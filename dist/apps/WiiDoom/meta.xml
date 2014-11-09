@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<app>
+	<name>Chocolate DOOM for Wii</name>
+	<coder>nitr8</coder>
+	<version>1.0</version> <release_date>10/22/2014</release_date> 
+<short_description>Port of Chocolate DOOM to the Wii!</short_description>
+<long_description>Now you can play id Software's DOOM chocolate style on your Wii!
+
+AN ORIGINAL WII CLASSIC CONTROLLER IS REQUIRED FOR THIS GAME
+
+This port is compatible with the following IWAD's:
+
+- Chex Quest
+- HACX - Twitch 'n Kill v1.2 (Registered Version ONLY)
+- FreeDOOM v0.8 (PHASE 2 ONLY)
+- DOOM BETA v1.4
+- DOOM BETA v1.5
+- DOOM BETA v1.6
+- DOOM Shareware v1.0
+- DOOM Shareware v1.1
+- DOOM Shareware v1.2
+- DOOM Shareware v1.25 (Sybex Release)
+- DOOM Shareware v1.666
+- DOOM Registered v1.1
+- DOOM Registered v1.2
+- DOOM Registered v1.6
+- DOOM Registered v1.8
+- DOOM Registered v1.9 (THE ULTIMATE DOOM)
+- DOOM II - Hell on Earth v1.666 (English Release)
+- DOOM II - Hell on Earth v1.666 (German Release)
+- DOOM II - Hell on Earth v1.7
+- DOOM II - Hell on Earth v1.8 (French Release)
+- DOOM II - Hell on Earth v1.9
+- FINAL DOOM - The Plutonia Experiment (Original Release)
+- FINAL DOOM - The Plutonia Experiment (Anthology Release)
+- FINAL DOOM - TNT Evilution (Original Release)
+- FINAL DOOM - TNT Evilution (Anthology Release)
+
+Use the Wiimote to choose your IWAD.
+
+Press A to select the device / WAD file.
+Press B to go back in the menu.
+Use the cursors to scroll up / down in the list.
+Finally, press button 1 to load the game.
+
+Upon startup you have to be patient as the game checks
+the IWAD being loaded.
+
+This Wii-Release also includes PWAD loading possibilities.
+</long_description>
+</app>
