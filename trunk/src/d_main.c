@@ -644,6 +644,7 @@ void D_DoAdvanceDemo (void)
 	if (fsize != 4261144 && fsize != 10401760 && fsize != 10396254 && fsize != 4274218 &&
 		fsize != 4207819)
 	    G_DeferedPlayDemo(DEH_String("demo1"));
+/*
 	else if(fsize == 4261144)
 	    G_DeferedPlayDemo(DEH_String("BT14LEV3"));
 	else if(fsize == 10401760)
@@ -654,6 +655,7 @@ void D_DoAdvanceDemo (void)
 	    G_DeferedPlayDemo(DEH_String("demo_4_1"));
 	else if(fsize == 4207819)
 	    G_DeferedPlayDemo(DEH_String("BT14LEV3"));
+*/
 	break;
       case 2:
 	pagetic = 200;
@@ -664,6 +666,7 @@ void D_DoAdvanceDemo (void)
 	if (fsize != 4261144 && fsize != 10401760 && fsize != 10396254 && fsize != 4274218 &&
 		fsize != 4207819)
 	    G_DeferedPlayDemo(DEH_String("demo2"));
+/*
 	else if(fsize == 4261144)
 	    G_DeferedPlayDemo(DEH_String("demo_1_2"));
 	else if(fsize == 10401760)
@@ -674,6 +677,7 @@ void D_DoAdvanceDemo (void)
 	    G_DeferedPlayDemo(DEH_String("demo_4_2"));
 	else if(fsize == 4207819)
 	    G_DeferedPlayDemo(DEH_String("demo_5_2"));
+*/
 	break;
       case 4:
 	gamestate = GS_DEMOSCREEN;
@@ -705,6 +709,7 @@ void D_DoAdvanceDemo (void)
 	if (fsize != 4261144 && fsize != 10401760 && fsize != 10396254 && fsize != 4274218 &&
 		fsize != 4207819)
 	    G_DeferedPlayDemo(DEH_String("demo3"));
+/*
 	else if(fsize == 4261144)
 	    G_DeferedPlayDemo(DEH_String("demo_1_3"));
 	else if(fsize == 10401760)
@@ -715,6 +720,7 @@ void D_DoAdvanceDemo (void)
 	    G_DeferedPlayDemo(DEH_String("demo_4_3"));
 	else if(fsize == 4207819)
 	    G_DeferedPlayDemo(DEH_String("demo_5_3"));
+*/
 	break;
         // THE DEFINITIVE DOOM Special Edition demo
       case 6:
