@@ -1837,7 +1837,14 @@ void D_DoomMain (void)
 	{
 	    opl = 1;
 
-	    D_AddFile(extra_wad);
+	    if(extra_wad_slot_1_loaded == 1)
+		D_AddFile(extra_wad_1);
+
+	    if(extra_wad_slot_2_loaded == 1)
+		D_AddFile(extra_wad_2);
+
+	    if(extra_wad_slot_3_loaded == 1)
+		D_AddFile(extra_wad_3);
 
 	    modifiedgame = /*W_ParseCommandLine()*/ true;
 	}
@@ -1896,7 +1903,7 @@ void D_DoomMain (void)
 
 	    u32 buttons = WaitButtons();
 
-	    if (buttons & WPAD_BUTTON_A)
+	    if (buttons & WPAD_CLASSIC_BUTTON_A)
 		break;
 
 	    WaitButtons();

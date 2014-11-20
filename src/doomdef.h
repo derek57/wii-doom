@@ -342,13 +342,18 @@ extern int		load_extra_wad;
 extern int		load_dehacked;
 extern int		use_vanilla_weapon_change;
 
-char			extra_wad[256];
+char			extra_wad_1[256];
+char			extra_wad_2[256];
+char			extra_wad_3[256];
 char			dehacked_file[256];
 char			target[MAXPATH];
 char			path_tmp[MAXPATH];
 char			temp[MAXPATH];
 
 int			detailLevel;
+int			extra_wad_slot_1_loaded;
+int			extra_wad_slot_2_loaded;
+int			extra_wad_slot_3_loaded;
 
 boolean			dont_move_forwards;
 boolean			error_detected;
