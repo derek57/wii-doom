@@ -343,7 +343,7 @@ static int G_NextWeapon(int direction)
 
 #define KEY_1               0x02
 
-void ChangeWeapon(void)
+void ChangeWeaponRight(void)
 {
     static player_t*	plyrweap;
     static event_t	kbevent;
@@ -372,6 +372,47 @@ void ChangeWeapon(void)
 	        break;
 	    }
         }
+        kbevent.type = ev_keydown;
+        kbevent.data1 = KEY_1 + num;
+
+        D_PostEvent(&kbevent);
+
+	dont_move_forwards = false;
+    }
+}
+
+void ChangeWeaponLeft(void)
+{
+    static player_t*	plyrweap;
+    static event_t	kbevent;
+
+    weapontype_t	num;
+
+    if (gamestate == GS_LEVEL && !(menuactive || automapactive))
+    {
+	plyrweap = &players[consoleplayer];
+
+	num = plyrweap->readyweapon;
+
+	while (1)
+	{
+	    dont_move_forwards = true;
+
+	    num--;
+
+	    if (num == -1)
+	        num = wp_supershotgun;
+
+	    if (plyrweap->weaponowned[num])
+	    {
+	        plyrweap->pendingweapon = num;
+
+	        break;
+	    }
+        }
+	if(num == wp_supershotgun)
+	    num = wp_fist;
+
         kbevent.type = ev_keydown;
         kbevent.data1 = KEY_1 + num;
 
@@ -614,12 +655,12 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
     	    forward -= forwardmove/*[speed]*/; 
     }
 
-    if (joyymove > 0) 
+    if (joyymove > 20) 
     {
 //	if(dont_move_forwards == true)
 	    forward += forwardmove/*[speed]*/; 
     }
-    if (joyymove < 0) 
+    if (joyymove < -20) 
     {
 //	if(dont_move_backwards == true)
 	    forward -= forwardmove/*[speed]*/; 
@@ -650,8 +691,10 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
 
     if(data->exp.type == WPAD_EXP_CLASSIC && !demoplayback)
     {
-	if(data->btns_d & WPAD_CLASSIC_BUTTON_UP)
-	    ChangeWeapon();
+	if(data->btns_d & WPAD_CLASSIC_BUTTON_RIGHT)
+	    ChangeWeaponRight();
+	if(data->btns_d & WPAD_CLASSIC_BUTTON_LEFT)
+	    ChangeWeaponLeft();
     }
 
     if (gamekeydown[key_use]

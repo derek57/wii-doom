@@ -615,6 +615,9 @@ void W_CheckCorrectIWAD(GameMission_t mission)
     }
 }
 */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+
 void W_CheckSize(int wad)
 {
 /*
@@ -745,7 +748,12 @@ void W_CheckSize(int wad)
     {
 	FILE *fprw;
 
-	fprw = fopen(extra_wad, "r");
+	if(extra_wad_slot_1_loaded == 1)
+	    fprw = fopen(extra_wad_1, "r");
+	else if(extra_wad_slot_2_loaded == 1)
+	    fprw = fopen(extra_wad_2, "r");
+	else if(extra_wad_slot_3_loaded == 1)
+	    fprw = fopen(extra_wad_3, "r");
 
 	if (fprw == NULL)
 	    printf(" ");
