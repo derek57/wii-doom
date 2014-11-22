@@ -1082,9 +1082,11 @@ void P_PlayerInSpecialSector (player_t* player)
 	break;
 			
       default:
-	I_Error ("P_PlayerInSpecialSector: "
-		 "unknown special %i",
+/*						// ON THE WII THIS CAUSED A WEIRD CRASH OF THE GAME
+	I_Error ("P_PlayerInSpecialSector: "	// WHEN WALKING INTO SECTORS THAT HAVE BEEN LOWERED
+		 "unknown special %i",		// BY TRIGGERING A LINEDEF THAT THE PLAYER CROSSED
 		 sector->special);
+*/
 	break;
     };
 }
