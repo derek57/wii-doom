@@ -174,20 +174,30 @@ extern int key_invright, key_invuse;
 #endif
 //    CONFIG_VARIABLE_INT		(btn_layout),
     CONFIG_VARIABLE_INT		(vanilla_weapon_change),
-    CONFIG_VARIABLE_INT		(key_uparrow),
-    CONFIG_VARIABLE_INT		(key_downarrow),
-    CONFIG_VARIABLE_INT		(key_leftarrow),
-    CONFIG_VARIABLE_INT		(key_rightarrow),
 /*
     CONFIG_VARIABLE_INT		(key_triangle),
     CONFIG_VARIABLE_INT		(key_cross),
     CONFIG_VARIABLE_INT		(key_square),
     CONFIG_VARIABLE_INT		(key_circle),
+    CONFIG_VARIABLE_INT		(key_start),
 */
-    CONFIG_VARIABLE_INT		(key_select),
-//    CONFIG_VARIABLE_INT		(key_start),
-    CONFIG_VARIABLE_INT		(key_lefttrigger),
+    CONFIG_VARIABLE_INT		(key_fire),
+    CONFIG_VARIABLE_INT		(key_use),
+    CONFIG_VARIABLE_INT		(key_menu),
+    CONFIG_VARIABLE_INT		(key_weapon_left),
+    CONFIG_VARIABLE_INT		(key_automap),
+    CONFIG_VARIABLE_INT		(key_weapon_right),
+    CONFIG_VARIABLE_INT		(key_automap_zoom_in),
+    CONFIG_VARIABLE_INT		(key_automap_zoom_out),
+/*
     CONFIG_VARIABLE_INT		(key_righttrigger),
+    CONFIG_VARIABLE_INT		(key_zl),
+    CONFIG_VARIABLE_INT		(key_zr),
+    CONFIG_VARIABLE_INT		(key_a),
+    CONFIG_VARIABLE_INT		(key_b),
+    CONFIG_VARIABLE_INT		(key_x),
+    CONFIG_VARIABLE_INT		(key_y),
+*/
 /*
 #ifdef FEATURE_SOUND
 

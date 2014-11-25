@@ -237,6 +237,22 @@ static int      joyymove;
 static int      joyirx;
 static int      joyiry;
 
+int joy_a = 1;		// 0
+int joy_r = 2;		// 1
+int joy_plus = 4;	// 2
+int joy_l = 8;		// 3
+int joy_minus = 16;	// 4
+int joy_b = 32;		// 5
+int joy_left = 64;	// 6
+int joy_down = 128;	// 7
+int joy_right = 256;	// 8
+int joy_up = 512;	// 9
+int joy_zr = 1024;	// 10
+int joy_zl = 2048;	// 11
+int joy_home = 4096;	// 12
+int joy_x = 8192;	// 13
+int joy_y = 16384;	// 14
+
 /*static*/ boolean  joyarray[MAX_JOY_BUTTONS + 1]; 
 //static boolean  joyarray[13]; 
 /*static*/ boolean *joybuttons = &joyarray[1];		// allow [-1] 
@@ -255,7 +271,22 @@ int             vanilla_demo_limit = 1;
 int key_strafe, joybstrafe;
 int     joybfire = 1;
 int     joybuse = 3;
-int     joybweapon = 9;
+int	joybmenu = 4;
+int	joybleft = 6;
+int	joybmap = 7;
+int	joybright = 8;
+int	joybmapzoomout = 10;
+int	joybmapzoomin = 11;
+
+extern fixed_t 	mtof_zoommul; // how far the window zooms in each tic (map coords)
+extern fixed_t 	ftom_zoommul; // how far the window zooms in each tic (fb coords)
+extern int	messageToPrint;
+extern boolean	messageNeedsInput;
+extern short	itemOn;			// menu item skull is on
+extern menu_t*	currentMenu;                          
+
+void AM_Start (void);
+void M_ClearMenus (void);
 
 int G_CmdChecksum (ticcmd_t* cmd) 
 { 
@@ -691,10 +722,89 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
 
     if(data->exp.type == WPAD_EXP_CLASSIC && !demoplayback)
     {
-	if(data->btns_d & WPAD_CLASSIC_BUTTON_RIGHT)
-	    ChangeWeaponRight();
-	if(data->btns_d & WPAD_CLASSIC_BUTTON_LEFT)
-	    ChangeWeaponLeft();
+	if(data->btns_d)
+//	if(data->btns_d & WPAD_CLASSIC_BUTTON_RIGHT)
+	{
+	    if(joybuttons[joybmenu])
+	    {
+		if (!menuactive)
+		{
+		    M_StartControlPanel ();
+		    S_StartSound(NULL,sfx_swtchn);
+		}
+		else
+		{
+		    currentMenu->lastOn = itemOn;
+		    M_ClearMenus ();
+		    S_StartSound(NULL,sfx_swtchx);
+		}
+
+		if (messageToPrint)
+		{
+		    if (messageNeedsInput)
+		    {
+			if(joybuttons[joybmenu])
+			{
+			    M_ClearMenus ();
+			    messageToPrint = 0;
+			    menuactive = false;
+			    S_StartSound(NULL,sfx_swtchx);
+			}
+		    }
+		}
+	    }
+
+	    if(joybuttons[joybright])
+		ChangeWeaponRight();
+
+	    if(joybuttons[joybleft])
+//	if(data->btns_d & WPAD_CLASSIC_BUTTON_LEFT)
+		ChangeWeaponLeft();
+
+	    if(joybuttons[joybmap])
+	    {
+		if (!automapactive)
+		{
+		    if(!menuactive)
+			AM_Start ();
+		}
+		else
+		{
+		    if(!menuactive)
+		    {
+			AM_Stop ();
+
+			extern int screenblocks;
+
+			R_SetViewSize (screenblocks, detailLevel);
+		    }
+		}
+	    }
+
+	    if(automapactive)
+	    {
+		if(joybuttons[joybmapzoomin])
+		{
+		    mtof_zoommul = M_ZOOMIN;
+		    ftom_zoommul = M_ZOOMOUT;
+		}
+
+		if(joybuttons[joybmapzoomout])
+		{
+		    mtof_zoommul = M_ZOOMOUT;
+		    ftom_zoommul = M_ZOOMIN;
+		}
+	    }
+	}
+    }
+
+    if(automapactive)
+    {
+	if(!(joybuttons[joybmapzoomin] || joybuttons[joybmapzoomout]))
+	{
+	    mtof_zoommul = FRACUNIT;
+	    ftom_zoommul = FRACUNIT;
+	}
     }
 
     if (gamekeydown[key_use]
@@ -1124,6 +1234,22 @@ boolean G_Responder (event_t* ev)
 
       case ev_joystick: 
 //        SetJoyButtons(ev->data1);
+        joybuttons[0] = (ev->data1 & joy_a) > 0;
+        joybuttons[1] = (ev->data1 & joy_r) > 0;
+        joybuttons[2] = (ev->data1 & joy_plus) > 0;
+        joybuttons[3] = (ev->data1 & joy_l) > 0;
+        joybuttons[4] = (ev->data1 & joy_minus) > 0;
+        joybuttons[5] = (ev->data1 & joy_b) > 0;
+        joybuttons[6] = (ev->data1 & joy_left) > 0;
+        joybuttons[7] = (ev->data1 & joy_down) > 0;
+        joybuttons[8] = (ev->data1 & joy_right) > 0;
+        joybuttons[9] = (ev->data1 & joy_up) > 0;
+        joybuttons[10] = (ev->data1 & joy_zr) > 0;
+        joybuttons[11] = (ev->data1 & joy_zl) > 0;
+        joybuttons[12] = (ev->data1 & joy_home) > 0;
+        joybuttons[13] = (ev->data1 & joy_x) > 0;
+        joybuttons[14] = (ev->data1 & joy_y) > 0;
+/*
         joybuttons[0] = (ev->data1 & 1) > 0;
         joybuttons[1] = (ev->data1 & 2) > 0;
         joybuttons[2] = (ev->data1 & 4) > 0;
@@ -1137,6 +1263,9 @@ boolean G_Responder (event_t* ev)
         joybuttons[10] = (ev->data1 & 1024) > 0;
         joybuttons[11] = (ev->data1 & 2048) > 0;
         joybuttons[12] = (ev->data1 & 4096) > 0;
+        joybuttons[13] = (ev->data1 & 8192) > 0;
+        joybuttons[14] = (ev->data1 & 16384) > 0;
+*/
 	joyxmove = ev->data2; 
 	joyymove = ev->data3; 
         joyirx = ev->data4;

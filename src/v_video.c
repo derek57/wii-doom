@@ -165,7 +165,7 @@ void V_DrawPatch(int x, int y, patch_t *patch)
         if(!patchclip_callback(patch, x, y))
             return;
     }
-
+/*
 #ifdef RANGECHECK
     if (x < 0
      || x + SHORT(patch->width) > ORIGWIDTH
@@ -175,7 +175,7 @@ void V_DrawPatch(int x, int y, patch_t *patch)
         I_Error("Bad V_DrawPatch");
     }
 #endif
-
+*/
     V_MarkRect(x, y, SHORT(patch->width), SHORT(patch->height));
 
     col = 0;

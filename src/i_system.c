@@ -254,7 +254,7 @@ void I_BindVariables(void)
 
 void I_Quit (void)
 {
-    if (devparm)
+//    if (devparm)
 	fclose (debugfile);
 
     atexit_listentry_t *entry;
@@ -310,7 +310,7 @@ void I_Error (char *error, ...)
     va_end(argptr);
 //    fflush(stderr);
 
-    if(devparm)
+//    if(devparm)
 	fclose (debugfile);
 
     if (already_quitting)
