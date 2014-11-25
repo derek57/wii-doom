@@ -147,7 +147,7 @@ static boolean opldev;
 
 int button_layout = 0;
 static int		FirstKey = 0;		// FOR PSP: SPECIAL MENU FUNCTIONS (ITEMCOUNT) ;-)
-//static int		keyaskedfor;
+static int		keyaskedfor;
 static boolean		askforkey = false;
 #define FIRSTKEY_MAX		0
 int			map = 1;
@@ -187,8 +187,8 @@ int			extra_wad_loaded;
 int			mhz333 = 0;
 */
 int			fps = 0;		// FOR PSP: calculating the frames per second
-int			key_controls_start_in_cfg_at_pos = 6;	// FOR PSP: ACTUALLY IT'S +2 !!!
-int			key_controls_end_in_cfg_at_pos = 19;	// FOR PSP: ACTUALLY IT'S +2 !!!
+int			key_controls_start_in_cfg_at_pos = 14;	// FOR PSP: ACTUALLY IT'S +2 !!!
+int			key_controls_end_in_cfg_at_pos = 22;	// FOR PSP: ACTUALLY IT'S +2 !!!
 int			crosshair = 0;
 int			show_stats = 0;
 //int			max_free_ram = 0;
@@ -223,6 +223,13 @@ int faketracknum = 1;
 extern short songlist[148];
 boolean forced = false;
 boolean fake = false;
+boolean got_invisibility = false;
+boolean got_radiation_suit = false;
+boolean got_berserk = false;
+boolean got_invulnerability = false;
+boolean got_map = false;
+boolean got_light_amp = false;
+boolean got_all = false;
 
 int turnspeed = 7;
 
@@ -337,15 +344,14 @@ void M_GameFiles(int choice);
 void M_Brightness(int choice);
 void M_Freelook(int choice);
 void M_FreelookSpeed(int choice);
-/*
-void M_KeyBindingsClearControls (int key);
+
+void M_KeyBindingsClearControls (int ch);
 void M_KeyBindingsClearAll (int choice);
 void M_KeyBindingsReset (int choice);
-void M_KeyBindingsButtonLayout(int choice);
+//void M_KeyBindingsButtonLayout(int choice);
 void M_KeyBindingsSetKey(int choice);
 void M_KeyBindings(int choice);
-void M_CpuSpeed(int choice);
-*/
+//void M_CpuSpeed(int choice);
 void M_FPS(int choice);
 void M_DisplayTicker(int choice);
 /*
@@ -421,7 +427,7 @@ void M_DrawArmor(void);
 void M_DrawWeapons(void);
 void M_DrawKeys(void);
 void M_DrawScreen(void);
-//void M_DrawKeyBindings(void);
+void M_DrawKeyBindings(void);
 void M_DrawControls(void);
 void M_DrawSystem(void);
 void M_DrawGame(void);
@@ -1225,7 +1231,9 @@ char *songtextplutmp3[] = {
     "28"
 };
 #endif
-/*
+
+#include <wiiuse/wpad.h>
+
 char *stupidtable[] =
 {
     "A","B","C","D","E",
@@ -1236,7 +1244,23 @@ char *stupidtable[] =
     "Z"
 };
 
-char *Key2String (int key)
+#define CLASSIC_CONTROLLER_A		0x1
+#define CLASSIC_CONTROLLER_R		0x2
+#define CLASSIC_CONTROLLER_PLUS		0x4
+#define CLASSIC_CONTROLLER_L		0x8
+#define CLASSIC_CONTROLLER_MINUS	0x10
+#define CLASSIC_CONTROLLER_B		0x20
+#define CLASSIC_CONTROLLER_LEFT		0x40
+#define CLASSIC_CONTROLLER_DOWN		0x80
+#define CLASSIC_CONTROLLER_RIGHT	0x100
+#define CLASSIC_CONTROLLER_UP		0x200
+#define CLASSIC_CONTROLLER_ZR		0x400
+#define CLASSIC_CONTROLLER_ZL		0x800
+#define CLASSIC_CONTROLLER_HOME		0x1000
+#define CLASSIC_CONTROLLER_X		0x2000
+#define CLASSIC_CONTROLLER_Y		0x4000
+
+char *Key2String (int ch)
 {
 // S.A.: return "[" or "]" or "\"" doesn't work
 // because there are no lumps for these chars,
@@ -1245,29 +1269,33 @@ char *Key2String (int key)
 // won't work with international keyboards and
 // dead keys, either.
 //
-    switch (key)
+    switch (ch)
     {
-	case KEY_UPARROW:	return "UP ARROW";
-	case KEY_DOWNARROW:	return "DOWN ARROW";
-	case KEY_LEFTARROW:	return "LEFT ARROW";
-	case KEY_RIGHTARROW:	return "RIGHT ARROW";
-	case KEY_TAB:		return "TRIANGLE";
-	case KEY_ENTER:		return "CROSS";
-	case KEY_ESCAPE:	return "SQUARE";
-	case KEY_PAUSE:		return "CIRCLE";
-	case KEY_RSHIFT:	return "SELECT";
-	case KEY_RCTRL:		return "START";
-	case KEY_EQUALS:	return "LEFT TRIGGER";
-	case KEY_MINUS:		return "RIGHT TRIGGER";
+	case CLASSIC_CONTROLLER_UP:	return "UP ARROW";
+	case CLASSIC_CONTROLLER_DOWN:	return "DOWN ARROW";
+	case CLASSIC_CONTROLLER_LEFT:	return "LEFT ARROW";
+	case CLASSIC_CONTROLLER_RIGHT:	return "RIGHT ARROW";
+	case CLASSIC_CONTROLLER_MINUS:	return "MINUS";
+	case CLASSIC_CONTROLLER_PLUS:	return "PLUS";
+	case CLASSIC_CONTROLLER_HOME:	return "HOME";
+	case CLASSIC_CONTROLLER_A:	return "A";
+	case CLASSIC_CONTROLLER_B:	return "B";
+	case CLASSIC_CONTROLLER_X:	return "X";
+	case CLASSIC_CONTROLLER_Y:	return "Y";
+	case CLASSIC_CONTROLLER_ZL:	return "ZL";
+	case CLASSIC_CONTROLLER_ZR:	return "ZR";
+	case CLASSIC_CONTROLLER_L:	return "LEFT TRIGGER";
+	case CLASSIC_CONTROLLER_R:	return "RIGHT TRIGGER";
     }
+
     // Handle letter keys
     // S.A.: could also be done with toupper
-    if (key >= 'a' && key <= 'z')
-	return stupidtable[(key - 'a')];
+    if (ch >= 'a' && ch <= 'z')
+	return stupidtable[(ch - 'a')];
 
     return "?";		// Everything else
 }
-*/
+
 //
 // DOOM MENU
 //
@@ -1681,7 +1709,7 @@ menu_t  ScreenDef =
     60,55,       // [STRIFE] changed y coord 64 -> 35
     0
 };
-/*
+
 enum
 {
     keybindings_up,
@@ -1696,9 +1724,12 @@ enum
 //    keybindings_start,
     keybindings_lefttrigger,
     keybindings_righttrigger,
+    keybindings_fire,
     keybindings_empty1,
+/*
     keybindings_layout,
     keybindings_empty2,
+*/
     keybindings_clearall,
     keybindings_reset,
     keybindings_end
@@ -1718,13 +1749,16 @@ menuitem_t KeyBindingsMenu[]=
 //    {5,"",M_KeyBindingsSetKey,5},
 //    {5,"",M_KeyBindingsSetKey,6},
 //    {5,"",M_KeyBindingsSetKey,7},
-    {5,"",M_KeyBindingsSetKey,8},
+    {5,"",M_KeyBindingsSetKey,4},
 //    {5,"",M_KeyBindingsSetKey,9},
-    {5,"",M_KeyBindingsSetKey,10},
-    {5,"",M_KeyBindingsSetKey,11},
+    {5,"",M_KeyBindingsSetKey,5},
+    {5,"",M_KeyBindingsSetKey,6},
+    {5,"",M_KeyBindingsSetKey,7},
     {-1,"",0,'\0'},
+/*
     {2,"",M_KeyBindingsButtonLayout,'l'},
     {-1,"",0,'\0'},
+*/
     {5,"",M_KeyBindingsClearAll,'c'},
     {5,"",M_KeyBindingsReset,'r'}
 };
@@ -1738,7 +1772,7 @@ menu_t  KeyBindingsDef =
     45,42,       // [STRIFE] changed y coord 64 -> 35
     0
 };
-*/
+
 enum
 {
     mousesens,
@@ -1751,8 +1785,8 @@ enum
     controls_freelook,
     mousespeed,
     controls_empty2,
-    controls_keybindings,
 */
+    controls_keybindings,
     controls_end
 } controls_e;
 
@@ -1767,11 +1801,11 @@ menuitem_t ControlsMenu[]=
     {2,"M_TSPEED",M_TurningSpeed,'t'},
     {-1,"",0,'\0'},
     {2,"M_SSPEED",M_StrafingSpeed,'s'},
-    {-1,"",0,'\0'}/*,
+    {-1,"",0,'\0'},/*
     {2,"M_FRLOOK",M_Freelook,'f'},
     {2,"M_FLKSPD",M_FreelookSpeed,'s'},
-    {-1,"",0,'\0'},
-    {1,"M_KBNDGS",M_KeyBindings,'b'}*/
+    {-1,"",0,'\0'},*/
+    {1,"M_KBNDGS",M_KeyBindings,'b'}
 };
 
 menu_t  ControlsDef =
@@ -2622,8 +2656,6 @@ void M_DrawEpisode(void)
 {
     V_DrawPatchDirect(54, 38, W_CacheLumpName(DEH_String("M_EPISOD"), PU_CACHE));
 }
-
-#include <wiiuse/wpad.h>
 
 void M_VerifyNightmare(int ch)
 {
@@ -3742,8 +3774,6 @@ static boolean IsNullKey(int key)
 // CONTROL PANEL
 //
 
-#include <wiiuse/wpad.h>
-
 //
 // M_Responder
 //
@@ -3867,14 +3897,14 @@ boolean M_Responder (event_t* ev)
 
 //	    joywait = I_GetTime() + 10;
 	}
-
-	if ((data->btns_d & WPAD_CLASSIC_BUTTON_MINUS) /*&& (joywait < I_GetTime())*/)
+/*
+	if (data->btns_d & WPAD_CLASSIC_BUTTON_MINUS)
 	{
 	    ch = key_menu_activate;                         // phares 3/7/98
 
 //	    joywait = I_GetTime() + 10;
 	}
-
+*/
 	if ((data->exp.classic.ljs.pos.y > (data->exp.classic.ljs.center.y + 50)) /*&& (joywait < I_GetTime())*/)
 	{
 	    ch = key_menu_up;
@@ -4014,15 +4044,15 @@ boolean M_Responder (event_t* ev)
 //	    joywait = I_GetTime() + 5;
 	}
     }
-/*
-    if (askforkey && ev->type == ev_keydown)		// KEY BINDINGS
+
+    if (askforkey && data->btns_d)		// KEY BINDINGS
     {
 	M_KeyBindingsClearControls(ev->data1);
-	*doom_defaults_list[keyaskedfor + 12 + FirstKey].location = ev->data1;
+	*doom_defaults_list[keyaskedfor + 14 + FirstKey].location = ev->data1;
 	askforkey = false;
 	return true;
     }
-*/
+
     if (askforkey && ev->type == ev_mouse)
     {
 	if (ev->data1 & 1)
@@ -4749,7 +4779,7 @@ void M_Drawer (void)
 	    V_DrawPatchDirect (x, y, W_CacheLumpName(name, PU_CACHE));
 	}
 
-	if (currentMenu == &CheatsDef || /*currentMenu == &KeyBindingsDef ||*/ currentMenu == &ItemsDef ||
+	if (currentMenu == &CheatsDef || currentMenu == &KeyBindingsDef || currentMenu == &ItemsDef ||
 	    currentMenu == &WeaponsDef || currentMenu == &ArmorDef || currentMenu == &KeysDef)
 	{
             y += LINEHEIGHT_SMALL;
@@ -5153,19 +5183,31 @@ void M_KeysD(int choice)
 
 void M_ItemsA(int choice)
 {
-    int i;
-
     if(!netgame && !demoplayback && gamestate == GS_LEVEL
 	&& gameskill != sk_nightmare && players[consoleplayer].playerstate == PST_LIVE)
     {
-	for(i=0;i<6;i++)
+	if(!got_all)
 	{
-	    if (!players[consoleplayer].powers[i])
-		P_GivePower( players[consoleplayer], i);
-	    else if (i!=pw_strength)
-		players[consoleplayer].powers[i] = 1;
-	    else
-		players[consoleplayer].powers[i] = 0;
+	    players[consoleplayer].powers[0] = INVULNTICS;
+	    players[consoleplayer].powers[1] = 1;
+	    players[consoleplayer].powers[2] = INVISTICS;
+	    players[consoleplayer].mo->flags |= MF_SHADOW;
+	    players[consoleplayer].powers[3] = IRONTICS;
+	    players[consoleplayer].powers[4] = 1;
+	    players[consoleplayer].powers[5] = INFRATICS;
+
+	    got_all = true;
+	}
+	else
+	{
+	    players[consoleplayer].powers[0] = 0;
+	    players[consoleplayer].powers[1] = 0;
+	    players[consoleplayer].powers[2] = 0;
+	    players[consoleplayer].powers[3] = 0;
+	    players[consoleplayer].powers[4] = 0;
+	    players[consoleplayer].powers[5] = 0;
+
+	    got_all = false;
 	}
 	players[consoleplayer].message = DEH_String("ALL ITEMS ADDED");
     }
@@ -5177,12 +5219,19 @@ void M_ItemsB(int choice)
     if(!netgame && !demoplayback && gamestate == GS_LEVEL
 	&& gameskill != sk_nightmare && players[consoleplayer].playerstate == PST_LIVE)
     {
-	if (!players[consoleplayer].powers[2])
-	    P_GivePower( players[consoleplayer], 2);
-	else if (2!=pw_strength)
-	    players[consoleplayer].powers[2] = 1;
+	if(!got_invisibility)
+	{
+	    players[consoleplayer].powers[2] = INVISTICS;
+	    players[consoleplayer].mo->flags |= MF_SHADOW;
+
+	    got_invisibility = true;
+	}
 	else
+	{
 	    players[consoleplayer].powers[2] = 0;
+
+	    got_invisibility = false;
+	}
 
 	if(fsize != 19321722)
 	    players[consoleplayer].message = DEH_String(GOTINVIS);
@@ -5197,12 +5246,18 @@ void M_ItemsC(int choice)
     if(!netgame && !demoplayback && gamestate == GS_LEVEL
 	&& gameskill != sk_nightmare && players[consoleplayer].playerstate == PST_LIVE)
     {
-	if (!players[consoleplayer].powers[3])
-	    P_GivePower( players[consoleplayer], 3);
-	else if (3!=pw_strength)
-	    players[consoleplayer].powers[3] = 1;
+	if(!got_radiation_suit)
+	{
+	    players[consoleplayer].powers[3] = IRONTICS;
+
+	    got_radiation_suit = true;
+	}
 	else
+	{
 	    players[consoleplayer].powers[3] = 0;
+
+	    got_radiation_suit = false;
+	}
 
 	if(fsize != 12361532 && fsize != 19321722)
 	    players[consoleplayer].message = DEH_String(GOTSUIT);
@@ -5219,12 +5274,18 @@ void M_ItemsD(int choice)
     if(!netgame && !demoplayback && gamestate == GS_LEVEL
 	&& gameskill != sk_nightmare && players[consoleplayer].playerstate == PST_LIVE)
     {
-	if (!players[consoleplayer].powers[4])
-	    P_GivePower( players[consoleplayer], 4);
-	else if (4!=pw_strength)
+	if(!got_map)
+	{
 	    players[consoleplayer].powers[4] = 1;
+
+	    got_map = true;
+	}
 	else
+	{
 	    players[consoleplayer].powers[4] = 0;
+
+	    got_map = false;
+	}
 
 	if(fsize != 19321722)
 	    players[consoleplayer].message = DEH_String(GOTMAP);
@@ -5239,12 +5300,18 @@ void M_ItemsE(int choice)
     if(!netgame && !demoplayback && gamestate == GS_LEVEL
 	&& gameskill != sk_nightmare && players[consoleplayer].playerstate == PST_LIVE)
     {
-	if (!players[consoleplayer].powers[5])
-	    P_GivePower( players[consoleplayer], 5);
-	else if (5!=pw_strength)
-	    players[consoleplayer].powers[5] = 1;
+	if(!got_light_amp)
+	{
+	    players[consoleplayer].powers[5] = INFRATICS;
+
+	    got_light_amp = true;
+	}
 	else
+	{
 	    players[consoleplayer].powers[5] = 0;
+
+	    got_light_amp = false;
+	}
 
 	if(fsize != 12361532 && fsize != 19321722)
 	    players[consoleplayer].message = DEH_String(GOTVISOR);
@@ -5261,12 +5328,18 @@ void M_ItemsF(int choice)
     if(!netgame && !demoplayback && gamestate == GS_LEVEL
 	&& gameskill != sk_nightmare && players[consoleplayer].playerstate == PST_LIVE)
     {
-	if (!players[consoleplayer].powers[0])
-	    P_GivePower( players[consoleplayer], 0);
-	else if (0!=pw_strength)
-	    players[consoleplayer].powers[0] = 1;
+	if(!got_invulnerability)
+	{
+	    players[consoleplayer].powers[0] = INVULNTICS;
+
+	    got_invulnerability = true;
+	}
 	else
+	{
 	    players[consoleplayer].powers[0] = 0;
+
+	    got_invulnerability = false;
+	}
 
 	if(fsize != 19321722)
 	    players[consoleplayer].message = DEH_String(GOTINVUL);
@@ -5281,12 +5354,18 @@ void M_ItemsG(int choice)
     if(!netgame && !demoplayback && gamestate == GS_LEVEL
 	&& gameskill != sk_nightmare && players[consoleplayer].playerstate == PST_LIVE)
     {
-	if (!players[consoleplayer].powers[1])
-	    P_GivePower( players[consoleplayer], 1);
-	else if (1!=pw_strength)
+	if(!got_berserk)
+	{
 	    players[consoleplayer].powers[1] = 1;
+
+	    got_berserk = true;
+	}
 	else
+	{
 	    players[consoleplayer].powers[1] = 0;
+
+	    got_berserk = false;
+	}
 
 	if(fsize != 19321722)
 	    players[consoleplayer].message = DEH_String(GOTBERSERK);
@@ -6115,7 +6194,7 @@ void M_KeyBindingsButtonLayout(int choice)
         break;
     }
 }
-
+*/
 void M_KeyBindingsSetKey(int choice)
 {
     askforkey = true;
@@ -6127,7 +6206,7 @@ void M_KeyBindingsSetKey(int choice)
     }
 }
 
-void M_KeyBindingsClearControls (int key)	// XXX (FOR PSP): NOW THIS IS RATHER IMPORTANT: IF...
+void M_KeyBindingsClearControls (int ch)	// XXX (FOR PSP): NOW THIS IS RATHER IMPORTANT: IF...
 {						// ...THE CONFIG VARIABLES IN THIS SOURCE EVER GET...
     int i;					// ...SOMEWHAT REARRANGED, THEN IT'S IMPORTANT TO...
 						// ...CHANGE THE START- & END-POS INTEGERS AS WELL...
@@ -6136,41 +6215,43 @@ void M_KeyBindingsClearControls (int key)	// XXX (FOR PSP): NOW THIS IS RATHER I
 
     for (i = key_controls_start_in_cfg_at_pos; i < key_controls_end_in_cfg_at_pos; i++)
     {
-	if (*doom_defaults_list[i].location == key)
+	if (*doom_defaults_list[i].location == ch)
 	    *doom_defaults_list[i].location = 0;
     }
 }
 
 void M_KeyBindingsClearAll (int choice)
 {
-    *doom_defaults_list[12].location = 0;
-    *doom_defaults_list[13].location = 0;
     *doom_defaults_list[14].location = 0;
     *doom_defaults_list[15].location = 0;
+    *doom_defaults_list[16].location = 0;
+    *doom_defaults_list[17].location = 0;
 //    *doom_defaults_list[15].location = 0;
 //    *doom_defaults_list[16].location = 0;
 //    *doom_defaults_list[17].location = 0;
 //    *doom_defaults_list[18].location = 0;
-    *doom_defaults_list[16].location = 0;
-//    *doom_defaults_list[20].location = 0;
-    *doom_defaults_list[17].location = 0;
     *doom_defaults_list[18].location = 0;
+//    *doom_defaults_list[20].location = 0;
+    *doom_defaults_list[19].location = 0;
+    *doom_defaults_list[20].location = 0;
+    *doom_defaults_list[21].location = 0;
 }
 
 void M_KeyBindingsReset (int choice)
 {
-    *doom_defaults_list[12].location = 173;
-    *doom_defaults_list[13].location = 9;
-    *doom_defaults_list[14].location = 91;
-    *doom_defaults_list[15].location = 93;
+    *doom_defaults_list[14].location = CLASSIC_CONTROLLER_R;
+    *doom_defaults_list[15].location = CLASSIC_CONTROLLER_L;
+    *doom_defaults_list[16].location = CLASSIC_CONTROLLER_MINUS;
+    *doom_defaults_list[17].location = CLASSIC_CONTROLLER_LEFT;
 //    *doom_defaults_list[15].location = 175;
 //    *doom_defaults_list[16].location = 157;
 //    *doom_defaults_list[17].location = 47;
 //    *doom_defaults_list[18].location = 32;
-    *doom_defaults_list[16].location = 27;
+    *doom_defaults_list[18].location = CLASSIC_CONTROLLER_DOWN;
 //    *doom_defaults_list[20].location = 13;
-    *doom_defaults_list[17].location = 44;
-    *doom_defaults_list[18].location = 46;
+    *doom_defaults_list[19].location = CLASSIC_CONTROLLER_RIGHT;
+    *doom_defaults_list[20].location = CLASSIC_CONTROLLER_ZL;
+    *doom_defaults_list[21].location = CLASSIC_CONTROLLER_ZR;
 }
 
 void M_DrawKeyBindings(void)
@@ -6182,41 +6263,42 @@ void M_DrawKeyBindings(void)
     else
 	V_DrawPatch (80, 15, W_CacheLumpName(DEH_String("M_KBNDGS"), PU_CACHE));
 
-    M_WriteText(40, 40, DEH_String("MOVE FORWARDS"));
-    M_WriteText(40, 50, DEH_String("MOVE BACKWARDS"));
+    M_WriteText(40, 40, DEH_String("FIRE"));
+    M_WriteText(40, 50, DEH_String("USE / OPEN"));
+    M_WriteText(40, 60, DEH_String("MAIN MENU"));
 
-    if(button_layout == 0)
+//    if(button_layout == 0)
     {
-    	M_WriteText(40, 60, DEH_String("TURN LEFT"));
-    	M_WriteText(40, 70, DEH_String("TURN RIGHT"));
+    	M_WriteText(40, 70, DEH_String("WEAPON LEFT"));
+    	M_WriteText(40, 80, DEH_String("SHOW AUTOMAP"));
     }
-    else
-    {
-    	M_WriteText(40, 60, DEH_String("STRAFE LEFT"));
-    	M_WriteText(40, 70, DEH_String("STRAFE RIGHT"));
-    }
+//    else
+//    {
+//    	M_WriteText(40, 60, DEH_String("STRAFE LEFT"));
+//    	M_WriteText(40, 70, DEH_String("STRAFE RIGHT"));
+//    }
 
 //    M_WriteText(40, 80, DEH_String("INVENTORY RIGHT"));
 //    M_WriteText(40, 90, DEH_String("JUMP"));
 //    M_WriteText(40, 100, DEH_String("OBJ.'S / GUNS / KEYS"));
 //    M_WriteText(40, 110, DEH_String("INVENTORY DROP"));
 
-    M_WriteText(40, 80, DEH_String("MAIN MENU"));
+    M_WriteText(40, 90, DEH_String("WEAPON RIGHT"));
 //    M_WriteText(40, 130, DEH_String("INVENTORY USE"));
-    M_WriteText(40, 90, DEH_String("USE / OPEN"));
-    M_WriteText(40, 100, DEH_String("FIRE"));
+    M_WriteText(40, 100, DEH_String("AUTOMAP ZOOM IN"));
+    M_WriteText(40, 110, DEH_String("AUTOMAP ZOOM OUT"));
 
-    M_WriteText(40, 120, DEH_String("BUTTON LAYOUT:"));
+//    M_WriteText(40, 120, DEH_String("BUTTON LAYOUT:"));
 
-    if(button_layout == 0)
-    	M_WriteText(195, 120, DEH_String("PS VITA"));
-    else if(button_layout == 1)
-    	M_WriteText(195, 120, DEH_String("PSP"));
+//    if(button_layout == 0)
+//    	M_WriteText(195, 120, DEH_String("PS VITA"));
+//    else if(button_layout == 1)
+//    	M_WriteText(195, 120, DEH_String("PSP"));
 
-    M_WriteText(40, 140, DEH_String("CLEAR ALL CONTROLS"));
-    M_WriteText(40, 150, DEH_String("RESET TO DEFAULTS"));
+    M_WriteText(40, 130, DEH_String("CLEAR ALL CONTROLS"));
+    M_WriteText(40, 140, DEH_String("RESET TO DEFAULTS"));
 
-    for (i = 0; i < 7; i++)
+    for (i = 0; i < 8; i++)
     {
 	if (askforkey && keyaskedfor == i)
 	{
@@ -6225,11 +6307,16 @@ void M_DrawKeyBindings(void)
 	else
 	{
 	    M_WriteText(195, (i*10+40),
-		Key2String(*(doom_defaults_list[i+FirstKey+12].location)));
+		Key2String(*(doom_defaults_list[i+FirstKey+14].location)));
 	}
     }
 }
 
+void M_KeyBindings(int choice)
+{
+    M_SetupNextMenu(&KeyBindingsDef);
+}
+/*
 void M_Freelook(int choice)
 {
     switch(choice)
@@ -6258,11 +6345,6 @@ void M_FreelookSpeed(int choice)
             mspeed++;
         break;
     }
-}
-
-void M_KeyBindings(int choice)
-{
-    M_SetupNextMenu(&KeyBindingsDef);
 }
 */
 void M_Controls(int choice)

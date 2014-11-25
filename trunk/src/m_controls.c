@@ -290,6 +290,22 @@ extern int forwardmove;
 extern int sidemove;
 extern int turnspeed;
 
+extern int joy_up;
+extern int joy_down;
+extern int joy_left;
+extern int joy_right;
+extern int joy_zl;
+extern int joy_zr;
+extern int joy_l;
+extern int joy_r;
+extern int joy_plus;
+extern int joy_minus;
+extern int joy_home;
+extern int joy_a;
+extern int joy_b;
+extern int joy_x;
+extern int joy_y;
+
 void M_BindBaseControls(void)
 {
     M_BindVariable("sfx_volume",             &sfxVolume);
@@ -325,20 +341,32 @@ void M_BindBaseControls(void)
 #endif
 //    M_BindVariable("btn_layout",             &button_layout);
     M_BindVariable("vanilla_weapon_change",  &use_vanilla_weapon_change);
+    M_BindVariable("key_fire",               &joy_r);
+    M_BindVariable("key_use",                &joy_l);
+    M_BindVariable("key_menu",               &joy_minus);
+    M_BindVariable("key_weapon_left",        &joy_left);
+    M_BindVariable("key_automap",            &joy_down);
+    M_BindVariable("key_weapon_right",       &joy_right);
+    M_BindVariable("key_automap_zoom_in",    &joy_zl);
+    M_BindVariable("key_automap_zoom_out",   &joy_zr);
+/*
+    M_BindVariable("key_righttrigger",       &joy_r);
+    M_BindVariable("key_zl",		     &joy_zl);
+    M_BindVariable("key_zr",       	     &joy_zr);
+    M_BindVariable("key_a",       	     &joy_a);
+    M_BindVariable("key_b",       	     &joy_b);
+    M_BindVariable("key_x",       	     &joy_x);
+    M_BindVariable("key_y",       	     &joy_y);
+*/
+/*
     M_BindVariable("key_uparrow",            &key_up);
     M_BindVariable("key_downarrow",          &key_down);
     M_BindVariable("key_leftarrow",          &key_left);
     M_BindVariable("key_rightarrow",         &key_right);
-/*
-    M_BindVariable("key_triangle",           &key_invright);
-    M_BindVariable("key_cross",              &key_jump);
-    M_BindVariable("key_square",             &key_flyup);
-    M_BindVariable("key_circle",             &key_flydown);
-*/
     M_BindVariable("key_select",             &key_strafeleft);
-//    M_BindVariable("key_start",              &key_useartifact);
     M_BindVariable("key_lefttrigger",        &key_use);
     M_BindVariable("key_righttrigger",       &key_fire);
+*/
 /*
     M_BindVariable("use_mouse",                 &usemouse);
     M_BindVariable("key_invDrop",        &key_invdrop);

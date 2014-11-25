@@ -100,11 +100,12 @@
 #define F_PANINC	4
 // how much zoom-in per tic
 // goes to 2x in 1 second
+/*
 #define M_ZOOMIN        ((int) (1.02*FRACUNIT))
 // how much zoom-out per tic
 // pulls out to 0.5x in 1 second
 #define M_ZOOMOUT       ((int) (FRACUNIT/1.02))
-
+*/
 // translates between frame-buffer and map distances
 #define FTOM(x) FixedMul(((x)<<16),scale_ftom)
 #define MTOF(x) (FixedMul((x),scale_mtof)>>16)
@@ -224,8 +225,8 @@ static byte*	fb; 			// pseudo-frame buffer
 static int 	amclock;
 
 static mpoint_t m_paninc; // how far the window pans each tic (map coords)
-static fixed_t 	mtof_zoommul; // how far the window zooms in each tic (map coords)
-static fixed_t 	ftom_zoommul; // how far the window zooms in each tic (fb coords)
+/*static*/ fixed_t 	mtof_zoommul; // how far the window zooms in each tic (map coords)
+/*static*/ fixed_t 	ftom_zoommul; // how far the window zooms in each tic (fb coords)
 
 static fixed_t 	m_x, m_y;   // LL x,y where the window is on the map (map coords)
 static fixed_t 	m_x2, m_y2; // UR x,y where the window is on the map (map coords)
@@ -626,7 +627,7 @@ boolean AM_Responder
     WPADData *data = WPAD_Data(0);
 
     rc = false;
-  
+/*  
     if (!automapactive)
     {
 	if (ev->type == ev_keydown && ev->data1 == key_map_toggle)
@@ -646,7 +647,7 @@ boolean AM_Responder
 	    rc = true;
 	}
     }
-    else if (ev->type == ev_joystick && (data->btns_d || ev->data2 != 0 || ev->data3 != 0))
+    else*/ if (automapactive && ev->type == ev_joystick && (data->btns_d || ev->data2 != 0 || ev->data3 != 0))
     {
 	rc = true;
 
@@ -678,6 +679,7 @@ boolean AM_Responder
 	    else
 		rc = false;
 	}
+/*
 	else if (data->btns_d & WPAD_CLASSIC_BUTTON_ZR)
 	{
 	    mtof_zoommul = M_ZOOMOUT;
@@ -700,6 +702,7 @@ boolean AM_Responder
 	    }
 	    rc = true;
 	}
+*/
 	else
 	    rc = false;
     }
@@ -718,12 +721,13 @@ boolean AM_Responder
 	    if (!(automapactive & followplayer))
 		m_paninc.y = 0;
 	}
-
+/*
 	if (data->btns_u & WPAD_CLASSIC_BUTTON_ZR || data->btns_u & WPAD_CLASSIC_BUTTON_ZL)
 	{
 	    mtof_zoommul = FRACUNIT;
 	    ftom_zoommul = FRACUNIT;
 	}
+*/
     }
     return rc;
 }

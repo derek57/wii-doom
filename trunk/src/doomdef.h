@@ -258,6 +258,10 @@ typedef enum
 
 #define	NUMKEYS		256
 
+#define M_ZOOMIN        ((int) (1.02*FRACUNIT))
+
+#define M_ZOOMOUT       ((int) (FRACUNIT/1.02))
+
 typedef enum 
 {
     DEFAULT_INT,
