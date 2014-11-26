@@ -519,8 +519,12 @@ void F_CastTicker (void)
 
 boolean F_CastResponder (event_t* ev)
 {
-    if (ev->type != ev_keydown)
-	return false;
+//    if (ev->type != ev_keydown)
+    if (ev->type == ev_joystick) 
+    {
+	if ((ev->data1 & 1) == 0) 
+	    return false;
+    }
 		
     if (castdeath)
 	return true;			// already in dying frames
