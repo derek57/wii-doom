@@ -123,6 +123,7 @@ static char hud_monsecstr[80];				// ADDED FOR PSP-STATS
 
 static boolean		headsupactive = false;
 
+extern int		screenSize;
 //
 // Builtin map names.
 // The actual names can be found in DStrings.h.
@@ -417,8 +418,12 @@ void HU_Drawer(void)
     const char *t;
 
     if(!automapactive && !demoplayback && crosshair == 1)
-        V_DrawPatch(158, 82, W_CacheLumpName(DEH_String("XHAIR"), PU_CACHE));
-
+    {
+	if(screenSize < 8)
+	    V_DrawPatch(158, 82, W_CacheLumpName(DEH_String("XHAIR"), PU_CACHE));
+	else
+	    V_DrawPatch(158, 98, W_CacheLumpName(DEH_String("XHAIR"), PU_CACHE));
+    }
     HUlib_drawSText(&w_message);
 //    HUlib_drawIText(&w_chat);
     if (automapactive)

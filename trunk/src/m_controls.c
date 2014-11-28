@@ -289,6 +289,7 @@ extern int musicVolume;
 extern int forwardmove;
 extern int sidemove;
 extern int turnspeed;
+extern int crosshair;
 
 extern int joy_up;
 extern int joy_down;
@@ -341,6 +342,7 @@ void M_BindBaseControls(void)
 #endif
 //    M_BindVariable("btn_layout",             &button_layout);
     M_BindVariable("vanilla_weapon_change",  &use_vanilla_weapon_change);
+    M_BindVariable("xhair",                  &crosshair);
     M_BindVariable("key_fire",               &joy_r);
     M_BindVariable("key_use",                &joy_l);
     M_BindVariable("key_menu",               &joy_minus);

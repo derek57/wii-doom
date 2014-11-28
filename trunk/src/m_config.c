@@ -174,6 +174,7 @@ extern int key_invright, key_invuse;
 #endif
 //    CONFIG_VARIABLE_INT		(btn_layout),
     CONFIG_VARIABLE_INT		(vanilla_weapon_change),
+    CONFIG_VARIABLE_INT		(xhair),
 /*
     CONFIG_VARIABLE_INT		(key_triangle),
     CONFIG_VARIABLE_INT		(key_cross),
