@@ -655,7 +655,10 @@ void W_CheckSize(int wad)
     {
 	FILE *fprw;
 
-	fprw = fopen("usb:/apps/wiidoom/pspdoom.wad", "r");
+	if(usb)
+	    fprw = fopen("usb:/apps/wiidoom/pspdoom.wad", "r");
+	else if(sd)
+	    fprw = fopen("sd:/apps/wiidoom/pspdoom.wad", "r");
 
 	if (fprw == NULL)
 	    printf(" ");
@@ -691,7 +694,10 @@ void W_CheckSize(int wad)
     {
 	FILE *fprw;
 
-	fprw = fopen("usb:/apps/wiidoom/pspchex.wad", "r");
+	if(usb)
+	    fprw = fopen("usb:/apps/wiidoom/pspchex.wad", "r");
+	else if(sd)
+	    fprw = fopen("sd:/apps/wiidoom/pspchex.wad", "r");
 
 	if (fprw == NULL)
 	    printf(" ");
@@ -710,7 +716,10 @@ void W_CheckSize(int wad)
     {
 	FILE *fprw;
 
-	fprw = fopen("usb:/apps/wiidoom/psphacx.wad", "r");
+	if(usb)
+	    fprw = fopen("usb:/apps/wiidoom/psphacx.wad", "r");
+	else if(sd)
+	    fprw = fopen("sd:/apps/wiidoom/psphacx.wad", "r");
 
 	if (fprw == NULL)
 	    printf(" ");
@@ -729,7 +738,10 @@ void W_CheckSize(int wad)
     {
 	FILE *fprw;
 
-	fprw = fopen("usb:/apps/wiidoom/pspfreedoom.wad", "r");
+	if(usb)
+	    fprw = fopen("usb:/apps/wiidoom/pspfreedoom.wad", "r");
+	else if(sd)
+	    fprw = fopen("sd:/apps/wiidoom/pspfreedoom.wad", "r");
 
 	if (fprw == NULL)
 	    printf(" ");

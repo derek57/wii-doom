@@ -502,8 +502,11 @@ void D_DoomLoop (void)
     if (demorecording)
 	G_BeginRecording ();
 
-    if(devparm)
-	debugfile = fopen("usb:/apps/wiidoom/debug.txt","w");
+//    if(devparm)
+	if(usb)
+	    debugfile = fopen("usb:/apps/wiidoom/debug.txt","w");
+	else if(sd)
+	    debugfile = fopen("sd:/apps/wiidoom/debug.txt","w");
 
     main_loop_started = true;
 
@@ -1253,8 +1256,14 @@ void W_CheckSize(int wad);
 //
 // D_DoomMain
 //
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+
 void D_DoomMain (void)
 {
+    FILE *fprw;
+
 //    int             p;
     char            file[256];
 //    char            demolumpname[9];
@@ -1271,7 +1280,10 @@ void D_DoomMain (void)
 
 //    W_CheckSize(0);
 
-    FILE *fprw = fopen("usb:/apps/wiidoom/pspdoom.wad","rb");
+    if(usb)
+	fprw = fopen("usb:/apps/wiidoom/pspdoom.wad","rb");
+    else if(sd)
+	fprw = fopen("sd:/apps/wiidoom/pspdoom.wad","rb");
 
     if(fprw)
     {
@@ -1827,7 +1839,12 @@ void D_DoomMain (void)
 //    InitGameVersion();
 
     if(devparm)
-	D_AddFile("usb:/apps/wiidoom/IWAD/DOOM/Reg/v12/DOOM.WAD");
+    {
+	if(usb)
+	    D_AddFile("usb:/apps/wiidoom/IWAD/DOOM/Reg/v12/DOOM.WAD");
+	else if(sd)
+	    D_AddFile("sd:/apps/wiidoom/IWAD/DOOM/Reg/v12/DOOM.WAD");
+    }
     else
 	D_AddFile(target);
 
@@ -1852,7 +1869,10 @@ void D_DoomMain (void)
 
     dont_show_adding_of_resource_wad = 1;
 
-    D_AddFile("usb:/apps/wiidoom/pspdoom.wad");
+    if(usb)
+	D_AddFile("usb:/apps/wiidoom/pspdoom.wad");
+    else if(sd)
+	D_AddFile("sd:/apps/wiidoom/pspdoom.wad");
 
     if(show_deh_loading_message == 1 && devparm)
 	printf(" loading %s\n", dehacked_file);
@@ -2009,7 +2029,12 @@ void D_DoomMain (void)
 	    I_QuitSerialFail();
 	}
 	else
-	    D_AddFile("usb:/apps/wiidoom/pspchex.wad");
+	{
+	    if(usb)
+		D_AddFile("usb:/apps/wiidoom/pspchex.wad");
+	    else if(sd)
+		D_AddFile("sd:/apps/wiidoom/pspchex.wad");
+	}
     }
     else if(fsize == 19321722)
     {
@@ -2032,7 +2057,12 @@ void D_DoomMain (void)
 	    I_QuitSerialFail();
 	}
 	else
-	    D_AddFile("usb:/apps/wiidoom/psphacx.wad");
+	{
+	    if(usb)
+		D_AddFile("usb:/apps/wiidoom/psphacx.wad");
+	    else if(sd)
+		D_AddFile("sd:/apps/wiidoom/psphacx.wad");
+	}
     }
     else if(fsize == 28422764)
     {
@@ -2055,7 +2085,12 @@ void D_DoomMain (void)
 	    I_QuitSerialFail();
 	}
 	else
-	    D_AddFile("usb:/apps/wiidoom/pspfreedoom.wad");
+	{
+	    if(usb)
+		D_AddFile("usb:/apps/wiidoom/pspfreedoom.wad");
+	    else if(sd)
+		D_AddFile("sd:/apps/wiidoom/pspfreedoom.wad");
+	}
     }
 
     // Check for -file in shareware

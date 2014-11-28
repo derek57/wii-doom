@@ -2187,6 +2187,9 @@ float M_GetFloatVariable(char *name)
 // Get the path to the default configuration dir to use, if NULL
 // is passed to M_SetConfigDir.
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wreturn-type"
+
 static char *GetDefaultConfigDir(void)
 {
 
@@ -2219,7 +2222,10 @@ static char *GetDefaultConfigDir(void)
 	if(devparm)
 	    printf("FROM M_CONFIG.O: HOME-DIR IS: %s\n", homedir);
 */
-        return strdup("usb:/apps/wiidoom/");
+	if(usb)
+	    return strdup("usb:/apps/wiidoom/");
+	else if(sd)
+	    return strdup("sd:/apps/wiidoom/");
     }
 }
 
@@ -2263,7 +2269,6 @@ char *M_GetSaveGameDir(char *iwadname)
 {
     char *savegamedir = NULL;
     char *savegameroot;
-    char *topdir;
 
     // If not "doing" a configuration directory (Windows), don't "do"
     // a savegame directory, either.
@@ -2274,115 +2279,243 @@ char *M_GetSaveGameDir(char *iwadname)
     }
     else
     {
-        // ~/.chocolate-doom/savegames
+        // ~/.chocolate-doom/savegames/
 
-        topdir = M_StringJoin(configdir, "savegames", NULL);
-        M_MakeDirectory(topdir);
+        savegamedir = malloc(strlen(configdir) + 30);
+        sprintf(savegamedir, "%ssavegames%c", configdir,
+                             DIR_SEPARATOR);
+
+        M_MakeDirectory(savegamedir);
 
         // eg. ~/.chocolate-doom/savegames/doom2.wad/
-/*
-        savegamedir = M_StringJoin(topdir, DIR_SEPARATOR_S, iwadname,
-                                   DIR_SEPARATOR_S, NULL);
-*/
-	savegameroot = SavePathRoot2;
-	M_MakeDirectory(savegameroot);
 
-	savegameroot = SavePathRoot3;
-	M_MakeDirectory(savegameroot);
+        sprintf(savegamedir + strlen(savegamedir), "%s%c",
+                iwadname, DIR_SEPARATOR);
 
-	savegameroot = SavePathRoot4;
-	M_MakeDirectory(savegameroot);
+	if(usb)
+	{
+	    savegameroot = SavePathRoot1USB;
 
-	savegameroot = SavePathRoot5;
-	M_MakeDirectory(savegameroot);
+	    M_MakeDirectory(savegameroot);
 
-	savegameroot = SavePathRoot6;
-	M_MakeDirectory(savegameroot);
+	    savegameroot = SavePathRoot2USB;
 
-	savegameroot = SavePathRoot7;
-	M_MakeDirectory(savegameroot);
+	    M_MakeDirectory(savegameroot);
 
-	savegameroot = SavePathRoot8;
-	M_MakeDirectory(savegameroot);
+	    savegameroot = SavePathRoot3USB;
 
-	if(fsize == 4261144)
-	    savegamedir = SavePathBeta14;
-	else if(fsize == 4271324)
-	    savegamedir = SavePathBeta15;
-	else if(fsize == 4211660)
-	    savegamedir = SavePathBeta16;
-	else if(fsize == 4207819)
-	    savegamedir = SavePathShare10;
-	else if(fsize == 4274218)
-	    savegamedir = SavePathShare11;
-	else if(fsize == 4225504)
-	    savegamedir = SavePathShare12;
-	else if(fsize == 4225460)
-	    savegamedir = SavePathShare125;
-	else if(fsize == 4234124)
-	    savegamedir = SavePathShare1666;
-	else if(fsize == 4196020)
-	    savegamedir = SavePathShare18;
-	else if(fsize == 10396254)
-	    savegamedir = SavePathReg11;
-	else if(fsize == 10399316)
-	    savegamedir = SavePathReg12;
-	else if(fsize == 10401760)
-	    savegamedir = SavePathReg16;
-	else if(fsize == 11159840)
-	    savegamedir = SavePathReg18;
-	else if(fsize == 12408292)
-	    savegamedir = SavePathReg19;
-	else if(fsize == 14943400)
-	    savegamedir = SavePath2Reg1666;
-	else if(fsize == 14824716)
-	    savegamedir = SavePath2Reg1666G;
-	else if(fsize == 14612688)
-	    savegamedir = SavePath2Reg17;
-	else if(fsize == 14607420)
-	    savegamedir = SavePath2Reg18F;
-	else if(fsize == 14604584)
-	    savegamedir = SavePath2Reg19;
-	else if(fsize == 18195736)
-	    savegamedir = SavePathTNT191;
-	else if(fsize == 18654796)
-	    savegamedir = SavePathTNT192;
-	else if(fsize == 18240172)
-	    savegamedir = SavePathPLUT191;
-	else if(fsize == 17420824)
-	    savegamedir = SavePathPLUT192;
-	else if(fsize == 12361532)
-	    savegamedir = SavePathChex;
+	    M_MakeDirectory(savegameroot);
 
-//	else if(fsize == 9745831)
-//	    savegamedir = SavePathHacxShare10;
-//	else if(fsize == 21951805)
-//	    savegamedir = SavePathHacxReg10;
-//	else if(fsize == 22102300)
-//	    savegamedir = SavePathHacxReg11;
+	    savegameroot = SavePathRoot4USB;
 
-	else if(fsize == 19321722)
-	    savegamedir = SavePathHacxReg12;
+	    M_MakeDirectory(savegameroot);
 
-//	else if(fsize == 19801320)
-//	    savegamedir = SavePathFreedoom064;
-//	else if(fsize == 27704188)
-//	    savegamedir = SavePathFreedoom07RC1;
-//	else if(fsize == 27625596)
-//	    savegamedir = SavePathFreedoom07;
-//	else if(fsize == 28144744)
-//	    savegamedir = SavePathFreedoom08B1;
-//	else if(fsize == 28592816)
-//	    savegamedir = SavePathFreedoom08;
-//	else if(fsize == 19362644)
-//	    savegamedir = SavePathFreedoom08P1;
+	    savegameroot = SavePathRoot5USB;
 
-	else if(fsize == 28422764)
-	    savegamedir = SavePathFreedoom08P2;
+	    M_MakeDirectory(savegameroot);
 
+	    savegameroot = SavePathRoot6USB;
+
+	    M_MakeDirectory(savegameroot);
+
+	    savegameroot = SavePathRoot7USB;
+
+	    M_MakeDirectory(savegameroot);
+
+	    savegameroot = SavePathRoot8USB;
+
+	    M_MakeDirectory(savegameroot);
+	}
+	else if(sd)
+	{
+	    savegameroot = SavePathRoot1SD;
+
+	    M_MakeDirectory(savegameroot);
+
+	    savegameroot = SavePathRoot2SD;
+
+	    M_MakeDirectory(savegameroot);
+
+	    savegameroot = SavePathRoot3SD;
+
+	    M_MakeDirectory(savegameroot);
+
+	    savegameroot = SavePathRoot4SD;
+
+	    M_MakeDirectory(savegameroot);
+
+	    savegameroot = SavePathRoot5SD;
+
+	    M_MakeDirectory(savegameroot);
+
+	    savegameroot = SavePathRoot6SD;
+
+	    M_MakeDirectory(savegameroot);
+
+	    savegameroot = SavePathRoot7SD;
+
+	    M_MakeDirectory(savegameroot);
+
+	    savegameroot = SavePathRoot8SD;
+
+	    M_MakeDirectory(savegameroot);
+	}
+
+	if(usb)
+	{
+	    if(fsize == 4261144)
+		savegamedir = SavePathBeta14USB;
+	    else if(fsize == 4271324)
+		savegamedir = SavePathBeta15USB;
+	    else if(fsize == 4211660)
+		savegamedir = SavePathBeta16USB;
+	    else if(fsize == 4207819)
+		savegamedir = SavePathShare10USB;
+	    else if(fsize == 4274218)
+		savegamedir = SavePathShare11USB;
+	    else if(fsize == 4225504)
+		savegamedir = SavePathShare12USB;
+	    else if(fsize == 4225460)
+		savegamedir = SavePathShare125USB;
+	    else if(fsize == 4234124)
+		savegamedir = SavePathShare1666USB;
+	    else if(fsize == 4196020)
+		savegamedir = SavePathShare18USB;
+	    else if(fsize == 10396254)
+		savegamedir = SavePathReg11USB;
+	    else if(fsize == 10399316)
+		savegamedir = SavePathReg12USB;
+	    else if(fsize == 10401760)
+		savegamedir = SavePathReg16USB;
+	    else if(fsize == 11159840)
+		savegamedir = SavePathReg18USB;
+	    else if(fsize == 12408292)
+		savegamedir = SavePathReg19USB;
+	    else if(fsize == 14943400)
+		savegamedir = SavePath2Reg1666USB;
+	    else if(fsize == 14824716)
+		savegamedir = SavePath2Reg1666GUSB;
+	    else if(fsize == 14612688)
+		savegamedir = SavePath2Reg17USB;
+	    else if(fsize == 14607420)
+		savegamedir = SavePath2Reg18FUSB;
+	    else if(fsize == 14604584)
+		savegamedir = SavePath2Reg19USB;
+	    else if(fsize == 18195736)
+		savegamedir = SavePathTNT191USB;
+	    else if(fsize == 18654796)
+		savegamedir = SavePathTNT192USB;
+	    else if(fsize == 18240172)
+		savegamedir = SavePathPLUT191USB;
+	    else if(fsize == 17420824)
+		savegamedir = SavePathPLUT192USB;
+	    else if(fsize == 12361532)
+		savegamedir = SavePathChexUSB;
+
+//	    else if(fsize == 9745831)
+//		savegamedir = SavePathHacxShare10USB;
+//	    else if(fsize == 21951805)
+//		savegamedir = SavePathHacxReg10USB;
+//	    else if(fsize == 22102300)
+//		savegamedir = SavePathHacxReg11USB;
+
+	    else if(fsize == 19321722)
+		savegamedir = SavePathHacxReg12USB;
+
+//	    else if(fsize == 19801320)
+//		savegamedir = SavePathFreedoom064USB;
+//	    else if(fsize == 27704188)
+//		savegamedir = SavePathFreedoom07RC1USB;
+//	    else if(fsize == 27625596)
+//		savegamedir = SavePathFreedoom07USB;
+//	    else if(fsize == 28144744)
+//		savegamedir = SavePathFreedoom08B1USB;
+//	    else if(fsize == 28592816)
+//		savegamedir = SavePathFreedoom08USB;
+//	    else if(fsize == 19362644)
+//		savegamedir = SavePathFreedoom08P1USB;
+
+	    else if(fsize == 28422764)
+		savegamedir = SavePathFreedoom08P2USB;
+	}
+	else if(sd)
+	{
+	    if(fsize == 4261144)
+		savegamedir = SavePathBeta14SD;
+	    else if(fsize == 4271324)
+		savegamedir = SavePathBeta15SD;
+	    else if(fsize == 4211660)
+		savegamedir = SavePathBeta16SD;
+	    else if(fsize == 4207819)
+		savegamedir = SavePathShare10SD;
+	    else if(fsize == 4274218)
+		savegamedir = SavePathShare11SD;
+	    else if(fsize == 4225504)
+		savegamedir = SavePathShare12SD;
+	    else if(fsize == 4225460)
+		savegamedir = SavePathShare125SD;
+	    else if(fsize == 4234124)
+		savegamedir = SavePathShare1666SD;
+	    else if(fsize == 4196020)
+		savegamedir = SavePathShare18SD;
+	    else if(fsize == 10396254)
+		savegamedir = SavePathReg11SD;
+	    else if(fsize == 10399316)
+		savegamedir = SavePathReg12SD;
+	    else if(fsize == 10401760)
+		savegamedir = SavePathReg16SD;
+	    else if(fsize == 11159840)
+		savegamedir = SavePathReg18SD;
+	    else if(fsize == 12408292)
+		savegamedir = SavePathReg19SD;
+	    else if(fsize == 14943400)
+		savegamedir = SavePath2Reg1666SD;
+	    else if(fsize == 14824716)
+		savegamedir = SavePath2Reg1666GSD;
+	    else if(fsize == 14612688)
+		savegamedir = SavePath2Reg17SD;
+	    else if(fsize == 14607420)
+		savegamedir = SavePath2Reg18FSD;
+	    else if(fsize == 14604584)
+		savegamedir = SavePath2Reg19SD;
+	    else if(fsize == 18195736)
+		savegamedir = SavePathTNT191SD;
+	    else if(fsize == 18654796)
+		savegamedir = SavePathTNT192SD;
+	    else if(fsize == 18240172)
+		savegamedir = SavePathPLUT191SD;
+	    else if(fsize == 17420824)
+		savegamedir = SavePathPLUT192SD;
+	    else if(fsize == 12361532)
+		savegamedir = SavePathChexSD;
+
+//	    else if(fsize == 9745831)
+//		savegamedir = SavePathHacxShare10SD;
+//	    else if(fsize == 21951805)
+//		savegamedir = SavePathHacxReg10SD;
+//	    else if(fsize == 22102300)
+//		savegamedir = SavePathHacxReg11SD;
+
+	    else if(fsize == 19321722)
+		savegamedir = SavePathHacxReg12SD;
+
+//	    else if(fsize == 19801320)
+//		savegamedir = SavePathFreedoom064SD;
+//	    else if(fsize == 27704188)
+//		savegamedir = SavePathFreedoom07RC1SD;
+//	    else if(fsize == 27625596)
+//		savegamedir = SavePathFreedoom07SD;
+//	    else if(fsize == 28144744)
+//		savegamedir = SavePathFreedoom08B1SD;
+//	    else if(fsize == 28592816)
+//		savegamedir = SavePathFreedoom08SD;
+//	    else if(fsize == 19362644)
+//		savegamedir = SavePathFreedoom08P1SD;
+
+	    else if(fsize == 28422764)
+		savegamedir = SavePathFreedoom08P2SD;
+	}
 	M_MakeDirectory(savegamedir);
-
-        free(topdir);
     }
 
     return savegamedir;
