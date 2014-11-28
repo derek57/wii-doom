@@ -626,6 +626,10 @@ void Menu_WadList(void)
 	printStyledText(9, 35,CONSOLE_FONT_BLACK,CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,&stTexteLocation,"PWAD3: ");
 	printStyledText(9, 41,CONSOLE_FONT_BLACK,CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,&stTexteLocation,stripped_extra_wad_3);
 	printStyledText(9, 33,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"|");
+
+	if(extra_wad_loaded || load_dehacked || md5_check)
+	    printStyledText(9, 18,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"X: start over");
+
 	printStyledText(10, 35,CONSOLE_FONT_BLACK,CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,&stTexteLocation,".DEH: ");
 	printStyledText(10, 41,CONSOLE_FONT_BLACK,CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,&stTexteLocation,stripped_dehacked_file);
 	printStyledText(10, 33,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"|");
