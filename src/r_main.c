@@ -809,6 +809,7 @@ void R_Init (void)
     R_InitSkyMap ();
     R_InitTranslationTables ();
     printf (".");
+    printf("]");
     I_Sleep(5);
 	
     framecount = 0;

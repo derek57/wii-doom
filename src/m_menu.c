@@ -187,8 +187,8 @@ int			extra_wad_loaded;
 int			mhz333 = 0;
 */
 int			fps = 0;		// FOR PSP: calculating the frames per second
-int			key_controls_start_in_cfg_at_pos = 14;	// FOR PSP: ACTUALLY IT'S +2 !!!
-int			key_controls_end_in_cfg_at_pos = 22;	// FOR PSP: ACTUALLY IT'S +2 !!!
+int			key_controls_start_in_cfg_at_pos = 15;	// FOR PSP: ACTUALLY IT'S +2 !!!
+int			key_controls_end_in_cfg_at_pos = 23;	// FOR PSP: ACTUALLY IT'S +2 !!!
 int			crosshair = 0;
 int			show_stats = 0;
 //int			max_free_ram = 0;
@@ -4048,7 +4048,7 @@ boolean M_Responder (event_t* ev)
     if (askforkey && data->btns_d)		// KEY BINDINGS
     {
 	M_KeyBindingsClearControls(ev->data1);
-	*doom_defaults_list[keyaskedfor + 14 + FirstKey].location = ev->data1;
+	*doom_defaults_list[keyaskedfor + 15 + FirstKey].location = ev->data1;
 	askforkey = false;
 	return true;
     }
@@ -6222,36 +6222,36 @@ void M_KeyBindingsClearControls (int ch)	// XXX (FOR PSP): NOW THIS IS RATHER IM
 
 void M_KeyBindingsClearAll (int choice)
 {
-    *doom_defaults_list[14].location = 0;
     *doom_defaults_list[15].location = 0;
     *doom_defaults_list[16].location = 0;
     *doom_defaults_list[17].location = 0;
+    *doom_defaults_list[18].location = 0;
 //    *doom_defaults_list[15].location = 0;
 //    *doom_defaults_list[16].location = 0;
 //    *doom_defaults_list[17].location = 0;
 //    *doom_defaults_list[18].location = 0;
-    *doom_defaults_list[18].location = 0;
-//    *doom_defaults_list[20].location = 0;
     *doom_defaults_list[19].location = 0;
+//    *doom_defaults_list[20].location = 0;
     *doom_defaults_list[20].location = 0;
     *doom_defaults_list[21].location = 0;
+    *doom_defaults_list[22].location = 0;
 }
 
 void M_KeyBindingsReset (int choice)
 {
-    *doom_defaults_list[14].location = CLASSIC_CONTROLLER_R;
-    *doom_defaults_list[15].location = CLASSIC_CONTROLLER_L;
-    *doom_defaults_list[16].location = CLASSIC_CONTROLLER_MINUS;
-    *doom_defaults_list[17].location = CLASSIC_CONTROLLER_LEFT;
+    *doom_defaults_list[15].location = CLASSIC_CONTROLLER_R;
+    *doom_defaults_list[16].location = CLASSIC_CONTROLLER_L;
+    *doom_defaults_list[17].location = CLASSIC_CONTROLLER_MINUS;
+    *doom_defaults_list[18].location = CLASSIC_CONTROLLER_LEFT;
 //    *doom_defaults_list[15].location = 175;
 //    *doom_defaults_list[16].location = 157;
 //    *doom_defaults_list[17].location = 47;
 //    *doom_defaults_list[18].location = 32;
-    *doom_defaults_list[18].location = CLASSIC_CONTROLLER_DOWN;
+    *doom_defaults_list[19].location = CLASSIC_CONTROLLER_DOWN;
 //    *doom_defaults_list[20].location = 13;
-    *doom_defaults_list[19].location = CLASSIC_CONTROLLER_RIGHT;
-    *doom_defaults_list[20].location = CLASSIC_CONTROLLER_ZL;
-    *doom_defaults_list[21].location = CLASSIC_CONTROLLER_ZR;
+    *doom_defaults_list[20].location = CLASSIC_CONTROLLER_RIGHT;
+    *doom_defaults_list[21].location = CLASSIC_CONTROLLER_ZL;
+    *doom_defaults_list[22].location = CLASSIC_CONTROLLER_ZR;
 }
 
 void M_DrawKeyBindings(void)
@@ -6307,7 +6307,7 @@ void M_DrawKeyBindings(void)
 	else
 	{
 	    M_WriteText(195, (i*10+40),
-		Key2String(*(doom_defaults_list[i+FirstKey+14].location)));
+		Key2String(*(doom_defaults_list[i+FirstKey+15].location)));
 	}
     }
 }
