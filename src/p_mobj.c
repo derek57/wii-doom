@@ -320,6 +320,11 @@ void P_ZMovement (mobj_t* mo)
 	
 	if (mo->momz < 0)
 	{
+	    if(jumping)
+	    {
+		if (mo->player)
+		    mo->player->jumpTics = 7;       // delay any jumping for a short time
+	    }
 	    if (mo->player
 		&& mo->momz < -GRAVITY*8)	
 	    {

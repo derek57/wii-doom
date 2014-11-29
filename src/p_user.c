@@ -263,6 +263,14 @@ void P_PlayerThink (player_t* player)
 	return;
     }
     
+    if(jumping)
+    {
+	if (player->jumpTics)
+	{
+	    player->jumpTics--;
+	}
+    }
+
     // Move around.
     // Reactiontime is used to prevent movement
     //  for a bit after a teleport.
@@ -276,6 +284,17 @@ void P_PlayerThink (player_t* player)
     if (player->mo->subsector->sector->special)
 	P_PlayerInSpecialSector (player);
     
+    if (cmd->arti)
+    {                           // Use an artifact
+	if(jumping)
+	{
+    	    if ((cmd->arti & AFLAG_JUMP) && onground && !player->jumpTics)
+    	    {
+		player->mo->momz = 9 * FRACUNIT;
+            	player->jumpTics = 18;
+    	    }
+	}
+    }
     // Check for weapon change.
 
     // A special event has no other buttons.

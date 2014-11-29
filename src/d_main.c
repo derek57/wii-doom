@@ -644,10 +644,10 @@ void D_DoAdvanceDemo (void)
 	}
 	break;
       case 1:
+/*
 	if (fsize != 4261144 && fsize != 10401760 && fsize != 10396254 && fsize != 4274218 &&
 		fsize != 4207819)
 	    G_DeferedPlayDemo(DEH_String("demo1"));
-/*
 	else if(fsize == 4261144)
 	    G_DeferedPlayDemo(DEH_String("BT14LEV3"));
 	else if(fsize == 10401760)
@@ -666,10 +666,10 @@ void D_DoAdvanceDemo (void)
 	pagename = DEH_String("CREDIT");
 	break;
       case 3:
+/*
 	if (fsize != 4261144 && fsize != 10401760 && fsize != 10396254 && fsize != 4274218 &&
 		fsize != 4207819)
 	    G_DeferedPlayDemo(DEH_String("demo2"));
-/*
 	else if(fsize == 4261144)
 	    G_DeferedPlayDemo(DEH_String("demo_1_2"));
 	else if(fsize == 10401760)
@@ -709,10 +709,10 @@ void D_DoAdvanceDemo (void)
 	}
 	break;
       case 5:
+/*
 	if (fsize != 4261144 && fsize != 10401760 && fsize != 10396254 && fsize != 4274218 &&
 		fsize != 4207819)
 	    G_DeferedPlayDemo(DEH_String("demo3"));
-/*
 	else if(fsize == 4261144)
 	    G_DeferedPlayDemo(DEH_String("demo_1_3"));
 	else if(fsize == 10401760)
@@ -727,7 +727,7 @@ void D_DoAdvanceDemo (void)
 	break;
         // THE DEFINITIVE DOOM Special Edition demo
       case 6:
-	G_DeferedPlayDemo(DEH_String("demo4"));
+//	G_DeferedPlayDemo(DEH_String("demo4"));
 	break;
     }
 

@@ -175,6 +175,7 @@ extern int key_invright, key_invuse;
 //    CONFIG_VARIABLE_INT		(btn_layout),
     CONFIG_VARIABLE_INT		(vanilla_weapon_change),
     CONFIG_VARIABLE_INT		(xhair),
+    CONFIG_VARIABLE_INT		(jump),
 /*
     CONFIG_VARIABLE_INT		(key_triangle),
     CONFIG_VARIABLE_INT		(key_cross),
@@ -190,6 +191,7 @@ extern int key_invright, key_invuse;
     CONFIG_VARIABLE_INT		(key_weapon_right),
     CONFIG_VARIABLE_INT		(key_automap_zoom_in),
     CONFIG_VARIABLE_INT		(key_automap_zoom_out),
+    CONFIG_VARIABLE_INT		(key_jump),
 /*
     CONFIG_VARIABLE_INT		(key_righttrigger),
     CONFIG_VARIABLE_INT		(key_zl),

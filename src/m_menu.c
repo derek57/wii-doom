@@ -187,8 +187,8 @@ int			extra_wad_loaded;
 int			mhz333 = 0;
 */
 int			fps = 0;		// FOR PSP: calculating the frames per second
-int			key_controls_start_in_cfg_at_pos = 15;	// FOR PSP: ACTUALLY IT'S +2 !!!
-int			key_controls_end_in_cfg_at_pos = 23;	// FOR PSP: ACTUALLY IT'S +2 !!!
+int			key_controls_start_in_cfg_at_pos = 16;	// FOR PSP: ACTUALLY IT'S +2 !!!
+int			key_controls_end_in_cfg_at_pos = 25;	// FOR PSP: ACTUALLY IT'S +2 !!!
 int			crosshair = 0;
 int			show_stats = 0;
 //int			max_free_ram = 0;
@@ -371,6 +371,7 @@ void M_MapRotation(int choice);
 void M_FollowMode(int choice);
 void M_Statistics(int choice);
 void M_Crosshair(int choice);
+void M_Jumping(int choice);
 void M_God(int choice);
 void M_Noclip(int choice);
 void M_Weapons(int choice);
@@ -1725,6 +1726,7 @@ enum
     keybindings_lefttrigger,
     keybindings_righttrigger,
     keybindings_fire,
+    keybindings_jump,
     keybindings_empty1,
 /*
     keybindings_layout,
@@ -1754,6 +1756,7 @@ menuitem_t KeyBindingsMenu[]=
     {5,"",M_KeyBindingsSetKey,5},
     {5,"",M_KeyBindingsSetKey,6},
     {5,"",M_KeyBindingsSetKey,7},
+    {5,"",M_KeyBindingsSetKey,8},
     {-1,"",0,'\0'},
 /*
     {2,"",M_KeyBindingsButtonLayout,'l'},
@@ -1859,6 +1862,7 @@ enum
     game_messages,
 //    game_dialogtext,
     game_crosshair,
+    game_jumping,
     game_weapon,
     game_end
 } game_e;
@@ -1877,6 +1881,7 @@ menuitem_t GameMenu[]=
     {2,"M_MESSG",M_ChangeMessages,'m'},
 //    {2,"M_DLGTXT",M_DialogText,'t'},
     {2,"M_XHAIR",M_Crosshair,'c'},
+    {2,"M_JUMPNG",M_Jumping,'j'},
     {2,"M_WPNCHG",M_WeaponChange,'w'}
 };
 
@@ -1886,7 +1891,7 @@ menu_t  GameDef =
     &OptionsDef,
     GameMenu,
     M_DrawGame,
-    40,35,       // [STRIFE] changed y coord 64 -> 35
+    40,20,       // [STRIFE] changed y coord 64 -> 35
     0
 };
 
@@ -2887,47 +2892,54 @@ void M_DrawScreen(void)
 void M_DrawGame(void)
 {
     if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
-	V_DrawPatchDirect(70, 15, W_CacheLumpName(DEH_String("M_T_GSET"),
+	V_DrawPatchDirect(70, 0, W_CacheLumpName(DEH_String("M_T_GSET"),
                                                PU_CACHE));
     else
-	V_DrawPatchDirect(70, 15, W_CacheLumpName(DEH_String("M_GMESET"),
+	V_DrawPatchDirect(70, 0, W_CacheLumpName(DEH_String("M_GMESET"),
                                                PU_CACHE));
 
-    M_WriteText(60, 105, DEH_String("----------------------------------"));
+    M_WriteText(60, 90, DEH_String("----------------------------------"));
 
-    V_DrawPatchDirect(OptionsDef.x + 185, OptionsDef.y-22 + LINEHEIGHT * game_messages,
+    V_DrawPatchDirect(OptionsDef.x + 185, OptionsDef.y-37 + LINEHEIGHT * game_messages,
                       W_CacheLumpName(DEH_String(msgNames[showMessages]),
                                       PU_CACHE));
 
     if(drawgrid == 1)
-	V_DrawPatch (245, 35, W_CacheLumpName(DEH_String("M_MSGON"), PU_CACHE));
+	V_DrawPatch (245, 20, W_CacheLumpName(DEH_String("M_MSGON"), PU_CACHE));
     else if(drawgrid == 0)
-	V_DrawPatch (245, 35, W_CacheLumpName(DEH_String("M_MSGOFF"), PU_CACHE));
+	V_DrawPatch (245, 20, W_CacheLumpName(DEH_String("M_MSGOFF"), PU_CACHE));
 
     if(am_rotate == true)
-	V_DrawPatch (245, 51, W_CacheLumpName(DEH_String("M_MSGON"), PU_CACHE));
+	V_DrawPatch (245, 36, W_CacheLumpName(DEH_String("M_MSGON"), PU_CACHE));
     else if(am_rotate == false)
-	V_DrawPatch (245, 51, W_CacheLumpName(DEH_String("M_MSGOFF"), PU_CACHE));
+	V_DrawPatch (245, 36, W_CacheLumpName(DEH_String("M_MSGOFF"), PU_CACHE));
 
     if(followplayer == 1)
-	V_DrawPatch (245, 67, W_CacheLumpName(DEH_String("M_MSGON"), PU_CACHE));
+	V_DrawPatch (245, 52, W_CacheLumpName(DEH_String("M_MSGON"), PU_CACHE));
     else if(followplayer == 0)
-	V_DrawPatch (245, 67, W_CacheLumpName(DEH_String("M_MSGOFF"), PU_CACHE));
+	V_DrawPatch (245, 52, W_CacheLumpName(DEH_String("M_MSGOFF"), PU_CACHE));
 
     if(show_stats == 1)
-	V_DrawPatch (245, 83, W_CacheLumpName(DEH_String("M_MSGON"), PU_CACHE));
+	V_DrawPatch (245, 68, W_CacheLumpName(DEH_String("M_MSGON"), PU_CACHE));
     else if (show_stats == 0)
-	V_DrawPatch (245, 83, W_CacheLumpName(DEH_String("M_MSGOFF"), PU_CACHE));
+	V_DrawPatch (245, 68, W_CacheLumpName(DEH_String("M_MSGOFF"), PU_CACHE));
 
     if(crosshair == 1)
-	V_DrawPatch (245, 131, W_CacheLumpName(DEH_String("M_MSGON"), PU_CACHE));
+	V_DrawPatch (245, 116, W_CacheLumpName(DEH_String("M_MSGON"), PU_CACHE));
     else if (crosshair == 0)
-	V_DrawPatch (245, 131, W_CacheLumpName(DEH_String("M_MSGOFF"), PU_CACHE));
+	V_DrawPatch (245, 116, W_CacheLumpName(DEH_String("M_MSGOFF"), PU_CACHE));
+
+    if(jumping)
+	V_DrawPatch (245, 132, W_CacheLumpName(DEH_String("M_MSGON"), PU_CACHE));
+    else
+	V_DrawPatch (245, 132, W_CacheLumpName(DEH_String("M_MSGOFF"), PU_CACHE));
 
     if(use_vanilla_weapon_change == 1)
-	V_DrawPatch (245, 150, W_CacheLumpName(DEH_String("M_SLOW"), PU_CACHE));
+	V_DrawPatch (245, 151, W_CacheLumpName(DEH_String("M_SLOW"), PU_CACHE));
     else if(use_vanilla_weapon_change == 0)
-	V_DrawPatch (245, 150, W_CacheLumpName(DEH_String("M_FAST"), PU_CACHE));
+	V_DrawPatch (245, 151, W_CacheLumpName(DEH_String("M_FAST"), PU_CACHE));
+
+    ST_doRefresh();
 }
 
 void DetectState(void)
@@ -4048,7 +4060,7 @@ boolean M_Responder (event_t* ev)
     if (askforkey && data->btns_d)		// KEY BINDINGS
     {
 	M_KeyBindingsClearControls(ev->data1);
-	*doom_defaults_list[keyaskedfor + 15 + FirstKey].location = ev->data1;
+	*doom_defaults_list[keyaskedfor + 16 + FirstKey].location = ev->data1;
 	askforkey = false;
 	return true;
     }
@@ -6222,36 +6234,28 @@ void M_KeyBindingsClearControls (int ch)	// XXX (FOR PSP): NOW THIS IS RATHER IM
 
 void M_KeyBindingsClearAll (int choice)
 {
-    *doom_defaults_list[15].location = 0;
     *doom_defaults_list[16].location = 0;
     *doom_defaults_list[17].location = 0;
     *doom_defaults_list[18].location = 0;
-//    *doom_defaults_list[15].location = 0;
-//    *doom_defaults_list[16].location = 0;
-//    *doom_defaults_list[17].location = 0;
-//    *doom_defaults_list[18].location = 0;
     *doom_defaults_list[19].location = 0;
-//    *doom_defaults_list[20].location = 0;
     *doom_defaults_list[20].location = 0;
     *doom_defaults_list[21].location = 0;
     *doom_defaults_list[22].location = 0;
+    *doom_defaults_list[23].location = 0;
+    *doom_defaults_list[24].location = 0;
 }
 
 void M_KeyBindingsReset (int choice)
 {
-    *doom_defaults_list[15].location = CLASSIC_CONTROLLER_R;
-    *doom_defaults_list[16].location = CLASSIC_CONTROLLER_L;
-    *doom_defaults_list[17].location = CLASSIC_CONTROLLER_MINUS;
-    *doom_defaults_list[18].location = CLASSIC_CONTROLLER_LEFT;
-//    *doom_defaults_list[15].location = 175;
-//    *doom_defaults_list[16].location = 157;
-//    *doom_defaults_list[17].location = 47;
-//    *doom_defaults_list[18].location = 32;
-    *doom_defaults_list[19].location = CLASSIC_CONTROLLER_DOWN;
-//    *doom_defaults_list[20].location = 13;
-    *doom_defaults_list[20].location = CLASSIC_CONTROLLER_RIGHT;
-    *doom_defaults_list[21].location = CLASSIC_CONTROLLER_ZL;
-    *doom_defaults_list[22].location = CLASSIC_CONTROLLER_ZR;
+    *doom_defaults_list[16].location = CLASSIC_CONTROLLER_R;
+    *doom_defaults_list[17].location = CLASSIC_CONTROLLER_L;
+    *doom_defaults_list[18].location = CLASSIC_CONTROLLER_MINUS;
+    *doom_defaults_list[19].location = CLASSIC_CONTROLLER_LEFT;
+    *doom_defaults_list[20].location = CLASSIC_CONTROLLER_DOWN;
+    *doom_defaults_list[21].location = CLASSIC_CONTROLLER_RIGHT;
+    *doom_defaults_list[22].location = CLASSIC_CONTROLLER_ZL;
+    *doom_defaults_list[23].location = CLASSIC_CONTROLLER_ZR;
+    *doom_defaults_list[24].location = CLASSIC_CONTROLLER_HOME;
 }
 
 void M_DrawKeyBindings(void)
@@ -6287,6 +6291,7 @@ void M_DrawKeyBindings(void)
 //    M_WriteText(40, 130, DEH_String("INVENTORY USE"));
     M_WriteText(40, 100, DEH_String("AUTOMAP ZOOM IN"));
     M_WriteText(40, 110, DEH_String("AUTOMAP ZOOM OUT"));
+    M_WriteText(40, 120, DEH_String("JUMP"));
 
 //    M_WriteText(40, 120, DEH_String("BUTTON LAYOUT:"));
 
@@ -6295,10 +6300,10 @@ void M_DrawKeyBindings(void)
 //    else if(button_layout == 1)
 //    	M_WriteText(195, 120, DEH_String("PSP"));
 
-    M_WriteText(40, 130, DEH_String("CLEAR ALL CONTROLS"));
-    M_WriteText(40, 140, DEH_String("RESET TO DEFAULTS"));
+    M_WriteText(40, 140, DEH_String("CLEAR ALL CONTROLS"));
+    M_WriteText(40, 150, DEH_String("RESET TO DEFAULTS"));
 
-    for (i = 0; i < 8; i++)
+    for (i = 0; i < 9; i++)
     {
 	if (askforkey && keyaskedfor == i)
 	{
@@ -6307,7 +6312,7 @@ void M_DrawKeyBindings(void)
 	else
 	{
 	    M_WriteText(195, (i*10+40),
-		Key2String(*(doom_defaults_list[i+FirstKey+15].location)));
+		Key2String(*(doom_defaults_list[i+FirstKey+16].location)));
 	}
     }
 }
@@ -6863,6 +6868,21 @@ void M_Crosshair(int choice)
     case 1:
         if (crosshair < 1)
             crosshair++;
+        break;
+    }
+}
+
+void M_Jumping(int choice)
+{
+    switch(choice)
+    {
+    case 0:
+        if (jumping)
+            jumping = false;
+        break;
+    case 1:
+        if (jumping == false)
+            jumping = true;
         break;
     }
 }
