@@ -65,9 +65,12 @@ static int		numvisplanes;				// ADDED FOR HIRES
 // ?
 //#define MAXOPENINGS	SCREENWIDTH*64				// CHANGED FOR HIRES
 #define MAXOPENINGS	SCREENWIDTH*64*4			// CHANGED FOR HIRES
-
-short			openings[MAXOPENINGS];
-short*			lastopening;
+/*
+short			openings[MAXOPENINGS];			// CHANGED FOR HIRES
+short*			lastopening;				// CHANGED FOR HIRES
+*/
+int			openings[MAXOPENINGS];			// CHANGED FOR HIRES
+int*			lastopening;				// CHANGED FOR HIRES
 
 
 //
@@ -75,8 +78,12 @@ short*			lastopening;
 //  floorclip starts out SCREENHEIGHT
 //  ceilingclip starts out -1
 //
-short			floorclip[SCREENWIDTH];
-short			ceilingclip[SCREENWIDTH];
+/*
+short			floorclip[SCREENWIDTH];			// CHANGED FOR HIRES
+short			ceilingclip[SCREENWIDTH];		// CHANGED FOR HIRES
+*/
+int			floorclip[SCREENWIDTH];			// CHANGED FOR HIRES
+int			ceilingclip[SCREENWIDTH];		// CHANGED FOR HIRES
 
 //
 // spanstart holds the start of a plane span
@@ -332,7 +339,7 @@ R_CheckPlane
 
     for (x=intrl ; x<= intrh ; x++)
 //	if (pl->top[x] != 0xff)					// CHANGED FOR HIRES
-	if (pl->top[x] != 0xffff)				// CHANGED FOR HIRES
+	if (pl->top[x] != 0xffffffffu)				// CHANGED FOR HIRES
 	    break;
 
     if (x > intrh)
@@ -368,10 +375,16 @@ R_CheckPlane
 void
 R_MakeSpans
 ( int		x,
-  int		t1,
-  int		b1,
-  int		t2,
-  int		b2 )
+/*
+  int	t1,							// CHANGED FOR HIRES
+  int	b1,							// CHANGED FOR HIRES
+  int	t2,							// CHANGED FOR HIRES
+  int	b2 )							// CHANGED FOR HIRES
+*/
+  unsigned int	t1,						// CHANGED FOR HIRES
+  unsigned int	b1,						// CHANGED FOR HIRES
+  unsigned int	t2,						// CHANGED FOR HIRES
+  unsigned int	b2 )						// CHANGED FOR HIRES
 {
     while (t1 < t2 && t1<=b1)
     {
@@ -457,7 +470,8 @@ void R_DrawPlanes (void)
 		dc_yl = pl->top[x];
 		dc_yh = pl->bottom[x];
 
-		if (dc_yl <= dc_yh)
+//		if (dc_yl <= dc_yh)					// CHANGED FOR HIRES
+		if ((unsigned) dc_yl <= dc_yh)				// CHANGED FOR HIRES
 		{
 		    angle = (viewangle + xtoviewangle[x])>>ANGLETOSKYSHIFT;
 		    dc_x = x;
@@ -486,8 +500,8 @@ void R_DrawPlanes (void)
 	pl->top[pl->maxx+1] = 0xff;				// CHANGED FOR HIRES
 	pl->top[pl->minx-1] = 0xff;				// CHANGED FOR HIRES
 */
-	pl->top[pl->maxx+1] = 0xffff;				// CHANGED FOR HIRES
-	pl->top[pl->minx-1] = 0xffff;				// CHANGED FOR HIRES
+	pl->top[pl->maxx+1] = 0xffffffffu;			// CHANGED FOR HIRES
+	pl->top[pl->minx-1] = 0xffffffffu;			// CHANGED FOR HIRES
 
 	stop = pl->maxx + 1;
 

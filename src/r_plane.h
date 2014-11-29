@@ -34,16 +34,20 @@
 
 
 // Visplane related.
-extern  short*		lastopening;
+//extern  short*	lastopening;			// CHANGED FOR HIRES
+extern  int*		lastopening;			// CHANGED FOR HIRES
 
 
 typedef void (*planefunction_t) (int top, int bottom);
 
 extern planefunction_t	floorfunc;
 extern planefunction_t	ceilingfunc_t;
-
-extern short		floorclip[SCREENWIDTH];
-extern short		ceilingclip[SCREENWIDTH];
+/*
+extern short		floorclip[SCREENWIDTH];		// CHANGED FOR HIRES
+extern short		ceilingclip[SCREENWIDTH];	// CHANGED FOR HIRES
+*/
+extern int		floorclip[SCREENWIDTH];		// CHANGED FOR HIRES
+extern int		ceilingclip[SCREENWIDTH];	// CHANGED FOR HIRES
 
 extern fixed_t		yslope[SCREENHEIGHT];
 extern fixed_t		distscale[SCREENWIDTH];
@@ -60,10 +64,16 @@ R_MapPlane
 void
 R_MakeSpans
 ( int		x,
-  int		t1,
-  int		b1,
-  int		t2,
-  int		b2 );
+/*
+  int	t1,						// CHANGED FOR HIRES
+  int	b1,						// CHANGED FOR HIRES
+  int	t2,						// CHANGED FOR HIRES
+  int	b2 );						// CHANGED FOR HIRES
+*/
+  unsigned int	t1,					// CHANGED FOR HIRES
+  unsigned int	b1,					// CHANGED FOR HIRES
+  unsigned int	t2,					// CHANGED FOR HIRES
+  unsigned int	b2 );					// CHANGED FOR HIRES
 
 void R_DrawPlanes (void);
 

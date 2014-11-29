@@ -80,8 +80,12 @@ lighttable_t**	spritelights;
 
 // constant arrays
 //  used for psprite clipping and initializing clipping
-short		negonearray[SCREENWIDTH];
-short		screenheightarray[SCREENWIDTH];
+/*
+short		negonearray[SCREENWIDTH];			// CHANGED FOR HIRES
+short		screenheightarray[SCREENWIDTH];			// CHANGED FOR HIRES
+*/
+int		negonearray[SCREENWIDTH];			// CHANGED FOR HIRES
+int		screenheightarray[SCREENWIDTH];			// CHANGED FOR HIRES
 
 
 //
@@ -342,8 +346,12 @@ vissprite_t* R_NewVisSprite (void)
 // Masked means: partly transparent, i.e. stored
 //  in posts/runs of opaque pixels.
 //
-short*		mfloorclip;
-short*		mceilingclip;
+/*
+short*		mfloorclip;			// CHANGED FOR HIRES
+short*		mceilingclip;			// CHANGED FOR HIRES
+*/
+int*		mfloorclip;			// CHANGED FOR HIRES
+int*		mceilingclip;			// CHANGED FOR HIRES
 
 fixed_t		spryscale;
 fixed_t		sprtopscreen;
@@ -847,8 +855,12 @@ void R_SortVisSprites (void)
 void R_DrawSprite (vissprite_t* spr)
 {
     drawseg_t*		ds;
-    short		clipbot[SCREENWIDTH];
-    short		cliptop[SCREENWIDTH];
+/*
+    short		clipbot[SCREENWIDTH];			// CHANGED FOR HIRES
+    short		cliptop[SCREENWIDTH];			// CHANGED FOR HIRES
+*/
+    int			clipbot[SCREENWIDTH];			// CHANGED FOR HIRES
+    int			cliptop[SCREENWIDTH];			// CHANGED FOR HIRES
     int			x;
     int			r1;
     int			r2;

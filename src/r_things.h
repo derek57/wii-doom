@@ -39,12 +39,20 @@ extern vissprite_t	vsprsortedhead;
 
 // Constant arrays used for psprite clipping
 //  and initializing clipping.
-extern short		negonearray[SCREENWIDTH];
-extern short		screenheightarray[SCREENWIDTH];
+/*
+extern short		negonearray[SCREENWIDTH];		// CHANGED FOR HIRES
+extern short		screenheightarray[SCREENWIDTH];		// CHANGED FOR HIRES
 
 // vars for R_DrawMaskedColumn
-extern short*		mfloorclip;
-extern short*		mceilingclip;
+extern short*		mfloorclip;				// CHANGED FOR HIRES
+extern short*		mceilingclip;				// CHANGED FOR HIRES
+*/
+extern int		negonearray[SCREENWIDTH];		// CHANGED FOR HIRES
+extern int		screenheightarray[SCREENWIDTH];		// CHANGED FOR HIRES
+
+// vars for R_DrawMaskedColumn
+extern int*		mfloorclip;				// CHANGED FOR HIRES
+extern int*		mceilingclip;				// CHANGED FOR HIRES
 extern fixed_t		spryscale;
 extern fixed_t		sprtopscreen;
 
