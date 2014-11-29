@@ -723,7 +723,7 @@ void R_InitData (void)
     printf (".");
     I_Sleep(5);
     R_InitSpriteLumps ();
-    printf (".");
+//    printf (".");
     I_Sleep(5);
     R_InitColormaps ();
 }

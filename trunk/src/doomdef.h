@@ -309,6 +309,8 @@ typedef enum
 
 #define M_ZOOMOUT       ((int) (FRACUNIT/1.02))
 
+#define AFLAG_JUMP			0x80
+
 extern boolean sd;
 extern boolean usb;
 
@@ -409,6 +411,7 @@ int			extra_wad_slot_1_loaded;
 int			extra_wad_slot_2_loaded;
 int			extra_wad_slot_3_loaded;
 
+boolean			jumping;
 boolean			dont_move_forwards;
 boolean			error_detected;
 boolean			print_resource_pwad_error;

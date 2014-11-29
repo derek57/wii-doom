@@ -166,6 +166,9 @@ typedef struct player_s
     // True if secret level has been done.
     boolean		didsecret;	
 
+    // delay the next jump for a moment
+    unsigned int	jumpTics;
+
     // total time the player's been playing
     unsigned int	worldTimer;
 } player_t;

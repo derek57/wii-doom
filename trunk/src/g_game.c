@@ -277,6 +277,7 @@ int	joybmap = 7;
 int	joybright = 8;
 int	joybmapzoomout = 10;
 int	joybmapzoomin = 11;
+int	joybjump = 12;
 
 extern fixed_t 	mtof_zoommul; // how far the window zooms in each tic (map coords)
 extern fixed_t 	ftom_zoommul; // how far the window zooms in each tic (fb coords)
@@ -718,6 +719,12 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
 	|| joybuttons[joybfire]) 
 	cmd->buttons |= BT_ATTACK; 
 
+    if (/*gamekeydown[key_jump] || mousebuttons[mousebjump]
+	||*/ joybuttons[joybjump] && !menuactive)
+    {
+	cmd->arti |= AFLAG_JUMP;
+    }
+
     WPADData *data = WPAD_Data(0);
 
     if(data->exp.type == WPAD_EXP_CLASSIC && !demoplayback)
@@ -766,7 +773,10 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
 		if (!automapactive)
 		{
 		    if(!menuactive)
-			AM_Start ();
+		    {
+			if(usergame)
+			    AM_Start ();
+		    }
 		}
 		else
 		{
