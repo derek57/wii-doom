@@ -93,9 +93,103 @@ fixed_t		bottomstep;
 
 lighttable_t**	walllights;
 
-short*		maskedtexturecol;
+//short*	maskedtexturecol;		// CHANGED FOR HIRES
+int*		maskedtexturecol;		// CHANGED FOR HIRES
 
+// [crispy] WiggleFix: add this code block near the top of r_segs.c
+//
+// R_FixWiggle()
+// Dynamic wall/texture rescaler, AKA "WiggleHack II"
+//  by Kurt "kb1" Baumgardner ("kb") and Andrey "Entryway" Budko ("e6y")
+//
+//  [kb] When the rendered view is positioned, such that the viewer is
+//   looking almost parallel down a wall, the result of the scale
+//   calculation in R_ScaleFromGlobalAngle becomes very large. And, the
+//   taller the wall, the larger that value becomes. If these large
+//   values were used as-is, subsequent calculations would overflow,
+//   causing full-screen HOM, and possible program crashes.
+//
+//  Therefore, vanilla Doom clamps this scale calculation, preventing it
+//   from becoming larger than 0x400000 (64*FRACUNIT). This number was
+//   chosen carefully, to allow reasonably-tight angles, with reasonably
+//   tall sectors to be rendered, within the limits of the fixed-point
+//   math system being used. When the scale gets clamped, Doom cannot
+//   properly render the wall, causing an undesirable wall-bending
+//   effect that I call "floor wiggle". Not a crash, but still ugly.
+//
+//  Modern source ports offer higher video resolutions, which worsens
+//   the issue. And, Doom is simply not adjusted for the taller walls
+//   found in many PWADs.
+//
+//  This code attempts to correct these issues, by dynamically
+//   adjusting the fixed-point math, and the maximum scale clamp,
+//   on a wall-by-wall basis. This has 2 effects:
+//
+//  1. Floor wiggle is greatly reduced and/or eliminated.
+//  2. Overflow is no longer possible, even in levels with maximum
+//     height sectors (65535 is the theoretical height, though Doom
+//     cannot handle sectors > 32767 units in height.
+//
+//  The code is not perfect across all situations. Some floor wiggle can
+//   still be seen, and some texture strips may be slightly misaligned in
+//   extreme cases. These effects cannot be corrected further, without
+//   increasing the precision of various renderer variables, and,
+//   possibly, creating a noticable performance penalty.
+//
 
+static int	max_rwscale = 64 * FRACUNIT;
+static int	heightbits = 12;
+static int	heightunit = (1 << 12);
+static int	invhgtbits = 4;
+
+static const struct
+{
+    int clamp;
+    int heightbits;
+} scale_values[8] = {
+    {2048 * FRACUNIT, 12},
+    {1024 * FRACUNIT, 12},
+    {1024 * FRACUNIT, 11},
+    { 512 * FRACUNIT, 11},
+    { 512 * FRACUNIT, 10},
+    { 256 * FRACUNIT, 10},
+    { 256 * FRACUNIT,  9},
+    { 128 * FRACUNIT,  9}
+};
+
+void R_FixWiggle (sector_t *sector)
+{
+    static int	lastheight = 0;
+    int		height = (sector->ceilingheight - sector->floorheight) >> FRACBITS;
+
+    // disallow negative heights. using 1 forces cache initialization
+    if (height < 1)
+	height = 1;
+
+    // early out?
+    if (height != lastheight)
+    {
+	lastheight = height;
+
+	// initialize, or handle moving sector
+	if (height != sector->cachedheight)
+	{
+	    sector->cachedheight = height;
+	    sector->scaleindex = 0;
+	    height >>= 7;
+
+	    // calculate adjustment
+	    while (height >>= 1)
+		sector->scaleindex++;
+	}
+
+	// fine-tune renderer for this wall
+	max_rwscale = scale_values[sector->scaleindex].clamp;
+	heightbits = scale_values[sector->scaleindex].heightbits;
+	heightunit = (1 << heightbits);
+	invhgtbits = FRACBITS - heightbits;
+    }
+}
 
 //
 // R_RenderMaskedSegRange
@@ -163,7 +257,8 @@ R_RenderMaskedSegRange
     for (dc_x = x1 ; dc_x <= x2 ; dc_x++)
     {
 	// calculate lighting
-	if (maskedtexturecol[dc_x] != SHRT_MAX)
+//	if (maskedtexturecol[dc_x] != SHRT_MAX)				// CHANGED FOR HIRES
+	if (maskedtexturecol[dc_x] != INT_MAX)				// CHANGED FOR HIRES
 	{
 	    if (!fixedcolormap)
 	    {
@@ -184,7 +279,8 @@ R_RenderMaskedSegRange
 		(byte *)R_GetColumn(texnum,maskedtexturecol[dc_x]) -3);
 			
 	    R_DrawMaskedColumn (col);
-	    maskedtexturecol[dc_x] = SHRT_MAX;
+//	    maskedtexturecol[dc_x] = SHRT_MAX;				// CHANGED FOR HIRES
+	    maskedtexturecol[dc_x] = INT_MAX;				// CHANGED FOR HIRES
 	}
 	spryscale += rw_scalestep;
     }
@@ -391,12 +487,12 @@ R_StoreWallRange
 
     // don't overflow and crash
 /*
-    if (ds_p == &drawsegs[MAXDRAWSEGS])			// CHANGED FOR HIRES
-	return;						// CHANGED FOR HIRES
+    if (ds_p == &drawsegs[MAXDRAWSEGS])					// CHANGED FOR HIRES
+	return;								// CHANGED FOR HIRES
 */
-    if (ds_p == &drawsegs[numdrawsegs])			// CHANGED FOR HIRES
-    {							// ADDED FOR HIRES
-	int numdrawsegs_old = numdrawsegs;		// ADDED FOR HIRES
+    if (ds_p == &drawsegs[numdrawsegs])					// CHANGED FOR HIRES
+    {									// ADDED FOR HIRES
+	int numdrawsegs_old = numdrawsegs;				// ADDED FOR HIRES
 
 	numdrawsegs = numdrawsegs ? 2 * numdrawsegs : MAXDRAWSEGS;	// ADDED FOR HIRES
 	drawsegs = realloc(drawsegs, numdrawsegs * sizeof(*drawsegs));	// ADDED FOR HIRES
@@ -437,6 +533,10 @@ R_StoreWallRange
     ds_p->curline = curline;
     rw_stopx = stop+1;
     
+    // WiggleFix: add this line, in r_segs.c:R_StoreWallRange,
+    // right before calls to R_ScaleFromGlobalAngle:
+    R_FixWiggle(frontsector);
+
     // calculate scale at both ends and step
     ds_p->scale1 = rw_scale = 
 	R_ScaleFromGlobalAngle (viewangle + xtoviewangle[start]);
@@ -740,7 +840,8 @@ R_StoreWallRange
     if ( ((ds_p->silhouette & SIL_TOP) || maskedtexture)
 	 && !ds_p->sprtopclip)
     {
-	memcpy (lastopening, ceilingclip+start, 2*(rw_stopx-start));
+//	memcpy (lastopening, ceilingclip+start, 2*(rw_stopx-start));			// CHANGED FOR HIRES
+	memcpy (lastopening, ceilingclip+start, sizeof(lastopening)*(rw_stopx-start));	// CHANGED FOR HIRES
 	ds_p->sprtopclip = lastopening - start;
 	lastopening += rw_stopx - start;
     }
@@ -748,7 +849,8 @@ R_StoreWallRange
     if ( ((ds_p->silhouette & SIL_BOTTOM) || maskedtexture)
 	 && !ds_p->sprbottomclip)
     {
-	memcpy (lastopening, floorclip+start, 2*(rw_stopx-start));
+//	memcpy (lastopening, floorclip+start, 2*(rw_stopx-start));			// CHANGED FOR HIRES
+	memcpy (lastopening, floorclip+start, sizeof(lastopening)*(rw_stopx-start));	// CHANGED FOR HIRES
 	ds_p->sprbottomclip = lastopening - start;
 	lastopening += rw_stopx - start;	
     }

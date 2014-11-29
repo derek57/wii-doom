@@ -137,6 +137,9 @@ typedef	struct
     int			linecount;
     struct line_s**	lines;	// [linecount] size
     
+    // WiggleFix: [kb] for R_FixWiggle()
+    int		cachedheight;
+    int		scaleindex;
 } sector_t;
 
 
@@ -333,10 +336,14 @@ typedef struct drawseg_s
     
     // Pointers to lists for sprite clipping,
     //  all three adjusted so [x1] is first value.
+/*
     short*		sprtopclip;		
     short*		sprbottomclip;	
     short*		maskedtexturecol;
-    
+*/    
+    int*		sprtopclip;
+    int*		sprbottomclip;
+    int*		maskedtexturecol;
 } drawseg_t;
 
 
@@ -449,15 +456,15 @@ typedef struct
   byte		bottom[SCREENWIDTH];				// CHANGED FOR HIRES
   byte		pad4;						// CHANGED FOR HIRES
 */
-  unsigned short		pad1;				// CHANGED FOR HIRES
+  unsigned int		pad1;					// CHANGED FOR HIRES
   // Here lies the rub for all
   //  dynamic resize/change of resolution.		
-  unsigned short		top[SCREENWIDTH];		// CHANGED FOR HIRES
-  unsigned short		pad2;				// CHANGED FOR HIRES
-  unsigned short		pad3;				// CHANGED FOR HIRES
+  unsigned int		top[SCREENWIDTH];			// CHANGED FOR HIRES
+  unsigned int		pad2;					// CHANGED FOR HIRES
+  unsigned int		pad3;					// CHANGED FOR HIRES
   // See above.
-  unsigned short		bottom[SCREENWIDTH];		// CHANGED FOR HIRES
-  unsigned short		pad4;				// CHANGED FOR HIRES
+  unsigned int		bottom[SCREENWIDTH];			// CHANGED FOR HIRES
+  unsigned int		pad4;					// CHANGED FOR HIRES
 } visplane_t;
 
 
