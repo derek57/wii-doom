@@ -462,7 +462,7 @@ void WI_drawLF(void)
     }
 }
 
-
+extern boolean secretexit;
 
 // Draws "Entering <LevelName>"
 void WI_drawEL(void)
@@ -486,7 +486,12 @@ void WI_drawEL(void)
 		y, 								// CHANGED FOR HIRES
                 lnames[wbs->next]);						// CHANGED FOR HIRES
 */
-    V_DrawPatch((ORIGWIDTH - SHORT(lnames[wbs->next]->width))/2,		// CHANGED FOR HIRES
+    if(gamemode == commercial && fsize == 14677988 && gamemap == 2 && secretexit)
+	V_DrawPatch(119,							// CHANGED FOR HIRES
+		y + 1, 								// CHANGED FOR HIRES
+                W_CacheLumpName("CWILV32", PU_CACHE));				// CHANGED FOR HIRES
+    else
+	V_DrawPatch((ORIGWIDTH - SHORT(lnames[wbs->next]->width))/2,		// CHANGED FOR HIRES
 		y, 								// CHANGED FOR HIRES
                 lnames[wbs->next]);						// CHANGED FOR HIRES
 }
@@ -1770,7 +1775,10 @@ void WI_loadData(void)
 {
     if (gamemode == commercial)
     {
-	NUMCMAPS = 32;
+	if(fsize != 14677988)
+	    NUMCMAPS = 32;
+	else
+	    NUMCMAPS = 33;
 	lnames = (patch_t **) Z_Malloc(sizeof(patch_t*) * NUMCMAPS,
 				       PU_STATIC, NULL);
     }
