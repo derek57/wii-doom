@@ -1800,12 +1800,20 @@ void G_DoCompleted (void)
 	if (secretexit)
 	    switch(gamemap)
 	    {
+	      if(fsize == 14677988)
+	      {
+		case 2: wminfo.next = 32; break;
+	      }
 	      case 15: wminfo.next = 30; break;
 	      case 31: wminfo.next = 31; break;
 	    }
 	else
 	    switch(gamemap)
 	    {
+	      if(fsize == 14677988)
+	      {
+		case 33: wminfo.next = 2; break;
+	      }
 	      case 31:
 	      case 32: wminfo.next = 15; break;
 	      default: wminfo.next = gamemap;
