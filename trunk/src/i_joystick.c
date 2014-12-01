@@ -74,7 +74,7 @@ void I_UpdateJoystick(void)
   WPADData *data = WPAD_Data(0);
   ir_t ir;
   WPAD_IR(0, &ir);
-  int nun_x, nun_y, center, min, max, btn_a, btn_b, btn_c, btn_z, btn_1, btn_2, btn_l, btn_r, btn_d, btn_u, btn_p, btn_m, btn_h, btn_x, btn_y;
+  int nun_x, nun_y, center, min, max, btn_a, btn_b, btn_c, btn_z, btn_1, btn_2, btn_l, btn_r, btn_d, btn_u, btn_p, btn_m, btn_h, btn_x, btn_y, btn_plus, btn_minus;
   event_t ev;
   Sint16 axis_x, axis_y;
   
@@ -93,6 +93,8 @@ void I_UpdateJoystick(void)
   btn_h = 0;
   btn_x = 0;
   btn_y = 0;
+  btn_plus = 0;
+  btn_minus = 0;
 
   //Wiimote + Nunchuk controls
   if(data->exp.type==WPAD_EXP_NUNCHUK){
@@ -281,6 +283,12 @@ void I_UpdateJoystick(void)
   if (data->btns_h & WPAD_CLASSIC_BUTTON_Y)
     btn_y = 1;
 
+  if (data->btns_h & WPAD_BUTTON_1)
+    btn_plus = 1;
+
+  if (data->btns_h & WPAD_BUTTON_2)
+    btn_minus = 1;
+
   ev.type = ev_joystick;
   ev.data1 =
     ((btn_d)<<0) |
@@ -297,7 +305,9 @@ void I_UpdateJoystick(void)
     ((btn_m)<<11) |
     ((btn_z)<<12) |
     ((btn_x)<<13) |
-    ((btn_y)<<14);
+    ((btn_y)<<14) |
+    ((btn_plus)<<15) |
+    ((btn_minus)<<16);
   ev.data2 = axis_x; 
   ev.data3 = axis_y;
 
