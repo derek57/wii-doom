@@ -71,6 +71,7 @@ int key_left = KEY_LEFTARROW;
 int key_right = KEY_RIGHTARROW;
 int key_invright = KEY_RIGHTBRACKET;
 int key_jump = KEY_DEL;
+int key_run = KEY_INS;
 //int key_mission   = KEY_SQUARE;
 //int key_invpop    = KEY_CIRCLE;
 int key_strafeleft = KEY_ESCAPE;		// FOR PSP: THIS IS RESERVED AS A SPECIAL KEY
@@ -306,6 +307,8 @@ extern int joy_a;
 extern int joy_b;
 extern int joy_x;
 extern int joy_y;
+extern int joy_1;
+extern int joy_2;
 
 void M_BindBaseControls(void)
 {
@@ -353,6 +356,7 @@ void M_BindBaseControls(void)
     M_BindVariable("key_automap_zoom_in",    &joy_zl);
     M_BindVariable("key_automap_zoom_out",   &joy_zr);
     M_BindVariable("key_jump",               &joy_home);
+    M_BindVariable("key_run",                &joy_1);
 /*
     M_BindVariable("key_righttrigger",       &joy_r);
     M_BindVariable("key_zl",		     &joy_zl);

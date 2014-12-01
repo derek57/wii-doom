@@ -169,9 +169,13 @@ byte		consistancy[MAXPLAYERS][BACKUPTICS];
 #define TURBOTHRESHOLD	0x32
 
 extern int		turnspeed;
+int		turnspd;
 
 extern fixed_t         forwardmove/*[2] = {0x19, 0x32}*/; 
 extern fixed_t         sidemove/*[2] = {0x18, 0x28}*/; 
+fixed_t		forwardmve;
+fixed_t		sidemve;
+
 fixed_t         angleturn/*[3] = {640, 1280, 320}*/;    // + slow turn 
 /*
 static int *weapon_keys[] = {
@@ -252,6 +256,8 @@ int joy_zl = 2048;	// 11
 int joy_home = 4096;	// 12
 int joy_x = 8192;	// 13
 int joy_y = 16384;	// 14
+int joy_1 = 32768;	// 15
+int joy_2 = 65536;	// 16
 
 /*static*/ boolean  joyarray[MAX_JOY_BUTTONS + 1]; 
 //static boolean  joyarray[13]; 
@@ -278,6 +284,7 @@ int	joybright = 8;
 int	joybmapzoomout = 10;
 int	joybmapzoomin = 11;
 int	joybjump = 12;
+int	joybspeed = 15;
 
 extern fixed_t 	mtof_zoommul; // how far the window zooms in each tic (map coords)
 extern fixed_t 	ftom_zoommul; // how far the window zooms in each tic (fb coords)
@@ -468,11 +475,11 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
 { 
 //    int		i; 
     boolean	strafe, use;
-/*
-    boolean	bstrafe; 
-    int		speed;
-    int		tspeed; 
-*/
+
+//    boolean	bstrafe; 
+//    int		speed;
+//    boolean *speed = &joybuttons[joybspeed];		// allow [-1] 
+//    int		tspeed; 
     int		forward;
     int		side;
 
@@ -491,7 +498,7 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
          || joybspeed >= MAX_JOY_BUTTONS
          || gamekeydown[key_speed] 
          || joybuttons[joybspeed];
-*/ 
+*/
     forward = side = 0;
 /*    
     // use two stage accelerative turning
@@ -508,105 +515,6 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
 	tspeed = 2;             // slow turn 
     else 
 	tspeed = speed;
-
-    if(mouseSensitivity == 0)		// ADDED FOR PSP: customizing movement speed per options menu
-    {
-	forwardmove	= 0x12;
-	sidemove	= 0x10;
-	angleturn	= 640;
-	turnspd		= 5;
-    }
-    else if(mouseSensitivity == 1)
-    {
-	forwardmove	= 0x13;
-	sidemove	= 0x11;
-	angleturn	= 689;
-	turnspd		= 5;
-    }
-    else if(mouseSensitivity == 2)
-    {
-	forwardmove	= 0x14;
-	sidemove	= 0x12;
-	angleturn	= 738;
-	turnspd		= 6;
-    }
-    else if(mouseSensitivity == 3)
-    {
-	forwardmove	= 0x15;
-	sidemove	= 0x12;
-	angleturn	= 787;
-	turnspd		= 6;
-    }
-    else if(mouseSensitivity == 4)
-    {
-	forwardmove	= 0x16;
-	sidemove	= 0x13;
-	angleturn	= 836;
-	turnspd		= 7;
-    }
-    else if(mouseSensitivity == 5)
-    {
-	forwardmove	= 0x17;
-	sidemove	= 0x14;
-	angleturn	= 886;
-	turnspd		= 7;
-    }
-    else if(mouseSensitivity == 6)
-    {
-	forwardmove	= 0x18;
-	sidemove	= 0x15;
-	angleturn	= 935;
-	turnspd		= 8;
-    }
-    else if(mouseSensitivity == 7)
-    {
-	forwardmove	= 0x19;
-	sidemove	= 0x15;
-	angleturn	= 984;
-	turnspd		= 8;
-    }
-    else if(mouseSensitivity == 8)
-    {
-	forwardmove	= 0x20;
-	sidemove	= 0x16;
-	angleturn	= 1033;
-	turnspd		= 9;
-    }
-    else if(mouseSensitivity == 9)
-    {
-	forwardmove	= 0x21;
-	sidemove	= 0x17;
-	angleturn	= 1082;
-	turnspd		= 9;
-    }
-    else if(mouseSensitivity == 10)
-    {
-	forwardmove	= 0x22;
-	sidemove	= 0x18;
-	angleturn	= 1131;
-	turnspd		= 10;
-    }
-    else if(mouseSensitivity == 11)
-    {
-	forwardmove	= 0x23;
-	sidemove	= 0x18;
-	angleturn	= 1180;
-	turnspd		= 10;
-    }
-    else if(mouseSensitivity == 12)
-    {
-	forwardmove	= 0x24;
-	sidemove	= 0x19;
-	angleturn	= 1230;
-	turnspd		= 11;
-    }
-    else if(mouseSensitivity == 13)
-    {
-	forwardmove	= 0x25;
-	sidemove	= 0x20;
-	angleturn	= 1280;
-	turnspd		= 11;
-    }
 */
     extern int button_layout;
 
@@ -625,9 +533,9 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
         }
 
         if (joyxmove > 0) 
-            side += sidemove/*[speed]*/; 
+            side += sidemve/*[speed]*/; 
         if (joyxmove < 0) 
-            side -= sidemove/*[speed]*/; 
+            side -= sidemve/*[speed]*/; 
 /*
         if (joyirx > 0)     // calculate wii IR curve based on input
             cmd->angleturn -= 5.0f * joyirx;
@@ -643,16 +551,18 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
             cmd->angleturn += angleturn/*[tspeed]*/; 
 
         if (joyxmove > 20) 
-            side += sidemove/*[speed]*/; 
+            side += sidemove; 
+//            side += sidemove[speed]; 
 //            cmd->angleturn -= angleturn[tspeed]; 
         if (joyxmove < -20) 
-            side -= sidemove/*[speed]*/; 
+            side -= sidemove; 
+//            side -= sidemove[speed]; 
 //            cmd->angleturn += angleturn[tspeed]; 
 
         if (joyirx > 0)     // calculate wii IR curve based on input
-            cmd->angleturn -= turnspeed * joyirx;
+            cmd->angleturn -= turnspd * joyirx;
         if (joyirx < 0)     // calculate wii IR curve based on input
-            cmd->angleturn -= turnspeed * joyirx;
+            cmd->angleturn -= turnspd * joyirx;
 /*
         if (joyirx > 0)     // calculate wii IR curve based on input (max speed ~2560)
             cmd->angleturn -= angleturn / 1.35; 
@@ -690,12 +600,14 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
     if (joyymove > 20) 
     {
 //	if(dont_move_forwards == true)
-	    forward += forwardmove/*[speed]*/; 
+//	    forward += forwardmove[speed]; 
+	    forward += forwardmve; 
     }
     if (joyymove < -20) 
     {
 //	if(dont_move_backwards == true)
-	    forward -= forwardmove/*[speed]*/; 
+//	    forward -= forwardmove[speed]; 
+	    forward -= forwardmve; 
     }
 
     if (/*gamekeydown[key_strafeleft]
@@ -718,6 +630,20 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
     if (gamekeydown[key_fire] /*|| mousebuttons[mousebfire] */
 	|| joybuttons[joybfire]) 
 	cmd->buttons |= BT_ATTACK; 
+
+    if (joybuttons[joybspeed]) 
+    {
+	forwardmve = forwardmove * 6;
+	sidemve = sidemove * 6;
+//	turnspd = turnspeed * 6;
+    }
+    else if(!joybuttons[joybspeed])
+    {
+	forwardmve = forwardmove;
+	sidemve = sidemove;
+//	turnspd = turnspeed;
+    }
+    turnspd = turnspeed;
 
     if (/*gamekeydown[key_jump] || mousebuttons[mousebjump]
 	||*/ joybuttons[joybjump] && !menuactive)
@@ -1259,6 +1185,8 @@ boolean G_Responder (event_t* ev)
         joybuttons[12] = (ev->data1 & joy_home) > 0;
         joybuttons[13] = (ev->data1 & joy_x) > 0;
         joybuttons[14] = (ev->data1 & joy_y) > 0;
+        joybuttons[15] = (ev->data1 & joy_1) > 0;
+        joybuttons[16] = (ev->data1 & joy_2) > 0;
 /*
         joybuttons[0] = (ev->data1 & 1) > 0;
         joybuttons[1] = (ev->data1 & 2) > 0;

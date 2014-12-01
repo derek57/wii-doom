@@ -188,7 +188,7 @@ int			mhz333 = 0;
 */
 int			fps = 0;		// FOR PSP: calculating the frames per second
 int			key_controls_start_in_cfg_at_pos = 16;	// FOR PSP: ACTUALLY IT'S +2 !!!
-int			key_controls_end_in_cfg_at_pos = 25;	// FOR PSP: ACTUALLY IT'S +2 !!!
+int			key_controls_end_in_cfg_at_pos = 26;	// FOR PSP: ACTUALLY IT'S +2 !!!
 int			crosshair = 0;
 int			show_stats = 0;
 //int			max_free_ram = 0;
@@ -1260,6 +1260,8 @@ char *stupidtable[] =
 #define CLASSIC_CONTROLLER_HOME		0x1000
 #define CLASSIC_CONTROLLER_X		0x2000
 #define CLASSIC_CONTROLLER_Y		0x4000
+#define CONTROLLER_1			0x8000
+#define CONTROLLER_2			0x10000
 
 char *Key2String (int ch)
 {
@@ -1287,6 +1289,8 @@ char *Key2String (int ch)
 	case CLASSIC_CONTROLLER_ZR:	return "ZR";
 	case CLASSIC_CONTROLLER_L:	return "LEFT TRIGGER";
 	case CLASSIC_CONTROLLER_R:	return "RIGHT TRIGGER";
+	case CONTROLLER_1:		return "1";
+	case CONTROLLER_2:		return "2";
     }
 
     // Handle letter keys
@@ -1727,6 +1731,7 @@ enum
     keybindings_righttrigger,
     keybindings_fire,
     keybindings_jump,
+    keybindings_run,
     keybindings_empty1,
 /*
     keybindings_layout,
@@ -1757,6 +1762,7 @@ menuitem_t KeyBindingsMenu[]=
     {5,"",M_KeyBindingsSetKey,6},
     {5,"",M_KeyBindingsSetKey,7},
     {5,"",M_KeyBindingsSetKey,8},
+    {5,"",M_KeyBindingsSetKey,9},
     {-1,"",0,'\0'},
 /*
     {2,"",M_KeyBindingsButtonLayout,'l'},
@@ -6251,6 +6257,7 @@ void M_KeyBindingsClearAll (int choice)
     *doom_defaults_list[22].location = 0;
     *doom_defaults_list[23].location = 0;
     *doom_defaults_list[24].location = 0;
+    *doom_defaults_list[25].location = 0;
 }
 
 void M_KeyBindingsReset (int choice)
@@ -6264,6 +6271,7 @@ void M_KeyBindingsReset (int choice)
     *doom_defaults_list[22].location = CLASSIC_CONTROLLER_ZL;
     *doom_defaults_list[23].location = CLASSIC_CONTROLLER_ZR;
     *doom_defaults_list[24].location = CLASSIC_CONTROLLER_HOME;
+    *doom_defaults_list[25].location = CONTROLLER_1;
 }
 
 void M_DrawKeyBindings(void)
@@ -6300,6 +6308,7 @@ void M_DrawKeyBindings(void)
     M_WriteText(40, 100, DEH_String("AUTOMAP ZOOM IN"));
     M_WriteText(40, 110, DEH_String("AUTOMAP ZOOM OUT"));
     M_WriteText(40, 120, DEH_String("JUMP"));
+    M_WriteText(40, 130, DEH_String("RUN"));
 
 //    M_WriteText(40, 120, DEH_String("BUTTON LAYOUT:"));
 
@@ -6308,10 +6317,10 @@ void M_DrawKeyBindings(void)
 //    else if(button_layout == 1)
 //    	M_WriteText(195, 120, DEH_String("PSP"));
 
-    M_WriteText(40, 140, DEH_String("CLEAR ALL CONTROLS"));
-    M_WriteText(40, 150, DEH_String("RESET TO DEFAULTS"));
+    M_WriteText(40, 150, DEH_String("CLEAR ALL CONTROLS"));
+    M_WriteText(40, 160, DEH_String("RESET TO DEFAULTS"));
 
-    for (i = 0; i < 9; i++)
+    for (i = 0; i < 10; i++)
     {
 	if (askforkey && keyaskedfor == i)
 	{
