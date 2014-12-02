@@ -290,7 +290,7 @@ void Menu_FatDevice(void)
 	    printStyledText(8, 35,CONSOLE_FONT_BLACK,CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,&stTexteLocation,"PWAD2: ");
 	    printf("\n                                 |\n");
 	    printStyledText(9, 35,CONSOLE_FONT_BLACK,CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,&stTexteLocation,"PWAD3: ");
-	    printf("\n  B: continue. / Home: Quit.     |");
+	    printf("\n  A: continue. / Home: Quit.     |");
 	    printf("\n                                 |\n");
 //	    printf("                      |\n");
 	    printStyledText(10, 35,CONSOLE_FONT_BLACK,CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,&stTexteLocation,".DEH: ");
@@ -639,13 +639,13 @@ void Menu_WadList(void)
 
 	printf("\n");
 
-	printStyledText(10, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"  B: Select WAD");
+	printStyledText(10, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"  A: Select WAD");
 	printStyledText(10, 16,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"/");
 
 	if(gDirLevel>1)
-	    printStyledText(10, 18,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"A: Prev. dir.");
+	    printStyledText(10, 18,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"B: Prev. dir.");
 	else
-	    printStyledText(10, 18,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"A: Sel. dev.");
+	    printStyledText(10, 18,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"B: Sel. dev.");
 
 	printStyledText(10, 33,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"|");
 	printStyledText(11, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"  ----------------------------------------------------------------------------  ");
