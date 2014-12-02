@@ -648,12 +648,13 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
     if (/*gamekeydown[key_jump] || mousebuttons[mousebjump]
 	||*/ joybuttons[joybjump] && !menuactive)
     {
-	cmd->arti |= AFLAG_JUMP;
+	if(!demoplayback)
+	    cmd->arti |= AFLAG_JUMP;
     }
 
     WPADData *data = WPAD_Data(0);
 
-    if(data->exp.type == WPAD_EXP_CLASSIC && !demoplayback)
+    if(data->exp.type == WPAD_EXP_CLASSIC)
     {
 	if(data->btns_d)
 //	if(data->btns_d & WPAD_CLASSIC_BUTTON_RIGHT)
@@ -687,48 +688,51 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
 		}
 	    }
 
-	    if(joybuttons[joybright])
-		ChangeWeaponRight();
-
-	    if(joybuttons[joybleft])
-//	if(data->btns_d & WPAD_CLASSIC_BUTTON_LEFT)
-		ChangeWeaponLeft();
-
-	    if(joybuttons[joybmap])
+	    if(!demoplayback)
 	    {
-		if (!automapactive)
+		if(joybuttons[joybright])
+		    ChangeWeaponRight();
+
+		if(joybuttons[joybleft])
+//		if(data->btns_d & WPAD_CLASSIC_BUTTON_LEFT)
+		    ChangeWeaponLeft();
+
+		if(joybuttons[joybmap])
 		{
-		    if(!menuactive)
+		    if (!automapactive)
 		    {
-			if(usergame)
-			    AM_Start ();
+			if(!menuactive)
+			{
+			    if(usergame)
+				AM_Start ();
+			}
+		    }
+		    else
+		    {
+			if(!menuactive)
+			{
+			    AM_Stop ();
+
+			    extern int screenblocks;
+
+			    R_SetViewSize (screenblocks, detailLevel);
+			}
 		    }
 		}
-		else
+
+		if(automapactive)
 		{
-		    if(!menuactive)
+		    if(joybuttons[joybmapzoomin])
 		    {
-			AM_Stop ();
-
-			extern int screenblocks;
-
-			R_SetViewSize (screenblocks, detailLevel);
+			mtof_zoommul = M_ZOOMIN;
+			ftom_zoommul = M_ZOOMOUT;
 		    }
-		}
-	    }
 
-	    if(automapactive)
-	    {
-		if(joybuttons[joybmapzoomin])
-		{
-		    mtof_zoommul = M_ZOOMIN;
-		    ftom_zoommul = M_ZOOMOUT;
-		}
-
-		if(joybuttons[joybmapzoomout])
-		{
-		    mtof_zoommul = M_ZOOMOUT;
-		    ftom_zoommul = M_ZOOMIN;
+		    if(joybuttons[joybmapzoomout])
+		    {
+			mtof_zoommul = M_ZOOMOUT;
+			ftom_zoommul = M_ZOOMIN;
+		    }
 		}
 	    }
 	}

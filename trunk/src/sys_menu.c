@@ -133,8 +133,8 @@ fatDevice fdevList[] = {
     { "sd",	"    SD-Card    ",		&__io_wiisd },
     { "usb",	"  USB-Storage  ",		&__io_usbstorage },
     { "usb2",	"USB 2.0 Storage",		&__io_wiiums },
-    { "gcsda",	"  SD-Gecko (A) ",		&__io_gcsda },
-    { "gcsdb",	"  SD-Gecko (B) ",		&__io_gcsdb },
+//    { "gcsda",	"  SD-Gecko (A) ",		&__io_gcsda },
+//    { "gcsdb",	"  SD-Gecko (B) ",		&__io_gcsdb },
 };
 
 // wiiNinja: Define a buffer holding the previous path names as user
@@ -316,7 +316,7 @@ void Menu_FatDevice(void)
 		Restart();
 
 	    /* A button */
-	    if (buttons & WPAD_CLASSIC_BUTTON_B)
+	    if (buttons & WPAD_CLASSIC_BUTTON_A)
 		break;
 	}
     }
@@ -1125,7 +1125,7 @@ void Menu_WadList(void)
 	}
 
 	// A button
-	if (buttons & WPAD_CLASSIC_BUTTON_B)
+	if (buttons & WPAD_CLASSIC_BUTTON_A)
 	{
 //	    WADLoaded = 0;
 
@@ -1698,7 +1698,7 @@ void Menu_WadList(void)
 	}
 
 	/* B button */
-	if (buttons & WPAD_CLASSIC_BUTTON_A)
+	if (buttons & WPAD_CLASSIC_BUTTON_B)
 	{
 	    if(gDirLevel<=1)
 	    {
@@ -1857,20 +1857,20 @@ u32 Pad_GetButtons(void)
 u32 WaitButtons(void)
 {
     u32 buttons = 0;
-    u32 buttonsGC = 0;
+//    u32 buttonsGC = 0;
 
     /* Wait for button pressing */
-    while (!buttons && !buttonsGC)
+    while (!buttons /*&& !buttonsGC*/)
     {
         // GC buttons
-        buttonsGC = Pad_GetButtons ();
+//        buttonsGC = Pad_GetButtons ();
 
         // Wii buttons
 	buttons = Wpad_GetButtons();
 
 	VIDEO_WaitVSync();
     }
-
+/*
     if (buttonsGC)
     {
         if(buttonsGC & PAD_BUTTON_A)
@@ -1909,7 +1909,8 @@ u32 WaitButtons(void)
             buttons |= WPAD_CLASSIC_BUTTON_HOME;
         }
     }
-	return buttons;
+*/
+    return buttons;
 }
 
 /*

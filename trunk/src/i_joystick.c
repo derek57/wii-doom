@@ -95,7 +95,7 @@ void I_UpdateJoystick(void)
   btn_y = 0;
   btn_plus = 0;
   btn_minus = 0;
-
+/*
   //Wiimote + Nunchuk controls
   if(data->exp.type==WPAD_EXP_NUNCHUK){
   nun_x = data->exp.nunchuk.js.pos.x;
@@ -190,7 +190,7 @@ void I_UpdateJoystick(void)
   ev.data5 = axis_y;
   }
   //End Wiimote + Nunchuk controls
-  
+*/  
   //Classic Controller
   if(data->exp.type==WPAD_EXP_CLASSIC){
   
@@ -342,7 +342,7 @@ void I_UpdateJoystick(void)
   
   }
   //End Classic Controller
-  
+/*  
   //Gamecube controller
   if(data->exp.type!=WPAD_EXP_NUNCHUK && data->exp.type!=WPAD_EXP_CLASSIC){
   
@@ -448,7 +448,7 @@ void I_UpdateJoystick(void)
   
   }
   //End gamecube controller
-
+*/
   D_PostEvent(&ev);
 }
 /*

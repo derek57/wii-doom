@@ -98,8 +98,6 @@
 
 typedef uint32_t u32;				///< 32bit unsigned integer
 
-#define WPAD_BUTTON_A							0x0008
-
 //
 // D-DoomLoop()
 // Not a globally visible function,
@@ -1885,26 +1883,24 @@ void D_DoomMain (void)
 
     if(gamemode == shareware && gameversion != exe_chex)
 	/*DEH_printf*/printf("         shareware version.\n");
-    else if(gamemode == shareware && gameversion == exe_chex)
+    else if((gamemode == shareware && gameversion == exe_chex) || gamemode == registered)
 	/*DEH_printf*/printf("         registered version.\n");
     else
-    {
 	/*DEH_printf*/printf("         commercial version.\n");
 
-	if(gamemode == retail || gamemode == registered)
-	{
-	    printf(" ===============================================================================");
-	    printf("                 This version is NOT SHAREWARE, do not distribute!              ");
-	    printf("             Please report software piracy to the SPA: 1-800-388-PIR8           ");
-	    printf(" ===============================================================================");
-	}
-	else if(gamemode == commercial)
-	{
-	    printf(" ===============================================================================");
-    	    printf("                                Do not distribute!                              ");
-    	    printf("             Please report software piracy to the SPA: 1-800-388-PIR8           ");
-    	    printf(" ===============================================================================");
-	}
+    if(gamemode == retail || gamemode == registered)
+    {
+	printf(" ===============================================================================");
+	printf("                 This version is NOT SHAREWARE, do not distribute!              ");
+	printf("             Please report software piracy to the SPA: 1-800-388-PIR8           ");
+	printf(" ===============================================================================");
+    }
+    else if(gamemode == commercial)
+    {
+	printf(" ===============================================================================");
+    	printf("                                Do not distribute!                              ");
+    	printf("             Please report software piracy to the SPA: 1-800-388-PIR8           ");
+    	printf(" ===============================================================================");
     }
 
     if(modifiedgame)
