@@ -1663,6 +1663,9 @@ void G_SecretExitLevel (void)
     gameaction = ga_completed; 
 } 
  
+boolean secret_1 = false;
+boolean secret_2 = false;
+
 void G_DoCompleted (void) 
 { 
     int             i; 
@@ -1698,6 +1701,12 @@ void G_DoCompleted (void)
               case 9: 
                 for (i=0 ; i<MAXPLAYERS ; i++) 
                     players[i].didsecret = true; 
+		secret_2 = true;
+                break;
+              case 10: 
+                for (i=0 ; i<MAXPLAYERS ; i++) 
+                    players[i].didsecret = true; 
+		secret_1 = true;
                 break;
             }
         }
@@ -1711,13 +1720,18 @@ void G_DoCompleted (void)
 	gameaction = ga_victory; 
 	return; 
     } 
-	 
-    if ( (gamemap == 9)
+
+    if ( (gamemap == 9 || (fsize == 12538385 && gameepisode == 1 && gamemap == 10))
 	 && (gamemode != commercial) ) 
     {
 	// exit secret level 
 	for (i=0 ; i<MAXPLAYERS ; i++) 
 	    players[i].didsecret = true; 
+
+	if(gamemap == 9)
+	    secret_2 = true;
+	else if(gamemap == 10)
+	    secret_1 = true;
     } 
 //#endif
     
@@ -1732,7 +1746,7 @@ void G_DoCompleted (void)
 	if (secretexit)
 	    switch(gamemap)
 	    {
-	      if(fsize == 14677988)
+	      if(fsize == 14677988 || fsize == 14683458)
 	      {
 		case 2: wminfo.next = 32; break;
 	      }
@@ -1742,7 +1756,7 @@ void G_DoCompleted (void)
 	else
 	    switch(gamemap)
 	    {
-	      if(fsize == 14677988)
+	      if(fsize == 14677988 || fsize == 14683458)
 	      {
 		case 33: wminfo.next = 2; break;
 	      }
@@ -1754,7 +1768,14 @@ void G_DoCompleted (void)
     else
     {
 	if (secretexit) 
-	    wminfo.next = 8; 	// go to secret level 
+	{
+	    if(fsize == 12538385 && gameepisode == 1 && gamemap == 1)
+		wminfo.next = 9; 	// go to secret level (IT SHOULD BE 9 / NOT 10)
+	    else
+		wminfo.next = 8; 	// go to secret level 
+	}
+	else if (gamemap == 10)
+	    wminfo.next = 1;
 	else if (gamemap == 9) 
 	{
 	    // returning from secret level 
@@ -2088,9 +2109,16 @@ G_InitNew
     if (map < 1)
 	map = 1;
 
-    if ( (map > 9)
-	 && ( gamemode != commercial) )
-      map = 9;
+    if (fsize != 12538385 || (fsize == 12538385 && gameepisode > 1))
+    {
+	if (map > 9 && gamemode != commercial)
+	    map = 9;
+    }
+    else
+    {
+	if (fsize == 12538385 && gameepisode == 1 && map > 10 && gamemode != commercial)
+	    map = 10;
+    }
 
     M_ClearRandom ();
 

@@ -432,11 +432,17 @@ void WI_drawLF(void)
         V_DrawPatch((SCREENWIDTH - SHORT(lnames[wbs->last]->width))/2, 		// CHANGED FOR HIRES
                     y, lnames[wbs->last]);					// CHANGED FOR HIRES
 */
-        V_DrawPatch((ORIGWIDTH - SHORT(lnames[wbs->last]->width))/2,		// CHANGED FOR HIRES
+	if(fsize != 12538385 || (fsize == 12538385 && gamemap != 10))
+	    V_DrawPatch((ORIGWIDTH - SHORT(lnames[wbs->last]->width))/2,	// CHANGED FOR HIRES
                     y, lnames[wbs->last]);					// CHANGED FOR HIRES
+	else
+	    V_DrawPatch (117, y, W_CacheLumpName(DEH_String("SEWERS"), PU_CACHE));
 
         // draw "Finished!"
-        y += (5*SHORT(lnames[wbs->last]->height))/4;
+	if(fsize != 12538385 || (fsize == 12538385 && gamemap != 10))
+	    y += (5*SHORT(lnames[wbs->last]->height))/4;
+	else
+	    y = 17;
 
 //        V_DrawPatch((SCREENWIDTH - SHORT(finished->width)) / 2, y, finished);	// CHANGED FOR HIRES
         V_DrawPatch((ORIGWIDTH - SHORT(finished->width)) / 2, y, finished);	// CHANGED FOR HIRES
@@ -480,16 +486,23 @@ void WI_drawEL(void)
                 entering);							// CHANGED FOR HIRES
 
     // draw level
-    y += (5*SHORT(lnames[wbs->next]->height))/4;
+    if(fsize == 12538385 && gamemap == 1 && secretexit)
+	y = 17;
+    else
+	y += (5*SHORT(lnames[wbs->next]->height))/4;
 /*
     V_DrawPatch((SCREENWIDTH - SHORT(lnames[wbs->next]->width))/2,		// CHANGED FOR HIRES
 		y, 								// CHANGED FOR HIRES
                 lnames[wbs->next]);						// CHANGED FOR HIRES
 */
-    if(gamemode == commercial && fsize == 14677988 && gamemap == 2 && secretexit)
+    if((fsize == 14683458 || fsize == 14677988) && gamemode == commercial && gamemap == 2 && secretexit)
 	V_DrawPatch(119,							// CHANGED FOR HIRES
 		y + 1, 								// CHANGED FOR HIRES
                 W_CacheLumpName("CWILV32", PU_CACHE));				// CHANGED FOR HIRES
+    else if(fsize == 12538385 && gamemode == retail && gameepisode == 1 && gamemap == 1 && secretexit)
+	V_DrawPatch(117,							// CHANGED FOR HIRES
+		y,								// CHANGED FOR HIRES
+                W_CacheLumpName("SEWERS", PU_CACHE));				// CHANGED FOR HIRES
     else
 	V_DrawPatch((ORIGWIDTH - SHORT(lnames[wbs->next]->width))/2,		// CHANGED FOR HIRES
 		y, 								// CHANGED FOR HIRES
@@ -840,8 +853,11 @@ void WI_drawShowNextLoc(void)
 	    WI_drawEL();
 	    return;
 	}
-	
-	last = (wbs->last == 8) ? wbs->next - 1 : wbs->last;
+
+	if(fsize == 12538385 && gamemap == 10)
+	    last = (wbs->last == 9) ? wbs->next - 1 : wbs->last;
+	else
+	    last = (wbs->last == 8) ? wbs->next - 1 : wbs->last;
 
 	// draw a splat on taken cities.
 	for (i=0 ; i<=last ; i++)
@@ -849,7 +865,18 @@ void WI_drawShowNextLoc(void)
 
 	// splat the secret level?
 	if (wbs->didsecret)
-	    WI_drawOnLnode(8, splat);
+	{
+	    extern boolean secret_1;
+	    extern boolean secret_2;
+
+	    if(secret_2)
+		WI_drawOnLnode(8, splat);
+
+	    if(fsize == 12538385 && secret_1 && gameepisode == 1)
+		WI_drawOnLnode(9, splat);
+//	    else
+//		WI_drawOnLnode(8, splat);
+	}
 
 	// draw flashing ptr
 	if (snl_pointeron)
@@ -860,7 +887,6 @@ void WI_drawShowNextLoc(void)
     if ( (gamemode != commercial)
 	 || wbs->next != 30)
 	WI_drawEL();  
-
 }
 
 void WI_drawNoState(void)
@@ -1488,7 +1514,7 @@ void WI_drawStats(void)
 
     // draw animated background
     WI_drawAnimatedBack();
-    
+
     WI_drawLF();
 
     V_DrawPatch(SP_STATSX, SP_STATSY, kills);
@@ -1775,7 +1801,7 @@ void WI_loadData(void)
 {
     if (gamemode == commercial)
     {
-	if(fsize != 14677988)
+	if(fsize != 14677988 && fsize != 14683458)
 	    NUMCMAPS = 32;
 	else
 	    NUMCMAPS = 33;

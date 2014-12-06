@@ -393,8 +393,11 @@ void HU_Start(void)
     
     t = DEH_String(t);
 
-    while (*s)
-	HUlib_addCharToTextLine(&w_title, *(s++));
+    if(fsize != 12538385 || (fsize == 12538385 && gamemap != 10))
+    {
+	while (*s)
+	    HUlib_addCharToTextLine(&w_title, *(s++));
+    }
 
     while (*t)
         HUlib_addCharToTextLine(&w_monsec, *(t++));

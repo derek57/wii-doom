@@ -1322,6 +1322,7 @@ void D_DoomMain (void)
 	fsize != 11159840	&&	// DOOM REGISTERED v1.8
 	fsize != 12408292	&&	// DOOM REGISTERED v1.9 (THE ULTIMATE DOOM)
 	fsize != 12474561	&&	// DOOM REGISTERED (BFG-XBOX360 EDITION)
+	fsize != 12538385	&&	// DOOM REGISTERED (BFG-XBOX360 EDITION)
 	fsize != 4207819	&&	// DOOM SHAREWARE v1.0
 	fsize != 4274218	&&	// DOOM SHAREWARE v1.1
 	fsize != 4225504	&&	// DOOM SHAREWARE v1.2
@@ -1334,6 +1335,7 @@ void D_DoomMain (void)
 	fsize != 14607420	&&	// DOOM 2 REGISTERED v1.8 (FRENCH VERSION)
 	fsize != 14604584	&&	// DOOM 2 REGISTERED v1.9
 	fsize != 14677988	&&	// DOOM 2 REGISTERED (BFG-PSN EDITION)
+	fsize != 14683458	&&	// DOOM 2 REGISTERED (XBOX EDITION)
 	fsize != 18195736	&&	// FINAL DOOM - TNT v1.9 (WITH YELLOW KEYCARD BUG)
 	fsize != 18654796	&&	// FINAL DOOM - TNT v1.9 (WITHOUT YELLOW KEYCARD BUG)
 	fsize != 18240172	&&	// FINAL DOOM - PLUTONIA v1.9 (WITH DEATHMATCH STARTS)
@@ -1400,6 +1402,7 @@ void D_DoomMain (void)
 	version13 = true;
     }
     else if(fsize == 12408292	||	// DOOM REGISTERED v1.9 (THE ULTIMATE DOOM)
+	    fsize == 12538385	||	// DOOM REGISTERED (XBOX EDITION)
 	    fsize == 12474561		// DOOM REGISTERED (BFG-XBOX360 EDITION)
 /*
 				||
@@ -1434,6 +1437,7 @@ void D_DoomMain (void)
     }
     else if(fsize == 14604584	||	// DOOM 2 REGISTERED v1.9
 	    fsize == 14677988	||	// DOOM 2 REGISTERED (BFG-PSN EDITION)
+	    fsize == 14683458	||	// DOOM 2 REGISTERED (XBOX EDITION)
 /*
 	    fsize == 9745831	||	// HACX SHAREWARE v1.0
 	    fsize == 21951805	||	// HACX REGISTERED v1.0
@@ -1778,6 +1782,7 @@ void D_DoomMain (void)
 	gameversion = exe_doom_1_9;
     }
     else if(fsize == 12408292	||	// DOOM REGISTERED v1.9 (THE ULTIMATE DOOM)
+	    fsize == 12538385	||	// DOOM REGISTERED (XBOX EDITION)
 	    fsize == 12474561		// DOOM REGISTERED (BFG-XBOX360 EDITION)
 /*
 				||
@@ -1795,6 +1800,7 @@ void D_DoomMain (void)
 	    fsize == 14607420	||	// DOOM 2 REGISTERED v1.8 (FRENCH VERSION)
 	    fsize == 14604584	||	// DOOM 2 REGISTERED v1.9
 	    fsize == 14677988	||	// DOOM 2 REGISTERED (BFG-PSN EDITION)
+	    fsize == 14683458	||	// DOOM 2 REGISTERED (XBOX EDITION)
 /*
 	    fsize == 19801320	||	// FREEDOOM v0.6.4
 	    fsize == 27704188	||	// FREEDOOM v0.7 RC 1

@@ -1374,6 +1374,8 @@ void AM_drawCrosshair(int color)
 
 }
 
+void M_WriteText(int x, int y, char *string);
+
 void AM_Drawer (void)
 {
     if (!automapactive) return;
@@ -1391,9 +1393,9 @@ void AM_Drawer (void)
 
     V_MarkRect(f_x, f_y, f_w, f_h);
 
+    if(fsize == 12538385 && gamemap == 10)
+	M_WriteText(0, 160, DEH_String("E1M10: SEWERS"));
 }
-
-void M_WriteText(int x, int y, char *string);
 
 void DrawWorldTimer(void)
 {
