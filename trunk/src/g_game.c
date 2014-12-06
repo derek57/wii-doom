@@ -2057,6 +2057,7 @@ void G_DoNewGame (void)
     gameaction = ga_nothing; 
 } 
 
+extern boolean map_flag;
 
 void
 G_InitNew
@@ -2111,14 +2112,18 @@ G_InitNew
 
     if (fsize != 12538385 || (fsize == 12538385 && gameepisode > 1))
     {
-	if (map > 9 && gamemode != commercial)
+	if (map > 9 && gamemode != commercial && !map_flag)
 	    map = 9;
+	else if(map_flag)
+	    map = 10;
     }
     else
     {
 	if (fsize == 12538385 && gameepisode == 1 && map > 10 && gamemode != commercial)
 	    map = 10;
     }
+
+    map_flag = false;
 
     M_ClearRandom ();
 
