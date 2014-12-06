@@ -2689,6 +2689,9 @@ void M_VerifyNightmare(int ch)
     M_ClearMenus ();
 }
 
+extern boolean secret_1;
+extern boolean secret_2;
+
 void M_ChooseSkill(int choice)
 {
     if (choice == nightmare)
@@ -2702,6 +2705,11 @@ void M_ChooseSkill(int choice)
 	G_DeferedInitNew(choice,epi,1);
     else
 	G_DeferedInitNew(choice,epi+1,1);
+
+    if(gameepisode == 1)
+	secret_1 = false;
+    else
+	secret_2 = false;
 
     M_ClearMenus ();
 }
@@ -2831,7 +2839,7 @@ void M_DrawWeapons(void)
 	}
 
 	if(fsize == 14943400 || fsize == 14824716 || fsize == 14612688 ||
-		fsize == 14607420 || fsize == 14604584 || fsize == 18195736 ||
+		fsize == 14607420 || fsize == 14604584 || fsize == 18195736 || fsize == 14683458 ||
 		fsize == 18654796 || fsize == 18240172 || fsize == 17420824 || fsize == 14677988)
 	    M_WriteText(80, 135, DEH_String("SUPER SHOTGUN"));
     }
@@ -3026,10 +3034,11 @@ void M_DrawCheats(void)
 
     M_WriteText(72, 156, DEH_String("PLAY MUSIC TITLE:"));
 
-    if (fsize == 4261144 || fsize == 4271324 || fsize == 4211660 || fsize == 4207819 ||
-	fsize == 4274218 || fsize == 4225504 || fsize == 4225460 || fsize == 4234124 ||
-	fsize == 4196020 || fsize == 10396254 || fsize == 10399316 || fsize == 10401760 ||
-	fsize == 11159840 || fsize == 12408292 || fsize == 12361532 || fsize == 12474561)
+    if (fsize == 4261144	|| fsize == 4271324	|| fsize == 4211660	|| fsize == 4207819  ||
+	fsize == 4274218	|| fsize == 4225504	|| fsize == 4225460	|| fsize == 4234124  ||
+	fsize == 4196020	|| fsize == 10396254	|| fsize == 10399316	|| fsize == 10401760 ||
+	fsize == 11159840	|| fsize == 12408292	|| fsize == 12361532	|| fsize == 12474561 ||
+	fsize == 12538385)
     {
 	if(epi == 0)
 	    epi = 1;
@@ -3039,7 +3048,10 @@ void M_DrawCheats(void)
 	else if(epi == 4 && map == 10)
 	    map = 9;
 
-	if(epi == 1 && gameversion != exe_chex)
+	if(fsize == 12538385 && epi == 1 && map == 10)
+	    M_WriteText(72, 116, "E1M10: SEWERS");
+
+	if(epi == 1 && gameversion != exe_chex && map != 10)
 	    M_WriteText(72, 116, maptext[map]);
 	else if(epi == 2 && gameversion != exe_chex)
 	    M_WriteText(72, 116, maptext[map+9]);
@@ -3054,10 +3066,10 @@ void M_DrawCheats(void)
     }
 
     if((fsize == 14943400 || fsize == 14824716 || fsize == 14612688 || fsize == 14607420 ||
-	    fsize == 14604584 || fsize == 14677988) && map < 33)
+	    fsize == 14604584 || fsize == 14677988 || fsize == 14683458) && map < 33)
 	M_WriteText(72, 116, maptext[map+36]);
 
-    if(fsize == 14677988 && map == 33)
+    if((fsize == 14677988 || fsize == 14683458) && map == 33)
 	M_WriteText(72, 116, "LEVEL 33: BETRAY");	
 
     if(fsize == 18195736 || fsize == 18654796)
@@ -3088,7 +3100,7 @@ void M_DrawCheats(void)
 	M_WriteText(220, 156, songtextbeta[tracknum]);
     }
     else if(fsize == 10396254 || fsize == 10399316 || fsize == 10401760 || fsize == 11159840 ||
-	    fsize == 12408292 || fsize == 12361532 || fsize == 12474561)
+	    fsize == 12408292 || fsize == 12361532 || fsize == 12474561 || fsize == 12538385)
     {
 	if(tracknum == 0)
 	    tracknum = 1;
@@ -3108,7 +3120,8 @@ void M_DrawCheats(void)
 #endif
     }
     else if(fsize == 14943400 || fsize == 14824716 || fsize == 14612688 || fsize == 14607420 ||
-	    fsize == 14604584 || fsize == 19321722 || fsize == 28422764 || fsize == 14677988)
+	    fsize == 14604584 || fsize == 19321722 || fsize == 28422764 || fsize == 14677988 ||
+	    fsize == 14683458)
     {
 #ifdef OGG_SUPPORT
 	if(opl)
@@ -4623,8 +4636,8 @@ void M_Drawer (void)
     if(fsize == 12361532 && currentMenu == &ItemsDef)
 	currentMenu->numitems = 7;
 
-    if((fsize == 10396254 || fsize == 10399316 || fsize == 10401760 ||
-	fsize == 11159840 || fsize == 12408292 || fsize == 12474561) && currentMenu == &WeaponsDef)
+    if((fsize == 10396254 || fsize == 10399316 || fsize == 10401760 || fsize == 11159840 ||
+	fsize == 12408292 || fsize == 12474561 || fsize == 12538385) && currentMenu == &WeaponsDef)
 	currentMenu->numitems = 8;
 
     for (i=0;i<max;i++)
@@ -5323,9 +5336,31 @@ void M_Rift(int choice)
 		    }
 		}
 	    }
+	    else if(fsize == 12538385)
+	    {
+		if(epi >= 1 && map >= 1)
+		{
+		    map--;
+		    if(epi == 4 && map == 0)
+		    {
+			epi = 3;
+			map = 9;
+		    }
+		    else if(epi == 3 && map == 0)
+		    {
+			epi = 2;
+			map = 9;
+		    }
+		    else if(epi == 2 && map == 0)
+		    {
+			epi = 1;
+			map = 10;
+		    }
+		}
+	    }
 	    else if(fsize == 14943400 || fsize == 14824716 || fsize == 14612688 || fsize == 14607420 ||
 		    fsize == 14604584 || fsize == 18195736 || fsize == 18654796 || fsize == 18240172 ||
-		    fsize == 17420824 || fsize == 28422764 || fsize == 14677988)
+		    fsize == 17420824 || fsize == 28422764 || fsize == 14677988 || fsize == 14683458)
 	    {
 		if(map >= 2)
 		    map--;
@@ -5414,6 +5449,33 @@ void M_Rift(int choice)
 		    }
 		}
 	    }
+	    else if(fsize == 12538385)
+	    {
+		if(epi <= 4 && map <= 10)
+		{
+		    map++;
+		    if(epi == 1 && map == 11)
+		    {
+			epi = 2;
+			map = 1;
+		    }
+		    else if(epi == 2 && map == 10)
+		    {
+			epi = 3;
+			map = 1;
+		    }
+		    else if(epi == 3 && map == 10)
+		    {
+			epi = 4;
+			map = 1;
+		    }
+		    else if(epi == 4 && map == 10)
+		    {
+			epi = 4;
+			map = 9;
+		    }
+		}
+	    }
 	    else if(fsize == 14943400 || fsize == 14612688 || fsize == 14607420 || fsize == 14604584 ||
 		    fsize == 18195736 || fsize == 18654796 || fsize == 18240172 || fsize == 17420824 ||
 		    fsize == 28422764)
@@ -5421,7 +5483,7 @@ void M_Rift(int choice)
 		if(map <= 31)
 		    map++;
 	    }
-	    else if(fsize == 14677988)
+	    else if(fsize == 14677988 || fsize == 14683458)
 	    {
 		if(map <= 32)
 		    map++;
@@ -5509,7 +5571,7 @@ void M_Spin(int choice)
 #endif
     	    }
 	    else if(fsize == 10396254 || fsize == 10399316 || fsize == 10401760 || fsize == 11159840 ||
-		    fsize == 12408292 || fsize == 12361532 || fsize == 12474561)
+		    fsize == 12408292 || fsize == 12361532 || fsize == 12474561 || fsize == 12538385)
 	    {
 #ifdef OGG_SUPPORT
 		if(opl)
@@ -5556,7 +5618,8 @@ void M_Spin(int choice)
 #endif
 	    }
 	    else if(fsize == 14943400 || fsize == 14824716 || fsize == 14612688 || fsize == 14607420 ||
-		    fsize == 14604584 || fsize == 19321722 || fsize == 28422764 || fsize == 14677988)
+		    fsize == 14604584 || fsize == 19321722 || fsize == 28422764 || fsize == 14677988 ||
+		    fsize == 14683458)
 	    {
 #ifdef OGG_SUPPORT
 	    	if(opl)
@@ -5780,7 +5843,7 @@ void M_Spin(int choice)
 #endif
 	    }
 	    else if(fsize == 10396254 || fsize == 10399316 || fsize == 10401760 || fsize == 11159840 ||
-		    fsize == 12408292 || fsize == 12361532 || fsize == 12474561)
+		    fsize == 12408292 || fsize == 12361532 || fsize == 12474561 || fsize == 12538385)
 	    {
 #ifdef OGG_SUPPORT
 	    	if(opl)
@@ -5827,7 +5890,8 @@ void M_Spin(int choice)
 #endif
 	    }
 	    else if(fsize == 14943400 || fsize == 14824716 || fsize == 14612688 || fsize == 14607420 ||
-		    fsize == 14604584 || fsize == 19321722 || fsize == 28422764 || fsize == 14677988)
+		    fsize == 14604584 || fsize == 19321722 || fsize == 28422764 || fsize == 14677988 ||
+		    fsize == 14683458)
 	    {
 #ifdef OGG_SUPPORT
 	    	if(opl)

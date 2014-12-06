@@ -430,6 +430,7 @@ void Menu_WadList(void)
     extern char known_md5_string_doom_reg_1_9_iwad[33];
     extern char known_md5_string_doom_reg_1_9ud_iwad[33];
     extern char known_md5_string_doom_bfg_psn_iwad[33];
+    extern char known_md5_string_doom_xbox_iwad[33];
     extern char known_md5_string_doom2_1_666_iwad[33];
     extern char known_md5_string_doom2_1_666g_iwad[33];
     extern char known_md5_string_doom2_1_7_iwad[33];
@@ -438,6 +439,7 @@ void Menu_WadList(void)
     extern char known_md5_string_doom2_1_8f_iwad[33];
     extern char known_md5_string_doom2_1_9_iwad[33];
     extern char known_md5_string_doom2_bfg_xbox360_iwad[33];
+    extern char known_md5_string_doom2_xbox_iwad[33];
     extern char known_md5_string_final_doom_tnt_old_iwad[33];
     extern char known_md5_string_final_doom_tnt_new_iwad[33];
     extern char known_md5_string_final_doom_plutonia_old_iwad[33];
@@ -763,6 +765,11 @@ void Menu_WadList(void)
 	}
 	else if(fsize == 14677988)
 	{
+	    printStyledText(14, 2,CONSOLE_FONT_BLACK,CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,&stTexteLocation,"DOOM IWAD VERSION: DOOM 2 REGISTERED XBOX360 DETECTED");
+	    printStyledText(14, 55,CONSOLE_FONT_BLACK,CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,&stTexteLocation,"(THIS WAD IS SUPPORTED)");
+	}
+	else if(fsize == 14683458)
+	{
 	    printStyledText(14, 2,CONSOLE_FONT_BLACK,CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,&stTexteLocation,"DOOM IWAD VERSION: DOOM 2 REGISTERED XBOX DETECTED");
 	    printStyledText(14, 55,CONSOLE_FONT_BLACK,CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,&stTexteLocation,"(THIS WAD IS SUPPORTED)");
 	}
@@ -897,6 +904,7 @@ void Menu_WadList(void)
 		 strncmp(calculated_md5_string, known_md5_string_doom_reg_1_9_iwad, 32) == 0 ||
 		 strncmp(calculated_md5_string, known_md5_string_doom_reg_1_9ud_iwad, 32) == 0 ||
 		 strncmp(calculated_md5_string, known_md5_string_doom_bfg_psn_iwad, 32) == 0 ||
+		 strncmp(calculated_md5_string, known_md5_string_doom_xbox_iwad, 32) == 0 ||
 		 strncmp(calculated_md5_string, known_md5_string_doom2_1_666_iwad, 32) == 0 ||
 		 strncmp(calculated_md5_string, known_md5_string_doom2_1_666g_iwad, 32) == 0 ||
 		 strncmp(calculated_md5_string, known_md5_string_doom2_1_7_iwad, 32) == 0 ||
@@ -905,6 +913,7 @@ void Menu_WadList(void)
 		 strncmp(calculated_md5_string, known_md5_string_doom2_1_8f_iwad, 32) == 0 ||
 		 strncmp(calculated_md5_string, known_md5_string_doom2_1_9_iwad, 32) == 0 ||
 		 strncmp(calculated_md5_string, known_md5_string_doom2_bfg_xbox360_iwad, 32) == 0 ||
+		 strncmp(calculated_md5_string, known_md5_string_doom2_xbox_iwad, 32) == 0 ||
 		 strncmp(calculated_md5_string, known_md5_string_final_doom_tnt_old_iwad, 32) == 0 ||
 		 strncmp(calculated_md5_string, known_md5_string_final_doom_tnt_new_iwad, 32) == 0 ||
 		 strncmp(calculated_md5_string, known_md5_string_final_doom_plutonia_old_iwad, 32) == 0 ||
@@ -984,6 +993,9 @@ void Menu_WadList(void)
 	else if(fsize == 12474561)
 	    printStyledText(21, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"known MD5 string: %s\n",
 		    known_md5_string_doom_bfg_psn_iwad);
+	else if(fsize == 12538385)
+	    printStyledText(21, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"known MD5 string: %s\n",
+		    known_md5_string_doom_xbox_iwad);
 	else if(fsize == 14943400)
 	    printStyledText(21, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"known MD5 string: %s\n",
 		    known_md5_string_doom2_1_666_iwad);
@@ -1008,6 +1020,9 @@ void Menu_WadList(void)
 	else if(fsize == 14677988)
 	    printStyledText(21, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"known MD5 string: %s\n",
 		    known_md5_string_doom2_bfg_xbox360_iwad);
+	else if(fsize == 14683458)
+	    printStyledText(21, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"known MD5 string: %s\n",
+		    known_md5_string_doom2_xbox_iwad);
 	else if(fsize == 18195736)
 	    printStyledText(21, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"known MD5 string: %s\n",
 		    known_md5_string_final_doom_tnt_old_iwad);
@@ -1375,6 +1390,15 @@ void Menu_WadList(void)
 
 		    md5_check = true;
 		}
+		else if (strncmp(calculated_md5_string, known_md5_string_doom_xbox_iwad, 32) == 0)
+		{
+		    strcpy(target, check);
+		    strcpy(stripped_target, tmpFile->filename);
+
+		    fsize = 12538385;
+
+		    md5_check = true;
+		}
 		else if (strncmp(calculated_md5_string, known_md5_string_doom2_1_666_iwad, 32) == 0)
 		{
 		    strcpy(target, check);
@@ -1446,6 +1470,15 @@ void Menu_WadList(void)
 		    strcpy(stripped_target, tmpFile->filename);
 
 		    fsize = 14677988;
+
+		    md5_check = true;
+		}
+		else if (strncmp(calculated_md5_string, known_md5_string_doom2_xbox_iwad, 32) == 0)
+		{
+		    strcpy(target, check);
+		    strcpy(stripped_target, tmpFile->filename);
+
+		    fsize = 14683458;
 
 		    md5_check = true;
 		}

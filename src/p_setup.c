@@ -791,11 +791,16 @@ P_SetupLevel
     }
     else
     {
-	lumpname[0] = 'E';
-	lumpname[1] = '0' + episode;
-	lumpname[2] = 'M';
-	lumpname[3] = '0' + map;
-	lumpname[4] = 0;
+	if(fsize != 12538385 || (fsize == 12538385 && map < 10))
+	{
+	    lumpname[0] = 'E';
+	    lumpname[1] = '0' + episode;
+	    lumpname[2] = 'M';
+	    lumpname[3] = '0' + map;
+	    lumpname[4] = 0;
+	}
+	else
+	    DEH_snprintf(lumpname, 9, "e1m10");
     }
 
     lumpnum = W_GetNumForName (lumpname);
