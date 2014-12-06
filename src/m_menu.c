@@ -5282,6 +5282,8 @@ void M_Topo(int choice)
     DetectState();
 }
 
+boolean map_flag = false;
+
 void M_Rift(int choice)
 {
     if(!netgame && !demoplayback && gamestate == GS_LEVEL
@@ -5355,6 +5357,7 @@ void M_Rift(int choice)
 		    {
 			epi = 1;
 			map = 10;
+			map_flag = true;
 		    }
 		}
 	    }
