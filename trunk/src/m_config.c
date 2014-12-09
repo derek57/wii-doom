@@ -2398,6 +2398,8 @@ char *M_GetSaveGameDir(char *iwadname)
 		savegamedir = SavePathReg19USB;
 	    else if(fsize == 12474561)
 		savegamedir = SavePathRegBFGXBOX360USB;
+	    else if(fsize == 12487824)
+		savegamedir = SavePathRegBFGPCUSB;
 	    else if(fsize == 12538385)
 		savegamedir = SavePathRegXBOXUSB;
 	    else if(fsize == 14943400)
@@ -2412,6 +2414,8 @@ char *M_GetSaveGameDir(char *iwadname)
 		savegamedir = SavePath2Reg19USB;
 	    else if(fsize == 14677988)
 		savegamedir = SavePath2RegBFGPSNUSB;
+	    else if(fsize == 14691821)
+		savegamedir = SavePath2RegBFGPCUSB;
 	    else if(fsize == 14683458)
 		savegamedir = SavePath2RegXBOXUSB;
 	    else if(fsize == 18195736)
@@ -2483,6 +2487,8 @@ char *M_GetSaveGameDir(char *iwadname)
 		savegamedir = SavePathReg19SD;
 	    else if(fsize == 12474561)
 		savegamedir = SavePathRegBFGXBOX360SD;
+	    else if(fsize == 12487824)
+		savegamedir = SavePathRegBFGPCSD;
 	    else if(fsize == 12538385)
 		savegamedir = SavePathRegXBOXSD;
 	    else if(fsize == 14943400)
@@ -2497,6 +2503,8 @@ char *M_GetSaveGameDir(char *iwadname)
 		savegamedir = SavePath2Reg19SD;
 	    else if(fsize == 14677988)
 		savegamedir = SavePath2RegBFGPSNSD;
+	    else if(fsize == 14691821)
+		savegamedir = SavePath2RegBFGPCSD;
 	    else if(fsize == 14683458)
 		savegamedir = SavePath2RegXBOXSD;
 	    else if(fsize == 18195736)
