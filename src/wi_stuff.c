@@ -495,7 +495,8 @@ void WI_drawEL(void)
 		y, 								// CHANGED FOR HIRES
                 lnames[wbs->next]);						// CHANGED FOR HIRES
 */
-    if((fsize == 14683458 || fsize == 14677988) && gamemode == commercial && gamemap == 2 && secretexit)
+    if((fsize == 14683458 || fsize == 14677988 || fsize == 14691821) &&
+		gamemode == commercial && gamemap == 2 && secretexit)
 	V_DrawPatch(119,							// CHANGED FOR HIRES
 		y + 1, 								// CHANGED FOR HIRES
                 W_CacheLumpName("CWILV32", PU_CACHE));				// CHANGED FOR HIRES
@@ -1801,7 +1802,7 @@ void WI_loadData(void)
 {
     if (gamemode == commercial)
     {
-	if(fsize != 14677988 && fsize != 14683458)
+	if(fsize != 14677988 && fsize != 14683458 && fsize != 14691821)
 	    NUMCMAPS = 32;
 	else
 	    NUMCMAPS = 33;

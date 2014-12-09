@@ -790,27 +790,27 @@ void R_Init (void)
 {
     R_InitData ();
     printf (".");
-    I_Sleep(5);
+//    I_Sleep(5);
     R_InitPointToAngle ();
     printf (".");
-    I_Sleep(5);
+//    I_Sleep(5);
     R_InitTables ();
     // viewwidth / viewheight / detailLevel are set by the defaults
     printf (".");
-    I_Sleep(5);
+//    I_Sleep(5);
 
     R_SetViewSize (screenblocks, detailLevel);
     R_InitPlanes ();
     printf (".");
-    I_Sleep(5);
+//    I_Sleep(5);
     R_InitLightTables ();
     printf (".");
-    I_Sleep(5);
+//    I_Sleep(5);
     R_InitSkyMap ();
     R_InitTranslationTables ();
     printf (".");
     printf("]");
-    I_Sleep(5);
+//    I_Sleep(5);
 	
     framecount = 0;
 }
