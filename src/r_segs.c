@@ -841,7 +841,7 @@ R_StoreWallRange
 	 && !ds_p->sprtopclip)
     {
 //	memcpy (lastopening, ceilingclip+start, 2*(rw_stopx-start));			// CHANGED FOR HIRES
-	memcpy (lastopening, ceilingclip+start, sizeof(lastopening)*(rw_stopx-start));	// CHANGED FOR HIRES
+	memcpy (lastopening, ceilingclip+start, sizeof(*lastopening)*(rw_stopx-start));	// CHANGED FOR HIRES
 	ds_p->sprtopclip = lastopening - start;
 	lastopening += rw_stopx - start;
     }
@@ -850,7 +850,7 @@ R_StoreWallRange
 	 && !ds_p->sprbottomclip)
     {
 //	memcpy (lastopening, floorclip+start, 2*(rw_stopx-start));			// CHANGED FOR HIRES
-	memcpy (lastopening, floorclip+start, sizeof(lastopening)*(rw_stopx-start));	// CHANGED FOR HIRES
+	memcpy (lastopening, floorclip+start, sizeof(*lastopening)*(rw_stopx-start));	// CHANGED FOR HIRES
 	ds_p->sprbottomclip = lastopening - start;
 	lastopening += rw_stopx - start;	
     }
