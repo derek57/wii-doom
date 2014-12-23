@@ -57,6 +57,7 @@
 #define HU_TITLE2	(mapnames_commercial[gamemap-1])
 #define HU_TITLEP	(mapnames_commercial[gamemap-1 + 32])
 #define HU_TITLET	(mapnames_commercial[gamemap-1 + 64])
+#define HU_TITLEN	(mapnames_commercial[gamemap-1 + 96])
 #define HU_TITLE_CHEX   (mapnames[gamemap - 1])
 #define HU_TITLEHEIGHT	1
 #define HU_TITLEX	0
@@ -300,7 +301,17 @@ char *mapnames_commercial[] =
     THUSTR_29,
     THUSTR_30,
     THUSTR_31,
-    THUSTR_32
+    THUSTR_32,
+
+    NHUSTR_1,
+    NHUSTR_2,
+    NHUSTR_3,
+    NHUSTR_4,
+    NHUSTR_5,
+    NHUSTR_6,
+    NHUSTR_7,
+    NHUSTR_8,
+    NHUSTR_9
 };
 
 void HU_Init(void)
@@ -372,6 +383,12 @@ void HU_Start(void)
       case pack_tnt:
 	s = HU_TITLET;
 	break;
+      case pack_nerve:
+	if (gamemap <= 9)
+	  s = HU_TITLEN;
+	else
+	  s = HU_TITLE2;
+	break;
       default:
          s = "Unknown level";
          break;
@@ -393,7 +410,12 @@ void HU_Start(void)
     
     t = DEH_String(t);
 
-    if(fsize != 12538385 || (fsize == 12538385 && gamemap != 10))
+    if((fsize != 12538385 &&
+	fsize != 14691821 &&
+	fsize != 14677988 &&
+	fsize != 14683458) ||
+	(fsize == 12538385 && gamemap != 10) ||
+	((fsize == 14683458 || fsize == 14677988 || fsize == 14691821) && gamemap != 33))
     {
 	while (*s)
 	    HUlib_addCharToTextLine(&w_title, *(s++));

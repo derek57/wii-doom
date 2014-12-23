@@ -499,9 +499,10 @@ R_StoreWallRange
 	memset(drawsegs + numdrawsegs_old, 0, (numdrawsegs - numdrawsegs_old) * sizeof(*drawsegs));			// ADDED FOR HIRES
 
 	ds_p = drawsegs + numdrawsegs_old;				// ADDED FOR HIRES
-
+/*
 	if (numdrawsegs_old)						// ADDED FOR HIRES
 	    printf("R_StoreWallRange: Hit MAXDRAWSEGS limit at %d, raised to %d.\n", numdrawsegs_old, numdrawsegs);	// ADDED FOR HIRES
+*/
     }									// ADDED FOR HIRES
 
 #ifdef RANGECHECK

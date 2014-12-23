@@ -22,6 +22,8 @@
 
 #include "opl_queue.h"
 
+#include "doomdef.h"
+
 #define MAX_OPL_QUEUE 64
 
 typedef struct
@@ -71,7 +73,7 @@ void OPL_Queue_Push(opl_callback_queue_t *queue,
 
     if (queue->num_entries >= MAX_OPL_QUEUE)
     {
-        fprintf(stderr, "OPL_Queue_Push: Exceeded maximum callbacks\n");
+        fprintf(statsfile, "OPL_Queue_Push: Exceeded maximum callbacks\n");
         return;
     }
 

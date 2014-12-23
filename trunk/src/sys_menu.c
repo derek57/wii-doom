@@ -31,6 +31,7 @@ int	load_dehacked = 0;
 
 bool	multiplayer = false;
 bool	multiplayer_flag = false;
+bool	nerve_pwad = false;
 
 // Local prototypes: wiiNinja
 void WaitPrompt (char *prompt);
@@ -457,6 +458,8 @@ void Menu_WadList(void)
     extern char known_md5_string_hacx_reg_1_0_iwad[33];
     extern char known_md5_string_hacx_reg_1_1_iwad[33];
     extern char known_md5_string_hacx_reg_1_2_iwad[33];
+    extern char known_md5_string_nerve_bfg_pwad[33];
+    extern char known_md5_string_nerve_xbox360_pwad[33];
 /*
     int		installCnt = 0;
     int		uninstallCnt = 0;
@@ -942,7 +945,9 @@ void Menu_WadList(void)
 		 strncmp(calculated_md5_string, known_md5_string_hacx_share_1_0_iwad, 32) == 0 ||
 		 strncmp(calculated_md5_string, known_md5_string_hacx_reg_1_0_iwad, 32) == 0 ||
 		 strncmp(calculated_md5_string, known_md5_string_hacx_reg_1_1_iwad, 32) == 0 ||
-		 strncmp(calculated_md5_string, known_md5_string_hacx_reg_1_2_iwad, 32) == 0)
+		 strncmp(calculated_md5_string, known_md5_string_hacx_reg_1_2_iwad, 32) == 0 ||
+		 strncmp(calculated_md5_string, known_md5_string_nerve_bfg_pwad, 32) == 0 ||
+		 strncmp(calculated_md5_string, known_md5_string_nerve_xbox360_pwad, 32) == 0)
 	    printStyledText(19, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"MD5 MATCH!");
 	else
 	    printStyledText(19, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"MD5 FAIL!");
@@ -1234,6 +1239,7 @@ void Menu_WadList(void)
 		    fsize = 12361532;
 
 		    md5_check = true;
+		    nerve_pwad = false;
 		}
 		else if (strncmp(calculated_md5_string, known_md5_string_doom_beta_1_4_iwad, 32) == 0)
 		{
@@ -1243,6 +1249,7 @@ void Menu_WadList(void)
 		    fsize = 4261144;
 
 		    md5_check = true;
+		    nerve_pwad = false;
 		}
 		else if (strncmp(calculated_md5_string, known_md5_string_doom_beta_1_5_iwad, 32) == 0)
 		{
@@ -1252,6 +1259,7 @@ void Menu_WadList(void)
 		    fsize = 4271324;
 
 		    md5_check = true;
+		    nerve_pwad = false;
 		}
 		else if (strncmp(calculated_md5_string, known_md5_string_doom_beta_1_6_iwad, 32) == 0)
 		{
@@ -1261,6 +1269,7 @@ void Menu_WadList(void)
 		    fsize = 4211660;
 
 		    md5_check = true;
+		    nerve_pwad = false;
 		}
 		else if (strncmp(calculated_md5_string, known_md5_string_doom_share_1_0_iwad, 32) == 0)
 		{
@@ -1270,6 +1279,7 @@ void Menu_WadList(void)
 		    fsize = 4207819;
 
 		    md5_check = true;
+		    nerve_pwad = false;
 		}
 		else if (strncmp(calculated_md5_string, known_md5_string_doom_share_1_1_iwad, 32) == 0)
 		{
@@ -1279,6 +1289,7 @@ void Menu_WadList(void)
 		    fsize = 4274218;
 
 		    md5_check = true;
+		    nerve_pwad = false;
 		}
 		else if (strncmp(calculated_md5_string, known_md5_string_doom_share_1_2_iwad, 32) == 0)
 		{
@@ -1288,6 +1299,7 @@ void Menu_WadList(void)
 		    fsize = 4225504;
 
 		    md5_check = true;
+		    nerve_pwad = false;
 		}
 		else if (strncmp(calculated_md5_string, known_md5_string_doom_share_1_25s_iwad, 32) == 0)
 		{
@@ -1297,6 +1309,7 @@ void Menu_WadList(void)
 		    fsize = 4225460;
 
 		    md5_check = true;
+		    nerve_pwad = false;
 		}
 		else if (strncmp(calculated_md5_string, known_md5_string_doom_share_1_666_iwad, 32) == 0)
 		{
@@ -1306,6 +1319,7 @@ void Menu_WadList(void)
 		    fsize = 4234124;
 
 		    md5_check = true;
+		    nerve_pwad = false;
 		}
 		else if (strncmp(calculated_md5_string, known_md5_string_doom_share_1_8_iwad, 32) == 0)
 		{
@@ -1315,6 +1329,7 @@ void Menu_WadList(void)
 		    fsize = 4196020;
 
 		    md5_check = true;
+		    nerve_pwad = false;
 		}
 		else if (strncmp(calculated_md5_string, known_md5_string_doom_share_1_9_iwad, 32) == 0)
 		{
@@ -1325,6 +1340,7 @@ void Menu_WadList(void)
 		    fsize = 20428208;
 */
 		    md5_check = true;
+		    nerve_pwad = false;
 		}
 		else if (strncmp(calculated_md5_string, known_md5_string_doom_reg_1_1_iwad, 32) == 0)
 		{
@@ -1334,6 +1350,7 @@ void Menu_WadList(void)
 		    fsize = 10396254;
 
 		    md5_check = true;
+		    nerve_pwad = false;
 		}
 		else if (strncmp(calculated_md5_string, known_md5_string_doom_reg_1_2_iwad, 32) == 0)
 		{
@@ -1343,6 +1360,7 @@ void Menu_WadList(void)
 		    fsize = 10399316;
 
 		    md5_check = true;
+		    nerve_pwad = false;
 		}
 		else if (strncmp(calculated_md5_string, known_md5_string_doom_reg_1_6_iwad, 32) == 0)
 		{
@@ -1352,6 +1370,7 @@ void Menu_WadList(void)
 		    fsize = 10401760;
 
 		    md5_check = true;
+		    nerve_pwad = false;
 		}
 		else if (strncmp(calculated_md5_string, known_md5_string_doom_reg_1_6b_iwad, 32) == 0)
 		{
@@ -1362,6 +1381,7 @@ void Menu_WadList(void)
 		    fsize = 20428208;
 */
 		    md5_check = true;
+		    nerve_pwad = false;
 		}
 		else if (strncmp(calculated_md5_string, known_md5_string_doom_reg_1_666_iwad, 32) == 0)
 		{
@@ -1372,6 +1392,7 @@ void Menu_WadList(void)
 		    fsize = 20428208;
 */
 		    md5_check = true;
+		    nerve_pwad = false;
 		}
 		else if (strncmp(calculated_md5_string, known_md5_string_doom_reg_1_8_iwad, 32) == 0)
 		{
@@ -1381,6 +1402,7 @@ void Menu_WadList(void)
 		    fsize = 11159840;
 
 		    md5_check = true;
+		    nerve_pwad = false;
 		}
 		else if (strncmp(calculated_md5_string, known_md5_string_doom_reg_1_9_iwad, 32) == 0)
 		{
@@ -1391,6 +1413,7 @@ void Menu_WadList(void)
 		    fsize = 20428208;
 */
 		    md5_check = true;
+		    nerve_pwad = false;
 		}
 		else if (strncmp(calculated_md5_string, known_md5_string_doom_reg_1_9ud_iwad, 32) == 0)
 		{
@@ -1400,6 +1423,7 @@ void Menu_WadList(void)
 		    fsize = 12408292;
 
 		    md5_check = true;
+		    nerve_pwad = false;
 		}
 		else if (strncmp(calculated_md5_string, known_md5_string_doom_bfg_psn_iwad, 32) == 0)
 		{
@@ -1409,6 +1433,7 @@ void Menu_WadList(void)
 		    fsize = 12474561;
 
 		    md5_check = true;
+		    nerve_pwad = false;
 		}
 		else if (strncmp(calculated_md5_string, known_md5_string_doom_bfg_pc_iwad, 32) == 0)
 		{
@@ -1418,6 +1443,7 @@ void Menu_WadList(void)
 		    fsize = 12487824;
 
 		    md5_check = true;
+		    nerve_pwad = false;
 		}
 		else if (strncmp(calculated_md5_string, known_md5_string_doom_xbox_iwad, 32) == 0)
 		{
@@ -1427,6 +1453,7 @@ void Menu_WadList(void)
 		    fsize = 12538385;
 
 		    md5_check = true;
+		    nerve_pwad = false;
 		}
 		else if (strncmp(calculated_md5_string, known_md5_string_doom2_1_666_iwad, 32) == 0)
 		{
@@ -1436,6 +1463,7 @@ void Menu_WadList(void)
 		    fsize = 14943400;
 
 		    md5_check = true;
+		    nerve_pwad = false;
 		}
 		else if (strncmp(calculated_md5_string, known_md5_string_doom2_1_666g_iwad, 32) == 0)
 		{
@@ -1445,6 +1473,7 @@ void Menu_WadList(void)
 		    fsize = 14824716;
 
 		    md5_check = true;
+		    nerve_pwad = false;
 		}
 		else if (strncmp(calculated_md5_string, known_md5_string_doom2_1_7_iwad, 32) == 0)
 		{
@@ -1454,6 +1483,7 @@ void Menu_WadList(void)
 		    fsize = 14612688;
 
 		    md5_check = true;
+		    nerve_pwad = false;
 		}
 		else if (strncmp(calculated_md5_string, known_md5_string_doom2_1_7a_iwad, 32) == 0)
 		{
@@ -1464,6 +1494,7 @@ void Menu_WadList(void)
 		    fsize = 20428208;
 */
 		    md5_check = true;
+		    nerve_pwad = false;
 		}
 		else if (strncmp(calculated_md5_string, known_md5_string_doom2_1_8_iwad, 32) == 0)
 		{
@@ -1474,6 +1505,7 @@ void Menu_WadList(void)
 		    fsize = 20428208;
 */
 		    md5_check = true;
+		    nerve_pwad = false;
 		}
 		else if (strncmp(calculated_md5_string, known_md5_string_doom2_1_8f_iwad, 32) == 0)
 		{
@@ -1483,6 +1515,7 @@ void Menu_WadList(void)
 		    fsize = 14607420;
 
 		    md5_check = true;
+		    nerve_pwad = false;
 		}
 		else if (strncmp(calculated_md5_string, known_md5_string_doom2_1_9_iwad, 32) == 0)
 		{
@@ -1492,6 +1525,7 @@ void Menu_WadList(void)
 		    fsize = 14604584;
 
 		    md5_check = true;
+		    nerve_pwad = false;
 		}
 		else if (strncmp(calculated_md5_string, known_md5_string_doom2_bfg_xbox360_iwad, 32) == 0)
 		{
@@ -1501,6 +1535,7 @@ void Menu_WadList(void)
 		    fsize = 14677988;
 
 		    md5_check = true;
+		    nerve_pwad = false;
 		}
 		else if (strncmp(calculated_md5_string, known_md5_string_doom2_bfg_pc_iwad, 32) == 0)
 		{
@@ -1510,6 +1545,7 @@ void Menu_WadList(void)
 		    fsize = 14691821;
 
 		    md5_check = true;
+		    nerve_pwad = false;
 		}
 		else if (strncmp(calculated_md5_string, known_md5_string_doom2_xbox_iwad, 32) == 0)
 		{
@@ -1519,6 +1555,7 @@ void Menu_WadList(void)
 		    fsize = 14683458;
 
 		    md5_check = true;
+		    nerve_pwad = false;
 		}
 		else if (strncmp(calculated_md5_string, known_md5_string_final_doom_tnt_old_iwad, 32) == 0)
 		{
@@ -1528,6 +1565,7 @@ void Menu_WadList(void)
 		    fsize = 18195736;
 
 		    md5_check = true;
+		    nerve_pwad = false;
 		}
 		else if (strncmp(calculated_md5_string, known_md5_string_final_doom_tnt_new_iwad, 32) == 0)
 		{
@@ -1537,6 +1575,7 @@ void Menu_WadList(void)
 		    fsize = 18654796;
 
 		    md5_check = true;
+		    nerve_pwad = false;
 		}
 		else if (strncmp(calculated_md5_string, known_md5_string_final_doom_plutonia_old_iwad, 32) == 0)
 		{
@@ -1546,6 +1585,7 @@ void Menu_WadList(void)
 		    fsize = 17420824;
 
 		    md5_check = true;
+		    nerve_pwad = false;
 		}
 		else if (strncmp(calculated_md5_string, known_md5_string_final_doom_plutonia_new_iwad, 32) == 0)
 		{
@@ -1555,6 +1595,7 @@ void Menu_WadList(void)
 		    fsize = 18240172;
 
 		    md5_check = true;
+		    nerve_pwad = false;
 		}
 		else if (strncmp(calculated_md5_string, known_md5_string_freedoom_0_6_4_iwad, 32) == 0)
 		{
@@ -1565,6 +1606,7 @@ void Menu_WadList(void)
 		    fsize = 19801320;
 */
 		    md5_check = true;
+		    nerve_pwad = false;
 		}
 		else if (strncmp(calculated_md5_string, known_md5_string_freedoom_0_7_rc_1_beta_1_iwad, 32) == 0)
 		{
@@ -1575,6 +1617,7 @@ void Menu_WadList(void)
 		    fsize = 27704188;
 */
 		    md5_check = true;
+		    nerve_pwad = false;
 		}
 		else if (strncmp(calculated_md5_string, known_md5_string_freedoom_0_7_iwad, 32) == 0)
 		{
@@ -1585,6 +1628,7 @@ void Menu_WadList(void)
 		    fsize = 27625596;
 */
 		    md5_check = true;
+		    nerve_pwad = false;
 		}
 		else if (strncmp(calculated_md5_string, known_md5_string_freedoom_0_8_beta_1_iwad, 32) == 0)
 		{
@@ -1595,6 +1639,7 @@ void Menu_WadList(void)
 		    fsize = 28144744;
 */
 		    md5_check = true;
+		    nerve_pwad = false;
 		}
 		else if (strncmp(calculated_md5_string, known_md5_string_freedoom_0_8_iwad, 32) == 0)
 		{
@@ -1605,6 +1650,7 @@ void Menu_WadList(void)
 		    fsize = 28592816;
 */
 		    md5_check = true;
+		    nerve_pwad = false;
 		}
 		else if (strncmp(calculated_md5_string, known_md5_string_freedoom_0_8_phase_1_iwad, 32) == 0)
 		{
@@ -1615,6 +1661,7 @@ void Menu_WadList(void)
 		    fsize = 19362644;
 */
 		    md5_check = true;
+		    nerve_pwad = false;
 		}
 		else if (strncmp(calculated_md5_string, known_md5_string_freedoom_0_8_phase_2_iwad, 32) == 0)
 		{
@@ -1624,6 +1671,7 @@ void Menu_WadList(void)
 		    fsize = 28422764;
 
 		    md5_check = true;
+		    nerve_pwad = false;
 		}
 		else if (strncmp(calculated_md5_string, known_md5_string_hacx_share_1_0_iwad, 32) == 0)
 		{
@@ -1634,6 +1682,7 @@ void Menu_WadList(void)
 		    fsize = 9745831;
 */
 		    md5_check = true;
+		    nerve_pwad = false;
 		}
 		else if (strncmp(calculated_md5_string, known_md5_string_hacx_reg_1_0_iwad, 32) == 0)
 		{
@@ -1644,6 +1693,7 @@ void Menu_WadList(void)
 		    fsize = 21951805;
 */
 		    md5_check = true;
+		    nerve_pwad = false;
 		}
 		else if (strncmp(calculated_md5_string, known_md5_string_hacx_reg_1_1_iwad, 32) == 0)
 		{
@@ -1654,6 +1704,7 @@ void Menu_WadList(void)
 		    fsize = 21951805;
 */
 		    md5_check = true;
+		    nerve_pwad = false;
 		}
 		else if (strncmp(calculated_md5_string, known_md5_string_hacx_reg_1_2_iwad, 32) == 0)
 		{
@@ -1663,6 +1714,31 @@ void Menu_WadList(void)
 		    fsize = 19321722;
 
 		    md5_check = true;
+		    nerve_pwad = false;
+		}
+		else if (strncmp(calculated_md5_string, known_md5_string_nerve_bfg_pwad, 32) == 0)
+		{
+		    load_extra_wad = 1;
+
+		    strcpy(extra_wad_1, check);
+		    strcpy(stripped_extra_wad_1, tmpFile->filename);
+
+		    extra_wad_slot_1_loaded = 1;
+
+		    md5_check = true;
+		    nerve_pwad = true;
+		}
+		else if (strncmp(calculated_md5_string, known_md5_string_nerve_xbox360_pwad, 32) == 0)
+		{
+		    load_extra_wad = 1;
+
+		    strcpy(extra_wad_1, check);
+		    strcpy(stripped_extra_wad_1, tmpFile->filename);
+
+		    extra_wad_slot_1_loaded = 1;
+
+		    md5_check = true;
+		    nerve_pwad = true;
 		}
 		else
 		    md5_check = false;

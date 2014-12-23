@@ -127,6 +127,7 @@ boolean         fastparm;	// checkparm of -fast
 //extern  int	musicVolume;
 
 extern  boolean	inhelpscreens;
+extern  boolean	devparm_nerve;
 
 skill_t		startskill;
 int             startepisode;
@@ -141,6 +142,7 @@ boolean         storedemo;
 
 // "BFG Edition" version of doom2.wad does not include TITLEPIC.
 boolean         bfgedition;
+//char            *nervewadfile = NULL;
 
 // If true, the main game loop has started.
 boolean         main_loop_started = false;
@@ -178,6 +180,7 @@ static SceCtrlData pad;
 static SceCtrlData lastpad;
 */
 extern boolean	opl;
+extern boolean	nerve_pwad;
 
 extern int	warped;
 
@@ -502,9 +505,15 @@ void D_DoomLoop (void)
 
 //    if(devparm)
 	if(usb)
+	{
 	    debugfile = fopen("usb:/apps/wiidoom/debug.txt","w");
+	    statsfile = fopen("usb:/apps/wiidoom/stats.txt","w");
+	}
 	else if(sd)
+	{
 	    debugfile = fopen("sd:/apps/wiidoom/debug.txt","w");
+	    statsfile = fopen("sd:/apps/wiidoom/stats.txt","w");
+	}
 
     main_loop_started = true;
 
@@ -899,13 +908,20 @@ void D_IdentifyVersion(void)
 
 void D_SetGameDescription(void)
 {
+    boolean is_freedoom = W_CheckNumForName("FREEDOOM") >= 0,
+            is_freedm = W_CheckNumForName("FREEDM") >= 0;
+
     gamedescription = "Unknown";
 
     if (logical_gamemission == doom)
     {
         // Doom 1.  But which version?
 
-        if (gamemode == retail)
+        if (is_freedoom)
+        {
+            gamedescription = GetGameName("Freedoom: Phase 1");
+        }
+        else if (gamemode == retail)
         {
             // Ultimate Doom
 
@@ -924,12 +940,21 @@ void D_SetGameDescription(void)
     {
         // Doom 2 of some kind.  But which mission?
 
-        if (logical_gamemission == doom2)
+        if (is_freedoom)
+        {
+            if (is_freedm)
+                gamedescription = GetGameName("FreeDM");
+            else
+                gamedescription = GetGameName("Freedoom: Phase 2");
+        }
+        else if (logical_gamemission == doom2)
             gamedescription = GetGameName("DOOM 2: Hell on Earth");
         else if (logical_gamemission == pack_plut)
             gamedescription = GetGameName("DOOM 2: Plutonia Experiment"); 
         else if (logical_gamemission == pack_tnt)
             gamedescription = GetGameName("DOOM 2: TNT - Evilution");
+        else if (logical_gamemission == pack_nerve)
+            gamedescription = GetGameName("DOOM 2: No Rest For The Living");
     }
 }
 
@@ -1206,6 +1231,60 @@ static void LoadChexDeh(void)
     }
 }
 
+static void LoadNerveWad(void)
+{
+    int i;
+    char lumpname[9];
+
+    if (gamemission != doom2)
+        return;
+
+    if (bfgedition && !modifiedgame)
+    {
+/*
+        if (strrchr(iwadfile, DIR_SEPARATOR) != NULL)
+        {
+            char *dir;
+            dir = M_DirName(iwadfile);
+            nervewadfile = M_StringJoin(dir, DIR_SEPARATOR_S, "nerve.wad", NULL);
+            free(dir);
+        }
+        else
+        {
+            nervewadfile = M_StringDuplicate("nerve.wad");
+        }
+
+        if (!M_FileExists(nervewadfile))
+        {
+            free(nervewadfile);
+            nervewadfile = D_FindWADByName("nerve.wad");
+        }
+
+        if (nervewadfile == NULL)
+        {
+            return;
+        }
+
+        D_AddFile(nervewadfile);
+*/
+        // rename level name patch lumps out of the way
+        for (i = 0; i < 9; i++)
+        {
+            M_snprintf (lumpname, 9, "CWILV%2.2d", i);
+            lumpinfo[W_GetNumForName(lumpname)].name[0] = 'N';
+        }
+    }
+    else
+    {
+	i = W_GetNumForName("map01");
+//	if (!strcmp(lumpinfo[i].wad_file->path, "nerve.wad"))
+	{
+	    gamemission = pack_nerve;
+	    DEH_AddStringReplacement ("TITLEPIC", "INTERPIC");
+	}
+    }
+}
+
 // Function called at exit to display the ENDOOM screen
 /*
 static void D_Endoom(void)
@@ -1267,7 +1346,8 @@ void D_DoomMain (void)
 //    char            demolumpname[9];
 
     if(devparm)
-	fsize = 10399316;
+//	fsize = 10399316;
+	fsize = 14943400;
 
 //    I_AtExit(D_Endoom, false);
 
@@ -1775,6 +1855,7 @@ void D_DoomMain (void)
 	gamemode = shareware;
 	gamemission = doom;
 	gameversion = exe_doom_1_9;
+	nerve_pwad = false;
     }
     else if(fsize == 10396254	||	// DOOM REGISTERED v1.1
 	    fsize == 10399316	||	// DOOM REGISTERED v1.2
@@ -1784,6 +1865,7 @@ void D_DoomMain (void)
 	gamemode = registered;
 	gamemission = doom;
 	gameversion = exe_doom_1_9;
+	nerve_pwad = false;
     }
     else if(fsize == 12408292	||	// DOOM REGISTERED v1.9 (THE ULTIMATE DOOM)
 	    fsize == 12538385	||	// DOOM REGISTERED (XBOX EDITION)
@@ -1798,6 +1880,7 @@ void D_DoomMain (void)
 	gamemode = retail;
 	gamemission = doom;
 	gameversion = exe_ultimate;
+	nerve_pwad = false;
     }
     else if(fsize == 14943400	||	// DOOM 2 REGISTERED v1.666
 	    fsize == 14824716	||	// DOOM 2 REGISTERED v1.666 (GERMAN VERSION)
@@ -1826,6 +1909,7 @@ void D_DoomMain (void)
 	gamemode = commercial;
 	gamemission = pack_tnt;
 	gameversion = exe_final;
+	nerve_pwad = false;
     }
     else if(fsize == 18240172	||	// FINAL DOOM - PLUTONIA v1.9 (WITH DEATHMATCH STARTS)
 	    fsize == 17420824)		// FINAL DOOM - PLUTONIA v1.9 (WITHOUT DEATHMATCH STARTS)
@@ -1833,12 +1917,14 @@ void D_DoomMain (void)
 	gamemode = commercial;
 	gamemission = pack_plut;
 	gameversion = exe_final;
+	nerve_pwad = false;
     }
     else if(fsize == 12361532)		// CHEX QUEST
     {
 	gamemode = shareware;
 	gamemission = pack_chex;
 	gameversion = exe_chex;
+	nerve_pwad = false;
     }
     else if(
 /*	    fsize == 9745831	||	// HACX SHAREWARE v1.0
@@ -1850,6 +1936,7 @@ void D_DoomMain (void)
 	gamemode = commercial;
 	gamemission = pack_hacx;
 	gameversion = exe_hacx;
+	nerve_pwad = false;
     }
 
 //    InitGameVersion();
@@ -1857,16 +1944,18 @@ void D_DoomMain (void)
     if(devparm)
     {
 	if(usb)
-	    D_AddFile("usb:/apps/wiidoom/IWAD/DOOM/Reg/v12/DOOM.WAD");
+//	    D_AddFile("usb:/apps/wiidoom/IWAD/DOOM/Reg/v12/DOOM.WAD");
+	    D_AddFile("usb:/apps/wiidoom/IWAD/DOOM2/v1666/DOOM2.WAD");
 	else if(sd)
-	    D_AddFile("sd:/apps/wiidoom/IWAD/DOOM/Reg/v12/DOOM.WAD");
+//	    D_AddFile("sd:/apps/wiidoom/IWAD/DOOM/Reg/v12/DOOM.WAD");
+	    D_AddFile("sd:/apps/wiidoom/IWAD/DOOM2/v1666/DOOM2.WAD");
     }
     else
 	D_AddFile(target);
 
     if(gamemode != shareware || (gamemode == shareware && gameversion == exe_chex))
     {
-	if(load_extra_wad == 1)
+	if(load_extra_wad == 1 && !nerve_pwad)
 	{
 	    opl = 1;
 
@@ -1881,7 +1970,12 @@ void D_DoomMain (void)
 
 	    modifiedgame = /*W_ParseCommandLine()*/ true;
 	}
+	else if(load_extra_wad == 1 && nerve_pwad)
+	    D_AddFile(extra_wad_1);
     }
+
+    if(devparm_nerve)
+	D_AddFile("usb:/apps/wiidoom/PWAD/DOOM2/NERVE.WAD");
 
     dont_show_adding_of_resource_wad = 1;
 
@@ -2008,9 +2102,12 @@ void D_DoomMain (void)
     // Generate the WAD hash table.  Speed things up a bit.
 
     W_GenerateHashTable();
+/*
+    if (!M_ParmExists("-nodeh"))
+	LoadNerveWad();
 
-//    D_IdentifyVersion();
-
+    D_IdentifyVersion();
+*/
     if(fsize == 12361532)
 	LoadChexDeh();
 
@@ -2353,14 +2450,15 @@ void D_DoomMain (void)
         storedemo = true;
 
     // Doom 3: BFG Edition includes modified versions of the classic
-    // IWADs. The modified version of doom2.wad does not have a
-    // TITLEPIC lump, so detect this so we can apply a workaround.
-    // We specifically check for TITLEPIC here, after PWADs have been
-    // loaded - this means that we can play with the BFG Edition with
-    // PWADs that change the title screen and still see the modified
-    // titles.
+    // IWADs which can be identified by an additional DMENUPIC lump.
+    // Furthermore, the M_GDHIGH lumps have been modified in a way that
+    // makes them incompatible to Vanilla Doom and the modified version
+    // of doom2.wad is missing the TITLEPIC lump.
+    // We specifically check for DMENUPIC here, before PWADs have been
+    // loaded which could probably include a lump of that name.
 
-    if (gamemode == commercial && W_CheckNumForName("titlepic") < 0)
+//    if (gamemode == commercial && W_CheckNumForName("titlepic") < 0)
+    if (W_CheckNumForName("dmenupic") >= 0)
     {
 //        printf("BFG Edition: Using INTERPIC instead of TITLEPIC.\n");
         bfgedition = true;
@@ -2374,7 +2472,23 @@ void D_DoomMain (void)
         DEH_AddStringReplacement(HUSTR_31, "level 31: idkfa");
         DEH_AddStringReplacement(HUSTR_32, "level 32: keen");
         DEH_AddStringReplacement(PHUSTR_1, "level 33: betray");
+
+        // The BFG edition doesn't have the "low detail" menu option (fair
+        // enough). But bizarrely, it reuses the M_GDHIGH patch as a label
+        // for the options menu (says "Fullscreen:"). Why the perpetrators
+        // couldn't just add a new graphic lump and had to reuse this one,
+        // I don't know.
+        //
+        // The end result is that M_GDHIGH is too wide and causes the game
+        // to crash. As a workaround to get a minimum level of support for
+        // the BFG edition IWADs, use the "ON"/"OFF" graphics instead.
+
+        DEH_AddStringReplacement("M_GDHIGH", "M_MSGON");
+        DEH_AddStringReplacement("M_GDLOW", "M_MSGOFF");
     }
+
+    if(nerve_pwad)
+	LoadNerveWad();
 
 //    if (M_CheckParmWithArgs("-statdump", 1))
     if(devparm)

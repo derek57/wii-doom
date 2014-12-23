@@ -41,6 +41,7 @@
 #include "z_zone.h"
 
 #include "doomtype.h"
+#include "doomdef.h"
 
 #define LOW_PASS_FILTER
 #define NUM_CHANNELS 16
@@ -995,13 +996,13 @@ static boolean I_SDL_InitSound(boolean _use_sfx_prefix)
 
     if (SDL_Init(SDL_INIT_AUDIO) < 0)
     {
-        fprintf(stderr, "Unable to set up sound.\n");
+        fprintf(statsfile, "Unable to set up sound.\n");
         return false;
     }
 
     if (Mix_OpenAudio(snd_samplerate, AUDIO_S16SYS, 2, GetSliceSize()) < 0)
     {
-        fprintf(stderr, "Error initialising SDL_mixer: %s\n", Mix_GetError());
+        fprintf(statsfile, "Error initialising SDL_mixer: %s\n", Mix_GetError());
         return false;
     }
 
@@ -1024,7 +1025,7 @@ static boolean I_SDL_InitSound(boolean _use_sfx_prefix)
 */
     if (use_libsamplerate != 0)
     {
-        fprintf(stderr, "I_SDL_InitSound: use_libsamplerate=%i, but "
+        fprintf(statsfile, "I_SDL_InitSound: use_libsamplerate=%i, but "
                         "libsamplerate support not compiled in.\n",
                         use_libsamplerate);
     }
@@ -1047,7 +1048,7 @@ static boolean I_SDL_InitSound(boolean _use_sfx_prefix)
         if (v <= SDL_VERSIONNUM(1, 2, 8))
         {
             setpanning_workaround = true;
-            fprintf(stderr, "\n"
+            fprintf(statsfile, "\n"
               "ATTENTION: You are using an old version of SDL_mixer!\n"
               "           This version has a bug that may cause "
                           "your sound to stutter.\n"

@@ -1000,7 +1000,7 @@ AM_drawFline
 	   || fl->b.x < 0 || fl->b.x >= f_w
 	   || fl->b.y < 0 || fl->b.y >= f_h)
     {
-        DEH_fprintf(stderr, "fuck %d \r", fuck++);
+        DEH_fprintf(statsfile, "fuck %d \r", fuck++);
 	return;
     }
 
@@ -1395,6 +1395,9 @@ void AM_Drawer (void)
 
     if(fsize == 12538385 && gamemap == 10)
 	M_WriteText(0, 160, DEH_String("E1M10: SEWERS"));
+
+    if((fsize == 14691821 || fsize == 14677988 || fsize == 14683458) && gamemap == 33)
+	M_WriteText(0, 160, DEH_String("LEVEL 33: BETRAY"));
 }
 
 void DrawWorldTimer(void)

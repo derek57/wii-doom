@@ -29,6 +29,8 @@
 #include "deh_defs.h"
 #include "deh_io.h"
 
+#include "doomdef.h"
+
 extern deh_section_t *deh_section_types[];
 extern char *deh_signatures[];
 
@@ -396,7 +398,7 @@ int DEH_LoadFile(char *filename)
 
     if (context == NULL)
     {
-        fprintf(stderr, "DEH_LoadFile: Unable to open %s\n", filename);
+        fprintf(statsfile, "DEH_LoadFile: Unable to open %s\n", filename);
         return 0;
     }
 
@@ -433,7 +435,7 @@ int DEH_LoadLump(int lumpnum, boolean allow_long, boolean allow_error)
 
     if (context == NULL)
     {
-        fprintf(stderr, "DEH_LoadFile: Unable to open lump %i\n", lumpnum);
+        fprintf(statsfile, "DEH_LoadFile: Unable to open lump %i\n", lumpnum);
         return 0;
     }
 
@@ -459,7 +461,7 @@ int DEH_LoadLumpByName(char *name, boolean allow_long, boolean allow_error)
 
     if (lumpnum == -1)
     {
-        fprintf(stderr, "DEH_LoadLumpByName: '%s' lump not found\n", name);
+        fprintf(statsfile, "DEH_LoadLumpByName: '%s' lump not found\n", name);
         return 0;
     }
 

@@ -55,6 +55,8 @@ char known_md5_string_hacx_share_1_0_iwad[33] = "d2918f9ba48b16e7128b89b61e4de35
 char known_md5_string_hacx_reg_1_0_iwad[33] = "1511a7032ebc834a3884cf390d7f186e";
 char known_md5_string_hacx_reg_1_1_iwad[33] = "b7fd2f43f3382cf012dc6b097a3cb182";
 char known_md5_string_hacx_reg_1_2_iwad[33] = "65ed74d522bdf6649c2831b13b9e02b4";
+char known_md5_string_nerve_bfg_pwad[33] = "967d5ae23daf45196212ae1b605da3b0";
+char known_md5_string_nerve_xbox360_pwad[33] = "4f47bb32bf5fd06bc1cc0b4a2e8e3910";
 
 int MD5_Check(char *final)		// FOR PSP: THIS FUNCTION DEFINITELY WORKS, BUT IT WAS NEVER USED - MAYBE FUTURE
 {

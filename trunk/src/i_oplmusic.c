@@ -36,6 +36,8 @@
 
 #include "i_oplmusic.h"
 
+#include "doomdef.h"
+
 // #define OPL_MIDI_DEBUG
 
 #define MAXMIDLENGTH (96 * 1024)
@@ -1004,7 +1006,7 @@ static void ControllerEvent(opl_track_data_t *track, midi_event_t *event)
 
         default:
 #ifdef OPL_MIDI_DEBUG
-            fprintf(stderr, "Unknown MIDI controller type: %i\n", controller);
+            fprintf(statsfile, "Unknown MIDI controller type: %i\n", controller);
 #endif
             break;
     }
@@ -1077,7 +1079,7 @@ static void MetaEvent(opl_track_data_t *track, midi_event_t *event)
 
         default:
 #ifdef OPL_MIDI_DEBUG
-            fprintf(stderr, "Unknown MIDI meta event type: %i\n",
+            fprintf(statsfile, "Unknown MIDI meta event type: %i\n",
                             event->data.meta.type);
 #endif
             break;
@@ -1122,7 +1124,7 @@ static void ProcessEvent(opl_track_data_t *track, midi_event_t *event)
 
         default:
 #ifdef OPL_MIDI_DEBUG
-            fprintf(stderr, "Unknown MIDI event type %i\n", event->event_type);
+            fprintf(statsfile, "Unknown MIDI event type %i\n", event->event_type);
 #endif
             break;
     }
@@ -1424,7 +1426,7 @@ static void *I_OPL_RegisterSong(void *data, int len)
 
     if (result == NULL)
     {
-        fprintf(stderr, "I_OPL_RegisterSong: Failed to load MID.\n");
+        fprintf(statsfile, "I_OPL_RegisterSong: Failed to load MID.\n");
     }
 
     // remove file now
