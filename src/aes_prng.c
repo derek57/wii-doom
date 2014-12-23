@@ -1043,7 +1043,7 @@ int main(int argc, char *argv[])
     }
     else
     {
-        fprintf(stderr, "AES self test failed: %s\n", errormsg);
+        fprintf(statsfile, "AES self test failed: %s\n", errormsg);
         return 1;
     }
 }

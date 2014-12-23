@@ -67,6 +67,8 @@
 #include "i_video.h"
 #include "m_argv.h"
 
+#include "doomdef.h"
+
 // Constants for GL framebuffer extension. These are not in the MingW
 // GL header, so this is a hacky workaround.
 #ifndef GL_FRAMEBUFFER
@@ -134,7 +136,7 @@ static void *GetGLFunction(char *name)
 
     if (ptr == NULL)
     {
-        fprintf(stderr, "Failed to find GL function: %s\n", name);
+        fprintf(statsfile, "Failed to find GL function: %s\n", name);
     }
 
     return ptr;
@@ -178,7 +180,7 @@ static boolean HaveExtension(char *extname)
 
     if (extensions == NULL)
     {
-        fprintf(stderr, "Failed to read GL extensions\n");
+        fprintf(statsfile, "Failed to read GL extensions\n");
         return false;
     }
 
@@ -205,7 +207,7 @@ static boolean HaveExtension(char *extname)
         }
     }
 
-    fprintf(stderr, "Missing GL extension: %s\n", extname);
+    fprintf(statsfile, "Missing GL extension: %s\n", extname);
     return false;
 }
 
@@ -363,7 +365,7 @@ static boolean SetupFramebuffer(void)
 
     if (_glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
     {
-        fprintf(stderr, "Failed to set up framebuffer.\n");
+        fprintf(statsfile, "Failed to set up framebuffer.\n");
         result = false;
     }
 

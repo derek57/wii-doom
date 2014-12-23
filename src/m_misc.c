@@ -536,3 +536,26 @@ char *M_OEMToUTF8(const char *oem)
 
 #endif
 
+char *M_DirName(char *path)
+{
+    char *src, *res;
+
+    res = M_StringDuplicate(path);
+    src = res + strlen(res) - 1;
+
+    while (src != res)
+    {
+	if (*src == DIR_SEPARATOR)
+	{
+	    *src = '\0';
+	    return res;
+	}
+
+	src--;
+    }
+
+    // path string does not contain a directory separator
+    free(res);
+    return M_StringDuplicate(".");
+}
+

@@ -256,6 +256,7 @@ void I_Quit (void)
 {
 //    if (devparm)
 	fclose (debugfile);
+	fclose (statsfile);
 
     atexit_listentry_t *entry;
 
@@ -315,7 +316,7 @@ void I_Error (char *error, ...)
 
     if (already_quitting)
     {
-        fprintf(stderr, "Warning: recursive call to I_Error detected.\n");
+        fprintf(statsfile, "Warning: recursive call to I_Error detected.\n");
 //        exit(-1);
 
 	error_detected = true;

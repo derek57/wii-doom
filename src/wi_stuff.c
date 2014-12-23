@@ -884,6 +884,9 @@ void WI_drawShowNextLoc(void)
 	    WI_drawOnLnode(wbs->next, yah); 
     }
 
+    if (gamemission == pack_nerve && wbs->last == 7)
+        return;
+
     // draws which level you are entering..
     if ( (gamemode != commercial)
 	 || wbs->next != 30)
@@ -1644,6 +1647,15 @@ static void WI_loadUnloadData(load_callback_t callback)
     char name[9];
     anim_t *a;
 
+    if (nerve_pwad && gamemission == pack_nerve)
+    {
+	for (i=0 ; i<9 ; i++)
+	{
+	    DEH_snprintf(name, 9, "NWILV%2.2d", i);
+            callback(name, &lnames[i]);
+	}
+    }
+    else
     if (gamemode == commercial)
     {
 	for (i=0 ; i<NUMCMAPS ; i++)

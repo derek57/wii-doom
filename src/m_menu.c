@@ -2841,7 +2841,7 @@ void M_DrawWeapons(void)
 	if(fsize == 14943400 || fsize == 14824716 || fsize == 14612688 ||
 		fsize == 14607420 || fsize == 14604584 || fsize == 18195736 || fsize == 14683458 ||
 		fsize == 18654796 || fsize == 18240172 || fsize == 17420824 || fsize == 14677988 ||
-		fsize == 14691821)
+		fsize == 14691821 || fsize == 28422764)
 	    M_WriteText(80, 135, DEH_String("SUPER SHOTGUN"));
     }
 
@@ -3067,7 +3067,8 @@ void M_DrawCheats(void)
     }
 
     if((fsize == 14943400 || fsize == 14824716 || fsize == 14612688 || fsize == 14607420 ||
-	    fsize == 14604584 || fsize == 14677988 || fsize == 14683458 || fsize == 14691821) &&
+	    fsize == 14604584 || fsize == 14677988 || fsize == 14683458 || fsize == 14691821 ||
+	    fsize == 28422764) &&
 	    map < 33)
 	M_WriteText(72, 116, maptext[map+36]);
 
@@ -5430,7 +5431,7 @@ void M_Rift(int choice)
 		    }
 		}
 	    }
-	    else if(fsize == 12408292 || fsize == 12474561 || 12487824)
+	    else if(fsize == 12408292 || fsize == 12474561 || fsize == 12487824)
 	    {
 		if(epi <= 4 && map <= 9)
 		{
@@ -5484,29 +5485,37 @@ void M_Rift(int choice)
 		    }
 		}
 	    }
-	    else if(fsize == 14943400 || fsize == 14612688 || fsize == 14607420 || fsize == 14604584 ||
-		    fsize == 18195736 || fsize == 18654796 || fsize == 18240172 || fsize == 17420824 ||
-		    fsize == 28422764)
-	    {
-		if(map <= 31)
-		    map++;
-	    }
-	    else if(fsize == 14677988 || fsize == 14683458 || fsize == 14691821)
-	    {
-		if(map <= 32)
-		    map++;
-	    }
-	    else if(fsize == 14824716)
-	    {
-		if(map <= 29)
-		    map++;
-	    }
 	    else if(fsize == 19321722)
 	    {
 		if(map <= 30)
 		    map++;
 		if(map == 21)
 		    map = 31;
+	    }
+	    if(!nerve_pwad)
+	    {
+		if (fsize == 14943400 || fsize == 14612688 || fsize == 14607420 || fsize == 14604584 ||
+		    fsize == 18195736 || fsize == 18654796 || fsize == 18240172 || fsize == 17420824 ||
+		    fsize == 28422764)
+		{
+		    if(map <= 31)
+			map++;
+		}
+		else if(fsize == 14677988 || fsize == 14683458 || fsize == 14691821)
+		{
+		    if(map <= 32)
+			map++;
+		}
+		else if(fsize == 14824716)
+		{
+		    if(map <= 29)
+			map++;
+		}
+	    }
+	    else
+	    {
+		if(map < 9)
+		    map++;
 	    }
             break;
 	}

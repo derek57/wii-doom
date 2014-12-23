@@ -2039,11 +2039,10 @@ static void SetVideoMode(screen_mode_t *mode, int w, int h)
 
         if (!I_GL_InitScale(screen->w, screen->h))
         {
-/*
-            fprintf(stderr,
+            fprintf(statsfile,
                     "Failed to initialize in OpenGL mode. "
                     "Falling back to software mode instead.\n");
-*/
+
             using_opengl = false;
 
             // TODO: This leaves us in window with borders around it.

@@ -718,7 +718,7 @@ int main(int argc, char *argv[])
 
     if (mus2mid(src, dst))
     {
-        fprintf(stderr, "mus2mid() failed\n");
+        fprintf(statsfile, "mus2mid() failed\n");
         exit(-1);
     }
 

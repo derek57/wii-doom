@@ -68,6 +68,7 @@ extern char            *gamedescription;
 
 // If true, we're using one of the mangled BFG edition IWADs.
 extern boolean bfgedition;
+extern boolean nerve_pwad;
 
 // Convenience macro.
 // 'gamemission' can be equal to pack_chex or pack_hacx, but these are

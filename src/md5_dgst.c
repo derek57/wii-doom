@@ -284,9 +284,9 @@ int printit(unsigned long *l)
 		{
 		for (ii=0; ii<8; ii++)
 			{
-			fprintf(stderr,"%08lx ",l[i*8+ii]);
+			fprintf(statsfile,"%08lx ",l[i*8+ii]);
 			}
-		fprintf(stderr,"\n");
+		fprintf(statsfile,"\n");
 		}
 	}
 #endif

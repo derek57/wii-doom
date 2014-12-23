@@ -432,5 +432,6 @@ boolean			gamekeydown[NUMKEYS];
 boolean			am_rotate;
 
 FILE			*debugfile;
+FILE			*statsfile;
 
 #endif          // __DOOMDEF__

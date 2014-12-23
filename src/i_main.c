@@ -38,6 +38,7 @@
 #include "xmn_main.h"
 
 boolean		devparm = false;	// started game with -devparm
+boolean		devparm_nerve = false;	// started game with -devparm
 
 //static char* margv;
 

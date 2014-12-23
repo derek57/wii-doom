@@ -28,6 +28,8 @@
 #include "deh_defs.h"
 #include "deh_io.h"
 
+#include "doomdef.h"
+
 typedef enum
 {
     DEH_INPUT_FILE,
@@ -308,9 +310,9 @@ void DEH_Warning(deh_context_t *context, char *msg, ...)
 
     va_start(args, msg);
 
-    fprintf(stderr, "%s:%i: warning: ", context->filename, context->linenum);
-    vfprintf(stderr, msg, args);
-    fprintf(stderr, "\n");
+    fprintf(statsfile, "%s:%i: warning: ", context->filename, context->linenum);
+    vfprintf(statsfile, msg, args);
+    fprintf(statsfile, "\n");
 
     va_end(args);
 }
@@ -321,9 +323,9 @@ void DEH_Error(deh_context_t *context, char *msg, ...)
 
     va_start(args, msg);
 
-    fprintf(stderr, "%s:%i: ", context->filename, context->linenum);
-    vfprintf(stderr, msg, args);
-    fprintf(stderr, "\n");
+    fprintf(statsfile, "%s:%i: ", context->filename, context->linenum);
+    vfprintf(statsfile, msg, args);
+    fprintf(statsfile, "\n");
 
     va_end(args);
 

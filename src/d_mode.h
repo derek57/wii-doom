@@ -43,6 +43,7 @@ typedef enum
     heretic,         // Heretic
     hexen,           // Hexen
     strife,          // Strife
+    pack_nerve,      // Doom 2: No Rest For The Living
 
     none
 } GameMission_t;
