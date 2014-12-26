@@ -112,6 +112,7 @@ lighttable_t*		zlight[LIGHTLEVELS][MAXLIGHTZ];
 // bumped light from gun blasts
 int			extralight;			
 
+boolean			BorderNeedRefresh;
 
 
 void (*colfunc) (void);
@@ -845,7 +846,6 @@ R_PointInSubsector
 }
 
 
-
 //
 // R_SetupFrame
 //
@@ -882,6 +882,15 @@ void R_SetupFrame (player_t* player)
 		
     framecount++;
     validcount++;
+
+    if (BorderNeedRefresh)
+    {
+        if (setblocks < 10)
+        {
+            R_DrawViewBorder();
+        }
+        BorderNeedRefresh = false;
+    }
 }
 
 

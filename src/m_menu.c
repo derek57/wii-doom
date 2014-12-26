@@ -138,6 +138,7 @@ boolean			menuactive;
 #define SKULLXOFF		-32
 #define LINEHEIGHT		16
 
+extern boolean		BorderNeedRefresh;
 extern boolean		sendpause;
 char			savegamestrings[10][SAVESTRINGSIZE];
 
@@ -6381,6 +6382,7 @@ void M_FPSCounter(int display_fps)
     {
 	M_WriteText(0, 30, fpsDisplay);
     }
+    BorderNeedRefresh = true;
 }
 
 void M_DisplayTicker(int choice)
@@ -6397,7 +6399,9 @@ void M_DisplayTicker(int choice)
 	players[consoleplayer].message = DEH_String("TICKER OFF");
     }
     I_DisplayFPSDots(display_ticker);
-    ST_doRefresh();
+
+    if(usergame)
+	ST_doRefresh();
 }
 /*
 void M_Battery(int choice)
