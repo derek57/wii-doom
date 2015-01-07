@@ -1955,37 +1955,37 @@ void D_DoomMain (void)
 
     if(gamemode != shareware || (gamemode == shareware && gameversion == exe_chex))
     {
-	if(load_extra_wad == 1 && !nerve_pwad)
+	if(load_extra_wad == 1)
 	{
 	    opl = 1;
 
 	    if(extra_wad_slot_1_loaded == 1)
 		D_AddFile(extra_wad_1);
 
-	    if(extra_wad_slot_2_loaded == 1)
-		D_AddFile(extra_wad_2);
+	    if(!nerve_pwad)
+	    {
+		if(extra_wad_slot_2_loaded == 1)
+		    D_AddFile(extra_wad_2);
 
-	    if(extra_wad_slot_3_loaded == 1)
-		D_AddFile(extra_wad_3);
-
+		if(extra_wad_slot_3_loaded == 1)
+		    D_AddFile(extra_wad_3);
+	    }
 	    modifiedgame = /*W_ParseCommandLine()*/ true;
 	}
-	else if(load_extra_wad == 1 && nerve_pwad)
-	    D_AddFile(extra_wad_1);
     }
 
     if(devparm_nerve)
 	D_AddFile("usb:/apps/wiidoom/PWAD/DOOM2/NERVE.WAD");
 
-    dont_show_adding_of_resource_wad = 1;
+    dont_show_adding_of_resource_wad = 0;
 
     if(usb)
 	D_AddFile("usb:/apps/wiidoom/pspdoom.wad");
     else if(sd)
 	D_AddFile("sd:/apps/wiidoom/pspdoom.wad");
 
-    if(show_deh_loading_message == 1 && devparm)
-	printf(" loading %s\n", dehacked_file);
+//    if(show_deh_loading_message == 1 && devparm)
+	printf("         adding %s\n", dehacked_file);
 
     if(gamemode == shareware && gameversion != exe_chex)
 	/*DEH_printf*/printf("         shareware version.\n");
