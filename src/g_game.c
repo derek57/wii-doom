@@ -79,6 +79,8 @@
 
 #include "g_game.h"
 
+#include "c_io.h"
+
 #include <wiiuse/wpad.h>
 
 #define SAVEGAMESIZE	0x2c000
@@ -285,6 +287,7 @@ int	joybmapzoomout = 10;
 int	joybmapzoomin = 11;
 int	joybjump = 12;
 int	joybspeed = 15;
+int	joybconsole = 16;
 
 extern fixed_t 	mtof_zoommul; // how far the window zooms in each tic (map coords)
 extern fixed_t 	ftom_zoommul; // how far the window zooms in each tic (fb coords)
@@ -482,7 +485,19 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
 //    int		tspeed; 
     int		forward;
     int		side;
-
+/*
+    if(gamestate == GS_CONSOLE)
+    {                         
+        int i;
+      
+        // fill ticcmd with console chars
+        for(i = 0; i < sizeof(ticcmd_t); i++)
+        {
+            ((unsigned char*)cmd)[i] = HU_dequeueChatChar();
+        }
+        return;
+    }
+*/
     memset(cmd, 0, sizeof(ticcmd_t));
 
     cmd->consistancy = 
@@ -659,6 +674,18 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
 	if(data->btns_d)
 //	if(data->btns_d & WPAD_CLASSIC_BUTTON_RIGHT)
 	{
+	    if(joybuttons[joybconsole])
+	    {
+		if(!menuactive)
+		{
+		    if (!consoleactive)
+		    {
+			C_SetConsole();
+			S_StartSound(NULL, sfx_doropn);
+		    }
+		}
+	    }
+
 	    if(joybuttons[joybmenu])
 	    {
 		if (!menuactive)
@@ -1009,6 +1036,7 @@ void G_DoLoadLevel (void)
         players[consoleplayer].message = "Press escape to quit.";
     }
 */
+    C_InstaPopup();  // pop up the console
 } 
 /*
 static void SetJoyButtons(unsigned int buttons_mask)
@@ -1393,6 +1421,9 @@ void G_Ticker (void)
       case GS_DEMOSCREEN: 
 	D_PageTicker (); 
 	break;
+
+      case GS_CONSOLE:
+        break;
     }        
 } 
  
@@ -2744,4 +2775,4 @@ boolean G_CheckDemoStatus(void)
 
     return false;
 }
- 
+

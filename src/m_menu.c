@@ -188,12 +188,12 @@ int			extra_wad_loaded;
 int			mhz333 = 0;
 */
 int			fps = 0;		// FOR PSP: calculating the frames per second
-int			key_controls_start_in_cfg_at_pos = 16;	// FOR PSP: ACTUALLY IT'S +2 !!!
-int			key_controls_end_in_cfg_at_pos = 26;	// FOR PSP: ACTUALLY IT'S +2 !!!
+int			key_controls_start_in_cfg_at_pos = 17;	// FOR PSP: ACTUALLY IT'S +2 !!!
+int			key_controls_end_in_cfg_at_pos = 28;	// FOR PSP: ACTUALLY IT'S +2 !!!
 int			crosshair = 0;
 int			show_stats = 0;
 //int			max_free_ram = 0;
-int tracknum = 1;
+int			tracknum = 1;
 //int mp3_volume;
 extern int		allocated_ram_size;
 extern default_t	doom_defaults_list[];		// FOR PSP: KEY BINDINGS
@@ -221,9 +221,11 @@ int rmap = 1;
 int rskill = 0;
 int warped = 0;
 int faketracknum = 1;
+int mus_engine = 1;
 extern short songlist[148];
 boolean forced = false;
 boolean fake = false;
+boolean mus_cheat_used = false;
 boolean got_invisibility = false;
 boolean got_radiation_suit = false;
 boolean got_berserk = false;
@@ -338,9 +340,9 @@ void M_StartMessage(char *string,void *routine,boolean input);
 void M_StopMessage(void);
 void M_ClearMenus (void);
 
-#ifdef OGG_SUPPORT
+//#ifdef OGG_SUPPORT
 void M_MusicType(int choice);
-#endif
+//#endif
 void M_GameFiles(int choice);
 void M_Brightness(int choice);
 void M_Freelook(int choice);
@@ -1365,7 +1367,7 @@ menuitem_t FilesMenu[]=
 menu_t  FilesDef =
 {
     files_end,
-    NULL,
+    &MainDef,
     FilesMenu,
     M_DrawFilesMenu,
     97,45, // haleyjd 08/28/10: [STRIFE] changed y coord
@@ -1535,6 +1537,58 @@ menu_t  ReadDef2 =
     0
 };
 
+//
+// CHEATS MENU
+//
+enum
+{
+    cheats_god,
+    cheats_noclip,
+    cheats_weapons,
+    cheats_keys,
+    cheats_armor,
+    cheats_items,
+    cheats_topo,
+    cheats_massacre,
+//    cheats_empty1,
+    cheats_rift,
+    cheats_empty2,
+    cheats_empty3,
+    cheats_riftnow,
+    cheats_empty4,
+    cheats_spin,
+    cheats_end
+} cheats_e;
+
+menuitem_t CheatsMenu[]=
+{
+    {2,"",M_God,'g'},
+    {2,"",M_Noclip,'n'},
+    {2,"",M_Weapons,'w'}, 
+    {2,"",M_Keys,'k'},
+    {2,"",M_Armor,'a'},
+    {1,"",M_Items,'i'},
+    {2,"",M_Topo,'t'},
+    {2,"",M_Massacre,'m'},
+//    {-1,"",0,'\0'},
+    {2,"",M_Rift,'r'},
+    {-1,"",0,'\0'},
+    {-1,"",0,'\0'},
+    {2,"",M_RiftNow,'e'},
+    {-1,"",0,'\0'},
+    {2,"",M_Spin,'s'}
+};
+
+menu_t  CheatsDef =
+{
+    cheats_end,
+    &FilesDef,
+    CheatsMenu,
+    M_DrawCheats,
+    75,28,       // [STRIFE] changed y coord 64 -> 35
+    0
+};
+
 enum
 {
     items1,
@@ -1571,7 +1625,7 @@ menuitem_t ItemsMenu[]=
 menu_t  ItemsDef =
 {
     items_end,
-    &FilesDef,
+    &CheatsDef,
     ItemsMenu,
     M_DrawItems,
     80,57,       // [STRIFE] changed y coord 64 -> 35
@@ -1604,7 +1658,7 @@ menuitem_t KeysMenu[]=
 menu_t  KeysDef =
 {
     keys_end,
-    &FilesDef,
+    &CheatsDef,
     KeysMenu,
     M_DrawKeys,
     80,57,       // [STRIFE] changed y coord 64 -> 35
@@ -1645,7 +1699,7 @@ menuitem_t WeaponsMenu[]=
 menu_t  WeaponsDef =
 {
     weapons_end,
-    &FilesDef,
+    &CheatsDef,
     WeaponsMenu,
     M_DrawWeapons,
     80,57,       // [STRIFE] changed y coord 64 -> 35
@@ -1676,7 +1730,7 @@ menuitem_t ArmorMenu[]=
 menu_t  ArmorDef =
 {
     armor_end,
-    &FilesDef,
+    &CheatsDef,
     ArmorMenu,
     M_DrawArmor,
     80,57,       // [STRIFE] changed y coord 64 -> 35
@@ -1713,73 +1767,6 @@ menu_t  ScreenDef =
     ScreenMenu,
     M_DrawScreen,
     60,55,       // [STRIFE] changed y coord 64 -> 35
-    0
-};
-
-enum
-{
-    keybindings_up,
-    keybindings_down,
-    keybindings_left,
-    keybindings_right,
-//    keybindings_triangle,
-//    keybindings_cross,
-//    keybindings_square,
-//    keybindings_circle,
-    keybindings_select,
-//    keybindings_start,
-    keybindings_lefttrigger,
-    keybindings_righttrigger,
-    keybindings_fire,
-    keybindings_jump,
-    keybindings_run,
-    keybindings_empty1,
-/*
-    keybindings_layout,
-    keybindings_empty2,
-*/
-    keybindings_clearall,
-    keybindings_reset,
-    keybindings_end
-} keybindings_e;
-
-// haleyjd 08/29/10:
-// [STRIFE] 
-// * Added voice volume
-// * Moved mouse sensitivity here (who knows why...)
-menuitem_t KeyBindingsMenu[]=
-{
-    {5,"",M_KeyBindingsSetKey,0},
-    {5,"",M_KeyBindingsSetKey,1},
-    {5,"",M_KeyBindingsSetKey,2},
-    {5,"",M_KeyBindingsSetKey,3},
-//    {5,"",M_KeyBindingsSetKey,4},
-//    {5,"",M_KeyBindingsSetKey,5},
-//    {5,"",M_KeyBindingsSetKey,6},
-//    {5,"",M_KeyBindingsSetKey,7},
-    {5,"",M_KeyBindingsSetKey,4},
-//    {5,"",M_KeyBindingsSetKey,9},
-    {5,"",M_KeyBindingsSetKey,5},
-    {5,"",M_KeyBindingsSetKey,6},
-    {5,"",M_KeyBindingsSetKey,7},
-    {5,"",M_KeyBindingsSetKey,8},
-    {5,"",M_KeyBindingsSetKey,9},
-    {-1,"",0,'\0'},
-/*
-    {2,"",M_KeyBindingsButtonLayout,'l'},
-    {-1,"",0,'\0'},
-*/
-    {5,"",M_KeyBindingsClearAll,'c'},
-    {5,"",M_KeyBindingsReset,'r'}
-};
-
-menu_t  KeyBindingsDef =
-{
-    keybindings_end,
-    &OptionsDef,
-    KeyBindingsMenu,
-    M_DrawKeyBindings,
-    45,42,       // [STRIFE] changed y coord 64 -> 35
     0
 };
 
@@ -1825,6 +1812,75 @@ menu_t  ControlsDef =
     ControlsMenu,
     M_DrawControls,
     50,50,       // [STRIFE] changed y coord 64 -> 35
+    0
+};
+
+enum
+{
+    keybindings_up,
+    keybindings_down,
+    keybindings_left,
+    keybindings_right,
+//    keybindings_triangle,
+//    keybindings_cross,
+//    keybindings_square,
+//    keybindings_circle,
+    keybindings_select,
+//    keybindings_start,
+    keybindings_lefttrigger,
+    keybindings_righttrigger,
+    keybindings_fire,
+    keybindings_jump,
+    keybindings_run,
+    keybindings_console,
+    keybindings_empty1,
+/*
+    keybindings_layout,
+    keybindings_empty2,
+*/
+    keybindings_clearall,
+    keybindings_reset,
+    keybindings_end
+} keybindings_e;
+
+// haleyjd 08/29/10:
+// [STRIFE] 
+// * Added voice volume
+// * Moved mouse sensitivity here (who knows why...)
+menuitem_t KeyBindingsMenu[]=
+{
+    {5,"",M_KeyBindingsSetKey,0},
+    {5,"",M_KeyBindingsSetKey,1},
+    {5,"",M_KeyBindingsSetKey,2},
+    {5,"",M_KeyBindingsSetKey,3},
+//    {5,"",M_KeyBindingsSetKey,4},
+//    {5,"",M_KeyBindingsSetKey,5},
+//    {5,"",M_KeyBindingsSetKey,6},
+//    {5,"",M_KeyBindingsSetKey,7},
+    {5,"",M_KeyBindingsSetKey,4},
+//    {5,"",M_KeyBindingsSetKey,9},
+    {5,"",M_KeyBindingsSetKey,5},
+    {5,"",M_KeyBindingsSetKey,6},
+    {5,"",M_KeyBindingsSetKey,7},
+    {5,"",M_KeyBindingsSetKey,8},
+    {5,"",M_KeyBindingsSetKey,9},
+    {5,"",M_KeyBindingsSetKey,10},
+    {-1,"",0,'\0'},
+/*
+    {2,"",M_KeyBindingsButtonLayout,'l'},
+    {-1,"",0,'\0'},
+*/
+    {5,"",M_KeyBindingsClearAll,'c'},
+    {5,"",M_KeyBindingsReset,'r'}
+};
+
+menu_t  KeyBindingsDef =
+{
+    keybindings_end,
+    &ControlsDef,
+    KeyBindingsMenu,
+    M_DrawKeyBindings,
+    45,32,       // [STRIFE] changed y coord 64 -> 35
     0
 };
 
@@ -1953,9 +2009,9 @@ enum
     music_vol,
     sfx_empty2,
 //    mus_track,
-#ifdef OGG_SUPPORT
+//#ifdef OGG_SUPPORT
     type,
-#endif
+//#endif
 //    track_loop,
     sound_end
 } sound_e;
@@ -1966,11 +2022,11 @@ menuitem_t SoundMenu[]=
     {-1,"",0,'\0'},
     {2,"M_MUSVOL",M_MusicVol,'m'},
     {-1,"",0,'\0'}
-#ifdef OGG_SUPPORT
+//#ifdef OGG_SUPPORT
 ,
 //    {2,"M_CTRACK",M_Spin,'t'}, 
     {2,"M_MUSTYP",M_MusicType,'t'}
-#endif
+//#endif
     /*,{2,"M_LTRACK",M_Loop,'l'}*/
 };
 
@@ -2011,7 +2067,7 @@ menuitem_t LoadMenu[]=
 menu_t  LoadDef =
 {
     load_end,
-    &MainDef,
+    &FilesDef,
     LoadMenu,
     M_DrawLoad,
     80,54,
@@ -2034,62 +2090,10 @@ menuitem_t SaveMenu[]=
 menu_t  SaveDef =
 {
     load_end,
-    &MainDef,
+    &FilesDef,
     SaveMenu,
     M_DrawSave,
     80,54,
-    0
-};
-
-//
-// CHEATS MENU
-//
-enum
-{
-    cheats_god,
-    cheats_noclip,
-    cheats_weapons,
-    cheats_keys,
-    cheats_armor,
-    cheats_items,
-    cheats_topo,
-    cheats_massacre,
-//    cheats_empty1,
-    cheats_rift,
-    cheats_empty2,
-    cheats_empty3,
-    cheats_riftnow,
-    cheats_empty4,
-    cheats_spin,
-    cheats_end
-} cheats_e;
-
-menuitem_t CheatsMenu[]=
-{
-    {2,"",M_God,'g'},
-    {2,"",M_Noclip,'n'},
-    {2,"",M_Weapons,'w'}, 
-    {2,"",M_Keys,'k'},
-    {2,"",M_Armor,'a'},
-    {1,"",M_Items,'i'},
-    {2,"",M_Topo,'t'},
-    {2,"",M_Massacre,'m'},
-//    {-1,"",0,'\0'},
-    {2,"",M_Rift,'r'},
-    {-1,"",0,'\0'},
-    {-1,"",0,'\0'},
-    {2,"",M_RiftNow,'e'},
-    {-1,"",0,'\0'},
-    {2,"",M_Spin,'s'}
-};
-
-menu_t  CheatsDef =
-{
-    cheats_end,
-    &OptionsDef,
-    CheatsMenu,
-    M_DrawCheats,
-    75,28,       // [STRIFE] changed y coord 64 -> 35
     0
 };
 
@@ -2119,7 +2123,7 @@ menuitem_t RecordMenu[]=
 menu_t  RecordDef =
 {
     record_end,
-    &OptionsDef,
+    &FilesDef,
     RecordMenu,
     M_DrawRecord,
     55,50,       // [STRIFE] changed y coord 64 -> 35
@@ -2526,6 +2530,15 @@ void M_DrawSound(void)
     else
 	V_DrawPatch (225, 135, W_CacheLumpName(DEH_String("M_MSGOFF"), PU_CACHE));
 */
+    if(mus_engine == 1)
+	V_DrawPatch (225, 122, W_CacheLumpName(DEH_String("M_MUSOPL"), PU_CACHE));
+    else
+	V_DrawPatch (225, 122, W_CacheLumpName(DEH_String("M_MUSOGG"), PU_CACHE));
+
+    if(mus_engine < 1)
+	mus_engine = 1;
+    else if(mus_engine > 2)
+	mus_engine = 2;
 }
 
 void M_Sound(int choice)
@@ -2615,8 +2628,28 @@ void M_MusicType(int choice)
     if(gamestate == GS_DEMOSCREEN || gamestate == GS_FINALE || gamestate == GS_INTERMISSION || demoplayback)
 	M_StartMessage(DEH_String("CANNOT CHANGE STATE IN THIS MODE"),NULL,true);
 }
+#else
+void M_MusicType(int choice)
+{
+    switch(choice)
+    {
+    case 0:
+        if(mus_engine > 1)
+	{
+            snd_musicdevice = SNDDEVICE_SB;
+	    mus_engine--;
+	}
+        break;
+    case 1:
+        if(mus_engine < 2)
+	{
+            snd_musicdevice = SNDDEVICE_GENMIDI;
+	    mus_engine++;
+	}
+        break;
+    }
+}
 #endif
-
 
 //
 // M_DrawMainMenu
@@ -3773,8 +3806,10 @@ M_WriteText
     while(1)
     {
 	c = *ch++;
+
 	if (!c)
 	    break;
+
 	if (c == '\n')
 	{
 	    cx = x;
@@ -3782,18 +3817,35 @@ M_WriteText
 	    continue;
 	}
 		
-	c = toupper(c) - HU_FONTSTART;
-	if (c < 0 || c>= HU_FONTSIZE)
+	if(c != 123 && c != 124 && c != 125)
+	    c = toupper(c) - HU_FONTSTART;
+
+        if (c < 0 || (c>= HU_FONTSIZE && c != 123 && c != 124 && c != 125))
 	{
 	    cx += 4;
 	    continue;
 	}
 		
-	w = SHORT (hu_font[c]->width);
+	if(c == 123 || c == 125)
+	    w = 7;
+	else if(c == 124)
+	    w = 10;
+	else
+	    w = SHORT (hu_font[c]->width);
+
 //	if (cx+w > SCREENWIDTH)					// CHANGED FOR HIRES
 	if (cx+w > ORIGWIDTH)					// CHANGED FOR HIRES
 	    break;
-	V_DrawPatchDirect(cx, cy,hu_font[c]);
+
+	if(c == 123)
+	    V_DrawPatch(cx, cy, W_CacheLumpName(DEH_String("STCFN123"), PU_CACHE));
+	else if(c == 124)
+	    V_DrawPatch(cx, cy, W_CacheLumpName(DEH_String("STCFN124"), PU_CACHE));
+	else if(c == 125)
+	    V_DrawPatch(cx, cy, W_CacheLumpName(DEH_String("STCFN125"), PU_CACHE));
+	else
+	    V_DrawPatch(cx, cy, hu_font[c]);
+
 	cx+=w;
     }
 }
@@ -3923,7 +3975,7 @@ boolean M_Responder (event_t* ev)
     if (askforkey && data->btns_d)		// KEY BINDINGS
     {
 	M_KeyBindingsClearControls(ev->data1);
-	*doom_defaults_list[keyaskedfor + 16 + FirstKey].location = ev->data1;
+	*doom_defaults_list[keyaskedfor + 17 + FirstKey].location = ev->data1;
 	askforkey = false;
 	return true;
     }
@@ -4613,6 +4665,9 @@ void M_Drawer (void)
     x = currentMenu->x;
     y = currentMenu->y;
     max = currentMenu->numitems;
+
+    if(currentMenu == &SoundDef && itemOn == 4)
+	M_WriteText(48, 150, "You must restart to take effect.");
 
     if (currentMenu->menuitems[itemOn].status == 5)		// FOR PSP (if too many menu items) ;-)
 	max += FirstKey;
@@ -6099,7 +6154,14 @@ void M_Spin(int choice)
 #ifdef OGG_SUPPORT
 	if(opl)
 #endif
-	    S_ChangeMusic(tracknum, /*loop*/true);
+	{
+	    if(mus_engine == 2)
+		S_ChangeMusic(tracknum, /*loop*/false);
+	    else if(mus_engine == 1)
+		S_ChangeMusic(tracknum, /*loop*/true);
+
+	    mus_cheat_used = true;
+	}
 #ifdef OGG_SUPPORT
 	else
 	{
@@ -6168,7 +6230,6 @@ void M_KeyBindingsClearControls (int ch)	// XXX (FOR PSP): NOW THIS IS RATHER IM
 
 void M_KeyBindingsClearAll (int choice)
 {
-    *doom_defaults_list[16].location = 0;
     *doom_defaults_list[17].location = 0;
     *doom_defaults_list[18].location = 0;
     *doom_defaults_list[19].location = 0;
@@ -6178,20 +6239,23 @@ void M_KeyBindingsClearAll (int choice)
     *doom_defaults_list[23].location = 0;
     *doom_defaults_list[24].location = 0;
     *doom_defaults_list[25].location = 0;
+    *doom_defaults_list[26].location = 0;
+    *doom_defaults_list[27].location = 0;
 }
 
 void M_KeyBindingsReset (int choice)
 {
-    *doom_defaults_list[16].location = CLASSIC_CONTROLLER_R;
-    *doom_defaults_list[17].location = CLASSIC_CONTROLLER_L;
-    *doom_defaults_list[18].location = CLASSIC_CONTROLLER_MINUS;
-    *doom_defaults_list[19].location = CLASSIC_CONTROLLER_LEFT;
-    *doom_defaults_list[20].location = CLASSIC_CONTROLLER_DOWN;
-    *doom_defaults_list[21].location = CLASSIC_CONTROLLER_RIGHT;
-    *doom_defaults_list[22].location = CLASSIC_CONTROLLER_ZL;
-    *doom_defaults_list[23].location = CLASSIC_CONTROLLER_ZR;
-    *doom_defaults_list[24].location = CLASSIC_CONTROLLER_HOME;
-    *doom_defaults_list[25].location = CONTROLLER_1;
+    *doom_defaults_list[17].location = CLASSIC_CONTROLLER_R;
+    *doom_defaults_list[18].location = CLASSIC_CONTROLLER_L;
+    *doom_defaults_list[19].location = CLASSIC_CONTROLLER_MINUS;
+    *doom_defaults_list[20].location = CLASSIC_CONTROLLER_LEFT;
+    *doom_defaults_list[21].location = CLASSIC_CONTROLLER_DOWN;
+    *doom_defaults_list[22].location = CLASSIC_CONTROLLER_RIGHT;
+    *doom_defaults_list[23].location = CLASSIC_CONTROLLER_ZL;
+    *doom_defaults_list[24].location = CLASSIC_CONTROLLER_ZR;
+    *doom_defaults_list[25].location = CLASSIC_CONTROLLER_HOME;
+    *doom_defaults_list[26].location = CONTROLLER_1;
+    *doom_defaults_list[27].location = CONTROLLER_2;
 }
 
 void M_DrawKeyBindings(void)
@@ -6199,18 +6263,18 @@ void M_DrawKeyBindings(void)
     int i;
 
     if(fsize != 19321722)
-	V_DrawPatch (80, 15, W_CacheLumpName(DEH_String("M_T_BNDS"), PU_CACHE));
+	V_DrawPatch (80, 5, W_CacheLumpName(DEH_String("M_T_BNDS"), PU_CACHE));
     else
-	V_DrawPatch (80, 15, W_CacheLumpName(DEH_String("M_KBNDGS"), PU_CACHE));
+	V_DrawPatch (80, 5, W_CacheLumpName(DEH_String("M_KBNDGS"), PU_CACHE));
 
-    M_WriteText(40, 40, DEH_String("FIRE"));
-    M_WriteText(40, 50, DEH_String("USE / OPEN"));
-    M_WriteText(40, 60, DEH_String("MAIN MENU"));
+    M_WriteText(40, 30, DEH_String("FIRE"));
+    M_WriteText(40, 40, DEH_String("USE / OPEN"));
+    M_WriteText(40, 50, DEH_String("MAIN MENU"));
 
 //    if(button_layout == 0)
     {
-    	M_WriteText(40, 70, DEH_String("WEAPON LEFT"));
-    	M_WriteText(40, 80, DEH_String("SHOW AUTOMAP"));
+    	M_WriteText(40, 60, DEH_String("WEAPON LEFT"));
+    	M_WriteText(40, 70, DEH_String("SHOW AUTOMAP"));
     }
 //    else
 //    {
@@ -6223,12 +6287,13 @@ void M_DrawKeyBindings(void)
 //    M_WriteText(40, 100, DEH_String("OBJ.'S / GUNS / KEYS"));
 //    M_WriteText(40, 110, DEH_String("INVENTORY DROP"));
 
-    M_WriteText(40, 90, DEH_String("WEAPON RIGHT"));
+    M_WriteText(40, 80, DEH_String("WEAPON RIGHT"));
 //    M_WriteText(40, 130, DEH_String("INVENTORY USE"));
-    M_WriteText(40, 100, DEH_String("AUTOMAP ZOOM IN"));
-    M_WriteText(40, 110, DEH_String("AUTOMAP ZOOM OUT"));
-    M_WriteText(40, 120, DEH_String("JUMP"));
-    M_WriteText(40, 130, DEH_String("RUN"));
+    M_WriteText(40, 90, DEH_String("AUTOMAP ZOOM IN"));
+    M_WriteText(40, 100, DEH_String("AUTOMAP ZOOM OUT"));
+    M_WriteText(40, 110, DEH_String("JUMP"));
+    M_WriteText(40, 120, DEH_String("RUN"));
+    M_WriteText(40, 130, DEH_String("CONSOLE"));
 
 //    M_WriteText(40, 120, DEH_String("BUTTON LAYOUT:"));
 
@@ -6240,16 +6305,16 @@ void M_DrawKeyBindings(void)
     M_WriteText(40, 150, DEH_String("CLEAR ALL CONTROLS"));
     M_WriteText(40, 160, DEH_String("RESET TO DEFAULTS"));
 
-    for (i = 0; i < 10; i++)
+    for (i = 0; i < 11; i++)
     {
 	if (askforkey && keyaskedfor == i)
 	{
-	    M_WriteText(195, (i*10+40), "???");
+	    M_WriteText(195, (i*10+30), "???");
 	}
 	else
 	{
-	    M_WriteText(195, (i*10+40),
-		Key2String(*(doom_defaults_list[i+FirstKey+16].location)));
+	    M_WriteText(195, (i*10+30),
+		Key2String(*(doom_defaults_list[i+FirstKey+17].location)));
 	}
     }
 }

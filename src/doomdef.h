@@ -61,6 +61,7 @@ typedef enum
     GS_INTERMISSION,
     GS_FINALE,
     GS_DEMOSCREEN,
+    GS_CONSOLE		// fullscreen console
 } gamestate_t;
 
 typedef enum

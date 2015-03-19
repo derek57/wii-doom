@@ -48,6 +48,8 @@
 
 #include "doomstat.h"
 
+#include "c_io.h"
+#include "hu_stuff.h"
 
 void	P_SpawnMapThing (mapthing_t*	mthing);
 
@@ -116,7 +118,7 @@ mapthing_t	deathmatchstarts[MAX_DEATHMATCH_STARTS];
 mapthing_t*	deathmatch_p;
 mapthing_t	playerstarts[MAXPLAYERS];
 
-
+extern boolean mus_cheat_used;
 
 
 
@@ -762,8 +764,11 @@ P_SetupLevel
     char	lumpname[9];
     int		lumpnum;
 	
+    mus_cheat_used = false;
+
     totalkills = totalitems = totalsecret = wminfo.maxfrags = 0;
     wminfo.partime = 180;
+
     for (i=0 ; i<MAXPLAYERS ; i++)
     {
 	players[i].killcount = players[i].secretcount 
@@ -877,6 +882,9 @@ P_SetupLevel
 
     //printf ("free memory: 0x%x\n", Z_FreeMemory());
 
+    C_Printf(" HU_NewLevel executed\n");
+
+    HU_NewLevel();
 }
 
 

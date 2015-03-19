@@ -59,7 +59,15 @@ void M_Init (void);
 // does nothing if menu is already up.
 void M_StartControlPanel (void);
 
+//
+//      Write a string using the hu_font
+//
+void M_WriteText (int x, int y, char *string);
 
+//
+// Find string width from hu_font chars
+//
+int M_StringWidth(char* string);
 
 extern int detailLevel;
 extern int screenblocks;

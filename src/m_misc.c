@@ -559,3 +559,14 @@ char *M_DirName(char *path)
     return M_StringDuplicate(".");
 }
 
+//
+// haleyjd 20141024: [SVE] Error-checked strdup
+//
+char *M_Strdup(const char *str)
+{
+    char *ret = strdup(str);
+    if(!ret)
+        I_Error("M_Strdup: failed on allocation of %lu bytes", strlen(str)+1);
+    return ret;
+}
+

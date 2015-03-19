@@ -46,6 +46,8 @@
 
 #include "d_loop.h"
 
+#include "c_io.h"
+
 ticcmd_t *netcmds;
 
 // Called when a player leaves the game
@@ -99,6 +101,7 @@ static void RunTic(ticcmd_t *cmds, boolean *ingame)
     if (advancedemo)
         D_DoAdvanceDemo ();
 
+    C_Ticker ();
     G_Ticker ();
 }
 

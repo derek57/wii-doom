@@ -291,6 +291,7 @@ extern int forwardmove;
 extern int sidemove;
 extern int turnspeed;
 extern int crosshair;
+extern int mus_engine;
 
 extern int joy_up;
 extern int joy_down;
@@ -347,6 +348,7 @@ void M_BindBaseControls(void)
     M_BindVariable("vanilla_weapon_change",  &use_vanilla_weapon_change);
     M_BindVariable("xhair",                  &crosshair);
     M_BindVariable("jump",                   &jumping);
+    M_BindVariable("music_engine",           &mus_engine);
     M_BindVariable("key_fire",               &joy_r);
     M_BindVariable("key_use",                &joy_l);
     M_BindVariable("key_menu",               &joy_minus);
@@ -357,6 +359,7 @@ void M_BindBaseControls(void)
     M_BindVariable("key_automap_zoom_out",   &joy_zr);
     M_BindVariable("key_jump",               &joy_home);
     M_BindVariable("key_run",                &joy_1);
+    M_BindVariable("key_console",            &joy_2);
 /*
     M_BindVariable("key_righttrigger",       &joy_r);
     M_BindVariable("key_zl",		     &joy_zl);

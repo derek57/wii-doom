@@ -63,5 +63,11 @@ void HU_Erase(void);
 
 extern char *chat_macros[10];
 
+// hu_newlevel called when we enter a new level
+// determine the level name and display it in
+// the console
+
+void HU_NewLevel();
+
 #endif
 

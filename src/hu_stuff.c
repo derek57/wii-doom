@@ -50,6 +50,8 @@
 
 #include "v_video.h"
 
+#include "c_io.h"
+
 //
 // Locally used constants, shortcuts.
 //
@@ -744,3 +746,18 @@ boolean HU_Responder(event_t *ev)
     return eatkey;
 
 }
+
+// hu_newlevel called when we enter a new level
+// determine the level name and display it in
+// the console
+
+void HU_NewLevel()
+{
+    // print the new level name into the console
+    C_Printf("\n");
+    C_Seperator();
+    C_Printf("%s\n\n", HU_TITLE);
+    C_InstaPopup();       // put console away
+//    C_Update();
+}
+

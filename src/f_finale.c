@@ -762,7 +762,10 @@ static void F_ArtScreenDrawer(void)
                 }
                 else
                 {
-                    lumpname = "HELP2";
+		    if(fsize != 12361532)
+			lumpname = "HELP2";
+		    else
+			lumpname = "HELP1";
                 }
                 break;
             case 2:

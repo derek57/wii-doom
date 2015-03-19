@@ -58,10 +58,10 @@ int snd_sfxdevice = SNDDEVICE_SB;
 
 // Sound modules
 
-//extern void I_InitTimidityConfig(void);
+extern void I_InitTimidityConfig(void);
 extern sound_module_t sound_sdl_module;
 //extern sound_module_t sound_pcsound_module;
-//extern music_module_t music_sdl_module;
+extern music_module_t music_sdl_module;
 extern music_module_t music_opl_module;
 
 // For OPL module:
@@ -97,7 +97,7 @@ static sound_module_t *sound_modules[] =
 static music_module_t *music_modules[] =
 {
 #ifdef FEATURE_SOUND
-//    &music_sdl_module,
+    &music_sdl_module,
     &music_opl_module,
 #endif
     NULL,
@@ -220,14 +220,12 @@ void I_InitSound(boolean use_sfx_prefix)
         // This is kind of a hack. If native MIDI is enabled, set up
         // the TIMIDITY_CFG environment variable here before SDL_mixer
         // is opened.
-/*
-        if (!nomusic
-         && (snd_musicdevice == SNDDEVICE_GENMIDI
-          || snd_musicdevice == SNDDEVICE_GUS))
+
+        if (/*!nomusic && (snd_musicdevice == SNDDEVICE_GENMIDI ||*/ snd_musicdevice == SNDDEVICE_GUS)//)
         {
             I_InitTimidityConfig();
         }
-*/
+
 //        if (!nosfx)
         {
             InitSfxModule(use_sfx_prefix);

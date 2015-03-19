@@ -91,6 +91,8 @@
 
 #include "d_main.h"
 
+#include "c_io.h"
+
 #include "w_wad.h"
 #include "sys_wpad.h"
 
@@ -166,6 +168,7 @@ boolean		version13 = false;
 extern int mp_skill;
 extern int warpepi;
 extern int warplev;
+extern int mus_engine;
 /*
 extern boolean skillflag;
 extern boolean nomonstersflag;
@@ -206,7 +209,7 @@ void D_ProcessEvents (void)
 	
     while ((ev = D_PopEvent()) != NULL)
     {
-	if (M_Responder (ev))
+	if (M_Responder (ev) || C_Responder (ev))
 	    continue;               // menu ate the event
 	G_Responder (ev);
     }
@@ -226,6 +229,8 @@ extern  boolean setsizeneeded;
 extern  int             showMessages;
 void R_ExecuteSetViewSize (void);
 
+boolean			redrawsbar;
+
 void D_Display (void)
 {
     static  boolean		viewactivestate = false;
@@ -240,8 +245,9 @@ void D_Display (void)
 //    int				y;
     boolean			done;
     boolean			wipe;
-    boolean			redrawsbar;
 /*
+    boolean			redrawsbar;
+
     if (nodrawers)
 	return;                    // for comparative timing / profiling
 */		
@@ -319,6 +325,9 @@ void D_Display (void)
       case GS_DEMOSCREEN:
 	D_PageDrawer ();
 	break;
+
+      case GS_CONSOLE:
+        break;
     }
     
     // draw buffered stuff to screen
@@ -382,6 +391,7 @@ void D_Display (void)
                           W_CacheLumpName (DEH_String("M_PAUSE"), PU_CACHE));			// CHANGED FOR HIRES
     }
 */
+    C_Drawer();
 
     // menus go directly to the screen
     M_Drawer ();          // menu is drawn even on top of everything
@@ -495,6 +505,9 @@ boolean D_GrabMouseCallback(void)
     return (gamestate == GS_LEVEL) && !demoplayback && !advancedemo;
 }
 */
+
+/*static*/ void I_SDL_PollMusic(void);
+
 //
 //  D_DoomLoop
 //
@@ -538,12 +551,18 @@ void D_DoomLoop (void)
 */
     while (1)
     {
+	// check if the OGG music stopped playing
+	if(gamestate == GS_LEVEL && usergame)
+	    I_SDL_PollMusic();
+
 	// frame syncronous IO operations
 	I_StartFrame ();
 
-        TryRunTics (); // will run at least one tic
+	// will run at least one tic
+        TryRunTics ();
 
-	S_UpdateSounds (players[consoleplayer].mo);// move positional sounds
+	// move positional sounds
+	S_UpdateSounds (players[consoleplayer].mo);
 
 	// Update display, next frame, with current state.
         if (screenvisible)
@@ -712,7 +731,12 @@ void D_DoAdvanceDemo (void)
 	    if ( gamemode == retail )
 	      pagename = DEH_String("CREDIT");
 	    else
-	      pagename = DEH_String("HELP2");
+	    {
+		if(fsize != 12361532)
+		    pagename = DEH_String("HELP2");
+		else
+		    pagename = DEH_String("HELP1");
+	    }
 	}
 	break;
       case 5:
@@ -744,6 +768,8 @@ void D_DoAdvanceDemo (void)
     {
         pagename = "INTERPIC";
     }
+
+    C_InstaPopup();       // make console go away
 }
 
 
@@ -756,6 +782,7 @@ void D_StartTitle (void)
     gameaction = ga_nothing;
     demosequence = -1;
     D_AdvanceDemo ();
+    C_InstaPopup();       // make console go away
 }
 
 // Strings for dehacked replacements of the startup banner
@@ -1346,8 +1373,8 @@ void D_DoomMain (void)
 //    char            demolumpname[9];
 
     if(devparm)
-//	fsize = 10399316;
-	fsize = 14943400;
+	fsize = 10399316;
+//	fsize = 14943400;
 
 //    I_AtExit(D_Endoom, false);
 
@@ -1617,6 +1644,10 @@ void D_DoomMain (void)
     DEH_printf("Z_Init: Init zone memory allocation daemon. \n");
 */
     Z_Init ();
+
+    C_Init();
+
+    C_Printf(" ");
 /*
 #ifdef FEATURE_MULTIPLAYER
     //!
@@ -1834,6 +1865,16 @@ void D_DoomMain (void)
     D_BindVariables();
     M_LoadDefaults();
 
+    if(mus_engine > 1)
+	mus_engine = 2;
+    else if(mus_engine < 2)
+	mus_engine = 1;
+
+    if(mus_engine == 1)
+	snd_musicdevice = SNDDEVICE_SB;
+    else
+	snd_musicdevice = SNDDEVICE_GENMIDI;
+
     // Save configuration at exit.
     I_AtExit(M_SaveDefaults, false);
 
@@ -1944,11 +1985,11 @@ void D_DoomMain (void)
     if(devparm)
     {
 	if(usb)
-//	    D_AddFile("usb:/apps/wiidoom/IWAD/DOOM/Reg/v12/DOOM.WAD");
-	    D_AddFile("usb:/apps/wiidoom/IWAD/DOOM2/v1666/DOOM2.WAD");
+	    D_AddFile("usb:/apps/wiidoom/IWAD/DOOM/Reg/v12/DOOM.WAD");
+//	    D_AddFile("usb:/apps/wiidoom/IWAD/DOOM2/v1666/DOOM2.WAD");
 	else if(sd)
-//	    D_AddFile("sd:/apps/wiidoom/IWAD/DOOM/Reg/v12/DOOM.WAD");
-	    D_AddFile("sd:/apps/wiidoom/IWAD/DOOM2/v1666/DOOM2.WAD");
+	    D_AddFile("sd:/apps/wiidoom/IWAD/DOOM/Reg/v12/DOOM.WAD");
+//	    D_AddFile("sd:/apps/wiidoom/IWAD/DOOM2/v1666/DOOM2.WAD");
     }
     else
 	D_AddFile(target);
@@ -1984,61 +2025,9 @@ void D_DoomMain (void)
     else if(sd)
 	D_AddFile("sd:/apps/wiidoom/pspdoom.wad");
 
-//    if(show_deh_loading_message == 1 && devparm)
+    if(show_deh_loading_message == 1 /*&& devparm*/)
 	printf("         adding %s\n", dehacked_file);
 
-    if(gamemode == shareware && gameversion != exe_chex)
-	/*DEH_printf*/printf("         shareware version.\n");
-    else if((gamemode == shareware && gameversion == exe_chex) || gamemode == registered)
-	/*DEH_printf*/printf("         registered version.\n");
-    else
-	/*DEH_printf*/printf("         commercial version.\n");
-
-    if(gamemode == retail || gamemode == registered)
-    {
-	printf(" ===============================================================================");
-	printf("                 This version is NOT SHAREWARE, do not distribute!              ");
-	printf("             Please report software piracy to the SPA: 1-800-388-PIR8           ");
-	printf(" ===============================================================================");
-    }
-    else if(gamemode == commercial)
-    {
-	printf(" ===============================================================================");
-    	printf("                                Do not distribute!                              ");
-    	printf("             Please report software piracy to the SPA: 1-800-388-PIR8           ");
-    	printf(" ===============================================================================");
-    }
-
-    if(modifiedgame)
-    {
-	while(1)
-	{
-//	    sceCtrlReadBufferPositive(&pad, 1);
-
-    	    if(wad_message_has_been_shown == 1)
-    	        goto skip_showing_message;
-	
-	    printf(" ===============================================================================");
-	    printf("    ATTENTION:  This version of DOOM has been modified.  If you would like to   ");
-	    printf("   get a copy of the original game, call 1-800-IDGAMES or see the readme file.  ");
-	    printf("            You will not receive technical support for modified games.          ");
-	    printf("                             press enter to continue                            ");
-	    printf(" ===============================================================================");
-
-	    skip_showing_message:
-	    {
-	    }
-
-	    u32 buttons = WaitButtons();
-
-	    if (buttons & WPAD_CLASSIC_BUTTON_A)
-		break;
-
-	    WaitButtons();
-
-	    wad_message_has_been_shown = 1;
-	}
-    }
 /*
     // Debug:
 //    W_PrintDirectory();
@@ -2201,6 +2190,59 @@ void D_DoomMain (void)
 		D_AddFile("usb:/apps/wiidoom/pspfreedoom.wad");
 	    else if(sd)
 		D_AddFile("sd:/apps/wiidoom/pspfreedoom.wad");
+	}
+    }
+
+    if(gamemode == shareware && gameversion != exe_chex)
+	/*DEH_printf*/printf("         shareware version.\n");
+    else if((gamemode == shareware && gameversion == exe_chex) || gamemode == registered)
+	/*DEH_printf*/printf("         registered version.\n");
+    else
+	/*DEH_printf*/printf("         commercial version.\n");
+
+    if(gamemode == retail || gamemode == registered)
+    {
+	printf(" ===============================================================================");
+	printf("                 This version is NOT SHAREWARE, do not distribute!              ");
+	printf("             Please report software piracy to the SPA: 1-800-388-PIR8           ");
+	printf(" ===============================================================================");
+    }
+    else if(gamemode == commercial)
+    {
+	printf(" ===============================================================================");
+    	printf("                                Do not distribute!                              ");
+    	printf("             Please report software piracy to the SPA: 1-800-388-PIR8           ");
+    	printf(" ===============================================================================");
+    }
+
+    if(modifiedgame)
+    {
+	while(1)
+	{
+//	    sceCtrlReadBufferPositive(&pad, 1);
+
+    	    if(wad_message_has_been_shown == 1)
+    	        goto skip_showing_message;
+	
+	    printf(" ===============================================================================");
+	    printf("    ATTENTION:  This version of DOOM has been modified.  If you would like to   ");
+	    printf("   get a copy of the original game, call 1-800-IDGAMES or see the readme file.  ");
+	    printf("            You will not receive technical support for modified games.          ");
+	    printf("                             press enter to continue                            ");
+	    printf(" ===============================================================================");
+
+	    skip_showing_message:
+	    {
+	    }
+
+	    u32 buttons = WaitButtons();
+
+	    if (buttons & WPAD_CLASSIC_BUTTON_A)
+		break;
+
+	    WaitButtons();
+
+	    wad_message_has_been_shown = 1;
 	}
     }
 

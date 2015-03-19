@@ -683,7 +683,7 @@ void W_CheckSize(int wad)
 	    fseek(fprw, 0, 2);		// file pointer at the end of file
 	    fsizerw = ftell(fprw);	// take a position of file pointer un size variable
 
-	    if(fsizerw != 252874)
+	    if(fsizerw != 254238)
 		print_resource_pwad_error = true;
 
 	    fclose(fprw);
@@ -722,7 +722,7 @@ void W_CheckSize(int wad)
 	    fseek(fprw, 0, 2);		// file pointer at the end of file
 	    fsizerw = ftell(fprw);	// take a position of file pointer un size variable
 
-	    if(fsizerw != 83869)
+	    if(fsizerw != 86843)
 		print_resource_pwad_error = true;
 
 	    fclose(fprw);
@@ -744,7 +744,7 @@ void W_CheckSize(int wad)
 	    fseek(fprw, 0, 2);		// file pointer at the end of file
 	    fsizerw = ftell(fprw);	// take a position of file pointer un size variable
 
-	    if(fsizerw != 130370)
+	    if(fsizerw != 134612)
 		print_resource_pwad_error = true;
 
 	    fclose(fprw);
@@ -766,7 +766,7 @@ void W_CheckSize(int wad)
 	    fseek(fprw, 0, 2);		// file pointer at the end of file
 	    fsizerw = ftell(fprw);	// take a position of file pointer un size variable
 
-	    if(fsizerw != 127845)
+	    if(fsizerw != 131869)
 		print_resource_pwad_error = true;
 
 	    fclose(fprw);

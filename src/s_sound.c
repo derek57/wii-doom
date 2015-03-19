@@ -50,6 +50,8 @@
 
 #include "i_oplmusic.h"
 
+#include "c_io.h"
+
 // when to clip out sounds
 // Does not fit the large outdoor areas.
 
@@ -75,7 +77,7 @@
 #define NORM_PRIORITY 64
 #define NORM_SEP 128
 
-int musicPlaying = 0;            //Is the music playing, or not?
+//int musicPlaying = 0;            //Is the music playing, or not?
 
 short songlist[148];
 short currentsong = 0;
@@ -83,6 +85,7 @@ short currentsong = 0;
 extern boolean opl;
 extern boolean forced;
 extern boolean fake;
+extern boolean change_anyway;
 
 extern int faketracknum;
 extern int tracknum;
@@ -123,7 +126,7 @@ static boolean mus_paused;
 
 // Music currently being played
 
-static musicinfo_t *mus_playing = NULL;
+/*static*/ musicinfo_t *mus_playing = NULL;
 
 // Number of channels to use
 
@@ -676,10 +679,12 @@ void S_ChangeMusic(int musicnum, int looping)
         music = &S_music[musicnum];
     }
 
-    if (mus_playing == music)
+    if (mus_playing == music && !change_anyway)
     {
         return;
     }
+
+    change_anyway = false;
 
     // shutdown old music
     S_StopMusic();
@@ -690,6 +695,11 @@ void S_ChangeMusic(int musicnum, int looping)
         sprintf(namebuf, "d_%s", DEH_String(music->name));
         music->lumpnum = W_GetNumForName(namebuf);
     }
+
+    if(looping)
+	C_Printf(" S_ChangeMusic: %s (loop = yes)\n", music->name);
+    else
+	C_Printf(" S_ChangeMusic: %s (loop = no)\n", music->name);
 
     music->data = W_CacheLumpNum(music->lumpnum, PU_STATIC);
 

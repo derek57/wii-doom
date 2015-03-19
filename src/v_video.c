@@ -44,9 +44,13 @@
 #include "w_wad.h"
 #include "z_zone.h"
 
+#include "v_misc.h"
+
 // TODO: There are separate RANGECHECK defines for different games, but this
 // is common code. Fix this.
 #define RANGECHECK
+
+static patch_t* v_font[V_FONTSIZE];
 
 // Blending table used for fuzzpatch, etc.
 // Only used in Heretic/Hexen
@@ -934,5 +938,45 @@ void V_DrawMouseSpeedBox(int speed)
 
     V_DrawVertLine(box_x + redline_x, box_y + 1,
                  MOUSE_SPEED_BOX_HEIGHT - 2, red);
+}
+
+// isprint() function (win32 doesnt like it, seems)
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wchar-subscripts"
+
+boolean V_IsPrint(char c)
+{
+    // new colour
+    if (c >= 128)
+    {
+/*
+	// translucent toggle
+	if(c == *(unsigned char *)FC_TRANS)
+	    return true;
+	else
+*/
+	{
+	    int colnum = c - 128;
+
+	    if(colnum < 0 || colnum >= 10)
+		return false;
+	    else
+		return true;
+	}
+    }
+
+    // hack to make spacebar work
+    if(c == ' ')
+	return true;
+  
+    c = toupper(c) - V_FONTSTART;
+
+    if (c >= V_FONTSIZE)
+    {
+        return false;
+    }
+  
+    return v_font[c] != NULL;
 }
 
