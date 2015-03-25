@@ -2332,6 +2332,26 @@ char *M_GetSaveGameDir(char *iwadname)
 	    savegameroot = SavePathRoot8USB;
 
 	    M_MakeDirectory(savegameroot);
+
+	    savegameroot = SavePathRootIWADUSB;
+
+	    M_MakeDirectory(savegameroot);
+
+	    savegameroot = SavePathRootPWADUSB;
+
+	    M_MakeDirectory(savegameroot);
+
+	    savegameroot = SavePathRootD1MusicUSB;
+
+	    M_MakeDirectory(savegameroot);
+
+	    savegameroot = SavePathRootD2MusicUSB;
+
+	    M_MakeDirectory(savegameroot);
+
+	    savegameroot = SavePathRootTNTMusicUSB;
+
+	    M_MakeDirectory(savegameroot);
 	}
 	else if(sd)
 	{
@@ -2364,6 +2384,26 @@ char *M_GetSaveGameDir(char *iwadname)
 	    M_MakeDirectory(savegameroot);
 
 	    savegameroot = SavePathRoot8SD;
+
+	    M_MakeDirectory(savegameroot);
+
+	    savegameroot = SavePathRootIWADSD;
+
+	    M_MakeDirectory(savegameroot);
+
+	    savegameroot = SavePathRootPWADSD;
+
+	    M_MakeDirectory(savegameroot);
+
+	    savegameroot = SavePathRootD1MusicSD;
+
+	    M_MakeDirectory(savegameroot);
+
+	    savegameroot = SavePathRootD2MusicSD;
+
+	    M_MakeDirectory(savegameroot);
+
+	    savegameroot = SavePathRootTNTMusicSD;
 
 	    M_MakeDirectory(savegameroot);
 	}
