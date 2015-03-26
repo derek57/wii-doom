@@ -214,11 +214,6 @@ typedef enum
 #define SavePathPLUT191USB "usb:/apps/wiidoom/savegames/plutonia.wad/FD2_1_19"
 #define SavePathPLUT192USB "usb:/apps/wiidoom/savegames/plutonia.wad/FD2_2_19"
 #define SavePathChexUSB "usb:/apps/wiidoom/savegames/chex.wad"
-#define SavePathRootIWADUSB "usb:/apps/wiidoom/IWAD"
-#define SavePathRootPWADUSB "usb:/apps/wiidoom/PWAD"
-#define SavePathRootD1MusicUSB "usb:/apps/wiidoom/doom1-music"
-#define SavePathRootD2MusicUSB "usb:/apps/wiidoom/doom2-music"
-#define SavePathRootTNTMusicUSB "usb:/apps/wiidoom/tnt-music"
 /*
 #define SavePathHacxShare10USB "usb:/apps/wiidoom/savegames/hacx.wad/HX_SW_10"
 #define SavePathHacxReg10USB "usb:/apps/wiidoom/savegames/hacx.wad/HX_R_10"
@@ -234,6 +229,13 @@ typedef enum
 #define SavePathFreedoom08P1USB "usb:/apps/wiidoom/savegames/freedoom.wad/FRDM08P1"
 */
 #define SavePathFreedoom08P2USB "usb:/apps/wiidoom/savegames/freedoom.wad/FRDM08P2"
+#define SavePathRootIWADUSB "usb:/apps/wiidoom/IWAD"
+#define SavePathRootPWADUSB "usb:/apps/wiidoom/PWAD"
+#define SavePathRootD1MusicUSB "usb:/apps/wiidoom/doom1-music"
+#define SavePathRootD2MusicUSB "usb:/apps/wiidoom/doom2-music"
+#define SavePathRootTNTMusicUSB "usb:/apps/wiidoom/tnt-music"
+#define SavePathRootChexMusicUSB "usb:/apps/wiidoom/chex-music"
+#define SavePathRootHacxMusicUSB "usb:/apps/wiidoom/hacx-music"
 #define SavePathRoot1SD "sd:/apps/wiidoom/savegames"
 #define SavePathRoot2SD "sd:/apps/wiidoom/savegames/doom.wad"
 #define SavePathRoot3SD "sd:/apps/wiidoom/savegames/doom2.wad"
@@ -292,6 +294,8 @@ typedef enum
 #define SavePathRootD1MusicSD "sd:/apps/wiidoom/doom1-music"
 #define SavePathRootD2MusicSD "sd:/apps/wiidoom/doom2-music"
 #define SavePathRootTNTMusicSD "sd:/apps/wiidoom/tnt-music"
+#define SavePathRootChexMusicSD "sd:/apps/wiidoom/chex-music"
+#define SavePathRootHacxMusicSD "sd:/apps/wiidoom/hacx-music"
 
 #ifndef VER_ID
 #define VER_ID "DVL"

@@ -2352,6 +2352,14 @@ char *M_GetSaveGameDir(char *iwadname)
 	    savegameroot = SavePathRootTNTMusicUSB;
 
 	    M_MakeDirectory(savegameroot);
+
+	    savegameroot = SavePathRootChexMusicUSB;
+
+	    M_MakeDirectory(savegameroot);
+
+	    savegameroot = SavePathRootHacxMusicUSB;
+
+	    M_MakeDirectory(savegameroot);
 	}
 	else if(sd)
 	{
@@ -2404,6 +2412,14 @@ char *M_GetSaveGameDir(char *iwadname)
 	    M_MakeDirectory(savegameroot);
 
 	    savegameroot = SavePathRootTNTMusicSD;
+
+	    M_MakeDirectory(savegameroot);
+
+	    savegameroot = SavePathRootChexMusicSD;
+
+	    M_MakeDirectory(savegameroot);
+
+	    savegameroot = SavePathRootHacxMusicSD;
 
 	    M_MakeDirectory(savegameroot);
 	}

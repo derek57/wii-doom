@@ -793,15 +793,25 @@ static void DumpSubstituteConfig(char *filename)
             fprintf(fs, "%02x", digest[h]);
         }
 
-        fprintf(fs, " = %s.ogg\n", name);
+	if(gamemission == doom)
+    	    fprintf(fs, " = doom1-music/%s.ogg\n", name);
+    	else if(gamemission == doom2)
+    	    fprintf(fs, " = doom2-music/%s.ogg\n", name);
+    	else if(gamemission == pack_tnt || gamemission == pack_plut)
+    	    fprintf(fs, " = tnt-music/%s.ogg\n", name);
+    	else if(gamemission == pack_chex)
+    	    fprintf(fs, " = chex-music/%s.ogg\n", name);
+    	else if(gamemission == pack_hacx)
+    	    fprintf(fs, " = hacx-music/%s.ogg\n", name);
     }
 
     fprintf(fs, "\n");
     fclose(fs);
-
-    C_Printf("Substitute MIDI config file written to %s.\n", filename);
+/*
+    printf(" Substitute MIDI config file written to %s.\n", filename);
 
     I_Quit();
+*/
 }
 
 // If the temp_timidity_cfg config variable is set, generate a "wrapper"
@@ -929,7 +939,7 @@ void TrackPositionCallback(int chan, void *stream, int len, void *udata)
 // Initialize music subsystem
 static boolean I_SDL_InitMusic(void)
 {
-    int i;
+//    int i;
 
     // SDL_mixer prior to v1.2.11 has a bug that causes crashes
     // with MIDI playback.  Print a warning message if we are
@@ -958,13 +968,24 @@ static boolean I_SDL_InitMusic(void)
     // Read all MIDI files from loaded WAD files, dump an example substitution
     // music config file to the specified filename and quit.
     //
-
+/*
     i = M_CheckParmWithArgs("-dumpsubstconfig", 1);
 
     if (i > 0)
     {
         DumpSubstituteConfig(myargv[i + 1]);
     }
+*/
+    if(gamemission == doom)
+        DumpSubstituteConfig("usb:/apps/wiidoom/doom1-music.cfg");
+    else if(gamemission == doom2)
+        DumpSubstituteConfig("usb:/apps/wiidoom/doom2-music.cfg");
+    else if(gamemission == pack_tnt || gamemission == pack_plut)
+        DumpSubstituteConfig("usb:/apps/wiidoom/tnt-music.cfg");
+    else if(gamemission == pack_chex)
+        DumpSubstituteConfig("usb:/apps/wiidoom/chex-music.cfg");
+    else if(gamemission == pack_hacx)
+        DumpSubstituteConfig("usb:/apps/wiidoom/hacx-music.cfg");
 
     // If SDL_mixer is not initialized, we have to initialize it
     // and have the responsibility to shut it down later on.
@@ -1015,7 +1036,7 @@ static boolean I_SDL_InitMusic(void)
     Mix_RegisterEffect(MIX_CHANNEL_POST, TrackPositionCallback, NULL, NULL);
 
     // If we're in GENMIDI mode, try to load sound packs.
-    if (snd_musicdevice == SNDDEVICE_GENMIDI)
+//    if (snd_musicdevice == SNDDEVICE_GENMIDI)
     {
         LoadSubstituteConfigs();
     }
