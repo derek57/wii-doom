@@ -976,17 +976,32 @@ static boolean I_SDL_InitMusic(void)
         DumpSubstituteConfig(myargv[i + 1]);
     }
 */
-    if(gamemission == doom)
-        DumpSubstituteConfig("usb:/apps/wiidoom/doom1-music.cfg");
-    else if(gamemission == doom2)
-        DumpSubstituteConfig("usb:/apps/wiidoom/doom2-music.cfg");
-    else if(gamemission == pack_tnt || gamemission == pack_plut)
-        DumpSubstituteConfig("usb:/apps/wiidoom/tnt-music.cfg");
-    else if(gamemission == pack_chex)
-        DumpSubstituteConfig("usb:/apps/wiidoom/chex-music.cfg");
-    else if(gamemission == pack_hacx)
-        DumpSubstituteConfig("usb:/apps/wiidoom/hacx-music.cfg");
-
+    if(usb)
+    {
+	if(gamemission == doom)
+    	    DumpSubstituteConfig("usb:/apps/wiidoom/doom1-music.cfg");
+	else if(gamemission == doom2)
+    	    DumpSubstituteConfig("usb:/apps/wiidoom/doom2-music.cfg");
+    	else if(gamemission == pack_tnt || gamemission == pack_plut)
+    	    DumpSubstituteConfig("usb:/apps/wiidoom/tnt-music.cfg");
+    	else if(gamemission == pack_chex)
+    	    DumpSubstituteConfig("usb:/apps/wiidoom/chex-music.cfg");
+    	else if(gamemission == pack_hacx)
+    	    DumpSubstituteConfig("usb:/apps/wiidoom/hacx-music.cfg");
+    }
+    else if(sd)
+    {
+	if(gamemission == doom)
+    	    DumpSubstituteConfig("sd:/apps/wiidoom/doom1-music.cfg");
+	else if(gamemission == doom2)
+    	    DumpSubstituteConfig("sd:/apps/wiidoom/doom2-music.cfg");
+    	else if(gamemission == pack_tnt || gamemission == pack_plut)
+    	    DumpSubstituteConfig("sd:/apps/wiidoom/tnt-music.cfg");
+    	else if(gamemission == pack_chex)
+    	    DumpSubstituteConfig("sd:/apps/wiidoom/chex-music.cfg");
+    	else if(gamemission == pack_hacx)
+    	    DumpSubstituteConfig("sd:/apps/wiidoom/hacx-music.cfg");
+    }
     // If SDL_mixer is not initialized, we have to initialize it
     // and have the responsibility to shut it down later on.
 
