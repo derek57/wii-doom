@@ -1395,14 +1395,85 @@ static void RestartCurrentTrack(void)
         // Have we reached the actual end of track (not loop end)?
         if (!Mix_PlayingMusic() && current_track_loop)
         {
-//            RestartCurrentTrack();
+//            RestartCurrentTrack();	// FIXME: NOT WORKING CORRECTLY FOR THE WII (WORKAROUND BELOW)
 
 	    change_anyway = true;
 
 	    if(!mus_cheat_used)
-		S_ChangeMusic(gamemap, 1);
+	    {
+		if(gamestate == GS_LEVEL)
+		{
+		    if(gamemode == commercial && gamemission == pack_nerve)
+		    {
+			if(gamemap == 1)
+			    S_ChangeMusic(mus_messag, true);
+			else if(gamemap == 2)
+			    S_ChangeMusic(mus_ddtblu, true);
+			else if(gamemap == 3)
+			    S_ChangeMusic(mus_doom, true);
+			else if(gamemap == 4)
+			    S_ChangeMusic(mus_shawn, true);
+			else if(gamemap == 5)
+			    S_ChangeMusic(mus_in_cit, true);
+			else if(gamemap == 6)
+			    S_ChangeMusic(mus_the_da, true);
+			else if(gamemap == 7)
+			    S_ChangeMusic(mus_in_cit, true);
+			else if(gamemap == 8)
+			    S_ChangeMusic(mus_shawn2, true);
+			else if(gamemap == 9)
+			    S_ChangeMusic(mus_ddtbl2, true);
+		    }
+		    else if(gamemode == commercial)
+			S_ChangeMusic(gamemap + 32, true);
+		    else
+		    {
+			if(gameepisode == 1)
+			    S_ChangeMusic(gamemap, true);
+			else if(gameepisode == 2)
+			    S_ChangeMusic(gamemap + 9, true);
+			else if(gameepisode == 3)
+			    S_ChangeMusic(gamemap + 18, true);
+			else if(gameepisode == 4)
+			{
+			    if(gamemap == 1)
+				S_ChangeMusic(mus_e3m4, true);
+			    else if(gamemap == 2)
+				S_ChangeMusic(mus_e3m2, true);
+			    else if(gamemap == 3)
+				S_ChangeMusic(mus_e3m3, true);
+			    else if(gamemap == 4)
+				S_ChangeMusic(mus_e1m5, true);
+			    else if(gamemap == 5)
+				S_ChangeMusic(mus_e2m7, true);
+			    else if(gamemap == 6)
+				S_ChangeMusic(mus_e2m4, true);
+			    else if(gamemap == 7)
+				S_ChangeMusic(mus_e2m6, true);
+			    else if(gamemap == 8)
+				S_ChangeMusic(mus_e2m5, true);
+			    else if(gamemap == 9)
+				S_ChangeMusic(mus_e1m9, true);
+			}
+		    }
+		}
+	        else if(gamestate == GS_INTERMISSION)
+		{
+		    if(gamemode == commercial)
+			S_ChangeMusic(mus_dm2int, true);
+		    else
+			S_ChangeMusic(mus_inter, true);
+		}
+		else if(gamestate == GS_FINALE)
+		{
+		    if(logical_gamemission == doom)
+			S_ChangeMusic(mus_victor, true);
+		    else
+			S_ChangeMusic(mus_read_m, true);
+		}
+	    }
 	    else
-		S_ChangeMusic(tracknum, 1);
+		S_ChangeMusic(tracknum, true);
         }
     }
 #endif

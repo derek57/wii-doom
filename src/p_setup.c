@@ -119,6 +119,7 @@ mapthing_t*	deathmatch_p;
 mapthing_t	playerstarts[MAXPLAYERS];
 
 extern boolean mus_cheat_used;
+extern boolean finale_music;
 
 
 
@@ -765,6 +766,7 @@ P_SetupLevel
     int		lumpnum;
 	
     mus_cheat_used = false;
+    finale_music = false;
 
     totalkills = totalitems = totalsecret = wminfo.maxfrags = 0;
     wminfo.partime = 180;

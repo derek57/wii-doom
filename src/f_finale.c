@@ -64,6 +64,8 @@ finalestage_t finalestage;
 
 unsigned int finalecount;
 
+boolean finale_music;
+
 #define	TEXTSPEED	3
 #define	TEXTWAIT	250
 
@@ -243,7 +245,11 @@ void F_Ticker (void)
 #ifdef OGG_SUPPORT
 	    if(opl)
 #endif
+	    {
 		S_StartMusic (mus_bunny);
+
+		finale_music = true;
+	    }
 #ifdef OGG_SUPPORT
 	    else
 		S_StartMP3Music(4, 0); 

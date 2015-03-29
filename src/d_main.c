@@ -130,6 +130,7 @@ boolean         fastparm;	// checkparm of -fast
 
 extern  boolean	inhelpscreens;
 extern  boolean	devparm_nerve;
+extern	boolean finale_music;
 
 skill_t		startskill;
 int             startepisode;
@@ -552,7 +553,7 @@ void D_DoomLoop (void)
     while (1)
     {
 	// check if the OGG music stopped playing
-	if(gamestate == GS_LEVEL && usergame)
+	if(usergame && gamestate != GS_DEMOSCREEN && gamestate != GS_CONSOLE && !finale_music)
 	    I_SDL_PollMusic();
 
 	// frame syncronous IO operations
