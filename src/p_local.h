@@ -92,6 +92,7 @@ void P_DropWeapon (player_t* player);
 // P_USER
 //
 void	P_PlayerThink (player_t* player);
+void	P_AimingHelp (player_t* player);
 
 
 //
@@ -286,6 +287,5 @@ P_DamageMobj
 // P_SPEC
 //
 #include "p_spec.h"
-
 
 #endif	// __P_LOCAL__

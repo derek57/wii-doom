@@ -131,6 +131,7 @@ boolean         fastparm;	// checkparm of -fast
 extern  boolean	inhelpscreens;
 extern  boolean	devparm_nerve;
 extern	boolean finale_music;
+extern	boolean aiming_help;
 
 skill_t		startskill;
 int             startepisode;
@@ -1865,6 +1866,9 @@ void D_DoomMain (void)
     M_SetConfigFilenames("default.cfg");//, PROGRAM_PREFIX "doom.cfg");
     D_BindVariables();
     M_LoadDefaults();
+
+    if(!devparm && aiming_help != 0)
+	aiming_help = 0;
 
     if(mus_engine > 1)
 	mus_engine = 2;

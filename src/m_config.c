@@ -196,6 +196,7 @@ extern int key_invright, key_invuse;
     CONFIG_VARIABLE_INT		(key_jump),
     CONFIG_VARIABLE_INT		(key_run),
     CONFIG_VARIABLE_INT		(key_console),
+    CONFIG_VARIABLE_INT		(key_aiminghelp),
 /*
     CONFIG_VARIABLE_INT		(key_righttrigger),
     CONFIG_VARIABLE_INT		(key_zl),

@@ -360,6 +360,7 @@ void M_BindBaseControls(void)
     M_BindVariable("key_jump",               &joy_home);
     M_BindVariable("key_run",                &joy_1);
     M_BindVariable("key_console",            &joy_2);
+    M_BindVariable("key_aiminghelp",         &joy_plus);
 /*
     M_BindVariable("key_righttrigger",       &joy_r);
     M_BindVariable("key_zl",		     &joy_zl);

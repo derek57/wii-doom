@@ -118,10 +118,8 @@ mapthing_t	deathmatchstarts[MAX_DEATHMATCH_STARTS];
 mapthing_t*	deathmatch_p;
 mapthing_t	playerstarts[MAXPLAYERS];
 
-extern boolean mus_cheat_used;
-extern boolean finale_music;
-
-
+extern boolean	mus_cheat_used;
+extern boolean	finale_music;
 
 //
 // P_LoadVertexes

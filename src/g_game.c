@@ -48,6 +48,7 @@
 #include "i_timer.h"
 #include "i_video.h"
 
+#include "p_local.h" 
 #include "p_setup.h"
 #include "p_saveg.h"
 #include "p_tick.h"
@@ -64,8 +65,6 @@
 #include "v_video.h"
 
 #include "w_wad.h"
-
-#include "p_local.h" 
 
 #include "s_sound.h"
 
@@ -161,6 +160,7 @@ int             testcontrols_mousespeed;
 int			mouselook;
 extern int		mspeed;
 extern boolean		netgameflag;
+extern boolean		aiming_help;
  
 wbstartstruct_t wminfo;               	// parms for world map / intermission 
  
@@ -278,6 +278,7 @@ int             vanilla_demo_limit = 1;
  
 int key_strafe, joybstrafe;
 int     joybfire = 1;
+int	joybaiminghelp = 2;
 int     joybuse = 3;
 int	joybmenu = 4;
 int	joybleft = 6;
@@ -665,6 +666,12 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
     {
 	if(!demoplayback)
 	    cmd->arti |= AFLAG_JUMP;
+    }
+									// FOR THE WII: UNUSED
+    if((joybuttons[joybaiminghelp] || aiming_help) && !demoplayback)
+    {
+	player_t* player = &players[consoleplayer];
+	P_AimingHelp(player);
     }
 
     WPADData *data = WPAD_Data(0);

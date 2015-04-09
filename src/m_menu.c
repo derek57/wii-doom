@@ -189,7 +189,7 @@ int			mhz333 = 0;
 */
 int			fps = 0;		// FOR PSP: calculating the frames per second
 int			key_controls_start_in_cfg_at_pos = 17;	// FOR PSP: ACTUALLY IT'S +2 !!!
-int			key_controls_end_in_cfg_at_pos = 28;	// FOR PSP: ACTUALLY IT'S +2 !!!
+int			key_controls_end_in_cfg_at_pos = 29;	// FOR PSP: ACTUALLY IT'S +2 !!!
 int			crosshair = 0;
 int			show_stats = 0;
 //int			max_free_ram = 0;
@@ -233,6 +233,7 @@ boolean got_invulnerability = false;
 boolean got_map = false;
 boolean got_light_amp = false;
 boolean got_all = false;
+boolean aiming_help;
 
 int turnspeed = 7;
 
@@ -370,6 +371,7 @@ void M_ShowMemory(int choice);
 */
 void M_MapGrid(int choice);
 void M_WeaponChange(int choice);
+void M_AimingHelp(int choice);
 void M_MapRotation(int choice);
 void M_FollowMode(int choice);
 void M_Statistics(int choice);
@@ -435,6 +437,7 @@ void M_DrawKeyBindings(void);
 void M_DrawControls(void);
 void M_DrawSystem(void);
 void M_DrawGame(void);
+void M_DrawGame2(void);
 void M_DrawDebug(void);
 void M_DrawSound(void);
 void M_DrawCheats(void);
@@ -1833,8 +1836,9 @@ enum
     keybindings_jump,
     keybindings_run,
     keybindings_console,
-    keybindings_empty1,
+    keybindings_aiminghelp,
 /*
+    keybindings_empty1,
     keybindings_layout,
     keybindings_empty2,
 */
@@ -1865,8 +1869,9 @@ menuitem_t KeyBindingsMenu[]=
     {5,"",M_KeyBindingsSetKey,8},
     {5,"",M_KeyBindingsSetKey,9},
     {5,"",M_KeyBindingsSetKey,10},
-    {-1,"",0,'\0'},
+    {5,"",M_KeyBindingsSetKey,11},
 /*
+    {-1,"",0,'\0'},
     {2,"",M_KeyBindingsButtonLayout,'l'},
     {-1,"",0,'\0'},
 */
@@ -1945,7 +1950,7 @@ menuitem_t GameMenu[]=
 //    {2,"M_DLGTXT",M_DialogText,'t'},
     {2,"M_XHAIR",M_Crosshair,'c'},
     {2,"M_JUMPNG",M_Jumping,'j'},
-    {2,"M_WPNCHG",M_WeaponChange,'w'}
+    {2,"M_WPNCHG",M_WeaponChange,'w'},
 };
 
 menu_t  GameDef =
@@ -1954,6 +1959,51 @@ menu_t  GameDef =
     &OptionsDef,
     GameMenu,
     M_DrawGame,
+    40,20,       // [STRIFE] changed y coord 64 -> 35
+    0
+};
+
+enum
+{
+    game2_mapgrid,
+    game2_maprotation,
+    game2_followmode,
+    game2_statistics,
+    game2_aiminghelp,
+//    game2_empty1,
+    game2_messages,
+//    game2_dialogtext,
+    game2_crosshair,
+    game2_jumping,
+    game2_weapon,
+    game2_end
+} game2_e;
+
+// haleyjd 08/29/10:
+// [STRIFE] 
+// * Added voice volume
+// * Moved mouse sensitivity here (who knows why...)
+menuitem_t GameMenu2[]=
+{
+    {2,"M_MAPGRD",M_MapGrid,'g'},
+    {2,"M_ROTATE",M_MapRotation,'r'},
+    {2,"M_FLWMDE",M_FollowMode,'f'},
+    {2,"M_STATS",M_Statistics,'s'},
+//    {-1,"",0,'\0'},
+    {2,"M_MESSG",M_ChangeMessages,'m'},
+    {2,"M_AIMHLP",M_AimingHelp,'h'},
+//    {2,"M_DLGTXT",M_DialogText,'t'},
+    {2,"M_XHAIR",M_Crosshair,'c'},
+    {2,"M_JUMPNG",M_Jumping,'j'},
+    {2,"M_WPNCHG",M_WeaponChange,'w'},
+};
+
+menu_t  GameDef2 =
+{
+    game2_end,
+    &OptionsDef,
+    GameMenu2,
+    M_DrawGame2,
     40,20,       // [STRIFE] changed y coord 64 -> 35
     0
 };
@@ -2972,6 +3022,62 @@ void M_DrawGame(void)
 	V_DrawPatch (245, 68, W_CacheLumpName(DEH_String("M_MSGON"), PU_CACHE));
     else if (show_stats == 0)
 	V_DrawPatch (245, 68, W_CacheLumpName(DEH_String("M_MSGOFF"), PU_CACHE));
+
+    if(crosshair == 1)
+	V_DrawPatch (245, 116, W_CacheLumpName(DEH_String("M_MSGON"), PU_CACHE));
+    else if (crosshair == 0)
+	V_DrawPatch (245, 116, W_CacheLumpName(DEH_String("M_MSGOFF"), PU_CACHE));
+
+    if(jumping)
+	V_DrawPatch (245, 132, W_CacheLumpName(DEH_String("M_MSGON"), PU_CACHE));
+    else
+	V_DrawPatch (245, 132, W_CacheLumpName(DEH_String("M_MSGOFF"), PU_CACHE));
+
+    if(use_vanilla_weapon_change == 1)
+	V_DrawPatch (245, 151, W_CacheLumpName(DEH_String("M_SLOW"), PU_CACHE));
+    else if(use_vanilla_weapon_change == 0)
+	V_DrawPatch (245, 151, W_CacheLumpName(DEH_String("M_FAST"), PU_CACHE));
+}
+
+void M_DrawGame2(void)
+{
+    if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
+	V_DrawPatchDirect(70, 0, W_CacheLumpName(DEH_String("M_T_GSET"),
+                                               PU_CACHE));
+    else
+	V_DrawPatchDirect(70, 0, W_CacheLumpName(DEH_String("M_GMESET"),
+                                               PU_CACHE));
+
+//    M_WriteText(60, 73, DEH_String("----------------------------------"));
+
+    V_DrawPatchDirect(OptionsDef.x + 185, OptionsDef.y-54 + LINEHEIGHT * game_messages,
+                      W_CacheLumpName(DEH_String(msgNames[showMessages]),
+                                      PU_CACHE));
+
+    if(drawgrid == 1)
+	V_DrawPatch (245, 20, W_CacheLumpName(DEH_String("M_MSGON"), PU_CACHE));
+    else if(drawgrid == 0)
+	V_DrawPatch (245, 20, W_CacheLumpName(DEH_String("M_MSGOFF"), PU_CACHE));
+
+    if(am_rotate == true)
+	V_DrawPatch (245, 36, W_CacheLumpName(DEH_String("M_MSGON"), PU_CACHE));
+    else if(am_rotate == false)
+	V_DrawPatch (245, 36, W_CacheLumpName(DEH_String("M_MSGOFF"), PU_CACHE));
+
+    if(followplayer == 1)
+	V_DrawPatch (245, 52, W_CacheLumpName(DEH_String("M_MSGON"), PU_CACHE));
+    else if(followplayer == 0)
+	V_DrawPatch (245, 52, W_CacheLumpName(DEH_String("M_MSGOFF"), PU_CACHE));
+
+    if(show_stats == 1)
+	V_DrawPatch (245, 68, W_CacheLumpName(DEH_String("M_MSGON"), PU_CACHE));
+    else if (show_stats == 0)
+	V_DrawPatch (245, 68, W_CacheLumpName(DEH_String("M_MSGOFF"), PU_CACHE));
+
+    if(aiming_help)
+	V_DrawPatch (245, 100, W_CacheLumpName(DEH_String("M_MSGON"), PU_CACHE));
+    else
+	V_DrawPatch (245, 100, W_CacheLumpName(DEH_String("M_MSGOFF"), PU_CACHE));
 
     if(crosshair == 1)
 	V_DrawPatch (245, 116, W_CacheLumpName(DEH_String("M_MSGON"), PU_CACHE));
@@ -4666,6 +4772,9 @@ void M_Drawer (void)
     y = currentMenu->y;
     max = currentMenu->numitems;
 
+    if(currentMenu == &GameDef && devparm)
+	currentMenu->numitems = 9;
+
     if(currentMenu == &SoundDef && itemOn == 4)
 	M_WriteText(48, 150, "You must restart to take effect.");
 
@@ -6241,6 +6350,7 @@ void M_KeyBindingsClearAll (int choice)
     *doom_defaults_list[25].location = 0;
     *doom_defaults_list[26].location = 0;
     *doom_defaults_list[27].location = 0;
+    *doom_defaults_list[28].location = 0;
 }
 
 void M_KeyBindingsReset (int choice)
@@ -6256,6 +6366,7 @@ void M_KeyBindingsReset (int choice)
     *doom_defaults_list[25].location = CLASSIC_CONTROLLER_HOME;
     *doom_defaults_list[26].location = CONTROLLER_1;
     *doom_defaults_list[27].location = CONTROLLER_2;
+    *doom_defaults_list[28].location = CLASSIC_CONTROLLER_PLUS;
 }
 
 void M_DrawKeyBindings(void)
@@ -6294,6 +6405,7 @@ void M_DrawKeyBindings(void)
     M_WriteText(40, 110, DEH_String("JUMP"));
     M_WriteText(40, 120, DEH_String("RUN"));
     M_WriteText(40, 130, DEH_String("CONSOLE"));
+    M_WriteText(40, 140, DEH_String("AIMING HELP"));
 
 //    M_WriteText(40, 120, DEH_String("BUTTON LAYOUT:"));
 
@@ -6305,7 +6417,7 @@ void M_DrawKeyBindings(void)
     M_WriteText(40, 150, DEH_String("CLEAR ALL CONTROLS"));
     M_WriteText(40, 160, DEH_String("RESET TO DEFAULTS"));
 
-    for (i = 0; i < 11; i++)
+    for (i = 0; i < 12; i++)
     {
 	if (askforkey && keyaskedfor == i)
 	{
@@ -6644,7 +6756,10 @@ void M_Record(int choice)
 
 void M_Game(int choice)
 {
-    M_SetupNextMenu(&GameDef);
+    if(devparm)
+	M_SetupNextMenu(&GameDef2);
+    else
+	M_SetupNextMenu(&GameDef);
 }
 
 void M_RMap(int choice)
@@ -6969,6 +7084,23 @@ void M_WeaponChange(int choice)
         if (use_vanilla_weapon_change == 0)
             use_vanilla_weapon_change = 1;
         players[consoleplayer].message = DEH_String("ORIGINAL WEAPON CHANGING STYLE ENABLED");
+        break;
+    }
+}
+
+void M_AimingHelp(int choice)
+{
+    switch(choice)
+    {
+    case 0:
+        if (aiming_help)
+            aiming_help = false;
+        players[consoleplayer].message = DEH_String("AIMING HELP DISABLED");
+        break;
+    case 1:
+        if (!aiming_help)
+            aiming_help = true;
+        players[consoleplayer].message = DEH_String("AIMING HELP ENABLED");
         break;
     }
 }

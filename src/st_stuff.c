@@ -513,6 +513,7 @@ cheatseq_t cheat_mypos = CHEAT("idmypos", 0);
 // 
 extern char*	mapnames[];
 
+int		prio = 0;
 
 //
 // STATUS BAR CODE
@@ -798,11 +799,14 @@ int ST_calcPainOffset(void)
 void ST_updateFaceWidget(void)
 {
     int		i;
+
     angle_t	badguyangle;
     angle_t	diffang;
+
+    boolean	doevilgrin;
+
     static int	lastattackdown = -1;
     static int	priority = 0;
-    boolean	doevilgrin;
 
     if (priority < 10)
     {
@@ -848,7 +852,7 @@ void ST_updateFaceWidget(void)
 	    && plyr->attacker != plyr->mo)
 	{
 	    // being attacked
-	    priority = 7;
+	    prio = priority = 7;
 	    
 	    if (plyr->health - st_oldhealth > ST_MUCHPAIN)
 	    {

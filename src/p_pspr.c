@@ -51,6 +51,8 @@
 
 int use_vanilla_weapon_change = 1;
 
+extern boolean aiming_help;
+
 //
 // P_SetPsprite
 //
@@ -655,8 +657,11 @@ P_GunShot
     damage = 5*(P_Random ()%3+1);
     angle = mo->angle;
 
-    if (!accurate)
-	angle += (P_Random()-P_Random())<<18;
+    if(!aiming_help)
+    {
+	if (!accurate)
+	    angle += (P_Random()-P_Random())<<18;
+    }
 
     P_LineAttack (mo, angle, MISSILERANGE, bulletslope, damage);
 }
@@ -680,6 +685,7 @@ A_FirePistol
 		  weaponinfo[player->readyweapon].flashstate);
 
     P_BulletSlope (player->mo);
+
     P_GunShot (player->mo, !player->refire);
 }
 

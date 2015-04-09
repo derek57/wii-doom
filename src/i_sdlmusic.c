@@ -687,7 +687,7 @@ static void LoadSubstituteConfigs(void)
     if(usb)
         musicdir = "usb:/apps/wiidoom/";
     else if(sd)
-        musicdir = "usb:/apps/wiidoom/";
+        musicdir = "sd:/apps/wiidoom/";
 
     // Load all music packs. We always load all music substitution packs for
     // all games. Why? Suppose we have a Doom PWAD that reuses some music from
