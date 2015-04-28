@@ -37,7 +37,7 @@
 #include "xmn_psp.h"
 #include "xmn_main.h"
 
-boolean		devparm = true;	// started game with -devparm
+boolean		devparm = false;	// started game with -devparm
 boolean		devparm_net = false;	// started game with -devparm
 boolean		devparm_nerve = false;	// started game with -devparm
 
