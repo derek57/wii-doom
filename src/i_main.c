@@ -37,7 +37,8 @@
 #include "xmn_psp.h"
 #include "xmn_main.h"
 
-boolean		devparm = false;	// started game with -devparm
+boolean		devparm = true;	// started game with -devparm
+boolean		devparm_net = false;	// started game with -devparm
 boolean		devparm_nerve = false;	// started game with -devparm
 
 //static char* margv;
@@ -178,7 +179,7 @@ int main(int argc, char **argv)
 
     wii_main();
 
-    if(devparm)
+    if(devparm || devparm_net)
 	D_DoomMain ();
     else
 	user_main();

@@ -235,6 +235,23 @@ boolean got_light_amp = false;
 boolean got_all = false;
 boolean aiming_help;
 
+boolean skillflag = true;
+boolean nomonstersflag;
+boolean fastflag;
+boolean respawnflag = true;
+boolean warpflag = true;
+boolean multiplayerflag = true;
+boolean deathmatchflag = true;
+boolean altdeathflag;
+boolean locallanflag;
+boolean searchflag;
+boolean queryflag;
+boolean dedicatedflag = true;
+boolean privateserverflag;
+
+int mp_skill = 4;
+int warpepi = 2;
+int warplev = 2;
 int turnspeed = 7;
 
 fixed_t         forwardmove = 29;
@@ -4457,6 +4474,8 @@ boolean M_Responder (event_t* ev)
 		    fsize == 18654796 || fsize == 18240172 || fsize == 17420824))
 		itemOn++;
 */
+	    if(!devparm && currentMenu == &KeyBindingsDef && itemOn == 11)
+		itemOn++;
 	    S_StartSound(NULL,sfx_pstop);
 	} while(currentMenu->menuitems[itemOn].status==-1);
 
@@ -4470,7 +4489,7 @@ boolean M_Responder (event_t* ev)
 	{
 	    if (!itemOn)
 	    {
-		if (FirstKey == 0)		// FOR PSP (if too menu items) ;-)
+		if (FirstKey == 0)		// FOR PSP (if too many menu items) ;-)
 		{
                     itemOn = currentMenu->numitems-1;
 		    FirstKey = FIRSTKEY_MAX;
@@ -4488,6 +4507,8 @@ boolean M_Responder (event_t* ev)
 		    fsize == 18654796 || fsize == 18240172 || fsize == 17420824))
 		itemOn--;
 */
+	    if(!devparm && currentMenu == &KeyBindingsDef && itemOn == 11)
+		itemOn--;
 	    S_StartSound(NULL,sfx_pstop);
 	} while(currentMenu->menuitems[itemOn].status==-1);
 
@@ -6405,7 +6426,9 @@ void M_DrawKeyBindings(void)
     M_WriteText(40, 110, DEH_String("JUMP"));
     M_WriteText(40, 120, DEH_String("RUN"));
     M_WriteText(40, 130, DEH_String("CONSOLE"));
-    M_WriteText(40, 140, DEH_String("AIMING HELP"));
+
+    if(devparm)
+	M_WriteText(40, 140, DEH_String("AIMING HELP"));
 
 //    M_WriteText(40, 120, DEH_String("BUTTON LAYOUT:"));
 
@@ -6421,12 +6444,13 @@ void M_DrawKeyBindings(void)
     {
 	if (askforkey && keyaskedfor == i)
 	{
-	    M_WriteText(195, (i*10+30), "???");
+	    if(i < 11 && !devparm)
+		M_WriteText(195, (i*10+30), "???");
 	}
 	else
 	{
-	    M_WriteText(195, (i*10+30),
-		Key2String(*(doom_defaults_list[i+FirstKey+17].location)));
+	    if(i < 11 && !devparm)
+		M_WriteText(195, (i*10+30), Key2String(*(doom_defaults_list[i+FirstKey+17].location)));
 	}
     }
 }

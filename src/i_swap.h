@@ -50,5 +50,19 @@
 #define SYS_BIG_ENDIAN
 //#endif
 
+#define doom_swap_l(x) \
+        ((long int)((((unsigned long int)(x) & 0x000000ffU) << 24) | \
+                             (((unsigned long int)(x) & 0x0000ff00U) <<  8) | \
+                             (((unsigned long int)(x) & 0x00ff0000U) >>  8) | \
+                             (((unsigned long int)(x) & 0xff000000U) >> 24)))
+
+#define doom_swap_s(x) \
+        ((short int)((((unsigned short int)(x) & 0x00ff) << 8) | \
+                              (((unsigned short int)(x) & 0xff00) >> 8))) 
+
+#define doom_htonl(x) doom_swap_l(x)
+#define doom_ntohs(x) doom_swap_s(x)
+#define doom_htons(x) doom_swap_s(x)
+
 #endif
 

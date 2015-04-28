@@ -50,6 +50,7 @@ enum
 };
         
 
+void *(Z_Realloc)(void *ptr, size_t n, int tag, void **user);
 void	Z_Init (void);
 void*	Z_Malloc (int size, int tag, void *ptr);
 void    Z_Free (void *ptr);

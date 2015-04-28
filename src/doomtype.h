@@ -69,6 +69,7 @@
 // standard and defined to include stdint.h, so include this. 
 
 #include <inttypes.h>
+//#include <stdbool.h>
 
 #ifdef __cplusplus
 
@@ -87,6 +88,18 @@ typedef enum
 #endif
 
 typedef uint8_t byte;
+
+typedef struct {
+  byte checksum;       // Simple checksum of the entire packet
+  byte type;           /* Type of packet */
+  byte reserved[2];	/* Was random in prboom <=2.2.4, now 0 */
+  unsigned int tic;        // Timestamp
+} PACKEDATTR packet_header_t;
+
+typedef unsigned long ULONG;
+typedef unsigned short USHORT;
+
+#define INT64  long long
 
 #include <limits.h>
 

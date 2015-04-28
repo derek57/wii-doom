@@ -26,6 +26,7 @@
 //-----------------------------------------------------------------------------
 
 #include <stdlib.h>
+#include <unistd.h>
 
 #include "doomfeatures.h"
 
@@ -136,6 +137,7 @@ static void LoadGameSettings(net_gamesettings_t *settings)
     {
         printf("NOTE: Turning resolution is reduced; this is probably "
                "because there is a client recording a Vanilla demo.\n");
+        sleep(1);
     }
 
     for (i = 0; i < MAXPLAYERS; ++i)
@@ -225,7 +227,12 @@ void D_ConnectNetGame(void)
     net_connect_data_t connect_data;
 
     InitConnectData(&connect_data);
-//    netgame = D_InitNetGame(&connect_data);
+    netgame = D_InitNetGame(&connect_data);
+
+#ifdef NET_DEBUG
+    printf("D_ConnectNetGame\n");
+    printf("Variable netgame = %d\n", netgame);
+#endif
 
     //!
     // @category net
@@ -279,9 +286,11 @@ void D_CheckNetGame (void)
         }
         else
         {
-            DEH_printf("Levels will end after %d minute", timelimit);
+            printf("Levels will end after %d minute", timelimit);
+	    sleep(1);
             if (timelimit > 1)
                 printf("s");
+	        sleep(1);
             printf(".\n");
         }
     }

@@ -80,11 +80,11 @@
 #include "wi_stuff.h"
 #include "st_stuff.h"
 #include "am_map.h"
-/*
+
 #include "net_client.h"
 #include "net_dedicated.h"
 #include "net_query.h"
-*/
+
 #include "p_setup.h"
 #include "r_local.h"
 #include "statdump.h"
@@ -132,6 +132,7 @@ extern  boolean	inhelpscreens;
 extern  boolean	devparm_nerve;
 extern	boolean finale_music;
 extern	boolean aiming_help;
+extern	boolean devparm_net;
 
 skill_t		startskill;
 int             startepisode;
@@ -171,7 +172,7 @@ extern int mp_skill;
 extern int warpepi;
 extern int warplev;
 extern int mus_engine;
-/*
+
 extern boolean skillflag;
 extern boolean nomonstersflag;
 extern boolean fastflag;
@@ -180,7 +181,11 @@ extern boolean warpflag;
 extern boolean multiplayerflag;
 extern boolean deathmatchflag;
 extern boolean altdeathflag;
-
+extern boolean locallanflag;
+extern boolean searchflag;
+extern boolean queryflag;
+extern boolean dedicatedflag;
+/*
 static SceCtrlData pad;
 static SceCtrlData lastpad;
 */
@@ -1370,11 +1375,11 @@ void D_DoomMain (void)
 {
     FILE *fprw;
 
-//    int             p;
+    int             p;
     char            file[256];
 //    char            demolumpname[9];
 
-    if(devparm)
+    if(devparm || devparm_net)
 	fsize = 10399316;
 //	fsize = 14943400;
 
@@ -1650,7 +1655,7 @@ void D_DoomMain (void)
     C_Init();
 
     C_Printf(" ");
-/*
+
 #ifdef FEATURE_MULTIPLAYER
     //!
     // @category net
@@ -1659,7 +1664,8 @@ void D_DoomMain (void)
     // in the game itself.
     //
 
-    if (M_CheckParm("-dedicated") > 0)
+//    if (M_CheckParm("-dedicated") > 0)
+    if (dedicatedflag && devparm_net)
     {
         printf("Dedicated server mode.\n");
         NET_DedicatedServer();
@@ -1674,7 +1680,8 @@ void D_DoomMain (void)
     // servers.
     //
 
-    if (M_CheckParm("-search"))
+//    if (M_CheckParm("-search"))
+    if (searchflag && devparm_net)
     {
         NET_MasterQuery();
         exit(0);
@@ -1687,10 +1694,12 @@ void D_DoomMain (void)
     // Query the status of the server running on the given IP
     // address.
     //
-
+/*
     p = M_CheckParmWithArgs("-query", 1);
 
     if (p)
+*/
+    if (queryflag && devparm_net)
     {
         NET_QueryAddress(myargv[p+1]);
         exit(0);
@@ -1702,14 +1711,15 @@ void D_DoomMain (void)
     // Search the local LAN for running servers.
     //
 
-    if (M_CheckParm("-localsearch"))
+//    if (M_CheckParm("-localsearch"))
+    if (locallanflag && devparm_net)
     {
         NET_LANQuery();
         exit(0);
     }
 
 #endif
-*/
+
 #ifdef FEATURE_DEHACKED
 //    printf("DEH_Init: Init Dehacked support.\n");
     if(load_dehacked == 1)
@@ -1736,10 +1746,10 @@ void D_DoomMain (void)
     //
     // Disable monsters.
     //
-/*
-    nomonsters = M_CheckParm ("-nomonsters");
 
-    if(nomonstersflag)
+//    nomonsters = M_CheckParm ("-nomonsters");
+
+    if(nomonstersflag && devparm_net)
 	nomonsters = true;
 
     //!
@@ -1748,9 +1758,9 @@ void D_DoomMain (void)
     // Monsters respawn after being killed.
     //
 
-    respawnparm = M_CheckParm ("-respawn");
+//    respawnparm = M_CheckParm ("-respawn");
 
-    if(respawnflag)
+    if(respawnflag && devparm_net)
 	respawnparm = true;
 
     //!
@@ -1759,9 +1769,9 @@ void D_DoomMain (void)
     // Monsters move faster.
     //
 
-    fastparm = M_CheckParm ("-fast");
+//    fastparm = M_CheckParm ("-fast");
 
-    if(fastflag)
+    if(fastflag && devparm_net)
 	fastparm = true;
 
     //! 
@@ -1770,7 +1780,7 @@ void D_DoomMain (void)
     // Developer mode.  F1 saves a screenshot in the current working
     // directory.
     //
-
+/*
     devparm = M_CheckParm ("-devparm");
 
     I_DisplayFPSDots(devparm);
@@ -1783,8 +1793,8 @@ void D_DoomMain (void)
     //
 
     if (M_CheckParm ("-deathmatch"))
-
-    if(deathmatchflag)
+*/
+    if(deathmatchflag && devparm_net)
 	deathmatch = 1;
 
     //!
@@ -1795,12 +1805,12 @@ void D_DoomMain (void)
     // all items respawn after 30 seconds.
     //
 
-    if (M_CheckParm ("-altdeath"))
+//    if (M_CheckParm ("-altdeath"))
 
-    if(altdeathflag)
+    if(altdeathflag && devparm_net)
 	deathmatch = 2;
-*/
-    if (devparm)
+
+    if (devparm || devparm_net)
 	/*DEH_printf*/printf(D_DEVSTR);
 /*    
     // find which dir to use for config files
@@ -1987,7 +1997,7 @@ void D_DoomMain (void)
 
 //    InitGameVersion();
 
-    if(devparm)
+    if(devparm || devparm_net)
     {
 	if(usb)
 	    D_AddFile("usb:/apps/wiidoom/IWAD/DOOM/Reg/v12/DOOM.WAD");
@@ -2287,11 +2297,13 @@ void D_DoomMain (void)
 
     I_PrintStartupBanner(gamedescription);
     PrintDehackedBanners();
+*/
 #ifdef FEATURE_MULTIPLAYER
-    printf ("NET_Init: Init network subsystem.\n");
+//    printf ("NET_Init: Init network subsystem.\n");
+
     NET_Init ();
 #endif
-*/
+
     // Initial netgame startup. Connect to server etc.
     D_ConnectNetGame();
 
@@ -2300,7 +2312,7 @@ void D_DoomMain (void)
     startepisode = 1;
     startmap = 1;
 
-    if(devparm)
+    if(devparm || devparm_net)
 	autostart = true;
     else
 	autostart = false;
@@ -2312,10 +2324,10 @@ void D_DoomMain (void)
     // Set the game skill, 1-5 (1: easiest, 5: hardest).  A skill of
     // 0 disables all monsters.
     //
-/*
-    p = M_CheckParmWithArgs("-skill", 1);
 
-    if (skillflag)
+//    p = M_CheckParmWithArgs("-skill", 1);
+
+    if (skillflag && devparm_net)
     {
 	startskill = mp_skill;
 	autostart = true;
@@ -2327,7 +2339,7 @@ void D_DoomMain (void)
     //
     // Start playing on episode n (1-4)
     //
-
+/*
     p = M_CheckParmWithArgs("-episode", 1);
 
     if (p)
@@ -2377,8 +2389,8 @@ void D_DoomMain (void)
     //
 
     p = M_CheckParmWithArgs("-warp", 1);
-
-    if (warpflag)
+*/
+    if (warpflag && devparm_net)
     {
         if (gamemode == commercial)
             startmap = warplev;
@@ -2401,7 +2413,7 @@ void D_DoomMain (void)
 
     // Undocumented:
     // Invoked by setup to test the controls.
-
+/*
     p = M_CheckParm("-testcontrols");
 
     if (p > 0)
@@ -2538,7 +2550,7 @@ void D_DoomMain (void)
 	LoadNerveWad();
 
 //    if (M_CheckParmWithArgs("-statdump", 1))
-    if(devparm)
+    if(devparm || devparm_net)
     {
         I_AtExit(StatDump, true);
 //        DEH_printf("External statistics registered.\n");
