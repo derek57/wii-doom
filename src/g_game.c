@@ -1565,6 +1565,7 @@ void G_PlayerReborn (int player)
     p->weaponowned[wp_pistol] = true; 
     p->ammo[am_clip] = deh_initial_bullets; 
     p->lookdir = 0;
+    p->recoilpitch = 0;
 	 
     for (i=0 ; i<NUMAMMO ; i++) 
 	p->maxammo[i] = maxammo[i]; 

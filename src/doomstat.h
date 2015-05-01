@@ -286,5 +286,6 @@ extern	int		rndindex;
 
 extern  ticcmd_t       *netcmds;
 
+extern	boolean		d_recoil;
 
 #endif

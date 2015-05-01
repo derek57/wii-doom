@@ -38,6 +38,7 @@ char *gamedescription;
 // Set if homebrew PWAD stuff has been added.
 boolean	modifiedgame;
 
+boolean d_recoil = true;
 
 
 

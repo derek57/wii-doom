@@ -176,6 +176,8 @@ typedef struct player_s
 
     boolean		centering;
 
+    int			recoilpitch;
+
 } player_t;
 
 

@@ -739,6 +739,7 @@ void P_SpawnPlayer (mapthing_t* mthing)
     p->extralight = 0;
     p->fixedcolormap = 0;
     p->viewheight = VIEWHEIGHT;
+    p->recoilpitch = 0;
 
     // setup gun psprite
     P_SetupPsprites (p);

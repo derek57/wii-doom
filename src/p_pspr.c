@@ -577,6 +577,9 @@ A_FireMissile
 {
     DecreaseAmmo(player, weaponinfo[player->readyweapon].ammo, 1);
     P_SpawnPlayerMissile (player->mo, MT_ROCKET);
+
+    if(d_recoil)
+        player->recoilpitch = (8*FRACUNIT);
 }
 
 
@@ -591,6 +594,9 @@ A_FireBFG
     DecreaseAmmo(player, weaponinfo[player->readyweapon].ammo, 
                  deh_bfg_cells_per_shot);
     P_SpawnPlayerMissile (player->mo, MT_BFG);
+
+    if(d_recoil)
+        player->recoilpitch = (14*FRACUNIT);
 }
 
 
@@ -610,6 +616,9 @@ A_FirePlasma
 		  weaponinfo[player->readyweapon].flashstate+(P_Random ()&1) );
 
     P_SpawnPlayerMissile (player->mo, MT_PLASMA);
+
+    if(d_recoil)
+        player->recoilpitch = (6*FRACUNIT);
 }
 
 
@@ -693,6 +702,9 @@ A_FirePistol
     P_BulletSlope (player->mo);
 
     P_GunShot (player->mo, !player->refire);
+
+    if(d_recoil)
+        player->recoilpitch = (6*FRACUNIT);
 }
 
 
@@ -719,6 +731,9 @@ A_FireShotgun
 	
     for (i=0 ; i<7 ; i++)
 	P_GunShot (player->mo, false);
+
+    if(d_recoil)
+        player->recoilpitch = (6*FRACUNIT);
 }
 
 
@@ -757,6 +772,9 @@ A_FireShotgun2
 		      MISSILERANGE,
 		      bulletslope + ((P_Random()-P_Random())<<5), damage);
     }
+
+    if(d_recoil)
+        player->recoilpitch = (8*FRACUNIT);
 }
 
 
@@ -785,6 +803,9 @@ A_FireCGun
     P_BulletSlope (player->mo);
 	
     P_GunShot (player->mo, !player->refire);
+
+    if(d_recoil)
+        player->recoilpitch = (8*FRACUNIT);
 }
 
 

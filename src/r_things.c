@@ -720,6 +720,9 @@ void R_DrawPSprite (pspdef_t* psp)
 	vis->startfrac = 0;
     }
     
+    // FOR FREELOOK
+    vis->texturemid += FixedMul(((centery - viewheight / 2) << FRACBITS), vis->xiscale);
+
     if (vis->x1 > x1)
 	vis->startfrac += vis->xiscale*(vis->x1-x1);
 

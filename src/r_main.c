@@ -847,13 +847,55 @@ R_PointInSubsector
 
 
 //
+// R_SetupPitch
+// villsa [STRIFE] new function
+// Calculate centery/centeryfrac for player viewpitch
+//
+
+int viewpitch;
+
+void R_SetupPitch(player_t* player)
+{
+    int pitchfrac;
+    int pitchfrac2;
+
+    int i = 0;
+
+    if(viewpitch != player->lookdir)
+    {
+        if (viewpitch > 90*FRACUNIT)
+            viewpitch = 90*FRACUNIT;
+
+        if (viewpitch < -110*FRACUNIT)
+            viewpitch = -110*FRACUNIT;
+
+//	pitchfrac  = (setblocks *  player->pitch)			/ 10;	// FOR HIRES (ORIGINAL)
+
+        pitchfrac  = (setblocks * (player->recoilpitch	>> FRACBITS))	/ 5;	// [SVE] (RECOIL)
+	pitchfrac2 = (setblocks * (player->lookdir	<< hires))	/ 10;	// FOR HIRES (HIRES)
+
+        centery     = pitchfrac + pitchfrac2 + viewheight / 2;
+
+        centeryfrac = centery << FRACBITS;
+
+        for(i = 0; i < viewheight; i++)
+        {
+            yslope[i] = FixedDiv(viewwidth / 2 * FRACUNIT,
+                                 abs(((i - centery) << FRACBITS) + (FRACUNIT/2)));
+        }
+    }
+}
+
+//
 // R_SetupFrame
 //
 void R_SetupFrame (player_t* player)
 {		
     int		i;
-    int		tempCentery;
+//    int		tempCentery;
     
+    R_SetupPitch(player);  // villsa [STRIFE]
+
     viewplayer = player;
     viewx = player->mo->x;
     viewy = player->mo->y;
@@ -861,7 +903,7 @@ void R_SetupFrame (player_t* player)
     extralight = player->extralight;
 
     viewz = player->viewz;
-    
+/*    
     tempCentery = viewheight / 2 + ((player->lookdir) << hires) * screenblocks / 10;	// CHANGED FOR HIRES
     if (centery != tempCentery)
     {
@@ -874,7 +916,7 @@ void R_SetupFrame (player_t* player)
                                      FRACUNIT / 2));
         }
     }
-
+*/
     viewsin = finesine[viewangle>>ANGLETOFINESHIFT];
     viewcos = finecosine[viewangle>>ANGLETOFINESHIFT];
 	

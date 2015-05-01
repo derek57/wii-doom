@@ -458,6 +458,18 @@ void P_PlayerThink (player_t* player)
     }
     else
 	player->fixedcolormap = 0;
+
+    if(player->recoilpitch && d_recoil)
+    {
+        fixed_t recoil = (player->recoilpitch >> 3);
+
+        if(player->recoilpitch - recoil > 0)
+            player->recoilpitch -= recoil;
+        else
+            player->recoilpitch = 0;
+    }
+    else
+        player->recoilpitch = 0;
 }
 
 void P_AimingHelp (player_t* player)
