@@ -28,6 +28,7 @@
 
 
 
+#include <stdlib.h>
 
 #include "doomdef.h"
 #include "d_event.h"
@@ -149,6 +150,8 @@ void P_CalcHeight (player_t* player)
 //
 void P_MovePlayer (player_t* player)
 {
+    int			look;
+
     ticcmd_t*		cmd;
 	
     cmd = &player->cmd;
@@ -169,6 +172,43 @@ void P_MovePlayer (player_t* player)
 	 && player->mo->state == &states[S_PLAY] )
     {
 	P_SetMobjState (player->mo, S_PLAY_RUN1);
+    }
+
+    look = cmd->lookfly & 15;
+    if (look > 7)
+    {
+        look -= 16;
+    }
+    if (look)
+    {
+        if (look == -8)
+        {
+            player->centering = true;
+        }
+        else
+        {
+            player->lookdir += 5 * look;
+            if (player->lookdir > 90 || player->lookdir < -110)
+            {
+                player->lookdir -= 5 * look;
+            }
+        }
+    }
+    if (player->centering)
+    {
+        if (player->lookdir > 0)
+        {
+            player->lookdir -= 8;
+        }
+        else if (player->lookdir < 0)
+        {
+            player->lookdir += 8;
+        }
+        if (abs(player->lookdir) < 8)
+        {
+            player->lookdir = 0;
+            player->centering = false;
+        }
     }
 }	
 
@@ -197,6 +237,21 @@ void P_DeathThink (player_t* player)
 
     player->deltaviewheight = 0;
     onground = (player->mo->z <= player->mo->floorz);
+
+    if (player->lookdir > 0)
+    {
+        player->lookdir -= 6;
+    }
+    else if (player->lookdir < 0)
+    {
+        player->lookdir += 6;
+    }
+
+    if (abs(player->lookdir) < 6)
+    {
+        player->lookdir = 0;
+    }
+
     P_CalcHeight (player);
 	
     if (player->attacker && player->attacker != player->mo)
@@ -413,7 +468,8 @@ void P_AimingHelp (player_t* player)
     if (prio == 7 &&
 	player->attacker->health > 0 &&
 	player->attacker &&
-	player->attacker != player->mo)
+	player->attacker != player->mo &&
+	P_CheckSight (player->mo, player->attacker))
     {
 	angle = R_PointToAngle2 (player->mo->x,
 				 player->mo->y,

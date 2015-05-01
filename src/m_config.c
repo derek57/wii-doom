@@ -148,10 +148,10 @@ extern int key_invright, key_invuse;
     CONFIG_VARIABLE_INT		(walking_speed),
     CONFIG_VARIABLE_INT		(turning_speed),
     CONFIG_VARIABLE_INT		(strafing_speed),
-//    CONFIG_VARIABLE_INT		(freelook_speed),
+    CONFIG_VARIABLE_INT		(freelook_speed),
     CONFIG_VARIABLE_INT		(use_gamma),
-/*
     CONFIG_VARIABLE_INT		(mouse_look),
+/*
     CONFIG_VARIABLE_INT		(voices),
 						// FOR PSP: USED TO BE FOR SET CFG VAR TICKER & FPS...
 						// ...BUT CAUSES A CRASH AS SOON AS THE SCREEN WIPES

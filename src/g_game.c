@@ -486,6 +486,7 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
 //    int		tspeed; 
     int		forward;
     int		side;
+    int		look;
 /*
     if(gamestate == GS_CONSOLE)
     {                         
@@ -515,7 +516,7 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
          || gamekeydown[key_speed] 
          || joybuttons[joybspeed];
 */
-    forward = side = 0;
+    forward = side = look = 0;
 /*    
     // use two stage accelerative turning
     // on the keyboard and joystick
@@ -661,14 +662,17 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
     }
     turnspd = turnspeed;
 
+    if(mouselook == 0)
+	look = -8;
+
     if (/*gamekeydown[key_jump] || mousebuttons[mousebjump]
 	||*/ joybuttons[joybjump] && !menuactive)
     {
 	if(!demoplayback)
 	    cmd->arti |= AFLAG_JUMP;
     }
-									// FOR THE WII: UNUSED
-    if((joybuttons[joybaiminghelp] || aiming_help) && !demoplayback)
+							// FOR THE WII: UNUSED BUT WORKING
+    if((joybuttons[joybaiminghelp] || aiming_help) && !demoplayback && devparm)
     {
 	player_t* player = &players[consoleplayer];
 	P_AimingHelp(player);
@@ -929,6 +933,45 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
 */
     forward += mousey; 
 
+    // mouselook, but not when paused
+    if (/*joybuttons[joybuse] &&*/ joyiry && !paused && mouselook > 0)	// FOR PSP: mouselook, but...
+    {									// ...not when paused & if on
+	// We'll directly change the viewing pitch of the console player.
+	float adj = ((joyiry * 0x4) << 16) / (float) 0x80000000*180*110.0/85.0;
+
+	// initialiser added to prevent compiler warning
+	float newlookdir = 0;
+
+	extern int mspeed;
+
+	// Speed up the X11 mlook a little.
+	adj *= mspeed;
+
+	if (mouselook == 1)
+	    newlookdir = players[consoleplayer].lookdir + adj;
+	else if (mouselook == 2)
+	    newlookdir = players[consoleplayer].lookdir - adj;
+
+	// vertical view angle taken from p_user.c line 249.
+	if (newlookdir > 90)
+	    newlookdir = 90;
+	else if (newlookdir < -110)
+	    newlookdir = -110;
+
+	players[consoleplayer].lookdir = newlookdir;
+/*
+	player_t* player = &players[consoleplayer];
+
+	C_Printf("newlookdir: %d\n", player->lookdir);
+
+	cmd->buttons |= BT_USE;
+
+	// clear double clicks if hit use button
+	dclicks = 0;
+
+	dont_move_forwards = false;
+*/
+    }
 /*
     if (strafe) 
 	side += mousex*2; 
@@ -955,6 +998,16 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
  
     cmd->forwardmove += forward; 
     cmd->sidemove += side;
+
+    if (players[consoleplayer].playerstate == PST_LIVE)
+    {
+        if (look < 0)
+        {
+            look += 16;
+        }
+        cmd->lookfly = look;
+    }
+//    cmd->lookfly |= flyheight << 4;
 
     // special buttons
     if (sendpause) 
@@ -1470,6 +1523,7 @@ void G_PlayerFinishLevel (int player)
     p->fixedcolormap = 0;		// cancel ir gogles 
     p->damagecount = 0;			// no palette changes 
     p->bonuscount = 0; 
+    p->lookdir = 0;
 } 
  
 
@@ -1510,6 +1564,7 @@ void G_PlayerReborn (int player)
     p->weaponowned[wp_fist] = true; 
     p->weaponowned[wp_pistol] = true; 
     p->ammo[am_clip] = deh_initial_bullets; 
+    p->lookdir = 0;
 	 
     for (i=0 ; i<NUMAMMO ; i++) 
 	p->maxammo[i] = maxammo[i]; 

@@ -155,6 +155,7 @@ int			map = 1;
 int			musnum = 1;
 int			cheeting;
 extern int		cheating;
+extern int		mspeed;
 /*
 extern u32		tickResolution;
 extern u64		fpsTickLast;
@@ -188,8 +189,8 @@ int			extra_wad_loaded;
 int			mhz333 = 0;
 */
 int			fps = 0;		// FOR PSP: calculating the frames per second
-int			key_controls_start_in_cfg_at_pos = 17;	// FOR PSP: ACTUALLY IT'S +2 !!!
-int			key_controls_end_in_cfg_at_pos = 29;	// FOR PSP: ACTUALLY IT'S +2 !!!
+int			key_controls_start_in_cfg_at_pos = 19;	// FOR PSP: ACTUALLY IT'S +2 !!!
+int			key_controls_end_in_cfg_at_pos = 31;	// FOR PSP: ACTUALLY IT'S +2 !!!
 int			crosshair = 0;
 int			show_stats = 0;
 //int			max_free_ram = 0;
@@ -1798,11 +1799,9 @@ enum
     controls_empty2,
     strafesens,
     controls_empty3,
-/*
     controls_freelook,
     mousespeed,
-    controls_empty2,
-*/
+    controls_empty4,
     controls_keybindings,
     controls_end
 } controls_e;
@@ -1818,10 +1817,10 @@ menuitem_t ControlsMenu[]=
     {2,"M_TSPEED",M_TurningSpeed,'t'},
     {-1,"",0,'\0'},
     {2,"M_SSPEED",M_StrafingSpeed,'s'},
-    {-1,"",0,'\0'},/*
-    {2,"M_FRLOOK",M_Freelook,'f'},
-    {2,"M_FLKSPD",M_FreelookSpeed,'s'},
-    {-1,"",0,'\0'},*/
+    {-1,"",0,'\0'},
+    {2,"M_FRLOOK",M_Freelook,'l'},
+    {2,"M_FLKSPD",M_FreelookSpeed,'f'},
+    {-1,"",0,'\0'},
     {1,"M_KBNDGS",M_KeyBindings,'b'}
 };
 
@@ -1831,7 +1830,7 @@ menu_t  ControlsDef =
     &OptionsDef,
     ControlsMenu,
     M_DrawControls,
-    50,50,       // [STRIFE] changed y coord 64 -> 35
+    50,5,       // [STRIFE] changed y coord 64 -> 35
     0
 };
 
@@ -4098,7 +4097,7 @@ boolean M_Responder (event_t* ev)
     if (askforkey && data->btns_d)		// KEY BINDINGS
     {
 	M_KeyBindingsClearControls(ev->data1);
-	*doom_defaults_list[keyaskedfor + 17 + FirstKey].location = ev->data1;
+	*doom_defaults_list[keyaskedfor + 19 + FirstKey].location = ev->data1;
 	askforkey = false;
 	return true;
     }
@@ -6360,8 +6359,6 @@ void M_KeyBindingsClearControls (int ch)	// XXX (FOR PSP): NOW THIS IS RATHER IM
 
 void M_KeyBindingsClearAll (int choice)
 {
-    *doom_defaults_list[17].location = 0;
-    *doom_defaults_list[18].location = 0;
     *doom_defaults_list[19].location = 0;
     *doom_defaults_list[20].location = 0;
     *doom_defaults_list[21].location = 0;
@@ -6372,22 +6369,24 @@ void M_KeyBindingsClearAll (int choice)
     *doom_defaults_list[26].location = 0;
     *doom_defaults_list[27].location = 0;
     *doom_defaults_list[28].location = 0;
+    *doom_defaults_list[29].location = 0;
+    *doom_defaults_list[30].location = 0;
 }
 
 void M_KeyBindingsReset (int choice)
 {
-    *doom_defaults_list[17].location = CLASSIC_CONTROLLER_R;
-    *doom_defaults_list[18].location = CLASSIC_CONTROLLER_L;
-    *doom_defaults_list[19].location = CLASSIC_CONTROLLER_MINUS;
-    *doom_defaults_list[20].location = CLASSIC_CONTROLLER_LEFT;
-    *doom_defaults_list[21].location = CLASSIC_CONTROLLER_DOWN;
-    *doom_defaults_list[22].location = CLASSIC_CONTROLLER_RIGHT;
-    *doom_defaults_list[23].location = CLASSIC_CONTROLLER_ZL;
-    *doom_defaults_list[24].location = CLASSIC_CONTROLLER_ZR;
-    *doom_defaults_list[25].location = CLASSIC_CONTROLLER_HOME;
-    *doom_defaults_list[26].location = CONTROLLER_1;
-    *doom_defaults_list[27].location = CONTROLLER_2;
-    *doom_defaults_list[28].location = CLASSIC_CONTROLLER_PLUS;
+    *doom_defaults_list[19].location = CLASSIC_CONTROLLER_R;
+    *doom_defaults_list[20].location = CLASSIC_CONTROLLER_L;
+    *doom_defaults_list[21].location = CLASSIC_CONTROLLER_MINUS;
+    *doom_defaults_list[22].location = CLASSIC_CONTROLLER_LEFT;
+    *doom_defaults_list[23].location = CLASSIC_CONTROLLER_DOWN;
+    *doom_defaults_list[24].location = CLASSIC_CONTROLLER_RIGHT;
+    *doom_defaults_list[25].location = CLASSIC_CONTROLLER_ZL;
+    *doom_defaults_list[26].location = CLASSIC_CONTROLLER_ZR;
+    *doom_defaults_list[27].location = CLASSIC_CONTROLLER_HOME;
+    *doom_defaults_list[28].location = CONTROLLER_1;
+    *doom_defaults_list[29].location = CONTROLLER_2;
+    *doom_defaults_list[30].location = CLASSIC_CONTROLLER_PLUS;
 }
 
 void M_DrawKeyBindings(void)
@@ -6450,7 +6449,7 @@ void M_DrawKeyBindings(void)
 	else
 	{
 	    if(i < 11 && !devparm)
-		M_WriteText(195, (i*10+30), Key2String(*(doom_defaults_list[i+FirstKey+17].location)));
+		M_WriteText(195, (i*10+30), Key2String(*(doom_defaults_list[i+FirstKey+19].location)));
 	}
     }
 }
@@ -6459,7 +6458,7 @@ void M_KeyBindings(int choice)
 {
     M_SetupNextMenu(&KeyBindingsDef);
 }
-/*
+
 void M_Freelook(int choice)
 {
     switch(choice)
@@ -6489,7 +6488,7 @@ void M_FreelookSpeed(int choice)
         break;
     }
 }
-*/
+
 void M_Controls(int choice)
 {
     M_SetupNextMenu(&ControlsDef);
@@ -6497,33 +6496,33 @@ void M_Controls(int choice)
 
 void M_DrawControls(void)
 {
+/*
     if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
 	V_DrawPatch (50, 15, W_CacheLumpName(DEH_String("M_T_CSET"), PU_CACHE));
     else
 	V_DrawPatch (50, 15, W_CacheLumpName(DEH_String("M_CTLSET"), PU_CACHE));
-/*
+*/
     if(mouselook == 0)
-    V_DrawPatch(190, 82,
+    V_DrawPatch(190, 101,
                       W_CacheLumpName(DEH_String("M_MSGOFF"), PU_CACHE));
     else if(mouselook == 1)
-    V_DrawPatch(190, 85,
+    V_DrawPatch(190, 104,
                       W_CacheLumpName(DEH_String("M_NORMAL"), PU_CACHE));
     else if(mouselook == 2)
-    V_DrawPatch(190, 85,
+    V_DrawPatch(190, 104,
                       W_CacheLumpName(DEH_String("M_INVRSE"), PU_CACHE));
-*/
-    M_DrawThermo(OptionsDef.x-10,OptionsDef.y-5+LINEHEIGHT*(mousesens+1),
+
+    M_DrawThermo(OptionsDef.x-10,OptionsDef.y-50+LINEHEIGHT*(mousesens+1),
                  29,forwardmove-19);
 
-    M_DrawThermo(OptionsDef.x-10,OptionsDef.y-5+LINEHEIGHT*(turnsens+1),
+    M_DrawThermo(OptionsDef.x-10,OptionsDef.y-50+LINEHEIGHT*(turnsens+1),
                  6,turnspeed-5);
 
-    M_DrawThermo(OptionsDef.x-10,OptionsDef.y-5+LINEHEIGHT*(strafesens+1),
+    M_DrawThermo(OptionsDef.x-10,OptionsDef.y-50+LINEHEIGHT*(strafesens+1),
                  17,sidemove-16);
-/*
-    M_DrawThermo(OptionsDef.x-5,OptionsDef.y-5+LINEHEIGHT*(mousespeed+1),
+
+    M_DrawThermo(OptionsDef.x-5,OptionsDef.y-50+LINEHEIGHT*(mousespeed+1),
                  11,mspeed);
-*/
 }
 /*
 void M_CpuSpeed(int choice)

@@ -45,6 +45,7 @@
 void G_PlayerReborn (int player);
 void P_SpawnMapThing (mapthing_t*	mthing);
 
+extern int mouselook;
 
 //
 // P_SetMobjState
@@ -334,6 +335,15 @@ void P_ZMovement (mobj_t* mo)
 		// and utter appropriate sound.
 		mo->player->deltaviewheight = mo->momz>>3;
 		S_StartSound (mo, sfx_oof);
+
+		if (mouselook && !demorecording && !demoplayback)
+		{
+		    mo->player->centering = false;
+		}
+		else
+		{
+		    mo->player->centering = true;
+		}
 	    }
 	    mo->momz = 0;
 	}
@@ -1042,13 +1052,16 @@ P_SpawnPlayerMissile
 	if (!linetarget)
 	{
 	    an = source->angle;
-	    slope = 0;
+//	    slope = 0;
+            slope = ((source->player->lookdir) << FRACBITS) / 173;
 	}
     }
 		
     x = source->x;
     y = source->y;
-    z = source->z + 4*8*FRACUNIT;
+//    z = source->z + 4*8*FRACUNIT;
+    z = source->z + 4 * 8 * FRACUNIT +
+        ((source->player->lookdir) << FRACBITS) / 173;
 	
     th = P_SpawnMobj (x,y,z, type);
 

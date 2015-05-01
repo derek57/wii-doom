@@ -109,6 +109,7 @@ int key_fire;
 //int key_fire = KEY_RCTRL;
 //int key_use = ' ';
 int key_speed; 
+int mspeed = 2;
 /*
 // 
 // Heretic keyboard controls
@@ -292,6 +293,7 @@ extern int sidemove;
 extern int turnspeed;
 extern int crosshair;
 extern int mus_engine;
+extern int mouselook;
 
 extern int joy_up;
 extern int joy_down;
@@ -323,10 +325,10 @@ void M_BindBaseControls(void)
     M_BindVariable("walking_speed",          &forwardmove);
     M_BindVariable("turning_speed",          &turnspeed);
     M_BindVariable("strafing_speed",         &sidemove);
-//    M_BindVariable("freelook_speed",         &mspeed);
+    M_BindVariable("freelook_speed",         &mspeed);
     M_BindVariable("use_gamma",              &usegamma);
-/*
     M_BindVariable("mouse_look",             &mouselook);
+/*
     M_BindVariable("voices",                 &disable_voices);
     M_BindVariable("fps",		     &display_fps);	// FOR PSP: DON'T ACTIVATE (WIPE = CRASH)
     M_BindVariable("framelimit",             &frame_limit);

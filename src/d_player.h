@@ -171,6 +171,11 @@ typedef struct player_s
 
     // total time the player's been playing
     unsigned int	worldTimer;
+
+    int			lookdir;
+
+    boolean		centering;
+
 } player_t;
 
 

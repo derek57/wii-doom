@@ -852,6 +852,7 @@ R_PointInSubsector
 void R_SetupFrame (player_t* player)
 {		
     int		i;
+    int		tempCentery;
     
     viewplayer = player;
     viewx = player->mo->x;
@@ -861,6 +862,19 @@ void R_SetupFrame (player_t* player)
 
     viewz = player->viewz;
     
+    tempCentery = viewheight / 2 + ((player->lookdir) << hires) * screenblocks / 10;	// CHANGED FOR HIRES
+    if (centery != tempCentery)
+    {
+        centery = tempCentery;
+        centeryfrac = centery << FRACBITS;
+        for (i = 0; i < viewheight; i++)
+        {
+            yslope[i] = FixedDiv((viewwidth << detailshift) / 2 * FRACUNIT,
+                                 abs(((i - centery) << FRACBITS) +
+                                     FRACUNIT / 2));
+        }
+    }
+
     viewsin = finesine[viewangle>>ANGLETOFINESHIFT];
     viewcos = finecosine[viewangle>>ANGLETOFINESHIFT];
 	
