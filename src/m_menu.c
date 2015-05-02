@@ -189,8 +189,8 @@ int			extra_wad_loaded;
 int			mhz333 = 0;
 */
 int			fps = 0;		// FOR PSP: calculating the frames per second
-int			key_controls_start_in_cfg_at_pos = 20;	// FOR PSP: ACTUALLY IT'S +2 !!!
-int			key_controls_end_in_cfg_at_pos = 32;	// FOR PSP: ACTUALLY IT'S +2 !!!
+int			key_controls_start_in_cfg_at_pos = 21;	// FOR PSP: ACTUALLY IT'S +2 !!!
+int			key_controls_end_in_cfg_at_pos = 33;	// FOR PSP: ACTUALLY IT'S +2 !!!
 int			crosshair = 0;
 int			show_stats = 0;
 //int			max_free_ram = 0;
@@ -396,6 +396,7 @@ void M_Statistics(int choice);
 void M_Crosshair(int choice);
 void M_Jumping(int choice);
 void M_WeaponRecoil(int choice);
+void M_RespawnMonsters(int choice);
 
 void M_God(int choice);
 void M_Noclip(int choice);
@@ -1951,6 +1952,7 @@ enum
     game_jumping,
     game_weapon,
     game_recoil,
+    game_respawn,
     game_end
 } game_e;
 
@@ -1983,6 +1985,7 @@ menuitem_t GameMenu[]=
     {2,"",M_Jumping,'j'},
     {2,"",M_WeaponChange,'w'},
     {2,"",M_WeaponRecoil,'c'},
+    {2,"",M_RespawnMonsters,'t'},
 };
 
 menu_t  GameDef =
@@ -1991,7 +1994,7 @@ menu_t  GameDef =
     &OptionsDef,
     GameMenu,
     M_DrawGame,
-    40,20,       // [STRIFE] changed y coord 64 -> 35
+    85,30,       // [STRIFE] changed y coord 64 -> 35
     0
 };
 
@@ -2009,6 +2012,7 @@ enum
     game2_jumping,
     game2_weapon,
     game2_recoil,
+    game2_respawn,
     game2_end
 } game2_e;
 
@@ -2043,6 +2047,7 @@ menuitem_t GameMenu2[]=
     {2,"",M_Jumping,'j'},
     {2,"",M_WeaponChange,'w'},
     {2,"",M_WeaponRecoil,'c'},
+    {2,"",M_RespawnMonsters,'t'},
 };
 
 menu_t  GameDef2 =
@@ -2051,7 +2056,7 @@ menu_t  GameDef2 =
     &OptionsDef,
     GameMenu2,
     M_DrawGame2,
-    80,20,       // [STRIFE] changed y coord 64 -> 35
+    85,32,       // [STRIFE] changed y coord 64 -> 35
     0
 };
 
@@ -3105,10 +3110,10 @@ void M_DrawGame(void)
 void M_DrawGame2(void)
 {
     if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
-	V_DrawPatchDirect(70, 0, W_CacheLumpName(DEH_String("M_T_GSET"),
+	V_DrawPatchDirect(70, 10, W_CacheLumpName(DEH_String("M_T_GSET"),
                                                PU_CACHE));
     else
-	V_DrawPatchDirect(70, 0, W_CacheLumpName(DEH_String("M_GMESET"),
+	V_DrawPatchDirect(70, 10, W_CacheLumpName(DEH_String("M_GMESET"),
                                                PU_CACHE));
 /*
     M_WriteText(60, 73, DEH_String("----------------------------------"));
@@ -3117,83 +3122,91 @@ void M_DrawGame2(void)
                       W_CacheLumpName(DEH_String(msgNames[showMessages]),
                                       PU_CACHE));
 */
-    M_WriteText(90, 20, DEH_String("MAP GRID"));
-    M_WriteText(90, 30, DEH_String("MAP ROTATION"));
-    M_WriteText(90, 40, DEH_String("FOLLOW MODE"));
-    M_WriteText(90, 50, DEH_String("STATISTICS"));
-    M_WriteText(90, 60, DEH_String("MESSAGES"));
-    M_WriteText(90, 70, DEH_String("AIMING HELP"));
-    M_WriteText(90, 80, DEH_String("CROSSHAIR"));
-    M_WriteText(90, 90, DEH_String("JUMPING"));
-    M_WriteText(90, 100, DEH_String("WEAPON CHANGE"));
-    M_WriteText(90, 110, DEH_String("WEAPON RECOIL"));
+    M_WriteText(85, 30, DEH_String("MAP GRID"));
+    M_WriteText(85, 40, DEH_String("MAP ROTATION"));
+    M_WriteText(85, 50, DEH_String("FOLLOW MODE"));
+    M_WriteText(85, 60, DEH_String("STATISTICS"));
+    M_WriteText(85, 70, DEH_String("MESSAGES"));
+    M_WriteText(85, 80, DEH_String("AIMING HELP"));
+    M_WriteText(85, 90, DEH_String("CROSSHAIR"));
+    M_WriteText(85, 100, DEH_String("JUMPING"));
+    M_WriteText(85, 110, DEH_String("WEAPON CHANGE"));
+    M_WriteText(85, 120, DEH_String("WEAPON RECOIL"));
+    M_WriteText(85, 130, DEH_String("RESPAWN MONSTERS"));
 
     if(drawgrid == 1)
-        M_WriteText(210, 20, DEH_String("ON"));
+        M_WriteText(220, 30, DEH_String("ON"));
 //	V_DrawPatch (245, 20, W_CacheLumpName(DEH_String("M_MSGON"), PU_CACHE));
     else if(drawgrid == 0)
-        M_WriteText(210, 20, DEH_String("OFF"));
+        M_WriteText(220, 30, DEH_String("OFF"));
 //	V_DrawPatch (245, 20, W_CacheLumpName(DEH_String("M_MSGOFF"), PU_CACHE));
 
     if(am_rotate == true)
-        M_WriteText(210, 30, DEH_String("ON"));
+        M_WriteText(220, 40, DEH_String("ON"));
 //	V_DrawPatch (245, 36, W_CacheLumpName(DEH_String("M_MSGON"), PU_CACHE));
     else if(am_rotate == false)
-        M_WriteText(210, 30, DEH_String("OFF"));
+        M_WriteText(220, 40, DEH_String("OFF"));
 //	V_DrawPatch (245, 36, W_CacheLumpName(DEH_String("M_MSGOFF"), PU_CACHE));
 
     if(followplayer == 1)
-        M_WriteText(210, 40, DEH_String("ON"));
+        M_WriteText(220, 50, DEH_String("ON"));
 //	V_DrawPatch (245, 52, W_CacheLumpName(DEH_String("M_MSGON"), PU_CACHE));
     else if(followplayer == 0)
-        M_WriteText(210, 40, DEH_String("OFF"));
+        M_WriteText(220, 50, DEH_String("OFF"));
 //	V_DrawPatch (245, 52, W_CacheLumpName(DEH_String("M_MSGOFF"), PU_CACHE));
 
     if(show_stats == 1)
-        M_WriteText(210, 50, DEH_String("ON"));
+        M_WriteText(220, 60, DEH_String("ON"));
 //	V_DrawPatch (245, 68, W_CacheLumpName(DEH_String("M_MSGON"), PU_CACHE));
     else if (show_stats == 0)
-        M_WriteText(210, 50, DEH_String("OFF"));
+        M_WriteText(220, 60, DEH_String("OFF"));
 //	V_DrawPatch (245, 68, W_CacheLumpName(DEH_String("M_MSGOFF"), PU_CACHE));
 
     if(showMessages)
-        M_WriteText(210, 60, DEH_String("ON"));
+        M_WriteText(220, 70, DEH_String("ON"));
     else
-        M_WriteText(210, 60, DEH_String("OFF"));
+        M_WriteText(220, 70, DEH_String("OFF"));
 
     if(aiming_help)
-        M_WriteText(210, 70, DEH_String("ON"));
+        M_WriteText(220, 80, DEH_String("ON"));
 //	V_DrawPatch (245, 100, W_CacheLumpName(DEH_String("M_MSGON"), PU_CACHE));
     else
-        M_WriteText(210, 70, DEH_String("OFF"));
+        M_WriteText(220, 80, DEH_String("OFF"));
 //	V_DrawPatch (245, 100, W_CacheLumpName(DEH_String("M_MSGOFF"), PU_CACHE));
 
     if(crosshair == 1)
-        M_WriteText(210, 80, DEH_String("ON"));
+        M_WriteText(220, 90, DEH_String("ON"));
 //	V_DrawPatch (245, 116, W_CacheLumpName(DEH_String("M_MSGON"), PU_CACHE));
     else if (crosshair == 0)
-        M_WriteText(210, 80, DEH_String("OFF"));
+        M_WriteText(220, 90, DEH_String("OFF"));
 //	V_DrawPatch (245, 116, W_CacheLumpName(DEH_String("M_MSGOFF"), PU_CACHE));
 
     if(jumping)
-        M_WriteText(210, 90, DEH_String("ON"));
+        M_WriteText(220, 100, DEH_String("ON"));
 //	V_DrawPatch (245, 132, W_CacheLumpName(DEH_String("M_MSGON"), PU_CACHE));
     else
-        M_WriteText(210, 90, DEH_String("OFF"));
+        M_WriteText(220, 100, DEH_String("OFF"));
 //	V_DrawPatch (245, 132, W_CacheLumpName(DEH_String("M_MSGOFF"), PU_CACHE));
 
     if(use_vanilla_weapon_change == 1)
-        M_WriteText(210, 100, DEH_String("ON"));
+        M_WriteText(220, 110, DEH_String("SLOW"));
 //	V_DrawPatch (245, 151, W_CacheLumpName(DEH_String("M_SLOW"), PU_CACHE));
     else if(use_vanilla_weapon_change == 0)
-        M_WriteText(210, 100, DEH_String("OFF"));
+        M_WriteText(220, 110, DEH_String("FAST"));
 //	V_DrawPatch (245, 151, W_CacheLumpName(DEH_String("M_FAST"), PU_CACHE));
 
     if(d_recoil)
-        M_WriteText(210, 110, DEH_String("ON"));
+        M_WriteText(220, 120, DEH_String("ON"));
 //	V_DrawPatch (245, 151, W_CacheLumpName(DEH_String("M_SLOW"), PU_CACHE));
     else
-        M_WriteText(210, 110, DEH_String("OFF"));
+        M_WriteText(220, 120, DEH_String("OFF"));
+//	V_DrawPatch (245, 151, W_CacheLumpName(DEH_String("M_FAST"), PU_CACHE));
+
+    if(respawnparm)
+        M_WriteText(220, 130, DEH_String("ON"));
+//	V_DrawPatch (245, 151, W_CacheLumpName(DEH_String("M_SLOW"), PU_CACHE));
+    else
+        M_WriteText(220, 130, DEH_String("OFF"));
 //	V_DrawPatch (245, 151, W_CacheLumpName(DEH_String("M_FAST"), PU_CACHE));
 }
 
@@ -4183,7 +4196,7 @@ boolean M_Responder (event_t* ev)
     if (askforkey && data->btns_d)		// KEY BINDINGS
     {
 	M_KeyBindingsClearControls(ev->data1);
-	*doom_defaults_list[keyaskedfor + 20 + FirstKey].location = ev->data1;
+	*doom_defaults_list[keyaskedfor + 21 + FirstKey].location = ev->data1;
 	askforkey = false;
 	return true;
     }
@@ -6446,7 +6459,6 @@ void M_KeyBindingsClearControls (int ch)	// XXX (FOR PSP): NOW THIS IS RATHER IM
 
 void M_KeyBindingsClearAll (int choice)
 {
-    *doom_defaults_list[20].location = 0;
     *doom_defaults_list[21].location = 0;
     *doom_defaults_list[22].location = 0;
     *doom_defaults_list[23].location = 0;
@@ -6458,22 +6470,23 @@ void M_KeyBindingsClearAll (int choice)
     *doom_defaults_list[29].location = 0;
     *doom_defaults_list[20].location = 0;
     *doom_defaults_list[31].location = 0;
+    *doom_defaults_list[32].location = 0;
 }
 
 void M_KeyBindingsReset (int choice)
 {
-    *doom_defaults_list[20].location = CLASSIC_CONTROLLER_R;
-    *doom_defaults_list[21].location = CLASSIC_CONTROLLER_L;
-    *doom_defaults_list[22].location = CLASSIC_CONTROLLER_MINUS;
-    *doom_defaults_list[23].location = CLASSIC_CONTROLLER_LEFT;
-    *doom_defaults_list[24].location = CLASSIC_CONTROLLER_DOWN;
-    *doom_defaults_list[25].location = CLASSIC_CONTROLLER_RIGHT;
-    *doom_defaults_list[26].location = CLASSIC_CONTROLLER_ZL;
-    *doom_defaults_list[27].location = CLASSIC_CONTROLLER_ZR;
-    *doom_defaults_list[28].location = CLASSIC_CONTROLLER_HOME;
-    *doom_defaults_list[29].location = CONTROLLER_1;
-    *doom_defaults_list[30].location = CONTROLLER_2;
-    *doom_defaults_list[31].location = CLASSIC_CONTROLLER_PLUS;
+    *doom_defaults_list[21].location = CLASSIC_CONTROLLER_R;
+    *doom_defaults_list[22].location = CLASSIC_CONTROLLER_L;
+    *doom_defaults_list[23].location = CLASSIC_CONTROLLER_MINUS;
+    *doom_defaults_list[24].location = CLASSIC_CONTROLLER_LEFT;
+    *doom_defaults_list[25].location = CLASSIC_CONTROLLER_DOWN;
+    *doom_defaults_list[26].location = CLASSIC_CONTROLLER_RIGHT;
+    *doom_defaults_list[27].location = CLASSIC_CONTROLLER_ZL;
+    *doom_defaults_list[28].location = CLASSIC_CONTROLLER_ZR;
+    *doom_defaults_list[29].location = CLASSIC_CONTROLLER_HOME;
+    *doom_defaults_list[30].location = CONTROLLER_1;
+    *doom_defaults_list[31].location = CONTROLLER_2;
+    *doom_defaults_list[32].location = CLASSIC_CONTROLLER_PLUS;
 }
 
 void M_DrawKeyBindings(void)
@@ -6536,7 +6549,7 @@ void M_DrawKeyBindings(void)
 	else
 	{
 	    if(i < 11 && !devparm)
-		M_WriteText(195, (i*10+30), Key2String(*(doom_defaults_list[i+FirstKey+20].location)));
+		M_WriteText(195, (i*10+30), Key2String(*(doom_defaults_list[i+FirstKey+21].location)));
 	}
     }
 }
@@ -7130,6 +7143,29 @@ void M_WeaponRecoil(int choice)
         if (d_recoil == false)
             d_recoil = true;
         players[consoleplayer].message = DEH_String("WEAPON RECOIL ON");
+        break;
+    }
+}
+
+void M_RespawnMonsters(int choice)
+{
+    switch(choice)
+    {
+    case 0:
+        if (respawnparm)
+	{
+            start_respawnparm = false;
+            respawnparm = false;
+	}
+        players[consoleplayer].message = DEH_String("RESPAWN MONSTERS DISABLED");
+        break;
+    case 1:
+        if (respawnparm == false)
+	{
+            start_respawnparm = true;
+            respawnparm = true;
+	}
+        players[consoleplayer].message = DEH_String("RESPAWN MONSTERS ENABLED");
         break;
     }
 }

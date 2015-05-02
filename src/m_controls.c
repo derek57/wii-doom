@@ -44,6 +44,7 @@ extern int showMessages;
 extern boolean am_rotate;
 extern boolean opl;
 extern boolean d_recoil;
+extern boolean respawnparm;
 
 //int mspeed;
 extern int mouseSensitivity;
@@ -353,6 +354,7 @@ void M_BindBaseControls(void)
     M_BindVariable("jump",                   &jumping);
     M_BindVariable("music_engine",           &mus_engine);
     M_BindVariable("recoil",                 &d_recoil);
+    M_BindVariable("monsters_respawn",       &respawnparm);
     M_BindVariable("key_fire",               &joy_r);
     M_BindVariable("key_use",                &joy_l);
     M_BindVariable("key_menu",               &joy_minus);

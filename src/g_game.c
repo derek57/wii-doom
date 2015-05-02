@@ -2186,8 +2186,12 @@ void G_DoNewGame (void)
     deathmatch = false;
 
     playeringame[1] = playeringame[2] = playeringame[3] = 0;
-    respawnparm = false;
+
+//    respawnparm = false;
     fastparm = false;
+
+    respawnparm = start_respawnparm;
+
     nomonsters = false;
     consoleplayer = 0;
     G_InitNew (d_skill, d_episode, d_map); 
@@ -2823,6 +2827,8 @@ boolean G_CheckDemoStatus(void)
 
         W_ReleaseLumpName(defdemoname);
         demoplayback = false;
+        respawnparm = start_respawnparm;
+//        fastparm = start_fastparm;
         D_AdvanceDemo();
         return true;
     }

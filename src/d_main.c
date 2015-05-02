@@ -121,8 +121,9 @@ char *          iwadfile;
 
 
 boolean         nomonsters;	// checkparm of -nomonsters
-boolean         respawnparm;	// checkparm of -respawn
+//boolean         respawnparm;	// checkparm of -respawn
 boolean         fastparm;	// checkparm of -fast
+boolean         start_respawnparm;
 
 //extern int soundVolume;
 //extern  int	sfxVolume;
@@ -1757,12 +1758,12 @@ void D_DoomMain (void)
     //
     // Monsters respawn after being killed.
     //
-
-//    respawnparm = M_CheckParm ("-respawn");
+/*
+    respawnparm = M_CheckParm ("-respawn");
 
     if(respawnflag && devparm_net)
 	respawnparm = true;
-
+*/
     //!
     // @vanilla
     //
@@ -1876,6 +1877,8 @@ void D_DoomMain (void)
     M_SetConfigFilenames("default.cfg");//, PROGRAM_PREFIX "doom.cfg");
     D_BindVariables();
     M_LoadDefaults();
+
+    respawnparm = false;
 
     if(!devparm && aiming_help != 0)
 	aiming_help = 0;
@@ -2306,6 +2309,8 @@ void D_DoomMain (void)
 
     // Initial netgame startup. Connect to server etc.
     D_ConnectNetGame();
+
+    start_respawnparm = respawnparm;
 
     // get skill / episode / map from parms
     startskill = sk_medium;

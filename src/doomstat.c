@@ -39,6 +39,6 @@ char *gamedescription;
 boolean	modifiedgame;
 
 boolean d_recoil = true;
-
+boolean	respawnparm = false;    		// checkparm of -respawn
 
 
