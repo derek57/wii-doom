@@ -305,7 +305,7 @@ char *M_StringDuplicate(const char *orig)
 {
     char *result;
 
-    result = strdup(orig);
+    result = M_Strdup(orig);
 
     if (result == NULL)
     {

@@ -1221,7 +1221,7 @@ static void LoadChexDeh(void)
         }
         else
         {
-            chex_deh = strdup("chex.deh");
+            chex_deh = M_Strdup("chex.deh");
         }
 
         // If the dehacked patch isn't found, try searching the WAD

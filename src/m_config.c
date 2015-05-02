@@ -1884,7 +1884,7 @@ static void SetVariable(default_t *def, char *value)
     switch (def->type)
     {
         case DEFAULT_STRING:
-            * (char **) def->location = strdup(value);
+            * (char **) def->location = M_Strdup(value);
             break;
 
         case DEFAULT_INT:
@@ -2235,9 +2235,9 @@ static char *GetDefaultConfigDir(void)
 	    printf("FROM M_CONFIG.O: HOME-DIR IS: %s\n", homedir);
 */
 	if(usb)
-	    return strdup("usb:/apps/wiidoom/");
+	    return M_Strdup("usb:/apps/wiidoom/");
 	else if(sd)
-	    return strdup("sd:/apps/wiidoom/");
+	    return M_Strdup("sd:/apps/wiidoom/");
     }
 }
 
@@ -2287,7 +2287,7 @@ char *M_GetSaveGameDir(char *iwadname)
 
     if (!strcmp(configdir, ""))
     {
-	savegamedir = strdup("");
+	savegamedir = M_Strdup("");
     }
     else
     {
