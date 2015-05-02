@@ -502,14 +502,14 @@ static char *GetFullPath(char *base_filename, char *path)
     // so just return it.
     if (path[0] == DIR_SEPARATOR)
     {
-        return M_Strdup(path);
+        return M_StringDuplicate(path);
     }
 
 #ifdef _WIN32
     // d:\path\...
     if (isalpha(path[0]) && path[1] == ':' && path[2] == DIR_SEPARATOR)
     {
-        return M_Strdup(path);
+        return M_StringDuplicate(path);
     }
 #endif
 
@@ -520,7 +520,7 @@ static char *GetFullPath(char *base_filename, char *path)
 
     // Copy config filename and cut off the filename to just get the
     // parent dir.
-    basedir = M_Strdup(base_filename);
+    basedir = M_StringDuplicate(base_filename);
     p = strrchr(basedir, DIR_SEPARATOR);
     if (p != NULL)
     {
@@ -529,7 +529,7 @@ static char *GetFullPath(char *base_filename, char *path)
     }
     else
     {
-        result = M_Strdup(path);
+        result = M_StringDuplicate(path);
     }
     free(basedir);
     free(path);
@@ -676,7 +676,7 @@ static void LoadSubstituteConfigs(void)
 /*
     if (!strcmp(configdir, ""))
     {
-        musicdir = M_Strdup("");
+        musicdir = M_StringDuplicate("");
     }
     else
     {
@@ -705,7 +705,7 @@ static void LoadSubstituteConfigs(void)
     {    
         for (i = 0; i < arrlen(subst_config_filenames); ++i)
         {
-            path = M_Strdup(subst_config_filenames[i]);
+            path = M_StringDuplicate(subst_config_filenames[i]);
             ReadSubstituteConfig(path);
             free(path);
         }
@@ -771,7 +771,7 @@ static void DumpSubstituteConfig(char *filename)
 
     for (lumpnum = 0; lumpnum < numlumps; ++lumpnum)
     {
-        strncpy(name, lumpinfo[lumpnum].name, 8);
+        M_StringCopy(name, lumpinfo[lumpnum].name, 8);
         name[8] = '\0';
 
         if (!IsMusicLump(lumpnum))
@@ -843,7 +843,7 @@ static boolean WriteWrapperTimidityConfig(char *write_path)
     p = strrchr(timidity_cfg_path, DIR_SEPARATOR);
     if (p != NULL)
     {
-        path = M_Strdup(timidity_cfg_path);
+        path = M_StringDuplicate(timidity_cfg_path);
         path[p - timidity_cfg_path] = '\0';
         fprintf(fstream, "dir %s\n", path);
         free(path);

@@ -47,6 +47,8 @@ u32 WaitButtons(void);
 u32 Pad_GetButtons(void);
 u32 Wpad_HeldButtons(void);
 
+bool M_StringCopy(char *dest, const char *src, size_t dest_size);
+
 bool Wpad_TimeButton(void)
 {
     u32 buttons = 1;
@@ -582,7 +584,7 @@ void Menu_WadList(void)
 	    if ((cnt - start) >= ENTRIES_PER_PAGE)
 		break;
 
-	    strncpy(str, file->filename, 40); //Only 40 chars to fit the screen
+	    M_StringCopy(str, file->filename, 40); //Only 40 chars to fit the screen
 
 	    str[40]=0;
 

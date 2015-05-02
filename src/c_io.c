@@ -293,7 +293,7 @@ static void C_AddToHistory(char *s)
     // add it to the history
     // 6/8/99 maximum linelength to prevent segfaults
     // -3 for safety
-    strncpy(history[history_last], s, LINELENGTH - 3);
+    M_StringCopy(history[history_last], s, LINELENGTH - 3);
 
     history_last++;
 

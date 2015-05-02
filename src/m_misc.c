@@ -305,7 +305,7 @@ char *M_StringDuplicate(const char *orig)
 {
     char *result;
 
-    result = M_Strdup(orig);
+    result = strdup(orig);
 
     if (result == NULL)
     {
@@ -382,12 +382,20 @@ char *M_StringReplace(const char *haystack, const char *needle,
 
 boolean M_StringCopy(char *dest, const char *src, size_t dest_size)
 {
+    size_t len;
+
     if (dest_size >= 1)
     {
         dest[dest_size - 1] = '\0';
         strncpy(dest, src, dest_size - 1);
     }
-    return strlen(dest) == strlen(src);
+    else
+    {
+        return false;
+    }
+
+    len = strlen(dest);
+    return src[len] == '\0';
 }
 
 // Safe string concat function that works like OpenBSD's strlcat().
@@ -557,16 +565,5 @@ char *M_DirName(char *path)
     // path string does not contain a directory separator
     free(res);
     return M_StringDuplicate(".");
-}
-
-//
-// Error-checked strdup
-//
-char *M_Strdup(const char *str)
-{
-    char *ret = strdup(str);
-    if(!ret)
-        I_Error("M_Strdup: failed on allocation of %lu bytes", strlen(str)+1);
-    return ret;
 }
 

@@ -131,7 +131,7 @@ static void ParseLine(gus_config_t *config, char *line)
     mapped_id = atoi(fields[MappingIndex()]);
 
     free(config->patch_names[instr_id]);
-    config->patch_names[instr_id] = M_Strdup(fields[5]);
+    config->patch_names[instr_id] = M_StringDuplicate(fields[5]);
     config->mapping[instr_id] = mapped_id;
 }
 

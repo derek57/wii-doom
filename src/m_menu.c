@@ -4837,7 +4837,7 @@ void M_Drawer (void)
 		if (messageString[start + i] == '\n')
 		{
 		    memset(string, 0, sizeof(string));
-		    strncpy(string, messageString + start, i);
+		    M_StringCopy(string, messageString + start, i);
 		    foundnewline = 1;
 		    start += i + 1;
 		    break;

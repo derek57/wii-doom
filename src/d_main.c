@@ -1221,7 +1221,7 @@ static void LoadChexDeh(void)
         }
         else
         {
-            chex_deh = M_Strdup("chex.deh");
+            chex_deh = M_StringDuplicate("chex.deh");
         }
 
         // If the dehacked patch isn't found, try searching the WAD
@@ -2091,7 +2091,7 @@ void D_DoomMain (void)
 
 	if (D_AddFile (file))
         {
-            strncpy(demolumpname, lumpinfo[numlumps - 1].name, 8);
+            M_StringCopy(demolumpname, lumpinfo[numlumps - 1].name, 8);
             demolumpname[8] = '\0';
 
             printf("Playing demo %s.\n", file);
@@ -2102,7 +2102,7 @@ void D_DoomMain (void)
             // the demo in the same way as Vanilla Doom.  This makes
             // tricks like "-playdemo demo1" possible.
 
-            strncpy(demolumpname, myargv[p + 1], 8);
+            M_StringCopy(demolumpname, myargv[p + 1], 8);
             demolumpname[8] = '\0';
         }
 

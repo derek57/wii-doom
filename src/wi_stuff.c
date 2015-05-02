@@ -54,6 +54,7 @@
 
 #include "s_sound.h"
 
+#include "m_misc.h"
 //
 // Data needed to add patches to full screen intermission pics.
 // Patches are statistics messages, and animations.
@@ -1787,12 +1788,12 @@ static void WI_loadUnloadData(load_callback_t callback)
 
     if (gamemode == commercial)
     {
-	strncpy(name, DEH_String("INTERPIC"), 9);
+	M_StringCopy(name, DEH_String("INTERPIC"), 9);
         name[8] = '\0';
     }
     else if (gamemode == retail && wbs->epsd == 3)
     {
-	strncpy(name, DEH_String("INTERPIC"), 9);
+	M_StringCopy(name, DEH_String("INTERPIC"), 9);
         name[8] = '\0';
     }
     else
