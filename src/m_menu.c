@@ -189,8 +189,8 @@ int			extra_wad_loaded;
 int			mhz333 = 0;
 */
 int			fps = 0;		// FOR PSP: calculating the frames per second
-int			key_controls_start_in_cfg_at_pos = 22;	// FOR PSP: ACTUALLY IT'S +2 !!!
-int			key_controls_end_in_cfg_at_pos = 34;	// FOR PSP: ACTUALLY IT'S +2 !!!
+int			key_controls_start_in_cfg_at_pos = 23;	// FOR PSP: ACTUALLY IT'S +2 !!!
+int			key_controls_end_in_cfg_at_pos = 35;	// FOR PSP: ACTUALLY IT'S +2 !!!
 int			crosshair = 0;
 int			show_stats = 0;
 //int			max_free_ram = 0;
@@ -398,6 +398,7 @@ void M_Jumping(int choice);
 void M_WeaponRecoil(int choice);
 void M_RespawnMonsters(int choice);
 void M_FastMonsters(int choice);
+void M_Autoaim(int choice);
 
 void M_God(int choice);
 void M_Noclip(int choice);
@@ -1395,7 +1396,7 @@ menu_t  FilesDef =
     &MainDef,
     FilesMenu,
     M_DrawFilesMenu,
-    97,45, // haleyjd 08/28/10: [STRIFE] changed y coord
+    97,45,
     0
 };
 
@@ -1610,7 +1611,7 @@ menu_t  CheatsDef =
     &FilesDef,
     CheatsMenu,
     M_DrawCheats,
-    75,28,       // [STRIFE] changed y coord 64 -> 35
+    75,28,
     0
 };
 
@@ -1629,10 +1630,6 @@ enum
     items_end
 } items_e;
 
-// haleyjd 08/29/10:
-// [STRIFE] 
-// * Added voice volume
-// * Moved mouse sensitivity here (who knows why...)
 menuitem_t ItemsMenu[]=
 {
     {2,"",M_ItemsA,'1'},
@@ -1653,7 +1650,7 @@ menu_t  ItemsDef =
     &CheatsDef,
     ItemsMenu,
     M_DrawItems,
-    80,57,       // [STRIFE] changed y coord 64 -> 35
+    80,57,
     0
 };
 
@@ -1667,10 +1664,6 @@ enum
     keys_end
 } keys_e;
 
-// haleyjd 08/29/10:
-// [STRIFE] 
-// * Added voice volume
-// * Moved mouse sensitivity here (who knows why...)
 menuitem_t KeysMenu[]=
 {
     {2,"",M_KeysA,'1'},
@@ -1686,7 +1679,7 @@ menu_t  KeysDef =
     &CheatsDef,
     KeysMenu,
     M_DrawKeys,
-    80,57,       // [STRIFE] changed y coord 64 -> 35
+    80,57,
     0
 };
 
@@ -1704,10 +1697,6 @@ enum
     weapons_end
 } weapons_e;
 
-// haleyjd 08/29/10:
-// [STRIFE] 
-// * Added voice volume
-// * Moved mouse sensitivity here (who knows why...)
 menuitem_t WeaponsMenu[]=
 {
     {2,"",M_WeaponsA,'1'},
@@ -1727,7 +1716,7 @@ menu_t  WeaponsDef =
     &CheatsDef,
     WeaponsMenu,
     M_DrawWeapons,
-    80,57,       // [STRIFE] changed y coord 64 -> 35
+    80,57,
     0
 };
 
@@ -1740,10 +1729,6 @@ enum
     armor_end
 } armor_e;
 
-// haleyjd 08/29/10:
-// [STRIFE] 
-// * Added voice volume
-// * Moved mouse sensitivity here (who knows why...)
 menuitem_t ArmorMenu[]=
 {
     {2,"",M_ArmorA,'1'},
@@ -1758,7 +1743,7 @@ menu_t  ArmorDef =
     &CheatsDef,
     ArmorMenu,
     M_DrawArmor,
-    80,57,       // [STRIFE] changed y coord 64 -> 35
+    80,57,
     0
 };
 
@@ -1772,10 +1757,6 @@ enum
     screen_end
 } screen_e;
 
-// haleyjd 08/29/10:
-// [STRIFE] 
-// * Added voice volume
-// * Moved mouse sensitivity here (who knows why...)
 menuitem_t ScreenMenu[]=
 {
     {2,"M_BRGTNS",M_Brightness,'b'},
@@ -1791,7 +1772,7 @@ menu_t  ScreenDef =
     &OptionsDef,
     ScreenMenu,
     M_DrawScreen,
-    60,55,       // [STRIFE] changed y coord 64 -> 35
+    60,55,
     0
 };
 
@@ -1810,10 +1791,6 @@ enum
     controls_end
 } controls_e;
 
-// haleyjd 08/29/10:
-// [STRIFE] 
-// * Added voice volume
-// * Moved mouse sensitivity here (who knows why...)
 menuitem_t ControlsMenu[]=
 {
     {2,"M_WSPEED",M_WalkingSpeed,'m'},
@@ -1834,7 +1811,7 @@ menu_t  ControlsDef =
     &OptionsDef,
     ControlsMenu,
     M_DrawControls,
-    50,5,       // [STRIFE] changed y coord 64 -> 35
+    50,5,
     0
 };
 
@@ -1867,10 +1844,6 @@ enum
     keybindings_end
 } keybindings_e;
 
-// haleyjd 08/29/10:
-// [STRIFE] 
-// * Added voice volume
-// * Moved mouse sensitivity here (who knows why...)
 menuitem_t KeyBindingsMenu[]=
 {
     {5,"",M_KeyBindingsSetKey,0},
@@ -1905,7 +1878,7 @@ menu_t  KeyBindingsDef =
     &ControlsDef,
     KeyBindingsMenu,
     M_DrawKeyBindings,
-    45,32,       // [STRIFE] changed y coord 64 -> 35
+    45,32,
     0
 };
 
@@ -1918,10 +1891,6 @@ enum
     system_end
 } system_e;
 
-// haleyjd 08/29/10:
-// [STRIFE] 
-// * Added voice volume
-// * Moved mouse sensitivity here (who knows why...)
 menuitem_t SystemMenu[]=
 {
 //    {2,"M_CPUSPD",M_CpuSpeed,'c'},
@@ -1936,7 +1905,7 @@ menu_t  SystemDef =
     &OptionsDef,
     SystemMenu,
     M_DrawSystem,
-    50,85,       // [STRIFE] changed y coord 64 -> 35
+    50,85,
     0
 };
 
@@ -1955,13 +1924,10 @@ enum
     game_recoil,
     game_respawn,
     game_fast,
+    game_autoaim,
     game_end
 } game_e;
 
-// haleyjd 08/29/10:
-// [STRIFE] 
-// * Added voice volume
-// * Moved mouse sensitivity here (who knows why...)
 menuitem_t GameMenu[]=
 {
 /*
@@ -1989,6 +1955,7 @@ menuitem_t GameMenu[]=
     {2,"",M_WeaponRecoil,'c'},
     {2,"",M_RespawnMonsters,'t'},
     {2,"",M_FastMonsters,'d'},
+    {2,"",M_Autoaim,'a'},
 };
 
 menu_t  GameDef =
@@ -1997,7 +1964,7 @@ menu_t  GameDef =
     &OptionsDef,
     GameMenu,
     M_DrawGame,
-    85,30,       // [STRIFE] changed y coord 64 -> 35
+    85,30,
     0
 };
 
@@ -2017,13 +1984,10 @@ enum
     game2_recoil,
     game2_respawn,
     game2_fast,
+    game2_autoaim,
     game2_end
 } game2_e;
 
-// haleyjd 08/29/10:
-// [STRIFE] 
-// * Added voice volume
-// * Moved mouse sensitivity here (who knows why...)
 menuitem_t GameMenu2[]=
 {
 /*
@@ -2053,6 +2017,7 @@ menuitem_t GameMenu2[]=
     {2,"",M_WeaponRecoil,'c'},
     {2,"",M_RespawnMonsters,'t'},
     {2,"",M_FastMonsters,'d'},
+    {2,"",M_Autoaim,'a'},
 };
 
 menu_t  GameDef2 =
@@ -2061,7 +2026,7 @@ menu_t  GameDef2 =
     &OptionsDef,
     GameMenu2,
     M_DrawGame2,
-    85,32,       // [STRIFE] changed y coord 64 -> 35
+    85,32,
     0
 };
 
@@ -2079,10 +2044,6 @@ enum
     debug_end
 } debug_e;
 
-// haleyjd 08/29/10:
-// [STRIFE] 
-// * Added voice volume
-// * Moved mouse sensitivity here (who knows why...)
 menuitem_t DebugMenu[]=
 {
 /*
@@ -2102,7 +2063,7 @@ menu_t  DebugDef =
     &OptionsDef,
     DebugMenu,
     M_DrawDebug,
-    45,75,       // [STRIFE] changed y coord 64 -> 35
+    45,75,
     0
 };
 
@@ -2233,7 +2194,7 @@ menu_t  RecordDef =
     &FilesDef,
     RecordMenu,
     M_DrawRecord,
-    55,50,       // [STRIFE] changed y coord 64 -> 35
+    55,50,
     0
 };
 
@@ -3139,6 +3100,7 @@ void M_DrawGame2(void)
     M_WriteText(85, 120, DEH_String("WEAPON RECOIL"));
     M_WriteText(85, 130, DEH_String("RESPAWN MONSTERS"));
     M_WriteText(85, 140, DEH_String("FAST MONSTERS"));
+    M_WriteText(85, 150, DEH_String("AUTOAIM"));
 
     if(drawgrid == 1)
         M_WriteText(220, 30, DEH_String("ON"));
@@ -3220,6 +3182,13 @@ void M_DrawGame2(void)
 //	V_DrawPatch (245, 151, W_CacheLumpName(DEH_String("M_SLOW"), PU_CACHE));
     else
         M_WriteText(220, 140, DEH_String("OFF"));
+//	V_DrawPatch (245, 151, W_CacheLumpName(DEH_String("M_FAST"), PU_CACHE));
+
+    if(autoaim)
+        M_WriteText(220, 150, DEH_String("ON"));
+//	V_DrawPatch (245, 151, W_CacheLumpName(DEH_String("M_SLOW"), PU_CACHE));
+    else
+        M_WriteText(220, 150, DEH_String("OFF"));
 //	V_DrawPatch (245, 151, W_CacheLumpName(DEH_String("M_FAST"), PU_CACHE));
 }
 
@@ -4209,7 +4178,7 @@ boolean M_Responder (event_t* ev)
     if (askforkey && data->btns_d)		// KEY BINDINGS
     {
 	M_KeyBindingsClearControls(ev->data1);
-	*doom_defaults_list[keyaskedfor + 22 + FirstKey].location = ev->data1;
+	*doom_defaults_list[keyaskedfor + 23 + FirstKey].location = ev->data1;
 	askforkey = false;
 	return true;
     }
@@ -6472,7 +6441,6 @@ void M_KeyBindingsClearControls (int ch)	// XXX (FOR PSP): NOW THIS IS RATHER IM
 
 void M_KeyBindingsClearAll (int choice)
 {
-    *doom_defaults_list[22].location = 0;
     *doom_defaults_list[23].location = 0;
     *doom_defaults_list[24].location = 0;
     *doom_defaults_list[25].location = 0;
@@ -6484,22 +6452,23 @@ void M_KeyBindingsClearAll (int choice)
     *doom_defaults_list[31].location = 0;
     *doom_defaults_list[32].location = 0;
     *doom_defaults_list[33].location = 0;
+    *doom_defaults_list[34].location = 0;
 }
 
 void M_KeyBindingsReset (int choice)
 {
-    *doom_defaults_list[22].location = CLASSIC_CONTROLLER_R;
-    *doom_defaults_list[23].location = CLASSIC_CONTROLLER_L;
-    *doom_defaults_list[24].location = CLASSIC_CONTROLLER_MINUS;
-    *doom_defaults_list[25].location = CLASSIC_CONTROLLER_LEFT;
-    *doom_defaults_list[26].location = CLASSIC_CONTROLLER_DOWN;
-    *doom_defaults_list[27].location = CLASSIC_CONTROLLER_RIGHT;
-    *doom_defaults_list[28].location = CLASSIC_CONTROLLER_ZL;
-    *doom_defaults_list[29].location = CLASSIC_CONTROLLER_ZR;
-    *doom_defaults_list[30].location = CLASSIC_CONTROLLER_HOME;
-    *doom_defaults_list[31].location = CONTROLLER_1;
-    *doom_defaults_list[32].location = CONTROLLER_2;
-    *doom_defaults_list[33].location = CLASSIC_CONTROLLER_PLUS;
+    *doom_defaults_list[23].location = CLASSIC_CONTROLLER_R;
+    *doom_defaults_list[24].location = CLASSIC_CONTROLLER_L;
+    *doom_defaults_list[25].location = CLASSIC_CONTROLLER_MINUS;
+    *doom_defaults_list[26].location = CLASSIC_CONTROLLER_LEFT;
+    *doom_defaults_list[27].location = CLASSIC_CONTROLLER_DOWN;
+    *doom_defaults_list[28].location = CLASSIC_CONTROLLER_RIGHT;
+    *doom_defaults_list[29].location = CLASSIC_CONTROLLER_ZL;
+    *doom_defaults_list[30].location = CLASSIC_CONTROLLER_ZR;
+    *doom_defaults_list[31].location = CLASSIC_CONTROLLER_HOME;
+    *doom_defaults_list[32].location = CONTROLLER_1;
+    *doom_defaults_list[33].location = CONTROLLER_2;
+    *doom_defaults_list[34].location = CLASSIC_CONTROLLER_PLUS;
 }
 
 void M_DrawKeyBindings(void)
@@ -6562,7 +6531,7 @@ void M_DrawKeyBindings(void)
 	else
 	{
 	    if(i < 11 && !devparm)
-		M_WriteText(195, (i*10+30), Key2String(*(doom_defaults_list[i+FirstKey+22].location)));
+		M_WriteText(195, (i*10+30), Key2String(*(doom_defaults_list[i+FirstKey+23].location)));
 	}
     }
 }
@@ -7202,6 +7171,23 @@ void M_FastMonsters(int choice)
             fastparm = true;
 	}
         players[consoleplayer].message = DEH_String("FAST MONSTERS ENABLED");
+        break;
+    }
+}
+
+void M_Autoaim(int choice)
+{
+    switch(choice)
+    {
+    case 0:
+        if (autoaim)
+            autoaim = 0;
+        players[consoleplayer].message = DEH_String("AUTOAIM DISABLED");
+        break;
+    case 1:
+        if (autoaim == 0)
+            autoaim = 1;
+        players[consoleplayer].message = DEH_String("AUTOAIM ENABLED");
         break;
     }
 }

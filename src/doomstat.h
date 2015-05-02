@@ -290,4 +290,6 @@ extern	boolean		d_recoil;
 extern	boolean		start_respawnparm;
 extern	boolean		start_fastparm;
 
+extern	int		autoaim;
+
 #endif

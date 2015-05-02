@@ -43,7 +43,7 @@
 #include "r_local.h"
 #include "r_sky.h"
 
-
+#include "d_player.h"
 
 
 
@@ -682,7 +682,10 @@ void R_ExecuteSetViewSize (void)
     int		i;
     int		j;
     int		level;
-    int		startmap; 	
+    int		startmap;
+    int		consoleplayer = 0;
+
+    player_t    players[MAXPLAYERS]; 
 
     setsizeneeded = false;
 
@@ -706,7 +709,11 @@ void R_ExecuteSetViewSize (void)
     viewwidth = scaledviewwidth>>detailshift;
     viewheight = scaledviewheight>>(detailshift && hires);		// ADDED FOR HIRES
 	
-    centery = viewheight/2;
+//    centery = viewheight/2;
+
+    centery = (setblocks*(players[consoleplayer].lookdir>>FRACBITS));
+    centery = (unsigned int)(centery/10)+viewheight/2;
+
     centerx = viewwidth/2;
     centerxfrac = centerx<<FRACBITS;
     centeryfrac = centery<<FRACBITS;
@@ -871,7 +878,7 @@ void R_SetupPitch(player_t* player)
 
 //	pitchfrac  = (setblocks *  player->pitch)			/ 10;	// FOR HIRES (ORIGINAL)
 
-        pitchfrac  = (setblocks * (player->recoilpitch	>> FRACBITS))	/ 5;	// [SVE] (RECOIL)
+        pitchfrac  = (setblocks * (player->recoilpitch	>> FRACBITS))	/ 5;	// RECOIL
 	pitchfrac2 = (setblocks * (player->lookdir	<< hires))	/ 10;	// FOR HIRES (HIRES)
 
         centery     = pitchfrac + pitchfrac2 + viewheight / 2;
@@ -894,7 +901,7 @@ void R_SetupFrame (player_t* player)
     int		i;
 //    int		tempCentery;
     
-    R_SetupPitch(player);  // villsa [STRIFE]
+    R_SetupPitch(player);
 
     viewplayer = player;
     viewx = player->mo->x;

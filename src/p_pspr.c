@@ -637,6 +637,18 @@ void P_BulletSlope (mobj_t*	mo)
     
     // see which target is to be aimed at
     an = mo->angle;
+
+    if(mo->player && !(autoaim))
+    {
+	bulletslope = (mo->player->lookdir << FRACBITS) / 173;
+
+        if(linetarget)
+//            P_SetTarget(&mo->target, linetarget);
+            mo->target = linetarget;
+
+        return;
+    }
+
     bulletslope = P_AimLineAttack (mo, an, 16*64*FRACUNIT);
 
     if (!linetarget)

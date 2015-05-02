@@ -57,7 +57,7 @@ char *M_OEMToUTF8(const char *ansi);
 char *M_DirName(char *path);
 
 //
-// haleyjd 20141024: [SVE] Error-checked strdup
+// Error-checked strdup
 //
 char *M_Strdup(const char *str);
 

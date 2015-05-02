@@ -26,8 +26,6 @@
 //#include "m_menu.h"
 #include "m_misc.h"
 
-//#include "p_dialog.h" // haleyjd [STRIFE]
-
 #include "s_sound.h"
 #include "r_local.h"
 #include "v_video.h"
@@ -297,6 +295,7 @@ extern int turnspeed;
 extern int crosshair;
 extern int mus_engine;
 extern int mouselook;
+extern int autoaim;
 
 extern int joy_up;
 extern int joy_down;
@@ -356,7 +355,8 @@ void M_BindBaseControls(void)
     M_BindVariable("music_engine",           &mus_engine);
     M_BindVariable("recoil",                 &d_recoil);
     M_BindVariable("monsters_respawn",       &respawnparm);
-    M_BindVariable("fast_respawn",           &fastparm);
+    M_BindVariable("fast_monsters",          &fastparm);
+    M_BindVariable("auto_aim",               &autoaim);
     M_BindVariable("key_fire",               &joy_r);
     M_BindVariable("key_use",                &joy_l);
     M_BindVariable("key_menu",               &joy_minus);

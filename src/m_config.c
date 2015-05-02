@@ -181,6 +181,7 @@ extern int key_invright, key_invuse;
     CONFIG_VARIABLE_INT		(recoil),
     CONFIG_VARIABLE_INT		(monsters_respawn),
     CONFIG_VARIABLE_INT		(fast_monsters),
+    CONFIG_VARIABLE_INT		(auto_aim),
 /*
     CONFIG_VARIABLE_INT		(key_triangle),
     CONFIG_VARIABLE_INT		(key_cross),

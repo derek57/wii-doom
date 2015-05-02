@@ -141,9 +141,8 @@ extern boolean mus_cheat_used;
 extern boolean usb;
 extern boolean sd;
 
-// [SVE]
-//#define SVE_USE_RWOPS_MUSIC	// FIXME: M_ReadFile CRASHES THE WII WHEN USING "CHANGE MUSIC" CHEAT
-#if defined(SVE_USE_RWOPS_MUSIC)
+//#define USE_RWOPS_MUSIC	// FIXME: M_ReadFile CRASHES THE WII WHEN USING "CHANGE MUSIC" CHEAT
+#if defined(USE_RWOPS_MUSIC)
 static SDL_RWops *rw_music_cache;
 static void      *rw_music_data;
 #endif
@@ -701,7 +700,7 @@ static void LoadSubstituteConfigs(void)
         free(path);
     }
 
-    // [SVE]: try also cwd
+    // try also cwd
     if(*musicdir)
     {    
         for (i = 0; i < arrlen(subst_config_filenames); ++i)
@@ -1122,7 +1121,7 @@ static void I_SDL_PlaySong(void *handle, boolean looping)
     // Don't loop when playing substitute music, as we do it
     // ourselves instead.
 
-#if !defined(SVE_USE_RWOPS_MUSIC)
+#if !defined(USE_RWOPS_MUSIC)
     if (playing_substitute && file_metadata.valid)
     {
 //        loops = 1;		// FIXME: WTF ???
@@ -1187,7 +1186,7 @@ static void I_SDL_UnRegisterSong(void *handle)
 
     Mix_FreeMusic(music);
 
-#if defined(SVE_USE_RWOPS_MUSIC)
+#if defined(USE_RWOPS_MUSIC)
     rw_music_cache = NULL;
     if(rw_music_data)
     {
@@ -1247,7 +1246,7 @@ static void *I_SDL_RegisterSong(void *data, int len)
 
     if (filename != NULL)		// FIXME: ON THE WII, M_READFILE SOMETIMES CAUSES THE GAME...
     {					// ...TO CRASH RANDOMLY WHENEVER THE MUSIC IS BEING CHANGED
-#if defined(SVE_USE_RWOPS_MUSIC)
+#if defined(USE_RWOPS_MUSIC)
         int size = M_ReadFile(filename, (byte **)&rw_music_data);
         rw_music_cache = SDL_RWFromMem(rw_music_data, size);
         music = Mix_LoadMUS_RW(rw_music_cache);
@@ -1267,7 +1266,7 @@ static void *I_SDL_RegisterSong(void *data, int len)
             // to loop the music.
             playing_substitute = true;
 
-#if !defined(SVE_USE_RWOPS_MUSIC)
+#if !defined(USE_RWOPS_MUSIC)
             ReadLoopPoints(filename, &file_metadata);
 #endif
 
@@ -1377,7 +1376,7 @@ static void RestartCurrentTrack(void)
 // then we need to go back.
 /*static*/ void I_SDL_PollMusic(void)
 {
-#if !defined(SVE_USE_RWOPS_MUSIC)
+#if !defined(USE_RWOPS_MUSIC)
     if (playing_substitute && file_metadata.valid)
     {
         double end = (double) file_metadata.end_time

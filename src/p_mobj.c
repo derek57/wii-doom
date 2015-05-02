@@ -877,7 +877,8 @@ void P_SpawnMapThing (mapthing_t* mthing)
 //
 extern fixed_t attackrange;
 
-void
+//void
+mobj_t*
 P_SpawnPuff
 ( fixed_t	x,
   fixed_t	y,
@@ -897,6 +898,8 @@ P_SpawnPuff
     // don't make punches spark on the wall
     if (attackrange == MELEERANGE)
 	P_SetMobjState (th, S_PUFF3);
+
+    return th;
 }
 
 
@@ -1022,7 +1025,8 @@ P_SpawnMissile
 // P_SpawnPlayerMissile
 // Tries to aim at a nearby monster
 //
-void
+//void
+mobj_t*
 P_SpawnPlayerMissile
 ( mobj_t*	source,
   mobjtype_t	type )
@@ -1030,32 +1034,54 @@ P_SpawnPlayerMissile
     mobj_t*	th;
     angle_t	an;
     
+    fixed_t	aim;
     fixed_t	x;
     fixed_t	y;
     fixed_t	z;
-    fixed_t	slope;
+    fixed_t	slope = NULL;		// SHUT UP COMPILER
     
     // see which target is to be aimed at
     an = source->angle;
-    slope = P_AimLineAttack (source, an, 16*64*FRACUNIT);
-    
-    if (!linetarget)
+    if(/*netgame ||*/ autoaim) // single player autoaim toggle
     {
-	an += 1<<26;
-	slope = P_AimLineAttack (source, an, 16*64*FRACUNIT);
+        slope = P_AimLineAttack (source, an, 16*64*FRACUNIT);
 
-	if (!linetarget)
-	{
-	    an -= 2<<26;
-	    slope = P_AimLineAttack (source, an, 16*64*FRACUNIT);
-	}
+        if(!linetarget)
+        {
+            an += 1<<26;
+            slope = P_AimLineAttack (source, an, 16*64*FRACUNIT);
 
-	if (!linetarget)
-	{
-	    an = source->angle;
-//	    slope = 0;
-            slope = ((source->player->lookdir) << FRACBITS) / 173;
-	}
+            if(!linetarget)
+            {
+                an -= 2<<26;
+                slope = P_AimLineAttack (source, an, 16*64*FRACUNIT);
+            }
+
+            if(!linetarget)
+            {
+                an = source->angle;
+/*
+		if (!autoaim)
+		    slope = ((p2fromp(source->player)->pitch / MLOOKUNIT) << FRACBITS) / 173;
+*/
+                // Removed, for look up/down support.
+                //slope = 0; 
+            }
+        }
+
+        if(linetarget)
+//            P_SetTarget(&source->target, linetarget);
+            source->target = linetarget;
+    }
+    else
+    {
+        P_AimLineAttack(source, an, 16*64*FRACUNIT);
+
+        if(linetarget)
+//            P_SetTarget(&source->target, linetarget);
+            source->target = linetarget;
+
+        linetarget = NULL;
     }
 		
     x = source->x;
@@ -1069,14 +1095,38 @@ P_SpawnPlayerMissile
     if (th->info->seesound)
 	S_StartSound (th, th->info->seesound);
 
+    if(!linetarget)
+    {
+        fixed_t pitch = (source->player->lookdir / 256);
+
+//        slope = pitch;
+	slope = (source->player->lookdir << FRACBITS) / 173;
+
+        if(pitch < 0)
+            pitch = pitch + FRACUNIT;
+        else
+            pitch = FRACUNIT - pitch;
+
+        aim = FixedMul(th->info->speed, pitch);
+    }
+    else
+        aim = th->info->speed;
+
     th->target = source;
     th->angle = an;
+/*
     th->momx = FixedMul( th->info->speed,
 			 finecosine[an>>ANGLETOFINESHIFT]);
     th->momy = FixedMul( th->info->speed,
 			 finesine[an>>ANGLETOFINESHIFT]);
+*/
+    th->momx = FixedMul(aim, finecosine[an>>ANGLETOFINESHIFT]);
+    th->momy = FixedMul(aim, finesine[an>>ANGLETOFINESHIFT]);
+
     th->momz = FixedMul( th->info->speed, slope);
 
     P_CheckMissileSpawn (th);
+
+    return th;
 }
 

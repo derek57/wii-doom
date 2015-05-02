@@ -840,6 +840,10 @@ void P_SlideMove (mobj_t* mo)
 mobj_t*		linetarget;	// who got hit (or NULL)
 mobj_t*		shootthing;
 
+fixed_t         shootdirx;
+fixed_t         shootdiry;
+fixed_t         shootdirz;
+
 // Height if not aiming up or down
 // ???: use slope for monsters?
 fixed_t		shootz;	
@@ -944,6 +948,7 @@ PTR_AimTraverse (intercept_t* in)
 //
 // PTR_ShootTraverse
 //
+/*
 boolean PTR_ShootTraverse (intercept_t* in)
 {
     fixed_t		x;
@@ -1078,10 +1083,236 @@ boolean PTR_ShootTraverse (intercept_t* in)
     return false;
 	
 }
+*/
+boolean PTR_ShootTraverse (intercept_t* in)
+{
+    fixed_t             x;
+    fixed_t             y;
+    fixed_t             z;
+    fixed_t             frac;
 
+    line_t*             li;
+
+    mobj_t*             th;
+    mobj_t*             th2;
+
+    fixed_t             slope;
+    fixed_t             dist;
+    fixed_t             thingtopslope;
+    fixed_t             thingbottomslope;
+
+    // new vars
+    boolean             hitplane = false;
+    sector_t            *sidesector = NULL;
+    fixed_t             hitx;
+    fixed_t             hity;
+    fixed_t             hitz;
+
+    if (in->isaline)
+    {
+        li = in->d.line;
+
+        if (li->special)
+            P_ShootSpecialLine (shootthing, li);
+
+        dist = FixedMul(attackrange, in->frac);
+
+        if ( !(li->flags & ML_TWOSIDED) )
+            goto hitline;
+
+        // crosses a two sided line
+        P_LineOpening (li);
+
+        // Check if backsector is NULL.  See comment in PTR_AimTraverse.
+
+        if (li->backsector == NULL)
+        {
+            goto hitline;
+        }
+
+        if (li->frontsector->floorheight != li->backsector->floorheight)
+        {
+            slope = FixedDiv (openbottom - shootz , dist);
+            if (slope > aimslope)
+                goto hitline;
+        }
+
+        if (li->frontsector->ceilingheight != li->backsector->ceilingheight)
+        {
+            slope = FixedDiv (opentop - shootz , dist);
+            if (slope < aimslope)
+                goto hitline;
+        }
+
+        // shot continues
+        return true;
+
+
+        // hit line
+hitline:
+        sidesector = (P_PointOnLineSide(shootthing->x, shootthing->y, li)) ? li->backsector : li->frontsector;
+        hitz = shootz + FixedMul(aimslope, dist);
+
+        if(sidesector != NULL)
+        {
+            if(!(hitz > sidesector->floorheight && hitz < sidesector->ceilingheight))
+            {
+                // ceiling/floor has been contacted
+                hitplane = true;
+            }
+        }
+
+        //
+        // hit ceiling/floor
+        // set position based on intersection
+        //
+        if(hitplane == true && sidesector)
+        {
+            fixed_t den;
+            fixed_t num;
+
+            // determine where we've hit
+            if(hitz <= sidesector->floorheight)
+            {
+                den = shootdirz;
+                if(den == 0)
+                {
+                    den = FRACUNIT;
+                }
+
+                num = shootz - sidesector->floorheight;
+            }
+            else
+            {
+                den = -shootdirz;
+                if(den == 0)
+                {
+                    den = -FRACUNIT;
+                }
+
+                num = -shootz + sidesector->ceilingheight;
+            }
+
+            // position on plane
+            frac = FixedDiv(FixedDiv(-num, den), attackrange);
+
+            hitx = shootdirx;
+            hity = shootdiry;
+        }
+        else
+        {
+            // position a bit closer
+            frac = in->frac - FixedDiv (4*FRACUNIT,attackrange);
+
+            hitx = trace.dx;
+            hity = trace.dy;
+        }
+
+        x = trace.x + FixedMul(hitx, frac);
+        y = trace.y + FixedMul(hity, frac);
+        z = shootz + FixedMul(aimslope, FixedMul(frac, attackrange));
+
+        if(li->frontsector->ceilingpic == skyflatnum)
+        {
+            // don't shoot the sky!
+            if(z > li->frontsector->ceilingheight)
+                return false;
+
+            // it's a sky hack wall
+            // added ceiling height check fix
+            if(li->backsector && li->backsector->ceilingpic == skyflatnum
+                && li->backsector->ceilingheight < z)
+            {
+                return false;
+            }
+        }
+
+        if(la_damage > 0)
+        {
+            mobj_t *puff;
+
+            // Test against attack range
+            if(attackrange != 2112*FRACUNIT)
+                puff = P_SpawnPuff(x, y, z); // Spawn bullet puffs.
+            else
+                puff = P_SpawnMobj(x, y, z, MT_PUFF);
+
+            // clip to floor or ceiling
+
+            if(puff->z > puff->ceilingz)
+            {
+                puff->z = puff->ceilingz;
+//                puff->prevpos.z = puff->z;
+            }
+
+            if(puff->z < puff->floorz)
+            {
+                puff->z = puff->floorz;
+//                puff->prevpos.z = puff->z;
+            }
+        }        
+
+        // don't go any farther
+        return false;   
+    }
+
+    // shoot a thing
+    th = in->d.thing;
+    if (th == shootthing)
+        return true;        // can't shoot self
+
+    if(!(th->flags&MF_SHOOTABLE))
+        return true;        // corpse or something
+
+    // check angles to see if the thing can be aimed at
+    dist = FixedMul(attackrange, in->frac);
+    thingtopslope = FixedDiv(th->z+th->height - shootz , dist);
+
+    if(thingtopslope < aimslope)
+        return true;        // shot over the thing
+
+    thingbottomslope = FixedDiv(th->z - shootz, dist);
+
+    if(thingbottomslope > aimslope)
+        return true;        // shot under the thing
+
+    // hit thing
+    // position a bit closer
+    frac = in->frac - FixedDiv (10*FRACUNIT,attackrange);
+
+    x = trace.x + FixedMul (trace.dx, frac);
+    y = trace.y + FixedMul (trace.dy, frac);
+    z = shootz + FixedMul (aimslope, FixedMul(frac, attackrange));
+
+    // Check for attack range
+    if(attackrange == 2112*FRACUNIT)
+    {
+        th2 = P_SpawnMobj(x, y, z, MT_PUFF);
+        th2->momz = -FRACUNIT;
+        P_DamageMobj(th, th2, shootthing, la_damage);
+        return false;
+    }
+
+    // disabled check for damage
+    //if (la_damage)
+    P_DamageMobj (th, shootthing, shootthing, la_damage);
+
+    // Spawn bullet puffs or blod spots,
+    // depending on target type.
+    if (in->d.thing->flags & MF_NOBLOOD)
+	P_SpawnPuff (x,y,z);
+    else
+	P_SpawnBlood (x,y,z, la_damage);
+
+    // don't go any farther
+    return false;
+
+}
 
 //
 // P_AimLineAttack
+//
+// Modified to support player->lookdir
 //
 fixed_t
 P_AimLineAttack
@@ -1097,8 +1328,21 @@ P_AimLineAttack
     angle >>= ANGLETOFINESHIFT;
     shootthing = t1;
     
-    x2 = t1->x + (distance>>FRACBITS)*finecosine[angle];
-    y2 = t1->y + (distance>>FRACBITS)*finesine[angle];
+    if(t1->player)
+    {
+	// for player pitch aiming
+        angle_t pitch = ((t1->player->lookdir / 256) << 14);
+        pitch >>= ANGLETOFINESHIFT;
+
+        x2 = t1->x + FixedMul(FixedMul(finecosine[pitch], finecosine[angle]), distance);
+        y2 = t1->y + FixedMul(FixedMul(finecosine[pitch], finesine[angle]), distance);
+    }
+    else
+    {
+        x2 = t1->x + (distance>>FRACBITS)*finecosine[angle];
+        y2 = t1->y + (distance>>FRACBITS)*finesine[angle];
+    }
+
     shootz = t1->z + (t1->height>>1) + 8*FRACUNIT;
 
     // can't shoot outside view angles
@@ -1115,6 +1359,11 @@ P_AimLineAttack
 		
     if (linetarget)
 	return aimslope;
+    else    // checks for player pitch
+    {
+        if(t1->player)
+            return t1->player->lookdir / 200;
+    }
 
     return 0;
 }
@@ -1135,19 +1384,54 @@ P_LineAttack
 {
     fixed_t	x2;
     fixed_t	y2;
-	
+
+    int         traverseflags;
+
     angle >>= ANGLETOFINESHIFT;
     shootthing = t1;
     la_damage = damage;
+/*
     x2 = t1->x + (distance>>FRACBITS)*finecosine[angle];
     y2 = t1->y + (distance>>FRACBITS)*finesine[angle];
+*/
     shootz = t1->z + (t1->height>>1) + 8*FRACUNIT;
     attackrange = distance;
     aimslope = slope;
 		
+    if(t1->player)
+    {
+	// for player pitch aiming
+        angle_t pitch = ((t1->player->lookdir / 256) << 14);
+        pitch >>= ANGLETOFINESHIFT;
+
+        shootdirx = FixedMul(FixedMul(finecosine[pitch], finecosine[angle]), distance);
+        shootdiry = FixedMul(FixedMul(finecosine[pitch], finesine[angle]), distance);
+
+        x2 = t1->x + shootdirx;
+        y2 = t1->y + shootdiry;
+    }
+    else
+    {
+        x2 = t1->x + (distance>>FRACBITS)*finecosine[angle];
+        y2 = t1->y + (distance>>FRACBITS)*finesine[angle];
+
+        shootdirx = x2 - t1->x;
+        shootdiry = y2 - t1->y;
+    }
+
+    // for plane hit detection
+    shootdirz = aimslope;
+
+    // test lines only if damage is <= 0
+    if(damage >= 1)
+        traverseflags = (PT_ADDLINES|PT_ADDTHINGS);
+    else
+        traverseflags = PT_ADDLINES;
+
     P_PathTraverse ( t1->x, t1->y,
 		     x2, y2,
-		     PT_ADDLINES|PT_ADDTHINGS,
+//		     PT_ADDLINES|PT_ADDTHINGS,
+		     traverseflags,
 		     PTR_ShootTraverse );
 }
  

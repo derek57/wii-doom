@@ -459,6 +459,7 @@ void P_PlayerThink (player_t* player)
     else
 	player->fixedcolormap = 0;
 
+    // recoil pitch from weapons
     if(player->recoilpitch && d_recoil)
     {
         fixed_t recoil = (player->recoilpitch >> 3);
