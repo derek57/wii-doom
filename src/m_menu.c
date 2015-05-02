@@ -189,8 +189,8 @@ int			extra_wad_loaded;
 int			mhz333 = 0;
 */
 int			fps = 0;		// FOR PSP: calculating the frames per second
-int			key_controls_start_in_cfg_at_pos = 21;	// FOR PSP: ACTUALLY IT'S +2 !!!
-int			key_controls_end_in_cfg_at_pos = 33;	// FOR PSP: ACTUALLY IT'S +2 !!!
+int			key_controls_start_in_cfg_at_pos = 22;	// FOR PSP: ACTUALLY IT'S +2 !!!
+int			key_controls_end_in_cfg_at_pos = 34;	// FOR PSP: ACTUALLY IT'S +2 !!!
 int			crosshair = 0;
 int			show_stats = 0;
 //int			max_free_ram = 0;
@@ -397,6 +397,7 @@ void M_Crosshair(int choice);
 void M_Jumping(int choice);
 void M_WeaponRecoil(int choice);
 void M_RespawnMonsters(int choice);
+void M_FastMonsters(int choice);
 
 void M_God(int choice);
 void M_Noclip(int choice);
@@ -1953,6 +1954,7 @@ enum
     game_weapon,
     game_recoil,
     game_respawn,
+    game_fast,
     game_end
 } game_e;
 
@@ -1986,6 +1988,7 @@ menuitem_t GameMenu[]=
     {2,"",M_WeaponChange,'w'},
     {2,"",M_WeaponRecoil,'c'},
     {2,"",M_RespawnMonsters,'t'},
+    {2,"",M_FastMonsters,'d'},
 };
 
 menu_t  GameDef =
@@ -2013,6 +2016,7 @@ enum
     game2_weapon,
     game2_recoil,
     game2_respawn,
+    game2_fast,
     game2_end
 } game2_e;
 
@@ -2048,6 +2052,7 @@ menuitem_t GameMenu2[]=
     {2,"",M_WeaponChange,'w'},
     {2,"",M_WeaponRecoil,'c'},
     {2,"",M_RespawnMonsters,'t'},
+    {2,"",M_FastMonsters,'d'},
 };
 
 menu_t  GameDef2 =
@@ -3133,6 +3138,7 @@ void M_DrawGame2(void)
     M_WriteText(85, 110, DEH_String("WEAPON CHANGE"));
     M_WriteText(85, 120, DEH_String("WEAPON RECOIL"));
     M_WriteText(85, 130, DEH_String("RESPAWN MONSTERS"));
+    M_WriteText(85, 140, DEH_String("FAST MONSTERS"));
 
     if(drawgrid == 1)
         M_WriteText(220, 30, DEH_String("ON"));
@@ -3207,6 +3213,13 @@ void M_DrawGame2(void)
 //	V_DrawPatch (245, 151, W_CacheLumpName(DEH_String("M_SLOW"), PU_CACHE));
     else
         M_WriteText(220, 130, DEH_String("OFF"));
+//	V_DrawPatch (245, 151, W_CacheLumpName(DEH_String("M_FAST"), PU_CACHE));
+
+    if(fastparm)
+        M_WriteText(220, 140, DEH_String("ON"));
+//	V_DrawPatch (245, 151, W_CacheLumpName(DEH_String("M_SLOW"), PU_CACHE));
+    else
+        M_WriteText(220, 140, DEH_String("OFF"));
 //	V_DrawPatch (245, 151, W_CacheLumpName(DEH_String("M_FAST"), PU_CACHE));
 }
 
@@ -4196,7 +4209,7 @@ boolean M_Responder (event_t* ev)
     if (askforkey && data->btns_d)		// KEY BINDINGS
     {
 	M_KeyBindingsClearControls(ev->data1);
-	*doom_defaults_list[keyaskedfor + 21 + FirstKey].location = ev->data1;
+	*doom_defaults_list[keyaskedfor + 22 + FirstKey].location = ev->data1;
 	askforkey = false;
 	return true;
     }
@@ -6459,7 +6472,6 @@ void M_KeyBindingsClearControls (int ch)	// XXX (FOR PSP): NOW THIS IS RATHER IM
 
 void M_KeyBindingsClearAll (int choice)
 {
-    *doom_defaults_list[21].location = 0;
     *doom_defaults_list[22].location = 0;
     *doom_defaults_list[23].location = 0;
     *doom_defaults_list[24].location = 0;
@@ -6471,22 +6483,23 @@ void M_KeyBindingsClearAll (int choice)
     *doom_defaults_list[20].location = 0;
     *doom_defaults_list[31].location = 0;
     *doom_defaults_list[32].location = 0;
+    *doom_defaults_list[33].location = 0;
 }
 
 void M_KeyBindingsReset (int choice)
 {
-    *doom_defaults_list[21].location = CLASSIC_CONTROLLER_R;
-    *doom_defaults_list[22].location = CLASSIC_CONTROLLER_L;
-    *doom_defaults_list[23].location = CLASSIC_CONTROLLER_MINUS;
-    *doom_defaults_list[24].location = CLASSIC_CONTROLLER_LEFT;
-    *doom_defaults_list[25].location = CLASSIC_CONTROLLER_DOWN;
-    *doom_defaults_list[26].location = CLASSIC_CONTROLLER_RIGHT;
-    *doom_defaults_list[27].location = CLASSIC_CONTROLLER_ZL;
-    *doom_defaults_list[28].location = CLASSIC_CONTROLLER_ZR;
-    *doom_defaults_list[29].location = CLASSIC_CONTROLLER_HOME;
-    *doom_defaults_list[30].location = CONTROLLER_1;
-    *doom_defaults_list[31].location = CONTROLLER_2;
-    *doom_defaults_list[32].location = CLASSIC_CONTROLLER_PLUS;
+    *doom_defaults_list[22].location = CLASSIC_CONTROLLER_R;
+    *doom_defaults_list[23].location = CLASSIC_CONTROLLER_L;
+    *doom_defaults_list[24].location = CLASSIC_CONTROLLER_MINUS;
+    *doom_defaults_list[25].location = CLASSIC_CONTROLLER_LEFT;
+    *doom_defaults_list[26].location = CLASSIC_CONTROLLER_DOWN;
+    *doom_defaults_list[27].location = CLASSIC_CONTROLLER_RIGHT;
+    *doom_defaults_list[28].location = CLASSIC_CONTROLLER_ZL;
+    *doom_defaults_list[29].location = CLASSIC_CONTROLLER_ZR;
+    *doom_defaults_list[30].location = CLASSIC_CONTROLLER_HOME;
+    *doom_defaults_list[31].location = CONTROLLER_1;
+    *doom_defaults_list[32].location = CONTROLLER_2;
+    *doom_defaults_list[33].location = CLASSIC_CONTROLLER_PLUS;
 }
 
 void M_DrawKeyBindings(void)
@@ -6549,7 +6562,7 @@ void M_DrawKeyBindings(void)
 	else
 	{
 	    if(i < 11 && !devparm)
-		M_WriteText(195, (i*10+30), Key2String(*(doom_defaults_list[i+FirstKey+21].location)));
+		M_WriteText(195, (i*10+30), Key2String(*(doom_defaults_list[i+FirstKey+22].location)));
 	}
     }
 }
@@ -7166,6 +7179,29 @@ void M_RespawnMonsters(int choice)
             respawnparm = true;
 	}
         players[consoleplayer].message = DEH_String("RESPAWN MONSTERS ENABLED");
+        break;
+    }
+}
+
+void M_FastMonsters(int choice)
+{
+    switch(choice)
+    {
+    case 0:
+        if (fastparm)
+	{
+            start_fastparm = false;
+            fastparm = false;
+	}
+        players[consoleplayer].message = DEH_String("FAST MONSTERS DISABLED");
+        break;
+    case 1:
+        if (fastparm == false)
+	{
+            start_fastparm = true;
+            fastparm = true;
+	}
+        players[consoleplayer].message = DEH_String("FAST MONSTERS ENABLED");
         break;
     }
 }

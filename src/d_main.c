@@ -121,9 +121,12 @@ char *          iwadfile;
 
 
 boolean         nomonsters;	// checkparm of -nomonsters
-//boolean         respawnparm;	// checkparm of -respawn
+/*
+boolean         respawnparm;	// checkparm of -respawn
 boolean         fastparm;	// checkparm of -fast
+*/
 boolean         start_respawnparm;
+boolean         start_fastparm;
 
 //extern int soundVolume;
 //extern  int	sfxVolume;
@@ -1763,18 +1766,18 @@ void D_DoomMain (void)
 
     if(respawnflag && devparm_net)
 	respawnparm = true;
-*/
+
     //!
     // @vanilla
     //
     // Monsters move faster.
     //
 
-//    fastparm = M_CheckParm ("-fast");
+    fastparm = M_CheckParm ("-fast");
 
     if(fastflag && devparm_net)
 	fastparm = true;
-
+*/
     //! 
     // @vanilla
     //
@@ -1879,6 +1882,7 @@ void D_DoomMain (void)
     M_LoadDefaults();
 
     respawnparm = false;
+    fastparm = false;
 
     if(!devparm && aiming_help != 0)
 	aiming_help = 0;
@@ -2311,6 +2315,7 @@ void D_DoomMain (void)
     D_ConnectNetGame();
 
     start_respawnparm = respawnparm;
+    start_fastparm = fastparm;
 
     // get skill / episode / map from parms
     startskill = sk_medium;
