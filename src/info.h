@@ -172,6 +172,11 @@ typedef enum
     SPR_BRS1,
     SPR_TLMP,
     SPR_TLP2,
+
+    SPR_FLSH,
+    SPR_SPRY,
+    SPR_CHNK,
+
     NUMSPRITES
 
 } spritenum_t;
@@ -1145,6 +1150,41 @@ typedef enum
     S_TECH2LAMP2,
     S_TECH2LAMP3,
     S_TECH2LAMP4,
+
+    S_FLESH_00,
+    S_FLESH_01,
+    S_FLESH_02,
+    S_FLESH_03,
+    S_FLESH_04,
+    S_FLESH_05,
+    S_FLESH_06,
+    S_FLESH_07,
+    S_FLESH_08,
+    S_FLESH_09,
+    S_FLESH_10,
+    S_FLESH_11,
+    S_FLESH_12,
+    S_FLESH_13,
+    S_FLESH_14,
+    S_FLESH_15,
+    S_FLESH_16,
+    S_FLESH_17,
+    S_FLESH_18,
+    S_FLESH_19,
+    S_SPRAY_00,
+    S_SPRAY_01,
+    S_SPRAY_02,
+    S_SPRAY_03,
+    S_SPRAY_04,
+    S_SPRAY_05,
+    S_SPRAY_06,
+    S_CHUNKA1,
+    S_CHUNKA2,
+    S_CHUNKA3,
+    S_CHUNKB1,
+    S_CHUNKB2,
+    S_CHUNKB3,
+
     NUMSTATES
 } statenum_t;
 
@@ -1302,6 +1342,12 @@ typedef enum {
     MT_MISC84,
     MT_MISC85,
     MT_MISC86,
+
+    MT_FLESH,
+    MT_GORE,
+    MT_CHUNK1,
+    MT_CHUNK2,
+
     NUMMOBJTYPES
 
 } mobjtype_t;

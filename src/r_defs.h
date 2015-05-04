@@ -140,6 +140,7 @@ typedef	struct
     // WiggleFix: [kb] for R_FixWiggle()
     int		cachedheight;
     int		scaleindex;
+
 } sector_t;
 
 
@@ -219,7 +220,8 @@ typedef struct line_s
     int		validcount;
 
     // thinker_t for reversable actions
-    void*	specialdata;		
+    void*	specialdata;
+		
 } line_t;
 
 
@@ -344,6 +346,7 @@ typedef struct drawseg_s
     int*		sprtopclip;
     int*		sprbottomclip;
     int*		maskedtexturecol;
+
 } drawseg_t;
 
 

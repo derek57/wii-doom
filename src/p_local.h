@@ -65,8 +65,6 @@
 // follow a player exlusively for 3 seconds
 #define	BASETHRESHOLD	 	100
 
-
-
 //
 // P_TICK
 //
@@ -288,6 +286,7 @@ P_DamageMobj
   mobj_t*	source,
   int		damage );
 
+void A_ImpExplode(mobj_t * actor);
 
 //
 // P_SPEC

@@ -96,6 +96,9 @@
 #include "w_wad.h"
 #include "sys_wpad.h"
 
+#include "w_merge.h"
+#include "p_local.h"
+
 //#define printf pspDebugScreenPrintf
 
 typedef uint32_t u32;				///< 32bit unsigned integer
@@ -2043,10 +2046,15 @@ void D_DoomMain (void)
     dont_show_adding_of_resource_wad = 0;
 
     if(usb)
+        W_MergeFile("usb:/apps/wiidoom/pspdoom.wad");
+    else if(sd)
+        W_MergeFile("sd:/apps/wiidoom/pspdoom.wad");
+/*
+    if(usb)
 	D_AddFile("usb:/apps/wiidoom/pspdoom.wad");
     else if(sd)
 	D_AddFile("sd:/apps/wiidoom/pspdoom.wad");
-
+*/
     if(show_deh_loading_message == 1 /*&& devparm*/)
 	printf("         adding %s\n", dehacked_file);
 

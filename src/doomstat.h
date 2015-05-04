@@ -289,7 +289,11 @@ extern  ticcmd_t       *netcmds;
 extern	boolean		d_recoil;
 extern	boolean		start_respawnparm;
 extern	boolean		start_fastparm;
+extern	boolean		d_maxgore;
 
 extern	int		autoaim;
+
+void A_MoreGibs(mobj_t* actor);
+
 
 #endif

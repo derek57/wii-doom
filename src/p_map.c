@@ -1600,7 +1600,6 @@ P_RadiusAttack
 boolean		crushchange;
 boolean		nofit;
 
-
 //
 // PIT_ChangeSector
 //
@@ -1619,6 +1618,9 @@ boolean PIT_ChangeSector (mobj_t*	thing)
     if (thing->health <= 0)
     {
 	P_SetMobjState (thing, S_GIBS);
+
+	if(d_maxgore)
+            A_MoreGibs(thing); // spit out meat/junk stuff
 
 	thing->flags &= ~MF_SOLID;
 	thing->height = 0;

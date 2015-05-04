@@ -45,14 +45,15 @@
 void G_PlayerReborn (int player);
 void P_SpawnMapThing (mapthing_t*	mthing);
 
-extern int mouselook;
+extern int     mouselook;
+
+int            test;
+
 
 //
 // P_SetMobjState
 // Returns true if the mobj is still present.
 //
-int test;
-
 boolean
 P_SetMobjState
 ( mobj_t*	mobj,
@@ -928,6 +929,23 @@ P_SpawnBlood
 	P_SetMobjState (th,S_BLOOD2);
     else if (damage < 9)
 	P_SetMobjState (th,S_BLOOD3);
+
+    // more blood and gore!
+    if(d_maxgore)
+    {
+        mobj_t *th2 = P_SpawnMobj(x, y, z, MT_GORE);
+        int t;
+        
+        th2->z = th->z;
+
+        t = P_Random();
+        th2->momx = (t - P_Random ()) << 10;
+        t = P_Random();
+        th2->momy = (t - P_Random ()) << 10;
+        th2->momz = P_Random() << 10;
+
+        P_SetMobjState(th2, S_BLOOD1 + (P_Random() % 2));
+    }
 }
 
 

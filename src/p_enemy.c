@@ -1592,15 +1592,6 @@ void A_Pain (mobj_t* actor)
 
 
 
-void A_Fall (mobj_t *actor)
-{
-    // actor is on ground, it can be walked over
-    actor->flags &= ~MF_SOLID;
-
-    // So change this if corpse objects
-    // are meant to be obstacles.
-}
-
 
 //
 // A_Explode
@@ -2027,3 +2018,124 @@ void A_PlayerScream (mobj_t* mo)
     
     S_StartSound (mo, sound);
 }
+
+//
+// A_MoreGibs
+//
+// Spawns gibs when organic actors get splattered.
+//
+void A_MoreGibs(mobj_t* actor)
+{
+    mobj_t* mo;
+    angle_t an;
+    int numchunks = (!d_maxgore) ? 1 : 8;
+
+    // max gore - ludicrous gibs
+    do
+    {
+        mo = P_SpawnMobj(actor->x, actor->y, actor->z + (24*FRACUNIT), MT_FLESH);
+        P_SetMobjState(mo, mo->info->spawnstate + (P_Random() % 19));
+
+        an = (P_Random() << 13) / 255;
+        mo->angle = an << ANGLETOFINESHIFT;
+
+        mo->momx = FixedMul(finecosine[an], (P_Random() & 0x0f) << FRACBITS);
+        mo->momy = FixedMul(finesine[an], (P_Random() & 0x0f) << FRACBITS);
+        mo->momz = (P_Random() & 0x0f) << FRACBITS;
+
+        // even more ludicrous gore
+        if(d_maxgore && !(actor->flags & MF_NOBLOOD))
+        {
+            mobj_t *gore = P_SpawnMobj(actor->x, actor->y, actor->z + (32*FRACUNIT), MT_GORE);
+
+            gore->angle = mo->angle;
+
+            gore->momx = mo->momx;
+            gore->momy = mo->momy;
+            gore->momz = mo->momz;
+        }
+    }
+    while(--numchunks > 0);
+}
+
+void A_Fall (mobj_t *actor)
+{
+    // actor is on ground, it can be walked over
+    actor->flags &= ~MF_SOLID;
+
+    // So change this if corpse objects
+    // are meant to be obstacles.
+
+    if(d_maxgore && !(actor->flags & MF_NOBLOOD))
+    {
+        int i, t;
+        mobj_t *mo;
+
+        for(i = 0; i < 8; i++)
+        {
+            // spray blood in a random direction
+            mo = P_SpawnMobj(actor->x,
+                             actor->y,
+                             actor->z + actor->info->height/2, MT_GORE);
+
+            t = P_Random() % 3;
+            if(t > 0)
+                P_SetMobjState(mo, S_SPRAY_00 + t);
+
+            t = P_Random();
+            mo->momx = (t - P_Random ()) << 11;
+            t = P_Random();
+            mo->momy = (t - P_Random ()) << 11;
+            mo->momz = P_Random() << 11;
+        }
+    }
+}
+
+//----------------------------------------------------------------------------
+//
+// PROC A_MoreBlood
+//
+//----------------------------------------------------------------------------
+
+void A_MoreBlood(mobj_t * actor)
+{
+    if(d_maxgore && !(actor->flags & MF_NOBLOOD))
+    {
+	int t;
+
+        mobj_t *mo;
+
+        mo = P_SpawnMobj(actor->x, actor->y, actor->z + actor->info->height/2, MT_CHUNK1);
+
+        t = P_Random() % 3;
+
+        if(t > 0)
+            P_SetMobjState(mo, S_CHUNKA1 + t);
+
+        t = P_Random();
+
+        mo->momx = (t - P_Random()) << 11;
+
+        t = P_Random();
+
+        mo->momy = (t - P_Random()) << 11;
+        mo->momz = P_Random() << 11;
+
+        mo = P_SpawnMobj(actor->x, actor->y, actor->z + actor->info->height/2, MT_CHUNK2);
+
+        t = P_Random() % 3;
+
+        if(t > 0)
+            P_SetMobjState(mo, S_CHUNKB1 + t);
+
+        t = P_Random();
+
+        mo->momx = (t - P_Random()) << 11;
+
+        t = P_Random();
+
+        mo->momy = (t - P_Random()) << 11;
+        mo->momz = P_Random() << 11;
+    }
+}
+

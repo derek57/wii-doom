@@ -57,7 +57,6 @@ extern int		validcount;
 extern int		linecount;
 extern int		loopcount;
 
-
 //
 // Lighting LUT.
 // Used for z-depth cuing per column/row,

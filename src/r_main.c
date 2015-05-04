@@ -122,7 +122,6 @@ void (*transcolfunc) (void);
 void (*spanfunc) (void);
 
 
-
 //
 // R_AddPointToBox
 // Expand a given bbox

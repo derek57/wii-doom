@@ -768,13 +768,23 @@ P_KillMobj
 	
     }
 
-    if (target->health < -target->info->spawnhealth 
+    int minhealth = target->info->spawnhealth;
+
+    // increase chance of gibbing
+    if(d_maxgore)
+        minhealth >>= 1;
+
+    if (target->health < -minhealth && -target->info->spawnhealth 
 	&& target->info->xdeathstate)
     {
 	P_SetMobjState (target, target->info->xdeathstate);
+
+        if(d_maxgore)
+            A_MoreGibs(target);
     }
     else
 	P_SetMobjState (target, target->info->deathstate);
+
     target->tics -= P_Random()&3;
 
     if (target->tics < 1)
