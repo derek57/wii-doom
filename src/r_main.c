@@ -708,11 +708,11 @@ void R_ExecuteSetViewSize (void)
     viewwidth = scaledviewwidth>>detailshift;
     viewheight = scaledviewheight>>(detailshift && hires);		// ADDED FOR HIRES
 	
-//    centery = viewheight/2;
-
+    centery = viewheight/2;
+/*
     centery = (setblocks*(players[consoleplayer].lookdir>>FRACBITS));
     centery = (unsigned int)(centery/10)+viewheight/2;
-
+*/
     centerx = viewwidth/2;
     centerxfrac = centerx<<FRACBITS;
     centeryfrac = centery<<FRACBITS;
