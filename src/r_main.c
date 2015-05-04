@@ -682,10 +682,11 @@ void R_ExecuteSetViewSize (void)
     int		j;
     int		level;
     int		startmap;
+/*
     int		consoleplayer = 0;
 
     player_t    players[MAXPLAYERS]; 
-
+*/
     setsizeneeded = false;
 
     if (setblocks == 11)
