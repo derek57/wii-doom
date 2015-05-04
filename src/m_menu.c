@@ -399,6 +399,7 @@ void M_WeaponRecoil(int choice);
 void M_RespawnMonsters(int choice);
 void M_FastMonsters(int choice);
 void M_Autoaim(int choice);
+void M_MaxGore(int choice);
 
 void M_God(int choice);
 void M_Noclip(int choice);
@@ -426,6 +427,7 @@ void M_ItemsF(int choice);
 void M_ItemsG(int choice);
 void M_ItemsH(int choice);
 void M_ItemsI(int choice);
+void M_ItemsJ(int choice);
 void M_Topo(int choice);
 void M_Rift(int choice);
 void M_RiftNow(int choice);
@@ -1627,6 +1629,7 @@ enum
     items7,
     items8,
     items9,
+    items0,
     items_end
 } items_e;
 
@@ -1641,7 +1644,8 @@ menuitem_t ItemsMenu[]=
     {2,"",M_ItemsI,'6'},
     {2,"",M_ItemsB,'7'},
     {2,"",M_ItemsF,'8'},
-    {2,"",M_ItemsG,'9'}
+    {2,"",M_ItemsG,'9'},
+    {2,"",M_ItemsJ,'0'}
 };
 
 menu_t  ItemsDef =
@@ -1925,6 +1929,7 @@ enum
     game_respawn,
     game_fast,
     game_autoaim,
+    game_gore,
     game_end
 } game_e;
 
@@ -1956,6 +1961,7 @@ menuitem_t GameMenu[]=
     {2,"",M_RespawnMonsters,'t'},
     {2,"",M_FastMonsters,'d'},
     {2,"",M_Autoaim,'a'},
+    {2,"",M_MaxGore,'o'},
 };
 
 menu_t  GameDef =
@@ -1985,6 +1991,7 @@ enum
     game2_respawn,
     game2_fast,
     game2_autoaim,
+    game2_gore,
     game2_end
 } game2_e;
 
@@ -2018,6 +2025,7 @@ menuitem_t GameMenu2[]=
     {2,"",M_RespawnMonsters,'t'},
     {2,"",M_FastMonsters,'d'},
     {2,"",M_Autoaim,'a'},
+    {2,"",M_MaxGore,'o'},
 };
 
 menu_t  GameDef2 =
@@ -2869,6 +2877,7 @@ void M_DrawItems(void)
 	M_WriteText(80, 125, DEH_String("PARTIAL INVISIBILITY"));
 	M_WriteText(80, 135, DEH_String("INVULNERABILITY!"));
 	M_WriteText(80, 145, DEH_String("BERSERK!"));
+	M_WriteText(80, 155, DEH_String("BACKPACK"));
     }
 
     if(fsize == 19321722)
@@ -3101,6 +3110,7 @@ void M_DrawGame2(void)
     M_WriteText(85, 130, DEH_String("RESPAWN MONSTERS"));
     M_WriteText(85, 140, DEH_String("FAST MONSTERS"));
     M_WriteText(85, 150, DEH_String("AUTOAIM"));
+    M_WriteText(85, 160, DEH_String("MORE GORE"));
 
     if(drawgrid == 1)
         M_WriteText(220, 30, DEH_String("ON"));
@@ -3189,6 +3199,13 @@ void M_DrawGame2(void)
 //	V_DrawPatch (245, 151, W_CacheLumpName(DEH_String("M_SLOW"), PU_CACHE));
     else
         M_WriteText(220, 150, DEH_String("OFF"));
+//	V_DrawPatch (245, 151, W_CacheLumpName(DEH_String("M_FAST"), PU_CACHE));
+
+    if(d_maxgore)
+        M_WriteText(220, 160, DEH_String("ON"));
+//	V_DrawPatch (245, 151, W_CacheLumpName(DEH_String("M_SLOW"), PU_CACHE));
+    else
+        M_WriteText(220, 160, DEH_String("OFF"));
 //	V_DrawPatch (245, 151, W_CacheLumpName(DEH_String("M_FAST"), PU_CACHE));
 }
 
@@ -5543,6 +5560,36 @@ void M_ItemsI(int choice)
     DetectState();
 }
 
+void M_ItemsJ(int choice)
+{
+    if(!netgame && !demoplayback && gamestate == GS_LEVEL
+	&& gameskill != sk_nightmare && players[consoleplayer].playerstate == PST_LIVE)
+    {
+        int i;
+
+	static player_t* player;
+
+	player = &players[consoleplayer];
+
+	if (!player->backpack)
+	{
+	    for (i=0 ; i<NUMAMMO ; i++)
+		player->maxammo[i] *= 2;
+	    player->backpack = true;
+	}
+	for (i=0 ; i<NUMAMMO ; i++)
+	    P_GiveAmmo (player, i, 1);
+	player->message = DEH_String(GOTBACKPACK);
+/*
+	if (players[consoleplayer].mo)
+	    players[consoleplayer].mo->health = 200;
+	players[consoleplayer].health = 200;
+	players[consoleplayer].message = DEH_String("GOT FULL HEALTH (200)");
+*/
+    }
+    DetectState();
+}
+
 void M_Topo(int choice)
 {
     if(!netgame && !demoplayback && gamestate == GS_LEVEL
@@ -7188,6 +7235,23 @@ void M_Autoaim(int choice)
         if (autoaim == 0)
             autoaim = 1;
         players[consoleplayer].message = DEH_String("AUTOAIM ENABLED");
+        break;
+    }
+}
+
+void M_MaxGore(int choice)
+{
+    switch(choice)
+    {
+    case 0:
+        if (d_maxgore)
+            d_maxgore = false;
+        players[consoleplayer].message = DEH_String("MORE GORE DISABLED");
+        break;
+    case 1:
+        if (!d_maxgore)
+            d_maxgore = true;
+        players[consoleplayer].message = DEH_String("MORE GORE ENABLED");
         break;
     }
 }
