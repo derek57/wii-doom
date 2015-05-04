@@ -108,7 +108,7 @@ fixed_t			cacheddistance[SCREENHEIGHT];
 fixed_t			cachedxstep[SCREENHEIGHT];
 fixed_t			cachedystep[SCREENHEIGHT];
 
-
+extern int mouselook;
 
 //
 // R_InitPlanes
@@ -458,6 +458,9 @@ void R_DrawPlanes (void)
 	{
 //	    dc_iscale = pspriteiscale>>detailshift;			// CHANGED FOR HIRES
 	    dc_iscale = pspriteiscale>>(detailshift && !hires);		// CHANGED FOR HIRES
+
+ 	    if (mouselook > 0)
+	        dc_iscale = dc_iscale * 128 / 228;
 	    
 	    // Sky is allways drawn full bright,
 	    //  i.e. colormaps[0] is used.
