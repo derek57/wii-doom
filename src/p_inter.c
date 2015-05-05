@@ -723,7 +723,8 @@ P_KillMobj
 {
     mobjtype_t	item;
     mobj_t*	mo;
-	
+    int		t;
+
     target->flags &= ~(MF_SHOOTABLE|MF_FLOAT|MF_SKULLFLY);
 
     if (target->type != MT_SKULL)
@@ -784,6 +785,13 @@ P_KillMobj
     }
     else
 	P_SetMobjState (target, target->info->deathstate);
+
+    if(d_maxgore && target->type != MT_BARREL)
+    {
+        t = P_Random() % 7;
+
+        S_StartSound(NULL, sfx_splsh0 + t);
+    }
 
     target->tics -= P_Random()&3;
 

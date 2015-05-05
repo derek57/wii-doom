@@ -229,6 +229,18 @@ typedef enum
     sfx_skesit,
     sfx_skeatk,
     sfx_radio,
+
+    sfx_splsh0,
+    sfx_splsh1,
+    sfx_splsh2,
+    sfx_splsh3,
+    sfx_splsh4,
+    sfx_splsh5,
+    sfx_splsh6,
+    sfx_splsh7,
+    sfx_splsh8,
+    sfx_splsh9,
+
     NUMSFX
 } sfxenum_t;
 

@@ -2109,7 +2109,7 @@ void A_MoreBlood(mobj_t * actor)
 
         t = P_Random() % 3;
 
-        if(t > 0)
+        if(t >= 0)
             P_SetMobjState(mo, S_CHUNKA1 + t);
 
         t = P_Random();
@@ -2125,7 +2125,7 @@ void A_MoreBlood(mobj_t * actor)
 
         t = P_Random() % 3;
 
-        if(t > 0)
+        if(t >= 0)
             P_SetMobjState(mo, S_CHUNKB1 + t);
 
         t = P_Random();
