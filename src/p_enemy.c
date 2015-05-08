@@ -2024,11 +2024,16 @@ void A_PlayerScream (mobj_t* mo)
 //
 // Spawns gibs when organic actors get splattered.
 //
+
+boolean		onground;
+
 void A_MoreGibs(mobj_t* actor)
 {
     mobj_t* mo;
     angle_t an;
     int numchunks = (!d_maxgore) ? 1 : 8;
+    int t;
+    int old_t = 0;
 
     // max gore - ludicrous gibs
     do
@@ -2042,6 +2047,20 @@ void A_MoreGibs(mobj_t* actor)
         mo->momx = FixedMul(finecosine[an], (P_Random() & 0x0f) << FRACBITS);
         mo->momy = FixedMul(finesine[an], (P_Random() & 0x0f) << FRACBITS);
         mo->momz = (P_Random() & 0x0f) << FRACBITS;
+
+        onground = (actor->z <= actor->floorz);
+
+        if(onground)
+        {
+            t = P_Random() % 8;
+
+            if(t > 0 && t < 10 && t != old_t)
+            {
+                old_t = t;
+
+                S_StartSound(actor, sfx_splsh0 + t);
+            }
+        }
 
         // even more ludicrous gore
         if(d_maxgore && !(actor->flags & MF_NOBLOOD))
@@ -2107,9 +2126,9 @@ void A_MoreBlood(mobj_t * actor)
 
         mo = P_SpawnMobj(actor->x, actor->y, actor->z + actor->info->height/2, MT_CHUNK1);
 
-        t = P_Random() % 3;
+        t = P_Random() % 2;
 
-        if(t >= 0)
+        if(t >= 0 && t < 3)
             P_SetMobjState(mo, S_CHUNKA1 + t);
 
         t = P_Random();
@@ -2119,13 +2138,13 @@ void A_MoreBlood(mobj_t * actor)
         t = P_Random();
 
         mo->momy = (t - P_Random()) << 11;
-        mo->momz = P_Random() << 11;
+        mo->momz = (P_Random() << 11) / 2;
 
         mo = P_SpawnMobj(actor->x, actor->y, actor->z + actor->info->height/2, MT_CHUNK2);
 
-        t = P_Random() % 3;
+        t = P_Random() % 2;
 
-        if(t >= 0)
+        if(t >= 0 && t < 3)
             P_SetMobjState(mo, S_CHUNKB1 + t);
 
         t = P_Random();
@@ -2135,7 +2154,7 @@ void A_MoreBlood(mobj_t * actor)
         t = P_Random();
 
         mo->momy = (t - P_Random()) << 11;
-        mo->momz = P_Random() << 11;
+        mo->momz = (P_Random() << 11) / 2;
     }
 }
 

@@ -773,24 +773,33 @@ P_KillMobj
 
     // increase chance of gibbing
     if(d_maxgore)
+    {
         minhealth >>= 1;
 
-    if (target->health < -minhealth && -target->info->spawnhealth 
-	&& target->info->xdeathstate)
-    {
-	P_SetMobjState (target, target->info->xdeathstate);
+        if (target->health < -minhealth && -target->info->spawnhealth 
+	    && target->info->xdeathstate)
+        {
+	    P_SetMobjState (target, target->info->xdeathstate);
+        }
+        else
+	    P_SetMobjState (target, target->info->deathstate);
 
-        if(d_maxgore)
-            A_MoreGibs(target);
+        if(target->type != MT_BARREL)
+        {
+            t = P_Random() % 7;
+
+            S_StartSound(target, sfx_splsh0 + t);
+        }
     }
     else
-	P_SetMobjState (target, target->info->deathstate);
-
-    if(d_maxgore && target->type != MT_BARREL)
     {
-        t = P_Random() % 7;
-
-        S_StartSound(NULL, sfx_splsh0 + t);
+        if (target->health < -target->info->spawnhealth 
+	    && target->info->xdeathstate)
+        {
+	    P_SetMobjState (target, target->info->xdeathstate);
+        }
+        else
+	    P_SetMobjState (target, target->info->deathstate);
     }
 
     target->tics -= P_Random()&3;

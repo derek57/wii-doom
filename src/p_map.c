@@ -1294,8 +1294,8 @@ hitline:
     }
 
     // disabled check for damage
-    //if (la_damage)
-    P_DamageMobj (th, shootthing, shootthing, la_damage);
+    if (la_damage)
+        P_DamageMobj (th, shootthing, shootthing, la_damage);
 
     // Spawn bullet puffs or blod spots,
     // depending on target type.
@@ -1618,9 +1618,6 @@ boolean PIT_ChangeSector (mobj_t*	thing)
     if (thing->health <= 0)
     {
 	P_SetMobjState (thing, S_GIBS);
-
-	if(d_maxgore)
-            A_MoreGibs(thing); // spit out meat/junk stuff
 
 	thing->flags &= ~MF_SOLID;
 	thing->height = 0;
