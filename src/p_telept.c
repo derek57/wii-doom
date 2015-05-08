@@ -64,11 +64,11 @@ EV_Teleport
     fixed_t	oldz;
 
     // don't teleport missiles, blood and gibs
-    if (thing->flags & MF_MISSILE ||
+    if (thing->flags & MF_MISSILE /*||
         thing->type == MT_GORE    ||
         thing->type == MT_FLESH   ||
         thing->type == MT_CHUNK1  ||
-        thing->type == MT_CHUNK2)
+        thing->type == MT_CHUNK2*/)
 	return 0;		
 
     // Don't teleport if hit back of line,
@@ -118,9 +118,10 @@ EV_Teleport
 		    thing->z = thing->floorz;
 
 		if (thing->player)
+                {
 		    thing->player->viewz = thing->z+thing->player->viewheight;
-
-                thing->player->lookdir = 0;
+                    thing->player->lookdir = 0;
+                }
 
 		// spawn teleport fog at source and destination
 		fog = P_SpawnMobj (oldx, oldy, oldz, MT_TFOG);
