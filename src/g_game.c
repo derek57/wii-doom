@@ -750,10 +750,11 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
 			if(!menuactive)
 			{
 			    AM_Stop ();
-
+/*
 			    extern int screenblocks;
 
 			    R_SetViewSize (screenblocks, detailLevel);
+*/
 			}
 		    }
 		}
