@@ -938,7 +938,10 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
     if (/*joybuttons[joybuse] &&*/ joyiry && !paused && mouselook > 0)	// FOR PSP: mouselook, but...
     {									// ...not when paused & if on
 	// We'll directly change the viewing pitch of the console player.
-	float adj = ((joyiry * 0x4) << 16) / (float) 0x80000000*180*110.0/85.0;
+        float adj = 0;
+
+        if(!menuactive)
+            adj = ((joyiry * 0x4) << 16) / (float) 0x80000000*180*110.0/85.0;
 
 	// initialiser added to prevent compiler warning
 	float newlookdir = 0;
