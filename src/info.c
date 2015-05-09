@@ -228,9 +228,9 @@ state_t	states[NUMSTATES] = {
     {SPR_BFGG,1,20,{A_ReFire},S_BFG,0,0},	// S_BFG4
     {SPR_BFGF,32768,11,{A_Light1},S_BFGFLASH2,0,0},	// S_BFGFLASH1
     {SPR_BFGF,32769,6,{A_Light2},S_LIGHTDONE,0,0},	// S_BFGFLASH2
-    {SPR_BLUD,2,8,{A_MoreBlood},S_BLOOD2,0,0},	// S_BLOOD1
+    {SPR_BLUD,2,8,{NULL},S_BLOOD2,0,0},	// S_BLOOD1
     {SPR_BLUD,1,8,{A_MoreBlood},S_BLOOD3,0,0},	// S_BLOOD2
-    {SPR_BLUD,0,8,{A_MoreBlood},S_NULL,0,0},	// S_BLOOD3
+    {SPR_BLUD,0,8,{NULL},S_NULL,0,0},	// S_BLOOD3
     {SPR_PUFF,32768,4,{NULL},S_PUFF2,0,0},	// S_PUFF1
     {SPR_PUFF,1,4,{NULL},S_PUFF3,0,0},	// S_PUFF2
     {SPR_PUFF,2,4,{NULL},S_PUFF4,0,0},	// S_PUFF3
@@ -1133,12 +1133,12 @@ state_t	states[NUMSTATES] = {
     {SPR_SPRY,4,3,{NULL},S_SPRAY_05,0,0},	// S_SPRAY_04
     {SPR_SPRY,5,3,{NULL},S_SPRAY_06,0,0},	// S_SPRAY_05
     {SPR_SPRY,6,2,{NULL},S_NULL,0,0},	// S_SPRAY_06
-    {SPR_CHNK,0,-1,{NULL},S_CHUNKA2,0,0},       // S_CHUNKA1
-    {SPR_CHNK,1,-1,{NULL},S_CHUNKA3,0,0},     // S_CHUNKA2
-    {SPR_CHNK,2,-1,{NULL},S_NULL,0,0},    // S_CHUNKA3
-    {SPR_CHNK,3,-1,{NULL},S_CHUNKB2,0,0},       // S_CHUNKB1
-    {SPR_CHNK,4,-1,{NULL},S_CHUNKB3,0,0},     // S_CHUNKB2
-    {SPR_CHNK,5,-1,{NULL},S_NULL,0,0}    // S_CHUNKB3
+    {SPR_CHNK,0,-1,{NULL},S_CHUNK_01,0,0},       // S_CHUNK_00
+    {SPR_CHNK,1,-1,{NULL},S_CHUNK_02,0,0},       // S_CHUNK_01
+    {SPR_CHNK,2,-1,{NULL},S_CHUNK_03,0,0},       // S_CHUNK_02
+    {SPR_CHNK,3,-1,{NULL},S_CHUNK_04,0,0},       // S_CHUNK_03
+    {SPR_CHNK,4,-1,{NULL},S_CHUNK_05,0,0},       // S_CHUNK_04
+    {SPR_CHNK,5,-1,{NULL},S_NULL,0,0}   // S_CHUNK_05
 };
 
 
@@ -4758,35 +4758,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
 	S_NULL		// raisestate
     },
 
-    {           // MT_CHUNK1
+    {           // MT_CHUNK
         -1,             // doomednum
-        S_CHUNKA1,             // spawnstate
-        1000,           // spawnhealth
-        S_NULL,         // seestate
-        sfx_None,              // seesound
-        8,              // reactiontime
-        sfx_None,              // attacksound
-        S_NULL,         // painstate
-        0,              // painchance
-        sfx_None,              // painsound
-        S_NULL,         // meleestate
-        S_NULL,         // missilestate
-        S_NULL,         // deathstate
-        S_NULL,         // xdeathstate
-        sfx_None,              // deathsound
-        0,              // speed
-        20 * FRACUNIT,         // radius
-        16 * FRACUNIT,         // height
-        100,            // mass
-        0,              // damage
-        sfx_None,              // activesound
-        0,          // flags
-        S_NULL          // raisestate
-    },
-
-    {           // MT_CHUNK2
-        -1,             // doomednum
-        S_CHUNKB1,             // spawnstate
+        S_CHUNK_00,             // spawnstate
         1000,           // spawnhealth
         S_NULL,         // seestate
         sfx_None,              // seesound
@@ -4809,5 +4783,6 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,          // flags
         S_NULL          // raisestate
     }
+
 };
 

@@ -37,6 +37,8 @@
 // from a lookup table.
 int M_Random (void);
 
+int M_RandomInt(int lower, int upper);
+
 // As M_Random, but used only by the play simulation.
 int P_Random (void);
 

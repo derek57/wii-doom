@@ -1178,14 +1178,15 @@ typedef enum
     S_SPRAY_04,
     S_SPRAY_05,
     S_SPRAY_06,
-    S_CHUNKA1,
-    S_CHUNKA2,
-    S_CHUNKA3,
-    S_CHUNKB1,
-    S_CHUNKB2,
-    S_CHUNKB3,
+    S_CHUNK_00,
+    S_CHUNK_01,
+    S_CHUNK_02,
+    S_CHUNK_03,
+    S_CHUNK_04,
+    S_CHUNK_05,
 
     NUMSTATES
+
 } statenum_t;
 
 
@@ -1345,8 +1346,7 @@ typedef enum {
 
     MT_FLESH,
     MT_GORE,
-    MT_CHUNK1,
-    MT_CHUNK2,
+    MT_CHUNK,
 
     NUMMOBJTYPES
 

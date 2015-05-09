@@ -25,6 +25,7 @@
 //-----------------------------------------------------------------------------
 
 
+#include <stdlib.h>
 #include <time.h>
 
 #include "m_random.h"
@@ -70,6 +71,11 @@ int M_Random (void)
 {
     rndindex = (rndindex+1)&0xff;
     return rndtable[rndindex];
+}
+
+int M_RandomInt(int lower, int upper)
+{
+    return (rand() % (upper - lower + 1) + lower);
 }
 
 void M_ClearRandom (void)

@@ -64,11 +64,7 @@ EV_Teleport
     fixed_t	oldz;
 
     // don't teleport missiles, blood and gibs
-    if (thing->flags & MF_MISSILE /*||
-        thing->type == MT_GORE    ||
-        thing->type == MT_FLESH   ||
-        thing->type == MT_CHUNK1  ||
-        thing->type == MT_CHUNK2*/)
+    if (thing->flags & MF_MISSILE)
 	return 0;		
 
     // Don't teleport if hit back of line,
