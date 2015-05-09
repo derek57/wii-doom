@@ -156,6 +156,8 @@ int			musnum = 1;
 int			cheeting;
 extern int		cheating;
 extern int		mspeed;
+extern int		left;
+extern int		right;
 /*
 extern u32		tickResolution;
 extern u64		fpsTickLast;
@@ -189,8 +191,8 @@ int			extra_wad_loaded;
 int			mhz333 = 0;
 */
 int			fps = 0;		// FOR PSP: calculating the frames per second
-int			key_controls_start_in_cfg_at_pos = 24;	// FOR PSP: ACTUALLY IT'S +2 !!!
-int			key_controls_end_in_cfg_at_pos = 36;	// FOR PSP: ACTUALLY IT'S +2 !!!
+int			key_controls_start_in_cfg_at_pos = 25;	// FOR PSP: ACTUALLY IT'S +2 !!!
+int			key_controls_end_in_cfg_at_pos = 37;	// FOR PSP: ACTUALLY IT'S +2 !!!
 int			crosshair = 0;
 int			show_stats = 0;
 //int			max_free_ram = 0;
@@ -236,6 +238,7 @@ boolean got_light_amp = false;
 boolean got_all = false;
 boolean aiming_help;
 boolean hud;
+boolean swap_sound_chans;
 
 boolean skillflag = true;
 boolean nomonstersflag;
@@ -363,6 +366,7 @@ void M_ClearMenus (void);
 //#ifdef OGG_SUPPORT
 void M_MusicType(int choice);
 //#endif
+void M_SoundChannels(int choice);
 void M_GameFiles(int choice);
 void M_Brightness(int choice);
 void M_Freelook(int choice);
@@ -2100,6 +2104,7 @@ enum
     type,
 //#endif
 //    track_loop,
+    channels,
     sound_end
 } sound_e;
 
@@ -2112,8 +2117,9 @@ menuitem_t SoundMenu[]=
 //#ifdef OGG_SUPPORT
 ,
 //    {2,"M_CTRACK",M_Spin,'t'}, 
-    {2,"M_MUSTYP",M_MusicType,'t'}
+    {2,"M_MUSTYP",M_MusicType,'t'},
 //#endif
+    {2,"M_SNDCHN",M_SoundChannels,'c'}
     /*,{2,"M_LTRACK",M_Loop,'l'}*/
 };
 
@@ -2622,6 +2628,11 @@ void M_DrawSound(void)
     else
 	V_DrawPatch (225, 122, W_CacheLumpName(DEH_String("M_MUSOGG"), PU_CACHE));
 
+    if(swap_sound_chans)
+	V_DrawPatch (225, 135, W_CacheLumpName(DEH_String("M_MSGON"), PU_CACHE));
+    else
+	V_DrawPatch (225, 135, W_CacheLumpName(DEH_String("M_MSGOFF"), PU_CACHE));
+
     if(mus_engine < 1)
 	mus_engine = 1;
     else if(mus_engine > 2)
@@ -2737,6 +2748,25 @@ void M_MusicType(int choice)
     }
 }
 #endif
+
+void M_SoundChannels(int choice)
+{
+    switch(choice)
+    {
+    case 0:
+        if(swap_sound_chans == true)
+	{
+            swap_sound_chans = false;
+	}
+        break;
+    case 1:
+        if(swap_sound_chans == false)
+	{
+            swap_sound_chans = true;
+	}
+        break;
+    }
+}
 
 //
 // M_DrawMainMenu
@@ -4269,7 +4299,7 @@ boolean M_Responder (event_t* ev)
     if (askforkey && data->btns_d)		// KEY BINDINGS
     {
 	M_KeyBindingsClearControls(ev->data1);
-	*doom_defaults_list[keyaskedfor + 24 + FirstKey].location = ev->data1;
+	*doom_defaults_list[keyaskedfor + 25 + FirstKey].location = ev->data1;
 	askforkey = false;
 	return true;
     }
@@ -4968,7 +4998,7 @@ void M_Drawer (void)
 	currentMenu->numitems = 9;
 
     if(currentMenu == &SoundDef && itemOn == 4)
-	M_WriteText(48, 150, "You must restart to take effect.");
+	M_WriteText(48, 155, "You must restart to take effect.");
 
     if (currentMenu->menuitems[itemOn].status == 5)		// FOR PSP (if too many menu items) ;-)
 	max += FirstKey;
@@ -6598,7 +6628,6 @@ void M_KeyBindingsClearControls (int ch)	// XXX (FOR PSP): NOW THIS IS RATHER IM
 
 void M_KeyBindingsClearAll (int choice)
 {
-    *doom_defaults_list[24].location = 0;
     *doom_defaults_list[25].location = 0;
     *doom_defaults_list[26].location = 0;
     *doom_defaults_list[27].location = 0;
@@ -6610,22 +6639,23 @@ void M_KeyBindingsClearAll (int choice)
     *doom_defaults_list[33].location = 0;
     *doom_defaults_list[34].location = 0;
     *doom_defaults_list[35].location = 0;
+    *doom_defaults_list[36].location = 0;
 }
 
 void M_KeyBindingsReset (int choice)
 {
-    *doom_defaults_list[24].location = CLASSIC_CONTROLLER_R;
-    *doom_defaults_list[25].location = CLASSIC_CONTROLLER_L;
-    *doom_defaults_list[26].location = CLASSIC_CONTROLLER_MINUS;
-    *doom_defaults_list[27].location = CLASSIC_CONTROLLER_LEFT;
-    *doom_defaults_list[28].location = CLASSIC_CONTROLLER_DOWN;
-    *doom_defaults_list[29].location = CLASSIC_CONTROLLER_RIGHT;
-    *doom_defaults_list[30].location = CLASSIC_CONTROLLER_ZL;
-    *doom_defaults_list[31].location = CLASSIC_CONTROLLER_ZR;
-    *doom_defaults_list[32].location = CLASSIC_CONTROLLER_HOME;
-    *doom_defaults_list[33].location = CONTROLLER_1;
-    *doom_defaults_list[34].location = CONTROLLER_2;
-    *doom_defaults_list[35].location = CLASSIC_CONTROLLER_PLUS;
+    *doom_defaults_list[25].location = CLASSIC_CONTROLLER_R;
+    *doom_defaults_list[26].location = CLASSIC_CONTROLLER_L;
+    *doom_defaults_list[27].location = CLASSIC_CONTROLLER_MINUS;
+    *doom_defaults_list[28].location = CLASSIC_CONTROLLER_LEFT;
+    *doom_defaults_list[29].location = CLASSIC_CONTROLLER_DOWN;
+    *doom_defaults_list[30].location = CLASSIC_CONTROLLER_RIGHT;
+    *doom_defaults_list[31].location = CLASSIC_CONTROLLER_ZL;
+    *doom_defaults_list[32].location = CLASSIC_CONTROLLER_ZR;
+    *doom_defaults_list[33].location = CLASSIC_CONTROLLER_HOME;
+    *doom_defaults_list[34].location = CONTROLLER_1;
+    *doom_defaults_list[35].location = CONTROLLER_2;
+    *doom_defaults_list[36].location = CLASSIC_CONTROLLER_PLUS;
 }
 
 void M_DrawKeyBindings(void)
@@ -6688,7 +6718,7 @@ void M_DrawKeyBindings(void)
 	else
 	{
 	    if(i < 11 && !devparm)
-		M_WriteText(195, (i*10+30), Key2String(*(doom_defaults_list[i+FirstKey+24].location)));
+		M_WriteText(195, (i*10+30), Key2String(*(doom_defaults_list[i+FirstKey+25].location)));
 	}
     }
 }

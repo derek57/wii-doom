@@ -91,6 +91,8 @@ int use_libsamplerate = 0;
 
 float libsamplerate_scale = 0.65;
 
+extern boolean swap_sound_chans;
+
 // Hook a sound into the linked list at the head.
 
 static void AllocatedSoundLink(allocated_sound_t *snd)
@@ -823,8 +825,16 @@ static void I_SDL_UpdateSoundParams(int handle, int vol, int sep)
         return;
     }
 
-    left = ((254 - sep) * vol) / 127;
-    right = ((sep) * vol) / 127;
+    if(swap_sound_chans)
+    {
+        right = ((254 - sep) * vol) / 127;
+        left = ((sep) * vol) / 127;
+    }
+    else
+    {
+        left = ((254 - sep) * vol) / 127;
+        right = ((sep) * vol) / 127;
+    }
 
     if (left < 0) left = 0;
     else if ( left > 255) left = 255;
