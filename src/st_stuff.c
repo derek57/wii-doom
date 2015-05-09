@@ -344,7 +344,7 @@ static patch_t*		armsbg;
 // weapon ownership patches
 static patch_t*		arms[6][2]; 
 
-static patch_t*         invammo[NUMAMMO]; // ammo/weapons
+static patch_t*         invammo[NUMAMMO + 3]; // ammo/weapons
 
 // ready-weapon widget
 static st_number_t	w_ready;
@@ -587,7 +587,31 @@ void ST_drawEx(void)
 
         if (ammo != am_noammo)
         {
-            V_DrawPatch(280, 196, invammo[ammo]);
+            if(player->readyweapon == wp_pistol)
+                V_DrawPatch(280, 196, invammo[0]);
+
+            if(player->readyweapon == wp_shotgun)
+                V_DrawPatch(280, 196, invammo[1]);
+
+            if(player->readyweapon == wp_chaingun)
+                V_DrawPatch(273, 196, invammo[2]);
+
+            if(player->readyweapon == wp_missile)
+                V_DrawPatch(281, 196, invammo[3]);
+
+            if (fsize != 4207819 && fsize != 4274218 && fsize != 4225504 &&
+                fsize != 4225460 && fsize != 4234124 && fsize != 4196020 &&
+                fsize != 4261144 && fsize != 4271324 && fsize != 4211660)
+            {
+                if(player->readyweapon == wp_plasma)
+                    V_DrawPatch(280, 196, invammo[4]);
+
+                if(player->readyweapon == wp_bfg)
+                    V_DrawPatch(273, 196, invammo[5]);
+            }
+
+            if(player->readyweapon == wp_supershotgun)
+                V_DrawPatch(275, 196, invammo[6]);
 
             sprintf(buffer_ammo, "%d\n", plyr->ammo[ammo]);
 
@@ -602,12 +626,12 @@ void ST_drawEx(void)
             if(i < 3)
             {
                 if (player->cards[i] == true)
-                    V_DrawPatch(245 + y, 190, keys[i]);
+                    V_DrawPatch(231 + y, 190, keys[i]);
             }
             else
             {
                 if (player->cards[i] == true)
-                    V_DrawPatch(221 + y, 189, keys[i]);
+                    V_DrawPatch(207 + y, 189, keys[i]);
             }
         }
     }
@@ -1249,6 +1273,8 @@ void ST_loadGraphics(void)
     
     char	namebuf[9];
 
+//    player_t*	player = &players[consoleplayer];
+
     // Load the numbers, tall and short
     for (i=0;i<10;i++)
     {
@@ -1322,10 +1348,21 @@ void ST_loadGraphics(void)
 
     // load ammo patches
     ammonum = 0;
+
     invammo[ammonum++] = W_CacheLumpName("CLIPA0", PU_STATIC);
     invammo[ammonum++] = W_CacheLumpName("SHELA0", PU_STATIC);
-    invammo[ammonum++] = W_CacheLumpName("CELLA0", PU_STATIC);
+    invammo[ammonum++] = W_CacheLumpName("AMMOA0", PU_STATIC);
     invammo[ammonum++] = W_CacheLumpName("ROCKA0", PU_STATIC);
+
+    if (fsize != 4207819 && fsize != 4274218 && fsize != 4225504 &&
+        fsize != 4225460 && fsize != 4234124 && fsize != 4196020 &&
+        fsize != 4261144 && fsize != 4271324 && fsize != 4211660)
+    {
+        invammo[ammonum++] = W_CacheLumpName("CELLA0", PU_STATIC);
+        invammo[ammonum++] = W_CacheLumpName("CELPA0", PU_STATIC);
+    }
+
+    invammo[ammonum++] = W_CacheLumpName("SBOXA0", PU_STATIC);
 }
 
 void ST_loadData(void)
