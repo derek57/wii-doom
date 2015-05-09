@@ -61,6 +61,9 @@ rcsid[] = "$Id: st_stuff.c,v 1.6 1997/02/03 22:45:13 b1 Exp $";
 #include "dstrings.h"
 #include "sounds.h"
 
+#include "m_menu.h"
+#include "deh_str.h"
+
 //
 // STATUS BAR DATA
 //
@@ -341,6 +344,8 @@ static patch_t*		armsbg;
 // weapon ownership patches
 static patch_t*		arms[6][2]; 
 
+static patch_t*         invammo[NUMAMMO]; // ammo/weapons
+
 // ready-weapon widget
 static st_number_t	w_ready;
 
@@ -513,6 +518,8 @@ cheatseq_t cheat_mypos = CHEAT("idmypos", 0);
 // 
 extern char*	mapnames[];
 
+extern boolean hud;
+
 int		prio = 0;
 
 //
@@ -542,7 +549,47 @@ void ST_refreshBackground(void)
 
 	V_CopyRect(ST_X, 0, st_backing_screen, ST_WIDTH, ST_HEIGHT, ST_X, ST_Y);
     }
+}
 
+void ST_drawEx(void)
+{
+    char buffer_ammo[10];
+    char buffer_armor[10];
+    char buffer_health[10];
+
+    if(hud)
+    {
+        ammotype_t ammo;
+
+        // health
+        V_DrawPatch(18, 196, W_CacheLumpName("MEDIA0", PU_CACHE));
+
+        sprintf(buffer_health, "%d\n", plyr->health);
+
+        M_WriteText(40, 189, buffer_health);
+        
+        // armor
+        if(plyr->armortype == 2)
+            V_DrawPatch(85, 196, W_CacheLumpName("ARM2A0", PU_CACHE));
+        else
+            V_DrawPatch(85, 196, W_CacheLumpName("ARM1A0", PU_CACHE));
+
+        sprintf(buffer_armor, "%d\n", plyr->armorpoints);
+
+        M_WriteText(107, 189, buffer_armor);
+
+        // ammo
+        ammo = weaponinfo[plyr->readyweapon].ammo;
+
+        if (ammo != am_noammo)
+        {
+            V_DrawPatch(280, 196, invammo[ammo]);
+
+            sprintf(buffer_ammo, "%d\n", plyr->ammo[ammo]);
+
+            M_WriteText(293, 189, buffer_ammo);
+        }
+    }
 }
 
 
@@ -1177,6 +1224,7 @@ void ST_loadGraphics(void)
     int		i;
     int		j;
     int		facenum;
+    int		ammonum;
     
     char	namebuf[9];
 
@@ -1251,6 +1299,12 @@ void ST_loadGraphics(void)
     faces[facenum++] = W_CacheLumpName("STFGOD0", PU_STATIC);
     faces[facenum++] = W_CacheLumpName("STFDEAD0", PU_STATIC);
 
+    // load ammo patches
+    ammonum = 0;
+    invammo[ammonum++] = W_CacheLumpName("CLIPA0", PU_STATIC);
+    invammo[ammonum++] = W_CacheLumpName("SHELA0", PU_STATIC);
+    invammo[ammonum++] = W_CacheLumpName("CELLA0", PU_STATIC);
+    invammo[ammonum++] = W_CacheLumpName("ROCKA0", PU_STATIC);
 }
 
 void ST_loadData(void)
@@ -1270,6 +1324,9 @@ void ST_unloadGraphics(void)
 	Z_ChangeTag(tallnum[i], PU_CACHE);
 	Z_ChangeTag(shortnum[i], PU_CACHE);
     }
+    // unload invammo
+    Z_ChangeTag(invammo, PU_CACHE); 
+
     // unload tall percent
     Z_ChangeTag(tallpercent, PU_CACHE); 
 

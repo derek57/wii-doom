@@ -240,7 +240,9 @@ void D_ProcessEvents (void)
 // wipegamestate can be set to -1 to force a wipe on the next draw
 gamestate_t     wipegamestate = GS_DEMOSCREEN;
 extern  boolean setsizeneeded;
+extern  boolean	hud;
 extern  int             showMessages;
+extern  int             screenSize;
 void R_ExecuteSetViewSize (void);
 
 boolean			redrawsbar;
@@ -364,6 +366,9 @@ void D_Display (void)
 	viewactivestate = false;        // view was not active
 	R_FillBackScreen ();    // draw the pattern into the back screen
     }
+
+    if(hud && !automapactive && screenSize == 8 && usergame)
+        ST_drawEx();
 
     // see if the border needs to be updated to the screen
 //    if (gamestate == GS_LEVEL && !automapactive && scaledviewwidth != 320)		// CHANGED FOR HIRES
