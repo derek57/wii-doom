@@ -753,10 +753,46 @@ boolean HU_Responder(event_t *ev)
 
 void HU_NewLevel()
 {
+    char*	s;
+
     // print the new level name into the console
     C_Printf("\n");
     C_Seperator();
-    C_Printf("%s\n\n", HU_TITLE);
+
+    switch ( logical_gamemission )
+    {
+      case doom:
+	s = HU_TITLE;
+	break;
+      case doom2:
+	 s = HU_TITLE2;
+	 break;
+      case pack_plut:
+	s = HU_TITLEP;
+	break;
+      case pack_tnt:
+	s = HU_TITLET;
+	break;
+      case pack_nerve:
+	if (gamemap <= 9)
+	  s = HU_TITLEN;
+	else
+	  s = HU_TITLE2;
+	break;
+      default:
+         s = "Unknown level";
+         break;
+    }
+
+    // Chex.exe always uses the episode 1 level title
+    // eg. E2M1 gives the title for E1M1
+
+    if (gameversion == exe_chex)
+    {
+        s = HU_TITLE_CHEX;
+    }
+
+    C_Printf("%s\n\n", s);
     C_InstaPopup();       // put console away
 //    C_Update();
 }
