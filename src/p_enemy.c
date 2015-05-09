@@ -2120,27 +2120,30 @@ void A_MoreBlood(mobj_t * actor)
 {
     if(d_maxgore && !(actor->flags & MF_NOBLOOD))
     {
-        int i, t;
-
+        int t;
+/*
         mobj_t *mo;
 
-//        for(i = 0; i < 8; i++)
-        {
-            mo = P_SpawnMobj(actor->x,
-                             actor->y,
-                             actor->z, MT_CHUNK);
+        mo = P_SpawnMobj(actor->x,		// FIXME: THIS LINE IS BUGGY AS HELL
+                         actor->y,		// ON THE WII SO WE CHANGE THE STATE
+                         actor->z, MT_CHUNK);	// DIRECTLY IN THE CODE LINES BELOW.
+*/
+        t = P_Random() % 6;
 
-            t = P_Random();
+        if(t > 0)
+            actor->state->nextstate = S_CHUNK_00 + t;
+/*
+            P_SetMobjState(mo, S_CHUNK_00 + t);
 
-            mo->momx = (t - P_Random()) << 10;
+        t = P_Random();
 
-            t = P_Random();
+        mo->momx = (t - P_Random()) << 11;
 
-            mo->momy = (t - P_Random()) << 10;
-            mo->momz = (P_Random() << 10) / 2;
+        t = P_Random();
 
-            P_SetMobjState(mo, S_CHUNK_00 + (P_Random() % 5));
-        }
+        mo->momy = (t - P_Random()) << 11;
+        mo->momz = (P_Random() << 11) / 2;
+*/
     }
 }
 

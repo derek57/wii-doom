@@ -67,6 +67,21 @@ int P_Random (void)
     return rndtable[prndindex];
 }
 
+// P_Random is used throughout all the p_xxx game code.
+byte P_Random2 ()
+{
+    return rndtable[++prndindex];
+}
+
+// lot of code used P_Random()-P_Random() since C don't define 
+// evaluation order it is compiler depenent so this allow network play 
+// between different compilers
+int P_SignedRandom ()
+{
+    int r = P_Random2();
+    return r - P_Random2();
+}
+
 int M_Random (void)
 {
     rndindex = (rndindex+1)&0xff;

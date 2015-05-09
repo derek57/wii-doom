@@ -33,6 +33,8 @@
 
 
 
+int P_SignedRandom ();
+
 // Returns a number from 0 to 255,
 // from a lookup table.
 int M_Random (void);
