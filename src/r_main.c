@@ -870,7 +870,7 @@ void R_SetupPitch(player_t* player)
 
     if(viewpitch != player->lookdir)
     {
-        viewpitch   = player->lookdir;
+        viewpitch = player->lookdir + player->recoilpitch;
 
         if (viewpitch > 90*FRACUNIT)
             viewpitch = 90*FRACUNIT;
