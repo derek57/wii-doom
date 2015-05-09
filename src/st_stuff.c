@@ -553,9 +553,13 @@ void ST_refreshBackground(void)
 
 void ST_drawEx(void)
 {
+    int i, y;
+
     char buffer_ammo[10];
     char buffer_armor[10];
     char buffer_health[10];
+
+    player_t* player = &players[consoleplayer];
 
     if(hud)
     {
@@ -588,6 +592,23 @@ void ST_drawEx(void)
             sprintf(buffer_ammo, "%d\n", plyr->ammo[ammo]);
 
             M_WriteText(293, 189, buffer_ammo);
+        }
+
+        // keys
+        for(i = 0; i < 6; i++)
+        {
+            y = i * 8;
+
+            if(i < 3)
+            {
+                if (player->cards[i] == true)
+                    V_DrawPatch(245 + y, 190, keys[i]);
+            }
+            else
+            {
+                if (player->cards[i] == true)
+                    V_DrawPatch(221 + y, 189, keys[i]);
+            }
         }
     }
 }

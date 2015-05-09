@@ -419,6 +419,9 @@ void M_KeysA(int choice);
 void M_KeysB(int choice);
 void M_KeysC(int choice);
 void M_KeysD(int choice);
+void M_KeysE(int choice);
+void M_KeysF(int choice);
+void M_KeysG(int choice);
 void M_Items(int choice);
 void M_ItemsA(int choice);
 void M_ItemsB(int choice);
@@ -1667,6 +1670,9 @@ enum
     keys2,
     keys3,
     keys4,
+    keys5,
+    keys6,
+    keys7,
     keys_end
 } keys_e;
 
@@ -1676,7 +1682,10 @@ menuitem_t KeysMenu[]=
     {-1,"",0,'\0'},
     {2,"",M_KeysB,'2'},
     {2,"",M_KeysC,'3'},
-    {2,"",M_KeysD,'4'}
+    {2,"",M_KeysD,'4'},
+    {2,"",M_KeysE,'5'},
+    {2,"",M_KeysF,'6'},
+    {2,"",M_KeysG,'7'}
 };
 
 menu_t  KeysDef =
@@ -2987,9 +2996,12 @@ void M_DrawKeys(void)
 
     M_WriteText(80, 55, DEH_String("GIVE THEM ALL AT ONCE"));
 
-    M_WriteText(80, 75, DEH_String("BLUE KEY"));
-    M_WriteText(80, 85, DEH_String("YELLOW KEY"));
-    M_WriteText(80, 95, DEH_String("RED KEY"));
+    M_WriteText(80, 75, DEH_String("BLUE KEYCARD"));
+    M_WriteText(80, 85, DEH_String("YELLOW KEYCARD"));
+    M_WriteText(80, 95, DEH_String("RED KEYCARD"));
+    M_WriteText(80, 105, DEH_String("BLUE SKULLKEY"));
+    M_WriteText(80, 115, DEH_String("YELLOW SKULLKEY"));
+    M_WriteText(80, 125, DEH_String("RED SKULLKEY"));
 }
 
 void M_DrawScreen(void)
@@ -5373,7 +5385,7 @@ void M_KeysB(int choice)
     {
 	players[consoleplayer].cards[0] = true;
 	
-	players[consoleplayer].message = DEH_String("BLUE KEY ADDED");
+	players[consoleplayer].message = DEH_String("BLUE KEYCARD ADDED");
     }
     DetectState();
 }
@@ -5385,7 +5397,7 @@ void M_KeysC(int choice)
     {
 	players[consoleplayer].cards[1] = true;
 	
-	players[consoleplayer].message = DEH_String("YELLOW KEY ADDED");
+	players[consoleplayer].message = DEH_String("YELLOW KEYCARD ADDED");
     }
     DetectState();
 }
@@ -5397,7 +5409,43 @@ void M_KeysD(int choice)
     {
 	players[consoleplayer].cards[2] = true;
 	
-	players[consoleplayer].message = DEH_String("RED KEY ADDED");
+	players[consoleplayer].message = DEH_String("RED KEYCARD ADDED");
+    }
+    DetectState();
+}
+
+void M_KeysE(int choice)
+{
+    if(!netgame && !demoplayback && gamestate == GS_LEVEL
+	&& gameskill != sk_nightmare && players[consoleplayer].playerstate == PST_LIVE)
+    {
+	players[consoleplayer].cards[3] = true;
+	
+	players[consoleplayer].message = DEH_String("BLUE SKULLKEY ADDED");
+    }
+    DetectState();
+}
+
+void M_KeysF(int choice)
+{
+    if(!netgame && !demoplayback && gamestate == GS_LEVEL
+	&& gameskill != sk_nightmare && players[consoleplayer].playerstate == PST_LIVE)
+    {
+	players[consoleplayer].cards[4] = true;
+	
+	players[consoleplayer].message = DEH_String("YELLOW SKULLKEY ADDED");
+    }
+    DetectState();
+}
+
+void M_KeysG(int choice)
+{
+    if(!netgame && !demoplayback && gamestate == GS_LEVEL
+	&& gameskill != sk_nightmare && players[consoleplayer].playerstate == PST_LIVE)
+    {
+	players[consoleplayer].cards[5] = true;
+	
+	players[consoleplayer].message = DEH_String("RED SKULLKEY ADDED");
     }
     DetectState();
 }

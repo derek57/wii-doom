@@ -367,7 +367,7 @@ void D_Display (void)
 	R_FillBackScreen ();    // draw the pattern into the back screen
     }
 
-    if(hud && !automapactive && screenSize == 8 && usergame)
+    if(hud && !automapactive && screenSize == 8 && usergame && gamestate == GS_LEVEL)
         ST_drawEx();
 
     // see if the border needs to be updated to the screen
