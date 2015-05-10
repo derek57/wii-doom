@@ -717,7 +717,8 @@ void W_NWTDashMerge(char *filename)
             // Replace this entry with an empty string.  This is what
             // nwt -merge does.
 
-            M_StringCopy(iwad_sprites.lumps[i].name, "", 8);
+            M_StringCopy(iwad_sprites.lumps[i].name, "", 8);	// FIXME: ..."", 8); <-- is this correct?
+								// shouldn't "8" be replaced with "9"?
         }
     }
 

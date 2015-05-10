@@ -225,7 +225,8 @@ wad_file_t *W_AddFile (char *filename)
 	lump_p->position = LONG(filerover->filepos);
 	lump_p->size = LONG(filerover->size);
         lump_p->cache = NULL;
-	strncpy(lump_p->name, filerover->name, 8);
+        strncpy(lump_p->name, filerover->name, 8);
+//	M_StringCopy(lump_p->name, filerover->name, 9);	<-- FIXME: safe function doesn't work...
 
         ++lump_p;
         ++filerover;
