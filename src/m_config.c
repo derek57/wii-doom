@@ -185,6 +185,7 @@ extern int key_invright, key_invuse;
     CONFIG_VARIABLE_INT		(max_gore),
     CONFIG_VARIABLE_INT		(extra_hud),
     CONFIG_VARIABLE_INT		(switch_chans),
+    CONFIG_VARIABLE_INT		(player_thrust),
 /*
     CONFIG_VARIABLE_INT		(key_triangle),
     CONFIG_VARIABLE_INT		(key_cross),

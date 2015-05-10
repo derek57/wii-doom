@@ -43,6 +43,7 @@ extern boolean am_rotate;
 extern boolean opl;
 extern boolean d_recoil;
 extern boolean d_maxgore;
+extern boolean d_thrust;
 extern boolean respawnparm;
 extern boolean fastparm;
 extern boolean hud;
@@ -363,6 +364,7 @@ void M_BindBaseControls(void)
     M_BindVariable("max_gore",               &d_maxgore);
     M_BindVariable("extra_hud",              &hud);
     M_BindVariable("switch_chans",           &swap_sound_chans);
+    M_BindVariable("player_thrust",          &d_thrust);
     M_BindVariable("key_fire",               &joy_r);
     M_BindVariable("key_use",                &joy_l);
     M_BindVariable("key_menu",               &joy_minus);

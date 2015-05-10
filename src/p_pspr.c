@@ -605,7 +605,9 @@ A_FireMissile
     if(d_recoil)
     {
         player->recoilpitch = (8*FRACUNIT);
-        A_Recoil (player);
+
+        if(d_thrust)
+            A_Recoil (player);
     }
 }
 
@@ -625,7 +627,9 @@ A_FireBFG
     if(d_recoil)
     {
         player->recoilpitch = (14*FRACUNIT);
-        A_Recoil (player);
+
+        if(d_thrust)
+            A_Recoil (player);
     }
 }
 
@@ -650,7 +654,9 @@ A_FirePlasma
     if(d_recoil)
     {
         player->recoilpitch = (6*FRACUNIT);
-        A_Recoil (player);
+
+        if(d_thrust)
+            A_Recoil (player);
     }
 }
 
@@ -751,7 +757,9 @@ A_FirePistol
     if(d_recoil)
     {
         player->recoilpitch = (6*FRACUNIT);
-        A_Recoil (player);
+
+        if(d_thrust)
+            A_Recoil (player);
     }
 }
 
@@ -783,7 +791,9 @@ A_FireShotgun
     if(d_recoil)
     {
         player->recoilpitch = (6*FRACUNIT);
-        A_Recoil (player);
+
+        if(d_thrust)
+            A_Recoil (player);
     }
 }
 
@@ -827,7 +837,9 @@ A_FireShotgun2
     if(d_recoil)
     {
         player->recoilpitch = (8*FRACUNIT);
-        A_Recoil (player);
+
+        if(d_thrust)
+            A_Recoil (player);
     }
 }
 
@@ -861,7 +873,9 @@ A_FireCGun
     if(d_recoil)
     {
         player->recoilpitch = (8*FRACUNIT);
-        A_Recoil (player);
+
+        if(d_thrust)
+            A_Recoil (player);
     }
 }
 
