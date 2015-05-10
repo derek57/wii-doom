@@ -53,6 +53,30 @@ int use_vanilla_weapon_change = 1;
 
 extern boolean aiming_help;
 
+static const int recoil_values[][2] = {
+    {10,   0}, // wp_fist
+    {10,   4}, // wp_pistol
+    {30,  12}, // wp_shotgun
+    {10,   4}, // wp_chaingun
+    {100, 16}, // wp_missile
+    {20,   8}, // wp_plasma
+    {100, 16}, // wp_bfg
+    {0,   -2}, // wp_chainsaw
+    {80,  16}, // wp_supershotgun
+};
+
+void A_Recoil (player_t* player)
+{
+    extern void P_Thrust (player_t* player, angle_t angle, fixed_t move);
+
+    if (!netgame && d_recoil && !(player->mo->flags & MF_NOCLIP))
+	P_Thrust(player, ANG180 + player->mo->angle, 2048 * recoil_values[player->readyweapon][0]);
+/*
+    if (crispy_pitch)
+	player->recoilpitch = recoil_values[player->readyweapon][1]<<FRACBITS;
+*/
+}
+
 //
 // P_SetPsprite
 //
@@ -579,7 +603,10 @@ A_FireMissile
     P_SpawnPlayerMissile (player->mo, MT_ROCKET);
 
     if(d_recoil)
+    {
         player->recoilpitch = (8*FRACUNIT);
+        A_Recoil (player);
+    }
 }
 
 
@@ -596,7 +623,10 @@ A_FireBFG
     P_SpawnPlayerMissile (player->mo, MT_BFG);
 
     if(d_recoil)
+    {
         player->recoilpitch = (14*FRACUNIT);
+        A_Recoil (player);
+    }
 }
 
 
@@ -618,7 +648,10 @@ A_FirePlasma
     P_SpawnPlayerMissile (player->mo, MT_PLASMA);
 
     if(d_recoil)
+    {
         player->recoilpitch = (6*FRACUNIT);
+        A_Recoil (player);
+    }
 }
 
 
@@ -716,7 +749,10 @@ A_FirePistol
     P_GunShot (player->mo, !player->refire);
 
     if(d_recoil)
+    {
         player->recoilpitch = (6*FRACUNIT);
+        A_Recoil (player);
+    }
 }
 
 
@@ -745,7 +781,10 @@ A_FireShotgun
 	P_GunShot (player->mo, false);
 
     if(d_recoil)
+    {
         player->recoilpitch = (6*FRACUNIT);
+        A_Recoil (player);
+    }
 }
 
 
@@ -786,7 +825,10 @@ A_FireShotgun2
     }
 
     if(d_recoil)
+    {
         player->recoilpitch = (8*FRACUNIT);
+        A_Recoil (player);
+    }
 }
 
 
@@ -817,7 +859,10 @@ A_FireCGun
     P_GunShot (player->mo, !player->refire);
 
     if(d_recoil)
+    {
         player->recoilpitch = (8*FRACUNIT);
+        A_Recoil (player);
+    }
 }
 
 
