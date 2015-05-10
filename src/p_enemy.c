@@ -2031,7 +2031,7 @@ void A_MoreGibs(mobj_t* actor)
 {
     mobj_t* mo;
     angle_t an;
-    int numchunks = (!d_maxgore) ? 1 : 8;
+    int numchunks = (!d_maxgore) ? 1 : 4;
     int t;
     int old_t = 0;
 
@@ -2052,9 +2052,10 @@ void A_MoreGibs(mobj_t* actor)
 
         if(onground)
         {
-            t = P_Random() % 8;
+            t = P_Random() % 9;
 
-            if(t > 0 && t < 10 && t != old_t)
+            if((t == 0 || t == 1 || t == 2 || t == 3 || t == 4 || t == 5 || 
+               t == 6 || t == 7 || t == 8 || t == 9) && t != old_t)
             {
                 old_t = t;
 
@@ -2130,7 +2131,7 @@ void A_MoreBlood(mobj_t * actor)
 */
         t = P_Random() % 6;
 
-        if(t > 0)
+        if(t == 0 || t == 1 || t == 2 || t == 3 || t == 4 || t == 5)
             actor->state->nextstate = S_CHUNK_00 + t;
 /*
             P_SetMobjState(mo, S_CHUNK_00 + t);
