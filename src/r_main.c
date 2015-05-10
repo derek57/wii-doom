@@ -111,6 +111,7 @@ lighttable_t*		zlight[LIGHTLEVELS][MAXLIGHTZ];
 
 // bumped light from gun blasts
 int			extralight;			
+int			viewpitch;
 
 boolean			BorderNeedRefresh;
 
@@ -708,10 +709,10 @@ void R_ExecuteSetViewSize (void)
     detailshift = setdetail;
     viewwidth = scaledviewwidth>>detailshift;
     viewheight = scaledviewheight>>(detailshift && hires);		// ADDED FOR HIRES
-	
+
     centery = viewheight/2;
 /*
-    centery = (setblocks*(players[consoleplayer].lookdir>>FRACBITS));
+    centery = (setblocks*(viewpitch>>FRACBITS));
     centery = (unsigned int)(centery/10)+viewheight/2;
 */
     centerx = viewwidth/2;
@@ -858,11 +859,9 @@ R_PointInSubsector
 // villsa [STRIFE] new function
 // Calculate centery/centeryfrac for player viewpitch
 //
-
-int viewpitch;
-
 void R_SetupPitch(player_t* player)
 {
+/*
     int pitchfrac;
     int pitchfrac2;
 
@@ -891,6 +890,24 @@ void R_SetupPitch(player_t* player)
         {
             yslope[i] = FixedDiv(viewwidth / 2 * FRACUNIT,
                                  abs(((i - centery) << FRACBITS) + (FRACUNIT/2)));
+        }
+    }
+*/
+    int i;
+    int tempCentery;
+
+    tempCentery = (viewheight / 2) + ((player->recoilpitch / (SCREENWIDTH * 32)) +
+                  (player->lookdir << ((hires && !detailshift)) * (screenblocks / 10)));
+
+    if (centery != tempCentery)
+    {
+        centery = tempCentery;
+        centeryfrac = centery << FRACBITS;
+        for (i = 0; i < viewheight; i++)
+        {
+            yslope[i] = FixedDiv((viewwidth << (detailshift && !hires)) / 2 * FRACUNIT,
+                                 abs(((i - centery) << FRACBITS) +
+                                     FRACUNIT / 2));
         }
     }
 }
