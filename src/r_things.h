@@ -54,7 +54,7 @@ extern int		screenheightarray[SCREENWIDTH];		// CHANGED FOR HIRES
 extern int*		mfloorclip;				// CHANGED FOR HIRES
 extern int*		mceilingclip;				// CHANGED FOR HIRES
 extern fixed_t		spryscale;
-extern fixed_t		sprtopscreen;
+extern int64_t		sprtopscreen; 				// WiggleFix
 
 extern fixed_t		pspritescale;
 extern fixed_t		pspriteiscale;

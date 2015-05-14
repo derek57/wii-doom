@@ -315,7 +315,7 @@ void R_RenderSegLoop (void)
     for ( ; rw_x < rw_stopx ; rw_x++)
     {
 	// mark floor / ceiling areas
-	yl = (topfrac+HEIGHTUNIT-1)>>HEIGHTBITS;
+	yl = (int)((topfrac+heightunit-1)>>heightbits); // WiggleFix
 
 	// no space above wall?
 	if (yl < ceilingclip[rw_x]+1)
@@ -425,7 +425,7 @@ void R_RenderSegLoop (void)
 	    if (bottomtexture)
 	    {
 		// bottom wall
-		mid = (pixlow+HEIGHTUNIT-1)>>HEIGHTBITS;
+		mid = (int)((pixlow+heightunit-1)>>heightbits); // WiggleFix
 		pixlow += pixlowstep;
 
 		// no space above wall?
@@ -467,6 +467,32 @@ void R_RenderSegLoop (void)
 }
 
 
+// WiggleFix: move R_ScaleFromGlobalAngle function to r_segs.c,
+// above R_StoreWallRange
+fixed_t R_ScaleFromGlobalAngle (angle_t visangle)
+{
+    int		anglea = ANG90 + (visangle - viewangle);
+    int		angleb = ANG90 + (visangle - rw_normalangle);
+    int		den = FixedMul(rw_distance, finesine[anglea >> ANGLETOFINESHIFT]);
+    fixed_t	num = FixedMul(projection, finesine[angleb >> ANGLETOFINESHIFT]);
+    fixed_t 	scale;
+
+    if (den > (num >> 16))
+    {
+	scale = FixedDiv(num, den);
+
+	// [kb] When this evaluates True, the scale is clamped,
+	//  and there will be some wiggling.
+	if (scale > max_rwscale)
+	    scale = max_rwscale;
+	else if (scale < 256)
+	    scale = 256;
+    }
+    else
+	scale = max_rwscale;
+
+    return scale;
+}
 
 
 //

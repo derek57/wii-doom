@@ -448,6 +448,8 @@ void R_InitPointToAngle (void)
 }
 
 
+// WiggleFix: move R_ScaleFromGlobalAngle function to r_segs.c,
+// above R_StoreWallRange
 //
 // R_ScaleFromGlobalAngle
 // Returns the texture mapping scale
@@ -455,6 +457,7 @@ void R_InitPointToAngle (void)
 //  at the given angle.
 // rw_distance must be calculated first.
 //
+/*
 fixed_t R_ScaleFromGlobalAngle (angle_t visangle)
 {
     fixed_t		scale;
@@ -506,7 +509,7 @@ fixed_t R_ScaleFromGlobalAngle (angle_t visangle)
 	
     return scale;
 }
-
+*/
 
 
 //

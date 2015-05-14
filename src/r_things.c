@@ -354,12 +354,12 @@ int*		mfloorclip;			// CHANGED FOR HIRES
 int*		mceilingclip;			// CHANGED FOR HIRES
 
 fixed_t		spryscale;
-fixed_t		sprtopscreen;
+int64_t		sprtopscreen; 			// WiggleFix
 
 void R_DrawMaskedColumn (column_t* column)
 {
-    int		topscreen;
-    int 	bottomscreen;
+    int64_t	topscreen; 			// WiggleFix
+    int64_t 	bottomscreen; 			// WiggleFix
     fixed_t	basetexturemid;
 	
     basetexturemid = dc_texturemid;
@@ -371,8 +371,8 @@ void R_DrawMaskedColumn (column_t* column)
 	topscreen = sprtopscreen + spryscale*column->topdelta;
 	bottomscreen = topscreen + spryscale*column->length;
 
-	dc_yl = (topscreen+FRACUNIT-1)>>FRACBITS;
-	dc_yh = (bottomscreen-1)>>FRACBITS;
+	dc_yl = (int)((topscreen+FRACUNIT-1)>>FRACBITS);	// WiggleFix
+	dc_yh = (int)((bottomscreen-1)>>FRACBITS); 		// WiggleFix
 		
 	if (dc_yh >= mfloorclip[dc_x])
 	    dc_yh = mfloorclip[dc_x]-1;
