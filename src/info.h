@@ -176,6 +176,8 @@ typedef enum
     SPR_FLSH,
     SPR_SPRY,
     SPR_CHNK,
+    SPR_PBUL,
+    SPR_PSHE,
 
     NUMSPRITES
 
@@ -1184,7 +1186,12 @@ typedef enum
     S_CHUNK_03,
     S_CHUNK_04,
     S_CHUNK_05,
-
+/*
+    S_BULLET_00,
+    S_BULLET_01,
+    S_SHELL_00,
+    S_SHELL_01,
+*/
     NUMSTATES
 
 } statenum_t;
@@ -1347,7 +1354,10 @@ typedef enum {
     MT_FLESH,
     MT_GORE,
     MT_CHUNK,
-
+/*
+    MT_BULLET,
+    MT_SHELL,
+*/
     NUMMOBJTYPES
 
 } mobjtype_t;

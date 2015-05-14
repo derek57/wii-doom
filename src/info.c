@@ -53,7 +53,7 @@ char *sprnames[] = {
     "COL5","TBLU","TGRN","TRED","SMBT","SMGT","SMRT","HDB1","HDB2","HDB3",
     "HDB4","HDB5","HDB6","POB1","POB2","BRS1","TLMP","TLP2",
 
-    "FLSH","SPRY","CHNK",
+    "FLSH","SPRY","CHNK","PBUL","PSHE",
 
     NULL
 };
@@ -136,6 +136,7 @@ void A_SpawnFly();
 void A_BrainExplode();
 void A_MoreBlood();
 void A_MoreGibs();
+//void A_Bullet();
 
 state_t	states[NUMSTATES] = {
     {SPR_TROO,0,-1,{NULL},S_NULL,0,0},	// S_NULL
@@ -154,6 +155,7 @@ state_t	states[NUMSTATES] = {
     {SPR_PISG,0,4,{NULL},S_PISTOL2,0,0},	// S_PISTOL1
     {SPR_PISG,1,6,{A_FirePistol},S_PISTOL3,0,0},// S_PISTOL2
     {SPR_PISG,2,4,{NULL},S_PISTOL4,0,0},	// S_PISTOL3
+//    {SPR_PISG,2,4,{A_Bullet},S_PISTOL4,0,0},	// S_PISTOL3
     {SPR_PISG,1,5,{A_ReFire},S_PISTOL,0,0},	// S_PISTOL4
     {SPR_PISF,32768,7,{A_Light1},S_LIGHTDONE,0,0},	// S_PISTOLFLASH
     {SPR_SHTG,0,1,{A_WeaponReady},S_SGUN,0,0},	// S_SGUN
@@ -165,6 +167,7 @@ state_t	states[NUMSTATES] = {
     {SPR_SHTG,2,5,{NULL},S_SGUN5,0,0},	// S_SGUN4
     {SPR_SHTG,3,4,{NULL},S_SGUN6,0,0},	// S_SGUN5
     {SPR_SHTG,2,5,{NULL},S_SGUN7,0,0},	// S_SGUN6
+//    {SPR_SHTG,2,5,{A_Bullet},S_SGUN7,0,0},	// S_SGUN6
     {SPR_SHTG,1,5,{NULL},S_SGUN8,0,0},	// S_SGUN7
     {SPR_SHTG,0,3,{NULL},S_SGUN9,0,0},	// S_SGUN8
     {SPR_SHTG,0,7,{A_ReFire},S_SGUN,0,0},	// S_SGUN9
@@ -190,8 +193,8 @@ state_t	states[NUMSTATES] = {
     {SPR_CHGG,0,1,{A_WeaponReady},S_CHAIN,0,0},	// S_CHAIN
     {SPR_CHGG,0,1,{A_Lower},S_CHAINDOWN,0,0},	// S_CHAINDOWN
     {SPR_CHGG,0,1,{A_Raise},S_CHAINUP,0,0},	// S_CHAINUP
-    {SPR_CHGG,0,4,{A_FireCGun},S_CHAIN2,0,0},	// S_CHAIN1
-    {SPR_CHGG,1,4,{A_FireCGun},S_CHAIN3,0,0},	// S_CHAIN2
+    {SPR_CHGG,0,1,{A_FireCGun},S_CHAIN2,0,0},	// S_CHAIN1
+    {SPR_CHGG,1,1,{A_FireCGun},S_CHAIN3,0,0},	// S_CHAIN2
     {SPR_CHGG,1,0,{A_ReFire},S_CHAIN,0,0},	// S_CHAIN3
     {SPR_CHGF,32768,5,{A_Light1},S_LIGHTDONE,0,0},	// S_CHAINFLASH1
     {SPR_CHGF,32769,5,{A_Light2},S_LIGHTDONE,0,0},	// S_CHAINFLASH2
@@ -1126,19 +1129,25 @@ state_t	states[NUMSTATES] = {
     {SPR_FLSH,17,-1,{NULL},S_NULL,0,0},	// S_FLESH_17
     {SPR_FLSH,18,-1,{NULL},S_NULL,0,0},	// S_FLESH_18
     {SPR_FLSH,19,-1,{NULL},S_NULL,0,0},	// S_FLESH_19
-    {SPR_SPRY,0,3,{NULL},S_SPRAY_01,0,0},	// S_SPRAY_00
-    {SPR_SPRY,1,3,{NULL},S_SPRAY_02,0,0},	// S_SPRAY_01
-    {SPR_SPRY,2,3,{NULL},S_SPRAY_03,0,0},	// S_SPRAY_02
-    {SPR_SPRY,3,3,{NULL},S_SPRAY_04,0,0},	// S_SPRAY_03
-    {SPR_SPRY,4,3,{NULL},S_SPRAY_05,0,0},	// S_SPRAY_04
-    {SPR_SPRY,5,3,{NULL},S_SPRAY_06,0,0},	// S_SPRAY_05
-    {SPR_SPRY,6,2,{NULL},S_NULL,0,0},	// S_SPRAY_06
+    {SPR_SPRY,0,3,{A_MoreBlood},S_SPRAY_01,0,0},	// S_SPRAY_00
+    {SPR_SPRY,1,3,{A_MoreBlood},S_SPRAY_02,0,0},	// S_SPRAY_01
+    {SPR_SPRY,2,3,{A_MoreBlood},S_SPRAY_03,0,0},	// S_SPRAY_02
+    {SPR_SPRY,3,3,{A_MoreBlood},S_SPRAY_04,0,0},	// S_SPRAY_03
+    {SPR_SPRY,4,3,{A_MoreBlood},S_SPRAY_05,0,0},	// S_SPRAY_04
+    {SPR_SPRY,5,3,{A_MoreBlood},S_SPRAY_06,0,0},	// S_SPRAY_05
+    {SPR_SPRY,6,2,{A_MoreBlood},S_NULL,0,0},	// S_SPRAY_06
     {SPR_CHNK,0,-1,{NULL},S_CHUNK_01,0,0},       // S_CHUNK_00
     {SPR_CHNK,1,-1,{NULL},S_CHUNK_02,0,0},       // S_CHUNK_01
     {SPR_CHNK,2,-1,{NULL},S_CHUNK_03,0,0},       // S_CHUNK_02
     {SPR_CHNK,3,-1,{NULL},S_CHUNK_04,0,0},       // S_CHUNK_03
     {SPR_CHNK,4,-1,{NULL},S_CHUNK_05,0,0},       // S_CHUNK_04
-    {SPR_CHNK,5,-1,{NULL},S_NULL,0,0}   // S_CHUNK_05
+    {SPR_CHNK,5,-1,{NULL},S_NULL,0,0},   // S_CHUNK_05
+/*
+    {SPR_PBUL,0,10,{NULL},S_BULLET_01,0,0},       // S_BULLET_00
+    {SPR_PBUL,1,10,{NULL},S_NULL,0,0},       // S_BULLET_01
+    {SPR_PSHE,0,20,{NULL},S_SHELL_01,0,0},       // S_SHELL_00
+    {SPR_PSHE,1,20,{NULL},S_NULL,0,0},       // S_SHELL_01
+*/
 };
 
 
@@ -4782,7 +4791,59 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         sfx_None,              // activesound
         0,          // flags
         S_NULL          // raisestate
-    }
+    }/*,
 
+    {           // MT_BULLET
+        -1,             // doomednum
+        S_BULLET_00,           // spawnstate
+        1000,           // spawnhealth
+        S_NULL,         // seestate
+        sfx_None,              // seesound
+        8,              // reactiontime
+        sfx_None,              // attacksound
+        S_NULL,         // painstate
+        0,              // painchance
+        sfx_None,              // painsound
+        S_NULL,         // meleestate
+        S_NULL,         // missilestate
+        S_NULL,         // deathstate
+        S_NULL,         // xdeathstate
+        sfx_None,              // deathsound
+        0,              // speed
+        20 * FRACUNIT,         // radius
+        16 * FRACUNIT,         // height
+        100,            // mass
+        0,              // damage
+        sfx_None,              // activesound
+        MF_MISSILE,              // flags
+        S_NULL          // raisestate
+    },
+
+    {           // MT_SHELL
+        -1,             // doomednum
+        S_SHELL_00,            // spawnstate
+        1000,           // spawnhealth
+        S_NULL,         // seestate
+        sfx_None,              // seesound
+        8,              // reactiontime
+        sfx_None,              // attacksound
+        S_NULL,         // painstate
+        0,              // painchance
+        sfx_None,              // painsound
+        S_NULL,         // meleestate
+        S_NULL,         // missilestate
+        S_NULL,         // deathstate
+        S_NULL,         // xdeathstate
+        sfx_None,              // deathsound
+        0,              // speed
+        20 * FRACUNIT,         // radius
+        16 * FRACUNIT,         // height
+        100,            // mass
+        0,              // damage
+        sfx_None,              // activesound
+        0,          // flags
+        S_NULL          // raisestate
+    }
+*/
 };
 

@@ -40,6 +40,7 @@
 #include "s_sound.h"
 
 #include "doomstat.h"
+#include "c_io.h"
 
 
 void G_PlayerReborn (int player);

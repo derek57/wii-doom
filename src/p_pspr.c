@@ -603,12 +603,10 @@ A_FireMissile
     P_SpawnPlayerMissile (player->mo, MT_ROCKET);
 
     if(d_recoil)
-    {
         player->recoilpitch = (8*FRACUNIT);
 
-        if(d_thrust)
-            A_Recoil (player);
-    }
+    if(d_thrust)
+        A_Recoil (player);
 }
 
 
@@ -625,12 +623,10 @@ A_FireBFG
     P_SpawnPlayerMissile (player->mo, MT_BFG);
 
     if(d_recoil)
-    {
         player->recoilpitch = (14*FRACUNIT);
 
-        if(d_thrust)
-            A_Recoil (player);
-    }
+    if(d_thrust)
+        A_Recoil (player);
 }
 
 
@@ -652,12 +648,10 @@ A_FirePlasma
     P_SpawnPlayerMissile (player->mo, MT_PLASMA);
 
     if(d_recoil)
-    {
         player->recoilpitch = (6*FRACUNIT);
 
-        if(d_thrust)
-            A_Recoil (player);
-    }
+    if(d_thrust)
+        A_Recoil (player);
 }
 
 
@@ -755,12 +749,10 @@ A_FirePistol
     P_GunShot (player->mo, !player->refire);
 
     if(d_recoil)
-    {
         player->recoilpitch = (6*FRACUNIT);
 
-        if(d_thrust)
-            A_Recoil (player);
-    }
+    if(d_thrust)
+        A_Recoil (player);
 }
 
 
@@ -789,12 +781,10 @@ A_FireShotgun
 	P_GunShot (player->mo, false);
 
     if(d_recoil)
-    {
         player->recoilpitch = (6*FRACUNIT);
 
-        if(d_thrust)
-            A_Recoil (player);
-    }
+    if(d_thrust)
+        A_Recoil (player);
 }
 
 
@@ -835,12 +825,10 @@ A_FireShotgun2
     }
 
     if(d_recoil)
-    {
         player->recoilpitch = (8*FRACUNIT);
 
-        if(d_thrust)
-            A_Recoil (player);
-    }
+    if(d_thrust)
+        A_Recoil (player);
 }
 
 
@@ -860,6 +848,8 @@ A_FireCGun
     P_SetMobjState (player->mo, S_PLAY_ATK2);
     DecreaseAmmo(player, weaponinfo[player->readyweapon].ammo, 1);
 
+//    A_Bullet(player);
+
     P_SetPsprite (player,
 		  ps_flash,
 		  weaponinfo[player->readyweapon].flashstate
@@ -871,12 +861,10 @@ A_FireCGun
     P_GunShot (player->mo, !player->refire);
 
     if(d_recoil)
-    {
         player->recoilpitch = (8*FRACUNIT);
 
-        if(d_thrust)
-            A_Recoil (player);
-    }
+    if(d_thrust)
+        A_Recoil (player);
 }
 
 
@@ -1004,5 +992,91 @@ void P_MovePsprites (player_t* player)
     player->psprites[ps_flash].sx = player->psprites[ps_weapon].sx;
     player->psprites[ps_flash].sy = player->psprites[ps_weapon].sy;
 }
+/*
+extern int mouselook;
 
+void A_Bullet (player_t *player)
+{
+//    if(d_casing)
+    {
+        if(player->lookdir < 0)
+            return;
+
+        int          t;
+        int          x_offset;
+        int          y_offset;
+        int          z_offset;
+
+        mobj_t       *mo = NULL;
+
+        mobjtype_t   motype = MT_BULLET;
+
+        angle_t      an;
+
+        fixed_t      x;
+        fixed_t      y;
+        fixed_t      z;
+
+        x_offset = 0;			// TO THE FRONT / BACK
+        y_offset = 12000000;		// TO THE LEFT / RIGHT
+        z_offset = 4 * 8 * FRACUNIT;
+
+        an = player->mo->angle;
+
+        if(player->readyweapon == wp_shotgun)
+        {
+            x_offset = -500000;		// TO THE FRONT / BACK
+            y_offset = 2000000;		// TO THE LEFT / RIGHT
+            z_offset = 8 * FRACUNIT;
+            motype = MT_SHELL;
+        }
+        else if(player->readyweapon == wp_pistol || player->readyweapon == wp_chaingun)
+        {
+            x_offset = 500000;		// TO THE FRONT / BACK
+            y_offset = 2000000;		// TO THE LEFT / RIGHT
+            z_offset = 8 * FRACUNIT;
+            motype = MT_BULLET;
+        }
+
+        x = player->mo->x + FixedMul(x_offset, finecosine[an >> ANGLETOFINESHIFT]);
+        y = player->mo->y + FixedMul(y_offset, finesine[an >> ANGLETOFINESHIFT]);
+        z = player->mo->z + z_offset;
+
+        // adjust x/y along a vector orthogonal to the source object's angle
+        an = an - ANG90;
+
+        x += FixedMul(x_offset, finecosine[an >> ANGLETOFINESHIFT]);
+        y += FixedMul(x_offset, finesine[an >> ANGLETOFINESHIFT]);
+
+        mo = P_SpawnMobj(x, y, z + (player->lookdir * FRACUNIT), motype);
+
+        if(player->readyweapon == wp_shotgun)
+            P_SetMobjState(mo, S_SHELL_01);
+
+        mo->target = player->mo;
+        mo->angle = x >= 0 ? an : an + ANG180;
+
+        t = P_Random() % 10;
+
+        if(t < 8)
+            t = P_Random() % 10;
+
+        mo->momx = FixedMul(finecosine[(an) >> ANGLETOFINESHIFT], (t & 0x0f) << FRACBITS);
+
+        t = P_Random() % 10;
+
+        if(t < 8)
+            t = P_Random() % 10;
+
+        mo->momy = FixedMul(finesine[(an) >> ANGLETOFINESHIFT], (t & 0x0f) << FRACBITS);
+
+        t = P_Random() % 10;
+
+        if(t < 8)
+            t = P_Random() % 10;
+
+        mo->momz = (t & 0x0f) << FRACBITS;
+    }
+}
+*/
 
