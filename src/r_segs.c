@@ -96,7 +96,7 @@ lighttable_t**	walllights;
 //short*	maskedtexturecol;		// CHANGED FOR HIRES
 int*		maskedtexturecol;		// CHANGED FOR HIRES
 
-// [crispy] WiggleFix: add this code block near the top of r_segs.c
+// WiggleFix: add this code block near the top of r_segs.c
 //
 // R_FixWiggle()
 // Dynamic wall/texture rescaler, AKA "WiggleHack II"

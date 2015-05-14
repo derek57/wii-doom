@@ -71,10 +71,6 @@ void A_Recoil (player_t* player)
 
     if (!netgame && d_recoil && !(player->mo->flags & MF_NOCLIP))
 	P_Thrust(player, ANG180 + player->mo->angle, 2048 * recoil_values[player->readyweapon][0]);
-/*
-    if (crispy_pitch)
-	player->recoilpitch = recoil_values[player->readyweapon][1]<<FRACBITS;
-*/
 }
 
 //

@@ -1954,7 +1954,7 @@ void G_DoCompleted (void)
     // overflows into the cpars array. It's necessary to emulate this
     // for statcheck regression testing.
     if (gamemap == 33)
-	// [crispy] map 33 par time sucks
+	// map 33 par time sucks
 	wminfo.partime = INT_MAX;
     else
     if (gamemission == pack_nerve)
