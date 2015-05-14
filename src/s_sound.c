@@ -209,6 +209,7 @@ static void S_StopChannel(int cnum)
 
         c->sfxinfo->usefulness--;
         c->sfxinfo = NULL;
+        c->origin = NULL;
     }
 }
 
