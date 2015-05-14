@@ -176,9 +176,10 @@ typedef enum
     SPR_FLSH,
     SPR_SPRY,
     SPR_CHNK,
+/*
     SPR_PBUL,
     SPR_PSHE,
-
+*/
     NUMSPRITES
 
 } spritenum_t;

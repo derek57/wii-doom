@@ -53,7 +53,7 @@ char *sprnames[] = {
     "COL5","TBLU","TGRN","TRED","SMBT","SMGT","SMRT","HDB1","HDB2","HDB3",
     "HDB4","HDB5","HDB6","POB1","POB2","BRS1","TLMP","TLP2",
 
-    "FLSH","SPRY","CHNK","PBUL","PSHE",
+    "FLSH","SPRY","CHNK",/*"PBUL","PSHE",*/
 
     NULL
 };
