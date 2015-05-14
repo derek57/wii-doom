@@ -389,11 +389,12 @@ boolean M_StringCopy(char *dest, const char *src, size_t dest_size)
         dest[dest_size - 1] = '\0';
         strncpy(dest, src, dest_size - 1);
     }
+/*
     else
     {
         return false;
     }
-
+*/
     len = strlen(dest);
     return src[len] == '\0';
 }
