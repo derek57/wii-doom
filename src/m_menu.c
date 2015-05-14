@@ -5506,6 +5506,12 @@ void M_ItemsA(int choice)
     if(!netgame && !demoplayback && gamestate == GS_LEVEL
 	&& gameskill != sk_nightmare && players[consoleplayer].playerstate == PST_LIVE)
     {
+            int i;
+
+            static player_t* player;
+
+            player = &players[consoleplayer];
+
 	if(!got_all)
 	{
 	    players[consoleplayer].powers[0] = INVULNTICS;
@@ -5515,6 +5521,16 @@ void M_ItemsA(int choice)
 	    players[consoleplayer].powers[3] = IRONTICS;
 	    players[consoleplayer].powers[4] = 1;
 	    players[consoleplayer].powers[5] = INFRATICS;
+
+            if (!player->backpack)
+            {
+                for (i=0 ; i<NUMAMMO ; i++)
+                    player->maxammo[i] *= 2;
+                player->backpack = true;
+            }
+            for (i=0 ; i<NUMAMMO ; i++)
+                P_GiveAmmo (player, i, 1);
+            player->message = DEH_String(GOTBACKPACK);
 
 	    got_all = true;
 	}
