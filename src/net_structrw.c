@@ -354,7 +354,7 @@ void NET_TiccmdDiff(ticcmd_t *tic1, ticcmd_t *tic2, net_ticdiff_t *diff)
 
 void NET_TiccmdPatch(ticcmd_t *src, net_ticdiff_t *diff, ticcmd_t *dest)
 {
-    memcpy(dest, src, sizeof(ticcmd_t));
+    memmove(dest, src, sizeof(ticcmd_t));
 
 #ifdef NET_DEBUG
     printf("NET_TiccmdPatch\n");
