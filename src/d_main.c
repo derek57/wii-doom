@@ -1369,6 +1369,11 @@ static void LoadHacxDeh(void)
     }
 }
 
+static void G_CheckDemoStatusAtExit (void)
+{
+    G_CheckDemoStatus();
+}
+
 u32 WaitButtons(void);
 
 void W_CheckSize(int wad);
@@ -2121,7 +2126,7 @@ void D_DoomMain (void)
 
     }
 */
-    I_AtExit((atexit_func_t) G_CheckDemoStatus, true);
+    I_AtExit(G_CheckDemoStatusAtExit, true);
 
     // Generate the WAD hash table.  Speed things up a bit.
 
