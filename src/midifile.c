@@ -132,7 +132,7 @@ static boolean ReadByte(byte *result, FILE *stream)
 static boolean ReadVariableLength(unsigned int *result, FILE *stream)
 {
     int i;
-    byte b;
+    byte b = 0;
 
     *result = 0;
 
@@ -205,7 +205,7 @@ static boolean ReadChannelEvent(midi_event_t *event,
                                 byte event_type, boolean two_param,
                                 FILE *stream)
 {
-    byte b;
+    byte b = 0;
 
     // Set basics:
 
@@ -271,7 +271,7 @@ static boolean ReadSysExEvent(midi_event_t *event, int event_type,
 
 static boolean ReadMetaEvent(midi_event_t *event, FILE *stream)
 {
-    byte b;
+    byte b = 0;
 
     event->event_type = MIDI_EVENT_META;
 
@@ -310,7 +310,7 @@ static boolean ReadMetaEvent(midi_event_t *event, FILE *stream)
 static boolean ReadEvent(midi_event_t *event, unsigned int *last_event_type,
                          FILE *stream)
 {
-    byte event_type;
+    byte event_type = 0;
 
     if (!ReadVariableLength(&event->delta_time, stream))
     {
