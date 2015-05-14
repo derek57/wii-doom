@@ -41,7 +41,7 @@ typedef struct
 } gus_config_t;
 
 char *gus_patch_path = "";
-unsigned int gus_ram_kb = 1024;
+int gus_ram_kb = 1024;
 
 extern boolean usb;
 extern boolean sd;
