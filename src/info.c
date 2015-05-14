@@ -193,8 +193,8 @@ state_t	states[NUMSTATES] = {
     {SPR_CHGG,0,1,{A_WeaponReady},S_CHAIN,0,0},	// S_CHAIN
     {SPR_CHGG,0,1,{A_Lower},S_CHAINDOWN,0,0},	// S_CHAINDOWN
     {SPR_CHGG,0,1,{A_Raise},S_CHAINUP,0,0},	// S_CHAINUP
-    {SPR_CHGG,0,1,{A_FireCGun},S_CHAIN2,0,0},	// S_CHAIN1
-    {SPR_CHGG,1,1,{A_FireCGun},S_CHAIN3,0,0},	// S_CHAIN2
+    {SPR_CHGG,0,4,{A_FireCGun},S_CHAIN2,0,0},	// S_CHAIN1
+    {SPR_CHGG,1,4,{A_FireCGun},S_CHAIN3,0,0},	// S_CHAIN2
     {SPR_CHGG,1,0,{A_ReFire},S_CHAIN,0,0},	// S_CHAIN3
     {SPR_CHGF,32768,5,{A_Light1},S_LIGHTDONE,0,0},	// S_CHAINFLASH1
     {SPR_CHGF,32769,5,{A_Light2},S_LIGHTDONE,0,0},	// S_CHAINFLASH2
