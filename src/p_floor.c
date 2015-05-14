@@ -522,6 +522,10 @@ EV_BuildStairs
 	height = sec->floorheight + stairsize;
 	floor->floordestheight = height;
 		
+	// Initialize
+	floor->type = lowerFloor;
+	floor->crush = true;
+
 	texture = sec->floorpic;
 	
 	// Find next sector to raise
@@ -564,6 +568,11 @@ EV_BuildStairs
 		floor->sector = sec;
 		floor->speed = speed;
 		floor->floordestheight = height;
+
+		// Initialize
+		floor->type = lowerFloor;
+		floor->crush = true;
+
 		ok = 1;
 		break;
 	    }
