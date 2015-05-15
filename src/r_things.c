@@ -363,6 +363,7 @@ void R_DrawMaskedColumn (column_t* column)
     fixed_t	basetexturemid;
 	
     basetexturemid = dc_texturemid;
+    dc_texheight = 0;				// Tutti-Frutti fix
 	
     for ( ; column->topdelta != 0xff ; ) 
     {

@@ -468,6 +468,7 @@ void R_DrawPlanes (void)
 	    //  by INVUL inverse mapping.
 	    dc_colormap = colormaps;
 	    dc_texturemid = skytexturemid;
+	    dc_texheight = textureheight[skytexture]>>FRACBITS; // Tutti-Frutti fix
 	    for (x=pl->minx ; x <= pl->maxx ; x++)
 	    {
 		dc_yl = pl->top[x];

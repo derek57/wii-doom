@@ -79,15 +79,15 @@ int		worldbottom;
 int		worldhigh;
 int		worldlow;
 
-fixed_t		pixhigh;
-fixed_t		pixlow;
+int64_t		pixhigh;	// WiggleFix
+int64_t		pixlow;		// WiggleFix
 fixed_t		pixhighstep;
 fixed_t		pixlowstep;
 
-fixed_t		topfrac;
+int64_t		topfrac;	// WiggleFix
 fixed_t		topstep;
 
-fixed_t		bottomfrac;
+int64_t		bottomfrac;	// WiggleFix
 fixed_t		bottomstep;
 
 
@@ -270,8 +270,27 @@ R_RenderMaskedSegRange
 
 		dc_colormap = walllights[index];
 	    }
-			
-	    sprtopscreen = centeryfrac - FixedMul(dc_texturemid, spryscale);
+
+	    // apply Killough's int64 sprtopscreen overflow fix
+	    // from winmbf/Source/r_segs.c:174-191
+	    //
+	    // This calculation used to overflow and cause crashes in Doom:
+	    //
+	    // sprtopscreen = centeryfrac - FixedMul(dc_texturemid, spryscale);
+	    //
+	    // This code fixes it, by using double-precision intermediate
+	    // arithmetic and by skipping the drawing of 2s normals whose
+	    // mapping to screen coordinates is totally out of range:
+
+	    int64_t t = ((int64_t) centeryfrac << FRACBITS) -
+		         (int64_t) dc_texturemid * spryscale;
+
+	    if (t + (int64_t) textureheight[texnum] * spryscale < 0 ||
+		t > (int64_t) SCREENHEIGHT << FRACBITS*2)
+		    continue; // skip if the texture is out of screen's range
+
+	    sprtopscreen = (int64_t)(t >> FRACBITS);	// WiggleFix
+
 	    dc_iscale = 0xffffffffu / (unsigned)spryscale;
 	    
 	    // draw the texture
@@ -336,7 +355,7 @@ void R_RenderSegLoop (void)
 	    }
 	}
 		
-	yh = bottomfrac>>HEIGHTBITS;
+	yh = (int)(bottomfrac>>heightbits); // WiggleFix
 
 	if (yh >= floorclip[rw_x])
 	    yh = floorclip[rw_x]-1;
@@ -387,6 +406,7 @@ void R_RenderSegLoop (void)
 	    dc_yh = yh;
 	    dc_texturemid = rw_midtexturemid;
 	    dc_source = R_GetColumn(midtexture,texturecolumn);
+	    dc_texheight = textureheight[midtexture]>>FRACBITS; // Tutti-Frutti fix
 	    colfunc ();
 	    ceilingclip[rw_x] = viewheight;
 	    floorclip[rw_x] = -1;
@@ -397,7 +417,7 @@ void R_RenderSegLoop (void)
 	    if (toptexture)
 	    {
 		// top wall
-		mid = pixhigh>>HEIGHTBITS;
+		mid = (int)(pixhigh>>heightbits); // WiggleFix
 		pixhigh += pixhighstep;
 
 		if (mid >= floorclip[rw_x])
@@ -409,6 +429,7 @@ void R_RenderSegLoop (void)
 		    dc_yh = mid;
 		    dc_texturemid = rw_toptexturemid;
 		    dc_source = R_GetColumn(toptexture,texturecolumn);
+		    dc_texheight = textureheight[toptexture]>>FRACBITS; // Tutti-Frutti fix
 		    colfunc ();
 		    ceilingclip[rw_x] = mid;
 		}
@@ -439,6 +460,7 @@ void R_RenderSegLoop (void)
 		    dc_texturemid = rw_bottomtexturemid;
 		    dc_source = R_GetColumn(bottomtexture,
 					    texturecolumn);
+		    dc_texheight = textureheight[bottomtexture]>>FRACBITS; // Tutti-Frutti fix
 		    colfunc ();
 		    floorclip[rw_x] = mid;
 		}
@@ -830,10 +852,12 @@ R_StoreWallRange
     worldbottom >>= 4;
 	
     topstep = -FixedMul (rw_scalestep, worldtop);
-    topfrac = (centeryfrac>>4) - FixedMul (worldtop, rw_scale);
+    topfrac = ((int64_t)centeryfrac>>invhgtbits) -
+              (((int64_t)worldtop * rw_scale)>>FRACBITS); // WiggleFix
 
     bottomstep = -FixedMul (rw_scalestep,worldbottom);
-    bottomfrac = (centeryfrac>>4) - FixedMul (worldbottom, rw_scale);
+    bottomfrac = ((int64_t)centeryfrac>>invhgtbits) -
+                 (((int64_t)worldbottom * rw_scale)>>FRACBITS); // WiggleFix
 	
     if (backsector)
     {	
@@ -842,13 +866,15 @@ R_StoreWallRange
 
 	if (worldhigh < worldtop)
 	{
-	    pixhigh = (centeryfrac>>4) - FixedMul (worldhigh, rw_scale);
+	    pixhigh = ((int64_t)centeryfrac>>invhgtbits) -
+                      (((int64_t)worldhigh * rw_scale)>>FRACBITS); // WiggleFix
 	    pixhighstep = -FixedMul (rw_scalestep,worldhigh);
 	}
 	
 	if (worldlow > worldbottom)
 	{
-	    pixlow = (centeryfrac>>4) - FixedMul (worldlow, rw_scale);
+	    pixlow = ((int64_t)centeryfrac>>invhgtbits) -
+                     (((int64_t)worldlow * rw_scale)>>FRACBITS); // WiggleFix
 	    pixlowstep = -FixedMul (rw_scalestep,worldlow);
 	}
     }
