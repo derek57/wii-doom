@@ -88,7 +88,8 @@ typedef	struct
 } cliprange_t;
 
 
-#define MAXSEGS		32
+//#define MAXSEGS		32
+#define MAXSEGS		(SCREENWIDTH/2+1)	// RAISE TO THE VALUE FOUND IN MBF
 
 // newend is one past the last valid seg
 cliprange_t*	newend;

@@ -50,12 +50,11 @@ planefunction_t		ceilingfunc;
 //
 
 // Here comes the obnoxious "visplane".
-#define MAXVISPLANES	128					// CHANGED FOR HIRES
-/*
+//#define MAXVISPLANES	128					// CHANGED FOR HIRES
 #define MAXVISPLANES	128*8					// CHANGED FOR HIRES
 
-visplane_t		visplanes[MAXVISPLANES];		// CHANGED FOR HIRES
-*/
+//visplane_t		visplanes[MAXVISPLANES];		// CHANGED FOR HIRES
+
 visplane_t*		visplanes = NULL;			// CHANGED FOR HIRES
 visplane_t*		lastvisplane;
 visplane_t*		floorplane;

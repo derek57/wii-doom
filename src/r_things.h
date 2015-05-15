@@ -33,7 +33,8 @@
 //#define MAXVISSPRITES  	128				// CHANGED FOR HIRES
 #define MAXVISSPRITES  	128*8					// CHANGED FOR HIRES
 
-extern vissprite_t	vissprites[MAXVISSPRITES];
+//extern vissprite_t	vissprites[MAXVISSPRITES];
+extern vissprite_t*	vissprites;			// LIMIT REMOVAL
 extern vissprite_t*	vissprite_p;
 extern vissprite_t	vsprsortedhead;
 
