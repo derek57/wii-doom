@@ -450,9 +450,9 @@ P_SpawnStrobeFlash
   int            inSync );
 
 void    EV_StartLightStrobing(line_t* line);
-void    EV_TurnTagLightsOff(line_t* line);
+int    EV_TurnTagLightsOff(line_t* line);
 
-void
+int
 EV_LightTurnOn
 ( line_t*        line,
   int            bright );
