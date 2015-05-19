@@ -34,5 +34,6 @@
 // Carries out all thinking of monsters and players.
 void P_Ticker (void);
 
+void P_SetTarget(mobj_t **mop, mobj_t *targ);
 
 #endif

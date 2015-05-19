@@ -38,6 +38,7 @@
 #include "i_system.h"
 #include "p_local.h"
 #include "p_saveg.h"
+#include "p_tick.h"
 #include "r_state.h"
 #include "z_zone.h"
 
@@ -1455,6 +1456,50 @@ void P_WriteSaveGameEOF(void)
 }
 
 //
+// killough 11/98
+//
+// Same as P_SetTarget() in p_tick.c, except that the target is nullified
+// first, so that no old target's reference count is decreased (when loading
+// savegames, old targets are indices, not really pointers to targets).
+//
+static void P_SetNewTarget(mobj_t **mop, mobj_t *targ)
+{
+    *mop = NULL;
+    P_SetTarget(mop, targ);
+}
+
+
+thinker_t *P_IndexToThinker(uint32_t index)
+{
+    thinker_t   *th;
+    uint32_t    i;
+
+    if (!index)
+        return NULL;
+
+    for (th = thinkercap.next, i = 1; th != &thinkercap; th = th->next, ++i)
+        if (th->function.acp1 == (actionf_p1)P_MobjThinker)
+            if (i == index)
+                return th;
+
+    return NULL;
+}
+
+void P_RestoreTargets(void)
+{
+    thinker_t   *th;
+
+    for (th = thinkercap.next; th != &thinkercap; th = th->next)
+        if (th->function.acp1 == (actionf_p1)P_MobjThinker)
+        {
+            mobj_t      *mo = (mobj_t *)th;
+
+            P_SetNewTarget(&mo->target, (mobj_t *)P_IndexToThinker((uintptr_t)mo->target));
+            P_SetNewTarget(&mo->tracer, (mobj_t *)P_IndexToThinker((uintptr_t)mo->tracer));
+        }
+}
+
+//
 // P_ArchivePlayers
 //
 void P_ArchivePlayers (void)
@@ -1631,7 +1676,6 @@ void P_ArchiveThinkers (void)
     // add a terminating marker
     saveg_write8(tc_end);
 }
-
 
 
 //

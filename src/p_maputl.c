@@ -62,145 +62,55 @@ P_AproxDistance
 //
 // P_PointOnLineSide
 // Returns 0 or 1
+// killough 5/3/98: reformatted, cleaned up
 //
-int
-P_PointOnLineSide
-( fixed_t        x,
-  fixed_t        y,
-  line_t*        line )
+int P_PointOnLineSide(fixed_t x, fixed_t y, line_t *line)
 {
-    fixed_t      dx;
-    fixed_t      dy;
-    fixed_t      left;
-    fixed_t      right;
-        
-    if (!line->dx)
-    {
-        if (x <= line->v1->x)
-            return line->dy > 0;
-        
-        return line->dy < 0;
-    }
-    if (!line->dy)
-    {
-        if (y <= line->v1->y)
-            return line->dx < 0;
-        
-        return line->dx > 0;
-    }
-        
-    dx = (x - line->v1->x);
-    dy = (y - line->v1->y);
-        
-    left = FixedMul ( line->dy>>FRACBITS , dx );
-    right = FixedMul ( dy , line->dx>>FRACBITS );
-        
-    if (right < left)
-        return 0;                // front side
-    return 1;                        // back side
+    return (!line->dx ? x <= line->v1->x ? line->dy > 0 : line->dy < 0 :
+        !line->dy ? y <= line->v1->y ? line->dx < 0 : line->dx > 0 :
+        FixedMul(y - line->v1->y, line->dx >> FRACBITS) >=
+        FixedMul(line->dy >> FRACBITS, x - line->v1->x));
 }
-
-
 
 //
 // P_BoxOnLineSide
 // Considers the line to be infinite
 // Returns side 0 or 1, -1 if box crosses the line.
+// killough 5/3/98: reformatted, cleaned up
 //
-int
-P_BoxOnLineSide
-( fixed_t*       tmbox,
-  line_t*        ld )
+int P_BoxOnLineSide(fixed_t *tmbox, line_t *ld)
 {
-    int          p1 = 0;
-    int          p2 = 0;
-        
     switch (ld->slopetype)
     {
-      case ST_HORIZONTAL:
-        p1 = tmbox[BOXTOP] > ld->v1->y;
-        p2 = tmbox[BOXBOTTOM] > ld->v1->y;
-        if (ld->dx < 0)
-        {
-            p1 ^= 1;
-            p2 ^= 1;
-        }
-        break;
-        
-      case ST_VERTICAL:
-        p1 = tmbox[BOXRIGHT] < ld->v1->x;
-        p2 = tmbox[BOXLEFT] < ld->v1->x;
-        if (ld->dy < 0)
-        {
-            p1 ^= 1;
-            p2 ^= 1;
-        }
-        break;
-        
-      case ST_POSITIVE:
-        p1 = P_PointOnLineSide (tmbox[BOXLEFT], tmbox[BOXTOP], ld);
-        p2 = P_PointOnLineSide (tmbox[BOXRIGHT], tmbox[BOXBOTTOM], ld);
-        break;
-        
-      case ST_NEGATIVE:
-        p1 = P_PointOnLineSide (tmbox[BOXRIGHT], tmbox[BOXTOP], ld);
-        p2 = P_PointOnLineSide (tmbox[BOXLEFT], tmbox[BOXBOTTOM], ld);
-        break;
+        int     p;
+
+        default:
+        case ST_HORIZONTAL:
+            return ((tmbox[BOXBOTTOM] > ld->v1->y) == (p = (tmbox[BOXTOP] > ld->v1->y)) ?
+                p ^ (ld->dx < 0) : -1);
+        case ST_VERTICAL:
+            return ((tmbox[BOXLEFT] < ld->v1->x) == (p = (tmbox[BOXRIGHT] < ld->v1->x)) ?
+                p ^ (ld->dy < 0) : -1);
+        case ST_POSITIVE:
+            return (P_PointOnLineSide(tmbox[BOXRIGHT], tmbox[BOXBOTTOM], ld) ==
+                (p = P_PointOnLineSide(tmbox[BOXLEFT], tmbox[BOXTOP], ld)) ? p : -1);
+        case ST_NEGATIVE:
+            return ((P_PointOnLineSide(tmbox[BOXLEFT], tmbox[BOXBOTTOM], ld)) ==
+                (p = P_PointOnLineSide(tmbox[BOXRIGHT], tmbox[BOXTOP], ld)) ? p : -1);
     }
-
-    if (p1 == p2)
-        return p1;
-    return -1;
 }
-
 
 //
 // P_PointOnDivlineSide
 // Returns 0 or 1.
+// killough 5/3/98: reformatted, cleaned up
 //
-int
-P_PointOnDivlineSide
-( fixed_t        x,
-  fixed_t        y,
-  divline_t*        line )
+static int P_PointOnDivlineSide(fixed_t x, fixed_t y, divline_t *line)
 {
-    fixed_t      dx;
-    fixed_t      dy;
-    fixed_t      left;
-    fixed_t      right;
-        
-    if (!line->dx)
-    {
-        if (x <= line->x)
-            return line->dy > 0;
-        
-        return line->dy < 0;
-    }
-    if (!line->dy)
-    {
-        if (y <= line->y)
-            return line->dx < 0;
-
-        return line->dx > 0;
-    }
-        
-    dx = (x - line->x);
-    dy = (y - line->y);
-        
-    // try to quickly decide by looking at sign bits
-    if ( (line->dy ^ line->dx ^ dx ^ dy)&0x80000000 )
-    {
-        if ( (line->dy ^ dx) & 0x80000000 )
-            return 1;                // (left is negative)
-        return 0;
-    }
-        
-    left = FixedMul ( line->dy>>8, dx>>8 );
-    right = FixedMul ( dy>>8 , line->dx>>8 );
-        
-    if (right < left)
-        return 0;                // front side
-    return 1;                        // back side
+    return (!line->dx ? x <= line->x ? line->dy > 0 : line->dy < 0 :
+        !line->dy ? y <= line->y ? line->dx < 0 : line->dx > 0 :
+        (line->dy ^ line->dx ^ (x -= line->x) ^ (y -= line->y)) < 0 ? (line->dy ^ x) < 0 :
+        FixedMul(y >> 8, line->dx >> 8) >= FixedMul(line->dy >> 8, x >> 8));
 }
 
 
@@ -542,14 +452,27 @@ P_BlockThingsIterator
 //
 // INTERCEPT ROUTINES
 //
-intercept_t      intercepts[MAXINTERCEPTS];
-intercept_t*     intercept_p;
+// 1/11/98 killough: Intercept limit removed
+static intercept_t      *intercepts;
+static intercept_t      *intercept_p;
+
+// Check for limit and double size if necessary -- killough
+static void check_intercept(void)
+{
+    static size_t       num_intercepts;
+    size_t              offset = intercept_p - intercepts;
+
+    if (offset >= num_intercepts)
+    {
+        num_intercepts = (num_intercepts ? num_intercepts * 2 : 128);
+        intercepts = (intercept_t *)realloc(intercepts, sizeof(*intercepts) * num_intercepts);
+        intercept_p = intercepts + offset;
+    }
+}
 
 divline_t        trace;
 boolean          earlyout;
 int              ptflags;
-
-static void InterceptsOverrun(int num_intercepts, intercept_t *intercept);
 
 //
 // PIT_AddLineIntercepts.
@@ -594,6 +517,8 @@ PIT_AddLineIntercepts (line_t* ld)
     if (frac < 0)
         return true;        // behind source
         
+    check_intercept();  // killough
+
     // try to early out the check
     if (earlyout
         && frac < FRACUNIT
@@ -606,7 +531,6 @@ PIT_AddLineIntercepts (line_t* ld)
     intercept_p->frac = frac;
     intercept_p->isaline = true;
     intercept_p->d.line = ld;
-    InterceptsOverrun(intercept_p - intercepts, intercept_p);
     intercept_p++;
 
     return true;        // continue
@@ -669,10 +593,11 @@ boolean PIT_AddThingIntercepts (mobj_t* thing)
     if (frac < 0)
         return true;                // behind source
 
+    check_intercept();  // killough
+
     intercept_p->frac = frac;
     intercept_p->isaline = false;
     intercept_p->d.thing = thing;
-    InterceptsOverrun(intercept_p - intercepts, intercept_p);
     intercept_p++;
 
     return true;                // keep going
@@ -735,125 +660,6 @@ P_TraverseIntercepts
 }
 
 extern fixed_t bulletslope;
-
-// Intercepts Overrun emulation, from PrBoom-plus.
-// Thanks to Andrey Budko (entryway) for researching this and his 
-// implementation of Intercepts Overrun emulation in PrBoom-plus
-// which this is based on.
-
-typedef struct
-{
-    int len;
-    void *addr;
-    boolean int16_array;
-} intercepts_overrun_t;
-
-// Intercepts memory table.  This is where various variables are located
-// in memory in Vanilla Doom.  When the intercepts table overflows, we
-// need to write to them.
-//
-// Almost all of the values to overwrite are 32-bit integers, except for
-// playerstarts, which is effectively an array of 16-bit integers and
-// must be treated differently.
-
-static intercepts_overrun_t intercepts_overrun[] =
-{
-    {4,   NULL,                          false},
-    {4,   NULL, /* &earlyout, */         false},
-    {4,   NULL, /* &intercept_p, */      false},
-    {4,   &lowfloor,                     false},
-    {4,   &openbottom,                   false},
-    {4,   &opentop,                      false},
-    {4,   &openrange,                    false},
-    {4,   NULL,                          false},
-    {120, NULL, /* &activeplats, */      false},
-    {8,   NULL,                          false},
-    {4,   &bulletslope,                  false},
-    {4,   NULL, /* &swingx, */           false},
-    {4,   NULL, /* &swingy, */           false},
-    {4,   NULL,                          false},
-    {40,  &playerstarts,                 true},
-    {4,   NULL, /* &blocklinks, */       false},
-    {4,   &bmapwidth,                    false},
-    {4,   NULL, /* &blockmap, */         false},
-    {4,   &bmaporgx,                     false},
-    {4,   &bmaporgy,                     false},
-    {4,   NULL, /* &blockmaplump, */     false},
-    {4,   &bmapheight,                   false},
-    {0,   NULL,                          false},
-};
-
-// Overwrite a specific memory location with a value.
-
-static void InterceptsMemoryOverrun(int location, int value)
-{
-    int i, offset;
-    int index;
-    void *addr;
-
-    i = 0;
-    offset = 0;
-
-    // Search down the array until we find the right entry
-
-    while (intercepts_overrun[i].len != 0)
-    {
-        if (offset + intercepts_overrun[i].len > location)
-        {
-            addr = intercepts_overrun[i].addr;
-
-            // Write the value to the memory location.
-            // 16-bit and 32-bit values are written differently.
-
-            if (addr != NULL)
-            {
-                if (intercepts_overrun[i].int16_array)
-                {
-                    index = (location - offset) / 2;
-                    ((short *) addr)[index] = value & 0xffff;
-                    ((short *) addr)[index + 1] = (value >> 16) & 0xffff;
-                }
-                else
-                {
-                    index = (location - offset) / 4;
-                    ((int *) addr)[index] = value;
-                }
-            }
-
-            break;
-        }
-
-        offset += intercepts_overrun[i].len;
-        ++i;
-    }
-}
-
-// Emulate overruns of the intercepts[] array.
-
-static void InterceptsOverrun(int num_intercepts, intercept_t *intercept)
-{
-    int location;
-
-    if (num_intercepts <= MAXINTERCEPTS_ORIGINAL)
-    {
-        // No overrun
-
-        return;
-    }
-
-    location = (num_intercepts - MAXINTERCEPTS_ORIGINAL - 1) * 12;
-
-    // Overwrite memory that is overwritten in Vanilla Doom, using
-    // the values from the intercept structure.
-    //
-    // Note: the ->d.{thing,line} member should really have its
-    // address translated into the correct address value for 
-    // Vanilla Doom.
-
-    InterceptsMemoryOverrun(location, intercept->frac);
-    InterceptsMemoryOverrun(location + 4, intercept->isaline);
-    InterceptsMemoryOverrun(location + 8, (intptr_t) intercept->d.thing);
-}
 
 
 //

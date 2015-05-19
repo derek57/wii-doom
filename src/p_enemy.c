@@ -40,6 +40,7 @@
 #include "i_system.h"
 #include "m_random.h"
 #include "p_local.h"
+#include "p_tick.h"
 #include "r_state.h"
 #include "s_sound.h"
 
@@ -621,7 +622,7 @@ void A_Look (mobj_t* actor)
     if (targ
         && (targ->flags & MF_SHOOTABLE) )
     {
-        actor->target = targ;
+        P_SetTarget(&actor->target, targ);
 
         if ( actor->flags & MF_AMBUSH )
         {
@@ -1024,7 +1025,7 @@ void A_SkelMissile (mobj_t* actor)
 
     mo->x += mo->momx;
     mo->y += mo->momy;
-    mo->tracer = actor->target;
+    P_SetTarget(&mo->tracer, actor->target);
 }
 
 int        TRACEANGLE = 0xc000000;
@@ -1225,7 +1226,7 @@ void A_VileChase (mobj_t* actor)
                     corpsehit->height <<= 2;
                     corpsehit->flags = info->flags;
                     corpsehit->health = info->spawnhealth;
-                    corpsehit->target = NULL;
+                    P_SetTarget(&corpsehit->target, NULL);
 
                     return;
                 }
@@ -1309,9 +1310,9 @@ void A_VileTarget (mobj_t*        actor)
                        actor->target->x,
                        actor->target->z, MT_FIRE);
     
-    actor->tracer = fog;
-    fog->target = actor;
-    fog->tracer = actor->target;
+    P_SetTarget(&actor->tracer, fog);
+    P_SetTarget(&fog->target, actor);
+    P_SetTarget(&fog->tracer, actor->target);
     A_Fire (fog);
 }
 
@@ -1522,7 +1523,7 @@ A_PainShootSkull
         return;
     }
                 
-    newmobj->target = actor->target;
+    P_SetTarget(&newmobj->target, actor->target);
     A_SkullAttack (newmobj);
 }
 
@@ -1937,7 +1938,7 @@ void A_BrainSpit (mobj_t*        mo)
 
     // spawn brain missile
     newmobj = P_SpawnMissile (mo, targ, MT_SPAWNSHOT);
-    newmobj->target = targ;
+    P_SetTarget(&newmobj->target, targ);
     newmobj->reactiontime =
         ((targ->y - mo->y)/newmobj->momy) / newmobj->state->tics;
 

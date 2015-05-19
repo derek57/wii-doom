@@ -34,6 +34,7 @@
 #include "i_system.h"
 #include "m_random.h"
 #include "p_local.h"
+#include "p_tick.h"
 #include "s_sound.h"
 #include "sounds.h"
 #include "st_stuff.h"
@@ -640,6 +641,9 @@ void P_RemoveMobj (mobj_t* mobj)
     // stop any playing sound
     S_StopSound (mobj);
     
+    P_SetTarget(&mobj->target, NULL);
+    P_SetTarget(&mobj->tracer, NULL);
+
     // free block
     P_RemoveThinker ((thinker_t*)mobj);
 }
@@ -1049,7 +1053,7 @@ P_SpawnMissile
     if (th->info->seesound)
         S_StartSound (th, th->info->seesound);
 
-    th->target = source;        // where it came from
+    P_SetTarget(&th->target, source);   // where it came from
     an = R_PointToAngle2 (source->x, source->y, dest->x, dest->y);
 
     // fuzzy player
@@ -1162,7 +1166,7 @@ P_SpawnPlayerMissile
     else
         aim = th->info->speed;
 
-    th->target = source;
+    P_SetTarget(&th->target, source);
     th->angle = an;
 
     th->momx = FixedMul(aim, finecosine[an>>ANGLETOFINESHIFT]);

@@ -44,6 +44,22 @@
 #define MAXSEGS     (SCREENWIDTH/2+1)        // RAISE TO THE VALUE FOUND IN MBF
 
 
+// 1/11/98: Lee Killough
+//
+// This fixes many strange venetian blinds crashes, which occurred when a scan
+// line had too many "posts" of alternating non-transparent and transparent
+// regions. Using a doubly-linked list to represent the posts is one way to
+// do it, but it has increased overhead and poor spatial locality, which hurts
+// cache performance on modern machines. Since the maximum number of posts
+// theoretically possible is a function of screen width, a static limit is
+// okay in this case. It used to be 32, which was way too small.
+//
+// This limit was frequently mistaken for the visplane limit in some Doom
+// editing FAQs, where visplanes were said to "double" if a pillar or other
+// object split the view's space into two pieces horizontally. That did not
+// have anything to do with visplanes, but it had everything to do with these
+// clip posts.
+
 //
 // ClipWallSegment
 // Clips the given range of columns
@@ -108,88 +124,74 @@ void R_ClearDrawSegs (void)
 //  e.g. single sided LineDefs (middle texture)
 //  that entirely block the view.
 // 
-void
-R_ClipSolidWallSegment
-( int                   first,
-  int                   last )
+static void R_ClipSolidWallSegment(int first, int last)
 {
-    cliprange_t*        next;
-    cliprange_t*        start;
+    cliprange_t *next;
+    cliprange_t *start = solidsegs;
 
     // Find the first range that touches the range
     //  (adjacent pixels are touching).
-    start = solidsegs;
-    while (start->last < first-1)
-        start++;
+    while (start->last < first - 1)
+        ++start;
 
     if (first < start->first)
     {
-        if (last < start->first-1)
+        if (last < start->first - 1)
         {
-            // Post is entirely visible (above start),
-            //  so insert a new clippost.
-            R_StoreWallRange (first, last);
-            next = newend;
-            newend++;
-            
-            while (next != start)
-            {
-                *next = *(next-1);
-                next--;
-            }
-            next->first = first;
-            next->last = last;
+            // Post is entirely visible (above start), so insert a new clippost.
+            R_StoreWallRange(first, last);
+
+            // 1/11/98 killough: performance tuning using fast memmove
+            memmove(start + 1, start, (++newend - start) * sizeof(*start));
+            start->first = first;
+            start->last = last;
             return;
         }
-                
+
         // There is a fragment above *start.
-        R_StoreWallRange (first, start->first - 1);
+        R_StoreWallRange(first, start->first - 1);
+
         // Now adjust the clip size.
-        start->first = first;        
+        start->first = first;
     }
 
     // Bottom contained in start?
     if (last <= start->last)
-        return;                        
-                
+        return;
+
     next = start;
-    while (last >= (next+1)->first-1)
+    while (last >= (next + 1)->first - 1)
     {
         // There is a fragment between two posts.
-        R_StoreWallRange (next->last + 1, (next+1)->first - 1);
-        next++;
-        
+        R_StoreWallRange(next->last + 1, (next + 1)->first - 1);
+        ++next;
+
         if (last <= next->last)
         {
-            // Bottom is contained in next.
-            // Adjust the clip size.
-            start->last = next->last;        
+            // Bottom is contained in next. Adjust the clip size.
+            start->last = next->last;
             goto crunch;
         }
     }
-        
+
     // There is a fragment after *next.
-    R_StoreWallRange (next->last + 1, last);
+    R_StoreWallRange(next->last + 1, last);
+
     // Adjust the clip size.
     start->last = last;
-        
-    // Remove start+1 to next from the clip list,
+
+    // Remove start + 1 to next from the clip list,
     // because start now covers their area.
-  crunch:
+
+crunch:
+
     if (next == start)
-    {
-        // Post just extended past the bottom of one post.
-        return;
-    }
-    
+        return;                 // Post just extended past the bottom of one post.
 
     while (next++ != newend)
-    {
-        // Remove a post.
-        *++start = *next;
-    }
+        *(++start) = *next;     // Remove a post.
 
-    newend = start+1;
+    newend = start;
 }
 
 
@@ -318,6 +320,8 @@ void R_AddLine (seg_t*     line)
     // but not necessarily visible.
     angle1 = (angle1+ANG90)>>ANGLETOFINESHIFT;
     angle2 = (angle2+ANG90)>>ANGLETOFINESHIFT;
+
+    // killough 1/31/98: Here is where "slime trails" can SOMETIMES occur:
     x1 = viewangletox[angle1];
     x2 = viewangletox[angle2];
 

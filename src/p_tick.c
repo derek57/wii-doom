@@ -66,6 +66,8 @@ void P_AddThinker (thinker_t* thinker)
     thinker->next = &thinkercap;
     thinker->prev = thinkercap.prev;
     thinkercap.prev = thinker;
+
+    thinker->references = 0;    // killough 11/98: init reference counter to 0
 }
 
 
@@ -155,5 +157,24 @@ void P_Ticker (void)
 
     // for par times
     leveltime++;        
+}
+
+//
+// P_SetTarget
+//
+// This function is used to keep track of pointer references to mobj thinkers.
+// In Doom, objects such as lost souls could sometimes be removed despite
+// their still being referenced. In Boom, 'target' mobj fields were tested
+// during each gametic, and any objects pointed to by them would be prevented
+// from being removed. But this was incomplete, and was slow (every mobj was
+// checked during every gametic). Now, we keep a count of the number of
+// references, and delay removal until the count is 0.
+//
+void P_SetTarget(mobj_t **mop, mobj_t *targ)
+{
+    if (*mop)           // If there was a target already, decrease its refcount
+        (*mop)->thinker.references--;
+    if ((*mop = targ))  // Set new target and if non-NULL, increase its counter
+        targ->thinker.references++;
 }
 
