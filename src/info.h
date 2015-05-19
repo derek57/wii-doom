@@ -1418,6 +1418,7 @@ typedef struct
     int        painsound;
     int        meleestate;
     int        missilestate;
+    int        crashstate;
     int        deathstate;
     int        xdeathstate;
     int        deathsound;
@@ -1430,6 +1431,7 @@ typedef struct
     int        flags;
     int        flags2;
     int        raisestate;
+    char*      name;
 
 } mobjinfo_t;
 

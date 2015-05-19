@@ -2049,12 +2049,12 @@ void A_MoreGibs(mobj_t* actor)
 {
     mobj_t* mo;
     angle_t an;
-    int numchunks = (!d_maxgore) ? 1 : 4;
+//    int numchunks = (!d_maxgore) ? 1 : 4;
     int t;
     int old_t = 0;
 
     // max gore - ludicrous gibs
-    do
+//    do
     {
         mo = P_SpawnMobj(actor->x, actor->y, actor->z + (24*FRACUNIT), MT_FLESH);
         P_SetMobjState(mo, mo->info->spawnstate + (P_Random() % 19));
@@ -2073,7 +2073,7 @@ void A_MoreGibs(mobj_t* actor)
             t = P_Random() % 9;
 
             if((t == 0 || t == 1 || t == 2 || t == 3 || t == 4 || t == 5 || 
-               t == 6 || t == 7 || t == 8 || t == 9) && t != old_t)
+                t == 6 || t == 7 || t == 8 || t == 9) && t != old_t)
             {
                 old_t = t;
 
@@ -2095,7 +2095,7 @@ void A_MoreGibs(mobj_t* actor)
             gore->momz = mo->momz;
         }
     }
-    while(--numchunks > 0);
+//    while(--numchunks > 0);
 }
 
 void A_Fall (mobj_t *actor)
