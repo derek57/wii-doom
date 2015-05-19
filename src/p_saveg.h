@@ -63,6 +63,7 @@ void P_ArchiveThinkers (void);
 void P_UnArchiveThinkers (void);
 void P_ArchiveSpecials (void);
 void P_UnArchiveSpecials (void);
+void P_RestoreTargets(void);
 
 extern FILE *save_stream;
 

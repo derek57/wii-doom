@@ -103,6 +103,7 @@ P_SetMobjState
         
         seenstate[state] = 1 + st->nextstate;                   // killough 4/9/98
 
+        state = st->nextstate;
     } while (!mobj->tics && !seenstate[state]);                 // killough 4/9/98
                                 
     if (!--recursion)

@@ -546,7 +546,7 @@ P_TryMove
     thing->y = y;
 
     P_SetThingPosition (thing);
-    
+/*    
     if (thing->flags2 & MF2_FOOTCLIP
         && P_GetThingFloorType(thing) != FLOOR_SOLID)
     {
@@ -556,7 +556,7 @@ P_TryMove
     {
         thing->flags2 &= ~MF2_FEETARECLIPPED;
     }
-
+*/
     // if any special lines were hit, do the effect
     if (! (thing->flags&(MF_TELEPORT|MF_NOCLIP)) )
     {

@@ -1783,6 +1783,8 @@ void G_DoLoadGame (void)
     P_UnArchiveThinkers (); 
     P_UnArchiveSpecials (); 
  
+    P_RestoreTargets();
+
     if (!P_ReadSaveGameEOF())
         I_Error ("Bad savegame");
 
