@@ -242,6 +242,12 @@ typedef enum
     sfx_splsh9,
     sfx_burn,
     sfx_gloop,
+    sfx_step0,
+    sfx_step1,
+    sfx_step2,
+    sfx_step3,
+    sfx_water,
+    sfx_lava,
 
     NUMSFX
 } sfxenum_t;

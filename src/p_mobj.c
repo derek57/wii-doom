@@ -49,6 +49,8 @@ void P_SpawnMapThing (mapthing_t* mthing);
 
 extern int      mouselook;
 
+extern boolean  not_walking;
+
 extern fixed_t  attackrange;
 
 int             test;
@@ -145,7 +147,7 @@ void P_XYMovement (mobj_t* mo)
     player_t*      player;
     fixed_t        xmove;
     fixed_t        ymove;
-                        
+
     if (!mo->momx && !mo->momy)
     {
         if (mo->flags & MF_SKULLFLY)
@@ -196,6 +198,7 @@ void P_XYMovement (mobj_t* mo)
             // blocked move
             if (mo->player)
             {        // try to slide along it
+                not_walking = true;
                 P_SlideMove (mo);
             }
             else if (mo->flags & MF_MISSILE)

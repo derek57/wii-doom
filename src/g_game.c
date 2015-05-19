@@ -205,6 +205,7 @@ boolean         singledemo;             // quit after playing a demo from cmdlin
 boolean         precache = true;        // if true, load all graphics at start 
 boolean         joyarray[MAX_JOY_BUTTONS + 1]; 
 boolean         *joybuttons = &joyarray[1]; // allow [-1] 
+boolean         not_walking;
 
 char            demoname[32];
 char            savename[256];
@@ -397,9 +398,17 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
             cmd->angleturn += angleturn; 
 
         if (joyxmove > 20) 
+        {
             side += sidemove; 
-        if (joyxmove < -20) 
+            not_walking = false;
+        }
+        else if (joyxmove < -20) 
+        {
             side -= sidemove; 
+            not_walking = false;
+        }
+        else
+            not_walking = true;
 
         if (joyirx > 0)     // calculate wii IR curve based on input
             cmd->angleturn -= turnspd * joyirx;
@@ -426,11 +435,15 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
     if (joyymove > 20) 
     {
         forward += forwardmve; 
+        not_walking = false;
     }
-    if (joyymove < -20) 
+    else if (joyymove < -20) 
     {
         forward -= forwardmve; 
+        not_walking = false;
     }
+    else
+        not_walking = true;
 
     if (joybuttons[joybstrafeleft]) 
     {

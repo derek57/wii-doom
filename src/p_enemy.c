@@ -80,6 +80,9 @@ dirtype_t diags[] =
 };
 
 
+int               old_t;
+
+extern boolean    not_walking;
 
 
 
@@ -1772,6 +1775,25 @@ void A_BossDeath (mobj_t* mo)
     G_ExitLevel ();
 }
 
+
+void A_Footstep (mobj_t* mo)
+{
+    int t = P_Random() % 4;
+
+    if(old_t == t)
+        t = P_Random() % 4;
+
+    if(!not_walking)
+    {
+        if(P_GetThingFloorType(mo) == 0)
+            S_StartSound (mo, sfx_step0 + t);
+        else if(P_GetThingFloorType(mo) == 1)
+            S_StartSound (mo, sfx_water);
+        else
+            S_StartSound (mo, sfx_lava);
+    }
+    old_t = t;
+}
 
 void A_Hoof (mobj_t* mo)
 {

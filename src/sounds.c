@@ -245,7 +245,13 @@ sfxinfo_t S_sfx[] =
     SOUND("splsh7", 60),
     SOUND("splsh8", 60),
     SOUND("splsh9", 60),
-    SOUND("burn",    10),
-    SOUND("gloop",   10),
+    SOUND("burn",   10),
+    SOUND("gloop",  10),
+    SOUND("step0",  96),
+    SOUND("step1",  96),
+    SOUND("step2",  96),
+    SOUND("step3",  96),
+    SOUND("water",  96),
+    SOUND("lava",  96),
 };
 

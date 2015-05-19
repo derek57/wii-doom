@@ -504,7 +504,7 @@ static void R_AdjustOpenings(int start, int stop)
         
         openings = (int *)realloc (openings, maxopenings * sizeof(*openings));
         lastopening = openings + pos;
-        C_Printf ("MaxOpenings increased to %u\n", maxopenings);
+        C_Printf (" MaxOpenings increased to %u\n", maxopenings);
 
         // [RH] We also need to adjust the openings pointers that
         //        were already stored in drawsegs.

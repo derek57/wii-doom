@@ -136,6 +136,7 @@ void A_SpawnFly();
 void A_BrainExplode();
 void A_MoreBlood();
 void A_MoreGibs();
+void A_Footstep();
 //void A_Bullet();
 
 state_t        states[NUMSTATES] = {
@@ -291,10 +292,10 @@ state_t        states[NUMSTATES] = {
     {SPR_IFOG,32771,6,{NULL},S_IFOG5,0,0},        // S_IFOG4
     {SPR_IFOG,32772,6,{NULL},S_NULL,0,0},        // S_IFOG5
     {SPR_PLAY,0,-1,{NULL},S_NULL,0,0},        // S_PLAY
-    {SPR_PLAY,0,4,{NULL},S_PLAY_RUN2,0,0},        // S_PLAY_RUN1
-    {SPR_PLAY,1,4,{NULL},S_PLAY_RUN3,0,0},        // S_PLAY_RUN2
-    {SPR_PLAY,2,4,{NULL},S_PLAY_RUN4,0,0},        // S_PLAY_RUN3
-    {SPR_PLAY,3,4,{NULL},S_PLAY_RUN1,0,0},        // S_PLAY_RUN4
+    {SPR_PLAY,0,12,{A_Footstep},S_PLAY_RUN2,0,0},        // S_PLAY_RUN1
+    {SPR_PLAY,1,12,{A_Footstep},S_PLAY_RUN3,0,0},        // S_PLAY_RUN2
+    {SPR_PLAY,2,12,{A_Footstep},S_PLAY_RUN4,0,0},        // S_PLAY_RUN3
+    {SPR_PLAY,3,12,{A_Footstep},S_PLAY_RUN1,0,0},        // S_PLAY_RUN4
     {SPR_PLAY,4,12,{NULL},S_PLAY,0,0},        // S_PLAY_ATK1
     {SPR_PLAY,32773,6,{NULL},S_PLAY_ATK1,0,0},        // S_PLAY_ATK2
     {SPR_PLAY,6,4,{NULL},S_PLAY_PAIN2,0,0},        // S_PLAY_PAIN
