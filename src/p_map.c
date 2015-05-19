@@ -87,6 +87,7 @@ fixed_t                tmdropoffz;
 // keep track of the line that lowers the ceiling,
 // so missiles don't explode against sky hack walls
 line_t*                ceilingline;
+line_t                 *blockline;     // killough 8/11/98: blocking linedef
 
 // keep track of special lines as they are hit,
 // but don't process them until the move is proven valid
@@ -246,8 +247,11 @@ boolean PIT_CheckLine (line_t* ld)
     // could be crossed in either order.
     
     if (!ld->backsector)
+    {
+        blockline = ld;
         return false;                // one sided line
-                
+    }
+
     if (!(tmthing->flags & MF_MISSILE) )
     {
         if ( ld->flags & ML_BLOCKING )
@@ -265,10 +269,14 @@ boolean PIT_CheckLine (line_t* ld)
     {
         tmceilingz = opentop;
         ceilingline = ld;
+        blockline = ld;
     }
 
     if (openbottom > tmfloorz)
+    {
         tmfloorz = openbottom;        
+        blockline = ld;
+    }
 
     if (lowfloor < tmdropoffz)
         tmdropoffz = lowfloor;
@@ -444,7 +452,7 @@ P_CheckPosition
     tmbbox[BOXLEFT] = x - tmthing->radius;
 
     newsubsec = R_PointInSubsector (x,y);
-    ceilingline = NULL;
+    blockline = ceilingline = NULL;
     
     // The base floor / ceiling is from the subsector
     // that contains the point.

@@ -224,6 +224,7 @@ extern  fixed_t        tmfloorz;
 extern  fixed_t        tmceilingz;
 
 extern  line_t*        ceilingline;
+extern  line_t         *blockline;
 
 boolean P_CheckPosition (mobj_t *thing, fixed_t x, fixed_t y);
 boolean P_TryMove (mobj_t* thing, fixed_t x, fixed_t y);
