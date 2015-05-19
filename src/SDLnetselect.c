@@ -37,6 +37,8 @@ struct _SDLNet_SocketSet {
     struct SDLNet_Socket **sockets;
 };
 
+void C_Printf(char *s, ...);
+
 /* Allocate a socket set for use with SDLNet_CheckSockets()
    This returns a socket set for up to 'maxsockets' sockets, or NULL if
    the function ran out of memory.
@@ -69,8 +71,8 @@ int SDLNet_AddSocket(SDLNet_SocketSet set, SDLNet_GenericSocket sock)
 {
     if ( sock != NULL ) {
         if ( set->numsockets == set->maxsockets ) {
-            printf("socketset is full");
-	    sleep(1);
+            C_Printf("socketset is full");
+            sleep(1);
             return(-1);
         }
         set->sockets[set->numsockets++] = (struct SDLNet_Socket *)sock;
@@ -90,8 +92,8 @@ int SDLNet_DelSocket(SDLNet_SocketSet set, SDLNet_GenericSocket sock)
             }
         }
         if ( i == set->numsockets ) {
-            printf("socket not found in socketset");
-	    sleep(1);
+            C_Printf("socket not found in socketset");
+            sleep(1);
             return(-1);
         }
         --set->numsockets;

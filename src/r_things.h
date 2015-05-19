@@ -20,7 +20,7 @@
 // 02111-1307, USA.
 //
 // DESCRIPTION:
-//	Rendering of moving objects, sprites.
+//        Rendering of moving objects, sprites.
 //
 //-----------------------------------------------------------------------------
 
@@ -29,39 +29,31 @@
 #define __R_THINGS__
 
 
+#define MAXVISSPRITES      128*8                              // CHANGED FOR HIRES
 
-//#define MAXVISSPRITES  	128				// CHANGED FOR HIRES
-#define MAXVISSPRITES  	128*8					// CHANGED FOR HIRES
 
-//extern vissprite_t	vissprites[MAXVISSPRITES];
-extern vissprite_t*	vissprites;			// LIMIT REMOVAL
-extern vissprite_t*	vissprite_p;
-extern vissprite_t	vsprsortedhead;
+extern vissprite_t*        vissprites;                        // LIMIT REMOVAL
+extern vissprite_t*        vissprite_p;
+extern vissprite_t         vsprsortedhead;
+
+extern fixed_t             spryscale;
+extern fixed_t             pspritescale;
+extern fixed_t             pspriteiscale;
 
 // Constant arrays used for psprite clipping
-//  and initializing clipping.
-/*
-extern short		negonearray[SCREENWIDTH];		// CHANGED FOR HIRES
-extern short		screenheightarray[SCREENWIDTH];		// CHANGED FOR HIRES
+// and initializing clipping.
+extern int                 negonearray[SCREENWIDTH];          // CHANGED FOR HIRES
+extern int                 screenheightarray[SCREENWIDTH];    // CHANGED FOR HIRES
 
 // vars for R_DrawMaskedColumn
-extern short*		mfloorclip;				// CHANGED FOR HIRES
-extern short*		mceilingclip;				// CHANGED FOR HIRES
-*/
-extern int		negonearray[SCREENWIDTH];		// CHANGED FOR HIRES
-extern int		screenheightarray[SCREENWIDTH];		// CHANGED FOR HIRES
+extern int*                mfloorclip;                        // CHANGED FOR HIRES
+extern int*                mceilingclip;                      // CHANGED FOR HIRES
 
-// vars for R_DrawMaskedColumn
-extern int*		mfloorclip;				// CHANGED FOR HIRES
-extern int*		mceilingclip;				// CHANGED FOR HIRES
-extern fixed_t		spryscale;
-extern int64_t		sprtopscreen; 				// WiggleFix
-
-extern fixed_t		pspritescale;
-extern fixed_t		pspriteiscale;
+extern int64_t             sprtopscreen;                      // WiggleFix
 
 
-void R_DrawMaskedColumn (column_t* column);
+
+void R_DrawMaskedColumn (column_t* column, signed int baseclip);
 
 
 void R_SortVisSprites (void);
@@ -75,9 +67,9 @@ void R_DrawMasked (void);
 
 void
 R_ClipVisSprite
-( vissprite_t*		vis,
-  int			xl,
-  int			xh );
+( vissprite_t*             vis,
+  int                      xl,
+  int                      xh );
 
 
 #endif

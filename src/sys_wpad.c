@@ -1,77 +1,78 @@
-#include <stdio.h>
 #include <ogcsys.h>
-#include <unistd.h>
+#include <stdio.h>
 #include <time.h>
+#include <unistd.h>
 
 #include "sys.h"
+
 #include <wiiuse/wpad.h>
-//#include "wkb.h"
 
 /* Constants */
-#define MAX_WIIMOTES	4
+#define MAX_WIIMOTES        4
 
 int start;
 
+u32 Wpad_GetButtons(void);
+
 void __Wpad_PowerCallback(s32 chan)
 {
-	/* Poweroff console */
-	Sys_Shutdown();
+    /* Poweroff console */
+    Sys_Shutdown();
 }
 
 
 s32 Wpad_Init(void)
 {
-	s32 ret;
+    s32 ret;
 
-	/* Initialize Wiimote subsystem */
-	ret = WPAD_Init();
-	if (ret < 0)
-		return ret;
+    /* Initialize Wiimote subsystem */
+    ret = WPAD_Init();
+    if (ret < 0)
+        return ret;
 
-	/* Set POWER button callback */
-	WPAD_SetPowerButtonCallback(__Wpad_PowerCallback);
+    /* Set POWER button callback */
+    WPAD_SetPowerButtonCallback(__Wpad_PowerCallback);
 
-	return ret;
+    return ret;
 }
 
 void Wpad_Disconnect(void)
 {
-	u32 cnt;
+    u32 cnt;
 
-	/* Disconnect Wiimotes */
-	for (cnt = 0; cnt < MAX_WIIMOTES; cnt++)
-		WPAD_Disconnect(cnt);
+    /* Disconnect Wiimotes */
+    for (cnt = 0; cnt < MAX_WIIMOTES; cnt++)
+        WPAD_Disconnect(cnt);
 
-	/* Shutdown Wiimote subsystem */
-	WPAD_Shutdown();
+    /* Shutdown Wiimote subsystem */
+    WPAD_Shutdown();
 }
-
-u32 Wpad_GetButtons(void);
 
 u32 Wpad_WaitButtons(void)
 {
-	u32 buttons = 0;
-	/* Wait for button pressing */
-	while (!buttons) {
-		buttons = Wpad_GetButtons();
-		VIDEO_WaitVSync();
-	}
+    u32 buttons = 0;
+    /* Wait for button pressing */
+    while (!buttons)
+    {
+        buttons = Wpad_GetButtons();
+        VIDEO_WaitVSync();
+    }
 
-	return buttons;
+    return buttons;
 }
 
 u32 Wpad_HeldButtons(void)
 {
-	u32 buttons = 0, cnt;
+    u32 buttons = 0, cnt;
 
-	/* Scan pads */
-	WPAD_ScanPads();
+    /* Scan pads */
+    WPAD_ScanPads();
 
-	/* Get pressed buttons */
-	for (cnt = 0; cnt < MAX_WIIMOTES; cnt++)
-		buttons |= WPAD_ButtonsHeld(cnt);
+    /* Get pressed buttons */
+    for (cnt = 0; cnt < MAX_WIIMOTES; cnt++)
+        buttons |= WPAD_ButtonsHeld(cnt);
 
-	return buttons;
+    return buttons;
 }
 
 

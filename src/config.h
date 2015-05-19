@@ -1,23 +1,8 @@
 /* config.h.  Generated from config.hin by configure.  */
 /* config.hin.  Generated from configure.ac by autoheader.  */
 
-/* Define to 1 if you have the <dev/isa/spkrio.h> header file. */
-/* #undef HAVE_DEV_ISA_SPKRIO_H */
-
-/* Define to 1 if you have the <dev/speaker/speaker.h> header file. */
-/* #undef HAVE_DEV_SPEAKER_SPEAKER_H */
-
 /* Define to 1 if you have the <inttypes.h> header file. */
 #define HAVE_INTTYPES_H 1
-
-/* Define to 1 if you have the `ioperm' function. */
-//#define HAVE_IOPERM 1
-
-/* Define to 1 if you have the `amd64' library (-lamd64). */
-/* #undef HAVE_LIBAMD64 */
-
-/* Define to 1 if you have the `i386' library (-li386). */
-/* #undef HAVE_LIBI386 */
 
 /* Define to 1 if you have the `m' library (-lm). */
 #define HAVE_LIBM 1
@@ -25,23 +10,11 @@
 /* Define to 1 if you have the `png' library (-lpng). */
 #define HAVE_LIBPNG 1
 
-/* Define to 1 if you have the `samplerate' library (-lsamplerate). */
-/* #undef HAVE_LIBSAMPLERATE */
-
 /* Define to 1 if you have the `z' library (-lz). */
 #define HAVE_LIBZ 1
 
-/* Define to 1 if you have the <linux/kd.h> header file. */
-//#define HAVE_LINUX_KD_H 1
-
 /* Define to 1 if you have the <memory.h> header file. */
 #define HAVE_MEMORY_H 1
-
-/* Define to 1 if you have the `mmap' function. */
-//#define HAVE_MMAP 1
-
-/* Define to 1 if you have the `sched_setaffinity' function. */
-//#define HAVE_SCHED_SETAFFINITY 1
 
 /* Define to 1 if you have the <stdint.h> header file. */
 #define HAVE_STDINT_H 1

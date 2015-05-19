@@ -26,7 +26,6 @@
 #include "d_mode.h"
 #include "i_system.h"
 #include "i_timer.h"
-#include "m_argv.h"
 #include "m_misc.h"
 
 #include "net_client.h"
@@ -41,6 +40,7 @@
 #include "net_structrw.h"
 
 #include "doomfeatures.h"
+#include "c_io.h"
 
 // How often to refresh our registration with the master server.
 
@@ -89,10 +89,6 @@ typedef struct
     // Last time new gamedata was received from this client
 
     int last_gamedata_time;
-
-    // recording a demo without -longtics
-
-    boolean recording_lowres;
 
     // send queue: items to send to the client
     // this is a circular buffer
@@ -701,13 +697,10 @@ static void NET_SV_ParseSYN(net_packet_t *packet,
         // will simply not function at all.
         //
 
-        if (M_CheckParm("-ignoreversion") == 0)
-        {
-            NET_SV_SendReject(addr,
-                "Different " PACKAGE_NAME " versions cannot play a net game!\n"
-                "Version mismatch: server version is: " PACKAGE_STRING);
-            return;
-        }
+        NET_SV_SendReject(addr,
+            "Different " PACKAGE_NAME " versions cannot play a net game!\n"
+            "Version mismatch: server version is: " PACKAGE_STRING);
+        return;
     }
 
     // read the game mode and mission
@@ -830,7 +823,6 @@ static void NET_SV_ParseSYN(net_packet_t *packet,
 
         NET_SV_InitNewClient(client, addr, player_name);
 
-        client->recording_lowres = data.lowres_turn;
         client->drone = data.drone;
         client->player_class = data.player_class;
     }
@@ -906,18 +898,6 @@ static void StartGame(void)
     // Assign player numbers
 
     NET_SV_AssignPlayers();
-
-    // Check if anyone is recording a demo and set lowres_turn if so.
-
-    sv_settings.lowres_turn = false;
-
-    for (i = 0; i < NET_MAXPLAYERS; ++i)
-    {
-        if (sv_players[i] != NULL && sv_players[i]->recording_lowres)
-        {
-            sv_settings.lowres_turn = true;
-        }
-    }
 
     sv_settings.num_players = NET_SV_NumPlayers();
 
@@ -1234,8 +1214,7 @@ static void NET_SV_ParseGameData(net_packet_t *packet, net_client_t *client)
         net_ticdiff_t diff;
         signed int latency;
 
-        if (!NET_ReadSInt16(packet, &latency)
-         || !NET_ReadTiccmdDiff(packet, &diff, sv_settings.lowres_turn))
+        if (!NET_ReadSInt16(packet, &latency))
         {
             return;
         }
@@ -1382,10 +1361,6 @@ static void NET_SV_SendTics(net_client_t *client,
         {
             I_Error("Wanted to send %i, but %i is in its place", i, cmd->seq);
         }
-
-        // Add command
-       
-        NET_WriteFullTiccmd(packet, cmd, sv_settings.lowres_turn);
     }
     
     // Send packet
@@ -1449,7 +1424,6 @@ void NET_SV_SendQueryResponse(net_addr_t *addr)
 {
     net_packet_t *reply;
     net_querydata_t querydata;
-    int p;
 
 #ifdef NET_DEBUG
     printf("NET_SV_SendQueryResponse\n");
@@ -1479,16 +1453,7 @@ void NET_SV_SendQueryResponse(net_addr_t *addr)
     // When starting a network server, specify a name for the server.
     //
 
-    p = M_CheckParmWithArgs("-servername", 1);
-
-    if (p > 0)
-    {
-        querydata.description = myargv[p + 1];
-    }
-    else
-    {
-        querydata.description = "Unnamed server";
-    }
+    querydata.description = "Unnamed server";
 
     // Send it and we're done.
 
@@ -1828,7 +1793,7 @@ static void NET_SV_RunClient(net_client_t *client)
         // Are there any clients left connected?  If not, return the
         // server to the waiting-for-players state.
         //
-	// Disconnect any drones still connected.
+        // Disconnect any drones still connected.
 
         if (NET_SV_NumPlayers() <= 0)
         {
@@ -1956,7 +1921,6 @@ void NET_SV_RegisterWithMaster(void)
     printf("NET_SV_RegisterWithMaster\n");
 #endif
 
-//    if (!M_CheckParm("-privateserver"))
     if(!privateserverflag)
     {
         master_server = NET_Query_ResolveMaster(server_context);
@@ -2054,7 +2018,7 @@ void NET_SV_Shutdown(void)
         return;
     }
     
-    printf("SV: Shutting down server...\n");
+    C_Printf("SV: Shutting down server...\n");
     sleep(1);
 
     // Disconnect all clients
@@ -2091,8 +2055,8 @@ void NET_SV_Shutdown(void)
         if (I_GetTimeMS() - start_time > 5000)
         {
             running = false;
-            printf("SV: Timed out waiting for clients to disconnect.\n");
-	    sleep(1);
+            C_Printf("SV: Timed out waiting for clients to disconnect.\n");
+            sleep(1);
         }
 
         // Run the client code in case this is a loopback client.

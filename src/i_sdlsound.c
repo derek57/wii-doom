@@ -14,37 +14,32 @@
 // GNU General Public License for more details.
 //
 // DESCRIPTION:
-//	System interface for sound.
+//        System interface for sound.
 //
 
-//#include "config.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <assert.h>
 #include <SDL/SDL.h>
 #include <SDL/SDL_mixer.h>
-/*
-#ifdef HAVE_LIBSAMPLERATE
-#include <samplerate.h>
-#endif
-*/
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "c_io.h"
 #include "deh_str.h"
+#include "doomdef.h"
+#include "doomtype.h"
 #include "i_sound.h"
-//#include "sounds.h"
-#include "i_system.h"
 #include "i_swap.h"
-//#include "m_argv.h"
+#include "i_system.h"
 #include "m_misc.h"
 #include "w_wad.h"
 #include "z_zone.h"
 
-#include "doomtype.h"
-#include "doomdef.h"
 
 #define LOW_PASS_FILTER
 #define NUM_CHANNELS 16
+
 
 typedef struct allocated_sound_s allocated_sound_t;
 
@@ -56,17 +51,17 @@ struct allocated_sound_s
     allocated_sound_t *prev, *next;
 };
 
-//extern boolean devparm_sdl_sound;
-
-static boolean setpanning_workaround = false;
-
-static boolean sound_initialized = false;
 
 static sfxinfo_t *channels_playing[NUM_CHANNELS];
 
 static int mixer_freq;
-static Uint16 mixer_format;
 static int mixer_channels;
+static int allocated_sounds_size = 0;
+
+static Uint16 mixer_format;
+
+static boolean setpanning_workaround = false;
+static boolean sound_initialized = false;
 static boolean use_sfx_prefix;
 static boolean (*ExpandSoundData)(sfxinfo_t *sfxinfo,
                                   byte *data,
@@ -79,7 +74,6 @@ static boolean (*ExpandSoundData)(sfxinfo_t *sfxinfo,
 
 static allocated_sound_t *allocated_sounds_head = NULL;
 static allocated_sound_t *allocated_sounds_tail = NULL;
-static int allocated_sounds_size = 0;
 
 int use_libsamplerate = 0;
 
@@ -301,155 +295,6 @@ static void ReleaseSoundOnChannel(int channel)
 
     UnlockAllocatedSound(sfxinfo->driver_data);
 }
-/*
-#ifdef HAVE_LIBSAMPLERATE
-
-// Returns the conversion mode for libsamplerate to use.
-
-static int SRC_ConversionMode(void)
-{
-    switch (use_libsamplerate)
-    {
-        // 0 = disabled
-
-        default:
-        case 0:
-            return -1;
-
-        // Ascending numbers give higher quality
-
-        case 1:
-            return SRC_LINEAR;
-        case 2:
-            return SRC_ZERO_ORDER_HOLD;
-        case 3:
-            return SRC_SINC_FASTEST;
-        case 4:
-            return SRC_SINC_MEDIUM_QUALITY;
-        case 5:
-            return SRC_SINC_BEST_QUALITY;
-    }
-}
-
-// libsamplerate-based generic sound expansion function for any sample rate
-//   unsigned 8 bits --> signed 16 bits
-//   mono --> stereo
-//   samplerate --> mixer_freq
-// Returns number of clipped samples.
-// DWF 2008-02-10 with cleanups by Simon Howard.
-
-static boolean ExpandSoundData_SRC(sfxinfo_t *sfxinfo,
-                                   byte *data,
-                                   int samplerate,
-                                   int length)
-{
-    SRC_DATA src_data;
-    uint32_t i, abuf_index=0, clipped=0;
-    uint32_t alen;
-    int retn;
-    int16_t *expanded;
-    Mix_Chunk *chunk;
-
-    src_data.input_frames = length;
-    src_data.data_in = malloc(length * sizeof(float));
-    src_data.src_ratio = (double)mixer_freq / samplerate;
-
-    // We include some extra space here in case of rounding-up.
-    src_data.output_frames = src_data.src_ratio * length + (mixer_freq / 4);
-    src_data.data_out = malloc(src_data.output_frames * sizeof(float));
-
-    assert(src_data.data_in != NULL && src_data.data_out != NULL);
-
-    // Convert input data to floats
-
-    for (i=0; i<length; ++i)
-    {
-        // Unclear whether 128 should be interpreted as "zero" or whether a
-        // symmetrical range should be assumed.  The following assumes a
-        // symmetrical range.
-        src_data.data_in[i] = data[i] / 127.5 - 1;
-    }
-
-    // Do the sound conversion
-
-    retn = src_simple(&src_data, SRC_ConversionMode(), 1);
-    assert(retn == 0);
-
-    // Allocate the new chunk.
-
-    alen = src_data.output_frames_gen * 4;
-
-    chunk = AllocateSound(sfxinfo, src_data.output_frames_gen * 4);
-
-    if (chunk == NULL)
-    {
-        return false;
-    }
-
-    expanded = (int16_t *) chunk->abuf;
-
-    // Convert the result back into 16-bit integers.
-
-    for (i=0; i<src_data.output_frames_gen; ++i)
-    {
-        // libsamplerate does not limit itself to the -1.0 .. 1.0 range on
-        // output, so a multiplier less than INT16_MAX (32767) is required
-        // to avoid overflows or clipping.  However, the smaller the
-        // multiplier, the quieter the sound effects get, and the more you
-        // have to turn down the music to keep it in balance.
-
-        // 22265 is the largest multiplier that can be used to resample all
-        // of the Vanilla DOOM sound effects to 48 kHz without clipping
-        // using SRC_SINC_BEST_QUALITY.  It is close enough (only slightly
-        // too conservative) for SRC_SINC_MEDIUM_QUALITY and
-        // SRC_SINC_FASTEST.  PWADs with interestingly different sound
-        // effects or target rates other than 48 kHz might still result in
-        // clipping--I don't know if there's a limit to it.
-
-        // As the number of clipped samples increases, the signal is
-        // gradually overtaken by noise, with the loudest parts going first.
-        // However, a moderate amount of clipping is often tolerated in the
-        // quest for the loudest possible sound overall.  The results of
-        // using INT16_MAX as the multiplier are not all that bad, but
-        // artifacts are noticeable during the loudest parts.
-
-        float cvtval_f =
-            src_data.data_out[i] * libsamplerate_scale * INT16_MAX;
-        int32_t cvtval_i = cvtval_f + (cvtval_f < 0 ? -0.5 : 0.5);
-
-        // Asymmetrical sound worries me, so we won't use -32768.
-        if (cvtval_i < -INT16_MAX)
-        {
-            cvtval_i = -INT16_MAX;
-            ++clipped;
-        }
-        else if (cvtval_i > INT16_MAX)
-        {
-            cvtval_i = INT16_MAX;
-            ++clipped;
-        }
-
-        // Left and right channels
-
-        expanded[abuf_index++] = cvtval_i;
-        expanded[abuf_index++] = cvtval_i;
-    }
-
-    free(src_data.data_in);
-    free(src_data.data_out);
-
-    if (clipped > 0)
-    {
-        fprintf(stderr, "Sound '%s': clipped %u samples (%0.2f %%)\n", 
-                        sfxinfo->name, clipped,
-                        400.0 * clipped / chunk->alen);
-    }
-
-    return true;
-}
-
-#endif
-*/
 
 static boolean ConvertibleRatio(int freq1, int freq2)
 {
@@ -480,52 +325,6 @@ static boolean ConvertibleRatio(int freq1, int freq2)
     }
 }
 
-// Debug code to dump resampled sound effects to WAV files for analysis.
-/*
-static void WriteWAV(char *filename, byte *data,
-                     uint32_t length, int samplerate)
-{
-    FILE *wav;
-    unsigned int i;
-    unsigned short s;
-
-    wav = fopen(filename, "wb");
-
-    // Header
-
-    fwrite("RIFF", 1, 4, wav);
-    i = LONG(36 + samplerate);
-    fwrite(&i, 4, 1, wav);
-    fwrite("WAVE", 1, 4, wav);
-
-    // Subchunk 1
-
-    fwrite("fmt ", 1, 4, wav);
-    i = LONG(16);
-    fwrite(&i, 4, 1, wav);           // Length
-    s = SHORT(1);
-    fwrite(&s, 2, 1, wav);           // Format (PCM)
-    s = SHORT(2);
-    fwrite(&s, 2, 1, wav);           // Channels (2=stereo)
-    i = LONG(samplerate);
-    fwrite(&i, 4, 1, wav);           // Sample rate
-    i = LONG(samplerate * 2 * 2);
-    fwrite(&i, 4, 1, wav);           // Byte rate (samplerate * stereo * 16 bit)
-    s = SHORT(2 * 2);
-    fwrite(&s, 2, 1, wav);           // Block align (stereo * 16 bit)
-    s = SHORT(16);
-    fwrite(&s, 2, 1, wav);           // Bits per sample (16 bit)
-
-    // Data subchunk
-
-    fwrite("data", 1, 4, wav);
-    i = LONG(length);
-    fwrite(&i, 4, 1, wav);           // Data length
-    fwrite(data, 1, length, wav);    // Data
-
-    fclose(wav);
-}
-*/
 // Generic sound expansion function for any sample rate.
 // Returns number of clipped samples (always 0).
 
@@ -601,37 +400,6 @@ static boolean ExpandSoundData_SDL(sfxinfo_t *sfxinfo,
 
             expanded[i * 2] = expanded[i * 2 + 1] = sample;
         }
-/*
-#ifdef LOW_PASS_FILTER
-        // Perform a low-pass filter on the upscaled sound to filter
-        // out high-frequency noise from the conversion process.
-
-        {
-            float rc, dt, alpha;
-
-            // Low-pass filter for cutoff frequency f:
-            //
-            // For sampling rate r, dt = 1 / r
-            // rc = 1 / 2*pi*f
-            // alpha = dt / (rc + dt)
-
-            // Filter to the half sample rate of the original sound effect
-            // (maximum frequency, by nyquist)
-
-            dt = 1.0f / mixer_freq;
-            rc = 1.0f / (3.14f * samplerate);
-            alpha = dt / (rc + dt);
-
-            // Both channels are processed in parallel, hence [i-2]:
-
-            for (i=2; i<expanded_length * 2; ++i)
-            {
-                expanded[i] = (Sint16) (alpha * expanded[i]
-                                      + (1 - alpha) * expanded[i-2]);
-            }
-        }
-#endif // #ifdef LOW_PASS_FILTER
-*/
     }
 
     return true;
@@ -695,17 +463,7 @@ static boolean CacheSFX(sfxinfo_t *sfxinfo)
     {
         return false;
     }
-/*
-    if(devparm_sdl_sound)
-    {
-        char filename[16];
 
-        M_snprintf(filename, sizeof(filename), "%s.wav",
-                   DEH_String(S_sfx[sound].name));
-        WriteWAV(filename, sound_chunks[sound].abuf,
-                 sound_chunks[sound].alen, mixer_freq);
-    }
-*/
     // don't need the original lump any more
   
     W_ReleaseLumpNum(lumpnum);
@@ -734,54 +492,11 @@ static void GetSfxLumpName(sfxinfo_t *sfx, char *buf, size_t buf_len)
         M_StringCopy(buf, DEH_String(sfx->name), buf_len);
     }
 }
-/*
-#ifdef HAVE_LIBSAMPLERATE
 
-// Preload all the sound effects - stops nasty ingame freezes
-
-static void I_SDL_PrecacheSounds(sfxinfo_t *sounds, int num_sounds)
-{
-    char namebuf[9];
-    int i;
-
-    // Don't need to precache the sounds unless we are using libsamplerate.
-
-    if (use_libsamplerate == 0)
-    {
-	return;
-    }
-
-    printf("I_SDL_PrecacheSounds: Precaching all sound effects..");
-
-    for (i=0; i<num_sounds; ++i)
-    {
-        if ((i % 6) == 0)
-        {
-            printf(".");
-            fflush(stdout);
-        }
-
-        GetSfxLumpName(&sounds[i], namebuf, sizeof(namebuf));
-
-        sounds[i].lumpnum = W_CheckNumForName(namebuf);
-
-        if (sounds[i].lumpnum != -1)
-        {
-            CacheSFX(&sounds[i]);
-        }
-    }
-
-    printf("\n");
-}
-
-#else
-*/
 static void I_SDL_PrecacheSounds(sfxinfo_t *sounds, int num_sounds)
 {
     // no-op
 }
-
-//#endif
 
 // Load a SFX chunk into memory and ensure that it is locked.
 
@@ -885,7 +600,7 @@ static int I_SDL_StartSound(sfxinfo_t *sfxinfo, int channel, int vol, int sep)
 
     if (!LockSound(sfxinfo))
     {
-	return -1;
+        return -1;
     }
 
     snd = sfxinfo->driver_data;
@@ -1006,40 +721,26 @@ static boolean I_SDL_InitSound(boolean _use_sfx_prefix)
 
     if (SDL_Init(SDL_INIT_AUDIO) < 0)
     {
-        fprintf(statsfile, "Unable to set up sound.\n");
+        C_Printf("Unable to set up sound.\n");
         return false;
     }
 
     if (Mix_OpenAudio(snd_samplerate, AUDIO_S16SYS, 2, GetSliceSize()) < 0)
     {
-        fprintf(statsfile, "Error initialising SDL_mixer: %s\n", Mix_GetError());
+        C_Printf("Error initialising SDL_mixer: %s\n", Mix_GetError());
         return false;
     }
 
     ExpandSoundData = ExpandSoundData_SDL;
 
     Mix_QuerySpec(&mixer_freq, &mixer_format, &mixer_channels);
-/*
-#ifdef HAVE_LIBSAMPLERATE
-    if (use_libsamplerate != 0)
-    {
-        if (SRC_ConversionMode() < 0)
-        {
-            I_Error("I_SDL_InitSound: Invalid value for use_libsamplerate: %i",
-                    use_libsamplerate);
-        }
 
-        ExpandSoundData = ExpandSoundData_SRC;
-    }
-#else
-*/
     if (use_libsamplerate != 0)
     {
-        fprintf(statsfile, "I_SDL_InitSound: use_libsamplerate=%i, but "
+        C_Printf("I_SDL_InitSound: use_libsamplerate=%i, but "
                         "libsamplerate support not compiled in.\n",
                         use_libsamplerate);
     }
-//#endif
 
     // SDL_mixer version 1.2.8 and earlier has a bug in the Mix_SetPanning
     // function that can cause the game to lock up.  If we're using an old
@@ -1058,7 +759,7 @@ static boolean I_SDL_InitSound(boolean _use_sfx_prefix)
         if (v <= SDL_VERSIONNUM(1, 2, 8))
         {
             setpanning_workaround = true;
-            fprintf(statsfile, "\n"
+            C_Printf("\n"
               "ATTENTION: You are using an old version of SDL_mixer!\n"
               "           This version has a bug that may cause "
                           "your sound to stutter.\n"

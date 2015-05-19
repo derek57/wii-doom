@@ -15,9 +15,11 @@
 //      Loopback network module for server compiled into the client
 //
 
+
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "doomfeatures.h"
 #include "doomtype.h"
 #include "i_system.h"
 #include "m_misc.h"
@@ -25,7 +27,6 @@
 #include "net_loop.h"
 #include "net_packet.h"
 
-#include "doomfeatures.h"
 
 #define MAX_QUEUE_SIZE 16
 

@@ -61,7 +61,7 @@ typedef enum
     GS_INTERMISSION,
     GS_FINALE,
     GS_DEMOSCREEN,
-    GS_CONSOLE		// fullscreen console
+    GS_CONSOLE                // fullscreen console
 } gamestate_t;
 
 typedef enum
@@ -83,12 +83,12 @@ typedef enum
 //
 
 // Skill flags.
-#define	MTF_EASY		1
-#define	MTF_NORMAL		2
-#define	MTF_HARD		4
+#define        MTF_EASY                1
+#define        MTF_NORMAL                2
+#define        MTF_HARD                4
 
 // Deaf monsters/do not react to sound.
-#define	MTF_AMBUSH		8
+#define        MTF_AMBUSH                8
 
 
 //
@@ -135,12 +135,12 @@ typedef enum
 // Ammunition types defined.
 typedef enum
 {
-    am_clip,	// Pistol / chaingun ammo.
-    am_shell,	// Shotgun / double barreled shotgun.
-    am_cell,	// Plasma rifle, BFG.
-    am_misl,	// Missile launcher.
+    am_clip,        // Pistol / chaingun ammo.
+    am_shell,        // Shotgun / double barreled shotgun.
+    am_cell,        // Plasma rifle, BFG.
+    am_misl,        // Missile launcher.
     NUMAMMO,
-    am_noammo	// Unlimited for chainsaw / fist.	
+    am_noammo        // Unlimited for chainsaw / fist.        
 
 } ammotype_t;
 
@@ -167,14 +167,14 @@ typedef enum
 //
 typedef enum
 {
-    INVULNTICS	= (30*TICRATE),
-    INVISTICS	= (60*TICRATE),
-    INFRATICS	= (120*TICRATE),
-    IRONTICS	= (60*TICRATE)
+    INVULNTICS        = (30*TICRATE),
+    INVISTICS        = (60*TICRATE),
+    INFRATICS        = (120*TICRATE),
+    IRONTICS        = (60*TICRATE)
     
 } powerduration_t;
 
-#define MAXPATH		0x108
+#define MAXPATH                0x108
 
 #define SavePathRoot1USB "usb:/apps/wiidoom/savegames"
 #define SavePathRoot2USB "usb:/apps/wiidoom/savegames/doom.wad"
@@ -330,13 +330,33 @@ typedef enum
 
 #define DATE_AS_INT (((YEAR - 2000) * 12 + MONTH) * 31 + DAY)
 
-#define	NUMKEYS		256
+#define        NUMKEYS                256
 
 #define M_ZOOMIN        ((int) (1.02*FRACUNIT))
 
 #define M_ZOOMOUT       ((int) (FRACUNIT/1.02))
 
-#define AFLAG_JUMP			0x80
+#define AFLAG_JUMP                        0x80
+
+// status bar height at bottom of screen
+//#define SBARHEIGHT                32                        // CHANGED FOR HIRES
+//#define SBARHEIGHT                (32 << hires)                // CHANGED FOR HIRES
+
+#define SCREENSCALE     2
+
+#define ORIGWIDTH  320
+#define ORIGHEIGHT 200
+
+#define SCREENWIDTH     (ORIGWIDTH * SCREENSCALE)
+#define SCREENHEIGHT    (ORIGHEIGHT * SCREENSCALE)
+
+#define SBARHEIGHT      (32 * SCREENSCALE)
+
+#define MF2_LOGRAV                0x00000001  // alternate gravity setting
+#define MF2_FOOTCLIP                0x00000020  // if feet are allowed to be clipped
+#define MF2_NOTELEPORT                0x00000080  // does not teleport
+#define MF2_CANNOTPUSH                0x00002000  // cannot push other pushable mobjs
+#define MF2_FEETARECLIPPED        0x00004000  // a mobj's feet are now being cut
 
 extern boolean sd;
 extern boolean usb;
@@ -387,66 +407,66 @@ typedef struct
 typedef struct
 {
     // 0 = no cursor here, 1 = ok, 2 = arrows ok
-    short	status;
+    short        status;
     
-    char	name[10];
+    char        name[10];
     
     // choice = menu item #.
     // if status = 2,
     //   choice=0:leftarrow,1:rightarrow
-    void	(*routine)(int choice);
+    void        (*routine)(int choice);
     
     // hotkey in menu
-    char	alphaKey;			
+    char        alphaKey;                        
 } menuitem_t;
 
 typedef struct menu_s
 {
-    short		numitems;	// # of menu items
-    struct menu_s*	prevMenu;	// previous menu
-    menuitem_t*		menuitems;	// menu items
-    void		(*routine)();	// draw routine
-    short		x;
-    short		y;		// x,y of menu
-    short		lastOn;		// last item user was on in menu
+    short                numitems;        // # of menu items
+    struct menu_s*        prevMenu;        // previous menu
+    menuitem_t*                menuitems;        // menu items
+    void                (*routine)();        // draw routine
+    short                x;
+    short                y;                // x,y of menu
+    short                lastOn;                // last item user was on in menu
 } menu_t;
 
-extern boolean		dont_move_backwards;
+extern boolean                dont_move_backwards;
 
-extern int		fsize;
-extern int		fsizerw;
-extern int		fsizecq;
-extern int		is_chex_2;
-extern int		show_deh_loading_message;
-extern int		followplayer;
-extern int		drawgrid;
-extern int		extra_wad_loaded;
-extern int		load_extra_wad;
-extern int		load_dehacked;
-extern int		use_vanilla_weapon_change;
+extern int                fsize;
+extern int                fsizerw;
+extern int                fsizecq;
+extern int                is_chex_2;
+extern int                show_deh_loading_message;
+extern int                followplayer;
+extern int                drawgrid;
+extern int                extra_wad_loaded;
+extern int                load_extra_wad;
+extern int                load_dehacked;
+extern int                use_vanilla_weapon_change;
 
-char			extra_wad_1[256];
-char			extra_wad_2[256];
-char			extra_wad_3[256];
-char			dehacked_file[256];
-char			target[MAXPATH];
-char			path_tmp[MAXPATH];
-char			temp[MAXPATH];
+char                        extra_wad_1[256];
+char                        extra_wad_2[256];
+char                        extra_wad_3[256];
+char                        dehacked_file[256];
+char                        target[MAXPATH];
+char                        path_tmp[MAXPATH];
+char                        temp[MAXPATH];
 
-int			detailLevel;
-int			extra_wad_slot_1_loaded;
-int			extra_wad_slot_2_loaded;
-int			extra_wad_slot_3_loaded;
+int                        detailLevel;
+int                        extra_wad_slot_1_loaded;
+int                        extra_wad_slot_2_loaded;
+int                        extra_wad_slot_3_loaded;
 
-boolean			jumping;
-boolean			dont_move_forwards;
-boolean			error_detected;
-boolean			print_resource_pwad_error;
-boolean			display_ticker;
-boolean			gamekeydown[NUMKEYS]; 
-boolean			am_rotate;
+boolean                        jumping;
+boolean                        dont_move_forwards;
+boolean                        error_detected;
+boolean                        print_resource_pwad_error;
+boolean                        display_ticker;
+boolean                        gamekeydown[NUMKEYS]; 
+boolean                        am_rotate;
 
-FILE			*debugfile;
-FILE			*statsfile;
+FILE                        *debugfile;
+FILE                        *statsfile;
 
 #endif          // __DOOMDEF__

@@ -21,54 +21,55 @@
 // 02111-1307, USA.
 //
 // DESCRIPTION:
-//	Gamma correction LUT stuff.
-//	Functions to draw patches (by post) directly to screen.
-//	Functions to blit a block to the screen.
+//        Gamma correction LUT stuff.
+//        Functions to draw patches (by post) directly to screen.
+//        Functions to blit a block to the screen.
 //
 //-----------------------------------------------------------------------------
 
+
+#include <math.h>
 #include <stdio.h>
 #include <string.h>
-#include <math.h>
-
-#include "i_system.h"
-
-#include "doomtype.h"
 
 #include "deh_str.h"
+#include "doomdef.h"
+#include "doomtype.h"
 #include "i_swap.h"
+#include "i_system.h"
 #include "i_video.h"
 #include "m_bbox.h"
 #include "m_misc.h"
+#include "v_misc.h"
 #include "v_video.h"
 #include "w_wad.h"
 #include "z_zone.h"
 
-#include "v_misc.h"
 
 // TODO: There are separate RANGECHECK defines for different games, but this
 // is common code. Fix this.
 #define RANGECHECK
 
-static patch_t* v_font[V_FONTSIZE];
 
-// Blending table used for fuzzpatch, etc.
-// Only used in Heretic/Hexen
-
-byte *tinttable = NULL;
-
-// villsa [STRIFE] Blending table used for Strife
-byte *xlatab = NULL;
+static  patch_t*             v_font[V_FONTSIZE];
 
 // The screen buffer that the v_video.c code draws to.
-
-static byte *dest_screen = NULL;
-
-int dirtybox[4]; 
+static  byte                 *dest_screen = NULL;
 
 // haleyjd 08/28/10: clipping callback function for patches.
 // This is needed for Chocolate Strife, which clips patches to the screen.
-static vpatchclipfunc_t patchclip_callback = NULL;
+static  vpatchclipfunc_t     patchclip_callback = NULL;
+
+// Blending table used for fuzzpatch, etc.
+// Only used in Heretic/Hexen
+byte    *tinttable = NULL;
+
+// villsa [STRIFE] Blending table used for Strife
+byte    *xlatab = NULL;
+
+int     dirtybox[4]; 
+
+int     italicize[15] = { 0, 2, 2, 2, 1, 1, 1, 1, 0, 0, 0, 0, -1, -1, -1 };
 
 //
 // V_MarkRect 
@@ -169,8 +170,8 @@ void V_DrawPatch(int x, int y, patch_t *patch)
         if(!patchclip_callback(patch, x, y))
             return;
     }
-/*
-#ifdef RANGECHECK
+
+#ifdef RANGECHECK    // FIXME: DO WE NEED TO DISABLE THIS ONE FOR THE WII PORT ?!
     if (x < 0
      || x + SHORT(patch->width) > ORIGWIDTH
      || y < 0
@@ -179,7 +180,7 @@ void V_DrawPatch(int x, int y, patch_t *patch)
         I_Error("Bad V_DrawPatch");
     }
 #endif
-*/
+
     V_MarkRect(x, y, SHORT(patch->width), SHORT(patch->height));
 
     col = 0;
@@ -194,23 +195,24 @@ void V_DrawPatch(int x, int y, patch_t *patch)
         // step through the posts in a column
         while (column->topdelta != 0xff)
         {
-          for (f = 0; f <= hires; f++)
-          {
-            source = (byte *)column + 3;
-            dest = desttop + column->topdelta*(SCREENWIDTH << hires) + (x * hires) + f;
-            count = column->length;
-
-            while (count--)
+            for (f = 0; f <= hires; f++)
             {
-                if (hires)
+                source = (byte *)column + 3;
+                dest = desttop + column->topdelta*(SCREENWIDTH << hires) +
+                       (x * hires) + f;
+                count = column->length;
+
+                while (count--)
                 {
-                    *dest = *source;
+                    if (hires)
+                    {
+                        *dest = *source;
+                        dest += SCREENWIDTH;
+                    }
+                    *dest = *source++;
                     dest += SCREENWIDTH;
                 }
-                *dest = *source++;
-                dest += SCREENWIDTH;
             }
-          }
             column = (column_t *)((byte *)column + column->length + 4);
         }
     }
@@ -266,23 +268,24 @@ void V_DrawPatchFlipped(int x, int y, patch_t *patch)
         // step through the posts in a column
         while (column->topdelta != 0xff )
         {
-          for (f = 0; f <= hires; f++)
-          {
-            source = (byte *)column + 3;
-            dest = desttop + column->topdelta*(SCREENWIDTH << hires) + (x * hires) + f;
-            count = column->length;
-
-            while (count--)
+            for (f = 0; f <= hires; f++)
             {
-                if (hires)
+                source = (byte *)column + 3;
+                dest = desttop + column->topdelta*(SCREENWIDTH << hires) +
+                       (x * hires) + f;
+                count = column->length;
+
+                while (count--)
                 {
-                    *dest = *source;
+                    if (hires)
+                    {
+                        *dest = *source;
+                        dest += SCREENWIDTH;
+                    }
+                    *dest = *source++;
                     dest += SCREENWIDTH;
                 }
-                *dest = *source++;
-                dest += SCREENWIDTH;
             }
-          }
             column = (column_t *)((byte *)column + column->length + 4);
         }
     }
@@ -336,23 +339,24 @@ void V_DrawTLPatch(int x, int y, patch_t * patch)
 
         while (column->topdelta != 0xff)
         {
-          for (f = 0; f <= hires; f++)
-          {
-            source = (byte *) column + 3;
-            dest = desttop + column->topdelta * (SCREENWIDTH << hires) + (x * hires) + f;
-            count = column->length;
-
-            while (count--)
+            for (f = 0; f <= hires; f++)
             {
-                if (hires)
+                source = (byte *) column + 3;
+                dest = desttop + column->topdelta * (SCREENWIDTH << hires) +
+                       (x * hires) + f;
+                count = column->length;
+
+                while (count--)
                 {
-                    *dest = tinttable[((*dest) << 8) + *source];
+                    if (hires)
+                    {
+                        *dest = tinttable[((*dest) << 8) + *source];
+                        dest += SCREENWIDTH;
+                    }
+                    *dest = tinttable[((*dest) << 8) + *source++];
                     dest += SCREENWIDTH;
                 }
-                *dest = tinttable[((*dest) << 8) + *source++];
-                dest += SCREENWIDTH;
             }
-          }
             column = (column_t *) ((byte *) column + column->length + 4);
         }
     }
@@ -392,24 +396,25 @@ void V_DrawXlaPatch(int x, int y, patch_t * patch)
 
         while(column->topdelta != 0xff)
         {
-          for (f = 0; f <= hires; f++)
-          {
-            source = (byte *) column + 3;
-            dest = desttop + column->topdelta * (SCREENWIDTH << hires) + (x * hires) + f;
-            count = column->length;
-
-            while(count--)
+            for (f = 0; f <= hires; f++)
             {
-                if (hires)
+                source = (byte *) column + 3;
+                dest = desttop + column->topdelta * (SCREENWIDTH << hires) +
+                       (x * hires) + f;
+                count = column->length;
+
+                while(count--)
                 {
+                    if (hires)
+                    {
+                        *dest = xlatab[*dest + ((*source) << 8)];
+                        dest += SCREENWIDTH;
+                    }
                     *dest = xlatab[*dest + ((*source) << 8)];
+                    source++;
                     dest += SCREENWIDTH;
                 }
-                *dest = xlatab[*dest + ((*source) << 8)];
-                source++;
-                dest += SCREENWIDTH;
             }
-          }
             column = (column_t *) ((byte *) column + column->length + 4);
         }
     }
@@ -451,23 +456,24 @@ void V_DrawAltTLPatch(int x, int y, patch_t * patch)
 
         while (column->topdelta != 0xff)
         {
-          for (f = 0; f <= hires; f++)
-          {
-            source = (byte *) column + 3;
-            dest = desttop + column->topdelta * (SCREENWIDTH << hires) + (x * hires) + f;
-            count = column->length;
-
-            while (count--)
+            for (f = 0; f <= hires; f++)
             {
-                if (hires)
+                source = (byte *) column + 3;
+                dest = desttop + column->topdelta * (SCREENWIDTH << hires) +
+                       (x * hires) + f;
+                count = column->length;
+
+                while (count--)
                 {
-                    *dest = tinttable[((*dest) << 8) + *source];
+                    if (hires)
+                    {
+                        *dest = tinttable[((*dest) << 8) + *source];
+                        dest += SCREENWIDTH;
+                    }
+                    *dest = tinttable[((*dest) << 8) + *source++];
                     dest += SCREENWIDTH;
                 }
-                *dest = tinttable[((*dest) << 8) + *source++];
-                dest += SCREENWIDTH;
             }
-          }
             column = (column_t *) ((byte *) column + column->length + 4);
         }
     }
@@ -511,29 +517,30 @@ void V_DrawShadowedPatch(int x, int y, patch_t *patch)
 
         while (column->topdelta != 0xff)
         {
-          for (f = 0; f <= hires; f++)
-          {
-            source = (byte *) column + 3;
-            dest = desttop + column->topdelta * (SCREENWIDTH << hires) + (x * hires) + f;
-            dest2 = desttop2 + column->topdelta * (SCREENWIDTH << hires) + (x * hires) + f;
-            count = column->length;
-
-            while (count--)
+            for (f = 0; f <= hires; f++)
             {
-                if (hires)
+                source = (byte *) column + 3;
+                dest = desttop + column->topdelta * (SCREENWIDTH << hires) +
+                       (x * hires) + f;
+                dest2 = desttop2 + column->topdelta * (SCREENWIDTH << hires) +
+                       (x * hires) + f;
+                count = column->length;
+
+                while (count--)
                 {
+                    if (hires)
+                    {
+                        *dest2 = tinttable[((*dest2) << 8)];
+                        dest2 += SCREENWIDTH;
+                        *dest = *source;
+                        dest += SCREENWIDTH;
+                    }
                     *dest2 = tinttable[((*dest2) << 8)];
                     dest2 += SCREENWIDTH;
-                    *dest = *source;
+                    *dest = *source++;
                     dest += SCREENWIDTH;
                 }
-                *dest2 = tinttable[((*dest2) << 8)];
-                dest2 += SCREENWIDTH;
-                *dest = *source++;
-                dest += SCREENWIDTH;
-
             }
-          }
             column = (column_t *) ((byte *) column + column->length + 4);
         }
     }
@@ -574,7 +581,7 @@ void V_DrawBlock(int x, int y, int width, int height, byte *src)
      || y < 0
      || y + height > SCREENHEIGHT)
     {
-	I_Error ("Bad V_DrawBlock");
+        I_Error ("Bad V_DrawBlock");
     }
 #endif 
  
@@ -584,9 +591,9 @@ void V_DrawBlock(int x, int y, int width, int height, byte *src)
 
     while (height--) 
     { 
-	memcpy (dest, src, width); 
-	src += width; 
-	dest += SCREENWIDTH; 
+        memcpy (dest, src, width); 
+        src += width; 
+        dest += SCREENWIDTH; 
     } 
 } 
 
@@ -601,7 +608,7 @@ void V_DrawScaledBlock(int x, int y, int width, int height, byte *src)
      || y < 0
      || y + height > ORIGHEIGHT)
     {
-	I_Error ("Bad V_DrawScaledBlock");
+        I_Error ("Bad V_DrawScaledBlock");
     }
 #endif
 
@@ -613,7 +620,8 @@ void V_DrawScaledBlock(int x, int y, int width, int height, byte *src)
     {
         for (j = 0; j < (width << hires); j++)
         {
-            *(dest + i * SCREENWIDTH + j) = *(src + (i >> hires) * width + (j >> hires));
+            *(dest + i * SCREENWIDTH + j) = *(src + (i >> hires) * width +
+                                            (j >> hires));
         }
     }
 }
@@ -696,7 +704,9 @@ void V_CopyScaledBuffer(byte *dest, byte *src, size_t size)
         {
             for (j = 0; j <= hires; j++)
             {
-                *(dest + (size << hires) + (hires * (int) (size / ORIGWIDTH) + i) * SCREENWIDTH + j) = *(src + size);
+                *(dest + (size << hires) + (hires *
+                (int) (size / ORIGWIDTH) + i) * SCREENWIDTH + j) =
+                *(src + size);
             }
         }
     }
@@ -706,6 +716,7 @@ void V_DrawRawScreen(byte *raw)
 {
     V_CopyScaledBuffer(dest_screen, raw, ORIGWIDTH * ORIGHEIGHT);
 }
+
 //
 // V_Init
 // 
@@ -730,216 +741,6 @@ void V_RestoreBuffer(void)
     dest_screen = I_VideoBuffer;
 }
 
-//
-// SCREEN SHOTS
-//
-
-typedef struct
-{
-    char		manufacturer;
-    char		version;
-    char		encoding;
-    char		bits_per_pixel;
-
-    unsigned short	xmin;
-    unsigned short	ymin;
-    unsigned short	xmax;
-    unsigned short	ymax;
-    
-    unsigned short	hres;
-    unsigned short	vres;
-
-    unsigned char	palette[48];
-    
-    char		reserved;
-    char		color_planes;
-    unsigned short	bytes_per_line;
-    unsigned short	palette_type;
-    
-    char		filler[58];
-    unsigned char	data;		// unbounded
-} PACKEDATTR pcx_t;
-
-
-//
-// WritePCXfile
-//
-
-void WritePCXfile(char *filename, byte *data,
-                  int width, int height,
-                  byte *palette)
-{
-    int		i;
-    int		length;
-    pcx_t*	pcx;
-    byte*	pack;
-	
-    pcx = Z_Malloc (width*height*2+1000, PU_STATIC, NULL);
-
-    pcx->manufacturer = 0x0a;		// PCX id
-    pcx->version = 5;			// 256 color
-    pcx->encoding = 1;			// uncompressed
-    pcx->bits_per_pixel = 8;		// 256 color
-    pcx->xmin = 0;
-    pcx->ymin = 0;
-    pcx->xmax = SHORT(width-1);
-    pcx->ymax = SHORT(height-1);
-    pcx->hres = SHORT(width);
-    pcx->vres = SHORT(height);
-    memset (pcx->palette,0,sizeof(pcx->palette));
-    pcx->color_planes = 1;		// chunky image
-    pcx->bytes_per_line = SHORT(width);
-    pcx->palette_type = SHORT(2);	// not a grey scale
-    memset (pcx->filler,0,sizeof(pcx->filler));
-
-    // pack the image
-    pack = &pcx->data;
-	
-    for (i=0 ; i<width*height ; i++)
-    {
-	if ( (*data & 0xc0) != 0xc0)
-	    *pack++ = *data++;
-	else
-	{
-	    *pack++ = 0xc1;
-	    *pack++ = *data++;
-	}
-    }
-    
-    // write the palette
-    *pack++ = 0x0c;	// palette ID byte
-    for (i=0 ; i<768 ; i++)
-	*pack++ = *palette++;
-    
-    // write output file
-    length = pack - (byte *)pcx;
-    M_WriteFile (filename, pcx, length);
-
-    Z_Free (pcx);
-}
-
-//
-// V_ScreenShot
-//
-
-void V_ScreenShot(char *format)
-{
-    int i;
-    char lbmname[16]; // haleyjd 20110213: BUG FIX - 12 is too small!
-    
-    // find a file name to save it to
-
-    for (i=0; i<=99; i++)
-    {
-        sprintf(lbmname, format, i);
-
-        if (!M_FileExists(lbmname))
-        {
-            break;      // file doesn't exist
-        }
-    }
-
-    if (i == 100)
-    {
-        I_Error ("V_ScreenShot: Couldn't create a PCX");
-    }
-
-    // save the pcx file
-    WritePCXfile(lbmname, I_VideoBuffer,
-                 SCREENWIDTH, SCREENHEIGHT,
-                 W_CacheLumpName (DEH_String("PLAYPAL"), PU_CACHE));
-}
-
-#define MOUSE_SPEED_BOX_WIDTH  120
-#define MOUSE_SPEED_BOX_HEIGHT 9
-
-void V_DrawMouseSpeedBox(int speed)
-{
-    extern int usemouse;
-    int bgcolor, bordercolor, red, black, white, yellow;
-    int box_x, box_y;
-    int original_speed;
-    int redline_x;
-    int linelen;
-
-    // Get palette indices for colors for widget. These depend on the
-    // palette of the game being played.
-
-    bgcolor = I_GetPaletteIndex(0x77, 0x77, 0x77);
-    bordercolor = I_GetPaletteIndex(0x55, 0x55, 0x55);
-    red = I_GetPaletteIndex(0xff, 0x00, 0x00);
-    black = I_GetPaletteIndex(0x00, 0x00, 0x00);
-    yellow = I_GetPaletteIndex(0xff, 0xff, 0x00);
-    white = I_GetPaletteIndex(0xff, 0xff, 0xff);
-
-    // If the mouse is turned off or acceleration is turned off, don't
-    // draw the box at all.
-
-    if (!usemouse || fabs(mouse_acceleration - 1) < 0.01)
-    {
-        return;
-    }
-
-    // Calculate box position
-
-    box_x = SCREENWIDTH - MOUSE_SPEED_BOX_WIDTH - 10;
-    box_y = 15;
-
-    V_DrawFilledBox(box_x, box_y,
-                    MOUSE_SPEED_BOX_WIDTH, MOUSE_SPEED_BOX_HEIGHT, bgcolor);
-    V_DrawBox(box_x, box_y,
-              MOUSE_SPEED_BOX_WIDTH, MOUSE_SPEED_BOX_HEIGHT, bordercolor);
-
-    // Calculate the position of the red line.  This is 1/3 of the way
-    // along the box.
-
-    redline_x = MOUSE_SPEED_BOX_WIDTH / 3;
-
-    // Undo acceleration and get back the original mouse speed
-
-    if (speed < mouse_threshold)
-    {
-        original_speed = speed;
-    }
-    else
-    {
-        original_speed = speed - mouse_threshold;
-        original_speed = (int) (original_speed / mouse_acceleration);
-        original_speed += mouse_threshold;
-    }
-
-    // Calculate line length
-
-    linelen = (original_speed * redline_x) / mouse_threshold;
-
-    // Draw horizontal "thermometer" 
-
-    if (linelen > MOUSE_SPEED_BOX_WIDTH - 1)
-    {
-        linelen = MOUSE_SPEED_BOX_WIDTH - 1;
-    }
-
-    V_DrawHorizLine(box_x + 1, box_y + 4, MOUSE_SPEED_BOX_WIDTH - 2, black);
-
-    if (linelen < redline_x)
-    {
-        V_DrawHorizLine(box_x + 1, box_y + MOUSE_SPEED_BOX_HEIGHT / 2,
-                      linelen, white);
-    }
-    else
-    {
-        V_DrawHorizLine(box_x + 1, box_y + MOUSE_SPEED_BOX_HEIGHT / 2,
-                        redline_x, white);
-        V_DrawHorizLine(box_x + redline_x, box_y + MOUSE_SPEED_BOX_HEIGHT / 2,
-                        linelen - redline_x, yellow);
-    }
-
-    // Draw red line
-
-    V_DrawVertLine(box_x + redline_x, box_y + 1,
-                 MOUSE_SPEED_BOX_HEIGHT - 2, red);
-}
-
 // isprint() function (win32 doesnt like it, seems)
 
 #pragma GCC diagnostic push
@@ -950,25 +751,17 @@ boolean V_IsPrint(char c)
     // new colour
     if (c >= 128)
     {
-/*
-	// translucent toggle
-	if(c == *(unsigned char *)FC_TRANS)
-	    return true;
-	else
-*/
-	{
-	    int colnum = c - 128;
+        int colnum = c - 128;
 
-	    if(colnum < 0 || colnum >= 10)
-		return false;
-	    else
-		return true;
-	}
+        if(colnum < 0 || colnum >= 10)
+            return false;
+        else
+            return true;
     }
 
     // hack to make spacebar work
     if(c == ' ')
-	return true;
+        return true;
   
     c = toupper(c) - V_FONTSTART;
 
@@ -978,5 +771,60 @@ boolean V_IsPrint(char c)
     }
   
     return v_font[c] != NULL;
+}
+
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-value"
+
+void V_DrawConsoleChar(int x,
+                       int y,
+                       patch_t *patch,
+                       byte color,
+                       boolean italics
+                       /*, int translucency*/)
+{
+    int         col = 0;
+    byte        *desttop = dest_screen + (y << hires) * SCREENWIDTH + x;
+    int         w = SHORT(patch->width);
+
+    for (; col < w; col++, desttop++)
+    {
+        column_t        *column = (column_t *)((byte *)patch +
+                                  LONG(patch->columnofs[col]));
+
+        // step through the posts in a column
+        while (column->topdelta != 0xff)
+        {
+            byte        *source = (byte *)column + 3;
+            byte        *dest = desttop + column->topdelta * SCREENWIDTH;
+            int         count = column->length;
+
+            while (count--)
+            {
+                if (y + column->topdelta + column->length - count > 0)
+                {
+                    if (*source == 160)
+                    {
+                        if (italics)
+                            *(dest + italicize[column->topdelta +
+                                    column->length - count]) = color;
+                        else if(!italics)
+                            *dest = color;
+/*
+                        else
+                            *dest = (translucency == 1 ?
+                                    tinttab25[(color << 8) + *dest] :
+                                    (translucency == 2 ?
+                                    tinttab25[(*dest << 8) + color] : color));
+*/
+                    }
+                    *(source++);
+                }
+                dest += SCREENWIDTH;
+            }
+            column = (column_t *)((byte *)column + column->length + 4);
+        }
+    }
 }
 

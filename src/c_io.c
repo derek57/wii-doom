@@ -37,287 +37,332 @@
  */
 
 
-#define _GNU_SOURCE
-
-
+#include <SDL/SDL.h>
+#include <SDL/SDL_mixer.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
 
-//#include "psnprntf.h"
-
 #include "c_io.h"
-//#include "c_runcmd.h"
-//#include "c_net.h"
-
 #include "d_event.h"
 #include "d_main.h"
+#include "deh_str.h"
 #include "doomdef.h"
+#include "doomstat.h"
 #include "g_game.h"
-/*
-#include "g_bind.h"
-#include "g_bindaxes.h"
-*/
 #include "hu_stuff.h"
 #include "i_system.h"
 #include "i_video.h"
-#include "v_video.h"
-#include "doomstat.h"
-#include "w_wad.h"
+#include "i_swap.h"
+#include "m_menu.h"
+#include "m_misc.h"
 #include "s_sound.h"
 #include "sounds.h"
-
-#include "m_menu.h"
 #include "v_misc.h"
+#include "v_video.h"
+#include "w_wad.h"
 #include "z_zone.h"
 
 #include <wiiuse/wpad.h>
 
 
-#define MESSAGES 384
+// default value for out of range colors
+#define CR_RED                  6
+
+#define CONSOLEFONTSTART        ' '
+#define CONSOLEFONTEND          '~'
+#define CONSOLEFONTSIZE         (CONSOLEFONTEND - CONSOLEFONTSTART + 1)
+
+#define CONSOLETEXTX            10
+
+#define CONSOLESCROLLBARWIDTH   3
+
+#define ITALICS                 '~'
+
+#define MESSAGES                384
+
+#define MAX_MYCHARSPERLINE      100
 
 // keep the last 32 typed commands
-#define HISTORY 32
+#define HISTORY                 32
 
-// default value for out of range colors
-#define CR_RED 6
+#define PACKAGE_NAMEANDVERSIONSTRING    "Wii-DOOM"
 
-
-extern char	*shiftxform;
-
-static char	*inputprompt = FC_HI " $" FC_NORMAL;
+static char        *inputprompt = " $" ;
 
 // left-most point you see of the command line
-static char	*input_point;
+static char        *input_point;
 
-static byte	*backdrop;
+static byte        *backdrop;
 
 // the messages (what you see in the console window)
-static char	messages[MESSAGES][LINELENGTH];
+static char        messages[MESSAGES][LINELENGTH];
 
-static char	inputtext[INPUTLENGTH];
-/*
-// the command history(what you type in)
-static char	history[HISTORY][LINELENGTH];
+static char        inputtext[INPUTLENGTH];
 
-static int	history_last = 0;
-static int	history_current = 0;
-*/
 // position in the history (last line in window)
-static int	message_pos = 0;
+static int        message_pos = 0;
 
 // the last message
-static int	message_last = 0;
+static int        message_last = 0;
 
-static int	backdrop_lumpnum = -1;
+static int        backdrop_lumpnum = -1;
 
 // for scrolling command line
-static int	pgup_down = 0;
-static int	pgdn_down = 0;
+static int        pgup_down = 0;
+static int        pgdn_down = 0;
 
-char		*lumpname;
+char              *lumpname;
 
 // the height of the console
-int		c_height = 100;		// 50 FOR STRIFE (100 FOR DOOM)
+int               c_height = 100;        // 50 FOR STRIFE (100 FOR DOOM)
 
 // pixels/tic it moves
-int		c_speed = 10;
+int               c_speed = 10;
 
-int		current_target = 0;
-int		current_height = 0;
-int		console_enabled = true;
+int               current_target = 0;
+int               current_height = 0;
+int               console_enabled = true;
 
-boolean		c_showprompt;
+boolean           c_showprompt;
 
-extern boolean	redrawsbar;
+patch_t*          c_font[CONSOLEFONTSIZE];
 
-/////////////////////////////////////////////////////////////////////////
+extern boolean    redrawsbar;
+
+extern char       *shiftxform;
+
+
+static struct
+{
+    char        char1;
+    char        char2;
+    int         adjust;
+} kern[] = {
+    { '\"', '+',  -1 }, { '\"', '.',  -1 }, { '\"', 'a',  -1 }, { '\"', 'c',  -1 },
+    { '\"', 'd',  -1 }, { '\"', 'e',  -1 }, { '\"', 'g',  -1 }, { '\"', 'j',  -2 },
+    { '\"', 'o',  -1 }, { '\"', 'q',  -1 }, { '\"', 's',  -1 }, { '\'', 'a',  -1 },
+    { '\'', 'c',  -1 }, { '\'', 'd',  -1 }, { '\'', 'e',  -1 }, { '\'', 'g',  -1 },
+    { '\'', 'j',  -2 }, { '\'', 'o',  -1 }, { '\"', 'q',  -1 }, { '\'', 's',  -1 },
+    { '.',  '\\', -1 }, { '.',  '7',  -1 }, { '/',  'o',  -1 }, { ':', '\\',  -1 },
+    { '_',  'f',  -1 }, { '0',  ',',  -1 }, { '0',  'j',  -2 }, { '1',  '\"', -1 },
+    { '1',  '\'', -1 }, { '1',  'j',  -2 }, { '2',  'j',  -2 }, { '3',  ',',  -1 },
+    { '3',  'j',  -2 }, { '4',  'j',  -2 }, { '5',  ',',  -1 }, { '5',  'j',  -2 },
+    { '6',  ',',  -1 }, { '6',  'j',  -2 }, { '7',  ',',  -2 }, { '7',  'j',  -2 },
+    { '8',  ',',  -1 }, { '8',  'j',  -2 }, { '9',  ',',  -1 }, { '9',  'j',  -2 },
+    { 'F',  '.',  -1 }, { 'F',  ',',  -1 }, { 'L',  '\\', -1 }, { 'L',  '\"', -1 },
+    { 'L',  '\'', -1 }, { 'P',  '.',  -1 }, { 'P',  ',',  -1 }, { 'T',  '.',  -1 },
+    { 'T',  ',',  -1 }, { 'V',  '.',  -1 }, { 'V',  ',',  -1 }, { 'Y',  '.',  -1 },
+    { 'Y',  ',',  -1 }, { 'a',  '\"', -1 }, { 'a',  '\'', -1 }, { 'a',  'j',  -2 },
+    { 'b',  ',',  -1 }, { 'b',  '\"', -1 }, { 'b',  '\\', -1 }, { 'b',  '\'', -1 },
+    { 'b',  'j',  -2 }, { 'c',  '\\', -1 }, { 'c',  ',',  -1 }, { 'c',  '\"', -1 },
+    { 'c',  '\'', -1 }, { 'c',  'j',  -2 }, { 'd',  'j',  -2 }, { 'e',  '\\', -1 },
+    { 'e',  ',',  -1 }, { 'e',  '\"', -1 }, { 'e',  '\'', -1 }, { 'e',  '_',  -1 },
+    { 'e',  'j',  -2 }, { 'f',  ',',  -2 }, { 'f',  '_',  -1 }, { 'f',  'j',  -2 },
+    { 'h',  '\\', -1 }, { 'h',  '\"', -1 }, { 'h',  '\'', -1 }, { 'h',  'j',  -2 },
+    { 'i',  'j',  -2 }, { 'k',  'j',  -2 }, { 'l',  'j',  -2 }, { 'm',  '\"', -1 },
+    { 'm',  '\\', -1 }, { 'm',  '\'', -1 }, { 'm',  'j',  -2 }, { 'n',  '\\', -1 },
+    { 'n',  '\"', -1 }, { 'n',  '\'', -1 }, { 'n',  'j',  -2 }, { 'o',  '\\', -1 },
+    { 'o',  ',',  -1 }, { 'o',  '\"', -1 }, { 'o',  '\'', -1 }, { 'o',  'j',  -2 },
+    { 'p',  '\\', -1 }, { 'p',  ',',  -1 }, { 'p',  '\"', -1 }, { 'p',  '\'', -1 },
+    { 'p',  'j',  -2 }, { 'r',  ' ',  -1 }, { 'r',  '\\', -1 }, { 'r',  '.',  -2 },
+    { 'r',  ',',  -2 }, { 'r',  '\"', -1 }, { 'r',  '\'', -1 }, { 'r',  '_',  -1 },
+    { 'r',  'a',  -1 }, { 'r',  'j',  -2 }, { 's',  ',',  -1 }, { 's',  'j',  -2 },
+    { 't',  'j',  -2 }, { 'u',  'j',  -2 }, { 'v',  ',',  -1 }, { 'v',  'j',  -2 },
+    { 'w',  'j',  -2 }, { 'x',  'j',  -2 }, { 'z',  'j',  -2 }, {  0 ,   0 ,   0 }
+};
+
+static int dayofweek(int day, int month, int year)
+{
+    int adjustment = (14 - month) / 12;
+    int m = month + 12 * adjustment - 2;
+    int y = year - adjustment;
+
+    return (day + (13 * m - 1) / 5 + y + y / 4 - y / 100 + y / 400) % 7;
+}
+
+void C_PrintCompileDate(void)
+{
+    int                 day, month, year, hour, minute;
+    static const char   *days[] =
+    {
+        "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
+    };
+    static const char   mths[] = "JanFebMarAprMayJunJulAugSepOctNovDec";
+    static const char   *months[] =
+    {
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+    };
+    static char         mth[4];
+
+    sscanf(__DATE__, "%3s %2d %4d", mth, &day, &year);
+    sscanf(__TIME__, "%2d:%2d:%*d", &hour, &minute);
+    month = (strstr(mths, mth) - mths) / 3;
+
+    C_Printf("");
+    C_Printf(" This %i-bit %s binary of %s was built on %s, %s %i, %i at %i:%02i%s\n",
+        (sizeof(intptr_t) == 4 ? 32 : 64),
+        "Linux",
+        PACKAGE_NAMEANDVERSIONSTRING, days[dayofweek(day, month + 1, year)], months[month], day,
+        year, (hour > 12 ? hour - 12 : hour), minute, (hour < 12 ? "am" : "pm"));
+}
+
+void C_PrintSDLVersions(void)
+{
+    C_Printf(" Using version %i.%i.%i of %s\n",
+        SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_PATCHLEVEL,
+#if defined(SDL20)
+        "SDL2.DLL"
+#else
+        "libSDL.a"
+#endif
+        );
+
+    C_Printf(" Using version %i.%i.%i of %s\n",
+        SDL_MIXER_MAJOR_VERSION, SDL_MIXER_MINOR_VERSION, SDL_MIXER_PATCHLEVEL,
+#if defined(SDL20)
+        "SDL2_MIXER.DLL"
+#else
+        "libSDL_mixer.a"
+#endif
+        );
+}
+
 //
 // Main Console functions
 //
 // ticker, responder, drawer, init etc.
 //
-
-
 void C_InitBackdrop(void)
-{
-//    TScreenVars oldscreen = { NULL, 0, 0 };
-  
+{  
     patch_t *patch;
-
-//    byte *oldscreen;
 
     switch(gamemode)
     {
     case retail:
     case registered:
-	lumpname = "PFUB1";
-	break;
+        lumpname = "PFUB1";
+        break;
 
     case shareware:
-	lumpname = "WIMAP0";
-	break;
+        lumpname = "WIMAP0";
+        break;
 
     case commercial:
-	lumpname = "INTERPIC";
-	break;
+        lumpname = "INTERPIC";
+        break;
 
     default:
-	lumpname = "TITLEPIC";
-	break;
+        lumpname = "TITLEPIC";
+        break;
     }
 
     // allow for custom console background graphic
     if(W_CheckNumForName("CONSOLE") >= 0)
-	lumpname = "CONSOLE";
+        lumpname = "CONSOLE";
 
     backdrop_lumpnum = W_GetNumForName(lumpname);
 
     if(backdrop)
-	Z_Free(backdrop);
+        Z_Free(backdrop);
 
     backdrop = Z_Malloc(SCREENWIDTH * SCREENHEIGHT, PU_STATIC, 0);
-
-    // hack to write to backdrop
-    // fill the oldscreen value with the current video buffer
-//    oldscreen = I_VideoBuffer;
 
     // draw the console background image to the newly allocated video buffer
     patch = W_CacheLumpName(lumpname, PU_CACHE);
 
     // fill the video buffer with the newly allocated screen
-//    I_VideoBuffer = (byte *)backdrop; 
     V_UseBuffer(backdrop);
 
     V_DrawPatch(0, 0, patch);
 
     // restore the backup up video buffer
-//    I_VideoBuffer = oldscreen;
     V_RestoreBuffer();
-
-//    V_CopyRect(0, 0, backdrop, 320, 100, 0, 0);
 }
 
-
-// input_point is the leftmost point of the inputtext which
-// we see. This function is called every time the inputtext
-// changes to decide where input_point should be.
-
-static void C_UpdateInputPoint(void)
-{
-    for(input_point = inputtext; M_StringWidth(input_point) > 320 - 20; input_point++);
-}
-
-
-// initialise the console
-
-void C_Init(void)
-{
-/*
-    // sf: stupid american spellings =)
-    C_NewAlias("color", "colour %opt");
-    C_NewAlias("centermsg", "centremsg %opt");
-
-    C_AddCommands();
-*/
-    C_UpdateInputPoint();
-/*
-    G_InitKeyBindings();
-    G_InitAxisBindings();
-*/
-}
-
-
+//
 // called every tic
-
+//
 void C_Ticker(void)
 {
     c_showprompt = true;
   
     if(gamestate != GS_CONSOLE)
     {
-	// specific to half-screen version only
-	if(current_height != current_target)
-	    redrawsbar = true;
+        // specific to half-screen version only
+        if(current_height != current_target)
+            redrawsbar = true;
 
-	// move the console toward its target
-	if(abs(current_height - current_target) >= c_speed)
-	    current_height += current_target < current_height ? -c_speed : c_speed;
-	else
-	    current_height = current_target;
+        // move the console toward its target
+        if(abs(current_height - current_target) >= c_speed)
+            current_height += current_target < current_height ? -c_speed : c_speed;
+        else
+            current_height = current_target;
     }
     else
     {
-	// console gamestate: no moving consoles!
-	current_target = current_height;
+        // console gamestate: no moving consoles!
+        current_target = current_height;
     }
 
     // no scrolling thru messages when fullscreen
-//  if(consoleactive)
-    {
-	// scroll based on keys down
-	message_pos += pgdn_down - pgup_down;
+    // scroll based on keys down
+    message_pos += pgdn_down - pgup_down;
       
-	// check we're in the area of valid messages        
-	if(message_pos < 0)
-	    message_pos = 0;
+    // check we're in the area of valid messages        
+    if(message_pos < 0)
+        message_pos = 0;
 
-	if(message_pos > message_last)
-            message_pos = message_last;
-    }
-/*
-    // run the delayed typed commands
-    C_RunBuffer(c_typed);
-    C_RunBuffer(c_menu);
-*/
+    if(message_pos > message_last)
+        message_pos = message_last;
 }
 
-/*
-static void C_AddToHistory(char *s)
-{
-    char *t;
-  
-    // display the command in console
-    C_Printf("%s%s\n", inputprompt, s);
-  
-    // check for nothing typed
-    t = s;
-
-    // or just spaces
-    while(*t == ' ')
-	t++;
-
-    if(!*t)
-	return; 
-  
-    // add it to the history
-    // 6/8/99 maximum linelength to prevent segfaults
-    // -3 for safety
-    M_StringCopy(history[history_last], s, LINELENGTH - 3);
-
-    history_last++;
-
-    // scroll the history if neccesary
-    while(history_last >= HISTORY)
-    {
-        int i;
-      
-        // haleyjd 03/02/02: this loop went one past the end of history
-        // and left possible garbage in the higher end of the array
-        for(i = 0; i < HISTORY - 1; i++)
-	    strcpy(history[i], history[i + 1]);
-
-        history[HISTORY - 1][0] = '\0';
-      
-        history_last--;
-    }
-
-    history_current = history_last;
-    history[history_last][0] = '\0';
-}
-*/
-
+//
 // respond to keyboard input/events
+//
+void C_DrawBackdrop()
+{
+    // re-init to the new screen size
+    C_InitBackdrop();
+
+    memcpy(I_VideoBuffer, backdrop +
+          (800 - (current_height * 4)) *
+           320, ((current_height * 4)) * 320);
+}
+
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wchar-subscripts"
+
+int C_StringWidth(char* string)
+{
+    size_t          i;
+    int             w = 0;
+    int             c;
+        
+    for (i = 0;i < strlen(string);i++)
+    {
+        c = toupper(string[i]) - CONSOLEFONTSTART;
+        if (c < 0 || c >= CONSOLEFONTSIZE)
+            w += 4;
+        else
+            w += SHORT (c_font[c]->width);
+    }
+
+    return w;
+}
+
+//
+// input_point is the leftmost point of the inputtext which
+// we see. This function is called every time the inputtext
+// changes to decide where input_point should be.
+//
+static void C_UpdateInputPoint(void)
+{
+    for(input_point = inputtext; C_StringWidth(input_point) > 320 - 20; input_point++);
+}
+
 
 int C_Responder(event_t* ev)
 {
@@ -326,65 +371,60 @@ int C_Responder(event_t* ev)
     boolean didsound = false;
 
     WPADData *data = WPAD_Data(0);
-/*  
-    if(ev->data1 == KEYD_RSHIFT)
-    {
-        shiftdown = ev->type == ev_keydown;
-        return consoleactive;   // eat if console active
-    }
-*/
+
     //Classic Controls
     if(data->exp.type == WPAD_EXP_CLASSIC)
     {
-	if(data->btns_d & WPAD_CLASSIC_BUTTON_UP)
-	{
-	    pgup_down = 1;
-	    pgdn_down = 0;
+        if(data->btns_d & WPAD_CLASSIC_BUTTON_UP)
+        {
+            pgup_down = 1;
+            pgdn_down = 0;
 
-	    return consoleactive;
-	}
-	else if(data->btns_d & WPAD_CLASSIC_BUTTON_DOWN)
-	{
-	    pgup_down = 0;
-	    pgdn_down = 1;
+            return consoleactive;
+        }
+        else if(data->btns_d & WPAD_CLASSIC_BUTTON_DOWN)
+        {
+            pgup_down = 0;
+            pgdn_down = 1;
 
-	    return consoleactive;
-	}
-	else if(data->btns_d & WPAD_CLASSIC_BUTTON_LEFT	  || data->btns_d & WPAD_CLASSIC_BUTTON_B    ||
-		data->btns_d & WPAD_CLASSIC_BUTTON_MINUS  || data->btns_d & WPAD_CLASSIC_BUTTON_HOME ||
-		data->btns_d & WPAD_CLASSIC_BUTTON_PLUS	  || data->btns_d & WPAD_CLASSIC_BUTTON_A    ||
-		data->btns_d & WPAD_CLASSIC_BUTTON_RIGHT  || data->btns_d & WPAD_CLASSIC_BUTTON_X    ||
-		data->btns_d & WPAD_CLASSIC_BUTTON_FULL_L || data->btns_d & WPAD_CLASSIC_BUTTON_Y    ||
-		data->btns_d & WPAD_CLASSIC_BUTTON_FULL_R || data->btns_d & WPAD_CLASSIC_BUTTON_ZL   ||
-		data->btns_d & WPAD_CLASSIC_BUTTON_ZR)
-	    return consoleactive;
+            return consoleactive;
+        }
+        else if(data->btns_d & WPAD_CLASSIC_BUTTON_LEFT   ||
+                data->btns_d & WPAD_CLASSIC_BUTTON_B      ||
+                data->btns_d & WPAD_CLASSIC_BUTTON_MINUS  ||
+                data->btns_d & WPAD_CLASSIC_BUTTON_HOME   ||
+                data->btns_d & WPAD_CLASSIC_BUTTON_PLUS   ||
+                data->btns_d & WPAD_CLASSIC_BUTTON_A      ||
+                data->btns_d & WPAD_CLASSIC_BUTTON_RIGHT  ||
+                data->btns_d & WPAD_CLASSIC_BUTTON_X      ||
+                data->btns_d & WPAD_CLASSIC_BUTTON_FULL_L ||
+                data->btns_d & WPAD_CLASSIC_BUTTON_Y      ||
+                data->btns_d & WPAD_CLASSIC_BUTTON_FULL_R ||
+                data->btns_d & WPAD_CLASSIC_BUTTON_ZL     ||
+                data->btns_d & WPAD_CLASSIC_BUTTON_ZR)
+            return consoleactive;
 
-	if(data->btns_u)
-	{
-	    pgdn_down = 0;
-	    pgup_down = 0;	
-	}
+        if(data->btns_u)
+        {
+            pgdn_down = 0;
+            pgup_down = 0;
+        }
     }  
 
     // only interested in keypresses
     if(!data->btns_d)
-	return false;
+        return false;
 
-    //////////////////////////////////
-    // Check for special keypresses
-    //
-    // detect activating of console etc.
-    //
-  
-    // activate console?
+    // Check for special keypresses and
+    // detect activation of console etc.  
     if(consoleactive && console_enabled)
     {
-	if(current_target > 0 && !didsound)
-	{
-	    didsound = true;
+        if(current_target > 0 && !didsound)
+        {
+            didsound = true;
 
-	    S_StartSound(NULL, sfx_dorcls);
-	}
+            S_StartSound(NULL, sfx_dorcls);
+        }
 
         // set console
         current_target = current_target == c_height ? 0 : c_height;
@@ -393,182 +433,190 @@ int C_Responder(event_t* ev)
     }
 
     if(!consoleactive)
-	return false;
+        return false;
 
     // not til its stopped moving
     if(current_target < current_height)
-	return false;
+        return false;
 
-    ///////////////////////////////////////
-    // Console active commands
-    //
-    // keypresses only dealt with if console active
-    //
-/*  
-    // tab-completion
-    if(ev->data1 == KEYD_TAB)
-    {
-        // set inputtext to next or previous in
-        // tab-completion list depending on whether
-        // shift is being held down
-        strcpy(inputtext, shiftdown ? C_NextTab(inputtext) :
-	     C_PrevTab(inputtext));
-      
-        C_UpdateInputPoint(); // reset scrolling
-        return true;
-    }
-  
-    // run command
-    if(ev->data1 == KEYD_ENTER)
-    {
-        C_AddToHistory(inputtext);      // add to history
-      
-        // run the command
-        cmdtype = c_typed;
-
-        C_RunTextCmd(inputtext);
-      
-        C_InitTab();            // reset tab completion
-      
-        inputtext[0] = 0;       // clear inputtext now
-
-        C_UpdateInputPoint();   // reset scrolling
-      
-        return true;
-    }
-
-    ////////////////////////////////
-    // Command history
-    //  
-
-    // previous command
-    if(data->exp.type == WPAD_EXP_CLASSIC)
-    {
-	if(data->btns_d & WPAD_CLASSIC_BUTTON_ZL)
-	{
-	    history_current =
-		(history_current <= 0) ? 0 : history_current - 1;
-      
-	    // read history from inputtext
-	    strcpy(inputtext, history[history_current]);
-      
-//	    C_InitTab();            // reset tab completion
-	    C_UpdateInputPoint();   // reset scrolling
-
-	    return true;
-	}
-  
-	// next command
-	if(data->btns_d & WPAD_CLASSIC_BUTTON_ZR)
-	{
-	    history_current = (history_current >= history_last)
-	        ? history_last : history_current + 1;
-
-	    // the last history is an empty string
-	    strcpy(inputtext, (history_current == history_last) ?
-	    	"" : (char *)history[history_current]);
-      
-//	    C_InitTab();            // reset tab-completion
-	    C_UpdateInputPoint();   // reset scrolling
-
-	    return true;
-	}
-    }
-
-    if(ev->data1 == KEYD_END)
-    {
-        message_pos = message_last;
-        return true;
-    }
-
-    /////////////////////////////////////////
-    // Normal Text Input
-    //
-  
-    // backspace  
-    if(ev->data1 == KEYD_BACKSPACE)
-    {
-        if(strlen(inputtext) > 0)
-	    inputtext[strlen(inputtext)-1] = '\0';
-      
-        C_InitTab();            // reset tab-completion
-        C_UpdateInputPoint();   // reset scrolling
-
-        return true;
-    }
-*/
-    // none of these, probably just a normal character
-
-    ch = shiftdown ? shiftxform[ev->data1] : ev->data1; // shifted?
+    // Normal Text Input:
+    // probably just a normal character
+    // (shifted)?
+    ch = shiftdown ? shiftxform[ev->data1] : ev->data1;
 
     // only care about valid characters
     // dont allow too many characters on one command line
-    // sf 19/6 V_IsPrint
-  
+    // sf 19/6 V_IsPrint  
     if(V_IsPrint(ch) && strlen(inputtext) < INPUTLENGTH - 3)
     {
-	sprintf(inputtext, "%s%c", inputtext, ch);
+        sprintf(inputtext, "%s%c", inputtext, ch);
       
-//      C_InitTab();            // reset tab-completion
-        C_UpdateInputPoint();   // reset scrolling
+        // reset scrolling
+        C_UpdateInputPoint();
 
         return true;
     }  
 
-    return false;   // dont care about this event
+    // dont care about this event
+    return false;
 }
 
-
-void C_DrawBackdrop()
+//
+// initialise the console
+//
+void C_Init(void)
 {
-/*
-    static int oldscreenheight = -1;
+    int         i;
+    int         j = CONSOLEFONTSTART;
+    char        buffer[9];
 
-    // Check for change in screen res
-    if(oldscreenheight != 100)
-*/
+    // load the heads-up font
+    j = CONSOLEFONTSTART;
+    for (i = 0; i < CONSOLEFONTSIZE; i++)
     {
-	// re-init to the new screen size
-        C_InitBackdrop();
+        if(j == 32)
+            j = 33;
 
-//        oldscreenheight = 100;
+        if(j < 127)
+        {
+            DEH_snprintf(buffer, 9, "DRFON%.3d", j++);
+            c_font[i] = W_CacheLumpName(buffer, PU_STATIC);
+        }
     }
-/*
-    memcpy(I_VideoBuffer,
-	backdrop + (200 - (current_height << hires)) * 320,
-	(200 + (current_height << hires)) * 320);
-*/
-    memcpy(I_VideoBuffer, backdrop + (800 - (current_height * 4)) * 320, ((current_height * 4)) * 320);
+
+    C_UpdateInputPoint();
 }
 
-// draw the console
+static void C_DrawText(int x, int y, char *text, byte color)
+{
+    boolean     italics = false;
 
+    size_t      i;
+    size_t      len = strlen(text);
+
+    char        prevletter = '\0';
+
+    patch_t     *lb = W_CacheLumpName("STCFN123", PU_STATIC);
+    patch_t     *mid = W_CacheLumpName("STCFN124", PU_STATIC);
+    patch_t     *rb = W_CacheLumpName("STCFN125", PU_STATIC);
+
+    patch_t     *lsquote = W_CacheLumpName("DRFON145", PU_STATIC);
+    patch_t     *ldquote = W_CacheLumpName("DRFON147", PU_STATIC);
+    patch_t     *degree = W_CacheLumpName("DRFON176", PU_STATIC);
+    patch_t     *multiply = W_CacheLumpName("DRFON215", PU_STATIC);
+    patch_t     *unknownchar = W_CacheLumpName("DRFON000", PU_STATIC);
+
+    while (C_StringWidth(text) > SCREENWIDTH - CONSOLETEXTX * 3 - CONSOLESCROLLBARWIDTH + 2)
+    {
+        text[len - 1] = '.';
+        text[len] = '.';
+        text[len + 1] = '.';
+        text[len + 2] = '\0';
+        --len;
+    }
+
+    for (i = 0; i < len; ++i)
+    {
+        char    letter = text[i];
+        int     c = letter - CONSOLEFONTSTART;
+        char    nextletter = text[i + 1];
+
+        if (letter == ITALICS && prevletter != ITALICS)
+        {
+            italics = !italics;
+            if (!italics)
+                ++x;
+        }
+        else
+        {
+            patch_t     *patch = NULL;
+
+            if (letter == ITALICS)
+                italics = false;
+
+            if((letter > 32 && letter < 127)    ||
+               (letter == 0    || letter == 145 || letter == 147 ||
+                letter == 215) || letter == ' ')
+            {
+                if(letter == ' ')
+                    x += 4;
+                else if(letter == '\t')
+                    x += 32;
+                else if(letter == '{')
+                {
+                    patch = lb;
+                    V_DrawPatch(x, y, patch);
+                }
+                else if(letter == '|')
+                {
+                    patch = mid;
+                    V_DrawPatch(x, y, patch);
+                }
+                else if(letter == '}')
+                {
+                    patch = rb;
+                    V_DrawPatch(x, y, patch);
+                }
+                else if(letter == '\xc2' && nextletter == '\xb0')
+                {
+                    patch = degree;
+                    ++i;
+                }
+                else
+                    patch = (c < 0 || c >= CONSOLEFONTSIZE ? unknownchar : c_font[c - 1]);
+            }
+
+            if (isdigit(prevletter) && letter == 'x' && isdigit(nextletter))
+                patch = multiply;
+            else if (prevletter == ' ' || prevletter == '\t' || !i)
+            {
+                if (letter == '\'')
+                    patch = lsquote;
+                else if (letter == '\"')
+                    patch = ldquote;
+            }
+
+            if (!italics)
+            {
+                int     k = 0;
+
+                while (kern[k].char1)
+                {
+                    if (prevletter == kern[k].char1 && letter == kern[k].char2)
+                    {
+                        x += kern[k].adjust;
+                        break;
+                    }
+                    ++k;
+                }
+            }
+
+            if (patch)
+            {
+                V_DrawConsoleChar(x, y, patch, color, italics);
+                x += SHORT(patch->width);
+            }
+        }
+        prevletter = letter;
+    }
+}
+
+//
+// draw the console
+//
 void C_Drawer(void)
 {
     int y;
     int count;
-//  static int oldscreenheight = 0;
   
     // dont draw if not active
     if(!consoleactive)
-	return;
+        return;
 
     // draw backdrop
     C_DrawBackdrop();
-/*
-    if (backdrop_lumpnum < 0)
-	C_InitBackdrop();
 
-    // fullscreen console for fullscreen mode
-    if (gamestate == GS_CONSOLE)
-	current_height = 200;
-
-    // draw backdrop
-    V_DrawPatch(0, current_height - 100, W_CacheLumpName(lumpname, PU_CACHE));
-*/  
-    //////////////////////////////////////////////////////////////////////
     // draw text messages
-  
     // offset starting point up by 8 if we are showing input prompt
     y = current_height - ((c_showprompt && message_pos == message_last) ? 8 : 0);
 
@@ -581,51 +629,47 @@ void C_Drawer(void)
         // back one line in the history
         y -= 8;
       
-	// end of message history?
+        // end of message history?
         if(--count < 0)
-	    break;
+            break;
 
-	// past top of screen?
+        // past top of screen?
         if(y < 0)
-	    break;
+            break;
       
         // draw this line
-//      V_WriteText(messages[count], 0, y);
-	M_WriteText(0, y, messages[count]);
+        C_DrawText(0, y, messages[count], 80);
     }
 
-    //////////////////////////////////
+    // draw branding
+    C_DrawText(SCREENWIDTH - C_StringWidth(PACKAGE_NAMEANDVERSIONSTRING) -
+        CONSOLETEXTX + 1, current_height - 8, PACKAGE_NAMEANDVERSIONSTRING, 100);
+
     // Draw input line
-    //
-  
     // input line on screen, not scrolled back in history?  
     if(current_height > 8 && c_showprompt && message_pos == message_last)
     {
-	char tempstr[LINELENGTH];
-	char *underline;
+        char tempstr[LINELENGTH];
+        char *underline;
 
-	if(leveltime & 16)
-	    underline = "_";
-	else
-	    underline = " ";
+        if(leveltime & 16)
+            underline = "_";
+        else
+            underline = " ";
       
-	// if we are scrolled back, dont draw the input line
-	if(message_pos == message_last)
-	    sprintf(tempstr, "%s%s%s", inputprompt, input_point, underline);
-/*
-	    psnprintf(tempstr, LINELENGTH, "%s%s_", inputprompt, input_point);
-      
-	V_WriteText(tempstr, 0, current_height - 8);
-*/
-	M_WriteText(0, current_height - 8, tempstr);
+        // if we are scrolled back, dont draw the input line
+        if(message_pos == message_last)
+            sprintf(tempstr, "%s%s%s", inputprompt, input_point, underline);
+
+        C_DrawText(0, current_height - 8, tempstr, 80);
     }
 }
 
-
+//
 // updates the screen without actually waiting for d_display
 // useful for functions that get input without using the gameloop
 // eg. serial code
-
+//
 void C_Update(void)
 {
     C_Drawer();
@@ -634,37 +678,33 @@ void C_Update(void)
 }
 
 
-/////////////////////////////////////////////////////////////////////////
 //
 // I/O Functions
 //
-
-
 // scroll console up
-
 static void C_ScrollUp(void)
 {
     if(message_last == message_pos)
-	message_pos++;
+        message_pos++;
 
     message_last++;
 
     // past the end of the string
     if(message_last >= MESSAGES)
     {
-	// cut off the oldest 128 messages
-	int i;
+        // cut off the oldest 128 messages
+        int i;
 
-	// haleyjd 03/02/02: fixed code that assumed MESSAGES == 256
-	for(i = 128; i < MESSAGES; i++)
-	    strcpy(messages[i - 128], messages[i]);
+        // haleyjd 03/02/02: fixed code that assumed MESSAGES == 256
+        for(i = 128; i < MESSAGES; i++)
+            strcpy(messages[i - 128], messages[i]);
 
-	// move the message boundary
-	message_last -= 128;
+        // move the message boundary
+        message_last -= 128;
 
-	// haleyjd 09/04/02: set message_pos to message_last
-	// to avoid problems with console flooding
-	message_pos = message_last;
+        // haleyjd 09/04/02: set message_pos to message_last
+        // to avoid problems with console flooding
+        message_pos = message_last;
     }
     // new line is empty
     messages[message_last][0] = '\0';
@@ -678,7 +718,6 @@ static void C_ScrollUp(void)
 // Add a message to the console.
 // Replaced C_AddChar.
 //
-
 static void C_AddMessage(char *s)
 {
     char *c;
@@ -686,10 +725,10 @@ static void C_AddMessage(char *s)
     char linecolor = CR_RED + FC_BASEVALUE;
 
     // haleyjd 09/04/02: set color to default at beginning
-    if(M_StringWidth(messages[message_last]) > SCREENWIDTH - 9 ||
+    if(C_StringWidth(messages[message_last]) > SCREENWIDTH - 9 ||
        strlen(messages[message_last]) >= LINELENGTH - 1)
     {
-	C_ScrollUp();
+        C_ScrollUp();
     }
 
     end = messages[message_last] + strlen(messages[message_last]);
@@ -698,59 +737,58 @@ static void C_AddMessage(char *s)
 
     for(c = (char *)s; *c; c++)
     {
-	// >= 128 for colours
-	if(*c == '\t' || (*c > 31 && *c < 127) || *c >= 128)
-	{
-	    if(*c >= 128)
-	        linecolor = *c;
+        // >= 128 for colours
+        if(*c == '\t' || (*c > 31 && *c < 127) || *c >= 128)
+        {
+            if(*c >= 128)
+                linecolor = *c;
 
-	    if(M_StringWidth(messages[message_last]) > SCREENWIDTH - 9 ||
-	        strlen(messages[message_last]) >= LINELENGTH - 1)
-	    {
-	        // might possibly over-run, go onto next line
-		C_ScrollUp();
+            if(C_StringWidth(messages[message_last]) > SCREENWIDTH - 9 ||
+                strlen(messages[message_last]) >= LINELENGTH - 1)
+            {
+                // might possibly over-run, go onto next line
+                C_ScrollUp();
 
-		end = messages[message_last] + strlen(messages[message_last]);
+                end = messages[message_last] + strlen(messages[message_last]);
 
-		// keep current color on next line
-		*end++ = linecolor;
-		*end = '\0';
-	    }
+                // keep current color on next line
+                *end++ = linecolor;
+                *end = '\0';
+            }
          
-	    end = messages[message_last] + strlen(messages[message_last]);
-	    *end++ = *c;
-	    *end = '\0';
-	}
+            end = messages[message_last] + strlen(messages[message_last]);
+            *end++ = *c;
+            *end = '\0';
+        }
 
-	// alert
-	if(*c == '\a')
-	{
-	    // 'tink'!
-	    S_StartSound(NULL, sfx_radio);
-	}
+        // alert
+        if(*c == '\a')
+        {
+            // 'tink'!
+            S_StartSound(NULL, sfx_radio);
+        }
 
-	if(*c == '\n')
-	{
-	    C_ScrollUp();
+        if(*c == '\n')
+        {
+            C_ScrollUp();
 
-	    end = messages[message_last] + strlen(messages[message_last]);
+            end = messages[message_last] + strlen(messages[message_last]);
 
-	    // keep current color on next line
-	    *end++ = linecolor;
-	    *end = '\0';
-	}
+            // keep current color on next line
+            *end++ = linecolor;
+            *end = '\0';
+        }
     }
 }
 
+//
 // haleyjd: this function attempts to break up formatted strings 
 // into segments no more than a gamemode-dependent number of 
 // characters long. It'll succeed as long as the string in question 
 // doesn't contain that number of consecutive characters without a 
 // space, tab, or line-break, so like, don't print stupidness 
 // like that. Its a console, not a hex editor...
-
-#define MAX_MYCHARSPERLINE 45
-
+//
 static void C_AdjustLineBreaks(char *str)
 {
     int i;
@@ -761,65 +799,64 @@ static void C_AdjustLineBreaks(char *str)
 
     for(i = 0; i < len; ++i)
     {
-	if(str[i] == ' ' || str[i] == '\t')
-	{
-	    if(firstspace == -1)
-		firstspace = i;
+        if(str[i] == ' ' || str[i] == '\t')
+        {
+            if(firstspace == -1)
+                firstspace = i;
 
-	    lastspace = i;
-	}
+            lastspace = i;
+        }
 
-	if(str[i] == '\n')
-	    count = lastspace = 0;
-	else
-	    count++;
+        if(str[i] == '\n')
+            count = lastspace = 0;
+        else
+            count++;
 
-	if(count == MAX_MYCHARSPERLINE)
-	{
-	    // 03/16/01: must add length since last space to new line
-	    count = i - (lastspace + 1);
+        if(count == MAX_MYCHARSPERLINE)
+        {
+            // 03/16/01: must add length since last space to new line
+            count = i - (lastspace + 1);
 
-	    // replace last space with \n
-	    // if no last space, we're screwed
-	    if(lastspace)
-	    {
-		if(lastspace == firstspace)
-		    firstspace = 0;
-		    str[lastspace] = '\n';
-		    lastspace = 0;
-	    }
-	}
+            // replace last space with \n
+            // if no last space, we're screwed
+            if(lastspace)
+            {
+                if(lastspace == firstspace)
+                    firstspace = 0;
+                    str[lastspace] = '\n';
+                    lastspace = 0;
+            }
+        }
     }
 
     if(firstspace)
     {      
-	// temporarily put a \0 in the first space
-	char temp = str[firstspace];
+        // temporarily put a \0 in the first space
+        char temp = str[firstspace];
 
-	str[firstspace] = '\0';
+        str[firstspace] = '\0';
 
-	// if the first segment of the string doesn't fit on the 
-	// current line, move the console up one line in advance
+        // if the first segment of the string doesn't fit on the 
+        // current line, move the console up one line in advance
 
-	if(M_StringWidth(str) + M_StringWidth(messages[message_last]) > SCREENWIDTH - 9
-	    || strlen(str) + strlen(messages[message_last]) >= LINELENGTH - 1)
-	{
-	    C_ScrollUp();
-	}
+        if(C_StringWidth(str) + C_StringWidth(messages[message_last]) > SCREENWIDTH - 9
+            || strlen(str) + strlen(messages[message_last]) >= LINELENGTH - 1)
+        {
+            C_ScrollUp();
+        }
 
-	// restore the string to normal
-	str[firstspace] = temp;
+        // restore the string to normal
+        str[firstspace] = temp;
     }
 }
 
-
-/* C_Printf -
- * write some text 'printf' style to the console
- * the main function for I/O
- * cph 2001/07/22 - remove arbitrary limit, use malloc'd buffer instead
- *  and make format string parameter const char*
- */
-
+//
+// C_Printf -
+// write some text 'printf' style to the console
+// the main function for I/O
+// cph 2001/07/22 - remove arbitrary limit, use malloc'd buffer instead
+//  and make format string parameter const char*
+//
 void C_Printf(char *s, ...)
 {
     va_list args;
@@ -828,21 +865,11 @@ void C_Printf(char *s, ...)
   
     // haleyjd: sanity check
     if(!s)
-	return;
+        return;
   
     // difficult to remove limit
     va_start(args, s);
-
-//#ifdef HAVE_VASPRINTF
     vasprintf(&t, s, args);
-
-//#else
-    // cph 2001/08/05 - since we use the libc vasprintf above, which uses the libc
-    // malloc, we must force the libc malloc(3) here and free(3) below
-//    t = (malloc)(2048);
-//    pvsnprintf(t, 2047, s, args);
-//#endif
-
     va_end(args);
 
     // haleyjd
@@ -853,63 +880,29 @@ void C_Printf(char *s, ...)
     (free)(t);
 }
 
-
-// write a line of text to the console
-// kind of redundant now, #defined as c_puts also
-
-void C_Puts(char *s)
-{
-    C_Printf("%s\n", s);
-}
-
-
-void C_Seperator()
-{
-    C_Puts(" {||||||||||||||||||||||||||||}\n");
-}
-
-
-///////////////////////////////////////////////////////////////////
 //
 // Console activation
 //
-
 // put smmu into console mode
-
-
+//
 void C_SetConsole(void)
 {
-/*
-    gamestate = GS_CONSOLE;
-    gameaction = ga_nothing;
-    current_height = 200;
-*/
     current_target = 100;
   
     C_Update();
-/*
-    // stop music if any
-    S_StopMusic();
-
-    // and sounds
-    S_StopSounds();
-
-    // stop demo playing
-    G_StopDemo();
-*/
 }
 
-
+//
 // make the console go up
-
+//
 void C_Popup(void)
 {
     current_target = 0;
 }
 
-
+//
 // make the console disappear
-
+//
 void C_InstaPopup(void)
 {
     current_target = current_height = 0;

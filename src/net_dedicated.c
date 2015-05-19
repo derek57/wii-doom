@@ -23,8 +23,6 @@
 #include "i_system.h"
 #include "i_timer.h"
 
-#include "m_argv.h"
-
 #include "net_defs.h"
 #include "net_sdl.h"
 #include "net_server.h"
@@ -38,42 +36,11 @@
 // specified to a dedicated server.
 //
 
-static char *not_dedicated_options[] = 
-{
-    "-deh", "-iwad", "-cdrom", "-gameversion", "-nomonsters", "-respawn",
-    "-fast", "-altdeath", "-deathmatch", "-turbo", "-merge", "-af", "-as",
-    "-aa", "-file", "-wart", "-skill", "-episode", "-timer", "-avg", "-warp",
-    "-loadgame", "-longtics", "-extratics", "-dup", NULL,
-};
-
-static void CheckForClientOptions(void)
-{
-    int i;
-
-#ifdef NET_DEBUG
-    printf("CheckForClientOptions\n");
-#endif
-
-    for (i=0; not_dedicated_options[i] != NULL; ++i)
-    {
-        if (M_CheckParm(not_dedicated_options[i]) > 0)
-        {
-            I_Error("The command line parameter '%s' was specified to a "
-                    "dedicated server.\nGame parameters should be specified "
-                    "to the first player to join a server, \nnot to the "
-                    "server itself. ",
-                    not_dedicated_options[i]);
-        }
-    }
-}
-
 void NET_DedicatedServer(void)
 {
 #ifdef NET_DEBUG
     printf("NET_DedicatedServer\n");
 #endif
-
-    CheckForClientOptions();
 
     NET_SV_Init();
     NET_SV_AddModule(&net_sdl_module);

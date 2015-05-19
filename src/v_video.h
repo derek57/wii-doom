@@ -20,9 +20,9 @@
 // 02111-1307, USA.
 //
 // DESCRIPTION:
-//	Gamma correction LUT.
-//	Functions to draw patches (by post) directly to screen.
-//	Functions to blit a block to the screen.
+//        Gamma correction LUT.
+//        Functions to draw patches (by post) directly to screen.
+//        Functions to blit a block to the screen.
 //
 //-----------------------------------------------------------------------------
 
@@ -35,23 +35,25 @@
 // Needed because we are refering to patches.
 #include "v_patch.h"
 
+
 //
 // VIDEO
 //
+#define CENTERY                        (SCREENHEIGHT/2)
 
-#define CENTERY			(SCREENHEIGHT/2)
+
+// haleyjd 08/28/10: implemented for Strife support
+// haleyjd 08/28/10: Patch clipping callback, implemented to support Choco
+// Strife.
+typedef boolean (*vpatchclipfunc_t)(patch_t *, int, int);
 
 
 extern int dirtybox[4];
 
 extern byte *tinttable;
 
-// haleyjd 08/28/10: implemented for Strife support
-// haleyjd 08/28/10: Patch clipping callback, implemented to support Choco
-// Strife.
-typedef boolean (*vpatchclipfunc_t)(patch_t *, int, int);
-void V_SetPatchClipCallback(vpatchclipfunc_t func);
 
+void V_SetPatchClipCallback(vpatchclipfunc_t func);
 
 // Allocates buffer screens, call before R_Init.
 void V_Init (void);
@@ -99,7 +101,7 @@ void V_RestoreBuffer(void);
 // format described in the string passed to the function, eg.
 // "DOOM%02i.pcx"
 
-void V_ScreenShot(char *format);
+//void V_ScreenShot(char *format);
 
 // Load the lookup table for translucency calculations from the TINTTAB
 // lump.
@@ -113,6 +115,13 @@ void V_LoadTintTable(void);
 void V_LoadXlaTable(void);
 
 void V_DrawMouseSpeedBox(int speed);
+
+void V_DrawConsoleChar(int x,
+                       int y,
+                       patch_t *patch,
+                       byte color,
+                       boolean italics/*,
+                       int translucency*/);
 
 #endif
 

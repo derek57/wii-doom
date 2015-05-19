@@ -20,7 +20,7 @@
 // 02111-1307, USA.
 //
 // DESCRIPTION:
-//	Fixed point implementation.
+//        Fixed point implementation.
 //
 //-----------------------------------------------------------------------------
 
@@ -30,7 +30,6 @@
 
 #include "doomtype.h"
 #include "i_system.h"
-
 #include "m_fixed.h"
 
 
@@ -40,8 +39,8 @@
 
 fixed_t
 FixedMul
-( fixed_t	a,
-  fixed_t	b )
+( fixed_t        a,
+  fixed_t        b )
 {
     return ((int64_t) a * (int64_t) b) >> FRACBITS;
 }
@@ -56,15 +55,32 @@ fixed_t FixedDiv(fixed_t a, fixed_t b)
 {
     if ((abs(a) >> 14) >= abs(b))
     {
-	return (a^b) < 0 ? INT_MIN : INT_MAX;
+        return (a^b) < 0 ? INT_MIN : INT_MAX;
     }
     else
     {
-	int64_t result;
+        int64_t result;
 
-	result = ((int64_t) a << 16) / b;
+        result = ((int64_t) a << 16) / b;
 
-	return (fixed_t) result;
+        return (fixed_t) result;
     }
+}
+
+int BETWEEN(int a, int b, int c)
+{
+    return MAX(a, MIN(b, c));
+}
+
+int MIN(int a, int b)
+{
+    a = a - b;
+    return (b + (a & (a >> 31)));
+}
+
+int MAX(int a, int b)
+{
+    b = a - b;
+    return (a - (b & (b >> 31)));
 }
 

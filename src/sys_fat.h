@@ -12,27 +12,28 @@
 
 /* 'FAT Device' structure */
 typedef struct {
-	/* Device mount point */
-	char *mount;
+    /* Device mount point */
+    char *mount;
 
-	/* Device name */
-	char *name;
+    /* Device name */
+    char *name;
 
-	/* Device interface */
-	const DISC_INTERFACE *interface;
+    /* Device interface */
+    const DISC_INTERFACE *interface;
 } fatDevice;
 
 /* 'FAT File' structure */
 typedef struct {
-	/* Filename */
-	char filename[128];
-	/* 1 = Batch Install, 2 = Batch Uninstall - Leathl */
-	int install;
-	
-	int installstate;
+    /* Filename */
+    char filename[128];
 
-	/* Filestat */
-	struct dirent entry;
+    /* 1 = Batch Install, 2 = Batch Uninstall - Leathl */
+    int install;
+    
+    int installstate;
+
+    /* Filestat */
+    struct dirent entry;
 } fatFile;
 
 

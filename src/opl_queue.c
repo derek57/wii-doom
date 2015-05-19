@@ -20,9 +20,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "c_io.h"
+#include "doomdef.h"
 #include "opl_queue.h"
 
-#include "doomdef.h"
 
 #define MAX_OPL_QUEUE 64
 
@@ -73,7 +74,7 @@ void OPL_Queue_Push(opl_callback_queue_t *queue,
 
     if (queue->num_entries >= MAX_OPL_QUEUE)
     {
-        fprintf(statsfile, "OPL_Queue_Push: Exceeded maximum callbacks\n");
+        C_Printf("OPL_Queue_Push: Exceeded maximum callbacks\n");
         return;
     }
 
@@ -215,73 +216,4 @@ void OPL_Queue_AdjustCallbacks(opl_callback_queue_t *queue,
         queue->entries[i].time = time + (uint64_t) (offset * factor);
     }
 }
-
-#ifdef TEST
-
-#include <assert.h>
-
-static void PrintQueueNode(opl_callback_queue_t *queue, int node, int depth)
-{
-    int i;
-
-    if (node >= queue->num_entries)
-    {
-        return;
-    }
-
-    for (i=0; i<depth * 3; ++i)
-    {
-        printf(" ");
-    }
-
-    printf("%i\n", queue->entries[node].time);
-
-    PrintQueueNode(queue, node * 2 + 1, depth + 1);
-    PrintQueueNode(queue, node * 2 + 2, depth + 1);
-}
-
-static void PrintQueue(opl_callback_queue_t *queue)
-{
-    PrintQueueNode(queue, 0, 0);
-}
-
-int main()
-{
-    opl_callback_queue_t *queue;
-    int iteration;
-
-    queue = OPL_Queue_Create();
-
-    for (iteration=0; iteration<5000; ++iteration)
-    {
-        opl_callback_t callback;
-        void *data;
-        unsigned int time;
-        unsigned int newtime;
-        int i;
-
-        for (i=0; i<MAX_OPL_QUEUE; ++i)
-        {
-            time = rand() % 0x10000;
-            OPL_Queue_Push(queue, NULL, NULL, time);
-        }
-
-        time = 0;
-
-        for (i=0; i<MAX_OPL_QUEUE; ++i)
-        {
-            assert(!OPL_Queue_IsEmpty(queue));
-            newtime = OPL_Queue_Peek(queue);
-            assert(OPL_Queue_Pop(queue, &callback, &data));
-
-            assert(newtime >= time);
-            time = newtime;
-        }
-
-        assert(OPL_Queue_IsEmpty(queue));
-        assert(!OPL_Queue_Pop(queue, &callback, &data));
-    }
-}
-
-#endif
 

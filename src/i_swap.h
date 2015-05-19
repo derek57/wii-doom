@@ -20,7 +20,7 @@
 // 02111-1307, USA.
 //
 // DESCRIPTION:
-//	Endianess handling, swapping 16bit and 32bit.
+//        Endianess handling, swapping 16bit and 32bit.
 //
 //-----------------------------------------------------------------------------
 
@@ -42,13 +42,8 @@
 #define LONG(x)   ((signed long) SDL_SwapLE32(x))
 
 // Defines for checking the endianness of the system.
-/*
-#if SDL_BYTEORDER == SYS_LIL_ENDIAN
-#define SYS_LITTLE_ENDIAN
-#elif SDL_BYTEORDER == SYS_BIG_ENDIAN
-*/
+
 #define SYS_BIG_ENDIAN
-//#endif
 
 #define doom_swap_l(x) \
         ((long int)((((unsigned long int)(x) & 0x000000ffU) << 24) | \

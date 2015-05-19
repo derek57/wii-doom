@@ -26,7 +26,6 @@
 #include "deh_str.h"
 #include "i_system.h"
 #include "i_timer.h"
-#include "m_argv.h"
 #include "m_fixed.h"
 #include "m_config.h"
 #include "m_misc.h"
@@ -42,6 +41,7 @@
 #include "w_wad.h"
 
 #include "doomfeatures.h"
+#include "c_io.h"
 
 extern void D_ReceiveTic(ticcmd_t *ticcmds, boolean *playeringame);
 
@@ -400,13 +400,7 @@ static void NET_CL_SendTics(int start, int end)
 
     for (i=start; i<=end; ++i)
     {
-        net_server_send_t *sendobj;
-
-        sendobj = &send_queue[i % BACKUPTICS];
-
         NET_WriteInt16(packet, average_latency / FRACUNIT);
-
-        NET_WriteTiccmdDiff(packet, &sendobj->cmd, settings.lowres_turn);
     }
     
     // Send the packet
@@ -684,12 +678,9 @@ static void NET_CL_CheckResends(void)
 
 static void NET_CL_ParseGameData(net_packet_t *packet)
 {
-    net_server_recv_t *recvobj;
     unsigned int seq, num_tics;
     unsigned int nowtime;
-    int resend_start, resend_end;
     size_t i;
-    int index;
     
 #ifdef NET_DEBUG
     printf("NET_CL_ParseGameData\n");
@@ -720,75 +711,7 @@ static void NET_CL_ParseGameData(net_packet_t *packet)
 
     for (i=0; i<num_tics; ++i)
     {
-        net_full_ticcmd_t cmd;
-
-        index = seq - recvwindow_start + i;
-
-        if (!NET_ReadFullTiccmd(packet, &cmd, settings.lowres_turn))
-        {
-            return;
-        }
-
-        if (index < 0 || index >= BACKUPTICS)
-        {
-            // Out of range of the recv window
-
-            continue;
-        }
-
-        // Store in the receive window
-        
-        recvobj = &recvwindow[index];
-
-        recvobj->active = true;
-        recvobj->cmd = cmd;
-    }
-
-    // Has this been received out of sequence, ie. have we not received
-    // all tics before the first tic in this packet?  If so, send a 
-    // resend request.
-
-    //printf("CL: %p: %i\n", client, seq);
-
-    resend_end = seq - recvwindow_start;
-
-    if (resend_end <= 0)
         return;
-
-    if (resend_end >= BACKUPTICS)
-        resend_end = BACKUPTICS - 1;
-
-    index = resend_end - 1;
-    resend_start = resend_end;
-    
-    while (index >= 0)
-    {
-        recvobj = &recvwindow[index];
-
-        if (recvobj->active)
-        {
-            // ended our run of unreceived tics
-
-            break;
-        }
-
-        if (recvobj->resend_time != 0)
-        {
-            // Already sent a resend request for this tic
-
-            break;
-        }
-
-        resend_start = index;
-        --index;
-    }
-
-    // Possibly send a resend request
-
-    if (resend_start < resend_end)
-    {
-        NET_CL_SendResendRequest(recvwindow_start + resend_start, 
-                                 recvwindow_start + resend_end - 1);
     }
 }
 
@@ -867,7 +790,7 @@ static void NET_CL_ParseConsoleMessage(net_packet_t *packet)
         return;
     }
 
-    printf("Message from server: ");
+    C_Printf("Message from server: ");
     sleep(1);
 
     NET_SafePuts(msg);
@@ -1146,8 +1069,8 @@ void NET_CL_Disconnect(void)
 
             client_state = CLIENT_STATE_WAITING_START;
 
-            printf("NET_CL_Disconnect: Timeout while disconnecting from server\n");
-	    sleep(1);
+            C_Printf("NET_CL_Disconnect: Timeout while disconnecting from server\n");
+            sleep(1);
             break;
         }
 
@@ -1175,17 +1098,6 @@ void NET_CL_Init(void)
         net_player_name = getenv("USER");
     if (net_player_name == NULL)
         net_player_name = getenv("USERNAME");
-
-    // On Windows, environment variables are in OEM codepage
-    // encoding, so convert to UTF8:
-
-#ifdef _WIN32
-    if (net_player_name != NULL)
-    {
-        net_player_name = M_OEMToUTF8(net_player_name);
-    }
-#endif
-
     if (net_player_name == NULL)
         net_player_name = "Player";
 }

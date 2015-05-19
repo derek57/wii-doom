@@ -20,7 +20,7 @@
 // 02111-1307, USA.
 //
 // DESCRIPTION:
-//	Globally defined strings.
+//        Globally defined strings.
 // 
 //-----------------------------------------------------------------------------
 

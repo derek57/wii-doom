@@ -25,43 +25,28 @@
 
 
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-
-#include <stdarg.h>
-
-#ifdef _WIN32
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#else
-#include <unistd.h>
-#endif
-
 #include <SDL/SDL.h>
+#include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 
+#include "c_io.h"
 #include "config.h"
-
 #include "deh_str.h"
+#include "doomdef.h"
 #include "doomtype.h"
-#include "m_argv.h"
-#include "m_config.h"
-#include "m_misc.h"
 #include "i_joystick.h"
 #include "i_sound.h"
+#include "i_system.h"
 #include "i_timer.h"
 #include "i_video.h"
-
-#include "i_system.h"
-
+#include "m_config.h"
+#include "m_misc.h"
 #include "w_wad.h"
 #include "z_zone.h"
 
-#include "doomdef.h"
-
-#ifdef __MACOSX__
-#include <CoreFoundation/CFUserNotification.h>
-#endif
 
 #define DEFAULT_RAM 16 * 2 /* MiB */
 #define MIN_RAM     4 * 4 /* MiB */
@@ -69,6 +54,8 @@
 extern boolean devparm;
 
 int allocated_ram_size;
+
+static boolean already_quitting = false;
 
 typedef struct atexit_listentry_s atexit_listentry_t;
 
@@ -127,7 +114,7 @@ static byte *AutoAllocMemory(int *size, int default_ram, int min_ram)
 
         *size = default_ram * 1024 * 1024;
 
-	allocated_ram_size = *size;
+        allocated_ram_size = *size;
 
         zonemem = malloc(*size);
 
@@ -147,32 +134,14 @@ byte *I_ZoneBase (int *size)
 {
     byte *zonemem;
     int min_ram, default_ram;
-    int p;
 
-    //!
-    // @arg <mb>
-    //
-    // Specify the heap size, in MiB (default 16).
-    //
-
-    p = M_CheckParmWithArgs("-mb", 1);
-
-    if (p > 0)
-    {
-        default_ram = atoi(myargv[p+1]);
-        min_ram = default_ram;
-    }
-    else
-    {
-        default_ram = DEFAULT_RAM;
-        min_ram = MIN_RAM;
-    }
+    default_ram = DEFAULT_RAM;
+    min_ram = MIN_RAM;
 
     zonemem = AutoAllocMemory(size, default_ram, min_ram);
-/*
-    printf("zone memory: %p, %x allocated for zone\n", 
-           zonemem, *size);
-*/
+
+    //printf(" zone memory: %p, %x allocated for zone\n", zonemem, *size);
+
     return zonemem;
 }
 
@@ -205,8 +174,8 @@ void I_PrintStartupBanner(char *gamedescription)
     I_PrintBanner(gamedescription);
     I_PrintDivider();
     
-    printf(
-    " " PACKAGE_NAME " is free software, covered by the GNU General Public\n"
+    C_Printf(
+    " Wii-DOOM is free software, covered by the GNU General Public\n"
     " License.  There is NO warranty; not even for MERCHANTABILITY or FITNESS\n"
     " FOR A PARTICULAR PURPOSE. You are welcome to change and distribute\n"
     " copies under certain conditions. See the source for more information.\n");
@@ -222,31 +191,8 @@ void I_PrintStartupBanner(char *gamedescription)
 
 boolean I_ConsoleStdout(void)
 {
-#ifdef _WIN32
-    // SDL "helpfully" always redirects stdout to a file.
-    return 0;
-#else
     return isatty(fileno(stdout));
-#endif
 }
-
-//
-// I_Init
-//
-/*
-void I_Init (void)
-{
-    I_CheckIsScreensaver();
-    I_InitTimer();
-    I_InitJoystick();
-}
-void I_BindVariables(void)
-{
-    I_BindVideoVariables();
-    I_BindJoystickVariables();
-    I_BindSoundVariables();
-}
-*/
 
 //
 // I_Quit
@@ -254,9 +200,8 @@ void I_BindVariables(void)
 
 void I_Quit (void)
 {
-//    if (devparm)
-	fclose (debugfile);
-	fclose (statsfile);
+    fclose (debugfile);
+    fclose (statsfile);
 
     atexit_listentry_t *entry;
 
@@ -282,46 +227,30 @@ void I_QuitSerialFail (void)
 // I_Error
 //
 
-static boolean already_quitting = false;
-
 void I_Error (char *error, ...)
 {
-//    char msgbuf[512];
-
     va_list argptr;
-    atexit_listentry_t *entry;
-/*
-    boolean exit_gui_popup;
 
-    if (already_quitting)
-    {
-        fprintf(stderr, "Warning: recursive call to I_Error detected.\n");
-        exit(-1);
-    }
-    else
-    {
-        already_quitting = true;
-    }
-*/    
+    atexit_listentry_t *entry;
+
     // Message first.
     va_start(argptr, error);
-    //fprintf(stderr, "\nError: ");
-    vfprintf(debugfile, error, argptr);
-    fprintf(debugfile, "\n\n");
-    va_end(argptr);
-//    fflush(stderr);
 
-//    if(devparm)
-	fclose (debugfile);
+    vfprintf(debugfile, error, argptr);
+
+    fprintf(debugfile, "\n\n");
+
+    va_end(argptr);
+
+    fclose (debugfile);
 
     if (already_quitting)
     {
-        fprintf(statsfile, "Warning: recursive call to I_Error detected.\n");
-//        exit(-1);
+        C_Printf("Warning: recursive call to I_Error detected.\n");
 
-	error_detected = true;
+        error_detected = true;
 
-	I_Quit();
+        I_Quit();
     }
     else
     {
@@ -341,72 +270,6 @@ void I_Error (char *error, ...)
 
         entry = entry->next;
     }
-/*
-    exit_gui_popup = !M_ParmExists("-nogui");
-
-#ifdef _WIN32
-    // On Windows, pop up a dialog box with the error message.
-
-    if (exit_gui_popup)
-    {
-        char msgbuf[512];
-        wchar_t wmsgbuf[512];
-
-        va_start(argptr, error);
-        memset(msgbuf, 0, sizeof(msgbuf));
-        M_vsnprintf(msgbuf, sizeof(msgbuf), error, argptr);
-        va_end(argptr);
-
-        MultiByteToWideChar(CP_ACP, 0,
-                            msgbuf, strlen(msgbuf) + 1,
-                            wmsgbuf, sizeof(wmsgbuf));
-
-        MessageBoxW(NULL, wmsgbuf, L"", MB_OK);
-    }
-#endif
-
-#ifdef __MACOSX__
-    if (exit_gui_popup && !I_ConsoleStdout())
-    {
-        CFStringRef message;
-        char msgbuf[512];
-	int i;
-
-        va_start(argptr, error);
-        memset(msgbuf, 0, sizeof(msgbuf));
-        M_vsnprintf(msgbuf, sizeof(msgbuf), error, argptr);
-        va_end(argptr);
-
-	// The CoreFoundation message box wraps text lines, so replace
-	// newline characters with spaces so that multiline messages
-	// are continuous.
-
-	for (i = 0; msgbuf[i] != '\0'; ++i)
-        {
-            if (msgbuf[i] == '\n')
-            {
-                msgbuf[i] = ' ';
-            }
-        }
-
-        message = CFStringCreateWithCString(NULL, msgbuf,
-                                            kCFStringEncodingUTF8);
-
-        CFUserNotificationDisplayNotice(0,
-                                        kCFUserNotificationCautionAlertLevel,
-                                        NULL,
-                                        NULL,
-                                        NULL,
-                                        CFSTR(PACKAGE_STRING),
-                                        message,
-                                        NULL);
-    }
-#endif
-*/
-    // abort();
-
-//    exit(-1);
-
     error_detected = true;
 
     I_Quit();
@@ -438,66 +301,11 @@ static const unsigned char mem_dump_win98[DOS_MEM_DUMP_SIZE] = {
   0x9E, 0x0F, 0xC9, 0x00, 0x65, 0x04, 0x70, 0x00, 0x16, 0x00};
 static const unsigned char mem_dump_dosbox[DOS_MEM_DUMP_SIZE] = {
   0x00, 0x00, 0x00, 0xF1, 0x00, 0x00, 0x00, 0x00, 0x07, 0x00};
-static unsigned char mem_dump_custom[DOS_MEM_DUMP_SIZE];
 
 static const unsigned char *dos_mem_dump = mem_dump_dos622;
 
 boolean I_GetMemoryValue(unsigned int offset, void *value, int size)
 {
-    static boolean firsttime = true;
-
-    if (firsttime)
-    {
-        int p, i, val;
-
-        firsttime = false;
-        i = 0;
-
-        //!
-        // @category compat
-        // @arg <version>
-        //
-        // Specify DOS version to emulate for NULL pointer dereference
-        // emulation.  Supported versions are: dos622, dos71, dosbox.
-        // The default is to emulate DOS 7.1 (Windows 98).
-        //
-
-        p = M_CheckParmWithArgs("-setmem", 1);
-
-        if (p > 0)
-        {
-            if (!strcasecmp(myargv[p + 1], "dos622"))
-            {
-                dos_mem_dump = mem_dump_dos622;
-            }
-            if (!strcasecmp(myargv[p + 1], "dos71"))
-            {
-                dos_mem_dump = mem_dump_win98;
-            }
-            else if (!strcasecmp(myargv[p + 1], "dosbox"))
-            {
-                dos_mem_dump = mem_dump_dosbox;
-            }
-            else
-            {
-                for (i = 0; i < DOS_MEM_DUMP_SIZE; ++i)
-                {
-                    ++p;
-
-                    if (p >= myargc || myargv[p][0] == '-')
-                    {
-                        break;
-                    }
-
-                    M_StrToInt(myargv[p], &val);
-                    mem_dump_custom[i++] = (unsigned char) val;
-                }
-
-                dos_mem_dump = mem_dump_custom;
-            }
-        }
-    }
-
     switch (size)
     {
     case 1:

@@ -28,6 +28,7 @@
 #include "net_structrw.h"
 
 #include "doomfeatures.h"
+#include "c_io.h"
 
 // connections time out after 30 seconds
 
@@ -200,7 +201,7 @@ static void NET_Conn_ParseReject(net_connection_t *conn, net_packet_t *packet)
         conn->state = NET_CONN_STATE_DISCONNECTED;
         conn->disconnect_reason = NET_DISCONNECT_REMOTE;
 
-        printf("Rejected by server: ");
+        C_Printf("Rejected by server: ");
         sleep(1);
         NET_SafePuts(msg);
     }

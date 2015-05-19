@@ -27,41 +27,43 @@
  *-----------------------------------------------------------------------------
  */
 
+
 #ifndef __C_IO_H__
 #define __C_IO_H__
 
+
 #include "doomstat.h"
 #include "d_event.h"
-        // for text colours:
 #include "v_video.h"
 
-#define INPUTLENGTH 512
-#define LINELENGTH 96
+
+#define INPUTLENGTH   512
+#define LINELENGTH    96
+#define consoleactive current_height
+#define c_moving      (current_height != current_target)
+
 
 void C_InitBackdrop(void);
 void C_Init(void);
 void C_Ticker(void);
 void C_Drawer(void);
-int C_Responder(event_t* ev);
 void C_Update(void);
-
 void C_Puts(char *s);
 void C_Printf(char *s, ...);
-
 void C_Seperator(void);
-
 void C_SetConsole(void);
 void C_Popup(void);
 void C_InstaPopup(void);
+void C_PrintCompileDate(void);
+void C_PrintSDLVersions(void);
 
-        // sf 9/99: made a #define
-#define consoleactive current_height
+int C_Responder(event_t* ev);
 
-extern int c_height;     // the height of the console
-extern int c_speed;       // pixels/tic it moves
-extern int current_height;
-extern int current_target;
-#define c_moving (current_height != current_target)
+extern int     c_height;      // the height of the console
+extern int     c_speed;       // pixels/tic it moves
+extern int     current_height;
+extern int     current_target;
+
 extern boolean c_showprompt;
 
 #endif

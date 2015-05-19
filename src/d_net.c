@@ -20,8 +20,8 @@
 // 02111-1307, USA.
 //
 // DESCRIPTION:
-//	DOOM Network game communication and protocol,
-//	all OS independend parts.
+//        DOOM Network game communication and protocol,
+//        all OS independend parts.
 //
 //-----------------------------------------------------------------------------
 
@@ -30,8 +30,8 @@
 
 #include "doomfeatures.h"
 
+#include "d_net.h"
 #include "d_main.h"
-#include "m_argv.h"
 #include "m_menu.h"
 #include "m_misc.h"
 #include "i_system.h"
@@ -126,19 +126,11 @@ static void LoadGameSettings(net_gamesettings_t *settings)
     startmap = settings->map;
     startskill = settings->skill;
     startloadgame = settings->loadgame;
-    lowres_turn = settings->lowres_turn;
     nomonsters = settings->nomonsters;
     fastparm = settings->fast_monsters;
     respawnparm = settings->respawn_monsters;
     timelimit = settings->timelimit;
     consoleplayer = settings->consoleplayer;
-
-    if (lowres_turn)
-    {
-        printf("NOTE: Turning resolution is reduced; this is probably "
-               "because there is a client recording a Vanilla demo.\n");
-        sleep(1);
-    }
 
     for (i = 0; i < MAXPLAYERS; ++i)
     {
@@ -164,39 +156,12 @@ static void SaveGameSettings(net_gamesettings_t *settings)
     settings->fast_monsters = fastparm;
     settings->respawn_monsters = respawnparm;
     settings->timelimit = timelimit;
-
-    settings->lowres_turn = M_CheckParm("-record") > 0
-                         && M_CheckParm("-longtics") == 0;
 }
 
 static void InitConnectData(net_connect_data_t *connect_data)
 {
     connect_data->max_players = MAXPLAYERS;
     connect_data->drone = false;
-
-    //!
-    // @category net
-    //
-    // Run as the left screen in three screen mode.
-    //
-
-    if (M_CheckParm("-left") > 0)
-    {
-        viewangleoffset = ANG90;
-        connect_data->drone = true;
-    }
-
-    //! 
-    // @category net
-    //
-    // Run as the right screen in three screen mode.
-    //
-
-    if (M_CheckParm("-right") > 0)
-    {
-        viewangleoffset = ANG270;
-        connect_data->drone = true;
-    }
 
     //
     // Connect data
@@ -206,11 +171,6 @@ static void InitConnectData(net_connect_data_t *connect_data)
 
     connect_data->gamemode = gamemode;
     connect_data->gamemission = gamemission;
-
-    // Are we recording a demo? Possibly set lowres turn mode
-
-    connect_data->lowres_turn = M_CheckParm("-record") > 0
-                             && M_CheckParm("-longtics") == 0;
 
     // Read checksums of our WAD directory and dehacked information
 
@@ -234,18 +194,6 @@ void D_ConnectNetGame(void)
     printf("Variable netgame = %d\n", netgame);
 #endif
 
-    //!
-    // @category net
-    //
-    // Start the game playing as though in a netgame with a single
-    // player.  This can also be used to play back single player netgame
-    // demos.
-    //
-
-    if (M_CheckParm("-solo-net") > 0)
-    {
-        netgame = true;
-    }
 }
 
 //
@@ -278,21 +226,12 @@ void D_CheckNetGame (void)
     if (timelimit > 0 && deathmatch)
     {
         // Gross hack to work like Vanilla:
-
-        if (timelimit == 20 && M_CheckParm("-avg"))
-        {
-            DEH_printf("Austin Virtual Gaming: Levels will end "
-                           "after 20 minutes\n");
-        }
-        else
-        {
-            printf("Levels will end after %d minute", timelimit);
-	    sleep(1);
-            if (timelimit > 1)
-                printf("s");
-	        sleep(1);
-            printf(".\n");
-        }
+        C_Printf("Levels will end after %d minute", timelimit);
+        sleep(1);
+        if (timelimit > 1)
+            C_Printf("s");
+        sleep(1);
+        C_Printf(".\n");
     }
 }
 

@@ -34,7 +34,6 @@ void NET_WriteConnectData(net_packet_t *packet, net_connect_data_t *data)
 
     NET_WriteInt8(packet, data->gamemode);
     NET_WriteInt8(packet, data->gamemission);
-    NET_WriteInt8(packet, data->lowres_turn);
     NET_WriteInt8(packet, data->drone);
     NET_WriteInt8(packet, data->max_players);
     NET_WriteInt8(packet, data->is_freedoom);
@@ -51,7 +50,6 @@ boolean NET_ReadConnectData(net_packet_t *packet, net_connect_data_t *data)
 
     return NET_ReadInt8(packet, (unsigned int *) &data->gamemode)
         && NET_ReadInt8(packet, (unsigned int *) &data->gamemission)
-        && NET_ReadInt8(packet, (unsigned int *) &data->lowres_turn)
         && NET_ReadInt8(packet, (unsigned int *) &data->drone)
         && NET_ReadInt8(packet, (unsigned int *) &data->max_players)
         && NET_ReadInt8(packet, (unsigned int *) &data->is_freedoom)
@@ -78,7 +76,6 @@ void NET_WriteSettings(net_packet_t *packet, net_gamesettings_t *settings)
     NET_WriteInt8(packet, settings->map);
     NET_WriteInt8(packet, settings->skill);
     NET_WriteInt8(packet, settings->gameversion);
-    NET_WriteInt8(packet, settings->lowres_turn);
     NET_WriteInt8(packet, settings->new_sync);
     NET_WriteInt32(packet, settings->timelimit);
     NET_WriteInt8(packet, settings->loadgame);
@@ -111,7 +108,6 @@ boolean NET_ReadSettings(net_packet_t *packet, net_gamesettings_t *settings)
            && NET_ReadInt8(packet, (unsigned int *) &settings->map)
            && NET_ReadSInt8(packet, &settings->skill)
            && NET_ReadInt8(packet, (unsigned int *) &settings->gameversion)
-           && NET_ReadInt8(packet, (unsigned int *) &settings->lowres_turn)
            && NET_ReadInt8(packet, (unsigned int *) &settings->new_sync)
            && NET_ReadInt32(packet, (unsigned int *) &settings->timelimit)
            && NET_ReadSInt8(packet, (signed int *) &settings->loadgame)
@@ -180,8 +176,7 @@ void NET_WriteQueryData(net_packet_t *packet, net_querydata_t *query)
     NET_WriteString(packet, query->description);
 }
 
-void NET_WriteTiccmdDiff(net_packet_t *packet, net_ticdiff_t *diff, 
-                         boolean lowres_turn)
+void NET_WriteTiccmdDiff(net_packet_t *packet, net_ticdiff_t *diff)
 {
 #ifdef NET_DEBUG
     printf("NET_WriteTiccmdDiff\n");
@@ -198,16 +193,7 @@ void NET_WriteTiccmdDiff(net_packet_t *packet, net_ticdiff_t *diff,
     if (diff->diff & NET_TICDIFF_SIDE)
         NET_WriteInt8(packet, diff->cmd.sidemove);
     if (diff->diff & NET_TICDIFF_TURN)
-    {
-        if (lowres_turn)
-        {
-            NET_WriteInt8(packet, diff->cmd.angleturn / 256);
-        }
-        else
-        {
-            NET_WriteInt16(packet, diff->cmd.angleturn);
-        }
-    }
+        NET_WriteInt16(packet, diff->cmd.angleturn);
     if (diff->diff & NET_TICDIFF_BUTTONS)
         NET_WriteInt8(packet, diff->cmd.buttons);
     if (diff->diff & NET_TICDIFF_CONSISTANCY)
@@ -226,8 +212,7 @@ void NET_WriteTiccmdDiff(net_packet_t *packet, net_ticdiff_t *diff,
     }
 }
 
-boolean NET_ReadTiccmdDiff(net_packet_t *packet, net_ticdiff_t *diff,
-                           boolean lowres_turn)
+boolean NET_ReadTiccmdDiff(net_packet_t *packet, net_ticdiff_t *diff)
 {
     unsigned int val;
     signed int sval;
@@ -259,18 +244,9 @@ boolean NET_ReadTiccmdDiff(net_packet_t *packet, net_ticdiff_t *diff,
 
     if (diff->diff & NET_TICDIFF_TURN)
     {
-        if (lowres_turn)
-        {
-            if (!NET_ReadSInt8(packet, &sval))
-                return false;
-            diff->cmd.angleturn = sval * 256;
-        }
-        else
-        {
-            if (!NET_ReadSInt16(packet, &sval))
-                return false;
-            diff->cmd.angleturn = sval;
-        }
+        if (!NET_ReadSInt16(packet, &sval))
+            return false;
+        diff->cmd.angleturn = sval;
     }
 
     if (diff->diff & NET_TICDIFF_BUTTONS)
@@ -407,7 +383,7 @@ void NET_TiccmdPatch(ticcmd_t *src, net_ticdiff_t *diff, ticcmd_t *dest)
 // net_full_ticcmd_t
 // 
 
-boolean NET_ReadFullTiccmd(net_packet_t *packet, net_full_ticcmd_t *cmd, boolean lowres_turn)
+boolean NET_ReadFullTiccmd(net_packet_t *packet, net_full_ticcmd_t *cmd)
 {
     unsigned int bitfield;
     int i;
@@ -441,17 +417,14 @@ boolean NET_ReadFullTiccmd(net_packet_t *packet, net_full_ticcmd_t *cmd, boolean
     {
         if (cmd->playeringame[i])
         {
-            if (!NET_ReadTiccmdDiff(packet, &cmd->cmds[i], lowres_turn))
-            {
-                return false;
-            }
+
         }
     }
 
     return true;
 }
 
-void NET_WriteFullTiccmd(net_packet_t *packet, net_full_ticcmd_t *cmd, boolean lowres_turn)
+void NET_WriteFullTiccmd(net_packet_t *packet, net_full_ticcmd_t *cmd)
 {
     unsigned int bitfield;
     int i;
@@ -485,7 +458,7 @@ void NET_WriteFullTiccmd(net_packet_t *packet, net_full_ticcmd_t *cmd, boolean l
     {
         if (cmd->playeringame[i])
         {
-            NET_WriteTiccmdDiff(packet, &cmd->cmds[i], lowres_turn);
+
         }
     }
 }

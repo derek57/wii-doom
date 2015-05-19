@@ -20,7 +20,7 @@
 // 02111-1307, USA.
 //
 // DESCRIPTION:
-//	Put all global tate variables here.
+//        Put all global tate variables here.
 //
 //-----------------------------------------------------------------------------
 
@@ -30,19 +30,20 @@
 
 
 // Game Mode - identify IWAD as shareware, retail etc.
-GameMode_t gamemode = indetermined;
-GameMission_t	gamemission = doom;
+GameMode_t      gamemode = indetermined;
+GameMission_t   gamemission = doom;
 GameVersion_t   gameversion = exe_final2;
+
 char *gamedescription;
 
 // Set if homebrew PWAD stuff has been added.
-boolean	modifiedgame;
+boolean         modifiedgame;
 
-boolean d_recoil = true;
-boolean	respawnparm = false;    		// checkparm of -respawn
-boolean	fastparm = false;    		// checkparm of -fast
-boolean	d_maxgore = false;
-boolean	d_thrust = false;
+boolean         d_recoil = true;
+boolean         d_maxgore = false;
+boolean         d_thrust = false;
+boolean         respawnparm = false;       // checkparm of -respawn
+boolean         fastparm = false;          // checkparm of -fast
 
-int	autoaim = false;
+int             autoaim = false;
 

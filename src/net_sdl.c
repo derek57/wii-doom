@@ -21,7 +21,6 @@
 
 #include "doomtype.h"
 #include "i_system.h"
-#include "m_argv.h"
 #include "m_misc.h"
 #include "net_defs.h"
 #include "net_io.h"
@@ -176,8 +175,6 @@ static void NET_SDL_FreeAddress(net_addr_t *addr)
 
 static boolean NET_SDL_InitClient(void)
 {
-    int p;
-
 #ifdef NET_DEBUG
     printf("NET_SDL_InitClient\n");
 #endif
@@ -192,10 +189,6 @@ static boolean NET_SDL_InitClient(void)
     // Use the specified UDP port for communications, instead of 
     // the default (2342).
     //
-
-    p = M_CheckParmWithArgs("-port", 1);
-    if (p > 0)
-        port = atoi(myargv[p+1]);
 
     SDLNet_Init();
 
@@ -221,18 +214,12 @@ static boolean NET_SDL_InitClient(void)
 
 static boolean NET_SDL_InitServer(void)
 {
-    int p;
-
 #ifdef NET_DEBUG
     printf("NET_SDL_InitServer\n");
 #endif
 
     if (initted)
         return true;
-
-    p = M_CheckParmWithArgs("-port", 1);
-    if (p > 0)
-        port = atoi(myargv[p+1]);
 
     SDLNet_Init();
 
@@ -391,21 +378,21 @@ net_addr_t *NET_SDL_ResolveAddress(char *address)
 
     if (colon != NULL)
     {
-	addr_hostname = M_StringDuplicate(address);
-	addr_hostname[colon - address] = '\0';
-	addr_port = atoi(colon + 1);
+        addr_hostname = M_StringDuplicate(address);
+        addr_hostname[colon - address] = '\0';
+        addr_port = atoi(colon + 1);
     }
     else
     {
-	addr_hostname = address;
-	addr_port = port;
+        addr_hostname = address;
+        addr_port = port;
     }
     
     result = SDLNet_ResolveHost(&ip, addr_hostname, addr_port);
 
     if (addr_hostname != address)
     {
-	free(addr_hostname);
+        free(addr_hostname);
     }
     
     if (result)

@@ -13,18 +13,18 @@
 // GNU General Public License for more details.
 //
 // DESCRIPTION:
-//	WAD I/O functions.
+//        WAD I/O functions.
 //
 
 
 #ifndef __W_WAD__
 #define __W_WAD__
 
+
 #include <stdio.h>
 
 #include "doomtype.h"
 #include "d_mode.h"
-
 #include "w_file.h"
 
 
@@ -40,42 +40,38 @@ typedef struct lumpinfo_s lumpinfo_t;
 
 struct lumpinfo_s
 {
-    char	name[8];
-    wad_file_t *wad_file;
-    int		position;
-    int		size;
-    void       *cache;
+    char        name[8];
+    wad_file_t  *wad_file;
+    int         position;
+    int         size;
+    void        *cache;
 
     // Used for hash table lookups
 
-    lumpinfo_t *next;
+    lumpinfo_t  *next;
 };
 
 
-extern lumpinfo_t *lumpinfo;
+extern lumpinfo_t   *lumpinfo;
+
 extern unsigned int numlumps;
-
-wad_file_t *W_AddFile (char *filename);
-
-int	W_CheckNumForName (char* name);
-int	W_GetNumForName (char* name);
-int	W_GetSecondNumForName (char* name);
-
-int	W_LumpLength (unsigned int lump);
-void    W_ReadLump (unsigned int lump, void *dest);
-
-void*	W_CacheLumpNum (int lump, int tag);
-void*	W_CacheLumpName (char* name, int tag);
-
-void    W_GenerateHashTable(void);
-
 extern unsigned int W_LumpNameHash(const char *s);
 
-void    W_ReleaseLumpNum(int lump);
-void    W_ReleaseLumpName(char *name);
+wad_file_t *W_AddFile (char *filename, boolean automatic);
 
-void W_CheckCorrectIWAD(GameMission_t mission);
+int        W_CheckNumForName (char* name);
+int        W_GetNumForName (char* name);
+int        W_GetSecondNumForName (char* name);
+int        W_LumpLength (unsigned int lump);
 
-void W_CheckSize(int wad);
+void       W_GenerateHashTable(void);
+void       W_ReleaseLumpNum(int lump);
+void       W_ReleaseLumpName(char *name);
+void       W_CheckCorrectIWAD(GameMission_t mission);
+void       W_CheckSize(int wad);
+void       W_ReadLump (unsigned int lump, void *dest);
+
+void*      W_CacheLumpNum (int lump, int tag);
+void*      W_CacheLumpName (char* name, int tag);
 
 #endif

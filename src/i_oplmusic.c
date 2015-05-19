@@ -13,7 +13,7 @@
 // GNU General Public License for more details.
 //
 // DESCRIPTION:
-//	System interface for music.
+//        System interface for music.
 //
 
 
@@ -21,34 +21,28 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "memio.h"
-#include "mus2mid.h"
-
+#include "c_io.h"
 #include "deh_main.h"
+#include "doomdef.h"
 #include "i_sound.h"
 #include "i_swap.h"
 #include "m_misc.h"
+#include "memio.h"
+#include "midifile.h"
+#include "mus2mid.h"
+#include "opl.h"
 #include "w_wad.h"
 #include "z_zone.h"
 
-#include "opl.h"
-#include "midifile.h"
 
-#include "i_oplmusic.h"
-
-#include "doomdef.h"
-
-// #define OPL_MIDI_DEBUG
-
-#define MAXMIDLENGTH (96 * 1024)
-#define GENMIDI_NUM_INSTRS  128
-#define GENMIDI_NUM_PERCUSSION 47
-
+#define MAXMIDLENGTH            (96 * 1024)
+#define GENMIDI_NUM_INSTRS      128
+#define GENMIDI_NUM_PERCUSSION  47
 #define GENMIDI_HEADER          "#OPL_II#"
 #define GENMIDI_FLAG_FIXED      0x0001         /* fixed pitch */
 #define GENMIDI_FLAG_2VOICE     0x0004         /* double voice (OPL3) */
-
 #define PERCUSSION_LOG_LEN 16
+
 
 typedef struct
 {
@@ -350,7 +344,7 @@ static boolean LoadInstrumentTable(void)
 
     if (strncmp((char *) lump, GENMIDI_HEADER, strlen(GENMIDI_HEADER)) != 0)
     {
-	W_ReleaseLumpName("GENMIDI");
+        W_ReleaseLumpName("GENMIDI");
 
         return false;
     }
@@ -614,13 +608,6 @@ static void KeyOffEvent(opl_track_data_t *track, midi_event_t *event)
     unsigned int key;
     unsigned int i;
 
-/*
-    printf("note off: channel %i, %i, %i\n",
-           event->data.channel.channel,
-           event->data.channel.param1,
-           event->data.channel.param2);
-*/
-
     channel = &track->channels[event->data.channel.channel];
     key = event->data.channel.param1;
 
@@ -878,13 +865,6 @@ static void KeyOnEvent(opl_track_data_t *track, midi_event_t *event)
     unsigned int key;
     unsigned int volume;
 
-/*
-    printf("note on: channel %i, %i, %i\n",
-           event->data.channel.channel,
-           event->data.channel.param1,
-           event->data.channel.param2);
-*/
-
     key = event->data.channel.param1;
     volume = event->data.channel.param2;
 
@@ -983,13 +963,6 @@ static void ControllerEvent(opl_track_data_t *track, midi_event_t *event)
     unsigned int param;
     opl_channel_data_t *channel;
 
-/*
-    printf("change controller: channel %i, %i, %i\n",
-           event->data.channel.channel,
-           event->data.channel.param1,
-           event->data.channel.param2);
-*/
-
     channel = &track->channels[event->data.channel.channel];
     controller = event->data.channel.param1;
     param = event->data.channel.param2;
@@ -1005,9 +978,6 @@ static void ControllerEvent(opl_track_data_t *track, midi_event_t *event)
             break;
 
         default:
-#ifdef OPL_MIDI_DEBUG
-            fprintf(statsfile, "Unknown MIDI controller type: %i\n", controller);
-#endif
             break;
     }
 }
@@ -1078,10 +1048,6 @@ static void MetaEvent(opl_track_data_t *track, midi_event_t *event)
             break;
 
         default:
-#ifdef OPL_MIDI_DEBUG
-            fprintf(statsfile, "Unknown MIDI meta event type: %i\n",
-                            event->data.meta.type);
-#endif
             break;
     }
 }
@@ -1123,9 +1089,6 @@ static void ProcessEvent(opl_track_data_t *track, midi_event_t *event)
             break;
 
         default:
-#ifdef OPL_MIDI_DEBUG
-            fprintf(statsfile, "Unknown MIDI event type %i\n", event->event_type);
-#endif
             break;
     }
 }
@@ -1417,7 +1380,7 @@ static void *I_OPL_RegisterSong(void *data, int len)
     }
     else
     {
-	// Assume a MUS file and try to convert
+        // Assume a MUS file and try to convert
 
         ConvertMus(data, len, filename);
     }
@@ -1426,7 +1389,7 @@ static void *I_OPL_RegisterSong(void *data, int len)
 
     if (result == NULL)
     {
-        fprintf(statsfile, "I_OPL_RegisterSong: Failed to load MID.\n");
+        C_Printf("I_OPL_RegisterSong: Failed to load MID.\n");
     }
 
     // remove file now
@@ -1451,7 +1414,7 @@ static boolean I_OPL_MusicIsPlaying(void)
 
 // Shutdown music
 
-/*static*/ void I_OPL_ShutdownMusic(void)
+static void I_OPL_ShutdownMusic(void)
 {
     if (music_initialized)
     {
@@ -1463,7 +1426,7 @@ static boolean I_OPL_MusicIsPlaying(void)
 
         // Release GENMIDI lump
 
-	W_ReleaseLumpName("GENMIDI");
+        W_ReleaseLumpName("GENMIDI");
 
         music_initialized = false;
     }
@@ -1471,13 +1434,13 @@ static boolean I_OPL_MusicIsPlaying(void)
 
 // Initialize music subsystem
 
-/*static*/ boolean I_OPL_InitMusic(void)
+static boolean I_OPL_InitMusic(void)
 {
     OPL_SetSampleRate(snd_samplerate);
 
     if (!OPL_Init(opl_io_port))
     {
-        printf("Dude.  The Adlib isn't responding.\n");
+        C_Printf(" Dude.  The Adlib isn't responding.\n");
         return false;
     }
 

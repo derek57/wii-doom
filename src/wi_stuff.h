@@ -48,7 +48,7 @@ void WI_Ticker (void);
 void WI_Drawer (void);
 
 // Setup for an intermission screen.
-void WI_Start(wbstartstruct_t*	 wbstartstruct);
+void WI_Start(wbstartstruct_t*         wbstartstruct);
 
 // Shut down the intermission screen
 void WI_End(void);

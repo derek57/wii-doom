@@ -26,6 +26,8 @@
 
 #include "z_zone.h"
 
+#include "c_io.h"
+
 typedef struct 
 {
     char *from_text;
@@ -58,7 +60,7 @@ static deh_substitution_t *SubstitutionForString(char *s)
 
     // Fallback if we have not initialized the hash table yet
     if (hash_table_length < 0)
-	return NULL;
+        return NULL;
 
     entry = strhash(s) % hash_table_length;
 
@@ -374,7 +376,7 @@ static char *FormatStringReplacement(char *s)
 
     if (!ValidFormatReplacement(s, repl))
     {
-        printf("WARNING: Unsafe dehacked replacement provided for "
+        C_Printf("WARNING: Unsafe dehacked replacement provided for "
                "printf format string: %s\n", s);
 
         return s;

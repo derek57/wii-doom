@@ -20,7 +20,7 @@
 // 02111-1307, USA.
 //
 // DESCRIPTION:
-//	The not so system specific sound interface.
+//        The not so system specific sound interface.
 //
 //-----------------------------------------------------------------------------
 
@@ -28,8 +28,10 @@
 #ifndef __S_SOUND__
 #define __S_SOUND__
 
+
 #include "p_mobj.h"
 #include "sounds.h"
+
 
 //
 // Initializes sound stuff, including volume
@@ -39,12 +41,9 @@
 
 void S_Init(int sfxVolume, int musicVolume);
 
-
 // Shut down sound 
 
 void S_Shutdown(void);
-
-void SDL_InitOGG(void);
 
 //
 // Per level startup code.
@@ -72,16 +71,12 @@ void S_StartMusic(int music_id);
 //  and set whether looping
 void S_ChangeMusic(int music_id, int looping);
 
-// query if music is playing
-boolean S_MusicPlaying(void);
-
 // Stops the music fer sure.
 void S_StopMusic(void);
 
 // Stop and resume music, during game PAUSE.
 void S_PauseSound(void);
 void S_ResumeSound(void);
-
 
 //
 // Updates music & sounds
@@ -92,6 +87,9 @@ void S_SetMusicVolume(int volume);
 void S_SetSfxVolume(int volume);
 
 void S_StartMP3Music(int type, int mode);
+
+// query if music is playing
+boolean S_MusicPlaying(void);
 
 extern int snd_channels;
 

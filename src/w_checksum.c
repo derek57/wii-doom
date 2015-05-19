@@ -32,8 +32,11 @@
 #include "w_checksum.h"
 #include "w_wad.h"
 
+
 static wad_file_t **open_wadfiles = NULL;
-static int num_open_wadfiles = 0;
+
+static int        num_open_wadfiles = 0;
+
 
 static int GetFileNumber(wad_file_t *handle)
 {

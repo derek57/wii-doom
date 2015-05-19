@@ -20,37 +20,22 @@
 // 02111-1307, USA.
 //
 // DESCRIPTION:
-//	WAD I/O functions.
+//        WAD I/O functions.
 //
 //-----------------------------------------------------------------------------
+
 
 #include <stdio.h>
 
 #include "config.h"
-
 #include "doomtype.h"
-#include "m_argv.h"
-
 #include "w_file.h"
+
 
 extern wad_file_class_t stdc_wad_file;
 
-#ifdef _WIN32
-extern wad_file_class_t win32_wad_file;
-#endif
-
-#ifdef HAVE_MMAP
-extern wad_file_class_t posix_wad_file;
-#endif 
-
 static wad_file_class_t *wad_file_classes[] = 
 {
-#ifdef _WIN32
-    &win32_wad_file,
-#endif
-#ifdef HAVE_MMAP
-    &posix_wad_file,
-#endif
     &stdc_wad_file,
 };
 
@@ -64,10 +49,7 @@ wad_file_t *W_OpenFile(char *path)
     // directly into memory.
     //
 
-    if (!M_CheckParm("-mmap"))
-    {
-        return stdc_wad_file.OpenFile(path);
-    }
+    return stdc_wad_file.OpenFile(path);
 
     // Try all classes in order until we find one that works
 

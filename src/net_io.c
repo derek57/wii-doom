@@ -16,14 +16,15 @@
 //     through the network module system
 //
 
+
 #include <stdio.h>
 
+#include "doomfeatures.h"
 #include "i_system.h"
 #include "net_defs.h"
 #include "net_io.h"
 #include "z_zone.h"
 
-#include "doomfeatures.h"
 
 #define MAX_MODULES 16
 

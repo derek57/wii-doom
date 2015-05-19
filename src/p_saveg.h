@@ -20,7 +20,7 @@
 // 02111-1307, USA.
 //
 // DESCRIPTION:
-//	Savegame I/O, archiving, persistence.
+//        Savegame I/O, archiving, persistence.
 //
 //-----------------------------------------------------------------------------
 
@@ -45,12 +45,13 @@ char *P_SaveGameFile(int slot);
 // Savegame file header read/write functions
 
 boolean P_ReadSaveGameHeader(void);
-void P_WriteSaveGameHeader(char *description);
 
 // Savegame end-of-file read/write functions
 
 boolean P_ReadSaveGameEOF(void);
+
 void P_WriteSaveGameEOF(void);
+void P_WriteSaveGameHeader(char *description);
 
 // Persistent storage/archiving.
 // These are the load / save game routines.
@@ -64,6 +65,7 @@ void P_ArchiveSpecials (void);
 void P_UnArchiveSpecials (void);
 
 extern FILE *save_stream;
+
 extern boolean savegame_error;
 
 

@@ -21,7 +21,7 @@
 // 02111-1307, USA.
 //
 // DESCRIPTION:
-//	System specific interface stuff.
+//        System specific interface stuff.
 //
 //-----------------------------------------------------------------------------
 
@@ -39,8 +39,8 @@
 
 typedef struct
 {
-    signed char	forwardmove;	// *2048 for move
-    signed char	sidemove;	// *2048 for move
+    signed char        forwardmove;        // *2048 for move
+    signed char        sidemove;        // *2048 for move
     short angleturn;            // <<16 for angle delta
     byte chatchar;
     byte buttons;

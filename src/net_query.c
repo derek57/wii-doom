@@ -34,6 +34,7 @@
 #include "net_sdl.h"
 
 #include "doomfeatures.h"
+#include "c_io.h"
 
 // DNS address of the Internet master server.
 
@@ -105,7 +106,7 @@ net_addr_t *NET_Query_ResolveMaster(net_context_t *context)
 
     if (addr == NULL)
     {
-        printf("Warning: Failed to resolve address "
+        C_Printf("Warning: Failed to resolve address "
                         "for master server\n");
         sleep(1);
     }
@@ -155,8 +156,8 @@ void NET_Query_MasterResponse(net_packet_t *packet)
 
             if (!registered_with_master)
             {
-                printf("Registered with master server");
-	        sleep(1);
+                C_Printf("Registered with master server");
+                sleep(1);
                 registered_with_master = true;
             }
         }
@@ -164,8 +165,8 @@ void NET_Query_MasterResponse(net_packet_t *packet)
         {
             // Always show rejections.
 
-            printf("Failed to register with master server");
-	    sleep(1);
+            C_Printf("Failed to register with master server");
+            sleep(1);
         }
 
         got_master_response = true;
@@ -529,9 +530,9 @@ static void CheckTargetTimeouts(void)
 
             if (targets[i].type == QUERY_TARGET_MASTER)
             {
-                printf("NET_MasterQuery: no response "
+                C_Printf("NET_MasterQuery: no response "
                                 "from master server.\n");
-	        sleep(1);
+                sleep(1);
             }
         }
     }
@@ -838,14 +839,14 @@ static void NET_QueryPrintCallback(net_addr_t *addr,
 
     if (data->gamemode != indetermined)
     {
-        printf("(%s) ", GameDescription(data->gamemode, 
+        C_Printf("(%s) ", GameDescription(data->gamemode, 
                                         data->gamemission));
         sleep(1);
     }
 
     if (data->server_state)
     {
-        printf("(game running) ");
+        C_Printf("(game running) ");
         sleep(1);
     }
 
@@ -860,12 +861,12 @@ void NET_LANQuery(void)
 
     if (NET_StartLANQuery())
     {
-        printf("\nSearching for servers on local LAN ...\n");
+        C_Printf("\nSearching for servers on local LAN ...\n");
         sleep(1);
 
         NET_Query_QueryLoop(NET_QueryPrintCallback, NULL);
 
-        printf("\n%i server(s) found.\n", GetNumResponses());
+        C_Printf("\n%i server(s) found.\n", GetNumResponses());
         sleep(1);
     }
 }
@@ -878,12 +879,12 @@ void NET_MasterQuery(void)
 
     if (NET_StartMasterQuery())
     {
-        printf("\nSearching for servers on Internet ...\n");
+        C_Printf("\nSearching for servers on Internet ...\n");
         sleep(1);
 
         NET_Query_QueryLoop(NET_QueryPrintCallback, NULL);
 
-        printf("\n%i server(s) found.\n", GetNumResponses());
+        C_Printf("\n%i server(s) found.\n", GetNumResponses());
         sleep(1);
     }
 }
@@ -910,7 +911,7 @@ void NET_QueryAddress(char *addr_str)
 
     target = GetTargetForAddr(addr, true);
 
-    printf("\nQuerying '%s'...\n", addr_str);
+    C_Printf("\nQuerying '%s'...\n", addr_str);
     sleep(1);
 
     // Run query loop.

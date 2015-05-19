@@ -26,28 +26,17 @@
 //-----------------------------------------------------------------------------
 
 
+#include <ctype.h>
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
-#include <errno.h>
-
-#ifdef _WIN32
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#include <io.h>
-#ifdef _MSC_VER
-#include <direct.h>
-#endif
-#else
 #include <sys/stat.h>
 #include <sys/types.h>
-#endif
 
-#include "doomtype.h"
-
+#include "c_io.h"
 #include "deh_str.h"
-
+#include "doomtype.h"
 #include "i_swap.h"
 #include "i_system.h"
 #include "i_video.h"
@@ -56,17 +45,14 @@
 #include "w_wad.h"
 #include "z_zone.h"
 
+
 //
 // Create a directory
 //
 
 void M_MakeDirectory(char *path)
 {
-#ifdef _WIN32
-    mkdir(path);
-#else
     mkdir(path, 0755);
-#endif
 }
 
 // Check if a file exists
@@ -120,19 +106,19 @@ long M_FileLength(FILE *handle)
 boolean M_WriteFile(char *name, void *source, int length)
 {
     FILE *handle;
-    int	count;
-	
+    int count;
+        
     handle = fopen(name, "wb");
 
     if (handle == NULL)
-	return false;
+        return false;
 
     count = fwrite(source, 1, length, handle);
     fclose(handle);
-	
+        
     if (count < length)
-	return false;
-		
+        return false;
+                
     return true;
 }
 
@@ -144,12 +130,12 @@ boolean M_WriteFile(char *name, void *source, int length)
 int M_ReadFile(char *name, byte **buffer)
 {
     FILE *handle;
-    int	count, length;
+    int  count, length;
     byte *buf;
-	
+        
     handle = fopen(name, "rb");
     if (handle == NULL)
-	I_Error ("Couldn't read file %s", name);
+        I_Error ("Couldn't read file %s", name);
 
     // find the size of the file by seeking to the end and
     // reading the current position
@@ -159,10 +145,10 @@ int M_ReadFile(char *name, byte **buffer)
     buf = Z_Malloc (length, PU_STATIC, NULL);
     count = fread(buf, 1, length, handle);
     fclose (handle);
-	
+        
     if (count < length)
-	I_Error ("Couldn't read file %s", name);
-		
+        I_Error ("Couldn't read file %s", name);
+                
     *buffer = buf;
     return length;
 }
@@ -176,22 +162,7 @@ char *M_TempFile(char *s)
 {
     char *tempdir;
 
-#ifdef _WIN32
-
-    // Check the TEMP environment variable to find the location.
-
-    tempdir = getenv("TEMP");
-
-    if (tempdir == NULL)
-    {
-        tempdir = ".";
-    }
-#else
-    // In Unix, just use /tmp.
-
-//    tempdir = "/tmp";
     tempdir = "";
-#endif
 
     return M_StringJoin(tempdir, DIR_SEPARATOR_S, s, NULL);
 }
@@ -215,7 +186,7 @@ void M_ExtractFileBase(char *path, char *dest)
     // back up until a \ or the start
     while (src != path && *(src - 1) != DIR_SEPARATOR)
     {
-	src--;
+        src--;
     }
 
     filename = src;
@@ -232,12 +203,12 @@ void M_ExtractFileBase(char *path, char *dest)
     {
         if (length >= 8)
         {
-            printf("Warning: Truncated '%s' lump name to '%.8s'.\n",
+            C_Printf("Warning: Truncated '%s' lump name to '%.8s'.\n",
                    filename, dest);
             break;
         }
 
-	dest[length++] = toupper((int)*src++);
+        dest[length++] = toupper((int)*src++);
     }
 }
 
@@ -481,13 +452,6 @@ char *M_StringJoin(const char *s, ...)
     return result;
 }
 
-// On Windows, vsnprintf() is _vsnprintf().
-#ifdef _WIN32
-#if _MSC_VER < 1400 /* not needed for Visual Studio 2008 */
-#define vsnprintf _vsnprintf
-#endif
-#endif
-
 // Safe, portable vsnprintf().
 int M_vsnprintf(char *buf, size_t buf_len, const char *s, va_list args)
 {
@@ -525,25 +489,6 @@ int M_snprintf(char *buf, size_t buf_len, const char *s, ...)
     return result;
 }
 
-#ifdef _WIN32
-
-char *M_OEMToUTF8(const char *oem)
-{
-    unsigned int len = strlen(oem) + 1;
-    wchar_t *tmp;
-    char *result;
-
-    tmp = malloc(len * sizeof(wchar_t));
-    MultiByteToWideChar(CP_OEMCP, 0, oem, len, tmp, len);
-    result = malloc(len * 4);
-    WideCharToMultiByte(CP_UTF8, 0, tmp, len, result, len * 4, NULL, NULL);
-    free(tmp);
-
-    return result;
-}
-
-#endif
-
 char *M_DirName(char *path)
 {
     char *src, *res;
@@ -553,17 +498,57 @@ char *M_DirName(char *path)
 
     while (src != res)
     {
-	if (*src == DIR_SEPARATOR)
-	{
-	    *src = '\0';
-	    return res;
-	}
+        if (*src == DIR_SEPARATOR)
+        {
+            *src = '\0';
+            return res;
+        }
 
-	src--;
+        src--;
     }
 
     // path string does not contain a directory separator
     free(res);
     return M_StringDuplicate(".");
+}
+
+char *uppercase(char *str)
+{
+    char        *newstr;
+    char        *p;
+
+    p = newstr = strdup(str);
+    while ((*p = toupper(*p)))
+        p++;
+
+    return newstr;
+}
+
+char *commify(int value)
+{
+    char result[64];
+
+    M_snprintf(result, sizeof(result), "%i", value);
+    if (abs(value) >= 1000)
+    {
+        char        *pt;
+        int         n;
+
+        for (pt = result; *pt && *pt != '.'; pt++);
+        n = result + sizeof(result) - pt;
+        do
+        {
+            pt -= 3;
+            if (pt > result)
+            {
+                memmove(pt + 1, pt, n);
+                *pt = ',';
+                n += 4;
+            }
+            else
+                break;
+        } while (1);
+    }
+    return strdup(result);
 }
 

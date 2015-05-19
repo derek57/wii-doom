@@ -13,7 +13,7 @@
 // GNU General Public License for more details.
 //
 // DESCRIPTION:
-//	System specific interface stuff.
+//        System specific interface stuff.
 //
 
 
@@ -26,12 +26,6 @@
 
 #define hires 1
 
-#define ORIGWIDTH  320
-#define ORIGHEIGHT 200
-
-#define SCREENWIDTH  (ORIGWIDTH << hires)
-#define SCREENHEIGHT (ORIGHEIGHT << hires)
-
 // Screen width used for "squash" scale functions
 
 #define SCREENWIDTH_4_3 (256 << hires)
@@ -39,14 +33,6 @@
 // Screen height used for "stretch" scale functions.
 
 #define SCREENHEIGHT_4_3 (240 << hires)
-/*
-#define SCREENWIDTH  320
-#define SCREENHEIGHT 200
-
-#define SCREENWIDTH_4_3 256
-
-#define SCREENHEIGHT_4_3 240
-*/
 #define MAX_MOUSE_BUTTONS 8
 
 typedef struct
@@ -150,15 +136,17 @@ void I_StartTic (void);
 void I_EnableLoadingDisk(void);
 
 extern char *video_driver;
+
 extern boolean screenvisible;
+extern boolean screensaver_mode;
 
 extern float mouse_acceleration;
-extern int mouse_threshold;
-extern int vanilla_keyboard_mapping;
-extern boolean screensaver_mode;
-extern int usegamma;
+
 extern byte *I_VideoBuffer;
 
+extern int mouse_threshold;
+extern int vanilla_keyboard_mapping;
+extern int usegamma;
 extern int screen_width;
 extern int screen_height;
 extern int screen_bpp;

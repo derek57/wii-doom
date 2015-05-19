@@ -24,8 +24,9 @@
 #include "memio.h"
 #include "mus2mid.h"
 
-#define NUM_CHANNELS 16
+#include "c_io.h"
 
+#define NUM_CHANNELS 16
 #define MIDI_PERCUSSION_CHAN 9
 #define MUS_PERCUSSION_CHAN 15
 
@@ -705,7 +706,7 @@ int main(int argc, char *argv[])
 
     if (argc != 3)
     {
-        printf("Usage: %s <musfile> <midfile>\n", argv[0]);
+        C_Printf("Usage: %s <musfile> <midfile>\n", argv[0]);
         exit(-1);
     }
 
@@ -718,7 +719,7 @@ int main(int argc, char *argv[])
 
     if (mus2mid(src, dst))
     {
-        fprintf(statsfile, "mus2mid() failed\n");
+        C_Printf("mus2mid() failed\n");
         exit(-1);
     }
 

@@ -20,15 +20,17 @@
 // 02111-1307, USA.
 //
 // DESCRIPTION:
-//	WAD I/O functions.
+//        WAD I/O functions.
 //
 //-----------------------------------------------------------------------------
+
 
 #include <stdio.h>
 
 #include "m_misc.h"
 #include "w_file.h"
 #include "z_zone.h"
+
 
 typedef struct
 {

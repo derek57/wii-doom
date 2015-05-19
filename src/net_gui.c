@@ -28,7 +28,6 @@
 #include "i_system.h"
 #include "i_timer.h"
 #include "i_video.h"
-#include "m_argv.h"
 #include "m_misc.h"
 
 #include "net_client.h"
@@ -37,6 +36,7 @@
 #include "net_server.h"
 
 #include "doomfeatures.h"
+#include "c_io.h"
 /*
 #include "textscreen.h"
 
@@ -231,17 +231,17 @@ static void CheckMasterStatus(void)
 */
     if (added)
     {
-        printf("Your server is now registered with the global master server.\n"
+        C_Printf("Your server is now registered with the global master server.\n"
             "Other players can find your server online.");
-	sleep(1);
+        sleep(1);
     }
     else
     {
-	printf("Failed to register with the master server. Your server is not\n"
+        C_Printf("Failed to register with the master server. Your server is not\n"
             "publicly accessible. You may need to reconfigure your Internet\n"
             "router to add a port forward for UDP port 2342. Look up\n"
             "information on port forwarding online.");
-	sleep(1);
+        sleep(1);
     }
 }
 /*

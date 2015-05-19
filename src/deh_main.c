@@ -23,13 +23,14 @@
 #include "doomtype.h"
 #include "i_system.h"
 #include "d_iwad.h"
-#include "m_argv.h"
 #include "w_wad.h"
 
 #include "deh_defs.h"
 #include "deh_io.h"
 
 #include "doomdef.h"
+
+#include "c_io.h"
 
 extern deh_section_t *deh_section_types[];
 extern char *deh_signatures[];
@@ -89,17 +90,6 @@ static void InitializeSections(void)
 
 /*static*/ void DEH_Init(void)
 {
-    //!
-    // @category mod
-    //
-    // Ignore cheats in dehacked files.
-    //
-
-    if (M_CheckParm("-nocheats") > 0) 
-    {
-	deh_apply_cheats = false;
-    }
-
     // Call init functions for all the section definitions.
     InitializeSections();
 
@@ -391,14 +381,14 @@ int DEH_LoadFile(char *filename)
     deh_allow_long_cheats = false;
     deh_allow_extended_strings = false;
 
-//    printf(" loading %s\n", filename);
+    C_Printf(" loading %s\n", filename);
     show_deh_loading_message = 1;
 
     context = DEH_OpenFile(filename);
 
     if (context == NULL)
     {
-        fprintf(statsfile, "DEH_LoadFile: Unable to open %s\n", filename);
+        C_Printf("DEH_LoadFile: Unable to open %s\n", filename);
         return 0;
     }
 
@@ -435,7 +425,7 @@ int DEH_LoadLump(int lumpnum, boolean allow_long, boolean allow_error)
 
     if (context == NULL)
     {
-        fprintf(statsfile, "DEH_LoadFile: Unable to open lump %i\n", lumpnum);
+        C_Printf("DEH_LoadFile: Unable to open lump %i\n", lumpnum);
         return 0;
     }
 
@@ -461,38 +451,10 @@ int DEH_LoadLumpByName(char *name, boolean allow_long, boolean allow_error)
 
     if (lumpnum == -1)
     {
-        fprintf(statsfile, "DEH_LoadLumpByName: '%s' lump not found\n", name);
+        C_Printf("DEH_LoadLumpByName: '%s' lump not found\n", name);
         return 0;
     }
 
     return DEH_LoadLump(lumpnum, allow_long, allow_error);
-}
-
-// Check the command line for -deh argument, and others.
-void DEH_ParseCommandLine(void)
-{
-    char *filename;
-    int p;
-
-    //!
-    // @arg <files>
-    // @category mod
-    //
-    // Load the given dehacked patch(es)
-    //
-
-    p = M_CheckParm("-deh");
-
-    if (p > 0)
-    {
-        ++p;
-
-        while (p < myargc && myargv[p][0] != '-')
-        {
-            filename = D_TryFindWADByName(myargv[p]);
-            DEH_LoadFile(filename);
-            ++p;
-        }
-    }
 }
 

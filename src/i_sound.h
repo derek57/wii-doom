@@ -13,7 +13,7 @@
 // GNU General Public License for more details.
 //
 // DESCRIPTION:
-//	The not so system specific sound interface.
+//        The not so system specific sound interface.
 //
 
 
@@ -26,7 +26,7 @@
 //
 // SoundFX struct.
 //
-typedef struct sfxinfo_struct	sfxinfo_t;
+typedef struct sfxinfo_struct        sfxinfo_t;
 
 struct sfxinfo_struct
 {
@@ -56,7 +56,7 @@ struct sfxinfo_struct
     int usefulness;
 
     // lump number of sfx
-    int lumpnum;		
+    int lumpnum;                
 
     // Maximum number of channels that the sound can be played on 
     // (Heretic)

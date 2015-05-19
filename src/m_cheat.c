@@ -20,7 +20,7 @@
 // 02111-1307, USA.
 //
 // DESCRIPTION:
-//	Cheat sequence checking.
+//        Cheat sequence checking.
 //
 //-----------------------------------------------------------------------------
 
@@ -41,8 +41,8 @@
 //
 int
 cht_CheckCheat
-( cheatseq_t*	cht,
-  char		key )
+( cheatseq_t*   cht,
+  char          key )
 {
     // if we make a short sequence on a cheat with parameters, this 
     // will not work in vanilla doom.  behave the same.
@@ -88,8 +88,8 @@ cht_CheckCheat
 
 void
 cht_GetParam
-( cheatseq_t*	cht,
-  char*		buffer )
+( cheatseq_t*   cht,
+  char*         buffer )
 {
     memcpy(buffer, cht->parameter_buf, cht->parameter_chars);
 }

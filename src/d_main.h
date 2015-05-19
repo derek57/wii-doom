@@ -20,7 +20,7 @@
 // 02111-1307, USA.
 //
 // DESCRIPTION:
-//	System specific interface stuff.
+//        System specific interface stuff.
 //
 //-----------------------------------------------------------------------------
 
@@ -36,7 +36,7 @@
 // Read events from all input devices
 
 void D_ProcessEvents (void); 
-	
+        
 
 //
 // BASE LEVEL
@@ -46,7 +46,9 @@ void D_PageDrawer (void);
 void D_AdvanceDemo (void);
 void D_DoAdvanceDemo (void);
 void D_StartTitle (void);
- 
+void D_DoomMain (void);
+void D_DoomLoop (void);
+
 //
 // GLOBAL VARIABLES
 //

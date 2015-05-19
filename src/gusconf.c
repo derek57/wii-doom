@@ -21,16 +21,16 @@
 //
 
 
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
-
-#include "w_wad.h"
-#include "z_zone.h"
-#include "m_misc.h"
 
 #include "c_io.h"
+#include "m_misc.h"
+#include "w_wad.h"
+#include "z_zone.h"
+
 
 #define MAX_INSTRUMENTS 256
 
@@ -41,6 +41,7 @@ typedef struct
 } gus_config_t;
 
 char *gus_patch_path = "";
+
 int gus_ram_kb = 1024;
 
 extern boolean usb;
@@ -209,9 +210,9 @@ static boolean WriteTimidityConfig(char *path, gus_config_t *config)
     unsigned int i;
 
     if(usb)
-	gus_patch_path = "usb:/apps/wiidoom/gus";
+        gus_patch_path = "usb:/apps/wiidoom/gus";
     else if(sd)
-	gus_patch_path = "sd:/apps/wiidoom/gus";
+        gus_patch_path = "sd:/apps/wiidoom/gus";
 
     fstream = fopen(path, "w");
 
@@ -262,9 +263,9 @@ boolean GUS_WriteConfig(char *path)
     gus_config_t config;
 
     if(usb)
-	gus_patch_path = "usb:/apps/wiidoom/gus";
+        gus_patch_path = "usb:/apps/wiidoom/gus";
     else if(sd)
-	gus_patch_path = "sd:/apps/wiidoom/gus";
+        gus_patch_path = "sd:/apps/wiidoom/gus";
 
     if (!strcmp(gus_patch_path, ""))
     {

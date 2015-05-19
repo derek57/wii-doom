@@ -26,6 +26,8 @@
 #include "deh_io.h"
 #include "deh_main.h"
 
+#include "c_io.h"
+
 static actionf_t codeptrs[NUMSTATES];
 
 static int CodePointerIndex(actionf_t *ptr)
@@ -95,7 +97,7 @@ static void DEH_PointerParseLine(deh_context_t *context, char *line, void *tag)
         return;
     }
     
-//    printf("Set %s to %s for state\n", variable_name, value);
+    C_Printf("Set %s to %s for state\n", variable_name, value);
 
     // all values are integers
 

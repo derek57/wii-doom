@@ -1,11 +1,10 @@
-//#include <pspdebug.h>
 #include <stdio.h>
-#include "md5.h"
+
 #include "doomdef.h"
+#include "md5.h"
 
-//#define printf pspDebugScreenPrintf
 
-extern char		target[MAXPATH];
+extern char                target[MAXPATH];
 
 char calculated_md5_string[33];
 char known_md5_string_chex_quest_iwad[33] = "25485721882b050afa96a56e5758dd52";
@@ -58,24 +57,17 @@ char known_md5_string_hacx_reg_1_2_iwad[33] = "65ed74d522bdf6649c2831b13b9e02b4"
 char known_md5_string_nerve_bfg_pwad[33] = "967d5ae23daf45196212ae1b605da3b0";
 char known_md5_string_nerve_xbox360_pwad[33] = "4f47bb32bf5fd06bc1cc0b4a2e8e3910";
 
-int MD5_Check(char *final)		// FOR PSP: THIS FUNCTION DEFINITELY WORKS, BUT IT WAS NEVER USED - MAYBE FUTURE
+int MD5_Check(char *final)
 {
     int i;
     int bytes;
-//    char *filename = target;
+
     unsigned char c[MD5_DIGEST_LENGTH];
     unsigned char data[1024];
 
     FILE *inFile = fopen (final, "rb");
 
     MD5_CTX mdContext;
-
-//    if (inFile == NULL)
-//    {
-//        printf("%s can't be opened.\n", filename);
-
-//        return 0;
-//    }
 
     MD5_Init(&mdContext);
 
@@ -85,19 +77,8 @@ int MD5_Check(char *final)		// FOR PSP: THIS FUNCTION DEFINITELY WORKS, BUT IT W
     MD5_Final(c, &mdContext);
 
     for (i = 0; i < MD5_DIGEST_LENGTH; i++)
-	sprintf(&calculated_md5_string[i * 2], "%02x", (unsigned int)c[i]);
-/*
-    if(strncmp(calculated_md5_string, known_md5_string_hexen_1_1_iwad, 32) == 0)
-	printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\nMD5 MATCH!\n");
-    else
-	printf("\nMD5 FAIL!\n");
+        sprintf(&calculated_md5_string[i * 2], "%02x", (unsigned int)c[i]);
 
-    printf("%s\n", known_md5_string_hexen_1_1_iwad);
-
-    printf("%s\n", calculated_md5_string);
-
-    printf("%s\n", final);
-*/
     fclose(inFile);
 
     return 0;

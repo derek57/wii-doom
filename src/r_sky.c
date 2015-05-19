@@ -36,17 +36,17 @@
 // Needed for Flat retrieval.
 #include "r_data.h"
 
-
 #include "r_sky.h"
+
 
 //
 // sky mapping
 //
-int			skyflatnum;
-int			skytexture;
-int			skytexturemid;
+int                     skyflatnum;
+int                     skytexture;
+int                     skytexturemid;
 
-extern int mouselook;
+extern int              mouselook;
 
 //
 // R_InitSkyMap
@@ -55,7 +55,7 @@ extern int mouselook;
 void R_InitSkyMap (void)
 {
   // skyflatnum = R_FlatNumForName ( SKYFLATNAME );
-//    skytexturemid = 100*FRACUNIT;
+
     if (mouselook > 0)
         skytexturemid = -28*FRACUNIT * 128 / 228;
     else

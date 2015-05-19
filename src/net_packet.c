@@ -16,11 +16,12 @@
 //
 
 #include <string.h>
+
+#include "doomfeatures.h"
 #include "m_misc.h"
 #include "net_packet.h"
 #include "z_zone.h"
 
-#include "doomfeatures.h"
 
 static int total_packet_memory = 0;
 

@@ -24,10 +24,12 @@
 //
 //-----------------------------------------------------------------------------
 
+
 #include <SDL/SDL.h>
 
-#include "i_timer.h"
 #include "doomtype.h"
+#include "i_timer.h"
+
 
 //
 // I_GetTime

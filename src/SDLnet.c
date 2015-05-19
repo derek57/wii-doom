@@ -30,6 +30,8 @@
 #include <stdarg.h>
 #endif
 
+void C_Printf(char *s, ...);
+
 const SDLNet_version *SDLNet_Linked_Version(void)
 {
     static SDLNet_version linked_version;
@@ -69,7 +71,7 @@ void SDLCALL SDLNet_SetError(const char *fmt, ...)
     SDL_vsnprintf(errorbuf, sizeof(errorbuf), fmt, argp);
     va_end(argp);
 #ifndef WITHOUT_SDL
-    printf("%s", errorbuf);
+    C_Printf("%s", errorbuf);
     sleep(1);
 #endif
 }
@@ -95,10 +97,10 @@ char ipaddress_text[16];
 
 // >>> FIX: For Nintendo Wii using devkitPPC / libogc
 // Adding stuff supposed to be present on the previously removed headers:
-#define MAXHOSTNAMELEN	256
+#define MAXHOSTNAMELEN        256
 // <<< FIX
 
-#define	NET_NAMELEN 64
+#define        NET_NAMELEN 64
 
 char my_tcpip_address[NET_NAMELEN];
 
@@ -106,8 +108,6 @@ static int net_controlsocket;
 //static struct sockaddr broadcastaddr;
 
 void I_Error (char *error, ...);
-
-int M_CheckParm(char *check);
 
 //int SDLNet_UDP_Open(Uint16 port);
 
@@ -123,7 +123,7 @@ int  SDLNet_Init(void)
 
         if ( WSAStartup(version_wanted, &wsaData) != 0 ) {
             printf("Couldn't initialize Winsock 1.1\n");
-	    sleep(1);
+            sleep(1);
             return(-1);
         }
 #else
@@ -142,67 +142,64 @@ int  SDLNet_Init(void)
 */
 // >>> FIX: For Nintendo Wii using devkitPPC / libogc
 // This variable is not needed in the current implementation:
-	//struct hostent *local;
+        //struct hostent *local;
 // <<< FIX
-	char	buff[MAXHOSTNAMELEN];
+        char        buff[MAXHOSTNAMELEN];
 // >>> FIX: For Nintendo Wii using devkitPPC / libogc
 // This variable is not needed in the current implementation:
-	//struct qsockaddr addr;
+        //struct qsockaddr addr;
 // <<< FIX
-	char *colon;
-	
-	if (M_CheckParm ("-noudp"))
-		return -1;
-
-	do
-	{
-		netinit_error = if_config(ipaddress_text, NULL, NULL, TRUE);
-	} while(netinit_error == -EAGAIN);
+        char *colon;
+        
+        do
+        {
+                netinit_error = if_config(ipaddress_text, NULL, NULL, TRUE);
+        } while(netinit_error == -EAGAIN);
 
 // >>> FIX: For Nintendo Wii using devkitPPC / libogc
 // Signal as uninitialized if if_config() failed previously:
-	if(netinit_error < 0)
-	{
-		printf("UDP_Init: if_config() failed with %i", netinit_error);
-		sleep(1);
-		return -1;
-	};
+        if(netinit_error < 0)
+        {
+                C_Printf("UDP_Init: if_config() failed with %i", netinit_error);
+                sleep(1);
+                return -1;
+        };
 // <<< FIX
 
-	// determine my name & address
+        // determine my name & address
 // >>> FIX: For Nintendo Wii using devkitPPC / libogc
 // Since we don't currently have a gethostname(), or equivalent, function, let's just paste the IP address of the device:
-	//gethostname(buff, MAXHOSTNAMELEN);
-	//local = gethostbyname(buff);
-	//myAddr = *(int *)local->h_addr_list[0];
-	strcpy(buff, ipaddress_text);
+        //gethostname(buff, MAXHOSTNAMELEN);
+        //local = gethostbyname(buff);
+        //myAddr = *(int *)local->h_addr_list[0];
+        strcpy(buff, ipaddress_text);
 // <<< FIX
 
-	// if the quake hostname isn't set, set it to the machine name
-//	if (strcmp(hostname.string, "UNNAMED") == 0)
-	{
-//		buff[15] = "hostname";
-//		Cvar_Set ("hostname", buff);
-	}
+        // if the quake hostname isn't set, set it to the machine name
+//        if (strcmp(hostname.string, "UNNAMED") == 0)
+        {
+//                buff[15] = "hostname";
+//                Cvar_Set ("hostname", buff);
+        }
 /*
-	if ((net_controlsocket = SDLNet_UDP_Open (0)) == -1)
-		I_Error("UDP_Init: Unable to open control socket\n");
+        if ((net_controlsocket = SDLNet_UDP_Open (0)) == -1)
+                I_Error("UDP_Init: Unable to open control socket\n");
 */
 // >>> FIX: For Nintendo Wii using devkitPPC / libogc
 // Since we can't bind anything to port 0, the following line does not work. Replacing:
-	//UDP_GetSocketAddr (net_controlsocket, &addr);
-	//strcpy(my_tcpip_address,  UDP_AddrToString (&addr));
-	strcpy(my_tcpip_address, buff);
+        //UDP_GetSocketAddr (net_controlsocket, &addr);
+        //strcpy(my_tcpip_address,  UDP_AddrToString (&addr));
+        strcpy(my_tcpip_address, buff);
 // <<< FIX
-	colon = strrchr (my_tcpip_address, ':');
-	if (colon)
-		*colon = 0;
+        colon = strrchr (my_tcpip_address, ':');
+        if (colon)
+                *colon = 0;
 
-	printf("UDP Initialized\n");
-	sleep(1);
-//	tcpipAvailable = TRUE;
+        C_Printf("UDP Initialized\n");
+        sleep(1);
+//        tcpipAvailable = TRUE;
 
-	return net_controlsocket;
+        return net_controlsocket;
 }
 void SDLNet_Quit(void)
 {
@@ -238,8 +235,8 @@ int SDLNet_ResolveHost(IPaddress *address, const char *host, Uint16 port)
 
     /* Perform the actual host resolution */
     if ( host == NULL ) {
-	printf("Host is NULL\n");
-	sleep(1);
+        C_Printf("Host is NULL\n");
+        sleep(1);
         address->host = INADDR_ANY;
     } else {
         address->host = inet_addr(host);
@@ -250,8 +247,8 @@ int SDLNet_ResolveHost(IPaddress *address, const char *host, Uint16 port)
             if ( hp ) {
                 memcpy(&address->host,hp->h_addr,hp->h_length);
             } else {
-		printf("Couldn't resolve host\n");
-		sleep(1);
+                C_Printf("Couldn't resolve host\n");
+                sleep(1);
                 retval = -1;
             }
         }
@@ -292,7 +289,7 @@ const char *SDLNet_ResolveIP(const IPaddress *ip)
     strcpy (name, (const char *)&ip->host);
 
     hp->h_name = name;
-	return 0;
+        return 0;
 }
 
 int SDLNet_GetLocalAddresses(IPaddress *addresses, int maxcount)

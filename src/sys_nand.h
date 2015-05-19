@@ -3,15 +3,15 @@
 
 /* 'NAND Device' structure */
 typedef struct {
-	/* Device name */
-	char *name;
+    /* Device name */
+    char *name;
 
-	/* Mode value */
-	u32 mode;
+    /* Mode value */
+    u32 mode;
 
-	/* Un/mount command */
-	u32 mountCmd;
-	u32 umountCmd;
+    /* Un/mount command */
+    u32 mountCmd;
+    u32 umountCmd;
 } nandDevice; 
 
 

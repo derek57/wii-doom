@@ -35,13 +35,13 @@
 #define AM_MSGENTERED (AM_MSGHEADER | ('e'<<8))
 #define AM_MSGEXITED (AM_MSGHEADER | ('x'<<8))
 
-#define AM_PANDOWNKEY	0xaf
-#define AM_PANUPKEY	KEY_UPARROW
-#define AM_PANRIGHTKEY	KEY_RIGHTARROW
-#define AM_PANLEFTKEY	KEY_LEFTARROW
-#define AM_ZOOMINKEY	'/'
-#define AM_ZOOMOUTKEY	' '
-#define AM_ENDKEY	KEY_TAB
+#define AM_PANDOWNKEY   0xaf
+#define AM_PANUPKEY     KEY_UPARROW
+#define AM_PANRIGHTKEY  KEY_RIGHTARROW
+#define AM_PANLEFTKEY   KEY_LEFTARROW
+#define AM_ZOOMINKEY    '/'
+#define AM_ZOOMOUTKEY   ' '
+#define AM_ENDKEY       KEY_TAB
 
 // Called by main loop.
 boolean AM_Responder (event_t* ev);
@@ -57,6 +57,9 @@ void AM_Drawer (void);
 // if the level is completed while it is up.
 void AM_Stop (void);
 
+void AM_Start (void);
+
+void DrawWorldTimer(void);
 
 extern cheatseq_t cheat_amap;
 

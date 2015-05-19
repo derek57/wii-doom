@@ -1,10 +1,12 @@
+#include <fat.h>
+#include <sdcard/wiisd_io.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <wiiuse/wpad.h>
-#include <sdcard/wiisd_io.h>
-#include <fat.h>
+
+#include "i_wiimain.h"
 
 bool sd = false;
 bool usb = false;
@@ -31,13 +33,13 @@ int wii_main()
     fp2 = fopen("sd:/apps/wiidoom/pspdoom.wad", "rb");
 
     if(fp2)
-	sd = true;
+        sd = true;
 
     if(!fp2)
-	fp2 = fopen("usb:/apps/wiidoom/pspdoom.wad", "rb");
+        fp2 = fopen("usb:/apps/wiidoom/pspdoom.wad", "rb");
 
     if(fp2 && !sd)
-	usb = true;
+        usb = true;
 
     return 0;
 }

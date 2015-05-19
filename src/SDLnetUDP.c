@@ -47,6 +47,8 @@ struct _UDPsocket {
     int packetloss;
 };
 
+void C_Printf(char *s, ...);
+
 /* Allocate/free a single UDP packet 'size' bytes long.
    The new packet is returned, or NULL if the function ran out of memory.
  */
@@ -66,8 +68,8 @@ extern UDPpacket *SDLNet_AllocPacket(int size)
         }
     }
     if ( error ) {
-        printf("Out of memory");
-	sleep(1);
+        C_Printf("Out of memory");
+        sleep(1);
         SDLNet_FreePacket(packet);
         packet = NULL;
     }
@@ -114,8 +116,8 @@ UDPpacket **SDLNet_AllocPacketV(int howmany, int size)
         packetV[i] = NULL;
 
         if ( i != howmany ) {
-            printf("Out of memory");
-	    sleep(1);
+            C_Printf("Out of memory");
+            sleep(1);
             SDLNet_FreePacketV(packetV);
             packetV = NULL;
         }
@@ -151,7 +153,7 @@ UDPsocket SDLNet_UDP_Open(Uint16 port)
     sock = (UDPsocket)malloc(sizeof(*sock));
     if ( sock == NULL ) {
         printf("Out of memory");
-	sleep(1);
+        sleep(1);
         goto error_return;
     }
     memset(sock, 0, sizeof(*sock));
@@ -162,7 +164,7 @@ UDPsocket SDLNet_UDP_Open(Uint16 port)
     if ( sock->channel == INVALID_SOCKET )
     {
         printf("Couldn't create socket");
-	sleep(1);
+        sleep(1);
         goto error_return;
     }
 
@@ -175,7 +177,7 @@ UDPsocket SDLNet_UDP_Open(Uint16 port)
     if ( net_bind(sock->channel, (struct sockaddr *)&sock_addr,
             sizeof(sock_addr)) == SOCKET_ERROR ) {
         printf("Couldn't bind to local port");
-	sleep(1);
+        sleep(1);
         goto error_return;
     }
 
@@ -228,97 +230,97 @@ error_return:
 
 UDPsocket SDLNet_UDP_Open(Uint16 port)
 {
-	UDPsocket newsocket;
-	struct sockaddr_in address;
-	bool _TRUE = TRUE;
+        UDPsocket newsocket;
+        struct sockaddr_in address;
+        bool _TRUE = TRUE;
 
-	newsocket = (UDPsocket)malloc(sizeof(*newsocket));
+        newsocket = (UDPsocket)malloc(sizeof(*newsocket));
 
 // >>> FIX: For Nintendo Wii using devkitPPC / libogc
 // Switching to the equivalent function in the library (and using supported parameters):
-	//if ((newsocket = socket (PF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1)
-	if ((newsocket->channel = net_socket (PF_INET, SOCK_DGRAM, IPPROTO_IP)) < 0)
+        //if ((newsocket = socket (PF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1)
+        if ((newsocket->channel = net_socket (PF_INET, SOCK_DGRAM, IPPROTO_IP)) < 0)
 // <<< FIX
-		return(NULL);
+                return(NULL);
 
 // >>> FIX: For Nintendo Wii using devkitPPC / libogc
 // Switching to the equivalent function in the library:
-	//if (ioctl (newsocket, FIONBIO, (char *)&_TRUE) == -1)
-	if (net_ioctl (newsocket->channel, FIONBIO, (char *)&_TRUE) < 0)
+        //if (ioctl (newsocket, FIONBIO, (char *)&_TRUE) == -1)
+        if (net_ioctl (newsocket->channel, FIONBIO, (char *)&_TRUE) < 0)
 // <<< FIX
-		goto ErrorReturn;
+                goto ErrorReturn;
 
 // >>> FIX: For Nintendo Wii using devkitPPC / libogc
 // Do not bind the socket if port == 0 (part 1):
-	if(port > 0) 
-	{
+        if(port > 0) 
+        {
 // <<< FIX
-	address.sin_family = AF_INET;
-	address.sin_addr.s_addr = INADDR_ANY;
-	address.sin_port = htons(port);
+        address.sin_family = AF_INET;
+        address.sin_addr.s_addr = INADDR_ANY;
+        address.sin_port = htons(port);
 // >>> FIX: For Nintendo Wii using devkitPPC / libogc
 // Switching to the equivalent function in the library:
-	//if( bind (newsocket, (void *)&address, sizeof(address)) == -1)
-	if( net_bind (newsocket->channel, (void *)&address, sizeof(address)) < 0)
+        //if( bind (newsocket, (void *)&address, sizeof(address)) == -1)
+        if( net_bind (newsocket->channel, (void *)&address, sizeof(address)) < 0)
 // <<< FIX
-		goto ErrorReturn;
+                goto ErrorReturn;
 
 // >>> FIX: For Nintendo Wii using devkitPPC / libogc
 // Do not bind the socket if port == 0 (part 2):
-	}
+        }
 // <<< FIX
-	return newsocket;
+        return newsocket;
 
 ErrorReturn:
         SDLNet_UDP_Close(newsocket);
-	return (NULL);
+        return (NULL);
 }
 
 /*
 int SDLNet_UDP_Open(Uint16 port)
 {
-	int newsocket;
-	struct sockaddr_in address;
-	bool _TRUE = TRUE;
+        int newsocket;
+        struct sockaddr_in address;
+        bool _TRUE = TRUE;
 
 // >>> FIX: For Nintendo Wii using devkitPPC / libogc
 // Switching to the equivalent function in the library (and using supported parameters):
-	//if ((newsocket = socket (PF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1)
-	if ((newsocket = net_socket (PF_INET, SOCK_DGRAM, IPPROTO_IP)) < 0)
+        //if ((newsocket = socket (PF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1)
+        if ((newsocket = net_socket (PF_INET, SOCK_DGRAM, IPPROTO_IP)) < 0)
 // <<< FIX
-		return -1;
+                return -1;
 
 // >>> FIX: For Nintendo Wii using devkitPPC / libogc
 // Switching to the equivalent function in the library:
-	//if (ioctl (newsocket, FIONBIO, (char *)&_TRUE) == -1)
-	if (net_ioctl (newsocket, FIONBIO, (char *)&_TRUE) < 0)
+        //if (ioctl (newsocket, FIONBIO, (char *)&_TRUE) == -1)
+        if (net_ioctl (newsocket, FIONBIO, (char *)&_TRUE) < 0)
 // <<< FIX
-		goto ErrorReturn;
+                goto ErrorReturn;
 
 // >>> FIX: For Nintendo Wii using devkitPPC / libogc
 // Do not bind the socket if port == 0 (part 1):
-	if(port > 0) 
-	{
+        if(port > 0) 
+        {
 // <<< FIX
-	address.sin_family = AF_INET;
-	address.sin_addr.s_addr = INADDR_ANY;
-	address.sin_port = htons(port);
+        address.sin_family = AF_INET;
+        address.sin_addr.s_addr = INADDR_ANY;
+        address.sin_port = htons(port);
 // >>> FIX: For Nintendo Wii using devkitPPC / libogc
 // Switching to the equivalent function in the library:
-	//if( bind (newsocket, (void *)&address, sizeof(address)) == -1)
-	if( net_bind (newsocket, (void *)&address, sizeof(address)) < 0)
+        //if( bind (newsocket, (void *)&address, sizeof(address)) == -1)
+        if( net_bind (newsocket, (void *)&address, sizeof(address)) < 0)
 // <<< FIX
-		goto ErrorReturn;
+                goto ErrorReturn;
 
 // >>> FIX: For Nintendo Wii using devkitPPC / libogc
 // Do not bind the socket if port == 0 (part 2):
-	}
+        }
 // <<< FIX
-	return newsocket;
+        return newsocket;
 
 ErrorReturn:
         close(newsocket);
-	return -1;
+        return -1;
 }
 */
 void SDLNet_UDP_SetPacketLoss(UDPsocket sock, int percent)
@@ -341,8 +343,8 @@ void SDLNet_UDP_SetPacketLoss(UDPsocket sock, int percent)
 static int ValidChannel(int channel)
 {
     if ( (channel < 0) || (channel >= SDLNET_MAX_UDPCHANNELS) ) {
-        printf("Invalid channel");
-	sleep(1);
+        C_Printf("Invalid channel");
+        sleep(1);
         return(0);
     }
     return(1);
@@ -363,8 +365,8 @@ int SDLNet_UDP_Bind(UDPsocket sock, int channel, const IPaddress *address)
     struct UDP_channel *binding;
 
     if ( sock == NULL ) {
-        printf("Passed a NULL socket");
-	sleep(1);
+        C_Printf("Passed a NULL socket");
+        sleep(1);
         return(-1);
     }
 
@@ -382,8 +384,8 @@ int SDLNet_UDP_Bind(UDPsocket sock, int channel, const IPaddress *address)
         binding = &sock->binding[channel];
     }
     if ( binding->numbound == SDLNET_MAX_UDPADDRESSES ) {
-        printf("No room for new addresses");
-	sleep(1);
+        C_Printf("No room for new addresses");
+        sleep(1);
         return(-1);
     }
     binding->address[binding->numbound++] = *address;
@@ -439,8 +441,8 @@ int SDLNet_UDP_SendV(UDPsocket sock, UDPpacket **packets, int npackets)
     struct sockaddr_in sock_addr;
 
     if ( sock == NULL ) {
-        printf("Passed a NULL socket");
-	sleep(1);
+        C_Printf("Passed a NULL socket");
+        sleep(1);
         return(0);
     }
 
@@ -479,8 +481,8 @@ int SDLNet_UDP_SendV(UDPsocket sock, UDPpacket **packets, int npackets)
         {
             /* Send to each of the bound addresses on the channel */
 //#ifdef DEBUG_NET
-            printf("SDLNet_UDP_SendV sending packet to channel = %d\n", packets[i]->channel );
-//	    sleep(1);
+            C_Printf("SDLNet_UDP_SendV sending packet to channel = %d\n", packets[i]->channel );
+//            sleep(1);
 //#endif
 
             binding = &sock->binding[packets[i]->channel];

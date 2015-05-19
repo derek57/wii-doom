@@ -24,33 +24,27 @@
 //
 //-----------------------------------------------------------------------------
 
+
 #include <stdlib.h>
 #include <string.h>
 
+#include "c_io.h"
 #include "doomfeatures.h"
-
 #include "d_event.h"
 #include "d_loop.h"
 #include "d_ticcmd.h"
-
 #include "i_system.h"
 #include "i_timer.h"
 #include "i_video.h"
-
-#include "m_argv.h"
 #include "m_fixed.h"
-
 #include "net_client.h"
 #include "net_gui.h"
 #include "net_io.h"
+#include "net_loop.h"
 #include "net_query.h"
 #include "net_server.h"
 #include "net_sdl.h"
-#include "net_loop.h"
 
-extern boolean privateserverflag;
-extern boolean multiplayerflag;
-extern boolean devparm_net;
 
 // The complete set of data for a particular tic.
 
@@ -69,41 +63,37 @@ typedef struct
 // from all players.
 //
 
-static ticcmd_set_t ticdata[BACKUPTICS];
-
 // The index of the next tic to be made (with a call to BuildTiccmd).
 
-static int maketic;
+static int      maketic;
 
 // The number of complete tics received from the server so far.
 
-static int recvtic;
-
-// The number of tics that have been run (using RunTic) so far.
-
-int gametic;
-
-// When set to true, a single tic is run each time TryRunTics() is called.
-// This is used for -timedemo mode.
-
-boolean singletics = false;
+static int      recvtic;
 
 // Index of the local player.
 
-static int localplayer;
+static int      localplayer;
 
 // Used for original sync code.
 
 static int      skiptics = 0;
 
-// Reduce the bandwidth needed by sampling game input less and transmitting
-// less.  If ticdup is 2, sample half normal, 3 = one third normal, etc.
+static int      frameon;
+static int      frameskip[4];
+static int      oldnettics;
 
-int		ticdup;
+// Requested player class "sent" to the server on connect.
+// If we are only doing a single player game then this needs to be remembered
+// and saved in the game settings.
 
-// Amount to offset the timer for game sync.
+static int      player_class;
 
-fixed_t         offsetms;
+// Current players in the multiplayer game.
+// This is distinct from playeringame[] used by the game code, which may
+// modify playeringame[] when playing back multiplayer demos.
+
+static boolean  local_playeringame[NET_MAXPLAYERS];
 
 // Use new client syncronisation code
 
@@ -113,18 +103,30 @@ static boolean  new_sync = true;
 
 static loop_interface_t *loop_interface = NULL;
 
-// Current players in the multiplayer game.
-// This is distinct from playeringame[] used by the game code, which may
-// modify playeringame[] when playing back multiplayer demos.
+static ticcmd_set_t ticdata[BACKUPTICS];
 
-static boolean local_playeringame[NET_MAXPLAYERS];
+// The number of tics that have been run (using RunTic) so far.
 
-// Requested player class "sent" to the server on connect.
-// If we are only doing a single player game then this needs to be remembered
-// and saved in the game settings.
+int             gametic;
 
-static int player_class;
+// Reduce the bandwidth needed by sampling game input less and transmitting
+// less.  If ticdup is 2, sample half normal, 3 = one third normal, etc.
 
+int             ticdup;
+int             lasttime;
+
+// When set to true, a single tic is run each time TryRunTics() is called.
+// This is used for -timedemo mode.
+
+boolean         singletics = false;
+
+// Amount to offset the timer for game sync.
+
+fixed_t         offsetms;
+
+extern boolean  privateserverflag;
+extern boolean  multiplayerflag;
+extern boolean  devparm_net;
 
 // 35 fps clock adjusted by offsetms milliseconds
 
@@ -136,8 +138,8 @@ static int GetAdjustedTime(void)
 
     if (new_sync)
     {
-	// Use the adjustments from net_client.c only if we are
-	// using the new sync mode.
+        // Use the adjustments from net_client.c only if we are
+        // using the new sync mode.
 
         time_ms += (offsetms / FRACUNIT);
     }
@@ -147,7 +149,7 @@ static int GetAdjustedTime(void)
 
 static boolean BuildNewTic(void)
 {
-    int	gameticdiv;
+    int      gameticdiv;
     ticcmd_t cmd;
 
     gameticdiv = gametic/ticdup;
@@ -215,13 +217,11 @@ static boolean BuildNewTic(void)
 // Builds ticcmds for console player,
 // sends out a packet
 //
-int      lasttime;
-
 void NetUpdate (void)
 {
     int nowtime;
     int newtics;
-    int	i;
+    int i;
 
     // If we are running with singletics (timing a demo), this
     // is all done separately.
@@ -281,7 +281,7 @@ static void D_Disconnected(void)
 
     // disconnected from server
 
-    printf("Disconnected from server.\n");
+    C_Printf("Disconnected from server.\n");
 }
 
 //
@@ -373,10 +373,7 @@ void D_StartNetGame(net_gamesettings_t *settings,
     // Use original game sync code.
     //
 
-    if (M_CheckParm("-oldsync") > 0)
-	settings->new_sync = 0;
-    else
-	settings->new_sync = 1;
+    settings->new_sync = 1;
 
     //!
     // @category net
@@ -386,12 +383,7 @@ void D_StartNetGame(net_gamesettings_t *settings,
     // packets.
     //
 
-    i = M_CheckParmWithArgs("-extratics", 1);
-
-    if (i > 0)
-        settings->extratics = atoi(myargv[i+1]);
-    else
-        settings->extratics = 1;
+    settings->extratics = 1;
 
     //!
     // @category net
@@ -401,12 +393,7 @@ void D_StartNetGame(net_gamesettings_t *settings,
     // the amount of network bandwidth needed.
     //
 
-    i = M_CheckParmWithArgs("-dup", 1);
-
-    if (i > 0)
-        settings->ticdup = atoi(myargv[i+1]);
-    else
-        settings->ticdup = 1;
+    settings->ticdup = 1;
 
     if (net_client_connected)
     {
@@ -442,7 +429,7 @@ void D_StartNetGame(net_gamesettings_t *settings,
 
     if (!new_sync)
     {
-	printf("Syncing netgames like Vanilla Doom.\n");
+        C_Printf("Syncing netgames like Vanilla Doom.\n");
     }
 }
 
@@ -467,8 +454,6 @@ void D_QuitNetGame (void)
 boolean D_InitNetGame(net_connect_data_t *connect_data)
 {
     boolean result = false;
-    net_addr_t *addr = NULL;
-    int i;
 
     // Call D_QuitNetGame on exit:
 
@@ -477,6 +462,9 @@ boolean D_InitNetGame(net_connect_data_t *connect_data)
     player_class = connect_data->player_class;
 
 #ifdef FEATURE_MULTIPLAYER
+
+    net_addr_t *addr = NULL;
+    int i;
 
 #ifdef NET_DEBUG
     printf("D_InitNetGame\n");
@@ -488,9 +476,6 @@ boolean D_InitNetGame(net_connect_data_t *connect_data)
     // Start a multiplayer server, listening for connections.
     //
 
-//    if (M_CheckParm("-server") > 0
-//     || M_CheckParm("-privateserver") > 0)
-
     if((privateserverflag || multiplayerflag) && devparm_net)
     {
         NET_SV_Init();
@@ -501,63 +486,16 @@ boolean D_InitNetGame(net_connect_data_t *connect_data)
         net_loop_client_module.InitClient();
         addr = net_loop_client_module.ResolveAddress(NULL);
     }
-    else
-    {
-        //!
-        // @category net
-        //
-        // Automatically search the local LAN for a multiplayer
-        // server and join it.
-        //
-
-        i = M_CheckParm("-autojoin");
-
-        if (i > 0)
-        {
-            addr = NET_FindLANServer();
-
-            if (addr == NULL)
-            {
-                I_Error("No server found on local LAN");
-            }
-        }
-
-        //!
-        // @arg <address>
-        // @category net
-        //
-        // Connect to a multiplayer server running on the given
-        // address.
-        //
-
-        i = M_CheckParmWithArgs("-connect", 1);
-
-        if (i > 0)
-        {
-            net_sdl_module.InitClient();
-            addr = net_sdl_module.ResolveAddress(myargv[i+1]);
-
-            if (addr == NULL)
-            {
-                I_Error("Unable to resolve '%s'\n", myargv[i+1]);
-            }
-        }
-    }
 
     if (addr != NULL)
     {
-        if (M_CheckParm("-drone") > 0)
-        {
-            connect_data->drone = true;
-        }
-
         if (!NET_CL_Connect(addr, connect_data))
         {
             I_Error("D_InitNetGame: Failed to connect to %s\n",
                     NET_AddrToString(addr));
         }
 
-        printf("D_InitNetGame: Connected to %s\n", NET_AddrToString(addr));
+        C_Printf("D_InitNetGame: Connected to %s\n", NET_AddrToString(addr));
 
         // Wait for launch message received from server.
 
@@ -594,10 +532,6 @@ static int GetLowTic(void)
 
     return lowtic;
 }
-
-static int frameon;
-static int frameskip[4];
-static int oldnettics;
 
 static void OldNetSync(void)
 {
@@ -716,13 +650,13 @@ static void SinglePlayerClear(ticcmd_set_t *set)
 
 void TryRunTics (void)
 {
-    int	i;
-    int	lowtic;
-    int	entertic;
+    int i;
+    int lowtic;
+    int entertic;
     static int oldentertics;
     int realtics;
-    int	availabletics;
-    int	counts;
+    int availabletics;
+    int counts;
 
     // get real tics
     entertic = I_GetTime() / ticdup;
@@ -749,7 +683,7 @@ void TryRunTics (void)
 
     if (new_sync)
     {
-	counts = availabletics;
+        counts = availabletics;
     }
     else
     {
@@ -772,26 +706,26 @@ void TryRunTics (void)
     }
 
     if (counts < 1)
-	counts = 1;
+        counts = 1;
 
     // wait for new tics if needed
 
     while (!PlayersInGame() || lowtic < gametic/ticdup + counts)
     {
-	NetUpdate ();
+        NetUpdate ();
 
         lowtic = GetLowTic();
 
-	if (lowtic < gametic/ticdup)
-	    I_Error ("TryRunTics: lowtic < gametic");
+        if (lowtic < gametic/ticdup)
+            I_Error ("TryRunTics: lowtic < gametic");
 
         // Don't stay in this loop forever.  The menu is still running,
         // so return to update the screen
 
-	if (I_GetTime() / ticdup - entertic > 0)
-	{
-	    return;
-	}
+        if (I_GetTime() / ticdup - entertic > 0)
+        {
+            return;
+        }
 
         I_Sleep(1);
     }
@@ -813,22 +747,22 @@ void TryRunTics (void)
             SinglePlayerClear(set);
         }
 
-	for (i=0 ; i<ticdup ; i++)
-	{
+        for (i=0 ; i<ticdup ; i++)
+        {
             if (gametic/ticdup > lowtic)
                 I_Error ("gametic>lowtic");
 
             memcpy(local_playeringame, set->ingame, sizeof(local_playeringame));
 
             loop_interface->RunTic(set->cmds, set->ingame);
-	    gametic++;
+            gametic++;
 
-	    // modify command for duplicated tics
+            // modify command for duplicated tics
 
             TicdupSquash(set);
-	}
+        }
 
-	NetUpdate ();	// check for new console commands
+        NetUpdate ();        // check for new console commands
     }
 }
 

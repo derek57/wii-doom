@@ -1,58 +1,85 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <malloc.h>
 #include <ogcsys.h>
 #include <ogc/pad.h>
-#include <wiilight.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 #include <wiiuse/wpad.h>
 
+#include "gui.h"
 #include "sys_fat.h"
 #include "sys_nand.h"
-#include "sys_usbstorage.h"
 #include "sys_globals.h"
+#include "sys_usbstorage.h"
+#include "sys_wpad.h"
 
 #include "video.h"
-#include "d2x-cios-installer.h"
-#include "gui.h"
+
 
 /* Macros */
-#define NB_FAT_DEVICES	(sizeof(fdevList) / sizeof(fatDevice))
-#define MAXPATH		0x108
-#define MAX_WIIMOTES	4
+#define NB_FAT_DEVICES    (sizeof(fdevList) / sizeof(fatDevice))
+#define MAXPATH           0x108
+#define MAX_WIIMOTES      4
 
-CONFIG gConfig;
 
-int	is_chex_2 = 0;
-int	extra_wad_loaded = 0;
-int	load_extra_wad = 0;
-int	load_dehacked = 0;
+CONFIG            gConfig;
 
-bool	multiplayer = false;
-bool	multiplayer_flag = false;
-bool	nerve_pwad = false;
+/* FAT device list  */
+fatDevice fdevList[] = {
+    { "sd",     "    SD-Card    ",        &__io_wiisd      },
+    { "usb",    "  USB-Storage  ",        &__io_usbstorage },
+    { "usb2",   "USB 2.0 Storage",        &__io_wiiums     }
+};
+
+// wiiNinja: Define a buffer holding the previous path names as user
+// traverses the directory tree. Max of 10 levels is define at this point
+static fatDevice  *fdev = NULL;
+
+static u8         gDirLevel = 0;
+
+static char       gDirList [MAX_DIR_LEVELS][MAX_FILE_PATH_LEN];
+
+static s32        gSeleted[MAX_DIR_LEVELS];
+static s32        gStart[MAX_DIR_LEVELS];
+
+char              gFileName[MAX_FILE_PATH_LEN];
+char              gTmpFilePath[MAX_FILE_PATH_LEN];
+
+int               is_chex_2 = 0;
+int               extra_wad_loaded = 0;
+int               load_extra_wad = 0;
+int               load_dehacked = 0;
+
+bool              multiplayer = false;
+bool              multiplayer_flag = false;
+bool              nerve_pwad = false;
+
 
 // Local prototypes: wiiNinja
 void WaitPrompt (char *prompt);
 void drawMain();
 void D_DoomMain (void);
 void W_CheckSize(int wad);
-//void WiiLightControl (int state);
+
 int PushCurrentDir(char *dirStr, s32 Selected, s32 Start);
+int MD5_Check(char *final);
+
 char *PopCurrentDir(s32 *Selected, s32 *Start);
 char *PeekCurrentDir (void);
+
 bool IsListFull (void);
+bool M_StringCopy(char *dest, const char *src, size_t dest_size);
+
 u32 WaitButtons(void);
 u32 Pad_GetButtons(void);
 u32 Wpad_HeldButtons(void);
 
-bool M_StringCopy(char *dest, const char *src, size_t dest_size);
 
 bool Wpad_TimeButton(void)
 {
     u32 buttons = 1;
-	
+    
     time_t start,end;
     time (&start);
 
@@ -61,16 +88,16 @@ bool Wpad_TimeButton(void)
     /* Wait for button pressing */
     while (buttons)
     {
-	buttons = Wpad_HeldButtons();
+        buttons = Wpad_HeldButtons();
 
-	VIDEO_WaitVSync();
+        VIDEO_WaitVSync();
 
-	time (&end);
+        time (&end);
 
-	dif = difftime (end,start);
+        dif = difftime (end,start);
 
-	if(dif>=2)
-	    return true;
+        if(dif>=2)
+            return true;
     }
     return false;
 }
@@ -84,7 +111,7 @@ u32 Wpad_GetButtons(void)
 
     /* Get pressed buttons */
     for (cnt = 0; cnt < MAX_WIIMOTES; cnt++)
-	buttons |= WPAD_ButtonsDown(cnt);
+        buttons |= WPAD_ButtonsDown(cnt);
 
     return buttons;
 }
@@ -103,11 +130,11 @@ void Sys_LoadMenu(void)
         sig[5] == 'A' &&
         sig[6] == 'X' &&
         sig[7] == 'X')
-	    HBC=1; // Exit to HBC
+        HBC=1; // Exit to HBC
 
     /* Homebrew Channel stub */
     if (HBC == 1)
-	exit(0);
+        exit(0);
 
     /* Return to the Wii system menu */
     SYS_ResetSystem(SYS_RETURNTOMENU, 0, 0);
@@ -131,25 +158,6 @@ void Restart(void)
     Sys_LoadMenu();
 }
 
-/* FAT device list  */
-fatDevice fdevList[] = {
-    { "sd",	"    SD-Card    ",		&__io_wiisd },
-    { "usb",	"  USB-Storage  ",		&__io_usbstorage },
-    { "usb2",	"USB 2.0 Storage",		&__io_wiiums },
-//    { "gcsda",	"  SD-Gecko (A) ",		&__io_gcsda },
-//    { "gcsdb",	"  SD-Gecko (B) ",		&__io_gcsdb },
-};
-
-// wiiNinja: Define a buffer holding the previous path names as user
-// traverses the directory tree. Max of 10 levels is define at this point
-static fatDevice  *fdev = NULL;
-static u8 gDirLevel = 0;
-static char gDirList [MAX_DIR_LEVELS][MAX_FILE_PATH_LEN];
-static s32  gSeleted[MAX_DIR_LEVELS];
-static s32  gStart[MAX_DIR_LEVELS];
-char gFileName[MAX_FILE_PATH_LEN];
-char gTmpFilePath[MAX_FILE_PATH_LEN];
-
 s32 __Menu_IsGreater(const void *p1, const void *p2)
 {
     u32 n1 = *(u32 *)p1;
@@ -157,7 +165,7 @@ s32 __Menu_IsGreater(const void *p1, const void *p2)
 
     /* Equal */
     if (n1 == n2)
-	return 0;
+        return 0;
 
     return (n1 > n2) ? 1 : -1;
 }
@@ -182,44 +190,43 @@ s32 __Menu_RetrieveList(char *inPath, fatFile **outbuf, u32 *outlen)
     fatFile  *buffer = NULL;
 
     DIR *dir = NULL;
-	
+    
     struct dirent *entry;
 
-    //char dirpath[256], filename[768];
     u32  cnt = 0;
 
     /* Open directory */
     dir = opendir(inPath);
 
     if (!dir)
-	return -1;
+        return -1;
 
     while ((entry = readdir(dir)))
-	cnt++;
+        cnt++;
 
     if (cnt > 0)
     {
-	/* Allocate memory */
-	buffer = malloc(sizeof(fatFile) * cnt);
+        /* Allocate memory */
+        buffer = malloc(sizeof(fatFile) * cnt);
 
-	if (!buffer)
-	{
-	    closedir(dir);
+        if (!buffer)
+        {
+            closedir(dir);
 
-	    return -2;
-	}
+            return -2;
+        }
 
-	/* Reset directory */
-	closedir(dir);
+        /* Reset directory */
+        closedir(dir);
 
-	dir = opendir(inPath);
+        dir = opendir(inPath);
 
-	/* Get entries */
-	for (cnt = 0; (entry = readdir(dir));)
-	{
-	    bool addFlag = false;
+        /* Get entries */
+        for (cnt = 0; (entry = readdir(dir));)
+        {
+            bool addFlag = false;
 
-	    if (entry->d_type==DT_DIR) 
+            if (entry->d_type==DT_DIR) 
             {
                 // Add only the item ".." which is the previous directory
                 // AND if we're not at the root directory
@@ -229,28 +236,28 @@ s32 __Menu_RetrieveList(char *inPath, fatFile **outbuf, u32 *outlen)
                     addFlag = true;
             }
             else
-	    {
-		if(strlen(entry->d_name)>4)
-		{
-		    if (!stricmp(entry->d_name+strlen(entry->d_name)-4, ".wad") ||
-			!stricmp(entry->d_name+strlen(entry->d_name)-4, ".deh"))
-			    addFlag = true;
-		}
-	    }
+            {
+                if(strlen(entry->d_name)>4)
+                {
+                    if (!stricmp(entry->d_name+strlen(entry->d_name)-4, ".wad") ||
+                        !stricmp(entry->d_name+strlen(entry->d_name)-4, ".deh"))
+                    addFlag = true;
+                }
+            }
 
             if (addFlag == true)
             {
-		fatFile *file = &buffer[cnt++];
+                fatFile *file = &buffer[cnt++];
+    
+                /* File name */
+                strcpy(file->filename, entry->d_name);
 
-		/* File name */
-		strcpy(file->filename, entry->d_name);
-
-		/* File stats */
-		file->entry = *entry;
-	    }
-	}
-	/* Sort list */
-	qsort(buffer, cnt, sizeof(fatFile), __Menu_EntryCmp);
+                /* File stats */
+                file->entry = *entry;
+            }
+        }
+        /* Sort list */
+        qsort(buffer, cnt, sizeof(fatFile), __Menu_EntryCmp);
     }
 
     /* Close directory */
@@ -270,64 +277,69 @@ void Menu_FatDevice(void)
     /* Select source device */
     if (gConfig.fatDeviceIndex < 0)
     {
-	for (;;)
-	{
-	    /* Clear console */
-	    Con_Clear();
+        for (;;)
+        {
+            /* Clear console */
+            Con_Clear();
 
-	    /* Draw main title */
-	    drawMain();
+            /* Draw main title */
+            drawMain();
 
-	    /* Selected device */
-	    fdev = &fdevList[selected];
+            /* Selected device */
+            fdev = &fdevList[selected];
 
-//	    printf(">>Source: < %.30s >"/*, 132*/, fdev->name);
-	    printf(">>Source: < %s >"/*, 132*/, fdev->name);
-	    printf("    |");
-	    printf("\n                                 |");
-	    printf("\n                                 |");
-	    printStyledText(6, 35,CONSOLE_FONT_BLACK,CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,&stTexteLocation,"IWAD: ");
-	    printf("\n  L / R: Change device.          |"/*, 132*/);
-	    printStyledText(7, 35,CONSOLE_FONT_BLACK,CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,&stTexteLocation,"PWAD1: ");
-	    printf("\n                                 |\n");
-	    printStyledText(8, 35,CONSOLE_FONT_BLACK,CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,&stTexteLocation,"PWAD2: ");
-	    printf("\n                                 |\n");
-	    printStyledText(9, 35,CONSOLE_FONT_BLACK,CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,&stTexteLocation,"PWAD3: ");
-	    printf("\n  A: continue. / Home: Quit.     |");
-	    printf("\n                                 |\n");
-//	    printf("                      |\n");
-	    printStyledText(10, 35,CONSOLE_FONT_BLACK,CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,&stTexteLocation,".DEH: ");
-	    printStyledText(11, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"  ----------------------------------------------------------------------------  ");
+            printf(">>Source: < %s >", fdev->name);
+            printf("    |");
+            printf("\n                                 |");
+            printf("\n                                 |");
+            printStyledText(6, 35, CONSOLE_FONT_BLACK, CONSOLE_FONT_GREEN,
+                        CONSOLE_FONT_BOLD, &stTexteLocation, "IWAD: ");
+            printf("\n  L / R: Change device.          |");
+            printStyledText(7, 35, CONSOLE_FONT_BLACK, CONSOLE_FONT_GREEN,
+                        CONSOLE_FONT_BOLD, &stTexteLocation, "PWAD1: ");
+            printf("\n                                 |\n");
+            printStyledText(8, 35,CONSOLE_FONT_BLACK, CONSOLE_FONT_GREEN,
+                        CONSOLE_FONT_BOLD, &stTexteLocation, "PWAD2: ");
+            printf("\n                                 |\n");
+            printStyledText(9, 35, CONSOLE_FONT_BLACK, CONSOLE_FONT_GREEN,
+                        CONSOLE_FONT_BOLD, &stTexteLocation, "PWAD3: ");
+            printf("\n  A: continue. / Home: Quit.     |");
+            printf("\n                                 |\n");
+            printStyledText(10, 35, CONSOLE_FONT_BLACK, CONSOLE_FONT_GREEN,
+                        CONSOLE_FONT_BOLD, &stTexteLocation,".DEH: ");
+            printStyledText(11, 0, CONSOLE_FONT_BLACK, CONSOLE_FONT_WHITE,
+                        CONSOLE_FONT_BOLD,&stTexteLocation,
+            "  ----------------------------------------------------------------------------  ");
 
-	    u32 buttons = WaitButtons();
+            u32 buttons = WaitButtons();
 
-	    /* LEFT/RIGHT buttons */
-	    if (buttons & WPAD_CLASSIC_BUTTON_LEFT)
-	    {
-		if ((--selected) <= -1)
-		    selected = (NB_FAT_DEVICES - 1);
-	    }
+            /* LEFT/RIGHT buttons */
+            if (buttons & WPAD_CLASSIC_BUTTON_LEFT)
+            {
+                if ((--selected) <= -1)
+                    selected = (NB_FAT_DEVICES - 1);
+            }
 
-	    if (buttons & WPAD_CLASSIC_BUTTON_RIGHT)
-	    {
-		if ((++selected) >= NB_FAT_DEVICES)
-		    selected = 0;
-	    }
+            if (buttons & WPAD_CLASSIC_BUTTON_RIGHT)
+            {
+                if ((++selected) >= NB_FAT_DEVICES)
+                    selected = 0;
+            }
 
-	    /* HOME button */
-	    if (buttons & WPAD_CLASSIC_BUTTON_HOME)
-		Restart();
+            /* HOME button */
+            if (buttons & WPAD_CLASSIC_BUTTON_HOME)
+                Restart();
 
-	    /* A button */
-	    if (buttons & WPAD_CLASSIC_BUTTON_A)
-		break;
-	}
+            /* A button */
+            if (buttons & WPAD_CLASSIC_BUTTON_A)
+                break;
+        }
     }
     else
     {
-	sleep(3/*5*/);
+        sleep(3);
 
-	fdev = &fdevList[gConfig.fatDeviceIndex];
+        fdev = &fdevList[gConfig.fatDeviceIndex];
     }
 
     /* Clear console */
@@ -336,7 +348,6 @@ void Menu_FatDevice(void)
     /* Draw main title */
     drawMain();
 
-//    printf("  Loading...: %.30s", fdev->name );
     printf("  Loading...: %s", fdev->name );
     printf("    |");
 
@@ -347,70 +358,76 @@ void Menu_FatDevice(void)
 
     if (ret < 0)
     {
-	printf("\n                                 |");
-	printStyledText(6, 35,CONSOLE_FONT_BLACK,CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,&stTexteLocation,"IWAD: ");
-	printf("\n");
-	printStyledText(6, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,&stTexteLocation,"  Error! (ret = %d)", ret);
-	printf("              |");
-	printf("\n                                 |");
-	printStyledText(7, 35,CONSOLE_FONT_BLACK,CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,&stTexteLocation,"PWAD1: ");
-	printf("\n                                 |");
-	printStyledText(8, 35,CONSOLE_FONT_BLACK,CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,&stTexteLocation,"PWAD2: ");
-	printf("\n                                 |");
-	printStyledText(9, 35,CONSOLE_FONT_BLACK,CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,&stTexteLocation,"PWAD3: ");
-	printf("\n                                 |");
-	printStyledText(10, 35,CONSOLE_FONT_BLACK,CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,&stTexteLocation,".DEH: ");
+        printf("\n                                 |");
+        printStyledText(6, 35, CONSOLE_FONT_BLACK, CONSOLE_FONT_GREEN,
+                    CONSOLE_FONT_BOLD, &stTexteLocation, "IWAD: ");
+        printf("\n");
+        printStyledText(6, 0, CONSOLE_FONT_BLACK, CONSOLE_FONT_RED,
+                    CONSOLE_FONT_BOLD, &stTexteLocation, "  Error! (ret = %d)", ret);
+        printf("              |");
+        printf("\n                                 |");
+        printStyledText(7, 35, CONSOLE_FONT_BLACK, CONSOLE_FONT_GREEN,
+                    CONSOLE_FONT_BOLD, &stTexteLocation, "PWAD1: ");
+        printf("\n                                 |");
+        printStyledText(8, 35, CONSOLE_FONT_BLACK, CONSOLE_FONT_GREEN,
+                    CONSOLE_FONT_BOLD, &stTexteLocation, "PWAD2: ");
+        printf("\n                                 |");
+        printStyledText(9, 35, CONSOLE_FONT_BLACK, CONSOLE_FONT_GREEN,
+                    CONSOLE_FONT_BOLD, &stTexteLocation, "PWAD3: ");
+        printf("\n                                 |");
+        printStyledText(10, 35, CONSOLE_FONT_BLACK, CONSOLE_FONT_GREEN,
+                    CONSOLE_FONT_BOLD, &stTexteLocation, ".DEH: ");
 
-	goto err;
+        goto err;
     }
     else
-	printf("  OK!                              |");
+        printf("  OK!                              |");
 
     return;
 
     err:
 
-    if(gConfig.fatDeviceIndex >= 0) gConfig.fatDeviceIndex = -1;
+    if(gConfig.fatDeviceIndex >= 0)
+        gConfig.fatDeviceIndex = -1;
 
-//	WiiLightControl (WII_LIGHT_OFF);
+    printf("\n  Press any key...               |\n");
+    printStyledText(11, 0, CONSOLE_FONT_BLACK, CONSOLE_FONT_WHITE,
+                    CONSOLE_FONT_BOLD, &stTexteLocation,
+    "  ----------------------------------------------------------------------------  ");
 
-	printf("\n  Press any key...               |\n"/*, 129*/);
-	printStyledText(11, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"  ----------------------------------------------------------------------------  ");
+    WaitButtons();
 
-	WaitButtons();
-
-	/* Prompt menu again */
-	Menu_FatDevice();
+    /* Prompt menu again */
+    Menu_FatDevice();
 }
 
-int MD5_Check(char *final);
 
 void Menu_WadList(void)
 {
-    bool	md5_check = false;
+    bool        md5_check = false;
 
-    char	buffer[4];
-    char	check[MAXPATH];
-    char	iwad_term[] = "IWAD";
-    char	pwad_term[] = "PWAD";
-    char	deh_term[] = "Patc";
-    char	str [100];
-    char	stripped_target[MAXPATH] = "";
-    char	stripped_extra_wad_1[256] = "";
-    char	stripped_extra_wad_2[256] = "";
-    char	stripped_extra_wad_3[256] = "";
-    char	stripped_dehacked_file[256] = "";
-    char	*tmpPath = malloc (MAX_FILE_PATH_LEN);
+    char        buffer[4];
+    char        check[MAXPATH];
+    char        iwad_term[] = "IWAD";
+    char        pwad_term[] = "PWAD";
+    char        deh_term[] = "Patc";
+    char        str [100];
+    char        stripped_target[MAXPATH] = "";
+    char        stripped_extra_wad_1[256] = "";
+    char        stripped_extra_wad_2[256] = "";
+    char        stripped_extra_wad_3[256] = "";
+    char        stripped_dehacked_file[256] = "";
+    char        *tmpPath = malloc (MAX_FILE_PATH_LEN);
 
-    const char	*iwad_ver = NULL;
-    const char	*shareware_warn = NULL;
+    const char  *iwad_ver = NULL;
+    const char  *shareware_warn = NULL;
 
-    extern char	path_tmp[MAXPATH];
-    extern char	target[MAXPATH];
-    extern char	extra_wad_1[256];
-    extern char	extra_wad_2[256];
-    extern char	extra_wad_3[256];
-    extern char	dehacked_file[256];
+    extern char path_tmp[MAXPATH];
+    extern char target[MAXPATH];
+    extern char extra_wad_1[256];
+    extern char extra_wad_2[256];
+    extern char extra_wad_3[256];
+    extern char dehacked_file[256];
     extern char calculated_md5_string[33];
     extern char known_md5_string_chex_quest_iwad[33];
     extern char known_md5_string_doom_beta_1_4_iwad[33];
@@ -462,41 +479,35 @@ void Menu_WadList(void)
     extern char known_md5_string_nerve_bfg_pwad[33];
     extern char known_md5_string_nerve_xbox360_pwad[33];
 
-    int		i, c;
-/*
-    int		installCnt = 0;
-    int		uninstallCnt = 0;
-    int		WADLoaded = 0;
-    int		txtLoaded = 0;
-*/
-    extern int	extra_wad_slot_1_loaded;
-    extern int	extra_wad_slot_2_loaded;
-    extern int	extra_wad_slot_3_loaded;
-    extern int	fsize;
-    extern int	fsizecq;
-//    extern int	fsizerw;
+    int         i, c;
 
-    FILE	*file;
+    extern int  extra_wad_slot_1_loaded;
+    extern int  extra_wad_slot_2_loaded;
+    extern int  extra_wad_slot_3_loaded;
+    extern int  fsize;
+    extern int  fsizecq;
 
-    fatFile	*fileList = NULL;
+    FILE        *file;
 
-    u32		fileCnt;
+    fatFile     *fileList = NULL;
 
-    s32		ret;
-    s32		selected = 0;
-    s32		start = 0;
+    u32         fileCnt;
+
+    s32         ret;
+    s32         selected = 0;
+    s32         start = 0;
 
     // wiiNinja: check for malloc error
     if (tmpPath == NULL)
     {
         ret = -997; // What am I gonna use here?
 
-	printf("  Error! Out of memory (ret = %d)\n", ret);
+        printf("  Error! Out of memory (ret = %d)\n", ret);
 
         return;
     }
 
-    printf("  Opening file list..."/*, 153*/);
+    printf("  Opening file list...");
 
     fflush(stdout);
 
@@ -511,10 +522,9 @@ void Menu_WadList(void)
 
     if (strcmp (WAD_DIRECTORY, gConfig.startupPath) != 0)
     {
-//	sprintf(tmpPath, "%s:/%s", fdev->mount, gConfig.startupPath);
-	sprintf(tmpPath, "%s:/apps/wiidoom/", fdev->mount);
+        sprintf(tmpPath, "%s:/apps/wiidoom/", fdev->mount);
 
-	PushCurrentDir(tmpPath,0,0); // wiiNinja
+        PushCurrentDir(tmpPath,0,0); // wiiNinja
     }
 
     /* Retrieve filelist */
@@ -532,17 +542,17 @@ void Menu_WadList(void)
 
     if (ret < 0)
     {
-	printf("  Error! (ret = %d)\n", ret);
+        printf("  Error! (ret = %d)\n", ret);
 
-	goto err;
+        goto err;
     }
 
     /* No files */
     if (!fileCnt)
     {
-	printf("  No files found!\n");
+        printf("  No files found!\n");
 
-	goto err;
+        goto err;
     }
 
     // Set install-values to 0 - Leathl
@@ -550,1430 +560,1602 @@ void Menu_WadList(void)
 
     for (counter = 0; counter < fileCnt; counter++)
     {
-	fatFile *file = &fileList[counter];
+        fatFile *file = &fileList[counter];
 
-	file->install = 0;
+        file->install = 0;
     }
 
     for (;;)
     {
-	u32 cnt;
+        u32 cnt;
 
-	s32 index;
+        s32 index;
 
-	/* Clear console */
-	Con_Clear();
+        /* Clear console */
+        Con_Clear();
 
-	/* Draw main title */
-	drawMain();
+        /* Draw main title */
+        drawMain();
 
-	/** Print entries **/
-	cnt = strlen(tmpPath);
+        /** Print entries **/
+        cnt = strlen(tmpPath);
 
-	if(cnt>30)
-	    index = cnt-30;
-	else
-	    index = 0;
+        if(cnt>30)
+            index = cnt-30;
+        else
+            index = 0;
 
-	/* Print entries */
-	for (cnt = start; cnt < fileCnt; cnt++)
-	{
-	    fatFile *file     = &fileList[cnt];
+        /* Print entries */
+        for (cnt = start; cnt < fileCnt; cnt++)
+        {
+            fatFile *file     = &fileList[cnt];
 
-	    /* Entries per page limit */
-	    if ((cnt - start) >= ENTRIES_PER_PAGE)
-		break;
+            /* Entries per page limit */
+            if ((cnt - start) >= ENTRIES_PER_PAGE)
+                break;
 
-	    M_StringCopy(str, file->filename, 40); //Only 40 chars to fit the screen
+            M_StringCopy(str, file->filename, 40); //Only 40 chars to fit the screen
 
-	    str[40]=0;
+            str[40]=0;
 
             if (file->entry.d_type==DT_DIR) // wiiNinja
-	    {
-		printf("%2s[%.27s]\n", (cnt == selected) ? ">>" : "  ", str);
+            {
+                printf("%2s[%.27s]\n", (cnt == selected) ? ">>" : "  ", str);
+            }
+            else
+            {
+                // REQUIRED FOR WAD SUPPORT MSG
+                if(cnt == selected && file->entry.d_type != DT_DIR)
+                {
+                    strcpy(path_tmp, tmpPath);
+                    strcat(path_tmp, file->filename);
+                }
+                printf("%2s%.27s\n", (cnt == selected) ? ">>" : "  ", str);
+            }
+        }
+
+        printStyledText(5, 33,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "|");
+
+        printStyledText(5, 35,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_YELLOW,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "Loc.:");
+        printStyledText(5, 41,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_YELLOW,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,tmpPath);
+
+        printStyledText(6, 33,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "|");
+
+        if(multiplayer)    // MAIN FLAG
+        {
+            printStyledText(6, 35,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_YELLOW,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "NET.:");
+
+            if(multiplayer_flag)
+                printStyledText(6, 41,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_YELLOW,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "YES");
+            else
+                printStyledText(6, 41,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_YELLOW,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "NO");
+        }
+
+        printStyledText(6, 35,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "IWAD: ");
+        printStyledText(6, 41,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,stripped_target);
+        printStyledText(6, 33,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "|");
+        printStyledText(7, 35,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "PWAD1: ");
+        printStyledText(7, 41,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,stripped_extra_wad_1);
+        printStyledText(7, 33,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "|");
+        printStyledText(8, 35,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "PWAD2: ");
+        printStyledText(8, 41,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,stripped_extra_wad_2);
+        printStyledText(8, 33,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "|");
+        printStyledText(9, 35,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "PWAD3: ");
+        printStyledText(9, 41,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,stripped_extra_wad_3);
+        printStyledText(9, 33,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "|");
+
+        if(extra_wad_loaded || load_dehacked || md5_check)
+            printStyledText(9, 18,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "X: start over");
+
+        printStyledText(10, 35,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        ".DEH: ");
+        printStyledText(10, 41,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,stripped_dehacked_file);
+        printStyledText(10, 33,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "|");
+
+        printf("\n");
+
+        printStyledText(10, 0,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "  A: Select WAD");
+        printStyledText(10, 16,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "/");
+
+        if(gDirLevel>1)
+            printStyledText(10, 18,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "B: Prev. dir.");
+        else
+            printStyledText(10, 18,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "B: Sel. dev.");
+
+        printStyledText(10, 33,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "|");
+        printStyledText(11, 0,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "  ----------------------------------------------------------------------------  ");
+        printStyledText(12, 0,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_YELLOW,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "  WARNING: LOADING IWAD'S AS PWAD, VICE VERSA OR EVEN NON-DOOM WADS MAY CRASH!");
+        printStyledText(13, 0,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "  ----------------------------------------------------------------------------  ");
+
+        if(fsize == 4261144)
+        {
+            printStyledText(14, 2,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "DOOM IWAD VERSION: DOOM 1 BETA v1.4 DETECTED");
+            printStyledText(14, 55,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "(THIS WAD IS SUPPORTED)");
+            printStyledText(16, 2,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "YOU CANNOT -FILE WITH THE SHAREWARE & BETA VERSION OF DOOM. PLEASE REGISTER!");
+        }
+        else if(fsize == 4271324)
+        {
+            printStyledText(14, 2,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "DOOM IWAD VERSION: DOOM 1 BETA v1.5 DETECTED");
+            printStyledText(14, 55,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "(THIS WAD IS SUPPORTED)");
+            printStyledText(16, 2,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "YOU CANNOT -FILE WITH THE SHAREWARE & BETA VERSION OF DOOM. PLEASE REGISTER!");
+        }
+        else if(fsize == 4211660)
+        {
+            printStyledText(14, 2,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "DOOM IWAD VERSION: DOOM 1 BETA v1.6 DETECTED");
+            printStyledText(14, 55,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "(THIS WAD IS SUPPORTED)");
+            printStyledText(16, 2,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "YOU CANNOT -FILE WITH THE SHAREWARE & BETA VERSION OF DOOM. PLEASE REGISTER!");
+        }
+        else if(fsize == 10396254)
+        {
+            printStyledText(14, 2,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "DOOM IWAD VERSION: DOOM 1 REGISTERED v1.1 DETECTED");
+            printStyledText(14, 55,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "(THIS WAD IS SUPPORTED)");
+        }
+        else if(fsize == 10399316)
+        {
+            printStyledText(14, 2,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "DOOM IWAD VERSION: DOOM 1 REGISTERED v1.2 DETECTED");
+            printStyledText(14, 55,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "(THIS WAD IS SUPPORTED)");
+        }
+        else if(fsize == 10401760)
+        {
+            printStyledText(14, 2,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "DOOM IWAD VERSION: DOOM 1 REGISTERED v1.6 DETECTED");
+            printStyledText(14, 55,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "(THIS WAD IS SUPPORTED)");
+        }
+        else if(fsize == 11159840)
+        {
+            printStyledText(14, 2,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "DOOM IWAD VERSION: DOOM 1 REGISTERED v1.8 DETECTED");
+            printStyledText(14, 55,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "(THIS WAD IS SUPPORTED)");
+        }
+        else if(fsize == 12408292)
+        {
+            printStyledText(14, 2,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "DOOM IWAD VERSION: DOOM 1 REGISTERED v1.9UD DETECTED");
+            printStyledText(14, 55,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "(THIS WAD IS SUPPORTED)");
+        }
+        else if(fsize == 12474561)
+        {
+            printStyledText(14, 2,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "DOOM IWAD VERSION: DOOM 1 REGISTERED BFG-PSN DETECTED");
+            printStyledText(14, 55,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "(THIS WAD IS SUPPORTED)");
+        }
+        else if(fsize == 12487824)
+        {
+            printStyledText(14, 2,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "DOOM IWAD VERSION: DOOM 1 REGISTERED BFG-PC DETECTED");
+            printStyledText(14, 55,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "(THIS WAD IS SUPPORTED)");
+        }
+        else if(fsize == 4207819)
+        {
+            printStyledText(14, 2,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "DOOM IWAD VERSION: DOOM 1 SHAREWARE v1.0 DETECTED");
+            printStyledText(14, 55,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "(THIS WAD IS SUPPORTED)");
+            printStyledText(16, 2,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "YOU CANNOT -FILE WITH THE SHAREWARE & BETA VERSION OF DOOM. PLEASE REGISTER!");
+        }
+        else if(fsize == 4274218)
+        {
+            printStyledText(14, 2,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "DOOM IWAD VERSION: DOOM 1 SHAREWARE v1.1 DETECTED");
+            printStyledText(14, 55,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "(THIS WAD IS SUPPORTED)");
+            printStyledText(16, 2,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "YOU CANNOT -FILE WITH THE SHAREWARE & BETA VERSION OF DOOM. PLEASE REGISTER!");
+        }
+        else if(fsize == 4225504)
+        {
+            printStyledText(14, 2,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "DOOM IWAD VERSION: DOOM 1 SHAREWARE v1.2 DETECTED");
+            printStyledText(14, 55,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "(THIS WAD IS SUPPORTED)");
+            printStyledText(16, 2,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "YOU CANNOT -FILE WITH THE SHAREWARE & BETA VERSION OF DOOM. PLEASE REGISTER!");
+        }
+        else if(fsize == 4225460)
+        {
+            printStyledText(14, 2,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "DOOM IWAD VERSION: DOOM 1 SW. v1.25 Sybex DETECTED");
+            printStyledText(14, 55,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "(THIS WAD IS SUPPORTED)");
+            printStyledText(16, 2,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "YOU CANNOT -FILE WITH THE SHAREWARE & BETA VERSION OF DOOM. PLEASE REGISTER!");
+        }
+        else if(fsize == 4234124)
+        {
+            printStyledText(14, 2,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "DOOM IWAD VERSION: DOOM 1 SHAREWARE v1.666 DETECTED");
+            printStyledText(14, 55,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "(THIS WAD IS SUPPORTED)");
+            printStyledText(16, 2,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "YOU CANNOT -FILE WITH THE SHAREWARE & BETA VERSION OF DOOM. PLEASE REGISTER!");
+        }
+        else if(fsize == 4196020)
+        {
+            printStyledText(14, 2,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "DOOM IWAD VERSION: DOOM 1 SHAREWARE v1.8 DETECTED");
+            printStyledText(14, 55,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "(THIS WAD IS SUPPORTED)");
+            printStyledText(16, 2,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "YOU CANNOT -FILE WITH THE SHAREWARE & BETA VERSION OF DOOM. PLEASE REGISTER!");
+        }
+        else if(fsize == 14943400)
+        {
+            printStyledText(14, 2,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "DOOM IWAD VERSION: DOOM 2 REGISTERED v1.666 DETECTED");
+            printStyledText(14, 55,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "(THIS WAD IS SUPPORTED)");
+        }
+        else if(fsize == 14824716)
+        {
+            printStyledText(14, 2,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "DOOM IWAD VERSION: DOOM 2 REGISTERED v1.666G DETECTED");
+            printStyledText(14, 55,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "(THIS WAD IS SUPPORTED)");
+        }
+        else if(fsize == 14612688)
+        {
+            printStyledText(14, 2,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "DOOM IWAD VERSION: DOOM 2 REGISTERED v1.7 DETECTED");
+            printStyledText(14, 55,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "(THIS WAD IS SUPPORTED)");
+        }
+        else if(fsize == 14607420)
+        {
+            printStyledText(14, 2,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "DOOM IWAD VERSION: DOOM 2 REGISTERED v1.8F DETECTED");
+            printStyledText(14, 55,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "(THIS WAD IS SUPPORTED)");
+        }
+        else if(fsize == 14604584)
+        {
+            printStyledText(14, 2,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "DOOM IWAD VERSION: DOOM 2 REGISTERED v1.9 DETECTED");
+            printStyledText(14, 55,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "(THIS WAD IS SUPPORTED)");
+        }
+        else if(fsize == 14677988)
+        {
+            printStyledText(14, 2,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "DOOM IWAD VERSION: DOOM 2 REGISTERED XBOX360 DETECTED");
+            printStyledText(14, 55,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "(THIS WAD IS SUPPORTED)");
+        }
+        else if(fsize == 14691821)
+        {
+            printStyledText(14, 2,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "DOOM IWAD VERSION: DOOM 2 REGISTERED BFG-PC DETECTED");
+            printStyledText(14, 55,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "(THIS WAD IS SUPPORTED)");
+        }
+        else if(fsize == 14683458)
+        {
+            printStyledText(14, 2,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "DOOM IWAD VERSION: DOOM 2 REGISTERED XBOX DETECTED");
+            printStyledText(14, 55,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "(THIS WAD IS SUPPORTED)");
+        }
+        else if(fsize == 18195736)
+        {
+            printStyledText(14, 2,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "DOOM IWAD VERSION: FINAL DOOM TNT");
+            printStyledText(14, 36,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_YELLOW,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "(OLD)");
+            printStyledText(14, 42,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "DETECTED");
+            printStyledText(14, 55,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "(THIS WAD IS SUPPORTED)");
+        }
+        else if(fsize == 18654796)
+        {
+            printStyledText(14, 2,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "DOOM IWAD VERSION: FINAL DOOM TNT");
+            printStyledText(14, 36,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "(NEW)");
+            printStyledText(14, 42,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "DETECTED");
+            printStyledText(14, 55,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "(THIS WAD IS SUPPORTED)");
+        }
+        else if(fsize == 18240172)
+        {
+            printStyledText(14, 2,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "DOOM IWAD VERSION: FINAL DOOM PLUTONIA");
+            printStyledText(14, 41,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "(NEW)");
+            printStyledText(14, 47,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "DETECTED");
+            printStyledText(14, 55,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "(THIS WAD IS SUPPORTED)");
+        }
+        else if(fsize == 17420824)
+        {
+            printStyledText(14, 2,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "DOOM IWAD VERSION: FINAL DOOM PLUTONIA");
+            printStyledText(14, 41,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_YELLOW,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "(OLD)");
+            printStyledText(14, 47,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "DETECTED");
+            printStyledText(14, 55,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "(THIS WAD IS SUPPORTED)");
+        }
+        else if(fsize == 19801320)
+        {
+            printStyledText(14, 2,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "FREEDOOM IWAD VERSION: FREEDOOM v0.6.4 DETECTED");
+            printStyledText(14, 55,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "(THIS WAD IS NOT SUPPORTED)");
+        }
+        else if(fsize == 27704188)
+        {
+            printStyledText(14, 2,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "FREEDOOM IWAD VERSION: FREEDOOM v0.7 RC 1 DETECTED");
+            printStyledText(14, 55,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "(THIS WAD IS NOT SUPPORTED)");
+        }
+        else if(fsize == 27625596)
+        {
+            printStyledText(14, 2,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "FREEDOOM IWAD VERSION: FREEDOOM v0.7 DETECTED");
+            printStyledText(14, 55,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "(THIS WAD IS NOT SUPPORTED)");
+        }
+        else if(fsize == 28144744)
+        {
+            printStyledText(14, 2,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "FREEDOOM IWAD VERSION: FREEDOOM v0.8 BETA 1 DETECTED");
+            printStyledText(14, 55,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "(THIS WAD IS NOT SUPPORTED)");
+        }
+        else if(fsize == 28592816)
+        {
+            printStyledText(14, 2,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "FREEDOOM IWAD VERSION: FREEDOOM v0.8 DETECTED");
+            printStyledText(14, 55,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "(THIS WAD IS NOT SUPPORTED)");
+        }
+        else if(fsize == 19362644)
+        {
+            printStyledText(14, 2,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "FREEDOOM IWAD VERSION: FREEDOOM v0.8 PHASE 1 DETECTED");
+            printStyledText(14, 55,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "(THIS WAD IS NOT SUPPORTED)");
+        }
+        else if(fsize == 28422764)
+        {
+            printStyledText(14, 2,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "FREEDOOM IWAD VERSION: FREEDOOM v0.8 PHASE 2 DETECTED");
+            printStyledText(14, 55,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "(THIS WAD IS SUPPORTED)");
+        }
+        else if(fsize == 12361532)
+        {
+            printStyledText(14, 2,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "CHEX QUEST IWAD VERSION: CHEX QUEST DETECTED");
+            printStyledText(14, 55,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "(THIS WAD IS SUPPORTED)");
+        }
+        else if(fsize == 9745831)
+        {
+            printStyledText(14, 2,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "HACX IWAD VERSION: HACX v1.0 SHAREWARE DETECTED");
+            printStyledText(14, 55,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "(THIS WAD IS NOT SUPPORTED)");
+        }
+        else if(fsize == 21951805)
+        {
+            printStyledText(14, 2,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "HACX IWAD VERSION: HACX v1.0 REGISTERED DETECTED");
+            printStyledText(14, 55,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "(THIS WAD IS NOT SUPPORTED)");
+        }
+        else if(fsize == 22102300)
+        {
+            printStyledText(14, 2,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "HACX IWAD VERSION: HACX v1.1 REGISTERED DETECTED");
+            printStyledText(14, 55,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "(THIS WAD IS NOT SUPPORTED)");
+        }
+        else if(fsize == 19321722)
+        {
+            printStyledText(14, 2,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "HACX IWAD VERSION: HACX v1.2 REGISTERED DETECTED");
+            printStyledText(14, 55,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "(THIS WAD IS SUPPORTED)");
+    }
+    printStyledText(14, 0,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,iwad_ver);
+    printStyledText(15, 0,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "  ----------------------------------------------------------------------------  ");
+    printStyledText(16, 0,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,shareware_warn);
+    printStyledText(17, 0,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "  ----------------------------------------------------------------------------  ");
+    if (selected < fileCnt - 1)
+        printStyledText(8, 32,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_YELLOW,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "+");
+
+    if(selected > 0)
+        printStyledText(5, 32,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_YELLOW,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "-");
+
+    /** Controls **/
+    u32 buttons = WaitButtons();
+
+    /* DPAD buttons */
+    if (buttons & WPAD_CLASSIC_BUTTON_UP)
+    {
+        selected--;
+
+        if (selected <= -1)
+            selected = 0;
+    }
+
+    if (buttons & WPAD_CLASSIC_BUTTON_LEFT)
+    {
+        selected = selected + ENTRIES_PER_PAGE;
+
+        if (selected >= fileCnt || selected == 0)
+            selected = 0;
+    }
+
+    if (buttons & WPAD_CLASSIC_BUTTON_DOWN)
+    {
+        selected ++;
+
+        if (selected >= fileCnt)
+            selected = fileCnt - 1;
+    }
+
+    if (buttons & WPAD_CLASSIC_BUTTON_RIGHT)
+    {
+        selected = selected - ENTRIES_PER_PAGE;
+
+        if (selected <= -1 || selected == fileCnt - 1)
+            selected = fileCnt - 1;
+    }
+
+    /* HOME button */
+    if (buttons & WPAD_CLASSIC_BUTTON_HOME)
+        Restart();
+
+    // 1 Button - Leathl
+    if (buttons & WPAD_CLASSIC_BUTTON_PLUS)
+    {
+        /* Clear console */
+        Con_Clear();
+
+        /* START DOOM */
+        D_DoomMain();
+    }
+
+    // A button
+    if (buttons & WPAD_CLASSIC_BUTTON_A)
+    {
+        fatFile *tmpFile = &fileList[selected];
+
+        // DO NOT INITIALIZE TO "NULL": CRASHES THE WII IF SELECTING A WAD
+        char *tmpCurPath;
+
+        if (tmpFile->entry.d_type==DT_DIR) // wiiNinja
+        {
+            if (strcmp (tmpFile->filename, "..") == 0)
+            {
+                selected = 0;
+
+                start = 0;
+
+                // Previous dir
+                tmpCurPath = PopCurrentDir(&selected, &start);
+
+                if (tmpCurPath != NULL)
+                    sprintf(tmpPath, "%s", tmpCurPath);
+
+                goto getList;
+            }
+            else
+            {
+                tmpCurPath = PeekCurrentDir ();
+
+                if (tmpCurPath != NULL)
+                {
+                    if(gDirLevel>1)
+                        sprintf(tmpPath, "%s%s", tmpCurPath, tmpFile->filename);
+                    else
+                        sprintf(tmpPath, "%s%s", tmpCurPath, tmpFile->filename);
+
+                    strcat(tmpPath, "/");
+                }
+
+                // wiiNinja: Need to PopCurrentDir
+                PushCurrentDir (tmpPath, selected, start);
+
+                selected = 0;
+
+                start = 0;
+
+                goto getList;
+            }
+        }
+        else
+        {
+            strcpy(check, tmpPath);
+            strcat(check, tmpFile->filename);
+
+            MD5_Check(check);
+
+            if (strncmp(calculated_md5_string,
+                        known_md5_string_chex_quest_iwad, 32) == 0)
+            {
+                strcpy(target, check);
+                strcpy(stripped_target, tmpFile->filename);
+
+                fsize = 12361532;
+
+                md5_check = true;
+                nerve_pwad = false;
+            }
+            else if (strncmp(calculated_md5_string,
+                        known_md5_string_doom_beta_1_4_iwad, 32) == 0)
+            {
+                strcpy(target, check);
+                strcpy(stripped_target, tmpFile->filename);
+
+                fsize = 4261144;
+
+                md5_check = true;
+                nerve_pwad = false;
+            }
+            else if (strncmp(calculated_md5_string,
+                        known_md5_string_doom_beta_1_5_iwad, 32) == 0)
+            {
+                strcpy(target, check);
+                strcpy(stripped_target, tmpFile->filename);
+
+                fsize = 4271324;
+
+                md5_check = true;
+                nerve_pwad = false;
+            }
+            else if (strncmp(calculated_md5_string,
+                        known_md5_string_doom_beta_1_6_iwad, 32) == 0)
+            {
+                strcpy(target, check);
+                strcpy(stripped_target, tmpFile->filename);
+
+                fsize = 4211660;
+
+                md5_check = true;
+                nerve_pwad = false;
+            }
+            else if (strncmp(calculated_md5_string,
+                        known_md5_string_doom_share_1_0_iwad, 32) == 0)
+            {
+                strcpy(target, check);
+                strcpy(stripped_target, tmpFile->filename);
+
+                fsize = 4207819;
+
+                md5_check = true;
+                nerve_pwad = false;
+            }
+            else if (strncmp(calculated_md5_string,
+                        known_md5_string_doom_share_1_1_iwad, 32) == 0)
+            {
+                strcpy(target, check);
+                strcpy(stripped_target, tmpFile->filename);
+
+                fsize = 4274218;
+
+                md5_check = true;
+                nerve_pwad = false;
+            }
+            else if (strncmp(calculated_md5_string,
+                        known_md5_string_doom_share_1_2_iwad, 32) == 0)
+            {
+                strcpy(target, check);
+                strcpy(stripped_target, tmpFile->filename);
+
+                fsize = 4225504;
+
+                md5_check = true;
+                nerve_pwad = false;
+            }
+            else if (strncmp(calculated_md5_string,
+                        known_md5_string_doom_share_1_25s_iwad, 32) == 0)
+            {
+                strcpy(target, check);
+                strcpy(stripped_target, tmpFile->filename);
+
+                fsize = 4225460;
+
+                md5_check = true;
+                nerve_pwad = false;
+            }
+            else if (strncmp(calculated_md5_string,
+                        known_md5_string_doom_share_1_666_iwad, 32) == 0)
+            {
+                strcpy(target, check);
+                strcpy(stripped_target, tmpFile->filename);
+
+                fsize = 4234124;
+
+                md5_check = true;
+                nerve_pwad = false;
+            }
+            else if (strncmp(calculated_md5_string,
+                        known_md5_string_doom_share_1_8_iwad, 32) == 0)
+            {
+                strcpy(target, check);
+                strcpy(stripped_target, tmpFile->filename);
+
+                fsize = 4196020;
+
+                md5_check = true;
+                nerve_pwad = false;
+            }
+            else if (strncmp(calculated_md5_string,
+                        known_md5_string_doom_share_1_9_iwad, 32) == 0)
+            {
 /*
-		if(cnt == selected)
-		    fsize = 0;
+                strcpy(target, check);
+                strcpy(stripped_target, tmpFile->filename);
+
+                fsize = 20428208;
 */
-	    }
-	    else
-	    {
-		if(cnt == selected && file->entry.d_type != DT_DIR)	// REQUIRED FOR WAD SUPPORT MSG
-		{
-		    strcpy(path_tmp, tmpPath);
-		    strcat(path_tmp, file->filename);
+                md5_check = true;
+                nerve_pwad = false;
+            }
+            else if (strncmp(calculated_md5_string,
+                        known_md5_string_doom_reg_1_1_iwad, 32) == 0)
+            {
+                strcpy(target, check);
+                strcpy(stripped_target, tmpFile->filename);
 
-//		    W_CheckSize(1);
-		}
-		printf("%2s%.27s\n", (cnt == selected) ? ">>" : "  ", str);
-//		printf("%2s%s%.27s\n", (cnt == selected) ? ">>" : "  ", (file->install == 1) ? "+" : ((file->install == 2) ? "-" : ((file->install == 3) ? "p" : " ")), str);
-	    }
-	}
+                fsize = 10396254;
 
-	printStyledText(5, 33,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"|");
+                md5_check = true;
+                nerve_pwad = false;
+            }
+            else if (strncmp(calculated_md5_string,
+                        known_md5_string_doom_reg_1_2_iwad, 32) == 0)
+            {
+                strcpy(target, check);
+                strcpy(stripped_target, tmpFile->filename);
 
-	printStyledText(5, 35,CONSOLE_FONT_BLACK,CONSOLE_FONT_YELLOW,CONSOLE_FONT_BOLD,&stTexteLocation,"Loc.:");
-	printStyledText(5, 41,CONSOLE_FONT_BLACK,CONSOLE_FONT_YELLOW,CONSOLE_FONT_BOLD,&stTexteLocation,tmpPath);
+                fsize = 10399316;
 
-	printStyledText(6, 33,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"|");
+                md5_check = true;
+                nerve_pwad = false;
+            }
+            else if (strncmp(calculated_md5_string,
+                        known_md5_string_doom_reg_1_6_iwad, 32) == 0)
+            {
+                strcpy(target, check);
+                strcpy(stripped_target, tmpFile->filename);
 
-	if(multiplayer)	// MAIN FLAG
-	{
-	    printStyledText(6, 35,CONSOLE_FONT_BLACK,CONSOLE_FONT_YELLOW,CONSOLE_FONT_BOLD,&stTexteLocation,"NET.:");
+                fsize = 10401760;
 
-	    if(multiplayer_flag)
-		printStyledText(6, 41,CONSOLE_FONT_BLACK,CONSOLE_FONT_YELLOW,CONSOLE_FONT_BOLD,&stTexteLocation,"YES");
-	    else
-		printStyledText(6, 41,CONSOLE_FONT_BLACK,CONSOLE_FONT_YELLOW,CONSOLE_FONT_BOLD,&stTexteLocation,"NO");
-	}
-
-	printStyledText(6, 35,CONSOLE_FONT_BLACK,CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,&stTexteLocation,"IWAD: ");
-	printStyledText(6, 41,CONSOLE_FONT_BLACK,CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,&stTexteLocation,stripped_target);
-	printStyledText(6, 33,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"|");
-	printStyledText(7, 35,CONSOLE_FONT_BLACK,CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,&stTexteLocation,"PWAD1: ");
-	printStyledText(7, 41,CONSOLE_FONT_BLACK,CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,&stTexteLocation,stripped_extra_wad_1);
-	printStyledText(7, 33,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"|");
-	printStyledText(8, 35,CONSOLE_FONT_BLACK,CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,&stTexteLocation,"PWAD2: ");
-	printStyledText(8, 41,CONSOLE_FONT_BLACK,CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,&stTexteLocation,stripped_extra_wad_2);
-	printStyledText(8, 33,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"|");
-	printStyledText(9, 35,CONSOLE_FONT_BLACK,CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,&stTexteLocation,"PWAD3: ");
-	printStyledText(9, 41,CONSOLE_FONT_BLACK,CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,&stTexteLocation,stripped_extra_wad_3);
-	printStyledText(9, 33,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"|");
-
-	if(extra_wad_loaded || load_dehacked || md5_check)
-	    printStyledText(9, 18,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"X: start over");
-
-	printStyledText(10, 35,CONSOLE_FONT_BLACK,CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,&stTexteLocation,".DEH: ");
-	printStyledText(10, 41,CONSOLE_FONT_BLACK,CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,&stTexteLocation,stripped_dehacked_file);
-	printStyledText(10, 33,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"|");
-
-	printf("\n");
-
-	printStyledText(10, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"  A: Select WAD");
-	printStyledText(10, 16,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"/");
-
-	if(gDirLevel>1)
-	    printStyledText(10, 18,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"B: Prev. dir.");
-	else
-	    printStyledText(10, 18,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"B: Sel. dev.");
-
-	printStyledText(10, 33,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"|");
-	printStyledText(11, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"  ----------------------------------------------------------------------------  ");
-	printStyledText(12, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_YELLOW,CONSOLE_FONT_BOLD,&stTexteLocation,"  WARNING: LOADING IWAD'S AS PWAD, VICE VERSA OR EVEN NON-DOOM WADS MAY CRASH!");
-	printStyledText(13, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"  ----------------------------------------------------------------------------  ");
-
-	if(fsize == 4261144)
-	{
-	    printStyledText(14, 2,CONSOLE_FONT_BLACK,CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,&stTexteLocation,"DOOM IWAD VERSION: DOOM 1 BETA v1.4 DETECTED");
-	    printStyledText(14, 55,CONSOLE_FONT_BLACK,CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,&stTexteLocation,"(THIS WAD IS SUPPORTED)");
-	    printStyledText(16, 2,CONSOLE_FONT_BLACK,CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,&stTexteLocation,"YOU CANNOT -FILE WITH THE SHAREWARE & BETA VERSION OF DOOM. PLEASE REGISTER!");
-	}
-	else if(fsize == 4271324)
-	{
-	    printStyledText(14, 2,CONSOLE_FONT_BLACK,CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,&stTexteLocation,"DOOM IWAD VERSION: DOOM 1 BETA v1.5 DETECTED");
-	    printStyledText(14, 55,CONSOLE_FONT_BLACK,CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,&stTexteLocation,"(THIS WAD IS SUPPORTED)");
-	    printStyledText(16, 2,CONSOLE_FONT_BLACK,CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,&stTexteLocation,"YOU CANNOT -FILE WITH THE SHAREWARE & BETA VERSION OF DOOM. PLEASE REGISTER!");
-	}
-	else if(fsize == 4211660)
-	{
-	    printStyledText(14, 2,CONSOLE_FONT_BLACK,CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,&stTexteLocation,"DOOM IWAD VERSION: DOOM 1 BETA v1.6 DETECTED");
-	    printStyledText(14, 55,CONSOLE_FONT_BLACK,CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,&stTexteLocation,"(THIS WAD IS SUPPORTED)");
-	    printStyledText(16, 2,CONSOLE_FONT_BLACK,CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,&stTexteLocation,"YOU CANNOT -FILE WITH THE SHAREWARE & BETA VERSION OF DOOM. PLEASE REGISTER!");
-	}
-	else if(fsize == 10396254)
-	{
-	    printStyledText(14, 2,CONSOLE_FONT_BLACK,CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,&stTexteLocation,"DOOM IWAD VERSION: DOOM 1 REGISTERED v1.1 DETECTED");
-	    printStyledText(14, 55,CONSOLE_FONT_BLACK,CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,&stTexteLocation,"(THIS WAD IS SUPPORTED)");
-	}
-	else if(fsize == 10399316)
-	{
-	    printStyledText(14, 2,CONSOLE_FONT_BLACK,CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,&stTexteLocation,"DOOM IWAD VERSION: DOOM 1 REGISTERED v1.2 DETECTED");
-	    printStyledText(14, 55,CONSOLE_FONT_BLACK,CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,&stTexteLocation,"(THIS WAD IS SUPPORTED)");
-	}
-	else if(fsize == 10401760)
-	{
-	    printStyledText(14, 2,CONSOLE_FONT_BLACK,CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,&stTexteLocation,"DOOM IWAD VERSION: DOOM 1 REGISTERED v1.6 DETECTED");
-	    printStyledText(14, 55,CONSOLE_FONT_BLACK,CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,&stTexteLocation,"(THIS WAD IS SUPPORTED)");
-	}
-	else if(fsize == 11159840)
-	{
-	    printStyledText(14, 2,CONSOLE_FONT_BLACK,CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,&stTexteLocation,"DOOM IWAD VERSION: DOOM 1 REGISTERED v1.8 DETECTED");
-	    printStyledText(14, 55,CONSOLE_FONT_BLACK,CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,&stTexteLocation,"(THIS WAD IS SUPPORTED)");
-	}
-	else if(fsize == 12408292)
-	{
-	    printStyledText(14, 2,CONSOLE_FONT_BLACK,CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,&stTexteLocation,"DOOM IWAD VERSION: DOOM 1 REGISTERED v1.9UD DETECTED");
-	    printStyledText(14, 55,CONSOLE_FONT_BLACK,CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,&stTexteLocation,"(THIS WAD IS SUPPORTED)");
-	}
-	else if(fsize == 12474561)
-	{
-	    printStyledText(14, 2,CONSOLE_FONT_BLACK,CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,&stTexteLocation,"DOOM IWAD VERSION: DOOM 1 REGISTERED BFG-PSN DETECTED");
-	    printStyledText(14, 55,CONSOLE_FONT_BLACK,CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,&stTexteLocation,"(THIS WAD IS SUPPORTED)");
-	}
-	else if(fsize == 12487824)
-	{
-	    printStyledText(14, 2,CONSOLE_FONT_BLACK,CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,&stTexteLocation,"DOOM IWAD VERSION: DOOM 1 REGISTERED BFG-PC DETECTED");
-	    printStyledText(14, 55,CONSOLE_FONT_BLACK,CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,&stTexteLocation,"(THIS WAD IS SUPPORTED)");
-	}
-	else if(fsize == 4207819)
-	{
-	    printStyledText(14, 2,CONSOLE_FONT_BLACK,CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,&stTexteLocation,"DOOM IWAD VERSION: DOOM 1 SHAREWARE v1.0 DETECTED");
-	    printStyledText(14, 55,CONSOLE_FONT_BLACK,CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,&stTexteLocation,"(THIS WAD IS SUPPORTED)");
-	    printStyledText(16, 2,CONSOLE_FONT_BLACK,CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,&stTexteLocation,"YOU CANNOT -FILE WITH THE SHAREWARE & BETA VERSION OF DOOM. PLEASE REGISTER!");
-	}
-	else if(fsize == 4274218)
-	{
-	    printStyledText(14, 2,CONSOLE_FONT_BLACK,CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,&stTexteLocation,"DOOM IWAD VERSION: DOOM 1 SHAREWARE v1.1 DETECTED");
-	    printStyledText(14, 55,CONSOLE_FONT_BLACK,CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,&stTexteLocation,"(THIS WAD IS SUPPORTED)");
-	    printStyledText(16, 2,CONSOLE_FONT_BLACK,CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,&stTexteLocation,"YOU CANNOT -FILE WITH THE SHAREWARE & BETA VERSION OF DOOM. PLEASE REGISTER!");
-	}
-	else if(fsize == 4225504)
-	{
-	    printStyledText(14, 2,CONSOLE_FONT_BLACK,CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,&stTexteLocation,"DOOM IWAD VERSION: DOOM 1 SHAREWARE v1.2 DETECTED");
-	    printStyledText(14, 55,CONSOLE_FONT_BLACK,CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,&stTexteLocation,"(THIS WAD IS SUPPORTED)");
-	    printStyledText(16, 2,CONSOLE_FONT_BLACK,CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,&stTexteLocation,"YOU CANNOT -FILE WITH THE SHAREWARE & BETA VERSION OF DOOM. PLEASE REGISTER!");
-	}
-	else if(fsize == 4225460)
-	{
-	    printStyledText(14, 2,CONSOLE_FONT_BLACK,CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,&stTexteLocation,"DOOM IWAD VERSION: DOOM 1 SW. v1.25 Sybex DETECTED");
-	    printStyledText(14, 55,CONSOLE_FONT_BLACK,CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,&stTexteLocation,"(THIS WAD IS SUPPORTED)");
-	    printStyledText(16, 2,CONSOLE_FONT_BLACK,CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,&stTexteLocation,"YOU CANNOT -FILE WITH THE SHAREWARE & BETA VERSION OF DOOM. PLEASE REGISTER!");
-	}
-	else if(fsize == 4234124)
-	{
-	    printStyledText(14, 2,CONSOLE_FONT_BLACK,CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,&stTexteLocation,"DOOM IWAD VERSION: DOOM 1 SHAREWARE v1.666 DETECTED");
-	    printStyledText(14, 55,CONSOLE_FONT_BLACK,CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,&stTexteLocation,"(THIS WAD IS SUPPORTED)");
-	    printStyledText(16, 2,CONSOLE_FONT_BLACK,CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,&stTexteLocation,"YOU CANNOT -FILE WITH THE SHAREWARE & BETA VERSION OF DOOM. PLEASE REGISTER!");
-	}
-	else if(fsize == 4196020)
-	{
-	    printStyledText(14, 2,CONSOLE_FONT_BLACK,CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,&stTexteLocation,"DOOM IWAD VERSION: DOOM 1 SHAREWARE v1.8 DETECTED");
-	    printStyledText(14, 55,CONSOLE_FONT_BLACK,CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,&stTexteLocation,"(THIS WAD IS SUPPORTED)");
-	    printStyledText(16, 2,CONSOLE_FONT_BLACK,CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,&stTexteLocation,"YOU CANNOT -FILE WITH THE SHAREWARE & BETA VERSION OF DOOM. PLEASE REGISTER!");
-	}
-	else if(fsize == 14943400)
-	{
-	    printStyledText(14, 2,CONSOLE_FONT_BLACK,CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,&stTexteLocation,"DOOM IWAD VERSION: DOOM 2 REGISTERED v1.666 DETECTED");
-	    printStyledText(14, 55,CONSOLE_FONT_BLACK,CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,&stTexteLocation,"(THIS WAD IS SUPPORTED)");
-	}
-	else if(fsize == 14824716)
-	{
-	    printStyledText(14, 2,CONSOLE_FONT_BLACK,CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,&stTexteLocation,"DOOM IWAD VERSION: DOOM 2 REGISTERED v1.666G DETECTED");
-	    printStyledText(14, 55,CONSOLE_FONT_BLACK,CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,&stTexteLocation,"(THIS WAD IS SUPPORTED)");
-	}
-	else if(fsize == 14612688)
-	{
-	    printStyledText(14, 2,CONSOLE_FONT_BLACK,CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,&stTexteLocation,"DOOM IWAD VERSION: DOOM 2 REGISTERED v1.7 DETECTED");
-	    printStyledText(14, 55,CONSOLE_FONT_BLACK,CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,&stTexteLocation,"(THIS WAD IS SUPPORTED)");
-	}
-	else if(fsize == 14607420)
-	{
-	    printStyledText(14, 2,CONSOLE_FONT_BLACK,CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,&stTexteLocation,"DOOM IWAD VERSION: DOOM 2 REGISTERED v1.8F DETECTED");
-	    printStyledText(14, 55,CONSOLE_FONT_BLACK,CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,&stTexteLocation,"(THIS WAD IS SUPPORTED)");
-	}
-	else if(fsize == 14604584)
-	{
-	    printStyledText(14, 2,CONSOLE_FONT_BLACK,CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,&stTexteLocation,"DOOM IWAD VERSION: DOOM 2 REGISTERED v1.9 DETECTED");
-	    printStyledText(14, 55,CONSOLE_FONT_BLACK,CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,&stTexteLocation,"(THIS WAD IS SUPPORTED)");
-	}
-	else if(fsize == 14677988)
-	{
-	    printStyledText(14, 2,CONSOLE_FONT_BLACK,CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,&stTexteLocation,"DOOM IWAD VERSION: DOOM 2 REGISTERED XBOX360 DETECTED");
-	    printStyledText(14, 55,CONSOLE_FONT_BLACK,CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,&stTexteLocation,"(THIS WAD IS SUPPORTED)");
-	}
-	else if(fsize == 14691821)
-	{
-	    printStyledText(14, 2,CONSOLE_FONT_BLACK,CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,&stTexteLocation,"DOOM IWAD VERSION: DOOM 2 REGISTERED BFG-PC DETECTED");
-	    printStyledText(14, 55,CONSOLE_FONT_BLACK,CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,&stTexteLocation,"(THIS WAD IS SUPPORTED)");
-	}
-	else if(fsize == 14683458)
-	{
-	    printStyledText(14, 2,CONSOLE_FONT_BLACK,CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,&stTexteLocation,"DOOM IWAD VERSION: DOOM 2 REGISTERED XBOX DETECTED");
-	    printStyledText(14, 55,CONSOLE_FONT_BLACK,CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,&stTexteLocation,"(THIS WAD IS SUPPORTED)");
-	}
-	else if(fsize == 18195736)
-	{
-	    printStyledText(14, 2,CONSOLE_FONT_BLACK,CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,&stTexteLocation,"DOOM IWAD VERSION: FINAL DOOM TNT");
-	    printStyledText(14, 36,CONSOLE_FONT_BLACK,CONSOLE_FONT_YELLOW,CONSOLE_FONT_BOLD,&stTexteLocation,"(OLD)");
-	    printStyledText(14, 42,CONSOLE_FONT_BLACK,CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,&stTexteLocation,"DETECTED");
-	    printStyledText(14, 55,CONSOLE_FONT_BLACK,CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,&stTexteLocation,"(THIS WAD IS SUPPORTED)");
-	}
-	else if(fsize == 18654796)
-	{
-	    printStyledText(14, 2,CONSOLE_FONT_BLACK,CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,&stTexteLocation,"DOOM IWAD VERSION: FINAL DOOM TNT");
-	    printStyledText(14, 36,CONSOLE_FONT_BLACK,CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,&stTexteLocation,"(NEW)");
-	    printStyledText(14, 42,CONSOLE_FONT_BLACK,CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,&stTexteLocation,"DETECTED");
-	    printStyledText(14, 55,CONSOLE_FONT_BLACK,CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,&stTexteLocation,"(THIS WAD IS SUPPORTED)");
-	}
-	else if(fsize == 18240172)
-	{
-	    printStyledText(14, 2,CONSOLE_FONT_BLACK,CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,&stTexteLocation,"DOOM IWAD VERSION: FINAL DOOM PLUTONIA");
-	    printStyledText(14, 41,CONSOLE_FONT_BLACK,CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,&stTexteLocation,"(NEW)");
-	    printStyledText(14, 47,CONSOLE_FONT_BLACK,CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,&stTexteLocation,"DETECTED");
-	    printStyledText(14, 55,CONSOLE_FONT_BLACK,CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,&stTexteLocation,"(THIS WAD IS SUPPORTED)");
-	}
-	else if(fsize == 17420824)
-	{
-	    printStyledText(14, 2,CONSOLE_FONT_BLACK,CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,&stTexteLocation,"DOOM IWAD VERSION: FINAL DOOM PLUTONIA");
-	    printStyledText(14, 41,CONSOLE_FONT_BLACK,CONSOLE_FONT_YELLOW,CONSOLE_FONT_BOLD,&stTexteLocation,"(OLD)");
-	    printStyledText(14, 47,CONSOLE_FONT_BLACK,CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,&stTexteLocation,"DETECTED");
-	    printStyledText(14, 55,CONSOLE_FONT_BLACK,CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,&stTexteLocation,"(THIS WAD IS SUPPORTED)");
-	}
-	else if(fsize == 19801320)
-	{
-	    printStyledText(14, 2,CONSOLE_FONT_BLACK,CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,&stTexteLocation,"FREEDOOM IWAD VERSION: FREEDOOM v0.6.4 DETECTED");
-	    printStyledText(14, 55,CONSOLE_FONT_BLACK,CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,&stTexteLocation,"(THIS WAD IS NOT SUPPORTED)");
-	}
-	else if(fsize == 27704188)
-	{
-	    printStyledText(14, 2,CONSOLE_FONT_BLACK,CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,&stTexteLocation,"FREEDOOM IWAD VERSION: FREEDOOM v0.7 RC 1 DETECTED");
-	    printStyledText(14, 55,CONSOLE_FONT_BLACK,CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,&stTexteLocation,"(THIS WAD IS NOT SUPPORTED)");
-	}
-	else if(fsize == 27625596)
-	{
-	    printStyledText(14, 2,CONSOLE_FONT_BLACK,CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,&stTexteLocation,"FREEDOOM IWAD VERSION: FREEDOOM v0.7 DETECTED");
-	    printStyledText(14, 55,CONSOLE_FONT_BLACK,CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,&stTexteLocation,"(THIS WAD IS NOT SUPPORTED)");
-	}
-	else if(fsize == 28144744)
-	{
-	    printStyledText(14, 2,CONSOLE_FONT_BLACK,CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,&stTexteLocation,"FREEDOOM IWAD VERSION: FREEDOOM v0.8 BETA 1 DETECTED");
-	    printStyledText(14, 55,CONSOLE_FONT_BLACK,CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,&stTexteLocation,"(THIS WAD IS NOT SUPPORTED)");
-	}
-	else if(fsize == 28592816)
-	{
-	    printStyledText(14, 2,CONSOLE_FONT_BLACK,CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,&stTexteLocation,"FREEDOOM IWAD VERSION: FREEDOOM v0.8 DETECTED");
-	    printStyledText(14, 55,CONSOLE_FONT_BLACK,CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,&stTexteLocation,"(THIS WAD IS NOT SUPPORTED)");
-	}
-	else if(fsize == 19362644)
-	{
-	    printStyledText(14, 2,CONSOLE_FONT_BLACK,CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,&stTexteLocation,"FREEDOOM IWAD VERSION: FREEDOOM v0.8 PHASE 1 DETECTED");
-	    printStyledText(14, 55,CONSOLE_FONT_BLACK,CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,&stTexteLocation,"(THIS WAD IS NOT SUPPORTED)");
-	}
-	else if(fsize == 28422764)
-	{
-	    printStyledText(14, 2,CONSOLE_FONT_BLACK,CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,&stTexteLocation,"FREEDOOM IWAD VERSION: FREEDOOM v0.8 PHASE 2 DETECTED");
-	    printStyledText(14, 55,CONSOLE_FONT_BLACK,CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,&stTexteLocation,"(THIS WAD IS SUPPORTED)");
-	}
-	else if(fsize == 12361532)
-	{
-	    printStyledText(14, 2,CONSOLE_FONT_BLACK,CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,&stTexteLocation,"CHEX QUEST IWAD VERSION: CHEX QUEST DETECTED");
-	    printStyledText(14, 55,CONSOLE_FONT_BLACK,CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,&stTexteLocation,"(THIS WAD IS SUPPORTED)");
-	}
-	else if(fsize == 9745831)
-	{
-	    printStyledText(14, 2,CONSOLE_FONT_BLACK,CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,&stTexteLocation,"HACX IWAD VERSION: HACX v1.0 SHAREWARE DETECTED");
-	    printStyledText(14, 55,CONSOLE_FONT_BLACK,CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,&stTexteLocation,"(THIS WAD IS NOT SUPPORTED)");
-	}
-	else if(fsize == 21951805)
-	{
-	    printStyledText(14, 2,CONSOLE_FONT_BLACK,CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,&stTexteLocation,"HACX IWAD VERSION: HACX v1.0 REGISTERED DETECTED");
-	    printStyledText(14, 55,CONSOLE_FONT_BLACK,CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,&stTexteLocation,"(THIS WAD IS NOT SUPPORTED)");
-	}
-	else if(fsize == 22102300)
-	{
-	    printStyledText(14, 2,CONSOLE_FONT_BLACK,CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,&stTexteLocation,"HACX IWAD VERSION: HACX v1.1 REGISTERED DETECTED");
-	    printStyledText(14, 55,CONSOLE_FONT_BLACK,CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,&stTexteLocation,"(THIS WAD IS NOT SUPPORTED)");
-	}
-	else if(fsize == 19321722)
-	{
-	    printStyledText(14, 2,CONSOLE_FONT_BLACK,CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,&stTexteLocation,"HACX IWAD VERSION: HACX v1.2 REGISTERED DETECTED");
-	    printStyledText(14, 55,CONSOLE_FONT_BLACK,CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,&stTexteLocation,"(THIS WAD IS SUPPORTED)");
-	}
+                md5_check = true;
+                nerve_pwad = false;
+            }
+            else if (strncmp(calculated_md5_string,
+                        known_md5_string_doom_reg_1_6b_iwad, 32) == 0)
+            {
 /*
-	else if(fsize != 4261144  && fsize != 4271324  && fsize != 4211660  && fsize != 10396254 &&
-		fsize != 10399316 && fsize != 10401760 && fsize != 11159840 && fsize != 12408292 &&
-		fsize != 4207819  && fsize != 4274218  && fsize != 4225504  && fsize != 4225460  &&
-		fsize != 4234124  && fsize != 4196020  && fsize != 14943400 && fsize != 14824716 &&
-		fsize != 14612688 && fsize != 14607420 && fsize != 14604584 && fsize != 18195736 &&
-		fsize != 18654796 && fsize != 18240172 && fsize != 17420824 && fsize != 28422764 &&
-		fsize != 12361532 && fsize != 9745831  && fsize != 21951805 && fsize != 22102300 &&
-		fsize != 19321722 && fsize != 27625596 && fsize != 27704188 && fsize != 28592816 &&
-		fsize != 28144744 && fsize != 19801320 && fsize != 19362644 && fsize != 0)
-	{
-	    fatFile *file     = &fileList[cnt];
+                strcpy(target, check);
+                strcpy(stripped_target, tmpFile->filename);
 
-	    if(file->entry.d_type != DT_DIR)
-		printStyledText(14, 2,CONSOLE_FONT_BLACK,CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,&stTexteLocation,"!!! WARNING: THIS WAD CAN'T BE USED AS A MAIN GAME IWAD  -  UNKNOWN FILE !!!");
-	}
+                fsize = 20428208;
 */
-	printStyledText(14, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,&stTexteLocation,iwad_ver);
-	printStyledText(15, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"  ----------------------------------------------------------------------------  ");
-	printStyledText(16, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,&stTexteLocation,shareware_warn);
-	printStyledText(17, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"  ----------------------------------------------------------------------------  ");
+                md5_check = true;
+                nerve_pwad = false;
+            }
+            else if (strncmp(calculated_md5_string,
+                        known_md5_string_doom_reg_1_666_iwad, 32) == 0)
+            {
 /*
-	// ONLY FOR DEBUGGING STUFF
-	if	(strncmp(calculated_md5_string, known_md5_string_chex_quest_iwad, 32) == 0 ||
-		 strncmp(calculated_md5_string, known_md5_string_doom_beta_1_4_iwad, 32) == 0 ||
-		 strncmp(calculated_md5_string, known_md5_string_doom_beta_1_5_iwad, 32) == 0 ||
-		 strncmp(calculated_md5_string, known_md5_string_doom_beta_1_6_iwad, 32) == 0 ||
-		 strncmp(calculated_md5_string, known_md5_string_doom_share_1_0_iwad, 32) == 0 ||
-		 strncmp(calculated_md5_string, known_md5_string_doom_share_1_1_iwad, 32) == 0 ||
-		 strncmp(calculated_md5_string, known_md5_string_doom_share_1_2_iwad, 32) == 0 ||
-		 strncmp(calculated_md5_string, known_md5_string_doom_share_1_25s_iwad, 32) == 0 ||
-		 strncmp(calculated_md5_string, known_md5_string_doom_share_1_666_iwad, 32) == 0 ||
-		 strncmp(calculated_md5_string, known_md5_string_doom_share_1_8_iwad, 32) == 0 ||
-		 strncmp(calculated_md5_string, known_md5_string_doom_share_1_9_iwad, 32) == 0 ||
-		 strncmp(calculated_md5_string, known_md5_string_doom_reg_1_1_iwad, 32) == 0 ||
-		 strncmp(calculated_md5_string, known_md5_string_doom_reg_1_2_iwad, 32) == 0 ||
-		 strncmp(calculated_md5_string, known_md5_string_doom_reg_1_6_iwad, 32) == 0 ||
-		 strncmp(calculated_md5_string, known_md5_string_doom_reg_1_6b_iwad, 32) == 0 ||
-		 strncmp(calculated_md5_string, known_md5_string_doom_reg_1_666_iwad, 32) == 0 ||
-		 strncmp(calculated_md5_string, known_md5_string_doom_reg_1_8_iwad, 32) == 0 ||
-		 strncmp(calculated_md5_string, known_md5_string_doom_reg_1_9_iwad, 32) == 0 ||
-		 strncmp(calculated_md5_string, known_md5_string_doom_reg_1_9ud_iwad, 32) == 0 ||
-		 strncmp(calculated_md5_string, known_md5_string_doom_bfg_psn_iwad, 32) == 0 ||
-		 strncmp(calculated_md5_string, known_md5_string_doom_bfg_pc_iwad, 32) == 0 ||
-		 strncmp(calculated_md5_string, known_md5_string_doom_xbox_iwad, 32) == 0 ||
-		 strncmp(calculated_md5_string, known_md5_string_doom2_1_666_iwad, 32) == 0 ||
-		 strncmp(calculated_md5_string, known_md5_string_doom2_1_666g_iwad, 32) == 0 ||
-		 strncmp(calculated_md5_string, known_md5_string_doom2_1_7_iwad, 32) == 0 ||
-		 strncmp(calculated_md5_string, known_md5_string_doom2_1_7a_iwad, 32) == 0 ||
-		 strncmp(calculated_md5_string, known_md5_string_doom2_1_8_iwad, 32) == 0 ||
-		 strncmp(calculated_md5_string, known_md5_string_doom2_1_8f_iwad, 32) == 0 ||
-		 strncmp(calculated_md5_string, known_md5_string_doom2_1_9_iwad, 32) == 0 ||
-		 strncmp(calculated_md5_string, known_md5_string_doom2_bfg_xbox360_iwad, 32) == 0 ||
-		 strncmp(calculated_md5_string, known_md5_string_doom2_bfg_pc_iwad, 32) == 0 ||
-		 strncmp(calculated_md5_string, known_md5_string_doom2_xbox_iwad, 32) == 0 ||
-		 strncmp(calculated_md5_string, known_md5_string_final_doom_tnt_old_iwad, 32) == 0 ||
-		 strncmp(calculated_md5_string, known_md5_string_final_doom_tnt_new_iwad, 32) == 0 ||
-		 strncmp(calculated_md5_string, known_md5_string_final_doom_plutonia_old_iwad, 32) == 0 ||
-		 strncmp(calculated_md5_string, known_md5_string_final_doom_plutonia_new_iwad, 32) == 0 ||
-		 strncmp(calculated_md5_string, known_md5_string_freedoom_0_6_4_iwad, 32) == 0 ||
-		 strncmp(calculated_md5_string, known_md5_string_freedoom_0_7_rc_1_beta_1_iwad, 32) == 0 ||
-		 strncmp(calculated_md5_string, known_md5_string_freedoom_0_7_iwad, 32) == 0 ||
-		 strncmp(calculated_md5_string, known_md5_string_freedoom_0_8_beta_1_iwad, 32) == 0 ||
-		 strncmp(calculated_md5_string, known_md5_string_freedoom_0_8_iwad, 32) == 0 ||
-		 strncmp(calculated_md5_string, known_md5_string_freedoom_0_8_phase_1_iwad, 32) == 0 ||
-		 strncmp(calculated_md5_string, known_md5_string_freedoom_0_8_phase_2_iwad, 32) == 0 ||
-		 strncmp(calculated_md5_string, known_md5_string_hacx_share_1_0_iwad, 32) == 0 ||
-		 strncmp(calculated_md5_string, known_md5_string_hacx_reg_1_0_iwad, 32) == 0 ||
-		 strncmp(calculated_md5_string, known_md5_string_hacx_reg_1_1_iwad, 32) == 0 ||
-		 strncmp(calculated_md5_string, known_md5_string_hacx_reg_1_2_iwad, 32) == 0 ||
-		 strncmp(calculated_md5_string, known_md5_string_nerve_bfg_pwad, 32) == 0 ||
-		 strncmp(calculated_md5_string, known_md5_string_nerve_xbox360_pwad, 32) == 0)
-	    printStyledText(19, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"MD5 MATCH!");
-	else
-	    printStyledText(19, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"MD5 FAIL!");
+                strcpy(target, check);
+                strcpy(stripped_target, tmpFile->filename);
 
-	if(fsize == 12361532)
-	    printStyledText(21, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"known MD5 string: %s\n",
-		    known_md5_string_chex_quest_iwad);
-	else if(fsize == 4261144)
-	    printStyledText(21, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"known MD5 string: %s\n",
-		    known_md5_string_doom_beta_1_4_iwad);
-	else if(fsize == 4271324)
-	    printStyledText(21, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"known MD5 string: %s\n",
-		    known_md5_string_doom_beta_1_5_iwad);
-	else if(fsize == 4211660)
-	    printStyledText(21, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"known MD5 string: %s\n",
-		    known_md5_string_doom_beta_1_6_iwad);
-	else if(fsize == 4207819)
-	    printStyledText(21, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"known MD5 string: %s\n",
-		    known_md5_string_doom_share_1_0_iwad);
-	else if(fsize == 4274218)
-	    printStyledText(21, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"known MD5 string: %s\n",
-		    known_md5_string_doom_share_1_1_iwad);
-	else if(fsize == 4225504)
-	    printStyledText(21, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"known MD5 string: %s\n",
-		    known_md5_string_doom_share_1_2_iwad);
-	else if(fsize == 4225460)
-	    printStyledText(21, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"known MD5 string: %s\n",
-		    known_md5_string_doom_share_1_25s_iwad);
-	else if(fsize == 4234124)
-	    printStyledText(21, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"known MD5 string: %s\n",
-		    known_md5_string_doom_share_1_666_iwad);
-	else if(fsize == 4196020)
-	    printStyledText(21, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"known MD5 string: %s\n",
-		    known_md5_string_doom_share_1_8_iwad);
-//	else if(fsize == )
-//	    printStyledText(21, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"known MD5 string: %s\n",
-//		    known_md5_string_doom_share_1_9_iwad);
-	else if(fsize == 10396254)
-	    printStyledText(21, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"known MD5 string: %s\n",
-		    known_md5_string_doom_reg_1_1_iwad);
-	else if(fsize == 10399316)
-	    printStyledText(21, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"known MD5 string: %s\n",
-		    known_md5_string_doom_reg_1_2_iwad);
-	else if(fsize == 10401760)
-	    printStyledText(21, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"known MD5 string: %s\n",
-		    known_md5_string_doom_reg_1_6_iwad);
-//	else if(fsize == )
-//	    printStyledText(21, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"known MD5 string: %s\n",
-//		    known_md5_string_doom_reg_1_6b_iwad);
-//	else if(fsize == )
-//	    printStyledText(21, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"known MD5 string: %s\n",
-//		    known_md5_string_doom_reg_1_666_iwad);
-	else if(fsize == 11159840)
-	    printStyledText(21, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"known MD5 string: %s\n",
-		    known_md5_string_doom_reg_1_8_iwad);
-//	else if(fsize == )
-//	    printStyledText(21, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"known MD5 string: %s\n",
-//		    known_md5_string_doom_reg_1_9_iwad);
-	else if(fsize == 12408292)
-	    printStyledText(21, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"known MD5 string: %s\n",
-		    known_md5_string_doom_reg_1_9ud_iwad);
-	else if(fsize == 12474561)
-	    printStyledText(21, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"known MD5 string: %s\n",
-		    known_md5_string_doom_bfg_psn_iwad);
-	else if(fsize == 12487824)
-	    printStyledText(21, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"known MD5 string: %s\n",
-		    known_md5_string_doom_bfg_pc_iwad);
-	else if(fsize == 12538385)
-	    printStyledText(21, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"known MD5 string: %s\n",
-		    known_md5_string_doom_xbox_iwad);
-	else if(fsize == 14943400)
-	    printStyledText(21, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"known MD5 string: %s\n",
-		    known_md5_string_doom2_1_666_iwad);
-	else if(fsize == 14824716)
-	    printStyledText(21, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"known MD5 string: %s\n",
-		    known_md5_string_doom2_1_666g_iwad);
-	else if(fsize == 14612688)
-	    printStyledText(21, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"known MD5 string: %s\n",
-		    known_md5_string_doom2_1_7_iwad);
-//	else if(fsize == )
-//	    printStyledText(21, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"known MD5 string: %s\n",
-//		    known_md5_string_doom2_1_7a_iwad);
-//	else if(fsize == )
-//	    printStyledText(21, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"known MD5 string: %s\n",
-//		    known_md5_string_doom2_1_8_iwad);
-	else if(fsize == 14607420)
-	    printStyledText(21, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"known MD5 string: %s\n",
-		    known_md5_string_doom2_1_8f_iwad);
-	else if(fsize == 14604584)
-	    printStyledText(21, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"known MD5 string: %s\n",
-		    known_md5_string_doom2_1_9_iwad);
-	else if(fsize == 14677988)
-	    printStyledText(21, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"known MD5 string: %s\n",
-		    known_md5_string_doom2_bfg_xbox360_iwad);
-	else if(fsize == 14691821)
-	    printStyledText(21, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"known MD5 string: %s\n",
-		    known_md5_string_doom2_bfg_pc_iwad);
-	else if(fsize == 14683458)
-	    printStyledText(21, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"known MD5 string: %s\n",
-		    known_md5_string_doom2_xbox_iwad);
-	else if(fsize == 18195736)
-	    printStyledText(21, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"known MD5 string: %s\n",
-		    known_md5_string_final_doom_tnt_old_iwad);
-	else if(fsize == 18654796)
-	    printStyledText(21, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"known MD5 string: %s\n",
-		    known_md5_string_final_doom_tnt_new_iwad);
-	else if(fsize == 17420824)
-	    printStyledText(21, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"known MD5 string: %s\n",
-		    known_md5_string_final_doom_plutonia_old_iwad);
-	else if(fsize == 18240172)
-	    printStyledText(21, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"known MD5 string: %s\n",
-		    known_md5_string_final_doom_plutonia_new_iwad);
-//	else if(fsize == )
-//	    printStyledText(21, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"known MD5 string: %s\n",
-//		    known_md5_string_freedoom_0_6_4_iwad);
-//	else if(fsize == )
-//	    printStyledText(21, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"known MD5 string: %s\n",
-//		    known_md5_string_freedoom_0_7_rc_1_beta_1_iwad);
-//	else if(fsize == )
-//	    printStyledText(21, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"known MD5 string: %s\n",
-//		    known_md5_string_freedoom_0_7_iwad);
-//	else if(fsize == )
-//	    printStyledText(21, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"known MD5 string: %s\n",
-//		    known_md5_string_freedoom_0_8_beta_1_iwad);
-//	else if(fsize == )
-//	    printStyledText(21, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"known MD5 string: %s\n",
-//		    known_md5_string_freedoom_0_8_iwad);
-//	else if(fsize == )
-//	    printStyledText(21, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"known MD5 string: %s\n",
-//		    known_md5_string_freedoom_0_8_phase_1_iwad);
-	else if(fsize == 28422764)
-	    printStyledText(21, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"known MD5 string: %s\n",
-		    known_md5_string_freedoom_0_8_phase_2_iwad);
-//	else if(fsize == )
-//	    printStyledText(21, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"known MD5 string: %s\n",
-//		    known_md5_string_hacx_share_1_0_iwad);
-//	else if(fsize == )
-//	    printStyledText(21, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"known MD5 string: %s\n",
-//		    known_md5_string_hacx_reg_1_0_iwad);
-//	else if(fsize == )
-//	    printStyledText(21, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"known MD5 string: %s\n",
-//		    known_md5_string_hacx_reg_1_1_iwad);
-	else if(fsize == 19321722)
-	    printStyledText(21, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"known MD5 string: %s\n",
-		    known_md5_string_hacx_reg_1_2_iwad);
-
-	printStyledText(22, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"calculated MD5 string: %s\n", calculated_md5_string);
+                fsize = 20428208;
 */
-	if (selected < fileCnt - 1)
-	    printStyledText(8, 32,CONSOLE_FONT_BLACK,CONSOLE_FONT_YELLOW,CONSOLE_FONT_BOLD,&stTexteLocation,"+");
+                md5_check = true;
+                nerve_pwad = false;
+            }
+            else if (strncmp(calculated_md5_string,
+                        known_md5_string_doom_reg_1_8_iwad, 32) == 0)
+            {
+                strcpy(target, check);
+                strcpy(stripped_target, tmpFile->filename);
 
-	if(selected > 0)
-	    printStyledText(5, 32,CONSOLE_FONT_BLACK,CONSOLE_FONT_YELLOW,CONSOLE_FONT_BOLD,&stTexteLocation,"-");
+                fsize = 11159840;
 
-	/** Controls **/
-	u32 buttons = WaitButtons();
-
-	/* DPAD buttons */
-	if (buttons & WPAD_CLASSIC_BUTTON_UP)
-	{
-	    selected--;
-
-	    if (selected <= -1)
-		selected = 0;
-	}
-
-	if (buttons & WPAD_CLASSIC_BUTTON_LEFT)
-	{
-	    selected = selected + ENTRIES_PER_PAGE;
-
-	    if (selected >= fileCnt || selected == 0)
-		selected = 0;
-	}
-
-	if (buttons & WPAD_CLASSIC_BUTTON_DOWN)
-	{
-	    selected ++;
-
-	    if (selected >= fileCnt)
-		selected = fileCnt - 1;
-	}
-
-	if (buttons & WPAD_CLASSIC_BUTTON_RIGHT)
-	{
-	    selected = selected - ENTRIES_PER_PAGE;
-
-	    if (selected <= -1 || selected == fileCnt - 1)
-		selected = fileCnt - 1;
-	}
-
-	/* HOME button */
-	if (buttons & WPAD_CLASSIC_BUTTON_HOME)
-	    Restart();
+                md5_check = true;
+                nerve_pwad = false;
+            }
+            else if (strncmp(calculated_md5_string,
+                        known_md5_string_doom_reg_1_9_iwad, 32) == 0)
+            {
 /*
-	// Plus Button - Leathl
-	if (buttons & WPAD_CLASSIC_BUTTON_PLUS)
-	{
-	    multiplayer_flag = true;
-	}
+                strcpy(target, check);
+                strcpy(stripped_target, tmpFile->filename);
 
-	// Minus Button - Leathl
-	if (buttons & WPAD_CLASSIC_BUTTON_MINUS)
-	{
-	    multiplayer_flag = false;
-	}
+                fsize = 20428208;
 */
-	// 1 Button - Leathl
-	if (buttons & WPAD_CLASSIC_BUTTON_PLUS)
-	{
-	    /* Clear console */
-	    Con_Clear();
+                md5_check = true;
+                nerve_pwad = false;
+            }
+            else if (strncmp(calculated_md5_string,
+                        known_md5_string_doom_reg_1_9ud_iwad, 32) == 0)
+            {
+                strcpy(target, check);
+                strcpy(stripped_target, tmpFile->filename);
 
-	    /* START DOOM */
-	    D_DoomMain();
-	}
+                fsize = 12408292;
 
-	// A button
-	if (buttons & WPAD_CLASSIC_BUTTON_A)
-	{
-//	    WADLoaded = 0;
+                md5_check = true;
+                nerve_pwad = false;
+            }
+            else if (strncmp(calculated_md5_string,
+                        known_md5_string_doom_bfg_psn_iwad, 32) == 0)
+            {
+                strcpy(target, check);
+                strcpy(stripped_target, tmpFile->filename);
 
-	    fatFile *tmpFile = &fileList[selected];
+                fsize = 12474561;
 
-	    char *tmpCurPath/* = NULL*/;	// DO NOT ACTIVATE: CRASHES THE WII IF SELECTING A WAD
+                md5_check = true;
+                nerve_pwad = false;
+            }
+            else if (strncmp(calculated_md5_string,
+                        known_md5_string_doom_bfg_pc_iwad, 32) == 0)
+            {
+                strcpy(target, check);
+                strcpy(stripped_target, tmpFile->filename);
 
-	    if (tmpFile->entry.d_type==DT_DIR) // wiiNinja
-	    {
-		if (strcmp (tmpFile->filename, "..") == 0)
-		{
-		    selected = 0;
+                fsize = 12487824;
 
-		    start = 0;
+                md5_check = true;
+                nerve_pwad = false;
+            }
+            else if (strncmp(calculated_md5_string,
+                        known_md5_string_doom_xbox_iwad, 32) == 0)
+            {
+                strcpy(target, check);
+                strcpy(stripped_target, tmpFile->filename);
 
-		    // Previous dir
-		    tmpCurPath = PopCurrentDir(&selected, &start);
+                fsize = 12538385;
 
-		    if (tmpCurPath != NULL)
-			sprintf(tmpPath, "%s", tmpCurPath);
+                md5_check = true;
+                nerve_pwad = false;
+            }
+            else if (strncmp(calculated_md5_string,
+                        known_md5_string_doom2_1_666_iwad, 32) == 0)
+            {
+                strcpy(target, check);
+                strcpy(stripped_target, tmpFile->filename);
 
-			goto getList;
-		}
+                fsize = 14943400;
+
+                md5_check = true;
+                nerve_pwad = false;
+            }
+            else if (strncmp(calculated_md5_string,
+                        known_md5_string_doom2_1_666g_iwad, 32) == 0)
+            {
+                strcpy(target, check);
+                strcpy(stripped_target, tmpFile->filename);
+
+                fsize = 14824716;
+
+                md5_check = true;
+                nerve_pwad = false;
+            }
+            else if (strncmp(calculated_md5_string,
+                        known_md5_string_doom2_1_7_iwad, 32) == 0)
+            {
+                strcpy(target, check);
+                strcpy(stripped_target, tmpFile->filename);
+
+                fsize = 14612688;
+
+                md5_check = true;
+                nerve_pwad = false;
+            }
+            else if (strncmp(calculated_md5_string,
+                        known_md5_string_doom2_1_7a_iwad, 32) == 0)
+            {
 /*
-		else if (IsListFull () == true)
-		{
-		    WaitPrompt ("reached maximum count of sub folders.\n");
-		}
+                strcpy(target, check);
+                strcpy(stripped_target, tmpFile->filename);
+
+                fsize = 20428208;
 */
-		else
-		{
-		    tmpCurPath = PeekCurrentDir ();
-
-		    if (tmpCurPath != NULL)
-		    {
-			if(gDirLevel>1)
-			    sprintf(tmpPath, "%s%s", tmpCurPath, tmpFile->filename);
-			else
-			    sprintf(tmpPath, "%s%s", tmpCurPath, tmpFile->filename);
-
-			strcat(tmpPath, "/");
-		    }
-
-		    // wiiNinja: Need to PopCurrentDir
-		    PushCurrentDir (tmpPath, selected, start);
-
-		    selected = 0;
-
-		    start = 0;
+                md5_check = true;
+                nerve_pwad = false;
+            }
+            else if (strncmp(calculated_md5_string,
+                        known_md5_string_doom2_1_8_iwad, 32) == 0)
+            {
 /*
-		    installCnt = 0;
+                strcpy(target, check);
+                strcpy(stripped_target, tmpFile->filename);
 
-		    uninstallCnt = 0;
+                fsize = 20428208;
 */
-		    goto getList;
-		}
-	    }
-	    else
-	    {
-		strcpy(check, tmpPath);
-//		strcpy(check, tmpCurPath);
-		strcat(check, tmpFile->filename);
+                md5_check = true;
+                nerve_pwad = false;
+            }
+            else if (strncmp(calculated_md5_string,
+                        known_md5_string_doom2_1_8f_iwad, 32) == 0)
+            {
+                strcpy(target, check);
+                strcpy(stripped_target, tmpFile->filename);
 
-		MD5_Check(check);
+                fsize = 14607420;
 
-		if (strncmp(calculated_md5_string, known_md5_string_chex_quest_iwad, 32) == 0)
-		{
-		    strcpy(target, check);
-		    strcpy(stripped_target, tmpFile->filename);
+                md5_check = true;
+                nerve_pwad = false;
+            }
+            else if (strncmp(calculated_md5_string,
+                        known_md5_string_doom2_1_9_iwad, 32) == 0)
+            {
+                strcpy(target, check);
+                strcpy(stripped_target, tmpFile->filename);
 
-		    fsize = 12361532;
+                fsize = 14604584;
 
-		    md5_check = true;
-		    nerve_pwad = false;
-		}
-		else if (strncmp(calculated_md5_string, known_md5_string_doom_beta_1_4_iwad, 32) == 0)
-		{
-		    strcpy(target, check);
-		    strcpy(stripped_target, tmpFile->filename);
+                md5_check = true;
+                nerve_pwad = false;
+            }
+            else if (strncmp(calculated_md5_string,
+                        known_md5_string_doom2_bfg_xbox360_iwad, 32) == 0)
+            {
+                strcpy(target, check);
+                strcpy(stripped_target, tmpFile->filename);
 
-		    fsize = 4261144;
+                fsize = 14677988;
 
-		    md5_check = true;
-		    nerve_pwad = false;
-		}
-		else if (strncmp(calculated_md5_string, known_md5_string_doom_beta_1_5_iwad, 32) == 0)
-		{
-		    strcpy(target, check);
-		    strcpy(stripped_target, tmpFile->filename);
+                md5_check = true;
+                nerve_pwad = false;
+            }
+            else if (strncmp(calculated_md5_string,
+                        known_md5_string_doom2_bfg_pc_iwad, 32) == 0)
+            {
+                strcpy(target, check);
+                strcpy(stripped_target, tmpFile->filename);
 
-		    fsize = 4271324;
+                fsize = 14691821;
 
-		    md5_check = true;
-		    nerve_pwad = false;
-		}
-		else if (strncmp(calculated_md5_string, known_md5_string_doom_beta_1_6_iwad, 32) == 0)
-		{
-		    strcpy(target, check);
-		    strcpy(stripped_target, tmpFile->filename);
+                md5_check = true;
+                nerve_pwad = false;
+            }
+            else if (strncmp(calculated_md5_string,
+                        known_md5_string_doom2_xbox_iwad, 32) == 0)
+            {
+                strcpy(target, check);
+                strcpy(stripped_target, tmpFile->filename);
 
-		    fsize = 4211660;
+                fsize = 14683458;
 
-		    md5_check = true;
-		    nerve_pwad = false;
-		}
-		else if (strncmp(calculated_md5_string, known_md5_string_doom_share_1_0_iwad, 32) == 0)
-		{
-		    strcpy(target, check);
-		    strcpy(stripped_target, tmpFile->filename);
+                md5_check = true;
+                nerve_pwad = false;
+            }
+            else if (strncmp(calculated_md5_string,
+                        known_md5_string_final_doom_tnt_old_iwad, 32) == 0)
+            {
+                strcpy(target, check);
+                strcpy(stripped_target, tmpFile->filename);
 
-		    fsize = 4207819;
+                fsize = 18195736;
 
-		    md5_check = true;
-		    nerve_pwad = false;
-		}
-		else if (strncmp(calculated_md5_string, known_md5_string_doom_share_1_1_iwad, 32) == 0)
-		{
-		    strcpy(target, check);
-		    strcpy(stripped_target, tmpFile->filename);
+                md5_check = true;
+                nerve_pwad = false;
+            }
+            else if (strncmp(calculated_md5_string,
+                        known_md5_string_final_doom_tnt_new_iwad, 32) == 0)
+            {
+                strcpy(target, check);
+                strcpy(stripped_target, tmpFile->filename);
 
-		    fsize = 4274218;
+                fsize = 18654796;
 
-		    md5_check = true;
-		    nerve_pwad = false;
-		}
-		else if (strncmp(calculated_md5_string, known_md5_string_doom_share_1_2_iwad, 32) == 0)
-		{
-		    strcpy(target, check);
-		    strcpy(stripped_target, tmpFile->filename);
+                md5_check = true;
+                nerve_pwad = false;
+            }
+            else if (strncmp(calculated_md5_string,
+                        known_md5_string_final_doom_plutonia_old_iwad, 32) == 0)
+            {
+                strcpy(target, check);
+                strcpy(stripped_target, tmpFile->filename);
 
-		    fsize = 4225504;
+                fsize = 17420824;
 
-		    md5_check = true;
-		    nerve_pwad = false;
-		}
-		else if (strncmp(calculated_md5_string, known_md5_string_doom_share_1_25s_iwad, 32) == 0)
-		{
-		    strcpy(target, check);
-		    strcpy(stripped_target, tmpFile->filename);
+                md5_check = true;
+                nerve_pwad = false;
+            }
+            else if (strncmp(calculated_md5_string,
+                        known_md5_string_final_doom_plutonia_new_iwad, 32) == 0)
+            {
+                strcpy(target, check);
+                strcpy(stripped_target, tmpFile->filename);
 
-		    fsize = 4225460;
+                fsize = 18240172;
 
-		    md5_check = true;
-		    nerve_pwad = false;
-		}
-		else if (strncmp(calculated_md5_string, known_md5_string_doom_share_1_666_iwad, 32) == 0)
-		{
-		    strcpy(target, check);
-		    strcpy(stripped_target, tmpFile->filename);
-
-		    fsize = 4234124;
-
-		    md5_check = true;
-		    nerve_pwad = false;
-		}
-		else if (strncmp(calculated_md5_string, known_md5_string_doom_share_1_8_iwad, 32) == 0)
-		{
-		    strcpy(target, check);
-		    strcpy(stripped_target, tmpFile->filename);
-
-		    fsize = 4196020;
-
-		    md5_check = true;
-		    nerve_pwad = false;
-		}
-		else if (strncmp(calculated_md5_string, known_md5_string_doom_share_1_9_iwad, 32) == 0)
-		{
+                md5_check = true;
+                nerve_pwad = false;
+            }
+            else if (strncmp(calculated_md5_string,
+                        known_md5_string_freedoom_0_6_4_iwad, 32) == 0)
+            {
 /*
-		    strcpy(target, check);
-		    strcpy(stripped_target, tmpFile->filename);
+                strcpy(target, check);
+                strcpy(stripped_target, tmpFile->filename);
 
-		    fsize = 20428208;
+                fsize = 19801320;
 */
-		    md5_check = true;
-		    nerve_pwad = false;
-		}
-		else if (strncmp(calculated_md5_string, known_md5_string_doom_reg_1_1_iwad, 32) == 0)
-		{
-		    strcpy(target, check);
-		    strcpy(stripped_target, tmpFile->filename);
-
-		    fsize = 10396254;
-
-		    md5_check = true;
-		    nerve_pwad = false;
-		}
-		else if (strncmp(calculated_md5_string, known_md5_string_doom_reg_1_2_iwad, 32) == 0)
-		{
-		    strcpy(target, check);
-		    strcpy(stripped_target, tmpFile->filename);
-
-		    fsize = 10399316;
-
-		    md5_check = true;
-		    nerve_pwad = false;
-		}
-		else if (strncmp(calculated_md5_string, known_md5_string_doom_reg_1_6_iwad, 32) == 0)
-		{
-		    strcpy(target, check);
-		    strcpy(stripped_target, tmpFile->filename);
-
-		    fsize = 10401760;
-
-		    md5_check = true;
-		    nerve_pwad = false;
-		}
-		else if (strncmp(calculated_md5_string, known_md5_string_doom_reg_1_6b_iwad, 32) == 0)
-		{
+                md5_check = true;
+                nerve_pwad = false;
+            }
+            else if (strncmp(calculated_md5_string,
+                        known_md5_string_freedoom_0_7_rc_1_beta_1_iwad, 32) == 0)
+            {
 /*
-		    strcpy(target, check);
-		    strcpy(stripped_target, tmpFile->filename);
+                strcpy(target, check);
+                strcpy(stripped_target, tmpFile->filename);
 
-		    fsize = 20428208;
+                fsize = 27704188;
 */
-		    md5_check = true;
-		    nerve_pwad = false;
-		}
-		else if (strncmp(calculated_md5_string, known_md5_string_doom_reg_1_666_iwad, 32) == 0)
-		{
+                md5_check = true;
+                nerve_pwad = false;
+            }
+            else if (strncmp(calculated_md5_string,
+                        known_md5_string_freedoom_0_7_iwad, 32) == 0)
+            {
 /*
-		    strcpy(target, check);
-		    strcpy(stripped_target, tmpFile->filename);
+                strcpy(target, check);
+                strcpy(stripped_target, tmpFile->filename);
 
-		    fsize = 20428208;
+                fsize = 27625596;
 */
-		    md5_check = true;
-		    nerve_pwad = false;
-		}
-		else if (strncmp(calculated_md5_string, known_md5_string_doom_reg_1_8_iwad, 32) == 0)
-		{
-		    strcpy(target, check);
-		    strcpy(stripped_target, tmpFile->filename);
-
-		    fsize = 11159840;
-
-		    md5_check = true;
-		    nerve_pwad = false;
-		}
-		else if (strncmp(calculated_md5_string, known_md5_string_doom_reg_1_9_iwad, 32) == 0)
-		{
+                md5_check = true;
+                nerve_pwad = false;
+            }
+            else if (strncmp(calculated_md5_string,
+                        known_md5_string_freedoom_0_8_beta_1_iwad, 32) == 0)
+            {
 /*
-		    strcpy(target, check);
-		    strcpy(stripped_target, tmpFile->filename);
+                strcpy(target, check);
+                strcpy(stripped_target, tmpFile->filename);
 
-		    fsize = 20428208;
+                fsize = 28144744;
 */
-		    md5_check = true;
-		    nerve_pwad = false;
-		}
-		else if (strncmp(calculated_md5_string, known_md5_string_doom_reg_1_9ud_iwad, 32) == 0)
-		{
-		    strcpy(target, check);
-		    strcpy(stripped_target, tmpFile->filename);
-
-		    fsize = 12408292;
-
-		    md5_check = true;
-		    nerve_pwad = false;
-		}
-		else if (strncmp(calculated_md5_string, known_md5_string_doom_bfg_psn_iwad, 32) == 0)
-		{
-		    strcpy(target, check);
-		    strcpy(stripped_target, tmpFile->filename);
-
-		    fsize = 12474561;
-
-		    md5_check = true;
-		    nerve_pwad = false;
-		}
-		else if (strncmp(calculated_md5_string, known_md5_string_doom_bfg_pc_iwad, 32) == 0)
-		{
-		    strcpy(target, check);
-		    strcpy(stripped_target, tmpFile->filename);
-
-		    fsize = 12487824;
-
-		    md5_check = true;
-		    nerve_pwad = false;
-		}
-		else if (strncmp(calculated_md5_string, known_md5_string_doom_xbox_iwad, 32) == 0)
-		{
-		    strcpy(target, check);
-		    strcpy(stripped_target, tmpFile->filename);
-
-		    fsize = 12538385;
-
-		    md5_check = true;
-		    nerve_pwad = false;
-		}
-		else if (strncmp(calculated_md5_string, known_md5_string_doom2_1_666_iwad, 32) == 0)
-		{
-		    strcpy(target, check);
-		    strcpy(stripped_target, tmpFile->filename);
-
-		    fsize = 14943400;
-
-		    md5_check = true;
-		    nerve_pwad = false;
-		}
-		else if (strncmp(calculated_md5_string, known_md5_string_doom2_1_666g_iwad, 32) == 0)
-		{
-		    strcpy(target, check);
-		    strcpy(stripped_target, tmpFile->filename);
-
-		    fsize = 14824716;
-
-		    md5_check = true;
-		    nerve_pwad = false;
-		}
-		else if (strncmp(calculated_md5_string, known_md5_string_doom2_1_7_iwad, 32) == 0)
-		{
-		    strcpy(target, check);
-		    strcpy(stripped_target, tmpFile->filename);
-
-		    fsize = 14612688;
-
-		    md5_check = true;
-		    nerve_pwad = false;
-		}
-		else if (strncmp(calculated_md5_string, known_md5_string_doom2_1_7a_iwad, 32) == 0)
-		{
+                md5_check = true;
+                nerve_pwad = false;
+            }
+            else if (strncmp(calculated_md5_string,
+                        known_md5_string_freedoom_0_8_iwad, 32) == 0)
+            {
 /*
-		    strcpy(target, check);
-		    strcpy(stripped_target, tmpFile->filename);
+                strcpy(target, check);
+                strcpy(stripped_target, tmpFile->filename);
 
-		    fsize = 20428208;
+                fsize = 28592816;
 */
-		    md5_check = true;
-		    nerve_pwad = false;
-		}
-		else if (strncmp(calculated_md5_string, known_md5_string_doom2_1_8_iwad, 32) == 0)
-		{
+                md5_check = true;
+                nerve_pwad = false;
+            }
+            else if (strncmp(calculated_md5_string,
+                        known_md5_string_freedoom_0_8_phase_1_iwad, 32) == 0)
+            {
 /*
-		    strcpy(target, check);
-		    strcpy(stripped_target, tmpFile->filename);
+                strcpy(target, check);
+                strcpy(stripped_target, tmpFile->filename);
 
-		    fsize = 20428208;
+                fsize = 19362644;
 */
-		    md5_check = true;
-		    nerve_pwad = false;
-		}
-		else if (strncmp(calculated_md5_string, known_md5_string_doom2_1_8f_iwad, 32) == 0)
-		{
-		    strcpy(target, check);
-		    strcpy(stripped_target, tmpFile->filename);
+                md5_check = true;
+                nerve_pwad = false;
+            }
+            else if (strncmp(calculated_md5_string,
+                        known_md5_string_freedoom_0_8_phase_2_iwad, 32) == 0)
+            {
+                strcpy(target, check);
+                strcpy(stripped_target, tmpFile->filename);
 
-		    fsize = 14607420;
+                fsize = 28422764;
 
-		    md5_check = true;
-		    nerve_pwad = false;
-		}
-		else if (strncmp(calculated_md5_string, known_md5_string_doom2_1_9_iwad, 32) == 0)
-		{
-		    strcpy(target, check);
-		    strcpy(stripped_target, tmpFile->filename);
-
-		    fsize = 14604584;
-
-		    md5_check = true;
-		    nerve_pwad = false;
-		}
-		else if (strncmp(calculated_md5_string, known_md5_string_doom2_bfg_xbox360_iwad, 32) == 0)
-		{
-		    strcpy(target, check);
-		    strcpy(stripped_target, tmpFile->filename);
-
-		    fsize = 14677988;
-
-		    md5_check = true;
-		    nerve_pwad = false;
-		}
-		else if (strncmp(calculated_md5_string, known_md5_string_doom2_bfg_pc_iwad, 32) == 0)
-		{
-		    strcpy(target, check);
-		    strcpy(stripped_target, tmpFile->filename);
-
-		    fsize = 14691821;
-
-		    md5_check = true;
-		    nerve_pwad = false;
-		}
-		else if (strncmp(calculated_md5_string, known_md5_string_doom2_xbox_iwad, 32) == 0)
-		{
-		    strcpy(target, check);
-		    strcpy(stripped_target, tmpFile->filename);
-
-		    fsize = 14683458;
-
-		    md5_check = true;
-		    nerve_pwad = false;
-		}
-		else if (strncmp(calculated_md5_string, known_md5_string_final_doom_tnt_old_iwad, 32) == 0)
-		{
-		    strcpy(target, check);
-		    strcpy(stripped_target, tmpFile->filename);
-
-		    fsize = 18195736;
-
-		    md5_check = true;
-		    nerve_pwad = false;
-		}
-		else if (strncmp(calculated_md5_string, known_md5_string_final_doom_tnt_new_iwad, 32) == 0)
-		{
-		    strcpy(target, check);
-		    strcpy(stripped_target, tmpFile->filename);
-
-		    fsize = 18654796;
-
-		    md5_check = true;
-		    nerve_pwad = false;
-		}
-		else if (strncmp(calculated_md5_string, known_md5_string_final_doom_plutonia_old_iwad, 32) == 0)
-		{
-		    strcpy(target, check);
-		    strcpy(stripped_target, tmpFile->filename);
-
-		    fsize = 17420824;
-
-		    md5_check = true;
-		    nerve_pwad = false;
-		}
-		else if (strncmp(calculated_md5_string, known_md5_string_final_doom_plutonia_new_iwad, 32) == 0)
-		{
-		    strcpy(target, check);
-		    strcpy(stripped_target, tmpFile->filename);
-
-		    fsize = 18240172;
-
-		    md5_check = true;
-		    nerve_pwad = false;
-		}
-		else if (strncmp(calculated_md5_string, known_md5_string_freedoom_0_6_4_iwad, 32) == 0)
-		{
+                md5_check = true;
+                nerve_pwad = false;
+            }
+            else if (strncmp(calculated_md5_string,
+                        known_md5_string_hacx_share_1_0_iwad, 32) == 0)
+            {
 /*
-		    strcpy(target, check);
-		    strcpy(stripped_target, tmpFile->filename);
+                strcpy(target, check);
+                strcpy(stripped_target, tmpFile->filename);
 
-		    fsize = 19801320;
+                fsize = 9745831;
 */
-		    md5_check = true;
-		    nerve_pwad = false;
-		}
-		else if (strncmp(calculated_md5_string, known_md5_string_freedoom_0_7_rc_1_beta_1_iwad, 32) == 0)
-		{
+                md5_check = true;
+                nerve_pwad = false;
+            }
+            else if (strncmp(calculated_md5_string,
+                        known_md5_string_hacx_reg_1_0_iwad, 32) == 0)
+            {
 /*
-		    strcpy(target, check);
-		    strcpy(stripped_target, tmpFile->filename);
+                strcpy(target, check);
+                strcpy(stripped_target, tmpFile->filename);
 
-		    fsize = 27704188;
+                fsize = 21951805;
 */
-		    md5_check = true;
-		    nerve_pwad = false;
-		}
-		else if (strncmp(calculated_md5_string, known_md5_string_freedoom_0_7_iwad, 32) == 0)
-		{
+                md5_check = true;
+                nerve_pwad = false;
+            }
+            else if (strncmp(calculated_md5_string,
+                        known_md5_string_hacx_reg_1_1_iwad, 32) == 0)
+            {
 /*
-		    strcpy(target, check);
-		    strcpy(stripped_target, tmpFile->filename);
+                strcpy(target, check);
+                strcpy(stripped_target, tmpFile->filename);
 
-		    fsize = 27625596;
+                fsize = 21951805;
 */
-		    md5_check = true;
-		    nerve_pwad = false;
-		}
-		else if (strncmp(calculated_md5_string, known_md5_string_freedoom_0_8_beta_1_iwad, 32) == 0)
-		{
-/*
-		    strcpy(target, check);
-		    strcpy(stripped_target, tmpFile->filename);
-
-		    fsize = 28144744;
-*/
-		    md5_check = true;
-		    nerve_pwad = false;
-		}
-		else if (strncmp(calculated_md5_string, known_md5_string_freedoom_0_8_iwad, 32) == 0)
-		{
-/*
-		    strcpy(target, check);
-		    strcpy(stripped_target, tmpFile->filename);
-
-		    fsize = 28592816;
-*/
-		    md5_check = true;
-		    nerve_pwad = false;
-		}
-		else if (strncmp(calculated_md5_string, known_md5_string_freedoom_0_8_phase_1_iwad, 32) == 0)
-		{
-/*
-		    strcpy(target, check);
-		    strcpy(stripped_target, tmpFile->filename);
-
-		    fsize = 19362644;
-*/
-		    md5_check = true;
-		    nerve_pwad = false;
-		}
-		else if (strncmp(calculated_md5_string, known_md5_string_freedoom_0_8_phase_2_iwad, 32) == 0)
-		{
-		    strcpy(target, check);
-		    strcpy(stripped_target, tmpFile->filename);
-
-		    fsize = 28422764;
-
-		    md5_check = true;
-		    nerve_pwad = false;
-		}
-		else if (strncmp(calculated_md5_string, known_md5_string_hacx_share_1_0_iwad, 32) == 0)
-		{
-/*
-		    strcpy(target, check);
-		    strcpy(stripped_target, tmpFile->filename);
-
-		    fsize = 9745831;
-*/
-		    md5_check = true;
-		    nerve_pwad = false;
-		}
-		else if (strncmp(calculated_md5_string, known_md5_string_hacx_reg_1_0_iwad, 32) == 0)
-		{
-/*
-		    strcpy(target, check);
-		    strcpy(stripped_target, tmpFile->filename);
-
-		    fsize = 21951805;
-*/
-		    md5_check = true;
-		    nerve_pwad = false;
-		}
-		else if (strncmp(calculated_md5_string, known_md5_string_hacx_reg_1_1_iwad, 32) == 0)
-		{
-/*
-		    strcpy(target, check);
-		    strcpy(stripped_target, tmpFile->filename);
-
-		    fsize = 21951805;
-*/
-		    md5_check = true;
-		    nerve_pwad = false;
-		}
-		else if (strncmp(calculated_md5_string, known_md5_string_hacx_reg_1_2_iwad, 32) == 0)
-		{
-		    strcpy(target, check);
-		    strcpy(stripped_target, tmpFile->filename);
-
-		    fsize = 19321722;
-
-		    md5_check = true;
-		    nerve_pwad = false;
-		}
-		else if (strncmp(calculated_md5_string, known_md5_string_nerve_bfg_pwad, 32) == 0)
-		{
-		    load_extra_wad = 1;
-
-		    strcpy(extra_wad_1, check);
-		    strcpy(stripped_extra_wad_1, tmpFile->filename);
-
-		    extra_wad_slot_1_loaded = 1;
-
-		    md5_check = true;
-		    nerve_pwad = true;
-		}
-		else if (strncmp(calculated_md5_string, known_md5_string_nerve_xbox360_pwad, 32) == 0)
-		{
-		    load_extra_wad = 1;
-
-		    strcpy(extra_wad_1, check);
-		    strcpy(stripped_extra_wad_1, tmpFile->filename);
-
-		    extra_wad_slot_1_loaded = 1;
-
-		    md5_check = true;
-		    nerve_pwad = true;
-		}
-		else
-		    md5_check = false;
-
-		file = fopen(check, "r");
-
-		if (file != NULL && !md5_check)
-		{
-		    for (i = 0; i < 4; i++)
-		    {
-			c = fgetc(file);	// Get character
-
-			buffer[i] = c;		// Store characters in array
-
-			if (strncmp(iwad_term, buffer, 4) == 0)
-			{
-			    if(extra_wad_slot_1_loaded == 0)
-			    {
-				load_extra_wad = 1;
-
-				strcpy(extra_wad_1, check);
-				strcpy(stripped_extra_wad_1, tmpFile->filename);
-
-				extra_wad_slot_1_loaded = 1;
-
-				extra_wad_loaded = 1;
-
-				break;
-			    }
-			    else if(extra_wad_slot_1_loaded == 1 && extra_wad_slot_2_loaded == 0)
-			    {
-				if(strcmp(check, extra_wad_1) != 0)
-				{
-				    load_extra_wad = 1;
-
-				    strcpy(extra_wad_2, check);
-				    strcpy(stripped_extra_wad_2, tmpFile->filename);
-
-				    extra_wad_slot_2_loaded = 1;
-
-				    extra_wad_loaded = 1;
-				}
-/*
-				else
-				{
-				    strcpy(extra_wad_2, "");
-
-				    extra_wad_slot_2_loaded = 0;
-				}
-*/
-				break;
-			    }
-			    else if(extra_wad_slot_1_loaded == 1 && extra_wad_slot_2_loaded == 1
-								 && extra_wad_slot_3_loaded == 0)
-			    {
-				if((strcmp(check, extra_wad_1) != 0 && strcmp(check, extra_wad_2) != 0))
-				{
-				    load_extra_wad = 1;
-
-				    strcpy(extra_wad_3, check);
-				    strcpy(stripped_extra_wad_3, tmpFile->filename);
-
-				    extra_wad_slot_3_loaded = 1;
-
-				    extra_wad_loaded = 1;
-				}
-/*
-				else
-				{
-				    strcpy(extra_wad_3, "");
-
-				    extra_wad_slot_3_loaded = 0;
-				}
-*/
-				break;
-			    }
-			}
-			else if (strncmp(pwad_term, buffer, 4) == 0 && extra_wad_slot_1_loaded == 0)
-			{
-			    load_extra_wad = 1;
-
-			    strcpy(extra_wad_1, check);
-			    strcpy(stripped_extra_wad_1, tmpFile->filename);
-
-			    extra_wad_slot_1_loaded = 1;
-
-			    W_CheckSize(4);
-
-			    if(fsizecq == 7585664)
-				is_chex_2 = true;
-
-			    extra_wad_loaded = 1;
-
-			    break;
-			}
-			else if (strncmp(pwad_term, buffer, 4) == 0 && extra_wad_slot_1_loaded == 1
-								    && extra_wad_slot_2_loaded == 0)
-			{
-			    if(strcmp(check, extra_wad_1) != 0)
-			    {
-				load_extra_wad = 1;
-
-				strcpy(extra_wad_2, check);
-				strcpy(stripped_extra_wad_2, tmpFile->filename);
-
-				extra_wad_slot_2_loaded = 1;
-
-				W_CheckSize(4);
-
-				if(fsizecq == 7585664)
-				    is_chex_2 = true;
-
-				extra_wad_loaded = 1;
-			    }
-/*
-			    else
-			    {
-				strcpy(extra_wad_2, "");
-
-				extra_wad_slot_2_loaded = 0;
-			    }
-*/
-			    break;
-			}
-			else if (strncmp(pwad_term, buffer, 4) == 0 && extra_wad_slot_1_loaded == 1
-								    && extra_wad_slot_2_loaded == 1
-								    && extra_wad_slot_3_loaded == 0)
-			{
-			    if((strcmp(check, extra_wad_1) != 0 && strcmp(check, extra_wad_2) != 0))
-			    {
-				load_extra_wad = 1;
-
-				strcpy(extra_wad_3, check);
-				strcpy(stripped_extra_wad_3, tmpFile->filename);
-
-				extra_wad_slot_3_loaded = 1;
-
-				W_CheckSize(4);
-
-				if(fsizecq == 7585664)
-				    is_chex_2 = true;
-
-				extra_wad_loaded = 1;
-			    }
-/*
-			    else
-			    {
-				strcpy(extra_wad_3, "");
-
-				extra_wad_slot_3_loaded = 0;
-			    }
-*/
-			    break;
-			}
-			else if (strncmp(deh_term, buffer, 4) == 0) 
-			{
-			    load_dehacked = 1;
-
-			    strcpy(dehacked_file, check);
-			    strcpy(stripped_dehacked_file, tmpFile->filename);
-
-			    break;
-			}
-		    }
-		}
-		memset(buffer, 0, sizeof(buffer));
-
-		fclose(file);
-	    }
-	}
-
-	/* B button */
-	if (buttons & WPAD_CLASSIC_BUTTON_B)
-	{
-	    if(gDirLevel<=1)
-	    {
-		return;
-	    }
-
-	    char *tmpCurPath;
-
-	    selected = 0;
-
-	    start = 0;
-
-	    // Previous dir
-	    tmpCurPath = PopCurrentDir(&selected, &start);
-
-	    if (tmpCurPath != NULL)
-		sprintf(tmpPath, "%s", tmpCurPath);
-
-	    goto getList;
-	}
-
-	if (buttons & WPAD_CLASSIC_BUTTON_X)
-	{
-	    load_dehacked = 0;
-	    load_extra_wad = 0;
-
-	    strcpy(stripped_dehacked_file, "");
-	    strcpy(stripped_extra_wad_1, "");
-	    strcpy(stripped_extra_wad_2, "");
-	    strcpy(stripped_extra_wad_3, "");
-	    strcpy(stripped_target, "");
-
-	    strcpy(dehacked_file, "");
-	    strcpy(extra_wad_1, "");
-	    strcpy(extra_wad_2, "");
-	    strcpy(extra_wad_3, "");
-	    strcpy(target, "");
-
-	    extra_wad_slot_1_loaded = 0;
-	    extra_wad_slot_2_loaded = 0;
-	    extra_wad_slot_3_loaded = 0;
-
-	    extra_wad_loaded = 0;
-	}
-
-	/* List scrolling */
-	index = (selected - start);
-
-	if (index >= ENTRIES_PER_PAGE)
-	    start += index - (ENTRIES_PER_PAGE - 1);
-
-	if (index <= -1)
-	    start += index;
+                md5_check = true;
+                nerve_pwad = false;
+            }
+            else if (strncmp(calculated_md5_string,
+                        known_md5_string_hacx_reg_1_2_iwad, 32) == 0)
+            {
+                strcpy(target, check);
+                strcpy(stripped_target, tmpFile->filename);
+
+                fsize = 19321722;
+
+                md5_check = true;
+                nerve_pwad = false;
+            }
+            else if (strncmp(calculated_md5_string,
+                        known_md5_string_nerve_bfg_pwad, 32) == 0)
+            {
+                load_extra_wad = 1;
+
+                strcpy(extra_wad_1, check);
+                strcpy(stripped_extra_wad_1, tmpFile->filename);
+
+                extra_wad_slot_1_loaded = 1;
+
+                md5_check = true;
+                nerve_pwad = true;
+            }
+            else if (strncmp(calculated_md5_string,
+                        known_md5_string_nerve_xbox360_pwad, 32) == 0)
+            {
+                load_extra_wad = 1;
+
+                strcpy(extra_wad_1, check);
+                strcpy(stripped_extra_wad_1, tmpFile->filename);
+
+                extra_wad_slot_1_loaded = 1;
+
+                md5_check = true;
+                nerve_pwad = true;
+            }
+            else
+                md5_check = false;
+
+            file = fopen(check, "r");
+
+            if (file != NULL && !md5_check)
+            {
+                for (i = 0; i < 4; i++)
+                {
+                    c = fgetc(file);    // Get character
+
+                    buffer[i] = c;        // Store characters in array
+
+                    if (strncmp(iwad_term, buffer, 4) == 0)
+                    {
+                        if(extra_wad_slot_1_loaded == 0)
+                        {
+                            load_extra_wad = 1;
+
+                            strcpy(extra_wad_1, check);
+                            strcpy(stripped_extra_wad_1, tmpFile->filename);
+
+                            extra_wad_slot_1_loaded = 1;
+
+                            extra_wad_loaded = 1;
+
+                            break;
+                        }
+                        else if(extra_wad_slot_1_loaded == 1 &&
+                                extra_wad_slot_2_loaded == 0)
+                        {
+                            if(strcmp(check, extra_wad_1) != 0)
+                            {
+                                load_extra_wad = 1;
+
+                                strcpy(extra_wad_2, check);
+                                strcpy(stripped_extra_wad_2, tmpFile->filename);
+
+                                extra_wad_slot_2_loaded = 1;
+
+                                extra_wad_loaded = 1;
+                            }
+                            break;
+                        }
+                        else if(extra_wad_slot_1_loaded == 1 &&
+                                extra_wad_slot_2_loaded == 1 &&
+                                extra_wad_slot_3_loaded == 0)
+                        {
+                            if((strcmp(check, extra_wad_1) != 0 &&
+                                strcmp(check, extra_wad_2) != 0))
+                            {
+                                load_extra_wad = 1;
+
+                                strcpy(extra_wad_3, check);
+                                strcpy(stripped_extra_wad_3, tmpFile->filename);
+
+                                extra_wad_slot_3_loaded = 1;
+
+                                extra_wad_loaded = 1;
+                            }
+                            break;
+                        }
+                    }
+                    else if (strncmp(pwad_term, buffer, 4) == 0 &&
+                             extra_wad_slot_1_loaded == 0)
+                    {
+                        load_extra_wad = 1;
+
+                        strcpy(extra_wad_1, check);
+                        strcpy(stripped_extra_wad_1, tmpFile->filename);
+
+                        extra_wad_slot_1_loaded = 1;
+
+                        W_CheckSize(4);
+
+                        if(fsizecq == 7585664)
+                            is_chex_2 = true;
+
+                        extra_wad_loaded = 1;
+
+                        break;
+                    }
+                    else if (strncmp(pwad_term, buffer, 4) == 0 &&
+                             extra_wad_slot_1_loaded == 1 &&
+                             extra_wad_slot_2_loaded == 0)
+                    {
+                        if(strcmp(check, extra_wad_1) != 0)
+                        {
+                            load_extra_wad = 1;
+
+                            strcpy(extra_wad_2, check);
+                            strcpy(stripped_extra_wad_2, tmpFile->filename);
+
+                            extra_wad_slot_2_loaded = 1;
+
+                            W_CheckSize(4);
+
+                            if(fsizecq == 7585664)
+                                is_chex_2 = true;
+
+                            extra_wad_loaded = 1;
+                        }
+                        break;
+                    }
+                    else if (strncmp(pwad_term, buffer, 4) == 0 &&
+                             extra_wad_slot_1_loaded == 1 &&
+                             extra_wad_slot_2_loaded == 1 &&
+                             extra_wad_slot_3_loaded == 0)
+                    {
+                        if((strcmp(check, extra_wad_1) != 0 &&
+                            strcmp(check, extra_wad_2) != 0))
+                        {
+                            load_extra_wad = 1;
+
+                            strcpy(extra_wad_3, check);
+                            strcpy(stripped_extra_wad_3, tmpFile->filename);
+
+                            extra_wad_slot_3_loaded = 1;
+
+                            W_CheckSize(4);
+
+                            if(fsizecq == 7585664)
+                                is_chex_2 = true;
+
+                            extra_wad_loaded = 1;
+                        }
+                        break;
+                    }
+                    else if (strncmp(deh_term, buffer, 4) == 0) 
+                    {
+                        load_dehacked = 1;
+
+                        strcpy(dehacked_file, check);
+                        strcpy(stripped_dehacked_file, tmpFile->filename);
+
+                        break;
+                    }
+                }
+            }
+            memset(buffer, 0, sizeof(buffer));
+
+            fclose(file);
+        }
+    }
+
+    /* B button */
+    if (buttons & WPAD_CLASSIC_BUTTON_B)
+    {
+        if(gDirLevel<=1)
+        {
+            return;
+        }
+
+        char *tmpCurPath;
+
+        selected = 0;
+
+        start = 0;
+
+        // Previous dir
+        tmpCurPath = PopCurrentDir(&selected, &start);
+
+        if (tmpCurPath != NULL)
+            sprintf(tmpPath, "%s", tmpCurPath);
+
+        goto getList;
+    }
+
+    if (buttons & WPAD_CLASSIC_BUTTON_X)
+    {
+        load_dehacked = 0;
+        load_extra_wad = 0;
+
+        strcpy(stripped_dehacked_file, "");
+        strcpy(stripped_extra_wad_1, "");
+        strcpy(stripped_extra_wad_2, "");
+        strcpy(stripped_extra_wad_3, "");
+        strcpy(stripped_target, "");
+
+        strcpy(dehacked_file, "");
+        strcpy(extra_wad_1, "");
+        strcpy(extra_wad_2, "");
+        strcpy(extra_wad_3, "");
+        strcpy(target, "");
+
+        extra_wad_slot_1_loaded = 0;
+        extra_wad_slot_2_loaded = 0;
+        extra_wad_slot_3_loaded = 0;
+
+        extra_wad_loaded = 0;
+    }
+
+    /* List scrolling */
+    index = (selected - start);
+
+    if (index >= ENTRIES_PER_PAGE)
+        start += index - (ENTRIES_PER_PAGE - 1);
+
+    if (index <= -1)
+        start += index;
     }
 
     err:
 
     printf("\n");
-    printf("\n  Press any key...               |\n"/*, 129*/);
+    printf("\n  Press any key...               |\n");
 
     free (tmpPath);
 
@@ -1985,11 +2167,11 @@ void Menu_Loop(void)
 {
     for (;;)
     {
-	/* FAT device menu */
-	Menu_FatDevice();
+        /* FAT device menu */
+        Menu_FatDevice();
 
-	/* WAD list menu */
-	Menu_WadList();
+        /* WAD list menu */
+        Menu_WadList();
     }
 }
 
@@ -2005,9 +2187,9 @@ int PushCurrentDir (char *dirStr, s32 Selected, s32 Start)
     {
         strcpy (gDirList [gDirLevel], dirStr);
 
-	gSeleted[gDirLevel]=Selected;
+        gSeleted[gDirLevel]=Selected;
 
-	gStart[gDirLevel]=Start;
+        gStart[gDirLevel]=Start;
 
         gDirLevel++;
     }
@@ -2028,7 +2210,7 @@ char *PopCurrentDir(s32 *Selected, s32 *Start)
 
     *Start = gStart[gDirLevel];
 
-	return PeekCurrentDir();
+    return PeekCurrentDir();
 }
 
 bool IsListFull (void)
@@ -2051,7 +2233,7 @@ char *PeekCurrentDir (void)
 void WaitPrompt (char *prompt)
 {
     printf("\n%s", prompt);
-    printf("\n  Press any key...               |\n"/*, 129*/);
+    printf("\n  Press any key...               |\n");
 
     /* Wait for button */
     WaitButtons();
@@ -2066,7 +2248,7 @@ u32 Pad_GetButtons(void)
 
     /* Get pressed buttons */
     for (cnt = 0; cnt < 4; cnt++)
-	buttons |= PAD_ButtonsDown(cnt);
+        buttons |= PAD_ButtonsDown(cnt);
 
     return buttons;
 }
@@ -2079,81 +2261,15 @@ u32 Pad_GetButtons(void)
 u32 WaitButtons(void)
 {
     u32 buttons = 0;
-//    u32 buttonsGC = 0;
 
     /* Wait for button pressing */
-    while (!buttons /*&& !buttonsGC*/)
+    while (!buttons)
     {
-        // GC buttons
-//        buttonsGC = Pad_GetButtons ();
-
         // Wii buttons
-	buttons = Wpad_GetButtons();
+        buttons = Wpad_GetButtons();
 
-	VIDEO_WaitVSync();
+        VIDEO_WaitVSync();
     }
-/*
-    if (buttonsGC)
-    {
-        if(buttonsGC & PAD_BUTTON_A)
-        {
-            //printf ("Button A on the GC controller\n");
-            buttons |= WPAD_CLASSIC_BUTTON_A;
-        }
-        else if(buttonsGC & PAD_BUTTON_B)
-        {
-            //printf ("Button B on the GC controller\n");
-            buttons |= WPAD_CLASSIC_BUTTON_B;
-        }
-        else if(buttonsGC & PAD_BUTTON_LEFT)
-        {
-            //printf ("Button LEFT on the GC controller\n");
-            buttons |= WPAD_CLASSIC_BUTTON_LEFT;
-        }
-        else if(buttonsGC & PAD_BUTTON_RIGHT)
-        {
-            //printf ("Button RIGHT on the GC controller\n");
-            buttons |= WPAD_CLASSIC_BUTTON_RIGHT;
-        }
-        else if(buttonsGC & PAD_BUTTON_DOWN)
-        {
-            //printf ("Button DOWN on the GC controller\n");
-            buttons |= WPAD_CLASSIC_BUTTON_DOWN;
-        }
-        else if(buttonsGC & PAD_BUTTON_UP)
-        {
-            //printf ("Button UP on the GC controller\n");
-            buttons |= WPAD_CLASSIC_BUTTON_UP;
-        }
-        else if(buttonsGC & PAD_BUTTON_START)
-        {
-            //printf ("Button START on the GC controller\n");
-            buttons |= WPAD_CLASSIC_BUTTON_HOME;
-        }
-    }
-*/
     return buttons;
 }
-
-/*
-void WiiLightControl (int state)
-{
-	switch (state)
-	{
-		case WII_LIGHT_ON:
-			// Turn on Wii Light
-			WIILIGHT_SetLevel(255);
-			WIILIGHT_TurnOn();
-			break;
-
-		case WII_LIGHT_OFF:
-		default:
-			// Turn off Wii Light
-			WIILIGHT_SetLevel(0);
-			WIILIGHT_TurnOn();
-			WIILIGHT_Toggle();
-			break;
-	}
-} // WiiLightControl
-*/
 

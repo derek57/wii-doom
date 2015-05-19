@@ -20,28 +20,28 @@
 // 02111-1307, USA.
 //
 // DESCRIPTION:
-//	Status bar code.
-//	Does the face/direction indicator animatin.
-//	Does palette indicators as well (red pain/berserk, bright pickup)
+//        Status bar code.
+//        Does the face/direction indicator animatin.
+//        Does palette indicators as well (red pain/berserk, bright pickup)
 //
 //-----------------------------------------------------------------------------
+
 
 #ifndef __STSTUFF_H__
 #define __STSTUFF_H__
 
-#include "doomtype.h"
 #include "d_event.h"
+#include "doomtype.h"
 #include "m_cheat.h"
+
 
 // Size of statusbar.
 // Now sensitive for scaling.
-#define ST_HEIGHT	32
-/*
-#define ST_WIDTH	SCREENWIDTH
-#define ST_Y		(SCREENHEIGHT - ST_HEIGHT)
-*/
-#define ST_WIDTH	ORIGWIDTH
-#define ST_Y		(ORIGHEIGHT - ST_HEIGHT)
+#define ST_HEIGHT        32
+
+#define ST_WIDTH         ORIGWIDTH
+#define ST_Y             (ORIGHEIGHT - ST_HEIGHT)
+
 
 //
 // STATUS BAR
@@ -63,6 +63,8 @@ void ST_Start (void);
 void ST_Init (void);
 
 void ST_drawEx(void);
+
+void ST_doRefresh(void);
 
 // States for status bar code.
 typedef enum

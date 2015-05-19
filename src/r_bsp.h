@@ -20,7 +20,7 @@
 // 02111-1307, USA.
 //
 // DESCRIPTION:
-//	Refresh module, BSP traversal and handling.
+//        Refresh module, BSP traversal and handling.
 //
 //-----------------------------------------------------------------------------
 
@@ -29,32 +29,36 @@
 #define __R_BSP__
 
 
+#include "r_defs.h"
 
-extern seg_t*		curline;
-extern side_t*		sidedef;
-extern line_t*		linedef;
-extern sector_t*	frontsector;
-extern sector_t*	backsector;
 
-extern int		rw_x;
-extern int		rw_stopx;
+extern seg_t*           curline;
 
-extern boolean		segtextured;
+extern side_t*          sidedef;
+
+extern line_t*          linedef;
+
+extern sector_t*        frontsector;
+extern sector_t*        backsector;
+
+extern int              rw_x;
+extern int              rw_stopx;
+extern int              numdrawsegs;                     // ADDED FOR HIRES
+
+extern boolean          segtextured;
 
 // false if the back side is the same plane
-extern boolean		markfloor;		
-extern boolean		markceiling;
+extern boolean          markfloor;                
+extern boolean          markceiling;
 
-extern boolean		skymap;
+extern boolean          skymap;
 
-extern drawseg_t*	drawsegs;			// CHANGED FOR HIRES
-//extern drawseg_t	drawsegs[MAXDRAWSEGS];		// CHANGED FOR HIRES
-extern drawseg_t*	ds_p;
-extern int		numdrawsegs;			// ADDED FOR HIRES
+extern drawseg_t*       drawsegs;                        // CHANGED FOR HIRES
+extern drawseg_t*       ds_p;
 
-extern lighttable_t**	hscalelight;
-extern lighttable_t**	vscalelight;
-extern lighttable_t**	dscalelight;
+extern lighttable_t**   hscalelight;
+extern lighttable_t**   vscalelight;
+extern lighttable_t**   dscalelight;
 
 
 typedef void (*drawfunc_t) (int start, int stop);
@@ -63,8 +67,6 @@ typedef void (*drawfunc_t) (int start, int stop);
 // BSP?
 void R_ClearClipSegs (void);
 void R_ClearDrawSegs (void);
-
-
 void R_RenderBSPNode (int bspnum);
 
 

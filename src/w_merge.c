@@ -18,19 +18,20 @@
 // read the deutex source code made my brain hurt.
 //
 
+
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 
 #include "doomtype.h"
 #include "i_system.h"
+#include "i_timer.h"
 #include "m_misc.h"
 #include "w_merge.h"
 #include "w_wad.h"
 #include "z_zone.h"
 
-#include "i_timer.h"
 
 typedef enum 
 { 
@@ -54,14 +55,14 @@ typedef struct
 
 static searchlist_t iwad;
 static searchlist_t iwad_sprites;
-static searchlist_t pwad;
-
 static searchlist_t iwad_flats;
+static searchlist_t pwad;
 static searchlist_t pwad_sprites;
 static searchlist_t pwad_flats;
 
 // lumps with these sprites must be replaced in the IWAD
 static sprite_frame_t *sprite_frames;
+
 static int num_sprite_frames;
 static int sprite_frames_alloced;
 
@@ -568,13 +569,13 @@ void W_PrintDirectory(void)
         for (n=0; n<8 && lumpinfo[i].name[n] != '\0'; ++n)
             putchar(lumpinfo[i].name[n]);
         putchar('\n');
-	I_Sleep(2);
+        I_Sleep(2);
     }
 }
 
 // Merge in a file by name
 
-void W_MergeFile(char *filename)
+void W_MergeFile(char *filename, boolean automatic)
 {
     int old_numlumps;
 
@@ -582,7 +583,7 @@ void W_MergeFile(char *filename)
 
     // Load PWAD
 
-    if (W_AddFile(filename) == NULL)
+    if (W_AddFile(filename, automatic) == NULL)
         return;
 
     // iwad is at the start, pwad was appended to the end
@@ -604,129 +605,5 @@ void W_MergeFile(char *filename)
     // Perform the merge
 
     DoMerge();
-}
-
-// Replace lumps in the given list with lumps from the PWAD
-
-static void W_NWTAddLumps(searchlist_t *list)
-{
-    int i;
-
-    // Go through the IWAD list given, replacing lumps with lumps of 
-    // the same name from the PWAD
-
-    for (i=0; i<list->numlumps; ++i)
-    {
-        int index;
-
-        index = FindInList(&pwad, list->lumps[i].name);
-
-        if (index > 0)
-        {
-            memcpy(&list->lumps[i], &pwad.lumps[index], 
-                   sizeof(lumpinfo_t));
-        }
-    }
-    
-}
-
-// Merge sprites and flats in the way NWT does with its -af and -as 
-// command-line options.
-
-void W_NWTMergeFile(char *filename, int flags)
-{
-    int old_numlumps;
-
-    old_numlumps = numlumps;
-
-    // Load PWAD
-
-    if (W_AddFile(filename) == NULL)
-        return;
-
-    // iwad is at the start, pwad was appended to the end
-
-    iwad.lumps = lumpinfo;
-    iwad.numlumps = old_numlumps;
-
-    pwad.lumps = lumpinfo + old_numlumps;
-    pwad.numlumps = numlumps - old_numlumps;
-    
-    // Setup sprite/flat lists
-
-    SetupLists();
-
-    // Merge in flats?
-    
-    if (flags & W_NWT_MERGE_FLATS)
-    {
-        W_NWTAddLumps(&iwad_flats);
-    }
-
-    // Sprites?
-
-    if (flags & W_NWT_MERGE_SPRITES)
-    {
-        W_NWTAddLumps(&iwad_sprites);
-    }
-    
-    // Discard the PWAD
-
-    numlumps = old_numlumps;
-}
-
-// Simulates the NWT -merge command line parameter.  What this does is load
-// a PWAD, then search the IWAD sprites, removing any sprite lumps that also
-// exist in the PWAD.
-
-void W_NWTDashMerge(char *filename)
-{
-    wad_file_t *wad_file;
-    int old_numlumps;
-    int i;
-
-    old_numlumps = numlumps;
-
-    // Load PWAD
-
-    wad_file = W_AddFile(filename);
-
-    if (wad_file == NULL)
-    {
-        return;
-    }
-
-    // iwad is at the start, pwad was appended to the end
-
-    iwad.lumps = lumpinfo;
-    iwad.numlumps = old_numlumps;
-
-    pwad.lumps = lumpinfo + old_numlumps;
-    pwad.numlumps = numlumps - old_numlumps;
-    
-    // Setup sprite/flat lists
-
-    SetupLists();
-
-    // Search through the IWAD sprites list.
-
-    for (i=0; i<iwad_sprites.numlumps; ++i)
-    {
-        if (FindInList(&pwad, iwad_sprites.lumps[i].name) >= 0)
-        {
-            // Replace this entry with an empty string.  This is what
-            // nwt -merge does.
-
-            M_StringCopy(iwad_sprites.lumps[i].name, "", 8);	// FIXME: ..."", 8); <-- is this correct?
-								// shouldn't "8" be replaced with "9"?
-        }
-    }
-
-    // Discard PWAD
-    // The PWAD must now be added in again with -file.
-
-    numlumps = old_numlumps;
-
-    W_CloseFile(wad_file);
 }
 

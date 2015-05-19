@@ -37,15 +37,13 @@
 
 // Enables multiplayer support (network games)
 
-#define FEATURE_MULTIPLAYER 1
+//#define FEATURE_MULTIPLAYER 1
 
 //#define NET_DEBUG 1
 
 // Enables sound output
 
 #define FEATURE_SOUND 1
-
-//#define OGG_SUPPORT 1
 
 #endif /* #ifndef DOOM_FEATURES_H */
 
