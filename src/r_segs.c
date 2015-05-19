@@ -900,8 +900,8 @@ R_StoreWallRange
 
     
     // calculate incremental stepping values for texture edges
-    worldtop >>= 4;
-    worldbottom >>= 4;
+    worldtop >>= invhgtbits;
+    worldbottom >>= invhgtbits;
         
     topstep = -FixedMul (rw_scalestep, worldtop);
     topfrac = ((int64_t)centeryfrac>>invhgtbits) -
@@ -913,8 +913,8 @@ R_StoreWallRange
         
     if (backsector)
     {        
-        worldhigh >>= 4;
-        worldlow >>= 4;
+        worldhigh >>= invhgtbits;
+        worldlow >>= invhgtbits;
 
         if (worldhigh < worldtop)
         {
