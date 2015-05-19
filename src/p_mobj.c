@@ -69,13 +69,25 @@ P_SetMobjState
 {
     state_t*        st;
 
+    // killough 4/9/98: remember states seen, to detect cycles:
+    static statenum_t   seenstate_tab[NUMSTATES];               // fast transition table
+    statenum_t          *seenstate = seenstate_tab;             // pointer to table
+    static int          recursion;                              // detects recursion
+    statenum_t          i = state;                              // initial state
+    boolean             ret = true;                             // return value
+    statenum_t          tempstate[NUMSTATES];                   // for use with recursion
+
+    if (recursion++)                                            // if recursion detected,
+        memset((seenstate = tempstate), 0, sizeof(tempstate));  // clear state table
+
     do
     {
         if (state == S_NULL)
         {
             mobj->state = (state_t *) S_NULL;
             P_RemoveMobj (mobj);
-            return false;
+            ret = false;
+            break;                                              // killough 4/9/98
         }
 
         st = &states[state];
@@ -89,10 +101,15 @@ P_SetMobjState
         if (st->action.acp1)                
             st->action.acp1(mobj);        
         
-        state = st->nextstate;
-    } while (!mobj->tics);
+        seenstate[state] = 1 + st->nextstate;                   // killough 4/9/98
+
+    } while (!mobj->tics && !seenstate[state]);                 // killough 4/9/98
                                 
-    return true;
+    if (!--recursion)
+        for (; (state = seenstate[i]); i = state - 1)
+            seenstate[i] = 0;            // killough 4/9/98: erase memory of states
+
+    return ret;
 }
 
 
@@ -158,7 +175,8 @@ void P_XYMovement (mobj_t* mo)
         
     do
     {
-        if (xmove > MAXMOVE/2 || ymove > MAXMOVE/2)
+        if (xmove > MAXMOVE / 2 || ymove > MAXMOVE / 2
+            || xmove < -MAXMOVE / 2 || ymove < -MAXMOVE / 2)
         {
             ptryx = mo->x + xmove/2;
             ptryy = mo->y + ymove/2;
@@ -789,6 +807,42 @@ void P_SpawnPlayer (mapthing_t* mthing)
     }
 }
 
+//
+// P_FindDoomedNum
+//
+// Finds a mobj type with a matching doomednum
+// killough 8/24/98: rewrote to use hashing
+//
+int P_FindDoomedNum(unsigned int type)
+{
+    static struct
+    {
+        int     first;
+        int     next;
+    } *hash;
+
+    int i;
+
+    if (!hash)
+    {
+        hash = Z_Malloc(sizeof(*hash) * NUMMOBJTYPES, PU_CACHE, (void **)&hash);
+        for (i = 0; i < NUMMOBJTYPES; i++)
+            hash[i].first = NUMMOBJTYPES;
+        for (i = 0; i < NUMMOBJTYPES; i++)
+            if (mobjinfo[i].doomednum != -1)
+            {
+                unsigned int    h = (unsigned int)mobjinfo[i].doomednum % NUMMOBJTYPES;
+
+                hash[i].next = hash[h].first;
+                hash[h].first = i;
+            }
+    }
+
+    i = hash[type % NUMMOBJTYPES].first;
+    while ((i < NUMMOBJTYPES) && ((unsigned int)mobjinfo[i].doomednum != type))
+        i = hash[i].next;
+    return i;
+}
 
 //
 // P_SpawnMapThing
@@ -803,6 +857,7 @@ void P_SpawnMapThing (mapthing_t* mthing)
     fixed_t                x;
     fixed_t                y;
     fixed_t                z;
+    short                  type = mthing->type;
                 
     // count deathmatch start positions
     if (mthing->type == 11)
@@ -849,9 +904,9 @@ void P_SpawnMapThing (mapthing_t* mthing)
         return;
         
     // find which type to spawn
-    for (i=0 ; i< NUMMOBJTYPES ; i++)
-        if (mthing->type == mobjinfo[i].doomednum)
-            break;
+
+    // killough 8/23/98: use table for faster lookup
+    i = P_FindDoomedNum(type);
         
     if (i==NUMMOBJTYPES)
         I_Error ("P_SpawnMapThing: Unknown type %i at (%i, %i)",

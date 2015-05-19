@@ -45,6 +45,8 @@ extern int              rw_x;
 extern int              rw_stopx;
 extern int              numdrawsegs;                     // ADDED FOR HIRES
 
+extern unsigned int     maxdrawsegs;
+
 extern boolean          segtextured;
 
 // false if the back side is the same plane

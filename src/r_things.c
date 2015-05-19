@@ -42,8 +42,9 @@
 #include "z_zone.h"
 
 
-#define MINZ           (FRACUNIT*4)
-#define BASEYCENTER    100
+#define MINZ                    (FRACUNIT*4)
+#define BASEYCENTER             100
+#define MAX_SPRITE_FRAMES       29
 
 
 typedef struct
@@ -74,7 +75,7 @@ int*                   mceilingclip;                      // CHANGED FOR HIRES
 
 int64_t                sprtopscreen;                      // WiggleFix
 
-static int             numvissprites;
+static int             num_vissprite, num_vissprite_alloc, num_vissprite_ptrs;
 
 //
 // INITIALIZATION FUNCTIONS
@@ -84,9 +85,9 @@ static int             numvissprites;
 //  and range check thing_t sprites patches
 spritedef_t*           sprites;
 
-spriteframe_t          sprtemp[29];
+spriteframe_t          sprtemp[MAX_SPRITE_FRAMES];
 
-vissprite_t*           vissprites = NULL;
+vissprite_t*           vissprites = NULL, **vissprite_ptrs;          // killough
 vissprite_t*           vissprite_p;
 vissprite_t            overflowsprite;
 vissprite_t            vsprsortedhead;
@@ -102,65 +103,46 @@ fixed_t                pspritescale;
 fixed_t                pspriteiscale;
 fixed_t                spryscale;
 
-lighttable_t**         spritelights;
+static lighttable_t    **spritelights;         // killough 1/25/98 made static
 
 
 //
 // R_InstallSpriteLump
 // Local function for R_InitSprites.
 //
-void
-R_InstallSpriteLump
-( int                  lump,
-  unsigned             frame,
-  unsigned             rotation,
-  boolean              flipped )
+void R_InstallSpriteLump(lumpinfo_t *lump, int lumpnum, unsigned int frame,
+                         unsigned int rotation, boolean flipped)
 {
-    int                r;
-        
-    if (frame >= 29 || rotation > 8)
-        I_Error("R_InstallSpriteLump: "
-                "Bad frame characters in lump %i", lump);
-        
+    if (frame >= MAX_SPRITE_FRAMES || rotation > 8)
+        I_Error("R_InstallSpriteLump: Bad frame characters in lump %s", lump->name);
+
     if ((int)frame > maxframe)
         maxframe = frame;
-                
+
     if (rotation == 0)
     {
-        // the lump should be used for all rotations
-        if (sprtemp[frame].rotate == false)
-            I_Error ("R_InitSprites: Sprite %s frame %c has "
-                     "multip rot=0 lump", spritename, 'A'+frame);
+        int r;
 
-        if (sprtemp[frame].rotate == true)
-            I_Error ("R_InitSprites: Sprite %s frame %c has rotations "
-                     "and a rot=0 lump", spritename, 'A'+frame);
-                        
-        sprtemp[frame].rotate = false;
-        for (r=0 ; r<8 ; r++)
+        // the lump should be used for all rotations
+        for (r = 0; r < 8; r++)
         {
-            sprtemp[frame].lump[r] = lump - firstspritelump;
-            sprtemp[frame].flip[r] = (byte)flipped;
+            if (sprtemp[frame].lump[r] == -1)
+            {
+                sprtemp[frame].lump[r] = lumpnum - firstspritelump;
+                sprtemp[frame].flip[r] = (byte)flipped;
+                sprtemp[frame].rotate = false;
+            }
         }
         return;
     }
-        
-    // the lump is only used for one rotation
-    if (sprtemp[frame].rotate == false)
-        I_Error ("R_InitSprites: Sprite %s frame %c has rotations "
-                 "and a rot=0 lump", spritename, 'A'+frame);
-                
-    sprtemp[frame].rotate = true;
 
-    // make 0 based
-    rotation--;                
-    if (sprtemp[frame].lump[rotation] != -1)
-        I_Error ("R_InitSprites: Sprite %s : %c : %c "
-                 "has two lumps mapped to it",
-                 spritename, 'A'+frame, '1'+rotation);
-                
-    sprtemp[frame].lump[rotation] = lump - firstspritelump;
-    sprtemp[frame].flip[rotation] = (byte)flipped;
+    // the lump is only used for one rotation
+    if (sprtemp[frame].lump[--rotation] == -1)
+    {
+        sprtemp[frame].lump[rotation] = lumpnum - firstspritelump;
+        sprtemp[frame].flip[rotation] = (byte)flipped;
+        sprtemp[frame].rotate = true;
+    }
 }
 
 
@@ -169,120 +151,128 @@ R_InstallSpriteLump
 //
 // R_InitSpriteDefs
 // Pass a null terminated list of sprite names
-//  (4 chars exactly) to be used.
+// (4 chars exactly) to be used.
+//
 // Builds the sprite rotation matrixes to account
-//  for horizontally flipped sprites.
-// Will report an error if the lumps are inconsistant. 
+// for horizontally flipped sprites.
+//
+// Will report an error if the lumps are inconsistent.
 // Only called at startup.
 //
 // Sprite lump names are 4 characters for the actor,
 //  a letter for the frame, and a number for the rotation.
+//
 // A sprite that is flippable will have an additional
 //  letter/number appended.
+//
 // The rotation character can be 0 to signify no rotations.
 //
-void R_InitSpriteDefs (char** namelist) 
-{ 
-    char**             check;
-    int                i;
-    int                l;
-    int                frame;
-    int                rotation;
-    int                start;
-    int                end;
-    int                patched;
-                
-    // count the number of sprite names
-    check = namelist;
-    while (*check != NULL)
-        check++;
+// 1/25/98, 1/31/98 killough : Rewritten for performance
+//
+// Empirically verified to have excellent hash
+// properties across standard Doom sprites:
+#define R_SpriteNameHash(s) ((unsigned int)((s)[0] - ((s)[1] * 3 - (s)[3] * 2 - (s)[2]) * 2))
 
-    numsprites = check-namelist;
-        
-    if (!numsprites)
+void R_InitSpriteDefs(char **namelist)
+{
+    size_t              numentries = lastspritelump - firstspritelump + 1;
+    unsigned int        i;
+
+    struct {
+        int     index;
+        int     next;
+    } *hash;
+
+    if (!numentries || !*namelist)
         return;
-                
-    sprites = Z_Malloc(numsprites *sizeof(*sprites), PU_STATIC, NULL);
-        
-    start = firstspritelump-1;
-    end = lastspritelump+1;
-        
-    // scan all the lump names for each of the names,
-    //  noting the highest frame letter.
-    // Just compare 4 characters as ints
-    for (i=0 ; i<numsprites ; i++)
-    {
-        spritename = DEH_String(namelist[i]);
-        memset (sprtemp,-1, sizeof(sprtemp));
-                
-        maxframe = -1;
-        
-        // scan the lumps,
-        //  filling in the frames for whatever is found
-        for (l=start+1 ; l<end ; l++)
-        {
-            if (!strncasecmp(lumpinfo[l].name, spritename, 4))
-            {
-                frame = lumpinfo[l].name[4] - 'A';
-                rotation = lumpinfo[l].name[5] - '0';
 
-                if (modifiedgame)
-                    patched = W_GetNumForName (lumpinfo[l].name);
-                else
-                    patched = l;
+    // count the number of sprite names
+    for (i = 0; namelist[i]; i++);
 
-                R_InstallSpriteLump (patched, frame, rotation, false);
+    numsprites = (signed int)i;
 
-                if (lumpinfo[l].name[6])
-                {
-                    frame = lumpinfo[l].name[6] - 'A';
-                    rotation = lumpinfo[l].name[7] - '0';
-                    R_InstallSpriteLump (l, frame, rotation, true);
-                }
-            }
-        }
-        
-        // check the frames that were found for completeness
-        if (maxframe == -1)
-        {
-            sprites[i].numframes = 0;
-            continue;
-        }
-                
-        maxframe++;
-        
-        for (frame = 0 ; frame < maxframe ; frame++)
-        {
-            switch ((int)sprtemp[frame].rotate)
-            {
-              case -1:
-                // no rotations were found for that frame at all
-                I_Error ("R_InitSprites: No patches found "
-                         "for %s frame %c", spritename, frame+'A');
-                break;
-                
-              case 0:
-                // only the first rotation is needed
-                break;
-                        
-              case 1:
-                // must have all 8 frames
-                for (rotation=0 ; rotation<8 ; rotation++)
-                    if (sprtemp[frame].lump[rotation] == -1)
-                        I_Error ("R_InitSprites: Sprite %s frame %c "
-                                 "is missing rotations",
-                                 spritename, frame+'A');
-                break;
-            }
-        }
-        
-        // allocate space for the frames present and copy sprtemp to it
-        sprites[i].numframes = maxframe;
-        sprites[i].spriteframes = 
-            Z_Malloc (maxframe * sizeof(spriteframe_t), PU_STATIC, NULL);
-        memcpy (sprites[i].spriteframes, sprtemp, maxframe*sizeof(spriteframe_t));
+    sprites = Z_Malloc(numsprites * sizeof(*sprites), PU_STATIC, NULL);
+
+    // Create hash table based on just the first four letters of each sprite
+    // killough 1/31/98
+    hash = malloc(sizeof(*hash) * numentries);  // allocate hash table
+
+    for (i = 0; i < numentries; i++)            // initialize hash table as empty
+        hash[i].index = -1;
+
+    for (i = 0; i < numentries; i++)            // Prepend each sprite to hash chain
+    {                                           // prepend so that later ones win
+        int     j = R_SpriteNameHash(lumpinfo[i + firstspritelump].name) % numentries;
+
+        hash[i].next = hash[j].index;
+        hash[j].index = i;
     }
 
+    // scan all the lump names for each of the names,
+    //  noting the highest frame letter.
+    for (i = 0; i < (unsigned int)numsprites; i++)
+    {
+        const char      *spritename = namelist[i];
+        int             j = hash[R_SpriteNameHash(spritename) % numentries].index;
+
+        if (j >= 0)
+        {
+            memset(sprtemp, -1, sizeof(sprtemp));
+            maxframe = -1;
+            do
+            {
+                lumpinfo_t      *lump = &lumpinfo[j + firstspritelump];
+
+                // Fast portable comparison -- killough
+                // (using int pointer cast is nonportable):
+                if (!((lump->name[0] ^ spritename[0]) |
+                      (lump->name[1] ^ spritename[1]) |
+                      (lump->name[2] ^ spritename[2]) |
+                      (lump->name[3] ^ spritename[3])))
+                {
+                    R_InstallSpriteLump(lump, j + firstspritelump, lump->name[4] - 'A', 
+                        lump->name[5] - '0', false);
+                    if (lump->name[6])
+                        R_InstallSpriteLump(lump, j + firstspritelump, lump->name[6] - 'A',
+                           lump->name[7] - '0', true);
+                }
+            } while ((j = hash[j].next) >= 0);
+
+            // check the frames that were found for completeness
+            if ((sprites[i].numframes = ++maxframe))  // killough 1/31/98
+            {
+                int     frame;
+
+                for (frame = 0; frame < maxframe; frame++)
+                    switch ((int)sprtemp[frame].rotate)
+                    {
+                        case -1:
+                            // no rotations were found for that frame at all
+                            break;
+
+                        case 0:
+                            // only the first rotation is needed
+                            break;
+
+                        case 1:
+                            // must have all 8 frames
+                        {
+                            int rotation;
+
+                            for (rotation = 0; rotation < 8; rotation++)
+                                if (sprtemp[frame].lump[rotation] == -1)
+                                    I_Error("R_InitSprites: Sprite %.8s frame %c is missing rotations",
+                                        namelist[i], frame + 'A');
+                            break;
+                        }
+                    }
+                    // allocate space for the frames present and copy sprtemp to it
+                    sprites[i].spriteframes = Z_Malloc(maxframe * sizeof(spriteframe_t), PU_STATIC, NULL);
+                    memcpy(sprites[i].spriteframes, sprtemp, maxframe * sizeof(spriteframe_t));
+            }
+        }
+    }
+    free(hash);             // free hash table
 }
 
 
@@ -316,7 +306,7 @@ void R_InitSprites (char** namelist)
 //
 void R_ClearSprites (void)
 {
-    vissprite_p = vissprites;
+    num_vissprite = 0;          // killough
 }
 
 
@@ -325,34 +315,12 @@ void R_ClearSprites (void)
 //
 vissprite_t* R_NewVisSprite (void)
 {
-    // remove MAXVISSPRITE Vanilla limit
-    if (vissprite_p == &vissprites[numvissprites])
+    if (num_vissprite >= num_vissprite_alloc)           // killough
     {
-        static int max;
-        int numvissprites_old = numvissprites;
-
-        // cap MAXVISSPRITES limit at 4096
-        if (!max && numvissprites == 32 * MAXVISSPRITES)
-        {
-            C_Printf("R_NewVisSprite: MAXVISSPRITES limit capped at %d.\n", numvissprites);
-            max++;
-        }
-
-        if (max)
-        return &overflowsprite;
-
-        numvissprites = numvissprites ? 2 * numvissprites : MAXVISSPRITES;
-        vissprites = realloc(vissprites, numvissprites * sizeof(*vissprites));
-        memset(vissprites + numvissprites_old, 0, (numvissprites - numvissprites_old) * sizeof(*vissprites));
-
-        vissprite_p = vissprites + numvissprites_old;
-
-        if (numvissprites_old)
-            C_Printf("R_NewVisSprite: Hit MAXVISSPRITES limit at %d, raised to %d.\n", numvissprites_old, numvissprites);
+        num_vissprite_alloc = (num_vissprite_alloc ? num_vissprite_alloc * 2 : 128);
+        vissprites = realloc(vissprites, num_vissprite_alloc * sizeof(*vissprites));
     }
-    
-    vissprite_p++;
-    return vissprite_p-1;
+    return (vissprites + num_vissprite++);
 }
 
 
@@ -839,55 +807,80 @@ void R_DrawPlayerSprites (void)
 //
 // R_SortVisSprites
 //
+// Rewritten by Lee Killough to avoid using unnecessary
+// linked lists, and to use faster sorting algorithm.
+//
+#define bcopyp(d, s, n) memcpy(d, s, (n) * sizeof(void *))
+
+// killough 9/2/98: merge sort
+static void msort(vissprite_t **s, vissprite_t **t, int n)
+{
+    if (n >= 16)
+    {
+        int             n1 = n / 2;
+        int             n2 = n - n1;
+        vissprite_t     **s1 = s;
+        vissprite_t     **s2 = s + n1;
+        vissprite_t     **d = t;
+
+        msort(s1, t, n1);
+        msort(s2, t, n2);
+
+        while ((*s1)->scale > (*s2)->scale ? (*d++ = *s1++, --n1) : (*d++ = *s2++, --n2));
+
+        if (n2)
+            bcopyp(d, s2, n2);
+        else
+            bcopyp(d, s1, n1);
+
+        bcopyp(s, t, n);
+    }
+    else
+    {
+        int     i;
+
+        for (i = 1; i < n; i++)
+        {
+            vissprite_t *temp = s[i];
+
+            if (s[i - 1]->scale < temp->scale)
+            {
+                int     j = i;
+
+                while ((s[j] = s[j - 1])->scale < temp->scale && --j);
+                s[j] = temp;
+            }
+        }
+    }
+}
 
 void R_SortVisSprites (void)
 {
-    int                i;
-    int                count;
-    vissprite_t*       ds;
-    vissprite_t*       best;
-    vissprite_t        unsorted;
-    fixed_t            bestscale;
-
-    count = vissprite_p - vissprites;
-        
-    unsorted.next = unsorted.prev = &unsorted;
-
-    if (!count)
-        return;
-                
-    for (ds=vissprites ; ds<vissprite_p ; ds++)
+    if (num_vissprite)
     {
-        ds->next = ds+1;
-        ds->prev = ds-1;
-    }
-    
-    vissprites[0].prev = &unsorted;
-    unsorted.next = &vissprites[0];
-    (vissprite_p-1)->next = &unsorted;
-    unsorted.prev = vissprite_p-1;
-    
-    // pull the vissprites out by scale
+        int     i;
 
-    vsprsortedhead.next = vsprsortedhead.prev = &vsprsortedhead;
-    for (i=0 ; i<count ; i++)
-    {
-        bestscale = INT_MAX;
-        best = unsorted.next;
-        for (ds=unsorted.next ; ds!= &unsorted ; ds=ds->next)
+        // If we need to allocate more pointers for the vissprites,
+        // allocate as many as were allocated for sprites -- killough
+        // killough 9/22/98: allocate twice as many
+        if (num_vissprite_ptrs < num_vissprite * 2)
         {
-            if (ds->scale < bestscale)
-            {
-                bestscale = ds->scale;
-                best = ds;
-            }
+            free(vissprite_ptrs);
+            vissprite_ptrs = (vissprite_t **)malloc((num_vissprite_ptrs = num_vissprite_alloc * 2)
+                * sizeof(*vissprite_ptrs));
         }
-        best->next->prev = best->prev;
-        best->prev->next = best->next;
-        best->next = &vsprsortedhead;
-        best->prev = vsprsortedhead.prev;
-        vsprsortedhead.prev->next = best;
-        vsprsortedhead.prev = best;
+
+        for (i = num_vissprite; --i >= 0;)
+        {
+            vissprite_t     *spr = vissprites + i;
+
+            spr->drawn = false;
+            vissprite_ptrs[i] = spr;
+        }
+
+        // killough 9/22/98: replace qsort with merge sort, since the keys
+        // are roughly in order to begin with, due to BSP rendering.
+        msort(vissprite_ptrs, vissprite_ptrs + num_vissprite, num_vissprite);
     }
 }
 
@@ -1015,21 +1008,19 @@ void R_DrawSprite (vissprite_t* spr)
 //
 void R_DrawMasked (void)
 {
-    vissprite_t*       spr;
+    int                i;
+
     drawseg_t*         ds;
         
     R_SortVisSprites ();
 
-    if (vissprite_p > vissprites)
+    // draw all other vissprites, back to front
+    for (i = num_vissprite; --i >= 0;)
     {
-        // draw all vissprites back to front
-        for (spr = vsprsortedhead.next ;
-             spr != &vsprsortedhead ;
-             spr=spr->next)
-        {
-            
-            R_DrawSprite (spr);
-        }
+        vissprite_t     *spr = vissprite_ptrs[i];
+
+        if (!spr->drawn)
+            R_DrawSprite(spr);
     }
     
     // render any remaining masked mid textures

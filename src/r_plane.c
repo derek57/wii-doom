@@ -72,9 +72,11 @@ fixed_t                    cacheddistance[SCREENHEIGHT];
 fixed_t                    cachedxstep[SCREENHEIGHT];
 fixed_t                    cachedystep[SCREENHEIGHT];
 
+size_t                     maxopenings;
+
 static int                 numvisplanes;             // ADDED FOR HIRES
 
-int                        openings[MAXOPENINGS];    // CHANGED FOR HIRES
+int                        *openings;                // dropoff overflow
 int*                       lastopening;              // CHANGED FOR HIRES
 
 // Clip values are the solid pixel bounding the range.

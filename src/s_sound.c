@@ -370,8 +370,11 @@ static int S_AdjustSoundParams(mobj_t *listener, mobj_t *source,
 
     // calculate the distance to sound origin
     //  and clip it if necessary
-    adx = abs(listener->x - source->x);
-    ady = abs(listener->y - source->y);
+
+    // killough 11/98: scale coordinates down before calculations start
+    // killough 12/98: use exact distance formula instead of approximation
+    adx = abs((listener->x >> FRACBITS) - (source->x >> FRACBITS));
+    ady = abs((listener->y >> FRACBITS) - (source->y >> FRACBITS));
 
     // From _GG1_ p.428. Appox. eucledian distance fast.
     approx_dist = adx + ady - ((adx < ady ? adx : ady)>>1);

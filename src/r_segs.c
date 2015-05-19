@@ -479,6 +479,45 @@ void R_RenderSegLoop (void)
     }
 }
 
+extern int *openings;
+extern size_t maxopenings;
+
+//
+// R_AdjustOpenings
+//
+// killough 1/6/98, 2/1/98: remove limit on openings
+// [SL] 2012-01-21 - Moved into its own function
+static void R_AdjustOpenings(int start, int stop)
+{
+    ptrdiff_t pos = lastopening - openings;
+    size_t need = (rw_stopx - start)*4 + pos;
+
+    if (need > maxopenings)
+    {
+        drawseg_t *ds;
+        int *oldopenings = openings;
+        int *oldlast = lastopening;
+
+        do
+            maxopenings = maxopenings ? maxopenings*2 : 16384;
+        while (need > maxopenings);
+        
+        openings = (int *)realloc (openings, maxopenings * sizeof(*openings));
+        lastopening = openings + pos;
+        C_Printf ("MaxOpenings increased to %u\n", maxopenings);
+
+        // [RH] We also need to adjust the openings pointers that
+        //        were already stored in drawsegs.
+        for (ds = drawsegs; ds < ds_p; ds++) {
+#define ADJUST(p) if (ds->p + ds->x1 >= oldopenings && ds->p + ds->x1 <= oldlast)\
+                  ds->p = ds->p - oldopenings + openings;
+            ADJUST (maskedtexturecol);
+            ADJUST (sprtopclip);
+            ADJUST (sprbottomclip);
+        }
+#undef ADJUST
+    }
+}
 
 // WiggleFix: move R_ScaleFromGlobalAngle function to r_segs.c,
 // above R_StoreWallRange
@@ -571,6 +610,9 @@ R_StoreWallRange
     ds_p->curline = curline;
     rw_stopx = stop+1;
     
+    // killough: remove limits on openings
+    R_AdjustOpenings(start, stop);
+
     // WiggleFix: add this line, in r_segs.c:R_StoreWallRange,
     // right before calls to R_ScaleFromGlobalAngle:
     R_FixWiggle(frontsector);
@@ -613,6 +655,8 @@ R_StoreWallRange
     midtexture = toptexture = bottomtexture = maskedtexture = 0;
     ds_p->maskedtexturecol = NULL;
         
+    fixed_t     h;
+
     if (!backsector)
     {
         // single sided line
@@ -632,6 +676,12 @@ R_StoreWallRange
             rw_midtexturemid = worldtop;
         }
         rw_midtexturemid += sidedef->rowoffset;
+
+        // killough 3/27/98: reduce offset
+        h = textureheight[sidedef->midtexture];
+
+        if (h & (h - FRACUNIT))
+            rw_midtexturemid %= h;
 
         ds_p->silhouette = SIL_BOTH;
         ds_p->sprtopclip = screenheightarray;
@@ -761,7 +811,20 @@ R_StoreWallRange
                 rw_bottomtexturemid = worldlow;
         }
         rw_toptexturemid += sidedef->rowoffset;
+
+        // killough 3/27/98: reduce offset
+        h = textureheight[sidedef->toptexture];
+
+        if (h & (h - FRACUNIT))
+            rw_toptexturemid %= h;
+
         rw_bottomtexturemid += sidedef->rowoffset;
+
+        // killough 3/27/98: reduce offset
+        h = textureheight[sidedef->bottomtexture];
+
+        if (h & (h - FRACUNIT))
+            rw_bottomtexturemid %= h;
         
         // allocate space for masked texture tables
         if (sidedef->midtexture)

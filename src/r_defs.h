@@ -274,6 +274,8 @@ typedef struct
     sector_t*      frontsector;
     sector_t*      backsector;
     
+    fixed_t        length;
+
 } seg_t;
 
 
@@ -396,6 +398,8 @@ typedef struct vissprite_s
     fixed_t        footclip;
 
     boolean        psprite;            // true if psprite
+
+    boolean        drawn;
 
 } vissprite_t;
 

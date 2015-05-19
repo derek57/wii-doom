@@ -103,7 +103,9 @@ line_t                 *blockline;     // killough 8/11/98: blocking linedef
 #define MAXSPECIALCROSS                 20
 #define MAXSPECIALCROSS_ORIGINAL        8
 
-line_t*                spechit[MAXSPECIALCROSS];
+// 1/11/98 killough: removed limit on special lines crossed
+line_t                 **spechit;
+static int             spechit_max;
 int                    numspechit;
 
 
@@ -218,8 +220,6 @@ P_TeleportMove
 // MOVEMENT ITERATOR FUNCTIONS
 //
 
-static void SpechitOverrun(line_t *ld);
-
 //
 // PIT_CheckLine
 // Adjusts tmfloorz and tmceilingz as lines are contacted
@@ -284,14 +284,13 @@ boolean PIT_CheckLine (line_t* ld)
     // if contacted a special line, add it to the list
     if (ld->special)
     {
-        spechit[numspechit] = ld;
-        numspechit++;
-
-        // fraggle: spechits overrun emulation code from prboom-plus
-        if (numspechit > MAXSPECIALCROSS_ORIGINAL)
+        // 1/11/98 killough: remove limit on lines hit, by array doubling
+        if (numspechit >= spechit_max)
         {
-            SpechitOverrun(ld);
+            spechit_max = (spechit_max ? spechit_max * 2 : 8);
+            spechit = realloc(spechit, sizeof(*spechit) * spechit_max);
         }
+        spechit[numspechit++] = ld;
     }
 
     return true;
@@ -510,9 +509,6 @@ P_TryMove
 {
     fixed_t        oldx;
     fixed_t        oldy;
-    int            side;
-    int            oldside;
-    line_t*        ld;
 
     floatok = false;
     if (!P_CheckPosition (thing, x, y))
@@ -567,14 +563,11 @@ P_TryMove
         while (numspechit--)
         {
             // see if the line was crossed
-            ld = spechit[numspechit];
-            side = P_PointOnLineSide (thing->x, thing->y, ld);
-            oldside = P_PointOnLineSide (oldx, oldy, ld);
-            if (side != oldside)
-            {
-                if (ld->special)
-                    P_CrossSpecialLine (ld-lines, oldside, thing);
-            }
+            line_t      *ld = spechit[numspechit];
+            int         oldside = P_PointOnLineSide(oldx, oldy, ld);
+
+            if (oldside != P_PointOnLineSide(thing->x, thing->y, ld) && ld->special)
+                P_CrossSpecialLine(ld, oldside, thing);
         }
     }
 
@@ -1494,6 +1487,27 @@ boolean        PTR_UseTraverse (intercept_t* in)
 }
 
 
+// Returns false if a "oof" sound should be made because of a blocking
+// linedef. Makes 2s middles which are impassable, as well as 2s uppers
+// and lowers which block the player, cause the sound effect when the
+// player tries to activate them. Specials are excluded, although it is
+// assumed that all special linedefs within reach have been considered
+// and rejected already (see P_UseLines).
+//
+// by Lee Killough
+//
+boolean PTR_NoWayTraverse(intercept_t *in)
+{
+    line_t *ld = in->d.line;
+
+    return (ld->special 
+            || !(ld->flags & ML_BLOCKING 
+                 || (P_LineOpening(ld),
+                     openrange <= 0 || 
+                     openbottom > usething->z + 24 * FRACUNIT ||
+                     opentop < usething->z + usething->height)));
+}
+
 //
 // P_UseLines
 // Looks for special lines in front of the player to activate.
@@ -1515,7 +1529,10 @@ void P_UseLines (player_t*        player)
     x2 = x1 + (USERANGE>>FRACBITS)*finecosine[angle];
     y2 = y1 + (USERANGE>>FRACBITS)*finesine[angle];
         
-    P_PathTraverse ( x1, y1, x2, y2, PT_ADDLINES, PTR_UseTraverse );
+    // This added test makes the "oof" sound work on 2s lines -- killough:
+    if (P_PathTraverse(x1, y1, x2, y2, PT_ADDLINES, PTR_UseTraverse))
+        if (!P_PathTraverse(x1, y1, x2, y2, PT_ADDLINES, PTR_NoWayTraverse))
+            S_StartSound(usething, sfx_oof);
 }
 
 
@@ -1707,47 +1724,4 @@ P_ChangeSector
     return nofit;
 }
 
-// Code to emulate the behavior of Vanilla Doom when encountering an overrun
-// of the spechit array.  This is by Andrey Budko (e6y) and comes from his
-// PrBoom plus port.  A big thanks to Andrey for this.
-
-static void SpechitOverrun(line_t *ld)
-{
-    static unsigned int baseaddr = 0;
-    unsigned int addr;
-   
-    if (baseaddr == 0)
-    {
-        // This is the first time we have had an overrun.  Work out
-        // what base address we are going to use.
-        // Allow a spechit value to be specified on the command line.
-
-        baseaddr = DEFAULT_SPECHIT_MAGIC;
-    }
-    
-    // Calculate address used in doom2.exe
-
-    addr = baseaddr + (ld - lines) * 0x3E;
-
-    switch(numspechit)
-    {
-        case 9: 
-        case 10:
-        case 11:
-        case 12:
-            tmbbox[numspechit-9] = addr;
-            break;
-        case 13: 
-            crushchange = addr; 
-            break;
-        case 14: 
-            nofit = addr; 
-            break;
-        default:
-            C_Printf("SpechitOverrun: Warning: unable to emulate"
-                            "an overrun where numspechit=%i\n",
-                            numspechit);
-            break;
-    }
-}
 

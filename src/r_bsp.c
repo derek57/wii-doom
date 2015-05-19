@@ -107,6 +107,7 @@ int                 checkcoord[12][4] =
 };
 
 
+unsigned int    maxdrawsegs;
 
 //
 // R_ClearDrawSegs

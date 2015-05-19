@@ -384,11 +384,7 @@ P_ShootSpecialLine
 ( mobj_t*        thing,
   line_t*        line );
 
-void
-P_CrossSpecialLine
-( int            linenum,
-  int            side,
-  mobj_t*        thing );
+void P_CrossSpecialLine(line_t *line, int side, mobj_t *thing);
 
 void    P_PlayerInSpecialSector (player_t* player);
 
