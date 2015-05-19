@@ -36,6 +36,8 @@
 #include "doomdef.h"
 
 
+#define NO_INDEX ((unsigned short)(-1))
+
 
 //
 // Map level types.

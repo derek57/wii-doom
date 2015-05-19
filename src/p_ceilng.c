@@ -30,6 +30,7 @@
 // State.
 #include "doomstat.h"
 
+#include "malloc.h"
 #include "p_local.h"
 #include "r_state.h"
 
@@ -45,7 +46,8 @@
 //
 
 
-ceiling_t*        activeceilings[MAXCEILINGS];
+// the list of ceilings moving currently, including crushers
+ceilinglist_t   *activeceilings;
 
 
 //
@@ -245,90 +247,94 @@ EV_DoCeiling
 
 
 //
+// P_AddActiveCeiling
 // Add an active ceiling
 //
-void P_AddActiveCeiling(ceiling_t* c)
+void P_AddActiveCeiling(ceiling_t *ceiling)
 {
-    int        i;
-    
-    for (i = 0; i < MAXCEILINGS;i++)
-    {
-        if (activeceilings[i] == NULL)
-        {
-            activeceilings[i] = c;
-            return;
-        }
-    }
+    ceilinglist_t       *list = malloc(sizeof(*list));
+
+    list->ceiling = ceiling;
+    ceiling->list = list;
+    if ((list->next = activeceilings))
+        list->next->prev = &list->next;
+    list->prev = &activeceilings;
+    activeceilings = list;
 }
 
-
-
 //
+// P_RemoveActiveCeiling
 // Remove a ceiling's thinker
 //
-void P_RemoveActiveCeiling(ceiling_t* c)
+void P_RemoveActiveCeiling(ceiling_t *ceiling)
 {
-    int        i;
-        
-    for (i = 0;i < MAXCEILINGS;i++)
+    ceilinglist_t       *list = ceiling->list;
+
+    ceiling->sector->specialdata = NULL;
+    P_RemoveThinker(&ceiling->thinker);
+    if ((*list->prev = list->next))
+        list->next->prev = list->prev;
+    free(list);
+}
+
+//
+// P_RemoveAllActiveCeilings()
+// Removes all ceilings from the active ceiling list
+//
+void P_RemoveAllActiveCeilings(void)
+{
+    while (activeceilings)
     {
-        if (activeceilings[i] == c)
-        {
-            activeceilings[i]->sector->specialdata = NULL;
-            P_RemoveThinker (&activeceilings[i]->thinker);
-            activeceilings[i] = NULL;
-            break;
-        }
+        ceilinglist_t   *next = activeceilings->next;
+
+        free(activeceilings);
+        activeceilings = next;
     }
 }
 
-
-
 //
+// P_ActivateInStasisCeiling
 // Restart a ceiling that's in-stasis
 //
-void P_ActivateInStasisCeiling(line_t* line)
+boolean P_ActivateInStasisCeiling(line_t *line)
 {
-    int        i;
-        
-    for (i = 0;i < MAXCEILINGS;i++)
+    boolean             result = false;
+    ceilinglist_t       *list;
+
+    for (list = activeceilings; list; list = list->next)
     {
-        if (activeceilings[i]
-            && (activeceilings[i]->tag == line->tag)
-            && (activeceilings[i]->direction == 0))
+        ceiling_t       *ceiling = list->ceiling;
+
+        if (ceiling->tag == line->tag && ceiling->direction == 0)
         {
-            activeceilings[i]->direction = activeceilings[i]->olddirection;
-            activeceilings[i]->thinker.function.acp1
-              = (actionf_p1)T_MoveCeiling;
+            ceiling->direction = ceiling->olddirection;
+            ceiling->thinker.function.acp1 = (actionf_p1) T_MoveCeiling;
+            result = true;
         }
     }
+    return result;
 }
-
-
 
 //
 // EV_CeilingCrushStop
 // Stop a ceiling from crushing!
 //
-int EV_CeilingCrushStop(line_t *line)
+boolean EV_CeilingCrushStop(line_t *line)
 {
-    int i;
-    int rtn;
-        
-    rtn = 0;
-    for (i = 0;i < MAXCEILINGS;i++)
+    boolean             result = false;
+    ceilinglist_t       *list;
+
+    for (list = activeceilings; list; list = list->next)
     {
-        if (activeceilings[i]
-            && (activeceilings[i]->tag == line->tag)
-            && (activeceilings[i]->direction != 0))
+        ceiling_t       *ceiling = list->ceiling;
+
+        if (ceiling->direction != 0 && ceiling->tag == line->tag)
         {
-            activeceilings[i]->olddirection = activeceilings[i]->direction;
-            activeceilings[i]->thinker.function.acv = (actionf_v)NULL;
-            activeceilings[i]->direction = 0;                // in-stasis
-            rtn = 1;
+            ceiling->olddirection = ceiling->direction;
+            ceiling->direction = 0;
+            ceiling->thinker.function.acp1 = NULL;
+            result = true;
         }
     }
-    
-
-    return rtn;
+    return result;
 }

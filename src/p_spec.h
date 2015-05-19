@@ -259,7 +259,14 @@ typedef struct
     int          tag;                   
     int          olddirection;
     
+    struct ceilinglist_s        *list;  // jff 2/22/98 copied from killough's plats
 } ceiling_t;
+
+typedef struct ceilinglist_s
+{
+    ceiling_t                   *ceiling;
+    struct ceilinglist_s        *next, **prev;
+} ceilinglist_t;
 
 //
 // P_SWITCH
@@ -333,7 +340,15 @@ typedef struct
     int          tag;
     plattype_e   type;
     
+    struct platlist_s  *list;   // killough
 } plat_t;
+
+// New limit-free plat structure -- killough
+typedef struct platlist_s
+{
+    plat_t             *plat;
+    struct platlist_s  *next, **prev;
+} platlist_t;
 
 //
 // End-level timer (-TIMER option)
@@ -342,11 +357,11 @@ extern boolean    levelTimer;
 
 extern int        levelTimeCount;
 
-extern plat_t*    activeplats[MAXPLATS];
+extern platlist_t *activeplats; // killough
 
 extern button_t   buttonlist[MAXBUTTONS]; 
 
-extern ceiling_t* activeceilings[MAXCEILINGS];
+extern ceilinglist_t* activeceilings;
 
 // at game start
 void    P_InitPicAnims (void);
@@ -405,10 +420,7 @@ P_FindNextHighestFloor
 fixed_t P_FindLowestCeilingSurrounding(sector_t* sec);
 fixed_t P_FindHighestCeilingSurrounding(sector_t* sec);
 
-int
-P_FindSectorFromLineTag
-( line_t*        line,
-  int            start );
+int P_FindSectorFromLineTag(const line_t *line, int start);
 
 int
 P_FindMinSurroundingLight
@@ -466,7 +478,7 @@ EV_DoPlat
 
 void    P_AddActivePlat(plat_t* plat);
 void    P_RemoveActivePlat(plat_t* plat);
-void    EV_StopPlat(line_t* line);
+boolean    EV_StopPlat(line_t* line);
 void    P_ActivateInStasis(int tag);
 
 void
@@ -585,8 +597,11 @@ EV_DoCeiling
 void    T_MoveCeiling (ceiling_t* ceiling);
 void    P_AddActiveCeiling(ceiling_t* c);
 void    P_RemoveActiveCeiling(ceiling_t* c);
-int     EV_CeilingCrushStop(line_t* line);
-void    P_ActivateInStasisCeiling(line_t* line);
+boolean    EV_CeilingCrushStop(line_t* line);
+boolean    P_ActivateInStasisCeiling(line_t* line);
+
+void P_RemoveAllActiveCeilings(void);
+void P_RemoveAllActivePlats(void);
 
 
 result_e

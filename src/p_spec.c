@@ -89,12 +89,14 @@ typedef struct
 #define MAXANIMS                32
 #define MAXLINEANIMS            64*256                                // CHANGED FOR HIRES
 #define MAX_ADJOINING_SECTORS   20
+#define ANIMSPEED               8
 
 short           numlinespecials;
 
 line_t*         linespeciallist[MAXLINEANIMS];
 
-anim_t          anims[MAXANIMS];
+static anim_t   *anims;         // new structure w/o limits -- killough
+static size_t   maxanims;
 anim_t*         lastanim;
 
 boolean         levelTimer;
@@ -116,33 +118,33 @@ int             levelTimeCount;
 //
 animdef_t                animdefs[] =
 {
-    {false,       "NUKAGE3",      "NUKAGE1",      8},
-    {false,       "FWATER4",      "FWATER1",      8},
-    {false,       "SWATER4",      "SWATER1",      8},
-    {false,       "LAVA4",        "LAVA1",        8},
-    {false,       "BLOOD3",       "BLOOD1",       8},
+    {false,       "NUKAGE3",      "NUKAGE1",      ANIMSPEED},
+    {false,       "FWATER4",      "FWATER1",      ANIMSPEED},
+    {false,       "SWATER4",      "SWATER1",      ANIMSPEED},
+    {false,       "LAVA4",        "LAVA1",        ANIMSPEED},
+    {false,       "BLOOD3",       "BLOOD1",       ANIMSPEED},
 
     // DOOM II flat animations.
-    {false,       "RROCK08",      "RROCK05",      8},                
-    {false,       "SLIME04",      "SLIME01",      8},
-    {false,       "SLIME08",      "SLIME05",      8},
-    {false,       "SLIME12",      "SLIME09",      8},
+    {false,       "RROCK08",      "RROCK05",      ANIMSPEED},                
+    {false,       "SLIME04",      "SLIME01",      ANIMSPEED},
+    {false,       "SLIME08",      "SLIME05",      ANIMSPEED},
+    {false,       "SLIME12",      "SLIME09",      ANIMSPEED},
 
-    {true,        "BLODGR4",      "BLODGR1",      8},
-    {true,        "SLADRIP3",     "SLADRIP1",     8},
+    {true,        "BLODGR4",      "BLODGR1",      ANIMSPEED},
+    {true,        "SLADRIP3",     "SLADRIP1",     ANIMSPEED},
 
-    {true,        "BLODRIP4",     "BLODRIP1",     8},
-    {true,        "FIREWALL",     "FIREWALA",     8},
-    {true,        "GSTFONT3",     "GSTFONT1",     8},
-    {true,        "FIRELAVA",     "FIRELAV3",     8},
-    {true,        "FIREMAG3",     "FIREMAG1",     8},
-    {true,        "FIREBLU2",     "FIREBLU1",     8},
-    {true,        "ROCKRED3",     "ROCKRED1",     8},
+    {true,        "BLODRIP4",     "BLODRIP1",     ANIMSPEED},
+    {true,        "FIREWALL",     "FIREWALA",     ANIMSPEED},
+    {true,        "GSTFONT3",     "GSTFONT1",     ANIMSPEED},
+    {true,        "FIRELAVA",     "FIRELAV3",     ANIMSPEED},
+    {true,        "FIREMAG3",     "FIREMAG1",     ANIMSPEED},
+    {true,        "FIREBLU2",     "FIREBLU1",     ANIMSPEED},
+    {true,        "ROCKRED3",     "ROCKRED1",     ANIMSPEED},
 
-    {true,        "BFALL4",       "BFALL1",       8},
-    {true,        "SFALL4",       "SFALL1",       8},
-    {true,        "WFALL4",       "WFALL1",       8},
-    {true,        "DBRAIN4",      "DBRAIN1",      8},
+    {true,        "BFALL4",       "BFALL1",       ANIMSPEED},
+    {true,        "SFALL4",       "SFALL1",       ANIMSPEED},
+    {true,        "WFALL4",       "WFALL1",       ANIMSPEED},
+    {true,        "DBRAIN4",      "DBRAIN1",      ANIMSPEED},
         
     {-1,          "",             "",             0},
 };
@@ -172,25 +174,34 @@ struct
 void P_InitPicAnims (void)
 {
     int                i;
-
     
-    //        Init animation
+    //  Init animation
     lastanim = anims;
-    for (i=0 ; animdefs[i].istexture != -1 ; i++)
+    for (i = 0; animdefs[i].endname[0]; i++)
     {
-        char *startname, *endname;
+        char    *startname = animdefs[i].startname;
+        char    *endname = animdefs[i].endname;
 
-        startname = DEH_String(animdefs[i].startname);
-        endname = DEH_String(animdefs[i].endname);
+        // 1/11/98 killough -- removed limit by array-doubling
+        if (lastanim >= anims + maxanims)
+        {
+            size_t      newmax = (maxanims ? maxanims * 2 : MAXANIMS);
+
+            anims = realloc(anims, newmax * sizeof(*anims));
+            lastanim = anims + maxanims;
+            maxanims = newmax;
+        }
 
         if (animdefs[i].istexture)
         {
-            // different episode ?
+            // different episode?
             if (R_CheckTextureNumForName(startname) == -1)
-                continue;        
+                continue;
 
             lastanim->picnum = R_TextureNumForName(endname);
             lastanim->basepic = R_TextureNumForName(startname);
+
+            lastanim->numpics = lastanim->picnum - lastanim->basepic + 1;
         }
         else
         {
@@ -199,19 +210,15 @@ void P_InitPicAnims (void)
 
             lastanim->picnum = R_FlatNumForName(endname);
             lastanim->basepic = R_FlatNumForName(startname);
+
+            lastanim->numpics = lastanim->picnum - lastanim->basepic + 1;
         }
 
         lastanim->istexture = animdefs[i].istexture;
-        lastanim->numpics = lastanim->picnum - lastanim->basepic + 1;
 
-        if (lastanim->numpics < 2)
-            I_Error ("P_InitPicAnims: bad cycle from %s to %s",
-                     startname, endname);
-        
         lastanim->speed = animdefs[i].speed;
         lastanim++;
     }
-        
 }
 
 
@@ -464,25 +471,44 @@ fixed_t        P_FindHighestCeilingSurrounding(sector_t* sec)
 
 
 
-//
-// RETURN NEXT SECTOR # THAT LINE TAG REFERS TO
-//
-int
-P_FindSectorFromLineTag
-( line_t*        line,
-  int            start )
+// Find the next sector with the same tag as a linedef.
+// Rewritten by Lee Killough to use chained hashing to improve speed
+int P_FindSectorFromLineTag(const line_t *line, int start)
 {
-    int          i;
-        
-    for (i=start+1;i<numsectors;i++)
-        if (sectors[i].tag == line->tag)
-            return i;
-    
-    return -1;
+    start = (start >= 0 ? sectors[start].nexttag :
+        sectors[(unsigned int)line->tag % (unsigned int)numsectors].firsttag);
+    while (start >= 0 && sectors[start].tag != line->tag)
+        start = sectors[start].nexttag;
+    return start;
 }
 
 
+// Hash the sector tags across the sectors and linedefs.
+static void P_InitTagLists(void)
+{
+    int i;
 
+    for (i = numsectors; --i >= 0;)     // Initially make all slots empty.
+        sectors[i].firsttag = -1;
+    for (i = numsectors; --i >= 0;)     // Proceed from last to first sector
+    {                                   // so that lower sectors appear first
+        int     j = (unsigned int)sectors[i].tag % (unsigned int)numsectors;    // Hash func
+
+        sectors[i].nexttag = sectors[j].firsttag;     // Prepend sector to chain
+        sectors[j].firsttag = i;
+    }
+
+    // killough 4/17/98: same thing, only for linedefs
+    for (i = numlines; --i >= 0;)       // Initially make all slots empty.
+        lines[i].firsttag = -1;
+    for (i = numlines; --i >= 0;)       // Proceed from last to first linedef
+    {                                   // so that lower linedefs appear first
+        int     j = (unsigned int)lines[i].tag % (unsigned int)numlines;        // Hash func
+
+        lines[i].nexttag = lines[j].firsttag;   // Prepend linedef to chain
+        lines[j].firsttag = i;
+    }
+}
 
 //
 // Find minimum light from an adjacent sector
@@ -1459,15 +1485,13 @@ void P_SpawnSpecials (void)
     }
 
     
-    //        Init other misc stuff
-    for (i = 0;i < MAXCEILINGS;i++)
-        activeceilings[i] = NULL;
-
-    for (i = 0;i < MAXPLATS;i++)
-        activeplats[i] = NULL;
+    P_RemoveAllActiveCeilings();
+    P_RemoveAllActivePlats();
     
     for (i = 0;i < MAXBUTTONS;i++)
         memset(&buttonlist[i],0,sizeof(button_t));
+
+    P_InitTagLists();
 
     // UNUSED: no horizonal sliders.
     //        P_InitSlidingDoorFrames();

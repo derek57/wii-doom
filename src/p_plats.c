@@ -25,6 +25,7 @@
 //-----------------------------------------------------------------------------
 
 
+#include <malloc.h>
 #include <stdio.h>
 
 #include "doomdef.h"
@@ -44,7 +45,7 @@
 #include "z_zone.h"
 
 
-plat_t*                activeplats[MAXPLATS];
+platlist_t *activeplats;        // killough 2/14/98: made global again
 
 
 //
@@ -253,60 +254,99 @@ EV_DoPlat
 
 
 
+// The following were all rewritten by Lee Killough
+// to use the new structure which places no limits
+// on active plats. It also avoids spending as much
+// time searching for active plats. Previously a
+// fixed-size array was used, with NULL indicating
+// empty entries, while now a doubly-linked list
+// is used.
+
+//
+// P_ActivateInStasis()
+// Activate a plat that has been put in stasis
+// (stopped perpetual floor, instant floor/ceil toggle)
+//
 void P_ActivateInStasis(int tag)
 {
-    int                i;
-        
-    for (i = 0;i < MAXPLATS;i++)
-        if (activeplats[i]
-            && (activeplats[i])->tag == tag
-            && (activeplats[i])->status == in_stasis)
+    platlist_t  *platlist;
+
+    for (platlist = activeplats; platlist; platlist = platlist->next)   // search the active plats
+    {
+        plat_t  *plat = platlist->plat;                         // for one in stasis with right tag
+
+        if (plat->tag == tag && plat->status == in_stasis)
         {
-            (activeplats[i])->status = (activeplats[i])->oldstatus;
-            (activeplats[i])->thinker.function.acp1
-              = (actionf_p1) T_PlatRaise;
+            plat->status = plat->oldstatus;
+            plat->thinker.function.acp1 = (actionf_p1) T_PlatRaise;
         }
+    }
 }
 
-void EV_StopPlat(line_t* line)
+//
+// EV_StopPlat()
+// Handler for "stop perpetual floor" linedef type
+//
+boolean EV_StopPlat(line_t *line)
 {
-    int                j;
-        
-    for (j = 0;j < MAXPLATS;j++)
-        if (activeplats[j]
-            && ((activeplats[j])->status != in_stasis)
-            && ((activeplats[j])->tag == line->tag))
+    platlist_t  *platlist;
+
+    for (platlist = activeplats; platlist; platlist = platlist->next)   // search the active plats
+    {
+        plat_t  *plat = platlist->plat;                         // for one with the tag not in stasis
+
+        if (plat->status != in_stasis && plat->tag == line->tag)
         {
-            (activeplats[j])->oldstatus = (activeplats[j])->status;
-            (activeplats[j])->status = in_stasis;
-            (activeplats[j])->thinker.function.acv = (actionf_v)NULL;
+            plat->oldstatus = plat->status;                     // put it in stasis
+            plat->status = in_stasis;
+            plat->thinker.function.acp1 = NULL;
         }
+    }
+    return true;
 }
 
-void P_AddActivePlat(plat_t* plat)
+//
+// P_AddActivePlat()
+// Add a plat to the head of the active plat list
+//
+void P_AddActivePlat(plat_t *plat)
 {
-    int                i;
-    
-    for (i = 0;i < MAXPLATS;i++)
-        if (activeplats[i] == NULL)
-        {
-            activeplats[i] = plat;
-            return;
-        }
-    I_Error ("P_AddActivePlat: no more plats!");
+    platlist_t  *list = malloc(sizeof(*list));
+
+    list->plat = plat;
+    plat->list = list;
+    if ((list->next = activeplats))
+        list->next->prev = &list->next;
+    list->prev = &activeplats;
+    activeplats = list;
 }
 
-void P_RemoveActivePlat(plat_t* plat)
+//
+// P_RemoveActivePlat()
+// Remove a plat from the active plat list
+//
+void P_RemoveActivePlat(plat_t *plat)
 {
-    int                i;
-    for (i = 0;i < MAXPLATS;i++)
-        if (plat == activeplats[i])
-        {
-            (activeplats[i])->sector->specialdata = NULL;
-            P_RemoveThinker(&(activeplats[i])->thinker);
-            activeplats[i] = NULL;
-            
-            return;
-        }
-    I_Error ("P_RemoveActivePlat: can't find plat!");
+    platlist_t  *list = plat->list;
+
+    plat->sector->specialdata = NULL;
+    P_RemoveThinker(&plat->thinker);
+    if ((*list->prev = list->next))
+        list->next->prev = list->prev;
+    free(list);
+}
+
+//
+// P_RemoveAllActivePlats()
+// Remove all plats from the active plat list
+//
+void P_RemoveAllActivePlats(void)
+{
+    while (activeplats)
+    {
+        platlist_t      *next = activeplats->next;
+
+        free(activeplats);
+        activeplats = next;
+    }
 }

@@ -1724,24 +1724,40 @@ enum
 void P_ArchiveSpecials (void)
 {
     thinker_t*                th;
-    int                        i;
         
     // save off the current thinkers
     for (th = thinkercap.next ; th != &thinkercap ; th=th->next)
     {
         if (th->function.acv == (actionf_v)NULL)
         {
-            for (i = 0; i < MAXCEILINGS;i++)
-                if (activeceilings[i] == (ceiling_t *)th)
+            boolean             done_one = false;
+
+            ceilinglist_t       *ceilinglist;
+            platlist_t          *platlist;
+
+            for (ceilinglist = activeceilings; ceilinglist; ceilinglist = ceilinglist->next)
+                if (ceilinglist->ceiling == (ceiling_t *)th)
+                {
+                    saveg_write8(tc_ceiling);
+                    saveg_write_pad();
+                    saveg_write_ceiling_t((ceiling_t *)th);
+                    done_one = true;
                     break;
+                }
             
-            if (i<MAXCEILINGS)
-            {
-                saveg_write8(tc_ceiling);
-                saveg_write_pad();
-                saveg_write_ceiling_t((ceiling_t *) th);
-            }
-            continue;
+            // [jeff-d] save height of moving platforms
+            for (platlist = activeplats; platlist; platlist = platlist->next)
+                if (platlist->plat == (plat_t*)th)
+                {
+                    saveg_write8(tc_plat);
+                    saveg_write_pad();
+                    saveg_write_plat_t((plat_t *)th);
+                    done_one = true;
+                    break;
+                }
+
+            if (done_one)
+                continue;
         }
                         
         if (th->function.acp1 == (actionf_p1)T_MoveCeiling)
