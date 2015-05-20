@@ -284,6 +284,7 @@ extern  boolean         d_footclip;
 extern  boolean         d_splash;
 extern  boolean         bfg_classic;
 extern  boolean         beta_skulls;
+extern  boolean         beta_plasma;
 
 extern  int             d_swirl;
 extern  int             autoaim;

@@ -2087,13 +2087,14 @@ void A_PlayerScream (mobj_t* mo)
 
 boolean                onground;
 
+int                    old_u;
+
 void A_MoreGibs(mobj_t* actor)
 {
     mobj_t* mo;
     angle_t an;
 //    int numchunks = (!d_maxgore) ? 1 : 4;
     int t;
-    int old_t = 0;
 
     // max gore - ludicrous gibs
 //    do
@@ -2115,11 +2116,11 @@ void A_MoreGibs(mobj_t* actor)
             t = P_Random() % 9;
 
             if((t == 0 || t == 1 || t == 2 || t == 3 || t == 4 || t == 5 || 
-                t == 6 || t == 7 || t == 8 || t == 9) && t != old_t)
+                t == 6 || t == 7 || t == 8 || t == 9) && t != old_u)
             {
-                old_t = t;
-
                 S_StartSound(actor, sfx_splsh0 + t);
+
+                old_u = t;
             }
         }
 

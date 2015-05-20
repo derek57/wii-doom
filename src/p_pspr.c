@@ -723,6 +723,9 @@ void A_FireOldBFG(player_t *player, pspdef_t *psp)
 //
 // A_FirePlasma
 //
+
+int old_v;
+
 void
 A_FirePlasma
 ( player_t*        player,
@@ -734,7 +737,19 @@ A_FirePlasma
                   ps_flash,
                   weaponinfo[player->readyweapon].flashstate+(P_Random ()&1) );
 
-    P_SpawnPlayerMissile (player->mo, MT_PLASMA);
+    if(beta_plasma)
+    {
+        int t = P_Random() % 2;
+
+        if(old_v == t)
+            t = P_Random() % 2;
+
+        P_SpawnPlayerMissile (player->mo, MT_PLASMA1 + t);
+
+        old_v = t;
+    }
+    else
+        P_SpawnPlayerMissile (player->mo, MT_PLASMA);
 
     if(d_recoil)
         player->recoilpitch = (6*FRACUNIT);

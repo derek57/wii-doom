@@ -49,6 +49,7 @@ boolean         d_footclip = false;
 boolean         d_splash = false;
 boolean         bfg_classic = false;
 boolean         beta_skulls = false;
+boolean         beta_plasma = false;
 
 int             d_swirl;
 int             autoaim = false;
