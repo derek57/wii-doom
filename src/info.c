@@ -53,7 +53,10 @@ char *sprnames[] = {
     "COL5","TBLU","TGRN","TRED","SMBT","SMGT","SMRT","HDB1","HDB2","HDB3",
     "HDB4","HDB5","HDB6","POB1","POB2","BRS1","TLMP","TLP2",
 
-    "FLSH","SPRY","CHNK","SPSH","LVAS","SLDG",/*"PBUL","PSHE",*/
+    "FLSH","SPRY","CHNK","SPSH","LVAS","SLDG",
+    "PLS1", // killough 7/19/98: first  of two plasma fireballs in the beta
+    "PLS2", // killough 7/19/98: second of two plasma fireballs in the beta
+    /*"PBUL","PSHE",*/
 
     NULL
 };
@@ -137,7 +140,11 @@ void A_BrainExplode();
 void A_MoreBlood();
 void A_MoreGibs();
 void A_Footstep();
+void A_FireOldBFG();      // killough 7/19/98: classic BFG firing function
 //void A_Bullet();
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmissing-braces"
 
 state_t        states[NUMSTATES] = {
     {SPR_TROO,0,-1,{NULL},S_NULL,0,0},        // S_NULL
@@ -1174,7 +1181,44 @@ state_t        states[NUMSTATES] = {
     {SPR_SLDG, 4, 5, {NULL}, S_SLUDGESPLASH2, 0, 0},      // S_SLUDGESPLASH1
     {SPR_SLDG, 5, 5, {NULL}, S_SLUDGESPLASH3, 0, 0},      // S_SLUDGESPLASH2
     {SPR_SLDG, 6, 5, {NULL}, S_SLUDGESPLASH4, 0, 0},      // S_SLUDGESPLASH3
-    {SPR_SLDG, 7, 5, {NULL}, S_NULL, 0, 0}       // S_SLUDGESPLASH4
+    {SPR_SLDG, 7, 5, {NULL}, S_NULL, 0, 0},       // S_SLUDGESPLASH4
+    {SPR_BFGG,0,10,{A_BFGsound},S_OLDBFG1+1,0,0},  // S_OLDBFG1
+
+    // killough 7/11/98: beta BFG begins here
+    // S_OLDBFG1
+
+    #define BFGDELAY 1
+    #define OLDBFG_1FRAMES(x) {SPR_BFGG,1,BFGDELAY,A_FireOldBFG,x+S_OLDBFG1+2,0,0},
+    #define OLDBFG_2FRAMES(x) OLDBFG_1FRAMES(x) OLDBFG_1FRAMES(x+1)
+    #define OLDBFG_4FRAMES(x) OLDBFG_2FRAMES(x) OLDBFG_2FRAMES(x+2)
+    #define OLDBFG_8FRAMES(x) OLDBFG_4FRAMES(x) OLDBFG_4FRAMES(x+4)
+
+    OLDBFG_8FRAMES(0)
+    OLDBFG_8FRAMES(8)
+    OLDBFG_8FRAMES(16) 
+    OLDBFG_8FRAMES(24)
+    OLDBFG_8FRAMES(32)
+
+    {SPR_BFGG,1,0,{A_Light0},S_OLDBFG43,0,0}, // S_OLDBFG42
+    {SPR_BFGG,1,20,{A_ReFire},S_BFG,0,0},   // S_OLDBFG43
+
+    // killough 7/11/98: end of beta BFG
+
+    // killough 7/19/98: First plasma fireball in the beta:
+    {SPR_PLS1,32768,6,{NULL},S_PLS1BALL2,0,0},  // S_PLS1BALL
+    {SPR_PLS1,32769,6,{NULL},S_PLS1BALL,0,0}, // S_PLS1BALL2
+    {SPR_PLS1,32770,4,{NULL},S_PLS1EXP2,0,0}, // S_PLS1EXP
+    {SPR_PLS1,32771,4,{NULL},S_PLS1EXP3,0,0}, // S_PLS1EXP2
+    {SPR_PLS1,32772,4,{NULL},S_PLS1EXP4,0,0}, // S_PLS1EXP3
+    {SPR_PLS1,32773,4,{NULL},S_PLS1EXP5,0,0}, // S_PLS1EXP4
+    {SPR_PLS1,32774,4,{NULL},S_NULL,0,0}, // S_PLS1EXP5
+
+    // killough 7/19/98: Second plasma fireball in the beta:
+    {SPR_PLS2,32768,4,{NULL},S_PLS2BALL2,0,0}, // S_PLS2BALL
+    {SPR_PLS2,32769,4,{NULL},S_PLS2BALL,0,0},  // S_PLS2BALL2
+    {SPR_PLS2,32770,6,{NULL},S_PLS2BALLX2,0,0},  // S_PLS2BALLX1
+    {SPR_PLS2,32771,6,{NULL},S_PLS2BALLX3,0,0},  // S_PLS2BALLX2
+    {SPR_PLS2,32772,6,{NULL},S_NULL,0,0} // S_PLS2BALLX3
 /*
     {SPR_PBUL,0,10,{NULL},S_BULLET_01,0,0},       // S_BULLET_00
     {SPR_PBUL,1,10,{NULL},S_NULL,0,0},       // S_BULLET_01
@@ -5415,6 +5459,66 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                         // damage
         sfx_None,                  // activesound
         MF_NOBLOCKMAP,             // flags
+        0,                         // flags2
+        S_NULL,                     // raisestate
+        NULL,       // namepointer
+    },
+
+    // killough 7/11/98: this is the first of two plasma fireballs in the beta
+    {   // MT_PLASMA1
+        -1,   // doomednum
+        S_PLS1BALL,   // spawnstate
+        1000,   // spawnhealth
+        S_NULL,   // seestate
+        sfx_plasma,   // seesound
+        8,    // reactiontime
+        sfx_None,   // attacksound
+        S_NULL,   // painstate
+        0,    // painchance
+        sfx_None,   // painsound
+        S_NULL,   // meleestate
+        S_NULL,   // missilestate
+        S_NULL,     // crashstate
+        S_PLS1EXP,    // deathstate
+        S_NULL,   // xdeathstate
+        sfx_firxpl,   // deathsound
+        25*FRACUNIT,    // speed
+        13*FRACUNIT,    // radius
+        8*FRACUNIT,   // height
+        100,    // mass
+        4,    // damage
+        sfx_None,   // activesound
+        MF_NOBLOCKMAP|MF_MISSILE|MF_DROPOFF|MF_NOGRAVITY, // flags
+        0,                         // flags2
+        S_NULL,                     // raisestate
+        NULL,       // namepointer
+    },
+  
+    // killough 7/11/98: this is the second of two plasma fireballs in the beta
+    {   // MT_PLASMA2
+        -1,   // doomednum
+        S_PLS2BALL,   // spawnstate
+        1000,   // spawnhealth
+        S_NULL,   // seestate
+        sfx_plasma,   // seesound
+        8,    // reactiontime
+        sfx_None,   // attacksound
+        S_NULL,   // painstate
+        0,    // painchance
+        sfx_None,   // painsound
+        S_NULL,   // meleestate
+        S_NULL,   // missilestate
+        S_NULL,     // crashstate
+        S_PLS2BALLX1,    // deathstate
+        S_NULL,   // xdeathstate
+        sfx_firxpl,   // deathsound
+        25*FRACUNIT,    // speed
+        6*FRACUNIT,    // radius
+        8*FRACUNIT,   // height
+        100,    // mass
+        4,    // damage
+        sfx_None,   // activesound
+        MF_NOBLOCKMAP|MF_MISSILE|MF_DROPOFF|MF_NOGRAVITY, // flags
         0,                         // flags2
         S_NULL,                     // raisestate
         NULL,       // namepointer

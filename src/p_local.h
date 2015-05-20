@@ -113,6 +113,7 @@ extern int                  numflats;
 
 
 void P_RespawnSpecials (void);
+void P_CheckMissileSpawn (mobj_t* th);
 
 mobj_t*
 P_SpawnMobj

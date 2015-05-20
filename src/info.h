@@ -179,6 +179,8 @@ typedef enum
     SPR_SPSH,
     SPR_LVAS,
     SPR_SLDG,
+    SPR_PLS1, // killough 7/19/98: first  of two plasma fireballs in the beta
+    SPR_PLS2, // killough 7/19/98: second of two plasma fireballs in the beta
 /*
     SPR_PBUL,
     SPR_PSHE,
@@ -1222,6 +1224,23 @@ typedef enum
     S_SLUDGESPLASH2,
     S_SLUDGESPLASH3,
     S_SLUDGESPLASH4,
+    S_OLDBFG1,  // killough 7/11/98: the old BFG's 43 firing frames
+    S_OLDBFG42 = S_OLDBFG1+41,
+    S_OLDBFG43,
+
+    S_PLS1BALL,      // killough 7/19/98: first plasma fireball in the beta
+    S_PLS1BALL2,
+    S_PLS1EXP,
+    S_PLS1EXP2,
+    S_PLS1EXP3,
+    S_PLS1EXP4,
+    S_PLS1EXP5,
+
+    S_PLS2BALL,     // killough 7/19/98: second plasma fireball in the beta
+    S_PLS2BALL2,
+    S_PLS2BALLX1,
+    S_PLS2BALLX2,
+    S_PLS2BALLX3,
 /*
     S_BULLET_00,
     S_BULLET_01,
@@ -1396,6 +1415,8 @@ typedef enum {
     MT_LAVASMOKE,
     MT_SLUDGECHUNK,
     MT_SLUDGESPLASH,
+    MT_PLASMA1, // killough 7/11/98: first  of alternating beta plasma fireballs
+    MT_PLASMA2, // killough 7/11/98: second of alternating beta plasma fireballs
 /*
     MT_BULLET,
     MT_SHELL,

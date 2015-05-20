@@ -1444,27 +1444,44 @@ void A_FatAttack3 (mobj_t*        actor)
 
 void A_SkullAttack (mobj_t* actor)
 {
-    mobj_t*                dest;
-    angle_t                an;
-    int                        dist;
+    if(beta_skulls)
+    {
+        mobj_t*                dest;
+        angle_t                an;
+        int                        dist;
 
-    if (!actor->target)
-        return;
+        if (!actor->target)
+            return;
                 
-    dest = actor->target;        
-    actor->flags |= MF_SKULLFLY;
+        dest = actor->target;        
+        actor->flags |= MF_SKULLFLY;
 
-    S_StartSound (actor, actor->info->attacksound);
-    A_FaceTarget (actor);
-    an = actor->angle >> ANGLETOFINESHIFT;
-    actor->momx = FixedMul (SKULLSPEED, finecosine[an]);
-    actor->momy = FixedMul (SKULLSPEED, finesine[an]);
-    dist = P_AproxDistance (dest->x - actor->x, dest->y - actor->y);
-    dist = dist / SKULLSPEED;
+        S_StartSound (actor, actor->info->attacksound);
+        A_FaceTarget (actor);
+        an = actor->angle >> ANGLETOFINESHIFT;
+        actor->momx = FixedMul (SKULLSPEED, finecosine[an]);
+        actor->momy = FixedMul (SKULLSPEED, finesine[an]);
+        dist = P_AproxDistance (dest->x - actor->x, dest->y - actor->y);
+        dist = dist / SKULLSPEED;
     
-    if (dist < 1)
-        dist = 1;
-    actor->momz = (dest->z+(dest->height>>1) - actor->z) / dist;
+        if (dist < 1)
+            dist = 1;
+        actor->momz = (dest->z+(dest->height>>1) - actor->z) / dist;
+    }
+    else
+    {
+        int damage;
+
+        if (!actor->target || actor->target->type == MT_SKULL)
+            return;
+
+        S_StartSound(actor, actor->info->attacksound);
+        A_FaceTarget(actor);
+
+        damage = (P_RandomSMMU(pr_skullfly)%8+1)*actor->info->damage;
+
+        P_DamageMobj(actor->target, actor, actor, damage);
+    }
 }
 
 

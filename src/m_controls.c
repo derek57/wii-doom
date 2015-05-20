@@ -152,6 +152,8 @@ void M_BindBaseControls(void)
     M_BindVariable("footclip",               &d_footclip);
     M_BindVariable("splash",                 &d_splash);
     M_BindVariable("swirl",                  &d_swirl);
+    M_BindVariable("classic_bfg",            &bfg_classic);
+    M_BindVariable("pr_skulls",              &beta_skulls);
     M_BindVariable("key_shoot",              &joy_r);
     M_BindVariable("key_open",               &joy_l);
     M_BindVariable("key_menu",               &joy_minus);

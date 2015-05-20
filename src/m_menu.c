@@ -864,8 +864,8 @@ int                        coordinates_info = 0;
 int                        timer_info = 0;
 int                        version_info = 0;
 int                        fps = 0;              // calculating the frames per second
-int                        key_controls_start_in_cfg_at_pos = 32; // ACTUALLY IT'S +2
-int                        key_controls_end_in_cfg_at_pos = 46;   // ACTUALLY IT'S +2
+int                        key_controls_start_in_cfg_at_pos = 34; // ACTUALLY IT'S +2
+int                        key_controls_end_in_cfg_at_pos = 48;   // ACTUALLY IT'S +2
 int                        crosshair = 0;
 int                        show_stats = 0;
 int                        tracknum = 1;
@@ -1045,6 +1045,8 @@ void M_Footstep(int choice);
 void M_Footclip(int choice);
 void M_Splash(int choice);
 void M_Swirl(int choice);
+void M_BFGClassic(int choice);
+void M_BetaSkulls(int choice);
 
 void M_God(int choice);
 void M_Noclip(int choice);
@@ -1704,6 +1706,8 @@ enum
     game2_footclip,
     game2_splash,
     game2_swirl,
+    game2_prbfg,
+    game2_prskulls,
     game2_end
 } game2_e;
 
@@ -1715,6 +1719,8 @@ menuitem_t GameMenu2[]=
     {2,"",M_Footclip,'c'},
     {2,"",M_Splash,'s'},
     {2,"",M_Swirl,'w'},
+    {2,"",M_BFGClassic,'b'},
+    {2,"",M_BetaSkulls,'x'},
 };
 
 menu_t  GameDef2 =
@@ -2655,6 +2661,8 @@ void M_DrawGame2(void)
     M_WriteText(GameDef.x - 15, GameDef.y + 28, DEH_String("HERETIC FOOTCLIPS"));
     M_WriteText(GameDef.x - 15, GameDef.y + 38, DEH_String("HERETIC LIQUID SPLASH"));
     M_WriteText(GameDef.x - 15, GameDef.y + 48, DEH_String("SWIRLING WATER HACK"));
+    M_WriteText(GameDef.x - 15, GameDef.y + 58, DEH_String("PRE-RELEASE BFG9000"));
+    M_WriteText(GameDef.x - 15, GameDef.y + 68, DEH_String("PRE-RELEASE SKULLS"));
 
     if(autoaim)
         M_WriteText(GameDef.x + 153, GameDef.y - 2, DEH_String("ON"));
@@ -2685,6 +2693,16 @@ void M_DrawGame2(void)
         M_WriteText(GameDef.x + 153, GameDef.y + 48, DEH_String("ON"));
     else
         M_WriteText(GameDef.x + 145, GameDef.y + 48, DEH_String("OFF"));
+
+    if(bfg_classic)
+        M_WriteText(GameDef.x + 153, GameDef.y + 58, DEH_String("ON"));
+    else
+        M_WriteText(GameDef.x + 145, GameDef.y + 58, DEH_String("OFF"));
+
+    if(beta_skulls)
+        M_WriteText(GameDef.x + 153, GameDef.y + 68, DEH_String("ON"));
+    else
+        M_WriteText(GameDef.x + 145, GameDef.y + 68, DEH_String("OFF"));
 }
 
 void DetectState(void)
@@ -3571,7 +3589,7 @@ boolean M_Responder (event_t* ev)
     if (askforkey && data->btns_d)                // KEY BINDINGS
     {
         M_KeyBindingsClearControls(ev->data1);
-        *doom_defaults_list[keyaskedfor + 32 + FirstKey].location = ev->data1;
+        *doom_defaults_list[keyaskedfor + 34 + FirstKey].location = ev->data1;
         askforkey = false;
         return true;
     }
@@ -5360,8 +5378,6 @@ void M_KeyBindingsClearControls (int ch)
 
 void M_KeyBindingsClearAll (int choice)
 {
-    *doom_defaults_list[32].location = 0;
-    *doom_defaults_list[33].location = 0;
     *doom_defaults_list[34].location = 0;
     *doom_defaults_list[35].location = 0;
     *doom_defaults_list[36].location = 0;
@@ -5374,24 +5390,26 @@ void M_KeyBindingsClearAll (int choice)
     *doom_defaults_list[43].location = 0;
     *doom_defaults_list[44].location = 0;
     *doom_defaults_list[45].location = 0;
+    *doom_defaults_list[46].location = 0;
+    *doom_defaults_list[47].location = 0;
 }
 
 void M_KeyBindingsReset (int choice)
 {
-    *doom_defaults_list[32].location = CLASSIC_CONTROLLER_R;
-    *doom_defaults_list[33].location = CLASSIC_CONTROLLER_L;
-    *doom_defaults_list[34].location = CLASSIC_CONTROLLER_MINUS;
-    *doom_defaults_list[35].location = CLASSIC_CONTROLLER_LEFT;
-    *doom_defaults_list[36].location = CLASSIC_CONTROLLER_DOWN;
-    *doom_defaults_list[37].location = CLASSIC_CONTROLLER_RIGHT;
-    *doom_defaults_list[38].location = CLASSIC_CONTROLLER_ZL;
-    *doom_defaults_list[39].location = CLASSIC_CONTROLLER_ZR;
-    *doom_defaults_list[40].location = CLASSIC_CONTROLLER_A;
-    *doom_defaults_list[41].location = CLASSIC_CONTROLLER_Y;
-    *doom_defaults_list[42].location = CLASSIC_CONTROLLER_B;
-    *doom_defaults_list[43].location = CONTROLLER_1;
-    *doom_defaults_list[44].location = CONTROLLER_2;
-    *doom_defaults_list[45].location = CLASSIC_CONTROLLER_PLUS;
+    *doom_defaults_list[34].location = CLASSIC_CONTROLLER_R;
+    *doom_defaults_list[35].location = CLASSIC_CONTROLLER_L;
+    *doom_defaults_list[36].location = CLASSIC_CONTROLLER_MINUS;
+    *doom_defaults_list[37].location = CLASSIC_CONTROLLER_LEFT;
+    *doom_defaults_list[38].location = CLASSIC_CONTROLLER_DOWN;
+    *doom_defaults_list[39].location = CLASSIC_CONTROLLER_RIGHT;
+    *doom_defaults_list[40].location = CLASSIC_CONTROLLER_ZL;
+    *doom_defaults_list[41].location = CLASSIC_CONTROLLER_ZR;
+    *doom_defaults_list[42].location = CLASSIC_CONTROLLER_A;
+    *doom_defaults_list[43].location = CLASSIC_CONTROLLER_Y;
+    *doom_defaults_list[44].location = CLASSIC_CONTROLLER_B;
+    *doom_defaults_list[45].location = CONTROLLER_1;
+    *doom_defaults_list[46].location = CONTROLLER_2;
+    *doom_defaults_list[47].location = CLASSIC_CONTROLLER_PLUS;
 }
 
 void M_DrawKeyBindings(void)
@@ -5427,7 +5445,7 @@ void M_DrawKeyBindings(void)
                 M_WriteText(195, (i*10+20), "???");
             else
                 M_WriteText(195, (i*10+20),
-                        Key2String(*(doom_defaults_list[i+FirstKey+32].location)));
+                        Key2String(*(doom_defaults_list[i+FirstKey+34].location)));
         }
     }
 }
@@ -6104,6 +6122,40 @@ void M_Swirl(int choice)
         if (!d_swirl)
             d_swirl = 1;
         players[consoleplayer].message = DEH_String("SWIRLING WATER HACK ENABLED");
+        break;
+    }
+}
+
+void M_BFGClassic(int choice)
+{
+    switch(choice)
+    {
+    case 0:
+        if (bfg_classic)
+            bfg_classic = false;
+        players[consoleplayer].message = DEH_String("PRE-RELEASE BFG9000 DISABLED");
+        break;
+    case 1:
+        if (!bfg_classic)
+            bfg_classic = true;
+        players[consoleplayer].message = DEH_String("PRE-RELEASE BFG9000 ENABLED");
+        break;
+    }
+}
+
+void M_BetaSkulls(int choice)
+{
+    switch(choice)
+    {
+    case 0:
+        if (beta_skulls)
+            beta_skulls = false;
+        players[consoleplayer].message = DEH_String("PRE-RELEASE SKULLS BEHAVIOR DISABLED");
+        break;
+    case 1:
+        if (!beta_skulls)
+            beta_skulls = true;
+        players[consoleplayer].message = DEH_String("PRE-RELEASE SKULLS BEHAVIOR ENABLED");
         break;
     }
 }

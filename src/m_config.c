@@ -108,6 +108,8 @@ default_t        doom_defaults_list[] =
     CONFIG_VARIABLE_INT                (footclip),
     CONFIG_VARIABLE_INT                (splash),
     CONFIG_VARIABLE_INT                (swirl),
+    CONFIG_VARIABLE_INT                (classic_bfg),
+    CONFIG_VARIABLE_INT                (pr_skulls),
     CONFIG_VARIABLE_INT                (key_shoot),
     CONFIG_VARIABLE_INT                (key_open),
     CONFIG_VARIABLE_INT                (key_menu),

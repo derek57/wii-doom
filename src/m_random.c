@@ -102,3 +102,34 @@ void M_ClearRandom (void)
     rndindex = time(NULL) & 0xff;
 }
 
+rng_t rng;     // the random number state
+
+unsigned long rngseed = 1993;   // killough 3/26/98: The seed
+
+int P_RandomSMMU(pr_class_t pr_class)
+{
+    // killough 2/16/98:  We always update both sets of random number
+    // generators, to ensure repeatability if the demo_compatibility
+    // flag is changed while the program is running. Changing the
+    // demo_compatibility flag does not change the sequences generated,
+    // only which one is selected from.
+    //
+    // All of this RNG stuff is tricky as far as demo sync goes --
+    // it's like playing with explosives :) Lee
+
+    unsigned long boom;
+
+    if (pr_class != pr_misc)      // killough 3/31/98
+        pr_class = pr_all_in_one;
+
+    boom = rng.seed[pr_class];
+
+    // killough 3/26/98: add pr_class*2 to addend
+
+    rng.seed[pr_class] = boom * 1664525ul + 221297ul + pr_class*2;
+
+    boom >>= 20;
+
+    return boom & 255;
+}
+
