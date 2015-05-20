@@ -547,7 +547,7 @@ P_TryMove
 
     P_SetThingPosition (thing);
 
-    if (thing->flags2 & MF2_FOOTCLIP
+    if (thing->flags2 & MF2_FOOTCLIP && d_footclip
         && P_GetThingFloorType(thing) != FLOOR_SOLID)
     {
         thing->flags2 |= MF2_FEETARECLIPPED;
@@ -1405,7 +1405,7 @@ P_LineAttack
 
     shootz = t1->z + (t1->height>>1) + 8*FRACUNIT;
 
-    if (t1->flags2 & MF2_FEETARECLIPPED)
+    if (t1->flags2 & MF2_FEETARECLIPPED && d_footclip)
     {
         shootz -= FOOTCLIPSIZE;
     }

@@ -619,7 +619,7 @@ P_SpawnMobj
     else 
         mobj->z = z;
 
-    if (mobj->flags2 & MF2_FOOTCLIP
+    if (mobj->flags2 & MF2_FOOTCLIP && d_footclip
         && P_GetThingFloorType(mobj) != FLOOR_SOLID
         && mobj->floorz == mobj->subsector->sector->floorheight)
     {
@@ -1100,7 +1100,7 @@ P_SpawnMissile
             z = source->z + 32 * FRACUNIT;
             break;
     }
-    if (source->flags2 & MF2_FEETARECLIPPED)
+    if (source->flags2 & MF2_FEETARECLIPPED && d_footclip)
     {
         z -= FOOTCLIPSIZE;
     }
@@ -1199,7 +1199,7 @@ P_SpawnPlayerMissile
     z = source->z + 4 * 8 * FRACUNIT +
         ((source->player->lookdir) << FRACBITS) / 173;
         
-    if (source->flags2 & MF2_FEETARECLIPPED)
+    if (source->flags2 & MF2_FEETARECLIPPED && d_footclip)
     {
         z -= FOOTCLIPSIZE;
     }

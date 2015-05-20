@@ -151,6 +151,7 @@ void M_BindBaseControls(void)
     M_BindVariable("player_thrust",          &d_thrust);
     M_BindVariable("run_count",              &runcount);
     M_BindVariable("footsteps",              &d_footstep);
+    M_BindVariable("footclip",               &d_footclip);
     M_BindVariable("key_fire",               &joy_r);
     M_BindVariable("key_use",                &joy_l);
     M_BindVariable("key_menu",               &joy_minus);

@@ -137,7 +137,7 @@ void P_CalcHeight (player_t* player)
     }
     player->viewz = player->mo->z + player->viewheight + bob;
 
-    if (player->mo->flags2 & MF2_FEETARECLIPPED
+    if (player->mo->flags2 & MF2_FEETARECLIPPED && d_footclip
         && player->playerstate != PST_DEAD
         && player->mo->z <= player->mo->floorz)
     {

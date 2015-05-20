@@ -424,7 +424,7 @@ R_DrawVisSprite
         sprtopscreen += (viewheight / 2 - centery) << FRACBITS;
     }
 
-    if (vis->footclip && !vis->psprite)
+    if (vis->footclip && !vis->psprite && d_footclip)
     {
         sprbotscreen = sprtopscreen + FixedMul(SHORT(patch->height) << FRACBITS, // WII FIX
                                                spryscale);
@@ -569,7 +569,7 @@ void R_ProjectSprite (mobj_t* thing)
     vis->gzt = thing->z + spritetopoffset[lump];
 
     // foot clipping
-    if (thing->flags2 & MF2_FEETARECLIPPED
+    if (thing->flags2 & MF2_FEETARECLIPPED && d_footclip
         && thing->z <= thing->subsector->sector->floorheight)
     {
         vis->footclip = 10;
