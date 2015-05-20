@@ -1087,6 +1087,7 @@ void M_Controls(int choice);
 void M_System(int choice);
 void M_Sound(int choice);
 void M_Game(int choice);
+void M_Game2(int choice);
 void M_Debug(int choice);
 void M_Cheats(int choice);
 void M_Record(int choice);
@@ -1104,6 +1105,7 @@ void M_DrawControls(void);
 void M_DrawSystem(void);
 void M_DrawGame(void);
 void M_DrawGame2(void);
+void M_DrawGameDev(void);
 void M_DrawDebug(void);
 void M_DrawSound(void);
 void M_DrawCheats(void);
@@ -1661,8 +1663,8 @@ enum
     game_thrust,
     game_respawn,
     game_fast,
-    game_autoaim,
-    game_gore,
+    game_empty,
+    game_game2,
     game_end
 } game_e;
 
@@ -1681,8 +1683,8 @@ menuitem_t GameMenu[]=
     {2,"",M_PlayerThrust,'p'},
     {2,"",M_RespawnMonsters,'t'},
     {2,"",M_FastMonsters,'d'},
-    {2,"",M_Autoaim,'a'},
-    {2,"",M_MaxGore,'o'},
+    {-1,"",0,'\0'},
+    {2,"",M_Game2,'n'}
 };
 
 menu_t  GameDef =
@@ -1697,25 +1699,48 @@ menu_t  GameDef =
 
 enum
 {
-    game2_mapgrid,
-    game2_maprotation,
-    game2_followmode,
-    game2_statistics,
-    game2_aiminghelp,
-    game2_messages,
-    game2_crosshair,
-    game2_jumping,
-    game2_weapon,
-    game2_recoil,
-    game2_thrust,
-    game2_respawn,
-    game2_fast,
     game2_autoaim,
     game2_gore,
     game2_end
 } game2_e;
 
 menuitem_t GameMenu2[]=
+{
+    {2,"",M_Autoaim,'a'},
+    {2,"",M_MaxGore,'o'},
+};
+
+menu_t  GameDef2 =
+{
+    game2_end,
+    &GameDef,
+    GameMenu2,
+    M_DrawGame2,
+    85,22,
+    0
+};
+
+enum
+{
+    gamedev_mapgrid,
+    gamedev_maprotation,
+    gamedev_followmode,
+    gamedev_statistics,
+    gamedev_aiminghelp,
+    gamedev_messages,
+    gamedev_crosshair,
+    gamedev_jumping,
+    gamedev_weapon,
+    gamedev_recoil,
+    gamedev_thrust,
+    gamedev_respawn,
+    gamedev_fast,
+    gamedev_empty,
+    gamedev_game2,
+    gamedev_end
+} gamedev_e;
+
+menuitem_t GameMenuDev[]=
 {
     {2,"",M_MapGrid,'g'},
     {2,"",M_MapRotation,'r'},
@@ -1730,16 +1755,16 @@ menuitem_t GameMenu2[]=
     {2,"",M_PlayerThrust,'p'},
     {2,"",M_RespawnMonsters,'t'},
     {2,"",M_FastMonsters,'d'},
-    {2,"",M_Autoaim,'a'},
-    {2,"",M_MaxGore,'o'},
+    {-1,"",0,'\0'},
+    {2,"",M_Game2,'n'}
 };
 
-menu_t  GameDef2 =
+menu_t  GameDefDev =
 {
-    game2_end,
+    gamedev_end,
     &OptionsDef,
-    GameMenu2,
-    M_DrawGame2,
+    GameMenuDev,
+    M_DrawGameDev,
     85,22,
     0
 };
@@ -1756,7 +1781,7 @@ menuitem_t DebugMenu[]=
 {
     {2,"M_COORDS",M_Coordinates,'c'},
     {2,"M_TIMER",M_Timer,'t'},
-    {2,"M_VRSN",M_Version,'v'},
+    {2,"M_VRSN",M_Version,'v'}
 };
 
 menu_t  DebugDef =
@@ -2590,8 +2615,7 @@ void M_DrawGame(void)
     M_WriteText(85, 120, DEH_String("PLAYER THRUST"));
     M_WriteText(85, 130, DEH_String("RESPAWN MONSTERS"));
     M_WriteText(85, 140, DEH_String("FAST MONSTERS"));
-    M_WriteText(85, 150, DEH_String("AUTOAIM"));
-    M_WriteText(85, 160, DEH_String("MORE GORE"));
+    M_WriteText(85, 160, DEH_String("MORE OPTIONS"));
 
     if(drawgrid == 1)
         M_WriteText(220, 20, DEH_String("ON"));
@@ -2657,19 +2681,32 @@ void M_DrawGame(void)
         M_WriteText(220, 140, DEH_String("ON"));
     else
         M_WriteText(220, 140, DEH_String("OFF"));
-
-    if(autoaim)
-        M_WriteText(220, 150, DEH_String("ON"));
-    else
-        M_WriteText(220, 150, DEH_String("OFF"));
-
-    if(d_maxgore)
-        M_WriteText(220, 160, DEH_String("ON"));
-    else
-        M_WriteText(220, 160, DEH_String("OFF"));
 }
 
 void M_DrawGame2(void)
+{
+    if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
+        V_DrawPatchDirect(70, 0, W_CacheLumpName(DEH_String("M_T_GSET"),
+                                               PU_CACHE));
+    else
+        V_DrawPatchDirect(70, 0, W_CacheLumpName(DEH_String("M_GMESET"),
+                                               PU_CACHE));
+
+    M_WriteText(85, 20, DEH_String("AUTOAIM"));
+    M_WriteText(85, 30, DEH_String("MORE GORE"));
+
+    if(autoaim)
+        M_WriteText(220, 20, DEH_String("ON"));
+    else
+        M_WriteText(220, 20, DEH_String("OFF"));
+
+    if(d_maxgore)
+        M_WriteText(220, 30, DEH_String("ON"));
+    else
+        M_WriteText(220, 30, DEH_String("OFF"));
+}
+
+void M_DrawGameDev(void)
 {
     if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
         V_DrawPatchDirect(70, 0, W_CacheLumpName(DEH_String("M_T_GSET"),
@@ -2691,8 +2728,7 @@ void M_DrawGame2(void)
     M_WriteText(85, 120, DEH_String("PLAYER THRUST"));
     M_WriteText(85, 130, DEH_String("RESPAWN MONSTERS"));
     M_WriteText(85, 140, DEH_String("FAST MONSTERS"));
-    M_WriteText(85, 150, DEH_String("AUTOAIM"));
-    M_WriteText(85, 160, DEH_String("MORE GORE"));
+    M_WriteText(85, 160, DEH_String("MORE OPTIONS"));
 
     if(drawgrid == 1)
         M_WriteText(220, 20, DEH_String("ON"));
@@ -2758,16 +2794,6 @@ void M_DrawGame2(void)
         M_WriteText(220, 140, DEH_String("ON"));
     else
         M_WriteText(220, 140, DEH_String("OFF"));
-
-    if(autoaim)
-        M_WriteText(220, 150, DEH_String("ON"));
-    else
-        M_WriteText(220, 150, DEH_String("OFF"));
-
-    if(d_maxgore)
-        M_WriteText(220, 160, DEH_String("ON"));
-    else
-        M_WriteText(220, 160, DEH_String("OFF"));
 }
 
 void DetectState(void)
@@ -4028,10 +4054,10 @@ void M_Drawer (void)
     x = currentMenu->x;
     y = currentMenu->y;
     max = currentMenu->numitems;
-
+/*
     if(currentMenu == &GameDef && devparm)
         currentMenu->numitems = 9;
-
+*/
     if(currentMenu == &SoundDef && itemOn == 4)
         M_WriteText(48, 155, "You must restart to take effect.");
 
@@ -4083,7 +4109,8 @@ void M_Drawer (void)
         if (currentMenu == &CheatsDef || currentMenu == &KeyBindingsDef ||
             currentMenu == &ItemsDef || currentMenu == &WeaponsDef ||
             currentMenu == &ArmorDef || currentMenu == &KeysDef || 
-            currentMenu == &GameDef || currentMenu == &GameDef2)
+            currentMenu == &GameDef || currentMenu == &GameDefDev ||
+            currentMenu == &GameDef2)
         {
             y += LINEHEIGHT_SMALL;
             // DRAW SKULL
@@ -5714,9 +5741,14 @@ void M_Record(int choice)
 void M_Game(int choice)
 {
     if(devparm)
-        M_SetupNextMenu(&GameDef2);
+        M_SetupNextMenu(&GameDefDev);
     else
         M_SetupNextMenu(&GameDef);
+}
+
+void M_Game2(int choice)
+{
+    M_SetupNextMenu(&GameDef2);
 }
 
 void M_RMap(int choice)
