@@ -812,8 +812,10 @@ char *Key2String (int ch)
 
 char                       savegamestrings[10][SAVESTRINGSIZE];
 char                       endstring[160];
+/*
 char                       detailNames[2][9] = {"M_GDHIGH","M_GDLOW"};
 char                       msgNames[2][9]    = {"M_MSGOFF","M_MSGON"};
+*/
 char                       fpsDisplay[100];
 char                       map_coordinates_textbuffer[50];
 char                       massacre_textbuffer[20];
@@ -826,7 +828,7 @@ char                       *messageString;
 
 // graphic name of skulls
 // warning: initializer-string for array of chars is too long
-char                       *skullName[2]      = {"M_SKULL1","M_SKULL2"};
+//char                       *skullName[2]      = {"M_SKULL1","M_SKULL2"};
 char                       *skullNameSmall[2] = {"M_SKULL3","M_SKULL4"};
 
 // defaulted values
@@ -890,7 +892,7 @@ short                      whichSkull;              // which skull to draw
 
 // timed message = no input from user
 boolean                    messageNeedsInput;
-
+boolean                    map_flag = false;
 boolean                    inhelpscreens;
 boolean                    menuactive;
 boolean                    forced = false;
@@ -999,6 +1001,7 @@ void M_DrawSave(void);
 void M_DrawSaveLoadBorder(int x,int y);
 void M_SetupNextMenu(menu_t *menudef);
 void M_DrawThermo(int x,int y,int thermWidth,int thermDot);
+void M_DrawThermoSmall(int x,int y,int thermWidth,int thermDot);
 void M_DrawEmptyCell(menu_t *menu,int item);
 void M_DrawSelCell(menu_t *menu,int item);
 void M_WriteText(int x, int y, char *string);
@@ -1133,12 +1136,12 @@ enum
 
 menuitem_t MainGameMenu[]=
 {
-    {1,"M_NGAME",M_NewGame,'n'},
-    {1,"M_OPTION",M_Options,'o'},
-    {1,"M_GFILES",M_GameFiles,'f'},
+    {1,"New Game",M_NewGame,'n'},
+    {1,"Options",M_Options,'o'},
+    {1,"Game Files",M_GameFiles,'f'},
     // Another hickup with Special edition.
-    {1,"M_RDTHIS",M_ReadThis,'r'},
-    {1,"M_QUITG",M_QuitDOOM,'q'}
+    {1,"Read This!",M_ReadThis,'r'},
+    {1,"Quit Game",M_QuitDOOM,'q'}
 };
 
 menu_t  MainDef =
@@ -1147,7 +1150,7 @@ menu_t  MainDef =
     NULL,
     MainGameMenu,
     M_DrawMainMenu,
-    97,64,
+    122,74,
     0
 };
 
@@ -1163,11 +1166,11 @@ enum
 
 menuitem_t FilesMenu[]=
 {
-    {1,"M_LOADG",M_LoadGame,'l'},
-    {1,"M_SAVEG",M_SaveGame,'s'},
-    {1,"M_ENDGAM",M_EndGame,'e'},
-    {1,"M_CHEATS",M_Cheats,'c'},
-    {1,"M_RECDMO",M_Record,'r'}
+    {1,"Load Game",M_LoadGame,'l'},
+    {1,"Save Game",M_SaveGame,'s'},
+    {1,"End Game",M_EndGame,'e'},
+    {1,"Cheats",M_Cheats,'c'},
+    {1,"Record Demo",M_Record,'r'}
 };
 
 menu_t  FilesDef =
@@ -1176,7 +1179,7 @@ menu_t  FilesDef =
     &MainDef,
     FilesMenu,
     M_DrawFilesMenu,
-    97,45,
+    122,65,
     0
 };
 
@@ -1194,10 +1197,10 @@ enum
 
 menuitem_t EpisodeMenu[]=
 {
-    {1,"M_EPI1", M_Episode,'k'},
-    {1,"M_EPI2", M_Episode,'t'},
-    {1,"M_EPI3", M_Episode,'i'},
-    {1,"M_EPI4", M_Episode,'t'}
+    {1,"Knee-Deep in the Dead", M_Episode,'k'},
+    {1,"The Shores of Hell", M_Episode,'t'},
+    {1,"Inferno", M_Episode,'i'},
+    {1,"Thy Flesh Consumed", M_Episode,'t'}
 };
 
 menu_t  EpiDef =
@@ -1206,7 +1209,7 @@ menu_t  EpiDef =
     &MainDef,              // previous menu
     EpisodeMenu,           // menuitem_t ->
     M_DrawEpisode,         // drawing routine ->
-    48,63,                 // x,y
+    95,73,                 // x,y
     ep1                    // lastOn
 };
 
@@ -1225,11 +1228,11 @@ enum
 
 menuitem_t NewGameMenu[]=
 {
-    {1,"M_JKILL", M_ChooseSkill, 'i'},
-    {1,"M_ROUGH", M_ChooseSkill, 'h'},
-    {1,"M_HURT",  M_ChooseSkill, 'h'},
-    {1,"M_ULTRA", M_ChooseSkill, 'u'},
-    {1,"",        M_ChooseSkill, 'n'}  // HACK: ALL ELSE THAN SHAREWARE 1.0 & 1.1
+    {1,"I'm too young to die.", M_ChooseSkill, 'i'},
+    {1,"Hey, not too rough.", M_ChooseSkill, 'h'},
+    {1,"Hurt me plenty.",  M_ChooseSkill, 'h'},
+    {1,"Ultra-Violence.", M_ChooseSkill, 'u'},
+    {1,"Nightmare!",        M_ChooseSkill, 'n'}
 };
 
 menu_t  NewDef =
@@ -1238,7 +1241,7 @@ menu_t  NewDef =
     &EpiDef,            // previous menu
     NewGameMenu,        // menuitem_t ->
     M_DrawNewGame,      // drawing routine ->
-    48,63,              // x,y
+    88,73,              // x,y
     hurtme              // lastOn
 };
 
@@ -1260,12 +1263,12 @@ enum
 
 menuitem_t OptionsMenu[]=
 {
-    {1,"M_SCRSET", M_Screen,'s'},
-    {1,"M_CTLSET", M_Controls,'c'},
-    {1,"M_SNDSET", M_Sound,'v'},
-    {1,"M_SYSSET", M_System,'y'},
-    {1,"M_GMESET", M_Game,'g'},
-    {1,"M_DBGSET", M_Debug,'d'}
+    {1,"Screen Settings", M_Screen,'s'},
+    {1,"Control Settings", M_Controls,'c'},
+    {1,"Sound Settings", M_Sound,'v'},
+    {1,"System Settings", M_System,'y'},
+    {1,"Game Settings", M_Game,'g'},
+    {1,"Debug Settings", M_Debug,'d'}
 };
 
 menu_t  OptionsDef =
@@ -1274,7 +1277,7 @@ menu_t  OptionsDef =
     &MainDef,
     OptionsMenu,
     M_DrawOptions,
-    60,57,
+    100,67,
     0
 };
 
@@ -1518,20 +1521,16 @@ menu_t  ArmorDef =
 enum
 {
     gamma,
-    screen_empty1,
     scrnsize,
-    screen_empty2,
     screen_detail,
     screen_end
 } screen_e;
 
 menuitem_t ScreenMenu[]=
 {
-    {2,"M_BRGTNS",M_Brightness,'b'},
-    {-1,"",0,'\0'},
-    {2,"M_SCRNSZ",M_SizeDisplay,'s'},
-    {-1,"",0,'\0'},
-    {2,"M_DETAIL",M_ChangeDetail,'d'}
+    {2,"Brightness",M_Brightness,'b'},
+    {2,"Screen Size",M_SizeDisplay,'s'},
+    {2,"Detail",M_ChangeDetail,'d'}
 };
 
 menu_t  ScreenDef =
@@ -1547,30 +1546,22 @@ menu_t  ScreenDef =
 enum
 {
     mousesens,
-    controls_empty1,
     turnsens,
-    controls_empty2,
     strafesens,
-    controls_empty3,
-    controls_freelook,
     mousespeed,
-    controls_empty4,
+    controls_freelook,
     controls_keybindings,
     controls_end
 } controls_e;
 
 menuitem_t ControlsMenu[]=
 {
-    {2,"M_WSPEED",M_WalkingSpeed,'m'},
-    {-1,"",0,'\0'},
-    {2,"M_TSPEED",M_TurningSpeed,'t'},
-    {-1,"",0,'\0'},
-    {2,"M_SSPEED",M_StrafingSpeed,'s'},
-    {-1,"",0,'\0'},
-    {2,"M_FRLOOK",M_Freelook,'l'},
-    {2,"M_FLKSPD",M_FreelookSpeed,'f'},
-    {-1,"",0,'\0'},
-    {1,"M_KBNDGS",M_KeyBindings,'b'}
+    {2,"Walking",M_WalkingSpeed,'m'},
+    {2,"Turning",M_TurningSpeed,'t'},
+    {2,"Strafing",M_StrafingSpeed,'s'},
+    {2,"Freelook",M_FreelookSpeed,'f'},
+    {2,"Freelook Mode",M_Freelook,'l'},
+    {1,"Key Bindings",M_KeyBindings,'b'}
 };
 
 menu_t  ControlsDef =
@@ -1579,7 +1570,7 @@ menu_t  ControlsDef =
     &OptionsDef,
     ControlsMenu,
     M_DrawControls,
-    50,5,
+    20,60,
     0
 };
 
@@ -1598,7 +1589,6 @@ enum
     keybindings_jump,
     keybindings_run,
     keybindings_console,
-    keybindings_aiminghelp,
     keybindings_clearall,
     keybindings_reset,
     keybindings_end
@@ -1619,7 +1609,6 @@ menuitem_t KeyBindingsMenu[]=
     {5,"",M_KeyBindingsSetKey,10},
     {5,"",M_KeyBindingsSetKey,11},
     {5,"",M_KeyBindingsSetKey,12},
-    {5,"",M_KeyBindingsSetKey,13},
     {5,"",M_KeyBindingsClearAll,'c'},
     {5,"",M_KeyBindingsReset,'r'}
 };
@@ -1643,8 +1632,8 @@ enum
 
 menuitem_t SystemMenu[]=
 {
-    {2,"M_FPSCNT",M_FPS,'f'},
-    {2,"M_DPLTCK",M_DisplayTicker,'t'}
+    {2,"FPS Counter",M_FPS,'f'},
+    {2,"Display Ticker",M_DisplayTicker,'t'}
 };
 
 menu_t  SystemDef =
@@ -1653,7 +1642,7 @@ menu_t  SystemDef =
     &OptionsDef,
     SystemMenu,
     M_DrawSystem,
-    50,85,
+    100,85,
     0
 };
 
@@ -1745,9 +1734,9 @@ enum
 
 menuitem_t DebugMenu[]=
 {
-    {2,"M_COORDS",M_Coordinates,'c'},
-    {2,"M_TIMER",M_Timer,'t'},
-    {2,"M_VRSN",M_Version,'v'}
+    {2,"Show Coordinates",M_Coordinates,'c'},
+    {2,"Show Timer",M_Timer,'t'},
+    {2,"Show Version",M_Version,'v'}
 };
 
 menu_t  DebugDef =
@@ -1756,7 +1745,7 @@ menu_t  DebugDef =
     &OptionsDef,
     DebugMenu,
     M_DrawDebug,
-    45,75,
+    67,75,
     0
 };
 
@@ -1766,9 +1755,7 @@ menu_t  DebugDef =
 enum
 {
     sfx_vol,
-    sfx_empty1,
     music_vol,
-    sfx_empty2,
     type,
     channels,
     sound_end
@@ -1776,12 +1763,10 @@ enum
 
 menuitem_t SoundMenu[]=
 {
-    {2,"M_SFXVOL",M_SfxVol,'s'},
-    {-1,"",0,'\0'},
-    {2,"M_MUSVOL",M_MusicVol,'m'},
-    {-1,"",0,'\0'},
-    {2,"M_MUSTYP",M_MusicType,'t'},
-    {2,"M_SNDCHN",M_SoundChannels,'c'}
+    {2,"Sound Volume",M_SfxVol,'s'},
+    {2,"Music Volume",M_MusicVol,'m'},
+    {2,"Music Type",M_MusicType,'t'},
+    {2,"Switch Sound Channels",M_SoundChannels,'c'}
 };
 
 menu_t  SoundDef =
@@ -1790,7 +1775,7 @@ menu_t  SoundDef =
     &OptionsDef,
     SoundMenu,
     M_DrawSound,
-    70,55,
+    45,70,
     0
 };
 
@@ -1824,7 +1809,7 @@ menu_t  LoadDef =
     &FilesDef,
     LoadMenu,
     M_DrawLoad,
-    80,54,
+    75,56,
     0
 };
 
@@ -1847,7 +1832,7 @@ menu_t  SaveDef =
     &FilesDef,
     SaveMenu,
     M_DrawSave,
-    80,54,
+    75,56,
     0
 };
 
@@ -1865,13 +1850,13 @@ enum
 
 menuitem_t RecordMenu[]=
 {
-    {2,"M_RECMAP",M_RMap,'m'},
+    {2,"Record Map:",M_RMap,'m'},
     {-1,"",0,'\0'},
     {-1,"",0,'\0'},
-    {2,"M_SKILL",M_RSkill,'s'},
+    {2,"Choose Skill Level:",M_RSkill,'s'},
     {-1,"",0,'\0'},
     {-1,"",0,'\0'},
-    {2,"M_STREC",M_StartRecord,'r'}
+    {2,"Start Recording",M_StartRecord,'r'}
 };
 
 menu_t  RecordDef =
@@ -1880,7 +1865,7 @@ menu_t  RecordDef =
     &FilesDef,
     RecordMenu,
     M_DrawRecord,
-    55,50,
+    105,60,
     0
 };
 
@@ -1924,8 +1909,8 @@ void M_DrawLoad(void)
 
     for (i = 0;i < load_end; i++)
     {
-        M_DrawSaveLoadBorder(LoadDef.x,LoadDef.y+LINEHEIGHT*i);
-        M_WriteText(LoadDef.x,LoadDef.y+LINEHEIGHT*i,savegamestrings[i]);
+        M_DrawSaveLoadBorder(LoadDef.x+5,LoadDef.y+LINEHEIGHT_SMALL*i);
+        M_WriteText(LoadDef.x,LoadDef.y-1+LINEHEIGHT_SMALL*i,savegamestrings[i]);
     }
 
     M_WriteText(62, 148, "* INDICATES A SAVEGAME THAT WAS");
@@ -1995,14 +1980,14 @@ void M_DrawSave(void)
     V_DrawPatchDirect(72, 28, W_CacheLumpName(DEH_String("M_T_SGME"), PU_CACHE));
     for (i = 0;i < load_end; i++)
     {
-        M_DrawSaveLoadBorder(LoadDef.x,LoadDef.y+LINEHEIGHT*i);
-        M_WriteText(LoadDef.x,LoadDef.y+LINEHEIGHT*i,savegamestrings[i]);
+        M_DrawSaveLoadBorder(LoadDef.x+5,LoadDef.y+LINEHEIGHT_SMALL*i);
+        M_WriteText(LoadDef.x,LoadDef.y-1+LINEHEIGHT_SMALL*i,savegamestrings[i]);
     }
         
     if (saveStringEnter)
     {
         i = M_StringWidth(savegamestrings[saveSlot]);
-        M_WriteText(LoadDef.x + i,LoadDef.y+LINEHEIGHT*saveSlot,"_");
+        M_WriteText(LoadDef.x + i,LoadDef.y-1+LINEHEIGHT_SMALL*saveSlot,"_");
     }
 
     M_WriteText(62, 148, "* INDICATES A SAVEGAME THAT WAS");
@@ -2173,35 +2158,26 @@ void M_DrawReadThis2(void)
 //
 void M_DrawSound(void)
 {
-    int offset = 0;
-
     if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
         V_DrawPatchDirect (65, 15, W_CacheLumpName(DEH_String("M_T_XSET"), PU_CACHE));
     else
-    {
-        offset = 5;
-
         V_DrawPatchDirect (65, 15, W_CacheLumpName(DEH_String("M_SNDSET"), PU_CACHE));
-    }
 
-    if(fsize == 28422764)
-        offset = 3;
-
-    M_DrawThermo(SoundDef.x, SoundDef.y - offset + 2 + LINEHEIGHT * (sfx_vol + 1),
+    M_DrawThermoSmall(SoundDef.x + 95, SoundDef.y + LINEHEIGHT_SMALL * (sfx_vol + 1),
                  16, sfxVolume);
 
-    M_DrawThermo(SoundDef.x, SoundDef.y - offset + 2 + LINEHEIGHT * (music_vol + 1),
+    M_DrawThermoSmall(SoundDef.x + 95, SoundDef.y + LINEHEIGHT_SMALL * (music_vol + 1),
                  16, musicVolume);
 
     if(mus_engine == 1)
-        V_DrawPatch (225, 122, W_CacheLumpName(DEH_String("M_MUSOPL"), PU_CACHE));
+        M_WriteText(SoundDef.x + 212, SoundDef.y + 18, "OPL");
     else
-        V_DrawPatch (225, 122, W_CacheLumpName(DEH_String("M_MUSOGG"), PU_CACHE));
+        M_WriteText(SoundDef.x + 212, SoundDef.y + 18, "OGG");
 
     if(swap_sound_chans)
-        V_DrawPatch (225, 135, W_CacheLumpName(DEH_String("M_MSGON"), PU_CACHE));
+        M_WriteText(SoundDef.x + 220, SoundDef.y + 28, "ON");
     else
-        V_DrawPatch (225, 135, W_CacheLumpName(DEH_String("M_MSGOFF"), PU_CACHE));
+        M_WriteText(SoundDef.x + 212, SoundDef.y + 28, "OFF");
 
     if(mus_engine < 1)
         mus_engine = 1;
@@ -2304,11 +2280,7 @@ void M_DrawMainMenu(void)
 void M_DrawNewGame(void)
 {
     V_DrawPatchDirect(96, 14, W_CacheLumpName(DEH_String("M_NEWG"), PU_CACHE));
-    V_DrawPatchDirect(54, 38, W_CacheLumpName(DEH_String("M_SKILL"), PU_CACHE));
-
-    // HACK: NOT FOR SHARE 1.0 & 1.1 && REG 1.1
-    if(fsize != 4207819 && fsize != 4274218 && fsize != 10396254)
-        V_DrawPatchDirect(48, 127, W_CacheLumpName(DEH_String("M_NMARE"), PU_CACHE));
+    M_WriteText(NewDef.x, NewDef.y - 22, "CHOOSE SKILL LEVEL:");
 }
 
 void M_NewGame(int choice)
@@ -2335,7 +2307,7 @@ int     epi;
 
 void M_DrawEpisode(void)
 {
-    V_DrawPatchDirect(54, 38, W_CacheLumpName(DEH_String("M_EPISOD"), PU_CACHE));
+    V_DrawPatchDirect(75, 38, W_CacheLumpName(DEH_String("M_EPISOD"), PU_CACHE));
 }
 
 void M_VerifyNightmare(int ch)
@@ -2541,8 +2513,6 @@ void M_DrawKeys(void)
 
 void M_DrawScreen(void)
 {
-    int offset = 0;
-
     if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
         V_DrawPatchDirect(58, 15, W_CacheLumpName(DEH_String("M_T_SSET"),
                                                PU_CACHE));
@@ -2550,17 +2520,19 @@ void M_DrawScreen(void)
         V_DrawPatchDirect(58, 15, W_CacheLumpName(DEH_String("M_SCRSET"),
                                                PU_CACHE));
 
-    if(fsize == 28422764)
-        offset = 3;
-
-    M_DrawThermo(OptionsDef.x, OptionsDef.y - offset + LINEHEIGHT * (gamma + 1),
+    M_DrawThermoSmall(ScreenDef.x + 152, ScreenDef.y + LINEHEIGHT_SMALL * (gamma + 1),
                  5, usegamma);
-
+/*
     V_DrawPatchDirect(OptionsDef.x + 175, OptionsDef.y + LINEHEIGHT + 11.5 *
                       screen_detail, W_CacheLumpName(DEH_String
                       (detailNames[detailLevel]), PU_CACHE));
+*/
+    if(detailLevel > 0)
+        M_WriteText(ScreenDef.x + 180, ScreenDef.y + 18, "LOW");
+    else
+        M_WriteText(ScreenDef.x + 177, ScreenDef.y + 18, "HIGH");
 
-    M_DrawThermo(OptionsDef.x, OptionsDef.y -offset + LINEHEIGHT * (scrnsize + 1),
+    M_DrawThermoSmall(ScreenDef.x + 120, ScreenDef.y + LINEHEIGHT_SMALL * (scrnsize + 1),
                  9, screenSize);
 }
 
@@ -2573,96 +2545,96 @@ void M_DrawGame(void)
         V_DrawPatchDirect(70, 0, W_CacheLumpName(DEH_String("M_GMESET"),
                                                PU_CACHE));
 
-    M_WriteText(85, 20, DEH_String("MAP GRID"));
-    M_WriteText(85, 30, DEH_String("MAP ROTATION"));
-    M_WriteText(85, 40, DEH_String("FOLLOW MODE"));
-    M_WriteText(85, 50, DEH_String("STATISTICS"));
-    M_WriteText(85, 60, DEH_String("EXTRA HUD"));
-    M_WriteText(85, 70, DEH_String("MESSAGES"));
-    M_WriteText(85, 80, DEH_String("CROSSHAIR"));
-    M_WriteText(85, 90, DEH_String("JUMPING"));
-    M_WriteText(85, 100, DEH_String("WEAPON CHANGE"));
-    M_WriteText(85, 110, DEH_String("WEAPON RECOIL"));
-    M_WriteText(85, 120, DEH_String("PLAYER THRUST"));
-    M_WriteText(85, 130, DEH_String("RESPAWN MONSTERS"));
-    M_WriteText(85, 140, DEH_String("FAST MONSTERS"));
+    M_WriteText(GameDef.x, GameDef.y - 2, DEH_String("MAP GRID"));
+    M_WriteText(GameDef.x, GameDef.y + 8, DEH_String("MAP ROTATION"));
+    M_WriteText(GameDef.x, GameDef.y + 18, DEH_String("FOLLOW MODE"));
+    M_WriteText(GameDef.x, GameDef.y + 28, DEH_String("STATISTICS"));
+    M_WriteText(GameDef.x, GameDef.y + 38, DEH_String("EXTRA HUD"));
+    M_WriteText(GameDef.x, GameDef.y + 48, DEH_String("MESSAGES"));
+    M_WriteText(GameDef.x, GameDef.y + 58, DEH_String("CROSSHAIR"));
+    M_WriteText(GameDef.x, GameDef.y + 68, DEH_String("JUMPING"));
+    M_WriteText(GameDef.x, GameDef.y + 78, DEH_String("WEAPON CHANGE"));
+    M_WriteText(GameDef.x, GameDef.y + 88, DEH_String("WEAPON RECOIL"));
+    M_WriteText(GameDef.x, GameDef.y + 98, DEH_String("PLAYER THRUST"));
+    M_WriteText(GameDef.x, GameDef.y + 108, DEH_String("RESPAWN MONSTERS"));
+    M_WriteText(GameDef.x, GameDef.y + 118, DEH_String("FAST MONSTERS"));
 
     if(devparm)
     {
         if(aiming_help)
-            M_WriteText(220, 150, DEH_String("ON"));
+            M_WriteText(GameDef.x + 141, GameDef.y + 128, DEH_String("ON"));
         else
-            M_WriteText(220, 150, DEH_String("OFF"));
+            M_WriteText(GameDef.x + 133, GameDef.y + 128, DEH_String("OFF"));
 
-        M_WriteText(85, 150, DEH_String("AIMING HELP"));
+        M_WriteText(GameDef.x, GameDef.y + 128, DEH_String("AIMING HELP"));
     }
 
-    M_WriteText(85, 160, DEH_String("MORE OPTIONS"));
+    M_WriteText(GameDef.x, GameDef.y + 138, DEH_String("MORE OPTIONS"));
 
     if(drawgrid == 1)
-        M_WriteText(220, 20, DEH_String("ON"));
+        M_WriteText(GameDef.x + 141, GameDef.y - 2, DEH_String("ON"));
     else if(drawgrid == 0)
-        M_WriteText(220, 20, DEH_String("OFF"));
+        M_WriteText(GameDef.x + 133, GameDef.y - 2, DEH_String("OFF"));
 
     if(am_rotate == true)
-        M_WriteText(220, 30, DEH_String("ON"));
+        M_WriteText(GameDef.x + 141, GameDef.y + 8, DEH_String("ON"));
     else if(am_rotate == false)
-        M_WriteText(220, 30, DEH_String("OFF"));
+        M_WriteText(GameDef.x + 133, GameDef.y + 8, DEH_String("OFF"));
 
     if(followplayer == 1)
-        M_WriteText(220, 40, DEH_String("ON"));
+        M_WriteText(GameDef.x + 141, GameDef.y + 18, DEH_String("ON"));
     else if(followplayer == 0)
-        M_WriteText(220, 40, DEH_String("OFF"));
+        M_WriteText(GameDef.x + 133, GameDef.y + 18, DEH_String("OFF"));
 
     if(show_stats == 1)
-        M_WriteText(220, 50, DEH_String("ON"));
+        M_WriteText(GameDef.x + 141, GameDef.y + 28, DEH_String("ON"));
     else if (show_stats == 0)
-        M_WriteText(220, 50, DEH_String("OFF"));
+        M_WriteText(GameDef.x + 133, GameDef.y + 28, DEH_String("OFF"));
 
     if(hud)
-        M_WriteText(220, 60, DEH_String("ON"));
+        M_WriteText(GameDef.x + 141, GameDef.y + 38, DEH_String("ON"));
     else
-        M_WriteText(220, 60, DEH_String("OFF"));
+        M_WriteText(GameDef.x + 133, GameDef.y + 38, DEH_String("OFF"));
 
     if(showMessages)
-        M_WriteText(220, 70, DEH_String("ON"));
+        M_WriteText(GameDef.x + 141, GameDef.y + 48, DEH_String("ON"));
     else
-        M_WriteText(220, 70, DEH_String("OFF"));
+        M_WriteText(GameDef.x + 133, GameDef.y + 48, DEH_String("OFF"));
 
     if(crosshair == 1)
-        M_WriteText(220, 80, DEH_String("ON"));
+        M_WriteText(GameDef.x + 141, GameDef.y + 58, DEH_String("ON"));
     else if (crosshair == 0)
-        M_WriteText(220, 80, DEH_String("OFF"));
+        M_WriteText(GameDef.x + 133, GameDef.y + 58, DEH_String("OFF"));
 
     if(jumping)
-        M_WriteText(220, 90, DEH_String("ON"));
+        M_WriteText(GameDef.x + 141, GameDef.y + 68, DEH_String("ON"));
     else
-        M_WriteText(220, 90, DEH_String("OFF"));
+        M_WriteText(GameDef.x + 133, GameDef.y + 68, DEH_String("OFF"));
 
     if(use_vanilla_weapon_change == 1)
-        M_WriteText(220, 100, DEH_String("SLOW"));
+        M_WriteText(GameDef.x + 125, GameDef.y + 78, DEH_String("SLOW"));
     else if(use_vanilla_weapon_change == 0)
-        M_WriteText(220, 100, DEH_String("FAST"));
+        M_WriteText(GameDef.x + 126, GameDef.y + 78, DEH_String("FAST"));
 
     if(d_recoil)
-        M_WriteText(220, 110, DEH_String("ON"));
+        M_WriteText(GameDef.x + 141, GameDef.y + 88, DEH_String("ON"));
     else
-        M_WriteText(220, 110, DEH_String("OFF"));
+        M_WriteText(GameDef.x + 133, GameDef.y + 88, DEH_String("OFF"));
 
     if(d_thrust)
-        M_WriteText(220, 120, DEH_String("ON"));
+        M_WriteText(GameDef.x + 141, GameDef.y + 98, DEH_String("ON"));
     else
-        M_WriteText(220, 120, DEH_String("OFF"));
+        M_WriteText(GameDef.x + 133, GameDef.y + 98, DEH_String("OFF"));
 
     if(respawnparm)
-        M_WriteText(220, 130, DEH_String("ON"));
+        M_WriteText(GameDef.x + 141, GameDef.y + 108, DEH_String("ON"));
     else
-        M_WriteText(220, 130, DEH_String("OFF"));
+        M_WriteText(GameDef.x + 133, GameDef.y + 108, DEH_String("OFF"));
 
     if(fastparm)
-        M_WriteText(220, 140, DEH_String("ON"));
+        M_WriteText(GameDef.x + 141, GameDef.y + 118, DEH_String("ON"));
     else
-        M_WriteText(220, 140, DEH_String("OFF"));
+        M_WriteText(GameDef.x + 133, GameDef.y + 118, DEH_String("OFF"));
 }
 
 void M_DrawGame2(void)
@@ -2674,36 +2646,36 @@ void M_DrawGame2(void)
         V_DrawPatchDirect(70, 0, W_CacheLumpName(DEH_String("M_GMESET"),
                                                PU_CACHE));
 
-    M_WriteText(70, 20, DEH_String("AUTOAIM"));
-    M_WriteText(70, 30, DEH_String("MORE GORE"));
-    M_WriteText(70, 40, DEH_String("PLAYER FOOTSTEPS"));
-    M_WriteText(70, 50, DEH_String("HERETIC FOOTCLIPS"));
-    M_WriteText(70, 60, DEH_String("HERETIC LIQUID SPLASH"));
+    M_WriteText(GameDef.x - 15, GameDef.y - 2, DEH_String("AUTOAIM"));
+    M_WriteText(GameDef.x - 15, GameDef.y + 8, DEH_String("MORE GORE"));
+    M_WriteText(GameDef.x - 15, GameDef.y + 18, DEH_String("PLAYER FOOTSTEPS"));
+    M_WriteText(GameDef.x - 15, GameDef.y + 28, DEH_String("HERETIC FOOTCLIPS"));
+    M_WriteText(GameDef.x - 15, GameDef.y + 38, DEH_String("HERETIC LIQUID SPLASH"));
 
     if(autoaim)
-        M_WriteText(230, 20, DEH_String("ON"));
+        M_WriteText(GameDef.x + 153, GameDef.y - 2, DEH_String("ON"));
     else
-        M_WriteText(230, 20, DEH_String("OFF"));
+        M_WriteText(GameDef.x + 145, GameDef.y - 2, DEH_String("OFF"));
 
     if(d_maxgore)
-        M_WriteText(230, 30, DEH_String("ON"));
+        M_WriteText(GameDef.x + 153, GameDef.y + 8, DEH_String("ON"));
     else
-        M_WriteText(230, 30, DEH_String("OFF"));
+        M_WriteText(GameDef.x + 145, GameDef.y + 8, DEH_String("OFF"));
 
     if(d_footstep)
-        M_WriteText(230, 40, DEH_String("ON"));
+        M_WriteText(GameDef.x + 153, GameDef.y + 18, DEH_String("ON"));
     else
-        M_WriteText(230, 40, DEH_String("OFF"));
+        M_WriteText(GameDef.x + 145, GameDef.y + 18, DEH_String("OFF"));
 
     if(d_footclip)
-        M_WriteText(230, 50, DEH_String("ON"));
+        M_WriteText(GameDef.x + 153, GameDef.y + 28, DEH_String("ON"));
     else
-        M_WriteText(230, 50, DEH_String("OFF"));
+        M_WriteText(GameDef.x + 145, GameDef.y + 28, DEH_String("OFF"));
 
     if(d_splash)
-        M_WriteText(230, 60, DEH_String("ON"));
+        M_WriteText(GameDef.x + 153, GameDef.y + 38, DEH_String("ON"));
     else
-        M_WriteText(230, 60, DEH_String("OFF"));
+        M_WriteText(GameDef.x + 145, GameDef.y + 38, DEH_String("OFF"));
 }
 
 void DetectState(void)
@@ -2906,6 +2878,10 @@ void M_DrawCheats(void)
 
 void M_DrawRecord(void)
 {
+    char buffer_map[2];
+
+    M_snprintf(buffer_map, sizeof(buffer_map), "%d", rmap);
+
     int offset = 0;
 
     V_DrawPatchDirect(58, 15, W_CacheLumpName(DEH_String("M_T_DREC"),
@@ -2919,89 +2895,57 @@ void M_DrawRecord(void)
         fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
     {
         if(repi == 1)
-            V_DrawPatch (55, 68, W_CacheLumpName(DEH_String("M_R_E1M"), PU_CACHE));
+            M_WriteText(RecordDef.x, RecordDef.y + 8, "E1M");
         else if(repi == 2)
-            V_DrawPatch (55, 68, W_CacheLumpName(DEH_String("M_R_E2M"), PU_CACHE));
+            M_WriteText(RecordDef.x, RecordDef.y + 8, "E2M");
         else if(repi == 3)
-            V_DrawPatch (55, 68, W_CacheLumpName(DEH_String("M_R_E3M"), PU_CACHE));
+            M_WriteText(RecordDef.x, RecordDef.y + 8, "E3M");
         else if(repi == 4)
-            V_DrawPatch (55, 68, W_CacheLumpName(DEH_String("M_R_E4M"), PU_CACHE));
+            M_WriteText(RecordDef.x, RecordDef.y + 8, "E4M");
 
-        if(rmap == 1)
-                V_DrawPatch (98, 68, W_CacheLumpName(DEH_String("M_R_NUM1"),
-                PU_CACHE));
-        else if(rmap == 2)
-                V_DrawPatch (98, 68, W_CacheLumpName(DEH_String("M_R_NUM2"),
-                PU_CACHE));
-        else if(rmap == 3)
-                V_DrawPatch (98, 68, W_CacheLumpName(DEH_String("M_R_NUM3"),
-                PU_CACHE));
-        else if(rmap == 4)
-                V_DrawPatch (98, 68, W_CacheLumpName(DEH_String("M_R_NUM4"), 
-                PU_CACHE));
-        else if(rmap == 5)
-                V_DrawPatch (98, 68, W_CacheLumpName(DEH_String("M_R_NUM5"),
-                PU_CACHE));
-        else if(rmap == 6)
-                V_DrawPatch (98, 68, W_CacheLumpName(DEH_String("M_R_NUM6"),
-                PU_CACHE));
-        else if(rmap == 7)
-                V_DrawPatch (98, 68, W_CacheLumpName(DEH_String("M_R_NUM7"), 
-                PU_CACHE));
-        else if(rmap == 8)
-                V_DrawPatch (98, 68, W_CacheLumpName(DEH_String("M_R_NUM8"),
-                PU_CACHE));
-        else if(rmap == 9)
-                V_DrawPatch (98, 68, W_CacheLumpName(DEH_String("M_R_NUM9"),
-                PU_CACHE));
+        if(repi > 1)
+            M_WriteText(RecordDef.x + 25, RecordDef.y + 8, buffer_map);
+        else
+            M_WriteText(RecordDef.x + 22, RecordDef.y + 8, buffer_map);
     }
     else if(fsize != 12361532)
     {
+        if(rmap > 9 && rmap < 20)
+            offset = 3;
+        else
+            offset = 0;
+
         if(rmap < 10)
-            V_DrawPatch (55, 68, W_CacheLumpName(DEH_String("M_R_MAP0"),
-            PU_CACHE));
+            M_WriteText(RecordDef.x, RecordDef.y + 8, "MAP0");
         else if(rmap < 20)
-            V_DrawPatch (55, 68, W_CacheLumpName(DEH_String("M_R_MAP1"),
-            PU_CACHE));
+            M_WriteText(RecordDef.x, RecordDef.y + 8, "MAP1");
         else if(rmap < 30)
-            V_DrawPatch (55, 68, W_CacheLumpName(DEH_String("M_R_MAP2"),
-            PU_CACHE));
+            M_WriteText(RecordDef.x, RecordDef.y + 8, "MAP2");
         else if(rmap < 40)
-            V_DrawPatch (55, 68, W_CacheLumpName(DEH_String("M_R_MAP3"),
-            PU_CACHE));
+            M_WriteText(RecordDef.x, RecordDef.y + 8, "MAP3");
 
         if(fsize != 19321722 && fsize != 28422764)
         {
             if(rmap == 1 || rmap == 11 || rmap == 21 || rmap == 31)
-                V_DrawPatch (115, 68, W_CacheLumpName(DEH_String("M_R_NUM1"),
-                PU_CACHE));
+                M_WriteText(RecordDef.x + 33 - offset, RecordDef.y + 8, "1");
             else if(rmap == 2 || rmap == 12 || rmap == 22 || rmap == 32)
-                V_DrawPatch (115, 68, W_CacheLumpName(DEH_String("M_R_NUM2"),
-                PU_CACHE));
+                M_WriteText(RecordDef.x + 33 - offset, RecordDef.y + 8, "2");
             else if(rmap == 3 || rmap == 13 || rmap == 23)
-                V_DrawPatch (115, 68, W_CacheLumpName(DEH_String("M_R_NUM3"),
-                PU_CACHE));
+                M_WriteText(RecordDef.x + 33 - offset, RecordDef.y + 8, "3");
             else if(rmap == 4 || rmap == 14 || rmap == 24)
-                V_DrawPatch (115, 68, W_CacheLumpName(DEH_String("M_R_NUM4"),
-                PU_CACHE));
+                M_WriteText(RecordDef.x + 33 - offset, RecordDef.y + 8, "4");
             else if(rmap == 5 || rmap == 15 || rmap == 25)
-                V_DrawPatch (115, 68, W_CacheLumpName(DEH_String("M_R_NUM5"),
-                PU_CACHE));
+                M_WriteText(RecordDef.x + 33 - offset, RecordDef.y + 8, "5");
             else if(rmap == 6 || rmap == 16 || rmap == 26)
-                V_DrawPatch (115, 68, W_CacheLumpName(DEH_String("M_R_NUM6"),
-                PU_CACHE));
+                M_WriteText(RecordDef.x + 33 - offset, RecordDef.y + 8, "6");
             else if(rmap == 7 || rmap == 17 || rmap == 27)
-                V_DrawPatch (115, 68, W_CacheLumpName(DEH_String("M_R_NUM7"),
-                PU_CACHE));
+                M_WriteText(RecordDef.x + 33 - offset, RecordDef.y + 8, "7");
             else if(rmap == 8 || rmap == 18 || rmap == 28)
-                V_DrawPatch (115, 68, W_CacheLumpName(DEH_String("M_R_NUM8"),
-                PU_CACHE));
+                M_WriteText(RecordDef.x + 33 - offset, RecordDef.y + 8, "8");
             else if(rmap == 9 || rmap == 19 || rmap == 29)
-                V_DrawPatch (115, 68, W_CacheLumpName(DEH_String("M_R_NUM9"),
-                PU_CACHE));
+                M_WriteText(RecordDef.x + 33 - offset, RecordDef.y + 8, "9");
             else if(rmap == 10 || rmap == 20 || rmap == 30)
-                V_DrawPatch (115, 68, W_CacheLumpName(DEH_String("M_R_NUM0"),
-                PU_CACHE));
+                M_WriteText(RecordDef.x + 33 - offset, RecordDef.y + 8, "0");
         }
         else
         {
@@ -3063,20 +3007,15 @@ void M_DrawRecord(void)
     }
 
     if(rskill == 0)
-        V_DrawPatch (55, 115, W_CacheLumpName(DEH_String("M_JKILL"), PU_CACHE));
+        M_WriteText(RecordDef.x, RecordDef.y + 38, "I'm too young to die.");
     else if(rskill == 1)
-        V_DrawPatch (55, 115, W_CacheLumpName(DEH_String("M_ROUGH"), PU_CACHE));
+        M_WriteText(RecordDef.x, RecordDef.y + 38, "Hey, not too rough.");
     else if(rskill == 2)
-        V_DrawPatch (55, 115, W_CacheLumpName(DEH_String("M_HURT"), PU_CACHE));
+        M_WriteText(RecordDef.x, RecordDef.y + 38, "Hurt me plenty.");
     else if(rskill == 3)
-        V_DrawPatch (55, 115, W_CacheLumpName(DEH_String("M_ULTRA"), PU_CACHE));
-
-    // HACK: NOT FOR SHARE 1.0 & 1.1 && REG 1.1
-    if(fsize != 4207819 && fsize != 4274218 && fsize != 10396254)
-    {
-        if(rskill == 4)
-            V_DrawPatch (55, 115, W_CacheLumpName(DEH_String("M_NMARE"), PU_CACHE));
-    }
+        M_WriteText(RecordDef.x, RecordDef.y + 38, "Ultra-Violence.");
+    else if(rskill == 4)
+        M_WriteText(RecordDef.x, RecordDef.y + 38, "Nightmare!");
 }
 
 void M_Options(int choice)
@@ -3384,6 +3323,32 @@ M_DrawThermo
                       W_CacheLumpName(DEH_String("M_THERMO"), PU_CACHE));
 }
 
+void
+M_DrawThermoSmall
+( int	x,
+  int	y,
+  int	thermWidth,
+  int	thermDot )
+{
+    int         xx;
+    int         yy;
+    int         i;
+
+    xx = x;
+    yy = y + 6; // +6 to y coordinate
+    V_DrawPatch(xx + 3, yy - 18, W_CacheLumpName(DEH_String("M_SLIDEL"), PU_CACHE));
+    xx += 8;
+    for (i=0;i<thermWidth;i++)
+    {
+        V_DrawPatch(xx, yy - 18, W_CacheLumpName(DEH_String("M_SLIDEM"), PU_CACHE));
+        xx += 8;
+    }
+    V_DrawPatch(xx, yy - 18, W_CacheLumpName(DEH_String("M_SLIDER"), PU_CACHE));
+
+    // +2 to initial y coordinate
+    V_DrawPatch((x + 9) + thermDot * 8, y - 12,
+                      W_CacheLumpName(DEH_String("M_SLIDEO"), PU_CACHE));
+}
 
 
 void
@@ -3391,7 +3356,7 @@ M_DrawEmptyCell
 ( menu_t*        menu,
   int            item )
 {
-    V_DrawPatchDirect(menu->x - 10, menu->y + item * LINEHEIGHT - 1,
+    V_DrawPatchDirect(menu->x - 10, menu->y + item * LINEHEIGHT_SMALL - 1,
                       W_CacheLumpName(DEH_String("M_CELL1"), PU_CACHE));
 }
 
@@ -3400,7 +3365,7 @@ M_DrawSelCell
 ( menu_t*        menu,
   int            item )
 {
-    V_DrawPatchDirect(menu->x - 10, menu->y + item * LINEHEIGHT - 1,
+    V_DrawPatchDirect(menu->x - 10, menu->y + item * LINEHEIGHT_SMALL - 1,
                       W_CacheLumpName(DEH_String("M_CELL2"), PU_CACHE));
 }
 
@@ -4026,6 +3991,20 @@ void M_Drawer (void)
 
     for (i=0;i<max;i++)
     {
+        menuitem_t *item = &(currentMenu->menuitems[i]);
+        name = DEH_String(item->name);
+
+        if(*name)
+            M_WriteText(x, y - 2, item->name);
+
+        y += LINEHEIGHT_SMALL;
+
+        // DRAW SKULL
+        V_DrawPatch(x + CURSORXOFF_SMALL, currentMenu->y - 5 +
+                    itemOn*LINEHEIGHT_SMALL,
+                    W_CacheLumpName(DEH_String(skullNameSmall[whichSkull]),
+                                          PU_CACHE));
+/*
         name = DEH_String(currentMenu->menuitems[i].name);
 
         if (name[0])
@@ -4045,6 +4024,7 @@ void M_Drawer (void)
                         W_CacheLumpName(DEH_String(skullNameSmall[whichSkull]),
                                               PU_CACHE));
         }
+
         else if(currentMenu)
         {
             y += LINEHEIGHT;
@@ -4054,6 +4034,7 @@ void M_Drawer (void)
                               W_CacheLumpName(DEH_String(skullName[whichSkull]),
                                               PU_CACHE));
         }
+*/
     }
 }
 
@@ -4793,8 +4774,6 @@ void M_Topo(int choice)
     DetectState();
 }
 
-boolean map_flag = false;
-
 void M_Rift(int choice)
 {
     if(!netgame && !demoplayback && gamestate == GS_LEVEL
@@ -5428,12 +5407,8 @@ void M_DrawKeyBindings(void)
     M_WriteText(40, 120, DEH_String("JUMP"));
     M_WriteText(40, 130, DEH_String("RUN"));
     M_WriteText(40, 140, DEH_String("CONSOLE"));
-
-    if(devparm)
-        M_WriteText(40, 150, DEH_String("AIMING HELP"));
-
-    M_WriteText(40, 160, DEH_String("CLEAR ALL CONTROLS"));
-    M_WriteText(40, 170, DEH_String("RESET TO DEFAULTS"));
+    M_WriteText(40, 150, DEH_String("CLEAR ALL CONTROLS"));
+    M_WriteText(40, 160, DEH_String("RESET TO DEFAULTS"));
 
     for (i = 0; i < 14; i++)
     {
@@ -5490,26 +5465,32 @@ void M_Controls(int choice)
 
 void M_DrawControls(void)
 {
-    if(mouselook == 0)
-    V_DrawPatch(190, 101,
-                      W_CacheLumpName(DEH_String("M_MSGOFF"), PU_CACHE));
-    else if(mouselook == 1)
-    V_DrawPatch(190, 104,
-                      W_CacheLumpName(DEH_String("M_NORMAL"), PU_CACHE));
-    else if(mouselook == 2)
-    V_DrawPatch(190, 104,
-                      W_CacheLumpName(DEH_String("M_INVRSE"), PU_CACHE));
+    if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
+        V_DrawPatchDirect(48, 15, W_CacheLumpName(DEH_String("M_T_CSET"),
+                                               PU_CACHE));
+    else
+        V_DrawPatchDirect(48, 15, W_CacheLumpName(DEH_String("M_CTLSET"),
+                                               PU_CACHE));
 
-    M_DrawThermo(OptionsDef.x-10,OptionsDef.y-50+LINEHEIGHT*(mousesens+1),
+    if(mouselook == 0)
+        M_WriteText(ControlsDef.x + 276, ControlsDef.y + 38, "OFF");
+    else if(mouselook == 1)
+        M_WriteText(ControlsDef.x + 251, ControlsDef.y + 38, "NORMAL");
+    else if(mouselook == 2)
+        M_WriteText(ControlsDef.x + 250, ControlsDef.y + 38, "INVERSE");
+
+    M_WriteText(ControlsDef.x, ControlsDef.y - 12, "SPEEDS:");
+
+    M_DrawThermoSmall(ControlsDef.x + 55,ControlsDef.y + LINEHEIGHT_SMALL*(mousesens+1),
                  29,forwardmove-19);
 
-    M_DrawThermo(OptionsDef.x-10,OptionsDef.y-50+LINEHEIGHT*(turnsens+1),
+    M_DrawThermoSmall(ControlsDef.x + 239,ControlsDef.y + LINEHEIGHT_SMALL*(turnsens+1),
                  6,turnspeed-5);
 
-    M_DrawThermo(OptionsDef.x-10,OptionsDef.y-50+LINEHEIGHT*(strafesens+1),
+    M_DrawThermoSmall(ControlsDef.x + 151,ControlsDef.y + LINEHEIGHT_SMALL*(strafesens+1),
                  17,sidemove-16);
 
-    M_DrawThermo(OptionsDef.x-5,OptionsDef.y-50+LINEHEIGHT*(mousespeed+1),
+    M_DrawThermoSmall(ControlsDef.x + 199,ControlsDef.y + LINEHEIGHT_SMALL*(mousespeed+1),
                  11,mspeed);
 }
 
@@ -6114,14 +6095,14 @@ void M_DrawSystem(void)
         V_DrawPatch (62, 20, W_CacheLumpName(DEH_String("M_SYSSET"), PU_CACHE));
 
     if(display_fps)
-        V_DrawPatch (244, 85, W_CacheLumpName(DEH_String("M_MSGON"), PU_CACHE));
+        M_WriteText(SystemDef.x + 118, SystemDef.y - 2, "ON");
     else
-        V_DrawPatch (244, 85, W_CacheLumpName(DEH_String("M_MSGOFF"), PU_CACHE));
+        M_WriteText(SystemDef.x + 110, SystemDef.y - 2, "OFF");
 
     if(display_ticker)
-        V_DrawPatch (244, 101, W_CacheLumpName(DEH_String("M_MSGON"), PU_CACHE));
+        M_WriteText(SystemDef.x + 118, SystemDef.y + 8, "ON");
     else
-        V_DrawPatch (244, 101, W_CacheLumpName(DEH_String("M_MSGOFF"), PU_CACHE));
+        M_WriteText(SystemDef.x + 110, SystemDef.y + 8, "OFF");
 }
 
 void M_HUD(int choice)
@@ -6253,19 +6234,19 @@ void M_DrawDebug(void)
         V_DrawPatch (67, 15, W_CacheLumpName(DEH_String("M_DBGSET"), PU_CACHE));
 
     if(coordinates_info)
-        V_DrawPatch (234, 75, W_CacheLumpName(DEH_String("M_MSGON"), PU_CACHE));
+        M_WriteText(DebugDef.x + 177, DebugDef.y - 2, "ON");
     else
-        V_DrawPatch (234, 75, W_CacheLumpName(DEH_String("M_MSGOFF"), PU_CACHE));
+        M_WriteText(DebugDef.x + 169, DebugDef.y - 2, "OFF");
 
     if(timer_info)
-        V_DrawPatch (234, 92, W_CacheLumpName(DEH_String("M_MSGON"), PU_CACHE));
+        M_WriteText(DebugDef.x + 177, DebugDef.y + 8, "ON");
     else
-        V_DrawPatch (234, 92, W_CacheLumpName(DEH_String("M_MSGOFF"), PU_CACHE));
+        M_WriteText(DebugDef.x + 169, DebugDef.y + 8, "OFF");
 
     if(version_info)
-        V_DrawPatch (234, 108, W_CacheLumpName(DEH_String("M_MSGON"), PU_CACHE));
+        M_WriteText(DebugDef.x + 177, DebugDef.y + 18, "ON");
     else
-        V_DrawPatch (234, 108, W_CacheLumpName(DEH_String("M_MSGOFF"), PU_CACHE));
+        M_WriteText(DebugDef.x + 169, DebugDef.y + 18, "OFF");
 }
 
 // jff 2/01/98 kill all monsters

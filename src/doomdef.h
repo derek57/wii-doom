@@ -424,7 +424,7 @@ typedef struct
     // 0 = no cursor here, 1 = ok, 2 = arrows ok
     short        status;
     
-    char        name[10];
+    char         *name;
     
     // choice = menu item #.
     // if status = 2,
