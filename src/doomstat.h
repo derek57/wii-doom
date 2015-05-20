@@ -283,6 +283,7 @@ extern  boolean         d_footstep;
 extern  boolean         d_footclip;
 extern  boolean         d_splash;
 
+extern  int             d_swirl;
 extern  int             autoaim;
 
 void A_MoreGibs(mobj_t* actor);

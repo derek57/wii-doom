@@ -48,5 +48,6 @@ boolean         d_footstep = false;
 boolean         d_footclip = false;
 boolean         d_splash = false;
 
+int             d_swirl;
 int             autoaim = false;
 

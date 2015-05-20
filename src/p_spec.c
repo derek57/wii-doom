@@ -1165,7 +1165,13 @@ void P_UpdateSpecials (void)
             if (anim->istexture)
                 texturetranslation[i] = pic;
             else
-                flattranslation[i] = pic;
+            {
+//                flattranslation[i] = pic;
+                  flattranslation[i] = d_swirl ? -1 : pic;
+                  // sf: > 65535 : swirly hack 
+                  if(anim->speed > 65535 || anim->numpics==1)
+                      flattranslation[i] = -1;
+            }
         }
     }
 
