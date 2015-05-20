@@ -43,6 +43,27 @@
 
 #define STOPSPEED               0x1000
 #define FRICTION                0xe800
+#define FRICTION_FLY            0xeb00
+
+
+static fixed_t FloatBobOffsets[64] = {
+    0, 51389, 102283, 152192,
+    200636, 247147, 291278, 332604,
+    370727, 405280, 435929, 462380,
+    484378, 501712, 514213, 521763,
+    524287, 521763, 514213, 501712,
+    484378, 462380, 435929, 405280,
+    370727, 332604, 291278, 247147,
+    200636, 152192, 102283, 51389,
+    -1, -51390, -102284, -152193,
+    -200637, -247148, -291279, -332605,
+    -370728, -405281, -435930, -462381,
+    -484380, -501713, -514215, -521764,
+    -524288, -521764, -514214, -501713,
+    -484379, -462381, -435930, -405280,
+    -370728, -332605, -291279, -247148,
+    -200637, -152193, -102284, -51389
+};
 
 void G_PlayerReborn (int player);
 void P_SpawnMapThing (mapthing_t* mthing);
@@ -232,8 +253,11 @@ void P_XYMovement (mobj_t* mo)
     if (mo->flags & (MF_MISSILE | MF_SKULLFLY) )
         return;         // no friction for missiles ever
                 
-    if (mo->z > mo->floorz)
-        return;                // no friction when airborne
+    if (mo->z > mo->floorz && !(mo->flags2 & MF2_FLY)
+        && !(mo->flags2 & MF2_ONMOBJ))
+    {                           // No friction when falling
+        return;
+    }
 
     if (mo->flags & MF_CORPSE)
     {
@@ -266,8 +290,17 @@ void P_XYMovement (mobj_t* mo)
     }
     else
     {
-        mo->momx = FixedMul (mo->momx, FRICTION);
-        mo->momy = FixedMul (mo->momy, FRICTION);
+        if (mo->flags2 & MF2_FLY && !(mo->z <= mo->floorz)
+            && !(mo->flags2 & MF2_ONMOBJ))
+        {
+            mo->momx = FixedMul(mo->momx, FRICTION_FLY);
+            mo->momy = FixedMul(mo->momy, FRICTION_FLY);
+        }
+        else
+        {
+            mo->momx = FixedMul (mo->momx, FRICTION);
+            mo->momy = FixedMul (mo->momy, FRICTION);
+        }
     }
 }
 
@@ -311,6 +344,11 @@ void P_ZMovement (mobj_t* mo)
         
     }
     
+    if (mo->player && mo->flags2 & MF2_FLY && !(mo->z <= mo->floorz)
+        && leveltime & 2)
+    {
+        mo->z += finesine[(FINEANGLES / 20 * leveltime >> 2) & FINEMASK];
+    }
     // clip movement
     if (mo->z <= mo->floorz)
     {
@@ -349,13 +387,13 @@ void P_ZMovement (mobj_t* mo)
         
         if (mo->momz < 0)
         {
-            if(jumping)
+            if (jumping)
             {
                 if (mo->player)
                     mo->player->jumpTics = 7;       // delay any jumping for a short time
             }
             if (mo->player
-                && mo->momz < -GRAVITY*8)        
+                && mo->momz < -GRAVITY*8 && !(mo->flags2 & MF2_FLY))        
             {
                 // Squat down.
                 // Decrease viewheight for a moment
@@ -506,6 +544,8 @@ P_NightmareRespawn (mobj_t* mobj)
 //
 void P_MobjThinker (mobj_t* mobj)
 {
+    mobj_t *onmo;
+
     // momentum movement
     if (mobj->momx
         || mobj->momy
@@ -517,16 +557,56 @@ void P_MobjThinker (mobj_t* mobj)
         if (mobj->thinker.function.acv == (actionf_v) (-1))
             return;                // mobj was removed
     }
-    if ( (mobj->z != mobj->floorz)
-         || mobj->momz )
-    {
-        P_ZMovement (mobj);
-        
-        // FIXME: decent NOP/NULL/Nil function pointer please.
-        if (mobj->thinker.function.acv == (actionf_v) (-1))
-            return;                // mobj was removed
-    }
 
+    if (mobj->flags2 & MF2_FLOATBOB)
+    {                           // Floating item bobbing motion
+        mobj->z = mobj->floorz + FloatBobOffsets[(mobj->health++) & 63];
+    }
+    else if ( (mobj->z != mobj->floorz) || mobj->momz )
+    {                           // Handle Z momentum and gravity
+        if (mobj->flags2 & MF2_PASSMOBJ)
+        {
+            if (!(onmo = P_CheckOnmobj(mobj)))
+            {
+                P_ZMovement(mobj);
+            }
+            else
+            {
+                if (mobj->player && mobj->momz < 0)
+                {
+                    mobj->flags2 |= MF2_ONMOBJ;
+                    mobj->momz = 0;
+                }
+/*
+                if (mobj->player && (onmo->player || onmo->type == MT_POD))
+                {
+                    mobj->momx = onmo->momx;
+                    mobj->momy = onmo->momy;
+                    if (onmo->z < onmo->floorz)
+                    {
+                        mobj->z += onmo->floorz - onmo->z;
+                        if (onmo->player)
+                        {
+                            onmo->player->viewheight -=
+                                onmo->floorz - onmo->z;
+                            onmo->player->deltaviewheight =
+                                (VIEWHEIGHT - onmo->player->viewheight) >> 3;
+                        }
+                        onmo->z = onmo->floorz;
+                    }
+                }
+*/
+            }
+        }
+        else
+        {
+            P_ZMovement(mobj);
+        }
+        if (mobj->thinker.function.acv == (actionf_v) (-1))
+        {                       // mobj was removed
+            return;
+        }
+    }
     
     // cycle through states,
     // calling action functions at transitions
@@ -941,6 +1021,11 @@ void P_SpawnMapThing (mapthing_t* mthing)
     
     mobj = P_SpawnMobj (x,y,z, i);
     mobj->spawnpoint = *mthing;
+
+    if (mobj->flags2 & MF2_FLOATBOB)
+    {                           // Seed random starting index for bobbing motion
+        mobj->health = P_Random();
+    }
 
     if (mobj->tics > 0)
         mobj->tics = 1 + (P_Random () % mobj->tics);

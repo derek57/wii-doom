@@ -58,13 +58,7 @@ extern int key_left;
 extern int key_up;
 extern int key_down;
 extern int key_strafeleft;
-extern int key_fire;
-extern int key_use;
-extern int key_jump;
-extern int key_run;
 extern int key_invright;
-extern int key_flyup;
-extern int key_flydown;
 extern int key_useartifact;
 
 //
@@ -113,14 +107,16 @@ default_t        doom_defaults_list[] =
     CONFIG_VARIABLE_INT                (footsteps),
     CONFIG_VARIABLE_INT                (footclip),
     CONFIG_VARIABLE_INT                (splash),
-    CONFIG_VARIABLE_INT                (key_fire),
-    CONFIG_VARIABLE_INT                (key_use),
+    CONFIG_VARIABLE_INT                (key_shoot),
+    CONFIG_VARIABLE_INT                (key_open),
     CONFIG_VARIABLE_INT                (key_menu),
     CONFIG_VARIABLE_INT                (key_weapon_left),
     CONFIG_VARIABLE_INT                (key_automap),
     CONFIG_VARIABLE_INT                (key_weapon_right),
     CONFIG_VARIABLE_INT                (key_automap_zoom_in),
     CONFIG_VARIABLE_INT                (key_automap_zoom_out),
+    CONFIG_VARIABLE_INT                (key_flyup),
+    CONFIG_VARIABLE_INT                (key_flydown),
     CONFIG_VARIABLE_INT                (key_jump),
     CONFIG_VARIABLE_INT                (key_run),
     CONFIG_VARIABLE_INT                (key_console),

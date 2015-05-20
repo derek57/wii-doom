@@ -144,6 +144,12 @@ typedef enum
 
 } ammotype_t;
 
+typedef enum
+{
+    arti_none,
+    arti_fly,
+    NUMARTIFACTS
+} artitype_t;
 
 // Power up artifacts.
 typedef enum
@@ -154,6 +160,7 @@ typedef enum
     pw_ironfeet,
     pw_allmap,
     pw_infrared,
+    pw_flight,
     NUMPOWERS
     
 } powertype_t;
@@ -170,7 +177,8 @@ typedef enum
     INVULNTICS        = (30*TICRATE),
     INVISTICS        = (60*TICRATE),
     INFRATICS        = (120*TICRATE),
-    IRONTICS        = (60*TICRATE)
+    IRONTICS        = (60*TICRATE),
+    FLIGHTTICS      = (60*TICRATE)
     
 } powerduration_t;
 
@@ -353,10 +361,17 @@ typedef enum
 #define SBARHEIGHT      (32 * SCREENSCALE)
 
 #define MF2_LOGRAV                0x00000001  // alternate gravity setting
+#define MF2_FLY			0x00000010  // fly mode is active
 #define MF2_FOOTCLIP                0x00000020  // if feet are allowed to be clipped
 #define MF2_NOTELEPORT                0x00000080  // does not teleport
+#define MF2_ONMOBJ		0x00000800  // mobj is resting on top of another
+                                            // mobj
+#define MF2_PASSMOBJ		0x00001000  // Enable z block checking.  If on,
+                                            // this flag will allow the mobj to
+                                            // pass over/under other mobjs.
 #define MF2_CANNOTPUSH                0x00002000  // cannot push other pushable mobjs
 #define MF2_FEETARECLIPPED        0x00004000  // a mobj's feet are now being cut
+#define MF2_FLOATBOB		0x00080000  // use float bobbing z movement
 
 extern boolean sd;
 extern boolean usb;

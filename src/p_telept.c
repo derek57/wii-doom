@@ -57,6 +57,7 @@ EV_Teleport
     fixed_t      oldx;
     fixed_t      oldy;
     fixed_t      oldz;
+    fixed_t      aboveFloor = thing->z - thing->floorz;
 
     if (thing->flags2 & MF2_NOTELEPORT)
     {
@@ -115,8 +116,20 @@ EV_Teleport
 
                 if (thing->player)
                 {
-                    thing->player->viewz = thing->z+thing->player->viewheight;
-                    thing->player->lookdir = 0;
+                    if (thing->player->powers[pw_flight] && aboveFloor)
+                    {
+                        thing->z = thing->floorz + aboveFloor;
+                        if (thing->z + thing->height > thing->ceilingz)
+                        {
+                            thing->z = thing->ceilingz - thing->height;
+                        }
+                        thing->player->viewz = thing->z + thing->player->viewheight;
+                    }
+                    else
+                    {
+                        thing->player->viewz = thing->z + thing->player->viewheight;
+                        thing->player->lookdir = 0;
+                    }
                 }
 
                 // spawn teleport fog at source and destination

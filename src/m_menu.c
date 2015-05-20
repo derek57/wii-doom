@@ -863,7 +863,7 @@ int                        timer_info = 0;
 int                        version_info = 0;
 int                        fps = 0;              // calculating the frames per second
 int                        key_controls_start_in_cfg_at_pos = 31; // ACTUALLY IT'S +2
-int                        key_controls_end_in_cfg_at_pos = 43;   // ACTUALLY IT'S +2
+int                        key_controls_end_in_cfg_at_pos = 45;   // ACTUALLY IT'S +2
 int                        crosshair = 0;
 int                        show_stats = 0;
 int                        tracknum = 1;
@@ -1072,6 +1072,7 @@ void M_ItemsG(int choice);
 void M_ItemsH(int choice);
 void M_ItemsI(int choice);
 void M_ItemsJ(int choice);
+void M_ItemsK(int choice);
 void M_Topo(int choice);
 void M_Rift(int choice);
 void M_RiftNow(int choice);
@@ -1108,7 +1109,6 @@ void M_DrawControls(void);
 void M_DrawSystem(void);
 void M_DrawGame(void);
 void M_DrawGame2(void);
-void M_DrawGameDev(void);
 void M_DrawDebug(void);
 void M_DrawSound(void);
 void M_DrawCheats(void);
@@ -1386,6 +1386,7 @@ enum
     items8,
     items9,
     items0,
+    itemsf,
     items_end
 } items_e;
 
@@ -1401,7 +1402,8 @@ menuitem_t ItemsMenu[]=
     {2,"",M_ItemsB,'7'},
     {2,"",M_ItemsF,'8'},
     {2,"",M_ItemsG,'9'},
-    {2,"",M_ItemsJ,'0'}
+    {2,"",M_ItemsJ,'0'},
+    {2,"",M_ItemsK,'f'}
 };
 
 menu_t  ItemsDef =
@@ -1410,7 +1412,7 @@ menu_t  ItemsDef =
     &CheatsDef,
     ItemsMenu,
     M_DrawItems,
-    80,57,
+    80,52,
     0
 };
 
@@ -1591,6 +1593,8 @@ enum
     keybindings_lefttrigger,
     keybindings_righttrigger,
     keybindings_fire,
+    keybindings_flyup,
+    keybindings_flydown,
     keybindings_jump,
     keybindings_run,
     keybindings_console,
@@ -1614,6 +1618,8 @@ menuitem_t KeyBindingsMenu[]=
     {5,"",M_KeyBindingsSetKey,9},
     {5,"",M_KeyBindingsSetKey,10},
     {5,"",M_KeyBindingsSetKey,11},
+    {5,"",M_KeyBindingsSetKey,12},
+    {5,"",M_KeyBindingsSetKey,13},
     {5,"",M_KeyBindingsClearAll,'c'},
     {5,"",M_KeyBindingsReset,'r'}
 };
@@ -1624,7 +1630,7 @@ menu_t  KeyBindingsDef =
     &ControlsDef,
     KeyBindingsMenu,
     M_DrawKeyBindings,
-    45,32,
+    45,22,
     0
 };
 
@@ -1726,55 +1732,6 @@ menu_t  GameDef2 =
     GameMenu2,
     M_DrawGame2,
     70,22,
-    0
-};
-
-enum
-{
-    gamedev_mapgrid,
-    gamedev_maprotation,
-    gamedev_followmode,
-    gamedev_statistics,
-    gamedev_aiminghelp,
-    gamedev_messages,
-    gamedev_crosshair,
-    gamedev_jumping,
-    gamedev_weapon,
-    gamedev_recoil,
-    gamedev_thrust,
-    gamedev_respawn,
-    gamedev_fast,
-    gamedev_empty,
-    gamedev_game2,
-    gamedev_end
-} gamedev_e;
-
-menuitem_t GameMenuDev[]=
-{
-    {2,"",M_MapGrid,'g'},
-    {2,"",M_MapRotation,'r'},
-    {2,"",M_FollowMode,'f'},
-    {2,"",M_Statistics,'s'},
-    {2,"",M_ChangeMessages,'m'},
-    {2,"",M_AimingHelp,'h'},
-    {2,"",M_Crosshair,'x'},
-    {2,"",M_Jumping,'j'},
-    {2,"",M_WeaponChange,'w'},
-    {2,"",M_WeaponRecoil,'c'},
-    {2,"",M_PlayerThrust,'p'},
-    {2,"",M_RespawnMonsters,'t'},
-    {2,"",M_FastMonsters,'d'},
-    {-1,"",0,'\0'},
-    {2,"",M_Game2,'n'}
-};
-
-menu_t  GameDefDev =
-{
-    gamedev_end,
-    &OptionsDef,
-    GameMenuDev,
-    M_DrawGameDev,
-    85,22,
     0
 };
 
@@ -2447,41 +2404,46 @@ void M_DrawOptions(void)
 
 void M_DrawItems(void)
 {
-    V_DrawPatchDirect(123, 15, W_CacheLumpName(DEH_String("M_T_ITMS"),
+    V_DrawPatchDirect(123, 10, W_CacheLumpName(DEH_String("M_T_ITMS"),
                                                PU_CACHE));
 
-    M_WriteText(80, 55, DEH_String("GIVE THEM ALL AT ONCE"));
+    M_WriteText(80, 50, DEH_String("GIVE THEM ALL AT ONCE"));
 
     if(fsize != 12361532 && fsize != 19321722)
     {
-        M_WriteText(80, 75, DEH_String("RADIATION SHIELDING SUIT"));
-        M_WriteText(80, 85, DEH_String("COMPUTER AREA MAP"));
-        M_WriteText(80, 95, DEH_String("LIGHT AMPLIFICATION VISOR"));
-        M_WriteText(80, 125, DEH_String("PARTIAL INVISIBILITY"));
-        M_WriteText(80, 135, DEH_String("INVULNERABILITY!"));
-        M_WriteText(80, 145, DEH_String("BERSERK!"));
-        M_WriteText(80, 155, DEH_String("BACKPACK"));
+        M_WriteText(80, 70, DEH_String("RADIATION SHIELDING SUIT"));
+        M_WriteText(80, 80, DEH_String("COMPUTER AREA MAP"));
+        M_WriteText(80, 90, DEH_String("LIGHT AMPLIFICATION VISOR"));
+        M_WriteText(80, 120, DEH_String("PARTIAL INVISIBILITY"));
+        M_WriteText(80, 130, DEH_String("INVULNERABILITY!"));
+        M_WriteText(80, 140, DEH_String("BERSERK!"));
+        M_WriteText(80, 150, DEH_String("BACKPACK"));
+        M_WriteText(80, 160, DEH_String("FLIGHT"));
     }
 
     if(fsize == 19321722)
     {
-        M_WriteText(80, 75, DEH_String("VULCAN RUBBER BOOTS"));
-        M_WriteText(80, 85, DEH_String("SI ARRAY MAPPING"));
-        M_WriteText(80, 95, DEH_String("INFRARED VISOR"));
-        M_WriteText(80, 125, DEH_String("ENK BLINDNESS"));
-        M_WriteText(80, 135, DEH_String("FORCE FIELD"));
-        M_WriteText(80, 145, DEH_String("007 MICROTEL"));
+        M_WriteText(80, 70, DEH_String("VULCAN RUBBER BOOTS"));
+        M_WriteText(80, 80, DEH_String("SI ARRAY MAPPING"));
+        M_WriteText(80, 90, DEH_String("INFRARED VISOR"));
+        M_WriteText(80, 120, DEH_String("ENK BLINDNESS"));
+        M_WriteText(80, 130, DEH_String("FORCE FIELD"));
+        M_WriteText(80, 140, DEH_String("007 MICROTEL"));
+        M_WriteText(80, 150, DEH_String("BACKPACK"));
+        M_WriteText(80, 160, DEH_String("FLIGHT"));
     }
 
     if(fsize == 12361532)
     {
-        M_WriteText(80, 75, DEH_String("SLIME-PROOF SUIT"));
-        M_WriteText(80, 85, DEH_String("COMPUTER AREA MAP"));
-        M_WriteText(80, 95, DEH_String("ULTRA GOGGLES"));
+        M_WriteText(80, 70, DEH_String("SLIME-PROOF SUIT"));
+        M_WriteText(80, 80, DEH_String("COMPUTER AREA MAP"));
+        M_WriteText(80, 90, DEH_String("ULTRA GOGGLES"));
+        M_WriteText(80, 100, DEH_String("BACKPACK"));
+        M_WriteText(80, 110, DEH_String("FLIGHT"));
     }
 
-    M_WriteText(80, 105, DEH_String("FULL HEALTH (100)"));
-    M_WriteText(80, 115, DEH_String("FULL HEALTH (200)"));
+    M_WriteText(80, 100, DEH_String("FULL HEALTH (100)"));
+    M_WriteText(80, 110, DEH_String("FULL HEALTH (200)"));
 }
 
 void M_DrawArmor(void)
@@ -2624,6 +2586,17 @@ void M_DrawGame(void)
     M_WriteText(85, 120, DEH_String("PLAYER THRUST"));
     M_WriteText(85, 130, DEH_String("RESPAWN MONSTERS"));
     M_WriteText(85, 140, DEH_String("FAST MONSTERS"));
+
+    if(devparm)
+    {
+        if(aiming_help)
+            M_WriteText(220, 150, DEH_String("ON"));
+        else
+            M_WriteText(220, 150, DEH_String("OFF"));
+
+        M_WriteText(85, 150, DEH_String("AIMING HELP"));
+    }
+
     M_WriteText(85, 160, DEH_String("MORE OPTIONS"));
 
     if(drawgrid == 1)
@@ -2731,96 +2704,6 @@ void M_DrawGame2(void)
         M_WriteText(230, 60, DEH_String("ON"));
     else
         M_WriteText(230, 60, DEH_String("OFF"));
-}
-
-void M_DrawGameDev(void)
-{
-    if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
-        V_DrawPatchDirect(70, 0, W_CacheLumpName(DEH_String("M_T_GSET"),
-                                               PU_CACHE));
-    else
-        V_DrawPatchDirect(70, 0, W_CacheLumpName(DEH_String("M_GMESET"),
-                                               PU_CACHE));
-
-    M_WriteText(85, 20, DEH_String("MAP GRID"));
-    M_WriteText(85, 30, DEH_String("MAP ROTATION"));
-    M_WriteText(85, 40, DEH_String("FOLLOW MODE"));
-    M_WriteText(85, 50, DEH_String("STATISTICS"));
-    M_WriteText(85, 60, DEH_String("MESSAGES"));
-    M_WriteText(85, 70, DEH_String("AIMING HELP"));
-    M_WriteText(85, 80, DEH_String("CROSSHAIR"));
-    M_WriteText(85, 90, DEH_String("JUMPING"));
-    M_WriteText(85, 100, DEH_String("WEAPON CHANGE"));
-    M_WriteText(85, 110, DEH_String("WEAPON RECOIL"));
-    M_WriteText(85, 120, DEH_String("PLAYER THRUST"));
-    M_WriteText(85, 130, DEH_String("RESPAWN MONSTERS"));
-    M_WriteText(85, 140, DEH_String("FAST MONSTERS"));
-    M_WriteText(85, 160, DEH_String("MORE OPTIONS"));
-
-    if(drawgrid == 1)
-        M_WriteText(220, 20, DEH_String("ON"));
-    else if(drawgrid == 0)
-        M_WriteText(220, 20, DEH_String("OFF"));
-
-    if(am_rotate == true)
-        M_WriteText(220, 30, DEH_String("ON"));
-    else if(am_rotate == false)
-        M_WriteText(220, 30, DEH_String("OFF"));
-
-    if(followplayer == 1)
-        M_WriteText(220, 40, DEH_String("ON"));
-    else if(followplayer == 0)
-        M_WriteText(220, 40, DEH_String("OFF"));
-
-    if(show_stats == 1)
-        M_WriteText(220, 50, DEH_String("ON"));
-    else if (show_stats == 0)
-        M_WriteText(220, 50, DEH_String("OFF"));
-
-    if(showMessages)
-        M_WriteText(220, 60, DEH_String("ON"));
-    else
-        M_WriteText(220, 60, DEH_String("OFF"));
-
-    if(aiming_help)
-        M_WriteText(220, 70, DEH_String("ON"));
-    else
-        M_WriteText(220, 70, DEH_String("OFF"));
-
-    if(crosshair == 1)
-        M_WriteText(220, 80, DEH_String("ON"));
-    else if (crosshair == 0)
-        M_WriteText(220, 80, DEH_String("OFF"));
-
-    if(jumping)
-        M_WriteText(220, 90, DEH_String("ON"));
-    else
-        M_WriteText(220, 90, DEH_String("OFF"));
-
-    if(use_vanilla_weapon_change == 1)
-        M_WriteText(220, 100, DEH_String("SLOW"));
-    else if(use_vanilla_weapon_change == 0)
-        M_WriteText(220, 100, DEH_String("FAST"));
-
-    if(d_recoil)
-        M_WriteText(220, 110, DEH_String("ON"));
-    else
-        M_WriteText(220, 110, DEH_String("OFF"));
-
-    if(d_thrust)
-        M_WriteText(220, 120, DEH_String("ON"));
-    else
-        M_WriteText(220, 120, DEH_String("OFF"));
-
-    if(respawnparm)
-        M_WriteText(220, 130, DEH_String("ON"));
-    else
-        M_WriteText(220, 130, DEH_String("OFF"));
-
-    if(fastparm)
-        M_WriteText(220, 140, DEH_String("ON"));
-    else
-        M_WriteText(220, 140, DEH_String("OFF"));
 }
 
 void DetectState(void)
@@ -3837,7 +3720,8 @@ boolean M_Responder (event_t* ev)
             if(!devparm && currentMenu == &KeyBindingsDef && itemOn == 11)
                 itemOn++;
             S_StartSound(NULL,sfx_pstop);
-        } while(currentMenu->menuitems[itemOn].status==-1);
+        } while((currentMenu->menuitems[itemOn].status==-1 && !devparm) ||
+                (currentMenu->menuitems[itemOn].status==-1 && currentMenu != &GameDef && devparm));
 
         return true;
     }
@@ -3864,7 +3748,8 @@ boolean M_Responder (event_t* ev)
             if(!devparm && currentMenu == &KeyBindingsDef && itemOn == 11)
                 itemOn--;
             S_StartSound(NULL,sfx_pstop);
-        } while(currentMenu->menuitems[itemOn].status==-1);
+        } while((currentMenu->menuitems[itemOn].status==-1 && !devparm) ||
+                (currentMenu->menuitems[itemOn].status==-1 && currentMenu != &GameDef && devparm));
 
         return true;
     }
@@ -3878,6 +3763,11 @@ boolean M_Responder (event_t* ev)
             S_StartSound(NULL,sfx_stnmov);
             currentMenu->menuitems[itemOn].routine(0);
         }
+        else if(currentMenu == &GameDef && devparm && itemOn == 13)
+        {
+            S_StartSound(NULL,sfx_stnmov);
+            M_AimingHelp(0);
+        }
         return true;
     }
     else if (ch == key_menu_right)
@@ -3889,6 +3779,11 @@ boolean M_Responder (event_t* ev)
         {
             S_StartSound(NULL,sfx_stnmov);
             currentMenu->menuitems[itemOn].routine(1);
+        }
+        else if(currentMenu == &GameDef && devparm && itemOn == 13)
+        {
+            S_StartSound(NULL,sfx_stnmov);
+            M_AimingHelp(1);
         }
         return true;
     }
@@ -3904,6 +3799,11 @@ boolean M_Responder (event_t* ev)
             {
                 currentMenu->menuitems[itemOn].routine(1);      // right arrow
                 S_StartSound(NULL,sfx_stnmov);
+            }
+            else if(currentMenu == &GameDef && devparm && itemOn == 13)
+            {
+                S_StartSound(NULL,sfx_stnmov);
+                M_AimingHelp(1);
             }
             else
             {
@@ -4136,8 +4036,7 @@ void M_Drawer (void)
         if (currentMenu == &CheatsDef || currentMenu == &KeyBindingsDef ||
             currentMenu == &ItemsDef || currentMenu == &WeaponsDef ||
             currentMenu == &ArmorDef || currentMenu == &KeysDef || 
-            currentMenu == &GameDef || currentMenu == &GameDefDev ||
-            currentMenu == &GameDef2)
+            currentMenu == &GameDef || currentMenu == &GameDef2)
         {
             y += LINEHEIGHT_SMALL;
             // DRAW SKULL
@@ -4615,6 +4514,7 @@ void M_ItemsA(int choice)
             players[consoleplayer].powers[3] = IRONTICS;
             players[consoleplayer].powers[4] = 1;
             players[consoleplayer].powers[5] = INFRATICS;
+            players[consoleplayer].powers[6] = FLIGHTTICS;
 
             if (!player->backpack)
             {
@@ -4636,6 +4536,7 @@ void M_ItemsA(int choice)
             players[consoleplayer].powers[3] = 0;
             players[consoleplayer].powers[4] = 0;
             players[consoleplayer].powers[5] = 0;
+            players[consoleplayer].powers[6] = 0;
 
             got_all = false;
         }
@@ -4860,6 +4761,22 @@ void M_ItemsJ(int choice)
         for (i=0 ; i<NUMAMMO ; i++)
             P_GiveAmmo (player, i, 1);
         player->message = DEH_String(GOTBACKPACK);
+    }
+    DetectState();
+}
+
+void M_ItemsK(int choice)
+{
+    if(!netgame && !demoplayback && gamestate == GS_LEVEL
+        && gameskill != sk_nightmare &&
+        players[consoleplayer].playerstate == PST_LIVE)
+    {
+	static player_t* player;
+	player = &players[consoleplayer];
+
+	P_UseArtifact(player, arti_fly);
+
+	player->message = DEH_String("FLIGHT ADDED");
     }
     DetectState();
 }
@@ -5467,6 +5384,8 @@ void M_KeyBindingsClearAll (int choice)
     *doom_defaults_list[40].location = 0;
     *doom_defaults_list[41].location = 0;
     *doom_defaults_list[42].location = 0;
+    *doom_defaults_list[43].location = 0;
+    *doom_defaults_list[44].location = 0;
 }
 
 void M_KeyBindingsReset (int choice)
@@ -5479,10 +5398,12 @@ void M_KeyBindingsReset (int choice)
     *doom_defaults_list[36].location = CLASSIC_CONTROLLER_RIGHT;
     *doom_defaults_list[37].location = CLASSIC_CONTROLLER_ZL;
     *doom_defaults_list[38].location = CLASSIC_CONTROLLER_ZR;
-    *doom_defaults_list[39].location = CLASSIC_CONTROLLER_HOME;
-    *doom_defaults_list[40].location = CONTROLLER_1;
-    *doom_defaults_list[41].location = CONTROLLER_2;
-    *doom_defaults_list[42].location = CLASSIC_CONTROLLER_PLUS;
+    *doom_defaults_list[39].location = CLASSIC_CONTROLLER_A;
+    *doom_defaults_list[40].location = CLASSIC_CONTROLLER_Y;
+    *doom_defaults_list[41].location = CLASSIC_CONTROLLER_B;
+    *doom_defaults_list[42].location = CONTROLLER_1;
+    *doom_defaults_list[43].location = CONTROLLER_2;
+    *doom_defaults_list[44].location = CLASSIC_CONTROLLER_PLUS;
 }
 
 void M_DrawKeyBindings(void)
@@ -5490,37 +5411,39 @@ void M_DrawKeyBindings(void)
     int i;
 
     if(fsize != 19321722)
-        V_DrawPatch (80, 5, W_CacheLumpName(DEH_String("M_T_BNDS"), PU_CACHE));
+        V_DrawPatch (80, 0, W_CacheLumpName(DEH_String("M_T_BNDS"), PU_CACHE));
     else
-        V_DrawPatch (80, 5, W_CacheLumpName(DEH_String("M_KBNDGS"), PU_CACHE));
+        V_DrawPatch (80, 0, W_CacheLumpName(DEH_String("M_KBNDGS"), PU_CACHE));
 
-    M_WriteText(40, 30, DEH_String("FIRE"));
-    M_WriteText(40, 40, DEH_String("USE / OPEN"));
-    M_WriteText(40, 50, DEH_String("MAIN MENU"));
-    M_WriteText(40, 60, DEH_String("WEAPON LEFT"));
-    M_WriteText(40, 70, DEH_String("SHOW AUTOMAP"));
-    M_WriteText(40, 80, DEH_String("WEAPON RIGHT"));
-    M_WriteText(40, 90, DEH_String("AUTOMAP ZOOM IN"));
-    M_WriteText(40, 100, DEH_String("AUTOMAP ZOOM OUT"));
-    M_WriteText(40, 110, DEH_String("JUMP"));
-    M_WriteText(40, 120, DEH_String("RUN"));
-    M_WriteText(40, 130, DEH_String("CONSOLE"));
+    M_WriteText(40, 20, DEH_String("FIRE"));
+    M_WriteText(40, 30, DEH_String("USE / OPEN"));
+    M_WriteText(40, 40, DEH_String("MAIN MENU"));
+    M_WriteText(40, 50, DEH_String("WEAPON LEFT"));
+    M_WriteText(40, 60, DEH_String("SHOW AUTOMAP"));
+    M_WriteText(40, 70, DEH_String("WEAPON RIGHT"));
+    M_WriteText(40, 80, DEH_String("AUTOMAP ZOOM IN"));
+    M_WriteText(40, 90, DEH_String("AUTOMAP ZOOM OUT"));
+    M_WriteText(40, 100, DEH_String("FLY UP"));
+    M_WriteText(40, 110, DEH_String("FLY DOWN"));
+    M_WriteText(40, 120, DEH_String("JUMP"));
+    M_WriteText(40, 130, DEH_String("RUN"));
+    M_WriteText(40, 140, DEH_String("CONSOLE"));
 
     if(devparm)
-        M_WriteText(40, 140, DEH_String("AIMING HELP"));
+        M_WriteText(40, 150, DEH_String("AIMING HELP"));
 
-    M_WriteText(40, 150, DEH_String("CLEAR ALL CONTROLS"));
-    M_WriteText(40, 160, DEH_String("RESET TO DEFAULTS"));
+    M_WriteText(40, 160, DEH_String("CLEAR ALL CONTROLS"));
+    M_WriteText(40, 170, DEH_String("RESET TO DEFAULTS"));
 
-    for (i = 0; i < 12; i++)
+    for (i = 0; i < 14; i++)
     {
-        if(i < 11 || (i == 11 && devparm))
+        if(i < 13 || (i == 13 && devparm))
         {
             if (askforkey && keyaskedfor == i)
-                M_WriteText(195, (i*10+30), "???");
+                M_WriteText(195, (i*10+20), "???");
             else
-                M_WriteText(195, (i*10+30),
-                Key2String(*(doom_defaults_list[i+FirstKey+31].location)));
+                M_WriteText(195, (i*10+20),
+                        Key2String(*(doom_defaults_list[i+FirstKey+31].location)));
         }
     }
 }
@@ -5767,10 +5690,7 @@ void M_Record(int choice)
 
 void M_Game(int choice)
 {
-    if(devparm)
-        M_SetupNextMenu(&GameDefDev);
-    else
-        M_SetupNextMenu(&GameDef);
+    M_SetupNextMenu(&GameDef);
 }
 
 void M_Game2(int choice)

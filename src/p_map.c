@@ -89,6 +89,8 @@ fixed_t                tmdropoffz;
 line_t*                ceilingline;
 line_t                 *blockline;     // killough 8/11/98: blocking linedef
 
+mobj_t                 *onmobj; //generic global onmobj...used for landing on pods/players
+
 // keep track of special lines as they are hit,
 // but don't process them until the move is proven valid
 
@@ -522,8 +524,24 @@ P_TryMove
         floatok = true;
         
         if ( !(thing->flags&MF_TELEPORT) 
-             &&tmceilingz - thing->z < thing->height)
+             && tmceilingz - thing->z < thing->height
+             && !(thing->flags2 & MF2_FLY))
             return false;        // mobj must lower itself to fit
+
+        if (thing->flags2 & MF2_FLY)
+        {
+            if (thing->z + thing->height > tmceilingz)
+            {
+                thing->momz = -8 * FRACUNIT;
+                return false;
+            }
+            else if (thing->z < tmfloorz
+                     && tmfloorz - tmdropoffz > 24 * FRACUNIT)
+            {
+                thing->momz = 8 * FRACUNIT;
+                return false;
+            }
+        }
 
         if ( !(thing->flags&MF_TELEPORT)
              && tmfloorz - thing->z > 24*FRACUNIT )
@@ -1724,4 +1742,129 @@ P_ChangeSector
     return nofit;
 }
 
+//=============================================================================
+//
+// P_FakeZMovement
+//
+//              Fake the zmovement so that we can check if a move is legal
+//=============================================================================
+
+void P_FakeZMovement(mobj_t * mo)
+{
+//
+// adjust height
+//
+    mo->z += mo->momz;
+    if (mo->player && mo->flags2 & MF2_FLY && !(mo->z <= mo->floorz)
+        && leveltime & 2)
+    {
+        mo->z += finesine[(FINEANGLES / 20 * leveltime >> 2) & FINEMASK];
+    }
+}
+
+//---------------------------------------------------------------------------
+//
+// PIT_CheckOnmobjZ
+//
+//---------------------------------------------------------------------------
+
+boolean PIT_CheckOnmobjZ(mobj_t * thing)
+{
+    fixed_t blockdist;
+
+    if (!(thing->flags & (MF_SOLID | MF_SPECIAL | MF_SHOOTABLE)))
+    {                           // Can't hit thing
+        return (true);
+    }
+    blockdist = thing->radius + tmthing->radius;
+    if (abs(thing->x - tmx) >= blockdist || abs(thing->y - tmy) >= blockdist)
+    {                           // Didn't hit thing
+        return (true);
+    }
+    if (thing == tmthing)
+    {                           // Don't clip against self
+        return (true);
+    }
+    if (tmthing->z > thing->z + thing->height)
+    {
+        return (true);
+    }
+    else if (tmthing->z + tmthing->height < thing->z)
+    {                           // under thing
+        return (true);
+    }
+    if (thing->flags & MF_SOLID)
+    {
+        onmobj = thing;
+    }
+    return (!(thing->flags & MF_SOLID));
+}
+
+//=============================================================================
+//
+// P_CheckOnmobj(mobj_t *thing)
+//
+//              Checks if the new Z position is legal
+//=============================================================================
+
+mobj_t *P_CheckOnmobj(mobj_t * thing)
+{
+    int xl, xh, yl, yh, bx, by;
+    subsector_t *newsubsec;
+    fixed_t x;
+    fixed_t y;
+    mobj_t oldmo;
+
+    x = thing->x;
+    y = thing->y;
+    tmthing = thing;
+    tmflags = thing->flags;
+    oldmo = *thing;             // save the old mobj before the fake zmovement
+    P_FakeZMovement(tmthing);
+
+    tmx = x;
+    tmy = y;
+
+    tmbbox[BOXTOP] = y + tmthing->radius;
+    tmbbox[BOXBOTTOM] = y - tmthing->radius;
+    tmbbox[BOXRIGHT] = x + tmthing->radius;
+    tmbbox[BOXLEFT] = x - tmthing->radius;
+
+    newsubsec = R_PointInSubsector(x, y);
+    ceilingline = NULL;
+
+//
+// the base floor / ceiling is from the subsector that contains the
+// point.  Any contacted lines the step closer together will adjust them
+//
+    tmfloorz = tmdropoffz = newsubsec->sector->floorheight;
+    tmceilingz = newsubsec->sector->ceilingheight;
+
+    validcount++;
+    numspechit = 0;
+
+    if (tmflags & MF_NOCLIP)
+        return NULL;
+
+//
+// check things first, possibly picking things up
+// the bounding box is extended by MAXRADIUS because mobj_ts are grouped
+// into mapblocks based on their origin point, and can overlap into adjacent
+// blocks by up to MAXRADIUS units
+//
+    xl = (tmbbox[BOXLEFT] - bmaporgx - MAXRADIUS) >> MAPBLOCKSHIFT;
+    xh = (tmbbox[BOXRIGHT] - bmaporgx + MAXRADIUS) >> MAPBLOCKSHIFT;
+    yl = (tmbbox[BOXBOTTOM] - bmaporgy - MAXRADIUS) >> MAPBLOCKSHIFT;
+    yh = (tmbbox[BOXTOP] - bmaporgy + MAXRADIUS) >> MAPBLOCKSHIFT;
+
+    for (bx = xl; bx <= xh; bx++)
+        for (by = yl; by <= yh; by++)
+            if (!P_BlockThingsIterator(bx, by, PIT_CheckOnmobjZ))
+            {
+                *tmthing = oldmo;
+                return onmobj;
+            }
+    *tmthing = oldmo;
+    return NULL;
+}
 

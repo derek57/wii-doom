@@ -315,6 +315,18 @@ P_GivePower
         return true;
     }
         
+    if (power == pw_flight)
+    {
+        player->powers[power] = FLIGHTTICS;
+        player->mo->flags2 |= MF2_FLY;
+        player->mo->flags |= MF_NOGRAVITY;
+        if (player->mo->z <= player->mo->floorz)
+        {
+            player->flyheight = 10;     // thrust the player in the air a bit
+        }
+        return (true);
+    }
+
     if (player->powers[power])
         return false;        // already got it
                 
@@ -729,6 +741,7 @@ P_KillMobj
     int                t;
 
     target->flags &= ~(MF_SHOOTABLE|MF_FLOAT|MF_SKULLFLY);
+    target->flags2 &= ~MF2_PASSMOBJ;
 
     if (target->type != MT_SKULL)
         target->flags &= ~MF_NOGRAVITY;
@@ -759,6 +772,8 @@ P_KillMobj
             target->player->frags[target->player-players]++;
                         
         target->flags &= ~MF_SOLID;
+        target->flags2 &= ~MF2_FLY;
+        target->player->powers[pw_flight] = 0;
         target->player->playerstate = PST_DEAD;
         P_DropWeapon (target->player);
 

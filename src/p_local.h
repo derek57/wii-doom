@@ -94,7 +94,7 @@ void P_DropWeapon (player_t* player);
 //
 void P_PlayerThink (player_t* player);
 void P_AimingHelp (player_t* player);
-
+boolean P_UseArtifact(player_t * player, artitype_t arti);
 
 //
 // P_MOBJ
@@ -223,6 +223,7 @@ boolean P_TryMove (mobj_t* thing, fixed_t x, fixed_t y);
 boolean P_TeleportMove (mobj_t* thing, fixed_t x, fixed_t y);
 boolean P_CheckSight (mobj_t* t1, mobj_t* t2);
 boolean P_ChangeSector (sector_t* sector, boolean crunch);
+mobj_t *P_CheckOnmobj(mobj_t * thing);
 
 void    P_SlideMove (mobj_t* mo);
 void    P_UseLines (player_t* player);

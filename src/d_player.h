@@ -178,6 +178,8 @@ typedef struct player_s
 
     int                        recoilpitch;
 
+    int                 flyheight;
+
 } player_t;
 
 

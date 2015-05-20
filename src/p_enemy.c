@@ -1778,7 +1778,7 @@ void A_BossDeath (mobj_t* mo)
 
 void A_Footstep (mobj_t* mo)
 {
-    if(d_footstep)
+    if(d_footstep && !mo->player->powers[pw_flight])
     {
         int t = P_Random() % 4;
 

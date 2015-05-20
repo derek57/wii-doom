@@ -33,6 +33,7 @@
 #include "d_event.h"
 #include "doomdef.h"
 #include "doomstat.h"
+#include "p_inter.h"
 #include "p_local.h"
 
 
@@ -64,8 +65,16 @@ P_Thrust
 {
     angle >>= ANGLETOFINESHIFT;
     
-    player->mo->momx += FixedMul(move,finecosine[angle]); 
-    player->mo->momy += FixedMul(move,finesine[angle]);
+    if (player->powers[pw_flight] && !(player->mo->z <= player->mo->floorz))
+    {
+        player->mo->momx += FixedMul(move, finecosine[angle]);
+        player->mo->momy += FixedMul(move, finesine[angle]);
+    }
+    else
+    {
+        player->mo->momx += FixedMul(move, finecosine[angle]); 
+        player->mo->momy += FixedMul(move, finesine[angle]);
+    }
 }
 
 
@@ -94,6 +103,11 @@ void P_CalcHeight (player_t* player)
 
     if (player->bob>MAXBOB)
         player->bob = MAXBOB;
+
+    if (player->mo->flags2 & MF2_FLY && !onground)
+    {
+        player->bob = FRACUNIT / 2;
+    }
 
     if ((player->cheats & CF_NOMOMENTUM) || !onground)
     {
@@ -161,6 +175,7 @@ void P_CalcHeight (player_t* player)
 void P_MovePlayer (player_t* player)
 {
     int        look;
+    int        fly;
 
     ticcmd_t*  cmd;
         
@@ -170,12 +185,13 @@ void P_MovePlayer (player_t* player)
 
     // Do not let the player control movement
     //  if not onground.
-    onground = (player->mo->z <= player->mo->floorz);
+    onground = (player->mo->z <= player->mo->floorz
+                || (player->mo->flags2 & MF2_ONMOBJ));
         
-    if (cmd->forwardmove && onground)
+    if (cmd->forwardmove && (onground || player->mo->flags2 & MF2_FLY))
         P_Thrust (player, player->mo->angle, cmd->forwardmove*2048);
     
-    if (cmd->sidemove && onground)
+    if (cmd->sidemove && (onground || player->mo->flags2 & MF2_FLY))
         P_Thrust (player, player->mo->angle-ANG90, cmd->sidemove*2048);
 
     if ( (cmd->forwardmove || cmd->sidemove) 
@@ -218,6 +234,40 @@ void P_MovePlayer (player_t* player)
         {
             player->lookdir = 0;
             player->centering = false;
+        }
+    }
+
+    fly = cmd->lookfly >> 4;
+
+    if (fly > 7)
+    {
+        fly -= 16;
+    }
+
+    if (fly && player->powers[pw_flight])
+    {
+        if (fly != -8)
+        {
+            player->flyheight = fly * 2;
+            if (!(player->mo->flags2 & MF2_FLY))
+            {
+                player->mo->flags2 |= MF2_FLY;
+                player->mo->flags |= MF_NOGRAVITY;
+            }
+        }
+        else
+        {
+            player->mo->flags2 &= ~MF2_FLY;
+            player->mo->flags &= ~MF_NOGRAVITY;
+        }
+    }
+
+    if (player->mo->flags2 & MF2_FLY)
+    {
+        player->mo->momz = player->flyheight * FRACUNIT;
+        if (player->flyheight)
+        {
+            player->flyheight /= 2;
         }
     }
 }        
@@ -348,7 +398,8 @@ void P_PlayerThink (player_t* player)
         {
                 if ((cmd->arti & AFLAG_JUMP) && onground && !player->jumpTics)
                 {
-                player->mo->momz = 9 * FRACUNIT;
+                    player->mo->momz = 9 * FRACUNIT;
+                    player->mo->flags2 &= ~MF2_ONMOBJ;
                     player->jumpTics = 18;
                 }
         }
@@ -431,6 +482,21 @@ void P_PlayerThink (player_t* player)
     if (player->powers[pw_ironfeet])
         player->powers[pw_ironfeet]--;
                 
+    if (player->powers[pw_flight])
+    {
+        if (!--player->powers[pw_flight])
+        {
+            // haleyjd: removed externdriver crap
+            if (player->mo->z != player->mo->floorz)
+            {
+                player->centering = true;
+            }
+
+            player->mo->flags2 &= ~MF2_FLY;
+            player->mo->flags &= ~MF_NOGRAVITY;
+        }
+    }
+
     if (player->damagecount)
         player->damagecount--;
                 
@@ -507,5 +573,29 @@ void P_AimingHelp (player_t* player)
         player->attacker &&
         player->attacker != player->mo)
         prio = 0;
+}
+
+//----------------------------------------------------------------------------
+//
+// FUNC P_UseArtifact
+//
+// Returns true if artifact was used.
+//
+//----------------------------------------------------------------------------
+
+boolean P_UseArtifact(player_t * player, artitype_t arti)
+{
+    switch (arti)
+    {
+        case arti_fly:
+            if (!P_GivePower(player, pw_flight))
+            {
+                return (false);
+            }
+            break;
+        default:
+            return (false);
+    }
+    return (true);
 }
 

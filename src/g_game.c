@@ -172,16 +172,21 @@ int             bodyqueslot;
 int             vanilla_savegame_limit = 0; // FIX FOR THE WII: SAVEGAME BUFFER OVERFLOW (GIBS)
 int             vanilla_demo_limit = 1; 
 int             key_strafe, joybstrafe;
+int             joybinvright = 0;
 int             joybfire = 1;
 int             joybaiminghelp = 2;
 int             joybuse = 3;
 int             joybmenu = 4;
+int             joybflydown = 5;
 int             joybleft = 6;
 int             joybmap = 7;
 int             joybright = 8;
+int             joybcenter = 9;
 int             joybmapzoomout = 10;
 int             joybmapzoomin = 11;
 int             joybjump = 12;
+int             joybflyup = 13;
+int             joybinvleft = 14;
 int             joybspeed = 15;
 int             joybconsole = 16;
 
@@ -361,6 +366,7 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
     int         forward;
     int         side;
     int         look;
+    int         flyheight;
 
     memset(cmd, 0, sizeof(ticcmd_t));
 
@@ -369,7 +375,7 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
  
     strafe = gamekeydown[key_strafe] || joybuttons[joybstrafe];
 
-    forward = side = look = 0;
+    forward = side = look = flyheight = 0;
 
     // let movement keys cancel each other out
     if (strafe) 
@@ -472,6 +478,16 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
 
     if(mouselook == 0)
         look = -8;
+
+    // Fly up/down/drop keys
+    if (joybuttons[joybflyup])
+    {
+        flyheight = 5;          // note that the actual flyheight will be twice this
+    }
+    if (joybuttons[joybflydown])
+    {
+        flyheight = -5;
+    }
 
     if (joybuttons[joybjump] && !menuactive)
     {
@@ -674,6 +690,12 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
         cmd->lookfly = look;
     }
 
+    if (flyheight < 0)
+    {
+        flyheight += 16;
+    }
+    cmd->lookfly |= flyheight << 4;
+
     // special buttons
     if (sendpause) 
     { 
@@ -741,21 +763,21 @@ boolean G_Responder (event_t* ev)
         return true;    // eat events 
 
       case ev_joystick: 
-        joybuttons[0] = (ev->data1 & joy_a) > 0;
+        joybuttons[0] = (ev->data1 & joy_x) > 0;
         joybuttons[1] = (ev->data1 & joy_r) > 0;
         joybuttons[2] = (ev->data1 & joy_plus) > 0;
         joybuttons[3] = (ev->data1 & joy_l) > 0;
         joybuttons[4] = (ev->data1 & joy_minus) > 0;
-        joybuttons[5] = (ev->data1 & joy_b) > 0;
+        joybuttons[5] = (ev->data1 & joy_y) > 0;
         joybuttons[6] = (ev->data1 & joy_left) > 0;
         joybuttons[7] = (ev->data1 & joy_down) > 0;
         joybuttons[8] = (ev->data1 & joy_right) > 0;
         joybuttons[9] = (ev->data1 & joy_up) > 0;
         joybuttons[10] = (ev->data1 & joy_zr) > 0;
         joybuttons[11] = (ev->data1 & joy_zl) > 0;
-        joybuttons[12] = (ev->data1 & joy_home) > 0;
-        joybuttons[13] = (ev->data1 & joy_x) > 0;
-        joybuttons[14] = (ev->data1 & joy_y) > 0;
+        joybuttons[12] = (ev->data1 & joy_b) > 0;
+        joybuttons[13] = (ev->data1 & joy_a) > 0;
+        joybuttons[14] = (ev->data1 & joy_home) > 0;
         joybuttons[15] = (ev->data1 & joy_1) > 0;
         joybuttons[16] = (ev->data1 & joy_2) > 0;
         joyxmove = ev->data2; 
@@ -791,6 +813,7 @@ void G_ReadDemoTiccmd (ticcmd_t* cmd)
     cmd->angleturn = ((unsigned char) *demo_p++)<<8; 
 
     cmd->buttons = (unsigned char)*demo_p++; 
+    cmd->lookfly = (unsigned char) *demo_p++;
 } 
 
 // Increase the size of the demo buffer to allow unlimited demos
@@ -837,6 +860,7 @@ void G_WriteDemoTiccmd (ticcmd_t* cmd)
     *demo_p++ = cmd->angleturn >> 8; 
 
     *demo_p++ = cmd->buttons; 
+    *demo_p++ = cmd->lookfly;
 
     // reset demo pointer back
     demo_p = demo_start;
@@ -893,8 +917,13 @@ G_CheckSpot
     x = mthing->x << FRACBITS; 
     y = mthing->y << FRACBITS; 
          
+    players[playernum].mo->flags2 &= ~MF2_PASSMOBJ;
     if (!P_CheckPosition (players[playernum].mo, x, y) ) 
-        return false; 
+    {
+        players[playernum].mo->flags2 |= MF2_PASSMOBJ;
+        return false;
+    }
+    players[playernum].mo->flags2 |= MF2_PASSMOBJ;
  
     // flush an old corpse if needed 
     if (bodyqueslot >= BODYQUESIZE) 
