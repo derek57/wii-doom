@@ -861,7 +861,9 @@ void C_Printf(char *s, ...)
 {
     va_list args;
 
-    char *t;
+//    char *t;
+
+    static char buffer[1024];
   
     // haleyjd: sanity check
     if(!s)
@@ -869,15 +871,20 @@ void C_Printf(char *s, ...)
   
     // difficult to remove limit
     va_start(args, s);
-    vasprintf(&t, s, args);
+    memset(buffer, 0, sizeof(buffer));
+//    vasprintf(&t, s, args);
+
+    M_vsnprintf(buffer, sizeof(buffer) - 1, s, args);
+    buffer[0] = toupper(buffer[0]);
+
     va_end(args);
 
     // haleyjd
-    C_AdjustLineBreaks(t);
+    C_AdjustLineBreaks(buffer);
 
-    C_AddMessage(t);
+    C_AddMessage(buffer);
   
-    (free)(t);
+//    (free)(buffer);
 }
 
 //
