@@ -134,7 +134,7 @@ EV_Teleport
                     thing->reactiontime = 18;        
 
                 thing->angle = m->angle;
-                if (thing->flags2 & MF2_FOOTCLIP && d_footclip
+                if (thing->flags2 & MF2_FOOTCLIP
                     && P_GetThingFloorType(thing) != FLOOR_SOLID)
                 {
                     thing->flags2 |= MF2_FEETARECLIPPED;

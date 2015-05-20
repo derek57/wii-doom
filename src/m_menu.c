@@ -862,8 +862,8 @@ int                        coordinates_info = 0;
 int                        timer_info = 0;
 int                        version_info = 0;
 int                        fps = 0;              // calculating the frames per second
-int                        key_controls_start_in_cfg_at_pos = 30; // ACTUALLY IT'S +2
-int                        key_controls_end_in_cfg_at_pos = 42;   // ACTUALLY IT'S +2
+int                        key_controls_start_in_cfg_at_pos = 31; // ACTUALLY IT'S +2
+int                        key_controls_end_in_cfg_at_pos = 43;   // ACTUALLY IT'S +2
 int                        crosshair = 0;
 int                        show_stats = 0;
 int                        tracknum = 1;
@@ -1040,6 +1040,7 @@ void M_Autoaim(int choice);
 void M_MaxGore(int choice);
 void M_Footstep(int choice);
 void M_Footclip(int choice);
+void M_Splash(int choice);
 
 void M_God(int choice);
 void M_Noclip(int choice);
@@ -1705,6 +1706,7 @@ enum
     game2_gore,
     game2_footstep,
     game2_footclip,
+    game2_splash,
     game2_end
 } game2_e;
 
@@ -1714,6 +1716,7 @@ menuitem_t GameMenu2[]=
     {2,"",M_MaxGore,'o'},
     {2,"",M_Footstep,'f'},
     {2,"",M_Footclip,'c'},
+    {2,"",M_Splash,'s'},
 };
 
 menu_t  GameDef2 =
@@ -1722,7 +1725,7 @@ menu_t  GameDef2 =
     &GameDef,
     GameMenu2,
     M_DrawGame2,
-    85,22,
+    70,22,
     0
 };
 
@@ -2698,30 +2701,36 @@ void M_DrawGame2(void)
         V_DrawPatchDirect(70, 0, W_CacheLumpName(DEH_String("M_GMESET"),
                                                PU_CACHE));
 
-    M_WriteText(85, 20, DEH_String("AUTOAIM"));
-    M_WriteText(85, 30, DEH_String("MORE GORE"));
-    M_WriteText(85, 40, DEH_String("PLAYER FOOTSTEPS"));
-    M_WriteText(85, 50, DEH_String("HERETIC FOOTCLIPS"));
+    M_WriteText(70, 20, DEH_String("AUTOAIM"));
+    M_WriteText(70, 30, DEH_String("MORE GORE"));
+    M_WriteText(70, 40, DEH_String("PLAYER FOOTSTEPS"));
+    M_WriteText(70, 50, DEH_String("HERETIC FOOTCLIPS"));
+    M_WriteText(70, 60, DEH_String("HERETIC LIQUID SPLASH"));
 
     if(autoaim)
-        M_WriteText(220, 20, DEH_String("ON"));
+        M_WriteText(230, 20, DEH_String("ON"));
     else
-        M_WriteText(220, 20, DEH_String("OFF"));
+        M_WriteText(230, 20, DEH_String("OFF"));
 
     if(d_maxgore)
-        M_WriteText(220, 30, DEH_String("ON"));
+        M_WriteText(230, 30, DEH_String("ON"));
     else
-        M_WriteText(220, 30, DEH_String("OFF"));
+        M_WriteText(230, 30, DEH_String("OFF"));
 
     if(d_footstep)
-        M_WriteText(220, 40, DEH_String("ON"));
+        M_WriteText(230, 40, DEH_String("ON"));
     else
-        M_WriteText(220, 40, DEH_String("OFF"));
+        M_WriteText(230, 40, DEH_String("OFF"));
 
     if(d_footclip)
-        M_WriteText(220, 50, DEH_String("ON"));
+        M_WriteText(230, 50, DEH_String("ON"));
     else
-        M_WriteText(220, 50, DEH_String("OFF"));
+        M_WriteText(230, 50, DEH_String("OFF"));
+
+    if(d_splash)
+        M_WriteText(230, 60, DEH_String("ON"));
+    else
+        M_WriteText(230, 60, DEH_String("OFF"));
 }
 
 void M_DrawGameDev(void)
@@ -3705,7 +3714,7 @@ boolean M_Responder (event_t* ev)
     if (askforkey && data->btns_d)                // KEY BINDINGS
     {
         M_KeyBindingsClearControls(ev->data1);
-        *doom_defaults_list[keyaskedfor + 30 + FirstKey].location = ev->data1;
+        *doom_defaults_list[keyaskedfor + 31 + FirstKey].location = ev->data1;
         askforkey = false;
         return true;
     }
@@ -5446,7 +5455,6 @@ void M_KeyBindingsClearControls (int ch)
 
 void M_KeyBindingsClearAll (int choice)
 {
-    *doom_defaults_list[30].location = 0;
     *doom_defaults_list[31].location = 0;
     *doom_defaults_list[32].location = 0;
     *doom_defaults_list[33].location = 0;
@@ -5458,22 +5466,23 @@ void M_KeyBindingsClearAll (int choice)
     *doom_defaults_list[39].location = 0;
     *doom_defaults_list[40].location = 0;
     *doom_defaults_list[41].location = 0;
+    *doom_defaults_list[42].location = 0;
 }
 
 void M_KeyBindingsReset (int choice)
 {
-    *doom_defaults_list[30].location = CLASSIC_CONTROLLER_R;
-    *doom_defaults_list[31].location = CLASSIC_CONTROLLER_L;
-    *doom_defaults_list[32].location = CLASSIC_CONTROLLER_MINUS;
-    *doom_defaults_list[33].location = CLASSIC_CONTROLLER_LEFT;
-    *doom_defaults_list[34].location = CLASSIC_CONTROLLER_DOWN;
-    *doom_defaults_list[35].location = CLASSIC_CONTROLLER_RIGHT;
-    *doom_defaults_list[36].location = CLASSIC_CONTROLLER_ZL;
-    *doom_defaults_list[37].location = CLASSIC_CONTROLLER_ZR;
-    *doom_defaults_list[38].location = CLASSIC_CONTROLLER_HOME;
-    *doom_defaults_list[39].location = CONTROLLER_1;
-    *doom_defaults_list[40].location = CONTROLLER_2;
-    *doom_defaults_list[41].location = CLASSIC_CONTROLLER_PLUS;
+    *doom_defaults_list[31].location = CLASSIC_CONTROLLER_R;
+    *doom_defaults_list[32].location = CLASSIC_CONTROLLER_L;
+    *doom_defaults_list[33].location = CLASSIC_CONTROLLER_MINUS;
+    *doom_defaults_list[34].location = CLASSIC_CONTROLLER_LEFT;
+    *doom_defaults_list[35].location = CLASSIC_CONTROLLER_DOWN;
+    *doom_defaults_list[36].location = CLASSIC_CONTROLLER_RIGHT;
+    *doom_defaults_list[37].location = CLASSIC_CONTROLLER_ZL;
+    *doom_defaults_list[38].location = CLASSIC_CONTROLLER_ZR;
+    *doom_defaults_list[39].location = CLASSIC_CONTROLLER_HOME;
+    *doom_defaults_list[40].location = CONTROLLER_1;
+    *doom_defaults_list[41].location = CONTROLLER_2;
+    *doom_defaults_list[42].location = CLASSIC_CONTROLLER_PLUS;
 }
 
 void M_DrawKeyBindings(void)
@@ -5511,7 +5520,7 @@ void M_DrawKeyBindings(void)
                 M_WriteText(195, (i*10+30), "???");
             else
                 M_WriteText(195, (i*10+30),
-                Key2String(*(doom_defaults_list[i+FirstKey+30].location)));
+                Key2String(*(doom_defaults_list[i+FirstKey+31].location)));
         }
     }
 }
@@ -6151,6 +6160,23 @@ void M_Footclip(int choice)
         if (!d_footclip)
             d_footclip = true;
         players[consoleplayer].message = DEH_String("HERETIC FOOTCLIPS ENABLED");
+        break;
+    }
+}
+
+void M_Splash(int choice)
+{
+    switch(choice)
+    {
+    case 0:
+        if (d_splash)
+            d_splash = false;
+        players[consoleplayer].message = DEH_String("HERETIC LIQUID SPLASH DISABLED");
+        break;
+    case 1:
+        if (!d_splash)
+            d_splash = true;
+        players[consoleplayer].message = DEH_String("HERETIC LIQUID SPLASH ENABLED");
         break;
     }
 }

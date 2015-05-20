@@ -281,6 +281,7 @@ extern  boolean         d_maxgore;
 extern  boolean         d_thrust;
 extern  boolean         d_footstep;
 extern  boolean         d_footclip;
+extern  boolean         d_splash;
 
 extern  int             autoaim;
 

@@ -46,6 +46,7 @@ boolean         respawnparm = false;       // checkparm of -respawn
 boolean         fastparm = false;          // checkparm of -fast
 boolean         d_footstep = false;
 boolean         d_footclip = false;
+boolean         d_splash = false;
 
 int             autoaim = false;
 
