@@ -51,24 +51,23 @@
 // ------------------------
 // Command line parameters.
 //
-extern  boolean        nomonsters;        // checkparm of -nomonsters
-extern  boolean        respawnparm;        // checkparm of -respawn
-extern  boolean        fastparm;        // checkparm of -fast
-
-extern  boolean        devparm;        // DEBUG: launched with -devparm
+extern  boolean         nomonsters;      // checkparm of -nomonsters
+extern  boolean         respawnparm;     // checkparm of -respawn
+extern  boolean         fastparm;        // checkparm of -fast
+extern  boolean         devparm;         // DEBUG: launched with -devparm
 
 
 // -----------------------------------------------------
 // Game Mode - identify IWAD as shareware, retail etc.
 //
-extern GameMode_t        gamemode;
-extern GameMission_t        gamemission;
-extern GameVersion_t    gameversion;
-extern char            *gamedescription;
+extern  GameMode_t      gamemode;
+extern  GameMission_t   gamemission;
+extern  GameVersion_t   gameversion;
+extern  char            *gamedescription;
 
 // If true, we're using one of the mangled BFG edition IWADs.
-extern boolean bfgedition;
-extern boolean nerve_pwad;
+extern  boolean         bfgedition;
+extern  boolean         nerve_pwad;
 
 // Convenience macro.
 // 'gamemission' can be equal to pack_chex or pack_hacx, but these are
@@ -80,7 +79,7 @@ extern boolean nerve_pwad;
      gamemission == pack_hacx ? doom2 : gamemission)
 
 // Set if homebrew PWAD stuff has been added.
-extern  boolean        modifiedgame;
+extern  boolean         modifiedgame;
 
 
 // -------------------------------------------
@@ -88,21 +87,21 @@ extern  boolean        modifiedgame;
 //
 
 // Defaults for menu, methinks.
-extern  skill_t                startskill;
+extern  skill_t         startskill;
 extern  int             startepisode;
-extern        int                startmap;
+extern  int             startmap;
 
 // Savegame slot to load on startup.  This is the value provided to
 // the -loadgame option.  If this has not been provided, this is -1.
 
 extern  int             startloadgame;
 
-extern  boolean                autostart;
+extern  boolean         autostart;
 
 // Selected by user. 
 extern  skill_t         gameskill;
-extern  int                gameepisode;
-extern  int                gamemap;
+extern  int             gameepisode;
+extern  int             gamemap;
 
 // If non-zero, exit the level after this number of minutes
 extern  int             timelimit;
@@ -111,10 +110,10 @@ extern  int             timelimit;
 extern  boolean         respawnmonsters;
 
 // Netgame? Only true if >1 player.
-extern  boolean        netgame;
+extern  boolean         netgame;
 
 // 0=Cooperative; 1=Deathmatch; 2=Altdeath
-extern boolean deathmatch;
+extern  boolean         deathmatch;
 
 // -------------------------
 // Internal parameters for sound rendering.
@@ -126,18 +125,18 @@ extern boolean deathmatch;
 //  Sound FX volume has default, 0 - 15
 //  Music volume has default, 0 - 15
 // These are multiplied by 8.
-extern int sfxVolume;
-extern int musicVolume;
+extern  int             sfxVolume;
+extern  int             musicVolume;
 
 // Current music/sfx card - index useless
 //  w/o a reference LUT in a sound module.
 // Ideally, this would use indices found
 //  in: /usr/include/linux/soundcard.h
-extern int snd_MusicDevice;
-extern int snd_SfxDevice;
+extern  int             snd_MusicDevice;
+extern  int             snd_SfxDevice;
 // Config file? Same disclaimer as above.
-extern int snd_DesiredMusicDevice;
-extern int snd_DesiredSfxDevice;
+extern  int             snd_DesiredMusicDevice;
+extern  int             snd_DesiredSfxDevice;
 
 
 // -------------------------
@@ -147,44 +146,38 @@ extern int snd_DesiredSfxDevice;
 // Depending on view size - no status bar?
 // Note that there is no way to disable the
 //  status bar explicitely.
-extern  boolean statusbaractive;
+extern  boolean         statusbaractive;
 
-extern  boolean automapactive;        // In AutoMap mode?
-extern  boolean        menuactive;        // Menu overlayed?
-extern  boolean        paused;                // Game Pause?
+extern  boolean         automapactive;        // In AutoMap mode?
+extern  boolean         menuactive;        // Menu overlayed?
+extern  boolean         paused;                // Game Pause?
 
 
-extern  boolean                viewactive;
+extern  boolean         viewactive;
 
-extern  boolean                nodrawers;
-
-/*
-extern  boolean         testcontrols;
-extern  int             testcontrols_mousespeed;
-*/
-
+extern  boolean         nodrawers;
 
 
 // This one is related to the 3-screen display mode.
 // ANG90 = left side, ANG270 = right
-extern  int        viewangleoffset;
+extern  int             viewangleoffset;
 
 // Player taking events, and displaying.
-extern  int        consoleplayer;        
-extern  int        displayplayer;
+extern  int             consoleplayer;        
+extern  int             displayplayer;
 
 
 // -------------------------------------
 // Scores, rating.
 // Statistics on a given map, for intermission.
 //
-extern  int        totalkills;
-extern        int        totalitems;
-extern        int        totalsecret;
+extern  int             totalkills;
+extern  int             totalitems;
+extern  int             totalsecret;
 
 // Timer, for scores.
-extern  int        levelstarttic;        // gametic at level start
-extern  int        leveltime;        // tics in game play for par
+extern  int             levelstarttic;        // gametic at level start
+extern  int             leveltime;        // tics in game play for par
 
 
 
@@ -192,19 +185,14 @@ extern  int        leveltime;        // tics in game play for par
 // DEMO playback/recording related stuff.
 // No demo, there is a human player in charge?
 // Disable save/end game?
-extern  boolean        usergame;
+extern  boolean         usergame;
 
 //?
-extern  boolean        demoplayback;
-extern  boolean        demorecording;
-
-// Round angleturn in ticcmds to the nearest 256.  This is used when
-// recording Vanilla demos in netgames.
-
-extern boolean lowres_turn;
+extern  boolean         demoplayback;
+extern  boolean         demorecording;
 
 // Quit after playing a demo from cmdline.
-extern  boolean                singledemo;        
+extern  boolean         singledemo;        
 
 
 
@@ -226,23 +214,23 @@ extern  gamestate_t     gamestate;
 
 
 // Bookkeeping on players - state.
-extern        player_t        players[MAXPLAYERS];
+extern  player_t        players[MAXPLAYERS];
 
 // Alive? Disconnected?
-extern  boolean                playeringame[MAXPLAYERS];
+extern  boolean         playeringame[MAXPLAYERS];
 
 
 // Player spawn spots for deathmatch.
 #define MAX_DM_STARTS   10
 extern  mapthing_t      deathmatchstarts[MAX_DM_STARTS];
-extern  mapthing_t*        deathmatch_p;
+extern  mapthing_t*     deathmatch_p;
 
 // Player spawn spots.
 extern  mapthing_t      playerstarts[MAXPLAYERS];
 
 // Intermission stats.
 // Parameters for world map / intermission.
-extern  wbstartstruct_t                wminfo;        
+extern  wbstartstruct_t wminfo;        
 
 
 
@@ -256,7 +244,7 @@ extern  wbstartstruct_t                wminfo;
 
 // File handling stuff.
 extern  char *          savegamedir;
-extern        char                basedefault[1024];
+extern  char            basedefault[1024];
 
 // if true, load all graphics at level load
 extern  boolean         precache;
@@ -275,24 +263,25 @@ extern  int             bodyqueslot;
 // Needed to store the number of the dummy sky flat.
 // Used for rendering,
 //  as well as tracking projectiles etc.
-extern int                skyflatnum;
+extern  int             skyflatnum;
 
 
 
 // Netgame stuff (buffers and pointers, i.e. indices).
 
 
-extern        int                rndindex;
+extern  int             rndindex;
 
-extern  ticcmd_t       *netcmds;
+extern  ticcmd_t        *netcmds;
 
-extern        boolean                d_recoil;
-extern        boolean                start_respawnparm;
-extern        boolean                start_fastparm;
-extern        boolean                d_maxgore;
-extern        boolean                d_thrust;
+extern  boolean         d_recoil;
+extern  boolean         start_respawnparm;
+extern  boolean         start_fastparm;
+extern  boolean         d_maxgore;
+extern  boolean         d_thrust;
+extern  boolean         d_footstep;
 
-extern        int                autoaim;
+extern  int             autoaim;
 
 void A_MoreGibs(mobj_t* actor);
 

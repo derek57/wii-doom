@@ -20,6 +20,7 @@
 #include "doomdef.h"
 #include "doomfeatures.h"
 #include "doomkeys.h"
+#include "doomstat.h"
 #include "doomtype.h"
 #include "m_config.h"
 #include "m_misc.h"
@@ -149,6 +150,7 @@ void M_BindBaseControls(void)
     M_BindVariable("switch_chans",           &swap_sound_chans);
     M_BindVariable("player_thrust",          &d_thrust);
     M_BindVariable("run_count",              &runcount);
+    M_BindVariable("footsteps",              &d_footstep);
     M_BindVariable("key_fire",               &joy_r);
     M_BindVariable("key_use",                &joy_l);
     M_BindVariable("key_menu",               &joy_minus);

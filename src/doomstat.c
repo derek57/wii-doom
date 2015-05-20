@@ -44,6 +44,7 @@ boolean         d_maxgore = false;
 boolean         d_thrust = false;
 boolean         respawnparm = false;       // checkparm of -respawn
 boolean         fastparm = false;          // checkparm of -fast
+boolean         d_footstep = false;
 
 int             autoaim = false;
 

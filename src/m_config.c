@@ -110,6 +110,7 @@ default_t        doom_defaults_list[] =
     CONFIG_VARIABLE_INT                (switch_chans),
     CONFIG_VARIABLE_INT                (player_thrust),
     CONFIG_VARIABLE_INT                (run_count),
+    CONFIG_VARIABLE_INT                (footsteps),
     CONFIG_VARIABLE_INT                (key_fire),
     CONFIG_VARIABLE_INT                (key_use),
     CONFIG_VARIABLE_INT                (key_menu),
