@@ -6373,7 +6373,8 @@ void M_Massacre(int choice)
     {
         if (currentthinker->function.acp1 == (actionf_p1) P_MobjThinker &&
            (((mobj_t *) currentthinker)->flags & MF_COUNTKILL ||
-            ((mobj_t *) currentthinker)->type == MT_SKULL))
+            ((mobj_t *) currentthinker)->type == MT_SKULL ||
+            ((mobj_t *) currentthinker)->type == MT_BETASKULL))
         {
             // killough 3/6/98: kill even if Pain Elemental is dead
 

@@ -56,6 +56,7 @@ char *sprnames[] = {
     "FLSH","SPRY","CHNK","SPSH","LVAS","SLDG",
     "PLS1", // killough 7/19/98: first  of two plasma fireballs in the beta
     "PLS2", // killough 7/19/98: second of two plasma fireballs in the beta
+    "BSKL",
     /*"PBUL","PSHE",*/
 
     NULL
@@ -141,6 +142,8 @@ void A_MoreBlood();
 void A_MoreGibs();
 void A_Footstep();
 void A_FireOldBFG();      // killough 7/19/98: classic BFG firing function
+void A_BetaSkullAttack();
+void A_Stop();
 //void A_Bullet();
 
 #pragma GCC diagnostic push
@@ -1218,8 +1221,41 @@ state_t        states[NUMSTATES] = {
     {SPR_PLS2,32769,4,{NULL},S_PLS2BALL,0,0},  // S_PLS2BALL2
     {SPR_PLS2,32770,6,{NULL},S_PLS2BALLX2,0,0},  // S_PLS2BALLX1
     {SPR_PLS2,32771,6,{NULL},S_PLS2BALLX3,0,0},  // S_PLS2BALLX2
-    {SPR_PLS2,32772,6,{NULL},S_NULL,0,0} // S_PLS2BALLX3
-/*
+    {SPR_PLS2,32772,6,{NULL},S_NULL,0,0}, // S_PLS2BALLX3
+
+    // killough 10/98: beta lost souls attacked from a distance, 
+    // animated with colors, and stayed in the air when killed.
+    // This is an approximation, but I'm sure it can be improved.
+
+    // spawnstate
+    {SPR_BSKL,0,10,{A_Look},S_BSKUL_STND,0,0},  // S_BSKUL_STND
+
+    // chasestate
+    {SPR_BSKL,1,5,{A_Chase},S_BSKUL_RUN2,0,0},  // S_BSKUL_RUN1
+    {SPR_BSKL,2,5,{A_Chase},S_BSKUL_RUN3,0,0},  // S_BSKUL_RUN2
+    {SPR_BSKL,3,5,{A_Chase},S_BSKUL_RUN4,0,0},  // S_BSKUL_RUN3
+    {SPR_BSKL,0,5,{A_Chase},S_BSKUL_RUN1,0,0},  // S_BSKUL_RUN4
+
+    // missilestate
+    {SPR_BSKL,4,4,{A_FaceTarget},S_BSKUL_ATK2,0,0},     // S_BSKUL_ATK1
+    {SPR_BSKL,5,5,{A_BetaSkullAttack},S_BSKUL_ATK3,0,0}, // S_BSKUL_ATK2
+    {SPR_BSKL,5,4,{NULL},S_BSKUL_RUN1,0,0},              // S_BSKUL_ATK3
+
+    // painstate
+    {SPR_BSKL,6,4,{NULL},S_BSKUL_PAIN2,0,0},     // S_BSKUL_PAIN1
+    {SPR_BSKL,7,2,{A_Pain},S_BSKUL_RUN1,0,0},   // S_BSKUL_PAIN2
+    {SPR_BSKL,8,4,{NULL},S_BSKUL_RUN1,0,0},      // S_BSKUL_PAIN3
+
+    // deathstate
+    {SPR_BSKL,9,5,{NULL},S_BSKUL_DIE2,0,0},     // S_BSKUL_DIE1
+    {SPR_BSKL,10,5,{NULL},S_BSKUL_DIE3,0,0},     // S_BSKUL_DIE2
+    {SPR_BSKL,11,5,{NULL},S_BSKUL_DIE4,0,0},     // S_BSKUL_DIE3
+    {SPR_BSKL,12,5,{NULL},S_BSKUL_DIE5,0,0},     // S_BSKUL_DIE4
+    {SPR_BSKL,13,5,{A_Scream},S_BSKUL_DIE6,0,0}, // S_BSKUL_DIE5
+    {SPR_BSKL,14,5,{NULL},S_BSKUL_DIE7,0,0},     // S_BSKUL_DIE6
+    {SPR_BSKL,15,5,{A_Fall},S_BSKUL_DIE8,0,0},   // S_BSKUL_DIE7
+    {SPR_BSKL,16,5,{A_Stop},S_BSKUL_DIE8,0,0}/*,   // S_BSKUL_DIE8
+
     {SPR_PBUL,0,10,{NULL},S_BULLET_01,0,0},       // S_BULLET_00
     {SPR_PBUL,1,10,{NULL},S_NULL,0,0},       // S_BULLET_01
     {SPR_PSHE,0,20,{NULL},S_SHELL_01,0,0},       // S_SHELL_00
@@ -5521,6 +5557,35 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_NOBLOCKMAP|MF_MISSILE|MF_DROPOFF|MF_NOGRAVITY, // flags
         0,                         // flags2
         S_NULL,                     // raisestate
+        NULL,       // namepointer
+    },
+
+    {                // MT_BETASKULL
+        -1,                // doomednum
+        S_BSKUL_STND,                // spawnstate
+        100,                // spawnhealth
+        S_BSKUL_RUN1,                // seestate
+        0,                // seesound
+        8,                // reactiontime
+        sfx_sklatk,                // attacksound
+        S_BSKUL_PAIN1,                // painstate
+        256,                // painchance
+        sfx_dmpain,                // painsound
+        0,                // meleestate
+        S_BSKUL_ATK1,                // missilestate
+        S_NULL,     // crashstate
+        S_BSKUL_DIE1,                // deathstate
+        S_NULL,                // xdeathstate
+        sfx_firxpl,                // deathsound
+        8,                // speed
+        16*FRACUNIT,                // radius
+        56*FRACUNIT,                // height
+        50,                // mass
+        3,                // damage
+        sfx_dmact,                // activesound
+        MF_SOLID|MF_SHOOTABLE|MF_FLOAT|MF_NOGRAVITY, // flags
+        MF2_FOOTCLIP, // flags2
+        S_NULL,                // raisestate
         NULL,       // namepointer
     }/*,
 

@@ -743,7 +743,7 @@ P_KillMobj
     target->flags &= ~(MF_SHOOTABLE|MF_FLOAT|MF_SKULLFLY);
     target->flags2 &= ~MF2_PASSMOBJ;
 
-    if (target->type != MT_SKULL)
+    if (target->type != MT_SKULL && target->type != MT_BETASKULL)
         target->flags &= ~MF_NOGRAVITY;
 
     target->flags |= MF_CORPSE|MF_DROPOFF;

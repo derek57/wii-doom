@@ -1002,10 +1002,13 @@ void P_SpawnMapThing (mapthing_t* mthing)
     if (deathmatch && mobjinfo[i].flags & MF_NOTDMATCH)
         return;
 
+    if(beta_skulls && type == MT_SKULL)
+        type = MT_BETASKULL;
+
     // don't spawn any monsters if -nomonsters
-    if (nomonsters
-        && ( i == MT_SKULL
-             || (mobjinfo[i].flags & MF_COUNTKILL)) )
+    if (nomonsters && ( i == MT_SKULL ||
+                        i == MT_BETASKULL ||
+                      ( mobjinfo[i].flags & MF_COUNTKILL)) )
     {
         return;
     }

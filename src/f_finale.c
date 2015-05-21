@@ -30,6 +30,7 @@
 
 // Functions.
 #include "deh_str.h"
+#include "doomstat.h"
 #include "hu_stuff.h"
 #include "i_system.h"
 #include "i_swap.h"
@@ -349,6 +350,27 @@ castinfo_t      castorder[] = {
     {NULL,0}
 };
 
+castinfo_t      castorderbeta[] = {
+    {CC_ZOMBIE, MT_POSSESSED},
+    {CC_SHOTGUN, MT_SHOTGUY},
+    {CC_HEAVY, MT_CHAINGUY},
+    {CC_IMP, MT_TROOP},
+    {CC_DEMON, MT_SERGEANT},
+    {CC_LOST, MT_BETASKULL},
+    {CC_CACO, MT_HEAD},
+    {CC_HELL, MT_KNIGHT},
+    {CC_BARON, MT_BRUISER},
+    {CC_ARACH, MT_BABY},
+    {CC_PAIN, MT_PAIN},
+    {CC_REVEN, MT_UNDEAD},
+    {CC_MANCU, MT_FATSO},
+    {CC_ARCH, MT_VILE},
+    {CC_SPIDER, MT_SPIDER},
+    {CC_CYBER, MT_CYBORG},
+    {CC_HERO, MT_PLAYER},
+
+    {NULL,0}
+};
 
 //
 // F_StartCast
@@ -357,7 +379,10 @@ void F_StartCast (void)
 {
     wipegamestate = -1;    // force a screen wipe
     castnum = 0;
-    caststate = &states[mobjinfo[castorder[castnum].type].seestate];
+    if(!beta_skulls)
+        caststate = &states[mobjinfo[castorder[castnum].type].seestate];
+    else
+        caststate = &states[mobjinfo[castorderbeta[castnum].type].seestate];
     casttics = caststate->tics;
     castdeath = false;
     finalestage = F_STAGE_CAST;
@@ -388,18 +413,34 @@ void F_CastTicker (void)
         // switch from deathstate to next monster
         castnum++;
         castdeath = false;
-        if (castorder[castnum].name == NULL)
-            castnum = 0;
-        if (mobjinfo[castorder[castnum].type].seesound)
-            S_StartSound (NULL, mobjinfo[castorder[castnum].type].seesound);
-        caststate = &states[mobjinfo[castorder[castnum].type].seestate];
+        if(!beta_skulls)
+        {
+            if (castorder[castnum].name == NULL)
+                castnum = 0;
+            if (mobjinfo[castorder[castnum].type].seesound)
+                S_StartSound (NULL, mobjinfo[castorder[castnum].type].seesound);
+            caststate = &states[mobjinfo[castorder[castnum].type].seestate];
+        }
+        else
+        {
+            if (castorderbeta[castnum].name == NULL)
+                castnum = 0;
+            if (mobjinfo[castorderbeta[castnum].type].seesound)
+                S_StartSound (NULL, mobjinfo[castorderbeta[castnum].type].seesound);
+            caststate = &states[mobjinfo[castorderbeta[castnum].type].seestate];
+        }
         castframes = 0;
     }
     else
     {
         // just advance to next state in animation
         if (caststate == &states[S_PLAY_ATK1])
-            goto stopattack;    // Oh, gross hack!
+        {
+            if(!beta_skulls)
+                goto stopattack;    // Oh, gross hack!
+            else
+                goto stopattackbeta;    // Oh, gross hack!
+        }
         st = caststate->nextstate;
         caststate = &states[st];
         castframes++;
@@ -454,31 +495,65 @@ void F_CastTicker (void)
     {
         // go into attack frame
         castattacking = true;
-        if (castonmelee)
-            caststate=&states[mobjinfo[castorder[castnum].type].meleestate];
-        else
-            caststate=&states[mobjinfo[castorder[castnum].type].missilestate];
-        castonmelee ^= 1;
-        if (caststate == &states[S_NULL])
+        if(!beta_skulls)
         {
             if (castonmelee)
-                caststate=
-                    &states[mobjinfo[castorder[castnum].type].meleestate];
+                caststate=&states[mobjinfo[castorder[castnum].type].meleestate];
             else
-                caststate=
-                    &states[mobjinfo[castorder[castnum].type].missilestate];
+                caststate=&states[mobjinfo[castorder[castnum].type].missilestate];
+            castonmelee ^= 1;
+            if (caststate == &states[S_NULL])
+            {
+                if (castonmelee)
+                    caststate=
+                        &states[mobjinfo[castorder[castnum].type].meleestate];
+                else
+                    caststate=
+                        &states[mobjinfo[castorder[castnum].type].missilestate];
+            }
+        }
+        else
+        {
+            if (castonmelee)
+                caststate=&states[mobjinfo[castorderbeta[castnum].type].meleestate];
+            else
+                caststate=&states[mobjinfo[castorderbeta[castnum].type].missilestate];
+            castonmelee ^= 1;
+            if (caststate == &states[S_NULL])
+            {
+                if (castonmelee)
+                    caststate=
+                        &states[mobjinfo[castorderbeta[castnum].type].meleestate];
+                else
+                    caststate=
+                        &states[mobjinfo[castorderbeta[castnum].type].missilestate];
+            }
         }
     }
         
     if (castattacking)
     {
-        if (castframes == 24
-            || caststate == &states[mobjinfo[castorder[castnum].type].seestate] )
+        if(!beta_skulls)
         {
-          stopattack:
-            castattacking = false;
-            castframes = 0;
-            caststate = &states[mobjinfo[castorder[castnum].type].seestate];
+            if (castframes == 24
+                || caststate == &states[mobjinfo[castorder[castnum].type].seestate] )
+            {
+              stopattack:
+                castattacking = false;
+                castframes = 0;
+                caststate = &states[mobjinfo[castorder[castnum].type].seestate];
+            }
+        }
+        else
+        {
+            if (castframes == 24
+                || caststate == &states[mobjinfo[castorderbeta[castnum].type].seestate] )
+            {
+              stopattackbeta:
+                castattacking = false;
+                castframes = 0;
+                caststate = &states[mobjinfo[castorderbeta[castnum].type].seestate];
+            }
         }
     }
         
@@ -506,13 +581,24 @@ boolean F_CastResponder (event_t* ev)
                 
     // go into death frame
     castdeath = true;
-    caststate = &states[mobjinfo[castorder[castnum].type].deathstate];
-    casttics = caststate->tics;
-    castframes = 0;
-    castattacking = false;
-    if (mobjinfo[castorder[castnum].type].deathsound)
-        S_StartSound (NULL, mobjinfo[castorder[castnum].type].deathsound);
-        
+    if(!beta_skulls)
+    {
+        caststate = &states[mobjinfo[castorder[castnum].type].deathstate];
+        casttics = caststate->tics;
+        castframes = 0;
+        castattacking = false;
+        if (mobjinfo[castorder[castnum].type].deathsound)
+            S_StartSound (NULL, mobjinfo[castorder[castnum].type].deathsound);
+    }
+    else    
+    {
+        caststate = &states[mobjinfo[castorderbeta[castnum].type].deathstate];
+        casttics = caststate->tics;
+        castframes = 0;
+        castattacking = false;
+        if (mobjinfo[castorderbeta[castnum].type].deathsound)
+            S_StartSound (NULL, mobjinfo[castorderbeta[castnum].type].deathsound);
+    }
     return true;
 }
 
@@ -583,8 +669,11 @@ void F_CastDrawer (void)
     // erase the entire screen to a background
     V_DrawPatch (0, 0, W_CacheLumpName (DEH_String("BOSSBACK"), PU_CACHE));
 
-    F_CastPrint (DEH_String(castorder[castnum].name));
-    
+    if(!beta_skulls)
+        F_CastPrint (DEH_String(castorder[castnum].name));
+    else
+        F_CastPrint (DEH_String(castorderbeta[castnum].name));
+
     // draw the current frame in the middle of the screen
     sprdef = &sprites[caststate->sprite];
     sprframe = &sprdef->spriteframes[ caststate->frame & FF_FRAMEMASK];
