@@ -942,9 +942,11 @@ void A_TroopAttack (mobj_t* actor)
         return;
     }
 
-    
     // launch a missile
-    P_SpawnMissile (actor, actor->target, MT_TROOPSHOT);
+    if(beta_imp)
+        P_SpawnMissile (actor, actor->target, MT_TROOPSHOT2);
+    else
+        P_SpawnMissile (actor, actor->target, MT_TROOPSHOT);
 }
 
 

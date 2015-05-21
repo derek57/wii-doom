@@ -282,9 +282,10 @@ extern  boolean         d_thrust;
 extern  boolean         d_footstep;
 extern  boolean         d_footclip;
 extern  boolean         d_splash;
-extern  boolean         bfg_classic;
+extern  boolean         beta_bfg;
 extern  boolean         beta_skulls;
 extern  boolean         beta_plasma;
+extern  boolean         beta_imp;
 
 extern  int             d_swirl;
 extern  int             autoaim;

@@ -864,8 +864,8 @@ int                        coordinates_info = 0;
 int                        timer_info = 0;
 int                        version_info = 0;
 int                        fps = 0;              // calculating the frames per second
-int                        key_controls_start_in_cfg_at_pos = 35; // ACTUALLY IT'S +2
-int                        key_controls_end_in_cfg_at_pos = 49;   // ACTUALLY IT'S +2
+int                        key_controls_start_in_cfg_at_pos = 36; // ACTUALLY IT'S +2
+int                        key_controls_end_in_cfg_at_pos = 50;   // ACTUALLY IT'S +2
 int                        crosshair = 0;
 int                        show_stats = 0;
 int                        tracknum = 1;
@@ -1048,6 +1048,7 @@ void M_Swirl(int choice);
 void M_BFGClassic(int choice);
 void M_BetaSkulls(int choice);
 void M_BetaPlasma(int choice);
+void M_BetaImp(int choice);
 
 void M_God(int choice);
 void M_Noclip(int choice);
@@ -1710,6 +1711,7 @@ enum
     game2_prbfg,
     game2_prskulls,
     game2_prplasma,
+    game2_primp,
     game2_end
 } game2_e;
 
@@ -1724,6 +1726,7 @@ menuitem_t GameMenu2[]=
     {2,"",M_BFGClassic,'b'},
     {2,"",M_BetaSkulls,'x'},
     {2,"",M_BetaPlasma,'p'},
+    {2,"",M_BetaImp,'i'},
 };
 
 menu_t  GameDef2 =
@@ -2667,6 +2670,7 @@ void M_DrawGame2(void)
     M_WriteText(GameDef.x - 15, GameDef.y + 58, DEH_String("PRE-RELEASE BFG9000"));
     M_WriteText(GameDef.x - 15, GameDef.y + 68, DEH_String("PRE-RELEASE SKULLS"));
     M_WriteText(GameDef.x - 15, GameDef.y + 78, DEH_String("PRE-RELEASE PLASMA"));
+    M_WriteText(GameDef.x - 15, GameDef.y + 88, DEH_String("PRE-RELEASE IMP"));
 
     if(autoaim)
         M_WriteText(GameDef.x + 153, GameDef.y - 2, DEH_String("ON"));
@@ -2698,7 +2702,7 @@ void M_DrawGame2(void)
     else
         M_WriteText(GameDef.x + 145, GameDef.y + 48, DEH_String("OFF"));
 
-    if(bfg_classic)
+    if(beta_bfg)
         M_WriteText(GameDef.x + 153, GameDef.y + 58, DEH_String("ON"));
     else
         M_WriteText(GameDef.x + 145, GameDef.y + 58, DEH_String("OFF"));
@@ -2712,6 +2716,11 @@ void M_DrawGame2(void)
         M_WriteText(GameDef.x + 153, GameDef.y + 78, DEH_String("ON"));
     else
         M_WriteText(GameDef.x + 145, GameDef.y + 78, DEH_String("OFF"));
+
+    if(beta_imp)
+        M_WriteText(GameDef.x + 153, GameDef.y + 88, DEH_String("ON"));
+    else
+        M_WriteText(GameDef.x + 145, GameDef.y + 88, DEH_String("OFF"));
 }
 
 void DetectState(void)
@@ -3598,7 +3607,7 @@ boolean M_Responder (event_t* ev)
     if (askforkey && data->btns_d)                // KEY BINDINGS
     {
         M_KeyBindingsClearControls(ev->data1);
-        *doom_defaults_list[keyaskedfor + 35 + FirstKey].location = ev->data1;
+        *doom_defaults_list[keyaskedfor + 36 + FirstKey].location = ev->data1;
         askforkey = false;
         return true;
     }
@@ -5387,7 +5396,6 @@ void M_KeyBindingsClearControls (int ch)
 
 void M_KeyBindingsClearAll (int choice)
 {
-    *doom_defaults_list[35].location = 0;
     *doom_defaults_list[36].location = 0;
     *doom_defaults_list[37].location = 0;
     *doom_defaults_list[38].location = 0;
@@ -5401,24 +5409,25 @@ void M_KeyBindingsClearAll (int choice)
     *doom_defaults_list[46].location = 0;
     *doom_defaults_list[47].location = 0;
     *doom_defaults_list[48].location = 0;
+    *doom_defaults_list[49].location = 0;
 }
 
 void M_KeyBindingsReset (int choice)
 {
-    *doom_defaults_list[35].location = CLASSIC_CONTROLLER_R;
-    *doom_defaults_list[36].location = CLASSIC_CONTROLLER_L;
-    *doom_defaults_list[37].location = CLASSIC_CONTROLLER_MINUS;
-    *doom_defaults_list[38].location = CLASSIC_CONTROLLER_LEFT;
-    *doom_defaults_list[39].location = CLASSIC_CONTROLLER_DOWN;
-    *doom_defaults_list[40].location = CLASSIC_CONTROLLER_RIGHT;
-    *doom_defaults_list[41].location = CLASSIC_CONTROLLER_ZL;
-    *doom_defaults_list[42].location = CLASSIC_CONTROLLER_ZR;
-    *doom_defaults_list[43].location = CLASSIC_CONTROLLER_A;
-    *doom_defaults_list[44].location = CLASSIC_CONTROLLER_Y;
-    *doom_defaults_list[45].location = CLASSIC_CONTROLLER_B;
-    *doom_defaults_list[46].location = CONTROLLER_1;
-    *doom_defaults_list[47].location = CONTROLLER_2;
-    *doom_defaults_list[48].location = CLASSIC_CONTROLLER_PLUS;
+    *doom_defaults_list[36].location = CLASSIC_CONTROLLER_R;
+    *doom_defaults_list[37].location = CLASSIC_CONTROLLER_L;
+    *doom_defaults_list[38].location = CLASSIC_CONTROLLER_MINUS;
+    *doom_defaults_list[39].location = CLASSIC_CONTROLLER_LEFT;
+    *doom_defaults_list[40].location = CLASSIC_CONTROLLER_DOWN;
+    *doom_defaults_list[41].location = CLASSIC_CONTROLLER_RIGHT;
+    *doom_defaults_list[42].location = CLASSIC_CONTROLLER_ZL;
+    *doom_defaults_list[43].location = CLASSIC_CONTROLLER_ZR;
+    *doom_defaults_list[44].location = CLASSIC_CONTROLLER_A;
+    *doom_defaults_list[45].location = CLASSIC_CONTROLLER_Y;
+    *doom_defaults_list[46].location = CLASSIC_CONTROLLER_B;
+    *doom_defaults_list[47].location = CONTROLLER_1;
+    *doom_defaults_list[48].location = CONTROLLER_2;
+    *doom_defaults_list[49].location = CLASSIC_CONTROLLER_PLUS;
 }
 
 void M_DrawKeyBindings(void)
@@ -5454,7 +5463,7 @@ void M_DrawKeyBindings(void)
                 M_WriteText(195, (i*10+20), "???");
             else
                 M_WriteText(195, (i*10+20),
-                        Key2String(*(doom_defaults_list[i+FirstKey+35].location)));
+                        Key2String(*(doom_defaults_list[i+FirstKey+36].location)));
         }
     }
 }
@@ -6140,13 +6149,13 @@ void M_BFGClassic(int choice)
     switch(choice)
     {
     case 0:
-        if (bfg_classic)
-            bfg_classic = false;
+        if (beta_bfg)
+            beta_bfg = false;
         players[consoleplayer].message = DEH_String("PRE-RELEASE BFG9000 DISABLED");
         break;
     case 1:
-        if (!bfg_classic)
-            bfg_classic = true;
+        if (!beta_bfg)
+            beta_bfg = true;
         players[consoleplayer].message = DEH_String("PRE-RELEASE BFG9000 ENABLED");
         break;
     }
@@ -6182,6 +6191,23 @@ void M_BetaPlasma(int choice)
         if (!beta_plasma)
             beta_plasma = true;
         players[consoleplayer].message = DEH_String("PRE-RELEASE PLASMA GUN ENABLED");
+        break;
+    }
+}
+
+void M_BetaImp(int choice)
+{
+    switch(choice)
+    {
+    case 0:
+        if (beta_imp)
+            beta_imp = false;
+        players[consoleplayer].message = DEH_String("PRE-RELEASE IMP DISABLED");
+        break;
+    case 1:
+        if (!beta_imp)
+            beta_imp = true;
+        players[consoleplayer].message = DEH_String("PRE-RELEASE IMP ENABLED");
         break;
     }
 }

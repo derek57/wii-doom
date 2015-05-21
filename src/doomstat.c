@@ -47,9 +47,11 @@ boolean         fastparm = false;          // checkparm of -fast
 boolean         d_footstep = false;
 boolean         d_footclip = false;
 boolean         d_splash = false;
-boolean         bfg_classic = false;
+boolean         beta_bfg = false;
 boolean         beta_skulls = false;
 boolean         beta_plasma = false;
+boolean         beta_imp = false;
+    
 
 int             d_swirl;
 int             autoaim = false;

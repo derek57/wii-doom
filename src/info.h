@@ -1436,6 +1436,7 @@ typedef enum {
     MT_PLASMA1, // killough 7/11/98: first  of alternating beta plasma fireballs
     MT_PLASMA2, // killough 7/11/98: second of alternating beta plasma fireballs
     MT_BETASKULL,
+    MT_TROOPSHOT2,
 /*
     MT_BULLET,
     MT_SHELL,

@@ -5587,6 +5587,35 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF2_FOOTCLIP, // flags2
         S_NULL,                // raisestate
         NULL,       // namepointer
+    },
+
+    {   // MT_TROOPSHOT2
+        -1,   // doomednum
+        S_PLS2BALL,   // spawnstate
+        1000,   // spawnhealth
+        S_NULL,   // seestate
+        sfx_firsht,   // seesound
+        8,    // reactiontime
+        sfx_None,   // attacksound
+        S_NULL,   // painstate
+        0,    // painchance
+        sfx_None,   // painsound
+        S_NULL,   // meleestate
+        S_NULL,   // missilestate
+        S_NULL,     // crashstate
+        S_PLS2BALLX1,    // deathstate
+        S_NULL,   // xdeathstate
+        sfx_firxpl,   // deathsound
+        12*FRACUNIT,    // speed
+        6*FRACUNIT,    // radius
+        8*FRACUNIT,   // height
+        100,    // mass
+        4,    // damage
+        sfx_None,   // activesound
+        MF_NOBLOCKMAP|MF_MISSILE|MF_DROPOFF|MF_NOGRAVITY, // flags
+        0,                         // flags2
+        S_NULL,                     // raisestate
+        NULL,       // namepointer
     }/*,
 
     {           // MT_BULLET

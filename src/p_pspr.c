@@ -98,7 +98,7 @@ P_SetPsprite
         }
         
         // killough 7/19/98: Pre-Beta BFG
-        if (stnum == S_BFG1 && bfg_classic)
+        if (stnum == S_BFG1 && beta_bfg)
 	    stnum = S_OLDBFG1; // Skip to alternate weapon frame
 
         state = &states[stnum];
