@@ -92,7 +92,6 @@ char *          savegamedir;
 
 // location of IWAD and WAD files
 
-char *          iwadfile;
 char            *pagename;
 
 boolean         nomonsters;     // checkparm of -nomonsters
@@ -1590,6 +1589,11 @@ void D_DoomMain (void)
                 if (W_CheckNumForName(name[i])<0)
                     I_Error(DEH_String("\nThis is not the registered version."));
     }
+
+    // disable any colored blood in Chex Quest,
+    // disable modifying Stealth Buzzer and D-Man blood in Hacx
+    d_chkblood = (gamemission != pack_chex);
+    d_chkblood2 = (gamemission != pack_chex && gamemission != pack_hacx);
 
 #ifdef FEATURE_MULTIPLAYER
     NET_Init ();

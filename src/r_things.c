@@ -38,6 +38,7 @@
 #include "i_swap.h"
 #include "i_system.h"
 #include "r_local.h"
+#include "v_trans.h"
 #include "w_wad.h"
 #include "z_zone.h"
 
@@ -412,6 +413,11 @@ R_DrawVisSprite
         dc_translation = translationtables - 256 +
             ( (vis->mobjflags & MF_TRANSLATION) >> (MF_TRANSSHIFT-8) );
     }
+    else if (vis->translation)
+    {
+	colfunc = transcolfunc;
+	dc_translation = vis->translation;
+    }
         
     // translucent sprites
     if (d_translucency && dc_colormap &&
@@ -569,6 +575,7 @@ void R_ProjectSprite (mobj_t* thing)
     
     // store information in a vissprite
     vis = R_NewVisSprite ();
+    vis->translation = NULL;
     vis->mobjflags = thing->flags;
     vis->psprite = false;
 
@@ -624,7 +631,7 @@ void R_ProjectSprite (mobj_t* thing)
     else if (thing->frame & FF_FULLBRIGHT)
     {
         // full bright
-        vis->colormap = colormaps;
+        vis->colormap = fixedcolormap ? fixedcolormap : colormaps;
     }
     else
     {
@@ -636,6 +643,34 @@ void R_ProjectSprite (mobj_t* thing)
 
         vis->colormap = spritelights[index];
     }        
+
+    // colored blood
+    if (d_colblood && d_chkblood &&
+        thing->type == MT_BLOOD && thing->target)
+    {
+        // Thorn Things in Hacx bleed green blood
+	if (gamemission == pack_hacx)
+	{
+	    if (thing->target->type == MT_BABY)
+	    {
+		vis->translation = cr[CR_GREEN];
+	    }
+	}
+	else
+	{
+	    // Barons of Hell and Hell Knights bleed green blood
+	    if (thing->target->type == MT_BRUISER || thing->target->type == MT_KNIGHT)
+	    {
+		vis->translation = cr[CR_GREEN];
+	    }
+	    else
+	    // Cacodemons bleed blue blood
+	    if (thing->target->type == MT_HEAD)
+	    {
+		vis->translation = cr[CR_BLUE];
+	    }
+	}
+    }
 }
 
 
@@ -726,6 +761,7 @@ void R_DrawPSprite (pspdef_t* psp, psprnum_t psprnum)
     
     // store information in a vissprite
     vis = &avis;
+    vis->translation = NULL;
     vis->mobjflags = 0;
     vis->psprite = true;
     vis->texturemid = (BASEYCENTER << FRACBITS) - (psp->sy - spritetopoffset[lump]); // HIRES

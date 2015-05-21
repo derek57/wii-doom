@@ -1510,9 +1510,9 @@ A_PainShootSkull
     
     mobj_t*        newmobj;
     angle_t        an;
-    int                prestep;
-    int                count;
-    thinker_t*        currentthinker;
+    int            prestep;
+    int            count;
+    thinker_t*     currentthinker;
 
     // count total number of skull currently on the level
     count = 0;
@@ -1565,6 +1565,10 @@ A_PainShootSkull
         return;
     }
                 
+    // Lost Souls bleed Puffs
+    if (d_colblood2 && d_chkblood2)
+	newmobj->flags |= MF_NOBLOOD;
+
     P_SetTarget(&newmobj->target, actor->target);
     A_SkullAttack (newmobj);
 }

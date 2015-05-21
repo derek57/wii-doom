@@ -130,7 +130,7 @@ void    P_MobjThinker (mobj_t* mobj);
 //void
 mobj_t* P_SpawnPuff (fixed_t x, fixed_t y, fixed_t z);
 
-void    P_SpawnBlood (fixed_t x, fixed_t y, fixed_t z, int damage);
+void    P_SpawnBlood (fixed_t x, fixed_t y, fixed_t z, int damage, mobj_t* target);
 mobj_t* P_SpawnMissile (mobj_t* source, mobj_t* dest, mobjtype_t type);
 
 mobj_t*

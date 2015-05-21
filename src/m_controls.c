@@ -157,6 +157,8 @@ void M_BindBaseControls(void)
     M_BindVariable("pr_plasma",              &beta_plasma);
     M_BindVariable("pr_imp",                 &beta_imp);
     M_BindVariable("translucency",           &d_translucency);
+    M_BindVariable("colored_blood",          &d_colblood);
+    M_BindVariable("fixed_blood",            &d_colblood2);
     M_BindVariable("key_shoot",              &joy_r);
     M_BindVariable("key_open",               &joy_l);
     M_BindVariable("key_menu",               &joy_minus);

@@ -39,6 +39,7 @@
 #include "r_data.h"
 #include "r_local.h"
 #include "r_sky.h"
+#include "v_trans.h"
 #include "w_wad.h"
 #include "z_zone.h"
 
@@ -911,6 +912,31 @@ void R_InitColormaps (void)
     //  256 byte align tables.
     lump = W_GetNumForName(DEH_String("COLORMAP"));
     colormaps = W_CacheLumpNum(lump, PU_STATIC);
+
+    // [crispy] initialize color translation and color strings tables
+    {
+	byte *playpal = W_CacheLumpName("PLAYPAL", PU_STATIC);
+
+	char c[3];
+	int i, j;
+
+	extern byte V_Colorize (byte *playpal, int cr, byte source);
+
+	if (!crstr)
+	    crstr = malloc(CRMAX * sizeof(*crstr));
+
+	for (i = 0; i < CRMAX; i++)
+	{
+	    for (j = 0; j < 256; j++)
+	    {
+		cr[i][j] = V_Colorize(playpal, i, j);
+	    }
+
+	    M_snprintf(c, sizeof(c), "\x1b%c", '0' + i);
+	    crstr[i] = M_StringDuplicate(c);
+	}
+	Z_ChangeTag(playpal, PU_CACHE);
+    }
 }
 
 

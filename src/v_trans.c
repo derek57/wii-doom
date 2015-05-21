@@ -27,6 +27,7 @@
 
 // this one will be the identity matrix
 static byte cr_none[256];
+
 // this one will be the ~50% darker matrix
 static byte cr_dark[256];
 static byte cr_gray[256];

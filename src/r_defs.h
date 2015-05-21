@@ -401,6 +401,8 @@ typedef struct vissprite_s
 
     boolean        drawn;
 
+    byte*	   translation;
+
 } vissprite_t;
 
 

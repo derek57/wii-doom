@@ -52,8 +52,11 @@ boolean         beta_skulls = false;
 boolean         beta_plasma = false;
 boolean         beta_imp = false;
 boolean         d_translucency = true;
-    
+boolean         d_chkblood = false;
+boolean         d_chkblood2 = false;
 
+int             d_colblood = 0;
+int             d_colblood2 = 0;
 int             d_swirl;
 int             autoaim = false;
 
