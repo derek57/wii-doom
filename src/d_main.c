@@ -203,11 +203,13 @@ void D_Display (void)
     static  boolean             menuactivestate = false;
     static  boolean             inhelpscreensstate = false;
     static  boolean             fullscreen = false;
+    static  char		menushade; // shade menu background
     static  gamestate_t         oldgamestate = -1;
     static  int                 borderdrawcount;
     int                         nowtime;
     int                         tics;
     int                         wipestart;
+    int                         y;
     boolean                     done;
     boolean                     wipe;
 
@@ -331,6 +333,22 @@ void D_Display (void)
     viewactivestate = viewactive;
     inhelpscreensstate = inhelpscreens;
     oldgamestate = wipegamestate = gamestate;
+
+    // shade background when a menu is active or the game is paused
+    if (paused || menuactive)
+    {
+	for (y = 0; y < SCREENWIDTH * SCREENHEIGHT; y++)
+	    I_VideoBuffer[y] = colormaps[menushade * 256 + I_VideoBuffer[y]];
+
+	if (menushade < 16)
+	    menushade++;
+
+	// [crispy] force redraw of status bar and border
+	viewactivestate = false;
+	inhelpscreensstate = true;
+    }
+    else if (menushade)
+	menushade = 0;
 
     C_Drawer();
 
