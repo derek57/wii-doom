@@ -258,6 +258,7 @@ void D_Display (void)
             redrawsbar = true;
         if (inhelpscreensstate && !inhelpscreens)
             redrawsbar = true;              // just put away the help screen
+
         ST_Drawer (scaledviewheight == (200 << hires), redrawsbar );     // HIRES
 
         if(warped == 1)
@@ -293,7 +294,9 @@ void D_Display (void)
     
     // draw the view directly
     if (gamestate == GS_LEVEL && !automapactive && gametic)
+    {
         R_RenderPlayerView (&players[displayplayer]);
+    }
 
     if (gamestate == GS_LEVEL && gametic)
         HU_Drawer ();

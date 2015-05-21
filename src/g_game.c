@@ -1371,11 +1371,9 @@ void G_DoCompleted (void)
     if (gamemap == 33)
         // map 33 par time sucks
         wminfo.partime = INT_MAX;
-    else
-    if (gamemission == pack_nerve)
+    else if (gamemission == pack_nerve)
         wminfo.partime = TICRATE*npars[gamemap-1];
-    else
-    if (gamemode == commercial)
+    else if (gamemode == commercial)
         wminfo.partime = TICRATE*cpars[gamemap-1];
     else if (gameepisode < 4)
         wminfo.partime = TICRATE*pars[gameepisode][gamemap];

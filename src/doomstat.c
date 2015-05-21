@@ -51,6 +51,7 @@ boolean         beta_bfg = false;
 boolean         beta_skulls = false;
 boolean         beta_plasma = false;
 boolean         beta_imp = false;
+boolean         d_translucency = true;
     
 
 int             d_swirl;

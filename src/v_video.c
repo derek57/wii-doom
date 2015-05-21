@@ -50,6 +50,8 @@
 // is common code. Fix this.
 #define RANGECHECK
 
+// prevent framebuffer overflow
+#define dest_in_framebuffer (safe || ((dest-dest_screen) < SCREENHEIGHT*SCREENWIDTH))
 
 static  patch_t*             v_font[V_FONTSIZE];
 
@@ -67,9 +69,15 @@ byte    *tinttable = NULL;
 // villsa [STRIFE] Blending table used for Strife
 byte    *xlatab = NULL;
 
+byte    *tranmap = NULL;
+
+byte    *dp_translation = NULL;
+
 int     dirtybox[4]; 
 
 int     italicize[15] = { 0, 2, 2, 2, 1, 1, 1, 1, 0, 0, 0, 0, -1, -1, -1 };
+
+boolean dp_translucent = false;
 
 //
 // V_MarkRect 
@@ -160,6 +168,8 @@ void V_DrawPatch(int x, int y, patch_t *patch)
     byte *dest;
     byte *source;
     int w, f;
+    // prevent framebuffer overflow
+    const boolean safe = !(y + SHORT(patch->height) > ORIGHEIGHT);
 
     y -= SHORT(patch->topoffset);
     x -= SHORT(patch->leftoffset);
@@ -171,11 +181,11 @@ void V_DrawPatch(int x, int y, patch_t *patch)
             return;
     }
 
-#ifdef RANGECHECK    // FIXME: DO WE NEED TO DISABLE THIS ONE FOR THE WII PORT ?!
+#ifdef RANGECHECK
     if (x < 0
-     || x + SHORT(patch->width) > ORIGWIDTH
+     || x /* + SHORT(patch->width) */ > ORIGWIDTH
      || y < 0
-     || y + SHORT(patch->height) > ORIGHEIGHT)
+     || y /* + SHORT(patch->height) */ > ORIGHEIGHT )
     {
         I_Error("Bad V_DrawPatch");
     }
@@ -188,6 +198,14 @@ void V_DrawPatch(int x, int y, patch_t *patch)
 
     w = SHORT(patch->width);
 
+    // prevent framebuffer overflow
+    if (x + w > ORIGWIDTH)
+        w = ORIGWIDTH - x;
+
+  // quadruple for-loop for each dp_translation and dp_translucent case
+  // to avoid checking these variables for each pixel and instead check once per patch
+  // (1) normal, opaque patch
+  if (!dp_translation && !dp_translucent)
     for ( ; col<w ; x++, col++, desttop++)
     {
         column = (column_t *)((byte *)patch + LONG(patch->columnofs[col]));
@@ -195,24 +213,117 @@ void V_DrawPatch(int x, int y, patch_t *patch)
         // step through the posts in a column
         while (column->topdelta != 0xff)
         {
-            for (f = 0; f <= hires; f++)
-            {
-                source = (byte *)column + 3;
-                dest = desttop + column->topdelta*(SCREENWIDTH << hires) +
-                       (x * hires) + f;
-                count = column->length;
+          for (f = 0; f <= hires; f++)
+          {
+            source = (byte *)column + 3;
+            dest = desttop + column->topdelta*(SCREENWIDTH << hires) + (x * hires) + f;
+            count = column->length;
 
-                while (count--)
+            // prevent framebuffer overflow
+            while (count-- && dest_in_framebuffer)
+            {
+                if (hires)
                 {
-                    if (hires)
-                    {
-                        *dest = *source;
-                        dest += SCREENWIDTH;
-                    }
-                    *dest = *source++;
+                    *dest = *source;
                     dest += SCREENWIDTH;
                 }
+                *dest = *source++;
+                dest += SCREENWIDTH;
             }
+          }
+            column = (column_t *)((byte *)column + column->length + 4);
+        }
+    }
+  else
+  // (2) color-translated, opaque patch
+  if (dp_translation && !dp_translucent)
+    for ( ; col<w ; x++, col++, desttop++)
+    {
+        column = (column_t *)((byte *)patch + LONG(patch->columnofs[col]));
+
+        // step through the posts in a column
+        while (column->topdelta != 0xff)
+        {
+          for (f = 0; f <= hires; f++)
+          {
+            source = (byte *)column + 3;
+            dest = desttop + column->topdelta*(SCREENWIDTH << hires) + (x * hires) + f;
+            count = column->length;
+
+            // prevent framebuffer overflow
+            while (count-- && dest_in_framebuffer)
+            {
+                if (hires)
+                {
+                    *dest = dp_translation[*source];
+                    dest += SCREENWIDTH;
+                }
+                *dest = dp_translation[*source++];
+                dest += SCREENWIDTH;
+            }
+          }
+            column = (column_t *)((byte *)column + column->length + 4);
+        }
+    }
+  else
+  // (3) normal, translucent patch
+  if (!dp_translation && dp_translucent)
+    for ( ; col<w ; x++, col++, desttop++)
+    {
+        column = (column_t *)((byte *)patch + LONG(patch->columnofs[col]));
+
+        // step through the posts in a column
+        while (column->topdelta != 0xff)
+        {
+          for (f = 0; f <= hires; f++)
+          {
+            source = (byte *)column + 3;
+            dest = desttop + column->topdelta*(SCREENWIDTH << hires) + (x * hires) + f;
+            count = column->length;
+
+            // prevent framebuffer overflow
+            while (count-- && dest_in_framebuffer)
+            {
+                if (hires)
+                {
+                    *dest = tranmap[(*dest<<8)+*source];
+                    dest += SCREENWIDTH;
+                }
+                *dest = tranmap[(*dest<<8)+*source++];
+                dest += SCREENWIDTH;
+            }
+          }
+            column = (column_t *)((byte *)column + column->length + 4);
+        }
+    }
+  else
+  // (4) color-translated, translucent patch
+  if (dp_translation && dp_translucent)
+    for ( ; col<w ; x++, col++, desttop++)
+    {
+        column = (column_t *)((byte *)patch + LONG(patch->columnofs[col]));
+
+        // step through the posts in a column
+        while (column->topdelta != 0xff)
+        {
+          for (f = 0; f <= hires; f++)
+          {
+            source = (byte *)column + 3;
+            dest = desttop + column->topdelta*(SCREENWIDTH << hires) + (x * hires) + f;
+            count = column->length;
+
+            // prevent framebuffer overflow
+            while (count-- && dest_in_framebuffer)
+            {
+                if (hires)
+                {
+                    *dest = tranmap[(*dest<<8)+dp_translation[*source]];
+                    dest += SCREENWIDTH;
+                }
+                *dest = tranmap[(*dest<<8)+dp_translation[*source++]];
+                dest += SCREENWIDTH;
+            }
+          }
             column = (column_t *)((byte *)column + column->length + 4);
         }
     }
@@ -232,6 +343,7 @@ void V_DrawPatchFlipped(int x, int y, patch_t *patch)
     byte *desttop;
     byte *dest;
     byte *source; 
+    byte sourcetrans;
     int w, f; 
  
     y -= SHORT(patch->topoffset); 
@@ -277,12 +389,19 @@ void V_DrawPatchFlipped(int x, int y, patch_t *patch)
 
                 while (count--)
                 {
+                    if (dp_translation)
+                        sourcetrans = dp_translation[*source++];
+                    else
+                        sourcetrans = *source++;
+
                     if (hires)
                     {
                         *dest = *source;
+                        *dest = sourcetrans;
                         dest += SCREENWIDTH;
                     }
                     *dest = *source++;
+                    *dest = sourcetrans;
                     dest += SCREENWIDTH;
                 }
             }

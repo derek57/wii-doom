@@ -286,6 +286,7 @@ extern  boolean         beta_bfg;
 extern  boolean         beta_skulls;
 extern  boolean         beta_plasma;
 extern  boolean         beta_imp;
+extern  boolean         d_translucency;
 
 extern  int             d_swirl;
 extern  int             autoaim;

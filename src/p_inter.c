@@ -789,6 +789,13 @@ P_KillMobj
 
     int minhealth = target->info->spawnhealth;
 
+    // Make Lost Soul and Pain Elemental explosions translucent
+    if (target->type == MT_BETASKULL ||
+        target->type == MT_SKULL ||
+        target->type == MT_PAIN ||
+        target->type == MT_BARREL)
+        target->flags |= MF_TRANSLUCENT;
+
     // increase chance of gibbing
     if(d_maxgore)
     {

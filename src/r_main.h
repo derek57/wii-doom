@@ -90,6 +90,7 @@ extern void               (*colfunc) (void);
 extern void               (*transcolfunc) (void);
 extern void               (*basecolfunc) (void);
 extern void               (*fuzzcolfunc) (void);
+extern void		  (*tlcolfunc) (void);
 
 // No shadow effects on floors.
 extern void               (*spanfunc) (void);
@@ -152,5 +153,7 @@ void R_Init (void);
 
 // Called by M_Responder.
 void R_SetViewSize (int blocks, int detail);
+
+angle_t R_WadToAngle(int wadangle);
 
 #endif

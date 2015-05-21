@@ -152,6 +152,7 @@ void P_ExplodeMissile (mobj_t* mo)
         mo->tics = 1;
 
     mo->flags &= ~MF_MISSILE;
+    mo->flags |= MF_TRANSLUCENT;
 
     if (mo->info->deathsound)
         S_StartSound (mo, mo->info->deathsound);

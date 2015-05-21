@@ -111,6 +111,7 @@ void (*colfunc) (void);
 void (*basecolfunc) (void);
 void (*fuzzcolfunc) (void);
 void (*transcolfunc) (void);
+void (*tlcolfunc) (void);
 void (*spanfunc) (void);
 
 
@@ -633,6 +634,7 @@ void R_ExecuteSetViewSize (void)
         fuzzcolfunc = R_DrawFuzzColumn;
         transcolfunc = R_DrawTranslatedColumn;
         spanfunc = R_DrawSpan;
+        tlcolfunc = R_DrawTLColumn;
     }
     else
     {
@@ -640,6 +642,7 @@ void R_ExecuteSetViewSize (void)
         fuzzcolfunc = R_DrawFuzzColumnLow;
         transcolfunc = R_DrawTranslatedColumnLow;
         spanfunc = R_DrawSpanLow;
+ 	tlcolfunc = R_DrawTLColumnLow;
     }
 
     R_InitBuffer (scaledviewwidth, scaledviewheight); // CHANGED FOR HIRES

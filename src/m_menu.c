@@ -864,8 +864,8 @@ int                        coordinates_info = 0;
 int                        timer_info = 0;
 int                        version_info = 0;
 int                        fps = 0;              // calculating the frames per second
-int                        key_controls_start_in_cfg_at_pos = 36; // ACTUALLY IT'S +2
-int                        key_controls_end_in_cfg_at_pos = 50;   // ACTUALLY IT'S +2
+int                        key_controls_start_in_cfg_at_pos = 37; // ACTUALLY IT'S +2
+int                        key_controls_end_in_cfg_at_pos = 51;   // ACTUALLY IT'S +2
 int                        crosshair = 0;
 int                        show_stats = 0;
 int                        tracknum = 1;
@@ -979,6 +979,7 @@ void M_StrafingSpeed(int choice);
 void M_SfxVol(int choice);
 void M_MusicVol(int choice);
 void M_ChangeDetail(int choice);
+void M_Translucency(int choice);
 void M_SizeDisplay(int choice);
 void M_StartGame(int choice);
 void M_Sound(int choice);
@@ -1528,6 +1529,7 @@ enum
     gamma,
     scrnsize,
     screen_detail,
+    screen_translucency,
     screen_end
 } screen_e;
 
@@ -1535,7 +1537,8 @@ menuitem_t ScreenMenu[]=
 {
     {2,"Brightness",M_Brightness,'b'},
     {2,"Screen Size",M_SizeDisplay,'s'},
-    {2,"Detail",M_ChangeDetail,'d'}
+    {2,"Detail",M_ChangeDetail,'d'},
+    {2,"Translucency",M_Translucency,'t'}
 };
 
 menu_t  ScreenDef =
@@ -1926,6 +1929,8 @@ void M_DrawLoad(void)
     {
         M_DrawSaveLoadBorder(LoadDef.x+5,LoadDef.y+LINEHEIGHT_SMALL*i);
         M_WriteText(LoadDef.x,LoadDef.y-1+LINEHEIGHT_SMALL*i,savegamestrings[i]);
+
+	V_ClearDPTranslation();
     }
 
     M_WriteText(62, 148, "* INDICATES A SAVEGAME THAT WAS");
@@ -2546,6 +2551,11 @@ void M_DrawScreen(void)
         M_WriteText(ScreenDef.x + 180, ScreenDef.y + 18, "LOW");
     else
         M_WriteText(ScreenDef.x + 177, ScreenDef.y + 18, "HIGH");
+
+    if(d_translucency > 0)
+        M_WriteText(ScreenDef.x + 189, ScreenDef.y + 28, "ON");
+    else
+        M_WriteText(ScreenDef.x + 181, ScreenDef.y + 28, "OFF");
 
     M_DrawThermoSmall(ScreenDef.x + 120, ScreenDef.y + LINEHEIGHT_SMALL * (scrnsize + 1),
                  9, screenSize);
@@ -3313,6 +3323,15 @@ void M_ChangeDetail(int choice)
         players[consoleplayer].message = DEH_String(DETAILLO);
 }
 
+void M_Translucency(int choice)
+{
+    choice = 0;
+    d_translucency = !d_translucency;
+
+    // translucent HUD?
+    if (screenblocks > TRANSLUCENT_HUD)
+	M_SizeDisplay(0);
+}
 
 
 
@@ -3393,6 +3412,8 @@ M_DrawThermoSmall
     // +2 to initial y coordinate
     V_DrawPatch((x + 9) + thermDot * 8, y - 12,
                       W_CacheLumpName(DEH_String("M_SLIDEO"), PU_CACHE));
+
+    V_ClearDPTranslation();
 }
 
 
@@ -3607,7 +3628,7 @@ boolean M_Responder (event_t* ev)
     if (askforkey && data->btns_d)                // KEY BINDINGS
     {
         M_KeyBindingsClearControls(ev->data1);
-        *doom_defaults_list[keyaskedfor + 36 + FirstKey].location = ev->data1;
+        *doom_defaults_list[keyaskedfor + 37 + FirstKey].location = ev->data1;
         askforkey = false;
         return true;
     }
@@ -4041,6 +4062,8 @@ void M_Drawer (void)
 
         if(*name)
             M_WriteText(x, y - 2, item->name);
+
+	V_ClearDPTranslation();
 
         y += LINEHEIGHT_SMALL;
 
@@ -5396,7 +5419,6 @@ void M_KeyBindingsClearControls (int ch)
 
 void M_KeyBindingsClearAll (int choice)
 {
-    *doom_defaults_list[36].location = 0;
     *doom_defaults_list[37].location = 0;
     *doom_defaults_list[38].location = 0;
     *doom_defaults_list[39].location = 0;
@@ -5410,24 +5432,25 @@ void M_KeyBindingsClearAll (int choice)
     *doom_defaults_list[47].location = 0;
     *doom_defaults_list[48].location = 0;
     *doom_defaults_list[49].location = 0;
+    *doom_defaults_list[50].location = 0;
 }
 
 void M_KeyBindingsReset (int choice)
 {
-    *doom_defaults_list[36].location = CLASSIC_CONTROLLER_R;
-    *doom_defaults_list[37].location = CLASSIC_CONTROLLER_L;
-    *doom_defaults_list[38].location = CLASSIC_CONTROLLER_MINUS;
-    *doom_defaults_list[39].location = CLASSIC_CONTROLLER_LEFT;
-    *doom_defaults_list[40].location = CLASSIC_CONTROLLER_DOWN;
-    *doom_defaults_list[41].location = CLASSIC_CONTROLLER_RIGHT;
-    *doom_defaults_list[42].location = CLASSIC_CONTROLLER_ZL;
-    *doom_defaults_list[43].location = CLASSIC_CONTROLLER_ZR;
-    *doom_defaults_list[44].location = CLASSIC_CONTROLLER_A;
-    *doom_defaults_list[45].location = CLASSIC_CONTROLLER_Y;
-    *doom_defaults_list[46].location = CLASSIC_CONTROLLER_B;
-    *doom_defaults_list[47].location = CONTROLLER_1;
-    *doom_defaults_list[48].location = CONTROLLER_2;
-    *doom_defaults_list[49].location = CLASSIC_CONTROLLER_PLUS;
+    *doom_defaults_list[37].location = CLASSIC_CONTROLLER_R;
+    *doom_defaults_list[38].location = CLASSIC_CONTROLLER_L;
+    *doom_defaults_list[39].location = CLASSIC_CONTROLLER_MINUS;
+    *doom_defaults_list[40].location = CLASSIC_CONTROLLER_LEFT;
+    *doom_defaults_list[41].location = CLASSIC_CONTROLLER_DOWN;
+    *doom_defaults_list[42].location = CLASSIC_CONTROLLER_RIGHT;
+    *doom_defaults_list[43].location = CLASSIC_CONTROLLER_ZL;
+    *doom_defaults_list[44].location = CLASSIC_CONTROLLER_ZR;
+    *doom_defaults_list[45].location = CLASSIC_CONTROLLER_A;
+    *doom_defaults_list[46].location = CLASSIC_CONTROLLER_Y;
+    *doom_defaults_list[47].location = CLASSIC_CONTROLLER_B;
+    *doom_defaults_list[48].location = CONTROLLER_1;
+    *doom_defaults_list[49].location = CONTROLLER_2;
+    *doom_defaults_list[50].location = CLASSIC_CONTROLLER_PLUS;
 }
 
 void M_DrawKeyBindings(void)
@@ -5463,7 +5486,7 @@ void M_DrawKeyBindings(void)
                 M_WriteText(195, (i*10+20), "???");
             else
                 M_WriteText(195, (i*10+20),
-                        Key2String(*(doom_defaults_list[i+FirstKey+36].location)));
+                        Key2String(*(doom_defaults_list[i+FirstKey+37].location)));
         }
     }
 }

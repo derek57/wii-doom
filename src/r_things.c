@@ -46,6 +46,9 @@
 #define BASEYCENTER             100
 #define MAX_SPRITE_FRAMES       29
 
+// invisibility is rendered translucently
+#define TRANSLUCENT_SHADOW      0
+
 
 typedef struct
 {
@@ -410,13 +413,21 @@ R_DrawVisSprite
             ( (vis->mobjflags & MF_TRANSLATION) >> (MF_TRANSSHIFT-8) );
     }
         
+    // translucent sprites
+    if (d_translucency && dc_colormap &&
+        ((vis->mobjflags & MF_TRANSLUCENT) ||
+        ((vis->mobjflags & MF_SHADOW) && TRANSLUCENT_SHADOW)))
+    {
+	colfunc = tlcolfunc;
+    }
+
     dc_iscale = abs(vis->xiscale)>>(detailshift && !hires);                // CHANGED FOR HIRES
     dc_texturemid = vis->texturemid;
     frac = vis->startfrac;
     spryscale = vis->scale;
     sprtopscreen = centeryfrac - FixedMul(dc_texturemid,spryscale);
         
-// check to see if weapon is a vissprite
+    // check to see if weapon is a vissprite
     if (vis->psprite)
     {
         dc_texturemid += FixedMul(((centery - viewheight / 2) << FRACBITS),
@@ -599,7 +610,8 @@ void R_ProjectSprite (mobj_t* thing)
     vis->patch = lump;
     
     // get light level
-    if (thing->flags & MF_SHADOW)
+    // do not invalidate colormap if invisibility is rendered translucently
+    if (thing->flags & MF_SHADOW && !TRANSLUCENT_SHADOW)
     {
         // shadow draw
         vis->colormap = NULL;
@@ -666,7 +678,7 @@ void R_AddSprites (sector_t* sec)
 //
 // R_DrawPSprite
 //
-void R_DrawPSprite (pspdef_t* psp)
+void R_DrawPSprite (pspdef_t* psp, psprnum_t psprnum)
 {
     fixed_t            tx;
     int                x1;
@@ -738,8 +750,10 @@ void R_DrawPSprite (pspdef_t* psp)
 
     vis->patch = lump;
 
-    if (viewplayer->powers[pw_invisibility] > 4*32
+    // do not invalidate colormap if invisibility is rendered translucently
+    if ((viewplayer->powers[pw_invisibility] > 4*32
         || viewplayer->powers[pw_invisibility] & 8)
+	&& !TRANSLUCENT_SHADOW)
     {
         // shadow draw
         vis->colormap = NULL;
@@ -760,6 +774,18 @@ void R_DrawPSprite (pspdef_t* psp)
         vis->colormap = spritelights[MAXLIGHTSCALE-1];
     }
         
+    // invisibility is rendered translucently
+    if ((viewplayer->powers[pw_invisibility] > 4*32 ||
+        viewplayer->powers[pw_invisibility] & 8) &&
+        TRANSLUCENT_SHADOW)
+    {
+	vis->mobjflags |= MF_TRANSLUCENT;
+    }
+
+    // translucent gun flash sprites
+    if (psprnum == ps_flash)
+        vis->mobjflags |= MF_TRANSLUCENT;
+
     R_DrawVisSprite (vis, vis->x1, vis->x2);
 }
 
@@ -796,7 +822,7 @@ void R_DrawPlayerSprites (void)
          i++,psp++)
     {
         if (psp->state)
-            R_DrawPSprite (psp);
+            R_DrawPSprite (psp, i);
     }
 }
 

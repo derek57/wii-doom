@@ -130,6 +130,10 @@ struct texture_s
 };
 
 
+enum {
+    r, g, b
+} rgb_t;
+
 
 int              firstflat;
 int              lastflat;
@@ -155,6 +159,8 @@ int              spritememory;
 int              *flattranslation;
 int              *texturetranslation;
 
+int              tran_filter_pct = 66;       // filter percent
+
 lighttable_t     *colormaps;
 
 texture_t**      textures;
@@ -174,6 +180,7 @@ unsigned**       texturecolumnofs; // fix Medusa bug
 
 byte**           texturecomposite;
 
+extern byte*     tranmap;
 
 //
 // MAPTEXTURE_T CACHING
@@ -795,6 +802,103 @@ void R_InitSpriteLumps (void)
 }
 
 
+//
+// R_InitTranMap
+//
+// Initialize translucency filter map
+//
+void R_InitTranMap()
+{
+    int lump = W_CheckNumForName("TRANMAP");
+
+    // If a tranlucency filter map lump is present, use it
+    if (lump != -1)
+    {
+	// Set a pointer to the translucency filter maps.
+	tranmap = W_CacheLumpNum(lump, PU_STATIC);
+	printf(":"); // loaded from a lump
+    }
+    else
+    {
+	// Compose a default transparent filter map based on PLAYPAL.
+	unsigned char *playpal = W_CacheLumpName("PLAYPAL", PU_STATIC);
+	char *fname = NULL;
+	extern char *configdir;
+
+	struct {
+	    unsigned char pct;
+	    unsigned char playpal[256*3]; // a palette has 768 bytes!
+	} cache;
+
+	FILE *cachefp = fopen(fname = M_StringJoin(configdir,
+	                      "tranmap.dat", NULL), "r+b"); // open file readable
+
+	tranmap = Z_Malloc(256*256, PU_STATIC, 0);
+
+	// Use cached translucency filter if it's available
+	if (!cachefp ? cachefp = fopen(fname,"wb") , 1 : // if file not readable, open writable, continue
+	    fread(&cache, 1, sizeof cache, cachefp) != sizeof cache || // could not read struct cache from file
+	    cache.pct != tran_filter_pct || // filter percents differ
+	    memcmp(cache.playpal, playpal, sizeof cache.playpal) || // base palettes differ
+	    fread(tranmap, 256, 256, cachefp) != 256 ) // could not read entire translucency map
+	{
+	byte *fg, *bg, blend[3], *tp = tranmap;
+	int i, j, btmp;
+	extern int FindNearestColor(byte *palette, int r, int g, int b);
+
+	// background color
+	for (i = 0; i < 256; i++)
+	{
+	    // foreground color
+	    for (j = 0; j < 256; j++)
+	    {
+		// shortcut: identical foreground and background
+		if (i == j)
+		{
+		    *tp++ = i;
+		    continue;
+		}
+
+		bg = playpal + 3*i;
+		fg = playpal + 3*j;
+
+		// blended color - emphasize blues
+		// Colour matching in RGB space doesn't work very well with the blues
+		// in Doom's palette. Rather than do any colour conversions, just
+		// emphasize the blues when building the translucency table.
+		btmp = fg[b] < (fg[r] + fg[g]) ? 0 : (fg[b] - (fg[r] + fg[g])) / 2;
+		blend[r] = (tran_filter_pct * fg[r] + (100 - tran_filter_pct) * bg[r]) / (100 + btmp);
+		blend[g] = (tran_filter_pct * fg[g] + (100 - tran_filter_pct) * bg[g]) / (100 + btmp);
+		blend[b] = (tran_filter_pct * fg[b] + (100 - tran_filter_pct) * bg[b]) / 100;
+
+		*tp++ = FindNearestColor(playpal, blend[r], blend[g], blend[b]);
+	    }
+	}
+
+	// write out the cached translucency map
+	if (cachefp)
+	{
+	    cache.pct = tran_filter_pct; // set filter percents
+	    memcpy(cache.playpal, playpal, sizeof cache.playpal); // set base palette
+	    fseek(cachefp, 0, SEEK_SET); // go to start of file
+	    fwrite(&cache, 1, sizeof cache, cachefp); // write struct cache
+	    fwrite(tranmap, 256, 256, cachefp); // write translucency map
+	    printf("!"); // generated and saved
+	}
+	else
+	    printf("?"); // generated, but not saved
+	}
+	else
+	    printf("."); // loaded from a file
+
+	if (cachefp)
+	    fclose(cachefp);
+
+	free(fname);
+
+	Z_ChangeTag(playpal, PU_CACHE);
+    }
+}
 
 //
 // R_InitColormaps
@@ -830,6 +934,10 @@ void R_InitData (void)
     C_Printf (".");
 
     R_InitSpriteLumps ();
+
+    R_InitTranMap();
+    printf (".");
+
     R_InitColormaps ();
 }
 

@@ -195,8 +195,12 @@ typedef enum
     // If 0x4 0x8 or 0xc,
     //  use a translation table for player colormaps
     MF_TRANSLATION         = 0xc000000,
+
     // Hmm ???.
-    MF_TRANSSHIFT          = 26
+    MF_TRANSSHIFT          = 26,
+
+    // Translucent sprite
+    MF_TRANSLUCENT         = 0x80000000
 
 } mobjflag_t;
 

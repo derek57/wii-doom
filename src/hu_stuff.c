@@ -92,6 +92,7 @@ boolean                 message_dontfuckwithme;
 
 patch_t*                hu_font[HU_FONTSIZE];
 
+extern int              screenblocks;
 extern int              showMessages;
 extern int              crosshair;
 extern int              show_stats;
@@ -415,6 +416,13 @@ void HU_Drawer(void)
         else
             V_DrawPatch(158, 98, W_CacheLumpName(DEH_String("XHAIR"), PU_CACHE));
     }
+
+    // translucent messages for translucent HUD
+    if (d_translucency && screenblocks > TRANSLUCENT_HUD && !automapactive)
+	dp_translucent = true;
+
+    V_ClearDPTranslation();
+
     HUlib_drawSText(&w_message);
 
     if (automapactive)
@@ -452,6 +460,10 @@ void HU_Drawer(void)
             HUlib_drawTextLine(&w_monsec, false);
         }
     }
+    V_ClearDPTranslation();
+
+    if (dp_translucent)
+	dp_translucent = false;
 }
 
 void HU_Erase(void)

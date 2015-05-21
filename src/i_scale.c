@@ -22,11 +22,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "c_io.h"
+#include "doomdef.h"
 #include "doomtype.h"
+
 #include "i_video.h"
 #include "z_zone.h"
-
 
 // Should be I_VideoBuffer
 
@@ -35,6 +35,10 @@ static byte *src_buffer;
 // Destination buffer, ie. screen->pixels.
 
 static byte *dest_buffer;
+
+// Pitch of destination buffer, ie. screen->pitch.
+
+static int dest_pitch;
 
 // Lookup tables used for aspect ratio correction stretching code.
 // stretch_tables[0] : 20% / 80%
@@ -45,15 +49,11 @@ static byte *stretch_tables[2] = { NULL, NULL };
 
 // 25%/75% stretch table, for 400x300 squash mode
 
-static byte *quarter_stretch_table = NULL;                                // ADDED FOR HIRES
+static byte *quarter_stretch_table = NULL;
 
 // 50%/50% stretch table, for 800x600 squash mode
 
 static byte *half_stretch_table = NULL;
-
-// Pitch of destination buffer, ie. screen->pitch.
-
-static int dest_pitch;
 
 // Called to set the source and destination buffers before doing the
 // scale.
@@ -232,7 +232,7 @@ screen_mode_t mode_scale_4x = {
     SCREENWIDTH * 4, SCREENHEIGHT * 4,
     NULL,
     I_Scale4x,
-    false || hires,                                        // CHANGED FOR HIRES
+    false || hires,
 };
 
 // 5x scale (1600x1000)
@@ -285,14 +285,14 @@ screen_mode_t mode_scale_5x = {
     SCREENWIDTH * 5, SCREENHEIGHT * 5,
     NULL,
     I_Scale5x,
-    false || hires,                                        // CHANGED FOR HIRES
+    false || hires,
 };
 
 
 // Search through the given palette, finding the nearest color that matches
 // the given color.
-
-static int FindNearestColor(byte *palette, int r, int g, int b)
+// share with v_trans.c:V_Colorize() and r_data.c:R_InitTranMap()
+int FindNearestColor(byte *palette, int r, int g, int b)
 {
     byte *col;
     int best;
@@ -374,10 +374,10 @@ static void I_InitStretchTables(byte *palette)
     // mix 80%  =  stretch_tables[0] used backwards
     // mix 100% =  just write line 2
 
-    C_Printf("I_InitStretchTables: Generating lookup tables..");
+    printf("I_InitStretchTables: Generating lookup tables..");
     fflush(stdout);
     stretch_tables[0] = GenerateStretchTable(palette, 20);
-    C_Printf(".."); fflush(stdout);
+    printf(".."); fflush(stdout);
     stretch_tables[1] = GenerateStretchTable(palette, 40);
     puts("");
 }
@@ -391,20 +391,18 @@ static void I_InitSquashTable(byte *palette)
         return;
     }
 
-    C_Printf("I_InitSquashTable: Generating lookup tables.."); // CHANGED FOR HIRES
+    printf("I_InitSquashTable: Generating lookup tables..");
     fflush(stdout);
     half_stretch_table = GenerateStretchTable(palette, 50);
-    C_Printf("..");                                            // ADDED FOR HIRES
-    fflush(stdout);                                            // ADDED FOR HIRES
+    printf(".."); fflush(stdout);
 
-    if (quarter_stretch_table != NULL)                         // ADDED FOR HIRES
-    {                                                          // ADDED FOR HIRES
-        puts("");                                              // ADDED FOR HIRES
-        return;                                                // ADDED FOR HIRES
-    }                                                          // ADDED FOR HIRES
+    if (quarter_stretch_table != NULL)
+    {
+        puts("");
+        return;
+    }
 
-    quarter_stretch_table = GenerateStretchTable(palette, 25); // ADDED FOR HIRES
-
+    quarter_stretch_table = GenerateStretchTable(palette, 25);
     puts("");
 }
 
@@ -419,7 +417,7 @@ void I_ResetScaleTables(byte *palette)
         Z_Free(stretch_tables[0]);
         Z_Free(stretch_tables[1]);
 
-        C_Printf("I_ResetScaleTables: Regenerating lookup tables..\n");
+        printf("I_ResetScaleTables: Regenerating lookup tables..\n");
         stretch_tables[0] = GenerateStretchTable(palette, 20);
         stretch_tables[1] = GenerateStretchTable(palette, 40);
     }
@@ -428,19 +426,19 @@ void I_ResetScaleTables(byte *palette)
     {
         Z_Free(half_stretch_table);
 
-        C_Printf("I_ResetScaleTables: Regenerating lookup table..\n");
+        printf("I_ResetScaleTables: Regenerating lookup table..\n");
 
         half_stretch_table = GenerateStretchTable(palette, 50);
     }
 
-    if (quarter_stretch_table != NULL)                        // ADDED FOR HIRES
-    {                                                         // ADDED FOR HIRES
-        Z_Free(quarter_stretch_table);                        // ADDED FOR HIRES
+    if (quarter_stretch_table != NULL)
+    {
+        Z_Free(quarter_stretch_table);
 
-        C_Printf("I_ResetScaleTables: Regenerating lookup table..\n"); // ADDED FOR HIRES
+        printf("I_ResetScaleTables: Regenerating lookup table..\n");
 
-        quarter_stretch_table = GenerateStretchTable(palette, 25);     // ADDED FOR HIRES
-    }                                                                  // ADDED FOR HIRES
+        quarter_stretch_table = GenerateStretchTable(palette, 25);
+    }
 }
 
 
@@ -521,7 +519,7 @@ screen_mode_t mode_stretch_1x = {
     SCREENWIDTH, SCREENHEIGHT_4_3,
     I_InitStretchTables,
     I_Stretch1x,
-    true && !hires,                                        // CHANGED FOR HIRES
+    true && !hires,
 };
 
 static inline void WriteLine2x(byte *dest, byte *src)
@@ -773,7 +771,7 @@ screen_mode_t mode_stretch_3x = {
     SCREENWIDTH * 3, SCREENHEIGHT_4_3 * 3,
     I_InitStretchTables,
     I_Stretch3x,
-    false || hires,                                        // CHANGED FOR HIRES
+    false || hires,
 };
 
 static inline void WriteLine4x(byte *dest, byte *src)
@@ -938,7 +936,7 @@ screen_mode_t mode_stretch_4x = {
     SCREENWIDTH * 4, SCREENHEIGHT_4_3 * 4,
     I_InitStretchTables,
     I_Stretch4x,
-    false || hires,                                        // CHANGED FOR HIRES
+    false || hires,
 };
 
 static inline void WriteLine5x(byte *dest, byte *src)
@@ -1005,7 +1003,6 @@ static boolean I_Stretch5x(int x1, int y1, int x2, int y2)
         WriteLine5x(screenp, bufp);
         screenp += dest_pitch; bufp += SCREENWIDTH;
     }
-
     return true;
 }
 
@@ -1013,7 +1010,7 @@ screen_mode_t mode_stretch_5x = {
     SCREENWIDTH * 5, SCREENHEIGHT_4_3 * 5,
     I_InitStretchTables,
     I_Stretch5x,
-    false || hires,                                   // CHANGED FOR HIRES
+    false || hires,
 };
 
 //
@@ -1100,7 +1097,7 @@ screen_mode_t mode_squash_1x = {
 // 1.5x squashed scale (400x300)
 //
 
-static inline void WriteSquashedLine1p5x(byte *dest, byte *src) // ADDED FOR HIRES
+static inline void WriteSquashedLine1p5x(byte *dest, byte *src)
 {
     byte *dest2, *dest3;
     int x;
@@ -1161,12 +1158,12 @@ static boolean I_Squash1p5x(int x1, int y1, int x2, int y2)
     if (x1 != 0 || y1 != 0 || x2 != SCREENWIDTH || y2 != SCREENHEIGHT)
     {
         return false;
-    }    
+    }
 
     bufp = src_buffer;
     screenp = (byte *) dest_buffer;
 
-    for (y=0; y<SCREENHEIGHT; y += 2) 
+    for (y=0; y<SCREENHEIGHT; y += 2)
     {
         WriteSquashedLine1p5x(screenp, bufp);
 
@@ -1177,7 +1174,7 @@ static boolean I_Squash1p5x(int x1, int y1, int x2, int y2)
     return true;
 }
 
-screen_mode_t mode_squash_1p5x = {                                // ADDED FOR HIRES
+screen_mode_t mode_squash_1p5x = {
     400 << hires, 300 << hires,
     I_InitSquashTable,
     I_Squash1p5x,
@@ -1359,7 +1356,7 @@ static boolean I_Squash3x(int x1, int y1, int x2, int y2)
 }
 
 screen_mode_t mode_squash_3x = {
-    800 << hires, 600 << hires,                            // CHANGED FOR HIRES
+    800 << hires, 600 << hires,
     I_InitSquashTable,
     I_Squash3x,
     false,
@@ -1473,7 +1470,7 @@ screen_mode_t mode_squash_4x = {
     SCREENWIDTH_4_3 * 4, SCREENHEIGHT * 4,
     I_InitStretchTables,
     I_Squash4x,
-    false || hires,                                        // CHANGED FOR HIRES
+    false || hires,
 };
 
 // We used to have mode_squash_5x here as well, but it got removed.

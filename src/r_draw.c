@@ -36,6 +36,8 @@
 #include "i_system.h"
 #include "r_local.h"
 
+#include "v_trans.h"
+
 // Needs access to LFB (guess what).
 #include "v_video.h"
 
@@ -487,6 +489,59 @@ void R_DrawFuzzColumnLow (void)
 } 
  
   
+// draw translucent column, low-resolution version
+void R_DrawTLColumnLow (void)
+{
+    int			count;
+    byte*		dest;
+    byte*		dest2;
+    byte*		dest3;
+    byte*		dest4;
+    fixed_t		frac;
+    fixed_t		fracstep;
+    int                 x;
+
+    count = dc_yh - dc_yl;
+    if (count < 0)
+	return;
+
+    x = dc_x << 1;
+
+#ifdef RANGECHECK
+    if ((unsigned)x >= SCREENWIDTH
+	|| dc_yl < 0
+	|| dc_yh >= SCREENHEIGHT)
+    {
+	I_Error ( "R_DrawColumn: %i to %i at %i",
+		  dc_yl, dc_yh, x);
+    }
+#endif
+
+    dest = ylookup[(dc_yl << hires)] + columnofs[x];
+    dest2 = ylookup[(dc_yl << hires)] + columnofs[x+1];
+    dest3 = ylookup[(dc_yl << hires) + 1] + columnofs[x];
+    dest4 = ylookup[(dc_yl << hires) + 1] + columnofs[x+1];
+
+    fracstep = dc_iscale;
+    frac = dc_texturemid + (dc_yl-centery)*fracstep;
+
+    do
+    {
+	*dest = tranmap[(*dest<<8)+dc_colormap[dc_source[frac>>FRACBITS]]];
+	*dest2 = tranmap[(*dest<<8)+dc_colormap[dc_source[frac>>FRACBITS]]];
+	dest += SCREENWIDTH << hires;
+	dest2 += SCREENWIDTH << hires;
+	if (hires)
+	{
+	    *dest3 = tranmap[(*dest<<8)+dc_colormap[dc_source[frac>>FRACBITS]]];
+	    *dest4 = tranmap[(*dest<<8)+dc_colormap[dc_source[frac>>FRACBITS]]];
+	    dest3 += SCREENWIDTH << hires;
+	    dest4 += SCREENWIDTH << hires;
+	}
+
+	frac += fracstep;
+    } while (count--);
+}  
   
  
 
@@ -607,6 +662,41 @@ void R_DrawTranslatedColumnLow (void)
 } 
 
 
+void R_DrawTLColumn (void)
+{
+    int			count;
+    byte*		dest;
+    fixed_t		frac;
+    fixed_t		fracstep;
+
+    count = dc_yh - dc_yl;
+    if (count < 0)
+	return;
+
+#ifdef RANGECHECK
+    if ((unsigned)dc_x >= SCREENWIDTH
+	|| dc_yl < 0
+	|| dc_yh >= SCREENHEIGHT)
+    {
+	I_Error ( "R_DrawColumn: %i to %i at %i",
+		  dc_yl, dc_yh, dc_x);
+    }
+#endif
+
+    dest = ylookup[dc_yl] + columnofs[dc_x];
+
+    fracstep = dc_iscale;
+    frac = dc_texturemid + (dc_yl-centery)*fracstep;
+
+    do
+    {
+        // actual translucency map lookup taken from boom202s/R_DRAW.C:255
+        *dest = tranmap[(*dest<<8)+dc_colormap[dc_source[frac>>FRACBITS]]];
+	dest += SCREENWIDTH;
+
+	frac += fracstep;
+    } while (count--);
+}
 
 
 //
