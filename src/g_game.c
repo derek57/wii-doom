@@ -35,6 +35,7 @@
 #include "deh_str.h"
 #include "deh_misc.h"
 #include "doomdef.h" 
+#include "doomfeatures.h" 
 #include "doomkeys.h"
 #include "doomstat.h"
 
@@ -637,7 +638,7 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
     forward += mousey; 
 
     // mouselook, but not when paused
-    if (joyiry && !paused && mouselook > 0)     // FOR PSP: mouselook, but...
+    if (joyiry && !paused && mouselook > 0 && players[consoleplayer].playerstate == PST_LIVE)
     {                                           // ...not when paused & if on
         // We'll directly change the viewing pitch of the console player.
         float adj = 0;

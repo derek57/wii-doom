@@ -886,7 +886,7 @@ P_DamageMobj
     player_t*        player;
     fixed_t        thrust;
     int                temp;
-        
+
     if ( !(target->flags & MF_SHOOTABLE) )
         return;        // shouldn't happen...
                 
@@ -1016,6 +1016,5 @@ P_DamageMobj
             && target->info->seestate != S_NULL)
             P_SetMobjState (target, target->info->seestate);
     }
-                        
 }
 

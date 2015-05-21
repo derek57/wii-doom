@@ -373,6 +373,9 @@ typedef enum
 #define MF2_FEETARECLIPPED        0x00004000  // a mobj's feet are now being cut
 #define MF2_FLOATBOB		0x00080000  // use float bobbing z movement
 
+#define MTF_FRIEND            128
+#define MF_FRIEND  0x40000000        // killough 7/18/98: friendly monsters
+
 extern boolean sd;
 extern boolean usb;
 

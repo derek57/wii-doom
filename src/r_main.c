@@ -873,3 +873,17 @@ void R_RenderPlayerView (player_t* player)
     NetUpdate ();                                
 }
 
+angle_t R_WadToAngle(int wadangle)
+{
+  // maintain compatibility
+  
+//  if(demo_version < 302)
+    return (wadangle / 45) * ANG45;
+
+  // allows wads to specify angles to
+  // the nearest degree, not nearest 45  
+
+//  return wadangle * (ANG45 / 45);
+}
+
+
