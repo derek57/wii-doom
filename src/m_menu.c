@@ -2678,9 +2678,9 @@ void M_DrawGame2(void)
     M_WriteText(GameDef.x - 15, GameDef.y + 38, DEH_String("HERETIC LIQUID SPLASH"));
     M_WriteText(GameDef.x - 15, GameDef.y + 48, DEH_String("SWIRLING WATER HACK"));
     M_WriteText(GameDef.x - 15, GameDef.y + 58, DEH_String("PRE-RELEASE BFG9000"));
-    M_WriteText(GameDef.x - 15, GameDef.y + 68, DEH_String("PRE-RELEASE SKULLS"));
-    M_WriteText(GameDef.x - 15, GameDef.y + 78, DEH_String("PRE-RELEASE PLASMA"));
-    M_WriteText(GameDef.x - 15, GameDef.y + 88, DEH_String("PRE-RELEASE IMP"));
+    M_WriteText(GameDef.x - 15, GameDef.y + 68, DEH_String("PRE-RELEASE LOST SOUL"));
+    M_WriteText(GameDef.x - 15, GameDef.y + 78, DEH_String("PRE-RELEASE PLASMAGUN"));
+    M_WriteText(GameDef.x - 15, GameDef.y + 88, DEH_String("PRE-RELEASE IMP FIRE"));
 
     if(autoaim)
         M_WriteText(GameDef.x + 153, GameDef.y - 2, DEH_String("ON"));
@@ -6191,12 +6191,12 @@ void M_BetaSkulls(int choice)
     case 0:
         if (beta_skulls)
             beta_skulls = false;
-        players[consoleplayer].message = DEH_String("PRE-RELEASE SKULLS BEHAVIOR DISABLED");
+        players[consoleplayer].message = DEH_String("PRE-RELEASE LOST SOULS DISABLED");
         break;
     case 1:
         if (!beta_skulls)
             beta_skulls = true;
-        players[consoleplayer].message = DEH_String("PRE-RELEASE SKULLS BEHAVIOR ENABLED");
+        players[consoleplayer].message = DEH_String("PRE-RELEASE LOST SOULS ENABLED");
         break;
     }
 }
@@ -6208,12 +6208,12 @@ void M_BetaPlasma(int choice)
     case 0:
         if (beta_plasma)
             beta_plasma = false;
-        players[consoleplayer].message = DEH_String("PRE-RELEASE PLASMA GUN DISABLED");
+        players[consoleplayer].message = DEH_String("PRE-RELEASE PLASMAGUN FIRE DISABLED");
         break;
     case 1:
         if (!beta_plasma)
             beta_plasma = true;
-        players[consoleplayer].message = DEH_String("PRE-RELEASE PLASMA GUN ENABLED");
+        players[consoleplayer].message = DEH_String("PRE-RELEASE PLASMAGUN FIRE ENABLED");
         break;
     }
 }
@@ -6225,12 +6225,12 @@ void M_BetaImp(int choice)
     case 0:
         if (beta_imp)
             beta_imp = false;
-        players[consoleplayer].message = DEH_String("PRE-RELEASE IMP DISABLED");
+        players[consoleplayer].message = DEH_String("PRE-RELEASE IMP FIREBALLS DISABLED");
         break;
     case 1:
         if (!beta_imp)
             beta_imp = true;
-        players[consoleplayer].message = DEH_String("PRE-RELEASE IMP ENABLED");
+        players[consoleplayer].message = DEH_String("PRE-RELEASE IMP FIREBALLS ENABLED");
         break;
     }
 }
