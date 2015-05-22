@@ -38,6 +38,7 @@
 #include "s_sound.h"
 #include "sounds.h"
 #include "st_stuff.h"
+#include "v_trans.h"
 #include "z_zone.h"
 
 
@@ -1043,8 +1044,20 @@ void P_SpawnMapThing (mapthing_t* mthing)
         mobj->flags |= MF_AMBUSH;
 
     // Lost Souls bleed Puffs
-    if (!netgame && d_colblood2 && d_chkblood2 && (i == MT_SKULL || i == MT_BETASKULL))
+    if (d_colblood2 && d_chkblood2 && (i == MT_SKULL || i == MT_BETASKULL))
         mobj->flags |= MF_NOBLOOD;
+
+    // RjY
+    // Print a warning when a solid hanging body is used in a sector where
+    // the player can walk under it, to help people with map debugging
+    if (!((~mobj->flags) & (MF_SOLID | MF_SPAWNCEILING)) // solid and hanging
+        // invert everything, then both bits should be clear
+        && mobj->floorz + mobjinfo[MT_PLAYER].height <= mobj->z) // head <= base
+        // player under body's head height <= bottom of body
+    {
+        C_Printf(CR_GOLD, " P_SpawnMapThing: solid hanging body in tall sector at %d,%d (type = %d)\n",
+                mthing->x, mthing->y, type);
+    }
 }
 
 
@@ -1119,6 +1132,10 @@ P_SpawnBlood
     if(d_maxgore)
     {
         mobj_t *th2 = P_SpawnMobj(x, y, z, MT_GORE);
+
+        // added for colored blood and gore!
+        th2->target = target;
+
         int t;
         
         th2->z = th->z;

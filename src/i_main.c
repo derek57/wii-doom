@@ -36,9 +36,29 @@
 #include "xmn_main.h"
 
 
-boolean        devparm = false;         // started game with -devparm
-boolean        devparm_net = false;     // started game with -devparm
-boolean        devparm_nerve = false;   // started game with -devparm
+// MAIN DEVPARM
+boolean        devparm = false;
+boolean        devparm_net = false;
+
+// NETWORK DEVPARM
+boolean        devparm_net_nerve = false;
+boolean        devparm_net_doom = false;
+boolean        devparm_net_doom2 = false;
+boolean        devparm_net_freedoom2 = false;
+boolean        devparm_net_tnt = false;
+boolean        devparm_net_plutonia = false;
+boolean        devparm_net_chex = false;
+boolean        devparm_net_hacx = false;
+
+// SOLO DEVPARM
+boolean        devparm_nerve = false;
+boolean        devparm_doom = false;
+boolean        devparm_doom2 = false;
+boolean        devparm_freedoom2 = false;
+boolean        devparm_tnt = false;
+boolean        devparm_plutonia = false;
+boolean        devparm_chex = false;
+boolean        devparm_hacx = false;
 
 
 int user_main()

@@ -21,8 +21,11 @@
 
 /* $Id$ */
 
+
+#include "c_io.h"
 #include "SDLnetsys.h"
 #include "SDL_net.h"
+
 
 /* The select() API for network sockets */
 
@@ -37,7 +40,7 @@ struct _SDLNet_SocketSet {
     struct SDLNet_Socket **sockets;
 };
 
-void C_Printf(char *s, ...);
+//void C_Printf(stringtype_t type, char *s, ...);
 
 /* Allocate a socket set for use with SDLNet_CheckSockets()
    This returns a socket set for up to 'maxsockets' sockets, or NULL if
@@ -71,7 +74,7 @@ int SDLNet_AddSocket(SDLNet_SocketSet set, SDLNet_GenericSocket sock)
 {
     if ( sock != NULL ) {
         if ( set->numsockets == set->maxsockets ) {
-            C_Printf("socketset is full");
+            C_Printf(CR_RED, " socketset is full");
             sleep(1);
             return(-1);
         }
@@ -92,7 +95,7 @@ int SDLNet_DelSocket(SDLNet_SocketSet set, SDLNet_GenericSocket sock)
             }
         }
         if ( i == set->numsockets ) {
-            C_Printf("socket not found in socketset");
+            C_Printf(CR_RED, " socket not found in socketset");
             sleep(1);
             return(-1);
         }

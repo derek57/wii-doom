@@ -40,6 +40,7 @@
 #include "p_local.h"
 #include "s_sound.h"
 #include "sounds.h"
+#include "v_trans.h"
 #include "w_wad.h"
 #include "z_zone.h"
 
@@ -686,9 +687,9 @@ void S_ChangeMusic(int musicnum, int looping)
     }
 
     if(looping)
-        C_Printf(" S_ChangeMusic: d_%s (loop = yes)\n", music->name);
+        C_Printf(CR_GRAY, " S_ChangeMusic: d_%s (loop = yes)\n", music->name);
     else
-        C_Printf(" S_ChangeMusic: d_%s (loop = no)\n", music->name);
+        C_Printf(CR_GRAY, " S_ChangeMusic: d_%s (loop = no)\n", music->name);
 
     music->data = W_CacheLumpNum(music->lumpnum, PU_STATIC);
 

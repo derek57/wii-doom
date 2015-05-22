@@ -54,7 +54,30 @@
 extern  boolean         nomonsters;      // checkparm of -nomonsters
 extern  boolean         respawnparm;     // checkparm of -respawn
 extern  boolean         fastparm;        // checkparm of -fast
-extern  boolean         devparm;         // DEBUG: launched with -devparm
+
+// MAIN DEVPARM
+extern  boolean         devparm;
+extern  boolean         devparm_net;
+
+// NETWORK DEVPARM
+extern  boolean         devparm_net_nerve;
+extern  boolean         devparm_net_doom;
+extern  boolean         devparm_net_doom2;
+extern  boolean         devparm_net_freedoom2;
+extern  boolean         devparm_net_tnt;
+extern  boolean         devparm_net_plutonia;
+extern  boolean         devparm_net_chex;
+extern  boolean         devparm_net_hacx;
+
+// SOLO DEVPARM
+extern  boolean         devparm_nerve;
+extern  boolean         devparm_doom;
+extern  boolean         devparm_doom2;
+extern  boolean         devparm_freedoom2;
+extern  boolean         devparm_tnt;
+extern  boolean         devparm_plutonia;
+extern  boolean         devparm_chex;
+extern  boolean         devparm_hacx;
 
 
 // -----------------------------------------------------

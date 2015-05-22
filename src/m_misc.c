@@ -41,6 +41,7 @@
 #include "i_system.h"
 #include "i_video.h"
 #include "m_misc.h"
+#include "v_trans.h"
 #include "v_video.h"
 #include "w_wad.h"
 #include "z_zone.h"
@@ -203,7 +204,7 @@ void M_ExtractFileBase(char *path, char *dest)
     {
         if (length >= 8)
         {
-            C_Printf("Warning: Truncated '%s' lump name to '%.8s'.\n",
+            C_Printf(CR_GOLD, "Warning: Truncated '%s' lump name to '%.8s'.\n",
                    filename, dest);
             break;
         }

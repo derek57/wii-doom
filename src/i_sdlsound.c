@@ -33,6 +33,7 @@
 #include "i_swap.h"
 #include "i_system.h"
 #include "m_misc.h"
+#include "v_trans.h"
 #include "w_wad.h"
 #include "z_zone.h"
 
@@ -721,13 +722,13 @@ static boolean I_SDL_InitSound(boolean _use_sfx_prefix)
 
     if (SDL_Init(SDL_INIT_AUDIO) < 0)
     {
-        C_Printf("Unable to set up sound.\n");
+        C_Printf(CR_RED, " Unable to set up sound.\n");
         return false;
     }
 
     if (Mix_OpenAudio(snd_samplerate, AUDIO_S16SYS, 2, GetSliceSize()) < 0)
     {
-        C_Printf("Error initialising SDL_mixer: %s\n", Mix_GetError());
+        C_Printf(CR_RED, " Error initialising SDL_mixer: %s\n", Mix_GetError());
         return false;
     }
 
@@ -737,7 +738,7 @@ static boolean I_SDL_InitSound(boolean _use_sfx_prefix)
 
     if (use_libsamplerate != 0)
     {
-        C_Printf("I_SDL_InitSound: use_libsamplerate=%i, but "
+        C_Printf(CR_RED, " I_SDL_InitSound: use_libsamplerate=%i, but "
                         "libsamplerate support not compiled in.\n",
                         use_libsamplerate);
     }
@@ -759,11 +760,11 @@ static boolean I_SDL_InitSound(boolean _use_sfx_prefix)
         if (v <= SDL_VERSIONNUM(1, 2, 8))
         {
             setpanning_workaround = true;
-            C_Printf("\n"
-              "ATTENTION: You are using an old version of SDL_mixer!\n"
-              "           This version has a bug that may cause "
+            C_Printf(CR_GOLD, "\n"
+              " ATTENTION: You are using an old version of SDL_mixer!\n"
+              "            This version has a bug that may cause "
                           "your sound to stutter.\n"
-              "           Please upgrade to a newer version!\n"
+              "            Please upgrade to a newer version!\n"
               "\n");
         }
     }

@@ -51,6 +51,7 @@
 // Data.
 #include "sounds.h"
 
+#include "v_trans.h"
 #include "w_wad.h"
 #include "z_zone.h"
 
@@ -383,17 +384,29 @@ P_FindNextHighestFloor
         
         if (other->floorheight > height)
         {
+            C_Printf(CR_RED, " P_FindNextHighestFloor: Overflow of heightlist[%d] array is detected.\n",
+                            MAX_ADJOINING_SECTORS);
+            C_Printf(CR_RED, " Heightlist index %d: ", h);
+
             // Emulation of memory (stack) overflow
             if (h == MAX_ADJOINING_SECTORS + 1)
             {
                 height = other->floorheight;
             }
+            else if (h <= MAX_ADJOINING_SECTORS + 1)
+                C_Printf(CR_GOLD, " successfully emulated.\n");
+/*
             else if (h == MAX_ADJOINING_SECTORS + 2)
             {
                 // Fatal overflow: game crashes at 22 textures
                 I_Error("Sector with more than 22 adjoining sectors. "
                         "Vanilla will crash here");
             }
+*/
+            else if (h <= MAX_ADJOINING_SECTORS + 6)
+                C_Printf(CR_RED, " Cannot be emulated - unpredictable behaviour.\n");
+            else
+                C_Printf(CR_RED, " Cannot be emulated - crash with high probability.\n");
 
             heightlist[h++] = other->floorheight;
         }
@@ -1308,8 +1321,8 @@ int EV_DoDonut(line_t*       line)
 
         if (s2 == NULL)
         {
-            C_Printf("EV_DoDonut: linedef had no second sidedef! "
-                     "Unexpected behavior may occur in Vanilla Doom. \n");
+            C_Printf(CR_RED, " EV_DoDonut: linedef had no second sidedef! "
+                     " Unexpected behavior may occur in Vanilla Doom. \n");
             break;
         }
 
@@ -1328,9 +1341,9 @@ int EV_DoDonut(line_t*       line)
                 // s3->floorpic is a short at 0000:0008
                 // Trying to emulate
 
-                C_Printf("EV_DoDonut: WARNING: emulating buffer overrun due to "
-                         "NULL back sector. "
-                         "Unexpected behavior may occur in Vanilla Doom.\n");
+                C_Printf(CR_RED, " EV_DoDonut: WARNING: emulating buffer overrun due to "
+                         " NULL back sector. "
+                         " Unexpected behavior may occur in Vanilla Doom.\n");
 
                 DonutOverrun(&s3_floorheight, &s3_floorpic, line, s1);
             }

@@ -40,6 +40,7 @@
 #include "m_bbox.h"
 #include "p_local.h"
 #include "s_sound.h"
+#include "v_trans.h"
 #include "w_wad.h"
 #include "z_zone.h"
 
@@ -205,6 +206,18 @@ void P_LoadSegs (int lump)
         li->sidedef = &sides[ldef->sidenum[side]];
         li->frontsector = sides[ldef->sidenum[side]].sector;
 
+        //e6y: fix wrong side index
+        if (side != 0 && side != 1)
+        {
+            C_Printf(CR_GOLD, " P_LoadSegs: seg %d contains wrong side index %d. Replaced with 1.\n", i, side);
+        }
+
+        // cph 2006/09/30 - our frontsector can be the second side of the
+        // linedef, so must check for NO_INDEX in case we are incorrectly
+        // referencing the back of a 1S line
+        if (ldef->sidenum[side] == -1)
+            C_Printf(CR_GOLD, " P_LoadSegs: front of seg %i has no sidedef\n", i);
+
         if (ldef-> flags & ML_TWOSIDED)
         {
             sidenum = ldef->sidenum[side ^ 1];
@@ -228,8 +241,20 @@ void P_LoadSegs (int lump)
         {
             li->backsector = 0;
         }
+
+        // e6y
+        // check and fix wrong references to non-existent vertexes
+        // see e1m9 @ NIVELES.WAD
+        // http://www.doomworld.com/idgames/index.php?id=12647
+/*
+        if (ml->v1 >= numvertexes)
+            C_Printf(" P_LoadSegs: compatibility loss - seg %d references a non-existent vertex %d\n"
+                    , i, ml->v1);
+        else if(ml->v2 >= numvertexes)
+            C_Printf(" P_LoadSegs: compatibility loss - seg %d references a non-existent vertex %d\n"
+                    , i, ml->v2);
+*/
     }
-        
     W_ReleaseLumpNum(lump);
 }
 
@@ -458,13 +483,48 @@ void P_LoadLineDefs (int lump)
         ld->sidenum[0] = SHORT(mld->sidenum[0]);
         ld->sidenum[1] = SHORT(mld->sidenum[1]);
 
+        // cph 2006/09/30 - fix sidedef errors right away.
+        // cph 2002/07/20 - these errors are fatal if not fixed, so apply them
+        // in compatibility mode - a desync is better than a crash! */
+        int j;
+        
+        for (j=0; j < 2; j++)
+        {
+            if (ld->sidenum[j] != -1 && ld->sidenum[j] >= numsides)
+            {
+                ld->sidenum[j] = -1;
+                C_Printf(CR_GOLD, " P_LoadLineDefs: linedef %d has out-of-range sidedef number\n", i);
+            }
+        }
+
+        // killough 11/98: fix common wad errors (missing sidedefs):
+
         if (ld->sidenum[0] != -1)
             ld->frontsector = sides[ld->sidenum[0]].sector;
+        else if (ld->sidenum[0] == -1)
+        {
+            // Substitute dummy sidedef for missing right side
+            ld->sidenum[0] = 0;
+
+            // cph - print a warning about the bug
+            C_Printf(CR_GOLD, " P_LoadLineDefs: linedef %d missing first sidedef\n", i);
+        }
         else
             ld->frontsector = 0;
 
         if (ld->sidenum[1] != -1)
             ld->backsector = sides[ld->sidenum[1]].sector;
+        else if ((ld->sidenum[1] == -1) && (ld->flags & ML_TWOSIDED))
+        {
+            // e6y
+            // ML_TWOSIDED flag shouldn't be cleared for compatibility purposes
+            // see CLNJ-506.LMP at http://doomedsda.us/wad1005.html
+
+            // Clear 2s flag for missing left side
+            ld->flags &= ~ML_TWOSIDED;
+            // cph - print a warning about the bug
+            C_Printf(CR_GOLD, " P_LoadLineDefs: linedef %d has two-sided flag set, but no second sidedef\n", i);
+        }
         else
             ld->backsector = 0;
     }
@@ -742,7 +802,7 @@ static void PadRejectArray(byte *array, unsigned int len)
 
     if (len > sizeof(rejectpad))
     {
-        C_Printf("PadRejectArray: REJECT lump too short to pad! (%i > %i)\n",
+        C_Printf(CR_GOLD, " PadRejectArray: REJECT lump too short to pad! (%i > %i)\n",
                         len, (int) sizeof(rejectpad));
 
         // Pad remaining space with 0 (or 0xff, if specified on command line).
@@ -778,6 +838,8 @@ static void P_LoadReject(int lumpnum)
         W_ReadLump(lumpnum, rejectmatrix);
 
         PadRejectArray(rejectmatrix + lumplen, minlength - lumplen);
+
+        C_Printf(CR_GOLD, " P_LoadReject: REJECT too short (%d<%d) - padded\n", minlength, lumplen);
     }
 }
 
@@ -900,7 +962,7 @@ P_SetupLevel
 
     //printf ("free memory: 0x%x\n", Z_FreeMemory());
 
-    C_Printf(" HU_NewLevel executed\n");
+    C_Printf(CR_GRAY, " HU_NewLevel executed\n");
 
     HU_NewLevel();
 }

@@ -42,6 +42,7 @@
 #include "m_controls.h"
 #include "s_sound.h"
 #include "sounds.h"
+#include "v_trans.h"
 #include "v_video.h"
 #include "w_wad.h"
 #include "z_zone.h"
@@ -492,7 +493,7 @@ void HU_Ticker(void)
             || (plr->message && message_dontfuckwithme))
         {
             HUlib_addMessageToSText(&w_message, 0, plr->message);
-            C_Printf(" %s\n", plr->message);
+            C_Printf(CR_GREEN, " %s\n", plr->message);
             plr->message = 0;
             message_on = true;
             message_counter = HU_MSGTIMEOUT;
@@ -527,8 +528,8 @@ void HU_NewLevel()
     char*       s;
 
     // print the new level name into the console
-    C_Printf("\n");
-    C_Printf(" {||||||||||||||||||||||||||||||}\n");
+    C_Printf(CR_RED, "\n");
+    C_Printf(CR_RED, " {||||||||||||||||||||||||||||||}\n");
 
     switch ( logical_gamemission )
     {
@@ -563,7 +564,11 @@ void HU_NewLevel()
         s = HU_TITLE_CHEX;
     }
 
-    C_Printf("\n %s\n\n", s);
+    C_Printf(CR_GOLD, " \n");
+
+    C_Printf(CR_GOLD, " %s\n \n", s);
+
+    C_Printf(CR_GOLD, " \n");
 
     C_InstaPopup();       // put console away
 }

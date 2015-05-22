@@ -20,14 +20,16 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "c_io.h"
 #include "config.h"
-#include "doomtype.h"
 #include "deh_main.h"
 #include "deh_str.h"
+#include "doomfeatures.h"
+#include "doomtype.h"
 #include "i_system.h"
 #include "i_timer.h"
-#include "m_fixed.h"
 #include "m_config.h"
+#include "m_fixed.h"
 #include "m_misc.h"
 #include "net_client.h"
 #include "net_common.h"
@@ -37,11 +39,10 @@
 #include "net_packet.h"
 #include "net_server.h"
 #include "net_structrw.h"
+#include "v_trans.h"
 #include "w_checksum.h"
 #include "w_wad.h"
 
-#include "doomfeatures.h"
-#include "c_io.h"
 
 extern void D_ReceiveTic(ticcmd_t *ticcmds, boolean *playeringame);
 
@@ -790,7 +791,7 @@ static void NET_CL_ParseConsoleMessage(net_packet_t *packet)
         return;
     }
 
-    C_Printf("Message from server: ");
+    C_Printf(CR_BLUE, " Message from server: ");
     sleep(1);
 
     NET_SafePuts(msg);
@@ -1069,7 +1070,7 @@ void NET_CL_Disconnect(void)
 
             client_state = CLIENT_STATE_WAITING_START;
 
-            C_Printf("NET_CL_Disconnect: Timeout while disconnecting from server\n");
+            C_Printf(CR_BLUE, " NET_CL_Disconnect: Timeout while disconnecting from server\n");
             sleep(1);
             break;
         }

@@ -40,6 +40,7 @@
 #include "r_state.h"
 #include "s_sound.h"
 #include "sounds.h"
+#include "v_trans.h"
 #include "z_zone.h"
 
 #if 0
@@ -466,7 +467,7 @@ EV_VerticalDoor
                 {
                     // This isn't a door OR a plat.  Now we're in trouble.
 
-                    C_Printf("EV_VerticalDoor: Tried to close "
+                    C_Printf(CR_GOLD, "EV_VerticalDoor: Tried to close "
                                     "something that wasn't a door.\n");
 
                     // Try closing it anyway. At least it will work on 32-bit

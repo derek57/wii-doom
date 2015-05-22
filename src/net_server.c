@@ -14,20 +14,20 @@
 // Network server code
 //
 
-#include <stdio.h>
 #include <stdarg.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 
+#include "c_io.h"
 #include "config.h"
-
-#include "doomtype.h"
 #include "d_mode.h"
+#include "doomfeatures.h"
+#include "doomtype.h"
 #include "i_system.h"
 #include "i_timer.h"
 #include "m_misc.h"
-
 #include "net_client.h"
 #include "net_common.h"
 #include "net_defs.h"
@@ -35,12 +35,11 @@
 #include "net_loop.h"
 #include "net_packet.h"
 #include "net_query.h"
-#include "net_server.h"
 #include "net_sdl.h"
+#include "net_server.h"
 #include "net_structrw.h"
+#include "v_trans.h"
 
-#include "doomfeatures.h"
-#include "c_io.h"
 
 // How often to refresh our registration with the master server.
 
@@ -2018,7 +2017,7 @@ void NET_SV_Shutdown(void)
         return;
     }
     
-    C_Printf("SV: Shutting down server...\n");
+    C_Printf(CR_BLUE, " SV: Shutting down server...\n");
     sleep(1);
 
     // Disconnect all clients
@@ -2055,7 +2054,7 @@ void NET_SV_Shutdown(void)
         if (I_GetTimeMS() - start_time > 5000)
         {
             running = false;
-            C_Printf("SV: Timed out waiting for clients to disconnect.\n");
+            C_Printf(CR_BLUE, " SV: Timed out waiting for clients to disconnect.\n");
             sleep(1);
         }
 

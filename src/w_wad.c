@@ -30,6 +30,7 @@
 #include "i_system.h"
 #include "i_video.h"
 #include "m_misc.h"
+#include "v_trans.h"
 #include "w_wad.h"
 #include "z_zone.h"
 
@@ -165,7 +166,7 @@ wad_file_t *W_AddFile (char *filename, boolean automatic)
     if (wad_file == NULL)
     {
         printf (" couldn't open %s\n", filename);
-        C_Printf (" couldn't open %s\n", filename);
+        C_Printf (CR_GOLD, " couldn't open %s\n", filename);
         return NULL;
     }
 
@@ -255,17 +256,17 @@ wad_file_t *W_AddFile (char *filename, boolean automatic)
         C_PrintSDLVersions();
 
         if (runcount < 2)
-            C_Printf(" Wii-DOOM has been run %s\n", (!runcount ? "once" : "twice"));
+            C_Printf(CR_GRAY, " Wii-DOOM has been run %s\n", (!runcount ? "once" : "twice"));
         else
-            C_Printf(" Wii-DOOM has been run %s times\n", commify(runcount + 1));
+            C_Printf(CR_GRAY, " Wii-DOOM has been run %s times\n", commify(runcount + 1));
 
-        C_Printf(" %s %s lumps from IWAD file %s\n",
+        C_Printf(CR_GRAY, " %s %s lumps from IWAD file %s\n",
                 (automatic ? "Automatically added" : "Added"),
                 commify(iwad_lumps), target);
 
-        C_Printf("         adding %s\n", filename);
+        C_Printf(CR_GRAY, "         adding %s\n", filename);
 
-        C_Printf(" %s %s lumps from %.4s file %s\n",
+        C_Printf(CR_GRAY, " %s %s lumps from %.4s file %s\n",
                 (automatic ? "Automatically added" : "Added"),
                 commify(numlumps - startlump),
                 header.identification, uppercase(filename));

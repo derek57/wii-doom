@@ -15,18 +15,19 @@
 // Parses Action Pointer entries in dehacked files
 //
 
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "doomtype.h"
-#include "info.h"
-
+#include "c_io.h"
 #include "deh_defs.h"
 #include "deh_io.h"
 #include "deh_main.h"
+#include "doomtype.h"
+#include "info.h"
+#include "v_trans.h"
 
-#include "c_io.h"
 
 static actionf_t codeptrs[NUMSTATES];
 
@@ -97,7 +98,7 @@ static void DEH_PointerParseLine(deh_context_t *context, char *line, void *tag)
         return;
     }
     
-    C_Printf("Set %s to %s for state\n", variable_name, value);
+    C_Printf(CR_GRAY, " Set %s to %s for state\n", variable_name, value);
 
     // all values are integers
 

@@ -23,6 +23,7 @@
 #include "c_io.h"
 #include "doomdef.h"
 #include "opl_queue.h"
+#include "v_trans.h"
 
 
 #define MAX_OPL_QUEUE 64
@@ -74,7 +75,7 @@ void OPL_Queue_Push(opl_callback_queue_t *queue,
 
     if (queue->num_entries >= MAX_OPL_QUEUE)
     {
-        C_Printf("OPL_Queue_Push: Exceeded maximum callbacks\n");
+        C_Printf(CR_GOLD, " OPL_Queue_Push: Exceeded maximum callbacks\n");
         return;
     }
 

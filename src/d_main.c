@@ -73,6 +73,7 @@
 #include "sounds.h"
 #include "st_stuff.h"
 #include "sys_wpad.h"
+#include "v_trans.h"
 #include "v_video.h"
 #include "video.h"
 #include "w_merge.h"
@@ -83,8 +84,6 @@
 
 typedef uint32_t u32;   // < 32bit unsigned integer
 
-// print title for every printed line
-char            title[128];
 
 // Location where savegames are stored
 
@@ -156,7 +155,6 @@ extern boolean  inhelpscreens;
 extern boolean  devparm_nerve;
 extern boolean  finale_music;
 extern boolean  aiming_help;
-extern boolean  devparm_net;
 extern boolean  iwad_added;
 extern boolean  pwad_added;
 
@@ -853,7 +851,7 @@ static void LoadHacxDeh(void)
                     "Hacx v1.2 IWAD.");
         }
         else
-            C_Printf(" Parsed DEHACKED lump from IWAD file %s\n", target);
+            C_Printf(CR_GOLD, " Parsed DEHACKED lump from IWAD file %s\n", target);
     }
 }
 
@@ -875,9 +873,20 @@ void D_DoomMain (void)
 
     char            file[256];
 
-    if(devparm || devparm_net)
-//        fsize = 10399316;
+    if(devparm_doom || devparm_net_doom)
+        fsize = 10399316;
+    else if(devparm_doom2 || devparm_net_doom2)
         fsize = 14943400;
+    else if(devparm_chex || devparm_net_chex)
+        fsize = 12361532;
+    else if(devparm_hacx || devparm_net_hacx)
+        fsize = 19321722;
+    else if(devparm_freedoom2 || devparm_net_freedoom2)
+        fsize = 28422764;
+    else if(devparm_tnt || devparm_net_tnt)
+        fsize = 18654796;
+    else if(devparm_plutonia || devparm_net_plutonia)
+        fsize = 18240172;
 
     printf(" ");
 
@@ -982,7 +991,9 @@ void D_DoomMain (void)
             fsize == 4225504    || // DOOM SHAREWARE v1.2
             fsize == 4225460)      // DOOM SHAREWARE v1.25 (SYBEX RELEASE)
     {
-        printStyledText(1, 1,CONSOLE_FONT_BLUE,CONSOLE_FONT_YELLOW,CONSOLE_FONT_BOLD,&stTexteLocation,"                          DOOM Operating System v1.2                           ");
+        printStyledText(1, 1,CONSOLE_FONT_BLUE,CONSOLE_FONT_YELLOW,
+        CONSOLE_FONT_BOLD,&stTexteLocation,
+        "                          DOOM Operating System v1.2                           ");
     }
     else if(fsize == 4261144    || // DOOM BETA v1.4
             fsize == 4271324    || // DOOM BETA v1.5
@@ -992,7 +1003,9 @@ void D_DoomMain (void)
             fsize == 4234124    || // DOOM SHAREWARE v1.666
             fsize == 4196020)      // DOOM SHAREWARE v1.8
     {
-        printStyledText(1, 1,CONSOLE_FONT_RED,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"                           DOOM System Startup v1.4                            ");
+        printStyledText(1, 1, CONSOLE_FONT_RED, CONSOLE_FONT_WHITE,
+        CONSOLE_FONT_BOLD, &stTexteLocation,
+        "                           DOOM System Startup v1.4                            ");
 
         version13 = true;
     }
@@ -1006,7 +1019,9 @@ void D_DoomMain (void)
 */
             )
     {
-        printStyledText(1, 1,CONSOLE_FONT_WHITE,CONSOLE_FONT_RED,CONSOLE_FONT_BOLD,&stTexteLocation,"                           DOOM System Startup v1.9                            ");
+        printStyledText(1, 1, CONSOLE_FONT_WHITE, CONSOLE_FONT_RED,
+        CONSOLE_FONT_BOLD, &stTexteLocation,
+        "                           DOOM System Startup v1.9                            ");
 
         version13 = true;
     }
@@ -1015,7 +1030,9 @@ void D_DoomMain (void)
             fsize == 14612688   ||  // DOOM 2 REGISTERED v1.7
             fsize == 14607420)      // DOOM 2 REGISTERED v1.8 (FRENCH VERSION)
     {
-        printStyledText(1, 1,CONSOLE_FONT_RED,CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,&stTexteLocation,"                         DOOM 2: Hell on Earth v1.666                          ");
+        printStyledText(1, 1,CONSOLE_FONT_RED,CONSOLE_FONT_WHITE,
+        CONSOLE_FONT_BOLD, &stTexteLocation,
+        "                         DOOM 2: Hell on Earth v1.666                          ");
 
         version13 = true;
     }
@@ -1347,11 +1364,39 @@ void D_DoomMain (void)
     if(devparm || devparm_net)
     {
         if(usb)
-//            D_AddFile("usb:/apps/wiidoom/IWAD/DOOM/Reg/v12/DOOM.WAD", true);
-            D_AddFile("usb:/apps/wiidoom/IWAD/DOOM2/v1666/DOOM2.WAD", true);
+        {
+            if(devparm_doom)
+                D_AddFile("usb:/apps/wiidoom/IWAD/DOOM/Reg/v12/DOOM.WAD", true);
+            else if(devparm_doom2)
+                D_AddFile("usb:/apps/wiidoom/IWAD/DOOM2/v1666/DOOM2.WAD", true);
+            else if(devparm_chex)
+                D_AddFile("usb:/apps/wiidoom/IWAD/CHEX/CHEX.WAD", true);
+            else if(devparm_hacx)
+                D_AddFile("usb:/apps/wiidoom/IWAD/HACX/v12/HACX.WAD", true);
+            else if(devparm_freedoom2)
+                D_AddFile("usb:/apps/wiidoom/IWAD/FREEDOOM/v08p2/FREEDOOM2.WAD", true);
+            else if(devparm_tnt)
+                D_AddFile("usb:/apps/wiidoom/IWAD/TNT/v19_NEW/TNT.WAD", true);
+            else if(devparm_plutonia)
+                D_AddFile("usb:/apps/wiidoom/IWAD/PLUTONIA/v19_NEW/PLUTONIA.WAD", true);
+        }
         else if(sd)
-//            D_AddFile("sd:/apps/wiidoom/IWAD/DOOM/Reg/v12/DOOM.WAD", true);
-            D_AddFile("sd:/apps/wiidoom/IWAD/DOOM2/v1666/DOOM2.WAD", true);
+        {
+            if(devparm_doom)
+                D_AddFile("sd:/apps/wiidoom/IWAD/DOOM/Reg/v12/DOOM.WAD", true);
+            else if(devparm_doom2)
+                D_AddFile("sd:/apps/wiidoom/IWAD/DOOM2/v1666/DOOM2.WAD", true);
+            else if(devparm_chex)
+                D_AddFile("sd:/apps/wiidoom/IWAD/CHEX/CHEX.WAD", true);
+            else if(devparm_hacx)
+                D_AddFile("sd:/apps/wiidoom/IWAD/HACX/v12/HACX.WAD", true);
+            else if(devparm_freedoom2)
+                D_AddFile("sd:/apps/wiidoom/IWAD/FREEDOOM/v08p2/FREEDOOM2.WAD", true);
+            else if(devparm_tnt)
+                D_AddFile("sd:/apps/wiidoom/IWAD/TNT/v19_NEW/TNT.WAD", true);
+            else if(devparm_plutonia)
+                D_AddFile("sd:/apps/wiidoom/IWAD/PLUTONIA/v19_NEW/PLUTONIA.WAD", true);
+        }
     }
     else
         D_AddFile(target, false);
@@ -1394,18 +1439,18 @@ void D_DoomMain (void)
     pwad_added = true;
 
     if(devparm)
-        C_Printf(D_DEVSTR);
+        C_Printf(CR_GOLD, D_DEVSTR);
 
-    C_Printf(" V_Init: allocate screens.\n");
-    C_Printf(" M_LoadDefaults: Load system defaults.\n");
-    C_Printf(" Z_Init: Init zone memory allocation daemon. \n");
-    C_Printf(" heap size: 0x3cdb000 \n");
-    C_Printf(" W_Init: Init WADfiles.\n");
+    C_Printf(CR_GRAY, " V_Init: allocate screens.\n");
+    C_Printf(CR_GRAY, " M_LoadDefaults: Load system defaults.\n");
+    C_Printf(CR_GRAY, " Z_Init: Init zone memory allocation daemon. \n");
+    C_Printf(CR_GRAY, " heap size: 0x3cdb000 \n");
+    C_Printf(CR_GRAY, " W_Init: Init WADfiles.\n");
 
     if(show_deh_loading_message == 1)
     {
         printf("         adding %s\n", dehacked_file);
-        C_Printf("         adding %s\n", dehacked_file);
+        C_Printf(CR_GRAY, "         adding %s\n", dehacked_file);
     }
 
     // Debug:
@@ -1513,17 +1558,17 @@ void D_DoomMain (void)
     if(gamemode == shareware && gameversion != exe_chex)
     {
         printf("         shareware version.\n");
-        C_Printf("         shareware version.\n");
+        C_Printf(CR_GRAY, "         shareware version.\n");
     }
     else if((gamemode == shareware && gameversion == exe_chex) || gamemode == registered)
     {
         printf("         registered version.\n");
-        C_Printf("         registered version.\n");
+        C_Printf(CR_GRAY, "         registered version.\n");
     }
     else
     {
         printf("         commercial version.\n");
-        C_Printf("         commercial version.\n");
+        C_Printf(CR_GRAY, "         commercial version.\n");
     }
     if(gamemode == retail || gamemode == registered)
     {
@@ -1531,10 +1576,10 @@ void D_DoomMain (void)
         printf("                 This version is NOT SHAREWARE, do not distribute!              ");
         printf("             Please report software piracy to the SPA: 1-800-388-PIR8           ");
         printf(" ===============================================================================");
-        C_Printf(" ===============================================================================\n");
-        C_Printf("                 This version is NOT SHAREWARE, do not distribute!              \n");
-        C_Printf("             Please report software piracy to the SPA: 1-800-388-PIR8           \n");
-        C_Printf(" ===============================================================================\n");
+        C_Printf(CR_GRAY, " ===============================================================================\n");
+        C_Printf(CR_GRAY, "                 This version is NOT SHAREWARE, do not distribute!              \n");
+        C_Printf(CR_GRAY, "             Please report software piracy to the SPA: 1-800-388-PIR8           \n");
+        C_Printf(CR_GRAY, " ===============================================================================\n");
     }
     else if(gamemode == commercial)
     {
@@ -1542,10 +1587,10 @@ void D_DoomMain (void)
         printf("                                Do not distribute!                              ");
         printf("             Please report software piracy to the SPA: 1-800-388-PIR8           ");
         printf(" ===============================================================================");
-        C_Printf(" ===============================================================================\n");
-        C_Printf("                                Do not distribute!                              \n");
-        C_Printf("             Please report software piracy to the SPA: 1-800-388-PIR8           \n");
-        C_Printf(" ===============================================================================\n");
+        C_Printf(CR_GRAY, " ===============================================================================\n");
+        C_Printf(CR_GRAY, "                                Do not distribute!                              \n");
+        C_Printf(CR_GRAY, "             Please report software piracy to the SPA: 1-800-388-PIR8           \n");
+        C_Printf(CR_GRAY, " ===============================================================================\n");
     }
 
     if(modifiedgame)
@@ -1561,12 +1606,12 @@ void D_DoomMain (void)
             printf("            You will not receive technical support for modified games.          ");
             printf("                             press enter to continue                            ");
             printf(" ===============================================================================");
-            C_Printf(" ===============================================================================");
-            C_Printf("    ATTENTION:  This version of DOOM has been modified.  If you would like to   ");
-            C_Printf("   get a copy of the original game, call 1-800-IDGAMES or see the readme file.  ");
-            C_Printf("            You will not receive technical support for modified games.          ");
-            C_Printf("                             press enter to continue                            ");
-            C_Printf(" ===============================================================================");
+            C_Printf(CR_GRAY, " ===============================================================================");
+            C_Printf(CR_GRAY, "    ATTENTION:  This version of DOOM has been modified.  If you would like to   ");
+            C_Printf(CR_GRAY, "   get a copy of the original game, call 1-800-IDGAMES or see the readme file.  ");
+            C_Printf(CR_GRAY, "            You will not receive technical support for modified games.          ");
+            C_Printf(CR_GRAY, "                             press enter to continue                            ");
+            C_Printf(CR_GRAY, " ===============================================================================");
 
             skip_showing_message:
             {
@@ -1683,64 +1728,64 @@ void D_DoomMain (void)
     startloadgame = -1;
 
     printf(" M_Init: Init miscellaneous info.\n");
-    C_Printf(" M_Init: Init miscellaneous info.\n");
+    C_Printf(CR_GRAY, " M_Init: Init miscellaneous info.\n");
     M_Init ();
 
     if(gameversion == exe_chex)
     {
         printf(" R_Init: Init Chex(R) Quest refresh daemon - ");
-        C_Printf(" R_Init: Init Chex(R) Quest refresh daemon - ");
+        C_Printf(CR_GRAY, " R_Init: Init Chex(R) Quest refresh daemon - ");
     }
     else
     {
         printf(" R_Init: Init DOOM refresh daemon - ");
-        C_Printf(" R_Init: Init DOOM refresh daemon - ");
+        C_Printf(CR_GRAY, " R_Init: Init DOOM refresh daemon ");
     }
     R_Init ();
 
     printf("\n P_Init: Init Playloop state.\n");
-    C_Printf(" P_Init: Init Playloop state.\n");
+    C_Printf(CR_GRAY, " P_Init: Init Playloop state.\n");
     P_Init ();
 
     printf(" I_Init: Setting up machine state.\n");
-    C_Printf(" I_Init: Setting up machine state.\n");
+    C_Printf(CR_GRAY, " I_Init: Setting up machine state.\n");
 
     printf(" I_StartupDPMI\n");
-    C_Printf(" I_StartupDPMI\n");
+    C_Printf(CR_GRAY, " I_StartupDPMI\n");
 
     printf(" I_StartupMouse\n");
-    C_Printf(" I_StartupMouse\n");
+    C_Printf(CR_GRAY, " I_StartupMouse\n");
 
     printf(" I_StartupJoystick\n");
-    C_Printf(" I_StartupJoystick\n");
+    C_Printf(CR_GRAY, " I_StartupJoystick\n");
 
     printf(" I_StartupKeyboard\n");
-    C_Printf(" I_StartupKeyboard\n");
+    C_Printf(CR_GRAY, " I_StartupKeyboard\n");
 
     printf(" I_StartupTimer\n");
-    C_Printf(" I_StartupTimer\n");
+    C_Printf(CR_GRAY, " I_StartupTimer\n");
     I_InitTimer();
 
     printf(" I_StartupSound\n");
-    C_Printf(" I_StartupSound\n");
+    C_Printf(CR_GRAY, " I_StartupSound\n");
 
     printf(" calling DMX_Init\n");
-    C_Printf(" calling DMX_Init\n");
+    C_Printf(CR_GRAY, " calling DMX_Init\n");
 
     printf(" D_CheckNetGame: Checking network game status.\n");
-    C_Printf(" D_CheckNetGame: Checking network game status.\n");
+    C_Printf(CR_GRAY, " D_CheckNetGame: Checking network game status.\n");
     D_CheckNetGame ();
 
     printf(" S_Init: Setting up sound.\n");
-    C_Printf(" S_Init: Setting up sound.\n");
+    C_Printf(CR_GRAY, " S_Init: Setting up sound.\n");
     S_Init (sfxVolume * 8, musicVolume * 8);
 
     printf(" HU_Init: Setting up heads up display.\n");
-    C_Printf(" HU_Init: Setting up heads up display.\n");
+    C_Printf(CR_GRAY, " HU_Init: Setting up heads up display.\n");
     HU_Init ();
 
     printf(" ST_Init: Init status bar.\n");
-    C_Printf(" ST_Init: Init status bar.\n");
+    C_Printf(CR_GRAY, " ST_Init: Init status bar.\n");
     ST_Init ();
 
     // If Doom II without a MAP01 lump, this is a store demo.
@@ -1759,7 +1804,7 @@ void D_DoomMain (void)
     // loaded which could probably include a lump of that name.
 
     if (W_CheckNumForName("dehacked") >= 0)
-        C_Printf(" Parsed DEHACKED lump\n");
+        C_Printf(CR_GOLD, " Parsed DEHACKED lump\n");
 
     if (W_CheckNumForName("dmenupic") >= 0)
     {
@@ -1808,7 +1853,7 @@ void D_DoomMain (void)
 
     startuptimer = I_GetTimeMS() - startuptimer;
 
-    C_Printf(" Startup took %02i:%02i:%02i.%i to complete.\n",
+    C_Printf(CR_GRAY, " Startup took %02i:%02i:%02i.%i to complete.\n",
         (startuptimer / (1000 * 60 * 60)) % 24,
         (startuptimer / (1000 * 60)) % 60,
         (startuptimer / 1000) % 60,

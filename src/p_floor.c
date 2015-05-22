@@ -25,6 +25,7 @@
 //-----------------------------------------------------------------------------
 
 
+#include "c_io.h"
 #include "doomdef.h"
 
 // State.
@@ -37,6 +38,7 @@
 // Data.
 #include "sounds.h"
 
+#include "v_trans.h"
 #include "z_zone.h"
 
 
@@ -89,6 +91,11 @@ T_MovePlane
                 {
                     sector->floorheight = lastpos;
                     P_ChangeSector(sector,crush);
+                    //e6y: warning about potential desynch
+                    if (crush == 10)
+                    {
+                        C_Printf(CR_GOLD, " T_MovePlane: Stairs which can potentially crush may lead to desynch in compatibility mode.\n");
+                }
                     return crushed;
                 }
             }

@@ -30,6 +30,7 @@
 
 #include "c_io.h"
 #include "memio.h"
+#include "v_trans.h"
 #include "z_zone.h"
 
 
@@ -70,7 +71,7 @@ size_t mem_fread(void *buf, size_t size, size_t nmemb, MEMFILE *stream)
 
         if (stream->mode != MODE_READ)
         {
-                C_Printf("not a read stream\n");
+                C_Printf(CR_RED, " not a read stream\n");
                 return -1;
         }
 
@@ -198,7 +199,7 @@ int mem_fseek(MEMFILE *stream, signed long position, mem_rel_t whence)
         }
         else
         {
-                C_Printf("Error seeking to %i\n", newpos);
+                C_Printf(CR_RED, "Error seeking to %i\n", newpos);
                 return -1;
         }
 }

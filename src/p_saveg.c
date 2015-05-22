@@ -40,6 +40,7 @@
 #include "p_saveg.h"
 #include "p_tick.h"
 #include "r_state.h"
+#include "v_trans.h"
 #include "z_zone.h"
 
 
@@ -101,7 +102,7 @@ static byte saveg_read8(void)
     {
         if (!savegame_error)
         {
-            C_Printf("saveg_read8: Unexpected end of file while "
+            C_Printf(CR_RED, " saveg_read8: Unexpected end of file while "
                             "reading save game\n");
 
             savegame_error = true;
@@ -117,7 +118,7 @@ static void saveg_write8(byte value)
     {
         if (!savegame_error)
         {
-            C_Printf("saveg_write8: Error while writing save game\n");
+            C_Printf(CR_RED, " saveg_write8: Error while writing save game\n");
 
             savegame_error = true;
         }

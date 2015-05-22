@@ -1447,32 +1447,77 @@ typedef enum {
 
 typedef struct
 {
-    int        doomednum;
-    int        spawnstate;
-    int        spawnhealth;
-    int        seestate;
-    int        seesound;
-    int        reactiontime;
-    int        attacksound;
-    int        painstate;
-    int        painchance;
-    int        painsound;
-    int        meleestate;
-    int        missilestate;
-    int        crashstate;
-    int        deathstate;
-    int        xdeathstate;
-    int        deathsound;
-    int        speed;
-    int        radius;
-    int        height;
-    int        mass;
-    int        damage;
-    int        activesound;
-    int        flags;
-    int        flags2;
-    int        raisestate;
-    char*      name;
+    int   doomednum;    // Thing number used in id's editor, and now
+                        // probably by every other editor too
+
+    int   spawnstate;   // The state (frame) index when this Thing is
+                        // first created
+
+    int   spawnhealth;  // The initial hit points for this Thing
+
+    int   seestate;     // The state when it sees you or wakes up
+
+    int   seesound;     // The sound it makes when waking
+
+    int   reactiontime; // How many tics it waits after it wakes up
+                        // before it will start to attack, in normal
+                        // skills (halved for nightmare)
+
+    int   attacksound;  // The sound it makes when it attacks
+
+    int   painstate;    // The state to indicate pain
+
+    int   painchance;   // A number that is checked against a random
+                        // number 0-255 to see if the Thing is supposed
+                        // to go to its painstate or not.  Note this
+                        // has absolutely nothing to do with the chance
+                        // it will get hurt, just the chance of it
+                        // reacting visibly.
+
+    int   painsound;    // The sound it emits when it feels pain
+
+    int   meleestate;   // Melee==close attack
+
+    int   missilestate; // What states to use when it's in the air, if
+                        // in fact it is ever used as a missile
+
+    int   crashstate;
+
+    int   deathstate;   // What state begins the death sequence
+
+    int   xdeathstate;  // What state begins the horrible death sequence
+                        // like when a rocket takes out a trooper
+
+    int   deathsound;   // The death sound.  See also A_Scream() in
+                        // p_enemy.c for some tweaking that goes on
+                        // for certain monsters
+
+    int   speed;        // How fast it moves.  Too fast and it can miss
+                        // collision logic.
+
+    int   radius;       // An often incorrect radius
+
+    int   height;       // An often incorrect height, used only to see
+                        // if a monster can enter a sector
+
+    int   mass;         // How much an impact will move it.  Cacodemons
+                        // seem to retreat when shot because they have
+                        // very little mass and are moved by impact
+
+    int   damage;       // If this is a missile, how much does it hurt?
+
+    int   activesound;  // What sound it makes wandering around, once
+                        // in a while.  Chance is 3/256 it will.
+
+    int   flags;        // Bit masks for lots of things.  See p_mobj.h
+
+    int   flags2;
+
+    int   raisestate;   // The first state for an Archvile or respawn
+                        // resurrection.  Zero means it won't come
+                        // back to life.
+
+    char* name;
 
 } mobjinfo_t;
 

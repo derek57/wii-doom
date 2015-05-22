@@ -30,7 +30,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "c_io.h"
 #include "doomdef.h"
 
 // State.
@@ -2128,6 +2127,10 @@ void A_MoreGibs(mobj_t* actor)
 //    do
     {
         mo = P_SpawnMobj(actor->x, actor->y, actor->z + (24*FRACUNIT), MT_FLESH);
+
+        // added for colored blood and gore!
+        mo->target = actor;
+
         P_SetMobjState(mo, mo->info->spawnstate + (P_Random() % 19));
 
         an = (P_Random() << 13) / 255;
@@ -2159,6 +2162,9 @@ void A_MoreGibs(mobj_t* actor)
                                        actor->y,
                                        actor->z + (32*FRACUNIT), MT_GORE);
 
+            // added for colored blood and gore!
+            gore->target = mo;
+
             gore->angle = mo->angle;
 
             gore->momx = mo->momx;
@@ -2188,6 +2194,9 @@ void A_Fall (mobj_t *actor)
             mo = P_SpawnMobj(actor->x,
                              actor->y,
                              actor->z + actor->info->height/2, MT_GORE);
+
+            // added for colored blood and gore!
+            mo->target = actor;
 
             t = P_Random() % 3;
             if(t > 0)
@@ -2233,6 +2242,9 @@ void A_MoreBlood(mobj_t * actor)
                 mo = P_SpawnMobj(actor->x,
                                  actor->y,
                                  actor->z, MT_CHUNK);
+
+                // added for colored blood and gore!
+                mo->target = actor;
 
                 t = P_Random() % 6;
 

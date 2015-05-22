@@ -28,6 +28,7 @@
 
 #include <stdio.h>
 
+#include "c_io.h"
 #include "deh_main.h"
 #include "doomdef.h"
 
@@ -42,6 +43,8 @@
 
 // Data.
 #include "sounds.h"
+
+#include "v_trans.h"
 
 
 //
@@ -131,6 +134,7 @@ void P_InitSwitchList(void)
         }
                 
         if (alphSwitchList[i].episode <= episode)
+/*
         {
 #if 0        // UNUSED - debug?
             int                value;
@@ -146,6 +150,33 @@ void P_InitSwitchList(void)
 #endif
             switchlist[index++] = R_TextureNumForName(DEH_String(alphSwitchList[i].name1));
             switchlist[index++] = R_TextureNumForName(DEH_String(alphSwitchList[i].name2));
+        }
+*/
+        {
+            int texture1, texture2;
+
+            if (!alphSwitchList[i].episode)
+                break;
+
+            // Ignore switches referencing unknown texture names, instead of exiting.
+            // Warn if either one is missing, but only add if both are valid.
+            texture1 = R_CheckTextureNumForName(alphSwitchList[i].name1);
+
+            if (texture1 < 0)
+                C_Printf(CR_RED, " P_InitSwitchList: unknown texture %s\n",
+                        alphSwitchList[i].name1);
+
+            texture2 = R_CheckTextureNumForName(alphSwitchList[i].name2);
+
+            if (texture2 < 0)
+                C_Printf(CR_RED, " P_InitSwitchList: unknown texture %s\n",
+                        alphSwitchList[i].name2);
+
+            if (texture1 != -1 && texture2 != -1)
+            {
+                switchlist[index++] = texture1;
+                switchlist[index++] = texture2;
+            }
         }
     }
 }

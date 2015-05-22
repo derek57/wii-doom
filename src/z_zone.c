@@ -20,6 +20,7 @@
 #include "c_io.h"
 #include "doomtype.h"
 #include "i_system.h"
+#include "v_trans.h"
 #include "z_zone.h"
 
 
@@ -330,16 +331,16 @@ Z_DumpHeap
 {
     memblock_t*        block;
         
-    C_Printf ("zone size: %i  location: %p\n",
+    C_Printf (CR_GRAY, " zone size: %i  location: %p\n",
             mainzone->size,mainzone);
     
-    C_Printf ("tag range: %i to %i\n",
+    C_Printf (CR_GRAY, " tag range: %i to %i\n",
             lowtag, hightag);
         
     for (block = mainzone->blocklist.next ; ; block = block->next)
     {
         if (block->tag >= lowtag && block->tag <= hightag)
-            C_Printf ("block:%p    size:%7i    user:%p    tag:%3i\n",
+            C_Printf (CR_GRAY, " block:%p    size:%7i    user:%p    tag:%3i\n",
                     block, block->size, block->user, block->tag);
                 
         if (block->next == &mainzone->blocklist)
@@ -349,13 +350,13 @@ Z_DumpHeap
         }
         
         if ( (byte *)block + block->size != (byte *)block->next)
-            C_Printf ("ERROR: block size does not touch the next block\n");
+            C_Printf (CR_RED, " ERROR: block size does not touch the next block\n");
 
         if ( block->next->prev != block)
-            C_Printf ("ERROR: next block doesn't have proper back link\n");
+            C_Printf (CR_RED, " ERROR: next block doesn't have proper back link\n");
 
         if (block->tag == PU_FREE && block->next->tag == PU_FREE)
-            C_Printf ("ERROR: two consecutive free blocks\n");
+            C_Printf (CR_RED, " ERROR: two consecutive free blocks\n");
     }
 }
 

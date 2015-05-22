@@ -20,13 +20,13 @@
 #include <string.h>
 #include <stdarg.h>
 
-#include "doomtype.h"
+#include "c_io.h"
 #include "deh_str.h"
+#include "doomtype.h"
 #include "m_misc.h"
-
+#include "v_trans.h"
 #include "z_zone.h"
 
-#include "c_io.h"
 
 typedef struct 
 {
@@ -376,7 +376,7 @@ static char *FormatStringReplacement(char *s)
 
     if (!ValidFormatReplacement(s, repl))
     {
-        C_Printf("WARNING: Unsafe dehacked replacement provided for "
+        C_Printf(CR_GOLD, " WARNING: Unsafe dehacked replacement provided for "
                "printf format string: %s\n", s);
 
         return s;

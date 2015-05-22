@@ -40,7 +40,7 @@
 #include "m_menu.h"
 #include "r_local.h"
 #include "r_sky.h"
-
+#include "v_trans.h"
 
 
 // Fineangles in the SCREENWIDTH wide window.
@@ -705,33 +705,33 @@ void R_Init (void)
 {
     R_InitData ();
     printf (".");
-    C_Printf (".");
+    //C_Printf (CR_GRAY, ".");
 
     R_InitPointToAngle ();
     printf (".");
-    C_Printf (".");
+    //C_Printf (CR_GRAY, ".");
 
     R_InitTables ();
     // viewwidth / viewheight / detailLevel are set by the defaults
     printf (".");
-    C_Printf (".");
+    //C_Printf (CR_GRAY, ".");
 
 
     R_SetViewSize (screenblocks, detailLevel);
     R_InitPlanes ();
     printf (".");
-    C_Printf (".");
+    //C_Printf (CR_GRAY, ".");
 
     R_InitLightTables ();
     printf (".");
-    C_Printf (".");
+    //C_Printf (CR_GRAY, ".");
 
     R_InitSkyMap ();
     R_InitTranslationTables ();
     printf (".");
-    C_Printf (".");
+    //C_Printf (CR_GRAY, ".");
     printf("]");
-    C_Printf ("]");
+    //C_Printf (CR_GRAY, "]");
         
     framecount = 0;
 }

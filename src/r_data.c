@@ -443,7 +443,7 @@ static void R_GenerateLookup(int texnum)
                             if (badcol)
                             {
                                 badcol = 0;
-                                C_Printf("\nWarning: Texture %8.8s "
+                                C_Printf(CR_GOLD, "\n Warning: Texture %8.8s "
                                         "(height %d) has bad column(s)"
                                         " starting at x = %d.",
                                         texturename, texture->height, x);
@@ -472,7 +472,7 @@ static void R_GenerateLookup(int texnum)
         {
             if (devparm)
             {
-                C_Printf("\nR_GenerateLookup:"
+                C_Printf(CR_GOLD, "\n R_GenerateLookup:"
                         " Column %d is without a patch in texture %.8s",
                         x, texturename);
             }
@@ -506,7 +506,7 @@ static void R_GenerateLookup(int texnum)
     // killough 10/98: non-verbose output
     if (err)
     {
-        C_Printf("\nR_GenerateLookup: Column without a patch in texture %.8s",
+        C_Printf(CR_GOLD, "\n R_GenerateLookup: Column without a patch in texture %.8s",
                 texturename);
     }
     free(count);
@@ -627,6 +627,9 @@ void R_InitTextures (void)
     {
         M_StringCopy(name, name_p + i * 8, sizeof(name));
         patchlookup[i] = W_CheckNumForName(name);
+
+        if (patchlookup[i] == -1)
+            C_Printf(CR_GOLD, " Warning: patch %.8s, index %d does not exist", name, i);
     }
     W_ReleaseLumpName(DEH_String("PNAMES"));
 
@@ -663,14 +666,14 @@ void R_InitTextures (void)
     totalwidth = 0;
     
     printf("[");
-    C_Printf("[");
+    //C_Printf(CR_GRAY, "[");
 
     for (i=0 ; i<numtextures ; i++, directory++)
     {
         if (!(i&63))
         {
             printf (".");
-            C_Printf (".");
+//            C_Printf (CR_GRAY, ".");
         }
 
         if (i == numtextures1)
@@ -790,7 +793,7 @@ void R_InitSpriteLumps (void)
         if (!(i&63))
         {
             printf (".");
-            C_Printf (".");
+//            C_Printf (CR_GRAY, ".");
         }
 
         patch = W_CacheLumpNum (firstspritelump+i, PU_CACHE);
@@ -923,13 +926,13 @@ void R_InitColormaps (void)
 	extern byte V_Colorize (byte *playpal, int cr, byte source);
 
 	if (!crstr)
-	    crstr = malloc(CRMAX * sizeof(*crstr));
+	    crstr = malloc(CRXMAX * sizeof(*crstr));
 
-	for (i = 0; i < CRMAX; i++)
+	for (i = 0; i < CRXMAX; i++)
 	{
 	    for (j = 0; j < 256; j++)
 	    {
-		cr[i][j] = V_Colorize(playpal, i, j);
+		crx[i][j] = V_Colorize(playpal, i, j);
 	    }
 
 	    M_snprintf(c, sizeof(c), "\x1b%c", '0' + i);
@@ -952,12 +955,12 @@ void R_InitData (void)
     R_InitTextures ();
 
     printf (".");
-    C_Printf (".");
+//    C_Printf (CR_GRAY, ".");
 
     R_InitFlats ();
 
     printf (".");
-    C_Printf (".");
+//    C_Printf (CR_GRAY, ".");
 
     R_InitSpriteLumps ();
 

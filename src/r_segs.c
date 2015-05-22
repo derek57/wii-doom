@@ -34,6 +34,7 @@
 #include "i_system.h"
 #include "r_local.h"
 #include "r_sky.h"
+#include "v_trans.h"
 
 
 #define HEIGHTBITS     12
@@ -504,7 +505,7 @@ static void R_AdjustOpenings(int start, int stop)
         
         openings = (int *)realloc (openings, maxopenings * sizeof(*openings));
         lastopening = openings + pos;
-        C_Printf (" MaxOpenings increased to %u\n", maxopenings);
+        C_Printf(CR_GOLD, " MaxOpenings increased to %u\n", maxopenings);
 
         // [RH] We also need to adjust the openings pointers that
         //        were already stored in drawsegs.
@@ -577,7 +578,7 @@ R_StoreWallRange
         ds_p = drawsegs + numdrawsegs_old;
 
         if (numdrawsegs_old)
-            C_Printf("R_StoreWallRange: Hit MAXDRAWSEGS limit at %d, \
+            C_Printf(CR_GOLD, " R_StoreWallRange: Hit MAXDRAWSEGS limit at %d, \
                       raised to %d.\n", numdrawsegs_old, numdrawsegs);
     }
 

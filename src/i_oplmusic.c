@@ -31,6 +31,7 @@
 #include "midifile.h"
 #include "mus2mid.h"
 #include "opl.h"
+#include "v_trans.h"
 #include "w_wad.h"
 #include "z_zone.h"
 
@@ -1389,7 +1390,7 @@ static void *I_OPL_RegisterSong(void *data, int len)
 
     if (result == NULL)
     {
-        C_Printf("I_OPL_RegisterSong: Failed to load MID.\n");
+        C_Printf(CR_RED, " I_OPL_RegisterSong: Failed to load MID.\n");
     }
 
     // remove file now
@@ -1440,7 +1441,7 @@ static boolean I_OPL_InitMusic(void)
 
     if (!OPL_Init(opl_io_port))
     {
-        C_Printf(" Dude.  The Adlib isn't responding.\n");
+        C_Printf(CR_GOLD, " Dude.  The Adlib isn't responding.\n");
         return false;
     }
 

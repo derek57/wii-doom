@@ -30,6 +30,7 @@
 #include "opl.h"
 #include "opl_internal.h"
 #include "opl_queue.h"
+#include "v_trans.h"
 
 
 #define MAX_SOUND_SLICE_TIME 100 /* ms */
@@ -301,13 +302,13 @@ static int OPL_SDL_Init(unsigned int port_base)
     {
         if (SDL_Init(SDL_INIT_AUDIO) < 0)
         {
-            C_Printf("Unable to set up sound.\n");
+            C_Printf(CR_RED, " Unable to set up sound.\n");
             return 0;
         }
 
         if (Mix_OpenAudio(opl_sample_rate, AUDIO_S16SYS, 2, GetSliceSize()) < 0)
         {
-            C_Printf("Error initialising SDL_mixer: %s\n", Mix_GetError());
+            C_Printf(CR_RED, " Error initialising SDL_mixer: %s\n", Mix_GetError());
 
             SDL_QuitSubSystem(SDL_INIT_AUDIO);
             return 0;
@@ -341,7 +342,7 @@ static int OPL_SDL_Init(unsigned int port_base)
 
     if (mixing_format != AUDIO_S16SYS || mixing_channels != 2)
     {
-        C_Printf("OPL_SDL only supports native signed 16-bit LSB, "
+        C_Printf(CR_GOLD, " OPL_SDL only supports native signed 16-bit LSB, "
                 "stereo format!\n");
 
         OPL_SDL_Shutdown();

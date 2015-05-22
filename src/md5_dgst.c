@@ -277,18 +277,3 @@ void md5_block_data_order (MD5_CTX *c, const void *data_, size_t num)
         }
 #endif
 
-#ifdef undef
-int printit(unsigned long *l)
-        {
-        int i,ii;
-
-        for (i=0; i<2; i++)
-                {
-                for (ii=0; ii<8; ii++)
-                        {
-                        C_Printf(statsfile,"%08lx ",l[i*8+ii]);
-                        }
-                C_Printf(statsfile,"\n");
-                }
-        }
-#endif

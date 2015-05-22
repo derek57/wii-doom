@@ -37,11 +37,21 @@
  */
 
 
+#include <ft2build.h>
+#include <freetype/freetype.h>
+#include <mpeg/smpeg.h>
+#include <jpeglib.h>
+#include <ogc/libversion.h>
+#include <png.h>
 #include <SDL/SDL.h>
 #include <SDL/SDL_mixer.h>
+#include <SDL/SDL_gfxPrimitives.h>
+#include <SDL/SDL_image.h>
+#include <SDL/SDL_ttf.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdarg.h>
+#include <zlib.h>
 
 #include "c_io.h"
 #include "d_event.h"
@@ -59,15 +69,13 @@
 #include "s_sound.h"
 #include "sounds.h"
 #include "v_misc.h"
+#include "v_trans.h"
 #include "v_video.h"
 #include "w_wad.h"
 #include "z_zone.h"
 
 #include <wiiuse/wpad.h>
 
-
-// default value for out of range colors
-#define CR_RED                  6
 
 #define CONSOLEFONTSTART        ' '
 #define CONSOLEFONTEND          '~'
@@ -101,36 +109,56 @@ static char        messages[MESSAGES][LINELENGTH];
 static char        inputtext[INPUTLENGTH];
 
 // position in the history (last line in window)
-static int        message_pos = 0;
+static int         message_pos = 0;
 
 // the last message
-static int        message_last = 0;
+static int         message_last = 0;
 
-static int        backdrop_lumpnum = -1;
+static int         backdrop_lumpnum = -1;
 
 // for scrolling command line
-static int        pgup_down = 0;
-static int        pgdn_down = 0;
+static int         pgup_down = 0;
+static int         pgdn_down = 0;
 
-char              *lumpname;
+char               *lumpname;
 
 // the height of the console
-int               c_height = 100;        // 50 FOR STRIFE (100 FOR DOOM)
+int                c_height = 100;        // 50 FOR STRIFE (100 FOR DOOM)
 
 // pixels/tic it moves
-int               c_speed = 10;
+int                c_speed = 10;
 
-int               current_target = 0;
-int               current_height = 0;
-int               console_enabled = true;
+int                current_target = 0;
+int                current_height = 0;
+int                console_enabled = true;
+int                textcolor;
+int                consolestrings = 0;
 
-boolean           c_showprompt;
+boolean            c_showprompt;
 
-patch_t*          c_font[CONSOLEFONTSIZE];
+patch_t*           c_font[CONSOLEFONTSIZE];
 
-extern boolean    redrawsbar;
+byte               redcol = 40;
+byte               whitecol = 80;
+byte               graycol = 100;
+byte               greencol = 120;
+byte               yellowcol = 160;
+byte               bluecol = 200;
+byte               consolecolors[STRINGTYPES];
 
-extern char       *shiftxform;
+extern boolean     redrawsbar;
+
+extern char        *shiftxform;
+
+
+typedef struct
+{
+    char                *string;
+    crx_t               type;
+    int                 tabs[8];
+} console_t;
+
+console_t       *console;
 
 
 static struct
@@ -200,33 +228,73 @@ void C_PrintCompileDate(void)
     sscanf(__TIME__, "%2d:%2d:%*d", &hour, &minute);
     month = (strstr(mths, mth) - mths) / 3;
 
-    C_Printf("");
-    C_Printf(" This %i-bit %s binary of %s was built on %s, %s %i, %i at %i:%02i%s\n",
+    C_Printf(CR_GRAY, " This %i-bit %s binary of %s was built on %s, %s %i, %i at %i:%02i%s\n",
         (sizeof(intptr_t) == 4 ? 32 : 64),
         "Linux",
         PACKAGE_NAMEANDVERSIONSTRING, days[dayofweek(day, month + 1, year)], months[month], day,
         year, (hour > 12 ? hour - 12 : hour), minute, (hour < 12 ? "am" : "pm"));
 }
 
+
 void C_PrintSDLVersions(void)
 {
-    C_Printf(" Using version %i.%i.%i of %s\n",
+    C_Printf(CR_GOLD, " Using version %i.%i.%i of %s\n",
         SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_PATCHLEVEL,
-#if defined(SDL20)
-        "SDL2.DLL"
-#else
         "libSDL.a"
-#endif
         );
 
-    C_Printf(" Using version %i.%i.%i of %s\n",
+    C_Printf(CR_GOLD, " Using version %i.%i.%i of %s\n",
         SDL_MIXER_MAJOR_VERSION, SDL_MIXER_MINOR_VERSION, SDL_MIXER_PATCHLEVEL,
-#if defined(SDL20)
-        "SDL2_MIXER.DLL"
-#else
         "libSDL_mixer.a"
-#endif
         );
+
+    C_Printf(CR_GOLD, " Using version %i.%i.%i of %s\n",
+        SDL_TTF_MAJOR_VERSION, SDL_TTF_MINOR_VERSION, SDL_TTF_PATCHLEVEL,
+        "libSDL_ttf.a"
+        );
+
+    C_Printf(CR_GOLD, " Using version %i.%i.%i of %s\n",
+        SDL_GFXPRIMITIVES_MAJOR, SDL_GFXPRIMITIVES_MINOR, SDL_GFXPRIMITIVES_MICRO,
+        "libSDL_gfx.a"
+        );
+
+    C_Printf(CR_GOLD, " Using version %i.%i.%i of %s\n",
+        SDL_IMAGE_MAJOR_VERSION, SDL_IMAGE_MINOR_VERSION, SDL_IMAGE_PATCHLEVEL,
+        "libSDL_image.a"
+        );
+
+    C_Printf(CR_GOLD, " Using version %i.%i.%i of %s\n",
+        SMPEG_MAJOR_VERSION, SMPEG_MINOR_VERSION, SMPEG_PATCHLEVEL,
+        "libsmpeg.a"
+        );
+
+    C_Printf(CR_GOLD, " Using version %i.%i of %s\n",
+        JPEG_LIB_VERSION_MAJOR, JPEG_LIB_VERSION_MINOR,
+        "libjpeg.a"
+        );
+
+    C_Printf(CR_GOLD, " Using version %i.%i.%i of %s\n",
+        PNG_LIBPNG_VER_MAJOR, PNG_LIBPNG_VER_MINOR, PNG_LIBPNG_VER_RELEASE,
+        "libpng15.a"
+        );
+
+    C_Printf(CR_GOLD, " Using version %i.%i.%i of %s\n",
+       FREETYPE_MAJOR, FREETYPE_MINOR, FREETYPE_PATCH,
+        "libfreetype.a"
+        );
+
+    C_Printf(CR_GOLD, " Using version %i.%i.%i.%i of %s\n",
+        ZLIB_VER_MAJOR, ZLIB_VER_MINOR, ZLIB_VER_REVISION, ZLIB_VER_SUBREVISION,
+        "libz.a"
+        );
+
+    C_Printf(CR_GOLD, " Using version %i.%i.%i of %s\n",
+        _V_MAJOR_, _V_MINOR_, _V_PATCH_,
+        "libogc.a"
+        );
+
+    C_Printf(CR_GOLD, " Also using the following libs: libasnd.a, libvorbisidec.a, libopengx.a,\n");
+    C_Printf(CR_GOLD, " libwiilight.a, libfat.a, libwiiuse.a, libbte.a, libwiikeyboard.a\n");
 }
 
 //
@@ -275,7 +343,9 @@ void C_InitBackdrop(void)
     // fill the video buffer with the newly allocated screen
     V_UseBuffer(backdrop);
 
+    dp_translation = crx[CRX_DARK];
     V_DrawPatch(0, 0, patch);
+    V_ClearDPTranslation();
 
     // restore the backup up video buffer
     V_RestoreBuffer();
@@ -484,6 +554,13 @@ void C_Init(void)
         }
     }
 
+    consolecolors[yellow] = yellowcol;
+    consolecolors[red] = redcol;
+    consolecolors[gray] = graycol;
+    consolecolors[blue] = bluecol;
+    consolecolors[white] = whitecol;
+    consolecolors[green] = greencol;
+
     C_UpdateInputPoint();
 }
 
@@ -628,7 +705,7 @@ void C_Drawer(void)
         // move up one line on the screen
         // back one line in the history
         y -= 8;
-      
+
         // end of message history?
         if(--count < 0)
             break;
@@ -636,9 +713,9 @@ void C_Drawer(void)
         // past top of screen?
         if(y < 0)
             break;
-      
+
         // draw this line
-        C_DrawText(0, y, messages[count], 80);
+        C_DrawText(0, y, console[count].string, consolecolors[console[count].type]);
     }
 
     // draw branding
@@ -857,13 +934,13 @@ static void C_AdjustLineBreaks(char *str)
 // cph 2001/07/22 - remove arbitrary limit, use malloc'd buffer instead
 //  and make format string parameter const char*
 //
-void C_Printf(char *s, ...)
+void C_Printf(stringtype_t type, char *s, ...)
 {
     va_list args;
 
 //    char *t;
 
-    static char buffer[1024];
+    char buffer[1024];
   
     // haleyjd: sanity check
     if(!s)
@@ -879,6 +956,11 @@ void C_Printf(char *s, ...)
 
     va_end(args);
 
+    console = realloc(console, (consolestrings + 1) * sizeof(*console));
+    console[consolestrings].string = strdup(buffer);
+    console[consolestrings].type = type;
+    ++consolestrings;
+
     // haleyjd
     C_AdjustLineBreaks(buffer);
 
@@ -886,6 +968,7 @@ void C_Printf(char *s, ...)
   
 //    (free)(buffer);
 }
+
 
 //
 // Console activation

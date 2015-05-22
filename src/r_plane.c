@@ -36,6 +36,7 @@
 #include "i_system.h"
 #include "r_local.h"
 #include "r_sky.h"
+#include "v_trans.h"
 #include "w_wad.h"
 #include "z_zone.h"
 
@@ -223,7 +224,7 @@ static void R_RaiseVisplanes (visplane_t** vp)
         ceilingplane = visplanes + (ceilingplane - visplanes_old);
 
         if (numvisplanes_old)
-            C_Printf("R_FindPlane: Hit MAXVISPLANES limit at %d, raised to %d.\n", numvisplanes_old, numvisplanes);
+            C_Printf(CR_GOLD, " R_FindPlane: Hit MAXVISPLANES limit at %d, raised to %d.\n", numvisplanes_old, numvisplanes);
 
         // keep the pointer passed as argument in relation to the visplanes pointer
         if (vp)

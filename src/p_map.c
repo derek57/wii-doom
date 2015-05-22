@@ -47,6 +47,8 @@
 // Data.
 #include "sounds.h"
 
+#include "v_trans.h"
+
 
 // Spechit overrun magic value.
 //
@@ -291,6 +293,7 @@ boolean PIT_CheckLine (line_t* ld)
         {
             spechit_max = (spechit_max ? spechit_max * 2 : 8);
             spechit = realloc(spechit, sizeof(*spechit) * spechit_max);
+            C_Printf(CR_GOLD, " MaxSpecHit increased to %u\n", spechit_max);
         }
         spechit[numspechit++] = ld;
     }
@@ -1180,8 +1183,11 @@ boolean PTR_ShootTraverse (intercept_t* in)
 
 
         // hit line
-hitline:
-        sidesector = (P_PointOnLineSide(shootthing->x, shootthing->y, li)) ? li->backsector : li->frontsector;
+        hitline:
+
+        sidesector = (P_PointOnLineSide(shootthing->x, shootthing->y, li)) ?
+                li->backsector : li->frontsector;
+
         hitz = shootz + FixedMul(aimslope, dist);
 
         if(sidesector != NULL)

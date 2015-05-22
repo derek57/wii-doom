@@ -37,10 +37,31 @@
 #include "v_video.h"
 
 
+typedef enum
+{
+    yellow,
+    red,
+    gray,
+    blue,
+    white,
+    green,
+    dark,
+    STRINGTYPES
+} stringtype_t;
+
+
 #define INPUTLENGTH   512
 #define LINELENGTH    96
 #define consoleactive current_height
 #define c_moving      (current_height != current_target)
+
+#define CR_GOLD yellow
+#define CR_RED red
+#define CR_GRAY gray
+#define CR_BLUE blue
+#define CR_WHITE white
+#define CR_GREEN green
+#define CR_DARK dark
 
 
 void C_InitBackdrop(void);
@@ -49,7 +70,7 @@ void C_Ticker(void);
 void C_Drawer(void);
 void C_Update(void);
 void C_Puts(char *s);
-void C_Printf(char *s, ...);
+void C_Printf(stringtype_t type, char *s, ...);
 void C_Seperator(void);
 void C_SetConsole(void);
 void C_Popup(void);

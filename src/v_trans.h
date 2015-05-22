@@ -33,21 +33,23 @@
 #ifndef __V_TRANS__
 #define __V_TRANS__
 
-#include "doomtype.h"
 
-enum
+typedef uint8_t byte;
+
+
+typedef enum
 {
-    CR_NONE,
-    CR_DARK,
-    CR_GRAY,
-    CR_GREEN,
-    CR_GOLD,
-    CR_RED,
-    CR_BLUE,
-    CRMAX
-} cr_t;
+    CRX_NONE,
+    CRX_DARK,
+    CRX_GRAY,
+    CRX_GREEN,
+    CRX_GOLD,
+    CRX_RED,
+    CRX_BLUE,
+    CRXMAX
+} crx_t;
 
-extern byte *cr[CRMAX];
+extern byte *crx[CRXMAX];
 extern char **crstr;
 
 extern byte *tranmap;

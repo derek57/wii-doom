@@ -30,8 +30,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
-#include "c_io.h"
 #include "deh_main.h"
 #include "doomdef.h"
 #include "doomstat.h"
@@ -575,7 +573,10 @@ void R_ProjectSprite (mobj_t* thing)
     
     // store information in a vissprite
     vis = R_NewVisSprite ();
+
+    // no color translation
     vis->translation = NULL;
+
     vis->mobjflags = thing->flags;
     vis->psprite = false;
 
@@ -645,15 +646,18 @@ void R_ProjectSprite (mobj_t* thing)
     }        
 
     // colored blood
-    if (d_colblood && d_chkblood &&
-        thing->type == MT_BLOOD && thing->target)
+    if (d_colblood && d_chkblood && thing->target &&
+       (thing->type == MT_BLOOD ||
+        thing->type == MT_GORE ||
+        thing->type == MT_CHUNK ||
+        thing->type == MT_FLESH))
     {
         // Thorn Things in Hacx bleed green blood
 	if (gamemission == pack_hacx)
 	{
 	    if (thing->target->type == MT_BABY)
 	    {
-		vis->translation = cr[CR_GREEN];
+		vis->translation = crx[CRX_GREEN];
 	    }
 	}
 	else
@@ -661,13 +665,12 @@ void R_ProjectSprite (mobj_t* thing)
 	    // Barons of Hell and Hell Knights bleed green blood
 	    if (thing->target->type == MT_BRUISER || thing->target->type == MT_KNIGHT)
 	    {
-		vis->translation = cr[CR_GREEN];
+		vis->translation = crx[CRX_GREEN];
 	    }
-	    else
 	    // Cacodemons bleed blue blood
-	    if (thing->target->type == MT_HEAD)
+	    else if (thing->target->type == MT_HEAD)
 	    {
-		vis->translation = cr[CR_BLUE];
+		vis->translation = crx[CRX_BLUE];
 	    }
 	}
     }
@@ -683,7 +686,7 @@ void R_ProjectSprite (mobj_t* thing)
 void R_AddSprites (sector_t* sec)
 {
     mobj_t*                thing;
-    int                        lightnum;
+    int                    lightnum;
 
     // BSP is traversed by subsector.
     // A sector might have been split into several
@@ -761,7 +764,10 @@ void R_DrawPSprite (pspdef_t* psp, psprnum_t psprnum)
     
     // store information in a vissprite
     vis = &avis;
+
+    // no color translation
     vis->translation = NULL;
+
     vis->mobjflags = 0;
     vis->psprite = true;
     vis->texturemid = (BASEYCENTER << FRACBITS) - (psp->sy - spritetopoffset[lump]); // HIRES

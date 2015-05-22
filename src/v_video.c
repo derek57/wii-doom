@@ -32,6 +32,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "c_io.h"
 #include "deh_str.h"
 #include "doomdef.h"
 #include "doomtype.h"
@@ -41,6 +42,7 @@
 #include "m_bbox.h"
 #include "m_misc.h"
 #include "v_misc.h"
+#include "v_trans.h"
 #include "v_video.h"
 #include "w_wad.h"
 #include "z_zone.h"
@@ -118,11 +120,13 @@ void V_CopyRect(int srcx, int srcy, byte *source,
      || srcy < 0
      || srcy + height > SCREENHEIGHT 
      || destx < 0
-     || destx + width > SCREENWIDTH
+     || destx /* + width */ > SCREENWIDTH
      || desty < 0
-     || desty + height > SCREENHEIGHT)
+     || desty /* + height */ > SCREENHEIGHT)
     {
-        I_Error ("Bad V_CopyRect");
+//        I_Error ("Bad V_CopyRect");
+        C_Printf(CR_RED, " Bad V_CopyRect: Patch (%d,%d)-(%d,%d) / Dest.: (%d,%d) exceeds LFB\n"
+                , srcx, srcy, srcx + width, srcy + height, destx, desty);
     }
 #endif 
 
@@ -187,7 +191,8 @@ void V_DrawPatch(int x, int y, patch_t *patch)
      || y < 0
      || y /* + SHORT(patch->height) */ > ORIGHEIGHT )
     {
-        I_Error("Bad V_DrawPatch");
+//        I_Error("Bad V_DrawPatch");
+        C_Printf(CR_RED, " Bad V_DrawPatch: Patch (%d,%d) exceeds LFB\n", x, y);
     }
 #endif
 
@@ -362,7 +367,9 @@ void V_DrawPatchFlipped(int x, int y, patch_t *patch)
      || y < 0
      || y + SHORT(patch->height) > ORIGHEIGHT)
     {
-        I_Error("Bad V_DrawPatchFlipped");
+//        I_Error("Bad V_DrawPatchFlipped");
+        C_Printf(CR_RED, " Bad V_DrawPatchFlipped: Patch (%d,%d)-(%d,%d) exceeds LFB\n"
+                , x, y, x + SHORT(patch->width), y + SHORT(patch->height));
     }
 #endif
 
@@ -443,7 +450,9 @@ void V_DrawTLPatch(int x, int y, patch_t * patch)
      || y < 0
      || y + SHORT(patch->height) > ORIGHEIGHT)
     {
-        I_Error("Bad V_DrawTLPatch");
+//        I_Error("Bad V_DrawTLPatch");
+        C_Printf(CR_RED, " Bad V_DrawTLPatch: Patch (%d,%d)-(%d,%d) exceeds LFB\n"
+                , x, y, x + SHORT(patch->width), y + SHORT(patch->height));
     }
 
     col = 0;
@@ -554,15 +563,17 @@ void V_DrawAltTLPatch(int x, int y, patch_t * patch)
 
     y -= SHORT(patch->topoffset);
     x -= SHORT(patch->leftoffset);
-
+#ifdef RANGECHECK
     if (x < 0
      || x + SHORT(patch->width) > ORIGWIDTH
      || y < 0
      || y + SHORT(patch->height) > ORIGHEIGHT)
     {
-        I_Error("Bad V_DrawAltTLPatch");
+//        I_Error("Bad V_DrawAltTLPatch");
+        C_Printf(CR_RED, " Bad V_DrawAltTLPatch: Patch (%d,%d)-(%d,%d) exceeds LFB\n"
+                , x, y, x + SHORT(patch->width), y + SHORT(patch->height));
     }
-
+#endif
     col = 0;
     desttop = dest_screen + (y << hires) * SCREENWIDTH + x;
 
@@ -614,15 +625,17 @@ void V_DrawShadowedPatch(int x, int y, patch_t *patch)
 
     y -= SHORT(patch->topoffset);
     x -= SHORT(patch->leftoffset);
-
+#ifdef RANGECHECK
     if (x < 0
      || x + SHORT(patch->width) > ORIGWIDTH
      || y < 0
      || y + SHORT(patch->height) > ORIGHEIGHT)
     {
-        I_Error("Bad V_DrawShadowedPatch");
+//        I_Error("Bad V_DrawShadowedPatch");
+        C_Printf(CR_RED, " Bad V_DrawShadowedPatch: Patch (%d,%d)-(%d,%d) exceeds LFB\n"
+                , x, y, x + SHORT(patch->width), y + SHORT(patch->height));
     }
-
+#endif
     col = 0;
     desttop = dest_screen + (y << hires) * SCREENWIDTH + x;
     desttop2 = dest_screen + ((y + 2) << hires) * SCREENWIDTH + x + 2;
@@ -700,7 +713,9 @@ void V_DrawBlock(int x, int y, int width, int height, byte *src)
      || y < 0
      || y + height > SCREENHEIGHT)
     {
-        I_Error ("Bad V_DrawBlock");
+//        I_Error ("Bad V_DrawBlock");
+        C_Printf(CR_RED, " Bad V_DrawBlock: Patch (%d,%d)-(%d,%d) exceeds LFB\n"
+                , x, y, x + width, y + height);
     }
 #endif 
  
@@ -727,7 +742,9 @@ void V_DrawScaledBlock(int x, int y, int width, int height, byte *src)
      || y < 0
      || y + height > ORIGHEIGHT)
     {
-        I_Error ("Bad V_DrawScaledBlock");
+//        I_Error ("Bad V_DrawScaledBlock");
+        C_Printf(CR_RED, " Bad V_DrawScaledBlock: Patch (%d,%d)-(%d,%d) exceeds LFB\n"
+                , x, y, x + width, y + height);
     }
 #endif
 
@@ -813,7 +830,8 @@ void V_CopyScaledBuffer(byte *dest, byte *src, size_t size)
     if (size < 0
      || size > ORIGWIDTH * ORIGHEIGHT)
     {
-        I_Error("Bad V_CopyScaledBuffer");
+//        I_Error("Bad V_CopyScaledBuffer");
+        C_Printf(CR_RED, " Bad V_CopyScaledBuffer: Size mismatch (%d)\n", size);
     }
 #endif
 

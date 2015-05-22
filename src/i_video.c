@@ -38,6 +38,7 @@
 #include "m_config.h"
 #include "m_misc.h"
 #include "tables.h"
+#include "v_trans.h"
 #include "v_video.h"
 #include "w_wad.h"
 #include "z_zone.h"
@@ -719,14 +720,14 @@ void I_InitGraphics(void)
     w = screen_width;
     h = screen_height;
 
-    C_Printf(" I_InitGraphics: Resolution is 640 x 400 x 32 bpp\n");
-    C_Printf(" Scaling to aspect ratio 16:9 in software mode\n");
-    C_Printf(" Using 256-color palette from PLAYPAL lump.\n");
+    C_Printf(CR_GRAY, " I_InitGraphics: Resolution is 640 x 400 x 32 bpp\n");
+    C_Printf(CR_GRAY, " Scaling to aspect ratio 16:9 in software mode\n");
+    C_Printf(CR_GRAY, " Using 256-color palette from PLAYPAL lump.\n");
 
     if(!usegamma)
-        C_Printf(" Gamma correction is off.\n");
+        C_Printf(CR_GRAY, " Gamma correction is off.\n");
     else
-        C_Printf(" Gamma correction is enabled.\n");
+        C_Printf(CR_GOLD, " Gamma correction is enabled.\n");
 
     screen_mode = I_FindScreenMode(w, h);
 
@@ -738,7 +739,7 @@ void I_InitGraphics(void)
 
     if (w != screen_mode->width || h != screen_mode->height)
     {
-        C_Printf("I_InitGraphics: %s (%ix%i within %ix%i)\n",
+        C_Printf(CR_GRAY, "I_InitGraphics: %s (%ix%i within %ix%i)\n",
               WindowBoxType(screen_mode, w, h),
               screen_mode->width, screen_mode->height, w, h);
     }

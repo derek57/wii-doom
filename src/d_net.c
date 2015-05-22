@@ -25,29 +25,28 @@
 //
 //-----------------------------------------------------------------------------
 
+
 #include <stdlib.h>
 #include <unistd.h>
 
-#include "doomfeatures.h"
-
+#include "c_io.h"
+#include "d_loop.h"
 #include "d_net.h"
 #include "d_main.h"
+#include "deh_main.h"
+#include "doomdef.h"
+#include "doomfeatures.h"
+#include "doomstat.h"
+#include "g_game.h"
 #include "m_menu.h"
 #include "m_misc.h"
 #include "i_system.h"
 #include "i_timer.h"
 #include "i_video.h"
-#include "g_game.h"
-#include "doomdef.h"
-#include "doomstat.h"
+#include "v_trans.h"
 #include "w_checksum.h"
 #include "w_wad.h"
 
-#include "deh_main.h"
-
-#include "d_loop.h"
-
-#include "c_io.h"
 
 ticcmd_t *netcmds;
 
@@ -226,12 +225,12 @@ void D_CheckNetGame (void)
     if (timelimit > 0 && deathmatch)
     {
         // Gross hack to work like Vanilla:
-        C_Printf("Levels will end after %d minute", timelimit);
+        C_Printf(CR_BLUE, " Levels will end after %d minute", timelimit);
         sleep(1);
         if (timelimit > 1)
-            C_Printf("s");
+            C_Printf(CR_BLUE, "s");
         sleep(1);
-        C_Printf(".\n");
+        C_Printf(CR_BLUE, ".\n");
     }
 }
 

@@ -98,9 +98,11 @@ typedef struct {
    address will be INADDR_NONE, and the function will return -1.
    If 'host' is NULL, the resolved host will be set to INADDR_ANY.
  */
+/*
 #ifndef INADDR_ANY
 #define INADDR_ANY      0x00000000
 #endif
+*/
 #ifndef INADDR_NONE
 #define INADDR_NONE     0xFFFFFFFF
 #endif

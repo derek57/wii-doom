@@ -26,6 +26,7 @@
 //-----------------------------------------------------------------------------
 
 
+#include "c_io.h"
 #include "d_event.h"
 #include "deh_misc.h"
 #include "doomdef.h"
@@ -41,6 +42,7 @@
 
 // Data.
 #include "sounds.h"
+#include "v_trans.h"
 
 
 #define LOWERSPEED              FRACUNIT*6
@@ -171,6 +173,9 @@ void P_BringUpWeapon (player_t* player)
     if (player->pendingweapon == wp_chainsaw)
         S_StartSound (player->mo, sfx_sawup);
                 
+    if (player->pendingweapon >= NUMWEAPONS)
+        C_Printf(CR_RED, " P_BringUpWeapon: weaponinfo overrun has occured.\n");
+
     newstate = weaponinfo[player->pendingweapon].upstate;
 
     player->pendingweapon = wp_nochange;

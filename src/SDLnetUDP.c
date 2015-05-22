@@ -21,10 +21,11 @@
 
 /* $Id$ */
 
-#include <network.h>
 
+#include "c_io.h"
 #include "SDLnetsys.h"
 #include "SDL_net.h"
+
 
 //#ifdef __WIN32__
 #define srandom srand
@@ -47,7 +48,7 @@ struct _UDPsocket {
     int packetloss;
 };
 
-void C_Printf(char *s, ...);
+//void C_Printf(stringtype_t type, char *s, ...);
 
 /* Allocate/free a single UDP packet 'size' bytes long.
    The new packet is returned, or NULL if the function ran out of memory.
@@ -68,7 +69,7 @@ extern UDPpacket *SDLNet_AllocPacket(int size)
         }
     }
     if ( error ) {
-        C_Printf("Out of memory");
+        C_Printf(200, " SDLNet_AllocPacket: Out of memory");
         sleep(1);
         SDLNet_FreePacket(packet);
         packet = NULL;
@@ -116,7 +117,7 @@ UDPpacket **SDLNet_AllocPacketV(int howmany, int size)
         packetV[i] = NULL;
 
         if ( i != howmany ) {
-            C_Printf("Out of memory");
+            C_Printf(200, " SDLNet_AllocPacketV: Out of memory");
             sleep(1);
             SDLNet_FreePacketV(packetV);
             packetV = NULL;
@@ -343,7 +344,7 @@ void SDLNet_UDP_SetPacketLoss(UDPsocket sock, int percent)
 static int ValidChannel(int channel)
 {
     if ( (channel < 0) || (channel >= SDLNET_MAX_UDPCHANNELS) ) {
-        C_Printf("Invalid channel");
+        C_Printf(200, " ValidChannel: Invalid channel");
         sleep(1);
         return(0);
     }
@@ -365,7 +366,7 @@ int SDLNet_UDP_Bind(UDPsocket sock, int channel, const IPaddress *address)
     struct UDP_channel *binding;
 
     if ( sock == NULL ) {
-        C_Printf("Passed a NULL socket");
+        C_Printf(200, " SDLNet_UDP_Bind: Passed a NULL socket");
         sleep(1);
         return(-1);
     }
@@ -384,7 +385,7 @@ int SDLNet_UDP_Bind(UDPsocket sock, int channel, const IPaddress *address)
         binding = &sock->binding[channel];
     }
     if ( binding->numbound == SDLNET_MAX_UDPADDRESSES ) {
-        C_Printf("No room for new addresses");
+        C_Printf(200, " SDLNet_UDP_Bind: No room for new addresses");
         sleep(1);
         return(-1);
     }
@@ -441,7 +442,7 @@ int SDLNet_UDP_SendV(UDPsocket sock, UDPpacket **packets, int npackets)
     struct sockaddr_in sock_addr;
 
     if ( sock == NULL ) {
-        C_Printf("Passed a NULL socket");
+        C_Printf(200, " SDLNet_UDP_SendV: Passed a NULL socket");
         sleep(1);
         return(0);
     }
@@ -481,7 +482,7 @@ int SDLNet_UDP_SendV(UDPsocket sock, UDPpacket **packets, int npackets)
         {
             /* Send to each of the bound addresses on the channel */
 //#ifdef DEBUG_NET
-            C_Printf("SDLNet_UDP_SendV sending packet to channel = %d\n", packets[i]->channel );
+            C_Printf(200, " SDLNet_UDP_SendV: sending packet to channel = %d\n", packets[i]->channel );
 //            sleep(1);
 //#endif
 

@@ -15,17 +15,17 @@
 //     OPL interface.
 //
 
-#include "config.h"
 
+#include <SDL/SDL.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <SDL/SDL.h>
-
+#include "c_io.h"
+#include "config.h"
 #include "opl.h"
 #include "opl_internal.h"
+#include "v_trans.h"
 
-#include "c_io.h"
 
 extern opl_driver_t opl_sdl_driver;
 
@@ -66,7 +66,7 @@ static int InitDriver(opl_driver_t *_driver, unsigned int port_base)
 
     if (!OPL_Detect() || !OPL_Detect())
     {
-        C_Printf(" OPL_Init: No OPL detected using '%s' driver.\n", _driver->name);
+        C_Printf(CR_GOLD, " OPL_Init: No OPL detected using '%s' driver.\n", _driver->name);
         _driver->shutdown_func();
         driver = NULL;
         return 0;
@@ -97,7 +97,7 @@ static int AutoSelectDriver(unsigned int port_base)
         }
     }
 
-    C_Printf("OPL_Init: Failed to find a working driver.\n");
+    C_Printf(CR_RED, " OPL_Init: Failed to find a working driver.\n");
 
     return 0;
 }
@@ -126,14 +126,14 @@ int OPL_Init(unsigned int port_base)
                 }
                 else
                 {
-                    C_Printf("OPL_Init: Failed to initialize "
+                    C_Printf(CR_RED, " OPL_Init: Failed to initialize "
                            "driver: '%s'.\n", driver_name);
                     return 0;
                 }
             }
         }
 
-        C_Printf("OPL_Init: unknown driver: '%s'.\n", driver_name);
+        C_Printf(CR_GOLD, " OPL_Init: unknown driver: '%s'.\n", driver_name);
 
         return 0;
     }

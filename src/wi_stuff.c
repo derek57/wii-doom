@@ -41,6 +41,8 @@
 // Data.
 #include "sounds.h"
 
+#include "v_trans.h"
+
 // Needs access to LFB.
 #include "v_video.h"
 
@@ -533,7 +535,7 @@ WI_drawOnLnode
     else
     {
         // DEBUG
-        C_Printf("Could not place patch on level %d", n+1); 
+        C_Printf(CR_RED, " Could not place patch on level %d", n+1); 
     }
 }
 

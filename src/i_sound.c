@@ -27,6 +27,7 @@
 #include "i_video.h"
 #include "m_config.h"
 #include "s_sound.h"
+#include "v_trans.h"
 
 
 int snd_musicdevice = SNDDEVICE_SB;
@@ -134,7 +135,7 @@ static void InitSfxModule(boolean use_sfx_prefix)
 
             if (sound_modules[i]->Init(use_sfx_prefix))
             {
-                C_Printf(" SFX playing at a sample rate of %.1fkHz on %i channels.\n",
+                C_Printf(CR_GRAY, " SFX playing at a sample rate of %.1fkHz on %i channels.\n",
                     snd_samplerate / 1000.0f, snd_channels);
 
                 sound_module = sound_modules[i];
@@ -166,9 +167,9 @@ static void InitMusicModule(void)
             if (music_modules[i]->Init())
             {
                 if(i > 0)
-                    C_Printf(" Using MIDI playback for music.\n");
+                    C_Printf(CR_GRAY, " Using MIDI playback for music.\n");
                 else
-                    C_Printf(" Using OGG playback for music.\n");
+                    C_Printf(CR_GRAY, " Using OGG playback for music.\n");
 
                 music_module = music_modules[i];
                 return;

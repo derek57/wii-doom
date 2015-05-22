@@ -18,15 +18,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "doomtype.h"
-
+#include "c_io.h"
 #include "deh_defs.h"
 #include "deh_main.h"
 #include "deh_mapping.h"
-
+#include "doomtype.h"
 #include "info.h"
+#include "v_trans.h"
 
-#include "c_io.h"
 
 DEH_BEGIN_MAPPING(thing_mapping, mobjinfo_t)
   DEH_MAPPING("ID #",                doomednum)
@@ -101,7 +100,7 @@ static void DEH_ThingParseLine(deh_context_t *context, char *line, void *tag)
         return;
     }
     
-    C_Printf("Set %s to %s for mobj\n", variable_name, value);
+    C_Printf(CR_GOLD, " Set %s to %s for mobj\n", variable_name, value);
 
     // all values are integers
 

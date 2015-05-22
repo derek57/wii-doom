@@ -44,6 +44,7 @@
 #include "net_query.h"
 #include "net_server.h"
 #include "net_sdl.h"
+#include "v_trans.h"
 
 
 // The complete set of data for a particular tic.
@@ -281,7 +282,7 @@ static void D_Disconnected(void)
 
     // disconnected from server
 
-    C_Printf("Disconnected from server.\n");
+    C_Printf(CR_BLUE, " Disconnected from server.\n");
 }
 
 //
@@ -429,7 +430,7 @@ void D_StartNetGame(net_gamesettings_t *settings,
 
     if (!new_sync)
     {
-        C_Printf("Syncing netgames like Vanilla Doom.\n");
+        C_Printf(CR_BLUE, " Syncing netgames like Vanilla Doom.\n");
     }
 }
 
@@ -495,7 +496,7 @@ boolean D_InitNetGame(net_connect_data_t *connect_data)
                     NET_AddrToString(addr));
         }
 
-        C_Printf("D_InitNetGame: Connected to %s\n", NET_AddrToString(addr));
+        C_Printf(CR_BLUE, " D_InitNetGame: Connected to %s\n", NET_AddrToString(addr));
 
         // Wait for launch message received from server.
 

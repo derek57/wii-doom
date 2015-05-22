@@ -16,15 +16,16 @@
 // mus2mid.c - Ben Ryves 2006 - http://benryves.com - benryves@benryves.com
 // Use to convert a MUS file into a single track, type 0 MIDI file.
 
+
 #include <stdio.h>
 
+#include "c_io.h"
 #include "doomtype.h"
 #include "i_swap.h"
-
 #include "memio.h"
 #include "mus2mid.h"
+#include "v_trans.h"
 
-#include "c_io.h"
 
 #define NUM_CHANNELS 16
 #define MIDI_PERCUSSION_CHAN 9
@@ -706,7 +707,7 @@ int main(int argc, char *argv[])
 
     if (argc != 3)
     {
-        C_Printf("Usage: %s <musfile> <midfile>\n", argv[0]);
+        C_Printf(CR_GOLD, " Usage: %s <musfile> <midfile>\n", argv[0]);
         exit(-1);
     }
 
@@ -719,7 +720,7 @@ int main(int argc, char *argv[])
 
     if (mus2mid(src, dst))
     {
-        C_Printf("mus2mid() failed\n");
+        C_Printf(CR_RED, " mus2mid() failed\n");
         exit(-1);
     }
 

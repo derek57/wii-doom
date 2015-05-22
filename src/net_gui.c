@@ -22,7 +22,9 @@
 #include <unistd.h>
 #include <ctype.h>
 
+#include "c_io.h"
 #include "config.h"
+#include "doomfeatures.h"
 #include "doomkeys.h"
 
 #include "i_system.h"
@@ -34,9 +36,8 @@
 #include "net_gui.h"
 #include "net_query.h"
 #include "net_server.h"
+#include "v_trans.h"
 
-#include "doomfeatures.h"
-#include "c_io.h"
 /*
 #include "textscreen.h"
 
@@ -231,16 +232,16 @@ static void CheckMasterStatus(void)
 */
     if (added)
     {
-        C_Printf("Your server is now registered with the global master server.\n"
-            "Other players can find your server online.");
+        C_Printf(CR_BLUE, " Your server is now registered with the global master server.\n"
+            " Other players can find your server online.");
         sleep(1);
     }
     else
     {
-        C_Printf("Failed to register with the master server. Your server is not\n"
-            "publicly accessible. You may need to reconfigure your Internet\n"
-            "router to add a port forward for UDP port 2342. Look up\n"
-            "information on port forwarding online.");
+        C_Printf(CR_BLUE, " Failed to register with the master server. Your server is not\n"
+            " publicly accessible. You may need to reconfigure your Internet\n"
+            " router to add a port forward for UDP port 2342. Look up\n"
+            " information on port forwarding online.");
         sleep(1);
     }
 }

@@ -32,6 +32,7 @@
 
 #include <stdlib.h>
 
+#include "c_io.h"
 #include "doomdef.h"
 #include "doomstat.h"
 #include "m_bbox.h"
@@ -39,6 +40,8 @@
 
 // State.
 #include "r_state.h"
+
+#include "v_trans.h"
 
 
 //
@@ -467,6 +470,7 @@ static void check_intercept(void)
         num_intercepts = (num_intercepts ? num_intercepts * 2 : 128);
         intercepts = (intercept_t *)realloc(intercepts, sizeof(*intercepts) * num_intercepts);
         intercept_p = intercepts + offset;
+        C_Printf(CR_GOLD, " MaxIntercepts increased to %u\n", num_intercepts);
     }
 }
 

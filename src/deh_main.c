@@ -15,22 +15,22 @@
 // Main dehacked code
 //
 
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
 
-#include "doomtype.h"
-#include "i_system.h"
+#include "c_io.h"
 #include "d_iwad.h"
-#include "w_wad.h"
-
 #include "deh_defs.h"
 #include "deh_io.h"
-
 #include "doomdef.h"
+#include "doomtype.h"
+#include "i_system.h"
+#include "w_wad.h"
+#include "v_trans.h"
 
-#include "c_io.h"
 
 extern deh_section_t *deh_section_types[];
 extern char *deh_signatures[];
@@ -381,14 +381,14 @@ int DEH_LoadFile(char *filename)
     deh_allow_long_cheats = false;
     deh_allow_extended_strings = false;
 
-    C_Printf(" loading %s\n", filename);
+    C_Printf(CR_GOLD, " loading %s\n", filename);
     show_deh_loading_message = 1;
 
     context = DEH_OpenFile(filename);
 
     if (context == NULL)
     {
-        C_Printf("DEH_LoadFile: Unable to open %s\n", filename);
+        C_Printf(CR_RED, "DEH_LoadFile: Unable to open %s\n", filename);
         return 0;
     }
 
@@ -425,7 +425,7 @@ int DEH_LoadLump(int lumpnum, boolean allow_long, boolean allow_error)
 
     if (context == NULL)
     {
-        C_Printf("DEH_LoadFile: Unable to open lump %i\n", lumpnum);
+        C_Printf(CR_RED, "DEH_LoadFile: Unable to open lump %i\n", lumpnum);
         return 0;
     }
 
@@ -451,7 +451,7 @@ int DEH_LoadLumpByName(char *name, boolean allow_long, boolean allow_error)
 
     if (lumpnum == -1)
     {
-        C_Printf("DEH_LoadLumpByName: '%s' lump not found\n", name);
+        C_Printf(CR_RED, "DEH_LoadLumpByName: '%s' lump not found\n", name);
         return 0;
     }
 

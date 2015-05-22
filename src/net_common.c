@@ -18,17 +18,17 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include "c_io.h"
+#include "doomfeatures.h"
 #include "doomtype.h"
 #include "d_mode.h"
 #include "i_timer.h"
-
 #include "net_common.h"
 #include "net_io.h"
 #include "net_packet.h"
 #include "net_structrw.h"
+#include "v_trans.h"
 
-#include "doomfeatures.h"
-#include "c_io.h"
 
 // connections time out after 30 seconds
 
@@ -201,7 +201,7 @@ static void NET_Conn_ParseReject(net_connection_t *conn, net_packet_t *packet)
         conn->state = NET_CONN_STATE_DISCONNECTED;
         conn->disconnect_reason = NET_DISCONNECT_REMOTE;
 
-        C_Printf("Rejected by server: ");
+        C_Printf(CR_BLUE, " Rejected by server: ");
         sleep(1);
         NET_SafePuts(msg);
     }

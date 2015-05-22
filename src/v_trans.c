@@ -19,7 +19,9 @@
 #include <math.h>
 
 #include "doomtype.h"
+#include "i_scale.h"
 #include "v_trans.h"
+
 
 // here used to be static color translation tables based on
 // the ones found in Boom and MBF. Nowadays these are recalculated
@@ -36,7 +38,7 @@ static byte cr_gold[256];
 static byte cr_red[256];
 static byte cr_blue[256];
 
-byte *cr[] =
+byte *crx[] =
 {
     (byte *) &cr_none,
     (byte *) &cr_dark,
@@ -191,10 +193,9 @@ static void rgb_to_hsv(vect *rgb, vect *hsv)
 byte V_Colorize (byte *playpal, int cr, byte source, boolean keepgray109)
 {
     vect rgb, hsv;
-    extern int FindNearestColor(byte *palette, int r, int g, int b);
 
     // preserve gray drop shadow in IWAD status bar numbers
-    if (cr == CR_NONE || (keepgray109 && source == 109))
+    if (cr == CRX_NONE || (keepgray109 && source == 109))
 	return source;
 
     rgb.x = playpal[3 * source + 0] / 255.;
@@ -203,34 +204,34 @@ byte V_Colorize (byte *playpal, int cr, byte source, boolean keepgray109)
 
     rgb_to_hsv(&rgb, &hsv);
 
-    if (cr == CR_DARK)
+    if (cr == CRX_DARK)
 	hsv.z *= 0.5;
     else
-    if (cr == CR_GRAY)
+    if (cr == CRX_GRAY)
 	hsv.y = 0;
     else
     {
 	// hack colors to full saturation
 	hsv.y = 1.0;
 
-	if (cr == CR_GREEN)
+	if (cr == CRX_GREEN)
 	{
 //	    hsv.x = ((16.216 * hsv.z) + 100.784)/360.;
 	    hsv.x = 135./360.;
 	}
 	else
-	if (cr == CR_GOLD)
+	if (cr == CRX_GOLD)
 	{
 //	    hsv.x = ((51.351 * hsv.z) + 8.648)/360.;
 	    hsv.x = 45./360.;
 	}
 	else
-	if (cr == CR_RED)
+	if (cr == CRX_RED)
 	{
 	    hsv.x = 0.;
 	}
 	else
-	if (cr == CR_BLUE)
+	if (cr == CRX_BLUE)
 	{
 	    hsv.x = 240./360.;
 	}

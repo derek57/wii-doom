@@ -22,15 +22,18 @@
 
 /* $Id$ */
 
-#include "SDLnetsys.h"
-#include "SDL_net.h"
 
 #ifdef WITHOUT_SDL
-#include <string.h>
 #include <stdarg.h>
+#include <string.h>
 #endif
 
-void C_Printf(char *s, ...);
+#include "c_io.h"
+#include "SDL_net.h"
+#include "SDLnetsys.h"
+
+
+//void C_Printf(stringtype_t type, char *s, ...);
 
 const SDLNet_version *SDLNet_Linked_Version(void)
 {
@@ -71,7 +74,7 @@ void SDLCALL SDLNet_SetError(const char *fmt, ...)
     SDL_vsnprintf(errorbuf, sizeof(errorbuf), fmt, argp);
     va_end(argp);
 #ifndef WITHOUT_SDL
-    C_Printf("%s", errorbuf);
+    C_Printf(CR_RED, " %s", errorbuf);
     sleep(1);
 #endif
 }
@@ -160,7 +163,7 @@ int  SDLNet_Init(void)
 // Signal as uninitialized if if_config() failed previously:
         if(netinit_error < 0)
         {
-                C_Printf("UDP_Init: if_config() failed with %i", netinit_error);
+                C_Printf(CR_BLUE, " SDLNet_Init: if_config() failed with %i", netinit_error);
                 sleep(1);
                 return -1;
         };
@@ -195,7 +198,7 @@ int  SDLNet_Init(void)
         if (colon)
                 *colon = 0;
 
-        C_Printf("UDP Initialized\n");
+        C_Printf(CR_BLUE, " SDLNet_Init: UDP Initialized\n");
         sleep(1);
 //        tcpipAvailable = TRUE;
 
@@ -235,7 +238,7 @@ int SDLNet_ResolveHost(IPaddress *address, const char *host, Uint16 port)
 
     /* Perform the actual host resolution */
     if ( host == NULL ) {
-        C_Printf("Host is NULL\n");
+        C_Printf(CR_BLUE, " SDLNet_ResolveHost: Host is NULL\n");
         sleep(1);
         address->host = INADDR_ANY;
     } else {
@@ -247,7 +250,7 @@ int SDLNet_ResolveHost(IPaddress *address, const char *host, Uint16 port)
             if ( hp ) {
                 memcpy(&address->host,hp->h_addr,hp->h_length);
             } else {
-                C_Printf("Couldn't resolve host\n");
+                C_Printf(CR_BLUE, " SDLNet_ResolveHost: Couldn't resolve host\n");
                 sleep(1);
                 retval = -1;
             }
