@@ -54,6 +54,7 @@ boolean         beta_imp = false;
 boolean         d_translucency = true;
 boolean         d_chkblood = false;
 boolean         d_chkblood2 = false;
+boolean         d_uncappedframerate = false;
 
 int             d_colblood = 0;
 int             d_colblood2 = 0;

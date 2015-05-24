@@ -122,7 +122,7 @@ void T_VerticalDoor (vldoor_t* door)
         // DOWN
         res = T_MovePlane(door->sector,
                           door->speed,
-                          door->sector->floorheight,
+                          door->sector->floor_height,
                           false,1,door->direction);
         if (res == pastdest)
         {
@@ -316,7 +316,7 @@ EV_DoDoor
             break;
             
           case close30ThenOpen:
-            door->topheight = sec->ceilingheight;
+            door->topheight = sec->ceiling_height;
             door->direction = -1;
             S_StartSound(&door->sector->soundorg, sfx_dorcls);
             break;
@@ -327,7 +327,7 @@ EV_DoDoor
             door->topheight = P_FindLowestCeilingSurrounding(sec);
             door->topheight -= 4*FRACUNIT;
             door->speed = VDOORSPEED * 4;
-            if (door->topheight != sec->ceilingheight)
+            if (door->topheight != sec->ceiling_height)
             {
                 if(fsize != 10396254 && fsize != 10399316 && fsize != 10401760 && fsize != 4207819 &&
                         fsize != 4274218 && fsize != 4225504 && fsize != 4225460)
@@ -340,7 +340,7 @@ EV_DoDoor
             door->direction = 1;
             door->topheight = P_FindLowestCeilingSurrounding(sec);
             door->topheight -= 4*FRACUNIT;
-            if (door->topheight != sec->ceilingheight)
+            if (door->topheight != sec->ceiling_height)
                 S_StartSound(&door->sector->soundorg, sfx_doropn);
             break;
             

@@ -61,6 +61,11 @@ T_MovePlane
     boolean      flag;
     fixed_t      lastpos;
         
+    // Store old sector heights for interpolation.
+    sector->oldfloorheight = sector->floor_height;
+    sector->oldceilingheight = sector->ceiling_height;
+    sector->oldgametic = gametic;
+
     switch(floorOrCeiling)
     {
       case 0:
@@ -69,14 +74,14 @@ T_MovePlane
         {
           case -1:
             // DOWN
-            if (sector->floorheight - speed < dest)
+            if (sector->floor_height - speed < dest)
             {
-                lastpos = sector->floorheight;
-                sector->floorheight = dest;
+                lastpos = sector->floor_height;
+                sector->floor_height = dest;
                 flag = P_ChangeSector(sector,crush);
                 if (flag == true)
                 {
-                    sector->floorheight =lastpos;
+                    sector->floor_height =lastpos;
                     P_ChangeSector(sector,crush);
                     //return crushed;
                 }
@@ -84,12 +89,12 @@ T_MovePlane
             }
             else
             {
-                lastpos = sector->floorheight;
-                sector->floorheight -= speed;
+                lastpos = sector->floor_height;
+                sector->floor_height -= speed;
                 flag = P_ChangeSector(sector,crush);
                 if (flag == true)
                 {
-                    sector->floorheight = lastpos;
+                    sector->floor_height = lastpos;
                     P_ChangeSector(sector,crush);
                     //e6y: warning about potential desynch
                     if (crush == 10)
@@ -103,14 +108,14 @@ T_MovePlane
                                                 
           case 1:
             // UP
-            if (sector->floorheight + speed > dest)
+            if (sector->floor_height + speed > dest)
             {
-                lastpos = sector->floorheight;
-                sector->floorheight = dest;
+                lastpos = sector->floor_height;
+                sector->floor_height = dest;
                 flag = P_ChangeSector(sector,crush);
                 if (flag == true)
                 {
-                    sector->floorheight = lastpos;
+                    sector->floor_height = lastpos;
                     P_ChangeSector(sector,crush);
                     //return crushed;
                 }
@@ -119,14 +124,14 @@ T_MovePlane
             else
             {
                 // COULD GET CRUSHED
-                lastpos = sector->floorheight;
-                sector->floorheight += speed;
+                lastpos = sector->floor_height;
+                sector->floor_height += speed;
                 flag = P_ChangeSector(sector,crush);
                 if (flag == true)
                 {
                     if (crush == true)
                         return crushed;
-                    sector->floorheight = lastpos;
+                    sector->floor_height = lastpos;
                     P_ChangeSector(sector,crush);
                     return crushed;
                 }
@@ -141,15 +146,15 @@ T_MovePlane
         {
           case -1:
             // DOWN
-            if (sector->ceilingheight - speed < dest)
+            if (sector->ceiling_height - speed < dest)
             {
-                lastpos = sector->ceilingheight;
-                sector->ceilingheight = dest;
+                lastpos = sector->ceiling_height;
+                sector->ceiling_height = dest;
                 flag = P_ChangeSector(sector,crush);
 
                 if (flag == true)
                 {
-                    sector->ceilingheight = lastpos;
+                    sector->ceiling_height = lastpos;
                     P_ChangeSector(sector,crush);
                     //return crushed;
                 }
@@ -158,15 +163,15 @@ T_MovePlane
             else
             {
                 // COULD GET CRUSHED
-                lastpos = sector->ceilingheight;
-                sector->ceilingheight -= speed;
+                lastpos = sector->ceiling_height;
+                sector->ceiling_height -= speed;
                 flag = P_ChangeSector(sector,crush);
 
                 if (flag == true)
                 {
                     if (crush == true)
                         return crushed;
-                    sector->ceilingheight = lastpos;
+                    sector->ceiling_height = lastpos;
                     P_ChangeSector(sector,crush);
                     return crushed;
                 }
@@ -175,14 +180,14 @@ T_MovePlane
                                                 
           case 1:
             // UP
-            if (sector->ceilingheight + speed > dest)
+            if (sector->ceiling_height + speed > dest)
             {
-                lastpos = sector->ceilingheight;
-                sector->ceilingheight = dest;
+                lastpos = sector->ceiling_height;
+                sector->ceiling_height = dest;
                 flag = P_ChangeSector(sector,crush);
                 if (flag == true)
                 {
-                    sector->ceilingheight = lastpos;
+                    sector->ceiling_height = lastpos;
                     P_ChangeSector(sector,crush);
                     //return crushed;
                 }
@@ -190,14 +195,14 @@ T_MovePlane
             }
             else
             {
-                lastpos = sector->ceilingheight;
-                sector->ceilingheight += speed;
+                lastpos = sector->ceiling_height;
+                sector->ceiling_height += speed;
                 flag = P_ChangeSector(sector,crush);
 // UNUSED
 #if 0
                 if (flag == true)
                 {
-                    sector->ceilingheight = lastpos;
+                    sector->ceiling_height = lastpos;
                     P_ChangeSector(sector,crush);
                     return crushed;
                 }
@@ -317,7 +322,7 @@ EV_DoFloor
             floor->speed = FLOORSPEED * 4;
             floor->floordestheight = 
                 P_FindHighestFloorSurrounding(sec);
-            if (floor->floordestheight != sec->floorheight)
+            if (floor->floordestheight != sec->floor_height)
                 floor->floordestheight += 8*FRACUNIT;
             break;
 
@@ -329,8 +334,8 @@ EV_DoFloor
             floor->speed = FLOORSPEED;
             floor->floordestheight = 
                 P_FindLowestCeilingSurrounding(sec);
-            if (floor->floordestheight > sec->ceilingheight)
-                floor->floordestheight = sec->ceilingheight;
+            if (floor->floordestheight > sec->ceiling_height)
+                floor->floordestheight = sec->ceiling_height;
             floor->floordestheight -= (8*FRACUNIT)*
                 (floortype == raiseFloorCrush);
             break;
@@ -340,7 +345,7 @@ EV_DoFloor
             floor->sector = sec;
             floor->speed = FLOORSPEED*4;
             floor->floordestheight = 
-                P_FindNextHighestFloor(sec,sec->floorheight);
+                P_FindNextHighestFloor(sec,sec->floor_height);
             break;
 
           case raiseFloorToNearest:
@@ -348,21 +353,21 @@ EV_DoFloor
             floor->sector = sec;
             floor->speed = FLOORSPEED;
             floor->floordestheight = 
-                P_FindNextHighestFloor(sec,sec->floorheight);
+                P_FindNextHighestFloor(sec,sec->floor_height);
             break;
 
           case raiseFloor24:
             floor->direction = 1;
             floor->sector = sec;
             floor->speed = FLOORSPEED;
-            floor->floordestheight = floor->sector->floorheight +
+            floor->floordestheight = floor->sector->floor_height +
                 24 * FRACUNIT;
             break;
           case raiseFloor512:
             floor->direction = 1;
             floor->sector = sec;
             floor->speed = FLOORSPEED;
-            floor->floordestheight = floor->sector->floorheight +
+            floor->floordestheight = floor->sector->floor_height +
                 512 * FRACUNIT;
             break;
 
@@ -370,7 +375,7 @@ EV_DoFloor
             floor->direction = 1;
             floor->sector = sec;
             floor->speed = FLOORSPEED;
-            floor->floordestheight = floor->sector->floorheight +
+            floor->floordestheight = floor->sector->floor_height +
                 24 * FRACUNIT;
             sec->floorpic = line->frontsector->floorpic;
             sec->special = line->frontsector->special;
@@ -403,7 +408,7 @@ EV_DoFloor
                   }
               }
               floor->floordestheight =
-                  floor->sector->floorheight + minsize;
+                  floor->sector->floor_height + minsize;
           }
           break;
           
@@ -443,7 +448,7 @@ EV_DoFloor
 */
                             sec = getSector(secnum,i,1);
 
-                        if (sec->floorheight == floor->floordestheight)
+                        if (sec->floor_height == floor->floordestheight)
                         {
                             floor->texture = sec->floorpic;
                             floor->newspecial = sec->special;
@@ -454,7 +459,7 @@ EV_DoFloor
                     {
                         sec = getSector(secnum,i,0);
 
-                        if (sec->floorheight == floor->floordestheight)
+                        if (sec->floor_height == floor->floordestheight)
                         {
                             floor->texture = sec->floorpic;
                             floor->newspecial = sec->special;
@@ -527,7 +532,7 @@ EV_BuildStairs
             break;
         }
         floor->speed = speed;
-        height = sec->floorheight + stairsize;
+        height = sec->floor_height + stairsize;
         floor->floordestheight = height;
                 
         // Initialize

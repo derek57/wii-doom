@@ -212,8 +212,8 @@ EV_DoCeiling
         {
           case fastCrushAndRaise:
             ceiling->crush = true;
-            ceiling->topheight = sec->ceilingheight;
-            ceiling->bottomheight = sec->floorheight + (8*FRACUNIT);
+            ceiling->topheight = sec->ceiling_height;
+            ceiling->bottomheight = sec->floor_height + (8*FRACUNIT);
             ceiling->direction = -1;
             ceiling->speed = CEILSPEED * 2;
             break;
@@ -221,10 +221,10 @@ EV_DoCeiling
           case silentCrushAndRaise:
           case crushAndRaise:
             ceiling->crush = true;
-            ceiling->topheight = sec->ceilingheight;
+            ceiling->topheight = sec->ceiling_height;
           case lowerAndCrush:
           case lowerToFloor:
-            ceiling->bottomheight = sec->floorheight;
+            ceiling->bottomheight = sec->floor_height;
             if (type != lowerToFloor)
                 ceiling->bottomheight += 8*FRACUNIT;
             ceiling->direction = -1;

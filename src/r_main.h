@@ -75,6 +75,10 @@ extern fixed_t            centerxfrac;
 extern fixed_t            centeryfrac;
 extern fixed_t            projection;
 
+// [AM] Fractional part of the current tic, in the half-open
+//      range of [0.0, 1.0).  Used for interpolation.
+extern fixed_t            fractionaltic;
+
 extern lighttable_t*      scalelight[LIGHTLEVELS][MAXLIGHTSCALE];
 extern lighttable_t*      scalelightfixed[MAXLIGHTSCALE];
 extern lighttable_t*      zlight[LIGHTLEVELS][MAXLIGHTZ];
@@ -139,7 +143,8 @@ R_AddPointToBox
   int            y,
   fixed_t*       box );
 
-
+// [AM] Interpolate between two angles.
+angle_t R_InterpolateAngle(angle_t oangle, angle_t nangle, fixed_t scale);
 
 //
 // REFRESH - the actual rendering functions.

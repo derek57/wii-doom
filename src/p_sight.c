@@ -212,22 +212,22 @@ boolean P_CrossSubsector (int num)
         back = seg->backsector;
 
         // no wall to block sight with?
-        if (front->floorheight == back->floorheight
-            && front->ceilingheight == back->ceilingheight)
+        if (front->floor_height == back->floor_height
+            && front->ceiling_height == back->ceiling_height)
             continue;        
 
         // possible occluder
         // because of ceiling height differences
-        if (front->ceilingheight < back->ceilingheight)
-            opentop = front->ceilingheight;
+        if (front->ceiling_height < back->ceiling_height)
+            opentop = front->ceiling_height;
         else
-            opentop = back->ceilingheight;
+            opentop = back->ceiling_height;
 
         // because of ceiling height differences
-        if (front->floorheight > back->floorheight)
-            openbottom = front->floorheight;
+        if (front->floor_height > back->floor_height)
+            openbottom = front->floor_height;
         else
-            openbottom = back->floorheight;
+            openbottom = back->floor_height;
                 
         // quick test for totally closed doors
         if (openbottom >= opentop)        
@@ -235,14 +235,14 @@ boolean P_CrossSubsector (int num)
         
         frac = P_InterceptVector2 (&strace, &divl);
                 
-        if (front->floorheight != back->floorheight)
+        if (front->floor_height != back->floor_height)
         {
             slope = FixedDiv (openbottom - sightzstart , frac);
             if (slope > bottomslope)
                 bottomslope = slope;
         }
                 
-        if (front->ceilingheight != back->ceilingheight)
+        if (front->ceiling_height != back->ceiling_height)
         {
             slope = FixedDiv (opentop - sightzstart , frac);
             if (slope < topslope)

@@ -118,7 +118,7 @@ void T_PlatRaise(plat_t* plat)
       case        waiting:
         if (!--plat->count)
         {
-            if (plat->sector->floorheight == plat->low)
+            if (plat->sector->floor_height == plat->low)
                 plat->status = up;
             else
                 plat->status = down;
@@ -184,7 +184,7 @@ EV_DoPlat
           case raiseToNearestAndChange:
             plat->speed = PLATSPEED/2;
             sec->floorpic = sides[line->sidenum[0]].sector->floorpic;
-            plat->high = P_FindNextHighestFloor(sec,sec->floorheight);
+            plat->high = P_FindNextHighestFloor(sec,sec->floor_height);
             plat->wait = 0;
             plat->status = up;
             // NO MORE DAMAGE, IF APPLICABLE
@@ -196,7 +196,7 @@ EV_DoPlat
           case raiseAndChange:
             plat->speed = PLATSPEED/2;
             sec->floorpic = sides[line->sidenum[0]].sector->floorpic;
-            plat->high = sec->floorheight + amount*FRACUNIT;
+            plat->high = sec->floor_height + amount*FRACUNIT;
             plat->wait = 0;
             plat->status = up;
 
@@ -207,10 +207,10 @@ EV_DoPlat
             plat->speed = PLATSPEED * 4;
             plat->low = P_FindLowestFloorSurrounding(sec);
 
-            if (plat->low > sec->floorheight)
-                plat->low = sec->floorheight;
+            if (plat->low > sec->floor_height)
+                plat->low = sec->floor_height;
 
-            plat->high = sec->floorheight;
+            plat->high = sec->floor_height;
             plat->wait = TICRATE*PLATWAIT;
             plat->status = down;
             S_StartSound(&sec->soundorg,sfx_pstart);
@@ -220,10 +220,10 @@ EV_DoPlat
             plat->speed = PLATSPEED * 8;
             plat->low = P_FindLowestFloorSurrounding(sec);
 
-            if (plat->low > sec->floorheight)
-                plat->low = sec->floorheight;
+            if (plat->low > sec->floor_height)
+                plat->low = sec->floor_height;
 
-            plat->high = sec->floorheight;
+            plat->high = sec->floor_height;
             plat->wait = TICRATE*PLATWAIT;
             plat->status = down;
             S_StartSound(&sec->soundorg,sfx_pstart);
@@ -233,13 +233,13 @@ EV_DoPlat
             plat->speed = PLATSPEED;
             plat->low = P_FindLowestFloorSurrounding(sec);
 
-            if (plat->low > sec->floorheight)
-                plat->low = sec->floorheight;
+            if (plat->low > sec->floor_height)
+                plat->low = sec->floor_height;
 
             plat->high = P_FindHighestFloorSurrounding(sec);
 
-            if (plat->high < sec->floorheight)
-                plat->high = sec->floorheight;
+            if (plat->high < sec->floor_height)
+                plat->high = sec->floor_height;
 
             plat->wait = TICRATE*PLATWAIT;
             plat->status = P_Random()&1;

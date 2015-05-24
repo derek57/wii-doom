@@ -312,6 +312,7 @@ extern  boolean         beta_imp;
 extern  boolean         d_translucency;
 extern  boolean         d_chkblood;
 extern  boolean         d_chkblood2;
+extern  boolean         d_uncappedframerate;
 
 extern  int             d_colblood;
 extern  int             d_colblood2;

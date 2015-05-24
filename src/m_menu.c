@@ -817,7 +817,6 @@ char                       endstring[160];
 char                       detailNames[2][9] = {"M_GDHIGH","M_GDLOW"};
 char                       msgNames[2][9]    = {"M_MSGOFF","M_MSGON"};
 */
-char                       fpsDisplay[100];
 char                       map_coordinates_textbuffer[50];
 char                       massacre_textbuffer[20];
 
@@ -864,9 +863,8 @@ int                        cheeting;
 int                        coordinates_info = 0;
 int                        timer_info = 0;
 int                        version_info = 0;
-int                        fps = 0;              // calculating the frames per second
 int                        key_controls_start_in_cfg_at_pos = 39; // ACTUALLY IT'S +2
-int                        key_controls_end_in_cfg_at_pos = 53;   // ACTUALLY IT'S +2
+int                        key_controls_end_in_cfg_at_pos = 52;   // ACTUALLY IT'S +2
 int                        crosshair = 0;
 int                        show_stats = 0;
 int                        tracknum = 1;
@@ -940,7 +938,6 @@ extern int                 left;
 extern int                 right;
 extern int                 mouselook;
 extern int                 dots_enabled;
-extern int                 fps_enabled;
 extern int                 dont_show;
 extern int                 display_fps;
 extern int                 allocated_ram_size;
@@ -983,6 +980,7 @@ void M_ChangeDetail(int choice);
 void M_Translucency(int choice);
 void M_ColoredBloodA(int choice);
 void M_ColoredBloodB(int choice);
+void M_UncappedFramerate(int choice);
 void M_SizeDisplay(int choice);
 void M_StartGame(int choice);
 void M_Sound(int choice);
@@ -1098,7 +1096,7 @@ void M_Weapons(int choice);
 void M_Items(int choice);
 void M_Massacre(int choice);
 void M_Screen(int choice);
-void M_FPSCounter(int display_fps);
+void M_FPSCounter(int choice);
 void M_Controls(int choice);
 void M_System(int choice);
 void M_Sound(int choice);
@@ -1535,6 +1533,7 @@ enum
     screen_translucency,
     screen_blooda,
     screen_bloodb,
+    screen_framerate,
     screen_end
 } screen_e;
 
@@ -1545,7 +1544,8 @@ menuitem_t ScreenMenu[]=
     {2,"Detail",M_ChangeDetail,'d'},
     {2,"Translucency",M_Translucency,'t'},
     {2,"Enable Colored Blood",M_ColoredBloodA,'a'},
-    {2,"Fix Monster Blood",M_ColoredBloodB,'b'}
+    {2,"Fix Monster Blood",M_ColoredBloodB,'b'},
+    {2,"Uncapped Framerate",M_UncappedFramerate,'u'}
 };
 
 menu_t  ScreenDef =
@@ -2634,6 +2634,19 @@ void M_DrawScreen(void)
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(ScreenDef.x + 181, ScreenDef.y + 48, "OFF");
+	V_ClearDPTranslation();
+    }
+
+    if(d_uncappedframerate)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(ScreenDef.x + 189, ScreenDef.y + 58, "ON");
+	V_ClearDPTranslation();
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(ScreenDef.x + 181, ScreenDef.y + 58, "OFF");
 	V_ClearDPTranslation();
     }
     M_DrawThermoSmall(ScreenDef.x + 120, ScreenDef.y + LINEHEIGHT_SMALL * (scrnsize + 1),
@@ -3834,6 +3847,12 @@ void M_ColoredBloodB(int choice)
     d_colblood2 = 1 - !!d_colblood2;
 }
 
+void M_UncappedFramerate(int choice)
+{
+    choice = 0;
+    d_uncappedframerate = !d_uncappedframerate;
+}
+
 void M_SizeDisplay(int choice)
 {
     switch(choice)
@@ -4435,15 +4454,6 @@ void M_Drawer (void)
             !menuactive && leveltime&16 && gamestate == GS_LEVEL)
         M_WriteText(140, 12, "BETA");
 
-    if(display_fps == 1)
-    {
-        M_FPSCounter(1);
-    }
-    else if(display_fps == 0)
-    {
-        M_FPSCounter(0);
-    }
-
     if(coordinates_info)
     {
             if(gamestate == GS_LEVEL)
@@ -4512,10 +4522,10 @@ void M_Drawer (void)
     x = currentMenu->x;
     y = currentMenu->y;
     max = currentMenu->numitems;
-/*
-    if(currentMenu == &GameDef && devparm)
-        currentMenu->numitems = 9;
-*/
+
+    if(currentMenu == &ScreenDef && devparm)
+        currentMenu->numitems = 6;
+
     if(currentMenu == &SoundDef && itemOn == 4)
         M_WriteText(48, 155, "You must restart to take effect.");
 
@@ -5938,7 +5948,6 @@ void M_KeyBindingsClearAll (int choice)
     *doom_defaults_list[49].location = 0;
     *doom_defaults_list[50].location = 0;
     *doom_defaults_list[51].location = 0;
-    *doom_defaults_list[52].location = 0;
 }
 
 void M_KeyBindingsReset (int choice)
@@ -5954,9 +5963,8 @@ void M_KeyBindingsReset (int choice)
     *doom_defaults_list[47].location = CLASSIC_CONTROLLER_A;
     *doom_defaults_list[48].location = CLASSIC_CONTROLLER_Y;
     *doom_defaults_list[49].location = CLASSIC_CONTROLLER_B;
-    *doom_defaults_list[40].location = CONTROLLER_1;
+    *doom_defaults_list[50].location = CONTROLLER_1;
     *doom_defaults_list[51].location = CONTROLLER_2;
-    *doom_defaults_list[52].location = CLASSIC_CONTROLLER_PLUS;
 }
 
 void M_DrawKeyBindings(void)
@@ -6084,13 +6092,11 @@ void M_FPS(int choice)
     if(display_fps < 1)
     {
         display_fps++;
-        fps_enabled = 1;
         players[consoleplayer].message = DEH_String("FPS COUNTER ON");
     }
     else if(display_fps)
     {
         display_fps--;
-        fps_enabled = 0;
         players[consoleplayer].message = DEH_String("FPS COUNTER OFF");
     }
 }
@@ -6098,30 +6104,6 @@ void M_FPS(int choice)
 u64 GetTicks(void)
 {
     return (u64)SDL_GetTicks();
-}
-
-void M_FPSCounter(int display_fps)
-{
-    int tickfreq = 1000;
-
-    static int fpsframecount = 0;
-    static u64 fpsticks;
-
-    fpsframecount++;
-
-    if(GetTicks() >= fpsticks + tickfreq)
-    {
-        fps = fpsframecount;
-        fpsframecount = 0;
-        fpsticks = GetTicks();
-    }
-    sprintf( fpsDisplay, "FPS: %d", fps );
-
-    if(display_fps)
-    {
-        M_WriteText(0, 30, fpsDisplay);
-    }
-    BorderNeedRefresh = true;
 }
 
 void M_DisplayTicker(int choice)

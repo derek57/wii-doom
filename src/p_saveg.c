@@ -1582,8 +1582,8 @@ void P_ArchiveWorld (void)
     // do sectors
     for (i=0, sec = sectors ; i<numsectors ; i++,sec++)
     {
-        saveg_write16(sec->floorheight >> FRACBITS);
-        saveg_write16(sec->ceilingheight >> FRACBITS);
+        saveg_write16(sec->floor_height >> FRACBITS);
+        saveg_write16(sec->ceiling_height >> FRACBITS);
         saveg_write16(sec->floorpic);
         saveg_write16(sec->ceilingpic);
         saveg_write16(sec->lightlevel);
@@ -1630,8 +1630,8 @@ void P_UnArchiveWorld (void)
     // do sectors
     for (i=0, sec = sectors ; i<numsectors ; i++,sec++)
     {
-        sec->floorheight = saveg_read16() << FRACBITS;
-        sec->ceilingheight = saveg_read16() << FRACBITS;
+        sec->floor_height = saveg_read16() << FRACBITS;
+        sec->ceiling_height = saveg_read16() << FRACBITS;
         sec->floorpic = saveg_read16();
         sec->ceilingpic = saveg_read16();
         sec->lightlevel = saveg_read16();
@@ -1746,8 +1746,8 @@ void P_UnArchiveThinkers (void)
             mobj->tracer = NULL;
             P_SetThingPosition (mobj);
             mobj->info = &mobjinfo[mobj->type];
-            mobj->floorz = mobj->subsector->sector->floorheight;
-            mobj->ceilingz = mobj->subsector->sector->ceilingheight;
+            mobj->floorz = mobj->subsector->sector->floor_height;
+            mobj->ceilingz = mobj->subsector->sector->ceiling_height;
             mobj->thinker.function.acp1 = (actionf_p1)P_MobjThinker;
             P_AddThinker (&mobj->thinker);
             break;

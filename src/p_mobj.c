@@ -270,7 +270,7 @@ void P_XYMovement (mobj_t* mo)
             || mo->momy > FRACUNIT/4
             || mo->momy < -FRACUNIT/4)
         {
-            if (mo->floorz != mo->subsector->sector->floorheight)
+            if (mo->floorz != mo->subsector->sector->floor_height)
                 return;
         }
     }
@@ -506,14 +506,14 @@ P_NightmareRespawn (mobj_t* mobj)
     // because of removal of the body?
     mo = P_SpawnMobj (mobj->x,
                       mobj->y,
-                      mobj->subsector->sector->floorheight , MT_TFOG); 
+                      mobj->subsector->sector->floor_height , MT_TFOG); 
     // initiate teleport sound
     S_StartSound (mo, sfx_telept);
 
     // spawn a teleport fog at the new spot
     ss = R_PointInSubsector (x,y); 
 
-    mo = P_SpawnMobj (x, y, ss->sector->floorheight , MT_TFOG); 
+    mo = P_SpawnMobj (x, y, ss->sector->floor_height , MT_TFOG); 
 
     S_StartSound (mo, sfx_telept);
 
@@ -547,6 +547,20 @@ P_NightmareRespawn (mobj_t* mobj)
 void P_MobjThinker (mobj_t* mobj)
 {
     mobj_t *onmo;
+
+    // Handle interpolation unless we're an active player.
+    if (!(mobj->player != NULL && mobj == mobj->player->mo))
+    {
+        // Assume we can interpolate at the beginning
+        // of the tic.
+        mobj->interp = true;
+
+        // Store starting position for mobj interpolation.
+        mobj->oldx = mobj->x;
+        mobj->oldy = mobj->y;
+        mobj->oldz = mobj->z;
+        mobj->oldangle = mobj->angle;
+    }
 
     // momentum movement
     if (mobj->momx
@@ -691,8 +705,8 @@ P_SpawnMobj
     // set subsector and/or block links
     P_SetThingPosition (mobj);
         
-    mobj->floorz = mobj->subsector->sector->floorheight;
-    mobj->ceilingz = mobj->subsector->sector->ceilingheight;
+    mobj->floorz = mobj->subsector->sector->floor_height;
+    mobj->ceilingz = mobj->subsector->sector->ceiling_height;
 
     if (z == ONFLOORZ)
         mobj->z = mobj->floorz;
@@ -701,9 +715,18 @@ P_SpawnMobj
     else 
         mobj->z = z;
 
+    // Do not interpolate on spawn.
+    mobj->interp = false;
+
+    // Just in case interpolation is attempted...
+    mobj->oldx = mobj->x;
+    mobj->oldy = mobj->y;
+    mobj->oldz = mobj->z;
+    mobj->oldangle = mobj->angle;
+
     if (mobj->flags2 & MF2_FOOTCLIP
         && P_GetThingFloorType(mobj) != FLOOR_SOLID
-        && mobj->floorz == mobj->subsector->sector->floorheight)
+        && mobj->floorz == mobj->subsector->sector->floor_height)
     {
         mobj->flags2 |= MF2_FEETARECLIPPED;
     }
@@ -790,7 +813,7 @@ void P_RespawnSpecials (void)
           
     // spawn a teleport fog at the new spot
     ss = R_PointInSubsector (x,y); 
-    mo = P_SpawnMobj (x, y, ss->sector->floorheight , MT_IFOG); 
+    mo = P_SpawnMobj (x, y, ss->sector->floor_height , MT_IFOG); 
 
     if(fsize != 10396254 && fsize != 10399316 && fsize != 10401760 && fsize != 4207819 &&
             fsize != 4274218 && fsize != 4225504 && fsize != 4225460)
@@ -1375,7 +1398,7 @@ int P_HitFloor(mobj_t * thing)
 {
     mobj_t *mo;
 
-    if (thing->floorz != thing->subsector->sector->floorheight)
+    if (thing->floorz != thing->subsector->sector->floor_height)
     {                           // don't splash if landing on the edge above water/lava/etc....
         return (FLOOR_SOLID);
     }

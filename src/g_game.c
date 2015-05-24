@@ -937,7 +937,7 @@ G_CheckSpot
     an = ( ANG45 * (((unsigned int) mthing->angle)/45) ) >> ANGLETOFINESHIFT; 
  
     mo = P_SpawnMobj (x+20*finecosine[an], y+20*finesine[an] 
-                      , ss->sector->floorheight 
+                      , ss->sector->floor_height 
                       , MT_TFOG); 
          
     if (players[consoleplayer].viewz != 1) 

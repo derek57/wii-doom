@@ -308,7 +308,7 @@ fixed_t        P_FindLowestFloorSurrounding(sector_t* sec)
     int                    i;
     line_t*                check;
     sector_t*              other;
-    fixed_t                floor = sec->floorheight;
+    fixed_t                floor = sec->floor_height;
         
     for (i=0 ;i < sec->linecount ; i++)
     {
@@ -318,8 +318,8 @@ fixed_t        P_FindLowestFloorSurrounding(sector_t* sec)
         if (!other)
             continue;
         
-        if (other->floorheight < floor)
-            floor = other->floorheight;
+        if (other->floor_height < floor)
+            floor = other->floor_height;
     }
     return floor;
 }
@@ -345,8 +345,8 @@ fixed_t        P_FindHighestFloorSurrounding(sector_t *sec)
         if (!other)
             continue;
         
-        if (other->floorheight > floor)
-            floor = other->floorheight;
+        if (other->floor_height > floor)
+            floor = other->floor_height;
     }
     return floor;
 }
@@ -382,7 +382,7 @@ P_FindNextHighestFloor
         if (!other)
             continue;
         
-        if (other->floorheight > height)
+        if (other->floor_height > height)
         {
             C_Printf(CR_RED, " P_FindNextHighestFloor: Overflow of heightlist[%d] array is detected.\n",
                             MAX_ADJOINING_SECTORS);
@@ -391,7 +391,7 @@ P_FindNextHighestFloor
             // Emulation of memory (stack) overflow
             if (h == MAX_ADJOINING_SECTORS + 1)
             {
-                height = other->floorheight;
+                height = other->floor_height;
             }
             else if (h <= MAX_ADJOINING_SECTORS + 1)
                 C_Printf(CR_GOLD, " successfully emulated.\n");
@@ -408,7 +408,7 @@ P_FindNextHighestFloor
             else
                 C_Printf(CR_RED, " Cannot be emulated - crash with high probability.\n");
 
-            heightlist[h++] = other->floorheight;
+            heightlist[h++] = other->floor_height;
         }
     }
     
@@ -451,8 +451,8 @@ P_FindLowestCeilingSurrounding(sector_t* sec)
         if (!other)
             continue;
 
-        if (other->ceilingheight < height)
-            height = other->ceilingheight;
+        if (other->ceiling_height < height)
+            height = other->ceiling_height;
     }
     return height;
 }
@@ -476,8 +476,8 @@ fixed_t        P_FindHighestCeilingSurrounding(sector_t* sec)
         if (!other)
             continue;
 
-        if (other->ceilingheight > height)
-            height = other->ceilingheight;
+        if (other->ceiling_height > height)
+            height = other->ceiling_height;
     }
     return height;
 }
@@ -1084,7 +1084,7 @@ void P_PlayerInSpecialSector (player_t* player)
     sector = player->mo->subsector->sector;
 
     // Falling, not all the way down yet?
-    if (player->mo->z != sector->floorheight)
+    if (player->mo->z != sector->floor_height)
         return;        
 
     // Has hitten ground.
@@ -1349,7 +1349,7 @@ int EV_DoDonut(line_t*       line)
             }
             else
             {
-                s3_floorheight = s3->floorheight;
+                s3_floorheight = s3->floor_height;
                 s3_floorpic = s3->floorpic;
             }
 

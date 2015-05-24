@@ -916,7 +916,7 @@ void R_InitColormaps (void)
     lump = W_GetNumForName(DEH_String("COLORMAP"));
     colormaps = W_CacheLumpNum(lump, PU_STATIC);
 
-    // [crispy] initialize color translation and color strings tables
+    // initialize color translation and color strings tables
     {
 	byte *playpal = W_CacheLumpName("PLAYPAL", PU_STATIC);
 

@@ -1153,12 +1153,12 @@ void AM_drawWalls(void)
                     else
                         AM_drawMline(&l, WALLCOLORS+lightlev);
                 }
-                else if (lines[i].backsector->floorheight
-                           != lines[i].frontsector->floorheight) {
+                else if (lines[i].backsector->floor_height
+                           != lines[i].frontsector->floor_height) {
                     AM_drawMline(&l, FDWALLCOLORS + lightlev); // floor level change
                 }
-                else if (lines[i].backsector->ceilingheight
-                           != lines[i].frontsector->ceilingheight) {
+                else if (lines[i].backsector->ceiling_height
+                           != lines[i].frontsector->ceiling_height) {
                     AM_drawMline(&l, CDWALLCOLORS+lightlev); // ceiling level change
                 }
                 else if (cheating) {

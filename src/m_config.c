@@ -115,6 +115,7 @@ default_t        doom_defaults_list[] =
     CONFIG_VARIABLE_INT                (translucency),
     CONFIG_VARIABLE_INT                (colored_blood),
     CONFIG_VARIABLE_INT                (fixed_blood),
+//    CONFIG_VARIABLE_INT                (uncapped_framerate),
     CONFIG_VARIABLE_INT                (key_shoot),
     CONFIG_VARIABLE_INT                (key_open),
     CONFIG_VARIABLE_INT                (key_menu),
@@ -128,7 +129,7 @@ default_t        doom_defaults_list[] =
     CONFIG_VARIABLE_INT                (key_jump),
     CONFIG_VARIABLE_INT                (key_run),
     CONFIG_VARIABLE_INT                (key_console),
-    CONFIG_VARIABLE_INT                (key_aiminghelp),
+//    CONFIG_VARIABLE_INT                (key_aiminghelp),
 };
 
 default_collection_t doom_defaults =

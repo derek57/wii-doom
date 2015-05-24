@@ -341,7 +341,7 @@ void D_Display (void)
 	if (menushade < 16)
 	    menushade++;
 
-	// [crispy] force redraw of status bar and border
+	// force redraw of status bar and border
 	viewactivestate = false;
 	inhelpscreensstate = true;
     }

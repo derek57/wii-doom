@@ -188,8 +188,8 @@ P_TeleportMove
     // that contains the point.
     // Any contacted lines the step closer together
     // will adjust them.
-    tmfloorz = tmdropoffz = newsubsec->sector->floorheight;
-    tmceilingz = newsubsec->sector->ceilingheight;
+    tmfloorz = tmdropoffz = newsubsec->sector->floor_height;
+    tmceilingz = newsubsec->sector->ceiling_height;
                         
     validcount++;
     numspechit = 0;
@@ -213,7 +213,11 @@ P_TeleportMove
     thing->ceilingz = tmceilingz;        
     thing->x = x;
     thing->y = y;
-
+    
+    // Don't interpolate mobjs that pass
+    // through teleporters
+    thing->interp = false;
+ 
     P_SetThingPosition (thing);
         
     return true;
@@ -462,8 +466,8 @@ P_CheckPosition
     // that contains the point.
     // Any contacted lines the step closer together
     // will adjust them.
-    tmfloorz = tmdropoffz = newsubsec->sector->floorheight;
-    tmceilingz = newsubsec->sector->ceilingheight;
+    tmfloorz = tmdropoffz = newsubsec->sector->floor_height;
+    tmceilingz = newsubsec->sector->ceiling_height;
                         
     validcount++;
     numspechit = 0;
@@ -923,7 +927,7 @@ PTR_AimTraverse (intercept_t* in)
         dist = FixedMul (attackrange, in->frac);
 
         if (li->backsector == NULL
-         || li->frontsector->floorheight != li->backsector->floorheight)
+         || li->frontsector->floor_height != li->backsector->floor_height)
         {
             slope = FixedDiv (openbottom - shootz , dist);
             if (slope > bottomslope)
@@ -931,7 +935,7 @@ PTR_AimTraverse (intercept_t* in)
         }
                 
         if (li->backsector == NULL
-         || li->frontsector->ceilingheight != li->backsector->ceilingheight)
+         || li->frontsector->ceiling_height != li->backsector->ceiling_height)
         {
             slope = FixedDiv (opentop - shootz , dist);
             if (slope < topslope)
@@ -1028,14 +1032,14 @@ boolean PTR_ShootTraverse (intercept_t* in)
         }
         else
         {
-            if (li->frontsector->floorheight != li->backsector->floorheight)
+            if (li->frontsector->floor_height != li->backsector->floor_height)
             {
                 slope = FixedDiv (openbottom - shootz , dist);
                 if (slope > aimslope)
                     goto hitline;
             }
 
-            if (li->frontsector->ceilingheight != li->backsector->ceilingheight)
+            if (li->frontsector->ceiling_height != li->backsector->ceiling_height)
             {
                 slope = FixedDiv (opentop - shootz , dist);
                 if (slope < aimslope)
@@ -1058,7 +1062,7 @@ boolean PTR_ShootTraverse (intercept_t* in)
         if (li->frontsector->ceilingpic == skyflatnum)
         {
             // don't shoot the sky!
-            if (z > li->frontsector->ceilingheight)
+            if (z > li->frontsector->ceiling_height)
                 return false;
             
             // it's a sky hack wall
@@ -1164,14 +1168,14 @@ boolean PTR_ShootTraverse (intercept_t* in)
             goto hitline;
         }
 
-        if (li->frontsector->floorheight != li->backsector->floorheight)
+        if (li->frontsector->floor_height != li->backsector->floor_height)
         {
             slope = FixedDiv (openbottom - shootz , dist);
             if (slope > aimslope)
                 goto hitline;
         }
 
-        if (li->frontsector->ceilingheight != li->backsector->ceilingheight)
+        if (li->frontsector->ceiling_height != li->backsector->ceiling_height)
         {
             slope = FixedDiv (opentop - shootz , dist);
             if (slope < aimslope)
@@ -1192,7 +1196,7 @@ boolean PTR_ShootTraverse (intercept_t* in)
 
         if(sidesector != NULL)
         {
-            if(!(hitz > sidesector->floorheight && hitz < sidesector->ceilingheight))
+            if(!(hitz > sidesector->floor_height && hitz < sidesector->ceiling_height))
             {
                 // ceiling/floor has been contacted
                 hitplane = true;
@@ -1209,7 +1213,7 @@ boolean PTR_ShootTraverse (intercept_t* in)
             fixed_t num;
 
             // determine where we've hit
-            if(hitz <= sidesector->floorheight)
+            if(hitz <= sidesector->floor_height)
             {
                 den = shootdirz;
                 if(den == 0)
@@ -1217,7 +1221,7 @@ boolean PTR_ShootTraverse (intercept_t* in)
                     den = FRACUNIT;
                 }
 
-                num = shootz - sidesector->floorheight;
+                num = shootz - sidesector->floor_height;
             }
             else
             {
@@ -1227,7 +1231,7 @@ boolean PTR_ShootTraverse (intercept_t* in)
                     den = -FRACUNIT;
                 }
 
-                num = -shootz + sidesector->ceilingheight;
+                num = -shootz + sidesector->ceiling_height;
             }
 
             // position on plane
@@ -1252,13 +1256,13 @@ boolean PTR_ShootTraverse (intercept_t* in)
         if(li->frontsector->ceilingpic == skyflatnum)
         {
             // don't shoot the sky!
-            if(z > li->frontsector->ceilingheight)
+            if(z > li->frontsector->ceiling_height)
                 return false;
 
             // it's a sky hack wall
             // added ceiling height check fix
             if(li->backsector && li->backsector->ceilingpic == skyflatnum
-                && li->backsector->ceilingheight < z)
+                && li->backsector->ceiling_height < z)
             {
                 return false;
             }
@@ -1845,8 +1849,8 @@ mobj_t *P_CheckOnmobj(mobj_t * thing)
 // the base floor / ceiling is from the subsector that contains the
 // point.  Any contacted lines the step closer together will adjust them
 //
-    tmfloorz = tmdropoffz = newsubsec->sector->floorheight;
-    tmceilingz = newsubsec->sector->ceilingheight;
+    tmfloorz = tmdropoffz = newsubsec->sector->floor_height;
+    tmceilingz = newsubsec->sector->ceiling_height;
 
     validcount++;
     numspechit = 0;

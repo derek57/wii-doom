@@ -50,16 +50,16 @@
 enum
 {
   ML_LABEL,                // A separator, name, ExMx or MAPxx
-  ML_THINGS,                // Monsters, items..
-  ML_LINEDEFS,                // LineDefs, from editing
-  ML_SIDEDEFS,                // SideDefs, from editing
-  ML_VERTEXES,                // Vertices, edited and BSP splits generated
-  ML_SEGS,                // LineSegs, from LineDefs split by BSP
-  ML_SSECTORS,                // SubSectors, list of LineSegs
+  ML_THINGS,               // Monsters, items..
+  ML_LINEDEFS,             // LineDefs, from editing
+  ML_SIDEDEFS,             // SideDefs, from editing
+  ML_VERTEXES,             // Vertices, edited and BSP splits generated
+  ML_SEGS,                 // LineSegs, from LineDefs split by BSP
+  ML_SSECTORS,             // SubSectors, list of LineSegs
   ML_NODES,                // BSP nodes
-  ML_SECTORS,                // Sectors, from editing
-  ML_REJECT,                // LUT, sector-sector visibility        
-  ML_BLOCKMAP                // LUT, motion clipping, walls/grid element
+  ML_SECTORS,              // Sectors, from editing
+  ML_REJECT,               // LUT, sector-sector visibility        
+  ML_BLOCKMAP              // LUT, motion clipping, walls/grid element
 };
 
 
@@ -77,9 +77,9 @@ typedef struct
 {
   short                textureoffset;
   short                rowoffset;
-  char                toptexture[8];
-  char                bottomtexture[8];
-  char                midtexture[8];
+  char                 toptexture[8];
+  char                 bottomtexture[8];
+  char                 midtexture[8];
   // Front sector, towards viewer.
   short                sector;
 } PACKEDATTR mapsidedef_t;
@@ -105,14 +105,14 @@ typedef struct
 //
 
 // Solid, is an obstacle.
-#define ML_BLOCKING                1
+#define ML_BLOCKING             1
 
 // Blocks monsters only.
 #define ML_BLOCKMONSTERS        2
 
 // Backside will not be present at all
 //  if not two sided.
-#define ML_TWOSIDED                4
+#define ML_TWOSIDED             4
 
 // If a texture is pegged, the texture will have
 // the end exposed to air held constant at the
@@ -124,22 +124,22 @@ typedef struct
 // top and bottom textures (use next to windows).
 
 // upper texture unpegged
-#define ML_DONTPEGTOP                8
+#define ML_DONTPEGTOP           8
 
 // lower texture unpegged
 #define ML_DONTPEGBOTTOM        16        
 
 // In AutoMap: don't map as two sided: IT'S A SECRET!
-#define ML_SECRET                32
+#define ML_SECRET               32
 
 // Sound rendering: don't let sound cross two of these.
-#define ML_SOUNDBLOCK                64
+#define ML_SOUNDBLOCK           64
 
 // Don't draw on the automap at all.
-#define ML_DONTDRAW                128
+#define ML_DONTDRAW             128
 
 // Set if already seen, thus drawn in automap.
-#define ML_MAPPED                256
+#define ML_MAPPED               256
 
 
 
@@ -147,10 +147,10 @@ typedef struct
 // Sector definition, from editing.
 typedef        struct
 {
-  short                floorheight;
-  short                ceilingheight;
-  char                floorpic[8];
-  char                ceilingpic[8];
+  short                floor_height;
+  short                ceiling_height;
+  char                 floorpic[8];
+  char                 ceilingpic[8];
   short                lightlevel;
   short                special;
   short                tag;
@@ -198,7 +198,7 @@ typedef struct
 
   // If NF_SUBSECTOR its a subsector,
   // else it's a node of another subtree.
-  unsigned short        children[2];
+  unsigned short       children[2];
 
 } PACKEDATTR mapnode_t;
 

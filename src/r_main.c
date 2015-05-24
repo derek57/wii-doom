@@ -36,6 +36,7 @@
 #include "d_loop.h"
 #include "d_player.h"
 #include "doomdef.h"
+#include "doomstat.h"
 #include "m_bbox.h"
 #include "m_menu.h"
 #include "r_local.h"
@@ -87,6 +88,10 @@ fixed_t                    viewy;
 fixed_t                    viewz;
 fixed_t                    viewcos;
 fixed_t                    viewsin;
+
+// Fractional part of the current tic, in the half-open
+//      range of [0.0, 1.0).  Used for interpolation.
+fixed_t                    fractionaltic;
 
 angle_t                    viewangle;
 
@@ -433,6 +438,28 @@ void R_InitPointToAngle (void)
 #endif
 }
 
+
+
+// Interpolate between two angles.
+angle_t R_InterpolateAngle(angle_t oangle, angle_t nangle, fixed_t scale)
+{
+    if (nangle == oangle)
+        return nangle;
+    else if (nangle > oangle)
+    {
+        if (nangle - oangle < ANG270)
+            return oangle + (angle_t)((nangle - oangle) * FIXED2DOUBLE(scale));
+        else // Wrapped around
+            return oangle - (angle_t)((oangle - nangle) * FIXED2DOUBLE(scale));
+    }
+    else // nangle < oangle
+    {
+        if (oangle - nangle < ANG270)
+            return oangle - (angle_t)((oangle - nangle) * FIXED2DOUBLE(scale));
+        else // Wrapped around
+            return oangle + (angle_t)((nangle - oangle) * FIXED2DOUBLE(scale));
+    }
+}
 
 
 //
@@ -802,12 +829,42 @@ void R_SetupFrame (player_t* player)
     R_SetupPitch(player);
 
     viewplayer = player;
-    viewx = player->mo->x;
-    viewy = player->mo->y;
-    viewangle = player->mo->angle + viewangleoffset;
-    extralight = player->extralight;
 
-    viewz = player->viewz;
+    // Interpolate the player camera if the feature is enabled.
+
+    // Figure out how far into the current tic we're in as a fixed_t
+    if (d_uncappedframerate)
+        fractionaltic = I_GetTimeMS() * TICRATE % 1000 * FRACUNIT / 1000;
+
+    if (d_uncappedframerate &&
+        // Don't interpolate on the first tic of a level,
+        // otherwise oldviewz might be garbage.
+        leveltime > 1 &&
+        // Don't interpolate if the player did something 
+        // that would necessitate turning it off for a tic.
+        player->mo->interp == true &&
+        // Don't interpolate during a paused state
+        !paused && !menuactive)
+    {
+        // Interpolate player camera from their old position to their current one.
+        viewx = player->mo->oldx + FixedMul(player->mo->x -
+                player->mo->oldx, fractionaltic);
+        viewy = player->mo->oldy + FixedMul(player->mo->y -
+                player->mo->oldy, fractionaltic);
+        viewz = player->oldviewz + FixedMul(player->viewz -
+                player->oldviewz, fractionaltic);
+        viewangle = R_InterpolateAngle(player->mo->oldangle,
+                player->mo->angle, fractionaltic) + viewangleoffset;
+    }
+    else
+    {
+        viewx = player->mo->x;
+        viewy = player->mo->y;
+        viewz = player->viewz;
+        viewangle = player->mo->angle + viewangleoffset;
+    }
+
+    extralight = player->extralight;
 
     viewsin = finesine[viewangle>>ANGLETOFINESHIFT];
     viewcos = finecosine[viewangle>>ANGLETOFINESHIFT];

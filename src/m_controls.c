@@ -159,6 +159,7 @@ void M_BindBaseControls(void)
     M_BindVariable("translucency",           &d_translucency);
     M_BindVariable("colored_blood",          &d_colblood);
     M_BindVariable("fixed_blood",            &d_colblood2);
+//    M_BindVariable("uncapped_framerate",     &d_uncappedframerate);
     M_BindVariable("key_shoot",              &joy_r);
     M_BindVariable("key_open",               &joy_l);
     M_BindVariable("key_menu",               &joy_minus);
@@ -172,7 +173,7 @@ void M_BindBaseControls(void)
     M_BindVariable("key_jump",               &joy_b);
     M_BindVariable("key_run",                &joy_1);
     M_BindVariable("key_console",            &joy_2);
-    M_BindVariable("key_aiminghelp",         &joy_plus);
+//    M_BindVariable("key_aiminghelp",         &joy_plus);
 }
 
 //

@@ -163,8 +163,8 @@ sector_t* GetSectorAtNullAddress(void)
     if (!null_sector_is_initialized)
     {
         memset(&null_sector, 0, sizeof(null_sector));
-        I_GetMemoryValue(0, &null_sector.floorheight, 4);
-        I_GetMemoryValue(4, &null_sector.ceilingheight, 4);
+        I_GetMemoryValue(0, &null_sector.floor_height, 4);
+        I_GetMemoryValue(4, &null_sector.ceiling_height, 4);
         null_sector_is_initialized = true;
     }
 
@@ -307,16 +307,26 @@ void P_LoadSectors (int lump)
     ss = sectors;
     for (i=0 ; i<numsectors ; i++, ss++, ms++)
     {
-        ss->floorheight = SHORT(ms->floorheight)<<FRACBITS;
-        ss->ceilingheight = SHORT(ms->ceilingheight)<<FRACBITS;
+        ss->floor_height = SHORT(ms->floor_height)<<FRACBITS;
+        ss->ceiling_height = SHORT(ms->ceiling_height)<<FRACBITS;
         ss->floorpic = R_FlatNumForName(ms->floorpic);
         ss->ceilingpic = R_FlatNumForName(ms->ceilingpic);
         ss->lightlevel = SHORT(ms->lightlevel);
         ss->special = SHORT(ms->special);
         ss->tag = SHORT(ms->tag);
         ss->thinglist = NULL;
+
         // WiggleFix: [kb] for R_FixWiggle()
         ss->cachedheight = 0;
+
+        // Sector interpolation.  Even if we're
+        // not running uncapped, the renderer still
+        // uses this data.
+        ss->oldfloorheight = ss->floor_height;
+        ss->interpfloorheight = ss->floor_height;
+        ss->oldceilingheight = ss->ceiling_height;
+        ss->interpceilingheight = ss->ceiling_height;
+        ss->oldgametic = 0;
     }
         
     W_ReleaseLumpNum(lump);

@@ -20,6 +20,7 @@
 #include <ctype.h>
 #include <math.h>
 #include <SDL/SDL.h>
+#include <SDL/SDL_stdinc.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -36,6 +37,7 @@
 #include "i_video.h"
 #include "i_scale.h"
 #include "m_config.h"
+#include "m_menu.h"
 #include "m_misc.h"
 #include "tables.h"
 #include "v_trans.h"
@@ -192,6 +194,8 @@ int usegamma = 0;
 patch_t *disk;
 
 extern int screenSize;
+
+extern int display_fps;
 
 // Set the variable controlling FPS dots.
 
@@ -588,8 +592,14 @@ static void SetVideoMode(screen_mode_t *mode, int w, int h)
 void I_FinishUpdate (void)
 {
     static int  lasttic;
+    static int	lastmili;
+    static int	fpscount;
+
+    static char	fpsbuf[5];
+
     int         tics;
     int         i;
+    int		mili;
 
     if (!initialized)
         return;
@@ -617,6 +627,24 @@ void I_FinishUpdate (void)
             I_VideoBuffer[ (SCREENHEIGHT-1)*SCREENWIDTH + i] = 0xff;
         for ( ; i<20*4 ; i+=4)
             I_VideoBuffer[ (SCREENHEIGHT-1)*SCREENWIDTH + i] = 0x0;
+    }
+
+    // [AM] Real FPS counter
+    if (display_fps)
+    {
+	fpscount += 1;
+	i = SDL_GetTicks();
+	mili = i - lastmili;
+
+	// Update FPS counter every 100ms
+	if (mili >= 100)
+	{
+	    SDL_itoa(((fpscount * 1000) / mili), fpsbuf, 10);
+	    fpscount = 0;
+	    lastmili = i;
+	}
+	M_WriteText(ORIGWIDTH - 30 - (8 * 3), 0, "FPS: ");
+	M_WriteText(ORIGWIDTH - (8 * 3), 0, fpsbuf);
     }
 
     FinishUpdateSoftware();
