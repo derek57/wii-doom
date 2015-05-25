@@ -56,6 +56,7 @@ boolean         d_chkblood = false;
 boolean         d_chkblood2 = false;
 boolean         d_uncappedframerate = false;
 boolean         d_flipcorpses = false;
+boolean         d_secrets = false;
 
 int             d_colblood = 0;
 int             d_colblood2 = 0;

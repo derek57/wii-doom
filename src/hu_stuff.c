@@ -79,13 +79,16 @@ static hu_textline_t    w_monsec;              // ADDED FOR PSP-STATS
 static hu_itext_t       w_inputbuffer[MAXPLAYERS];
 
 static hu_stext_t       w_message;
+static hu_stext_t	w_secret;
 
 static boolean          always_off = false;
 static boolean          message_on;
 static boolean          message_nottobefuckedwith;
 static boolean          headsupactive = false;
+static boolean		secret_on;
 
 static int              message_counter;
+static int		secret_counter;
 
 static char             hud_monsecstr[80];     // ADDED FOR PSP-STATS
 
@@ -325,12 +328,19 @@ void HU_Start(void)
     message_on = false;
     message_dontfuckwithme = false;
     message_nottobefuckedwith = false;
+    secret_on = false;
 
     // create the message widget
     HUlib_initSText(&w_message,
                     HU_MSGX, HU_MSGY, HU_MSGHEIGHT,
                     hu_font,
                     HU_FONTSTART, &message_on);
+
+    // create the secret message widget
+    HUlib_initSText(&w_secret,
+		    88, 86, HU_MSGHEIGHT,
+		    hu_font,
+		    HU_FONTSTART, &secret_on);
 
     // create the map title widget
     HUlib_initTextLine(&w_title,
@@ -426,6 +436,10 @@ void HU_Drawer(void)
 
     HUlib_drawSText(&w_message);
 
+    dp_translation = crx[CRX_GOLD];
+    HUlib_drawSText(&w_secret);
+    V_ClearDPTranslation();
+
     if (automapactive)
     {
         HUlib_drawTextLine(&w_title, false);
@@ -471,8 +485,8 @@ void HU_Erase(void)
 {
 
     HUlib_eraseSText(&w_message);
+    HUlib_eraseSText(&w_secret);
     HUlib_eraseTextLine(&w_title);
-
     HUlib_eraseTextLine(&w_monsec);
 }
 
@@ -485,11 +499,24 @@ void HU_Ticker(void)
         message_nottobefuckedwith = false;
     }
 
+    if (secret_counter && !--secret_counter)
+    {
+	secret_on = false;
+    }
+
     if (showMessages || message_dontfuckwithme)
     {
 
         // display message if necessary
-        if ((plr->message && !message_nottobefuckedwith)
+	if (plr->message
+	    && !strncmp(plr->message, HUSTR_SECRETFOUND, 21))
+	{
+	    HUlib_addMessageToSText(&w_secret, 0, plr->message);
+	    plr->message = 0;
+	    secret_on = true;
+	    secret_counter = HU_MSGTIMEOUT >> 1;
+	}
+	else if ((plr->message && !message_nottobefuckedwith)
             || (plr->message && message_dontfuckwithme))
         {
             HUlib_addMessageToSText(&w_message, 0, plr->message);

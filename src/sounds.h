@@ -248,6 +248,7 @@ typedef enum
     sfx_step3,
     sfx_water,
     sfx_lava,
+    sfx_secret,
 
     NUMSFX
 } sfxenum_t;

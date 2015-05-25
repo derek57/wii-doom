@@ -252,6 +252,7 @@ sfxinfo_t S_sfx[] =
     SOUND("step2",  96),
     SOUND("step3",  96),
     SOUND("water",  96),
-    SOUND("lava",  96),
+    SOUND("lava",   96),
+    SOUND("secret", 96),
 };
 

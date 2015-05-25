@@ -314,6 +314,7 @@ extern  boolean         d_chkblood;
 extern  boolean         d_chkblood2;
 extern  boolean         d_uncappedframerate;
 extern  boolean         d_flipcorpses;
+extern  boolean         d_secrets;
 
 extern  int             d_colblood;
 extern  int             d_colblood2;

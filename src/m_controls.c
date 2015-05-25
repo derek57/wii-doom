@@ -159,6 +159,8 @@ void M_BindBaseControls(void)
     M_BindVariable("translucency",           &d_translucency);
     M_BindVariable("colored_blood",          &d_colblood);
     M_BindVariable("fixed_blood",            &d_colblood2);
+    M_BindVariable("mirrored_corpses",       &d_flipcorpses);
+    M_BindVariable("show_secrets",           &d_secrets);
 //    M_BindVariable("uncapped_framerate",     &d_uncappedframerate);
     M_BindVariable("key_shoot",              &joy_r);
     M_BindVariable("key_open",               &joy_l);

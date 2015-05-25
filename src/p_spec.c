@@ -32,6 +32,7 @@
 #include <stdlib.h>
 
 #include "c_io.h"
+#include "d_englsh.h"
 #include "deh_main.h"
 #include "doomdef.h"
 #include "doomstat.h"
@@ -1079,9 +1080,9 @@ P_ShootSpecialLine
 //
 void P_PlayerInSpecialSector (player_t* player)
 {
-    sector_t*        sector;
-        
-    sector = player->mo->subsector->sector;
+    extern int       showMessages;
+
+    sector_t*        sector = player->mo->subsector->sector;
 
     // Falling, not all the way down yet?
     if (player->mo->z != sector->floor_height)
@@ -1125,6 +1126,12 @@ void P_PlayerInSpecialSector (player_t* player)
                         
       case 9:
         // SECRET SECTOR
+	if (showMessages && d_secrets)
+	{
+	    player->message = HUSTR_SECRETFOUND;
+	    if (player == &players[consoleplayer])
+	        S_StartSound(NULL, sfx_secret);
+	}
         player->secretcount++;
         sector->special = 0;
         break;

@@ -115,6 +115,8 @@ default_t        doom_defaults_list[] =
     CONFIG_VARIABLE_INT                (translucency),
     CONFIG_VARIABLE_INT                (colored_blood),
     CONFIG_VARIABLE_INT                (fixed_blood),
+    CONFIG_VARIABLE_INT                (mirrored_corpses),
+    CONFIG_VARIABLE_INT                (show_secrets),
 //    CONFIG_VARIABLE_INT                (uncapped_framerate),
     CONFIG_VARIABLE_INT                (key_shoot),
     CONFIG_VARIABLE_INT                (key_open),
