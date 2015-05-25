@@ -829,6 +829,10 @@ P_KillMobj
 
     target->tics -= P_Random()&3;
 
+    // randomize corpse health
+    if (!netgame)
+        target->health -= target->tics & 1;
+
     if (target->tics < 1)
         target->tics = 1;
                 

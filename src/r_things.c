@@ -628,6 +628,13 @@ void R_ProjectSprite (mobj_t* thing)
     vis->x2 = x2 >= viewwidth ? viewwidth-1 : x2;        
     iscale = FixedDiv (FRACUNIT, xscale);
 
+    // flip death sprites and corpses randomly
+    if (!netgame && thing->type != MT_CYBORG &&
+        thing->flags & MF_CORPSE && thing->health & 1)
+    {
+        flip = !!d_flipcorpses;
+    }
+
     if (flip)
     {
         vis->startfrac = spritewidth[lump]-1;
