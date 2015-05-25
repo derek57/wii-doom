@@ -488,9 +488,9 @@ cheatseq_t cheat_mypos = CHEAT("idmypos", 0);
 // 
 extern char*        mapnames[];
 
-extern boolean hud;
+extern boolean      hud;
 
-int                prio = 0;
+int                 prio = 0;
 
 //
 // STATUS BAR CODE
@@ -533,7 +533,8 @@ void ST_drawEx(void)
 
     player_t* player = &players[consoleplayer];
 
-    if(hud)
+    if (d_translucency && hud && !automapactive)
+	dp_translucent = true;
     {
         ammotype_t ammo;
 
@@ -607,6 +608,9 @@ void ST_drawEx(void)
             }
         }
     }
+
+    if (dp_translucent)
+	dp_translucent = false;
 }
 
 
@@ -615,24 +619,24 @@ void ST_drawEx(void)
 boolean
 ST_Responder (event_t* ev)
 {
-  // Filter automap on/off.
-  if (ev->type == ev_keyup
-      && ((ev->data1 & 0xffff0000) == AM_MSGHEADER))
-  {
-    switch(ev->data1)
+    // Filter automap on/off.
+    if (ev->type == ev_keyup
+            && ((ev->data1 & 0xffff0000) == AM_MSGHEADER))
     {
-      case AM_MSGENTERED:
-        st_gamestate = AutomapState;
-        st_firsttime = true;
-        break;
+        switch(ev->data1)
+        {
+            case AM_MSGENTERED:
+            st_gamestate = AutomapState;
+            st_firsttime = true;
+            break;
         
-      case AM_MSGEXITED:
-        //        fprintf(stderr, "AM exited\n");
-        st_gamestate = FirstPersonState;
-        break;
+            case AM_MSGEXITED:
+            //        fprintf(stderr, "AM exited\n");
+            st_gamestate = FirstPersonState;
+            break;
+        }
     }
-  }
-  return false;
+    return false;
 }
 
 
@@ -1032,7 +1036,6 @@ void ST_Drawer (boolean fullscreen, boolean refresh)
     if (st_firsttime) ST_doRefresh();
     // Otherwise, update as little as possible
     else ST_diffDraw();
-
 }
 
 void ST_loadGraphics(void)
