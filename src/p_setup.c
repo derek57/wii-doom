@@ -914,7 +914,7 @@ P_SetupLevel
         else
             DEH_snprintf(lumpname, 9, "e1m10");
     }
-/*
+
     if(beta_style && gameepisode == 1 && gamemap == 2)
         DEH_snprintf(lumpname, 9, "e1m0");
 
@@ -923,7 +923,7 @@ P_SetupLevel
 
     if(beta_style && gameepisode == 3 && gamemap == 5)
         DEH_snprintf(lumpname, 9, "e3m0");
-*/
+
     lumpnum = W_GetNumForName (lumpname);
 
     if (nerve_pwad && gamemission != pack_nerve)

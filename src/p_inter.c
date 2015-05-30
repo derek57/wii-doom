@@ -743,6 +743,18 @@ P_TouchSpecialThing
         player->message = DEH_String(GOTSKULLCHEST);
         break;
 
+      case SPR_BND3:
+        if(player->item < 100);
+            player->item++;
+        player->message = DEH_String(GOTSCEPTRE);
+        break;
+
+      case SPR_BND4:
+        if(player->item < 100);
+            player->item++;
+        player->message = DEH_String(GOTBIBLE);
+        break;
+
       default:
         I_Error ("P_SpecialThing: Unknown gettable thing");
     }

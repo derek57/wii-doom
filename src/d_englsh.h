@@ -93,6 +93,8 @@
 
 #define GOTDAGGER      "You pick up a demonic dagger."
 #define GOTSKULLCHEST  "You pick up a skull chest."
+#define GOTBIBLE       "You pick up an unholy bible."
+#define GOTSCEPTRE     "You pick up an evil sceptre."
 
 #define GOTBLUECARD    "Picked up a blue keycard."
 #define GOTYELWCARD    "Picked up a yellow keycard."

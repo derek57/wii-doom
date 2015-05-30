@@ -5681,11 +5681,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         NULL,       // namepointer
     },
 
-    {                // MT_EVILSCEPTRE
-        2016,                // doomednum
-        S_BND2,                // spawnstate
+    {                // MT_UNHOLYBIBLE
+        2017,                // doomednum
+        S_BND4,                // spawnstate
         1000,                // spawnhealth
-        S_BND2,                // seestate
+        S_BND4,                // seestate
         sfx_None,                // seesound
         8,                // reactiontime
         sfx_None,                // attacksound
@@ -5710,8 +5710,8 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         NULL,       // namepointer
     },
 
-    {                // MT_UNHOLYBIBLE
-        2017,                // doomednum
+    {                // MT_EVILSCEPTRE
+        2016,                // doomednum
         S_BND3,                // spawnstate
         1000,                // spawnhealth
         S_BND3,                // seestate
