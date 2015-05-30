@@ -504,10 +504,10 @@ void R_ProjectSprite (mobj_t* thing)
     angle_t            ang;
     fixed_t            iscale;
     
-    fixed_t             interpx;
-    fixed_t             interpy;
-    fixed_t             interpz;
-    fixed_t             interpangle;
+    fixed_t            interpx;
+    fixed_t            interpy;
+    fixed_t            interpz;
+    fixed_t            interpangle;
 
     // Interpolate between current and last position,
     // if prudent.
@@ -828,7 +828,7 @@ void R_DrawPSprite (pspdef_t* psp, psprnum_t psprnum)
     // do not invalidate colormap if invisibility is rendered translucently
     if ((viewplayer->powers[pw_invisibility] > 4*32
         || viewplayer->powers[pw_invisibility] & 8)
-	&& !TRANSLUCENT_SHADOW)
+	&& !TRANSLUCENT_SHADOW && !beta_style)
     {
         // shadow draw
         vis->colormap = NULL;

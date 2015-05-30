@@ -271,7 +271,7 @@ void HUlib_eraseSText(hu_stext_t* s)
     s->laston = *s->on;
 
 }
-
+/*
 void
 HUlib_initIText
 ( hu_itext_t*   it,
@@ -358,4 +358,5 @@ void HUlib_eraseIText(hu_itext_t* it)
     HUlib_eraseTextLine(&it->l);
     it->laston = *it->on;
 }
+*/
 

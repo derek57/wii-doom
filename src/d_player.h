@@ -140,7 +140,9 @@ typedef struct player_s
     int                  secretcount;
 
     // Hint messages.
-    char*                message;        
+    char*                message;
+    char*                messages[3];
+    int                  message_count;
     
     // For screen flashing (red or bright).
     int                  damagecount;
@@ -183,6 +185,16 @@ typedef struct player_s
     // [AM] Previous position of viewz before think.
     //      Used to interpolate between camera positions.
     angle_t		 oldviewz;
+
+    int                  item;
+
+    int                  score;
+
+    int                  lifes;
+
+    int                  extra_lifes;
+
+    int                  nextextra;
 
 } player_t;
 

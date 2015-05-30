@@ -138,6 +138,22 @@ rcsid[] = "$Id: st_stuff.c,v 1.6 1997/02/03 22:45:13 b1 Exp $";
 #define ST_HEALTHX                  90
 #define ST_HEALTHY                  171
 
+// SCORE number pos.
+#define ST_SCOREWIDTH               7
+#define ST_SCOREX                   102
+#define ST_SCOREY                   171
+
+// ITEM number pos.
+#define ST_ITEMWIDTH                2
+#define ST_ITEMX                    138
+#define ST_ITEMY                    171
+#define ST_ITEMBGX                  104
+#define ST_ITEMBGY                  168
+
+// CHAT pos.
+#define ST_CHATBGX                  104
+#define ST_CHATBGY                  168
+
 // Weapon pos.
 #define ST_ARMSX                    111
 #define ST_ARMSY                    172
@@ -219,7 +235,7 @@ rcsid[] = "$Id: st_stuff.c,v 1.6 1997/02/03 22:45:13 b1 Exp $";
 #define ST_WEAPON4X                 122 
 #define ST_WEAPON4Y                 181
 
- // bfg
+// bfg
 #define ST_WEAPON5X                 134
 #define ST_WEAPON5Y                 181
 
@@ -227,7 +243,7 @@ rcsid[] = "$Id: st_stuff.c,v 1.6 1997/02/03 22:45:13 b1 Exp $";
 #define ST_WPNSX                    109 
 #define ST_WPNSY                    191
 
- // DETH title
+// DETH title
 #define ST_DETHX                    109
 #define ST_DETHY                    191
 
@@ -251,7 +267,7 @@ rcsid[] = "$Id: st_stuff.c,v 1.6 1997/02/03 22:45:13 b1 Exp $";
 // Width, in characters again.
 #define ST_OUTWIDTH                 52 
 
- // Height, in lines. 
+// Height, in lines. 
 #define ST_OUTHEIGHT                1
 
 #define ST_MAPWIDTH        \
@@ -307,11 +323,27 @@ static boolean                st_armson;
 // !deathmatch
 static boolean                st_fragson; 
 
+// !deathmatch
+static boolean                st_itemon; 
+
+// !deathmatch
+static boolean                st_chaton; 
+
+// !deathmatch
+static boolean                st_scoreon; 
+
 // main bar left
 static patch_t*               sbar;
 
+static patch_t*               sbarmap;
 static patch_t*               sbar_left_oldwad;
 static patch_t*               sbar_right_oldwad;
+static patch_t*               sbara_shotgun;
+static patch_t*               sbara_chaingun;
+static patch_t*               sbara_missile;
+static patch_t*               sbara_plasma;
+static patch_t*               sbara_bfg;
+static patch_t*               sbara_chainsaw;
 
 // 0-9, tall numbers
 static patch_t*               tallnum[10];
@@ -331,7 +363,13 @@ static patch_t*               faces[ST_NUMFACES];
 // face background
 static patch_t*               faceback;
 
- // main bar right
+// main item middle
+static patch_t*               itembg;
+
+// main chat middle
+static patch_t*               chatbg;
+
+// main bar right
 static patch_t*               armsbg;
 
 // weapon ownership patches
@@ -342,15 +380,20 @@ static patch_t*               invammo[NUMAMMO + 3]; // ammo/weapons
 // ready-weapon widget
 static st_number_t            w_ready;
 
- // in deathmatch only, summary of frags stats
+// in deathmatch only, summary of frags stats
 static st_number_t            w_frags;
 
 // health widget
 static st_percent_t           w_health;
 
+// item background
+static st_binicon_t           w_itembg; 
+
+// chat background
+static st_binicon_t           w_chatbg; 
+
 // arms background
 static st_binicon_t           w_armsbg; 
-
 
 // weapon ownership widgets
 static st_multicon_t          w_arms[6];
@@ -364,6 +407,12 @@ static st_multicon_t          w_keyboxes[3];
 // armor widget
 static st_percent_t           w_armor;
 
+// item widget
+static st_number_t            w_item;
+
+// score widget
+static st_number_t            w_score;
+
 // ammo widgets
 static st_number_t            w_ammo[4];
 
@@ -372,8 +421,14 @@ static st_number_t            w_maxammo[4];
 
 
 
- // number of frags so far in deathmatch
+// number of frags so far in deathmatch
 static int                    st_fragscount;
+
+// number of items so far
+static int                    st_itemcount;
+
+// number of score so far
+static int                    st_scorecount;
 
 // used to use appopriately pained face
 static int                    st_oldhealth = -1;
@@ -381,7 +436,7 @@ static int                    st_oldhealth = -1;
 // used for evil grin
 static boolean                oldweaponsowned[NUMWEAPONS]; 
 
- // count until face changes
+// count until face changes
 static int                    st_facecount = 0;
 
 // current face index, used by w_faces
@@ -489,6 +544,8 @@ cheatseq_t cheat_mypos = CHEAT("idmypos", 0);
 extern char*        mapnames[];
 
 extern boolean      hud;
+extern boolean      in_slime;
+extern boolean      show_chat_bar;
 
 int                 prio = 0;
 
@@ -499,19 +556,51 @@ void ST_Stop(void);
 
 void ST_refreshBackground(void)
 {
+    player_t* player = &players[consoleplayer];
 
     if (st_statusbaron)
     {
         V_UseBuffer(st_backing_screen);
 
-        // HACK: NOT FOR SHARE 1.0 & 1.1 && REG 1.1
-        if(fsize != 4207819 && fsize != 4274218 && fsize != 10396254)
-            V_DrawPatch(ST_X, 0, sbar);
-        // HACK: IF SHAREWARE 1.0 OR 1.1
+        if(beta_style)
+        {
+            if(!automapactive)
+            {
+                if(fsize != 4207819 && fsize != 4274218 && fsize != 10396254)
+                    V_DrawPatch(ST_X, 0, sbar);
+                else
+                {
+                    V_DrawPatch(0, 0, sbar_left_oldwad);
+                    V_DrawPatch(104, 0, sbar_right_oldwad);
+                }
+            }
+            else
+            {
+                V_DrawPatch(ST_X, 0, sbarmap);
+
+                if(player->weaponowned[wp_shotgun])
+                    V_DrawPatch(110, 4, sbara_shotgun);
+                if(player->weaponowned[wp_chaingun])
+                    V_DrawPatch(110, 10, sbara_chaingun);
+                if(player->weaponowned[wp_missile])
+                    V_DrawPatch(135, 3, sbara_missile);
+                if(player->weaponowned[wp_plasma])
+                    V_DrawPatch(135, 10, sbara_plasma);
+                if(player->weaponowned[wp_bfg])
+                    V_DrawPatch(185, 3, sbara_bfg);
+                if(player->weaponowned[wp_chainsaw])
+                    V_DrawPatch(160, 5, sbara_chainsaw);
+            }
+        }
         else
         {
-            V_DrawPatch(0, 0, sbar_left_oldwad);
-            V_DrawPatch(104, 0, sbar_right_oldwad);
+            if(fsize != 4207819 && fsize != 4274218 && fsize != 10396254)
+                V_DrawPatch(ST_X, 0, sbar);
+            else
+            {
+                V_DrawPatch(0, 0, sbar_left_oldwad);
+                V_DrawPatch(104, 0, sbar_right_oldwad);
+            }
         }
 
         if (netgame)
@@ -770,16 +859,22 @@ void ST_updateFaceWidget(void)
         }
     }
   
-    if (priority < 7)
+    if (priority < 7 ||
+       (beta_style && in_slime && !(players[consoleplayer].cheats & CF_GODMODE)))
     {
         // getting hurt because of your own damn stupidity
-        if (plyr->damagecount)
+        if (plyr->damagecount ||
+           (beta_style && in_slime && !(players[consoleplayer].cheats & CF_GODMODE)))
         {
-            if (plyr->health - st_oldhealth > ST_MUCHPAIN)
+            if (plyr->health - st_oldhealth > ST_MUCHPAIN ||
+               (beta_style && in_slime && !(players[consoleplayer].cheats & CF_GODMODE)))
             {
                 priority = 7;
                 st_facecount = ST_TURNCOUNT;
                 st_faceindex = ST_calcPainOffset() + ST_OUCHOFFSET;
+
+                if(beta_style && in_slime)
+                    in_slime = false;
             }
             else
             {
@@ -841,7 +936,7 @@ void ST_updateFaceWidget(void)
 
 void ST_updateWidgets(void)
 {
-    static int        largeammo = 1994; // means "n/a"
+    static int         largeammo = 1994; // means "n/a"
     int                i;
 
     // must redirect the pointer if the ready weapon has changed.
@@ -879,15 +974,26 @@ void ST_updateWidgets(void)
     // refresh everything if this is him coming back to life
     ST_updateFaceWidget();
 
-    // used by the w_armsbg widget
+    // used by the w_armsbg & w_itembg & w_chatbg widget
     st_notdeathmatch = !deathmatch;
     
     // used by w_arms[] widgets
-    st_armson = st_statusbaron && !deathmatch; 
+    st_armson = st_statusbaron && !deathmatch;
 
     // used by w_frags widget
     st_fragson = deathmatch && !st_statusbaron; 
     st_fragscount = 0;
+
+    // used by w_item widget
+    st_itemon = beta_style && st_statusbaron && !deathmatch;
+    st_itemcount = plyr->item;
+
+    // used by w_chat widget
+    st_chaton = beta_style && st_statusbaron && show_chat_bar && !deathmatch;
+
+    // used by w_score widget
+    st_scoreon = beta_style && st_statusbaron && automapactive && !deathmatch;
+    st_scorecount = plyr->score; 
 
     for (i=0 ; i<MAXPLAYERS ; i++)
     {
@@ -919,13 +1025,13 @@ void ST_doPaletteStuff(void)
 {
 
     int                palette;
-    byte*        pal;
+    byte*              pal;
     int                cnt;
     int                bzc;
 
     cnt = plyr->damagecount;
 
-    if (plyr->powers[pw_strength])
+    if (plyr->powers[pw_strength] && !beta_style)
     {
         // slowly fade the berzerk out
           bzc = 12 - (plyr->powers[pw_strength]>>6);
@@ -954,9 +1060,14 @@ void ST_doPaletteStuff(void)
         palette += STARTBONUSPALS;
     }
 
-    else if ( plyr->powers[pw_ironfeet] > 4*32
-              || plyr->powers[pw_ironfeet]&8)
+    else if ( (plyr->powers[pw_ironfeet] > 4*32
+              || plyr->powers[pw_ironfeet]&8) && !beta_style)
         palette = RADIATIONPAL;
+
+    else if ( (plyr->powers[pw_infrared] > 4*32
+              || plyr->powers[pw_infrared]&8) && beta_style)
+        palette = RADIATIONPAL;
+
     else
         palette = 0;
 
@@ -969,39 +1080,77 @@ void ST_doPaletteStuff(void)
 
 }
 
+//
+// Completely changed for PRE-BETA functionality
+// maybe needs more optimization but at least it's working
+//
 void ST_drawWidgets(boolean refresh)
 {
     int                i;
 
-    // used by w_arms[] widgets
-    st_armson = st_statusbaron && !deathmatch;
-
-    // used by w_frags widget
-    st_fragson = deathmatch && !st_statusbaron; 
-
-    STlib_updateNum(&w_ready, refresh);
-
-    for (i=0;i<4;i++)
+    if((beta_style && !automapactive) || !beta_style)
     {
-        STlib_updateNum(&w_ammo[i], refresh);
-        STlib_updateNum(&w_maxammo[i], refresh);
+        // used by w_arms[] widgets
+        st_armson = st_statusbaron && !deathmatch;
+
+        // used by w_frags widget
+        st_fragson = deathmatch && !st_statusbaron; 
+
+        // used by w_item widget
+        st_itemon = beta_style && st_statusbaron && !deathmatch; 
+
+        // used by w_chat widget
+        st_chaton = beta_style && st_statusbaron && show_chat_bar && !deathmatch;
+
+        // used by w_score widget
+        st_scoreon = beta_style && st_statusbaron && !deathmatch;
+
+        STlib_updateNum(&w_ready, refresh);
+
+        STlib_updatePercent(&w_health, refresh);
+
+        if(beta_style)
+            STlib_updateBinIcon(&w_chatbg, refresh);
+
+        if(!beta_style)
+        {
+            STlib_updateBinIcon(&w_armsbg, refresh);
+
+            for (i=0;i<6;i++)
+                STlib_updateMultIcon(&w_arms[i], refresh);
+        }
+
+        if(beta_style && !show_chat_bar)
+        {
+                STlib_updateBinIcon(&w_itembg, refresh);
+                STlib_updateNum(&w_item, refresh);
+        }
+
+        if((beta_style && !show_chat_bar) || !beta_style)
+        {
+            STlib_updateMultIcon(&w_faces, refresh);
+
+            STlib_updatePercent(&w_armor, refresh);
+
+            for (i=0;i<3;i++)
+                STlib_updateMultIcon(&w_keyboxes[i], refresh);
+
+            for (i=0;i<4;i++)
+            {
+                STlib_updateNum(&w_ammo[i], refresh);
+                STlib_updateNum(&w_maxammo[i], refresh);
+            }
+
+            STlib_updateNum(&w_frags, refresh);
+        }
     }
 
-    STlib_updatePercent(&w_health, refresh);
-    STlib_updatePercent(&w_armor, refresh);
+    if(beta_style && automapactive)
+    {
+        STlib_updateBinIcon(&w_chatbg, refresh);
 
-    STlib_updateBinIcon(&w_armsbg, refresh);
-
-    for (i=0;i<6;i++)
-        STlib_updateMultIcon(&w_arms[i], refresh);
-
-    STlib_updateMultIcon(&w_faces, refresh);
-
-    for (i=0;i<3;i++)
-        STlib_updateMultIcon(&w_keyboxes[i], refresh);
-
-    STlib_updateNum(&w_frags, refresh);
-
+        STlib_updateNum(&w_score, refresh);
+    }
 }
 
 void ST_doRefresh(void)
@@ -1033,9 +1182,11 @@ void ST_Drawer (boolean fullscreen, boolean refresh)
     ST_doPaletteStuff();
 
     // If just after ST_Start(), refresh all
-    if (st_firsttime) ST_doRefresh();
+    if (st_firsttime || beta_style)
+        ST_doRefresh();
     // Otherwise, update as little as possible
-    else ST_diffDraw();
+    else if(!beta_style)
+        ST_diffDraw();
 }
 
 void ST_loadGraphics(void)
@@ -1046,7 +1197,7 @@ void ST_loadGraphics(void)
     int                facenum;
     int                ammonum;
     
-    char        namebuf[9];
+    char               namebuf[9];
 
     // Load the numbers, tall and short
     for (i=0;i<10;i++)
@@ -1069,19 +1220,28 @@ void ST_loadGraphics(void)
         keys[i] = (patch_t *) W_CacheLumpName(namebuf, PU_STATIC);
     }
 
-    // arms background
-    armsbg = (patch_t *) W_CacheLumpName("STARMS", PU_STATIC);
-
-    // arms ownership widgets
-    for (i=0;i<6;i++)
+    // item background
+    if(beta_style)
     {
-        sprintf(namebuf, "STGNUM%d", i+2);
+        itembg = (patch_t *) W_CacheLumpName("STITEM", PU_STATIC);
+        chatbg = (patch_t *) W_CacheLumpName("STCHAT", PU_STATIC);
+    }
+    // arms background
+    else
+    {
+        armsbg = (patch_t *) W_CacheLumpName("STARMS", PU_STATIC);
 
-        // gray #
-        arms[i][0] = (patch_t *) W_CacheLumpName(namebuf, PU_STATIC);
+        // arms ownership widgets
+        for (i=0;i<6;i++)
+        {
+            sprintf(namebuf, "STGNUM%d", i+2);
 
-        // yellow #
-        arms[i][1] = shortnum[i+2]; 
+            // gray #
+            arms[i][0] = (patch_t *) W_CacheLumpName(namebuf, PU_STATIC);
+
+            // yellow #
+            arms[i][1] = shortnum[i+2]; 
+        }
     }
 
     // face backgrounds for different color players
@@ -1089,15 +1249,28 @@ void ST_loadGraphics(void)
     faceback = (patch_t *) W_CacheLumpName(namebuf, PU_STATIC);
 
     // status bar background bits
-    // HACK: NOT FOR SHARE 1.0 & 1.1 && REG 1.1
-    if(fsize != 4207819 && fsize != 4274218 && fsize != 10396254)
-        sbar = (patch_t *) W_CacheLumpName("STBAR", PU_STATIC);
     // HACK: IF SHAREWARE 1.0 OR 1.1
-    else
+    if(fsize == 4207819 || fsize == 4274218 || fsize == 10396254)
     {
         sbar_left_oldwad = (patch_t *) W_CacheLumpName("STMBARL", PU_STATIC);
         sbar_right_oldwad = (patch_t *) W_CacheLumpName("STMBARR", PU_STATIC);
     }
+    else
+    {
+        sbar = (patch_t *) W_CacheLumpName("STBAR", PU_STATIC);
+        sbarmap = (patch_t *) W_CacheLumpName("ST_AMAP", PU_STATIC);
+    }
+
+    if(beta_style)
+    {
+        sbara_shotgun = (patch_t *) W_CacheLumpName("STWEAP0", PU_STATIC);
+        sbara_chaingun = (patch_t *) W_CacheLumpName("STWEAP1", PU_STATIC);
+        sbara_missile = (patch_t *) W_CacheLumpName("STWEAP2", PU_STATIC);
+        sbara_plasma = (patch_t *) W_CacheLumpName("STWEAP3", PU_STATIC);
+        sbara_bfg = (patch_t *) W_CacheLumpName("STWEAP5", PU_STATIC);
+        sbara_chainsaw = (patch_t *) W_CacheLumpName("STWEAP4", PU_STATIC);
+    }
+
     // face states
     facenum = 0;
     for (i=0;i<ST_NUMPAINFACES;i++)
@@ -1163,26 +1336,48 @@ void ST_unloadGraphics(void)
     // unload tall percent
     Z_ChangeTag(tallpercent, PU_CACHE); 
 
+    // unload item background
+    if(beta_style)
+    {
+        Z_ChangeTag(itembg, PU_CACHE); 
+        Z_ChangeTag(chatbg, PU_CACHE); 
+    }
     // unload arms background
-    Z_ChangeTag(armsbg, PU_CACHE); 
+    else
+    {
+        Z_ChangeTag(armsbg, PU_CACHE); 
 
-    // unload gray #'s
-    for (i=0;i<6;i++)
-        Z_ChangeTag(arms[i][0], PU_CACHE);
-    
+        // unload gray #'s
+        for (i=0;i<6;i++)
+            Z_ChangeTag(arms[i][0], PU_CACHE);
+    }
+
     // unload the key cards
     for (i=0;i<NUMCARDS;i++)
         Z_ChangeTag(keys[i], PU_CACHE);
 
-    // HACK: NOT FOR SHARE 1.0 & 1.1 && REG 1.1
-    if(fsize != 4207819 && fsize != 4274218 && fsize != 10396254)
-        Z_ChangeTag(sbar, PU_CACHE);
     // HACK: IF SHAREWARE 1.0 OR 1.1
-    else
+    if(fsize == 4207819 || fsize == 4274218 || fsize == 10396254)
     {
         Z_ChangeTag(sbar_left_oldwad, PU_CACHE);
         Z_ChangeTag(sbar_right_oldwad, PU_CACHE);
     }
+    else
+    {
+        Z_ChangeTag(sbar, PU_CACHE);
+        Z_ChangeTag(sbarmap, PU_CACHE);
+    }
+
+    if(beta_style)
+    {
+        Z_ChangeTag(sbara_shotgun, PU_CACHE);
+        Z_ChangeTag(sbara_chaingun, PU_CACHE);
+        Z_ChangeTag(sbara_missile, PU_CACHE);
+        Z_ChangeTag(sbara_plasma, PU_CACHE);
+        Z_ChangeTag(sbara_bfg, PU_CACHE);
+        Z_ChangeTag(sbara_chainsaw, PU_CACHE);
+    }
+
     Z_ChangeTag(faceback, PU_CACHE);
 
     for (i=0;i<ST_NUMFACES;i++)
@@ -1272,7 +1467,8 @@ void ST_createWidgets(void)
                            ST_ARMSY+(i/3)*ST_ARMSYSPACE,
                            arms[i],
                            &plyr->weaponowned[i+1],
-                           &st_armson);    }
+                           &st_armson);
+    }
 
     // frags sum
     STlib_initNum(&w_frags,
@@ -1387,6 +1583,39 @@ void ST_createWidgets(void)
                   &st_statusbaron,
                   ST_MAXAMMO3WIDTH);
 
+    // item, score & chat background
+    if(beta_style)
+    {
+        STlib_initBinIcon(&w_itembg,
+                          ST_ITEMBGX,
+                          ST_ITEMBGY,
+                          itembg,
+                          &st_itemon,
+                          &st_statusbaron);
+
+        STlib_initNum(&w_item,
+                      ST_ITEMX,
+                      ST_ITEMY,
+                      tallnum,
+                      &st_itemcount,
+                      &st_itemon,
+                      ST_ITEMWIDTH);
+
+        STlib_initBinIcon(&w_chatbg,
+                          ST_CHATBGX,
+                          ST_CHATBGY,
+                          chatbg,
+                          &st_chaton,
+                          &st_statusbaron);
+
+        STlib_initNum(&w_score,
+                      ST_SCOREX,
+                      ST_SCOREY,
+                      tallnum,
+                      &st_scorecount,
+                      &st_scoreon,
+                      ST_SCOREWIDTH);
+    }
 }
 
 static boolean        st_stopped = true;

@@ -56,7 +56,7 @@ char *sprnames[] = {
     "FLSH","SPRY","CHNK","SPSH","LVAS","SLDG",
     "PLS1", // killough 7/19/98: first  of two plasma fireballs in the beta
     "PLS2", // killough 7/19/98: second of two plasma fireballs in the beta
-    "BSKL",
+    "BSKL","BND1","BND2","BND3","BND4",
     /*"PBUL","PSHE",*/
 
     NULL
@@ -1254,7 +1254,12 @@ state_t        states[NUMSTATES] = {
     {SPR_BSKL,13,5,{A_Scream},S_BSKUL_DIE6,0,0}, // S_BSKUL_DIE5
     {SPR_BSKL,14,5,{NULL},S_BSKUL_DIE7,0,0},     // S_BSKUL_DIE6
     {SPR_BSKL,15,5,{A_Fall},S_BSKUL_DIE8,0,0},   // S_BSKUL_DIE7
-    {SPR_BSKL,16,5,{A_Stop},S_BSKUL_DIE8,0,0}/*,   // S_BSKUL_DIE8
+    {SPR_BSKL,16,5,{A_Stop},S_BSKUL_DIE8,0,0},   // S_BSKUL_DIE8
+
+    {SPR_BND1,0,6,{NULL},S_BND1,0,0},        // S_BND1
+    {SPR_BND2,0,6,{NULL},S_BND2,0,0},        // S_BND2
+    {SPR_BND3,0,6,{NULL},S_BND3,0,0},        // S_BND3
+    {SPR_BND4,0,6,{NULL},S_BND4,0,0}/*,        // S_BND4
 
     {SPR_PBUL,0,10,{NULL},S_BULLET_01,0,0},       // S_BULLET_00
     {SPR_PBUL,1,10,{NULL},S_NULL,0,0},       // S_BULLET_01
@@ -5615,6 +5620,122 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_NOBLOCKMAP|MF_MISSILE|MF_DROPOFF|MF_NOGRAVITY|MF_TRANSLUCENT, // flags
         0,                         // flags2
         S_NULL,                     // raisestate
+        NULL,       // namepointer
+    },
+
+    {                // MT_DAGGER
+        -1,                // doomednum
+        S_BND1,                // spawnstate
+        1000,                // spawnhealth
+        S_BND1,                // seestate
+        sfx_None,                // seesound
+        8,                // reactiontime
+        sfx_None,                // attacksound
+        S_NULL,                // painstate
+        0,                // painchance
+        sfx_None,                // painsound
+        S_NULL,                // meleestate
+        S_NULL,                // missilestate
+        S_NULL,     // crashstate
+        S_NULL,                // deathstate
+        S_NULL,                // xdeathstate
+        sfx_None,                // deathsound
+        0,                // speed
+        20*FRACUNIT,                // radius
+        16*FRACUNIT,                // height
+        100,                // mass
+        0,                // damage
+        sfx_None,                // activesound
+        MF_SPECIAL|MF_COUNTITEM,                // flags
+        0,                          // flags2
+        S_NULL,                // raisestate
+        NULL,       // namepointer
+    },
+
+    {                // MT_SKULLCHEST
+        -1,                // doomednum
+        S_BND2,                // spawnstate
+        1000,                // spawnhealth
+        S_BND2,                // seestate
+        sfx_None,                // seesound
+        8,                // reactiontime
+        sfx_None,                // attacksound
+        S_NULL,                // painstate
+        0,                // painchance
+        sfx_None,                // painsound
+        S_NULL,                // meleestate
+        S_NULL,                // missilestate
+        S_NULL,     // crashstate
+        S_NULL,                // deathstate
+        S_NULL,                // xdeathstate
+        sfx_None,                // deathsound
+        0,                // speed
+        20*FRACUNIT,                // radius
+        16*FRACUNIT,                // height
+        100,                // mass
+        0,                // damage
+        sfx_None,                // activesound
+        MF_SPECIAL|MF_COUNTITEM,                // flags
+        0,                          // flags2
+        S_NULL,                // raisestate
+        NULL,       // namepointer
+    },
+
+    {                // MT_EVILSCEPTRE
+        2016,                // doomednum
+        S_BND2,                // spawnstate
+        1000,                // spawnhealth
+        S_BND2,                // seestate
+        sfx_None,                // seesound
+        8,                // reactiontime
+        sfx_None,                // attacksound
+        S_NULL,                // painstate
+        0,                // painchance
+        sfx_None,                // painsound
+        S_NULL,                // meleestate
+        S_NULL,                // missilestate
+        S_NULL,     // crashstate
+        S_NULL,                // deathstate
+        S_NULL,                // xdeathstate
+        sfx_None,                // deathsound
+        0,                // speed
+        20*FRACUNIT,                // radius
+        16*FRACUNIT,                // height
+        100,                // mass
+        0,                // damage
+        sfx_None,                // activesound
+        MF_SPECIAL|MF_COUNTITEM,                // flags
+        0,                          // flags2
+        S_NULL,                // raisestate
+        NULL,       // namepointer
+    },
+
+    {                // MT_UNHOLYBIBLE
+        2017,                // doomednum
+        S_BND3,                // spawnstate
+        1000,                // spawnhealth
+        S_BND3,                // seestate
+        sfx_None,                // seesound
+        8,                // reactiontime
+        sfx_None,                // attacksound
+        S_NULL,                // painstate
+        0,                // painchance
+        sfx_None,                // painsound
+        S_NULL,                // meleestate
+        S_NULL,                // missilestate
+        S_NULL,     // crashstate
+        S_NULL,                // deathstate
+        S_NULL,                // xdeathstate
+        sfx_None,                // deathsound
+        0,                // speed
+        20*FRACUNIT,                // radius
+        16*FRACUNIT,                // height
+        100,                // mass
+        0,                // damage
+        sfx_None,                // activesound
+        MF_SPECIAL|MF_COUNTITEM,                // flags
+        0,                          // flags2
+        S_NULL,                // raisestate
         NULL,       // namepointer
     }/*,
 

@@ -68,6 +68,8 @@
 // follow a player exlusively for 3 seconds
 #define BASETHRESHOLD       100
 
+#define EXTRAPOINTS         30000
+
 //
 // P_TICK
 //

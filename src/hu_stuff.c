@@ -42,6 +42,7 @@
 #include "m_controls.h"
 #include "s_sound.h"
 #include "sounds.h"
+#include "st_stuff.h"
 #include "v_trans.h"
 #include "v_video.h"
 #include "w_wad.h"
@@ -76,12 +77,17 @@ static player_t*        plr;
 static hu_textline_t    w_title;
 static hu_textline_t    w_monsec;              // ADDED FOR PSP-STATS
 
-static hu_itext_t       w_inputbuffer[MAXPLAYERS];
+//static hu_itext_t       w_inputbuffer[MAXPLAYERS];
 
 static hu_stext_t       w_message;
+
+static hu_stext_t       w_message_0;
+static hu_stext_t       w_message_1;
+static hu_stext_t       w_message_2;
+
 static hu_stext_t	w_secret;
 
-static boolean          always_off = false;
+//static boolean          always_off = false;
 static boolean          message_on;
 static boolean          message_nottobefuckedwith;
 static boolean          headsupactive = false;
@@ -93,8 +99,10 @@ static int		secret_counter;
 static char             hud_monsecstr[80];     // ADDED FOR PSP-STATS
 
 boolean                 message_dontfuckwithme;
+boolean                 show_chat_bar;
 
 patch_t*                hu_font[HU_FONTSIZE];
+patch_t*                beta_hu_font[HU_FONTSIZE];
 
 extern int              screenblocks;
 extern int              showMessages;
@@ -102,6 +110,7 @@ extern int              crosshair;
 extern int              show_stats;
 extern int              screenSize;
 
+extern boolean          game_startup;
 
 //
 // Builtin map names.
@@ -305,8 +314,11 @@ void HU_Init(void)
     {
         DEH_snprintf(buffer, 9, "STCFN%.3d", j++);
         hu_font[i] = (patch_t *) W_CacheLumpName(buffer, PU_STATIC);
-    }
 
+        // haleyjd 09/18/10: load beta_hu_font as well
+        buffer[2] = 'B';
+        beta_hu_font[i] = (patch_t *) W_CacheLumpName(buffer, PU_STATIC);
+    }
 }
 
 void HU_Stop(void)
@@ -316,8 +328,7 @@ void HU_Stop(void)
 
 void HU_Start(void)
 {
-
-    int       i;
+//    int       i;
     char*     s;
     char*     t;
 
@@ -331,7 +342,26 @@ void HU_Start(void)
     secret_on = false;
 
     // create the message widget
-    HUlib_initSText(&w_message,
+
+    if(beta_style)
+    {
+        HUlib_initSText(&w_message_0,
+                    HU_MSGX + 106, HU_MSGY + 179, HU_MSGHEIGHT,
+                    beta_hu_font,
+                    HU_FONTSTART, &message_on);
+
+        HUlib_initSText(&w_message_1,
+                    HU_MSGX + 106, HU_MSGY + 185, HU_MSGHEIGHT,
+                    beta_hu_font,
+                    HU_FONTSTART, &message_on);
+
+        HUlib_initSText(&w_message_2,
+                    HU_MSGX + 106, HU_MSGY + 191, HU_MSGHEIGHT,
+                    beta_hu_font,
+                    HU_FONTSTART, &message_on);
+    }
+    else
+        HUlib_initSText(&w_message,
                     HU_MSGX, HU_MSGY, HU_MSGHEIGHT,
                     hu_font,
                     HU_FONTSTART, &message_on);
@@ -407,11 +437,11 @@ void HU_Start(void)
 
     while (*t)
         HUlib_addCharToTextLine(&w_monsec, *(t++));
-
+/*
     // create the inputbuffer widgets
     for (i=0 ; i<MAXPLAYERS ; i++)
         HUlib_initIText(&w_inputbuffer[i], 0, 0, 0, 0, &always_off);
-
+*/
     headsupactive = true;
 
 }
@@ -434,7 +464,14 @@ void HU_Drawer(void)
 
     V_ClearDPTranslation();
 
-    HUlib_drawSText(&w_message);
+    if(beta_style)
+    {
+        HUlib_drawSText(&w_message_0);
+        HUlib_drawSText(&w_message_1);
+        HUlib_drawSText(&w_message_2);
+    }
+    else
+        HUlib_drawSText(&w_message);
 
     dp_translation = crx[CRX_GOLD];
     HUlib_drawSText(&w_secret);
@@ -483,8 +520,15 @@ void HU_Drawer(void)
 
 void HU_Erase(void)
 {
+    if(beta_style)
+    {
+        HUlib_eraseSText(&w_message_0);
+        HUlib_eraseSText(&w_message_1);
+        HUlib_eraseSText(&w_message_2);
+    }
+    else
+        HUlib_eraseSText(&w_message);
 
-    HUlib_eraseSText(&w_message);
     HUlib_eraseSText(&w_secret);
     HUlib_eraseTextLine(&w_title);
     HUlib_eraseTextLine(&w_monsec);
@@ -497,6 +541,12 @@ void HU_Ticker(void)
     {
         message_on = false;
         message_nottobefuckedwith = false;
+
+        if(beta_style)
+        {
+            show_chat_bar = false;
+            ST_doRefresh();
+        }
     }
 
     if (secret_counter && !--secret_counter)
@@ -519,7 +569,28 @@ void HU_Ticker(void)
 	else if ((plr->message && !message_nottobefuckedwith)
             || (plr->message && message_dontfuckwithme))
         {
-            HUlib_addMessageToSText(&w_message, 0, plr->message);
+            if(beta_style)
+            {
+                if(plr->messages[1])
+                {
+                    plr->messages[0] = plr->messages[1];
+                    HUlib_addMessageToSText(&w_message_0, 0, plr->messages[0]);
+                }
+
+                if(plr->messages[2])
+                {
+                    plr->messages[1] = plr->messages[2];
+                    HUlib_addMessageToSText(&w_message_1, 0, plr->messages[1]);
+                }
+                plr->messages[2] = plr->message;
+                HUlib_addMessageToSText(&w_message_2, 0, plr->messages[2]);
+
+                show_chat_bar = true;
+                ST_doRefresh();
+            }
+            else
+                HUlib_addMessageToSText(&w_message, 0, plr->message);
+
             C_Printf(CR_GREEN, " %s\n", plr->message);
             plr->message = 0;
             message_on = true;
@@ -549,14 +620,9 @@ boolean HU_Responder(event_t *ev)
 // hu_newlevel called when we enter a new level
 // determine the level name and display it in
 // the console
-
 void HU_NewLevel()
 {
     char*       s;
-
-    // print the new level name into the console
-    C_Printf(CR_RED, "\n");
-    C_Printf(CR_RED, " {||||||||||||||||||||||||||||||}\n");
 
     switch ( logical_gamemission )
     {
@@ -590,13 +656,21 @@ void HU_NewLevel()
     {
         s = HU_TITLE_CHEX;
     }
+    // print the new level name into the console
+  
+    C_Printf(CR_GRAY, "\n");
+    C_Seperator();
 
-    C_Printf(CR_GOLD, " \n");
+    C_Printf(CR_GRAY, "\n");
 
-    C_Printf(CR_GOLD, " %s\n \n", s);
+    if(game_startup)
+        C_Printf(CR_GRAY, " %s\n\n", s);
+    else
+        C_Printf(CR_GRAY, " %s\n", s);
 
-    C_Printf(CR_GOLD, " \n");
+    C_Printf(CR_GRAY, "\n");
 
     C_InstaPopup();       // put console away
+    //  C_Update();
 }
 

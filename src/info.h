@@ -182,6 +182,10 @@ typedef enum
     SPR_PLS1, // killough 7/19/98: first  of two plasma fireballs in the beta
     SPR_PLS2, // killough 7/19/98: second of two plasma fireballs in the beta
     SPR_BSKL,
+    SPR_BND1,
+    SPR_BND2,
+    SPR_BND3,
+    SPR_BND4,
 /*
     SPR_PBUL,
     SPR_PSHE,
@@ -1259,6 +1263,10 @@ typedef enum
     S_BSKUL_DIE6,
     S_BSKUL_DIE7,
     S_BSKUL_DIE8,
+    S_BND1,
+    S_BND2,
+    S_BND3,
+    S_BND4,
 /*
     S_BULLET_00,
     S_BULLET_01,
@@ -1437,6 +1445,10 @@ typedef enum {
     MT_PLASMA2, // killough 7/11/98: second of alternating beta plasma fireballs
     MT_BETASKULL,
     MT_TROOPSHOT2,
+    MT_DAGGER,
+    MT_SKULLCHEST,
+    MT_EVILSCEPTRE,
+    MT_UNHOLYBIBLE,
 /*
     MT_BULLET,
     MT_SHELL,

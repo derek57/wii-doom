@@ -93,17 +93,22 @@ typedef struct
 #define MAX_ADJOINING_SECTORS   20
 #define ANIMSPEED               8
 
+
+static anim_t   *anims;         // new structure w/o limits -- killough
+static size_t   maxanims;
+
 short           numlinespecials;
 
 line_t*         linespeciallist[MAXLINEANIMS];
 
-static anim_t   *anims;         // new structure w/o limits -- killough
-static size_t   maxanims;
 anim_t*         lastanim;
 
+boolean         in_slime;
 boolean         levelTimer;
 
 int             levelTimeCount;
+
+extern boolean  noclip_on;
 
 //
 // P_InitPicAnims
@@ -883,7 +888,10 @@ void P_CrossSpecialLine(line_t *line, int side, mobj_t *thing)
         
       case 77:
         // Fast Ceiling Crush & Raise
-        EV_DoCeiling(line,fastCrushAndRaise);
+        if(beta_style)
+            EV_DoCeiling(line,crushAndRaise);
+        else
+            EV_DoCeiling(line,fastCrushAndRaise);
         break;
         
       case 79:
@@ -1096,6 +1104,7 @@ void P_PlayerInSpecialSector (player_t* player)
         if (!player->powers[pw_ironfeet])
             if (!(leveltime&0x1f))
             {
+                in_slime = true;
                 P_DamageMobj (player->mo, NULL, NULL, 10);
                 P_HitFloor(player->mo);
             }
@@ -1106,6 +1115,7 @@ void P_PlayerInSpecialSector (player_t* player)
         if (!player->powers[pw_ironfeet])
             if (!(leveltime&0x1f))
             {
+                in_slime = true;
                 P_DamageMobj (player->mo, NULL, NULL, 5);
                 P_HitFloor(player->mo);
             }
@@ -1120,13 +1130,16 @@ void P_PlayerInSpecialSector (player_t* player)
             || (P_Random()<5) )
         {
             if (!(leveltime&0x1f))
+            {
+                in_slime = true;
                 P_DamageMobj (player->mo, NULL, NULL, 20);
+            }
         }
         break;
                         
       case 9:
         // SECRET SECTOR
-	if (showMessages && d_secrets)
+	if (showMessages && d_secrets && !noclip_on)
 	{
 	    player->message = HUSTR_SECRETFOUND;
 	    if (player == &players[consoleplayer])
@@ -1142,6 +1155,7 @@ void P_PlayerInSpecialSector (player_t* player)
 
         if (!(leveltime&0x1f))
         {
+            in_slime = true;
             P_DamageMobj (player->mo, NULL, NULL, 20);
             P_HitFloor(player->mo);
         }

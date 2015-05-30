@@ -1034,8 +1034,20 @@ int R_CheckTextureNumForName (char *name)
 int R_TextureNumForName (char* name)
 {
     int                i;
-        
-    i = R_CheckTextureNumForName (name);
+/*
+    if(((name[0] == 'B' && name[1] == 'O' && name[2] == 'N' && name[3] == '1' &&
+	    name[4] == 'A' && name[5] == '0') ||
+        (name[0] == 'B' && name[1] == 'O' && name[2] == 'N' && name[3] == '1' &&
+	    name[4] == 'B' && name[5] == '0') ||
+        (name[0] == 'B' && name[1] == 'O' && name[2] == 'N' && name[3] == '1' &&
+	    name[4] == 'C' && name[5] == '0') ||
+        (name[0] == 'B' && name[1] == 'O' && name[2] == 'N' && name[3] == '1' &&
+	    name[4] == 'D' && name[5] == '0')) && beta_style)
+
+	i = R_CheckTextureNumForName ("BND1A0");
+    else
+*/
+        i = R_CheckTextureNumForName (name);
 
     if (i==-1)
     {

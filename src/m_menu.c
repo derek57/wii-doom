@@ -863,8 +863,8 @@ int                        cheeting;
 int                        coordinates_info = 0;
 int                        timer_info = 0;
 int                        version_info = 0;
-int                        key_controls_start_in_cfg_at_pos = 41; // ACTUALLY IT'S +2
-int                        key_controls_end_in_cfg_at_pos = 54;   // ACTUALLY IT'S +2
+int                        key_controls_start_in_cfg_at_pos = 38; // ACTUALLY IT'S +2
+int                        key_controls_end_in_cfg_at_pos = 51;   // ACTUALLY IT'S +2
 int                        crosshair = 0;
 int                        show_stats = 0;
 int                        tracknum = 1;
@@ -918,8 +918,10 @@ boolean                    altdeathflag;
 boolean                    locallanflag;
 boolean                    searchflag;
 boolean                    queryflag;
+boolean                    noclip_on;
 boolean                    dedicatedflag = true;
 boolean                    privateserverflag;
+boolean                    massacre_cheat_used;
 
 fixed_t                    forwardmove = 29;
 fixed_t                    sidemove = 21; 
@@ -952,6 +954,7 @@ extern boolean             BorderNeedRefresh;
 extern boolean             sendpause;
 extern boolean             secret_1;
 extern boolean             secret_2;
+extern boolean             game_startup;
 
 extern short               songlist[148];
 
@@ -1047,10 +1050,7 @@ void M_Footstep(int choice);
 void M_Footclip(int choice);
 void M_Splash(int choice);
 void M_Swirl(int choice);
-void M_BFGClassic(int choice);
-void M_BetaSkulls(int choice);
-void M_BetaPlasma(int choice);
-void M_BetaImp(int choice);
+void M_Beta(int choice);
 void M_Corpses(int choice);
 void M_Secrets(int choice);
 
@@ -1239,7 +1239,7 @@ menuitem_t NewGameMenu[]=
 {
     {1,"I'm too young to die.", M_ChooseSkill, 'i'},
     {1,"Hey, not too rough.", M_ChooseSkill, 'h'},
-    {1,"Hurt me plenty.",  M_ChooseSkill, 'h'},
+    {1,"",  M_ChooseSkill, 'h'},
     {1,"Ultra-Violence.", M_ChooseSkill, 'u'},
     {1,"Nightmare!",        M_ChooseSkill, 'n'}
 };
@@ -1546,8 +1546,7 @@ menuitem_t ScreenMenu[]=
     {2,"Detail",M_ChangeDetail,'d'},
     {2,"Translucency",M_Translucency,'t'},
     {2,"Enable Colored Blood",M_ColoredBloodA,'a'},
-    {2,"Fix Monster Blood",M_ColoredBloodB,'b'},
-    {2,"Uncapped Framerate",M_UncappedFramerate,'u'}
+    {2,"Fix Monster Blood",M_ColoredBloodB,'b'}
 };
 
 menu_t  ScreenDef =
@@ -1720,10 +1719,7 @@ enum
     game2_footclip,
     game2_splash,
     game2_swirl,
-    game2_prbfg,
-    game2_prskulls,
-    game2_prplasma,
-    game2_primp,
+    game2_prbeta,
     game2_corpses,
     game2_secrets,
     game2_end
@@ -1737,10 +1733,7 @@ menuitem_t GameMenu2[]=
     {2,"",M_Footclip,'c'},
     {2,"",M_Splash,'s'},
     {2,"",M_Swirl,'w'},
-    {2,"",M_BFGClassic,'b'},
-    {2,"",M_BetaSkulls,'x'},
-    {2,"",M_BetaPlasma,'p'},
-    {2,"",M_BetaImp,'i'},
+    {2,"",M_Beta,'b'},
     {2,"",M_Corpses,'d'},
     {2,"",M_Secrets,'z'},
 };
@@ -2337,6 +2330,9 @@ void M_DrawNewGame(void)
 {
     V_DrawPatchDirect(96, 14, W_CacheLumpName(DEH_String("M_NEWG"), PU_CACHE));
     M_WriteText(NewDef.x, NewDef.y - 22, "CHOOSE SKILL LEVEL:");
+
+    if(beta_style)
+        M_WriteText(NewDef.x, NewDef.y + 18, "I JUST WANT TO KILL.");
 }
 
 void M_NewGame(int choice)
@@ -2643,18 +2639,6 @@ void M_DrawScreen(void)
 	V_ClearDPTranslation();
     }
 
-    if(d_uncappedframerate)
-    {
-        dp_translation = crx[CRX_GREEN];
-        M_WriteText(ScreenDef.x + 189, ScreenDef.y + 58, "ON");
-	V_ClearDPTranslation();
-    }
-    else
-    {
-        dp_translation = crx[CRX_DARK];
-        M_WriteText(ScreenDef.x + 181, ScreenDef.y + 58, "OFF");
-	V_ClearDPTranslation();
-    }
     M_DrawThermoSmall(ScreenDef.x + 120, ScreenDef.y + LINEHEIGHT_SMALL * (scrnsize + 1),
                  9, screenSize);
 }
@@ -2888,12 +2872,9 @@ void M_DrawGame2(void)
     M_WriteText(GameDef.x - 15, GameDef.y + 28, DEH_String("HERETIC FOOTCLIPS"));
     M_WriteText(GameDef.x - 15, GameDef.y + 38, DEH_String("HERETIC LIQUID SPLASH"));
     M_WriteText(GameDef.x - 15, GameDef.y + 48, DEH_String("SWIRLING WATER HACK"));
-    M_WriteText(GameDef.x - 15, GameDef.y + 58, DEH_String("PRE-RELEASE BFG9000"));
-    M_WriteText(GameDef.x - 15, GameDef.y + 68, DEH_String("PRE-RELEASE LOST SOUL"));
-    M_WriteText(GameDef.x - 15, GameDef.y + 78, DEH_String("PRE-RELEASE PLASMAGUN"));
-    M_WriteText(GameDef.x - 15, GameDef.y + 88, DEH_String("PRE-RELEASE IMP FIRE"));
-    M_WriteText(GameDef.x - 15, GameDef.y + 98, DEH_String("RANDOMLY FLIP CORPSES"));
-    M_WriteText(GameDef.x - 15, GameDef.y + 108, DEH_String("SHOW REVEALED SECRETS"));
+    M_WriteText(GameDef.x - 15, GameDef.y + 58, DEH_String("PRE-RELEASE BETA MODE"));
+    M_WriteText(GameDef.x - 15, GameDef.y + 68, DEH_String("RANDOMLY FLIP CORPSES"));
+    M_WriteText(GameDef.x - 15, GameDef.y + 78, DEH_String("SHOW REVEALED SECRETS"));
 
     if(autoaim)
     {
@@ -2973,7 +2954,7 @@ void M_DrawGame2(void)
 	V_ClearDPTranslation();
     }
 
-    if(beta_bfg)
+    if(beta_style_mode)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef.x + 153, GameDef.y + 58, DEH_String("ON"));
@@ -2986,7 +2967,7 @@ void M_DrawGame2(void)
 	V_ClearDPTranslation();
     }
 
-    if(beta_skulls)
+    if(d_flipcorpses)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef.x + 153, GameDef.y + 68, DEH_String("ON"));
@@ -2999,7 +2980,7 @@ void M_DrawGame2(void)
 	V_ClearDPTranslation();
     }
 
-    if(beta_plasma)
+    if(d_secrets)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef.x + 153, GameDef.y + 78, DEH_String("ON"));
@@ -3009,45 +2990,6 @@ void M_DrawGame2(void)
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(GameDef.x + 145, GameDef.y + 78, DEH_String("OFF"));
-	V_ClearDPTranslation();
-    }
-
-    if(beta_imp)
-    {
-        dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef.x + 153, GameDef.y + 88, DEH_String("ON"));
-	V_ClearDPTranslation();
-    }
-    else
-    {
-        dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef.x + 145, GameDef.y + 88, DEH_String("OFF"));
-	V_ClearDPTranslation();
-    }
-
-    if(d_flipcorpses)
-    {
-        dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef.x + 153, GameDef.y + 98, DEH_String("ON"));
-	V_ClearDPTranslation();
-    }
-    else
-    {
-        dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef.x + 145, GameDef.y + 98, DEH_String("OFF"));
-	V_ClearDPTranslation();
-    }
-
-    if(d_secrets)
-    {
-        dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef.x + 153, GameDef.y + 108, DEH_String("ON"));
-	V_ClearDPTranslation();
-    }
-    else
-    {
-        dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef.x + 145, GameDef.y + 108, DEH_String("OFF"));
 	V_ClearDPTranslation();
     }
 }
@@ -3108,7 +3050,7 @@ void M_DrawCheats(void)
     if (players[consoleplayer].cheats & CF_GODMODE)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(215, 26, DEH_String("ON"));
+        M_WriteText(223, 26, DEH_String("ON"));
 	V_ClearDPTranslation();
     }
     else
@@ -3123,7 +3065,7 @@ void M_DrawCheats(void)
     if (players[consoleplayer].cheats & CF_NOCLIP)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(215, 36, DEH_String("ON"));
+        M_WriteText(223, 36, DEH_String("ON"));
 	V_ClearDPTranslation();
     }
     else
@@ -3160,7 +3102,7 @@ void M_DrawCheats(void)
     else if (cheating && cheeting!=2)
     {
         dp_translation = crx[CRX_GOLD];
-        M_WriteText(197, 86, DEH_String("WALLS"));
+        M_WriteText(199, 86, DEH_String("WALLS"));
 	V_ClearDPTranslation();
     }
     else if (cheating && cheeting==2)          
@@ -4181,7 +4123,7 @@ boolean M_Responder (event_t* ev)
     if (askforkey && data->btns_d)                // KEY BINDINGS
     {
         M_KeyBindingsClearControls(ev->data1);
-        *doom_defaults_list[keyaskedfor + 41 + FirstKey].location = ev->data1;
+        *doom_defaults_list[keyaskedfor + 38 + FirstKey].location = ev->data1;
         askforkey = false;
         return true;
     }
@@ -4484,7 +4426,7 @@ void M_Drawer (void)
     inhelpscreens = false;
     
     // DISPLAYS BLINKING "BETA" MESSAGE
-    if ((fsize == 4261144 || fsize == 4271324 || fsize == 4211660) &&
+    if ((fsize == 4261144 || fsize == 4271324 || fsize == 4211660 || beta_style) &&
             !menuactive && leveltime&16 && gamestate == GS_LEVEL)
         M_WriteText(140, 12, "BETA");
 
@@ -4557,10 +4499,10 @@ void M_Drawer (void)
     y = currentMenu->y;
     max = currentMenu->numitems;
 
-    if(currentMenu == &ScreenDef && devparm)
-        currentMenu->numitems = 6;
-
     if(currentMenu == &SoundDef && itemOn == 4)
+        M_WriteText(48, 155, "You must restart to take effect.");
+
+    if(currentMenu == &GameDef2 && itemOn == 6)
         M_WriteText(48, 155, "You must restart to take effect.");
 
     // FOR PSP (if too many menu items)
@@ -4767,16 +4709,18 @@ void M_Noclip(int choice)
         players[consoleplayer].playerstate == PST_LIVE)
     {
         players[consoleplayer].cheats ^= CF_NOCLIP;
-            if (players[consoleplayer].cheats & CF_NOCLIP)
-            {
+        if (players[consoleplayer].cheats & CF_NOCLIP)
+        {
             players[consoleplayer].message = DEH_String(STSTR_NCON);
             players[consoleplayer].mo->flags |= MF_NOCLIP;
-            }
-            else
-            {
+            noclip_on = true;
+        }
+        else
+        {
             players[consoleplayer].message = DEH_String(STSTR_NCOFF);
             players[consoleplayer].mo->flags &= ~MF_NOCLIP;
-            }
+            noclip_on = false;
+        }
     }
     DetectState();
 }
@@ -5137,6 +5081,9 @@ void M_ItemsA(int choice)
             players[consoleplayer].powers[5] = 0;
             players[consoleplayer].powers[6] = 0;
 
+            if(beta_style)
+                players[consoleplayer].fixedcolormap = 0;
+
             got_all = false;
         }
         players[consoleplayer].message = DEH_String("ALL ITEMS ADDED");
@@ -5162,6 +5109,9 @@ void M_ItemsB(int choice)
             players[consoleplayer].powers[2] = 0;
 
             got_invisibility = false;
+
+            if(beta_style)
+                players[consoleplayer].fixedcolormap = 0;
         }
 
         if(fsize != 19321722)
@@ -5640,6 +5590,9 @@ void M_RiftNow(int choice)
         if(forced)
             forced = false;
 
+        if(gamemap > 1)
+            game_startup = false;
+
         warped = 1;
         menuactive = 0;
         G_DeferedInitNew(gameskill, epi, map);
@@ -5969,6 +5922,9 @@ void M_KeyBindingsClearControls (int ch)
 
 void M_KeyBindingsClearAll (int choice)
 {
+    *doom_defaults_list[38].location = 0;
+    *doom_defaults_list[39].location = 0;
+    *doom_defaults_list[40].location = 0;
     *doom_defaults_list[41].location = 0;
     *doom_defaults_list[42].location = 0;
     *doom_defaults_list[43].location = 0;
@@ -5979,26 +5935,23 @@ void M_KeyBindingsClearAll (int choice)
     *doom_defaults_list[48].location = 0;
     *doom_defaults_list[49].location = 0;
     *doom_defaults_list[50].location = 0;
-    *doom_defaults_list[51].location = 0;
-    *doom_defaults_list[52].location = 0;
-    *doom_defaults_list[53].location = 0;
 }
 
 void M_KeyBindingsReset (int choice)
 {
-    *doom_defaults_list[41].location = CLASSIC_CONTROLLER_R;
-    *doom_defaults_list[42].location = CLASSIC_CONTROLLER_L;
-    *doom_defaults_list[43].location = CLASSIC_CONTROLLER_MINUS;
-    *doom_defaults_list[44].location = CLASSIC_CONTROLLER_LEFT;
-    *doom_defaults_list[45].location = CLASSIC_CONTROLLER_DOWN;
-    *doom_defaults_list[46].location = CLASSIC_CONTROLLER_RIGHT;
-    *doom_defaults_list[47].location = CLASSIC_CONTROLLER_ZL;
-    *doom_defaults_list[48].location = CLASSIC_CONTROLLER_ZR;
-    *doom_defaults_list[49].location = CLASSIC_CONTROLLER_A;
-    *doom_defaults_list[50].location = CLASSIC_CONTROLLER_Y;
-    *doom_defaults_list[51].location = CLASSIC_CONTROLLER_B;
-    *doom_defaults_list[52].location = CONTROLLER_1;
-    *doom_defaults_list[53].location = CONTROLLER_2;
+    *doom_defaults_list[38].location = CLASSIC_CONTROLLER_R;
+    *doom_defaults_list[39].location = CLASSIC_CONTROLLER_L;
+    *doom_defaults_list[40].location = CLASSIC_CONTROLLER_MINUS;
+    *doom_defaults_list[41].location = CLASSIC_CONTROLLER_LEFT;
+    *doom_defaults_list[42].location = CLASSIC_CONTROLLER_DOWN;
+    *doom_defaults_list[43].location = CLASSIC_CONTROLLER_RIGHT;
+    *doom_defaults_list[44].location = CLASSIC_CONTROLLER_ZL;
+    *doom_defaults_list[45].location = CLASSIC_CONTROLLER_ZR;
+    *doom_defaults_list[46].location = CLASSIC_CONTROLLER_A;
+    *doom_defaults_list[47].location = CLASSIC_CONTROLLER_Y;
+    *doom_defaults_list[48].location = CLASSIC_CONTROLLER_B;
+    *doom_defaults_list[49].location = CONTROLLER_1;
+    *doom_defaults_list[50].location = CONTROLLER_2;
 }
 
 void M_DrawKeyBindings(void)
@@ -6034,7 +5987,7 @@ void M_DrawKeyBindings(void)
                 M_WriteText(195, (i*10+20), "???");
             else
                 M_WriteText(195, (i*10+20),
-                        Key2String(*(doom_defaults_list[i+FirstKey+41].location)));
+                        Key2String(*(doom_defaults_list[i+FirstKey+38].location)));
         }
     }
 }
@@ -6700,70 +6653,23 @@ void M_Swirl(int choice)
     }
 }
 
-void M_BFGClassic(int choice)
+void M_Beta(int choice)
 {
     switch(choice)
     {
     case 0:
-        if (beta_bfg)
-            beta_bfg = false;
-        players[consoleplayer].message = DEH_String("PRE-RELEASE BFG9000 DISABLED");
+        if (beta_style_mode)
+        {
+            beta_style_mode = false;
+        }
+        players[consoleplayer].message = DEH_String("PRE-RELEASE MODE DISABLED");
         break;
     case 1:
-        if (!beta_bfg)
-            beta_bfg = true;
-        players[consoleplayer].message = DEH_String("PRE-RELEASE BFG9000 ENABLED");
-        break;
-    }
-}
-
-void M_BetaSkulls(int choice)
-{
-    switch(choice)
-    {
-    case 0:
-        if (beta_skulls)
-            beta_skulls = false;
-        players[consoleplayer].message = DEH_String("PRE-RELEASE LOST SOULS DISABLED");
-        break;
-    case 1:
-        if (!beta_skulls)
-            beta_skulls = true;
-        players[consoleplayer].message = DEH_String("PRE-RELEASE LOST SOULS ENABLED");
-        break;
-    }
-}
-
-void M_BetaPlasma(int choice)
-{
-    switch(choice)
-    {
-    case 0:
-        if (beta_plasma)
-            beta_plasma = false;
-        players[consoleplayer].message = DEH_String("PRE-RELEASE PLASMAGUN FIRE DISABLED");
-        break;
-    case 1:
-        if (!beta_plasma)
-            beta_plasma = true;
-        players[consoleplayer].message = DEH_String("PRE-RELEASE PLASMAGUN FIRE ENABLED");
-        break;
-    }
-}
-
-void M_BetaImp(int choice)
-{
-    switch(choice)
-    {
-    case 0:
-        if (beta_imp)
-            beta_imp = false;
-        players[consoleplayer].message = DEH_String("PRE-RELEASE IMP FIREBALLS DISABLED");
-        break;
-    case 1:
-        if (!beta_imp)
-            beta_imp = true;
-        players[consoleplayer].message = DEH_String("PRE-RELEASE IMP FIREBALLS ENABLED");
+        if (!beta_style_mode)
+        {
+            beta_style_mode = true;
+        }
+        players[consoleplayer].message = DEH_String("PRE-RELEASE MODE ENABLED");
         break;
     }
 }
@@ -6991,6 +6897,7 @@ void M_DrawDebug(void)
 //static void cheat_massacre()
 void M_Massacre(int choice)
 {
+    massacre_cheat_used = true;
     // jff 02/01/98 'em' cheat - kill all monsters
     // partially taken from Chi's .46 port
 
@@ -7028,6 +6935,7 @@ void M_Massacre(int choice)
             }
         }
     }
+
     // killough 3/22/98: make more intelligent about plural
 
     // Ty 03/27/98 - string(s) *not* externalized
@@ -7036,5 +6944,7 @@ void M_Massacre(int choice)
         killcount, killcount == 1 ? "" : "S");
 
     players[consoleplayer].message = DEH_String(massacre_textbuffer);
+
+    massacre_cheat_used = false;
 }
 

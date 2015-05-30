@@ -1678,36 +1678,39 @@ boolean PIT_ChangeSector (mobj_t*        thing)
         // keep checking
         return true;
     }
+
+    if(!beta_style)
+    {
+        // crunch bodies to giblets
+        if (thing->health <= 0)
+        {
+            P_SetMobjState (thing, S_GIBS);
     
+            thing->flags &= ~MF_SOLID;
+            thing->height = 0;
+            thing->radius = 0;
 
-    // crunch bodies to giblets
-    if (thing->health <= 0)
-    {
-        P_SetMobjState (thing, S_GIBS);
+            // keep checking
+            return true;                
+        }
 
-        thing->flags &= ~MF_SOLID;
-        thing->height = 0;
-        thing->radius = 0;
-
-        // keep checking
-        return true;                
-    }
-
-    // crunch dropped items
-    if (thing->flags & MF_DROPPED)
-    {
-        P_RemoveMobj (thing);
+        // crunch dropped items
+        if (thing->flags & MF_DROPPED)
+        {
+            P_RemoveMobj (thing);
         
-        // keep checking
-        return true;                
+            // keep checking
+            return true;                
+        }
+
+        if (! (thing->flags & MF_SHOOTABLE) )
+        {
+            // assume it is bloody gibs or something
+            return true;                        
+        }
+
     }
 
-    if (! (thing->flags & MF_SHOOTABLE) )
-    {
-        // assume it is bloody gibs or something
-        return true;                        
-    }
-    
     nofit = true;
 
     if (crushchange && !(leveltime&3) )
@@ -1715,16 +1718,18 @@ boolean PIT_ChangeSector (mobj_t*        thing)
         P_DamageMobj(thing,NULL,NULL,10);
 
         // spray blood in a random direction
-        mo = P_SpawnMobj (thing->x,
-                          thing->y,
-                          thing->z + thing->height/2, MT_BLOOD);
+        if(!beta_style)
+        {
+            mo = P_SpawnMobj (thing->x,
+                              thing->y,
+                              thing->z + thing->height/2, MT_BLOOD);
         
-        mo->target = thing;
+            mo->target = thing;
 
-        mo->momx = (P_Random() - P_Random ())<<12;
-        mo->momy = (P_Random() - P_Random ())<<12;
+            mo->momx = (P_Random() - P_Random ())<<12;
+            mo->momy = (P_Random() - P_Random ())<<12;
+        }
     }
-
     // keep checking (crush other things)        
     return true;        
 }

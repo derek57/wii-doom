@@ -934,6 +934,9 @@ static void C_AdjustLineBreaks(char *str)
 // cph 2001/07/22 - remove arbitrary limit, use malloc'd buffer instead
 //  and make format string parameter const char*
 //
+// These symbols are not being printed: ä ö ü € ² ³ µ \ % § °
+// The game might crash if trying to print this symbol: ~
+//
 void C_Printf(stringtype_t type, char *s, ...)
 {
     va_list args;
@@ -946,6 +949,9 @@ void C_Printf(stringtype_t type, char *s, ...)
     if(!s)
         return;
   
+    if(fgets(buffer, sizeof(buffer), stdin))
+        C_Printf(CR_RED, "C_Printf: Buffer overflow");
+
     // difficult to remove limit
     va_start(args, s);
     memset(buffer, 0, sizeof(buffer));
@@ -996,5 +1002,10 @@ void C_Popup(void)
 void C_InstaPopup(void)
 {
     current_target = current_height = 0;
+}
+
+void C_Seperator(void)
+{
+  C_Printf(CR_RED, " {|||||||||||||||||||||||||||||}\n");
 }
 

@@ -93,6 +93,7 @@ char *          savegamedir;
 
 char            *pagename;
 
+boolean         done;
 boolean         nomonsters;     // checkparm of -nomonsters
 boolean         start_respawnparm;
 boolean         start_fastparm;
@@ -208,7 +209,6 @@ void D_Display (void)
     int                         tics;
     int                         wipestart;
     int                         y;
-    boolean                     done;
     boolean                     wipe;
 
     redrawsbar = false;
@@ -1250,6 +1250,23 @@ void D_DoomMain (void)
         snd_musicdevice = SNDDEVICE_SB;
     else
         snd_musicdevice = SNDDEVICE_GENMIDI;
+
+    if(beta_style_mode)
+    {
+        beta_style = true;
+        beta_skulls = true;
+        beta_imp = true;
+        beta_bfg = true;
+        beta_plasma = true;
+    }
+    else
+    {
+        beta_style = false;
+        beta_skulls = false;
+        beta_imp = false;
+        beta_bfg = false;
+        beta_plasma = false;
+    }
 
     // Save configuration at exit.
     I_AtExit(M_SaveDefaults, false);

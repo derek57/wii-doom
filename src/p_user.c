@@ -484,9 +484,9 @@ void P_PlayerThink (player_t* player)
         player->powers[pw_invulnerability]--;
 
     if (player->powers[pw_invisibility])
-        if (! --player->powers[pw_invisibility] )
+        if (! --player->powers[pw_invisibility])
             player->mo->flags &= ~MF_SHADOW;
-                        
+
     if (player->powers[pw_infrared])
         player->powers[pw_infrared]--;
                 
@@ -516,18 +516,30 @@ void P_PlayerThink (player_t* player)
 
     
     // Handling colormaps.
+    if (beta_style)
+    {
+        if (player->powers[pw_invisibility])
+        {
+            if (player->powers[pw_invisibility] > 4*32
+                || (player->powers[pw_invisibility]&8) )
+                player->fixedcolormap = INVERSECOLORMAP;
+            else
+                player->fixedcolormap = 0;
+        }
+    }
+
     if (player->powers[pw_invulnerability])
     {
-        if (player->powers[pw_invulnerability] > 4*32
-            || (player->powers[pw_invulnerability]&8) )
+        if ((player->powers[pw_invulnerability] > 4*32
+            || (player->powers[pw_invulnerability]&8)) && !beta_style)
             player->fixedcolormap = INVERSECOLORMAP;
         else
             player->fixedcolormap = 0;
     }
-    else if (player->powers[pw_infrared])        
+    else if (player->powers[pw_infrared])
     {
-        if (player->powers[pw_infrared] > 4*32
-            || (player->powers[pw_infrared]&8) )
+        if ((player->powers[pw_infrared] > 4*32
+            || (player->powers[pw_infrared]&8)) && !beta_style)
         {
             // almost full bright
             player->fixedcolormap = 1;
@@ -535,7 +547,7 @@ void P_PlayerThink (player_t* player)
         else
             player->fixedcolormap = 0;
     }
-    else
+    else if (!beta_style)
         player->fixedcolormap = 0;
 
     // recoil pitch from weapons

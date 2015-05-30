@@ -28,7 +28,9 @@ rcsid[] = "$Id: st_lib.c,v 1.4 1997/02/03 16:47:56 b1 Exp $";
 
 #include <ctype.h>
 
+#include "deh_str.h"
 #include "doomdef.h"
+#include "doomstat.h"
 #include "i_swap.h"
 #include "i_system.h"
 #include "r_local.h"
@@ -232,6 +234,22 @@ STlib_updateMultIcon
         }
         V_DrawPatch(mi->x, mi->y, mi->p[*mi->inum]);
         mi->oldinum = *mi->inum;
+    }
+
+    if(beta_style)
+    {
+        player_t *player = &players[consoleplayer];
+
+        // "3" = standard lifes in the pre-beta version of the game
+        if(3 + player->extra_lifes < 10);
+        {
+            int             i = 3 + player->extra_lifes;
+            char            namebuf[9];
+
+            sprintf(namebuf, "STYSNUM%d", i);
+            V_DrawPatch(173, 193,
+                    W_CacheLumpName(DEH_String(namebuf), PU_CACHE));
+        }
     }
 }
 

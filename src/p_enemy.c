@@ -622,6 +622,10 @@ void A_Look (mobj_t* actor)
     actor->threshold = 0;        // any shot will wake up
     targ = actor->subsector->sector->soundtarget;
 
+    if(beta_style && actor->flags & MF_COUNTKILL &&
+            actor->state->frame == 1 && actor->state->tics > 0)
+        actor->state->tics = 0;
+
     if (targ
         && (targ->flags & MF_SHOOTABLE) )
     {

@@ -152,10 +152,7 @@ void M_BindBaseControls(void)
     M_BindVariable("footclip",               &d_footclip);
     M_BindVariable("splash",                 &d_splash);
     M_BindVariable("swirl",                  &d_swirl);
-    M_BindVariable("pr_bfg",                 &beta_bfg);
-    M_BindVariable("pr_skulls",              &beta_skulls);
-    M_BindVariable("pr_plasma",              &beta_plasma);
-    M_BindVariable("pr_imp",                 &beta_imp);
+    M_BindVariable("pr_beta",                &beta_style_mode);
     M_BindVariable("translucency",           &d_translucency);
     M_BindVariable("colored_blood",          &d_colblood);
     M_BindVariable("fixed_blood",            &d_colblood2);

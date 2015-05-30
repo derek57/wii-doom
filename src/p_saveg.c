@@ -804,6 +804,22 @@ static void saveg_read_player_t(player_t *str)
 
     // boolean didsecret;
     str->didsecret = saveg_read32();
+
+    str->lookdir = saveg_read32();
+
+    str->centering = saveg_read32();
+
+    str->recoilpitch = saveg_read32();
+
+    str->flyheight = saveg_read32();
+
+    str->item = saveg_read32();
+
+    str->score = saveg_read32();
+
+    str->extra_lifes = saveg_read32();
+
+    str->nextextra = saveg_read32();
 }
 
 static void saveg_write_player_t(player_t *str)
@@ -944,6 +960,22 @@ static void saveg_write_player_t(player_t *str)
 
     // boolean didsecret;
     saveg_write32(str->didsecret);
+
+    saveg_write32(str->lookdir);
+
+    saveg_write32(str->centering);
+
+    saveg_write32(str->recoilpitch);
+
+    saveg_write32(str->flyheight);
+
+    saveg_write32(str->item);
+
+    saveg_write32(str->score);
+
+    saveg_write32(str->extra_lifes);
+
+    saveg_write32(str->nextextra);
 }
 
 

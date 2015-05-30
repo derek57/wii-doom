@@ -645,7 +645,7 @@ A_FireBFG
 // This code may not be used in other mods without appropriate credit given.
 // Code leeches will be telefragged.
 
-#define LOOKSLOPE 800
+#define LOOKSLOPE 400
 
 void A_FireOldBFG(player_t *player, pspdef_t *psp)
 {

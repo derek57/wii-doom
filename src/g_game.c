@@ -212,6 +212,7 @@ boolean         precache = true;        // if true, load all graphics at start
 boolean         joyarray[MAX_JOY_BUTTONS + 1]; 
 boolean         *joybuttons = &joyarray[1]; // allow [-1] 
 boolean         not_walking;
+boolean         game_startup;
 
 char            demoname[32];
 char            savename[256];
@@ -243,6 +244,7 @@ extern int      mspeed;
 extern int      turnspeed;
 extern int      messageToPrint;
 
+extern boolean  done;
 extern boolean  netgameflag;
 extern boolean  aiming_help;
 extern boolean  messageNeedsInput;
@@ -515,8 +517,11 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
                 {
                     if (!consoleactive)
                     {
-                        C_SetConsole();
-                        S_StartSound(NULL, sfx_doropn);
+                        if(done)
+                        {
+                            C_SetConsole();
+                            S_StartSound(NULL, sfx_doropn);
+                        }
                     }
                 }
             }
@@ -573,6 +578,8 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
                         if(!menuactive)
                         {
                             AM_Stop ();
+                            if(beta_style)
+                                ST_doRefresh();
                         }
                     }
                 }
@@ -1723,6 +1730,12 @@ void G_ScreenShot (void)
  
 void G_ExitLevel (void) 
 { 
+    player_t *player = &players[consoleplayer];
+    player->item = 0;
+
+    if(gamemap > 1)
+        game_startup = false;
+
     secretexit = false; 
     gameaction = ga_completed; 
 } 
@@ -1879,14 +1892,25 @@ G_InitNew
   int        episode,
   int        map )
 {
-    char *skytexturename;
-    int             i;
+    char     *skytexturename;
+    int      i;
+
+    if(episode > 0 && episode < 5 && map == 1)
+        game_startup = true;
+    else if(map > 1)
+        game_startup = false;
 
     if (paused)
     {
         paused = false;
         S_ResumeSound ();
     }
+
+    player_t *player = &players[consoleplayer];
+    player->nextextra = EXTRAPOINTS;
+    player->item = 0;
+    player->score = 0;
+    player->extra_lifes = 0;
 
     /*
     // Note: This commented-out block of code was added at some point

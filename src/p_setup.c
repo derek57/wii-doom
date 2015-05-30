@@ -914,7 +914,16 @@ P_SetupLevel
         else
             DEH_snprintf(lumpname, 9, "e1m10");
     }
+/*
+    if(beta_style && gameepisode == 1 && gamemap == 2)
+        DEH_snprintf(lumpname, 9, "e1m0");
 
+    if(beta_style && gameepisode == 2 && gamemap == 2)
+        DEH_snprintf(lumpname, 9, "e2m0");
+
+    if(beta_style && gameepisode == 3 && gamemap == 5)
+        DEH_snprintf(lumpname, 9, "e3m0");
+*/
     lumpnum = W_GetNumForName (lumpname);
 
     if (nerve_pwad && gamemission != pack_nerve)
@@ -971,8 +980,6 @@ P_SetupLevel
         R_PrecacheLevel ();
 
     //printf ("free memory: 0x%x\n", Z_FreeMemory());
-
-    C_Printf(CR_GRAY, " HU_NewLevel executed\n");
 
     HU_NewLevel();
 }

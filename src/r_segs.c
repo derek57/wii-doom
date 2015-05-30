@@ -885,8 +885,6 @@ R_StoreWallRange
     // if a floor / ceiling plane is on the wrong side
     //  of the view plane, it is definitely invisible
     //  and doesn't need to be marked.
-    
-  
     if (frontsector->interpfloorheight >= viewz)
     {
         // above view plane
@@ -899,7 +897,6 @@ R_StoreWallRange
         // below view plane
         markceiling = false;
     }
-
     
     // calculate incremental stepping values for texture edges
     worldtop >>= invhgtbits;

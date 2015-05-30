@@ -91,6 +91,9 @@
 #define GOTMEDIKIT     "Picked up a medikit."
 #define GOTSUPER       "Supercharge!"
 
+#define GOTDAGGER      "You pick up a demonic dagger."
+#define GOTSKULLCHEST  "You pick up a skull chest."
+
 #define GOTBLUECARD    "Picked up a blue keycard."
 #define GOTYELWCARD    "Picked up a yellow keycard."
 #define GOTREDCARD     "Picked up a red keycard."

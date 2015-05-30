@@ -204,7 +204,10 @@ EV_DoPlat
             break;
             
           case downWaitUpStay:
-            plat->speed = PLATSPEED * 4;
+            if(beta_style)
+                plat->speed = PLATSPEED;
+            else
+                plat->speed = PLATSPEED * 4;
             plat->low = P_FindLowestFloorSurrounding(sec);
 
             if (plat->low > sec->floor_height)

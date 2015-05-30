@@ -1027,8 +1027,20 @@ void P_SpawnMapThing (mapthing_t* mthing)
     if (deathmatch && mobjinfo[i].flags & MF_NOTDMATCH)
         return;
 
-    if(beta_skulls && type == MT_SKULL)
-        type = MT_BETASKULL;
+    if(beta_skulls)
+    {
+        if(i == MT_SKULL)
+            i = MT_BETASKULL;
+    }
+
+    if(beta_style)
+    {
+        if(i == MT_MISC2)
+            i = MT_DAGGER;
+
+        if(i == MT_MISC3)
+            i = MT_SKULLCHEST;
+    }
 
     // don't spawn any monsters if -nomonsters
     if (nomonsters && ( i == MT_SKULL ||
@@ -1145,7 +1157,7 @@ P_SpawnBlood
 
     if (th->tics < 1)
         th->tics = 1;
-                
+
     if (damage <= 12 && damage >= 9)
         P_SetMobjState (th,S_BLOOD2);
     else if (damage < 9)
@@ -1256,7 +1268,7 @@ P_SpawnMissile
 
     // fuzzy player
     if (dest->flags & MF_SHADOW)
-        an += (P_Random()-P_Random())<<20;        
+        an += (P_Random()-P_Random())<<20;
 
     th->angle = an;
     an >>= ANGLETOFINESHIFT;

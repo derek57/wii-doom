@@ -767,7 +767,7 @@ void I_InitGraphics(void)
 
     if (w != screen_mode->width || h != screen_mode->height)
     {
-        C_Printf(CR_GRAY, "I_InitGraphics: %s (%ix%i within %ix%i)\n",
+        C_Printf(CR_GRAY, " I_InitGraphics: %s (%ix%i within %ix%i)\n",
               WindowBoxType(screen_mode, w, h),
               screen_mode->width, screen_mode->height, w, h);
     }

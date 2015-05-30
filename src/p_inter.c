@@ -40,6 +40,7 @@
 #include "p_local.h"
 #include "s_sound.h"
 #include "sounds.h"
+#include "st_stuff.h"
 
 
 #define BONUSADD        6
@@ -47,8 +48,10 @@
 
 // a weapon is found with two clip loads,
 // a big item has five clip loads
-int        maxammo[NUMAMMO] = {200, 50, 300, 50};
-int        clipammo[NUMAMMO] = {10, 4, 20, 1};
+int                     maxammo[NUMAMMO] = {200, 50, 300, 50};
+int                     clipammo[NUMAMMO] = {10, 4, 20, 1};
+
+extern boolean          massacre_cheat_used;
 
 
 //
@@ -291,7 +294,10 @@ P_GivePower
     
     if (power == pw_invisibility)
     {
-        player->powers[power] = INVISTICS;
+        if(beta_style)
+            player->powers[power] = INVULNTICS;
+        else
+            player->powers[power] = INVISTICS;
         player->mo->flags |= MF_SHADOW;
         return true;
     }
@@ -404,11 +410,21 @@ P_TouchSpecialThing
         break;
         
       case SPR_SOUL:
-        player->health += deh_soulsphere_health;
-        if (player->health > deh_max_soulsphere)
-            player->health = deh_max_soulsphere;
-        player->mo->health = player->health;
-        player->message = DEH_String(GOTSUPER);
+        if(beta_style)
+        {
+            player->health = 100;
+            player->mo->health = player->health;
+            player->extra_lifes++;
+            ST_doRefresh();
+        }
+        else
+        {
+            player->health += deh_soulsphere_health;
+            if (player->health > deh_max_soulsphere)
+                player->health = deh_max_soulsphere;
+            player->mo->health = player->health;
+            player->message = DEH_String(GOTSUPER);
+        }
 
         if(fsize != 10396254 && fsize != 10399316 && fsize != 10401760 &&
                 fsize != 4261144 && fsize != 4271324 && fsize != 4211660 &&
@@ -715,6 +731,18 @@ P_TouchSpecialThing
         sound = sfx_wpnup;        
         break;
                 
+      case SPR_BND1:
+        if(player->item < 100);
+            player->item++;
+        player->message = DEH_String(GOTDAGGER);
+        break;
+
+      case SPR_BND2:
+        if(player->item < 100);
+            player->item++;
+        player->message = DEH_String(GOTSKULLCHEST);
+        break;
+
       default:
         I_Error ("P_SpecialThing: Unknown gettable thing");
     }
@@ -728,6 +756,9 @@ P_TouchSpecialThing
 }
 
 
+//(POSSESSED = 200, IMP = 600, LOST SOUL = 1000, DEMON = 1500, CACODEMON = 4000)
+// EXTRA LIFE EACH 30000 POINTS
+
 //
 // KillMobj
 //
@@ -736,9 +767,10 @@ P_KillMobj
 ( mobj_t*        source,
   mobj_t*        target )
 {
-    mobjtype_t        item;
-    mobj_t*        mo;
-    int                t;
+    mobjtype_t   item;
+    mobj_t*      mo;
+    int          t;
+    int          i;
 
     target->flags &= ~(MF_SHOOTABLE|MF_FLOAT|MF_SKULLFLY);
     target->flags2 &= ~MF2_PASSMOBJ;
@@ -757,6 +789,71 @@ P_KillMobj
 
         if (target->player)
             source->player->frags[target->player-players]++;
+
+        if (beta_style && !massacre_cheat_used && target->flags & MF_COUNTKILL)
+        {
+            if(target->type == MT_POSSESSED)
+                i = 200;
+
+            if(target->type == MT_SHOTGUY)
+                i = 400;
+
+            if(target->type == MT_TROOP)
+                i = 600;
+
+            if(target->type == MT_CHAINGUY)
+                i = 800;
+
+            if(target->type == MT_SKULL || target->type == MT_BETASKULL)
+                i = 1000;
+
+            if(target->type == MT_SERGEANT)
+                i = 1500;
+
+            if(target->type == MT_KNIGHT)
+                i = 2000;
+
+            if(target->type == MT_BRUISER)
+                i = 2500;
+
+            if(target->type == MT_BABY)
+                i = 3000;
+
+            if(target->type == MT_UNDEAD)
+                i = 3500;
+
+            if(target->type == MT_HEAD)
+                i = 4000;
+
+            if(target->type == MT_PAIN)
+                i = 4500;
+
+            if(target->type == MT_FATSO)
+                i = 5000;
+
+            if(target->type == MT_VILE)
+                i = 5500;
+
+            if(target->type == MT_SPIDER)
+                i = 10000;
+
+            if(target->type == MT_CYBORG)
+                i = 20000;
+
+            if(source->player->score < 10000000)
+                source->player->score += i;
+
+            while (source->player->score >= source->player->nextextra)
+            {
+		source->player->nextextra += EXTRAPOINTS;
+		source->player->extra_lifes += 1;
+
+                if (source->player->score > 0 && source->player->score < EXTRAPOINTS)
+                    source->player->extra_lifes = 0;
+
+                ST_doRefresh();
+            }
+        }
     }
     else if (!netgame && (target->flags & MF_COUNTKILL) )
     {
@@ -802,7 +899,7 @@ P_KillMobj
         minhealth >>= 1;
 
         if (target->health < -minhealth && -target->info->spawnhealth 
-            && target->info->xdeathstate)
+            && target->info->xdeathstate && !beta_style)
         {
             P_SetMobjState (target, target->info->xdeathstate);
         }
@@ -819,7 +916,7 @@ P_KillMobj
     else
     {
         if (target->health < -target->info->spawnhealth 
-            && target->info->xdeathstate)
+            && target->info->xdeathstate && !beta_style)
         {
             P_SetMobjState (target, target->info->xdeathstate);
         }
@@ -840,7 +937,7 @@ P_KillMobj
 
     // In Chex Quest, monsters don't drop items.
 
-    if (gameversion == exe_chex)
+    if (gameversion == exe_chex || beta_style)
     {
         return;
     }
