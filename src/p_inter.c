@@ -481,6 +481,7 @@ P_TouchSpecialThing
         return;
         
       case SPR_BSKU:
+      case SPR_BBSK:
         if (!player->cards[it_blueskull])
             player->message = DEH_String(GOTBLUESKUL);
         P_GiveCard (player, it_blueskull);
@@ -489,6 +490,7 @@ P_TouchSpecialThing
         return;
         
       case SPR_YSKU:
+      case SPR_BYSK:
         if (!player->cards[it_yellowskull])
             player->message = DEH_String(GOTYELWSKUL);
         P_GiveCard (player, it_yellowskull);
@@ -497,6 +499,7 @@ P_TouchSpecialThing
         return;
         
       case SPR_RSKU:
+      case SPR_BRSK:
         if (!player->cards[it_redskull])
             player->message = DEH_String(GOTREDSKULL);
         P_GiveCard (player, it_redskull);
@@ -524,6 +527,7 @@ P_TouchSpecialThing
         
         // power ups
       case SPR_PINV:
+      case SPR_BPNV:
         if (!P_GivePower (player, pw_invulnerability))
             return;
         player->message = DEH_String(GOTINVUL);
@@ -554,6 +558,7 @@ P_TouchSpecialThing
         break;
         
       case SPR_PINS:
+      case SPR_BPNS:
         if (!P_GivePower (player, pw_invisibility))
             return;
         player->message = DEH_String(GOTINVIS);
@@ -643,6 +648,7 @@ P_TouchSpecialThing
         break;
         
       case SPR_CELL:
+      case SPR_BCLL:
         if (!P_GiveAmmo (player, am_cell,1))
             return;
         player->message = DEH_String(GOTCELL);
@@ -655,12 +661,14 @@ P_TouchSpecialThing
         break;
         
       case SPR_SHEL:
+      case SPR_BSHL:
         if (!P_GiveAmmo (player, am_shell,1))
             return;
         player->message = DEH_String(GOTSHELLS);
         break;
         
       case SPR_SBOX:
+      case SPR_BBOX:
         if (!P_GiveAmmo (player, am_shell,5))
             return;
         player->message = DEH_String(GOTSHELLBOX);
@@ -902,6 +910,7 @@ P_KillMobj
     if (target->type == MT_BETASKULL ||
         target->type == MT_SKULL ||
         target->type == MT_PAIN ||
+        target->type == MT_BETABARREL ||
         target->type == MT_BARREL)
         target->flags |= MF_TRANSLUCENT;
 
@@ -918,7 +927,7 @@ P_KillMobj
         else
             P_SetMobjState (target, target->info->deathstate);
 
-        if(target->type != MT_BARREL)
+        if(target->type != MT_BARREL && target->type != MT_BETABARREL)
         {
             t = P_Random() % 7;
 

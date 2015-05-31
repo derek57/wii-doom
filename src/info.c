@@ -54,9 +54,27 @@ char *sprnames[] = {
     "HDB4","HDB5","HDB6","POB1","POB2","BRS1","TLMP","TLP2",
 
     "FLSH","SPRY","CHNK","SPSH","LVAS","SLDG",
+
+    // BETA SPRITES BELOW
+
     "PLS1", // killough 7/19/98: first  of two plasma fireballs in the beta
     "PLS2", // killough 7/19/98: second of two plasma fireballs in the beta
-    "BSKL","BND1","BND2","BND3","BND4",
+    "BSKL",
+    "BND1",
+    "BND2",
+    "BND3",
+    "BND4",
+    "BPL3",
+    "BPL5",
+    "BBSK",
+    "BRSK",
+    "BYSK",
+    "BSHL",
+    "BCLL",
+    "BBOX",
+    "BBXP",
+    "BPNS",
+    "BPNV",
     /*"PBUL","PSHE",*/
 
     NULL
@@ -1259,8 +1277,33 @@ state_t        states[NUMSTATES] = {
     {SPR_BND1,0,6,{NULL},S_BND1,0,0},        // S_BND1
     {SPR_BND2,0,6,{NULL},S_BND2,0,0},        // S_BND2
     {SPR_BND3,0,6,{NULL},S_BND3,0,0},        // S_BND3
-    {SPR_BND4,0,6,{NULL},S_BND4,0,0}/*,        // S_BND4
-
+    {SPR_BND4,0,6,{NULL},S_BND4,0,0},        // S_BND4
+    {SPR_BPL3,32768,6,{NULL},S_BETAHEADCANDLES2,0,0},        // S_BETAHEADCANDLES
+    {SPR_BPL3,32769,6,{NULL},S_BETAHEADCANDLES,0,0},        // S_BETAHEADCANDLES2
+    {SPR_BPL5,0,-1,{NULL},S_NULL,0,0},        // S_BETAGIBS
+    {SPR_BBSK,0,10,{NULL},S_BETABSKULL2,0,0},        // S_BETABSKULL
+    {SPR_BBSK,32769,10,{NULL},S_BETABSKULL,0,0},        // S_BETABSKULL2
+    {SPR_BRSK,0,10,{NULL},S_BETARSKULL2,0,0},        // S_BETARSKULL
+    {SPR_BRSK,32769,10,{NULL},S_BETARSKULL,0,0},        // S_BETARSKULL2
+    {SPR_BYSK,0,10,{NULL},S_BETAYSKULL2,0,0},        // S_BETAYSKULL
+    {SPR_BYSK,32769,10,{NULL},S_BETAYSKULL,0,0},        // S_BETAYSKULL2
+    {SPR_BSHL,0,-1,{NULL},S_NULL,0,0},        // S_BETASHELL
+    {SPR_BCLL,0,-1,{NULL},S_NULL,0,0},        // S_BETACELL
+    {SPR_BBOX,0,-1,{NULL},S_NULL,0,0},        // S_BETASBOX
+    {SPR_BBXP,32768,5,{NULL},S_BETABEXP2,0,0},        // S_BETABEXP
+    {SPR_BBXP,32769,5,{A_Scream},S_BETABEXP3,0,0},        // S_BETABEXP2
+    {SPR_BBXP,32770,5,{NULL},S_BETABEXP4,0,0},        // S_BETABEXP3
+    {SPR_BBXP,32771,10,{A_Explode},S_BETABEXP5,0,0},        // S_BETABEXP4
+    {SPR_BBXP,32772,10,{NULL},S_NULL,0,0},        // S_BETABEXP5
+    {SPR_BPNS,32768,6,{NULL},S_BETAPINS2,0,0},        // S_BETAPINS
+    {SPR_BPNS,32769,6,{NULL},S_BETAPINS3,0,0},        // S_BETAPINS2
+    {SPR_BPNS,32770,6,{NULL},S_BETAPINS4,0,0},        // S_BETAPINS3
+    {SPR_BPNS,32771,6,{NULL},S_BETAPINS,0,0},        // S_BETAPINS4
+    {SPR_BPNV,32768,6,{NULL},S_BETAPINV2,0,0},        // S_BETAPINV
+    {SPR_BPNV,32769,6,{NULL},S_BETAPINV3,0,0},        // S_BETAPINV2
+    {SPR_BPNV,32770,6,{NULL},S_BETAPINV4,0,0},        // S_BETAPINV3
+    {SPR_BPNV,32771,6,{NULL},S_BETAPINV,0,0},        // S_BETAPINV4
+/*
     {SPR_PBUL,0,10,{NULL},S_BULLET_01,0,0},       // S_BULLET_00
     {SPR_PBUL,1,10,{NULL},S_NULL,0,0},       // S_BULLET_01
     {SPR_PSHE,0,20,{NULL},S_SHELL_01,0,0},       // S_SHELL_00
@@ -5737,8 +5780,327 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                          // flags2
         S_NULL,                // raisestate
         NULL,       // namepointer
-    }/*,
+    },
 
+    {                // MT_BETAHEADCANDLES
+        -1,                // doomednum
+        S_BETAHEADCANDLES,                // spawnstate
+        1000,                // spawnhealth
+        S_NULL,                // seestate
+        sfx_None,                // seesound
+        8,                // reactiontime
+        sfx_None,                // attacksound
+        S_NULL,                // painstate
+        0,                // painchance
+        sfx_None,                // painsound
+        S_NULL,                // meleestate
+        S_NULL,                // missilestate
+        S_NULL,     // crashstate
+        S_NULL,                // deathstate
+        S_NULL,                // xdeathstate
+        sfx_None,                // deathsound
+        0,                // speed
+        16*FRACUNIT,                // radius
+        16*FRACUNIT,                // height
+        100,                // mass
+        0,                // damage
+        sfx_None,                // activesound
+        MF_SOLID,                // flags
+        0,                          // flags2
+        S_NULL,                // raisestate
+        NULL,       // namepointer
+    },
+
+    {                // MT_BETAGIBS
+        -1,                // doomednum
+        S_BETAGIBS,                // spawnstate
+        1000,                // spawnhealth
+        S_NULL,                // seestate
+        sfx_None,                // seesound
+        8,                // reactiontime
+        sfx_None,                // attacksound
+        S_NULL,                // painstate
+        0,                // painchance
+        sfx_None,                // painsound
+        S_NULL,                // meleestate
+        S_NULL,                // missilestate
+        S_NULL,     // crashstate
+        S_NULL,                // deathstate
+        S_NULL,                // xdeathstate
+        sfx_None,                // deathsound
+        0,                // speed
+        20*FRACUNIT,                // radius
+        16*FRACUNIT,                // height
+        100,                // mass
+        0,                // damage
+        sfx_None,                // activesound
+        0,                // flags
+        0,                          // flags2
+        S_NULL,                // raisestate
+        NULL,       // namepointer
+    },
+
+    {                // MT_BETABLUESKULLKEY
+        -1,                // doomednum
+        S_BETABSKULL,                // spawnstate
+        1000,                // spawnhealth
+        S_NULL,                // seestate
+        sfx_None,                // seesound
+        8,                // reactiontime
+        sfx_None,                // attacksound
+        S_NULL,                // painstate
+        0,                // painchance
+        sfx_None,                // painsound
+        S_NULL,                // meleestate
+        S_NULL,                // missilestate
+        S_NULL,     // crashstate
+        S_NULL,                // deathstate
+        S_NULL,                // xdeathstate
+        sfx_None,                // deathsound
+        0,                // speed
+        20*FRACUNIT,                // radius
+        16*FRACUNIT,                // height
+        100,                // mass
+        0,                // damage
+        sfx_None,                // activesound
+        MF_SPECIAL|MF_NOTDMATCH,                // flags
+        0,                          // flags2
+        S_NULL,                // raisestate
+        NULL,       // namepointer
+    },
+
+    {                // MT_BETAREDSKULLKEY
+        -1,                // doomednum
+        S_BETARSKULL,                // spawnstate
+        1000,                // spawnhealth
+        S_NULL,                // seestate
+        sfx_None,                // seesound
+        8,                // reactiontime
+        sfx_None,                // attacksound
+        S_NULL,                // painstate
+        0,                // painchance
+        sfx_None,                // painsound
+        S_NULL,                // meleestate
+        S_NULL,                // missilestate
+        S_NULL,     // crashstate
+        S_NULL,                // deathstate
+        S_NULL,                // xdeathstate
+        sfx_None,                // deathsound
+        0,                // speed
+        20*FRACUNIT,                // radius
+        16*FRACUNIT,                // height
+        100,                // mass
+        0,                // damage
+        sfx_None,                // activesound
+        MF_SPECIAL|MF_NOTDMATCH,                // flags
+        0,                          // flags2
+        S_NULL,                // raisestate
+        NULL,       // namepointer
+    },
+
+    {                // MT_BETAYELLOWSKULLKEY
+        -1,                // doomednum
+        S_BETAYSKULL,                // spawnstate
+        1000,                // spawnhealth
+        S_NULL,                // seestate
+        sfx_None,                // seesound
+        8,                // reactiontime
+        sfx_None,                // attacksound
+        S_NULL,                // painstate
+        0,                // painchance
+        sfx_None,                // painsound
+        S_NULL,                // meleestate
+        S_NULL,                // missilestate
+        S_NULL,     // crashstate
+        S_NULL,                // deathstate
+        S_NULL,                // xdeathstate
+        sfx_None,                // deathsound
+        0,                // speed
+        20*FRACUNIT,                // radius
+        16*FRACUNIT,                // height
+        100,                // mass
+        0,                // damage
+        sfx_None,                // activesound
+        MF_SPECIAL|MF_NOTDMATCH,                // flags
+        0,                          // flags2
+        S_NULL,                // raisestate
+        NULL,       // namepointer
+    },
+
+    {                // MT_BETASHELL
+        -1,                // doomednum
+        S_BETASHELL,                // spawnstate
+        1000,                // spawnhealth
+        S_NULL,                // seestate
+        sfx_None,                // seesound
+        8,                // reactiontime
+        sfx_None,                // attacksound
+        S_NULL,                // painstate
+        0,                // painchance
+        sfx_None,                // painsound
+        S_NULL,                // meleestate
+        S_NULL,                // missilestate
+        S_NULL,     // crashstate
+        S_NULL,                // deathstate
+        S_NULL,                // xdeathstate
+        sfx_None,                // deathsound
+        0,                // speed
+        20*FRACUNIT,                // radius
+        16*FRACUNIT,                // height
+        100,                // mass
+        0,                // damage
+        sfx_None,                // activesound
+        MF_SPECIAL,                // flags
+        0,                          // flags2
+        S_NULL,                // raisestate
+        NULL,       // namepointer
+    },
+
+    {                // MT_BETACELL
+        -1,                // doomednum
+        S_BETACELL,                // spawnstate
+        1000,                // spawnhealth
+        S_NULL,                // seestate
+        sfx_None,                // seesound
+        8,                // reactiontime
+        sfx_None,                // attacksound
+        S_NULL,                // painstate
+        0,                // painchance
+        sfx_None,                // painsound
+        S_NULL,                // meleestate
+        S_NULL,                // missilestate
+        S_NULL,     // crashstate
+        S_NULL,                // deathstate
+        S_NULL,                // xdeathstate
+        sfx_None,                // deathsound
+        0,                // speed
+        20*FRACUNIT,                // radius
+        16*FRACUNIT,                // height
+        100,                // mass
+        0,                // damage
+        sfx_None,                // activesound
+        MF_SPECIAL,                // flags
+        0,                          // flags2
+        S_NULL,                // raisestate
+        NULL,       // namepointer
+    },
+
+    {                // MT_BETASHELLBOX
+        -1,                // doomednum
+        S_BETASBOX,                // spawnstate
+        1000,                // spawnhealth
+        S_NULL,                // seestate
+        sfx_None,                // seesound
+        8,                // reactiontime
+        sfx_None,                // attacksound
+        S_NULL,                // painstate
+        0,                // painchance
+        sfx_None,                // painsound
+        S_NULL,                // meleestate
+        S_NULL,                // missilestate
+        S_NULL,     // crashstate
+        S_NULL,                // deathstate
+        S_NULL,                // xdeathstate
+        sfx_None,                // deathsound
+        0,                // speed
+        20*FRACUNIT,                // radius
+        16*FRACUNIT,                // height
+        100,                // mass
+        0,                // damage
+        sfx_None,                // activesound
+        MF_SPECIAL,                // flags
+        0,                          // flags2
+        S_NULL,                // raisestate
+        NULL,       // namepointer
+    },
+
+    {                // MT_BETABARREL
+        -1,                // doomednum
+        S_BAR1,                // spawnstate
+        20,                // spawnhealth
+        S_NULL,                // seestate
+        sfx_None,                // seesound
+        8,                // reactiontime
+        sfx_None,                // attacksound
+        S_NULL,                // painstate
+        0,                // painchance
+        sfx_None,                // painsound
+        S_NULL,                // meleestate
+        S_NULL,                // missilestate
+        S_NULL,     // crashstate
+        S_BETABEXP,                // deathstate
+        S_NULL,                // xdeathstate
+        sfx_barexp,                // deathsound
+        0,                // speed
+        10*FRACUNIT,                // radius
+        42*FRACUNIT,                // height
+        100,                // mass
+        0,                // damage
+        sfx_None,                // activesound
+        MF_SOLID|MF_SHOOTABLE|MF_NOBLOOD,                // flags
+        0,                          // flags2
+        S_NULL,                // raisestate
+        NULL,       // namepointer
+    },
+
+    {                // MT_BETAINS
+        -1,                // doomednum
+        S_BETAPINS,                // spawnstate
+        1000,                // spawnhealth
+        S_NULL,                // seestate
+        sfx_None,                // seesound
+        8,                // reactiontime
+        sfx_None,                // attacksound
+        S_NULL,                // painstate
+        0,                // painchance
+        sfx_None,                // painsound
+        S_NULL,                // meleestate
+        S_NULL,                // missilestate
+        S_NULL,     // crashstate
+        S_NULL,                // deathstate
+        S_NULL,                // xdeathstate
+        sfx_None,                // deathsound
+        0,                // speed
+        20*FRACUNIT,                // radius
+        16*FRACUNIT,                // height
+        100,                // mass
+        0,                // damage
+        sfx_None,                // activesound
+        MF_SPECIAL|MF_COUNTITEM|MF_TRANSLUCENT,                // flags
+        0,                          // flags2
+        S_NULL,                // raisestate
+        NULL,       // namepointer
+    },
+
+    {                // MT_BETAINV
+        -1,                // doomednum
+        S_BETAPINV,                // spawnstate
+        1000,                // spawnhealth
+        S_NULL,                // seestate
+        sfx_None,                // seesound
+        8,                // reactiontime
+        sfx_None,                // attacksound
+        S_NULL,                // painstate
+        0,                // painchance
+        sfx_None,                // painsound
+        S_NULL,                // meleestate
+        S_NULL,                // missilestate
+        S_NULL,     // crashstate
+        S_NULL,                // deathstate
+        S_NULL,                // xdeathstate
+        sfx_None,                // deathsound
+        0,                // speed
+        20*FRACUNIT,                // radius
+        16*FRACUNIT,                // height
+        100,                // mass
+        0,                // damage
+        sfx_None,                // activesound
+        MF_SPECIAL|MF_COUNTITEM|MF_TRANSLUCENT,                // flags
+        0,                          // flags2
+        S_NULL,                // raisestate
+        NULL,       // namepointer
+    },
+/*
     {           // MT_BULLET
         -1,             // doomednum
         S_BULLET_00,           // spawnstate

@@ -750,6 +750,8 @@ void P_RemoveMobj (mobj_t* mobj)
 {
     if ((mobj->flags & MF_SPECIAL)
         && !(mobj->flags & MF_DROPPED)
+        && (mobj->type != MT_BETAINS)
+        && (mobj->type != MT_BETAINV)
         && (mobj->type != MT_INV)
         && (mobj->type != MT_INS))
     {
@@ -1040,6 +1042,39 @@ void P_SpawnMapThing (mapthing_t* mthing)
 
         if(i == MT_MISC3)
             i = MT_SKULLCHEST;
+
+        if(i == MT_MISC7)	// ALL NEW BELOW - CHECK FOR REPLACEMENTS IN OTHER .C-FILES
+            i = MT_BETAYELLOWSKULLKEY;
+
+        if(i == MT_MISC8)
+            i = MT_BETAREDSKULLKEY;
+
+        if(i == MT_MISC9)
+            i = MT_BETABLUESKULLKEY;
+
+        if(i == MT_MISC20)
+            i = MT_BETACELL;
+
+        if(i == MT_MISC22)
+            i = MT_BETASHELL;
+
+        if(i == MT_MISC23)
+            i = MT_BETASHELLBOX;
+
+        if(i == MT_MISC71)
+            i = MT_BETAGIBS;
+
+        if(i == MT_MISC73)
+            i = MT_BETAHEADCANDLES;
+
+        if(i == MT_BARREL)
+            i = MT_BETABARREL;
+
+        if(i == MT_INS)
+            i = MT_BETAINS;
+
+        if(i == MT_INV)
+            i = MT_BETAINV;
     }
 
     // don't spawn any monsters if -nomonsters
