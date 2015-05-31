@@ -1303,6 +1303,7 @@ typedef enum
     S_BETAPINV2,
     S_BETAPINV3,
     S_BETAPINV4,
+    S_BETAARM1A,
 /*
     S_BULLET_00,
     S_BULLET_01,
@@ -1496,6 +1497,7 @@ typedef enum {
     MT_BETABARREL,
     MT_BETAINS,
     MT_BETAINV,
+    MT_BETAARMOR,
 /*
     MT_BULLET,
     MT_SHELL,

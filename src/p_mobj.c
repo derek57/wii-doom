@@ -1037,6 +1037,9 @@ void P_SpawnMapThing (mapthing_t* mthing)
 
     if(beta_style)
     {
+        if(i == MT_MISC0)
+            i = MT_BETAARMOR;
+
         if(i == MT_MISC2)
             i = MT_DAGGER;
 

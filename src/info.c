@@ -1303,6 +1303,7 @@ state_t        states[NUMSTATES] = {
     {SPR_BPNV,32769,6,{NULL},S_BETAPINV3,0,0},        // S_BETAPINV2
     {SPR_BPNV,32770,6,{NULL},S_BETAPINV4,0,0},        // S_BETAPINV3
     {SPR_BPNV,32771,6,{NULL},S_BETAPINV,0,0},        // S_BETAPINV4
+    {SPR_ARM1,32769,7,{NULL},S_BETAARM1A,0,0},        // S_BETAARM1A
 /*
     {SPR_PBUL,0,10,{NULL},S_BULLET_01,0,0},       // S_BULLET_00
     {SPR_PBUL,1,10,{NULL},S_NULL,0,0},       // S_BULLET_01
@@ -6096,6 +6097,35 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_None,                // activesound
         MF_SPECIAL|MF_COUNTITEM|MF_TRANSLUCENT,                // flags
+        0,                          // flags2
+        S_NULL,                // raisestate
+        NULL,       // namepointer
+    },
+
+    {                // MT_BETAARMOR
+        -1,                // doomednum
+        S_BETAARM1A,                // spawnstate
+        1000,                // spawnhealth
+        S_NULL,                // seestate
+        sfx_None,                // seesound
+        8,                // reactiontime
+        sfx_None,                // attacksound
+        S_NULL,                // painstate
+        0,                // painchance
+        sfx_None,                // painsound
+        S_NULL,                // meleestate
+        S_NULL,                // missilestate
+        S_NULL,     // crashstate
+        S_NULL,                // deathstate
+        S_NULL,                // xdeathstate
+        sfx_None,                // deathsound
+        0,                // speed
+        20*FRACUNIT,                // radius
+        16*FRACUNIT,                // height
+        100,                // mass
+        0,                // damage
+        sfx_None,                // activesound
+        MF_SPECIAL,                // flags
         0,                          // flags2
         S_NULL,                // raisestate
         NULL,       // namepointer
