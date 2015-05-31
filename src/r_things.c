@@ -760,6 +760,7 @@ void R_DrawPSprite (pspdef_t* psp, psprnum_t psprnum)
     boolean            flip;
     vissprite_t*       vis;
     vissprite_t        avis;
+    player_t*          player = &players[consoleplayer];
     
     // decide which patch to use
 #ifdef RANGECHECK
@@ -858,7 +859,8 @@ void R_DrawPSprite (pspdef_t* psp, psprnum_t psprnum)
     }
 
     // translucent gun flash sprites
-    if (psprnum == ps_flash)
+    if (psprnum == ps_flash && (!beta_style ||
+                               ( beta_style && player->readyweapon != wp_chaingun)))
         vis->mobjflags |= MF_TRANSLUCENT;
 
     R_DrawVisSprite (vis, vis->x1, vis->x2);

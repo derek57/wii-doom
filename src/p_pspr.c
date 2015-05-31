@@ -176,7 +176,12 @@ void P_BringUpWeapon (player_t* player)
     if (player->pendingweapon >= NUMWEAPONS)
         C_Printf(CR_RED, " P_BringUpWeapon: weaponinfo overrun has occured.\n");
 
-    newstate = weaponinfo[player->pendingweapon].upstate;
+    if(beta_style && player->pendingweapon == wp_chaingun)
+        newstate = S_BETACHAINUP;
+    else if(beta_style && player->pendingweapon == wp_plasma)
+        newstate = S_BETAPLASMAUP;
+    else
+        newstate = weaponinfo[player->pendingweapon].upstate;
 
     player->pendingweapon = wp_nochange;
     player->psprites[ps_weapon].sy = WEAPONBOTTOM;
@@ -263,9 +268,19 @@ boolean P_CheckAmmo (player_t* player)
     } while (player->pendingweapon == wp_nochange);
 
     // Now set appropriate weapon overlay.
-    P_SetPsprite (player,
-                  ps_weapon,
-                  weaponinfo[player->readyweapon].downstate);
+    
+    if(beta_style && player->readyweapon == wp_chaingun)
+        P_SetPsprite (player,
+                      ps_weapon,
+                      S_BETACHAINDOWN);
+    else if(beta_style && player->readyweapon == wp_plasma)
+        P_SetPsprite (player,
+                      ps_weapon,
+                      S_BETAPLASMADOWN);
+    else
+        P_SetPsprite (player,
+                      ps_weapon,
+                      weaponinfo[player->readyweapon].downstate);
 
     return false;        
 }
@@ -282,7 +297,14 @@ void P_FireWeapon (player_t* player)
         return;
         
     P_SetMobjState (player->mo, S_PLAY_ATK1);
-    newstate = weaponinfo[player->readyweapon].atkstate;
+
+    if(beta_style && player->readyweapon == wp_chaingun)
+        newstate = S_BETACHAIN1;
+    else if(beta_style && player->readyweapon == wp_plasma)
+        newstate = S_BETAPLASMA1;
+    else
+        newstate = weaponinfo[player->readyweapon].atkstate;
+
     P_SetPsprite (player, ps_weapon, newstate);
     P_NoiseAlert (player->mo, player->mo);
 }
@@ -295,9 +317,18 @@ void P_FireWeapon (player_t* player)
 //
 void P_DropWeapon (player_t* player)
 {
-    P_SetPsprite (player,
-                  ps_weapon,
-                  weaponinfo[player->readyweapon].downstate);
+    if(beta_style && player->readyweapon == wp_chaingun)
+        P_SetPsprite (player,
+                      ps_weapon,
+                      S_BETACHAINDOWN);
+    else if(beta_style && player->readyweapon == wp_plasma)
+        P_SetPsprite (player,
+                      ps_weapon,
+                      S_BETAPLASMADOWN);
+    else
+        P_SetPsprite (player,
+                      ps_weapon,
+                      weaponinfo[player->readyweapon].downstate);
 }
 
 
@@ -336,7 +367,12 @@ A_WeaponReady
     {
         // change weapon
         //  (pending weapon should allready be validated)
-        newstate = weaponinfo[player->readyweapon].downstate;
+        if(beta_style && player->readyweapon == wp_chaingun)
+            newstate = S_BETACHAINDOWN;
+        else if(beta_style && player->readyweapon == wp_plasma)
+            newstate = S_BETAPLASMADOWN;
+        else
+            newstate = weaponinfo[player->readyweapon].downstate;
         P_SetPsprite (player, ps_weapon, newstate);
         return;        
     }
@@ -417,6 +453,12 @@ A_Lower
 ( player_t*        player,
   pspdef_t*        psp )
 {        
+    if (beta_style && player->playerstate == PST_DEAD)
+    {
+        psp->sy = WEAPONTOP;
+        return;
+    }
+
     psp->sy += LOWERSPEED;
 
     // Is already down.
@@ -471,7 +513,14 @@ A_Raise
     
     // The weapon has been raised all the way,
     //  so change to the ready state.
-    newstate = weaponinfo[player->readyweapon].readystate;
+    if(beta_style && player->readyweapon == wp_chaingun)
+        newstate = S_BETACHAIN;
+    else if(beta_style && player->readyweapon == wp_plasma)
+        newstate = S_BETAPLASMA;
+    else if(beta_style && player->readyweapon == wp_chainsaw)
+        newstate = S_BETASAW;
+    else
+        newstate = weaponinfo[player->readyweapon].readystate;
 
     P_SetPsprite (player, ps_weapon, newstate);
 }
@@ -487,7 +536,11 @@ A_GunFlash
   pspdef_t*        psp ) 
 {
     P_SetMobjState (player->mo, S_PLAY_ATK2);
-    P_SetPsprite (player,ps_flash,weaponinfo[player->readyweapon].flashstate);
+
+    if(beta_style && player->readyweapon == wp_chaingun)
+        P_SetPsprite (player,ps_flash,S_BETACHAINFLASH1);
+    else if((beta_style && player->readyweapon != wp_missile) || !beta_style)
+        P_SetPsprite (player,ps_flash,weaponinfo[player->readyweapon].flashstate);
 }
 
 
@@ -738,16 +791,21 @@ A_FirePlasma
 {
     DecreaseAmmo(player, weaponinfo[player->readyweapon].ammo, 1);
 
-    P_SetPsprite (player,
-                  ps_flash,
-                  weaponinfo[player->readyweapon].flashstate+(P_Random ()&1) );
+    if(beta_style)
+        P_SetPsprite (player,
+                      ps_flash,
+                      S_BETAPLASMAFLASH1);
+    else
+        P_SetPsprite (player,
+                      ps_flash,
+                      weaponinfo[player->readyweapon].flashstate+(P_Random ()&1) );
 
     if(beta_plasma)
     {
-        int t = P_Random() % 2;
+        int t = 0;
 
         if(old_v == t)
-            t = P_Random() % 2;
+            t = 1;
 
         P_SpawnPlayerMissile (player->mo, MT_PLASMA1 + t);
 
@@ -955,11 +1013,19 @@ A_FireCGun
 
 //    A_Bullet(player);
 
-    P_SetPsprite (player,
-                  ps_flash,
-                  weaponinfo[player->readyweapon].flashstate
-                  + psp->state
-                  - &states[S_CHAIN1] );
+
+    if(beta_style && player->readyweapon == wp_chaingun)
+        P_SetPsprite (player,
+                      ps_flash,
+                      S_BETACHAINFLASH1
+                      + psp->state
+                      - &states[S_BETACHAIN1] );
+    else
+        P_SetPsprite (player,
+                      ps_flash,
+                      weaponinfo[player->readyweapon].flashstate
+                      + psp->state
+                      - &states[S_CHAIN1] );
 
     P_BulletSlope (player->mo);
         

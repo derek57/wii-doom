@@ -75,6 +75,10 @@ char *sprnames[] = {
     "BBXP",
     "BPNS",
     "BPNV",
+    "BCHG",
+    "BCHF",
+    "BPLG",
+    "BPLF",
     /*"PBUL","PSHE",*/
 
     NULL
@@ -1304,6 +1308,21 @@ state_t        states[NUMSTATES] = {
     {SPR_BPNV,32770,6,{NULL},S_BETAPINV4,0,0},        // S_BETAPINV3
     {SPR_BPNV,32771,6,{NULL},S_BETAPINV,0,0},        // S_BETAPINV4
     {SPR_ARM1,32769,7,{NULL},S_BETAARM1A,0,0},        // S_BETAARM1A
+    {SPR_BCHG,0,1,{A_WeaponReady},S_BETACHAIN,0,0},        // S_BETACHAIN
+    {SPR_BCHG,0,1,{A_Lower},S_BETACHAINDOWN,0,0},        // S_BETACHAINDOWN
+    {SPR_BCHG,0,1,{A_Raise},S_BETACHAINUP,0,0},        // S_BETACHAINUP
+    {SPR_BCHG,0,4,{A_FireCGun},S_BETACHAIN2,0,0},        // S_BETACHAIN1
+    {SPR_BCHG,1,4,{A_FireCGun},S_BETACHAIN3,0,0},        // S_BETACHAIN2
+    {SPR_BCHG,1,0,{A_ReFire},S_BETACHAIN,0,0},        // S_BETACHAIN3
+    {SPR_BCHF,32768,5,{A_Light1},S_LIGHTDONE,0,0},        // S_BETACHAINFLASH1
+    {SPR_BCHF,32769,5,{A_Light2},S_LIGHTDONE,0,0},        // S_BETACHAINFLASH2
+    {SPR_BPLG,0,1,{A_WeaponReady},S_BETAPLASMA,0,0},        // S_BETAPLASMA
+    {SPR_BPLG,0,1,{A_Lower},S_BETAPLASMADOWN,0,0},        // S_BETAPLASMADOWN
+    {SPR_BPLG,0,1,{A_Raise},S_BETAPLASMAUP,0,0},        // S_BETAPLASMAUP
+    {SPR_BPLG,0,3,{A_FirePlasma},S_BETAPLASMA2,0,0},        // S_BETAPLASMA1
+    {SPR_BPLG,1,20,{A_ReFire},S_BETAPLASMA,0,0},        // S_BETAPLASMA2
+    {SPR_BPLF,32768,4,{A_Light1},S_LIGHTDONE,0,0},        // S_BETAPLASMAFLASH1
+    {SPR_SAWG,2,4,{A_WeaponReady},S_BETASAW,0,0},        // S_BETASAW
 /*
     {SPR_PBUL,0,10,{NULL},S_BULLET_01,0,0},       // S_BULLET_00
     {SPR_PBUL,1,10,{NULL},S_NULL,0,0},       // S_BULLET_01
