@@ -915,14 +915,17 @@ P_SetupLevel
             DEH_snprintf(lumpname, 9, "e1m10");
     }
 
-    if(beta_style && gameepisode == 1 && gamemap == 2)
-        DEH_snprintf(lumpname, 9, "e1m0");
+    if(beta_style && gamemode != shareware && gamemode != commercial)
+    {
+        if(gameepisode == 1 && gamemap == 2)
+            DEH_snprintf(lumpname, 9, "e1m0");
 
-    if(beta_style && gameepisode == 2 && gamemap == 2)
-        DEH_snprintf(lumpname, 9, "e2m0");
+        if(gameepisode == 2 && gamemap == 2)
+            DEH_snprintf(lumpname, 9, "e3m0");
 
-    if(beta_style && gameepisode == 3 && gamemap == 5)
-        DEH_snprintf(lumpname, 9, "e3m0");
+        if(gameepisode == 3 && gamemap == 5)
+            DEH_snprintf(lumpname, 9, "e2m0");
+    }
 
     lumpnum = W_GetNumForName (lumpname);
 

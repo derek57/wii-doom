@@ -452,6 +452,7 @@ extern boolean                dont_move_backwards;
 
 extern int                fsize;
 extern int                fsizerw;
+extern int                fsizerw2;
 extern int                fsizecq;
 extern int                is_chex_2;
 extern int                show_deh_loading_message;
@@ -479,6 +480,7 @@ boolean                        jumping;
 boolean                        dont_move_forwards;
 boolean                        error_detected;
 boolean                        print_resource_pwad_error;
+boolean                        print_resource_pwad2_error;
 boolean                        display_ticker;
 boolean                        gamekeydown[NUMKEYS]; 
 boolean                        am_rotate;

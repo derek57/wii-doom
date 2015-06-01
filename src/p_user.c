@@ -338,7 +338,6 @@ void P_DeathThink (player_t* player)
     else if (player->damagecount)
         player->damagecount--;
         
-
     if (player->cmd.buttons & BT_USE)
         player->playerstate = PST_REBORN;
 }
@@ -407,12 +406,12 @@ void P_PlayerThink (player_t* player)
     {                           // Use an artifact
         if(jumping)
         {
-                if ((cmd->arti & AFLAG_JUMP) && onground && !player->jumpTics)
-                {
-                    player->mo->momz = 9 * FRACUNIT;
-                    player->mo->flags2 &= ~MF2_ONMOBJ;
-                    player->jumpTics = 18;
-                }
+            if ((cmd->arti & AFLAG_JUMP) && onground && !player->jumpTics)
+            {
+                player->mo->momz = 9 * FRACUNIT;
+                player->mo->flags2 &= ~MF2_ONMOBJ;
+                player->jumpTics = 18;
+            }
         }
     }
     // Check for weapon change.

@@ -1535,7 +1535,6 @@ enum
     screen_translucency,
     screen_blooda,
     screen_bloodb,
-    screen_framerate,
     screen_end
 } screen_e;
 
@@ -2333,6 +2332,8 @@ void M_DrawNewGame(void)
 
     if(beta_style)
         M_WriteText(NewDef.x, NewDef.y + 18, "I JUST WANT TO KILL.");
+    else
+        M_WriteText(NewDef.x, NewDef.y + 18, "HURT ME PLENTY.");
 }
 
 void M_NewGame(int choice)

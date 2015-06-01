@@ -117,6 +117,7 @@ int             startmap;
 int             startloadgame;
 int             fsize = 0;
 int             fsizerw = 0;
+int             fsizerw2 = 0;
 int             wad_message_has_been_shown = 0;
 int             dont_show_adding_of_resource_wad = 0;
 int             dots_enabled = 0;
@@ -926,6 +927,22 @@ void D_DoomMain (void)
         I_QuitSerialFail();
     }
 
+    if(print_resource_pwad2_error)
+    {
+        printf("\n\n\n\n\n");
+        printf(" ===============================================================================");
+        printf("                         !!! WRONG RESOURCE PWAD FILE !!!                       ");
+        printf("                 PLEASE COPY THE FILE 'DOOM1EXTRAS.WAD' THAT CAME               ");
+        printf("                    WITH THIS RELEASE, INTO THE GAME DIRECTORY                  \n");
+        printf("                                                                                \n");
+        printf("                                QUITTING NOW ...                                ");
+        printf(" ===============================================================================");
+
+        sleep(5);
+
+        I_QuitSerialFail();
+    }
+
     if (fsize != 4261144  &&  // DOOM BETA v1.4
         fsize != 4271324  &&  // DOOM BETA v1.5
         fsize != 4211660  &&  // DOOM BETA v1.6
@@ -1452,6 +1469,14 @@ void D_DoomMain (void)
         W_MergeFile("usb:/apps/wiidoom/pspdoom.wad", true);
     else if(sd)
         W_MergeFile("sd:/apps/wiidoom/pspdoom.wad", true);
+
+    if(beta_style && gamemode != shareware && gamemode != commercial)
+    {
+        W_CheckSize(5);
+
+        if(fsizerw2 == 592573)
+            W_MergeFile("usb:/apps/wiidoom/doom1extras.wad", true);
+    }
 
     pwad_added = true;
 

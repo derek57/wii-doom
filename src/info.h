@@ -201,6 +201,7 @@ typedef enum
     SPR_BCHF,
     SPR_BPLG,
     SPR_BPLF,
+    SPR_BMSL,
 /*
     SPR_PBUL,
     SPR_PSHE,
@@ -1323,6 +1324,9 @@ typedef enum
     S_BETAPLASMA2,
     S_BETAPLASMAFLASH1,
     S_BETASAW,
+    S_BETAEXPLODE1,
+    S_BETAEXPLODE2,
+    S_BETAEXPLODE3,
 /*
     S_BULLET_00,
     S_BULLET_01,

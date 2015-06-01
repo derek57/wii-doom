@@ -1627,7 +1627,10 @@ static void WI_loadUnloadData(load_callback_t callback)
         callback(DEH_String("WIURH1"), &yah[1]);
 
         // splat
-        callback(DEH_String("WISPLAT"), &splat[0]);
+        if(beta_style)
+            callback(DEH_String("WIUWH0"), &splat[0]);
+        else
+            callback(DEH_String("WISPLAT"), &splat[0]);
 
         if (wbs->epsd < 3)
         {

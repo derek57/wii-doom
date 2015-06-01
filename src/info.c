@@ -79,6 +79,7 @@ char *sprnames[] = {
     "BCHF",
     "BPLG",
     "BPLF",
+    "BMSL",
     /*"PBUL","PSHE",*/
 
     NULL
@@ -1323,6 +1324,9 @@ state_t        states[NUMSTATES] = {
     {SPR_BPLG,1,20,{A_ReFire},S_BETAPLASMA,0,0},        // S_BETAPLASMA2
     {SPR_BPLF,32768,4,{A_Light1},S_LIGHTDONE,0,0},        // S_BETAPLASMAFLASH1
     {SPR_SAWG,2,4,{A_WeaponReady},S_BETASAW,0,0},        // S_BETASAW
+    {SPR_BMSL,32769,8,{A_Explode},S_BETAEXPLODE2,0,0},        // S_BETAEXPLODE1
+    {SPR_BMSL,32770,6,{NULL},S_BETAEXPLODE3,0,0},        // S_BETAEXPLODE2
+    {SPR_BMSL,32771,4,{NULL},S_NULL,0,0},        // S_BETAEXPLODE3
 /*
     {SPR_PBUL,0,10,{NULL},S_BULLET_01,0,0},       // S_BULLET_00
     {SPR_PBUL,1,10,{NULL},S_NULL,0,0},       // S_BULLET_01

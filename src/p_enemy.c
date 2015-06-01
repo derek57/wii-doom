@@ -2116,7 +2116,7 @@ void A_PlayerScream (mobj_t* mo)
 // Spawns gibs when organic actors get splattered.
 //
 
-boolean                onground;
+boolean                on_ground;
 
 int                    old_u;
 
@@ -2144,9 +2144,9 @@ void A_MoreGibs(mobj_t* actor)
         mo->momy = FixedMul(finesine[an], (P_Random() & 0x0f) << FRACBITS);
         mo->momz = (P_Random() & 0x0f) << FRACBITS;
 
-        onground = (actor->z <= actor->floorz);
+        on_ground = (actor->z <= actor->floorz);
 
-        if(onground)
+        if(on_ground)
         {
             t = P_Random() % 9;
 

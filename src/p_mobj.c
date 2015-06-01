@@ -145,7 +145,10 @@ void P_ExplodeMissile (mobj_t* mo)
 {
     mo->momx = mo->momy = mo->momz = 0;
 
-    P_SetMobjState (mo, mobjinfo[mo->type].deathstate);
+    if(beta_style)
+        P_SetMobjState (mo, S_BETAEXPLODE1);
+    else
+        P_SetMobjState (mo, mobjinfo[mo->type].deathstate);
 
     mo->tics -= P_Random()&3;
 

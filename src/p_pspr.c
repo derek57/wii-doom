@@ -359,8 +359,12 @@ A_WeaponReady
         && psp->state == &states[S_SAW])
     {
         S_StartSound (player->mo, sfx_sawidl);
+
     }
     
+    if(beta_style && psp->state == &states[S_SAWB])
+        psp->state = &states[S_SAW];
+
     // check for change
     //  if player is dead, put the weapon away
     if (player->pendingweapon != wp_nochange || !player->health)

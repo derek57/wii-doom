@@ -981,13 +981,22 @@ int R_FlatNumForName (char* name)
     int         i;
     char        namet[9];
 
+    if (name[0] == 'F' &&
+        name[1] == 'L' &&
+        name[2] == 'A' &&
+        name[3] == 'T' &&
+        name[4] == '2' &&
+        name[5] == '2' &&
+        beta_style && gamemode != shareware && gamemode != commercial)
+	name = "BFLAT22";
+
     i = W_CheckNumForName (name);
 
     if (i == -1)
     {
         namet[8] = 0;
         memcpy (namet, name,8);
-        I_Error ("R_FlatNumForName: %s not found",namet);
+	C_Printf(CR_RED, "R_FlatNumForName: %.8s not found", name);
     }
     return i - firstflat;
 }
@@ -1034,25 +1043,89 @@ int R_CheckTextureNumForName (char *name)
 int R_TextureNumForName (char* name)
 {
     int                i;
-/*
-    if(((name[0] == 'B' && name[1] == 'O' && name[2] == 'N' && name[3] == '1' &&
-	    name[4] == 'A' && name[5] == '0') ||
-        (name[0] == 'B' && name[1] == 'O' && name[2] == 'N' && name[3] == '1' &&
-	    name[4] == 'B' && name[5] == '0') ||
-        (name[0] == 'B' && name[1] == 'O' && name[2] == 'N' && name[3] == '1' &&
-	    name[4] == 'C' && name[5] == '0') ||
-        (name[0] == 'B' && name[1] == 'O' && name[2] == 'N' && name[3] == '1' &&
-	    name[4] == 'D' && name[5] == '0')) && beta_style)
 
-	i = R_CheckTextureNumForName ("BND1A0");
+    if(beta_style && gamemode != shareware && gamemode != commercial)
+    {
+        if (name[0] == 'A' &&
+	    name[1] == 'A' &&
+	    name[2] == 'S' &&
+	    name[3] == 'T' &&
+	    name[4] == 'I' &&
+            name[5] == 'N' &&
+	    name[6] == 'K' &&
+	    name[7] == 'Y')
+            i = R_CheckTextureNumForName ("BASTINKY");
+
+        else if (name[0] == 'C' &&
+	    name[1] == 'O' &&
+	    name[2] == 'M' &&
+	    name[3] == 'P' &&
+	    name[4] == 'U' &&
+            name[5] == 'T' &&
+	    name[6] == 'E' &&
+	    name[7] == '2')
+            i = R_CheckTextureNumForName ("BCMPUTE2");
+
+        else if (name[0] == 'B' &&
+	    name[1] == 'I' &&
+	    name[2] == 'G' &&
+	    name[3] == 'D' &&
+	    name[4] == 'O' &&
+            name[5] == 'O' &&
+	    name[6] == 'R' &&
+	    name[7] == '2')
+            i = R_CheckTextureNumForName ("BDOOR102");
+
+        else if (name[0] == 'M' &&
+	    name[1] == 'A' &&
+	    name[2] == 'R' &&
+	    name[3] == 'B' &&
+	    name[4] == 'F' &&
+            name[5] == 'A' &&
+	    name[6] == 'C' &&
+	    name[7] == 'E')
+            i = R_CheckTextureNumForName ("BMWALL41");
+
+        else if (name[0] == 'S' &&
+	    name[1] == 'K' &&
+	    name[2] == 'Y' &&
+	    name[3] == '1')
+            i = R_CheckTextureNumForName ("BSKY1");
+
+        else if (name[0] == 'S' &&
+	    name[1] == 'T' &&
+	    name[2] == 'E' &&
+	    name[3] == 'P' &&
+	    name[4] == '4')
+            i = R_CheckTextureNumForName ("BSTEP4");
+
+        else if (name[0] == 'S' &&
+	    name[1] == 'W' &&
+	    name[2] == '1' &&
+	    name[3] == 'D' &&
+	    name[4] == 'I' &&
+            name[5] == 'R' &&
+	    name[6] == 'T')
+            i = R_CheckTextureNumForName ("BSW1DIRT");
+
+        else if (name[0] == 'S' &&
+	    name[1] == 'W' &&
+	    name[2] == '2' &&
+	    name[3] == 'D' &&
+	    name[4] == 'I' &&
+            name[5] == 'R' &&
+	    name[6] == 'T')
+            i = R_CheckTextureNumForName ("BSW2DIRT");
+
+        else
+            i = R_CheckTextureNumForName (name);
+    }
     else
-*/
         i = R_CheckTextureNumForName (name);
 
     if (i==-1)
     {
-        I_Error ("R_TextureNumForName: %s not found",
-                 name);
+	C_Printf(CR_RED, "R_TextureNumForName: %.8s not found", name);
     }
     return i;
 }

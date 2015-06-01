@@ -631,7 +631,7 @@ void W_CheckSize(int wad)
             fseek(fprw, 0, 2);                // file pointer at the end of file
             fsizerw = ftell(fprw);        // take a position of file pointer un size variable
 
-            if(fsizerw != 976754)
+            if(fsizerw != 573851)
                 print_resource_pwad_error = true;
 
             fclose(fprw);
@@ -712,6 +712,26 @@ void W_CheckSize(int wad)
         {
             fseek(fprw, 0, 2);            // file pointer at the end of file
             fsizecq = ftell(fprw);        // take a position of file pointer un size variable
+
+            fclose(fprw);
+        }
+    }
+    else if(wad == 5)
+    {
+        if(usb)
+            fprw = fopen("usb:/apps/wiidoom/doom1extras.wad", "r");
+        else if(sd)
+            fprw = fopen("sd:/apps/wiidoom/doom1extras.wad", "r");
+
+        if (fprw == NULL)
+            printf(" ");
+        else
+        {
+            fseek(fprw, 0, 2);                // file pointer at the end of file
+            fsizerw2 = ftell(fprw);        // take a position of file pointer un size variable
+
+            if(fsizerw2 != 592573)
+                print_resource_pwad2_error = true;
 
             fclose(fprw);
         }
