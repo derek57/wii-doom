@@ -415,6 +415,9 @@ extern boolean                 opl;
 void WI_slamBackground(void)
 {
     V_DrawPatch(0, 0, background);
+
+    if(beta_style && gameepisode == 1)
+        V_DrawPatch(232, 168, W_CacheLumpName(DEH_String("WILVBX"), PU_CACHE));
 }
 
 // The ticker is used to detect keys
@@ -433,21 +436,29 @@ void WI_drawLF(void)
     if (gamemode != commercial || wbs->last < NUMCMAPS)
     {
         // draw <LevelName> 
-        if(fsize != 12538385 || (fsize == 12538385 && gamemap != 10))
-            V_DrawPatch((ORIGWIDTH -
-                    SHORT(lnames[wbs->last]->width))/2, // CHANGED FOR HIRES
-                    y, lnames[wbs->last]);              // CHANGED FOR HIRES
+        if(beta_style && gameepisode == 1 && gamemap < 10)
+        {
+            if(fsize != 12538385 || (fsize == 12538385 && gamemap != 10))
+                V_DrawPatch(232, 176, lnames[wbs->last]);
+        }
         else
-            V_DrawPatch (117, y, W_CacheLumpName(DEH_String("SEWERS"), PU_CACHE));
+        {
+            if(fsize != 12538385 || (fsize == 12538385 && gamemap != 10))
+                V_DrawPatch((ORIGWIDTH -
+                        SHORT(lnames[wbs->last]->width))/2, // CHANGED FOR HIRES
+                        y, lnames[wbs->last]);              // CHANGED FOR HIRES
+            else
+                V_DrawPatch (117, y, W_CacheLumpName(DEH_String("SEWERS"), PU_CACHE));
 
-        // draw "Finished!"
-        if(fsize != 12538385 || (fsize == 12538385 && gamemap != 10))
-            y += (5*SHORT(lnames[wbs->last]->height))/4;
-        else
-            y = 17;
+            // draw "Finished!"
+            if(fsize != 12538385 || (fsize == 12538385 && gamemap != 10))
+                y += (5*SHORT(lnames[wbs->last]->height))/4;
+            else
+                y = 17;
 
-        V_DrawPatch((ORIGWIDTH - SHORT(finished->width)) / 2,
+            V_DrawPatch((ORIGWIDTH - SHORT(finished->width)) / 2,
                 y, finished);        // CHANGED FOR HIRES
+        }
     }
     else if (wbs->last == NUMCMAPS)
     {
@@ -473,25 +484,33 @@ void WI_drawEL(void)
     int y = WI_TITLEY;
 
     // draw "Entering"
-    V_DrawPatch((ORIGWIDTH - SHORT(entering->width))/2, // CHANGED FOR HIRES
+    if(!beta_style)
+        V_DrawPatch((ORIGWIDTH - SHORT(entering->width))/2, // CHANGED FOR HIRES
                 y,
                 entering);
 
     // draw level
-    if(fsize == 12538385 && gamemap == 1 && secretexit)
-        y = 17;
+    if(beta_style && gameepisode == 1 && gamemap < 10)
+    {
+        V_DrawPatch(232, 176, lnames[wbs->next]);
+    }
     else
-        y += (5*SHORT(lnames[wbs->next]->height))/4;
+    {
+        if(fsize == 12538385 && gamemap == 1 && secretexit)
+            y = 17;
+        else
+            y += (5*SHORT(lnames[wbs->next]->height))/4;
 
-    if((fsize == 14683458 || fsize == 14677988 || fsize == 14691821) &&
-                gamemode == commercial && gamemap == 2 && secretexit)
-        V_DrawPatch(119, y + 1, W_CacheLumpName("CWILV32", PU_CACHE));
-    else if(fsize == 12538385 && gamemode == retail && gameepisode == 1 &&
-            gamemap == 1 && secretexit)
-        V_DrawPatch(117, y, W_CacheLumpName("SEWERS", PU_CACHE));
-    else
-        V_DrawPatch((ORIGWIDTH - SHORT(lnames[wbs->next]->width))/2, // CHANGED FOR HIRES
-                y, lnames[wbs->next]);
+        if((fsize == 14683458 || fsize == 14677988 || fsize == 14691821) &&
+                    gamemode == commercial && gamemap == 2 && secretexit)
+            V_DrawPatch(119, y + 1, W_CacheLumpName("CWILV32", PU_CACHE));
+        else if(fsize == 12538385 && gamemode == retail && gameepisode == 1 &&
+                gamemap == 1 && secretexit)
+            V_DrawPatch(117, y, W_CacheLumpName("SEWERS", PU_CACHE));
+        else
+            V_DrawPatch((ORIGWIDTH - SHORT(lnames[wbs->next]->width))/2, // CHANGED FOR HIRES
+                    y, lnames[wbs->next]);
+    }
 }
 
 void
@@ -1501,7 +1520,7 @@ void WI_drawStats(void)
     // CHANGED FOR HIRES
     WI_drawTime(ORIGWIDTH/2 - SP_TIMEX, SP_TIMEY, cnt_time);
 
-    if (wbs->epsd < 3)
+    if (wbs->epsd < 3 && !beta_style)
     {
         // CHANGED FOR HIRES
         V_DrawPatch(ORIGWIDTH/2 + SP_TIMEX, SP_TIMEY, par);
@@ -1616,7 +1635,10 @@ static void WI_loadUnloadData(load_callback_t callback)
     {
         for (i=0 ; i<NUMMAPS ; i++)
         {
-            DEH_snprintf(name, 9, "WILV%d%d", wbs->epsd, i);
+            if(beta_style && gameepisode == 1)
+                DEH_snprintf(name, 9, "WIBLV0%d", i);
+            else
+                DEH_snprintf(name, 9, "WILV%d%d", wbs->epsd, i);
             callback(name, &lnames[i]);
         }
 
@@ -1749,7 +1771,10 @@ static void WI_loadUnloadData(load_callback_t callback)
     }
     else
     {
-        DEH_snprintf(name, 9, "WIMAP%d", wbs->epsd);
+        if(beta_style && gameepisode == 1)
+            DEH_snprintf(name, 9, "WIBMAP0");
+        else
+            DEH_snprintf(name, 9, "WIMAP%d", wbs->epsd);
     }
 
     // Draw backdrop and save to a temporary buffer
