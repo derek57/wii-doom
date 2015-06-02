@@ -130,6 +130,12 @@ void V_CopyRect(int srcx, int srcy, byte *source,
     }
 #endif 
 
+    // prevent framebuffer overflow
+    if (destx + width > SCREENWIDTH)
+	width = SCREENWIDTH - destx;
+    if (desty + height > SCREENHEIGHT)
+	height = SCREENHEIGHT - desty;
+
     V_MarkRect(destx, desty, width, height); 
  
     src = source + SCREENWIDTH * srcy + srcx; 
@@ -350,7 +356,9 @@ void V_DrawPatchFlipped(int x, int y, patch_t *patch)
     byte *source; 
     byte sourcetrans;
     int w, f; 
- 
+    // prevent framebuffer overflow
+    const boolean safe = !(y + SHORT(patch->height) > ORIGHEIGHT);
+
     y -= SHORT(patch->topoffset); 
     x -= SHORT(patch->leftoffset); 
 
@@ -363,9 +371,9 @@ void V_DrawPatchFlipped(int x, int y, patch_t *patch)
 
 #ifdef RANGECHECK 
     if (x < 0
-     || x + SHORT(patch->width) > ORIGWIDTH
+     || x /* + SHORT(patch->width) */ > ORIGWIDTH
      || y < 0
-     || y + SHORT(patch->height) > ORIGHEIGHT)
+     || y /* + SHORT(patch->height) */ > ORIGHEIGHT )
     {
 //        I_Error("Bad V_DrawPatchFlipped");
         C_Printf(CR_RED, " Bad V_DrawPatchFlipped: Patch (%d,%d)-(%d,%d) exceeds LFB\n"
@@ -379,6 +387,10 @@ void V_DrawPatchFlipped(int x, int y, patch_t *patch)
     desttop = dest_screen + (y << hires) * SCREENWIDTH + x;
 
     w = SHORT(patch->width);
+
+    // prevent framebuffer overflow
+    if (x + w > ORIGWIDTH)
+        w = ORIGWIDTH - x;
 
     for ( ; col<w ; x++, col++, desttop++)
     {
@@ -394,7 +406,9 @@ void V_DrawPatchFlipped(int x, int y, patch_t *patch)
                        (x * hires) + f;
                 count = column->length;
 
-                while (count--)
+//                while (count--)
+                // prevent framebuffer overflow
+                while (count-- && dest_in_framebuffer)
                 {
                     if (dp_translation)
                         sourcetrans = dp_translation[*source++];

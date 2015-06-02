@@ -336,11 +336,16 @@ void D_Display (void)
     // shade background when a menu is active or the game is paused
     if (paused || menuactive)
     {
+	static int firsttic;
+
 	for (y = 0; y < SCREENWIDTH * SCREENHEIGHT; y++)
 	    I_VideoBuffer[y] = colormaps[menushade * 256 + I_VideoBuffer[y]];
 
-	if (menushade < 16)
-	    menushade++;
+	if (menushade < 16 && gametic != firsttic)
+	{
+	    menushade += ticdup;
+	    firsttic = gametic;
+	}
 
 	// force redraw of status bar and border
 	viewactivestate = false;
