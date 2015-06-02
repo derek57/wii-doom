@@ -159,6 +159,7 @@ extern boolean  finale_music;
 extern boolean  aiming_help;
 extern boolean  iwad_added;
 extern boolean  pwad_added;
+extern boolean  show_chat_bar;
 
 extern menu_t*  currentMenu;                          
 extern menu_t   CheatsDef;
@@ -389,6 +390,12 @@ void D_Display (void)
         M_Drawer ();                            // menu is drawn even on top of wipes
         I_FinishUpdate ();                      // page flip or blit buffer
     } while (!done);
+
+    if(beta_style && done)
+    {
+        show_chat_bar = false;
+        ST_doRefresh();
+    }
 }
 
 //
