@@ -1470,6 +1470,8 @@ void D_DoomMain (void)
     else if(sd)
         W_MergeFile("sd:/apps/wiidoom/pspdoom.wad", true);
 
+    pwad_added = true;
+
     if(beta_style && gamemode != shareware && gamemode != commercial)
     {
         W_CheckSize(5);
@@ -1477,8 +1479,6 @@ void D_DoomMain (void)
         if(fsizerw2 == 592573)
             W_MergeFile("usb:/apps/wiidoom/doom1extras.wad", true);
     }
-
-    pwad_added = true;
 
     if(devparm)
         C_Printf(CR_GOLD, D_DEVSTR);

@@ -3847,6 +3847,11 @@ void M_SizeDisplay(int choice)
             screenblocks++;
             screenSize++;
         }
+        if (screenSize == 8 && beta_style)
+        {
+            screenblocks--;
+            screenSize--;
+        }
         break;
     }
     R_SetViewSize (screenblocks, detailLevel);
@@ -4428,8 +4433,12 @@ void M_Drawer (void)
     
     // DISPLAYS BLINKING "BETA" MESSAGE
     if ((fsize == 4261144 || fsize == 4271324 || fsize == 4211660 || beta_style) &&
-            !menuactive && leveltime&16 && gamestate == GS_LEVEL)
+            !menuactive && leveltime & 16 && gamestate == GS_LEVEL &&
+            current_height == 0)
+    {
         M_WriteText(140, 12, "BETA");
+	BorderNeedRefresh = true;
+    }
 
     if(coordinates_info)
     {

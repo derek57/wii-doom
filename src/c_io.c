@@ -247,7 +247,7 @@ void C_PrintSDLVersions(void)
         SDL_MIXER_MAJOR_VERSION, SDL_MIXER_MINOR_VERSION, SDL_MIXER_PATCHLEVEL,
         "libSDL_mixer.a"
         );
-
+/*
     C_Printf(CR_GOLD, " Using version %i.%i.%i of %s\n",
         SDL_TTF_MAJOR_VERSION, SDL_TTF_MINOR_VERSION, SDL_TTF_PATCHLEVEL,
         "libSDL_ttf.a"
@@ -262,12 +262,12 @@ void C_PrintSDLVersions(void)
         SDL_IMAGE_MAJOR_VERSION, SDL_IMAGE_MINOR_VERSION, SDL_IMAGE_PATCHLEVEL,
         "libSDL_image.a"
         );
-
+*/
     C_Printf(CR_GOLD, " Using version %i.%i.%i of %s\n",
         SMPEG_MAJOR_VERSION, SMPEG_MINOR_VERSION, SMPEG_PATCHLEVEL,
         "libsmpeg.a"
         );
-
+/*
     C_Printf(CR_GOLD, " Using version %i.%i of %s\n",
         JPEG_LIB_VERSION_MAJOR, JPEG_LIB_VERSION_MINOR,
         "libjpeg.a"
@@ -287,14 +287,14 @@ void C_PrintSDLVersions(void)
         ZLIB_VER_MAJOR, ZLIB_VER_MINOR, ZLIB_VER_REVISION, ZLIB_VER_SUBREVISION,
         "libz.a"
         );
-
+*/
     C_Printf(CR_GOLD, " Using version %i.%i.%i of %s\n",
         _V_MAJOR_, _V_MINOR_, _V_PATCH_,
         "libogc.a"
         );
 
-    C_Printf(CR_GOLD, " Also using the following libs: libasnd.a, libvorbisidec.a, libopengx.a,\n");
-    C_Printf(CR_GOLD, " libwiilight.a, libfat.a, libwiiuse.a, libbte.a, libwiikeyboard.a\n");
+    C_Printf(CR_GOLD, " Also using the following libs:\n");
+    C_Printf(CR_GOLD, " libvorbisidec.a libwiilight.a, libfat.a, libwiiuse.a, libbte.a, libwiikeyboard.a\n");
 }
 
 //

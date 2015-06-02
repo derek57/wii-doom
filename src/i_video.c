@@ -139,6 +139,11 @@ int screen_height = SCREENHEIGHT;
 
 int screen_bpp = 0;
 
+// Automatically adjust video settings if the selected mode is 
+// not a valid video mode.
+
+static int autoadjust_video_settings = 0;
+
 // Run in full screen mode?  (int type for config code)
 
 int fullscreen = false;
@@ -356,22 +361,79 @@ static boolean BlitArea(int x1, int y1, int x2, int y2)
     return result;
 }
 
+static void UpdateRect(int x1, int y1, int x2, int y2)
+{
+    int x1_scaled, x2_scaled, y1_scaled, y2_scaled;
+
+    // Do stretching and blitting
+
+    if (BlitArea(x1, y1, x2, y2))
+    {
+        // Update the area
+
+        x1_scaled = (x1 * screen_mode->width) / SCREENWIDTH;
+        y1_scaled = (y1 * screen_mode->height) / SCREENHEIGHT;
+        x2_scaled = (x2 * screen_mode->width) / SCREENWIDTH;
+        y2_scaled = (y2 * screen_mode->height) / SCREENHEIGHT;
+
+        SDL_UpdateRect(screen,
+                       x1_scaled, y1_scaled,
+                       x2_scaled - x1_scaled,
+                       y2_scaled - y1_scaled);
+    }
+}
+
 void I_BeginRead(void)
 {
+    byte *screenloc = I_VideoBuffer
+                    + (SCREENHEIGHT - LOADING_DISK_H) * SCREENWIDTH
+                    + (SCREENWIDTH - LOADING_DISK_W);
+    int y;
+
     if (!initialized || disk_image == NULL)
         return;
 
-    if(screenSize > 6)                                          // THIS WORKS GOOD FOR PSP AND
-        V_DrawPatch(ORIGWIDTH - LOADING_DISK_W + 16, -1, disk); // IS ALSO A FIX FOR THE WII
+    // save background and copy the disk image in
+
+    for (y=0; y<LOADING_DISK_H; ++y)
+    {
+        memcpy(saved_background + y * LOADING_DISK_W,
+               screenloc,
+               LOADING_DISK_W);
+        memcpy(screenloc,
+               disk_image + y * LOADING_DISK_W,
+               LOADING_DISK_W);
+
+        screenloc += SCREENWIDTH;
+    }
+
+    UpdateRect(SCREENWIDTH - LOADING_DISK_W, SCREENHEIGHT - LOADING_DISK_H,
+               SCREENWIDTH, SCREENHEIGHT);
 }
 
 void I_EndRead(void)
 {
+    byte *screenloc = I_VideoBuffer
+                    + (SCREENHEIGHT - LOADING_DISK_H) * SCREENWIDTH
+                    + (SCREENWIDTH - LOADING_DISK_W);
+    int y;
+
     if (!initialized || disk_image == NULL)
         return;
 
-    if(screenSize > 6)                                          // THIS WORKS GOOD FOR PSP AND
-        V_DrawPatch(ORIGWIDTH - LOADING_DISK_W + 16, -1, disk); // IS ALSO A FIX FOR THE WII
+    // save background and copy the disk image in
+
+    for (y=0; y<LOADING_DISK_H; ++y)
+    {
+        memcpy(screenloc,
+               saved_background + y * LOADING_DISK_W,
+               LOADING_DISK_W);
+
+        screenloc += SCREENWIDTH;
+    }
+
+    UpdateRect(SCREENWIDTH - LOADING_DISK_W, SCREENHEIGHT - LOADING_DISK_H,
+               SCREENWIDTH, SCREENHEIGHT);
 }
 
 // Ending of I_FinishUpdate() when in software scaling mode.
@@ -512,6 +574,13 @@ static void SetVideoMode(screen_mode_t *mode, int w, int h)
 
     // Set the video mode.
 
+    flags |= SDL_SWSURFACE | SDL_DOUBLEBUF;
+
+    if (screen_bpp == 8)
+    {
+        flags |= SDL_HWPALETTE;
+    }
+
     if (fullscreen)
     {
         flags |= SDL_FULLSCREEN;
@@ -522,13 +591,6 @@ static void SetVideoMode(screen_mode_t *mode, int w, int h)
         // running. Mac OS X has a quirk where an ugly resize handle is
         // shown in software mode when resizing is enabled, so avoid that.
         flags |= SDL_RESIZABLE;
-    }
-
-    flags |= SDL_SWSURFACE | SDL_DOUBLEBUF;
-
-    if (screen_bpp == 8)
-    {
-        flags |= SDL_HWPALETTE;
     }
 
     screen = SDL_SetVideoMode(w, h, screen_bpp, flags);
@@ -565,10 +627,6 @@ static void SetVideoMode(screen_mode_t *mode, int w, int h)
         }
     }
 
-    // Save screen mode.
-
-    screen_mode = mode;
-
     // Create the screenbuffer surface; if we have a real 8-bit palettized
     // screen, then we can use the screen as the screenbuffer.
 
@@ -584,6 +642,10 @@ static void SetVideoMode(screen_mode_t *mode, int w, int h)
 
         SDL_FillRect(screenbuffer, NULL, 0);
     }
+
+    // Save screen mode.
+
+    screen_mode = mode;
 }
 
 //
@@ -730,6 +792,216 @@ static char *WindowBoxType(screen_mode_t *mode, int w, int h)
     }
 }
 
+// Adjust to an appropriate fullscreen mode.
+// Returns true if successful.
+
+static boolean AutoAdjustFullscreen(void)
+{
+    SDL_Rect **modes;
+    SDL_Rect *best_mode;
+    screen_mode_t *screen_mode;
+    int diff, best_diff;
+    int i;
+
+    modes = SDL_ListModes(NULL, SDL_FULLSCREEN);
+
+    // No fullscreen modes available at all?
+
+    if (modes == NULL || modes == (SDL_Rect **) -1 || *modes == NULL)
+    {
+        return false;
+    }
+
+    // Find the best mode that matches the mode specified in the
+    // configuration file
+
+    best_mode = NULL;
+    best_diff = INT_MAX;
+
+    for (i=0; modes[i] != NULL; ++i)
+    {
+        //printf("%ix%i?\n", modes[i]->w, modes[i]->h);
+
+        // What screen_mode_t would be used for this video mode?
+
+        screen_mode = I_FindScreenMode(modes[i]->w, modes[i]->h);
+
+        // Never choose a screen mode that we cannot run in, or
+        // is poor quality for fullscreen
+
+        if (screen_mode == NULL || screen_mode->poor_quality)
+        {
+        //    printf("\tUnsupported / poor quality\n");
+            continue;
+        }
+
+        // Do we have the exact mode?
+        // If so, no autoadjust needed
+
+        if (screen_width == modes[i]->w && screen_height == modes[i]->h)
+        {
+        //    printf("\tExact mode!\n");
+            return true;
+        }
+
+        // Is this mode better than the current mode?
+
+        diff = (screen_width - modes[i]->w) * (screen_width - modes[i]->w)
+             + (screen_height - modes[i]->h) * (screen_height - modes[i]->h);
+
+        if (diff < best_diff)
+        {
+        //    printf("\tA valid mode\n");
+            best_mode = modes[i];
+            best_diff = diff;
+        }
+    }
+
+    if (best_mode == NULL)
+    {
+        // Unable to find a valid mode!
+
+        return false;
+    }
+
+    printf("I_InitGraphics: %ix%i mode not supported on this machine.\n",
+           screen_width, screen_height);
+
+    screen_width = best_mode->w;
+    screen_height = best_mode->h;
+
+    return true;
+}
+
+// Auto-adjust to a valid windowed mode.
+
+static void AutoAdjustWindowed(void)
+{
+    screen_mode_t *best_mode;
+
+    // Find a screen_mode_t to fit within the current settings
+
+    best_mode = I_FindScreenMode(screen_width, screen_height);
+
+    if (best_mode == NULL)
+    {
+        // Nothing fits within the current settings.
+        // Pick the closest to 320x200 possible.
+
+        best_mode = I_FindScreenMode(SCREENWIDTH, SCREENHEIGHT_4_3);
+    }
+
+    // Switch to the best mode if necessary.
+
+    if (best_mode->width != screen_width || best_mode->height != screen_height)
+    {
+        printf("I_InitGraphics: Cannot run at specified mode: %ix%i\n",
+               screen_width, screen_height);
+
+        screen_width = best_mode->width;
+        screen_height = best_mode->height;
+    }
+}
+
+// Auto-adjust to a valid color depth.
+
+static void AutoAdjustColorDepth(void)
+{
+    SDL_Rect **modes;
+    SDL_PixelFormat format;
+    const SDL_VideoInfo *info;
+    int flags;
+
+    // If screen_bpp=0, we should use the current (default) pixel depth.
+    // Fetch it from SDL.
+
+    if (screen_bpp == 0)
+    {
+        info = SDL_GetVideoInfo();
+
+        if (info != NULL && info->vfmt != NULL)
+        {
+            screen_bpp = info->vfmt->BitsPerPixel;
+        }
+    }
+
+    if (fullscreen)
+    {
+        flags = SDL_FULLSCREEN;
+    }
+    else
+    {
+        flags = 0;
+    }
+
+    format.BitsPerPixel = screen_bpp;
+    format.BytesPerPixel = (screen_bpp + 7) / 8;
+
+    // Are any screen modes supported at the configured color depth?
+
+    modes = SDL_ListModes(&format, flags);
+
+    // If not, we must autoadjust to something sensible.
+
+    if (modes == NULL)
+    {
+        printf("I_InitGraphics: %ibpp color depth not supported.\n",
+               screen_bpp);
+
+        info = SDL_GetVideoInfo();
+
+        if (info != NULL && info->vfmt != NULL)
+        {
+            screen_bpp = info->vfmt->BitsPerPixel;
+        }
+    }
+}
+
+// If the video mode set in the configuration file is not available,
+// try to choose a different mode.
+
+static void I_AutoAdjustSettings(void)
+{
+    int old_screen_w, old_screen_h, old_screen_bpp;
+
+    old_screen_w = screen_width;
+    old_screen_h = screen_height;
+    old_screen_bpp = screen_bpp;
+
+    // Possibly adjust color depth.
+
+    AutoAdjustColorDepth();
+
+    // If we are running fullscreen, try to autoadjust to a valid fullscreen
+    // mode.  If this is impossible, switch to windowed.
+
+    if (fullscreen && !AutoAdjustFullscreen())
+    {
+        fullscreen = 0;
+    }
+
+    // If we are running windowed, pick a valid window size.
+
+    if (!fullscreen)
+    {
+        AutoAdjustWindowed();
+    }
+
+    // Have the settings changed?  Show a message.
+
+    if (screen_width != old_screen_w || screen_height != old_screen_h
+     || screen_bpp != old_screen_bpp)
+    {
+        printf("I_InitGraphics: Auto-adjusted to %ix%ix%ibpp.\n",
+               screen_width, screen_height, screen_bpp);
+
+        printf("NOTE: Your video settings have been adjusted.  "
+               "To disable this behavior,\n"
+               "set autoadjust_video_settings to 0 in your "
+               "configuration file.\n");
+    }
+}
+
 void I_InitGraphics(void)
 {
     SDL_Event dummy;
@@ -745,10 +1017,15 @@ void I_InitGraphics(void)
     //
     int w, h;
 
+    if (autoadjust_video_settings)
+    {
+        I_AutoAdjustSettings();
+    }
+
     w = screen_width;
     h = screen_height;
 
-    C_Printf(CR_GRAY, " I_InitGraphics: Resolution is 640 x 400 x 32 bpp\n");
+    C_Printf(CR_GRAY, " I_InitGraphics: Resolution is %d x %d x %d bpp\n", w, h, screen_bpp);
     C_Printf(CR_GRAY, " Scaling to aspect ratio 16:9 in software mode\n");
     C_Printf(CR_GRAY, " Using 256-color palette from PLAYPAL lump.\n");
 
@@ -773,17 +1050,18 @@ void I_InitGraphics(void)
     }
     SetVideoMode(screen_mode, w, h);
 
-    // Set the palette
-
-    doompal = W_CacheLumpName(DEH_String("PLAYPAL"), PU_CACHE);
-    I_SetPalette(doompal);
-
-    SDL_SetColors(screenbuffer, palette, 0, 256);
-
     // Start with a clear black screen
     // (screen will be flipped after we set the palette)
 
     SDL_FillRect(screenbuffer, NULL, 0);
+
+    // Set the palette
+
+    doompal = W_CacheLumpName(DEH_String("PLAYPAL"), PU_CACHE);
+
+    I_SetPalette(doompal);
+
+    SDL_SetColors(screenbuffer, palette, 0, 256);
 
     UpdateFocus();
 

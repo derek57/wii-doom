@@ -579,7 +579,10 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
                         {
                             AM_Stop ();
                             if(beta_style)
+                            {
                                 ST_doRefresh();
+                                R_SetViewSize (screenblocks, detailLevel);
+                            }
                         }
                     }
                 }
