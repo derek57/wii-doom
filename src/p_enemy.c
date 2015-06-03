@@ -30,6 +30,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "c_io.h"
 #include "doomdef.h"
 
 // State.
@@ -1904,9 +1905,10 @@ A_CloseShotgun2
 
 
 
-mobj_t*                braintargets[32];
+mobj_t**           braintargets;
 int                numbraintargets;
 int                braintargeton = 0;
+static int	   maxbraintargets;     // remove braintargets limit
 
 void A_BrainAwake (mobj_t* mo)
 {
@@ -1929,12 +1931,26 @@ void A_BrainAwake (mobj_t* mo)
 
         if (m->type == MT_BOSSTARGET )
         {
-            braintargets[numbraintargets] = m;
-            numbraintargets++;
+	    // remove braintargets limit
+	    if (numbraintargets == maxbraintargets)
+	    {
+		maxbraintargets = maxbraintargets ? 2 * maxbraintargets : 32;
+		braintargets = realloc(braintargets, maxbraintargets * sizeof(*braintargets));
+
+		if (maxbraintargets > 32)
+		    C_Printf(CR_GOLD, " R_BrainAwake: Raised braintargets limit to %d.\n", maxbraintargets);
+	    }
+
+	    braintargets[numbraintargets] = m;
+	    numbraintargets++;
         }
     }
         
     S_StartSound (NULL,sfx_bossit);
+
+    // no spawn spots available
+    if (numbraintargets == 0)
+	numbraintargets = INT_MIN;
 }
 
 
@@ -2009,6 +2025,14 @@ void A_BrainSpit (mobj_t*        mo)
     if (gameskill <= sk_easy && (!easy))
         return;
                 
+    // avoid division by zero by recalculating the number of spawn spots
+    if (numbraintargets == 0)
+	A_BrainAwake(NULL);
+
+    // still no spawn spots available
+    if (numbraintargets == INT_MIN)
+	return;
+
     // shoot a cube at current target
     targ = braintargets[braintargeton];
     braintargeton = (braintargeton+1)%numbraintargets;
