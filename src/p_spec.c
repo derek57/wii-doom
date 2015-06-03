@@ -372,13 +372,25 @@ P_FindNextHighestFloor
 ( sector_t* sec,
   int       currentheight )
 {
-    int         i;
-    int         h;
-    int         min;
-    line_t*     check;
-    sector_t*   other;
-    fixed_t     height = currentheight;
-    fixed_t     heightlist[MAX_ADJOINING_SECTORS + 2];
+    int             i;
+    int             h;
+    int             min;
+    line_t*         check;
+    sector_t*       other;
+    fixed_t         height = currentheight;
+    static fixed_t* heightlist = NULL;
+    static int      heightlist_size = 0;
+
+    // remove MAX_ADJOINING_SECTORS Vanilla limit
+    // from prboom-plus/src/p_spec.c:404-411
+    if (sec->linecount > heightlist_size)
+    {
+	do
+	{
+	    heightlist_size = heightlist_size ? 2 * heightlist_size : MAX_ADJOINING_SECTORS;
+	} while (sec->linecount > heightlist_size);
+	heightlist = realloc(heightlist, heightlist_size * sizeof(*heightlist));
+    }
 
     for (i=0, h=0; i < sec->linecount; i++)
     {
@@ -390,25 +402,17 @@ P_FindNextHighestFloor
         
         if (other->floor_height > height)
         {
-            C_Printf(CR_RED, " P_FindNextHighestFloor: Overflow of heightlist[%d] array is detected.\n",
-                            MAX_ADJOINING_SECTORS);
+            C_Printf(CR_RED, " P_FindNextHighestFloor: Overflow of heightlist[%d] array is detected.\n", MAX_ADJOINING_SECTORS);
             C_Printf(CR_RED, " Heightlist index %d: ", h);
 
             // Emulation of memory (stack) overflow
             if (h == MAX_ADJOINING_SECTORS + 1)
-            {
                 height = other->floor_height;
-            }
             else if (h <= MAX_ADJOINING_SECTORS + 1)
                 C_Printf(CR_GOLD, " successfully emulated.\n");
-/*
             else if (h == MAX_ADJOINING_SECTORS + 2)
-            {
                 // Fatal overflow: game crashes at 22 textures
-                I_Error("Sector with more than 22 adjoining sectors. "
-                        "Vanilla will crash here");
-            }
-*/
+                C_Printf(CR_GOLD, " P_FindNextHighestFloor: Sector with more than 22 adjoining sectors. Vanilla will crash here");
             else if (h <= MAX_ADJOINING_SECTORS + 6)
                 C_Printf(CR_RED, " Cannot be emulated - unpredictable behaviour.\n");
             else
