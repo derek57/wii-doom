@@ -492,28 +492,28 @@ void R_DrawFuzzColumnLow (void)
 // draw translucent column, low-resolution version
 void R_DrawTLColumnLow (void)
 {
-    int			count;
-    byte*		dest;
-    byte*		dest2;
-    byte*		dest3;
-    byte*		dest4;
-    fixed_t		frac;
-    fixed_t		fracstep;
-    int                 x;
+    int                  count;
+    byte*                dest;
+    byte*                dest2;
+    byte*                dest3;
+    byte*                dest4;
+    fixed_t              frac;
+    fixed_t              fracstep;
+    int                  x;
 
     count = dc_yh - dc_yl;
     if (count < 0)
-	return;
+        return;
 
     x = dc_x << 1;
 
 #ifdef RANGECHECK
     if ((unsigned)x >= SCREENWIDTH
-	|| dc_yl < 0
-	|| dc_yh >= SCREENHEIGHT)
+        || dc_yl < 0
+        || dc_yh >= SCREENHEIGHT)
     {
-	I_Error ( "R_DrawColumn: %i to %i at %i",
-		  dc_yl, dc_yh, x);
+        I_Error ( "R_DrawColumn: %i to %i at %i",
+                  dc_yl, dc_yh, x);
     }
 #endif
 
@@ -527,19 +527,19 @@ void R_DrawTLColumnLow (void)
 
     do
     {
-	*dest = tranmap[(*dest<<8)+dc_colormap[dc_source[frac>>FRACBITS]]];
-	*dest2 = tranmap[(*dest<<8)+dc_colormap[dc_source[frac>>FRACBITS]]];
-	dest += SCREENWIDTH << hires;
-	dest2 += SCREENWIDTH << hires;
-	if (hires)
-	{
-	    *dest3 = tranmap[(*dest<<8)+dc_colormap[dc_source[frac>>FRACBITS]]];
-	    *dest4 = tranmap[(*dest<<8)+dc_colormap[dc_source[frac>>FRACBITS]]];
-	    dest3 += SCREENWIDTH << hires;
-	    dest4 += SCREENWIDTH << hires;
-	}
+        *dest = tranmap[(*dest<<8)+dc_colormap[dc_source[frac>>FRACBITS]]];
+        *dest2 = tranmap[(*dest<<8)+dc_colormap[dc_source[frac>>FRACBITS]]];
+        dest += SCREENWIDTH << hires;
+        dest2 += SCREENWIDTH << hires;
+        if (hires)
+        {
+            *dest3 = tranmap[(*dest<<8)+dc_colormap[dc_source[frac>>FRACBITS]]];
+            *dest4 = tranmap[(*dest<<8)+dc_colormap[dc_source[frac>>FRACBITS]]];
+            dest3 += SCREENWIDTH << hires;
+            dest4 += SCREENWIDTH << hires;
+        }
 
-	frac += fracstep;
+        frac += fracstep;
     } while (count--);
 }  
   
@@ -664,22 +664,22 @@ void R_DrawTranslatedColumnLow (void)
 
 void R_DrawTLColumn (void)
 {
-    int			count;
-    byte*		dest;
-    fixed_t		frac;
-    fixed_t		fracstep;
+    int          count;
+    byte*        dest;
+    fixed_t      frac;
+    fixed_t      fracstep;
 
     count = dc_yh - dc_yl;
     if (count < 0)
-	return;
+        return;
 
 #ifdef RANGECHECK
     if ((unsigned)dc_x >= SCREENWIDTH
-	|| dc_yl < 0
-	|| dc_yh >= SCREENHEIGHT)
+        || dc_yl < 0
+        || dc_yh >= SCREENHEIGHT)
     {
-	I_Error ( "R_DrawColumn: %i to %i at %i",
-		  dc_yl, dc_yh, dc_x);
+        I_Error ( "R_DrawColumn: %i to %i at %i",
+                  dc_yl, dc_yh, dc_x);
     }
 #endif
 
@@ -692,9 +692,9 @@ void R_DrawTLColumn (void)
     {
         // actual translucency map lookup taken from boom202s/R_DRAW.C:255
         *dest = tranmap[(*dest<<8)+dc_colormap[dc_source[frac>>FRACBITS]]];
-	dest += SCREENWIDTH;
+        dest += SCREENWIDTH;
 
-	frac += fracstep;
+        frac += fracstep;
     } while (count--);
 }
 

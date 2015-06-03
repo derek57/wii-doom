@@ -132,9 +132,9 @@ void V_CopyRect(int srcx, int srcy, byte *source,
 
     // prevent framebuffer overflow
     if (destx + width > SCREENWIDTH)
-	width = SCREENWIDTH - destx;
+        width = SCREENWIDTH - destx;
     if (desty + height > SCREENHEIGHT)
-	height = SCREENHEIGHT - desty;
+        height = SCREENHEIGHT - desty;
 
     V_MarkRect(destx, desty, width, height); 
  

@@ -96,10 +96,9 @@ fixed_t            bmaporgy;
 
 static int         totallines;
 
-short*             blockmap;        // int for larger maps
-
 // offsets in blockmap are from here
-short*             blockmaplump;                
+int64_t*           blockmaplump; // BLOCKMAP limit
+int64_t*           blockmap;     // int for larger maps (BLOCKMAP limit)
 
 
 // REJECT
@@ -582,21 +581,33 @@ void P_LoadBlockMap (int lump)
     int i;
     int count;
     int lumplen;
+    short *wadblockmaplump;
 
     lumplen = W_LumpLength(lump);
     count = lumplen / 2;
         
-    blockmaplump = Z_Malloc(lumplen, PU_LEVEL, NULL);
+    // remove BLOCKMAP limit
+    // adapted from boom202s/P_SETUP.C:1025-1076
+    wadblockmaplump = Z_Malloc(lumplen, PU_LEVEL, NULL);
     W_ReadLump(lump, blockmaplump);
+    blockmaplump = Z_Malloc(sizeof(*blockmaplump) * count, PU_LEVEL, NULL);
     blockmap = blockmaplump + 4;
+
+    blockmaplump[0] = SHORT(wadblockmaplump[0]);
+    blockmaplump[1] = SHORT(wadblockmaplump[1]);
+    blockmaplump[2] = (int64_t)(SHORT(wadblockmaplump[2])) & 0xffff;
+    blockmaplump[3] = (int64_t)(SHORT(wadblockmaplump[3])) & 0xffff;
 
     // Swap all short integers to native byte ordering.
   
-    for (i=0; i<count; i++)
+    for (i=4; i<count; i++)
     {
-        blockmaplump[i] = SHORT(blockmaplump[i]);
+	short t = SHORT(wadblockmaplump[i]);
+	blockmaplump[i] = (t == -1) ? -1l : (int64_t) t & 0xffff;
     }
                 
+    Z_Free(wadblockmaplump);
+
     // Read the header
 
     bmaporgx = blockmaplump[0]<<FRACBITS;

@@ -204,7 +204,7 @@ void D_Display (void)
     static  boolean             menuactivestate = false;
     static  boolean             inhelpscreensstate = false;
     static  boolean             fullscreen = false;
-    static  char		menushade; // shade menu background
+    static  char                menushade; // shade menu background
     static  gamestate_t         oldgamestate = -1;
     static  int                 borderdrawcount;
     int                         nowtime;
@@ -337,23 +337,23 @@ void D_Display (void)
     // shade background when a menu is active or the game is paused
     if (paused || menuactive)
     {
-	static int firsttic;
+        static int firsttic;
 
-	for (y = 0; y < SCREENWIDTH * SCREENHEIGHT; y++)
-	    I_VideoBuffer[y] = colormaps[menushade * 256 + I_VideoBuffer[y]];
+        for (y = 0; y < SCREENWIDTH * SCREENHEIGHT; y++)
+            I_VideoBuffer[y] = colormaps[menushade * 256 + I_VideoBuffer[y]];
 
-	if (menushade < 16 && gametic != firsttic)
-	{
-	    menushade += ticdup;
-	    firsttic = gametic;
-	}
+        if (menushade < 16 && gametic != firsttic)
+        {
+            menushade += ticdup;
+            firsttic = gametic;
+        }
 
-	// force redraw of status bar and border
-	viewactivestate = false;
-	inhelpscreensstate = true;
+        // force redraw of status bar and border
+        viewactivestate = false;
+        inhelpscreensstate = true;
     }
     else if (menushade)
-	menushade = 0;
+        menushade = 0;
 
     C_Drawer();
 
@@ -939,22 +939,6 @@ void D_DoomMain (void)
         I_QuitSerialFail();
     }
 
-    if(print_resource_pwad2_error)
-    {
-        printf("\n\n\n\n\n");
-        printf(" ===============================================================================");
-        printf("                         !!! WRONG RESOURCE PWAD FILE !!!                       ");
-        printf("                 PLEASE COPY THE FILE 'DOOM1EXTRAS.WAD' THAT CAME               ");
-        printf("                    WITH THIS RELEASE, INTO THE GAME DIRECTORY                  \n");
-        printf("                                                                                \n");
-        printf("                                QUITTING NOW ...                                ");
-        printf(" ===============================================================================");
-
-        sleep(5);
-
-        I_QuitSerialFail();
-    }
-
     if (fsize != 4261144  &&  // DOOM BETA v1.4
         fsize != 4271324  &&  // DOOM BETA v1.5
         fsize != 4211660  &&  // DOOM BETA v1.6
@@ -1488,8 +1472,29 @@ void D_DoomMain (void)
     {
         W_CheckSize(5);
 
-        if(fsizerw2 == 592573)
-            W_MergeFile("usb:/apps/wiidoom/doom1extras.wad", true);
+        if(fsizerw2 == 658313)
+        {
+            if(usb)
+                W_MergeFile("usb:/apps/wiidoom/doom1extras.wad", true);
+            else if(sd)
+                W_MergeFile("sd:/apps/wiidoom/doom1extras.wad", true);
+        }
+    }
+
+    if(print_resource_pwad2_error)
+    {
+        printf("\n\n\n\n\n");
+        printf(" ===============================================================================");
+        printf("                         !!! WRONG RESOURCE PWAD FILE !!!                       ");
+        printf("                 PLEASE COPY THE FILE 'DOOM1EXTRAS.WAD' THAT CAME               ");
+        printf("                    WITH THIS RELEASE, INTO THE GAME DIRECTORY                  \n");
+        printf("                                                                                \n");
+        printf("                                QUITTING NOW ...                                ");
+        printf(" ===============================================================================");
+
+        sleep(5);
+
+        I_QuitSerialFail();
     }
 
     if(devparm)

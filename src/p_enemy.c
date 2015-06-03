@@ -1237,9 +1237,9 @@ void A_VileChase (mobj_t* actor)
                     corpsehit->health = info->spawnhealth;
                     P_SetTarget(&corpsehit->target, NULL);
 
-		    // resurrected pools of gore ("ghost monsters") are translucent
-		    if (corpsehit->height == 0 && corpsehit->radius == 0)
-		        corpsehit->flags |= MF_TRANSLUCENT;
+                    // resurrected pools of gore ("ghost monsters") are translucent
+                    if (corpsehit->height == 0 && corpsehit->radius == 0)
+                        corpsehit->flags |= MF_TRANSLUCENT;
 
                     return;
                 }
@@ -1523,8 +1523,8 @@ A_PainShootSkull
     currentthinker = thinkercap.next;
     while (currentthinker != &thinkercap)
     {
-	if (   (currentthinker->function.acp1 == (actionf_p1)P_MobjThinker)
-	    && (((mobj_t *)currentthinker)->type == MT_SKULL ||
+        if (   (currentthinker->function.acp1 == (actionf_p1)P_MobjThinker)
+            && (((mobj_t *)currentthinker)->type == MT_SKULL ||
                 ((mobj_t *)currentthinker)->type == MT_SKULL))
             count++;
         currentthinker = currentthinker->next;
@@ -1570,7 +1570,7 @@ A_PainShootSkull
                 
     // Lost Souls bleed Puffs
     if (d_colblood2 && d_chkblood2)
-	newmobj->flags |= MF_NOBLOOD;
+        newmobj->flags |= MF_NOBLOOD;
 
     P_SetTarget(&newmobj->target, actor->target);
     A_SkullAttack (newmobj);
@@ -1681,7 +1681,8 @@ static boolean CheckBossEnd(mobjtype_t motype)
 
         // Baron death on later episodes is nothing special.
 
-        if (motype == MT_BRUISER && gameepisode != 1)
+        if(((motype == MT_BRUISER && !beta_style) ||
+            (motype == MT_BETABRUISER && beta_style)) && gameepisode != 1)
         {
             return false;
         }
@@ -1698,7 +1699,10 @@ static boolean CheckBossEnd(mobjtype_t motype)
         switch(gameepisode)
         {
             case 1:
-                return gamemap == 8 && motype == MT_BRUISER;
+                if(beta_style)
+                    return gamemap == 8 && motype == MT_BETABRUISER;
+                else
+                    return gamemap == 8 && motype == MT_BRUISER;
 
             case 2:
                 return gamemap == 8 && motype == MT_CYBORG;
@@ -2072,9 +2076,15 @@ void A_SpawnFly (mobj_t* mo)
     else if (r<246)
         type = MT_KNIGHT;
     else
-        type = MT_BRUISER;                
+    {
+        if(beta_style)
+            type = MT_BETABRUISER;
+        else
+            type = MT_BRUISER;
+    }
 
-    newmobj        = P_SpawnMobj (targ->x, targ->y, targ->z, type);
+    newmobj = P_SpawnMobj (targ->x, targ->y, targ->z, type);
+
     if (P_LookForPlayers (newmobj, true) )
         P_SetMobjState (newmobj, newmobj->info->seestate);
         

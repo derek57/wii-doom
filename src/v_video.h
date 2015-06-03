@@ -57,7 +57,7 @@ extern boolean dp_translucent;
 static inline void V_ClearDPTranslation(void)
 {
     if (dp_translation)
-	dp_translation = NULL;
+        dp_translation = NULL;
 }
 
 void V_SetPatchClipCallback(vpatchclipfunc_t func);

@@ -413,8 +413,8 @@ R_DrawVisSprite
     }
     else if (vis->translation)
     {
-	colfunc = transcolfunc;
-	dc_translation = vis->translation;
+        colfunc = transcolfunc;
+        dc_translation = vis->translation;
     }
         
     // translucent sprites
@@ -422,7 +422,7 @@ R_DrawVisSprite
         ((vis->mobjflags & MF_TRANSLUCENT) ||
         ((vis->mobjflags & MF_SHADOW) && TRANSLUCENT_SHADOW)))
     {
-	colfunc = tlcolfunc;
+        colfunc = tlcolfunc;
     }
 
     dc_iscale = abs(vis->xiscale)>>(detailshift && !hires);                // CHANGED FOR HIRES
@@ -571,8 +571,8 @@ void R_ProjectSprite (mobj_t* thing)
     if (sprframe->rotate)
     {
         // choose a different rotation based on player view
-	ang = R_PointToAngle (interpx, interpy);
-	rot = (ang-interpangle+(unsigned)(ANG45/2)*9)>>29;
+        ang = R_PointToAngle (interpx, interpy);
+        rot = (ang-interpangle+(unsigned)(ANG45/2)*9)>>29;
         lump = sprframe->lump[rot];
         flip = (boolean)sprframe->flip[rot];
     }
@@ -686,26 +686,28 @@ void R_ProjectSprite (mobj_t* thing)
         thing->type == MT_FLESH))
     {
         // Thorn Things in Hacx bleed green blood
-	if (gamemission == pack_hacx)
-	{
-	    if (thing->target->type == MT_BABY)
-	    {
-		vis->translation = crx[CRX_GREEN];
-	    }
-	}
-	else
-	{
-	    // Barons of Hell and Hell Knights bleed green blood
-	    if (thing->target->type == MT_BRUISER || thing->target->type == MT_KNIGHT)
-	    {
-		vis->translation = crx[CRX_GREEN];
-	    }
-	    // Cacodemons bleed blue blood
-	    else if (thing->target->type == MT_HEAD)
-	    {
-		vis->translation = crx[CRX_BLUE];
-	    }
-	}
+        if (gamemission == pack_hacx)
+        {
+            if (thing->target->type == MT_BABY)
+            {
+                vis->translation = crx[CRX_GREEN];
+            }
+        }
+        else
+        {
+            // Barons of Hell and Hell Knights bleed green blood
+            if ((thing->target->type == MT_BRUISER && !beta_style) ||
+                (thing->target->type == MT_BETABRUISER && beta_style) ||
+                thing->target->type == MT_KNIGHT)
+            {
+                vis->translation = crx[CRX_GREEN];
+            }
+            // Cacodemons bleed blue blood
+            else if (thing->target->type == MT_HEAD)
+            {
+                vis->translation = crx[CRX_BLUE];
+            }
+        }
     }
 }
 
@@ -829,7 +831,7 @@ void R_DrawPSprite (pspdef_t* psp, psprnum_t psprnum)
     // do not invalidate colormap if invisibility is rendered translucently
     if ((viewplayer->powers[pw_invisibility] > 4*32
         || viewplayer->powers[pw_invisibility] & 8)
-	&& !TRANSLUCENT_SHADOW && !beta_style)
+        && !TRANSLUCENT_SHADOW && !beta_style)
     {
         // shadow draw
         vis->colormap = NULL;
@@ -855,7 +857,7 @@ void R_DrawPSprite (pspdef_t* psp, psprnum_t psprnum)
         viewplayer->powers[pw_invisibility] & 8) &&
         TRANSLUCENT_SHADOW)
     {
-	vis->mobjflags |= MF_TRANSLUCENT;
+        vis->mobjflags |= MF_TRANSLUCENT;
     }
 
     // translucent gun flash sprites

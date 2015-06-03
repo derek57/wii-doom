@@ -833,7 +833,7 @@ P_KillMobj
             if(target->type == MT_KNIGHT)
                 i = 2000;
 
-            if(target->type == MT_BRUISER)
+            if(target->type == MT_BRUISER || target->type == MT_BETABRUISER)
                 i = 2500;
 
             if(target->type == MT_BABY)
@@ -865,8 +865,8 @@ P_KillMobj
 
             while (source->player->score >= source->player->nextextra)
             {
-		source->player->nextextra += EXTRAPOINTS;
-		source->player->extra_lifes += 1;
+                source->player->nextextra += EXTRAPOINTS;
+                source->player->extra_lifes += 1;
 
                 if (source->player->score > 0 && source->player->score < EXTRAPOINTS)
                     source->player->extra_lifes = 0;

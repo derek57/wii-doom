@@ -401,52 +401,51 @@ char distortedflat[4096];
 
 char *R_DistortedFlat(int flatnum)
 {
-  static int swirltic = -1;
-  static int offset[4096];
-  int i;
-  int leveltic = I_GetTime();
+    static int swirltic = -1;
+    static int offset[4096];
+    int i;
+    int leveltic = I_GetTime();
   
-  // built this tic?
+    // built this tic?
 
-  if(gametic != swirltic)
+    if(gametic != swirltic)
     {
-      int x, y;
+        int x, y;
       
-      for(x=0; x<64; x++)
-	for(y=0; y<64; y++)
-	  {
-	    int x1, y1;
-	    int sinvalue, sinvalue2;
+        for(x=0; x<64; x++)
+        {
+            for(y=0; y<64; y++)
+            {
+                int x1, y1;
+                int sinvalue, sinvalue2;
 
-	    sinvalue = (y * swirlfactor + leveltic*SPEED*5 + 900) & 8191;
-	    sinvalue2 = (x * swirlfactor2 + leveltic*SPEED*4 + 300) & 8191;
-	    x1 = x + 128
-	      + ((finesine[sinvalue]*AMP) >> FRACBITS)
-	      + ((finesine[sinvalue2]*AMP2) >> FRACBITS);
+                sinvalue = (y * swirlfactor + leveltic*SPEED*5 + 900) & 8191;
+                sinvalue2 = (x * swirlfactor2 + leveltic*SPEED*4 + 300) & 8191;
+                x1 = x + 128 + ((finesine[sinvalue]*AMP) >> FRACBITS) +
+                        ((finesine[sinvalue2]*AMP2) >> FRACBITS);
 
-	    sinvalue = (x * swirlfactor + leveltic*SPEED*3 + 700) & 8191;
-	    sinvalue2 = (y * swirlfactor2 + leveltic*SPEED*4 + 1200) & 8191;
-	    y1 = y + 128
-	      + ((finesine[sinvalue]*AMP) >> FRACBITS)
-	      + ((finesine[sinvalue2]*AMP2) >> FRACBITS);
+                sinvalue = (x * swirlfactor + leveltic*SPEED*3 + 700) & 8191;
+                sinvalue2 = (y * swirlfactor2 + leveltic*SPEED*4 + 1200) & 8191;
+                y1 = y + 128 + ((finesine[sinvalue]*AMP) >> FRACBITS) +
+                        ((finesine[sinvalue2]*AMP2) >> FRACBITS);
 
-	    x1 &= 63; y1 &= 63;
+                x1 &= 63; y1 &= 63;
 
-	    offset[(y<<6) + x] = (y1<<6) + x1;
-	  }
-
-      swirltic = gametic;
+                offset[(y<<6) + x] = (y1<<6) + x1;
+            }
+        }
+        swirltic = gametic;
     }
 
-  normalflat = W_CacheLumpNum(firstflat + flatnum, PU_STATIC);
+    normalflat = W_CacheLumpNum(firstflat + flatnum, PU_STATIC);
 
-  for(i=0; i<4096; i++)
-    distortedflat[i] = normalflat[offset[i]];
+    for(i=0; i<4096; i++)
+        distortedflat[i] = normalflat[offset[i]];
 
-  // free the original
-  Z_ChangeTag(normalflat, PU_CACHE);
+    // free the original
+    Z_ChangeTag(normalflat, PU_CACHE);
 
-  return distortedflat;
+    return distortedflat;
 }
 
 //
@@ -520,8 +519,8 @@ void R_DrawPlanes (void)
             lumpnum = firstflat + flattranslation[pl->picnum];
             swirling = flattranslation[pl->picnum] == -1;
             ds_source =  swirling ?
-	            R_DistortedFlat(pl->picnum): W_CacheLumpNum(lumpnum,
-		            PU_STATIC);
+                    R_DistortedFlat(pl->picnum): W_CacheLumpNum(lumpnum,
+                            PU_STATIC);
 
             planeheight = abs(pl->height-viewz);
             light = (pl->lightlevel >> LIGHTSEGSHIFT)+extralight;

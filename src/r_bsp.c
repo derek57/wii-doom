@@ -372,12 +372,12 @@ void R_AddLine (seg_t*     line)
 
     // Closed door.
     if (backsector->interpceilingheight <= frontsector->interpfloorheight
-	|| backsector->interpfloorheight >= frontsector->interpceilingheight)
+        || backsector->interpfloorheight >= frontsector->interpceilingheight)
         goto clipsolid;                
 
     // Window.
     if (backsector->interpceilingheight != frontsector->interpceilingheight
-	|| backsector->interpfloorheight != frontsector->interpfloorheight)
+        || backsector->interpfloorheight != frontsector->interpfloorheight)
         goto clippass;        
                 
     // Reject empty lines used for triggers

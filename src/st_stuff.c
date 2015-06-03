@@ -623,7 +623,7 @@ void ST_drawEx(void)
     player_t* player = &players[consoleplayer];
 
     if (d_translucency && hud && !automapactive)
-	dp_translucent = true;
+        dp_translucent = true;
     {
         ammotype_t ammo;
 
@@ -699,7 +699,7 @@ void ST_drawEx(void)
     }
 
     if (dp_translucent)
-	dp_translucent = false;
+        dp_translucent = false;
 }
 
 

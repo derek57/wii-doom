@@ -1934,12 +1934,12 @@ void M_DrawLoad(void)
     {
         M_DrawSaveLoadBorder(LoadDef.x+5,LoadDef.y+LINEHEIGHT_SMALL*i);
 
-	if (!strncmp(savegamestrings[i], EMPTYSTRING, strlen(EMPTYSTRING)))
-	    dp_translation = crx[CRX_DARK];
+        if (!strncmp(savegamestrings[i], EMPTYSTRING, strlen(EMPTYSTRING)))
+            dp_translation = crx[CRX_DARK];
 
- 	M_WriteText(LoadDef.x,LoadDef.y-1+LINEHEIGHT_SMALL*i,savegamestrings[i]);
+        M_WriteText(LoadDef.x,LoadDef.y-1+LINEHEIGHT_SMALL*i,savegamestrings[i]);
 
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
 
     M_WriteText(62, 148, "* INDICATES A SAVEGAME THAT WAS");
@@ -2205,26 +2205,26 @@ void M_DrawSound(void)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(SoundDef.x + 212, SoundDef.y + 18, "OPL");
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(SoundDef.x + 212, SoundDef.y + 18, "OGG");
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
 
     if(swap_sound_chans)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(SoundDef.x + 220, SoundDef.y + 28, "ON");
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(SoundDef.x + 212, SoundDef.y + 28, "OFF");
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
 
     if(mus_engine < 1)
@@ -2592,52 +2592,52 @@ void M_DrawScreen(void)
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(ScreenDef.x + 180, ScreenDef.y + 18, "LOW");
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(ScreenDef.x + 177, ScreenDef.y + 18, "HIGH");
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
 
     if(d_translucency > 0)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(ScreenDef.x + 189, ScreenDef.y + 28, "ON");
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(ScreenDef.x + 181, ScreenDef.y + 28, "OFF");
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
 
     if(d_colblood)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(ScreenDef.x + 189, ScreenDef.y + 38, "ON");
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(ScreenDef.x + 181, ScreenDef.y + 38, "OFF");
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
 
     if(d_colblood2)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(ScreenDef.x + 189, ScreenDef.y + 48, "ON");
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(ScreenDef.x + 181, ScreenDef.y + 48, "OFF");
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
 
     M_DrawThermoSmall(ScreenDef.x + 120, ScreenDef.y + LINEHEIGHT_SMALL * (scrnsize + 1),
@@ -2673,7 +2673,7 @@ void M_DrawGame(void)
         {
             dp_translation = crx[CRX_GREEN];
             M_WriteText(GameDef.x + 141, GameDef.y + 128, DEH_String("ON"));
-	    V_ClearDPTranslation();
+            V_ClearDPTranslation();
         }
         else
         {
@@ -2692,169 +2692,169 @@ void M_DrawGame(void)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef.x + 141, GameDef.y - 2, DEH_String("ON"));
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
     else if(drawgrid == 0)
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(GameDef.x + 133, GameDef.y - 2, DEH_String("OFF"));
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
 
     if(am_rotate == true)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef.x + 141, GameDef.y + 8, DEH_String("ON"));
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
     else if(am_rotate == false)
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(GameDef.x + 133, GameDef.y + 8, DEH_String("OFF"));
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
 
     if(followplayer == 1)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef.x + 141, GameDef.y + 18, DEH_String("ON"));
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
     else if(followplayer == 0)
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(GameDef.x + 133, GameDef.y + 18, DEH_String("OFF"));
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
 
     if(show_stats == 1)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef.x + 141, GameDef.y + 28, DEH_String("ON"));
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
     else if (show_stats == 0)
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(GameDef.x + 133, GameDef.y + 28, DEH_String("OFF"));
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
 
     if(hud)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef.x + 141, GameDef.y + 38, DEH_String("ON"));
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(GameDef.x + 133, GameDef.y + 38, DEH_String("OFF"));
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
 
     if(showMessages)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef.x + 141, GameDef.y + 48, DEH_String("ON"));
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(GameDef.x + 133, GameDef.y + 48, DEH_String("OFF"));
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
 
     if(crosshair == 1)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef.x + 141, GameDef.y + 58, DEH_String("ON"));
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
     else if (crosshair == 0)
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(GameDef.x + 133, GameDef.y + 58, DEH_String("OFF"));
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
 
     if(jumping)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef.x + 141, GameDef.y + 68, DEH_String("ON"));
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(GameDef.x + 133, GameDef.y + 68, DEH_String("OFF"));
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
 
     if(use_vanilla_weapon_change == 1)
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(GameDef.x + 125, GameDef.y + 78, DEH_String("SLOW"));
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
     else if(use_vanilla_weapon_change == 0)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef.x + 126, GameDef.y + 78, DEH_String("FAST"));
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
 
     if(d_recoil)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef.x + 141, GameDef.y + 88, DEH_String("ON"));
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(GameDef.x + 133, GameDef.y + 88, DEH_String("OFF"));
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
 
     if(d_thrust)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef.x + 141, GameDef.y + 98, DEH_String("ON"));
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(GameDef.x + 133, GameDef.y + 98, DEH_String("OFF"));
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
 
     if(respawnparm)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef.x + 141, GameDef.y + 108, DEH_String("ON"));
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(GameDef.x + 133, GameDef.y + 108, DEH_String("OFF"));
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
 
     if(fastparm)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef.x + 141, GameDef.y + 118, DEH_String("ON"));
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(GameDef.x + 133, GameDef.y + 118, DEH_String("OFF"));
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
 }
 
@@ -2881,117 +2881,117 @@ void M_DrawGame2(void)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef.x + 153, GameDef.y - 2, DEH_String("ON"));
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(GameDef.x + 145, GameDef.y - 2, DEH_String("OFF"));
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
 
     if(d_maxgore)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef.x + 153, GameDef.y + 8, DEH_String("ON"));
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(GameDef.x + 145, GameDef.y + 8, DEH_String("OFF"));
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
 
     if(d_footstep)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef.x + 153, GameDef.y + 18, DEH_String("ON"));
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(GameDef.x + 145, GameDef.y + 18, DEH_String("OFF"));
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
 
     if(d_footclip)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef.x + 153, GameDef.y + 28, DEH_String("ON"));
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(GameDef.x + 145, GameDef.y + 28, DEH_String("OFF"));
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
 
     if(d_splash)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef.x + 153, GameDef.y + 38, DEH_String("ON"));
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(GameDef.x + 145, GameDef.y + 38, DEH_String("OFF"));
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
 
     if(d_swirl)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef.x + 153, GameDef.y + 48, DEH_String("ON"));
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(GameDef.x + 145, GameDef.y + 48, DEH_String("OFF"));
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
 
     if(beta_style_mode)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef.x + 153, GameDef.y + 58, DEH_String("ON"));
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(GameDef.x + 145, GameDef.y + 58, DEH_String("OFF"));
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
 
     if(d_flipcorpses)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef.x + 153, GameDef.y + 68, DEH_String("ON"));
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(GameDef.x + 145, GameDef.y + 68, DEH_String("OFF"));
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
 
     if(d_secrets)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef.x + 153, GameDef.y + 78, DEH_String("ON"));
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(GameDef.x + 145, GameDef.y + 78, DEH_String("OFF"));
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
 }
 
@@ -3052,13 +3052,13 @@ void M_DrawCheats(void)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(223, 26, DEH_String("ON"));
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(215, 26, DEH_String("OFF"));
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
 
     M_WriteText(72, 36, DEH_String("NOCLIP"));
@@ -3067,13 +3067,13 @@ void M_DrawCheats(void)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(223, 36, DEH_String("ON"));
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(215, 36, DEH_String("OFF"));
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
 
     dp_translation = crx[CRX_GRAY];
@@ -3098,19 +3098,19 @@ void M_DrawCheats(void)
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(215, 86, DEH_String("OFF"));
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
     else if (cheating && cheeting!=2)
     {
         dp_translation = crx[CRX_GOLD];
         M_WriteText(199, 86, DEH_String("WALLS"));
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
     else if (cheating && cheeting==2)          
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(215, 86, DEH_String("ALL"));
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
     M_WriteText(72, 96, DEH_String("KILL ALL ENEMIES"));
     M_WriteText(72, 106, DEH_String("WARP TO MAP:"));
@@ -3134,43 +3134,43 @@ void M_DrawCheats(void)
 
         if(fsize == 12538385 && epi == 1 && map == 10)
         {
-	    dp_translation = crx[CRX_GRAY];
+            dp_translation = crx[CRX_GRAY];
             M_WriteText(72, 116, "E1M10: SEWERS");
             V_ClearDPTranslation();
         }
         if(epi == 1 && gameversion != exe_chex && map != 10)
         {
-	    dp_translation = crx[CRX_GRAY];
+            dp_translation = crx[CRX_GRAY];
             M_WriteText(72, 116, maptext[map]);
             V_ClearDPTranslation();
         }
         else if(epi == 2 && gameversion != exe_chex)
         {
-	    dp_translation = crx[CRX_GRAY];
+            dp_translation = crx[CRX_GRAY];
             M_WriteText(72, 116, maptext[map+9]);
             V_ClearDPTranslation();
         }
         else if(epi == 3 && gameversion != exe_chex)
         {
-	    dp_translation = crx[CRX_GRAY];
+            dp_translation = crx[CRX_GRAY];
             M_WriteText(72, 116, maptext[map+18]);
             V_ClearDPTranslation();
         }
         else if(epi == 4 && gameversion != exe_chex)
         {
-	    dp_translation = crx[CRX_GRAY];
+            dp_translation = crx[CRX_GRAY];
             M_WriteText(72, 116, maptext[map+27]);
             V_ClearDPTranslation();
         }
         else if(epi == 1 && gameversion == exe_chex && !is_chex_2)
         {
-	    dp_translation = crx[CRX_GRAY];
+            dp_translation = crx[CRX_GRAY];
             M_WriteText(72, 116, maptext[map+132]);
             V_ClearDPTranslation();
         }
         else if(epi == 1 && gameversion == exe_chex && is_chex_2)
         {
-	    dp_translation = crx[CRX_GRAY];
+            dp_translation = crx[CRX_GRAY];
             M_WriteText(72, 116, maptext[map+137]);
             V_ClearDPTranslation();
         }
@@ -3181,44 +3181,44 @@ void M_DrawCheats(void)
             fsize == 14683458 || fsize == 14691821 || fsize == 28422764) &&
             map < 33)
     {
-	dp_translation = crx[CRX_GRAY];
+        dp_translation = crx[CRX_GRAY];
         M_WriteText(72, 116, maptext[map+36]);
         V_ClearDPTranslation();
     }
     if((fsize == 14677988 || fsize == 14683458 || fsize == 14691821) &&
         map == 33)
     {
-	dp_translation = crx[CRX_GRAY];
+        dp_translation = crx[CRX_GRAY];
         M_WriteText(72, 116, "LEVEL 33: BETRAY");        
         V_ClearDPTranslation();
     }
     if(fsize == 18195736 || fsize == 18654796)
     {
-	dp_translation = crx[CRX_GRAY];
+        dp_translation = crx[CRX_GRAY];
         M_WriteText(72, 116, maptext[map+68]);
         V_ClearDPTranslation();
     }
     if(fsize == 18240172 || fsize == 17420824)
     {
-	dp_translation = crx[CRX_GRAY];
+        dp_translation = crx[CRX_GRAY];
         M_WriteText(72, 116, maptext[map+100]);
         V_ClearDPTranslation();
     }
     if(fsize == 19321722)
     {
-	dp_translation = crx[CRX_GRAY];
+        dp_translation = crx[CRX_GRAY];
         M_WriteText(72, 116, maptext[map+142]);
         V_ClearDPTranslation();
     }
     if(fsize == 12361532 && !is_chex_2)
     {
-	dp_translation = crx[CRX_GRAY];
+        dp_translation = crx[CRX_GRAY];
         M_WriteText(72, 116, maptext[map+132]);
         V_ClearDPTranslation();
     }
     if(fsize == 12361532 && is_chex_2)
     {
-	dp_translation = crx[CRX_GRAY];
+        dp_translation = crx[CRX_GRAY];
         M_WriteText(72, 116, maptext[map+137]);
         V_ClearDPTranslation();
     }
@@ -3232,7 +3232,7 @@ void M_DrawCheats(void)
         if(faketracknum == 0)
             faketracknum = 1;
 
-	dp_translation = crx[CRX_GRAY];
+        dp_translation = crx[CRX_GRAY];
         M_WriteText(220, 156, songtextbeta[tracknum]);
         V_ClearDPTranslation();
     }
@@ -3245,13 +3245,13 @@ void M_DrawCheats(void)
 
         if(fsize == 12361532)
         {
-	    dp_translation = crx[CRX_GRAY];
+            dp_translation = crx[CRX_GRAY];
             M_WriteText(220, 156, songtextchex[tracknum]);
             V_ClearDPTranslation();
         }
         else
         {
-	    dp_translation = crx[CRX_GRAY];
+            dp_translation = crx[CRX_GRAY];
             M_WriteText(220, 156, songtext[tracknum]);
             V_ClearDPTranslation();
         }
@@ -3266,19 +3266,19 @@ void M_DrawCheats(void)
 
         if(fsize == 19321722)
         {
-	    dp_translation = crx[CRX_GRAY];
+            dp_translation = crx[CRX_GRAY];
             M_WriteText(220, 156, songtext2hacx[tracknum]);
             V_ClearDPTranslation();
         }
         else if(fsize == 28422764)
         {
-	    dp_translation = crx[CRX_GRAY];
+            dp_translation = crx[CRX_GRAY];
             M_WriteText(220, 156, songtext2fd[tracknum]);
             V_ClearDPTranslation();
         }
         else
         {
-	    dp_translation = crx[CRX_GRAY];
+            dp_translation = crx[CRX_GRAY];
             M_WriteText(220, 156, songtext2[tracknum]);
             V_ClearDPTranslation();
         }
@@ -3288,7 +3288,7 @@ void M_DrawCheats(void)
         if(tracknum == 1)
             tracknum = 33;
 
-	dp_translation = crx[CRX_GRAY];
+        dp_translation = crx[CRX_GRAY];
         M_WriteText(220, 156, songtexttnt[tracknum]);
         V_ClearDPTranslation();
     }
@@ -3297,7 +3297,7 @@ void M_DrawCheats(void)
         if(tracknum == 1)
             tracknum = 33;
 
-	dp_translation = crx[CRX_GRAY];
+        dp_translation = crx[CRX_GRAY];
         M_WriteText(220, 156, songtextplut[tracknum]);
         V_ClearDPTranslation();
     }
@@ -3803,13 +3803,13 @@ void M_Translucency(int choice)
 
     // translucent HUD?
     if (screenblocks > TRANSLUCENT_HUD)
-	M_SizeDisplay(0);
+        M_SizeDisplay(0);
 }
 
 void M_ColoredBloodA(int choice)
 {
     if (!d_chkblood)
-	return;
+        return;
 
     choice = 0;
     d_colblood = 1 - !!d_colblood;
@@ -3818,7 +3818,7 @@ void M_ColoredBloodA(int choice)
 void M_ColoredBloodB(int choice)
 {
     if (!d_chkblood2)
-	return;
+        return;
 
     choice = 0;
     d_colblood2 = 1 - !!d_colblood2;
@@ -3889,10 +3889,10 @@ M_DrawThermo
 
 void
 M_DrawThermoSmall
-( int	x,
-  int	y,
-  int	thermWidth,
-  int	thermDot )
+( int        x,
+  int        y,
+  int        thermWidth,
+  int        thermDot )
 {
     int         xx;
     int         yy;
@@ -4029,7 +4029,7 @@ void M_WriteText(int x, int y, char* string)
             continue;
         }
 
-	if (c == '\x1b')
+        if (c == '\x1b')
         {
             c = *ch++;
             dp_translation = crx[(int) (c - '0')];
@@ -4437,7 +4437,7 @@ void M_Drawer (void)
             current_height == 0)
     {
         M_WriteText(140, 12, "BETA");
-	BorderNeedRefresh = true;
+        BorderNeedRefresh = true;
     }
 
     if(coordinates_info)
@@ -4558,10 +4558,10 @@ void M_Drawer (void)
 
         if(*name)
         {
-	    if ((currentMenu == &FilesDef && i == savegame && !usergame) ||
-	        (currentMenu == &FilesDef && i == endgame && !usergame) ||
-	        (currentMenu == &FilesDef && i == loadgame && netgame))
-	        dp_translation = crx[CRX_DARK];
+            if ((currentMenu == &FilesDef && i == savegame && !usergame) ||
+                (currentMenu == &FilesDef && i == endgame && !usergame) ||
+                (currentMenu == &FilesDef && i == loadgame && netgame))
+                dp_translation = crx[CRX_DARK];
 
             M_WriteText(x, y - 2, item->name);
 
@@ -5330,12 +5330,12 @@ void M_ItemsK(int choice)
         && gameskill != sk_nightmare &&
         players[consoleplayer].playerstate == PST_LIVE)
     {
-	static player_t* player;
-	player = &players[consoleplayer];
+        static player_t* player;
+        player = &players[consoleplayer];
 
-	P_UseArtifact(player, arti_fly);
+        P_UseArtifact(player, arti_fly);
 
-	player->message = DEH_String("FLIGHT ADDED");
+        player->message = DEH_String("FLIGHT ADDED");
     }
     DetectState();
 }
@@ -6055,19 +6055,19 @@ void M_DrawControls(void)
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(ControlsDef.x + 276, ControlsDef.y + 38, "OFF");
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
     else if(mouselook == 1)
     {
         dp_translation = crx[CRX_GOLD];
         M_WriteText(ControlsDef.x + 251, ControlsDef.y + 38, "NORMAL");
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
     else if(mouselook == 2)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(ControlsDef.x + 250, ControlsDef.y + 38, "INVERSE");
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
     M_WriteText(ControlsDef.x, ControlsDef.y - 12, "SPEEDS:");
 
@@ -6712,26 +6712,26 @@ void M_DrawSystem(void)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(SystemDef.x + 118, SystemDef.y - 2, "ON");
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(SystemDef.x + 110, SystemDef.y - 2, "OFF");
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
 
     if(display_ticker)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(SystemDef.x + 118, SystemDef.y + 8, "ON");
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(SystemDef.x + 110, SystemDef.y + 8, "OFF");
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
 }
 
@@ -6867,39 +6867,39 @@ void M_DrawDebug(void)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(DebugDef.x + 177, DebugDef.y - 2, "ON");
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(DebugDef.x + 169, DebugDef.y - 2, "OFF");
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
 
     if(timer_info)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(DebugDef.x + 177, DebugDef.y + 8, "ON");
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(DebugDef.x + 169, DebugDef.y + 8, "OFF");
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
 
     if(version_info)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(DebugDef.x + 177, DebugDef.y + 18, "ON");
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(DebugDef.x + 169, DebugDef.y + 18, "OFF");
-	V_ClearDPTranslation();
+        V_ClearDPTranslation();
     }
 }
 

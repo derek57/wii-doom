@@ -109,62 +109,62 @@ typedef struct
 //
 typedef        struct
 {
-    fixed_t        floor_height;
-    fixed_t        ceiling_height;
+    fixed_t         floor_height;
+    fixed_t         ceiling_height;
 
-    int            nexttag, firsttag;
+    int             nexttag, firsttag;
 
-    short          floorpic;
-    short          ceilingpic;
-    short          lightlevel;
-    short          special;
-    short          tag;
+    short           floorpic;
+    short           ceilingpic;
+    short           lightlevel;
+    short           special;
+    short           tag;
 
     // 0 = untraversed, 1,2 = sndlines -1
-    int            soundtraversed;
+    int             soundtraversed;
 
     // thing that made a sound (or null)
-    mobj_t*        soundtarget;
+    mobj_t*         soundtarget;
 
     // mapblock bounding box for height changes
-    int            blockbox[4];
+    int             blockbox[4];
 
     // origin for any sounds played by the sector
-    degenmobj_t    soundorg;
+    degenmobj_t     soundorg;
 
     // if == validcount, already checked
-    int            validcount;
+    int             validcount;
 
     // list of mobjs in sector
-    mobj_t*        thinglist;
+    mobj_t*         thinglist;
 
     // thinker_t for reversable actions
-    void*          specialdata;
+    void*           specialdata;
 
-    int            linecount;
+    int             linecount;
     struct line_s** lines;        // [linecount] size
     
     // WiggleFix: [kb] for R_FixWiggle()
-    int            cachedheight;
-    int            scaleindex;
+    int             cachedheight;
+    int             scaleindex;
 
     // [AM] Previous position of floor and ceiling before
     //      think.  Used to interpolate between positions.
-    fixed_t	   oldfloorheight;
-    fixed_t	   oldceilingheight;
+    fixed_t         oldfloorheight;
+    fixed_t         oldceilingheight;
 
     // [AM] Gametic when the old positions were recorded.
     //      Has a dual purpose; it prevents movement thinkers
     //      from storing old positions twice in a tic, and
     //      prevents the renderer from attempting to interpolate
     //      if old values were not updated recently.
-    int            oldgametic;
+    int             oldgametic;
 
     // [AM] Interpolated floor and ceiling height.
     //      Calculated once per tic and used inside
     //      the renderer.
-    fixed_t	   interpfloorheight;
-    fixed_t	   interpceilingheight;
+    fixed_t         interpfloorheight;
+    fixed_t         interpceilingheight;
 
 } sector_t;
 
@@ -419,7 +419,7 @@ typedef struct vissprite_s
 
     boolean        drawn;
 
-    byte*	   translation;
+    byte*          translation;
 
 } vissprite_t;
 

@@ -1032,12 +1032,6 @@ void P_SpawnMapThing (mapthing_t* mthing)
     if (deathmatch && mobjinfo[i].flags & MF_NOTDMATCH)
         return;
 
-    if(beta_skulls)
-    {
-        if(i == MT_SKULL)
-            i = MT_BETASKULL;
-    }
-
     if(beta_style)
     {
         if(i == MT_MISC0)
@@ -1049,7 +1043,7 @@ void P_SpawnMapThing (mapthing_t* mthing)
         if(i == MT_MISC3)
             i = MT_SKULLCHEST;
 
-        if(i == MT_MISC7)	// ALL NEW BELOW - CHECK FOR REPLACEMENTS IN OTHER .C-FILES
+        if(i == MT_MISC7)
             i = MT_BETAYELLOWSKULLKEY;
 
         if(i == MT_MISC8)
@@ -1064,14 +1058,32 @@ void P_SpawnMapThing (mapthing_t* mthing)
         if(i == MT_MISC22)
             i = MT_BETASHELL;
 
+        if(i == MT_MISC32)
+            i = MT_BETACOL1;
+
         if(i == MT_MISC23)
             i = MT_BETASHELLBOX;
+
+        if(i == MT_MISC47)
+            i = MT_BETASTALAGTITE;
+
+        if(i == MT_MISC48)
+            i = MT_BETAELEC;
 
         if(i == MT_MISC71)
             i = MT_BETAGIBS;
 
+        if(i == MT_MISC72)
+            i = MT_BETAHEADONASTICK;
+
         if(i == MT_MISC73)
             i = MT_BETAHEADCANDLES;
+
+        if(i == MT_MISC74)
+            i = MT_BETADEADSTICK;
+
+        if(i == MT_MISC75)
+            i = MT_BETALIVESTICK;
 
         if(i == MT_BARREL)
             i = MT_BETABARREL;
@@ -1081,6 +1093,12 @@ void P_SpawnMapThing (mapthing_t* mthing)
 
         if(i == MT_INV)
             i = MT_BETAINV;
+
+        if(i == MT_SKULL)
+            i = MT_BETASKULL;
+
+        if(i == MT_BRUISER)
+            i = MT_BETABRUISER;
     }
 
     // don't spawn any monsters if -nomonsters

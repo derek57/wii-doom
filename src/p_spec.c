@@ -1139,12 +1139,12 @@ void P_PlayerInSpecialSector (player_t* player)
                         
       case 9:
         // SECRET SECTOR
-	if (showMessages && d_secrets && !noclip_on)
-	{
-	    player->message = HUSTR_SECRETFOUND;
-	    if (player == &players[consoleplayer])
-	        S_StartSound(NULL, sfx_secret);
-	}
+        if (showMessages && d_secrets && !noclip_on)
+        {
+            player->message = HUSTR_SECRETFOUND;
+            if (player == &players[consoleplayer])
+                S_StartSound(NULL, sfx_secret);
+        }
         player->secretcount++;
         sector->special = 0;
         break;

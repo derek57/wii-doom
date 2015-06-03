@@ -196,7 +196,7 @@ byte V_Colorize (byte *playpal, int cr, byte source, boolean keepgray109)
 
     // preserve gray drop shadow in IWAD status bar numbers
     if (cr == CRX_NONE || (keepgray109 && source == 109))
-	return source;
+        return source;
 
     rgb.x = playpal[3 * source + 0] / 255.;
     rgb.y = playpal[3 * source + 1] / 255.;
@@ -205,36 +205,32 @@ byte V_Colorize (byte *playpal, int cr, byte source, boolean keepgray109)
     rgb_to_hsv(&rgb, &hsv);
 
     if (cr == CRX_DARK)
-	hsv.z *= 0.5;
-    else
-    if (cr == CRX_GRAY)
-	hsv.y = 0;
+        hsv.z *= 0.5;
+    else if (cr == CRX_GRAY)
+        hsv.y = 0;
     else
     {
-	// hack colors to full saturation
-	hsv.y = 1.0;
+        // hack colors to full saturation
+        hsv.y = 1.0;
 
-	if (cr == CRX_GREEN)
-	{
-//	    hsv.x = ((16.216 * hsv.z) + 100.784)/360.;
-	    hsv.x = 135./360.;
-	}
-	else
-	if (cr == CRX_GOLD)
-	{
-//	    hsv.x = ((51.351 * hsv.z) + 8.648)/360.;
-	    hsv.x = 45./360.;
-	}
-	else
-	if (cr == CRX_RED)
-	{
-	    hsv.x = 0.;
-	}
-	else
-	if (cr == CRX_BLUE)
-	{
-	    hsv.x = 240./360.;
-	}
+        if (cr == CRX_GREEN)
+        {
+//            hsv.x = ((16.216 * hsv.z) + 100.784)/360.;
+            hsv.x = 135./360.;
+        }
+        else if (cr == CRX_GOLD)
+        {
+//            hsv.x = ((51.351 * hsv.z) + 8.648)/360.;
+            hsv.x = 45./360.;
+        }
+        else if (cr == CRX_RED)
+        {
+            hsv.x = 0.;
+        }
+        else if (cr == CRX_BLUE)
+        {
+            hsv.x = 240./360.;
+        }
     }
 
     hsv_to_rgb(&hsv, &rgb);

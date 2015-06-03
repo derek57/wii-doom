@@ -818,89 +818,89 @@ void R_InitTranMap()
     // If a tranlucency filter map lump is present, use it
     if (lump != -1)
     {
-	// Set a pointer to the translucency filter maps.
-	tranmap = W_CacheLumpNum(lump, PU_STATIC);
-	printf(":"); // loaded from a lump
+        // Set a pointer to the translucency filter maps.
+        tranmap = W_CacheLumpNum(lump, PU_STATIC);
+        printf(":"); // loaded from a lump
     }
     else
     {
-	// Compose a default transparent filter map based on PLAYPAL.
-	unsigned char *playpal = W_CacheLumpName("PLAYPAL", PU_STATIC);
-	char *fname = NULL;
-	extern char *configdir;
+        // Compose a default transparent filter map based on PLAYPAL.
+        unsigned char *playpal = W_CacheLumpName("PLAYPAL", PU_STATIC);
+        char *fname = NULL;
+        extern char *configdir;
 
-	struct {
-	    unsigned char pct;
-	    unsigned char playpal[256*3]; // a palette has 768 bytes!
-	} cache;
+        struct {
+            unsigned char pct;
+            unsigned char playpal[256*3]; // a palette has 768 bytes!
+        } cache;
 
-	FILE *cachefp = fopen(fname = M_StringJoin(configdir,
-	                      "tranmap.dat", NULL), "r+b"); // open file readable
+        FILE *cachefp = fopen(fname = M_StringJoin(configdir,
+                              "tranmap.dat", NULL), "r+b"); // open file readable
 
-	tranmap = Z_Malloc(256*256, PU_STATIC, 0);
+        tranmap = Z_Malloc(256*256, PU_STATIC, 0);
 
-	// Use cached translucency filter if it's available
-	if (!cachefp ? cachefp = fopen(fname,"wb") , 1 : // if file not readable, open writable, continue
-	    fread(&cache, 1, sizeof cache, cachefp) != sizeof cache || // could not read struct cache from file
-	    cache.pct != tran_filter_pct || // filter percents differ
-	    memcmp(cache.playpal, playpal, sizeof cache.playpal) || // base palettes differ
-	    fread(tranmap, 256, 256, cachefp) != 256 ) // could not read entire translucency map
-	{
-	byte *fg, *bg, blend[3], *tp = tranmap;
-	int i, j, btmp;
-	extern int FindNearestColor(byte *palette, int r, int g, int b);
+        // Use cached translucency filter if it's available
+        if (!cachefp ? cachefp = fopen(fname,"wb") , 1 : // if file not readable, open writable, continue
+            fread(&cache, 1, sizeof cache, cachefp) != sizeof cache || // could not read struct cache from file
+            cache.pct != tran_filter_pct || // filter percents differ
+            memcmp(cache.playpal, playpal, sizeof cache.playpal) || // base palettes differ
+            fread(tranmap, 256, 256, cachefp) != 256 ) // could not read entire translucency map
+        {
+        byte *fg, *bg, blend[3], *tp = tranmap;
+        int i, j, btmp;
+        extern int FindNearestColor(byte *palette, int r, int g, int b);
 
-	// background color
-	for (i = 0; i < 256; i++)
-	{
-	    // foreground color
-	    for (j = 0; j < 256; j++)
-	    {
-		// shortcut: identical foreground and background
-		if (i == j)
-		{
-		    *tp++ = i;
-		    continue;
-		}
+        // background color
+        for (i = 0; i < 256; i++)
+        {
+            // foreground color
+            for (j = 0; j < 256; j++)
+            {
+                // shortcut: identical foreground and background
+                if (i == j)
+                {
+                    *tp++ = i;
+                    continue;
+                }
 
-		bg = playpal + 3*i;
-		fg = playpal + 3*j;
+                bg = playpal + 3*i;
+                fg = playpal + 3*j;
 
-		// blended color - emphasize blues
-		// Colour matching in RGB space doesn't work very well with the blues
-		// in Doom's palette. Rather than do any colour conversions, just
-		// emphasize the blues when building the translucency table.
-		btmp = fg[b] < (fg[r] + fg[g]) ? 0 : (fg[b] - (fg[r] + fg[g])) / 2;
-		blend[r] = (tran_filter_pct * fg[r] + (100 - tran_filter_pct) * bg[r]) / (100 + btmp);
-		blend[g] = (tran_filter_pct * fg[g] + (100 - tran_filter_pct) * bg[g]) / (100 + btmp);
-		blend[b] = (tran_filter_pct * fg[b] + (100 - tran_filter_pct) * bg[b]) / 100;
+                // blended color - emphasize blues
+                // Colour matching in RGB space doesn't work very well with the blues
+                // in Doom's palette. Rather than do any colour conversions, just
+                // emphasize the blues when building the translucency table.
+                btmp = fg[b] < (fg[r] + fg[g]) ? 0 : (fg[b] - (fg[r] + fg[g])) / 2;
+                blend[r] = (tran_filter_pct * fg[r] + (100 - tran_filter_pct) * bg[r]) / (100 + btmp);
+                blend[g] = (tran_filter_pct * fg[g] + (100 - tran_filter_pct) * bg[g]) / (100 + btmp);
+                blend[b] = (tran_filter_pct * fg[b] + (100 - tran_filter_pct) * bg[b]) / 100;
 
-		*tp++ = FindNearestColor(playpal, blend[r], blend[g], blend[b]);
-	    }
-	}
+                *tp++ = FindNearestColor(playpal, blend[r], blend[g], blend[b]);
+            }
+        }
 
-	// write out the cached translucency map
-	if (cachefp)
-	{
-	    cache.pct = tran_filter_pct; // set filter percents
-	    memcpy(cache.playpal, playpal, sizeof cache.playpal); // set base palette
-	    fseek(cachefp, 0, SEEK_SET); // go to start of file
-	    fwrite(&cache, 1, sizeof cache, cachefp); // write struct cache
-	    fwrite(tranmap, 256, 256, cachefp); // write translucency map
-	    printf("!"); // generated and saved
-	}
-	else
-	    printf("?"); // generated, but not saved
-	}
-	else
-	    printf("."); // loaded from a file
+        // write out the cached translucency map
+        if (cachefp)
+        {
+            cache.pct = tran_filter_pct; // set filter percents
+            memcpy(cache.playpal, playpal, sizeof cache.playpal); // set base palette
+            fseek(cachefp, 0, SEEK_SET); // go to start of file
+            fwrite(&cache, 1, sizeof cache, cachefp); // write struct cache
+            fwrite(tranmap, 256, 256, cachefp); // write translucency map
+            printf("!"); // generated and saved
+        }
+        else
+            printf("?"); // generated, but not saved
+        }
+        else
+            printf("."); // loaded from a file
 
-	if (cachefp)
-	    fclose(cachefp);
+        if (cachefp)
+            fclose(cachefp);
 
-	free(fname);
+        free(fname);
 
-	Z_ChangeTag(playpal, PU_CACHE);
+        Z_ChangeTag(playpal, PU_CACHE);
     }
 }
 
@@ -918,27 +918,27 @@ void R_InitColormaps (void)
 
     // initialize color translation and color strings tables
     {
-	byte *playpal = W_CacheLumpName("PLAYPAL", PU_STATIC);
+        byte *playpal = W_CacheLumpName("PLAYPAL", PU_STATIC);
 
-	char c[3];
-	int i, j;
+        char c[3];
+        int i, j;
 
-	extern byte V_Colorize (byte *playpal, int cr, byte source);
+        extern byte V_Colorize (byte *playpal, int cr, byte source);
 
-	if (!crstr)
-	    crstr = malloc(CRXMAX * sizeof(*crstr));
+        if (!crstr)
+            crstr = malloc(CRXMAX * sizeof(*crstr));
 
-	for (i = 0; i < CRXMAX; i++)
-	{
-	    for (j = 0; j < 256; j++)
-	    {
-		crx[i][j] = V_Colorize(playpal, i, j);
-	    }
+        for (i = 0; i < CRXMAX; i++)
+        {
+            for (j = 0; j < 256; j++)
+            {
+                crx[i][j] = V_Colorize(playpal, i, j);
+            }
 
-	    M_snprintf(c, sizeof(c), "\x1b%c", '0' + i);
-	    crstr[i] = M_StringDuplicate(c);
-	}
-	Z_ChangeTag(playpal, PU_CACHE);
+            M_snprintf(c, sizeof(c), "\x1b%c", '0' + i);
+            crstr[i] = M_StringDuplicate(c);
+        }
+        Z_ChangeTag(playpal, PU_CACHE);
     }
 }
 
@@ -988,7 +988,16 @@ int R_FlatNumForName (char* name)
         name[4] == '2' &&
         name[5] == '2' &&
         beta_style && gamemode != shareware && gamemode != commercial)
-	name = "BFLAT22";
+        name = "BFLAT22";
+
+    if (name[0] == 'D' &&
+        name[1] == 'E' &&
+        name[2] == 'M' &&
+        name[3] == '1' &&
+        name[4] == '_' &&
+        name[5] == '5' &&
+        beta_style && gamemode != shareware && gamemode != commercial)
+        name = "BDEM1_5";
 
     i = W_CheckNumForName (name);
 
@@ -996,7 +1005,7 @@ int R_FlatNumForName (char* name)
     {
         namet[8] = 0;
         memcpy (namet, name,8);
-	C_Printf(CR_RED, "R_FlatNumForName: %.8s not found", name);
+        C_Printf(CR_RED, "R_FlatNumForName: %.8s not found", name);
     }
     return i - firstflat;
 }
@@ -1047,75 +1056,125 @@ int R_TextureNumForName (char* name)
     if(beta_style && gamemode != shareware && gamemode != commercial)
     {
         if (name[0] == 'A' &&
-	    name[1] == 'A' &&
-	    name[2] == 'S' &&
-	    name[3] == 'T' &&
-	    name[4] == 'I' &&
+            name[1] == 'A' &&
+            name[2] == 'S' &&
+            name[3] == 'T' &&
+            name[4] == 'I' &&
             name[5] == 'N' &&
-	    name[6] == 'K' &&
-	    name[7] == 'Y')
+            name[6] == 'K' &&
+            name[7] == 'Y')
             i = R_CheckTextureNumForName ("BASTINKY");
 
         else if (name[0] == 'C' &&
-	    name[1] == 'O' &&
-	    name[2] == 'M' &&
-	    name[3] == 'P' &&
-	    name[4] == 'U' &&
+            name[1] == 'O' &&
+            name[2] == 'M' &&
+            name[3] == 'P' &&
+            name[4] == 'U' &&
             name[5] == 'T' &&
-	    name[6] == 'E' &&
-	    name[7] == '2')
+            name[6] == 'E' &&
+            name[7] == '2')
             i = R_CheckTextureNumForName ("BCMPUTE2");
 
         else if (name[0] == 'B' &&
-	    name[1] == 'I' &&
-	    name[2] == 'G' &&
-	    name[3] == 'D' &&
-	    name[4] == 'O' &&
+            name[1] == 'I' &&
+            name[2] == 'G' &&
+            name[3] == 'D' &&
+            name[4] == 'O' &&
             name[5] == 'O' &&
-	    name[6] == 'R' &&
-	    name[7] == '2')
+            name[6] == 'R' &&
+            name[7] == '2')
             i = R_CheckTextureNumForName ("BDOOR102");
 
         else if (name[0] == 'M' &&
-	    name[1] == 'A' &&
-	    name[2] == 'R' &&
-	    name[3] == 'B' &&
-	    name[4] == 'F' &&
+            name[1] == 'A' &&
+            name[2] == 'R' &&
+            name[3] == 'B' &&
+            name[4] == 'F' &&
             name[5] == 'A' &&
-	    name[6] == 'C' &&
-	    name[7] == 'E')
+            name[6] == 'C' &&
+            name[7] == 'E')
             i = R_CheckTextureNumForName ("BMWALL41");
 
         else if (name[0] == 'S' &&
-	    name[1] == 'K' &&
-	    name[2] == 'Y' &&
-	    name[3] == '1')
+            name[1] == 'K' &&
+            name[2] == 'Y' &&
+            name[3] == '1')
             i = R_CheckTextureNumForName ("BSKY1");
 
         else if (name[0] == 'S' &&
-	    name[1] == 'T' &&
-	    name[2] == 'E' &&
-	    name[3] == 'P' &&
-	    name[4] == '4')
+            name[1] == 'T' &&
+            name[2] == 'E' &&
+            name[3] == 'P' &&
+            name[4] == '4')
             i = R_CheckTextureNumForName ("BSTEP4");
 
         else if (name[0] == 'S' &&
-	    name[1] == 'W' &&
-	    name[2] == '1' &&
-	    name[3] == 'D' &&
-	    name[4] == 'I' &&
+            name[1] == 'W' &&
+            name[2] == '1' &&
+            name[3] == 'D' &&
+            name[4] == 'I' &&
             name[5] == 'R' &&
-	    name[6] == 'T')
+            name[6] == 'T')
             i = R_CheckTextureNumForName ("BSW1DIRT");
 
         else if (name[0] == 'S' &&
-	    name[1] == 'W' &&
-	    name[2] == '2' &&
-	    name[3] == 'D' &&
-	    name[4] == 'I' &&
+            name[1] == 'W' &&
+            name[2] == '2' &&
+            name[3] == 'D' &&
+            name[4] == 'I' &&
             name[5] == 'R' &&
-	    name[6] == 'T')
+            name[6] == 'T')
             i = R_CheckTextureNumForName ("BSW2DIRT");
+
+        else if (name[0] == 'W' &&
+            name[1] == 'A' &&
+            name[2] == 'L' &&
+            name[3] == 'L' &&
+            name[4] == '5' &&
+            name[5] == '7' &&
+            name[6] == '_' &&
+            name[5] == '2')
+            i = R_CheckTextureNumForName ("BWALL572");
+
+        else if (name[0] == 'W' &&
+            name[1] == 'A' &&
+            name[2] == 'L' &&
+            name[3] == 'L' &&
+            name[4] == '5' &&
+            name[5] == '7' &&
+            name[6] == '_' &&
+            name[5] == '3')
+            i = R_CheckTextureNumForName ("BWALL573");
+
+        else if (name[0] == 'W' &&
+            name[1] == 'A' &&
+            name[2] == 'L' &&
+            name[3] == 'L' &&
+            name[4] == '5' &&
+            name[5] == '7' &&
+            name[6] == '_' &&
+            name[5] == '4')
+            i = R_CheckTextureNumForName ("BWALL574");
+
+        else if (name[0] == 'W' &&
+            name[1] == 'A' &&
+            name[2] == 'L' &&
+            name[3] == 'L' &&
+            name[4] == '6' &&
+            name[5] == '3' &&
+            name[6] == '_' &&
+            name[5] == '1')
+            i = R_CheckTextureNumForName ("BWALL631");
+
+        else if (name[0] == 'W' &&
+            name[1] == 'A' &&
+            name[2] == 'L' &&
+            name[3] == 'L' &&
+            name[4] == '6' &&
+            name[5] == '3' &&
+            name[6] == '_' &&
+            name[5] == '2')
+            i = R_CheckTextureNumForName ("BWALL632");
 
         else
             i = R_CheckTextureNumForName (name);
@@ -1125,7 +1184,7 @@ int R_TextureNumForName (char* name)
 
     if (i==-1)
     {
-	C_Printf(CR_RED, "R_TextureNumForName: %.8s not found", name);
+        C_Printf(CR_RED, "R_TextureNumForName: %.8s not found", name);
     }
     return i;
 }

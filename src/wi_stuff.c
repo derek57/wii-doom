@@ -347,6 +347,9 @@ static int                     me;
 // You Are Here graphic
 static patch_t*                yah[3] = { NULL, NULL, NULL }; 
 
+// You Are Here graphic (BETA)
+static patch_t*                byah[3] = { NULL, NULL, NULL }; 
+
 // splat
 static patch_t*                splat[2] = { NULL, NULL };
 
@@ -876,7 +879,12 @@ void WI_drawShowNextLoc(void)
 
         // draw flashing ptr
         if (snl_pointeron)
-            WI_drawOnLnode(wbs->next, yah); 
+        {
+            if(beta_style)
+                WI_drawOnLnode(wbs->next, byah); 
+            else
+                WI_drawOnLnode(wbs->next, yah); 
+        }
     }
 
     if (gamemission == pack_nerve && wbs->last == 7)
@@ -1642,11 +1650,22 @@ static void WI_loadUnloadData(load_callback_t callback)
             callback(name, &lnames[i]);
         }
 
-        // you are here
-        callback(DEH_String("WIURH0"), &yah[0]);
+        if(beta_style)
+        {
+            // you are here
+            callback(DEH_String("WIBURH0"), &byah[0]);
 
-        // you are here (alt.)
-        callback(DEH_String("WIURH1"), &yah[1]);
+            // you are here (alt.)
+            callback(DEH_String("WIBURH0"), &byah[1]);
+        }
+        else
+        {
+            // you are here
+            callback(DEH_String("WIURH0"), &yah[0]);
+
+            // you are here (alt.)
+            callback(DEH_String("WIURH1"), &yah[1]);
+        }
 
         // splat
         if(beta_style)
@@ -1665,7 +1684,11 @@ static void WI_loadUnloadData(load_callback_t callback)
                     if (wbs->epsd != 1 || j != 8)
                     {
                         // animations
-                        DEH_snprintf(name, 9, "WIA%d%.2d%.2d", wbs->epsd, j, i);
+                        if(beta_style && gameepisode == 1)
+                            DEH_snprintf(name, 9, "WIB%d%.2d%.2d", wbs->epsd, j, i);
+                        else
+                            DEH_snprintf(name, 9, "WIA%d%.2d%.2d", wbs->epsd, j, i);
+
                         callback(name, &a->p[i]);
                     }
                     else

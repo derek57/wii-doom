@@ -359,7 +359,7 @@ castinfo_t      castorderbeta[] = {
     {CC_LOST, MT_BETASKULL},
     {CC_CACO, MT_HEAD},
     {CC_HELL, MT_KNIGHT},
-    {CC_BARON, MT_BRUISER},
+    {CC_BARON, MT_BETABRUISER},
     {CC_ARACH, MT_BABY},
     {CC_PAIN, MT_PAIN},
     {CC_REVEN, MT_UNDEAD},

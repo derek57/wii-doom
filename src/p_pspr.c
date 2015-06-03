@@ -101,7 +101,7 @@ P_SetPsprite
         
         // killough 7/19/98: Pre-Beta BFG
         if (stnum == S_BFG1 && beta_bfg)
-	    stnum = S_OLDBFG1; // Skip to alternate weapon frame
+            stnum = S_OLDBFG1; // Skip to alternate weapon frame
 
         state = &states[stnum];
         psp->state = state;
@@ -713,7 +713,7 @@ void A_FireOldBFG(player_t *player, pspdef_t *psp)
 
     if (d_recoil && !(player->mo->flags & MF_NOCLIP))
         P_Thrust(player, ANG180 + player->mo->angle,
-	        512*recoil_values[wp_plasma][0]);
+                512*recoil_values[wp_plasma][0]);
 
     player->ammo[weaponinfo[player->readyweapon].ammo]--;
 
@@ -730,34 +730,28 @@ void A_FireOldBFG(player_t *player, pspdef_t *psp)
         fixed_t slope;
 
         if (autoaim)
-	{
-	    // killough 8/2/98: make autoaiming prefer enemies
-/*
-	    int mask = MF_FRIEND;
-	    do
-*/
-	    {
-	        slope = P_AimLineAttack(mo, an, 16*64*FRACUNIT/*, mask*/);
+        {
+            // killough 8/2/98: make autoaiming prefer enemies
+            slope = P_AimLineAttack(mo, an, 16*64*FRACUNIT);
 
-	        if (!linetarget)
-		    slope = P_AimLineAttack(mo, an += 1<<26, 16*64*FRACUNIT/*, mask*/);
+            if (!linetarget)
+                slope = P_AimLineAttack(mo, an += 1<<26, 16*64*FRACUNIT);
 
-	        if (!linetarget)
-		    slope = P_AimLineAttack(mo, an -= 2<<26, 16*64*FRACUNIT/*, mask*/);
+            if (!linetarget)
+                slope = P_AimLineAttack(mo, an -= 2<<26, 16*64*FRACUNIT);
 
-	        if (!linetarget)
-                    // sf: looking up/down
-                    slope = 1 == 1 ? player->lookdir * LOOKSLOPE : 0, an = mo->angle;
-	    }
-//	    while (mask && (mask=0, !linetarget));     // killough 8/2/98
-	    an1 += an - mo->angle;
+            if (!linetarget)
+                // sf: looking up/down
+                slope = 1 == 1 ? player->lookdir * LOOKSLOPE : 0, an = mo->angle;
+
+            an1 += an - mo->angle;
 
             // sf: despite killough's infinite wisdom.. even
             // he is prone to mistakes. seems negative numbers
             // won't survive a bitshift!
             an2 += slope<0 ? -tantoangle[-slope >> DBITS] :
                               tantoangle[slope >> DBITS];
-	}
+        }
         else
         {
             slope = 1 == 1 ? player->lookdir * LOOKSLOPE : 0;
@@ -766,8 +760,8 @@ void A_FireOldBFG(player_t *player, pspdef_t *psp)
         }
 
         th = P_SpawnMobj(mo->x, mo->y,
-		         mo->z + 62*FRACUNIT - player->psprites[ps_weapon].sy,
-		         type);
+                         mo->z + 62*FRACUNIT - player->psprites[ps_weapon].sy,
+                         type);
 
         P_SetTarget(&th->target, mo);
 

@@ -669,7 +669,7 @@ void R_ExecuteSetViewSize (void)
         fuzzcolfunc = R_DrawFuzzColumnLow;
         transcolfunc = R_DrawTranslatedColumnLow;
         spanfunc = R_DrawSpanLow;
- 	tlcolfunc = R_DrawTLColumnLow;
+        tlcolfunc = R_DrawTLColumnLow;
     }
 
     R_InitBuffer (scaledviewwidth, scaledviewheight); // CHANGED FOR HIRES
