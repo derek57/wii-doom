@@ -384,39 +384,39 @@ P_SetThingPosition (mobj_t* thing)
 //
 boolean
 P_BlockLinesIterator
-( int            x,
-  int            y,
+( int			x,
+  int			y,
   boolean(*func)(line_t*) )
 {
-    int          offset;
-    short*       list;
-    line_t*      ld;
-        
+    int			offset;
+    int64_t*		list; // BLOCKMAP limit
+    line_t*		ld;
+	
     if (x<0
-        || y<0
-        || x>=bmapwidth
-        || y>=bmapheight)
+	|| y<0
+	|| x>=bmapwidth
+	|| y>=bmapheight)
     {
-        return true;
+	return true;
     }
     
     offset = y*bmapwidth+x;
-        
+	
     offset = *(blockmap+offset);
 
     for ( list = blockmaplump+offset ; *list != -1 ; list++)
     {
-        ld = &lines[*list];
+	ld = &lines[*list];
 
-        if (ld->validcount == validcount)
-            continue;         // line has already been checked
+	if (ld->validcount == validcount)
+	    continue; 	// line has already been checked
 
-        ld->validcount = validcount;
-                
-        if ( !func(ld) )
-            return false;
+	ld->validcount = validcount;
+		
+	if ( !func(ld) )
+	    return false;
     }
-    return true;        // everything was checked
+    return true;	// everything was checked
 }
 
 
