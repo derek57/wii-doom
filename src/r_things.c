@@ -30,6 +30,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "c_io.h"
 #include "deh_main.h"
 #include "doomdef.h"
 #include "doomstat.h"
@@ -315,12 +316,39 @@ void R_ClearSprites (void)
 //
 // R_NewVisSprite
 //
+// FIXME: DISABLED CODE WORKS FOR THE WII (ENABLED CODE IS USED FOR CONSOLE REPORTS)
+//
 vissprite_t* R_NewVisSprite (void)
 {
+/*
     if (num_vissprite >= num_vissprite_alloc)           // killough
     {
         num_vissprite_alloc = (num_vissprite_alloc ? num_vissprite_alloc * 2 : 128);
         vissprites = realloc(vissprites, num_vissprite_alloc * sizeof(*vissprites));
+    }
+    return (vissprites + num_vissprite++);
+*/
+    if (num_vissprite >= num_vissprite_alloc)           // killough
+    {
+        static int max;
+        int numvissprites_old = num_vissprite_alloc;
+
+        // cap MAXVISSPRITES limit at 4096
+        if (!max && num_vissprite_alloc == 32 * 128)
+        {
+            C_Printf(CR_GOLD, " R_NewVisSprite: MAXVISSPRITES limit capped at %d.\n", num_vissprite_alloc);
+            max++;
+        }
+
+        if (max)
+            return &overflowsprite;
+
+        num_vissprite_alloc = (num_vissprite_alloc ? num_vissprite_alloc * 2 : 128);
+        vissprites = realloc(vissprites, num_vissprite_alloc * sizeof(*vissprites));
+        memset(vissprites + numvissprites_old, 0, (num_vissprite_alloc - numvissprites_old) * sizeof(*vissprites));
+
+        if (numvissprites_old)
+            C_Printf(CR_GOLD, " R_NewVisSprite: Hit MAXVISSPRITES limit at %d, raised to %d.\n", numvissprites_old, num_vissprite_alloc);
     }
     return (vissprites + num_vissprite++);
 }
