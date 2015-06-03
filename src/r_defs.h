@@ -292,8 +292,6 @@ typedef struct
     sector_t*      frontsector;
     sector_t*      backsector;
     
-    fixed_t        length;
-
 } seg_t;
 
 
