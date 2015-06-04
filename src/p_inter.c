@@ -842,7 +842,7 @@ P_KillMobj
             if(target->type == MT_UNDEAD)
                 i = 3500;
 
-            if(target->type == MT_HEAD)
+            if(target->type == MT_HEAD || target->type == MT_BETAHEAD)
                 i = 4000;
 
             if(target->type == MT_PAIN)
@@ -969,10 +969,12 @@ P_KillMobj
     switch (target->type)
     {
       case MT_WOLFSS:
+      case MT_BETAPOSSESSED:
       case MT_POSSESSED:
         item = MT_CLIP;
         break;
         
+      case MT_BETASHOTGUY:
       case MT_SHOTGUY:
         item = MT_SHOTGUN;
         break;

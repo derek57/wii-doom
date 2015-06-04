@@ -351,13 +351,13 @@ castinfo_t      castorder[] = {
 };
 
 castinfo_t      castorderbeta[] = {
-    {CC_ZOMBIE, MT_POSSESSED},
-    {CC_SHOTGUN, MT_SHOTGUY},
+    {CC_ZOMBIE, MT_BETAPOSSESSED},
+    {CC_SHOTGUN, MT_BETASHOTGUY},
     {CC_HEAVY, MT_CHAINGUY},
     {CC_IMP, MT_TROOP},
     {CC_DEMON, MT_SERGEANT},
     {CC_LOST, MT_BETASKULL},
-    {CC_CACO, MT_HEAD},
+    {CC_CACO, MT_BETAHEAD},
     {CC_HELL, MT_KNIGHT},
     {CC_BARON, MT_BETABRUISER},
     {CC_ARACH, MT_BABY},
@@ -449,7 +449,9 @@ void F_CastTicker (void)
         switch (st)
         {
           case S_PLAY_ATK1:     sfx = sfx_dshtgn; break;
+          case S_BETAPOSS_ATK2:     
           case S_POSS_ATK2:     sfx = sfx_pistol; break;
+          case S_BETASPOS_ATK2:     
           case S_SPOS_ATK2:     sfx = sfx_shotgn; break;
           case S_VILE_ATK2:     sfx = sfx_vilatk; break;
           case S_SKEL_FIST2:    sfx = sfx_skeswg; break;
@@ -463,9 +465,12 @@ void F_CastTicker (void)
           case S_CPOS_ATK4:     sfx = sfx_shotgn; break;
           case S_TROO_ATK3:     sfx = sfx_claw; break;
           case S_SARG_ATK2:     sfx = sfx_sgtatk; break;
+          case S_BETABOSS_ATK2:
           case S_BOSS_ATK2:
           case S_BOS2_ATK2:
+          case S_BETAHEAD_ATK2:     
           case S_HEAD_ATK2:     sfx = sfx_firsht; break;
+          case S_BSKUL_ATK2:    
           case S_SKULL_ATK2:    sfx = sfx_sklatk; break;
           case S_SPID_ATK2:
           case S_SPID_ATK3:     sfx = sfx_shotgn; break;

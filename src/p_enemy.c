@@ -2088,7 +2088,12 @@ void A_SpawnFly (mobj_t* mo)
     else if (r<130)
         type = MT_PAIN;
     else if (r<160)
-        type = MT_HEAD;
+    {
+        if(beta_style)
+            type = MT_BETAHEAD;
+        else
+            type = MT_HEAD;
+    }
     else if (r<162)
         type = MT_VILE;
     else if (r<172)

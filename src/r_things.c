@@ -731,7 +731,8 @@ void R_ProjectSprite (mobj_t* thing)
                 vis->translation = crx[CRX_GREEN];
             }
             // Cacodemons bleed blue blood
-            else if (thing->target->type == MT_HEAD)
+            else if ((thing->target->type == MT_HEAD && !beta_style) ||
+                     (thing->target->type == MT_BETAHEAD && beta_style))
             {
                 vis->translation = crx[CRX_BLUE];
             }

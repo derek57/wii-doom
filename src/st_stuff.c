@@ -605,6 +605,8 @@ void ST_refreshBackground(void)
 
         if (netgame)
             V_DrawPatch(ST_FX, 0, faceback);
+        else if(beta_style && !automapactive)
+            V_DrawPatch(ST_FX - 1, 1, faceback);
 
         V_RestoreBuffer();
 
@@ -1245,7 +1247,12 @@ void ST_loadGraphics(void)
     }
 
     // face backgrounds for different color players
-    sprintf(namebuf, "STFB%d", consoleplayer);
+
+    if(beta_style)
+        sprintf(namebuf, "STFB4");
+    else
+        sprintf(namebuf, "STFB%d", consoleplayer);
+
     faceback = (patch_t *) W_CacheLumpName(namebuf, PU_STATIC);
 
     // status bar background bits
@@ -1480,12 +1487,20 @@ void ST_createWidgets(void)
                   ST_FRAGSWIDTH);
 
     // faces
-    STlib_initMultIcon(&w_faces,
-                       ST_FACESX,
-                       ST_FACESY,
-                       faces,
-                       &st_faceindex,
-                       &st_statusbaron);
+    if(beta_style)
+        STlib_initMultIcon(&w_faces,
+                           ST_FACESX - 1,
+                           ST_FACESY,
+                           faces,
+                           &st_faceindex,
+                           &st_statusbaron);
+    else
+        STlib_initMultIcon(&w_faces,
+                           ST_FACESX,
+                           ST_FACESY,
+                           faces,
+                           &st_faceindex,
+                           &st_statusbaron);
 
     // armor percentage - should be colored later
     STlib_initPercent(&w_armor,

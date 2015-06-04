@@ -247,7 +247,7 @@ STlib_updateMultIcon
             char            namebuf[9];
 
             sprintf(namebuf, "STYSNUM%d", i);
-            V_DrawPatch(173, 193,
+            V_DrawPatch(173, 192,
                     W_CacheLumpName(DEH_String(namebuf), PU_CACHE));
         }
     }
