@@ -634,6 +634,9 @@ void P_MobjThinker (mobj_t* mobj)
     {
         mobj->tics--;
                 
+        if (beta_style && mobj->state->nextstate == S_ARM1)
+            mobj->state->nextstate = S_ARM1A;
+
         // you can cycle through multiple states in a tic
         if (!mobj->tics)
             if (!P_SetMobjState (mobj, mobj->state->nextstate) )
