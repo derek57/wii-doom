@@ -425,12 +425,10 @@ void D_DoomLoop (void)
     if(usb)
     {
         debugfile = fopen("usb:/apps/wiidoom/debug.txt","w");
-        statsfile = fopen("usb:/apps/wiidoom/stats.txt","w");
     }
     else if(sd)
     {
         debugfile = fopen("sd:/apps/wiidoom/debug.txt","w");
-        statsfile = fopen("sd:/apps/wiidoom/stats.txt","w");
     }
 
     main_loop_started = true;
@@ -1472,13 +1470,15 @@ void D_DoomMain (void)
     {
         W_CheckSize(5);
 
-        if(fsizerw2 == 658313)
+        if(fsizerw2 == 653705)
         {
             if(usb)
                 W_MergeFile("usb:/apps/wiidoom/doom1extras.wad", true);
             else if(sd)
                 W_MergeFile("sd:/apps/wiidoom/doom1extras.wad", true);
         }
+        else
+            print_resource_pwad2_error = true;
     }
 
     if(print_resource_pwad2_error)
@@ -1511,10 +1511,10 @@ void D_DoomMain (void)
         printf("         adding %s\n", dehacked_file);
         C_Printf(CR_GRAY, "         adding %s\n", dehacked_file);
     }
-
-    // Debug:
-    // W_PrintDirectory();
-
+/*
+    if(devparm)
+        W_PrintDirectory();
+*/
     I_AtExit(G_CheckDemoStatusAtExit, true);
 
     // Generate the WAD hash table.  Speed things up a bit.

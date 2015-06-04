@@ -1684,11 +1684,7 @@ static void WI_loadUnloadData(load_callback_t callback)
                     if (wbs->epsd != 1 || j != 8)
                     {
                         // animations
-                        if(beta_style && gameepisode == 1)
-                            DEH_snprintf(name, 9, "WIB%d%.2d%.2d", wbs->epsd, j, i);
-                        else
-                            DEH_snprintf(name, 9, "WIA%d%.2d%.2d", wbs->epsd, j, i);
-
+                        DEH_snprintf(name, 9, "WIA%d%.2d%.2d", wbs->epsd, j, i);
                         callback(name, &a->p[i]);
                     }
                     else

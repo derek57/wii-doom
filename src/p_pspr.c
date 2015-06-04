@@ -521,8 +521,10 @@ A_Raise
         newstate = S_BETACHAIN;
     else if(beta_style && player->readyweapon == wp_plasma)
         newstate = S_BETAPLASMA;
+/*
     else if(beta_style && player->readyweapon == wp_chainsaw)
         newstate = S_BETASAW;
+*/
     else
         newstate = weaponinfo[player->readyweapon].readystate;
 

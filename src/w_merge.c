@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "doomdef.h"
 #include "doomtype.h"
 #include "i_system.h"
 #include "i_timer.h"
@@ -65,6 +66,8 @@ static sprite_frame_t *sprite_frames;
 
 static int num_sprite_frames;
 static int sprite_frames_alloced;
+
+extern boolean devparm;
 
 // Search in a list to find a lump with a particular name
 // Linear search (slow!)
@@ -563,13 +566,22 @@ void W_PrintDirectory(void)
 {
     unsigned int i, n;
 
+    if(usb)
+        statsfile = fopen("usb:/apps/wiidoom/stats.txt","w");
+    else if(sd)
+        statsfile = fopen("sd:/apps/wiidoom/stats.txt","w");
+
     // debug
     for (i=0; i<numlumps; ++i)
     {
         for (n=0; n<8 && lumpinfo[i].name[n] != '\0'; ++n)
+        {
             putchar(lumpinfo[i].name[n]);
+            fprintf(statsfile, "%c", putchar(lumpinfo[i].name[n]));
+        }
         putchar('\n');
-        I_Sleep(2);
+        fprintf(statsfile, "%c", putchar('\n'));
+//        I_Sleep(2);
     }
 }
 
@@ -585,6 +597,9 @@ void W_MergeFile(char *filename, boolean automatic)
 
     if (W_AddFile(filename, automatic) == NULL)
         return;
+
+    if(devparm)
+        printf("         merging %s\n", filename);
 
     // iwad is at the start, pwad was appended to the end
 

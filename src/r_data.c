@@ -981,23 +981,24 @@ int R_FlatNumForName (char* name)
     int         i;
     char        namet[9];
 
-    if (name[0] == 'F' &&
-        name[1] == 'L' &&
-        name[2] == 'A' &&
-        name[3] == 'T' &&
-        name[4] == '2' &&
-        name[5] == '2' &&
-        beta_style && gamemode != shareware && gamemode != commercial)
-        name = "BFLAT22";
+    if(beta_style && gamemode != shareware && gamemode != commercial)
+    {
+        if (name[0] == 'F' &&
+            name[1] == 'L' &&
+            name[2] == 'A' &&
+            name[3] == 'T' &&
+            name[4] == '2' &&
+            name[5] == '2')
+            name = "BFLAT22";
 
-    if (name[0] == 'D' &&
-        name[1] == 'E' &&
-        name[2] == 'M' &&
-        name[3] == '1' &&
-        name[4] == '_' &&
-        name[5] == '5' &&
-        beta_style && gamemode != shareware && gamemode != commercial)
-        name = "BDEM1_5";
+        else if (name[0] == 'D' &&
+            name[1] == 'E' &&
+            name[2] == 'M' &&
+            name[3] == '1' &&
+            name[4] == '_' &&
+            name[5] == '5')
+            name = "BDEM1_5";
+    }
 
     i = W_CheckNumForName (name);
 

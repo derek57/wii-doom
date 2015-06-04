@@ -144,10 +144,11 @@ P_SetMobjState
 void P_ExplodeMissile (mobj_t* mo)
 {
     mo->momx = mo->momy = mo->momz = 0;
-
+/*
     if(beta_style)
         P_SetMobjState (mo, S_BETAEXPLODE1);
     else
+*/
         P_SetMobjState (mo, mobjinfo[mo->type].deathstate);
 
     mo->tics -= P_Random()&3;
@@ -1034,9 +1035,10 @@ void P_SpawnMapThing (mapthing_t* mthing)
 
     if(beta_style)
     {
+/*
         if(i == MT_MISC0)
             i = MT_BETAARMOR;
-
+*/
         if(i == MT_MISC2)
             i = MT_DAGGER;
 

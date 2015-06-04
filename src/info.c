@@ -1315,7 +1315,7 @@ state_t        states[NUMSTATES] = {
     {SPR_BPNV,32769,6,{NULL},S_BETAPINV3,0,0},        // S_BETAPINV2
     {SPR_BPNV,32770,6,{NULL},S_BETAPINV4,0,0},        // S_BETAPINV3
     {SPR_BPNV,32771,6,{NULL},S_BETAPINV,0,0},        // S_BETAPINV4
-    {SPR_ARM1,32769,7,{NULL},S_BETAARM1A,0,0},        // S_BETAARM1A
+//    {SPR_ARM1,32769,7,{NULL},S_BETAARM1A,0,0},        // S_BETAARM1A
     {SPR_BCHG,0,1,{A_WeaponReady},S_BETACHAIN,0,0},        // S_BETACHAIN
     {SPR_BCHG,0,1,{A_Lower},S_BETACHAINDOWN,0,0},        // S_BETACHAINDOWN
     {SPR_BCHG,0,1,{A_Raise},S_BETACHAINUP,0,0},        // S_BETACHAINUP
@@ -1330,7 +1330,7 @@ state_t        states[NUMSTATES] = {
     {SPR_BPLG,0,3,{A_FirePlasma},S_BETAPLASMA2,0,0},        // S_BETAPLASMA1
     {SPR_BPLG,1,20,{A_ReFire},S_BETAPLASMA,0,0},        // S_BETAPLASMA2
     {SPR_BPLF,32768,4,{A_Light1},S_LIGHTDONE,0,0},        // S_BETAPLASMAFLASH1
-    {SPR_SAWG,2,4,{A_WeaponReady},S_BETASAW,0,0},        // S_BETASAW
+//    {SPR_SAWG,2,4,{A_WeaponReady},S_BETASAW,0,0},        // S_BETASAW
     {SPR_BMSL,32769,8,{A_Explode},S_BETAEXPLODE2,0,0},        // S_BETAEXPLODE1
     {SPR_BMSL,32770,6,{NULL},S_BETAEXPLODE3,0,0},        // S_BETAEXPLODE2
     {SPR_BMSL,32771,4,{NULL},S_NULL,0,0},        // S_BETAEXPLODE3
@@ -1353,9 +1353,7 @@ state_t        states[NUMSTATES] = {
     {SPR_BBSS,9,8,{A_Scream},S_BETABOSS_DIE3,0,0},        // S_BETABOSS_DIE2
     {SPR_BBSS,10,8,{NULL},S_BETABOSS_DIE4,0,0},        // S_BETABOSS_DIE3
     {SPR_BBSS,11,8,{A_Fall},S_BETABOSS_DIE5,0,0},        // S_BETABOSS_DIE4
-    {SPR_BBSS,12,8,{NULL},S_BETABOSS_DIE6,0,0},        // S_BETABOSS_DIE5
-    {SPR_BBSS,13,8,{NULL},S_BETABOSS_DIE7,0,0},        // S_BETABOSS_DIE6
-    {SPR_BBSS,14,-1,{A_BossDeath},S_NULL,0,0},        // S_BETABOSS_DIE7
+    {SPR_BBSS,12,-1,{A_BossDeath},S_NULL,0,0},        // S_BETABOSS_DIE5
     {SPR_BBSS,14,8,{NULL},S_BETABOSS_RAISE2,0,0},        // S_BETABOSS_RAISE1
     {SPR_BBSS,13,8,{NULL},S_BETABOSS_RAISE3,0,0},        // S_BETABOSS_RAISE2
     {SPR_BBSS,12,8,{NULL},S_BETABOSS_RAISE4,0,0},        // S_BETABOSS_RAISE3
@@ -5721,11 +5719,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         S_PLS2BALLX1,    // deathstate
         S_NULL,   // xdeathstate
         sfx_firxpl,   // deathsound
-        12*FRACUNIT,    // speed
+        10*FRACUNIT,    // speed
         6*FRACUNIT,    // radius
         8*FRACUNIT,   // height
         100,    // mass
-        4,    // damage
+        3,    // damage
         sfx_None,   // activesound
         MF_NOBLOCKMAP|MF_MISSILE|MF_DROPOFF|MF_NOGRAVITY|MF_TRANSLUCENT, // flags
         0,                         // flags2
@@ -5791,11 +5789,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         NULL,       // namepointer
     },
 
-    {                // MT_UNHOLYBIBLE
-        2017,                // doomednum
-        S_BND4,                // spawnstate
+    {                // MT_EVILSCEPTRE
+        2016,                // doomednum
+        S_BND3,                // spawnstate
         1000,                // spawnhealth
-        S_BND4,                // seestate
+        S_BND3,                // seestate
         sfx_None,                // seesound
         8,                // reactiontime
         sfx_None,                // attacksound
@@ -5820,11 +5818,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         NULL,       // namepointer
     },
 
-    {                // MT_EVILSCEPTRE
-        2016,                // doomednum
-        S_BND3,                // spawnstate
+    {                // MT_UNHOLYBIBLE
+        2017,                // doomednum
+        S_BND4,                // spawnstate
         1000,                // spawnhealth
-        S_BND3,                // seestate
+        S_BND4,                // seestate
         sfx_None,                // seesound
         8,                // reactiontime
         sfx_None,                // attacksound
@@ -6167,7 +6165,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         S_NULL,                // raisestate
         NULL,       // namepointer
     },
-
+/*
     {                // MT_BETAARMOR
         -1,                // doomednum
         S_BETAARM1A,                // spawnstate
@@ -6196,7 +6194,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         S_NULL,                // raisestate
         NULL,       // namepointer
     },
-
+*/
     {                // MT_BETABRUISER
         -1,                // doomednum
         S_BETABOSS_STND,                // spawnstate
@@ -6398,8 +6396,8 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                          // flags2
         S_NULL,                // raisestate
         NULL,       // namepointer
-    },
-/*
+    }/*,
+
     {           // MT_BULLET
         -1,             // doomednum
         S_BULLET_00,           // spawnstate

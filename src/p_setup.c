@@ -258,7 +258,6 @@ void P_LoadSegs (int lump)
     W_ReleaseLumpNum(lump);
 }
 
-
 //
 // P_LoadSubsectors
 //
