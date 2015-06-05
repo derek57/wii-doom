@@ -38,6 +38,7 @@
 #include "doomtype.h"
 #include "i_swap.h"
 #include "i_system.h"
+#include "i_tinttab.h"
 #include "i_video.h"
 #include "m_bbox.h"
 #include "m_misc.h"
@@ -54,6 +55,7 @@
 
 // prevent framebuffer overflow
 #define dest_in_framebuffer (safe || ((dest-dest_screen) < SCREENHEIGHT*SCREENWIDTH))
+
 
 static  patch_t*             v_font[V_FONTSIZE];
 
@@ -213,129 +215,134 @@ void V_DrawPatch(int x, int y, patch_t *patch)
     if (x + w > ORIGWIDTH)
         w = ORIGWIDTH - x;
 
-  // quadruple for-loop for each dp_translation and dp_translucent case
-  // to avoid checking these variables for each pixel and instead check once per patch
-  // (1) normal, opaque patch
-  if (!dp_translation && !dp_translucent)
-    for ( ; col<w ; x++, col++, desttop++)
+    // quadruple for-loop for each dp_translation and dp_translucent case
+    // to avoid checking these variables for each pixel and instead check once per patch
+    // (1) normal, opaque patch
+    if (!dp_translation && !dp_translucent)
     {
-        column = (column_t *)((byte *)patch + LONG(patch->columnofs[col]));
-
-        // step through the posts in a column
-        while (column->topdelta != 0xff)
+        for ( ; col<w ; x++, col++, desttop++)
         {
-          for (f = 0; f <= hires; f++)
-          {
-            source = (byte *)column + 3;
-            dest = desttop + column->topdelta*(SCREENWIDTH << hires) + (x * hires) + f;
-            count = column->length;
+            column = (column_t *)((byte *)patch + LONG(patch->columnofs[col]));
 
-            // prevent framebuffer overflow
-            while (count-- && dest_in_framebuffer)
+            // step through the posts in a column
+            while (column->topdelta != 0xff)
             {
-                if (hires)
+                for (f = 0; f <= hires; f++)
                 {
-                    *dest = *source;
-                    dest += SCREENWIDTH;
+                    source = (byte *)column + 3;
+                    dest = desttop + column->topdelta*(SCREENWIDTH << hires) + (x * hires) + f;
+                    count = column->length;
+
+                    // prevent framebuffer overflow
+                    while (count-- && dest_in_framebuffer)
+                    {
+                        if (hires)
+                        {
+                            *dest = *source;
+                            dest += SCREENWIDTH;
+                        }
+                        *dest = *source++;
+                        dest += SCREENWIDTH;
+                    }
                 }
-                *dest = *source++;
-                dest += SCREENWIDTH;
+                column = (column_t *)((byte *)column + column->length + 4);
             }
-          }
-            column = (column_t *)((byte *)column + column->length + 4);
         }
     }
-  else
-  // (2) color-translated, opaque patch
-  if (dp_translation && !dp_translucent)
-    for ( ; col<w ; x++, col++, desttop++)
+    // (2) color-translated, opaque patch
+    else if (dp_translation && !dp_translucent)
     {
-        column = (column_t *)((byte *)patch + LONG(patch->columnofs[col]));
-
-        // step through the posts in a column
-        while (column->topdelta != 0xff)
+        for ( ; col<w ; x++, col++, desttop++)
         {
-          for (f = 0; f <= hires; f++)
-          {
-            source = (byte *)column + 3;
-            dest = desttop + column->topdelta*(SCREENWIDTH << hires) + (x * hires) + f;
-            count = column->length;
+            column = (column_t *)((byte *)patch + LONG(patch->columnofs[col]));
 
-            // prevent framebuffer overflow
-            while (count-- && dest_in_framebuffer)
+            // step through the posts in a column
+            while (column->topdelta != 0xff)
             {
-                if (hires)
+                for (f = 0; f <= hires; f++)
                 {
-                    *dest = dp_translation[*source];
-                    dest += SCREENWIDTH;
+                    source = (byte *)column + 3;
+                    dest = desttop + column->topdelta*(SCREENWIDTH << hires) + (x * hires) + f;
+                    count = column->length;
+
+                    // prevent framebuffer overflow
+                    while (count-- && dest_in_framebuffer)
+                    {
+                        if (hires)
+                        {
+                            *dest = dp_translation[*source];
+                            dest += SCREENWIDTH;
+                        }
+                        *dest = dp_translation[*source++];
+                        dest += SCREENWIDTH;
+                    }
                 }
-                *dest = dp_translation[*source++];
-                dest += SCREENWIDTH;
+                column = (column_t *)((byte *)column + column->length + 4);
             }
-          }
-            column = (column_t *)((byte *)column + column->length + 4);
         }
     }
-  else
-  // (3) normal, translucent patch
-  if (!dp_translation && dp_translucent)
-    for ( ; col<w ; x++, col++, desttop++)
+    // (3) normal, translucent patch
+    else if (!dp_translation && dp_translucent)
     {
-        column = (column_t *)((byte *)patch + LONG(patch->columnofs[col]));
-
-        // step through the posts in a column
-        while (column->topdelta != 0xff)
+        for ( ; col<w ; x++, col++, desttop++)
         {
-          for (f = 0; f <= hires; f++)
-          {
-            source = (byte *)column + 3;
-            dest = desttop + column->topdelta*(SCREENWIDTH << hires) + (x * hires) + f;
-            count = column->length;
+            column = (column_t *)((byte *)patch + LONG(patch->columnofs[col]));
 
-            // prevent framebuffer overflow
-            while (count-- && dest_in_framebuffer)
+            // step through the posts in a column
+            while (column->topdelta != 0xff)
             {
-                if (hires)
+                for (f = 0; f <= hires; f++)
                 {
-                    *dest = tranmap[(*dest<<8)+*source];
-                    dest += SCREENWIDTH;
+                    source = (byte *)column + 3;
+                    dest = desttop + column->topdelta*(SCREENWIDTH << hires) + (x * hires) + f;
+                    count = column->length;
+
+                    // prevent framebuffer overflow
+                    while (count-- && dest_in_framebuffer)
+                    {
+                        if (hires)
+                        {
+                            *dest = tranmap[(*dest<<8)+*source];
+                            dest += SCREENWIDTH;
+                        }
+                        *dest = tranmap[(*dest<<8)+*source++];
+                        dest += SCREENWIDTH;
+                    }
                 }
-                *dest = tranmap[(*dest<<8)+*source++];
-                dest += SCREENWIDTH;
+                column = (column_t *)((byte *)column + column->length + 4);
             }
-          }
-            column = (column_t *)((byte *)column + column->length + 4);
         }
     }
-  else
-  // (4) color-translated, translucent patch
-  if (dp_translation && dp_translucent)
-    for ( ; col<w ; x++, col++, desttop++)
+    // (4) color-translated, translucent patch
+    else if (dp_translation && dp_translucent)
     {
-        column = (column_t *)((byte *)patch + LONG(patch->columnofs[col]));
-
-        // step through the posts in a column
-        while (column->topdelta != 0xff)
+        for ( ; col<w ; x++, col++, desttop++)
         {
-          for (f = 0; f <= hires; f++)
-          {
-            source = (byte *)column + 3;
-            dest = desttop + column->topdelta*(SCREENWIDTH << hires) + (x * hires) + f;
-            count = column->length;
+            column = (column_t *)((byte *)patch + LONG(patch->columnofs[col]));
 
-            // prevent framebuffer overflow
-            while (count-- && dest_in_framebuffer)
+            // step through the posts in a column
+            while (column->topdelta != 0xff)
             {
-                if (hires)
+                for (f = 0; f <= hires; f++)
                 {
-                    *dest = tranmap[(*dest<<8)+dp_translation[*source]];
-                    dest += SCREENWIDTH;
+                    source = (byte *)column + 3;
+                    dest = desttop + column->topdelta*(SCREENWIDTH << hires) + (x * hires) + f;
+                    count = column->length;
+
+                    // prevent framebuffer overflow
+                    while (count-- && dest_in_framebuffer)
+                    {
+                        if (hires)
+                        {
+                            *dest = tranmap[(*dest<<8)+dp_translation[*source]];
+                            dest += SCREENWIDTH;
+                        }
+                        *dest = tranmap[(*dest<<8)+dp_translation[*source++]];
+                        dest += SCREENWIDTH;
+                    }
                 }
-                *dest = tranmap[(*dest<<8)+dp_translation[*source++]];
-                dest += SCREENWIDTH;
+                column = (column_t *)((byte *)column + column->length + 4);
             }
-          }
-            column = (column_t *)((byte *)column + column->length + 4);
         }
     }
 }
@@ -932,8 +939,8 @@ void V_DrawConsoleChar(int x,
                        int y,
                        patch_t *patch,
                        byte color,
-                       boolean italics
-                       /*, int translucency*/)
+                       boolean italics,
+                       int translucency)
 {
     int         col = 0;
     byte        *desttop = dest_screen + (y << hires) * SCREENWIDTH + x;
@@ -962,13 +969,11 @@ void V_DrawConsoleChar(int x,
                                     column->length - count]) = color;
                         else if(!italics)
                             *dest = color;
-/*
                         else
                             *dest = (translucency == 1 ?
                                     tinttab25[(color << 8) + *dest] :
                                     (translucency == 2 ?
                                     tinttab25[(*dest << 8) + color] : color));
-*/
                     }
                     *(source++);
                 }

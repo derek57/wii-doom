@@ -818,7 +818,7 @@ char                       detailNames[2][9] = {"M_GDHIGH","M_GDLOW"};
 char                       msgNames[2][9]    = {"M_MSGOFF","M_MSGON"};
 */
 char                       map_coordinates_textbuffer[50];
-char                       massacre_textbuffer[20];
+char                       massacre_textbuffer[30];
 
 // old save description before edit
 char                       saveOldString[SAVESTRINGSIZE];  
@@ -6950,7 +6950,7 @@ void M_Massacre(int choice)
 
     // Ty 03/27/98 - string(s) *not* externalized
 
-    sprintf(massacre_textbuffer, "%d MONSTER%s KILLED\n",
+    sprintf(massacre_textbuffer, "%d MONSTER%s KILLED",
         killcount, killcount == 1 ? "" : "S");
 
     players[consoleplayer].message = DEH_String(massacre_textbuffer);

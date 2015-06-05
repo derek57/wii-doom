@@ -127,8 +127,8 @@ void V_DrawConsoleChar(int x,
                        int y,
                        patch_t *patch,
                        byte color,
-                       boolean italics/*,
-                       int translucency*/);
+                       boolean italics,
+                       int translucency);
 
 #endif
 

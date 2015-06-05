@@ -34,6 +34,7 @@
 #include "i_swap.h"
 #include "i_system.h"
 #include "i_timer.h"
+#include "i_tinttab.h"
 #include "i_video.h"
 #include "i_scale.h"
 #include "m_config.h"
@@ -1005,7 +1006,9 @@ static void I_AutoAdjustSettings(void)
 void I_InitGraphics(void)
 {
     SDL_Event dummy;
-    byte *doompal;
+    byte      *doompal = W_CacheLumpName("PLAYPAL", PU_CACHE);
+
+    I_InitTintTables(doompal);
 
     if (SDL_Init(SDL_INIT_VIDEO) < 0) 
     {
@@ -1056,8 +1059,6 @@ void I_InitGraphics(void)
     SDL_FillRect(screenbuffer, NULL, 0);
 
     // Set the palette
-
-    doompal = W_CacheLumpName(DEH_String("PLAYPAL"), PU_CACHE);
 
     I_SetPalette(doompal);
 

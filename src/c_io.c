@@ -77,24 +77,22 @@
 #include <wiiuse/wpad.h>
 
 
-#define CONSOLEFONTSTART        ' '
-#define CONSOLEFONTEND          '~'
-#define CONSOLEFONTSIZE         (CONSOLEFONTEND - CONSOLEFONTSTART + 1)
+#define CONSOLEFONTSTART                ' '
+#define CONSOLEFONTEND                  '~'
+#define CONSOLEFONTSIZE                 (CONSOLEFONTEND - CONSOLEFONTSTART + 1)
+#define CONSOLETEXTX                    10
 
-#define CONSOLETEXTX            10
+#define ITALICS                         '~'
 
-#define CONSOLESCROLLBARWIDTH   3
+#define MESSAGES                        384
 
-#define ITALICS                 '~'
-
-#define MESSAGES                384
-
-#define MAX_MYCHARSPERLINE      100
+#define MAX_MYCHARSPERLINE              100
 
 // keep the last 32 typed commands
-#define HISTORY                 32
+#define HISTORY                         32
 
 #define PACKAGE_NAMEANDVERSIONSTRING    "Wii-DOOM"
+
 
 static char        *inputprompt = " $" ;
 
@@ -120,6 +118,16 @@ static int         backdrop_lumpnum = -1;
 static int         pgup_down = 0;
 static int         pgdn_down = 0;
 
+static patch_t     *lb;
+static patch_t     *mid;
+static patch_t     *rb;
+static patch_t     *lsquote;
+static patch_t     *ldquote;
+static patch_t     *degree;
+static patch_t     *multiply;
+static patch_t     *unknownchar;
+static patch_t     *c_font[CONSOLEFONTSIZE];
+
 char               *lumpname;
 
 // the height of the console
@@ -135,8 +143,6 @@ int                textcolor;
 int                consolestrings = 0;
 
 boolean            c_showprompt;
-
-patch_t*           c_font[CONSOLEFONTSIZE];
 
 byte               redcol = 40;
 byte               whitecol = 80;
@@ -537,22 +543,28 @@ int C_Responder(event_t* ev)
 void C_Init(void)
 {
     int         i;
-    int         j = CONSOLEFONTSTART;
+    int         j;
     char        buffer[9];
 
     // load the heads-up font
-    j = CONSOLEFONTSTART;
+    j = CONSOLEFONTSTART + 1;
     for (i = 0; i < CONSOLEFONTSIZE; i++)
     {
-        if(j == 32)
-            j = 33;
-
-        if(j < 127)
+        if(j < CONSOLEFONTEND + 1)
         {
             DEH_snprintf(buffer, 9, "DRFON%.3d", j++);
             c_font[i] = W_CacheLumpName(buffer, PU_STATIC);
         }
     }
+
+    lb = W_CacheLumpName("STCFN123", PU_STATIC);
+    mid = W_CacheLumpName("STCFN124", PU_STATIC);
+    rb = W_CacheLumpName("STCFN125", PU_STATIC);
+    lsquote = W_CacheLumpName("DRFON145", PU_STATIC);
+    ldquote = W_CacheLumpName("DRFON147", PU_STATIC);
+    degree = W_CacheLumpName("DRFON176", PU_STATIC);
+    multiply = W_CacheLumpName("DRFON215", PU_STATIC);
+    unknownchar = W_CacheLumpName("DRFON000", PU_STATIC);
 
     consolecolors[yellow] = yellowcol;
     consolecolors[red] = redcol;
@@ -564,26 +576,14 @@ void C_Init(void)
     C_UpdateInputPoint();
 }
 
-static void C_DrawText(int x, int y, char *text, byte color)
+static void C_DrawText(int x, int y, char *text, byte color, int translucency, int italics)
 {
-    boolean     italics = false;
-
     size_t      i;
     size_t      len = strlen(text);
 
     char        prevletter = '\0';
 
-    patch_t     *lb = W_CacheLumpName("STCFN123", PU_STATIC);
-    patch_t     *mid = W_CacheLumpName("STCFN124", PU_STATIC);
-    patch_t     *rb = W_CacheLumpName("STCFN125", PU_STATIC);
-
-    patch_t     *lsquote = W_CacheLumpName("DRFON145", PU_STATIC);
-    patch_t     *ldquote = W_CacheLumpName("DRFON147", PU_STATIC);
-    patch_t     *degree = W_CacheLumpName("DRFON176", PU_STATIC);
-    patch_t     *multiply = W_CacheLumpName("DRFON215", PU_STATIC);
-    patch_t     *unknownchar = W_CacheLumpName("DRFON000", PU_STATIC);
-
-    while (C_StringWidth(text) > SCREENWIDTH - CONSOLETEXTX * 3 - CONSOLESCROLLBARWIDTH + 2)
+    while (C_StringWidth(text) > SCREENWIDTH - CONSOLETEXTX * 3 - 5)
     {
         text[len - 1] = '.';
         text[len] = '.';
@@ -598,81 +598,69 @@ static void C_DrawText(int x, int y, char *text, byte color)
         int     c = letter - CONSOLEFONTSTART;
         char    nextletter = text[i + 1];
 
-        if (letter == ITALICS && prevletter != ITALICS)
+        patch_t *charpatch = NULL;
+
+        if((letter > 32 && letter < 127)    ||
+           (letter == 0    || letter == 145 || letter == 147 ||
+            letter == 215) || letter == ' ')
         {
-            italics = !italics;
-            if (!italics)
-                ++x;
+            if(letter == ' ')
+                x += 4;
+            else if(letter == '\t')
+                x += 32;
+            else if(letter == '{')
+            {
+                charpatch = lb;
+                V_DrawPatch(x, y, charpatch);
+            }
+            else if(letter == '|')
+            {
+                charpatch = mid;
+                V_DrawPatch(x, y, charpatch);
+            }
+            else if(letter == '}')
+            {
+                charpatch = rb;
+                V_DrawPatch(x, y, charpatch);
+            }
+            else if(letter == '\xc2' && nextletter == '\xb0')
+            {
+                charpatch = degree;
+                ++i;
+            }
+            else
+                charpatch = (c < 0 || c >= CONSOLEFONTSIZE ? unknownchar : c_font[c - 1]);
         }
-        else
+
+        if (isdigit(prevletter) && letter == 'x' && isdigit(nextletter))
+            charpatch = multiply;
+        else if (prevletter == ' ' || prevletter == '\t' || !i)
         {
-            patch_t     *patch = NULL;
+            if (letter == '\'')
+                charpatch = lsquote;
+            else if (letter == '\"')
+                charpatch = ldquote;
+        }
 
-            if (letter == ITALICS)
-                italics = false;
+        if (!italics)
+        {
+            int     k = 0;
 
-            if((letter > 32 && letter < 127)    ||
-               (letter == 0    || letter == 145 || letter == 147 ||
-                letter == 215) || letter == ' ')
+            while (kern[k].char1)
             {
-                if(letter == ' ')
-                    x += 4;
-                else if(letter == '\t')
-                    x += 32;
-                else if(letter == '{')
+                if (prevletter == kern[k].char1 && letter == kern[k].char2)
                 {
-                    patch = lb;
-                    V_DrawPatch(x, y, patch);
-                }
-                else if(letter == '|')
-                {
-                    patch = mid;
-                    V_DrawPatch(x, y, patch);
-                }
-                else if(letter == '}')
-                {
-                    patch = rb;
-                    V_DrawPatch(x, y, patch);
-                }
-                else if(letter == '\xc2' && nextletter == '\xb0')
-                {
-                    patch = degree;
-                    ++i;
-                }
-                else
-                    patch = (c < 0 || c >= CONSOLEFONTSIZE ? unknownchar : c_font[c - 1]);
-            }
-
-            if (isdigit(prevletter) && letter == 'x' && isdigit(nextletter))
-                patch = multiply;
-            else if (prevletter == ' ' || prevletter == '\t' || !i)
-            {
-                if (letter == '\'')
-                    patch = lsquote;
-                else if (letter == '\"')
-                    patch = ldquote;
-            }
-
-            if (!italics)
-            {
-                int     k = 0;
-
-                while (kern[k].char1)
-                {
-                    if (prevletter == kern[k].char1 && letter == kern[k].char2)
-                    {
-                        x += kern[k].adjust;
+                    x += kern[k].adjust;
                         break;
-                    }
-                    ++k;
                 }
+                ++k;
             }
+        }
 
-            if (patch)
-            {
-                V_DrawConsoleChar(x, y, patch, color, italics);
-                x += SHORT(patch->width);
-            }
+        if (charpatch)
+        {
+            V_DrawConsoleChar(x, y, charpatch, color, italics, translucency);
+            x += SHORT(charpatch->width);
         }
         prevletter = letter;
     }
@@ -715,12 +703,12 @@ void C_Drawer(void)
             break;
 
         // draw this line
-        C_DrawText(0, y, console[count].string, consolecolors[console[count].type]);
+        C_DrawText(0, y, console[count].string, consolecolors[console[count].type], 0, 0);
     }
 
     // draw branding
     C_DrawText(SCREENWIDTH - C_StringWidth(PACKAGE_NAMEANDVERSIONSTRING) -
-        CONSOLETEXTX + 1, current_height - 8, PACKAGE_NAMEANDVERSIONSTRING, 100);
+        CONSOLETEXTX + 1, current_height - 8, PACKAGE_NAMEANDVERSIONSTRING, 100, 1, 1);
 
     // Draw input line
     // input line on screen, not scrolled back in history?  
@@ -738,7 +726,7 @@ void C_Drawer(void)
         if(message_pos == message_last)
             sprintf(tempstr, "%s%s%s", inputprompt, input_point, underline);
 
-        C_DrawText(0, current_height - 8, tempstr, 80);
+        C_DrawText(0, current_height - 8, tempstr, 80, 0, 0);
     }
 }
 
