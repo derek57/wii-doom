@@ -60,7 +60,9 @@ typedef struct
 extern int        runcount;
 
 boolean           iwad_added;
-boolean           pwad_added;
+boolean           psp_pwad_added;
+boolean           extras_pwad_added;
+boolean           custom_pwad_added;
 
 int               iwad_lumps;
 int               fsizecq = 0;
@@ -248,7 +250,7 @@ wad_file_t *W_AddFile (char *filename, boolean automatic)
     if(!iwad_added)
         iwad_lumps = numlumps - startlump;
 
-    if(!pwad_added)
+    if(!psp_pwad_added)
     {
         C_Init();
 
@@ -264,8 +266,14 @@ wad_file_t *W_AddFile (char *filename, boolean automatic)
                 (automatic ? "Automatically added" : "Added"),
                 commify(iwad_lumps), target);
 
-        C_Printf(CR_GRAY, "         adding %s\n", filename);
+        C_Printf(CR_GRAY, " %s %s lumps from %.4s file %s\n",
+                (automatic ? "Automatically added" : "Added"),
+                commify(numlumps - startlump),
+                header.identification, uppercase(filename));
+    }
 
+    if(!custom_pwad_added || !extras_pwad_added)
+    {
         C_Printf(CR_GRAY, " %s %s lumps from %.4s file %s\n",
                 (automatic ? "Automatically added" : "Added"),
                 commify(numlumps - startlump),

@@ -403,8 +403,8 @@ void C_DrawBackdrop()
     C_InitBackdrop();
 
     memcpy(I_VideoBuffer, backdrop +
-          (800 - (current_height * 4)) *
-           320, ((current_height * 4)) * 320);
+          ((ORIGHEIGHT * 4) - (current_height * 4)) *
+           ORIGWIDTH, ((current_height * 4)) * ORIGWIDTH);
 }
 
 

@@ -143,11 +143,11 @@ int screen_bpp = 0;
 // Automatically adjust video settings if the selected mode is 
 // not a valid video mode.
 
-static int autoadjust_video_settings = 0;
+static int autoadjust_video_settings = 1;
 
 // Run in full screen mode?  (int type for config code)
 
-int fullscreen = false;
+int fullscreen = true;
 
 // Aspect ratio correction mode
 
@@ -865,7 +865,7 @@ static boolean AutoAdjustFullscreen(void)
         return false;
     }
 
-    printf("I_InitGraphics: %ix%i mode not supported on this machine.\n",
+    C_Printf(CR_GRAY, " I_InitGraphics: %i x %i mode not supported on this machine.\n",
            screen_width, screen_height);
 
     screen_width = best_mode->w;
@@ -896,7 +896,7 @@ static void AutoAdjustWindowed(void)
 
     if (best_mode->width != screen_width || best_mode->height != screen_height)
     {
-        printf("I_InitGraphics: Cannot run at specified mode: %ix%i\n",
+        C_Printf(CR_GRAY, " I_InitGraphics: Cannot run at specified mode: %i x %i\n",
                screen_width, screen_height);
 
         screen_width = best_mode->width;
@@ -946,7 +946,7 @@ static void AutoAdjustColorDepth(void)
 
     if (modes == NULL)
     {
-        printf("I_InitGraphics: %ibpp color depth not supported.\n",
+        C_Printf(CR_GRAY, " I_InitGraphics: %i bpp color depth not supported.\n",
                screen_bpp);
 
         info = SDL_GetVideoInfo();
@@ -993,13 +993,10 @@ static void I_AutoAdjustSettings(void)
     if (screen_width != old_screen_w || screen_height != old_screen_h
      || screen_bpp != old_screen_bpp)
     {
-        printf("I_InitGraphics: Auto-adjusted to %ix%ix%ibpp.\n",
+        C_Printf(CR_GRAY, " I_InitGraphics: Auto-adjusted to %i x %i x %i bpp.\n",
                screen_width, screen_height, screen_bpp);
 
-        printf("NOTE: Your video settings have been adjusted.  "
-               "To disable this behavior,\n"
-               "set autoadjust_video_settings to 0 in your "
-               "configuration file.\n");
+        C_Printf(CR_GOLD, " NOTE: Your video settings have been adjusted.\n");
     }
 }
 
@@ -1028,7 +1025,6 @@ void I_InitGraphics(void)
     w = screen_width;
     h = screen_height;
 
-    C_Printf(CR_GRAY, " I_InitGraphics: Resolution is %d x %d x %d bpp\n", w, h, screen_bpp);
     C_Printf(CR_GRAY, " Scaling to aspect ratio 16:9 in software mode\n");
     C_Printf(CR_GRAY, " Using 256-color palette from PLAYPAL lump.\n");
 
@@ -1042,12 +1038,12 @@ void I_InitGraphics(void)
     if (screen_mode == NULL)
     {
         I_Error("I_InitGraphics: Unable to find a screen mode small "
-                "enough for %ix%i", w, h);
+                "enough for %i x %i", w, h);
     }
 
     if (w != screen_mode->width || h != screen_mode->height)
     {
-        C_Printf(CR_GRAY, " I_InitGraphics: %s (%ix%i within %ix%i)\n",
+        C_Printf(CR_GRAY, " I_InitGraphics: %s (%i x %i within %i x %i)\n",
               WindowBoxType(screen_mode, w, h),
               screen_mode->width, screen_mode->height, w, h);
     }

@@ -158,7 +158,9 @@ extern boolean  devparm_nerve;
 extern boolean  finale_music;
 extern boolean  aiming_help;
 extern boolean  iwad_added;
-extern boolean  pwad_added;
+extern boolean  psp_pwad_added;
+extern boolean  extras_pwad_added;
+extern boolean  custom_pwad_added;
 extern boolean  show_chat_bar;
 
 extern menu_t*  currentMenu;                          
@@ -1385,7 +1387,9 @@ void D_DoomMain (void)
     }
 
     iwad_added = false;
-    pwad_added = true;
+    psp_pwad_added = true;
+    extras_pwad_added = true;
+    custom_pwad_added = true;
 
     startuptimer = I_GetTimeMS();
 
@@ -1431,6 +1435,8 @@ void D_DoomMain (void)
 
     iwad_added = true;
 
+    custom_pwad_added = false;
+
     if(gamemode != shareware || (gamemode == shareware && gameversion == exe_chex))
     {
         if(load_extra_wad == 1)
@@ -1452,19 +1458,23 @@ void D_DoomMain (void)
         }
     }
 
+    custom_pwad_added = true;
+
     if(devparm_nerve)
         D_AddFile("usb:/apps/wiidoom/PWAD/DOOM2/NERVE.WAD", true);
 
     dont_show_adding_of_resource_wad = 0;
 
-    pwad_added = false;
+    psp_pwad_added = false;
 
     if(usb)
         W_MergeFile("usb:/apps/wiidoom/pspdoom.wad", true);
     else if(sd)
         W_MergeFile("sd:/apps/wiidoom/pspdoom.wad", true);
 
-    pwad_added = true;
+    psp_pwad_added = true;
+
+    extras_pwad_added = false;
 
     if(beta_style && gamemode != shareware && gamemode != commercial)
     {
@@ -1480,6 +1490,8 @@ void D_DoomMain (void)
         else
             print_resource_pwad2_error = true;
     }
+
+    extras_pwad_added = true;
 
     if(print_resource_pwad2_error)
     {
