@@ -934,6 +934,7 @@ static boolean             askforkey = false;
 static int                 FirstKey = 0;           // SPECIAL MENU FUNCTIONS (ITEMCOUNT)
 static int                 keyaskedfor;
 
+extern int                 opl_type;
 extern int                 cheating;
 extern int                 mspeed;
 extern int                 left;
@@ -954,7 +955,7 @@ extern boolean             BorderNeedRefresh;
 extern boolean             sendpause;
 extern boolean             secret_1;
 extern boolean             secret_2;
-extern boolean             game_startup;
+//extern boolean             game_startup;
 
 extern short               songlist[148];
 
@@ -2204,7 +2205,13 @@ void M_DrawSound(void)
     if(mus_engine == 1)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(SoundDef.x + 212, SoundDef.y + 18, "OPL");
+        M_WriteText(SoundDef.x + 204, SoundDef.y + 18, "OPL2");
+        V_ClearDPTranslation();
+    }
+    else if(mus_engine == 2)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(SoundDef.x + 204, SoundDef.y + 18, "OPL3");
         V_ClearDPTranslation();
     }
     else
@@ -2228,9 +2235,12 @@ void M_DrawSound(void)
     }
 
     if(mus_engine < 1)
+    {
         mus_engine = 1;
-    else if(mus_engine > 2)
-        mus_engine = 2;
+        opl_type = 0;
+    }
+    else if(mus_engine > 3)
+        mus_engine = 3;
 }
 
 void M_Sound(int choice)
@@ -2277,14 +2287,24 @@ void M_MusicType(int choice)
     case 0:
         if(mus_engine > 1)
         {
-            snd_musicdevice = SNDDEVICE_SB;
+            if(mus_engine == 3)
+                snd_musicdevice = SNDDEVICE_SB;
+            else if(mus_engine == 2)
+                opl_type = 1;
+            else if(mus_engine == 1)
+                opl_type = 0;
             mus_engine--;
         }
         break;
     case 1:
-        if(mus_engine < 2)
+        if(mus_engine < 4)
         {
-            snd_musicdevice = SNDDEVICE_GENMIDI;
+            if(mus_engine == 3)
+                snd_musicdevice = SNDDEVICE_GENMIDI;
+            else if(mus_engine == 2)
+                opl_type = 1;
+            else if(mus_engine == 1)
+                opl_type = 0;
             mus_engine++;
         }
         break;
@@ -4509,11 +4529,13 @@ void M_Drawer (void)
     y = currentMenu->y;
     max = currentMenu->numitems;
 
-    if(currentMenu == &SoundDef && itemOn == 4)
+    if((currentMenu == &SoundDef && itemOn == 2) ||
+       (currentMenu == &GameDef2 && itemOn == 6))
+    {
+        dp_translation = crx[CRX_GOLD];
         M_WriteText(48, 155, "You must restart to take effect.");
-
-    if(currentMenu == &GameDef2 && itemOn == 6)
-        M_WriteText(48, 155, "You must restart to take effect.");
+        V_ClearDPTranslation();
+    }
 
     // FOR PSP (if too many menu items)
     if (currentMenu->menuitems[itemOn].status == 5)
@@ -5599,10 +5621,10 @@ void M_RiftNow(int choice)
     {
         if(forced)
             forced = false;
-
+/*
         if(gamemap > 1)
             game_startup = false;
-
+*/
         warped = 1;
         menuactive = 0;
         G_DeferedInitNew(gameskill, epi, map);
@@ -5892,9 +5914,9 @@ void M_Spin(int choice)
         }
         players[consoleplayer].message = DEH_String(STSTR_MUS);
 
-        if(mus_engine == 2)
+        if(mus_engine == 3)
             S_ChangeMusic(tracknum, false);
-        else if(mus_engine == 1)
+        else if(mus_engine == 1 || mus_engine == 2)
             S_ChangeMusic(tracknum, true);
 
         mus_cheat_used = true;

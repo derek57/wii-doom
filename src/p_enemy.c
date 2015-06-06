@@ -1908,7 +1908,7 @@ A_CloseShotgun2
 mobj_t**           braintargets;
 int                numbraintargets;
 int                braintargeton = 0;
-static int	   maxbraintargets;     // remove braintargets limit
+static int         maxbraintargets;     // remove braintargets limit
 
 void A_BrainAwake (mobj_t* mo)
 {
@@ -1931,18 +1931,18 @@ void A_BrainAwake (mobj_t* mo)
 
         if (m->type == MT_BOSSTARGET )
         {
-	    // remove braintargets limit
-	    if (numbraintargets == maxbraintargets)
-	    {
-		maxbraintargets = maxbraintargets ? 2 * maxbraintargets : 32;
-		braintargets = realloc(braintargets, maxbraintargets * sizeof(*braintargets));
+            // remove braintargets limit
+            if (numbraintargets == maxbraintargets)
+            {
+                maxbraintargets = maxbraintargets ? 2 * maxbraintargets : 32;
+                braintargets = realloc(braintargets, maxbraintargets * sizeof(*braintargets));
 
-		if (maxbraintargets > 32)
-		    C_Printf(CR_GOLD, " R_BrainAwake: Raised braintargets limit to %d.\n", maxbraintargets);
-	    }
+                if (maxbraintargets > 32)
+                    C_Printf(CR_GOLD, " R_BrainAwake: Raised braintargets limit to %d.\n", maxbraintargets);
+            }
 
-	    braintargets[numbraintargets] = m;
-	    numbraintargets++;
+            braintargets[numbraintargets] = m;
+            numbraintargets++;
         }
     }
         
@@ -1950,7 +1950,7 @@ void A_BrainAwake (mobj_t* mo)
 
     // no spawn spots available
     if (numbraintargets == 0)
-	numbraintargets = INT_MIN;
+        numbraintargets = INT_MIN;
 }
 
 
@@ -2027,11 +2027,11 @@ void A_BrainSpit (mobj_t*        mo)
                 
     // avoid division by zero by recalculating the number of spawn spots
     if (numbraintargets == 0)
-	A_BrainAwake(NULL);
+        A_BrainAwake(NULL);
 
     // still no spawn spots available
     if (numbraintargets == INT_MIN)
-	return;
+        return;
 
     // shoot a cube at current target
     targ = braintargets[braintargeton];

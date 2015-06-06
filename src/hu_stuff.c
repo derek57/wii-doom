@@ -110,7 +110,7 @@ extern int              crosshair;
 extern int              show_stats;
 extern int              screenSize;
 
-extern boolean          game_startup;
+//extern boolean          game_startup;
 
 //
 // Builtin map names.
@@ -662,15 +662,16 @@ void HU_NewLevel()
     C_Seperator();
 
     C_Printf(CR_GRAY, "\n");
-
+/*
     if(game_startup)
         C_Printf(CR_GRAY, " %s\n\n", s);
     else
+*/
         C_Printf(CR_GRAY, " %s\n", s);
 
-    C_Printf(CR_GRAY, "\n");
+    C_Printf(CR_GRAY, " \n");
 
-    C_InstaPopup();       // put console away
+//    C_InstaPopup();       // put console away
     //  C_Update();
 }
 

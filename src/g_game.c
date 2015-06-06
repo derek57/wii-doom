@@ -212,7 +212,7 @@ boolean         precache = true;        // if true, load all graphics at start
 boolean         joyarray[MAX_JOY_BUTTONS + 1]; 
 boolean         *joybuttons = &joyarray[1]; // allow [-1] 
 boolean         not_walking;
-boolean         game_startup;
+//boolean         game_startup;
 
 char            demoname[32];
 char            savename[256];
@@ -1071,7 +1071,7 @@ void G_DoLoadLevel (void)
 
     memset (joybuttons, 0, sizeof(joybuttons)); 
 
-    C_InstaPopup();  // pop up the console
+//    C_InstaPopup();  // pop up the console
 } 
 
 void G_DoNewGame (void) 
@@ -1735,10 +1735,10 @@ void G_ExitLevel (void)
 { 
     player_t *player = &players[consoleplayer];
     player->item = 0;
-
+/*
     if(gamemap > 1)
         game_startup = false;
-
+*/
     secretexit = false; 
     gameaction = ga_completed; 
 } 
@@ -1897,12 +1897,12 @@ G_InitNew
 {
     char     *skytexturename;
     int      i;
-
+/*
     if(episode > 0 && episode < 5 && map == 1)
         game_startup = true;
     else if(map > 1)
         game_startup = false;
-
+*/
     if (paused)
     {
         paused = false;

@@ -78,6 +78,7 @@ extern int joy_y;
 extern int joy_1;
 extern int joy_2;
 
+extern int opl_type;
 
 int key_up = KEY_UPARROW;
 int key_down = KEY_DOWNARROW; 
@@ -159,6 +160,7 @@ void M_BindBaseControls(void)
     M_BindVariable("mirrored_corpses",       &d_flipcorpses);
     M_BindVariable("show_secrets",           &d_secrets);
 //    M_BindVariable("uncapped_framerate",     &d_uncappedframerate);
+    M_BindVariable("opltype",                &opl_type);
     M_BindVariable("key_shoot",              &joy_r);
     M_BindVariable("key_open",               &joy_l);
     M_BindVariable("key_menu",               &joy_minus);

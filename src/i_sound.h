@@ -214,6 +214,12 @@ typedef struct
     void (*Poll)(void);
 } music_module_t;
 
+// DMX version to emulate for OPL emulation:
+typedef enum {
+    opl_v_old,   // Hexen, Heretic
+    opl_v_new    // Doom, Strife
+} opl_driver_ver_t;
+
 void I_InitMusic(void);
 void I_ShutdownMusic(void);
 void I_SetMusicVolume(int volume);

@@ -129,6 +129,7 @@ int             pagetic;
 int             runcount = 0;
 int             startuptimer;
 
+extern int      opl_type;
 extern int      mp_skill;
 extern int      warpepi;
 extern int      warplev;
@@ -437,7 +438,6 @@ void D_DoomLoop (void)
 
     TryRunTics();
 
-    I_InitGraphics();
     I_EnableLoadingDisk();
 
     V_RestoreBuffer();
@@ -635,7 +635,7 @@ void D_DoAdvanceDemo (void)
         pagename = "INTERPIC";
     }
 
-    C_InstaPopup();       // make console go away
+//    C_InstaPopup();       // make console go away
 }
 
 //
@@ -647,7 +647,7 @@ void D_StartTitle (void)
     gameaction = ga_nothing;
     demosequence = -1;
     D_AdvanceDemo ();
-    C_InstaPopup();       // make console go away
+//    C_InstaPopup();       // make console go away
 }
 
 // Strings for dehacked replacements of the startup banner
@@ -1254,13 +1254,23 @@ void D_DoomMain (void)
     if(!devparm && aiming_help != 0)
         aiming_help = 0;
 
-    if(mus_engine > 1)
-        mus_engine = 2;
+    if(mus_engine > 2)
+        mus_engine = 3;
     else if(mus_engine < 2)
+    {
         mus_engine = 1;
+        opl_type = 0;
+    }
 
-    if(mus_engine == 1)
+    if(mus_engine == 1 || mus_engine == 2)
+    {
         snd_musicdevice = SNDDEVICE_SB;
+
+        if(mus_engine == 1)
+            opl_type = 0;
+        else
+            opl_type = 1;
+    }
     else
         snd_musicdevice = SNDDEVICE_GENMIDI;
 
@@ -1908,6 +1918,16 @@ void D_DoomMain (void)
     if(nerve_pwad)
         LoadNerveWad();
 
+    I_InitGraphics();
+
+    startuptimer = I_GetTimeMS() - startuptimer;
+
+    C_Printf(CR_GRAY, " Startup took %02i:%02i:%02i.%i to complete.\n",
+        (startuptimer / (1000 * 60 * 60)) % 24,
+        (startuptimer / (1000 * 60)) % 60,
+        (startuptimer / 1000) % 60,
+        (startuptimer % 1000) / 10);
+
     if (startloadgame >= 0)
     {
         strcpy(file, P_SaveGameFile(startloadgame));
@@ -1921,14 +1941,6 @@ void D_DoomMain (void)
         else
             D_StartTitle ();                // start up intro loop
     }
-
-    startuptimer = I_GetTimeMS() - startuptimer;
-
-    C_Printf(CR_GRAY, " Startup took %02i:%02i:%02i.%i to complete.\n",
-        (startuptimer / (1000 * 60 * 60)) % 24,
-        (startuptimer / (1000 * 60)) % 60,
-        (startuptimer / 1000) % 60,
-        (startuptimer % 1000) / 10);
 
     D_DoomLoop ();  // never returns
 }

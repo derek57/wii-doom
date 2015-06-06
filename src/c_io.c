@@ -686,7 +686,7 @@ void C_Drawer(void)
     y = current_height - ((c_showprompt && message_pos == message_last) ? 8 : 0);
 
     // start at our position in the message history
-    count = message_pos;
+    count = message_pos + 1;
 
     while(1)
     {
@@ -994,6 +994,6 @@ void C_InstaPopup(void)
 
 void C_Seperator(void)
 {
-  C_Printf(CR_RED, " {|||||||||||||||||||||||||||||}\n");
+    C_Printf(CR_RED, " {|||||||||||||||||||||||||||||}\n");
 }
 
