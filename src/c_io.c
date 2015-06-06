@@ -1,41 +1,42 @@
-/* Emacs style mode select   -*- C++ -*- 
- *-----------------------------------------------------------------------------
- *
- *
- *  PrBoom a Doom port merged with LxDoom and LSDLDoom
- *  based on BOOM, a modified and improved DOOM engine
- *  Copyright (C) 1999 by
- *  id Software, Chi Hoang, Lee Killough, Jim Flynn, Rand Phares, Ty Halderman
- *  Copyright (C) 1999-2000 by
- *  Jess Haas, Nicolas Kalkhof, Colin Phipps, Florian Schulze
- *  
- *  This program is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU General Public License
- *  as published by the Free Software Foundation; either version 2
- *  of the License, or (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 
- *  02111-1307, USA.
- *
- * DESCRIPTION:
- *
- * Console I/O
- *
- * Basic routines: outputting text to the console, main console functions:
- *                 drawer, responder, ticker, init
- *
- * By Simon Howard, added to PrBoom by Florian Schulze
- *
- *-----------------------------------------------------------------------------
- */
+/*
+========================================================================
 
+                               DOOM RETRO
+         The classic, refined DOOM source port. For Windows PC.
+
+========================================================================
+
+  Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+  Copyright (C) 2013-2015 Brad Harding.
+
+  DOOM RETRO is a fork of CHOCOLATE DOOM by Simon Howard.
+  For a complete list of credits, see the accompanying AUTHORS file.
+
+  This file is part of DOOM RETRO.
+
+  DOOM RETRO is free software: you can redistribute it and/or modify it
+  under the terms of the GNU General Public License as published by the
+  Free Software Foundation, either version 3 of the License, or (at your
+  option) any later version.
+
+  DOOM RETRO is distributed in the hope that it will be useful, but
+  WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+  General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with DOOM RETRO. If not, see <http://www.gnu.org/licenses/>.
+
+  DOOM is a registered trademark of id Software LLC, a ZeniMax Media
+  company, in the US and/or other countries and is used without
+  permission. All other trademarks are the property of their respective
+  holders. DOOM RETRO is in no way affiliated with nor endorsed by
+  id Software LLC.
+
+========================================================================
+*/
+
+#include <ctype.h>
 
 #include <ft2build.h>
 #include <freetype/freetype.h>
@@ -43,32 +44,25 @@
 #include <jpeglib.h>
 #include <ogc/libversion.h>
 #include <png.h>
+#include "c_io.h"
+#include "deh_str.h"
+#include "d_event.h"
+#include "doomstat.h"
+#include "g_game.h"
+#include "i_swap.h"
+#include "i_system.h"
+#include "i_timer.h"
+#include "i_tinttab.h"
+#include "i_video.h"
+#include "m_menu.h"
+#include "m_misc.h"
+#include "p_local.h"
 #include <SDL/SDL.h>
 #include <SDL/SDL_mixer.h>
 #include <SDL/SDL_gfxPrimitives.h>
 #include <SDL/SDL_image.h>
 #include <SDL/SDL_ttf.h>
-#include <stdarg.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <zlib.h>
-
-#include "c_io.h"
-#include "d_event.h"
-#include "d_main.h"
-#include "deh_str.h"
-#include "doomdef.h"
-#include "doomstat.h"
-#include "g_game.h"
-#include "hu_stuff.h"
-#include "i_system.h"
-#include "i_video.h"
-#include "i_swap.h"
-#include "m_menu.h"
-#include "m_misc.h"
-#include "s_sound.h"
-#include "sounds.h"
-#include "v_misc.h"
 #include "v_trans.h"
 #include "v_video.h"
 #include "w_wad.h"
@@ -76,96 +70,257 @@
 
 #include <wiiuse/wpad.h>
 
+#define CONSOLESPEED            (CONSOLEHEIGHT / 12)
 
-#define CONSOLEFONTSTART                ' '
-#define CONSOLEFONTEND                  '~'
-#define CONSOLEFONTSIZE                 (CONSOLEFONTEND - CONSOLEFONTSTART + 1)
-#define CONSOLETEXTX                    10
+#define CONSOLEFONTSTART        ' '
+#define CONSOLEFONTEND          '~'
+#define CONSOLEFONTSIZE         (CONSOLEFONTEND - CONSOLEFONTSTART + 1)
 
-#define ITALICS                         '~'
+#define CONSOLETEXTX            10
+#define CONSOLETEXTY            8
+#define CONSOLELINES            11
+#define CONSOLELINEHEIGHT       14
 
-#define MESSAGES                        384
+#define CONSOLEINPUTPIXELWIDTH  500
 
-#define MAX_MYCHARSPERLINE              100
+#define CONSOLESCROLLBARWIDTH   3
+#define CONSOLESCROLLBARHEIGHT  ((CONSOLELINES - 1) * CONSOLELINEHEIGHT - 4)
+#define CONSOLESCROLLBARX       (SCREENWIDTH - CONSOLETEXTX - CONSOLESCROLLBARWIDTH)
+#define CONSOLESCROLLBARY       (CONSOLETEXTY + 1)
 
-// keep the last 32 typed commands
-#define HISTORY                         32
+#define CONSOLEDIVIDERWIDTH     (SCREENWIDTH - CONSOLETEXTX * 3 - CONSOLESCROLLBARWIDTH)
 
-#define PACKAGE_NAMEANDVERSIONSTRING    "Wii-DOOM"
+#define SPACEWIDTH              3
+#define DIVIDER                 "~~~"
+#define ITALICS                 '~'
 
+#define CARETWAIT               10
 
-static char        *inputprompt = " $" ;
+boolean         consoleactive = false;
+int             consoleheight = 0;
+int             consoledirection = -1;
+static int      consolewait = 0;
 
-// left-most point you see of the command line
-static char        *input_point;
+patch_t         *unknownchar;
+patch_t         *consolefont[CONSOLEFONTSIZE];
+patch_t         *lsquote;
+patch_t         *ldquote;
+patch_t         *degree;
+patch_t         *multiply;
+patch_t     *lb;
+patch_t     *mid;
+patch_t     *rb;
 
-static byte        *backdrop;
+char            consoleinput[255] = "";
+int             consolestrings = 0;
 
-// the messages (what you see in the console window)
-static char        messages[MESSAGES][LINELENGTH];
+patch_t         *caret;
+patch_t         *route;
+patch_t         *space;
+int             caretpos = 0;
+static boolean  showcaret = true;
+static int      caretwait = 0;
+int             selectstart = 0;
+int             selectend = 0;
 
-static char        inputtext[INPUTLENGTH];
+char            consolecheat[255] = "";
+char            consolecheatparm[3] = "";
+static int      outputhistory = -1;
 
-// position in the history (last line in window)
-static int         message_pos = 0;
+static int      notabs[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 
-// the last message
-static int         message_last = 0;
+extern boolean  translucency;
+extern byte     *tinttab75;
+extern int      fps;
+boolean         alwaysrun;
 
-static int         backdrop_lumpnum = -1;
+void G_ToggleAlwaysRun(void);
 
-// for scrolling command line
-static int         pgup_down = 0;
-static int         pgdn_down = 0;
-
-static patch_t     *lb;
-static patch_t     *mid;
-static patch_t     *rb;
-static patch_t     *lsquote;
-static patch_t     *ldquote;
-static patch_t     *degree;
-static patch_t     *multiply;
-static patch_t     *unknownchar;
-static patch_t     *c_font[CONSOLEFONTSIZE];
-
-char               *lumpname;
-
-// the height of the console
-int                c_height = 100;        // 50 FOR STRIFE (100 FOR DOOM)
-
-// pixels/tic it moves
-int                c_speed = 10;
-
-int                current_target = 0;
-int                current_height = 0;
-int                console_enabled = true;
-int                textcolor;
-int                consolestrings = 0;
-
-boolean            c_showprompt;
-
-byte               redcol = 40;
-byte               whitecol = 80;
-byte               graycol = 100;
-byte               greencol = 120;
-byte               yellowcol = 160;
-byte               bluecol = 200;
-byte               consolecolors[STRINGTYPES];
-
-extern boolean     redrawsbar;
-
-extern char        *shiftxform;
-
-
-typedef struct
+char *upper =
 {
-    char                *string;
-    crx_t               type;
-    int                 tabs[8];
-} console_t;
+    "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0 !\"#$%&\"()*+,_>?)!@#$%^&*(:"
+    ":<+>?\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0{\\}^_`ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+};
 
-console_t       *console;
+byte            *c_tempscreen;
+byte            *c_blurredscreen;
 
+byte            inputcolor = 4;
+byte            whitecolor = 80;
+byte            bluecolor = 200;
+byte            redcolor = 40;
+byte            graycolor = 100;
+byte            greencolor = 120;
+byte            yellowcolor = 160;
+
+byte            consolebrandingcolor = 100;
+byte            consolescrollbartrackcolor = 100;
+byte            consolescrollbarfacecolor = 88;
+byte            consoletintcolor = 5;
+
+byte            consolecolors[STRINGTYPES];
+
+
+void C_Printf(stringtype_t type, char *string, ...)
+{
+    va_list     argptr;
+    char        buffer[1024];
+
+    va_start(argptr, string);
+    memset(buffer, 0, sizeof(buffer));
+    M_vsnprintf(buffer, sizeof(buffer) - 1, string, argptr);
+    va_end(argptr);
+
+    console = realloc(console, (consolestrings + 1) * sizeof(*console));
+    console[consolestrings].string = strdup(buffer);
+    console[consolestrings].type = type;
+    memset(console[consolestrings].tabs, 0, sizeof(console[consolestrings].tabs));
+    ++consolestrings;
+    outputhistory = -1;
+}
+
+void C_AddConsoleDivider(void)
+{
+    if (!consolestrings || strcasecmp(console[consolestrings - 1].string, DIVIDER))
+        C_Printf(CR_RED, " {||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||}\n");
+}
+
+static void C_DrawDivider(int y)
+{
+    int i;
+
+    y *= SCREENWIDTH;
+    if (y >= CONSOLETOP * SCREENWIDTH)
+        for (i = y + CONSOLETEXTX; i < y + CONSOLETEXTX + CONSOLEDIVIDERWIDTH; ++i)
+            screens[0][i] = redcolor;
+    if ((y += SCREENWIDTH) >= CONSOLETOP * SCREENWIDTH)
+        for (i = y + CONSOLETEXTX; i < y + CONSOLETEXTX + CONSOLEDIVIDERWIDTH; ++i)
+            screens[0][i] = redcolor;
+}
+
+static void C_DrawScrollbar(void)
+{
+    int x, y;
+    int trackstart;
+    int trackend;
+    int facestart;
+    int faceend;
+    int offset = (CONSOLEHEIGHT - consoleheight) * SCREENWIDTH;
+
+    // Draw scrollbar track
+    trackstart = CONSOLESCROLLBARY * SCREENWIDTH;
+    trackend = trackstart + CONSOLESCROLLBARHEIGHT * SCREENWIDTH;
+    for (y = trackstart; y < trackend; y += SCREENWIDTH)
+        if (y - offset >= 0)
+            for (x = CONSOLESCROLLBARX; x < CONSOLESCROLLBARX + CONSOLESCROLLBARWIDTH; ++x)
+                screens[0][y - offset + x] = consolescrollbartrackcolor;
+
+    // Draw scrollbar face
+    facestart = (CONSOLESCROLLBARY + CONSOLESCROLLBARHEIGHT * (outputhistory == -1 ?
+        MAX(0, consolestrings - CONSOLELINES) : outputhistory) / consolestrings) * SCREENWIDTH;
+    faceend = facestart + (CONSOLESCROLLBARHEIGHT - CONSOLESCROLLBARHEIGHT
+        * MAX(0, consolestrings - CONSOLELINES) / consolestrings) * SCREENWIDTH;
+
+    for (y = facestart; y < faceend; y += SCREENWIDTH)
+        if (y - offset >= 0)
+            for (x = CONSOLESCROLLBARX; x < CONSOLESCROLLBARX + CONSOLESCROLLBARWIDTH; ++x)
+                screens[0][y - offset + x] = consolescrollbarfacecolor;
+}
+
+void C_Init(void)
+{
+    int         i;
+    int         j = CONSOLEFONTSTART;
+    char        buffer[9];
+
+    unknownchar = W_CacheLumpName("DRFON000", PU_STATIC);
+    for (i = 0; i < CONSOLEFONTSIZE; i++)
+    {
+        M_snprintf(buffer, 9, "DRFON%03d", j++);
+        consolefont[i] = W_CacheLumpName(buffer, PU_STATIC);
+    }
+
+    lb = W_CacheLumpName("STCFN123", PU_STATIC);
+    mid = W_CacheLumpName("STCFN124", PU_STATIC);
+    rb = W_CacheLumpName("STCFN125", PU_STATIC);
+    lsquote = W_CacheLumpName("DRFON145", PU_STATIC);
+    ldquote = W_CacheLumpName("DRFON147", PU_STATIC);
+    degree = W_CacheLumpName("DRFON176", PU_STATIC);
+    multiply = W_CacheLumpName("DRFON215", PU_STATIC);
+
+    space = consolefont[' ' - CONSOLEFONTSTART];
+    route = consolefont['$' - CONSOLEFONTSTART];
+    caret = consolefont['_' - CONSOLEFONTSTART];
+
+    consolecolors[yellow] = yellowcolor; // yellow = 160
+    consolecolors[red] = redcolor;       // red = 40
+    consolecolors[gray] = graycolor;     // gray = 100
+    consolecolors[blue] = bluecolor;     // blue = 200
+    consolecolors[white] = whitecolor;   // white = 80
+    consolecolors[green] = greencolor;   // green = 120
+
+    c_tempscreen = Z_Malloc(SCREENWIDTH * SCREENHEIGHT, PU_STATIC, NULL);
+    c_blurredscreen = Z_Malloc(SCREENWIDTH * SCREENHEIGHT, PU_STATIC, NULL);
+}
+
+void C_HideConsole(void)
+{
+    consoledirection = -1;
+}
+
+void C_HideConsoleFast(void)
+{
+    consoleheight = 0;
+    consoledirection = -1;
+    consoleactive = false;
+}
+
+static void c_blurscreen(int x1, int y1, int x2, int y2, int i)
+{
+    int x, y;
+
+    memcpy(c_tempscreen, c_blurredscreen, SCREENWIDTH * (CONSOLEHEIGHT + 5));
+
+    for (y = y1; y < y2; y += SCREENWIDTH)
+        for (x = y + x1; x < y + x2; ++x)
+            c_blurredscreen[x] = tinttab50[c_tempscreen[x] + (c_tempscreen[x + i] << 8)];
+}
+
+static void C_DrawBackground(int height)
+{
+    static boolean      blurred = false;
+    int                 i;
+
+    extern boolean      wipe;
+
+    height = (height + 5) * SCREENWIDTH;
+
+    if (!blurred)
+    {
+        for (i = 0; i < height; ++i)
+            c_blurredscreen[i] = screens[0][i];
+
+        c_blurscreen(0, 0, SCREENWIDTH - 1, height, 1);
+        c_blurscreen(1, 0, SCREENWIDTH, height, -1);
+        c_blurscreen(0, 0, SCREENWIDTH - 1, height - SCREENWIDTH, SCREENWIDTH + 1);
+        c_blurscreen(1, SCREENWIDTH, SCREENWIDTH, height, -(SCREENWIDTH + 1));
+        c_blurscreen(0, 0, SCREENWIDTH, height - SCREENWIDTH, SCREENWIDTH);
+        c_blurscreen(0, SCREENWIDTH, SCREENWIDTH, height, -SCREENWIDTH);
+        c_blurscreen(1, 0, SCREENWIDTH, height - SCREENWIDTH, SCREENWIDTH - 1);
+        c_blurscreen(0, SCREENWIDTH, SCREENWIDTH - 1, height, -(SCREENWIDTH - 1));
+    }
+
+    blurred = (consoleheight == CONSOLEHEIGHT && !wipe);
+
+    for (i = 0; i < height; ++i)
+        screens[0][i] = tinttab50[c_blurredscreen[i] + (consoletintcolor << 8)];
+
+    for (i = height - SCREENWIDTH * 3; i < height - SCREENWIDTH * 2; ++i)
+        screens[0][i] = tinttab25[((consolebrandingcolor + 5) << 8) + screens[0][i]];
+
+    for (i = height - SCREENWIDTH * 2; i < height; ++i)
+        screens[0][i] = tinttab25[(consolebrandingcolor << 8) + screens[0][i]];
+}
 
 static struct
 {
@@ -206,6 +361,243 @@ static struct
     { 'w',  'j',  -2 }, { 'x',  'j',  -2 }, { 'z',  'j',  -2 }, {  0 ,   0 ,   0 }
 };
 
+static int C_TextWidth(char *text)
+{
+    size_t      i;
+    char        prevletter = '\0';
+    int         w = 0;
+
+    for (i = 0; i < strlen(text); ++i)
+    {
+        char    letter = text[i];
+        int     c = letter - CONSOLEFONTSTART;
+        char    nextletter = text[i + 1];
+        int     j = 0;
+
+        if (letter == '\xc2' && nextletter == '\xb0')
+        {
+            w += SHORT(degree->width);
+            ++i;
+        }
+        else
+            w += SHORT(c < 0 || c >= CONSOLEFONTSIZE ? unknownchar->width : consolefont[c]->width);
+
+        while (kern[j].char1)
+        {
+            if (prevletter == kern[j].char1 && letter == kern[j].char2)
+            {
+                w += kern[j].adjust;
+                break;
+            }
+            ++j;
+        }
+        prevletter = letter;
+    }
+    return w;
+}
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wchar-subscripts"
+
+static void C_DrawConsoleText(int x, int y, char *text, byte color, int translucency, int tabs[8],
+    boolean inverted)
+{
+    boolean     italics = false;
+    size_t      i;
+    int         tab = -1;
+    size_t      len = strlen(text);
+    char        prevletter = '\0';
+
+    while (C_TextWidth(text) > SCREENWIDTH - CONSOLETEXTX * 3 - CONSOLESCROLLBARWIDTH + 2)
+    {
+        text[len - 1] = '.';
+        text[len] = '.';
+        text[len + 1] = '.';
+        text[len + 2] = '\0';
+        --len;
+    }
+
+    for (i = 0; i < len; ++i)
+    {
+        char    letter = text[i];
+        int     c = letter - CONSOLEFONTSTART;
+        char    nextletter = text[i + 1];
+
+        if (letter == ITALICS && prevletter != ITALICS)
+        {
+            italics = !italics;
+            if (!italics)
+                ++x;
+        }
+        else
+        {
+            patch_t     *patch = NULL;
+
+            if (letter == ITALICS)
+                italics = false;
+            if (letter == '\t')
+                x = (x > tabs[++tab] ? x + SPACEWIDTH : tabs[tab]);
+            else if(letter == '{')
+                patch = lb;
+            else if(letter == '|')
+                patch = mid;
+            else if(letter == '}')
+                patch = rb;
+            else if (letter == '\xc2' && nextletter == '\xb0')
+            {
+                patch = degree;
+                ++i;
+            }
+            else if (letter != '\n')
+                patch = (c < 0 || c >= CONSOLEFONTSIZE ? unknownchar : consolefont[c]);
+
+            if (isdigit(prevletter) && letter == 'x' && isdigit(nextletter))
+                patch = multiply;
+            else if (prevletter == ' ' || prevletter == '\t' || !i)
+            {
+                if (letter == '\'')
+                    patch = lsquote;
+                else if (letter == '\"')
+                    patch = ldquote;
+            }
+
+            if (!italics)
+            {
+                int     k = 0;
+
+                while (kern[k].char1)
+                {
+                    if (prevletter == kern[k].char1 && letter == kern[k].char2)
+                    {
+                        x += kern[k].adjust;
+                        break;
+                    }
+                    ++k;
+                }
+            }
+
+            if (patch)
+            {
+                V_DrawConsoleChar(x, y - (CONSOLEHEIGHT - consoleheight), patch, color, italics,
+                    translucency, inverted);
+                x += SHORT(patch->width);
+            }
+        }
+        prevletter = letter;
+    }
+}
+
+void C_Drawer(void)
+{
+    if (consoleheight)
+    {
+        int     i;
+        int     x = CONSOLETEXTX;
+        int     start;
+        int     end;
+
+        if (consolewait < I_GetTime())
+        {
+            consoleheight = BETWEEN(0, consoleheight + CONSOLESPEED * consoledirection,
+                CONSOLEHEIGHT);
+            consolewait = I_GetTime();
+        }
+
+        consoleactive = (consoledirection == 1);
+
+        // draw tiled background and bottom edge
+        C_DrawBackground(consoleheight);
+
+        // draw branding
+        C_DrawConsoleText(SCREENWIDTH - C_TextWidth("Wii-DOOM") - CONSOLETEXTX - 1,
+            CONSOLEHEIGHT - 10, "Wii-DOOM", graycolor, 1, notabs, false);
+
+        // draw console text
+        if (outputhistory == -1)
+        {
+            start = MAX(0, consolestrings - CONSOLELINES);
+            end = consolestrings;
+        }
+        else
+        {
+            start = outputhistory;
+            end = outputhistory + CONSOLELINES;
+        }
+        for (i = start; i < end; ++i)
+        {
+            int y = CONSOLELINEHEIGHT * (i - start + MAX(0, CONSOLELINES - consolestrings))
+                    - CONSOLELINEHEIGHT / 2 + 1;
+
+            if (console[i].type == red)
+                C_DrawDivider(y + 5 - (CONSOLEHEIGHT - consoleheight));
+            else
+                C_DrawConsoleText(CONSOLETEXTX, y + (CONSOLELINEHEIGHT / 2), console[i].string,
+                    consolecolors[console[i].type], 0, console[i].tabs, false);
+        }
+
+        // draw caret
+        if (caretwait < I_GetTime())
+        {
+            showcaret = !showcaret;
+            caretwait = I_GetTime() + CARETWAIT;
+        }
+
+        V_DrawConsoleChar(x, consoleheight - 10, space, inputcolor,
+                false, 0, false);
+        V_DrawConsoleChar(x + SHORT(space->width), consoleheight - 10, route,
+                inputcolor, false, 0, false);
+
+        if (showcaret)
+            V_DrawConsoleChar(x + SHORT(route->width) + 4, consoleheight - 10,
+                    caret, inputcolor, false, 0, false);
+        x += 3;
+
+        // draw the scrollbar
+        C_DrawScrollbar();
+    }
+
+    else
+        consoleactive = false;
+}
+
+boolean C_Responder(event_t *ev)
+{
+    if (consoleheight < CONSOLEHEIGHT && consoledirection == -1)
+        return false;
+
+    WPADData *data = WPAD_Data(0);
+
+    if(data->exp.type == WPAD_EXP_CLASSIC)
+    {
+
+        int     key = data->btns_h;
+
+        switch (key)
+        {
+            // scroll output up
+            case WPAD_CLASSIC_BUTTON_UP:
+                if (consolestrings > CONSOLELINES)
+                    outputhistory = (outputhistory == -1 ? consolestrings - (CONSOLELINES + 1)
+                        : MAX(0, outputhistory - 1));
+                break;
+
+            // scroll output down
+            case WPAD_CLASSIC_BUTTON_DOWN:
+                if (outputhistory != -1)
+                {
+                    ++outputhistory;
+                    if (outputhistory + CONSOLELINES == consolestrings)
+                        outputhistory = -1;
+                }
+                break;
+
+            default:
+                return false;
+        }
+    }
+    return true;
+}
+
 static int dayofweek(int day, int month, int year)
 {
     int adjustment = (14 - month) / 12;
@@ -237,7 +629,7 @@ void C_PrintCompileDate(void)
     C_Printf(CR_GRAY, " This %i-bit %s binary of %s was built on %s, %s %i, %i at %i:%02i%s\n",
         (sizeof(intptr_t) == 4 ? 32 : 64),
         "Linux",
-        PACKAGE_NAMEANDVERSIONSTRING, days[dayofweek(day, month + 1, year)], months[month], day,
+        "Wii-DOOM", days[dayofweek(day, month + 1, year)], months[month], day,
         year, (hour > 12 ? hour - 12 : hour), minute, (hour < 12 ? "am" : "pm"));
 }
 
@@ -253,47 +645,12 @@ void C_PrintSDLVersions(void)
         SDL_MIXER_MAJOR_VERSION, SDL_MIXER_MINOR_VERSION, SDL_MIXER_PATCHLEVEL,
         "libSDL_mixer.a"
         );
-/*
-    C_Printf(CR_GOLD, " Using version %i.%i.%i of %s\n",
-        SDL_TTF_MAJOR_VERSION, SDL_TTF_MINOR_VERSION, SDL_TTF_PATCHLEVEL,
-        "libSDL_ttf.a"
-        );
 
-    C_Printf(CR_GOLD, " Using version %i.%i.%i of %s\n",
-        SDL_GFXPRIMITIVES_MAJOR, SDL_GFXPRIMITIVES_MINOR, SDL_GFXPRIMITIVES_MICRO,
-        "libSDL_gfx.a"
-        );
-
-    C_Printf(CR_GOLD, " Using version %i.%i.%i of %s\n",
-        SDL_IMAGE_MAJOR_VERSION, SDL_IMAGE_MINOR_VERSION, SDL_IMAGE_PATCHLEVEL,
-        "libSDL_image.a"
-        );
-*/
     C_Printf(CR_GOLD, " Using version %i.%i.%i of %s\n",
         SMPEG_MAJOR_VERSION, SMPEG_MINOR_VERSION, SMPEG_PATCHLEVEL,
         "libsmpeg.a"
         );
-/*
-    C_Printf(CR_GOLD, " Using version %i.%i of %s\n",
-        JPEG_LIB_VERSION_MAJOR, JPEG_LIB_VERSION_MINOR,
-        "libjpeg.a"
-        );
 
-    C_Printf(CR_GOLD, " Using version %i.%i.%i of %s\n",
-        PNG_LIBPNG_VER_MAJOR, PNG_LIBPNG_VER_MINOR, PNG_LIBPNG_VER_RELEASE,
-        "libpng15.a"
-        );
-
-    C_Printf(CR_GOLD, " Using version %i.%i.%i of %s\n",
-       FREETYPE_MAJOR, FREETYPE_MINOR, FREETYPE_PATCH,
-        "libfreetype.a"
-        );
-
-    C_Printf(CR_GOLD, " Using version %i.%i.%i.%i of %s\n",
-        ZLIB_VER_MAJOR, ZLIB_VER_MINOR, ZLIB_VER_REVISION, ZLIB_VER_SUBREVISION,
-        "libz.a"
-        );
-*/
     C_Printf(CR_GOLD, " Using version %i.%i.%i of %s\n",
         _V_MAJOR_, _V_MINOR_, _V_PATCH_,
         "libogc.a"
@@ -301,699 +658,5 @@ void C_PrintSDLVersions(void)
 
     C_Printf(CR_GOLD, " Also using the following libs:\n");
     C_Printf(CR_GOLD, " libvorbisidec.a libwiilight.a, libfat.a, libwiiuse.a, libbte.a, libwiikeyboard.a\n");
-}
-
-//
-// Main Console functions
-//
-// ticker, responder, drawer, init etc.
-//
-void C_InitBackdrop(void)
-{  
-    patch_t *patch;
-
-    switch(gamemode)
-    {
-    case retail:
-    case registered:
-        lumpname = "PFUB1";
-        break;
-
-    case shareware:
-        lumpname = "WIMAP0";
-        break;
-
-    case commercial:
-        lumpname = "INTERPIC";
-        break;
-
-    default:
-        lumpname = "TITLEPIC";
-        break;
-    }
-
-    // allow for custom console background graphic
-    if(W_CheckNumForName("CONSOLE") >= 0)
-        lumpname = "CONSOLE";
-
-    backdrop_lumpnum = W_GetNumForName(lumpname);
-
-    if(backdrop)
-        Z_Free(backdrop);
-
-    backdrop = Z_Malloc(SCREENWIDTH * SCREENHEIGHT, PU_STATIC, 0);
-
-    // draw the console background image to the newly allocated video buffer
-    patch = W_CacheLumpName(lumpname, PU_CACHE);
-
-    // fill the video buffer with the newly allocated screen
-    V_UseBuffer(backdrop);
-
-    dp_translation = crx[CRX_DARK];
-    V_DrawPatch(0, 0, patch);
-    V_ClearDPTranslation();
-
-    // restore the backup up video buffer
-    V_RestoreBuffer();
-}
-
-//
-// called every tic
-//
-void C_Ticker(void)
-{
-    c_showprompt = true;
-  
-    if(gamestate != GS_CONSOLE)
-    {
-        // specific to half-screen version only
-        if(current_height != current_target)
-            redrawsbar = true;
-
-        // move the console toward its target
-        if(abs(current_height - current_target) >= c_speed)
-            current_height += current_target < current_height ? -c_speed : c_speed;
-        else
-            current_height = current_target;
-    }
-    else
-    {
-        // console gamestate: no moving consoles!
-        current_target = current_height;
-    }
-
-    // no scrolling thru messages when fullscreen
-    // scroll based on keys down
-    message_pos += pgdn_down - pgup_down;
-      
-    // check we're in the area of valid messages        
-    if(message_pos < 0)
-        message_pos = 0;
-
-    if(message_pos > message_last)
-        message_pos = message_last;
-}
-
-//
-// respond to keyboard input/events
-//
-void C_DrawBackdrop()
-{
-    // re-init to the new screen size
-    C_InitBackdrop();
-
-    memcpy(I_VideoBuffer, backdrop +
-          ((ORIGHEIGHT * 4) - (current_height * 4)) *
-           ORIGWIDTH, ((current_height * 4)) * ORIGWIDTH);
-}
-
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wchar-subscripts"
-
-int C_StringWidth(char* string)
-{
-    size_t          i;
-    int             w = 0;
-    int             c;
-        
-    for (i = 0;i < strlen(string);i++)
-    {
-        c = toupper(string[i]) - CONSOLEFONTSTART;
-        if (c < 0 || c >= CONSOLEFONTSIZE)
-            w += 4;
-        else
-            w += SHORT (c_font[c]->width);
-    }
-
-    return w;
-}
-
-//
-// input_point is the leftmost point of the inputtext which
-// we see. This function is called every time the inputtext
-// changes to decide where input_point should be.
-//
-static void C_UpdateInputPoint(void)
-{
-    for(input_point = inputtext; C_StringWidth(input_point) > 320 - 20; input_point++);
-}
-
-
-int C_Responder(event_t* ev)
-{
-    static int shiftdown;
-    char ch;
-    boolean didsound = false;
-
-    WPADData *data = WPAD_Data(0);
-
-    //Classic Controls
-    if(data->exp.type == WPAD_EXP_CLASSIC)
-    {
-        if(data->btns_d & WPAD_CLASSIC_BUTTON_UP)
-        {
-            pgup_down = 1;
-            pgdn_down = 0;
-
-            return consoleactive;
-        }
-        else if(data->btns_d & WPAD_CLASSIC_BUTTON_DOWN)
-        {
-            pgup_down = 0;
-            pgdn_down = 1;
-
-            return consoleactive;
-        }
-        else if(data->btns_d & WPAD_CLASSIC_BUTTON_LEFT   ||
-                data->btns_d & WPAD_CLASSIC_BUTTON_B      ||
-                data->btns_d & WPAD_CLASSIC_BUTTON_MINUS  ||
-                data->btns_d & WPAD_CLASSIC_BUTTON_HOME   ||
-                data->btns_d & WPAD_CLASSIC_BUTTON_PLUS   ||
-                data->btns_d & WPAD_CLASSIC_BUTTON_A      ||
-                data->btns_d & WPAD_CLASSIC_BUTTON_RIGHT  ||
-                data->btns_d & WPAD_CLASSIC_BUTTON_X      ||
-                data->btns_d & WPAD_CLASSIC_BUTTON_FULL_L ||
-                data->btns_d & WPAD_CLASSIC_BUTTON_Y      ||
-                data->btns_d & WPAD_CLASSIC_BUTTON_FULL_R ||
-                data->btns_d & WPAD_CLASSIC_BUTTON_ZL     ||
-                data->btns_d & WPAD_CLASSIC_BUTTON_ZR)
-            return consoleactive;
-
-        if(data->btns_u)
-        {
-            pgdn_down = 0;
-            pgup_down = 0;
-        }
-    }  
-
-    // only interested in keypresses
-    if(!data->btns_d)
-        return false;
-
-    // Check for special keypresses and
-    // detect activation of console etc.  
-    if(consoleactive && console_enabled)
-    {
-        if(current_target > 0 && !didsound)
-        {
-            didsound = true;
-
-            S_StartSound(NULL, sfx_dorcls);
-        }
-
-        // set console
-        current_target = current_target == c_height ? 0 : c_height;
-
-        return consoleactive;
-    }
-
-    if(!consoleactive)
-        return false;
-
-    // not til its stopped moving
-    if(current_target < current_height)
-        return false;
-
-    // Normal Text Input:
-    // probably just a normal character
-    // (shifted)?
-    ch = shiftdown ? shiftxform[ev->data1] : ev->data1;
-
-    // only care about valid characters
-    // dont allow too many characters on one command line
-    // sf 19/6 V_IsPrint  
-    if(V_IsPrint(ch) && strlen(inputtext) < INPUTLENGTH - 3)
-    {
-        sprintf(inputtext, "%s%c", inputtext, ch);
-      
-        // reset scrolling
-        C_UpdateInputPoint();
-
-        return true;
-    }  
-
-    // dont care about this event
-    return false;
-}
-
-//
-// initialise the console
-//
-void C_Init(void)
-{
-    int         i;
-    int         j;
-    char        buffer[9];
-
-    // load the heads-up font
-    j = CONSOLEFONTSTART + 1;
-    for (i = 0; i < CONSOLEFONTSIZE; i++)
-    {
-        if(j < CONSOLEFONTEND + 1)
-        {
-            DEH_snprintf(buffer, 9, "DRFON%.3d", j++);
-            c_font[i] = W_CacheLumpName(buffer, PU_STATIC);
-        }
-    }
-
-    lb = W_CacheLumpName("STCFN123", PU_STATIC);
-    mid = W_CacheLumpName("STCFN124", PU_STATIC);
-    rb = W_CacheLumpName("STCFN125", PU_STATIC);
-    lsquote = W_CacheLumpName("DRFON145", PU_STATIC);
-    ldquote = W_CacheLumpName("DRFON147", PU_STATIC);
-    degree = W_CacheLumpName("DRFON176", PU_STATIC);
-    multiply = W_CacheLumpName("DRFON215", PU_STATIC);
-    unknownchar = W_CacheLumpName("DRFON000", PU_STATIC);
-
-    consolecolors[yellow] = yellowcol;
-    consolecolors[red] = redcol;
-    consolecolors[gray] = graycol;
-    consolecolors[blue] = bluecol;
-    consolecolors[white] = whitecol;
-    consolecolors[green] = greencol;
-
-    C_UpdateInputPoint();
-}
-
-static void C_DrawText(int x, int y, char *text, byte color, int translucency, int italics)
-{
-    size_t      i;
-    size_t      len = strlen(text);
-
-    char        prevletter = '\0';
-
-    while (C_StringWidth(text) > SCREENWIDTH - CONSOLETEXTX * 3 - 5)
-    {
-        text[len - 1] = '.';
-        text[len] = '.';
-        text[len + 1] = '.';
-        text[len + 2] = '\0';
-        --len;
-    }
-
-    for (i = 0; i < len; ++i)
-    {
-        char    letter = text[i];
-        int     c = letter - CONSOLEFONTSTART;
-        char    nextletter = text[i + 1];
-
-        patch_t *charpatch = NULL;
-
-        if((letter > 32 && letter < 127)    ||
-           (letter == 0    || letter == 145 || letter == 147 ||
-            letter == 215) || letter == ' ')
-        {
-            if(letter == ' ')
-                x += 4;
-            else if(letter == '\t')
-                x += 32;
-            else if(letter == '{')
-            {
-                charpatch = lb;
-                V_DrawPatch(x, y, charpatch);
-            }
-            else if(letter == '|')
-            {
-                charpatch = mid;
-                V_DrawPatch(x, y, charpatch);
-            }
-            else if(letter == '}')
-            {
-                charpatch = rb;
-                V_DrawPatch(x, y, charpatch);
-            }
-            else if(letter == '\xc2' && nextletter == '\xb0')
-            {
-                charpatch = degree;
-                ++i;
-            }
-            else
-                charpatch = (c < 0 || c >= CONSOLEFONTSIZE ? unknownchar : c_font[c - 1]);
-        }
-
-        if (isdigit(prevletter) && letter == 'x' && isdigit(nextletter))
-            charpatch = multiply;
-        else if (prevletter == ' ' || prevletter == '\t' || !i)
-        {
-            if (letter == '\'')
-                charpatch = lsquote;
-            else if (letter == '\"')
-                charpatch = ldquote;
-        }
-
-        if (!italics)
-        {
-            int     k = 0;
-
-            while (kern[k].char1)
-            {
-                if (prevletter == kern[k].char1 && letter == kern[k].char2)
-                {
-                    x += kern[k].adjust;
-                        break;
-                }
-                ++k;
-            }
-        }
-
-        if (charpatch)
-        {
-            V_DrawConsoleChar(x, y, charpatch, color, italics, translucency);
-            x += SHORT(charpatch->width);
-        }
-        prevletter = letter;
-    }
-}
-
-//
-// draw the console
-//
-void C_Drawer(void)
-{
-    int y;
-    int count;
-  
-    // dont draw if not active
-    if(!consoleactive)
-        return;
-
-    // draw backdrop
-    C_DrawBackdrop();
-
-    // draw text messages
-    // offset starting point up by 8 if we are showing input prompt
-    y = current_height - ((c_showprompt && message_pos == message_last) ? 8 : 0);
-
-    // start at our position in the message history
-    count = message_pos + 1;
-
-    while(1)
-    {
-        // move up one line on the screen
-        // back one line in the history
-        y -= 8;
-
-        // end of message history?
-        if(--count < 0)
-            break;
-
-        // past top of screen?
-        if(y < 0)
-            break;
-
-        // draw this line
-        C_DrawText(0, y, console[count].string, consolecolors[console[count].type], 0, 0);
-    }
-
-    // draw branding
-    C_DrawText(SCREENWIDTH - C_StringWidth(PACKAGE_NAMEANDVERSIONSTRING) -
-        CONSOLETEXTX + 1, current_height - 8, PACKAGE_NAMEANDVERSIONSTRING, 100, 1, 1);
-
-    // Draw input line
-    // input line on screen, not scrolled back in history?  
-    if(current_height > 8 && c_showprompt && message_pos == message_last)
-    {
-        char tempstr[LINELENGTH];
-        char *underline;
-
-        if(leveltime & 16)
-            underline = "_";
-        else
-            underline = " ";
-      
-        // if we are scrolled back, dont draw the input line
-        if(message_pos == message_last)
-            sprintf(tempstr, "%s%s%s", inputprompt, input_point, underline);
-
-        C_DrawText(0, current_height - 8, tempstr, 80, 0, 0);
-    }
-}
-
-//
-// updates the screen without actually waiting for d_display
-// useful for functions that get input without using the gameloop
-// eg. serial code
-//
-void C_Update(void)
-{
-    C_Drawer();
-
-    I_FinishUpdate();
-}
-
-
-//
-// I/O Functions
-//
-// scroll console up
-static void C_ScrollUp(void)
-{
-    if(message_last == message_pos)
-        message_pos++;
-
-    message_last++;
-
-    // past the end of the string
-    if(message_last >= MESSAGES)
-    {
-        // cut off the oldest 128 messages
-        int i;
-
-        // haleyjd 03/02/02: fixed code that assumed MESSAGES == 256
-        for(i = 128; i < MESSAGES; i++)
-            strcpy(messages[i - 128], messages[i]);
-
-        // move the message boundary
-        message_last -= 128;
-
-        // haleyjd 09/04/02: set message_pos to message_last
-        // to avoid problems with console flooding
-        message_pos = message_last;
-    }
-    // new line is empty
-    messages[message_last][0] = '\0';
-}
-
-
-// 
-// C_AddMessage
-//
-// haleyjd:
-// Add a message to the console.
-// Replaced C_AddChar.
-//
-static void C_AddMessage(char *s)
-{
-    char *c;
-    char *end;
-    char linecolor = CR_RED + FC_BASEVALUE;
-
-    // haleyjd 09/04/02: set color to default at beginning
-    if(C_StringWidth(messages[message_last]) > SCREENWIDTH - 9 ||
-       strlen(messages[message_last]) >= LINELENGTH - 1)
-    {
-        C_ScrollUp();
-    }
-
-    end = messages[message_last] + strlen(messages[message_last]);
-    *end++ = linecolor;
-    *end = '\0';
-
-    for(c = (char *)s; *c; c++)
-    {
-        // >= 128 for colours
-        if(*c == '\t' || (*c > 31 && *c < 127) || *c >= 128)
-        {
-            if(*c >= 128)
-                linecolor = *c;
-
-            if(C_StringWidth(messages[message_last]) > SCREENWIDTH - 9 ||
-                strlen(messages[message_last]) >= LINELENGTH - 1)
-            {
-                // might possibly over-run, go onto next line
-                C_ScrollUp();
-
-                end = messages[message_last] + strlen(messages[message_last]);
-
-                // keep current color on next line
-                *end++ = linecolor;
-                *end = '\0';
-            }
-         
-            end = messages[message_last] + strlen(messages[message_last]);
-            *end++ = *c;
-            *end = '\0';
-        }
-
-        // alert
-        if(*c == '\a')
-        {
-            // 'tink'!
-            S_StartSound(NULL, sfx_radio);
-        }
-
-        if(*c == '\n')
-        {
-            C_ScrollUp();
-
-            end = messages[message_last] + strlen(messages[message_last]);
-
-            // keep current color on next line
-            *end++ = linecolor;
-            *end = '\0';
-        }
-    }
-}
-
-//
-// haleyjd: this function attempts to break up formatted strings 
-// into segments no more than a gamemode-dependent number of 
-// characters long. It'll succeed as long as the string in question 
-// doesn't contain that number of consecutive characters without a 
-// space, tab, or line-break, so like, don't print stupidness 
-// like that. Its a console, not a hex editor...
-//
-static void C_AdjustLineBreaks(char *str)
-{
-    int i;
-    int count = 0;
-    int firstspace = -1;
-    int lastspace = 0;
-    int len = strlen(str);
-
-    for(i = 0; i < len; ++i)
-    {
-        if(str[i] == ' ' || str[i] == '\t')
-        {
-            if(firstspace == -1)
-                firstspace = i;
-
-            lastspace = i;
-        }
-
-        if(str[i] == '\n')
-            count = lastspace = 0;
-        else
-            count++;
-
-        if(count == MAX_MYCHARSPERLINE)
-        {
-            // 03/16/01: must add length since last space to new line
-            count = i - (lastspace + 1);
-
-            // replace last space with \n
-            // if no last space, we're screwed
-            if(lastspace)
-            {
-                if(lastspace == firstspace)
-                    firstspace = 0;
-                    str[lastspace] = '\n';
-                    lastspace = 0;
-            }
-        }
-    }
-
-    if(firstspace)
-    {      
-        // temporarily put a \0 in the first space
-        char temp = str[firstspace];
-
-        str[firstspace] = '\0';
-
-        // if the first segment of the string doesn't fit on the 
-        // current line, move the console up one line in advance
-
-        if(C_StringWidth(str) + C_StringWidth(messages[message_last]) > SCREENWIDTH - 9
-            || strlen(str) + strlen(messages[message_last]) >= LINELENGTH - 1)
-        {
-            C_ScrollUp();
-        }
-
-        // restore the string to normal
-        str[firstspace] = temp;
-    }
-}
-
-//
-// C_Printf -
-// write some text 'printf' style to the console
-// the main function for I/O
-// cph 2001/07/22 - remove arbitrary limit, use malloc'd buffer instead
-//  and make format string parameter const char*
-//
-// These symbols are not being printed: ä ö ü € ² ³ µ \ % § °
-// The game might crash if trying to print this symbol: ~
-//
-void C_Printf(stringtype_t type, char *s, ...)
-{
-    va_list args;
-
-//    char *t;
-
-    char buffer[1024];
-  
-    // haleyjd: sanity check
-    if(!s)
-        return;
-  
-    if(fgets(buffer, sizeof(buffer), stdin))
-        C_Printf(CR_RED, "C_Printf: Buffer overflow");
-
-    // difficult to remove limit
-    va_start(args, s);
-    memset(buffer, 0, sizeof(buffer));
-//    vasprintf(&t, s, args);
-
-    M_vsnprintf(buffer, sizeof(buffer) - 1, s, args);
-    buffer[0] = toupper(buffer[0]);
-
-    va_end(args);
-
-    console = realloc(console, (consolestrings + 1) * sizeof(*console));
-    console[consolestrings].string = strdup(buffer);
-    console[consolestrings].type = type;
-    ++consolestrings;
-
-    // haleyjd
-    C_AdjustLineBreaks(buffer);
-
-    C_AddMessage(buffer);
-  
-//    (free)(buffer);
-}
-
-
-//
-// Console activation
-//
-// put smmu into console mode
-//
-void C_SetConsole(void)
-{
-    current_target = 100;
-  
-    C_Update();
-}
-
-//
-// make the console go up
-//
-void C_Popup(void)
-{
-    current_target = 0;
-}
-
-//
-// make the console disappear
-//
-void C_InstaPopup(void)
-{
-    current_target = current_height = 0;
-}
-
-void C_Seperator(void)
-{
-    C_Printf(CR_RED, " {|||||||||||||||||||||||||||||}\n");
 }
 

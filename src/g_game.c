@@ -519,8 +519,20 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
                     {
                         if(done)
                         {
-                            C_SetConsole();
-                            S_StartSound(NULL, sfx_doropn);
+                            if (consoleheight < CONSOLEHEIGHT && consoledirection == -1)
+                            {
+                                consoleheight = MAX(1, consoleheight);
+                                consoledirection = 1;
+                                S_StartSound(NULL, sfx_doropn);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if(done)
+                        {
+                            C_HideConsole();
+                            S_StartSound(NULL, sfx_dorcls);
                         }
                     }
                 }
@@ -528,28 +540,31 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
 
             if(joybuttons[joybmenu])
             {
-                if (!menuactive)
+                if (!consoleactive)
                 {
-                    M_StartControlPanel ();
-                    S_StartSound(NULL,sfx_swtchn);
-                }
-                else
-                {
-                    currentMenu->lastOn = itemOn;
-                    M_ClearMenus ();
-                    S_StartSound(NULL,sfx_swtchx);
-                }
-
-                if (messageToPrint)
-                {
-                    if (messageNeedsInput)
+                    if (!menuactive)
                     {
-                        if(joybuttons[joybmenu])
+                        M_StartControlPanel ();
+                        S_StartSound(NULL,sfx_swtchn);
+                    }
+                    else
+                    {
+                        currentMenu->lastOn = itemOn;
+                        M_ClearMenus ();
+                        S_StartSound(NULL,sfx_swtchx);
+                    }
+                
+                    if (messageToPrint)
+                    {
+                        if (messageNeedsInput)
                         {
-                            M_ClearMenus ();
-                            messageToPrint = 0;
-                            menuactive = false;
-                            S_StartSound(NULL,sfx_swtchx);
+                            if(joybuttons[joybmenu])
+                            {
+                                M_ClearMenus ();
+                                messageToPrint = 0;
+                                menuactive = false;
+                                S_StartSound(NULL,sfx_swtchx);
+                            }
                         }
                     }
                 }
@@ -569,8 +584,11 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
                     {
                         if(!menuactive)
                         {
-                            if(usergame)
-                                AM_Start ();
+                            if(!consoleactive)
+                            {
+                                if(usergame)
+                                    AM_Start ();
+                            }
                         }
                     }
                     else
@@ -1060,7 +1078,7 @@ void G_DoLoadLevel (void)
     P_SetupLevel (gameepisode, gamemap, 0, gameskill);    
     displayplayer = consoleplayer;                // view the guy you are playing    
     gameaction = ga_nothing; 
-    Z_CheckHeap ();
+//    Z_CheckHeap ();
     
     // clear cmd building stuff
 
@@ -1852,6 +1870,12 @@ void G_DoLoadGame (void)
     
     // draw the pattern into the back screen
     R_FillBackScreen ();   
+
+    if (consoleactive)
+    {
+        C_Printf(CR_GRAY, " %s loaded.", uppercase(savename));
+        C_HideConsoleFast();
+    }
 } 
  
 
