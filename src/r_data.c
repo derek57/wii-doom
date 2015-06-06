@@ -1028,6 +1028,8 @@ int R_CheckTextureNumForName (char *name)
     if (name[0] == '-')                
         return 0;
                 
+//    C_Printf(CR_GRAY, "%s\n", name);
+
     key = W_LumpNameHash(name) % numtextures;
 
     texture=textures_hashtable[key]; 

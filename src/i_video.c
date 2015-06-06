@@ -160,7 +160,7 @@ static int startup_delay = 1000;
 
 // The screen buffer; this is modified to draw things to the screen
 
-byte *I_VideoBuffer = NULL;
+//byte *I_VideoBuffer = NULL;
 
 // Flag indicating whether the screen is currently visible:
 // when the screen isnt visible, don't render the screen
@@ -257,11 +257,11 @@ void I_EnableLoadingDisk(void)
     tmpbuf = Z_Malloc(SCREENWIDTH *
              ((disk->height + 1) << hires), PU_STATIC, NULL);        // CHANGED FOR HIRES
 
-    V_UseBuffer(tmpbuf);
+//    V_UseBuffer(tmpbuf);
 
     // Draw the disk to the screen:
 
-    V_DrawPatch(0, 0, disk);
+    V_DrawPatch(0, 0, 0, disk);
 
     disk_image = Z_Malloc(LOADING_DISK_W * LOADING_DISK_H, PU_STATIC, NULL);
     saved_background = Z_Malloc(LOADING_DISK_W * LOADING_DISK_H, PU_STATIC, NULL);
@@ -277,7 +277,7 @@ void I_EnableLoadingDisk(void)
     // video buffer.
 
     W_ReleaseLumpName(disk_name);
-    V_RestoreBuffer();
+//    V_RestoreBuffer();
     Z_Free(tmpbuf);
 }
 
@@ -346,7 +346,14 @@ static boolean BlitArea(int x1, int y1, int x2, int y2)
 
     if (SDL_LockSurface(screenbuffer) >= 0)
     {
+/*
         I_InitScale(I_VideoBuffer,
+                    (byte *) screenbuffer->pixels
+                                + (y_offset * screenbuffer->pitch)
+                                + x_offset,
+                    screenbuffer->pitch);
+*/
+        I_InitScale(screens[0],
                     (byte *) screenbuffer->pixels
                                 + (y_offset * screenbuffer->pitch)
                                 + x_offset,
@@ -386,7 +393,12 @@ static void UpdateRect(int x1, int y1, int x2, int y2)
 
 void I_BeginRead(void)
 {
+/*
     byte *screenloc = I_VideoBuffer
+                    + (SCREENHEIGHT - LOADING_DISK_H) * SCREENWIDTH
+                    + (SCREENWIDTH - LOADING_DISK_W);
+*/
+    byte *screenloc = screens[0]
                     + (SCREENHEIGHT - LOADING_DISK_H) * SCREENWIDTH
                     + (SCREENWIDTH - LOADING_DISK_W);
     int y;
@@ -398,9 +410,15 @@ void I_BeginRead(void)
 
     for (y=0; y<LOADING_DISK_H; ++y)
     {
+/*
         memcpy(saved_background + y * LOADING_DISK_W,
                screenloc,
                LOADING_DISK_W);
+*/
+        memcpy(screens[1] + y * LOADING_DISK_W,
+               screenloc,
+               LOADING_DISK_W);
+
         memcpy(screenloc,
                disk_image + y * LOADING_DISK_W,
                LOADING_DISK_W);
@@ -414,7 +432,12 @@ void I_BeginRead(void)
 
 void I_EndRead(void)
 {
+/*
     byte *screenloc = I_VideoBuffer
+                    + (SCREENHEIGHT - LOADING_DISK_H) * SCREENWIDTH
+                    + (SCREENWIDTH - LOADING_DISK_W);
+*/
+    byte *screenloc = screens[0]
                     + (SCREENHEIGHT - LOADING_DISK_H) * SCREENWIDTH
                     + (SCREENWIDTH - LOADING_DISK_W);
     int y;
@@ -426,8 +449,13 @@ void I_EndRead(void)
 
     for (y=0; y<LOADING_DISK_H; ++y)
     {
+/*
         memcpy(screenloc,
                saved_background + y * LOADING_DISK_W,
+               LOADING_DISK_W);
+*/
+        memcpy(screenloc,
+               screens[1] + y * LOADING_DISK_W,
                LOADING_DISK_W);
 
         screenloc += SCREENWIDTH;
@@ -680,6 +708,7 @@ void I_FinishUpdate (void)
     // draws little dots on the bottom of the screen
 
     if (display_fps_dots)
+/*
     {
         i = I_GetTime();
         tics = i - lasttic;
@@ -690,6 +719,20 @@ void I_FinishUpdate (void)
             I_VideoBuffer[ (SCREENHEIGHT-1)*SCREENWIDTH + i] = 0xff;
         for ( ; i<20*4 ; i+=4)
             I_VideoBuffer[ (SCREENHEIGHT-1)*SCREENWIDTH + i] = 0x0;
+    }
+*/
+    {
+	i = I_GetTime();
+	tics = i - lasttic;
+	lasttic = i;
+
+	if (tics > 20) tics = 20;
+
+	for (i=0 ; i<tics*4 ; i+=4)
+	    screens[0][ (SCREENHEIGHT-1)*SCREENWIDTH + i] = 0xff;
+
+	for ( ; i<20*4 ; i+=4)
+	    screens[0][ (SCREENHEIGHT-1)*SCREENWIDTH + i] = 0x0;
     }
 
     // [AM] Real FPS counter
@@ -719,7 +762,8 @@ void I_FinishUpdate (void)
 //
 void I_ReadScreen (byte* scr)
 {
-    memcpy(scr, I_VideoBuffer, SCREENWIDTH*SCREENHEIGHT);
+//    memcpy(scr, I_VideoBuffer, SCREENWIDTH*SCREENHEIGHT);
+    memcpy(scr, screens[0], SCREENWIDTH * SCREENHEIGHT);
 }
 
 
@@ -1085,7 +1129,7 @@ void I_InitGraphics(void)
 
     // If not, allocate a buffer and copy from that buffer to the
     // screen when we do an update
-
+/*
     if (native_surface)
     {
         I_VideoBuffer = (unsigned char *) screen->pixels;
@@ -1097,13 +1141,18 @@ void I_InitGraphics(void)
         I_VideoBuffer = (unsigned char *) Z_Malloc(SCREENWIDTH * SCREENHEIGHT,
                                                    PU_STATIC, NULL);
     }
-
-    V_RestoreBuffer();
+*/
+//    V_RestoreBuffer();
 
     // Clear the screen to black.
 
-    memset(I_VideoBuffer, 0, SCREENWIDTH * SCREENHEIGHT);
-
+//    memset(I_VideoBuffer, 0, SCREENWIDTH * SCREENHEIGHT);
+    screens[0] = Z_Malloc(SCREENWIDTH * SCREENHEIGHT, PU_STATIC, NULL);
+    memset(screens[0], 0, SCREENWIDTH * SCREENHEIGHT);
+/*
+    for (i = 0; i < SCREENHEIGHT; i++)		// FIXME
+        rows[i] = *screens + i * SCREENWIDTH;
+*/
     // We need SDL to give us translated versions of keys as well
 
     SDL_EnableUNICODE(1);

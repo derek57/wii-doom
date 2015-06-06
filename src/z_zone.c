@@ -67,6 +67,12 @@ typedef struct
 memzone_t*        mainzone;
 
 
+// Minimum chunk size at which blocks are allocated
+#define CHUNK_SIZE      32
+
+static const size_t     HEADER_SIZE = (sizeof(memblock_t) + CHUNK_SIZE - 1) & ~(CHUNK_SIZE - 1);
+static memblock_t       *blockbytag[PU_NUM_TAGS];
+
 //
 // Z_ClearZone
 //
@@ -299,6 +305,7 @@ Z_FreeTags
 ( int                lowtag,
   int                hightag )
 {
+/*
     memblock_t*        block;
     memblock_t*        next;
         
@@ -315,6 +322,31 @@ Z_FreeTags
         
         if (block->tag >= lowtag && block->tag <= hightag)
             Z_Free ( (byte *)block+sizeof(memblock_t));
+    }
+*/
+    if (lowtag <= PU_FREE)
+        lowtag = PU_FREE + 1;
+    if (hightag > PU_CACHE)
+        hightag = PU_CACHE;
+
+    for (; lowtag <= hightag; ++lowtag)
+    {
+        memblock_t      *block;
+        memblock_t      *end_block;
+
+        block = blockbytag[lowtag];
+        if (!block)
+            continue;
+        end_block = block->prev;
+        while (1)
+        {
+            memblock_t  *next = block->next;
+
+            Z_Free((char *)block + HEADER_SIZE);
+            if (block == end_block)
+                break;
+            block = next;                               // Advance to next block
+        }
     }
 }
 

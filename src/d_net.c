@@ -101,7 +101,7 @@ static void RunTic(ticcmd_t *cmds, boolean *ingame)
     if (advancedemo)
         D_DoAdvanceDemo ();
 
-    C_Ticker ();
+//    C_Ticker ();
     G_Ticker ();
 }
 

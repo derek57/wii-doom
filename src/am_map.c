@@ -468,7 +468,8 @@ void AM_initVariables(void)
     static event_t st_notify = { ev_keyup, AM_MSGENTERED, 0, 0 };
 
     automapactive = true;
-    fb = I_VideoBuffer;
+//    fb = I_VideoBuffer;
+    fb = screens[0];
 
     f_oldloc.x = INT_MAX;
     amclock = 0;
@@ -1326,7 +1327,7 @@ void AM_drawMarks(void)
 
             if (fx >= f_x && fx <= (f_w >> hires) -                 // HIRES
                         w && fy >= f_y && fy <= (f_h >> hires) - h) // HIRES
-                V_DrawPatch(fx, fy, marknums[i]);
+                V_DrawPatch(fx, fy, 0, marknums[i]);
         }
     }
 

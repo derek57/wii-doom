@@ -41,7 +41,23 @@
 #define __I_TINTTAB__
 
 
+extern byte    *tinttab;
 extern byte    *tinttab25;
+extern byte    *tinttab33;
+extern byte    *tinttab40;
+extern byte    *tinttab50;
+extern byte    *tinttab60;
+extern byte    *tinttab66;
+extern byte    *tinttab75;
+extern byte    *tinttab80;
+extern byte    *tinttabred;
+extern byte    *tinttabredwhite;
+extern byte    *tinttabgreen;
+extern byte    *tinttabblue;
+extern byte    *tinttabred50;
+extern byte    *tinttabredwhite50;
+extern byte    *tinttabgreen50;
+extern byte    *tinttabblue50;
 
 
 void I_InitTintTables(byte *palette);

@@ -453,9 +453,9 @@ void HU_Drawer(void)
     if(!automapactive && !demoplayback && crosshair == 1)
     {
         if(screenSize < 8)
-            V_DrawPatch(158, 82, W_CacheLumpName(DEH_String("XHAIR"), PU_CACHE));
+            V_DrawPatch(158, 82, 0, W_CacheLumpName(DEH_String("XHAIR"), PU_CACHE));
         else
-            V_DrawPatch(158, 98, W_CacheLumpName(DEH_String("XHAIR"), PU_CACHE));
+            V_DrawPatch(158, 98, 0, W_CacheLumpName(DEH_String("XHAIR"), PU_CACHE));
     }
 
     // translucent messages for translucent HUD
@@ -657,21 +657,15 @@ void HU_NewLevel()
         s = HU_TITLE_CHEX;
     }
     // print the new level name into the console
-  
-    C_Printf(CR_GRAY, "\n");
-    C_Seperator();
 
     C_Printf(CR_GRAY, "\n");
-/*
-    if(game_startup)
-        C_Printf(CR_GRAY, " %s\n\n", s);
-    else
-*/
-        C_Printf(CR_GRAY, " %s\n", s);
+
+    C_AddConsoleDivider();
+
+    C_Printf(CR_GRAY, "\n");
+
+    C_Printf(CR_GRAY, " %s\n", s);
 
     C_Printf(CR_GRAY, " \n");
-
-//    C_InstaPopup();       // put console away
-    //  C_Update();
 }
 

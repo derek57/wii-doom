@@ -93,6 +93,7 @@ char *          savegamedir;
 
 char            *pagename;
 
+boolean         wipe;
 boolean         done;
 boolean         nomonsters;     // checkparm of -nomonsters
 boolean         start_respawnparm;
@@ -214,7 +215,6 @@ void D_Display (void)
     int                         tics;
     int                         wipestart;
     int                         y;
-    boolean                     wipe;
 
     redrawsbar = false;
     
@@ -343,7 +343,8 @@ void D_Display (void)
         static int firsttic;
 
         for (y = 0; y < SCREENWIDTH * SCREENHEIGHT; y++)
-            I_VideoBuffer[y] = colormaps[menushade * 256 + I_VideoBuffer[y]];
+//            I_VideoBuffer[y] = colormaps[menushade * 256 + I_VideoBuffer[y]];
+            screens[0][y] = colormaps[menushade * 256 + screens[0][y]];
 
         if (menushade < 16 && gametic != firsttic)
         {
@@ -358,7 +359,8 @@ void D_Display (void)
     else if (menushade)
         menushade = 0;
 
-    C_Drawer();
+    if (!wipe)
+        C_Drawer();
 
     // menus go directly to the screen
     M_Drawer ();          // menu is drawn even on top of everything
@@ -389,6 +391,7 @@ void D_Display (void)
         wipestart = nowtime;
         done = wipe_ScreenWipe(wipe_Melt
                                , 0, 0, SCREENWIDTH, SCREENHEIGHT, tics);
+        C_Drawer();
         I_UpdateNoBlit ();
         M_Drawer ();                            // menu is drawn even on top of wipes
         I_FinishUpdate ();                      // page flip or blit buffer
@@ -440,7 +443,7 @@ void D_DoomLoop (void)
 
     I_EnableLoadingDisk();
 
-    V_RestoreBuffer();
+//    V_RestoreBuffer();
     R_ExecuteSetViewSize();
 
     D_StartGameLoop();
@@ -483,7 +486,7 @@ void D_PageTicker (void)
 
 void D_PageDrawer (void)
 {
-    V_DrawPatch (0, 0, W_CacheLumpName(pagename, PU_CACHE));
+    V_DrawPatch (0, 0, 0, W_CacheLumpName(pagename, PU_CACHE));
 }
 
 

@@ -963,7 +963,8 @@ R_InitBuffer
 
     // Preclaculate all row offsets.
     for (i=0 ; i<height ; i++) 
-        ylookup[i] = I_VideoBuffer + (i+viewwindowy)*SCREENWIDTH; 
+//        ylookup[i] = I_VideoBuffer + (i+viewwindowy)*SCREENWIDTH; 
+	ylookup[i] = screens[0] + (i+viewwindowy)*SCREENWIDTH; 
 } 
  
  
@@ -1018,7 +1019,8 @@ void R_FillBackScreen (void)
         name = name1;
     
     src = W_CacheLumpName(name, PU_CACHE); 
-    dest = background_buffer;
+//    dest = background_buffer;
+    dest = screens[1];
          
     for (y=0 ; y<SCREENHEIGHT-SBARHEIGHT ; y++) 
     { 
@@ -1037,46 +1039,46 @@ void R_FillBackScreen (void)
      
     // Draw screen and bezel; this is done to a separate screen buffer.
 
-    V_UseBuffer(background_buffer);
+//    V_UseBuffer(background_buffer);
 
     patch = W_CacheLumpName(DEH_String("brdr_t"),PU_CACHE);
 
     // COMPLETELY CHANGED FOR HIRES
     for (x=0 ; x<(scaledviewwidth >> hires) ; x+=8)
-        V_DrawPatch((viewwindowx >> hires)+x, (viewwindowy >> hires)-8, patch);
+        V_DrawPatch((viewwindowx >> hires)+x, (viewwindowy >> hires)-8, 1, patch);
     patch = W_CacheLumpName(DEH_String("brdr_b"),PU_CACHE);
 
     for (x=0 ; x<(scaledviewwidth >> hires) ; x+=8)
         V_DrawPatch((viewwindowx >> hires)+x, (viewwindowy >> hires)+
-        (scaledviewheight >> hires), patch);
+        (scaledviewheight >> hires), 1, patch);
     patch = W_CacheLumpName(DEH_String("brdr_l"),PU_CACHE);
 
     for (y=0 ; y<(scaledviewheight >> hires) ; y+=8)
-        V_DrawPatch((viewwindowx >> hires)-8, (viewwindowy >> hires)+y, patch);
+        V_DrawPatch((viewwindowx >> hires)-8, (viewwindowy >> hires)+y, 1, patch);
     patch = W_CacheLumpName(DEH_String("brdr_r"),PU_CACHE);
 
     for (y=0 ; y<(scaledviewheight >> hires); y+=8)
         V_DrawPatch((viewwindowx >> hires)+(scaledviewwidth >> hires),
-        (viewwindowy >> hires)+y, patch);
+        (viewwindowy >> hires)+y, 1, patch);
 
     // Draw beveled edge. 
     V_DrawPatch((viewwindowx >> hires)-8,
-                (viewwindowy >> hires)-8,
+                (viewwindowy >> hires)-8, 1,
                 W_CacheLumpName(DEH_String("brdr_tl"),PU_CACHE));
     
     V_DrawPatch((viewwindowx >> hires)+(scaledviewwidth >> hires),
-                (viewwindowy >> hires)-8,
+                (viewwindowy >> hires)-8, 1,
                 W_CacheLumpName(DEH_String("brdr_tr"),PU_CACHE));
     
     V_DrawPatch((viewwindowx >> hires)-8,
-                (viewwindowy >> hires)+(scaledviewheight >> hires),
+                (viewwindowy >> hires)+(scaledviewheight >> hires), 1,
                 W_CacheLumpName(DEH_String("brdr_bl"),PU_CACHE));
     
     V_DrawPatch((viewwindowx >> hires)+(scaledviewwidth >> hires),
-                (viewwindowy >> hires)+(scaledviewheight >> hires),
+                (viewwindowy >> hires)+(scaledviewheight >> hires), 1,
                 W_CacheLumpName(DEH_String("brdr_br"),PU_CACHE));
 
-    V_RestoreBuffer();
+//    V_RestoreBuffer();
 } 
  
 
@@ -1096,7 +1098,8 @@ R_VideoErase
 
     if (background_buffer != NULL)
     {
-        memcpy(I_VideoBuffer + ofs, background_buffer + ofs, count); 
+//        memcpy(I_VideoBuffer + ofs, background_buffer + ofs, count); 
+        memcpy(screens[0] + ofs, screens[1] + ofs, count);
     }
 } 
 

@@ -57,6 +57,9 @@
 #define dest_in_framebuffer (safe || ((dest-dest_screen) < SCREENHEIGHT*SCREENWIDTH))
 
 
+// Each screen is [SCREENWIDTH * SCREENHEIGHT];
+byte                         *screens[5];
+
 static  patch_t*             v_font[V_FONTSIZE];
 
 // The screen buffer that the v_video.c code draws to.
@@ -91,7 +94,7 @@ void V_MarkRect(int x, int y, int width, int height)
     // If we are temporarily using an alternate screen, do not 
     // affect the update box.
 
-    if (dest_screen == I_VideoBuffer)
+//    if (dest_screen == I_VideoBuffer)
     {
         M_AddToBox (dirtybox, x, y); 
         M_AddToBox (dirtybox, x + width-1, y + height-1); 
@@ -102,9 +105,16 @@ void V_MarkRect(int x, int y, int width, int height)
 //
 // V_CopyRect 
 // 
-void V_CopyRect(int srcx, int srcy, byte *source,
-                int width, int height,
-                int destx, int desty)
+void
+V_CopyRect
+( int		srcx,
+  int		srcy,
+  int		srcscrn,
+  int		width,
+  int		height,
+  int		destx,
+  int		desty,
+  int		destscrn ) 
 { 
     byte *src;
     byte *dest; 
@@ -139,9 +149,12 @@ void V_CopyRect(int srcx, int srcy, byte *source,
         height = SCREENHEIGHT - desty;
 
     V_MarkRect(destx, desty, width, height); 
- 
+/* 
     src = source + SCREENWIDTH * srcy + srcx; 
     dest = dest_screen + SCREENWIDTH * desty + destx; 
+*/
+    src = screens[srcscrn] + SCREENWIDTH * srcy + srcx;
+    dest = screens[destscrn] + SCREENWIDTH * desty + destx;
 
     for ( ; height>0 ; height--) 
     { 
@@ -171,7 +184,12 @@ void V_SetPatchClipCallback(vpatchclipfunc_t func)
 // Masks a column based masked pic to the screen. 
 //
 
-void V_DrawPatch(int x, int y, patch_t *patch)
+void
+V_DrawPatch
+( int		x,
+  int		y,
+  int		scrn,
+  patch_t*	patch ) 
 { 
     int count;
     int col;
@@ -207,7 +225,8 @@ void V_DrawPatch(int x, int y, patch_t *patch)
     V_MarkRect(x, y, SHORT(patch->width), SHORT(patch->height));
 
     col = 0;
-    desttop = dest_screen + (y << hires) * SCREENWIDTH + x;
+//    desttop = dest_screen + (y << hires) * SCREENWIDTH + x;
+    desttop = screens[scrn] + (y << hires) * SCREENWIDTH + x;
 
     w = SHORT(patch->width);
 
@@ -353,7 +372,12 @@ void V_DrawPatch(int x, int y, patch_t *patch)
 // Flips horizontally, e.g. to mirror face.
 //
 
-void V_DrawPatchFlipped(int x, int y, patch_t *patch)
+void
+V_DrawPatchFlipped
+( int		x,
+  int		y,
+  int		scrn,
+  patch_t*	patch ) 
 {
     int count;
     int col; 
@@ -391,7 +415,9 @@ void V_DrawPatchFlipped(int x, int y, patch_t *patch)
     V_MarkRect (x, y, SHORT(patch->width), SHORT(patch->height));
 
     col = 0;
-    desttop = dest_screen + (y << hires) * SCREENWIDTH + x;
+//    desttop = dest_screen + (y << hires) * SCREENWIDTH + x;
+//    desttop = screens[0] + (y << hires) * SCREENWIDTH + x; // FIXME
+    desttop = screens[scrn]+ (y << hires) * SCREENWIDTH + x; // FIXME
 
     w = SHORT(patch->width);
 
@@ -445,9 +471,14 @@ void V_DrawPatchFlipped(int x, int y, patch_t *patch)
 // Draws directly to the screen on the pc. 
 //
 
-void V_DrawPatchDirect(int x, int y, patch_t *patch)
+void
+V_DrawPatchDirect
+( int		x,
+  int		y,
+  int		scrn,
+  patch_t*	patch ) 
 {
-    V_DrawPatch(x, y, patch); 
+    V_DrawPatch(x, y, scrn, patch); 
 } 
 
 //
@@ -455,7 +486,7 @@ void V_DrawPatchDirect(int x, int y, patch_t *patch)
 //
 // Masks a column based translucent masked pic to the screen.
 //
-
+/*
 void V_DrawTLPatch(int x, int y, patch_t * patch)
 {
     int count, col;
@@ -477,7 +508,8 @@ void V_DrawTLPatch(int x, int y, patch_t * patch)
     }
 
     col = 0;
-    desttop = dest_screen + (y << hires) * SCREENWIDTH + x;
+//    desttop = dest_screen + (y << hires) * SCREENWIDTH + x;
+    desttop = screens[scrn] + (y << hires) * SCREENWIDTH + x;
 
     w = SHORT(patch->width);
     for (; col < w; x++, col++, desttop++)
@@ -534,7 +566,8 @@ void V_DrawXlaPatch(int x, int y, patch_t * patch)
     }
 
     col = 0;
-    desttop = dest_screen + (y << hires) * SCREENWIDTH + x;
+//    desttop = dest_screen + (y << hires) * SCREENWIDTH + x;
+    desttop = screens[scrn] + (y << hires) * SCREENWIDTH + x;
 
     w = SHORT(patch->width);
     for(; col < w; x++, col++, desttop++)
@@ -596,7 +629,8 @@ void V_DrawAltTLPatch(int x, int y, patch_t * patch)
     }
 #endif
     col = 0;
-    desttop = dest_screen + (y << hires) * SCREENWIDTH + x;
+//    desttop = dest_screen + (y << hires) * SCREENWIDTH + x;
+    desttop = screens[scrn] + (y << hires) * SCREENWIDTH + x;
 
     w = SHORT(patch->width);
     for (; col < w; x++, col++, desttop++)
@@ -658,8 +692,12 @@ void V_DrawShadowedPatch(int x, int y, patch_t *patch)
     }
 #endif
     col = 0;
-    desttop = dest_screen + (y << hires) * SCREENWIDTH + x;
-    desttop2 = dest_screen + ((y + 2) << hires) * SCREENWIDTH + x + 2;
+
+//    desttop = dest_screen + (y << hires) * SCREENWIDTH + x;
+//    desttop2 = dest_screen + ((y + 2) << hires) * SCREENWIDTH + x + 2;
+
+    desttop = screens[0] + (y << hires) * SCREENWIDTH + x;
+    desttop2 = screens[0] + ((y + 2) << hires) * SCREENWIDTH + x + 2;
 
     w = SHORT(patch->width);
     for (; col < w; x++, col++, desttop++, desttop2++)
@@ -718,13 +756,20 @@ void V_LoadXlaTable(void)
 {
     xlatab = W_CacheLumpName("XLATAB", PU_STATIC);
 }
-
+*/
 //
 // V_DrawBlock
 // Draw a linear block of pixels into the view buffer.
 //
 
-void V_DrawBlock(int x, int y, int width, int height, byte *src) 
+void
+V_DrawBlock
+( int		x,
+  int		y,
+  int		scrn,
+  int		width,
+  int		height,
+  byte*		src ) 
 { 
     byte *dest; 
  
@@ -742,7 +787,9 @@ void V_DrawBlock(int x, int y, int width, int height, byte *src)
  
     V_MarkRect (x, y, width, height); 
  
-    dest = dest_screen + (y << hires) * SCREENWIDTH + x;
+//    dest = dest_screen + (y << hires) * SCREENWIDTH + x;
+//    dest = screens[0] + (y << hires) * SCREENWIDTH + x;  // FIXME
+    dest = screens[scrn] + (y << hires) * SCREENWIDTH + x; // FIXME
 
     while (height--) 
     { 
@@ -752,7 +799,7 @@ void V_DrawBlock(int x, int y, int width, int height, byte *src)
     } 
 } 
 
-void V_DrawScaledBlock(int x, int y, int width, int height, byte *src)
+void V_DrawScaledBlock(int x, int y, int scrn, int width, int height, byte *src)
 {
     byte *dest;
     int i, j;
@@ -771,7 +818,8 @@ void V_DrawScaledBlock(int x, int y, int width, int height, byte *src)
 
     V_MarkRect (x, y, width, height);
 
-    dest = dest_screen + (y << hires) * SCREENWIDTH + (x << hires);
+//    dest = dest_screen + (y << hires) * SCREENWIDTH + (x << hires);
+    dest = screens[scrn] + (y << hires) * SCREENWIDTH + (x << hires);
 
     for (i = 0; i < (height << hires); i++)
     {
@@ -788,7 +836,8 @@ void V_DrawFilledBox(int x, int y, int w, int h, int c)
     uint8_t *buf, *buf1;
     int x1, y1;
 
-    buf = I_VideoBuffer + SCREENWIDTH * y + x;
+//    buf = I_VideoBuffer + SCREENWIDTH * y + x;
+    buf = screens[0] + SCREENWIDTH * y + x;
 
     for (y1 = 0; y1 < h; ++y1)
     {
@@ -808,7 +857,8 @@ void V_DrawHorizLine(int x, int y, int w, int c)
     uint8_t *buf;
     int x1;
 
-    buf = I_VideoBuffer + SCREENWIDTH * y + x;
+//    buf = I_VideoBuffer + SCREENWIDTH * y + x;
+    buf = screens[0] + SCREENWIDTH * y + x;
 
     for (x1 = 0; x1 < w; ++x1)
     {
@@ -821,7 +871,8 @@ void V_DrawVertLine(int x, int y, int h, int c)
     uint8_t *buf;
     int y1;
 
-    buf = I_VideoBuffer + SCREENWIDTH * y + x;
+//    buf = I_VideoBuffer + SCREENWIDTH * y + x;
+    buf = screens[0] + SCREENWIDTH * y + x;
 
     for (y1 = 0; y1 < h; ++y1)
     {
@@ -872,7 +923,8 @@ void V_CopyScaledBuffer(byte *dest, byte *src, size_t size)
  
 void V_DrawRawScreen(byte *raw)
 {
-    V_CopyScaledBuffer(dest_screen, raw, ORIGWIDTH * ORIGHEIGHT);
+//    V_CopyScaledBuffer(dest_screen, raw, ORIGWIDTH * ORIGHEIGHT);
+    memcpy(screens[0], raw, ORIGWIDTH * ORIGHEIGHT);
 }
 
 //
@@ -883,10 +935,16 @@ void V_Init (void)
     // no-op!
     // There used to be separate screens that could be drawn to; these are
     // now handled in the upper layers.
+
+    int         i;
+    byte        *base = Z_Malloc(SCREENWIDTH * SCREENHEIGHT * 4, PU_STATIC, NULL);
+
+    for (i = 0; i < 4; i++)
+        screens[i] = base + i * SCREENWIDTH * SCREENHEIGHT;
 }
 
 // Set the buffer that the code draws to.
-
+/*
 void V_UseBuffer(byte *buffer)
 {
     dest_screen = buffer;
@@ -898,7 +956,7 @@ void V_RestoreBuffer(void)
 {
     dest_screen = I_VideoBuffer;
 }
-
+*/
 // isprint() function (win32 doesnt like it, seems)
 
 #pragma GCC diagnostic push
@@ -934,7 +992,7 @@ boolean V_IsPrint(char c)
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-value"
-
+/*
 void V_DrawConsoleChar(int x,
                        int y,
                        patch_t *patch,
@@ -977,6 +1035,45 @@ void V_DrawConsoleChar(int x,
                     }
                     *(source++);
                 }
+                dest += SCREENWIDTH;
+            }
+            column = (column_t *)((byte *)column + column->length + 4);
+        }
+    }
+}
+*/
+void V_DrawConsoleChar(int x, int y, patch_t *patch, byte color, boolean italics, int translucency,
+    boolean inverted)
+{
+    int         col = 0;
+    byte        *desttop = screens[0] + y * SCREENWIDTH + x;
+    int         w = SHORT(patch->width);
+
+    for (; col < w; col++, desttop++)
+    {
+        column_t        *column = (column_t *)((byte *)patch + LONG(patch->columnofs[col]));
+
+        // step through the posts in a column
+        while (column->topdelta != 0xff)
+        {
+            byte        *source = (byte *)column + 3;
+            byte        *dest = desttop + column->topdelta * SCREENWIDTH;
+            int         count = column->length;
+
+            while (count--)
+            {
+                if (y + column->topdelta + column->length - count > CONSOLETOP)
+                {
+                    if ((*source && !inverted) || (!*source && inverted))
+                    {
+                        if (italics)
+                            *(dest + italicize[column->topdelta + column->length - count]) = color;
+                        else
+                            *dest = (translucency == 1 ? tinttab25[(color << 8) + *dest] :
+                            (translucency == 2 ? tinttab25[(*dest << 8) + color] : color));
+                    }
+                }
+                *(source++);
                 dest += SCREENWIDTH;
             }
             column = (column_t *)((byte *)column + column->length + 4);

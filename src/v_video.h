@@ -47,7 +47,11 @@
 // Strife.
 typedef boolean (*vpatchclipfunc_t)(patch_t *, int, int);
 
-extern int dirtybox[4];
+extern int  dirtybox[4];
+
+// Screen 0 is the screen updated by I_Update screen.
+// Screen 1 is an extra buffer.
+extern byte *screens[5];
 
 extern byte *tinttable;
 extern byte *dp_translation;
@@ -67,22 +71,54 @@ void V_Init (void);
 
 // Draw a block from the specified source screen to the screen.
 
-void V_CopyRect(int srcx, int srcy, byte *source,
-                int width, int height,
-                int destx, int desty);
+void
+V_CopyRect
+( int		srcx,
+  int		srcy,
+  int		srcscrn,
+  int		width,
+  int		height,
+  int		destx,
+  int		desty,
+  int		destscrn ) ;
 
-void V_DrawPatch(int x, int y, patch_t *patch);
-void V_DrawPatchFlipped(int x, int y, patch_t *patch);
+void
+V_DrawPatch
+( int		x,
+  int		y,
+  int		scrn,
+  patch_t*	patch ) ;
+
+void
+V_DrawPatchFlipped
+( int		x,
+  int		y,
+  int		scrn,
+  patch_t*	patch ) ;
+
 void V_DrawTLPatch(int x, int y, patch_t *patch);
 void V_DrawAltTLPatch(int x, int y, patch_t * patch);
 void V_DrawShadowedPatch(int x, int y, patch_t *patch);
 void V_DrawXlaPatch(int x, int y, patch_t * patch);     // villsa [STRIFE]
-void V_DrawPatchDirect(int x, int y, patch_t *patch);
+void
+V_DrawPatchDirect
+( int		x,
+  int		y,
+  int		scrn,
+  patch_t*	patch ) ;
 
 // Draw a linear block of pixels into the view buffer.
 
-void V_DrawBlock(int x, int y, int width, int height, byte *src);
-void V_DrawScaledBlock(int x, int y, int width, int height, byte *src);
+void
+V_DrawBlock
+( int		x,
+  int		y,
+  int		scrn,
+  int		width,
+  int		height,
+  byte*		src ) ;
+
+void V_DrawScaledBlock(int x, int y, int scrn, int width, int height, byte *src);
 
 void V_MarkRect(int x, int y, int width, int height);
 
@@ -123,12 +159,8 @@ void V_LoadXlaTable(void);
 
 void V_DrawMouseSpeedBox(int speed);
 
-void V_DrawConsoleChar(int x,
-                       int y,
-                       patch_t *patch,
-                       byte color,
-                       boolean italics,
-                       int translucency);
+void V_DrawConsoleChar(int x, int y, patch_t *patch, byte color, boolean italics, int translucency,
+    boolean inverted);
 
 #endif
 

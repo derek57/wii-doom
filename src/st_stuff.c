@@ -30,6 +30,7 @@ rcsid[] = "$Id: st_stuff.c,v 1.6 1997/02/03 22:45:13 b1 Exp $";
 #include <stdio.h>
 
 #include "am_map.h"
+#include "c_io.h"
 #include "deh_str.h"
 #include "doomdef.h"
 
@@ -560,57 +561,58 @@ void ST_refreshBackground(void)
 
     if (st_statusbaron)
     {
-        V_UseBuffer(st_backing_screen);
+//        V_UseBuffer(st_backing_screen);
 
         if(beta_style)
         {
             if(!automapactive)
             {
                 if(fsize != 4207819 && fsize != 4274218 && fsize != 10396254)
-                    V_DrawPatch(ST_X, 0, sbar);
+                    V_DrawPatch(ST_X, 0, 4, sbar);
                 else
                 {
-                    V_DrawPatch(0, 0, sbar_left_oldwad);
-                    V_DrawPatch(104, 0, sbar_right_oldwad);
+                    V_DrawPatch(0, 0, 4, sbar_left_oldwad);
+                    V_DrawPatch(104, 0, 4, sbar_right_oldwad);
                 }
             }
             else
             {
-                V_DrawPatch(ST_X, 0, sbarmap);
+                V_DrawPatch(ST_X, 0, 4, sbarmap);
 
                 if(player->weaponowned[wp_shotgun])
-                    V_DrawPatch(110, 4, sbara_shotgun);
+                    V_DrawPatch(110, 4, 4, sbara_shotgun);
                 if(player->weaponowned[wp_chaingun])
-                    V_DrawPatch(110, 10, sbara_chaingun);
+                    V_DrawPatch(110, 10, 4, sbara_chaingun);
                 if(player->weaponowned[wp_missile])
-                    V_DrawPatch(135, 3, sbara_missile);
+                    V_DrawPatch(135, 3, 4, sbara_missile);
                 if(player->weaponowned[wp_plasma])
-                    V_DrawPatch(135, 10, sbara_plasma);
+                    V_DrawPatch(135, 10, 4, sbara_plasma);
                 if(player->weaponowned[wp_bfg])
-                    V_DrawPatch(185, 3, sbara_bfg);
+                    V_DrawPatch(185, 3, 4, sbara_bfg);
                 if(player->weaponowned[wp_chainsaw])
-                    V_DrawPatch(160, 5, sbara_chainsaw);
+                    V_DrawPatch(160, 5, 4, sbara_chainsaw);
             }
         }
         else
         {
             if(fsize != 4207819 && fsize != 4274218 && fsize != 10396254)
-                V_DrawPatch(ST_X, 0, sbar);
+                V_DrawPatch(ST_X, 0, 4, sbar);
             else
             {
-                V_DrawPatch(0, 0, sbar_left_oldwad);
-                V_DrawPatch(104, 0, sbar_right_oldwad);
+                V_DrawPatch(0, 0, 4, sbar_left_oldwad);
+                V_DrawPatch(104, 0, 4, sbar_right_oldwad);
             }
         }
 
         if (netgame)
-            V_DrawPatch(ST_FX, 0, faceback);
+            V_DrawPatch(ST_FX, 0, 4, faceback);
         else if(beta_style && !automapactive)
-            V_DrawPatch(ST_FX - 1, 1, faceback);
+            V_DrawPatch(ST_FX - 1, 1, 4, faceback);
 
-        V_RestoreBuffer();
+//        V_RestoreBuffer();
 
-        V_CopyRect(ST_X, 0, st_backing_screen, ST_WIDTH, ST_HEIGHT, ST_X, ST_Y);
+//        V_CopyRect(ST_X, 0, st_backing_screen, ST_WIDTH, ST_HEIGHT, ST_X, ST_Y);
+        V_CopyRect(ST_X, 0, 4, ST_WIDTH, ST_HEIGHT, ST_X, ST_Y, 0);
     }
 }
 
@@ -630,7 +632,7 @@ void ST_drawEx(void)
         ammotype_t ammo;
 
         // health
-        V_DrawPatch(18, 196, W_CacheLumpName("MEDIA0", PU_CACHE));
+        V_DrawPatch(18, 196, 0, W_CacheLumpName("MEDIA0", PU_CACHE));
 
         sprintf(buffer_health, "%d\n", plyr->health);
 
@@ -638,9 +640,9 @@ void ST_drawEx(void)
         
         // armor
         if(plyr->armortype == 2)
-            V_DrawPatch(85, 196, W_CacheLumpName("ARM2A0", PU_CACHE));
+            V_DrawPatch(85, 196, 0, W_CacheLumpName("ARM2A0", PU_CACHE));
         else
-            V_DrawPatch(85, 196, W_CacheLumpName("ARM1A0", PU_CACHE));
+            V_DrawPatch(85, 196, 0, W_CacheLumpName("ARM1A0", PU_CACHE));
 
         sprintf(buffer_armor, "%d\n", plyr->armorpoints);
 
@@ -652,30 +654,30 @@ void ST_drawEx(void)
         if (ammo != am_noammo)
         {
             if(player->readyweapon == wp_pistol)
-                V_DrawPatch(280, 196, invammo[0]);
+                V_DrawPatch(280, 196, 0, invammo[0]);
 
             if(player->readyweapon == wp_shotgun)
-                V_DrawPatch(280, 196, invammo[1]);
+                V_DrawPatch(280, 196, 0, invammo[1]);
 
             if(player->readyweapon == wp_chaingun)
-                V_DrawPatch(273, 196, invammo[2]);
+                V_DrawPatch(273, 196, 0, invammo[2]);
 
             if(player->readyweapon == wp_missile)
-                V_DrawPatch(281, 196, invammo[3]);
+                V_DrawPatch(281, 196, 0, invammo[3]);
 
             if (fsize != 4207819 && fsize != 4274218 && fsize != 4225504 &&
                 fsize != 4225460 && fsize != 4234124 && fsize != 4196020 &&
                 fsize != 4261144 && fsize != 4271324 && fsize != 4211660)
             {
                 if(player->readyweapon == wp_plasma)
-                    V_DrawPatch(280, 196, invammo[4]);
+                    V_DrawPatch(280, 196, 0, invammo[4]);
 
                 if(player->readyweapon == wp_bfg)
-                    V_DrawPatch(273, 196, invammo[5]);
+                    V_DrawPatch(273, 196, 0, invammo[5]);
             }
 
             if(player->readyweapon == wp_supershotgun)
-                V_DrawPatch(275, 196, invammo[6]);
+                V_DrawPatch(275, 196, 0, invammo[6]);
 
             sprintf(buffer_ammo, "%d\n", plyr->ammo[ammo]);
 
@@ -690,12 +692,12 @@ void ST_drawEx(void)
             if(i < 3)
             {
                 if (player->cards[i] == true)
-                    V_DrawPatch(231 + y, 190, keys[i]);
+                    V_DrawPatch(231 + y, 190, 0, keys[i]);
             }
             else
             {
                 if (player->cards[i] == true)
-                    V_DrawPatch(207 + y, 189, keys[i]);
+                    V_DrawPatch(207 + y, 189, 0, keys[i]);
             }
         }
     }
@@ -974,7 +976,10 @@ void ST_updateWidgets(void)
     }
 
     // refresh everything if this is him coming back to life
-    ST_updateFaceWidget();
+
+    // [BH] but only if not paused and no menu
+    if (!paused && !menuactive && !consoleactive)
+        ST_updateFaceWidget();
 
     // used by the w_armsbg & w_itembg & w_chatbg widget
     st_notdeathmatch = !deathmatch;
@@ -1661,6 +1666,9 @@ void ST_Stop (void)
 void ST_Init (void)
 {
     ST_loadData();
+/*
     st_backing_screen = (byte *) Z_Malloc((ST_WIDTH << hires) *
                         (ST_HEIGHT << hires), PU_STATIC, 0); // CHANGED FOR HIRES
+*/
+    screens[4] = Z_Malloc(ST_WIDTH * SBARHEIGHT, PU_STATIC, 0);
 }

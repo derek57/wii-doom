@@ -1928,7 +1928,7 @@ void M_DrawLoad(void)
 {
     int             i;
 
-    V_DrawPatchDirect(72, 28,
+    V_DrawPatchDirect(72, 28, 0,
                       W_CacheLumpName(DEH_String("M_T_LGME"), PU_CACHE));
 
     for (i = 0;i < load_end; i++)
@@ -1956,17 +1956,17 @@ void M_DrawSaveLoadBorder(int x,int y)
 {
     int             i;
         
-    V_DrawPatchDirect(x - 8, y + 7,
+    V_DrawPatchDirect(x - 8, y + 7, 0,
                       W_CacheLumpName(DEH_String("M_LSLEFT"), PU_CACHE));
         
     for (i = 0;i < 24;i++)
     {
-        V_DrawPatchDirect(x, y + 7,
+        V_DrawPatchDirect(x, y + 7, 0,
                           W_CacheLumpName(DEH_String("M_LSCNTR"), PU_CACHE));
         x += 8;
     }
 
-    V_DrawPatchDirect(x, y + 7,
+    V_DrawPatchDirect(x, y + 7, 0,
                       W_CacheLumpName(DEH_String("M_LSRGHT"), PU_CACHE));
 }
 
@@ -2007,7 +2007,7 @@ void M_DrawSave(void)
 {
     int             i;
         
-    V_DrawPatchDirect(72, 28, W_CacheLumpName(DEH_String("M_T_SGME"), PU_CACHE));
+    V_DrawPatchDirect(72, 28, 0, W_CacheLumpName(DEH_String("M_T_SGME"), PU_CACHE));
     for (i = 0;i < load_end; i++)
     {
         M_DrawSaveLoadBorder(LoadDef.x+5,LoadDef.y+LINEHEIGHT_SMALL*i);
@@ -2164,7 +2164,7 @@ void M_DrawReadThis1(void)
 
     lumpname = DEH_String(lumpname);
     
-    V_DrawPatchDirect (0, 0, W_CacheLumpName(lumpname, PU_CACHE));
+    V_DrawPatchDirect (0, 0, 0, W_CacheLumpName(lumpname, PU_CACHE));
 
     ReadDef1.x = skullx;
     ReadDef1.y = skully;
@@ -2182,7 +2182,7 @@ void M_DrawReadThis2(void)
     // We only ever draw the second page if this is 
     // gameversion == exe_doom_1_9 and gamemode == registered
 
-    V_DrawPatchDirect(0, 0, W_CacheLumpName(DEH_String("HELP1"), PU_CACHE));
+    V_DrawPatchDirect(0, 0, 0, W_CacheLumpName(DEH_String("HELP1"), PU_CACHE));
 }
 
 
@@ -2192,9 +2192,9 @@ void M_DrawReadThis2(void)
 void M_DrawSound(void)
 {
     if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
-        V_DrawPatchDirect (65, 15, W_CacheLumpName(DEH_String("M_T_XSET"), PU_CACHE));
+        V_DrawPatchDirect (65, 15, 0, W_CacheLumpName(DEH_String("M_T_XSET"), PU_CACHE));
     else
-        V_DrawPatchDirect (65, 15, W_CacheLumpName(DEH_String("M_SNDSET"), PU_CACHE));
+        V_DrawPatchDirect (65, 15, 0, W_CacheLumpName(DEH_String("M_SNDSET"), PU_CACHE));
 
     M_DrawThermoSmall(SoundDef.x + 95, SoundDef.y + LINEHEIGHT_SMALL * (sfx_vol + 1),
                  16, sfxVolume);
@@ -2335,7 +2335,7 @@ void M_SoundChannels(int choice)
 //
 void M_DrawMainMenu(void)
 {
-    V_DrawPatchDirect(94, 2,
+    V_DrawPatchDirect(94, 2, 0,
                       W_CacheLumpName(DEH_String("M_DOOM"), PU_CACHE));
 }
 
@@ -2347,7 +2347,7 @@ void M_DrawMainMenu(void)
 //
 void M_DrawNewGame(void)
 {
-    V_DrawPatchDirect(96, 14, W_CacheLumpName(DEH_String("M_NEWG"), PU_CACHE));
+    V_DrawPatchDirect(96, 14, 0, W_CacheLumpName(DEH_String("M_NEWG"), PU_CACHE));
     M_WriteText(NewDef.x, NewDef.y - 22, "CHOOSE SKILL LEVEL:");
 
     if(beta_style)
@@ -2380,7 +2380,7 @@ int     epi;
 
 void M_DrawEpisode(void)
 {
-    V_DrawPatchDirect(75, 38, W_CacheLumpName(DEH_String("M_EPISOD"), PU_CACHE));
+    V_DrawPatchDirect(75, 38, 0, W_CacheLumpName(DEH_String("M_EPISOD"), PU_CACHE));
 }
 
 void M_VerifyNightmare(int ch)
@@ -2443,13 +2443,13 @@ void M_Episode(int choice)
 
 void M_DrawOptions(void)
 {
-    V_DrawPatchDirect(108, 15, W_CacheLumpName(DEH_String("M_OPTTTL"),
+    V_DrawPatchDirect(108, 15, 0, W_CacheLumpName(DEH_String("M_OPTTTL"),
                                                PU_CACHE));
 }
 
 void M_DrawItems(void)
 {
-    V_DrawPatchDirect(123, 10, W_CacheLumpName(DEH_String("M_T_ITMS"),
+    V_DrawPatchDirect(123, 10, 0, W_CacheLumpName(DEH_String("M_T_ITMS"),
                                                PU_CACHE));
 
     dp_translation = crx[CRX_GOLD];
@@ -2495,7 +2495,7 @@ void M_DrawItems(void)
 
 void M_DrawArmor(void)
 {
-    V_DrawPatchDirect(115, 15, W_CacheLumpName(DEH_String("M_T_ARMR"),
+    V_DrawPatchDirect(115, 15, 0, W_CacheLumpName(DEH_String("M_T_ARMR"),
                                                PU_CACHE));
 
     dp_translation = crx[CRX_GOLD];
@@ -2523,7 +2523,7 @@ void M_DrawArmor(void)
 
 void M_DrawWeapons(void)
 {
-    V_DrawPatchDirect(103, 15, W_CacheLumpName(DEH_String("M_T_WPNS"),
+    V_DrawPatchDirect(103, 15, 0, W_CacheLumpName(DEH_String("M_T_WPNS"),
                                                PU_CACHE));
 
     dp_translation = crx[CRX_GOLD];
@@ -2577,7 +2577,7 @@ void M_DrawWeapons(void)
 
 void M_DrawKeys(void)
 {
-    V_DrawPatchDirect(125, 15, W_CacheLumpName(DEH_String("M_T_KEYS"),
+    V_DrawPatchDirect(125, 15, 0, W_CacheLumpName(DEH_String("M_T_KEYS"),
                                                PU_CACHE));
 
     dp_translation = crx[CRX_GOLD];
@@ -2595,10 +2595,10 @@ void M_DrawKeys(void)
 void M_DrawScreen(void)
 {
     if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
-        V_DrawPatchDirect(58, 15, W_CacheLumpName(DEH_String("M_T_SSET"),
+        V_DrawPatchDirect(58, 15, 0, W_CacheLumpName(DEH_String("M_T_SSET"),
                                                PU_CACHE));
     else
-        V_DrawPatchDirect(58, 15, W_CacheLumpName(DEH_String("M_SCRSET"),
+        V_DrawPatchDirect(58, 15, 0, W_CacheLumpName(DEH_String("M_SCRSET"),
                                                PU_CACHE));
 
     M_DrawThermoSmall(ScreenDef.x + 152, ScreenDef.y + LINEHEIGHT_SMALL * (gamma + 1),
@@ -2667,10 +2667,10 @@ void M_DrawScreen(void)
 void M_DrawGame(void)
 {
     if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
-        V_DrawPatchDirect(70, 0, W_CacheLumpName(DEH_String("M_T_GSET"),
+        V_DrawPatchDirect(70, 0, 0, W_CacheLumpName(DEH_String("M_T_GSET"),
                                                PU_CACHE));
     else
-        V_DrawPatchDirect(70, 0, W_CacheLumpName(DEH_String("M_GMESET"),
+        V_DrawPatchDirect(70, 0, 0, W_CacheLumpName(DEH_String("M_GMESET"),
                                                PU_CACHE));
 
     M_WriteText(GameDef.x, GameDef.y - 2, DEH_String("MAP GRID"));
@@ -2881,10 +2881,10 @@ void M_DrawGame(void)
 void M_DrawGame2(void)
 {
     if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
-        V_DrawPatchDirect(70, 0, W_CacheLumpName(DEH_String("M_T_GSET"),
+        V_DrawPatchDirect(70, 0, 0, W_CacheLumpName(DEH_String("M_T_GSET"),
                                                PU_CACHE));
     else
-        V_DrawPatchDirect(70, 0, W_CacheLumpName(DEH_String("M_GMESET"),
+        V_DrawPatchDirect(70, 0, 0, W_CacheLumpName(DEH_String("M_GMESET"),
                                                PU_CACHE));
 
     M_WriteText(GameDef.x - 15, GameDef.y - 2, DEH_String("AUTOAIM"));
@@ -3062,9 +3062,9 @@ void DetectState(void)
 void M_DrawCheats(void)
 {
     if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
-        V_DrawPatch (110, 6, W_CacheLumpName(DEH_String("M_T_CHTS"), PU_CACHE));
+        V_DrawPatch (110, 6, 0, W_CacheLumpName(DEH_String("M_T_CHTS"), PU_CACHE));
     else
-        V_DrawPatch (110, 6, W_CacheLumpName(DEH_String("M_CHEATS"), PU_CACHE));
+        V_DrawPatch (110, 6, 0, W_CacheLumpName(DEH_String("M_CHEATS"), PU_CACHE));
 
     M_WriteText(72, 26, DEH_String("GOD MODE"));
 
@@ -3332,7 +3332,7 @@ void M_DrawRecord(void)
 
     int offset = 0;
 
-    V_DrawPatchDirect(58, 15, W_CacheLumpName(DEH_String("M_T_DREC"),
+    V_DrawPatchDirect(58, 15, 0, W_CacheLumpName(DEH_String("M_T_DREC"),
                                                PU_CACHE));
     if (rmap == 0)
         rmap = 1;
@@ -3480,34 +3480,34 @@ void M_DrawRecord(void)
             if(fsize == 28422764)
                 offset = 7;
             if(rmap == 1 || rmap == 11 || rmap == 21 || rmap == 31)
-                V_DrawPatch (115 - offset, 68, W_CacheLumpName
+                V_DrawPatch (115 - offset, 68, 0, W_CacheLumpName
                 (DEH_String("WINUM1"), PU_CACHE));
             else if(rmap == 2 || rmap == 12 || rmap == 22 || rmap == 32)
-                V_DrawPatch (115 - offset, 68, W_CacheLumpName
+                V_DrawPatch (115 - offset, 68, 0, W_CacheLumpName
                 (DEH_String("WINUM2"), PU_CACHE));
             else if(rmap == 3 || rmap == 13 || rmap == 23)
-                V_DrawPatch (115 - offset, 68, W_CacheLumpName
+                V_DrawPatch (115 - offset, 68, 0, W_CacheLumpName
                 (DEH_String("WINUM3"), PU_CACHE));
             else if(rmap == 4 || rmap == 14 || rmap == 24)
-                V_DrawPatch (115 - offset, 68, W_CacheLumpName
+                V_DrawPatch (115 - offset, 68, 0, W_CacheLumpName
                 (DEH_String("WINUM4"), PU_CACHE));
             else if(rmap == 5 || rmap == 15 || rmap == 25)
-                V_DrawPatch (115 - offset, 68, W_CacheLumpName
+                V_DrawPatch (115 - offset, 68, 0, W_CacheLumpName
                 (DEH_String("WINUM5"), PU_CACHE));
             else if(rmap == 6 || rmap == 16 || rmap == 26)
-                V_DrawPatch (115 - offset, 68, W_CacheLumpName
+                V_DrawPatch (115 - offset, 68, 0, W_CacheLumpName
                 (DEH_String("WINUM6"), PU_CACHE));
             else if(rmap == 7 || rmap == 17 || rmap == 27)
-                V_DrawPatch (115 - offset, 68, W_CacheLumpName
+                V_DrawPatch (115 - offset, 68, 0, W_CacheLumpName
                 (DEH_String("WINUM7"), PU_CACHE));
             else if(rmap == 8 || rmap == 18 || rmap == 28)
-                V_DrawPatch (115 - offset, 68, W_CacheLumpName
+                V_DrawPatch (115 - offset, 68, 0, W_CacheLumpName
                 (DEH_String("WINUM8"), PU_CACHE));
             else if(rmap == 9 || rmap == 19 || rmap == 29)
-                V_DrawPatch (115 - offset, 68, W_CacheLumpName
+                V_DrawPatch (115 - offset, 68, 0, W_CacheLumpName
                 (DEH_String("WINUM9"), PU_CACHE));
             else if(rmap == 10 || rmap == 20 || rmap == 30)
-                V_DrawPatch (115 - offset, 68, W_CacheLumpName
+                V_DrawPatch (115 - offset, 68, 0, W_CacheLumpName
                 (DEH_String("WINUM0"), PU_CACHE));
         }
     }
@@ -3517,19 +3517,19 @@ void M_DrawRecord(void)
         if(repi == 1)
         {
             if(rmap == 1)
-                V_DrawPatch (55, 68, W_CacheLumpName(DEH_String("WILV00"),
+                V_DrawPatch (55, 68, 0, W_CacheLumpName(DEH_String("WILV00"),
                 PU_CACHE));
             else if(rmap == 2)
-                V_DrawPatch (55, 68, W_CacheLumpName(DEH_String("WILV01"),
+                V_DrawPatch (55, 68, 0, W_CacheLumpName(DEH_String("WILV01"),
                 PU_CACHE));
             else if(rmap == 3)
-                V_DrawPatch (55, 68, W_CacheLumpName(DEH_String("WILV02"),
+                V_DrawPatch (55, 68, 0, W_CacheLumpName(DEH_String("WILV02"),
                 PU_CACHE));
             else if(rmap == 4)
-                V_DrawPatch (55, 68, W_CacheLumpName(DEH_String("WILV03"),
+                V_DrawPatch (55, 68, 0, W_CacheLumpName(DEH_String("WILV03"),
                 PU_CACHE));
             else if(rmap == 5)
-                V_DrawPatch (55, 68, W_CacheLumpName(DEH_String("WILV04"),
+                V_DrawPatch (55, 68, 0, W_CacheLumpName(DEH_String("WILV04"),
                 PU_CACHE));
         }
     }
@@ -3606,7 +3606,7 @@ void M_EndGameResponse(int ch)
 
 void M_EndGame(int choice)
 {
-    V_DrawPatchDirect(58, 15, W_CacheLumpName(DEH_String("M_T_EGME"),
+    V_DrawPatchDirect(58, 15, 0, W_CacheLumpName(DEH_String("M_T_EGME"),
                                                PU_CACHE));
 
     choice = 0;
@@ -3894,16 +3894,16 @@ M_DrawThermo
     int                i;
 
     xx = x;
-    V_DrawPatchDirect(xx, y, W_CacheLumpName(DEH_String("M_THERML"), PU_CACHE));
+    V_DrawPatchDirect(xx, y, 0, W_CacheLumpName(DEH_String("M_THERML"), PU_CACHE));
     xx += 8;
     for (i=0;i<thermWidth;i++)
     {
-        V_DrawPatchDirect(xx, y, W_CacheLumpName(DEH_String("M_THERMM"), PU_CACHE));
+        V_DrawPatchDirect(xx, y, 0, W_CacheLumpName(DEH_String("M_THERMM"), PU_CACHE));
         xx += 8;
     }
-    V_DrawPatchDirect(xx, y, W_CacheLumpName(DEH_String("M_THERMR"), PU_CACHE));
+    V_DrawPatchDirect(xx, y, 0, W_CacheLumpName(DEH_String("M_THERMR"), PU_CACHE));
 
-    V_DrawPatchDirect((x + 8) + thermDot * 8, y,
+    V_DrawPatchDirect((x + 8) + thermDot * 8, y, 0,
                       W_CacheLumpName(DEH_String("M_THERMO"), PU_CACHE));
 }
 
@@ -3920,17 +3920,17 @@ M_DrawThermoSmall
 
     xx = x;
     yy = y + 6; // +6 to y coordinate
-    V_DrawPatch(xx + 3, yy - 18, W_CacheLumpName(DEH_String("M_SLIDEL"), PU_CACHE));
+    V_DrawPatch(xx + 3, yy - 18, 0, W_CacheLumpName(DEH_String("M_SLIDEL"), PU_CACHE));
     xx += 8;
     for (i=0;i<thermWidth;i++)
     {
-        V_DrawPatch(xx, yy - 18, W_CacheLumpName(DEH_String("M_SLIDEM"), PU_CACHE));
+        V_DrawPatch(xx, yy - 18, 0, W_CacheLumpName(DEH_String("M_SLIDEM"), PU_CACHE));
         xx += 8;
     }
-    V_DrawPatch(xx, yy - 18, W_CacheLumpName(DEH_String("M_SLIDER"), PU_CACHE));
+    V_DrawPatch(xx, yy - 18, 0, W_CacheLumpName(DEH_String("M_SLIDER"), PU_CACHE));
 
     // +2 to initial y coordinate
-    V_DrawPatch((x + 9) + thermDot * 8, y - 12,
+    V_DrawPatch((x + 9) + thermDot * 8, y - 12, 0,
                       W_CacheLumpName(DEH_String("M_SLIDEO"), PU_CACHE));
 }
 
@@ -3940,7 +3940,7 @@ M_DrawEmptyCell
 ( menu_t*        menu,
   int            item )
 {
-    V_DrawPatchDirect(menu->x - 10, menu->y + item * LINEHEIGHT_SMALL - 1,
+    V_DrawPatchDirect(menu->x - 10, menu->y + item * LINEHEIGHT_SMALL - 1, 0,
                       W_CacheLumpName(DEH_String("M_CELL1"), PU_CACHE));
 }
 
@@ -3949,7 +3949,7 @@ M_DrawSelCell
 ( menu_t*        menu,
   int            item )
 {
-    V_DrawPatchDirect(menu->x - 10, menu->y + item * LINEHEIGHT_SMALL - 1,
+    V_DrawPatchDirect(menu->x - 10, menu->y + item * LINEHEIGHT_SMALL - 1, 0,
                       W_CacheLumpName(DEH_String("M_CELL2"), PU_CACHE));
 }
 
@@ -4066,7 +4066,7 @@ void M_WriteText(int x, int y, char* string)
         w = SHORT (hu_font[c]->width);
         if (cx+w > ORIGWIDTH)                // CHANGED FOR HIRES
             break;
-        V_DrawPatchDirect(cx, cy, hu_font[c]);
+        V_DrawPatchDirect(cx, cy, 0, hu_font[c]);
         cx+=w;
     }
 }
@@ -4454,7 +4454,7 @@ void M_Drawer (void)
     // DISPLAYS BLINKING "BETA" MESSAGE
     if ((fsize == 4261144 || fsize == 4271324 || fsize == 4211660 || beta_style) &&
             !menuactive && leveltime & 16 && gamestate == GS_LEVEL &&
-            current_height == 0)
+            consoleheight == 0)
     {
         M_WriteText(140, 12, "BETA");
         BorderNeedRefresh = true;
@@ -4593,7 +4593,7 @@ void M_Drawer (void)
 
         // DRAW SKULL
         V_DrawPatch(x + CURSORXOFF_SMALL, currentMenu->y - 5 +
-                    itemOn*LINEHEIGHT_SMALL,
+                    itemOn*LINEHEIGHT_SMALL, 0,
                     W_CacheLumpName(DEH_String(skullNameSmall[whichSkull]),
                                           PU_CACHE));
 /*
@@ -5991,9 +5991,9 @@ void M_DrawKeyBindings(void)
     int i;
 
     if(fsize != 19321722)
-        V_DrawPatch (80, 0, W_CacheLumpName(DEH_String("M_T_BNDS"), PU_CACHE));
+        V_DrawPatch (80, 0, 0, W_CacheLumpName(DEH_String("M_T_BNDS"), PU_CACHE));
     else
-        V_DrawPatch (80, 0, W_CacheLumpName(DEH_String("M_KBNDGS"), PU_CACHE));
+        V_DrawPatch (80, 0, 0, W_CacheLumpName(DEH_String("M_KBNDGS"), PU_CACHE));
 
     M_WriteText(40, 20, DEH_String("FIRE"));
     M_WriteText(40, 30, DEH_String("USE / OPEN"));
@@ -6067,10 +6067,10 @@ void M_Controls(int choice)
 void M_DrawControls(void)
 {
     if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
-        V_DrawPatchDirect(48, 15, W_CacheLumpName(DEH_String("M_T_CSET"),
+        V_DrawPatchDirect(48, 15, 0, W_CacheLumpName(DEH_String("M_T_CSET"),
                                                PU_CACHE));
     else
-        V_DrawPatchDirect(48, 15, W_CacheLumpName(DEH_String("M_CTLSET"),
+        V_DrawPatchDirect(48, 15, 0, W_CacheLumpName(DEH_String("M_CTLSET"),
                                                PU_CACHE));
 
     if(mouselook == 0)
@@ -6726,9 +6726,9 @@ void M_Debug(int choice)
 void M_DrawSystem(void)
 {
     if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
-        V_DrawPatch (62, 20, W_CacheLumpName(DEH_String("M_T_YSET"), PU_CACHE));
+        V_DrawPatch (62, 20, 0, W_CacheLumpName(DEH_String("M_T_YSET"), PU_CACHE));
     else
-        V_DrawPatch (62, 20, W_CacheLumpName(DEH_String("M_SYSSET"), PU_CACHE));
+        V_DrawPatch (62, 20, 0, W_CacheLumpName(DEH_String("M_SYSSET"), PU_CACHE));
 
     if(display_fps)
     {
@@ -6881,9 +6881,9 @@ void M_Statistics(int choice)
 void M_DrawDebug(void)
 {
     if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
-        V_DrawPatch (67, 15, W_CacheLumpName(DEH_String("M_T_DSET"), PU_CACHE));
+        V_DrawPatch (67, 15, 0, W_CacheLumpName(DEH_String("M_T_DSET"), PU_CACHE));
     else
-        V_DrawPatch (67, 15, W_CacheLumpName(DEH_String("M_DBGSET"), PU_CACHE));
+        V_DrawPatch (67, 15, 0, W_CacheLumpName(DEH_String("M_DBGSET"), PU_CACHE));
 
     if(coordinates_info)
     {

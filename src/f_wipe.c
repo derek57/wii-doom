@@ -257,7 +257,7 @@ wipe_EndScreen
 {
     wipe_scr_end = Z_Malloc(SCREENWIDTH * SCREENHEIGHT, PU_STATIC, NULL);
     I_ReadScreen(wipe_scr_end);
-    V_DrawBlock(x, y, width, height, wipe_scr_start); // restore start scr.
+    V_DrawBlock(x, y, 0, width, height, wipe_scr_start); // restore start scr.
     return 0;
 }
 
@@ -277,14 +277,15 @@ wipe_ScreenWipe
         wipe_initMelt, wipe_doMelt, wipe_exitMelt
     };
 
-    ticks <<= hires; // ADDED FOR HIRES
+//    ticks <<= hires; // ADDED FOR HIRES
 
     // initial stuff
     if (!go)
     {
         go = 1;
         // wipe_scr = (byte *) Z_Malloc(width*height, PU_STATIC, 0); // DEBUG
-        wipe_scr = I_VideoBuffer;
+//        wipe_scr = I_VideoBuffer;
+        wipe_scr = screens[0];
         (*wipes[wipeno*3])(width, height, ticks);
     }
 
