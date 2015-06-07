@@ -62,7 +62,7 @@ void ST_Start (void);
 // Called by startup code.
 void ST_Init (void);
 
-void ST_drawEx(void);
+void ST_DrawStatus(void);
 
 void ST_doRefresh(void);
 

@@ -317,7 +317,7 @@ void D_Display (void)
     }
 
     if(hud && !automapactive && screenSize == 8 && usergame && gamestate == GS_LEVEL)
-        ST_drawEx();
+        ST_DrawStatus();
 
     // see if the border needs to be updated to the screen
     if (gamestate == GS_LEVEL && !automapactive && scaledviewwidth != (320 << hires)) // HIRES

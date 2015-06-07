@@ -41,6 +41,7 @@ rcsid[] = "$Id: st_stuff.c,v 1.6 1997/02/03 22:45:13 b1 Exp $";
 #include "dstrings.h"
 
 #include "g_game.h"
+#include "i_swap.h"
 #include "i_system.h"
 #include "i_video.h"
 #include "m_cheat.h"
@@ -271,17 +272,68 @@ rcsid[] = "$Id: st_stuff.c,v 1.6 1997/02/03 22:45:13 b1 Exp $";
 // Height, in lines. 
 #define ST_OUTHEIGHT                1
 
-#define ST_MAPWIDTH        \
-    (strlen(mapnames[(gameepisode-1)*9+(gamemap-1)]))
+#define ST_MAPWIDTH                 (strlen(mapnames[(gameepisode-1)*9+(gamemap-1)]))
 
-#define ST_MAPTITLEX (ORIGWIDTH - ST_MAPWIDTH * ST_CHATFONTWIDTH) // CHANGED FOR HIRES
+#define ST_MAPTITLEX                (ORIGWIDTH - ST_MAPWIDTH * ST_CHATFONTWIDTH) // HIRES
 
 #define ST_MAPTITLEY                0
 #define ST_MAPHEIGHT                1
 
-// graphics are drawn to a backing screen and blitted to the real screen
-byte                          *st_backing_screen;
-            
+#define ST_X_COORD                  10 * SCREENSCALE / 2
+#define ST_Y_COORD                  311 * SCREENSCALE / 2 + SBARHEIGHT
+
+#define ST_HEALTH_X                 ST_X_COORD
+#define ST_HEALTH_Y                 ST_Y_COORD - 8
+#define ST_HEALTH_MIN               20
+#define ST_HEALTH_WAIT              8
+
+#define ST_AMMO_X                   (ST_HEALTH_X + 108 * SCREENSCALE / 2)
+#define ST_AMMO_Y                   ST_HEALTH_Y
+#define ST_AMMO_MIN                 20
+#define ST_AMMO_WAIT                8
+
+#define ST_KEYS_X                   (ST_HEALTH_X + 484 * SCREENSCALE / 2)
+#define ST_KEYS_Y                   ST_HEALTH_Y
+
+#define ST_ARMOR_X                  (SCREENWIDTH - 10 * SCREENSCALE / 2)
+#define ST_ARMOR_Y                  ST_HEALTH_Y
+
+#define ST_KEY_WAIT                 8
+
+
+static struct
+{
+    char        *patchname;
+    int         mobjnum;
+    int         x;
+    int         y;
+    patch_t     *patch;
+} ammopic[NUMAMMO + 4] = {
+    { "PSTRA0", MT_MISC13, 0,  2, NULL },	// ??
+    { "CLIPA0", MT_CLIP,   8,  2, NULL },
+    { "SHELA0", MT_MISC22, 5,  5, NULL },
+    { "AMMOA0", MT_MISC17, 5,  5, NULL },	// ??
+    { "ROCKA0", MT_MISC18, 8, -6, NULL },
+
+    { "CELLA0", MT_MISC20, 0,  2, NULL },
+    { "CELPA0", MT_MISC21, 0,  2, NULL },	// ??
+    { "SBOXA0", MT_MISC23, 5,  5, NULL }	// ??
+};
+
+static struct
+{
+    char        *patchnamea;
+    char        *patchnameb;
+    patch_t     *patch;
+} keypic[NUMCARDS] = {
+    { "BKEYA0", "BKEYB0", NULL },
+    { "YKEYA0", "YKEYB0", NULL },
+    { "RKEYA0", "RKEYB0", NULL },
+    { "BSKUA0", "BSKUB0", NULL },
+    { "YSKUA0", "YSKUB0", NULL },
+    { "RSKUA0", "RSKUB0", NULL }
+};
+
 // main player in game
 static player_t*              plyr; 
 
@@ -291,11 +343,37 @@ static boolean                st_firsttime;
 // lump number for PLAYPAL
 static int                    lu_palette;
 
-// used for timing
-static unsigned int           st_clock;
-
 // used for making messages go away
 static int                    st_msgcounter=0;
+
+// number of frags so far in deathmatch
+static int                    st_fragscount;
+
+// number of items so far
+static int                    st_itemcount;
+
+// number of score so far
+static int                    st_scorecount;
+
+// used to use appopriately pained face
+static int                    st_oldhealth = -1;
+
+// count until face changes
+static int                    st_facecount = 0;
+
+// current face index, used by w_faces
+static int                    st_faceindex = 0;
+
+// holds key-type for each key box on bar
+static int                    keyboxes[3]; 
+
+// a random number per tick
+static int                    st_randomnumber;  
+
+static int                    st_palette = 0;
+
+// used for timing
+static unsigned int           st_clock;
 
 // used when in chat 
 static st_chatstateenum_t     st_chatstate;
@@ -304,7 +382,7 @@ static st_chatstateenum_t     st_chatstate;
 static st_stateenum_t         st_gamestate;
 
 // whether left-side main status bar is active
-/*static*/ boolean            st_statusbaron;
+static boolean            st_statusbaron;
 
 // whether status bar chat is active
 static boolean                st_chat;
@@ -333,9 +411,18 @@ static boolean                st_chaton;
 // !deathmatch
 static boolean                st_scoreon; 
 
+// used for evil grin
+static boolean                oldweaponsowned[NUMWEAPONS]; 
+
+static boolean                st_stopped = true;
+
 // main bar left
 static patch_t*               sbar;
 
+static patch_t*               healthpatch;
+static patch_t*               berserkpatch;
+static patch_t*               greenarmorpatch;
+static patch_t*               bluearmorpatch;
 static patch_t*               sbarmap;
 static patch_t*               sbar_left_oldwad;
 static patch_t*               sbar_right_oldwad;
@@ -375,8 +462,6 @@ static patch_t*               armsbg;
 
 // weapon ownership patches
 static patch_t*               arms[6][2]; 
-
-static patch_t*               invammo[NUMAMMO + 3]; // ammo/weapons
 
 // ready-weapon widget
 static st_number_t            w_ready;
@@ -420,36 +505,6 @@ static st_number_t            w_ammo[4];
 // max ammo widgets
 static st_number_t            w_maxammo[4]; 
 
-
-
-// number of frags so far in deathmatch
-static int                    st_fragscount;
-
-// number of items so far
-static int                    st_itemcount;
-
-// number of score so far
-static int                    st_scorecount;
-
-// used to use appopriately pained face
-static int                    st_oldhealth = -1;
-
-// used for evil grin
-static boolean                oldweaponsowned[NUMWEAPONS]; 
-
-// count until face changes
-static int                    st_facecount = 0;
-
-// current face index, used by w_faces
-static int                    st_faceindex = 0;
-
-// holds key-type for each key box on bar
-static int                    keyboxes[3]; 
-
-// a random number per tick
-static int                    st_randomnumber;  
-
-
 // Massive bunches of cheat shit
 //  to keep it from being easy to figure them out.
 // Yeah, right...
@@ -478,7 +533,6 @@ unsigned char        cheat_ammonokey_seq[] =
     0xb2, 0x26, 0x66, 0xa2, 0xff        // idfa
 };
 
-
 // Smashing Pumpkins Into Samml Piles Of Putried Debris. 
 unsigned char        cheat_noclip_seq[] =
 {
@@ -492,8 +546,6 @@ unsigned char        cheat_commercial_noclip_seq[] =
     0xb2, 0x26, 0xe2, 0x36, 0xb2, 0x2a, 0xff        // idclip
 }; 
 
-
-
 unsigned char        cheat_powerup_seq[7][10] =
 {
     { 0xb2, 0x26, 0x62, 0xa6, 0x32, 0xf6, 0x36, 0x26, 0x6e, 0xff },         // beholdv
@@ -505,19 +557,16 @@ unsigned char        cheat_powerup_seq[7][10] =
     { 0xb2, 0x26, 0x62, 0xa6, 0x32, 0xf6, 0x36, 0x26, 0xff }                // behold
 };
 
-
 unsigned char        cheat_clev_seq[] =
 {
     0xb2, 0x26,  0xe2, 0x36, 0xa6, 0x6e, 1, 0, 0, 0xff        // idclev
 };
-
 
 // my position cheat
 unsigned char        cheat_mypos_seq[] =
 {
     0xb2, 0x26, 0xb6, 0xba, 0x2a, 0xf6, 0xea, 0xff        // idmypos
 }; 
-
 
 cheatseq_t cheat_mus = CHEAT("idmus", 2);
 cheatseq_t cheat_god = CHEAT("iddqd", 0);
@@ -541,6 +590,25 @@ cheatseq_t cheat_choppers = CHEAT("idchoppers", 0);
 cheatseq_t cheat_clev = CHEAT("idclev", 2);
 cheatseq_t cheat_mypos = CHEAT("idmypos", 0);
 
+patch_t *ST_LoadStatusAmmoPatch(int ammopicnum)
+{
+    if ((mobjinfo[ammopic[ammopicnum].mobjnum].flags & MF_SPECIAL)
+        && W_CheckNumForName(ammopic[ammopicnum].patchname) >= 0)
+        return W_CacheLumpNum(W_GetNumForName(ammopic[ammopicnum].patchname), PU_CACHE);
+    else
+        return NULL;
+}
+
+patch_t *ST_LoadStatusKeyPatch(int keypicnum)
+{
+    if (load_dehacked && W_CheckNumForName(keypic[keypicnum].patchnamea) >= 0)
+        return W_CacheLumpNum(W_GetNumForName(keypic[keypicnum].patchnamea), PU_CACHE);
+    else if (W_CheckNumForName(keypic[keypicnum].patchnameb) >= 0)
+        return W_CacheLumpNum(W_GetNumForName(keypic[keypicnum].patchnameb), PU_CACHE);
+    else
+        return NULL;
+}
+
 // 
 extern char*        mapnames[];
 
@@ -548,16 +616,37 @@ extern boolean      hud;
 extern boolean      in_slime;
 extern boolean      show_chat_bar;
 
+extern int          screenSize;
+extern int          load_dehacked;
+
 int                 prio = 0;
 
+boolean             emptytallpercent;
+
+// graphics are drawn to a backing screen and blitted to the real screen
+byte                *st_backing_screen;
+
+void (*hudfunc)(int, int, patch_t *, boolean);
+void (*hudnumfunc)(int, int, patch_t *, boolean);
+void (*godhudfunc)(int, int, patch_t *, boolean);
+
+            
 //
 // STATUS BAR CODE
 //
-void ST_Stop(void);
+void ST_Stop (void)
+{
+    if (st_stopped)
+        return;
+
+    I_SetPalette (W_CacheLumpNum (lu_palette, PU_CACHE));
+
+    st_stopped = true;
+}
 
 void ST_refreshBackground(void)
 {
-    player_t* player = &players[consoleplayer];
+    plyr = &players[consoleplayer];
 
     if (st_statusbaron)
     {
@@ -579,17 +668,17 @@ void ST_refreshBackground(void)
             {
                 V_DrawPatch(ST_X, 0, 4, sbarmap);
 
-                if(player->weaponowned[wp_shotgun])
+                if(plyr->weaponowned[wp_shotgun])
                     V_DrawPatch(110, 4, 4, sbara_shotgun);
-                if(player->weaponowned[wp_chaingun])
+                if(plyr->weaponowned[wp_chaingun])
                     V_DrawPatch(110, 10, 4, sbara_chaingun);
-                if(player->weaponowned[wp_missile])
+                if(plyr->weaponowned[wp_missile])
                     V_DrawPatch(135, 3, 4, sbara_missile);
-                if(player->weaponowned[wp_plasma])
+                if(plyr->weaponowned[wp_plasma])
                     V_DrawPatch(135, 10, 4, sbara_plasma);
-                if(player->weaponowned[wp_bfg])
+                if(plyr->weaponowned[wp_bfg])
                     V_DrawPatch(185, 3, 4, sbara_bfg);
-                if(player->weaponowned[wp_chainsaw])
+                if(plyr->weaponowned[wp_chainsaw])
                     V_DrawPatch(160, 5, 4, sbara_chainsaw);
             }
         }
@@ -616,96 +705,213 @@ void ST_refreshBackground(void)
     }
 }
 
-void ST_drawEx(void)
+static void DrawStatusNumber(int *x, int y, int val, boolean invert,
+                          void (*hudnumfunc)(int, int, patch_t *, boolean))
 {
-    int i, y;
+    int         oldval = val;
+    patch_t     *patch;
 
-    char buffer_ammo[10];
-    char buffer_armor[10];
-    char buffer_health[10];
-
-    player_t* player = &players[consoleplayer];
-
-    if (d_translucency && hud && !automapactive)
-        dp_translucent = true;
+    if (val > 99)
     {
-        ammotype_t ammo;
+        patch = tallnum[val / 100];
+        hudnumfunc(*x, y, patch, invert);
+        *x += SHORT(patch->width);
+    }
+    val %= 100;
+    if (val > 9 || oldval > 99)
+    {
+        patch = tallnum[val / 10];
+        hudnumfunc(*x, y, patch, invert);
+        *x += SHORT(patch->width);
+    }
+    val %= 10;
+    patch = tallnum[val];
+    hudnumfunc(*x, y, patch, invert);
+    *x += SHORT(patch->width);
+}
 
-        // health
-        V_DrawPatch(18, 196, 0, W_CacheLumpName("MEDIA0", PU_CACHE));
+static int StatusNumberWidth(int val)
+{
+    int oldval = val;
+    int width = 0;
 
-        sprintf(buffer_health, "%d\n", plyr->health);
+    if (val > 99)
+        width += SHORT(tallnum[val / 100]->width);
+    val %= 100;
+    if (val > 9 || oldval > 99)
+        width += SHORT(tallnum[val / 10]->width);
+    val %= 10;
+    width += SHORT(tallnum[val]->width);
+    return width;
+}
 
-        M_WriteText(40, 189, buffer_health);
-        
-        // armor
-        if(plyr->armortype == 2)
-            V_DrawPatch(85, 196, 0, W_CacheLumpName("ARM2A0", PU_CACHE));
+void ST_DrawStatus(void)
+{
+    int             health = MAX(0, plyr->mo->health);
+    int             ammotype = weaponinfo[plyr->readyweapon].ammo;
+    int             ammo = plyr->ammo[ammotype];
+    int             armor = plyr->armorpoints;
+    int             health_x = ST_HEALTH_X;
+    int             key = 0;
+    int             i = 0;
+    static int      healthwait = 0;
+    boolean         invert;
+    int             invulnerability = plyr->powers[pw_invulnerability];
+    static boolean  healthanim = false;
+    patch_t         *patch;
+
+    if (d_translucency)
+    {
+        hudfunc = V_DrawTranslucentStatusPatch;
+        hudnumfunc = V_DrawTranslucentStatusNumberPatch;
+        godhudfunc = V_DrawTranslucentYellowStatusPatch;
+    }
+    else
+    {
+        hudfunc = V_DrawStatusPatch;
+        hudnumfunc = V_DrawStatusPatch;
+        godhudfunc = V_DrawYellowStatusPatch;
+    }
+
+    if (((plyr->readyweapon == wp_fist && plyr->pendingweapon == wp_nochange)
+        || plyr->pendingweapon == wp_fist) && plyr->powers[pw_strength])
+        patch = berserkpatch;
+    else
+        patch = healthpatch;
+
+    invert = (!health || (health <= ST_HEALTH_MIN && healthanim) || health > ST_HEALTH_MIN
+        || menuactive || paused || consoleactive);
+    if (patch)
+    {
+        if ((plyr->cheats & CF_GODMODE) || invulnerability > 128 || (invulnerability & 8))
+            godhudfunc(health_x, ST_HEALTH_Y - (SHORT(patch->height) - 17), patch, invert);
         else
-            V_DrawPatch(85, 196, 0, W_CacheLumpName("ARM1A0", PU_CACHE));
+            hudfunc(health_x, ST_HEALTH_Y - (SHORT(patch->height) - 17), patch, invert);
+        health_x += SHORT(patch->width) + 8;
+    }
+    DrawStatusNumber(&health_x, ST_HEALTH_Y, health, invert, hudnumfunc);
+    if (!emptytallpercent)
+        hudnumfunc(health_x, ST_HEALTH_Y, tallpercent, invert);
 
-        sprintf(buffer_armor, "%d\n", plyr->armorpoints);
-
-        M_WriteText(107, 189, buffer_armor);
-
-        // ammo
-        ammo = weaponinfo[plyr->readyweapon].ammo;
-
-        if (ammo != am_noammo)
+    if (health <= ST_HEALTH_MIN && !menuactive && !paused && !consoleactive)
+    {
+        if (healthwait < I_GetTime())
         {
-            if(player->readyweapon == wp_pistol)
-                V_DrawPatch(280, 196, 0, invammo[0]);
+            healthanim = !healthanim;
+            healthwait = I_GetTime() + ST_HEALTH_WAIT * health / ST_HEALTH_MIN + 4;
+        }
+    }
+    else
+    {
+        healthanim = false;
+        healthwait = 0;
+    }
 
-            if(player->readyweapon == wp_shotgun)
-                V_DrawPatch(280, 196, 0, invammo[1]);
+    if (plyr->pendingweapon != wp_nochange)
+    {
+        ammotype = weaponinfo[plyr->pendingweapon].ammo;
+        ammo = plyr->ammo[ammotype];
+    }
 
-            if(player->readyweapon == wp_chaingun)
-                V_DrawPatch(273, 196, 0, invammo[2]);
+    if (health && ammo && ammotype != am_noammo)
+    {
+        int                 ammo_x = ST_AMMO_X + ammopic[ammotype].x;
+        static int          ammowait = 0;
+        static boolean      ammoanim = false;
 
-            if(player->readyweapon == wp_missile)
-                V_DrawPatch(281, 196, 0, invammo[3]);
+        invert = ((ammo <= ST_AMMO_MIN && ammoanim) || ammo > ST_AMMO_MIN
+            || menuactive || paused || consoleactive);
 
-            if (fsize != 4207819 && fsize != 4274218 && fsize != 4225504 &&
-                fsize != 4225460 && fsize != 4234124 && fsize != 4196020 &&
-                fsize != 4261144 && fsize != 4271324 && fsize != 4211660)
+            patch = ammopic[plyr->readyweapon].patch;
+
+            if (patch)
             {
-                if(player->readyweapon == wp_plasma)
-                    V_DrawPatch(280, 196, 0, invammo[4]);
+                if(plyr->readyweapon != wp_fist)
+                    hudnumfunc(ammo_x, ST_AMMO_Y + ammopic[ammotype].y,
+                            patch, invert);
+                else if(plyr->readyweapon == wp_fist && plyr->powers[pw_strength])
+                    hudnumfunc(0, ST_AMMO_Y + ammopic[0].y,
+                            patch, invert);
 
-                if(player->readyweapon == wp_bfg)
-                    V_DrawPatch(273, 196, 0, invammo[5]);
+                ammo_x += SHORT(patch->width) + 8;
             }
 
-            if(player->readyweapon == wp_supershotgun)
-                V_DrawPatch(275, 196, 0, invammo[6]);
+        DrawStatusNumber(&ammo_x, ST_AMMO_Y, ammo, invert, hudnumfunc);
 
-            sprintf(buffer_ammo, "%d\n", plyr->ammo[ammo]);
+        if (ammo <= ST_AMMO_MIN && !menuactive && !paused && !consoleactive)
+        {
+            if (ammowait < I_GetTime())
+            {
+                ammoanim = !ammoanim;
+                ammowait = I_GetTime() + ST_AMMO_WAIT * ammo / ST_AMMO_MIN + 4;
+            }
+        }
+        else
+        {
+            ammoanim = false;
+            ammowait = 0;
+        }
+    }
 
-            M_WriteText(293, 189, buffer_ammo);
+    while (i < NUMCARDS)
+        if (plyr->cards[i++] > 0)
+            key++;
+
+    if (key)
+    {
+        int                 keypic_x = ST_KEYS_X - 100;
+
+        if (!armor)
+            keypic_x += 123;
+        else
+        {
+            if (emptytallpercent)
+                keypic_x += SHORT(tallpercent->width);
+            if (armor < 10)
+                keypic_x += 26;
+            else if (armor < 100)
+                keypic_x += 12;
         }
 
-        // keys
-        for(i = 0; i < 6; i++)
+        for (i = 0; i < NUMCARDS; i++)
         {
-            y = i * 8;
+            int y = i * 20;
+            if (plyr->cards[i] > 0)
+            {
+                patch_t     *patch = keypic[i].patch;
 
-            if(i < 3)
-            {
-                if (player->cards[i] == true)
-                    V_DrawPatch(231 + y, 190, 0, keys[i]);
-            }
-            else
-            {
-                if (player->cards[i] == true)
-                    V_DrawPatch(207 + y, 189, 0, keys[i]);
+                if (patch)
+                    hudfunc(keypic_x + y,
+                        ST_KEYS_Y, patch, true);
             }
         }
     }
 
-    if (dp_translucent)
-        dp_translucent = false;
-}
+    if (armor)
+    {
+        patch_t     *patch = (plyr->armortype == 1 ? greenarmorpatch : bluearmorpatch);
+        int         armor_x = ST_ARMOR_X;
 
+        if (patch)
+        {
+            armor_x -= SHORT(patch->width);
+            hudfunc(armor_x, ST_ARMOR_Y - (SHORT(patch->height) - 16), patch, true);
+            armor_x -= 7;
+        }
+        if (emptytallpercent)
+        {
+            armor_x -= StatusNumberWidth(armor);
+            DrawStatusNumber(&armor_x, ST_ARMOR_Y, armor, true, hudnumfunc);
+        }
+        else
+        {
+            armor_x -= SHORT(tallpercent->width);
+            hudnumfunc(armor_x, ST_ARMOR_Y, tallpercent, true);
+            armor_x -= StatusNumberWidth(armor);
+            DrawStatusNumber(&armor_x, ST_ARMOR_Y, armor, true, hudnumfunc);
+        }
+    }
+}
 
 // Respond to keyboard input events,
 //  intercept cheats.
@@ -761,13 +967,13 @@ void ST_updateFaceWidget(void)
 {
     int                i;
 
-    angle_t        badguyangle;
-    angle_t        diffang;
+    angle_t            badguyangle;
+    angle_t            diffang;
 
-    boolean        doevilgrin;
+    boolean            doevilgrin;
 
-    static int        lastattackdown = -1;
-    static int        priority = 0;
+    static int         lastattackdown = -1;
+    static int         priority = 0;
 
     if (priority < 10)
     {
@@ -864,14 +1070,14 @@ void ST_updateFaceWidget(void)
     }
   
     if (priority < 7 ||
-       (beta_style && in_slime && !(players[consoleplayer].cheats & CF_GODMODE)))
+       (beta_style && in_slime && !(plyr->cheats & CF_GODMODE)))
     {
         // getting hurt because of your own damn stupidity
         if (plyr->damagecount ||
-           (beta_style && in_slime && !(players[consoleplayer].cheats & CF_GODMODE)))
+           (beta_style && in_slime && !(plyr->cheats & CF_GODMODE)))
         {
             if (plyr->health - st_oldhealth > ST_MUCHPAIN ||
-               (beta_style && in_slime && !(players[consoleplayer].cheats & CF_GODMODE)))
+               (beta_style && in_slime && !(plyr->cheats & CF_GODMODE)))
             {
                 priority = 7;
                 st_facecount = ST_TURNCOUNT;
@@ -1026,8 +1232,6 @@ void ST_Ticker (void)
 
 }
 
-static int st_palette = 0;
-
 void ST_doPaletteStuff(void)
 {
 
@@ -1181,7 +1385,6 @@ void ST_diffDraw(void)
 
 void ST_Drawer (boolean fullscreen, boolean refresh)
 {
-  
     st_statusbaron = (!fullscreen) || automapactive;
     st_firsttime = st_firsttime || refresh;
 
@@ -1202,7 +1405,6 @@ void ST_loadGraphics(void)
     int                i;
     int                j;
     int                facenum;
-    int                ammonum;
     
     char               namebuf[9];
 
@@ -1219,6 +1421,7 @@ void ST_loadGraphics(void)
     // Load percent key.
     //Note: why not load STMINUS here, too?
     tallpercent = (patch_t *) W_CacheLumpName("STTPRCNT", PU_STATIC);
+    emptytallpercent = V_EmptyPatch(tallpercent);
 
     // key cards
     for (i=0;i<NUMCARDS;i++)
@@ -1305,24 +1508,6 @@ void ST_loadGraphics(void)
     }
     faces[facenum++] = W_CacheLumpName("STFGOD0", PU_STATIC);
     faces[facenum++] = W_CacheLumpName("STFDEAD0", PU_STATIC);
-
-    // load ammo patches
-    ammonum = 0;
-
-    invammo[ammonum++] = W_CacheLumpName("CLIPA0", PU_STATIC);
-    invammo[ammonum++] = W_CacheLumpName("SHELA0", PU_STATIC);
-    invammo[ammonum++] = W_CacheLumpName("AMMOA0", PU_STATIC);
-    invammo[ammonum++] = W_CacheLumpName("ROCKA0", PU_STATIC);
-
-    if (fsize != 4207819 && fsize != 4274218 && fsize != 4225504 &&
-        fsize != 4225460 && fsize != 4234124 && fsize != 4196020 &&
-        fsize != 4261144 && fsize != 4271324 && fsize != 4211660)
-    {
-        invammo[ammonum++] = W_CacheLumpName("CELLA0", PU_STATIC);
-        invammo[ammonum++] = W_CacheLumpName("CELPA0", PU_STATIC);
-    }
-
-    invammo[ammonum++] = W_CacheLumpName("SBOXA0", PU_STATIC);
 }
 
 void ST_loadData(void)
@@ -1342,8 +1527,6 @@ void ST_unloadGraphics(void)
         Z_ChangeTag(tallnum[i], PU_CACHE);
         Z_ChangeTag(shortnum[i], PU_CACHE);
     }
-    // unload invammo
-    Z_ChangeTag(invammo, PU_CACHE); 
 
     // unload tall percent
     Z_ChangeTag(tallpercent, PU_CACHE); 
@@ -1638,9 +1821,6 @@ void ST_createWidgets(void)
     }
 }
 
-static boolean        st_stopped = true;
-
-
 void ST_Start (void)
 {
 
@@ -1651,16 +1831,43 @@ void ST_Start (void)
     ST_createWidgets();
     st_stopped = false;
 
-}
+    if (W_CheckNumForName("MEDIA0"))
+        healthpatch = W_CacheLumpNum(W_GetNumForName("MEDIA0"), PU_CACHE);
+    if (gamemode != shareware && W_CheckNumForName("PSTRA0"))
+        berserkpatch = W_CacheLumpNum(W_GetNumForName("PSTRA0"), PU_CACHE);
+    else
+        berserkpatch = healthpatch;
+    if (W_CheckNumForName("ARM1A0"))
+        greenarmorpatch = W_CacheLumpNum(W_GetNumForName("ARM1A0"), PU_CACHE);
+    if (W_CheckNumForName("ARM2A0"))
+        bluearmorpatch = W_CacheLumpNum(W_GetNumForName("ARM2A0"), PU_CACHE);
 
-void ST_Stop (void)
-{
-    if (st_stopped)
-        return;
+    ammopic[am_clip].patch = ST_LoadStatusAmmoPatch(am_clip);
+    ammopic[am_shell].patch = ST_LoadStatusAmmoPatch(am_shell);
 
-    I_SetPalette (W_CacheLumpNum (lu_palette, PU_CACHE));
+    if (gamemode != shareware)
+    {
+        ammopic[am_cell].patch = ST_LoadStatusAmmoPatch(am_cell);
 
-    st_stopped = true;
+        ammopic[4].patch = ST_LoadStatusAmmoPatch(4);
+        ammopic[7].patch = ST_LoadStatusAmmoPatch(7);
+    }
+
+    ammopic[am_misl].patch = ST_LoadStatusAmmoPatch(am_misl);
+
+    ammopic[5].patch = ST_LoadStatusAmmoPatch(5);
+    ammopic[6].patch = ST_LoadStatusAmmoPatch(6);
+
+    keypic[it_bluecard].patch = ST_LoadStatusKeyPatch(it_bluecard);
+    keypic[it_yellowcard].patch = ST_LoadStatusKeyPatch(exe_hacx ? it_yellowskull : it_yellowcard);
+    keypic[it_redcard].patch = ST_LoadStatusKeyPatch(it_redcard);
+    if (gamemode != shareware)
+    {
+        keypic[it_blueskull].patch = ST_LoadStatusKeyPatch(it_blueskull);
+        keypic[it_yellowskull].patch = ST_LoadStatusKeyPatch(it_yellowskull);
+        keypic[it_redskull].patch = ST_LoadStatusKeyPatch(it_redskull);
+    }
+
 }
 
 void ST_Init (void)

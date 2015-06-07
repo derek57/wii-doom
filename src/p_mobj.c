@@ -1509,6 +1509,7 @@ int P_HitFloor(mobj_t * thing)
                 mo->momx = (P_Random() - P_Random()) << 8;
                 mo->momy = (P_Random() - P_Random()) << 8;
                 mo->momz = FRACUNIT + (P_Random() << 8);
+                S_StartSound(mo, sfx_gloop);
                 return (FLOOR_SLUDGE);
         }
         return (FLOOR_SOLID);
