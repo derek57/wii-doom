@@ -1294,6 +1294,9 @@ void D_DoomMain (void)
         beta_plasma = false;
     }
 
+    if(beta_style && screenSize > 7)
+        screenSize = 7;
+
     // Save configuration at exit.
     I_AtExit(M_SaveDefaults, false);
 
