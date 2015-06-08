@@ -39,7 +39,7 @@ char            *gamedescription;
 // Set if homebrew PWAD stuff has been added.
 boolean         modifiedgame;
 
-boolean         d_recoil = true;
+boolean         d_recoil = false;
 boolean         d_maxgore = false;
 boolean         d_thrust = false;
 boolean         respawnparm = false;       // checkparm of -respawn
@@ -51,7 +51,7 @@ boolean         beta_bfg = false;
 boolean         beta_skulls = false;
 boolean         beta_plasma = false;
 boolean         beta_imp = false;
-boolean         d_translucency = true;
+boolean         d_translucency = false;
 boolean         d_chkblood = false;
 boolean         d_chkblood2 = false;
 boolean         d_uncappedframerate = false;
@@ -59,6 +59,7 @@ boolean         d_flipcorpses = false;
 boolean         d_secrets = false;
 boolean         beta_style = false;
 boolean         beta_style_mode = false;
+boolean         smoketrails = false;
 
 int             d_colblood = 0;
 int             d_colblood2 = 0;

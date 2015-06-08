@@ -238,9 +238,11 @@
                                        // this flag will allow the mobj to
                                        // pass over/under other mobjs.
 
-#define MF2_CANNOTPUSH     0x00002000  // cannot push other pushable mobjs
+#define MF2_MIRRORED       0x00002000
 #define MF2_FEETARECLIPPED 0x00004000  // a mobj's feet are now being cut
 #define MF2_FLOATBOB       0x00080000  // use float bobbing z movement
+#define MF2_SMOKETRAIL     0x02000000  // Object has smoke trail
+
 
 #define TRANSLUCENT_HUD    11
 

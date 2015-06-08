@@ -1240,6 +1240,12 @@ state_t        states[NUMSTATES] = {
 
     // killough 7/11/98: end of beta BFG
 
+    // Smoke Trail (MT_TRAIL)
+    {SPR_PUFF,0,4,{NULL},S_TRAIL2,0,0}, // S_TRAIL
+    {SPR_PUFF,1,4,{NULL},S_TRAIL3,0,0}, // S_TRAIL
+    {SPR_PUFF,2,10,{NULL},S_TRAIL4,0,0}, // S_TRAIL
+    {SPR_PUFF,3,14,{NULL},S_NULL,0,0}, // S_TRAIL
+
     // killough 7/19/98: First plasma fireball in the beta:
     {SPR_PLS1,32768,6,{NULL},S_PLS1BALL2,0,0},  // S_PLS1BALL
     {SPR_PLS1,32769,6,{NULL},S_PLS1BALL,0,0}, // S_PLS1BALL2
@@ -5533,7 +5539,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                         // damage
         sfx_None,                  // activesound
         MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF,   // flags
-        MF2_NOTELEPORT | MF2_LOGRAV | MF2_CANNOTPUSH,       // flags2
+        MF2_NOTELEPORT | MF2_LOGRAV,       // flags2
         S_NULL,                     // raisestate
         NULL,       // namepointer
     },
@@ -5649,7 +5655,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                         // damage
         sfx_None,                  // activesound
         MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF,   // flags
-        MF2_NOTELEPORT | MF2_LOGRAV | MF2_CANNOTPUSH,       // flags2
+        MF2_NOTELEPORT | MF2_LOGRAV,       // flags2
         S_NULL,                     // raisestate
         NULL,       // namepointer
     },
@@ -5680,6 +5686,35 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_NOBLOCKMAP,             // flags
         0,                         // flags2
         S_NULL,                     // raisestate
+        NULL,       // namepointer
+    },
+
+    {                           // MT_TRAIL
+        -1,                        // doomednum
+        S_TRAIL,           // spawnstate
+        1000,                      // spawnhealth
+        S_NULL,                    // seestate
+        sfx_None,                  // seesound
+        8,                         // reactiontime
+        sfx_None,                  // attacksound
+        S_NULL,                    // painstate
+        0,                         // painchance
+        sfx_None,                  // painsound
+        S_NULL,                    // meleestate
+        S_NULL,                    // missilestate
+        S_NULL,     // crashstate
+        S_NULL,                    // deathstate
+        S_NULL,                    // xdeathstate
+        sfx_None,                  // deathsound
+        0,                         // speed
+        20 * FRACUNIT,             // radius
+        16 * FRACUNIT,             // height
+        100,                       // mass
+        0,                         // damage
+        sfx_None,                  // activesound
+        MF_NOBLOCKMAP | MF_NOGRAVITY | MF_TRANSLUCENT,             // flags
+        0,                         // flags2
+        S_NULL,                    // raisestate
         NULL,       // namepointer
     },
 

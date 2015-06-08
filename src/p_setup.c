@@ -905,11 +905,55 @@ void P_GroupLines (void)
         
 }
 
-// remove slime trails
-// mostly taken from Lee Killough's implementation in mbfsrc/P_SETUP.C:849-924,
+//
+// killough 10/98
+//
+// Remove slime trails.
+//
+// Slime trails are inherent to Doom's coordinate system -- i.e. there is
+// nothing that a node builder can do to prevent slime trails ALL of the time,
+// because it's a product of the integer coodinate system, and just because
+// two lines pass through exact integer coordinates, doesn't necessarily mean
+// that they will intersect at integer coordinates. Thus we must allow for
+// fractional coordinates if we are to be able to split segs with node lines,
+// as a node builder must do when creating a BSP tree.
+//
+// A wad file does not allow fractional coordinates, so node builders are out
+// of luck except that they can try to limit the number of splits (they might
+// also be able to detect the degree of roundoff error and try to avoid splits
+// with a high degree of roundoff error). But we can use fractional coordinates
+// here, inside the engine. It's like the difference between square inches and
+// square miles, in terms of granularity.
+//
+// For each vertex of every seg, check to see whether it's also a vertex of
+// the linedef associated with the seg (i.e, it's an endpoint). If it's not
+// an endpoint, and it wasn't already moved, move the vertex towards the
+// linedef by projecting it using the law of cosines. Formula:
+//
+//    dx²  x0 + dy²  x1 + dx dy (y0 - y1)  dy²  y0 + dx²  y1 + dx dy (x0 - x1)
+//   {-----------------------------------, -----------------------------------}
+//
+//                dx²  + dy²                           dx²  + dy²
+//
+// (x0,y0) is the vertex being moved, and (x1,y1)-(x1+dx,y1+dy) is the
+// reference linedef.
+//
+// Segs corresponding to orthogonal linedefs (exactly vertical or horizontal
+// linedefs), which comprise at least half of all linedefs in most wads, don't
+// need to be considered, because they almost never contribute to slime trails
+// (because then any roundoff error is parallel to the linedef, which doesn't
+// cause slime). Skipping simple orthogonal lines lets the code finish quicker.
+//
+// Please note: This section of code is not interchangable with TeamTNT's
+// code which attempts to fix the same problem.
+//
+// Firelines (TM) is a Rezistered Trademark of MBF Productions
+//
+// Mostly taken from Lee Killough's implementation in mbfsrc/P_SETUP.C:849-924,
 // with the exception that not the actual vertex coordinates are modified,
 // but pseudovertexes which are dummies that are *only* used in rendering,
 // i.e. r_bsp.c:R_AddLine()
+//
 static void P_RemoveSlimeTrails(void)
 {
     int i;

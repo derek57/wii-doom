@@ -863,8 +863,8 @@ int                        cheeting;
 int                        coordinates_info = 0;
 int                        timer_info = 0;
 int                        version_info = 0;
-int                        key_controls_start_in_cfg_at_pos = 39; // ACTUALLY IT'S +2
-int                        key_controls_end_in_cfg_at_pos = 52;   // ACTUALLY IT'S +2
+int                        key_controls_start_in_cfg_at_pos = 40; // ACTUALLY IT'S +2
+int                        key_controls_end_in_cfg_at_pos = 53;   // ACTUALLY IT'S +2
 int                        crosshair = 0;
 int                        show_stats = 0;
 int                        tracknum = 1;
@@ -1054,6 +1054,7 @@ void M_Swirl(int choice);
 void M_Beta(int choice);
 void M_Corpses(int choice);
 void M_Secrets(int choice);
+void M_Trails(int choice);
 
 void M_God(int choice);
 void M_Noclip(int choice);
@@ -1722,6 +1723,7 @@ enum
     game2_prbeta,
     game2_corpses,
     game2_secrets,
+    game2_trails,
     game2_end
 } game2_e;
 
@@ -1736,6 +1738,7 @@ menuitem_t GameMenu2[]=
     {2,"",M_Beta,'b'},
     {2,"",M_Corpses,'d'},
     {2,"",M_Secrets,'z'},
+    {2,"",M_Trails,'t'},
 };
 
 menu_t  GameDef2 =
@@ -2704,9 +2707,20 @@ void M_DrawGame(void)
         M_WriteText(GameDef.x, GameDef.y + 128, DEH_String("AIMING HELP"));
     }
 
-    dp_translation = crx[CRX_GRAY];
-    M_WriteText(GameDef.x, GameDef.y + 138, DEH_String("MORE OPTIONS"));
-    V_ClearDPTranslation();
+    if(itemOn == 11 || itemOn == 12)
+    {
+        char *string = "YOU MUST START A NEW GAME TO TAKE EFFECT.";
+        int x = 160 - M_StringWidth(string) / 2;
+        dp_translation = crx[CRX_GOLD];
+        M_WriteText(x, GameDef.y + 138, DEH_String(string));
+        V_ClearDPTranslation();
+    }
+    else
+    {
+        dp_translation = crx[CRX_GRAY];
+        M_WriteText(GameDef.x, GameDef.y + 138, DEH_String("MORE OPTIONS"));
+        V_ClearDPTranslation();
+    }
 
     if(drawgrid == 1)
     {
@@ -2887,130 +2901,144 @@ void M_DrawGame2(void)
         V_DrawPatchDirect(70, 0, 0, W_CacheLumpName(DEH_String("M_GMESET"),
                                                PU_CACHE));
 
-    M_WriteText(GameDef.x - 15, GameDef.y - 2, DEH_String("AUTOAIM"));
-    M_WriteText(GameDef.x - 15, GameDef.y + 8, DEH_String("MORE GORE"));
-    M_WriteText(GameDef.x - 15, GameDef.y + 18, DEH_String("PLAYER FOOTSTEPS"));
-    M_WriteText(GameDef.x - 15, GameDef.y + 28, DEH_String("HERETIC FOOTCLIPS"));
-    M_WriteText(GameDef.x - 15, GameDef.y + 38, DEH_String("HERETIC LIQUID SPLASH"));
-    M_WriteText(GameDef.x - 15, GameDef.y + 48, DEH_String("SWIRLING WATER HACK"));
-    M_WriteText(GameDef.x - 15, GameDef.y + 58, DEH_String("PRE-RELEASE BETA MODE"));
-    M_WriteText(GameDef.x - 15, GameDef.y + 68, DEH_String("RANDOMLY FLIP CORPSES"));
-    M_WriteText(GameDef.x - 15, GameDef.y + 78, DEH_String("SHOW REVEALED SECRETS"));
+    M_WriteText(GameDef2.x, GameDef2.y - 2, DEH_String("AUTOAIM"));
+    M_WriteText(GameDef2.x, GameDef2.y + 8, DEH_String("MORE GORE"));
+    M_WriteText(GameDef2.x, GameDef2.y + 18, DEH_String("PLAYER FOOTSTEPS"));
+    M_WriteText(GameDef2.x, GameDef2.y + 28, DEH_String("HERETIC FOOTCLIPS"));
+    M_WriteText(GameDef2.x, GameDef2.y + 38, DEH_String("HERETIC LIQUID SPLASH"));
+    M_WriteText(GameDef2.x, GameDef2.y + 48, DEH_String("SWIRLING WATER HACK"));
+    M_WriteText(GameDef2.x, GameDef2.y + 58, DEH_String("PRE-RELEASE BETA MODE"));
+    M_WriteText(GameDef2.x, GameDef2.y + 68, DEH_String("RANDOMLY FLIP CORPSES"));
+    M_WriteText(GameDef2.x, GameDef2.y + 78, DEH_String("SHOW REVEALED SECRETS"));
+    M_WriteText(GameDef2.x, GameDef2.y + 88, DEH_String("ROCKET TRAILS"));
 
     if(autoaim)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef.x + 153, GameDef.y - 2, DEH_String("ON"));
+        M_WriteText(GameDef2.x + 168, GameDef2.y - 2, DEH_String("ON"));
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef.x + 145, GameDef.y - 2, DEH_String("OFF"));
+        M_WriteText(GameDef2.x + 160, GameDef2.y - 2, DEH_String("OFF"));
         V_ClearDPTranslation();
     }
 
     if(d_maxgore)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef.x + 153, GameDef.y + 8, DEH_String("ON"));
+        M_WriteText(GameDef2.x + 168, GameDef2.y + 8, DEH_String("ON"));
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef.x + 145, GameDef.y + 8, DEH_String("OFF"));
+        M_WriteText(GameDef2.x + 160, GameDef2.y + 8, DEH_String("OFF"));
         V_ClearDPTranslation();
     }
 
     if(d_footstep)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef.x + 153, GameDef.y + 18, DEH_String("ON"));
+        M_WriteText(GameDef2.x + 168, GameDef2.y + 18, DEH_String("ON"));
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef.x + 145, GameDef.y + 18, DEH_String("OFF"));
+        M_WriteText(GameDef2.x + 160, GameDef2.y + 18, DEH_String("OFF"));
         V_ClearDPTranslation();
     }
 
     if(d_footclip)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef.x + 153, GameDef.y + 28, DEH_String("ON"));
+        M_WriteText(GameDef2.x + 168, GameDef2.y + 28, DEH_String("ON"));
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef.x + 145, GameDef.y + 28, DEH_String("OFF"));
+        M_WriteText(GameDef2.x + 160, GameDef2.y + 28, DEH_String("OFF"));
         V_ClearDPTranslation();
     }
 
     if(d_splash)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef.x + 153, GameDef.y + 38, DEH_String("ON"));
+        M_WriteText(GameDef2.x + 168, GameDef2.y + 38, DEH_String("ON"));
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef.x + 145, GameDef.y + 38, DEH_String("OFF"));
+        M_WriteText(GameDef2.x + 160, GameDef2.y + 38, DEH_String("OFF"));
         V_ClearDPTranslation();
     }
 
     if(d_swirl)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef.x + 153, GameDef.y + 48, DEH_String("ON"));
+        M_WriteText(GameDef2.x + 168, GameDef2.y + 48, DEH_String("ON"));
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef.x + 145, GameDef.y + 48, DEH_String("OFF"));
+        M_WriteText(GameDef2.x + 160, GameDef2.y + 48, DEH_String("OFF"));
         V_ClearDPTranslation();
     }
 
     if(beta_style_mode)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef.x + 153, GameDef.y + 58, DEH_String("ON"));
+        M_WriteText(GameDef2.x + 168, GameDef2.y + 58, DEH_String("ON"));
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef.x + 145, GameDef.y + 58, DEH_String("OFF"));
+        M_WriteText(GameDef2.x + 160, GameDef2.y + 58, DEH_String("OFF"));
         V_ClearDPTranslation();
     }
 
     if(d_flipcorpses)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef.x + 153, GameDef.y + 68, DEH_String("ON"));
+        M_WriteText(GameDef2.x + 168, GameDef2.y + 68, DEH_String("ON"));
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef.x + 145, GameDef.y + 68, DEH_String("OFF"));
+        M_WriteText(GameDef2.x + 160, GameDef2.y + 68, DEH_String("OFF"));
         V_ClearDPTranslation();
     }
 
     if(d_secrets)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef.x + 153, GameDef.y + 78, DEH_String("ON"));
+        M_WriteText(GameDef2.x + 168, GameDef2.y + 78, DEH_String("ON"));
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef.x + 145, GameDef.y + 78, DEH_String("OFF"));
+        M_WriteText(GameDef2.x + 160, GameDef2.y + 78, DEH_String("OFF"));
+        V_ClearDPTranslation();
+    }
+
+    if(smoketrails)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(GameDef2.x + 168, GameDef2.y + 88, DEH_String("ON"));
+        V_ClearDPTranslation();
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(GameDef2.x + 160, GameDef2.y + 88, DEH_String("OFF"));
         V_ClearDPTranslation();
     }
 }
@@ -4149,7 +4177,7 @@ boolean M_Responder (event_t* ev)
     if (askforkey && data->btns_d)                // KEY BINDINGS
     {
         M_KeyBindingsClearControls(ev->data1);
-        *doom_defaults_list[keyaskedfor + 39 + FirstKey].location = ev->data1;
+        *doom_defaults_list[keyaskedfor + 40 + FirstKey].location = ev->data1;
         askforkey = false;
         return true;
     }
@@ -4532,8 +4560,10 @@ void M_Drawer (void)
     if((currentMenu == &SoundDef && itemOn == 2) ||
        (currentMenu == &GameDef2 && itemOn == 6))
     {
+        char *message_string = "YOU MUST QUIT AND RESTART TO TAKE EFFECT.";
+        int message_offset = 160 - M_StringWidth(message_string) / 2;
         dp_translation = crx[CRX_GOLD];
-        M_WriteText(48, 155, "You must restart to take effect.");
+        M_WriteText(message_offset, 160, DEH_String(message_string));
         V_ClearDPTranslation();
     }
 
@@ -5954,7 +5984,6 @@ void M_KeyBindingsClearControls (int ch)
 
 void M_KeyBindingsClearAll (int choice)
 {
-    *doom_defaults_list[39].location = 0;
     *doom_defaults_list[40].location = 0;
     *doom_defaults_list[41].location = 0;
     *doom_defaults_list[42].location = 0;
@@ -5967,23 +5996,24 @@ void M_KeyBindingsClearAll (int choice)
     *doom_defaults_list[49].location = 0;
     *doom_defaults_list[50].location = 0;
     *doom_defaults_list[51].location = 0;
+    *doom_defaults_list[52].location = 0;
 }
 
 void M_KeyBindingsReset (int choice)
 {
-    *doom_defaults_list[39].location = CLASSIC_CONTROLLER_R;
-    *doom_defaults_list[40].location = CLASSIC_CONTROLLER_L;
-    *doom_defaults_list[41].location = CLASSIC_CONTROLLER_MINUS;
-    *doom_defaults_list[42].location = CLASSIC_CONTROLLER_LEFT;
-    *doom_defaults_list[43].location = CLASSIC_CONTROLLER_DOWN;
-    *doom_defaults_list[44].location = CLASSIC_CONTROLLER_RIGHT;
-    *doom_defaults_list[45].location = CLASSIC_CONTROLLER_ZL;
-    *doom_defaults_list[46].location = CLASSIC_CONTROLLER_ZR;
-    *doom_defaults_list[47].location = CLASSIC_CONTROLLER_A;
-    *doom_defaults_list[48].location = CLASSIC_CONTROLLER_Y;
-    *doom_defaults_list[49].location = CLASSIC_CONTROLLER_B;
-    *doom_defaults_list[50].location = CONTROLLER_1;
-    *doom_defaults_list[51].location = CONTROLLER_2;
+    *doom_defaults_list[40].location = CLASSIC_CONTROLLER_R;
+    *doom_defaults_list[41].location = CLASSIC_CONTROLLER_L;
+    *doom_defaults_list[42].location = CLASSIC_CONTROLLER_MINUS;
+    *doom_defaults_list[43].location = CLASSIC_CONTROLLER_LEFT;
+    *doom_defaults_list[44].location = CLASSIC_CONTROLLER_DOWN;
+    *doom_defaults_list[45].location = CLASSIC_CONTROLLER_RIGHT;
+    *doom_defaults_list[46].location = CLASSIC_CONTROLLER_ZL;
+    *doom_defaults_list[47].location = CLASSIC_CONTROLLER_ZR;
+    *doom_defaults_list[48].location = CLASSIC_CONTROLLER_A;
+    *doom_defaults_list[49].location = CLASSIC_CONTROLLER_Y;
+    *doom_defaults_list[50].location = CLASSIC_CONTROLLER_B;
+    *doom_defaults_list[51].location = CONTROLLER_1;
+    *doom_defaults_list[52].location = CONTROLLER_2;
 }
 
 void M_DrawKeyBindings(void)
@@ -6019,7 +6049,7 @@ void M_DrawKeyBindings(void)
                 M_WriteText(195, (i*10+20), "???");
             else
                 M_WriteText(195, (i*10+20),
-                        Key2String(*(doom_defaults_list[i+FirstKey+39].location)));
+                        Key2String(*(doom_defaults_list[i+FirstKey+40].location)));
         }
     }
 }
@@ -6716,6 +6746,12 @@ void M_Secrets(int choice)
 {
     choice = 0;
     d_secrets = !d_secrets;
+}
+
+void M_Trails(int choice)
+{
+    choice = 0;
+    smoketrails = !smoketrails;
 }
 
 void M_Debug(int choice)

@@ -57,8 +57,13 @@
 #include "z_zone.h"
 
 
-#define DONUT_FLOORHEIGHT_DEFAULT 0x00000000
-#define DONUT_FLOORPIC_DEFAULT 0x16
+#define DONUT_FLOORHEIGHT_DEFAULT    0x00000000
+#define DONUT_FLOORPIC_DEFAULT       0x16
+
+#define MAXANIMS                     32
+#define MAXLINEANIMS                 64 * 256    // CHANGED FOR HIRES
+#define MAX_ADJOINING_SECTORS        20
+#define ANIMSPEED                    8
 
 
 //
@@ -85,13 +90,6 @@ typedef struct
     char        startname[9];
     int         speed;
 } animdef_t;
-
-
-
-#define MAXANIMS                32
-#define MAXLINEANIMS            64*256                                // CHANGED FOR HIRES
-#define MAX_ADJOINING_SECTORS   20
-#define ANIMSPEED               8
 
 
 static anim_t   *anims;         // new structure w/o limits -- killough
@@ -132,10 +130,10 @@ animdef_t                animdefs[] =
     {false,       "BLOOD3",       "BLOOD1",       ANIMSPEED},
 
     // DOOM II flat animations.
-    {false,       "RROCK08",      "RROCK05",      ANIMSPEED},                
     {false,       "SLIME04",      "SLIME01",      ANIMSPEED},
     {false,       "SLIME08",      "SLIME05",      ANIMSPEED},
     {false,       "SLIME12",      "SLIME09",      ANIMSPEED},
+    {false,       "RROCK08",      "RROCK05",      ANIMSPEED},                
 
     {true,        "BLODGR4",      "BLODGR1",      ANIMSPEED},
     {true,        "SLADRIP3",     "SLADRIP1",     ANIMSPEED},
@@ -164,11 +162,11 @@ struct
     int type;
 } TerrainTypeDefs[] =
 {
+    { "NUKAGE1", FLOOR_SLUDGE },
     { "FWATER1", FLOOR_WATER },
     { "SWATER1", FLOOR_WATER },
     { "LAVA1", FLOOR_LAVA },
     { "BLOOD1", FLOOR_LAVA },
-    { "NUKAGE1", FLOOR_SLUDGE },
     { "SLIME01", FLOOR_SLUDGE },
     { "SLIME05", FLOOR_SLUDGE },
     { "SLIME09", FLOOR_SLUDGE },
@@ -1110,7 +1108,6 @@ void P_PlayerInSpecialSector (player_t* player)
             {
                 in_slime = true;
                 P_DamageMobj (player->mo, NULL, NULL, 10);
-                P_HitFloor(player->mo);
             }
         break;
         
@@ -1121,13 +1118,11 @@ void P_PlayerInSpecialSector (player_t* player)
             {
                 in_slime = true;
                 P_DamageMobj (player->mo, NULL, NULL, 5);
-                P_HitFloor(player->mo);
             }
         break;
         
       case 16:
         // SUPER HELLSLIME DAMAGE
-        P_HitFloor(player->mo);
       case 4:
         // STROBE HURT
         if (!player->powers[pw_ironfeet]
@@ -1161,7 +1156,6 @@ void P_PlayerInSpecialSector (player_t* player)
         {
             in_slime = true;
             P_DamageMobj (player->mo, NULL, NULL, 20);
-            P_HitFloor(player->mo);
         }
 
         if (player->health <= 10)

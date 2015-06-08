@@ -345,7 +345,8 @@ boolean P_Move (mobj_t* actor)
     {
         if (actor->z > actor->floorz)
         {
-            P_HitFloor(actor);
+            if(d_splash)
+                P_HitFloor(actor);
         }
         actor->z = actor->floorz;
     }
@@ -990,11 +991,16 @@ void A_HeadAttack (mobj_t* actor)
 
 void A_CyberAttack (mobj_t* actor)
 {        
+    mobj_t      *mo;
+
     if (!actor->target)
         return;
                 
     A_FaceTarget (actor);
-    P_SpawnMissile (actor, actor->target, MT_ROCKET);
+    mo = P_SpawnMissile (actor, actor->target, MT_ROCKET);
+
+    if (smoketrails)
+        mo->flags2 |= MF2_SMOKETRAIL;
 }
 
 
@@ -1052,7 +1058,7 @@ void A_Tracer (mobj_t* actor)
         return;
     
     // spawn a puff of smoke behind the rocket                
-    P_SpawnPuff (actor->x, actor->y, actor->z);
+    P_SpawnSmokeTrail(actor->x, actor->y, actor->z, actor->angle);
         
     th = P_SpawnMobj (actor->x-actor->momx,
                       actor->y-actor->momy,
@@ -1662,7 +1668,9 @@ void A_Pain (mobj_t* actor)
 void A_Explode (mobj_t* thingy)
 {
     P_RadiusAttack(thingy, thingy->target, 128);
-    P_HitFloor(thingy);
+
+    if(d_splash)
+        P_HitFloor(thingy);
 }
 
 // Check whether the death of the specified monster type is allowed
@@ -2120,7 +2128,7 @@ void A_SpawnFly (mobj_t* mo)
     // telefrag anything in this spot
     P_TeleportMove (newmobj, newmobj->x, newmobj->y);
 
-    if ((mo->z <= mo->floorz) && (P_HitFloor(mo) != FLOOR_SOLID))
+    if ((mo->z <= mo->floorz) && (P_HitFloor(mo) != FLOOR_SOLID) && d_splash)
     {                           // Landed in some sort of liquid
         // remove self (i.e., cube).
         P_RemoveMobj (mo);

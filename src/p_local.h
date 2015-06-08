@@ -253,7 +253,7 @@ P_RadiusAttack
   mobj_t*        source,
   int                damage );
 
-
+void P_SpawnSmokeTrail(fixed_t x, fixed_t y, fixed_t z, angle_t angle);
 
 //
 // P_SETUP

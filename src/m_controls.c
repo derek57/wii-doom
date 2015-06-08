@@ -161,6 +161,7 @@ void M_BindBaseControls(void)
     M_BindVariable("show_secrets",           &d_secrets);
 //    M_BindVariable("uncapped_framerate",     &d_uncappedframerate);
     M_BindVariable("opltype",                &opl_type);
+    M_BindVariable("trails",                 &smoketrails);
     M_BindVariable("key_shoot",              &joy_r);
     M_BindVariable("key_open",               &joy_l);
     M_BindVariable("key_menu",               &joy_minus);

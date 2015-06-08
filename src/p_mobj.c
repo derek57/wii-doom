@@ -26,6 +26,7 @@
 
 
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "c_io.h"
 #include "doomdef.h"
@@ -79,6 +80,7 @@ int             test;
 int             itemrespawntime[ITEMQUESIZE];
 int             iquehead;
 int             iquetail;
+int             puffcount;
 
 mapthing_t      itemrespawnque[ITEMQUESIZE];
 
@@ -163,6 +165,18 @@ void P_ExplodeMissile (mobj_t* mo)
 }
 
 
+void P_SpawnSmokeTrail(fixed_t x, fixed_t y, fixed_t z, angle_t angle)
+{
+    mobj_t      *th = P_SpawnMobj(x, y, z + ((P_Random() - P_Random()) << 10), MT_TRAIL);
+
+    th->momz = FRACUNIT / 2;
+    th->tics -= (P_Random() & 3);
+
+    th->angle = angle;
+
+    th->flags2 |= (rand() & 1) * MF2_MIRRORED;
+}
+
 //
 // P_XYMovement  
 //
@@ -170,9 +184,10 @@ void P_XYMovement (mobj_t* mo)
 {         
     fixed_t        ptryx;
     fixed_t        ptryy;
-    player_t*      player;
     fixed_t        xmove;
     fixed_t        ymove;
+    player_t*      player;
+    int            flags2 = mo->flags2;
 
     if (!mo->momx && !mo->momy)
     {
@@ -189,6 +204,10 @@ void P_XYMovement (mobj_t* mo)
         
     player = mo->player;
                 
+    if (flags2 & MF2_SMOKETRAIL)
+        if (puffcount++ > 1)
+            P_SpawnSmokeTrail(mo->x, mo->y, mo->z, mo->angle);
+
     if (mo->momx > MAXMOVE)
         mo->momx = MAXMOVE;
     else if (mo->momx < -MAXMOVE)
@@ -409,7 +428,8 @@ void P_ZMovement (mobj_t* mo)
                 if(P_HitFloor(mo) == 0)
                     S_StartSound (mo, sfx_oof);
                 else
-                    S_StartSound (mo, sfx_gloop);
+                    if(d_splash)
+                        S_StartSound (mo, sfx_gloop);
 
                 if (mouselook && !demorecording && !demoplayback)
                 {
@@ -426,7 +446,8 @@ void P_ZMovement (mobj_t* mo)
 
         if (mo->z - mo->momz > mo->floorz)
         {                       // Spawn splashes, etc.
-            P_HitFloor(mo);
+            if(d_splash)
+                P_HitFloor(mo);
         }
 
         // cph 2001/05/26 -
@@ -1199,7 +1220,6 @@ P_SpawnPuff
 }
 
 
-
 //
 // P_SpawnBlood
 // 
@@ -1452,6 +1472,12 @@ P_SpawnPlayerMissile
 
     th->momz = FixedMul( th->info->speed, slope);
 
+    if (type == MT_ROCKET && smoketrails && !load_dehacked)
+    {
+        th->flags2 |= MF2_SMOKETRAIL;
+        puffcount = 0;
+    }
+
     P_CheckMissileSpawn (th);
 
     return th;
@@ -1483,37 +1509,33 @@ int P_HitFloor(mobj_t * thing)
         return (FLOOR_SOLID);
     }
 
-    if(d_splash)
+    switch (P_GetThingFloorType(thing))
     {
-        switch (P_GetThingFloorType(thing))
-        {
-            case FLOOR_WATER:
-                P_SpawnMobj(thing->x, thing->y, ONFLOORZ, MT_SPLASHBASE);
-                mo = P_SpawnMobj(thing->x, thing->y, ONFLOORZ, MT_SPLASH);
-                mo->target = thing;
-                mo->momx = (P_Random() - P_Random()) << 8;
-                mo->momy = (P_Random() - P_Random()) << 8;
-                mo->momz = 2 * FRACUNIT + (P_Random() << 8);
-                S_StartSound(mo, sfx_gloop);
-                return (FLOOR_WATER);
-            case FLOOR_LAVA:
-                P_SpawnMobj(thing->x, thing->y, ONFLOORZ, MT_LAVASPLASH);
-                mo = P_SpawnMobj(thing->x, thing->y, ONFLOORZ, MT_LAVASMOKE);
-                mo->momz = FRACUNIT + (P_Random() << 7);
-                S_StartSound(mo, sfx_burn);
-                return (FLOOR_LAVA);
-            case FLOOR_SLUDGE:
-                P_SpawnMobj(thing->x, thing->y, ONFLOORZ, MT_SLUDGESPLASH);
-                mo = P_SpawnMobj(thing->x, thing->y, ONFLOORZ, MT_SLUDGECHUNK);
-                mo->target = thing;
-                mo->momx = (P_Random() - P_Random()) << 8;
-                mo->momy = (P_Random() - P_Random()) << 8;
-                mo->momz = FRACUNIT + (P_Random() << 8);
-                S_StartSound(mo, sfx_gloop);
-                return (FLOOR_SLUDGE);
-        }
-        return (FLOOR_SOLID);
+        case FLOOR_WATER:
+            P_SpawnMobj(thing->x, thing->y, ONFLOORZ, MT_SPLASHBASE);
+            mo = P_SpawnMobj(thing->x, thing->y, ONFLOORZ, MT_SPLASH);
+            mo->target = thing;
+            mo->momx = (P_Random() - P_Random()) << 8;
+            mo->momy = (P_Random() - P_Random()) << 8;
+            mo->momz = 2 * FRACUNIT + (P_Random() << 8);
+            S_StartSound(mo, sfx_gloop);
+            return (FLOOR_WATER);
+        case FLOOR_LAVA:
+            P_SpawnMobj(thing->x, thing->y, ONFLOORZ, MT_LAVASPLASH);
+            mo = P_SpawnMobj(thing->x, thing->y, ONFLOORZ, MT_LAVASMOKE);
+            mo->momz = FRACUNIT + (P_Random() << 7);
+            S_StartSound(mo, sfx_burn);
+            return (FLOOR_LAVA);
+        case FLOOR_SLUDGE:
+            P_SpawnMobj(thing->x, thing->y, ONFLOORZ, MT_SLUDGESPLASH);
+            mo = P_SpawnMobj(thing->x, thing->y, ONFLOORZ, MT_SLUDGECHUNK);
+            mo->target = thing;
+            mo->momx = (P_Random() - P_Random()) << 8;
+            mo->momy = (P_Random() - P_Random()) << 8;
+            mo->momz = FRACUNIT + (P_Random() << 8);
+            S_StartSound(mo, sfx_gloop);
+            return (FLOOR_SLUDGE);
     }
-    return false;
+    return (FLOOR_SOLID);
 }
 

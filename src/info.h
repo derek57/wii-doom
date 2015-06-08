@@ -1258,6 +1258,10 @@ typedef enum
     S_OLDBFG1,  // killough 7/11/98: the old BFG's 43 firing frames
     S_OLDBFG42 = S_OLDBFG1+41,
     S_OLDBFG43,
+    S_TRAIL,
+    S_TRAIL2,
+    S_TRAIL3,
+    S_TRAIL4,
     S_PLS1BALL,      // killough 7/19/98: first plasma fireball in the beta
     S_PLS1BALL2,
     S_PLS1EXP,
@@ -1612,6 +1616,7 @@ typedef enum {
     MT_LAVASMOKE,
     MT_SLUDGECHUNK,
     MT_SLUDGESPLASH,
+    MT_TRAIL,
     MT_PLASMA1, // killough 7/11/98: first  of alternating beta plasma fireballs
     MT_PLASMA2, // killough 7/11/98: second of alternating beta plasma fireballs
     MT_BETASKULL,
