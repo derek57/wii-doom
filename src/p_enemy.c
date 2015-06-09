@@ -2055,16 +2055,6 @@ void A_BrainSpit (mobj_t*        mo)
 }
 
 
-
-void A_SpawnFly (mobj_t* mo);
-
-// travelling cube sound
-void A_SpawnSound (mobj_t* mo)        
-{
-    S_StartSound (mo,sfx_boscub);
-    A_SpawnFly(mo);
-}
-
 void A_SpawnFly (mobj_t* mo)
 {
     mobj_t*        newmobj;
@@ -2134,6 +2124,15 @@ void A_SpawnFly (mobj_t* mo)
         P_RemoveMobj (mo);
     }
 }
+
+
+// travelling cube sound
+void A_SpawnSound (mobj_t* mo)        
+{
+    S_StartSound (mo,sfx_boscub);
+    A_SpawnFly(mo);
+}
+
 
 
 

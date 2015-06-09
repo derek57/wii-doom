@@ -83,6 +83,8 @@ void G_ScreenShot (void);
 
 void G_DrawMouseSpeedBox(void);
 
+void G_PlayerReborn (int player);
+
 extern int vanilla_savegame_limit;
 extern int vanilla_demo_limit;
 #endif
