@@ -66,6 +66,8 @@ void ST_DrawStatus(void);
 
 void ST_doRefresh(void);
 
+void ST_DrawSoundInfo(void);
+
 // States for status bar code.
 typedef enum
 {

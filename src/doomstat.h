@@ -318,6 +318,7 @@ extern  boolean         d_secrets;
 extern  boolean         beta_style;
 extern  boolean         beta_style_mode;
 extern  boolean         smoketrails;
+extern  boolean         sound_info;
 
 extern  int             d_colblood;
 extern  int             d_colblood2;

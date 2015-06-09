@@ -46,6 +46,7 @@ rcsid[] = "$Id: st_stuff.c,v 1.6 1997/02/03 22:45:13 b1 Exp $";
 #include "i_video.h"
 #include "m_cheat.h"
 #include "m_menu.h"
+#include "m_misc.h"
 #include "m_random.h"
 #include "p_inter.h"
 #include "p_local.h"
@@ -609,9 +610,12 @@ patch_t *ST_LoadStatusKeyPatch(int keypicnum)
         return NULL;
 }
 
-// 
+
+extern channel_t    channels[8];
+
 extern char*        mapnames[];
 
+extern boolean      BorderNeedRefresh;
 extern boolean      hud;
 extern boolean      in_slime;
 extern boolean      show_chat_bar;
@@ -1381,6 +1385,95 @@ void ST_diffDraw(void)
 {
     // update all widgets
     ST_drawWidgets(false);
+}
+
+//
+// ST_DrawSoundInfo
+//
+// Displays sound debugging information.
+//
+
+void ST_GetChannelInfo(sfxinfo_t *s)
+{
+    int i;
+    ChanInfo_t *c;
+
+    s->numchannels = snd_channels;
+    s->volume = sfxVolume;
+    for (i = 0; i < snd_channels; i++)
+    {
+        c = &s->chan[i];
+        c->id = channels[i].sound_id;
+        c->priority = channels[i].priority;
+        c->name = S_sfx[c->id].name;
+        c->mo = channels[i].origin;
+        if (c->mo != NULL)
+        {
+            c->distance = P_AproxDistance(c->mo->x - viewx, c->mo->y - viewy)
+                >> FRACBITS;
+        }
+        else
+        {
+            c->distance = 0;
+        }
+    }
+}
+
+void ST_DrawSoundInfo(void)
+{
+    int i;
+    sfxinfo_t s;
+    ChanInfo_t *c;
+    char text[32];
+    int x;
+    int y;
+    int xPos[7] = { 1, 75, 112, 156, 200, 230, 260 };
+
+    if (leveltime & 16)
+    {
+        M_WriteText(xPos[0], 20, "*** SOUND DEBUG INFO ***");
+    }
+    ST_GetChannelInfo(&s);
+    if (s.numchannels == 0)
+    {
+        return;
+    }
+    x = 0;
+    M_WriteText(xPos[x++], 30, "NAME");
+    M_WriteText(xPos[x++], 30, "MO.T");
+    M_WriteText(xPos[x++], 30, "MO.X");
+    M_WriteText(xPos[x++], 30, "MO.Y");
+    M_WriteText(xPos[x++], 30, "ID");
+    M_WriteText(xPos[x++], 30, "PRI");
+    M_WriteText(xPos[x++], 30, "DIST");
+    for (i = 0; i < s.numchannels; i++)
+    {
+        c = &s.chan[i];
+        x = 0;
+        y = 40 + i * 10;
+        if (c->mo == NULL)
+        {                       // Channel is unused
+            M_WriteText(xPos[0], y, "------");
+            continue;
+        }
+        M_snprintf(text, sizeof(text), "%s", c->name);
+        M_ForceUppercase(text);
+        M_WriteText(xPos[x++], y, text);
+        M_snprintf(text, sizeof(text), "%d", c->mo->type);
+        M_WriteText(xPos[x++], y, text);
+        M_snprintf(text, sizeof(text), "%d", c->mo->x >> FRACBITS);
+        M_WriteText(xPos[x++], y, text);
+        M_snprintf(text, sizeof(text), "%d", c->mo->y >> FRACBITS);
+        M_WriteText(xPos[x++], y, text);
+        M_snprintf(text, sizeof(text), "%d", (int) c->id);
+        M_WriteText(xPos[x++], y, text);
+        M_snprintf(text, sizeof(text), "%d", c->priority);
+        M_WriteText(xPos[x++], y, text);
+        M_snprintf(text, sizeof(text), "%d", c->distance);
+        M_WriteText(xPos[x++], y, text);
+    }
+//    UpdateState |= I_FULLSCRN;
+    BorderNeedRefresh = true;
 }
 
 void ST_Drawer (boolean fullscreen, boolean refresh)

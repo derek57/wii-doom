@@ -28,6 +28,7 @@
 #include <stdio.h>
 
 #include "am_map.h"
+#include "c_io.h"
 #include "deh_str.h"
 #include "doomkeys.h"
 #include "doomdef.h"
@@ -973,7 +974,7 @@ AM_drawFline
            || fl->b.x < 0 || fl->b.x >= f_w
            || fl->b.y < 0 || fl->b.y >= f_h)
     {
-        DEH_fprintf(statsfile, "fuck %d \r", fuck++);
+        C_Printf(CR_RED, "fuck %d \r", fuck++);
         return;
     }
 

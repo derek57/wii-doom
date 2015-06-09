@@ -83,22 +83,10 @@ extern boolean change_anyway;
 extern int faketracknum;
 extern int tracknum;
 
-typedef struct
-{
-    // sound information (if null, channel avail.)
-    sfxinfo_t *sfxinfo;
-
-    // origin of sound
-    mobj_t *origin;
-
-    // handle of the sound being played
-    int handle;
-    
-} channel_t;
 
 // The set of channels available
 
-static channel_t *channels;
+/*static*/ channel_t channels[8];
 
 // Internal volume level, ranging from 0-127
 
@@ -146,7 +134,7 @@ void S_Init(int sfxVolume, int musicVolume)
     // Allocating the internal channels for mixing
     // (the maximum numer of sounds rendered
     // simultaneously) within zone memory.
-    channels = Z_Malloc(snd_channels*sizeof(channel_t), PU_STATIC, 0);
+//    channels = Z_Malloc(snd_channels*sizeof(channel_t), PU_STATIC, 0);
 
     // Free all channels for use
     for (i=0 ; i<snd_channels ; i++)
@@ -430,6 +418,27 @@ static int S_AdjustSoundParams(mobj_t *listener, mobj_t *source,
     return (*vol > 0);
 }
 
+static mobj_t *GetSoundListener(void)
+{
+    static degenmobj_t dummy_listener;
+
+    // If we are at the title screen, the console player doesn't have an
+    // object yet, so return a pointer to a static dummy listener instead.
+
+    if (players[consoleplayer].mo != NULL)
+    {
+        return players[consoleplayer].mo;
+    }
+    else
+    {
+        dummy_listener.x = 0;
+        dummy_listener.y = 0;
+        dummy_listener.z = 0;
+
+        return (mobj_t *) &dummy_listener;
+    }
+}
+
 void S_StartSound(void *origin_p, int sfx_id)
 {
     sfxinfo_t *sfx;
@@ -515,6 +524,27 @@ void S_StartSound(void *origin_p, int sfx_id)
     }
 
     channels[cnum].handle = I_StartSound(sfx, cnum, volume, sep);
+
+    if(!menuactive && devparm && !automapactive && sound_info)
+    {
+        mobj_t *listener = GetSoundListener();
+
+        if(listener == NULL || origin == NULL)
+            goto skip;
+
+        int priority = S_sfx[sfx_id].priority;
+        int absx = abs(origin->x - listener->x);
+        int absy = abs(origin->y - listener->y);
+        int dist = absx + absy - (absx > absy ? absy >> 1 : absx >> 1);
+
+        dist >>= FRACBITS;
+        priority *= (10 - (dist / 160));
+
+        channels[cnum].sound_id = sfx_id;
+        channels[cnum].priority = priority;
+
+        skip: ;
+    }
 }        
 
 //

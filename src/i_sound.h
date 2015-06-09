@@ -21,6 +21,17 @@
 #define __I_SOUND__
 
 #include "doomtype.h"
+#include "p_mobj.h"
+
+
+typedef struct
+{
+    int id;
+    unsigned short priority;
+    char *name;
+    mobj_t *mo;
+    int distance;
+} ChanInfo_t;
 
 
 //
@@ -64,6 +75,12 @@ struct sfxinfo_struct
 
     // data used by the low level code
     void *driver_data;
+
+    int distance;
+
+    mobj_t *mo;
+
+    ChanInfo_t chan[8];
 };
 
 //
