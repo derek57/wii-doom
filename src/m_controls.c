@@ -59,6 +59,7 @@ extern int mus_engine;
 extern int mouselook;
 extern int autoaim;
 extern int runcount;
+extern int chaingun_tics;
 
 extern int joy_up;
 extern int joy_down;
@@ -162,6 +163,7 @@ void M_BindBaseControls(void)
 //    M_BindVariable("uncapped_framerate",     &d_uncappedframerate);
     M_BindVariable("opltype",                &opl_type);
     M_BindVariable("trails",                 &smoketrails);
+    M_BindVariable("chaingun_speed",         &chaingun_tics);
     M_BindVariable("key_shoot",              &joy_r);
     M_BindVariable("key_open",               &joy_l);
     M_BindVariable("key_menu",               &joy_minus);

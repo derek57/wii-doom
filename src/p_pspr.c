@@ -52,7 +52,9 @@
 
 int                use_vanilla_weapon_change = 1;
 
-extern             boolean aiming_help;
+extern boolean     aiming_help;
+
+extern int         chaingun_tics;
 
 fixed_t            bulletslope;
 
@@ -1013,7 +1015,6 @@ A_FireCGun
 
 //    A_Bullet(player);
 
-
     if(beta_style && player->readyweapon == wp_chaingun)
         P_SetPsprite (player,
                       ps_flash,
@@ -1026,6 +1027,8 @@ A_FireCGun
                       weaponinfo[player->readyweapon].flashstate
                       + psp->state
                       - &states[S_CHAIN1] );
+
+    psp->state->tics = chaingun_tics;
 
     P_BulletSlope (player->mo);
         
