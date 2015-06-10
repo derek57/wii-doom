@@ -525,7 +525,7 @@ void S_StartSound(void *origin_p, int sfx_id)
 
     channels[cnum].handle = I_StartSound(sfx, cnum, volume, sep);
 
-    if(!menuactive && devparm && !automapactive && sound_info)
+    if(!menuactive && devparm && !automapactive && sound_info && gamestate == GS_LEVEL && usergame)
     {
         mobj_t *listener = GetSoundListener();
 
