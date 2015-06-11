@@ -184,7 +184,7 @@ void C_AddConsoleDivider(void)
     if (!consolestrings || strcasecmp(console[consolestrings - 1].string, DIVIDER))
         C_Printf(CR_RED, " {||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||}\n");
 }
-
+/*
 static void C_DrawDivider(int y)
 {
     int i;
@@ -197,7 +197,7 @@ static void C_DrawDivider(int y)
         for (i = y + CONSOLETEXTX; i < y + CONSOLETEXTX + CONSOLEDIVIDERWIDTH; ++i)
             screens[0][i] = redcolor;
 }
-
+*/
 static void C_DrawScrollbar(void)
 {
     int x, y;
@@ -527,10 +527,11 @@ void C_Drawer(void)
         {
             int y = CONSOLELINEHEIGHT * (i - start + MAX(0, CONSOLELINES - consolestrings))
                     - CONSOLELINEHEIGHT / 2 + 1;
-
+/*
             if (console[i].type == red)
                 C_DrawDivider(y + 5 - (CONSOLEHEIGHT - consoleheight));
             else
+*/
                 C_DrawConsoleText(CONSOLETEXTX, y + (CONSOLELINEHEIGHT / 2), console[i].string,
                     consolecolors[console[i].type], 0, console[i].tabs, false);
         }
