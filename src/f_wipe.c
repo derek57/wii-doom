@@ -277,7 +277,7 @@ wipe_ScreenWipe
         wipe_initMelt, wipe_doMelt, wipe_exitMelt
     };
 
-//    ticks <<= hires; // ADDED FOR HIRES
+    ticks <<= hires; // ADDED FOR HIRES
 
     // initial stuff
     if (!go)
