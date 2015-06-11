@@ -310,14 +310,14 @@ static struct
     int         y;
     patch_t     *patch;
 } ammopic[NUMAMMO + 4] = {
-    { "PSTRA0", MT_MISC13, 15,  8, NULL },	// ??
+    { "PSTRA0", MT_MISC13, 15,  8, NULL },
     { "CLIPA0", MT_CLIP,   15,  8, NULL },
     { "SHELA0", MT_MISC22, 15,  8, NULL },
-    { "AMMOA0", MT_MISC17, 15,  8, NULL },	// ??
+    { "AMMOA0", MT_MISC17, 15,  8, NULL },
     { "ROCKA0", MT_MISC18, 15,  8, NULL },
     { "CELLA0", MT_MISC20, 8,  8, NULL },
-    { "CELPA0", MT_MISC21, 8,  8, NULL },	// ??
-    { "SBOXA0", MT_MISC23, 15,  8, NULL }	// ??
+    { "CELPA0", MT_MISC21, 8,  8, NULL },
+    { "SBOXA0", MT_MISC23, 15,  8, NULL }
 };
 
 static struct
@@ -870,7 +870,7 @@ void ST_DrawStatus(void)
 
     if (key)
     {
-        int                 keypic_x = ST_KEYS_X - 100;
+        int keypic_x = ST_KEYS_X - 100;
 
         if (!armor)
             keypic_x += 123;
@@ -1959,7 +1959,7 @@ void ST_Start (void)
     ammopic[6].patch = ST_LoadStatusAmmoPatch(6);
 
     keypic[it_bluecard].patch = ST_LoadStatusKeyPatch(it_bluecard);
-    keypic[it_yellowcard].patch = ST_LoadStatusKeyPatch(exe_hacx ? it_yellowskull : it_yellowcard);
+    keypic[it_yellowcard].patch = ST_LoadStatusKeyPatch(exe_hacx ? it_yellowcard : it_yellowskull);
     keypic[it_redcard].patch = ST_LoadStatusKeyPatch(it_redcard);
     if (gamemode != shareware)
     {
