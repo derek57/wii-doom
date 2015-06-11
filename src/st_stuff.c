@@ -310,15 +310,14 @@ static struct
     int         y;
     patch_t     *patch;
 } ammopic[NUMAMMO + 4] = {
-    { "PSTRA0", MT_MISC13, 0,  2, NULL },	// ??
-    { "CLIPA0", MT_CLIP,   8,  2, NULL },
-    { "SHELA0", MT_MISC22, 5,  5, NULL },
-    { "AMMOA0", MT_MISC17, 5,  5, NULL },	// ??
-    { "ROCKA0", MT_MISC18, 8, -6, NULL },
-
-    { "CELLA0", MT_MISC20, 0,  2, NULL },
-    { "CELPA0", MT_MISC21, 0,  2, NULL },	// ??
-    { "SBOXA0", MT_MISC23, 5,  5, NULL }	// ??
+    { "PSTRA0", MT_MISC13, 15,  8, NULL },	// ??
+    { "CLIPA0", MT_CLIP,   15,  8, NULL },
+    { "SHELA0", MT_MISC22, 15,  8, NULL },
+    { "AMMOA0", MT_MISC17, 15,  8, NULL },	// ??
+    { "ROCKA0", MT_MISC18, 15,  8, NULL },
+    { "CELLA0", MT_MISC20, 8,  8, NULL },
+    { "CELPA0", MT_MISC21, 8,  8, NULL },	// ??
+    { "SBOXA0", MT_MISC23, 15,  8, NULL }	// ??
 };
 
 static struct
@@ -819,28 +818,36 @@ void ST_DrawStatus(void)
 
     if (health && ammo && ammotype != am_noammo)
     {
-        int                 ammo_x = ST_AMMO_X + ammopic[ammotype].x;
         static int          ammowait = 0;
         static boolean      ammoanim = false;
 
         invert = ((ammo <= ST_AMMO_MIN && ammoanim) || ammo > ST_AMMO_MIN
             || menuactive || paused || consoleactive);
 
-            patch = ammopic[plyr->readyweapon].patch;
+        patch = ammopic[plyr->readyweapon].patch;
 
-            if (patch)
-            {
-                if(plyr->readyweapon != wp_fist)
-                    hudnumfunc(ammo_x, ST_AMMO_Y + ammopic[ammotype].y,
-                            patch, invert);
-                else if(plyr->readyweapon == wp_fist && plyr->powers[pw_strength])
-                    hudnumfunc(0, ST_AMMO_Y + ammopic[0].y,
-                            patch, invert);
+        if (patch)
+        {
+            int offset_special = 0;
 
-                ammo_x += SHORT(patch->width) + 8;
-            }
+            int offset_width = ST_AMMO_X + ammopic[ammotype].x;
+            int offset_height = ST_AMMO_Y + ammopic[ammotype].y;
 
-        DrawStatusNumber(&ammo_x, ST_AMMO_Y, ammo, invert, hudnumfunc);
+            int half_patch_width = (SHORT(patch->width) / 2);
+            int half_patch_height = (SHORT(patch->height) / 2);
+
+            int ammo_x = offset_width - half_patch_width;
+            int ammo_y = offset_height - half_patch_height;
+
+            hudfunc(ammo_x, ammo_y, patch, invert);
+
+            if (ammo < 200 && ammo > 99)
+                offset_special = 3;
+
+            ammo_x += offset_width + half_patch_width - 110 + offset_special;
+
+            DrawStatusNumber(&ammo_x, ST_AMMO_Y, ammo, invert, hudnumfunc);
+        }
 
         if (ammo <= ST_AMMO_MIN && !menuactive && !paused && !consoleactive)
         {
