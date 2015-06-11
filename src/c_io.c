@@ -288,14 +288,14 @@ static void c_blurscreen(int x1, int y1, int x2, int y2, int i)
 
 static void C_DrawBackground(int height)
 {
-    static boolean      blurred = false;
+//    static boolean      blurred = false;
     int                 i;
 
-    extern boolean      wipe;
+//    extern boolean      wipe;
 
     height = (height + 5) * SCREENWIDTH;
 
-    if (!blurred)
+//    if (!blurred)
     {
         for (i = 0; i < height; ++i)
             c_blurredscreen[i] = screens[0][i];
@@ -310,7 +310,7 @@ static void C_DrawBackground(int height)
         c_blurscreen(0, SCREENWIDTH, SCREENWIDTH - 1, height, -(SCREENWIDTH - 1));
     }
 
-    blurred = (consoleheight == CONSOLEHEIGHT && !wipe);
+//    blurred = (consoleheight == CONSOLEHEIGHT && !wipe);
 
     for (i = 0; i < height; ++i)
         screens[0][i] = tinttab50[c_blurredscreen[i] + (consoletintcolor << 8)];
