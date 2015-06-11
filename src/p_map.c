@@ -292,12 +292,26 @@ boolean PIT_CheckLine (line_t* ld)
     // if contacted a special line, add it to the list
     if (ld->special)
     {
+/*
         // 1/11/98 killough: remove limit on lines hit, by array doubling
         if (numspechit >= spechit_max)
         {
             spechit_max = (spechit_max ? spechit_max * 2 : 8);
             spechit = realloc(spechit, sizeof(*spechit) * spechit_max);
             C_Printf(CR_GOLD, " MaxSpecHit increased to %u\n", spechit_max);
+        }
+*/
+        // 1/11/98 killough: remove limit on lines hit, by array doubling
+        if (numspechit >= spechit_max)
+        {
+            int oldspechit = (int)spechit;
+
+            spechit_max = (spechit_max ? spechit_max * 2 : 8);
+            spechit = realloc(spechit, sizeof(*spechit) * spechit_max);
+
+            if (oldspechit != 0)
+                C_Printf(CR_GOLD, " PIT_CheckLine: Hit MaxSpecHit limit at %d, raised to %u\n",
+                        oldspechit, spechit_max);
         }
         spechit[numspechit++] = ld;
     }

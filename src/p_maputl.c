@@ -462,6 +462,7 @@ static intercept_t      *intercept_p;
 // Check for limit and double size if necessary -- killough
 static void check_intercept(void)
 {
+/*
     static size_t       num_intercepts;
     size_t              offset = intercept_p - intercepts;
 
@@ -471,6 +472,22 @@ static void check_intercept(void)
         intercepts = (intercept_t *)realloc(intercepts, sizeof(*intercepts) * num_intercepts);
         intercept_p = intercepts + offset;
         C_Printf(CR_GOLD, " MaxIntercepts increased to %u\n", num_intercepts);
+    }
+*/
+    static size_t       num_intercepts;
+    size_t              num_intercepts_old = num_intercepts;
+    size_t              offset = intercept_p - intercepts;
+
+    if (offset >= num_intercepts)
+    {
+        num_intercepts = (num_intercepts ? num_intercepts * 2 : 128);
+        intercepts = (intercept_t *)realloc(intercepts, sizeof(*intercepts) * num_intercepts);
+        intercept_p = intercepts + offset;
+        memset(intercepts + num_intercepts_old, 0, (num_intercepts - num_intercepts_old) * sizeof(*intercepts));
+
+        if (num_intercepts_old != 0)
+            C_Printf(CR_GOLD, " Check_Intercept: MaxIntercepts limit at %d, raised to %u\n",
+                    num_intercepts_old, num_intercepts);
     }
 }
 

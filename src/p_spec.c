@@ -400,21 +400,20 @@ P_FindNextHighestFloor
         
         if (other->floor_height > height)
         {
-            C_Printf(CR_RED, " P_FindNextHighestFloor: Overflow of heightlist[%d] array is detected.\n", MAX_ADJOINING_SECTORS);
-            C_Printf(CR_RED, " Heightlist index %d: ", h);
+            C_Printf(CR_GOLD, " P_FindNextHighestFloor: Overflow of heightlist[%d] array is detected.\n", MAX_ADJOINING_SECTORS);
 
             // Emulation of memory (stack) overflow
             if (h == MAX_ADJOINING_SECTORS + 1)
                 height = other->floor_height;
             else if (h <= MAX_ADJOINING_SECTORS + 1)
-                C_Printf(CR_GOLD, " successfully emulated.\n");
+                C_Printf(CR_GOLD, " Heightlist index %d: successfully emulated.\n", h);
             else if (h == MAX_ADJOINING_SECTORS + 2)
                 // Fatal overflow: game crashes at 22 textures
                 C_Printf(CR_GOLD, " P_FindNextHighestFloor: Sector with more than 22 adjoining sectors. Vanilla will crash here");
             else if (h <= MAX_ADJOINING_SECTORS + 6)
-                C_Printf(CR_RED, " Cannot be emulated - unpredictable behaviour.\n");
+                C_Printf(CR_RED, " Heightlist index %d: cannot be emulated - unpredictable behaviour.\n", h);
             else
-                C_Printf(CR_RED, " Cannot be emulated - crash with high probability.\n");
+                C_Printf(CR_RED, " Heightlist index %d: cannot be emulated - crash with high probability.\n", h);
 
             heightlist[h++] = other->floor_height;
         }
