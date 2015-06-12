@@ -25,6 +25,7 @@
 #include <string.h>
 
 #include "doomdef.h"
+#include "doomstat.h"
 #include "doomtype.h"
 #include "i_system.h"
 #include "i_timer.h"
@@ -54,20 +55,23 @@ typedef struct
     lumpinfo_t *angle_lumps[8];
 } sprite_frame_t;
 
-static searchlist_t iwad;
-static searchlist_t iwad_sprites;
-static searchlist_t iwad_flats;
-static searchlist_t pwad;
-static searchlist_t pwad_sprites;
-static searchlist_t pwad_flats;
+static searchlist_t   iwad;
+static searchlist_t   iwad_sprites;
+static searchlist_t   iwad_flats;
+static searchlist_t   pwad;
+static searchlist_t   pwad_sprites;
+static searchlist_t   pwad_flats;
 
 // lumps with these sprites must be replaced in the IWAD
 static sprite_frame_t *sprite_frames;
 
-static int num_sprite_frames;
-static int sprite_frames_alloced;
+static int            num_sprite_frames;
+static int            sprite_frames_alloced;
 
-extern boolean devparm;
+extern boolean        devparm;
+extern boolean        version13;
+
+extern int            dont_show_adding_of_resource_wad;
 
 // Search in a list to find a lump with a particular name
 // Linear search (slow!)
@@ -599,7 +603,13 @@ void W_MergeFile(char *filename, boolean automatic)
         return;
 
     if(devparm)
-        printf("         merging %s\n", filename);
+    {
+        if(gamemode == shareware || load_extra_wad == 1 || version13 == true)
+        {
+            if(dont_show_adding_of_resource_wad == 0)
+                printf("         merging %s\n", filename);
+        }
+    }
 
     // iwad is at the start, pwad was appended to the end
 
