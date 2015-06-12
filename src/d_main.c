@@ -1483,7 +1483,10 @@ void D_DoomMain (void)
     custom_pwad_added = true;
 
     if(devparm_nerve)
+    {
         D_AddFile("usb:/apps/wiidoom/PWAD/DOOM2/NERVE.WAD", true);
+        nerve_pwad = true;
+    }
 
     dont_show_adding_of_resource_wad = 0;
 
