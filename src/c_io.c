@@ -107,9 +107,6 @@ patch_t         *lsquote;
 patch_t         *ldquote;
 patch_t         *degree;
 patch_t         *multiply;
-patch_t     *lb;
-patch_t     *mid;
-patch_t     *rb;
 
 char            consoleinput[255] = "";
 int             consolestrings = 0;
@@ -240,9 +237,6 @@ void C_Init(void)
         consolefont[i] = W_CacheLumpName(buffer, PU_STATIC);
     }
 
-    lb = W_CacheLumpName("STCFN123", PU_STATIC);
-    mid = W_CacheLumpName("STCFN124", PU_STATIC);
-    rb = W_CacheLumpName("STCFN125", PU_STATIC);
     lsquote = W_CacheLumpName("DRFON145", PU_STATIC);
     ldquote = W_CacheLumpName("DRFON147", PU_STATIC);
     degree = W_CacheLumpName("DRFON176", PU_STATIC);
@@ -437,12 +431,6 @@ static void C_DrawConsoleText(int x, int y, char *text, byte color, int transluc
                 italics = false;
             if (letter == '\t')
                 x = (x > tabs[++tab] ? x + SPACEWIDTH : tabs[tab]);
-            else if(letter == '{')
-                patch = lb;
-            else if(letter == '|')
-                patch = mid;
-            else if(letter == '}')
-                patch = rb;
             else if (letter == '\xc2' && nextletter == '\xb0')
             {
                 patch = degree;
