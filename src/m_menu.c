@@ -863,8 +863,8 @@ int                        cheeting;
 int                        coordinates_info = 0;
 int                        timer_info = 0;
 int                        version_info = 0;
-int                        key_controls_start_in_cfg_at_pos = 42; // ACTUALLY IT'S +2
-int                        key_controls_end_in_cfg_at_pos = 55;   // ACTUALLY IT'S +2
+int                        key_controls_start_in_cfg_at_pos = 41;
+int                        key_controls_end_in_cfg_at_pos = 54;
 int                        crosshair = 0;
 int                        show_stats = 0;
 int                        tracknum = 1;
@@ -3671,9 +3671,10 @@ void M_EndGameResponse(int ch)
 
 void M_EndGame(int choice)
 {
+/*
     V_DrawPatchDirect(58, 15, 0, W_CacheLumpName(DEH_String("M_T_EGME"),
                                                PU_CACHE));
-
+*/
     choice = 0;
     if (!usergame)
     {
@@ -4214,7 +4215,7 @@ boolean M_Responder (event_t* ev)
     if (askforkey && data->btns_d)                // KEY BINDINGS
     {
         M_KeyBindingsClearControls(ev->data1);
-        *doom_defaults_list[keyaskedfor + 42 + FirstKey].location = ev->data1;
+        *doom_defaults_list[keyaskedfor + key_controls_start_in_cfg_at_pos + FirstKey].location = ev->data1;
         askforkey = false;
         return true;
     }
@@ -6038,36 +6039,40 @@ void M_KeyBindingsClearControls (int ch)
 
 void M_KeyBindingsClearAll (int choice)
 {
-    *doom_defaults_list[42].location = 0;
-    *doom_defaults_list[43].location = 0;
-    *doom_defaults_list[44].location = 0;
-    *doom_defaults_list[45].location = 0;
-    *doom_defaults_list[46].location = 0;
-    *doom_defaults_list[47].location = 0;
-    *doom_defaults_list[48].location = 0;
-    *doom_defaults_list[49].location = 0;
-    *doom_defaults_list[50].location = 0;
-    *doom_defaults_list[51].location = 0;
-    *doom_defaults_list[52].location = 0;
-    *doom_defaults_list[53].location = 0;
-    *doom_defaults_list[54].location = 0;
+    int i;
+
+    for (i = key_controls_start_in_cfg_at_pos; i < key_controls_end_in_cfg_at_pos; i++)
+        *doom_defaults_list[i].location = 0;
 }
 
 void M_KeyBindingsReset (int choice)
 {
-    *doom_defaults_list[42].location = CLASSIC_CONTROLLER_R;
-    *doom_defaults_list[43].location = CLASSIC_CONTROLLER_L;
-    *doom_defaults_list[44].location = CLASSIC_CONTROLLER_MINUS;
-    *doom_defaults_list[45].location = CLASSIC_CONTROLLER_LEFT;
-    *doom_defaults_list[46].location = CLASSIC_CONTROLLER_DOWN;
-    *doom_defaults_list[47].location = CLASSIC_CONTROLLER_RIGHT;
-    *doom_defaults_list[48].location = CLASSIC_CONTROLLER_ZL;
-    *doom_defaults_list[49].location = CLASSIC_CONTROLLER_ZR;
-    *doom_defaults_list[50].location = CLASSIC_CONTROLLER_A;
-    *doom_defaults_list[51].location = CLASSIC_CONTROLLER_Y;
-    *doom_defaults_list[52].location = CLASSIC_CONTROLLER_B;
-    *doom_defaults_list[53].location = CONTROLLER_1;
-    *doom_defaults_list[54].location = CONTROLLER_2;
+    int i = key_controls_start_in_cfg_at_pos;
+    *doom_defaults_list[i].location = CLASSIC_CONTROLLER_R;
+    i++;
+    *doom_defaults_list[i].location = CLASSIC_CONTROLLER_L;
+    i++;
+    *doom_defaults_list[i].location = CLASSIC_CONTROLLER_MINUS;
+    i++;
+    *doom_defaults_list[i].location = CLASSIC_CONTROLLER_LEFT;
+    i++;
+    *doom_defaults_list[i].location = CLASSIC_CONTROLLER_DOWN;
+    i++;
+    *doom_defaults_list[i].location = CLASSIC_CONTROLLER_RIGHT;
+    i++;
+    *doom_defaults_list[i].location = CLASSIC_CONTROLLER_ZL;
+    i++;
+    *doom_defaults_list[i].location = CLASSIC_CONTROLLER_ZR;
+    i++;
+    *doom_defaults_list[i].location = CLASSIC_CONTROLLER_A;
+    i++;
+    *doom_defaults_list[i].location = CLASSIC_CONTROLLER_Y;
+    i++;
+    *doom_defaults_list[i].location = CLASSIC_CONTROLLER_B;
+    i++;
+    *doom_defaults_list[i].location = CONTROLLER_1;
+    i++;
+    *doom_defaults_list[i].location = CONTROLLER_2;
 }
 
 void M_DrawKeyBindings(void)
@@ -6095,16 +6100,13 @@ void M_DrawKeyBindings(void)
     M_WriteText(40, 150, DEH_String("CLEAR ALL CONTROLS"));
     M_WriteText(40, 160, DEH_String("RESET TO DEFAULTS"));
 
-    for (i = 0; i < 14; i++)
+    for (i = 0; i < key_controls_end_in_cfg_at_pos - key_controls_start_in_cfg_at_pos; i++)
     {
-        if(i < 13 || (i == 13 && devparm))
-        {
-            if (askforkey && keyaskedfor == i)
-                M_WriteText(195, (i*10+20), "???");
-            else
-                M_WriteText(195, (i*10+20),
-                        Key2String(*(doom_defaults_list[i+FirstKey+42].location)));
-        }
+        if (askforkey && keyaskedfor == i)
+            M_WriteText(195, (i*10+20), "???");
+        else
+            M_WriteText(195, (i*10+20),
+                    Key2String(*(doom_defaults_list[i + FirstKey + key_controls_start_in_cfg_at_pos].location)));
     }
 }
 
