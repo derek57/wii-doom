@@ -880,8 +880,6 @@ static void LoadHacxDeh(void)
             I_Error("DEHACKED lump not found.  Please check that this is the "
                     "Hacx v1.2 IWAD.");
         }
-        else
-            C_Printf(CR_GOLD, " Parsed DEHACKED lump from IWAD file %s\n", target);
     }
 }
 
@@ -1569,11 +1567,6 @@ void D_DoomMain (void)
 
     W_GenerateHashTable();
 
-    if(
-//        fsize == 9745831 || fsize == 21951805 || fsize == 22102300 ||
-        fsize == 19321722)
-        LoadHacxDeh();
-
     D_SetGameDescription();
     savegamedir = M_GetSaveGameDir(D_SaveGameIWADName(gamemission));
 
@@ -1608,8 +1601,9 @@ void D_DoomMain (void)
                 D_AddFile("sd:/apps/wiidoom/pspchex.wad", true);
         }
     }
-    else if(fsize == 19321722)
+    else if(fsize == 19321722 /*|| fsize == 9745831 || fsize == 21951805 || fsize == 22102300*/)
     {
+        LoadHacxDeh();
         W_CheckSize(2);
 
         if(print_resource_pwad_error)
