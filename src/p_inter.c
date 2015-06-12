@@ -25,6 +25,8 @@
 //-----------------------------------------------------------------------------
 
 
+#include <stdlib.h>
+
 #include "am_map.h"
 #include "deh_misc.h"
 #include "deh_str.h"
@@ -776,9 +778,6 @@ P_TouchSpecialThing
 }
 
 
-//(POSSESSED = 200, IMP = 600, LOST SOUL = 1000, DEMON = 1500, CACODEMON = 4000)
-// EXTRA LIFE EACH 30000 POINTS
-
 //
 // KillMobj
 //
@@ -989,6 +988,9 @@ P_KillMobj
 
     mo = P_SpawnMobj (target->x,target->y,ONFLOORZ, item);
     mo->flags |= MF_DROPPED;        // special versions of items
+
+    if ((rand() & 1))
+        mo->flags2 |= MF2_MIRRORED;
 }
 
 

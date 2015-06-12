@@ -657,8 +657,8 @@ void R_ProjectSprite (mobj_t* thing)
     iscale = FixedDiv (FRACUNIT, xscale);
 
     // flip death sprites and corpses randomly
-    if (!netgame && thing->type != MT_CYBORG &&
-        thing->flags & MF_CORPSE && thing->health & 1)
+    if (!netgame && ((thing->type != MT_CYBORG &&
+        thing->flags & MF_CORPSE && thing->health & 1) || thing->flags2 & MF2_MIRRORED))
     {
         flip = !!d_flipcorpses;
     }
