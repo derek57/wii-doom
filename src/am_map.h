@@ -28,7 +28,6 @@
 #define __AMMAP_H__
 
 #include "d_event.h"
-#include "m_cheat.h"
 
 // Used by ST StatusBar stuff.
 #define AM_MSGHEADER (('a'<<24)+('m'<<16))
@@ -60,8 +59,6 @@ void AM_Stop (void);
 void AM_Start (void);
 
 void DrawWorldTimer(void);
-
-extern cheatseq_t cheat_amap;
 
 
 #endif

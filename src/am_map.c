@@ -33,7 +33,6 @@
 #include "doomkeys.h"
 #include "doomdef.h"
 #include "i_system.h"
-#include "m_cheat.h"
 #include "m_controls.h"
 #include "m_menu.h"
 #include "p_local.h"
@@ -300,8 +299,6 @@ static player_t    *plr;
 static patch_t     *marknums[10];
 
 static boolean     stopped = true;
-
-cheatseq_t         cheat_amap = CHEAT("iddt", 0);
 
 boolean            dont_move_backwards = false;
 

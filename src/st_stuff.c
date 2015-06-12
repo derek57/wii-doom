@@ -44,7 +44,6 @@ rcsid[] = "$Id: st_stuff.c,v 1.6 1997/02/03 22:45:13 b1 Exp $";
 #include "i_swap.h"
 #include "i_system.h"
 #include "i_video.h"
-#include "m_cheat.h"
 #include "m_menu.h"
 #include "m_misc.h"
 #include "m_random.h"
@@ -505,91 +504,6 @@ static st_number_t            w_ammo[4];
 // max ammo widgets
 static st_number_t            w_maxammo[4]; 
 
-// Massive bunches of cheat shit
-//  to keep it from being easy to figure them out.
-// Yeah, right...
-unsigned char        cheat_mus_seq[] =
-{
-    0xb2, 0x26, 0xb6, 0xae, 0xea, 1, 0, 0, 0xff
-};
-
-unsigned char        cheat_choppers_seq[] =
-{
-    0xb2, 0x26, 0xe2, 0x32, 0xf6, 0x2a, 0x2a, 0xa6, 0x6a, 0xea, 0xff // id...
-};
-
-unsigned char        cheat_god_seq[] =
-{
-    0xb2, 0x26, 0x26, 0xaa, 0x26, 0xff  // iddqd
-};
-
-unsigned char        cheat_ammo_seq[] =
-{
-    0xb2, 0x26, 0xf2, 0x66, 0xa2, 0xff        // idkfa
-};
-
-unsigned char        cheat_ammonokey_seq[] =
-{
-    0xb2, 0x26, 0x66, 0xa2, 0xff        // idfa
-};
-
-// Smashing Pumpkins Into Samml Piles Of Putried Debris. 
-unsigned char        cheat_noclip_seq[] =
-{
-    0xb2, 0x26, 0xea, 0x2a, 0xb2,        // idspispopd
-    0xea, 0x2a, 0xf6, 0x2a, 0x26, 0xff
-};
-
-//
-unsigned char        cheat_commercial_noclip_seq[] =
-{
-    0xb2, 0x26, 0xe2, 0x36, 0xb2, 0x2a, 0xff        // idclip
-}; 
-
-unsigned char        cheat_powerup_seq[7][10] =
-{
-    { 0xb2, 0x26, 0x62, 0xa6, 0x32, 0xf6, 0x36, 0x26, 0x6e, 0xff },         // beholdv
-    { 0xb2, 0x26, 0x62, 0xa6, 0x32, 0xf6, 0x36, 0x26, 0xea, 0xff },         // beholds
-    { 0xb2, 0x26, 0x62, 0xa6, 0x32, 0xf6, 0x36, 0x26, 0xb2, 0xff },         // beholdi
-    { 0xb2, 0x26, 0x62, 0xa6, 0x32, 0xf6, 0x36, 0x26, 0x6a, 0xff },         // beholdr
-    { 0xb2, 0x26, 0x62, 0xa6, 0x32, 0xf6, 0x36, 0x26, 0xa2, 0xff },         // beholda
-    { 0xb2, 0x26, 0x62, 0xa6, 0x32, 0xf6, 0x36, 0x26, 0x36, 0xff },         // beholdl
-    { 0xb2, 0x26, 0x62, 0xa6, 0x32, 0xf6, 0x36, 0x26, 0xff }                // behold
-};
-
-unsigned char        cheat_clev_seq[] =
-{
-    0xb2, 0x26,  0xe2, 0x36, 0xa6, 0x6e, 1, 0, 0, 0xff        // idclev
-};
-
-// my position cheat
-unsigned char        cheat_mypos_seq[] =
-{
-    0xb2, 0x26, 0xb6, 0xba, 0x2a, 0xf6, 0xea, 0xff        // idmypos
-}; 
-
-cheatseq_t cheat_mus = CHEAT("idmus", 2);
-cheatseq_t cheat_god = CHEAT("iddqd", 0);
-cheatseq_t cheat_ammo = CHEAT("idkfa", 0);
-cheatseq_t cheat_ammonokey = CHEAT("idfa", 0);
-cheatseq_t cheat_noclip = CHEAT("idspispopd", 0);
-cheatseq_t cheat_commercial_noclip = CHEAT("idclip", 0);
-
-cheatseq_t        cheat_powerup[7] =
-{
-    CHEAT("idbeholdv", 0),
-    CHEAT("idbeholds", 0),
-    CHEAT("idbeholdi", 0),
-    CHEAT("idbeholdr", 0),
-    CHEAT("idbeholda", 0),
-    CHEAT("idbeholdl", 0),
-    CHEAT("idbehold", 0),
-};
-
-cheatseq_t cheat_choppers = CHEAT("idchoppers", 0);
-cheatseq_t cheat_clev = CHEAT("idclev", 2);
-cheatseq_t cheat_mypos = CHEAT("idmypos", 0);
-
 patch_t *ST_LoadStatusAmmoPatch(int ammopicnum)
 {
     if ((mobjinfo[ammopic[ammopicnum].mobjnum].flags & MF_SPECIAL)
@@ -610,6 +524,15 @@ patch_t *ST_LoadStatusKeyPatch(int keypicnum)
 }
 
 
+boolean             emptytallpercent;
+
+// graphics are drawn to a backing screen and blitted to the real screen
+byte                *st_backing_screen;
+
+void (*hudfunc)(int, int, patch_t *, boolean);
+void (*hudnumfunc)(int, int, patch_t *, boolean);
+void (*godhudfunc)(int, int, patch_t *, boolean);
+
 extern channel_t    channels[8];
 
 extern char*        mapnames[];
@@ -623,15 +546,6 @@ extern int          screenSize;
 extern int          load_dehacked;
 
 int                 prio = 0;
-
-boolean             emptytallpercent;
-
-// graphics are drawn to a backing screen and blitted to the real screen
-byte                *st_backing_screen;
-
-void (*hudfunc)(int, int, patch_t *, boolean);
-void (*hudnumfunc)(int, int, patch_t *, boolean);
-void (*godhudfunc)(int, int, patch_t *, boolean);
 
             
 //
@@ -825,6 +739,9 @@ void ST_DrawStatus(void)
             || menuactive || paused || consoleactive);
 
         patch = ammopic[plyr->readyweapon].patch;
+
+        if (plyr->readyweapon == wp_supershotgun)
+            patch = ammopic[plyr->readyweapon - 1].patch;
 
         if (patch)
         {
