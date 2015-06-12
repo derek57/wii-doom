@@ -2670,7 +2670,11 @@ void M_DrawScreen(void)
         V_ClearDPTranslation();
     }
 
-    M_DrawThermoSmall(ScreenDef.x + 120, ScreenDef.y + LINEHEIGHT_SMALL * (scrnsize + 1),
+    if(beta_style)
+        M_DrawThermoSmall(ScreenDef.x + 128, ScreenDef.y + LINEHEIGHT_SMALL * (scrnsize + 1),
+                 8, screenSize);
+    else
+        M_DrawThermoSmall(ScreenDef.x + 120, ScreenDef.y + LINEHEIGHT_SMALL * (scrnsize + 1),
                  9, screenSize);
 }
 
@@ -2909,7 +2913,7 @@ void M_DrawGame2(void)
                                                PU_CACHE));
 
     M_WriteText(GameDef2.x, GameDef2.y - 2, DEH_String("AUTOAIM"));
-    M_WriteText(GameDef2.x, GameDef2.y + 8, DEH_String("MORE GORE"));
+    M_WriteText(GameDef2.x, GameDef2.y + 8, DEH_String("MORE BLOOD & GORE"));
     M_WriteText(GameDef2.x, GameDef2.y + 18, DEH_String("PLAYER FOOTSTEPS"));
     M_WriteText(GameDef2.x, GameDef2.y + 28, DEH_String("HERETIC FOOTCLIPS"));
     M_WriteText(GameDef2.x, GameDef2.y + 38, DEH_String("HERETIC LIQUID SPLASH"));
@@ -4590,10 +4594,27 @@ void M_Drawer (void)
     y = currentMenu->y;
     max = currentMenu->numitems;
 
-    if((currentMenu == &SoundDef && itemOn == 2) ||
-       (currentMenu == &GameDef2 && itemOn == 6))
+    if (fsize != 28422764 && fsize != 19321722 && fsize != 12361532 &&
+        ((currentMenu == &SoundDef && itemOn == 2) || (currentMenu == &GameDef2 && itemOn == 6)))
     {
         char *message_string = "YOU MUST QUIT AND RESTART TO TAKE EFFECT.";
+        int message_offset = 160 - M_StringWidth(message_string) / 2;
+        dp_translation = crx[CRX_GOLD];
+        M_WriteText(message_offset, 160, DEH_String(message_string));
+        V_ClearDPTranslation();
+    }
+    else if((fsize == 28422764 || fsize == 19321722 || fsize == 12361532) &&
+            currentMenu == &GameDef2 && itemOn == 6)
+    {
+        char *message_string = "NO BETA MODE FOR CHEX, HACX & FREEDOOM.";
+        int message_offset = 160 - M_StringWidth(message_string) / 2;
+        dp_translation = crx[CRX_GOLD];
+        M_WriteText(message_offset, 160, DEH_String(message_string));
+        V_ClearDPTranslation();
+    }
+    else if(fsize == 12361532 && currentMenu == &GameDef2 && itemOn == 1)
+    {
+        char *message_string = "NO EXTRA BLOOD & GORE FOR CHEX QUEST.";
         int message_offset = 160 - M_StringWidth(message_string) / 2;
         dp_translation = crx[CRX_GOLD];
         M_WriteText(message_offset, 160, DEH_String(message_string));
@@ -6683,12 +6704,12 @@ void M_MaxGore(int choice)
     switch(choice)
     {
     case 0:
-        if (d_maxgore)
+        if (d_maxgore && fsize != 12361532)
             d_maxgore = false;
         players[consoleplayer].message = DEH_String("MORE GORE DISABLED");
         break;
     case 1:
-        if (!d_maxgore)
+        if (!d_maxgore && fsize != 12361532)
             d_maxgore = true;
         players[consoleplayer].message = DEH_String("MORE GORE ENABLED");
         break;
@@ -6768,14 +6789,14 @@ void M_Beta(int choice)
     switch(choice)
     {
     case 0:
-        if (beta_style_mode)
+        if (beta_style_mode && fsize != 28422764 && fsize != 19321722 && fsize != 12361532)
         {
             beta_style_mode = false;
         }
         players[consoleplayer].message = DEH_String("PRE-RELEASE MODE DISABLED");
         break;
     case 1:
-        if (!beta_style_mode)
+        if (!beta_style_mode && fsize != 28422764 && fsize != 19321722 && fsize != 12361532)
         {
             beta_style_mode = true;
         }

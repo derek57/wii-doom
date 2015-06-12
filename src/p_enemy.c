@@ -2168,14 +2168,13 @@ int                    old_u;
 
 void A_MoreGibs(mobj_t* actor)
 {
-    mobj_t* mo;
-    angle_t an;
-//    int numchunks = (!d_maxgore) ? 1 : 4;
-    int t;
-
-    // max gore - ludicrous gibs
-//    do
+    if(d_maxgore)
     {
+        mobj_t* mo;
+        angle_t an;
+        int t;
+
+        // max gore - ludicrous gibs
         mo = P_SpawnMobj(actor->x, actor->y, actor->z + (24*FRACUNIT), MT_FLESH);
 
         // added for colored blood and gore!
@@ -2222,7 +2221,6 @@ void A_MoreGibs(mobj_t* actor)
             gore->momz = mo->momz;
         }
     }
-//    while(--numchunks > 0);
 }
 
 void A_Fall (mobj_t *actor)

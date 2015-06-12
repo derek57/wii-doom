@@ -815,7 +815,7 @@ static void LoadChexDeh(void)
     if (gameversion == exe_chex)
     {
         // Look for chex.deh in the same directory as the IWAD file.
-        if (load_dehacked == 0)
+        if (load_dehacked == 0 && !devparm_chex)
         {
             printf("\n\n\n");
             printf(" ===============================================================================");
@@ -833,6 +833,14 @@ static void LoadChexDeh(void)
             sleep(5);
 
             I_QuitSerialFail();
+        }
+
+        if (devparm_chex)
+        {
+            if(usb)
+                D_AddFile("usb:/apps/wiidoom/IWAD/CHEX/CHEX.DEH", true);
+            else if(sd)
+                D_AddFile("sd:/apps/wiidoom/IWAD/CHEX/CHEX.DEH", true);
         }
     }
 }
@@ -1283,6 +1291,9 @@ void D_DoomMain (void)
     else
         snd_musicdevice = SNDDEVICE_GENMIDI;
 
+    if(fsize == 28422764 || fsize == 19321722 || fsize == 12361532)
+        beta_style_mode = false;
+
     if(beta_style_mode)
     {
         beta_style = true;
@@ -1558,9 +1569,6 @@ void D_DoomMain (void)
 
     W_GenerateHashTable();
 
-    if(fsize == 12361532)
-        LoadChexDeh();
-
     if(
 //        fsize == 9745831 || fsize == 21951805 || fsize == 22102300 ||
         fsize == 19321722)
@@ -1571,7 +1579,11 @@ void D_DoomMain (void)
 
     if(fsize == 12361532)
     {
+        LoadChexDeh();
         W_CheckSize(1);
+
+        if(d_maxgore)
+            d_maxgore = false;
 
         if(print_resource_pwad_error)
         {
