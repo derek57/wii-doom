@@ -6048,31 +6048,20 @@ void M_KeyBindingsClearAll (int choice)
 void M_KeyBindingsReset (int choice)
 {
     int i = key_controls_start_in_cfg_at_pos;
-    *doom_defaults_list[i].location = CLASSIC_CONTROLLER_R;
-    i++;
-    *doom_defaults_list[i].location = CLASSIC_CONTROLLER_L;
-    i++;
-    *doom_defaults_list[i].location = CLASSIC_CONTROLLER_MINUS;
-    i++;
-    *doom_defaults_list[i].location = CLASSIC_CONTROLLER_LEFT;
-    i++;
-    *doom_defaults_list[i].location = CLASSIC_CONTROLLER_DOWN;
-    i++;
-    *doom_defaults_list[i].location = CLASSIC_CONTROLLER_RIGHT;
-    i++;
-    *doom_defaults_list[i].location = CLASSIC_CONTROLLER_ZL;
-    i++;
-    *doom_defaults_list[i].location = CLASSIC_CONTROLLER_ZR;
-    i++;
-    *doom_defaults_list[i].location = CLASSIC_CONTROLLER_A;
-    i++;
-    *doom_defaults_list[i].location = CLASSIC_CONTROLLER_Y;
-    i++;
-    *doom_defaults_list[i].location = CLASSIC_CONTROLLER_B;
-    i++;
-    *doom_defaults_list[i].location = CONTROLLER_1;
-    i++;
-    *doom_defaults_list[i].location = CONTROLLER_2;
+
+    *doom_defaults_list[i++].location = CLASSIC_CONTROLLER_R;
+    *doom_defaults_list[i++].location = CLASSIC_CONTROLLER_L;
+    *doom_defaults_list[i++].location = CLASSIC_CONTROLLER_MINUS;
+    *doom_defaults_list[i++].location = CLASSIC_CONTROLLER_LEFT;
+    *doom_defaults_list[i++].location = CLASSIC_CONTROLLER_DOWN;
+    *doom_defaults_list[i++].location = CLASSIC_CONTROLLER_RIGHT;
+    *doom_defaults_list[i++].location = CLASSIC_CONTROLLER_ZL;
+    *doom_defaults_list[i++].location = CLASSIC_CONTROLLER_ZR;
+    *doom_defaults_list[i++].location = CLASSIC_CONTROLLER_A;
+    *doom_defaults_list[i++].location = CLASSIC_CONTROLLER_Y;
+    *doom_defaults_list[i++].location = CLASSIC_CONTROLLER_B;
+    *doom_defaults_list[i++].location = CONTROLLER_1;
+    *doom_defaults_list[i++].location = CONTROLLER_2;
 }
 
 void M_DrawKeyBindings(void)
