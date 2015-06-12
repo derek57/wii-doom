@@ -149,6 +149,7 @@ byte            redcolor = 40;
 byte            graycolor = 100;
 byte            greencolor = 120;
 byte            yellowcolor = 160;
+byte            dividercolor = 0;   // actually it's colored red
 
 byte            consolebrandingcolor = 100;
 byte            consolescrollbartrackcolor = 100;
@@ -179,9 +180,9 @@ void C_Printf(stringtype_t type, char *string, ...)
 void C_AddConsoleDivider(void)
 {
     if (!consolestrings || strcasecmp(console[consolestrings - 1].string, DIVIDER))
-        C_Printf(CR_RED, " {||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||}\n");
+        C_Printf(CR_DIVIDER, " {||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||}\n");
 }
-/*
+
 static void C_DrawDivider(int y)
 {
     int i;
@@ -194,7 +195,7 @@ static void C_DrawDivider(int y)
         for (i = y + CONSOLETEXTX; i < y + CONSOLETEXTX + CONSOLEDIVIDERWIDTH; ++i)
             screens[0][i] = redcolor;
 }
-*/
+
 static void C_DrawScrollbar(void)
 {
     int x, y;
@@ -246,12 +247,13 @@ void C_Init(void)
     route = consolefont['$' - CONSOLEFONTSTART];
     caret = consolefont['_' - CONSOLEFONTSTART];
 
-    consolecolors[yellow] = yellowcolor; // yellow = 160
-    consolecolors[red] = redcolor;       // red = 40
-    consolecolors[gray] = graycolor;     // gray = 100
-    consolecolors[blue] = bluecolor;     // blue = 200
-    consolecolors[white] = whitecolor;   // white = 80
-    consolecolors[green] = greencolor;   // green = 120
+    consolecolors[yellow] = yellowcolor;   // yellow = 160
+    consolecolors[red] = redcolor;         // red = 40
+    consolecolors[gray] = graycolor;       // gray = 100
+    consolecolors[blue] = bluecolor;       // blue = 200
+    consolecolors[white] = whitecolor;     // white = 80
+    consolecolors[green] = greencolor;     // green = 120
+    consolecolors[divider] = dividercolor; // divider = 0 (linked to red color)
 
     c_tempscreen = Z_Malloc(SCREENWIDTH * SCREENHEIGHT, PU_STATIC, NULL);
     c_blurredscreen = Z_Malloc(SCREENWIDTH * SCREENHEIGHT, PU_STATIC, NULL);
@@ -515,11 +517,10 @@ void C_Drawer(void)
         {
             int y = CONSOLELINEHEIGHT * (i - start + MAX(0, CONSOLELINES - consolestrings))
                     - CONSOLELINEHEIGHT / 2 + 1;
-/*
-            if (console[i].type == red)
+
+            if (console[i].type == divider)
                 C_DrawDivider(y + 5 - (CONSOLEHEIGHT - consoleheight));
             else
-*/
                 C_DrawConsoleText(CONSOLETEXTX, y + (CONSOLELINEHEIGHT / 2), console[i].string,
                     consolecolors[console[i].type], 0, console[i].tabs, false);
         }

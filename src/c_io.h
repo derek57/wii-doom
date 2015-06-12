@@ -58,6 +58,7 @@ typedef enum
     white,
     green,
     dark,
+    divider,
     STRINGTYPES
 } stringtype_t;
 
@@ -69,6 +70,7 @@ typedef enum
 #define CR_WHITE white
 #define CR_GREEN green
 #define CR_DARK dark
+#define CR_DIVIDER divider
 
 typedef struct
 {
