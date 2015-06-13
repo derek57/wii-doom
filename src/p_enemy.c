@@ -1846,12 +1846,12 @@ void A_Footstep (mobj_t* mo)
 
         if(!not_walking)
         {
-            if(P_GetThingFloorType(mo) == 0)
+            if (P_GetThingFloorType(mo) < 51 ||
+                    (P_GetThingFloorType(mo) > 53 && P_GetThingFloorType(mo) < 69) ||
+                    (P_GetThingFloorType(mo) > 76 && P_GetThingFloorType(mo) < 89) ||
+                    (P_GetThingFloorType(mo) > 91 && P_GetThingFloorType(mo) < 136) ||
+                    P_GetThingFloorType(mo) > 147)
                 S_StartSound (mo, sfx_step0 + t);
-            else if(P_GetThingFloorType(mo) == 1)
-                S_StartSound (mo, sfx_water);
-            else
-                S_StartSound (mo, sfx_lava);
         }
         old_t = t;
     }

@@ -5625,7 +5625,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         100,                       // mass
         0,                         // damage
         sfx_None,                  // activesound
-        MF_NOBLOCKMAP | MF_NOGRAVITY | MF_SHADOW,  // flags
+        MF_NOBLOCKMAP | MF_NOGRAVITY,  // flags
         0,                         // flags2
         S_NULL,                     // raisestate
         NULL,       // namepointer

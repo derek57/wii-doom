@@ -80,18 +80,6 @@ typedef struct
     
 } anim_t;
 
-//
-//      source animation definition
-//
-typedef struct
-{
-    int         istexture;        // if false, it is a flat
-    char        endname[9];
-    char        startname[9];
-    int         speed;
-} animdef_t;
-
-
 static anim_t   *anims;         // new structure w/o limits -- killough
 static size_t   maxanims;
 
@@ -103,6 +91,7 @@ anim_t*         lastanim;
 
 boolean         in_slime;
 boolean         levelTimer;
+boolean         *isliquid;
 
 int             levelTimeCount;
 
@@ -123,38 +112,38 @@ extern boolean  noclip_on;
 //
 animdef_t                animdefs[] =
 {
-    {false,       "NUKAGE3",      "NUKAGE1",      ANIMSPEED},
-    {false,       "FWATER4",      "FWATER1",      ANIMSPEED},
-    {false,       "SWATER4",      "SWATER1",      ANIMSPEED},
-    {false,       "LAVA4",        "LAVA1",        ANIMSPEED},
-    {false,       "BLOOD3",       "BLOOD1",       ANIMSPEED},
+    {false,       "NUKAGE3",      "NUKAGE1",      ANIMSPEED, true,  FLOOR_SLUDGE},
+    {false,       "FWATER4",      "FWATER1",      ANIMSPEED, true,  FLOOR_WATER},
+    {false,       "SWATER4",      "SWATER1",      ANIMSPEED, true,  FLOOR_WATER},
+    {false,       "LAVA4",        "LAVA1",        ANIMSPEED, true,  FLOOR_LAVA},
+    {false,       "BLOOD3",       "BLOOD1",       ANIMSPEED, true,  FLOOR_WATER},
 
     // DOOM II flat animations.
-    {false,       "SLIME04",      "SLIME01",      ANIMSPEED},
-    {false,       "SLIME08",      "SLIME05",      ANIMSPEED},
-    {false,       "SLIME12",      "SLIME09",      ANIMSPEED},
-    {false,       "RROCK08",      "RROCK05",      ANIMSPEED},                
+    {false,       "SLIME04",      "SLIME01",      ANIMSPEED, true,  FLOOR_SLUDGE},
+    {false,       "SLIME08",      "SLIME05",      ANIMSPEED, true,  FLOOR_SLUDGE},
+    {false,       "SLIME12",      "SLIME09",      ANIMSPEED, true,  FLOOR_SLUDGE},
+    {false,       "RROCK08",      "RROCK05",      ANIMSPEED, false, FLOOR_SOLID},                
 
-    {true,        "BLODGR4",      "BLODGR1",      ANIMSPEED},
-    {true,        "SLADRIP3",     "SLADRIP1",     ANIMSPEED},
+    {true,        "BLODGR4",      "BLODGR1",      ANIMSPEED, false, FLOOR_SOLID},
+    {true,        "SLADRIP3",     "SLADRIP1",     ANIMSPEED, false, FLOOR_SOLID},
 
-    {true,        "BLODRIP4",     "BLODRIP1",     ANIMSPEED},
-    {true,        "FIREWALL",     "FIREWALA",     ANIMSPEED},
-    {true,        "GSTFONT3",     "GSTFONT1",     ANIMSPEED},
-    {true,        "FIRELAVA",     "FIRELAV3",     ANIMSPEED},
-    {true,        "FIREMAG3",     "FIREMAG1",     ANIMSPEED},
-    {true,        "FIREBLU2",     "FIREBLU1",     ANIMSPEED},
-    {true,        "ROCKRED3",     "ROCKRED1",     ANIMSPEED},
+    {true,        "BLODRIP4",     "BLODRIP1",     ANIMSPEED, false, FLOOR_SOLID},
+    {true,        "FIREWALL",     "FIREWALA",     ANIMSPEED, false, FLOOR_SOLID},
+    {true,        "GSTFONT3",     "GSTFONT1",     ANIMSPEED, false, FLOOR_SOLID},
+    {true,        "FIRELAVA",     "FIRELAV3",     ANIMSPEED, false, FLOOR_SOLID},
+    {true,        "FIREMAG3",     "FIREMAG1",     ANIMSPEED, false, FLOOR_SOLID},
+    {true,        "FIREBLU2",     "FIREBLU1",     ANIMSPEED, false, FLOOR_SOLID},
+    {true,        "ROCKRED3",     "ROCKRED1",     ANIMSPEED, false, FLOOR_SOLID},
 
-    {true,        "BFALL4",       "BFALL1",       ANIMSPEED},
-    {true,        "SFALL4",       "SFALL1",       ANIMSPEED},
-    {true,        "WFALL4",       "WFALL1",       ANIMSPEED},
-    {true,        "DBRAIN4",      "DBRAIN1",      ANIMSPEED},
+    {true,        "BFALL4",       "BFALL1",       ANIMSPEED, false, FLOOR_SOLID},
+    {true,        "SFALL4",       "SFALL1",       ANIMSPEED, false, FLOOR_SOLID},
+    {true,        "WFALL4",       "WFALL1",       ANIMSPEED, false, FLOOR_SOLID},
+    {true,        "DBRAIN4",      "DBRAIN1",      ANIMSPEED, false, FLOOR_SOLID},
         
-    {-1,          "",             "",             0},
+    {-1,          "",             "",                     0, false,           0}
 };
 
-
+/*
 int *TerrainTypes;
 struct
 {
@@ -172,13 +161,18 @@ struct
     { "SLIME09", FLOOR_SLUDGE },
     { "END", -1 }
 };
+*/
 
 //
 //      Animating line specials
 //
 void P_InitPicAnims (void)
 {
-    int                i;
+    int  i;
+    int  size = (numflats + 1) * sizeof(boolean);
+
+    isliquid = Z_Malloc(size, PU_STATIC, 0);
+    memset(isliquid, false, size);
     
     //  Init animation
     lastanim = anims;
@@ -217,6 +211,14 @@ void P_InitPicAnims (void)
             lastanim->basepic = R_FlatNumForName(startname);
 
             lastanim->numpics = lastanim->picnum - lastanim->basepic + 1;
+
+            if (animdefs[i].isliquid)
+            {
+                int     j;
+
+                for (j = 0; j < lastanim->numpics; j++)
+                    isliquid[lastanim->basepic + j] = true;
+            }
         }
 
         lastanim->istexture = animdefs[i].istexture;
@@ -1534,7 +1536,7 @@ void P_SpawnSpecials (void)
 // PROC P_InitTerrainTypes
 //
 //----------------------------------------------------------------------------
-
+/*
 void P_InitTerrainTypes(void)
 {
     int i;
@@ -1553,4 +1555,5 @@ void P_InitTerrainTypes(void)
         }
     }
 }
+*/
 

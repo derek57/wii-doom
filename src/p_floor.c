@@ -42,6 +42,71 @@
 #include "z_zone.h"
 
 
+fixed_t animatedliquiddiffs[128] =
+{
+     3211,  3211,  3211,  3211,  3180,  3180,  3119,  3119,
+     3027,  3027,  2907,  2907,  2758,  2758,  2582,  2582,
+     2382,  2382,  2159,  2159,  1915,  1915,  1653,  1653,
+     1374,  1374,  1083,  1083,   781,   781,   471,   471,
+      157,   157,  -157,  -157,  -471,  -471,  -781,  -781,
+    -1083, -1083, -1374, -1374, -1653, -1653, -1915, -1915,
+    -2159, -2159, -2382, -2382, -2582, -2582, -2758, -2758,
+    -2907, -2907, -3027, -3027, -3119, -3119, -3180, -3180,
+    -3211, -3211, -3211, -3211, -3180, -3180, -3119, -3119,
+    -3027, -3027, -2907, -2907, -2758, -2758, -2582, -2582,
+    -2382, -2382, -2159, -2159, -1915, -1915, -1653, -1653,
+    -1374, -1374, -1083, -1083,  -781,  -781,  -471,  -471,
+     -157,  -157,   157,   157,   471,   471,   781,   781,
+     1083,  1083,  1374,  1374,  1653,  1653,  1915,  1915,
+     2159,  2159,  2382,  2382,  2582,  2582,  2758,  2758,
+     2907,  2907,  3027,  3027,  3119,  3119,  3180,  3180
+};
+
+static void T_AnimateLiquid(floormove_t *floor)
+{
+    sector_t    *sector = floor->sector;
+
+    if (d_swirl && isliquid[sector->floorpic]
+        && sector->ceiling_height != sector->floor_height)
+    {
+        if (sector->animate == INT_MAX)
+            sector->animate = animatedliquiddiffs[leveltime & 127];
+        else
+            sector->animate += animatedliquiddiffs[leveltime & 127];
+    }
+    else
+        sector->animate = INT_MAX;
+}
+
+static void P_StartAnimatedLiquid(sector_t *sector)
+{
+    thinker_t       *th;
+    floormove_t     *floor;
+
+    for (th = thinkercap.next; th != &thinkercap; th = th->next)
+        if (th->function.acp1 == (actionf_p1) T_AnimateLiquid && ((floormove_t *)th)->sector == sector)
+            return;
+
+    floor = Z_Malloc(sizeof(*floor), PU_LEVSPEC, 0);
+    memset(floor, 0, sizeof(*floor));
+    P_AddThinker(&floor->thinker);
+    floor->thinker.function.acp1 = (actionf_p1) T_AnimateLiquid;
+    floor->sector = sector;
+}
+
+void P_InitAnimatedLiquids(void)
+{
+    int         i;
+    sector_t    *sector;
+
+    for (i = 0, sector = sectors; i < numsectors; i++, sector++)
+    {
+        sector->animate = INT_MAX;
+        if (isliquid[sector->floorpic])
+            P_StartAnimatedLiquid(sector);
+    }
+}
+
 //
 // FLOORS
 //
@@ -243,6 +308,10 @@ void T_MoveFloor(floormove_t* floor)
               case donutRaise:
                 floor->sector->special = floor->newspecial;
                 floor->sector->floorpic = floor->texture;
+
+                if (isliquid[floor->sector->floorpic])
+                    P_StartAnimatedLiquid(floor->sector);
+
               default:
                 break;
             }
@@ -254,6 +323,10 @@ void T_MoveFloor(floormove_t* floor)
               case lowerAndChange:
                 floor->sector->special = floor->newspecial;
                 floor->sector->floorpic = floor->texture;
+
+                if (isliquid[floor->sector->floorpic])
+                    P_StartAnimatedLiquid(floor->sector);
+
               default:
                 break;
             }

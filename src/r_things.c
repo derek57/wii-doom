@@ -526,6 +526,7 @@ void R_ProjectSprite (mobj_t* thing)
     boolean            flip;
     
     int                index;
+    int                flags2 = thing->flags2;
 
     vissprite_t*       vis;
     
@@ -642,15 +643,24 @@ void R_ProjectSprite (mobj_t* thing)
     vis->gzt = interpz + spritetopoffset[lump];
 
     // foot clipping
-    if (thing->flags2 & MF2_FEETARECLIPPED && d_footclip
-        && thing->z <= thing->subsector->sector->floor_height)
+    if ((thing->flags2 & MF2_FEETARECLIPPED) && d_footclip &&
+            interpz <= thing->subsector->sector->interpfloorheight + FRACUNIT)
     {
-        vis->footclip = 10;
+        fixed_t clipfeet = MIN((spriteheight[lump] >> FRACBITS) / 4, 10) << FRACBITS;
+
+        vis->texturemid = vis->gzt - viewz - clipfeet;
+
+        if (!(flags2 & MF2_FLOATBOB) && thing->subsector->sector->animate != INT_MAX)
+            clipfeet += thing->subsector->sector->animate;
+
+        vis->footclip = clipfeet;
     }
     else
+    {
         vis->footclip = 0;
 
-    vis->texturemid = vis->gzt - viewz - (vis->footclip << FRACBITS);
+        vis->texturemid = vis->gzt - viewz;
+    }
 
     vis->x1 = x1 < 0 ? 0 : x1;
     vis->x2 = x2 >= viewwidth ? viewwidth-1 : x2;        
@@ -838,6 +848,7 @@ void R_DrawPSprite (pspdef_t* psp, psprnum_t psprnum)
     vis->texturemid = (BASEYCENTER << FRACBITS) - (psp->sy - spritetopoffset[lump]); // HIRES
     vis->x1 = x1 < 0 ? 0 : x1;
     vis->x2 = x2 >= viewwidth ? viewwidth-1 : x2;        
+    vis->footclip = 0;
 
     vis->scale = pspritescale<<(detailshift && !hires);                // CHANGED FOR HIRES
     

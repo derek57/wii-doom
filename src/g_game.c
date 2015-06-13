@@ -1860,6 +1860,8 @@ void G_DoLoadGame (void)
  
     P_RestoreTargets();
 
+    P_InitAnimatedLiquids();
+
     if (!P_ReadSaveGameEOF())
         I_Error ("Bad savegame");
 

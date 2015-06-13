@@ -171,7 +171,8 @@ texture_t**      textures_hashtable;
 fixed_t*         textureheight;                
 
 // needed for pre rendering
-fixed_t*         spritewidth;        
+fixed_t*         spritewidth;
+fixed_t*         spriteheight;
 fixed_t*         spriteoffset;
 fixed_t*         spritetopoffset;
 
@@ -785,6 +786,7 @@ void R_InitSpriteLumps (void)
     
     numspritelumps = lastspritelump - firstspritelump + 1;
     spritewidth = Z_Malloc (numspritelumps*sizeof(*spritewidth), PU_STATIC, 0);
+    spriteheight = Z_Malloc(numspritelumps * sizeof(*spriteheight), PU_STATIC, 0);
     spriteoffset = Z_Malloc (numspritelumps*sizeof(*spriteoffset), PU_STATIC, 0);
     spritetopoffset = Z_Malloc (numspritelumps*sizeof(*spritetopoffset), PU_STATIC, 0);
         

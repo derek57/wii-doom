@@ -166,6 +166,8 @@ typedef        struct
     fixed_t         interpfloorheight;
     fixed_t         interpceilingheight;
 
+    int             animate;
+
 } sector_t;
 
 
@@ -490,6 +492,8 @@ typedef struct
     // See above.
     unsigned int     bottom[SCREENWIDTH];   // CHANGED FOR HIRES
     unsigned int     pad4;                  // CHANGED FOR HIRES
+
+    sector_t         *sector;               // [BH] Support animated liquid sectors
 
 } visplane_t;
 

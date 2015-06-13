@@ -1065,6 +1065,36 @@ P_DamageMobj
         ang >>= ANGLETOFINESHIFT;
         target->momx += FixedMul (thrust, finecosine[ang]);
         target->momy += FixedMul (thrust, finesine[ang]);
+
+        if (source)
+        {
+            int dist;
+            int z;
+
+            if (source == target)
+            {
+                viewx = inflictor->x;
+                viewy = inflictor->y;
+                z = inflictor->z;
+            }
+            else
+            {
+                viewx = source->x;
+                viewy = source->y;
+                z = source->z;
+            }
+            dist = R_PointToDist(target->x, target->y);
+
+            if (target->flags2 & MF2_FEETARECLIPPED)
+                z += FOOTCLIPSIZE;
+
+            viewx = 0;
+            viewy = z;
+            ang = R_PointToAngle(dist, target->z);
+
+            ang >>= ANGLETOFINESHIFT;
+            target->momz += FixedMul(thrust, finesine[ang]);
+        }
     }
     
     // player specific

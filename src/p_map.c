@@ -167,7 +167,7 @@ P_TeleportMove
     int                        bx;
     int                        by;
     
-    subsector_t*        newsubsec;
+    subsector_t*               newsubsec;
     
     // kill anything occupying the position
     tmthing = thing;
@@ -220,6 +220,11 @@ P_TeleportMove
  
     P_SetThingPosition (thing);
         
+    if ((thing->flags2 & MF2_FOOTCLIP) && isliquid[newsubsec->sector->floorpic])
+        thing->flags2 |= MF2_FEETARECLIPPED;
+    else
+        thing->flags2 &= ~MF2_FEETARECLIPPED;
+
     return true;
 }
 
@@ -534,6 +539,7 @@ P_TryMove
 {
     fixed_t        oldx;
     fixed_t        oldy;
+    sector_t       *newsec;
 
     floatok = false;
     if (!P_CheckPosition (thing, x, y))
@@ -588,15 +594,12 @@ P_TryMove
 
     P_SetThingPosition (thing);
 
-    if (thing->flags2 & MF2_FOOTCLIP
-        && P_GetThingFloorType(thing) != FLOOR_SOLID)
-    {
+    newsec = thing->subsector->sector;
+
+    if (thing->flags2 & MF2_FOOTCLIP && isliquid[newsec->floorpic])
         thing->flags2 |= MF2_FEETARECLIPPED;
-    }
-    else if (thing->flags2 & MF2_FEETARECLIPPED)
-    {
+    else
         thing->flags2 &= ~MF2_FEETARECLIPPED;
-    }
 
     // if any special lines were hit, do the effect
     if (! (thing->flags&(MF_TELEPORT|MF_NOCLIP)) )
@@ -629,6 +632,8 @@ P_TryMove
 boolean P_ThingHeightClip (mobj_t* thing)
 {
     boolean                onfloor;
+    fixed_t                oldfloorz = thing->floorz; // haleyjd
+    int                    flags2 = thing->flags2;
         
     onfloor = (thing->z == thing->floorz);
         
@@ -638,7 +643,17 @@ boolean P_ThingHeightClip (mobj_t* thing)
     thing->floorz = tmfloorz;
     thing->ceilingz = tmceilingz;
         
-    if (onfloor)
+    if ((flags2 & MF2_FEETARECLIPPED) && d_swirl && !thing->player)
+        thing->z = thing->floorz;
+    else if (flags2 & MF2_FLOATBOB)
+    {
+        if (thing->floorz > oldfloorz || !(thing->flags & MF_NOGRAVITY))
+            thing->z = thing->z - oldfloorz + thing->floorz;
+
+        if (thing->z + thing->height > thing->ceilingz)
+            thing->z = thing->ceilingz - thing->height;
+    }
+    else if (onfloor)
     {
         // walking monsters rise and fall with the floor
         thing->z = thing->floorz;
@@ -1450,9 +1465,7 @@ P_LineAttack
     shootz = t1->z + (t1->height>>1) + 8*FRACUNIT;
 
     if (t1->flags2 & MF2_FEETARECLIPPED && d_footclip)
-    {
         shootz -= FOOTCLIPSIZE;
-    }
 
     attackrange = distance;
     aimslope = slope;
@@ -1681,6 +1694,7 @@ P_RadiusAttack
 //
 boolean            crushchange;
 boolean            nofit;
+boolean            isliquidsector;
 
 //
 // PIT_ChangeSector
@@ -1688,7 +1702,13 @@ boolean            nofit;
 boolean PIT_ChangeSector (mobj_t*        thing)
 {
     mobj_t*        mo;
+    int            flags2 = thing->flags2;
         
+    if (isliquidsector && (flags2 & MF2_FOOTCLIP))
+        thing->flags2 |= MF2_FEETARECLIPPED;
+    else
+        thing->flags2 &= ~MF2_FEETARECLIPPED;
+
     if (P_ThingHeightClip (thing))
     {
         // keep checking
@@ -1765,6 +1785,7 @@ P_ChangeSector
         
     nofit = false;
     crushchange = crunch;
+    isliquidsector = isliquid[sector->floorpic];
         
     // re-check heights for all things near the moving sector
     for (x=sector->blockbox[BOXLEFT] ; x<= sector->blockbox[BOXRIGHT] ; x++)

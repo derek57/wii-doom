@@ -52,5 +52,6 @@ R_StoreWallRange
   int        stop );
 
 
+extern fixed_t*         spriteheight;
 
 #endif                // __R_LOCAL__

@@ -34,6 +34,8 @@
 #include "doomdef.h"
 #include "doomstat.h"
 #include "i_system.h"
+#include "r_defs.h"
+#include "p_spec.h"
 #include "r_local.h"
 #include "r_sky.h"
 #include "v_trans.h"
@@ -462,7 +464,6 @@ void R_DrawPlanes (void)
     int                 x;
     int                 stop;
     int                 angle;
-    int                 lumpnum;
                                 
 #ifdef RANGECHECK
 
@@ -517,15 +518,20 @@ void R_DrawPlanes (void)
         }
         else      // regular flat
         {
-            int swirling = 0;
-      
-            lumpnum = firstflat + flattranslation[pl->picnum];
-            swirling = flattranslation[pl->picnum] == -1;
-            ds_source =  swirling ?
-                    R_DistortedFlat(pl->picnum): W_CacheLumpNum(lumpnum,
-                            PU_STATIC);
+            int         picnum = pl->picnum;
+            boolean     liquid = isliquid[picnum];
+            boolean     swirling = (liquid && d_swirl);
+            int lumpnum = firstflat + flattranslation[picnum];
+
+            ds_source = (swirling ?
+                    R_DistortedFlat(picnum): W_CacheLumpNum(lumpnum,
+                            PU_STATIC));
 
             planeheight = abs(pl->height-viewz);
+
+            if (liquid && pl->sector && pl->sector->animate != INT_MAX)
+                planeheight -= pl->sector->animate;
+
             light = (pl->lightlevel >> LIGHTSEGSHIFT)+extralight;
 
             if (light >= LIGHTLEVELS)

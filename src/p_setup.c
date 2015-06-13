@@ -1182,6 +1182,8 @@ P_SetupLevel
     deathmatch_p = deathmatchstarts;
     P_LoadThings (lumpnum+ML_THINGS);
     
+    P_InitAnimatedLiquids();
+
     // if deathmatch, randomly spawn the active players
     if (deathmatch)
     {
@@ -1221,7 +1223,7 @@ void P_Init (void)
 {
     P_InitSwitchList ();
     P_InitPicAnims ();
-    P_InitTerrainTypes();
+//    P_InitTerrainTypes();
     R_InitSprites (sprnames);
 }
 
