@@ -1847,11 +1847,19 @@ void A_Footstep (mobj_t* mo)
         if(!not_walking)
         {
             if (P_GetThingFloorType(mo) < 51 ||
-                    (P_GetThingFloorType(mo) > 53 && P_GetThingFloorType(mo) < 69) ||
-                    (P_GetThingFloorType(mo) > 76 && P_GetThingFloorType(mo) < 89) ||
-                    (P_GetThingFloorType(mo) > 91 && P_GetThingFloorType(mo) < 136) ||
+                    (P_GetThingFloorType(mo) > 53  && P_GetThingFloorType(mo) < 69)  ||
+                    (P_GetThingFloorType(mo) > 76  && P_GetThingFloorType(mo) < 89)  ||
+                    (P_GetThingFloorType(mo) > 91  && P_GetThingFloorType(mo) < 136) ||
                     P_GetThingFloorType(mo) > 147)
                 S_StartSound (mo, sfx_step0 + t);
+            else if (P_GetThingFloorType(mo) > 68  && P_GetThingFloorType(mo) < 73)
+                S_StartSound (mo, sfx_water);
+            else if((P_GetThingFloorType(mo) > 50  && P_GetThingFloorType(mo) < 54)  ||
+                    (P_GetThingFloorType(mo) > 135 && P_GetThingFloorType(mo) < 144) ||
+                    (P_GetThingFloorType(mo) > 72  && P_GetThingFloorType(mo) < 77)  ||
+                    (P_GetThingFloorType(mo) > 88  && P_GetThingFloorType(mo) < 92)  ||
+                    (P_GetThingFloorType(mo) > 143 && P_GetThingFloorType(mo) < 148))
+                S_StartSound (mo, sfx_lava);
         }
         old_t = t;
     }
