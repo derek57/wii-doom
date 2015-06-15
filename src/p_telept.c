@@ -150,7 +150,7 @@ EV_Teleport
 
                 }
                 thing->angle = m->angle;
-                if (thing->flags2 & MF2_FOOTCLIP
+                if (!(thing->flags2 & MF2_NOFOOTCLIP)
                     && P_GetThingFloorType(thing) != FLOOR_SOLID)
                 {
                     thing->flags2 |= MF2_FEETARECLIPPED;

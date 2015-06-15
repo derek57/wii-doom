@@ -526,7 +526,6 @@ void R_ProjectSprite (mobj_t* thing)
     boolean            flip;
     
     int                index;
-    int                flags2 = thing->flags2;
 
     vissprite_t*       vis;
     
@@ -646,21 +645,16 @@ void R_ProjectSprite (mobj_t* thing)
     if ((thing->flags2 & MF2_FEETARECLIPPED) && d_footclip &&
             interpz <= thing->subsector->sector->interpfloorheight + FRACUNIT)
     {
-        fixed_t clipfeet = MIN((spriteheight[lump] >> FRACBITS) / 4, 10) << FRACBITS;
-
-        vis->texturemid = vis->gzt - viewz - clipfeet;
-
-        if (!(flags2 & MF2_FLOATBOB) && thing->subsector->sector->animate != INT_MAX)
-            clipfeet += thing->subsector->sector->animate;
+        fixed_t clipfeet = (spriteheight[lump] >> FRACBITS) / 4;
 
         vis->footclip = clipfeet;
     }
     else
     {
         vis->footclip = 0;
-
-        vis->texturemid = vis->gzt - viewz;
     }
+
+    vis->texturemid = vis->gzt - viewz - (vis->footclip << FRACBITS);
 
     vis->x1 = x1 < 0 ? 0 : x1;
     vis->x2 = x2 >= viewwidth ? viewwidth-1 : x2;        

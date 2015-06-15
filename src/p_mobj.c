@@ -48,23 +48,16 @@
 #define FRICTION_FLY            0xeb00
 
 
-static fixed_t FloatBobOffsets[64] = {
-    0, 51389, 102283, 152192,
-    200636, 247147, 291278, 332604,
-    370727, 405280, 435929, 462380,
-    484378, 501712, 514213, 521763,
-    524287, 521763, 514213, 501712,
-    484378, 462380, 435929, 405280,
-    370727, 332604, 291278, 247147,
-    200636, 152192, 102283, 51389,
-    -1, -51390, -102284, -152193,
-    -200637, -247148, -291279, -332605,
-    -370728, -405281, -435930, -462381,
-    -484380, -501713, -514215, -521764,
-    -524288, -521764, -514214, -501713,
-    -484379, -462381, -435930, -405280,
-    -370728, -332605, -291279, -247148,
-    -200637, -152193, -102284, -51389
+static fixed_t floatbobdiffs[64] =
+{
+     25695,  25695,  25447,  24955,  24222,  23256,  22066,  20663,
+     19062,  17277,  15325,  13226,  10999,   8667,   6251,   3775,
+      1262,  -1262,  -3775,  -6251,  -8667, -10999, -13226, -15325,
+    -17277, -19062, -20663, -22066, -23256, -24222, -24955, -25447,
+    -25695, -25695, -25447, -24955, -24222, -23256, -22066, -20663,
+    -19062, -17277, -15325, -13226, -11000,  -8667,  -6251,  -3775,
+     -1262,   1262,   3775,   6251,   8667,  10999,  13226,  15325,
+     17277,  19062,  20663,  22066,  23256,  24222,  24955,  25447
 };
 
 void G_PlayerReborn (int player);
@@ -607,10 +600,8 @@ void P_MobjThinker (mobj_t* mobj)
     if ((flags2 & MF2_FEETARECLIPPED) && !player &&
             mobj->z <= sector->floor_height && !mobj->momz && d_swirl)
         mobj->z += animatedliquiddiffs[leveltime & 127];
-    else if (mobj->flags2 & MF2_FLOATBOB)
-    {                           // Floating item bobbing motion
-        mobj->z = mobj->floorz + FloatBobOffsets[(mobj->health++) & 63];
-    }
+    else if (flags2 & MF2_FLOATBOB)
+        mobj->z += floatbobdiffs[(mobj->floatbob + leveltime) & 63];
     else if ( (mobj->z != mobj->floorz) || mobj->momz )
     {                           // Handle Z momentum and gravity
         if (mobj->flags2 & MF2_PASSMOBJ)
@@ -744,6 +735,8 @@ P_SpawnMobj
     mobj->floorz = mobj->subsector->sector->floor_height;
     mobj->ceilingz = mobj->subsector->sector->ceiling_height;
 
+    mobj->floatbob = P_Random();
+
     if (z == ONFLOORZ)
         mobj->z = mobj->floorz;
     else if (z == ONCEILINGZ)
@@ -764,7 +757,7 @@ P_SpawnMobj
         
     P_AddThinker (&mobj->thinker);
 
-    if ((mobj->flags2 & MF2_FOOTCLIP) && isliquid[mobj->subsector->sector->floorpic])
+    if (!(mobj->flags2 & MF2_NOFOOTCLIP) && isliquid[mobj->subsector->sector->floorpic])
         mobj->flags2 |= MF2_FEETARECLIPPED;
 
     return mobj;
@@ -1152,11 +1145,6 @@ void P_SpawnMapThing (mapthing_t* mthing)
     mobj = P_SpawnMobj (x,y,z, i);
     mobj->spawnpoint = *mthing;
 
-    if (mobj->flags2 & MF2_FLOATBOB)
-    {                           // Seed random starting index for bobbing motion
-        mobj->health = P_Random();
-    }
-
     if (mobj->tics > 0)
         mobj->tics = 1 + (P_Random () % mobj->tics);
     if (mobj->flags & MF_COUNTKILL)
@@ -1502,7 +1490,8 @@ int P_HitFloor(mobj_t * thing)
 {
     mobj_t *mo;
 
-    if (thing->floorz != thing->subsector->sector->floor_height)
+//    if (thing->floorz != thing->subsector->sector->floor_height)
+    if(thing->z > thing->subsector->sector->floor_height)
     {                           // don't splash if landing on the edge above water/lava/etc....
         return (FLOOR_SOLID);
     }

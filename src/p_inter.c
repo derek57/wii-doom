@@ -902,6 +902,8 @@ P_KillMobj
         }
         
     }
+    else
+        target->flags2 &= ~MF2_NOFLOATBOB;
 
     int minhealth = target->info->spawnhealth;
 

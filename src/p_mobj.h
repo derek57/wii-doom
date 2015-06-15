@@ -296,6 +296,9 @@ typedef struct mobj_s
     fixed_t                oldz;
     angle_t                oldangle;
 
+    // For bobbing up and down.
+    int                    floatbob;
+
 } mobj_t;
 
 

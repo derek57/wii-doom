@@ -220,7 +220,7 @@ P_TeleportMove
  
     P_SetThingPosition (thing);
         
-    if ((thing->flags2 & MF2_FOOTCLIP) && isliquid[newsubsec->sector->floorpic])
+    if (!(thing->flags2 & MF2_NOFOOTCLIP) && isliquid[newsubsec->sector->floorpic])
         thing->flags2 |= MF2_FEETARECLIPPED;
     else
         thing->flags2 &= ~MF2_FEETARECLIPPED;
@@ -596,7 +596,7 @@ P_TryMove
 
     newsec = thing->subsector->sector;
 
-    if (thing->flags2 & MF2_FOOTCLIP && isliquid[newsec->floorpic])
+    if (!(thing->flags2 & MF2_NOFOOTCLIP) && isliquid[newsec->floorpic])
         thing->flags2 |= MF2_FEETARECLIPPED;
     else
         thing->flags2 &= ~MF2_FEETARECLIPPED;
@@ -1704,7 +1704,7 @@ boolean PIT_ChangeSector (mobj_t*        thing)
     mobj_t*        mo;
     int            flags2 = thing->flags2;
         
-    if (isliquidsector && (flags2 & MF2_FOOTCLIP))
+    if (isliquidsector && !(flags2 & MF2_NOFOOTCLIP))
         thing->flags2 |= MF2_FEETARECLIPPED;
     else
         thing->flags2 &= ~MF2_FEETARECLIPPED;

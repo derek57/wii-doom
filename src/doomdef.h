@@ -229,18 +229,18 @@
 
 #define MF2_LOGRAV         0x00000001  // alternate gravity setting
 #define MF2_FLY            0x00000010  // fly mode is active
-#define MF2_FOOTCLIP       0x00000020  // if feet are allowed to be clipped
 #define MF2_NOTELEPORT     0x00000080  // does not teleport
-#define MF2_ONMOBJ         0x00000800  // mobj is resting on top of another
-                                       // mobj
+#define MF2_FLOATBOB       0x00001000  // Object bobs up and down
+#define MF2_ONMOBJ         0x00000800  // mobj is resting on top of another mobj
 
 #define MF2_PASSMOBJ       0x00001000  // Enable z block checking.  If on,
                                        // this flag will allow the mobj to
                                        // pass over/under other mobjs.
 
-#define MF2_MIRRORED       0x00002000
+#define MF2_MIRRORED       0x00002000  // object sprite is being displayed mirrored
 #define MF2_FEETARECLIPPED 0x00004000  // a mobj's feet are now being cut
-#define MF2_FLOATBOB       0x00080000  // use float bobbing z movement
+#define MF2_NOFOOTCLIP     0x00040000  // Object's feet won't be clipped in liquid
+#define MF2_NOFLOATBOB     0x00080000  // use float bobbing z movement
 #define MF2_SMOKETRAIL     0x02000000  // Object has smoke trail
 
 
