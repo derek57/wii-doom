@@ -83,6 +83,7 @@ dirtype_t diags[] =
 int               old_t;
 
 extern boolean    not_walking;
+extern boolean    is_spectre;
 
 
 
@@ -1203,7 +1204,7 @@ void A_VileChase (mobj_t* actor)
     int                        by;
 
     mobjinfo_t*                info;
-    mobj_t*                temp;
+    mobj_t*                    temp;
         
     if (actor->movedir != DI_NODIR)
     {
@@ -1289,8 +1290,8 @@ void A_FireCrackle (mobj_t* actor)
 void A_Fire (mobj_t* actor)
 {
     mobj_t*        dest;
-    mobj_t*     target;
-    unsigned        an;
+    mobj_t*        target;
+    unsigned       an;
                 
     dest = actor->tracer;
     if (!dest)
@@ -2186,7 +2187,7 @@ void A_MoreGibs(mobj_t* actor)
         mo = P_SpawnMobj(actor->x, actor->y, actor->z + (24*FRACUNIT), MT_FLESH);
 
         // added for colored blood and gore!
-        mo->target = actor->target;
+        mo->target = actor;
 
         P_SetMobjState(mo, mo->info->spawnstate + (P_Random() % 19));
 
@@ -2220,7 +2221,7 @@ void A_MoreGibs(mobj_t* actor)
                                        actor->z + (32*FRACUNIT), MT_GORE);
 
             // added for colored blood and gore!
-            gore->target = mo->target;
+            gore->target = mo;
 
             gore->angle = mo->angle;
 
@@ -2252,7 +2253,13 @@ void A_Fall (mobj_t *actor)
                              actor->z + actor->info->height/2, MT_GORE);
 
             // added for colored blood and gore!
-            mo->target = actor->target;
+            mo->target = actor;
+
+            // Spectres bleed spectre blood
+            if ((d_colblood2 && d_chkblood2) && is_spectre)
+                mo->flags |= MF_SHADOW;
+            else if(!is_spectre)
+                mo->flags &= ~MF_SHADOW;
 
             t = P_Random() % 3;
             if(t > 0)
@@ -2299,6 +2306,12 @@ void A_MoreBlood(mobj_t * actor)
 
                 // added for colored blood and gore!
                 mo->target = actor->target;
+
+                // Spectres bleed spectre blood
+                if ((d_colblood2 && d_chkblood2) && is_spectre)
+                    mo->flags |= MF_SHADOW;
+                else if(!is_spectre)
+                    mo->flags &= ~MF_SHADOW;
 
                 t = P_Random() % 6;
 

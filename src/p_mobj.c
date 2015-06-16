@@ -77,6 +77,8 @@ int             iquehead;
 int             iquetail;
 int             puffcount;
 
+boolean         is_spectre;
+
 mapthing_t      itemrespawnque[ITEMQUESIZE];
 
 //
@@ -1257,6 +1259,15 @@ P_SpawnBlood
         t = P_Random();
         th2->momy = (t - P_Random ()) << 10;
         th2->momz = P_Random() << 10;
+
+        // Spectres bleed spectre blood
+        if ((d_colblood2 && d_chkblood2) && target->type == MT_SHADOWS)
+        {
+            th2->flags |= MF_SHADOW;
+            is_spectre = true;
+        }
+        else if(target->type != MT_SHADOWS)
+            is_spectre = false;
 
         P_SetMobjState(th2, S_BLOOD1 + (P_Random() % 2));
     }
