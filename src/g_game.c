@@ -141,6 +141,7 @@ int             timelimit;
 int             mousex;
 int             mousey;         
 
+int	        defdemosize;            // demo progress bar
 int             d_episode; 
 int             d_map; 
 int             gameepisode; 
@@ -1160,6 +1161,13 @@ void G_DoPlayDemo (void)
          
     gameaction = ga_nothing; 
     demobuffer = demo_p = W_CacheLumpName (defdemoname, PU_STATIC); 
+
+    // demo progress bar
+    defdemosize = 0;
+    while (*demo_p++ != DEMOMARKER)
+    {
+	defdemosize++;
+    }
 
     if (fsize != 10396254 && fsize != 10399316 && fsize != 4207819 && fsize != 4274218 &&
         fsize != 4225504 && fsize != 4225460)
