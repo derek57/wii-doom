@@ -2186,7 +2186,7 @@ void A_MoreGibs(mobj_t* actor)
         mo = P_SpawnMobj(actor->x, actor->y, actor->z + (24*FRACUNIT), MT_FLESH);
 
         // added for colored blood and gore!
-        mo->target = actor;
+        mo->target = actor->target;
 
         P_SetMobjState(mo, mo->info->spawnstate + (P_Random() % 19));
 
@@ -2220,7 +2220,7 @@ void A_MoreGibs(mobj_t* actor)
                                        actor->z + (32*FRACUNIT), MT_GORE);
 
             // added for colored blood and gore!
-            gore->target = mo;
+            gore->target = mo->target;
 
             gore->angle = mo->angle;
 
@@ -2252,7 +2252,7 @@ void A_Fall (mobj_t *actor)
                              actor->z + actor->info->height/2, MT_GORE);
 
             // added for colored blood and gore!
-            mo->target = actor;
+            mo->target = actor->target;
 
             t = P_Random() % 3;
             if(t > 0)
@@ -2279,15 +2279,13 @@ int numsplats;
 
 void A_MoreBlood(mobj_t * actor)
 {
-    int i;
-
-    numsplats++;
-
     if(d_maxgore && !(actor->flags & MF_NOBLOOD))
     {
-        int t;
+        int i, t;
 
         mobj_t *mo;
+
+        numsplats++;
 
         // WARNING: don't go lower than BLOODSPLAT_PER_COUNTER !!!
         for(i = SPLAT_PER_COUNTER; i <= numsplats / SPLAT_PER_COUNTER; ++i)
@@ -2300,7 +2298,7 @@ void A_MoreBlood(mobj_t * actor)
                                  actor->z, MT_CHUNK);
 
                 // added for colored blood and gore!
-                mo->target = actor;
+                mo->target = actor->target;
 
                 t = P_Random() % 6;
 

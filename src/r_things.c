@@ -714,8 +714,7 @@ void R_ProjectSprite (mobj_t* thing)
     if (d_colblood && d_chkblood && thing->target &&
        (thing->type == MT_BLOOD ||
         thing->type == MT_GORE ||
-        thing->type == MT_CHUNK ||
-        thing->type == MT_FLESH))
+        thing->type == MT_CHUNK))
     {
         // Thorn Things in Hacx bleed green blood
         if (gamemission == pack_hacx)
@@ -728,15 +727,15 @@ void R_ProjectSprite (mobj_t* thing)
         else
         {
             // Barons of Hell and Hell Knights bleed green blood
-            if ((thing->target->type == MT_BRUISER && !beta_style) ||
-                (thing->target->type == MT_BETABRUISER && beta_style) ||
+            if (thing->target->type == MT_BRUISER ||
+                thing->target->type == MT_BETABRUISER ||
                 thing->target->type == MT_KNIGHT)
             {
                 vis->translation = crx[CRX_GREEN];
             }
             // Cacodemons bleed blue blood
-            else if ((thing->target->type == MT_HEAD && !beta_style) ||
-                     (thing->target->type == MT_BETAHEAD && beta_style))
+            else if (thing->target->type == MT_HEAD ||
+                     thing->target->type == MT_BETAHEAD)
             {
                 vis->translation = crx[CRX_BLUE];
             }
