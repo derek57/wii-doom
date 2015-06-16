@@ -1373,6 +1373,7 @@ boolean PTR_ShootTraverse (intercept_t* in)
     // depending on target type.
     if (in->d.thing->flags & MF_NOBLOOD)
         P_SpawnPuff (x,y,z);
+    // explode a missile
     else
         P_SpawnBlood (x,y,z, la_damage, th);
 
