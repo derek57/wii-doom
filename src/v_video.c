@@ -54,7 +54,7 @@
 #define RANGECHECK
 
 // prevent framebuffer overflow
-#define dest_in_framebuffer (safe || ((dest-dest_screen) < SCREENHEIGHT*SCREENWIDTH))
+#define dest_in_framebuffer ((dest >= screens[scrn]) && (dest < screens[scrn] + SCREENHEIGHT*SCREENWIDTH))
 
 
 byte redtoyellow[] =
@@ -80,11 +80,6 @@ byte redtoyellow[] =
 
 // Each screen is [SCREENWIDTH * SCREENHEIGHT];
 byte                         *screens[5];
-
-static  patch_t*             v_font[V_FONTSIZE];
-
-// The screen buffer that the v_video.c code draws to.
-static  byte                 *dest_screen = NULL;
 
 // haleyjd 08/28/10: clipping callback function for patches.
 // This is needed for Chocolate Strife, which clips patches to the screen.
@@ -115,11 +110,8 @@ void V_MarkRect(int x, int y, int width, int height)
     // If we are temporarily using an alternate screen, do not 
     // affect the update box.
 
-//    if (dest_screen == I_VideoBuffer)
-    {
-        M_AddToBox (dirtybox, x, y); 
-        M_AddToBox (dirtybox, x + width-1, y + height-1); 
-    }
+    M_AddToBox (dirtybox, x, y); 
+    M_AddToBox (dirtybox, x + width-1, y + height-1); 
 } 
  
 
@@ -157,7 +149,6 @@ V_CopyRect
      || desty < 0
      || desty /* + height */ > SCREENHEIGHT)
     {
-//        I_Error ("Bad V_CopyRect");
         C_Printf(CR_RED, " Bad V_CopyRect: Patch (%d,%d)-(%d,%d) / Dest.: (%d,%d) exceeds LFB\n"
                 , srcx, srcy, srcx + width, srcy + height, destx, desty);
     }
@@ -170,10 +161,7 @@ V_CopyRect
         height = SCREENHEIGHT - desty;
 
     V_MarkRect(destx, desty, width, height); 
-/* 
-    src = source + SCREENWIDTH * srcy + srcx; 
-    dest = dest_screen + SCREENWIDTH * desty + destx; 
-*/
+
     src = screens[srcscrn] + SCREENWIDTH * srcy + srcx;
     dest = screens[destscrn] + SCREENWIDTH * desty + destx;
 
@@ -219,8 +207,6 @@ V_DrawPatch
     byte *dest;
     byte *source;
     int w, f;
-    // prevent framebuffer overflow
-    const boolean safe = !(y + SHORT(patch->height) > ORIGHEIGHT);
 
     y -= SHORT(patch->topoffset);
     x -= SHORT(patch->leftoffset);
@@ -234,11 +220,10 @@ V_DrawPatch
 
 #ifdef RANGECHECK
     if (x < 0
-     || x /* + SHORT(patch->width) */ > ORIGWIDTH
+     || x + SHORT(patch->width) > ORIGWIDTH
      || y < 0
-     || y /* + SHORT(patch->height) */ > ORIGHEIGHT )
+     || y + SHORT(patch->height) > ORIGHEIGHT )
     {
-//        I_Error("Bad V_DrawPatch");
         C_Printf(CR_RED, " Bad V_DrawPatch: Patch (%d,%d) exceeds LFB\n", x, y);
     }
 #endif
@@ -246,7 +231,6 @@ V_DrawPatch
     V_MarkRect(x, y, SHORT(patch->width), SHORT(patch->height));
 
     col = 0;
-//    desttop = dest_screen + (y << hires) * SCREENWIDTH + x;
     desttop = screens[scrn] + (y << hires) * SCREENWIDTH + x;
 
     w = SHORT(patch->width);
@@ -274,8 +258,16 @@ V_DrawPatch
                     count = column->length;
 
                     // prevent framebuffer overflow
-                    while (count-- && dest_in_framebuffer)
+                    while (count--)
                     {
+                        // prevent framebuffer overflow
+                        if (!dest_in_framebuffer)
+                        {
+                            source++;
+                            dest += (1 + hires) * SCREENWIDTH;
+                            continue;
+                        }
+
                         if (hires)
                         {
                             *dest = *source;
@@ -306,8 +298,16 @@ V_DrawPatch
                     count = column->length;
 
                     // prevent framebuffer overflow
-                    while (count-- && dest_in_framebuffer)
+                    while (count--)
                     {
+                        // prevent framebuffer overflow
+                        if (!dest_in_framebuffer)
+                        {
+                            source++;
+                            dest += (1 + hires) * SCREENWIDTH;
+                            continue;
+                        }
+
                         if (hires)
                         {
                             *dest = dp_translation[*source];
@@ -338,8 +338,16 @@ V_DrawPatch
                     count = column->length;
 
                     // prevent framebuffer overflow
-                    while (count-- && dest_in_framebuffer)
+                    while (count--)
                     {
+                        // prevent framebuffer overflow
+                        if (!dest_in_framebuffer)
+                        {
+                            source++;
+                            dest += (1 + hires) * SCREENWIDTH;
+                            continue;
+                        }
+
                         if (hires)
                         {
                             *dest = tranmap[(*dest<<8)+*source];
@@ -370,8 +378,16 @@ V_DrawPatch
                     count = column->length;
 
                     // prevent framebuffer overflow
-                    while (count-- && dest_in_framebuffer)
+                    while (count--)
                     {
+                        // prevent framebuffer overflow
+                        if (!dest_in_framebuffer)
+                        {
+                            source++;
+                            dest += (1 + hires) * SCREENWIDTH;
+                            continue;
+                        }
+
                         if (hires)
                         {
                             *dest = tranmap[(*dest<<8)+dp_translation[*source]];
@@ -408,8 +424,6 @@ V_DrawPatchFlipped
     byte *source; 
     byte sourcetrans;
     int w, f; 
-    // prevent framebuffer overflow
-    const boolean safe = !(y + SHORT(patch->height) > ORIGHEIGHT);
 
     y -= SHORT(patch->topoffset); 
     x -= SHORT(patch->leftoffset); 
@@ -421,13 +435,12 @@ V_DrawPatchFlipped
             return;
     }
 
-#ifdef RANGECHECK 
+#ifdef RANGECHECK
     if (x < 0
-     || x /* + SHORT(patch->width) */ > ORIGWIDTH
+     || x + SHORT(patch->width) > ORIGWIDTH
      || y < 0
-     || y /* + SHORT(patch->height) */ > ORIGHEIGHT )
+     || y + SHORT(patch->height) > ORIGHEIGHT )
     {
-//        I_Error("Bad V_DrawPatchFlipped");
         C_Printf(CR_RED, " Bad V_DrawPatchFlipped: Patch (%d,%d)-(%d,%d) exceeds LFB\n"
                 , x, y, x + SHORT(patch->width), y + SHORT(patch->height));
     }
@@ -436,9 +449,7 @@ V_DrawPatchFlipped
     V_MarkRect (x, y, SHORT(patch->width), SHORT(patch->height));
 
     col = 0;
-//    desttop = dest_screen + (y << hires) * SCREENWIDTH + x;
-//    desttop = screens[0] + (y << hires) * SCREENWIDTH + x; // FIXME
-    desttop = screens[scrn]+ (y << hires) * SCREENWIDTH + x; // FIXME
+    desttop = screens[scrn]+ (y << hires) * SCREENWIDTH + x;
 
     w = SHORT(patch->width);
 
@@ -460,10 +471,17 @@ V_DrawPatchFlipped
                        (x * hires) + f;
                 count = column->length;
 
-//                while (count--)
                 // prevent framebuffer overflow
-                while (count-- && dest_in_framebuffer)
+                while (count--)
                 {
+                    // prevent framebuffer overflow
+                    if (!dest_in_framebuffer)
+                    {
+                        source++;
+                        dest += (1 + hires) * SCREENWIDTH;
+                        continue;
+                    }
+
                     if (dp_translation)
                         sourcetrans = dp_translation[*source++];
                     else
@@ -502,282 +520,7 @@ V_DrawPatchDirect
     V_DrawPatch(x, y, scrn, patch); 
 } 
 
-//
-// V_DrawTLPatch
-//
-// Masks a column based translucent masked pic to the screen.
-//
-/*
-void V_DrawTLPatch(int x, int y, patch_t * patch)
-{
-    int count, col;
-    column_t *column;
-    byte *desttop, *dest, *source;
-    int w, f;
 
-    y -= SHORT(patch->topoffset);
-    x -= SHORT(patch->leftoffset);
-
-    if (x < 0
-     || x + SHORT(patch->width) > ORIGWIDTH 
-     || y < 0
-     || y + SHORT(patch->height) > ORIGHEIGHT)
-    {
-//        I_Error("Bad V_DrawTLPatch");
-        C_Printf(CR_RED, " Bad V_DrawTLPatch: Patch (%d,%d)-(%d,%d) exceeds LFB\n"
-                , x, y, x + SHORT(patch->width), y + SHORT(patch->height));
-    }
-
-    col = 0;
-//    desttop = dest_screen + (y << hires) * SCREENWIDTH + x;
-    desttop = screens[scrn] + (y << hires) * SCREENWIDTH + x;
-
-    w = SHORT(patch->width);
-    for (; col < w; x++, col++, desttop++)
-    {
-        column = (column_t *) ((byte *) patch + LONG(patch->columnofs[col]));
-
-        // step through the posts in a column
-
-        while (column->topdelta != 0xff)
-        {
-            for (f = 0; f <= hires; f++)
-            {
-                source = (byte *) column + 3;
-                dest = desttop + column->topdelta * (SCREENWIDTH << hires) +
-                       (x * hires) + f;
-                count = column->length;
-
-                while (count--)
-                {
-                    if (hires)
-                    {
-                        *dest = tinttable[((*dest) << 8) + *source];
-                        dest += SCREENWIDTH;
-                    }
-                    *dest = tinttable[((*dest) << 8) + *source++];
-                    dest += SCREENWIDTH;
-                }
-            }
-            column = (column_t *) ((byte *) column + column->length + 4);
-        }
-    }
-}
-
-//
-// V_DrawXlaPatch
-//
-// villsa [STRIFE] Masks a column based translucent masked pic to the screen.
-//
-
-void V_DrawXlaPatch(int x, int y, patch_t * patch)
-{
-    int count, col;
-    column_t *column;
-    byte *desttop, *dest, *source;
-    int w, f;
-
-    y -= SHORT(patch->topoffset);
-    x -= SHORT(patch->leftoffset);
-
-    if(patchclip_callback)
-    {
-        if(!patchclip_callback(patch, x, y))
-            return;
-    }
-
-    col = 0;
-//    desttop = dest_screen + (y << hires) * SCREENWIDTH + x;
-    desttop = screens[scrn] + (y << hires) * SCREENWIDTH + x;
-
-    w = SHORT(patch->width);
-    for(; col < w; x++, col++, desttop++)
-    {
-        column = (column_t *) ((byte *) patch + LONG(patch->columnofs[col]));
-
-        // step through the posts in a column
-
-        while(column->topdelta != 0xff)
-        {
-            for (f = 0; f <= hires; f++)
-            {
-                source = (byte *) column + 3;
-                dest = desttop + column->topdelta * (SCREENWIDTH << hires) +
-                       (x * hires) + f;
-                count = column->length;
-
-                while(count--)
-                {
-                    if (hires)
-                    {
-                        *dest = xlatab[*dest + ((*source) << 8)];
-                        dest += SCREENWIDTH;
-                    }
-                    *dest = xlatab[*dest + ((*source) << 8)];
-                    source++;
-                    dest += SCREENWIDTH;
-                }
-            }
-            column = (column_t *) ((byte *) column + column->length + 4);
-        }
-    }
-}
-
-//
-// V_DrawAltTLPatch
-//
-// Masks a column based translucent masked pic to the screen.
-//
-
-void V_DrawAltTLPatch(int x, int y, patch_t * patch)
-{
-    int count, col;
-    column_t *column;
-    byte *desttop, *dest, *source;
-    int w, f;
-
-    y -= SHORT(patch->topoffset);
-    x -= SHORT(patch->leftoffset);
-#ifdef RANGECHECK
-    if (x < 0
-     || x + SHORT(patch->width) > ORIGWIDTH
-     || y < 0
-     || y + SHORT(patch->height) > ORIGHEIGHT)
-    {
-//        I_Error("Bad V_DrawAltTLPatch");
-        C_Printf(CR_RED, " Bad V_DrawAltTLPatch: Patch (%d,%d)-(%d,%d) exceeds LFB\n"
-                , x, y, x + SHORT(patch->width), y + SHORT(patch->height));
-    }
-#endif
-    col = 0;
-//    desttop = dest_screen + (y << hires) * SCREENWIDTH + x;
-    desttop = screens[scrn] + (y << hires) * SCREENWIDTH + x;
-
-    w = SHORT(patch->width);
-    for (; col < w; x++, col++, desttop++)
-    {
-        column = (column_t *) ((byte *) patch + LONG(patch->columnofs[col]));
-
-        // step through the posts in a column
-
-        while (column->topdelta != 0xff)
-        {
-            for (f = 0; f <= hires; f++)
-            {
-                source = (byte *) column + 3;
-                dest = desttop + column->topdelta * (SCREENWIDTH << hires) +
-                       (x * hires) + f;
-                count = column->length;
-
-                while (count--)
-                {
-                    if (hires)
-                    {
-                        *dest = tinttable[((*dest) << 8) + *source];
-                        dest += SCREENWIDTH;
-                    }
-                    *dest = tinttable[((*dest) << 8) + *source++];
-                    dest += SCREENWIDTH;
-                }
-            }
-            column = (column_t *) ((byte *) column + column->length + 4);
-        }
-    }
-}
-
-//
-// V_DrawShadowedPatch
-//
-// Masks a column based masked pic to the screen.
-//
-
-void V_DrawShadowedPatch(int x, int y, patch_t *patch)
-{
-    int count, col;
-    column_t *column;
-    byte *desttop, *dest, *source;
-    byte *desttop2, *dest2;
-    int w, f;
-
-    y -= SHORT(patch->topoffset);
-    x -= SHORT(patch->leftoffset);
-#ifdef RANGECHECK
-    if (x < 0
-     || x + SHORT(patch->width) > ORIGWIDTH
-     || y < 0
-     || y + SHORT(patch->height) > ORIGHEIGHT)
-    {
-//        I_Error("Bad V_DrawShadowedPatch");
-        C_Printf(CR_RED, " Bad V_DrawShadowedPatch: Patch (%d,%d)-(%d,%d) exceeds LFB\n"
-                , x, y, x + SHORT(patch->width), y + SHORT(patch->height));
-    }
-#endif
-    col = 0;
-
-//    desttop = dest_screen + (y << hires) * SCREENWIDTH + x;
-//    desttop2 = dest_screen + ((y + 2) << hires) * SCREENWIDTH + x + 2;
-
-    desttop = screens[0] + (y << hires) * SCREENWIDTH + x;
-    desttop2 = screens[0] + ((y + 2) << hires) * SCREENWIDTH + x + 2;
-
-    w = SHORT(patch->width);
-    for (; col < w; x++, col++, desttop++, desttop2++)
-    {
-        column = (column_t *) ((byte *) patch + LONG(patch->columnofs[col]));
-
-        // step through the posts in a column
-
-        while (column->topdelta != 0xff)
-        {
-            for (f = 0; f <= hires; f++)
-            {
-                source = (byte *) column + 3;
-                dest = desttop + column->topdelta * (SCREENWIDTH << hires) +
-                       (x * hires) + f;
-                dest2 = desttop2 + column->topdelta * (SCREENWIDTH << hires) +
-                       (x * hires) + f;
-                count = column->length;
-
-                while (count--)
-                {
-                    if (hires)
-                    {
-                        *dest2 = tinttable[((*dest2) << 8)];
-                        dest2 += SCREENWIDTH;
-                        *dest = *source;
-                        dest += SCREENWIDTH;
-                    }
-                    *dest2 = tinttable[((*dest2) << 8)];
-                    dest2 += SCREENWIDTH;
-                    *dest = *source++;
-                    dest += SCREENWIDTH;
-                }
-            }
-            column = (column_t *) ((byte *) column + column->length + 4);
-        }
-    }
-}
-
-//
-// Load tint table from TINTTAB lump.
-//
-
-void V_LoadTintTable(void)
-{
-    tinttable = W_CacheLumpName("TINTTAB", PU_STATIC);
-}
-
-//
-// V_LoadXlaTable
-//
-// villsa [STRIFE] Load xla table from XLATAB lump.
-//
-
-void V_LoadXlaTable(void)
-{
-    xlatab = W_CacheLumpName("XLATAB", PU_STATIC);
-}
-*/
 //
 // V_DrawBlock
 // Draw a linear block of pixels into the view buffer.
@@ -800,7 +543,6 @@ V_DrawBlock
      || y < 0
      || y + height > SCREENHEIGHT)
     {
-//        I_Error ("Bad V_DrawBlock");
         C_Printf(CR_RED, " Bad V_DrawBlock: Patch (%d,%d)-(%d,%d) exceeds LFB\n"
                 , x, y, x + width, y + height);
     }
@@ -808,9 +550,7 @@ V_DrawBlock
  
     V_MarkRect (x, y, width, height); 
  
-//    dest = dest_screen + (y << hires) * SCREENWIDTH + x;
-//    dest = screens[0] + (y << hires) * SCREENWIDTH + x;  // FIXME
-    dest = screens[scrn] + (y << hires) * SCREENWIDTH + x; // FIXME
+    dest = screens[scrn] + (y << hires) * SCREENWIDTH + x;
 
     while (height--) 
     { 
@@ -831,7 +571,6 @@ void V_DrawScaledBlock(int x, int y, int scrn, int width, int height, byte *src)
      || y < 0
      || y + height > ORIGHEIGHT)
     {
-//        I_Error ("Bad V_DrawScaledBlock");
         C_Printf(CR_RED, " Bad V_DrawScaledBlock: Patch (%d,%d)-(%d,%d) exceeds LFB\n"
                 , x, y, x + width, y + height);
     }
@@ -839,7 +578,6 @@ void V_DrawScaledBlock(int x, int y, int scrn, int width, int height, byte *src)
 
     V_MarkRect (x, y, width, height);
 
-//    dest = dest_screen + (y << hires) * SCREENWIDTH + (x << hires);
     dest = screens[scrn] + (y << hires) * SCREENWIDTH + (x << hires);
 
     for (i = 0; i < (height << hires); i++)
@@ -857,7 +595,6 @@ void V_DrawFilledBox(int x, int y, int w, int h, int c)
     uint8_t *buf, *buf1;
     int x1, y1;
 
-//    buf = I_VideoBuffer + SCREENWIDTH * y + x;
     buf = screens[0] + SCREENWIDTH * y + x;
 
     for (y1 = 0; y1 < h; ++y1)
@@ -878,7 +615,6 @@ void V_DrawHorizLine(int x, int y, int w, int c)
     uint8_t *buf;
     int x1;
 
-//    buf = I_VideoBuffer + SCREENWIDTH * y + x;
     buf = screens[0] + SCREENWIDTH * y + x;
 
     for (x1 = 0; x1 < w; ++x1)
@@ -892,7 +628,6 @@ void V_DrawVertLine(int x, int y, int h, int c)
     uint8_t *buf;
     int y1;
 
-//    buf = I_VideoBuffer + SCREENWIDTH * y + x;
     buf = screens[0] + SCREENWIDTH * y + x;
 
     for (y1 = 0; y1 < h; ++y1)
@@ -923,7 +658,6 @@ void V_CopyScaledBuffer(byte *dest, byte *src, size_t size)
     if (size < 0
      || size > ORIGWIDTH * ORIGHEIGHT)
     {
-//        I_Error("Bad V_CopyScaledBuffer");
         C_Printf(CR_RED, " Bad V_CopyScaledBuffer: Size mismatch (%d)\n", size);
     }
 #endif
@@ -944,7 +678,6 @@ void V_CopyScaledBuffer(byte *dest, byte *src, size_t size)
  
 void V_DrawRawScreen(byte *raw)
 {
-//    V_CopyScaledBuffer(dest_screen, raw, ORIGWIDTH * ORIGHEIGHT);
     memcpy(screens[0], raw, ORIGWIDTH * ORIGHEIGHT);
 }
 
@@ -964,105 +697,9 @@ void V_Init (void)
         screens[i] = base + i * SCREENWIDTH * SCREENHEIGHT;
 }
 
-// Set the buffer that the code draws to.
-/*
-void V_UseBuffer(byte *buffer)
-{
-    dest_screen = buffer;
-}
-
-// Restore screen buffer to the i_video screen buffer.
-
-void V_RestoreBuffer(void)
-{
-    dest_screen = I_VideoBuffer;
-}
-*/
-// isprint() function (win32 doesnt like it, seems)
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wchar-subscripts"
-
-boolean V_IsPrint(char c)
-{
-    // new colour
-    if (c >= 128)
-    {
-        int colnum = c - 128;
-
-        if(colnum < 0 || colnum >= 10)
-            return false;
-        else
-            return true;
-    }
-
-    // hack to make spacebar work
-    if(c == ' ')
-        return true;
-  
-    c = toupper(c) - V_FONTSTART;
-
-    if (c >= V_FONTSIZE)
-    {
-        return false;
-    }
-  
-    return v_font[c] != NULL;
-}
-
-
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-value"
-/*
-void V_DrawConsoleChar(int x,
-                       int y,
-                       patch_t *patch,
-                       byte color,
-                       boolean italics,
-                       int translucency)
-{
-    int         col = 0;
-    byte        *desttop = dest_screen + (y << hires) * SCREENWIDTH + x;
-    int         w = SHORT(patch->width);
 
-    for (; col < w; col++, desttop++)
-    {
-        column_t        *column = (column_t *)((byte *)patch +
-                                  LONG(patch->columnofs[col]));
-
-        // step through the posts in a column
-        while (column->topdelta != 0xff)
-        {
-            byte        *source = (byte *)column + 3;
-            byte        *dest = desttop + column->topdelta * SCREENWIDTH;
-            int         count = column->length;
-
-            while (count--)
-            {
-                if (y + column->topdelta + column->length - count > 0)
-                {
-                    if (*source == 160)
-                    {
-                        if (italics)
-                            *(dest + italicize[column->topdelta +
-                                    column->length - count]) = color;
-                        else if(!italics)
-                            *dest = color;
-                        else
-                            *dest = (translucency == 1 ?
-                                    tinttab25[(color << 8) + *dest] :
-                                    (translucency == 2 ?
-                                    tinttab25[(*dest << 8) + color] : color));
-                    }
-                    *(source++);
-                }
-                dest += SCREENWIDTH;
-            }
-            column = (column_t *)((byte *)column + column->length + 4);
-        }
-    }
-}
-*/
 void V_DrawConsoleChar(int x, int y, patch_t *patch, byte color, boolean italics, int translucency,
     boolean inverted)
 {
