@@ -299,6 +299,10 @@ void    P_InitTerrainTypes(void);
 
 int     P_HitFloor(mobj_t * thing);
 
+void A_ReFire
+( player_t*        player,
+  pspdef_t*        psp );
+
 //
 // P_SPEC
 //

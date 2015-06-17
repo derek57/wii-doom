@@ -53,7 +53,7 @@ char *sprnames[] = {
     "COL5","TBLU","TGRN","TRED","SMBT","SMGT","SMRT","HDB1","HDB2","HDB3",
     "HDB4","HDB5","HDB6","POB1","POB2","BRS1","TLMP","TLP2",
 
-    "FLSH","SPRY","CHNK","SPSH","LVAS","SLDG",
+    "FLSH","SPRY","CHNK","CHKB","CHKG","SPSH","LVAS","SLDG",
 
     // BETA SPRITES BELOW
 
@@ -1186,6 +1186,18 @@ state_t        states[NUMSTATES] = {
     {SPR_CHNK,3,-1,{NULL},S_CHUNK_04,0,0},       // S_CHUNK_03
     {SPR_CHNK,4,-1,{NULL},S_CHUNK_05,0,0},       // S_CHUNK_04
     {SPR_CHNK,5,-1,{NULL},S_NULL,0,0},   // S_CHUNK_05
+    {SPR_CHKB,0,-1,{NULL},S_CHUNKBLUE_01,0,0},       // S_CHUNKBLUE_00
+    {SPR_CHKB,1,-1,{NULL},S_CHUNKBLUE_02,0,0},       // S_CHUNKBLUE_01
+    {SPR_CHKB,2,-1,{NULL},S_CHUNKBLUE_03,0,0},       // S_CHUNKBLUE_02
+    {SPR_CHKB,3,-1,{NULL},S_CHUNKBLUE_04,0,0},       // S_CHUNKBLUE_03
+    {SPR_CHKB,4,-1,{NULL},S_CHUNKBLUE_05,0,0},       // S_CHUNKBLUE_04
+    {SPR_CHKB,5,-1,{NULL},S_NULL,0,0},   // S_CHUNKBLUE_05
+    {SPR_CHKG,0,-1,{NULL},S_CHUNKGREEN_01,0,0},       // S_CHUNKGREEN_00
+    {SPR_CHKG,1,-1,{NULL},S_CHUNKGREEN_02,0,0},       // S_CHUNKGREEN_01
+    {SPR_CHKG,2,-1,{NULL},S_CHUNKGREEN_03,0,0},       // S_CHUNKGREEN_02
+    {SPR_CHKG,3,-1,{NULL},S_CHUNKGREEN_04,0,0},       // S_CHUNKGREEN_03
+    {SPR_CHKG,4,-1,{NULL},S_CHUNKGREEN_05,0,0},       // S_CHUNKGREEN_04
+    {SPR_CHKG,5,-1,{NULL},S_NULL,0,0},   // S_CHUNKGREEN_05
     {SPR_SPSH, 0, 8, {NULL}, S_SPLASH2, 0, 0},    // S_SPLASH1
     {SPR_SPSH, 1, 8, {NULL}, S_SPLASH3, 0, 0},    // S_SPLASH2
     {SPR_SPSH, 2, 8, {NULL}, S_SPLASH4, 0, 0},    // S_SPLASH3
@@ -1885,7 +1897,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_dmact,                // activesound
         MF_SOLID|MF_SHOOTABLE|MF_FLOAT|MF_NOGRAVITY|MF_COUNTKILL, // flags
-        MF2_NOFLOATBOB, // flags2
+        MF2_NOFLOATBOB | MF2_BLUEBLOOD, // flags2
         S_HEAD_RAISE1,                // raisestate
         NULL,       // namepointer
     },
@@ -1914,7 +1926,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_dmact,                // activesound
         MF_SOLID|MF_SHOOTABLE|MF_COUNTKILL, // flags
-        MF2_NOFLOATBOB, // flags2
+        MF2_NOFLOATBOB | MF2_GREENBLOOD, // flags2
         S_BOSS_RAISE1,                // raisestate
         NULL,       // namepointer
     },
@@ -1972,7 +1984,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_dmact,                // activesound
         MF_SOLID|MF_SHOOTABLE|MF_COUNTKILL, // flags
-        MF2_NOFLOATBOB, // flags2
+        MF2_NOFLOATBOB | MF2_GREENBLOOD, // flags2
         S_BOS2_RAISE1,                // raisestate
         NULL,       // namepointer
     },
@@ -5515,6 +5527,64 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         NULL,       // namepointer
     },
 
+    {           // MT_CHUNK_BLUE
+        -1,             // doomednum
+        S_CHUNKBLUE_00,             // spawnstate
+        1000,           // spawnhealth
+        S_NULL,         // seestate
+        sfx_None,              // seesound
+        8,              // reactiontime
+        sfx_None,              // attacksound
+        S_NULL,         // painstate
+        0,              // painchance
+        sfx_None,              // painsound
+        S_NULL,         // meleestate
+        S_NULL,         // missilestate
+        S_NULL,     // crashstate
+        S_NULL,         // deathstate
+        S_NULL,         // xdeathstate
+        sfx_None,              // deathsound
+        0,              // speed
+        5 * FRACUNIT,         // radius
+        16 * FRACUNIT,         // height
+        100,            // mass
+        0,              // damage
+        sfx_None,              // activesound
+        0,          // flags
+        0,                          // flags2
+        S_NULL,          // raisestate
+        NULL,       // namepointer
+    },
+
+    {           // MT_CHUNK_GREEN
+        -1,             // doomednum
+        S_CHUNKGREEN_00,             // spawnstate
+        1000,           // spawnhealth
+        S_NULL,         // seestate
+        sfx_None,              // seesound
+        8,              // reactiontime
+        sfx_None,              // attacksound
+        S_NULL,         // painstate
+        0,              // painchance
+        sfx_None,              // painsound
+        S_NULL,         // meleestate
+        S_NULL,         // missilestate
+        S_NULL,     // crashstate
+        S_NULL,         // deathstate
+        S_NULL,         // xdeathstate
+        sfx_None,              // deathsound
+        0,              // speed
+        5 * FRACUNIT,         // radius
+        16 * FRACUNIT,         // height
+        100,            // mass
+        0,              // damage
+        sfx_None,              // activesound
+        0,          // flags
+        0,                          // flags2
+        S_NULL,          // raisestate
+        NULL,       // namepointer
+    },
+
     {                           // MT_SPLASH
         -1,                        // doomednum
         S_SPLASH1,                 // spawnstate
@@ -6295,7 +6365,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_dmact,                // activesound
         MF_SOLID|MF_SHOOTABLE|MF_COUNTKILL, // flags
-        MF2_NOFLOATBOB, // flags2
+        MF2_NOFLOATBOB | MF2_GREENBLOOD, // flags2
         S_BETABOSS_RAISE1,                // raisestate
         NULL,       // namepointer
     },
@@ -6498,7 +6568,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_dmact,                // activesound
         MF_SOLID|MF_SHOOTABLE|MF_FLOAT|MF_NOGRAVITY|MF_COUNTKILL, // flags
-        MF2_NOFLOATBOB, // flags2
+        MF2_NOFLOATBOB | MF2_BLUEBLOOD, // flags2
         S_BETAHEAD_RAISE1,                // raisestate
         NULL,       // namepointer
     },

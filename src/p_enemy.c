@@ -48,6 +48,10 @@
 #include "sounds.h"
 
 
+#define        FATSPREAD            (ANG90/8)
+#define        SKULLSPEED           (20*FRACUNIT)
+#define        SPLAT_PER_COUNTER    7
+
 
 typedef enum
 {
@@ -80,15 +84,33 @@ dirtype_t diags[] =
 };
 
 
+fixed_t           xspeed[8] = {FRACUNIT,47000,0,-47000,-FRACUNIT,-47000,0,47000};
+fixed_t           yspeed[8] = {0,47000,FRACUNIT,47000,0,-47000,-FRACUNIT,-47000};
+fixed_t           viletryx;
+fixed_t           viletryy;
+
+// 1/11/98 killough: Limit removed on special lines crossed
+mobj_t*           soundtarget;
+mobj_t*           corpsehit;
+mobj_t*           vileobj;
+mobj_t**          braintargets;
+
 int               old_t;
+int               old_u;
+int               TRACEANGLE = 0xc000000;
+int               numbraintargets;
+int               braintargeton = 0;
+int               numsplats;
+
+static int        maxbraintargets;     // remove braintargets limit
+
+extern int        numspechit;
+
+boolean           on_ground;
 
 extern boolean    not_walking;
-extern boolean    is_spectre;
 
-
-
-void A_Fall (mobj_t *actor);
-
+extern line_t     **spechit;
 
 //
 // ENEMY THINKING
@@ -105,7 +127,6 @@ void A_Fall (mobj_t *actor);
 // sound blocking lines cut off traversal.
 //
 
-mobj_t*         soundtarget;
 
 void
 P_RecursiveSound
@@ -267,12 +288,6 @@ boolean P_CheckMissileRange (mobj_t* actor)
 // Move in the current direction,
 // returns false if the move is blocked.
 //
-fixed_t xspeed[8] = {FRACUNIT,47000,0,-47000,-FRACUNIT,-47000,0,47000};
-fixed_t yspeed[8] = {0,47000,FRACUNIT,47000,0,-47000,-FRACUNIT,-47000};
-
-// 1/11/98 killough: Limit removed on special lines crossed
-extern line_t   **spechit;
-extern int      numspechit;
 
 boolean P_Move (mobj_t* actor)
 {
@@ -572,6 +587,50 @@ P_LookForPlayers
     }
 
     return false;
+}
+
+
+void A_Fall (mobj_t *actor)
+{
+    // actor is on ground, it can be walked over
+    actor->flags &= ~MF_SOLID;
+
+    // So change this if corpse objects
+    // are meant to be obstacles.
+
+    if(d_maxgore && !(actor->flags & MF_NOBLOOD))
+    {
+        int i, t;
+        mobj_t *mo;
+
+        for(i = 0; i < 8; i++)
+        {
+            // spray blood in a random direction
+            mo = P_SpawnMobj(actor->x,
+                             actor->y,
+                             actor->z + actor->info->height/2, MT_GORE);
+
+            // added for colored blood and gore!
+            mo->target = actor;
+
+            // Spectres bleed spectre blood
+            if (d_colblood2 && d_chkblood2) 
+            {
+                if(actor->type == MT_SHADOWS)
+                    mo->flags |= MF_SHADOW;
+            }
+
+            t = P_Random() % 3;
+            if(t > 0)
+                P_SetMobjState(mo, S_SPRAY_00 + t);
+
+            t = P_Random();
+            mo->momx = (t - P_Random ()) << 11;
+            t = P_Random();
+            mo->momy = (t - P_Random ()) << 11;
+            mo->momz = P_Random() << 11;
+        }
+    }
 }
 
 
@@ -1045,7 +1104,6 @@ void A_SkelMissile (mobj_t* actor)
     P_SetTarget(&mo->tracer, actor->target);
 }
 
-int        TRACEANGLE = 0xc000000;
 
 void A_Tracer (mobj_t* actor)
 {
@@ -1150,10 +1208,6 @@ void A_SkelFist (mobj_t*        actor)
 // PIT_VileCheck
 // Detect a corpse that could be raised.
 //
-mobj_t*                corpsehit;
-mobj_t*                vileobj;
-fixed_t                viletryx;
-fixed_t                viletryy;
 
 boolean PIT_VileCheck (mobj_t*        thing)
 {
@@ -1273,19 +1327,6 @@ void A_VileStart (mobj_t* actor)
 // A_Fire
 // Keep fire in front of player unless out of sight
 //
-void A_Fire (mobj_t* actor);
-
-void A_StartFire (mobj_t* actor)
-{
-    S_StartSound(actor,sfx_flamst);
-    A_Fire(actor);
-}
-
-void A_FireCrackle (mobj_t* actor)
-{
-    S_StartSound(actor,sfx_flame);
-    A_Fire(actor);
-}
 
 void A_Fire (mobj_t* actor)
 {
@@ -1310,6 +1351,18 @@ void A_Fire (mobj_t* actor)
     actor->y = dest->y + FixedMul (24*FRACUNIT, finesine[an]);
     actor->z = dest->z;
     P_SetThingPosition (actor);
+}
+
+void A_StartFire (mobj_t* actor)
+{
+    S_StartSound(actor,sfx_flamst);
+    A_Fire(actor);
+}
+
+void A_FireCrackle (mobj_t* actor)
+{
+    S_StartSound(actor,sfx_flame);
+    A_Fire(actor);
 }
 
 
@@ -1382,7 +1435,6 @@ void A_VileAttack (mobj_t* actor)
 // in three different directions?
 // Doesn't look like it. 
 //
-#define        FATSPREAD        (ANG90/8)
 
 void A_FatRaise (mobj_t *actor)
 {
@@ -1458,7 +1510,6 @@ void A_FatAttack3 (mobj_t*        actor)
 // SkullAttack
 // Fly at the player like a missile.
 //
-#define        SKULLSPEED                (20*FRACUNIT)
 
 void A_SkullAttack (mobj_t* actor)
 {
@@ -1608,10 +1659,6 @@ void A_PainDie (mobj_t* actor)
 }
 
 
-
-
-
-
 void A_Scream (mobj_t* actor)
 {
     int                sound;
@@ -1654,10 +1701,11 @@ void A_XScream (mobj_t* actor)
     S_StartSound (actor, sfx_slop);        
 }
 
+
 void A_Pain (mobj_t* actor)
 {
     if (actor->info->painsound)
-        S_StartSound (actor, actor->info->painsound);        
+        S_StartSound (actor, actor->info->painsound);
 }
 
 
@@ -1890,42 +1938,24 @@ void A_BabyMetal (mobj_t* mo)
     A_Chase (mo);
 }
 
-void
-A_OpenShotgun2
-( player_t*        player,
-  pspdef_t*        psp )
+void A_OpenShotgun2 (player_t* player, pspdef_t* psp)
 {
     S_StartSound (player->mo, sfx_dbopn);
 }
 
-void
-A_LoadShotgun2
-( player_t*        player,
-  pspdef_t*        psp )
+void A_LoadShotgun2 (player_t* player, pspdef_t* psp )
 {
     S_StartSound (player->mo, sfx_dbload);
 }
 
-void
-A_ReFire
-( player_t*        player,
-  pspdef_t*        psp );
 
-void
-A_CloseShotgun2
-( player_t*        player,
-  pspdef_t*        psp )
+void A_CloseShotgun2 (player_t* player, pspdef_t* psp )
 {
     S_StartSound (player->mo, sfx_dbcls);
     A_ReFire(player,psp);
 }
 
 
-
-mobj_t**           braintargets;
-int                numbraintargets;
-int                braintargeton = 0;
-static int         maxbraintargets;     // remove braintargets limit
 
 void A_BrainAwake (mobj_t* mo)
 {
@@ -2171,10 +2201,6 @@ void A_PlayerScream (mobj_t* mo)
 // Spawns gibs when organic actors get splattered.
 //
 
-boolean                on_ground;
-
-int                    old_u;
-
 void A_MoreGibs(mobj_t* actor)
 {
     if(d_maxgore)
@@ -2232,57 +2258,11 @@ void A_MoreGibs(mobj_t* actor)
     }
 }
 
-void A_Fall (mobj_t *actor)
-{
-    // actor is on ground, it can be walked over
-    actor->flags &= ~MF_SOLID;
-
-    // So change this if corpse objects
-    // are meant to be obstacles.
-
-    if(d_maxgore && !(actor->flags & MF_NOBLOOD))
-    {
-        int i, t;
-        mobj_t *mo;
-
-        for(i = 0; i < 8; i++)
-        {
-            // spray blood in a random direction
-            mo = P_SpawnMobj(actor->x,
-                             actor->y,
-                             actor->z + actor->info->height/2, MT_GORE);
-
-            // added for colored blood and gore!
-            mo->target = actor;
-
-            // Spectres bleed spectre blood
-            if ((d_colblood2 && d_chkblood2) && is_spectre)
-                mo->flags |= MF_SHADOW;
-            else if(!is_spectre)
-                mo->flags &= ~MF_SHADOW;
-
-            t = P_Random() % 3;
-            if(t > 0)
-                P_SetMobjState(mo, S_SPRAY_00 + t);
-
-            t = P_Random();
-            mo->momx = (t - P_Random ()) << 11;
-            t = P_Random();
-            mo->momy = (t - P_Random ()) << 11;
-            mo->momz = P_Random() << 11;
-        }
-    }
-}
-
 //----------------------------------------------------------------------------
 //
 // PROC A_MoreBlood
 //
 //----------------------------------------------------------------------------
-
-int numsplats;
-
-#define SPLAT_PER_COUNTER 7
 
 void A_MoreBlood(mobj_t * actor)
 {
@@ -2291,46 +2271,55 @@ void A_MoreBlood(mobj_t * actor)
         int i, t;
 
         mobj_t *mo;
+        mobjtype_t type;
 
         numsplats++;
 
+        if(actor->flags & MF2_BLUEBLOOD)
+            type = MT_CHUNK_BLUE;
+        else if(actor->flags & MF2_GREENBLOOD)
+            type = MT_CHUNK_GREEN;
+        else
+            type = MT_CHUNK;
+
         // WARNING: don't go lower than BLOODSPLAT_PER_COUNTER !!!
-        for(i = SPLAT_PER_COUNTER; i <= numsplats / SPLAT_PER_COUNTER; ++i)
+        for(i = SPLAT_PER_COUNTER; i <= numsplats / SPLAT_PER_COUNTER && numsplats % i == 0; ++i)
         {
-            if(numsplats % i == 0)
+            mo = P_SpawnMobj(actor->x,
+                             actor->y,
+                             actor->z, type);
+
+            // added for colored blood and gore!
+            mo->target = actor->target;
+
+            if (d_colblood2 && d_chkblood2)
             {
-                // FIXME: THIS LINE MAY BE BUGGY
-                mo = P_SpawnMobj(actor->x,
-                                 actor->y,
-                                 actor->z, MT_CHUNK);
-
-                // added for colored blood and gore!
-                mo->target = actor->target;
-
                 // Spectres bleed spectre blood
-                if ((d_colblood2 && d_chkblood2) && is_spectre)
+                if(actor->target->type == MT_SHADOWS)
                     mo->flags |= MF_SHADOW;
-                else if(!is_spectre)
-                    mo->flags &= ~MF_SHADOW;
-
-                t = P_Random() % 6;
-
-                if(t == 0 || t == 1 || t == 2 || t == 3 || t == 4 || t == 5)
-                    P_SetMobjState(mo, S_CHUNK_00 + t);
-
-                t = P_Random();
-
-                mo->momx = (t - P_Random()) << 11;
-
-                t = P_Random();
-
-                mo->momy = (t - P_Random()) << 11;
-                mo->momz = (P_Random() << 11) / 2;
-
-                break;
             }
-            else
-                return;
+
+            t = P_Random() % 6;
+
+            if(t == 0 || t == 1 || t == 2 || t == 3 || t == 4 || t == 5)
+            {
+                if(actor->flags & MF2_BLUEBLOOD)
+                    P_SetMobjState(mo, S_CHUNKBLUE_00 + t);
+                else if(actor->flags & MF2_GREENBLOOD)
+                    P_SetMobjState(mo, S_CHUNKGREEN_00 + t);
+                else
+                    P_SetMobjState(mo, S_CHUNK_00 + t);
+            }
+
+            t = P_Random();
+
+            mo->momx = (t - P_Random()) << 11;
+
+            t = P_Random();
+
+            mo->momy = (t - P_Random()) << 11;
+            mo->momz = (P_Random() << 11) / 2;
+            break;
         }
     }
 }

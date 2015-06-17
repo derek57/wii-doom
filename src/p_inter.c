@@ -926,7 +926,9 @@ P_KillMobj
             P_SetMobjState (target, target->info->xdeathstate);
         }
         else
+        {
             P_SetMobjState (target, target->info->deathstate);
+        }
 
         if(target->type != MT_BARREL && target->type != MT_BETABARREL)
         {

@@ -77,8 +77,6 @@ int             iquehead;
 int             iquetail;
 int             puffcount;
 
-boolean         is_spectre;
-
 mapthing_t      itemrespawnque[ITEMQUESIZE];
 
 //
@@ -1231,8 +1229,20 @@ P_SpawnBlood
     th->target = target;
 
     // Spectres bleed spectre blood
-    if ((d_colblood2 && d_chkblood2) && target->flags & MF_SHADOW)
-        th->flags |= MF_SHADOW;
+    if (d_colblood2 && d_chkblood2)
+    {
+        if(target->type == MT_SHADOWS)
+            th->flags |= MF_SHADOW;
+/*
+        else if (target->type == MT_HEAD ||
+                 target->type == MT_BETAHEAD)
+            th->flags2 |= MF2_BLUE;
+        else if(target->type == MT_BRUISER ||
+                target->type == MT_BETABRUISER ||
+                target->type == MT_KNIGHT)
+            th->flags2 |= MF2_GREEN;
+*/
+    }
 
     if (th->tics < 1)
         th->tics = 1;
@@ -1261,13 +1271,20 @@ P_SpawnBlood
         th2->momz = P_Random() << 10;
 
         // Spectres bleed spectre blood
-        if ((d_colblood2 && d_chkblood2) && target->type == MT_SHADOWS)
+        if (d_colblood2 && d_chkblood2)
         {
-            th2->flags |= MF_SHADOW;
-            is_spectre = true;
+            if(th2->target->type == MT_SHADOWS)
+                th2->flags |= MF_SHADOW;
+/*
+            else if (th2->target->type == MT_HEAD ||
+                     th2->target->type == MT_BETAHEAD)
+                th2->flags2 |= MF2_BLUE;
+            else if (th2->target->type == MT_BRUISER ||
+                     th2->target->type == MT_BETABRUISER ||
+                     th2->target->type == MT_KNIGHT)
+                th2->flags2 |= MF2_GREEN;
+*/
         }
-        else if(target->type != MT_SHADOWS)
-            is_spectre = false;
 
         P_SetMobjState(th2, S_BLOOD1 + (P_Random() % 2));
     }

@@ -466,7 +466,6 @@ void AM_initVariables(void)
     static event_t st_notify = { ev_keyup, AM_MSGENTERED, 0, 0 };
 
     automapactive = true;
-//    fb = I_VideoBuffer;
     fb = screens[0];
 
     f_oldloc.x = INT_MAX;

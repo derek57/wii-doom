@@ -263,7 +263,6 @@ void F_TextWrite (void)
     
     // erase the entire screen to a tiled background
     src = W_CacheLumpName ( finaleflat , PU_CACHE);
-//    dest = I_VideoBuffer;
     dest = screens[0];
         
     for (y=0 ; y<SCREENHEIGHT ; y++)
@@ -710,7 +709,6 @@ F_DrawPatchCol
     int         count, f;     // CHANGED FOR HIRES
 
     column = (column_t *)((byte *)patch + LONG(patch->columnofs[col]));
-//    desttop = I_VideoBuffer + x;
     desttop = screens[0] + x;
 
     // step through the posts in a column

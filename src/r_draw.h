@@ -29,18 +29,33 @@
 #define __R_DRAW__
 
 
-
-
-extern lighttable_t*      dc_colormap;
 extern int                dc_x;
 extern int                dc_yl;
 extern int                dc_yh;
-extern fixed_t            dc_iscale;
-extern fixed_t            dc_texturemid;
 extern int                dc_texheight;
+extern int                ds_y;
+extern int                ds_x1;
+extern int                ds_x2;
+
+// start of a 64*64 tile image
+extern byte*              ds_source;                
 
 // first pixel in a column
 extern byte*              dc_source;                
+
+extern byte*              translationtables;
+extern byte*              dc_translation;
+
+extern lighttable_t*      dc_colormap;
+extern lighttable_t*      ds_colormap;
+
+extern fixed_t            ds_xfrac;
+extern fixed_t            ds_yfrac;
+extern fixed_t            ds_xstep;
+extern fixed_t            ds_ystep;
+extern fixed_t            dc_blood;
+extern fixed_t            dc_iscale;
+extern fixed_t            dc_texturemid;
 
 
 // The span blitting interface.
@@ -59,29 +74,7 @@ void         R_DrawFuzzColumnLow (void);
 void         R_DrawTranslatedColumn (void);
 void         R_DrawTranslatedColumnLow (void);
 void         R_DrawTLColumn (void);
-
-void
-R_VideoErase
-( unsigned           ofs,
-  int                count );
-
-extern int           ds_y;
-extern int           ds_x1;
-extern int           ds_x2;
-
-extern lighttable_t* ds_colormap;
-
-extern fixed_t       ds_xfrac;
-extern fixed_t       ds_yfrac;
-extern fixed_t       ds_xstep;
-extern fixed_t       ds_ystep;
-
-// start of a 64*64 tile image
-extern byte*         ds_source;                
-
-extern byte*         translationtables;
-extern byte*         dc_translation;
-
+void         R_VideoErase(unsigned ofs, int count );
 
 // Span blitting for rows, floor/ceiling.
 // No Sepctre effect needed.
@@ -89,25 +82,17 @@ void         R_DrawSpan (void);
 
 // Low resolution mode, 160x200?
 void         R_DrawSpanLow (void);
-
 void         R_DrawTLColumnLow (void);
-
-void
-R_InitBuffer
-( int                width,
-  int                height );
-
+void         R_InitBuffer(int width, int height );
 
 // Initialize color translation tables,
 //  for player rendering etc.
-void        R_InitTranslationTables (void);
-
-
+void         R_InitTranslationTables (void);
 
 // Rendering function.
-void R_FillBackScreen (void);
+void         R_FillBackScreen (void);
 
 // If the view size is not full screen, draws a border around it.
-void R_DrawViewBorder (void);
+void         R_DrawViewBorder (void);
 
 #endif

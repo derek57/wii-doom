@@ -1369,11 +1369,10 @@ boolean PTR_ShootTraverse (intercept_t* in)
     if (la_damage)
         P_DamageMobj (th, shootthing, shootthing, la_damage);
 
-    // Spawn bullet puffs or blod spots,
+    // Spawn bullet puffs or blood spots,
     // depending on target type.
     if (in->d.thing->flags & MF_NOBLOOD)
         P_SpawnPuff (x,y,z);
-    // explode a missile
     else
         P_SpawnBlood (x,y,z, la_damage, th);
 

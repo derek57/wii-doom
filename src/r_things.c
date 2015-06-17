@@ -439,6 +439,7 @@ R_DrawVisSprite
         dc_translation = translationtables - 256 +
             ( (vis->mobjflags & MF_TRANSLATION) >> (MF_TRANSSHIFT-8) );
     }
+    // color-translated sprites (i.e. blood)
     else if (vis->translation)
     {
         colfunc = transcolfunc;
@@ -496,6 +497,7 @@ R_DrawVisSprite
 }
 
 
+int i;
 
 //
 // R_ProjectSprite
@@ -633,6 +635,7 @@ void R_ProjectSprite (mobj_t* thing)
     vis->translation = NULL;
 
     vis->mobjflags = thing->flags;
+    vis->mobjflags2 = thing->flags2;
     vis->psprite = false;
 
     vis->scale = xscale<<(detailshift && !hires);                // CHANGED FOR HIRES
@@ -837,6 +840,7 @@ void R_DrawPSprite (pspdef_t* psp, psprnum_t psprnum)
     vis->translation = NULL;
 
     vis->mobjflags = 0;
+    vis->mobjflags2 = 0;
     vis->psprite = true;
     vis->texturemid = (BASEYCENTER << FRACBITS) - (psp->sy - spritetopoffset[lump]); // HIRES
     vis->x1 = x1 < 0 ? 0 : x1;

@@ -53,9 +53,6 @@
 // is common code. Fix this.
 #define RANGECHECK
 
-// prevent framebuffer overflow
-#define dest_in_framebuffer ((dest >= screens[scrn]) && (dest < screens[scrn] + SCREENHEIGHT*SCREENWIDTH))
-
 
 byte redtoyellow[] =
 {
@@ -206,7 +203,7 @@ V_DrawPatch
     byte *desttop;
     byte *dest;
     byte *source;
-    int w, f;
+    int w, f, tmpy;
 
     y -= SHORT(patch->topoffset);
     x -= SHORT(patch->leftoffset);
@@ -236,15 +233,20 @@ V_DrawPatch
     w = SHORT(patch->width);
 
     // prevent framebuffer overflow
-    if (x + w > ORIGWIDTH)
-        w = ORIGWIDTH - x;
+    while (x < 0)
+    {
+        x++;
+        col++;
+        desttop++;
+    }
 
     // quadruple for-loop for each dp_translation and dp_translucent case
     // to avoid checking these variables for each pixel and instead check once per patch
     // (1) normal, opaque patch
     if (!dp_translation && !dp_translucent)
     {
-        for ( ; col<w ; x++, col++, desttop++)
+        // prevent framebuffer overflow
+        for ( ; col<w && x < ORIGWIDTH; x++, col++, desttop++)
         {
             column = (column_t *)((byte *)patch + LONG(patch->columnofs[col]));
 
@@ -256,18 +258,24 @@ V_DrawPatch
                     source = (byte *)column + 3;
                     dest = desttop + column->topdelta*(SCREENWIDTH << hires) + (x * hires) + f;
                     count = column->length;
-
+                    tmpy = y + column->topdelta;
+ 
                     // prevent framebuffer overflow
-                    while (count--)
+                    while (tmpy < 0)
                     {
-                        // prevent framebuffer overflow
-                        if (!dest_in_framebuffer)
-                        {
-                            source++;
-                            dest += (1 + hires) * SCREENWIDTH;
-                            continue;
-                        }
+                        count--;
+                        source++;
+                        dest += (SCREENWIDTH << hires);
+                        tmpy++;
+                    }
 
+                    while (tmpy + count > ORIGHEIGHT)
+                    {
+                        count--;
+                    }
+
+                    while (count-- > 0)
+                    {
                         if (hires)
                         {
                             *dest = *source;
@@ -284,7 +292,8 @@ V_DrawPatch
     // (2) color-translated, opaque patch
     else if (dp_translation && !dp_translucent)
     {
-        for ( ; col<w ; x++, col++, desttop++)
+        // prevent framebuffer overflow
+        for ( ; col<w && x < ORIGWIDTH; x++, col++, desttop++)
         {
             column = (column_t *)((byte *)patch + LONG(patch->columnofs[col]));
 
@@ -296,18 +305,24 @@ V_DrawPatch
                     source = (byte *)column + 3;
                     dest = desttop + column->topdelta*(SCREENWIDTH << hires) + (x * hires) + f;
                     count = column->length;
+                    tmpy = y + column->topdelta;
 
                     // prevent framebuffer overflow
-                    while (count--)
+                    while (tmpy < 0)
                     {
-                        // prevent framebuffer overflow
-                        if (!dest_in_framebuffer)
-                        {
-                            source++;
-                            dest += (1 + hires) * SCREENWIDTH;
-                            continue;
-                        }
+                        count--;
+                        source++;
+                        dest += (SCREENWIDTH << hires);
+                        tmpy++;
+                    }
 
+                    while (tmpy + count > ORIGHEIGHT)
+                    {
+                        count--;
+                    }
+
+                    while (count-- > 0)
+                    {
                         if (hires)
                         {
                             *dest = dp_translation[*source];
@@ -324,7 +339,8 @@ V_DrawPatch
     // (3) normal, translucent patch
     else if (!dp_translation && dp_translucent)
     {
-        for ( ; col<w ; x++, col++, desttop++)
+        // prevent framebuffer overflow
+        for ( ; col<w && x < ORIGWIDTH; x++, col++, desttop++)
         {
             column = (column_t *)((byte *)patch + LONG(patch->columnofs[col]));
 
@@ -336,18 +352,24 @@ V_DrawPatch
                     source = (byte *)column + 3;
                     dest = desttop + column->topdelta*(SCREENWIDTH << hires) + (x * hires) + f;
                     count = column->length;
+                    tmpy = y + column->topdelta;
 
                     // prevent framebuffer overflow
-                    while (count--)
+                    while (tmpy < 0)
                     {
-                        // prevent framebuffer overflow
-                        if (!dest_in_framebuffer)
-                        {
-                            source++;
-                            dest += (1 + hires) * SCREENWIDTH;
-                            continue;
-                        }
+                        count--;
+                        source++;
+                        dest += (SCREENWIDTH << hires);
+                        tmpy++;
+                    }
 
+                    while (tmpy + count > ORIGHEIGHT)
+                    {
+                        count--;
+                    }
+ 
+                    while (count-- > 0)
+                    {
                         if (hires)
                         {
                             *dest = tranmap[(*dest<<8)+*source];
@@ -364,7 +386,8 @@ V_DrawPatch
     // (4) color-translated, translucent patch
     else if (dp_translation && dp_translucent)
     {
-        for ( ; col<w ; x++, col++, desttop++)
+        // prevent framebuffer overflow
+        for ( ; col<w && x < ORIGWIDTH; x++, col++, desttop++)
         {
             column = (column_t *)((byte *)patch + LONG(patch->columnofs[col]));
 
@@ -376,18 +399,24 @@ V_DrawPatch
                     source = (byte *)column + 3;
                     dest = desttop + column->topdelta*(SCREENWIDTH << hires) + (x * hires) + f;
                     count = column->length;
+                    tmpy = y + column->topdelta;
 
                     // prevent framebuffer overflow
-                    while (count--)
+                    while (tmpy < 0)
                     {
-                        // prevent framebuffer overflow
-                        if (!dest_in_framebuffer)
-                        {
-                            source++;
-                            dest += (1 + hires) * SCREENWIDTH;
-                            continue;
-                        }
+                        count--;
+                        source++;
+                        dest += (SCREENWIDTH << hires);
+                        tmpy++;
+                    }
 
+                    while (tmpy + count > ORIGHEIGHT)
+                    {
+                        count--;
+                    }
+ 
+                    while (count-- > 0)
+                    {
                         if (hires)
                         {
                             *dest = tranmap[(*dest<<8)+dp_translation[*source]];
@@ -423,7 +452,7 @@ V_DrawPatchFlipped
     byte *dest;
     byte *source; 
     byte sourcetrans;
-    int w, f; 
+    int w, f, tmpy; 
 
     y -= SHORT(patch->topoffset); 
     x -= SHORT(patch->leftoffset); 
@@ -454,10 +483,15 @@ V_DrawPatchFlipped
     w = SHORT(patch->width);
 
     // prevent framebuffer overflow
-    if (x + w > ORIGWIDTH)
-        w = ORIGWIDTH - x;
+    while (x < 0)
+    {
+        x++;
+        col++;
+        desttop++;
+    }
 
-    for ( ; col<w ; x++, col++, desttop++)
+    // prevent framebuffer overflow
+    for ( ; col<w && x < ORIGWIDTH; x++, col++, desttop++)
     {
         column = (column_t *)((byte *)patch + LONG(patch->columnofs[w-1-col]));
 
@@ -470,23 +504,30 @@ V_DrawPatchFlipped
                 dest = desttop + column->topdelta*(SCREENWIDTH << hires) +
                        (x * hires) + f;
                 count = column->length;
+                tmpy = y + column->topdelta;
 
                 // prevent framebuffer overflow
-                while (count--)
+                while (tmpy < 0)
                 {
-                    // prevent framebuffer overflow
-                    if (!dest_in_framebuffer)
-                    {
-                        source++;
-                        dest += (1 + hires) * SCREENWIDTH;
-                        continue;
-                    }
+                    count--;
+                    source++;
+                    dest += (SCREENWIDTH << hires);
+                    tmpy++;
+                }
+
+                while (tmpy + count > ORIGHEIGHT)
+                {
+                    count--;
+                }
 
                     if (dp_translation)
                         sourcetrans = dp_translation[*source++];
                     else
                         sourcetrans = *source++;
 
+
+                while (count-- > 0)
+                {
                     if (hires)
                     {
                         *dest = *source;

@@ -68,7 +68,9 @@ EV_Teleport
     if((thing->flags & MF_MISSILE) ||
        thing->type == MT_FLESH ||
        thing->type == MT_GORE ||
-       thing->type == MT_CHUNK)
+       thing->type == MT_CHUNK ||
+       thing->type == MT_CHUNK_GREEN ||
+       thing->type == MT_CHUNK_BLUE)
         return 0;                
 
     // Don't teleport if hit back of line,

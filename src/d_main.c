@@ -352,7 +352,6 @@ void D_Display (void)
         static int firsttic;
 
         for (y = 0; y < SCREENWIDTH * SCREENHEIGHT; y++)
-//            I_VideoBuffer[y] = colormaps[menushade * 256 + I_VideoBuffer[y]];
             screens[0][y] = colormaps[menushade * 256 + screens[0][y]];
 
         if (menushade < 16 && gametic != firsttic)

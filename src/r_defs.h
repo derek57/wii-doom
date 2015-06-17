@@ -411,6 +411,7 @@ typedef struct vissprite_s
     lighttable_t*  colormap;
    
     int            mobjflags;
+    int            mobjflags2;
     
     // foot clipping
     fixed_t        footclip;

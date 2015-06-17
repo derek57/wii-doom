@@ -963,7 +963,6 @@ R_InitBuffer
 
     // Preclaculate all row offsets.
     for (i=0 ; i<height ; i++) 
-//        ylookup[i] = I_VideoBuffer + (i+viewwindowy)*SCREENWIDTH; 
 	ylookup[i] = screens[0] + (i+viewwindowy)*SCREENWIDTH; 
 } 
  
@@ -1098,7 +1097,6 @@ R_VideoErase
 
     if (background_buffer != NULL)
     {
-//        memcpy(I_VideoBuffer + ofs, background_buffer + ofs, count); 
         memcpy(screens[0] + ofs, screens[1] + ofs, count);
     }
 } 

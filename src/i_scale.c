@@ -28,7 +28,7 @@
 #include "i_video.h"
 #include "z_zone.h"
 
-// Should be I_VideoBuffer
+// Should be screen buffer
 
 static byte *src_buffer;
 
