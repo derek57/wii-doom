@@ -196,6 +196,10 @@ typedef struct player_s
 
     int                  nextextra;
 
+    int                  neededcard;
+
+    int                  neededcardflash;
+
 } player_t;
 
 

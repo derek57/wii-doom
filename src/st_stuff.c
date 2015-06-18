@@ -287,15 +287,15 @@ rcsid[] = "$Id: st_stuff.c,v 1.6 1997/02/03 22:45:13 b1 Exp $";
 #define ST_HEALTH_MIN               20
 #define ST_HEALTH_WAIT              8
 
-#define ST_AMMO_X                   (ST_HEALTH_X + 108 * SCREENSCALE / 2)
+#define ST_AMMO_X                   (ST_X_COORD + 100 * SCREENSCALE / 2)
 #define ST_AMMO_Y                   ST_HEALTH_Y
 #define ST_AMMO_MIN                 20
 #define ST_AMMO_WAIT                8
 
-#define ST_KEYS_X                   (ST_HEALTH_X + 484 * SCREENSCALE / 2)
+#define ST_KEYS_X                   (SCREENWIDTH - ST_X_COORD - 128 * SCREENSCALE / 2)
 #define ST_KEYS_Y                   ST_HEALTH_Y
 
-#define ST_ARMOR_X                  (SCREENWIDTH - 10 * SCREENSCALE / 2)
+#define ST_ARMOR_X                  (SCREENWIDTH - ST_X_COORD)
 #define ST_ARMOR_Y                  ST_HEALTH_Y
 
 #define ST_KEY_WAIT                 8
@@ -544,6 +544,7 @@ extern boolean      show_chat_bar;
 
 extern int          screenSize;
 extern int          load_dehacked;
+extern int          cardsfound;
 
 int                 prio = 0;
 
@@ -761,7 +762,7 @@ void ST_DrawStatus(void)
             if (ammo < 200 && ammo > 99)
                 offset_special = 3;
 
-            ammo_x += offset_width + half_patch_width - 110 + offset_special;
+            ammo_x += offset_width + half_patch_width - (ORIGHEIGHT / 2) + offset_special;
 
             DrawStatusNumber(&ammo_x, ST_AMMO_Y, ammo, invert, hudnumfunc);
         }
@@ -785,12 +786,14 @@ void ST_DrawStatus(void)
         if (plyr->cards[i++] > 0)
             key++;
 
-    if (key)
+    if (key || plyr->neededcardflash)
     {
-        int keypic_x = ST_KEYS_X - 100;
+        int keypic_x = ST_KEYS_X - 20 * (key - 1);
+        static int          keywait = 0;
+        static boolean      showkey = false;
 
         if (!armor)
-            keypic_x += 123;
+            keypic_x += 114;
         else
         {
             if (emptytallpercent)
@@ -801,15 +804,39 @@ void ST_DrawStatus(void)
                 keypic_x += 12;
         }
 
+        if (plyr->neededcardflash)
+        {
+            patch_t     *patch = keypic[plyr->neededcard].patch;
+
+            if (patch)
+            {
+                if (!menuactive && !paused && !consoleactive)
+                {
+                    if (keywait < I_GetTime())
+                    {
+                        showkey = !showkey;
+                        keywait = I_GetTime() + ST_KEY_WAIT;
+                        plyr->neededcardflash--;
+                    }
+                }
+                if (showkey)
+                    hudfunc(keypic_x - (SHORT(patch->width) + 6), ST_KEYS_Y, patch, true);
+            }
+        }
+        else
+        {
+            showkey = false;
+            keywait = 0;
+        }
+
         for (i = 0; i < NUMCARDS; i++)
         {
-            int y = i * 20;
             if (plyr->cards[i] > 0)
             {
                 patch_t     *patch = keypic[i].patch;
 
                 if (patch)
-                    hudfunc(keypic_x + y,
+                    hudfunc(keypic_x + (SHORT(patch->width) + 6) * (cardsfound - plyr->cards[i]),
                         ST_KEYS_Y, patch, true);
             }
         }

@@ -32,6 +32,7 @@
 #include "r_local.h"
 #endif
 
+
 #define FLOOR_SOLID         0
 #define FLOOR_WATER         1
 #define FLOOR_LAVA          2
@@ -70,6 +71,18 @@
 
 #define EXTRAPOINTS         30000
 
+#define NEEDEDCARDFLASH     8
+
+#define ONFLOORZ            INT_MIN
+#define ONCEILINGZ          INT_MAX
+
+// Time interval for item respawning.
+#define ITEMQUESIZE         128
+
+#define PT_ADDLINES         1
+#define PT_ADDTHINGS        2
+#define PT_EARLYOUT         4
+
 //
 // P_TICK
 //
@@ -101,11 +114,6 @@ boolean P_UseArtifact(player_t * player, artitype_t arti);
 //
 // P_MOBJ
 //
-#define ONFLOORZ            INT_MIN
-#define ONCEILINGZ          INT_MAX
-
-// Time interval for item respawning.
-#define ITEMQUESIZE         128
 
 extern mapthing_t           itemrespawnque[ITEMQUESIZE];
 extern int                  itemrespawntime[ITEMQUESIZE];
@@ -188,10 +196,6 @@ void    P_LineOpening (line_t* linedef);
 
 boolean P_BlockLinesIterator (int x, int y, boolean(*func)(line_t*) );
 boolean P_BlockThingsIterator (int x, int y, boolean(*func)(mobj_t*) );
-
-#define PT_ADDLINES            1
-#define PT_ADDTHINGS           2
-#define PT_EARLYOUT            4
 
 extern divline_t               trace;
 
@@ -298,6 +302,13 @@ int     P_GetThingFloorType(mobj_t * thing);
 void    P_InitTerrainTypes(void);
 
 int     P_HitFloor(mobj_t * thing);
+
+void P_InitCards(player_t *player);
+
+void
+P_GiveCard
+( player_t*        player,
+  card_t        card );
 
 void A_ReFire
 ( player_t*        player,

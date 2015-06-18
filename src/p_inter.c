@@ -52,6 +52,7 @@
 // a big item has five clip loads
 int                     maxammo[NUMAMMO] = {200, 50, 300, 50};
 int                     clipammo[NUMAMMO] = {10, 4, 20, 1};
+int                     cardsfound;
 
 extern boolean          massacre_cheat_used;
 
@@ -263,6 +264,82 @@ P_GiveArmor
 }
 
 
+//
+// P_InitCards
+//
+void P_InitCards(player_t *player)
+{
+    int i;
+
+    for (i = 0; i < NUMCARDS; i++)
+        player->cards[i] = 0;
+
+    cardsfound = 0;
+
+    for (i = 0; i < numsectors; i++)
+    {
+        mobj_t  *thing = sectors[i].thinglist;
+
+        while (thing)
+        {
+            switch (thing->sprite)
+            {
+                case SPR_BKEY:
+                    player->cards[it_bluecard] = 0;
+                    break;
+                case SPR_RKEY:
+                    player->cards[it_redcard] = 0;
+                    break;
+                case SPR_YKEY:
+                    player->cards[it_yellowcard] = 0;
+                    break;
+                case SPR_BSKU:
+                    player->cards[it_blueskull] = 0;
+                    break;
+                case SPR_RSKU:
+                    player->cards[it_redskull] = 0;
+                    break;
+                case SPR_YSKU:
+                    player->cards[it_yellowskull] = 0;
+                    break;
+                default:
+                    break;
+            }
+            thing = thing->snext;
+        }
+    }
+
+    for (i = 0; i < numlines; i++)
+    {
+        line_t  *line = &lines[i];
+
+        switch (line->special)
+        {
+            case 26:
+            case 32:
+            case 99:
+            case 133:
+                if (!player->cards[it_blueskull])
+                    player->cards[it_bluecard] = 0;
+                break;
+            case 28:
+            case 33:
+            case 134:
+            case 135:
+                if (!player->cards[it_redskull])
+                    player->cards[it_redcard] = 0;
+                break;
+            case 27:
+            case 34:
+            case 136:
+            case 137:
+                if (!player->cards[it_yellowskull])
+                    player->cards[it_yellowcard] = 0;
+                break;
+        }
+    }
+}
+
 
 //
 // P_GiveCard
@@ -276,7 +353,10 @@ P_GiveCard
         return;
     
     player->bonuscount = BONUSADD;
-    player->cards[card] = 1;
+    player->cards[card] = ++cardsfound;
+
+    if (card == player->neededcard)
+        player->neededcard = player->neededcardflash = 0;
 }
 
 

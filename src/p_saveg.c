@@ -56,6 +56,8 @@ boolean       savegame_error;
 
 static int    restoretargets_fail;
 
+extern int    cardsfound;
+
 
 // Get the filename of a temporary file to write the savegame to.  After
 // the file has been successfully saved, it will be renamed to the 
@@ -773,7 +775,14 @@ static void saveg_read_player_t(player_t *str)
     for (i=0; i<NUMCARDS; ++i)
     {
         str->cards[i] = saveg_read32();
+        cardsfound = MAX(cardsfound, str->cards[i]);
     }
+
+    // int neededcard
+    str->neededcard = saveg_read32();
+
+    // int neededcardflash
+    str->neededcardflash = saveg_read32();
 
     // boolean backpack;
     str->backpack = saveg_read32();
@@ -930,6 +939,12 @@ static void saveg_write_player_t(player_t *str)
     {
         saveg_write32(str->cards[i]);
     }
+
+    // int neededcard
+    saveg_write32(str->neededcard);
+
+    // int neededcardflash
+    saveg_write32(str->neededcardflash);
 
     // boolean backpack;
     saveg_write32(str->backpack);
@@ -1624,6 +1639,8 @@ void P_UnArchivePlayers (void)
             continue;
         
         saveg_read_pad();
+
+        P_InitCards(&players[i]);
 
         saveg_read_player_t(&players[i]);
         

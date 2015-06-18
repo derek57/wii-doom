@@ -945,6 +945,7 @@ extern int                 dots_enabled;
 extern int                 dont_show;
 extern int                 display_fps;
 extern int                 allocated_ram_size;
+extern int                 cardsfound;
 
 extern default_t           doom_defaults_list[];   // KEY BINDINGS
 
@@ -956,7 +957,6 @@ extern boolean             BorderNeedRefresh;
 extern boolean             sendpause;
 extern boolean             secret_1;
 extern boolean             secret_2;
-//extern boolean             game_startup;
 
 extern short               songlist[148];
 
@@ -5017,13 +5017,19 @@ void M_KeysA(int choice)
 {
     int i;
 
+    player_t *player = &players[consoleplayer];
+
     if(!netgame && !demoplayback && gamestate == GS_LEVEL
         && gameskill != sk_nightmare &&
         players[consoleplayer].playerstate == PST_LIVE)
     {
-        for (i=0;i<NUMCARDS;i++)
-          players[consoleplayer].cards[i] = true;
-        
+        cardsfound = 0;
+
+        for (i = NUMCARDS - 1; i >= 0; i--)
+        {
+            if (!player->cards[i])
+                P_GiveCard(player, i);
+        }
         players[consoleplayer].message = DEH_String("ALL KEYS ADDED");
     }
     DetectState();
@@ -5031,11 +5037,13 @@ void M_KeysA(int choice)
 
 void M_KeysB(int choice)
 {
+    player_t *player = &players[consoleplayer];
+
     if(!netgame && !demoplayback && gamestate == GS_LEVEL
         && gameskill != sk_nightmare &&
         players[consoleplayer].playerstate == PST_LIVE)
     {
-        players[consoleplayer].cards[0] = true;
+        P_GiveCard (player, it_bluecard);
         
         players[consoleplayer].message = DEH_String("BLUE KEYCARD ADDED");
     }
@@ -5044,11 +5052,13 @@ void M_KeysB(int choice)
 
 void M_KeysC(int choice)
 {
+    player_t *player = &players[consoleplayer];
+
     if(!netgame && !demoplayback && gamestate == GS_LEVEL
         && gameskill != sk_nightmare &&
         players[consoleplayer].playerstate == PST_LIVE)
     {
-        players[consoleplayer].cards[1] = true;
+        P_GiveCard (player, it_yellowcard);
         
         players[consoleplayer].message = DEH_String("YELLOW KEYCARD ADDED");
     }
@@ -5057,11 +5067,13 @@ void M_KeysC(int choice)
 
 void M_KeysD(int choice)
 {
+    player_t *player = &players[consoleplayer];
+
     if(!netgame && !demoplayback && gamestate == GS_LEVEL
         && gameskill != sk_nightmare &&
         players[consoleplayer].playerstate == PST_LIVE)
     {
-        players[consoleplayer].cards[2] = true;
+        P_GiveCard (player, it_redcard);
         
         players[consoleplayer].message = DEH_String("RED KEYCARD ADDED");
     }
@@ -5070,11 +5082,13 @@ void M_KeysD(int choice)
 
 void M_KeysE(int choice)
 {
+    player_t *player = &players[consoleplayer];
+
     if(!netgame && !demoplayback && gamestate == GS_LEVEL
         && gameskill != sk_nightmare &&
         players[consoleplayer].playerstate == PST_LIVE)
     {
-        players[consoleplayer].cards[3] = true;
+        P_GiveCard (player, it_blueskull);
         
         players[consoleplayer].message = DEH_String("BLUE SKULLKEY ADDED");
     }
@@ -5083,11 +5097,13 @@ void M_KeysE(int choice)
 
 void M_KeysF(int choice)
 {
+    player_t *player = &players[consoleplayer];
+
     if(!netgame && !demoplayback && gamestate == GS_LEVEL
         && gameskill != sk_nightmare &&
         players[consoleplayer].playerstate == PST_LIVE)
     {
-        players[consoleplayer].cards[4] = true;
+        P_GiveCard (player, it_yellowskull);
         
         players[consoleplayer].message = DEH_String("YELLOW SKULLKEY ADDED");
     }
@@ -5096,11 +5112,13 @@ void M_KeysF(int choice)
 
 void M_KeysG(int choice)
 {
+    player_t *player = &players[consoleplayer];
+
     if(!netgame && !demoplayback && gamestate == GS_LEVEL
         && gameskill != sk_nightmare &&
         players[consoleplayer].playerstate == PST_LIVE)
     {
-        players[consoleplayer].cards[5] = true;
+        P_GiveCard (player, it_redskull);
         
         players[consoleplayer].message = DEH_String("RED SKULLKEY ADDED");
     }
@@ -5660,10 +5678,7 @@ void M_RiftNow(int choice)
     {
         if(forced)
             forced = false;
-/*
-        if(gamemap > 1)
-            game_startup = false;
-*/
+
         warped = 1;
         menuactive = 0;
         G_DeferedInitNew(gameskill, epi, map);

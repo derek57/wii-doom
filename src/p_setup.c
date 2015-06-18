@@ -1182,6 +1182,7 @@ P_SetupLevel
     deathmatch_p = deathmatchstarts;
     P_LoadThings (lumpnum+ML_THINGS);
     
+    P_InitCards(&players[i]);
     P_InitAnimatedLiquids();
 
     // if deathmatch, randomly spawn the active players

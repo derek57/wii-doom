@@ -43,6 +43,7 @@
 #include "v_trans.h"
 #include "z_zone.h"
 
+
 #if 0
 //
 // Sliding door frame information
@@ -228,7 +229,24 @@ EV_DoLockedDoor
             return 0;
         if (!p->cards[it_bluecard] && !p->cards[it_blueskull])
         {
-            p->message = DEH_String(PD_BLUEO);
+            if (!p->cards[it_bluecard])
+            {
+                if (!p->neededcardflash || p->neededcard != it_bluecard)
+                {
+                    p->neededcard = it_bluecard;
+                    p->neededcardflash = NEEDEDCARDFLASH;
+                }
+                p->message = DEH_String(PD_BLUEO);
+            }
+            else if (!p->cards[it_blueskull])
+            {
+                if (!p->neededcardflash || p->neededcard != it_blueskull)
+                {
+                    p->neededcard = it_blueskull;
+                    p->neededcardflash = NEEDEDCARDFLASH;
+                }
+                p->message = DEH_String(PD_BLUEO);
+            }
             S_StartSound(NULL,sfx_oof);
             return 0;
         }
@@ -240,7 +258,24 @@ EV_DoLockedDoor
             return 0;
         if (!p->cards[it_redcard] && !p->cards[it_redskull])
         {
-            p->message = DEH_String(PD_REDO);
+            if (!p->cards[it_redcard])
+            {
+                if (!p->neededcardflash || p->neededcard != it_redcard)
+                {
+                    p->neededcard = it_redcard;
+                    p->neededcardflash = NEEDEDCARDFLASH;
+                }
+                p->message = DEH_String(PD_REDO);
+            }
+            else if (!p->cards[it_redskull])
+            {
+                if (!p->neededcardflash || p->neededcard != it_redskull)
+                {
+                    p->neededcard = it_redskull;
+                    p->neededcardflash = NEEDEDCARDFLASH;
+                }
+                p->message = DEH_String(PD_REDO);
+            }
             S_StartSound(NULL,sfx_oof);
             return 0;
         }
@@ -250,10 +285,26 @@ EV_DoLockedDoor
       case 137:
         if ( !p )
             return 0;
-        if (!p->cards[it_yellowcard] &&
-            !p->cards[it_yellowskull])
+        if (!p->cards[it_yellowcard] && !p->cards[it_yellowskull])
         {
-            p->message = DEH_String(PD_YELLOWO);
+            if (!p->cards[it_yellowcard])
+            {
+                if (!p->neededcardflash || p->neededcard != it_yellowcard)
+                {
+                    p->neededcard = it_yellowcard;
+                    p->neededcardflash = NEEDEDCARDFLASH;
+                }
+                p->message = DEH_String(PD_YELLOWO);
+            }
+            else if (!p->cards[it_yellowskull])
+            {
+                if (!p->neededcardflash || p->neededcard != it_yellowskull)
+                {
+                    p->neededcard = it_yellowskull;
+                    p->neededcardflash = NEEDEDCARDFLASH;
+                }
+                p->message = DEH_String(PD_YELLOWO);
+            }
             S_StartSound(NULL,sfx_oof);
             return 0;
         }
@@ -380,7 +431,24 @@ EV_VerticalDoor
         
         if (!player->cards[it_bluecard] && !player->cards[it_blueskull])
         {
-            player->message = DEH_String(PD_BLUEK);
+            if (!player->cards[it_bluecard])
+            {
+                if (!player->neededcardflash || player->neededcard != it_bluecard)
+                {
+                    player->neededcard = it_bluecard;
+                    player->neededcardflash = NEEDEDCARDFLASH;
+                }
+                player->message = DEH_String(PD_BLUEK);
+            }
+            else if (!player->cards[it_blueskull])
+            {
+                if (!player->neededcardflash || player->neededcard != it_blueskull)
+                {
+                    player->neededcard = it_blueskull;
+                    player->neededcardflash = NEEDEDCARDFLASH;
+                }
+                player->message = DEH_String(PD_BLUEK);
+            }
             S_StartSound(NULL,sfx_oof);
             return;
         }
@@ -391,10 +459,26 @@ EV_VerticalDoor
         if ( !player )
             return;
         
-        if (!player->cards[it_yellowcard] &&
-            !player->cards[it_yellowskull])
+        if (!player->cards[it_yellowcard] && !player->cards[it_yellowskull])
         {
-            player->message = DEH_String(PD_YELLOWK);
+            if (!player->cards[it_yellowcard])
+            {
+                if (!player->neededcardflash || player->neededcard != it_yellowcard)
+                {
+                    player->neededcard = it_yellowcard;
+                    player->neededcardflash = NEEDEDCARDFLASH;
+                }
+                player->message = DEH_String(PD_YELLOWK);
+            }
+            else if (!player->cards[it_yellowskull])
+            {
+                if (!player->neededcardflash || player->neededcard != it_yellowskull)
+                {
+                    player->neededcard = it_yellowskull;
+                    player->neededcardflash = NEEDEDCARDFLASH;
+                }
+                player->message = DEH_String(PD_YELLOWK);
+            }
             S_StartSound(NULL,sfx_oof);
             return;
         }
@@ -407,7 +491,24 @@ EV_VerticalDoor
         
         if (!player->cards[it_redcard] && !player->cards[it_redskull])
         {
-            player->message = DEH_String(PD_REDK);
+            if (!player->cards[it_redcard])
+            {
+                if (!player->neededcardflash || player->neededcard != it_redcard)
+                {
+                    player->neededcard = it_redcard;
+                    player->neededcardflash = NEEDEDCARDFLASH;
+                }
+                player->message = DEH_String(PD_REDK);
+            }
+            else if (!player->cards[it_redskull])
+            {
+                if (!player->neededcardflash || player->neededcard != it_redskull)
+                {
+                    player->neededcard = it_redskull;
+                    player->neededcardflash = NEEDEDCARDFLASH;
+                }
+                player->message = DEH_String(PD_REDK);
+            }
             S_StartSound(NULL,sfx_oof);
             return;
         }
