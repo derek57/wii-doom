@@ -294,12 +294,15 @@ void P_InitCards(player_t *player)
                     player->cards[it_yellowcard] = 0;
                     break;
                 case SPR_BSKU:
+                case SPR_BBSK:
                     player->cards[it_blueskull] = 0;
                     break;
                 case SPR_RSKU:
+                case SPR_BRSK:
                     player->cards[it_redskull] = 0;
                     break;
                 case SPR_YSKU:
+                case SPR_BYSK:
                     player->cards[it_yellowskull] = 0;
                     break;
                 default:
