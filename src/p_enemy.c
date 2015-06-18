@@ -1953,7 +1953,14 @@ void A_BossDeath (mobj_t* mo)
 
 void A_Footstep (mobj_t* mo)
 {
-    if(d_footstep && !mo->player->powers[pw_flight])
+    player_t*        player = &players[consoleplayer];
+
+    sector_t*        sector = player->mo->subsector->sector;
+
+    if(d_footstep &&
+           !mo->player->powers[pw_flight] &&
+           !mo->player->jumpTics &&
+           player->mo->z == sector->floor_height)
     {
         int t = P_Random() % 4;
 
@@ -1975,7 +1982,12 @@ void A_Footstep (mobj_t* mo)
                     (P_GetThingFloorType(mo) > 72  && P_GetThingFloorType(mo) < 77)  ||
                     (P_GetThingFloorType(mo) > 88  && P_GetThingFloorType(mo) < 92)  ||
                     (P_GetThingFloorType(mo) > 143 && P_GetThingFloorType(mo) < 148))
-                S_StartSound (mo, sfx_lava);
+            {
+                if(!(players[consoleplayer].cheats & CF_GODMODE))
+                    S_StartSound (mo, sfx_lava);
+                else
+                    S_StartSound (mo, sfx_water);
+            }
         }
         old_t = t;
     }
