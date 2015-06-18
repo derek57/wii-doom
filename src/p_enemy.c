@@ -50,7 +50,7 @@
 
 #define        FATSPREAD            (ANG90/8)
 #define        SKULLSPEED           (20*FRACUNIT)
-#define        SPLAT_PER_COUNTER    7
+#define        SPLAT_PER_COUNTER    1
 
 
 typedef enum
@@ -93,7 +93,9 @@ fixed_t           viletryy;
 mobj_t*           soundtarget;
 mobj_t*           corpsehit;
 mobj_t*           vileobj;
-mobj_t**          braintargets;
+mobj_t*           *braintargets;
+
+mobjtype_t        chunk_type;
 
 int               old_t;
 int               old_u;
@@ -589,6 +591,77 @@ P_LookForPlayers
     return false;
 }
 
+//----------------------------------------------------------------------------
+//
+// PROC A_MoreBlood
+//
+//----------------------------------------------------------------------------
+
+void A_MoreBlood(mobj_t * actor)
+{
+    if(d_maxgore && !(actor->flags & MF_NOBLOOD))
+    {
+        int i, t;
+
+        mobj_t *mo;
+        mobjtype_t chunk_type;
+
+        numsplats++;
+
+        if (actor->type == MT_HEAD ||
+                actor->type == MT_BETAHEAD)
+            chunk_type = MT_CHUNK_BLUE;
+        else if(actor->type == MT_BRUISER ||
+                actor->type == MT_BETABRUISER ||
+                actor->type == MT_KNIGHT)
+            chunk_type = MT_CHUNK_GREEN;
+        else
+            chunk_type = MT_CHUNK;
+
+        // WARNING: don't go lower than SPLAT_PER_COUNTER !!!
+        for(i = SPLAT_PER_COUNTER; i <= numsplats / SPLAT_PER_COUNTER && numsplats % i == 0; ++i)
+        {
+            mo = P_SpawnMobj(actor->x,
+                             actor->y,
+                             actor->z, chunk_type);
+
+            // added for colored blood and gore!
+            mo->target = actor;
+
+            mo->type = chunk_type;
+
+            if (d_colblood2 && d_chkblood2)
+            {
+                // Spectres bleed spectre blood
+                if(mo->target->type == MT_SHADOWS)
+                    mo->flags |= MF_SHADOW;
+            }
+
+            t = P_Random() % 6;
+
+            if(t == 0 || t == 1 || t == 2 || t == 3 || t == 4 || t == 5)
+                P_SetMobjState(mo, mobjinfo[mo->type].spawnstate + t);
+
+            t = P_Random();
+
+            mo->momx = (t - P_Random()) << 11;
+
+            t = P_Random();
+
+            mo->momy = (t - P_Random()) << 11;
+            mo->momz = (P_Random() << 11) / 2;
+            break;
+        }
+    }
+}
+
+void A_Pain (mobj_t* actor)
+{
+    if (actor->info->painsound)
+        S_StartSound (actor, actor->info->painsound);
+
+    A_MoreBlood(actor);
+}
 
 void A_Fall (mobj_t *actor)
 {
@@ -629,6 +702,8 @@ void A_Fall (mobj_t *actor)
             t = P_Random();
             mo->momy = (t - P_Random ()) << 11;
             mo->momz = P_Random() << 11;
+
+            A_MoreBlood(actor);
         }
     }
 }
@@ -1702,14 +1777,6 @@ void A_XScream (mobj_t* actor)
 }
 
 
-void A_Pain (mobj_t* actor)
-{
-    if (actor->info->painsound)
-        S_StartSound (actor, actor->info->painsound);
-}
-
-
-
 
 //
 // A_Explode
@@ -2003,6 +2070,8 @@ void A_BrainAwake (mobj_t* mo)
 
 void A_BrainPain (mobj_t*        mo)
 {
+    A_MoreBlood(mo);
+
     S_StartSound (NULL,sfx_bospn);
 }
 
@@ -2254,72 +2323,6 @@ void A_MoreGibs(mobj_t* actor)
             gore->momx = mo->momx;
             gore->momy = mo->momy;
             gore->momz = mo->momz;
-        }
-    }
-}
-
-//----------------------------------------------------------------------------
-//
-// PROC A_MoreBlood
-//
-//----------------------------------------------------------------------------
-
-void A_MoreBlood(mobj_t * actor)
-{
-    if(d_maxgore && !(actor->flags & MF_NOBLOOD))
-    {
-        int i, t;
-
-        mobj_t *mo;
-        mobjtype_t type;
-
-        numsplats++;
-
-        if(actor->flags & MF2_BLUEBLOOD)
-            type = MT_CHUNK_BLUE;
-        else if(actor->flags & MF2_GREENBLOOD)
-            type = MT_CHUNK_GREEN;
-        else
-            type = MT_CHUNK;
-
-        // WARNING: don't go lower than BLOODSPLAT_PER_COUNTER !!!
-        for(i = SPLAT_PER_COUNTER; i <= numsplats / SPLAT_PER_COUNTER && numsplats % i == 0; ++i)
-        {
-            mo = P_SpawnMobj(actor->x,
-                             actor->y,
-                             actor->z, type);
-
-            // added for colored blood and gore!
-            mo->target = actor->target;
-
-            if (d_colblood2 && d_chkblood2)
-            {
-                // Spectres bleed spectre blood
-                if(actor->target->type == MT_SHADOWS)
-                    mo->flags |= MF_SHADOW;
-            }
-
-            t = P_Random() % 6;
-
-            if(t == 0 || t == 1 || t == 2 || t == 3 || t == 4 || t == 5)
-            {
-                if(actor->flags & MF2_BLUEBLOOD)
-                    P_SetMobjState(mo, S_CHUNKBLUE_00 + t);
-                else if(actor->flags & MF2_GREENBLOOD)
-                    P_SetMobjState(mo, S_CHUNKGREEN_00 + t);
-                else
-                    P_SetMobjState(mo, S_CHUNK_00 + t);
-            }
-
-            t = P_Random();
-
-            mo->momx = (t - P_Random()) << 11;
-
-            t = P_Random();
-
-            mo->momy = (t - P_Random()) << 11;
-            mo->momz = (P_Random() << 11) / 2;
-            break;
         }
     }
 }

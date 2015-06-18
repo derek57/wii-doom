@@ -277,7 +277,7 @@ state_t        states[NUMSTATES] = {
     {SPR_BFGF,32769,6,{A_Light2},S_LIGHTDONE,0,0},        // S_BFGFLASH2
     {SPR_BLUD,2,8,{NULL},S_BLOOD2,0,0},        // S_BLOOD1
     {SPR_BLUD,1,8,{NULL},S_BLOOD3,0,0},        // S_BLOOD2
-    {SPR_BLUD,0,8,{A_MoreBlood},S_NULL,0,0},        // S_BLOOD3
+    {SPR_BLUD,0,8,{NULL},S_NULL,0,0},        // S_BLOOD3
     {SPR_PUFF,32768,4,{NULL},S_PUFF2,0,0},        // S_PUFF1
     {SPR_PUFF,1,4,{NULL},S_PUFF3,0,0},        // S_PUFF2
     {SPR_PUFF,2,4,{NULL},S_PUFF4,0,0},        // S_PUFF3
@@ -341,7 +341,7 @@ state_t        states[NUMSTATES] = {
     {SPR_PLAY,3,12,{A_Footstep},S_PLAY_RUN1,0,0},        // S_PLAY_RUN4
     {SPR_PLAY,4,12,{NULL},S_PLAY,0,0},        // S_PLAY_ATK1
     {SPR_PLAY,32773,6,{NULL},S_PLAY_ATK1,0,0},        // S_PLAY_ATK2
-    {SPR_PLAY,6,4,{NULL},S_PLAY_PAIN2,0,0},        // S_PLAY_PAIN
+    {SPR_PLAY,6,4,{A_MoreBlood},S_PLAY_PAIN2,0,0},        // S_PLAY_PAIN
     {SPR_PLAY,6,4,{A_Pain},S_PLAY,0,0},        // S_PLAY_PAIN2
     {SPR_PLAY,7,10,{NULL},S_PLAY_DIE2,0,0},        // S_PLAY_DIE1
     {SPR_PLAY,8,10,{A_PlayerScream},S_PLAY_DIE3,0,0},        // S_PLAY_DIE2
@@ -372,7 +372,7 @@ state_t        states[NUMSTATES] = {
     {SPR_POSS,4,10,{A_FaceTarget},S_POSS_ATK2,0,0},        // S_POSS_ATK1
     {SPR_POSS,5,8,{A_PosAttack},S_POSS_ATK3,0,0},        // S_POSS_ATK2
     {SPR_POSS,4,8,{NULL},S_POSS_RUN1,0,0},        // S_POSS_ATK3
-    {SPR_POSS,6,3,{NULL},S_POSS_PAIN2,0,0},        // S_POSS_PAIN
+    {SPR_POSS,6,3,{A_MoreBlood},S_POSS_PAIN2,0,0},        // S_POSS_PAIN
     {SPR_POSS,6,3,{A_Pain},S_POSS_RUN1,0,0},        // S_POSS_PAIN2
     {SPR_POSS,7,5,{NULL},S_POSS_DIE2,0,0},        // S_POSS_DIE1
     {SPR_POSS,8,5,{A_Scream},S_POSS_DIE3,0,0},        // S_POSS_DIE2
@@ -405,7 +405,7 @@ state_t        states[NUMSTATES] = {
     {SPR_SPOS,4,10,{A_FaceTarget},S_SPOS_ATK2,0,0},        // S_SPOS_ATK1
     {SPR_SPOS,32773,10,{A_SPosAttack},S_SPOS_ATK3,0,0},        // S_SPOS_ATK2
     {SPR_SPOS,4,10,{NULL},S_SPOS_RUN1,0,0},        // S_SPOS_ATK3
-    {SPR_SPOS,6,3,{NULL},S_SPOS_PAIN2,0,0},        // S_SPOS_PAIN
+    {SPR_SPOS,6,3,{A_MoreBlood},S_SPOS_PAIN2,0,0},        // S_SPOS_PAIN
     {SPR_SPOS,6,3,{A_Pain},S_SPOS_RUN1,0,0},        // S_SPOS_PAIN2
     {SPR_SPOS,7,5,{NULL},S_SPOS_DIE2,0,0},        // S_SPOS_DIE1
     {SPR_SPOS,8,5,{A_Scream},S_SPOS_DIE3,0,0},        // S_SPOS_DIE2
@@ -454,7 +454,7 @@ state_t        states[NUMSTATES] = {
     {SPR_VILE,32794,10,{NULL},S_VILE_HEAL2,0,0},        // S_VILE_HEAL1
     {SPR_VILE,32795,10,{NULL},S_VILE_HEAL3,0,0},        // S_VILE_HEAL2
     {SPR_VILE,32796,10,{NULL},S_VILE_RUN1,0,0},        // S_VILE_HEAL3
-    {SPR_VILE,16,5,{NULL},S_VILE_PAIN2,0,0},        // S_VILE_PAIN
+    {SPR_VILE,16,5,{A_MoreBlood},S_VILE_PAIN2,0,0},        // S_VILE_PAIN
     {SPR_VILE,16,5,{A_Pain},S_VILE_RUN1,0,0},        // S_VILE_PAIN2
     {SPR_VILE,16,7,{NULL},S_VILE_DIE2,0,0},        // S_VILE_DIE1
     {SPR_VILE,17,7,{A_Scream},S_VILE_DIE3,0,0},        // S_VILE_DIE2
@@ -528,7 +528,7 @@ state_t        states[NUMSTATES] = {
     {SPR_SKEL,32777,10,{A_FaceTarget},S_SKEL_MISS3,0,0},        // S_SKEL_MISS2
     {SPR_SKEL,10,10,{A_SkelMissile},S_SKEL_MISS4,0,0},        // S_SKEL_MISS3
     {SPR_SKEL,10,10,{A_FaceTarget},S_SKEL_RUN1,0,0},        // S_SKEL_MISS4
-    {SPR_SKEL,11,5,{NULL},S_SKEL_PAIN2,0,0},        // S_SKEL_PAIN
+    {SPR_SKEL,11,5,{A_MoreBlood},S_SKEL_PAIN2,0,0},        // S_SKEL_PAIN
     {SPR_SKEL,11,5,{A_Pain},S_SKEL_RUN1,0,0},        // S_SKEL_PAIN2
     {SPR_SKEL,11,7,{NULL},S_SKEL_DIE2,0,0},        // S_SKEL_DIE1
     {SPR_SKEL,12,7,{NULL},S_SKEL_DIE3,0,0},        // S_SKEL_DIE2
@@ -571,7 +571,7 @@ state_t        states[NUMSTATES] = {
     {SPR_FATT,32775,10,{A_FatAttack3},S_FATT_ATK9,0,0},        // S_FATT_ATK8
     {SPR_FATT,8,5,{A_FaceTarget},S_FATT_ATK10,0,0},        // S_FATT_ATK9
     {SPR_FATT,6,5,{A_FaceTarget},S_FATT_RUN1,0,0},        // S_FATT_ATK10
-    {SPR_FATT,9,3,{NULL},S_FATT_PAIN2,0,0},        // S_FATT_PAIN
+    {SPR_FATT,9,3,{A_MoreBlood},S_FATT_PAIN2,0,0},        // S_FATT_PAIN
     {SPR_FATT,9,3,{A_Pain},S_FATT_RUN1,0,0},        // S_FATT_PAIN2
     {SPR_FATT,10,6,{NULL},S_FATT_DIE2,0,0},        // S_FATT_DIE1
     {SPR_FATT,11,6,{A_Scream},S_FATT_DIE3,0,0},        // S_FATT_DIE2
@@ -605,7 +605,7 @@ state_t        states[NUMSTATES] = {
     {SPR_CPOS,32773,4,{A_CPosAttack},S_CPOS_ATK3,0,0},        // S_CPOS_ATK2
     {SPR_CPOS,32772,4,{A_CPosAttack},S_CPOS_ATK4,0,0},        // S_CPOS_ATK3
     {SPR_CPOS,5,1,{A_CPosRefire},S_CPOS_ATK2,0,0},        // S_CPOS_ATK4
-    {SPR_CPOS,6,3,{NULL},S_CPOS_PAIN2,0,0},        // S_CPOS_PAIN
+    {SPR_CPOS,6,3,{A_MoreBlood},S_CPOS_PAIN2,0,0},        // S_CPOS_PAIN
     {SPR_CPOS,6,3,{A_Pain},S_CPOS_RUN1,0,0},        // S_CPOS_PAIN2
     {SPR_CPOS,7,5,{NULL},S_CPOS_DIE2,0,0},        // S_CPOS_DIE1
     {SPR_CPOS,8,5,{A_Scream},S_CPOS_DIE3,0,0},        // S_CPOS_DIE2
@@ -640,7 +640,7 @@ state_t        states[NUMSTATES] = {
     {SPR_TROO,4,8,{A_FaceTarget},S_TROO_ATK2,0,0},        // S_TROO_ATK1
     {SPR_TROO,5,8,{A_FaceTarget},S_TROO_ATK3,0,0},        // S_TROO_ATK2
     {SPR_TROO,6,6,{A_TroopAttack},S_TROO_RUN1,0,0},        // S_TROO_ATK3
-    {SPR_TROO,7,2,{NULL},S_TROO_PAIN2,0,0},        // S_TROO_PAIN
+    {SPR_TROO,7,2,{A_MoreBlood},S_TROO_PAIN2,0,0},        // S_TROO_PAIN
     {SPR_TROO,7,2,{A_Pain},S_TROO_RUN1,0,0},        // S_TROO_PAIN2
     {SPR_TROO,8,8,{NULL},S_TROO_DIE2,0,0},        // S_TROO_DIE1
     {SPR_TROO,9,8,{A_Scream},S_TROO_DIE3,0,0},        // S_TROO_DIE2
@@ -673,7 +673,7 @@ state_t        states[NUMSTATES] = {
     {SPR_SARG,4,8,{A_FaceTarget},S_SARG_ATK2,0,0},        // S_SARG_ATK1
     {SPR_SARG,5,8,{A_FaceTarget},S_SARG_ATK3,0,0},        // S_SARG_ATK2
     {SPR_SARG,6,8,{A_SargAttack},S_SARG_RUN1,0,0},        // S_SARG_ATK3
-    {SPR_SARG,7,2,{NULL},S_SARG_PAIN2,0,0},        // S_SARG_PAIN
+    {SPR_SARG,7,2,{A_MoreBlood},S_SARG_PAIN2,0,0},        // S_SARG_PAIN
     {SPR_SARG,7,2,{A_Pain},S_SARG_RUN1,0,0},        // S_SARG_PAIN2
     {SPR_SARG,8,8,{NULL},S_SARG_DIE2,0,0},        // S_SARG_DIE1
     {SPR_SARG,9,8,{A_Scream},S_SARG_DIE3,0,0},        // S_SARG_DIE2
@@ -692,9 +692,9 @@ state_t        states[NUMSTATES] = {
     {SPR_HEAD,1,5,{A_FaceTarget},S_HEAD_ATK2,0,0},        // S_HEAD_ATK1
     {SPR_HEAD,2,5,{A_FaceTarget},S_HEAD_ATK3,0,0},        // S_HEAD_ATK2
     {SPR_HEAD,32771,5,{A_HeadAttack},S_HEAD_RUN1,0,0},        // S_HEAD_ATK3
-    {SPR_HEAD,4,3,{NULL},S_HEAD_PAIN2,0,0},        // S_HEAD_PAIN
+    {SPR_HEAD,4,3,{A_MoreBlood},S_HEAD_PAIN2,0,0},        // S_HEAD_PAIN
     {SPR_HEAD,4,3,{A_Pain},S_HEAD_PAIN3,0,0},        // S_HEAD_PAIN2
-    {SPR_HEAD,5,6,{NULL},S_HEAD_RUN1,0,0},        // S_HEAD_PAIN3
+    {SPR_HEAD,5,6,{A_MoreBlood},S_HEAD_RUN1,0,0},        // S_HEAD_PAIN3
     {SPR_HEAD,6,8,{NULL},S_HEAD_DIE2,0,0},        // S_HEAD_DIE1
     {SPR_HEAD,7,8,{A_Scream},S_HEAD_DIE3,0,0},        // S_HEAD_DIE2
     {SPR_HEAD,8,8,{NULL},S_HEAD_DIE4,0,0},        // S_HEAD_DIE3
@@ -725,7 +725,7 @@ state_t        states[NUMSTATES] = {
     {SPR_BOSS,4,8,{A_FaceTarget},S_BOSS_ATK2,0,0},        // S_BOSS_ATK1
     {SPR_BOSS,5,8,{A_FaceTarget},S_BOSS_ATK3,0,0},        // S_BOSS_ATK2
     {SPR_BOSS,6,8,{A_BruisAttack},S_BOSS_RUN1,0,0},        // S_BOSS_ATK3
-    {SPR_BOSS,7,2,{NULL},S_BOSS_PAIN2,0,0},        // S_BOSS_PAIN
+    {SPR_BOSS,7,2,{A_MoreBlood},S_BOSS_PAIN2,0,0},        // S_BOSS_PAIN
     {SPR_BOSS,7,2,{A_Pain},S_BOSS_RUN1,0,0},        // S_BOSS_PAIN2
     {SPR_BOSS,8,8,{NULL},S_BOSS_DIE2,0,0},        // S_BOSS_DIE1
     {SPR_BOSS,9,8,{A_Scream},S_BOSS_DIE3,0,0},        // S_BOSS_DIE2
@@ -754,7 +754,7 @@ state_t        states[NUMSTATES] = {
     {SPR_BOS2,4,8,{A_FaceTarget},S_BOS2_ATK2,0,0},        // S_BOS2_ATK1
     {SPR_BOS2,5,8,{A_FaceTarget},S_BOS2_ATK3,0,0},        // S_BOS2_ATK2
     {SPR_BOS2,6,8,{A_BruisAttack},S_BOS2_RUN1,0,0},        // S_BOS2_ATK3
-    {SPR_BOS2,7,2,{NULL},S_BOS2_PAIN2,0,0},        // S_BOS2_PAIN
+    {SPR_BOS2,7,2,{A_MoreBlood},S_BOS2_PAIN2,0,0},        // S_BOS2_PAIN
     {SPR_BOS2,7,2,{A_Pain},S_BOS2_RUN1,0,0},        // S_BOS2_PAIN2
     {SPR_BOS2,8,8,{NULL},S_BOS2_DIE2,0,0},        // S_BOS2_DIE1
     {SPR_BOS2,9,8,{A_Scream},S_BOS2_DIE3,0,0},        // S_BOS2_DIE2
@@ -778,7 +778,7 @@ state_t        states[NUMSTATES] = {
     {SPR_SKUL,32771,4,{A_SkullAttack},S_SKULL_ATK3,0,0},        // S_SKULL_ATK2
     {SPR_SKUL,32770,4,{NULL},S_SKULL_ATK4,0,0},        // S_SKULL_ATK3
     {SPR_SKUL,32771,4,{NULL},S_SKULL_ATK3,0,0},        // S_SKULL_ATK4
-    {SPR_SKUL,32772,3,{NULL},S_SKULL_PAIN2,0,0},        // S_SKULL_PAIN
+    {SPR_SKUL,32772,3,{A_MoreBlood},S_SKULL_PAIN2,0,0},        // S_SKULL_PAIN
     {SPR_SKUL,32772,3,{A_Pain},S_SKULL_RUN1,0,0},        // S_SKULL_PAIN2
     {SPR_SKUL,32773,6,{NULL},S_SKULL_DIE2,0,0},        // S_SKULL_DIE1
     {SPR_SKUL,32774,6,{A_Scream},S_SKULL_DIE3,0,0},        // S_SKULL_DIE2
@@ -804,7 +804,7 @@ state_t        states[NUMSTATES] = {
     {SPR_SPID,32774,4,{A_SPosAttack},S_SPID_ATK3,0,0},        // S_SPID_ATK2
     {SPR_SPID,32775,4,{A_SPosAttack},S_SPID_ATK4,0,0},        // S_SPID_ATK3
     {SPR_SPID,32775,1,{A_SpidRefire},S_SPID_ATK2,0,0},        // S_SPID_ATK4
-    {SPR_SPID,8,3,{NULL},S_SPID_PAIN2,0,0},        // S_SPID_PAIN
+    {SPR_SPID,8,3,{A_MoreBlood},S_SPID_PAIN2,0,0},        // S_SPID_PAIN
     {SPR_SPID,8,3,{A_Pain},S_SPID_RUN1,0,0},        // S_SPID_PAIN2
     {SPR_SPID,9,20,{A_Scream},S_SPID_DIE2,0,0},        // S_SPID_DIE1
     {SPR_SPID,10,10,{A_Fall},S_SPID_DIE3,0,0},        // S_SPID_DIE2
@@ -836,7 +836,7 @@ state_t        states[NUMSTATES] = {
     {SPR_BSPI,32774,4,{A_BspiAttack},S_BSPI_ATK3,0,0},        // S_BSPI_ATK2
     {SPR_BSPI,32775,4,{NULL},S_BSPI_ATK4,0,0},        // S_BSPI_ATK3
     {SPR_BSPI,32775,1,{A_SpidRefire},S_BSPI_ATK2,0,0},        // S_BSPI_ATK4
-    {SPR_BSPI,8,3,{NULL},S_BSPI_PAIN2,0,0},        // S_BSPI_PAIN
+    {SPR_BSPI,8,3,{A_MoreBlood},S_BSPI_PAIN2,0,0},        // S_BSPI_PAIN
     {SPR_BSPI,8,3,{A_Pain},S_BSPI_RUN1,0,0},        // S_BSPI_PAIN2
     {SPR_BSPI,9,20,{A_Scream},S_BSPI_DIE2,0,0},        // S_BSPI_DIE1
     {SPR_BSPI,10,7,{A_Fall},S_BSPI_DIE3,0,0},        // S_BSPI_DIE2
@@ -897,7 +897,7 @@ state_t        states[NUMSTATES] = {
     {SPR_PAIN,4,5,{A_FaceTarget},S_PAIN_ATK3,0,0},        // S_PAIN_ATK2
     {SPR_PAIN,32773,5,{A_FaceTarget},S_PAIN_ATK4,0,0},        // S_PAIN_ATK3
     {SPR_PAIN,32773,0,{A_PainAttack},S_PAIN_RUN1,0,0},        // S_PAIN_ATK4
-    {SPR_PAIN,6,6,{NULL},S_PAIN_PAIN2,0,0},        // S_PAIN_PAIN
+    {SPR_PAIN,6,6,{A_MoreBlood},S_PAIN_PAIN2,0,0},        // S_PAIN_PAIN
     {SPR_PAIN,6,6,{A_Pain},S_PAIN_RUN1,0,0},        // S_PAIN_PAIN2
     {SPR_PAIN,32775,8,{NULL},S_PAIN_DIE2,0,0},        // S_PAIN_DIE1
     {SPR_PAIN,32776,8,{A_Scream},S_PAIN_DIE3,0,0},        // S_PAIN_DIE2
@@ -927,7 +927,7 @@ state_t        states[NUMSTATES] = {
     {SPR_SSWV,5,6,{A_FaceTarget},S_SSWV_ATK5,0,0},        // S_SSWV_ATK4
     {SPR_SSWV,32774,4,{A_CPosAttack},S_SSWV_ATK6,0,0},        // S_SSWV_ATK5
     {SPR_SSWV,5,1,{A_CPosRefire},S_SSWV_ATK2,0,0},        // S_SSWV_ATK6
-    {SPR_SSWV,7,3,{NULL},S_SSWV_PAIN2,0,0},        // S_SSWV_PAIN
+    {SPR_SSWV,7,3,{A_MoreBlood},S_SSWV_PAIN2,0,0},        // S_SSWV_PAIN
     {SPR_SSWV,7,3,{A_Pain},S_SSWV_RUN1,0,0},        // S_SSWV_PAIN2
     {SPR_SSWV,8,5,{NULL},S_SSWV_DIE2,0,0},        // S_SSWV_DIE1
     {SPR_SSWV,9,5,{A_Scream},S_SSWV_DIE3,0,0},        // S_SSWV_DIE2
@@ -961,7 +961,7 @@ state_t        states[NUMSTATES] = {
     {SPR_KEEN,9,6,{NULL},S_COMMKEEN11,0,0},        // S_COMMKEEN10
     {SPR_KEEN,10,6,{A_KeenDie},S_COMMKEEN12,0,0},// S_COMMKEEN11
     {SPR_KEEN,11,-1,{NULL},S_NULL,0,0},                // S_COMMKEEN12
-    {SPR_KEEN,12,4,{NULL},S_KEENPAIN2,0,0},        // S_KEENPAIN
+    {SPR_KEEN,12,4,{A_MoreBlood},S_KEENPAIN2,0,0},        // S_KEENPAIN
     {SPR_KEEN,12,8,{A_Pain},S_KEENSTND,0,0},        // S_KEENPAIN2
     {SPR_BBRN,0,-1,{NULL},S_NULL,0,0},                // S_BRAIN
     {SPR_BBRN,1,36,{A_BrainPain},S_BRAIN,0,0},        // S_BRAIN_PAIN
@@ -1173,13 +1173,13 @@ state_t        states[NUMSTATES] = {
     {SPR_FLSH,17,-1,{NULL},S_NULL,0,0},        // S_FLESH_17
     {SPR_FLSH,18,-1,{NULL},S_NULL,0,0},        // S_FLESH_18
     {SPR_FLSH,19,-1,{NULL},S_NULL,0,0},        // S_FLESH_19
-    {SPR_SPRY,0,3,{A_MoreBlood},S_SPRAY_01,0,0},        // S_SPRAY_00
-    {SPR_SPRY,1,3,{A_MoreBlood},S_SPRAY_02,0,0},        // S_SPRAY_01
-    {SPR_SPRY,2,3,{A_MoreBlood},S_SPRAY_03,0,0},        // S_SPRAY_02
-    {SPR_SPRY,3,3,{A_MoreBlood},S_SPRAY_04,0,0},        // S_SPRAY_03
-    {SPR_SPRY,4,3,{A_MoreBlood},S_SPRAY_05,0,0},        // S_SPRAY_04
-    {SPR_SPRY,5,3,{A_MoreBlood},S_SPRAY_06,0,0},        // S_SPRAY_05
-    {SPR_SPRY,6,2,{A_MoreBlood},S_NULL,0,0},        // S_SPRAY_06
+    {SPR_SPRY,0,3,{NULL},S_SPRAY_01,0,0},        // S_SPRAY_00
+    {SPR_SPRY,1,3,{NULL},S_SPRAY_02,0,0},        // S_SPRAY_01
+    {SPR_SPRY,2,3,{NULL},S_SPRAY_03,0,0},        // S_SPRAY_02
+    {SPR_SPRY,3,3,{NULL},S_SPRAY_04,0,0},        // S_SPRAY_03
+    {SPR_SPRY,4,3,{NULL},S_SPRAY_05,0,0},        // S_SPRAY_04
+    {SPR_SPRY,5,3,{NULL},S_SPRAY_06,0,0},        // S_SPRAY_05
+    {SPR_SPRY,6,2,{NULL},S_NULL,0,0},        // S_SPRAY_06
     {SPR_CHNK,0,-1,{NULL},S_CHUNK_01,0,0},       // S_CHUNK_00
     {SPR_CHNK,1,-1,{NULL},S_CHUNK_02,0,0},       // S_CHUNK_01
     {SPR_CHNK,2,-1,{NULL},S_CHUNK_03,0,0},       // S_CHUNK_02
@@ -1293,9 +1293,9 @@ state_t        states[NUMSTATES] = {
     {SPR_BSKL,5,4,{NULL},S_BSKUL_RUN1,0,0},              // S_BSKUL_ATK3
 
     // painstate
-    {SPR_BSKL,6,4,{NULL},S_BSKUL_PAIN2,0,0},     // S_BSKUL_PAIN1
+    {SPR_BSKL,6,4,{A_MoreBlood},S_BSKUL_PAIN2,0,0},     // S_BSKUL_PAIN1
     {SPR_BSKL,7,2,{A_Pain},S_BSKUL_RUN1,0,0},   // S_BSKUL_PAIN2
-    {SPR_BSKL,8,4,{NULL},S_BSKUL_RUN1,0,0},      // S_BSKUL_PAIN3
+    {SPR_BSKL,8,4,{A_MoreBlood},S_BSKUL_RUN1,0,0},      // S_BSKUL_PAIN3
 
     // deathstate
     {SPR_BSKL,9,5,{NULL},S_BSKUL_DIE2,0,0},     // S_BSKUL_DIE1
@@ -1366,7 +1366,7 @@ state_t        states[NUMSTATES] = {
     {SPR_BBSS,4,8,{A_FaceTarget},S_BETABOSS_ATK2,0,0},        // S_BETABOSS_ATK1
     {SPR_BBSS,5,8,{A_FaceTarget},S_BETABOSS_ATK3,0,0},        // S_BETABOSS_ATK2
     {SPR_BBSS,6,8,{A_BruisAttack},S_BETABOSS_RUN1,0,0},        // S_BETABOSS_ATK3
-    {SPR_BBSS,7,2,{NULL},S_BETABOSS_PAIN2,0,0},        // S_BETABOSS_PAIN
+    {SPR_BBSS,7,2,{A_MoreBlood},S_BETABOSS_PAIN2,0,0},        // S_BETABOSS_PAIN
     {SPR_BBSS,7,2,{A_Pain},S_BETABOSS_RUN1,0,0},        // S_BETABOSS_PAIN2
     {SPR_BBSS,8,8,{NULL},S_BETABOSS_DIE2,0,0},        // S_BETABOSS_DIE1
     {SPR_BBSS,9,8,{A_Scream},S_BETABOSS_DIE3,0,0},        // S_BETABOSS_DIE2
@@ -1392,9 +1392,9 @@ state_t        states[NUMSTATES] = {
     {SPR_BHED,1,5,{A_FaceTarget},S_BETAHEAD_ATK2,0,0},        // S_BETAHEAD_ATK1
     {SPR_BHED,2,5,{A_FaceTarget},S_BETAHEAD_ATK3,0,0},        // S_BETAHEAD_ATK2
     {SPR_BHED,32771,5,{A_HeadAttack},S_BETAHEAD_RUN1,0,0},        // S_BETAHEAD_ATK3
-    {SPR_BHED,4,3,{NULL},S_BETAHEAD_PAIN2,0,0},        // S_BETAHEAD_PAIN
+    {SPR_BHED,4,3,{A_MoreBlood},S_BETAHEAD_PAIN2,0,0},        // S_BETAHEAD_PAIN
     {SPR_BHED,4,3,{A_Pain},S_BETAHEAD_PAIN3,0,0},        // S_BETAHEAD_PAIN2
-    {SPR_BHED,5,6,{NULL},S_BETAHEAD_RUN1,0,0},        // S_BETAHEAD_PAIN3
+    {SPR_BHED,5,6,{A_MoreBlood},S_BETAHEAD_RUN1,0,0},        // S_BETAHEAD_PAIN3
     {SPR_BHED,6,8,{NULL},S_BETAHEAD_DIE2,0,0},        // S_BETAHEAD_DIE1
     {SPR_BHED,7,8,{A_Scream},S_BETAHEAD_DIE3,0,0},        // S_BETAHEAD_DIE2
     {SPR_BHED,8,8,{NULL},S_BETAHEAD_DIE4,0,0},        // S_BETAHEAD_DIE3
@@ -1420,7 +1420,7 @@ state_t        states[NUMSTATES] = {
     {SPR_BPSS,4,10,{A_FaceTarget},S_BETAPOSS_ATK2,0,0},        // S_BETAPOSS_ATK1
     {SPR_BPSS,5,8,{A_PosAttack},S_BETAPOSS_ATK3,0,0},        // S_BETAPOSS_ATK2
     {SPR_BPSS,4,8,{NULL},S_BETAPOSS_RUN1,0,0},        // S_BETAPOSS_ATK3
-    {SPR_BPSS,6,3,{NULL},S_BETAPOSS_PAIN2,0,0},        // S_BETAPOSS_PAIN
+    {SPR_BPSS,6,3,{A_MoreBlood},S_BETAPOSS_PAIN2,0,0},        // S_BETAPOSS_PAIN
     {SPR_BPSS,6,3,{A_Pain},S_BETAPOSS_RUN1,0,0},        // S_BETAPOSS_PAIN2
     {SPR_BPSS,7,5,{NULL},S_BETAPOSS_DIE2,0,0},        // S_BETAPOSS_DIE1
     {SPR_BPSS,8,5,{A_Scream},S_BETAPOSS_DIE3,0,0},        // S_BETAPOSS_DIE2
@@ -1444,7 +1444,7 @@ state_t        states[NUMSTATES] = {
     {SPR_BSPS,4,10,{A_FaceTarget},S_BETASPOS_ATK2,0,0},        // S_BETASPOS_ATK1
     {SPR_BSPS,32773,10,{A_SPosAttack},S_BETASPOS_ATK3,0,0},        // S_BETASPOS_ATK2
     {SPR_BSPS,4,10,{NULL},S_BETASPOS_RUN1,0,0},        // S_BETASPOS_ATK3
-    {SPR_BSPS,6,3,{NULL},S_BETASPOS_PAIN2,0,0},        // S_BETASPOS_PAIN
+    {SPR_BSPS,6,3,{A_MoreBlood},S_BETASPOS_PAIN2,0,0},        // S_BETASPOS_PAIN
     {SPR_BSPS,6,3,{A_Pain},S_BETASPOS_RUN1,0,0},        // S_BETASPOS_PAIN2
     {SPR_BSPS,7,5,{NULL},S_BETASPOS_DIE2,0,0},        // S_BETASPOS_DIE1
     {SPR_BSPS,8,5,{A_Scream},S_BETASPOS_DIE3,0,0},        // S_BETASPOS_DIE2
@@ -1897,7 +1897,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_dmact,                // activesound
         MF_SOLID|MF_SHOOTABLE|MF_FLOAT|MF_NOGRAVITY|MF_COUNTKILL, // flags
-        MF2_NOFLOATBOB | MF2_BLUEBLOOD, // flags2
+        MF2_NOFLOATBOB, // flags2
         S_HEAD_RAISE1,                // raisestate
         NULL,       // namepointer
     },
@@ -1926,7 +1926,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_dmact,                // activesound
         MF_SOLID|MF_SHOOTABLE|MF_COUNTKILL, // flags
-        MF2_NOFLOATBOB | MF2_GREENBLOOD, // flags2
+        MF2_NOFLOATBOB, // flags2
         S_BOSS_RAISE1,                // raisestate
         NULL,       // namepointer
     },
@@ -1984,7 +1984,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_dmact,                // activesound
         MF_SOLID|MF_SHOOTABLE|MF_COUNTKILL, // flags
-        MF2_NOFLOATBOB | MF2_GREENBLOOD, // flags2
+        MF2_NOFLOATBOB, // flags2
         S_BOS2_RAISE1,                // raisestate
         NULL,       // namepointer
     },
@@ -6365,7 +6365,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_dmact,                // activesound
         MF_SOLID|MF_SHOOTABLE|MF_COUNTKILL, // flags
-        MF2_NOFLOATBOB | MF2_GREENBLOOD, // flags2
+        MF2_NOFLOATBOB, // flags2
         S_BETABOSS_RAISE1,                // raisestate
         NULL,       // namepointer
     },
@@ -6568,7 +6568,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_dmact,                // activesound
         MF_SOLID|MF_SHOOTABLE|MF_FLOAT|MF_NOGRAVITY|MF_COUNTKILL, // flags
-        MF2_NOFLOATBOB | MF2_BLUEBLOOD, // flags2
+        MF2_NOFLOATBOB, // flags2
         S_BETAHEAD_RAISE1,                // raisestate
         NULL,       // namepointer
     },

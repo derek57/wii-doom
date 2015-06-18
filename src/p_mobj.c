@@ -1233,15 +1233,6 @@ P_SpawnBlood
     {
         if(target->type == MT_SHADOWS)
             th->flags |= MF_SHADOW;
-/*
-        else if (target->type == MT_HEAD ||
-                 target->type == MT_BETAHEAD)
-            th->flags2 |= MF2_BLUE;
-        else if(target->type == MT_BRUISER ||
-                target->type == MT_BETABRUISER ||
-                target->type == MT_KNIGHT)
-            th->flags2 |= MF2_GREEN;
-*/
     }
 
     if (th->tics < 1)
@@ -1275,15 +1266,6 @@ P_SpawnBlood
         {
             if(th2->target->type == MT_SHADOWS)
                 th2->flags |= MF_SHADOW;
-/*
-            else if (th2->target->type == MT_HEAD ||
-                     th2->target->type == MT_BETAHEAD)
-                th2->flags2 |= MF2_BLUE;
-            else if (th2->target->type == MT_BRUISER ||
-                     th2->target->type == MT_BETABRUISER ||
-                     th2->target->type == MT_KNIGHT)
-                th2->flags2 |= MF2_GREEN;
-*/
         }
 
         P_SetMobjState(th2, S_BLOOD1 + (P_Random() % 2));

@@ -716,8 +716,7 @@ void R_ProjectSprite (mobj_t* thing)
     // colored blood
     if (d_colblood && d_chkblood && thing->target &&
        (thing->type == MT_BLOOD ||
-        thing->type == MT_GORE ||
-        thing->type == MT_CHUNK))
+        thing->type == MT_GORE))
     {
         // Thorn Things in Hacx bleed green blood
         if (gamemission == pack_hacx)

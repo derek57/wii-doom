@@ -232,8 +232,6 @@
 #define MF2_BLUEBLOOD      0x00000020  // Object's blood is blue
 #define MF2_GREENBLOOD     0x00000040  // Object's blood is green
 #define MF2_NOTELEPORT     0x00000080  // does not teleport
-#define MF2_GREEN          0x00000200  // Convert all red to green
-#define MF2_BLUE           0x00000400  // Convert all green to red
 #define MF2_ONMOBJ         0x00000800  // mobj is resting on top of another mobj
 #define MF2_FLOATBOB       0x00001000  // Object bobs up and down
 #define MF2_MIRRORED       0x00002000  // object sprite is being displayed mirrored
