@@ -268,15 +268,6 @@ void D_Display (void)
 
         ST_Drawer (scaledviewheight == (200 << hires), redrawsbar );     // HIRES
 
-        if(warped == 1)
-        {
-            paused = true;
-            currentMenu = &CheatsDef;
-            menuactive = 1;
-            itemOn = currentMenu->lastOn;
-            warped = 0;
-        }
-
         fullscreen = scaledviewheight == (200 << hires); // CHANGED FOR HIRES
         break;
 
@@ -411,6 +402,18 @@ void D_Display (void)
     {
         show_chat_bar = false;
         ST_doRefresh();
+    }
+
+    if(done)
+    {
+        if(warped == 1)
+        {
+            paused = true;
+            currentMenu = &CheatsDef;
+            menuactive = 1;
+            itemOn = currentMenu->lastOn;
+            warped = 0;
+        }
     }
 }
 
