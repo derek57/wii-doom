@@ -608,16 +608,21 @@ void A_MoreBlood(mobj_t * actor)
 
         numsplats++;
 
-        if (actor->type == MT_HEAD ||
-                actor->type == MT_BETAHEAD)
-            chunk_type = MT_CHUNK_BLUE;
-        else if(actor->type == MT_BRUISER ||
-                actor->type == MT_BETABRUISER ||
-                actor->type == MT_KNIGHT)
-            chunk_type = MT_CHUNK_GREEN;
+        if (d_chkblood && d_colblood)
+        {
+            if (actor->type == MT_HEAD ||
+                    actor->type == MT_BETAHEAD)
+                chunk_type = MT_CHUNK_BLUE;
+            else if(actor->type == MT_BRUISER ||
+                    actor->type == MT_BETABRUISER ||
+                    actor->type == MT_KNIGHT)
+                chunk_type = MT_CHUNK_GREEN;
+            else
+                chunk_type = MT_CHUNK;
+        }
         else
             chunk_type = MT_CHUNK;
-
+        
         // WARNING: don't go lower than SPLAT_PER_COUNTER !!!
         for(i = SPLAT_PER_COUNTER; i <= numsplats / SPLAT_PER_COUNTER && numsplats % i == 0; ++i)
         {
