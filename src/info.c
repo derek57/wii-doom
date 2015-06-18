@@ -53,7 +53,7 @@ char *sprnames[] = {
     "COL5","TBLU","TGRN","TRED","SMBT","SMGT","SMRT","HDB1","HDB2","HDB3",
     "HDB4","HDB5","HDB6","POB1","POB2","BRS1","TLMP","TLP2",
 
-    "FLSH","SPRY","CHNK","CHKB","CHKG","SPSH","LVAS","SLDG",
+    "FLSH","SPRY","CHNK","CHKB","CHKG","POLB","POLG","SPSH","LVAS","SLDG",
 
     // BETA SPRITES BELOW
 
@@ -1198,6 +1198,8 @@ state_t        states[NUMSTATES] = {
     {SPR_CHKG,3,-1,{NULL},S_CHUNKGREEN_04,0,0},       // S_CHUNKGREEN_03
     {SPR_CHKG,4,-1,{NULL},S_CHUNKGREEN_05,0,0},       // S_CHUNKGREEN_04
     {SPR_CHKG,5,-1,{NULL},S_NULL,0,0},   // S_CHUNKGREEN_05
+    {SPR_POLB,0,-1,{NULL},S_NULL,0,0},   // S_GIBSBLUE
+    {SPR_POLG,0,-1,{NULL},S_NULL,0,0},   // S_GIBSGREEN
     {SPR_SPSH, 0, 8, {NULL}, S_SPLASH2, 0, 0},    // S_SPLASH1
     {SPR_SPSH, 1, 8, {NULL}, S_SPLASH3, 0, 0},    // S_SPLASH2
     {SPR_SPSH, 2, 8, {NULL}, S_SPLASH4, 0, 0},    // S_SPLASH3

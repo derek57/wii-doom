@@ -623,6 +623,16 @@ void A_MoreBlood(mobj_t * actor)
         else
             chunk_type = MT_CHUNK;
         
+        if (d_chkblood2 && d_colblood2)
+        {
+            if (actor->type == MT_SKULL ||
+                   actor->type == MT_BETASKULL)
+            {
+                actor->flags |= MF_NOBLOOD;
+                goto skip;
+            }
+        }
+
         // WARNING: don't go lower than SPLAT_PER_COUNTER !!!
         for(i = SPLAT_PER_COUNTER; i <= numsplats / SPLAT_PER_COUNTER && numsplats % i == 0; ++i)
         {
@@ -657,6 +667,7 @@ void A_MoreBlood(mobj_t * actor)
             mo->momz = (P_Random() << 11) / 2;
             break;
         }
+        skip: ;
     }
 }
 
@@ -680,6 +691,10 @@ void A_Fall (mobj_t *actor)
     {
         int i, t;
         mobj_t *mo;
+
+        if((actor->type == MT_SKULL ||
+               actor->type == MT_BETASKULL) && d_colblood2 && d_chkblood2)
+            goto skip;
 
         for(i = 0; i < 8; i++)
         {
@@ -710,6 +725,7 @@ void A_Fall (mobj_t *actor)
 
             A_MoreBlood(actor);
         }
+        skip: ;
     }
 }
 
@@ -2295,6 +2311,13 @@ void A_MoreGibs(mobj_t* actor)
         angle_t an;
         int t;
 
+        if((actor->type == MT_SKULL ||
+               actor->type == MT_BETASKULL) && d_colblood2 && d_chkblood2)
+        {
+            actor->flags |= MF_NOBLOOD;
+            goto skip;
+        }
+
         // max gore - ludicrous gibs
         mo = P_SpawnMobj(actor->x, actor->y, actor->z + (24*FRACUNIT), MT_FLESH);
 
@@ -2341,6 +2364,7 @@ void A_MoreGibs(mobj_t* actor)
             gore->momy = mo->momy;
             gore->momz = mo->momz;
         }
+        skip: ;
     }
 }
 

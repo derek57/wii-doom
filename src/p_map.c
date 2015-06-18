@@ -1721,6 +1721,15 @@ boolean PIT_ChangeSector (mobj_t*        thing)
         if (thing->health <= 0)
         {
             P_SetMobjState (thing, S_GIBS);
+
+            if (d_chkblood && d_colblood)
+            {
+                if (thing->type == MT_HEAD)
+                    P_SetMobjState (thing, S_GIBSBLUE);
+                else if (thing->type == MT_BRUISER ||
+                         thing->type == MT_KNIGHT)
+                    P_SetMobjState (thing, S_GIBSGREEN);
+            }
     
             thing->flags &= ~MF_SOLID;
             thing->height = 0;

@@ -1222,6 +1222,16 @@ P_SpawnBlood
 {
     mobj_t*        th;
         
+    if (d_colblood2 && d_chkblood2)
+    {
+        if(target->type == MT_SKULL ||
+               target->type == MT_BETASKULL)
+        {
+            th->flags |= MF_NOBLOOD;
+            goto skip;
+        }
+    }
+
     z += ((P_Random()-P_Random())<<10);
     th = P_SpawnMobj (x,y,z, MT_BLOOD);
     th->momz = FRACUNIT*2;
@@ -1270,6 +1280,7 @@ P_SpawnBlood
 
         P_SetMobjState(th2, S_BLOOD1 + (P_Random() % 2));
     }
+    skip: ;
 }
 
 
