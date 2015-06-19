@@ -249,6 +249,7 @@ typedef enum
     sfx_water,
     sfx_lava,
     sfx_secret,
+    sfx_jump,
 
     NUMSFX
 } sfxenum_t;

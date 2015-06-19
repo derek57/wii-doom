@@ -35,6 +35,8 @@
 #include "doomstat.h"
 #include "p_inter.h"
 #include "p_local.h"
+#include "s_sound.h"
+#include "sounds.h"
 
 
 #define ANG5                    (ANG90/18)
@@ -411,6 +413,7 @@ void P_PlayerThink (player_t* player)
                 player->mo->momz = 9 * FRACUNIT;
                 player->mo->flags2 &= ~MF2_ONMOBJ;
                 player->jumpTics = 18;
+                S_StartSound(NULL, sfx_jump);
             }
         }
     }
