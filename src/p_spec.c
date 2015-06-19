@@ -97,6 +97,8 @@ int             levelTimeCount;
 
 extern boolean  noclip_on;
 
+extern int      snd_module;
+
 //
 // P_InitPicAnims
 //
@@ -1142,7 +1144,7 @@ void P_PlayerInSpecialSector (player_t* player)
         if (showMessages && d_secrets && !noclip_on)
         {
             player->message = HUSTR_SECRETFOUND;
-            if (player == &players[consoleplayer])
+            if (player == &players[consoleplayer] && !snd_module)
                 S_StartSound(NULL, sfx_secret);
         }
         player->secretcount++;

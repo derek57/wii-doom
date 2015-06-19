@@ -58,9 +58,13 @@ static music_module_t *music_module;
 
 // Sound modules
 
+boolean I_PCS_InitSound(boolean _use_sfx_prefix);
+boolean I_SDL_InitSound(boolean _use_sfx_prefix);
+
 extern void I_InitTimidityConfig(void);
 
 extern sound_module_t sound_sdl_module;
+extern sound_module_t sound_pcsound_module;
 
 extern music_module_t music_sdl_module;
 extern music_module_t music_opl_module;
@@ -79,7 +83,7 @@ static sound_module_t *sound_modules[] =
 {
 #ifdef FEATURE_SOUND
     &sound_sdl_module,
-//    &sound_pcsound_module,
+    &sound_pcsound_module,
 #endif
     NULL,
 };
@@ -118,31 +122,17 @@ static boolean SndDeviceInList(snddevice_t device, snddevice_t *list,
 
 static void InitSfxModule(boolean use_sfx_prefix)
 {
-    int i;
+    extern int snd_module;
 
-    sound_module = NULL;
+    if(snd_module)
+        I_PCS_InitSound(use_sfx_prefix);
+    else
+        I_SDL_InitSound(use_sfx_prefix);
 
-    for (i=0; sound_modules[i] != NULL; ++i)
-    {
-        // Is the sfx device in the list of devices supported by
-        // this module?
+    sound_module = sound_modules[snd_module];
 
-        if (SndDeviceInList(snd_sfxdevice, 
-                            sound_modules[i]->sound_devices,
-                            sound_modules[i]->num_sound_devices))
-        {
-            // Initialize the module
-
-            if (sound_modules[i]->Init(use_sfx_prefix))
-            {
-                C_Printf(CR_GRAY, " SFX playing at a sample rate of %.1fkHz on %i channels.\n",
-                    snd_samplerate / 1000.0f, snd_channels);
-
-                sound_module = sound_modules[i];
-                return;
-            }
-        }
-    }
+    C_Printf(CR_GRAY, " SFX playing at a sample rate of %.1fkHz on %i channels using %s module.\n",
+            snd_samplerate / 1000.0f, snd_channels, snd_module == 1 ? "PC-SPEAKER" : "SDL");
 }
 
 // Initialize music according to snd_musicdevice.

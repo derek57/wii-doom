@@ -54,6 +54,7 @@ int                     cardsfound;
 
 extern boolean          massacre_cheat_used;
 
+extern int              snd_module;
 
 //
 // GET STUFF
@@ -1025,7 +1026,8 @@ P_KillMobj
         {
             t = P_Random() % 7;
 
-            S_StartSound(target, sfx_splsh0 + t);
+            if(!snd_module)
+                S_StartSound(target, sfx_splsh0 + t);
         }
     }
     else

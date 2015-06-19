@@ -64,6 +64,7 @@ void G_PlayerReborn (int player);
 void P_SpawnMapThing (mapthing_t* mthing);
 
 extern int      mouselook;
+extern int      snd_module;
 
 extern boolean  not_walking;
 extern boolean  in_slime;
@@ -71,7 +72,6 @@ extern boolean  in_slime;
 extern fixed_t  animatedliquiddiffs[128];
 extern fixed_t  attackrange;
 
-int             test;
 int             itemrespawntime[ITEMQUESIZE];
 int             iquehead;
 int             iquetail;
@@ -1530,10 +1530,13 @@ int P_HitFloor(mobj_t * thing)
             mo->momy = (P_Random() - P_Random()) << 8;
             mo->momz = 2 * FRACUNIT + (P_Random() << 8);
 
-            if(in_slime)
-                S_StartSound(mo, sfx_burn);
-            else
-                S_StartSound(mo, sfx_gloop);
+            if(!snd_module)
+            {
+                if(in_slime)
+                    S_StartSound(mo, sfx_burn);
+                else
+                    S_StartSound(mo, sfx_gloop);
+            }
 
             return (FLOOR_WATER);
         case 73:
@@ -1551,10 +1554,13 @@ int P_HitFloor(mobj_t * thing)
             mo = P_SpawnMobj(thing->x, thing->y, ONFLOORZ, MT_LAVASMOKE);
             mo->momz = FRACUNIT + (P_Random() << 7);
 
-            if(in_slime)
-                S_StartSound(mo, sfx_burn);
-            else
-                S_StartSound(mo, sfx_gloop);
+            if(!snd_module)
+            {
+                if(in_slime)
+                    S_StartSound(mo, sfx_burn);
+                else
+                    S_StartSound(mo, sfx_gloop);
+            }
 
             return (FLOOR_LAVA);
         case 51:
@@ -1575,10 +1581,13 @@ int P_HitFloor(mobj_t * thing)
             mo->momy = (P_Random() - P_Random()) << 8;
             mo->momz = FRACUNIT + (P_Random() << 8);
 
-            if(in_slime)
-                S_StartSound(mo, sfx_burn);
-            else
-                S_StartSound(mo, sfx_gloop);
+            if(!snd_module)
+            {
+                if(in_slime)
+                    S_StartSound(mo, sfx_burn);
+                else
+                    S_StartSound(mo, sfx_gloop);
+            }
 
             return (FLOOR_SLUDGE);
         default:

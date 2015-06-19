@@ -863,8 +863,8 @@ int                        cheeting;
 int                        coordinates_info = 0;
 int                        timer_info = 0;
 int                        version_info = 0;
-int                        key_controls_start_in_cfg_at_pos = 41;
-int                        key_controls_end_in_cfg_at_pos = 54;
+int                        key_controls_start_in_cfg_at_pos = 42;
+int                        key_controls_end_in_cfg_at_pos = 55;
 int                        crosshair = 0;
 int                        show_stats = 0;
 int                        tracknum = 1;
@@ -881,6 +881,7 @@ int                        warpepi = 2;
 int                        warplev = 2;
 int                        turnspeed = 7;
 int                        chaingun_tics = 4;
+int                        snd_module = 0;
 
 //
 // MENU TYPEDEFS
@@ -1016,6 +1017,7 @@ void M_StopMessage(void);
 void M_ClearMenus (void);
 
 void M_MusicType(int choice);
+void M_SoundType(int choice);
 void M_SoundChannels(int choice);
 void M_GameFiles(int choice);
 void M_Brightness(int choice);
@@ -1789,17 +1791,19 @@ enum
 {
     sfx_vol,
     music_vol,
-    type,
+    mus_type,
+    sfx_type,
     channels,
     sound_end
 } sound_e;
 
 menuitem_t SoundMenu[]=
 {
-    {2,"Sound Volume",M_SfxVol,'s'},
+    {2,"Sound Volume",M_SfxVol,'v'},
     {2,"Music Volume",M_MusicVol,'m'},
     {2,"Music Type",M_MusicType,'t'},
-    {2,"Switch Sound Channels",M_SoundChannels,'c'}
+    {2,"Sound Type",M_SoundType,'s'},
+    {2,"Switch Left / Right Channels",M_SoundChannels,'c'}
 };
 
 menu_t  SoundDef =
@@ -2230,16 +2234,29 @@ void M_DrawSound(void)
         V_ClearDPTranslation();
     }
 
+    if(snd_module)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(SoundDef.x + 159, SoundDef.y + 28, "PC-SPEAKER");
+        V_ClearDPTranslation();
+    }
+    else
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(SoundDef.x + 213, SoundDef.y + 28, "SDL");
+        V_ClearDPTranslation();
+    }
+
     if(swap_sound_chans)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(SoundDef.x + 220, SoundDef.y + 28, "ON");
+        M_WriteText(SoundDef.x + 220, SoundDef.y + 38, "ON");
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(SoundDef.x + 212, SoundDef.y + 28, "OFF");
+        M_WriteText(SoundDef.x + 212, SoundDef.y + 38, "OFF");
         V_ClearDPTranslation();
     }
 
@@ -2287,6 +2304,21 @@ void M_MusicVol(int choice)
         break;
     }
     S_SetMusicVolume(musicVolume * 8);
+}
+
+void M_SoundType(int choice)
+{
+    switch(choice)
+    {
+      case 0:
+        if (snd_module && fsize != 19321722)
+            snd_module = 0;
+        break;
+      case 1:
+        if (!snd_module && fsize != 19321722)
+            snd_module = 1;
+        break;
+    }
 }
 
 void M_MusicType(int choice)
@@ -4549,7 +4581,8 @@ void M_Drawer (void)
     max = currentMenu->numitems;
 
     if (fsize != 28422764 && fsize != 19321722 && fsize != 12361532 &&
-        ((currentMenu == &SoundDef && itemOn == 2) || (currentMenu == &GameDef2 && itemOn == 6)))
+        ((currentMenu == &SoundDef && (itemOn == 2 || itemOn == 3)) ||
+         (currentMenu == &GameDef2 && itemOn == 6)))
     {
         char *message_string = "YOU MUST QUIT AND RESTART TO TAKE EFFECT.";
         int message_offset = 160 - M_StringWidth(message_string) / 2;
@@ -4569,6 +4602,14 @@ void M_Drawer (void)
     else if(fsize == 12361532 && currentMenu == &GameDef2 && itemOn == 1)
     {
         char *message_string = "NO EXTRA BLOOD & GORE FOR CHEX QUEST.";
+        int message_offset = 160 - M_StringWidth(message_string) / 2;
+        dp_translation = crx[CRX_GOLD];
+        M_WriteText(message_offset, 160, DEH_String(message_string));
+        V_ClearDPTranslation();
+    }
+    else if(fsize == 19321722 && currentMenu == &SoundDef && itemOn == 3)
+    {
+        char *message_string = "NO PC-SPEAKERS AVAILABLE FOR HACX";
         int message_offset = 160 - M_StringWidth(message_string) / 2;
         dp_translation = crx[CRX_GOLD];
         M_WriteText(message_offset, 160, DEH_String(message_string));

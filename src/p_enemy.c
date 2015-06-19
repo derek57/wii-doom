@@ -107,6 +107,7 @@ int               numsplats;
 static int        maxbraintargets;     // remove braintargets limit
 
 extern int        numspechit;
+extern int        snd_module;
 
 boolean           on_ground;
 
@@ -1995,19 +1996,28 @@ void A_Footstep (mobj_t* mo)
                     (P_GetThingFloorType(mo) > 76  && P_GetThingFloorType(mo) < 89)  ||
                     (P_GetThingFloorType(mo) > 91  && P_GetThingFloorType(mo) < 136) ||
                     P_GetThingFloorType(mo) > 147)
-                S_StartSound (mo, sfx_step0 + t);
+            {
+                if(!snd_module)
+                    S_StartSound (mo, sfx_step0 + t);
+            }
             else if (P_GetThingFloorType(mo) > 68  && P_GetThingFloorType(mo) < 73)
-                S_StartSound (mo, sfx_water);
+            {
+                if(!snd_module)
+                    S_StartSound (mo, sfx_water);
+            }
             else if((P_GetThingFloorType(mo) > 50  && P_GetThingFloorType(mo) < 54)  ||
                     (P_GetThingFloorType(mo) > 135 && P_GetThingFloorType(mo) < 144) ||
                     (P_GetThingFloorType(mo) > 72  && P_GetThingFloorType(mo) < 77)  ||
                     (P_GetThingFloorType(mo) > 88  && P_GetThingFloorType(mo) < 92)  ||
                     (P_GetThingFloorType(mo) > 143 && P_GetThingFloorType(mo) < 148))
             {
-                if(!(players[consoleplayer].cheats & CF_GODMODE))
-                    S_StartSound (mo, sfx_lava);
-                else
-                    S_StartSound (mo, sfx_water);
+                if(!snd_module)
+                {
+                    if(!(players[consoleplayer].cheats & CF_GODMODE))
+                        S_StartSound (mo, sfx_lava);
+                    else
+                        S_StartSound (mo, sfx_water);
+                }
             }
         }
         old_t = t;
@@ -2342,7 +2352,8 @@ void A_MoreGibs(mobj_t* actor)
             if((t == 0 || t == 1 || t == 2 || t == 3 || t == 4 || t == 5 || 
                 t == 6 || t == 7 || t == 8 || t == 9) && t != old_u)
             {
-                S_StartSound(actor, sfx_splsh0 + t);
+                if(!snd_module)
+                    S_StartSound(actor, sfx_splsh0 + t);
 
                 old_u = t;
             }

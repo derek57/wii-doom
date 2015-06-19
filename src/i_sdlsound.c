@@ -707,7 +707,7 @@ static int GetSliceSize(void)
     return 1024;
 }
 
-static boolean I_SDL_InitSound(boolean _use_sfx_prefix)
+/*static*/ boolean I_SDL_InitSound(boolean _use_sfx_prefix)
 {
     int i;
 
