@@ -945,7 +945,6 @@ extern int                 dots_enabled;
 extern int                 dont_show;
 extern int                 display_fps;
 extern int                 allocated_ram_size;
-extern int                 cardsfound;
 
 extern default_t           doom_defaults_list[];   // KEY BINDINGS
 
@@ -2588,7 +2587,7 @@ void M_DrawKeys(void)
                                                PU_CACHE));
 
     dp_translation = crx[CRX_GOLD];
-    M_WriteText(80, 55, DEH_String("GIVE THEM ALL AT ONCE"));
+    M_WriteText(80, 55, DEH_String("GIVE ALL KEYS FOR THIS MAP"));
     V_ClearDPTranslation();
 }
 
@@ -5015,22 +5014,14 @@ void M_WeaponsH(int choice)
 
 void M_KeysA(int choice)
 {
-    int i;
-
     player_t *player = &players[consoleplayer];
 
     if(!netgame && !demoplayback && gamestate == GS_LEVEL
         && gameskill != sk_nightmare &&
         players[consoleplayer].playerstate == PST_LIVE)
     {
-        cardsfound = 0;
-
-        for (i = NUMCARDS - 1; i >= 0; i--)
-        {
-            if (!player->cards[i])
-                P_GiveCard(player, i);
-        }
-        players[consoleplayer].message = DEH_String("ALL KEYS ADDED");
+        P_GiveAllCards(player);
+        players[consoleplayer].message = DEH_String("ALL KEYS FOR THIS MAP ADDED");
     }
     DetectState();
 }

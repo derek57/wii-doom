@@ -83,6 +83,10 @@
 #define PT_ADDTHINGS        2
 #define PT_EARLYOUT         4
 
+#define CARDNOTFOUNDYET     -1
+#define CARDNOTINMAP        0
+#define BONUSADD            6
+
 //
 // P_TICK
 //
@@ -304,6 +308,10 @@ void    P_InitTerrainTypes(void);
 int     P_HitFloor(mobj_t * thing);
 
 void P_InitCards(player_t *player);
+
+void P_GiveAllCards(player_t *player);
+
+void P_AddBonus(player_t *player, int amount);
 
 void
 P_GiveCard

@@ -1130,9 +1130,9 @@ void ST_updateWidgets(void)
     // update keycard multiple widgets
     for (i=0;i<3;i++)
     {
-        keyboxes[i] = plyr->cards[i] ? i : -1;
+        keyboxes[i] = (plyr->cards[i] > 0 ? i : -1);
 
-        if (plyr->cards[i+3])
+        if (plyr->cards[i + 3] > 0)
             keyboxes[i] = i+3;
     }
 

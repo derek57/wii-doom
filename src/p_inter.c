@@ -28,6 +28,7 @@
 #include <stdlib.h>
 
 #include "am_map.h"
+#include "c_io.h"
 #include "deh_misc.h"
 #include "deh_str.h"
 
@@ -43,9 +44,6 @@
 #include "s_sound.h"
 #include "sounds.h"
 #include "st_stuff.h"
-
-
-#define BONUSADD        6
 
 
 // a weapon is found with two clip loads,
@@ -272,7 +270,7 @@ void P_InitCards(player_t *player)
     int i;
 
     for (i = 0; i < NUMCARDS; i++)
-        player->cards[i] = 0;
+        player->cards[i] = CARDNOTINMAP;
 
     cardsfound = 0;
 
@@ -285,25 +283,25 @@ void P_InitCards(player_t *player)
             switch (thing->sprite)
             {
                 case SPR_BKEY:
-                    player->cards[it_bluecard] = 0;
+                    player->cards[it_bluecard] = CARDNOTFOUNDYET;
                     break;
                 case SPR_RKEY:
-                    player->cards[it_redcard] = 0;
+                    player->cards[it_redcard] = CARDNOTFOUNDYET;
                     break;
                 case SPR_YKEY:
-                    player->cards[it_yellowcard] = 0;
+                    player->cards[it_yellowcard] = CARDNOTFOUNDYET;
                     break;
                 case SPR_BSKU:
                 case SPR_BBSK:
-                    player->cards[it_blueskull] = 0;
+                    player->cards[it_blueskull] = CARDNOTFOUNDYET;
                     break;
                 case SPR_RSKU:
                 case SPR_BRSK:
-                    player->cards[it_redskull] = 0;
+                    player->cards[it_redskull] = CARDNOTFOUNDYET;
                     break;
                 case SPR_YSKU:
                 case SPR_BYSK:
-                    player->cards[it_yellowskull] = 0;
+                    player->cards[it_yellowskull] = CARDNOTFOUNDYET;
                     break;
                 default:
                     break;
@@ -322,22 +320,22 @@ void P_InitCards(player_t *player)
             case 32:
             case 99:
             case 133:
-                if (!player->cards[it_blueskull])
-                    player->cards[it_bluecard] = 0;
+                if (player->cards[it_blueskull] == CARDNOTINMAP)
+                    player->cards[it_bluecard] = CARDNOTFOUNDYET;
                 break;
             case 28:
             case 33:
             case 134:
             case 135:
-                if (!player->cards[it_redskull])
-                    player->cards[it_redcard] = 0;
+                if (player->cards[it_redskull] == CARDNOTINMAP)
+                    player->cards[it_redcard] = CARDNOTFOUNDYET;
                 break;
             case 27:
             case 34:
             case 136:
             case 137:
-                if (!player->cards[it_yellowskull])
-                    player->cards[it_yellowcard] = 0;
+                if (player->cards[it_yellowskull] == CARDNOTINMAP)
+                    player->cards[it_yellowcard] = CARDNOTFOUNDYET;
                 break;
         }
     }
@@ -352,9 +350,6 @@ P_GiveCard
 ( player_t*        player,
   card_t        card )
 {
-    if (player->cards[card])
-        return;
-    
     player->bonuscount = BONUSADD;
     player->cards[card] = ++cardsfound;
 
@@ -362,6 +357,19 @@ P_GiveCard
         player->neededcard = player->neededcardflash = 0;
 }
 
+void P_GiveAllCards(player_t *player)
+{
+    int         i;
+
+    cardsfound = 0;
+    for (i = NUMCARDS - 1; i >= 0; i--)
+    {
+        if (player->cards[i] != CARDNOTINMAP)
+        {
+            P_GiveCard(player, i);
+        }
+    }
+}
 
 //
 // P_GivePower

@@ -227,9 +227,9 @@ EV_DoLockedDoor
       case 133:
         if ( !p )
             return 0;
-        if (!p->cards[it_bluecard] && !p->cards[it_blueskull])
+        if (p->cards[it_bluecard] <= 0 && p->cards[it_blueskull] <= 0)
         {
-            if (!p->cards[it_bluecard])
+            if (p->cards[it_bluecard] == CARDNOTFOUNDYET)
             {
                 if (!p->neededcardflash || p->neededcard != it_bluecard)
                 {
@@ -238,7 +238,7 @@ EV_DoLockedDoor
                 }
                 p->message = DEH_String(PD_BLUEO);
             }
-            else if (!p->cards[it_blueskull])
+            else if (p->cards[it_blueskull] == CARDNOTFOUNDYET)
             {
                 if (!p->neededcardflash || p->neededcard != it_blueskull)
                 {
@@ -256,9 +256,9 @@ EV_DoLockedDoor
       case 135:
         if ( !p )
             return 0;
-        if (!p->cards[it_redcard] && !p->cards[it_redskull])
+        if (p->cards[it_redcard] <= 0 && p->cards[it_redskull] <= 0)
         {
-            if (!p->cards[it_redcard])
+            if (p->cards[it_redcard] == CARDNOTFOUNDYET)
             {
                 if (!p->neededcardflash || p->neededcard != it_redcard)
                 {
@@ -267,7 +267,7 @@ EV_DoLockedDoor
                 }
                 p->message = DEH_String(PD_REDO);
             }
-            else if (!p->cards[it_redskull])
+            else if (p->cards[it_redskull] == CARDNOTFOUNDYET)
             {
                 if (!p->neededcardflash || p->neededcard != it_redskull)
                 {
@@ -285,9 +285,9 @@ EV_DoLockedDoor
       case 137:
         if ( !p )
             return 0;
-        if (!p->cards[it_yellowcard] && !p->cards[it_yellowskull])
+        if (p->cards[it_yellowcard] <= 0 && p->cards[it_yellowskull] <= 0)
         {
-            if (!p->cards[it_yellowcard])
+            if (p->cards[it_yellowcard] == CARDNOTFOUNDYET)
             {
                 if (!p->neededcardflash || p->neededcard != it_yellowcard)
                 {
@@ -296,7 +296,7 @@ EV_DoLockedDoor
                 }
                 p->message = DEH_String(PD_YELLOWO);
             }
-            else if (!p->cards[it_yellowskull])
+            else if (p->cards[it_yellowskull] == CARDNOTFOUNDYET)
             {
                 if (!p->neededcardflash || p->neededcard != it_yellowskull)
                 {
@@ -429,9 +429,9 @@ EV_VerticalDoor
         if ( !player )
             return;
         
-        if (!player->cards[it_bluecard] && !player->cards[it_blueskull])
+        if (player->cards[it_bluecard] <= 0 && player->cards[it_blueskull] <= 0)
         {
-            if (!player->cards[it_bluecard])
+            if (player->cards[it_bluecard] == CARDNOTFOUNDYET)
             {
                 if (!player->neededcardflash || player->neededcard != it_bluecard)
                 {
@@ -440,7 +440,7 @@ EV_VerticalDoor
                 }
                 player->message = DEH_String(PD_BLUEK);
             }
-            else if (!player->cards[it_blueskull])
+            else if (player->cards[it_blueskull] == CARDNOTFOUNDYET)
             {
                 if (!player->neededcardflash || player->neededcard != it_blueskull)
                 {
@@ -459,9 +459,9 @@ EV_VerticalDoor
         if ( !player )
             return;
         
-        if (!player->cards[it_yellowcard] && !player->cards[it_yellowskull])
+        if (player->cards[it_yellowcard] <= 0 && player->cards[it_yellowskull] <= 0)
         {
-            if (!player->cards[it_yellowcard])
+            if (player->cards[it_yellowcard] == CARDNOTFOUNDYET)
             {
                 if (!player->neededcardflash || player->neededcard != it_yellowcard)
                 {
@@ -470,7 +470,7 @@ EV_VerticalDoor
                 }
                 player->message = DEH_String(PD_YELLOWK);
             }
-            else if (!player->cards[it_yellowskull])
+            else if (player->cards[it_yellowskull] == CARDNOTFOUNDYET)
             {
                 if (!player->neededcardflash || player->neededcard != it_yellowskull)
                 {
@@ -489,9 +489,9 @@ EV_VerticalDoor
         if ( !player )
             return;
         
-        if (!player->cards[it_redcard] && !player->cards[it_redskull])
+        if (player->cards[it_redcard] <= 0 && player->cards[it_redskull] <= 0)
         {
-            if (!player->cards[it_redcard])
+            if (player->cards[it_redcard] == CARDNOTFOUNDYET)
             {
                 if (!player->neededcardflash || player->neededcard != it_redcard)
                 {
@@ -500,7 +500,7 @@ EV_VerticalDoor
                 }
                 player->message = DEH_String(PD_REDK);
             }
-            else if (!player->cards[it_redskull])
+            else if (player->cards[it_redskull] == CARDNOTFOUNDYET)
             {
                 if (!player->neededcardflash || player->neededcard != it_redskull)
                 {
