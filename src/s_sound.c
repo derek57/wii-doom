@@ -84,10 +84,6 @@ extern int faketracknum;
 extern int tracknum;
 
 
-// The set of channels available
-
-/*static*/ channel_t channels[8];
-
 // Internal volume level, ranging from 0-127
 
 static int snd_SfxVolume;
@@ -112,6 +108,10 @@ int sfxVolume = 8;
 // Maximum volume of music. 
 
 int musicVolume = 8;
+
+// The set of channels available
+
+/*static*/ channel_t channels[8];
 
 //
 // Initializes sound stuff, including volume

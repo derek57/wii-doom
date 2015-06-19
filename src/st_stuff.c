@@ -545,6 +545,7 @@ extern boolean      show_chat_bar;
 extern int          screenSize;
 extern int          load_dehacked;
 extern int          cardsfound;
+extern int          snd_chans;
 
 int                 prio = 0;
 
@@ -1349,9 +1350,9 @@ void ST_GetChannelInfo(sfxinfo_t *s)
     int i;
     ChanInfo_t *c;
 
-    s->numchannels = snd_channels;
+    s->numchannels = 8;
     s->volume = sfxVolume;
-    for (i = 0; i < snd_channels; i++)
+    for (i = 0; i < 8; i++)
     {
         c = &s->chan[i];
         c->id = channels[i].sound_id;

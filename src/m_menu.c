@@ -863,8 +863,8 @@ int                        cheeting;
 int                        coordinates_info = 0;
 int                        timer_info = 0;
 int                        version_info = 0;
-int                        key_controls_start_in_cfg_at_pos = 42;
-int                        key_controls_end_in_cfg_at_pos = 55;
+int                        key_controls_start_in_cfg_at_pos = 43;
+int                        key_controls_end_in_cfg_at_pos = 56;
 int                        crosshair = 0;
 int                        show_stats = 0;
 int                        tracknum = 1;
@@ -882,6 +882,8 @@ int                        warplev = 2;
 int                        turnspeed = 7;
 int                        chaingun_tics = 4;
 int                        snd_module = 0;
+int                        snd_chans = 1;
+int                        sound_channels = 8;
 
 //
 // MENU TYPEDEFS
@@ -1018,6 +1020,7 @@ void M_ClearMenus (void);
 
 void M_MusicType(int choice);
 void M_SoundType(int choice);
+void M_SoundOutput(int choice);
 void M_SoundChannels(int choice);
 void M_GameFiles(int choice);
 void M_Brightness(int choice);
@@ -1794,6 +1797,7 @@ enum
     mus_type,
     sfx_type,
     channels,
+    output,
     sound_end
 } sound_e;
 
@@ -1803,7 +1807,8 @@ menuitem_t SoundMenu[]=
     {2,"Music Volume",M_MusicVol,'m'},
     {2,"Music Type",M_MusicType,'t'},
     {2,"Sound Type",M_SoundType,'s'},
-    {2,"Switch Left / Right Channels",M_SoundChannels,'c'}
+    {2,"Number of Sound Channels",M_SoundChannels,'c'},
+    {2,"Switch Left / Right Output",M_SoundOutput,'o'}
 };
 
 menu_t  SoundDef =
@@ -2247,16 +2252,29 @@ void M_DrawSound(void)
         V_ClearDPTranslation();
     }
 
+    if(sound_channels == 8)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(SoundDef.x + 228, SoundDef.y + 38, "8");
+        V_ClearDPTranslation();
+    }
+    else if(sound_channels == 16)
+    {
+        dp_translation = crx[CRX_GOLD];
+        M_WriteText(SoundDef.x + 223, SoundDef.y + 38, "16");
+        V_ClearDPTranslation();
+    }
+
     if(swap_sound_chans)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(SoundDef.x + 220, SoundDef.y + 38, "ON");
+        M_WriteText(SoundDef.x + 220, SoundDef.y + 48, "ON");
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(SoundDef.x + 212, SoundDef.y + 38, "OFF");
+        M_WriteText(SoundDef.x + 212, SoundDef.y + 48, "OFF");
         V_ClearDPTranslation();
     }
 
@@ -2352,7 +2370,7 @@ void M_MusicType(int choice)
     }
 }
 
-void M_SoundChannels(int choice)
+void M_SoundOutput(int choice)
 {
     switch(choice)
     {
@@ -2367,6 +2385,29 @@ void M_SoundChannels(int choice)
         {
             swap_sound_chans = true;
         }
+        break;
+    }
+}
+
+void M_SoundChannels(int choice)
+{
+    switch(choice)
+    {
+    case 0:
+        if(snd_chans > 1)
+            snd_chans--;
+        if(snd_chans == 1)
+            sound_channels = 8;
+        else if(snd_chans == 2)
+            sound_channels = 16;
+        break;
+    case 1:
+        if(snd_chans < 2)
+            snd_chans++;
+        if(snd_chans == 1)
+            sound_channels = 8;
+        else if(snd_chans == 2)
+            sound_channels = 16;
         break;
     }
 }
@@ -4581,7 +4622,7 @@ void M_Drawer (void)
     max = currentMenu->numitems;
 
     if (fsize != 28422764 && fsize != 19321722 && fsize != 12361532 &&
-        ((currentMenu == &SoundDef && (itemOn == 2 || itemOn == 3)) ||
+        ((currentMenu == &SoundDef && itemOn > 1 && itemOn < 5) ||
          (currentMenu == &GameDef2 && itemOn == 6)))
     {
         char *message_string = "YOU MUST QUIT AND RESTART TO TAKE EFFECT.";

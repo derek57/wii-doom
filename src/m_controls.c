@@ -61,6 +61,7 @@ extern int autoaim;
 extern int runcount;
 extern int chaingun_tics;
 extern int snd_module;
+extern int sound_channels;
 
 extern int joy_up;
 extern int joy_down;
@@ -166,6 +167,7 @@ void M_BindBaseControls(void)
     M_BindVariable("trails",                 &smoketrails);
     M_BindVariable("chaingun_speed",         &chaingun_tics);
     M_BindVariable("sound_type",             &snd_module);
+    M_BindVariable("sound_chans",            &sound_channels);
     M_BindVariable("key_shoot",              &joy_r);
     M_BindVariable("key_open",               &joy_l);
     M_BindVariable("key_menu",               &joy_minus);

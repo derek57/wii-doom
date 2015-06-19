@@ -138,6 +138,7 @@ extern int      mus_engine;
 extern int      warped;
 extern int      showMessages;
 extern int      screenSize;
+extern int      sound_channels;
 
 extern boolean  skillflag;
 extern boolean  nomonstersflag;
@@ -1295,6 +1296,8 @@ void D_DoomMain (void)
     }
     else
         snd_musicdevice = SNDDEVICE_GENMIDI;
+
+    snd_channels = sound_channels;
 
     if(fsize == 28422764 || fsize == 19321722 || fsize == 12361532)
         beta_style_mode = false;

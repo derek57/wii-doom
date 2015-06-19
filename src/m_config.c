@@ -119,6 +119,7 @@ default_t        doom_defaults_list[] =
     CONFIG_VARIABLE_INT                (trails),
     CONFIG_VARIABLE_INT                (chaingun_speed),
     CONFIG_VARIABLE_INT                (sound_type),
+    CONFIG_VARIABLE_INT                (sound_chans),
     CONFIG_VARIABLE_INT                (key_shoot),
     CONFIG_VARIABLE_INT                (key_open),
     CONFIG_VARIABLE_INT                (key_menu),
