@@ -1609,6 +1609,10 @@ void G_Ticker (void)
                     break; 
                                          
                   case BTS_SAVEGAME: 
+		    // never override savegames by demo playback
+		    if (demoplayback)
+			break;
+
                     if (!savedescription[0]) 
                         strcpy (savedescription, "NET GAME"); 
                     savegameslot =  
