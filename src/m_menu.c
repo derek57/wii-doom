@@ -868,7 +868,6 @@ int                        key_controls_end_in_cfg_at_pos = 56;
 int                        crosshair = 0;
 int                        show_stats = 0;
 int                        tracknum = 1;
-int                        opl = 1;
 int                        epi = 1;
 int                        repi = 1;
 int                        rmap = 1;

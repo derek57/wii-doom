@@ -75,7 +75,6 @@
 short songlist[148];
 short currentsong = 0;
 
-extern boolean opl;
 extern boolean forced;
 extern boolean fake;
 extern boolean change_anyway;

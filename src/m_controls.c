@@ -30,7 +30,6 @@
 
 
 extern boolean am_rotate;
-extern boolean opl;
 extern boolean d_recoil;
 extern boolean d_maxgore;
 extern boolean d_thrust;
