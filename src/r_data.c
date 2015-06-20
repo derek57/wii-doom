@@ -179,6 +179,7 @@ fixed_t*         spritetopoffset;
 short**          texturecolumnlump;
 
 unsigned**       texturecolumnofs; // fix Medusa bug
+unsigned**	 texturecolumnofs2; // original column offsets for single-patched textures
 
 byte**           texturecomposite;
 
@@ -258,6 +259,9 @@ static void R_GenerateComposite(int texnum)
     // marks to identify transparent regions in merged textures
     byte *marks = calloc(texture->width, texture->height), *source;
 
+    // initialize composite background to black (index 0)
+    memset(block, 0, texturecompositesize[texnum]);
+
     for (; --i >=0; patch++)
     {
         patch_t *realpatch = W_CacheLumpNum(patch->patch, PU_CACHE);
@@ -272,11 +276,11 @@ static void R_GenerateComposite(int texnum)
 
         for (x = x1; x < x2 ; x++)
             // Column has multiple patches?
-            if (collump[x] == -1)
-                // Fix medusa bug.
-                R_DrawColumnInCache((column_t*)((byte*) realpatch + LONG(cofs[x])),
-                                  block + colofs[x], patch->originy,
-                                  texture->height, marks + x*texture->height);
+            // generate composites for single-patched textures as well
+            // Fix medusa bug.
+            R_DrawColumnInCache((column_t*)((byte*) realpatch + LONG(cofs[x])),
+                              block + colofs[x], patch->originy,
+                              texture->height, marks + x*texture->height);
     }
 
     // Next, convert multipatched columns into true columns,
@@ -285,6 +289,7 @@ static void R_GenerateComposite(int texnum)
     source = malloc(texture->height);
 
     for (i=0; i < texture->width; i++)
+    {
         // process only multipatched columns
         if (collump[i] == -1)
         {
@@ -329,16 +334,17 @@ static void R_GenerateComposite(int texnum)
                 // next post
                 col = (column_t *)((byte *) col + len + 4);
             }
-      }
-      // free temporary column
-      free(source);
+        }
+    }
+    // free temporary column
+    free(source);
 
-      // free transparency marks
-      free(marks);
+    // free transparency marks
+    free(marks);
 
-      // Now that the texture has been built in column cache,
-      // it is purgable from zone memory.
-      Z_ChangeTag(block, PU_CACHE);
+    // Now that the texture has been built in column cache,
+    // it is purgable from zone memory.
+    Z_ChangeTag(block, PU_CACHE);
 }
 
 
@@ -355,6 +361,9 @@ static void R_GenerateLookup(int texnum)
 
     // make 32-bit
     unsigned *colofs = texturecolumnofs[texnum];
+
+    // original column offsets
+    unsigned *colofs2 = texturecolumnofs2[texnum];
 
     // keep count of posts in addition to patches.
     // Part of fix for medusa bug for multipatched 2s normals.
@@ -388,7 +397,7 @@ static void R_GenerateLookup(int texnum)
         {
             count[x].patches++;
             collump[x] = pat;
-            colofs[x] = LONG(cofs[x])+3;
+            colofs[x] = colofs2[x] = LONG(cofs[x])+3;
         }
     }
 
@@ -429,6 +438,9 @@ static void R_GenerateLookup(int texnum)
                 // Only multipatched columns
                 if (count[x].patches > 1)
                 {
+                    // applies to single-patched textures as well
+                    // mark lump as multipatched
+
                     const column_t *col =
                         (column_t*)((byte*) realpatch+LONG(cofs[x]));
                     const byte *base = (const byte *) col;
@@ -482,23 +494,23 @@ static void R_GenerateLookup(int texnum)
         }
 
         if (count[x].patches > 1)
-        {
-            // Fix Medusa bug, by adding room for column header
-            // and trailer bytes for each post in merged column.
-            // For now, just allocate conservatively 4 bytes
-            // per post per patch per column, since we don't
-            // yet know how many posts the merged column will
-            // require, and it's bounded above by this limit.
-            // mark lump as multipatched
-            collump[x] = -1;
+            collump[x] = -1; // mark lump as multipatched
 
-            // three header bytes in a column
-            colofs[x] = csize + 3;
+        // Fix Medusa bug, by adding room for column header
+        // and trailer bytes for each post in merged column.
+        // For now, just allocate conservatively 4 bytes
+        // per post per patch per column, since we don't
+        // yet know how many posts the merged column will
+        // require, and it's bounded above by this limit.
+        // mark lump as multipatched
 
-            // add room for one extra post
-            // 1 stop byte plus 4 bytes per post
-            csize += 4*count[x].posts+5;
-        }
+        // three header bytes in a column
+        colofs[x] = csize + 3;
+
+        // add room for one extra post
+        // 1 stop byte plus 4 bytes per post
+        csize += 4*count[x].posts+5;
+
         // height bytes of texture data
         csize += height;
     }
@@ -521,17 +533,21 @@ static void R_GenerateLookup(int texnum)
 byte*
 R_GetColumn
 (   int                tex,
-    int                col )
+    int                col,
+    boolean            opaque )
 {
     int                lump;
     int                ofs;
+    int                ofs2;
         
     col &= texturewidthmask[tex];
     lump = texturecolumnlump[tex][col];
     ofs = texturecolumnofs[tex][col];
+    ofs2 = texturecolumnofs2[tex][col];
     
-    if (lump > 0)
-        return (byte *)W_CacheLumpNum(lump,PU_CACHE)+ofs;
+    // single-patched mid-textures on two-sided walls
+    if (lump > 0 && !opaque)
+	return (byte *)W_CacheLumpNum(lump,PU_CACHE)+ofs2;
 
     if (!texturecomposite[tex])
         R_GenerateComposite (tex);
@@ -659,6 +675,7 @@ void R_InitTextures (void)
     textures = Z_Malloc (numtextures * sizeof(*textures), PU_STATIC, 0);
     texturecolumnlump = Z_Malloc (numtextures * sizeof(*texturecolumnlump), PU_STATIC, 0);
     texturecolumnofs = Z_Malloc (numtextures * sizeof(*texturecolumnofs), PU_STATIC, 0);
+    texturecolumnofs2 = Z_Malloc (numtextures * sizeof(*texturecolumnofs2), PU_STATIC, 0);
     texturecomposite = Z_Malloc (numtextures * sizeof(*texturecomposite), PU_STATIC, 0);
     texturecompositesize = Z_Malloc (numtextures * sizeof(*texturecompositesize), PU_STATIC, 0);
     texturewidthmask = Z_Malloc (numtextures * sizeof(*texturewidthmask), PU_STATIC, 0);
@@ -718,6 +735,7 @@ void R_InitTextures (void)
         }                
         texturecolumnlump[i] = Z_Malloc (texture->width*sizeof(**texturecolumnlump), PU_STATIC,0);
         texturecolumnofs[i] = Z_Malloc (texture->width*sizeof(**texturecolumnofs), PU_STATIC,0);
+        texturecolumnofs2[i] = Z_Malloc (texture->width*sizeof(**texturecolumnofs2), PU_STATIC,0);
 
         j = 1;
         while (j*2 <= texture->width)
