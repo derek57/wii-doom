@@ -319,6 +319,7 @@ extern  boolean         beta_style;
 extern  boolean         beta_style_mode;
 extern  boolean         smoketrails;
 extern  boolean         sound_info;
+extern  boolean         autodetect_hom;
 
 extern  int             d_colblood;
 extern  int             d_colblood2;

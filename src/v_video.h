@@ -174,5 +174,7 @@ void V_DrawTranslucentStatusNumberPatch(int x, int y, patch_t *patch, boolean in
 
 void V_DrawTranslucentYellowStatusPatch(int x, int y, patch_t *patch, boolean invert);
 
+void V_ColorBlock(int x, int y, int scrn, int width, int height, byte color);
+
 #endif
 

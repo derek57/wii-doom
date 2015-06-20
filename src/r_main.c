@@ -42,6 +42,7 @@
 #include "r_local.h"
 #include "r_sky.h"
 #include "v_trans.h"
+#include "v_video.h"
 
 
 // Fineangles in the SCREENWIDTH wide window.
@@ -899,6 +900,13 @@ void R_SetupFrame (player_t* player)
 }
 
 
+void R_HOMdrawer()
+{
+    byte colour = (gametic % 20) < 9 ? 40 : 0;
+
+    V_ColorBlock(0, 0, 0, SCREENWIDTH, SCREENHEIGHT - SBARHEIGHT, colour);
+}
+
 
 //
 // R_RenderView
@@ -913,6 +921,9 @@ void R_RenderPlayerView (player_t* player)
     R_ClearPlanes ();
     R_ClearSprites ();
     
+    if(autodetect_hom && !menuactive)
+        R_HOMdrawer();
+
     // check for new console commands.
     NetUpdate ();
 

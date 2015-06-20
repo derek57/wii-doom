@@ -863,8 +863,8 @@ int                        cheeting;
 int                        coordinates_info = 0;
 int                        timer_info = 0;
 int                        version_info = 0;
-int                        key_controls_start_in_cfg_at_pos = 43;
-int                        key_controls_end_in_cfg_at_pos = 56;
+int                        key_controls_start_in_cfg_at_pos = 44;
+int                        key_controls_end_in_cfg_at_pos = 57;
 int                        crosshair = 0;
 int                        show_stats = 0;
 int                        tracknum = 1;
@@ -1107,6 +1107,7 @@ void M_Items(int choice);
 void M_Massacre(int choice);
 void M_Screen(int choice);
 void M_FPSCounter(int choice);
+void M_HOMDetector(int choice);
 void M_Controls(int choice);
 void M_System(int choice);
 void M_Sound(int choice);
@@ -1650,13 +1651,15 @@ enum
 {
     system_fps,
     system_ticker,
+    system_hom,
     system_end
 } system_e;
 
 menuitem_t SystemMenu[]=
 {
     {2,"FPS Counter",M_FPS,'f'},
-    {2,"Display Ticker",M_DisplayTicker,'t'}
+    {2,"Display Ticker",M_DisplayTicker,'t'},
+    {2,"Hall of Mirrors Detector",M_HOMDetector,'h'}
 };
 
 menu_t  SystemDef =
@@ -1665,7 +1668,7 @@ menu_t  SystemDef =
     &OptionsDef,
     SystemMenu,
     M_DrawSystem,
-    100,85,
+    57,85,
     0
 };
 
@@ -6220,6 +6223,20 @@ void M_FPS(int choice)
     }
 }
 
+void M_HOMDetector(int choice)
+{
+    if(!autodetect_hom)
+    {
+        autodetect_hom = true;
+        players[consoleplayer].message = DEH_String("HALL OF MIRRORS DETECTOR ENABLED");
+    }
+    else if(autodetect_hom)
+    {
+        autodetect_hom = false;
+        players[consoleplayer].message = DEH_String("HALL OF MIRRORS DETECTOR DISABLED");
+    }
+}
+
 u64 GetTicks(void)
 {
     return (u64)SDL_GetTicks();
@@ -6870,26 +6887,39 @@ void M_DrawSystem(void)
     if(display_fps)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(SystemDef.x + 118, SystemDef.y - 2, "ON");
+        M_WriteText(SystemDef.x + 198, SystemDef.y - 2, "ON");
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(SystemDef.x + 110, SystemDef.y - 2, "OFF");
+        M_WriteText(SystemDef.x + 190, SystemDef.y - 2, "OFF");
         V_ClearDPTranslation();
     }
 
     if(display_ticker)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(SystemDef.x + 118, SystemDef.y + 8, "ON");
+        M_WriteText(SystemDef.x + 198, SystemDef.y + 8, "ON");
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(SystemDef.x + 110, SystemDef.y + 8, "OFF");
+        M_WriteText(SystemDef.x + 190, SystemDef.y + 8, "OFF");
+        V_ClearDPTranslation();
+    }
+
+    if(autodetect_hom)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(SystemDef.x + 198, SystemDef.y + 18, "ON");
+        V_ClearDPTranslation();
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(SystemDef.x + 190, SystemDef.y + 18, "OFF");
         V_ClearDPTranslation();
     }
 }

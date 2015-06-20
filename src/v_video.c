@@ -954,3 +954,31 @@ void V_DrawTranslucentYellowStatusPatch(int x, int y, patch_t *patch, boolean in
     }
 }
 
+//
+// V_ColorBlock
+//
+// Draws a block of solid color.
+//
+void V_ColorBlock(int x, int y, int scrn, int width, int height, byte color)
+{
+    byte *dest;
+
+#ifdef RANGECHECK
+    if (x < 0
+     || x + width > SCREENWIDTH
+     || y < 0
+     || y + height > SCREENHEIGHT)
+    {
+        C_Printf(CR_RED, " V_ColorBlock: block exceeds buffer boundaries.\n");
+    }
+#endif
+
+    dest = screens[scrn] + y * SCREENWIDTH + x;
+   
+    while(height--)
+    {
+        memset(dest, color, width);
+        dest += SCREENWIDTH;
+    }
+}
+
