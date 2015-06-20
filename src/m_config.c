@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "c_io.h"
 #include "doomdef.h"
 #include "doomfeatures.h"
 #include "doomkeys.h"
@@ -298,7 +299,7 @@ static void SetVariable(default_t *def, char *value)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wchar-subscripts"
 
-static void LoadDefaultCollection(default_collection_t *collection)
+static boolean LoadDefaultCollection(default_collection_t *collection)
 {
     FILE *f;
     default_t *def;
@@ -313,7 +314,7 @@ static void LoadDefaultCollection(default_collection_t *collection)
         // File not opened, but don't complain. 
         // It's probably just the first time they ran the game.
 
-        return;
+        return false;
     }
 
     while (!feof(f))
@@ -357,6 +358,7 @@ static void LoadDefaultCollection(default_collection_t *collection)
     }
 
     fclose (f);
+    return true;
 }
 
 // Set the default filenames to use for configuration files.
@@ -405,7 +407,11 @@ void M_LoadDefaults (void)
     doom_defaults.filename
         = M_StringJoin(configdir, default_main_config, NULL);
 
-    LoadDefaultCollection(&doom_defaults);
+    if (LoadDefaultCollection(&doom_defaults))
+        C_Printf(CR_GRAY, " Loaded CVARs from %s.", uppercase(doom_defaults.filename));
+    else
+        C_Printf(CR_GRAY, " %s not found. Using defaults for all CVARs and creating %s.",
+            uppercase(doom_defaults.filename), uppercase(doom_defaults.filename));
 }
 
 // Get a configuration file variable by its name

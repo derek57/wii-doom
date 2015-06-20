@@ -57,14 +57,6 @@ typedef struct
 
 // Location of each lump on disk.
 
-extern int        runcount;
-
-boolean           iwad_added;
-boolean           psp_pwad_added;
-boolean           extras_pwad_added;
-boolean           custom_pwad_added;
-
-int               iwad_lumps;
 int               fsizecq = 0;
 
 unsigned int      numlumps = 0;
@@ -247,38 +239,10 @@ wad_file_t *W_AddFile (char *filename, boolean automatic)
         lumphash = NULL;
     }
 
-    if(!iwad_added)
-        iwad_lumps = numlumps - startlump;
-
-    if(!psp_pwad_added)
-    {
-        C_Init();
-
-        C_PrintCompileDate();
-        C_PrintSDLVersions();
-
-        if (runcount < 2)
-            C_Printf(CR_GRAY, " Wii-DOOM has been run %s\n", (!runcount ? "once" : "twice"));
-        else
-            C_Printf(CR_GRAY, " Wii-DOOM has been run %s times\n", commify(runcount + 1));
-
-        C_Printf(CR_GRAY, " %s %s lumps from IWAD file %s\n",
-                (automatic ? "Automatically added" : "Added"),
-                commify(iwad_lumps), target);
-
-        C_Printf(CR_GRAY, " %s %s lumps from %.4s file %s\n",
-                (automatic ? "Automatically added" : "Added"),
-                commify(numlumps - startlump),
-                header.identification, uppercase(filename));
-    }
-
-    if(!custom_pwad_added || !extras_pwad_added)
-    {
-        C_Printf(CR_GRAY, " %s %s lumps from %.4s file %s\n",
-                (automatic ? "Automatically added" : "Added"),
-                commify(numlumps - startlump),
-                header.identification, uppercase(filename));
-    }
+    C_Printf(CR_GRAY, " %s %s lumps from %.4s file %s\n",
+            (automatic ? "Automatically added" : "Added"),
+            commify(numlumps - startlump),
+            header.identification, uppercase(filename));
 
     return wad_file;
 }

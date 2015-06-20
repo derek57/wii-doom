@@ -139,6 +139,7 @@ extern int      warped;
 extern int      showMessages;
 extern int      screenSize;
 extern int      sound_channels;
+extern int      startlump;
 
 extern boolean  skillflag;
 extern boolean  nomonstersflag;
@@ -152,7 +153,6 @@ extern boolean  locallanflag;
 extern boolean  searchflag;
 extern boolean  queryflag;
 extern boolean  dedicatedflag;
-extern boolean  opl;
 extern boolean  nerve_pwad;
 extern boolean  setsizeneeded;
 extern boolean  hud;
@@ -160,10 +160,6 @@ extern boolean  inhelpscreens;
 extern boolean  devparm_nerve;
 extern boolean  finale_music;
 extern boolean  aiming_help;
-extern boolean  iwad_added;
-extern boolean  psp_pwad_added;
-extern boolean  extras_pwad_added;
-extern boolean  custom_pwad_added;
 extern boolean  show_chat_bar;
 
 extern menu_t*  currentMenu;                          
@@ -1266,6 +1262,10 @@ void D_DoomMain (void)
     printf(" M_LoadDefaults: Load system defaults.\n");
     M_SetConfigFilenames("default.cfg");
     D_BindVariables();
+
+    C_PrintCompileDate();
+    C_PrintSDLVersions();
+
     M_LoadDefaults();
 
     if (runcount < 32768)
@@ -1427,12 +1427,12 @@ void D_DoomMain (void)
         nerve_pwad = false;
     }
 
-    iwad_added = false;
-    psp_pwad_added = true;
-    extras_pwad_added = true;
-    custom_pwad_added = true;
-
     startuptimer = I_GetTimeMS();
+
+    if (runcount < 2)
+        C_Printf(CR_GRAY, " Wii-DOOM has been run %s\n", (!runcount ? "once" : "twice"));
+    else
+        C_Printf(CR_GRAY, " Wii-DOOM has been run %s times\n", commify(runcount + 1));
 
     if(devparm || devparm_net)
     {
@@ -1474,16 +1474,10 @@ void D_DoomMain (void)
     else
         D_AddFile(target, false);
 
-    iwad_added = true;
-
-    custom_pwad_added = false;
-
     if(gamemode != shareware || (gamemode == shareware && gameversion == exe_chex))
     {
         if(load_extra_wad == 1)
         {
-            opl = 1;
-
             if(extra_wad_slot_1_loaded == 1)
                 D_AddFile(extra_wad_1, false);
 
@@ -1499,8 +1493,6 @@ void D_DoomMain (void)
         }
     }
 
-    custom_pwad_added = true;
-
     if(devparm_nerve)
     {
         D_AddFile("usb:/apps/wiidoom/PWAD/DOOM2/NERVE.WAD", true);
@@ -1509,16 +1501,12 @@ void D_DoomMain (void)
 
     dont_show_adding_of_resource_wad = 0;
 
-    psp_pwad_added = false;
-
     if(usb)
         W_MergeFile("usb:/apps/wiidoom/pspdoom.wad", true);
     else if(sd)
         W_MergeFile("sd:/apps/wiidoom/pspdoom.wad", true);
 
-    psp_pwad_added = true;
-
-    extras_pwad_added = false;
+    C_Init();
 
     if(beta_style && gamemode != shareware && gamemode != commercial)
     {
@@ -1534,8 +1522,6 @@ void D_DoomMain (void)
         else
             print_resource_pwad2_error = true;
     }
-
-    extras_pwad_added = true;
 
     if(print_resource_pwad2_error)
     {
@@ -1918,6 +1904,89 @@ void D_DoomMain (void)
     if (W_CheckNumForName("dehacked") >= 0)
         C_Printf(CR_GOLD, " Parsed DEHACKED lump\n");
 
+    if (fsize == 4207819)
+        C_Printf(CR_GRAY, " Playing \"DOOM SHAREWARE v1.0\".");
+    else if(fsize == 4274218)
+        C_Printf(CR_GRAY, " Playing \"DOOM SHAREWARE v1.1\".");
+    else if(fsize == 4225504)
+        C_Printf(CR_GRAY, " Playing \"DOOM SHAREWARE v1.2\".");
+    else if(fsize == 4225460)
+        C_Printf(CR_GRAY, " Playing \"DOOM SHAREWARE v1.25 (SYBEX RELEASE)\".");
+    else if(fsize == 4234124)
+        C_Printf(CR_GRAY, " Playing \"DOOM SHAREWARE v1.666\".");
+    else if(fsize == 4196020)
+        C_Printf(CR_GRAY, " Playing \"DOOM SHAREWARE v1.8\".");
+    else if(fsize == 4261144)
+        C_Printf(CR_GRAY, " Playing \"DOOM BETA v1.4\".");
+    else if(fsize == 4271324)
+        C_Printf(CR_GRAY, " Playing \"DOOM BETA v1.5\".");
+    else if(fsize == 4211660)
+        C_Printf(CR_GRAY, " Playing \"DOOM BETA v1.6\".");
+    else if(fsize == 10396254)
+        C_Printf(CR_GRAY, " Playing \"DOOM REGISTERED v1.1\".");
+    else if(fsize == 10399316)
+        C_Printf(CR_GRAY, " Playing \"DOOM REGISTERED v1.2\".");
+    else if(fsize == 10401760)
+        C_Printf(CR_GRAY, " Playing \"DOOM REGISTERED v1.6\".");
+    else if(fsize == 11159840)
+        C_Printf(CR_GRAY, " Playing \"DOOM REGISTERED v1.8\".");
+    else if(fsize == 12408292)
+        C_Printf(CR_GRAY, " Playing \"DOOM REGISTERED v1.9 (THE ULTIMATE DOOM)\".");
+    else if(fsize == 12538385)
+        C_Printf(CR_GRAY, " Playing \"DOOM REGISTERED (XBOX EDITION)\".");
+    else if(fsize == 12487824)
+        C_Printf(CR_GRAY, " Playing \"DOOM REGISTERED (BFG-PC EDITION)\".");
+    else if(fsize == 12474561)
+        C_Printf(CR_GRAY, " Playing \"DOOM REGISTERED (BFG-XBOX360 EDITION)\".");
+    else if(fsize == 19362644)
+        C_Printf(CR_GRAY, " Playing \"FREEDOOM v0.8 PHASE 1\".");
+    else if(fsize == 14943400)
+        C_Printf(CR_GRAY, " Playing \"DOOM 2 REGISTERED v1.666\".");
+    else if(fsize == 14824716)
+        C_Printf(CR_GRAY, " Playing \"DOOM 2 REGISTERED v1.666 (GERMAN VERSION)\".");
+    else if(fsize == 14612688)
+        C_Printf(CR_GRAY, " Playing \"DOOM 2 REGISTERED v1.7\".");
+    else if(fsize == 14607420)
+        C_Printf(CR_GRAY, " Playing \"DOOM 2 REGISTERED v1.8 (FRENCH VERSION)\".");
+    else if(fsize == 14604584)
+        C_Printf(CR_GRAY, " Playing \"DOOM 2 REGISTERED v1.9\".");
+    else if(fsize == 14677988)
+        C_Printf(CR_GRAY, " Playing \"DOOM 2 REGISTERED (BFG-PSN EDITION)\".");
+    else if(fsize == 14691821)
+        C_Printf(CR_GRAY, " Playing \"DOOM 2 REGISTERED (BFG-PC EDITION)\".");
+    else if(fsize == 14683458)
+        C_Printf(CR_GRAY, " Playing \"DOOM 2 REGISTERED (XBOX EDITION)\".");
+    else if(fsize == 19801320)
+        C_Printf(CR_GRAY, " Playing \"FREEDOOM v0.6.4\".");
+    else if(fsize == 27704188)
+        C_Printf(CR_GRAY, " Playing \"FREEDOOM v0.7 RC 1\".");
+    else if(fsize == 27625596)
+        C_Printf(CR_GRAY, " Playing \"FREEDOOM v0.7\".");
+    else if(fsize == 28144744)
+        C_Printf(CR_GRAY, " Playing \"FREEDOOM v0.8 BETA 1\".");
+    else if(fsize == 28592816)
+        C_Printf(CR_GRAY, " Playing \"FREEDOOM v0.8\".");
+    else if(fsize == 28422764)
+        C_Printf(CR_GRAY, " Playing \"FREEDOOM v0.8 PHASE 2\".");
+    else if(fsize == 18195736)
+        C_Printf(CR_GRAY, " Playing \"FINAL DOOM - TNT v1.9 (WITH YELLOW KEYCARD BUG)\".");
+    else if(fsize == 18654796)
+        C_Printf(CR_GRAY, " Playing \"FINAL DOOM - TNT v1.9 (WITHOUT YELLOW KEYCARD BUG)\".");
+    else if(fsize == 18240172)
+        C_Printf(CR_GRAY, " Playing \"FINAL DOOM - PLUTONIA v1.9 (WITH DEATHMATCH STARTS)\".");
+    else if(fsize == 17420824)
+        C_Printf(CR_GRAY, " Playing \"FINAL DOOM - PLUTONIA v1.9 (WITHOUT DEATHMATCH STARTS)\".");
+    else if(fsize == 12361532)
+        C_Printf(CR_GRAY, " Playing \"CHEX QUEST\".");
+    else if(fsize == 9745831)
+        C_Printf(CR_GRAY, " Playing \"HACX SHAREWARE v1.0\".");
+    else if(fsize == 21951805)
+        C_Printf(CR_GRAY, " Playing \"HACX REGISTERED v1.0\".");
+    else if(fsize == 22102300)
+        C_Printf(CR_GRAY, " Playing \"HACX REGISTERED v1.1\".");
+    else if(fsize == 19321722)
+        C_Printf(CR_GRAY, " Playing \"HACX REGISTERED v1.2\".");
+
     if (W_CheckNumForName("dmenupic") >= 0)
     {
         bfgedition = true;
@@ -1950,6 +2019,11 @@ void D_DoomMain (void)
         LoadNerveWad();
 
     I_InitGraphics();
+
+    if(d_uncappedframerate)
+        C_Printf(CR_GRAY, " The framerate is uncapped.");
+    else
+        C_Printf(CR_GRAY, " The framerate is capped at %i FPS.", TICRATE);
 
     startuptimer = I_GetTimeMS() - startuptimer;
 
