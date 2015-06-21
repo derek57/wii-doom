@@ -322,6 +322,8 @@ void A_ReFire
 ( player_t*        player,
   pspdef_t*        psp );
 
+void P_FallingDamage (mobj_t *mo);
+
 //
 // P_SPEC
 //

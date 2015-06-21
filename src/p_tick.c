@@ -155,6 +155,19 @@ void P_Ticker (void)
     P_UpdateSpecials ();
     P_RespawnSpecials ();
 
+    // [RH] Apply falling damage
+    for (i = 0; i < MAXPLAYERS; i++)
+    {
+        if (playeringame[i])
+        {
+            P_FallingDamage (players[i].mo);
+
+            players[i].oldvelocity[0] = players[i].mo->momx;
+            players[i].oldvelocity[1] = players[i].mo->momy;
+            players[i].oldvelocity[2] = players[i].mo->momz;
+        }
+    }
+
     // for par times
     leveltime++;        
 }

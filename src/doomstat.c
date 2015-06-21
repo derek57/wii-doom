@@ -61,7 +61,8 @@ boolean         beta_style = false;
 boolean         beta_style_mode = false;
 boolean         smoketrails = false;
 boolean         sound_info = false;
-boolean         autodetect_hom = true;
+boolean         autodetect_hom = false;
+boolean         d_fallingdamage = false;
 
 int             d_colblood = 0;
 int             d_colblood2 = 0;

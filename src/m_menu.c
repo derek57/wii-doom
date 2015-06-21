@@ -863,8 +863,8 @@ int                        cheeting;
 int                        coordinates_info = 0;
 int                        timer_info = 0;
 int                        version_info = 0;
-int                        key_controls_start_in_cfg_at_pos = 44;
-int                        key_controls_end_in_cfg_at_pos = 57;
+int                        key_controls_start_in_cfg_at_pos = 45;
+int                        key_controls_end_in_cfg_at_pos = 58;
 int                        crosshair = 0;
 int                        show_stats = 0;
 int                        tracknum = 1;
@@ -1061,6 +1061,7 @@ void M_Corpses(int choice);
 void M_Secrets(int choice);
 void M_Trails(int choice);
 void M_ChaingunTics(int choice);
+void M_FallingDamage(int choice);
 
 void M_God(int choice);
 void M_Noclip(int choice);
@@ -1734,6 +1735,7 @@ enum
     game2_secrets,
     game2_trails,
     game2_tics,
+    game2_falling,
     game2_end
 } game2_e;
 
@@ -1741,15 +1743,16 @@ menuitem_t GameMenu2[]=
 {
     {2,"AUTOAIM",M_Autoaim,'a'},
     {2,"MORE BLOOD & GORE",M_MaxGore,'o'},
-    {2,"PLAYER FOOTSTEPS",M_Footstep,'f'},
+    {2,"PLAYER FOOTSTEPS",M_Footstep,'s'},
     {2,"HERETIC FOOTCLIPS",M_Footclip,'c'},
-    {2,"HERETIC LIQUID SPLASH",M_Splash,'s'},
+    {2,"HERETIC LIQUID SPLASH",M_Splash,'l'},
     {2,"SWIRLING WATER HACK",M_Swirl,'w'},
     {2,"PRE-RELEASE BETA MODE",M_Beta,'b'},
     {2,"RANDOMLY FLIP CORPSES & GUNS",M_Corpses,'d'},
     {2,"SHOW REVEALED SECRETS",M_Secrets,'z'},
     {2,"ROCKET TRAILS",M_Trails,'t'},
     {2,"CHAINGUN SPEED",M_ChaingunTics,'g'},
+    {2,"FALLING DAMAGE",M_FallingDamage,'f'}
 };
 
 menu_t  GameDef2 =
@@ -3114,6 +3117,19 @@ void M_DrawGame2(void)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef2.x + 175, GameDef2.y + 98, DEH_String("NORMAL"));
+        V_ClearDPTranslation();
+    }
+
+    if(d_fallingdamage)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(GameDef2.x + 208, GameDef2.y + 108, DEH_String("ON"));
+        V_ClearDPTranslation();
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(GameDef2.x + 200, GameDef2.y + 108, DEH_String("OFF"));
         V_ClearDPTranslation();
     }
 }
@@ -6870,6 +6886,23 @@ void M_ChaingunTics(int choice)
         break;
     }
     players[consoleplayer].message = DEH_String("CHAINGUN SPEED HAS BEEN ADJUSTED");
+}
+
+void M_FallingDamage(int choice)
+{
+    switch(choice)
+    {
+    case 0:
+        if (d_fallingdamage)
+            d_fallingdamage = false;
+        players[consoleplayer].message = DEH_String("FALLING DAMAGE HAS BEEN DISABLED");
+        break;
+    case 1:
+        if (!d_fallingdamage)
+            d_fallingdamage = true;
+        players[consoleplayer].message = DEH_String("FALLING DAMAGE HAS BEEN ENABLED");
+        break;
+    }
 }
 
 void M_Debug(int choice)

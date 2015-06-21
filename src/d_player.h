@@ -200,6 +200,9 @@ typedef struct player_s
 
     int                  neededcardflash;
 
+    // [RH] Used for falling damage
+    fixed_t              oldvelocity[3];
+
 } player_t;
 
 

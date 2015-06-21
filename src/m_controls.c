@@ -168,6 +168,7 @@ void M_BindBaseControls(void)
     M_BindVariable("sound_type",             &snd_module);
     M_BindVariable("sound_chans",            &sound_channels);
     M_BindVariable("hom_detector",           &autodetect_hom);
+    M_BindVariable("falling_damage",         &d_fallingdamage);
     M_BindVariable("key_shoot",              &joy_r);
     M_BindVariable("key_open",               &joy_l);
     M_BindVariable("key_menu",               &joy_minus);

@@ -624,3 +624,58 @@ boolean P_UseArtifact(player_t * player, artitype_t arti)
     return (true);
 }
 
+// [RH] (Adapted from Q2)
+// P_FallingDamage
+//
+void P_FallingDamage (mobj_t *mo)
+{
+    float    delta;
+    int      damage;
+
+    if (!mo->player)
+        return;        // not a player
+
+    if (mo->flags & MF_NOCLIP)
+        return;
+
+    if ((mo->player->oldvelocity[2] < 0)
+        && (mo->momz > mo->player->oldvelocity[2])
+        && (!(mo->flags2 & MF2_ONMOBJ)
+            || !(mo->z <= mo->floorz)))
+    {
+        delta = (float)mo->player->oldvelocity[2];
+    }
+    else
+    {
+        if (!(mo->flags2 & MF2_ONMOBJ))
+            return;
+        delta = (float)(mo->momz - mo->player->oldvelocity[2]);
+    }
+    delta = delta*delta * 2.03904313e-11f;
+
+    if (delta < 1)
+        return;
+
+    if (delta < 15)
+    {
+        //mo->s.event = EV_FOOTSTEP;
+        return;
+    }
+
+    if (delta > 30)
+    {
+        damage = (int)((delta-30)/2);
+        if (damage < 1)
+            damage = 1;
+
+        if (d_fallingdamage)
+            P_DamageMobj (mo, NULL, NULL, damage);
+    }
+    else
+    {
+        //mo->s.event = EV_FALLSHORT;
+        return;
+    }
+
+}
+
