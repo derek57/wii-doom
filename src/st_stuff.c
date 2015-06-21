@@ -43,6 +43,7 @@ rcsid[] = "$Id: st_stuff.c,v 1.6 1997/02/03 22:45:13 b1 Exp $";
 #include "g_game.h"
 #include "i_swap.h"
 #include "i_system.h"
+#include "i_tinttab.h"
 #include "i_video.h"
 #include "m_menu.h"
 #include "m_misc.h"
@@ -529,9 +530,9 @@ boolean             emptytallpercent;
 // graphics are drawn to a backing screen and blitted to the real screen
 byte                *st_backing_screen;
 
-void (*hudfunc)(int, int, patch_t *, boolean);
-void (*hudnumfunc)(int, int, patch_t *, boolean);
-void (*godhudfunc)(int, int, patch_t *, boolean);
+void (*hudfunc)(int, int, patch_t *, byte *);
+void (*hudnumfunc)(int, int, patch_t *, byte *);
+void (*godhudfunc)(int, int, patch_t *, byte *);
 
 extern channel_t    channels[8];
 
@@ -624,8 +625,8 @@ void ST_refreshBackground(void)
     }
 }
 
-static void DrawStatusNumber(int *x, int y, int val, boolean invert,
-                          void (*hudnumfunc)(int, int, patch_t *, boolean))
+static void DrawStatusNumber(int *x, int y, int val, byte *tinttab,
+                          void (*hudnumfunc)(int, int, patch_t *, byte *))
 {
     int         oldval = val;
     patch_t     *patch;
@@ -633,19 +634,19 @@ static void DrawStatusNumber(int *x, int y, int val, boolean invert,
     if (val > 99)
     {
         patch = tallnum[val / 100];
-        hudnumfunc(*x, y, patch, invert);
+        hudnumfunc(*x, y, patch, tinttab);
         *x += SHORT(patch->width);
     }
     val %= 100;
     if (val > 9 || oldval > 99)
     {
         patch = tallnum[val / 10];
-        hudnumfunc(*x, y, patch, invert);
+        hudnumfunc(*x, y, patch, tinttab);
         *x += SHORT(patch->width);
     }
     val %= 10;
     patch = tallnum[val];
-    hudnumfunc(*x, y, patch, invert);
+    hudnumfunc(*x, y, patch, tinttab);
     *x += SHORT(patch->width);
 }
 
@@ -674,7 +675,7 @@ void ST_DrawStatus(void)
     int             key = 0;
     int             i = 0;
     static int      healthwait = 0;
-    boolean         invert;
+    byte            *tinttab;
     int             invulnerability = plyr->powers[pw_invulnerability];
     static boolean  healthanim = false;
     patch_t         *patch;
@@ -692,27 +693,26 @@ void ST_DrawStatus(void)
         godhudfunc = V_DrawYellowStatusPatch;
     }
 
-    if (((plyr->readyweapon == wp_fist && plyr->pendingweapon == wp_nochange)
-        || plyr->pendingweapon == wp_fist) && plyr->powers[pw_strength])
-        patch = berserkpatch;
-    else
-        patch = healthpatch;
+    boolean gamepaused = (menuactive || paused || consoleactive);
 
-    invert = (!health || (health <= ST_HEALTH_MIN && healthanim) || health > ST_HEALTH_MIN
-        || menuactive || paused || consoleactive);
+    tinttab = (!health || (health <= ST_HEALTH_MIN && healthanim) || health > ST_HEALTH_MIN
+        || gamepaused ? tinttab75 : tinttab25);
+
+    patch = (((plyr->readyweapon == wp_fist && plyr->pendingweapon == wp_nochange)
+        || plyr->pendingweapon == wp_fist) && plyr->powers[pw_strength] ? berserkpatch : healthpatch);
     if (patch)
     {
         if ((plyr->cheats & CF_GODMODE) || invulnerability > 128 || (invulnerability & 8))
-            godhudfunc(health_x, ST_HEALTH_Y - (SHORT(patch->height) - 17), patch, invert);
+            godhudfunc(health_x, ST_HEALTH_Y - (SHORT(patch->height) - 17), patch, tinttab);
         else
-            hudfunc(health_x, ST_HEALTH_Y - (SHORT(patch->height) - 17), patch, invert);
+            hudfunc(health_x, ST_HEALTH_Y - (SHORT(patch->height) - 17), patch, tinttab);
         health_x += SHORT(patch->width) + 8;
     }
-    DrawStatusNumber(&health_x, ST_HEALTH_Y, health, invert, hudnumfunc);
+    DrawStatusNumber(&health_x, ST_HEALTH_Y, health, tinttab, hudnumfunc);
     if (!emptytallpercent)
-        hudnumfunc(health_x, ST_HEALTH_Y, tallpercent, invert);
+        hudnumfunc(health_x, ST_HEALTH_Y, tallpercent, tinttab);
 
-    if (health <= ST_HEALTH_MIN && !menuactive && !paused && !consoleactive)
+    if (health <= ST_HEALTH_MIN && !gamepaused)
     {
         if (healthwait < I_GetTime())
         {
@@ -737,8 +737,8 @@ void ST_DrawStatus(void)
         static int          ammowait = 0;
         static boolean      ammoanim = false;
 
-        invert = ((ammo <= ST_AMMO_MIN && ammoanim) || ammo > ST_AMMO_MIN
-            || menuactive || paused || consoleactive);
+        tinttab = ((ammo <= ST_AMMO_MIN && ammoanim) || ammo > ST_AMMO_MIN || gamepaused ?
+            tinttab75 : tinttab25);
 
         patch = ammopic[plyr->readyweapon].patch;
 
@@ -758,17 +758,17 @@ void ST_DrawStatus(void)
             int ammo_x = offset_width - half_patch_width;
             int ammo_y = offset_height - half_patch_height;
 
-            hudfunc(ammo_x, ammo_y, patch, invert);
+            hudfunc(ammo_x, ammo_y, patch, tinttab);
 
             if (ammo < 200 && ammo > 99)
                 offset_special = 3;
 
             ammo_x += offset_width + half_patch_width - (ORIGHEIGHT / 2) + offset_special;
 
-            DrawStatusNumber(&ammo_x, ST_AMMO_Y, ammo, invert, hudnumfunc);
+            DrawStatusNumber(&ammo_x, ST_AMMO_Y, ammo, tinttab, hudnumfunc);
         }
 
-        if (ammo <= ST_AMMO_MIN && !menuactive && !paused && !consoleactive)
+        if (ammo <= ST_AMMO_MIN && !gamepaused)
         {
             if (ammowait < I_GetTime())
             {
@@ -811,7 +811,7 @@ void ST_DrawStatus(void)
 
             if (patch)
             {
-                if (!menuactive && !paused && !consoleactive)
+                if (!gamepaused)
                 {
                     if (keywait < I_GetTime())
                     {
@@ -821,7 +821,7 @@ void ST_DrawStatus(void)
                     }
                 }
                 if (showkey)
-                    hudfunc(keypic_x - (SHORT(patch->width) + 6), ST_KEYS_Y, patch, true);
+                    hudfunc(keypic_x - (SHORT(patch->width) + 6), ST_KEYS_Y, patch, tinttab75);
             }
         }
         else
@@ -838,7 +838,7 @@ void ST_DrawStatus(void)
 
                 if (patch)
                     hudfunc(keypic_x + (SHORT(patch->width) + 6) * (cardsfound - plyr->cards[i]),
-                        ST_KEYS_Y, patch, true);
+                        ST_KEYS_Y, patch, tinttab75);
             }
         }
     }
@@ -851,20 +851,20 @@ void ST_DrawStatus(void)
         if (patch)
         {
             armor_x -= SHORT(patch->width);
-            hudfunc(armor_x, ST_ARMOR_Y - (SHORT(patch->height) - 16), patch, true);
+            hudfunc(armor_x, ST_ARMOR_Y - (SHORT(patch->height) - 16), patch, tinttab75);
             armor_x -= 7;
         }
         if (emptytallpercent)
         {
             armor_x -= StatusNumberWidth(armor);
-            DrawStatusNumber(&armor_x, ST_ARMOR_Y, armor, true, hudnumfunc);
+            DrawStatusNumber(&armor_x, ST_ARMOR_Y, armor, tinttab75, hudnumfunc);
         }
         else
         {
             armor_x -= SHORT(tallpercent->width);
-            hudnumfunc(armor_x, ST_ARMOR_Y, tallpercent, true);
+            hudnumfunc(armor_x, ST_ARMOR_Y, tallpercent, tinttab75);
             armor_x -= StatusNumberWidth(armor);
-            DrawStatusNumber(&armor_x, ST_ARMOR_Y, armor, true, hudnumfunc);
+            DrawStatusNumber(&armor_x, ST_ARMOR_Y, armor, tinttab75, hudnumfunc);
         }
     }
 }

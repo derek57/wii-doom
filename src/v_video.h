@@ -162,17 +162,17 @@ void V_DrawMouseSpeedBox(int speed);
 void V_DrawConsoleChar(int x, int y, patch_t *patch, byte color, boolean italics, int translucency,
     boolean inverted);
 
-void V_DrawStatusPatch(int x, int y, patch_t *patch, boolean invert);
+void V_DrawStatusPatch(int x, int y, patch_t *patch, byte *tinttab);
+
+void V_DrawYellowStatusPatch(int x, int y, patch_t *patch, byte *tinttab);
+
+void V_DrawTranslucentStatusPatch(int x, int y, patch_t *patch, byte *tinttab);
+
+void V_DrawTranslucentStatusNumberPatch(int x, int y, patch_t *patch, byte *tinttab);
+
+void V_DrawTranslucentYellowStatusPatch(int x, int y, patch_t *patch, byte *tinttab);
 
 boolean V_EmptyPatch(patch_t *patch);
-
-void V_DrawYellowStatusPatch(int x, int y, patch_t *patch, boolean invert);
-
-void V_DrawTranslucentStatusPatch(int x, int y, patch_t *patch, boolean invert);
-
-void V_DrawTranslucentStatusNumberPatch(int x, int y, patch_t *patch, boolean invert);
-
-void V_DrawTranslucentYellowStatusPatch(int x, int y, patch_t *patch, boolean invert);
 
 void V_ColorBlock(int x, int y, int scrn, int width, int height, byte color);
 

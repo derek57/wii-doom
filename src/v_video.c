@@ -780,13 +780,13 @@ void V_DrawConsoleChar(int x, int y, patch_t *patch, byte color, boolean italics
     }
 }
 
-void V_DrawStatusPatch(int x, int y, patch_t *patch, boolean invert)
+void V_DrawStatusPatch(int x, int y, patch_t *patch, byte *tinttab)
 {
     int         col = 0;
     byte        *desttop;
     int         w;
 
-    if (!invert)
+    if (!tinttab)
         return;
 
     desttop = screens[0] + y * SCREENWIDTH + x;
@@ -806,6 +806,125 @@ void V_DrawStatusPatch(int x, int y, patch_t *patch, boolean invert)
             while (count--)
             {
                 *dest = *source++;
+                dest += SCREENWIDTH;
+            }
+            column = (column_t *)((byte *)column + column->length + 4);
+        }
+    }
+}
+
+void V_DrawYellowStatusPatch(int x, int y, patch_t *patch, byte *tinttab)
+{
+    int         col = 0;
+    byte        *desttop;
+    int         w;
+
+    if (!tinttab)
+        return;
+
+    desttop = screens[0] + y * SCREENWIDTH + x;
+    w = SHORT(patch->width);
+
+    for (; col < w; col++, desttop++)
+    {
+        column_t        *column = (column_t *)((byte *)patch + LONG(patch->columnofs[col]));
+
+        // step through the posts in a column
+        while (column->topdelta != 0xff)
+        {
+            byte        *source = (byte *)column + 3;
+            byte        *dest = desttop + column->topdelta * SCREENWIDTH;
+            int         count = column->length;
+
+            while (count--)
+            {
+                *dest = redtoyellow[*source++];
+                dest += SCREENWIDTH;
+            }
+            column = (column_t *)((byte *)column + column->length + 4);
+        }
+    }
+}
+
+void V_DrawTranslucentStatusPatch(int x, int y, patch_t *patch, byte *tinttab)
+{
+    int         col = 0;
+    byte        *desttop = screens[0] + y * SCREENWIDTH + x;
+    int         w = SHORT(patch->width);
+
+    for (; col < w; col++, desttop++)
+    {
+        column_t        *column = (column_t *)((byte *)patch + LONG(patch->columnofs[col]));
+
+        // step through the posts in a column
+        while (column->topdelta != 0xff)
+        {
+            byte        *source = (byte *)column + 3;
+            byte        *dest = desttop + column->topdelta * SCREENWIDTH;
+            int         count = column->length;
+
+            while (count--)
+            {
+                *dest = tinttab[(*source++ << 8) + *dest];
+                dest += SCREENWIDTH;
+            }
+            column = (column_t *)((byte *)column + column->length + 4);
+        }
+    }
+}
+
+void V_DrawTranslucentStatusNumberPatch(int x, int y, patch_t *patch, byte *tinttab)
+{
+    int         col = 0;
+    byte        *desttop = screens[0] + y * SCREENWIDTH + x;
+    int         w = SHORT(patch->width);
+
+    for (; col < w; col++, desttop++)
+    {
+        column_t        *column = (column_t *)((byte *)patch + LONG(patch->columnofs[col]));
+
+        // step through the posts in a column
+        while (column->topdelta != 0xff)
+        {
+            byte        *source = (byte *)column + 3;
+            byte        *dest = desttop + column->topdelta * SCREENWIDTH;
+            int         count = column->length;
+
+            while (count--)
+            {
+                byte    dot = *source++;
+
+                if (dot == 109 && tinttab)
+                    *dest = tinttab33[*dest];
+                else
+                    *dest = tinttab[(dot << 8) + *dest];
+                dest += SCREENWIDTH;
+            }
+            column = (column_t *)((byte *)column + column->length + 4);
+        }
+    }
+}
+
+void V_DrawTranslucentYellowStatusPatch(int x, int y, patch_t *patch, byte *tinttab)
+{
+    int         col = 0;
+    byte        *desttop = screens[0] + y * SCREENWIDTH + x;
+    int         w = SHORT(patch->width);
+
+    for (; col < w; col++, desttop++)
+    {
+        column_t        *column = (column_t *)((byte *)patch + LONG(patch->columnofs[col]));
+
+        // step through the posts in a column
+        while (column->topdelta != 0xff)
+        {
+            byte        *source = (byte *)column + 3;
+            byte        *dest = desttop + column->topdelta * SCREENWIDTH;
+            int         count = column->length;
+
+            while (count--)
+            {
+                *dest = tinttab75[(redtoyellow[*source++] << 8) + *dest];
                 dest += SCREENWIDTH;
             }
             column = (column_t *)((byte *)column + column->length + 4);
@@ -833,125 +952,6 @@ boolean V_EmptyPatch(patch_t *patch)
     }
     
     return true;
-}
-
-void V_DrawYellowStatusPatch(int x, int y, patch_t *patch, boolean invert)
-{
-    int         col = 0;
-    byte        *desttop;
-    int         w;
-
-    if (!invert)
-        return;
-
-    desttop = screens[0] + y * SCREENWIDTH + x;
-    w = SHORT(patch->width);
-
-    for (; col < w; col++, desttop++)
-    {
-        column_t        *column = (column_t *)((byte *)patch + LONG(patch->columnofs[col]));
-
-        // step through the posts in a column
-        while (column->topdelta != 0xff)
-        {
-            byte        *source = (byte *)column + 3;
-            byte        *dest = desttop + column->topdelta * SCREENWIDTH;
-            int         count = column->length;
-
-            while (count--)
-            {
-                *dest = redtoyellow[*source++];
-                dest += SCREENWIDTH;
-            }
-            column = (column_t *)((byte *)column + column->length + 4);
-        }
-    }
-}
-
-void V_DrawTranslucentStatusPatch(int x, int y, patch_t *patch, boolean invert)
-{
-    int         col = 0;
-    byte        *desttop = screens[0] + y * SCREENWIDTH + x;
-    int         w = SHORT(patch->width);
-
-    for (; col < w; col++, desttop++)
-    {
-        column_t        *column = (column_t *)((byte *)patch + LONG(patch->columnofs[col]));
-
-        // step through the posts in a column
-        while (column->topdelta != 0xff)
-        {
-            byte        *source = (byte *)column + 3;
-            byte        *dest = desttop + column->topdelta * SCREENWIDTH;
-            int         count = column->length;
-
-            while (count--)
-            {
-                *dest = tinttab75[(*source++ << (8 * invert)) + (*dest << (8 * !invert))];
-                dest += SCREENWIDTH;
-            }
-            column = (column_t *)((byte *)column + column->length + 4);
-        }
-    }
-}
-
-void V_DrawTranslucentStatusNumberPatch(int x, int y, patch_t *patch, boolean invert)
-{
-    int         col = 0;
-    byte        *desttop = screens[0] + y * SCREENWIDTH + x;
-    int         w = SHORT(patch->width);
-
-    for (; col < w; col++, desttop++)
-    {
-        column_t        *column = (column_t *)((byte *)patch + LONG(patch->columnofs[col]));
-
-        // step through the posts in a column
-        while (column->topdelta != 0xff)
-        {
-            byte        *source = (byte *)column + 3;
-            byte        *dest = desttop + column->topdelta * SCREENWIDTH;
-            int         count = column->length;
-
-            while (count--)
-            {
-                byte    dot = *source++;
-
-                if (dot == 109 && invert)
-                    *dest = tinttab33[*dest];
-                else
-                    *dest = tinttab75[(dot << (8 * invert)) + (*dest << (8 * !invert))];
-                dest += SCREENWIDTH;
-            }
-            column = (column_t *)((byte *)column + column->length + 4);
-        }
-    }
-}
-
-void V_DrawTranslucentYellowStatusPatch(int x, int y, patch_t *patch, boolean invert)
-{
-    int         col = 0;
-    byte        *desttop = screens[0] + y * SCREENWIDTH + x;
-    int         w = SHORT(patch->width);
-
-    for (; col < w; col++, desttop++)
-    {
-        column_t        *column = (column_t *)((byte *)patch + LONG(patch->columnofs[col]));
-
-        // step through the posts in a column
-        while (column->topdelta != 0xff)
-        {
-            byte        *source = (byte *)column + 3;
-            byte        *dest = desttop + column->topdelta * SCREENWIDTH;
-            int         count = column->length;
-
-            while (count--)
-            {
-                *dest = tinttab75[(redtoyellow[*source++] << (8 * invert)) + (*dest << (8 * !invert))];
-                dest += SCREENWIDTH;
-            }
-            column = (column_t *)((byte *)column + column->length + 4);
-        }
-    }
 }
 
 //
