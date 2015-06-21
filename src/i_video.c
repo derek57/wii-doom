@@ -253,8 +253,6 @@ void I_EnableLoadingDisk(void)
     tmpbuf = Z_Malloc(SCREENWIDTH *
              ((disk->height + 1) << hires), PU_STATIC, NULL);        // CHANGED FOR HIRES
 
-//    V_UseBuffer(tmpbuf);
-
     // Draw the disk to the screen:
 
     V_DrawPatch(0, 0, 0, disk);
@@ -273,7 +271,6 @@ void I_EnableLoadingDisk(void)
     // video buffer.
 
     W_ReleaseLumpName(disk_name);
-//    V_RestoreBuffer();
     Z_Free(tmpbuf);
 }
 

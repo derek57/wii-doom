@@ -506,9 +506,6 @@ patch_t *ST_LoadStatusKeyPatch(int keypicnum)
 
 boolean             emptytallpercent;
 
-// graphics are drawn to a backing screen and blitted to the real screen
-byte                *st_backing_screen;
-
 void (*hudfunc)(int, int, patch_t *, byte *);
 void (*hudnumfunc)(int, int, patch_t *, byte *);
 void (*godhudfunc)(int, int, patch_t *, byte *);
@@ -551,8 +548,6 @@ void ST_refreshBackground(void)
 
     if (st_statusbaron)
     {
-//        V_UseBuffer(st_backing_screen);
-
         if(beta_style)
         {
             if(!automapactive)
@@ -599,9 +594,6 @@ void ST_refreshBackground(void)
         else if(beta_style && !automapactive)
             V_DrawPatch(ST_FX - 1, 1, 4, faceback);
 
-//        V_RestoreBuffer();
-
-//        V_CopyRect(ST_X, 0, st_backing_screen, ST_WIDTH, ST_HEIGHT, ST_X, ST_Y);
         V_CopyRect(ST_X, 0, 4, ST_WIDTH, ST_HEIGHT, ST_X, ST_Y, 0);
     }
 }
@@ -854,16 +846,6 @@ void ST_DrawStatus(void)
 
         if (armorhighlight)
         {
-/*
-            armor_x -= SHORT(patch->width);
-            hudfunc(armor_x, ST_ARMOR_Y - (SHORT(patch->height) - 16), patch, tinttab75);
-            armor_x -= 7;
-        }
-        if (emptytallpercent)
-        {
-            armor_x -= StatusNumberWidth(armor);
-            DrawStatusNumber(&armor_x, ST_ARMOR_Y, armor, tinttab75, hudnumfunc);
-*/
             if (armorhighlight < I_GetTime())
                 armorhighlight = 0;
 
@@ -889,12 +871,6 @@ void ST_DrawStatus(void)
         }
         else
         {
-/*
-            armor_x -= SHORT(tallpercent->width);
-            hudnumfunc(armor_x, ST_ARMOR_Y, tallpercent, tinttab75);
-            armor_x -= StatusNumberWidth(armor);
-            DrawStatusNumber(&armor_x, ST_ARMOR_Y, armor, tinttab75, hudnumfunc);
-*/
             if (patch)
             {
                 armor_x -= SHORT(patch->width);
@@ -1966,9 +1942,6 @@ void ST_Start (void)
 void ST_Init (void)
 {
     ST_loadData();
-/*
-    st_backing_screen = (byte *) Z_Malloc((ST_WIDTH << hires) *
-                        (ST_HEIGHT << hires), PU_STATIC, 0); // CHANGED FOR HIRES
-*/
+
     screens[4] = Z_Malloc(ST_WIDTH * SBARHEIGHT, PU_STATIC, 0);
 }

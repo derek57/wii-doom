@@ -453,7 +453,6 @@ void D_DoomLoop (void)
 
     I_EnableLoadingDisk();
 
-//    V_RestoreBuffer();
     R_ExecuteSetViewSize();
 
     D_StartGameLoop();

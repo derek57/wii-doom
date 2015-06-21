@@ -110,9 +110,6 @@ typedef enum
 } st_chatstateenum_t;
 
 
-
-extern byte     *st_backing_screen;
-
 extern int      healthhighlight;
 extern int      ammohighlight;
 extern int      armorhighlight;

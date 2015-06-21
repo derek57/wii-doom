@@ -142,8 +142,6 @@ extern boolean screensaver_mode;
 
 extern float mouse_acceleration;
 
-extern byte *I_VideoBuffer;
-
 extern int mouse_threshold;
 extern int vanilla_keyboard_mapping;
 extern int usegamma;

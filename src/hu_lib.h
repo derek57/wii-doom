@@ -116,9 +116,6 @@ boolean HUlib_delCharFromTextLine(hu_textline_t *t);
 // draws tline
 void        HUlib_drawTextLine(hu_textline_t *l, boolean drawcursor);
 
-// erases text line
-void        HUlib_eraseTextLine(hu_textline_t *l); 
-
 
 //
 // Scrolling Text window widget routines

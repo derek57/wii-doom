@@ -143,42 +143,6 @@ HUlib_drawTextLine
 }
 
 
-// sorta called by HU_Erase and just better darn get things straight
-void HUlib_eraseTextLine(hu_textline_t* l)
-{
-    int   lh;
-    int   y;
-    int   yoffset;
-
-    // Only erases when NOT in automap and the screen is reduced,
-    // and the text must either need updating or refreshing
-    // (because of a recent change back from the automap)
-
-    if (!automapactive &&
-        viewwindowx && l->needsupdate)
-    {
-        lh = (SHORT(l->f[0]->height) + 1) << hires;  // CHANGED FOR HIRES
-        for (y=(l->y << hires), yoffset=y*SCREENWIDTH ;
-             y<(l->y << hires)+lh ;
-             y++,yoffset+=SCREENWIDTH)               // CHANGED FOR HIRES
-        {
-            if (y < viewwindowy ||
-                y >= viewwindowy + scaledviewheight) // CHANGED FOR HIRES
-                R_VideoErase(yoffset, SCREENWIDTH);  // erase entire line
-            else
-            {
-                R_VideoErase(yoffset, viewwindowx);  // erase left border
-                R_VideoErase(yoffset + viewwindowx + scaledviewwidth,
-                             viewwindowx);           // CHANGED FOR HIRES
-                // erase right border
-            }
-        }
-    }
-
-    if (l->needsupdate) l->needsupdate--;
-
-}
-
 void
 HUlib_initSText
 ( hu_stext_t*   s,
@@ -266,7 +230,6 @@ void HUlib_eraseSText(hu_stext_t* s)
     {
         if (s->laston && !*s->on)
             s->l[i].needsupdate = 4;
-        HUlib_eraseTextLine(&s->l[i]);
     }
     s->laston = *s->on;
 

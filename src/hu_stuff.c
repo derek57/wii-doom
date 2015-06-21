@@ -551,8 +551,6 @@ void HU_Erase(void)
         HUlib_eraseSText(&w_message);
 
     HUlib_eraseSText(&w_secret);
-    HUlib_eraseTextLine(&w_title);
-    HUlib_eraseTextLine(&w_monsec);
 }
 
 void HU_Ticker(void)
