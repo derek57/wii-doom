@@ -44,6 +44,7 @@
 #include "i_video.h"
 #include "m_config.h"
 #include "m_misc.h"
+#include "s_sound.h"
 #include "v_trans.h"
 #include "w_wad.h"
 #include "z_zone.h"
@@ -272,6 +273,10 @@ void I_Error (char *error, ...)
         entry = entry->next;
     }
     error_detected = true;
+
+    S_Shutdown();
+
+    I_ShutdownGraphics();
 
     I_Quit();
 }
