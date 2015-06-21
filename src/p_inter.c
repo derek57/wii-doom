@@ -38,6 +38,7 @@
 #include "doomstat.h"
 #include "dstrings.h"
 #include "i_system.h"
+#include "i_timer.h"
 #include "m_random.h"
 #include "p_inter.h"
 #include "p_local.h"
@@ -103,6 +104,9 @@ P_GiveAmmo
 
     if (player->ammo[ammo] > player->maxammo[ammo])
         player->ammo[ammo] = player->maxammo[ammo];
+
+    if (num && ammo == weaponinfo[player->readyweapon].ammo)
+        ammohighlight = I_GetTime() + ST_AMMO_HIGHLIGHT_WAIT;
 
     // If non zero ammo, 
     // don't change up weapons,
@@ -213,7 +217,13 @@ P_GiveWeapon
         player->pendingweapon = weapon;
     }
         
-    return (gaveweapon || gaveammo);
+    if (gaveweapon || gaveammo)
+    {
+        ammohighlight = I_GetTime() + ST_AMMO_HIGHLIGHT_WAIT;
+        return true;
+    }
+    else
+        return false;
 }
 
  
@@ -235,6 +245,8 @@ P_GiveBody
         player->health = MAXHEALTH;
     player->mo->health = player->health;
         
+    healthhighlight = I_GetTime() + ST_HEALTH_HIGHLIGHT_WAIT;
+
     return true;
 }
 
@@ -259,6 +271,8 @@ P_GiveArmor
     player->armortype = armortype;
     player->armorpoints = hits;
         
+    armorhighlight = I_GetTime() + ST_ARMOR_HIGHLIGHT_WAIT;
+ 
     return true;
 }
 
@@ -488,6 +502,8 @@ P_TouchSpecialThing
         player->health++;                // can go over 100%
         if (player->health > deh_max_health)
             player->health = deh_max_health;
+        else
+            healthhighlight = I_GetTime() + ST_HEALTH_HIGHLIGHT_WAIT;
         player->mo->health = player->health;
         player->message = DEH_String(GOTHTHBONUS);
         break;
@@ -496,6 +512,8 @@ P_TouchSpecialThing
         player->armorpoints++;                // can go over 100%
         if (player->armorpoints > deh_max_armor)
             player->armorpoints = deh_max_armor;
+        else
+            armorhighlight = I_GetTime() + ST_ARMOR_HIGHLIGHT_WAIT;
         // deh_green_armor_class only applies to the green armor shirt;
         // for the armor helmets, armortype 1 is always used.
         if (!player->armortype)
@@ -508,6 +526,7 @@ P_TouchSpecialThing
         {
             player->health = 100;
             player->mo->health = player->health;
+            healthhighlight = I_GetTime() + ST_HEALTH_HIGHLIGHT_WAIT;
             player->extra_lifes++;
             ST_doRefresh();
         }
