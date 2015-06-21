@@ -126,6 +126,10 @@ fixed_t             dc_texturemid;
 
 static const int linesize = SCREENWIDTH;
  
+// Backing buffer containing the bezel drawn around the screen and 
+// surrounding background.
+static byte *background_buffer = NULL;
+
 
 //
 // R_DrawColumn
@@ -986,6 +990,28 @@ void R_FillBackScreen (void)
     // DOOM II border patch.
     char *name2 = DEH_String("GRNROCK");
 
+    // If we are running full screen, there is no need to do any of this,
+    // and the background buffer can be freed if it was previously in use.
+
+    if (scaledviewwidth == SCREENWIDTH)
+    {
+        if (background_buffer != NULL)
+        {
+            Z_Free(background_buffer);
+            background_buffer = NULL;
+        }
+
+        return;
+    }
+
+    // Allocate the background buffer if necessary
+        
+    if (background_buffer == NULL)
+    {
+        background_buffer = Z_Malloc(SCREENWIDTH * (SCREENHEIGHT - SBARHEIGHT),
+                                     PU_STATIC, NULL);
+    }
+
     if (gamemode == commercial)
         name = name2;
     else
@@ -1050,6 +1076,26 @@ void R_FillBackScreen (void)
 } 
  
 
+//
+// Copy a screen buffer.
+//
+void
+R_VideoErase
+( unsigned        ofs,
+  int             count ) 
+{ 
+  // LFB copy.
+  // This might not be a good idea if memcpy
+  //  is not optiomal, e.g. byte by byte on
+  //  a 32bit CPU, as GNU GCC/Linux libc did
+  //  at one point.
+
+    if (background_buffer != NULL)
+    {
+        memcpy(screens[0] + ofs, screens[1] + ofs, count);
+    }
+} 
+
 
 //
 // R_DrawViewBorder
@@ -1069,15 +1115,22 @@ void R_DrawViewBorder (void)
     top = ((SCREENHEIGHT-SBARHEIGHT)-scaledviewheight)/2; // CHANGED FOR HIRES
     side = (SCREENWIDTH-scaledviewwidth)/2; 
  
+    // copy top and one line of left side 
+    R_VideoErase (0, top*SCREENWIDTH+side); 
+ 
     // copy one line of right side and bottom 
     ofs = (scaledviewheight+top)*SCREENWIDTH-side;        // CHANGED FOR HIRES
+    R_VideoErase (ofs, top*SCREENWIDTH+side); 
  
     // copy sides using wraparound 
     ofs = top*SCREENWIDTH + SCREENWIDTH-side; 
     side <<= 1;
     
     for (i=1 ; i<scaledviewheight ; i++)                  // CHANGED FOR HIRES
+    { 
+        R_VideoErase (ofs, side); 
         ofs += SCREENWIDTH; 
+    } 
 
     // ? 
     V_MarkRect (0,0,SCREENWIDTH, SCREENHEIGHT-SBARHEIGHT); 
