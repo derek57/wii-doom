@@ -123,7 +123,7 @@ HUlib_drawTextLine
             w = SHORT(l->f[c - l->sc]->width);
             if (x+w > ORIGWIDTH)    // CHANGED FOR HIRES
                 break;
-            V_DrawPatchDirect(x, l->y, 0, l->f[c - l->sc]);
+            V_DrawPatch(x, l->y, 0, l->f[c - l->sc]);
             x += w;
         }
         else
@@ -138,7 +138,7 @@ HUlib_drawTextLine
     if (drawcursor                                           // CHANGED FOR HIRES
         && x + SHORT(l->f['_' - l->sc]->width) <= ORIGWIDTH) // CHANGED FOR HIRES
     {
-        V_DrawPatchDirect(x, l->y, 0, l->f['_' - l->sc]);
+        V_DrawPatch(x, l->y, 0, l->f['_' - l->sc]);
     }
 }
 
