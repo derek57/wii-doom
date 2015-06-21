@@ -47,7 +47,6 @@
 // Strife.
 typedef boolean (*vpatchclipfunc_t)(patch_t *, int, int);
 
-extern int  dirtybox[4];
 
 // Screen 0 is the screen updated by I_Update screen.
 // Screen 1 is an extra buffer.
@@ -64,7 +63,7 @@ static inline void V_ClearDPTranslation(void)
         dp_translation = NULL;
 }
 
-void V_SetPatchClipCallback(vpatchclipfunc_t func);
+void V_DrawHorizLine(int x, int y, int w, int c);
 
 // Allocates buffer screens, call before R_Init.
 void V_Init (void);
@@ -96,17 +95,6 @@ V_DrawPatchFlipped
   int		scrn,
   patch_t*	patch ) ;
 
-void V_DrawTLPatch(int x, int y, patch_t *patch);
-void V_DrawAltTLPatch(int x, int y, patch_t * patch);
-void V_DrawShadowedPatch(int x, int y, patch_t *patch);
-void V_DrawXlaPatch(int x, int y, patch_t * patch);     // villsa [STRIFE]
-void
-V_DrawPatchDirect
-( int		x,
-  int		y,
-  int		scrn,
-  patch_t*	patch ) ;
-
 // Draw a linear block of pixels into the view buffer.
 
 void
@@ -118,46 +106,7 @@ V_DrawBlock
   int		height,
   byte*		src ) ;
 
-void V_DrawScaledBlock(int x, int y, int scrn, int width, int height, byte *src);
-
 void V_MarkRect(int x, int y, int width, int height);
-
-void V_DrawFilledBox(int x, int y, int w, int h, int c);
-void V_DrawHorizLine(int x, int y, int w, int c);
-void V_DrawVertLine(int x, int y, int h, int c);
-void V_DrawBox(int x, int y, int w, int h, int c);
-void V_CopyScaledBuffer(byte *dest, byte *src, size_t size);
-
-// Draw a raw screen lump
-
-void V_DrawRawScreen(byte *raw);
-
-// Temporarily switch to using a different buffer to draw graphics, etc.
-
-void V_UseBuffer(byte *buffer);
-
-// Return to using the normal screen buffer to draw graphics.
-
-void V_RestoreBuffer(void);
-
-// Save a screenshot of the current screen to a file, named in the 
-// format described in the string passed to the function, eg.
-// "DOOM%02i.pcx"
-
-//void V_ScreenShot(char *format);
-
-// Load the lookup table for translucency calculations from the TINTTAB
-// lump.
-
-void V_LoadTintTable(void);
-
-// villsa [STRIFE]
-// Load the lookup table for translucency calculations from the XLATAB
-// lump.
-
-void V_LoadXlaTable(void);
-
-void V_DrawMouseSpeedBox(int speed);
 
 void V_DrawConsoleChar(int x, int y, patch_t *patch, byte color, boolean italics, int translucency,
     boolean inverted);

@@ -42,6 +42,7 @@
 #include "i_video.h"
 #include "m_bbox.h"
 #include "m_misc.h"
+#include "r_main.h"
 #include "v_misc.h"
 #include "v_trans.h"
 #include "v_video.h"
@@ -82,22 +83,17 @@ byte                         *screens[5];
 // This is needed for Chocolate Strife, which clips patches to the screen.
 static  vpatchclipfunc_t     patchclip_callback = NULL;
 
-// Blending table used for fuzzpatch, etc.
-// Only used in Heretic/Hexen
-byte    *tinttable = NULL;
+byte                         *tranmap = NULL;
 
-// villsa [STRIFE] Blending table used for Strife
-byte    *xlatab = NULL;
+byte                         *dp_translation = NULL;
 
-byte    *tranmap = NULL;
+int                          dirtybox[4]; 
 
-byte    *dp_translation = NULL;
+int                          italicize[15] = { 0, 2, 2, 2, 1, 1, 1, 1, 0, 0, 0, 0, -1, -1, -1 };
 
-int     dirtybox[4]; 
+boolean                      dp_translucent = false;
 
-int     italicize[15] = { 0, 2, 2, 2, 1, 1, 1, 1, 0, 0, 0, 0, -1, -1, -1 };
-
-boolean dp_translucent = false;
+extern int                   screenblocks;
 
 //
 // V_MarkRect 
@@ -111,6 +107,19 @@ void V_MarkRect(int x, int y, int width, int height)
     M_AddToBox (dirtybox, x + width-1, y + height-1); 
 } 
  
+
+void V_DrawHorizLine(int x, int y, int w, int c)
+{
+    uint8_t *buf;
+    int x1;
+
+    buf = screens[0] + SCREENWIDTH * y + x;
+
+    for (x1 = 0; x1 < w; ++x1)
+    {
+        *buf++ = c;
+    }
+}
 
 //
 // V_CopyRect 
@@ -170,21 +179,6 @@ V_CopyRect
     } 
 } 
  
-//
-// V_SetPatchClipCallback
-//
-// haleyjd 08/28/10: Added for Strife support.
-// By calling this function, you can setup runtime error checking for patch 
-// clipping. Strife never caused errors by drawing patches partway off-screen.
-// Some versions of vanilla DOOM also behaved differently than the default
-// implementation, so this could possibly be extended to those as well for
-// accurate emulation.
-//
-void V_SetPatchClipCallback(vpatchclipfunc_t func)
-{
-    patchclip_callback = func;
-}
-
 //
 // V_DrawPatch
 // Masks a column based masked pic to the screen. 
@@ -545,23 +539,6 @@ V_DrawPatchFlipped
 }
 
 
-
-//
-// V_DrawPatchDirect
-// Draws directly to the screen on the pc. 
-//
-
-void
-V_DrawPatchDirect
-( int		x,
-  int		y,
-  int		scrn,
-  patch_t*	patch ) 
-{
-    V_DrawPatch(x, y, scrn, patch); 
-} 
-
-
 //
 // V_DrawBlock
 // Draw a linear block of pixels into the view buffer.
@@ -600,127 +577,6 @@ V_DrawBlock
         dest += SCREENWIDTH; 
     } 
 } 
-
-void V_DrawScaledBlock(int x, int y, int scrn, int width, int height, byte *src)
-{
-    byte *dest;
-    int i, j;
-
-#ifdef RANGECHECK
-    if (x < 0
-     || x + width > ORIGWIDTH
-     || y < 0
-     || y + height > ORIGHEIGHT)
-    {
-        C_Printf(CR_RED, " Bad V_DrawScaledBlock: Patch (%d,%d)-(%d,%d) exceeds LFB\n"
-                , x, y, x + width, y + height);
-    }
-#endif
-
-    V_MarkRect (x, y, width, height);
-
-    dest = screens[scrn] + (y << hires) * SCREENWIDTH + (x << hires);
-
-    for (i = 0; i < (height << hires); i++)
-    {
-        for (j = 0; j < (width << hires); j++)
-        {
-            *(dest + i * SCREENWIDTH + j) = *(src + (i >> hires) * width +
-                                            (j >> hires));
-        }
-    }
-}
-
-void V_DrawFilledBox(int x, int y, int w, int h, int c)
-{
-    uint8_t *buf, *buf1;
-    int x1, y1;
-
-    buf = screens[0] + SCREENWIDTH * y + x;
-
-    for (y1 = 0; y1 < h; ++y1)
-    {
-        buf1 = buf;
-
-        for (x1 = 0; x1 < w; ++x1)
-        {
-            *buf1++ = c;
-        }
-
-        buf += SCREENWIDTH;
-    }
-}
-
-void V_DrawHorizLine(int x, int y, int w, int c)
-{
-    uint8_t *buf;
-    int x1;
-
-    buf = screens[0] + SCREENWIDTH * y + x;
-
-    for (x1 = 0; x1 < w; ++x1)
-    {
-        *buf++ = c;
-    }
-}
-
-void V_DrawVertLine(int x, int y, int h, int c)
-{
-    uint8_t *buf;
-    int y1;
-
-    buf = screens[0] + SCREENWIDTH * y + x;
-
-    for (y1 = 0; y1 < h; ++y1)
-    {
-        *buf = c;
-        buf += SCREENWIDTH;
-    }
-}
-
-void V_DrawBox(int x, int y, int w, int h, int c)
-{
-    V_DrawHorizLine(x, y, w, c);
-    V_DrawHorizLine(x, y+h-1, w, c);
-    V_DrawVertLine(x, y, h, c);
-    V_DrawVertLine(x+w-1, y, h, c);
-}
-
-//
-// Draw a "raw" screen (lump containing raw data to blit directly
-// to the screen)
-//
-
-void V_CopyScaledBuffer(byte *dest, byte *src, size_t size)
-{
-    int i, j;
-
-#ifdef RANGECHECK
-    if (size < 0
-     || size > ORIGWIDTH * ORIGHEIGHT)
-    {
-        C_Printf(CR_RED, " Bad V_CopyScaledBuffer: Size mismatch (%d)\n", size);
-    }
-#endif
-
-    while (size--)
-    {
-        for (i = 0; i <= hires; i++)
-        {
-            for (j = 0; j <= hires; j++)
-            {
-                *(dest + (size << hires) + (hires *
-                (int) (size / ORIGWIDTH) + i) * SCREENWIDTH + j) =
-                *(src + size);
-            }
-        }
-    }
-}
- 
-void V_DrawRawScreen(byte *raw)
-{
-    memcpy(screens[0], raw, ORIGWIDTH * ORIGHEIGHT);
-}
 
 //
 // V_Init
@@ -980,5 +836,7 @@ void V_ColorBlock(int x, int y, int scrn, int width, int height, byte color)
         memset(dest, color, width);
         dest += SCREENWIDTH;
     }
+
+    R_SetViewSize (screenblocks, detailLevel);
 }
 
