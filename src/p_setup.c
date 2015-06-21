@@ -272,6 +272,9 @@ void P_LoadSubsectors (int lump)
     subsectors = Z_Malloc (numsubsectors*sizeof(subsector_t),PU_LEVEL,0);        
     data = W_CacheLumpNum (lump,PU_STATIC);
         
+    if(!data || !numsubsectors)
+        C_Printf(CR_RED, " P_LoadSubsectors: No subsectors in map!");
+
     ms = (mapsubsector_t *)data;
     memset (subsectors,0, numsubsectors*sizeof(subsector_t));
     ss = subsectors;
