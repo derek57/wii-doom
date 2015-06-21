@@ -123,6 +123,7 @@ default_t        doom_defaults_list[] =
     CONFIG_VARIABLE_INT                (sound_chans),
     CONFIG_VARIABLE_INT                (hom_detector),
     CONFIG_VARIABLE_INT                (falling_damage),
+    CONFIG_VARIABLE_INT                (infinite_ammo),
     CONFIG_VARIABLE_INT                (key_shoot),
     CONFIG_VARIABLE_INT                (key_open),
     CONFIG_VARIABLE_INT                (key_menu),

@@ -63,6 +63,7 @@ boolean         smoketrails = false;
 boolean         sound_info = false;
 boolean         autodetect_hom = false;
 boolean         d_fallingdamage = false;
+boolean         d_infiniteammo = false;
 
 int             d_colblood = 0;
 int             d_colblood2 = 0;

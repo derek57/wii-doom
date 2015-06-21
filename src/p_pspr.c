@@ -666,7 +666,9 @@ A_FireMissile
 ( player_t*        player,
   pspdef_t*        psp ) 
 {
-    DecreaseAmmo(player, weaponinfo[player->readyweapon].ammo, 1);
+    if(!d_infiniteammo)
+        DecreaseAmmo(player, weaponinfo[player->readyweapon].ammo, 1);
+
     P_SpawnPlayerMissile (player->mo, MT_ROCKET);
 
     if(d_recoil)
@@ -685,8 +687,10 @@ A_FireBFG
 ( player_t*        player,
   pspdef_t*        psp ) 
 {
-    DecreaseAmmo(player, weaponinfo[player->readyweapon].ammo, 
+    if(!d_infiniteammo)
+        DecreaseAmmo(player, weaponinfo[player->readyweapon].ammo, 
                  deh_bfg_cells_per_shot);
+
     P_SpawnPlayerMissile (player->mo, MT_BFG);
 
     if(d_recoil)
@@ -719,7 +723,8 @@ void A_FireOldBFG(player_t *player, pspdef_t *psp)
         P_Thrust(player, ANG180 + player->mo->angle,
                 512*recoil_values[wp_plasma][0]);
 
-    player->ammo[weaponinfo[player->readyweapon].ammo]--;
+    if(!d_infiniteammo)
+        player->ammo[weaponinfo[player->readyweapon].ammo]--;
 
     player->extralight = 2;
 
@@ -791,7 +796,8 @@ A_FirePlasma
 ( player_t*        player,
   pspdef_t*        psp ) 
 {
-    DecreaseAmmo(player, weaponinfo[player->readyweapon].ammo, 1);
+    if(!d_infiniteammo)
+        DecreaseAmmo(player, weaponinfo[player->readyweapon].ammo, 1);
 
     if(beta_style)
         P_SetPsprite (player,
@@ -903,7 +909,9 @@ A_FirePistol
     S_StartSound (player->mo, sfx_pistol);
 
     P_SetMobjState (player->mo, S_PLAY_ATK2);
-    DecreaseAmmo(player, weaponinfo[player->readyweapon].ammo, 1);
+
+    if(!d_infiniteammo)
+        DecreaseAmmo(player, weaponinfo[player->readyweapon].ammo, 1);
 
     P_SetPsprite (player,
                   ps_flash,
@@ -934,7 +942,8 @@ A_FireShotgun
     S_StartSound (player->mo, sfx_shotgn);
     P_SetMobjState (player->mo, S_PLAY_ATK2);
 
-    DecreaseAmmo(player, weaponinfo[player->readyweapon].ammo, 1);
+    if(!d_infiniteammo)
+        DecreaseAmmo(player, weaponinfo[player->readyweapon].ammo, 1);
 
     P_SetPsprite (player,
                   ps_flash,
@@ -970,7 +979,8 @@ A_FireShotgun2
     S_StartSound (player->mo, sfx_dshtgn);
     P_SetMobjState (player->mo, S_PLAY_ATK2);
 
-    DecreaseAmmo(player, weaponinfo[player->readyweapon].ammo, 2);
+    if(!d_infiniteammo)
+        DecreaseAmmo(player, weaponinfo[player->readyweapon].ammo, 2);
 
     P_SetPsprite (player,
                   ps_flash,
@@ -1011,9 +1021,9 @@ A_FireCGun
         return;
                 
     P_SetMobjState (player->mo, S_PLAY_ATK2);
-    DecreaseAmmo(player, weaponinfo[player->readyweapon].ammo, 1);
 
-//    A_Bullet(player);
+    if(!d_infiniteammo)
+        DecreaseAmmo(player, weaponinfo[player->readyweapon].ammo, 1);
 
     if(beta_style && player->readyweapon == wp_chaingun)
         P_SetPsprite (player,
