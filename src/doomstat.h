@@ -322,6 +322,7 @@ extern  boolean         sound_info;
 extern  boolean         autodetect_hom;
 extern  boolean         d_fallingdamage;
 extern  boolean         d_infiniteammo;
+extern  boolean         not_monsters;
 
 extern  int             d_colblood;
 extern  int             d_colblood2;

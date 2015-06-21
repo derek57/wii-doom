@@ -170,6 +170,7 @@ void M_BindBaseControls(void)
     M_BindVariable("hom_detector",           &autodetect_hom);
     M_BindVariable("falling_damage",         &d_fallingdamage);
     M_BindVariable("infinite_ammo",          &d_infiniteammo);
+    M_BindVariable("no_monsters",            &not_monsters);
     M_BindVariable("key_shoot",              &joy_r);
     M_BindVariable("key_open",               &joy_l);
     M_BindVariable("key_menu",               &joy_minus);

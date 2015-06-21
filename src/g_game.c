@@ -1109,7 +1109,11 @@ void G_DoNewGame (void)
     respawnparm = start_respawnparm;
     fastparm = start_fastparm;
 
-    nomonsters = false;
+    if(!not_monsters)
+        nomonsters = false;
+    else
+        nomonsters = true;
+
     consoleplayer = 0;
     G_InitNew (d_skill, d_episode, d_map); 
     gameaction = ga_nothing; 

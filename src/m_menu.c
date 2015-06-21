@@ -863,8 +863,8 @@ int                        cheeting;
 int                        coordinates_info = 0;
 int                        timer_info = 0;
 int                        version_info = 0;
-int                        key_controls_start_in_cfg_at_pos = 46;
-int                        key_controls_end_in_cfg_at_pos = 59;
+int                        key_controls_start_in_cfg_at_pos = 47;
+int                        key_controls_end_in_cfg_at_pos = 60;
 int                        crosshair = 0;
 int                        show_stats = 0;
 int                        tracknum = 1;
@@ -1063,6 +1063,7 @@ void M_Trails(int choice);
 void M_ChaingunTics(int choice);
 void M_FallingDamage(int choice);
 void M_InfiniteAmmo(int choice);
+void M_NoMonsters(int choice);
 
 void M_God(int choice);
 void M_Noclip(int choice);
@@ -1738,6 +1739,7 @@ enum
     game2_tics,
     game2_falling,
     game2_ammo,
+    game2_monsters,
     game2_end
 } game2_e;
 
@@ -1755,7 +1757,8 @@ menuitem_t GameMenu2[]=
     {2,"ROCKET TRAILS",M_Trails,'t'},
     {2,"CHAINGUN SPEED",M_ChaingunTics,'g'},
     {2,"FALLING DAMAGE",M_FallingDamage,'f'},
-    {2,"INFINITE AMMO",M_InfiniteAmmo,'i'}
+    {2,"INFINITE AMMO",M_InfiniteAmmo,'i'},
+    {2,"NO MONSTERS",M_NoMonsters,'m'}
 };
 
 menu_t  GameDef2 =
@@ -3146,6 +3149,28 @@ void M_DrawGame2(void)
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(GameDef2.x + 200, GameDef2.y + 118, DEH_String("OFF"));
+        V_ClearDPTranslation();
+    }
+
+    if(not_monsters)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(GameDef2.x + 208, GameDef2.y + 128, DEH_String("ON"));
+        V_ClearDPTranslation();
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(GameDef2.x + 200, GameDef2.y + 128, DEH_String("OFF"));
+        V_ClearDPTranslation();
+    }
+
+    if(itemOn == 13)
+    {
+        char *string = "YOU MUST START A NEW GAME TO TAKE EFFECT.";
+        int x = 160 - M_StringWidth(string) / 2;
+        dp_translation = crx[CRX_GOLD];
+        M_WriteText(x, GameDef.y + 138, DEH_String(string));
         V_ClearDPTranslation();
     }
 }
@@ -6934,6 +6959,23 @@ void M_InfiniteAmmo(int choice)
         if (!d_infiniteammo)
             d_infiniteammo = true;
         players[consoleplayer].message = DEH_String("INFINITE AMMO HAS BEEN ENABLED");
+        break;
+    }
+}
+
+void M_NoMonsters(int choice)
+{
+    switch(choice)
+    {
+    case 0:
+        if (not_monsters)
+            not_monsters = false;
+        players[consoleplayer].message = DEH_String("NO MONSTERS OPTION HAS BEEN DISABLED");
+        break;
+    case 1:
+        if (!not_monsters)
+            not_monsters = true;
+        players[consoleplayer].message = DEH_String("NO MONSTERS OPTION HAS BEEN ENABLED");
         break;
     }
 }
