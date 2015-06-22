@@ -55,6 +55,9 @@
 #define RANGECHECK
 
 
+// villsa [STRIFE] Blending table used for Strife
+byte *xlatab = NULL;
+
 byte redtoyellow[] =
 {
       0,   1,   2,   3,   4,   5,   6,   7,   8,   9,  10,  11,  12,  13,  14,  15,
@@ -126,14 +129,14 @@ void V_DrawHorizLine(int x, int y, int w, int c)
 // 
 void
 V_CopyRect
-( int		srcx,
-  int		srcy,
-  int		srcscrn,
-  int		width,
-  int		height,
-  int		destx,
-  int		desty,
-  int		destscrn ) 
+( int        srcx,
+  int        srcy,
+  int        srcscrn,
+  int        width,
+  int        height,
+  int        destx,
+  int        desty,
+  int        destscrn ) 
 { 
     byte *src;
     byte *dest; 
@@ -186,10 +189,10 @@ V_CopyRect
 
 void
 V_DrawPatch
-( int		x,
-  int		y,
-  int		scrn,
-  patch_t*	patch ) 
+( int        x,
+  int        y,
+  int        scrn,
+  patch_t*    patch ) 
 { 
     int count;
     int col;
@@ -434,10 +437,10 @@ V_DrawPatch
 
 void
 V_DrawPatchFlipped
-( int		x,
-  int		y,
-  int		scrn,
-  patch_t*	patch ) 
+( int        x,
+  int        y,
+  int        scrn,
+  patch_t*    patch ) 
 {
     int count;
     int col; 
@@ -546,12 +549,12 @@ V_DrawPatchFlipped
 
 void
 V_DrawBlock
-( int		x,
-  int		y,
-  int		scrn,
-  int		width,
-  int		height,
-  byte*		src ) 
+( int        x,
+  int        y,
+  int        scrn,
+  int        width,
+  int        height,
+  byte*        src ) 
 { 
     byte *dest; 
  
@@ -838,5 +841,43 @@ void V_ColorBlock(int x, int y, int scrn, int width, int height, byte color)
     }
 
     R_SetViewSize (screenblocks, detailLevel);
+}
+
+//
+// V_GetBlock
+// Gets a linear block of pixels from the view buffer.
+//
+void V_GetBlock (int x, int y, int scrn, int width, int height, byte *dest)
+{
+    byte *src;
+
+#ifdef RANGECHECK 
+    if (x < 0
+     || x + width > SCREENWIDTH
+     || y < 0
+     || y + height > SCREENHEIGHT)
+    {
+        C_Printf(CR_RED, " Bad V_GetBlock");
+    }
+#endif
+
+    src = screens[scrn] + y * SCREENWIDTH + x;
+
+    while(height--)
+    {
+        memcpy (dest, src, width);
+        src += SCREENWIDTH;
+        dest += width;
+    }
+}
+
+//
+// V_LoadXlaTable
+//
+// villsa [STRIFE] Load xla table from XLATAB lump.
+//
+void V_LoadXlaTable(void)
+{
+    xlatab = W_CacheLumpName("XLATAB", PU_STATIC);
 }
 

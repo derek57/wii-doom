@@ -863,8 +863,8 @@ int                        cheeting;
 int                        coordinates_info = 0;
 int                        timer_info = 0;
 int                        version_info = 0;
-int                        key_controls_start_in_cfg_at_pos = 47;
-int                        key_controls_end_in_cfg_at_pos = 60;
+int                        key_controls_start_in_cfg_at_pos = 50;
+int                        key_controls_end_in_cfg_at_pos = 63;
 int                        crosshair = 0;
 int                        show_stats = 0;
 int                        tracknum = 1;
@@ -947,11 +947,13 @@ extern int                 dots_enabled;
 extern int                 dont_show;
 extern int                 display_fps;
 extern int                 allocated_ram_size;
+extern int                 wipe_type;
 
 extern default_t           doom_defaults_list[];   // KEY BINDINGS
 
 extern patch_t*            hu_font[HU_FONTSIZE];
 
+extern boolean             overlay_trigger;
 extern boolean             message_dontfuckwithme;
 extern boolean             chat_on;                // in heads-up code
 extern boolean             BorderNeedRefresh;
@@ -986,6 +988,7 @@ void M_ChangeDetail(int choice);
 void M_Translucency(int choice);
 void M_ColoredBloodA(int choice);
 void M_ColoredBloodB(int choice);
+void M_WipeType(int choice);
 void M_UncappedFramerate(int choice);
 void M_SizeDisplay(int choice);
 void M_StartGame(int choice);
@@ -1064,6 +1067,7 @@ void M_ChaingunTics(int choice);
 void M_FallingDamage(int choice);
 void M_InfiniteAmmo(int choice);
 void M_NoMonsters(int choice);
+void M_AutomapOverlay(int choice);
 
 void M_God(int choice);
 void M_Noclip(int choice);
@@ -1116,6 +1120,7 @@ void M_System(int choice);
 void M_Sound(int choice);
 void M_Game(int choice);
 void M_Game2(int choice);
+void M_Game3(int choice);
 void M_Debug(int choice);
 void M_Cheats(int choice);
 void M_Record(int choice);
@@ -1133,6 +1138,7 @@ void M_DrawControls(void);
 void M_DrawSystem(void);
 void M_DrawGame(void);
 void M_DrawGame2(void);
+void M_DrawGame3(void);
 void M_DrawDebug(void);
 void M_DrawSound(void);
 void M_DrawCheats(void);
@@ -1545,8 +1551,7 @@ enum
     scrnsize,
     screen_detail,
     screen_translucency,
-    screen_blooda,
-    screen_bloodb,
+    screen_wipe,
     screen_end
 } screen_e;
 
@@ -1556,8 +1561,7 @@ menuitem_t ScreenMenu[]=
     {2,"Screen Size",M_SizeDisplay,'s'},
     {2,"Detail",M_ChangeDetail,'d'},
     {2,"Translucency",M_Translucency,'t'},
-    {2,"Enable Colored Blood",M_ColoredBloodA,'a'},
-    {2,"Fix Monster Blood",M_ColoredBloodB,'b'}
+    {2,"Wipe Type",M_WipeType,'w'}
 };
 
 menu_t  ScreenDef =
@@ -1740,6 +1744,7 @@ enum
     game2_falling,
     game2_ammo,
     game2_monsters,
+    game2_game3,
     game2_end
 } game2_e;
 
@@ -1754,11 +1759,12 @@ menuitem_t GameMenu2[]=
     {2,"PRE-RELEASE BETA MODE",M_Beta,'b'},
     {2,"RANDOMLY FLIP CORPSES & GUNS",M_Corpses,'d'},
     {2,"SHOW REVEALED SECRETS",M_Secrets,'z'},
-    {2,"ROCKET TRAILS",M_Trails,'t'},
+    {2,"ROCKET TRAILS",M_Trails,'r'},
     {2,"CHAINGUN SPEED",M_ChaingunTics,'g'},
     {2,"FALLING DAMAGE",M_FallingDamage,'f'},
     {2,"INFINITE AMMO",M_InfiniteAmmo,'i'},
-    {2,"NO MONSTERS",M_NoMonsters,'m'}
+    {2,"NO MONSTERS",M_NoMonsters,'m'},
+    {2,"",M_Game3,'n'}
 };
 
 menu_t  GameDef2 =
@@ -1773,8 +1779,34 @@ menu_t  GameDef2 =
 
 enum
 {
+    game3_overlay,
+    game3_timer,
+    game3_blooda,
+    game3_bloodb,
+    game3_end
+} game3_e;
+
+menuitem_t GameMenu3[]=
+{
+    {2,"AUTOMAP OVERLAY",M_AutomapOverlay,'n'},
+    {2,"Show Timer",M_Timer,'t'},
+    {2,"Enable Colored Blood",M_ColoredBloodA,'a'},
+    {2,"Fix Monster Blood",M_ColoredBloodB,'b'}
+};
+
+menu_t  GameDef3 =
+{
+    game3_end,
+    &GameDef2,
+    GameMenu3,
+    M_DrawGame3,
+    48,22,
+    0
+};
+
+enum
+{
     debug_coordinates,
-    debug_timer,
     debug_version,
     debug_sound,
     debug_end
@@ -1783,7 +1815,6 @@ enum
 menuitem_t DebugMenu[]=
 {
     {2,"Show Coordinates",M_Coordinates,'c'},
-    {2,"Show Timer",M_Timer,'t'},
     {2,"Show Version",M_Version,'v'},
     {2,"Show Sound Info",M_SoundInfo,'s'}
 };
@@ -2717,38 +2748,43 @@ void M_DrawScreen(void)
         V_ClearDPTranslation();
     }
 
-    if(d_colblood)
-    {
-        dp_translation = crx[CRX_GREEN];
-        M_WriteText(ScreenDef.x + 189, ScreenDef.y + 38, "ON");
-        V_ClearDPTranslation();
-    }
-    else
-    {
-        dp_translation = crx[CRX_DARK];
-        M_WriteText(ScreenDef.x + 181, ScreenDef.y + 38, "OFF");
-        V_ClearDPTranslation();
-    }
-
-    if(d_colblood2)
-    {
-        dp_translation = crx[CRX_GREEN];
-        M_WriteText(ScreenDef.x + 189, ScreenDef.y + 48, "ON");
-        V_ClearDPTranslation();
-    }
-    else
-    {
-        dp_translation = crx[CRX_DARK];
-        M_WriteText(ScreenDef.x + 181, ScreenDef.y + 48, "OFF");
-        V_ClearDPTranslation();
-    }
-
     if(beta_style)
         M_DrawThermoSmall(ScreenDef.x + 128, ScreenDef.y + LINEHEIGHT_SMALL * (scrnsize + 1),
                  8, screenSize);
     else
         M_DrawThermoSmall(ScreenDef.x + 120, ScreenDef.y + LINEHEIGHT_SMALL * (scrnsize + 1),
                  9, screenSize);
+
+    if(wipe_type == 0)
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(ScreenDef.x + 173, ScreenDef.y + 38, "NONE");
+        V_ClearDPTranslation();
+    }
+    else if(wipe_type == 1)
+    {
+        dp_translation = crx[CRX_RED];
+        M_WriteText(ScreenDef.x + 172, ScreenDef.y + 38, "MELT");
+        V_ClearDPTranslation();
+    }
+    else if(wipe_type == 2)
+    {
+        dp_translation = crx[CRX_GOLD];
+        M_WriteText(ScreenDef.x + 173, ScreenDef.y + 38, "BURN");
+        V_ClearDPTranslation();
+    }
+    else if(wipe_type == 3)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(ScreenDef.x + 173, ScreenDef.y + 38, "FADE");
+        V_ClearDPTranslation();
+    }
+    else if(wipe_type == 4)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(ScreenDef.x + 122, ScreenDef.y + 38, "COLORXFORM");
+        V_ClearDPTranslation();
+    }
 }
 
 void M_DrawGame(void)
@@ -3170,7 +3206,75 @@ void M_DrawGame2(void)
         char *string = "YOU MUST START A NEW GAME TO TAKE EFFECT.";
         int x = 160 - M_StringWidth(string) / 2;
         dp_translation = crx[CRX_GOLD];
-        M_WriteText(x, GameDef.y + 138, DEH_String(string));
+        M_WriteText(x, GameDef2.y + 138, DEH_String(string));
+        V_ClearDPTranslation();
+    }
+    else
+    {
+        dp_translation = crx[CRX_GRAY];
+        M_WriteText(GameDef2.x, GameDef2.y + 138, DEH_String("EVEN MORE OPTIONS"));
+        V_ClearDPTranslation();
+    }
+}
+
+void M_DrawGame3(void)
+{
+    if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
+        V_DrawPatch(70, 0, 0, W_CacheLumpName(DEH_String("M_T_GSET"),
+                                               PU_CACHE));
+    else
+        V_DrawPatch(70, 0, 0, W_CacheLumpName(DEH_String("M_GMESET"),
+                                               PU_CACHE));
+
+    if(overlay_trigger)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(GameDef3.x + 208, GameDef3.y - 2, DEH_String("ON"));
+        V_ClearDPTranslation();
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(GameDef3.x + 200, GameDef3.y - 2, DEH_String("OFF"));
+        V_ClearDPTranslation();
+    }
+    
+    if(timer_info)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(GameDef3.x + 208, GameDef3.y + 8, DEH_String("ON"));
+        V_ClearDPTranslation();
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(GameDef3.x + 200, GameDef3.y + 8, DEH_String("OFF"));
+        V_ClearDPTranslation();
+    }
+
+    if(d_colblood)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(GameDef3.x + 208, GameDef3.y + 18, DEH_String("ON"));
+        V_ClearDPTranslation();
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(GameDef3.x + 200, GameDef3.y + 18, DEH_String("OFF"));
+        V_ClearDPTranslation();
+    }
+
+    if(d_colblood2)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(GameDef3.x + 208, GameDef3.y + 28, DEH_String("ON"));
+        V_ClearDPTranslation();
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(GameDef3.x + 200, GameDef3.y + 28, DEH_String("OFF"));
         V_ClearDPTranslation();
     }
 }
@@ -3995,6 +4099,21 @@ void M_ColoredBloodB(int choice)
     d_colblood2 = 1 - !!d_colblood2;
 }
 
+void M_WipeType(int choice)
+{
+    switch(choice)
+    {
+      case 0:
+        if (wipe_type > 0)
+            wipe_type--;
+        break;
+      case 1:
+        if (wipe_type < 4) // FIXME: actually there are 4 types (#3 & #4 currently not working)
+            wipe_type++;
+        break;
+    }
+}
+
 void M_UncappedFramerate(int choice)
 {
     choice = 0;
@@ -4627,10 +4746,6 @@ void M_Drawer (void)
             M_WriteText(0, 24, map_coordinates_textbuffer);
             }
     }
-
-    // DISPLAYS THE GAME TIME
-    if(timer_info)
-        DrawWorldTimer();
 
     // DISPLAYS BINARY VERSION
     if(version_info)
@@ -6454,6 +6569,11 @@ void M_Game2(int choice)
     M_SetupNextMenu(&GameDef2);
 }
 
+void M_Game3(int choice)
+{
+    M_SetupNextMenu(&GameDef3);
+}
+
 void M_RMap(int choice)
 {
         switch(choice)
@@ -6980,6 +7100,23 @@ void M_NoMonsters(int choice)
     }
 }
 
+void M_AutomapOverlay(int choice)
+{
+    switch(choice)
+    {
+    case 0:
+        if (overlay_trigger)
+            overlay_trigger = false;
+        players[consoleplayer].message = DEH_String("AUTOMAP OVERLAY MODE HAS BEEN DISABLED");
+        break;
+    case 1:
+        if (!overlay_trigger)
+            overlay_trigger = true;
+        players[consoleplayer].message = DEH_String("AUTOMAP OVERLAY MODE HAS BEEN ENABLED");
+        break;
+    }
+}
+
 void M_Debug(int choice)
 {
     M_SetupNextMenu(&DebugDef);
@@ -7173,7 +7310,7 @@ void M_DrawDebug(void)
         V_ClearDPTranslation();
     }
 
-    if(timer_info)
+    if(version_info)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(DebugDef.x + 177, DebugDef.y + 8, "ON");
@@ -7186,7 +7323,7 @@ void M_DrawDebug(void)
         V_ClearDPTranslation();
     }
 
-    if(version_info)
+    if(sound_info)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(DebugDef.x + 177, DebugDef.y + 18, "ON");
@@ -7196,19 +7333,6 @@ void M_DrawDebug(void)
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(DebugDef.x + 169, DebugDef.y + 18, "OFF");
-        V_ClearDPTranslation();
-    }
-
-    if(sound_info)
-    {
-        dp_translation = crx[CRX_GREEN];
-        M_WriteText(DebugDef.x + 177, DebugDef.y + 28, "ON");
-        V_ClearDPTranslation();
-    }
-    else
-    {
-        dp_translation = crx[CRX_DARK];
-        M_WriteText(DebugDef.x + 169, DebugDef.y + 28, "OFF");
         V_ClearDPTranslation();
     }
 }

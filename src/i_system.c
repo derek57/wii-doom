@@ -53,11 +53,6 @@
 #define DEFAULT_RAM 16 * 2 /* MiB */
 #define MIN_RAM     4 * 4 /* MiB */
 
-extern boolean devparm;
-
-int allocated_ram_size;
-
-static boolean already_quitting = false;
 
 typedef struct atexit_listentry_s atexit_listentry_t;
 
@@ -67,6 +62,13 @@ struct atexit_listentry_s
     boolean run_on_error;
     atexit_listentry_t *next;
 };
+
+
+extern boolean devparm;
+
+int allocated_ram_size;
+
+static boolean already_quitting = false;
 
 static atexit_listentry_t *exit_funcs = NULL;
 

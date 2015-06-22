@@ -130,6 +130,8 @@ int             pagetic;
 int             runcount = 0;
 int             startuptimer;
 
+extern int      show_stats;
+extern int      timer_info;
 extern int      opl_type;
 extern int      mp_skill;
 extern int      warpepi;
@@ -141,6 +143,7 @@ extern int      screenSize;
 extern int      sound_channels;
 extern int      startlump;
 
+extern boolean  BorderNeedRefresh;
 extern boolean  skillflag;
 extern boolean  nomonstersflag;
 extern boolean  fastflag;
@@ -235,7 +238,7 @@ void D_Display (void)
             display_fps = 0;        // ...UPON WIPING SCREEN WITH ENABLED DISPLAY TICKER
 
         wipe = true;
-        wipe_StartScreen(0, 0, SCREENWIDTH, SCREENHEIGHT);
+        wipe_StartScreen();
     }
     else
     {
@@ -256,6 +259,8 @@ void D_Display (void)
       case GS_LEVEL:
         if (!gametic)
             break;
+        if (automapactive && !am_overlay)
+            R_RenderPlayerView (&players[consoleplayer]);
         if (automapactive)
             AM_Drawer ();
         if (wipe || (scaledviewheight != (200 << hires) && fullscreen) ) // HIRES
@@ -288,12 +293,14 @@ void D_Display (void)
     I_UpdateNoBlit ();
     
     // draw the view directly
-    if (gamestate == GS_LEVEL && !automapactive && gametic)
+    if (gamestate == GS_LEVEL && (!automapactive || (automapactive && am_overlay)) && gametic)
     {
         R_RenderPlayerView (&players[displayplayer]);
     }
 
-    if (gamestate == GS_LEVEL && gametic)
+    // in automap overlay mode,
+    // the HUD is drawn on top of everything else
+    if (gamestate == GS_LEVEL && gametic && !(automapactive && am_overlay))
         HU_Drawer ();
     
     // clean up border stuff
@@ -317,7 +324,8 @@ void D_Display (void)
     }
 
     // see if the border needs to be updated to the screen
-    if (gamestate == GS_LEVEL && !automapactive && scaledviewwidth != (320 << hires)) // HIRES
+    if  (gamestate == GS_LEVEL && (!automapactive ||
+        (automapactive && am_overlay)) && scaledviewwidth != (320 << hires))
     {
         if (menuactive || menuactivestate || !viewactivestate)
             borderdrawcount = 3;
@@ -333,6 +341,26 @@ void D_Display (void)
     viewactivestate = viewactive;
     inhelpscreensstate = inhelpscreens;
     oldgamestate = wipegamestate = gamestate;
+
+    // in automap overlay mode,
+    // draw the automap and HUD on top of everything else
+    if (automapactive && am_overlay)
+    {
+	AM_Drawer ();
+	HU_Drawer ();
+
+	// force redraw of status bar and border
+	viewactivestate = false;
+	inhelpscreensstate = true;
+
+        R_DrawViewBorder ();    // erase old menu stuff
+
+        if(show_stats == 1)
+            HU_DrawStats();
+
+        if(timer_info == 1)
+            AM_DrawWorldTimer();
+    }
 
     // shade background when a menu is active or the game is paused
     if (paused || menuactive)
@@ -373,7 +401,7 @@ void D_Display (void)
     }
     
     // wipe update
-    wipe_EndScreen(0, 0, SCREENWIDTH, SCREENHEIGHT);
+    wipe_EndScreen();
 
     wipestart = I_GetTime () - 1;
 
@@ -387,8 +415,7 @@ void D_Display (void)
         } while (tics <= 0);
         
         wipestart = nowtime;
-        done = wipe_ScreenWipe(wipe_Melt
-                               , 0, 0, SCREENWIDTH, SCREENHEIGHT, tics);
+        done = wipe_ScreenWipe(tics);
         C_Drawer();
         I_UpdateNoBlit ();
         M_Drawer ();                            // menu is drawn even on top of wipes
@@ -403,6 +430,8 @@ void D_Display (void)
 
     if(done)
     {
+        BorderNeedRefresh = true;
+
         if(warped == 1)
         {
             paused = true;

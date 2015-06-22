@@ -302,7 +302,6 @@ static patch_t     *marknums[10];
 static boolean     stopped = true;
 
 boolean            dont_move_backwards = false;
-
 boolean            automapactive = false;
 
 extern boolean     am_rotate;
@@ -1337,17 +1336,46 @@ void AM_drawCrosshair(int color)
 
 }
 
+void AM_Toggle (void)
+{
+    if (gamestate != GS_LEVEL)
+        return;
+
+    if (!automapactive)
+    {
+        AM_Start ();
+
+        if (overlay_trigger)
+            am_overlay = true;
+        else
+            am_overlay = false;
+    }
+    else
+    {
+        if (overlay_trigger && am_overlay)
+            am_overlay = false;
+        else
+            AM_Stop ();
+    }
+}
+
 void AM_Drawer (void)
 {
-    if (!automapactive) return;
+    if (!automapactive)
+        return;
 
-    AM_clearFB(BACKGROUND);
+    if (!am_overlay)
+        AM_clearFB(BACKGROUND);
+
     if (drawgrid)
         AM_drawGrid(GRIDCOLORS);
+
     AM_drawWalls();
     AM_drawPlayers();
+
     if (cheating==2)
         AM_drawThings(THINGCOLORS, THINGRANGE);
+
     AM_drawCrosshair(XHAIRCOLORS);
 
     AM_drawMarks();
@@ -1361,7 +1389,7 @@ void AM_Drawer (void)
         M_WriteText(0, 160, DEH_String("LEVEL 33: BETRAY"));
 }
 
-void DrawWorldTimer(void)
+void AM_DrawWorldTimer(void)
 {
     int days;
     int hours;

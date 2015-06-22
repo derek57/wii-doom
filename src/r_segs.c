@@ -597,6 +597,9 @@ R_StoreWallRange
     // mark the segment as visible for auto map
     linedef->flags |= ML_MAPPED;
     
+    if (automapactive && !am_overlay)
+        return;
+
     // calculate rw_distance for scale calculation
     rw_normalangle = curline->angle + ANG90;
     offsetangle = abs(rw_normalangle-rw_angle1);

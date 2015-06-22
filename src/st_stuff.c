@@ -1461,7 +1461,7 @@ void ST_Drawer (boolean fullscreen, boolean refresh)
     ST_doPaletteStuff();
 
     // If just after ST_Start(), refresh all
-    if (st_firsttime || beta_style)
+    if (st_firsttime || beta_style || (scaledviewheight == SCREENHEIGHT && viewactive))
         ST_doRefresh();
     // Otherwise, update as little as possible
     else if(!beta_style)

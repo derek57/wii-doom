@@ -581,26 +581,13 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
 
                 if(joybuttons[joybmap])
                 {
-                    if (!automapactive)
+                    if(!menuactive)
                     {
-                        if(!menuactive)
+                        if(!consoleactive)
                         {
-                            if(!consoleactive)
+                            if(usergame)
                             {
-                                if(usergame)
-                                    AM_Start ();
-                            }
-                        }
-                    }
-                    else
-                    {
-                        if(!menuactive)
-                        {
-                            AM_Stop ();
-                            if(beta_style)
-                            {
-                                ST_doRefresh();
-                                R_SetViewSize (screenblocks, detailLevel);
+                                AM_Toggle();
                             }
                         }
                     }

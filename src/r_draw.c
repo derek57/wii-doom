@@ -710,6 +710,9 @@ void R_InitTranslationTables (void)
 {
     int                i;
         
+    // villsa [STRIFE] 09/26/10: load table through this function instead
+    V_LoadXlaTable();
+
     translationtables = Z_Malloc (256*3, PU_STATIC, 0);
     
     // translate just the 16 green colors

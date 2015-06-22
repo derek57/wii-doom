@@ -38,6 +38,7 @@ char            *gamedescription;
 
 // Set if homebrew PWAD stuff has been added.
 boolean         modifiedgame;
+boolean         am_overlay = false;
 
 boolean         d_recoil = false;
 boolean         d_maxgore = false;
@@ -65,6 +66,7 @@ boolean         autodetect_hom = false;
 boolean         d_fallingdamage = false;
 boolean         d_infiniteammo = false;
 boolean         not_monsters = false;
+boolean         overlay_trigger = false;
 
 int             d_colblood = 0;
 int             d_colblood2 = 0;

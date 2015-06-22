@@ -297,6 +297,8 @@ extern  int             rndindex;
 
 extern  ticcmd_t        *netcmds;
 
+extern  boolean         am_overlay;
+
 extern  boolean         d_recoil;
 extern  boolean         start_respawnparm;
 extern  boolean         start_fastparm;
@@ -323,6 +325,7 @@ extern  boolean         autodetect_hom;
 extern  boolean         d_fallingdamage;
 extern  boolean         d_infiniteammo;
 extern  boolean         not_monsters;
+extern  boolean         overlay_trigger;
 
 extern  int             d_colblood;
 extern  int             d_colblood2;

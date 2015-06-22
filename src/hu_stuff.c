@@ -26,6 +26,7 @@
 
 #include <ctype.h>
 
+#include "am_map.h"
 #include "c_io.h"
 #include "deh_str.h"
 #include "doomdef.h"
@@ -109,6 +110,7 @@ extern int              showMessages;
 extern int              crosshair;
 extern int              show_stats;
 extern int              screenSize;
+extern int              timer_info;
 
 //extern boolean          game_startup;
 
@@ -463,10 +465,41 @@ static void HU_DemoProgressBar (void)
     V_DrawHorizLine(i - 1, SCREENHEIGHT - 2, 1, 4); // white end
 }
 
-void HU_Drawer(void)
+void HU_DrawStats(void)
 {
     const char *t;
 
+    strcpy(hud_monsecstr,"");
+    t = hud_monsecstr;
+
+    // clear the internal widget text buffer
+    HUlib_clearTextLine(&w_monsec);
+
+    //jff 3/26/98 use ESC not '\' for paths
+    // build the init string with fixed colors
+    sprintf
+    (
+    hud_monsecstr,
+    " \x1b\x3 KILLS: %d/%d \x1b\x3 ITEMS: %d/%d \x1b\x3 SECRETS: %d/%d",
+    plr->killcount,totalkills,
+    plr->itemcount,totalitems,
+    plr->secretcount,totalsecret
+    );
+
+    // transfer the init string to the widget
+    t = hud_monsecstr;
+
+    //jff 2/17/98 initialize kills/items/secret widget
+    while (*t)
+        HUlib_addCharToTextLine(&w_monsec, *(t++));
+
+    // display the kills/items/secrets each frame, if optioned
+    HUlib_drawTextLine(&w_monsec, false);
+}
+
+
+void HU_Drawer(void)
+{
     if(!automapactive && !demoplayback && crosshair == 1)
     {
         if(screenSize < 8)
@@ -476,7 +509,8 @@ void HU_Drawer(void)
     }
 
     // translucent messages for translucent HUD
-    if (d_translucency && screenblocks > TRANSLUCENT_HUD && !automapactive)
+    if  (d_translucency && screenblocks > TRANSLUCENT_HUD &&
+            (!automapactive || (automapactive && am_overlay)))
         dp_translucent = true;
 
     V_ClearDPTranslation();
@@ -500,34 +534,10 @@ void HU_Drawer(void)
 
         // display the hud kills/items/secret display if optioned
         if (show_stats == 1)
-        {
-            strcpy(hud_monsecstr,"");
-            t = hud_monsecstr;
+            HU_DrawStats();
 
-            // clear the internal widget text buffer
-            HUlib_clearTextLine(&w_monsec);
-
-            //jff 3/26/98 use ESC not '\' for paths
-            // build the init string with fixed colors
-            sprintf
-            (
-            hud_monsecstr,
-            " \x1b\x3 KILLS: %d/%d \x1b\x3 ITEMS: %d/%d \x1b\x3 SECRETS: %d/%d",
-            plr->killcount,totalkills,
-            plr->itemcount,totalitems,
-            plr->secretcount,totalsecret
-            );
-
-            // transfer the init string to the widget
-            t = hud_monsecstr;
-
-            //jff 2/17/98 initialize kills/items/secret widget
-            while (*t)
-                HUlib_addCharToTextLine(&w_monsec, *(t++));
-
-            // display the kills/items/secrets each frame, if optioned
-            HUlib_drawTextLine(&w_monsec, false);
-        }
+        if (timer_info == 1)
+            AM_DrawWorldTimer();
     }
     V_ClearDPTranslation();
 

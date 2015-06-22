@@ -58,7 +58,8 @@ void AM_Stop (void);
 
 void AM_Start (void);
 
-void DrawWorldTimer(void);
+void AM_DrawWorldTimer(void);
 
+void AM_Toggle (void);
 
 #endif

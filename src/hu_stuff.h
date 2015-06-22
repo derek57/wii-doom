@@ -69,5 +69,7 @@ extern char *chat_macros[10];
 
 void HU_NewLevel();
 
+void HU_DrawStats(void);
+
 #endif
 

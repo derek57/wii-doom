@@ -43,6 +43,8 @@ extern int drawgrid;
 extern int followplayer;
 extern int showMessages;
 extern int mouseSensitivity;
+extern int wipe_type;
+extern int timer_info;
 
 // Bind all of the common controls used by Doom and all other games.
 
@@ -171,6 +173,9 @@ void M_BindBaseControls(void)
     M_BindVariable("falling_damage",         &d_fallingdamage);
     M_BindVariable("infinite_ammo",          &d_infiniteammo);
     M_BindVariable("no_monsters",            &not_monsters);
+    M_BindVariable("screenwipe_type",        &wipe_type);
+    M_BindVariable("automap_overlay",        &overlay_trigger);
+    M_BindVariable("show_timer",             &timer_info);
     M_BindVariable("key_shoot",              &joy_r);
     M_BindVariable("key_open",               &joy_l);
     M_BindVariable("key_menu",               &joy_minus);
