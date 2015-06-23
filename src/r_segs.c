@@ -156,7 +156,8 @@ void R_FixWiggle (sector_t *sector)
 {
     static int  lastheight = 0;
 
-    int         height = (sector->interpceilingheight - sector->interpfloorheight) >> FRACBITS;
+    // disallow negative heights, force cache initialization
+    int         height = MAX(1, (sector->interpceilingheight - sector->interpfloorheight) >> FRACBITS);
 
     // disallow negative heights. using 1 forces cache initialization
     if (height < 1)
@@ -200,7 +201,8 @@ R_RenderMaskedSegRange
     column_t*       col;
     int             lightnum;
     int             texnum;
-    
+    fixed_t         texheight;
+
     // Calculate light table.
     // Use different light tables
     //   for horizontal / vertical / diagonal. Diagonal?
@@ -209,6 +211,7 @@ R_RenderMaskedSegRange
     frontsector = curline->frontsector;
     backsector = curline->backsector;
     texnum = texturetranslation[curline->sidedef->midtexture];
+    texheight = textureheight[texnum];
         
     lightnum = (frontsector->lightlevel >> LIGHTSEGSHIFT)+extralight;
 
@@ -233,19 +236,12 @@ R_RenderMaskedSegRange
     
     // find positioning
     if (curline->linedef->flags & ML_DONTPEGBOTTOM)
-    {
-        dc_texturemid = frontsector->interpfloorheight > backsector->interpfloorheight
-            ? frontsector->interpfloorheight : backsector->interpfloorheight;
-        dc_texturemid = dc_texturemid + textureheight[texnum] - viewz;
-    }
+        dc_texturemid = MAX(frontsector->interpfloorheight, backsector->interpfloorheight)
+            + texheight - viewz + curline->sidedef->rowoffset;
     else
-    {
-        dc_texturemid =frontsector->interpceilingheight<backsector->interpceilingheight
-            ? frontsector->interpceilingheight : backsector->interpceilingheight;
-        dc_texturemid = dc_texturemid - viewz;
-    }
-    dc_texturemid += curline->sidedef->rowoffset;
-                        
+        dc_texturemid = MIN(frontsector->interpceilingheight, backsector->interpceilingheight)
+            - viewz + curline->sidedef->rowoffset;
+
     if (fixedcolormap)
         dc_colormap = fixedcolormap;
     
@@ -280,7 +276,7 @@ R_RenderMaskedSegRange
             int64_t t = ((int64_t) centeryfrac << FRACBITS) -
                          (int64_t) dc_texturemid * spryscale;
 
-            if (t + (int64_t) textureheight[texnum] * spryscale < 0 ||
+            if (t + (int64_t)texheight * spryscale < 0 ||
                 t > (int64_t) SCREENHEIGHT << FRACBITS*2)
                     continue; // skip if the texture is out of screen's range
 
@@ -661,7 +657,8 @@ R_StoreWallRange
     worldbottom = frontsector->interpfloorheight - viewz;
         
     // [BH] animate liquid sectors
-    if (frontsector->animate != INT_MAX)
+    if (frontsector->animate != INT_MAX && (frontsector->heightsec == -1
+        || viewz > sectors[frontsector->heightsec].interpfloorheight))
         worldbottom += frontsector->animate + 2 * FRACUNIT;
 
     midtexture = toptexture = bottomtexture = maskedtexture = 0;
@@ -750,7 +747,9 @@ R_StoreWallRange
                 
         // [BH] animate liquid sectors
         if (backsector->animate != INT_MAX
-                && backsector->interpfloorheight > frontsector->interpfloorheight)
+            && backsector->interpfloorheight > frontsector->interpfloorheight
+            && (backsector->heightsec == -1
+            || viewz > sectors[backsector->heightsec].interpfloorheight))
             worldlow += backsector->animate + 2 * FRACUNIT;
 
         // hack to allow height changes in outdoor areas

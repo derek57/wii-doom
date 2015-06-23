@@ -62,6 +62,7 @@ typedef struct
 } maskdraw_t;
 
 
+boolean                clip_this;
 
 char*                  spritename;
 
@@ -107,6 +108,9 @@ fixed_t                pspriteiscale;
 fixed_t                spryscale;
 
 static lighttable_t    **spritelights;         // killough 1/25/98 made static
+
+extern boolean         realframe;
+extern boolean         skippsprinterp;
 
 
 //
@@ -421,7 +425,6 @@ R_DrawVisSprite
     int                texturecolumn;
     fixed_t            frac;
     patch_t*           patch;
-    fixed_t            sprbotscreen;        
     fixed_t            baseclip;
         
     patch = W_CacheLumpNum (vis->patch+firstspritelump, PU_CACHE);
@@ -468,18 +471,11 @@ R_DrawVisSprite
         sprtopscreen += (viewheight / 2 - centery) << FRACBITS;
     }
 
-    if (vis->footclip && !vis->psprite && d_footclip)
-    {
-        sprbotscreen = sprtopscreen + FixedMul(SHORT(patch->height) << FRACBITS, // WII FIX
-                                               spryscale);
-
-        baseclip = (sprbotscreen - FixedMul(vis->footclip << FRACBITS,
-                                            spryscale)) >> FRACBITS;
-    }
+    if (vis->footclip)
+        baseclip = ((int)sprtopscreen + FixedMul(SHORT(patch->height) << FRACBITS, spryscale)
+            - FixedMul(vis->footclip, spryscale)) >> FRACBITS;
     else
-    {
         baseclip = -1;
-    }
 
     for (dc_x=vis->x1 ; dc_x<=vis->x2 ; dc_x++, frac += vis->xiscale)
     {
@@ -511,6 +507,7 @@ void R_ProjectSprite (mobj_t* thing)
     
     fixed_t            gxt;
     fixed_t            gyt;
+    fixed_t            gzt;
     
     fixed_t            tx;
     fixed_t            tz;
@@ -539,6 +536,10 @@ void R_ProjectSprite (mobj_t* thing)
     fixed_t            interpz;
     fixed_t            interpangle;
 
+    int                heightsec;
+
+    sector_t           *sector = thing->subsector->sector;
+
     // Interpolate between current and last position,
     // if prudent.
     if (d_uncappedframerate &&
@@ -546,7 +547,7 @@ void R_ProjectSprite (mobj_t* thing)
         // that would necessitate turning it off for a tic.
         thing->interp == true &&
         // Don't interpolate during a paused state.
-        !paused && !menuactive)
+        !paused && !menuactive && !consoleactive)
     {
         interpx = thing->oldx + FixedMul(thing->x - thing->oldx, fractionaltic);
         interpy = thing->oldy + FixedMul(thing->y - thing->oldy, fractionaltic);
@@ -628,8 +629,37 @@ void R_ProjectSprite (mobj_t* thing)
     if (x2 < 0)
         return;
     
+    gzt = interpz + spritetopoffset[lump];
+
+    if (interpz > viewz + FixedDiv(viewheight << FRACBITS, xscale)
+        || gzt < viewz - FixedDiv((viewheight << FRACBITS) - viewheight, xscale))
+        return;
+
+    // killough 3/27/98: exclude things totally separated
+    // from the viewer, by either water or fake ceilings
+    // killough 4/11/98: improve sprite clipping for underwater/fake ceilings
+    heightsec = sector->heightsec;
+
+    if (heightsec != -1)   // only clip things which are in special sectors
+    {
+        int     phs = viewplayer->mo->subsector->sector->heightsec;
+
+        if (phs != -1 && viewz < sectors[phs].floor_height ?
+            thing->z >= sectors[heightsec].floor_height :
+            gzt < sectors[heightsec].floor_height)
+            return;
+        if (phs != -1 && viewz > sectors[phs].ceiling_height ?
+            gzt < sectors[heightsec].ceiling_height &&
+            viewz >= sectors[heightsec].ceiling_height :
+            thing->z >= sectors[heightsec].ceiling_height)
+            return;
+    }
+
     // store information in a vissprite
     vis = R_NewVisSprite ();
+
+    // killough 3/27/98: save sector for special clipping later
+    vis->heightsec = heightsec;
 
     // no color translation
     vis->translation = NULL;
@@ -642,22 +672,40 @@ void R_ProjectSprite (mobj_t* thing)
     vis->gx = interpx;
     vis->gy = interpy;
     vis->gz = interpz;
-    vis->gzt = interpz + spritetopoffset[lump];
+    vis->gzt = gzt;
 
     // foot clipping
-    if ((thing->flags2 & MF2_FEETARECLIPPED) && d_footclip &&
-            interpz <= thing->subsector->sector->interpfloorheight + FRACUNIT)
+    if ((thing->flags2 & MF2_FEETARECLIPPED) && interpz <= sector->interpfloorheight + FRACUNIT
+        && heightsec == -1 && d_footclip)
     {
-        fixed_t clipfeet = (spriteheight[lump] >> FRACBITS) / 4;
+        int clipheight;
+
+        if ((P_GetThingFloorType(thing) > 68  && P_GetThingFloorType(thing) < 73)  ||
+                (P_GetThingFloorType(thing) > 50  && P_GetThingFloorType(thing) < 54)  ||
+                (P_GetThingFloorType(thing) > 135 && P_GetThingFloorType(thing) < 144) ||
+                (P_GetThingFloorType(thing) > 72  && P_GetThingFloorType(thing) < 77)  ||
+                (P_GetThingFloorType(thing) > 88  && P_GetThingFloorType(thing) < 92)  ||
+                (P_GetThingFloorType(thing) > 143 && P_GetThingFloorType(thing) < 148))
+            clipheight = 10;
+        else
+            clipheight = 0;
+
+        fixed_t clipfeet = MIN((spriteheight[lump] >> FRACBITS) / 4,
+                               clipheight) << FRACBITS;
+
+        vis->texturemid = gzt - viewz - clipfeet;
+
+        if ((thing->flags2 & MF2_NOLIQUIDBOB) && sector->animate != INT_MAX)
+            clipfeet += sector->animate;
 
         vis->footclip = clipfeet;
     }
     else
     {
         vis->footclip = 0;
-    }
 
-    vis->texturemid = vis->gzt - viewz - (vis->footclip << FRACBITS);
+        vis->texturemid = gzt - viewz;
+    }
 
     vis->x1 = x1 < 0 ? 0 : x1;
     vis->x2 = x2 >= viewwidth ? viewwidth-1 : x2;        
@@ -901,6 +949,47 @@ void R_DrawPSprite (pspdef_t* psp, psprnum_t psprnum)
                                ( beta_style && player->readyweapon != wp_chaingun)))
         vis->mobjflags |= MF_TRANSLUCENT;
 
+    //e6y: interpolation for weapon bobbing
+    if (d_uncappedframerate)
+    {
+        typedef struct interpolate_s
+        {
+            int x1;
+            int x1_prev;
+            int texturemid;
+            int texturemid_prev;
+            int lump;
+        } psp_interpolate_t;
+
+        static psp_interpolate_t        psp_inter;
+
+        if (realframe)
+        {
+            psp_inter.x1 = psp_inter.x1_prev;
+            psp_inter.texturemid = psp_inter.texturemid_prev;
+        }
+
+        psp_inter.x1_prev = vis->x1;
+        psp_inter.texturemid_prev = vis->texturemid;
+
+        if (lump == psp_inter.lump && !skippsprinterp)
+        {
+            int deltax = vis->x2 - vis->x1;
+
+            vis->x1 = psp_inter.x1 + FixedMul(fractionaltic, vis->x1 - psp_inter.x1);
+            vis->x2 = vis->x1 + deltax;
+            vis->texturemid = psp_inter.texturemid
+                + FixedMul(fractionaltic, vis->texturemid - psp_inter.texturemid);
+        }
+        else
+        {
+            skippsprinterp = false;
+            psp_inter.x1 = vis->x1;
+            psp_inter.texturemid = vis->texturemid;
+            psp_inter.lump = lump;
+        }
+    }
+
     R_DrawVisSprite (vis, vis->x1, vis->x2);
 }
 
@@ -1123,6 +1212,49 @@ void R_DrawSprite (vissprite_t* spr)
                 
     }
     
+        // killough 3/27/98:
+        // Clip the sprite against deep water and/or fake ceilings.
+        // killough 4/9/98: optimize by adding mh
+        // killough 4/11/98: improve sprite clipping for underwater/fake ceilings
+        // killough 11/98: fix disappearing sprites
+        if (spr->heightsec != -1)  // only things in specially marked sectors
+        {
+            fixed_t h, mh;
+            int phs = viewplayer->mo->subsector->sector->heightsec;
+            if ((mh = sectors[spr->heightsec].floor_height) > spr->gz &&
+                (h = centeryfrac - FixedMul(mh -= viewz, spr->scale)) >= 0 &&
+                (h >>= FRACBITS) < viewheight)
+            {
+                if (mh <= 0 || (phs != -1 && viewz > sectors[phs].floor_height))
+                {                          // clip bottom
+                    for (x = spr->x1; x <= spr->x2; x++)
+                        if (clipbot[x] == -2 || h < clipbot[x])
+                            clipbot[x] = h;
+                }
+                else                        // clip top
+                    if (phs != -1 && viewz <= sectors[phs].floor_height) // killough 11/98
+                        for (x = spr->x1; x <= spr->x2; x++)
+                            if (cliptop[x] == -2 || h > cliptop[x])
+                                cliptop[x] = h;
+            }
+
+            if ((mh = sectors[spr->heightsec].ceiling_height) < spr->gzt &&
+                (h = centeryfrac - FixedMul(mh - viewz, spr->scale)) >= 0 &&
+                (h >>= FRACBITS) < viewheight)
+            {
+                if (phs != -1 && viewz >= sectors[phs].ceiling_height)
+                {                         // clip bottom
+                    for (x = spr->x1; x <= spr->x2; x++)
+                        if (clipbot[x] == -2 || h < clipbot[x])
+                            clipbot[x] = h;
+                }
+                else                       // clip top
+                    for (x = spr->x1; x <= spr->x2; x++)
+                        if (cliptop[x] == -2 || h > cliptop[x])
+                            cliptop[x] = h;
+            }
+        }
+
     // all clipping has been performed, so draw the sprite
 
     // check for unclipped columns

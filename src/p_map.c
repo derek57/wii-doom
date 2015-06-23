@@ -668,7 +668,8 @@ boolean P_ThingHeightClip (mobj_t* thing)
     if (thing->ceilingz - thing->floorz < thing->height)
         return false;
                 
-    return true;
+//    return true;
+    return (thing->ceilingz - thing->floorz >= thing->height);
 }
 
 
@@ -1805,23 +1806,54 @@ P_ChangeSector
     return nofit;
 }
 
-//=============================================================================
 //
 // P_FakeZMovement
 //
-//              Fake the zmovement so that we can check if a move is legal
-//=============================================================================
-
-void P_FakeZMovement(mobj_t * mo)
+void P_FakeZMovement(mobj_t *mo)
 {
-//
-// adjust height
-//
+    // adjust height
     mo->z += mo->momz;
-    if (mo->player && mo->flags2 & MF2_FLY && !(mo->z <= mo->floorz)
-        && leveltime & 2)
+
+    if ((mo->flags & MF_FLOAT) && mo->target)
     {
-        mo->z += finesine[(FINEANGLES / 20 * leveltime >> 2) & FINEMASK];
+        // float down towards target if too close
+        if (!(mo->flags & MF_SKULLFLY) && !(mo->flags & MF_INFLOAT))
+        {
+            fixed_t     delta = (mo->target->z + (mo->height >> 1) - mo->z) * 3;
+
+            if (P_AproxDistance(mo->x - mo->target->x, mo->y - mo->target->y) < abs(delta))
+                mo->z += (delta < 0 ? -FLOATSPEED : FLOATSPEED);
+        }
+    }
+
+    // clip movement
+    if (mo->z <= mo->floorz)
+    {
+        // hit the floor
+        if (mo->flags & MF_SKULLFLY)
+            mo->momz = -mo->momz;       // the skull slammed into something
+
+        if (mo->momz < 0)
+            mo->momz = 0;
+        mo->z = mo->floorz;
+    }
+    else if (!(mo->flags & MF_NOGRAVITY))
+    {
+        if (!mo->momz)
+            mo->momz = -GRAVITY;
+        mo->momz -= GRAVITY;
+    }
+
+    if (mo->z + mo->height > mo->ceilingz)
+    {
+        // hit the ceiling
+        if (mo->momz > 0)
+            mo->momz = 0;
+
+        if (mo->flags & MF_SKULLFLY)
+            mo->momz = -mo->momz;       // the skull slammed into something
+
+        mo->z = mo->ceilingz - mo->height;
     }
 }
 

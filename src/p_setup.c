@@ -328,6 +328,10 @@ void P_LoadSectors (int lump)
         ss->interpfloorheight = ss->floor_height;
         ss->oldceilingheight = ss->ceiling_height;
         ss->interpceilingheight = ss->ceiling_height;
+
+        // killough 3/7/98:
+        ss->heightsec = -1;       // sector used to get floor and ceiling height
+
         ss->oldgametic = 0;
     }
         

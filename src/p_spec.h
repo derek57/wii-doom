@@ -59,23 +59,7 @@
 #define MO_TELEPORTMAN          14
 
 
-//extern int       *TerrainTypes;
-
 extern boolean   *isliquid;
-
-
-//
-//      source animation definition
-//
-typedef struct
-{
-    int         istexture;        // if false, it is a flat
-    char        endname[9];
-    char        startname[9];
-    int         speed;
-    boolean     isliquid;
-    int         type;
-} animdef_t;
 
 
 //

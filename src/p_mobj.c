@@ -564,7 +564,6 @@ void P_MobjThinker (mobj_t* mobj)
 {
     int      flags2;
     mobj_t   *onmo;
-    player_t *player = mobj->player;
     sector_t *sector = mobj->subsector->sector;
 
     // Handle interpolation unless we're an active player.
@@ -597,7 +596,7 @@ void P_MobjThinker (mobj_t* mobj)
         mobj->flags2 &= ~MF2_FEETARECLIPPED;
     flags2 = mobj->flags2;
 
-    if ((flags2 & MF2_FEETARECLIPPED) && !player &&
+    if ((flags2 & MF2_FEETARECLIPPED) && !(flags2 & MF2_NOLIQUIDBOB) &&
             mobj->z <= sector->floor_height && !mobj->momz && d_swirl)
         mobj->z += animatedliquiddiffs[leveltime & 127];
     else if (flags2 & MF2_FLOATBOB)
@@ -757,7 +756,8 @@ P_SpawnMobj
         
     P_AddThinker (&mobj->thinker);
 
-    if (!(mobj->flags2 & MF2_NOFOOTCLIP) && isliquid[mobj->subsector->sector->floorpic])
+    if (!(mobj->flags2 & MF2_NOFOOTCLIP) && isliquid[mobj->subsector->sector->floorpic] &&
+            mobj->subsector->sector->heightsec == -1)
         mobj->flags2 |= MF2_FEETARECLIPPED;
 
     return mobj;
@@ -1350,7 +1350,8 @@ P_SpawnMissile
             break;
     }
 
-    if (source->flags2 & MF2_FEETARECLIPPED && d_footclip)
+    if (source->flags2 & MF2_FEETARECLIPPED && d_footclip &&
+            source->subsector->sector->heightsec == -1)
         z -= FOOTCLIPSIZE;
 
     th = P_SpawnMobj (source->x,
@@ -1447,7 +1448,8 @@ P_SpawnPlayerMissile
     z = source->z + 4 * 8 * FRACUNIT +
         ((source->player->lookdir) << FRACBITS) / 173;
         
-    if (source->flags2 & MF2_FEETARECLIPPED && d_footclip)
+    if (source->flags2 & MF2_FEETARECLIPPED && d_footclip &&
+            source->subsector->sector->heightsec == -1)
         z -= FOOTCLIPSIZE;
 
     th = P_SpawnMobj (x,y,z, type);
@@ -1511,10 +1513,9 @@ int P_HitFloor(mobj_t * thing)
 {
     mobj_t *mo;
 
-//    if (thing->floorz != thing->subsector->sector->floor_height)
     if(thing->z > thing->subsector->sector->floor_height)
     {                           // don't splash if landing on the edge above water/lava/etc....
-        return (FLOOR_SOLID);
+        return false;
     }
 
     switch (P_GetThingFloorType(thing))
@@ -1538,7 +1539,7 @@ int P_HitFloor(mobj_t * thing)
                     S_StartSound(mo, sfx_gloop);
             }
 
-            return (FLOOR_WATER);
+            return true;
         case 73:
         case 74:
         case 75:
@@ -1562,7 +1563,7 @@ int P_HitFloor(mobj_t * thing)
                     S_StartSound(mo, sfx_gloop);
             }
 
-            return (FLOOR_LAVA);
+            return true;
         case 51:
         case 52:
         case 53:
@@ -1589,10 +1590,10 @@ int P_HitFloor(mobj_t * thing)
                     S_StartSound(mo, sfx_gloop);
             }
 
-            return (FLOOR_SLUDGE);
+            return true;
         default:
-            return (FLOOR_SOLID);
+            return false;
     }
-    return (FLOOR_SOLID);
+    return false;
 }
 

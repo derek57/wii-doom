@@ -33,11 +33,6 @@
 #endif
 
 
-#define FLOOR_SOLID         0
-#define FLOOR_WATER         1
-#define FLOOR_LAVA          2
-#define FLOOR_SLUDGE        3
-
 #define FOOTCLIPSIZE        (10 * FRACUNIT)
 #define FLOATSPEED          (FRACUNIT*4)
 #define MAXHEALTH           100

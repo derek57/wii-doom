@@ -50,11 +50,16 @@
 #define WEAPONBOTTOM            128*FRACUNIT
 #define WEAPONTOP               32*FRACUNIT
 
+
+boolean            skippsprinterp = false;
+
 int                use_vanilla_weapon_change = 1;
 
 extern boolean     aiming_help;
 
 extern int         chaingun_tics;
+
+extern void        P_Thrust (player_t* player, angle_t angle, fixed_t move);
 
 fixed_t            bulletslope;
 
@@ -69,8 +74,6 @@ static const int recoil_values[][2] = {
     {0,   -2}, // wp_chainsaw
     {80,  16}, // wp_supershotgun
 };
-
-extern void P_Thrust (player_t* player, angle_t angle, fixed_t move);
 
 void A_Recoil (player_t* player)
 {
@@ -1140,6 +1143,7 @@ void P_SetupPsprites (player_t* player)
     // spawn the gun
     player->pendingweapon = player->readyweapon;
     P_BringUpWeapon (player);
+    skippsprinterp = true;
 }
 
 

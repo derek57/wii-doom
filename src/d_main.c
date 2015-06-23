@@ -112,6 +112,7 @@ boolean         main_loop_started = false;
 
 boolean         version13 = false;
 boolean         redrawsbar;
+boolean         realframe;
 
 int             startepisode;
 int             startmap;
@@ -211,6 +212,7 @@ void D_Display (void)
     static  char                menushade; // shade menu background
     static  gamestate_t         oldgamestate = -1;
     static  int                 borderdrawcount;
+    static  int                 saved_gametic = -1;
     int                         nowtime;
     int                         tics;
     int                         wipestart;
@@ -221,6 +223,11 @@ void D_Display (void)
 
     redrawsbar = false;
     
+    realframe = (!d_uncappedframerate || gametic > saved_gametic);
+
+    if (realframe)
+        saved_gametic = gametic;
+
     // change the view size if needed
     if (setsizeneeded)
     {

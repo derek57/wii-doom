@@ -80,6 +80,18 @@ typedef struct
     
 } anim_t;
 
+//
+//      source animation definition
+//
+typedef struct
+{
+    int         istexture;        // if false, it is a flat
+    char        endname[9];
+    char        startname[9];
+    int         speed;
+    boolean     isliquid;
+} animdef_t;
+
 static anim_t   *anims;         // new structure w/o limits -- killough
 static size_t   maxanims;
 
@@ -114,35 +126,35 @@ extern int      snd_module;
 //
 animdef_t                animdefs[] =
 {
-    {false,       "NUKAGE3",      "NUKAGE1",      ANIMSPEED, true,  FLOOR_SLUDGE},
-    {false,       "FWATER4",      "FWATER1",      ANIMSPEED, true,  FLOOR_WATER},
-    {false,       "SWATER4",      "SWATER1",      ANIMSPEED, true,  FLOOR_WATER},
-    {false,       "LAVA4",        "LAVA1",        ANIMSPEED, true,  FLOOR_LAVA},
-    {false,       "BLOOD3",       "BLOOD1",       ANIMSPEED, true,  FLOOR_WATER},
+    {false,       "NUKAGE3",      "NUKAGE1",      ANIMSPEED, true},
+    {false,       "FWATER4",      "FWATER1",      ANIMSPEED, true},
+    {false,       "SWATER4",      "SWATER1",      ANIMSPEED, true},
+    {false,       "LAVA4",        "LAVA1",        ANIMSPEED, true},
+    {false,       "BLOOD3",       "BLOOD1",       ANIMSPEED, true},
 
     // DOOM II flat animations.
-    {false,       "SLIME04",      "SLIME01",      ANIMSPEED, true,  FLOOR_SLUDGE},
-    {false,       "SLIME08",      "SLIME05",      ANIMSPEED, true,  FLOOR_SLUDGE},
-    {false,       "SLIME12",      "SLIME09",      ANIMSPEED, true,  FLOOR_SLUDGE},
-    {false,       "RROCK08",      "RROCK05",      ANIMSPEED, false, FLOOR_SOLID},                
+    {false,       "SLIME04",      "SLIME01",      ANIMSPEED, true},
+    {false,       "SLIME08",      "SLIME05",      ANIMSPEED, true},
+    {false,       "SLIME12",      "SLIME09",      ANIMSPEED, true},
+    {false,       "RROCK08",      "RROCK05",      ANIMSPEED, false},                
 
-    {true,        "BLODGR4",      "BLODGR1",      ANIMSPEED, false, FLOOR_SOLID},
-    {true,        "SLADRIP3",     "SLADRIP1",     ANIMSPEED, false, FLOOR_SOLID},
+    {true,        "BLODGR4",      "BLODGR1",      ANIMSPEED, false},
+    {true,        "SLADRIP3",     "SLADRIP1",     ANIMSPEED, false},
 
-    {true,        "BLODRIP4",     "BLODRIP1",     ANIMSPEED, false, FLOOR_SOLID},
-    {true,        "FIREWALL",     "FIREWALA",     ANIMSPEED, false, FLOOR_SOLID},
-    {true,        "GSTFONT3",     "GSTFONT1",     ANIMSPEED, false, FLOOR_SOLID},
-    {true,        "FIRELAVA",     "FIRELAV3",     ANIMSPEED, false, FLOOR_SOLID},
-    {true,        "FIREMAG3",     "FIREMAG1",     ANIMSPEED, false, FLOOR_SOLID},
-    {true,        "FIREBLU2",     "FIREBLU1",     ANIMSPEED, false, FLOOR_SOLID},
-    {true,        "ROCKRED3",     "ROCKRED1",     ANIMSPEED, false, FLOOR_SOLID},
+    {true,        "BLODRIP4",     "BLODRIP1",     ANIMSPEED, false},
+    {true,        "FIREWALL",     "FIREWALA",     ANIMSPEED, false},
+    {true,        "GSTFONT3",     "GSTFONT1",     ANIMSPEED, false},
+    {true,        "FIRELAVA",     "FIRELAV3",     ANIMSPEED, false},
+    {true,        "FIREMAG3",     "FIREMAG1",     ANIMSPEED, false},
+    {true,        "FIREBLU2",     "FIREBLU1",     ANIMSPEED, false},
+    {true,        "ROCKRED3",     "ROCKRED1",     ANIMSPEED, false},
 
-    {true,        "BFALL4",       "BFALL1",       ANIMSPEED, false, FLOOR_SOLID},
-    {true,        "SFALL4",       "SFALL1",       ANIMSPEED, false, FLOOR_SOLID},
-    {true,        "WFALL4",       "WFALL1",       ANIMSPEED, false, FLOOR_SOLID},
-    {true,        "DBRAIN4",      "DBRAIN1",      ANIMSPEED, false, FLOOR_SOLID},
+    {true,        "BFALL4",       "BFALL1",       ANIMSPEED, false},
+    {true,        "SFALL4",       "SFALL1",       ANIMSPEED, false},
+    {true,        "WFALL4",       "WFALL1",       ANIMSPEED, false},
+    {true,        "DBRAIN4",      "DBRAIN1",      ANIMSPEED, false},
         
-    {-1,          "",             "",                     0, false,           0}
+    {-1,          "",             "",                     0, false}
 };
 
 /*

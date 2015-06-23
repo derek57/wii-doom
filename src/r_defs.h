@@ -168,6 +168,9 @@ typedef        struct
 
     int             animate;
 
+    // killough 3/7/98: support flat heights drawn at another sector's heights
+    int             heightsec;      // other sector, or -1 if no other sector
+
 } sector_t;
 
 
@@ -421,6 +424,9 @@ typedef struct vissprite_s
     boolean        drawn;
 
     byte*          translation;
+
+    // killough 3/27/98: height sector for underwater/fake ceiling support
+    int            heightsec;
 
 } vissprite_t;
 

@@ -2269,7 +2269,7 @@ void A_SpawnFly (mobj_t* mo)
     // telefrag anything in this spot
     P_TeleportMove (newmobj, newmobj->x, newmobj->y);
 
-    if ((mo->z <= mo->floorz) && (P_HitFloor(mo) != FLOOR_SOLID) && d_splash)
+    if ((mo->z <= mo->floorz) && P_HitFloor(mo) && d_splash)
     {                           // Landed in some sort of liquid
         // remove self (i.e., cube).
         P_RemoveMobj (mo);
