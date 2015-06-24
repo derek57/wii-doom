@@ -1743,7 +1743,7 @@ enum
     game2_tics,
     game2_falling,
     game2_ammo,
-    game2_monsters,
+    game2_empty,
     game2_game3,
     game2_end
 } game2_e;
@@ -1763,7 +1763,7 @@ menuitem_t GameMenu2[]=
     {2,"CHAINGUN SPEED",M_ChaingunTics,'g'},
     {2,"FALLING DAMAGE",M_FallingDamage,'f'},
     {2,"INFINITE AMMO",M_InfiniteAmmo,'i'},
-    {2,"NO MONSTERS",M_NoMonsters,'m'},
+    {-1,"",0,'\0'},
     {2,"",M_Game3,'n'}
 };
 
@@ -1783,15 +1783,17 @@ enum
     game3_timer,
     game3_blooda,
     game3_bloodb,
+    game3_monsters,
     game3_end
 } game3_e;
 
 menuitem_t GameMenu3[]=
 {
     {2,"AUTOMAP OVERLAY",M_AutomapOverlay,'n'},
-    {2,"Show Timer",M_Timer,'t'},
+    {2,"Show Timer on map",M_Timer,'t'},
     {2,"Enable Colored Blood",M_ColoredBloodA,'a'},
-    {2,"Fix Monster Blood",M_ColoredBloodB,'b'}
+    {2,"Fix Monster Blood",M_ColoredBloodB,'b'},
+    {2,"NO MONSTERS",M_NoMonsters,'m'}
 };
 
 menu_t  GameDef3 =
@@ -3182,19 +3184,6 @@ void M_DrawGame2(void)
         V_ClearDPTranslation();
     }
 
-    if(not_monsters)
-    {
-        dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef2.x + 208, GameDef2.y + 128, DEH_String("ON"));
-        V_ClearDPTranslation();
-    }
-    else
-    {
-        dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef2.x + 200, GameDef2.y + 128, DEH_String("OFF"));
-        V_ClearDPTranslation();
-    }
-
     if(itemOn == 13)
     {
         char *string = "YOU MUST START A NEW GAME TO TAKE EFFECT.";
@@ -3269,6 +3258,19 @@ void M_DrawGame3(void)
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(GameDef3.x + 200, GameDef3.y + 28, DEH_String("OFF"));
+        V_ClearDPTranslation();
+    }
+
+    if(not_monsters)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(GameDef2.x + 208, GameDef2.y + 38, DEH_String("ON"));
+        V_ClearDPTranslation();
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(GameDef2.x + 200, GameDef2.y + 38, DEH_String("OFF"));
         V_ClearDPTranslation();
     }
 }
