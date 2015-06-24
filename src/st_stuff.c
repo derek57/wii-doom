@@ -674,21 +674,19 @@ void ST_DrawStatus(void)
     patch = (((plyr->readyweapon == wp_fist && plyr->pendingweapon == wp_nochange)
         || plyr->pendingweapon == wp_fist) && plyr->powers[pw_strength] ? berserkpatch : healthpatch);
 
+    if (patch)
+    {
+        if ((plyr->cheats & CF_GODMODE) || invulnerability > 128 || (invulnerability & 8))
+            godhudfunc(health_x, ST_HEALTH_Y - (SHORT(patch->height) - 17), patch, tinttab);
+        else
+            hudfunc(health_x, ST_HEALTH_Y - (SHORT(patch->height) - 17), patch, tinttab);
+        health_x += SHORT(patch->width) + 8;
+    }
+
     if (healthhighlight)
     {
         if (healthhighlight < I_GetTime())
             healthhighlight = 0;
-
-        if (patch)
-        {
-            if ((plyr->cheats & CF_GODMODE) || invulnerability > 128 || (invulnerability & 8))
-                V_DrawYellowStatusPatch(health_x, ST_HEALTH_Y - (SHORT(patch->height) - 17), patch,
-                    tinttab);
-            else
-                V_DrawStatusPatch(health_x, ST_HEALTH_Y - (SHORT(patch->height) - 17), patch,
-                    tinttab);
-            health_x += SHORT(patch->width) + 8;
-        }
 
         DrawStatusNumber(&health_x, ST_HEALTH_Y, health, tinttab, V_DrawStatusPatch);
         if (!emptytallpercent)
@@ -696,15 +694,6 @@ void ST_DrawStatus(void)
     }
     else
     {
-        if (patch)
-        {
-            if ((plyr->cheats & CF_GODMODE) || invulnerability > 128 || (invulnerability & 8))
-                godhudfunc(health_x, ST_HEALTH_Y - (SHORT(patch->height) - 17), patch, tinttab);
-            else
-                hudfunc(health_x, ST_HEALTH_Y - (SHORT(patch->height) - 17), patch, tinttab);
-            health_x += SHORT(patch->width) + 8;
-        }
-
         DrawStatusNumber(&health_x, ST_HEALTH_Y, health, tinttab, hudnumfunc);
         if (!emptytallpercent)
             hudnumfunc(health_x, ST_HEALTH_Y, tallpercent, tinttab);
@@ -743,37 +732,36 @@ void ST_DrawStatus(void)
         if (plyr->readyweapon == wp_supershotgun)
             patch = ammopic[plyr->readyweapon - 1].patch;
 
+        int offset_special = 0;
+
+        int offset_width = ST_AMMO_X + ammopic[ammotype].x;
+        int offset_height = ST_AMMO_Y + ammopic[ammotype].y;
+
+        int half_patch_width = (SHORT(patch->width) / 2);
+        int half_patch_height = (SHORT(patch->height) / 2);
+
+        int ammo_x = offset_width - half_patch_width;
+        int ammo_y = offset_height - half_patch_height;
+
+        if (ammo < 200 && ammo > 99)
+            offset_special = 3;
+
         if (patch)
         {
-            int offset_special = 0;
+            hudfunc(ammo_x, ammo_y, patch, tinttab);
+            ammo_x += offset_width + half_patch_width - (ORIGHEIGHT / 2) + offset_special;
+        }
 
-            int offset_width = ST_AMMO_X + ammopic[ammotype].x;
-            int offset_height = ST_AMMO_Y + ammopic[ammotype].y;
+        if (ammohighlight)
+        {
+            if (ammohighlight < I_GetTime())
+                ammohighlight = 0;
 
-            int half_patch_width = (SHORT(patch->width) / 2);
-            int half_patch_height = (SHORT(patch->height) / 2);
-
-            int ammo_x = offset_width - half_patch_width;
-            int ammo_y = offset_height - half_patch_height;
-
-            if (ammo < 200 && ammo > 99)
-                offset_special = 3;
-
-            if (ammohighlight)
-            {
-                if (ammohighlight < I_GetTime())
-                    ammohighlight = 0;
-
-                V_DrawStatusPatch(ammo_x, ammo_y, patch, tinttab);
-                ammo_x += offset_width + half_patch_width - (ORIGHEIGHT / 2) + offset_special;
-                DrawStatusNumber(&ammo_x, ST_AMMO_Y, ammo, tinttab, V_DrawStatusPatch);
-            }
-            else
-            {
-                hudfunc(ammo_x, ammo_y, patch, tinttab);
-                ammo_x += offset_width + half_patch_width - (ORIGHEIGHT / 2) + offset_special;
-                DrawStatusNumber(&ammo_x, ST_AMMO_Y, ammo, tinttab, hudnumfunc);
-            }
+            DrawStatusNumber(&ammo_x, ST_AMMO_Y, ammo, tinttab, V_DrawStatusPatch);
+        }
+        else
+        {
+            DrawStatusNumber(&ammo_x, ST_AMMO_Y, ammo, tinttab, hudnumfunc);
         }
 
         if (ammo <= ST_AMMO_MIN && !gamepaused)
@@ -792,8 +780,10 @@ void ST_DrawStatus(void)
     }
 
     while (i < NUMCARDS)
+    {
         if (plyr->cards[i++] > 0)
             key++;
+    }
 
     if (key || plyr->neededcardflash)
     {
@@ -856,18 +846,18 @@ void ST_DrawStatus(void)
         patch_t     *patch = (plyr->armortype == 1 ? greenarmorpatch : bluearmorpatch);
         int         armor_x = ST_ARMOR_X;
 
+        if (patch)
+        {
+            armor_x -= SHORT(patch->width);
+            hudfunc(armor_x, ST_ARMOR_Y - (SHORT(patch->height) - 16), patch, tinttab66);
+            armor_x -= 7;
+        }
+
         if (armorhighlight)
         {
             if (armorhighlight < I_GetTime())
                 armorhighlight = 0;
 
-            if (patch)
-            {
-                armor_x -= SHORT(patch->width);
-                V_DrawStatusPatch(armor_x, ST_ARMOR_Y - (SHORT(patch->height) - 16), patch,
-                    tinttab66);
-                armor_x -= 7;
-            }
             if (emptytallpercent)
             {
                 armor_x -= StatusNumberWidth(armor);
@@ -883,12 +873,6 @@ void ST_DrawStatus(void)
         }
         else
         {
-            if (patch)
-            {
-                armor_x -= SHORT(patch->width);
-                hudfunc(armor_x, ST_ARMOR_Y - (SHORT(patch->height) - 16), patch, tinttab66);
-                armor_x -= 7;
-            }
             if (emptytallpercent)
             {
                 armor_x -= StatusNumberWidth(armor);
