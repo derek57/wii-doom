@@ -322,12 +322,15 @@ void D_Display (void)
         R_FillBackScreen ();    // draw the pattern into the back screen
     }
 
-    if (gamestate == GS_LEVEL && usergame && !automapactive)
+    if (gamestate == GS_LEVEL && usergame)
     {
         if (hud && screenSize == 8)
-            ST_DrawStatus();
+        {
+            if((am_overlay && automapactive) || !automapactive)
+                ST_DrawStatus();
+        }
 
-        if (!menuactive && devparm && sound_info)
+        if (!menuactive && devparm && sound_info && !automapactive)
             ST_DrawSoundInfo();
     }
 

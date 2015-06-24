@@ -541,7 +541,7 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
 
             if(joybuttons[joybmenu])
             {
-                if (!consoleactive)
+                if ((consoleheight == 0 || consoleheight == CONSOLEHEIGHT) && !consoleactive)
                 {
                     if (!menuactive)
                     {
@@ -1077,7 +1077,8 @@ void G_DoLoadLevel (void)
 
     memset (joybuttons, 0, sizeof(joybuttons)); 
 
-//    C_InstaPopup();  // pop up the console
+    if (consoleactive)
+        C_HideConsoleFast();
 } 
 
 void G_DoNewGame (void) 
@@ -1444,7 +1445,7 @@ void G_DoSaveGame (void)
     char *temp_savegame_file;
 
     temp_savegame_file = P_TempSaveGameFile();
-    savegame_file = P_SaveGameFile(savegameslot);
+    savegame_file = (consoleactive ? savename : P_SaveGameFile(savegameslot));
 
     // Open the savegame file for writing.  We write to a temporary file
     // and then rename it at the end if it was successfully written.
@@ -1487,6 +1488,9 @@ void G_DoSaveGame (void)
     remove(savegame_file);
     rename(temp_savegame_file, savegame_file);
     
+    if (consoleactive)
+        C_Printf(CR_GOLD, " %s saved.", uppercase(savename));
+
     gameaction = ga_nothing; 
     M_StringCopy(savedescription, "", sizeof(savedescription));
 
@@ -1892,8 +1896,10 @@ void G_DoLoadGame (void)
 void
 G_SaveGame
 ( int   slot,
-  char* description ) 
+  char* description,
+  char* name ) 
 { 
+    M_StringCopy(savename, (consoleactive ? name : ""), sizeof(savename));
     savegameslot = slot; 
     M_StringCopy(savedescription, description, sizeof(savedescription));
     sendsave = true; 

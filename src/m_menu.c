@@ -2094,7 +2094,7 @@ void M_DrawSave(void)
 //
 void M_DoSave(int slot)
 {
-    G_SaveGame (slot,savegamestrings[slot]);
+    G_SaveGame(slot, savegamestrings[slot], "");
     M_ClearMenus ();
 }
 
