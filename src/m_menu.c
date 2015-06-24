@@ -1773,7 +1773,7 @@ menu_t  GameDef2 =
     &GameDef,
     GameMenu2,
     M_DrawGame2,
-    48,22,
+    40,22,
     0
 };
 
@@ -3006,187 +3006,187 @@ void M_DrawGame2(void)
     if(autoaim)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef2.x + 208, GameDef2.y - 2, DEH_String("ON"));
+        M_WriteText(GameDef2.x + 216, GameDef2.y - 2, DEH_String("ON"));
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef2.x + 200, GameDef2.y - 2, DEH_String("OFF"));
+        M_WriteText(GameDef2.x + 208, GameDef2.y - 2, DEH_String("OFF"));
         V_ClearDPTranslation();
     }
 
     if(d_maxgore)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef2.x + 208, GameDef2.y + 8, DEH_String("ON"));
+        M_WriteText(GameDef2.x + 216, GameDef2.y + 8, DEH_String("ON"));
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef2.x + 200, GameDef2.y + 8, DEH_String("OFF"));
+        M_WriteText(GameDef2.x + 208, GameDef2.y + 8, DEH_String("OFF"));
         V_ClearDPTranslation();
     }
 
     if(d_footstep)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef2.x + 208, GameDef2.y + 18, DEH_String("ON"));
+        M_WriteText(GameDef2.x + 216, GameDef2.y + 18, DEH_String("ON"));
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef2.x + 200, GameDef2.y + 18, DEH_String("OFF"));
+        M_WriteText(GameDef2.x + 208, GameDef2.y + 18, DEH_String("OFF"));
         V_ClearDPTranslation();
     }
 
     if(d_footclip)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef2.x + 208, GameDef2.y + 28, DEH_String("ON"));
+        M_WriteText(GameDef2.x + 216, GameDef2.y + 28, DEH_String("ON"));
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef2.x + 200, GameDef2.y + 28, DEH_String("OFF"));
+        M_WriteText(GameDef2.x + 208, GameDef2.y + 28, DEH_String("OFF"));
         V_ClearDPTranslation();
     }
 
     if(d_splash)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef2.x + 208, GameDef2.y + 38, DEH_String("ON"));
+        M_WriteText(GameDef2.x + 216, GameDef2.y + 38, DEH_String("ON"));
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef2.x + 200, GameDef2.y + 38, DEH_String("OFF"));
+        M_WriteText(GameDef2.x + 208, GameDef2.y + 38, DEH_String("OFF"));
         V_ClearDPTranslation();
     }
 
     if(d_swirl)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef2.x + 208, GameDef2.y + 48, DEH_String("ON"));
+        M_WriteText(GameDef2.x + 216, GameDef2.y + 48, DEH_String("ON"));
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef2.x + 200, GameDef2.y + 48, DEH_String("OFF"));
+        M_WriteText(GameDef2.x + 208, GameDef2.y + 48, DEH_String("OFF"));
         V_ClearDPTranslation();
     }
 
     if(beta_style_mode)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef2.x + 208, GameDef2.y + 58, DEH_String("ON"));
+        M_WriteText(GameDef2.x + 216, GameDef2.y + 58, DEH_String("ON"));
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef2.x + 200, GameDef2.y + 58, DEH_String("OFF"));
+        M_WriteText(GameDef2.x + 208, GameDef2.y + 58, DEH_String("OFF"));
         V_ClearDPTranslation();
     }
 
     if(d_flipcorpses)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef2.x + 208, GameDef2.y + 68, DEH_String("ON"));
+        M_WriteText(GameDef2.x + 216, GameDef2.y + 68, DEH_String("ON"));
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef2.x + 200, GameDef2.y + 68, DEH_String("OFF"));
+        M_WriteText(GameDef2.x + 208, GameDef2.y + 68, DEH_String("OFF"));
         V_ClearDPTranslation();
     }
 
     if(d_secrets)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef2.x + 208, GameDef2.y + 78, DEH_String("ON"));
+        M_WriteText(GameDef2.x + 216, GameDef2.y + 78, DEH_String("ON"));
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef2.x + 200, GameDef2.y + 78, DEH_String("OFF"));
+        M_WriteText(GameDef2.x + 208, GameDef2.y + 78, DEH_String("OFF"));
         V_ClearDPTranslation();
     }
 
     if(smoketrails)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef2.x + 208, GameDef2.y + 88, DEH_String("ON"));
+        M_WriteText(GameDef2.x + 216, GameDef2.y + 88, DEH_String("ON"));
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef2.x + 200, GameDef2.y + 88, DEH_String("OFF"));
+        M_WriteText(GameDef2.x + 208, GameDef2.y + 88, DEH_String("OFF"));
         V_ClearDPTranslation();
     }
 
     if(chaingun_tics == 1)
     {
         dp_translation = crx[CRX_BLUE];
-        M_WriteText(GameDef2.x + 184, GameDef2.y + 98, DEH_String("ULTRA"));
+        M_WriteText(GameDef2.x + 192, GameDef2.y + 98, DEH_String("ULTRA"));
         V_ClearDPTranslation();
     }
     else if(chaingun_tics == 2)
     {
         dp_translation = crx[CRX_RED];
-        M_WriteText(GameDef2.x + 158, GameDef2.y + 98, DEH_String("VERY FAST"));
+        M_WriteText(GameDef2.x + 166, GameDef2.y + 98, DEH_String("VERY FAST"));
         V_ClearDPTranslation();
     }
     else if(chaingun_tics == 3)
     {
         dp_translation = crx[CRX_GOLD];
-        M_WriteText(GameDef2.x + 177, GameDef2.y + 98, DEH_String("FASTER"));
+        M_WriteText(GameDef2.x + 185, GameDef2.y + 98, DEH_String("FASTER"));
         V_ClearDPTranslation();
     }
     else if(chaingun_tics == 4)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef2.x + 175, GameDef2.y + 98, DEH_String("NORMAL"));
+        M_WriteText(GameDef2.x + 183, GameDef2.y + 98, DEH_String("NORMAL"));
         V_ClearDPTranslation();
     }
 
     if(d_fallingdamage)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef2.x + 208, GameDef2.y + 108, DEH_String("ON"));
+        M_WriteText(GameDef2.x + 216, GameDef2.y + 108, DEH_String("ON"));
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef2.x + 200, GameDef2.y + 108, DEH_String("OFF"));
+        M_WriteText(GameDef2.x + 208, GameDef2.y + 108, DEH_String("OFF"));
         V_ClearDPTranslation();
     }
 
     if(d_infiniteammo)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef2.x + 208, GameDef2.y + 118, DEH_String("ON"));
+        M_WriteText(GameDef2.x + 216, GameDef2.y + 118, DEH_String("ON"));
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef2.x + 200, GameDef2.y + 118, DEH_String("OFF"));
+        M_WriteText(GameDef2.x + 208, GameDef2.y + 118, DEH_String("OFF"));
         V_ClearDPTranslation();
     }
 
-    if(itemOn == 13)
+    if(itemOn == 6)
     {
-        char *string = "YOU MUST START A NEW GAME TO TAKE EFFECT.";
+        char *string = "YOU MUST QUIT AND RESTART TO TAKE EFFECT.";
         int x = 160 - M_StringWidth(string) / 2;
         dp_translation = crx[CRX_GOLD];
         M_WriteText(x, GameDef2.y + 138, DEH_String(string));
@@ -3271,6 +3271,15 @@ void M_DrawGame3(void)
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(GameDef2.x + 200, GameDef2.y + 38, DEH_String("OFF"));
+        V_ClearDPTranslation();
+    }
+
+    if(itemOn == 4)
+    {
+        char *string = "YOU MUST START A NEW GAME TO TAKE EFFECT.";
+        int x = 160 - M_StringWidth(string) / 2;
+        dp_translation = crx[CRX_GOLD];
+        M_WriteText(x, GameDef2.y + 138, DEH_String(string));
         V_ClearDPTranslation();
     }
 }
@@ -4792,8 +4801,7 @@ void M_Drawer (void)
     max = currentMenu->numitems;
 
     if (fsize != 28422764 && fsize != 19321722 && fsize != 12361532 &&
-        ((currentMenu == &SoundDef && itemOn > 1 && itemOn < 5) ||
-         (currentMenu == &GameDef2 && itemOn == 6)))
+        currentMenu == &SoundDef && itemOn > 1 && itemOn < 5)
     {
         char *message_string = "YOU MUST QUIT AND RESTART TO TAKE EFFECT.";
         int message_offset = 160 - M_StringWidth(message_string) / 2;
