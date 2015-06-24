@@ -233,7 +233,7 @@ UDPsocket SDLNet_UDP_Open(Uint16 port)
 {
         UDPsocket newsocket;
         struct sockaddr_in address;
-        bool _TRUE = TRUE;
+        boolean _TRUE = true;
 
         newsocket = (UDPsocket)malloc(sizeof(*newsocket));
 
@@ -282,7 +282,7 @@ int SDLNet_UDP_Open(Uint16 port)
 {
         int newsocket;
         struct sockaddr_in address;
-        bool _TRUE = TRUE;
+        boolean _TRUE = TRUE;
 
 // >>> FIX: For Nintendo Wii using devkitPPC / libogc
 // Switching to the equivalent function in the library (and using supported parameters):

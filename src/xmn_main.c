@@ -2,6 +2,7 @@
 
 #include "doomdef.h"
 #include "gui.h"
+#include "m_misc.h"
 #include "video.h"
 #include "xmn_main.h"
 
@@ -34,9 +35,9 @@ void CreateDirs(void)
     char createPWADDir[121];
     char createIWADDir[121];
 
-    strcpy(createWADRoot, WADRoot);
-    strcpy(createPWADDir, PWADPath);
-    strcpy(createIWADDir, IWADPath);
+    M_StringCopy(createWADRoot, WADRoot, sizeof(createWADRoot));
+    M_StringCopy(createPWADDir, PWADPath, sizeof(createPWADDir));
+    M_StringCopy(createIWADDir, IWADPath, sizeof(createIWADDir));
 
     createWADRoot[120] = 0;
     createPWADDir[120] = 0;

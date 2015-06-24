@@ -41,6 +41,7 @@
 #include "i_swap.h"
 #include "i_video.h"
 #include "m_controls.h"
+#include "m_misc.h"
 #include "s_sound.h"
 #include "sounds.h"
 #include "st_stuff.h"
@@ -469,7 +470,7 @@ void HU_DrawStats(void)
 {
     const char *t;
 
-    strcpy(hud_monsecstr,"");
+    M_StringCopy(hud_monsecstr, "", sizeof(hud_monsecstr));
     t = hud_monsecstr;
 
     // clear the internal widget text buffer

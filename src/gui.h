@@ -13,7 +13,7 @@ struct stConsoleCursorLocation stTexteLocation;
 struct stTimer
 {
     unsigned short int intInterval;
-    bool blnRunning;
+    boolean blnRunning;
 };
 
 u8 getTextBoxRow(u8 chRow);

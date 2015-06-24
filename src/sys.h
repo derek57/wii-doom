@@ -4,8 +4,8 @@
 u32 boot2version;
 
 /* Prototypes */
-bool isIOSstub(u8 ios_number);
-bool loadIOS(int ios);
+boolean isIOSstub(u8 ios_number);
+boolean loadIOS(int ios);
 
 void Sys_Init(void);
 void Sys_Reboot(void);

@@ -1488,7 +1488,7 @@ void G_DoSaveGame (void)
     rename(temp_savegame_file, savegame_file);
     
     gameaction = ga_nothing; 
-    strcpy(savedescription, "");
+    M_StringCopy(savedescription, "", sizeof(savedescription));
 
     players[consoleplayer].message = DEH_String(GGSAVED);
 
@@ -1605,7 +1605,7 @@ void G_Ticker (void)
 			break;
 
                     if (!savedescription[0]) 
-                        strcpy (savedescription, "NET GAME"); 
+                        M_StringCopy(savedescription, "NET GAME", sizeof(savedescription));
                     savegameslot =  
                         (players[i].cmd.buttons & BTS_SAVEMASK)>>BTS_SAVESHIFT; 
                     gameaction = ga_savegame; 
@@ -1822,7 +1822,7 @@ void G_WorldDone (void)
 //
 void G_LoadGame (char* name) 
 { 
-    strcpy (savename, name); 
+    M_StringCopy(savename, name, sizeof(savename));
     gameaction = ga_loadgame; 
 } 
 
@@ -1895,7 +1895,7 @@ G_SaveGame
   char* description ) 
 { 
     savegameslot = slot; 
-    strcpy (savedescription, description); 
+    M_StringCopy(savedescription, description, sizeof(savedescription));
     sendsave = true; 
 } 
  
@@ -2174,7 +2174,7 @@ boolean G_CheckDemoStatus(void)
 
     FILE    *test_access;
 
-    strcpy(lbmname,"DEMO00.lmp");
+    M_StringCopy(lbmname, "DEMO00.lmp", sizeof(lbmname));
 
     for (i=1 ; i<=98 ; i++)
     {

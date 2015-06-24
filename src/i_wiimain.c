@@ -1,4 +1,5 @@
 #include <fat.h>
+#include "doomtype.h"
 #include <sdcard/wiisd_io.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -6,10 +7,11 @@
 #include <unistd.h>
 #include <wiiuse/wpad.h>
 
+#include "doomtype.h"
 #include "i_wiimain.h"
 
-bool sd = false;
-bool usb = false;
+boolean sd = false;
+boolean usb = false;
 
 int wii_main()
 {

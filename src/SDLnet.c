@@ -29,6 +29,7 @@
 #endif
 
 #include "c_io.h"
+#include "m_misc.h"
 #include "SDL_net.h"
 #include "SDLnetsys.h"
 
@@ -156,7 +157,7 @@ int  SDLNet_Init(void)
         
         do
         {
-                netinit_error = if_config(ipaddress_text, NULL, NULL, TRUE);
+                netinit_error = if_config(ipaddress_text, NULL, NULL, true);
         } while(netinit_error == -EAGAIN);
 
 // >>> FIX: For Nintendo Wii using devkitPPC / libogc
@@ -175,7 +176,7 @@ int  SDLNet_Init(void)
         //gethostname(buff, MAXHOSTNAMELEN);
         //local = gethostbyname(buff);
         //myAddr = *(int *)local->h_addr_list[0];
-        strcpy(buff, ipaddress_text);
+        M_StringCopy(buff, ipaddress_text, sizeof(buff));
 // <<< FIX
 
         // if the quake hostname isn't set, set it to the machine name
@@ -192,7 +193,7 @@ int  SDLNet_Init(void)
 // Since we can't bind anything to port 0, the following line does not work. Replacing:
         //UDP_GetSocketAddr (net_controlsocket, &addr);
         //strcpy(my_tcpip_address,  UDP_AddrToString (&addr));
-        strcpy(my_tcpip_address, buff);
+        M_StringCopy(my_tcpip_address, buff, sizeof(my_tcpip_address));
 // <<< FIX
         colon = strrchr (my_tcpip_address, ':');
         if (colon)
@@ -289,7 +290,7 @@ const char *SDLNet_ResolveIP(const IPaddress *ip)
 
     struct hostent *hp = NULL;
 
-    strcpy (name, (const char *)&ip->host);
+    M_StringCopy (name, (const char *)&ip->host, sizeof(name));
 
     hp->h_name = name;
         return 0;

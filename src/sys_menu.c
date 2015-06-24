@@ -8,6 +8,7 @@
 #include <wiiuse/wpad.h>
 
 #include "gui.h"
+#include "m_misc.h"
 #include "sys_fat.h"
 #include "sys_nand.h"
 #include "sys_globals.h"
@@ -51,9 +52,9 @@ int               extra_wad_loaded = 0;
 int               load_extra_wad = 0;
 int               load_dehacked = 0;
 
-bool              multiplayer = false;
-bool              multiplayer_flag = false;
-bool              nerve_pwad = false;
+boolean              multiplayer = false;
+boolean              multiplayer_flag = false;
+boolean              nerve_pwad = false;
 
 
 // Local prototypes: wiiNinja
@@ -68,15 +69,14 @@ int MD5_Check(char *final);
 char *PopCurrentDir(s32 *Selected, s32 *Start);
 char *PeekCurrentDir (void);
 
-bool IsListFull (void);
-bool M_StringCopy(char *dest, const char *src, size_t dest_size);
+boolean IsListFull (void);
 
 u32 WaitButtons(void);
 u32 Pad_GetButtons(void);
 u32 Wpad_HeldButtons(void);
 
 
-bool Wpad_TimeButton(void)
+boolean Wpad_TimeButton(void)
 {
     u32 buttons = 1;
     
@@ -224,7 +224,7 @@ s32 __Menu_RetrieveList(char *inPath, fatFile **outbuf, u32 *outlen)
         /* Get entries */
         for (cnt = 0; (entry = readdir(dir));)
         {
-            bool addFlag = false;
+            boolean addFlag = false;
 
             if (entry->d_type==DT_DIR) 
             {
@@ -250,7 +250,7 @@ s32 __Menu_RetrieveList(char *inPath, fatFile **outbuf, u32 *outlen)
                 fatFile *file = &buffer[cnt++];
     
                 /* File name */
-                strcpy(file->filename, entry->d_name);
+                M_StringCopy(file->filename, entry->d_name, sizeof(file->filename));
 
                 /* File stats */
                 file->entry = *entry;
@@ -404,7 +404,7 @@ void Menu_FatDevice(void)
 
 void Menu_WadList(void)
 {
-    bool        md5_check = false;
+    boolean        md5_check = false;
 
     char        buffer[4];
     char        check[MAXPATH];
@@ -594,7 +594,7 @@ void Menu_WadList(void)
             if ((cnt - start) >= ENTRIES_PER_PAGE)
                 break;
 
-            M_StringCopy(str, file->filename, 40); //Only 40 chars to fit the screen
+            M_StringCopy(str, file->filename, sizeof(str)); //Only 40 chars to fit the screen
 
             str[40]=0;
 
@@ -607,7 +607,7 @@ void Menu_WadList(void)
                 // REQUIRED FOR WAD SUPPORT MSG
                 if(cnt == selected && file->entry.d_type != DT_DIR)
                 {
-                    strcpy(path_tmp, tmpPath);
+                    M_StringCopy(path_tmp, tmpPath, sizeof(path_tmp));
                     strcat(path_tmp, file->filename);
                 }
                 printf("%2s%.27s\n", (cnt == selected) ? ">>" : "  ", str);
@@ -1387,7 +1387,7 @@ void Menu_WadList(void)
         }
         else
         {
-            strcpy(check, tmpPath);
+            M_StringCopy(check, tmpPath, sizeof(check));
             strcat(check, tmpFile->filename);
 
             MD5_Check(check);
@@ -1395,8 +1395,8 @@ void Menu_WadList(void)
             if (strncmp(calculated_md5_string,
                         known_md5_string_chex_quest_iwad, 32) == 0)
             {
-                strcpy(target, check);
-                strcpy(stripped_target, tmpFile->filename);
+                M_StringCopy(target, check, sizeof(target));
+                M_StringCopy(stripped_target, tmpFile->filename, sizeof(stripped_target));
 
                 fsize = 12361532;
 
@@ -1406,8 +1406,8 @@ void Menu_WadList(void)
             else if (strncmp(calculated_md5_string,
                         known_md5_string_doom_beta_1_4_iwad, 32) == 0)
             {
-                strcpy(target, check);
-                strcpy(stripped_target, tmpFile->filename);
+                M_StringCopy(target, check, sizeof(target));
+                M_StringCopy(stripped_target, tmpFile->filename, sizeof(stripped_target));
 
                 fsize = 4261144;
 
@@ -1417,8 +1417,8 @@ void Menu_WadList(void)
             else if (strncmp(calculated_md5_string,
                         known_md5_string_doom_beta_1_5_iwad, 32) == 0)
             {
-                strcpy(target, check);
-                strcpy(stripped_target, tmpFile->filename);
+                M_StringCopy(target, check, sizeof(target));
+                M_StringCopy(stripped_target, tmpFile->filename, sizeof(stripped_target));
 
                 fsize = 4271324;
 
@@ -1428,8 +1428,8 @@ void Menu_WadList(void)
             else if (strncmp(calculated_md5_string,
                         known_md5_string_doom_beta_1_6_iwad, 32) == 0)
             {
-                strcpy(target, check);
-                strcpy(stripped_target, tmpFile->filename);
+                M_StringCopy(target, check, sizeof(target));
+                M_StringCopy(stripped_target, tmpFile->filename, sizeof(stripped_target));
 
                 fsize = 4211660;
 
@@ -1439,8 +1439,8 @@ void Menu_WadList(void)
             else if (strncmp(calculated_md5_string,
                         known_md5_string_doom_share_1_0_iwad, 32) == 0)
             {
-                strcpy(target, check);
-                strcpy(stripped_target, tmpFile->filename);
+                M_StringCopy(target, check, sizeof(target));
+                M_StringCopy(stripped_target, tmpFile->filename, sizeof(stripped_target));
 
                 fsize = 4207819;
 
@@ -1450,8 +1450,8 @@ void Menu_WadList(void)
             else if (strncmp(calculated_md5_string,
                         known_md5_string_doom_share_1_1_iwad, 32) == 0)
             {
-                strcpy(target, check);
-                strcpy(stripped_target, tmpFile->filename);
+                M_StringCopy(target, check, sizeof(target));
+                M_StringCopy(stripped_target, tmpFile->filename, sizeof(stripped_target));
 
                 fsize = 4274218;
 
@@ -1461,8 +1461,8 @@ void Menu_WadList(void)
             else if (strncmp(calculated_md5_string,
                         known_md5_string_doom_share_1_2_iwad, 32) == 0)
             {
-                strcpy(target, check);
-                strcpy(stripped_target, tmpFile->filename);
+                M_StringCopy(target, check, sizeof(target));
+                M_StringCopy(stripped_target, tmpFile->filename, sizeof(stripped_target));
 
                 fsize = 4225504;
 
@@ -1472,8 +1472,8 @@ void Menu_WadList(void)
             else if (strncmp(calculated_md5_string,
                         known_md5_string_doom_share_1_25s_iwad, 32) == 0)
             {
-                strcpy(target, check);
-                strcpy(stripped_target, tmpFile->filename);
+                M_StringCopy(target, check, sizeof(target));
+                M_StringCopy(stripped_target, tmpFile->filename, sizeof(stripped_target));
 
                 fsize = 4225460;
 
@@ -1483,8 +1483,8 @@ void Menu_WadList(void)
             else if (strncmp(calculated_md5_string,
                         known_md5_string_doom_share_1_666_iwad, 32) == 0)
             {
-                strcpy(target, check);
-                strcpy(stripped_target, tmpFile->filename);
+                M_StringCopy(target, check, sizeof(target));
+                M_StringCopy(stripped_target, tmpFile->filename, sizeof(stripped_target));
 
                 fsize = 4234124;
 
@@ -1494,8 +1494,8 @@ void Menu_WadList(void)
             else if (strncmp(calculated_md5_string,
                         known_md5_string_doom_share_1_8_iwad, 32) == 0)
             {
-                strcpy(target, check);
-                strcpy(stripped_target, tmpFile->filename);
+                M_StringCopy(target, check, sizeof(target));
+                M_StringCopy(stripped_target, tmpFile->filename, sizeof(stripped_target));
 
                 fsize = 4196020;
 
@@ -1506,8 +1506,8 @@ void Menu_WadList(void)
                         known_md5_string_doom_share_1_9_iwad, 32) == 0)
             {
 /*
-                strcpy(target, check);
-                strcpy(stripped_target, tmpFile->filename);
+                M_StringCopy(target, check, sizeof(target));
+                M_StringCopy(stripped_target, tmpFile->filename, sizeof(stripped_target));
 
                 fsize = 20428208;
 */
@@ -1517,8 +1517,8 @@ void Menu_WadList(void)
             else if (strncmp(calculated_md5_string,
                         known_md5_string_doom_reg_1_1_iwad, 32) == 0)
             {
-                strcpy(target, check);
-                strcpy(stripped_target, tmpFile->filename);
+                M_StringCopy(target, check, sizeof(target));
+                M_StringCopy(stripped_target, tmpFile->filename, sizeof(stripped_target));
 
                 fsize = 10396254;
 
@@ -1528,8 +1528,8 @@ void Menu_WadList(void)
             else if (strncmp(calculated_md5_string,
                         known_md5_string_doom_reg_1_2_iwad, 32) == 0)
             {
-                strcpy(target, check);
-                strcpy(stripped_target, tmpFile->filename);
+                M_StringCopy(target, check, sizeof(target));
+                M_StringCopy(stripped_target, tmpFile->filename, sizeof(stripped_target));
 
                 fsize = 10399316;
 
@@ -1539,8 +1539,8 @@ void Menu_WadList(void)
             else if (strncmp(calculated_md5_string,
                         known_md5_string_doom_reg_1_6_iwad, 32) == 0)
             {
-                strcpy(target, check);
-                strcpy(stripped_target, tmpFile->filename);
+                M_StringCopy(target, check, sizeof(target));
+                M_StringCopy(stripped_target, tmpFile->filename, sizeof(stripped_target));
 
                 fsize = 10401760;
 
@@ -1551,8 +1551,8 @@ void Menu_WadList(void)
                         known_md5_string_doom_reg_1_6b_iwad, 32) == 0)
             {
 /*
-                strcpy(target, check);
-                strcpy(stripped_target, tmpFile->filename);
+                M_StringCopy(target, check, sizeof(target));
+                M_StringCopy(stripped_target, tmpFile->filename, sizeof(stripped_target));
 
                 fsize = 20428208;
 */
@@ -1563,8 +1563,8 @@ void Menu_WadList(void)
                         known_md5_string_doom_reg_1_666_iwad, 32) == 0)
             {
 /*
-                strcpy(target, check);
-                strcpy(stripped_target, tmpFile->filename);
+                M_StringCopy(target, check, sizeof(target));
+                M_StringCopy(stripped_target, tmpFile->filename, sizeof(stripped_target));
 
                 fsize = 20428208;
 */
@@ -1574,8 +1574,8 @@ void Menu_WadList(void)
             else if (strncmp(calculated_md5_string,
                         known_md5_string_doom_reg_1_8_iwad, 32) == 0)
             {
-                strcpy(target, check);
-                strcpy(stripped_target, tmpFile->filename);
+                M_StringCopy(target, check, sizeof(target));
+                M_StringCopy(stripped_target, tmpFile->filename, sizeof(stripped_target));
 
                 fsize = 11159840;
 
@@ -1586,8 +1586,8 @@ void Menu_WadList(void)
                         known_md5_string_doom_reg_1_9_iwad, 32) == 0)
             {
 /*
-                strcpy(target, check);
-                strcpy(stripped_target, tmpFile->filename);
+                M_StringCopy(target, check, sizeof(target));
+                M_StringCopy(stripped_target, tmpFile->filename, sizeof(stripped_target));
 
                 fsize = 20428208;
 */
@@ -1597,8 +1597,8 @@ void Menu_WadList(void)
             else if (strncmp(calculated_md5_string,
                         known_md5_string_doom_reg_1_9ud_iwad, 32) == 0)
             {
-                strcpy(target, check);
-                strcpy(stripped_target, tmpFile->filename);
+                M_StringCopy(target, check, sizeof(target));
+                M_StringCopy(stripped_target, tmpFile->filename, sizeof(stripped_target));
 
                 fsize = 12408292;
 
@@ -1608,8 +1608,8 @@ void Menu_WadList(void)
             else if (strncmp(calculated_md5_string,
                         known_md5_string_doom_bfg_psn_iwad, 32) == 0)
             {
-                strcpy(target, check);
-                strcpy(stripped_target, tmpFile->filename);
+                M_StringCopy(target, check, sizeof(target));
+                M_StringCopy(stripped_target, tmpFile->filename, sizeof(stripped_target));
 
                 fsize = 12474561;
 
@@ -1619,8 +1619,8 @@ void Menu_WadList(void)
             else if (strncmp(calculated_md5_string,
                         known_md5_string_doom_bfg_pc_iwad, 32) == 0)
             {
-                strcpy(target, check);
-                strcpy(stripped_target, tmpFile->filename);
+                M_StringCopy(target, check, sizeof(target));
+                M_StringCopy(stripped_target, tmpFile->filename, sizeof(stripped_target));
 
                 fsize = 12487824;
 
@@ -1630,8 +1630,8 @@ void Menu_WadList(void)
             else if (strncmp(calculated_md5_string,
                         known_md5_string_doom_xbox_iwad, 32) == 0)
             {
-                strcpy(target, check);
-                strcpy(stripped_target, tmpFile->filename);
+                M_StringCopy(target, check, sizeof(target));
+                M_StringCopy(stripped_target, tmpFile->filename, sizeof(stripped_target));
 
                 fsize = 12538385;
 
@@ -1641,8 +1641,8 @@ void Menu_WadList(void)
             else if (strncmp(calculated_md5_string,
                         known_md5_string_doom2_1_666_iwad, 32) == 0)
             {
-                strcpy(target, check);
-                strcpy(stripped_target, tmpFile->filename);
+                M_StringCopy(target, check, sizeof(target));
+                M_StringCopy(stripped_target, tmpFile->filename, sizeof(stripped_target));
 
                 fsize = 14943400;
 
@@ -1652,8 +1652,8 @@ void Menu_WadList(void)
             else if (strncmp(calculated_md5_string,
                         known_md5_string_doom2_1_666g_iwad, 32) == 0)
             {
-                strcpy(target, check);
-                strcpy(stripped_target, tmpFile->filename);
+                M_StringCopy(target, check, sizeof(target));
+                M_StringCopy(stripped_target, tmpFile->filename, sizeof(stripped_target));
 
                 fsize = 14824716;
 
@@ -1663,8 +1663,8 @@ void Menu_WadList(void)
             else if (strncmp(calculated_md5_string,
                         known_md5_string_doom2_1_7_iwad, 32) == 0)
             {
-                strcpy(target, check);
-                strcpy(stripped_target, tmpFile->filename);
+                M_StringCopy(target, check, sizeof(target));
+                M_StringCopy(stripped_target, tmpFile->filename, sizeof(stripped_target));
 
                 fsize = 14612688;
 
@@ -1675,8 +1675,8 @@ void Menu_WadList(void)
                         known_md5_string_doom2_1_7a_iwad, 32) == 0)
             {
 /*
-                strcpy(target, check);
-                strcpy(stripped_target, tmpFile->filename);
+                M_StringCopy(target, check, sizeof(target));
+                M_StringCopy(stripped_target, tmpFile->filename, sizeof(stripped_target));
 
                 fsize = 20428208;
 */
@@ -1687,8 +1687,8 @@ void Menu_WadList(void)
                         known_md5_string_doom2_1_8_iwad, 32) == 0)
             {
 /*
-                strcpy(target, check);
-                strcpy(stripped_target, tmpFile->filename);
+                M_StringCopy(target, check, sizeof(target));
+                M_StringCopy(stripped_target, tmpFile->filename, sizeof(stripped_target));
 
                 fsize = 20428208;
 */
@@ -1698,8 +1698,8 @@ void Menu_WadList(void)
             else if (strncmp(calculated_md5_string,
                         known_md5_string_doom2_1_8f_iwad, 32) == 0)
             {
-                strcpy(target, check);
-                strcpy(stripped_target, tmpFile->filename);
+                M_StringCopy(target, check, sizeof(target));
+                M_StringCopy(stripped_target, tmpFile->filename, sizeof(stripped_target));
 
                 fsize = 14607420;
 
@@ -1709,8 +1709,8 @@ void Menu_WadList(void)
             else if (strncmp(calculated_md5_string,
                         known_md5_string_doom2_1_9_iwad, 32) == 0)
             {
-                strcpy(target, check);
-                strcpy(stripped_target, tmpFile->filename);
+                M_StringCopy(target, check, sizeof(target));
+                M_StringCopy(stripped_target, tmpFile->filename, sizeof(stripped_target));
 
                 fsize = 14604584;
 
@@ -1720,8 +1720,8 @@ void Menu_WadList(void)
             else if (strncmp(calculated_md5_string,
                         known_md5_string_doom2_bfg_xbox360_iwad, 32) == 0)
             {
-                strcpy(target, check);
-                strcpy(stripped_target, tmpFile->filename);
+                M_StringCopy(target, check, sizeof(target));
+                M_StringCopy(stripped_target, tmpFile->filename, sizeof(stripped_target));
 
                 fsize = 14677988;
 
@@ -1731,8 +1731,8 @@ void Menu_WadList(void)
             else if (strncmp(calculated_md5_string,
                         known_md5_string_doom2_bfg_pc_iwad, 32) == 0)
             {
-                strcpy(target, check);
-                strcpy(stripped_target, tmpFile->filename);
+                M_StringCopy(target, check, sizeof(target));
+                M_StringCopy(stripped_target, tmpFile->filename, sizeof(stripped_target));
 
                 fsize = 14691821;
 
@@ -1742,8 +1742,8 @@ void Menu_WadList(void)
             else if (strncmp(calculated_md5_string,
                         known_md5_string_doom2_xbox_iwad, 32) == 0)
             {
-                strcpy(target, check);
-                strcpy(stripped_target, tmpFile->filename);
+                M_StringCopy(target, check, sizeof(target));
+                M_StringCopy(stripped_target, tmpFile->filename, sizeof(stripped_target));
 
                 fsize = 14683458;
 
@@ -1753,8 +1753,8 @@ void Menu_WadList(void)
             else if (strncmp(calculated_md5_string,
                         known_md5_string_final_doom_tnt_old_iwad, 32) == 0)
             {
-                strcpy(target, check);
-                strcpy(stripped_target, tmpFile->filename);
+                M_StringCopy(target, check, sizeof(target));
+                M_StringCopy(stripped_target, tmpFile->filename, sizeof(stripped_target));
 
                 fsize = 18195736;
 
@@ -1764,8 +1764,8 @@ void Menu_WadList(void)
             else if (strncmp(calculated_md5_string,
                         known_md5_string_final_doom_tnt_new_iwad, 32) == 0)
             {
-                strcpy(target, check);
-                strcpy(stripped_target, tmpFile->filename);
+                M_StringCopy(target, check, sizeof(target));
+                M_StringCopy(stripped_target, tmpFile->filename, sizeof(stripped_target));
 
                 fsize = 18654796;
 
@@ -1775,8 +1775,8 @@ void Menu_WadList(void)
             else if (strncmp(calculated_md5_string,
                         known_md5_string_final_doom_plutonia_old_iwad, 32) == 0)
             {
-                strcpy(target, check);
-                strcpy(stripped_target, tmpFile->filename);
+                M_StringCopy(target, check, sizeof(target));
+                M_StringCopy(stripped_target, tmpFile->filename, sizeof(stripped_target));
 
                 fsize = 17420824;
 
@@ -1786,8 +1786,8 @@ void Menu_WadList(void)
             else if (strncmp(calculated_md5_string,
                         known_md5_string_final_doom_plutonia_new_iwad, 32) == 0)
             {
-                strcpy(target, check);
-                strcpy(stripped_target, tmpFile->filename);
+                M_StringCopy(target, check, sizeof(target));
+                M_StringCopy(stripped_target, tmpFile->filename, sizeof(stripped_target));
 
                 fsize = 18240172;
 
@@ -1798,8 +1798,8 @@ void Menu_WadList(void)
                         known_md5_string_freedoom_0_6_4_iwad, 32) == 0)
             {
 /*
-                strcpy(target, check);
-                strcpy(stripped_target, tmpFile->filename);
+                M_StringCopy(target, check, sizeof(target));
+                M_StringCopy(stripped_target, tmpFile->filename, sizeof(stripped_target));
 
                 fsize = 19801320;
 */
@@ -1810,8 +1810,8 @@ void Menu_WadList(void)
                         known_md5_string_freedoom_0_7_rc_1_beta_1_iwad, 32) == 0)
             {
 /*
-                strcpy(target, check);
-                strcpy(stripped_target, tmpFile->filename);
+                M_StringCopy(target, check, sizeof(target));
+                M_StringCopy(stripped_target, tmpFile->filename, sizeof(stripped_target));
 
                 fsize = 27704188;
 */
@@ -1822,8 +1822,8 @@ void Menu_WadList(void)
                         known_md5_string_freedoom_0_7_iwad, 32) == 0)
             {
 /*
-                strcpy(target, check);
-                strcpy(stripped_target, tmpFile->filename);
+                M_StringCopy(target, check, sizeof(target));
+                M_StringCopy(stripped_target, tmpFile->filename, sizeof(stripped_target));
 
                 fsize = 27625596;
 */
@@ -1834,8 +1834,8 @@ void Menu_WadList(void)
                         known_md5_string_freedoom_0_8_beta_1_iwad, 32) == 0)
             {
 /*
-                strcpy(target, check);
-                strcpy(stripped_target, tmpFile->filename);
+                M_StringCopy(target, check, sizeof(target));
+                M_StringCopy(stripped_target, tmpFile->filename, sizeof(stripped_target));
 
                 fsize = 28144744;
 */
@@ -1846,8 +1846,8 @@ void Menu_WadList(void)
                         known_md5_string_freedoom_0_8_iwad, 32) == 0)
             {
 /*
-                strcpy(target, check);
-                strcpy(stripped_target, tmpFile->filename);
+                M_StringCopy(target, check, sizeof(target));
+                M_StringCopy(stripped_target, tmpFile->filename, sizeof(stripped_target));
 
                 fsize = 28592816;
 */
@@ -1858,8 +1858,8 @@ void Menu_WadList(void)
                         known_md5_string_freedoom_0_8_phase_1_iwad, 32) == 0)
             {
 /*
-                strcpy(target, check);
-                strcpy(stripped_target, tmpFile->filename);
+                M_StringCopy(target, check, sizeof(target));
+                M_StringCopy(stripped_target, tmpFile->filename, sizeof(stripped_target));
 
                 fsize = 19362644;
 */
@@ -1869,8 +1869,8 @@ void Menu_WadList(void)
             else if (strncmp(calculated_md5_string,
                         known_md5_string_freedoom_0_8_phase_2_iwad, 32) == 0)
             {
-                strcpy(target, check);
-                strcpy(stripped_target, tmpFile->filename);
+                M_StringCopy(target, check, sizeof(target));
+                M_StringCopy(stripped_target, tmpFile->filename, sizeof(stripped_target));
 
                 fsize = 28422764;
 
@@ -1881,8 +1881,8 @@ void Menu_WadList(void)
                         known_md5_string_hacx_share_1_0_iwad, 32) == 0)
             {
 /*
-                strcpy(target, check);
-                strcpy(stripped_target, tmpFile->filename);
+                M_StringCopy(target, check, sizeof(target));
+                M_StringCopy(stripped_target, tmpFile->filename, sizeof(stripped_target));
 
                 fsize = 9745831;
 */
@@ -1893,8 +1893,8 @@ void Menu_WadList(void)
                         known_md5_string_hacx_reg_1_0_iwad, 32) == 0)
             {
 /*
-                strcpy(target, check);
-                strcpy(stripped_target, tmpFile->filename);
+                M_StringCopy(target, check, sizeof(target));
+                M_StringCopy(stripped_target, tmpFile->filename, sizeof(stripped_target));
 
                 fsize = 21951805;
 */
@@ -1905,8 +1905,8 @@ void Menu_WadList(void)
                         known_md5_string_hacx_reg_1_1_iwad, 32) == 0)
             {
 /*
-                strcpy(target, check);
-                strcpy(stripped_target, tmpFile->filename);
+                M_StringCopy(target, check, sizeof(target));
+                M_StringCopy(stripped_target, tmpFile->filename, sizeof(stripped_target));
 
                 fsize = 21951805;
 */
@@ -1916,8 +1916,8 @@ void Menu_WadList(void)
             else if (strncmp(calculated_md5_string,
                         known_md5_string_hacx_reg_1_2_iwad, 32) == 0)
             {
-                strcpy(target, check);
-                strcpy(stripped_target, tmpFile->filename);
+                M_StringCopy(target, check, sizeof(target));
+                M_StringCopy(stripped_target, tmpFile->filename, sizeof(stripped_target));
 
                 fsize = 19321722;
 
@@ -1929,8 +1929,8 @@ void Menu_WadList(void)
             {
                 load_extra_wad = 1;
 
-                strcpy(extra_wad_1, check);
-                strcpy(stripped_extra_wad_1, tmpFile->filename);
+                M_StringCopy(extra_wad_1, check, sizeof(extra_wad_1));
+                M_StringCopy(stripped_extra_wad_1, tmpFile->filename, sizeof(stripped_extra_wad_1));
 
                 extra_wad_slot_1_loaded = 1;
 
@@ -1942,8 +1942,8 @@ void Menu_WadList(void)
             {
                 load_extra_wad = 1;
 
-                strcpy(extra_wad_1, check);
-                strcpy(stripped_extra_wad_1, tmpFile->filename);
+                M_StringCopy(extra_wad_1, check, sizeof(extra_wad_1));
+                M_StringCopy(stripped_extra_wad_1, tmpFile->filename, sizeof(stripped_extra_wad_1));
 
                 extra_wad_slot_1_loaded = 1;
 
@@ -1969,8 +1969,9 @@ void Menu_WadList(void)
                         {
                             load_extra_wad = 1;
 
-                            strcpy(extra_wad_1, check);
-                            strcpy(stripped_extra_wad_1, tmpFile->filename);
+                            M_StringCopy(extra_wad_1, check, sizeof(extra_wad_1));
+                            M_StringCopy(stripped_extra_wad_1, tmpFile->filename,
+                                    sizeof(stripped_extra_wad_1));
 
                             extra_wad_slot_1_loaded = 1;
 
@@ -1985,8 +1986,9 @@ void Menu_WadList(void)
                             {
                                 load_extra_wad = 1;
 
-                                strcpy(extra_wad_2, check);
-                                strcpy(stripped_extra_wad_2, tmpFile->filename);
+                                M_StringCopy(extra_wad_2, check, sizeof(extra_wad_2));
+                                M_StringCopy(stripped_extra_wad_2, tmpFile->filename,
+                                        sizeof(stripped_extra_wad_2));
 
                                 extra_wad_slot_2_loaded = 1;
 
@@ -2003,8 +2005,9 @@ void Menu_WadList(void)
                             {
                                 load_extra_wad = 1;
 
-                                strcpy(extra_wad_3, check);
-                                strcpy(stripped_extra_wad_3, tmpFile->filename);
+                                M_StringCopy(extra_wad_3, check, sizeof(extra_wad_3));
+                                M_StringCopy(stripped_extra_wad_3, tmpFile->filename,
+                                        sizeof(stripped_extra_wad_3));
 
                                 extra_wad_slot_3_loaded = 1;
 
@@ -2018,8 +2021,9 @@ void Menu_WadList(void)
                     {
                         load_extra_wad = 1;
 
-                        strcpy(extra_wad_1, check);
-                        strcpy(stripped_extra_wad_1, tmpFile->filename);
+                        M_StringCopy(extra_wad_1, check, sizeof(extra_wad_1));
+                        M_StringCopy(stripped_extra_wad_1, tmpFile->filename,
+                                sizeof(stripped_extra_wad_1));
 
                         extra_wad_slot_1_loaded = 1;
 
@@ -2040,8 +2044,9 @@ void Menu_WadList(void)
                         {
                             load_extra_wad = 1;
 
-                            strcpy(extra_wad_2, check);
-                            strcpy(stripped_extra_wad_2, tmpFile->filename);
+                            M_StringCopy(extra_wad_2, check, sizeof(extra_wad_2));
+                            M_StringCopy(stripped_extra_wad_2, tmpFile->filename,
+                                    sizeof(stripped_extra_wad_2));
 
                             extra_wad_slot_2_loaded = 1;
 
@@ -2064,8 +2069,9 @@ void Menu_WadList(void)
                         {
                             load_extra_wad = 1;
 
-                            strcpy(extra_wad_3, check);
-                            strcpy(stripped_extra_wad_3, tmpFile->filename);
+                            M_StringCopy(extra_wad_3, check, sizeof(extra_wad_3));
+                            M_StringCopy(stripped_extra_wad_3, tmpFile->filename,
+                                    sizeof(stripped_extra_wad_3));
 
                             extra_wad_slot_3_loaded = 1;
 
@@ -2082,8 +2088,9 @@ void Menu_WadList(void)
                     {
                         load_dehacked = 1;
 
-                        strcpy(dehacked_file, check);
-                        strcpy(stripped_dehacked_file, tmpFile->filename);
+                        M_StringCopy(dehacked_file, check, sizeof(dehacked_file));
+                        M_StringCopy(stripped_dehacked_file, tmpFile->filename,
+                                sizeof(stripped_dehacked_file));
 
                         break;
                     }
@@ -2123,17 +2130,17 @@ void Menu_WadList(void)
         load_dehacked = 0;
         load_extra_wad = 0;
 
-        strcpy(stripped_dehacked_file, "");
-        strcpy(stripped_extra_wad_1, "");
-        strcpy(stripped_extra_wad_2, "");
-        strcpy(stripped_extra_wad_3, "");
-        strcpy(stripped_target, "");
+        M_StringCopy(stripped_dehacked_file, "", sizeof(stripped_dehacked_file));
+        M_StringCopy(stripped_extra_wad_1, "", sizeof(stripped_extra_wad_1));
+        M_StringCopy(stripped_extra_wad_2, "", sizeof(stripped_extra_wad_2));
+        M_StringCopy(stripped_extra_wad_3, "", sizeof(stripped_extra_wad_3));
+        M_StringCopy(stripped_target, "", sizeof(stripped_target));
 
-        strcpy(dehacked_file, "");
-        strcpy(extra_wad_1, "");
-        strcpy(extra_wad_2, "");
-        strcpy(extra_wad_3, "");
-        strcpy(target, "");
+        M_StringCopy(dehacked_file, "", sizeof(dehacked_file));
+        M_StringCopy(extra_wad_1, "", sizeof(extra_wad_1));
+        M_StringCopy(extra_wad_2, "", sizeof(extra_wad_2));
+        M_StringCopy(extra_wad_3, "", sizeof(extra_wad_3));
+        M_StringCopy(target, "", sizeof(target));
 
         extra_wad_slot_1_loaded = 0;
         extra_wad_slot_2_loaded = 0;
@@ -2185,7 +2192,7 @@ int PushCurrentDir (char *dirStr, s32 Selected, s32 Start)
     // WARNING: Make sure dirStr is no larger than MAX_FILE_PATH_LEN
     if (gDirLevel < MAX_DIR_LEVELS)
     {
-        strcpy (gDirList [gDirLevel], dirStr);
+        M_StringCopy (gDirList [gDirLevel], dirStr, sizeof(gDirList [gDirLevel]));
 
         gSeleted[gDirLevel]=Selected;
 
@@ -2213,7 +2220,7 @@ char *PopCurrentDir(s32 *Selected, s32 *Start)
     return PeekCurrentDir();
 }
 
-bool IsListFull (void)
+boolean IsListFull (void)
 {
     if (gDirLevel < MAX_DIR_LEVELS)
         return (false);

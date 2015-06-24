@@ -767,7 +767,7 @@ static char *GetGameName(char *gamename)
             sprintf(gamename, deh_sub, DOOM_VERSION / 100, DOOM_VERSION % 100);
 
             while (gamename[0] != '\0' && isspace(gamename[0]))
-                strcpy(gamename, gamename+1);
+                M_StringCopy(gamename, gamename+1, sizeof(gamename));
 
             while (gamename[0] != '\0' && isspace(gamename[strlen(gamename)-1]))
                 gamename[strlen(gamename) - 1] = '\0';
@@ -2072,7 +2072,7 @@ void D_DoomMain (void)
 
     if (startloadgame >= 0)
     {
-        strcpy(file, P_SaveGameFile(startloadgame));
+        M_StringCopy(file, P_SaveGameFile(startloadgame), sizeof(file));
         G_LoadGame (file);
     }
         

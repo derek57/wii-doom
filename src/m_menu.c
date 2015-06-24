@@ -1967,12 +1967,12 @@ void M_ReadSaveStrings(void)
 
     for (i = 0;i < load_end;i++)
     {
-        strcpy(name, P_SaveGameFile(i));
+        M_StringCopy(name, P_SaveGameFile(i), sizeof(name));
 
         handle = fopen(name, "rb");
         if (handle == NULL)
         {
-            strcpy(&savegamestrings[i][0], EMPTYSTRING);
+            M_StringCopy(&savegamestrings[i][0], EMPTYSTRING, sizeof(&savegamestrings[i][0]));
             LoadMenu[i].status = 0;
             continue;
         }
@@ -2041,7 +2041,7 @@ void M_LoadSelect(int choice)
 {
     char    name[256];
         
-    strcpy(name, P_SaveGameFile(choice));
+    M_StringCopy(name, P_SaveGameFile(choice), sizeof(name));
 
     G_LoadGame (name);
     M_ClearMenus ();
@@ -2135,7 +2135,7 @@ void M_SaveSelect(int choice)
             sprintf(savegamestrings[choice], "map%2.2d %d/%d/%d %2.2d:%2.2d",
                     gamemap, year, month, day, hour, min);
     }
-    strcpy(saveOldString,savegamestrings[choice]);
+    M_StringCopy(saveOldString,savegamestrings[choice], sizeof(saveOldString));
     if (!strcmp(savegamestrings[choice],EMPTYSTRING))
         savegamestrings[choice][0] = 0;
     saveCharIndex = strlen(savegamestrings[choice]);
@@ -3264,13 +3264,13 @@ void M_DrawGame3(void)
     if(not_monsters)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef2.x + 208, GameDef2.y + 38, DEH_String("ON"));
+        M_WriteText(GameDef3.x + 208, GameDef3.y + 38, DEH_String("ON"));
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef2.x + 200, GameDef2.y + 38, DEH_String("OFF"));
+        M_WriteText(GameDef3.x + 200, GameDef3.y + 38, DEH_String("OFF"));
         V_ClearDPTranslation();
     }
 
@@ -4449,7 +4449,7 @@ boolean M_Responder (event_t* ev)
         {
           case KEY_ESCAPE:
             saveStringEnter = 0;
-            strcpy(&savegamestrings[saveSlot][0],saveOldString);
+            M_StringCopy(&savegamestrings[saveSlot][0],saveOldString, sizeof(&savegamestrings[saveSlot][0]));
             break;
                                 
           case KEY_ENTER:
@@ -4777,7 +4777,7 @@ void M_Drawer (void)
                                 
             if (!foundnewline)
             {
-                strcpy(string, messageString + start);
+                M_StringCopy(string, messageString + start, sizeof(string));
                 start += strlen(string);
             }
 
