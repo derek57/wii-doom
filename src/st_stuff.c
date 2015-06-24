@@ -673,19 +673,22 @@ void ST_DrawStatus(void)
 
     patch = (((plyr->readyweapon == wp_fist && plyr->pendingweapon == wp_nochange)
         || plyr->pendingweapon == wp_fist) && plyr->powers[pw_strength] ? berserkpatch : healthpatch);
-    if (patch)
-    {
-        if ((plyr->cheats & CF_GODMODE) || invulnerability > 128 || (invulnerability & 8))
-            godhudfunc(health_x, ST_HEALTH_Y - (SHORT(patch->height) - 17), patch, tinttab);
-        else
-            hudfunc(health_x, ST_HEALTH_Y - (SHORT(patch->height) - 17), patch, tinttab);
-        health_x += SHORT(patch->width) + 8;
-    }
 
     if (healthhighlight)
     {
         if (healthhighlight < I_GetTime())
             healthhighlight = 0;
+
+        if (patch)
+        {
+            if ((plyr->cheats & CF_GODMODE) || invulnerability > 128 || (invulnerability & 8))
+                V_DrawYellowStatusPatch(health_x, ST_HEALTH_Y - (SHORT(patch->height) - 17), patch,
+                    tinttab);
+            else
+                V_DrawStatusPatch(health_x, ST_HEALTH_Y - (SHORT(patch->height) - 17), patch,
+                    tinttab);
+            health_x += SHORT(patch->width) + 8;
+        }
 
         DrawStatusNumber(&health_x, ST_HEALTH_Y, health, tinttab, V_DrawStatusPatch);
         if (!emptytallpercent)
@@ -693,6 +696,15 @@ void ST_DrawStatus(void)
     }
     else
     {
+        if (patch)
+        {
+            if ((plyr->cheats & CF_GODMODE) || invulnerability > 128 || (invulnerability & 8))
+                godhudfunc(health_x, ST_HEALTH_Y - (SHORT(patch->height) - 17), patch, tinttab);
+            else
+                hudfunc(health_x, ST_HEALTH_Y - (SHORT(patch->height) - 17), patch, tinttab);
+            health_x += SHORT(patch->width) + 8;
+        }
+
         DrawStatusNumber(&health_x, ST_HEALTH_Y, health, tinttab, hudnumfunc);
         if (!emptytallpercent)
             hudnumfunc(health_x, ST_HEALTH_Y, tallpercent, tinttab);
