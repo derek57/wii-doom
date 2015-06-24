@@ -59,9 +59,9 @@ enum
 };
         
 
-void         *(Z_Realloc)(void *ptr, size_t n, int tag, void **user);
-void         Z_Init (void);
+void         *Z_MallocAlign (int reqsize, int tag, void **user, int alignbits);
 void         *Z_Malloc (int size, int tag, void *ptr);
+void         Z_Init (void);
 void         Z_Free (void *ptr);
 void         Z_FreeTags (int lowtag, int hightag);
 void         Z_DumpHeap (int lowtag, int hightag);
@@ -71,8 +71,6 @@ void         Z_ChangeTag2 (void *ptr, int tag, char *file, int line);
 void         Z_ChangeUser(void *ptr, void **user);
 
 int          Z_FreeMemory (void);
-
-unsigned int Z_ZoneSize(void);
 
 
 #endif

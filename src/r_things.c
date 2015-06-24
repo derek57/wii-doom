@@ -36,6 +36,7 @@
 #include "doomstat.h"
 #include "i_swap.h"
 #include "i_system.h"
+#include "p_local.h"
 #include "r_local.h"
 #include "v_trans.h"
 #include "w_wad.h"

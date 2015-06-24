@@ -114,6 +114,7 @@ boolean         version13 = false;
 boolean         redrawsbar;
 boolean         realframe;
 
+int             wipe_type = 0;
 int             startepisode;
 int             startmap;
 int             startloadgame;
@@ -245,7 +246,7 @@ void D_Display (void)
             display_fps = 0;        // ...UPON WIPING SCREEN WITH ENABLED DISPLAY TICKER
 
         wipe = true;
-        wipe_StartScreen();
+	wipe_StartScreen(0, 0, SCREENWIDTH, SCREENHEIGHT);
     }
     else
     {
@@ -408,7 +409,7 @@ void D_Display (void)
     }
     
     // wipe update
-    wipe_EndScreen();
+    wipe_EndScreen(0, 0, SCREENWIDTH, SCREENHEIGHT);
 
     wipestart = I_GetTime () - 1;
 
@@ -422,7 +423,8 @@ void D_Display (void)
         } while (tics <= 0);
         
         wipestart = nowtime;
-        done = wipe_ScreenWipe(tics);
+	done = wipe_ScreenWipe(wipe_type
+			       , 0, 0, SCREENWIDTH, SCREENHEIGHT, tics);
         C_Drawer();
         I_UpdateNoBlit ();
         M_Drawer ();                            // menu is drawn even on top of wipes

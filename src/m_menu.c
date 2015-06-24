@@ -2763,8 +2763,8 @@ void M_DrawScreen(void)
     }
     else if(wipe_type == 1)
     {
-        dp_translation = crx[CRX_RED];
-        M_WriteText(ScreenDef.x + 172, ScreenDef.y + 38, "MELT");
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(ScreenDef.x + 173, ScreenDef.y + 38, "FADE");
         V_ClearDPTranslation();
     }
     else if(wipe_type == 2)
@@ -2775,14 +2775,8 @@ void M_DrawScreen(void)
     }
     else if(wipe_type == 3)
     {
-        dp_translation = crx[CRX_GREEN];
-        M_WriteText(ScreenDef.x + 173, ScreenDef.y + 38, "FADE");
-        V_ClearDPTranslation();
-    }
-    else if(wipe_type == 4)
-    {
-        dp_translation = crx[CRX_GREEN];
-        M_WriteText(ScreenDef.x + 122, ScreenDef.y + 38, "COLORXFORM");
+        dp_translation = crx[CRX_RED];
+        M_WriteText(ScreenDef.x + 172, ScreenDef.y + 38, "MELT");
         V_ClearDPTranslation();
     }
 }
@@ -4108,7 +4102,7 @@ void M_WipeType(int choice)
             wipe_type--;
         break;
       case 1:
-        if (wipe_type < 4) // FIXME: actually there are 4 types (#3 & #4 currently not working)
+        if (wipe_type < 3)
             wipe_type++;
         break;
     }

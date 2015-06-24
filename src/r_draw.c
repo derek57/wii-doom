@@ -55,6 +55,8 @@
 #define MAXWIDTH       1120
 #define MAXHEIGHT      832
 
+#define NUMTRANSTABLES 2     // how many translucency tables are used
+
 
 //
 // All drawing to the view buffer is accomplished in this file.
@@ -75,6 +77,7 @@ byte*               viewimage;
 byte*               ylookup[MAXHEIGHT]; 
 byte*               dc_translation;
 byte*               translationtables;
+byte*               transtables;    // translucency tables
 
 // first pixel in a column (possibly virtual) 
 byte*               dc_source;                
@@ -710,8 +713,14 @@ void R_InitTranslationTables (void)
 {
     int                i;
         
-    // villsa [STRIFE] 09/26/10: load table through this function instead
-    V_LoadXlaTable();
+    //added:11-01-98: load here the transparency lookup tables 'TINTTAB'
+    // NOTE: the TINTTAB resource MUST BE aligned on 64k for the asm optimised
+    //       (in other words, transtables pointer low word is 0)
+    transtables = Z_MallocAlign (NUMTRANSTABLES*0x10000, PU_STATIC, 0, 16);
+
+    // load in translucency tables
+    W_ReadLump( W_GetNumForName("TRANSMED"), transtables );
+    W_ReadLump( W_GetNumForName("TRANSMOR"), transtables+0x10000 );
 
     translationtables = Z_Malloc (256*3, PU_STATIC, 0);
     

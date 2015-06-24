@@ -17,6 +17,8 @@
 //
 
 
+#include <malloc.h>
+
 #include "c_io.h"
 #include "doomtype.h"
 #include "i_system.h"
@@ -513,8 +515,43 @@ int Z_FreeMemory (void)
     return free;
 }
 
-unsigned int Z_ZoneSize(void)
+void* Z_MallocAlign (int reqsize, int tag, void **user, int alignbits)
 {
-    return mainzone->size;
+    memblock_t* newblock;
+
+    // with the memalloc header
+    int         memalloc_size;
+   
+    // choose safe interpretation
+    if( tag == PU_FREE )
+    {
+       tag = PU_LEVEL;
+    }
+
+    // alloc rounded up to next 4 byte alignment
+    reqsize = (reqsize + 3) & ~3;
+
+    // account for size of block header
+    memalloc_size = reqsize + sizeof(memblock_t);
+
+    newblock = malloc(memalloc_size);
+
+    if( newblock == NULL )
+    {
+       I_Error ("Z_Malloc: malloc failed on allocation of %i bytes\n");
+    }
+
+    mainzone->size += memalloc_size;
+
+    newblock->id = ZONEID;
+    newblock->user = user;
+    newblock->size = memalloc_size;
+
+    void* basedata = (byte*)newblock + sizeof(memblock_t);
+
+    if (user)
+        *user = basedata;
+
+    return basedata;
 }
 

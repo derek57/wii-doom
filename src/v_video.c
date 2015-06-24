@@ -871,13 +871,3 @@ void V_GetBlock (int x, int y, int scrn, int width, int height, byte *dest)
     }
 }
 
-//
-// V_LoadXlaTable
-//
-// villsa [STRIFE] Load xla table from XLATAB lump.
-//
-void V_LoadXlaTable(void)
-{
-    xlatab = W_CacheLumpName("XLATAB", PU_STATIC);
-}
-
