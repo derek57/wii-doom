@@ -1015,7 +1015,7 @@ void R_InitData (void)
 int R_FlatNumForName (char* name)
 {
     int         i;
-    char        namet[9];
+//    char        namet[9];
 
     if(beta_style && gamemode != shareware && gamemode != commercial)
     {
@@ -1040,9 +1040,12 @@ int R_FlatNumForName (char* name)
 
     if (i == -1)
     {
+/*
         namet[8] = 0;
         memcpy (namet, name,8);
-        C_Printf(CR_RED, "R_FlatNumForName: %.8s not found", name);
+*/
+        C_Printf(CR_RED, " R_FlatNumForName: %.8s not found (replaced with FLOOR0_1)", name);
+        i = W_CheckNumForName ("FLOOR0_1");
     }
     return i - firstflat;
 }
@@ -1223,7 +1226,8 @@ int R_TextureNumForName (char* name)
 
     if (i==-1)
     {
-        C_Printf(CR_RED, "R_TextureNumForName: %.8s not found", name);
+        C_Printf(CR_RED, " R_TextureNumForName: %.8s not found (replaced with BROWN1)", name);
+        i = R_CheckTextureNumForName ("BROWN1");
     }
     return i;
 }
