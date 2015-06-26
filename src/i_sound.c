@@ -72,6 +72,7 @@ extern music_module_t music_opl_module;
 // For OPL module:
 
 extern int opl_io_port;
+extern int mus_engine;
 
 // For native music module:
 
@@ -156,10 +157,12 @@ static void InitMusicModule(void)
 
             if (music_modules[i]->Init())
             {
-                if(i > 0)
+                if(mus_engine == 1 || mus_engine == 2)
                     C_Printf(CR_GRAY, " Using MIDI playback for music.\n");
-                else
+                else if(mus_engine == 3)
                     C_Printf(CR_GRAY, " Using OGG playback for music.\n");
+                else if(mus_engine == 4)
+                    C_Printf(CR_GRAY, " Using TIMIDITY for music playback.\n");
 
                 music_module = music_modules[i];
                 return;
@@ -182,7 +185,7 @@ void I_InitSound(boolean use_sfx_prefix)
     // the TIMIDITY_CFG environment variable here before SDL_mixer
     // is opened.
 
-    if (/*!nomusic && (snd_musicdevice == SNDDEVICE_GENMIDI ||*/ snd_musicdevice == SNDDEVICE_GUS)//)
+    if (/*!nomusic &&*/ (snd_musicdevice == SNDDEVICE_GENMIDI || snd_musicdevice == SNDDEVICE_GUS))
     {
         I_InitTimidityConfig();
     }

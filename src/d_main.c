@@ -1320,14 +1320,6 @@ void D_DoomMain (void)
     if(!devparm && aiming_help != 0)
         aiming_help = 0;
 
-    if(mus_engine > 2)
-        mus_engine = 3;
-    else if(mus_engine < 2)
-    {
-        mus_engine = 1;
-        opl_type = 0;
-    }
-
     if(mus_engine == 1 || mus_engine == 2)
     {
         snd_musicdevice = SNDDEVICE_SB;
@@ -1337,8 +1329,10 @@ void D_DoomMain (void)
         else
             opl_type = 1;
     }
-    else
+    else if(mus_engine == 3)
         snd_musicdevice = SNDDEVICE_GENMIDI;
+    else if(mus_engine == 4)
+        snd_musicdevice = SNDDEVICE_GUS;
 
     snd_channels = sound_channels;
 

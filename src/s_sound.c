@@ -712,12 +712,12 @@ void S_ChangeMusic(int musicnum, int looping)
         sprintf(namebuf, "d_%s", DEH_String(music->name));
         music->lumpnum = W_GetNumForName(namebuf);
     }
-
+/*
     if(looping)
         C_Printf(CR_GRAY, " S_ChangeMusic: d_%s (loop = yes)\n", music->name);
     else
         C_Printf(CR_GRAY, " S_ChangeMusic: d_%s (loop = no)\n", music->name);
-
+*/
     music->data = W_CacheLumpNum(music->lumpnum, PU_STATIC);
 
     handle = I_RegisterSong(music->data, W_LumpLength(music->lumpnum));
