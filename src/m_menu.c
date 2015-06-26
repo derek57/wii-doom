@@ -1694,7 +1694,6 @@ enum
     game_thrust,
     game_respawn,
     game_fast,
-    game_empty,
     game_game2,
     game_end
 } game_e;
@@ -1714,7 +1713,6 @@ menuitem_t GameMenu[]=
     {2,"PLAYER THRUST",M_PlayerThrust,'p'},
     {2,"RESPAWN MONSTERS",M_RespawnMonsters,'t'},
     {2,"FAST MONSTERS",M_FastMonsters,'d'},
-    {-1,"",0,'\0'},
     {2,"",M_Game2,'n'}
 };
 
@@ -1743,7 +1741,6 @@ enum
     game2_tics,
     game2_falling,
     game2_ammo,
-    game2_empty,
     game2_game3,
     game2_end
 } game2_e;
@@ -1763,7 +1760,6 @@ menuitem_t GameMenu2[]=
     {2,"CHAINGUN SPEED",M_ChaingunTics,'g'},
     {2,"FALLING DAMAGE",M_FallingDamage,'f'},
     {2,"INFINITE AMMO",M_InfiniteAmmo,'i'},
-    {-1,"",0,'\0'},
     {2,"",M_Game3,'n'}
 };
 
@@ -1972,7 +1968,7 @@ void M_ReadSaveStrings(void)
         handle = fopen(name, "rb");
         if (handle == NULL)
         {
-            M_StringCopy(&savegamestrings[i][0], EMPTYSTRING, sizeof(&savegamestrings[i][0]));
+            M_StringCopy(&savegamestrings[i][0], EMPTYSTRING, sizeof(savegamestrings));
             LoadMenu[i].status = 0;
             continue;
         }
@@ -2005,8 +2001,10 @@ void M_DrawLoad(void)
         V_ClearDPTranslation();
     }
 
+    dp_translation = crx[CRX_GOLD];
     M_WriteText(62, 148, "* INDICATES A SAVEGAME THAT WAS");
     M_WriteText(62, 158, "CREATED USING AN OPTIONAL PWAD!");
+    V_ClearDPTranslation();
 }
 
 
@@ -2085,8 +2083,10 @@ void M_DrawSave(void)
         V_ClearDPTranslation();
     }
 
+    dp_translation = crx[CRX_GOLD];
     M_WriteText(62, 148, "* INDICATES A SAVEGAME THAT WAS");
     M_WriteText(62, 158, "CREATED USING AN OPTIONAL PWAD!");
+    V_ClearDPTranslation();
 }
 
 //
@@ -2276,10 +2276,16 @@ void M_DrawSound(void)
         M_WriteText(SoundDef.x + 204, SoundDef.y + 18, "OPL3");
         V_ClearDPTranslation();
     }
-    else
+    else if(mus_engine == 3)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(SoundDef.x + 212, SoundDef.y + 18, "OGG");
+        V_ClearDPTranslation();
+    }
+    else if(mus_engine == 4)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(SoundDef.x + 183, SoundDef.y + 18, "TIMIDITY");
         V_ClearDPTranslation();
     }
 
@@ -2321,14 +2327,6 @@ void M_DrawSound(void)
         M_WriteText(SoundDef.x + 212, SoundDef.y + 48, "OFF");
         V_ClearDPTranslation();
     }
-
-    if(mus_engine < 1)
-    {
-        mus_engine = 1;
-        opl_type = 0;
-    }
-    else if(mus_engine > 3)
-        mus_engine = 3;
 }
 
 void M_Sound(int choice)
@@ -2390,24 +2388,38 @@ void M_MusicType(int choice)
     case 0:
         if(mus_engine > 1)
         {
-            if(mus_engine == 3)
+            if(mus_engine == 4)
+                snd_musicdevice = SNDDEVICE_GUS;
+            else if(mus_engine == 3)
+                snd_musicdevice = SNDDEVICE_GENMIDI;
+            else if(mus_engine < 3)
+            {
+                if(mus_engine == 2)
+                    opl_type = 1;
+                else
+                    opl_type = 0;
+
                 snd_musicdevice = SNDDEVICE_SB;
-            else if(mus_engine == 2)
-                opl_type = 1;
-            else if(mus_engine == 1)
-                opl_type = 0;
+            }
             mus_engine--;
         }
         break;
     case 1:
         if(mus_engine < 4)
         {
-            if(mus_engine == 3)
+            if(mus_engine == 4)
+                snd_musicdevice = SNDDEVICE_GUS;
+            else if(mus_engine == 3)
                 snd_musicdevice = SNDDEVICE_GENMIDI;
-            else if(mus_engine == 2)
-                opl_type = 1;
-            else if(mus_engine == 1)
-                opl_type = 0;
+            else if(mus_engine < 3)
+            {
+                if(mus_engine == 2)
+                    opl_type = 1;
+                else
+                    opl_type = 0;
+
+                snd_musicdevice = SNDDEVICE_SB;
+            }
             mus_engine++;
         }
         break;
@@ -2809,7 +2821,7 @@ void M_DrawGame(void)
         M_WriteText(GameDef.x, GameDef.y + 128, DEH_String("AIMING HELP"));
     }
 
-    if(itemOn == 11 || itemOn == 12)
+    if((itemOn == 11 || itemOn == 12) && whichSkull == 1)
     {
         char *string = "YOU MUST START A NEW GAME TO TAKE EFFECT.";
         int x = 160 - M_StringWidth(string) / 2;
@@ -2820,7 +2832,7 @@ void M_DrawGame(void)
     else
     {
         dp_translation = crx[CRX_GRAY];
-        M_WriteText(GameDef.x, GameDef.y + 138, DEH_String("MORE OPTIONS"));
+        M_WriteText(GameDef.x, GameDef.y + 128, DEH_String("MORE OPTIONS"));
         V_ClearDPTranslation();
     }
 
@@ -3184,7 +3196,7 @@ void M_DrawGame2(void)
         V_ClearDPTranslation();
     }
 
-    if(itemOn == 6)
+    if(itemOn == 6 && whichSkull == 1)
     {
         char *string = "YOU MUST QUIT AND RESTART TO TAKE EFFECT.";
         int x = 160 - M_StringWidth(string) / 2;
@@ -3195,7 +3207,7 @@ void M_DrawGame2(void)
     else
     {
         dp_translation = crx[CRX_GRAY];
-        M_WriteText(GameDef2.x, GameDef2.y + 138, DEH_String("EVEN MORE OPTIONS"));
+        M_WriteText(GameDef2.x, GameDef2.y + 128, DEH_String("EVEN MORE OPTIONS"));
         V_ClearDPTranslation();
     }
 }
@@ -3274,7 +3286,7 @@ void M_DrawGame3(void)
         V_ClearDPTranslation();
     }
 
-    if(itemOn == 4)
+    if(itemOn == 4 && whichSkull == 1)
     {
         char *string = "YOU MUST START A NEW GAME TO TAKE EFFECT.";
         int x = 160 - M_StringWidth(string) / 2;
@@ -4449,7 +4461,7 @@ boolean M_Responder (event_t* ev)
         {
           case KEY_ESCAPE:
             saveStringEnter = 0;
-            M_StringCopy(&savegamestrings[saveSlot][0],saveOldString, sizeof(&savegamestrings[saveSlot][0]));
+            M_StringCopy(&savegamestrings[saveSlot][0],saveOldString, sizeof(savegamestrings));
             break;
                                 
           case KEY_ENTER:
@@ -4801,7 +4813,7 @@ void M_Drawer (void)
     max = currentMenu->numitems;
 
     if (fsize != 28422764 && fsize != 19321722 && fsize != 12361532 &&
-        currentMenu == &SoundDef && itemOn > 1 && itemOn < 5)
+        currentMenu == &SoundDef && itemOn > 1 && itemOn < 5 && whichSkull == 1)
     {
         char *message_string = "YOU MUST QUIT AND RESTART TO TAKE EFFECT.";
         int message_offset = 160 - M_StringWidth(message_string) / 2;
@@ -4810,7 +4822,7 @@ void M_Drawer (void)
         V_ClearDPTranslation();
     }
     else if((fsize == 28422764 || fsize == 19321722 || fsize == 12361532) &&
-            currentMenu == &GameDef2 && itemOn == 6)
+            currentMenu == &GameDef2 && itemOn == 6 && whichSkull == 1)
     {
         char *message_string = "NO BETA MODE FOR CHEX, HACX & FREEDOOM.";
         int message_offset = 160 - M_StringWidth(message_string) / 2;
@@ -4818,7 +4830,7 @@ void M_Drawer (void)
         M_WriteText(message_offset, 160, DEH_String(message_string));
         V_ClearDPTranslation();
     }
-    else if(fsize == 12361532 && currentMenu == &GameDef2 && itemOn == 1)
+    else if(fsize == 12361532 && currentMenu == &GameDef2 && itemOn == 1 && whichSkull == 1)
     {
         char *message_string = "NO EXTRA BLOOD & GORE FOR CHEX QUEST.";
         int message_offset = 160 - M_StringWidth(message_string) / 2;
@@ -4826,7 +4838,7 @@ void M_Drawer (void)
         M_WriteText(message_offset, 160, DEH_String(message_string));
         V_ClearDPTranslation();
     }
-    else if(fsize == 19321722 && currentMenu == &SoundDef && itemOn == 3)
+    else if(fsize == 19321722 && currentMenu == &SoundDef && itemOn == 3 && whichSkull == 1)
     {
         char *message_string = "NO PC-SPEAKERS AVAILABLE FOR HACX";
         int message_offset = 160 - M_StringWidth(message_string) / 2;
