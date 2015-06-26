@@ -52,9 +52,10 @@ int               extra_wad_loaded = 0;
 int               load_extra_wad = 0;
 int               load_dehacked = 0;
 
-boolean              multiplayer = false;
-boolean              multiplayer_flag = false;
-boolean              nerve_pwad = false;
+boolean           multiplayer = false;
+boolean           multiplayer_flag = false;
+boolean           nerve_pwad = false;
+boolean           merge = false;
 
 
 // Local prototypes: wiiNinja
@@ -307,6 +308,8 @@ void Menu_FatDevice(void)
             printf("\n                                 |\n");
             printStyledText(10, 35, CONSOLE_FONT_BLACK, CONSOLE_FONT_GREEN,
                         CONSOLE_FONT_BOLD, &stTexteLocation,".DEH: ");
+            printStyledText(10, 68, CONSOLE_FONT_BLACK, CONSOLE_FONT_YELLOW,
+                        CONSOLE_FONT_BOLD, &stTexteLocation,"MERGE: ");
             printStyledText(11, 0, CONSOLE_FONT_BLACK, CONSOLE_FONT_WHITE,
                         CONSOLE_FONT_BOLD,&stTexteLocation,
             "  ----------------------------------------------------------------------------  ");
@@ -377,6 +380,8 @@ void Menu_FatDevice(void)
         printf("\n                                 |");
         printStyledText(10, 35, CONSOLE_FONT_BLACK, CONSOLE_FONT_GREEN,
                     CONSOLE_FONT_BOLD, &stTexteLocation, ".DEH: ");
+        printStyledText(10, 68, CONSOLE_FONT_BLACK, CONSOLE_FONT_YELLOW,
+                    CONSOLE_FONT_BOLD, &stTexteLocation, "MERGE: ");
 
         goto err;
     }
@@ -632,23 +637,25 @@ void Menu_WadList(void)
                         &stTexteLocation,
                         "|");
 
-        if(multiplayer)    // MAIN FLAG
+//        if(multiplayer)    // MAIN FLAG
         {
             printStyledText(6, 35,CONSOLE_FONT_BLACK,
                         CONSOLE_FONT_YELLOW,CONSOLE_FONT_BOLD,
                         &stTexteLocation,
-                        "NET.:");
+//                        "NET.:");
+                        "MERGE:");
 
-            if(multiplayer_flag)
-                printStyledText(6, 41,CONSOLE_FONT_BLACK,
+//            if(multiplayer_flag)
+            if(merge)
+                printStyledText(10, 75,CONSOLE_FONT_BLACK,
                         CONSOLE_FONT_YELLOW,CONSOLE_FONT_BOLD,
                         &stTexteLocation,
                         "YES");
             else
-                printStyledText(6, 41,CONSOLE_FONT_BLACK,
+                printStyledText(10, 75,CONSOLE_FONT_BLACK,
                         CONSOLE_FONT_YELLOW,CONSOLE_FONT_BOLD,
                         &stTexteLocation,
-                        "NO");
+                        " NO");
         }
 
         printStyledText(6, 35,CONSOLE_FONT_BLACK,
@@ -697,15 +704,29 @@ void Menu_WadList(void)
                         "|");
 
         if(extra_wad_loaded || load_dehacked || md5_check)
+        {
             printStyledText(9, 18,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_YELLOW,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "X: Clear Sel.");
+            printStyledText(9, 0,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_YELLOW,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "  Y: Merge  WAD");
+            printStyledText(9, 16,CONSOLE_FONT_BLACK,
                         CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,
                         &stTexteLocation,
-                        "X: start over");
+                        "/");
+        }
 
         printStyledText(10, 35,CONSOLE_FONT_BLACK,
                         CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,
                         &stTexteLocation,
                         ".DEH: ");
+        printStyledText(10, 68,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_YELLOW,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "MERGE: ");
         printStyledText(10, 41,CONSOLE_FONT_BLACK,
                         CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,
                         &stTexteLocation,stripped_dehacked_file);
@@ -717,7 +738,7 @@ void Menu_WadList(void)
         printf("\n");
 
         printStyledText(10, 0,CONSOLE_FONT_BLACK,
-                        CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,
+                        CONSOLE_FONT_YELLOW,CONSOLE_FONT_BOLD,
                         &stTexteLocation,
                         "  A: Select WAD");
         printStyledText(10, 16,CONSOLE_FONT_BLACK,
@@ -727,12 +748,12 @@ void Menu_WadList(void)
 
         if(gDirLevel>1)
             printStyledText(10, 18,CONSOLE_FONT_BLACK,
-                        CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,
+                        CONSOLE_FONT_YELLOW,CONSOLE_FONT_BOLD,
                         &stTexteLocation,
                         "B: Prev. dir.");
         else
             printStyledText(10, 18,CONSOLE_FONT_BLACK,
-                        CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,
+                        CONSOLE_FONT_YELLOW,CONSOLE_FONT_BOLD,
                         &stTexteLocation,
                         "B: Sel. dev.");
 
@@ -2125,6 +2146,7 @@ void Menu_WadList(void)
         goto getList;
     }
 
+    // X button
     if (buttons & WPAD_CLASSIC_BUTTON_X)
     {
         load_dehacked = 0;
@@ -2147,6 +2169,15 @@ void Menu_WadList(void)
         extra_wad_slot_3_loaded = 0;
 
         extra_wad_loaded = 0;
+    }
+
+    // Y button
+    if (buttons & WPAD_CLASSIC_BUTTON_Y)
+    {
+        if (!merge)
+            merge = true;
+        else if(merge)
+            merge = false;
     }
 
     /* List scrolling */

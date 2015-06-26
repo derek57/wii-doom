@@ -5,6 +5,8 @@
 #include <gctypes.h>
 #include <ogc/color.h>
 
+#include "pngu.h"
+
 
 enum CONSOLE_FONT_COLORS {
     CONSOLE_FONT_BLACK=0,

@@ -8,6 +8,7 @@
 #include <stdlib.h>
 
 #include "gui.h"
+#include "pngu.h"
 #include "video.h"
 
 

@@ -132,6 +132,7 @@ int             pagetic;
 int             runcount = 0;
 int             startuptimer;
 
+extern int      exit_by_reset;
 extern int      show_stats;
 extern int      timer_info;
 extern int      opl_type;
@@ -145,6 +146,7 @@ extern int      screenSize;
 extern int      sound_channels;
 extern int      startlump;
 
+extern boolean  merge;
 extern boolean  BorderNeedRefresh;
 extern boolean  skillflag;
 extern boolean  nomonstersflag;
@@ -291,9 +293,6 @@ void D_Display (void)
 
       case GS_DEMOSCREEN:
         D_PageDrawer ();
-        break;
-
-      case GS_CONSOLE:
         break;
     }
     
@@ -500,8 +499,11 @@ void D_DoomLoop (void)
 
     while (1)
     {
+        if(exit_by_reset)
+            break;
+
         // check if the OGG music stopped playing
-        if(usergame && gamestate != GS_DEMOSCREEN && gamestate != GS_CONSOLE && !finale_music)
+        if(usergame && gamestate != GS_DEMOSCREEN && !finale_music)
             I_SDL_PollMusic();
 
         // frame syncronous IO operations
@@ -1231,9 +1233,10 @@ void D_DoomMain (void)
 #ifdef FEATURE_DEHACKED
     if(load_dehacked == 1)
         DEH_LoadFile(dehacked_file);
-
+/*
     if(fsize == 19321722)
         DEH_Init();
+*/
 #endif
     modifiedgame = false;
 
@@ -1519,15 +1522,30 @@ void D_DoomMain (void)
         if(load_extra_wad == 1)
         {
             if(extra_wad_slot_1_loaded == 1)
-                D_AddFile(extra_wad_1, false);
+            {
+                if(merge)
+                    W_MergeFile(extra_wad_1, false);
+                else
+                    D_AddFile(extra_wad_1, false);
+            }
 
             if(!nerve_pwad)
             {
                 if(extra_wad_slot_2_loaded == 1)
-                    D_AddFile(extra_wad_2, false);
+                {
+                    if(merge)
+                        W_MergeFile(extra_wad_2, false);
+                    else
+                        D_AddFile(extra_wad_2, false);
+                }
 
                 if(extra_wad_slot_3_loaded == 1)
-                    D_AddFile(extra_wad_3, false);
+                {
+                    if(merge)
+                        W_MergeFile(extra_wad_3, false);
+                    else
+                        D_AddFile(extra_wad_3, false);
+                }
             }
             modifiedgame = true;
         }
@@ -1589,10 +1607,7 @@ void D_DoomMain (void)
     C_Printf(CR_GRAY, " W_Init: Init WADfiles.\n");
 
     if(show_deh_loading_message == 1)
-    {
         printf("         adding %s\n", dehacked_file);
-        C_Printf(CR_GRAY, "         adding %s\n", dehacked_file);
-    }
 /*
     if(devparm)
         W_PrintDirectory();

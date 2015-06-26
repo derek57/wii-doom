@@ -53,7 +53,6 @@ typedef struct
 
 
 extern CONFIG gConfig;
-extern nandDevice ndevList[];
 extern fatDevice fdevList[];
 
 

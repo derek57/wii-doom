@@ -990,18 +990,18 @@ void R_InitData (void)
 {
     R_InitTextures ();
 
-    printf (".");
+//    printf (".");
 //    C_Printf (CR_GRAY, ".");
 
     R_InitFlats ();
 
-    printf (".");
+//    printf (".");
 //    C_Printf (CR_GRAY, ".");
 
     R_InitSpriteLumps ();
 
     R_InitTranMap();
-    printf (".");
+//    printf (".");
 
     R_InitColormaps ();
 }

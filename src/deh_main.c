@@ -88,7 +88,7 @@ static void InitializeSections(void)
     }
 }
 
-/*static*/ void DEH_Init(void)
+static void DEH_Init(void)
 {
     // Call init functions for all the section definitions.
     InitializeSections();
@@ -381,14 +381,14 @@ int DEH_LoadFile(char *filename)
     deh_allow_long_cheats = false;
     deh_allow_extended_strings = false;
 
-    C_Printf(CR_GOLD, " loading %s\n", filename);
+    printf(" loading %s\n", filename);
     show_deh_loading_message = 1;
 
     context = DEH_OpenFile(filename);
 
     if (context == NULL)
     {
-        C_Printf(CR_RED, "DEH_LoadFile: Unable to open %s\n", filename);
+        printf(" DEH_LoadFile: Unable to open %s\n", filename);
         return 0;
     }
 
@@ -425,7 +425,7 @@ int DEH_LoadLump(int lumpnum, boolean allow_long, boolean allow_error)
 
     if (context == NULL)
     {
-        C_Printf(CR_RED, "DEH_LoadFile: Unable to open lump %i\n", lumpnum);
+        printf(" DEH_LoadFile: Unable to open lump %i\n", lumpnum);
         return 0;
     }
 
@@ -451,7 +451,7 @@ int DEH_LoadLumpByName(char *name, boolean allow_long, boolean allow_error)
 
     if (lumpnum == -1)
     {
-        C_Printf(CR_RED, "DEH_LoadLumpByName: '%s' lump not found\n", name);
+        printf(" DEH_LoadLumpByName: '%s' lump not found\n", name);
         return 0;
     }
 

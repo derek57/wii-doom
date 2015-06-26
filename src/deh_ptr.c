@@ -98,7 +98,7 @@ static void DEH_PointerParseLine(deh_context_t *context, char *line, void *tag)
         return;
     }
     
-    C_Printf(CR_GRAY, " Set %s to %s for state\n", variable_name, value);
+    //printf(" Set %s to %s for state\n", variable_name, value);
 
     // all values are integers
 

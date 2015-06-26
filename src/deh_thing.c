@@ -100,7 +100,7 @@ static void DEH_ThingParseLine(deh_context_t *context, char *line, void *tag)
         return;
     }
     
-    C_Printf(CR_GOLD, " Set %s to %s for mobj\n", variable_name, value);
+    //printf(" Set %s to %s for mobj\n", variable_name, value);
 
     // all values are integers
 
