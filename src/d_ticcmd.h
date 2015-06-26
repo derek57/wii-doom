@@ -57,6 +57,9 @@ typedef struct
 
     byte lookfly;               // look/fly up/down/centering
     byte arti;                  // artitype_t to use
+
+    int lookdir;
+
 } ticcmd_t;
 
 
