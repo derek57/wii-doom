@@ -326,6 +326,7 @@ extern  boolean         d_fallingdamage;
 extern  boolean         d_infiniteammo;
 extern  boolean         not_monsters;
 extern  boolean         overlay_trigger;
+extern  boolean         replace_missing;
 
 extern  int             d_colblood;
 extern  int             d_colblood2;

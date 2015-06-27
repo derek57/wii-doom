@@ -1044,8 +1044,16 @@ int R_FlatNumForName (char* name)
         namet[8] = 0;
         memcpy (namet, name,8);
 */
-        C_Printf(CR_RED, " R_FlatNumForName: %.8s not found (replaced with FLOOR0_1)", name);
-        i = W_CheckNumForName ("FLOOR0_1");
+        if(replace_missing)
+        {
+            i = W_CheckNumForName ("FLOOR0_1");
+            C_Printf(CR_RED, " R_FlatNumForName: %.8s not found (replaced with FLOOR0_1)", name);
+        }
+        else
+        {
+            C_Printf(CR_RED, " R_FlatNumForName: %.8s not found");
+            return 0;
+        }
     }
     return i - firstflat;
 }
@@ -1226,8 +1234,16 @@ int R_TextureNumForName (char* name)
 
     if (i==-1)
     {
-        C_Printf(CR_RED, " R_TextureNumForName: %.8s not found (replaced with BROWN1)", name);
-        i = R_CheckTextureNumForName ("BROWN1");
+        if(replace_missing)
+        {
+            i = R_CheckTextureNumForName ("BROWN1");
+            C_Printf(CR_RED, " R_TextureNumForName: %.8s not found (replaced with BROWN1)", name);
+        }
+        else
+        {
+            C_Printf(CR_RED, " R_TextureNumForName: %.8s not found");
+            return 0;
+        }
     }
     return i;
 }

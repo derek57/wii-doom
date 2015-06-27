@@ -67,6 +67,7 @@ boolean         d_fallingdamage = false;
 boolean         d_infiniteammo = false;
 boolean         not_monsters = false;
 boolean         overlay_trigger = false;
+boolean         replace_missing = false;
 
 int             d_colblood = 0;
 int             d_colblood2 = 0;

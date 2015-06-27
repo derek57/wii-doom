@@ -128,6 +128,7 @@ default_t        doom_defaults_list[] =
     CONFIG_VARIABLE_INT                (screenwipe_type),
     CONFIG_VARIABLE_INT                (automap_overlay),
     CONFIG_VARIABLE_INT                (show_timer),
+    CONFIG_VARIABLE_INT                (replace),
     CONFIG_VARIABLE_INT                (key_shoot),
     CONFIG_VARIABLE_INT                (key_open),
     CONFIG_VARIABLE_INT                (key_menu),

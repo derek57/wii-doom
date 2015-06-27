@@ -863,8 +863,8 @@ int                        cheeting;
 int                        coordinates_info = 0;
 int                        timer_info = 0;
 int                        version_info = 0;
-int                        key_controls_start_in_cfg_at_pos = 50;
-int                        key_controls_end_in_cfg_at_pos = 63;
+int                        key_controls_start_in_cfg_at_pos = 51;
+int                        key_controls_end_in_cfg_at_pos = 64;
 int                        crosshair = 0;
 int                        show_stats = 0;
 int                        tracknum = 1;
@@ -1115,6 +1115,7 @@ void M_Massacre(int choice);
 void M_Screen(int choice);
 void M_FPSCounter(int choice);
 void M_HOMDetector(int choice);
+void M_ReplaceMissing(int choice);
 void M_Controls(int choice);
 void M_System(int choice);
 void M_Sound(int choice);
@@ -1659,6 +1660,7 @@ enum
     system_fps,
     system_ticker,
     system_hom,
+    system_replace,
     system_end
 } system_e;
 
@@ -1666,7 +1668,8 @@ menuitem_t SystemMenu[]=
 {
     {2,"FPS Counter",M_FPS,'f'},
     {2,"Display Ticker",M_DisplayTicker,'t'},
-    {2,"Hall of Mirrors Detector",M_HOMDetector,'h'}
+    {2,"Hall of Mirrors Detector",M_HOMDetector,'h'},
+    {2,"Replace Missing Textures",M_ReplaceMissing,'r'}
 };
 
 menu_t  SystemDef =
@@ -6425,6 +6428,20 @@ void M_HOMDetector(int choice)
     }
 }
 
+void M_ReplaceMissing(int choice)
+{
+    if(!replace_missing)
+    {
+        replace_missing = true;
+        players[consoleplayer].message = DEH_String("MISSING TEXTURES & FLATS WILL BE REPLACED");
+    }
+    else if(replace_missing)
+    {
+        replace_missing = false;
+        players[consoleplayer].message = DEH_String("MISSING TEXTURES & FLATS WON'T BE REPLACED");
+    }
+}
+
 u64 GetTicks(void)
 {
     return (u64)SDL_GetTicks();
@@ -7181,6 +7198,19 @@ void M_DrawSystem(void)
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(SystemDef.x + 190, SystemDef.y + 18, "OFF");
+        V_ClearDPTranslation();
+    }
+
+    if(replace_missing)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(SystemDef.x + 198, SystemDef.y + 28, "ON");
+        V_ClearDPTranslation();
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(SystemDef.x + 190, SystemDef.y + 28, "OFF");
         V_ClearDPTranslation();
     }
 }

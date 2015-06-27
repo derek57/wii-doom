@@ -176,6 +176,7 @@ void M_BindBaseControls(void)
     M_BindVariable("screenwipe_type",        &wipe_type);
     M_BindVariable("automap_overlay",        &overlay_trigger);
     M_BindVariable("show_timer",             &timer_info);
+    M_BindVariable("replace",                &replace_missing);
     M_BindVariable("key_shoot",              &joy_r);
     M_BindVariable("key_open",               &joy_l);
     M_BindVariable("key_menu",               &joy_minus);

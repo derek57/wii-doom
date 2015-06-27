@@ -453,11 +453,12 @@ typedef struct
     //  we might as well insert the same name eight times.
     boolean        rotate;
 
-    // Lump to use for view angles 0-7.
-    short          lump[8];
+    // Lump to use for view angles 0-15.
+    short          lump[16];
 
-    // Flip bit (1 = flip) to use for view angles 0-7.
-    byte           flip[8];
+    // Flip bit (1 = flip) to use for view angles 0-15.
+//    byte           flip[8];
+    unsigned short flip;
     
 } spriteframe_t;
 
