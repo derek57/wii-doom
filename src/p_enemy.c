@@ -100,11 +100,11 @@ mobjtype_t        chunk_type;
 int               old_t;
 int               old_u;
 int               TRACEANGLE = 0xc000000;
-int               numbraintargets;
+int               numbraintargets = 0; // [crispy] initialize
 int               braintargeton = 0;
 int               numsplats;
 
-static int        maxbraintargets;     // remove braintargets limit
+static int        maxbraintargets;     // [crispy] remove braintargets limit
 
 extern int        numspechit;
 extern int        snd_module;
@@ -1724,7 +1724,7 @@ A_PainShootSkull
         return;
     }
                 
-    // Lost Souls bleed Puffs
+    // [crispy] Lost Souls bleed Puffs
     if (d_colblood2 && d_chkblood2)
         newmobj->flags |= MF_NOBLOOD;
 
@@ -2088,7 +2088,7 @@ void A_BrainAwake (mobj_t* mo)
 
         if (m->type == MT_BOSSTARGET )
         {
-            // remove braintargets limit
+            // [crispy] remove braintargets limit
             if (numbraintargets == maxbraintargets)
             {
                 maxbraintargets = maxbraintargets ? 2 * maxbraintargets : 32;
@@ -2105,7 +2105,7 @@ void A_BrainAwake (mobj_t* mo)
         
     S_StartSound (NULL,sfx_bossit);
 
-    // no spawn spots available
+    // [crispy] no spawn spots available
     if (numbraintargets == 0)
         numbraintargets = INT_MIN;
 }
@@ -2164,6 +2164,7 @@ void A_BrainExplode (mobj_t* mo)
     if (th->tics < 1)
         th->tics = 1;
 
+    // [crispy] brain explosions are translucent
     th->flags |= MF_TRANSLUCENT;
 }
 
@@ -2184,11 +2185,11 @@ void A_BrainSpit (mobj_t*        mo)
     if (gameskill <= sk_easy && (!easy))
         return;
                 
-    // avoid division by zero by recalculating the number of spawn spots
+    // [crispy] avoid division by zero by recalculating the number of spawn spots
     if (numbraintargets == 0)
         A_BrainAwake(NULL);
 
-    // still no spawn spots available
+    // [crispy] still no spawn spots available
     if (numbraintargets == INT_MIN)
         return;
 

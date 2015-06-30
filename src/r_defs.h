@@ -73,7 +73,7 @@ typedef struct
     fixed_t        x;
     fixed_t        y;
     
-    // remove slime trails
+    // [crispy] remove slime trails
     // pseudovertexes are dummies that have their coordinates modified to get
     // moved towards the linedef associated with their seg by projecting them
     // using the law of cosines in p_setup.c:P_RemoveSlimeTrails();
@@ -144,7 +144,7 @@ typedef        struct
     int             linecount;
     struct line_s** lines;        // [linecount] size
     
-    // WiggleFix: [kb] for R_FixWiggle()
+    // [crispy] WiggleFix: [kb] for R_FixWiggle()
     int             cachedheight;
     int             scaleindex;
 
@@ -370,9 +370,9 @@ typedef struct drawseg_s
     
     // Pointers to lists for sprite clipping,
     //  all three adjusted so [x1] is first value.
-    int*           sprtopclip;
-    int*           sprbottomclip;
-    int*           maskedtexturecol;
+    int*           sprtopclip;       // [crispy] 32-bit integer math
+    int*           sprbottomclip;    // [crispy] 32-bit integer math
+    int*           maskedtexturecol; // [crispy] 32-bit integer math
 
 } drawseg_t;
 
@@ -423,6 +423,7 @@ typedef struct vissprite_s
 
     boolean        drawn;
 
+    // [crispy] color translation table for blood colored by monster class
     byte*          translation;
 
     // killough 3/27/98: height sector for underwater/fake ceiling support
@@ -489,19 +490,19 @@ typedef struct
     int              maxx;
   
     // leave pads for [minx-1]/[maxx+1]
-    unsigned int     pad1;                  // CHANGED FOR HIRES
+    unsigned int     pad1;                // [crispy] hires / 32-bit integer math
 
     // Here lies the rub for all
     //  dynamic resize/change of resolution.                
-    unsigned int     top[SCREENWIDTH];      // CHANGED FOR HIRES
-    unsigned int     pad2;                  // CHANGED FOR HIRES
-    unsigned int     pad3;                  // CHANGED FOR HIRES
+    unsigned int     top[SCREENWIDTH];    // [crispy] hires / 32-bit integer math
+    unsigned int     pad2;                // [crispy] hires / 32-bit integer math
+    unsigned int     pad3;                // [crispy] hires / 32-bit integer math
 
     // See above.
-    unsigned int     bottom[SCREENWIDTH];   // CHANGED FOR HIRES
-    unsigned int     pad4;                  // CHANGED FOR HIRES
+    unsigned int     bottom[SCREENWIDTH]; // [crispy] hires / 32-bit integer math
+    unsigned int     pad4;                // [crispy] hires / 32-bit integer math
 
-    sector_t         *sector;               // [BH] Support animated liquid sectors
+    sector_t         *sector;             // [BH] Support animated liquid sectors
 
 } visplane_t;
 

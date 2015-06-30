@@ -163,7 +163,7 @@ V_CopyRect
     }
 #endif 
 
-    // prevent framebuffer overflow
+    // [crispy] prevent framebuffer overflow
     if (destx + width > SCREENWIDTH)
         width = SCREENWIDTH - destx;
     if (desty + height > SCREENHEIGHT)
@@ -229,7 +229,7 @@ V_DrawPatch
 
     w = SHORT(patch->width);
 
-    // prevent framebuffer overflow
+    // [crispy] prevent framebuffer overflow
     while (x < 0)
     {
         x++;
@@ -237,12 +237,12 @@ V_DrawPatch
         desttop++;
     }
 
-    // quadruple for-loop for each dp_translation and dp_translucent case
+    // [crispy] quadruple for-loop for each dp_translation and dp_translucent case
     // to avoid checking these variables for each pixel and instead check once per patch
     // (1) normal, opaque patch
     if (!dp_translation && !dp_translucent)
     {
-        // prevent framebuffer overflow
+        // [crispy] prevent framebuffer overflow
         for ( ; col<w && x < ORIGWIDTH; x++, col++, desttop++)
         {
             column = (column_t *)((byte *)patch + LONG(patch->columnofs[col]));
@@ -257,7 +257,7 @@ V_DrawPatch
                     count = column->length;
                     tmpy = y + column->topdelta;
  
-                    // prevent framebuffer overflow
+                    // [crispy] prevent framebuffer overflow
                     while (tmpy < 0)
                     {
                         count--;
@@ -289,7 +289,7 @@ V_DrawPatch
     // (2) color-translated, opaque patch
     else if (dp_translation && !dp_translucent)
     {
-        // prevent framebuffer overflow
+        // [crispy] prevent framebuffer overflow
         for ( ; col<w && x < ORIGWIDTH; x++, col++, desttop++)
         {
             column = (column_t *)((byte *)patch + LONG(patch->columnofs[col]));
@@ -304,7 +304,7 @@ V_DrawPatch
                     count = column->length;
                     tmpy = y + column->topdelta;
 
-                    // prevent framebuffer overflow
+                    // [crispy] prevent framebuffer overflow
                     while (tmpy < 0)
                     {
                         count--;
@@ -336,7 +336,7 @@ V_DrawPatch
     // (3) normal, translucent patch
     else if (!dp_translation && dp_translucent)
     {
-        // prevent framebuffer overflow
+        // [crispy] prevent framebuffer overflow
         for ( ; col<w && x < ORIGWIDTH; x++, col++, desttop++)
         {
             column = (column_t *)((byte *)patch + LONG(patch->columnofs[col]));
@@ -351,7 +351,7 @@ V_DrawPatch
                     count = column->length;
                     tmpy = y + column->topdelta;
 
-                    // prevent framebuffer overflow
+                    // [crispy] prevent framebuffer overflow
                     while (tmpy < 0)
                     {
                         count--;
@@ -383,7 +383,7 @@ V_DrawPatch
     // (4) color-translated, translucent patch
     else if (dp_translation && dp_translucent)
     {
-        // prevent framebuffer overflow
+        // [crispy] prevent framebuffer overflow
         for ( ; col<w && x < ORIGWIDTH; x++, col++, desttop++)
         {
             column = (column_t *)((byte *)patch + LONG(patch->columnofs[col]));
@@ -398,7 +398,7 @@ V_DrawPatch
                     count = column->length;
                     tmpy = y + column->topdelta;
 
-                    // prevent framebuffer overflow
+                    // [crispy] prevent framebuffer overflow
                     while (tmpy < 0)
                     {
                         count--;
@@ -479,7 +479,7 @@ V_DrawPatchFlipped
 
     w = SHORT(patch->width);
 
-    // prevent framebuffer overflow
+    // [crispy] prevent framebuffer overflow
     while (x < 0)
     {
         x++;
@@ -487,7 +487,7 @@ V_DrawPatchFlipped
         desttop++;
     }
 
-    // prevent framebuffer overflow
+    // [crispy] prevent framebuffer overflow
     for ( ; col<w && x < ORIGWIDTH; x++, col++, desttop++)
     {
         column = (column_t *)((byte *)patch + LONG(patch->columnofs[w-1-col]));
@@ -503,7 +503,7 @@ V_DrawPatchFlipped
                 count = column->length;
                 tmpy = y + column->topdelta;
 
-                // prevent framebuffer overflow
+                // [crispy] prevent framebuffer overflow
                 while (tmpy < 0)
                 {
                     count--;

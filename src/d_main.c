@@ -212,7 +212,7 @@ void D_Display (void)
     static  boolean             menuactivestate = false;
     static  boolean             inhelpscreensstate = false;
     static  boolean             fullscreen = false;
-    static  char                menushade; // shade menu background
+    static  char                menushade; // [crispy] shade menu background
     static  gamestate_t         oldgamestate = -1;
     static  int                 borderdrawcount;
     static  int                 saved_gametic = -1;
@@ -221,8 +221,8 @@ void D_Display (void)
     int                         wipestart;
     int                         y;
 
-    // catch SlopeDiv overflows
-    SlopeDiv = SlopeDivOverflow;
+    // [crispy] catch SlopeDiv overflows
+    SlopeDiv = SlopeDivCrispy;
 
     redrawsbar = false;
     
@@ -302,10 +302,11 @@ void D_Display (void)
     // draw the view directly
     if (gamestate == GS_LEVEL && (!automapactive || (automapactive && am_overlay)) && gametic)
     {
+        // [crispy] update automap while playing
         R_RenderPlayerView (&players[displayplayer]);
     }
 
-    // in automap overlay mode,
+    // [crispy] in automap overlay mode,
     // the HUD is drawn on top of everything else
     if (gamestate == GS_LEVEL && gametic && !(automapactive && am_overlay))
         HU_Drawer ();
@@ -352,14 +353,14 @@ void D_Display (void)
     inhelpscreensstate = inhelpscreens;
     oldgamestate = wipegamestate = gamestate;
 
-    // in automap overlay mode,
+    // [crispy] in automap overlay mode,
     // draw the automap and HUD on top of everything else
     if (automapactive && am_overlay)
     {
 	AM_Drawer ();
 	HU_Drawer ();
 
-	// force redraw of status bar and border
+	// [crispy] force redraw of status bar and border
 	viewactivestate = false;
 	inhelpscreensstate = true;
 
@@ -372,7 +373,7 @@ void D_Display (void)
             AM_DrawWorldTimer();
     }
 
-    // shade background when a menu is active or the game is paused
+    // [crispy] shade background when a menu is active or the game is paused
     if (paused || menuactive)
     {
         static int firsttic;
@@ -386,7 +387,7 @@ void D_Display (void)
             firsttic = gametic;
         }
 
-        // force redraw of status bar and border
+        // [crispy] force redraw of status bar and border
         viewactivestate = false;
         inhelpscreensstate = true;
     }
@@ -400,7 +401,7 @@ void D_Display (void)
     M_Drawer ();          // menu is drawn even on top of everything
     NetUpdate ();         // send out any new accumulation
 
-    // back to Vanilla SlopeDiv
+    // [crispy] back to Vanilla SlopeDiv
     SlopeDiv = SlopeDivVanilla;
 
     // normal update

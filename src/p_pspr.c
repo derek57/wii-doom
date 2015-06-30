@@ -63,6 +63,8 @@ extern void        P_Thrust (player_t* player, angle_t angle, fixed_t move);
 
 fixed_t            bulletslope;
 
+// [crispy] weapon recoil {thrust, pitch} values
+// thrust values from prboom-plus/src/p_pspr.c:73-83
 static const int recoil_values[][2] = {
     {10,   0}, // wp_fist
     {10,   4}, // wp_pistol
@@ -75,6 +77,8 @@ static const int recoil_values[][2] = {
     {80,  16}, // wp_supershotgun
 };
 
+// [crispy] add weapon recoil
+// adapted from prboom-plus/src/p_pspr.c:484-495 (A_FireSomething ())
 void A_Recoil (player_t* player)
 {
     if (!netgame && d_recoil && !(player->mo->flags & MF_NOCLIP))

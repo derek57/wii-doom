@@ -40,11 +40,11 @@ extern planefunction_t        ceilingfunc_t;
 extern fixed_t                yslope[SCREENHEIGHT];
 extern fixed_t                distscale[SCREENWIDTH];
 
-extern int                    floorclip[SCREENWIDTH];     // CHANGED FOR HIRES
-extern int                    ceilingclip[SCREENWIDTH];   // CHANGED FOR HIRES
+extern int                    floorclip[SCREENWIDTH];     // [crispy] 32-bit integer math
+extern int                    ceilingclip[SCREENWIDTH];   // [crispy] 32-bit integer math
 
 // Visplane related.
-extern  int*                  lastopening;                // CHANGED FOR HIRES
+extern  int*                  lastopening;                // [crispy] 32-bit integer math
 
 void R_InitPlanes (void);
 void R_ClearPlanes (void);
@@ -58,10 +58,10 @@ R_MapPlane
 void
 R_MakeSpans
 ( int                x,
-  unsigned int       t1,                                 // CHANGED FOR HIRES
-  unsigned int       b1,                                 // CHANGED FOR HIRES
-  unsigned int       t2,                                 // CHANGED FOR HIRES
-  unsigned int       b2 );                               // CHANGED FOR HIRES
+  unsigned int       t1,                                  // [crispy] 32-bit integer math
+  unsigned int       b1,                                  // [crispy] 32-bit integer math
+  unsigned int       t2,                                  // [crispy] 32-bit integer math
+  unsigned int       b2 );                                // [crispy] 32-bit integer math
 
 void R_DrawPlanes (void);
 

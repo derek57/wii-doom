@@ -262,8 +262,11 @@ void P_SpawnSmokeTrail(fixed_t x, fixed_t y, fixed_t z, angle_t angle);
 // P_SETUP
 //
 extern byte*              rejectmatrix;     // for fast sight rejection
-extern int64_t*           blockmaplump;     // offsets in blockmap are from here (BLOCKMAP limit)
+
+// [crispy] BLOCKMAP limit
+extern int64_t*           blockmaplump;     // offsets in blockmap are from here
 extern int64_t*           blockmap;         // int for BLOCKMAP limit removal
+
 extern int                bmapwidth;
 extern int                bmapheight;       // in mapblocks
 extern fixed_t            bmaporgx;

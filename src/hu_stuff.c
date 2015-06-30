@@ -45,8 +45,13 @@
 #include "s_sound.h"
 #include "sounds.h"
 #include "st_stuff.h"
+
+ // [crispy] colored kills/items/secret/etc. messages
 #include "v_trans.h"
+
+ // [crispy] V_ClearDPTranslation()
 #include "v_video.h"
+
 #include "w_wad.h"
 #include "z_zone.h"
 
@@ -369,7 +374,7 @@ void HU_Start(void)
                     hu_font,
                     HU_FONTSTART, &message_on);
 
-    // create the secret message widget
+    // [crispy] create the secret message widget
     HUlib_initSText(&w_secret,
                     88, 86, HU_MSGHEIGHT,
                     hu_font,
@@ -449,7 +454,7 @@ void HU_Start(void)
 
 }
 
-// print a bar indicating demo progress at the bottom of the screen
+// [crispy] print a bar indicating demo progress at the bottom of the screen
 static void HU_DemoProgressBar (void)
 {
     int i;
@@ -458,12 +463,12 @@ static void HU_DemoProgressBar (void)
 
     i = SCREENWIDTH * (demo_p - demobuffer) / defdemosize;
 
-    V_DrawHorizLine(0, SCREENHEIGHT - 3, i, 4);     // white
-    V_DrawHorizLine(0, SCREENHEIGHT - 2, i, 0);     // black
-    V_DrawHorizLine(0, SCREENHEIGHT - 1, i, 4);     // white
+    V_DrawHorizLine(0, SCREENHEIGHT - 3, i, 4);     // [crispy] white
+    V_DrawHorizLine(0, SCREENHEIGHT - 2, i, 0);     // [crispy] black
+    V_DrawHorizLine(0, SCREENHEIGHT - 1, i, 4);     // [crispy] white
 
-    V_DrawHorizLine(0, SCREENHEIGHT - 2, 1, 4);     // white start
-    V_DrawHorizLine(i - 1, SCREENHEIGHT - 2, 1, 4); // white end
+    V_DrawHorizLine(0, SCREENHEIGHT - 2, 1, 4);     // [crispy] white start
+    V_DrawHorizLine(i - 1, SCREENHEIGHT - 2, 1, 4); // [crispy] white end
 }
 
 void HU_DrawStats(void)
@@ -509,7 +514,7 @@ void HU_Drawer(void)
             V_DrawPatch(158, 98, 0, W_CacheLumpName(DEH_String("XHAIR"), PU_CACHE));
     }
 
-    // translucent messages for translucent HUD
+    // [crispy] translucent messages for translucent HUD
     if  (d_translucency && screenblocks > TRANSLUCENT_HUD &&
             (!automapactive || (automapactive && am_overlay)))
         dp_translucent = true;
@@ -545,7 +550,7 @@ void HU_Drawer(void)
     if (dp_translucent)
         dp_translucent = false;
 
-    // demo progress bar
+    // [crispy] demo progress bar
     if (demoplayback)
 	HU_DemoProgressBar();
 }

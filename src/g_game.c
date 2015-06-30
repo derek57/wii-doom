@@ -103,11 +103,13 @@ int cpars[32] =
     120,30                                      // 31-32
 };
  
+// [crispy] Episode 4 par times from the BFG Edition
 static int e4pars[10] =
 {
     0,165,255,135,150,180,390,135,360,180
 };
 
+// [crispy] No Rest For The Living par times from the BFG Edition
 static int npars[9] =
 {
     75,105,120,105,210,105,165,105,135
@@ -141,7 +143,7 @@ int             timelimit;
 int             mousex;
 int             mousey;         
 
-int	        defdemosize;            // demo progress bar
+int	        defdemosize;            // [crispy] demo progress bar
 int             d_episode; 
 int             d_map; 
 int             gameepisode; 
@@ -1154,7 +1156,7 @@ void G_DoPlayDemo (void)
     gameaction = ga_nothing; 
     demobuffer = demo_p = W_CacheLumpName (defdemoname, PU_STATIC); 
 
-    // demo progress bar
+    // [crispy] demo progress bar
     defdemosize = 0;
     while (*demo_p++ != DEMOMARKER)
     {
@@ -1604,7 +1606,7 @@ void G_Ticker (void)
                     break; 
                                          
                   case BTS_SAVEGAME: 
-		    // never override savegames by demo playback
+		    // [crispy] never override savegames by demo playback
 		    if (demoplayback)
 			break;
 
@@ -1862,6 +1864,7 @@ void G_DoLoadGame (void)
     P_UnArchiveThinkers (); 
     P_UnArchiveSpecials (); 
  
+    // [crispy] restore mobj->target and mobj->tracer pointers
     P_RestoreTargets();
 
     P_InitAnimatedLiquids();

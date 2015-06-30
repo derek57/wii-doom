@@ -112,7 +112,7 @@ int                 columnofs[MAXWIDTH];
 int                 dc_x; 
 int                 dc_yl; 
 int                 dc_yh; 
-int                 dc_texheight;                 // Tutti-Frutti fix
+int                 dc_texheight;                 // [crispy] Tutti-Frutti fix
 int                 ds_y; 
 int                 ds_x1; 
 int                 ds_x2;
@@ -146,14 +146,44 @@ static byte *background_buffer = NULL;
 // Thus a special case loop for very fast rendering can
 //  be used. It has also been used with Wolfenstein 3D.
 // 
-// replace R_DrawColumn() with Lee Killough's implementation
+// [crispy] replace R_DrawColumn() with Lee Killough's implementation
 // found in MBF to fix Tutti-Frutti, taken from mbfsrc/R_DRAW.C:99-1979
+
+// Emacs style mode select   -*- C++ -*- 
+//-----------------------------------------------------------------------------
+//
+// $Id: r_draw.c,v 1.16 1998/05/03 22:41:46 killough Exp $
+//
+//  Copyright (C) 1999 by
+//  id Software, Chi Hoang, Lee Killough, Jim Flynn, Rand Phares, Ty Halderman
+//
+//  This program is free software; you can redistribute it and/or
+//  modify it under the terms of the GNU General Public License
+//  as published by the Free Software Foundation; either version 2
+//  of the License, or (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program; if not, write to the Free Software
+//  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 
+//  02111-1307, USA.
+//
+// DESCRIPTION:
+//      The actual span/column drawing functions.
+//      Here find the main potential for optimization,
+//       e.g. inline assembly, different algorithms.
+//
+//-----------------------------------------------------------------------------
 void R_DrawColumn (void) 
 { 
     int              count;
 
-    register byte    *dest;
-    register fixed_t frac;
+    register byte    *dest; // killough
+    register fixed_t frac;  // killough
 
     fixed_t          fracstep;
 
@@ -181,13 +211,14 @@ void R_DrawColumn (void)
 
     // Inner loop that does the actual texture mapping,
     //  e.g. a DDA-lile scaling.
-    // This is as fast as it gets.
-    // more performance tuning
+    // This is as fast as it gets.       (Yeah, right!!! -- killough)
+    //
+    // killough 2/1/98: more performance tuning
     register const byte *source = dc_source;
     register const lighttable_t *colormap = dc_colormap;
     register int heightmask = dc_texheight-1;
 
-    // not a power of 2
+    // not a power of 2 -- killough
     if (dc_texheight & heightmask)
     {
         heightmask++;
@@ -202,9 +233,9 @@ void R_DrawColumn (void)
         {
             // Re-map color indices from wall texture column
             // using a lighting/special effects LUT.
-            // heightmask is the Tutti-Frutti fix
+            // heightmask is the Tutti-Frutti fix -- killough
             *dest = colormap[source[frac>>FRACBITS]];
-            dest += linesize;
+            dest += linesize; // killough 11/98
 
             if ((frac += fracstep) >= heightmask)
                 frac -= heightmask;
@@ -217,10 +248,10 @@ void R_DrawColumn (void)
         while ((count-=2)>=0)
         {
             *dest = colormap[source[(frac>>FRACBITS) & heightmask]];
-            dest += linesize;
+            dest += linesize; // killough 11/98
             frac += fracstep;
             *dest = colormap[source[(frac>>FRACBITS) & heightmask]];
-            dest += linesize;
+            dest += linesize; // killough 11/98
             frac += fracstep;
         }
 
@@ -492,7 +523,7 @@ void R_DrawFuzzColumnLow (void)
 } 
  
   
-// draw translucent column, low-resolution version
+// [crispy] draw translucent column, low-resolution version
 void R_DrawTLColumnLow (void)
 {
     int                  count;
@@ -665,6 +696,7 @@ void R_DrawTranslatedColumnLow (void)
 } 
 
 
+// [crispy] draw translucent column
 void R_DrawTLColumn (void)
 {
     int          count;

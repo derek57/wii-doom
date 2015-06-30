@@ -702,7 +702,7 @@ void TryRunTics (void)
         else
             counts = availabletics;
 
-        // If we've uncapped the framerate and there are no tics
+        // [AM] If we've uncapped the framerate and there are no tics
         // to run, return early instead of waiting around.
         if (counts == 0 && d_uncappedframerate && gametic)
             return;

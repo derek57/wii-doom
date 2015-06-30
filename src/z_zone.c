@@ -227,7 +227,13 @@ Z_Malloc
         if (rover == start)
         {
             // scanned all the way around the list
-            I_Error ("Z_Malloc: failed on allocation of %i bytes", size);
+//            I_Error ("Z_Malloc: failed on allocation of %i bytes", size);
+
+            // [nitr8]: i highly doubt that this is going to work for the Wii port
+            //          as RAM is very limited for that console (let's find out)
+
+            // [crispy] allocate another zone twice as big
+            Z_Init();
         }
         
         if (rover->tag != PU_FREE)

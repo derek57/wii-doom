@@ -138,11 +138,15 @@ byte *I_ZoneBase (int *size)
 {
     byte *zonemem;
     int min_ram, default_ram;
+    static int i = 1;
 
     default_ram = DEFAULT_RAM;
     min_ram = MIN_RAM;
 
-    zonemem = AutoAllocMemory(size, default_ram, min_ram);
+    zonemem = AutoAllocMemory(size, default_ram * i, min_ram * i);
+
+    // [crispy] if called again, allocate another zone twice as big
+    i *= 2;
 
     //printf(" zone memory: %p, %x allocated for zone\n", zonemem, *size);
 

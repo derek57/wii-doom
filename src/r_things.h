@@ -42,14 +42,14 @@ extern fixed_t             pspriteiscale;
 
 // Constant arrays used for psprite clipping
 // and initializing clipping.
-extern int                 negonearray[SCREENWIDTH];          // CHANGED FOR HIRES
-extern int                 screenheightarray[SCREENWIDTH];    // CHANGED FOR HIRES
+extern int                 negonearray[SCREENWIDTH];       // [crispy] 32-bit integer math
+extern int                 screenheightarray[SCREENWIDTH]; // [crispy] 32-bit integer math
 
 // vars for R_DrawMaskedColumn
-extern int*                mfloorclip;                        // CHANGED FOR HIRES
-extern int*                mceilingclip;                      // CHANGED FOR HIRES
+extern int*                mfloorclip;                     // [crispy] 32-bit integer math
+extern int*                mceilingclip;                   // [crispy] 32-bit integer math
 
-extern int64_t             sprtopscreen;                      // WiggleFix
+extern int64_t             sprtopscreen;                   // [crispy] WiggleFix
 
 
 

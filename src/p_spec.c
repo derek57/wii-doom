@@ -395,7 +395,7 @@ P_FindNextHighestFloor
     static fixed_t* heightlist = NULL;
     static int      heightlist_size = 0;
 
-    // remove MAX_ADJOINING_SECTORS Vanilla limit
+    // [crispy] remove MAX_ADJOINING_SECTORS Vanilla limit
     // from prboom-plus/src/p_spec.c:404-411
     if (sec->linecount > heightlist_size)
     {
@@ -1153,6 +1153,7 @@ void P_PlayerInSpecialSector (player_t* player)
                         
       case 9:
         // SECRET SECTOR
+	// [crispy] show centered "Secret Revealed!" message
         if (showMessages && d_secrets && !noclip_on)
         {
             player->message = HUSTR_SECRETFOUND;

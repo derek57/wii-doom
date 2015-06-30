@@ -80,13 +80,13 @@ size_t                     maxopenings;
 static int                 numvisplanes;             // ADDED FOR HIRES
 
 int                        *openings;                // dropoff overflow
-int*                       lastopening;              // CHANGED FOR HIRES
+int*                       lastopening;              // [crispy] 32-bit integer math
 
 // Clip values are the solid pixel bounding the range.
 //  floorclip starts out SCREENHEIGHT
 //  ceilingclip starts out -1
-int                        floorclip[SCREENWIDTH];   // CHANGED FOR HIRES
-int                        ceilingclip[SCREENWIDTH]; // CHANGED FOR HIRES
+int                        floorclip[SCREENWIDTH];   // [crispy] 32-bit integer math
+int                        ceilingclip[SCREENWIDTH]; // [crispy] 32-bit integer math
 
 // spanstart holds the start of a plane span
 // initialized to 0 at start
@@ -210,6 +210,7 @@ void R_ClearPlanes (void)
 }
 
 
+// [crispy] remove MAXVISPLANES Vanilla limit
 static void R_RaiseVisplanes (visplane_t** vp)
 {
     if (lastvisplane - visplanes == numvisplanes)
@@ -320,7 +321,7 @@ R_CheckPlane
     }
 
     for (x=intrl ; x<= intrh ; x++)
-        if (pl->top[x] != 0xffffffffu)                                // CHANGED FOR HIRES
+        if (pl->top[x] != 0xffffffffu) // [crispy] hires / 32-bit integer math
             break;
 
     if (x > intrh)
@@ -356,10 +357,10 @@ R_CheckPlane
 void
 R_MakeSpans
 ( int                x,
-  unsigned int       t1,                                                // CHANGED FOR HIRES
-  unsigned int       b1,                                                // CHANGED FOR HIRES
-  unsigned int       t2,                                                // CHANGED FOR HIRES
-  unsigned int       b2 )                                                // CHANGED FOR HIRES
+  unsigned int       t1,  // [crispy] hires / 32-bit integer math
+  unsigned int       b1,  // [crispy] hires / 32-bit integer math
+  unsigned int       t2,  // [crispy] hires / 32-bit integer math
+  unsigned int       b2 ) // [crispy] hires / 32-bit integer math
 {
     while (t1 < t2 && t1<=b1)
     {
@@ -467,13 +468,13 @@ void R_DrawPlanes (void)
                                 
 #ifdef RANGECHECK
 
-    if (ds_p - drawsegs > numdrawsegs)                                // CHANGED FOR HIRES
+    if (ds_p - drawsegs > numdrawsegs)                          // CHANGED FOR HIRES
         I_Error ("R_DrawPlanes: drawsegs overflow (%i)",        // CHANGED FOR HIRES
-                 ds_p - drawsegs);                                // CHANGED FOR HIRES
+                 ds_p - drawsegs);                              // CHANGED FOR HIRES
     
     if (lastvisplane - visplanes > numvisplanes)                // CHANGED FOR HIRES
         I_Error ("R_DrawPlanes: visplane overflow (%i)",        // CHANGED FOR HIRES
-                 lastvisplane - visplanes);                        // CHANGED FOR HIRES
+                 lastvisplane - visplanes);                     // CHANGED FOR HIRES
 
     if (lastopening - openings > MAXOPENINGS)
         I_Error ("R_DrawPlanes: opening overflow (%i)",
@@ -500,13 +501,13 @@ void R_DrawPlanes (void)
             //  by INVUL inverse mapping.
             dc_colormap = colormaps;
             dc_texturemid = skytexturemid;
-            dc_texheight = textureheight[skytexture]>>FRACBITS; // Tutti-Frutti fix
+            dc_texheight = textureheight[skytexture]>>FRACBITS; // [crispy] Tutti-Frutti fix
             for (x=pl->minx ; x <= pl->maxx ; x++)
             {
                 dc_yl = pl->top[x];
                 dc_yh = pl->bottom[x];
 
-                if ((unsigned) dc_yl <= dc_yh)                                // CHANGED FOR HIRES
+                if ((unsigned) dc_yl <= dc_yh) // [crispy] 32-bit integer math
                 {
                     angle = (viewangle + xtoviewangle[x])>>ANGLETOSKYSHIFT;
                     dc_x = x;
@@ -542,8 +543,8 @@ void R_DrawPlanes (void)
 
             planezlight = zlight[light];
 
-            pl->top[pl->maxx+1] = 0xffffffffu;                        // CHANGED FOR HIRES
-            pl->top[pl->minx-1] = 0xffffffffu;                        // CHANGED FOR HIRES
+            pl->top[pl->maxx+1] = 0xffffffffu; // [crispy] hires / 32-bit integer math
+            pl->top[pl->minx-1] = 0xffffffffu; // [crispy] hires / 32-bit integer math
 
             stop = pl->maxx + 1;
 

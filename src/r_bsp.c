@@ -41,7 +41,7 @@
 #include "r_things.h"
 
 
-#define MAXSEGS     (SCREENWIDTH/2+1)        // RAISE TO THE VALUE FOUND IN MBF
+#define MAXSEGS     (SCREENWIDTH/2+1) // [crispy] RAISE TO THE VALUE FOUND IN MBF
 
 
 // 1/11/98: Lee Killough
@@ -308,6 +308,7 @@ void R_AddLine (seg_t*     line)
     curline = line;
 
     // OPTIMIZE: quickly reject orthogonal back sides.
+    // [crispy] remove slime trails
     angle1 = R_PointToAngle (line->v1->x, line->v1->y);
     angle2 = R_PointToAngle (line->v2->x, line->v2->y);
     

@@ -69,8 +69,8 @@ int SlopeDivVanilla(unsigned int num, unsigned int den)
     }
 }
 
-// catch SlopeDiv overflows, only used in rendering
-int SlopeDivOverflow(unsigned int num, unsigned int den)
+// [crispy] catch SlopeDiv overflows, only used in rendering
+int SlopeDivCrispy(unsigned int num, unsigned int den)
 {
     // catch overflow for very big enumerators
     uint64_t ans;

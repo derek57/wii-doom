@@ -23,7 +23,7 @@
 #include "v_trans.h"
 
 
-// here used to be static color translation tables based on
+// [crispy] here used to be static color translation tables based on
 // the ones found in Boom and MBF. Nowadays these are recalculated
 // by means of actual color space conversions in r_data:R_InitColormaps().
 
@@ -194,7 +194,7 @@ byte V_Colorize (byte *playpal, int cr, byte source, boolean keepgray109)
 {
     vect rgb, hsv;
 
-    // preserve gray drop shadow in IWAD status bar numbers
+    // [crispy] preserve gray drop shadow in IWAD status bar numbers
     if (cr == CRX_NONE || (keepgray109 && source == 109))
         return source;
 
@@ -210,7 +210,7 @@ byte V_Colorize (byte *playpal, int cr, byte source, boolean keepgray109)
         hsv.y = 0;
     else
     {
-        // hack colors to full saturation
+        // [crispy] hack colors to full saturation
         hsv.y = 1.0;
 
         if (cr == CRX_GREEN)

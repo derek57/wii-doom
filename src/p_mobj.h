@@ -199,7 +199,7 @@ typedef enum
     // Hmm ???.
     MF_TRANSSHIFT          = 26,
 
-    // Translucent sprite
+    // [crispy] translucent sprite
     MF_TRANSLUCENT         = 0x80000000
 
 } mobjflag_t;

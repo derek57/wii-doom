@@ -153,6 +153,8 @@ void P_ExplodeMissile (mobj_t* mo)
         mo->tics = 1;
 
     mo->flags &= ~MF_MISSILE;
+
+    // [crispy] missile explosions are translucent
     mo->flags |= MF_TRANSLUCENT;
 
     if (mo->info->deathsound)
@@ -1046,7 +1048,6 @@ void P_SpawnMapThing (mapthing_t* mthing)
                  mthing->x, mthing->y);
                 
     // don't spawn keycards and players in deathmatch
-
     if (deathmatch && mobjinfo[i].flags & MF_NOTDMATCH)
         return;
 
@@ -1156,7 +1157,7 @@ void P_SpawnMapThing (mapthing_t* mthing)
     if (mthing->options & MTF_AMBUSH)
         mobj->flags |= MF_AMBUSH;
 
-    // Lost Souls bleed Puffs
+    // [crispy] Lost Souls bleed Puffs
     if (d_colblood2 && d_chkblood2 && (i == MT_SKULL || i == MT_BETASKULL))
         mobj->flags |= MF_NOBLOOD;
 
@@ -1218,7 +1219,7 @@ P_SpawnBlood
   fixed_t        y,
   fixed_t        z,
   int            damage,
-  mobj_t*        target )
+  mobj_t*        target ) // [crispy] pass thing type
 {
     mobj_t*        th;
         
@@ -1236,9 +1237,11 @@ P_SpawnBlood
     th = P_SpawnMobj (x,y,z, MT_BLOOD);
     th->momz = FRACUNIT*2;
     th->tics -= P_Random()&3;
+
+    // [crispy] connect blood object with the monster that bleeds it
     th->target = target;
 
-    // Spectres bleed spectre blood
+    // [crispy] Spectres bleed spectre blood
     if (d_colblood2 && d_chkblood2)
     {
         if(target->type == MT_SHADOWS)

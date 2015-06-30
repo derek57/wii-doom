@@ -1770,6 +1770,7 @@ boolean PIT_ChangeSector (mobj_t*        thing)
                               thing->y,
                               thing->z + thing->height/2, MT_BLOOD);
         
+            // [crispy] connect blood object with the monster that bleeds it
             mo->target = thing;
 
             mo->momx = (P_Random() - P_Random ())<<12;

@@ -389,7 +389,7 @@ P_BlockLinesIterator
   boolean(*func)(line_t*) )
 {
     int                 offset;
-    int64_t*            list; // BLOCKMAP limit
+    int64_t*            list; // [crispy] BLOCKMAP limit
     line_t*             ld;
         
     if (x<0

@@ -443,7 +443,7 @@ static void saveg_read_mobj_t(mobj_t *str)
     str->tracer = saveg_readp();
 }
 
-// enumerate all thinker pointers
+// [crispy] enumerate all thinker pointers
 static uint32_t P_ThinkerToIndex (thinker_t* thinker)
 {
     thinker_t*	th;
@@ -464,7 +464,7 @@ static uint32_t P_ThinkerToIndex (thinker_t* thinker)
     return 0;
 }
 
-// replace indizes with corresponding pointers
+// [crispy] replace indizes with corresponding pointers
 static thinker_t* P_IndexToThinker (uint32_t index)
 {
     thinker_t*	th;
@@ -578,7 +578,7 @@ static void saveg_write_mobj_t(mobj_t *str)
 
     // struct mobj_s* target;
     //saveg_writep(str->target);
-    // instead of the actual pointer, store the
+    // [crispy] instead of the actual pointer, store the
     // corresponding index in the mobj->target field
     saveg_writep((void *)(uintptr_t) P_ThinkerToIndex((thinker_t *) str->target));
 
@@ -606,7 +606,7 @@ static void saveg_write_mobj_t(mobj_t *str)
 
     // struct mobj_s* tracer;
     //saveg_writep(str->tracer);
-    // instead of the actual pointer, store the
+    // [crispy] instead of the actual pointer, store the
     // corresponding index in the mobj->tracers field
     saveg_writep((void *)(uintptr_t) P_ThinkerToIndex((thinker_t *) str->tracer));
 }
@@ -1581,7 +1581,7 @@ void P_WriteSaveGameEOF(void)
     saveg_write8(SAVEGAME_EOF);
 }
 
-// after all the thinkers have been restored, replace all indices in
+// [crispy] after all the thinkers have been restored, replace all indices in
 // the mobj->target and mobj->tracers fields by the corresponding current pointers again
 void P_RestoreTargets (void)
 {

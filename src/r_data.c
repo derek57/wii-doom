@@ -39,7 +39,7 @@
 #include "r_data.h"
 #include "r_local.h"
 #include "r_sky.h"
-#include "v_trans.h"
+#include "v_trans.h" // [crispy] tranmap, CRMAX
 #include "w_wad.h"
 #include "z_zone.h"
 
@@ -178,8 +178,8 @@ fixed_t*         spritetopoffset;
 
 short**          texturecolumnlump;
 
-unsigned**       texturecolumnofs; // fix Medusa bug
-unsigned**	 texturecolumnofs2; // original column offsets for single-patched textures
+unsigned**       texturecolumnofs; // [crispy] fix Medusa bug
+unsigned**	 texturecolumnofs2; // [crispy] original column offsets for single-patched textures
 
 byte**           texturecomposite;
 
@@ -199,10 +199,44 @@ extern byte*     tranmap;
 
 
 
+// [crispy] replace R_DrawColumnInCache(), R_GenerateComposite() and R_GenerateLookup()
+// with Lee Killough's implementations found in MBF to fix Medusa bug
+// taken from mbfsrc/R_DATA.C:136-425
+
+// Emacs style mode select   -*- C++ -*-
+//-----------------------------------------------------------------------------
 //
+// $Id: r_data.c,v 1.23 1998/05/23 08:05:57 killough Exp $
+//
+//  Copyright (C) 1999 by
+//  id Software, Chi Hoang, Lee Killough, Jim Flynn, Rand Phares, Ty Halderman
+//
+//  This program is free software; you can redistribute it and/or
+//  modify it under the terms of the GNU General Public License
+//  as published by the Free Software Foundation; either version 2
+//  of the License, or (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program; if not, write to the Free Software
+//  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 
+//  02111-1307, USA.
+//
+// DESCRIPTION:
+//      Preparation of data for rendering,
+//      generation of lookups, caching, retrieval by name.
+//
+//-----------------------------------------------------------------------------
+
 // R_DrawColumnInCache
 // Clip and draw a column
 //  from a patch into a cached post.
+//
+// Rewritten by Lee Killough for performance and to fix Medusa bug
 //
 void
 R_DrawColumnInCache
@@ -250,6 +284,8 @@ R_DrawColumnInCache
 //  the composite texture is created from the patches,
 //  and each column is cached.
 //
+// Rewritten by Lee Killough for performance and to fix Medusa bug
+//
 void R_GenerateComposite(int texnum)
 {
     byte*		block;
@@ -281,7 +317,7 @@ void R_GenerateComposite(int texnum)
     // killough 4/9/98: marks to identify transparent regions in merged textures
     marks = calloc(texture->width, texture->height);
 
-    // initialize composite background to black (index 0)
+    // [crispy] initialize composite background to black (index 0)
     memset(block, 0, texturecompositesize[texnum]);
 
     for (i=0 , patch = texture->patches;
@@ -319,7 +355,7 @@ void R_GenerateComposite(int texnum)
 	}
     }
 
-    // Next, convert multipatched columns into true columns,
+    // killough 4/9/98: Next, convert multipatched columns into true columns,
     // to fix Medusa bug while still allowing for transparent regions.
     // temporary column
     source = malloc(texture->height); // temporary column
@@ -337,7 +373,7 @@ void R_GenerateComposite(int texnum)
             // reconstruct the column by scanning transparency marks
             for (;;)
             {
-                unsigned len;
+                unsigned len; // killough 12/98
 
                 // skip transparent cells
                 while (j < texture->height && !mark[j])
@@ -353,11 +389,13 @@ void R_GenerateComposite(int texnum)
                 // starting offset of post
                 col->topdelta = j;
 
+                // killough 12/98
                 // Use 32-bit len counter, to support tall 1s multipatched textures
                 for (len = 0; j < texture->height && mark[j]; j++)
                     // count opaque cells
                     len++;
 
+                // killough 12/98
                 // intentionally truncate length
                 col->length = len;
 
@@ -378,6 +416,8 @@ void R_GenerateComposite(int texnum)
 
 //
 // R_GenerateLookup
+//
+// Rewritten by Lee Killough for performance and to fix Medusa bug
 //
 void R_GenerateLookup(int texnum)
 {
@@ -560,7 +600,7 @@ R_GetColumn
     ofs = texturecolumnofs[tex][col];
     ofs2 = texturecolumnofs2[tex][col];
     
-    // single-patched mid-textures on two-sided walls
+    // [crispy] single-patched mid-textures on two-sided walls
     if (lump > 0 && !opaque)
 	return (byte *)W_CacheLumpNum(lump,PU_CACHE)+ofs2;
 
@@ -744,7 +784,8 @@ void R_InitTextures (void)
             patch->patch = patchlookup[SHORT(mpatch->patch)];
             if (patch->patch == -1)
             {
-                I_Error ("R_InitTextures: Missing patch in texture %s",
+		// [crispy] make non-fatal
+                C_Printf (CR_GOLD, " R_InitTextures: Missing patch in texture %s",
                          texture->name);
             }
         }                
@@ -845,7 +886,8 @@ void R_InitSpriteLumps (void)
 //
 // R_InitTranMap
 //
-// Initialize translucency filter map
+// [crispy] Initialize translucency filter map
+// based in parts on the implementation from boom202s/R_DATA.C:676-787
 //
 void R_InitTranMap()
 {
@@ -856,7 +898,7 @@ void R_InitTranMap()
     {
         // Set a pointer to the translucency filter maps.
         tranmap = W_CacheLumpNum(lump, PU_STATIC);
-        printf(":"); // loaded from a lump
+        printf(":"); // [crispy] loaded from a lump
     }
     else
     {
@@ -867,32 +909,32 @@ void R_InitTranMap()
 
         struct {
             unsigned char pct;
-            unsigned char playpal[256*3]; // a palette has 768 bytes!
+            unsigned char playpal[256*3]; // [crispy] a palette has 768 bytes!
         } cache;
 
         FILE *cachefp = fopen(fname = M_StringJoin(configdir,
-                              "tranmap.dat", NULL), "r+b"); // open file readable
+                              "tranmap.dat", NULL), "r+b"); // [crispy] open file readable
 
         tranmap = Z_Malloc(256*256, PU_STATIC, 0);
 
         // Use cached translucency filter if it's available
-        if (!cachefp ? cachefp = fopen(fname,"wb") , 1 : // if file not readable, open writable, continue
-            fread(&cache, 1, sizeof cache, cachefp) != sizeof cache || // could not read struct cache from file
-            cache.pct != tran_filter_pct || // filter percents differ
-            memcmp(cache.playpal, playpal, sizeof cache.playpal) || // base palettes differ
-            fread(tranmap, 256, 256, cachefp) != 256 ) // could not read entire translucency map
+        if (!cachefp ? cachefp = fopen(fname,"wb") , 1 : // [crispy] if file not readable, open writable, continue
+            fread(&cache, 1, sizeof cache, cachefp) != sizeof cache || // [crispy] could not read struct cache from file
+            cache.pct != tran_filter_pct || // [crispy] filter percents differ
+            memcmp(cache.playpal, playpal, sizeof cache.playpal) || // [crispy] base palettes differ
+            fread(tranmap, 256, 256, cachefp) != 256 ) // [crispy] could not read entire translucency map
         {
         byte *fg, *bg, blend[3], *tp = tranmap;
         int i, j, btmp;
         extern int FindNearestColor(byte *palette, int r, int g, int b);
 
-        // background color
+        // [crispy] background color
         for (i = 0; i < 256; i++)
         {
-            // foreground color
+            // [crispy] foreground color
             for (j = 0; j < 256; j++)
             {
-                // shortcut: identical foreground and background
+                // [crispy] shortcut: identical foreground and background
                 if (i == j)
                 {
                     *tp++ = i;
@@ -902,7 +944,7 @@ void R_InitTranMap()
                 bg = playpal + 3*i;
                 fg = playpal + 3*j;
 
-                // blended color - emphasize blues
+                // [crispy] blended color - emphasize blues
                 // Colour matching in RGB space doesn't work very well with the blues
                 // in Doom's palette. Rather than do any colour conversions, just
                 // emphasize the blues when building the translucency table.
@@ -918,18 +960,18 @@ void R_InitTranMap()
         // write out the cached translucency map
         if (cachefp)
         {
-            cache.pct = tran_filter_pct; // set filter percents
-            memcpy(cache.playpal, playpal, sizeof cache.playpal); // set base palette
-            fseek(cachefp, 0, SEEK_SET); // go to start of file
-            fwrite(&cache, 1, sizeof cache, cachefp); // write struct cache
-            fwrite(tranmap, 256, 256, cachefp); // write translucency map
-            printf("!"); // generated and saved
+            cache.pct = tran_filter_pct; // [crispy] set filter percents
+            memcpy(cache.playpal, playpal, sizeof cache.playpal); // [crispy] set base palette
+            fseek(cachefp, 0, SEEK_SET); // [crispy] go to start of file
+            fwrite(&cache, 1, sizeof cache, cachefp); // [crispy] write struct cache
+            fwrite(tranmap, 256, 256, cachefp); // [crispy] write translucency map
+            printf("!"); // [crispy] generated and saved
         }
         else
-            printf("?"); // generated, but not saved
+            printf("?"); // [crispy] generated, but not saved
         }
         else
-            printf("."); // loaded from a file
+            printf("."); // [crispy] loaded from a file
 
         if (cachefp)
             fclose(cachefp);
@@ -952,7 +994,7 @@ void R_InitColormaps (void)
     lump = W_GetNumForName(DEH_String("COLORMAP"));
     colormaps = W_CacheLumpNum(lump, PU_STATIC);
 
-    // initialize color translation and color strings tables
+    // [crispy] initialize color translation and color strings tables
     {
         byte *playpal = W_CacheLumpName("PLAYPAL", PU_STATIC);
 
@@ -1000,7 +1042,7 @@ void R_InitData (void)
 
     R_InitSpriteLumps ();
 
-    R_InitTranMap();
+    R_InitTranMap(); // [crispy] prints a mark itself
 //    printf (".");
 
     R_InitColormaps ();
@@ -1044,6 +1086,7 @@ int R_FlatNumForName (char* name)
         namet[8] = 0;
         memcpy (namet, name,8);
 */
+	// [crispy] make non-fatal
         if(replace_missing)
         {
             i = W_CheckNumForName ("FLOOR0_1");
@@ -1234,6 +1277,7 @@ int R_TextureNumForName (char* name)
 
     if (i==-1)
     {
+	// [crispy] make non-fatal
         if(replace_missing)
         {
             i = R_CheckTextureNumForName ("BROWN1");

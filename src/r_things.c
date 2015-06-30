@@ -38,7 +38,7 @@
 #include "i_system.h"
 #include "p_local.h"
 #include "r_local.h"
-#include "v_trans.h"
+#include "v_trans.h" // [crispy] colored blood sprites
 #include "w_wad.h"
 #include "z_zone.h"
 
@@ -69,16 +69,16 @@ char*                  spritename;
 
 // constant arrays
 //  used for psprite clipping and initializing clipping
-int                    negonearray[SCREENWIDTH];          // CHANGED FOR HIRES
-int                    screenheightarray[SCREENWIDTH];    // CHANGED FOR HIRES
+int                    negonearray[SCREENWIDTH];          // [crispy] 32-bit integer math
+int                    screenheightarray[SCREENWIDTH];    // [crispy] 32-bit integer math
 int                    numsprites;
 int                    maxframe;
 int                    newvissprite;
 
-int*                   mfloorclip;                        // CHANGED FOR HIRES
-int*                   mceilingclip;                      // CHANGED FOR HIRES
+int*                   mfloorclip;                        // [crispy] 32-bit integer math
+int*                   mceilingclip;                      // [crispy] 32-bit integer math
 
-int64_t                sprtopscreen;                      // WiggleFix
+int64_t                sprtopscreen;                      // [crispy] WiggleFix
 
 static int             num_vissprite, num_vissprite_alloc, num_vissprite_ptrs;
 
@@ -375,7 +375,7 @@ vissprite_t* R_NewVisSprite (void)
         static int max;
         int numvissprites_old = num_vissprite_alloc;
 
-        // cap MAXVISSPRITES limit at 4096
+        // [crispy] cap MAXVISSPRITES limit at 4096
         if (!max && num_vissprite_alloc == 32 * 128)
         {
             C_Printf(CR_GOLD, " R_NewVisSprite: MAXVISSPRITES limit capped at %d.\n", num_vissprite_alloc);
@@ -406,12 +406,12 @@ vissprite_t* R_NewVisSprite (void)
 
 void R_DrawMaskedColumn (column_t* column, signed int baseclip)
 {
-    int64_t            topscreen;                         // WiggleFix
-    int64_t            bottomscreen;                      // WiggleFix
+    int64_t            topscreen;                         // [crispy] WiggleFix
+    int64_t            bottomscreen;                      // [crispy] WiggleFix
     fixed_t            basetexturemid;
         
     basetexturemid = dc_texturemid;
-    dc_texheight = 0;                                     // Tutti-Frutti fix
+    dc_texheight = 0;                                     // [crispy] Tutti-Frutti fix
         
     for ( ; column->topdelta != 0xff ; ) 
     {
@@ -420,8 +420,8 @@ void R_DrawMaskedColumn (column_t* column, signed int baseclip)
         topscreen = sprtopscreen + spryscale*column->topdelta;
         bottomscreen = topscreen + spryscale*column->length;
 
-        dc_yl = (int)((topscreen+FRACUNIT-1)>>FRACBITS);  // WiggleFix
-        dc_yh = (int)((bottomscreen-1)>>FRACBITS);        // WiggleFix
+        dc_yl = (int)((topscreen+FRACUNIT-1)>>FRACBITS);  // [crispy] WiggleFix
+        dc_yh = (int)((bottomscreen-1)>>FRACBITS);        // [crispy] WiggleFix
                 
         if (dc_yh >= mfloorclip[dc_x])
             dc_yh = mfloorclip[dc_x]-1;
@@ -480,14 +480,14 @@ R_DrawVisSprite
         dc_translation = translationtables - 256 +
             ( (vis->mobjflags & MF_TRANSLATION) >> (MF_TRANSSHIFT-8) );
     }
-    // color-translated sprites (i.e. blood)
+    // [crispy] color-translated sprites (i.e. blood)
     else if (vis->translation)
     {
         colfunc = transcolfunc;
         dc_translation = vis->translation;
     }
         
-    // translucent sprites
+    // [crispy] translucent sprites
     if (d_translucency && dc_colormap &&
         ((vis->mobjflags & MF_TRANSLUCENT) ||
         ((vis->mobjflags & MF_SHADOW) && TRANSLUCENT_SHADOW)))
@@ -517,10 +517,19 @@ R_DrawVisSprite
 
     for (dc_x=vis->x1 ; dc_x<=vis->x2 ; dc_x++, frac += vis->xiscale)
     {
+	static boolean error = 0;
         texturecolumn = frac>>FRACBITS;
 #ifdef RANGECHECK
         if (texturecolumn < 0 || texturecolumn >= SHORT(patch->width))
-            I_Error ("R_DrawSpriteRange: bad texturecolumn");
+	{
+	    // [crispy] make non-fatal
+	    if (!error)
+	    {
+                C_Printf (CR_GOLD, " R_DrawSpriteRange: bad texturecolumn\n");
+                error++;
+            }
+	    continue;
+	}
 #endif
         column = (column_t *) ((byte *)patch +
                                LONG(patch->columnofs[texturecolumn]));
@@ -578,7 +587,7 @@ void R_ProjectSprite (mobj_t* thing)
 
     sector_t           *sector = thing->subsector->sector;
 
-    // Interpolate between current and last position,
+    // [AM] Interpolate between current and last position,
     // if prudent.
     if (d_uncappedframerate &&
         // Don't interpolate if the mobj did something 
@@ -702,7 +711,7 @@ void R_ProjectSprite (mobj_t* thing)
     // killough 3/27/98: save sector for special clipping later
     vis->heightsec = heightsec;
 
-    // no color translation
+    // [crispy] no color translation
     vis->translation = NULL;
 
     vis->mobjflags = thing->flags;
@@ -752,7 +761,7 @@ void R_ProjectSprite (mobj_t* thing)
     vis->x2 = x2 >= viewwidth ? viewwidth-1 : x2;        
     iscale = FixedDiv (FRACUNIT, xscale);
 
-    // flip death sprites and corpses randomly
+    // [crispy] flip death sprites and corpses randomly
     if (!netgame && ((thing->type != MT_CYBORG &&
         thing->flags & MF_CORPSE && thing->health & 1) || thing->flags2 & MF2_MIRRORED))
     {
@@ -775,7 +784,7 @@ void R_ProjectSprite (mobj_t* thing)
     vis->patch = lump;
     
     // get light level
-    // do not invalidate colormap if invisibility is rendered translucently
+    // [crispy] do not invalidate colormap if invisibility is rendered translucently
     if (thing->flags & MF_SHADOW && !TRANSLUCENT_SHADOW)
     {
         // shadow draw
@@ -802,12 +811,12 @@ void R_ProjectSprite (mobj_t* thing)
         vis->colormap = spritelights[index];
     }        
 
-    // colored blood
+    // [crispy] colored blood
     if (d_colblood && d_chkblood && thing->target &&
        (thing->type == MT_BLOOD ||
         thing->type == MT_GORE))
     {
-        // Thorn Things in Hacx bleed green blood
+        // [crispy] Thorn Things in Hacx bleed green blood
         if (gamemission == pack_hacx)
         {
             if (thing->target->type == MT_BABY)
@@ -817,14 +826,14 @@ void R_ProjectSprite (mobj_t* thing)
         }
         else
         {
-            // Barons of Hell and Hell Knights bleed green blood
+            // [crispy] Barons of Hell and Hell Knights bleed green blood
             if (thing->target->type == MT_BRUISER ||
                 thing->target->type == MT_BETABRUISER ||
                 thing->target->type == MT_KNIGHT)
             {
                 vis->translation = crx[CRX_GREEN];
             }
-            // Cacodemons bleed blue blood
+            // [crispy] Cacodemons bleed blue blood
             else if (thing->target->type == MT_HEAD ||
                      thing->target->type == MT_BETAHEAD)
             {
@@ -924,13 +933,15 @@ void R_DrawPSprite (pspdef_t* psp, psprnum_t psprnum)
     // store information in a vissprite
     vis = &avis;
 
-    // no color translation
+    // [crispy] no color translation
     vis->translation = NULL;
 
     vis->mobjflags = 0;
     vis->mobjflags2 = 0;
     vis->psprite = true;
-    vis->texturemid = (BASEYCENTER << FRACBITS) - (psp->sy - spritetopoffset[lump]); // HIRES
+
+    vis->texturemid = (BASEYCENTER << FRACBITS) - (psp->sy - spritetopoffset[lump]);
+
     vis->x1 = x1 < 0 ? 0 : x1;
     vis->x2 = x2 >= viewwidth ? viewwidth-1 : x2;        
     vis->footclip = 0;
@@ -953,7 +964,7 @@ void R_DrawPSprite (pspdef_t* psp, psprnum_t psprnum)
 
     vis->patch = lump;
 
-    // do not invalidate colormap if invisibility is rendered translucently
+    // [crispy] do not invalidate colormap if invisibility is rendered translucently
     if ((viewplayer->powers[pw_invisibility] > 4*32
         || viewplayer->powers[pw_invisibility] & 8)
         && !TRANSLUCENT_SHADOW && !beta_style)
@@ -977,7 +988,7 @@ void R_DrawPSprite (pspdef_t* psp, psprnum_t psprnum)
         vis->colormap = spritelights[MAXLIGHTSCALE-1];
     }
         
-    // invisibility is rendered translucently
+    // [crispy] invisibility is rendered translucently
     if ((viewplayer->powers[pw_invisibility] > 4*32 ||
         viewplayer->powers[pw_invisibility] & 8) &&
         TRANSLUCENT_SHADOW)
@@ -985,7 +996,7 @@ void R_DrawPSprite (pspdef_t* psp, psprnum_t psprnum)
         vis->mobjflags |= MF_TRANSLUCENT;
     }
 
-    // translucent gun flash sprites
+    // [crispy] translucent gun flash sprites
     if (psprnum == ps_flash && (!beta_style ||
                                ( beta_style && player->readyweapon != wp_chaingun)))
         vis->mobjflags |= MF_TRANSLUCENT;
@@ -1067,7 +1078,7 @@ void R_DrawPlayerSprites (void)
          i++,psp++)
     {
         if (psp->state)
-            R_DrawPSprite (psp, i);
+            R_DrawPSprite (psp, i); // [crispy] pass gun or flash sprite
     }
 }
 
@@ -1163,8 +1174,8 @@ void R_DrawSprite (vissprite_t* spr)
 {
     drawseg_t*         ds;
 
-    int                clipbot[SCREENWIDTH];                        // CHANGED FOR HIRES
-    int                cliptop[SCREENWIDTH];                        // CHANGED FOR HIRES
+    int                clipbot[SCREENWIDTH]; // [crispy] 32-bit integer math
+    int                cliptop[SCREENWIDTH]; // [crispy] 32-bit integer math
     int                x;
     int                r1;
     int                r2;

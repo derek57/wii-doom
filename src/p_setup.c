@@ -97,8 +97,8 @@ fixed_t            bmaporgy;
 static int         totallines;
 
 // offsets in blockmap are from here
-int64_t*           blockmaplump; // BLOCKMAP limit
-int64_t*           blockmap;     // BLOCKMAP limit (int for larger maps)
+int64_t*           blockmaplump; // [crispy] BLOCKMAP limit
+int64_t*           blockmap;     // [crispy] BLOCKMAP limit (int for larger maps)
 
 boolean            createblockmap = false;
 
@@ -272,6 +272,7 @@ void P_LoadSubsectors (int lump)
     subsectors = Z_Malloc (numsubsectors*sizeof(subsector_t),PU_LEVEL,0);        
     data = W_CacheLumpNum (lump,PU_STATIC);
         
+    // [crispy] fail on missing subsectors
     if(!data || !numsubsectors)
         C_Printf(CR_RED, " P_LoadSubsectors: No subsectors in map!");
 
@@ -300,11 +301,19 @@ void P_LoadSectors (int lump)
     mapsector_t*    ms;
     sector_t*       ss;
         
+    // [crispy] fail on missing sectors
+    if (lump >= numlumps)
+	I_Error("P_LoadSectors: No sectors in map!");
+
     numsectors = W_LumpLength (lump) / sizeof(mapsector_t);
     sectors = Z_Malloc (numsectors*sizeof(sector_t),PU_LEVEL,0);        
     memset (sectors, 0, numsectors*sizeof(sector_t));
     data = W_CacheLumpNum (lump,PU_STATIC);
         
+    // [crispy] fail on missing sectors
+    if (!data || !numsectors)
+	I_Error("P_LoadSectors: No sectors in map!");
+
     ms = (mapsector_t *)data;
     ss = sectors;
     for (i=0 ; i<numsectors ; i++, ss++, ms++)
@@ -318,10 +327,10 @@ void P_LoadSectors (int lump)
         ss->tag = SHORT(ms->tag);
         ss->thinglist = NULL;
 
-        // WiggleFix: [kb] for R_FixWiggle()
+        // [crispy] WiggleFix: [kb] for R_FixWiggle()
         ss->cachedheight = 0;
 
-        // Sector interpolation.  Even if we're
+        // [AM] Sector interpolation.  Even if we're
         // not running uncapped, the renderer still
         // uses this data.
         ss->oldfloorheight = ss->floor_height;
@@ -355,6 +364,15 @@ void P_LoadNodes (int lump)
     nodes = Z_Malloc (numnodes*sizeof(node_t),PU_LEVEL,0);        
     data = W_CacheLumpNum (lump,PU_STATIC);
         
+    // [crispy] warn about missing nodes
+    if (!data || !numnodes)
+    {
+	if (numsubsectors == 1)
+	    C_Printf(CR_GOLD, " P_LoadNodes: No nodes in map, but only one subsector.\n");
+	else
+	    I_Error("P_LoadNodes: No nodes in map!");
+    }
+
     mn = (mapnode_t *)data;
     no = nodes;
     
@@ -415,6 +433,17 @@ void P_LoadThings (int lump)
                 break;
             }
         }
+	// [crispy] do not spawn Wolf SS in BFG Edition
+	else
+	{
+	    // [crispy] BFG Edition MAP33 "Betray" still has Wolf SS
+	    if (bfgedition && !netgame && mt->type == 84)
+	    {
+	        // [crispy] spawn Former Human instead
+	        mt->type = 3004;
+	    }
+	}
+
         if (spawn == false)
             break;
 
@@ -444,6 +473,7 @@ void P_LoadLineDefs (int lump)
     line_t*         ld;
     vertex_t*       v1;
     vertex_t*       v2;
+    int             warn; // [crispy] warn about unknown linedef types
         
     numlines = W_LumpLength (lump) / sizeof(maplinedef_t);
     lines = Z_Malloc (numlines*sizeof(line_t),PU_LEVEL,0);        
@@ -452,11 +482,20 @@ void P_LoadLineDefs (int lump)
         
     mld = (maplinedef_t *)data;
     ld = lines;
+    warn = 0; // [crispy] warn about unknown linedef types
     for (i=0 ; i<numlines ; i++, mld++, ld++)
     {
         ld->flags = SHORT(mld->flags);
         ld->special = SHORT(mld->special);
         ld->tag = SHORT(mld->tag);
+
+	// [crispy] warn about unknown linedef types
+	if ((unsigned short) ld->special > 141)
+	{
+	    C_Printf(CR_GOLD, " P_LoadLineDefs: Unknown special %d at line %d\n", ld->special, i);
+	    warn++;
+	}
+
         v1 = ld->v1 = &vertexes[SHORT(mld->v1)];
         v2 = ld->v2 = &vertexes[SHORT(mld->v2)];
         ld->dx = v2->x - v1->x;
@@ -545,6 +584,13 @@ void P_LoadLineDefs (int lump)
             ld->backsector = 0;
     }
 
+    // [crispy] warn about unknown linedef types
+    if (warn)
+    {
+	C_Printf(CR_GOLD, " P_LoadLineDefs: Found %d line%s with unknown linedef type.\n"
+	                "THIS MAP MAY NOT WORK AS EXPECTED!\n", warn, (warn > 1) ? "s" : "");
+    }
+
     W_ReleaseLumpNum(lump);
 }
 
@@ -580,7 +626,7 @@ void P_LoadSideDefs (int lump)
 }
 
 
-// taken from mbfsrc/P_SETUP.C:547-707, slightly adapted
+// [crispy] taken from mbfsrc/P_SETUP.C:547-707, slightly adapted
 static void P_CreateBlockMap(void)
 {
     register int i;
@@ -729,7 +775,7 @@ static void P_CreateBlockMap(void)
 
         free(bmap);    // Free uncompressed blockmap
 
-    // copied over from P_LoadBlockMap()
+    // [crispy] copied over from P_LoadBlockMap()
     count = sizeof(*blocklinks) * bmapwidth * bmapheight;
     blocklinks = Z_Malloc(count, PU_LEVEL, 0);
     memset(blocklinks, 0, count);
@@ -746,7 +792,7 @@ void P_LoadBlockMap (int lump)
     int   lumplen;
     short *wadblockmaplump;
 
-    // (re-)create BLOCKMAP if necessary
+    // [crispy] (re-)create BLOCKMAP if necessary
     if (lump >= numlumps ||
         (lumplen = W_LumpLength(lump)) < 8 ||
         (count = lumplen / 2) >= 0x10000)
@@ -756,7 +802,7 @@ void P_LoadBlockMap (int lump)
         return;
     }
 
-    // remove BLOCKMAP limit
+    // [crispy] remove BLOCKMAP limit
     // adapted from boom202s/P_SETUP.C:1025-1076
     wadblockmaplump = Z_Malloc(lumplen, PU_LEVEL, NULL);
     W_ReadLump(lump, wadblockmaplump);
@@ -956,7 +1002,7 @@ void P_GroupLines (void)
 //
 // Firelines (TM) is a Rezistered Trademark of MBF Productions
 //
-// Mostly taken from Lee Killough's implementation in mbfsrc/P_SETUP.C:849-924,
+// [crispy] Mostly taken from Lee Killough's implementation in mbfsrc/P_SETUP.C:849-924,
 // with the exception that not the actual vertex coordinates are modified,
 // but pseudovertexes which are dummies that are *only* used in rendering,
 // i.e. r_bsp.c:R_AddLine()
@@ -970,19 +1016,19 @@ static void P_RemoveSlimeTrails(void)
         const line_t *l = segs[i].linedef;
         vertex_t *v = segs[i].v1;
 
-        // ignore exactly vertical or horizontal linedefs
+        // [crispy] ignore exactly vertical or horizontal linedefs
         if (l->dx && l->dy)
         {
             do
             {
-                // vertex wasn't already moved
+                // [crispy] vertex wasn't already moved
                 if (!v->moved)
                 {
                     v->moved = true;
-                    // ignore endpoints of linedefs
+                    // [crispy] ignore endpoints of linedefs
                     if (v != l->v1 && v != l->v2)
                     {
-                        // move the vertex towards the linedef
+                        // [crispy] move the vertex towards the linedef
                         // by projecting it using the law of cosines
                         int64_t dx2 = (l->dx >> FRACBITS) * (l->dx >> FRACBITS);
                         int64_t dy2 = (l->dy >> FRACBITS) * (l->dy >> FRACBITS);
@@ -990,12 +1036,12 @@ static void P_RemoveSlimeTrails(void)
                         int64_t s = dx2 + dy2;
                         int x0 = v->x, y0 = v->y, x1 = l->v1->x, y1 = l->v1->y;
 
-                        // MBF actually overrides v->x and v->y here
+                        // [crispy] MBF actually overrides v->x and v->y here
                         v->px = (fixed_t)((dx2 * x0 + dy2 * x1 + dxy * (y0 - y1)) / s);
                         v->py = (fixed_t)((dy2 * y0 + dx2 * y1 + dxy * (x0 - x1)) / s);
                     }
                 }
-            // if v doesn't point to the second vertex of the seg already, point it there
+            // [crispy] if v doesn't point to the second vertex of the seg already, point it there
             } while ((v != segs[i].v2) && (v = segs[i].v2));
         }
     }
@@ -1171,7 +1217,7 @@ P_SetupLevel
 
     P_LoadLineDefs (lumpnum+ML_LINEDEFS);
 
-    // (re-)create BLOCKMAP if necessary
+    // [crispy] (re-)create BLOCKMAP if necessary
     if (createblockmap)
         P_CreateBlockMap();
 
@@ -1182,7 +1228,7 @@ P_SetupLevel
     P_GroupLines ();
     P_LoadReject (lumpnum+ML_REJECT);
 
-    // remove slime trails
+    // [crispy] remove slime trails
     P_RemoveSlimeTrails();
 
     bodyqueslot = 0;

@@ -101,7 +101,7 @@
 #define F_PANINC         4
 
 // translates between frame-buffer and map distances
-// fix int overflow that causes map and grid lines to disappear
+// [crispy] fix int overflow that causes map and grid lines to disappear
 #define FTOM(x) (((int64_t)((x)<<16) * scale_ftom) >> FRACBITS)
 #define MTOF(x) ((((int64_t)(x) * scale_mtof) >> FRACBITS)>>16)
 
@@ -1364,6 +1364,7 @@ void AM_Drawer (void)
     if (!automapactive)
         return;
 
+    // [crispy] automap-overlay
     if (!am_overlay)
         AM_clearFB(BACKGROUND);
 
