@@ -1901,7 +1901,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_dmact,                // activesound
         MF_SOLID|MF_SHOOTABLE|MF_FLOAT|MF_NOGRAVITY|MF_COUNTKILL, // flags
-        MF2_NOLIQUIDBOB, // flags2
+        MF2_NOLIQUIDBOB | MF2_NOFOOTCLIP, // flags2
         S_HEAD_RAISE1,                // raisestate
         NULL,       // namepointer
     },
@@ -2133,7 +2133,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_dmact,                // activesound
         MF_SOLID|MF_SHOOTABLE|MF_FLOAT|MF_NOGRAVITY|MF_COUNTKILL,                // flags
-        MF2_NOLIQUIDBOB,                          // flags2
+        MF2_NOLIQUIDBOB | MF2_NOFOOTCLIP,                          // flags2
         S_PAIN_RAISE1,                // raisestate
         NULL,       // namepointer
     },
@@ -6572,7 +6572,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_dmact,                // activesound
         MF_SOLID|MF_SHOOTABLE|MF_FLOAT|MF_NOGRAVITY|MF_COUNTKILL, // flags
-        MF2_NOLIQUIDBOB, // flags2
+        MF2_NOLIQUIDBOB | MF2_NOFOOTCLIP, // flags2
         S_BETAHEAD_RAISE1,                // raisestate
         NULL,       // namepointer
     },
