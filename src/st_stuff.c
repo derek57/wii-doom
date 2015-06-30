@@ -5,6 +5,9 @@
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 //
+// Copyright (C) 2015 by Brad Harding: - Status Bar changes (Extra HUD)
+//                                     - (Key Card modification for locked doors)
+//
 // This source is available for distribution and/or modification
 // only under the terms of the DOOM Source Code License as
 // published by id Software. All rights reserved.
