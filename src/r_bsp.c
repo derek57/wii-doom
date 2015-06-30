@@ -262,7 +262,7 @@ void R_ClearClipSegs (void)
     newend = solidsegs+2;
 }
 
-// Interpolate the passed sector, if prudent.
+// [AM] Interpolate the passed sector, if prudent.
 void R_MaybeInterpolateSector(sector_t* sector)
 {
     if (d_uncappedframerate &&
@@ -366,7 +366,7 @@ void R_AddLine (seg_t*     line)
     if (!backsector)
         goto clipsolid;                
 
-    // Interpolate sector movement before
+    // [AM] Interpolate sector movement before
     // running clipping tests.  Frontsector
     // should already be interpolated.
     R_MaybeInterpolateSector(backsector);
@@ -545,7 +545,7 @@ void R_Subsector (int num)
     count = sub->numlines;
     line = &segs[sub->firstline];
 
-    // Interpolate sector movement.  Usually only needed
+    // [AM] Interpolate sector movement.  Usually only needed
     // when you're standing inside the sector.
     R_MaybeInterpolateSector(frontsector);
 

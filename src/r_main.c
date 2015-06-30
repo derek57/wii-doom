@@ -90,7 +90,7 @@ fixed_t                    viewz;
 fixed_t                    viewcos;
 fixed_t                    viewsin;
 
-// Fractional part of the current tic, in the half-open
+// [AM] Fractional part of the current tic, in the half-open
 //      range of [0.0, 1.0).  Used for interpolation.
 fixed_t                    fractionaltic;
 
@@ -441,7 +441,7 @@ void R_InitPointToAngle (void)
 
 
 
-// Interpolate between two angles.
+// [AM] Interpolate between two angles.
 angle_t R_InterpolateAngle(angle_t oangle, angle_t nangle, fixed_t scale)
 {
     if (nangle == oangle)
@@ -831,7 +831,7 @@ void R_SetupFrame (player_t* player)
 
     viewplayer = player;
 
-    // Interpolate the player camera if the feature is enabled.
+    // [AM] Interpolate the player camera if the feature is enabled.
 
     // Figure out how far into the current tic we're in as a fixed_t
     if (d_uncappedframerate)

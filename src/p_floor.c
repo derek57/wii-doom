@@ -126,7 +126,7 @@ T_MovePlane
     boolean      flag;
     fixed_t      lastpos;
         
-    // Store old sector heights for interpolation.
+    // [AM] Store old sector heights for interpolation.
     sector->oldfloorheight = sector->floor_height;
     sector->oldceilingheight = sector->ceiling_height;
     sector->oldgametic = gametic;

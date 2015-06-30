@@ -568,7 +568,7 @@ void P_MobjThinker (mobj_t* mobj)
     mobj_t   *onmo;
     sector_t *sector = mobj->subsector->sector;
 
-    // Handle interpolation unless we're an active player.
+    // [AM] Handle interpolation unless we're an active player.
     if (!(mobj->player != NULL && mobj == mobj->player->mo))
     {
         // Assume we can interpolate at the beginning
@@ -745,10 +745,10 @@ P_SpawnMobj
     else 
         mobj->z = z;
 
-    // Do not interpolate on spawn.
+    // [AM] Do not interpolate on spawn.
     mobj->interp = false;
 
-    // Just in case interpolation is attempted...
+    // [AM] Just in case interpolation is attempted...
     mobj->oldx = mobj->x;
     mobj->oldy = mobj->y;
     mobj->oldz = mobj->z;

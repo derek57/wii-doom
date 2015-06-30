@@ -214,7 +214,7 @@ P_TeleportMove
     thing->x = x;
     thing->y = y;
     
-    // Don't interpolate mobjs that pass
+    // [AM] Don't interpolate mobjs that pass
     // through teleporters
     thing->interp = false;
  
