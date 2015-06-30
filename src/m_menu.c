@@ -4853,10 +4853,10 @@ void M_Drawer (void)
     // FOR PSP (if too many menu items)
     if (currentMenu->menuitems[itemOn].status == 5)
         max += FirstKey;
-
+/*
     if(extra_wad_loaded == 1 && currentMenu == &SoundDef)
         currentMenu->numitems = 4;
-
+*/
     if(!devparm && currentMenu == &OptionsDef)
         currentMenu->numitems = 5;
 
