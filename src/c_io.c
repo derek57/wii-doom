@@ -139,8 +139,8 @@ char *upper =
     ":<+>?\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0{\\}^_`ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 };
 
-byte            *c_tempscreen;
-byte            *c_blurredscreen;
+byte            c_tempscreen[SCREENWIDTH * SCREENHEIGHT];
+byte            c_blurredscreen[SCREENWIDTH * SCREENHEIGHT];
 
 byte            inputcolor = 4;
 byte            whitecolor = 80;
@@ -158,6 +158,8 @@ byte            consoletintcolor = 5;
 
 byte            consolecolors[STRINGTYPES];
 
+int             consoleedgecolor1 = 105;
+int             consoleedgecolor2 = 100;
 
 void C_Printf(stringtype_t type, char *string, ...)
 {
@@ -255,8 +257,9 @@ void C_Init(void)
     consolecolors[green] = greencolor;     // green = 120
     consolecolors[divider] = dividercolor; // divider = 0 (linked to red color)
 
-    c_tempscreen = Z_Malloc(SCREENWIDTH * SCREENHEIGHT, PU_STATIC, NULL);
-    c_blurredscreen = Z_Malloc(SCREENWIDTH * SCREENHEIGHT, PU_STATIC, NULL);
+    consoletintcolor <<= 8;
+    consoleedgecolor1 <<= 8;
+    consoleedgecolor2 <<= 8;
 }
 
 void C_HideConsole(void)
@@ -309,13 +312,13 @@ static void C_DrawBackground(int height)
 //    blurred = (consoleheight == CONSOLEHEIGHT && !wipe);
 
     for (i = 0; i < height; ++i)
-        screens[0][i] = tinttab50[c_blurredscreen[i] + (consoletintcolor << 8)];
+        screens[0][i] = tinttab50[c_blurredscreen[i] + consoletintcolor];
 
     for (i = height - SCREENWIDTH * 3; i < height - SCREENWIDTH * 2; ++i)
-        screens[0][i] = tinttab25[((consolebrandingcolor + 5) << 8) + screens[0][i]];
+        screens[0][i] = tinttab25[consoleedgecolor1 + screens[0][i]];
 
     for (i = height - SCREENWIDTH * 2; i < height; ++i)
-        screens[0][i] = tinttab25[(consolebrandingcolor << 8) + screens[0][i]];
+        screens[0][i] = tinttab25[consoleedgecolor2 + screens[0][i]];
 }
 
 static struct
