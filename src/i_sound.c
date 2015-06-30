@@ -179,19 +179,9 @@ static void InitMusicModule(void)
 
 void I_InitSound(boolean use_sfx_prefix)
 {  
-    // Initialize the sound and music subsystems.
-
-    // This is kind of a hack. If native MIDI is enabled, set up
-    // the TIMIDITY_CFG environment variable here before SDL_mixer
-    // is opened.
-
-    if (/*!nomusic &&*/ (snd_musicdevice == SNDDEVICE_GENMIDI || snd_musicdevice == SNDDEVICE_GUS))
-    {
-        I_InitTimidityConfig();
-    }
+    // Initialize the sound subsystem.
 
     InitSfxModule(use_sfx_prefix);
-    InitMusicModule();
 }
 
 void I_ShutdownSound(void)
@@ -199,11 +189,6 @@ void I_ShutdownSound(void)
     if (sound_module != NULL)
     {
         sound_module->Shutdown();
-    }
-
-    if (music_module != NULL)
-    {
-        music_module->Shutdown();
     }
 }
 
@@ -305,11 +290,26 @@ void I_PrecacheSounds(sfxinfo_t *sounds, int num_sounds)
 
 void I_InitMusic(void)
 {
+    // Initialize the music subsystems.
+
+    // This is kind of a hack. If native MIDI is enabled, set up
+    // the TIMIDITY_CFG environment variable here before SDL_mixer
+    // is opened.
+
+    if (/*!nomusic &&*/ (snd_musicdevice == SNDDEVICE_GENMIDI || snd_musicdevice == SNDDEVICE_GUS))
+    {
+        I_InitTimidityConfig();
+    }
+
+    InitMusicModule();
 }
 
 void I_ShutdownMusic(void)
 {
-
+    if (music_module != NULL)
+    {
+        music_module->Shutdown();
+    }
 }
 
 void I_SetMusicVolume(int volume)
