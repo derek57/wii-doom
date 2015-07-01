@@ -1759,6 +1759,9 @@ void G_ExitLevel (void)
 { 
     player_t *player = &players[consoleplayer];
     player->item = 0;
+
+    if(consoleactive)
+        C_HideConsoleFast();
 /*
     if(gamemap > 1)
         game_startup = false;
