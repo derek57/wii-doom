@@ -108,6 +108,7 @@ static int        maxbraintargets;     // [crispy] remove braintargets limit
 
 extern int        numspechit;
 extern int        snd_module;
+extern int        gore_amount;
 
 boolean           on_ground;
 
@@ -2321,6 +2322,7 @@ void A_MoreGibs(mobj_t* actor)
         mobj_t* mo;
         angle_t an;
         int t;
+        int numchunks = gore_amount;
 
         if((actor->type == MT_SKULL ||
                actor->type == MT_BETASKULL) && d_colblood2 && d_chkblood2)
@@ -2329,53 +2331,58 @@ void A_MoreGibs(mobj_t* actor)
             goto skip;
         }
 
-        // max gore - ludicrous gibs
-        mo = P_SpawnMobj(actor->x, actor->y, actor->z + (24*FRACUNIT), MT_FLESH);
-
-        // added for colored blood and gore!
-        mo->target = actor;
-
-        P_SetMobjState(mo, mo->info->spawnstate + (P_Random() % 19));
-
-        an = (P_Random() << 13) / 255;
-        mo->angle = an << ANGLETOFINESHIFT;
-
-        mo->momx = FixedMul(finecosine[an], (P_Random() & 0x0f) << FRACBITS);
-        mo->momy = FixedMul(finesine[an], (P_Random() & 0x0f) << FRACBITS);
-        mo->momz = (P_Random() & 0x0f) << FRACBITS;
-
-        on_ground = (actor->z <= actor->floorz);
-
-        if(on_ground)
+        do
         {
-            t = P_Random() % 9;
-
-            if((t == 0 || t == 1 || t == 2 || t == 3 || t == 4 || t == 5 || 
-                t == 6 || t == 7 || t == 8 || t == 9) && t != old_u)
-            {
-                if(!snd_module)
-                    S_StartSound(actor, sfx_splsh0 + t);
-
-                old_u = t;
-            }
-        }
-
-        // even more ludicrous gore
-        if(d_maxgore && !(actor->flags & MF_NOBLOOD))
-        {
-            mobj_t *gore = P_SpawnMobj(actor->x,
-                                       actor->y,
-                                       actor->z + (32*FRACUNIT), MT_GORE);
+            // max gore - ludicrous gibs
+            mo = P_SpawnMobj(actor->x, actor->y, actor->z + (24*FRACUNIT), MT_FLESH);
 
             // added for colored blood and gore!
-            gore->target = mo;
+            mo->target = actor;
 
-            gore->angle = mo->angle;
+            P_SetMobjState(mo, mo->info->spawnstate + (P_Random() % 19));
 
-            gore->momx = mo->momx;
-            gore->momy = mo->momy;
-            gore->momz = mo->momz;
+            an = (P_Random() << 13) / 255;
+            mo->angle = an << ANGLETOFINESHIFT;
+
+            mo->momx = FixedMul(finecosine[an], (P_Random() & 0x0f) << FRACBITS);
+            mo->momy = FixedMul(finesine[an], (P_Random() & 0x0f) << FRACBITS);
+            mo->momz = (P_Random() & 0x0f) << FRACBITS;
+
+            on_ground = (actor->z <= actor->floorz);
+
+            if(on_ground)
+            {
+                t = P_Random() % 9;
+
+                if((t == 0 || t == 1 || t == 2 || t == 3 || t == 4 || t == 5 || 
+                    t == 6 || t == 7 || t == 8 || t == 9) && t != old_u)
+                {
+                    if(!snd_module)
+                        S_StartSound(actor, sfx_splsh0 + t);
+
+                    old_u = t;
+                }
+            }
+
+            // even more ludicrous gore
+            if(d_maxgore && !(actor->flags & MF_NOBLOOD))
+            {
+                mobj_t *gore = P_SpawnMobj(actor->x,
+                                           actor->y,
+                                           actor->z + (32*FRACUNIT), MT_GORE);
+
+                // added for colored blood and gore!
+                gore->target = mo;
+
+                gore->angle = mo->angle;
+
+                gore->momx = mo->momx;
+                gore->momy = mo->momy;
+                gore->momz = mo->momz;
+            }
         }
+        while(--numchunks > 0);
+
         skip: ;
     }
 }

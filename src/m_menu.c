@@ -863,8 +863,8 @@ int                        cheeting;
 int                        coordinates_info = 0;
 int                        timer_info = 0;
 int                        version_info = 0;
-int                        key_controls_start_in_cfg_at_pos = 51;
-int                        key_controls_end_in_cfg_at_pos = 64;
+int                        key_controls_start_in_cfg_at_pos = 52;
+int                        key_controls_end_in_cfg_at_pos = 65;
 int                        crosshair = 0;
 int                        show_stats = 0;
 int                        tracknum = 1;
@@ -883,6 +883,7 @@ int                        chaingun_tics = 4;
 int                        snd_module = 0;
 int                        snd_chans = 1;
 int                        sound_channels = 8;
+int                        gore_amount = 4;
 
 //
 // MENU TYPEDEFS
@@ -1066,6 +1067,7 @@ void M_Trails(int choice);
 void M_ChaingunTics(int choice);
 void M_FallingDamage(int choice);
 void M_InfiniteAmmo(int choice);
+void M_GoreAmount(int choice);
 void M_NoMonsters(int choice);
 void M_AutomapOverlay(int choice);
 
@@ -1688,35 +1690,37 @@ enum
     game_maprotation,
     game_followmode,
     game_statistics,
-    game_hud,
+    game_overlay,
+    game_timer,
     game_messages,
-    game_crosshair,
     game_jumping,
     game_weapon,
     game_recoil,
     game_thrust,
     game_respawn,
     game_fast,
+    game_aiming,
     game_game2,
     game_end
 } game_e;
 
 menuitem_t GameMenu[]=
 {
-    {2,"MAP GRID",M_MapGrid,'g'},
-    {2,"MAP ROTATION",M_MapRotation,'r'},
-    {2,"MAP FOLLOW MODE",M_FollowMode,'f'},
-    {2,"MAP STATISTICS",M_Statistics,'s'},
-    {2,"EXTRA HUD",M_HUD,'h'},
+    {2,"AUTOMAP GRID",M_MapGrid,'g'},
+    {2,"AUTOMAP ROTATION",M_MapRotation,'r'},
+    {2,"AUTOMAP FOLLOW MODE",M_FollowMode,'f'},
+    {2,"AUTOMAP STATISTICS",M_Statistics,'s'},
+    {2,"AUTOMAP OVERLAY",M_AutomapOverlay,'n'},
+    {2,"AUTOMAP TIMER",M_Timer,'t'},
     {2,"MESSAGES",M_ChangeMessages,'m'},
-    {2,"CROSSHAIR",M_Crosshair,'x'},
     {2,"JUMPING",M_Jumping,'j'},
     {2,"WEAPON CHANGE",M_WeaponChange,'w'},
     {2,"WEAPON RECOIL",M_WeaponRecoil,'c'},
     {2,"PLAYER THRUST",M_PlayerThrust,'p'},
-    {2,"RESPAWN MONSTERS",M_RespawnMonsters,'t'},
+    {2,"RESPAWN MONSTERS",M_RespawnMonsters,'i'},
     {2,"FAST MONSTERS",M_FastMonsters,'d'},
-    {2,"",M_Game2,'n'}
+    {2,"",NULL,'a'},
+    {2,"",M_Game2,'2'}
 };
 
 menu_t  GameDef =
@@ -1725,14 +1729,14 @@ menu_t  GameDef =
     &OptionsDef,
     GameMenu,
     M_DrawGame,
-    85,22,
+    75,22,
     0
 };
 
 enum
 {
-    game2_autoaim,
-    game2_gore,
+    game2_monsters,
+    game2_hud,
     game2_footstep,
     game2_footclip,
     game2_splash,
@@ -1750,8 +1754,8 @@ enum
 
 menuitem_t GameMenu2[]=
 {
-    {2,"AUTOAIM",M_Autoaim,'a'},
-    {2,"MORE BLOOD & GORE",M_MaxGore,'o'},
+    {2,"NO MONSTERS",M_NoMonsters,'m'},
+    {2,"FULLSCREEN HUD",M_HUD,'h'},
     {2,"PLAYER FOOTSTEPS",M_Footstep,'s'},
     {2,"HERETIC FOOTCLIPS",M_Footclip,'c'},
     {2,"HERETIC LIQUID SPLASH",M_Splash,'l'},
@@ -1778,21 +1782,23 @@ menu_t  GameDef2 =
 
 enum
 {
-    game3_overlay,
-    game3_timer,
+    game3_crosshair,
+    game3_gore,
     game3_blooda,
     game3_bloodb,
-    game3_monsters,
+    game3_amount,
+    game2_autoaim,
     game3_end
 } game3_e;
 
 menuitem_t GameMenu3[]=
 {
-    {2,"AUTOMAP OVERLAY",M_AutomapOverlay,'n'},
-    {2,"Show Timer on map",M_Timer,'t'},
-    {2,"Enable Colored Blood",M_ColoredBloodA,'a'},
-    {2,"Fix Monster Blood",M_ColoredBloodB,'b'},
-    {2,"NO MONSTERS",M_NoMonsters,'m'}
+    {2,"CROSSHAIR",M_Crosshair,'x'},
+    {2,"MORE BLOOD & GORE",M_MaxGore,'o'},
+    {2,"Enable Colored Blood",M_ColoredBloodA,'b'},
+    {2,"Fix Monster Blood",M_ColoredBloodB,'2'},
+    {2,"Gore Amount",M_GoreAmount,'g'},
+    {2,"AUTOAIM",M_Autoaim,'a'}
 };
 
 menu_t  GameDef3 =
@@ -2812,28 +2818,46 @@ void M_DrawGame(void)
         if(aiming_help)
         {
             dp_translation = crx[CRX_GREEN];
-            M_WriteText(GameDef.x + 141, GameDef.y + 128, DEH_String("ON"));
+            M_WriteText(GameDef.x + 161, GameDef.y + 128, DEH_String("ON"));
             V_ClearDPTranslation();
         }
         else
         {
             dp_translation = crx[CRX_DARK];
-            M_WriteText(GameDef.x + 133, GameDef.y + 128, DEH_String("OFF"));
+            M_WriteText(GameDef.x + 153, GameDef.y + 128, DEH_String("OFF"));
             V_ClearDPTranslation();
         }
         M_WriteText(GameDef.x, GameDef.y + 128, DEH_String("AIMING HELP"));
     }
 
-    if((itemOn == 11 || itemOn == 12) && whichSkull == 1)
+    if(devparm)
     {
-        char *string = "YOU MUST START A NEW GAME TO TAKE EFFECT.";
-        int x = 160 - M_StringWidth(string) / 2;
-        dp_translation = crx[CRX_GOLD];
-        M_WriteText(x, GameDef.y + 138, DEH_String(string));
-        V_ClearDPTranslation();
+        if((itemOn == 11 || itemOn == 12) && whichSkull == 1)
+        {
+            char *string = "YOU MUST START A NEW GAME TO TAKE EFFECT.";
+            int x = 160 - M_StringWidth(string) / 2;
+            dp_translation = crx[CRX_GOLD];
+            M_WriteText(x, GameDef.y + 138, DEH_String(string));
+            V_ClearDPTranslation();
+        }
+        else
+        {
+            dp_translation = crx[CRX_GRAY];
+            M_WriteText(GameDef.x, GameDef.y + 138, DEH_String("MORE OPTIONS"));
+            V_ClearDPTranslation();
+        }
     }
     else
     {
+        if((itemOn == 11 || itemOn == 12) && whichSkull == 1)
+        {
+            char *string = "YOU MUST START A NEW GAME TO TAKE EFFECT.";
+            int x = 160 - M_StringWidth(string) / 2;
+            dp_translation = crx[CRX_GOLD];
+            M_WriteText(x, GameDef.y + 138, DEH_String(string));
+            V_ClearDPTranslation();
+        }
+
         dp_translation = crx[CRX_GRAY];
         M_WriteText(GameDef.x, GameDef.y + 128, DEH_String("MORE OPTIONS"));
         V_ClearDPTranslation();
@@ -2842,169 +2866,169 @@ void M_DrawGame(void)
     if(drawgrid == 1)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef.x + 141, GameDef.y - 2, DEH_String("ON"));
+        M_WriteText(GameDef.x + 161, GameDef.y - 2, DEH_String("ON"));
         V_ClearDPTranslation();
     }
     else if(drawgrid == 0)
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef.x + 133, GameDef.y - 2, DEH_String("OFF"));
+        M_WriteText(GameDef.x + 153, GameDef.y - 2, DEH_String("OFF"));
         V_ClearDPTranslation();
     }
 
     if(am_rotate == true)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef.x + 141, GameDef.y + 8, DEH_String("ON"));
+        M_WriteText(GameDef.x + 161, GameDef.y + 8, DEH_String("ON"));
         V_ClearDPTranslation();
     }
     else if(am_rotate == false)
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef.x + 133, GameDef.y + 8, DEH_String("OFF"));
+        M_WriteText(GameDef.x + 153, GameDef.y + 8, DEH_String("OFF"));
         V_ClearDPTranslation();
     }
 
     if(followplayer == 1)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef.x + 141, GameDef.y + 18, DEH_String("ON"));
+        M_WriteText(GameDef.x + 161, GameDef.y + 18, DEH_String("ON"));
         V_ClearDPTranslation();
     }
     else if(followplayer == 0)
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef.x + 133, GameDef.y + 18, DEH_String("OFF"));
+        M_WriteText(GameDef.x + 153, GameDef.y + 18, DEH_String("OFF"));
         V_ClearDPTranslation();
     }
 
     if(show_stats == 1)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef.x + 141, GameDef.y + 28, DEH_String("ON"));
+        M_WriteText(GameDef.x + 161, GameDef.y + 28, DEH_String("ON"));
         V_ClearDPTranslation();
     }
     else if (show_stats == 0)
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef.x + 133, GameDef.y + 28, DEH_String("OFF"));
+        M_WriteText(GameDef.x + 153, GameDef.y + 28, DEH_String("OFF"));
         V_ClearDPTranslation();
     }
 
-    if(hud)
+    if(overlay_trigger)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef.x + 141, GameDef.y + 38, DEH_String("ON"));
+        M_WriteText(GameDef.x + 161, GameDef.y + 38, DEH_String("ON"));
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef.x + 133, GameDef.y + 38, DEH_String("OFF"));
+        M_WriteText(GameDef.x + 153, GameDef.y + 38, DEH_String("OFF"));
+        V_ClearDPTranslation();
+    }
+
+    if(timer_info)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(GameDef.x + 161, GameDef.y + 48, DEH_String("ON"));
+        V_ClearDPTranslation();
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(GameDef.x + 153, GameDef.y + 48, DEH_String("OFF"));
         V_ClearDPTranslation();
     }
 
     if(showMessages)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef.x + 141, GameDef.y + 48, DEH_String("ON"));
+        M_WriteText(GameDef.x + 161, GameDef.y + 58, DEH_String("ON"));
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef.x + 133, GameDef.y + 48, DEH_String("OFF"));
-        V_ClearDPTranslation();
-    }
-
-    if(crosshair == 1)
-    {
-        dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef.x + 141, GameDef.y + 58, DEH_String("ON"));
-        V_ClearDPTranslation();
-    }
-    else if (crosshair == 0)
-    {
-        dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef.x + 133, GameDef.y + 58, DEH_String("OFF"));
+        M_WriteText(GameDef.x + 153, GameDef.y + 58, DEH_String("OFF"));
         V_ClearDPTranslation();
     }
 
     if(jumping)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef.x + 141, GameDef.y + 68, DEH_String("ON"));
+        M_WriteText(GameDef.x + 161, GameDef.y + 68, DEH_String("ON"));
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef.x + 133, GameDef.y + 68, DEH_String("OFF"));
+        M_WriteText(GameDef.x + 153, GameDef.y + 68, DEH_String("OFF"));
         V_ClearDPTranslation();
     }
 
     if(use_vanilla_weapon_change == 1)
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef.x + 125, GameDef.y + 78, DEH_String("SLOW"));
+        M_WriteText(GameDef.x + 145, GameDef.y + 78, DEH_String("SLOW"));
         V_ClearDPTranslation();
     }
     else if(use_vanilla_weapon_change == 0)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef.x + 126, GameDef.y + 78, DEH_String("FAST"));
+        M_WriteText(GameDef.x + 146, GameDef.y + 78, DEH_String("FAST"));
         V_ClearDPTranslation();
     }
 
     if(d_recoil)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef.x + 141, GameDef.y + 88, DEH_String("ON"));
+        M_WriteText(GameDef.x + 161, GameDef.y + 88, DEH_String("ON"));
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef.x + 133, GameDef.y + 88, DEH_String("OFF"));
+        M_WriteText(GameDef.x + 153, GameDef.y + 88, DEH_String("OFF"));
         V_ClearDPTranslation();
     }
 
     if(d_thrust)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef.x + 141, GameDef.y + 98, DEH_String("ON"));
+        M_WriteText(GameDef.x + 161, GameDef.y + 98, DEH_String("ON"));
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef.x + 133, GameDef.y + 98, DEH_String("OFF"));
+        M_WriteText(GameDef.x + 153, GameDef.y + 98, DEH_String("OFF"));
         V_ClearDPTranslation();
     }
 
     if(respawnparm)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef.x + 141, GameDef.y + 108, DEH_String("ON"));
+        M_WriteText(GameDef.x + 161, GameDef.y + 108, DEH_String("ON"));
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef.x + 133, GameDef.y + 108, DEH_String("OFF"));
+        M_WriteText(GameDef.x + 153, GameDef.y + 108, DEH_String("OFF"));
         V_ClearDPTranslation();
     }
 
     if(fastparm)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef.x + 141, GameDef.y + 118, DEH_String("ON"));
+        M_WriteText(GameDef.x + 161, GameDef.y + 118, DEH_String("ON"));
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef.x + 133, GameDef.y + 118, DEH_String("OFF"));
+        M_WriteText(GameDef.x + 153, GameDef.y + 118, DEH_String("OFF"));
         V_ClearDPTranslation();
     }
 }
@@ -3018,7 +3042,7 @@ void M_DrawGame2(void)
         V_DrawPatch(70, 0, 0, W_CacheLumpName(DEH_String("M_GMESET"),
                                                PU_CACHE));
 
-    if(autoaim)
+    if(not_monsters)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef2.x + 216, GameDef2.y - 2, DEH_String("ON"));
@@ -3031,7 +3055,7 @@ void M_DrawGame2(void)
         V_ClearDPTranslation();
     }
 
-    if(d_maxgore)
+    if(hud)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef2.x + 216, GameDef2.y + 8, DEH_String("ON"));
@@ -3199,6 +3223,15 @@ void M_DrawGame2(void)
         V_ClearDPTranslation();
     }
 
+    if(itemOn == 0 && whichSkull == 1)
+    {
+        char *string = "YOU MUST START A NEW GAME TO TAKE EFFECT.";
+        int x = 160 - M_StringWidth(string) / 2;
+        dp_translation = crx[CRX_GOLD];
+        M_WriteText(x, GameDef2.y + 138, DEH_String(string));
+        V_ClearDPTranslation();
+    }
+
     if(itemOn == 6 && whichSkull == 1)
     {
         char *string = "YOU MUST QUIT AND RESTART TO TAKE EFFECT.";
@@ -3207,12 +3240,10 @@ void M_DrawGame2(void)
         M_WriteText(x, GameDef2.y + 138, DEH_String(string));
         V_ClearDPTranslation();
     }
-    else
-    {
-        dp_translation = crx[CRX_GRAY];
-        M_WriteText(GameDef2.x, GameDef2.y + 128, DEH_String("EVEN MORE OPTIONS"));
-        V_ClearDPTranslation();
-    }
+
+    dp_translation = crx[CRX_GRAY];
+    M_WriteText(GameDef2.x, GameDef2.y + 128, DEH_String("EVEN MORE OPTIONS"));
+    V_ClearDPTranslation();
 }
 
 void M_DrawGame3(void)
@@ -3224,20 +3255,20 @@ void M_DrawGame3(void)
         V_DrawPatch(70, 0, 0, W_CacheLumpName(DEH_String("M_GMESET"),
                                                PU_CACHE));
 
-    if(overlay_trigger)
+    if(crosshair == 1)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef3.x + 208, GameDef3.y - 2, DEH_String("ON"));
+        M_WriteText(GameDef3.x + 208, GameDef3.y -2, DEH_String("ON"));
         V_ClearDPTranslation();
     }
-    else
+    else if (crosshair == 0)
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef3.x + 200, GameDef3.y - 2, DEH_String("OFF"));
+        M_WriteText(GameDef3.x + 200, GameDef3.y -2, DEH_String("OFF"));
         V_ClearDPTranslation();
     }
     
-    if(timer_info)
+    if(d_maxgore)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef3.x + 208, GameDef3.y + 8, DEH_String("ON"));
@@ -3276,25 +3307,47 @@ void M_DrawGame3(void)
         V_ClearDPTranslation();
     }
 
-    if(not_monsters)
+    if(gore_amount == 4)
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(GameDef3.x + 199, GameDef3.y + 38, DEH_String("LOW"));
+        V_ClearDPTranslation();
+    }
+    else if(gore_amount == 8)
+    {
+        dp_translation = crx[CRX_GOLD];
+        M_WriteText(GameDef3.x + 178, GameDef3.y + 38, DEH_String("MEDIUM"));
+        V_ClearDPTranslation();
+    }
+    else if(gore_amount == 12)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef3.x + 208, GameDef3.y + 38, DEH_String("ON"));
+        M_WriteText(GameDef3.x + 196, GameDef3.y + 38, DEH_String("HIGH"));
+        V_ClearDPTranslation();
+    }
+    else if(gore_amount == 16)
+    {
+        dp_translation = crx[CRX_BLUE];
+        M_WriteText(GameDef3.x + 168, GameDef3.y + 38, DEH_String("CARNAGE"));
+        V_ClearDPTranslation();
+    }
+    else if(gore_amount == 20)
+    {
+        dp_translation = crx[CRX_RED];
+        M_WriteText(GameDef3.x + 116, GameDef3.y + 38, DEH_String("RIP'EM TO PIECES"));
+        V_ClearDPTranslation();
+    }
+
+    if(autoaim)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(GameDef3.x + 208, GameDef3.y + 48, DEH_String("ON"));
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef3.x + 200, GameDef3.y + 38, DEH_String("OFF"));
-        V_ClearDPTranslation();
-    }
-
-    if(itemOn == 4 && whichSkull == 1)
-    {
-        char *string = "YOU MUST START A NEW GAME TO TAKE EFFECT.";
-        int x = 160 - M_StringWidth(string) / 2;
-        dp_translation = crx[CRX_GOLD];
-        M_WriteText(x, GameDef2.y + 138, DEH_String(string));
+        M_WriteText(GameDef3.x + 200, GameDef3.y + 48, DEH_String("OFF"));
         V_ClearDPTranslation();
     }
 }
@@ -4557,10 +4610,16 @@ boolean M_Responder (event_t* ev)
                     FirstKey++;
                 }
             }
-            else itemOn++;
-
-            if(!devparm && currentMenu == &KeyBindingsDef && itemOn == 11)
+            else
                 itemOn++;
+
+            if(!devparm)
+            {
+                if (currentMenu == &KeyBindingsDef && itemOn == 11)
+                    itemOn++;
+                else if (currentMenu == &GameDef && itemOn == 14)
+                    itemOn = 0;
+            }
             S_StartSound(NULL,sfx_pstop);
         } while((currentMenu->menuitems[itemOn].status==-1 && !devparm) ||
                 (currentMenu->menuitems[itemOn].status==-1 && currentMenu != &GameDef && devparm));
@@ -4585,10 +4644,15 @@ boolean M_Responder (event_t* ev)
                     FirstKey--;
                 }
             }
-            else itemOn--;
-
-            if(!devparm && currentMenu == &KeyBindingsDef && itemOn == 11)
+            else
                 itemOn--;
+
+            if(!devparm)
+            {
+                if((currentMenu == &KeyBindingsDef && itemOn == 11) ||
+                        (currentMenu == &GameDef && itemOn == 14))
+                    itemOn--;
+            }
             S_StartSound(NULL,sfx_pstop);
         } while((currentMenu->menuitems[itemOn].status==-1 && !devparm) ||
                 (currentMenu->menuitems[itemOn].status==-1 && currentMenu != &GameDef && devparm));
@@ -4642,16 +4706,16 @@ boolean M_Responder (event_t* ev)
                 currentMenu->menuitems[itemOn].routine(1);      // right arrow
                 S_StartSound(NULL,sfx_stnmov);
             }
-            else if(currentMenu == &GameDef && devparm && itemOn == 13)
-            {
-                S_StartSound(NULL,sfx_stnmov);
-                M_AimingHelp(1);
-            }
             else
             {
                 currentMenu->menuitems[itemOn].routine(itemOn);
                 S_StartSound(NULL,sfx_pistol);
             }
+        }
+        else if(currentMenu == &GameDef && !devparm && itemOn == 13)
+        {
+            S_StartSound(NULL,sfx_pistol);
+            M_Game2(ch);
         }
         return true;
     }
@@ -7114,6 +7178,22 @@ void M_InfiniteAmmo(int choice)
         players[consoleplayer].message = DEH_String("INFINITE AMMO HAS BEEN ENABLED");
         break;
     }
+}
+
+void M_GoreAmount(int choice)
+{
+    switch(choice)
+    {
+    case 0:
+        if (gore_amount > 4)
+            gore_amount -= 4;
+        break;
+    case 1:
+        if (gore_amount < 20)
+            gore_amount += 4;
+        break;
+    }
+    players[consoleplayer].message = DEH_String("THE AMOUNT OF GORE HAS BEEN ADJUSTED");
 }
 
 void M_NoMonsters(int choice)
