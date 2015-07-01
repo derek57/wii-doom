@@ -37,6 +37,7 @@ extern boolean respawnparm;
 extern boolean fastparm;
 extern boolean hud;
 extern boolean swap_sound_chans;
+extern boolean randompitch;
 
 extern int display_fps;
 extern int drawgrid;
@@ -179,6 +180,7 @@ void M_BindBaseControls(void)
     M_BindVariable("show_timer",             &timer_info);
     M_BindVariable("replace",                &replace_missing);
     M_BindVariable("goreamount",             &gore_amount);
+    M_BindVariable("random_pitch",           &randompitch);
     M_BindVariable("key_shoot",              &joy_r);
     M_BindVariable("key_open",               &joy_l);
     M_BindVariable("key_menu",               &joy_minus);

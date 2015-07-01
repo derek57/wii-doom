@@ -66,7 +66,6 @@
 
 #define S_STEREO_SWING (96 * FRACUNIT)
 
-#define NORM_PITCH 128
 #define NORM_PRIORITY 64
 #define NORM_SEP 128
 
@@ -438,12 +437,26 @@ static mobj_t *GetSoundListener(void)
     }
 }
 
+static int Clamp(int x)
+{
+    if (x < 0)
+    {
+        return 0;
+    }
+    else if (x > 255)
+    {
+        return 255;
+    }
+    return x;
+}
+
 void S_StartSound(void *origin_p, int sfx_id)
 {
     sfxinfo_t *sfx;
     mobj_t *origin;
     int rc;
     int sep;
+    int pitch;
     int cnum;
     int volume;
 
@@ -459,9 +472,12 @@ void S_StartSound(void *origin_p, int sfx_id)
     sfx = &S_sfx[sfx_id];
 
     // Initialize sound parameters
+    pitch = NORM_PITCH;
+
     if (sfx->link)
     {
         volume += sfx->volume;
+        pitch = sfx->pitch;
 
         if (volume < 1)
         {
@@ -500,6 +516,17 @@ void S_StartSound(void *origin_p, int sfx_id)
         sep = NORM_SEP;
     }
 
+    // hacks to vary the sfx pitches
+    if (sfx_id >= sfx_sawup && sfx_id <= sfx_sawhit)
+    {
+        pitch += 8 - (M_Random() & 15);
+    }
+    else if (sfx_id != sfx_itemup && sfx_id != sfx_tink)
+    {
+        pitch += 16 - (M_Random() & 31);
+    }
+    pitch = Clamp(pitch);
+
     // kill old sound
     S_StopSound(origin);
 
@@ -522,7 +549,8 @@ void S_StartSound(void *origin_p, int sfx_id)
         sfx->lumpnum = I_GetSfxLumpNum(sfx);
     }
 
-    channels[cnum].handle = I_StartSound(sfx, cnum, volume, sep);
+    channels[cnum].pitch = pitch;
+    channels[cnum].handle = I_StartSound(sfx, cnum, volume, sep, channels[cnum].pitch);
 
     if(!menuactive && devparm && !automapactive && sound_info && gamestate == GS_LEVEL && usergame)
     {

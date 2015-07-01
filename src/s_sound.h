@@ -48,6 +48,8 @@ typedef struct
 
     int sound_id;
 
+    int pitch;
+
 } channel_t;
 
 

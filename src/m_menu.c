@@ -863,8 +863,8 @@ int                        cheeting;
 int                        coordinates_info = 0;
 int                        timer_info = 0;
 int                        version_info = 0;
-int                        key_controls_start_in_cfg_at_pos = 52;
-int                        key_controls_end_in_cfg_at_pos = 65;
+int                        key_controls_start_in_cfg_at_pos = 53;
+int                        key_controls_end_in_cfg_at_pos = 66;
 int                        crosshair = 0;
 int                        show_stats = 0;
 int                        tracknum = 1;
@@ -926,6 +926,7 @@ boolean                    noclip_on;
 boolean                    dedicatedflag = true;
 boolean                    privateserverflag;
 boolean                    massacre_cheat_used;
+boolean                    randompitch;
 
 fixed_t                    forwardmove = 29;
 fixed_t                    sidemove = 21; 
@@ -1024,6 +1025,7 @@ void M_ClearMenus (void);
 void M_MusicType(int choice);
 void M_SoundType(int choice);
 void M_SoundOutput(int choice);
+void M_SoundPitch(int choice);
 void M_SoundChannels(int choice);
 void M_GameFiles(int choice);
 void M_Brightness(int choice);
@@ -1784,9 +1786,9 @@ enum
 {
     game3_crosshair,
     game3_gore,
+    game3_amount,
     game3_blooda,
     game3_bloodb,
-    game3_amount,
     game2_autoaim,
     game3_end
 } game3_e;
@@ -1795,9 +1797,9 @@ menuitem_t GameMenu3[]=
 {
     {2,"CROSSHAIR",M_Crosshair,'x'},
     {2,"MORE BLOOD & GORE",M_MaxGore,'o'},
+    {2,"Gore Amount",M_GoreAmount,'g'},
     {2,"Enable Colored Blood",M_ColoredBloodA,'b'},
     {2,"Fix Monster Blood",M_ColoredBloodB,'2'},
-    {2,"Gore Amount",M_GoreAmount,'g'},
     {2,"AUTOAIM",M_Autoaim,'a'}
 };
 
@@ -1847,6 +1849,7 @@ enum
     sfx_type,
     channels,
     output,
+    pitch,
     sound_end
 } sound_e;
 
@@ -1857,7 +1860,8 @@ menuitem_t SoundMenu[]=
     {2,"Music Type",M_MusicType,'t'},
     {2,"Sound Type",M_SoundType,'s'},
     {2,"Number of Sound Channels",M_SoundChannels,'c'},
-    {2,"Switch Left / Right Output",M_SoundOutput,'o'}
+    {2,"Switch Left / Right Output",M_SoundOutput,'o'},
+    {2,"Sound Pitch",M_SoundPitch,'p'}
 };
 
 menu_t  SoundDef =
@@ -2336,6 +2340,19 @@ void M_DrawSound(void)
         M_WriteText(SoundDef.x + 212, SoundDef.y + 48, "OFF");
         V_ClearDPTranslation();
     }
+
+    if(randompitch)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(SoundDef.x + 220, SoundDef.y + 58, "ON");
+        V_ClearDPTranslation();
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(SoundDef.x + 212, SoundDef.y + 58, "OFF");
+        V_ClearDPTranslation();
+    }
 }
 
 void M_Sound(int choice)
@@ -2449,6 +2466,25 @@ void M_SoundOutput(int choice)
         if(swap_sound_chans == false)
         {
             swap_sound_chans = true;
+        }
+        break;
+    }
+}
+
+void M_SoundPitch(int choice)
+{
+    switch(choice)
+    {
+    case 0:
+        if(randompitch == true)
+        {
+            randompitch = false;
+        }
+        break;
+    case 1:
+        if(randompitch == false)
+        {
+            randompitch = true;
         }
         break;
     }
@@ -3281,20 +3317,38 @@ void M_DrawGame3(void)
         V_ClearDPTranslation();
     }
 
-    if(d_colblood)
-    {
-        dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef3.x + 208, GameDef3.y + 18, DEH_String("ON"));
-        V_ClearDPTranslation();
-    }
-    else
+    if(gore_amount == 4)
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef3.x + 200, GameDef3.y + 18, DEH_String("OFF"));
+        M_WriteText(GameDef3.x + 199, GameDef3.y + 18, DEH_String("LOW"));
+        V_ClearDPTranslation();
+    }
+    else if(gore_amount == 8)
+    {
+        dp_translation = crx[CRX_GOLD];
+        M_WriteText(GameDef3.x + 178, GameDef3.y + 18, DEH_String("MEDIUM"));
+        V_ClearDPTranslation();
+    }
+    else if(gore_amount == 12)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(GameDef3.x + 196, GameDef3.y + 18, DEH_String("HIGH"));
+        V_ClearDPTranslation();
+    }
+    else if(gore_amount == 16)
+    {
+        dp_translation = crx[CRX_BLUE];
+        M_WriteText(GameDef3.x + 168, GameDef3.y + 18, DEH_String("CARNAGE"));
+        V_ClearDPTranslation();
+    }
+    else if(gore_amount == 20)
+    {
+        dp_translation = crx[CRX_RED];
+        M_WriteText(GameDef3.x + 116, GameDef3.y + 18, DEH_String("RIP'EM TO PIECES"));
         V_ClearDPTranslation();
     }
 
-    if(d_colblood2)
+    if(d_colblood)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef3.x + 208, GameDef3.y + 28, DEH_String("ON"));
@@ -3307,34 +3361,16 @@ void M_DrawGame3(void)
         V_ClearDPTranslation();
     }
 
-    if(gore_amount == 4)
-    {
-        dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef3.x + 199, GameDef3.y + 38, DEH_String("LOW"));
-        V_ClearDPTranslation();
-    }
-    else if(gore_amount == 8)
-    {
-        dp_translation = crx[CRX_GOLD];
-        M_WriteText(GameDef3.x + 178, GameDef3.y + 38, DEH_String("MEDIUM"));
-        V_ClearDPTranslation();
-    }
-    else if(gore_amount == 12)
+    if(d_colblood2)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef3.x + 196, GameDef3.y + 38, DEH_String("HIGH"));
+        M_WriteText(GameDef3.x + 208, GameDef3.y + 38, DEH_String("ON"));
         V_ClearDPTranslation();
     }
-    else if(gore_amount == 16)
+    else
     {
-        dp_translation = crx[CRX_BLUE];
-        M_WriteText(GameDef3.x + 168, GameDef3.y + 38, DEH_String("CARNAGE"));
-        V_ClearDPTranslation();
-    }
-    else if(gore_amount == 20)
-    {
-        dp_translation = crx[CRX_RED];
-        M_WriteText(GameDef3.x + 116, GameDef3.y + 38, DEH_String("RIP'EM TO PIECES"));
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(GameDef3.x + 200, GameDef3.y + 38, DEH_String("OFF"));
         V_ClearDPTranslation();
     }
 

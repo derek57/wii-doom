@@ -130,6 +130,7 @@ default_t        doom_defaults_list[] =
     CONFIG_VARIABLE_INT                (show_timer),
     CONFIG_VARIABLE_INT                (replace),
     CONFIG_VARIABLE_INT                (goreamount),
+    CONFIG_VARIABLE_INT                (random_pitch),
     CONFIG_VARIABLE_INT                (key_shoot),
     CONFIG_VARIABLE_INT                (key_open),
     CONFIG_VARIABLE_INT                (key_menu),
