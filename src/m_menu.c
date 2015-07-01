@@ -2830,39 +2830,6 @@ void M_DrawGame(void)
         M_WriteText(GameDef.x, GameDef.y + 128, DEH_String("AIMING HELP"));
     }
 
-    if(devparm)
-    {
-        if((itemOn == 11 || itemOn == 12) && whichSkull == 1)
-        {
-            char *string = "YOU MUST START A NEW GAME TO TAKE EFFECT.";
-            int x = 160 - M_StringWidth(string) / 2;
-            dp_translation = crx[CRX_GOLD];
-            M_WriteText(x, GameDef.y + 138, DEH_String(string));
-            V_ClearDPTranslation();
-        }
-        else
-        {
-            dp_translation = crx[CRX_GRAY];
-            M_WriteText(GameDef.x, GameDef.y + 138, DEH_String("MORE OPTIONS"));
-            V_ClearDPTranslation();
-        }
-    }
-    else
-    {
-        if((itemOn == 11 || itemOn == 12) && whichSkull == 1)
-        {
-            char *string = "YOU MUST START A NEW GAME TO TAKE EFFECT.";
-            int x = 160 - M_StringWidth(string) / 2;
-            dp_translation = crx[CRX_GOLD];
-            M_WriteText(x, GameDef.y + 138, DEH_String(string));
-            V_ClearDPTranslation();
-        }
-
-        dp_translation = crx[CRX_GRAY];
-        M_WriteText(GameDef.x, GameDef.y + 128, DEH_String("MORE OPTIONS"));
-        V_ClearDPTranslation();
-    }
-
     if(drawgrid == 1)
     {
         dp_translation = crx[CRX_GREEN];
@@ -3029,6 +2996,39 @@ void M_DrawGame(void)
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(GameDef.x + 153, GameDef.y + 118, DEH_String("OFF"));
+        V_ClearDPTranslation();
+    }
+
+    if(devparm)
+    {
+        if((itemOn == 11 || itemOn == 12) && whichSkull == 1)
+        {
+            char *string = "YOU MUST START A NEW GAME TO TAKE EFFECT.";
+            int x = 160 - M_StringWidth(string) / 2;
+            dp_translation = crx[CRX_GOLD];
+            M_WriteText(x, GameDef.y + 138, DEH_String(string));
+            V_ClearDPTranslation();
+        }
+        else
+        {
+            dp_translation = crx[CRX_GRAY];
+            M_WriteText(GameDef.x, GameDef.y + 138, DEH_String("MORE OPTIONS"));
+            V_ClearDPTranslation();
+        }
+    }
+    else
+    {
+        if((itemOn == 11 || itemOn == 12) && whichSkull == 1)
+        {
+            char *string = "YOU MUST START A NEW GAME TO TAKE EFFECT.";
+            int x = 160 - M_StringWidth(string) / 2;
+            dp_translation = crx[CRX_GOLD];
+            M_WriteText(x, GameDef.y + 138, DEH_String(string));
+            V_ClearDPTranslation();
+        }
+
+        dp_translation = crx[CRX_GRAY];
+        M_WriteText(GameDef.x, GameDef.y + 128, DEH_String("MORE OPTIONS"));
         V_ClearDPTranslation();
     }
 }
@@ -4897,7 +4897,7 @@ void M_Drawer (void)
         M_WriteText(message_offset, 160, DEH_String(message_string));
         V_ClearDPTranslation();
     }
-    else if(fsize == 12361532 && currentMenu == &GameDef2 && itemOn == 1 && whichSkull == 1)
+    else if(fsize == 12361532 && currentMenu == &GameDef3 && itemOn == 1 && whichSkull == 1)
     {
         char *message_string = "NO EXTRA BLOOD & GORE FOR CHEX QUEST.";
         int message_offset = 160 - M_StringWidth(message_string) / 2;
