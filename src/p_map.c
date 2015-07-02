@@ -114,6 +114,7 @@ line_t                 **spechit;
 static int             spechit_max;
 int                    numspechit;
 
+static boolean         telefrag;   /* killough 8/9/98: whether to telefrag at exit */
 
 
 //
@@ -144,8 +145,8 @@ boolean PIT_StompThing (mobj_t* thing)
         return true;
     
     // monsters don't stomp things except on boss level
-    if ( !tmthing->player && gamemap != 30)
-        return false;        
+    if (!telefrag)  // killough 8/9/98: make consistent across all levels
+        return false;
                 
     P_DamageMobj (thing, tmthing, tmthing, 10000);
         
@@ -160,7 +161,8 @@ boolean
 P_TeleportMove
 ( mobj_t*        thing,
   fixed_t        x,
-  fixed_t        y )
+  fixed_t        y,
+  boolean        boss)
 {
     int                        xl;
     int                        xh;
@@ -171,6 +173,9 @@ P_TeleportMove
     
     subsector_t*               newsubsec;
     
+    /* killough 8/9/98: make telefragging more consistent, preserve compatibility */
+    telefrag = thing->player || (!d_telefrag ? boss : (gamemap==30));
+
     // kill anything occupying the position
     tmthing = thing;
     tmflags = thing->flags;

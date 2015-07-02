@@ -863,8 +863,8 @@ int                        cheeting;
 int                        coordinates_info = 0;
 int                        timer_info = 0;
 int                        version_info = 0;
-int                        key_controls_start_in_cfg_at_pos = 53;
-int                        key_controls_end_in_cfg_at_pos = 66;
+int                        key_controls_start_in_cfg_at_pos = 56;
+int                        key_controls_end_in_cfg_at_pos = 69;
 int                        crosshair = 0;
 int                        show_stats = 0;
 int                        tracknum = 1;
@@ -1070,6 +1070,8 @@ void M_ChaingunTics(int choice);
 void M_FallingDamage(int choice);
 void M_InfiniteAmmo(int choice);
 void M_GoreAmount(int choice);
+void M_Telefrag(int choice);
+void M_Doorstuck(int choice);
 void M_NoMonsters(int choice);
 void M_AutomapOverlay(int choice);
 
@@ -1557,6 +1559,7 @@ enum
     screen_detail,
     screen_translucency,
     screen_wipe,
+    screen_framerate,
     screen_end
 } screen_e;
 
@@ -1566,7 +1569,8 @@ menuitem_t ScreenMenu[]=
     {2,"Screen Size",M_SizeDisplay,'s'},
     {2,"Detail",M_ChangeDetail,'d'},
     {2,"Translucency",M_Translucency,'t'},
-    {2,"Wipe Type",M_WipeType,'w'}
+    {2,"Wipe Type",M_WipeType,'w'},
+    {2,"Uncapped Framerate",M_UncappedFramerate,'f'}
 };
 
 menu_t  ScreenDef =
@@ -1790,6 +1794,8 @@ enum
     game3_blooda,
     game3_bloodb,
     game2_autoaim,
+    game2_telefrag,
+    game2_stuck,
     game3_end
 } game3_e;
 
@@ -1800,7 +1806,9 @@ menuitem_t GameMenu3[]=
     {2,"Gore Amount",M_GoreAmount,'g'},
     {2,"Enable Colored Blood",M_ColoredBloodA,'b'},
     {2,"Fix Monster Blood",M_ColoredBloodB,'2'},
-    {2,"AUTOAIM",M_Autoaim,'a'}
+    {2,"AUTOAIM",M_Autoaim,'a'},
+    {2,"Monsters Telefrag on MAP30",M_Telefrag,'t'},
+    {2,"Monsters stuck on doors",M_Doorstuck,'s'}
 };
 
 menu_t  GameDef3 =
@@ -2838,6 +2846,19 @@ void M_DrawScreen(void)
         M_WriteText(ScreenDef.x + 172, ScreenDef.y + 38, "MELT");
         V_ClearDPTranslation();
     }
+
+    if(d_uncappedframerate)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(ScreenDef.x + 189, ScreenDef.y + 48, "ON");
+        V_ClearDPTranslation();
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(ScreenDef.x + 181, ScreenDef.y + 48, "OFF");
+        V_ClearDPTranslation();
+    }
 }
 
 void M_DrawGame(void)
@@ -3384,6 +3405,32 @@ void M_DrawGame3(void)
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(GameDef3.x + 200, GameDef3.y + 48, DEH_String("OFF"));
+        V_ClearDPTranslation();
+    }
+
+    if(d_telefrag)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(GameDef3.x + 208, GameDef3.y + 58, DEH_String("ON"));
+        V_ClearDPTranslation();
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(GameDef3.x + 200, GameDef3.y + 58, DEH_String("OFF"));
+        V_ClearDPTranslation();
+    }
+
+    if(d_doorstuck)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(GameDef3.x + 208, GameDef3.y + 68, DEH_String("ON"));
+        V_ClearDPTranslation();
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(GameDef3.x + 200, GameDef3.y + 68, DEH_String("OFF"));
         V_ClearDPTranslation();
     }
 }
@@ -7212,6 +7259,40 @@ void M_InfiniteAmmo(int choice)
         if (!d_infiniteammo)
             d_infiniteammo = true;
         players[consoleplayer].message = DEH_String("INFINITE AMMO HAS BEEN ENABLED");
+        break;
+    }
+}
+
+void M_Telefrag(int choice)
+{
+    switch(choice)
+    {
+    case 0:
+        if (d_telefrag)
+            d_telefrag = false;
+        players[consoleplayer].message = DEH_String("MONSTERS DO TELEFRAG ON MAP30");
+        break;
+    case 1:
+        if (!d_telefrag)
+            d_telefrag = true;
+        players[consoleplayer].message = DEH_String("MONSTERS DON'T TELEFRAG ON MAP30");
+        break;
+    }
+}
+
+void M_Doorstuck(int choice)
+{
+    switch(choice)
+    {
+    case 0:
+        if (d_doorstuck)
+            d_doorstuck = false;
+        players[consoleplayer].message = DEH_String("MONSTERS WILL GET STUCK ON DOORTRACKS");
+        break;
+    case 1:
+        if (!d_doorstuck)
+            d_doorstuck = true;
+        players[consoleplayer].message = DEH_String("MONSTERS WON'T GET STUCK ON DOORTRACKS");
         break;
     }
 }

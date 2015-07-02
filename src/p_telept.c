@@ -108,7 +108,7 @@ EV_Teleport
                 oldy = thing->y;
                 oldz = thing->z;
                                 
-                if (!P_TeleportMove (thing, m->x, m->y))
+                if (!P_TeleportMove (thing, m->x, m->y, false)) /* killough 8/9/98 */
                     return 0;
 
                 // The first Final Doom executable does not set thing->z

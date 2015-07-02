@@ -353,7 +353,10 @@ boolean P_Move (mobj_t* actor)
             if (P_UseSpecialLine(actor, spechit[numspechit], 0))
                 good |= (spechit[numspechit] == blockline ? 1 : 2);
 
-        return (good && ((P_Random() >= 230) ^ (good & 1)));
+        if (!good || d_doorstuck)
+            return good;
+
+        return (P_Random() & 3); /* jff 8/13/98 */
     }
     else
     {
@@ -2269,7 +2272,7 @@ void A_SpawnFly (mobj_t* mo)
         P_SetMobjState (newmobj, newmobj->info->seestate);
         
     // telefrag anything in this spot
-    P_TeleportMove (newmobj, newmobj->x, newmobj->y);
+    P_TeleportMove (newmobj, newmobj->x, newmobj->y, true); /* killough 8/9/98 */
 
     if ((mo->z <= mo->floorz) && P_HitFloor(mo) && d_splash)
     {                           // Landed in some sort of liquid

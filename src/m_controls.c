@@ -165,7 +165,7 @@ void M_BindBaseControls(void)
     M_BindVariable("fixed_blood",            &d_colblood2);
     M_BindVariable("mirrored_corpses",       &d_flipcorpses);
     M_BindVariable("show_secrets",           &d_secrets);
-//    M_BindVariable("uncapped_framerate",     &d_uncappedframerate);
+    M_BindVariable("uncapped_framerate",     &d_uncappedframerate);
     M_BindVariable("opltype",                &opl_type);
     M_BindVariable("trails",                 &smoketrails);
     M_BindVariable("chaingun_speed",         &chaingun_tics);
@@ -181,6 +181,8 @@ void M_BindBaseControls(void)
     M_BindVariable("replace",                &replace_missing);
     M_BindVariable("goreamount",             &gore_amount);
     M_BindVariable("random_pitch",           &randompitch);
+    M_BindVariable("telefrag",               &d_telefrag);
+    M_BindVariable("doorstuck",              &d_doorstuck);
     M_BindVariable("key_shoot",              &joy_r);
     M_BindVariable("key_open",               &joy_l);
     M_BindVariable("key_menu",               &joy_minus);

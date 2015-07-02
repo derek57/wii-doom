@@ -68,6 +68,8 @@ boolean         d_infiniteammo = false;
 boolean         not_monsters = false;
 boolean         overlay_trigger = false;
 boolean         replace_missing = false;
+boolean         d_telefrag = false;
+boolean         d_doorstuck = false;
 
 int             d_colblood = 0;
 int             d_colblood2 = 0;

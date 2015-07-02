@@ -226,7 +226,7 @@ extern  line_t         *blockline;
 
 boolean P_CheckPosition (mobj_t *thing, fixed_t x, fixed_t y);
 boolean P_TryMove (mobj_t* thing, fixed_t x, fixed_t y);
-boolean P_TeleportMove (mobj_t* thing, fixed_t x, fixed_t y);
+boolean P_TeleportMove (mobj_t* thing, fixed_t x, fixed_t y, boolean boss);
 boolean P_CheckSight (mobj_t* t1, mobj_t* t2);
 boolean P_ChangeSector (sector_t* sector, boolean crunch);
 mobj_t *P_CheckOnmobj(mobj_t * thing);
