@@ -70,6 +70,7 @@ boolean         overlay_trigger = false;
 boolean         replace_missing = false;
 boolean         d_telefrag = false;
 boolean         d_doorstuck = false;
+boolean         d_resurrectghosts = false;
 
 int             d_colblood = 0;
 int             d_colblood2 = 0;

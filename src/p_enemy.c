@@ -1332,9 +1332,27 @@ boolean PIT_VileCheck (mobj_t*        thing)
                 
     corpsehit = thing;
     corpsehit->momx = corpsehit->momy = 0;
-    corpsehit->height <<= 2;
-    check = P_CheckPosition (corpsehit, corpsehit->x, corpsehit->y);
-    corpsehit->height >>= 2;
+
+    if (d_resurrectghosts)                                          // phares
+    {                                                               //   |
+        corpsehit->height <<= 2;                                    //   V
+        check = P_CheckPosition(corpsehit, corpsehit->x, corpsehit->y);
+        corpsehit->height >>= 2;
+    }
+    else
+    {
+        int height, radius;
+
+        height = corpsehit->height; // save temporarily
+        radius = corpsehit->radius; // save temporarily
+        corpsehit->height = corpsehit->info->height;
+        corpsehit->radius = corpsehit->info->radius;
+        corpsehit->flags |= MF_SOLID;
+        check = P_CheckPosition(corpsehit, corpsehit->x, corpsehit->y);
+        corpsehit->height = height; // restore
+        corpsehit->radius = radius; // restore                      //   ^
+        corpsehit->flags &= ~MF_SOLID;                              //   |
+    }                                                               // phares
 
     if (!check)
         return true;                // doesn't fit here
@@ -1395,7 +1413,15 @@ void A_VileChase (mobj_t* actor)
                     info = corpsehit->info;
                     
                     P_SetMobjState (corpsehit,info->raisestate);
-                    corpsehit->height <<= 2;
+
+                    if (d_resurrectghosts)                            // phares
+                        corpsehit->height <<= 2;                      //   |
+                    else                                              //   V
+                    {
+                        corpsehit->height = info->height; // fix Ghost bug
+                        corpsehit->radius = info->radius; // fix Ghost bug
+                    }                                                 // phares
+
                     corpsehit->flags = info->flags;
                     corpsehit->health = info->spawnhealth;
                     P_SetTarget(&corpsehit->target, NULL);

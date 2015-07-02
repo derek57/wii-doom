@@ -183,6 +183,7 @@ void M_BindBaseControls(void)
     M_BindVariable("random_pitch",           &randompitch);
     M_BindVariable("telefrag",               &d_telefrag);
     M_BindVariable("doorstuck",              &d_doorstuck);
+    M_BindVariable("resurrect_ghosts",       &d_resurrectghosts);
     M_BindVariable("key_shoot",              &joy_r);
     M_BindVariable("key_open",               &joy_l);
     M_BindVariable("key_menu",               &joy_minus);
