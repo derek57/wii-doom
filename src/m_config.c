@@ -134,6 +134,7 @@ default_t        doom_defaults_list[] =
     CONFIG_VARIABLE_INT                (telefrag),
     CONFIG_VARIABLE_INT                (doorstuck),
     CONFIG_VARIABLE_INT                (resurrect_ghosts),
+    CONFIG_VARIABLE_INT                (limited_ghosts),
     CONFIG_VARIABLE_INT                (key_shoot),
     CONFIG_VARIABLE_INT                (key_open),
     CONFIG_VARIABLE_INT                (key_menu),

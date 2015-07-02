@@ -1718,7 +1718,7 @@ A_PainShootSkull
 
     // if there are allready 20 skulls on the level,
     // don't spit another one
-    if (count > 20)
+    if (count > 20 && d_limitedghosts)
         return;
 
 

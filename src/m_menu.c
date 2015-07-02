@@ -863,8 +863,8 @@ int                        cheeting;
 int                        coordinates_info = 0;
 int                        timer_info = 0;
 int                        version_info = 0;
-int                        key_controls_start_in_cfg_at_pos = 57;
-int                        key_controls_end_in_cfg_at_pos = 70;
+int                        key_controls_start_in_cfg_at_pos = 58;
+int                        key_controls_end_in_cfg_at_pos = 71;
 int                        crosshair = 0;
 int                        show_stats = 0;
 int                        tracknum = 1;
@@ -1073,6 +1073,7 @@ void M_GoreAmount(int choice);
 void M_Telefrag(int choice);
 void M_Doorstuck(int choice);
 void M_ResurrectGhosts(int choice);
+void M_LimitedGhosts(int choice);
 void M_NoMonsters(int choice);
 void M_AutomapOverlay(int choice);
 
@@ -1797,7 +1798,8 @@ enum
     game3_autoaim,
     game3_telefrag,
     game3_stuck,
-    game3_ghosts,
+    game3_ressurection,
+    game3_limitation,
     game3_end
 } game3_e;
 
@@ -1811,7 +1813,8 @@ menuitem_t GameMenu3[]=
     {2,"AUTOAIM",M_Autoaim,'a'},
     {2,"Monsters Telefrag on MAP30",M_Telefrag,'t'},
     {2,"Monsters stuck on doors",M_Doorstuck,'s'},
-    {2,"ARCH-VILE resurrects ghosts",M_ResurrectGhosts,'r'}
+    {2,"ARCH-VILE resurrects ghosts",M_ResurrectGhosts,'r'},
+    {2,"P.-E.'s have limited ghosts",M_LimitedGhosts,'l'}
 };
 
 menu_t  GameDef3 =
@@ -3447,6 +3450,19 @@ void M_DrawGame3(void)
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(GameDef3.x + 200, GameDef3.y + 78, DEH_String("OFF"));
+        V_ClearDPTranslation();
+    }
+
+    if(d_limitedghosts)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(GameDef3.x + 208, GameDef3.y + 88, DEH_String("ON"));
+        V_ClearDPTranslation();
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(GameDef3.x + 200, GameDef3.y + 88, DEH_String("OFF"));
         V_ClearDPTranslation();
     }
 }
@@ -7326,6 +7342,23 @@ void M_ResurrectGhosts(int choice)
         if (!d_resurrectghosts)
             d_resurrectghosts = true;
         players[consoleplayer].message = DEH_String("ARCH-VILE WILL RESURRECT GHOSTS");
+        break;
+    }
+}
+
+void M_LimitedGhosts(int choice)
+{
+    switch(choice)
+    {
+    case 0:
+        if (d_limitedghosts)
+            d_limitedghosts = false;
+        players[consoleplayer].message = DEH_String("PAIN ELEMENTALS DO SPIT UNLIMITED GHOSTS");
+        break;
+    case 1:
+        if (!d_limitedghosts)
+            d_limitedghosts = true;
+        players[consoleplayer].message = DEH_String("PAIN ELEMENTALS DON'T SPIT UNLIMITED GHOSTS");
         break;
     }
 }
