@@ -116,6 +116,10 @@ int                    numspechit;
 
 static boolean         telefrag;   /* killough 8/9/98: whether to telefrag at exit */
 
+static int pe_x; // Pain Elemental position for Lost Soul checks // phares
+static int pe_y; // Pain Elemental position for Lost Soul checks // phares
+static int ls_x; // Lost Soul position for Lost Soul checks      // phares
+static int ls_y; // Lost Soul position for Lost Soul checks      // phares
 
 //
 // TELEPORT MOVE
@@ -1969,5 +1973,90 @@ mobj_t *P_CheckOnmobj(mobj_t * thing)
             }
     *tmthing = oldmo;
     return NULL;
+}
+
+//                                                                  // phares
+// PIT_CrossLine                                                    //   |
+// Checks to see if a PE->LS trajectory line crosses a blocking     //   V
+// line. Returns false if it does.
+//
+// tmbbox holds the bounding box of the trajectory. If that box
+// does not touch the bounding box of the line in question,
+// then the trajectory is not blocked. If the PE is on one side
+// of the line and the LS is on the other side, then the
+// trajectory is blocked.
+//
+// Currently this assumes an infinite line, which is not quite
+// correct. A more correct solution would be to check for an
+// intersection of the trajectory and the line, but that takes
+// longer and probably really isn't worth the effort.
+//
+
+// killough 3/26/98: make static
+static boolean PIT_CrossLine (line_t* ld)
+{
+    if (!(ld->flags & ML_TWOSIDED) || (ld->flags & (ML_BLOCKING | ML_BLOCKMONSTERS)))
+    {
+        if (!(tmbbox[BOXLEFT] > ld->bbox[BOXRIGHT]  ||
+            tmbbox[BOXRIGHT]  < ld->bbox[BOXLEFT]   ||
+            tmbbox[BOXTOP]    < ld->bbox[BOXBOTTOM] ||
+            tmbbox[BOXBOTTOM] > ld->bbox[BOXTOP]))
+        {
+            if (P_PointOnLineSide(pe_x, pe_y, ld) != P_PointOnLineSide(ls_x, ls_y, ld))
+                return(false);  // line blocks trajectory           //   ^
+        }                                                           //   |
+    }                                                               // phares
+    return(true); // line doesn't block trajectory
+}
+
+// This routine checks for Lost Souls trying to be spawned      // phares
+// across 1-sided lines, impassible lines, or "monsters can't   //   |
+// cross" lines. Draw an imaginary line between the PE          //   V
+// and the new Lost Soul spawn spot. If that line crosses
+// a 'blocking' line, then disallow the spawn. Only search
+// lines in the blocks of the blockmap where the bounding box
+// of the trajectory line resides. Then check bounding box
+// of the trajectory vs. the bounding box of each blocking
+// line to see if the trajectory and the blocking line cross.
+// Then check the PE and LS to see if they're on different
+// sides of the blocking line. If so, return true, otherwise
+// false.
+
+boolean Check_Sides(mobj_t* actor, int x, int y)
+{
+    int bx, by, xl, xh, yl, yh;
+
+    pe_x = actor->x;
+    pe_y = actor->y;
+    ls_x = x;
+    ls_y = y;
+
+    // Here is the bounding box of the trajectory
+
+    tmbbox[BOXLEFT]   = pe_x < x ? pe_x : x;
+    tmbbox[BOXRIGHT]  = pe_x > x ? pe_x : x;
+    tmbbox[BOXTOP]    = pe_y > y ? pe_y : y;
+    tmbbox[BOXBOTTOM] = pe_y < y ? pe_y : y;
+
+    // Determine which blocks to look in for blocking lines
+
+    xl = (tmbbox[BOXLEFT]   - bmaporgx) >> MAPBLOCKSHIFT;
+    xh = (tmbbox[BOXRIGHT]  - bmaporgx) >> MAPBLOCKSHIFT;
+    yl = (tmbbox[BOXBOTTOM] - bmaporgy) >> MAPBLOCKSHIFT;
+    yh = (tmbbox[BOXTOP]    - bmaporgy) >> MAPBLOCKSHIFT;
+
+    // xl->xh, yl->yh determine the mapblock set to search
+
+    validcount++; // prevents checking same line twice
+
+    for (bx = xl ; bx <= xh ; bx++)
+    {
+        for (by = yl ; by <= yh ; by++)
+        {
+            if (!P_BlockLinesIterator(bx, by, PIT_CrossLine))
+                return true;                                    //   ^
+        }                                                       //   |
+    }                                                           // phares
+    return(false);
 }
 

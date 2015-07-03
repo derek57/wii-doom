@@ -44,6 +44,9 @@
 #include "z_zone.h"
 
 
+#define    STAIRS_UNINITIALIZED_CRUSH_FIELD_VALUE    10
+
+
 fixed_t animatedliquiddiffs[128] =
 {
      3211,  3211,  3211,  3211,  3180,  3180,  3119,  3119,
@@ -127,6 +130,8 @@ T_MovePlane
 {
     boolean      flag;
     fixed_t      lastpos;
+    fixed_t      destheight; //jff 02/04/98 used to keep floors/ceilings
+                             // from moving thru each other
         
     // [AM] Store old sector heights for interpolation.
     sector->oldfloorheight = sector->floor_height;
@@ -159,7 +164,7 @@ T_MovePlane
                 lastpos = sector->floor_height;
                 sector->floor_height -= speed;
                 flag = P_ChangeSector(sector,crush);
-                if (flag == true)
+                if (flag == true && d_floors)
                 {
                     sector->floor_height = lastpos;
                     P_ChangeSector(sector,crush);
@@ -167,7 +172,7 @@ T_MovePlane
                     if (crush == 10)
                     {
                         C_Printf(CR_GOLD, " T_MovePlane: Stairs which can potentially crush may lead to desynch in compatibility mode.\n");
-                }
+                    }
                     return crushed;
                 }
             }
@@ -175,10 +180,12 @@ T_MovePlane
                                                 
           case 1:
             // UP
-            if (sector->floor_height + speed > dest)
+            destheight = (d_floors || dest < sector->ceiling_height)?
+                          dest : sector->ceiling_height;
+            if (sector->floor_height + speed > destheight)
             {
                 lastpos = sector->floor_height;
-                sector->floor_height = dest;
+                sector->floor_height = destheight;
                 flag = P_ChangeSector(sector,crush);
                 if (flag == true)
                 {
@@ -196,10 +203,19 @@ T_MovePlane
                 flag = P_ChangeSector(sector,crush);
                 if (flag == true)
                 {
-                    if (crush == true)
-                        return crushed;
+                    /* jff 1/25/98 fix floor crusher */
+                    if (d_floors)
+                    {
+                        //e6y: warning about potential desynch
+                        if (crush == STAIRS_UNINITIALIZED_CRUSH_FIELD_VALUE)
+                        {
+                            C_Printf(CR_GOLD, " T_MovePlane: Stairs which can potentially crush may lead to desynch.\n");
+                        }
+                        if (crush == true)
+                            return crushed;
+                    }
                     sector->floor_height = lastpos;
-                    P_ChangeSector(sector,crush);
+                    P_ChangeSector(sector,crush);      //jff 3/19/98 use faster chk
                     return crushed;
                 }
             }
@@ -213,10 +229,12 @@ T_MovePlane
         {
           case -1:
             // DOWN
-            if (sector->ceiling_height - speed < dest)
+            destheight = (d_floors || dest > sector->floor_height)?
+                          dest : sector->floor_height;
+            if (sector->ceiling_height - speed < destheight)
             {
                 lastpos = sector->ceiling_height;
-                sector->ceiling_height = dest;
+                sector->ceiling_height = destheight;
                 flag = P_ChangeSector(sector,crush);
 
                 if (flag == true)

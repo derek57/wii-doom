@@ -863,8 +863,8 @@ int                        cheeting;
 int                        coordinates_info = 0;
 int                        timer_info = 0;
 int                        version_info = 0;
-int                        key_controls_start_in_cfg_at_pos = 58;
-int                        key_controls_end_in_cfg_at_pos = 71;
+int                        key_controls_start_in_cfg_at_pos = 60;
+int                        key_controls_end_in_cfg_at_pos = 73;
 int                        crosshair = 0;
 int                        show_stats = 0;
 int                        tracknum = 1;
@@ -1074,6 +1074,10 @@ void M_Telefrag(int choice);
 void M_Doorstuck(int choice);
 void M_ResurrectGhosts(int choice);
 void M_LimitedGhosts(int choice);
+void M_BlockSkulls(int choice);
+void M_BlazingDoors(int choice);
+void M_GodAbsolute(int choice);
+void M_Floor(int choice);
 void M_NoMonsters(int choice);
 void M_AutomapOverlay(int choice);
 
@@ -1130,6 +1134,7 @@ void M_Sound(int choice);
 void M_Game(int choice);
 void M_Game2(int choice);
 void M_Game3(int choice);
+void M_Game4(int choice);
 void M_Debug(int choice);
 void M_Cheats(int choice);
 void M_Record(int choice);
@@ -1148,6 +1153,7 @@ void M_DrawSystem(void);
 void M_DrawGame(void);
 void M_DrawGame2(void);
 void M_DrawGame3(void);
+void M_DrawGame4(void);
 void M_DrawDebug(void);
 void M_DrawSound(void);
 void M_DrawCheats(void);
@@ -1791,30 +1797,38 @@ menu_t  GameDef2 =
 enum
 {
     game3_crosshair,
+    game3_autoaim,
     game3_gore,
     game3_amount,
     game3_blooda,
     game3_bloodb,
-    game3_autoaim,
     game3_telefrag,
     game3_stuck,
     game3_ressurection,
     game3_limitation,
+    game3_block,
+    game3_doors,
+    game3_god,
+    game3_game4,
     game3_end
 } game3_e;
 
 menuitem_t GameMenu3[]=
 {
     {2,"CROSSHAIR",M_Crosshair,'x'},
+    {2,"AUTOAIM",M_Autoaim,'a'},
     {2,"MORE BLOOD & GORE",M_MaxGore,'o'},
     {2,"Gore Amount",M_GoreAmount,'g'},
     {2,"Enable Colored Blood",M_ColoredBloodA,'b'},
     {2,"Fix Monster Blood",M_ColoredBloodB,'2'},
-    {2,"AUTOAIM",M_Autoaim,'a'},
-    {2,"Monsters Telefrag on MAP30",M_Telefrag,'t'},
-    {2,"Monsters stuck on doors",M_Doorstuck,'s'},
-    {2,"ARCH-VILE resurrects ghosts",M_ResurrectGhosts,'r'},
-    {2,"P.-E.'s have limited ghosts",M_LimitedGhosts,'l'}
+    {2,"Monsters can Telefrag on MAP30",M_Telefrag,'t'},
+    {2,"Monsters stuck on doortracks",M_Doorstuck,'s'},
+    {2,"ARCH-VILE can resurrect ghosts",M_ResurrectGhosts,'r'},
+    {2,"Pain Elementals have lost soul limit",M_LimitedGhosts,'l'},
+    {2,"Lost Souls get stuck behind walls",M_BlockSkulls,'w'},
+    {2,"Blazing Doors play double sound",M_BlazingDoors,'d'},
+    {2,"God mode isn't absolute",M_GodAbsolute,'i'},
+    {2,"",M_Game4,'n'}
 };
 
 menu_t  GameDef3 =
@@ -1823,7 +1837,28 @@ menu_t  GameDef3 =
     &GameDef2,
     GameMenu3,
     M_DrawGame3,
-    48,22,
+    23,22,
+    0
+};
+
+enum
+{
+    game4_floor,
+    game4_end
+} game4_e;
+
+menuitem_t GameMenu4[]=
+{
+    {2,"Use Doom's floor motion behavior",M_Floor,'f'},
+};
+
+menu_t  GameDef4 =
+{
+    game4_end,
+    &GameDef3,
+    GameMenu4,
+    M_DrawGame4,
+    23,22,
     0
 };
 
@@ -1875,7 +1910,7 @@ menuitem_t SoundMenu[]=
     {2,"Sound Type",M_SoundType,'s'},
     {2,"Number of Sound Channels",M_SoundChannels,'c'},
     {2,"Switch Left / Right Output",M_SoundOutput,'o'},
-    {2,"Sound Pitch",M_SoundPitch,'p'}
+    {2,"v1.1 Random Sound Pitch",M_SoundPitch,'p'}
 };
 
 menu_t  SoundDef =
@@ -3305,7 +3340,7 @@ void M_DrawGame2(void)
     }
 
     dp_translation = crx[CRX_GRAY];
-    M_WriteText(GameDef2.x, GameDef2.y + 128, DEH_String("EVEN MORE OPTIONS"));
+    M_WriteText(GameDef2.x, GameDef2.y + 128, DEH_String("MORE & MORE OPTIONS"));
     V_ClearDPTranslation();
 }
 
@@ -3321,152 +3356,218 @@ void M_DrawGame3(void)
     if(crosshair == 1)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef3.x + 208, GameDef3.y -2, DEH_String("ON"));
+        M_WriteText(GameDef3.x + 266, GameDef3.y -2, DEH_String("ON"));
         V_ClearDPTranslation();
     }
     else if (crosshair == 0)
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef3.x + 200, GameDef3.y -2, DEH_String("OFF"));
+        M_WriteText(GameDef3.x + 258, GameDef3.y -2, DEH_String("OFF"));
         V_ClearDPTranslation();
     }
     
-    if(d_maxgore)
+    if(autoaim)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef3.x + 208, GameDef3.y + 8, DEH_String("ON"));
+        M_WriteText(GameDef3.x + 266, GameDef3.y + 8, DEH_String("ON"));
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef3.x + 200, GameDef3.y + 8, DEH_String("OFF"));
+        M_WriteText(GameDef3.x + 258, GameDef3.y + 8, DEH_String("OFF"));
+        V_ClearDPTranslation();
+    }
+
+    if(d_maxgore)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(GameDef3.x + 266, GameDef3.y + 18, DEH_String("ON"));
+        V_ClearDPTranslation();
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(GameDef3.x + 258, GameDef3.y + 18, DEH_String("OFF"));
         V_ClearDPTranslation();
     }
 
     if(gore_amount == 4)
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef3.x + 199, GameDef3.y + 18, DEH_String("LOW"));
+        M_WriteText(GameDef3.x + 257, GameDef3.y + 28, DEH_String("LOW"));
         V_ClearDPTranslation();
     }
     else if(gore_amount == 8)
     {
         dp_translation = crx[CRX_GOLD];
-        M_WriteText(GameDef3.x + 178, GameDef3.y + 18, DEH_String("MEDIUM"));
+        M_WriteText(GameDef3.x + 236, GameDef3.y + 28, DEH_String("MEDIUM"));
         V_ClearDPTranslation();
     }
     else if(gore_amount == 12)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef3.x + 196, GameDef3.y + 18, DEH_String("HIGH"));
+        M_WriteText(GameDef3.x + 254, GameDef3.y + 28, DEH_String("HIGH"));
         V_ClearDPTranslation();
     }
     else if(gore_amount == 16)
     {
         dp_translation = crx[CRX_BLUE];
-        M_WriteText(GameDef3.x + 168, GameDef3.y + 18, DEH_String("CARNAGE"));
+        M_WriteText(GameDef3.x + 226, GameDef3.y + 28, DEH_String("CARNAGE"));
         V_ClearDPTranslation();
     }
     else if(gore_amount == 20)
     {
         dp_translation = crx[CRX_RED];
-        M_WriteText(GameDef3.x + 116, GameDef3.y + 18, DEH_String("RIP'EM TO PIECES"));
+        M_WriteText(GameDef3.x + 174, GameDef3.y + 28, DEH_String("RIP'EM TO PIECES"));
         V_ClearDPTranslation();
     }
 
     if(d_colblood)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef3.x + 208, GameDef3.y + 28, DEH_String("ON"));
+        M_WriteText(GameDef3.x + 266, GameDef3.y + 38, DEH_String("ON"));
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef3.x + 200, GameDef3.y + 28, DEH_String("OFF"));
+        M_WriteText(GameDef3.x + 258, GameDef3.y + 38, DEH_String("OFF"));
         V_ClearDPTranslation();
     }
 
     if(d_colblood2)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef3.x + 208, GameDef3.y + 38, DEH_String("ON"));
+        M_WriteText(GameDef3.x + 266, GameDef3.y + 48, DEH_String("ON"));
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef3.x + 200, GameDef3.y + 38, DEH_String("OFF"));
-        V_ClearDPTranslation();
-    }
-
-    if(autoaim)
-    {
-        dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef3.x + 208, GameDef3.y + 48, DEH_String("ON"));
-        V_ClearDPTranslation();
-    }
-    else
-    {
-        dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef3.x + 200, GameDef3.y + 48, DEH_String("OFF"));
+        M_WriteText(GameDef3.x + 258, GameDef3.y + 48, DEH_String("OFF"));
         V_ClearDPTranslation();
     }
 
     if(d_telefrag)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef3.x + 208, GameDef3.y + 58, DEH_String("ON"));
+        M_WriteText(GameDef3.x + 266, GameDef3.y + 58, DEH_String("ON"));
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef3.x + 200, GameDef3.y + 58, DEH_String("OFF"));
+        M_WriteText(GameDef3.x + 258, GameDef3.y + 58, DEH_String("OFF"));
         V_ClearDPTranslation();
     }
 
     if(d_doorstuck)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef3.x + 208, GameDef3.y + 68, DEH_String("ON"));
+        M_WriteText(GameDef3.x + 266, GameDef3.y + 68, DEH_String("ON"));
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef3.x + 200, GameDef3.y + 68, DEH_String("OFF"));
+        M_WriteText(GameDef3.x + 258, GameDef3.y + 68, DEH_String("OFF"));
         V_ClearDPTranslation();
     }
 
     if(d_resurrectghosts)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef3.x + 208, GameDef3.y + 78, DEH_String("ON"));
+        M_WriteText(GameDef3.x + 266, GameDef3.y + 78, DEH_String("ON"));
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef3.x + 200, GameDef3.y + 78, DEH_String("OFF"));
+        M_WriteText(GameDef3.x + 258, GameDef3.y + 78, DEH_String("OFF"));
         V_ClearDPTranslation();
     }
 
     if(d_limitedghosts)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef3.x + 208, GameDef3.y + 88, DEH_String("ON"));
+        M_WriteText(GameDef3.x + 266, GameDef3.y + 88, DEH_String("ON"));
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef3.x + 200, GameDef3.y + 88, DEH_String("OFF"));
+        M_WriteText(GameDef3.x + 258, GameDef3.y + 88, DEH_String("OFF"));
+        V_ClearDPTranslation();
+    }
+
+    if(!d_blockskulls)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(GameDef3.x + 266, GameDef3.y + 98, DEH_String("ON"));
+        V_ClearDPTranslation();
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(GameDef3.x + 258, GameDef3.y + 98, DEH_String("OFF"));
+        V_ClearDPTranslation();
+    }
+
+    if(!d_blazingsound)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(GameDef3.x + 266, GameDef3.y + 108, DEH_String("ON"));
+        V_ClearDPTranslation();
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(GameDef3.x + 258, GameDef3.y + 108, DEH_String("OFF"));
+        V_ClearDPTranslation();
+    }
+
+    if(d_god)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(GameDef3.x + 266, GameDef3.y + 118, DEH_String("ON"));
+        V_ClearDPTranslation();
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(GameDef3.x + 258, GameDef3.y + 118, DEH_String("OFF"));
+        V_ClearDPTranslation();
+    }
+
+    dp_translation = crx[CRX_GRAY];
+    M_WriteText(GameDef3.x, GameDef3.y + 128, DEH_String("EVEN MORE OPTIONS"));
+    V_ClearDPTranslation();
+}
+
+void M_DrawGame4(void)
+{
+    if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
+        V_DrawPatch(70, 0, 0, W_CacheLumpName(DEH_String("M_T_GSET"),
+                                               PU_CACHE));
+    else
+        V_DrawPatch(70, 0, 0, W_CacheLumpName(DEH_String("M_GMESET"),
+                                               PU_CACHE));
+
+    if(d_floors == 1)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(GameDef4.x + 266, GameDef4.y -2, DEH_String("ON"));
+        V_ClearDPTranslation();
+    }
+    else if (d_floors == 0)
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(GameDef4.x + 258, GameDef4.y -2, DEH_String("OFF"));
         V_ClearDPTranslation();
     }
 }
-
+    
 void DetectState(void)
 {
     if(!netgame && !demoplayback && gamestate == GS_LEVEL
@@ -6786,6 +6887,11 @@ void M_Game3(int choice)
     M_SetupNextMenu(&GameDef3);
 }
 
+void M_Game4(int choice)
+{
+    M_SetupNextMenu(&GameDef4);
+}
+
 void M_RMap(int choice)
 {
         switch(choice)
@@ -7359,6 +7465,74 @@ void M_LimitedGhosts(int choice)
         if (!d_limitedghosts)
             d_limitedghosts = true;
         players[consoleplayer].message = DEH_String("PAIN ELEMENTALS DON'T SPIT UNLIMITED GHOSTS");
+        break;
+    }
+}
+
+void M_BlockSkulls(int choice)
+{
+    switch(choice)
+    {
+    case 0:
+        if (d_blockskulls)
+            d_blockskulls = false;
+        players[consoleplayer].message = DEH_String("LOST SOULS WILL GET STUCK BEHIND WALLS");
+        break;
+    case 1:
+        if (!d_blockskulls)
+            d_blockskulls = true;
+        players[consoleplayer].message = DEH_String("LOST SOULS WON'T GET STUCK BEHIND WALLS");
+        break;
+    }
+}
+
+void M_BlazingDoors(int choice)
+{
+    switch(choice)
+    {
+    case 0:
+        if (d_blazingsound)
+            d_blazingsound = false;
+        players[consoleplayer].message = DEH_String("BLAZING DOORS PLAY DOUBLE CLOSING SOUND");
+        break;
+    case 1:
+        if (!d_blazingsound)
+            d_blazingsound = true;
+        players[consoleplayer].message = DEH_String("BLAZING DOORS DON'T PLAY DOUBLE CLOSING SOUND");
+        break;
+    }
+}
+
+void M_GodAbsolute(int choice)
+{
+    switch(choice)
+    {
+    case 0:
+        if (d_god)
+            d_god = false;
+        players[consoleplayer].message = DEH_String("GOD MODE IS ABSOLUTE");
+        break;
+    case 1:
+        if (!d_god)
+            d_god = true;
+        players[consoleplayer].message = DEH_String("GOD MODE IS NOT ABSOLUTE");
+        break;
+    }
+}
+
+void M_Floor(int choice)
+{
+    switch(choice)
+    {
+    case 0:
+        if (d_floors)
+            d_floors = false;
+        players[consoleplayer].message = DEH_String("Don't use Doom's floor motion behavior");
+        break;
+    case 1:
+        if (!d_floors)
+            d_floors = true;
+        players[consoleplayer].message = DEH_String("Use Doom's floor motion behavior");
         break;
     }
 }

@@ -112,6 +112,19 @@ void T_PlatRaise(plat_t* plat)
             plat->count = plat->wait;
             plat->status = waiting;
             S_StartSound(&plat->sector->soundorg,sfx_pstop);
+
+            // remove the plat if its a pure raise type
+            if (!d_floors)
+            {
+                switch(plat->type)
+                {
+                  case raiseAndChange:
+                  case raiseToNearestAndChange:
+                    P_RemoveActivePlat(plat);
+                  default:
+                    break;
+                }
+            }
         }
         break;
         

@@ -136,7 +136,11 @@ void T_VerticalDoor (vldoor_t* door)
 
                 if(fsize != 10396254 && fsize != 10399316 && fsize != 10401760 && fsize != 4207819 &&
                         fsize != 4274218 && fsize != 4225504 && fsize != 4225460)
-                    S_StartSound(&door->sector->soundorg, sfx_bdcls);
+                {
+                    // killough 4/15/98: remove double-closing sound of blazing doors
+                    if (!d_blazingsound)
+                        S_StartSound((mobj_t *)&door->sector->soundorg, sfx_bdcls);
+                }
                 break;
                 
               case normal:

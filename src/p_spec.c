@@ -1168,8 +1168,9 @@ void P_PlayerInSpecialSector (player_t* player)
                         
       case 11:
         // EXIT SUPER DAMAGE! (for E1M8 finale)
-        player->cheats &= ~CF_GODMODE;
-
+        if (d_god) /* killough 2/21/98: add compatibility switch */
+            player->cheats &= ~CF_GODMODE; // on godmode cheat clearing
+                                           // does not affect invulnerability
         if (!(leveltime&0x1f))
         {
             in_slime = true;

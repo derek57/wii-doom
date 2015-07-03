@@ -1740,11 +1740,42 @@ A_PainShootSkull
     x = actor->x + FixedMul (prestep, finecosine[an]);
     y = actor->y + FixedMul (prestep, finesine[an]);
     z = actor->z + 8*FRACUNIT;
-                
-    if(beta_skulls)
-        newmobj = P_SpawnMobj (x , y, z, MT_BETASKULL);
-    else
-        newmobj = P_SpawnMobj (x , y, z, MT_SKULL);
+
+    if (!d_blockskulls)   /* killough 10/98: compatibility-optioned */
+    {
+        if (beta_skulls)
+            newmobj = P_SpawnMobj (x, y, z, MT_BETASKULL);
+        else
+            newmobj = P_SpawnMobj (x, y, z, MT_SKULL);
+    }
+    else                                                            // phares
+    {
+        // Check whether the Lost Soul is being fired through a 1-sided
+        // wall or an impassible line, or a "monsters can't cross" line.
+        // If it is, then we don't allow the spawn. This is a bug fix, but
+        // it should be considered an enhancement, since it may disturb
+        // existing demos, so don't do it in compatibility mode.
+
+        if (Check_Sides(actor,x,y))
+            return;
+
+        if (beta_skulls)
+            newmobj = P_SpawnMobj (x, y, z, MT_BETASKULL);
+        else
+            newmobj = P_SpawnMobj (x, y, z, MT_SKULL);
+
+        // Check to see if the new Lost Soul's z value is above the
+        // ceiling of its new sector, or below the floor. If so, kill it.
+
+        if ((newmobj->z >
+                (newmobj->subsector->sector->ceiling_height - newmobj->height)) ||
+                (newmobj->z < newmobj->subsector->sector->floor_height))
+        {
+            // kill it immediately
+            P_DamageMobj(newmobj, actor, actor, 10000);
+            return;                                                 //   ^
+        }                                                           //   |
+    }                                                               // phares
 
     // Check for movements.
     if (!P_TryMove (newmobj, newmobj->x, newmobj->y))

@@ -185,6 +185,10 @@ void M_BindBaseControls(void)
     M_BindVariable("doorstuck",              &d_doorstuck);
     M_BindVariable("resurrect_ghosts",       &d_resurrectghosts);
     M_BindVariable("limited_ghosts",         &d_limitedghosts);
+    M_BindVariable("block_skulls",           &d_blockskulls);
+    M_BindVariable("blazing_sound",          &d_blazingsound);
+    M_BindVariable("god",                    &d_god);
+    M_BindVariable("floors",                 &d_floors);
     M_BindVariable("key_shoot",              &joy_r);
     M_BindVariable("key_open",               &joy_l);
     M_BindVariable("key_menu",               &joy_minus);

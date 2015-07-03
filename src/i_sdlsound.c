@@ -659,7 +659,7 @@ static int I_SDL_StartSound(sfxinfo_t *sfxinfo, int channel, int vol, int sep, i
         return -1;
     }
 
-    if (randompitch)
+    if (randompitch && !menuactive)
     {
         if (!(snd = GetAllocatedSoundBySfxInfoAndPitch(sfxinfo, pitch)))
         {

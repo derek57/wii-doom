@@ -72,6 +72,10 @@ boolean         d_telefrag = false;
 boolean         d_doorstuck = false;
 boolean         d_resurrectghosts = false;
 boolean         d_limitedghosts = false;
+boolean         d_blockskulls = false;
+boolean         d_blazingsound = false;
+boolean         d_god = false;
+boolean         d_floors = false;
 
 int             d_colblood = 0;
 int             d_colblood2 = 0;

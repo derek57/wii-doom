@@ -322,6 +322,8 @@ void A_ReFire
 
 void P_FallingDamage (mobj_t *mo);
 
+boolean Check_Sides(mobj_t* actor, int x, int y);
+
 //
 // P_SPEC
 //

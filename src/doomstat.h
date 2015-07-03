@@ -331,6 +331,10 @@ extern  boolean         d_telefrag;
 extern  boolean         d_doorstuck;
 extern  boolean         d_resurrectghosts;
 extern  boolean         d_limitedghosts;
+extern  boolean         d_blockskulls;
+extern  boolean         d_blazingsound;
+extern  boolean         d_god;
+extern  boolean         d_floors;
 
 extern  int             d_colblood;
 extern  int             d_colblood2;
