@@ -3602,18 +3602,6 @@ void M_DrawGame3(void)
     }
     else if(gore_amount == 12)
     {
-        dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef3.x + 254, GameDef3.y + 28, DEH_String("HIGH"));
-        V_ClearDPTranslation();
-    }
-    else if(gore_amount == 16)
-    {
-        dp_translation = crx[CRX_BLUE];
-        M_WriteText(GameDef3.x + 226, GameDef3.y + 28, DEH_String("CARNAGE"));
-        V_ClearDPTranslation();
-    }
-    else if(gore_amount == 20)
-    {
         dp_translation = crx[CRX_RED];
         M_WriteText(GameDef3.x + 174, GameDef3.y + 28, DEH_String("RIP'EM TO PIECES"));
         V_ClearDPTranslation();
@@ -7980,7 +7968,7 @@ void M_GoreAmount(int choice)
             gore_amount -= 4;
         break;
     case 1:
-        if (gore_amount < 20)
+        if (gore_amount < 12)
             gore_amount += 4;
         break;
     }
