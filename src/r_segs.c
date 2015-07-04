@@ -573,6 +573,7 @@ R_StoreWallRange
     angle_t         distangle, offsetangle;
     fixed_t         vtop;
     int             lightnum;
+    int             liquidoffset = 0;
 
     // [crispy] remove MAXDRAWSEGS Vanilla limit
     if (ds_p == &drawsegs[numdrawsegs])
@@ -669,7 +670,7 @@ R_StoreWallRange
     // [BH] animate liquid sectors
     if (frontsector->animate != INT_MAX && (frontsector->heightsec == -1
         || viewz > sectors[frontsector->heightsec].interpfloorheight))
-        worldbottom += frontsector->animate + 2 * FRACUNIT;
+        worldbottom += frontsector->animate;
 
     midtexture = toptexture = bottomtexture = maskedtexture = 0;
     ds_p->maskedtexturecol = NULL;
@@ -760,7 +761,10 @@ R_StoreWallRange
             && backsector->interpfloorheight > frontsector->interpfloorheight
             && (backsector->heightsec == -1
             || viewz > sectors[backsector->heightsec].interpfloorheight))
-            worldlow += backsector->animate + 2 * FRACUNIT;
+        {
+            liquidoffset = backsector->animate;
+            worldlow += liquidoffset;
+        }
 
         // hack to allow height changes in outdoor areas
         if (frontsector->ceilingpic == skyflatnum 
@@ -831,7 +835,7 @@ R_StoreWallRange
             {
                 // bottom of texture at bottom
                 // top of texture at top
-                rw_bottomtexturemid = worldtop;
+                rw_bottomtexturemid = worldlow - liquidoffset;
             }
             else        // top of texture at top
                 rw_bottomtexturemid = worldlow;
