@@ -236,6 +236,9 @@ P_ChangeSwitchTexture
 ( line_t*         line,
   int             useAgain )
 {
+    /* Rearranged a bit to avoid too much code duplication */
+    mobj_t  *soundorg;
+
     int     texTop;
     int     texMid;
     int     texBot;
@@ -251,15 +254,25 @@ P_ChangeSwitchTexture
         
     sound = sfx_swtchn;
 
+    // use the sound origin of the linedef (its midpoint)
+    soundorg = (mobj_t *)&line->soundorg;
+
+    if (d_sound)
+    {
+        /* usually NULL, unless there is another button already pressed in,
+         * in which case it's the sound origin of that button press... */
+        soundorg = (mobj_t *)buttonlist->soundorg;
+    }
+/*
     // EXIT SWITCH?
     if (line->special == 11)                
         sound = sfx_swtchx;
-        
+*/        
     for (i = 0;i < numswitches*2;i++)
     {
         if (switchlist[i] == texTop)
         {
-            S_StartSound(buttonlist->soundorg,sound);
+            S_StartSound(soundorg,sound);
             sides[line->sidenum[0]].toptexture = switchlist[i^1];
 
             if (useAgain)
@@ -271,7 +284,7 @@ P_ChangeSwitchTexture
         {
             if (switchlist[i] == texMid)
             {
-                S_StartSound(buttonlist->soundorg,sound);
+                S_StartSound(soundorg,sound);
                 sides[line->sidenum[0]].midtexture = switchlist[i^1];
 
                 if (useAgain)
@@ -283,7 +296,7 @@ P_ChangeSwitchTexture
             {
                 if (switchlist[i] == texBot)
                 {
-                    S_StartSound(buttonlist->soundorg,sound);
+                    S_StartSound(soundorg,sound);
                     sides[line->sidenum[0]].bottomtexture = switchlist[i^1];
 
                     if (useAgain)

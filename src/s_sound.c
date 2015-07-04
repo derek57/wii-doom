@@ -528,7 +528,19 @@ void S_StartSound(void *origin_p, int sfx_id)
     pitch = Clamp(pitch);
 
     // kill old sound
-    S_StopSound(origin);
+    if (d_sound)
+    {
+        for (cnum = 0 ; cnum < snd_channels ; cnum++)
+        {
+            if (channels[cnum].sfxinfo && channels[cnum].origin == origin)
+            {
+                S_StopChannel(cnum);
+                break;
+            }
+        }
+    }
+    else
+        S_StopSound(origin);
 
     // try to find a channel
     cnum = S_GetChannel(origin, sfx);

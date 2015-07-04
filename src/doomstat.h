@@ -335,6 +335,12 @@ extern  boolean         d_blockskulls;
 extern  boolean         d_blazingsound;
 extern  boolean         d_god;
 extern  boolean         d_floors;
+extern  boolean         d_moveblock;
+extern  boolean         d_model;
+extern  boolean         d_666;
+extern  boolean         d_maskedanim;
+extern  boolean         d_sound;
+extern  boolean         d_ouchface;
 
 extern  int             d_colblood;
 extern  int             d_colblood2;

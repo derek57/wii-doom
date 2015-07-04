@@ -189,6 +189,11 @@ void M_BindBaseControls(void)
     M_BindVariable("blazing_sound",          &d_blazingsound);
     M_BindVariable("god",                    &d_god);
     M_BindVariable("floors",                 &d_floors);
+    M_BindVariable("model",                  &d_model);
+    M_BindVariable("hell",                   &d_666);
+    M_BindVariable("masked_anim",            &d_maskedanim);
+    M_BindVariable("sound",                  &d_sound);
+    M_BindVariable("ouchface",               &d_ouchface);
     M_BindVariable("key_shoot",              &joy_r);
     M_BindVariable("key_open",               &joy_l);
     M_BindVariable("key_menu",               &joy_minus);

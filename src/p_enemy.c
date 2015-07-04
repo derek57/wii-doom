@@ -1880,7 +1880,7 @@ void A_Explode (mobj_t* thingy)
 
 static boolean CheckBossEnd(mobjtype_t motype)
 {
-    if (gameversion < exe_ultimate)
+    if (gameversion < exe_ultimate || d_666)
     {
         if (gamemap != 8)
         {

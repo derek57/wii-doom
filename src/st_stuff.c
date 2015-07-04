@@ -1000,8 +1000,21 @@ void ST_updateFaceWidget(void)
             // being attacked
             prio = priority = 7;
             
-            if (plyr->health - st_oldhealth > ST_MUCHPAIN)
+            // haleyjd 10/12/03: classic DOOM problem of missing OUCH face
+            // was due to inversion of this test:
+            // if(plyr->health - st_oldhealth > ST_MUCHPAIN)
+            // e6y: compatibility optioned
+            if((d_ouchface?
+                (plyr->health - st_oldhealth):
+                (st_oldhealth - plyr->health)) > ST_MUCHPAIN)
             {
+                // e6y
+                // There are TWO bugs in the ouch face code.
+                // Not only was the condition reversed, but the priority system is
+                // broken in a way that makes the face not work with monster damage.
+                if(!d_ouchface)
+                    priority = 8;
+
                 st_facecount = ST_TURNCOUNT;
                 st_faceindex = ST_calcPainOffset() + ST_OUCHOFFSET;
             }
@@ -1055,8 +1068,14 @@ void ST_updateFaceWidget(void)
         if (plyr->damagecount ||
            (beta_style && in_slime && !(plyr->cheats & CF_GODMODE)))
         {
-            if (plyr->health - st_oldhealth > ST_MUCHPAIN ||
-               (beta_style && in_slime && !(plyr->cheats & CF_GODMODE)))
+            // haleyjd 10/12/03: classic DOOM problem of missing OUCH face
+            // was due to inversion of this test:
+            // if(plyr->health - st_oldhealth > ST_MUCHPAIN)
+            // e6y: compatibility optioned
+            if(((d_ouchface?
+                (plyr->health - st_oldhealth):
+                (st_oldhealth - plyr->health)) > ST_MUCHPAIN) ||
+                (beta_style && in_slime && !(plyr->cheats & CF_GODMODE)))
             {
                 priority = 7;
                 st_facecount = ST_TURNCOUNT;

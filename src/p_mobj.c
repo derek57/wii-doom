@@ -78,6 +78,7 @@ int             itemrespawntime[ITEMQUESIZE];
 int             iquehead;
 int             iquetail;
 int             puffcount;
+int             correct_lost_soul_bounce;
 
 mapthing_t      itemrespawnque[ITEMQUESIZE];
 
@@ -222,8 +223,8 @@ void P_XYMovement (mobj_t* mo)
         
     do
     {
-        if (xmove > MAXMOVE / 2 || ymove > MAXMOVE / 2
-            || xmove < -MAXMOVE / 2 || ymove < -MAXMOVE / 2)
+        if (xmove > MAXMOVE / 2 || ymove > MAXMOVE / 2 ||
+                (!d_moveblock && (xmove < -MAXMOVE/2 || ymove < -MAXMOVE/2)))
         {
             ptryx = mo->x + xmove/2;
             ptryy = mo->y + ymove/2;
@@ -400,7 +401,7 @@ void P_ZMovement (mobj_t* mo)
         // So we need to check that this is either retail or commercial
         // (but not doom2)
         
-        int correct_lost_soul_bounce = gameversion >= exe_ultimate;
+//        int correct_lost_soul_bounce = gameversion >= exe_ultimate;
 
         if (correct_lost_soul_bounce && mo->flags & MF_SKULLFLY)
         {
@@ -424,7 +425,7 @@ void P_ZMovement (mobj_t* mo)
                 // and utter appropriate sound.
                 mo->player->deltaviewheight = mo->momz>>3;
 
-                if(P_HitFloor(mo) == 0)
+                if(d_sound || P_HitFloor(mo) == 0)
                     S_StartSound (mo, sfx_oof);
 
                 if (mouselook && !demorecording && !demoplayback)

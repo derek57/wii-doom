@@ -76,6 +76,12 @@ boolean         d_blockskulls = false;
 boolean         d_blazingsound = false;
 boolean         d_god = false;
 boolean         d_floors = false;
+boolean         d_moveblock = false;
+boolean         d_model = false;
+boolean         d_666 = false;
+boolean         d_maskedanim = false;
+boolean         d_sound = false;
+boolean         d_ouchface = false;
 
 int             d_colblood = 0;
 int             d_colblood2 = 0;

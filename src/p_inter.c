@@ -194,7 +194,7 @@ P_GiveWeapon
             P_GiveAmmo (player, weaponinfo[weapon].ammo, 2);
         player->pendingweapon = weapon;
 
-        if (player == &players[consoleplayer])
+        if (!d_sound || player == &players[consoleplayer])
             S_StartSound (NULL, sfx_wpnup);
         return false;
     }
@@ -887,7 +887,7 @@ P_TouchSpecialThing
         player->itemcount++;
     P_RemoveMobj (special);
     player->bonuscount += BONUSADD;
-    if (player == &players[consoleplayer])
+    if (!d_sound || player == &players[consoleplayer])
         S_StartSound (NULL, sound);
 }
 

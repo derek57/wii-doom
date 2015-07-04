@@ -1022,7 +1022,8 @@ A_FireCGun
 ( player_t*        player,
   pspdef_t*        psp ) 
 {
-    S_StartSound (player->mo, sfx_pistol);
+    if (player->ammo[weaponinfo[player->readyweapon].ammo] || d_sound)
+        S_StartSound(player->mo, sfx_pistol);
 
     if (!player->ammo[weaponinfo[player->readyweapon].ammo])
         return;

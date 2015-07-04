@@ -254,6 +254,9 @@ typedef struct line_s
                 
     int            nexttag, firsttag;
 
+    // sound origin for switches/buttons
+    degenmobj_t    soundorg;
+
 } line_t;
 
 

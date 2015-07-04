@@ -28,6 +28,7 @@
 
 
 #include "doomdef.h"
+#include "doomstat.h"
 #include "m_random.h"
 #include "p_local.h"
 
@@ -283,6 +284,11 @@ EV_LightTurnOn
                     tbright = temp->lightlevel;
         }
         sector->lightlevel = tbright;
+
+        //jff 5/17/98 unless compatibility optioned
+        //then maximum near ANY tagged sector
+        if (d_model)
+            bright = tbright;
     }
     return 1;
 }

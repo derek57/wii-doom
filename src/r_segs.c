@@ -212,7 +212,15 @@ R_RenderMaskedSegRange
     curline = ds->curline;
     frontsector = curline->frontsector;
     backsector = curline->backsector;
-    texnum = texturetranslation[curline->sidedef->midtexture];
+
+//    texnum = texturetranslation[curline->sidedef->midtexture];
+
+    // cph 2001/11/25 - middle textures did not animate in v1.2
+    texnum = curline->sidedef->midtexture;
+
+    if (!d_maskedanim)
+        texnum = texturetranslation[texnum];
+
     texheight = textureheight[texnum];
         
     lightnum = (frontsector->lightlevel >> LIGHTSEGSHIFT)+extralight;

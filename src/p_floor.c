@@ -479,6 +479,10 @@ EV_DoFloor
               int        minsize = INT_MAX;
               side_t*        side;
                                 
+              /* jff 3/13/98 no ovf */
+              if (!d_model)
+                  minsize = 32000<<FRACBITS;
+
               floor->direction = 1;
               floor->sector = sec;
               floor->speed = FLOORSPEED;
@@ -487,21 +491,33 @@ EV_DoFloor
                   if (twoSided (secnum, i) )
                   {
                       side = getSide(secnum,i,0);
-                      if (side->bottomtexture >= 0)
+                      // jff 8/14/98 don't scan texture 0, its not real
+                      if (side->bottomtexture >= 0 ||
+                              (d_model && !side->bottomtexture))
                           if (textureheight[side->bottomtexture] < 
                               minsize)
                               minsize = 
                                   textureheight[side->bottomtexture];
                       side = getSide(secnum,i,1);
-                      if (side->bottomtexture >= 0)
+                      // jff 8/14/98 don't scan texture 0, its not real
+                      if (side->bottomtexture >= 0 ||
+                              (d_model && !side->bottomtexture))
                           if (textureheight[side->bottomtexture] < 
                               minsize)
                               minsize = 
                                   textureheight[side->bottomtexture];
                   }
               }
-              floor->floordestheight =
-                  floor->sector->floor_height + minsize;
+              if (d_model)
+                  floor->floordestheight = floor->sector->floor_height + minsize;
+              else
+              {
+                  floor->floordestheight =
+                          (floor->sector->floor_height>>FRACBITS) + (minsize >> FRACBITS);
+                  if (floor->floordestheight > 32000)
+                      floor->floordestheight = 32000;      //jff 3/13/98 do not
+                  floor->floordestheight <<= FRACBITS;     // allow height overflow
+              }
           }
           break;
           

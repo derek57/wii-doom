@@ -863,8 +863,8 @@ int                        cheeting;
 int                        coordinates_info = 0;
 int                        timer_info = 0;
 int                        version_info = 0;
-int                        key_controls_start_in_cfg_at_pos = 60;
-int                        key_controls_end_in_cfg_at_pos = 73;
+int                        key_controls_start_in_cfg_at_pos = 67;
+int                        key_controls_end_in_cfg_at_pos = 80;
 int                        crosshair = 0;
 int                        show_stats = 0;
 int                        tracknum = 1;
@@ -950,6 +950,7 @@ extern int                 dont_show;
 extern int                 display_fps;
 extern int                 allocated_ram_size;
 extern int                 wipe_type;
+extern int                 correct_lost_soul_bounce;
 
 extern default_t           doom_defaults_list[];   // KEY BINDINGS
 
@@ -1078,6 +1079,13 @@ void M_BlockSkulls(int choice);
 void M_BlazingDoors(int choice);
 void M_GodAbsolute(int choice);
 void M_Floor(int choice);
+void M_Clipping(int choice);
+void M_Model(int choice);
+void M_BossDeath(int choice);
+void M_Bounce(int choice);
+void M_Masked(int choice);
+void M_Quirk(int choice);
+void M_Ouch(int choice);
 void M_NoMonsters(int choice);
 void M_AutomapOverlay(int choice);
 
@@ -1844,12 +1852,26 @@ menu_t  GameDef3 =
 enum
 {
     game4_floor,
+    game4_clipping,
+    game4_model,
+    game4_bossdeath,
+    game4_bounce,
+    game4_masked,
+    game4_sound,
+    game4_ouch,
     game4_end
 } game4_e;
 
 menuitem_t GameMenu4[]=
 {
     {2,"Use Doom's floor motion behavior",M_Floor,'f'},
+    {2,"Use Doom's movement clipping code",M_Clipping,'c'},
+    {2,"Use Doom's linedef trigger model",M_Model,'m'},
+    {2,"Emulate pre-Ultimate Boss Death",M_BossDeath,'d'},
+    {2,"Lost souls don't bounce off flats",M_Bounce,'b'},
+    {2,"2S middle textures do not animate",M_Masked,'a'},
+    {2,"Retain quirks in Doom's sound code",M_Quirk,'s'},
+    {2,"Use Doom's buggy ouch face code",M_Ouch,'o'}
 };
 
 menu_t  GameDef4 =
@@ -2581,11 +2603,6 @@ void M_DrawNewGame(void)
 {
     V_DrawPatch(96, 14, 0, W_CacheLumpName(DEH_String("M_NEWG"), PU_CACHE));
     M_WriteText(NewDef.x, NewDef.y - 22, "CHOOSE SKILL LEVEL:");
-
-    if(beta_style)
-        M_WriteText(NewDef.x, NewDef.y + 18, "I JUST WANT TO KILL.");
-    else
-        M_WriteText(NewDef.x, NewDef.y + 18, "HURT ME PLENTY.");
 }
 
 void M_NewGame(int choice)
@@ -2690,35 +2707,116 @@ void M_DrawItems(void)
 
     if(fsize != 12361532 && fsize != 19321722)
     {
+        if(itemOn == 2)
+            dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 70, DEH_String("RADIATION SHIELDING SUIT"));
+        V_ClearDPTranslation();
+
+        if(itemOn == 3)
+            dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 80, DEH_String("COMPUTER AREA MAP"));
+        V_ClearDPTranslation();
+
+        if(itemOn == 4)
+            dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 90, DEH_String("LIGHT AMPLIFICATION VISOR"));
+        V_ClearDPTranslation();
+
+        if(itemOn == 7)
+            dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 120, DEH_String("PARTIAL INVISIBILITY"));
+        V_ClearDPTranslation();
+
+        if(itemOn == 8)
+            dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 130, DEH_String("INVULNERABILITY!"));
+        V_ClearDPTranslation();
+
+        if(itemOn == 9)
+            dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 140, DEH_String("BERSERK!"));
+        V_ClearDPTranslation();
+
+        if(itemOn == 10)
+            dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 150, DEH_String("BACKPACK"));
+        V_ClearDPTranslation();
+
+        if(itemOn == 11)
+            dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 160, DEH_String("FLIGHT"));
+        V_ClearDPTranslation();
     }
 
     if(fsize == 19321722)
     {
+        if(itemOn == 2)
+            dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 70, DEH_String("VULCAN RUBBER BOOTS"));
+        V_ClearDPTranslation();
+
+        if(itemOn == 3)
+            dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 80, DEH_String("SI ARRAY MAPPING"));
+        V_ClearDPTranslation();
+
+        if(itemOn == 4)
+            dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 90, DEH_String("INFRARED VISOR"));
+        V_ClearDPTranslation();
+
+        if(itemOn == 7)
+            dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 120, DEH_String("ENK BLINDNESS"));
+        V_ClearDPTranslation();
+
+        if(itemOn == 8)
+            dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 130, DEH_String("FORCE FIELD"));
+        V_ClearDPTranslation();
+
+        if(itemOn == 9)
+            dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 140, DEH_String("007 MICROTEL"));
+        V_ClearDPTranslation();
+
+        if(itemOn == 10)
+            dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 150, DEH_String("BACKPACK"));
+        V_ClearDPTranslation();
+
+        if(itemOn == 11)
+            dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 160, DEH_String("FLIGHT"));
+        V_ClearDPTranslation();
     }
 
     if(fsize == 12361532)
     {
+        if(itemOn == 2)
+            dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 70, DEH_String("SLIME-PROOF SUIT"));
+        V_ClearDPTranslation();
+
+        if(itemOn == 3)
+            dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 80, DEH_String("COMPUTER AREA MAP"));
+        V_ClearDPTranslation();
+
+        if(itemOn == 4)
+            dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 90, DEH_String("ULTRA GOGGLES"));
+        V_ClearDPTranslation();
+
+        if(itemOn == 5)
+            dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 100, DEH_String("BACKPACK"));
+        V_ClearDPTranslation();
+
+        if(itemOn == 6)
+            dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 110, DEH_String("FLIGHT"));
+        V_ClearDPTranslation();
     }
 }
 
@@ -2728,25 +2826,46 @@ void M_DrawArmor(void)
                                                PU_CACHE));
 
     dp_translation = crx[CRX_GOLD];
-    M_WriteText(80, 55, DEH_String("GIVE THEM ALL AT ONCE"));
+    M_WriteText(80, 55, DEH_String("GIVE THEM BOTH AT ONCE"));
     V_ClearDPTranslation();
 
     if(fsize != 12361532 && fsize != 19321722)
     {
+        if(itemOn == 2)
+            dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 75, DEH_String("GREEN ARMOR"));
+        V_ClearDPTranslation();
+
+        if(itemOn == 3)
+            dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 85, DEH_String("BLUE ARMOR"));
+        V_ClearDPTranslation();
     }
 
     if(fsize == 12361532)
     {
+        if(itemOn == 2)
+            dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 75, DEH_String("CHEX(R) ARMOR"));
+        V_ClearDPTranslation();
+
+        if(itemOn == 2)
+            dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 85, DEH_String("SUPER CHEX(R) ARMOR"));
+        V_ClearDPTranslation();
     }
 
     if(fsize == 19321722)
     {
+        if(itemOn == 2)
+            dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 75, DEH_String("KEVLAR VEST"));
+        V_ClearDPTranslation();
+
+        if(itemOn == 2)
+            dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 85, DEH_String("SUPER KEVLAR VEST"));
+        V_ClearDPTranslation();
     }
 }
 
@@ -2761,17 +2880,39 @@ void M_DrawWeapons(void)
 
     if(fsize != 19321722 && fsize != 12361532)
     {
+        if(itemOn == 2)
+            dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 75, DEH_String("CHAINSAW"));
+        V_ClearDPTranslation();
+
+        if(itemOn == 3)
+            dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 85, DEH_String("SHOTGUN"));
+        V_ClearDPTranslation();
+
+        if(itemOn == 4)
+            dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 95, DEH_String("CHAINGUN"));
+        V_ClearDPTranslation();
+
+        if(itemOn == 5)
+            dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 105, DEH_String("ROCKET LAUNCHER"));
+        V_ClearDPTranslation();
 
         if(fsize != 4261144 && fsize != 4271324 && fsize != 4211660 &&
                 fsize != 4207819 && fsize != 4274218 && fsize != 4225504 &&
                 fsize != 4225460 && fsize != 4234124 && fsize != 4196020)
         {
+            if(itemOn == 6)
+                dp_translation = crx[CRX_GOLD];
             M_WriteText(80, 115, DEH_String("PLASMA CANNON"));
+            V_ClearDPTranslation();
+
+            if(itemOn == 7)
+                dp_translation = crx[CRX_GOLD];
             M_WriteText(80, 125, DEH_String("BFG 9000"));
+            V_ClearDPTranslation();
         }
 
         if(fsize == 14943400 || fsize == 14824716 || fsize == 14612688 ||
@@ -2779,28 +2920,83 @@ void M_DrawWeapons(void)
                 fsize == 14683458 || fsize == 18654796 || fsize == 18240172 ||
                 fsize == 17420824 || fsize == 14677988 || fsize == 14691821 ||
                 fsize == 28422764)
+        {
+            if(itemOn == 8)
+                dp_translation = crx[CRX_GOLD];
             M_WriteText(80, 135, DEH_String("SUPER SHOTGUN"));
+            V_ClearDPTranslation();
+        }
     }
 
     if(fsize == 19321722)
     {
+        if(itemOn == 2)
+            dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 75, DEH_String("HOIG REZNATOR"));
+        V_ClearDPTranslation();
+
+        if(itemOn == 3)
+            dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 85, DEH_String("TAZER"));
+        V_ClearDPTranslation();
+
+        if(itemOn == 4)
+            dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 95, DEH_String("UZI"));
+        V_ClearDPTranslation();
+
+        if(itemOn == 5)
+            dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 105, DEH_String("PHOTON 'ZOOKA"));
+        V_ClearDPTranslation();
+
+        if(itemOn == 6)
+            dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 115, DEH_String("STICK"));
+        V_ClearDPTranslation();
+
+        if(itemOn == 7)
+            dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 125, DEH_String("NUKER"));
+        V_ClearDPTranslation();
+
+        if(itemOn == 8)
+            dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 135, DEH_String("CRYOGUN"));
+        V_ClearDPTranslation();
     }
 
     if(fsize == 12361532)
     {
+        if(itemOn == 2)
+            dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 75, DEH_String("SUPER BOOTSPORK"));
+        V_ClearDPTranslation();
+
+        if(itemOn == 3)
+            dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 85, DEH_String("LARGE ZORCHER"));
+        V_ClearDPTranslation();
+
+        if(itemOn == 4)
+            dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 95, DEH_String("RAPID ZORCHER"));
+        V_ClearDPTranslation();
+
+        if(itemOn == 5)
+            dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 105, DEH_String("ZORCH PROPULSOR"));
+        V_ClearDPTranslation();
+
+        if(itemOn == 6)
+            dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 115, DEH_String("PHASING ZORCHER"));
+        V_ClearDPTranslation();
+
+        if(itemOn == 7)
+            dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 125, DEH_String("LARGE AREA ZORCHING DEVICE"));
+        V_ClearDPTranslation();
     }
 }
 
@@ -3554,16 +3750,107 @@ void M_DrawGame4(void)
         V_DrawPatch(70, 0, 0, W_CacheLumpName(DEH_String("M_GMESET"),
                                                PU_CACHE));
 
-    if(d_floors == 1)
+    if(d_floors)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef4.x + 266, GameDef4.y -2, DEH_String("ON"));
+        M_WriteText(GameDef4.x + 266, GameDef4.y - 2, DEH_String("ON"));
         V_ClearDPTranslation();
     }
-    else if (d_floors == 0)
+    else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef4.x + 258, GameDef4.y -2, DEH_String("OFF"));
+        M_WriteText(GameDef4.x + 258, GameDef4.y - 2, DEH_String("OFF"));
+        V_ClearDPTranslation();
+    }
+
+    if(d_moveblock)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(GameDef4.x + 266, GameDef4.y + 8, DEH_String("ON"));
+        V_ClearDPTranslation();
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(GameDef4.x + 258, GameDef4.y + 8, DEH_String("OFF"));
+        V_ClearDPTranslation();
+    }
+
+    if(d_model)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(GameDef4.x + 266, GameDef4.y + 18, DEH_String("ON"));
+        V_ClearDPTranslation();
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(GameDef4.x + 258, GameDef4.y + 18, DEH_String("OFF"));
+        V_ClearDPTranslation();
+    }
+
+    if(d_666)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(GameDef4.x + 266, GameDef4.y + 28, DEH_String("ON"));
+        V_ClearDPTranslation();
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(GameDef4.x + 258, GameDef4.y + 28, DEH_String("OFF"));
+        V_ClearDPTranslation();
+    }
+
+    if(correct_lost_soul_bounce)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(GameDef4.x + 266, GameDef4.y + 38, DEH_String("ON"));
+        V_ClearDPTranslation();
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(GameDef4.x + 258, GameDef4.y + 38, DEH_String("OFF"));
+        V_ClearDPTranslation();
+    }
+
+    if(d_maskedanim)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(GameDef4.x + 266, GameDef4.y + 48, DEH_String("ON"));
+        V_ClearDPTranslation();
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(GameDef4.x + 258, GameDef4.y + 48, DEH_String("OFF"));
+        V_ClearDPTranslation();
+    }
+
+    if(d_sound)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(GameDef4.x + 266, GameDef4.y + 58, DEH_String("ON"));
+        V_ClearDPTranslation();
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(GameDef4.x + 258, GameDef4.y + 58, DEH_String("OFF"));
+        V_ClearDPTranslation();
+    }
+
+    if(d_ouchface)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(GameDef4.x + 266, GameDef4.y + 68, DEH_String("ON"));
+        V_ClearDPTranslation();
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(GameDef4.x + 258, GameDef4.y + 68, DEH_String("OFF"));
         V_ClearDPTranslation();
     }
 }
@@ -3645,19 +3932,31 @@ void M_DrawCheats(void)
         V_ClearDPTranslation();
     }
 
-    dp_translation = crx[CRX_GRAY];
+    if(itemOn == 2)
+        dp_translation = crx[CRX_GOLD];
+    else
+        dp_translation = crx[CRX_GRAY];
     M_WriteText(75, 46, DEH_String("WEAPONS..."));
     V_ClearDPTranslation();
 
-    dp_translation = crx[CRX_GRAY];
+    if(itemOn == 3)
+        dp_translation = crx[CRX_GOLD];
+    else
+        dp_translation = crx[CRX_GRAY];
     M_WriteText(75, 56, DEH_String("KEYS..."));
     V_ClearDPTranslation();
 
-    dp_translation = crx[CRX_GRAY];
+    if(itemOn == 4)
+        dp_translation = crx[CRX_GOLD];
+    else
+        dp_translation = crx[CRX_GRAY];
     M_WriteText(75, 66, DEH_String("ARMOR..."));
     V_ClearDPTranslation();
 
-    dp_translation = crx[CRX_GRAY];
+    if(itemOn == 5)
+        dp_translation = crx[CRX_GOLD];
+    else
+        dp_translation = crx[CRX_GRAY];
     M_WriteText(75, 76, DEH_String("ITEMS..."));
     V_ClearDPTranslation();
 
@@ -5177,7 +5476,21 @@ void M_Drawer (void)
                 (currentMenu == &FilesDef && i == endgame && !usergame) ||
                 (currentMenu == &FilesDef && i == loadgame && netgame))
                 dp_translation = crx[CRX_DARK];
+            else if (i == itemOn)
+                dp_translation = crx[CRX_GOLD];
+            else if (currentMenu == &NewDef)
+            {
+                if (itemOn == 2)
+                    dp_translation = crx[CRX_GOLD];
 
+                if(beta_style)
+                    M_WriteText(NewDef.x, NewDef.y + 18, "I JUST WANT TO KILL.");
+                else
+                    M_WriteText(NewDef.x, NewDef.y + 18, "HURT ME PLENTY.");
+
+    
+                V_ClearDPTranslation();
+            }
             M_WriteText(x, y - 2, item->name);
 
             V_ClearDPTranslation();
@@ -6558,6 +6871,8 @@ void M_KeyBindingsClearAll (int choice)
 
     for (i = key_controls_start_in_cfg_at_pos; i < key_controls_end_in_cfg_at_pos; i++)
         *doom_defaults_list[i].location = 0;
+
+    *doom_defaults_list[key_controls_start_in_cfg_at_pos + 2].location = CLASSIC_CONTROLLER_MINUS;
 }
 
 void M_KeyBindingsReset (int choice)
@@ -7533,6 +7848,125 @@ void M_Floor(int choice)
         if (!d_floors)
             d_floors = true;
         players[consoleplayer].message = DEH_String("Use Doom's floor motion behavior");
+        break;
+    }
+}
+
+void M_Clipping(int choice)
+{
+    switch(choice)
+    {
+    case 0:
+        if (d_moveblock)
+            d_moveblock = false;
+        players[consoleplayer].message = DEH_String("Don't use Doom's movement clipping code");
+        break;
+    case 1:
+        if (!d_moveblock)
+            d_moveblock = true;
+        players[consoleplayer].message = DEH_String("Use Doom's movement clipping code");
+        break;
+    }
+}
+
+void M_Model(int choice)
+{
+    switch(choice)
+    {
+    case 0:
+        if (d_model)
+            d_model = false;
+        players[consoleplayer].message = DEH_String("Don't use Doom's linedef trigger model");
+        break;
+    case 1:
+        if (!d_model)
+            d_model = true;
+        players[consoleplayer].message = DEH_String("Use Doom's linedef trigger model");
+        break;
+    }
+}
+
+void M_BossDeath(int choice)
+{
+    switch(choice)
+    {
+    case 0:
+        if (d_666)
+            d_666 = false;
+        players[consoleplayer].message = DEH_String("Don't emulate pre-Ultimate Boss Death");
+        break;
+    case 1:
+        if (!d_666)
+            d_666 = true;
+        players[consoleplayer].message = DEH_String("Emulate pre-Ultimate Boss Death");
+        break;
+    }
+}
+
+void M_Bounce(int choice)
+{
+    switch(choice)
+    {
+    case 0:
+        if (correct_lost_soul_bounce == 1)
+            correct_lost_soul_bounce = 0;
+        players[consoleplayer].message = DEH_String("Lost souls don't bounce off flats");
+        break;
+    case 1:
+        if (correct_lost_soul_bounce == 0)
+            correct_lost_soul_bounce = 1;
+        players[consoleplayer].message = DEH_String("Lost souls will bounce off flats");
+        break;
+    }
+}
+
+void M_Masked(int choice)
+{
+    switch(choice)
+    {
+    case 0:
+        if (d_maskedanim)
+            d_maskedanim = false;
+        players[consoleplayer].message = DEH_String("2S middle textures won't animate");
+        break;
+    case 1:
+        if (!d_maskedanim)
+            d_maskedanim = true;
+        players[consoleplayer].message = DEH_String("2S middle textures will be animated");
+        break;
+    }
+}
+
+void M_Quirk(int choice)
+{
+    switch(choice)
+    {
+    case 0:
+        if (d_sound)
+            d_sound = false;
+        players[consoleplayer].message = DEH_String("Quirks in the sound code will be retained");
+        break;
+    case 1:
+        if (!d_sound)
+            d_sound = true;
+        players[consoleplayer].message = DEH_String("Quirks in the sound code won't be retained");
+        break;
+    }
+}
+
+void M_Ouch(int choice)
+{
+    switch(choice)
+    {
+    case 0:
+        if (d_ouchface)
+            d_ouchface = false;
+        players[consoleplayer].message = DEH_String("Don't use Doom's buggy ouch face code");
+        break;
+    case 1:
+        if (!d_ouchface)
+            d_ouchface = true;
+        players[consoleplayer].message = DEH_String("Use Doom's buggy ouch face code");
         break;
     }
 }

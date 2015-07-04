@@ -294,7 +294,12 @@ twoSided
 ( int        sector,
   int        line )
 {
-    return (sectors[sector].lines[line])->flags & ML_TWOSIDED;
+    //jff 1/26/98 return what is actually needed, whether the line
+    //has two sidedefs, rather than whether the 2S flag is set
+
+    return d_model ?
+        (sectors[sector].lines[line])->flags & ML_TWOSIDED :
+        (sectors[sector].lines[line])->sidenum[1] != NO_INDEX;
 }
 
 
@@ -310,12 +315,24 @@ getNextSector
 ( line_t*        line,
   sector_t*      sec )
 {
-    if (!(line->flags & ML_TWOSIDED))
-        return NULL;
+    //jff 1/26/98 check unneeded since line->backsector already
+    //returns NULL if the line is not two sided, and does so from
+    //the actual two-sidedness of the line, rather than its 2S flag
+
+    if (d_model)
+    {
+        if (!(line->flags & ML_TWOSIDED))
+            return NULL;
+    }
                 
     if (line->frontsector == sec)
-        return line->backsector;
-        
+    {
+        if (d_model || line->backsector != sec)
+            return line->backsector; //jff 5/3/98 don't retn sec unless compatibility
+        else                         // fixes an intra-sector line breaking functions
+            return NULL;             // like floor->highest floor
+    }
+
     return line->frontsector;
 }
 
@@ -359,6 +376,11 @@ fixed_t        P_FindHighestFloorSurrounding(sector_t *sec)
     sector_t*              other;
     fixed_t                floor = -500*FRACUNIT;
         
+    //jff 1/26/98 Fix initial value for floor to not act differently
+    //in sections of wad that are below -500 units
+    if (!d_model)                  /* jff 3/12/98 avoid ovf */
+        floor = -32000 * FRACUNIT; // in height calculations
+
     for (i=0 ;i < sec->linecount ; i++)
     {
         check = sec->lines[i];
@@ -468,6 +490,10 @@ P_FindLowestCeilingSurrounding(sector_t* sec)
     sector_t*              other;
     fixed_t                height = INT_MAX;
         
+    /* jff 3/12/98 avoid ovf in height calculations */
+    if (!d_model)
+        height = 32000 * FRACUNIT;
+
     for (i=0 ;i < sec->linecount ; i++)
     {
         check = sec->lines[i];
@@ -493,6 +519,12 @@ fixed_t        P_FindHighestCeilingSurrounding(sector_t* sec)
     sector_t*      other;
     fixed_t        height = 0;
         
+    /* jff 1/26/98 Fix initial value for floor to not act differently
+     * in sections of wad that are below 0 units
+     * jff 3/12/98 avoid ovf in height calculations */
+    if (!d_model)
+        height = -32000 * FRACUNIT;
+
     for (i=0 ;i < sec->linecount ; i++)
     {
         check = sec->lines[i];
@@ -1267,7 +1299,16 @@ void P_UpdateSpecials (void)
                         buttonlist[i].btexture;
                     break;
                 }
-                S_StartSound(&buttonlist[i].soundorg,sfx_swtchn);
+                /* don't take the address of the switch's sound origin,
+                 * unless in a compatibility mode. */
+                mobj_t *so = (mobj_t *)buttonlist[i].soundorg;
+
+                if (d_sound)
+                    /* since the buttonlist array is usually zeroed out,
+                     * button popouts generally appear to come from (0,0) */
+                    so = (mobj_t *)&buttonlist[i].soundorg;
+
+                S_StartSound(so, sfx_swtchn);
                 memset(&buttonlist[i],0,sizeof(button_t));
             }
         }
