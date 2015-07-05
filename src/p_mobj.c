@@ -798,6 +798,7 @@ void P_RemoveMobj (mobj_t* mobj)
     
     P_SetTarget(&mobj->target, NULL);
     P_SetTarget(&mobj->tracer, NULL);
+    P_SetTarget(&mobj->lastenemy, NULL);
 
     // free block
     P_RemoveThinker ((thinker_t*)mobj);

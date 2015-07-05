@@ -299,6 +299,9 @@ typedef struct mobj_s
     // For bobbing up and down.
     int                    floatbob;
 
+    // new field: last known enemy -- killough 2/15/98
+    struct mobj_s          *lastenemy;
+
 } mobj_t;
 
 

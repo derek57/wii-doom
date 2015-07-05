@@ -5994,6 +5994,7 @@ void M_ItemsA(int choice)
             players[consoleplayer].powers[4] = 1;
             players[consoleplayer].powers[5] = INFRATICS;
             players[consoleplayer].powers[6] = FLIGHTTICS;
+            player->cheats ^= CF_NOTARGET;
 
             if (!player->backpack)
             {
@@ -6016,6 +6017,7 @@ void M_ItemsA(int choice)
             players[consoleplayer].powers[4] = 0;
             players[consoleplayer].powers[5] = 0;
             players[consoleplayer].powers[6] = 0;
+            player->cheats &= ~CF_NOTARGET;
 
             if(beta_style)
                 players[consoleplayer].fixedcolormap = 0;
@@ -6035,6 +6037,7 @@ void M_ItemsB(int choice)
     {
         if(!got_invisibility)
         {
+            players[consoleplayer].cheats ^= CF_NOTARGET;
             players[consoleplayer].powers[2] = INVISTICS;
             players[consoleplayer].mo->flags |= MF_SHADOW;
 

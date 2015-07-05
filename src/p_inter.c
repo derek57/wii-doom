@@ -55,6 +55,7 @@
 int                     maxammo[NUMAMMO] = {200, 50, 300, 50};
 int                     clipammo[NUMAMMO] = {10, 4, 20, 1};
 int                     cardsfound;
+int                     species_infighting = 0;
 
 extern boolean          massacre_cheat_used;
 
@@ -1293,6 +1294,9 @@ P_DamageMobj
     {
         // if not intent on another player,
         // chase after this one
+        if (!target->lastenemy || target->lastenemy->health <= 0 || !target->lastenemy->player)
+            target->lastenemy = target->target;     // remember last enemy - killough
+
         target->target = source;
         target->threshold = BASETHRESHOLD;
         if (target->state == &states[target->info->spawnstate]

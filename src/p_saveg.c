@@ -443,6 +443,27 @@ static void saveg_read_mobj_t(mobj_t *str)
 
     // struct mobj_s* tracer;
     str->tracer = saveg_readp();
+
+    // struct mobj_s *lastenemy
+    str->lastenemy = (mobj_t *)saveg_readp();
+
+    // int floatbob
+    str->floatbob = saveg_read32();
+
+    // boolean interp
+    str->interp = saveg_read32();
+
+    // int oldx
+    str->oldx = saveg_read32();
+
+    // int oldy
+    str->oldy = saveg_read32();
+
+    // int oldz
+    str->oldz = saveg_read32();
+
+    // angle_t oldangle
+    str->oldangle = saveg_read32();
 }
 
 // [crispy] enumerate all thinker pointers
@@ -611,6 +632,27 @@ static void saveg_write_mobj_t(mobj_t *str)
     // [crispy] instead of the actual pointer, store the
     // corresponding index in the mobj->tracers field
     saveg_writep((void *)(uintptr_t) P_ThinkerToIndex((thinker_t *) str->tracer));
+
+    // struct mobj_s *lastenemy
+    saveg_writep((void *)(uintptr_t)P_ThinkerToIndex((thinker_t *)str->lastenemy));
+
+    // int floatbob
+    saveg_write32(str->floatbob);
+
+    // boolean interp
+    saveg_write32(str->interp);
+
+    // int oldx
+    saveg_write32(str->oldx);
+
+    // int oldy
+    saveg_write32(str->oldy);
+
+    // int oldz
+    saveg_write32(str->oldz);
+
+    // angle_t oldangle
+    saveg_write32(str->oldangle);
 }
 
 

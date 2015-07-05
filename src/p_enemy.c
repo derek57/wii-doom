@@ -51,6 +51,7 @@
 #define        FATSPREAD            (ANG90/8)
 #define        SKULLSPEED           (20*FRACUNIT)
 #define        SPLAT_PER_COUNTER    1
+#define        MONS_LOOK_RANGE      (32 * 64 * FRACUNIT)
 
 
 typedef enum
@@ -537,6 +538,7 @@ void P_NewChaseDir (mobj_t*        actor)
 // If allaround is false, only look 180 degrees in front.
 // Returns true if a player is targeted.
 //
+/*
 boolean
 P_LookForPlayers
 ( mobj_t*        actor,
@@ -594,6 +596,100 @@ P_LookForPlayers
     }
 
     return false;
+}
+*/
+static boolean P_LookForMonsters(mobj_t *actor)
+{
+    mobj_t      *mo;
+    thinker_t   *th;
+
+    if (!P_CheckSight(players[0].mo, actor))
+        return false;           // player can't see monster
+
+    for (th = thinkercap.next; th != &thinkercap; th = th->next)
+    {
+        mo = (mobj_t *)th;
+        if (!(mo->flags & MF_COUNTKILL) || mo == actor || mo->health <= 0)
+            continue;           // not a valid monster
+
+        if (P_AproxDistance(actor->x - mo->x, actor->y - mo->y) > MONS_LOOK_RANGE)
+            continue;           // out of range
+
+        if (!P_CheckSight(actor, mo))
+            continue;           // out of sight
+
+        // Found a target monster
+        P_SetTarget(&actor->lastenemy, actor->target);
+        P_SetTarget(&actor->target, mo);
+        return true;
+    }
+    return false;
+}
+
+static boolean P_LookForPlayers(mobj_t *actor, boolean allaround)
+{
+    player_t    *player;
+    mobj_t      *mo;
+    angle_t     an;
+    fixed_t     dist;
+
+    if (infight)
+        // player is dead, look for monsters
+        return P_LookForMonsters(actor);
+
+    player = &players[0];
+    mo = player->mo;
+
+    if (player->cheats & CF_NOTARGET)
+        return false;
+
+    if (player->health <= 0 || !P_CheckSight(actor, mo))
+    {
+        // Use last known enemy if no players sighted -- killough 2/15/98
+        if (actor->lastenemy && actor->lastenemy->health > 0)
+        {
+            P_SetTarget(&actor->target, actor->lastenemy);
+            P_SetTarget(&actor->lastenemy, NULL);
+            return true;
+        }
+        return false;
+    }
+
+    dist = P_AproxDistance(mo->x - actor->x, mo->y - actor->y);
+
+    if (!allaround)
+    {
+        an = R_PointToAngle2(actor->x, actor->y, mo->x, mo->y) - actor->angle;
+
+        if (an > ANG90 && an < ANG270)
+        {
+            // if real close, react anyway
+            if (dist > MELEERANGE)
+            {
+                // Use last known enemy if no players sighted -- killough 2/15/98
+                if (actor->lastenemy && actor->lastenemy->health > 0)
+                {
+                    P_SetTarget(&actor->target, actor->lastenemy);
+                    P_SetTarget(&actor->lastenemy, NULL);
+                    return true;
+                }
+                return false;
+            }
+        }
+    }
+
+    if (mo->flags & MF_SHADOW)
+    {
+        // player is invisible
+        if (dist > 2 * MELEERANGE && P_AproxDistance(mo->momx, mo->momy) < 5 * FRACUNIT)
+            return false;       // player is sneaking - can't detect
+        if (P_Random() < 225)
+            return false;       // player isn't sneaking, but still didn't detect
+    }
+
+    P_SetTarget(&actor->target, mo);
+    actor->threshold = 60;
+    return true;
 }
 
 //----------------------------------------------------------------------------

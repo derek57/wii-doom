@@ -286,6 +286,8 @@ void P_DeathThink (player_t* player)
     angle_t    angle;
     angle_t   delta;
 
+    infight = true;
+
     P_MovePsprites (player);
         
     // fall to the ground

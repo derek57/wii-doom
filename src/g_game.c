@@ -410,23 +410,25 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
             cmd->angleturn += angleturn; 
 
         if (joyxmove > 20) 
-        {
             side += sidemove; 
-            not_walking = false;
-        }
         else if (joyxmove < -20) 
-        {
             side -= sidemove; 
-            not_walking = false;
-        }
-        else
-            not_walking = true;
 
         if (joyirx > 0)     // calculate wii IR curve based on input
             cmd->angleturn -= turnspd * joyirx;
         if (joyirx < 0)     // calculate wii IR curve based on input
             cmd->angleturn -= turnspd * joyirx;
     } 
+
+    if (joyymove > 20) 
+        forward += forwardmve; 
+    else if (joyymove < -20) 
+        forward -= forwardmve; 
+
+    if (joyxmove > 20 || joyymove > 20 || joyxmove < -20 || joyymove < -20)
+        not_walking = false;
+    else
+        not_walking = true;
 
     extern boolean dont_move_forwards;
     extern boolean dont_move_backwards;
@@ -443,19 +445,6 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
         if(dont_move_backwards == true)
             forward -= forwardmove; 
     }
-
-    if (joyymove > 20) 
-    {
-        forward += forwardmve; 
-        not_walking = false;
-    }
-    else if (joyymove < -20) 
-    {
-        forward -= forwardmve; 
-        not_walking = false;
-    }
-    else
-        not_walking = true;
 
     if (joybuttons[joybstrafeleft]) 
     {
@@ -1107,6 +1096,7 @@ void G_DoNewGame (void)
     consoleplayer = 0;
     G_InitNew (d_skill, d_episode, d_map); 
     gameaction = ga_nothing; 
+    infight = false;
 } 
 
 // Generate a string describing a demo version
@@ -1705,7 +1695,8 @@ void G_PlayerReborn (int player)
          
     for (i=0 ; i<NUMAMMO ; i++) 
         p->maxammo[i] = maxammo[i]; 
-                 
+
+    infight = false;
 }
 
 //
@@ -1924,6 +1915,7 @@ G_DeferedInitNew
     d_episode = episode; 
     d_map = map; 
     gameaction = ga_newgame; 
+    infight = false;
 } 
 
 

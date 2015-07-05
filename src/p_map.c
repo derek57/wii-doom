@@ -121,6 +121,8 @@ static int pe_y; // Pain Elemental position for Lost Soul checks // phares
 static int ls_x; // Lost Soul position for Lost Soul checks      // phares
 static int ls_y; // Lost Soul position for Lost Soul checks      // phares
 
+boolean                infight;
+
 //
 // TELEPORT MOVE
 // 
@@ -395,6 +397,10 @@ boolean PIT_CheckThing (mobj_t* thing)
             // Don't hit same species as originator.
             if (thing == tmthing->target)
                 return true;
+            else if (thing->type != MT_PLAYER && !infight && !species_infighting)
+                // Explode, but do no damage.
+                // Let players missile other players.
+                return false;
 
             // sdh: Add deh_species_infighting here.  We can override the
             // "monsters of the same species cant hurt each other" behavior
