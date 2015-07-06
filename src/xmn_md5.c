@@ -57,7 +57,7 @@ char known_md5_string_hacx_reg_1_2_iwad[33] = "65ed74d522bdf6649c2831b13b9e02b4"
 char known_md5_string_nerve_bfg_pwad[33] = "967d5ae23daf45196212ae1b605da3b0";
 char known_md5_string_nerve_xbox360_pwad[33] = "4f47bb32bf5fd06bc1cc0b4a2e8e3910";
 
-int MD5_Check(char *final)
+int MD5_Check(char *fin)
 {
     int i;
     int bytes;
@@ -65,7 +65,7 @@ int MD5_Check(char *final)
     unsigned char c[MD5_DIGEST_LENGTH];
     unsigned char data[1024];
 
-    FILE *inFile = fopen (final, "rb");
+    FILE *inFile = fopen (fin, "rb");
 
     MD5_CTX mdContext;
 

@@ -6,11 +6,6 @@
 /* Prototypes */
 s32  Wpad_Init(void);
 
-void Wpad_Disconnect(void);
-
-u32  Wpad_GetButtons(void);
-u32  Wpad_WaitButtons(void);
-
 boolean Wpad_TimeButton(void);
 
 // Routine to wait for a button from either the Wiimote or a gamecube

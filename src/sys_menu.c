@@ -1,15 +1,21 @@
+#include <jpgogc.h>
 #include <malloc.h>
 #include <ogcsys.h>
 #include <ogc/pad.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <string.h>
 #include <unistd.h>
 #include <wiiuse/wpad.h>
+
+#include "d_main.h"
 
 #include "gui.h"
 #include "m_misc.h"
 #include "sys_fat.h"
+#include "sys_menu.h"
 #include "sys_nand.h"
 #include "sys_globals.h"
 #include "sys_usbstorage.h"
@@ -17,21 +23,23 @@
 
 #include "video.h"
 
+#include "w_wad.h"
 
-/* Macros */
+// Macros
 #define NB_FAT_DEVICES    (sizeof(fdevList) / sizeof(fatDevice))
 #define MAXPATH           0x108
 #define MAX_WIIMOTES      4
 
 
-CONFIG            gConfig;
+static CONFIG            gConfig;
 
-/* FAT device list  */
-fatDevice fdevList[] = {
+// FAT device list 
+static fatDevice fdevList[] = {
     { "sd",     "    SD-Card    ",        &__io_wiisd      },
     { "usb",    "  USB-Storage  ",        &__io_usbstorage },
     { "usb2",   "USB 2.0 Storage",        &__io_wiiums     }
 };
+
 
 // wiiNinja: Define a buffer holding the previous path names as user
 // traverses the directory tree. Max of 10 levels is define at this point
@@ -39,13 +47,14 @@ static fatDevice  *fdev = NULL;
 
 static u8         gDirLevel = 0;
 
-static char       gDirList [MAX_DIR_LEVELS][MAX_FILE_PATH_LEN];
+static char       gDirList[MAX_DIR_LEVELS][MAX_FILE_PATH_LEN];
 
 static s32        gSeleted[MAX_DIR_LEVELS];
 static s32        gStart[MAX_DIR_LEVELS];
 
-char              gFileName[MAX_FILE_PATH_LEN];
-char              gTmpFilePath[MAX_FILE_PATH_LEN];
+static u32        *xfb;
+
+static GXRModeObj *rmode;
 
 int               is_chex_2 = 0;
 int               extra_wad_loaded = 0;
@@ -57,67 +66,91 @@ boolean           multiplayer_flag = false;
 boolean           nerve_pwad = false;
 boolean           merge = false;
 
-
-// Local prototypes: wiiNinja
-void WaitPrompt (char *prompt);
-void drawMain();
-void D_DoomMain (void);
-void W_CheckSize(int wad);
-
-int PushCurrentDir(char *dirStr, s32 Selected, s32 Start);
-int MD5_Check(char *final);
-
-char *PopCurrentDir(s32 *Selected, s32 *Start);
-char *PeekCurrentDir (void);
-
-boolean IsListFull (void);
-
-u32 WaitButtons(void);
-u32 Pad_GetButtons(void);
-u32 Wpad_HeldButtons(void);
+extern char       picdata[];
+extern int        piclength;
 
 
-boolean Wpad_TimeButton(void)
+static int PushCurrentDir (char *dirStr, s32 Selected, s32 Start)
 {
-    u32 buttons = 1;
-    
-    time_t start,end;
-    time (&start);
+    int retval = 0;
 
-    int dif;
-
-    /* Wait for button pressing */
-    while (buttons)
+    // Store dirStr into the list and increment the gDirLevel
+    // WARNING: Make sure dirStr is no larger than MAX_FILE_PATH_LEN
+    if (gDirLevel < MAX_DIR_LEVELS)
     {
-        buttons = Wpad_HeldButtons();
+        M_StringCopy (gDirList [gDirLevel], dirStr, sizeof(gDirList [gDirLevel]));
 
-        VIDEO_WaitVSync();
+        gSeleted[gDirLevel] = Selected;
 
-        time (&end);
+        gStart[gDirLevel] = Start;
 
-        dif = difftime (end,start);
-
-        if(dif>=2)
-            return true;
+        gDirLevel++;
     }
-    return false;
+    else
+        retval = -1;
+
+    return (retval);
 }
 
-u32 Wpad_GetButtons(void)
+static char *PeekCurrentDir (void)
 {
-    u32 buttons = 0, cnt;
-
-    /* Scan pads */
-    WPAD_ScanPads();
-
-    /* Get pressed buttons */
-    for (cnt = 0; cnt < MAX_WIIMOTES; cnt++)
-        buttons |= WPAD_ButtonsDown(cnt);
-
-    return buttons;
+    // Return the current path
+    if (gDirLevel > 0)
+        return (gDirList [gDirLevel - 1]);
+    else
+        return (NULL);
 }
 
-void Sys_LoadMenu(void)
+static char *PopCurrentDir(s32 *Selected, s32 *Start)
+{
+    if (gDirLevel > 1)
+        gDirLevel--;
+    else
+        gDirLevel = 0;
+
+    *Selected = gSeleted[gDirLevel];
+
+    *Start = gStart[gDirLevel];
+
+    return PeekCurrentDir();
+}
+
+static void Initialise()
+{
+    VIDEO_Init();
+
+    rmode = VIDEO_GetPreferredMode(NULL);
+	
+    xfb = MEM_K0_TO_K1(SYS_AllocateFramebuffer(rmode));
+
+    console_init(xfb, 20, 20, rmode->fbWidth, rmode->xfbHeight, rmode->fbWidth * VI_DISPLAY_PIX_SZ);
+
+    VIDEO_Configure(rmode);
+    VIDEO_SetNextFramebuffer(xfb);
+    VIDEO_SetBlack(false);
+    VIDEO_Flush();
+    VIDEO_WaitVSync();
+
+    if(rmode->viTVMode & VI_NON_INTERLACE)
+        VIDEO_WaitVSync();
+}
+
+static void display_jpeg(JPEGIMG jpeg, int x, int y)
+{
+    unsigned int *jpegout = (unsigned int *) jpeg.outbuffer;
+
+    int i, j;
+    int height = jpeg.height;
+    int width = jpeg.width / 2;
+
+    for(i = 0; i <= width; i++)
+        for(j = 0; j <= height - 2; j++)
+            xfb[(i + x) + 320 * (j + 16 + y)] = jpegout[i + width * j];
+
+    free(jpeg.outbuffer);
+}
+
+static void Sys_LoadMenu(void)
 {
     int HBC = 0;
 
@@ -131,72 +164,60 @@ void Sys_LoadMenu(void)
         sig[5] == 'A' &&
         sig[6] == 'X' &&
         sig[7] == 'X')
-        HBC=1; // Exit to HBC
+        HBC = 1; // Exit to HBC
 
-    /* Homebrew Channel stub */
+    // Homebrew Channel stub
     if (HBC == 1)
         exit(0);
 
-    /* Return to the Wii system menu */
+    // Return to the Wii system menu
     SYS_ResetSystem(SYS_RETURNTOMENU, 0, 0);
 }
 
-void Con_Clear(void)
+static void Con_Clear(void)
 {
-    /* Clear console */
+    // Clear console
     printf("\x1b[2J");
 
     fflush(stdout);
 }
 
-void Restart(void)
+static void Restart(void)
 {
     Con_Clear ();
 
-    fflush(stdout);
+    //fflush(stdout);
 
-    /* Load system menu */
+    // Load system menu
     Sys_LoadMenu();
 }
 
-s32 __Menu_IsGreater(const void *p1, const void *p2)
-{
-    u32 n1 = *(u32 *)p1;
-    u32 n2 = *(u32 *)p2;
-
-    /* Equal */
-    if (n1 == n2)
-        return 0;
-
-    return (n1 > n2) ? 1 : -1;
-}
-
-
-s32 __Menu_EntryCmp(const void *p1, const void *p2)
+static s32 __Menu_EntryCmp(const void *p1, const void *p2)
 {
     fatFile *f1 = (fatFile *)p1;
     fatFile *f2 = (fatFile *)p2;
 
-    /* Compare entries */ // wiiNinja: Include directory
-    if ((f1->entry.d_type==DT_DIR) && !(f2->entry.d_type==DT_DIR))
+    // Compare entries
+    // wiiNinja: Include directory
+    if ((f1->entry.d_type == DT_DIR) && !(f2->entry.d_type == DT_DIR))
         return (-1);
-    else if (!(f1->entry.d_type==DT_DIR) && (f2->entry.d_type==DT_DIR))
+    else if (!(f1->entry.d_type == DT_DIR) && (f2->entry.d_type == DT_DIR))
         return (1);
     else
         return strcmp(f1->filename, f2->filename);
 }
 
-s32 __Menu_RetrieveList(char *inPath, fatFile **outbuf, u32 *outlen)
+static s32 __Menu_RetrieveList(char *inPath, fatFile **outbuf, u32 *outlen)
 {
-    fatFile  *buffer = NULL;
+    fatFile *buffer = NULL;
 
     DIR *dir = NULL;
     
     struct dirent *entry;
 
-    u32  cnt = 0;
+    u32 cnt = 0;
 
-    /* Open directory */
+    // Open directory
     dir = opendir(inPath);
 
     if (!dir)
@@ -207,7 +228,7 @@ s32 __Menu_RetrieveList(char *inPath, fatFile **outbuf, u32 *outlen)
 
     if (cnt > 0)
     {
-        /* Allocate memory */
+        // Allocate memory
         buffer = malloc(sizeof(fatFile) * cnt);
 
         if (!buffer)
@@ -217,17 +238,17 @@ s32 __Menu_RetrieveList(char *inPath, fatFile **outbuf, u32 *outlen)
             return -2;
         }
 
-        /* Reset directory */
+        // Reset directory
         closedir(dir);
 
         dir = opendir(inPath);
 
-        /* Get entries */
+        // Get entries
         for (cnt = 0; (entry = readdir(dir));)
         {
             boolean addFlag = false;
 
-            if (entry->d_type==DT_DIR) 
+            if (entry->d_type == DT_DIR) 
             {
                 // Add only the item ".." which is the previous directory
                 // AND if we're not at the root directory
@@ -238,11 +259,12 @@ s32 __Menu_RetrieveList(char *inPath, fatFile **outbuf, u32 *outlen)
             }
             else
             {
-                if(strlen(entry->d_name)>4)
+                if(strlen(entry->d_name) > 4)
                 {
-                    if (!stricmp(entry->d_name+strlen(entry->d_name)-4, ".wad") ||
-                        !stricmp(entry->d_name+strlen(entry->d_name)-4, ".deh"))
-                    addFlag = true;
+                    if (!stricmp(entry->d_name + strlen(entry->d_name) - 4, ".wad") ||
+                            !stricmp(entry->d_name + strlen(entry->d_name) - 4, ".deh") ||
+                            !stricmp(entry->d_name + strlen(entry->d_name) - 4, ".txt"))
+                        addFlag = true;
                 }
             }
 
@@ -250,43 +272,43 @@ s32 __Menu_RetrieveList(char *inPath, fatFile **outbuf, u32 *outlen)
             {
                 fatFile *file = &buffer[cnt++];
     
-                /* File name */
+                // File name
                 M_StringCopy(file->filename, entry->d_name, sizeof(file->filename));
 
-                /* File stats */
+                // File stats
                 file->entry = *entry;
             }
         }
-        /* Sort list */
+        // Sort list
         qsort(buffer, cnt, sizeof(fatFile), __Menu_EntryCmp);
     }
 
-    /* Close directory */
+    // Close directory
     closedir(dir);
 
-    /* Set values */
+    // Set values
     *outbuf = buffer;
     *outlen = cnt;
 
     return 0;
 }
 
-void Menu_FatDevice(void)
+static void Menu_FatDevice(void)
 {
     s32 ret, selected = 0;
 
-    /* Select source device */
+    // Select source device
     if (gConfig.fatDeviceIndex < 0)
     {
-        for (;;)
+        for ( ; ; )
         {
-            /* Clear console */
+            // Clear console
             Con_Clear();
 
-            /* Draw main title */
+            // Draw main title
             drawMain();
 
-            /* Selected device */
+            // Selected device
             fdev = &fdevList[selected];
 
             printf(">>Source: < %s >", fdev->name);
@@ -316,7 +338,7 @@ void Menu_FatDevice(void)
 
             u32 buttons = WaitButtons();
 
-            /* LEFT/RIGHT buttons */
+            // LEFT/RIGHT buttons
             if (buttons & WPAD_CLASSIC_BUTTON_LEFT)
             {
                 if ((--selected) <= -1)
@@ -329,11 +351,11 @@ void Menu_FatDevice(void)
                     selected = 0;
             }
 
-            /* HOME button */
+            // HOME button
             if (buttons & WPAD_CLASSIC_BUTTON_HOME)
                 Restart();
 
-            /* A button */
+            // A button
             if (buttons & WPAD_CLASSIC_BUTTON_A)
                 break;
         }
@@ -345,10 +367,10 @@ void Menu_FatDevice(void)
         fdev = &fdevList[gConfig.fatDeviceIndex];
     }
 
-    /* Clear console */
+    // Clear console
     Con_Clear();
 
-    /* Draw main title */
+    // Draw main title
     drawMain();
 
     printf("  Loading...: %s", fdev->name );
@@ -356,7 +378,7 @@ void Menu_FatDevice(void)
 
     fflush(stdout);
 
-    /* Mount FAT device */
+    // Mount FAT device
     ret = Fat_Mount(fdev);
 
     if (ret < 0)
@@ -402,14 +424,14 @@ void Menu_FatDevice(void)
 
     WaitButtons();
 
-    /* Prompt menu again */
+    // Prompt menu again
     Menu_FatDevice();
 }
 
 
-void Menu_WadList(void)
+static void Menu_WadList(void)
 {
-    boolean        md5_check = false;
+    boolean     md5_check = false;
 
     char        buffer[4];
     char        check[MAXPATH];
@@ -422,7 +444,6 @@ void Menu_WadList(void)
     char        stripped_extra_wad_2[256] = "";
     char        stripped_extra_wad_3[256] = "";
     char        stripped_dehacked_file[256] = "";
-    char        *tmpPath = malloc (MAX_FILE_PATH_LEN);
 
     const char  *iwad_ver = NULL;
     const char  *shareware_warn = NULL;
@@ -502,10 +523,13 @@ void Menu_WadList(void)
     s32         selected = 0;
     s32         start = 0;
 
+    char        *tmpPath = malloc (MAX_FILE_PATH_LEN);
+
     // wiiNinja: check for malloc error
     if (tmpPath == NULL)
     {
-        ret = -997; // What am I gonna use here?
+        // What am I gonna use here?
+        ret = -997;
 
         printf("  Error! Out of memory (ret = %d)\n", ret);
 
@@ -523,16 +547,17 @@ void Menu_WadList(void)
     // both sides of the argument win
     sprintf(tmpPath, "%s:" WAD_DIRECTORY, fdev->mount);
 
-    PushCurrentDir(tmpPath,0,0);
+    PushCurrentDir(tmpPath, 0, 0);
 
     if (strcmp (WAD_DIRECTORY, gConfig.startupPath) != 0)
     {
         sprintf(tmpPath, "%s:/apps/wiidoom/", fdev->mount);
 
-        PushCurrentDir(tmpPath,0,0); // wiiNinja
+        // wiiNinja
+        PushCurrentDir(tmpPath, 0, 0);
     }
 
-    /* Retrieve filelist */
+    // Retrieve filelist
 
     getList:
 
@@ -552,7 +577,7 @@ void Menu_WadList(void)
         goto err;
     }
 
-    /* No files */
+    // No files
     if (!fileCnt)
     {
         printf("  No files found!\n");
@@ -570,40 +595,53 @@ void Menu_WadList(void)
         file->install = 0;
     }
 
-    for (;;)
+    for ( ; ; )
     {
         u32 cnt;
 
         s32 index;
 
-        /* Clear console */
+        // Clear console
         Con_Clear();
 
-        /* Draw main title */
+        // Draw main title
         drawMain();
 
-        /** Print entries **/
+        JPEGIMG about;
+
+        memset(&about, 0, sizeof(JPEGIMG));
+
+        about.inbuffer = picdata;
+        about.inbufferlength = piclength;
+
+        JPEG_Decompress(&about);
+
+        display_jpeg(about, 0, 300);
+
+        //* Print entries *
         cnt = strlen(tmpPath);
 
-        if(cnt>30)
-            index = cnt-30;
+        if(cnt > 30)
+            index = cnt - 30;
         else
             index = 0;
 
-        /* Print entries */
+        // Print entries
         for (cnt = start; cnt < fileCnt; cnt++)
         {
-            fatFile *file     = &fileList[cnt];
+            fatFile *file = &fileList[cnt];
 
-            /* Entries per page limit */
+            // Entries per page limit
             if ((cnt - start) >= ENTRIES_PER_PAGE)
                 break;
 
-            M_StringCopy(str, file->filename, sizeof(str)); //Only 40 chars to fit the screen
+            // Only 40 chars to fit the screen
+            M_StringCopy(str, file->filename, sizeof(str));
 
-            str[40]=0;
+            str[40] = 0;
 
-            if (file->entry.d_type==DT_DIR) // wiiNinja
+            // wiiNinja
+            if (file->entry.d_type == DT_DIR)
             {
                 printf("%2s[%.27s]\n", (cnt == selected) ? ">>" : "  ", str);
             }
@@ -1308,10 +1346,10 @@ void Menu_WadList(void)
                         &stTexteLocation,
                         "-");
 
-    /** Controls **/
+    //* Controls *
     u32 buttons = WaitButtons();
 
-    /* DPAD buttons */
+    // DPAD buttons
     if (buttons & WPAD_CLASSIC_BUTTON_UP)
     {
         selected--;
@@ -1344,17 +1382,17 @@ void Menu_WadList(void)
             selected = fileCnt - 1;
     }
 
-    /* HOME button */
+    // HOME button
     if (buttons & WPAD_CLASSIC_BUTTON_HOME)
         Restart();
 
     // 1 Button - Leathl
     if (buttons & WPAD_CLASSIC_BUTTON_PLUS)
     {
-        /* Clear console */
+        // Clear console
         Con_Clear();
 
-        /* START DOOM */
+        // START DOOM
         D_DoomMain();
     }
 
@@ -1526,12 +1564,12 @@ void Menu_WadList(void)
             else if (strncmp(calculated_md5_string,
                         known_md5_string_doom_share_1_9_iwad, 32) == 0)
             {
-/*
+//
                 M_StringCopy(target, check, sizeof(target));
                 M_StringCopy(stripped_target, tmpFile->filename, sizeof(stripped_target));
 
                 fsize = 20428208;
-*/
+
                 md5_check = true;
                 nerve_pwad = false;
             }
@@ -1571,24 +1609,24 @@ void Menu_WadList(void)
             else if (strncmp(calculated_md5_string,
                         known_md5_string_doom_reg_1_6b_iwad, 32) == 0)
             {
-/*
+//
                 M_StringCopy(target, check, sizeof(target));
                 M_StringCopy(stripped_target, tmpFile->filename, sizeof(stripped_target));
 
                 fsize = 20428208;
-*/
+
                 md5_check = true;
                 nerve_pwad = false;
             }
             else if (strncmp(calculated_md5_string,
                         known_md5_string_doom_reg_1_666_iwad, 32) == 0)
             {
-/*
+//
                 M_StringCopy(target, check, sizeof(target));
                 M_StringCopy(stripped_target, tmpFile->filename, sizeof(stripped_target));
 
                 fsize = 20428208;
-*/
+
                 md5_check = true;
                 nerve_pwad = false;
             }
@@ -1606,12 +1644,12 @@ void Menu_WadList(void)
             else if (strncmp(calculated_md5_string,
                         known_md5_string_doom_reg_1_9_iwad, 32) == 0)
             {
-/*
+//
                 M_StringCopy(target, check, sizeof(target));
                 M_StringCopy(stripped_target, tmpFile->filename, sizeof(stripped_target));
 
                 fsize = 20428208;
-*/
+
                 md5_check = true;
                 nerve_pwad = false;
             }
@@ -1695,24 +1733,24 @@ void Menu_WadList(void)
             else if (strncmp(calculated_md5_string,
                         known_md5_string_doom2_1_7a_iwad, 32) == 0)
             {
-/*
+//
                 M_StringCopy(target, check, sizeof(target));
                 M_StringCopy(stripped_target, tmpFile->filename, sizeof(stripped_target));
 
                 fsize = 20428208;
-*/
+
                 md5_check = true;
                 nerve_pwad = false;
             }
             else if (strncmp(calculated_md5_string,
                         known_md5_string_doom2_1_8_iwad, 32) == 0)
             {
-/*
+//
                 M_StringCopy(target, check, sizeof(target));
                 M_StringCopy(stripped_target, tmpFile->filename, sizeof(stripped_target));
 
                 fsize = 20428208;
-*/
+
                 md5_check = true;
                 nerve_pwad = false;
             }
@@ -1818,72 +1856,72 @@ void Menu_WadList(void)
             else if (strncmp(calculated_md5_string,
                         known_md5_string_freedoom_0_6_4_iwad, 32) == 0)
             {
-/*
+//
                 M_StringCopy(target, check, sizeof(target));
                 M_StringCopy(stripped_target, tmpFile->filename, sizeof(stripped_target));
 
                 fsize = 19801320;
-*/
+
                 md5_check = true;
                 nerve_pwad = false;
             }
             else if (strncmp(calculated_md5_string,
                         known_md5_string_freedoom_0_7_rc_1_beta_1_iwad, 32) == 0)
             {
-/*
+//
                 M_StringCopy(target, check, sizeof(target));
                 M_StringCopy(stripped_target, tmpFile->filename, sizeof(stripped_target));
 
                 fsize = 27704188;
-*/
+
                 md5_check = true;
                 nerve_pwad = false;
             }
             else if (strncmp(calculated_md5_string,
                         known_md5_string_freedoom_0_7_iwad, 32) == 0)
             {
-/*
+//
                 M_StringCopy(target, check, sizeof(target));
                 M_StringCopy(stripped_target, tmpFile->filename, sizeof(stripped_target));
 
                 fsize = 27625596;
-*/
+
                 md5_check = true;
                 nerve_pwad = false;
             }
             else if (strncmp(calculated_md5_string,
                         known_md5_string_freedoom_0_8_beta_1_iwad, 32) == 0)
             {
-/*
+//
                 M_StringCopy(target, check, sizeof(target));
                 M_StringCopy(stripped_target, tmpFile->filename, sizeof(stripped_target));
 
                 fsize = 28144744;
-*/
+
                 md5_check = true;
                 nerve_pwad = false;
             }
             else if (strncmp(calculated_md5_string,
                         known_md5_string_freedoom_0_8_iwad, 32) == 0)
             {
-/*
+//
                 M_StringCopy(target, check, sizeof(target));
                 M_StringCopy(stripped_target, tmpFile->filename, sizeof(stripped_target));
 
                 fsize = 28592816;
-*/
+
                 md5_check = true;
                 nerve_pwad = false;
             }
             else if (strncmp(calculated_md5_string,
                         known_md5_string_freedoom_0_8_phase_1_iwad, 32) == 0)
             {
-/*
+//
                 M_StringCopy(target, check, sizeof(target));
                 M_StringCopy(stripped_target, tmpFile->filename, sizeof(stripped_target));
 
                 fsize = 19362644;
-*/
+
                 md5_check = true;
                 nerve_pwad = false;
             }
@@ -1901,36 +1939,36 @@ void Menu_WadList(void)
             else if (strncmp(calculated_md5_string,
                         known_md5_string_hacx_share_1_0_iwad, 32) == 0)
             {
-/*
+//
                 M_StringCopy(target, check, sizeof(target));
                 M_StringCopy(stripped_target, tmpFile->filename, sizeof(stripped_target));
 
                 fsize = 9745831;
-*/
+
                 md5_check = true;
                 nerve_pwad = false;
             }
             else if (strncmp(calculated_md5_string,
                         known_md5_string_hacx_reg_1_0_iwad, 32) == 0)
             {
-/*
+//
                 M_StringCopy(target, check, sizeof(target));
                 M_StringCopy(stripped_target, tmpFile->filename, sizeof(stripped_target));
 
                 fsize = 21951805;
-*/
+
                 md5_check = true;
                 nerve_pwad = false;
             }
             else if (strncmp(calculated_md5_string,
                         known_md5_string_hacx_reg_1_1_iwad, 32) == 0)
             {
-/*
+//
                 M_StringCopy(target, check, sizeof(target));
                 M_StringCopy(stripped_target, tmpFile->filename, sizeof(stripped_target));
 
                 fsize = 21951805;
-*/
+
                 md5_check = true;
                 nerve_pwad = false;
             }
@@ -1980,9 +2018,11 @@ void Menu_WadList(void)
             {
                 for (i = 0; i < 4; i++)
                 {
-                    c = fgetc(file);    // Get character
+                    // Get character
+                    c = fgetc(file);
 
-                    buffer[i] = c;        // Store characters in array
+                    // Store characters in array
+                    buffer[i] = c;
 
                     if (strncmp(iwad_term, buffer, 4) == 0)
                     {
@@ -2123,10 +2163,10 @@ void Menu_WadList(void)
         }
     }
 
-    /* B button */
+    // B button
     if (buttons & WPAD_CLASSIC_BUTTON_B)
     {
-        if(gDirLevel<=1)
+        if(gDirLevel <= 1)
         {
             return;
         }
@@ -2180,7 +2220,7 @@ void Menu_WadList(void)
             merge = false;
     }
 
-    /* List scrolling */
+    // List scrolling
     index = (selected - start);
 
     if (index >= ENTRIES_PER_PAGE)
@@ -2197,117 +2237,21 @@ void Menu_WadList(void)
 
     free (tmpPath);
 
-    /* Wait for button */
+    // Wait for button
     WaitButtons();
 }
 
 void Menu_Loop(void)
 {
-    for (;;)
+    Initialise();
+
+    for ( ; ; )
     {
-        /* FAT device menu */
+        // FAT device menu
         Menu_FatDevice();
 
-        /* WAD list menu */
+        // WAD list menu
         Menu_WadList();
     }
-}
-
-// Start of wiiNinja's added routines
-
-int PushCurrentDir (char *dirStr, s32 Selected, s32 Start)
-{
-    int retval = 0;
-
-    // Store dirStr into the list and increment the gDirLevel
-    // WARNING: Make sure dirStr is no larger than MAX_FILE_PATH_LEN
-    if (gDirLevel < MAX_DIR_LEVELS)
-    {
-        M_StringCopy (gDirList [gDirLevel], dirStr, sizeof(gDirList [gDirLevel]));
-
-        gSeleted[gDirLevel]=Selected;
-
-        gStart[gDirLevel]=Start;
-
-        gDirLevel++;
-    }
-    else
-        retval = -1;
-
-    return (retval);
-}
-
-char *PopCurrentDir(s32 *Selected, s32 *Start)
-{
-    if (gDirLevel > 1)
-        gDirLevel--;
-    else
-        gDirLevel = 0;
-
-    *Selected = gSeleted[gDirLevel];
-
-    *Start = gStart[gDirLevel];
-
-    return PeekCurrentDir();
-}
-
-boolean IsListFull (void)
-{
-    if (gDirLevel < MAX_DIR_LEVELS)
-        return (false);
-    else
-        return (true);
-}
-
-char *PeekCurrentDir (void)
-{
-    // Return the current path
-    if (gDirLevel > 0)
-        return (gDirList [gDirLevel-1]);
-    else
-        return (NULL);
-}
-
-void WaitPrompt (char *prompt)
-{
-    printf("\n%s", prompt);
-    printf("\n  Press any key...               |\n");
-
-    /* Wait for button */
-    WaitButtons();
-}
-
-u32 Pad_GetButtons(void)
-{
-    u32 buttons = 0, cnt;
-
-    /* Scan pads */
-    PAD_ScanPads();
-
-    /* Get pressed buttons */
-    for (cnt = 0; cnt < 4; cnt++)
-        buttons |= PAD_ButtonsDown(cnt);
-
-    return buttons;
-}
-
-// Routine to wait for a button from either the Wiimote or a gamecube
-// controller. The return value will mimic the WPAD buttons to minimize
-// the amount of changes to the original code, that is expecting only
-// Wiimote button presses. Note that the "HOME" button on the Wiimote
-// is mapped to the "SELECT" button on the Gamecube Ctrl. (wiiNinja 5/15/2009)
-u32 WaitButtons(void)
-{
-    u32 buttons = 0;
-
-    /* Wait for button pressing */
-    while (!buttons)
-    {
-        // Wii buttons
-        buttons = Wpad_GetButtons();
-
-        VIDEO_WaitVSync();
-    }
-    return buttons;
 }
 

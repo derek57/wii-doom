@@ -52,8 +52,4 @@ typedef struct
 } CONFIG;
 
 
-extern CONFIG gConfig;
-extern fatDevice fdevList[];
-
-
 #endif

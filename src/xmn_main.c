@@ -4,6 +4,7 @@
 #include "gui.h"
 #include "m_misc.h"
 #include "video.h"
+#include "sys_menu.h"
 #include "xmn_main.h"
 
 
@@ -11,10 +12,6 @@
 #define PWADPath        "WADS/PWAD/"
 #define IWADPath        "WADS/IWAD/"
 
-
-struct stConsoleCursorLocation stTexteLocation;
-
-void Menu_Loop(void);
 
 void drawMain()
 {
@@ -29,7 +26,7 @@ void drawMain()
     "  ----------------------------------------------------------------------------  ");
 }
 
-void CreateDirs(void)
+static void CreateDirs(void)
 {
     char createWADRoot[121];
     char createPWADDir[121];
