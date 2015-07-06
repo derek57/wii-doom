@@ -6,24 +6,21 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
-#include <string.h>
 #include <unistd.h>
 #include <wiiuse/wpad.h>
 
 #include "d_main.h"
-
 #include "gui.h"
 #include "m_misc.h"
 #include "sys_fat.h"
+#include "sys_globals.h"
 #include "sys_menu.h"
 #include "sys_nand.h"
-#include "sys_globals.h"
 #include "sys_usbstorage.h"
 #include "sys_wpad.h"
-
 #include "video.h"
-
 #include "w_wad.h"
+
 
 // Macros
 #define NB_FAT_DEVICES    (sizeof(fdevList) / sizeof(fatDevice))
@@ -123,7 +120,7 @@ static void Initialise()
 	
     xfb = MEM_K0_TO_K1(SYS_AllocateFramebuffer(rmode));
 
-    console_init(xfb, 20, 20, rmode->fbWidth, rmode->xfbHeight, rmode->fbWidth * VI_DISPLAY_PIX_SZ);
+    console_init(xfb, 20, 20, rmode->fbWidth, 359, rmode->fbWidth * VI_DISPLAY_PIX_SZ);
 
     VIDEO_Configure(rmode);
     VIDEO_SetNextFramebuffer(xfb);
@@ -133,6 +130,11 @@ static void Initialise()
 
     if(rmode->viTVMode & VI_NON_INTERLACE)
         VIDEO_WaitVSync();
+}
+
+void Video_Clear(s32 color)
+{
+    VIDEO_ClearFrameBuffer(rmode, xfb, color);
 }
 
 static void display_jpeg(JPEGIMG jpeg, int x, int y)
@@ -186,7 +188,10 @@ static void Restart(void)
 {
     Con_Clear ();
 
-    //fflush(stdout);
+    fflush(stdout);
+
+    // Clear the part of the screen that is being overdrawn by the JPEG image
+    Video_Clear(COLOR_BLACK);
 
     // Load system menu
     Sys_LoadMenu();
@@ -295,7 +300,8 @@ static s32 __Menu_RetrieveList(char *inPath, fatFile **outbuf, u32 *outlen)
 
 static void Menu_FatDevice(void)
 {
-    s32 ret, selected = 0;
+    s32 ret;
+    s32 selected = 0;
 
     // Select source device
     if (gConfig.fatDeviceIndex < 0)
@@ -363,6 +369,19 @@ static void Menu_FatDevice(void)
     else
     {
         sleep(3);
+
+        Initialise();
+
+        JPEGIMG about;
+
+        memset(&about, 0, sizeof(JPEGIMG));
+
+        about.inbuffer = picdata;
+        about.inbufferlength = piclength;
+
+        JPEG_Decompress(&about);
+
+        display_jpeg(about, 0, 343);
 
         fdev = &fdevList[gConfig.fatDeviceIndex];
     }
@@ -607,17 +626,6 @@ static void Menu_WadList(void)
         // Draw main title
         drawMain();
 
-        JPEGIMG about;
-
-        memset(&about, 0, sizeof(JPEGIMG));
-
-        about.inbuffer = picdata;
-        about.inbufferlength = piclength;
-
-        JPEG_Decompress(&about);
-
-        display_jpeg(about, 0, 300);
-
         //* Print entries *
         cnt = strlen(tmpPath);
 
@@ -741,21 +749,18 @@ static void Menu_WadList(void)
                         &stTexteLocation,
                         "|");
 
-        if(extra_wad_loaded || load_dehacked || md5_check)
-        {
-            printStyledText(9, 18,CONSOLE_FONT_BLACK,
+        printStyledText(10, 0,CONSOLE_FONT_BLACK,
                         CONSOLE_FONT_YELLOW,CONSOLE_FONT_BOLD,
                         &stTexteLocation,
-                        "X: Clear Sel.");
-            printStyledText(9, 0,CONSOLE_FONT_BLACK,
+                        "  X: Clear Sel.");
+        printStyledText(10, 18,CONSOLE_FONT_BLACK,
                         CONSOLE_FONT_YELLOW,CONSOLE_FONT_BOLD,
                         &stTexteLocation,
-                        "  Y: Merge  WAD");
-            printStyledText(9, 16,CONSOLE_FONT_BLACK,
+                        "Y: Merge  WAD");
+        printStyledText(10, 16,CONSOLE_FONT_BLACK,
                         CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,
                         &stTexteLocation,
                         "/");
-        }
 
         printStyledText(10, 35,CONSOLE_FONT_BLACK,
                         CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,
@@ -775,22 +780,22 @@ static void Menu_WadList(void)
 
         printf("\n");
 
-        printStyledText(10, 0,CONSOLE_FONT_BLACK,
+        printStyledText(9, 0,CONSOLE_FONT_BLACK,
                         CONSOLE_FONT_YELLOW,CONSOLE_FONT_BOLD,
                         &stTexteLocation,
                         "  A: Select WAD");
-        printStyledText(10, 16,CONSOLE_FONT_BLACK,
+        printStyledText(9, 16,CONSOLE_FONT_BLACK,
                         CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,
                         &stTexteLocation,
                         "/");
 
         if(gDirLevel>1)
-            printStyledText(10, 18,CONSOLE_FONT_BLACK,
+            printStyledText(9, 18,CONSOLE_FONT_BLACK,
                         CONSOLE_FONT_YELLOW,CONSOLE_FONT_BOLD,
                         &stTexteLocation,
                         "B: Prev. dir.");
         else
-            printStyledText(10, 18,CONSOLE_FONT_BLACK,
+            printStyledText(9, 18,CONSOLE_FONT_BLACK,
                         CONSOLE_FONT_YELLOW,CONSOLE_FONT_BOLD,
                         &stTexteLocation,
                         "B: Sel. dev.");
@@ -1334,6 +1339,11 @@ static void Menu_WadList(void)
                         CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,
                         &stTexteLocation,
                         "  ----------------------------------------------------------------------------  ");
+    printStyledText(18, 0,CONSOLE_FONT_BLACK,
+                        CONSOLE_FONT_YELLOW,CONSOLE_FONT_BOLD,
+                        &stTexteLocation,
+                        "  IF A WAD CONTAINS SPRITES THAT AREN'T REPLACED INSIDE THE GAME, TRY MERGING!  ");
+
     if (selected < fileCnt - 1)
         printStyledText(8, 32,CONSOLE_FONT_BLACK,
                         CONSOLE_FONT_YELLOW,CONSOLE_FONT_BOLD,
@@ -1349,7 +1359,7 @@ static void Menu_WadList(void)
     //* Controls *
     u32 buttons = WaitButtons();
 
-    // DPAD buttons
+    // UP button
     if (buttons & WPAD_CLASSIC_BUTTON_UP)
     {
         selected--;
@@ -1358,6 +1368,7 @@ static void Menu_WadList(void)
             selected = 0;
     }
 
+    // LEFT button
     if (buttons & WPAD_CLASSIC_BUTTON_LEFT)
     {
         selected = selected + ENTRIES_PER_PAGE;
@@ -1366,6 +1377,7 @@ static void Menu_WadList(void)
             selected = 0;
     }
 
+    // DOWN button
     if (buttons & WPAD_CLASSIC_BUTTON_DOWN)
     {
         selected ++;
@@ -1374,6 +1386,7 @@ static void Menu_WadList(void)
             selected = fileCnt - 1;
     }
 
+    // RIGHT button
     if (buttons & WPAD_CLASSIC_BUTTON_RIGHT)
     {
         selected = selected - ENTRIES_PER_PAGE;
@@ -1386,11 +1399,19 @@ static void Menu_WadList(void)
     if (buttons & WPAD_CLASSIC_BUTTON_HOME)
         Restart();
 
-    // 1 Button - Leathl
+    // PLUS button - Leathl
+    // Updated by [nitr8] 07/06/2015)
     if (buttons & WPAD_CLASSIC_BUTTON_PLUS)
     {
-        // Clear console
+        // Clear the previously initialized (smaller) Wii debug console
         Con_Clear();
+
+        // RE-INIT the Wii's debug console with fullscreen size for game startup
+        console_init(xfb, 20, 20, rmode->fbWidth, rmode->xfbHeight,
+                     rmode->fbWidth * VI_DISPLAY_PIX_SZ);
+
+	// Clear the part of the screen that is being overdrawn by the JPEG image
+	Video_Clear(COLOR_BLACK);
 
         // START DOOM
         D_DoomMain();
@@ -2243,8 +2264,6 @@ static void Menu_WadList(void)
 
 void Menu_Loop(void)
 {
-    Initialise();
-
     for ( ; ; )
     {
         // FAT device menu
