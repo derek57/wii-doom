@@ -132,7 +132,7 @@ static void Initialise()
         VIDEO_WaitVSync();
 }
 
-void Video_Clear(s32 color)
+static void Video_Clear(s32 color)
 {
     VIDEO_ClearFrameBuffer(rmode, xfb, color);
 }
