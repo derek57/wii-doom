@@ -298,6 +298,8 @@ int wipe_doBurn (int width, int height, int ticks)
 int wipe_exitBurn (int width, int height, int ticks)
 {
     Z_Free(burnarray);
+    Z_Free(wipe_scr_start);
+    Z_Free(wipe_scr_end);
 
     // we DEFINITELY need to do this
     ST_doRefresh();
@@ -356,6 +358,9 @@ int wipe_doFade(int width, int height, int ticks)
 
 int wipe_exitFade(int width, int height, int ticks)
 {
+    Z_Free(wipe_scr_start);
+    Z_Free(wipe_scr_end);
+
     return 0;
 }
 
