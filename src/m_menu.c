@@ -927,6 +927,7 @@ boolean                    dedicatedflag = true;
 boolean                    privateserverflag;
 boolean                    massacre_cheat_used;
 boolean                    randompitch;
+boolean                    memory_usage;
 
 fixed_t                    forwardmove = 29;
 fixed_t                    sidemove = 21; 
@@ -948,7 +949,6 @@ extern int                 mouselook;
 extern int                 dots_enabled;
 extern int                 dont_show;
 extern int                 display_fps;
-extern int                 allocated_ram_size;
 extern int                 wipe_type;
 extern int                 correct_lost_soul_bounce;
 
@@ -963,6 +963,7 @@ extern boolean             BorderNeedRefresh;
 extern boolean             sendpause;
 extern boolean             secret_1;
 extern boolean             secret_2;
+extern boolean             done;
 
 extern short               songlist[148];
 
@@ -1027,6 +1028,7 @@ void M_MusicType(int choice);
 void M_SoundType(int choice);
 void M_SoundOutput(int choice);
 void M_SoundPitch(int choice);
+void M_RestartSong(int choice);
 void M_SoundChannels(int choice);
 void M_GameFiles(int choice);
 void M_Brightness(int choice);
@@ -1135,6 +1137,7 @@ void M_Massacre(int choice);
 void M_Screen(int choice);
 void M_FPSCounter(int choice);
 void M_HOMDetector(int choice);
+void M_MemoryUsage(int choice);
 void M_ReplaceMissing(int choice);
 void M_Controls(int choice);
 void M_System(int choice);
@@ -1889,6 +1892,8 @@ enum
     debug_coordinates,
     debug_version,
     debug_sound,
+    debug_mem,
+    debug_restart,
     debug_end
 } debug_e;
 
@@ -1896,7 +1901,9 @@ menuitem_t DebugMenu[]=
 {
     {2,"Show Coordinates",M_Coordinates,'c'},
     {2,"Show Version",M_Version,'v'},
-    {2,"Show Sound Info",M_SoundInfo,'s'}
+    {2,"Show Sound Info",M_SoundInfo,'s'},
+    {2,"Show Memory Usage",M_MemoryUsage,'m'},
+    {2,"Restart Current MAP-Music Track",M_RestartSong,'r'}
 };
 
 menu_t  DebugDef =
@@ -2559,6 +2566,12 @@ void M_SoundPitch(int choice)
         }
         break;
     }
+}
+
+void M_RestartSong(int choice)
+{
+    S_StopMusic();
+    S_ChangeMusic(gamemap, true);
 }
 
 void M_SoundChannels(int choice)
@@ -3588,19 +3601,25 @@ void M_DrawGame3(void)
         V_ClearDPTranslation();
     }
 
-    if(gore_amount == 4)
+    if(gore_amount == 1)
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(GameDef3.x + 257, GameDef3.y + 28, DEH_String("LOW"));
         V_ClearDPTranslation();
     }
-    else if(gore_amount == 8)
+    else if(gore_amount == 2)
     {
         dp_translation = crx[CRX_GOLD];
         M_WriteText(GameDef3.x + 236, GameDef3.y + 28, DEH_String("MEDIUM"));
         V_ClearDPTranslation();
     }
-    else if(gore_amount == 12)
+    else if(gore_amount == 3)
+    {
+        dp_translation = crx[CRX_RED];
+        M_WriteText(GameDef3.x + 254, GameDef3.y + 28, DEH_String("HIGH"));
+        V_ClearDPTranslation();
+    }
+    else if(gore_amount == 4)
     {
         dp_translation = crx[CRX_RED];
         M_WriteText(GameDef3.x + 174, GameDef3.y + 28, DEH_String("RIP'EM TO PIECES"));
@@ -5319,8 +5338,8 @@ void M_Drawer (void)
 
     if(coordinates_info)
     {
-            if(gamestate == GS_LEVEL)
-            {
+        if(gamestate == GS_LEVEL)
+        {
             static player_t* player;
 
             player = &players[consoleplayer];
@@ -5331,7 +5350,12 @@ void M_Drawer (void)
                     player->mo->y);
 
             M_WriteText(0, 24, map_coordinates_textbuffer);
-            }
+        }
+    }
+
+    if(memory_usage && done && consoleheight == 0 && !menuactive)
+    {
+        Z_DrawStats();           // print memory allocation stats
     }
 
     // DISPLAYS BINARY VERSION
@@ -7014,6 +7038,20 @@ void M_HOMDetector(int choice)
     }
 }
 
+void M_MemoryUsage(int choice)
+{
+    if(!memory_usage)
+    {
+        memory_usage = true;
+        players[consoleplayer].message = DEH_String("SHOW MEMORY USAGE ENABLED");
+    }
+    else if(memory_usage)
+    {
+        memory_usage = false;
+        players[consoleplayer].message = DEH_String("SHOW MEMORY USAGE DISABLED");
+    }
+}
+
 void M_ReplaceMissing(int choice)
 {
     if(!replace_missing)
@@ -7967,12 +8005,12 @@ void M_GoreAmount(int choice)
     switch(choice)
     {
     case 0:
-        if (gore_amount > 4)
-            gore_amount -= 4;
+        if (gore_amount > 1)
+            gore_amount--;
         break;
     case 1:
-        if (gore_amount < 12)
-            gore_amount += 4;
+        if (gore_amount < 4)
+            gore_amount++;
         break;
     }
     players[consoleplayer].message = DEH_String("THE AMOUNT OF GORE HAS BEEN ADJUSTED");
@@ -8241,6 +8279,19 @@ void M_DrawDebug(void)
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(DebugDef.x + 169, DebugDef.y + 18, "OFF");
+        V_ClearDPTranslation();
+    }
+
+    if(memory_usage)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(DebugDef.x + 177, DebugDef.y + 28, "ON");
+        V_ClearDPTranslation();
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(DebugDef.x + 169, DebugDef.y + 28, "OFF");
         V_ClearDPTranslation();
     }
 }
