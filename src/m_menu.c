@@ -3134,7 +3134,12 @@ void M_DrawGame(void)
             M_WriteText(GameDef.x + 153, GameDef.y + 128, DEH_String("OFF"));
             V_ClearDPTranslation();
         }
+
+        if(itemOn == 13)
+            dp_translation = crx[CRX_GOLD];
+
         M_WriteText(GameDef.x, GameDef.y + 128, DEH_String("AIMING HELP"));
+        V_ClearDPTranslation();
     }
 
     if(drawgrid == 1)
@@ -3318,7 +3323,11 @@ void M_DrawGame(void)
         }
         else
         {
-            dp_translation = crx[CRX_GRAY];
+            if(itemOn == 14)
+                dp_translation = crx[CRX_GOLD];
+            else
+                dp_translation = crx[CRX_GRAY];
+
             M_WriteText(GameDef.x, GameDef.y + 138, DEH_String("MORE OPTIONS"));
             V_ClearDPTranslation();
         }
@@ -3334,7 +3343,11 @@ void M_DrawGame(void)
             V_ClearDPTranslation();
         }
 
-        dp_translation = crx[CRX_GRAY];
+        if(itemOn == 13)
+            dp_translation = crx[CRX_GOLD];
+        else
+            dp_translation = crx[CRX_GRAY];
+
         M_WriteText(GameDef.x, GameDef.y + 128, DEH_String("MORE OPTIONS"));
         V_ClearDPTranslation();
     }
@@ -3548,7 +3561,11 @@ void M_DrawGame2(void)
         V_ClearDPTranslation();
     }
 
-    dp_translation = crx[CRX_GRAY];
+    if(itemOn == 13)
+        dp_translation = crx[CRX_GOLD];
+    else
+        dp_translation = crx[CRX_GRAY];
+
     M_WriteText(GameDef2.x, GameDef2.y + 128, DEH_String("MORE & MORE OPTIONS"));
     V_ClearDPTranslation();
 }
@@ -3743,7 +3760,11 @@ void M_DrawGame3(void)
         V_ClearDPTranslation();
     }
 
-    dp_translation = crx[CRX_GRAY];
+    if(itemOn == 13)
+        dp_translation = crx[CRX_GOLD];
+    else
+        dp_translation = crx[CRX_GRAY];
+
     M_WriteText(GameDef3.x, GameDef3.y + 128, DEH_String("EVEN MORE OPTIONS"));
     V_ClearDPTranslation();
 }
