@@ -48,8 +48,6 @@
 // Maintain single and multi player starting spots.
 #define MAX_DEATHMATCH_STARTS        10
 
-void        P_SpawnMapThing (mapthing_t*        mthing);
-
 
 //
 // MAP related Lookup tables.
@@ -1098,9 +1096,10 @@ static void PadRejectArray(byte *array, unsigned int len)
 
     if (len > sizeof(rejectpad))
     {
+/*
         C_Printf(CR_GOLD, " PadRejectArray: REJECT lump too short to pad! (%i > %i)\n",
                         len, (int) sizeof(rejectpad));
-
+*/
         // Pad remaining space with 0 (or 0xff, if specified on command line).
 
         padvalue = 0xf00;
@@ -1135,7 +1134,7 @@ static void P_LoadReject(int lumpnum)
 
         PadRejectArray(rejectmatrix + lumplen, minlength - lumplen);
 
-        C_Printf(CR_GOLD, " P_LoadReject: REJECT too short (%d<%d) - padded\n", minlength, lumplen);
+        C_Printf(CR_GOLD, " P_LoadReject: REJECT too short (%d < %d) - has been padded\n", minlength, lumplen);
     }
 }
 
@@ -1280,6 +1279,7 @@ P_SetupLevel
     if (precache)
         R_PrecacheLevel ();
 
+    C_Printf(CR_GOLD, " P_SetupLevel: Free Memory (0x%x)\n", Z_FreeMemory());
     //printf ("free memory: 0x%x\n", Z_FreeMemory());
 
     HU_NewLevel();
