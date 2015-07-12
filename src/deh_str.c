@@ -376,7 +376,7 @@ static char *FormatStringReplacement(char *s)
 
     if (!ValidFormatReplacement(s, repl))
     {
-        printf(" WARNING: Unsafe dehacked replacement provided for "
+        C_Printf(CR_GOLD, " WARNING: Unsafe dehacked replacement provided for "
                "printf format string: %s\n", s);
 
         return s;

@@ -25,6 +25,7 @@
 
 
 
+#include <fcntl.h>
 #include <SDL/SDL.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -51,7 +52,7 @@
 
 
 #define DEFAULT_RAM 16 * 2 /* MiB */
-#define MIN_RAM     4 * 4 /* MiB */
+#define MIN_RAM      4 * 4 /* MiB */
 
 
 typedef struct atexit_listentry_s atexit_listentry_t;
@@ -64,9 +65,11 @@ struct atexit_listentry_s
 };
 
 
+byte *zone_mem;
+
 extern boolean devparm;
 
-int allocated_ram_size;
+int memory_size;
 
 static boolean already_quitting = false;
 
@@ -118,9 +121,9 @@ static byte *AutoAllocMemory(int *size, int default_ram, int min_ram)
 
         *size = default_ram * 1024 * 1024;
 
-        allocated_ram_size = *size;
-
         zonemem = malloc(*size);
+
+        printf("0x%x allocated for zone\n", default_ram);
 
         // Failed to allocate?  Reduce zone size until we reach a size
         // that is acceptable.
@@ -143,12 +146,14 @@ byte *I_ZoneBase (int *size)
     default_ram = DEFAULT_RAM;
     min_ram = MIN_RAM;
 
+    printf(" DPMI memory: 0x%x, ", default_ram);
+
     zonemem = AutoAllocMemory(size, default_ram * i, min_ram * i);
 
     // [crispy] if called again, allocate another zone twice as big
     i *= 2;
 
-    //printf(" zone memory: %p, %x allocated for zone\n", zonemem, *size);
+    memory_size = *size;
 
     return zonemem;
 }

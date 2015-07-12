@@ -719,6 +719,7 @@ P_SpawnMobj
     mobj->flags = info->flags;
     mobj->flags2 = info->flags2;
     mobj->health = info->spawnhealth;
+    mobj->name = info->name;
 
     if (gameskill != sk_nightmare)
         mobj->reactiontime = info->reactiontime;
@@ -1173,8 +1174,8 @@ void P_SpawnMapThing (mapthing_t* mthing)
         && mobj->floorz + mobjinfo[MT_PLAYER].height <= mobj->z) // head <= base
         // player under body's head height <= bottom of body
     {
-        C_Printf(CR_GOLD, " P_SpawnMapThing: solid hanging body in tall sector at %d,%d (type = %d)\n",
-                mthing->x, mthing->y, type);
+        C_Printf(CR_GOLD, " P_SpawnMapThing: solid hanging body in tall sector at %d,%d (%s)\n",
+                mthing->x, mthing->y, mobj->name);
     }
 }
 

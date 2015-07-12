@@ -302,6 +302,8 @@ typedef struct mobj_s
     // new field: last known enemy -- killough 2/15/98
     struct mobj_s          *lastenemy;
 
+    char                   *name;
+
 } mobj_t;
 
 

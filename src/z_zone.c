@@ -22,6 +22,7 @@
 #include "c_io.h"
 #include "doomtype.h"
 #include "i_system.h"
+#include "m_menu.h"
 #include "v_trans.h"
 #include "z_zone.h"
 
@@ -44,12 +45,15 @@
 
 typedef struct memblock_s
 {
-    int                   size; // including the header and possibly tiny fragments
-    void**                user;
-    int                   tag;  // PU_FREE if this is free
-    int                   id;   // should be ZONEID
-    struct memblock_s*    next;
-    struct memblock_s*    prev;
+    int                size; // including the header and possibly tiny fragments
+    int                tag;  // PU_FREE if this is free
+    int                id;   // should be ZONEID
+
+    void**             user;
+
+    struct memblock_s* next;
+    struct memblock_s* prev;
+
 } memblock_t;
 
 
@@ -66,15 +70,61 @@ typedef struct
 } memzone_t;
 
 
-memzone_t*        mainzone;
+memzone_t*             mainzone;
+
+/*
+static const size_t    HEADER_SIZE = (sizeof(memblock_t) + MEM_ALIGN - 1) & ~(MEM_ALIGN - 1);
+
+static memblock_t      *blockbytag[PU_NUM_TAGS];
+*/
+static int             free_memory = 0;
+static int             active_memory = 0;
+static int             purgable_memory = 0;
+
+extern int             memory_size;
 
 
-// Minimum chunk size at which blocks are allocated
-#define CHUNK_SIZE      32
+void Z_DrawStats(void)            // Print allocation statistics
+{
+    char act_mem[50];
+    char pur_mem[50];
+    char free_mem[50];
+    char tot_mem[50];
 
-static const size_t     HEADER_SIZE = (sizeof(memblock_t) + CHUNK_SIZE - 1) & ~(CHUNK_SIZE - 1);
-static memblock_t       *blockbytag[PU_NUM_TAGS];
+    if (gamestate != GS_LEVEL)
+        return;
 
+    if (memory_size > 0)
+    {
+        unsigned long total_memory = free_memory + memory_size + active_memory + purgable_memory;
+        double s = 100.0 / total_memory;
+
+        sprintf(act_mem, "%d\t%6.01f%%\tstatic\n", active_memory, active_memory * s);
+        sprintf(pur_mem, "%d\t%6.01f%%\tpurgable\n", purgable_memory, purgable_memory * s);
+        sprintf(free_mem, "%d\t%6.01f%%\tfree\n", (free_memory + memory_size),
+               (free_memory + memory_size) * s);
+        sprintf(tot_mem, "%lu\t\ttotal\n", total_memory);
+    }
+    else
+    {
+        unsigned long total_memory = active_memory + purgable_memory;
+        double s = 100.0 / total_memory;
+
+        sprintf(act_mem, "%d\t%6.01f%%\tstatic\n", active_memory, active_memory * s);
+        sprintf(pur_mem, "%d\t%6.01f%%\tpurgable\n", purgable_memory, purgable_memory * s);
+        sprintf(tot_mem, "%lu\t\ttotal\n", total_memory);
+    }
+
+    if(leveltime & 16)
+        M_WriteText(0, 10, "Memory Heap Info\n");
+
+    M_WriteText(0, 20, act_mem);
+    M_WriteText(0, 30, pur_mem);
+    M_WriteText(0, 40, free_mem);
+    M_WriteText(0, 50, tot_mem);
+}
+
+/*
 //
 // Z_ClearZone
 //
@@ -98,7 +148,7 @@ void Z_ClearZone (memzone_t* zone)
 
     block->size = zone->size - sizeof(memzone_t);
 }
-
+*/
 
 
 //
@@ -156,6 +206,13 @@ void Z_Free (void* ptr)
         
     other = block->prev;
 
+    free_memory += block->size;
+
+    if (block->tag >= PU_PURGELEVEL)
+        purgable_memory -= block->size;
+    else
+        active_memory -= block->size;
+
     if (other->tag == PU_FREE)
     {
         // merge with previous free block
@@ -191,16 +248,16 @@ void Z_Free (void* ptr)
 
 void*
 Z_Malloc
-( int                size,
-  int                tag,
+( int                  size,
+  int                  tag,
   void*                user )
 {
     int                extra;
     memblock_t*        start;
-    memblock_t* rover;
-    memblock_t* newblock;
+    memblock_t*        rover;
+    memblock_t*        newblock;
     memblock_t*        base;
-    void *result;
+    void*              result;
 
     size = (size + MEM_ALIGN - 1) & ~(MEM_ALIGN - 1);
     
@@ -211,7 +268,32 @@ Z_Malloc
 
     // account for size of block header
     size += sizeof(memblock_t);
-    
+/*
+    if (memory_size > 0 && ((free_memory + memory_size) < (int)(size + HEADER_SIZE)))
+    {
+        memblock_t *end_block;
+        base = blockbytag[PU_CACHE];
+
+        if (base)
+        {
+            end_block = base->prev;
+
+            while (1)
+            {
+                memblock_t *next = base->next;
+
+                (Z_Free)((char *) base + HEADER_SIZE);
+
+                if (((free_memory + memory_size) >= (int)(size + HEADER_SIZE)) || (base == end_block))
+                    break;
+
+                // Advance to next block
+                base = next;
+            }
+        }
+        base = NULL;
+    }
+*/
     // if there is a free block behind the rover,
     //  back up over them
     base = mainzone->rover;
@@ -271,7 +353,7 @@ Z_Malloc
         // there will be a free fragment after the allocated block
         newblock = (memblock_t *) ((byte *)base + size );
         newblock->size = extra;
-        
+
         newblock->tag = PU_FREE;
         newblock->user = NULL;        
         newblock->prev = base;
@@ -280,10 +362,17 @@ Z_Malloc
 
         base->next = newblock;
         base->size = size;
+
+        if (tag >= PU_PURGELEVEL)
+            purgable_memory += base->size;
+        else
+            active_memory += base->size;
+
+        free_memory -= base->size;
     }
-        
-        if (user == NULL && tag >= PU_PURGELEVEL)
-            I_Error ("Z_Malloc: an owner is required for purgable blocks");
+
+    if (user == NULL && tag >= PU_PURGELEVEL)
+        I_Error ("Z_Malloc: an owner is required for purgable blocks");
 
     base->user = user;
     base->tag = tag;
@@ -313,7 +402,6 @@ Z_FreeTags
 ( int                lowtag,
   int                hightag )
 {
-/*
     memblock_t*        block;
     memblock_t*        next;
         
@@ -331,7 +419,7 @@ Z_FreeTags
         if (block->tag >= lowtag && block->tag <= hightag)
             Z_Free ( (byte *)block+sizeof(memblock_t));
     }
-*/
+/*
     if (lowtag <= PU_FREE)
         lowtag = PU_FREE + 1;
     if (hightag > PU_CACHE)
@@ -356,6 +444,7 @@ Z_FreeTags
             block = next;                               // Advance to next block
         }
     }
+*/
 }
 
 
@@ -480,6 +569,17 @@ void Z_ChangeTag2(void *ptr, int tag, char *file, int line)
         I_Error("%s:%i: Z_ChangeTag: an owner is required "
                 "for purgable blocks", file, line);
 
+    if (block->tag < PU_PURGELEVEL && tag >= PU_PURGELEVEL)
+    {
+        active_memory -= block->size;
+        purgable_memory += block->size;
+    }
+    else if (block->tag >= PU_PURGELEVEL && tag < PU_PURGELEVEL)
+    {
+        active_memory += block->size;
+        purgable_memory -= block->size;
+    }
+
     block->tag = tag;
 }
 
@@ -505,6 +605,7 @@ void Z_ChangeUser(void *ptr, void **user)
 //
 int Z_FreeMemory (void)
 {
+/*
     memblock_t*                block;
     int                        free;
         
@@ -518,6 +619,34 @@ int Z_FreeMemory (void)
             free += block->size;
     }
 
+    return free;
+*/
+    memblock_t*         block;
+    int                 free = 0;
+
+    for (block = mainzone->blocklist.next ;
+         block != &mainzone->blocklist;
+         block = block->next)
+    {
+        if (block->user == 0)
+        {
+            // free memory
+            free += block->size;
+        }
+        else
+        {
+            if(block->tag >= PU_PURGELEVEL)
+            {
+                // purgable memory (cache)
+                free += block->size;
+            }
+            else
+            {
+                // used block
+                free = 0;
+            }
+        }
+    }
     return free;
 }
 

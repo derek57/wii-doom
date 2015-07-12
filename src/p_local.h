@@ -127,12 +127,7 @@ extern int                  numflats;
 void P_RespawnSpecials (void);
 void P_CheckMissileSpawn (mobj_t* th);
 
-mobj_t*
-P_SpawnMobj
-( fixed_t        x,
-  fixed_t        y,
-  fixed_t        z,
-  mobjtype_t     type );
+mobj_t* P_SpawnMobj (fixed_t x, fixed_t y, fixed_t z, mobjtype_t type);
 
 void    P_RemoveMobj (mobj_t* th);
 mobj_t* P_SubstNullMobj (mobj_t* th);
@@ -201,14 +196,8 @@ boolean P_BlockThingsIterator (int x, int y, boolean(*func)(mobj_t*) );
 
 extern divline_t               trace;
 
-boolean
-P_PathTraverse
-( fixed_t        x1,
-  fixed_t        y1,
-  fixed_t        x2,
-  fixed_t        y2,
-  int            flags,
-  boolean        (*trav) (intercept_t *));
+boolean P_PathTraverse (fixed_t x1, fixed_t y1, fixed_t x2, fixed_t y2, int flags,
+                        boolean (*trav) (intercept_t *));
 
 void P_UnsetThingPosition (mobj_t* thing);
 void P_SetThingPosition (mobj_t* thing);
@@ -239,25 +228,11 @@ void    P_UseLines (player_t* player);
 
 extern  mobj_t*        linetarget;        // who got hit (or NULL)
 
-fixed_t
-P_AimLineAttack
-( mobj_t*        t1,
-  angle_t        angle,
-  fixed_t        distance );
+fixed_t P_AimLineAttack (mobj_t* t1, angle_t angle, fixed_t distance);
 
-void
-P_LineAttack
-( mobj_t*        t1,
-  angle_t        angle,
-  fixed_t        distance,
-  fixed_t        slope,
-  int                damage );
+void P_LineAttack (mobj_t* t1, angle_t angle, fixed_t distance, fixed_t slope, int damage);
 
-void
-P_RadiusAttack
-( mobj_t*        spot,
-  mobj_t*        source,
-  int                damage );
+void P_RadiusAttack (mobj_t* spot, mobj_t* source, int damage);
 
 void P_SpawnSmokeTrail(fixed_t x, fixed_t y, fixed_t z, angle_t angle);
 
@@ -284,29 +259,17 @@ extern mobj_t**           blocklinks;       // for thing chains
 extern int                maxammo[NUMAMMO];
 extern int                clipammo[NUMAMMO];
 
-void
-P_TouchSpecialThing
-( mobj_t*        special,
-  mobj_t*        toucher );
+void P_TouchSpecialThing (mobj_t* special, mobj_t* toucher);
 
-void
-P_DamageMobj
-( mobj_t*        target,
-  mobj_t*        inflictor,
-  mobj_t*        source,
-  int            damage );
+void P_DamageMobj (mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage);
 
-boolean
-P_GiveAmmo
-( player_t*      player,
-  ammotype_t     ammo,
-  int            num );
+boolean P_GiveAmmo (player_t* player, ammotype_t ammo, int num);
 
-int     P_GetThingFloorType(mobj_t * thing);
+int  P_GetThingFloorType(mobj_t * thing);
 
-void    P_InitTerrainTypes(void);
+void P_InitTerrainTypes(void);
 
-int     P_HitFloor(mobj_t * thing);
+int  P_HitFloor(mobj_t * thing);
 
 void P_InitCards(player_t *player);
 
@@ -314,16 +277,13 @@ void P_GiveAllCards(player_t *player);
 
 void P_AddBonus(player_t *player, int amount);
 
-void
-P_GiveCard
-( player_t*        player,
-  card_t        card );
+void P_GiveCard (player_t* player, card_t card);
 
-void A_ReFire
-( player_t*        player,
-  pspdef_t*        psp );
+void A_ReFire (player_t* player, pspdef_t* psp );
 
 void P_FallingDamage (mobj_t *mo);
+
+void P_SpawnMapThing (mapthing_t* mthing);
 
 boolean Check_Sides(mobj_t* actor, int x, int y);
 

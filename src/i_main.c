@@ -40,7 +40,7 @@
 #include <wiiuse/wpad.h>
 
 // MAIN DEVPARM
-boolean        devparm = false;
+boolean        devparm = true;
 boolean        devparm_net = false;
 
 // SOLO DEVPARM
@@ -51,7 +51,7 @@ boolean        devparm_freedoom2 = false;
 boolean        devparm_tnt = false;
 boolean        devparm_plutonia = false;
 boolean        devparm_chex = false;
-boolean        devparm_hacx = false;
+boolean        devparm_hacx = true;
 
 // NETWORK DEVPARM
 boolean        devparm_net_nerve = false;

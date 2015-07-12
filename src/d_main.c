@@ -132,6 +132,8 @@ int             pagetic;
 int             runcount = 0;
 int             startuptimer;
 
+extern byte     *zone_mem;
+
 extern int      exit_by_reset;
 extern int      show_stats;
 extern int      timer_info;
@@ -1364,7 +1366,8 @@ void D_DoomMain (void)
     I_AtExit(M_SaveDefaults, false);
 
     printf(" Z_Init: Init zone memory allocation daemon. \n");
-    printf(" heap size: 0x3cdb000 \n");
+//    printf(" heap size: 0x3cdb000 \n");
+    printf(" heap size: %p \n", zone_mem);
     printf(" W_Init: Init WADfiles.\n");
 
     if (fsize == 4207819        ||  // DOOM SHAREWARE v1.0

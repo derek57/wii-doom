@@ -298,6 +298,7 @@ extern  int             rndindex;
 extern  ticcmd_t        *netcmds;
 
 extern  boolean         am_overlay;
+extern  boolean         memory_usage;
 
 extern  boolean         d_recoil;
 extern  boolean         start_respawnparm;

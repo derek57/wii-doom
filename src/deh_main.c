@@ -287,7 +287,8 @@ static void DEH_ParseContext(deh_context_t *context)
 
     if (!CheckSignatures(context))
     {
-        DEH_Error(context, "This is not a valid dehacked patch file!");
+        // [crispy] make non-fatal
+        C_Printf(CR_GOLD, " This is not a valid dehacked patch file!\n");
     }
 
     // Read the file
@@ -381,14 +382,14 @@ int DEH_LoadFile(char *filename)
     deh_allow_long_cheats = false;
     deh_allow_extended_strings = false;
 
-    printf(" loading %s\n", filename);
+    C_Printf(CR_GRAY, " loading %s\n", filename);
     show_deh_loading_message = 1;
 
     context = DEH_OpenFile(filename);
 
     if (context == NULL)
     {
-        printf(" DEH_LoadFile: Unable to open %s\n", filename);
+        C_Printf(CR_RED, " DEH_LoadFile: Unable to open %s\n", filename);
         return 0;
     }
 
@@ -425,7 +426,7 @@ int DEH_LoadLump(int lumpnum, boolean allow_long, boolean allow_error)
 
     if (context == NULL)
     {
-        printf(" DEH_LoadFile: Unable to open lump %i\n", lumpnum);
+        C_Printf(CR_RED, " DEH_LoadFile: Unable to open lump %i\n", lumpnum);
         return 0;
     }
 
@@ -451,7 +452,7 @@ int DEH_LoadLumpByName(char *name, boolean allow_long, boolean allow_error)
 
     if (lumpnum == -1)
     {
-        printf(" DEH_LoadLumpByName: '%s' lump not found\n", name);
+        C_Printf(CR_RED, " DEH_LoadLumpByName: '%s' lump not found\n", name);
         return 0;
     }
 
