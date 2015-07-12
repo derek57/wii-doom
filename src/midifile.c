@@ -28,6 +28,9 @@
 #include "midifile.h"
 #include "v_trans.h"
 
+#include "z_zone.h"
+
+void *Z_Realloc(void *ptr, int size, int tag, void **user);
 
 #define HEADER_CHUNK_ID "MThd"
 #define TRACK_CHUNK_ID  "MTrk"
@@ -414,11 +417,13 @@ static boolean ReadTrackHeader(midi_track_t *track, FILE *stream)
 
     if (records_read < 1)
     {
+        C_Printf(CR_RED, " ReadTrackHeader: records_read is < 1\n");
         return false;
     }
 
     if (!CheckChunkHeader(&chunk_header, TRACK_CHUNK_ID))
     {
+        C_Printf(CR_RED, " ReadTrackHeader: Error (CheckChunkHeader)\n");
         return false;
     }
 
@@ -440,6 +445,7 @@ static boolean ReadTrack(midi_track_t *track, FILE *stream)
 
     if (!ReadTrackHeader(track, stream))
     {
+        C_Printf(CR_RED, " ReadTrack: Error (Read the header)\n");
         return false;
     }
 
@@ -454,8 +460,14 @@ static boolean ReadTrack(midi_track_t *track, FILE *stream)
         new_events = realloc(track->events, 
                              sizeof(midi_event_t) * (track->num_events + 1));
 
+/*
+        new_events = Z_Realloc(track->events, 
+                             sizeof(midi_event_t) * (track->num_events + 1), PU_STATIC, NULL);
+*/
         if (new_events == NULL)
         {
+            C_Printf(CR_RED, " ReadTrack: Error (new_events is NULL)\n");
+            C_Printf(CR_RED, " ReadTrack: Error (track->num_events is %d)\n", track->num_events);
             return false;
         }
 
@@ -466,6 +478,7 @@ static boolean ReadTrack(midi_track_t *track, FILE *stream)
         event = &track->events[track->num_events];
         if (!ReadEvent(event, &last_event_type, stream))
         {
+            C_Printf(CR_RED, " ReadTrack: Error (Read the next event)\n");
             return false;
         }
 
@@ -507,6 +520,7 @@ static boolean ReadAllTracks(midi_file_t *file, FILE *stream)
 
     if (file->tracks == NULL)
     {
+        C_Printf(CR_RED, " ReadAllTracks: file->tracks is NULL\n");
         return false;
     }
 
@@ -518,6 +532,7 @@ static boolean ReadAllTracks(midi_file_t *file, FILE *stream)
     {
         if (!ReadTrack(&file->tracks[i], stream))
         {
+            C_Printf(CR_RED, " ReadAllTracks: Error (Read each track)\n");
             return false;
         }
     }
@@ -536,6 +551,7 @@ static boolean ReadFileHeader(midi_file_t *file, FILE *stream)
 
     if (records_read < 1)
     {
+        C_Printf(CR_RED, " ReadFileHeader: records_read is < 1\n");
         return false;
     }
 
@@ -588,6 +604,7 @@ midi_file_t *MIDI_LoadFile(char *filename)
 
     if (file == NULL)
     {
+        C_Printf(CR_RED, " MIDI_LoadFile: file is NULL for file %c\n", filename);
         return NULL;
     }
 
@@ -611,6 +628,7 @@ midi_file_t *MIDI_LoadFile(char *filename)
 
     if (!ReadFileHeader(file, stream))
     {
+        C_Printf(CR_RED, " MIDI_LoadFile: Error (Read MIDI file header)\n");
         fclose(stream);
         MIDI_FreeFile(file);
         return NULL;
@@ -620,6 +638,7 @@ midi_file_t *MIDI_LoadFile(char *filename)
 
     if (!ReadAllTracks(file, stream))
     {
+        C_Printf(CR_RED, " MIDI_LoadFile: Error (Read all tracks)\n");
         fclose(stream);
         MIDI_FreeFile(file);
         return NULL;
