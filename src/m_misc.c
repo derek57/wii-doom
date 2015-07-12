@@ -112,13 +112,19 @@ boolean M_WriteFile(char *name, void *source, int length)
     handle = fopen(name, "wb");
 
     if (handle == NULL)
+    {
+        C_Printf(CR_RED, " M_WriteFile: handle is NULL for file %c\n", name);
         return false;
+    }
 
     count = fwrite(source, 1, length, handle);
     fclose(handle);
         
     if (count < length)
+    {
+        C_Printf(CR_RED, " M_WriteFile: count < length for file %c\n", name);
         return false;
+    }
                 
     return true;
 }
@@ -204,7 +210,7 @@ void M_ExtractFileBase(char *path, char *dest)
     {
         if (length >= 8)
         {
-            C_Printf(CR_GOLD, "Warning: Truncated '%s' lump name to '%.8s'.\n",
+            C_Printf(CR_GOLD, " Warning: Truncated '%s' lump name to '%.8s'.\n",
                    filename, dest);
             break;
         }
