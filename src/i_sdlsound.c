@@ -348,6 +348,13 @@ static void ReleaseSoundOnChannel(int channel)
     channels_playing[channel] = NULL;
 
     UnlockAllocatedSound(snd);
+
+    // if the sound is a pitch-shift and it's not in use, immediately
+    // free it
+    if(snd->pitch != NORM_PITCH && snd->use_count <= 0)
+    {
+        FreeAllocatedSound(snd);
+    }
 }
 
 static boolean ConvertibleRatio(int freq1, int freq2)
