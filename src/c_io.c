@@ -164,10 +164,9 @@ int             consoleedgecolor2 = 100;
 void C_Printf(stringtype_t type, char *string, ...)
 {
     va_list     argptr;
-    char        buffer[1024];
+    char        buffer[1024] = "";
 
     va_start(argptr, string);
-    memset(buffer, 0, sizeof(buffer));
     M_vsnprintf(buffer, sizeof(buffer) - 1, string, argptr);
     va_end(argptr);
 
@@ -287,29 +286,21 @@ static void c_blurscreen(int x1, int y1, int x2, int y2, int i)
 
 static void C_DrawBackground(int height)
 {
-//    static boolean      blurred = false;
     int                 i;
-
-//    extern boolean      wipe;
 
     height = (height + 5) * SCREENWIDTH;
 
-//    if (!blurred)
-    {
-        for (i = 0; i < height; ++i)
-            c_blurredscreen[i] = screens[0][i];
+    for (i = 0; i < height; ++i)
+        c_blurredscreen[i] = screens[0][i];
 
-        c_blurscreen(0, 0, SCREENWIDTH - 1, height, 1);
-        c_blurscreen(1, 0, SCREENWIDTH, height, -1);
-        c_blurscreen(0, 0, SCREENWIDTH - 1, height - SCREENWIDTH, SCREENWIDTH + 1);
-        c_blurscreen(1, SCREENWIDTH, SCREENWIDTH, height, -(SCREENWIDTH + 1));
-        c_blurscreen(0, 0, SCREENWIDTH, height - SCREENWIDTH, SCREENWIDTH);
-        c_blurscreen(0, SCREENWIDTH, SCREENWIDTH, height, -SCREENWIDTH);
-        c_blurscreen(1, 0, SCREENWIDTH, height - SCREENWIDTH, SCREENWIDTH - 1);
-        c_blurscreen(0, SCREENWIDTH, SCREENWIDTH - 1, height, -(SCREENWIDTH - 1));
-    }
-
-//    blurred = (consoleheight == CONSOLEHEIGHT && !wipe);
+    c_blurscreen(0, 0, SCREENWIDTH - 1, height, 1);
+    c_blurscreen(1, 0, SCREENWIDTH, height, -1);
+    c_blurscreen(0, 0, SCREENWIDTH - 1, height - SCREENWIDTH, SCREENWIDTH + 1);
+    c_blurscreen(1, SCREENWIDTH, SCREENWIDTH, height, -(SCREENWIDTH + 1));
+    c_blurscreen(0, 0, SCREENWIDTH, height - SCREENWIDTH, SCREENWIDTH);
+    c_blurscreen(0, SCREENWIDTH, SCREENWIDTH, height, -SCREENWIDTH);
+    c_blurscreen(1, 0, SCREENWIDTH, height - SCREENWIDTH, SCREENWIDTH - 1);
+    c_blurscreen(0, SCREENWIDTH, SCREENWIDTH - 1, height, -(SCREENWIDTH - 1));
 
     for (i = 0; i < height; ++i)
         screens[0][i] = tinttab50[c_blurredscreen[i] + consoletintcolor];
