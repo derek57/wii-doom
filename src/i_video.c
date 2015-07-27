@@ -1001,6 +1001,8 @@ void I_InitGraphics(void)
     SDL_Event dummy;
     byte      *doompal = W_CacheLumpName("PLAYPAL", PU_CACHE);
 
+    wad_file_t *playpalwad = lumpinfo[W_CheckNumForName("PLAYPAL")].wad_file;
+
     I_InitTintTables(doompal);
 
     if (SDL_Init(SDL_INIT_VIDEO) < 0) 
@@ -1022,7 +1024,10 @@ void I_InitGraphics(void)
     h = screen_height;
 
     C_Printf(CR_GRAY, " Scaling to aspect ratio 16:9 in software mode\n");
-    C_Printf(CR_GRAY, " Using 256-color palette from PLAYPAL lump.\n");
+    C_Printf(CR_GRAY, " Using 256-color palette from PLAYPAL lump in %s file %s",
+            (playpalwad->type == IWAD ? "IWAD" : "PWAD"), uppercase(playpalwad->path));
+
+//    C_Printf(CR_GRAY, "         %s.");
 
     if(!usegamma)
         C_Printf(CR_GRAY, " Gamma correction is off.\n");

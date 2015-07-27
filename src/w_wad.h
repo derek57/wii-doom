@@ -28,6 +28,10 @@
 #include "w_file.h"
 
 
+#define IWAD 1
+#define PWAD 2
+
+
 //
 // TYPES
 //

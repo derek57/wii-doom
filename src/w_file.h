@@ -70,7 +70,9 @@ struct _wad_file_s
     unsigned int length;
 
     // name of this file
-    char *path;
+    char path[260];
+
+    int type;
 };
 
 // Open the specified file. Returns a pointer to a new wad_file_t 

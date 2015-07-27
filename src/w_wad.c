@@ -164,6 +164,8 @@ wad_file_t *W_AddFile (char *filename, boolean automatic)
         return NULL;
     }
 
+    M_StringCopy(wad_file->path, filename, sizeof(wad_file->path));
+
     newnumlumps = numlumps;
 
     if (strcasecmp(filename+strlen(filename)-3 , "wad" ) )
@@ -201,6 +203,8 @@ wad_file_t *W_AddFile (char *filename, boolean automatic)
             
             // ???modifiedgame = true;                
         }
+
+        wad_file->type = (!strncmp(header.identification, "IWAD", 4) ? IWAD : PWAD);
 
         header.numlumps = LONG(header.numlumps);
         header.infotableofs = LONG(header.infotableofs);
