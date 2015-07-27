@@ -655,6 +655,7 @@ void ST_DrawStatus(void)
     int             invulnerability = plyr->powers[pw_invulnerability];
     static boolean  healthanim = false;
     patch_t         *patch;
+    int             currenttics = I_GetTime();
 
     if (d_translucency)
     {
@@ -688,7 +689,7 @@ void ST_DrawStatus(void)
 
     if (healthhighlight)
     {
-        if (healthhighlight < I_GetTime())
+        if (healthhighlight < currenttics)
             healthhighlight = 0;
 
         DrawStatusNumber(&health_x, ST_HEALTH_Y, health, tinttab, V_DrawStatusPatch);
@@ -704,10 +705,10 @@ void ST_DrawStatus(void)
 
     if (health <= ST_HEALTH_MIN && !gamepaused)
     {
-        if (healthwait < I_GetTime())
+        if (healthwait < currenttics)
         {
             healthanim = !healthanim;
-            healthwait = I_GetTime() + ST_HEALTH_WAIT * health / ST_HEALTH_MIN + 4;
+            healthwait = currenttics + ST_HEALTH_WAIT * health / ST_HEALTH_MIN + 4;
         }
     }
     else
@@ -757,7 +758,7 @@ void ST_DrawStatus(void)
 
         if (ammohighlight)
         {
-            if (ammohighlight < I_GetTime())
+            if (ammohighlight < currenttics)
                 ammohighlight = 0;
 
             DrawStatusNumber(&ammo_x, ST_AMMO_Y, ammo, tinttab, V_DrawStatusPatch);
@@ -769,10 +770,10 @@ void ST_DrawStatus(void)
 
         if (ammo <= ST_AMMO_MIN && !gamepaused)
         {
-            if (ammowait < I_GetTime())
+            if (ammowait < currenttics)
             {
                 ammoanim = !ammoanim;
-                ammowait = I_GetTime() + ST_AMMO_WAIT * ammo / ST_AMMO_MIN + 4;
+                ammowait = currenttics + ST_AMMO_WAIT * ammo / ST_AMMO_MIN + 4;
             }
         }
         else
@@ -814,10 +815,10 @@ void ST_DrawStatus(void)
             {
                 if (!gamepaused)
                 {
-                    if (keywait < I_GetTime())
+                    if (keywait < currenttics)
                     {
                         showkey = !showkey;
-                        keywait = I_GetTime() + ST_KEY_WAIT;
+                        keywait = currenttics + ST_KEY_WAIT;
                         plyr->neededcardflash--;
                     }
                 }
@@ -858,7 +859,7 @@ void ST_DrawStatus(void)
 
         if (armorhighlight)
         {
-            if (armorhighlight < I_GetTime())
+            if (armorhighlight < currenttics)
                 armorhighlight = 0;
 
             if (emptytallpercent)
