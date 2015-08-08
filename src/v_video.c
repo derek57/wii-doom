@@ -755,10 +755,7 @@ void V_DrawTranslucentStatusNumberPatch(int x, int y, patch_t *patch, byte *tint
             {
                 byte    dot = *source++;
 
-                if (dot == 109 && tinttab)
-                    *dest = tinttab33[*dest];
-                else
-                    *dest = tinttab[(dot << 8) + *dest];
+                *dest = (dot == 109 ? tinttab33[*dest] : tinttab[(dot << 8) + *dest]);
                 dest += SCREENWIDTH;
             }
             column = (column_t *)((byte *)column + column->length + 4);
