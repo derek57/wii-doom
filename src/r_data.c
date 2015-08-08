@@ -306,7 +306,7 @@ void R_GenerateComposite(int texnum)
 
     block = Z_Malloc (texturecompositesize[texnum],
 		      PU_STATIC, 
-		      &texturecomposite[texnum]);	
+		      (void **) &texturecomposite[texnum]);	
 
     collump = texturecolumnlump[texnum];
     colofs = texturecolumnofs[texnum];
@@ -449,8 +449,8 @@ void R_GenerateLookup(int texnum)
     //  that are covered by more than one patch.
     // Fill in the lump / offset, so columns
     //  with only a single patch are all done.
-    patchcount = (byte *) Z_Malloc(texture->width, PU_STATIC, &patchcount);
-    postcount = (byte *) Z_Malloc(texture->width, PU_STATIC, &postcount);
+    patchcount = (byte *) Z_Malloc(texture->width, PU_STATIC, (void **) &patchcount);
+    postcount = (byte *) Z_Malloc(texture->width, PU_STATIC, (void **) &postcount);
     memset (patchcount, 0, texture->width);
     patch = texture->patches;
 

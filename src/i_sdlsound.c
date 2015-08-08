@@ -302,11 +302,15 @@ static allocated_sound_t * PitchShift(allocated_sound_t *insnd, int pitch)
     Sint16 *srcbuf, *dstbuf;
     Uint32 srclen, dstlen;
 
-    // rounds up
-    dstlen = (insnd->chunk.alen) * ((pitch + 1) * 100 / NORM_PITCH) / 100;
+    srcbuf = (Sint16 *)insnd->chunk.abuf;
+    srclen = insnd->chunk.alen;
 
-    // must be even
-    if (dstlen % 2 != 0)
+    // determine ratio pitch:NORM_PITCH and apply to srclen, then invert.
+    // This is an approximation of vanilla behaviour based on measurements
+    dstlen = (int)((1 + (1 - (float)pitch / NORM_PITCH)) * srclen);
+
+    // ensure that the new buffer is an even length
+    if( (dstlen % 2) == 0)
         dstlen++;
 
     outsnd = AllocateSound(insnd->sfxinfo, dstlen);
@@ -317,9 +321,6 @@ static allocated_sound_t * PitchShift(allocated_sound_t *insnd, int pitch)
     }
 
     outsnd->pitch = pitch;
-
-    srcbuf = (Sint16 *)insnd->chunk.abuf;
-    srclen = insnd->chunk.alen;
     dstbuf = (Sint16 *)outsnd->chunk.abuf;
 
     // loop over output buffer. find corresponding input cell, copy over
@@ -410,12 +411,13 @@ static boolean ExpandSoundData_SDL(sfxinfo_t *sfxinfo,
     // Allocate a chunk in which to expand the sound
 
     snd = AllocateSound(sfxinfo, expanded_length);
-    chunk = &snd->chunk;
 
-    if (chunk == NULL)
+    if (snd == NULL)
     {
         return false;
     }
+
+    chunk = &snd->chunk;
 
     // If we can, use the standard / optimized SDL conversion routines.
 
@@ -666,37 +668,36 @@ static int I_SDL_StartSound(sfxinfo_t *sfxinfo, int channel, int vol, int sep, i
         return -1;
     }
 
-    if (randompitch && !menuactive)
+    snd = GetAllocatedSoundBySfxInfoAndPitch(sfxinfo, pitch);
+
+    if(snd == NULL)
     {
-        if (!(snd = GetAllocatedSoundBySfxInfoAndPitch(sfxinfo, pitch)))
+        allocated_sound_t *newsnd;
+
+        // fetch the base sound effect, un-pitch-shifted
+        snd = GetAllocatedSoundBySfxInfoAndPitch(sfxinfo, NORM_PITCH);
+
+        if(!snd)
         {
-            allocated_sound_t *newsnd;
-
-            // base sound
-            snd = GetAllocatedSoundBySfxInfoAndPitch(sfxinfo, 127);
-
-            if (!snd)
-            {
-                return -1;
-            }
-
-            newsnd = PitchShift(snd, pitch);
-            if (!newsnd)
-            {
-                return -1;
-                // TODO: unlock the original sound?
-            }
-            LockAllocatedSound(newsnd);
-            UnlockAllocatedSound(snd);
-            snd = newsnd;
+            return -1;
         }
-        else
+
+        if(randompitch && !menuactive)
         {
-            LockAllocatedSound(snd);
+            newsnd = PitchShift(snd, pitch);
+
+            if(newsnd)
+            {
+                LockAllocatedSound(newsnd);
+                UnlockAllocatedSound(snd);
+                snd = newsnd;
+            }
         }
     }
     else
-        snd = GetAllocatedSoundBySfxInfoAndPitch(sfxinfo, NORM_PITCH);
+    {
+        LockAllocatedSound(snd);
+    }
 
     // play sound
 

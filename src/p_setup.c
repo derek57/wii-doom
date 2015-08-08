@@ -1129,7 +1129,7 @@ static void P_LoadReject(int lumpnum)
     }
     else
     {
-        rejectmatrix = Z_Malloc(minlength, PU_LEVEL, &rejectmatrix);
+        rejectmatrix = Z_Malloc(minlength, PU_LEVEL, (void **) &rejectmatrix);
         W_ReadLump(lumpnum, rejectmatrix);
 
         PadRejectArray(rejectmatrix + lumplen, minlength - lumplen);
@@ -1279,7 +1279,7 @@ P_SetupLevel
     if (precache)
         R_PrecacheLevel ();
 
-    C_Printf(CR_GOLD, " P_SetupLevel: Free Memory (0x%x)\n", Z_FreeMemory());
+//    C_Printf(CR_GOLD, " P_SetupLevel: Free Memory (0x%x)\n", Z_FreeMemory());
     //printf ("free memory: 0x%x\n", Z_FreeMemory());
 
     HU_NewLevel();

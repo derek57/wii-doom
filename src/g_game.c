@@ -578,7 +578,11 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
                         {
                             if(usergame)
                             {
-                                AM_Toggle();
+if(!automapactive)
+//                                AM_Toggle();
+AM_Start();
+else
+AM_Stop();
                             }
                         }
                     }
@@ -1053,11 +1057,11 @@ void G_DoLoadLevel (void)
             players[i].playerstate = PST_REBORN; 
         memset (players[i].frags,0,sizeof(players[i].frags)); 
     } 
-                 
+
     P_SetupLevel (gameepisode, gamemap, 0, gameskill);    
     displayplayer = consoleplayer;                // view the guy you are playing    
     gameaction = ga_nothing; 
-    Z_CheckHeap ();
+//    Z_CheckHeap ();
     
     // clear cmd building stuff
 
@@ -1751,7 +1755,7 @@ void G_ExitLevel (void)
     player_t *player = &players[consoleplayer];
     player->item = 0;
 
-    C_Printf(CR_GOLD, " G_ExitLevel: Free Memory (0x%x)\n", Z_FreeMemory());
+//    C_Printf(CR_GOLD, " G_ExitLevel: Free Memory (0x%x)\n", Z_FreeMemory());
 
     if(consoleactive)
         C_HideConsoleFast();
@@ -1766,7 +1770,7 @@ void G_ExitLevel (void)
 // Here's for the german edition.
 void G_SecretExitLevel (void) 
 { 
-    C_Printf(CR_GOLD, " G_SecretExitLevel: Free Memory (0x%x)\n", Z_FreeMemory());
+//    C_Printf(CR_GOLD, " G_SecretExitLevel: Free Memory (0x%x)\n", Z_FreeMemory());
 
     // IF NO WOLF3D LEVELS, NO SECRET EXIT!
     if ( (gamemode == commercial)

@@ -78,10 +78,85 @@
 #define HU_MONSECX       -16
 #define HU_MONSECY      (25 - SHORT(hu_font[0]->height))
 
+#define AM              "American McGee"
+#define JA              "John Anderson"
+#define JR              "John Romero"
+#define MB              "Michael Bukowski"
+#define RH              "Richard Heath"
+#define RM              "Russell Meakim"
+#define SG              "Shawn Green"
+#define SP              "Sandy Petersen"
+#define TH              "Tom Hall"
+#define TW              "Tim Willits"
+#define AMSP            AM" and "SP
+#define JRTH            JR" and "TH
+#define SPTH            SP" and "TH
+
+char *authors[][6] =
+{
+    /*        DOOM  | DOOM | DOOM2 | ULT. | DOOM2 | NERVE
+             SHARE. | REG. |       | DOOM |  BFG  | PACK.
+       00 */ { "",    "",    "",     "",     "",    "" },
+    /* 01 */ { "",    "",    SP,     "",     SP,    RM },
+    /* 02 */ { "",    "",    AM,     "",     AM,    RH },
+    /* 03 */ { "",    "",    AM,     "",     AM,    RM },
+    /* 04 */ { "",    "",    AM,     "",     AM,    RM },
+    /* 05 */ { "",    "",    AM,     "",     AM,    RH },
+    /* 06 */ { "",    "",    AM,     "",     AM,    RH },
+    /* 07 */ { "",    "",    AMSP,   "",     AMSP,  RH },
+    /* 08 */ { "",    "",    SP,     "",     SP,    RH },
+    /* 09 */ { "",    "",    SP,     "",     SP,    RM },
+    /* 10 */ { "",    "",    SPTH,   "",     SPTH,  "" },
+    /* 11 */ { JR,    JR,    JR,     JR,     JR,    "" },
+    /* 12 */ { JR,    JR,    SP,     JR,     SP,    "" },
+    /* 13 */ { JR,    JR,    SP,     JR,     SP,    "" },
+    /* 14 */ { JRTH,  JRTH,  AM,     JRTH,   AM,    "" },
+    /* 15 */ { JR,    JR,    JR,     JR,     JR,    "" },
+    /* 16 */ { JR,    JR,    SP,     JR,     SP,    "" },
+    /* 17 */ { JR,    JR,    JR,     JR,     JR,    "" },
+    /* 18 */ { SPTH,  SPTH,  SP,     SPTH,   SP,    "" },
+    /* 19 */ { JR,    JR,    SP,     JR,     SP,    "" },
+    /* 20 */ { "",    "",    JR,     "",     JR,    "" },
+    /* 21 */ { "",    SPTH,  SP,     SPTH,   SP,    "" },
+    /* 22 */ { "",    SPTH,  AM,     SPTH,   AM,    "" },
+    /* 23 */ { "",    SPTH,  SP,     SPTH,   SP,    "" },
+    /* 24 */ { "",    SPTH,  SP,     SPTH,   SP,    "" },
+    /* 25 */ { "",    SP,    SG,     SP,     SG,    "" },
+    /* 26 */ { "",    SP,    JR,     SP,     JR,    "" },
+    /* 27 */ { "",    SPTH,  SP,     SPTH,   SP,    "" },
+    /* 28 */ { "",    SP,    SP,     SP,     SP,    "" },
+    /* 29 */ { "",    SP,    JR,     SP,     JR,    "" },
+    /* 30 */ { "",    "",    SP,     "",     SP,    "" },
+    /* 31 */ { "",    "",    SP,     "",     SP,    "" },
+    /* 32 */ { "",    "",    SP,     "",     SP,    "" },
+    /* 33 */ { "",    SPTH,  "",     SPTH,   MB,    "" },
+    /* 34 */ { "",    "",    "",     "",     "",    "" },
+    /* 35 */ { "",    "",    "",     "",     "",    "" },
+    /* 36 */ { "",    "",    "",     "",     "",    "" },
+    /* 37 */ { "",    "",    "",     "",     "",    "" },
+    /* 38 */ { "",    "",    "",     "",     "",    "" },
+    /* 39 */ { "",    "",    "",     "",     "",    "" },
+    /* 40 */ { "",    "",    "",     "",     "",    "" },
+    /* 41 */ { "",    "",    "",     AM,     "",    "" },
+    /* 42 */ { "",    "",    "",     JR,     "",    "" },
+    /* 43 */ { "",    "",    "",     SG,     "",    "" },
+    /* 44 */ { "",    "",    "",     AM,     "",    "" },
+    /* 45 */ { "",    "",    "",     TW,     "",    "" },
+    /* 46 */ { "",    "",    "",     JR,     "",    "" },
+    /* 47 */ { "",    "",    "",     JA,     "",    "" },
+    /* 48 */ { "",    "",    "",     SG,     "",    "" },
+    /* 49 */ { "",    "",    "",     TW,     "",    "" }
+};
+
+#define NERVE_AUTHORS      authors[gamemap][5]
+#define BFGEDITION_AUTHORS authors[gamemap][4]
+#define GENERAL_AUTHORS    authors[gameepisode * 10 + gamemap][gamemode]
 
 static player_t*        plr;
 
 static hu_textline_t    w_title;
+static hu_textline_t    w_author_title;
+static hu_textline_t    w_authors;
 static hu_textline_t    w_monsec;              // ADDED FOR PSP-STATS
 
 //static hu_itext_t       w_inputbuffer[MAXPLAYERS];
@@ -339,6 +414,8 @@ void HU_Start(void)
 //    int       i;
     char*     s;
     char*     t;
+    char*     u;
+    char*     v = "AUTHOR(S):";
 
     if (headsupactive)
         HU_Stop();
@@ -385,7 +462,19 @@ void HU_Start(void)
                        HU_TITLEX, HU_TITLEY,
                        hu_font,
                        HU_FONTSTART);
-    
+    if(show_authors)
+    {
+        HUlib_initTextLine(&w_author_title,
+                           HU_TITLEX, HU_TITLEY - 10,
+                           hu_font,
+                           HU_FONTSTART);
+
+        HUlib_initTextLine(&w_authors,
+                           HU_TITLEX + 80, HU_TITLEY - 10,
+                           hu_font,
+                           HU_FONTSTART);
+    }
+
     HUlib_initTextLine(&w_monsec,
                        HU_MONSECX, HU_MONSECY,
                        hu_font,
@@ -424,6 +513,19 @@ void HU_Start(void)
         s = HU_TITLE_CHEX;
     }
 
+    if (gamemission == pack_nerve)
+    {
+        u = NERVE_AUTHORS;
+    }
+    else if (bfgedition && gamemission == doom2)
+    {
+        u = BFGEDITION_AUTHORS;
+    }
+    else
+    {
+        u = GENERAL_AUTHORS;
+    }
+
     // dehacked substitution to get modified level name
 
     t = hud_monsecstr;
@@ -431,6 +533,8 @@ void HU_Start(void)
     s = DEH_String(s);
     
     t = DEH_String(t);
+
+    u = DEH_String(u);
 
     if((fsize != 12538385 &&
         fsize != 14691821 &&
@@ -445,6 +549,15 @@ void HU_Start(void)
 
     while (*t)
         HUlib_addCharToTextLine(&w_monsec, *(t++));
+
+    if(show_authors)
+    {
+        while (*u)
+            HUlib_addCharToTextLine(&w_authors, *(u++));
+
+        while (*v)
+            HUlib_addCharToTextLine(&w_author_title, *(v++));
+    }
 /*
     // create the inputbuffer widgets
     for (i=0 ; i<MAXPLAYERS ; i++)
@@ -537,6 +650,12 @@ void HU_Drawer(void)
     if (automapactive)
     {
         HUlib_drawTextLine(&w_title, false);
+
+        if(show_authors)
+        {
+            HUlib_drawTextLine(&w_author_title, false);
+            HUlib_drawTextLine(&w_authors, false);
+        }
 
         // display the hud kills/items/secret display if optioned
         if (show_stats == 1)

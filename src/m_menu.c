@@ -863,8 +863,8 @@ int                        cheeting;
 int                        coordinates_info = 0;
 int                        timer_info = 0;
 int                        version_info = 0;
-int                        key_controls_start_in_cfg_at_pos = 67;
-int                        key_controls_end_in_cfg_at_pos = 80;
+int                        key_controls_start_in_cfg_at_pos = 68;
+int                        key_controls_end_in_cfg_at_pos = 81;
 int                        crosshair = 0;
 int                        show_stats = 0;
 int                        tracknum = 1;
@@ -898,7 +898,6 @@ boolean                    messageNeedsInput;
 boolean                    map_flag = false;
 boolean                    inhelpscreens;
 boolean                    menuactive;
-boolean                    forced = false;
 boolean                    fake = false;
 boolean                    mus_cheat_used = false;
 boolean                    got_invisibility = false;
@@ -1044,6 +1043,7 @@ void M_FPS(int choice);
 void M_DisplayTicker(int choice);
 void M_Coordinates(int choice);
 void M_Timer(int choice);
+void M_Authors(int choice);
 void M_Version(int choice);
 void M_SoundInfo(int choice);
 void M_HUD(int choice);
@@ -1717,8 +1717,8 @@ enum
     game_statistics,
     game_overlay,
     game_timer,
+    game_authors,
     game_messages,
-    game_jumping,
     game_weapon,
     game_recoil,
     game_thrust,
@@ -1737,14 +1737,14 @@ menuitem_t GameMenu[]=
     {2,"AUTOMAP STATISTICS",M_Statistics,'s'},
     {2,"AUTOMAP OVERLAY",M_AutomapOverlay,'n'},
     {2,"AUTOMAP TIMER",M_Timer,'t'},
+    {2,"AUTOMAP AUTHORS",M_Authors,'a'},
     {2,"MESSAGES",M_ChangeMessages,'m'},
-    {2,"JUMPING",M_Jumping,'j'},
     {2,"WEAPON CHANGE",M_WeaponChange,'w'},
     {2,"WEAPON RECOIL",M_WeaponRecoil,'c'},
     {2,"PLAYER THRUST",M_PlayerThrust,'p'},
     {2,"RESPAWN MONSTERS",M_RespawnMonsters,'i'},
     {2,"FAST MONSTERS",M_FastMonsters,'d'},
-    {2,"",NULL,'a'},
+    {2,"",NULL,'0'},
     {2,"",M_Game2,'2'}
 };
 
@@ -1809,6 +1809,7 @@ enum
 {
     game3_crosshair,
     game3_autoaim,
+    game3_jumping,
     game3_gore,
     game3_amount,
     game3_blooda,
@@ -1819,7 +1820,6 @@ enum
     game3_limitation,
     game3_block,
     game3_doors,
-    game3_god,
     game3_game4,
     game3_end
 } game3_e;
@@ -1828,6 +1828,7 @@ menuitem_t GameMenu3[]=
 {
     {2,"CROSSHAIR",M_Crosshair,'x'},
     {2,"AUTOAIM",M_Autoaim,'a'},
+    {2,"JUMPING",M_Jumping,'j'},
     {2,"MORE BLOOD & GORE",M_MaxGore,'o'},
     {2,"Gore Amount",M_GoreAmount,'g'},
     {2,"Enable Colored Blood",M_ColoredBloodA,'b'},
@@ -1838,7 +1839,6 @@ menuitem_t GameMenu3[]=
     {2,"Pain Elementals have lost soul limit",M_LimitedGhosts,'l'},
     {2,"Lost Souls get stuck behind walls",M_BlockSkulls,'w'},
     {2,"Blazing Doors play double sound",M_BlazingDoors,'d'},
-    {2,"God mode isn't absolute",M_GodAbsolute,'i'},
     {2,"",M_Game4,'n'}
 };
 
@@ -1854,6 +1854,7 @@ menu_t  GameDef3 =
 
 enum
 {
+    game4_god,
     game4_floor,
     game4_clipping,
     game4_model,
@@ -1867,6 +1868,7 @@ enum
 
 menuitem_t GameMenu4[]=
 {
+    {2,"God mode isn't absolute",M_GodAbsolute,'i'},
     {2,"Use Doom's floor motion behavior",M_Floor,'f'},
     {2,"Use Doom's movement clipping code",M_Clipping,'c'},
     {2,"Use Doom's linedef trigger model",M_Model,'m'},
@@ -3220,7 +3222,7 @@ void M_DrawGame(void)
         V_ClearDPTranslation();
     }
 
-    if(showMessages)
+    if(show_authors)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef.x + 161, GameDef.y + 58, DEH_String("ON"));
@@ -3233,7 +3235,7 @@ void M_DrawGame(void)
         V_ClearDPTranslation();
     }
 
-    if(jumping)
+    if(showMessages)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef.x + 161, GameDef.y + 68, DEH_String("ON"));
@@ -3605,7 +3607,7 @@ void M_DrawGame3(void)
         V_ClearDPTranslation();
     }
 
-    if(d_maxgore)
+    if(jumping)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef3.x + 266, GameDef3.y + 18, DEH_String("ON"));
@@ -3618,45 +3620,45 @@ void M_DrawGame3(void)
         V_ClearDPTranslation();
     }
 
-    if(gore_amount == 1)
-    {
-        dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef3.x + 257, GameDef3.y + 28, DEH_String("LOW"));
-        V_ClearDPTranslation();
-    }
-    else if(gore_amount == 2)
-    {
-        dp_translation = crx[CRX_GOLD];
-        M_WriteText(GameDef3.x + 236, GameDef3.y + 28, DEH_String("MEDIUM"));
-        V_ClearDPTranslation();
-    }
-    else if(gore_amount == 3)
-    {
-        dp_translation = crx[CRX_RED];
-        M_WriteText(GameDef3.x + 254, GameDef3.y + 28, DEH_String("HIGH"));
-        V_ClearDPTranslation();
-    }
-    else if(gore_amount == 4)
-    {
-        dp_translation = crx[CRX_RED];
-        M_WriteText(GameDef3.x + 174, GameDef3.y + 28, DEH_String("RIP'EM TO PIECES"));
-        V_ClearDPTranslation();
-    }
-
-    if(d_colblood)
+    if(d_maxgore)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef3.x + 266, GameDef3.y + 38, DEH_String("ON"));
+        M_WriteText(GameDef3.x + 266, GameDef3.y + 28, DEH_String("ON"));
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef3.x + 258, GameDef3.y + 38, DEH_String("OFF"));
+        M_WriteText(GameDef3.x + 258, GameDef3.y + 28, DEH_String("OFF"));
         V_ClearDPTranslation();
     }
 
-    if(d_colblood2)
+    if(gore_amount == 1)
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(GameDef3.x + 257, GameDef3.y + 38, DEH_String("LOW"));
+        V_ClearDPTranslation();
+    }
+    else if(gore_amount == 2)
+    {
+        dp_translation = crx[CRX_GOLD];
+        M_WriteText(GameDef3.x + 236, GameDef3.y + 38, DEH_String("MEDIUM"));
+        V_ClearDPTranslation();
+    }
+    else if(gore_amount == 3)
+    {
+        dp_translation = crx[CRX_RED];
+        M_WriteText(GameDef3.x + 254, GameDef3.y + 38, DEH_String("HIGH"));
+        V_ClearDPTranslation();
+    }
+    else if(gore_amount == 4)
+    {
+        dp_translation = crx[CRX_RED];
+        M_WriteText(GameDef3.x + 174, GameDef3.y + 38, DEH_String("RIP'EM TO PIECES"));
+        V_ClearDPTranslation();
+    }
+
+    if(d_colblood)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef3.x + 266, GameDef3.y + 48, DEH_String("ON"));
@@ -3669,7 +3671,7 @@ void M_DrawGame3(void)
         V_ClearDPTranslation();
     }
 
-    if(d_telefrag)
+    if(d_colblood2)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef3.x + 266, GameDef3.y + 58, DEH_String("ON"));
@@ -3682,7 +3684,7 @@ void M_DrawGame3(void)
         V_ClearDPTranslation();
     }
 
-    if(d_doorstuck)
+    if(d_telefrag)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef3.x + 266, GameDef3.y + 68, DEH_String("ON"));
@@ -3695,7 +3697,7 @@ void M_DrawGame3(void)
         V_ClearDPTranslation();
     }
 
-    if(d_resurrectghosts)
+    if(d_doorstuck)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef3.x + 266, GameDef3.y + 78, DEH_String("ON"));
@@ -3708,7 +3710,7 @@ void M_DrawGame3(void)
         V_ClearDPTranslation();
     }
 
-    if(d_limitedghosts)
+    if(d_resurrectghosts)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef3.x + 266, GameDef3.y + 88, DEH_String("ON"));
@@ -3721,7 +3723,7 @@ void M_DrawGame3(void)
         V_ClearDPTranslation();
     }
 
-    if(!d_blockskulls)
+    if(d_limitedghosts)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef3.x + 266, GameDef3.y + 98, DEH_String("ON"));
@@ -3734,7 +3736,7 @@ void M_DrawGame3(void)
         V_ClearDPTranslation();
     }
 
-    if(!d_blazingsound)
+    if(!d_blockskulls)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef3.x + 266, GameDef3.y + 108, DEH_String("ON"));
@@ -3747,7 +3749,7 @@ void M_DrawGame3(void)
         V_ClearDPTranslation();
     }
 
-    if(d_god)
+    if(!d_blazingsound)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef3.x + 266, GameDef3.y + 118, DEH_String("ON"));
@@ -3778,7 +3780,7 @@ void M_DrawGame4(void)
         V_DrawPatch(70, 0, 0, W_CacheLumpName(DEH_String("M_GMESET"),
                                                PU_CACHE));
 
-    if(d_floors)
+    if(d_god)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef4.x + 266, GameDef4.y - 2, DEH_String("ON"));
@@ -3791,7 +3793,7 @@ void M_DrawGame4(void)
         V_ClearDPTranslation();
     }
 
-    if(d_moveblock)
+    if(d_floors)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef4.x + 266, GameDef4.y + 8, DEH_String("ON"));
@@ -3804,7 +3806,7 @@ void M_DrawGame4(void)
         V_ClearDPTranslation();
     }
 
-    if(d_model)
+    if(d_moveblock)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef4.x + 266, GameDef4.y + 18, DEH_String("ON"));
@@ -3817,7 +3819,7 @@ void M_DrawGame4(void)
         V_ClearDPTranslation();
     }
 
-    if(d_666)
+    if(d_model)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef4.x + 266, GameDef4.y + 28, DEH_String("ON"));
@@ -3830,7 +3832,7 @@ void M_DrawGame4(void)
         V_ClearDPTranslation();
     }
 
-    if(correct_lost_soul_bounce)
+    if(d_666)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef4.x + 266, GameDef4.y + 38, DEH_String("ON"));
@@ -3843,7 +3845,7 @@ void M_DrawGame4(void)
         V_ClearDPTranslation();
     }
 
-    if(d_maskedanim)
+    if(correct_lost_soul_bounce)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef4.x + 266, GameDef4.y + 48, DEH_String("ON"));
@@ -3856,7 +3858,7 @@ void M_DrawGame4(void)
         V_ClearDPTranslation();
     }
 
-    if(d_sound)
+    if(d_maskedanim)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef4.x + 266, GameDef4.y + 58, DEH_String("ON"));
@@ -3869,7 +3871,7 @@ void M_DrawGame4(void)
         V_ClearDPTranslation();
     }
 
-    if(d_ouchface)
+    if(d_sound)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef4.x + 266, GameDef4.y + 68, DEH_String("ON"));
@@ -3879,6 +3881,19 @@ void M_DrawGame4(void)
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(GameDef4.x + 258, GameDef4.y + 68, DEH_String("OFF"));
+        V_ClearDPTranslation();
+    }
+
+    if(d_ouchface)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(GameDef4.x + 266, GameDef4.y + 78, DEH_String("ON"));
+        V_ClearDPTranslation();
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(GameDef4.x + 258, GameDef4.y + 78, DEH_String("OFF"));
         V_ClearDPTranslation();
     }
 }
@@ -6571,9 +6586,6 @@ void M_RiftNow(int choice)
         && gameskill != sk_nightmare &&
         players[consoleplayer].playerstate == PST_LIVE)
     {
-        if(forced)
-            forced = false;
-
         warped = 1;
         menuactive = 0;
         G_DeferedInitNew(gameskill, epi, map);
@@ -6870,7 +6882,6 @@ void M_Spin(int choice)
 
         mus_cheat_used = true;
     }
-    forced = false;
 }
 
 void M_KeyBindingsSetKey(int choice)
@@ -7137,6 +7148,21 @@ void M_Timer(int choice)
     case 1:
         if (timer_info < 1)
             timer_info++;
+        break;
+    }
+}
+
+void M_Authors(int choice)
+{
+    switch(choice)
+    {
+    case 0:
+        if (show_authors)
+            show_authors = false;
+        break;
+    case 1:
+        if (!show_authors)
+            show_authors = true;
         break;
     }
 }

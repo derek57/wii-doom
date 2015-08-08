@@ -1746,7 +1746,7 @@ typedef struct
                         // resurrection.  Zero means it won't come
                         // back to life.
 
-    char* name;
+    char  name[100];
 
 } mobjinfo_t;
 

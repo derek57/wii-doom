@@ -51,8 +51,8 @@
 #include "z_zone.h"
 
 
-#define DEFAULT_RAM 16 * 2 /* MiB */
-#define MIN_RAM      4 * 4 /* MiB */
+#define DEFAULT_RAM 32 /* MiB */
+#define MIN_RAM     16 /* MiB */
 
 
 typedef struct atexit_listentry_s atexit_listentry_t;

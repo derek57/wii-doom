@@ -30,11 +30,11 @@
 
 #include "z_zone.h"
 
-void *Z_Realloc(void *ptr, int size, int tag, void **user);
 
 #define HEADER_CHUNK_ID "MThd"
 #define TRACK_CHUNK_ID  "MTrk"
 #define MAX_BUFFER_SIZE 0x10000
+
 
 typedef struct
 {
@@ -80,6 +80,7 @@ struct midi_file_s
     byte *buffer;
     unsigned int buffer_size;
 };
+
 
 // Check the header of a chunk:
 

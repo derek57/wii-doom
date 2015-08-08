@@ -297,8 +297,8 @@ static struct
     { "SHELA0", MT_MISC22, 15,  8, NULL },
     { "AMMOA0", MT_MISC17, 15,  8, NULL },
     { "ROCKA0", MT_MISC18, 15,  8, NULL },
-    { "CELLA0", MT_MISC20, 8,  8, NULL },
-    { "CELPA0", MT_MISC21, 8,  8, NULL },
+    { "CELLA0", MT_MISC20,  8,  8, NULL },
+    { "CELPA0", MT_MISC21,  8,  8, NULL },
     { "SBOXA0", MT_MISC23, 15,  8, NULL }
 };
 
@@ -326,7 +326,7 @@ static boolean                st_firsttime;
 static int                    lu_palette;
 
 // used for making messages go away
-static int                    st_msgcounter=0;
+static int                    st_msgcounter = 0;
 
 // number of frags so far in deathmatch
 static int                    st_fragscount;
@@ -364,7 +364,7 @@ static st_chatstateenum_t     st_chatstate;
 static st_stateenum_t         st_gamestate;
 
 // whether left-side main status bar is active
-static boolean            st_statusbaron;
+static boolean                st_statusbaron;
 
 // whether status bar chat is active
 static boolean                st_chat;
@@ -490,7 +490,7 @@ static st_number_t            w_maxammo[4];
 patch_t *ST_LoadStatusAmmoPatch(int ammopicnum)
 {
     if ((mobjinfo[ammopic[ammopicnum].mobjnum].flags & MF_SPECIAL)
-        && W_CheckNumForName(ammopic[ammopicnum].patchname) >= 0)
+            && W_CheckNumForName(ammopic[ammopicnum].patchname) >= 0)
         return W_CacheLumpNum(W_GetNumForName(ammopic[ammopicnum].patchname), PU_CACHE);
     else
         return NULL;
@@ -553,17 +553,7 @@ void ST_refreshBackground(void)
     {
         if(beta_style)
         {
-            if(!automapactive)
-            {
-                if(fsize != 4207819 && fsize != 4274218 && fsize != 10396254)
-                    V_DrawPatch(ST_X, 0, 4, sbar);
-                else
-                {
-                    V_DrawPatch(0, 0, 4, sbar_left_oldwad);
-                    V_DrawPatch(104, 0, 4, sbar_right_oldwad);
-                }
-            }
-            else
+            if(automapactive)
             {
                 V_DrawPatch(ST_X, 0, 4, sbarmap);
 
@@ -580,16 +570,26 @@ void ST_refreshBackground(void)
                 if(plyr->weaponowned[wp_chainsaw])
                     V_DrawPatch(160, 5, 4, sbara_chainsaw);
             }
+            else
+            {
+                if(fsize == 4207819 || fsize == 4274218 || fsize == 10396254)
+                {
+                    V_DrawPatch(ST_X, 0, 4, sbar_left_oldwad);
+                    V_DrawPatch(104, 0, 4, sbar_right_oldwad);
+                }
+                else
+                    V_DrawPatch(ST_X, 0, 4, sbar);
+            }
         }
         else
         {
-            if(fsize != 4207819 && fsize != 4274218 && fsize != 10396254)
-                V_DrawPatch(ST_X, 0, 4, sbar);
-            else
+            if(fsize == 4207819 || fsize == 4274218 || fsize == 10396254)
             {
-                V_DrawPatch(0, 0, 4, sbar_left_oldwad);
+                V_DrawPatch(ST_X, 0, 4, sbar_left_oldwad);
                 V_DrawPatch(104, 0, 4, sbar_right_oldwad);
             }
+            else
+                V_DrawPatch(ST_X, 0, 4, sbar);
         }
 
         if (netgame)
@@ -945,6 +945,7 @@ int ST_calcPainOffset(void)
 //
 void ST_updateFaceWidget(void)
 {
+
     int                i;
 
     angle_t            badguyangle;
@@ -1145,6 +1146,7 @@ void ST_updateFaceWidget(void)
 
 void ST_updateWidgets(void)
 {
+
     static int         largeammo = 1994; // means "n/a"
     int                i;
 
@@ -1241,7 +1243,7 @@ void ST_doPaletteStuff(void)
     if (plyr->powers[pw_strength] && !beta_style)
     {
         // slowly fade the berzerk out
-          bzc = 12 - (plyr->powers[pw_strength]>>6);
+        bzc = 12 - (plyr->powers[pw_strength]>>6);
 
         if (bzc > cnt)
             cnt = bzc;
@@ -1318,8 +1320,7 @@ void ST_drawWidgets(boolean refresh)
 
         if(beta_style)
             STlib_updateBinIcon(&w_chatbg, refresh);
-
-        if(!beta_style)
+        else
         {
             STlib_updateBinIcon(&w_armsbg, refresh);
 
@@ -1477,7 +1478,7 @@ void ST_Drawer (boolean fullscreen, boolean refresh)
     ST_doPaletteStuff();
 
     // If just after ST_Start(), refresh all
-    if (st_firsttime || beta_style || (scaledviewheight == SCREENHEIGHT && viewactive))
+    if (st_firsttime || beta_style /*|| (scaledviewheight == SCREENHEIGHT && viewactive)*/)
         ST_doRefresh();
     // Otherwise, update as little as possible
     else if(!beta_style)
@@ -1558,11 +1559,11 @@ void ST_loadGraphics(void)
     else
     {
         sbar = (patch_t *) W_CacheLumpName("STBAR", PU_STATIC);
-        sbarmap = (patch_t *) W_CacheLumpName("ST_AMAP", PU_STATIC);
     }
 
     if(beta_style)
     {
+        sbarmap = (patch_t *) W_CacheLumpName("ST_AMAP", PU_STATIC);
         sbara_shotgun = (patch_t *) W_CacheLumpName("STWEAP0", PU_STATIC);
         sbara_chaingun = (patch_t *) W_CacheLumpName("STWEAP1", PU_STATIC);
         sbara_missile = (patch_t *) W_CacheLumpName("STWEAP2", PU_STATIC);
@@ -1584,11 +1585,11 @@ void ST_loadGraphics(void)
         faces[facenum++] = W_CacheLumpName(namebuf, PU_STATIC);
         sprintf(namebuf, "STFTL%d0", i);        // turn left
         faces[facenum++] = W_CacheLumpName(namebuf, PU_STATIC);
-        sprintf(namebuf, "STFOUCH%d", i);        // ouch!
+        sprintf(namebuf, "STFOUCH%d", i);       // ouch!
         faces[facenum++] = W_CacheLumpName(namebuf, PU_STATIC);
         sprintf(namebuf, "STFEVL%d", i);        // evil grin ;)
         faces[facenum++] = W_CacheLumpName(namebuf, PU_STATIC);
-        sprintf(namebuf, "STFKILL%d", i);        // pissed off
+        sprintf(namebuf, "STFKILL%d", i);       // pissed off
         faces[facenum++] = W_CacheLumpName(namebuf, PU_STATIC);
     }
     faces[facenum++] = W_CacheLumpName("STFGOD0", PU_STATIC);
@@ -1645,11 +1646,11 @@ void ST_unloadGraphics(void)
     else
     {
         Z_ChangeTag(sbar, PU_CACHE);
-        Z_ChangeTag(sbarmap, PU_CACHE);
     }
 
     if(beta_style)
     {
+        Z_ChangeTag(sbarmap, PU_CACHE);
         Z_ChangeTag(sbara_shotgun, PU_CACHE);
         Z_ChangeTag(sbara_chaingun, PU_CACHE);
         Z_ChangeTag(sbara_missile, PU_CACHE);

@@ -45,6 +45,8 @@
 
 #define FEATURE_SOUND 1
 
+//#define BOOM_ZONE_HANDLING 1
+
 #endif /* #ifndef DOOM_FEATURES_H */
 
 
