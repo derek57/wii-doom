@@ -1177,6 +1177,10 @@ void P_SpawnMapThing (mapthing_t* mthing)
         C_Printf(CR_GOLD, " P_SpawnMapThing: solid hanging body in tall sector at %d,%d (%s)\n",
                 mthing->x, mthing->y, mobj->name);
     }
+
+    if (d_flipcorpses && (i == MT_SUPERSHOTGUN || (i >= MT_SHOTGUN && i <= MT_MISC25))
+        && (rand() & 1))
+         mobj->flags2 |= MF2_MIRRORED;
 }
 
 
