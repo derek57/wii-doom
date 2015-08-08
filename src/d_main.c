@@ -375,6 +375,9 @@ void D_Display (void)
             AM_DrawWorldTimer();
     }
 
+    // [crispy] back to Vanilla SlopeDiv
+    SlopeDiv = SlopeDivVanilla;
+
     // [crispy] shade background when a menu is active or the game is paused
     if (paused || menuactive)
     {
@@ -402,9 +405,6 @@ void D_Display (void)
     // menus go directly to the screen
     M_Drawer ();          // menu is drawn even on top of everything
     NetUpdate ();         // send out any new accumulation
-
-    // [crispy] back to Vanilla SlopeDiv
-    SlopeDiv = SlopeDivVanilla;
 
     // normal update
     if (!wipe)
