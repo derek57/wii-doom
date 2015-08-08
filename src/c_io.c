@@ -286,7 +286,7 @@ static void c_blurscreen(int x1, int y1, int x2, int y2, int i)
 
 static void C_DrawBackground(int height)
 {
-    int                 i;
+    int                 i, j;
 
     height = (height + 5) * SCREENWIDTH;
 
@@ -317,6 +317,10 @@ static void C_DrawBackground(int height)
 
     for (i = height - SCREENWIDTH * 2; i < height; ++i)
         screens[0][i] = tinttab25[consoleedgecolor2 + screens[0][i]];
+
+    for (j = 1; j <= 4; ++j)
+        for (i = height; i < height + SCREENWIDTH * j; ++i)
+            screens[0][i] = colormaps[256 * 4 + screens[0][i]];
 }
 
 static struct
