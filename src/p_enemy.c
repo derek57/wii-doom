@@ -47,6 +47,8 @@
 // Data.
 #include "sounds.h"
 
+#include "z_zone.h"
+
 
 #define        FATSPREAD            (ANG90/8)
 #define        SKULLSPEED           (20*FRACUNIT)
@@ -704,7 +706,7 @@ void A_MoreBlood(mobj_t * actor)
     {
         int i, t;
 
-        mobj_t *mo;
+        mobj_t *mo = Z_Malloc(sizeof(*mo), PU_LEVEL, NULL);
         mobjtype_t chunk_type;
 
         numsplats++;
@@ -737,6 +739,8 @@ void A_MoreBlood(mobj_t * actor)
         // WARNING: don't go lower than SPLAT_PER_COUNTER !!!
         for(i = SPLAT_PER_COUNTER; i <= numsplats / SPLAT_PER_COUNTER && numsplats % i == 0; ++i)
         {
+            memset(mo, 0, sizeof(*mo));
+
             mo = P_SpawnMobj(actor->x,
                              actor->y,
                              actor->z, chunk_type);
