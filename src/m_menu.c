@@ -1874,7 +1874,7 @@ menuitem_t GameMenu4[]=
     {2,"Use Doom's linedef trigger model",M_Model,'m'},
     {2,"Emulate pre-Ultimate Boss Death",M_BossDeath,'d'},
     {2,"Lost souls don't bounce off flats",M_Bounce,'b'},
-    {2,"2S middle textures do not animate",M_Masked,'a'},
+    {2,"Two-S. middle textures don't animate",M_Masked,'a'},
     {2,"Retain quirks in Doom's sound code",M_Quirk,'s'},
     {2,"Use Doom's buggy ouch face code",M_Ouch,'o'}
 };
