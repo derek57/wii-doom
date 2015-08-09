@@ -754,7 +754,7 @@ void HU_Ticker(void)
         if(beta_style)
         {
             show_chat_bar = false;
-            ST_doRefresh();
+//            ST_doRefresh();
         }
     }
 

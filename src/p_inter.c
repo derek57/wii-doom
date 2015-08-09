@@ -532,7 +532,7 @@ P_TouchSpecialThing
             player->mo->health = player->health;
             healthhighlight = I_GetTime() + ST_HEALTH_HIGHLIGHT_WAIT;
             player->extra_lifes++;
-            ST_doRefresh();
+//            ST_doRefresh();
         }
         else
         {
@@ -985,7 +985,7 @@ P_KillMobj
                 if (source->player->score > 0 && source->player->score < EXTRAPOINTS)
                     source->player->extra_lifes = 0;
 
-                ST_doRefresh();
+//                ST_doRefresh();
             }
         }
     }
