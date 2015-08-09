@@ -517,7 +517,8 @@ void HU_Start(void)
                        hu_font,
                        HU_FONTSTART);
 
-    if(show_authors && load_extra_wad == 0)
+    if ((show_authors && load_extra_wad == 0) ||
+        (show_authors && nerve_pwad))
     {
         HUlib_initTextLine(&w_author_title,
                            HU_TITLEX, HU_TITLEY - 10,
@@ -602,7 +603,8 @@ void HU_Start(void)
     while (*t)
         HUlib_addCharToTextLine(&w_monsec, *(t++));
 
-    if(show_authors && load_extra_wad == 0)
+    if ((show_authors && load_extra_wad == 0) ||
+        (show_authors && nerve_pwad))
     {
         while (*u)
             HUlib_addCharToTextLine(&w_authors, *(u++));
@@ -703,7 +705,8 @@ void HU_Drawer(void)
     {
         HUlib_drawTextLine(&w_title, false);
 
-        if(show_authors && load_extra_wad == 0)
+        if ((show_authors && load_extra_wad == 0) ||
+            (show_authors && nerve_pwad))
         {
             HUlib_drawTextLine(&w_author_title, false);
             HUlib_drawTextLine(&w_authors, false);
