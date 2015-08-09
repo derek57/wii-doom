@@ -578,11 +578,7 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
                         {
                             if(usergame)
                             {
-if(!automapactive)
-//                                AM_Toggle();
-AM_Start();
-else
-AM_Stop();
+                                AM_Toggle();
                             }
                         }
                     }
@@ -1143,20 +1139,78 @@ static char *DemoVersionDescription(int version)
 
 void G_DoPlayDemo (void) 
 { 
-    skill_t skill; 
-    int             i, episode, map; 
-    int demoversion;
+    skill_t   skill; 
+    int       i, episode, map; 
+    int       demoversion;
          
     gameaction = ga_nothing; 
     demobuffer = demo_p = W_CacheLumpName (defdemoname, PU_STATIC); 
 
-    // [crispy] demo progress bar
-    defdemosize = 0;
-    while (*demo_p++ != DEMOMARKER)
+    // THESE ARE PRIOR VERSION 1.2
+    if (fsize == 4261144  || fsize == 4271324  || fsize == 4211660  ||
+        fsize == 10401760 || fsize == 11159840 || fsize == 12408292 ||
+        fsize == 12474561 || fsize == 12487824 || fsize == 12538385 ||
+        fsize == 4234124  || fsize == 4196020  || fsize == 14943400 ||
+        fsize == 14824716 || fsize == 14612688 || fsize == 14607420 ||
+        fsize == 14604584 || fsize == 14677988 || fsize == 14691821 ||
+        fsize == 14683458 || fsize == 18195736 || fsize == 18654796 ||
+        fsize == 18240172 || fsize == 17420824 || fsize == 28422764 ||
+        fsize == 12361532 || fsize == 19321722)
     {
-	defdemosize++;
+        // [crispy] demo progress bar
+        defdemosize = 0;
+        while (*demo_p++ != DEMOMARKER)
+        {
+            defdemosize++;
+        }
+
+        demoversion = *demo_p++;
+        if ( *demo_p++ != demoversion)
+        {
+            C_Printf(CR_RED, " Demo is from a different game version!\n");
+            gameaction = ga_nothing;
+            return;
+        }
+    }
+    
+    skill = *demo_p++; 
+    episode = *demo_p++; 
+    map = *demo_p++; 
+
+    if (fsize == 4261144  || fsize == 4271324  || fsize == 4211660  ||
+        fsize == 10401760 || fsize == 11159840 || fsize == 12408292 ||
+        fsize == 12474561 || fsize == 12487824 || fsize == 12538385 ||
+        fsize == 4234124  || fsize == 4196020  || fsize == 14943400 ||
+        fsize == 14824716 || fsize == 14612688 || fsize == 14607420 ||
+        fsize == 14604584 || fsize == 14677988 || fsize == 14691821 ||
+        fsize == 14683458 || fsize == 18195736 || fsize == 18654796 ||
+        fsize == 18240172 || fsize == 17420824 || fsize == 28422764 ||
+        fsize == 12361532 || fsize == 19321722)
+    {
+        deathmatch = *demo_p++;
+        respawnparm = *demo_p++;
+        fastparm = *demo_p++;
+        nomonsters = *demo_p++;
+        consoleplayer = *demo_p++;
+    }
+	
+    for (i=0 ; i<MAXPLAYERS ; i++) 
+	playeringame[i] = *demo_p++; 
+
+    if (playeringame[1]) 
+    { 
+	netgame = true; 
+	netdemo = true; 
     }
 
+    // don't spend a lot of time in loadlevel 
+    precache = false;
+    G_InitNew (skill, episode, map); 
+    precache = true; 
+
+    usergame = false; 
+    demoplayback = true; 
+/*
     if (fsize != 10396254 && fsize != 10399316 && fsize != 4207819 && fsize != 4274218 &&
         fsize != 4225504 && fsize != 4225460)
     {
@@ -1208,6 +1262,7 @@ void G_DoPlayDemo (void)
 
     usergame = false; 
     demoplayback = true; 
+*/
 } 
 
 
