@@ -120,16 +120,16 @@ static void LoadGameSettings(net_gamesettings_t *settings)
 {
     unsigned int i;
 
-    deathmatch = settings->deathmatch;
+//    deathmatch = settings->deathmatch;
     startepisode = settings->episode;
     startmap = settings->map;
     startskill = settings->skill;
     startloadgame = settings->loadgame;
-    nomonsters = settings->nomonsters;
-    fastparm = settings->fast_monsters;
-    respawnparm = settings->respawn_monsters;
-    timelimit = settings->timelimit;
-    consoleplayer = settings->consoleplayer;
+//    nomonsters = settings->nomonsters;
+//    fastparm = settings->fast_monsters;
+//    respawnparm = settings->respawn_monsters;
+//    timelimit = settings->timelimit;
+//    consoleplayer = settings->consoleplayer;
 
     for (i = 0; i < MAXPLAYERS; ++i)
     {

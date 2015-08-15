@@ -145,6 +145,7 @@ default_t        doom_defaults_list[] =
     CONFIG_VARIABLE_INT                (sound),
     CONFIG_VARIABLE_INT                (ouchface),
     CONFIG_VARIABLE_INT                (authors),
+    CONFIG_VARIABLE_INT                (png_screenshot),
 //    CONFIG_VARIABLE_INT                (memory),
     CONFIG_VARIABLE_INT                (key_shoot),
     CONFIG_VARIABLE_INT                (key_open),
@@ -159,6 +160,7 @@ default_t        doom_defaults_list[] =
     CONFIG_VARIABLE_INT                (key_jump),
     CONFIG_VARIABLE_INT                (key_run),
     CONFIG_VARIABLE_INT                (key_console),
+    CONFIG_VARIABLE_INT                (key_screenshots),
 //    CONFIG_VARIABLE_INT                (key_aiminghelp),
 };
 
@@ -692,6 +694,10 @@ char *M_GetSaveGameDir(char *iwadname)
             savegameroot = SavePathRootHacxMusicUSB;
 
             M_MakeDirectory(savegameroot);
+
+            savegameroot = SavePathScreenshotsUSB;
+
+            M_MakeDirectory(savegameroot);
         }
         else if(sd)
         {
@@ -752,6 +758,10 @@ char *M_GetSaveGameDir(char *iwadname)
             M_MakeDirectory(savegameroot);
 
             savegameroot = SavePathRootHacxMusicSD;
+
+            M_MakeDirectory(savegameroot);
+
+            savegameroot = SavePathScreenshotsSD;
 
             M_MakeDirectory(savegameroot);
         }

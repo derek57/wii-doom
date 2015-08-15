@@ -193,6 +193,10 @@ int vanilla_keyboard_mapping = true;
 
 int usegamma = 0;
 
+// Save screenshots in PNG format.
+
+int png_screenshots = 0;
+
 patch_t *disk;
 
 extern int screenSize;

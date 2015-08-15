@@ -655,7 +655,22 @@ void C_PrintSDLVersions(void)
         "libogc.a"
         );
 
+    C_Printf(CR_GOLD, " Using version %i.%i.%i of %s\n",
+        PNG_LIBPNG_VER_MAJOR, PNG_LIBPNG_VER_MINOR, PNG_LIBPNG_VER_RELEASE,
+        "libpng15.a"
+        );
+
+    C_Printf(CR_GOLD, " Using version %i (6b) of %s\n",
+        JPEG_LIB_VERSION,
+        "libjpeg.a"
+        );
+
+    C_Printf(CR_GOLD, " Using version %i.%i.%i.%i of %s\n",
+        ZLIB_VER_MAJOR, ZLIB_VER_MINOR, ZLIB_VER_REVISION, ZLIB_VER_SUBREVISION,
+        "libz.a"
+        );
+
     C_Printf(CR_GOLD, " Also using the following libs:\n");
-    C_Printf(CR_GOLD, " libvorbisidec.a libwiilight.a, libfat.a, libwiiuse.a, libbte.a, libwiikeyboard.a\n");
+    C_Printf(CR_GOLD, " libvorbisidec.a libwiilight.a, libfat.a, libwiiuse.a, libbte.a, libwiikeyboard.a, libsupc++.a, libstdc++.a, libm.a\n");
 }
 

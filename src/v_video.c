@@ -30,6 +30,7 @@
 //-----------------------------------------------------------------------------
 
 
+#include <libpng15/png.h>
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
@@ -867,6 +868,254 @@ void V_GetBlock (int x, int y, int scrn, int width, int height, byte *dest)
         memcpy (dest, src, width);
         src += SCREENWIDTH;
         dest += width;
+    }
+}
+
+//
+// SCREEN SHOTS
+//
+
+typedef struct
+{
+    char		manufacturer;
+    char		version;
+    char		encoding;
+    char		bits_per_pixel;
+
+    unsigned short	xmin;
+    unsigned short	ymin;
+    unsigned short	xmax;
+    unsigned short	ymax;
+    
+    unsigned short	hres;
+    unsigned short	vres;
+
+    unsigned char	palette[48];
+    
+    char		reserved;
+    char		color_planes;
+    unsigned short	bytes_per_line;
+    unsigned short	palette_type;
+    
+    char		filler[58];
+    unsigned char	data;		// unbounded
+} PACKEDATTR pcx_t;
+
+
+//
+// WritePCXfile
+//
+
+void WritePCXfile(char *filename, byte *data,
+                  int width, int height,
+                  byte *palette)
+{
+    int		i;
+    int		length;
+    pcx_t*	pcx;
+    byte*	pack;
+	
+    pcx = Z_Malloc (width*height*2+1000, PU_STATIC, NULL);
+
+    pcx->manufacturer = 0x0a;		// PCX id
+    pcx->version = 5;			// 256 color
+    pcx->encoding = 1;			// uncompressed
+    pcx->bits_per_pixel = 8;		// 256 color
+    pcx->xmin = 0;
+    pcx->ymin = 0;
+    pcx->xmax = SHORT(width-1);
+    pcx->ymax = SHORT(height-1);
+    pcx->hres = SHORT(width);
+    pcx->vres = SHORT(height);
+    memset (pcx->palette,0,sizeof(pcx->palette));
+    pcx->color_planes = 1;		// chunky image
+    pcx->bytes_per_line = SHORT(width);
+    pcx->palette_type = SHORT(2);	// not a grey scale
+    memset (pcx->filler,0,sizeof(pcx->filler));
+
+    // pack the image
+    pack = &pcx->data;
+	
+    for (i=0 ; i<width*height ; i++)
+    {
+	if ( (*data & 0xc0) != 0xc0)
+	    *pack++ = *data++;
+	else
+	{
+	    *pack++ = 0xc1;
+	    *pack++ = *data++;
+	}
+    }
+    
+    // write the palette
+    *pack++ = 0x0c;	// palette ID byte
+    for (i=0 ; i<768 ; i++)
+	*pack++ = *palette++;
+    
+    // write output file
+    length = pack - (byte *)pcx;
+    M_WriteFile (filename, pcx, length);
+
+    Z_Free (pcx);
+}
+
+//#ifdef HAVE_LIBPNG
+//
+// WritePNGfile
+//
+
+static void error_fn(png_structp p, png_const_charp s)
+{
+    printf("libpng error: %s\n", s);
+}
+
+static void warning_fn(png_structp p, png_const_charp s)
+{
+    printf("libpng warning: %s\n", s);
+}
+
+void WritePNGfile(char *filename, byte *data,
+                  int inwidth, int inheight,
+                  byte *palette)
+{
+    png_structp ppng;
+    png_infop pinfo;
+    png_colorp pcolor;
+    FILE *handle;
+    int i, j;
+    int width, height;
+    byte *rowbuf;
+
+    // scale up to accommodate aspect ratio correction
+    width = inwidth * 5;
+    height = inheight * 6;
+
+    handle = fopen(filename, "wb");
+    if (!handle)
+    {
+        return;
+    }
+
+    ppng = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL,
+                                   error_fn, warning_fn);
+    if (!ppng)
+    {
+        return;
+    }
+
+    pinfo = png_create_info_struct(ppng);
+    if (!pinfo)
+    {
+        png_destroy_write_struct(&ppng, NULL);
+        return;
+    }
+
+    png_init_io(ppng, handle);
+
+    png_set_IHDR(ppng, pinfo, width, height,
+                 8, PNG_COLOR_TYPE_PALETTE, PNG_INTERLACE_NONE,
+                 PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
+
+    pcolor = malloc(sizeof(*pcolor) * 256);
+    if (!pcolor)
+    {
+        png_destroy_write_struct(&ppng, &pinfo);
+        return;
+    }
+
+    for (i = 0; i < 256; i++)
+    {
+        pcolor[i].red   = *(palette + 3 * i);
+        pcolor[i].green = *(palette + 3 * i + 1);
+        pcolor[i].blue  = *(palette + 3 * i + 2);
+    }
+
+    png_set_PLTE(ppng, pinfo, pcolor, 256);
+    free(pcolor);
+
+    png_write_info(ppng, pinfo);
+
+    rowbuf = malloc(width);
+
+    if (rowbuf)
+    {
+        for (i = 0; i < SCREENHEIGHT; i++)
+        {
+            // expand the row 5x
+            for (j = 0; j < SCREENWIDTH; j++)
+            {
+                memset(rowbuf + j * 5, *(data + i*SCREENWIDTH + j), 5);
+            }
+
+            // write the row 6 times
+            for (j = 0; j < 6; j++)
+            {
+                png_write_row(ppng, rowbuf);
+            }
+        }
+
+        free(rowbuf);
+    }
+
+    png_write_end(ppng, pinfo);
+    png_destroy_write_struct(&ppng, &pinfo);
+    fclose(handle);
+}
+//#endif
+
+//
+// V_ScreenShot
+//
+
+void V_ScreenShot(char *format)
+{
+    int i;
+    char lbmname[60]; // haleyjd 20110213: BUG FIX - 12 is too small!
+    char *ext;
+    
+    // find a file name to save it to
+
+//#ifdef HAVE_LIBPNG
+    extern int png_screenshots;
+    if (png_screenshots)
+    {
+        ext = "png";
+    }
+    else
+//#endif
+    {
+        ext = "pcx";
+    }
+
+    for (i=0; i<=99; i++)
+    {
+        M_snprintf(lbmname, sizeof(lbmname), format, i, ext);
+
+        if (!M_FileExists(lbmname))
+        {
+            break;      // file doesn't exist
+        }
+    }
+
+    if (i == 100)
+    {
+        I_Error ("V_ScreenShot: Couldn't create a PCX");
+    }
+
+//#ifdef HAVE_LIBPNG
+    if (png_screenshots)
+    {
+    WritePNGfile(lbmname, screens[0],
+                 SCREENWIDTH, SCREENHEIGHT,
+                 W_CacheLumpName (DEH_String("PLAYPAL"), PU_CACHE));
+    }
+    else
+//#endif
+    {
+    // save the pcx file
+    WritePCXfile(lbmname, screens[0],
+                 SCREENWIDTH, SCREENHEIGHT,
+                 W_CacheLumpName (DEH_String("PLAYPAL"), PU_CACHE));
     }
 }
 

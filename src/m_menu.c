@@ -863,8 +863,8 @@ int                        cheeting;
 int                        coordinates_info = 0;
 int                        timer_info = 0;
 int                        version_info = 0;
-int                        key_controls_start_in_cfg_at_pos = 68;
-int                        key_controls_end_in_cfg_at_pos = 81;
+int                        key_controls_start_in_cfg_at_pos = 69;
+int                        key_controls_end_in_cfg_at_pos = 83;
 int                        crosshair = 0;
 int                        show_stats = 0;
 int                        tracknum = 1;
@@ -950,6 +950,7 @@ extern int                 dont_show;
 extern int                 display_fps;
 extern int                 wipe_type;
 extern int                 correct_lost_soul_bounce;
+extern int                 png_screenshots;
 
 extern default_t           doom_defaults_list[];   // KEY BINDINGS
 
@@ -993,6 +994,7 @@ void M_ColoredBloodA(int choice);
 void M_ColoredBloodB(int choice);
 void M_WipeType(int choice);
 void M_UncappedFramerate(int choice);
+void M_Screenshots(int choice);
 void M_SizeDisplay(int choice);
 void M_StartGame(int choice);
 void M_Sound(int choice);
@@ -1579,6 +1581,7 @@ enum
     screen_translucency,
     screen_wipe,
     screen_framerate,
+    screen_shots,
     screen_end
 } screen_e;
 
@@ -1589,7 +1592,8 @@ menuitem_t ScreenMenu[]=
     {2,"Detail",M_ChangeDetail,'d'},
     {2,"Translucency",M_Translucency,'t'},
     {2,"Wipe Type",M_WipeType,'w'},
-    {2,"Uncapped Framerate",M_UncappedFramerate,'f'}
+    {2,"Uncapped Framerate",M_UncappedFramerate,'f'},
+    {2,"Screenshot Format",M_Screenshots,'x'},
 };
 
 menu_t  ScreenDef =
@@ -1648,6 +1652,7 @@ enum
     keybindings_jump,
     keybindings_run,
     keybindings_console,
+    keybindings_screenshots,
     keybindings_clearall,
     keybindings_reset,
     keybindings_end
@@ -1665,11 +1670,12 @@ menuitem_t KeyBindingsMenu[]=
     {5,"AUTOMAP ZOOM OUT",M_KeyBindingsSetKey,7},
     {5,"FLY UP",M_KeyBindingsSetKey,8},
     {5,"FLY DOWN",M_KeyBindingsSetKey,9},
-    {5,"JUMP",M_KeyBindingsSetKey,10},
-    {5,"RUN",M_KeyBindingsSetKey,11},
-    {5,"CONSOLE",M_KeyBindingsSetKey,12},
-    {5,"CLEAR ALL CONTROLS",M_KeyBindingsClearAll,'c'},
-    {5,"RESET TO DEFAULTS",M_KeyBindingsReset,'r'}
+    {5,"JUMP",M_KeyBindingsSetKey,'j'},
+    {5,"RUN",M_KeyBindingsSetKey,'r'},
+    {5,"CONSOLE",M_KeyBindingsSetKey,'c'},
+    {5,"SCREENSHOTS",M_KeyBindingsSetKey,'s'},
+    {5,"",M_KeyBindingsClearAll,'x'},
+    {5,"",M_KeyBindingsReset,'d'}
 };
 
 menu_t  KeyBindingsDef =
@@ -3109,6 +3115,19 @@ void M_DrawScreen(void)
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(ScreenDef.x + 181, ScreenDef.y + 48, "OFF");
+        V_ClearDPTranslation();
+    }
+
+    if(png_screenshots)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(ScreenDef.x + 181, ScreenDef.y + 58, "PNG");
+        V_ClearDPTranslation();
+    }
+    else
+    {
+        dp_translation = crx[CRX_GOLD];
+        M_WriteText(ScreenDef.x + 180, ScreenDef.y + 58, "PCX");
         V_ClearDPTranslation();
     }
 }
@@ -4751,6 +4770,21 @@ void M_UncappedFramerate(int choice)
     d_uncappedframerate = !d_uncappedframerate;
 }
 
+void M_Screenshots(int choice)
+{
+    switch(choice)
+    {
+      case 0:
+        if (png_screenshots)
+            png_screenshots = 0;
+        break;
+      case 1:
+        if (png_screenshots == 0)
+            png_screenshots = 1;
+        break;
+    }
+}
+
 void M_SizeDisplay(int choice)
 {
     switch(choice)
@@ -5173,9 +5207,10 @@ boolean M_Responder (event_t* ev)
 
             if(!devparm)
             {
+/*
                 if (currentMenu == &KeyBindingsDef && itemOn == 11)
                     itemOn++;
-                else if (currentMenu == &GameDef && itemOn == 14)
+                else*/ if (currentMenu == &GameDef && itemOn == 14)
                     itemOn = 0;
             }
             S_StartSound(NULL,sfx_pstop);
@@ -5546,7 +5581,13 @@ void M_Drawer (void)
         y += LINEHEIGHT_SMALL;
 
         // DRAW SKULL
-        V_DrawPatch(x + CURSORXOFF_SMALL, currentMenu->y - 5 +
+        if(currentMenu == &KeyBindingsDef && itemOn == 15)
+            V_DrawPatch(x + 280 + CURSORXOFF_SMALL, currentMenu->y - 15 +
+                    itemOn*LINEHEIGHT_SMALL, 0,
+                    W_CacheLumpName(DEH_String(skullNameSmall[whichSkull]),
+                                          PU_CACHE));
+        else
+            V_DrawPatch(x + CURSORXOFF_SMALL, currentMenu->y - 5 +
                     itemOn*LINEHEIGHT_SMALL, 0,
                     W_CacheLumpName(DEH_String(skullNameSmall[whichSkull]),
                                           PU_CACHE));
@@ -6939,6 +6980,7 @@ void M_KeyBindingsReset (int choice)
     *doom_defaults_list[i++].location = CLASSIC_CONTROLLER_B;
     *doom_defaults_list[i++].location = CONTROLLER_1;
     *doom_defaults_list[i++].location = CONTROLLER_2;
+    *doom_defaults_list[i++].location = CLASSIC_CONTROLLER_X;
 }
 
 void M_DrawKeyBindings(void)
@@ -6958,6 +7000,34 @@ void M_DrawKeyBindings(void)
             M_WriteText(195, (i*10+20),
                     Key2String(*(doom_defaults_list[i + FirstKey + key_controls_start_in_cfg_at_pos].location)));
     }
+
+    dp_translation = crx[CRX_GRAY];
+    M_WriteText(183, 160, "/");
+    V_ClearDPTranslation();
+
+    dp_translation = crx[CRX_BLUE];
+
+    if(itemOn == 14)
+        dp_translation = crx[CRX_GOLD];
+
+    M_WriteText(45, 160, "CLEAR ALL CONTROLS");
+
+    if(itemOn == 14)
+        V_ClearDPTranslation();
+
+    V_ClearDPTranslation();
+
+    dp_translation = crx[CRX_BLUE];
+
+    if(itemOn == 15)
+        dp_translation = crx[CRX_GOLD];
+
+    M_WriteText(195, 160, "RESET DEFAULTS");
+
+    if(itemOn == 15)
+        V_ClearDPTranslation();
+
+    V_ClearDPTranslation();
 }
 
 void M_KeyBindings(int choice)

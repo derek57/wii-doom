@@ -48,6 +48,7 @@ extern int key_menu_back;
 extern int key_menu_forward;
 extern int key_menu_confirm;
 extern int key_menu_abort;
+extern int key_menu_screenshot;
 
 extern int joybstrafeleft;
 extern int joybstraferight;

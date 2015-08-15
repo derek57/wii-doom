@@ -56,6 +56,7 @@
 
 #define MAXPATH                  0x108
 
+#define SavePathScreenshotsUSB   "usb:/apps/wiidoom/screenshots"
 #define SavePathRoot1USB         "usb:/apps/wiidoom/savegames"
 #define SavePathRoot2USB         "usb:/apps/wiidoom/savegames/doom.wad"
 #define SavePathRoot3USB         "usb:/apps/wiidoom/savegames/doom2.wad"
@@ -116,6 +117,7 @@
 #define SavePathRootTNTMusicUSB  "usb:/apps/wiidoom/tnt-music"
 #define SavePathRootChexMusicUSB "usb:/apps/wiidoom/chex-music"
 #define SavePathRootHacxMusicUSB "usb:/apps/wiidoom/hacx-music"
+#define SavePathScreenshotsSD    "sd:/apps/wiidoom/screenshots"
 #define SavePathRoot1SD          "sd:/apps/wiidoom/savegames"
 #define SavePathRoot2SD          "sd:/apps/wiidoom/savegames/doom.wad"
 #define SavePathRoot3SD          "sd:/apps/wiidoom/savegames/doom2.wad"

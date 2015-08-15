@@ -75,14 +75,17 @@
 #include <wiiuse/wpad.h>
 
 
-#define SAVEGAMESIZE    0x2c000
-#define MAXPLMOVE       0x32
-#define TURBOTHRESHOLD  0x32
-#define MAX_JOY_BUTTONS 20
-#define BODYQUESIZE     32
-#define KEY_1           0x02
-#define VERSIONSIZE     16 
-#define DEMOMARKER      0x80
+#define SAVEGAMESIZE     0x2c000
+#define MAXPLMOVE        0x32
+#define TURBOTHRESHOLD   0x32
+#define MAX_JOY_BUTTONS  20
+#define BODYQUESIZE      32
+#define KEY_1            0x02
+#define VERSIONSIZE      16 
+#define DEMOMARKER       0x80
+
+// Version code for cph's longtics hack ("v1.91")
+#define DOOM_191_VERSION 111
 
 
 // DOOM Par Times
@@ -445,6 +448,9 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
         if(dont_move_backwards == true)
             forward -= forwardmove; 
     }
+
+    if (joybuttons[joybinvright])
+        G_ScreenShot();
 
     if (joybuttons[joybstrafeleft]) 
     {
@@ -1137,6 +1143,25 @@ static char *DemoVersionDescription(int version)
     }
 }
 
+// Get the demo version code appropriate for the version set in gameversion.
+int G_VanillaVersionCode(void)
+{
+    switch (gameversion)
+    {
+        case exe_doom_1_2:
+            I_Error("Doom 1.2 does not have a version code!");
+        case exe_doom_1_666:
+            return 106;
+        case exe_doom_1_7:
+            return 107;
+        case exe_doom_1_8:
+            return 108;
+        case exe_doom_1_9:
+        default:  // All other versions are variants on v1.9:
+            return 109;
+    }
+}
+
 void G_DoPlayDemo (void) 
 { 
     skill_t   skill; 
@@ -1145,6 +1170,51 @@ void G_DoPlayDemo (void)
          
     gameaction = ga_nothing; 
     demobuffer = demo_p = W_CacheLumpName (defdemoname, PU_STATIC); 
+/*
+    demoversion = *demo_p++;
+
+    if(demoversion != G_VanillaVersionCode() && demoversion != DOOM_191_VERSION)
+    {
+        char *message = "Demo is from a different game version!\n"
+                        "(read %i, should be %i)\n"
+                        "\n"
+                        "*** You may need to upgrade your version "
+                            "of Doom to v1.9. ***\n"
+                        "    See: http://doomworld.com/files/patches.shtml\n"
+                        "    This appears to be %s.";
+
+        I_Error(message, demoversion, G_VanillaVersionCode(),
+                         DemoVersionDescription(demoversion));
+    }
+
+    skill = *demo_p++; 
+    episode = *demo_p++; 
+    map = *demo_p++; 
+
+    deathmatch = *demo_p++;
+    respawnparm = *demo_p++;
+    fastparm = *demo_p++;
+    nomonsters = *demo_p++;
+    consoleplayer = *demo_p++;
+
+    for (i=0 ; i<MAXPLAYERS ; i++) 
+	playeringame[i] = *demo_p++; 
+
+    if (playeringame[1])
+    {
+	netgame = true;
+	netdemo = true;
+    }
+
+    // don't spend a lot of time in loadlevel 
+    precache = false;
+    G_InitNew (skill, episode, map); 
+    precache = true; 
+    starttime = I_GetTime (); 
+
+    usergame = false; 
+    demoplayback = true; 
+*/
 
     // THESE ARE PRIOR VERSION 1.2
     if (fsize == 4261144  || fsize == 4271324  || fsize == 4211660  ||
@@ -1210,6 +1280,8 @@ void G_DoPlayDemo (void)
 
     usergame = false; 
     demoplayback = true; 
+
+
 /*
     if (fsize != 10396254 && fsize != 10399316 && fsize != 4207819 && fsize != 4274218 &&
         fsize != 4225504 && fsize != 4225460)
@@ -1595,10 +1667,15 @@ void G_Ticker (void)
           case ga_worlddone: 
             G_DoWorldDone (); 
             break; 
-          case ga_screenshot: 
+	  case ga_screenshot: 
+            if(usb)
+                V_ScreenShot("usb:/apps/wiidoom/screenshots/DOOM%02i.%s"); 
+            else if(sd)
+                V_ScreenShot("sd:/apps/wiidoom/screenshots/DOOM%02i.%s"); 
+
             players[consoleplayer].message = DEH_String("screen shot");
-            gameaction = ga_nothing; 
-            break; 
+	    gameaction = ga_nothing; 
+	    break; 
           case ga_nothing: 
             break; 
         } 

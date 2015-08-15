@@ -65,6 +65,7 @@ extern int chaingun_tics;
 extern int snd_module;
 extern int sound_channels;
 extern int gore_amount;
+extern int png_screenshots;
 
 extern int joy_up;
 extern int joy_down;
@@ -119,6 +120,7 @@ int key_menu_back      = KEY_BACKSPACE;
 int key_menu_forward   = KEY_ENTER;
 int key_menu_confirm   = 'y';
 int key_menu_abort     = 'n';
+int key_menu_screenshot = 0;
 
 // Joystick controls
 
@@ -195,6 +197,7 @@ void M_BindBaseControls(void)
     M_BindVariable("sound",                  &d_sound);
     M_BindVariable("ouchface",               &d_ouchface);
     M_BindVariable("authors",                &show_authors);
+    M_BindVariable("png_screenshot",         &png_screenshots);
 //    M_BindVariable("memory",                 &memory_usage);
     M_BindVariable("key_shoot",              &joy_r);
     M_BindVariable("key_open",               &joy_l);
@@ -209,6 +212,7 @@ void M_BindBaseControls(void)
     M_BindVariable("key_jump",               &joy_b);
     M_BindVariable("key_run",                &joy_1);
     M_BindVariable("key_console",            &joy_2);
+    M_BindVariable("key_screenshots",        &joy_x);
 //    M_BindVariable("key_aiminghelp",         &joy_plus);
 }
 
