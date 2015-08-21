@@ -40,12 +40,12 @@
 #include <wiiuse/wpad.h>
 
 // MAIN DEVPARM
-boolean        devparm = false;
+boolean        devparm = true;
 boolean        devparm_net = false;
 
 // SOLO DEVPARM
 boolean        devparm_nerve = false;
-boolean        devparm_doom = false;
+boolean        devparm_doom = true;
 boolean        devparm_doom2 = false;
 boolean        devparm_freedoom2 = false;
 boolean        devparm_tnt = false;

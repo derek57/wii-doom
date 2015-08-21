@@ -1005,7 +1005,7 @@ void I_InitGraphics(void)
     SDL_Event dummy;
     byte      *doompal = W_CacheLumpName("PLAYPAL", PU_CACHE);
 
-    wad_file_t *playpalwad = lumpinfo[W_CheckNumForName("PLAYPAL")].wad_file;
+    wad_file_t *playpalwad = lumpinfo[W_CheckNumForName("PLAYPAL")]->wad_file;
 
     I_InitTintTables(doompal);
 

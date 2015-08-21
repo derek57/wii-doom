@@ -1334,7 +1334,7 @@ void R_PrecacheLevel (void)
         if (flatpresent[i])
         {
             lump = firstflat + i;
-            flatmemory += lumpinfo[lump].size;
+            flatmemory += lumpinfo[lump]->size;
             W_CacheLumpNum(lump, PU_CACHE);
         }
     }
@@ -1371,7 +1371,7 @@ void R_PrecacheLevel (void)
         for (j=0 ; j<texture->patchcount ; j++)
         {
             lump = texture->patches[j].patch;
-            texturememory += lumpinfo[lump].size;
+            texturememory += lumpinfo[lump]->size;
             W_CacheLumpNum(lump , PU_CACHE);
         }
     }
@@ -1400,7 +1400,7 @@ void R_PrecacheLevel (void)
             for (k=0 ; k<8 ; k++)
             {
                 lump = firstspritelump + sf->lump[k];
-                spritememory += lumpinfo[lump].size;
+                spritememory += lumpinfo[lump]->size;
                 W_CacheLumpNum(lump , PU_CACHE);
             }
         }

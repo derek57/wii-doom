@@ -41,6 +41,7 @@
 //
 
 typedef struct lumpinfo_s lumpinfo_t;
+typedef int lumpindex_t;
 
 struct lumpinfo_s
 {
@@ -52,29 +53,30 @@ struct lumpinfo_s
 
     // Used for hash table lookups
 
-    lumpinfo_t  *next;
+    lumpindex_t next;
 };
 
-extern lumpinfo_t   *lumpinfo;
+extern lumpinfo_t  **lumpinfo;
 
 extern unsigned int numlumps;
 extern unsigned int W_LumpNameHash(const char *s);
 
 wad_file_t *W_AddFile (char *filename, boolean automatic);
 
-int        W_CheckNumForName (char* name);
-int        W_GetNumForName (char* name);
-int        W_GetSecondNumForName (char* name);
-int        W_LumpLength (unsigned int lump);
+lumpindex_t W_CheckNumForName(char *name);
+lumpindex_t W_GetNumForName(char *name);
 
-void       W_GenerateHashTable(void);
-void       W_ReleaseLumpNum(int lump);
-void       W_ReleaseLumpName(char *name);
-void       W_CheckCorrectIWAD(GameMission_t mission);
-void       W_CheckSize(int wad);
-void       W_ReadLump (unsigned int lump, void *dest);
+int         W_GetSecondNumForName (char* name);
+int         W_LumpLength(lumpindex_t lump);
 
-void*      W_CacheLumpNum (int lump, int tag);
-void*      W_CacheLumpName (char* name, int tag);
+void        W_GenerateHashTable(void);
+void        W_ReleaseLumpNum(lumpindex_t lump);
+void        W_ReleaseLumpName(char *name);
+void        W_CheckCorrectIWAD(GameMission_t mission);
+void        W_CheckSize(int wad);
+void        W_ReadLump(lumpindex_t lump, void *dest);
+
+void        *W_CacheLumpNum(lumpindex_t lump, int tag);
+void        *W_CacheLumpName(char *name, int tag);
 
 #endif

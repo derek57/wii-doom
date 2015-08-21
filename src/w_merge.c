@@ -44,7 +44,7 @@ typedef enum
 
 typedef struct
 {
-    lumpinfo_t *lumps;
+    lumpinfo_t **lumps;
     int numlumps;
 } searchlist_t;
 
@@ -84,7 +84,7 @@ static int FindInList(searchlist_t *list, char *name)
 
     for (i=0; i<list->numlumps; ++i)
     {
-        if (!strncasecmp(list->lumps[i].name, name, 8))
+        if (!strncasecmp(list->lumps[i]->name, name, 8))
             return i;
     }
 
@@ -365,7 +365,7 @@ static void GenerateSpriteList(void)
     
     for (i=0; i<iwad_sprites.numlumps; ++i)
     {
-        AddSpriteLump(&iwad_sprites.lumps[i]);
+        AddSpriteLump(iwad_sprites.lumps[i]);
     }
     
     // Add all sprites from the PWAD
@@ -373,7 +373,7 @@ static void GenerateSpriteList(void)
 
     for (i=0; i<pwad_sprites.numlumps; ++i)
     {
-        AddSpriteLump(&pwad_sprites.lumps[i]);
+        AddSpriteLump(pwad_sprites.lumps[i]);
     }
 }
 
@@ -399,13 +399,13 @@ static void GenerateSpriteList(void)
 static void DoMerge(void)
 {
     section_t current_section;
-    lumpinfo_t *newlumps;
+    lumpinfo_t **newlumps;
     int num_newlumps;
     int lumpindex;
     int i, n;
     
     // Can't ever have more lumps than we already have
-    newlumps = malloc(sizeof(lumpinfo_t) * numlumps);
+    newlumps = calloc(numlumps, sizeof(lumpinfo_t *));
     num_newlumps = 0;
 
     // Add IWAD lumps
@@ -413,7 +413,7 @@ static void DoMerge(void)
 
     for (i=0; i<iwad.numlumps; ++i)
     {
-        lumpinfo_t *lump = &iwad.lumps[i];
+        lumpinfo_t *lump = iwad.lumps[i];
 
         switch (current_section)
         {
@@ -427,7 +427,7 @@ static void DoMerge(void)
                     current_section = SECTION_SPRITES;
                 }
 
-                newlumps[num_newlumps++] = *lump;
+                newlumps[num_newlumps++] = lump;
 
                 break;
 
@@ -445,7 +445,7 @@ static void DoMerge(void)
                         newlumps[num_newlumps++] = pwad_flats.lumps[n];
                     }
 
-                    newlumps[num_newlumps++] = *lump;
+                    newlumps[num_newlumps++] = lump;
 
                     // back to normal reading
                     current_section = SECTION_NORMAL;
@@ -461,7 +461,7 @@ static void DoMerge(void)
 
                     if (lumpindex < 0)
                     {
-                        newlumps[num_newlumps++] = *lump;
+                        newlumps[num_newlumps++] = lump;
                     }
                 }
 
@@ -477,14 +477,14 @@ static void DoMerge(void)
 
                     for (n=0; n<pwad_sprites.numlumps; ++n)
                     {
-                        if (SpriteLumpNeeded(&pwad_sprites.lumps[n]))
+                        if (SpriteLumpNeeded(pwad_sprites.lumps[n]))
                         {
                             newlumps[num_newlumps++] = pwad_sprites.lumps[n];
                         }
                     }
 
                     // copy the ending
-                    newlumps[num_newlumps++] = *lump;
+                    newlumps[num_newlumps++] = lump;
 
                     // back to normal reading
                     current_section = SECTION_NORMAL;
@@ -496,7 +496,7 @@ static void DoMerge(void)
 
                     if (SpriteLumpNeeded(lump))
                     {
-                        newlumps[num_newlumps++] = *lump;
+                        newlumps[num_newlumps++] = lump;
                     }
                 }
 
@@ -509,7 +509,7 @@ static void DoMerge(void)
 
     for (i=0; i<pwad.numlumps; ++i)
     {
-        lumpinfo_t *lump = &pwad.lumps[i];
+        lumpinfo_t *lump = pwad.lumps[i];
 
         switch (current_section)
         {
@@ -528,7 +528,7 @@ static void DoMerge(void)
                 {
                     // Don't include the headers of sections
        
-                    newlumps[num_newlumps++] = *lump;
+                    newlumps[num_newlumps++] = lump;
                 }
                 break;
 
@@ -578,10 +578,10 @@ void W_PrintDirectory(void)
     // debug
     for (i=0; i<numlumps; ++i)
     {
-        for (n=0; n<8 && lumpinfo[i].name[n] != '\0'; ++n)
+        for (n=0; n<8 && lumpinfo[i]->name[n] != '\0'; ++n)
         {
-            putchar(lumpinfo[i].name[n]);
-            fprintf(statsfile, "%c", putchar(lumpinfo[i].name[n]));
+            putchar(lumpinfo[i]->name[n]);
+            fprintf(statsfile, "%c", putchar(lumpinfo[i]->name[n]));
         }
         putchar('\n');
         fprintf(statsfile, "%c", putchar('\n'));
