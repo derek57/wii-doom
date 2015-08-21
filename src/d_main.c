@@ -866,7 +866,7 @@ static void LoadNerveWad(void)
         for (i = 0; i < 9; i++)
         {
             M_snprintf (lumpname, 9, "CWILV%2.2d", i);
-            lumpinfo[W_GetNumForName(lumpname)].name[0] = 'N';
+            lumpinfo[W_GetNumForName(lumpname)]->name[0] = 'N';
         }
     }
     else

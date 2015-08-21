@@ -36,14 +36,15 @@
 ========================================================================
 */
 
-#include <ctype.h>
 
+#include <ctype.h>
 #include <ft2build.h>
 #include <freetype/freetype.h>
 #include <mpeg/smpeg.h>
 #include <jpeglib.h>
 #include <ogc/libversion.h>
 #include <png.h>
+
 #include "c_io.h"
 #include "deh_str.h"
 #include "d_event.h"
@@ -69,6 +70,7 @@
 #include "z_zone.h"
 
 #include <wiiuse/wpad.h>
+
 
 #define CONSOLESPEED            (CONSOLEHEIGHT / 12)
 
@@ -96,10 +98,50 @@
 
 #define CARETWAIT               10
 
+
+static struct
+{
+    char        char1;
+    char        char2;
+    int         adjust;
+} kern[] = {
+    { ' ',  '(',  -1 }, { '\\', 'V',  -1 }, { '\"', '+',  -1 }, { '\"', '.',  -1 },
+    { '\"', 'a',  -1 }, { '\"', 'c',  -1 }, { '\"', 'd',  -1 }, { '\"', 'e',  -1 },
+    { '\"', 'g',  -1 }, { '\"', 'j',  -2 }, { '\"', 'o',  -1 }, { '\"', 'q',  -1 },
+    { '\"', 's',  -1 }, { '\'', 'a',  -1 }, { '\'', 'c',  -1 }, { '\'', 'd',  -1 },
+    { '\'', 'e',  -1 }, { '\'', 'g',  -1 }, { '\'', 'j',  -2 }, { '\'', 'o',  -1 },
+    { '\"', 'q',  -1 }, { '\'', 's',  -1 }, { '.',  '\\', -1 }, { '.',  '7',  -1 },
+    { '/',  'o',  -1 }, { ':', '\\',  -1 }, { '_',  'f',  -1 }, { '0',  ',',  -1 },
+    { '0',  'j',  -2 }, { '1',  '\"', -1 }, { '1',  '\'', -1 }, { '1',  'j',  -2 },
+    { '2',  'j',  -2 }, { '3',  ',',  -1 }, { '3',  'j',  -2 }, { '4',  'j',  -2 },
+    { '5',  ',',  -1 }, { '5',  'j',  -2 }, { '6',  ',',  -1 }, { '6',  'j',  -2 },
+    { '7',  ',',  -2 }, { '7',  'j',  -2 }, { '8',  ',',  -1 }, { '8',  'j',  -2 },
+    { '9',  ',',  -1 }, { '9',  'j',  -2 }, { 'F',  '.',  -1 }, { 'F',  ',',  -1 },
+    { 'L',  '\\', -1 }, { 'L',  '\"', -1 }, { 'L',  '\'', -1 }, { 'P',  '.',  -1 },
+    { 'P',  ',',  -1 }, { 'T',  '.',  -1 }, { 'T',  ',',  -1 }, { 'V',  '.',  -1 },
+    { 'V',  ',',  -1 }, { 'Y',  '.',  -1 }, { 'Y',  ',',  -1 }, { 'a',  '\"', -1 },
+    { 'a',  '\'', -1 }, { 'a',  'j',  -2 }, { 'b',  ',',  -1 }, { 'b',  '\"', -1 },
+    { 'b',  '\\', -1 }, { 'b',  '\'', -1 }, { 'b',  'j',  -2 }, { 'c',  '\\', -1 },
+    { 'c',  ',',  -1 }, { 'c',  '\"', -1 }, { 'c',  '\'', -1 }, { 'c',  'j',  -2 },
+    { 'd',  'j',  -2 }, { 'e',  '\\', -1 }, { 'e',  ',',  -1 }, { 'e',  '\"', -1 },
+    { 'e',  '\'', -1 }, { 'e',  '_',  -1 }, { 'e',  'j',  -2 }, { 'f',  ',',  -2 },
+    { 'f',  '_',  -1 }, { 'f',  'j',  -2 }, { 'h',  '\\', -1 }, { 'h',  '\"', -1 },
+    { 'h',  '\'', -1 }, { 'h',  'j',  -2 }, { 'i',  'j',  -2 }, { 'k',  'j',  -2 },
+    { 'l',  'j',  -2 }, { 'm',  '\"', -1 }, { 'm',  '\\', -1 }, { 'm',  '\'', -1 },
+    { 'm',  'j',  -2 }, { 'n',  '\\', -1 }, { 'n',  '\"', -1 }, { 'n',  '\'', -1 },
+    { 'n',  'j',  -2 }, { 'o',  '\\', -1 }, { 'o',  ',',  -1 }, { 'o',  '\"', -1 },
+    { 'o',  '\'', -1 }, { 'o',  'j',  -2 }, { 'p',  '\\', -1 }, { 'p',  ',',  -1 },
+    { 'p',  '\"', -1 }, { 'p',  '\'', -1 }, { 'p',  'j',  -2 }, { 'r',  ' ',  -1 },
+    { 'r',  '\\', -1 }, { 'r',  '.',  -2 }, { 'r',  ',',  -2 }, { 'r',  '\"', -1 },
+    { 'r',  '\'', -1 }, { 'r',  '_',  -1 }, { 'r',  'a',  -1 }, { 'r',  'j',  -2 },
+    { 's',  ',',  -1 }, { 's',  'j',  -2 }, { 't',  'j',  -2 }, { 'u',  'j',  -2 },
+    { 'v',  ',',  -1 }, { 'v',  'j',  -2 }, { 'w',  'j',  -2 }, { 'x',  'j',  -2 },
+    { 'z',  'j',  -2 }, {  0 ,   0 ,   0 }
+};
+
+
 boolean         consoleactive = false;
-int             consoleheight = 0;
-int             consoledirection = -1;
-static int      consolewait = 0;
+boolean         alwaysrun;
 
 patch_t         *unknownchar;
 patch_t         *consolefont[CONSOLEFONTSIZE];
@@ -107,41 +149,12 @@ patch_t         *lsquote;
 patch_t         *ldquote;
 patch_t         *degree;
 patch_t         *multiply;
-
-char            consoleinput[255] = "";
-int             consolestrings = 0;
-
 patch_t         *caret;
 patch_t         *route;
 patch_t         *space;
-int             caretpos = 0;
-static boolean  showcaret = true;
-static int      caretwait = 0;
-int             selectstart = 0;
-int             selectend = 0;
-
-char            consolecheat[255] = "";
-char            consolecheatparm[3] = "";
-static int      outputhistory = -1;
-
-static int      notabs[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
-
-extern boolean  translucency;
-extern byte     *tinttab75;
-extern int      fps;
-boolean         alwaysrun;
-
-void G_ToggleAlwaysRun(void);
-
-char *upper =
-{
-    "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0 !\"#$%&\"()*+,_>?)!@#$%^&*(:"
-    ":<+>?\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0{\\}^_`ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-};
 
 byte            c_tempscreen[SCREENWIDTH * SCREENHEIGHT];
 byte            c_blurredscreen[SCREENWIDTH * SCREENHEIGHT];
-
 byte            inputcolor = 4;
 byte            whitecolor = 80;
 byte            bluecolor = 200;
@@ -150,16 +163,44 @@ byte            graycolor = 100;
 byte            greencolor = 120;
 byte            yellowcolor = 160;
 byte            dividercolor = 0;   // actually it's colored red
-
 byte            consolebrandingcolor = 100;
 byte            consolescrollbartrackcolor = 100;
 byte            consolescrollbarfacecolor = 88;
 byte            consoletintcolor = 5;
-
 byte            consolecolors[STRINGTYPES];
 
+char            consoleinput[255] = "";
+char            consolecheat[255] = "";
+char            consolecheatparm[3] = "";
+
+char            *upper =
+{
+    "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0 !\"#$%&\"()*+,_>?)!@#$%^&*(:"
+    ":<+>?\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0{\\}^_`ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+};
+
+int             consoleheight = 0;
+int             consoledirection = -1;
+int             consolestrings = 0;
 int             consoleedgecolor1 = 105;
 int             consoleedgecolor2 = 100;
+int             caretpos = 0;
+int             selectstart = 0;
+int             selectend = 0;
+
+static int      caretwait = 0;
+static int      outputhistory = -1;
+static int      consolewait = 0;
+static int      notabs[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+
+static boolean  showcaret = true;
+
+extern boolean  translucency;
+
+extern byte     *tinttab75;
+
+extern int      fps;
+
 
 void C_Printf(stringtype_t type, char *string, ...)
 {
@@ -322,46 +363,6 @@ static void C_DrawBackground(int height)
         for (i = height; i < height + SCREENWIDTH * j; ++i)
             screens[0][i] = colormaps[256 * 4 + screens[0][i]];
 }
-
-static struct
-{
-    char        char1;
-    char        char2;
-    int         adjust;
-} kern[] = {
-    { ' ',  '(',  -1 }, { '\\', 'V',  -1 }, { '\"', '+',  -1 }, { '\"', '.',  -1 },
-    { '\"', 'a',  -1 }, { '\"', 'c',  -1 }, { '\"', 'd',  -1 }, { '\"', 'e',  -1 },
-    { '\"', 'g',  -1 }, { '\"', 'j',  -2 }, { '\"', 'o',  -1 }, { '\"', 'q',  -1 },
-    { '\"', 's',  -1 }, { '\'', 'a',  -1 }, { '\'', 'c',  -1 }, { '\'', 'd',  -1 },
-    { '\'', 'e',  -1 }, { '\'', 'g',  -1 }, { '\'', 'j',  -2 }, { '\'', 'o',  -1 },
-    { '\"', 'q',  -1 }, { '\'', 's',  -1 }, { '.',  '\\', -1 }, { '.',  '7',  -1 },
-    { '/',  'o',  -1 }, { ':', '\\',  -1 }, { '_',  'f',  -1 }, { '0',  ',',  -1 },
-    { '0',  'j',  -2 }, { '1',  '\"', -1 }, { '1',  '\'', -1 }, { '1',  'j',  -2 },
-    { '2',  'j',  -2 }, { '3',  ',',  -1 }, { '3',  'j',  -2 }, { '4',  'j',  -2 },
-    { '5',  ',',  -1 }, { '5',  'j',  -2 }, { '6',  ',',  -1 }, { '6',  'j',  -2 },
-    { '7',  ',',  -2 }, { '7',  'j',  -2 }, { '8',  ',',  -1 }, { '8',  'j',  -2 },
-    { '9',  ',',  -1 }, { '9',  'j',  -2 }, { 'F',  '.',  -1 }, { 'F',  ',',  -1 },
-    { 'L',  '\\', -1 }, { 'L',  '\"', -1 }, { 'L',  '\'', -1 }, { 'P',  '.',  -1 },
-    { 'P',  ',',  -1 }, { 'T',  '.',  -1 }, { 'T',  ',',  -1 }, { 'V',  '.',  -1 },
-    { 'V',  ',',  -1 }, { 'Y',  '.',  -1 }, { 'Y',  ',',  -1 }, { 'a',  '\"', -1 },
-    { 'a',  '\'', -1 }, { 'a',  'j',  -2 }, { 'b',  ',',  -1 }, { 'b',  '\"', -1 },
-    { 'b',  '\\', -1 }, { 'b',  '\'', -1 }, { 'b',  'j',  -2 }, { 'c',  '\\', -1 },
-    { 'c',  ',',  -1 }, { 'c',  '\"', -1 }, { 'c',  '\'', -1 }, { 'c',  'j',  -2 },
-    { 'd',  'j',  -2 }, { 'e',  '\\', -1 }, { 'e',  ',',  -1 }, { 'e',  '\"', -1 },
-    { 'e',  '\'', -1 }, { 'e',  '_',  -1 }, { 'e',  'j',  -2 }, { 'f',  ',',  -2 },
-    { 'f',  '_',  -1 }, { 'f',  'j',  -2 }, { 'h',  '\\', -1 }, { 'h',  '\"', -1 },
-    { 'h',  '\'', -1 }, { 'h',  'j',  -2 }, { 'i',  'j',  -2 }, { 'k',  'j',  -2 },
-    { 'l',  'j',  -2 }, { 'm',  '\"', -1 }, { 'm',  '\\', -1 }, { 'm',  '\'', -1 },
-    { 'm',  'j',  -2 }, { 'n',  '\\', -1 }, { 'n',  '\"', -1 }, { 'n',  '\'', -1 },
-    { 'n',  'j',  -2 }, { 'o',  '\\', -1 }, { 'o',  ',',  -1 }, { 'o',  '\"', -1 },
-    { 'o',  '\'', -1 }, { 'o',  'j',  -2 }, { 'p',  '\\', -1 }, { 'p',  ',',  -1 },
-    { 'p',  '\"', -1 }, { 'p',  '\'', -1 }, { 'p',  'j',  -2 }, { 'r',  ' ',  -1 },
-    { 'r',  '\\', -1 }, { 'r',  '.',  -2 }, { 'r',  ',',  -2 }, { 'r',  '\"', -1 },
-    { 'r',  '\'', -1 }, { 'r',  '_',  -1 }, { 'r',  'a',  -1 }, { 'r',  'j',  -2 },
-    { 's',  ',',  -1 }, { 's',  'j',  -2 }, { 't',  'j',  -2 }, { 'u',  'j',  -2 },
-    { 'v',  ',',  -1 }, { 'v',  'j',  -2 }, { 'w',  'j',  -2 }, { 'x',  'j',  -2 },
-    { 'z',  'j',  -2 }, {  0 ,   0 ,   0 }
-};
 
 static int C_TextWidth(char *text)
 {
@@ -632,7 +633,6 @@ void C_PrintCompileDate(void)
         year, (hour > 12 ? hour - 12 : hour), minute, (hour < 12 ? "am" : "pm"));
 }
 
-
 void C_PrintSDLVersions(void)
 {
     C_Printf(CR_GOLD, " Using version %i.%i.%i of %s\n",
@@ -670,7 +670,8 @@ void C_PrintSDLVersions(void)
         "libz.a"
         );
 
-    C_Printf(CR_GOLD, " Also using the following libs:\n");
-    C_Printf(CR_GOLD, " libvorbisidec.a libwiilight.a, libfat.a, libwiiuse.a, libbte.a, libwiikeyboard.a, libsupc++.a, libstdc++.a, libm.a\n");
+    C_Printf(CR_GOLD, " Also using the following libraries:\n");
+    C_Printf(CR_GOLD, " libvorbisidec.a libwiilight.a, libfat.a, libwiiuse.a, libbte.a,\n");
+    C_Printf(CR_GOLD, " libwiikeyboard.a, libsupc++.a, libstdc++.a, libm.a\n");
 }
 

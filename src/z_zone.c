@@ -872,7 +872,7 @@ memzone_t*             mainzone;
 
 static const size_t    HEADER_SIZE = (sizeof(memblock_t) + MEM_ALIGN - 1) & ~(MEM_ALIGN - 1);
 
-static memblock_t      *blockbytag[PU_NUM_TAGS];
+//static memblock_t      *blockbytag[PU_NUM_TAGS];
 
 static int             free_memory = 0;
 static int             active_memory = 0;
@@ -1199,7 +1199,6 @@ Z_FreeTags
 ( int                lowtag,
   int                hightag )
 {
-/*
     memblock_t*        block;
     memblock_t*        next;
         
@@ -1217,7 +1216,7 @@ Z_FreeTags
         if (block->tag >= lowtag && block->tag <= hightag)
             Z_Free ( (byte *)block + sizeof(memblock_t));
     }
-*/
+/*
     if (lowtag <= PU_FREE)
         lowtag = PU_FREE + 1;
     if (hightag > PU_CACHE)
@@ -1242,6 +1241,7 @@ Z_FreeTags
             block = next;                               // Advance to next block
         }
     }
+*/
 }
 
 

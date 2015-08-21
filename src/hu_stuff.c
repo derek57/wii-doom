@@ -795,7 +795,7 @@ void HU_Ticker(void)
                 HUlib_addMessageToSText(&w_message_2, 0, plr->messages[2]);
 
                 show_chat_bar = true;
-                ST_doRefresh();
+//                ST_doRefresh();
             }
             else
                 HUlib_addMessageToSText(&w_message, 0, plr->message);

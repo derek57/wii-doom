@@ -159,7 +159,9 @@ V_CopyRect
      || destx < 0
      || destx /* + width */ > SCREENWIDTH
      || desty < 0
-     || desty /* + height */ > SCREENHEIGHT)
+     || desty /* + height */ > SCREENHEIGHT
+     || (unsigned)srcscrn > 4
+     || (unsigned)destscrn > 4)
     {
         C_Printf(CR_RED, " Bad V_CopyRect: Patch (%d,%d)-(%d,%d) / Dest.: (%d,%d) exceeds LFB\n"
                 , srcx, srcy, srcx + width, srcy + height, destx, desty);
@@ -195,7 +197,7 @@ V_DrawPatch
 ( int        x,
   int        y,
   int        scrn,
-  patch_t*    patch ) 
+  patch_t*   patch ) 
 { 
     int count;
     int col;
@@ -219,13 +221,15 @@ V_DrawPatch
     if (x < 0
      || x + SHORT(patch->width) > ORIGWIDTH
      || y < 0
-     || y + SHORT(patch->height) > ORIGHEIGHT )
+     || y + SHORT(patch->height) > ORIGHEIGHT
+     || (unsigned)scrn > 4)
     {
         C_Printf(CR_RED, " Bad V_DrawPatch: Patch (%d,%d) exceeds LFB\n", x, y);
     }
 #endif
 
-    V_MarkRect(x, y, SHORT(patch->width), SHORT(patch->height));
+    if (!scrn)
+        V_MarkRect(x, y, SHORT(patch->width), SHORT(patch->height));
 
     col = 0;
     desttop = screens[scrn] + (y << hires) * SCREENWIDTH + x;
@@ -468,14 +472,16 @@ V_DrawPatchFlipped
     if (x < 0
      || x + SHORT(patch->width) > ORIGWIDTH
      || y < 0
-     || y + SHORT(patch->height) > ORIGHEIGHT )
+     || y + SHORT(patch->height) > ORIGHEIGHT
+     || (unsigned)scrn > 4)
     {
         C_Printf(CR_RED, " Bad V_DrawPatchFlipped: Patch (%d,%d)-(%d,%d) exceeds LFB\n"
                 , x, y, x + SHORT(patch->width), y + SHORT(patch->height));
     }
 #endif
 
-    V_MarkRect (x, y, SHORT(patch->width), SHORT(patch->height));
+    if (!scrn)
+        V_MarkRect (x, y, SHORT(patch->width), SHORT(patch->height));
 
     col = 0;
     desttop = screens[scrn]+ (y << hires) * SCREENWIDTH + x;
@@ -565,14 +571,16 @@ V_DrawBlock
     if (x < 0
      || x + width >SCREENWIDTH
      || y < 0
-     || y + height > SCREENHEIGHT)
+     || y + height > SCREENHEIGHT
+     || (unsigned)scrn > 4)
     {
         C_Printf(CR_RED, " Bad V_DrawBlock: Patch (%d,%d)-(%d,%d) exceeds LFB\n"
                 , x, y, x + width, y + height);
     }
 #endif 
  
-    V_MarkRect (x, y, width, height); 
+    if(!scrn)
+        V_MarkRect (x, y, width, height); 
  
     dest = screens[scrn] + (y << hires) * SCREENWIDTH + x;
 
@@ -826,7 +834,8 @@ void V_ColorBlock(int x, int y, int scrn, int width, int height, byte color)
     if (x < 0
      || x + width > SCREENWIDTH
      || y < 0
-     || y + height > SCREENHEIGHT)
+     || y + height > SCREENHEIGHT
+     || (unsigned)scrn > 4)
     {
         C_Printf(CR_RED, " V_ColorBlock: block exceeds buffer boundaries.\n");
     }
@@ -855,7 +864,8 @@ void V_GetBlock (int x, int y, int scrn, int width, int height, byte *dest)
     if (x < 0
      || x + width > SCREENWIDTH
      || y < 0
-     || y + height > SCREENHEIGHT)
+     || y + height > SCREENHEIGHT
+     || (unsigned)scrn > 4)
     {
         C_Printf(CR_RED, " Bad V_GetBlock");
     }

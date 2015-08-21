@@ -1063,7 +1063,7 @@ void G_DoLoadLevel (void)
     P_SetupLevel (gameepisode, gamemap, 0, gameskill);    
     displayplayer = consoleplayer;                // view the guy you are playing    
     gameaction = ga_nothing; 
-//    Z_CheckHeap ();
+    Z_CheckHeap ();
     
     // clear cmd building stuff
 
