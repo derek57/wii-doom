@@ -521,6 +521,7 @@ extern boolean      BorderNeedRefresh;
 extern boolean      hud;
 extern boolean      in_slime;
 extern boolean      show_chat_bar;
+extern boolean      done;
 
 extern int          screenSize;
 extern int          load_dehacked;
@@ -1485,115 +1486,139 @@ void ST_Drawer (boolean fullscreen, boolean refresh)
         ST_diffDraw();
 }
 
-void ST_loadGraphics(void)
+typedef void (*load_callback_t)(char *lumpname, patch_t **variable); 
+
+// Iterates through all graphics to be loaded or unloaded, along with
+// the variable they use, invoking the specified callback function.
+
+static void ST_loadUnloadGraphics(load_callback_t callback)
 {
 
-    int                i;
-    int                j;
-    int                facenum;
+    int		i;
+    int		j;
+    int		facenum;
     
-    char               namebuf[9];
+    char	namebuf[9];
 
     // Load the numbers, tall and short
     for (i=0;i<10;i++)
     {
-        sprintf(namebuf, "STTNUM%d", i);
-        tallnum[i] = (patch_t *) W_CacheLumpName(namebuf, PU_STATIC);
+	DEH_snprintf(namebuf, 9, "STTNUM%d", i);
+        callback(namebuf, &tallnum[i]);
 
-        sprintf(namebuf, "STYSNUM%d", i);
-        shortnum[i] = (patch_t *) W_CacheLumpName(namebuf, PU_STATIC);
+	DEH_snprintf(namebuf, 9, "STYSNUM%d", i);
+        callback(namebuf, &shortnum[i]);
     }
 
     // Load percent key.
     //Note: why not load STMINUS here, too?
-    tallpercent = (patch_t *) W_CacheLumpName("STTPRCNT", PU_STATIC);
+
+    callback(DEH_String("STTPRCNT"), &tallpercent);
     emptytallpercent = V_EmptyPatch(tallpercent);
 
     // key cards
     for (i=0;i<NUMCARDS;i++)
     {
-        sprintf(namebuf, "STKEYS%d", i);
-        keys[i] = (patch_t *) W_CacheLumpName(namebuf, PU_STATIC);
+	DEH_snprintf(namebuf, 9, "STKEYS%d", i);
+        callback(namebuf, &keys[i]);
     }
 
     // item background
     if(beta_style)
     {
-        itembg = (patch_t *) W_CacheLumpName("STITEM", PU_STATIC);
-        chatbg = (patch_t *) W_CacheLumpName("STCHAT", PU_STATIC);
+        callback(DEH_String("STITEM"), &itembg);
+        callback(DEH_String("STCHAT"), &chatbg);
     }
-    // arms background
     else
     {
-        armsbg = (patch_t *) W_CacheLumpName("STARMS", PU_STATIC);
+        // arms background
+        callback(DEH_String("STARMS"), &armsbg);
 
         // arms ownership widgets
-        for (i=0;i<6;i++)
+        for (i=0; i<6; i++)
         {
-            sprintf(namebuf, "STGNUM%d", i+2);
+	    DEH_snprintf(namebuf, 9, "STGNUM%d", i+2);
 
-            // gray #
-            arms[i][0] = (patch_t *) W_CacheLumpName(namebuf, PU_STATIC);
+	    // gray #
+            callback(namebuf, &arms[i][0]);
 
             // yellow #
             arms[i][1] = shortnum[i+2]; 
         }
     }
 
-    // face backgrounds for different color players
-
-    if(beta_style)
-        sprintf(namebuf, "STFB4");
+    if(beta_style && !netgame)
+        DEH_snprintf(namebuf, 9, "STFB4", consoleplayer);
     else
-        sprintf(namebuf, "STFB%d", consoleplayer);
+        DEH_snprintf(namebuf, 9, "STFB%d", consoleplayer);
 
-    faceback = (patch_t *) W_CacheLumpName(namebuf, PU_STATIC);
+    // face backgrounds for different color players
+    callback(namebuf, &faceback);
 
     // status bar background bits
     // HACK: IF SHAREWARE 1.0 OR 1.1
     if(fsize == 4207819 || fsize == 4274218 || fsize == 10396254)
     {
-        sbar_left_oldwad = (patch_t *) W_CacheLumpName("STMBARL", PU_STATIC);
-        sbar_right_oldwad = (patch_t *) W_CacheLumpName("STMBARR", PU_STATIC);
+        callback(DEH_String("STMBARL"), &sbar_left_oldwad);
+        callback(DEH_String("STMBARR"), &sbar_right_oldwad);
     }
     else
     {
-        sbar = (patch_t *) W_CacheLumpName("STBAR", PU_STATIC);
+        callback(DEH_String("STBAR"), &sbar);
     }
 
     if(beta_style)
     {
-        sbarmap = (patch_t *) W_CacheLumpName("ST_AMAP", PU_STATIC);
-        sbara_shotgun = (patch_t *) W_CacheLumpName("STWEAP0", PU_STATIC);
-        sbara_chaingun = (patch_t *) W_CacheLumpName("STWEAP1", PU_STATIC);
-        sbara_missile = (patch_t *) W_CacheLumpName("STWEAP2", PU_STATIC);
-        sbara_plasma = (patch_t *) W_CacheLumpName("STWEAP3", PU_STATIC);
-        sbara_bfg = (patch_t *) W_CacheLumpName("STWEAP5", PU_STATIC);
-        sbara_chainsaw = (patch_t *) W_CacheLumpName("STWEAP4", PU_STATIC);
+        callback(DEH_String("ST_AMAP"), &sbarmap);
+        callback(DEH_String("STWEAP0"), &sbara_shotgun);
+        callback(DEH_String("STWEAP1"), &sbara_chaingun);
+        callback(DEH_String("STWEAP2"), &sbara_missile);
+        callback(DEH_String("STWEAP3"), &sbara_plasma);
+        callback(DEH_String("STWEAP5"), &sbara_bfg);
+        callback(DEH_String("STWEAP4"), &sbara_chainsaw);
     }
 
     // face states
     facenum = 0;
-    for (i=0;i<ST_NUMPAINFACES;i++)
+    for (i=0; i<ST_NUMPAINFACES; i++)
     {
-        for (j=0;j<ST_NUMSTRAIGHTFACES;j++)
-        {
-            sprintf(namebuf, "STFST%d%d", i, j);
-            faces[facenum++] = W_CacheLumpName(namebuf, PU_STATIC);
-        }
-        sprintf(namebuf, "STFTR%d0", i);        // turn right
-        faces[facenum++] = W_CacheLumpName(namebuf, PU_STATIC);
-        sprintf(namebuf, "STFTL%d0", i);        // turn left
-        faces[facenum++] = W_CacheLumpName(namebuf, PU_STATIC);
-        sprintf(namebuf, "STFOUCH%d", i);       // ouch!
-        faces[facenum++] = W_CacheLumpName(namebuf, PU_STATIC);
-        sprintf(namebuf, "STFEVL%d", i);        // evil grin ;)
-        faces[facenum++] = W_CacheLumpName(namebuf, PU_STATIC);
-        sprintf(namebuf, "STFKILL%d", i);       // pissed off
-        faces[facenum++] = W_CacheLumpName(namebuf, PU_STATIC);
+	for (j=0; j<ST_NUMSTRAIGHTFACES; j++)
+	{
+	    DEH_snprintf(namebuf, 9, "STFST%d%d", i, j);
+            callback(namebuf, &faces[facenum]);
+            ++facenum;
+	}
+	DEH_snprintf(namebuf, 9, "STFTR%d0", i);	// turn right
+        callback(namebuf, &faces[facenum]);
+        ++facenum;
+	DEH_snprintf(namebuf, 9, "STFTL%d0", i);	// turn left
+        callback(namebuf, &faces[facenum]);
+        ++facenum;
+	DEH_snprintf(namebuf, 9, "STFOUCH%d", i);	// ouch!
+        callback(namebuf, &faces[facenum]);
+        ++facenum;
+	DEH_snprintf(namebuf, 9, "STFEVL%d", i);	// evil grin ;)
+        callback(namebuf, &faces[facenum]);
+        ++facenum;
+	DEH_snprintf(namebuf, 9, "STFKILL%d", i);	// pissed off
+        callback(namebuf, &faces[facenum]);
+        ++facenum;
     }
-    faces[facenum++] = W_CacheLumpName("STFGOD0", PU_STATIC);
-    faces[facenum++] = W_CacheLumpName("STFDEAD0", PU_STATIC);
+
+    callback(DEH_String("STFGOD0"), &faces[facenum]);
+    ++facenum;
+    callback(DEH_String("STFDEAD0"), &faces[facenum]);
+    ++facenum;
+}
+
+static void ST_loadCallback(char *lumpname, patch_t **variable)
+{
+    *variable = W_CacheLumpName(lumpname, PU_STATIC);
+}
+
+void ST_loadGraphics(void)
+{
+    ST_loadUnloadGraphics(ST_loadCallback);
 }
 
 void ST_loadData(void)
@@ -1602,70 +1627,15 @@ void ST_loadData(void)
     ST_loadGraphics();
 }
 
+static void ST_unloadCallback(char *lumpname, patch_t **variable)
+{
+    W_ReleaseLumpName(lumpname);
+    *variable = NULL;
+}
+
 void ST_unloadGraphics(void)
 {
-
-    int i;
-
-    // unload the numbers, tall and short
-    for (i=0;i<10;i++)
-    {
-        Z_ChangeTag(tallnum[i], PU_CACHE);
-        Z_ChangeTag(shortnum[i], PU_CACHE);
-    }
-
-    // unload tall percent
-    Z_ChangeTag(tallpercent, PU_CACHE); 
-
-    // unload item background
-    if(beta_style)
-    {
-        Z_ChangeTag(itembg, PU_CACHE); 
-        Z_ChangeTag(chatbg, PU_CACHE); 
-    }
-    // unload arms background
-    else
-    {
-        Z_ChangeTag(armsbg, PU_CACHE); 
-
-        // unload gray #'s
-        for (i=0;i<6;i++)
-            Z_ChangeTag(arms[i][0], PU_CACHE);
-    }
-
-    // unload the key cards
-    for (i=0;i<NUMCARDS;i++)
-        Z_ChangeTag(keys[i], PU_CACHE);
-
-    // HACK: IF SHAREWARE 1.0 OR 1.1
-    if(fsize == 4207819 || fsize == 4274218 || fsize == 10396254)
-    {
-        Z_ChangeTag(sbar_left_oldwad, PU_CACHE);
-        Z_ChangeTag(sbar_right_oldwad, PU_CACHE);
-    }
-    else
-    {
-        Z_ChangeTag(sbar, PU_CACHE);
-    }
-
-    if(beta_style)
-    {
-        Z_ChangeTag(sbarmap, PU_CACHE);
-        Z_ChangeTag(sbara_shotgun, PU_CACHE);
-        Z_ChangeTag(sbara_chaingun, PU_CACHE);
-        Z_ChangeTag(sbara_missile, PU_CACHE);
-        Z_ChangeTag(sbara_plasma, PU_CACHE);
-        Z_ChangeTag(sbara_bfg, PU_CACHE);
-        Z_ChangeTag(sbara_chainsaw, PU_CACHE);
-    }
-
-    Z_ChangeTag(faceback, PU_CACHE);
-
-    for (i=0;i<ST_NUMFACES;i++)
-        Z_ChangeTag(faces[i], PU_CACHE);
-
-    // Note: nobody ain't seen no unloading
-    //   of stminus yet. Dude.
+    ST_loadUnloadGraphics(ST_unloadCallback);
 }
 
 void ST_unloadData(void)
@@ -1960,5 +1930,5 @@ void ST_Init (void)
 {
     ST_loadData();
 
-    screens[4] = Z_Malloc(ST_WIDTH * SBARHEIGHT, PU_STATIC, 0);
+    screens[4] = Z_Malloc((ST_WIDTH << hires) * (ST_HEIGHT << hires), PU_STATIC, 0);
 }
