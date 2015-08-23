@@ -32,6 +32,7 @@
 
 #include "c_io.h"
 #include "doomdef.h"
+#include "doomfeatures.h"
 #include "doomstat.h"
 #include "i_system.h"
 #include "r_local.h"
@@ -668,10 +669,11 @@ R_StoreWallRange
     worldbottom = frontsector->interpfloorheight - viewz;
         
     // [BH] animate liquid sectors
-    if (frontsector->animate != INT_MAX && (frontsector->heightsec == -1
+#ifdef ANIMATED_FLOOR_LIQUIDS
+    if (frontsector->animate && (frontsector->heightsec == -1
         || viewz > sectors[frontsector->heightsec].interpfloorheight))
         worldbottom += frontsector->animate;
-
+#endif
     midtexture = toptexture = bottomtexture = maskedtexture = 0;
     ds_p->maskedtexturecol = NULL;
         
@@ -757,7 +759,8 @@ R_StoreWallRange
         worldlow = backsector->interpfloorheight - viewz;
                 
         // [BH] animate liquid sectors
-        if (backsector->animate != INT_MAX
+#ifdef ANIMATED_FLOOR_LIQUIDS
+        if (backsector->animate
             && backsector->interpfloorheight > frontsector->interpfloorheight
             && (backsector->heightsec == -1
             || viewz > sectors[backsector->heightsec].interpfloorheight))
@@ -765,7 +768,7 @@ R_StoreWallRange
             liquidoffset = backsector->animate;
             worldlow += liquidoffset;
         }
-
+#endif
         // hack to allow height changes in outdoor areas
         if (frontsector->ceilingpic == skyflatnum 
             && backsector->ceilingpic == skyflatnum)

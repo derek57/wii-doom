@@ -34,6 +34,7 @@
 
 #include "c_io.h"
 #include "doomdef.h"
+#include "doomfeatures.h"
 #include "doomstat.h"
 #include "i_system.h"
 #include "r_defs.h"
@@ -531,10 +532,10 @@ void R_DrawPlanes (void)
                             PU_STATIC));
 
             planeheight = abs(pl->height-viewz);
-
-            if (liquid && pl->sector && pl->sector->animate != INT_MAX)
+#ifdef ANIMATED_FLOOR_LIQUIDS
+            if (liquid && pl->sector && pl->sector->animate)
                 planeheight -= pl->sector->animate;
-
+#endif
             light = (pl->lightlevel >> LIGHTSEGSHIFT)+extralight;
 
             if (light >= LIGHTLEVELS)

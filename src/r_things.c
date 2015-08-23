@@ -35,6 +35,7 @@
 #include "c_io.h"
 #include "deh_main.h"
 #include "doomdef.h"
+#include "doomfeatures.h"
 #include "doomstat.h"
 #include "i_swap.h"
 #include "i_system.h"
@@ -243,7 +244,7 @@ void R_InitSpriteDefs(char **namelist)
             maxframe = -1;
             do
             {
-                lumpinfo_t      *lump = *lumpinfo + j + firstspritelump;
+                lumpinfo_t      *lump = lumpinfo[j + firstspritelump];
 
                 // Fast portable comparison -- killough
                 // (using int pointer cast is nonportable):
@@ -746,10 +747,10 @@ void R_ProjectSprite (mobj_t* thing)
                                clipheight) << FRACBITS;
 
         vis->texturemid = gzt - viewz - clipfeet;
-
-        if ((thing->flags2 & MF2_NOLIQUIDBOB) && sector->animate != INT_MAX)
+#ifdef ANIMATED_FLOOR_LIQUIDS
+        if ((thing->flags2 & MF2_NOLIQUIDBOB) && sector->animate)
             clipfeet += sector->animate;
-
+#endif
         vis->footclip = clipfeet;
     }
     else
@@ -901,13 +902,13 @@ void R_DrawPSprite (pspdef_t* psp, psprnum_t psprnum)
     // decide which patch to use
 #ifdef RANGECHECK
     if ( (unsigned)psp->state->sprite >= (unsigned int) numsprites)
-        I_Error ("R_ProjectSprite: invalid sprite number %i ",
+        I_Error ("R_DrawPSprite: invalid sprite number %i ",
                  psp->state->sprite);
 #endif
     sprdef = &sprites[psp->state->sprite];
 #ifdef RANGECHECK
     if ( (psp->state->frame & FF_FRAMEMASK)  >= sprdef->numframes)
-        I_Error ("R_ProjectSprite: invalid sprite frame %i : %i ",
+        I_Error ("R_DrawPSprite: invalid sprite frame %i : %i ",
                  psp->state->sprite, psp->state->frame);
 #endif
     sprframe = &sprdef->spriteframes[ psp->state->frame & FF_FRAMEMASK ];

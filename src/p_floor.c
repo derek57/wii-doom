@@ -29,6 +29,7 @@
 
 #include "c_io.h"
 #include "doomdef.h"
+#include "doomfeatures.h"
 
 // State.
 #include "doomstat.h"
@@ -47,40 +48,15 @@
 #define    STAIRS_UNINITIALIZED_CRUSH_FIELD_VALUE    10
 
 
-fixed_t animatedliquiddiffs[128] =
-{
-     3211,  3211,  3211,  3211,  3180,  3180,  3119,  3119,
-     3027,  3027,  2907,  2907,  2758,  2758,  2582,  2582,
-     2382,  2382,  2159,  2159,  1915,  1915,  1653,  1653,
-     1374,  1374,  1083,  1083,   781,   781,   471,   471,
-      157,   157,  -157,  -157,  -471,  -471,  -781,  -781,
-    -1083, -1083, -1374, -1374, -1653, -1653, -1915, -1915,
-    -2159, -2159, -2382, -2382, -2582, -2582, -2758, -2758,
-    -2907, -2907, -3027, -3027, -3119, -3119, -3180, -3180,
-    -3211, -3211, -3211, -3211, -3180, -3180, -3119, -3119,
-    -3027, -3027, -2907, -2907, -2758, -2758, -2582, -2582,
-    -2382, -2382, -2159, -2159, -1915, -1915, -1653, -1653,
-    -1374, -1374, -1083, -1083,  -781,  -781,  -471,  -471,
-     -157,  -157,   157,   157,   471,   471,   781,   781,
-     1083,  1083,  1374,  1374,  1653,  1653,  1915,  1915,
-     2159,  2159,  2382,  2382,  2582,  2582,  2758,  2758,
-     2907,  2907,  3027,  3027,  3119,  3119,  3180,  3180
-};
+#ifdef ANIMATED_FLOOR_LIQUIDS
+fixed_t         animatedliquiddiff;
 
 static void T_AnimateLiquid(floormove_t *floor)
 {
     sector_t    *sector = floor->sector;
 
-    if (d_swirl && isliquid[sector->floorpic]
-        && sector->ceiling_height != sector->floor_height)
-    {
-        if (sector->animate == INT_MAX)
-            sector->animate = 2 * FRACUNIT + animatedliquiddiffs[leveltime & 127];
-        else
-            sector->animate += animatedliquiddiffs[leveltime & 127];
-    }
-    else
-        sector->animate = INT_MAX;
+    sector->animate = (d_swirl && isliquid[sector->floorpic]
+        && sector->ceiling_height != sector->floor_height ? animatedliquiddiff : 0);
 }
 
 static void P_StartAnimatedLiquid(sector_t *sector)
@@ -97,6 +73,7 @@ static void P_StartAnimatedLiquid(sector_t *sector)
     P_AddThinker(&floor->thinker);
     floor->thinker.function.acp1 = (actionf_p1) T_AnimateLiquid;
     floor->sector = sector;
+    T_AnimateLiquid(floor);
 }
 
 void P_InitAnimatedLiquids(void)
@@ -106,12 +83,11 @@ void P_InitAnimatedLiquids(void)
 
     for (i = 0, sector = sectors; i < numsectors; i++, sector++)
     {
-        sector->animate = INT_MAX;
         if (isliquid[sector->floorpic])
             P_StartAnimatedLiquid(sector);
     }
 }
-
+#endif
 //
 // FLOORS
 //
@@ -328,10 +304,10 @@ void T_MoveFloor(floormove_t* floor)
               case donutRaise:
                 floor->sector->special = floor->newspecial;
                 floor->sector->floorpic = floor->texture;
-
+#ifdef ANIMATED_FLOOR_LIQUIDS
                 if (isliquid[floor->sector->floorpic])
                     P_StartAnimatedLiquid(floor->sector);
-
+#endif
               default:
                 break;
             }
@@ -343,10 +319,10 @@ void T_MoveFloor(floormove_t* floor)
               case lowerAndChange:
                 floor->sector->special = floor->newspecial;
                 floor->sector->floorpic = floor->texture;
-
+#ifdef ANIMATED_FLOOR_LIQUIDS
                 if (isliquid[floor->sector->floorpic])
                     P_StartAnimatedLiquid(floor->sector);
-
+#endif
               default:
                 break;
             }

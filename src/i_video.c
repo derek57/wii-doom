@@ -158,11 +158,6 @@ int aspect_ratio_correct = false;
 
 static int startup_delay = 1000;
 
-// Flag indicating whether the screen is currently visible:
-// when the screen isnt visible, don't render the screen
-
-boolean screenvisible;
-
 // If true, we display dots at the bottom of the screen to 
 // indicate FPS.
 
@@ -208,23 +203,6 @@ extern int display_fps;
 void I_DisplayFPSDots(boolean dots_on)
 {
     display_fps_dots = dots_on;
-}
-
-// Update the value of window_focused when we get a focus event
-//
-// We try to make ourselves be well-behaved: the grab on the mouse
-// is removed if we lose focus (such as a popup window appearing),
-// and we dont move the mouse around if we aren't focused either.
-
-static void UpdateFocus(void)
-{
-    Uint8 state;
-
-    state = SDL_GetAppState();
-
-    // Should the screen be grabbed?
-
-    screenvisible = (state & SDL_APPACTIVE) != 0;
 }
 
 void I_EnableLoadingDisk(void)
@@ -1064,8 +1042,6 @@ void I_InitGraphics(void)
     I_SetPalette(doompal);
 
     SDL_SetColors(screenbuffer, palette, 0, 256);
-
-    UpdateFocus();
 
     // On some systems, it takes a second or so for the screen to settle
     // after changing modes.  We include the option to add a delay when

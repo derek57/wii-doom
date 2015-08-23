@@ -32,6 +32,7 @@
 
 #include "c_io.h"
 #include "doomdef.h"
+#include "doomfeatures.h"
 #include "doomstat.h"
 #include "hu_stuff.h"
 #include "i_system.h"
@@ -70,8 +71,9 @@ extern int      snd_module;
 
 extern boolean  not_walking;
 extern boolean  in_slime;
-
-extern fixed_t  animatedliquiddiffs[128];
+#ifdef ANIMATED_FLOOR_LIQUIDS
+extern fixed_t  animatedliquiddiffs[64];
+#endif
 extern fixed_t  attackrange;
 
 int             itemrespawntime[ITEMQUESIZE];
@@ -600,11 +602,13 @@ void P_MobjThinker (mobj_t* mobj)
     if (!isliquid[sector->floorpic])
         mobj->flags2 &= ~MF2_FEETARECLIPPED;
     flags2 = mobj->flags2;
-
+#ifdef ANIMATED_FLOOR_LIQUIDS
     if ((flags2 & MF2_FEETARECLIPPED) && !(flags2 & MF2_NOLIQUIDBOB) &&
             mobj->z <= sector->floor_height && !mobj->momz && d_swirl)
-        mobj->z += animatedliquiddiffs[leveltime & 127];
-    else if (flags2 & MF2_FLOATBOB)
+        mobj->z += animatedliquiddiffs[(mobj->floatbob + leveltime) & 63];
+    else
+#endif
+    if (flags2 & MF2_FLOATBOB)
         mobj->z += floatbobdiffs[(mobj->floatbob + leveltime) & 63];
     else if ( (mobj->z != mobj->floorz) || mobj->momz )
     {                           // Handle Z momentum and gravity

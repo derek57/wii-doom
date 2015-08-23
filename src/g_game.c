@@ -827,7 +827,8 @@ void G_ReadDemoTiccmd (ticcmd_t* cmd)
     cmd->angleturn = ((unsigned char) *demo_p++)<<8; 
 
     cmd->buttons = (unsigned char)*demo_p++; 
-    cmd->lookfly = (unsigned char) *demo_p++;
+
+//    cmd->lookfly = (unsigned char) *demo_p++;
 } 
 
 // Increase the size of the demo buffer to allow unlimited demos
@@ -874,7 +875,8 @@ void G_WriteDemoTiccmd (ticcmd_t* cmd)
     *demo_p++ = cmd->angleturn >> 8; 
 
     *demo_p++ = cmd->buttons; 
-    *demo_p++ = cmd->lookfly;
+
+//    *demo_p++ = cmd->lookfly;
 
     // reset demo pointer back
     demo_p = demo_start;
@@ -2000,9 +2002,9 @@ void G_DoLoadGame (void)
  
     // [crispy] restore mobj->target and mobj->tracer pointers
     P_RestoreTargets();
-
+#ifdef ANIMATED_FLOOR_LIQUIDS
     P_InitAnimatedLiquids();
-
+#endif
     if (!P_ReadSaveGameEOF())
         I_Error ("Bad savegame");
 

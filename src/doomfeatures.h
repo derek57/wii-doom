@@ -47,6 +47,8 @@
 
 //#define BOOM_ZONE_HANDLING 1
 
+#define ANIMATED_FLOOR_LIQUIDS 1
+
 #endif /* #ifndef DOOM_FEATURES_H */
 
 

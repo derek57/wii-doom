@@ -91,8 +91,19 @@ typedef struct
     char        endname[9];
     char        startname[9];
     int         speed;
-    boolean     isliquid;
 } animdef_t;
+
+fixed_t animatedliquiddiffs[64] =
+{
+     6422,  6422,  6360,  6238,  6054,  5814,  5516,  5164,
+     4764,  4318,  3830,  3306,  2748,  2166,  1562,   942,
+      314,  -314,  -942, -1562, -2166, -2748, -3306, -3830,
+    -4318, -4764, -5164, -5516, -5814, -6054, -6238, -6360,
+    -6422, -6422, -6360, -6238, -6054, -5814, -5516, -5164,
+    -4764, -4318, -3830, -3306, -2748, -2166, -1562,  -942,
+     -314,   314,   942,  1562,  2166,  2748,  3306,  3830,
+     4318,  4764,  5164,  5516,  5814,  6054,  6238,  6360
+};
 
 static anim_t   *anims;         // new structure w/o limits -- killough
 static size_t   maxanims;
@@ -113,6 +124,9 @@ extern boolean  noclip_on;
 
 extern int      snd_module;
 
+extern fixed_t  animatedliquiddiff;
+
+
 //
 // P_InitPicAnims
 //
@@ -128,35 +142,35 @@ extern int      snd_module;
 //
 animdef_t                animdefs[] =
 {
-    {false,       "NUKAGE3",      "NUKAGE1",      ANIMSPEED, true},
-    {false,       "FWATER4",      "FWATER1",      ANIMSPEED, true},
-    {false,       "SWATER4",      "SWATER1",      ANIMSPEED, true},
-    {false,       "LAVA4",        "LAVA1",        ANIMSPEED, true},
-    {false,       "BLOOD3",       "BLOOD1",       ANIMSPEED, true},
+    {false,       "NUKAGE3",      "NUKAGE1",      ANIMSPEED},
+    {false,       "FWATER4",      "FWATER1",      ANIMSPEED},
+    {false,       "SWATER4",      "SWATER1",      ANIMSPEED},
+    {false,       "LAVA4",        "LAVA1",        ANIMSPEED},
+    {false,       "BLOOD3",       "BLOOD1",       ANIMSPEED},
 
     // DOOM II flat animations.
-    {false,       "SLIME04",      "SLIME01",      ANIMSPEED, true},
-    {false,       "SLIME08",      "SLIME05",      ANIMSPEED, true},
-    {false,       "SLIME12",      "SLIME09",      ANIMSPEED, true},
-    {false,       "RROCK08",      "RROCK05",      ANIMSPEED, false},                
+    {false,       "SLIME04",      "SLIME01",      ANIMSPEED},
+    {false,       "SLIME08",      "SLIME05",      ANIMSPEED},
+    {false,       "SLIME12",      "SLIME09",      ANIMSPEED},
+    {false,       "RROCK08",      "RROCK05",      ANIMSPEED},                
 
-    {true,        "BLODGR4",      "BLODGR1",      ANIMSPEED, false},
-    {true,        "SLADRIP3",     "SLADRIP1",     ANIMSPEED, false},
+    {true,        "BLODGR4",      "BLODGR1",      ANIMSPEED},
+    {true,        "SLADRIP3",     "SLADRIP1",     ANIMSPEED},
 
-    {true,        "BLODRIP4",     "BLODRIP1",     ANIMSPEED, false},
-    {true,        "FIREWALL",     "FIREWALA",     ANIMSPEED, false},
-    {true,        "GSTFONT3",     "GSTFONT1",     ANIMSPEED, false},
-    {true,        "FIRELAVA",     "FIRELAV3",     ANIMSPEED, false},
-    {true,        "FIREMAG3",     "FIREMAG1",     ANIMSPEED, false},
-    {true,        "FIREBLU2",     "FIREBLU1",     ANIMSPEED, false},
-    {true,        "ROCKRED3",     "ROCKRED1",     ANIMSPEED, false},
+    {true,        "BLODRIP4",     "BLODRIP1",     ANIMSPEED},
+    {true,        "FIREWALL",     "FIREWALA",     ANIMSPEED},
+    {true,        "GSTFONT3",     "GSTFONT1",     ANIMSPEED},
+    {true,        "FIRELAVA",     "FIRELAV3",     ANIMSPEED},
+    {true,        "FIREMAG3",     "FIREMAG1",     ANIMSPEED},
+    {true,        "FIREBLU2",     "FIREBLU1",     ANIMSPEED},
+    {true,        "ROCKRED3",     "ROCKRED1",     ANIMSPEED},
 
-    {true,        "BFALL4",       "BFALL1",       ANIMSPEED, false},
-    {true,        "SFALL4",       "SFALL1",       ANIMSPEED, false},
-    {true,        "WFALL4",       "WFALL1",       ANIMSPEED, false},
-    {true,        "DBRAIN4",      "DBRAIN1",      ANIMSPEED, false},
+    {true,        "BFALL4",       "BFALL1",       ANIMSPEED},
+    {true,        "SFALL4",       "SFALL1",       ANIMSPEED},
+    {true,        "WFALL4",       "WFALL1",       ANIMSPEED},
+    {true,        "DBRAIN4",      "DBRAIN1",      ANIMSPEED},
         
-    {-1,          "",             "",                     0, false}
+    {-1,          "",             "",                     0}
 };
 
 /*
@@ -228,7 +242,8 @@ void P_InitPicAnims (void)
 
             lastanim->numpics = lastanim->picnum - lastanim->basepic + 1;
 
-            if (animdefs[i].isliquid)
+            if (strcasecmp(animdefs[i].startname, "RROCK05")
+                && strcasecmp(animdefs[i].startname, "SLIME09"))
             {
                 int     j;
 
@@ -1274,6 +1289,7 @@ void P_UpdateSpecials (void)
         }
     }
 
+    animatedliquiddiff += animatedliquiddiffs[leveltime & 63];
     
     //        DO BUTTONS
     for (i = 0; i < MAXBUTTONS; i++)

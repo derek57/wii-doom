@@ -32,12 +32,14 @@
 #include "c_io.h"
 #include "deh_main.h"
 #include "doomdef.h"
+#include "doomfeatures.h"
 #include "doomstat.h"
 #include "g_game.h"
 #include "hu_stuff.h"
 #include "i_swap.h"
 #include "i_system.h"
 #include "m_bbox.h"
+#include "m_misc.h"
 #include "p_local.h"
 #include "s_sound.h"
 #include "v_trans.h"
@@ -115,6 +117,9 @@ extern boolean     finale_music;
 
 extern int         numsplats;
 
+extern fixed_t     animatedliquiddiff;
+
+
 //
 // P_LoadVertexes
 //
@@ -135,6 +140,9 @@ void P_LoadVertexes (int lump)
     // Load data into cache.
     data = W_CacheLumpNum (lump, PU_STATIC);
         
+    if (!data || !numvertexes)
+        C_Printf(CR_RED, " There are no vertices in this map.\n");
+
     ml = (mapvertex_t *)data;
     li = vertexes;
 
@@ -188,6 +196,9 @@ void P_LoadSegs (int lump)
     memset (segs, 0, numsegs*sizeof(seg_t));
     data = W_CacheLumpNum (lump,PU_STATIC);
         
+    if (!data || !numsegs)
+        C_Printf(CR_RED, " There are no segs in this map.\n");
+
     ml = (mapseg_t *)data;
     li = segs;
     for (i=0 ; i<numsegs ; i++, li++, ml++)
@@ -198,6 +209,10 @@ void P_LoadSegs (int lump)
         li->angle = (SHORT(ml->angle))<<16;
         li->offset = (SHORT(ml->offset))<<16;
         linedef = SHORT(ml->linedef);
+
+        if (linedef < 0 || linedef >= numlines)
+            C_Printf(CR_RED, " Seg %s references an invalid linedef of %s.\n", commify(i), commify(linedef));
+
         ldef = &lines[linedef];
         li->linedef = ldef;
         side = SHORT(ml->side);
@@ -207,14 +222,20 @@ void P_LoadSegs (int lump)
         //e6y: fix wrong side index
         if (side != 0 && side != 1)
         {
-            C_Printf(CR_GOLD, " P_LoadSegs: seg %d contains wrong side index %d. Replaced with 1.\n", i, side);
+            C_Printf(CR_GOLD, " P_LoadSegs: Seg %d has a wrong side index of %d. It has been replaced with 1.\n", i, side);
+             side = 1;
         }
+
+        // e6y: check for wrong indexes
+        if ((unsigned int)ldef->sidenum[side] >= (unsigned int)numsides)
+            C_Printf(CR_GOLD, " Linedef %s for seg %s references an invalid sidedef of %s.\n",
+                commify(linedef), commify(i), commify(ldef->sidenum[side]));
 
         // cph 2006/09/30 - our frontsector can be the second side of the
         // linedef, so must check for NO_INDEX in case we are incorrectly
         // referencing the back of a 1S line
         if (ldef->sidenum[side] == -1)
-            C_Printf(CR_GOLD, " P_LoadSegs: front of seg %i has no sidedef\n", i);
+            C_Printf(CR_GOLD, " P_LoadSegs: The front of seg %s has no sidedef.\n", commify(i));
 
         if (ldef-> flags & ML_TWOSIDED)
         {
@@ -245,12 +266,9 @@ void P_LoadSegs (int lump)
         // see e1m9 @ NIVELES.WAD
         // http://www.doomworld.com/idgames/index.php?id=12647
 /*
-        if (ml->v1 >= numvertexes)
-            C_Printf(" P_LoadSegs: compatibility loss - seg %d references a non-existent vertex %d\n"
+        if (ml->v1 >= numvertexes || ml->v2 >= numvertexes)
+            C_Printf(CR_GOLD, " P_LoadSegs: Seg %d references an invalid vertex %i.\n"
                     , i, ml->v1);
-        else if(ml->v2 >= numvertexes)
-            C_Printf(" P_LoadSegs: compatibility loss - seg %d references a non-existent vertex %d\n"
-                    , i, ml->v2);
 */
     }
     W_ReleaseLumpNum(lump);
@@ -684,6 +702,9 @@ static void P_CreateBlockMap(void)
     unsigned tot = bmapwidth * bmapheight;            // size of blockmap
 
     bmap_t *bmap = calloc(sizeof *bmap, tot);         // array of blocklists
+
+    if (!bmap)
+        C_Printf(CR_RED, " Unable to create blockmap.\n");
 
     int x, y, adx, ady, dx, dy, diff, b, bend;
 
@@ -1220,6 +1241,7 @@ P_SetupLevel
     }
 
     leveltime = 0;
+    animatedliquiddiff = FRACUNIT;
         
     createblockmap = false;
 
@@ -1251,9 +1273,9 @@ P_SetupLevel
     
     for (i=0 ; i<MAXPLAYERS ; i++)
         P_InitCards(&players[i]);
-
+#ifdef ANIMATED_FLOOR_LIQUIDS
     P_InitAnimatedLiquids();
-
+#endif
     // if deathmatch, randomly spawn the active players
     if (deathmatch)
     {
