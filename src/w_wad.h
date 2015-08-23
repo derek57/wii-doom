@@ -68,6 +68,7 @@ lumpindex_t W_GetNumForName(char *name);
 
 int         W_GetSecondNumForName (char* name);
 int         W_LumpLength(lumpindex_t lump);
+int         W_CheckMultipleLumps(char *name);
 
 void        W_GenerateHashTable(void);
 void        W_ReleaseLumpNum(lumpindex_t lump);

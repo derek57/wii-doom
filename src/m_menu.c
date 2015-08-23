@@ -44,6 +44,7 @@
 #include "i_swap.h"
 #include "i_system.h"
 #include "i_timer.h"
+#include "i_tinttab.h"
 #include "i_video.h"
 #include "m_controls.h"
 #include "m_menu.h"
@@ -884,6 +885,7 @@ int                        snd_module = 0;
 int                        snd_chans = 1;
 int                        sound_channels = 8;
 int                        gore_amount = 4;
+int                        height;
 
 //
 // MENU TYPEDEFS
@@ -927,12 +929,16 @@ boolean                    privateserverflag;
 boolean                    massacre_cheat_used;
 boolean                    randompitch;
 boolean                    memory_usage;
+boolean                    blurred = false;
 
 fixed_t                    forwardmove = 29;
 fixed_t                    sidemove = 21; 
 
 // current menudef
-menu_t*                    currentMenu;                          
+menu_t                     *currentMenu;                          
+
+byte                       *tempscreen;
+byte                       *blurredscreen;
 
 static boolean             askforkey = false;
 
@@ -2050,6 +2056,51 @@ menu_t  RecordDef =
     0
 };
 
+static void blurscreen(int x1, int y1, int x2, int y2, int i)
+{
+    int x, y;
+
+    memcpy(tempscreen, blurredscreen, SCREENWIDTH * SCREENHEIGHT);
+
+    for (y = y1; y < y2; y += SCREENWIDTH)
+        for (x = y + x1; x < y + x2; ++x)
+            blurredscreen[x] = tinttab50[tempscreen[x] + (tempscreen[x + i] << 8)];
+}
+
+//
+// M_DarkBackground
+//  darken and blur background while menu is displayed
+//
+void M_DarkBackground(void)
+{
+    int i;
+
+    height = SCREENHEIGHT * SCREENWIDTH;
+
+    if (!blurred)
+    {
+        for (i = 0; i < height; ++i)
+            blurredscreen[i] = grays[screens[0][i]];
+
+        blurscreen(0, 0, SCREENWIDTH - 1, height, 1);
+        blurscreen(1, 0, SCREENWIDTH, height, -1);
+        blurscreen(0, 0, SCREENWIDTH - 1, height - SCREENWIDTH, SCREENWIDTH + 1);
+        blurscreen(1, SCREENWIDTH, SCREENWIDTH, height, -(SCREENWIDTH + 1));
+        blurscreen(0, 0, SCREENWIDTH, height - SCREENWIDTH, SCREENWIDTH);
+        blurscreen(0, SCREENWIDTH, SCREENWIDTH, height, -SCREENWIDTH);
+        blurscreen(1, 0, SCREENWIDTH, height - SCREENWIDTH, SCREENWIDTH - 1);
+        blurscreen(0, SCREENWIDTH, SCREENWIDTH - 1, height, -(SCREENWIDTH - 1));
+
+        blurred = true;
+    }
+
+    for (i = 0; i < height; ++i)
+        screens[0][i] = tinttab50[blurredscreen[i]];
+
+    if (detailLevel)
+        V_LowGraphicDetail(SCREENHEIGHT);
+}
+
 //
 // M_ReadSaveStrings
 //  read the strings from the savegame files
@@ -2084,6 +2135,8 @@ void M_ReadSaveStrings(void)
 void M_DrawLoad(void)
 {
     int             i;
+
+    M_DarkBackground();
 
     V_DrawPatch(72, 28, 0,
                       W_CacheLumpName(DEH_String("M_T_LGME"), PU_CACHE));
@@ -2166,6 +2219,8 @@ void M_DrawSave(void)
 {
     int             i;
         
+    M_DarkBackground();
+
     V_DrawPatch(72, 28, 0, W_CacheLumpName(DEH_String("M_T_SGME"), PU_CACHE));
     for (i = 0;i < load_end; i++)
     {
@@ -2352,6 +2407,8 @@ void M_DrawReadThis2(void)
 //
 void M_DrawSound(void)
 {
+    M_DarkBackground();
+
     if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
         V_DrawPatch (65, 15, 0, W_CacheLumpName(DEH_String("M_T_XSET"), PU_CACHE));
     else
@@ -2610,6 +2667,8 @@ void M_SoundChannels(int choice)
 //
 void M_DrawMainMenu(void)
 {
+    M_DarkBackground();
+
     V_DrawPatch(94, 2, 0,
                       W_CacheLumpName(DEH_String("M_DOOM"), PU_CACHE));
 }
@@ -2622,6 +2681,8 @@ void M_DrawMainMenu(void)
 //
 void M_DrawNewGame(void)
 {
+    M_DarkBackground();
+
     V_DrawPatch(96, 14, 0, W_CacheLumpName(DEH_String("M_NEWG"), PU_CACHE));
     M_WriteText(NewDef.x, NewDef.y - 22, "CHOOSE SKILL LEVEL:");
 }
@@ -2650,6 +2711,8 @@ int     epi;
 
 void M_DrawEpisode(void)
 {
+    M_DarkBackground();
+
     V_DrawPatch(75, 38, 0, W_CacheLumpName(DEH_String("M_EPISOD"), PU_CACHE));
 }
 
@@ -2713,12 +2776,16 @@ void M_Episode(int choice)
 
 void M_DrawOptions(void)
 {
+    M_DarkBackground();
+
     V_DrawPatch(108, 15, 0, W_CacheLumpName(DEH_String("M_OPTTTL"),
                                                PU_CACHE));
 }
 
 void M_DrawItems(void)
 {
+    M_DarkBackground();
+
     V_DrawPatch(123, 10, 0, W_CacheLumpName(DEH_String("M_T_ITMS"),
                                                PU_CACHE));
 
@@ -2843,6 +2910,8 @@ void M_DrawItems(void)
 
 void M_DrawArmor(void)
 {
+    M_DarkBackground();
+
     V_DrawPatch(115, 15, 0, W_CacheLumpName(DEH_String("M_T_ARMR"),
                                                PU_CACHE));
 
@@ -2892,6 +2961,8 @@ void M_DrawArmor(void)
 
 void M_DrawWeapons(void)
 {
+    M_DarkBackground();
+
     V_DrawPatch(103, 15, 0, W_CacheLumpName(DEH_String("M_T_WPNS"),
                                                PU_CACHE));
 
@@ -3023,6 +3094,8 @@ void M_DrawWeapons(void)
 
 void M_DrawKeys(void)
 {
+    M_DarkBackground();
+
     V_DrawPatch(125, 15, 0, W_CacheLumpName(DEH_String("M_T_KEYS"),
                                                PU_CACHE));
 
@@ -3033,6 +3106,8 @@ void M_DrawKeys(void)
 
 void M_DrawScreen(void)
 {
+    M_DarkBackground();
+
     if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
         V_DrawPatch(58, 15, 0, W_CacheLumpName(DEH_String("M_T_SSET"),
                                                PU_CACHE));
@@ -3134,6 +3209,8 @@ void M_DrawScreen(void)
 
 void M_DrawGame(void)
 {
+    M_DarkBackground();
+
     if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
         V_DrawPatch(70, 0, 0, W_CacheLumpName(DEH_String("M_T_GSET"),
                                                PU_CACHE));
@@ -3376,6 +3453,8 @@ void M_DrawGame(void)
 
 void M_DrawGame2(void)
 {
+    M_DarkBackground();
+
     if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
         V_DrawPatch(70, 0, 0, W_CacheLumpName(DEH_String("M_T_GSET"),
                                                PU_CACHE));
@@ -3593,6 +3672,8 @@ void M_DrawGame2(void)
 
 void M_DrawGame3(void)
 {
+    M_DarkBackground();
+
     if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
         V_DrawPatch(70, 0, 0, W_CacheLumpName(DEH_String("M_T_GSET"),
                                                PU_CACHE));
@@ -3792,6 +3873,8 @@ void M_DrawGame3(void)
 
 void M_DrawGame4(void)
 {
+    M_DarkBackground();
+
     if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
         V_DrawPatch(70, 0, 0, W_CacheLumpName(DEH_String("M_T_GSET"),
                                                PU_CACHE));
@@ -3963,6 +4046,8 @@ void DetectState(void)
 
 void M_DrawCheats(void)
 {
+    M_DarkBackground();
+
     if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
         V_DrawPatch (110, 6, 0, W_CacheLumpName(DEH_String("M_T_CHTS"), PU_CACHE));
     else
@@ -4230,6 +4315,8 @@ void M_DrawCheats(void)
 
 void M_DrawRecord(void)
 {
+    M_DarkBackground();
+
     char buffer_map[2];
 
     M_snprintf(buffer_map, sizeof(buffer_map), "%d", rmap);
@@ -5379,6 +5466,7 @@ void M_StartControlPanel (void)
     menuactive = 1;
     currentMenu = &MainDef;         // JDC
     itemOn = currentMenu->lastOn;   // JDC
+    blurred = false;
 }
 
 //
@@ -5436,6 +5524,8 @@ void M_Drawer (void)
     // Horiz. & Vertically center string and print it.
     if (messageToPrint)
     {
+        M_DarkBackground();
+
         start = 0;
         y = 100 - M_StringHeight(messageString) / 2;
         while (messageString[start] != '\0')
@@ -5679,6 +5769,8 @@ void M_Init (void)
     messageToPrint = 0;
     messageString = NULL;
     messageLastMenuActive = menuactive;
+    tempscreen = Z_Malloc(SCREENWIDTH * SCREENHEIGHT, PU_STATIC, NULL);
+    blurredscreen = Z_Malloc(SCREENWIDTH * SCREENHEIGHT, PU_STATIC, NULL);
 
     // Here we could catch other version dependencies,
     //  like HELP1/2, and four episodes.
@@ -6985,6 +7077,8 @@ void M_KeyBindingsReset (int choice)
 
 void M_DrawKeyBindings(void)
 {
+    M_DarkBackground();
+
     int i;
 
     if(fsize != 19321722)
@@ -7072,6 +7166,8 @@ void M_Controls(int choice)
 
 void M_DrawControls(void)
 {
+    M_DarkBackground();
+
     if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
         V_DrawPatch(48, 15, 0, W_CacheLumpName(DEH_String("M_T_CSET"),
                                                PU_CACHE));
@@ -7279,6 +7375,7 @@ void M_GameFiles(int choice)
 
 void M_DrawFilesMenu(void)
 {
+    M_DarkBackground();
 }
 
 void M_Brightness(int choice)
@@ -8174,6 +8271,8 @@ void M_Debug(int choice)
 
 void M_DrawSystem(void)
 {
+    M_DarkBackground();
+
     if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
         V_DrawPatch (62, 20, 0, W_CacheLumpName(DEH_String("M_T_YSET"), PU_CACHE));
     else
@@ -8355,6 +8454,8 @@ void M_Statistics(int choice)
 
 void M_DrawDebug(void)
 {
+    M_DarkBackground();
+
     if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
         V_DrawPatch (67, 15, 0, W_CacheLumpName(DEH_String("M_T_DSET"), PU_CACHE));
     else

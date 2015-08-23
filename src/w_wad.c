@@ -681,3 +681,22 @@ void W_CheckSize(int wad)
     }
 }
 
+//
+// W_CheckMultipleLumps
+// Check if there's more than one of the same lump.
+//
+int W_CheckMultipleLumps(char *name)
+{
+    int         i;
+    int         count = 0;
+
+    if (fsize == 28422764 || fsize == 19321722)
+        return 3;
+
+    for (i = numlumps - 1; i >= 0; --i)
+        if (!strncasecmp(lumpinfo[i]->name, name, 8))
+            ++count;
+
+    return count;
+}
+

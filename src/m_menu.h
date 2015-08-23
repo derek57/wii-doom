@@ -71,9 +71,10 @@ int M_StringWidth(char* string);
 
 void M_ClearMenus (void);
 
-extern int detailLevel;
-extern int screenblocks;
+extern int      detailLevel;
+extern int      screenblocks;
 
+extern byte     grays[256];
 
 
 #endif    

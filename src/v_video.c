@@ -1129,3 +1129,22 @@ void V_ScreenShot(char *format)
     }
 }
 
+void V_LowGraphicDetail(int height)
+{
+    int x, y;
+    int h = SCREENWIDTH;
+
+    height *= SCREENWIDTH;
+
+    for (y = 0; y < height; y += h)
+        for (x = 0; x < SCREENWIDTH; x += 2)
+        {
+            byte        *dot = screens[0] + y + x;
+            int         xx, yy;
+
+            for (yy = 0; yy < h; yy += SCREENWIDTH)
+                for (xx = 0; xx < 2; xx++)
+                    *(dot + yy + xx) = *dot;
+        }
+}
+

@@ -104,5 +104,7 @@ void V_GetBlock (int x, int y, int scrn, int width, int height, byte *dest);
 
 void V_ScreenShot(char *format);
 
+void V_LowGraphicDetail(int height);
+
 #endif
 

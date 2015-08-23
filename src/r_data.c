@@ -32,6 +32,7 @@
 #include "deh_main.h"
 #include "doomdef.h"
 #include "doomstat.h"
+#include "i_scale.h"
 #include "i_swap.h"
 #include "i_system.h"
 #include "m_misc.h"
@@ -183,7 +184,10 @@ unsigned**	 texturecolumnofs2; // [crispy] original column offsets for single-pa
 
 byte**           texturecomposite;
 
+byte             grays[256];
+
 extern byte*     tranmap;
+
 
 //
 // MAPTEXTURE_T CACHING
@@ -988,36 +992,65 @@ void R_InitTranMap()
 void R_InitColormaps (void)
 {
     int        lump;
+    boolean    COLORMAP = (W_CheckMultipleLumps("COLORMAP") > 1);
+    int        i;
+    byte       *palsrc, *palette;
 
     // Load in the light tables, 
     //  256 byte align tables.
     lump = W_GetNumForName(DEH_String("COLORMAP"));
     colormaps = W_CacheLumpNum(lump, PU_STATIC);
 
-    // [crispy] initialize color translation and color strings tables
+    // [BH] There's a typo in dcolors.c, the source code of the utility Id
+    // Software used to construct the palettes and colormaps for DOOM (see
+    // http://www.doomworld.com/idgames/?id=16644). When constructing colormap
+    // 32, which is used for the invulnerability powerup, the traditional
+    // Y luminance values are used (see http://en.wikipedia.org/wiki/YIQ), but a
+    // value of 0.144 is used when it should be 0.114. So I've grabbed the
+    // offending code from dcolor.c, corrected it, put it here, and now colormap
+    // 32 is manually calculated rather than grabbing it from the colormap lump.
+    // The resulting differences are minor.
+    palsrc = palette = W_CacheLumpName("PLAYPAL", PU_CACHE);
+
+    for (i = 0; i < 255; i++)
     {
-        byte *playpal = W_CacheLumpName("PLAYPAL", PU_STATIC);
+        float       red = *palsrc++ / 256.0f;
+        float       green = *palsrc++ / 256.0f;
+        float       blue = *palsrc++ / 256.0f;
+        float       gray = red * 0.299f + green * 0.587f + blue * 0.114f/*0.144f*/;
 
-        char c[3];
-        int i, j;
+        grays[i] = FindNearestColor(palette, (int)(gray * 255.0f),
+            (int)(gray * 255.0f), (int)(gray * 255.0f));
 
-        extern byte V_Colorize (byte *playpal, int cr, byte source);
-
-        if (!crstr)
-            crstr = malloc(CRXMAX * sizeof(*crstr));
-
-        for (i = 0; i < CRXMAX; i++)
+        if (!COLORMAP)
         {
-            for (j = 0; j < 256; j++)
-            {
-                crx[i][j] = V_Colorize(playpal, i, j);
-            }
-
-            M_snprintf(c, sizeof(c), "\x1b%c", '0' + i);
-            crstr[i] = M_StringDuplicate(c);
+            gray = (1.0f - gray) * 255.0f;
+            colormaps[32 * 256 + i] = FindNearestColor(palette, (int)gray, (int)gray, (int)gray);
         }
-        Z_ChangeTag(playpal, PU_CACHE);
     }
+
+    // [crispy] initialize color translation and color strings tables
+    byte *playpal = W_CacheLumpName("PLAYPAL", PU_STATIC);
+
+    char c[3];
+    int j, k;
+
+    extern byte V_Colorize (byte *playpal, int cr, byte source);
+
+    if (!crstr)
+        crstr = malloc(CRXMAX * sizeof(*crstr));
+
+    for (j = 0; j < CRXMAX; j++)
+    {
+        for (k = 0; k < 256; k++)
+        {
+            crx[j][k] = V_Colorize(playpal, j, k);
+        }
+
+        M_snprintf(c, sizeof(c), "\x1b%c", '0' + j);
+        crstr[j] = M_StringDuplicate(c);
+    }
+    Z_ChangeTag(playpal, PU_CACHE);
 }
 
 
