@@ -800,7 +800,7 @@ void HU_Ticker(void)
             else
                 HUlib_addMessageToSText(&w_message, 0, plr->message);
 
-            C_Printf(CR_GREEN, " %s\n", plr->message);
+            C_PlayerMessage(" %s\n", plr->message);
             plr->message = 0;
             message_on = true;
             message_counter = HU_MSGTIMEOUT;

@@ -77,6 +77,7 @@ typedef struct
     char                *string;
     stringtype_t        type;
     int                 tabs[8];
+    char                *timestamp;
 } console_t;
 
 console_t       *console;

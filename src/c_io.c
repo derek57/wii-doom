@@ -44,6 +44,7 @@
 #include <jpeglib.h>
 #include <ogc/libversion.h>
 #include <png.h>
+#include <time.h>
 
 #include "c_io.h"
 #include "deh_str.h"
@@ -97,6 +98,8 @@
 #define ITALICS                 '~'
 
 #define CARETWAIT               10
+
+#define NOBACKGROUNDCOLOR       -1
 
 
 static struct
@@ -215,6 +218,7 @@ void C_Printf(stringtype_t type, char *string, ...)
     console[consolestrings].string = strdup(buffer);
     console[consolestrings].type = type;
     memset(console[consolestrings].tabs, 0, sizeof(console[consolestrings].tabs));
+    console[consolestrings].timestamp = "";
     ++consolestrings;
     outputhistory = -1;
 }
@@ -532,8 +536,15 @@ void C_Drawer(void)
             if (console[i].type == divider)
                 C_DrawDivider(y + 5 - (CONSOLEHEIGHT - consoleheight));
             else
+            {
                 C_DrawConsoleText(CONSOLETEXTX, y + (CONSOLELINEHEIGHT / 2), console[i].string,
                     consolecolors[console[i].type], 0, console[i].tabs, false);
+
+                if (console[i].timestamp[0])
+                    C_DrawConsoleText(SCREENWIDTH - C_TextWidth(console[i].timestamp)
+                        - CONSOLETEXTX * 2 - CONSOLESCROLLBARWIDTH + 1, y + (CONSOLELINEHEIGHT / 2),
+                        console[i].timestamp, consolebrandingcolor, 0, notabs, false);
+            }
         }
 
         // draw caret
@@ -673,5 +684,48 @@ void C_PrintSDLVersions(void)
     C_Printf(CR_GOLD, " Also using the following libraries:\n");
     C_Printf(CR_GOLD, " libvorbisidec.a libwiilight.a, libfat.a, libwiiuse.a, libbte.a,\n");
     C_Printf(CR_GOLD, " libwiikeyboard.a, libsupc++.a, libstdc++.a, libm.a\n");
+}
+
+void C_PlayerMessage(char *string, ...)
+{
+    va_list     argptr;
+    char        buffer[1024] = "";
+
+    va_start(argptr, string);
+    M_vsnprintf(buffer, sizeof(buffer) - 1, string, argptr);
+    va_end(argptr);
+
+    if (consolestrings && !strcasecmp(console[consolestrings - 1].string, buffer))
+    {
+        M_snprintf(buffer, sizeof(buffer), "%s (2)", console[consolestrings - 1].string);
+        console[consolestrings - 1].string = strdup(buffer);
+    }
+    else if (consolestrings && M_StringStartsWith(console[consolestrings - 1].string, buffer))
+    {
+        char    *count = strrchr(console[consolestrings - 1].string, '(') + 1;
+
+        count[strlen(count) - 1] = '\0';
+
+        M_snprintf(buffer, sizeof(buffer), "%s (%i)", buffer, atoi(count) + 1);
+        console[consolestrings - 1].string = strdup(buffer);
+    }
+    else
+    {
+        time_t          rawtime;
+        struct tm       *timeinfo;
+
+        console = realloc(console, (consolestrings + 1) * sizeof(*console));
+        console[consolestrings].string = strdup(buffer);
+        console[consolestrings].type = green;
+        memset(console[consolestrings].tabs, 0, sizeof(console[consolestrings].tabs));
+
+        time(&rawtime);
+        timeinfo = localtime(&rawtime);
+        strftime(buffer, sizeof(buffer), "%T", timeinfo);
+        console[consolestrings].timestamp = strdup(buffer);
+
+        ++consolestrings;
+    }
+    outputhistory = -1;
 }
 
