@@ -2085,7 +2085,7 @@ void M_DarkBackground(void)
         if (!blurred)
         {
             for (i = 0; i < height; ++i)
-                blurredscreen[i] = /*grays[*/screens[0][i]/*]*/;
+                blurredscreen[i] = grays[screens[0][i]];
 
             blurscreen(0, 0, SCREENWIDTH - 1, height, 1);
             blurscreen(1, 0, SCREENWIDTH, height, -1);
