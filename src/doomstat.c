@@ -88,4 +88,5 @@ int             d_colblood = 0;
 int             d_colblood2 = 0;
 int             d_swirl;
 int             autoaim = false;
+int             background_type = 1;
 

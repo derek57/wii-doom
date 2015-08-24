@@ -348,6 +348,7 @@ extern  int             d_colblood;
 extern  int             d_colblood2;
 extern  int             d_swirl;
 extern  int             autoaim;
+extern  int             background_type;
 
 void A_MoreGibs(mobj_t* actor);
 

@@ -379,7 +379,7 @@ void D_Display (void)
     SlopeDiv = SlopeDivVanilla;
 
     // [crispy] shade background when a menu is active or the game is paused
-    if (paused || menuactive)
+    if ((paused || menuactive) && background_type == 1)
     {
         static int firsttic;
 

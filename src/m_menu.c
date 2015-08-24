@@ -864,8 +864,8 @@ int                        cheeting;
 int                        coordinates_info = 0;
 int                        timer_info = 0;
 int                        version_info = 0;
-int                        key_controls_start_in_cfg_at_pos = 69;
-int                        key_controls_end_in_cfg_at_pos = 83;
+int                        key_controls_start_in_cfg_at_pos = 70;
+int                        key_controls_end_in_cfg_at_pos = 84;
 int                        crosshair = 0;
 int                        show_stats = 0;
 int                        tracknum = 1;
@@ -1001,6 +1001,7 @@ void M_ColoredBloodB(int choice);
 void M_WipeType(int choice);
 void M_UncappedFramerate(int choice);
 void M_Screenshots(int choice);
+void M_Background(int choice);
 void M_SizeDisplay(int choice);
 void M_StartGame(int choice);
 void M_Sound(int choice);
@@ -1588,6 +1589,7 @@ enum
     screen_wipe,
     screen_framerate,
     screen_shots,
+    screen_background,
     screen_end
 } screen_e;
 
@@ -1600,6 +1602,7 @@ menuitem_t ScreenMenu[]=
     {2,"Wipe Type",M_WipeType,'w'},
     {2,"Uncapped Framerate",M_UncappedFramerate,'f'},
     {2,"Screenshot Format",M_Screenshots,'x'},
+    {2,"Menu Background",M_Background,'b'},
 };
 
 menu_t  ScreenDef =
@@ -2073,32 +2076,35 @@ static void blurscreen(int x1, int y1, int x2, int y2, int i)
 //
 void M_DarkBackground(void)
 {
-    int i;
-
-    height = SCREENHEIGHT * SCREENWIDTH;
-
-    if (!blurred)
+    if(background_type == 0)
     {
+        int i;
+
+        height = SCREENHEIGHT * SCREENWIDTH;
+
+        if (!blurred)
+        {
+            for (i = 0; i < height; ++i)
+                blurredscreen[i] = /*grays[*/screens[0][i]/*]*/;
+
+            blurscreen(0, 0, SCREENWIDTH - 1, height, 1);
+            blurscreen(1, 0, SCREENWIDTH, height, -1);
+            blurscreen(0, 0, SCREENWIDTH - 1, height - SCREENWIDTH, SCREENWIDTH + 1);
+            blurscreen(1, SCREENWIDTH, SCREENWIDTH, height, -(SCREENWIDTH + 1));
+            blurscreen(0, 0, SCREENWIDTH, height - SCREENWIDTH, SCREENWIDTH);
+            blurscreen(0, SCREENWIDTH, SCREENWIDTH, height, -SCREENWIDTH);
+            blurscreen(1, 0, SCREENWIDTH, height - SCREENWIDTH, SCREENWIDTH - 1);
+            blurscreen(0, SCREENWIDTH, SCREENWIDTH - 1, height, -(SCREENWIDTH - 1));
+
+            blurred = true;
+        }
+
         for (i = 0; i < height; ++i)
-            blurredscreen[i] = grays[screens[0][i]];
+            screens[0][i] = tinttab50[blurredscreen[i]];
 
-        blurscreen(0, 0, SCREENWIDTH - 1, height, 1);
-        blurscreen(1, 0, SCREENWIDTH, height, -1);
-        blurscreen(0, 0, SCREENWIDTH - 1, height - SCREENWIDTH, SCREENWIDTH + 1);
-        blurscreen(1, SCREENWIDTH, SCREENWIDTH, height, -(SCREENWIDTH + 1));
-        blurscreen(0, 0, SCREENWIDTH, height - SCREENWIDTH, SCREENWIDTH);
-        blurscreen(0, SCREENWIDTH, SCREENWIDTH, height, -SCREENWIDTH);
-        blurscreen(1, 0, SCREENWIDTH, height - SCREENWIDTH, SCREENWIDTH - 1);
-        blurscreen(0, SCREENWIDTH, SCREENWIDTH - 1, height, -(SCREENWIDTH - 1));
-
-        blurred = true;
+        if (detailLevel)
+            V_LowGraphicDetail(SCREENHEIGHT);
     }
-
-    for (i = 0; i < height; ++i)
-        screens[0][i] = tinttab50[blurredscreen[i]];
-
-    if (detailLevel)
-        V_LowGraphicDetail(SCREENHEIGHT);
 }
 
 //
@@ -3203,6 +3209,19 @@ void M_DrawScreen(void)
     {
         dp_translation = crx[CRX_GOLD];
         M_WriteText(ScreenDef.x + 180, ScreenDef.y + 58, "PCX");
+        V_ClearDPTranslation();
+    }
+
+    if(background_type == 0)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(ScreenDef.x + 173, ScreenDef.y + 68, "BLUR");
+        V_ClearDPTranslation();
+    }
+    else if(background_type == 1)
+    {
+        dp_translation = crx[CRX_GOLD];
+        M_WriteText(ScreenDef.x + 166, ScreenDef.y + 68, "SHADE");
         V_ClearDPTranslation();
     }
 }
@@ -4569,6 +4588,8 @@ void M_Options(int choice)
 //
 void M_ChangeMessages(int choice)
 {
+    blurred = false;
+
     // warning: unused parameter `int choice'
     choice = 0;
     showMessages = 1 - showMessages;
@@ -4797,6 +4818,7 @@ void M_StrafingSpeed(int choice)
 
 void M_ChangeDetail(int choice)
 {
+    blurred = false;
     choice = 0;
     detailLevel = 1 - detailLevel;
 
@@ -4872,6 +4894,21 @@ void M_Screenshots(int choice)
     }
 }
 
+void M_Background(int choice)
+{
+    switch(choice)
+    {
+      case 0:
+        if (background_type)
+            background_type = 0;
+        break;
+      case 1:
+        if (background_type == 0)
+            background_type = 1;
+        break;
+    }
+}
+
 void M_SizeDisplay(int choice)
 {
     switch(choice)
@@ -4896,6 +4933,7 @@ void M_SizeDisplay(int choice)
         }
         break;
     }
+    blurred = false;
     R_SetViewSize (screenblocks, detailLevel);
 }
 
@@ -4987,6 +5025,7 @@ M_StartMessage
     messageString = string;
     messageRoutine = routine;
     messageNeedsInput = input;
+    blurred = false;
     menuactive = true;
     return;
 }
