@@ -1323,8 +1323,8 @@ void D_DoomMain (void)
     I_AtExit(M_SaveDefaults, false);
 
     printf(" Z_Init: Init zone memory allocation daemon. \n");
-//    printf(" heap size: 0x3cdb000 \n");
-    printf(" heap size: %p \n", zone_mem);
+    printf(" heap size: 0x3cdb000 \n");
+//    printf(" heap size: %p \n", zone_mem);
     printf(" W_Init: Init WADfiles.\n");
 
     if (fsize == 4207819        ||  // DOOM SHAREWARE v1.0

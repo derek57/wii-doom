@@ -146,7 +146,7 @@ byte *I_ZoneBase (int *size)
     default_ram = DEFAULT_RAM;
     min_ram = MIN_RAM;
 
-    printf(" DPMI memory: 0x%x, ", default_ram);
+//    printf(" DPMI memory: 0x%x, ", default_ram);
 
     zonemem = AutoAllocMemory(size, default_ram * i, min_ram * i);
 
@@ -216,6 +216,8 @@ void I_Quit (void)
     fclose (debugfile);
     fclose (statsfile);
 
+    C_ConDump();
+
     atexit_listentry_t *entry;
 
     // Run through all exit functions
@@ -256,6 +258,8 @@ void I_Error (char *error, ...)
     va_end(argptr);
 
     fclose (debugfile);
+
+    C_ConDump();
 
     if (already_quitting)
     {

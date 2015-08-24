@@ -73,6 +73,10 @@
 #include <wiiuse/wpad.h>
 
 
+#if !defined(MAX_PATH)
+#define MAX_PATH        260
+#endif
+
 #define CONSOLESPEED            (CONSOLEHEIGHT / 12)
 
 #define CONSOLEFONTSTART        ' '
@@ -204,6 +208,51 @@ extern byte     *tinttab75;
 
 extern int      fps;
 
+
+char *removenewlines(const char *input)
+{
+    char        *p = malloc(strlen(input) + 1);
+
+    if (p)
+    {
+        char    *p2 = p;
+
+        while (*input != '\0')
+            if (*input != '\n')
+                *p2++ = *input++;
+            else
+                ++input;
+        *p2 = '\0';
+    }
+
+    return p;
+}
+
+void C_ConDump(void)
+{
+    if (consolestrings)
+    {
+        char *filename;
+
+        if(usb)
+            filename = "usb:/apps/wiidoom/condump.txt";
+        else
+            filename = "sd:/apps/wiidoom/condump.txt";
+
+        FILE    *file = fopen(filename, "wt");
+
+        int i;
+
+        if (file)
+        {
+            for (i = 1; i < consolestrings - 1; ++i)
+                fprintf(file, "%s\n",
+                    (console[i].type == divider ? DIVIDERSTRING : removenewlines(console[i].string)));
+
+            fclose(file);
+        }
+    }
+}
 
 void C_Printf(stringtype_t type, char *string, ...)
 {
