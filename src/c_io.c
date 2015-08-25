@@ -666,7 +666,7 @@ void C_Drawer(void)
                     consolecolors[console[i].type], 0, console[i].tabs, false);
 
                 if (console[i].timestamp[0])
-                    C_DrawTimeStamp(timestampx, y, console[i].timestamp);
+                    C_DrawTimeStamp(timestampx, y + (CONSOLELINEHEIGHT / 2), console[i].timestamp);
             }
         }
 
