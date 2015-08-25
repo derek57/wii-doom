@@ -610,9 +610,9 @@ static void C_DrawTimeStamp(int x, int y, char *text)
         if (patch)
         {
             if (text[i] == '1')
-                x += (zerowidth - patch->width) / 2;
+                x += (zerowidth - SHORT(patch->width)) / 2;
             V_DrawConsoleChar(x, y, patch, consolebrandingcolor, false, 1, false);
-            x += (isdigit(text[i]) ? zerowidth : patch->width);
+            x += (isdigit(text[i]) ? zerowidth : SHORT(patch->width));
         }
     }
 }
