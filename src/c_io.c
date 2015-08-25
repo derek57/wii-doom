@@ -194,6 +194,8 @@ int             consoleedgecolor2 = 100;
 int             caretpos = 0;
 int             selectstart = 0;
 int             selectend = 0;
+int             timestampx;
+int             zerowidth;
 
 static int      caretwait = 0;
 static int      outputhistory = -1;
@@ -362,6 +364,42 @@ static void C_DrawScrollbar(void)
                 screens[0][y - offset + x] = consolescrollbarfacecolor;
 }
 
+static int C_TextWidth(char *text)
+{
+    size_t      i;
+    size_t      len = strlen(text);
+    char        prevletter = '\0';
+    int         w = 0;
+
+    for (i = 0; i < len; ++i)
+    {
+        char    letter = text[i];
+        int     c = letter - CONSOLEFONTSTART;
+        char    nextletter = text[i + 1];
+        int     j = 0;
+
+        if (letter == '\xc2' && nextletter == '\xb0')
+        {
+            w += SHORT(degree->width);
+            ++i;
+        }
+        else
+            w += SHORT(c < 0 || c >= CONSOLEFONTSIZE ? unknownchar->width : consolefont[c]->width);
+
+        while (kern[j].char1)
+        {
+            if (prevletter == kern[j].char1 && letter == kern[j].char2)
+            {
+                w += kern[j].adjust;
+                break;
+            }
+            ++j;
+        }
+        prevletter = letter;
+    }
+    return w;
+}
+
 void C_Init(void)
 {
     int         i;
@@ -383,6 +421,11 @@ void C_Init(void)
     space = consolefont[' ' - CONSOLEFONTSTART];
     route = consolefont['$' - CONSOLEFONTSTART];
     caret = consolefont['_' - CONSOLEFONTSTART];
+
+    timestampx = SCREENWIDTH - C_TextWidth("00:00:00") - CONSOLETEXTX * 2
+        - CONSOLESCROLLBARWIDTH + 1;
+
+    zerowidth = SHORT(consolefont['0' - CONSOLEFONTSTART]->width);
 
     consolecolors[yellow] = yellowcolor;   // yellow = 160
     consolecolors[red] = redcolor;         // red = 40
@@ -459,42 +502,6 @@ static void C_DrawBackground(int height)
             screens[0][i] = colormaps[256 * 4 + screens[0][i]];
 }
 
-static int C_TextWidth(char *text)
-{
-    size_t      i;
-    size_t      len = strlen(text);
-    char        prevletter = '\0';
-    int         w = 0;
-
-    for (i = 0; i < len; ++i)
-    {
-        char    letter = text[i];
-        int     c = letter - CONSOLEFONTSTART;
-        char    nextletter = text[i + 1];
-        int     j = 0;
-
-        if (letter == '\xc2' && nextletter == '\xb0')
-        {
-            w += SHORT(degree->width);
-            ++i;
-        }
-        else
-            w += SHORT(c < 0 || c >= CONSOLEFONTSIZE ? unknownchar->width : consolefont[c]->width);
-
-        while (kern[j].char1)
-        {
-            if (prevletter == kern[j].char1 && letter == kern[j].char2)
-            {
-                w += kern[j].adjust;
-                break;
-            }
-            ++j;
-        }
-        prevletter = letter;
-    }
-    return w;
-}
-
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wchar-subscripts"
 
@@ -506,6 +513,8 @@ static void C_DrawConsoleText(int x, int y, char *text, byte color, int transluc
     int         tab = -1;
     size_t      len = strlen(text);
     char        prevletter = '\0';
+
+    y -= (CONSOLEHEIGHT - consoleheight);
 
     if (len > 80)
     {
@@ -574,12 +583,32 @@ static void C_DrawConsoleText(int x, int y, char *text, byte color, int transluc
 
             if (patch)
             {
-                V_DrawConsoleChar(x, y - (CONSOLEHEIGHT - consoleheight), patch, color, italics,
-                    translucency, inverted);
+                V_DrawConsoleChar(x, y, patch, color, italics, translucency, inverted);
                 x += SHORT(patch->width);
             }
         }
         prevletter = letter;
+    }
+}
+
+static void C_DrawTimeStamp(int x, int y, char *text)
+{
+    size_t      i;
+    size_t      len = strlen(text);
+
+    y -= (CONSOLEHEIGHT - consoleheight);
+
+    for (i = 0; i < len; ++i)
+    {
+        patch_t *patch = consolefont[text[i] - CONSOLEFONTSTART];
+
+        if (patch)
+        {
+            if (text[i] == '1')
+                x += (zerowidth - patch->width) / 2;
+            V_DrawConsoleChar(x, y, patch, consolebrandingcolor, false, 0, false);
+            x += (isdigit(text[i]) ? zerowidth : patch->width);
+        }
     }
 }
 
@@ -632,9 +661,7 @@ void C_Drawer(void)
                     consolecolors[console[i].type], 0, console[i].tabs, false);
 
                 if (console[i].timestamp[0])
-                    C_DrawConsoleText(SCREENWIDTH - C_TextWidth(console[i].timestamp)
-                        - CONSOLETEXTX * 2 - CONSOLESCROLLBARWIDTH + 1, y + (CONSOLELINEHEIGHT / 2),
-                        console[i].timestamp, consolebrandingcolor, 0, notabs, false);
+                    C_DrawTimeStamp(timestampx, y, console[i].timestamp);
             }
         }
 
