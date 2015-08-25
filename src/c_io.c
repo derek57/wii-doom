@@ -254,6 +254,7 @@ void C_ConDump(void)
                 else
                 {
                     unsigned int        inpos;
+                    unsigned int        spaces;
                     unsigned int        len = strlen(console[i].string);
                     unsigned int        outpos = 0;
                     int                 tabcount = 0;
@@ -270,8 +271,6 @@ void C_ConDump(void)
 
                                 if (outpos < tabstop)
                                 {
-                                    unsigned int       spaces;
-
                                     for (spaces = 0; spaces < tabstop - outpos; ++spaces)
                                         fputc(' ', file);
                                     outpos = tabstop;
@@ -290,6 +289,14 @@ void C_ConDump(void)
                             }
                         }
                     }
+
+                    if (console[i].timestamp[0])
+                    {
+                        for (spaces = 0; spaces < 91 - outpos; ++spaces)
+                            fputc(' ', file);
+                        fputs(console[i].timestamp, file);
+                    }
+
                     fputc('\n', file);
                 }
             }
