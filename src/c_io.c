@@ -429,9 +429,7 @@ void C_Init(void)
     route = consolefont['$' - CONSOLEFONTSTART];
     caret = consolefont['_' - CONSOLEFONTSTART];
 
-    timestampx = SCREENWIDTH - C_TextWidth("00:00:00") - CONSOLETEXTX * 2
-        - CONSOLESCROLLBARWIDTH + 1;
-
+    timestampx = SCREENWIDTH - C_TextWidth("00:00:00") - CONSOLETEXTX * 2 - CONSOLESCROLLBARWIDTH;
     zerowidth = SHORT(consolefont['0' - CONSOLEFONTSTART]->width);
 
     consolecolors[yellow] = yellowcolor;   // yellow = 160
