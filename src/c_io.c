@@ -611,7 +611,7 @@ static void C_DrawTimeStamp(int x, int y, char *text)
         {
             if (text[i] == '1')
                 x += (zerowidth - patch->width) / 2;
-            V_DrawConsoleChar(x, y, patch, consolebrandingcolor, false, 0, false);
+            V_DrawConsoleChar(x, y, patch, consolebrandingcolor, false, 1, false);
             x += (isdigit(text[i]) ? zerowidth : patch->width);
         }
     }
