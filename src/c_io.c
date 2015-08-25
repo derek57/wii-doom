@@ -239,12 +239,12 @@ void C_ConDump(void)
         else
             filename = "sd:/apps/wiidoom/condump.txt";
 
-        FILE    *file = fopen(filename, "wt");
-
-        int i;
+        FILE *file = fopen(filename, "wt");
 
         if (file)
         {
+            int i;
+
             for (i = 1; i < consolestrings - 1; ++i)
             {
                 if (console[i].type == divider)
