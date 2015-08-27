@@ -286,24 +286,6 @@ rcsid[] = "$Id: st_stuff.c,v 1.6 1997/02/03 22:45:13 b1 Exp $";
 
 static struct
 {
-    char        *patchname;
-    int         mobjnum;
-    int         x;
-    int         y;
-    patch_t     *patch;
-} ammopic[NUMAMMO + 4] = {
-    { "PSTRA0", MT_MISC13, 15,  8, NULL },
-    { "CLIPA0", MT_CLIP,   15,  8, NULL },
-    { "SHELA0", MT_MISC22, 15,  8, NULL },
-    { "AMMOA0", MT_MISC17, 15,  8, NULL },
-    { "ROCKA0", MT_MISC18, 15,  8, NULL },
-    { "CELLA0", MT_MISC20,  8,  8, NULL },
-    { "CELPA0", MT_MISC21,  8,  8, NULL },
-    { "SBOXA0", MT_MISC23, 15,  8, NULL }
-};
-
-static struct
-{
     char        *patchnamea;
     char        *patchnameb;
     patch_t     *patch;
@@ -487,14 +469,6 @@ static st_number_t            w_ammo[4];
 // max ammo widgets
 static st_number_t            w_maxammo[4]; 
 
-patch_t *ST_LoadStatusAmmoPatch(int ammopicnum)
-{
-    if ((mobjinfo[ammopic[ammopicnum].mobjnum].flags & MF_SPECIAL)
-            && W_CheckNumForName(ammopic[ammopicnum].patchname) >= 0)
-        return W_CacheLumpNum(W_GetNumForName(ammopic[ammopicnum].patchname), PU_CACHE);
-    else
-        return NULL;
-}
 
 patch_t *ST_LoadStatusKeyPatch(int keypicnum)
 {
@@ -732,15 +706,27 @@ void ST_DrawStatus(void)
         tinttab = ((ammo <= ST_AMMO_MIN && ammoanim) || ammo > ST_AMMO_MIN || gamepaused ?
             tinttab66 : tinttab25);
 
-        patch = ammopic[plyr->readyweapon].patch;
-
-        if (plyr->readyweapon == wp_supershotgun)
-            patch = ammopic[plyr->readyweapon - 1].patch;
+        if(plyr->readyweapon == wp_pistol)
+            patch = W_CacheLumpName(DEH_String("CLIPA0"), PU_CACHE);
+        else if(plyr->readyweapon == wp_shotgun)
+            patch = W_CacheLumpName(DEH_String("SHELA0"), PU_CACHE);
+        else if(plyr->readyweapon == wp_chaingun)
+            patch = W_CacheLumpName(DEH_String("AMMOA0"), PU_CACHE);
+        else if(plyr->readyweapon == wp_missile)
+            patch = W_CacheLumpName(DEH_String("ROCKA0"), PU_CACHE);
+        else if(plyr->readyweapon == wp_plasma)
+            patch = W_CacheLumpName(DEH_String("CELLA0"), PU_CACHE);
+        else if(plyr->readyweapon == wp_bfg)
+            patch = W_CacheLumpName(DEH_String("CELPA0"), PU_CACHE);
+        else if(plyr->readyweapon == wp_supershotgun)
+            patch = W_CacheLumpName(DEH_String("SBOXA0"), PU_CACHE);
+        else
+            patch = W_CacheLumpName(DEH_String("EMPTY"), PU_CACHE);
 
         int offset_special = 0;
 
-        int offset_width = ST_AMMO_X + ammopic[ammotype].x;
-        int offset_height = ST_AMMO_Y + ammopic[ammotype].y;
+        int offset_width = ST_AMMO_X + 15;
+        int offset_height = ST_AMMO_Y + 8;
 
         int half_patch_width = (SHORT(patch->width) / 2);
         int half_patch_height = (SHORT(patch->height) / 2);
@@ -1879,7 +1865,6 @@ void ST_createWidgets(void)
 
 void ST_Start (void)
 {
-
     if (!st_stopped)
         ST_Stop();
 
@@ -1889,41 +1874,28 @@ void ST_Start (void)
 
     if (W_CheckNumForName("MEDIA0"))
         healthpatch = W_CacheLumpNum(W_GetNumForName("MEDIA0"), PU_CACHE);
+
     if (gamemode != shareware && W_CheckNumForName("PSTRA0"))
         berserkpatch = W_CacheLumpNum(W_GetNumForName("PSTRA0"), PU_CACHE);
     else
         berserkpatch = healthpatch;
+
     if (W_CheckNumForName("ARM1A0"))
         greenarmorpatch = W_CacheLumpNum(W_GetNumForName("ARM1A0"), PU_CACHE);
+
     if (W_CheckNumForName("ARM2A0"))
         bluearmorpatch = W_CacheLumpNum(W_GetNumForName("ARM2A0"), PU_CACHE);
-
-    ammopic[am_clip].patch = ST_LoadStatusAmmoPatch(am_clip);
-    ammopic[am_shell].patch = ST_LoadStatusAmmoPatch(am_shell);
-
-    if (gamemode != shareware)
-    {
-        ammopic[am_cell].patch = ST_LoadStatusAmmoPatch(am_cell);
-
-        ammopic[4].patch = ST_LoadStatusAmmoPatch(4);
-        ammopic[7].patch = ST_LoadStatusAmmoPatch(7);
-    }
-
-    ammopic[am_misl].patch = ST_LoadStatusAmmoPatch(am_misl);
-
-    ammopic[5].patch = ST_LoadStatusAmmoPatch(5);
-    ammopic[6].patch = ST_LoadStatusAmmoPatch(6);
 
     keypic[it_bluecard].patch = ST_LoadStatusKeyPatch(it_bluecard);
     keypic[it_yellowcard].patch = ST_LoadStatusKeyPatch(exe_hacx ? it_yellowcard : it_yellowskull);
     keypic[it_redcard].patch = ST_LoadStatusKeyPatch(it_redcard);
+
     if (gamemode != shareware)
     {
         keypic[it_blueskull].patch = ST_LoadStatusKeyPatch(it_blueskull);
         keypic[it_yellowskull].patch = ST_LoadStatusKeyPatch(it_yellowskull);
         keypic[it_redskull].patch = ST_LoadStatusKeyPatch(it_redskull);
     }
-
 }
 
 void ST_Init (void)
