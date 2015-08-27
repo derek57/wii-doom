@@ -3,6 +3,7 @@
 //
 // Copyright(C) 1993-1996 Id Software, Inc.
 // Copyright(C) 2005 Simon Howard
+// Copyright(C) 2015 Brad Harding (Shadowed Menu Background)
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
