@@ -343,6 +343,7 @@ extern  boolean         d_maskedanim;
 extern  boolean         d_sound;
 extern  boolean         d_ouchface;
 extern  boolean         show_authors;
+extern  boolean         font_shadow;
 
 extern  int             d_colblood;
 extern  int             d_colblood2;

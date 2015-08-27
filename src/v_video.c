@@ -1148,3 +1148,52 @@ void V_LowGraphicDetail(int height)
         }
 }
 
+void V_DrawPatchWithShadow(int x, int y, int scrn, patch_t *patch, boolean flag)
+{
+    int         col = 0;
+    byte        *desttop;
+    int         w = SHORT(patch->width) << 16;
+    fixed_t     DX = (SCREENWIDTH << 16) / ORIGWIDTH;
+    fixed_t     DXI = (ORIGWIDTH << 16) / SCREENWIDTH;
+    fixed_t     DY = (SCREENHEIGHT << 16) / ORIGHEIGHT;
+    fixed_t     DYI = (ORIGHEIGHT << 16) / SCREENHEIGHT;
+
+    y -= SHORT(patch->topoffset);
+    x -= SHORT(patch->leftoffset);
+
+    desttop = screens[scrn] + ((y * DY) >> 16) * SCREENWIDTH + ((x * DX) >> 16);
+
+    for (; col < w; col += DXI, desttop++)
+    {
+        column_t        *column = (column_t *)((byte *)patch + LONG(patch->columnofs[col >> 16]));
+
+        // step through the posts in a column
+        while (column->topdelta != 0xff)
+        {
+            byte        *source = (byte *)column + 3;
+            byte        *dest = desttop + ((column->topdelta * DY) >> 16) * SCREENWIDTH;
+            int         count = (column->length * DY) >> 16;
+            int         srccol = 0;
+
+            while (count--)
+            {
+                int     height = (((y + column->topdelta + column->length) * DY) >> 16) - count;
+
+                if (height > 0)
+                    *dest = source[srccol >> 16];
+                dest += SCREENWIDTH;
+                if (height + 2 > 0)
+                {
+                    byte        *shadow = dest + SCREENWIDTH + 2;
+
+                    if (!flag || (*shadow != 47 && *shadow != 191))
+                        *shadow = (d_translucency ? tinttab50[*shadow] : 0);
+                }
+                srccol += DYI;
+            }
+
+            column = (column_t *)((byte *)column + column->length + 4);
+        }
+    }
+}
+

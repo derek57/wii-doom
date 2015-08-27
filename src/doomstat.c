@@ -83,6 +83,7 @@ boolean         d_maskedanim = false;
 boolean         d_sound = false;
 boolean         d_ouchface = false;
 boolean         show_authors = false;
+boolean         font_shadow = false;
 
 int             d_colblood = 0;
 int             d_colblood2 = 0;

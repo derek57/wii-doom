@@ -864,8 +864,8 @@ int                        cheeting;
 int                        coordinates_info = 0;
 int                        timer_info = 0;
 int                        version_info = 0;
-int                        key_controls_start_in_cfg_at_pos = 70;
-int                        key_controls_end_in_cfg_at_pos = 84;
+int                        key_controls_start_in_cfg_at_pos = 71;
+int                        key_controls_end_in_cfg_at_pos = 85;
 int                        crosshair = 0;
 int                        show_stats = 0;
 int                        tracknum = 1;
@@ -1002,6 +1002,7 @@ void M_WipeType(int choice);
 void M_UncappedFramerate(int choice);
 void M_Screenshots(int choice);
 void M_Background(int choice);
+void M_FontShadow(int choice);
 void M_SizeDisplay(int choice);
 void M_StartGame(int choice);
 void M_Sound(int choice);
@@ -1590,6 +1591,7 @@ enum
     screen_framerate,
     screen_shots,
     screen_background,
+    screen_shadow,
     screen_end
 } screen_e;
 
@@ -1600,9 +1602,10 @@ menuitem_t ScreenMenu[]=
     {2,"Detail",M_ChangeDetail,'d'},
     {2,"Translucency",M_Translucency,'t'},
     {2,"Wipe Type",M_WipeType,'w'},
-    {2,"Uncapped Framerate",M_UncappedFramerate,'f'},
+    {2,"Uncapped Framerate",M_UncappedFramerate,'u'},
     {2,"Screenshot Format",M_Screenshots,'x'},
-    {2,"Menu Background",M_Background,'b'},
+    {2,"Menu Main Background",M_Background,'b'},
+    {2,"Menu Font Style",M_FontShadow,'f'}
 };
 
 menu_t  ScreenDef =
@@ -2144,8 +2147,8 @@ void M_DrawLoad(void)
 
     M_DarkBackground();
 
-    V_DrawPatch(72, 28, 0,
-                      W_CacheLumpName(DEH_String("M_T_LGME"), PU_CACHE));
+    V_DrawPatchWithShadow(72, 28, 0,
+                      W_CacheLumpName(DEH_String("M_T_LGME"), PU_CACHE), false);
 
     for (i = 0;i < load_end; i++)
     {
@@ -2174,18 +2177,18 @@ void M_DrawSaveLoadBorder(int x,int y)
 {
     int             i;
         
-    V_DrawPatch(x - 8, y + 7, 0,
-                      W_CacheLumpName(DEH_String("M_LSLEFT"), PU_CACHE));
+    V_DrawPatchWithShadow(x - 8, y + 7, 0,
+                      W_CacheLumpName(DEH_String("M_LSLEFT"), PU_CACHE), false);
         
     for (i = 0;i < 24;i++)
     {
-        V_DrawPatch(x, y + 7, 0,
-                          W_CacheLumpName(DEH_String("M_LSCNTR"), PU_CACHE));
+        V_DrawPatchWithShadow(x, y + 7, 0,
+                          W_CacheLumpName(DEH_String("M_LSCNTR"), PU_CACHE), false);
         x += 8;
     }
 
-    V_DrawPatch(x, y + 7, 0,
-                      W_CacheLumpName(DEH_String("M_LSRGHT"), PU_CACHE));
+    V_DrawPatchWithShadow(x, y + 7, 0,
+                      W_CacheLumpName(DEH_String("M_LSRGHT"), PU_CACHE), false);
 }
 
 
@@ -2227,7 +2230,7 @@ void M_DrawSave(void)
         
     M_DarkBackground();
 
-    V_DrawPatch(72, 28, 0, W_CacheLumpName(DEH_String("M_T_SGME"), PU_CACHE));
+    V_DrawPatchWithShadow(72, 28, 0, W_CacheLumpName(DEH_String("M_T_SGME"), PU_CACHE), false);
     for (i = 0;i < load_end; i++)
     {
         M_DrawSaveLoadBorder(LoadDef.x+5,LoadDef.y+LINEHEIGHT_SMALL*i);
@@ -2386,7 +2389,7 @@ void M_DrawReadThis1(void)
 
     lumpname = DEH_String(lumpname);
     
-    V_DrawPatch (0, 0, 0, W_CacheLumpName(lumpname, PU_CACHE));
+    V_DrawPatchWithShadow (0, 0, 0, W_CacheLumpName(lumpname, PU_CACHE), false);
 
     ReadDef1.x = skullx;
     ReadDef1.y = skully;
@@ -2404,7 +2407,7 @@ void M_DrawReadThis2(void)
     // We only ever draw the second page if this is 
     // gameversion == exe_doom_1_9 and gamemode == registered
 
-    V_DrawPatch(0, 0, 0, W_CacheLumpName(DEH_String("HELP1"), PU_CACHE));
+    V_DrawPatchWithShadow(0, 0, 0, W_CacheLumpName(DEH_String("HELP1"), PU_CACHE), false);
 }
 
 
@@ -2416,9 +2419,9 @@ void M_DrawSound(void)
     M_DarkBackground();
 
     if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
-        V_DrawPatch (65, 15, 0, W_CacheLumpName(DEH_String("M_T_XSET"), PU_CACHE));
+        V_DrawPatchWithShadow (65, 15, 0, W_CacheLumpName(DEH_String("M_T_XSET"), PU_CACHE), false);
     else
-        V_DrawPatch (65, 15, 0, W_CacheLumpName(DEH_String("M_SNDSET"), PU_CACHE));
+        V_DrawPatchWithShadow (65, 15, 0, W_CacheLumpName(DEH_String("M_SNDSET"), PU_CACHE), false);
 
     M_DrawThermoSmall(SoundDef.x + 95, SoundDef.y + LINEHEIGHT_SMALL * (sfx_vol + 1),
                  16, sfxVolume);
@@ -2675,8 +2678,8 @@ void M_DrawMainMenu(void)
 {
     M_DarkBackground();
 
-    V_DrawPatch(94, 2, 0,
-                      W_CacheLumpName(DEH_String("M_DOOM"), PU_CACHE));
+    V_DrawPatchWithShadow(94, 2, 0,
+                      W_CacheLumpName(DEH_String("M_DOOM"), PU_CACHE), false);
 }
 
 
@@ -2689,7 +2692,7 @@ void M_DrawNewGame(void)
 {
     M_DarkBackground();
 
-    V_DrawPatch(96, 14, 0, W_CacheLumpName(DEH_String("M_NEWG"), PU_CACHE));
+    V_DrawPatchWithShadow(96, 14, 0, W_CacheLumpName(DEH_String("M_NEWG"), PU_CACHE), false);
     M_WriteText(NewDef.x, NewDef.y - 22, "CHOOSE SKILL LEVEL:");
 }
 
@@ -2719,7 +2722,7 @@ void M_DrawEpisode(void)
 {
     M_DarkBackground();
 
-    V_DrawPatch(75, 38, 0, W_CacheLumpName(DEH_String("M_EPISOD"), PU_CACHE));
+    V_DrawPatchWithShadow(75, 38, 0, W_CacheLumpName(DEH_String("M_EPISOD"), PU_CACHE), false);
 }
 
 void M_VerifyNightmare(int ch)
@@ -2784,16 +2787,16 @@ void M_DrawOptions(void)
 {
     M_DarkBackground();
 
-    V_DrawPatch(108, 15, 0, W_CacheLumpName(DEH_String("M_OPTTTL"),
-                                               PU_CACHE));
+    V_DrawPatchWithShadow(108, 15, 0, W_CacheLumpName(DEH_String("M_OPTTTL"),
+                                               PU_CACHE), false);
 }
 
 void M_DrawItems(void)
 {
     M_DarkBackground();
 
-    V_DrawPatch(123, 10, 0, W_CacheLumpName(DEH_String("M_T_ITMS"),
-                                               PU_CACHE));
+    V_DrawPatchWithShadow(123, 10, 0, W_CacheLumpName(DEH_String("M_T_ITMS"),
+                                               PU_CACHE), false);
 
     dp_translation = crx[CRX_GOLD];
     M_WriteText(80, 50, DEH_String("GIVE THEM ALL AT ONCE"));
@@ -2918,8 +2921,8 @@ void M_DrawArmor(void)
 {
     M_DarkBackground();
 
-    V_DrawPatch(115, 15, 0, W_CacheLumpName(DEH_String("M_T_ARMR"),
-                                               PU_CACHE));
+    V_DrawPatchWithShadow(115, 15, 0, W_CacheLumpName(DEH_String("M_T_ARMR"),
+                                               PU_CACHE), false);
 
     dp_translation = crx[CRX_GOLD];
     M_WriteText(80, 55, DEH_String("GIVE THEM BOTH AT ONCE"));
@@ -2969,8 +2972,8 @@ void M_DrawWeapons(void)
 {
     M_DarkBackground();
 
-    V_DrawPatch(103, 15, 0, W_CacheLumpName(DEH_String("M_T_WPNS"),
-                                               PU_CACHE));
+    V_DrawPatchWithShadow(103, 15, 0, W_CacheLumpName(DEH_String("M_T_WPNS"),
+                                               PU_CACHE), false);
 
     dp_translation = crx[CRX_GOLD];
     M_WriteText(80, 55, DEH_String("GIVE THEM ALL AT ONCE"));
@@ -3102,8 +3105,8 @@ void M_DrawKeys(void)
 {
     M_DarkBackground();
 
-    V_DrawPatch(125, 15, 0, W_CacheLumpName(DEH_String("M_T_KEYS"),
-                                               PU_CACHE));
+    V_DrawPatchWithShadow(125, 15, 0, W_CacheLumpName(DEH_String("M_T_KEYS"),
+                                               PU_CACHE), false);
 
     dp_translation = crx[CRX_GOLD];
     M_WriteText(80, 55, DEH_String("GIVE ALL KEYS FOR THIS MAP"));
@@ -3115,18 +3118,18 @@ void M_DrawScreen(void)
     M_DarkBackground();
 
     if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
-        V_DrawPatch(58, 15, 0, W_CacheLumpName(DEH_String("M_T_SSET"),
-                                               PU_CACHE));
+        V_DrawPatchWithShadow(58, 15, 0, W_CacheLumpName(DEH_String("M_T_SSET"),
+                                               PU_CACHE), false);
     else
-        V_DrawPatch(58, 15, 0, W_CacheLumpName(DEH_String("M_SCRSET"),
-                                               PU_CACHE));
+        V_DrawPatchWithShadow(58, 15, 0, W_CacheLumpName(DEH_String("M_SCRSET"),
+                                               PU_CACHE), false);
 
     M_DrawThermoSmall(ScreenDef.x + 152, ScreenDef.y + LINEHEIGHT_SMALL * (gamma + 1),
                  5, usegamma);
 /*
-    V_DrawPatch(OptionsDef.x + 175, OptionsDef.y + LINEHEIGHT + 11.5 *
+    V_DrawPatchWithShadow(OptionsDef.x + 175, OptionsDef.y + LINEHEIGHT + 11.5 *
                       screen_detail, W_CacheLumpName(DEH_String
-                      (detailNames[detailLevel]), PU_CACHE));
+                      (detailNames[detailLevel]), PU_CACHE), false);
 */
     if(detailLevel > 0)
     {
@@ -3224,6 +3227,19 @@ void M_DrawScreen(void)
         M_WriteText(ScreenDef.x + 166, ScreenDef.y + 68, "SHADE");
         V_ClearDPTranslation();
     }
+
+    if(font_shadow)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(ScreenDef.x + 141, ScreenDef.y + 78, "SHADOWED");
+        V_ClearDPTranslation();
+    }
+    else
+    {
+        dp_translation = crx[CRX_GOLD];
+        M_WriteText(ScreenDef.x + 149, ScreenDef.y + 78, "COLORED");
+        V_ClearDPTranslation();
+    }
 }
 
 void M_DrawGame(void)
@@ -3231,11 +3247,11 @@ void M_DrawGame(void)
     M_DarkBackground();
 
     if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
-        V_DrawPatch(70, 0, 0, W_CacheLumpName(DEH_String("M_T_GSET"),
-                                               PU_CACHE));
+        V_DrawPatchWithShadow(70, 0, 0, W_CacheLumpName(DEH_String("M_T_GSET"),
+                                               PU_CACHE), false);
     else
-        V_DrawPatch(70, 0, 0, W_CacheLumpName(DEH_String("M_GMESET"),
-                                               PU_CACHE));
+        V_DrawPatchWithShadow(70, 0, 0, W_CacheLumpName(DEH_String("M_GMESET"),
+                                               PU_CACHE), false);
 
     if(devparm)
     {
@@ -3475,11 +3491,11 @@ void M_DrawGame2(void)
     M_DarkBackground();
 
     if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
-        V_DrawPatch(70, 0, 0, W_CacheLumpName(DEH_String("M_T_GSET"),
-                                               PU_CACHE));
+        V_DrawPatchWithShadow(70, 0, 0, W_CacheLumpName(DEH_String("M_T_GSET"),
+                                               PU_CACHE), false);
     else
-        V_DrawPatch(70, 0, 0, W_CacheLumpName(DEH_String("M_GMESET"),
-                                               PU_CACHE));
+        V_DrawPatchWithShadow(70, 0, 0, W_CacheLumpName(DEH_String("M_GMESET"),
+                                               PU_CACHE), false);
 
     if(not_monsters)
     {
@@ -3694,11 +3710,11 @@ void M_DrawGame3(void)
     M_DarkBackground();
 
     if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
-        V_DrawPatch(70, 0, 0, W_CacheLumpName(DEH_String("M_T_GSET"),
-                                               PU_CACHE));
+        V_DrawPatchWithShadow(70, 0, 0, W_CacheLumpName(DEH_String("M_T_GSET"),
+                                               PU_CACHE), false);
     else
-        V_DrawPatch(70, 0, 0, W_CacheLumpName(DEH_String("M_GMESET"),
-                                               PU_CACHE));
+        V_DrawPatchWithShadow(70, 0, 0, W_CacheLumpName(DEH_String("M_GMESET"),
+                                               PU_CACHE), false);
 
     if(crosshair == 1)
     {
@@ -3895,11 +3911,11 @@ void M_DrawGame4(void)
     M_DarkBackground();
 
     if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
-        V_DrawPatch(70, 0, 0, W_CacheLumpName(DEH_String("M_T_GSET"),
-                                               PU_CACHE));
+        V_DrawPatchWithShadow(70, 0, 0, W_CacheLumpName(DEH_String("M_T_GSET"),
+                                               PU_CACHE), false);
     else
-        V_DrawPatch(70, 0, 0, W_CacheLumpName(DEH_String("M_GMESET"),
-                                               PU_CACHE));
+        V_DrawPatchWithShadow(70, 0, 0, W_CacheLumpName(DEH_String("M_GMESET"),
+                                               PU_CACHE), false);
 
     if(d_god)
     {
@@ -4068,9 +4084,9 @@ void M_DrawCheats(void)
     M_DarkBackground();
 
     if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
-        V_DrawPatch (110, 6, 0, W_CacheLumpName(DEH_String("M_T_CHTS"), PU_CACHE));
+        V_DrawPatchWithShadow (110, 6, 0, W_CacheLumpName(DEH_String("M_T_CHTS"), PU_CACHE), false);
     else
-        V_DrawPatch (110, 6, 0, W_CacheLumpName(DEH_String("M_CHEATS"), PU_CACHE));
+        V_DrawPatchWithShadow (110, 6, 0, W_CacheLumpName(DEH_String("M_CHEATS"), PU_CACHE), false);
 
     if (players[consoleplayer].cheats & CF_GODMODE)
     {
@@ -4342,8 +4358,8 @@ void M_DrawRecord(void)
 
     int offset = 0;
 
-    V_DrawPatch(58, 15, 0, W_CacheLumpName(DEH_String("M_T_DREC"),
-                                               PU_CACHE));
+    V_DrawPatchWithShadow(58, 15, 0, W_CacheLumpName(DEH_String("M_T_DREC"),
+                                               PU_CACHE), false);
     if (rmap == 0)
         rmap = 1;
 
@@ -4490,35 +4506,35 @@ void M_DrawRecord(void)
             if(fsize == 28422764)
                 offset = 7;
             if(rmap == 1 || rmap == 11 || rmap == 21 || rmap == 31)
-                V_DrawPatch (115 - offset, 68, 0, W_CacheLumpName
-                (DEH_String("WINUM1"), PU_CACHE));
+                V_DrawPatchWithShadow (115 - offset, 68, 0, W_CacheLumpName
+                (DEH_String("WINUM1"), PU_CACHE), false);
             else if(rmap == 2 || rmap == 12 || rmap == 22 || rmap == 32)
-                V_DrawPatch (115 - offset, 68, 0, W_CacheLumpName
-                (DEH_String("WINUM2"), PU_CACHE));
+                V_DrawPatchWithShadow (115 - offset, 68, 0, W_CacheLumpName
+                (DEH_String("WINUM2"), PU_CACHE), false);
             else if(rmap == 3 || rmap == 13 || rmap == 23)
-                V_DrawPatch (115 - offset, 68, 0, W_CacheLumpName
-                (DEH_String("WINUM3"), PU_CACHE));
+                V_DrawPatchWithShadow (115 - offset, 68, 0, W_CacheLumpName
+                (DEH_String("WINUM3"), PU_CACHE), false);
             else if(rmap == 4 || rmap == 14 || rmap == 24)
-                V_DrawPatch (115 - offset, 68, 0, W_CacheLumpName
-                (DEH_String("WINUM4"), PU_CACHE));
+                V_DrawPatchWithShadow (115 - offset, 68, 0, W_CacheLumpName
+                (DEH_String("WINUM4"), PU_CACHE), false);
             else if(rmap == 5 || rmap == 15 || rmap == 25)
-                V_DrawPatch (115 - offset, 68, 0, W_CacheLumpName
-                (DEH_String("WINUM5"), PU_CACHE));
+                V_DrawPatchWithShadow (115 - offset, 68, 0, W_CacheLumpName
+                (DEH_String("WINUM5"), PU_CACHE), false);
             else if(rmap == 6 || rmap == 16 || rmap == 26)
-                V_DrawPatch (115 - offset, 68, 0, W_CacheLumpName
-                (DEH_String("WINUM6"), PU_CACHE));
+                V_DrawPatchWithShadow (115 - offset, 68, 0, W_CacheLumpName
+                (DEH_String("WINUM6"), PU_CACHE), false);
             else if(rmap == 7 || rmap == 17 || rmap == 27)
-                V_DrawPatch (115 - offset, 68, 0, W_CacheLumpName
-                (DEH_String("WINUM7"), PU_CACHE));
+                V_DrawPatchWithShadow (115 - offset, 68, 0, W_CacheLumpName
+                (DEH_String("WINUM7"), PU_CACHE), false);
             else if(rmap == 8 || rmap == 18 || rmap == 28)
-                V_DrawPatch (115 - offset, 68, 0, W_CacheLumpName
-                (DEH_String("WINUM8"), PU_CACHE));
+                V_DrawPatchWithShadow (115 - offset, 68, 0, W_CacheLumpName
+                (DEH_String("WINUM8"), PU_CACHE), false);
             else if(rmap == 9 || rmap == 19 || rmap == 29)
-                V_DrawPatch (115 - offset, 68, 0, W_CacheLumpName
-                (DEH_String("WINUM9"), PU_CACHE));
+                V_DrawPatchWithShadow (115 - offset, 68, 0, W_CacheLumpName
+                (DEH_String("WINUM9"), PU_CACHE), false);
             else if(rmap == 10 || rmap == 20 || rmap == 30)
-                V_DrawPatch (115 - offset, 68, 0, W_CacheLumpName
-                (DEH_String("WINUM0"), PU_CACHE));
+                V_DrawPatchWithShadow (115 - offset, 68, 0, W_CacheLumpName
+                (DEH_String("WINUM0"), PU_CACHE), false);
         }
     }
 
@@ -4527,20 +4543,20 @@ void M_DrawRecord(void)
         if(repi == 1)
         {
             if(rmap == 1)
-                V_DrawPatch (55, 68, 0, W_CacheLumpName(DEH_String("WILV00"),
-                PU_CACHE));
+                V_DrawPatchWithShadow (55, 68, 0, W_CacheLumpName(DEH_String("WILV00"),
+                PU_CACHE), false);
             else if(rmap == 2)
-                V_DrawPatch (55, 68, 0, W_CacheLumpName(DEH_String("WILV01"),
-                PU_CACHE));
+                V_DrawPatchWithShadow (55, 68, 0, W_CacheLumpName(DEH_String("WILV01"),
+                PU_CACHE), false);
             else if(rmap == 3)
-                V_DrawPatch (55, 68, 0, W_CacheLumpName(DEH_String("WILV02"),
-                PU_CACHE));
+                V_DrawPatchWithShadow (55, 68, 0, W_CacheLumpName(DEH_String("WILV02"),
+                PU_CACHE), false);
             else if(rmap == 4)
-                V_DrawPatch (55, 68, 0, W_CacheLumpName(DEH_String("WILV03"),
-                PU_CACHE));
+                V_DrawPatchWithShadow (55, 68, 0, W_CacheLumpName(DEH_String("WILV03"),
+                PU_CACHE), false);
             else if(rmap == 5)
-                V_DrawPatch (55, 68, 0, W_CacheLumpName(DEH_String("WILV04"),
-                PU_CACHE));
+                V_DrawPatchWithShadow (55, 68, 0, W_CacheLumpName(DEH_String("WILV04"),
+                PU_CACHE), false);
         }
     }
 
@@ -4619,8 +4635,8 @@ void M_EndGameResponse(int ch)
 void M_EndGame(int choice)
 {
 /*
-    V_DrawPatch(58, 15, 0, W_CacheLumpName(DEH_String("M_T_EGME"),
-                                               PU_CACHE));
+    V_DrawPatchWithShadow(58, 15, 0, W_CacheLumpName(DEH_String("M_T_EGME"),
+                                               PU_CACHE), false);
 */
     choice = 0;
     if (!usergame)
@@ -4909,6 +4925,21 @@ void M_Background(int choice)
     }
 }
 
+void M_FontShadow(int choice)
+{
+    switch(choice)
+    {
+      case 0:
+        if (font_shadow)
+            font_shadow = false;
+        break;
+      case 1:
+        if (!font_shadow)
+            font_shadow = true;
+        break;
+    }
+}
+
 void M_SizeDisplay(int choice)
 {
     switch(choice)
@@ -4954,17 +4985,17 @@ M_DrawThermo
     int                i;
 
     xx = x;
-    V_DrawPatch(xx, y, 0, W_CacheLumpName(DEH_String("M_THERML"), PU_CACHE));
+    V_DrawPatchWithShadow(xx, y, 0, W_CacheLumpName(DEH_String("M_THERML"), PU_CACHE), false);
     xx += 8;
     for (i=0;i<thermWidth;i++)
     {
-        V_DrawPatch(xx, y, 0, W_CacheLumpName(DEH_String("M_THERMM"), PU_CACHE));
+        V_DrawPatchWithShadow(xx, y, 0, W_CacheLumpName(DEH_String("M_THERMM"), PU_CACHE), false);
         xx += 8;
     }
-    V_DrawPatch(xx, y, 0, W_CacheLumpName(DEH_String("M_THERMR"), PU_CACHE));
+    V_DrawPatchWithShadow(xx, y, 0, W_CacheLumpName(DEH_String("M_THERMR"), PU_CACHE), false);
 
-    V_DrawPatch((x + 8) + thermDot * 8, y, 0,
-                      W_CacheLumpName(DEH_String("M_THERMO"), PU_CACHE));
+    V_DrawPatchWithShadow((x + 8) + thermDot * 8, y, 0,
+                      W_CacheLumpName(DEH_String("M_THERMO"), PU_CACHE), false);
 }
 
 void
@@ -4980,18 +5011,18 @@ M_DrawThermoSmall
 
     xx = x;
     yy = y + 6; // +6 to y coordinate
-    V_DrawPatch(xx + 3, yy - 18, 0, W_CacheLumpName(DEH_String("M_SLIDEL"), PU_CACHE));
+    V_DrawPatchWithShadow(xx + 3, yy - 18, 0, W_CacheLumpName(DEH_String("M_SLIDEL"), PU_CACHE), false);
     xx += 8;
     for (i=0;i<thermWidth;i++)
     {
-        V_DrawPatch(xx, yy - 18, 0, W_CacheLumpName(DEH_String("M_SLIDEM"), PU_CACHE));
+        V_DrawPatchWithShadow(xx, yy - 18, 0, W_CacheLumpName(DEH_String("M_SLIDEM"), PU_CACHE), false);
         xx += 8;
     }
-    V_DrawPatch(xx, yy - 18, 0, W_CacheLumpName(DEH_String("M_SLIDER"), PU_CACHE));
+    V_DrawPatchWithShadow(xx, yy - 18, 0, W_CacheLumpName(DEH_String("M_SLIDER"), PU_CACHE), false);
 
     // +2 to initial y coordinate
-    V_DrawPatch((x + 9) + thermDot * 8, y - 12, 0,
-                      W_CacheLumpName(DEH_String("M_SLIDEO"), PU_CACHE));
+    V_DrawPatchWithShadow((x + 9) + thermDot * 8, y - 12, 0,
+                      W_CacheLumpName(DEH_String("M_SLIDEO"), PU_CACHE), false);
 }
 
 
@@ -5000,8 +5031,8 @@ M_DrawEmptyCell
 ( menu_t*        menu,
   int            item )
 {
-    V_DrawPatch(menu->x - 10, menu->y + item * LINEHEIGHT_SMALL - 1, 0,
-                      W_CacheLumpName(DEH_String("M_CELL1"), PU_CACHE));
+    V_DrawPatchWithShadow(menu->x - 10, menu->y + item * LINEHEIGHT_SMALL - 1, 0,
+                      W_CacheLumpName(DEH_String("M_CELL1"), PU_CACHE), false);
 }
 
 void
@@ -5009,8 +5040,8 @@ M_DrawSelCell
 ( menu_t*        menu,
   int            item )
 {
-    V_DrawPatch(menu->x - 10, menu->y + item * LINEHEIGHT_SMALL - 1, 0,
-                      W_CacheLumpName(DEH_String("M_CELL2"), PU_CACHE));
+    V_DrawPatchWithShadow(menu->x - 10, menu->y + item * LINEHEIGHT_SMALL - 1, 0,
+                      W_CacheLumpName(DEH_String("M_CELL2"), PU_CACHE), false);
 }
 
 
@@ -5127,7 +5158,11 @@ void M_WriteText(int x, int y, char* string)
         w = SHORT (hu_font[c]->width);
         if (cx+w > ORIGWIDTH)                // CHANGED FOR HIRES
             break;
-        V_DrawPatch(cx, cy, 0, hu_font[c]);
+
+        if(font_shadow)
+            V_DrawPatchWithShadow(cx, cy, 0, hu_font[c], false);
+        else
+            V_DrawPatch(cx, cy, 0, hu_font[c]);
         cx+=w;
     }
 }
@@ -5711,21 +5746,21 @@ void M_Drawer (void)
 
         // DRAW SKULL
         if(currentMenu == &KeyBindingsDef && itemOn == 15)
-            V_DrawPatch(x + 280 + CURSORXOFF_SMALL, currentMenu->y - 15 +
+            V_DrawPatchWithShadow(x + 280 + CURSORXOFF_SMALL, currentMenu->y - 15 +
                     itemOn*LINEHEIGHT_SMALL, 0,
                     W_CacheLumpName(DEH_String(skullNameSmall[whichSkull]),
-                                          PU_CACHE));
+                                          PU_CACHE), false);
         else
-            V_DrawPatch(x + CURSORXOFF_SMALL, currentMenu->y - 5 +
+            V_DrawPatchWithShadow(x + CURSORXOFF_SMALL, currentMenu->y - 5 +
                     itemOn*LINEHEIGHT_SMALL, 0,
                     W_CacheLumpName(DEH_String(skullNameSmall[whichSkull]),
-                                          PU_CACHE));
+                                          PU_CACHE), false);
 /*
         name = DEH_String(currentMenu->menuitems[i].name);
 
         if (name[0])
         {
-            V_DrawPatch (x, y, W_CacheLumpName(name, PU_CACHE));
+            V_DrawPatchWithShadow (x, y, W_CacheLumpName(name, PU_CACHE), false);
         }
 
         if (currentMenu == &CheatsDef || currentMenu == &KeyBindingsDef ||
@@ -5735,20 +5770,20 @@ void M_Drawer (void)
         {
             y += LINEHEIGHT_SMALL;
             // DRAW SKULL
-            V_DrawPatch(x + CURSORXOFF_SMALL, currentMenu->y - 5 +
+            V_DrawPatchWithShadow(x + CURSORXOFF_SMALL, currentMenu->y - 5 +
                         itemOn*LINEHEIGHT_SMALL,
                         W_CacheLumpName(DEH_String(skullNameSmall[whichSkull]),
-                                              PU_CACHE));
+                                              PU_CACHE), false);
         }
 
         else if(currentMenu)
         {
             y += LINEHEIGHT;
             // DRAW SKULL
-            V_DrawPatch(x + SKULLXOFF, currentMenu->y - 5 +
+            V_DrawPatchWithShadow(x + SKULLXOFF, currentMenu->y - 5 +
                               itemOn*LINEHEIGHT,
                               W_CacheLumpName(DEH_String(skullName[whichSkull]),
-                                              PU_CACHE));
+                                              PU_CACHE), false);
         }
 */
     }
@@ -7121,9 +7156,9 @@ void M_DrawKeyBindings(void)
     int i;
 
     if(fsize != 19321722)
-        V_DrawPatch (80, 0, 0, W_CacheLumpName(DEH_String("M_T_BNDS"), PU_CACHE));
+        V_DrawPatchWithShadow (80, 0, 0, W_CacheLumpName(DEH_String("M_T_BNDS"), PU_CACHE), false);
     else
-        V_DrawPatch (80, 0, 0, W_CacheLumpName(DEH_String("M_KBNDGS"), PU_CACHE));
+        V_DrawPatchWithShadow (80, 0, 0, W_CacheLumpName(DEH_String("M_KBNDGS"), PU_CACHE), false);
 
     for (i = 0; i < key_controls_end_in_cfg_at_pos - key_controls_start_in_cfg_at_pos; i++)
     {
@@ -7208,11 +7243,11 @@ void M_DrawControls(void)
     M_DarkBackground();
 
     if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
-        V_DrawPatch(48, 15, 0, W_CacheLumpName(DEH_String("M_T_CSET"),
-                                               PU_CACHE));
+        V_DrawPatchWithShadow(48, 15, 0, W_CacheLumpName(DEH_String("M_T_CSET"),
+                                               PU_CACHE), false);
     else
-        V_DrawPatch(48, 15, 0, W_CacheLumpName(DEH_String("M_CTLSET"),
-                                               PU_CACHE));
+        V_DrawPatchWithShadow(48, 15, 0, W_CacheLumpName(DEH_String("M_CTLSET"),
+                                               PU_CACHE), false);
 
     if(mouselook == 0)
     {
@@ -8313,9 +8348,9 @@ void M_DrawSystem(void)
     M_DarkBackground();
 
     if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
-        V_DrawPatch (62, 20, 0, W_CacheLumpName(DEH_String("M_T_YSET"), PU_CACHE));
+        V_DrawPatchWithShadow (62, 20, 0, W_CacheLumpName(DEH_String("M_T_YSET"), PU_CACHE), false);
     else
-        V_DrawPatch (62, 20, 0, W_CacheLumpName(DEH_String("M_SYSSET"), PU_CACHE));
+        V_DrawPatchWithShadow (62, 20, 0, W_CacheLumpName(DEH_String("M_SYSSET"), PU_CACHE), false);
 
     if(display_fps)
     {
@@ -8496,9 +8531,9 @@ void M_DrawDebug(void)
     M_DarkBackground();
 
     if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
-        V_DrawPatch (67, 15, 0, W_CacheLumpName(DEH_String("M_T_DSET"), PU_CACHE));
+        V_DrawPatchWithShadow (67, 15, 0, W_CacheLumpName(DEH_String("M_T_DSET"), PU_CACHE), false);
     else
-        V_DrawPatch (67, 15, 0, W_CacheLumpName(DEH_String("M_DBGSET"), PU_CACHE));
+        V_DrawPatchWithShadow (67, 15, 0, W_CacheLumpName(DEH_String("M_DBGSET"), PU_CACHE), false);
 
     if(coordinates_info)
     {

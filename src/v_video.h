@@ -106,5 +106,7 @@ void V_ScreenShot(char *format);
 
 void V_LowGraphicDetail(int height);
 
+void V_DrawPatchWithShadow(int x, int y, int scrn, patch_t *patch, boolean flag);
+
 #endif
 
