@@ -68,14 +68,14 @@ typedef struct
 
 boolean                clip_this;
 
-char*                  spritename;
+static char*           spritename;
 
 // constant arrays
 //  used for psprite clipping and initializing clipping
 int                    negonearray[SCREENWIDTH];          // [crispy] 32-bit integer math
 int                    screenheightarray[SCREENWIDTH];    // [crispy] 32-bit integer math
 int                    numsprites;
-int                    maxframe;
+static int             maxframe;
 int                    newvissprite;
 
 int*                   mfloorclip;                        // [crispy] 32-bit integer math
@@ -96,7 +96,7 @@ static int             num_vissprite_ptrs;
 //  and range check thing_t sprites patches
 spritedef_t*           sprites;
 
-spriteframe_t          sprtemp[MAX_SPRITE_FRAMES];
+static spriteframe_t          sprtemp[MAX_SPRITE_FRAMES];
 
 vissprite_t*           vissprites[NUMVISSPRITETYPES];
 vissprite_t**          vissprite_ptrs;          // killough
@@ -584,8 +584,6 @@ void R_ProjectSprite(mobj_t *thing)
     unsigned           rot;
     boolean            flip;
     
-    int                index;
-
     vissprite_t*       vis;
     
     angle_t            ang;
@@ -819,7 +817,7 @@ void R_ProjectSprite(mobj_t *thing)
     else
     {
         // diminished light
-        index = xscale>>(LIGHTSCALESHIFT-detailshift+hires);        // CHANGED FOR HIRES
+        int index = (xscale * 160 / centerx)>>(LIGHTSCALESHIFT-detailshift+hires); // CHANGED FOR HIRES
 
         if (index >= MAXLIGHTSCALE) 
             index = MAXLIGHTSCALE-1;
