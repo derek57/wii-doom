@@ -1138,8 +1138,8 @@ void R_AddSprites (sector_t* sec)
     // Well, now it will be done.
     sec->validcount = validcount;
         
-    spritelights = scalelight[BETWEEN(0, (sec->lightlevel >> LIGHTSEGSHIFT) + extralight,
-        LIGHTLEVELS - 1)];
+    spritelights = scalelight[BETWEEN(0, (sec->lightlevel >> LIGHTSEGSHIFT)
+        + extralight * LIGHTBRIGHT, LIGHTLEVELS - 1)];
 
     // Handle all things in sector.
     if (fixedcolormap || isliquid[floorpic] || floorpic == skyflatnum || !d_shadows)
@@ -1333,7 +1333,7 @@ void R_DrawPlayerSprites (void)
     // get light level
     lightnum =
         (viewplayer->mo->subsector->sector->lightlevel >> LIGHTSEGSHIFT) 
-        +extralight;
+        +extralight * LIGHTBRIGHT;
 
     if (lightnum < 0)                
         spritelights = scalelight[0];

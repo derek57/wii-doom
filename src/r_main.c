@@ -582,7 +582,7 @@ void R_InitLightTables (void)
     //  for each level / distance combination.
     for (i=0 ; i< LIGHTLEVELS ; i++)
     {
-        startmap = ((LIGHTLEVELS-1-i)*2)*NUMCOLORMAPS/LIGHTLEVELS;
+        startmap = ((LIGHTLEVELS-LIGHTBRIGHT-i)*2)*NUMCOLORMAPS/LIGHTLEVELS;
         for (j=0 ; j<MAXLIGHTZ ; j++)
         {
             scale = FixedDiv ((ORIGWIDTH/2*FRACUNIT), (j+1)<<LIGHTZSHIFT); // HIRES
@@ -705,7 +705,7 @@ void R_ExecuteSetViewSize (void)
     //  for each level / scale combination.
     for (i=0 ; i< LIGHTLEVELS ; i++)
     {
-        startmap = ((LIGHTLEVELS-1-i)*2)*NUMCOLORMAPS/LIGHTLEVELS;
+        startmap = ((LIGHTLEVELS-LIGHTBRIGHT-i)*2)*NUMCOLORMAPS/LIGHTLEVELS;
         for (j=0 ; j<MAXLIGHTSCALE ; j++)
         {
             level = startmap - j*SCREENWIDTH/(viewwidth<<detailshift)/DISTMAP;
@@ -884,7 +884,7 @@ void R_SetupFrame (player_t* player)
         viewangle = player->mo->angle + viewangleoffset;
     }
 
-    extralight = player->extralight;
+    extralight = player->extralight<<1;
 
     viewsin = finesine[viewangle>>ANGLETOFINESHIFT];
     viewcos = finecosine[viewangle>>ANGLETOFINESHIFT];
