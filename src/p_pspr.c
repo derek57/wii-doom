@@ -410,7 +410,7 @@ A_WeaponReady
     angle = (128*leveltime)&FINEMASK;
     psp->sx = FRACUNIT + FixedMul (player->bob, finecosine[angle]);
     angle &= FINEANGLES/2-1;
-    psp->sy = WEAPONTOP + FixedMul (player->bob, finesine[angle]);
+    psp->sy = WEAPONTOP + (player->bob - FixedMul(player->bob, finecosine[angle * 2 & (FINEANGLES - 1)])) / 2;
 }
 
 
