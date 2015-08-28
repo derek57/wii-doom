@@ -450,6 +450,9 @@ static void saveg_read_mobj_t(mobj_t *str)
     // int floatbob
     str->floatbob = saveg_read32();
 
+    // struct mobj_s *shadow
+    str->shadow = NULL;
+
     // boolean interp
     str->interp = saveg_read32();
 
@@ -1840,6 +1843,7 @@ void P_UnArchiveThinkers (void)
     thinker_t*             currentthinker;
     thinker_t*             next;
     mobj_t*                mobj;
+    int                    i;
     
     // remove all the current thinkers
     currentthinker = thinkercap.next;
@@ -1856,6 +1860,18 @@ void P_UnArchiveThinkers (void)
     }
     P_InitThinkers ();
     
+    // remove the remaining shadows
+    for (i = 0; i < numsectors; ++i)
+    {
+        mobj_t   *mo = sectors[i].thinglist;
+
+        while (mo)
+        {
+            P_RemoveMobj(mo);
+            mo = mo->snext;
+        }
+    }
+
     // read in saved thinkers
     while (1)
     {
@@ -1877,6 +1893,18 @@ void P_UnArchiveThinkers (void)
             mobj->floorz = mobj->subsector->sector->floor_height;
             mobj->ceilingz = mobj->subsector->sector->ceiling_height;
             mobj->thinker.function.acp1 = (actionf_p1)P_MobjThinker;
+
+            mobj->colfunc = mobj->info->colfunc;
+            mobj->projectfunc = R_ProjectSprite;
+
+            if (mobj->flags2 & MF2_SHADOW)
+            {
+                P_SpawnShadow(mobj);
+
+                if (mobj->flags2 & MF2_MIRRORED)
+                    mobj->shadow->flags2 |= MF2_MIRRORED;
+            }
+
             P_AddThinker (&mobj->thinker);
             break;
 
