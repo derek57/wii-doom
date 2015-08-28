@@ -1123,11 +1123,12 @@ void R_ProjectShadow(mobj_t *thing)
 // R_AddSprites
 // During BSP traversal, this adds sprites by sector.
 //
-void R_AddSprites (sector_t* sec)
+// killough 9/18/98: add lightlevel as parameter, fixing underwater lighting
+void R_AddSprites (sector_t* sec, int lightlevel)
 {
     mobj_t*                thing;
     short                  floorpic = sec->floorpic;
-
+/*
     // BSP is traversed by subsector.
     // A sector might have been split into several
     //  subsectors during BSP building.
@@ -1137,8 +1138,8 @@ void R_AddSprites (sector_t* sec)
 
     // Well, now it will be done.
     sec->validcount = validcount;
-        
-    spritelights = scalelight[BETWEEN(0, (sec->lightlevel >> LIGHTSEGSHIFT)
+*/
+    spritelights = scalelight[BETWEEN(0, (lightlevel >> LIGHTSEGSHIFT)
         + extralight * LIGHTBRIGHT, LIGHTLEVELS - 1)];
 
     // Handle all things in sector.

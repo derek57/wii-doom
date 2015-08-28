@@ -389,7 +389,11 @@ void R_AddLine (seg_t*     line)
     if (backsector->ceilingpic == frontsector->ceilingpic
         && backsector->floorpic == frontsector->floorpic
         && backsector->lightlevel == frontsector->lightlevel
-        && curline->sidedef->midtexture == 0)
+        && curline->sidedef->midtexture == 0
+
+        // killough 4/16/98: consider altered lighting
+        && backsector->floorlightsec == frontsector->floorlightsec
+        && backsector->ceilinglightsec == frontsector->ceilinglightsec)
     {
         return;
     }
@@ -529,8 +533,11 @@ boolean R_CheckBBox (fixed_t*  bspcoord)
 void R_Subsector (int num)
 {
     int               count;
+    int               floorlightlevel;      // killough 3/16/98: set floor lightlevel
+    int               ceilinglightlevel;    // killough 4/11/98
     seg_t*            line;
     subsector_t*      sub;
+    sector_t          tempsec;              // killough 3/7/98: deep water hack
         
 #ifdef RANGECHECK
     if (num>=numsubsectors)
@@ -549,11 +556,14 @@ void R_Subsector (int num)
     // when you're standing inside the sector.
     R_MaybeInterpolateSector(frontsector);
 
+    // killough 3/8/98, 4/4/98: Deep water / fake ceiling effect
+    frontsector = R_FakeFlat(frontsector, &tempsec, &floorlightlevel, &ceilinglightlevel, false);
+
     if (frontsector->interpfloorheight < viewz)
     {
         floorplane = R_FindPlane(frontsector->interpfloorheight,
                                   frontsector->floorpic,
-                                  frontsector->lightlevel);
+                                  floorlightlevel);
     }
     else
         floorplane = NULL;
@@ -563,12 +573,16 @@ void R_Subsector (int num)
     {
         ceilingplane = R_FindPlane (frontsector->interpceilingheight,
                                     frontsector->ceilingpic,
-                                    frontsector->lightlevel);
+                                    ceilinglightlevel);
     }
     else
         ceilingplane = NULL;
                 
-    R_AddSprites (frontsector);        
+    if (sub->sector->validcount != validcount)
+    {
+        sub->sector->validcount = validcount;
+        R_AddSprites(sub->sector, (floorlightlevel + ceilinglightlevel) / 2);
+    }
 
     while (count--)
     {
@@ -613,4 +627,98 @@ void R_RenderBSPNode (int bspnum)
         R_RenderBSPNode (bsp->children[side^1]);
 }
 
+//
+// killough 3/7/98: Hack floor/ceiling heights for deep water etc.
+//
+// If player's view height is underneath fake floor, lower the
+// drawn ceiling to be just under the floor height, and replace
+// the drawn floor and ceiling textures, and light level, with
+// the control sector's.
+//
+// Similar for ceiling, only reflected.
+//
+// killough 4/11/98, 4/13/98: fix bugs, add 'back' parameter
+//
+sector_t *R_FakeFlat(sector_t *sec, sector_t *tempsec, int *floorlightlevel,
+    int *ceilinglightlevel, boolean back)
+{
+    if (floorlightlevel)
+        *floorlightlevel = (sec->floorlightsec == -1 ? sec->lightlevel :
+            sectors[sec->floorlightsec].lightlevel);
+
+    if (ceilinglightlevel)
+        *ceilinglightlevel = (sec->ceilinglightsec == -1 ? sec->lightlevel :
+            sectors[sec->ceilinglightsec].lightlevel);
+
+    if (sec->heightsec != -1)
+    {
+        const sector_t  *s = &sectors[sec->heightsec];
+        int             heightsec = viewplayer->mo->subsector->sector->heightsec;
+        int             underwater = (heightsec != -1 && viewz <= sectors[heightsec].interpfloorheight);
+
+        // Replace sector being drawn, with a copy to be hacked
+        *tempsec = *sec;
+
+        // Replace floor and ceiling height with other sector's heights.
+        tempsec->interpfloorheight = s->interpfloorheight;
+        tempsec->interpceilingheight = s->interpceilingheight;
+
+        // killough 11/98: prevent sudden light changes from non-water sectors:
+        if (underwater && (tempsec->interpfloorheight = sec->interpfloorheight,
+            tempsec->interpceilingheight = s->interpfloorheight - 1, !back))
+        {
+            // head-below-floor hack
+            tempsec->floorpic = s->floorpic;
+
+            if (underwater)
+            {
+                if (s->ceilingpic == skyflatnum)
+                {
+                    tempsec->interpfloorheight = tempsec->interpceilingheight + 1;
+                    tempsec->ceilingpic = tempsec->floorpic;
+                }
+                else
+                {
+                    tempsec->ceilingpic = s->ceilingpic;
+                }
+            }
+            tempsec->lightlevel = s->lightlevel;
+
+            if (floorlightlevel)
+                *floorlightlevel = (s->floorlightsec == -1 ? s->lightlevel :
+                    sectors[s->floorlightsec].lightlevel);              // killough 3/16/98
+
+            if (ceilinglightlevel)
+                *ceilinglightlevel = (s->ceilinglightsec == -1 ? s->lightlevel :
+                    sectors[s->ceilinglightsec].lightlevel);            // killough 4/11/98
+        }
+        else if (heightsec != -1 && viewz >= sectors[heightsec].interpceilingheight
+            && sec->interpceilingheight > s->interpceilingheight)
+        {
+            // Above-ceiling hack
+            tempsec->interpceilingheight = s->interpceilingheight;
+            tempsec->interpfloorheight = s->interpceilingheight + 1;
+
+            tempsec->floorpic = tempsec->ceilingpic = s->ceilingpic;
+
+            if (s->floorpic != skyflatnum)
+            {
+                tempsec->interpceilingheight = sec->interpceilingheight;
+                tempsec->floorpic = s->floorpic;
+            }
+
+            tempsec->lightlevel = s->lightlevel;
+
+            if (floorlightlevel)
+                *floorlightlevel = (s->floorlightsec == -1 ? s->lightlevel :
+                    sectors[s->floorlightsec].lightlevel);              // killough 3/16/98
+
+            if (ceilinglightlevel)
+                *ceilinglightlevel = (s->ceilinglightsec == -1 ? s->lightlevel :
+                    sectors[s->ceilinglightsec].lightlevel);            // killough 4/11/98
+        }
+        sec = tempsec;        // Use other sector
+    }
+    return sec;
+}
 

@@ -205,6 +205,7 @@ R_RenderMaskedSegRange
     int             lightnum;
     int             texnum;
     fixed_t         texheight;
+    sector_t        tempsec;        // killough 4/13/98
 
     // Calculate light table.
     // Use different light tables
@@ -224,7 +225,9 @@ R_RenderMaskedSegRange
 
     texheight = textureheight[texnum];
         
-    lightnum = (frontsector->lightlevel >> LIGHTSEGSHIFT)+extralight * LIGHTBRIGHT;
+    // killough 4/13/98: get correct lightlevel for 2s normal textures
+    lightnum = (R_FakeFlat(frontsector, &tempsec, NULL, NULL, false)->lightlevel >> LIGHTSEGSHIFT)
+        + extralight * LIGHTBRIGHT;
 
     if (curline->v1->y == curline->v2->y)
         lightnum -= LIGHTBRIGHT;
@@ -779,7 +782,10 @@ R_StoreWallRange
                         
         if (worldlow != worldbottom 
             || backsector->floorpic != frontsector->floorpic
-            || backsector->lightlevel != frontsector->lightlevel)
+            || backsector->lightlevel != frontsector->lightlevel
+
+            // killough 4/17/98: draw floors if different light levels
+            || backsector->floorlightsec != frontsector->floorlightsec)
         {
             markfloor = true;
         }
@@ -792,7 +798,10 @@ R_StoreWallRange
                         
         if (worldhigh != worldtop 
             || backsector->ceilingpic != frontsector->ceilingpic
-            || backsector->lightlevel != frontsector->lightlevel)
+            || backsector->lightlevel != frontsector->lightlevel
+
+            // killough 4/17/98: draw ceilings if different light levels
+            || backsector->ceilinglightsec != frontsector->ceilinglightsec)
         {
             markceiling = true;
         }

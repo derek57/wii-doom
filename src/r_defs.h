@@ -171,6 +171,9 @@ typedef        struct
     // killough 3/7/98: support flat heights drawn at another sector's heights
     int             heightsec;      // other sector, or -1 if no other sector
 
+    // killough 4/11/98: support for lightlevels coming from another sector
+    int             floorlightsec, ceilinglightsec;
+
 } sector_t;
 
 

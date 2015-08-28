@@ -1602,6 +1602,39 @@ void P_SpawnSpecials (void)
 
     P_InitTagLists();
 
+    for (i = 0; i < numlines; i++)
+    {
+        int sec;
+        int s;
+
+        switch (lines[i].special)
+        {
+            // killough 3/7/98:
+            // support for drawn heights coming from different sector
+            case 242:
+                sec = sides[*lines[i].sidenum].sector - sectors;
+                for (s = -1; (s = P_FindSectorFromLineTag(lines + i, s)) >= 0;)
+                    sectors[s].heightsec = sec;
+                break;
+
+            // killough 3/16/98: Add support for setting
+            // floor lighting independently (e.g. lava)
+            case 213:
+                sec = sides[*lines[i].sidenum].sector - sectors;
+                for (s = -1; (s = P_FindSectorFromLineTag(lines + i, s)) >= 0;)
+                    sectors[s].floorlightsec = sec;
+                break;
+
+            // killough 4/11/98: Add support for setting
+            // ceiling lighting independently
+            case 261:
+                sec = sides[*lines[i].sidenum].sector - sectors;
+                for (s = -1; (s = P_FindSectorFromLineTag(lines + i, s)) >= 0;)
+                    sectors[s].ceilinglightsec = sec;
+                break;
+        }
+    }
+
     // UNUSED: no horizonal sliders.
     //        P_InitSlidingDoorFrames();
 }

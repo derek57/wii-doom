@@ -189,7 +189,7 @@ void P_LoadSegs (int lump)
     line_t*        ldef;
     int            linedef;
     int            side;
-    int            sidenum;
+//    int            sidenum;
         
     numsegs = W_LumpLength (lump) / sizeof(mapseg_t);
     segs = Z_Malloc (numsegs*sizeof(seg_t),PU_LEVEL,0);        
@@ -237,25 +237,9 @@ void P_LoadSegs (int lump)
         if (ldef->sidenum[side] == -1)
             C_Printf(CR_GOLD, " P_LoadSegs: The front of seg %s has no sidedef.\n", commify(i));
 
-        if (ldef-> flags & ML_TWOSIDED)
-        {
-            sidenum = ldef->sidenum[side ^ 1];
-
-            // If the sidenum is out of range, this may be a "glass hack"
-            // impassible window.  Point at side #0 (this may not be
-            // the correct Vanilla behavior; however, it seems to work for
-            // OTTAWAU.WAD, which is the one place I've seen this trick
-            // used).
-
-            if (sidenum < 0 || sidenum >= numsides)
-            {
-                li->backsector = GetSectorAtNullAddress();
-            }
-            else
-            {
-                li->backsector = sides[sidenum].sector;
-            }
-        }
+        // killough 5/3/98: ignore 2s flag if second sidedef missing:
+        if (ldef->flags & ML_TWOSIDED && ldef->sidenum[side ^ 1] != -1)
+            li->backsector = sides[ldef->sidenum[side ^ 1]].sector;
         else
         {
             li->backsector = 0;
@@ -356,6 +340,8 @@ void P_LoadSectors (int lump)
 
         // killough 3/7/98:
         ss->heightsec = -1;       // sector used to get floor and ceiling height
+        ss->floorlightsec = -1;   // sector used to get floor lighting
+        ss->ceilinglightsec = -1; // sector used to get ceiling lighting
 
         ss->oldgametic = 0;
     }
@@ -481,7 +467,7 @@ void P_LoadThings (int lump)
 // P_LoadLineDefs
 // Also counts secret lines for intermissions.
 //
-void P_LoadLineDefs (int lump)
+static void P_LoadLineDefs (int lump)
 {
     byte*           data;
     int             i;
@@ -517,17 +503,8 @@ void P_LoadLineDefs (int lump)
         ld->dx = v2->x - v1->x;
         ld->dy = v2->y - v1->y;
         
-        if (!ld->dx)
-            ld->slopetype = ST_VERTICAL;
-        else if (!ld->dy)
-            ld->slopetype = ST_HORIZONTAL;
-        else
-        {
-            if (FixedDiv (ld->dy , ld->dx) > 0)
-                ld->slopetype = ST_POSITIVE;
-            else
-                ld->slopetype = ST_NEGATIVE;
-        }
+        ld->slopetype = !ld->dx ? ST_VERTICAL : !ld->dy ? ST_HORIZONTAL :
+            FixedDiv(ld->dy, ld->dx) > 0 ? ST_POSITIVE : ST_NEGATIVE;
                 
         if (v1->x < v2->x)
         {
