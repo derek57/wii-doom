@@ -536,7 +536,7 @@ void R_DrawPlanes (void)
             if (liquid && pl->sector && pl->sector->animate)
                 planeheight -= pl->sector->animate;
 #endif
-            light = (pl->lightlevel >> LIGHTSEGSHIFT)+extralight * LIGHTBRIGHT;
+            light = (pl->lightlevel >> LIGHTSEGSHIFT)+extralight;
 
             planezlight = zlight[light >= LIGHTLEVELS ? LIGHTLEVELS - 1 : MAX(0, light)];
 

@@ -68,7 +68,7 @@ typedef struct
 
 boolean                clip_this;
 
-static char*           spritename;
+//static char*           spritename;
 
 // constant arrays
 //  used for psprite clipping and initializing clipping
@@ -1126,7 +1126,6 @@ void R_ProjectShadow(mobj_t *thing)
 void R_AddSprites (sector_t* sec)
 {
     mobj_t*                thing;
-    int                    lightnum;
     short                  floorpic = sec->floorpic;
 
     // BSP is traversed by subsector.
@@ -1139,9 +1138,8 @@ void R_AddSprites (sector_t* sec)
     // Well, now it will be done.
     sec->validcount = validcount;
         
-    lightnum = (sec->lightlevel >> LIGHTSEGSHIFT)+extralight * LIGHTBRIGHT;
-
-    spritelights = scalelight[lightnum >= LIGHTLEVELS ? LIGHTLEVELS - 1 : MAX(0, lightnum)];
+    spritelights = scalelight[BETWEEN(0, (sec->lightlevel >> LIGHTSEGSHIFT) + extralight,
+        LIGHTLEVELS - 1)];
 
     // Handle all things in sector.
     if (fixedcolormap || isliquid[floorpic] || floorpic == skyflatnum || !d_shadows)
@@ -1335,7 +1333,7 @@ void R_DrawPlayerSprites (void)
     // get light level
     lightnum =
         (viewplayer->mo->subsector->sector->lightlevel >> LIGHTSEGSHIFT) 
-        +extralight * LIGHTBRIGHT;
+        +extralight;
 
     if (lightnum < 0)                
         spritelights = scalelight[0];

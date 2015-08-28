@@ -39,13 +39,12 @@
 //
 
 // Lighting constants.
-#define LIGHTLEVELS       32
-#define LIGHTSEGSHIFT     3
-#define LIGHTBRIGHT       2
-#define MAXLIGHTSCALE     48
-#define LIGHTSCALESHIFT   12
-#define MAXLIGHTZ         128
-#define LIGHTZSHIFT       20
+#define LIGHTLEVELS             128
+#define LIGHTSEGSHIFT           1
+#define MAXLIGHTSCALE           0x180
+#define LIGHTSCALESHIFT         12
+#define MAXLIGHTZ               1024
+#define LIGHTZSHIFT             17
 
 // Number of diminishing brightness levels.
 // There a 0-31, i.e. 32 LUT in the COLORMAP lump.
