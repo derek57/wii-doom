@@ -536,15 +536,9 @@ void R_DrawPlanes (void)
             if (liquid && pl->sector && pl->sector->animate)
                 planeheight -= pl->sector->animate;
 #endif
-            light = (pl->lightlevel >> LIGHTSEGSHIFT)+extralight;
+            light = (pl->lightlevel >> LIGHTSEGSHIFT)+extralight * LIGHTBRIGHT;
 
-            if (light >= LIGHTLEVELS)
-                light = LIGHTLEVELS-1;
-
-            if (light < 0)
-                light = 0;
-
-            planezlight = zlight[light];
+            planezlight = zlight[light >= LIGHTLEVELS ? LIGHTLEVELS - 1 : MAX(0, light)];
 
             pl->top[pl->maxx+1] = 0xffffffffu; // [crispy] hires / 32-bit integer math
             pl->top[pl->minx-1] = 0xffffffffu; // [crispy] hires / 32-bit integer math

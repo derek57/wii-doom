@@ -39,9 +39,9 @@
 //
 
 // Lighting constants.
-// Now why not 32 levels here?
-#define LIGHTLEVELS       16
-#define LIGHTSEGSHIFT     4
+#define LIGHTLEVELS       32
+#define LIGHTSEGSHIFT     3
+#define LIGHTBRIGHT       2
 #define MAXLIGHTSCALE     48
 #define LIGHTSCALESHIFT   12
 #define MAXLIGHTZ         128
