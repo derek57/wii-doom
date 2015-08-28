@@ -814,6 +814,8 @@ void R_ProjectSprite(mobj_t *thing)
         // full bright
         vis->colormap = fixedcolormap ? fixedcolormap : colormaps;
     }
+    else if (thing->type == MT_BLOOD)
+        vis->colormap = spritelights[MIN(xscale >> LIGHTSCALESHIFT, MAXLIGHTSCALE - 1)];
     else
     {
         // diminished light
