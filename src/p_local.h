@@ -288,6 +288,11 @@ void P_SpawnMapThing (mapthing_t* mthing);
 boolean Check_Sides(mobj_t* actor, int x, int y);
 
 void P_RemoveMobjShadow(mobj_t *mobj);
+void P_SpawnShadow(mobj_t *actor);
+
+int EV_LightTurnOnPartway(line_t *line, fixed_t level);
+int EV_LightByAdjacentSectors(sector_t *sector, fixed_t level);
+int P_FindLineFromLineTag(const line_t *line, int start);
 
 //
 // P_SPEC

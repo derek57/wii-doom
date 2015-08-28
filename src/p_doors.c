@@ -125,6 +125,18 @@ void T_VerticalDoor (vldoor_t* door)
                           door->speed,
                           door->sector->floor_height,
                           false,1,door->direction);
+        // [BH] enhanced to apply effects to all doors
+        if (door->topheight - door->sector->floor_height)
+        {
+            fixed_t level = FixedDiv(door->sector->ceiling_height - door->sector->floor_height,
+                door->topheight - door->sector->floor_height);
+
+            if (door->lighttag)
+                EV_LightTurnOnPartway(door->line, level);
+            else
+                EV_LightByAdjacentSectors(door->sector, level);
+        }
+
         if (res == pastdest)
         {
             switch(door->type)
@@ -181,6 +193,18 @@ void T_VerticalDoor (vldoor_t* door)
                           door->topheight,
                           false,1,door->direction);
         
+        // [BH] enhanced to apply effects to all doors
+        if (door->topheight - door->sector->floor_height)
+        {
+            fixed_t level = FixedDiv(door->sector->ceiling_height - door->sector->floor_height,
+                door->topheight - door->sector->floor_height);
+
+            if (door->lighttag)
+                EV_LightTurnOnPartway(door->line, level);
+            else
+                EV_LightByAdjacentSectors(door->sector, level);
+        }
+
         if (res == pastdest)
         {
             switch(door->type)
@@ -349,6 +373,8 @@ EV_DoDoor
         door->type = type;
         door->topwait = VDOORWAIT;
         door->speed = VDOORSPEED;
+        door->line = line;      // jff 1/31/98 remember line that triggered us
+        door->lighttag = 0;
                 
         switch(type)
         {
@@ -616,6 +642,11 @@ EV_VerticalDoor
     door->direction = 1;
     door->speed = VDOORSPEED;
     door->topwait = VDOORWAIT;
+    door->line = line;          // jff 1/31/98 remember line that triggered us
+
+    // killough 10/98: use gradual lighting changes if nonzero tag given
+    // [BH] check if tag is valid
+    door->lighttag = (P_FindLineFromLineTag(line, 0) ? line->tag : 0);  // killough 10/98
 
     switch(line->special)
     {
@@ -642,6 +673,10 @@ EV_VerticalDoor
         door->type = blazeOpen;
         line->special = 0;
         door->speed = VDOORSPEED*4;
+        break;
+
+      default:
+        door->lighttag = 0; // killough 10/98
         break;
     }
     
@@ -671,6 +706,8 @@ void P_SpawnDoorCloseIn30 (sector_t* sec)
     door->type = normal;
     door->speed = VDOORSPEED;
     door->topcountdown = 30 * TICRATE;
+    door->line = NULL;          // jff 1/31/98 remember line that triggered us
+    door->lighttag = 0;         // killough 10/98: no lighting changes
 }
 
 //
@@ -699,6 +736,8 @@ P_SpawnDoorRaiseIn5Mins
     door->topheight -= 4*FRACUNIT;
     door->topwait = VDOORWAIT;
     door->topcountdown = 5 * 60 * TICRATE;
+    door->line = NULL; // jff 1/31/98 remember line that triggered us
+    door->lighttag = 0;  // killough 10/98: no lighting changes
 }
 
 

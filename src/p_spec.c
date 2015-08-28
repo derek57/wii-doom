@@ -1606,6 +1606,16 @@ void P_SpawnSpecials (void)
     //        P_InitSlidingDoorFrames();
 }
 
+// killough 4/16/98: Same thing, only for linedefs
+int P_FindLineFromLineTag(const line_t *line, int start)
+{
+    start = (start >= 0 ? lines[start].nexttag :
+        lines[(unsigned int)line->tag % (unsigned int)numlines].firsttag);
+    while (start >= 0 && lines[start].tag != line->tag)
+        start = lines[start].nexttag;
+    return start;
+}
+
 //----------------------------------------------------------------------------
 //
 // PROC P_InitTerrainTypes
