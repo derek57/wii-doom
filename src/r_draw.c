@@ -27,6 +27,10 @@
 //-----------------------------------------------------------------------------
 
 
+#include <stdio.h>
+#include <stdlib.h>
+
+#include "c_io.h"
 #include "deh_main.h"
 #include "doomdef.h"
 
@@ -34,6 +38,7 @@
 #include "doomstat.h"
 
 #include "i_system.h"
+#include "i_tinttab.h"
 #include "r_local.h"
 
 #include "v_trans.h"
@@ -1179,4 +1184,55 @@ void R_DrawViewBorder (void)
     // ? 
     V_MarkRect (0,0,SCREENWIDTH, SCREENHEIGHT-SBARHEIGHT); 
 } 
+
+void R_DrawShadowColumn(void)
+{
+    int32_t     count = dc_yh - dc_yl + 1;
+    byte        *dest = R_ADDRESS(0, dc_x, dc_yl);
+
+    if (--count)
+    {
+        *dest = tinttab25[*dest];
+        dest += SCREENWIDTH;
+    }
+    while (--count > 0)
+    {
+        *dest = tinttab40[*dest];
+        dest += SCREENWIDTH;
+    }
+    *dest = tinttab25[*dest];
+}
+
+void R_DrawSpectreShadowColumn(void)
+{
+    int32_t     count = dc_yh - dc_yl + 1;
+    byte        *dest = R_ADDRESS(0, dc_x, dc_yl);
+
+    if (--count)
+    {
+        if (!(rand() % 4) && !consoleactive)
+            *dest = tinttab25[*dest];
+        dest += SCREENWIDTH;
+    }
+    while (--count > 0)
+    {
+        *dest = tinttab25[*dest];
+        dest += SCREENWIDTH;
+    }
+    if (!(rand() % 4) && !consoleactive)
+        *dest = tinttab25[*dest];
+}
+
+void R_DrawSolidShadowColumn(void)
+{
+    int32_t     count = dc_yh - dc_yl + 1;
+    byte        *dest = R_ADDRESS(0, dc_x, dc_yl);
+
+    while (--count > 0)
+    {
+        *dest = 0;
+        dest += SCREENWIDTH;
+    }
+    *dest = 0;
+}
 

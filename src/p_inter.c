@@ -886,6 +886,10 @@ P_TouchSpecialThing
         
     if (special->flags & MF_COUNTITEM)
         player->itemcount++;
+
+    if (special->shadow)
+        P_RemoveMobjShadow(special);
+
     P_RemoveMobj (special);
     player->bonuscount += BONUSADD;
     if (!d_sound || player == &players[consoleplayer])
@@ -1020,6 +1024,10 @@ P_KillMobj
     else
         target->flags2 &= ~MF2_NOLIQUIDBOB;
 
+    if ((target->type == MT_BARREL || target->type == MT_PAIN || target->type == MT_SKULL) &&
+            target->shadow)
+        P_RemoveMobjShadow(target);
+
     int minhealth = target->info->spawnhealth;
 
     // Make Lost Soul and Pain Elemental explosions translucent
@@ -1110,7 +1118,12 @@ P_KillMobj
     mo->flags |= MF_DROPPED;        // special versions of items
 
     if ((rand() & 1))
+    {
         mo->flags2 |= MF2_MIRRORED;
+
+        if (mo->shadow)
+            mo->shadow->flags2 |= MF2_MIRRORED;
+    }
 }
 
 

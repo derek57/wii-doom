@@ -29,6 +29,10 @@
 #define __R_DRAW__
 
 
+#define R_ADDRESS(scrn, px, py) \
+    (screens[scrn] + (viewwindowy + (py)) * SCREENWIDTH + (viewwindowx + (px)))
+
+
 extern int                dc_x;
 extern int                dc_yl;
 extern int                dc_yh;
@@ -93,5 +97,9 @@ void         R_FillBackScreen (void);
 
 // If the view size is not full screen, draws a border around it.
 void         R_DrawViewBorder (void);
+
+void         R_DrawShadowColumn(void);
+void         R_DrawSpectreShadowColumn(void);
+void         R_DrawSolidShadowColumn(void);
 
 #endif

@@ -238,6 +238,16 @@ P_TeleportMove
     else
         thing->flags2 &= ~MF2_FEETARECLIPPED;
 
+    if (thing->shadow)
+    {
+        P_UnsetThingPosition(thing->shadow);
+
+        thing->shadow->x = thing->x;
+        thing->shadow->y = thing->y;
+
+        P_SetThingPosition(thing->shadow);
+    }
+
     return true;
 }
 
@@ -630,6 +640,16 @@ P_TryMove
             if (oldside != P_PointOnLineSide(thing->x, thing->y, ld) && ld->special)
                 P_CrossSpecialLine(ld, oldside, thing);
         }
+    }
+
+    if (thing->shadow)
+    {
+        P_UnsetThingPosition(thing->shadow);
+
+        thing->shadow->x = thing->x;
+        thing->shadow->y = thing->y;
+
+        P_SetThingPosition(thing->shadow);
     }
 
     return true;
@@ -1760,6 +1780,9 @@ boolean PIT_ChangeSector (mobj_t*        thing)
         // crunch dropped items
         if (thing->flags & MF_DROPPED)
         {
+            if (thing->shadow)
+                P_RemoveMobjShadow(thing);
+
             P_RemoveMobj (thing);
         
             // keep checking

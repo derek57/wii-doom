@@ -1497,6 +1497,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_SOLID|MF_SHOOTABLE|MF_DROPOFF|MF_PICKUP|MF_NOTDMATCH, // flags
         MF2_NOLIQUIDBOB, // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Player",       // namepointer
     },
 
@@ -1524,8 +1525,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_posact,                // activesound
         MF_SOLID|MF_SHOOTABLE|MF_COUNTKILL, // flags
-        MF2_NOLIQUIDBOB, // flags2
+        MF2_SHADOW | MF2_NOLIQUIDBOB, // flags2
         S_POSS_RAISE1,                // raisestate
+        0,              // shadowoffset
         "Zombieman",       // namepointer
     },
 
@@ -1553,8 +1555,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_posact,                // activesound
         MF_SOLID|MF_SHOOTABLE|MF_COUNTKILL, // flags
-        MF2_NOLIQUIDBOB, // flags2
+        MF2_SHADOW | MF2_NOLIQUIDBOB, // flags2
         S_SPOS_RAISE1,                // raisestate
+        0,              // shadowoffset
         "Shotgun Guy",       // namepointer
     },
 
@@ -1582,8 +1585,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_vilact,                // activesound
         MF_SOLID|MF_SHOOTABLE|MF_COUNTKILL, // flags
-        MF2_NOLIQUIDBOB, // flags2
+        MF2_SHADOW | MF2_NOLIQUIDBOB, // flags2
         S_NULL,                // raisestate
+        4 * FRACUNIT,              // shadowoffset
         "Arch-Vile",       // namepointer
     },
 
@@ -1613,6 +1617,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_NOBLOCKMAP|MF_NOGRAVITY|MF_TRANSLUCENT,                // flags
         MF2_NOLIQUIDBOB | MF2_NOFOOTCLIP,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Arch-Vile Fire",       // namepointer
     },
 
@@ -1640,8 +1645,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_skeact,                // activesound
         MF_SOLID|MF_SHOOTABLE|MF_COUNTKILL, // flags
-        MF2_NOLIQUIDBOB, // flags2
+        MF2_SHADOW | MF2_NOLIQUIDBOB, // flags2
         S_SKEL_RAISE1,                // raisestate
+        2 * FRACUNIT,              // shadowoffset
         "Revenant",       // namepointer
     },
 
@@ -1671,6 +1677,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_NOBLOCKMAP|MF_MISSILE|MF_DROPOFF|MF_NOGRAVITY,                // flags
         MF2_NOLIQUIDBOB,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Revenant Projectile",       // namepointer
     },
 
@@ -1700,6 +1707,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_NOBLOCKMAP|MF_NOGRAVITY|MF_TRANSLUCENT,                // flags
         MF2_NOLIQUIDBOB,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Smoke",       // namepointer
     },
 
@@ -1727,8 +1735,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_posact,                // activesound
         MF_SOLID|MF_SHOOTABLE|MF_COUNTKILL, // flags
-        MF2_NOLIQUIDBOB, // flags2
+        MF2_SHADOW | MF2_NOLIQUIDBOB, // flags2
         S_FATT_RAISE1,                // raisestate
+        0,              // shadowoffset
         "Mancubus",       // namepointer
     },
 
@@ -1758,6 +1767,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_NOBLOCKMAP|MF_MISSILE|MF_DROPOFF|MF_NOGRAVITY|MF_TRANSLUCENT,                // flags
         MF2_NOLIQUIDBOB,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Mancubus Fire",       // namepointer
     },
 
@@ -1785,8 +1795,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_posact,                // activesound
         MF_SOLID|MF_SHOOTABLE|MF_COUNTKILL, // flags
-        MF2_NOLIQUIDBOB, // flags2
+        MF2_SHADOW | MF2_NOLIQUIDBOB, // flags2
         S_CPOS_RAISE1,                // raisestate
+        0,              // shadowoffset
         "Chaingunner",       // namepointer
     },
 
@@ -1814,8 +1825,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_bgact,                // activesound
         MF_SOLID|MF_SHOOTABLE|MF_COUNTKILL, // flags
-        MF2_NOLIQUIDBOB, // flags2
+        MF2_SHADOW | MF2_NOLIQUIDBOB, // flags2
         S_TROO_RAISE1,                // raisestate
+        0,              // shadowoffset
         "Imp",       // namepointer
     },
 
@@ -1843,8 +1855,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_dmact,                // activesound
         MF_SOLID|MF_SHOOTABLE|MF_COUNTKILL, // flags
-        MF2_NOLIQUIDBOB, // flags2
+        MF2_SHADOW | MF2_NOLIQUIDBOB, // flags2
         S_SARG_RAISE1,                // raisestate
+        2 * FRACUNIT,              // shadowoffset
         "Demon",       // namepointer
     },
 
@@ -1872,8 +1885,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_dmact,                // activesound
         MF_SOLID|MF_SHOOTABLE|MF_SHADOW|MF_COUNTKILL,                // flags
-        MF2_NOLIQUIDBOB,                          // flags2
+        MF2_SHADOW | MF2_NOLIQUIDBOB,                          // flags2
         S_SARG_RAISE1,                // raisestate
+        2 * FRACUNIT,              // shadowoffset
         "Spectre",       // namepointer
     },
 
@@ -1901,8 +1915,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_dmact,                // activesound
         MF_SOLID|MF_SHOOTABLE|MF_FLOAT|MF_NOGRAVITY|MF_COUNTKILL, // flags
-        MF2_NOLIQUIDBOB | MF2_NOFOOTCLIP, // flags2
+        MF2_SHADOW | MF2_NOLIQUIDBOB | MF2_NOFOOTCLIP, // flags2
         S_HEAD_RAISE1,                // raisestate
+        0,              // shadowoffset
         "Cacodemon",       // namepointer
     },
 
@@ -1930,8 +1945,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_dmact,                // activesound
         MF_SOLID|MF_SHOOTABLE|MF_COUNTKILL, // flags
-        MF2_NOLIQUIDBOB, // flags2
+        MF2_SHADOW | MF2_NOLIQUIDBOB, // flags2
         S_BOSS_RAISE1,                // raisestate
+        4 * FRACUNIT,              // shadowoffset
         "Baron of Hell",       // namepointer
     },
 
@@ -1961,6 +1977,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_NOBLOCKMAP|MF_MISSILE|MF_DROPOFF|MF_NOGRAVITY|MF_TRANSLUCENT,                // flags
         MF2_NOLIQUIDBOB,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Baron of Hell / Hell Knight Projectile",       // namepointer
     },
 
@@ -1988,8 +2005,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_dmact,                // activesound
         MF_SOLID|MF_SHOOTABLE|MF_COUNTKILL, // flags
-        MF2_NOLIQUIDBOB, // flags2
+        MF2_SHADOW | MF2_NOLIQUIDBOB, // flags2
         S_BOS2_RAISE1,                // raisestate
+        4 * FRACUNIT,              // shadowoffset
         "Hell Knight",       // namepointer
     },
 
@@ -2017,8 +2035,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         3,                // damage
         sfx_dmact,                // activesound
         MF_SOLID|MF_SHOOTABLE|MF_FLOAT|MF_NOGRAVITY, // flags
-        MF2_NOFOOTCLIP | MF2_NOLIQUIDBOB, // flags2
+        MF2_SHADOW | MF2_NOFOOTCLIP | MF2_NOLIQUIDBOB, // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Lost Soul",       // namepointer
     },
 
@@ -2046,8 +2065,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_dmact,                // activesound
         MF_SOLID|MF_SHOOTABLE|MF_COUNTKILL, // flags
-        MF2_NOLIQUIDBOB, // flags2
+        MF2_SHADOW | MF2_NOLIQUIDBOB, // flags2
         S_NULL,                // raisestate
+        12 * FRACUNIT,              // shadowoffset
         "Spider Mastermind",       // namepointer
     },
 
@@ -2075,8 +2095,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_bspact,                // activesound
         MF_SOLID|MF_SHOOTABLE|MF_COUNTKILL, // flags
-        MF2_NOLIQUIDBOB, // flags2
+        MF2_SHADOW | MF2_NOLIQUIDBOB, // flags2
         S_BSPI_RAISE1,                // raisestate
+        4 * FRACUNIT,              // shadowoffset
         "Arachnotron",       // namepointer
     },
 
@@ -2104,8 +2125,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_dmact,                // activesound
         MF_SOLID|MF_SHOOTABLE|MF_COUNTKILL,                // flags
-        MF2_NOLIQUIDBOB,                          // flags2
+        MF2_SHADOW | MF2_NOLIQUIDBOB,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Cyberdemon",       // namepointer
     },
 
@@ -2133,8 +2155,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_dmact,                // activesound
         MF_SOLID|MF_SHOOTABLE|MF_FLOAT|MF_NOGRAVITY|MF_COUNTKILL,                // flags
-        MF2_NOLIQUIDBOB | MF2_NOFOOTCLIP,                          // flags2
+        MF2_SHADOW | MF2_NOLIQUIDBOB | MF2_NOFOOTCLIP,                          // flags2
         S_PAIN_RAISE1,                // raisestate
+        0,              // shadowoffset
         "Pain Elemental",       // namepointer
     },
 
@@ -2162,8 +2185,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_posact,                // activesound
         MF_SOLID|MF_SHOOTABLE|MF_COUNTKILL,                // flags
-        MF2_NOLIQUIDBOB,                          // flags2
+        MF2_SHADOW | MF2_NOLIQUIDBOB,                          // flags2
         S_SSWV_RAISE1,                // raisestate
+        0,              // shadowoffset
         "Wolfenstein 3D SS Guard",       // namepointer
     },
 
@@ -2193,6 +2217,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_SOLID|MF_SPAWNCEILING|MF_NOGRAVITY|MF_SHOOTABLE|MF_COUNTKILL,                // flags
         0,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Commander Keen",       // namepointer
     },
 
@@ -2222,6 +2247,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_SOLID|MF_SHOOTABLE,                // flags
         0,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Icon of Sin",       // namepointer
     },
 
@@ -2251,6 +2277,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_NOBLOCKMAP|MF_NOSECTOR,                // flags
         0,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Monster Spawner",       // namepointer
     },
 
@@ -2280,6 +2307,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_NOBLOCKMAP|MF_NOSECTOR,                // flags
         0,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Monster Target",       // namepointer
     },
 
@@ -2307,8 +2335,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         3,                // damage
         sfx_None,                // activesound
         MF_NOBLOCKMAP|MF_MISSILE|MF_DROPOFF|MF_NOGRAVITY|MF_NOCLIP,                // flags
-        MF2_NOFOOTCLIP,                          // flags2
+        MF2_SHADOW | MF2_NOFOOTCLIP,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Icon of Sin Projectile",       // namepointer
     },
 
@@ -2338,6 +2367,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_NOBLOCKMAP|MF_NOGRAVITY|MF_TRANSLUCENT,                // flags
         MF2_NOFOOTCLIP,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Icon of Sin Teleport Fog",       // namepointer
     },
 
@@ -2365,8 +2395,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_None,                // activesound
         MF_SOLID|MF_SHOOTABLE|MF_NOBLOOD,                // flags
-        MF2_NOLIQUIDBOB,                          // flags2
+        MF2_SHADOW | MF2_NOLIQUIDBOB,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Barrel",       // namepointer
     },
 
@@ -2396,6 +2427,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_NOBLOCKMAP|MF_MISSILE|MF_DROPOFF|MF_NOGRAVITY|MF_TRANSLUCENT,                // flags
         MF2_NOFOOTCLIP,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Imp Projectile",       // namepointer
     },
 
@@ -2425,6 +2457,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_NOBLOCKMAP|MF_MISSILE|MF_DROPOFF|MF_NOGRAVITY|MF_TRANSLUCENT,                // flags
         MF2_NOFOOTCLIP,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Cacodemon Projectile",       // namepointer
     },
 
@@ -2452,8 +2485,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         20,                // damage
         sfx_None,                // activesound
         MF_NOBLOCKMAP|MF_MISSILE|MF_DROPOFF|MF_NOGRAVITY,                // flags
-        MF2_NOFOOTCLIP,                          // flags2
+        MF2_SHADOW | MF2_NOFOOTCLIP,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Rocket Launcher Projectile",       // namepointer
     },
 
@@ -2483,6 +2517,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_NOBLOCKMAP|MF_MISSILE|MF_DROPOFF|MF_NOGRAVITY|MF_TRANSLUCENT,                // flags
         MF2_NOFOOTCLIP,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Plasma Rifle Projectile",       // namepointer
     },
 
@@ -2512,6 +2547,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_NOBLOCKMAP|MF_MISSILE|MF_DROPOFF|MF_NOGRAVITY|MF_TRANSLUCENT,                // flags
         MF2_NOFOOTCLIP,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "BFG-9000 Primary Projectile",       // namepointer
     },
 
@@ -2541,6 +2577,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_NOBLOCKMAP|MF_MISSILE|MF_DROPOFF|MF_NOGRAVITY|MF_TRANSLUCENT,                // flags
         MF2_NOFOOTCLIP,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Arachnotron Projectile",       // namepointer
     },
 
@@ -2570,6 +2607,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_NOBLOCKMAP|MF_NOGRAVITY|MF_TRANSLUCENT,                // flags
         MF2_NOFOOTCLIP,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Bullet Puff",       // namepointer
     },
 
@@ -2599,6 +2637,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_NOBLOCKMAP,                // flags
         MF2_NOFOOTCLIP,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Blood Splat",       // namepointer
     },
 
@@ -2628,6 +2667,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_NOBLOCKMAP|MF_NOGRAVITY|MF_TRANSLUCENT,                // flags
         MF2_NOFOOTCLIP,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Teleport Fog",       // namepointer
     },
 
@@ -2657,6 +2697,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_NOBLOCKMAP|MF_NOGRAVITY|MF_TRANSLUCENT,                // flags
         MF2_NOFOOTCLIP,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Item Respawn Fog",       // namepointer
     },
 
@@ -2686,6 +2727,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_NOBLOCKMAP|MF_NOSECTOR,                // flags
         0,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Teleport Destination",       // namepointer
     },
 
@@ -2715,6 +2757,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_NOBLOCKMAP|MF_NOGRAVITY,                // flags
         MF2_NOFOOTCLIP,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "BFG-9000 Secondary Projectile",       // namepointer
     },
 
@@ -2742,8 +2785,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_None,                // activesound
         MF_SPECIAL,                // flags
-        0,                          // flags2
+        MF2_SHADOW,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Green Armor",       // namepointer
     },
 
@@ -2771,8 +2815,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_None,                // activesound
         MF_SPECIAL,                // flags
-        0,                          // flags2
+        MF2_SHADOW,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Blue Armor",       // namepointer
     },
 
@@ -2800,8 +2845,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_None,                // activesound
         MF_SPECIAL|MF_COUNTITEM|MF_TRANSLUCENT,                // flags
-        0,                          // flags2
+        MF2_SHADOW,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Health Potion",       // namepointer
     },
 
@@ -2829,8 +2875,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_None,                // activesound
         MF_SPECIAL|MF_COUNTITEM,                // flags
-        0,                          // flags2
+        MF2_SHADOW,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Armor Point",       // namepointer
     },
 
@@ -2858,8 +2905,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_None,                // activesound
         MF_SPECIAL|MF_NOTDMATCH,                // flags
-        0,                          // flags2
+        MF2_SHADOW,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Blue Key Card",       // namepointer
     },
 
@@ -2887,8 +2935,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_None,                // activesound
         MF_SPECIAL|MF_NOTDMATCH,                // flags
-        0,                          // flags2
+        MF2_SHADOW,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Red Key Card",       // namepointer
     },
 
@@ -2916,8 +2965,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_None,                // activesound
         MF_SPECIAL|MF_NOTDMATCH,                // flags
-        0,                          // flags2
+        MF2_SHADOW,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Yellow Key Card",       // namepointer
     },
 
@@ -2945,8 +2995,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_None,                // activesound
         MF_SPECIAL|MF_NOTDMATCH,                // flags
-        0,                          // flags2
+        MF2_SHADOW,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Yellow Skull Key",       // namepointer
     },
 
@@ -2974,8 +3025,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_None,                // activesound
         MF_SPECIAL|MF_NOTDMATCH,                // flags
-        0,                          // flags2
+        MF2_SHADOW,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Red Skull Key",       // namepointer
     },
 
@@ -3003,8 +3055,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_None,                // activesound
         MF_SPECIAL|MF_NOTDMATCH,                // flags
-        0,                          // flags2
+        MF2_SHADOW,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Blue Skull Key",       // namepointer
     },
 
@@ -3032,8 +3085,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_None,                // activesound
         MF_SPECIAL,                // flags
-        0,                          // flags2
+        MF2_SHADOW,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Stimpack",       // namepointer
     },
 
@@ -3061,8 +3115,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_None,                // activesound
         MF_SPECIAL,                // flags
-        0,                          // flags2
+        MF2_SHADOW,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Medikit",       // namepointer
     },
 
@@ -3090,8 +3145,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_None,                // activesound
         MF_SPECIAL|MF_COUNTITEM|MF_TRANSLUCENT,                // flags
-        MF2_FLOATBOB | MF2_NOFOOTCLIP,                          // flags2
+        MF2_SHADOW | MF2_FLOATBOB | MF2_NOFOOTCLIP,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Soulsphere",       // namepointer
     },
 
@@ -3119,8 +3175,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_None,                // activesound
         MF_SPECIAL|MF_COUNTITEM|MF_TRANSLUCENT,                // flags
-        MF2_FLOATBOB | MF2_NOFOOTCLIP,                          // flags2
+        MF2_SHADOW | MF2_FLOATBOB | MF2_NOFOOTCLIP,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Invulnerability",       // namepointer
     },
 
@@ -3148,8 +3205,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_None,                // activesound
         MF_SPECIAL|MF_COUNTITEM,                // flags
-        0,                          // flags2
+        MF2_SHADOW,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Berserk",       // namepointer
     },
 
@@ -3177,8 +3235,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_None,                // activesound
         MF_SPECIAL|MF_COUNTITEM|MF_TRANSLUCENT,                // flags
-        MF2_FLOATBOB | MF2_NOFOOTCLIP,                          // flags2
+        MF2_SHADOW | MF2_FLOATBOB | MF2_NOFOOTCLIP,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Partial Invisibility",       // namepointer
     },
 
@@ -3206,8 +3265,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_None,                // activesound
         MF_SPECIAL,                // flags
-        MF2_FLOATBOB | MF2_NOFOOTCLIP,                          // flags2
+        MF2_SHADOW | MF2_FLOATBOB | MF2_NOFOOTCLIP,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Radiation Shielding Suit",       // namepointer
     },
 
@@ -3235,8 +3295,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_None,                // activesound
         MF_SPECIAL|MF_COUNTITEM,                // flags
-        0,                          // flags2
+        MF2_SHADOW,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Computer Area Map",       // namepointer
     },
 
@@ -3264,8 +3325,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_None,                // activesound
         MF_SPECIAL|MF_COUNTITEM,                // flags
-        0,                          // flags2
+        MF2_SHADOW,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Light Amplification Visor",       // namepointer
     },
 
@@ -3293,8 +3355,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_None,                // activesound
         MF_SPECIAL|MF_COUNTITEM|MF_TRANSLUCENT,                // flags
-        MF2_FLOATBOB | MF2_NOFOOTCLIP,                          // flags2
+        MF2_SHADOW | MF2_FLOATBOB | MF2_NOFOOTCLIP,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Megasphere",       // namepointer
     },
 
@@ -3322,8 +3385,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_None,                // activesound
         MF_SPECIAL,                // flags
-        0,                          // flags2
+        MF2_SHADOW,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Ammo Clip",       // namepointer
     },
 
@@ -3351,8 +3415,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_None,                // activesound
         MF_SPECIAL,                // flags
-        0,                          // flags2
+        MF2_SHADOW,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Box of Bullets",       // namepointer
     },
 
@@ -3380,8 +3445,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_None,                // activesound
         MF_SPECIAL,                // flags
-        0,                          // flags2
+        MF2_SHADOW,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Rocket",       // namepointer
     },
 
@@ -3409,8 +3475,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_None,                // activesound
         MF_SPECIAL,                // flags
-        0,                          // flags2
+        MF2_SHADOW,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Box of Rockets",       // namepointer
     },
 
@@ -3438,8 +3505,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_None,                // activesound
         MF_SPECIAL,                // flags
-        0,                          // flags2
+        MF2_SHADOW,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Plasma Cell",       // namepointer
     },
 
@@ -3467,8 +3535,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_None,                // activesound
         MF_SPECIAL,                // flags
-        0,                          // flags2
+        MF2_SHADOW,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Plasma Cell Pack",       // namepointer
     },
 
@@ -3493,11 +3562,12 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         20*FRACUNIT,                // radius
         16*FRACUNIT,                // height
         100,                // mass
-        0,                // damage
+        MF2_SHADOW,                // damage
         sfx_None,                // activesound
         MF_SPECIAL,                // flags
         0,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Shotgun Shells",       // namepointer
     },
 
@@ -3525,8 +3595,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_None,                // activesound
         MF_SPECIAL,                // flags
-        0,                          // flags2
+        MF2_SHADOW,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Box of Shotgun Shells",       // namepointer
     },
 
@@ -3554,8 +3625,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_None,                // activesound
         MF_SPECIAL,                // flags
-        0,                          // flags2
+        MF2_SHADOW,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Backpack",       // namepointer
     },
 
@@ -3583,8 +3655,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_None,                // activesound
         MF_SPECIAL,                // flags
-        0,                          // flags2
+        MF2_SHADOW,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "BFG-9000",       // namepointer
     },
 
@@ -3612,8 +3685,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_None,                // activesound
         MF_SPECIAL,                // flags
-        0,                          // flags2
+        MF2_SHADOW,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Chaingun",       // namepointer
     },
 
@@ -3641,8 +3715,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_None,                // activesound
         MF_SPECIAL,                // flags
-        0,                          // flags2
+        MF2_SHADOW,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Chainsaw",       // namepointer
     },
 
@@ -3670,8 +3745,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_None,                // activesound
         MF_SPECIAL,                // flags
-        0,                          // flags2
+        MF2_SHADOW,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Rocket Launcher",       // namepointer
     },
 
@@ -3699,8 +3775,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_None,                // activesound
         MF_SPECIAL,                // flags
-        0,                          // flags2
+        MF2_SHADOW,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Plasma Rifle",       // namepointer
     },
 
@@ -3728,8 +3805,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_None,                // activesound
         MF_SPECIAL,                // flags
-        0,                          // flags2
+        MF2_SHADOW,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Shotgun",       // namepointer
     },
 
@@ -3757,8 +3835,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_None,                // activesound
         MF_SPECIAL,                // flags
-        0,                          // flags2
+        MF2_SHADOW,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Double barreled Shotgun",       // namepointer
     },
 
@@ -3788,6 +3867,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_SOLID,                // flags
         MF2_NOLIQUIDBOB,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Tall Techno Floor Lamp",       // namepointer
     },
 
@@ -3817,6 +3897,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_SOLID,                // flags
         MF2_NOLIQUIDBOB,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Short Techno Floor Lamp",       // namepointer
     },
 
@@ -3846,6 +3927,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_SOLID,                // flags
         MF2_NOLIQUIDBOB,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Floor Lamp",       // namepointer
     },
 
@@ -3875,6 +3957,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_SOLID,                // flags
         MF2_NOLIQUIDBOB,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Tall Green Column",       // namepointer
     },
 
@@ -3904,6 +3987,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_SOLID,                // flags
         MF2_NOLIQUIDBOB,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Short Green Column",       // namepointer
     },
 
@@ -3933,6 +4017,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_SOLID,                // flags
         MF2_NOLIQUIDBOB,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Tall Red Column",       // namepointer
     },
 
@@ -3962,6 +4047,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_SOLID,                // flags
         MF2_NOLIQUIDBOB,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Short Red Column",       // namepointer
     },
 
@@ -3991,6 +4077,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_SOLID,                // flags
         MF2_NOLIQUIDBOB,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Short Red Column with Skull",       // namepointer
     },
 
@@ -4020,6 +4107,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_SOLID,                // flags
         MF2_NOLIQUIDBOB,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Short Green Column with beating Heart",       // namepointer
     },
 
@@ -4049,6 +4137,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_SOLID,                // flags
         MF2_NOLIQUIDBOB,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Evil Eye",       // namepointer
     },
 
@@ -4078,6 +4167,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_SOLID,                // flags
         MF2_NOFOOTCLIP,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Floating Skull Rock",       // namepointer
     },
 
@@ -4107,6 +4197,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_SOLID,                // flags
         MF2_NOLIQUIDBOB,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Torched Tree",       // namepointer
     },
 
@@ -4136,6 +4227,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_SOLID,                // flags
         MF2_NOLIQUIDBOB,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Tall Blue Firestick",       // namepointer
     },
 
@@ -4165,6 +4257,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_SOLID,                // flags
         MF2_NOLIQUIDBOB,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Tall Green Firestick",       // namepointer
     },
 
@@ -4194,6 +4287,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_SOLID,                // flags
         MF2_NOLIQUIDBOB,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Tall Red Firestick",       // namepointer
     },
 
@@ -4223,6 +4317,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_SOLID,                // flags
         MF2_NOLIQUIDBOB,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Short Blue Firestick",       // namepointer
     },
 
@@ -4252,6 +4347,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_SOLID,                // flags
         MF2_NOLIQUIDBOB,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Short Green Firestick",       // namepointer
     },
 
@@ -4281,6 +4377,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_SOLID,                // flags
         MF2_NOLIQUIDBOB,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Short Red Firestick",       // namepointer
     },
 
@@ -4310,6 +4407,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_SOLID,                // flags
         MF2_NOLIQUIDBOB,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Stalagtite",       // namepointer
     },
 
@@ -4339,6 +4437,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_SOLID,                // flags
         MF2_NOLIQUIDBOB,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Tall Techno Pillar",       // namepointer
     },
 
@@ -4368,6 +4467,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // flags
         MF2_NOLIQUIDBOB,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Candle Stick",       // namepointer
     },
 
@@ -4397,6 +4497,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_SOLID,                // flags
         MF2_NOLIQUIDBOB,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Candelabra",       // namepointer
     },
 
@@ -4426,6 +4527,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_SOLID|MF_SPAWNCEILING|MF_NOGRAVITY,                // flags
         0,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Hanging Victim (Twitching, Blocking)",       // namepointer
     },
 
@@ -4455,6 +4557,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_SOLID|MF_SPAWNCEILING|MF_NOGRAVITY,                // flags
         0,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Hanging Victim (Arms out, Blocking)",       // namepointer
     },
 
@@ -4484,6 +4587,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_SOLID|MF_SPAWNCEILING|MF_NOGRAVITY,                // flags
         0,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Hanging Victim (One-legged, Blocking)",       // namepointer
     },
 
@@ -4513,6 +4617,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_SOLID|MF_SPAWNCEILING|MF_NOGRAVITY,                // flags
         0,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Hanging Pair of Legs (Blocking)",       // namepointer
     },
 
@@ -4542,6 +4647,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_SOLID|MF_SPAWNCEILING|MF_NOGRAVITY,                // flags
         0,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Hanging Leg (Blocking)",       // namepointer
     },
 
@@ -4571,6 +4677,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_SPAWNCEILING|MF_NOGRAVITY,                // flags
         0,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Hanging Victim (Arms out)",       // namepointer
     },
 
@@ -4600,6 +4707,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_SPAWNCEILING|MF_NOGRAVITY,                // flags
         0,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Hanging Pair of Legs",       // namepointer
     },
 
@@ -4629,6 +4737,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_SPAWNCEILING|MF_NOGRAVITY,                // flags
         0,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Hanging Victim (One-legged)",       // namepointer
     },
 
@@ -4658,6 +4767,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_SPAWNCEILING|MF_NOGRAVITY,                // flags
         0,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Hanging Leg",       // namepointer
     },
 
@@ -4687,6 +4797,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_SPAWNCEILING|MF_NOGRAVITY,                // flags
         0,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Hanging Victim (Twitching)",       // namepointer
     },
 
@@ -4714,8 +4825,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_None,                // activesound
         0,                // flags
-        0,                          // flags2
+        MF2_SHADOW,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Dead Cacodemon",       // namepointer
     },
 
@@ -4743,8 +4855,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_None,                // activesound
         0,                // flags
-        0,                          // flags2
+        MF2_SHADOW,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Dead Player",       // namepointer
     },
 
@@ -4772,8 +4885,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_None,                // activesound
         0,                // flags
-        0,                          // flags2
+        MF2_SHADOW,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Dead Zombieman",       // namepointer
     },
 
@@ -4801,8 +4915,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_None,                // activesound
         0,                // flags
-        0,                          // flags2
+        MF2_SHADOW,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Dead Demon",       // namepointer
     },
 
@@ -4832,6 +4947,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // flags
         0,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Dead Lost Soul",       // namepointer
     },
 
@@ -4859,8 +4975,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_None,                // activesound
         0,                // flags
-        0,                          // flags2
+        MF2_SHADOW,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Dead Imp",       // namepointer
     },
 
@@ -4888,8 +5005,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_None,                // activesound
         0,                // flags
-        0,                          // flags2
+        MF2_SHADOW,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Dead Shotgun Guy",       // namepointer
     },
 
@@ -4917,8 +5035,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_None,                // activesound
         0,                // flags
-        0,                          // flags2
+        MF2_SHADOW,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Bloody Mess 1",       // namepointer
     },
 
@@ -4946,8 +5065,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_None,                // activesound
         0,                // flags
-        0,                          // flags2
+        MF2_SHADOW,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Bloody Mess 2",       // namepointer
     },
 
@@ -4977,6 +5097,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_SOLID,                // flags
         MF2_NOLIQUIDBOB,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Five Skulls Shishkebab",       // namepointer
     },
 
@@ -5006,6 +5127,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // flags
         0,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Pool of Blood and Bones",       // namepointer
     },
 
@@ -5035,6 +5157,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_SOLID,                // flags
         MF2_NOLIQUIDBOB,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Skull on a Pole",       // namepointer
     },
 
@@ -5064,6 +5187,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_SOLID,                // flags
         MF2_NOLIQUIDBOB,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Pile of Skulls and Candles",       // namepointer
     },
 
@@ -5093,6 +5217,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_SOLID,                // flags
         MF2_NOLIQUIDBOB,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Impaled Human",       // namepointer
     },
 
@@ -5122,6 +5247,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_SOLID,                // flags
         MF2_NOLIQUIDBOB,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Twitching Impaled Human",       // namepointer
     },
 
@@ -5151,6 +5277,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_SOLID,                // flags
         MF2_NOLIQUIDBOB,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Large Brown Tree",       // namepointer
     },
 
@@ -5180,6 +5307,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_SOLID,                // flags
         MF2_NOLIQUIDBOB,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Burning Barrel",       // namepointer
     },
 
@@ -5209,6 +5337,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_SOLID|MF_SPAWNCEILING|MF_NOGRAVITY,                // flags
         0,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Hanging Victim (Guts Removed)",       // namepointer
     },
 
@@ -5238,6 +5367,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_SOLID|MF_SPAWNCEILING|MF_NOGRAVITY,                // flags
         0,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Hanging Victim (Guts And Brain Removed)",       // namepointer
     },
 
@@ -5267,6 +5397,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_SOLID|MF_SPAWNCEILING|MF_NOGRAVITY,                // flags
         0,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Hanging Torso (Looking Down)",       // namepointer
     },
 
@@ -5296,6 +5427,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_SOLID|MF_SPAWNCEILING|MF_NOGRAVITY,                // flags
         0,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Hanging Torso (Open Skull)",       // namepointer
     },
 
@@ -5325,6 +5457,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_SOLID|MF_SPAWNCEILING|MF_NOGRAVITY,                // flags
         0,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Hanging Torso (Looking Up)",       // namepointer
     },
 
@@ -5354,6 +5487,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_SOLID|MF_SPAWNCEILING|MF_NOGRAVITY,                // flags
         0,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Hanging Torso (Brain Removed)",       // namepointer
     },
 
@@ -5383,6 +5517,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_NOBLOCKMAP,                // flags
         0,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Pool of Blood and Guts",       // namepointer
     },
 
@@ -5412,6 +5547,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_NOBLOCKMAP,                // flags
         0,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Pool of Blood",       // namepointer
     },
 
@@ -5441,6 +5577,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_NOBLOCKMAP,                // flags
         0,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Pool of Brains",       // namepointer
     },
 
@@ -5468,8 +5605,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,              // damage
         sfx_None,              // activesound
         0,          // flags
-        0,                          // flags2
+        MF2_SHADOW,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Flesh and Meat",       // namepointer
     },
 
@@ -5499,6 +5637,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,          // flags
         MF2_NOLIQUIDBOB,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Bloody Gore",       // namepointer
     },
 
@@ -5528,6 +5667,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,          // flags
         0,                          // flags2
         S_NULL,          // raisestate
+        0,              // shadowoffset
         "Red Bloodsplat",       // namepointer
     },
 
@@ -5557,6 +5697,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,          // flags
         0,                          // flags2
         S_NULL,          // raisestate
+        0,              // shadowoffset
         "Blue Bloodsplat",       // namepointer
     },
 
@@ -5586,6 +5727,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,          // flags
         0,                          // flags2
         S_NULL,          // raisestate
+        0,              // shadowoffset
         "Green Bloodsplat",       // namepointer
     },
 
@@ -5615,6 +5757,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF,   // flags
         MF2_NOTELEPORT | MF2_LOGRAV,       // flags2
         S_NULL,                     // raisestate
+        0,              // shadowoffset
         "Water Splash",       // namepointer
     },
 
@@ -5644,6 +5787,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_NOBLOCKMAP,             // flags
         0,                         // flags2
         S_NULL,                     // raisestate
+        0,              // shadowoffset
         "Water Splash Base",       // namepointer
     },
 
@@ -5673,6 +5817,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_NOBLOCKMAP,             // flags
         0,                         // flags2
         S_NULL,                     // raisestate
+        0,              // shadowoffset
         "Lava Splash",       // namepointer
     },
 
@@ -5702,6 +5847,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_NOBLOCKMAP | MF_NOGRAVITY,  // flags
         MF2_NOLIQUIDBOB,                         // flags2
         S_NULL,                     // raisestate
+        0,              // shadowoffset
         "Lava Smoke",       // namepointer
     },
 
@@ -5731,6 +5877,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF,   // flags
         MF2_NOTELEPORT | MF2_LOGRAV,       // flags2
         S_NULL,                     // raisestate
+        0,              // shadowoffset
         "Sludge Chunk",       // namepointer
     },
 
@@ -5760,6 +5907,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_NOBLOCKMAP,             // flags
         0,                         // flags2
         S_NULL,                     // raisestate
+        0,              // shadowoffset
         "Sludge Splash",       // namepointer
     },
 
@@ -5789,6 +5937,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_NOBLOCKMAP | MF_NOGRAVITY | MF_TRANSLUCENT,             // flags
         MF2_NOLIQUIDBOB | MF2_NOFOOTCLIP,                         // flags2
         S_NULL,                    // raisestate
+        0,              // shadowoffset
         "Rocket Trail",       // namepointer
     },
 
@@ -5819,6 +5968,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_NOBLOCKMAP|MF_MISSILE|MF_DROPOFF|MF_NOGRAVITY|MF_TRANSLUCENT, // flags
         MF2_NOLIQUIDBOB,                         // flags2
         S_NULL,                     // raisestate
+        0,              // shadowoffset
         "Beta Plasma Rifle Projectile 1",       // namepointer
     },
   
@@ -5849,6 +5999,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_NOBLOCKMAP|MF_MISSILE|MF_DROPOFF|MF_NOGRAVITY|MF_TRANSLUCENT, // flags
         MF2_NOLIQUIDBOB,                         // flags2
         S_NULL,                     // raisestate
+        0,              // shadowoffset
         "Beta Plasma Rifle Projectile 2",       // namepointer
     },
 
@@ -5876,8 +6027,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         3,                // damage
         sfx_dmact,                // activesound
         MF_SOLID|MF_SHOOTABLE|MF_FLOAT|MF_NOGRAVITY, // flags
-        MF2_NOFOOTCLIP | MF2_NOLIQUIDBOB, // flags2
+        MF2_SHADOW | MF2_NOFOOTCLIP | MF2_NOLIQUIDBOB, // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Beta Lost Soul",       // namepointer
     },
 
@@ -5907,6 +6059,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_NOBLOCKMAP|MF_MISSILE|MF_DROPOFF|MF_NOGRAVITY|MF_TRANSLUCENT, // flags
         MF2_NOLIQUIDBOB,                         // flags2
         S_NULL,                     // raisestate
+        0,              // shadowoffset
         "Beta Imp Projectile",       // namepointer
     },
 
@@ -5934,8 +6087,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_None,                // activesound
         MF_SPECIAL|MF_COUNTITEM,                // flags
-        0,                          // flags2
+        MF2_SHADOW,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Beta Dagger",       // namepointer
     },
 
@@ -5963,8 +6117,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_None,                // activesound
         MF_SPECIAL|MF_COUNTITEM,                // flags
-        0,                          // flags2
+        MF2_SHADOW,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Beta Skull Chest",       // namepointer
     },
 
@@ -5992,8 +6147,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_None,                // activesound
         MF_SPECIAL|MF_COUNTITEM,                // flags
-        0,                          // flags2
+        MF2_SHADOW,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Beta Evil Sceptre",       // namepointer
     },
 
@@ -6021,8 +6177,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_None,                // activesound
         MF_SPECIAL|MF_COUNTITEM,                // flags
-        0,                          // flags2
+        MF2_SHADOW,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Beta Unholy Bible",       // namepointer
     },
 
@@ -6050,8 +6207,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_None,                // activesound
         MF_SOLID,                // flags
-        0,                          // flags2
+        MF2_SHADOW,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Beta Pile of Skulls and Candles",       // namepointer
     },
 
@@ -6079,8 +6237,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_None,                // activesound
         0,                // flags
-        0,                          // flags2
+        MF2_SHADOW,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Beta Pool of Blood and Bones",       // namepointer
     },
 
@@ -6108,8 +6267,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_None,                // activesound
         MF_SPECIAL|MF_NOTDMATCH,                // flags
-        0,                          // flags2
+        MF2_SHADOW,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Beta Blue Skull Key Card",       // namepointer
     },
 
@@ -6137,8 +6297,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_None,                // activesound
         MF_SPECIAL|MF_NOTDMATCH,                // flags
-        0,                          // flags2
+        MF2_SHADOW,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Beta Red Skull Key Card",       // namepointer
     },
 
@@ -6166,8 +6327,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_None,                // activesound
         MF_SPECIAL|MF_NOTDMATCH,                // flags
-        0,                          // flags2
+        MF2_SHADOW,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Beta Yellow Skull Key Card",       // namepointer
     },
 
@@ -6195,8 +6357,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_None,                // activesound
         MF_SPECIAL,                // flags
-        0,                          // flags2
+        MF2_SHADOW,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Beta Shotgun Shells",       // namepointer
     },
 
@@ -6224,8 +6387,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_None,                // activesound
         MF_SPECIAL,                // flags
-        0,                          // flags2
+        MF2_SHADOW,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Beta Plasma Rifle Cell",       // namepointer
     },
 
@@ -6253,8 +6417,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_None,                // activesound
         MF_SPECIAL,                // flags
-        0,                          // flags2
+        MF2_SHADOW,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Beta Box of Shotgun Shells",       // namepointer
     },
 
@@ -6282,8 +6447,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_None,                // activesound
         MF_SOLID|MF_SHOOTABLE|MF_NOBLOOD,                // flags
-        MF2_NOLIQUIDBOB,                          // flags2
+        MF2_SHADOW | MF2_NOLIQUIDBOB,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Beta Barrel",       // namepointer
     },
 
@@ -6311,8 +6477,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_None,                // activesound
         MF_SPECIAL|MF_COUNTITEM|MF_TRANSLUCENT,                // flags
-        MF2_FLOATBOB,                          // flags2
+        MF2_SHADOW | MF2_FLOATBOB,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Beta Partial Invisibility",       // namepointer
     },
 
@@ -6340,8 +6507,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_None,                // activesound
         MF_SPECIAL|MF_COUNTITEM|MF_TRANSLUCENT,                // flags
-        MF2_FLOATBOB,                          // flags2
+        MF2_SHADOW | MF2_FLOATBOB,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Beta Invulnerability",       // namepointer
     },
 
@@ -6369,8 +6537,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_dmact,                // activesound
         MF_SOLID|MF_SHOOTABLE|MF_COUNTKILL, // flags
-        MF2_NOLIQUIDBOB, // flags2
+        MF2_SHADOW | MF2_NOLIQUIDBOB, // flags2
         S_BETABOSS_RAISE1,                // raisestate
+        4 * FRACUNIT,              // shadowoffset
         "Beta Baron of Hell",       // namepointer
     },
 
@@ -6398,8 +6567,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_None,                // activesound
         MF_SOLID,                // flags
-        MF2_NOLIQUIDBOB,                          // flags2
+        MF2_SHADOW | MF2_NOLIQUIDBOB,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Beta Tall Green Column",       // namepointer
     },
 
@@ -6429,6 +6599,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_SOLID,                // flags
         MF2_NOLIQUIDBOB,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Beta Tall Techno Pillar",       // namepointer
     },
 
@@ -6456,8 +6627,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_None,                // activesound
         MF_SOLID,                // flags
-        MF2_NOLIQUIDBOB,                          // flags2
+        MF2_SHADOW | MF2_NOLIQUIDBOB,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Beta Skull on a Pole",       // namepointer
     },
 
@@ -6485,8 +6657,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_None,                // activesound
         MF_SOLID,                // flags
-        MF2_NOLIQUIDBOB,                          // flags2
+        MF2_SHADOW | MF2_NOLIQUIDBOB,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Beta Impaled Human",       // namepointer
     },
 
@@ -6514,8 +6687,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_None,                // activesound
         MF_SOLID,                // flags
-        MF2_NOLIQUIDBOB,                          // flags2
+        MF2_SHADOW | MF2_NOLIQUIDBOB,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Beta Twitching Impaled Human",       // namepointer
     },
 
@@ -6543,8 +6717,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_None,                // activesound
         MF_SOLID,                // flags
-        MF2_NOLIQUIDBOB,                          // flags2
+        MF2_SHADOW | MF2_NOLIQUIDBOB,                          // flags2
         S_NULL,                // raisestate
+        0,              // shadowoffset
         "Beta Stalagtite",       // namepointer
     },
 
@@ -6572,8 +6747,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_dmact,                // activesound
         MF_SOLID|MF_SHOOTABLE|MF_FLOAT|MF_NOGRAVITY|MF_COUNTKILL, // flags
-        MF2_NOLIQUIDBOB | MF2_NOFOOTCLIP, // flags2
+        MF2_SHADOW | MF2_NOLIQUIDBOB | MF2_NOFOOTCLIP, // flags2
         S_BETAHEAD_RAISE1,                // raisestate
+        0,              // shadowoffset
         "Beta Cacodemon",       // namepointer
     },
 
@@ -6601,8 +6777,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_posact,                // activesound
         MF_SOLID|MF_SHOOTABLE|MF_COUNTKILL, // flags
-        MF2_NOLIQUIDBOB, // flags2
+        MF2_SHADOW | MF2_NOLIQUIDBOB, // flags2
         S_BETAPOSS_RAISE1,                // raisestate
+        0,              // shadowoffset
         "Beta Zombieman",       // namepointer
     },
 
@@ -6630,9 +6807,40 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_posact,                // activesound
         MF_SOLID|MF_SHOOTABLE|MF_COUNTKILL, // flags
-        MF2_NOLIQUIDBOB, // flags2
+        MF2_SHADOW | MF2_NOLIQUIDBOB, // flags2
         S_BETASPOS_RAISE1,                // raisestate
+        0,              // shadowoffset
         "Beta Shotgun Guy",       // namepointer
+    },
+
+    {                // MT_SHADOW
+        -1,                // doomednum
+        S_NULL,                // spawnstate
+        0,                // spawnhealth
+        S_NULL,                // seestate
+        sfx_None,                // seesound
+        0,                // reactiontime
+        sfx_None,                // attacksound
+        S_NULL,                // painstate
+        0,                // painchance
+        sfx_None,                // painsound
+        S_NULL,                // meleestate
+        S_NULL,                // missilestate
+        S_NULL,     // crashstate
+        S_NULL,                // deathstate
+        S_NULL,                // xdeathstate
+        sfx_None,                // deathsound
+        0,                // speed
+        0,                // radius
+        0,                // height
+        0,                // mass
+        0,                // damage
+        sfx_None,                // activesound
+        0, // flags
+        0, // flags2
+        S_NULL,                // raisestate
+        0,              // shadowoffset
+        "Shadow",       // namepointer
     },
 /*
     {           // MT_BULLET
@@ -6661,6 +6869,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         MF_MISSILE,              // flags
         0,                          // flags2
         S_NULL          // raisestate
+        0,              // shadowoffset
         NULL,       // namepointer
     },
 
@@ -6690,6 +6899,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,          // flags
         0,          // flags2
         S_NULL          // raisestate
+        0,              // shadowoffset
         NULL,       // namepointer
     }
 */

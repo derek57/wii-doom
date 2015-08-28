@@ -722,6 +722,23 @@ void R_ExecuteSetViewSize (void)
 }
 
 
+void R_InitColumnFunctions(void)
+{
+    int i;
+
+    colfunc = basecolfunc = R_DrawColumn;
+
+    for (i = 0; i < NUMMOBJTYPES; i++)
+    {
+        mobjinfo_t      *info = &mobjinfo[i];
+
+        if (info->flags & MF_SHADOW)
+            info->colfunc = fuzzcolfunc;
+        else
+            info->colfunc = basecolfunc;
+    }
+}
+
 
 //
 // R_Init
@@ -757,6 +774,8 @@ void R_Init (void)
     R_InitSkyMap ();
     R_InitTranslationTables ();
     printf (".");
+
+    R_InitColumnFunctions();
     //C_Printf (CR_GRAY, ".");
     printf("]");
     //C_Printf (CR_GRAY, "]");

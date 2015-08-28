@@ -246,6 +246,7 @@
 
 #define MF2_NOFOOTCLIP     0x00040000  // Object's feet won't be clipped in liquid
 #define MF2_NOLIQUIDBOB    0x00080000  // use float bobbing z movement
+#define MF2_SHADOW         0x00400000  // Object has a shadow
 #define MF2_DRAWFIRST      0x00800000  // Object is drawn first
 #define MF2_SMOKETRAIL     0x02000000  // Object has smoke trail
 

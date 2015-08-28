@@ -1666,6 +1666,7 @@ typedef enum {
     MT_BETAHEAD,
     MT_BETAPOSSESSED,
     MT_BETASHOTGUY,
+    MT_SHADOW,
 /*
     MT_BULLET,
     MT_SHELL,
@@ -1746,7 +1747,11 @@ typedef struct
                         // resurrection.  Zero means it won't come
                         // back to life.
 
+    int   shadowoffset;
+
     char  name[100];
+
+    void  (*colfunc)(void);
 
 } mobjinfo_t;
 

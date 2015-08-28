@@ -39,6 +39,7 @@
 #include "m_random.h"
 #include "p_local.h"
 #include "p_tick.h"
+#include "r_things.h"
 #include "s_sound.h"
 #include "sounds.h"
 #include "st_stuff.h"
@@ -84,6 +85,22 @@ int             correct_lost_soul_bounce;
 
 mapthing_t      itemrespawnque[ITEMQUESIZE];
 
+
+void P_RemoveMobjShadow(mobj_t *mobj)
+{
+    // unlink from sector and block lists
+    P_UnsetThingPosition(mobj->shadow);
+/*
+    // Delete all nodes on the current sector_list
+    if (sector_list)
+    {
+        P_DelSeclist(sector_list);
+        sector_list = NULL;
+    }
+*/
+    mobj->shadow = NULL;
+}
+
 //
 // P_SetMobjState
 // Returns true if the mobj is still present.
@@ -102,6 +119,7 @@ P_SetMobjState
     statenum_t          i = state;                              // initial state
     boolean             ret = true;                             // return value
     statenum_t          tempstate[NUMSTATES];                   // for use with recursion
+    mobj_t              *shadow = mobj->shadow;
 
     if (recursion++)                                            // if recursion detected,
         memset((seenstate = tempstate), 0, sizeof(tempstate));  // clear state table
@@ -111,6 +129,10 @@ P_SetMobjState
         if (state == S_NULL)
         {
             mobj->state = (state_t *) S_NULL;
+
+            if (shadow)
+                P_RemoveMobjShadow(mobj);
+
             P_RemoveMobj (mobj);
             ret = false;
             break;                                              // killough 4/9/98
@@ -136,6 +158,13 @@ P_SetMobjState
         for (; (state = seenstate[i]); i = state - 1)
             seenstate[i] = 0;            // killough 4/9/98: erase memory of states
 
+    if (ret && shadow)
+    {
+        shadow->sprite = mobj->sprite;
+        shadow->frame = mobj->frame;
+        shadow->angle = mobj->angle;
+    }
+
     return ret;
 }
 
@@ -158,6 +187,13 @@ void P_ExplodeMissile (mobj_t* mo)
         mo->tics = 1;
 
     mo->flags &= ~MF_MISSILE;
+
+    if (mo->type == MT_ROCKET)
+    {
+        mo->colfunc = tlcolfunc;
+        if (mo->shadow)
+            P_RemoveMobjShadow(mo);
+    }
 
     // [crispy] missile explosions are translucent
     mo->flags |= MF_TRANSLUCENT;
@@ -258,6 +294,9 @@ void P_XYMovement (mobj_t* mo)
                     // Hack to prevent missiles exploding
                     // against the sky.
                     // Does not handle sky floors.
+                    if (mo->type == MT_ROCKET && mo->shadow)
+                        P_RemoveMobjShadow(mo);
+
                     P_RemoveMobj (mo);
                     return;
                 }
@@ -560,6 +599,9 @@ P_NightmareRespawn (mobj_t* mobj)
     mo->reactiontime = 18;
         
     // remove the old monster,
+    if (mobj->shadow)
+        P_RemoveMobjShadow(mobj);
+
     P_RemoveMobj (mobj);
 }
 
@@ -697,6 +739,34 @@ void P_MobjThinker (mobj_t* mobj)
 
 
 //
+// P_SpawnShadow
+//
+void P_SpawnShadow(mobj_t *actor)
+{
+    mobj_t      *mobj = Z_Malloc(sizeof(*mobj), PU_LEVEL, NULL);
+
+    memset(mobj, 0, sizeof(*mobj));
+
+    mobj->type = MT_SHADOW;
+    mobj->info = &mobjinfo[MT_SHADOW];
+    mobj->x = actor->x;
+    mobj->y = actor->y;
+
+    mobj->sprite = actor->state->sprite;
+    mobj->frame = actor->state->frame;
+
+//    mobj->flags2 = MF2_DONOTMAP;
+
+    mobj->colfunc = (actor->type == MT_SHADOWS ? R_DrawSpectreShadowColumn : R_DrawShadowColumn);
+    mobj->projectfunc = R_ProjectShadow;
+
+    P_SetThingPosition(mobj);
+
+    actor->shadow = mobj;
+    mobj->shadow = actor;
+}
+
+//
 // P_SpawnMobj
 //
 mobj_t*
@@ -737,6 +807,8 @@ P_SpawnMobj
     mobj->tics = st->tics;
     mobj->sprite = st->sprite;
     mobj->frame = st->frame;
+    mobj->colfunc = info->colfunc;
+    mobj->projectfunc = R_ProjectSprite;
 
     // set subsector and/or block links
     P_SetThingPosition (mobj);
@@ -769,6 +841,9 @@ P_SpawnMobj
     if (!(mobj->flags2 & MF2_NOFOOTCLIP) && isliquid[mobj->subsector->sector->floorpic] &&
             mobj->subsector->sector->heightsec == -1)
         mobj->flags2 |= MF2_FEETARECLIPPED;
+
+    if (mobj->flags2 & MF2_SHADOW && d_shadows)
+        P_SpawnShadow(mobj);
 
     return mobj;
 }
@@ -1163,6 +1238,26 @@ void P_SpawnMapThing (mapthing_t* mthing)
         totalitems++;
                 
     mobj->angle = ANG45 * (mthing->angle/45);
+
+    if (mobj->shadow)
+        mobj->shadow->angle = mobj->angle;
+
+    if ((mobj->flags & MF_CORPSE) && d_flipcorpses)
+    {
+        static int      prev = 0;
+        int             r = M_RandomInt(1, 10);
+
+        if (r <= 5 + prev)
+        {
+            prev--;
+            mobj->flags2 |= MF2_MIRRORED;
+            if (mobj->shadow)
+                mobj->shadow->flags2 |= MF2_MIRRORED;
+        }
+        else
+            prev++;
+    }
+
     if (mthing->options & MTF_AMBUSH)
         mobj->flags |= MF_AMBUSH;
 
@@ -1235,6 +1330,8 @@ P_SpawnBlood
   mobj_t*        target ) // [crispy] pass thing type
 {
     mobj_t*        th;
+    int            color = 0;
+    mobjinfo_t*    info = &mobjinfo[color];
         
     if (d_colblood2 && d_chkblood2)
     {
@@ -1250,6 +1347,9 @@ P_SpawnBlood
     th = P_SpawnMobj (x,y,z, MT_BLOOD);
     th->momz = FRACUNIT*2;
     th->tics -= P_Random()&3;
+
+    th->colfunc = info->colfunc;
+    th->projectfunc = R_ProjectSprite;
 
     // [crispy] connect blood object with the monster that bleeds it
     th->target = target;

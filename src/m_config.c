@@ -148,6 +148,7 @@ default_t        doom_defaults_list[] =
     CONFIG_VARIABLE_INT                (png_screenshot),
     CONFIG_VARIABLE_INT                (menu_type),
     CONFIG_VARIABLE_INT                (menu_shadow),
+    CONFIG_VARIABLE_INT                (shadows),
 //    CONFIG_VARIABLE_INT                (memory),
     CONFIG_VARIABLE_INT                (key_shoot),
     CONFIG_VARIABLE_INT                (key_open),

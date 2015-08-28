@@ -865,8 +865,8 @@ int                        cheeting;
 int                        coordinates_info = 0;
 int                        timer_info = 0;
 int                        version_info = 0;
-int                        key_controls_start_in_cfg_at_pos = 71;
-int                        key_controls_end_in_cfg_at_pos = 85;
+int                        key_controls_start_in_cfg_at_pos = 72;
+int                        key_controls_end_in_cfg_at_pos = 86;
 int                        crosshair = 0;
 int                        show_stats = 0;
 int                        tracknum = 1;
@@ -1084,6 +1084,7 @@ void M_ChaingunTics(int choice);
 void M_FallingDamage(int choice);
 void M_InfiniteAmmo(int choice);
 void M_GoreAmount(int choice);
+void M_Shadows(int choice);
 void M_Telefrag(int choice);
 void M_Doorstuck(int choice);
 void M_ResurrectGhosts(int choice);
@@ -1833,12 +1834,12 @@ enum
     game3_amount,
     game3_blooda,
     game3_bloodb,
+    game3_shadows,
     game3_telefrag,
     game3_stuck,
     game3_ressurection,
     game3_limitation,
     game3_block,
-    game3_doors,
     game3_game4,
     game3_end
 } game3_e;
@@ -1850,14 +1851,14 @@ menuitem_t GameMenu3[]=
     {2,"JUMPING",M_Jumping,'j'},
     {2,"MORE BLOOD & GORE",M_MaxGore,'o'},
     {2,"Gore Amount",M_GoreAmount,'g'},
-    {2,"Enable Colored Blood",M_ColoredBloodA,'b'},
+    {2,"Enable Colored Blood",M_ColoredBloodA,'1'},
     {2,"Fix Monster Blood",M_ColoredBloodB,'2'},
+    {2,"Shadows for Monsters and Items",M_Shadows,'s'},
     {2,"Monsters can Telefrag on MAP30",M_Telefrag,'t'},
-    {2,"Monsters stuck on doortracks",M_Doorstuck,'s'},
+    {2,"Monsters stuck on doortracks",M_Doorstuck,'d'},
     {2,"ARCH-VILE can resurrect ghosts",M_ResurrectGhosts,'r'},
     {2,"Pain Elementals have lost soul limit",M_LimitedGhosts,'l'},
     {2,"Lost Souls get stuck behind walls",M_BlockSkulls,'w'},
-    {2,"Blazing Doors play double sound",M_BlazingDoors,'d'},
     {2,"",M_Game4,'n'}
 };
 
@@ -1873,6 +1874,7 @@ menu_t  GameDef3 =
 
 enum
 {
+    game4_doors,
     game4_god,
     game4_floor,
     game4_clipping,
@@ -1887,6 +1889,7 @@ enum
 
 menuitem_t GameMenu4[]=
 {
+    {2,"Blazing Doors play double sound",M_BlazingDoors,'d'},
     {2,"God mode isn't absolute",M_GodAbsolute,'i'},
     {2,"Use Doom's floor motion behavior",M_Floor,'f'},
     {2,"Use Doom's movement clipping code",M_Clipping,'c'},
@@ -3820,7 +3823,7 @@ void M_DrawGame3(void)
         V_ClearDPTranslation();
     }
 
-    if(d_telefrag)
+    if(d_shadows)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef3.x + 266, GameDef3.y + 68, DEH_String("ON"));
@@ -3833,7 +3836,7 @@ void M_DrawGame3(void)
         V_ClearDPTranslation();
     }
 
-    if(d_doorstuck)
+    if(d_telefrag)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef3.x + 266, GameDef3.y + 78, DEH_String("ON"));
@@ -3846,7 +3849,7 @@ void M_DrawGame3(void)
         V_ClearDPTranslation();
     }
 
-    if(d_resurrectghosts)
+    if(d_doorstuck)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef3.x + 266, GameDef3.y + 88, DEH_String("ON"));
@@ -3859,7 +3862,7 @@ void M_DrawGame3(void)
         V_ClearDPTranslation();
     }
 
-    if(d_limitedghosts)
+    if(d_resurrectghosts)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef3.x + 266, GameDef3.y + 98, DEH_String("ON"));
@@ -3872,7 +3875,7 @@ void M_DrawGame3(void)
         V_ClearDPTranslation();
     }
 
-    if(!d_blockskulls)
+    if(d_limitedghosts)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef3.x + 266, GameDef3.y + 108, DEH_String("ON"));
@@ -3885,7 +3888,7 @@ void M_DrawGame3(void)
         V_ClearDPTranslation();
     }
 
-    if(!d_blazingsound)
+    if(!d_blockskulls)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef3.x + 266, GameDef3.y + 118, DEH_String("ON"));
@@ -3895,6 +3898,15 @@ void M_DrawGame3(void)
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(GameDef3.x + 258, GameDef3.y + 118, DEH_String("OFF"));
+        V_ClearDPTranslation();
+    }
+
+    if((itemOn == 7) && whichSkull == 1)
+    {
+        char *string = "YOU MUST START A NEW GAME TO TAKE EFFECT.";
+        int x = 160 - M_StringWidth(string) / 2;
+        dp_translation = crx[CRX_GOLD];
+        M_WriteText(x, GameDef.y + 138, DEH_String(string));
         V_ClearDPTranslation();
     }
 
@@ -3918,7 +3930,7 @@ void M_DrawGame4(void)
         V_DrawPatchWithShadow(70, 0, 0, W_CacheLumpName(DEH_String("M_GMESET"),
                                                PU_CACHE), false);
 
-    if(d_god)
+    if(!d_blazingsound)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef4.x + 266, GameDef4.y - 2, DEH_String("ON"));
@@ -3931,7 +3943,7 @@ void M_DrawGame4(void)
         V_ClearDPTranslation();
     }
 
-    if(d_floors)
+    if(d_god)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef4.x + 266, GameDef4.y + 8, DEH_String("ON"));
@@ -3944,7 +3956,7 @@ void M_DrawGame4(void)
         V_ClearDPTranslation();
     }
 
-    if(d_moveblock)
+    if(d_floors)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef4.x + 266, GameDef4.y + 18, DEH_String("ON"));
@@ -3957,7 +3969,7 @@ void M_DrawGame4(void)
         V_ClearDPTranslation();
     }
 
-    if(d_model)
+    if(d_moveblock)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef4.x + 266, GameDef4.y + 28, DEH_String("ON"));
@@ -3970,7 +3982,7 @@ void M_DrawGame4(void)
         V_ClearDPTranslation();
     }
 
-    if(d_666)
+    if(d_model)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef4.x + 266, GameDef4.y + 38, DEH_String("ON"));
@@ -3983,7 +3995,7 @@ void M_DrawGame4(void)
         V_ClearDPTranslation();
     }
 
-    if(correct_lost_soul_bounce)
+    if(d_666)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef4.x + 266, GameDef4.y + 48, DEH_String("ON"));
@@ -3996,7 +4008,7 @@ void M_DrawGame4(void)
         V_ClearDPTranslation();
     }
 
-    if(d_maskedanim)
+    if(correct_lost_soul_bounce)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef4.x + 266, GameDef4.y + 58, DEH_String("ON"));
@@ -4009,7 +4021,7 @@ void M_DrawGame4(void)
         V_ClearDPTranslation();
     }
 
-    if(d_sound)
+    if(d_maskedanim)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef4.x + 266, GameDef4.y + 68, DEH_String("ON"));
@@ -4022,7 +4034,7 @@ void M_DrawGame4(void)
         V_ClearDPTranslation();
     }
 
-    if(d_ouchface)
+    if(d_sound)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef4.x + 266, GameDef4.y + 78, DEH_String("ON"));
@@ -4032,6 +4044,19 @@ void M_DrawGame4(void)
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(GameDef4.x + 258, GameDef4.y + 78, DEH_String("OFF"));
+        V_ClearDPTranslation();
+    }
+
+    if(d_ouchface)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(GameDef4.x + 266, GameDef4.y + 88, DEH_String("ON"));
+        V_ClearDPTranslation();
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(GameDef4.x + 258, GameDef4.y + 88, DEH_String("OFF"));
         V_ClearDPTranslation();
     }
 }
@@ -8030,6 +8055,23 @@ void M_InfiniteAmmo(int choice)
         if (!d_infiniteammo)
             d_infiniteammo = true;
         players[consoleplayer].message = DEH_String("INFINITE AMMO HAS BEEN ENABLED");
+        break;
+    }
+}
+
+void M_Shadows(int choice)
+{
+    switch(choice)
+    {
+    case 0:
+        if (d_shadows)
+            d_shadows = false;
+        players[consoleplayer].message = DEH_String("SHADOWS HAVE BEEN DISABLED");
+        break;
+    case 1:
+        if (!d_shadows)
+            d_shadows = true;
+        players[consoleplayer].message = DEH_String("SHADOWS HAVE BEEN ENABLED");
         break;
     }
 }

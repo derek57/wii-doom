@@ -32,7 +32,18 @@
 #define MAXVISSPRITES      128*8                              // CHANGED FOR HIRES
 
 
-extern vissprite_t*        vissprites;                        // LIMIT REMOVAL
+typedef enum
+{
+    VST_THING,
+//    VST_BLOODSPLAT,
+    VST_SHADOW,
+
+    NUMVISSPRITETYPES
+
+} visspritetype_t;
+
+
+extern vissprite_t*        vissprites[NUMVISSPRITETYPES];                        // LIMIT REMOVAL
 extern vissprite_t*        vissprite_p;
 extern vissprite_t         vsprsortedhead;
 
@@ -71,5 +82,7 @@ R_ClipVisSprite
   int                      xl,
   int                      xh );
 
+void R_ProjectShadow(mobj_t *thing);
+void R_ProjectSprite(mobj_t *thing);
 
 #endif

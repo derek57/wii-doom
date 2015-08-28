@@ -304,6 +304,11 @@ typedef struct mobj_s
 
     char                   *name;
 
+    struct mobj_s          *shadow;
+
+    void                   (*colfunc)(void);
+    void                   (*projectfunc)();
+
 } mobj_t;
 
 

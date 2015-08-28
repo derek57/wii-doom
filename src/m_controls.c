@@ -200,6 +200,7 @@ void M_BindBaseControls(void)
     M_BindVariable("png_screenshot",         &png_screenshots);
     M_BindVariable("menu_type",              &background_type);
     M_BindVariable("menu_shadow",            &font_shadow);
+    M_BindVariable("shadows",                &d_shadows);
 //    M_BindVariable("memory",                 &memory_usage);
     M_BindVariable("key_shoot",              &joy_r);
     M_BindVariable("key_open",               &joy_l);

@@ -982,6 +982,9 @@ void A_Chase (mobj_t*        actor)
             actor->angle += ANG90/2;
     }
 
+    if (actor->shadow)
+        actor->shadow->angle = actor->angle;
+
     if (!actor->target
         || !(actor->target->flags&MF_SHOOTABLE))
     {
@@ -1075,6 +1078,9 @@ void A_FaceTarget (mobj_t* actor)
     
     if (actor->target->flags & MF_SHADOW)
         actor->angle += (P_Random()-P_Random())<<21;
+
+    if (actor->shadow)
+        actor->shadow->angle = actor->angle;
 }
 
 
@@ -1523,6 +1529,10 @@ void A_VileChase (mobj_t* actor)
                     }                                                 // phares
 
                     corpsehit->flags = info->flags;
+
+                    if (corpsehit->shadow)
+                        corpsehit->shadow->flags2 &= ~MF2_MIRRORED;
+
                     corpsehit->health = info->spawnhealth;
                     P_SetTarget(&corpsehit->target, NULL);
 
@@ -1880,6 +1890,9 @@ A_PainShootSkull
     // Check for movements.
     if (!P_TryMove (newmobj, newmobj->x, newmobj->y))
     {
+        if (newmobj->shadow)
+            P_RemoveMobjShadow(newmobj);
+
         // kill it immediately
         P_DamageMobj (newmobj,actor,actor,10000);        
         return;
@@ -2433,6 +2446,9 @@ void A_SpawnFly (mobj_t* mo)
 
     if ((mo->z <= mo->floorz) && P_HitFloor(mo) && d_splash)
     {                           // Landed in some sort of liquid
+        if (mo->shadow)
+            P_RemoveMobjShadow(mo);
+
         // remove self (i.e., cube).
         P_RemoveMobj (mo);
     }

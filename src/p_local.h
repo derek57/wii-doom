@@ -287,6 +287,8 @@ void P_SpawnMapThing (mapthing_t* mthing);
 
 boolean Check_Sides(mobj_t* actor, int x, int y);
 
+void P_RemoveMobjShadow(mobj_t *mobj);
+
 //
 // P_SPEC
 //
