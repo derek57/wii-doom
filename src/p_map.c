@@ -363,8 +363,15 @@ boolean PIT_CheckThing (mobj_t* thing)
 
     if (!(thing->flags & (MF_SOLID|MF_SPECIAL|MF_SHOOTABLE) ))
         return true;
-    
-    blockdist = thing->radius + tmthing->radius;
+
+    // [BH] don't hit if either thing is a corpse, which may still be solid if
+    // they are still going through their death sequence.
+    if (!(thing->flags2 & MF2_RESURRECTING) && ((thing->flags & MF_CORPSE) || (tmflags & MF_CORPSE)))
+        return true;
+
+    // [BH] specify standard radius of 20 for pickups here as thing->radius
+    // has been changed to allow better clipping
+    blockdist = ((thing->flags & MF_SPECIAL) ? 20 * FRACUNIT : thing->radius) + tmthing->radius;
 
     if ( abs(thing->x - tmx) >= blockdist
          || abs(thing->y - tmy) >= blockdist )
@@ -383,6 +390,15 @@ boolean PIT_CheckThing (mobj_t* thing)
     else if (P_AproxDistance(thing->x - tmx, thing->y - tmy) > dist)
         unblocking = (tmthing->z < thing->z + thing->height
             && tmthing->z + tmthing->height > thing->z);
+
+    // check if a mobj passed over/under another object
+    if (tmthing->flags2 & MF2_PASSMOBJ)
+    {
+        if (tmthing->z >= thing->z + thing->height)
+            return true;        // over thing
+        else if (tmthing->z + tmthing->height <= thing->z)
+            return true;        // under thing
+    }
 
     // check for skulls slamming into things
     if (tmthing->flags & MF_SKULLFLY)
@@ -479,6 +495,18 @@ boolean PIT_CheckThing (mobj_t* thing)
             P_TouchSpecialThing (thing, tmthing);
         }
         return !solid;
+    }
+
+    // RjY
+    // an attempt to handle blocking hanging bodies
+    // A solid hanging body will allow sufficiently small things underneath it.
+    if (!((~thing->flags) & (MF_SOLID | MF_SPAWNCEILING))              // solid and hanging
+        // invert everything, then both bits should be clear
+        && tmthing->z + tmthing->height <= thing->z)            // head height <= base
+        // top of thing trying to move under the body <= bottom of body
+    {
+        tmceilingz = thing->z;   // pretend ceiling height is at body's base
+        return true;
     }
 
     // killough 3/16/98: Allow non-solid moving objects to move through solid

@@ -1486,10 +1486,12 @@ boolean PIT_VileCheck (mobj_t*        thing)
         corpsehit->height = corpsehit->info->height;
         corpsehit->radius = corpsehit->info->radius;
         corpsehit->flags |= MF_SOLID;
+        corpsehit->flags2 |= MF2_RESURRECTING;
         check = P_CheckPosition(corpsehit, corpsehit->x, corpsehit->y);
         corpsehit->height = height; // restore
         corpsehit->radius = radius; // restore                      //   ^
         corpsehit->flags &= ~MF_SOLID;                              //   |
+        corpsehit->flags2 &= ~MF2_RESURRECTING;
     }                                                               // phares
 
     if (!check)
