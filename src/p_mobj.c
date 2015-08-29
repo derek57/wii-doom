@@ -182,10 +182,7 @@ void P_ExplodeMissile (mobj_t* mo)
     else
         P_SetMobjState (mo, mobjinfo[mo->type].deathstate);
 
-    mo->tics -= P_Random()&3;
-
-    if (mo->tics < 1)
-        mo->tics = 1;
+    mo->tics = MAX(1, mo->tics - (P_Random() & 3));
 
     mo->flags &= ~MF_MISSILE;
 
@@ -228,13 +225,13 @@ void P_XYMovement (mobj_t* mo)
     player_t*      player;
     boolean        corpse = ((mo->flags & MF_CORPSE) && mo->type != MT_BARREL);
 
-    if (!mo->momx && !mo->momy)
+    if (!(mo->momx | mo->momy))
     {
         if (mo->flags & MF_SKULLFLY)
         {
             // the skull slammed into something
             mo->flags &= ~MF_SKULLFLY;
-            mo->momx = mo->momy = mo->momz = 0;
+            mo->momz = 0;
 
             P_SetMobjState (mo, mo->info->spawnstate);
         }
@@ -522,25 +519,23 @@ void P_ZMovement (mobj_t* mo)
     else if (! (mo->flags & MF_NOGRAVITY) )
     {
         if (mo->momz == 0)
-            mo->momz = -GRAVITY*2;
-        else
-            mo->momz -= GRAVITY;
+            mo->momz = -GRAVITY;
+        mo->momz -= GRAVITY;
     }
         
     if (mo->z + mo->height > mo->ceilingz)
     {
-        // hit the ceiling
-        if (mo->momz > 0)
-            mo->momz = 0;
-        {
-            mo->z = mo->ceilingz - mo->height;
-        }
-
         if (mo->flags & MF_SKULLFLY)
         {        // the skull slammed into something
             mo->momz = -mo->momz;
         }
         
+        // hit the ceiling
+        if (mo->momz > 0)
+            mo->momz = 0;
+
+        mo->z = mo->ceilingz - mo->height;
+
         if ( (mo->flags & MF_MISSILE)
              && !(mo->flags & MF_NOCLIP) )
         {
@@ -1323,16 +1318,11 @@ P_SpawnPuff
   fixed_t        y,
   fixed_t        z )
 {
-    mobj_t*      th;
-        
-    z += ((P_Random()-P_Random())<<10);
+    mobj_t *th = P_SpawnMobj(x, y, z + ((P_Random() - P_Random()) << 10), MT_PUFF);
 
-    th = P_SpawnMobj (x,y,z, MT_PUFF);
     th->momz = FRACUNIT;
-    th->tics -= P_Random()&3;
 
-    if (th->tics < 1)
-        th->tics = 1;
+    th->tics = MAX(1, th->tics - (P_Random() & 3));
         
     // don't make punches spark on the wall
     if (attackrange == MELEERANGE)
@@ -1432,9 +1422,7 @@ P_SpawnBlood
 //
 void P_CheckMissileSpawn (mobj_t* th)
 {
-    th->tics -= P_Random()&3;
-    if (th->tics < 1)
-        th->tics = 1;
+    th->tics = MAX(1, th->tics - (P_Random() & 3));
     
     // move a little forward so an angle can
     // be computed if it immediately explodes
