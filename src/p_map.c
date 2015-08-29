@@ -358,7 +358,9 @@ boolean PIT_CheckThing (mobj_t* thing)
     fixed_t                blockdist;
     boolean                solid;
     int                    damage;
-                
+    boolean                unblocking = false;
+    fixed_t                dist = P_AproxDistance(thing->x - tmthing->x, thing->y - tmthing->y);
+
     if (!(thing->flags & (MF_SOLID|MF_SPECIAL|MF_SHOOTABLE) ))
         return true;
     
@@ -375,6 +377,13 @@ boolean PIT_CheckThing (mobj_t* thing)
     if (thing == tmthing)
         return true;
     
+    // [BH] check if things are stuck and allow move if it makes them further apart
+    if (tmx == tmthing->x && tmy == tmthing->y)
+        unblocking = true;
+    else if (P_AproxDistance(thing->x - tmx, thing->y - tmy) > dist)
+        unblocking = (tmthing->z < thing->z + thing->height
+            && tmthing->z + tmthing->height > thing->z);
+
     // check for skulls slamming into things
     if (tmthing->flags & MF_SKULLFLY)
     {
@@ -427,6 +436,25 @@ boolean PIT_CheckThing (mobj_t* thing)
             }
         }
         
+        // killough 8/10/98: if moving thing is not a missile, no damage
+        // is inflicted, and momentum is reduced if object hit is solid.
+        if (!(tmflags & MF_MISSILE))
+        {
+            if (!(thing->flags & MF_SOLID))
+                return true;
+            else
+            {
+                tmthing->momx = -tmthing->momx;
+                tmthing->momy = -tmthing->momy;
+                if (!(tmthing->flags & MF_NOGRAVITY))
+                {
+                    tmthing->momx >>= 2;
+                    tmthing->momy >>= 2;
+                }
+                return false;
+            }
+        }
+
         if (! (thing->flags & MF_SHOOTABLE) )
         {
             // didn't do any damage
@@ -452,8 +480,12 @@ boolean PIT_CheckThing (mobj_t* thing)
         }
         return !solid;
     }
-        
-    return !(thing->flags & MF_SOLID);
+
+    // killough 3/16/98: Allow non-solid moving objects to move through solid
+    // ones, by allowing the moving thing (tmthing) to move if it's non-solid,
+    // despite another solid thing being in the way.
+    // killough 4/11/98: Treat no-clipping things as not blocking
+    return (!((thing->flags & MF_SOLID) && !(thing->flags & MF_NOCLIP) && (tmflags & MF_SOLID)) || unblocking);
 }
 
 
