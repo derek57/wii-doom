@@ -50,6 +50,7 @@
 #define STOPSPEED               0x1000
 #define FRICTION                0xe800
 #define FRICTION_FLY            0xeb00
+#define WATERFRICTION           0xfb00
 
 
 static fixed_t floatbobdiffs[64] =
@@ -225,7 +226,7 @@ void P_XYMovement (mobj_t* mo)
     fixed_t        xmove;
     fixed_t        ymove;
     player_t*      player;
-    int            flags2 = mo->flags2;
+    boolean        corpse = ((mo->flags & MF_CORPSE) && mo->type != MT_BARREL);
 
     if (!mo->momx && !mo->momy)
     {
@@ -242,7 +243,7 @@ void P_XYMovement (mobj_t* mo)
         
     player = mo->player;
                 
-    if (flags2 & MF2_SMOKETRAIL)
+    if (mo->flags2 & MF2_SMOKETRAIL)
         if (puffcount++ > 1)
             P_SpawnSmokeTrail(mo->x, mo->y, mo->z, mo->angle);
 
@@ -325,7 +326,7 @@ void P_XYMovement (mobj_t* mo)
         return;
     }
 
-    if (mo->flags & MF_CORPSE)
+    if (corpse || (mo->flags2 & MF2_FALLING))
     {
         // do not stop sliding
         //  if halfway off a step with some momentum
@@ -353,6 +354,11 @@ void P_XYMovement (mobj_t* mo)
         
         mo->momx = 0;
         mo->momy = 0;
+    }
+    else if ((mo->flags2 & MF2_FEETARECLIPPED) && corpse && !player)
+    {
+        mo->momx = FixedMul(mo->momx, WATERFRICTION);
+        mo->momy = FixedMul(mo->momy, WATERFRICTION);
     }
     else
     {
@@ -613,7 +619,6 @@ P_NightmareRespawn (mobj_t* mobj)
 //
 void P_MobjThinker (mobj_t* mobj)
 {
-    int      flags2;
     mobj_t   *onmo;
     sector_t *sector = mobj->subsector->sector;
 
@@ -645,14 +650,14 @@ void P_MobjThinker (mobj_t* mobj)
 
     if (!isliquid[sector->floorpic])
         mobj->flags2 &= ~MF2_FEETARECLIPPED;
-    flags2 = mobj->flags2;
+
 #ifdef ANIMATED_FLOOR_LIQUIDS
-    if ((flags2 & MF2_FEETARECLIPPED) && !(flags2 & MF2_NOLIQUIDBOB) &&
+    if ((mobj->flags2 & MF2_FEETARECLIPPED) && !(mobj->flags2 & MF2_NOLIQUIDBOB) &&
             mobj->z <= sector->floor_height && !mobj->momz && d_swirl)
         mobj->z += animatedliquiddiffs[(mobj->floatbob + leveltime) & 63];
     else
 #endif
-    if (flags2 & MF2_FLOATBOB)
+    if (mobj->flags2 & MF2_FLOATBOB)
         mobj->z += floatbobdiffs[(mobj->floatbob + leveltime) & 63];
     else if ( (mobj->z != mobj->floorz) || mobj->momz )
     {                           // Handle Z momentum and gravity

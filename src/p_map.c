@@ -629,6 +629,14 @@ P_TryMove
                 felldown = (!(thing->flags & MF_NOGRAVITY) && thing->z - tmfloorz > 24 * FRACUNIT);
             }
         }
+
+        // killough 11/98: prevent falling objects from going up too many steps
+        if ((thing->flags2 & MF2_FALLING)
+            && tmfloorz - thing->z > FixedMul(thing->momx, thing->momx) +
+                                     FixedMul(thing->momy, thing->momy))
+        {
+            return false;
+        }
     }
     
     // the move is ok,
@@ -801,10 +809,9 @@ void P_ApplyTorque(mobj_t *mo)
     // systems somehow :)
 
     if (!((mo->flags2 | flags2) & MF2_FALLING))   // If not falling for a while,
-        mo->gear = 0;                                // Reset it to full strength
-    else
-        if (mo->gear < MAXGEAR)                      // Else if not at max gear,
-            mo->gear++;                                // move up a gear
+        mo->gear = 0;                             //  Reset it to full strength
+    else if (mo->gear < MAXGEAR)                  // Else if not at max gear,
+            mo->gear++;                           //  move up a gear
 }
 
 //
@@ -846,6 +853,10 @@ boolean P_ThingHeightClip (mobj_t* thing)
     {
         // walking monsters rise and fall with the floor
         thing->z = thing->floorz;
+
+        // killough 11/98: Possibly upset balance of objects hanging off ledges
+        if ((flags2 & MF2_FALLING) && thing->gear >= MAXGEAR)
+            thing->gear = 0;
     }
     else
     {
