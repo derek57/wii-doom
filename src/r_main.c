@@ -31,13 +31,10 @@
 #include <math.h>
 #include <stdlib.h>
 
-
 #include "c_io.h"
 #include "d_loop.h"
 #include "d_player.h"
-#include "doomdef.h"
 #include "doomstat.h"
-#include "m_bbox.h"
 #include "m_menu.h"
 #include "r_local.h"
 #include "r_sky.h"
@@ -55,15 +52,9 @@ int                        setdetail;
 int                        viewangleoffset;
 int                        centerx;
 int                        centery;
-int                        sscount;
-int                        linecount;
-int                        loopcount;
 
 // increment every time a check is made
 int                        validcount = 1;                
-
-// just for profiling purposes
-int                        framecount;        
 
 // 0 = high, 1 = low
 int                        detailshift;        
@@ -119,28 +110,6 @@ void (*fuzzcolfunc) (void);
 void (*transcolfunc) (void);
 void (*tlcolfunc) (void);
 void (*spanfunc) (void);
-
-
-//
-// R_AddPointToBox
-// Expand a given bbox
-// so that it encloses a given point.
-//
-void
-R_AddPointToBox
-( int                x,
-  int                y,
-  fixed_t*           box )
-{
-    if (x< box[BOXLEFT])
-        box[BOXLEFT] = x;
-    if (x> box[BOXRIGHT])
-        box[BOXRIGHT] = x;
-    if (y< box[BOXBOTTOM])
-        box[BOXBOTTOM] = y;
-    if (y> box[BOXTOP])
-        box[BOXTOP] = y;
-}
 
 
 //
@@ -503,62 +472,57 @@ void R_InitTables (void)
 //
 void R_InitTextureMapping (void)
 {
-    int                    i;
-    int                    x;
-    int                    t;
-    fixed_t                focallength;
-    
+    int         i;
+    int         x;
+    int         t;
+    fixed_t     focallength;
+
     // Use tangent table to generate viewangletox:
     //  viewangletox will give the next greatest x
     //  after the view angle.
-    //
+
+    const fixed_t       hitan = finetangent[FINEANGLES / 4 + FIELDOFVIEW / 2];
+    const fixed_t       lotan = finetangent[FINEANGLES / 4 - FIELDOFVIEW / 2];
+    const int           highend = viewwidth + 1;
+
     // Calc focallength
     //  so FIELDOFVIEW angles covers SCREENWIDTH.
-    focallength = FixedDiv (centerxfrac,
-                            finetangent[FINEANGLES/4+FIELDOFVIEW/2] );
-        
-    for (i=0 ; i<FINEANGLES/2 ; i++)
+    focallength = FixedDiv(centerxfrac, hitan);
+
+    for (i = 0; i < FINEANGLES / 2; i++)
     {
-        if (finetangent[i] > FRACUNIT*2)
+        fixed_t tangent = finetangent[i];
+
+        if (tangent > hitan)
             t = -1;
-        else if (finetangent[i] < -FRACUNIT*2)
-            t = viewwidth+1;
+        else if (tangent < lotan)
+            t = highend;
         else
         {
-            t = FixedMul (finetangent[i], focallength);
-            t = (centerxfrac - t+FRACUNIT-1)>>FRACBITS;
-
-            if (t < -1)
-                t = -1;
-            else if (t>viewwidth+1)
-                t = viewwidth+1;
+            t = (centerxfrac - FixedMul(tangent, focallength) + FRACUNIT - 1) >> FRACBITS;
+            t = BETWEEN(-1, t, highend);
         }
         viewangletox[i] = t;
     }
-    
+
     // Scan viewangletox[] to generate xtoviewangle[]:
     //  xtoviewangle will give the smallest view angle
-    //  that maps to x.        
-    for (x=0;x<=viewwidth;x++)
+    //  that maps to x.
+    for (x = 0; x <= viewwidth; x++)
     {
-        i = 0;
-        while (viewangletox[i]>x)
-            i++;
-        xtoviewangle[x] = (i<<ANGLETOFINESHIFT)-ANG90;
+        for (i = 0; viewangletox[i] > x; i++);
+        xtoviewangle[x] = (i << ANGLETOFINESHIFT) - ANG90;
     }
-    
+
     // Take out the fencepost cases from viewangletox.
-    for (i=0 ; i<FINEANGLES/2 ; i++)
+    for (i = 0; i < FINEANGLES / 2; i++)
     {
-        t = FixedMul (finetangent[i], focallength);
-        t = centerx - t;
-        
         if (viewangletox[i] == -1)
             viewangletox[i] = 0;
-        else if (viewangletox[i] == viewwidth+1)
-            viewangletox[i]  = viewwidth;
+        else if (viewangletox[i] == highend)
+            viewangletox[i]--;
     }
-        
+
     clipangle = xtoviewangle[0];
 }
 
@@ -591,8 +555,7 @@ void R_InitLightTables (void)
             
             if (level < 0)
                 level = 0;
-
-            if (level >= NUMCOLORMAPS)
+            else if (level >= NUMCOLORMAPS)
                 level = NUMCOLORMAPS-1;
 
             zlight[i][j] = colormaps + level*256;
@@ -712,8 +675,7 @@ void R_ExecuteSetViewSize (void)
             
             if (level < 0)
                 level = 0;
-
-            if (level >= NUMCOLORMAPS)
+            else if (level >= NUMCOLORMAPS)
                 level = NUMCOLORMAPS-1;
 
             scalelight[i][j] = colormaps + level*256;
@@ -779,8 +741,6 @@ void R_Init (void)
     //C_Printf (CR_GRAY, ".");
     printf("]");
     //C_Printf (CR_GRAY, "]");
-        
-    framecount = 0;
 }
 
 
@@ -792,8 +752,6 @@ R_PointInSubsector
 ( fixed_t        x,
   fixed_t        y )
 {
-    node_t*      node;
-    int          side;
     int          nodenum;
 
     // single subsector is a special case
@@ -803,11 +761,7 @@ R_PointInSubsector
     nodenum = numnodes-1;
 
     while (! (nodenum & NF_SUBSECTOR) )
-    {
-        node = &nodes[nodenum];
-        side = R_PointOnSide (x, y, node);
-        nodenum = node->children[side];
-    }
+        nodenum = nodes[nodenum].children[R_PointOnSide(x, y, nodes+nodenum)];
         
     return &subsectors[nodenum & ~NF_SUBSECTOR];
 }
@@ -888,9 +842,7 @@ void R_SetupFrame (player_t* player)
 
     viewsin = finesine[viewangle>>ANGLETOFINESHIFT];
     viewcos = finecosine[viewangle>>ANGLETOFINESHIFT];
-        
-    sscount = 0;
-        
+
     if (player->fixedcolormap)
     {
         fixedcolormap =
@@ -905,7 +857,6 @@ void R_SetupFrame (player_t* player)
     else
         fixedcolormap = 0;
                 
-    framecount++;
     validcount++;
 
     if (BorderNeedRefresh)
