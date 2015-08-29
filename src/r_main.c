@@ -884,7 +884,7 @@ void R_SetupFrame (player_t* player)
         viewangle = player->mo->angle + viewangleoffset;
     }
 
-    extralight = player->extralight<<1;
+    extralight = player->extralight;
 
     viewsin = finesine[viewangle>>ANGLETOFINESHIFT];
     viewcos = finecosine[viewangle>>ANGLETOFINESHIFT];

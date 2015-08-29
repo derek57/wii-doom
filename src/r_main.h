@@ -39,13 +39,13 @@
 //
 
 // Lighting constants.
-#define LIGHTLEVELS       128
-#define LIGHTSEGSHIFT     1
+#define LIGHTLEVELS       32
+#define LIGHTSEGSHIFT     3
 #define LIGHTBRIGHT       2
-#define MAXLIGHTSCALE     384
+#define MAXLIGHTSCALE     48
 #define LIGHTSCALESHIFT   12
-#define MAXLIGHTZ         1024
-#define LIGHTZSHIFT       17
+#define MAXLIGHTZ         128
+#define LIGHTZSHIFT       20
 
 // Number of diminishing brightness levels.
 // There a 0-31, i.e. 32 LUT in the COLORMAP lump.
@@ -57,6 +57,8 @@ extern int                viewwindowy;
 extern int                centerx;
 extern int                centery;
 extern int                validcount;
+extern int                linecount;
+extern int                loopcount;
 extern int                extralight;
 
 // Blocky/low detail mode.

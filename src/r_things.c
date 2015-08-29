@@ -68,14 +68,14 @@ typedef struct
 
 boolean                clip_this;
 
-//static char*           spritename;
+char*                  spritename;
 
 // constant arrays
 //  used for psprite clipping and initializing clipping
 int                    negonearray[SCREENWIDTH];          // [crispy] 32-bit integer math
 int                    screenheightarray[SCREENWIDTH];    // [crispy] 32-bit integer math
 int                    numsprites;
-static int             maxframe;
+int                    maxframe;
 int                    newvissprite;
 
 int*                   mfloorclip;                        // [crispy] 32-bit integer math
@@ -96,7 +96,7 @@ static int             num_vissprite_ptrs;
 //  and range check thing_t sprites patches
 spritedef_t*           sprites;
 
-static spriteframe_t          sprtemp[MAX_SPRITE_FRAMES];
+spriteframe_t          sprtemp[MAX_SPRITE_FRAMES];
 
 vissprite_t*           vissprites[NUMVISSPRITETYPES];
 vissprite_t**          vissprite_ptrs;          // killough
@@ -584,6 +584,8 @@ void R_ProjectSprite(mobj_t *thing)
     unsigned           rot;
     boolean            flip;
     
+    int                index;
+
     vissprite_t*       vis;
     
     angle_t            ang;
@@ -812,12 +814,10 @@ void R_ProjectSprite(mobj_t *thing)
         // full bright
         vis->colormap = fixedcolormap ? fixedcolormap : colormaps;
     }
-    else if (thing->type == MT_BLOOD)
-        vis->colormap = spritelights[MIN(xscale >> LIGHTSCALESHIFT, MAXLIGHTSCALE - 1)];
     else
     {
         // diminished light
-        int index = (xscale * 160 / centerx)>>(LIGHTSCALESHIFT-detailshift+hires); // CHANGED FOR HIRES
+        index = xscale>>(LIGHTSCALESHIFT-detailshift+hires);        // CHANGED FOR HIRES
 
         if (index >= MAXLIGHTSCALE) 
             index = MAXLIGHTSCALE-1;
@@ -1123,12 +1123,12 @@ void R_ProjectShadow(mobj_t *thing)
 // R_AddSprites
 // During BSP traversal, this adds sprites by sector.
 //
-// killough 9/18/98: add lightlevel as parameter, fixing underwater lighting
-void R_AddSprites (sector_t* sec, int lightlevel)
+void R_AddSprites (sector_t* sec)
 {
     mobj_t*                thing;
+    int                    lightnum;
     short                  floorpic = sec->floorpic;
-/*
+
     // BSP is traversed by subsector.
     // A sector might have been split into several
     //  subsectors during BSP building.
@@ -1138,9 +1138,15 @@ void R_AddSprites (sector_t* sec, int lightlevel)
 
     // Well, now it will be done.
     sec->validcount = validcount;
-*/
-    spritelights = scalelight[BETWEEN(0, (lightlevel >> LIGHTSEGSHIFT)
-        + extralight * LIGHTBRIGHT, LIGHTLEVELS - 1)];
+        
+    lightnum = (sec->lightlevel >> LIGHTSEGSHIFT)+extralight*LIGHTBRIGHT;
+
+    if (lightnum < 0)                
+        spritelights = scalelight[0];
+    else if (lightnum >= LIGHTLEVELS)
+        spritelights = scalelight[LIGHTLEVELS-1];
+    else
+        spritelights = scalelight[lightnum];
 
     // Handle all things in sector.
     if (fixedcolormap || isliquid[floorpic] || floorpic == skyflatnum || !d_shadows)
@@ -1334,7 +1340,7 @@ void R_DrawPlayerSprites (void)
     // get light level
     lightnum =
         (viewplayer->mo->subsector->sector->lightlevel >> LIGHTSEGSHIFT) 
-        +extralight * LIGHTBRIGHT;
+        +extralight*LIGHTBRIGHT;
 
     if (lightnum < 0)                
         spritelights = scalelight[0];

@@ -464,6 +464,7 @@ static char *R_DistortedFlat(int flatnum)
 void R_DrawPlanes (void)
 {
     visplane_t*         pl;
+    int                 light;
     int                 x;
     int                 stop;
     int                 angle;
@@ -535,9 +536,15 @@ void R_DrawPlanes (void)
             if (liquid && pl->sector && pl->sector->animate)
                 planeheight -= pl->sector->animate;
 #endif
-            int light = (pl->lightlevel >> LIGHTSEGSHIFT)+extralight * LIGHTBRIGHT;
+            light = (pl->lightlevel >> LIGHTSEGSHIFT)+extralight*LIGHTBRIGHT;
 
-            planezlight = zlight[light >= LIGHTLEVELS ? LIGHTLEVELS - 1 : MAX(0, light)];
+            if (light >= LIGHTLEVELS)
+                light = LIGHTLEVELS-1;
+
+            if (light < 0)
+                light = 0;
+
+            planezlight = zlight[light];
 
             pl->top[pl->maxx+1] = 0xffffffffu; // [crispy] hires / 32-bit integer math
             pl->top[pl->minx-1] = 0xffffffffu; // [crispy] hires / 32-bit integer math

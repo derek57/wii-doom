@@ -378,7 +378,8 @@ void P_ZMovement (mobj_t* mo)
     fixed_t        delta;
     
     // check for smooth step up
-    if (mo->player && mo->z < mo->floorz)
+    // killough 5/12/98: exclude voodoo dolls
+    if (mo->player && mo->player->mo == mo && mo->z < mo->floorz)
     {
         mo->player->viewheight -= mo->floorz-mo->z;
 

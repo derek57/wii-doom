@@ -205,7 +205,6 @@ R_RenderMaskedSegRange
     int             lightnum;
     int             texnum;
     fixed_t         texheight;
-    sector_t        tempsec;        // killough 4/13/98
 
     // Calculate light table.
     // Use different light tables
@@ -225,14 +224,12 @@ R_RenderMaskedSegRange
 
     texheight = textureheight[texnum];
         
-    // killough 4/13/98: get correct lightlevel for 2s normal textures
-    lightnum = (R_FakeFlat(frontsector, &tempsec, NULL, NULL, false)->lightlevel >> LIGHTSEGSHIFT)
-        + extralight * LIGHTBRIGHT;
+    lightnum = (frontsector->lightlevel >> LIGHTSEGSHIFT)+extralight*LIGHTBRIGHT;
 
     if (curline->v1->y == curline->v2->y)
-        lightnum -= LIGHTBRIGHT;
+        lightnum-=LIGHTBRIGHT;
     else if (curline->v1->x == curline->v2->x)
-        lightnum += LIGHTBRIGHT;
+        lightnum+=LIGHTBRIGHT;
 
     if (lightnum < 0)                
         walllights = scalelight[0];
@@ -779,38 +776,22 @@ R_StoreWallRange
             worldtop = worldhigh;
         }
         
-                        
-        if (worldlow != worldbottom 
+        markfloor = (worldlow != worldbottom
             || backsector->floorpic != frontsector->floorpic
             || backsector->lightlevel != frontsector->lightlevel
 
-            // killough 4/17/98: draw floors if different light levels
-            || backsector->floorlightsec != frontsector->floorlightsec)
-        {
-            markfloor = true;
-        }
-        else
-        {
-            // same plane on both sides
-            markfloor = false;
-        }
-        
-                        
-        if (worldhigh != worldtop 
+            // killough 4/15/98: prevent 2s normals
+            // from bleeding through deep water
+            || frontsector->heightsec != -1);
+
+        markceiling = (worldhigh != worldtop
             || backsector->ceilingpic != frontsector->ceilingpic
             || backsector->lightlevel != frontsector->lightlevel
 
-            // killough 4/17/98: draw ceilings if different light levels
-            || backsector->ceilinglightsec != frontsector->ceilinglightsec)
-        {
-            markceiling = true;
-        }
-        else
-        {
-            // same plane on both sides
-            markceiling = false;
-        }
-        
+            // killough 4/15/98: prevent 2s normals
+            // from bleeding through fake ceilings
+            || (frontsector->heightsec != -1 && frontsector->ceilingpic != skyflatnum));
+
         if (backsector->interpceilingheight <= frontsector->interpfloorheight
             || backsector->interpfloorheight >= frontsector->interpceilingheight)
         {
@@ -906,31 +887,33 @@ R_StoreWallRange
         // OPTIMIZE: get rid of LIGHTSEGSHIFT globally
         if (!fixedcolormap)
         {
-            lightnum = (frontsector->lightlevel >> LIGHTSEGSHIFT)+extralight * LIGHTBRIGHT;
+            lightnum = (frontsector->lightlevel >> LIGHTSEGSHIFT)+extralight*LIGHTBRIGHT;
 
             if (curline->v1->y == curline->v2->y)
-                lightnum -= LIGHTBRIGHT;
+                lightnum-=LIGHTBRIGHT;
             else if (curline->v1->x == curline->v2->x)
-                lightnum += LIGHTBRIGHT;
+                lightnum+=LIGHTBRIGHT;
 
-            walllights = scalelight[lightnum >= LIGHTLEVELS ? LIGHTLEVELS - 1 : MAX(0, lightnum)];
+            if (lightnum < 0)                
+                walllights = scalelight[0];
+            else if (lightnum >= LIGHTLEVELS)
+                walllights = scalelight[LIGHTLEVELS-1];
+            else
+                walllights = scalelight[lightnum];
         }
     }
     
     // if a floor / ceiling plane is on the wrong side
     //  of the view plane, it is definitely invisible
     //  and doesn't need to be marked.
-    if (frontsector->interpfloorheight >= viewz)
+    // killough 3/7/98: add deep water check
+    if (frontsector->heightsec == -1)
     {
-        // above view plane
-        markfloor = false;
-    }
-    
-    if (frontsector->interpceilingheight <= viewz 
-        && frontsector->ceilingpic != skyflatnum)
-    {
-        // below view plane
-        markceiling = false;
+        if (frontsector->interpfloorheight >= viewz)
+            markfloor = false;          // above view plane
+
+        if (frontsector->interpceilingheight <= viewz && frontsector->ceilingpic != skyflatnum)
+            markceiling = false;        // below view plane
     }
     
     // calculate incremental stepping values for texture edges
