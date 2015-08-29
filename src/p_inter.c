@@ -1114,7 +1114,11 @@ P_KillMobj
         return;
     }
 
-    mo = P_SpawnMobj (target->x,target->y,ONFLOORZ, item);
+    mo = P_SpawnMobj(target->x, target->y, target->floorz + FRACUNIT * target->height / 2, item);
+    mo->momx += P_Random() << 8;
+    mo->momy += P_Random() << 8;
+    mo->momz = FRACUNIT * 5 + (P_Random() << 10);
+    mo->angle = target->angle + ((P_Random() - P_Random()) << 20);
     mo->flags |= MF_DROPPED;        // special versions of items
 
     if ((rand() & 1))
