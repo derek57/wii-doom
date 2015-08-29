@@ -275,8 +275,9 @@ void P_XYMovement (mobj_t* mo)
             ptryy = mo->y + ymove;
             xmove = ymove = 0;
         }
-                
-        if (!P_TryMove (mo, ptryx, ptryy))
+
+        // killough 3/15/98: Allow objects to drop off
+        if (!P_TryMove(mo, ptryx, ptryy, true))
         {
             // blocked move
             if (mo->player)
@@ -698,6 +699,22 @@ void P_MobjThinker (mobj_t* mobj)
             return;
         }
     }
+    else if (!(mobj->momx | mobj->momy) && !sentient(mobj))
+    {
+        // killough 9/12/98: objects fall off ledges if they are hanging off
+        // slightly push off of ledge if hanging more than halfway off
+        // [RH] Be more restrictive to avoid pushing monsters/players down steps
+        if (!(mobj->flags & MF_NOGRAVITY) && !(mobj->flags2 & MF2_FLOATBOB)
+            && mobj->z > mobj->dropoffz && (mobj->health <= 0 || ((mobj->flags & MF_COUNTKILL)
+            && mobj->z - mobj->dropoffz > 24 * FRACUNIT)))
+            P_ApplyTorque(mobj);
+        else
+        {
+            // Reset torque
+            mobj->flags2 &= ~MF2_FALLING;
+            mobj->gear = 0;
+        }
+    }
     
     // cycle through states,
     // calling action functions at transitions
@@ -813,7 +830,8 @@ P_SpawnMobj
 
     // set subsector and/or block links
     P_SetThingPosition (mobj);
-        
+
+    mobj->dropoffz =           // killough 11/98: for tracking dropoffs
     mobj->floorz = mobj->subsector->sector->floor_height;
     mobj->ceilingz = mobj->subsector->sector->ceiling_height;
 
@@ -1419,7 +1437,7 @@ void P_CheckMissileSpawn (mobj_t* th)
     th->y += (th->momy>>1);
     th->z += (th->momz>>1);
 
-    if (!P_TryMove (th, th->x, th->y))
+    if (!P_TryMove(th, th->x, th->y, false))
         P_ExplodeMissile (th);
 }
 

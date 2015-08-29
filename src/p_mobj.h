@@ -45,6 +45,17 @@
 #include "tables.h"
 
 
+// killough 11/98:
+// For torque simulation:
+
+#define OVERDRIVE               6
+#define MAXGEAR                 (OVERDRIVE + 16)
+
+// killough 11/98:
+// Whether an object is "sentient" or not. Used for environmental influences.
+#define sentient(mobj)          ((mobj)->health > 0 && (mobj)->info->seestate)
+
+
 //
 // NOTES: mobj_t
 //
@@ -308,6 +319,11 @@ typedef struct mobj_s
 
     void                   (*colfunc)(void);
     void                   (*projectfunc)();
+
+    // killough 11/98: the lowest floor over all contacted Sectors.
+    fixed_t                dropoffz;
+
+    short                  gear; // killough 11/98: used in torque simulation
 
 } mobj_t;
 

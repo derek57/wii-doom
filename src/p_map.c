@@ -83,6 +83,7 @@ fixed_t                tmy;
 // If "floatok" true, move would be ok
 // if within "tmfloorz - tmceilingz".
 boolean                floatok;
+boolean                felldown;
 
 fixed_t                tmfloorz;
 fixed_t                tmceilingz;
@@ -224,6 +225,8 @@ P_TeleportMove
 
     thing->floorz = tmfloorz;
     thing->ceilingz = tmceilingz;        
+    thing->dropoffz = tmdropoffz;        // killough 11/98
+
     thing->x = x;
     thing->y = y;
     
@@ -562,12 +565,14 @@ boolean
 P_TryMove
 ( mobj_t*        thing,
   fixed_t        x,
-  fixed_t        y )
+  fixed_t        y,
+  boolean        dropoff )
 {
     fixed_t        oldx;
     fixed_t        oldy;
     sector_t       *newsec;
 
+    felldown = false;
     floatok = false;
     if (!P_CheckPosition (thing, x, y))
         return false;                // solid wall or thing
@@ -603,9 +608,27 @@ P_TryMove
              && tmfloorz - thing->z > 24*FRACUNIT )
             return false;        // too big a step up
 
-        if ( !(thing->flags&(MF_DROPOFF|MF_FLOAT))
-             && tmfloorz - tmdropoffz > 24*FRACUNIT )
-            return false;        // don't stand over a dropoff
+        // killough 3/15/98: Allow certain objects to drop off
+        // killough 7/24/98, 8/1/98: 
+        // Prevent monsters from getting stuck hanging off ledges
+        // killough 10/98: Allow dropoffs in controlled circumstances
+        // killough 11/98: Improve symmetry of clipping on stairs
+        if (!(thing->flags & (MF_DROPOFF | MF_FLOAT)))
+        {
+            if (!dropoff)
+            {
+                if (thing->floorz - tmfloorz > 24 * FRACUNIT
+                    || thing->dropoffz - tmdropoffz > 24 * FRACUNIT)
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                // dropoff allowed -- check for whether it fell more than 24
+                felldown = (!(thing->flags & MF_NOGRAVITY) && thing->z - tmfloorz > 24 * FRACUNIT);
+            }
+        }
     }
     
     // the move is ok,
@@ -615,7 +638,9 @@ P_TryMove
     oldx = thing->x;
     oldy = thing->y;
     thing->floorz = tmfloorz;
-    thing->ceilingz = tmceilingz;        
+    thing->ceilingz = tmceilingz;
+    thing->dropoffz = tmdropoffz;      // killough 11/98: keep track of dropoffs
+
     thing->x = x;
     thing->y = y;
 
@@ -655,6 +680,132 @@ P_TryMove
     return true;
 }
 
+//
+// killough 9/12/98:
+//
+// Apply "torque" to objects hanging off of ledges, so that they
+// fall off. It's not really torque, since Doom has no concept of
+// rotation, but it's a convincing effect which avoids anomalies
+// such as lifeless objects hanging more than halfway off of ledges,
+// and allows objects to roll off of the edges of moving lifts, or
+// to slide up and then back down stairs, or to fall into a ditch.
+// If more than one linedef is contacted, the effects are cumulative,
+// so balancing is possible.
+//
+
+static boolean PIT_ApplyTorque(line_t *ld)
+{
+    if (ld->backsector &&       // If thing touches two-sided pivot linedef
+        tmbbox[BOXRIGHT]  > ld->bbox[BOXLEFT] &&
+        tmbbox[BOXLEFT]   < ld->bbox[BOXRIGHT] &&
+        tmbbox[BOXTOP]    > ld->bbox[BOXBOTTOM] &&
+        tmbbox[BOXBOTTOM] < ld->bbox[BOXTOP] &&
+        P_BoxOnLineSide(tmbbox, ld) == -1)
+    {
+        mobj_t *mo = tmthing;
+
+        fixed_t dist =                               // lever arm
+            +(ld->dx >> FRACBITS) * (mo->y >> FRACBITS)
+            - (ld->dy >> FRACBITS) * (mo->x >> FRACBITS)
+            - (ld->dx >> FRACBITS) * (ld->v1->y >> FRACBITS)
+            + (ld->dy >> FRACBITS) * (ld->v1->x >> FRACBITS);
+
+        if (dist < 0 ?                               // dropoff direction
+            ld->frontsector->floor_height < mo->z &&
+            ld->backsector->floor_height >= mo->z :
+            ld->backsector->floor_height < mo->z &&
+            ld->frontsector->floor_height >= mo->z)
+        {
+            // At this point, we know that the object straddles a two-sided
+            // linedef, and that the object's center of mass is above-ground.
+
+            fixed_t x = abs(ld->dx), y = abs(ld->dy);
+
+            if (y > x)
+            {
+                fixed_t t = x;
+                x = y;
+                y = t;
+            }
+
+            y = finesine[(tantoangle[FixedDiv(y, x) >> DBITS] +
+                ANG90) >> ANGLETOFINESHIFT];
+
+            // Momentum is proportional to distance between the
+            // object's center of mass and the pivot linedef.
+            //
+            // It is scaled by 2^(OVERDRIVE - gear). When gear is
+            // increased, the momentum gradually decreases to 0 for
+            // the same amount of pseudotorque, so that oscillations
+            // are prevented, yet it has a chance to reach equilibrium.
+
+            dist = FixedDiv(FixedMul(dist, (mo->gear < OVERDRIVE) ?
+                y << -(mo->gear - OVERDRIVE) :
+                y >> +(mo->gear - OVERDRIVE)), x);
+
+            // Apply momentum away from the pivot linedef.
+
+            x = FixedMul(ld->dy, dist);
+            y = FixedMul(ld->dx, dist);
+
+            // Avoid moving too fast all of a sudden (step into "overdrive")
+
+            dist = FixedMul(x, x) + FixedMul(y, y);
+
+            while (dist > FRACUNIT * 4 && mo->gear < MAXGEAR)
+                ++mo->gear, x >>= 1, y >>= 1, dist >>= 1;
+
+            mo->momx -= x;
+            mo->momy += y;
+        }
+    }
+    return true;
+}
+
+//
+// killough 9/12/98
+//
+// Applies "torque" to objects, based on all contacted linedefs
+//
+
+void P_ApplyTorque(mobj_t *mo)
+{
+    int xl = ((tmbbox[BOXLEFT] =
+        mo->x - mo->radius) - bmaporgx) >> MAPBLOCKSHIFT;
+    int xh = ((tmbbox[BOXRIGHT] =
+        mo->x + mo->radius) - bmaporgx) >> MAPBLOCKSHIFT;
+    int yl = ((tmbbox[BOXBOTTOM] =
+        mo->y - mo->radius) - bmaporgy) >> MAPBLOCKSHIFT;
+    int yh = ((tmbbox[BOXTOP] =
+        mo->y + mo->radius) - bmaporgy) >> MAPBLOCKSHIFT;
+    int bx, by, flags2 = mo->flags2; //Remember the current state, for gear-change
+
+    tmthing = mo;
+    validcount++; // prevents checking same line twice
+
+    for (bx = xl; bx <= xh; bx++)
+        for (by = yl; by <= yh; by++)
+            P_BlockLinesIterator(bx, by, PIT_ApplyTorque);
+
+    // If any momentum, mark object as 'falling' using engine-internal flags
+    if (mo->momx | mo->momy)
+        mo->flags2 |= MF2_FALLING;
+    else  // Clear the engine-internal flag indicating falling object.
+        mo->flags2 &= ~MF2_FALLING;
+
+    // If the object has been moving, step up the gear.
+    // This helps reach equilibrium and avoid oscillations.
+    //
+    // Doom has no concept of potential energy, much less
+    // of rotation, so we have to creatively simulate these 
+    // systems somehow :)
+
+    if (!((mo->flags2 | flags2) & MF2_FALLING))   // If not falling for a while,
+        mo->gear = 0;                                // Reset it to full strength
+    else
+        if (mo->gear < MAXGEAR)                      // Else if not at max gear,
+            mo->gear++;                                // move up a gear
+}
 
 //
 // P_ThingHeightClip
@@ -679,7 +830,8 @@ boolean P_ThingHeightClip (mobj_t* thing)
         
     thing->floorz = tmfloorz;
     thing->ceilingz = tmceilingz;
-        
+    thing->dropoffz = tmdropoffz;         // killough 11/98: remember dropoffs
+
     if ((flags2 & MF2_FEETARECLIPPED) && d_swirl && !thing->player)
         thing->z = thing->floorz;
     else if (flags2 & MF2_FLOATBOB)
@@ -899,8 +1051,8 @@ void P_SlideMove (mobj_t* mo)
     {
         // the move most have hit the middle, so stairstep
       stairstep:
-        if (!P_TryMove (mo, mo->x, mo->y + mo->momy))
-            P_TryMove (mo, mo->x + mo->momx, mo->y);
+        if (!P_TryMove (mo, mo->x, mo->y + mo->momy, true))
+            P_TryMove (mo, mo->x + mo->momx, mo->y, true);
         return;
     }
 
@@ -911,7 +1063,7 @@ void P_SlideMove (mobj_t* mo)
         newx = FixedMul (mo->momx, bestslidefrac);
         newy = FixedMul (mo->momy, bestslidefrac);
         
-        if (!P_TryMove (mo, mo->x+newx, mo->y+newy))
+        if (!P_TryMove (mo, mo->x+newx, mo->y+newy, true))
             goto stairstep;
     }
     
@@ -933,7 +1085,7 @@ void P_SlideMove (mobj_t* mo)
     mo->momx = tmxmove;
     mo->momy = tmymove;
                 
-    if (!P_TryMove (mo, mo->x+tmxmove, mo->y+tmymove))
+    if (!P_TryMove (mo, mo->x+tmxmove, mo->y+tmymove, true))
     {
         goto retry;
     }

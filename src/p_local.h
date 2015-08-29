@@ -217,7 +217,7 @@ extern  line_t*        ceilingline;
 extern  line_t         *blockline;
 
 boolean P_CheckPosition (mobj_t *thing, fixed_t x, fixed_t y);
-boolean P_TryMove (mobj_t* thing, fixed_t x, fixed_t y);
+boolean P_TryMove (mobj_t* thing, fixed_t x, fixed_t y, boolean dropoff);
 boolean P_TeleportMove (mobj_t* thing, fixed_t x, fixed_t y, boolean boss);
 boolean P_CheckSight (mobj_t* t1, mobj_t* t2);
 boolean P_ChangeSector (sector_t* sector, boolean crunch);
@@ -250,7 +250,8 @@ extern int                bmapheight;       // in mapblocks
 extern fixed_t            bmaporgx;
 extern fixed_t            bmaporgy;         // origin of block map
 extern mobj_t**           blocklinks;       // for thing chains
-
+extern boolean            felldown;         // killough 11/98: indicates object pushed off ledge
+extern fixed_t            tmbbox[4];
 
 
 //
@@ -293,6 +294,8 @@ void P_SpawnShadow(mobj_t *actor);
 int EV_LightTurnOnPartway(line_t *line, fixed_t level);
 int EV_LightByAdjacentSectors(sector_t *sector, fixed_t level);
 int P_FindLineFromLineTag(const line_t *line, int start);
+
+void P_ApplyTorque(mobj_t *mo); // killough 9/12/98
 
 //
 // P_SPEC
