@@ -1487,6 +1487,7 @@ extern state_t        states[NUMSTATES];
 extern char *sprnames[];
 
 typedef enum {
+    NOTYPE = -1,
     MT_PLAYER,
     MT_POSSESSED,
     MT_SHOTGUY,
@@ -1756,5 +1757,17 @@ typedef struct
 } mobjinfo_t;
 
 extern mobjinfo_t mobjinfo[NUMMOBJTYPES];
+
+typedef struct
+{
+    char        name[9];
+    short       x;
+    short       y;
+    short       width;
+    short       height;
+    mobjtype_t  type;
+} offset_t;
+
+extern offset_t sproffsets[];
 
 #endif

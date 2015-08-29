@@ -882,6 +882,25 @@ void R_InitSpriteLumps (void)
         spriteoffset[i] = SHORT(patch->leftoffset)<<FRACBITS;
         spritetopoffset[i] = SHORT(patch->topoffset)<<FRACBITS;
 
+        // [BH] override sprite offsets in WAD with those in sproffsets[] in info.c
+        if (d_fixspriteoffsets && fsize != 28422764 && fsize != 19321722)
+        {
+            int j = 0;
+
+            while (sproffsets[j].name[0])
+            {
+                if (i == W_CheckNumForName(sproffsets[j].name) - firstspritelump
+                    && spritewidth[i] == (SHORT(sproffsets[j].width) << FRACBITS)
+                    && spriteheight[i] == (SHORT(sproffsets[j].height) << FRACBITS))
+                {
+                    spriteoffset[i] = SHORT(sproffsets[j].x) << FRACBITS;
+                    spritetopoffset[i] = SHORT(sproffsets[j].y) << FRACBITS;
+                    break;
+                }
+                j++;
+            }
+        }
+
 //        I_Sleep(3);
     }
 }

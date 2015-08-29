@@ -345,6 +345,7 @@ extern  boolean         d_ouchface;
 extern  boolean         show_authors;
 extern  boolean         font_shadow;
 extern  boolean         d_shadows;
+extern  boolean         d_fixspriteoffsets;
 
 extern  int             d_colblood;
 extern  int             d_colblood2;

@@ -85,6 +85,7 @@ boolean         d_ouchface = false;
 boolean         show_authors = false;
 boolean         font_shadow = false;
 boolean         d_shadows = false;
+boolean         d_fixspriteoffsets = true;
 
 int             d_colblood = 0;
 int             d_colblood2 = 0;
