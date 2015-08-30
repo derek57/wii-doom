@@ -1885,7 +1885,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
         0,                // damage
         sfx_dmact,                // activesound
         MF_SOLID|MF_SHOOTABLE|MF_SHADOW|MF_COUNTKILL,                // flags
-        MF2_SHADOW | MF2_NOLIQUIDBOB,                          // flags2
+        MF2_NOLIQUIDBOB,                          // flags2
         S_SARG_RAISE1,                // raisestate
         2 * FRACUNIT,              // shadowoffset
         "Spectre",       // namepointer
