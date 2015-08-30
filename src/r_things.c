@@ -63,10 +63,6 @@ typedef struct
 } maskdraw_t;
 
 
-boolean                clip_this;
-
-char*                  spritename;
-
 // constant arrays
 //  used for psprite clipping and initializing clipping
 int                    negonearray[SCREENWIDTH];          // [crispy] 32-bit integer math
