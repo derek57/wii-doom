@@ -50,9 +50,6 @@
 #define BASEYCENTER             100
 #define MAX_SPRITE_FRAMES       29
 
-// invisibility is rendered translucently
-#define TRANSLUCENT_SHADOW      0
-
 
 typedef struct
 {
@@ -500,7 +497,7 @@ R_DrawVisSprite
     // [crispy] translucent sprites
     if (d_translucency && dc_colormap &&
         ((vis->mobjflags & MF_TRANSLUCENT) ||
-        ((vis->mobjflags & MF_SHADOW) && TRANSLUCENT_SHADOW)))
+        ((vis->mobjflags & MF_SHADOW) && d_translucency)))
     {
         colfunc = tlcolfunc;
     }
@@ -562,17 +559,9 @@ int i;
 //
 void R_ProjectSprite(mobj_t *thing)
 {
-    fixed_t            tr_x;
-    fixed_t            tr_y;
-    
-    fixed_t            gxt;
-    fixed_t            gyt;
     fixed_t            gzt;
     
     fixed_t            tx;
-    fixed_t            tz;
-
-    fixed_t            xscale;
     
     int                x1;
     int                x2;
@@ -622,21 +611,19 @@ void R_ProjectSprite(mobj_t *thing)
         interpangle = thing->angle;
     }
 
-    // transform the origin point
-    tr_x = interpx - viewx;
-    tr_y = interpy - viewy;
-        
-    gxt = FixedMul(tr_x,viewcos); 
-    gyt = -FixedMul(tr_y,viewsin);
+    fixed_t            tr_x = interpx - viewx;
+    fixed_t            tr_y = interpy - viewy;
     
-    tz = gxt-gyt; 
+    fixed_t            gxt = FixedMul(tr_x,viewcos);
+    fixed_t            gyt = -FixedMul(tr_y,viewsin);
+    fixed_t            tz = gxt-gyt;
+
+    fixed_t            xscale = FixedDiv(projection, tz);
 
     // thing is behind view plane?
     if (tz < MINZ)
         return;
     
-    xscale = FixedDiv(projection, tz);
-        
     gxt = -FixedMul(tr_x,viewsin); 
     gyt = FixedMul(tr_y,viewcos); 
     tx = -(gyt+gxt); 
@@ -799,7 +786,7 @@ void R_ProjectSprite(mobj_t *thing)
     
     // get light level
     // [crispy] do not invalidate colormap if invisibility is rendered translucently
-    if (thing->flags & MF_SHADOW && !TRANSLUCENT_SHADOW)
+    if (thing->flags & MF_SHADOW && !d_translucency)
     {
         // shadow draw
         vis->colormap = NULL;
@@ -1248,7 +1235,7 @@ void R_DrawPSprite (pspdef_t* psp, psprnum_t psprnum)
     // [crispy] do not invalidate colormap if invisibility is rendered translucently
     if ((viewplayer->powers[pw_invisibility] > 4*32
         || viewplayer->powers[pw_invisibility] & 8)
-        && !TRANSLUCENT_SHADOW && !beta_style)
+        && !d_translucency && !beta_style)
     {
         // shadow draw
         vis->colormap = NULL;
@@ -1272,7 +1259,7 @@ void R_DrawPSprite (pspdef_t* psp, psprnum_t psprnum)
     // [crispy] invisibility is rendered translucently
     if ((viewplayer->powers[pw_invisibility] > 4*32 ||
         viewplayer->powers[pw_invisibility] & 8) &&
-        TRANSLUCENT_SHADOW)
+        d_translucency)
     {
         vis->mobjflags |= MF_TRANSLUCENT;
     }
