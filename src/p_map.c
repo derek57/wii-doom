@@ -364,15 +364,19 @@ boolean PIT_CheckThing (mobj_t* thing)
     if (!(thing->flags & (MF_SOLID|MF_SPECIAL|MF_SHOOTABLE) ))
         return true;
     
-    blockdist = thing->radius + tmthing->radius;
+    // [BH] don't hit if either thing is a corpse, which may still be solid if
+    // they are still going through their death sequence.
+    if (!(thing->flags2 & MF2_RESURRECTING) && ((thing->flags & MF_CORPSE) ||
+            (tmthing->flags & MF_CORPSE)))
+        return true;
 
-    if ( abs(thing->x - tmx) >= blockdist
-         || abs(thing->y - tmy) >= blockdist )
-    {
-        // didn't hit it
-        return true;        
-    }
-    
+    // [BH] specify standard radius of 20 for pickups here as thing->radius
+    // has been changed to allow better clipping
+    blockdist = ((thing->flags & MF_SPECIAL) ? 20 * FRACUNIT : thing->radius) + tmthing->radius;
+
+    if (abs(thing->x - tmx) >= blockdist || abs(thing->y - tmy) >= blockdist)
+        return true;            // didn't hit it
+
     // don't clip against self
     if (thing == tmthing)
         return true;

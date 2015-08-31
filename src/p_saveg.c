@@ -365,6 +365,9 @@ static void saveg_read_mobj_t(mobj_t *str)
     // fixed_t floorz;
     str->floorz = saveg_read32();
 
+    // fixed_t dropoffz
+    str->dropoffz = saveg_read32();
+
     // fixed_t ceilingz;
     str->ceilingz = saveg_read32();
 
@@ -449,6 +452,9 @@ static void saveg_read_mobj_t(mobj_t *str)
 
     // int floatbob
     str->floatbob = saveg_read32();
+
+    // short gear
+    str->gear = saveg_read16();
 
     // struct mobj_s *shadow
     str->shadow = NULL;
@@ -554,6 +560,9 @@ static void saveg_write_mobj_t(mobj_t *str)
     // fixed_t floorz;
     saveg_write32(str->floorz);
 
+    // fixed_t dropoffz
+    saveg_write32(str->dropoffz);
+
     // fixed_t ceilingz;
     saveg_write32(str->ceilingz);
 
@@ -641,6 +650,9 @@ static void saveg_write_mobj_t(mobj_t *str)
 
     // int floatbob
     saveg_write32(str->floatbob);
+
+    // short gear
+    saveg_write16(str->gear);
 
     // boolean interp
     saveg_write32(str->interp);

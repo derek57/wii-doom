@@ -1709,6 +1709,7 @@ enum
     system_ticker,
     system_hom,
     system_replace,
+    system_mem,
     system_end
 } system_e;
 
@@ -1717,7 +1718,8 @@ menuitem_t SystemMenu[]=
     {2,"FPS Counter",M_FPS,'f'},
     {2,"Display Ticker",M_DisplayTicker,'t'},
     {2,"Hall of Mirrors Detector",M_HOMDetector,'h'},
-    {2,"Replace Missing Textures",M_ReplaceMissing,'r'}
+    {2,"Replace Missing Textures",M_ReplaceMissing,'r'},
+    {2,"Show Memory Usage",M_MemoryUsage,'m'}
 };
 
 menu_t  SystemDef =
@@ -1919,7 +1921,6 @@ enum
     debug_coordinates,
     debug_version,
     debug_sound,
-    debug_mem,
     debug_restart,
     debug_end
 } debug_e;
@@ -1929,7 +1930,6 @@ menuitem_t DebugMenu[]=
     {2,"Show Coordinates",M_Coordinates,'c'},
     {2,"Show Version",M_Version,'v'},
     {2,"Show Sound Info",M_SoundInfo,'s'},
-    {2,"Show Memory Usage",M_MemoryUsage,'m'},
     {2,"Restart Current MAP-Music Track",M_RestartSong,'r'}
 };
 
@@ -8479,6 +8479,19 @@ void M_DrawSystem(void)
         M_WriteText(SystemDef.x + 190, SystemDef.y + 28, "OFF");
         V_ClearDPTranslation();
     }
+
+    if(memory_usage)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(SystemDef.x + 198, SystemDef.y + 38, "ON");
+        V_ClearDPTranslation();
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(SystemDef.x + 190, SystemDef.y + 38, "OFF");
+        V_ClearDPTranslation();
+    }
 }
 
 void M_HUD(int choice)
@@ -8647,19 +8660,6 @@ void M_DrawDebug(void)
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(DebugDef.x + 169, DebugDef.y + 18, "OFF");
-        V_ClearDPTranslation();
-    }
-
-    if(memory_usage)
-    {
-        dp_translation = crx[CRX_GREEN];
-        M_WriteText(DebugDef.x + 177, DebugDef.y + 28, "ON");
-        V_ClearDPTranslation();
-    }
-    else
-    {
-        dp_translation = crx[CRX_DARK];
-        M_WriteText(DebugDef.x + 169, DebugDef.y + 28, "OFF");
         V_ClearDPTranslation();
     }
 }
