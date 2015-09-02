@@ -462,10 +462,10 @@ P_TouchSpecialThing
 ( mobj_t*        special,
   mobj_t*        toucher )
 {
-    player_t*        player;
-    int                i;
-    fixed_t        delta;
-    int                sound;
+    player_t*    player;
+    int          i;
+    fixed_t      delta;
+    int          sound;
                 
     delta = special->z - toucher->z;
 
@@ -574,54 +574,72 @@ P_TouchSpecialThing
         // cards
         // leave cards for everyone
       case SPR_BKEY:
-        if (!player->cards[it_bluecard])
+        if (player->cards[it_bluecard] <= 0)
+        {
             player->message = DEH_String(GOTBLUECARD);
-        P_GiveCard (player, it_bluecard);
-        if (!netgame)
-            break;
+            P_GiveCard (player, it_bluecard);
+
+            if (!netgame)
+                break;
+        }
         return;
         
       case SPR_YKEY:
-        if (!player->cards[it_yellowcard])
+        if (player->cards[it_yellowcard] <= 0)
+        {
             player->message = DEH_String(GOTYELWCARD);
-        P_GiveCard (player, it_yellowcard);
-        if (!netgame)
-            break;
+            P_GiveCard (player, it_yellowcard);
+
+            if (!netgame)
+                break;
+        }
         return;
         
       case SPR_RKEY:
-        if (!player->cards[it_redcard])
+        if (player->cards[it_redcard] <= 0)
+        {
             player->message = DEH_String(GOTREDCARD);
-        P_GiveCard (player, it_redcard);
-        if (!netgame)
-            break;
+            P_GiveCard (player, it_redcard);
+
+            if (!netgame)
+                break;
+        }
         return;
         
       case SPR_BSKU:
       case SPR_BBSK:
-        if (!player->cards[it_blueskull])
+        if (player->cards[it_blueskull] <= 0)
+        {
             player->message = DEH_String(GOTBLUESKUL);
-        P_GiveCard (player, it_blueskull);
-        if (!netgame)
-            break;
+            P_GiveCard (player, it_blueskull);
+
+            if (!netgame)
+                break;
+        }
         return;
         
       case SPR_YSKU:
       case SPR_BYSK:
-        if (!player->cards[it_yellowskull])
+        if (player->cards[it_yellowskull] <= 0)
+        {
             player->message = DEH_String(GOTYELWSKUL);
-        P_GiveCard (player, it_yellowskull);
-        if (!netgame)
-            break;
+            P_GiveCard (player, it_yellowskull);
+
+            if (!netgame)
+                break;
+        }
         return;
         
       case SPR_RSKU:
       case SPR_BRSK:
-        if (!player->cards[it_redskull])
+        if (player->cards[it_redskull] <= 0)
+        {
             player->message = DEH_String(GOTREDSKULL);
-        P_GiveCard (player, it_redskull);
-        if (!netgame)
-            break;
+            P_GiveCard (player, it_redskull);
+
+            if (!netgame)
+                break;
+        }
         return;
         
         // medikits, heals
@@ -881,7 +899,9 @@ P_TouchSpecialThing
         break;
 
       default:
-        I_Error ("P_SpecialThing: Unknown gettable thing");
+            C_Printf(CR_RED, " P_SpecialThing: Unknown gettable thing\n");
+            return;
+//        I_Error ("P_SpecialThing: Unknown gettable thing");
     }
         
     if (special->flags & MF_COUNTITEM)
