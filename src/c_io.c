@@ -609,14 +609,9 @@ static void C_DrawTimeStamp(int x, int y, char *text)
     {
         patch_t *patch = consolefont[text[i] - CONSOLEFONTSTART];
 
-        if (patch)
-        {
-            if (text[i] == '1')
-                x += (zerowidth - SHORT(patch->width)) / 2;
-            V_DrawConsoleChar(x + (text[i] == '1' ? (zerowidth - SHORT(patch->width)) / 2 : 0), y,
-                    patch, consolebrandingcolor, false, 1, false);
-            x += (isdigit(text[i]) ? zerowidth : SHORT(patch->width));
-        }
+        V_DrawConsoleChar(x + (text[i] == '1' ? (zerowidth - SHORT(patch->width)) / 2 : 0), y,
+                patch, consolebrandingcolor, false, 1, false);
+        x += (isdigit(text[i]) ? zerowidth : SHORT(patch->width));
     }
 }
 
