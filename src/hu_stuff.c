@@ -193,7 +193,7 @@ extern int              show_stats;
 extern int              screenSize;
 extern int              timer_info;
 
-//extern boolean          game_startup;
+extern boolean          blurred;
 
 //
 // Builtin map names.
@@ -667,7 +667,8 @@ void HU_DrawStats(void)
         HUlib_addCharToTextLine(&w_monsec, *(t++));
 
     // display the kills/items/secrets each frame, if optioned
-    HUlib_drawTextLine(&w_monsec, false);
+    if(!am_overlay || (am_overlay && screenSize > 6))
+        HUlib_drawTextLine(&w_monsec, false);
 }
 
 
@@ -705,8 +706,9 @@ void HU_Drawer(void)
     {
         HUlib_drawTextLine(&w_title, false);
 
-        if ((show_authors && load_extra_wad == 0) ||
-            (show_authors && nerve_pwad))
+        if (((!am_overlay ||
+             ((am_overlay && screenSize > 6 && (show_authors && load_extra_wad == 0))) ||
+              (show_authors && nerve_pwad))))
         {
             HUlib_drawTextLine(&w_author_title, false);
             HUlib_drawTextLine(&w_authors, false);
@@ -750,6 +752,7 @@ void HU_Ticker(void)
     {
         message_on = false;
         message_nottobefuckedwith = false;
+        blurred = false;
 
         if(beta_style)
         {

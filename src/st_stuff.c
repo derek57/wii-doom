@@ -481,6 +481,9 @@ patch_t *ST_LoadStatusKeyPatch(int keypicnum)
 }
 
 
+// graphics are drawn to a backing screen and blitted to the real screen
+byte                *st_backing_screen;
+	    
 boolean             emptytallpercent;
 
 void (*hudfunc)(int, int, patch_t *, byte *);
@@ -526,6 +529,8 @@ void ST_refreshBackground(void)
 
     if (st_statusbaron)
     {
+        V_UseBuffer(st_backing_screen);
+
         if(beta_style)
         {
             if(automapactive)
@@ -572,7 +577,9 @@ void ST_refreshBackground(void)
         else if(beta_style && !automapactive)
             V_DrawPatch(ST_FX - 1, 1, 4, faceback);
 
-        V_CopyRect(ST_X, 0, 4, ST_WIDTH, ST_HEIGHT, ST_X, ST_Y, 0);
+        V_RestoreBuffer();
+
+        V_CopyRect(ST_X, 0, st_backing_screen, ST_WIDTH, ST_HEIGHT, ST_X, ST_Y);
     }
 }
 
@@ -778,7 +785,7 @@ void ST_DrawStatus(void)
 
     if (key || plyr->neededcardflash)
     {
-        int keypic_x = ST_KEYS_X - 20 * (key - 1);
+        int                 keypic_x = ST_KEYS_X - 20 * (key - 1);
         static int          keywait = 0;
         static boolean      showkey = false;
 
@@ -1350,7 +1357,6 @@ void ST_drawWidgets(boolean refresh)
 
 void ST_doRefresh(void)
 {
-
     st_firsttime = false;
 
     // draw status bar background to off-screen buff
@@ -1358,7 +1364,6 @@ void ST_doRefresh(void)
 
     // and refresh all widgets
     ST_drawWidgets(true);
-
 }
 
 void ST_diffDraw(void)
@@ -1903,4 +1908,6 @@ void ST_Init (void)
     ST_loadData();
 
     screens[4] = Z_Malloc((ST_WIDTH << hires) * (ST_HEIGHT << hires), PU_STATIC, 0);
+
+    st_backing_screen = screens[4];
 }

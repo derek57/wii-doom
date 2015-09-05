@@ -52,8 +52,6 @@
 
 #define WII_LIGHT_OFF  0
 #define WII_LIGHT_ON   1
-#define LOADING_DISK_W (16 << hires) // CHANGED FOR HIRES
-#define LOADING_DISK_H (16 << hires) // CHANGED FOR HIRES
 
 
 // WiiLightControl
@@ -168,11 +166,10 @@ static boolean display_fps_dots;
 
 static boolean noblit;
 
-// disk image data and background overwritten by the disk to be
-// restored by EndRead
+// disk image patch (either STDISK or STCDROM) and
+// background overwritten by the disk to be restored by EndRead
 
-static byte *disk_image = NULL;
-static byte *saved_background;
+static patch_t *disk;
 
 // The screen mode and scale functions being used
 
@@ -192,11 +189,17 @@ int usegamma = 0;
 
 int png_screenshots = 0;
 
-patch_t *disk;
+// The screen buffer; this is modified to draw things to the screen
+
+byte *I_VideoBuffer = NULL;
+
+static int loading_disk_xoffs = 0;
+static int loading_disk_yoffs = 0;
 
 extern int screenSize;
 
 extern int display_fps;
+
 
 // Set the variable controlling FPS dots.
 
@@ -205,23 +208,12 @@ void I_DisplayFPSDots(boolean dots_on)
     display_fps_dots = dots_on;
 }
 
-void I_EnableLoadingDisk(void)
+void I_EnableLoadingDisk(int xoffs, int yoffs)
 {
-    byte *tmpbuf;
     char *disk_name;
-    int y;
-    char buf[20];
 
-    SDL_VideoDriverName(buf, 15);
-
-    if (!strcmp(buf, "Quartz"))
-    {
-        // MacOS Quartz gives us pageflipped graphics that screw up the 
-        // display when we use the loading disk.  Disable it.
-        // This is a gross hack.
-
-        return;
-    }
+    loading_disk_xoffs = xoffs;
+    loading_disk_yoffs = yoffs;
 /*
     if (M_CheckParm("-cdrom") > 0)
         disk_name = DEH_String("STCDROM");
@@ -230,30 +222,6 @@ void I_EnableLoadingDisk(void)
         disk_name = DEH_String("STDISK");
 
     disk = W_CacheLumpName(disk_name, PU_STATIC);
-
-    // Draw the patch into a temporary buffer
-    tmpbuf = Z_Malloc(SCREENWIDTH *
-             ((disk->height + 1) << hires), PU_STATIC, NULL);        // CHANGED FOR HIRES
-
-    // Draw the disk to the screen:
-
-    V_DrawPatch(0, 0, 0, disk);
-
-    disk_image = Z_Malloc(LOADING_DISK_W * LOADING_DISK_H, PU_STATIC, NULL);
-    saved_background = Z_Malloc(LOADING_DISK_W * LOADING_DISK_H, PU_STATIC, NULL);
-
-    for (y=0; y<LOADING_DISK_H; ++y) 
-    {
-        memcpy(disk_image + LOADING_DISK_W * y,
-               tmpbuf + SCREENWIDTH * y,
-               LOADING_DISK_W);
-    }
-
-    // All done - free the screen buffer and restore the normal 
-    // video buffer.
-
-    W_ReleaseLumpName(disk_name);
-    Z_Free(tmpbuf);
 }
 
 void I_ShutdownGraphics(void)
@@ -321,7 +289,7 @@ static boolean BlitArea(int x1, int y1, int x2, int y2)
 
     if (SDL_LockSurface(screenbuffer) >= 0)
     {
-        I_InitScale(screens[0],
+        I_InitScale(I_VideoBuffer,
                     (byte *) screenbuffer->pixels
                                 + (y_offset * screenbuffer->pitch)
                                 + x_offset,
@@ -337,86 +305,27 @@ static boolean BlitArea(int x1, int y1, int x2, int y2)
     return result;
 }
 
-static void UpdateRect(int x1, int y1, int x2, int y2)
-{
-    int x1_scaled, x2_scaled, y1_scaled, y2_scaled;
-
-    // Do stretching and blitting
-
-    if (BlitArea(x1, y1, x2, y2))
-    {
-        // Update the area
-
-        x1_scaled = (x1 * screen_mode->width) / SCREENWIDTH;
-        y1_scaled = (y1 * screen_mode->height) / SCREENHEIGHT;
-        x2_scaled = (x2 * screen_mode->width) / SCREENWIDTH;
-        y2_scaled = (y2 * screen_mode->height) / SCREENHEIGHT;
-
-        SDL_UpdateRect(screen,
-                       x1_scaled, y1_scaled,
-                       x2_scaled - x1_scaled,
-                       y2_scaled - y1_scaled);
-    }
-}
-
 void I_BeginRead(void)
 {
-    byte *screenloc = screens[0]
-                    + (SCREENHEIGHT - LOADING_DISK_H) * SCREENWIDTH
-                    + (SCREENWIDTH - LOADING_DISK_W);
-    int y;
-
-    if (!initialized || disk_image == NULL)
+    if (!initialized || disk == NULL)
         return;
 
-    // save background and copy the disk image in
+    // Draw the disk to the screen
 
-    for (y=0; y<LOADING_DISK_H; ++y)
-    {
-        memcpy(screens[1] + y * LOADING_DISK_W,
-               screenloc,
-               LOADING_DISK_W);
-
-        memcpy(screenloc,
-               disk_image + y * LOADING_DISK_W,
-               LOADING_DISK_W);
-
-        screenloc += SCREENWIDTH;
-    }
-
-    UpdateRect(SCREENWIDTH - LOADING_DISK_W, SCREENHEIGHT - LOADING_DISK_H,
-               SCREENWIDTH, SCREENHEIGHT);
-}
-
-void I_EndRead(void)
-{
-    byte *screenloc = screens[0]
-                    + (SCREENHEIGHT - LOADING_DISK_H) * SCREENWIDTH
-                    + (SCREENWIDTH - LOADING_DISK_W);
-    int y;
-
-    if (!initialized || disk_image == NULL)
-        return;
-
-    // save background and copy the disk image in
-
-    for (y=0; y<LOADING_DISK_H; ++y)
-    {
-        memcpy(screenloc,
-               screens[1] + y * LOADING_DISK_W,
-               LOADING_DISK_W);
-
-        screenloc += SCREENWIDTH;
-    }
-
-    UpdateRect(SCREENWIDTH - LOADING_DISK_W, SCREENHEIGHT - LOADING_DISK_H,
-               SCREENWIDTH, SCREENHEIGHT);
+    V_DrawPatch((loading_disk_xoffs >> hires), (loading_disk_yoffs >> hires), 5, disk);
 }
 
 // Ending of I_FinishUpdate() when in software scaling mode.
 
 static void FinishUpdateSoftware(void)
 {
+    if (disk_indicator)
+    {
+        I_BeginRead();
+
+        disk_indicator = false;
+    }
+
     // draw to screen
 
     BlitArea(0, 0, SCREENWIDTH, SCREENHEIGHT);
@@ -664,10 +573,10 @@ void I_FinishUpdate (void)
 	if (tics > 20) tics = 20;
 
 	for (i=0 ; i<tics*4 ; i+=4)
-	    screens[0][ (SCREENHEIGHT-1)*SCREENWIDTH + i] = 0xff;
+	    I_VideoBuffer[ (SCREENHEIGHT-1)*SCREENWIDTH + i] = 0xff;
 
 	for ( ; i<20*4 ; i+=4)
-	    screens[0][ (SCREENHEIGHT-1)*SCREENWIDTH + i] = 0x0;
+	    I_VideoBuffer[ (SCREENHEIGHT-1)*SCREENWIDTH + i] = 0x0;
     }
 
     // [AM] Real FPS counter
@@ -697,7 +606,7 @@ void I_FinishUpdate (void)
 //
 void I_ReadScreen (byte* scr)
 {
-    memcpy(scr, screens[0], SCREENWIDTH * SCREENHEIGHT);
+    memcpy(scr, I_VideoBuffer, SCREENWIDTH * SCREENHEIGHT);
 }
 
 
@@ -1067,8 +976,11 @@ void I_InitGraphics(void)
     // If not, allocate a buffer and copy from that buffer to the
     // screen when we do an update
 
-    screens[0] = Z_Malloc(SCREENWIDTH * SCREENHEIGHT, PU_STATIC, NULL);
-    memset(screens[0], 0, SCREENWIDTH * SCREENHEIGHT);
+    I_VideoBuffer = screens[0];
+
+    V_RestoreBuffer();
+
+    memset(I_VideoBuffer, 0, SCREENWIDTH * SCREENHEIGHT);
 
     // We need SDL to give us translated versions of keys as well
 

@@ -247,7 +247,7 @@ int wipe_doBurn (int width, int height, int ticks)
     xstep = (FIREWIDTH * FRACUNIT) / height;
     ystep = (FIREHEIGHT * FRACUNIT) / height;
 
-    to = screens[0];
+    to = I_VideoBuffer;
 
     fromold = (byte *) wipe_scr_start;
     fromnew = (byte *) wipe_scr_end;
@@ -479,7 +479,9 @@ int wipe_StartScreen(int x, int y, int width, int height )
 {
     wipe_scr_start = Z_Malloc(width * height, PU_STATIC, NULL);
 
-    V_GetBlock (0, 0, 0, width, height, wipe_scr_start);
+    I_ReadScreen(wipe_scr_start);
+
+//    V_GetBlock (0, 0, width, height, wipe_scr_start);
 
     return 0;
 }
@@ -488,9 +490,10 @@ int wipe_EndScreen(int x, int y, int width, int height)
 {
     wipe_scr_end = Z_Malloc(width * height, PU_STATIC, NULL);
 
-    V_GetBlock (0, 0, 0, width, height, wipe_scr_end);
+//    V_GetBlock (0, 0, width, height, wipe_scr_end);
+    I_ReadScreen(wipe_scr_end);
 
-    V_DrawBlock(x, y, 0, width, height, wipe_scr_start); // restore start scr.
+    V_DrawBlock(x, y, width, height, wipe_scr_start); // restore start scr.
 
     return 0;
 }
@@ -524,7 +527,7 @@ int wipe_ScreenWipe(int wipeno, int x, int y, int width, int height, int ticks)
 
         // wipe_scr = (byte *) Z_Malloc(width*height, PU_STATIC, 0); // DEBUG
 
-        wipe_scr = screens[0];
+        wipe_scr = I_VideoBuffer;
 
         (*wipes[wipeno * 3])(width, height, ticks);
     }
@@ -534,7 +537,7 @@ int wipe_ScreenWipe(int wipeno, int x, int y, int width, int height, int ticks)
 
     rc = (*wipes[wipeno * 3 + 1])(width, height, ticks);
 
-    //  V_DrawBlock(x, y, 0, width, height, wipe_scr); // DEBUG
+    //  V_DrawBlock(x, y, width, height, wipe_scr); // DEBUG
 
     // final stuff
     if (rc)

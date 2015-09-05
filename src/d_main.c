@@ -170,6 +170,7 @@ extern boolean  devparm_nerve;
 extern boolean  finale_music;
 extern boolean  aiming_help;
 extern boolean  show_chat_bar;
+extern boolean  blurred;
 
 extern menu_t*  currentMenu;                          
 extern menu_t   CheatsDef;
@@ -214,6 +215,7 @@ void D_Display (void)
     static  boolean             menuactivestate = false;
     static  boolean             inhelpscreensstate = false;
     static  boolean             fullscreen = false;
+    static  boolean             force_redrawsbar = false;
     static  char                menushade; // [crispy] shade menu background
     static  gamestate_t         oldgamestate = -1;
     static  int                 borderdrawcount;
@@ -226,7 +228,13 @@ void D_Display (void)
     // [crispy] catch SlopeDiv overflows
     SlopeDiv = SlopeDivCrispy;
 
-    redrawsbar = false;
+    if (force_redrawsbar)
+    {
+	redrawsbar = true;
+	force_redrawsbar = false;
+    }
+    else
+        redrawsbar = false;
     
     realframe = (!d_uncappedframerate || gametic > saved_gametic);
 
@@ -384,7 +392,7 @@ void D_Display (void)
         static int firsttic;
 
         for (y = 0; y < SCREENWIDTH * SCREENHEIGHT; y++)
-            screens[0][y] = colormaps[menushade * 256 + screens[0][y]];
+            I_VideoBuffer[y] = colormaps[menushade * 256 + I_VideoBuffer[y]];
 
         if (menushade < 16 && gametic != firsttic)
         {
@@ -409,6 +417,11 @@ void D_Display (void)
     // normal update
     if (!wipe)
     {
+	if (disk_indicator)
+	{
+	    force_redrawsbar = true;
+	}
+
         I_FinishUpdate ();              // page flip or blit buffer
         return;
     }
@@ -430,6 +443,7 @@ void D_Display (void)
         wipestart = nowtime;
 	done = wipe_ScreenWipe(wipe_type
 			       , 0, 0, SCREENWIDTH, SCREENHEIGHT, tics);
+        blurred = false;
         C_Drawer();
         I_UpdateNoBlit ();
         M_Drawer ();                            // menu is drawn even on top of wipes
@@ -494,7 +508,9 @@ void D_DoomLoop (void)
 
     TryRunTics();
 
-    I_EnableLoadingDisk();
+    I_EnableLoadingDisk(SCREENWIDTH - LOADING_DISK_W, SCREENHEIGHT - LOADING_DISK_H);
+
+    V_RestoreBuffer();
 
     R_ExecuteSetViewSize();
 
@@ -567,6 +583,7 @@ void D_DoAdvanceDemo (void)
     usergame = false;               // no save / end game here
     paused = false;
     gameaction = ga_nothing;
+    blurred = false;
 
     // The Ultimate Doom executable changed the demo sequence to add
     // a DEMO4 demo.  Final Doom was based on Ultimate, so also

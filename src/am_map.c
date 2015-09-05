@@ -306,6 +306,9 @@ boolean            automapactive = false;
 
 extern boolean     am_rotate;
 
+extern int         screenSize;
+
+
 // Calculates the slope and slope according to the x-axis of a line
 // segment in map coordinates (with the upright y-axis n' all) so
 // that it can be used with the brain-dead drawing stuff.
@@ -466,7 +469,7 @@ void AM_initVariables(void)
     static event_t st_notify = { ev_keyup, AM_MSGENTERED, 0, 0 };
 
     automapactive = true;
-    fb = screens[0];
+    fb = I_VideoBuffer;
 
     f_oldloc.x = INT_MAX;
     amclock = 0;
@@ -1412,7 +1415,9 @@ void AM_DrawWorldTimer(void)
     seconds = worldTimer;
 
     sprintf(timeBuffer, "%.2d : %.2d : %.2d", hours, minutes, seconds);
-    M_WriteText(240, 8, timeBuffer);
+
+    if(!am_overlay || (am_overlay && screenSize > 6))
+        M_WriteText(240, 8, timeBuffer);
 
     if (days)
     {

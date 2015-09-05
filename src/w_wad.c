@@ -57,6 +57,8 @@ typedef struct
 
 // Location of each lump on disk.
 
+boolean           disk_indicator = false;
+
 int               fsizecq = 0;
 
 unsigned int      numlumps = 0;
@@ -339,7 +341,7 @@ void W_ReadLump(lumpindex_t lump, void *dest)
 
     l = lumpinfo[lump];
 
-    I_BeginRead();
+    disk_indicator = true;
 
     c = W_Read(l->wad_file, l->position, dest, l->size);
 
@@ -348,8 +350,6 @@ void W_ReadLump(lumpindex_t lump, void *dest)
         I_Error ("W_ReadLump: only read %i of %i on lump %i",
                  c, l->size, lump);        
     }
-
-    I_EndRead();
 }
 
 

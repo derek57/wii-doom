@@ -114,4 +114,6 @@ extern int      healthhighlight;
 extern int      ammohighlight;
 extern int      armorhighlight;
 
+extern byte*    st_backing_screen;
+
 #endif

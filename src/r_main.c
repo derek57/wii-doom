@@ -874,7 +874,7 @@ void R_HOMdrawer()
 {
     byte colour = (gametic % 20) < 9 ? 40 : 0;
 
-    V_ColorBlock(0, 0, 0, SCREENWIDTH, SCREENHEIGHT - SBARHEIGHT, colour);
+    V_ColorBlock(0, 0, SCREENWIDTH, SCREENHEIGHT - SBARHEIGHT, colour);
 }
 
 

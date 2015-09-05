@@ -51,6 +51,7 @@ typedef boolean (*vpatchclipfunc_t)(patch_t *, int, int);
 // Screen 0 is the screen updated by I_Update screen.
 // Screen 1 is an extra buffer.
 extern byte *screens[5];
+
 extern byte *xlatab;
 extern byte *tinttable;
 extern byte *dp_translation;
@@ -72,41 +73,37 @@ void V_Init (void);
 
 // Draw a block from the specified source screen to the screen.
 
-void V_CopyRect(int srcx, int srcy, int srcscrn, int width,
-                int height, int destx, int desty, int destscrn ) ;
-
-void V_DrawPatch(int x, int y, int scrn, patch_t* patch ) ;
-
-void V_DrawPatchFlipped(int x, int y, int scrn, patch_t* patch ) ;
+void V_CopyRect(int srcx, int srcy, byte* srcscrn, int width,
+                int height, int destx, int desty) ;
 
 // Draw a linear block of pixels into the view buffer.
 
-void V_DrawBlock(int x, int y, int scrn, int width, int height, byte* src ) ;
+void V_DrawBlock(int x, int y, int width, int height, byte* src ) ;
 
+// Temporarily switch to using a different buffer to draw graphics, etc.
+
+void V_UseBuffer(byte *buffer);
+
+// Return to using the normal screen buffer to draw graphics.
+
+void V_RestoreBuffer(void);
+
+void V_DrawPatch(int x, int y, int scrn, patch_t* patch ) ;
+void V_DrawPatchFlipped(int x, int y, patch_t* patch ) ;
 void V_MarkRect(int x, int y, int width, int height);
-
 void V_DrawConsoleChar(int x, int y, patch_t *patch, byte color, boolean italics, int translucency,
                        boolean inverted);
 
 void V_DrawStatusPatch(int x, int y, patch_t *patch, byte *tinttab);
-
 void V_DrawYellowStatusPatch(int x, int y, patch_t *patch, byte *tinttab);
-
 void V_DrawTranslucentStatusPatch(int x, int y, patch_t *patch, byte *tinttab);
-
 void V_DrawTranslucentStatusNumberPatch(int x, int y, patch_t *patch, byte *tinttab);
-
 void V_DrawTranslucentYellowStatusPatch(int x, int y, patch_t *patch, byte *tinttab);
-
-void V_ColorBlock(int x, int y, int scrn, int width, int height, byte color);
-
-void V_GetBlock (int x, int y, int scrn, int width, int height, byte *dest);
-
+void V_ColorBlock(int x, int y, int width, int height, byte color);
+void V_GetBlock (int x, int y, int width, int height, byte *dest);
 void V_ScreenShot(char *format);
-
 void V_LowGraphicDetail(int height);
-
-void V_DrawPatchWithShadow(int x, int y, int scrn, patch_t *patch, boolean flag);
+void V_DrawPatchWithShadow(int x, int y, patch_t *patch, boolean flag);
 
 #endif
 

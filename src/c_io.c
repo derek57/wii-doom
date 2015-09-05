@@ -336,10 +336,10 @@ static void C_DrawDivider(int y)
     y *= SCREENWIDTH;
     if (y >= CONSOLETOP * SCREENWIDTH)
         for (i = y + CONSOLETEXTX; i < y + CONSOLETEXTX + CONSOLEDIVIDERWIDTH; ++i)
-            screens[0][i] = redcolor;
+            I_VideoBuffer[i] = redcolor;
     if ((y += SCREENWIDTH) >= CONSOLETOP * SCREENWIDTH)
         for (i = y + CONSOLETEXTX; i < y + CONSOLETEXTX + CONSOLEDIVIDERWIDTH; ++i)
-            screens[0][i] = redcolor;
+            I_VideoBuffer[i] = redcolor;
 }
 
 static void C_DrawScrollbar(void)
@@ -357,7 +357,7 @@ static void C_DrawScrollbar(void)
     for (y = trackstart; y < trackend; y += SCREENWIDTH)
         if (y - offset >= 0)
             for (x = CONSOLESCROLLBARX; x < CONSOLESCROLLBARX + CONSOLESCROLLBARWIDTH; ++x)
-                screens[0][y - offset + x] = consolescrollbartrackcolor;
+                I_VideoBuffer[y - offset + x] = consolescrollbartrackcolor;
 
     // Draw scrollbar face
     facestart = (CONSOLESCROLLBARY + CONSOLESCROLLBARHEIGHT * (outputhistory == -1 ?
@@ -368,7 +368,7 @@ static void C_DrawScrollbar(void)
     for (y = facestart; y < faceend; y += SCREENWIDTH)
         if (y - offset >= 0)
             for (x = CONSOLESCROLLBARX; x < CONSOLESCROLLBARX + CONSOLESCROLLBARWIDTH; ++x)
-                screens[0][y - offset + x] = consolescrollbarfacecolor;
+                I_VideoBuffer[y - offset + x] = consolescrollbarfacecolor;
 }
 
 static int C_TextWidth(char *text)
@@ -477,7 +477,7 @@ static void C_DrawBackground(int height)
     height = (height + 5) * SCREENWIDTH;
 
     for (i = 0; i < height; ++i)
-        c_blurredscreen[i] = screens[0][i];
+        c_blurredscreen[i] = I_VideoBuffer[i];
 
     c_blurscreen(0, 0, SCREENWIDTH - 1, height, 1);
     c_blurscreen(1, 0, SCREENWIDTH, height, -1);
@@ -489,24 +489,24 @@ static void C_DrawBackground(int height)
     c_blurscreen(0, SCREENWIDTH, SCREENWIDTH - 1, height, -(SCREENWIDTH - 1));
 
     for (i = 0; i < height; ++i)
-        screens[0][i] = tinttab50[c_blurredscreen[i] + consoletintcolor];
+        I_VideoBuffer[i] = tinttab50[c_blurredscreen[i] + consoletintcolor];
 
     for (i = height - 2; i > 1; i -= 3)
     {
-        screens[0][i] = colormaps[256 * 6 + screens[0][i]];
+        I_VideoBuffer[i] = colormaps[256 * 6 + I_VideoBuffer[i]];
         if (((i - 1) % SCREENWIDTH) < SCREENWIDTH - 2)
-            screens[0][i + 1] = colormaps[256 * 6 + screens[0][i - 1]];
+            I_VideoBuffer[i + 1] = colormaps[256 * 6 + I_VideoBuffer[i - 1]];
     }
 
     for (i = height - SCREENWIDTH * 3; i < height - SCREENWIDTH * 2; ++i)
-        screens[0][i] = tinttab25[consoleedgecolor1 + screens[0][i]];
+        I_VideoBuffer[i] = tinttab25[consoleedgecolor1 + I_VideoBuffer[i]];
 
     for (i = height - SCREENWIDTH * 2; i < height; ++i)
-        screens[0][i] = tinttab25[consoleedgecolor2 + screens[0][i]];
+        I_VideoBuffer[i] = tinttab25[consoleedgecolor2 + I_VideoBuffer[i]];
 
     for (j = 1; j <= 4; ++j)
         for (i = height; i < height + SCREENWIDTH * j; ++i)
-            screens[0][i] = colormaps[256 * 4 + screens[0][i]];
+            I_VideoBuffer[i] = colormaps[256 * 4 + I_VideoBuffer[i]];
 }
 
 #pragma GCC diagnostic push

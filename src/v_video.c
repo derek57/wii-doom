@@ -86,9 +86,9 @@ byte redtoyellow[] =
 // Each screen is [SCREENWIDTH * SCREENHEIGHT];
 byte                         *screens[5];
 
-// haleyjd 08/28/10: clipping callback function for patches.
-// This is needed for Chocolate Strife, which clips patches to the screen.
-static  vpatchclipfunc_t     patchclip_callback = NULL;
+// The screen buffer that the v_video.c code draws to.
+
+static byte                  *dest_screen = NULL;
 
 // [crispy] four different rendering functions
 // for each possible combination of dp_translation and dp_translucent:
@@ -125,8 +125,11 @@ void V_MarkRect(int x, int y, int width, int height)
     // If we are temporarily using an alternate screen, do not 
     // affect the update box.
 
-    M_AddToBox (dirtybox, x, y); 
-    M_AddToBox (dirtybox, x + width-1, y + height-1); 
+    if (dest_screen == I_VideoBuffer)
+    {
+        M_AddToBox (dirtybox, x, y); 
+        M_AddToBox (dirtybox, x + width-1, y + height-1); 
+    }
 } 
  
 
@@ -135,7 +138,7 @@ void V_DrawHorizLine(int x, int y, int w, int c)
     uint8_t *buf;
     int x1;
 
-    buf = screens[0] + SCREENWIDTH * y + x;
+    buf = dest_screen + SCREENWIDTH * y + x;
 
     for (x1 = 0; x1 < w; ++x1)
     {
@@ -150,12 +153,11 @@ void
 V_CopyRect
 ( int        srcx,
   int        srcy,
-  int        srcscrn,
+  byte*      srcscrn,
   int        width,
   int        height,
   int        destx,
-  int        desty,
-  int        destscrn ) 
+  int        desty) 
 { 
     byte *src;
     byte *dest; 
@@ -176,8 +178,7 @@ V_CopyRect
      || destx /* + width */ > SCREENWIDTH
      || desty < 0
      || desty /* + height */ > SCREENHEIGHT
-     || (unsigned)srcscrn > 4
-     || (unsigned)destscrn > 4)
+     /*|| (unsigned)srcscrn > 4*/)
     {
         C_Printf(CR_RED, " Bad V_CopyRect: Patch (%d,%d)-(%d,%d) / Dest.: (%d,%d) exceeds LFB\n"
                 , srcx, srcy, srcx + width, srcy + height, destx, desty);
@@ -190,10 +191,11 @@ V_CopyRect
     if (desty + height > SCREENHEIGHT)
         height = SCREENHEIGHT - desty;
 
-    V_MarkRect(destx, desty, width, height); 
+    if (!srcscrn)
+        V_MarkRect(destx, desty, width, height); 
 
-    src = screens[srcscrn] + SCREENWIDTH * srcy + srcx;
-    dest = screens[destscrn] + SCREENWIDTH * desty + destx;
+    src = srcscrn + SCREENWIDTH * srcy + srcx;
+    dest = dest_screen + SCREENWIDTH * desty + destx;
 
     for ( ; height>0 ; height--) 
     { 
@@ -232,19 +234,12 @@ V_DrawPatch
     y -= SHORT(patch->topoffset);
     x -= SHORT(patch->leftoffset);
 
-    // haleyjd 08/28/10: Strife needs silent error checking here.
-    if(patchclip_callback)
-    {
-        if(!patchclip_callback(patch, x, y))
-            return;
-    }
-
 #ifdef RANGECHECK
     if (x < 0
      || x + SHORT(patch->width) > ORIGWIDTH
      || y < 0
      || y + SHORT(patch->height) > ORIGHEIGHT
-     || (unsigned)scrn > 4)
+     || (unsigned)scrn > 5)
     {
         C_Printf(CR_RED, " Bad V_DrawPatch: Patch (%d,%d) exceeds LFB\n", x, y);
     }
@@ -254,7 +249,11 @@ V_DrawPatch
         V_MarkRect(x, y, SHORT(patch->width), SHORT(patch->height));
 
     col = 0;
-    desttop = screens[scrn] + (y << hires) * SCREENWIDTH + x;
+
+    if(scrn > 4)
+        desttop = dest_screen + (y << hires) * SCREENWIDTH + x;
+    else
+        desttop = screens[scrn] + (y << hires) * SCREENWIDTH + x;
 
     w = SHORT(patch->width);
 
@@ -333,8 +332,7 @@ void
 V_DrawPatchFlipped
 ( int        x,
   int        y,
-  int        scrn,
-  patch_t*    patch ) 
+  patch_t*   patch ) 
 {
     int count;
     int col; 
@@ -347,30 +345,21 @@ V_DrawPatchFlipped
     y -= SHORT(patch->topoffset); 
     x -= SHORT(patch->leftoffset); 
 
-    // haleyjd 08/28/10: Strife needs silent error checking here.
-    if(patchclip_callback)
-    {
-        if(!patchclip_callback(patch, x, y))
-            return;
-    }
-
 #ifdef RANGECHECK
     if (x < 0
      || x + SHORT(patch->width) > ORIGWIDTH
      || y < 0
-     || y + SHORT(patch->height) > ORIGHEIGHT
-     || (unsigned)scrn > 4)
+     || y + SHORT(patch->height) > ORIGHEIGHT)
     {
         C_Printf(CR_RED, " Bad V_DrawPatchFlipped: Patch (%d,%d)-(%d,%d) exceeds LFB\n"
                 , x, y, x + SHORT(patch->width), y + SHORT(patch->height));
     }
 #endif
 
-    if (!scrn)
-        V_MarkRect (x, y, SHORT(patch->width), SHORT(patch->height));
+    V_MarkRect (x, y, SHORT(patch->width), SHORT(patch->height));
 
     col = 0;
-    desttop = screens[scrn]+ (y << hires) * SCREENWIDTH + x;
+    desttop = dest_screen + (y << hires) * SCREENWIDTH + x;
 
     w = SHORT(patch->width);
 
@@ -450,10 +439,9 @@ void
 V_DrawBlock
 ( int        x,
   int        y,
-  int        scrn,
   int        width,
   int        height,
-  byte*        src ) 
+  byte*      src ) 
 { 
     byte *dest; 
  
@@ -461,18 +449,16 @@ V_DrawBlock
     if (x < 0
      || x + width >SCREENWIDTH
      || y < 0
-     || y + height > SCREENHEIGHT
-     || (unsigned)scrn > 4)
+     || y + height > SCREENHEIGHT)
     {
         C_Printf(CR_RED, " Bad V_DrawBlock: Patch (%d,%d)-(%d,%d) exceeds LFB\n"
                 , x, y, x + width, y + height);
     }
 #endif 
  
-    if(!scrn)
-        V_MarkRect (x, y, width, height); 
+    V_MarkRect (x, y, width, height); 
  
-    dest = screens[scrn] + (y << hires) * SCREENWIDTH + x;
+    dest = dest_screen + (y << hires) * SCREENWIDTH + x;
 
     while (height--) 
     { 
@@ -505,7 +491,7 @@ void V_DrawConsoleChar(int x, int y, patch_t *patch, byte color, boolean italics
     boolean inverted)
 {
     int         col = 0;
-    byte        *desttop = screens[0] + y * SCREENWIDTH + x;
+    byte        *desttop = dest_screen + y * SCREENWIDTH + x;
     int         w = SHORT(patch->width);
 
     for (; col < w; col++, desttop++)
@@ -549,7 +535,7 @@ void V_DrawStatusPatch(int x, int y, patch_t *patch, byte *tinttab)
     if (!tinttab)
         return;
 
-    desttop = screens[0] + y * SCREENWIDTH + x;
+    desttop = dest_screen + y * SCREENWIDTH + x;
     w = SHORT(patch->width);
 
     for (; col < w; col++, desttop++)
@@ -582,7 +568,7 @@ void V_DrawYellowStatusPatch(int x, int y, patch_t *patch, byte *tinttab)
     if (!tinttab)
         return;
 
-    desttop = screens[0] + y * SCREENWIDTH + x;
+    desttop = dest_screen + y * SCREENWIDTH + x;
     w = SHORT(patch->width);
 
     for (; col < w; col++, desttop++)
@@ -609,7 +595,7 @@ void V_DrawYellowStatusPatch(int x, int y, patch_t *patch, byte *tinttab)
 void V_DrawTranslucentStatusPatch(int x, int y, patch_t *patch, byte *tinttab)
 {
     int         col = 0;
-    byte        *desttop = screens[0] + y * SCREENWIDTH + x;
+    byte        *desttop = dest_screen + y * SCREENWIDTH + x;
     int         w = SHORT(patch->width);
 
     for (; col < w; col++, desttop++)
@@ -636,7 +622,7 @@ void V_DrawTranslucentStatusPatch(int x, int y, patch_t *patch, byte *tinttab)
 void V_DrawTranslucentStatusNumberPatch(int x, int y, patch_t *patch, byte *tinttab)
 {
     int         col = 0;
-    byte        *desttop = screens[0] + y * SCREENWIDTH + x;
+    byte        *desttop = dest_screen + y * SCREENWIDTH + x;
     int         w = SHORT(patch->width);
 
     for (; col < w; col++, desttop++)
@@ -665,7 +651,7 @@ void V_DrawTranslucentStatusNumberPatch(int x, int y, patch_t *patch, byte *tint
 void V_DrawTranslucentYellowStatusPatch(int x, int y, patch_t *patch, byte *tinttab)
 {
     int         col = 0;
-    byte        *desttop = screens[0] + y * SCREENWIDTH + x;
+    byte        *desttop = dest_screen + y * SCREENWIDTH + x;
     int         w = SHORT(patch->width);
 
     for (; col < w; col++, desttop++)
@@ -716,7 +702,7 @@ boolean V_EmptyPatch(patch_t *patch)
 //
 // Draws a block of solid color.
 //
-void V_ColorBlock(int x, int y, int scrn, int width, int height, byte color)
+void V_ColorBlock(int x, int y, int width, int height, byte color)
 {
     byte *dest;
 
@@ -724,14 +710,13 @@ void V_ColorBlock(int x, int y, int scrn, int width, int height, byte color)
     if (x < 0
      || x + width > SCREENWIDTH
      || y < 0
-     || y + height > SCREENHEIGHT
-     || (unsigned)scrn > 4)
+     || y + height > SCREENHEIGHT)
     {
         C_Printf(CR_RED, " V_ColorBlock: block exceeds buffer boundaries.\n");
     }
 #endif
 
-    dest = screens[scrn] + y * SCREENWIDTH + x;
+    dest = dest_screen + y * SCREENWIDTH + x;
    
     while(height--)
     {
@@ -746,7 +731,7 @@ void V_ColorBlock(int x, int y, int scrn, int width, int height, byte color)
 // V_GetBlock
 // Gets a linear block of pixels from the view buffer.
 //
-void V_GetBlock (int x, int y, int scrn, int width, int height, byte *dest)
+void V_GetBlock (int x, int y, int width, int height, byte *dest)
 {
     byte *src;
 
@@ -754,14 +739,13 @@ void V_GetBlock (int x, int y, int scrn, int width, int height, byte *dest)
     if (x < 0
      || x + width > SCREENWIDTH
      || y < 0
-     || y + height > SCREENHEIGHT
-     || (unsigned)scrn > 4)
+     || y + height > SCREENHEIGHT)
     {
         C_Printf(CR_RED, " Bad V_GetBlock");
     }
 #endif
 
-    src = screens[scrn] + y * SCREENWIDTH + x;
+    src = dest_screen + y * SCREENWIDTH + x;
 
     while(height--)
     {
@@ -1005,17 +989,17 @@ void V_ScreenShot(char *format)
 //#ifdef HAVE_LIBPNG
     if (png_screenshots)
     {
-    WritePNGfile(lbmname, screens[0],
-                 SCREENWIDTH, SCREENHEIGHT,
-                 W_CacheLumpName (DEH_String("PLAYPAL"), PU_CACHE));
+        WritePNGfile(lbmname, dest_screen,
+                SCREENWIDTH, SCREENHEIGHT,
+                W_CacheLumpName (DEH_String("PLAYPAL"), PU_CACHE));
     }
     else
 //#endif
     {
-    // save the pcx file
-    WritePCXfile(lbmname, screens[0],
-                 SCREENWIDTH, SCREENHEIGHT,
-                 W_CacheLumpName (DEH_String("PLAYPAL"), PU_CACHE));
+        // save the pcx file
+        WritePCXfile(lbmname, dest_screen,
+                SCREENWIDTH, SCREENHEIGHT,
+                W_CacheLumpName (DEH_String("PLAYPAL"), PU_CACHE));
     }
 }
 
@@ -1029,7 +1013,7 @@ void V_LowGraphicDetail(int height)
     for (y = 0; y < height; y += h)
         for (x = 0; x < SCREENWIDTH; x += 2)
         {
-            byte        *dot = screens[0] + y + x;
+            byte        *dot = dest_screen + y + x;
             int         xx, yy;
 
             for (yy = 0; yy < h; yy += SCREENWIDTH)
@@ -1038,7 +1022,7 @@ void V_LowGraphicDetail(int height)
         }
 }
 
-void V_DrawPatchWithShadow(int x, int y, int scrn, patch_t *patch, boolean flag)
+void V_DrawPatchWithShadow(int x, int y, patch_t *patch, boolean flag)
 {
     int         col = 0;
     byte        *desttop;
@@ -1051,7 +1035,7 @@ void V_DrawPatchWithShadow(int x, int y, int scrn, patch_t *patch, boolean flag)
     y -= SHORT(patch->topoffset);
     x -= SHORT(patch->leftoffset);
 
-    desttop = screens[scrn] + ((y * DY) >> 16) * SCREENWIDTH + ((x * DX) >> 16);
+    desttop = dest_screen + ((y * DY) >> 16) * SCREENWIDTH + ((x * DX) >> 16);
 
     for (; col < w; col += DXI, desttop++)
     {
@@ -1085,5 +1069,19 @@ void V_DrawPatchWithShadow(int x, int y, int scrn, patch_t *patch, boolean flag)
             column = (column_t *)((byte *)column + column->length + 4);
         }
     }
+}
+
+// Set the buffer that the code draws to.
+
+void V_UseBuffer(byte *buffer)
+{
+    dest_screen = buffer;
+}
+
+// Restore screen buffer to the i_video screen buffer.
+
+void V_RestoreBuffer(void)
+{
+    dest_screen = I_VideoBuffer;
 }
 

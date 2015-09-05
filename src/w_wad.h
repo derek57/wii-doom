@@ -61,6 +61,8 @@ extern lumpinfo_t  **lumpinfo;
 extern unsigned int numlumps;
 extern unsigned int W_LumpNameHash(const char *s);
 
+extern boolean disk_indicator;
+
 wad_file_t *W_AddFile (char *filename, boolean automatic);
 
 lumpindex_t W_CheckNumForName(char *name);

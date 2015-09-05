@@ -35,6 +35,12 @@
 #define SCREENHEIGHT_4_3 (240 << hires)
 #define MAX_MOUSE_BUTTONS 8
 
+// Dimensions of the flashing "loading" disk icon
+
+#define LOADING_DISK_W (16 << hires)
+#define LOADING_DISK_H (16 << hires)
+
+
 typedef struct
 {
     // Screen width and height
@@ -107,6 +113,7 @@ void I_FinishUpdate (void);
 
 void I_ReadScreen (byte* scr);
 
+void I_PrepareRead (void);
 void I_BeginRead (void);
 void I_EndRead (void);
 
@@ -133,7 +140,7 @@ void I_StartTic (void);
 
 // Enable the loading disk image displayed when reading from disk.
 
-void I_EnableLoadingDisk(void);
+void I_EnableLoadingDisk(int xoffs, int yoffs);
 
 extern char *video_driver;
 
@@ -150,5 +157,7 @@ extern int screen_height;
 extern int screen_bpp;
 extern int fullscreen;
 extern int aspect_ratio_correct;
+
+extern byte *I_VideoBuffer;
 
 #endif

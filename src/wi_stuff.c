@@ -421,8 +421,6 @@ void WI_slamBackground(void)
 
     if(beta_style && gameepisode == 1)
         V_DrawPatch(232, 168, 0, W_CacheLumpName(DEH_String("WILVBX"), PU_CACHE));
-
-//    memcpy(screens[0], screens[1], SCREENWIDTH * SCREENHEIGHT);	// FIXME
 }
 
 // The ticker is used to detect keys

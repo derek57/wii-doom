@@ -940,8 +940,10 @@ menu_t                     *currentMenu;
 
 byte                       *tempscreen;
 byte                       *blurredscreen;
+byte                       *firescreen;
 
 static boolean             askforkey = false;
+static boolean             fire_good;
 
 static int                 FirstKey = 0;           // SPECIAL MENU FUNCTIONS (ITEMCOUNT)
 static int                 keyaskedfor;
@@ -971,6 +973,7 @@ extern boolean             sendpause;
 extern boolean             secret_1;
 extern boolean             secret_2;
 extern boolean             done;
+extern boolean             skippsprinterp;
 
 extern short               songlist[148];
 
@@ -987,6 +990,7 @@ void M_Options(int choice);
 void M_EndGame(int choice);
 void M_ReadThis(int choice);
 void M_ReadThis2(int choice);
+void M_Credits(int choice);
 void M_QuitDOOM(int choice);
 
 void M_ChangeMessages(int choice);
@@ -1016,6 +1020,7 @@ void M_ReadSaveStrings(void);
 void M_DrawMainMenu(void);
 void M_DrawReadThis1(void);
 void M_DrawReadThis2(void);
+void M_DrawCredits(void);
 void M_DrawNewGame(void);
 void M_DrawEpisode(void);
 void M_DrawOptions(void);
@@ -1196,6 +1201,7 @@ enum
     options,
     gamefiles,
     readthis,
+    credits,
     quitdoom,
     main_end
 } main_e;
@@ -1207,6 +1213,7 @@ menuitem_t MainGameMenu[]=
     {1,"Game Files",M_GameFiles,'f'},
     // Another hickup with Special edition.
     {1,"Read This!",M_ReadThis,'r'},
+    {1,"Credits",M_Credits,'c'},
     {1,"Quit Game",M_QuitDOOM,'q'}
 };
 
@@ -1389,6 +1396,27 @@ menu_t  ReadDef2 =
     ReadMenu2,
     M_DrawReadThis2,
     330,175,
+    0
+};
+
+enum
+{
+//    rdthsempty1,
+    credits_end
+} credits_e;
+
+menuitem_t CreditsMenu[] =
+{
+//    {1,"",M_ReadThis2,0}
+};
+
+menu_t  CreditsDef =
+{
+    credits_end,
+    &MainDef,
+    CreditsMenu,
+    M_DrawCredits,
+    280,185,
     0
 };
 
@@ -1861,7 +1889,7 @@ menuitem_t GameMenu3[]=
     {2,"Monsters can Telefrag on MAP30",M_Telefrag,'t'},
     {2,"Monsters stuck on doortracks",M_Doorstuck,'d'},
     {2,"ARCH-VILE can resurrect ghosts",M_ResurrectGhosts,'r'},
-    {2,"Pain Elementals have lost soul limit",M_LimitedGhosts,'l'},
+    {2,"Pain-Elementals have lost soul limit",M_LimitedGhosts,'l'},
     {2,"",M_Game4,'n'}
 };
 
@@ -2095,7 +2123,7 @@ void M_DarkBackground(void)
         if (!blurred)
         {
             for (i = 0; i < height; ++i)
-                blurredscreen[i] = grays[screens[0][i]];
+                blurredscreen[i] = grays[I_VideoBuffer[i]];
 
             blurscreen(0, 0, SCREENWIDTH - 1, height, 1);
             blurscreen(1, 0, SCREENWIDTH, height, -1);
@@ -2110,7 +2138,7 @@ void M_DarkBackground(void)
         }
 
         for (i = 0; i < height; ++i)
-            screens[0][i] = tinttab50[blurredscreen[i]];
+            I_VideoBuffer[i] = tinttab50[blurredscreen[i]];
 
         if (detailLevel)
             V_LowGraphicDetail(SCREENHEIGHT);
@@ -2154,8 +2182,7 @@ void M_DrawLoad(void)
 
     M_DarkBackground();
 
-    V_DrawPatchWithShadow(72, 28, 0,
-                      W_CacheLumpName(DEH_String("M_T_LGME"), PU_CACHE), false);
+    V_DrawPatchWithShadow(72, 28, W_CacheLumpName(DEH_String("M_T_LGME"), PU_CACHE), false);
 
     for (i = 0;i < load_end; i++)
     {
@@ -2184,18 +2211,15 @@ void M_DrawSaveLoadBorder(int x,int y)
 {
     int             i;
         
-    V_DrawPatchWithShadow(x - 8, y + 7, 0,
-                      W_CacheLumpName(DEH_String("M_LSLEFT"), PU_CACHE), false);
+    V_DrawPatchWithShadow(x - 8, y + 7, W_CacheLumpName(DEH_String("M_LSLEFT"), PU_CACHE), false);
         
     for (i = 0;i < 24;i++)
     {
-        V_DrawPatchWithShadow(x, y + 7, 0,
-                          W_CacheLumpName(DEH_String("M_LSCNTR"), PU_CACHE), false);
+        V_DrawPatchWithShadow(x, y + 7, W_CacheLumpName(DEH_String("M_LSCNTR"), PU_CACHE), false);
         x += 8;
     }
 
-    V_DrawPatchWithShadow(x, y + 7, 0,
-                      W_CacheLumpName(DEH_String("M_LSRGHT"), PU_CACHE), false);
+    V_DrawPatchWithShadow(x, y + 7, W_CacheLumpName(DEH_String("M_LSRGHT"), PU_CACHE), false);
 }
 
 
@@ -2237,7 +2261,7 @@ void M_DrawSave(void)
         
     M_DarkBackground();
 
-    V_DrawPatchWithShadow(72, 28, 0, W_CacheLumpName(DEH_String("M_T_SGME"), PU_CACHE), false);
+    V_DrawPatchWithShadow(72, 28, W_CacheLumpName(DEH_String("M_T_SGME"), PU_CACHE), false);
     for (i = 0;i < load_end; i++)
     {
         M_DrawSaveLoadBorder(LoadDef.x+5,LoadDef.y+LINEHEIGHT_SMALL*i);
@@ -2396,7 +2420,7 @@ void M_DrawReadThis1(void)
 
     lumpname = DEH_String(lumpname);
     
-    V_DrawPatchWithShadow (0, 0, 0, W_CacheLumpName(lumpname, PU_CACHE), false);
+    V_DrawPatchWithShadow (0, 0, W_CacheLumpName(lumpname, PU_CACHE), false);
 
     ReadDef1.x = skullx;
     ReadDef1.y = skully;
@@ -2414,9 +2438,148 @@ void M_DrawReadThis2(void)
     // We only ever draw the second page if this is 
     // gameversion == exe_doom_1_9 and gamemode == registered
 
-    V_DrawPatchWithShadow(0, 0, 0, W_CacheLumpName(DEH_String("HELP1"), PU_CACHE), false);
+    V_DrawPatchWithShadow(0, 0, W_CacheLumpName(DEH_String("HELP1"), PU_CACHE), false);
 }
 
+void M_DrawCredits(void)
+{
+//    M_DarkBackground();
+			// [RH] The following fire code is based on the PTC fire demo
+			int a, b, x = 1, y = 1;
+			byte *from;
+
+			int width, height, pitch;
+
+//			V_LockScreen (&FireScreen);
+
+			width = SCREENWIDTH;
+			height = SCREENHEIGHT;
+			pitch = SCREENWIDTH;
+
+			from = screens[3] + (height - 3) * pitch;
+			for (a = 0; a < width; a++, from++) {
+				*from = *(from + (pitch << 1)) = M_Random();
+			}
+
+			from = screens[3];
+			for (b = 0; b < SCREENHEIGHT - 4; b += 2) {
+				byte *pixel = from;
+
+				// special case: first pixel on line
+				byte *p = pixel + (pitch << 1);
+				unsigned int top = *p + *(p + width - 1) + *(p + 1);
+				unsigned int bottom = *(pixel + (pitch << 2));
+				unsigned int c1 = (top + bottom) >> 2;
+				if (c1 > 1) c1--;
+				*pixel = c1;
+				*(pixel + pitch) = (c1 + bottom) >> 1;
+				pixel++;
+
+				// main line loop
+				for (a = 1; a < width-1; a++)
+				{
+					// sum top pixels
+					p = pixel + (pitch << 1);
+					top = *p + *(p - 1) + *(p + 1);
+
+					// bottom pixel
+					bottom = *(pixel + (pitch << 2));
+
+					// combine pixels
+					c1 = (top + bottom) >> 2;
+					if (c1 > 1) c1--;
+
+					// store pixels
+					*pixel = c1;
+					*(pixel + pitch) = (c1 + bottom) >> 1;		// interpolate
+
+					// next pixel
+					pixel++;
+				}
+
+				// special case: last pixel on line
+				p = pixel + (pitch << 1);
+				top = *p + *(p - 1) + *(p - width + 1);
+				bottom = *(pixel + (pitch << 2));
+				c1 = (top + bottom) >> 2;
+				if (c1 > 1) c1--;
+				*pixel = c1;
+				*(pixel + pitch) = (c1 + bottom) >> 1;
+
+				// next line
+				from += pitch << 1;
+			}
+
+			y--;
+			pitch = SCREENWIDTH;
+			switch (1) {
+				case 1:
+					for (b = 0; b < SCREENHEIGHT; b++) {
+						byte *to = I_VideoBuffer + y * SCREENWIDTH + x;
+						from = screens[3] + b * SCREENWIDTH;
+						y += 1;
+
+						for (a = 0; a < SCREENWIDTH; a++, to++, from++) {
+							int c;
+							for (c = 1; c; c--)
+								*(to + pitch*c) = colormaps[*from];
+						}
+					}
+					break;
+
+				case 2:
+					for (b = 0; b < SCREENHEIGHT; b++) {
+						byte *to = I_VideoBuffer + y * SCREENWIDTH + x;
+						from = screens[3] + b * SCREENWIDTH;
+						y += 1;
+
+						for (a = 0; a < SCREENWIDTH; a++, to += 2, from++) {
+							int c;
+							for (c = 1; c; c--) {
+								*(to + pitch*c) = colormaps[*from];
+								*(to + pitch*c + 1) = colormaps[*from];
+							}
+						}
+					}
+					break;
+
+				case 3:
+					for (b = 0; b < SCREENHEIGHT; b++) {
+						byte *to = I_VideoBuffer + y * SCREENWIDTH + x;
+						from = screens[3] + b * SCREENWIDTH;
+						y += 1;
+
+						for (a = 0; a < SCREENWIDTH; a++, to += 3, from++) {
+							int c;
+							for (c = 1; c; c--) {
+								*(to + pitch*c) = colormaps[*from];
+								*(to + pitch*c + 1) = colormaps[*from];
+								*(to + pitch*c + 2) = colormaps[*from];
+							}
+						}
+					}
+					break;
+
+				case 4:
+				default:
+					for (b = 0; b < SCREENHEIGHT; b++) {
+						byte *to = I_VideoBuffer + y * SCREENWIDTH + x;
+						from = screens[3] + b * SCREENWIDTH;
+						y += 1;
+
+						for (a = 0; a < SCREENWIDTH; a++, to += 4, from++) {
+							int c;
+							for (c = 1; c; c--) {
+								*(to + pitch*c) = colormaps[*from];
+								*(to + pitch*c + 1) = colormaps[*from];
+								*(to + pitch*c + 2) = colormaps[*from];
+								*(to + pitch*c + 3) = colormaps[*from];
+							}
+						}
+					}
+					break;
+			}
+}
 
 //
 // Change Sfx & Music volumes
@@ -2426,9 +2589,9 @@ void M_DrawSound(void)
     M_DarkBackground();
 
     if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
-        V_DrawPatchWithShadow (65, 15, 0, W_CacheLumpName(DEH_String("M_T_XSET"), PU_CACHE), false);
+        V_DrawPatchWithShadow (65, 15, W_CacheLumpName(DEH_String("M_T_XSET"), PU_CACHE), false);
     else
-        V_DrawPatchWithShadow (65, 15, 0, W_CacheLumpName(DEH_String("M_SNDSET"), PU_CACHE), false);
+        V_DrawPatchWithShadow (65, 15, W_CacheLumpName(DEH_String("M_SNDSET"), PU_CACHE), false);
 
     M_DrawThermoSmall(SoundDef.x + 95, SoundDef.y + LINEHEIGHT_SMALL * (sfx_vol + 1),
                  16, sfxVolume);
@@ -2685,8 +2848,7 @@ void M_DrawMainMenu(void)
 {
     M_DarkBackground();
 
-    V_DrawPatchWithShadow(94, 2, 0,
-                      W_CacheLumpName(DEH_String("M_DOOM"), PU_CACHE), false);
+    V_DrawPatchWithShadow(94, 2, W_CacheLumpName(DEH_String("M_DOOM"), PU_CACHE), false);
 }
 
 
@@ -2699,7 +2861,7 @@ void M_DrawNewGame(void)
 {
     M_DarkBackground();
 
-    V_DrawPatchWithShadow(96, 14, 0, W_CacheLumpName(DEH_String("M_NEWG"), PU_CACHE), false);
+    V_DrawPatchWithShadow(96, 14, W_CacheLumpName(DEH_String("M_NEWG"), PU_CACHE), false);
     M_WriteText(NewDef.x, NewDef.y - 22, "CHOOSE SKILL LEVEL:");
 }
 
@@ -2729,7 +2891,7 @@ void M_DrawEpisode(void)
 {
     M_DarkBackground();
 
-    V_DrawPatchWithShadow(75, 38, 0, W_CacheLumpName(DEH_String("M_EPISOD"), PU_CACHE), false);
+    V_DrawPatchWithShadow(75, 38, W_CacheLumpName(DEH_String("M_EPISOD"), PU_CACHE), false);
 }
 
 void M_VerifyNightmare(int ch)
@@ -2794,7 +2956,7 @@ void M_DrawOptions(void)
 {
     M_DarkBackground();
 
-    V_DrawPatchWithShadow(108, 15, 0, W_CacheLumpName(DEH_String("M_OPTTTL"),
+    V_DrawPatchWithShadow(108, 15, W_CacheLumpName(DEH_String("M_OPTTTL"),
                                                PU_CACHE), false);
 }
 
@@ -2802,7 +2964,7 @@ void M_DrawItems(void)
 {
     M_DarkBackground();
 
-    V_DrawPatchWithShadow(123, 10, 0, W_CacheLumpName(DEH_String("M_T_ITMS"),
+    V_DrawPatchWithShadow(123, 10, W_CacheLumpName(DEH_String("M_T_ITMS"),
                                                PU_CACHE), false);
 
     dp_translation = crx[CRX_GOLD];
@@ -2928,7 +3090,7 @@ void M_DrawArmor(void)
 {
     M_DarkBackground();
 
-    V_DrawPatchWithShadow(115, 15, 0, W_CacheLumpName(DEH_String("M_T_ARMR"),
+    V_DrawPatchWithShadow(115, 15, W_CacheLumpName(DEH_String("M_T_ARMR"),
                                                PU_CACHE), false);
 
     dp_translation = crx[CRX_GOLD];
@@ -2979,7 +3141,7 @@ void M_DrawWeapons(void)
 {
     M_DarkBackground();
 
-    V_DrawPatchWithShadow(103, 15, 0, W_CacheLumpName(DEH_String("M_T_WPNS"),
+    V_DrawPatchWithShadow(103, 15, W_CacheLumpName(DEH_String("M_T_WPNS"),
                                                PU_CACHE), false);
 
     dp_translation = crx[CRX_GOLD];
@@ -3112,7 +3274,7 @@ void M_DrawKeys(void)
 {
     M_DarkBackground();
 
-    V_DrawPatchWithShadow(125, 15, 0, W_CacheLumpName(DEH_String("M_T_KEYS"),
+    V_DrawPatchWithShadow(125, 15, W_CacheLumpName(DEH_String("M_T_KEYS"),
                                                PU_CACHE), false);
 
     dp_translation = crx[CRX_GOLD];
@@ -3125,10 +3287,10 @@ void M_DrawScreen(void)
     M_DarkBackground();
 
     if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
-        V_DrawPatchWithShadow(58, 15, 0, W_CacheLumpName(DEH_String("M_T_SSET"),
+        V_DrawPatchWithShadow(58, 15, W_CacheLumpName(DEH_String("M_T_SSET"),
                                                PU_CACHE), false);
     else
-        V_DrawPatchWithShadow(58, 15, 0, W_CacheLumpName(DEH_String("M_SCRSET"),
+        V_DrawPatchWithShadow(58, 15, W_CacheLumpName(DEH_String("M_SCRSET"),
                                                PU_CACHE), false);
 
     M_DrawThermoSmall(ScreenDef.x + 152, ScreenDef.y + LINEHEIGHT_SMALL * (gamma + 1),
@@ -3254,10 +3416,10 @@ void M_DrawGame(void)
     M_DarkBackground();
 
     if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
-        V_DrawPatchWithShadow(70, 0, 0, W_CacheLumpName(DEH_String("M_T_GSET"),
+        V_DrawPatchWithShadow(70, 0, W_CacheLumpName(DEH_String("M_T_GSET"),
                                                PU_CACHE), false);
     else
-        V_DrawPatchWithShadow(70, 0, 0, W_CacheLumpName(DEH_String("M_GMESET"),
+        V_DrawPatchWithShadow(70, 0, W_CacheLumpName(DEH_String("M_GMESET"),
                                                PU_CACHE), false);
 
     if(devparm)
@@ -3498,10 +3660,10 @@ void M_DrawGame2(void)
     M_DarkBackground();
 
     if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
-        V_DrawPatchWithShadow(70, 0, 0, W_CacheLumpName(DEH_String("M_T_GSET"),
+        V_DrawPatchWithShadow(70, 0, W_CacheLumpName(DEH_String("M_T_GSET"),
                                                PU_CACHE), false);
     else
-        V_DrawPatchWithShadow(70, 0, 0, W_CacheLumpName(DEH_String("M_GMESET"),
+        V_DrawPatchWithShadow(70, 0, W_CacheLumpName(DEH_String("M_GMESET"),
                                                PU_CACHE), false);
 
     if(not_monsters)
@@ -3717,10 +3879,10 @@ void M_DrawGame3(void)
     M_DarkBackground();
 
     if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
-        V_DrawPatchWithShadow(70, 0, 0, W_CacheLumpName(DEH_String("M_T_GSET"),
+        V_DrawPatchWithShadow(70, 0, W_CacheLumpName(DEH_String("M_T_GSET"),
                                                PU_CACHE), false);
     else
-        V_DrawPatchWithShadow(70, 0, 0, W_CacheLumpName(DEH_String("M_GMESET"),
+        V_DrawPatchWithShadow(70, 0, W_CacheLumpName(DEH_String("M_GMESET"),
                                                PU_CACHE), false);
 
     if(crosshair == 1)
@@ -3927,10 +4089,10 @@ void M_DrawGame4(void)
     M_DarkBackground();
 
     if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
-        V_DrawPatchWithShadow(70, 0, 0, W_CacheLumpName(DEH_String("M_T_GSET"),
+        V_DrawPatchWithShadow(70, 0, W_CacheLumpName(DEH_String("M_T_GSET"),
                                                PU_CACHE), false);
     else
-        V_DrawPatchWithShadow(70, 0, 0, W_CacheLumpName(DEH_String("M_GMESET"),
+        V_DrawPatchWithShadow(70, 0, W_CacheLumpName(DEH_String("M_GMESET"),
                                                PU_CACHE), false);
 
     if(!d_blockskulls)
@@ -4126,9 +4288,9 @@ void M_DrawCheats(void)
     M_DarkBackground();
 
     if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
-        V_DrawPatchWithShadow (110, 6, 0, W_CacheLumpName(DEH_String("M_T_CHTS"), PU_CACHE), false);
+        V_DrawPatchWithShadow (110, 6, W_CacheLumpName(DEH_String("M_T_CHTS"), PU_CACHE), false);
     else
-        V_DrawPatchWithShadow (110, 6, 0, W_CacheLumpName(DEH_String("M_CHEATS"), PU_CACHE), false);
+        V_DrawPatchWithShadow (110, 6, W_CacheLumpName(DEH_String("M_CHEATS"), PU_CACHE), false);
 
     if (players[consoleplayer].cheats & CF_GODMODE)
     {
@@ -4400,7 +4562,7 @@ void M_DrawRecord(void)
 
     int offset = 0;
 
-    V_DrawPatchWithShadow(58, 15, 0, W_CacheLumpName(DEH_String("M_T_DREC"),
+    V_DrawPatchWithShadow(58, 15, W_CacheLumpName(DEH_String("M_T_DREC"),
                                                PU_CACHE), false);
     if (rmap == 0)
         rmap = 1;
@@ -4548,34 +4710,34 @@ void M_DrawRecord(void)
             if(fsize == 28422764)
                 offset = 7;
             if(rmap == 1 || rmap == 11 || rmap == 21 || rmap == 31)
-                V_DrawPatchWithShadow (115 - offset, 68, 0, W_CacheLumpName
+                V_DrawPatchWithShadow (115 - offset, 68, W_CacheLumpName
                 (DEH_String("WINUM1"), PU_CACHE), false);
             else if(rmap == 2 || rmap == 12 || rmap == 22 || rmap == 32)
-                V_DrawPatchWithShadow (115 - offset, 68, 0, W_CacheLumpName
+                V_DrawPatchWithShadow (115 - offset, 68, W_CacheLumpName
                 (DEH_String("WINUM2"), PU_CACHE), false);
             else if(rmap == 3 || rmap == 13 || rmap == 23)
-                V_DrawPatchWithShadow (115 - offset, 68, 0, W_CacheLumpName
+                V_DrawPatchWithShadow (115 - offset, 68, W_CacheLumpName
                 (DEH_String("WINUM3"), PU_CACHE), false);
             else if(rmap == 4 || rmap == 14 || rmap == 24)
-                V_DrawPatchWithShadow (115 - offset, 68, 0, W_CacheLumpName
+                V_DrawPatchWithShadow (115 - offset, 68, W_CacheLumpName
                 (DEH_String("WINUM4"), PU_CACHE), false);
             else if(rmap == 5 || rmap == 15 || rmap == 25)
-                V_DrawPatchWithShadow (115 - offset, 68, 0, W_CacheLumpName
+                V_DrawPatchWithShadow (115 - offset, 68, W_CacheLumpName
                 (DEH_String("WINUM5"), PU_CACHE), false);
             else if(rmap == 6 || rmap == 16 || rmap == 26)
-                V_DrawPatchWithShadow (115 - offset, 68, 0, W_CacheLumpName
+                V_DrawPatchWithShadow (115 - offset, 68, W_CacheLumpName
                 (DEH_String("WINUM6"), PU_CACHE), false);
             else if(rmap == 7 || rmap == 17 || rmap == 27)
-                V_DrawPatchWithShadow (115 - offset, 68, 0, W_CacheLumpName
+                V_DrawPatchWithShadow (115 - offset, 68, W_CacheLumpName
                 (DEH_String("WINUM7"), PU_CACHE), false);
             else if(rmap == 8 || rmap == 18 || rmap == 28)
-                V_DrawPatchWithShadow (115 - offset, 68, 0, W_CacheLumpName
+                V_DrawPatchWithShadow (115 - offset, 68, W_CacheLumpName
                 (DEH_String("WINUM8"), PU_CACHE), false);
             else if(rmap == 9 || rmap == 19 || rmap == 29)
-                V_DrawPatchWithShadow (115 - offset, 68, 0, W_CacheLumpName
+                V_DrawPatchWithShadow (115 - offset, 68, W_CacheLumpName
                 (DEH_String("WINUM9"), PU_CACHE), false);
             else if(rmap == 10 || rmap == 20 || rmap == 30)
-                V_DrawPatchWithShadow (115 - offset, 68, 0, W_CacheLumpName
+                V_DrawPatchWithShadow (115 - offset, 68, W_CacheLumpName
                 (DEH_String("WINUM0"), PU_CACHE), false);
         }
     }
@@ -4585,19 +4747,19 @@ void M_DrawRecord(void)
         if(repi == 1)
         {
             if(rmap == 1)
-                V_DrawPatchWithShadow (55, 68, 0, W_CacheLumpName(DEH_String("WILV00"),
+                V_DrawPatchWithShadow (55, 68, W_CacheLumpName(DEH_String("WILV00"),
                 PU_CACHE), false);
             else if(rmap == 2)
-                V_DrawPatchWithShadow (55, 68, 0, W_CacheLumpName(DEH_String("WILV01"),
+                V_DrawPatchWithShadow (55, 68, W_CacheLumpName(DEH_String("WILV01"),
                 PU_CACHE), false);
             else if(rmap == 3)
-                V_DrawPatchWithShadow (55, 68, 0, W_CacheLumpName(DEH_String("WILV02"),
+                V_DrawPatchWithShadow (55, 68, W_CacheLumpName(DEH_String("WILV02"),
                 PU_CACHE), false);
             else if(rmap == 4)
-                V_DrawPatchWithShadow (55, 68, 0, W_CacheLumpName(DEH_String("WILV03"),
+                V_DrawPatchWithShadow (55, 68, W_CacheLumpName(DEH_String("WILV03"),
                 PU_CACHE), false);
             else if(rmap == 5)
-                V_DrawPatchWithShadow (55, 68, 0, W_CacheLumpName(DEH_String("WILV04"),
+                V_DrawPatchWithShadow (55, 68, W_CacheLumpName(DEH_String("WILV04"),
                 PU_CACHE), false);
         }
     }
@@ -4646,6 +4808,9 @@ void M_Options(int choice)
 //
 void M_ChangeMessages(int choice)
 {
+    if(screenSize < 8);
+        ST_doRefresh();
+
     blurred = false;
 
     // warning: unused parameter `int choice'
@@ -4677,7 +4842,7 @@ void M_EndGameResponse(int ch)
 void M_EndGame(int choice)
 {
 /*
-    V_DrawPatchWithShadow(58, 15, 0, W_CacheLumpName(DEH_String("M_T_EGME"),
+    V_DrawPatchWithShadow(58, 15, W_CacheLumpName(DEH_String("M_T_EGME"),
                                                PU_CACHE), false);
 */
     choice = 0;
@@ -4731,6 +4896,12 @@ void M_FinishReadThis(int choice)
     M_SetupNextMenu(&MainDef);
 }
 
+
+void M_Credits(int choice)
+{
+    choice = 0;
+    M_SetupNextMenu(&CreditsDef);
+}
 
 //
 // M_QuitDOOM
@@ -4822,6 +4993,9 @@ void M_QuitDOOM(int choice)
             DEH_String("%s\n\n" DOSY),
             DEH_String(M_SelectEndMessage()));
 
+    if(screenSize < 8);
+        ST_doRefresh();
+
     M_StartMessage(endstring,M_QuitResponse,true);
 }
 
@@ -4876,6 +5050,9 @@ void M_StrafingSpeed(int choice)
 
 void M_ChangeDetail(int choice)
 {
+    if(screenSize < 8);
+        ST_doRefresh();
+
     blurred = false;
     choice = 0;
     detailLevel = 1 - detailLevel;
@@ -5006,8 +5183,13 @@ void M_SizeDisplay(int choice)
         }
         break;
     }
-    blurred = false;
     R_SetViewSize (screenblocks, detailLevel);
+
+    if(screenSize < 8);
+        ST_doRefresh();
+
+    blurred = false;
+    skippsprinterp = true;
 }
 
 
@@ -5027,17 +5209,17 @@ M_DrawThermo
     int                i;
 
     xx = x;
-    V_DrawPatchWithShadow(xx, y, 0, W_CacheLumpName(DEH_String("M_THERML"), PU_CACHE), false);
+    V_DrawPatchWithShadow(xx, y, W_CacheLumpName(DEH_String("M_THERML"), PU_CACHE), false);
     xx += 8;
     for (i=0;i<thermWidth;i++)
     {
-        V_DrawPatchWithShadow(xx, y, 0, W_CacheLumpName(DEH_String("M_THERMM"), PU_CACHE), false);
+        V_DrawPatchWithShadow(xx, y, W_CacheLumpName(DEH_String("M_THERMM"), PU_CACHE), false);
         xx += 8;
     }
-    V_DrawPatchWithShadow(xx, y, 0, W_CacheLumpName(DEH_String("M_THERMR"), PU_CACHE), false);
+    V_DrawPatchWithShadow(xx, y, W_CacheLumpName(DEH_String("M_THERMR"), PU_CACHE), false);
 
-    V_DrawPatchWithShadow((x + 8) + thermDot * 8, y, 0,
-                      W_CacheLumpName(DEH_String("M_THERMO"), PU_CACHE), false);
+    V_DrawPatchWithShadow((x + 8) + thermDot * 8, y, W_CacheLumpName(DEH_String("M_THERMO"),
+                      PU_CACHE), false);
 }
 
 void
@@ -5053,18 +5235,18 @@ M_DrawThermoSmall
 
     xx = x;
     yy = y + 6; // +6 to y coordinate
-    V_DrawPatchWithShadow(xx + 3, yy - 18, 0, W_CacheLumpName(DEH_String("M_SLIDEL"), PU_CACHE), false);
+    V_DrawPatchWithShadow(xx + 3, yy - 18, W_CacheLumpName(DEH_String("M_SLIDEL"), PU_CACHE), false);
     xx += 8;
     for (i=0;i<thermWidth;i++)
     {
-        V_DrawPatchWithShadow(xx, yy - 18, 0, W_CacheLumpName(DEH_String("M_SLIDEM"), PU_CACHE), false);
+        V_DrawPatchWithShadow(xx, yy - 18, W_CacheLumpName(DEH_String("M_SLIDEM"), PU_CACHE), false);
         xx += 8;
     }
-    V_DrawPatchWithShadow(xx, yy - 18, 0, W_CacheLumpName(DEH_String("M_SLIDER"), PU_CACHE), false);
+    V_DrawPatchWithShadow(xx, yy - 18, W_CacheLumpName(DEH_String("M_SLIDER"), PU_CACHE), false);
 
     // +2 to initial y coordinate
-    V_DrawPatchWithShadow((x + 9) + thermDot * 8, y - 12, 0,
-                      W_CacheLumpName(DEH_String("M_SLIDEO"), PU_CACHE), false);
+    V_DrawPatchWithShadow((x + 9) + thermDot * 8, y - 12, W_CacheLumpName(DEH_String("M_SLIDEO"),
+                     PU_CACHE), false);
 }
 
 
@@ -5073,8 +5255,9 @@ M_DrawEmptyCell
 ( menu_t*        menu,
   int            item )
 {
-    V_DrawPatchWithShadow(menu->x - 10, menu->y + item * LINEHEIGHT_SMALL - 1, 0,
-                      W_CacheLumpName(DEH_String("M_CELL1"), PU_CACHE), false);
+    V_DrawPatchWithShadow(menu->x-10,
+                          menu->y+item*LINEHEIGHT_SMALL-1, W_CacheLumpName(DEH_String("M_CELL1"),
+                          PU_CACHE), false);
 }
 
 void
@@ -5082,8 +5265,9 @@ M_DrawSelCell
 ( menu_t*        menu,
   int            item )
 {
-    V_DrawPatchWithShadow(menu->x - 10, menu->y + item * LINEHEIGHT_SMALL - 1, 0,
-                      W_CacheLumpName(DEH_String("M_CELL2"), PU_CACHE), false);
+    V_DrawPatchWithShadow(menu->x-10,
+                          menu->y+item*LINEHEIGHT_SMALL-1, W_CacheLumpName(DEH_String("M_CELL2"),
+                          PU_CACHE), false);
 }
 
 
@@ -5098,6 +5282,10 @@ M_StartMessage
     messageString = string;
     messageRoutine = routine;
     messageNeedsInput = input;
+
+    if(screenSize < 8);
+        ST_doRefresh();
+
     blurred = false;
     menuactive = true;
     return;
@@ -5202,7 +5390,7 @@ void M_WriteText(int x, int y, char* string)
             break;
 
         if(font_shadow)
-            V_DrawPatchWithShadow(cx, cy, 0, hu_font[c], false);
+            V_DrawPatchWithShadow(cx, cy, hu_font[c], false);
         else
             V_DrawPatch(cx, cy, 0, hu_font[c]);
         cx+=w;
@@ -5582,6 +5770,10 @@ void M_StartControlPanel (void)
     menuactive = 1;
     currentMenu = &MainDef;         // JDC
     itemOn = currentMenu->lastOn;   // JDC
+
+    if(screenSize < 8);
+        ST_doRefresh();
+
     blurred = false;
 }
 
@@ -5789,13 +5981,11 @@ void M_Drawer (void)
         // DRAW SKULL
         if(currentMenu == &KeyBindingsDef && itemOn == 15)
             V_DrawPatchWithShadow(x + 280 + CURSORXOFF_SMALL, currentMenu->y - 15 +
-                    itemOn*LINEHEIGHT_SMALL, 0,
-                    W_CacheLumpName(DEH_String(skullNameSmall[whichSkull]),
+                    itemOn*LINEHEIGHT_SMALL, W_CacheLumpName(DEH_String(skullNameSmall[whichSkull]),
                                           PU_CACHE), false);
         else
             V_DrawPatchWithShadow(x + CURSORXOFF_SMALL, currentMenu->y - 5 +
-                    itemOn*LINEHEIGHT_SMALL, 0,
-                    W_CacheLumpName(DEH_String(skullNameSmall[whichSkull]),
+                    itemOn*LINEHEIGHT_SMALL, W_CacheLumpName(DEH_String(skullNameSmall[whichSkull]),
                                           PU_CACHE), false);
 /*
         name = DEH_String(currentMenu->menuitems[i].name);
@@ -5840,6 +6030,9 @@ void M_ClearMenus (void)
     menuactive = 0;
 
     paused = false;
+
+    if(screenSize < 8);
+        ST_doRefresh();
 
     // if (!netgame && usergame && paused)
     //       sendpause = true;
@@ -5887,6 +6080,7 @@ void M_Init (void)
     messageLastMenuActive = menuactive;
     tempscreen = Z_Malloc(SCREENWIDTH * SCREENHEIGHT, PU_STATIC, NULL);
     blurredscreen = Z_Malloc(SCREENWIDTH * SCREENHEIGHT, PU_STATIC, NULL);
+    firescreen = Z_Malloc(SCREENWIDTH * SCREENHEIGHT, PU_STATIC, NULL);
 
     // Here we could catch other version dependencies,
     //  like HELP1/2, and four episodes.
@@ -7198,9 +7392,9 @@ void M_DrawKeyBindings(void)
     int i;
 
     if(fsize != 19321722)
-        V_DrawPatchWithShadow (80, 0, 0, W_CacheLumpName(DEH_String("M_T_BNDS"), PU_CACHE), false);
+        V_DrawPatchWithShadow (80, 0, W_CacheLumpName(DEH_String("M_T_BNDS"), PU_CACHE), false);
     else
-        V_DrawPatchWithShadow (80, 0, 0, W_CacheLumpName(DEH_String("M_KBNDGS"), PU_CACHE), false);
+        V_DrawPatchWithShadow (80, 0, W_CacheLumpName(DEH_String("M_KBNDGS"), PU_CACHE), false);
 
     for (i = 0; i < key_controls_end_in_cfg_at_pos - key_controls_start_in_cfg_at_pos; i++)
     {
@@ -7285,10 +7479,10 @@ void M_DrawControls(void)
     M_DarkBackground();
 
     if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
-        V_DrawPatchWithShadow(48, 15, 0, W_CacheLumpName(DEH_String("M_T_CSET"),
+        V_DrawPatchWithShadow(48, 15, W_CacheLumpName(DEH_String("M_T_CSET"),
                                                PU_CACHE), false);
     else
-        V_DrawPatchWithShadow(48, 15, 0, W_CacheLumpName(DEH_String("M_CTLSET"),
+        V_DrawPatchWithShadow(48, 15, W_CacheLumpName(DEH_String("M_CTLSET"),
                                                PU_CACHE), false);
 
     if(mouselook == 0)
@@ -8424,9 +8618,9 @@ void M_DrawSystem(void)
     M_DarkBackground();
 
     if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
-        V_DrawPatchWithShadow (62, 20, 0, W_CacheLumpName(DEH_String("M_T_YSET"), PU_CACHE), false);
+        V_DrawPatchWithShadow (62, 20, W_CacheLumpName(DEH_String("M_T_YSET"), PU_CACHE), false);
     else
-        V_DrawPatchWithShadow (62, 20, 0, W_CacheLumpName(DEH_String("M_SYSSET"), PU_CACHE), false);
+        V_DrawPatchWithShadow (62, 20, W_CacheLumpName(DEH_String("M_SYSSET"), PU_CACHE), false);
 
     if(display_fps)
     {
@@ -8620,9 +8814,9 @@ void M_DrawDebug(void)
     M_DarkBackground();
 
     if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
-        V_DrawPatchWithShadow (67, 15, 0, W_CacheLumpName(DEH_String("M_T_DSET"), PU_CACHE), false);
+        V_DrawPatchWithShadow (67, 15, W_CacheLumpName(DEH_String("M_T_DSET"), PU_CACHE), false);
     else
-        V_DrawPatchWithShadow (67, 15, 0, W_CacheLumpName(DEH_String("M_DBGSET"), PU_CACHE), false);
+        V_DrawPatchWithShadow (67, 15, W_CacheLumpName(DEH_String("M_DBGSET"), PU_CACHE), false);
 
     if(coordinates_info)
     {
