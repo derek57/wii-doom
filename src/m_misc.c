@@ -142,7 +142,10 @@ int M_ReadFile(char *name, byte **buffer)
         
     handle = fopen(name, "rb");
     if (handle == NULL)
-        I_Error ("Couldn't read file %s", name);
+    {
+         I_Error("Couldn't read file %s", name);
+        return 0;
+    }
 
     // find the size of the file by seeking to the end and
     // reading the current position
