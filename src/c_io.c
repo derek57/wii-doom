@@ -972,7 +972,7 @@ void C_PrintSDLVersions(void)
         SDL_MIXER_MAJOR_VERSION, SDL_MIXER_MINOR_VERSION, SDL_MIXER_PATCHLEVEL,
         "libSDL_mixer.a"
         );
-/*
+#ifdef WII
     C_Printf(CR_GOLD, " Using version %i.%i.%i of %s\n",
         SMPEG_MAJOR_VERSION, SMPEG_MINOR_VERSION, SMPEG_PATCHLEVEL,
         "libsmpeg.a"
@@ -1001,7 +1001,7 @@ void C_PrintSDLVersions(void)
     C_Printf(CR_GOLD, " Also using the following libraries:\n");
     C_Printf(CR_GOLD, " libvorbisidec.a libwiilight.a, libfat.a, libwiiuse.a, libbte.a,\n");
     C_Printf(CR_GOLD, " libwiikeyboard.a, libsupc++.a, libstdc++.a, libm.a\n");
-*/
+#endif
 }
 
 void C_PlayerMessage(char *string, ...)
