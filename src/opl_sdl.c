@@ -23,7 +23,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "c_io.h"
+#include "../src/c_io.h"
 #include "config.h"
 #include "dbopl.h"
 

@@ -1,3 +1,4 @@
+#ifdef WII
 #include <stdio.h>
 
 #include "doomdef.h"
@@ -83,4 +84,5 @@ int MD5_Check(char *fin)
 
     return 0;
 }
+#endif
 

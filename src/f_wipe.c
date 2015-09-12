@@ -65,6 +65,10 @@ unsigned int      Col2RGB8[65][256];
 
 extern   byte     *transtables;
 
+extern   boolean  usergame;
+
+extern   int      screenSize;
+
 
 void wipe_shittyColMajorXform(short *array, int width, int height)
 {
@@ -218,6 +222,19 @@ int wipe_doBurn (int width, int height, int ticks)
 {
     boolean       done;
 
+    fixed_t       xstep;
+    fixed_t       ystep;
+
+    fixed_t       firex;
+    fixed_t       firey;
+
+    int           x;
+    int           y;
+
+    byte          *to;
+    byte          *fromold;
+    byte          *fromnew;
+
     burntime += ticks;
 
     // Make the fire burn
@@ -231,18 +248,6 @@ int wipe_doBurn (int width, int height, int ticks)
     }
 
     // Draw the screen
-    fixed_t       xstep;
-    fixed_t       ystep;
-
-    fixed_t       firex;
-    fixed_t       firey;
-
-    int           x;
-    int           y;
-
-    byte          *to;
-    byte          *fromold;
-    byte          *fromnew;
 
     xstep = (FIREWIDTH * FRACUNIT) / height;
     ystep = (FIREHEIGHT * FRACUNIT) / height;
@@ -302,7 +307,11 @@ int wipe_exitBurn (int width, int height, int ticks)
     Z_Free(wipe_scr_end);
 
     // we DEFINITELY need to do this
-    ST_doRefresh();
+    if(screenSize < 8);
+    {
+        if(usergame)
+            ST_doRefresh();
+    }
 
     return 0;
 }
@@ -477,7 +486,7 @@ int wipe_exitMelt(int width, int height, int ticks)
 
 int wipe_StartScreen(int x, int y, int width, int height )
 {
-    wipe_scr_start = Z_Malloc(width * height, PU_STATIC, NULL);
+    wipe_scr_start = Z_Malloc(SCREENWIDTH * SCREENHEIGHT, PU_STATIC, NULL);
 
     I_ReadScreen(wipe_scr_start);
 
@@ -488,7 +497,7 @@ int wipe_StartScreen(int x, int y, int width, int height )
 
 int wipe_EndScreen(int x, int y, int width, int height)
 {
-    wipe_scr_end = Z_Malloc(width * height, PU_STATIC, NULL);
+    wipe_scr_end = Z_Malloc(SCREENWIDTH * SCREENHEIGHT, PU_STATIC, NULL);
 
 //    V_GetBlock (0, 0, width, height, wipe_scr_end);
     I_ReadScreen(wipe_scr_end);
@@ -500,14 +509,6 @@ int wipe_EndScreen(int x, int y, int width, int height)
 
 int wipe_ScreenWipe(int wipeno, int x, int y, int width, int height, int ticks)
 {
-    if (wipeno == wipe_None)
-    {
-        // we DEFINITELY need to do this
-        ST_doRefresh();
-
-        return true;
-    }
-
     int           rc;
 
     static int    (*wipes[])(int, int, int) =
@@ -517,6 +518,18 @@ int wipe_ScreenWipe(int wipeno, int x, int y, int width, int height, int ticks)
         wipe_initBurn, wipe_doBurn, wipe_exitBurn,
         wipe_initMelt, wipe_doMelt, wipe_exitMelt
     };
+
+    if (wipeno == wipe_None)
+    {
+        // we DEFINITELY need to do this
+        if(screenSize < 8);
+        {
+            if(usergame)
+                ST_doRefresh();
+        }
+
+        return true;
+    }
 
     ticks <<= hires; // ADDED FOR HIRES
 

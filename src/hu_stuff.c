@@ -517,7 +517,7 @@ void HU_Start(void)
                        hu_font,
                        HU_FONTSTART);
 
-    if ((show_authors && load_extra_wad == 0) ||
+    if ((show_authors) ||
         (show_authors && nerve_pwad))
     {
         HUlib_initTextLine(&w_author_title,
@@ -550,12 +550,6 @@ void HU_Start(void)
       case pack_tnt:
         s = HU_TITLET;
         break;
-      case pack_nerve:
-        if (gamemap <= 9)
-          s = HU_TITLEN;
-        else
-          s = HU_TITLE2;
-        break;
       default:
          s = "Unknown level";
          break;
@@ -566,11 +560,7 @@ void HU_Start(void)
         s = HU_TITLE_CHEX;
     }
 
-    if (gamemission == pack_nerve)
-    {
-        u = NERVE_AUTHORS;
-    }
-    else if (bfgedition && gamemission == doom2)
+    if (bfgedition && gamemission == doom2)
     {
         u = BFGEDITION_AUTHORS;
     }
@@ -603,7 +593,7 @@ void HU_Start(void)
     while (*t)
         HUlib_addCharToTextLine(&w_monsec, *(t++));
 
-    if ((show_authors && load_extra_wad == 0) ||
+    if ((show_authors) ||
         (show_authors && nerve_pwad))
     {
         while (*u)
@@ -677,9 +667,9 @@ void HU_Drawer(void)
     if(!automapactive && !demoplayback && crosshair == 1)
     {
         if(screenSize < 8)
-            V_DrawPatch(158, 82, 0, W_CacheLumpName(DEH_String("XHAIR"), PU_CACHE));
+            V_DrawPatch(158, 82, W_CacheLumpName(DEH_String("XHAIR"), PU_CACHE));
         else
-            V_DrawPatch(158, 98, 0, W_CacheLumpName(DEH_String("XHAIR"), PU_CACHE));
+            V_DrawPatch(158, 98, W_CacheLumpName(DEH_String("XHAIR"), PU_CACHE));
     }
 
     // [crispy] translucent messages for translucent HUD
@@ -707,11 +697,14 @@ void HU_Drawer(void)
         HUlib_drawTextLine(&w_title, false);
 
         if (((!am_overlay ||
-             ((am_overlay && screenSize > 6 && (show_authors && load_extra_wad == 0))) ||
-              (show_authors && nerve_pwad))))
+             ((am_overlay && screenSize > 6 && (show_authors))) ||
+              (show_authors))))
         {
-            HUlib_drawTextLine(&w_author_title, false);
-            HUlib_drawTextLine(&w_authors, false);
+            if(!modifiedgame)
+            {
+                HUlib_drawTextLine(&w_author_title, false);
+                HUlib_drawTextLine(&w_authors, false);
+            }
         }
 
         // display the hud kills/items/secret display if optioned
@@ -849,12 +842,6 @@ void HU_NewLevel()
         break;
       case pack_tnt:
         s = HU_TITLET;
-        break;
-      case pack_nerve:
-        if (gamemap <= 9)
-          s = HU_TITLEN;
-        else
-          s = HU_TITLE2;
         break;
       default:
          s = "Unknown level";

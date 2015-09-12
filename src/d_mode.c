@@ -1,7 +1,5 @@
-// Emacs style mode select   -*- C++ -*- 
-//-----------------------------------------------------------------------------
 //
-// Copyright(C) 2005 Simon Howard
+// Copyright(C) 2005-2014 Simon Howard
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -13,12 +11,6 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-// You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-// 02111-1307, USA.
-//
-//-----------------------------------------------------------------------------
 //
 // DESCRIPTION:
 //   Functions and definitions relating to the game type and operational
@@ -128,6 +120,9 @@ static struct {
     GameMission_t mission;
     GameVersion_t version;
 } valid_versions[] = {
+    { doom,     exe_doom_1_666 },
+    { doom,     exe_doom_1_7 },
+    { doom,     exe_doom_1_8 },
     { doom,     exe_doom_1_9 },
     { doom,     exe_hacx },
     { doom,     exe_ultimate },
@@ -184,6 +179,34 @@ boolean D_IsEpisodeMap(GameMission_t mission)
         case strife:
         default:
             return false;
+    }
+}
+
+char *D_GameMissionString(GameMission_t mission)
+{
+    switch (mission)
+    {
+        case none:
+        default:
+            return "none";
+        case doom:
+            return "doom";
+        case doom2:
+            return "doom2";
+        case pack_tnt:
+            return "tnt";
+        case pack_plut:
+            return "plutonia";
+        case pack_hacx:
+            return "hacx";
+        case pack_chex:
+            return "chex";
+        case heretic:
+            return "heretic";
+        case hexen:
+            return "hexen";
+        case strife:
+            return "strife";
     }
 }
 

@@ -19,7 +19,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "c_io.h"
+#include "../src/c_io.h"
 #include "config.h"
 #include "pcsound.h"
 #include "pcsound_internal.h"

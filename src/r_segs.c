@@ -205,6 +205,7 @@ R_RenderMaskedSegRange
     int             lightnum;
     int             texnum;
     fixed_t         texheight;
+    int64_t         t;
 
     // Calculate light table.
     // Use different light tables
@@ -284,7 +285,7 @@ R_RenderMaskedSegRange
             // arithmetic and by skipping the drawing of 2s normals whose
             // mapping to screen coordinates is totally out of range:
 
-            int64_t t = ((int64_t) centeryfrac << FRACBITS) -
+            t = ((int64_t) centeryfrac << FRACBITS) -
                          (int64_t) dc_texturemid * spryscale;
 
             if (t + (int64_t)texheight * spryscale < 0 ||
@@ -498,7 +499,11 @@ extern size_t maxopenings;
 // [SL] 2012-01-21 - Moved into its own function
 static void R_AdjustOpenings(int start, int stop)
 {
+#ifdef WII
     ptrdiff_t pos = lastopening - openings;
+#else
+    long int pos = lastopening - openings;
+#endif
     size_t need = (rw_stopx - start)*4 + pos;
 
     if (need > maxopenings)
@@ -569,6 +574,7 @@ R_StoreWallRange
 ( int        start,
   int        stop )
 {
+    fixed_t         h;
     fixed_t         hyp;
     fixed_t         sineval;
     angle_t         distangle, offsetangle;
@@ -676,8 +682,6 @@ R_StoreWallRange
 #endif
     midtexture = toptexture = bottomtexture = maskedtexture = 0;
     ds_p->maskedtexturecol = NULL;
-        
-    fixed_t     h;
 
     if (!backsector)
     {

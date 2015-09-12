@@ -32,7 +32,7 @@
  *-----------------------------------------------------------------------------
  */
 
-
+#ifdef WII
 #include <math.h>
 #include <SDL/SDL.h>
 #include <stdlib.h>
@@ -257,4 +257,5 @@ void I_UpdateJoystick(void)
 
     D_PostEvent(&ev);
 }
+#endif
 

@@ -215,24 +215,7 @@ void S_Start(void)
     // start new music for the level
     mus_paused = 0;
 
-    if (gamemode == commercial && (gamemission == pack_nerve))
-    {
-        int nmus[]=
-        {
-            mus_messag,
-            mus_ddtblu,
-            mus_doom,
-            mus_shawn,
-            mus_in_cit,
-            mus_the_da,
-            mus_in_cit,
-            mus_shawn2,
-            mus_ddtbl2,
-        };
-
-        mnum = nmus[gamemap-1];
-    }
-    else if (gamemode == commercial)
+    if (gamemode == commercial)
     {
         mnum = mus_runnin + gamemap - 1;
     }
@@ -458,6 +441,10 @@ void S_StartSound(void *origin_p, int sfx_id)
     int pitch;
     int cnum;
     int volume;
+    int priority;
+    int absx;
+    int absy;
+    int dist;
 
     origin = (mobj_t *) origin_p;
     volume = snd_SfxVolume;
@@ -570,10 +557,10 @@ void S_StartSound(void *origin_p, int sfx_id)
         if(listener == NULL || origin == NULL)
             goto skip;
 
-        int priority = S_sfx[sfx_id].priority;
-        int absx = abs(origin->x - listener->x);
-        int absy = abs(origin->y - listener->y);
-        int dist = absx + absy - (absx > absy ? absy >> 1 : absx >> 1);
+        priority = S_sfx[sfx_id].priority;
+        absx = abs(origin->x - listener->x);
+        absy = abs(origin->y - listener->y);
+        dist = absx + absy - (absx > absy ? absy >> 1 : absx >> 1);
 
         dist >>= FRACBITS;
         priority *= (10 - (dist / 160));

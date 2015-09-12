@@ -39,9 +39,13 @@
 
 // Basic data types.
 // Needs fixed point, and BAM angles.
+#ifdef WII
 #include "m_fixed.h"
 #include "tables.h"
-
+#else
+#include "../m_fixed.h"
+#include "../tables.h"
+#endif
 
 //
 // Frame flags:

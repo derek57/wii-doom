@@ -24,20 +24,40 @@
 //
 //-----------------------------------------------------------------------------
 
-
+#ifdef WII
 #include <ogcsys.h>
+#endif
+
 #include <SDL/SDL.h>
 #include <stdio.h>
 
 #include "config.h"
+
+#ifdef WII
 #include "d_main.h"
+#else
+#include "doom/d_main.h"
+#endif
+
 #include "doomtype.h"
+
+#ifdef WII
 #include "gui.h"
+#endif
+
 #include "i_system.h"
+
+#ifdef WII
 #include "i_wiimain.h"
+#endif
+
+#include "m_argv.h"
+
+#ifdef WII
 #include "xmn_main.h"
 
 #include <wiiuse/wpad.h>
+#endif
 
 
 // MAIN DEVPARM
@@ -68,7 +88,7 @@ boolean        devparm_net_hacx = false;
 int exit_by_reset = 0;
 int return_reset = 2;
 
-
+#ifdef WII
 void reset_call()
 {
     exit_by_reset = return_reset;
@@ -103,9 +123,18 @@ void My_Quit(void)
 
     return;
 }
+#endif
 
 int main(int argc, char **argv)
 {
+    // save arguments
+#ifndef WII
+    myargc = argc;
+    myargv = argv;
+#endif
+//    M_FindResponseFile();
+
+#ifdef WII
     // Set RESET/POWER button callback
     SYS_SetResetCallback(reset_call); // esto es para que puedas salir al pulsar boton de RESET
     SYS_SetPowerCallback(power_call); // esto para apagar con power
@@ -113,13 +142,17 @@ int main(int argc, char **argv)
     wii_main();
 
     atexit (My_Quit);
+#endif
 
     // start doom
+#ifdef WII
     if(devparm || devparm_net)
+#endif
         D_DoomMain ();
+#ifdef WII
     else
         user_main();
-
+#endif
     return 0;
 }
 

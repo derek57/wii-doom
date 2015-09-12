@@ -20,7 +20,7 @@
 */
 
 /* $Id$ */
-
+#ifdef WII
 /* Include normal system headers */
 #include <stdio.h>
 #include <stdlib.h>
@@ -67,5 +67,6 @@ typedef Uint32 socklen_t;
 #else
 int SDLNet_GetLastError(void);
 void SDLNet_SetLastError(int err);
+#endif
 #endif
 

@@ -186,7 +186,7 @@ byte**           texturecomposite;
 
 byte             grays[256];
 
-extern byte*     tranmap;
+//extern byte*     tranmap;
 
 
 //
@@ -353,7 +353,9 @@ void R_GenerateComposite(int texnum)
 				    + LONG(realpatch->columnofs[x-x1]));
 	    R_DrawColumnInCache (patchcol,
 				 block + colofs[x],
-				 patch->originy,
+				 // [crispy] single-patched columns are normally not composited
+				 // but directly read from the patch lump ignoring their originy
+				 collump[x] >= 0 ? 0 : patch->originy,
 				 texture->height,
 				 marks + x*texture->height);
 	}
@@ -867,7 +869,7 @@ void R_InitSpriteLumps (void)
     spriteheight = Z_Malloc(numspritelumps * sizeof(*spriteheight), PU_STATIC, 0);
     spriteoffset = Z_Malloc (numspritelumps*sizeof(*spriteoffset), PU_STATIC, 0);
     spritetopoffset = Z_Malloc (numspritelumps*sizeof(*spritetopoffset), PU_STATIC, 0);
-        
+
     for (i=0 ; i< numspritelumps ; i++)
     {
         if (!(i&63))
@@ -883,7 +885,7 @@ void R_InitSpriteLumps (void)
         spritetopoffset[i] = SHORT(patch->topoffset)<<FRACBITS;
 
         // [BH] override sprite offsets in WAD with those in sproffsets[] in info.c
-        if (d_fixspriteoffsets && fsize != 28422764 && fsize != 19321722)
+        if (d_fixspriteoffsets && fsize != 28422764 && fsize != 19321722 && !modifiedgame)
         {
             int j = 0;
 
@@ -949,7 +951,7 @@ void R_InitTranMap()
         {
         byte *fg, *bg, blend[3], *tp = tranmap;
         int i, j, btmp;
-        extern int FindNearestColor(byte *palette, int r, int g, int b);
+//        extern int FindNearestColor(byte *palette, int r, int g, int b);
 
         // [crispy] background color
         for (i = 0; i < 256; i++)
@@ -1008,12 +1010,15 @@ void R_InitTranMap()
 //
 // R_InitColormaps
 //
+extern byte V_Colorize (byte *playpal, int cr, byte source);
+
 void R_InitColormaps (void)
 {
     int        lump;
     boolean    COLORMAP = (W_CheckMultipleLumps("COLORMAP") > 1);
-    int        i;
-    byte       *palsrc, *palette;
+    int        i, j, k;
+    byte       *palsrc, *palette, *playpal;
+    char       c[3];
 
     // Load in the light tables, 
     //  256 byte align tables.
@@ -1049,12 +1054,7 @@ void R_InitColormaps (void)
     }
 
     // [crispy] initialize color translation and color strings tables
-    byte *playpal = W_CacheLumpName("PLAYPAL", PU_STATIC);
-
-    char c[3];
-    int j, k;
-
-    extern byte V_Colorize (byte *playpal, int cr, byte source);
+    playpal = W_CacheLumpName("PLAYPAL", PU_STATIC);
 
     if (!crstr)
         crstr = malloc(CRXMAX * sizeof(*crstr));

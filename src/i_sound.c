@@ -26,7 +26,13 @@
 #include "i_sound.h"
 #include "i_video.h"
 #include "m_config.h"
+
+#ifdef WII
 #include "s_sound.h"
+#else
+#include "doom/s_sound.h"
+#endif
+
 #include "v_trans.h"
 
 
@@ -180,8 +186,10 @@ static void InitMusicModule(void)
 void I_InitSound(boolean use_sfx_prefix)
 {  
     // Initialize the sound subsystem.
-
-    InitSfxModule(use_sfx_prefix);
+#ifndef WII
+    if (!screensaver_mode)
+#endif
+        InitSfxModule(use_sfx_prefix);
 }
 
 void I_ShutdownSound(void)

@@ -22,7 +22,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef WII
 #include "doomdef.h"
+#else
+#include "doom/doomdef.h"
+#endif
+
 #include "doomtype.h"
 
 #include "i_video.h"

@@ -25,7 +25,13 @@
 #include <string.h>
 
 #include "c_io.h"
+
+#ifdef WII
 #include "doomdef.h"
+#else
+#include "doom/doomdef.h"
+#endif
+
 #include "doomfeatures.h"
 #include "doomkeys.h"
 #include "doomtype.h"
@@ -52,7 +58,7 @@
 #define CONFIG_VARIABLE_STRING(name) \
     CONFIG_VARIABLE_GENERIC(name, DEFAULT_STRING)
 
-extern boolean devparm;
+//extern boolean devparm;
 
 extern int key_right;
 extern int key_left;
@@ -165,6 +171,10 @@ default_t        doom_defaults_list[] =
     CONFIG_VARIABLE_INT                (key_run),
     CONFIG_VARIABLE_INT                (key_console),
     CONFIG_VARIABLE_INT                (key_screenshots),
+#ifndef WII
+    CONFIG_VARIABLE_INT                (key_strafe_left),
+    CONFIG_VARIABLE_INT                (key_strafe_right),
+#endif
 //    CONFIG_VARIABLE_INT                (key_aiminghelp),
 };
 
@@ -568,16 +578,20 @@ static char *GetDefaultConfigDir(void)
         // homedir
 
         result = M_StringJoin(homedir, DIR_SEPARATOR_S,
-                              "." "chocolate-doom", DIR_SEPARATOR_S, NULL);
+                              "." "wii-doom", DIR_SEPARATOR_S, NULL);
 
         return result;
     }
     else
     {
+#ifdef WII
         if(usb)
             return M_StringDuplicate("usb:/apps/wiidoom/");
         else if(sd)
             return M_StringDuplicate("sd:/apps/wiidoom/");
+#else
+        return M_StringDuplicate("");
+#endif
     }
 }
 
@@ -613,7 +627,6 @@ void M_SetConfigDir(char *dir)
 char *M_GetSaveGameDir(char *iwadname)
 {
     char *savegamedir = NULL;
-    char *savegameroot;
 
     // If not "doing" a configuration directory (Windows), don't "do"
     // a savegame directory, either.
@@ -625,6 +638,8 @@ char *M_GetSaveGameDir(char *iwadname)
     else
     {
         // ~/.chocolate-doom/savegames/
+#ifdef WII
+        char *savegameroot;
 
         savegamedir = malloc(strlen(configdir) + 30);
         sprintf(savegamedir, "%ssavegames%c", configdir,
@@ -949,6 +964,22 @@ char *M_GetSaveGameDir(char *iwadname)
                 savegamedir = SavePathFreedoom08P2SD;
         }
         M_MakeDirectory(savegamedir);
+#else
+        // ~/.chocolate-doom/savegames
+        char *topdir;
+
+        topdir = M_StringJoin(configdir, "savegames", NULL);
+        M_MakeDirectory(topdir);
+
+        // eg. ~/.chocolate-doom/savegames/doom2.wad/
+
+        savegamedir = M_StringJoin(topdir, DIR_SEPARATOR_S, iwadname,
+                                   DIR_SEPARATOR_S, NULL);
+
+        M_MakeDirectory(savegamedir);
+
+        free(topdir);
+#endif
     }
 
     return savegamedir;

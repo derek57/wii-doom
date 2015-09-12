@@ -71,9 +71,9 @@
 #include "w_wad.h"
 #include "wi_stuff.h"
 #include "z_zone.h"
-
+#ifdef WII
 #include <wiiuse/wpad.h>
-
+#endif
 
 #define SAVEGAMESIZE     0x2c000
 #define MAXPLMOVE        0x32
@@ -178,7 +178,7 @@ int             joy_2 = 65536;          // 16
 int             bodyqueslot; 
 int             vanilla_savegame_limit = 0; // FIX FOR THE WII: SAVEGAME BUFFER OVERFLOW (GIBS)
 int             vanilla_demo_limit = 1; 
-int             key_strafe, joybstrafe;
+int             joybstrafe;
 int             joybinvright = 0;
 int             joybfire = 1;
 int             joybaiminghelp = 2;
@@ -223,7 +223,6 @@ boolean         not_walking;
 char            demoname[32];
 char            savename[256];
 char            *defdemoname; 
- 
 
 byte*           demobuffer;
 byte*           demo_p;
@@ -231,10 +230,14 @@ byte*           demoend;
 
 byte            consistancy[MAXPLAYERS][BACKUPTICS]; 
 
+static boolean  mousearray[MAX_MOUSE_BUTTONS + 1];
+static boolean  *mousebuttons = &mousearray[1];  // allow [-1]
+static boolean  dclickstate;
 static boolean  dclickstate2;
 
 static char     savedescription[32]; 
 
+static int      dclicktime;
 static int      dclicks; 
 static int      dclicktime2;
 static int      dclicks2;
@@ -245,6 +248,41 @@ static int      joyxmove;
 static int      joyymove;
 static int      joyirx;
 static int      joyiry;
+
+#ifndef WII
+static int *weapon_keys[] = {
+    &key_weapon1,
+    &key_weapon2,
+    &key_weapon3,
+    &key_weapon4,
+    &key_weapon5,
+    &key_weapon6,
+    &key_weapon7,
+    &key_weapon8
+};
+
+// Set to -1 or +1 to switch to the previous or next weapon.
+
+static int next_weapon = 0;
+#endif
+
+// Used for prev/next weapon keys.
+
+static const struct
+{
+    weapontype_t weapon;
+    weapontype_t weapon_num;
+} weapon_order_table[] = {
+    { wp_fist,            wp_fist },
+    { wp_chainsaw,        wp_fist },
+    { wp_pistol,          wp_pistol },
+    { wp_shotgun,         wp_shotgun },
+    { wp_supershotgun,    wp_shotgun },
+    { wp_chaingun,        wp_chaingun },
+    { wp_missile,         wp_missile },
+    { wp_plasma,          wp_plasma },
+    { wp_bfg,             wp_bfg }
+};
 
 extern int      mspeed;
 extern int      turnspeed;
@@ -262,7 +300,7 @@ extern fixed_t  sidemove;
 extern fixed_t  mtof_zoommul; // how far the window zooms in each tic (map coords)
 extern fixed_t  ftom_zoommul; // how far the window zooms in each tic (fb coords)
 
-extern ticcmd_t *netcmds;
+//extern ticcmd_t *netcmds;
 
 extern menu_t   *currentMenu;                          
 
@@ -361,6 +399,80 @@ void ChangeWeaponLeft(void)
     }
 }
 
+#ifndef WII
+static boolean WeaponSelectable(weapontype_t weapon)
+{
+    // Can't select the super shotgun in Doom 1.
+
+    if (weapon == wp_supershotgun && logical_gamemission == doom)
+    {
+        return false;
+    }
+
+    // These weapons aren't available in shareware.
+
+    if ((weapon == wp_plasma || weapon == wp_bfg)
+     && gamemission == doom && gamemode == shareware)
+    {
+        return false;
+    }
+
+    // Can't select a weapon if we don't own it.
+
+    if (!players[consoleplayer].weaponowned[weapon])
+    {
+        return false;
+    }
+
+    // Can't select the fist if we have the chainsaw, unless
+    // we also have the berserk pack.
+
+    if (weapon == wp_fist
+     && players[consoleplayer].weaponowned[wp_chainsaw]
+     && !players[consoleplayer].powers[pw_strength])
+    {
+        return false;
+    }
+
+    return true;
+}
+
+static int G_NextWeapon(int direction)
+{
+    weapontype_t weapon;
+    int start_i, i;
+
+    // Find index in the table.
+
+    if (players[consoleplayer].pendingweapon == wp_nochange)
+    {
+        weapon = players[consoleplayer].readyweapon;
+    }
+    else
+    {
+        weapon = players[consoleplayer].pendingweapon;
+    }
+
+    for (i=0; i<arrlen(weapon_order_table); ++i)
+    {
+        if (weapon_order_table[i].weapon == weapon)
+        {
+            break;
+        }
+    }
+
+    // Switch weapon. Don't loop forever.
+    start_i = i;
+    do
+    {
+        i += direction;
+        i = (i + arrlen(weapon_order_table)) % arrlen(weapon_order_table);
+    } while (i != start_i && !WeaponSelectable(weapon_order_table[i].weapon));
+
+    return weapon_order_table[i].weapon_num;
+}
+#endif
+
 //
 // G_BuildTiccmd
 // Builds a ticcmd from all of the available inputs
@@ -370,31 +482,39 @@ void ChangeWeaponLeft(void)
 
 void G_BuildTiccmd (ticcmd_t* cmd, int maketic) 
 { 
-    boolean     strafe, use;
+    boolean     strafe, use, bstrafe;
+
+#ifndef WII
+    int         i;
+#endif
 
     int         forward;
     int         side;
     int         look;
     int         flyheight;
 
+    float newlookdir;
+
     memset(cmd, 0, sizeof(ticcmd_t));
 
     cmd->consistancy = 
         consistancy[consoleplayer][maketic%BACKUPTICS]; 
  
-    strafe = gamekeydown[key_strafe] || joybuttons[joybstrafe];
+    strafe = gamekeydown[key_strafe] || joybuttons[joybstrafe] || mousebuttons[mousebstrafe] ||
+             mousebuttons[mousebstrafeleft] || mousebuttons[mousebstraferight] ||
+             gamekeydown[key_strafeleft] || gamekeydown[key_straferight];
 
     forward = side = look = flyheight = 0;
 
     // let movement keys cancel each other out
     if (strafe) 
     { 
-        if (gamekeydown[key_right]) 
+        if (gamekeydown[key_right] || mousebuttons[mousebstraferight] || gamekeydown[key_straferight]) 
         {
             // fprintf(stderr, "strafe right\n");
             side += sidemove; 
         }
-        if (gamekeydown[key_left]) 
+        if (gamekeydown[key_left] || mousebuttons[mousebstrafeleft] || gamekeydown[key_strafeleft]) 
         {
             // fprintf(stderr, "strafe left\n");
             side -= sidemove; 
@@ -408,9 +528,9 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
     else 
     { 
         if (gamekeydown[key_right])
-            cmd->angleturn -= angleturn; 
+            cmd->angleturn -= turnspd * 140; 
         if (gamekeydown[key_left]) 
-            cmd->angleturn += angleturn; 
+            cmd->angleturn += turnspd * 140; 
 
         if (joyxmove > 20) 
             side += sidemove; 
@@ -433,19 +553,23 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
     else
         not_walking = true;
 
-    extern boolean dont_move_forwards;
-    extern boolean dont_move_backwards;
+//    extern boolean dont_move_forwards;
+//    extern boolean dont_move_backwards;
 
     if (gamekeydown[key_up]) 
     {
         // fprintf(stderr, "up\n");
+#ifdef WII
         if(dont_move_forwards == true)
+#endif
             forward += forwardmove; 
     }
     if (gamekeydown[key_down]) 
     {
         // fprintf(stderr, "down\n");
+#ifdef WII
         if(dont_move_backwards == true)
+#endif
             forward -= forwardmove; 
     }
 
@@ -462,15 +586,15 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
         side += sidemove; 
     }
 
-    if (gamekeydown[key_fire] || joybuttons[joybfire]) 
+    if (gamekeydown[key_fire] || joybuttons[joybfire] || mousebuttons[mousebfire]) 
         cmd->buttons |= BT_ATTACK; 
 
-    if (joybuttons[joybspeed]) 
+    if (joybuttons[joybspeed] || gamekeydown[key_speed]) 
     {
         forwardmve = forwardmove * 6;
         sidemve = sidemove * 6;
     }
-    else if(!joybuttons[joybspeed])
+    else if(!joybuttons[joybspeed] || !gamekeydown[key_speed])
     {
         forwardmve = forwardmove;
         sidemve = sidemove;
@@ -481,28 +605,36 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
         look = -8;
 
     // Fly up/down/drop keys
-    if (joybuttons[joybflyup])
+    if (joybuttons[joybflyup] || gamekeydown[key_flyup])
     {
         flyheight = 5;          // note that the actual flyheight will be twice this
     }
-    if (joybuttons[joybflydown])
+    if (joybuttons[joybflydown] || gamekeydown[key_flydown])
     {
         flyheight = -5;
     }
 
-    if (joybuttons[joybjump] && !menuactive)
+    if ((joybuttons[joybjump] || gamekeydown[key_jump] || mousebuttons[mousebjump]) && !menuactive)
     {
         if(!demoplayback)
             cmd->arti |= AFLAG_JUMP;
     }
 
+    if(!demoplayback)
+    {
+        if(mousebuttons[mousebnextweapon])
+            ChangeWeaponRight();
+
+        if(mousebuttons[mousebprevweapon])
+            ChangeWeaponLeft();
+    }
     // FOR THE WII: UNUSED BUT WORKING
     if((joybuttons[joybaiminghelp] || aiming_help) && !demoplayback && devparm)
     {
         player_t* player = &players[consoleplayer];
         P_AimingHelp(player);
     }
-
+#ifdef WII
     WPADData *data = WPAD_Data(0);
 
     if(data->exp.type == WPAD_EXP_CLASSIC)
@@ -616,8 +748,9 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
             ftom_zoommul = FRACUNIT;
         }
     }
+#endif
 
-    if (gamekeydown[key_use] || joybuttons[joybuse])
+    if (gamekeydown[key_use] || joybuttons[joybuse] || mousebuttons[mousebuse])
     { 
         cmd->buttons |= BT_USE;
 
@@ -625,7 +758,102 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
         dclicks = 0;                   
     } 
 
-    use = gamekeydown[key_use];
+    // If the previous or next weapon button is pressed, the
+    // next_weapon variable is set to change weapons when
+    // we generate a ticcmd.  Choose a new weapon.
+
+#ifndef WII
+    if (gamestate == GS_LEVEL && next_weapon != 0)
+    {
+        i = G_NextWeapon(next_weapon);
+        cmd->buttons |= BT_CHANGE;
+        cmd->buttons |= i << BT_WEAPONSHIFT;
+    }
+    else
+    {
+        // Check weapon keys.
+
+        for (i=0; i<arrlen(weapon_keys); ++i)
+        {
+            int key = *weapon_keys[i];
+
+            if (gamekeydown[key])
+            {
+                cmd->buttons |= BT_CHANGE;
+                cmd->buttons |= i<<BT_WEAPONSHIFT;
+                break;
+            }
+        }
+    }
+
+    next_weapon = 0;
+#endif
+
+    // mouse
+    if (mousebuttons[mousebforward]) 
+    {
+	forward += forwardmove;
+    }
+    if (mousebuttons[mousebbackward])
+    {
+        forward -= forwardmove;
+    }
+
+    if (dclick_use)
+    {
+        // forward double click
+        if (mousebuttons[mousebforward] != dclickstate && dclicktime > 1 ) 
+        { 
+            dclickstate = mousebuttons[mousebforward]; 
+            if (dclickstate) 
+                dclicks++; 
+            if (dclicks == 2) 
+            { 
+                cmd->buttons |= BT_USE; 
+                dclicks = 0; 
+            } 
+            else 
+                dclicktime = 0; 
+        } 
+        else 
+        { 
+            dclicktime += ticdup; 
+            if (dclicktime > 20) 
+            { 
+                dclicks = 0; 
+                dclickstate = 0; 
+            } 
+        }
+        
+        // strafe double click
+        bstrafe =
+            mousebuttons[mousebstrafe] 
+            || joybuttons[joybstrafe]; 
+        if (bstrafe != dclickstate2 && dclicktime2 > 1 ) 
+        { 
+            dclickstate2 = bstrafe; 
+            if (dclickstate2) 
+                dclicks2++; 
+            if (dclicks2 == 2) 
+            { 
+                cmd->buttons |= BT_USE; 
+                dclicks2 = 0; 
+            } 
+            else 
+                dclicktime2 = 0; 
+        } 
+        else 
+        { 
+            dclicktime2 += ticdup; 
+            if (dclicktime2 > 20) 
+            { 
+                dclicks2 = 0; 
+                dclickstate2 = 0; 
+            } 
+        } 
+    }
+
+    use = (gamekeydown[key_use]);
     if (use != dclickstate2 && dclicktime2 > 1 )
     {
         dclickstate2 = use;
@@ -648,21 +876,35 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
     else                                //   |
         cmd->angleturn -= mousex*0x8;   // <--
 
+#ifdef WII
     forward += mousey; 
-
+#else
+    if(!mouselook)
+        forward += mousey; 
+#endif
     // mouselook, but not when paused
+#ifdef WII
     if (joyiry && !paused && mouselook > 0 && players[consoleplayer].playerstate == PST_LIVE)
+#else
+    if (mousey && !paused && mouselook > 0 && players[consoleplayer].playerstate == PST_LIVE)
+#endif
     {                                           // ...not when paused & if on
         // We'll directly change the viewing pitch of the console player.
         float adj = 0;
 
         if(!menuactive)
+        {
+#ifdef WII
             adj = ((joyiry * 0x4) << 16) / (float) 0x80000000*180*110.0/85.0;
+#else
+            adj = ((mousey * 0x4) << 16) / (float) 0x80000000*180*110.0/85.0;
+#endif
+        }
 
         // initialiser added to prevent compiler warning
-        float newlookdir = 0;
+        newlookdir = 0;
 
-        extern int mspeed;
+//        extern int mspeed;
 
         // Speed up the X11 mlook a little.
         adj *= mspeed;
@@ -682,7 +924,7 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
     }
 
     mousex = mousey = 0; 
-         
+
     if (forward > MAXPLMOVE) 
         forward = MAXPLMOVE; 
     else if (forward < -MAXPLMOVE) 
@@ -724,15 +966,32 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
     } 
 } 
  
+/*
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsizeof-pointer-memaccess"
-
+*/
 //
 // G_Responder  
 // Get info needed to make ticcmd_ts for the players.
 // 
 boolean G_Responder (event_t* ev) 
 { 
+#ifndef WII
+    // any other key pops up menu if in demos
+    if (gameaction == ga_nothing && !singledemo && 
+	(demoplayback || gamestate == GS_DEMOSCREEN) 
+	) 
+    { 
+	if (ev->type == ev_keydown ||  
+	    (ev->type == ev_mouse && ev->data1) || 
+	    (ev->type == ev_joystick && ev->data1) ) 
+	{ 
+	    M_StartControlPanel (); 
+	    return true; 
+	} 
+	return false; 
+    } 
+#endif
     if (gamestate == GS_LEVEL) 
     { 
 #if 0 
@@ -756,22 +1015,40 @@ boolean G_Responder (event_t* ev)
             return true;        // finale ate the event 
     } 
 
+    // If the next/previous weapon keys are pressed, set the next_weapon
+    // variable to change weapons when the next ticcmd is generated.
+#ifndef WII
+    if((ev->type == ev_keydown && ev->data1 == key_prevweapon) ||
+        mousebuttons[mousebprevweapon])
+    {
+        next_weapon = -1;
+    }
+    else if((ev->type == ev_keydown && ev->data1 == key_nextweapon) ||
+        mousebuttons[mousebnextweapon])
+    {
+        next_weapon = 1;
+    }
+#endif
     switch (ev->type) 
     { 
       case ev_keydown: 
         if (ev->data1 <NUMKEYS) 
-        {
             gamekeydown[ev->data1] = true; 
-        }
 
         return true;    // eat key down events 
  
       case ev_keyup: 
         if (ev->data1 <NUMKEYS) 
             gamekeydown[ev->data1] = false; 
+
         return false;   // always let key up events filter down 
                  
       case ev_mouse: 
+        mousebuttons[0] = (ev->data1 & 1) > 0;
+        mousebuttons[1] = (ev->data1 & 2) > 0;
+        mousebuttons[2] = (ev->data1 & 4) > 0;
+        mousebuttons[3] = (ev->data1 & 8) > 0;
+        mousebuttons[4] = (ev->data1 & 16) > 0;
         mousex = ev->data2*(mouseSensitivity+5)/10; 
         mousey = ev->data3*(mouseSensitivity+5)/10; 
         return true;    // eat events 
@@ -910,53 +1187,102 @@ void G_WriteDemoTiccmd (ticcmd_t* cmd)
  
 boolean
 G_CheckSpot
-( int             playernum,
-  mapthing_t*     mthing ) 
+( int		playernum,
+  mapthing_t*	mthing ) 
 { 
-    fixed_t       x;
-    fixed_t       y; 
-    subsector_t*  ss; 
-    unsigned      an; 
-    mobj_t*       mo; 
-    int           i;
-        
+    fixed_t		x;
+    fixed_t		y; 
+    subsector_t*	ss; 
+    mobj_t*		mo; 
+    int			i;
+	
     if (!players[playernum].mo)
     {
-        // first spawn of level, before corpses
-        for (i=0 ; i<playernum ; i++)
-            if (players[i].mo->x == mthing->x << FRACBITS
-                && players[i].mo->y == mthing->y << FRACBITS)
-                return false;
-        return true;
+	// first spawn of level, before corpses
+	for (i=0 ; i<playernum ; i++)
+	    if (players[i].mo->x == mthing->x << FRACBITS
+		&& players[i].mo->y == mthing->y << FRACBITS)
+		return false;	
+	return true;
     }
-                
+		
     x = mthing->x << FRACBITS; 
     y = mthing->y << FRACBITS; 
-         
-    players[playernum].mo->flags2 &= ~MF2_PASSMOBJ;
+	 
     if (!P_CheckPosition (players[playernum].mo, x, y) ) 
-    {
-        players[playernum].mo->flags2 |= MF2_PASSMOBJ;
-        return false;
-    }
-    players[playernum].mo->flags2 |= MF2_PASSMOBJ;
+	return false; 
  
     // flush an old corpse if needed 
     if (bodyqueslot >= BODYQUESIZE) 
-        P_RemoveMobj (bodyque[bodyqueslot%BODYQUESIZE]); 
+	P_RemoveMobj (bodyque[bodyqueslot%BODYQUESIZE]); 
     bodyque[bodyqueslot%BODYQUESIZE] = players[playernum].mo; 
     bodyqueslot++; 
-        
-    // spawn a teleport fog 
-    ss = R_PointInSubsector (x,y); 
-    an = ( ANG45 * (((unsigned int) mthing->angle)/45) ) >> ANGLETOFINESHIFT; 
- 
-    mo = P_SpawnMobj (x+20*finecosine[an], y+20*finesine[an] 
-                      , ss->sector->floor_height 
-                      , MT_TFOG); 
-         
+
+    // spawn a teleport fog
+    ss = R_PointInSubsector (x,y);
+
+
+    // The code in the released source looks like this:
+    //
+    //    an = ( ANG45 * (((unsigned int) mthing->angle)/45) )
+    //         >> ANGLETOFINESHIFT;
+    //    mo = P_SpawnMobj (x+20*finecosine[an], y+20*finesine[an]
+    //                     , ss->sector->floorheight
+    //                     , MT_TFOG);
+    //
+    // But 'an' can be a signed value in the DOS version. This means that
+    // we get a negative index and the lookups into finecosine/finesine
+    // end up dereferencing values in finetangent[].
+    // A player spawning on a deathmatch start facing directly west spawns
+    // "silently" with no spawn fog. Emulate this.
+    //
+    // This code is imported from PrBoom+.
+
+    {
+        fixed_t xa, ya;
+        signed int an;
+
+        // This calculation overflows in Vanilla Doom, but here we deliberately
+        // avoid integer overflow as it is undefined behavior, so the value of
+        // 'an' will always be positive.
+        an = (ANG45 >> ANGLETOFINESHIFT) * ((signed int) mthing->angle / 45);
+
+        switch (an)
+        {
+            case 4096:  // -4096:
+                xa = finetangent[2048];    // finecosine[-4096]
+                ya = finetangent[0];       // finesine[-4096]
+                break;
+            case 5120:  // -3072:
+                xa = finetangent[3072];    // finecosine[-3072]
+                ya = finetangent[1024];    // finesine[-3072]
+                break;
+            case 6144:  // -2048:
+                xa = finesine[0];          // finecosine[-2048]
+                ya = finetangent[2048];    // finesine[-2048]
+                break;
+            case 7168:  // -1024:
+                xa = finesine[1024];       // finecosine[-1024]
+                ya = finetangent[3072];    // finesine[-1024]
+                break;
+            case 0:
+            case 1024:
+            case 2048:
+            case 3072:
+                xa = finecosine[an];
+                ya = finesine[an];
+                break;
+            default:
+                I_Error("G_CheckSpot: unexpected angle %d\n", an);
+                xa = ya = 0;
+                break;
+        }
+        mo = P_SpawnMobj(x + 20 * xa, y + 20 * ya,
+                         ss->sector->floor_height, MT_TFOG);
+    }
+
     if (players[consoleplayer].viewz != 1) 
-        S_StartSound (mo, sfx_telept);  // don't start sound on first frame 
+	S_StartSound (mo, sfx_telept);	// don't start sound on first frame 
  
     return true; 
 } 
@@ -1074,7 +1400,8 @@ void G_DoLoadLevel (void)
     mousex = mousey = 0; 
     sendpause = sendsave = paused = false; 
 
-    memset (joybuttons, 0, sizeof(joybuttons)); 
+    memset(mousearray, 0, sizeof(mousearray));
+    memset(joyarray, 0, sizeof(joyarray)); 
 
     if (consoleactive)
         C_HideConsoleFast();
@@ -1439,22 +1766,6 @@ void G_DoCompleted (void)
     wminfo.epsd = gameepisode -1; 
     wminfo.last = gamemap -1;
     
-    // wminfo.next is 0 biased, unlike gamemap
-    if ( gamemission == pack_nerve )
-    {
-        if (secretexit)
-            switch(gamemap)
-            {
-              case  4: wminfo.next = 8; break;
-            }
-        else
-            switch(gamemap)
-            {
-              case  9: wminfo.next = 4; break;
-              default: wminfo.next = gamemap;
-            }
-    }
-    else
     if ( gamemode == commercial)
     {
         if (secretexit)
@@ -1524,8 +1835,6 @@ void G_DoCompleted (void)
     if (gamemap == 33 || (gameepisode == 1 && gamemap == 10))
         // map 33 par time sucks
         wminfo.partime = INT_MAX;
-    else if (gamemission == pack_nerve)
-        wminfo.partime = TICRATE*npars[gamemap-1];
     else if (gamemode == commercial)
         wminfo.partime = TICRATE*cpars[gamemap-1];
     else if (gameepisode < 4 && gameepisode != 1 && gamemap != 10)
@@ -1615,6 +1924,8 @@ void G_DoSaveGame (void)
     
     if (consoleactive)
         C_Printf(CR_GOLD, " %s saved.", uppercase(savename));
+    else
+        C_Printf(CR_GOLD, " \"%s\" saved.", savedescription);
 
     gameaction = ga_nothing; 
     M_StringCopy(savedescription, "", sizeof(savedescription));
@@ -1670,11 +1981,14 @@ void G_Ticker (void)
             G_DoWorldDone (); 
             break; 
 	  case ga_screenshot: 
+#ifdef WII
             if(usb)
                 V_ScreenShot("usb:/apps/wiidoom/screenshots/DOOM%02i.%s"); 
             else if(sd)
                 V_ScreenShot("sd:/apps/wiidoom/screenshots/DOOM%02i.%s"); 
-
+#else
+	    V_ScreenShot("DOOM%02i.%s"); 
+#endif
             players[consoleplayer].message = DEH_String("screen shot");
 	    gameaction = ga_nothing; 
 	    break; 
@@ -1926,16 +2240,6 @@ void G_WorldDone (void)
     if (secretexit) 
         players[consoleplayer].didsecret = true; 
 
-    if ( gamemission == pack_nerve )
-    {
-        switch (gamemap)
-        {
-          case 8:
-            F_StartFinale ();
-            break;
-        }
-    }
-    else
     if ( gamemode == commercial )
     {
         switch (gamemap)
@@ -2069,6 +2373,7 @@ G_InitNew
 {
     char     *skytexturename;
     int      i;
+    player_t *player;
 /*
     if(episode > 0 && episode < 5 && map == 1)
         game_startup = true;
@@ -2081,7 +2386,7 @@ G_InitNew
         S_ResumeSound ();
     }
 
-    player_t *player = &players[consoleplayer];
+    player = &players[consoleplayer];
     player->nextextra = EXTRAPOINTS;
     player->item = 0;
     player->score = 0;

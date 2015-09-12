@@ -42,7 +42,7 @@ rcsid[] = "$Id: st_lib.c,v 1.4 1997/02/03 16:47:56 b1 Exp $";
 
 
 // in AM_map.c
-extern boolean          automapactive; 
+//extern boolean          automapactive; 
 
 //
 // Hack display negative frags.
@@ -130,19 +130,19 @@ STlib_drawNum
 
     // in the special case of 0, you draw 0
     if (!num)
-        V_DrawPatch(x - w, n->y, 0, n->p[ 0 ]);
+        V_DrawPatch(x - w, n->y, n->p[ 0 ]);
 
     // draw the new number
     while (num && numdigits--)
     {
         x -= w;
-        V_DrawPatch(x, n->y, 0, n->p[ num % 10 ]);
+        V_DrawPatch(x, n->y, n->p[ num % 10 ]);
         num /= 10;
     }
 
     // draw a minus sign if necessary
     if (neg)
-        V_DrawPatch(x - 8, n->y, 0, sttminus);
+        V_DrawPatch(x - 8, n->y, sttminus);
 }
 
 
@@ -180,7 +180,7 @@ STlib_updatePercent
   int                   refresh )
 {
     if (refresh && *per->n.on)
-        V_DrawPatch(per->n.x, per->n.y, 0, per->p);
+        V_DrawPatch(per->n.x, per->n.y, per->p);
     
     STlib_updateNum(&per->n, refresh);
 }
@@ -232,7 +232,7 @@ STlib_updateMultIcon
 
             V_CopyRect(x, y-ST_Y, st_backing_screen, w, h, x, y);
         }
-        V_DrawPatch(mi->x, mi->y, 0, mi->p[*mi->inum]);
+        V_DrawPatch(mi->x, mi->y, mi->p[*mi->inum]);
         mi->oldinum = *mi->inum;
     }
 
@@ -247,7 +247,7 @@ STlib_updateMultIcon
             char            namebuf[9];
 
             sprintf(namebuf, "STYSNUM%d", i);
-            V_DrawPatch(173, 192, 0,
+            V_DrawPatch(173, 192,
                     W_CacheLumpName(DEH_String(namebuf), PU_CACHE));
         }
     }
@@ -296,7 +296,7 @@ STlib_updateBinIcon
             I_Error("updateBinIcon: y - ST_Y < 0");
 
         if (*bi->val)
-            V_DrawPatch(bi->x, bi->y, 0, bi->p);
+            V_DrawPatch(bi->x, bi->y, bi->p);
         else
             V_CopyRect(x, y-ST_Y, st_backing_screen, w, h, x, y);
 

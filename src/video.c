@@ -1,3 +1,4 @@
+#ifdef WII
 #include <math.h>
 #include <ogc/color.h>
 #include <ogc/consol.h>
@@ -116,4 +117,5 @@ int getConsoleRow()
 
     return intConsoleRow;
 }
+#endif
 

@@ -32,8 +32,8 @@
 // This is the stuff configured by Setup.Exe.
 // Most key data are simple ascii (uppercased).
 //
-#define KEY_LEFTBRACKET                0x2f
-#define KEY_RIGHTBRACKET        0x30
+#define KEY_LEFTBRACKET                91
+#define KEY_RIGHTBRACKET        93
 
 #define KEY_RIGHTARROW        0xae
 #define KEY_LEFTARROW        0xac
@@ -54,6 +54,7 @@
 #define KEY_F10                (0x80+0x44)
 #define KEY_F11                (0x80+0x57)
 #define KEY_F12                (0x80+0x58)
+#define KEY_TILDE       0x5e
 
 #define KEY_BACKSPACE        0x7f
 #define KEY_PAUSE        0xff
@@ -70,7 +71,15 @@
 // new keys:
 
 #define        KEY_SPACE        (0x80+0x39)
+#define KEY_BACKQUOTE		96
+#define KEY_QUOTEDBL		34
+#define KEY_QUOTE		39
+#define KEY_SEMICOLON		59
+#define KEY_PERIOD		46
+#define KEY_COMMA		44
+#define KEY_SLASH		47
 
+#define	KEY_BACKSLASH		92	/* 0x5C */
 #define KEY_CAPSLOCK    (0x80+0x3a)
 #define KEY_NUMLOCK     (0x80+0x45)
 #define KEY_SCRLCK      (0x80+0x46)

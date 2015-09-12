@@ -25,7 +25,13 @@
 #include "d_iwad.h"
 #include "deh_defs.h"
 #include "deh_io.h"
+
+#ifdef WII
 #include "doomdef.h"
+#else
+#include "doom/doomdef.h"
+#endif
+
 #include "doomtype.h"
 #include "i_system.h"
 #include "w_wad.h"

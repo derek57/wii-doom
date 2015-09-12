@@ -38,7 +38,13 @@
 
 #include "c_io.h"
 #include "deh_str.h"
+
+#ifdef WII
 #include "doomdef.h"
+#else
+#include "doom/doomdef.h"
+#endif
+
 #include "doomtype.h"
 #include "i_swap.h"
 #include "i_system.h"
@@ -46,7 +52,13 @@
 #include "i_video.h"
 #include "m_bbox.h"
 #include "m_misc.h"
+
+#ifdef WII
 #include "r_main.h"
+#else
+#include "doom/r_main.h"
+#endif
+
 #include "v_misc.h"
 #include "v_trans.h"
 #include "v_video.h"
@@ -82,9 +94,6 @@ byte redtoyellow[] =
     240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252, 253, 254, 255
 };
 
-
-// Each screen is [SCREENWIDTH * SCREENHEIGHT];
-byte                         *screens[5];
 
 // The screen buffer that the v_video.c code draws to.
 
@@ -138,7 +147,7 @@ void V_DrawHorizLine(int x, int y, int w, int c)
     uint8_t *buf;
     int x1;
 
-    buf = dest_screen + SCREENWIDTH * y + x;
+    buf = I_VideoBuffer + SCREENWIDTH * y + x;
 
     for (x1 = 0; x1 < w; ++x1)
     {
@@ -153,7 +162,7 @@ void
 V_CopyRect
 ( int        srcx,
   int        srcy,
-  byte*      srcscrn,
+  byte*      source,
   int        width,
   int        height,
   int        destx,
@@ -177,8 +186,7 @@ V_CopyRect
      || destx < 0
      || destx /* + width */ > SCREENWIDTH
      || desty < 0
-     || desty /* + height */ > SCREENHEIGHT
-     /*|| (unsigned)srcscrn > 4*/)
+     || desty /* + height */ > SCREENHEIGHT)
     {
         C_Printf(CR_RED, " Bad V_CopyRect: Patch (%d,%d)-(%d,%d) / Dest.: (%d,%d) exceeds LFB\n"
                 , srcx, srcy, srcx + width, srcy + height, destx, desty);
@@ -191,10 +199,9 @@ V_CopyRect
     if (desty + height > SCREENHEIGHT)
         height = SCREENHEIGHT - desty;
 
-    if (!srcscrn)
-        V_MarkRect(destx, desty, width, height); 
+    V_MarkRect(destx, desty, width, height); 
 
-    src = srcscrn + SCREENWIDTH * srcy + srcx;
+    src = source + SCREENWIDTH * srcy + srcx;
     dest = dest_screen + SCREENWIDTH * desty + destx;
 
     for ( ; height>0 ; height--) 
@@ -214,7 +221,6 @@ void
 V_DrawPatch
 ( int        x,
   int        y,
-  int        scrn,
   patch_t*   patch ) 
 { 
     int count;
@@ -223,7 +229,7 @@ V_DrawPatch
     byte *desttop;
     byte *dest;
     byte *source;
-    int w, f;
+    int w, f, tmpy;
 
     // [crispy] four different rendering functions
     const byte (* drawpatchpx) (const byte dest, const byte source) =
@@ -238,22 +244,17 @@ V_DrawPatch
     if (x < 0
      || x + SHORT(patch->width) > ORIGWIDTH
      || y < 0
-     || y + SHORT(patch->height) > ORIGHEIGHT
-     || (unsigned)scrn > 5)
+     || y + SHORT(patch->height) > ORIGHEIGHT)
     {
         C_Printf(CR_RED, " Bad V_DrawPatch: Patch (%d,%d) exceeds LFB\n", x, y);
     }
 #endif
 
-    if (!scrn)
-        V_MarkRect(x, y, SHORT(patch->width), SHORT(patch->height));
+    V_MarkRect(x, y, SHORT(patch->width), SHORT(patch->height));
 
     col = 0;
 
-    if(scrn > 4)
-        desttop = dest_screen + (y << hires) * SCREENWIDTH + x;
-    else
-        desttop = screens[scrn] + (y << hires) * SCREENWIDTH + x;
+    desttop = dest_screen + (y << hires) * SCREENWIDTH + x;
 
     w = SHORT(patch->width);
 
@@ -271,7 +272,7 @@ V_DrawPatch
                 count = column->length;
  
                 // [crispy] prevent framebuffer overflow
-                int tmpy = y + column->topdelta;
+                tmpy = y + column->topdelta;
 
                 // [crispy] too far left
                 if (x < 0)
@@ -340,7 +341,7 @@ V_DrawPatchFlipped
     byte *desttop;
     byte *dest;
     byte *source; 
-    int w, f; 
+    int w, f, tmpy; 
 
     y -= SHORT(patch->topoffset); 
     x -= SHORT(patch->leftoffset); 
@@ -378,7 +379,7 @@ V_DrawPatchFlipped
                 count = column->length;
 
                 // [crispy] prevent framebuffer overflow
-                int tmpy = y + column->topdelta;
+                tmpy = y + column->topdelta;
 
                 // [crispy] too far left
                 if (x < 0)
@@ -476,12 +477,6 @@ void V_Init (void)
     // no-op!
     // There used to be separate screens that could be drawn to; these are
     // now handled in the upper layers.
-
-    int         i;
-    byte        *base = Z_Malloc(SCREENWIDTH * SCREENHEIGHT * 4, PU_STATIC, NULL);
-
-    for (i = 0; i < 4; i++)
-        screens[i] = base + i * SCREENWIDTH * SCREENHEIGHT;
 }
 
 #pragma GCC diagnostic push
@@ -989,7 +984,7 @@ void V_ScreenShot(char *format)
 //#ifdef HAVE_LIBPNG
     if (png_screenshots)
     {
-        WritePNGfile(lbmname, dest_screen,
+        WritePNGfile(lbmname, I_VideoBuffer,
                 SCREENWIDTH, SCREENHEIGHT,
                 W_CacheLumpName (DEH_String("PLAYPAL"), PU_CACHE));
     }
@@ -997,7 +992,7 @@ void V_ScreenShot(char *format)
 //#endif
     {
         // save the pcx file
-        WritePCXfile(lbmname, dest_screen,
+        WritePCXfile(lbmname, I_VideoBuffer,
                 SCREENWIDTH, SCREENHEIGHT,
                 W_CacheLumpName (DEH_String("PLAYPAL"), PU_CACHE));
     }

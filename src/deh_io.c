@@ -28,7 +28,12 @@
 #include "deh_defs.h"
 #include "deh_io.h"
 
+#ifdef WII
 #include "doomdef.h"
+#else
+#include "doom/doomdef.h"
+#endif
+
 
 typedef enum
 {

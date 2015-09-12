@@ -472,7 +472,7 @@ static st_number_t            w_maxammo[4];
 
 patch_t *ST_LoadStatusKeyPatch(int keypicnum)
 {
-    if (load_dehacked && W_CheckNumForName(keypic[keypicnum].patchnamea) >= 0)
+    if (W_CheckNumForName(keypic[keypicnum].patchnamea) >= 0)
         return W_CacheLumpNum(W_GetNumForName(keypic[keypicnum].patchnamea), PU_CACHE);
     else if (W_CheckNumForName(keypic[keypicnum].patchnameb) >= 0)
         return W_CacheLumpNum(W_GetNumForName(keypic[keypicnum].patchnameb), PU_CACHE);
@@ -501,7 +501,7 @@ extern boolean      show_chat_bar;
 extern boolean      done;
 
 extern int          screenSize;
-extern int          load_dehacked;
+//extern int          load_dehacked;
 extern int          cardsfound;
 extern int          snd_chans;
 
@@ -535,47 +535,47 @@ void ST_refreshBackground(void)
         {
             if(automapactive)
             {
-                V_DrawPatch(ST_X, 0, 4, sbarmap);
+                V_DrawPatch(ST_X, 0, sbarmap);
 
                 if(plyr->weaponowned[wp_shotgun])
-                    V_DrawPatch(110, 4, 4, sbara_shotgun);
+                    V_DrawPatch(110, 4, sbara_shotgun);
                 if(plyr->weaponowned[wp_chaingun])
-                    V_DrawPatch(110, 10, 4, sbara_chaingun);
+                    V_DrawPatch(110, 10, sbara_chaingun);
                 if(plyr->weaponowned[wp_missile])
-                    V_DrawPatch(135, 3, 4, sbara_missile);
+                    V_DrawPatch(135, 3, sbara_missile);
                 if(plyr->weaponowned[wp_plasma])
-                    V_DrawPatch(135, 10, 4, sbara_plasma);
+                    V_DrawPatch(135, 10, sbara_plasma);
                 if(plyr->weaponowned[wp_bfg])
-                    V_DrawPatch(185, 3, 4, sbara_bfg);
+                    V_DrawPatch(185, 3, sbara_bfg);
                 if(plyr->weaponowned[wp_chainsaw])
-                    V_DrawPatch(160, 5, 4, sbara_chainsaw);
+                    V_DrawPatch(160, 5, sbara_chainsaw);
             }
             else
             {
                 if(fsize == 4207819 || fsize == 4274218 || fsize == 10396254)
                 {
-                    V_DrawPatch(ST_X, 0, 4, sbar_left_oldwad);
-                    V_DrawPatch(104, 0, 4, sbar_right_oldwad);
+                    V_DrawPatch(ST_X, 0, sbar_left_oldwad);
+                    V_DrawPatch(104, 0, sbar_right_oldwad);
                 }
                 else
-                    V_DrawPatch(ST_X, 0, 4, sbar);
+                    V_DrawPatch(ST_X, 0, sbar);
             }
         }
         else
         {
             if(fsize == 4207819 || fsize == 4274218 || fsize == 10396254)
             {
-                V_DrawPatch(ST_X, 0, 4, sbar_left_oldwad);
-                V_DrawPatch(104, 0, 4, sbar_right_oldwad);
+                V_DrawPatch(ST_X, 0, sbar_left_oldwad);
+                V_DrawPatch(104, 0, sbar_right_oldwad);
             }
             else
-                V_DrawPatch(ST_X, 0, 4, sbar);
+                V_DrawPatch(ST_X, 0, sbar);
         }
 
         if (netgame)
-            V_DrawPatch(ST_FX, 0, 4, faceback);
+            V_DrawPatch(ST_FX, 0, faceback);
         else if(beta_style && !automapactive)
-            V_DrawPatch(ST_FX - 1, 1, 4, faceback);
+            V_DrawPatch(ST_FX - 1, 1, faceback);
 
         V_RestoreBuffer();
 
@@ -638,6 +638,14 @@ void ST_DrawStatus(void)
     static boolean  healthanim = false;
     patch_t         *patch;
     int             currenttics = I_GetTime();
+    boolean         gamepaused;
+    int             offset_special;
+    int             offset_width;
+    int             offset_height;
+    int             half_patch_width;
+    int             half_patch_height;
+    int             ammo_x;
+    int             ammo_y;
 
     if (d_translucency)
     {
@@ -652,7 +660,7 @@ void ST_DrawStatus(void)
         godhudfunc = V_DrawYellowStatusPatch;
     }
 
-    boolean gamepaused = (menuactive || paused || consoleactive);
+    gamepaused = (menuactive || paused || consoleactive);
 
     tinttab = (!health || (health <= ST_HEALTH_MIN && healthanim) || health > ST_HEALTH_MIN
         || gamepaused ? tinttab66 : tinttab25);
@@ -730,16 +738,16 @@ void ST_DrawStatus(void)
         else
             patch = W_CacheLumpName(DEH_String("EMPTY"), PU_CACHE);
 
-        int offset_special = 0;
+        offset_special = 0;
 
-        int offset_width = ST_AMMO_X + 15;
-        int offset_height = ST_AMMO_Y + 8;
+        offset_width = ST_AMMO_X + 15;
+        offset_height = ST_AMMO_Y + 8;
 
-        int half_patch_width = (SHORT(patch->width) / 2);
-        int half_patch_height = (SHORT(patch->height) / 2);
+        half_patch_width = (SHORT(patch->width) / 2);
+        half_patch_height = (SHORT(patch->height) / 2);
 
-        int ammo_x = offset_width - half_patch_width;
-        int ammo_y = offset_height - half_patch_height;
+        ammo_x = offset_width - half_patch_width;
+        ammo_y = offset_height - half_patch_height;
 
         if (ammo < 200 && ammo > 99)
             offset_special = 3;
@@ -1471,7 +1479,13 @@ void ST_Drawer (boolean fullscreen, boolean refresh)
 
     // If just after ST_Start(), refresh all
     if (st_firsttime || beta_style || (scaledviewheight == SCREENHEIGHT && viewactive))
-        ST_doRefresh();
+    {
+        if(screenSize < 8);
+        {
+            if(usergame)
+                ST_doRefresh();
+        }
+    }
     // Otherwise, update as little as possible
     else if(!beta_style)
         ST_diffDraw();
@@ -1907,7 +1921,5 @@ void ST_Init (void)
 {
     ST_loadData();
 
-    screens[4] = Z_Malloc((ST_WIDTH << hires) * (ST_HEIGHT << hires), PU_STATIC, 0);
-
-    st_backing_screen = screens[4];
+    st_backing_screen = Z_Malloc((ST_WIDTH << hires) * (ST_HEIGHT << hires), PU_STATIC, 0);
 }

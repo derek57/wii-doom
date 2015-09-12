@@ -36,23 +36,42 @@
 #include "c_io.h"
 #include "config.h"
 #include "deh_str.h"
+
+#ifdef WII
 #include "doomdef.h"
+#else
+#include "doom/doomdef.h"
+#endif
+
 #include "doomtype.h"
 #include "i_joystick.h"
 #include "i_sound.h"
 #include "i_system.h"
 #include "i_timer.h"
 #include "i_video.h"
+#include "m_argv.h"
 #include "m_config.h"
 #include "m_misc.h"
+
+#ifdef WII
 #include "s_sound.h"
+#else
+#include "doom/s_sound.h"
+#endif
+
 #include "v_trans.h"
 #include "w_wad.h"
 #include "z_zone.h"
 
-
+#ifdef WII
 #define DEFAULT_RAM 32 /* MiB */
 #define MIN_RAM     16 /* MiB */
+#else
+#define DEFAULT_RAM 64 /* MiB */
+#define MIN_RAM     32 /* MiB */
+#endif
+
+#define ZENITY_BINARY "/usr/bin/zenity"
 
 
 typedef struct atexit_listentry_s atexit_listentry_t;
@@ -67,7 +86,7 @@ struct atexit_listentry_s
 
 byte *zone_mem;
 
-extern boolean devparm;
+//extern boolean devparm;
 
 int memory_size;
 
@@ -213,12 +232,13 @@ boolean I_ConsoleStdout(void)
 
 void I_Quit (void)
 {
-    fclose (debugfile);
-    fclose (statsfile);
+    atexit_listentry_t *entry;
+
+//    if(devparm)
+        fclose (debugfile);
+//    fclose (statsfile);
 
     C_ConDump();
-
-    atexit_listentry_t *entry;
 
     // Run through all exit functions
  
@@ -238,12 +258,95 @@ void I_QuitSerialFail (void)
     exit(0);
 }
 
+// returns non-zero if zenity is available
+
+#ifndef WII
+static int ZenityAvailable(void)
+{
+    return system(ZENITY_BINARY " --help >/dev/null 2>&1") == 0;
+}
+
+// Escape special characters in the given string so that they can be
+// safely enclosed in shell quotes.
+
+static char *EscapeShellString(char *string)
+{
+    char *result;
+    char *r, *s;
+
+    // In the worst case, every character might be escaped.
+    result = malloc(strlen(string) * 2 + 3);
+    r = result;
+
+    // Enclosing quotes.
+    *r = '"';
+    ++r;
+
+    for (s = string; *s != '\0'; ++s)
+    {
+        // From the bash manual:
+        //
+        //  "Enclosing characters in double quotes preserves the literal
+        //   value of all characters within the quotes, with the exception
+        //   of $, `, \, and, when history expansion is enabled, !."
+        //
+        // Therefore, escape these characters by prefixing with a backslash.
+
+        if (strchr("$`\\!", *s) != NULL)
+        {
+            *r = '\\';
+            ++r;
+        }
+
+        *r = *s;
+        ++r;
+    }
+
+    // Enclosing quotes.
+    *r = '"';
+    ++r;
+    *r = '\0';
+
+    return result;
+}
+
+// Open a native error box with a message using zenity
+
+static int ZenityErrorBox(char *message)
+{
+    int result;
+    char *escaped_message;
+    char *errorboxpath;
+    static size_t errorboxpath_size;
+
+    if (!ZenityAvailable())
+    {
+        return 0;
+    }
+
+    escaped_message = EscapeShellString(message);
+
+    errorboxpath_size = strlen(ZENITY_BINARY) + strlen(escaped_message) + 19;
+    errorboxpath = malloc(errorboxpath_size);
+    M_snprintf(errorboxpath, errorboxpath_size, "%s --error --text=%s",
+               ZENITY_BINARY, escaped_message);
+
+    result = system(errorboxpath);
+
+    free(errorboxpath);
+    free(escaped_message);
+
+    return result;
+}
+#endif
+
 //
 // I_Error
 //
 
 void I_Error (char *error, ...)
 {
+#ifdef WII
     va_list argptr;
 
     atexit_listentry_t *entry;
@@ -294,6 +397,66 @@ void I_Error (char *error, ...)
     I_ShutdownGraphics();
 
     I_Quit();
+#else
+    char msgbuf[512];
+    va_list argptr;
+    atexit_listentry_t *entry;
+    boolean exit_gui_popup;
+
+    if (already_quitting)
+    {
+        fprintf(stderr, "Warning: recursive call to I_Error detected.\n");
+        exit(-1);
+    }
+    else
+    {
+        already_quitting = true;
+    }
+
+    // Message first.
+    va_start(argptr, error);
+    //fprintf(stderr, "\nError: ");
+    vfprintf(stderr, error, argptr);
+    fprintf(stderr, "\n\n");
+    va_end(argptr);
+    fflush(stderr);
+
+    // Write a copy of the message into buffer.
+    va_start(argptr, error);
+    memset(msgbuf, 0, sizeof(msgbuf));
+    M_vsnprintf(msgbuf, sizeof(msgbuf), error, argptr);
+    va_end(argptr);
+
+    // Shutdown. Here might be other errors.
+
+    entry = exit_funcs;
+
+    while (entry != NULL)
+    {
+        if (entry->run_on_error)
+        {
+            entry->func();
+        }
+
+        entry = entry->next;
+    }
+
+    exit_gui_popup = !M_ParmExists("-nogui");
+
+    // Pop up a GUI dialog box to show the error message, if the
+    // game was not run from the console (and the user will
+    // therefore be unable to otherwise see the message).
+    if (exit_gui_popup && !I_ConsoleStdout())
+    {
+        ZenityErrorBox(msgbuf);
+    }
+
+    // abort();
+
+    SDL_Quit();
+
+    exit(-1);
+#endif
 }
 
 //

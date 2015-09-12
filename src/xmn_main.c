@@ -1,3 +1,4 @@
+#ifdef WII
 #include <sys/stat.h>
 
 #include "doomdef.h"
@@ -54,4 +55,5 @@ void drawDirectory()
 
     drawMain();
 }
+#endif
 

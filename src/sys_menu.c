@@ -1,3 +1,4 @@
+#ifdef WII
 #include <jpgogc.h>
 #include <malloc.h>
 #include <ogcsys.h>
@@ -2273,4 +2274,5 @@ void Menu_Loop(void)
         Menu_WadList();
     }
 }
+#endif
 

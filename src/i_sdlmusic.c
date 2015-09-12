@@ -33,11 +33,18 @@
 #include "i_sound.h"
 #include "i_system.h"
 #include "i_swap.h"
+#include "m_argv.h"
 #include "m_config.h"
 #include "m_misc.h"
 #include "memio.h"
 #include "mus2mid.h"
+
+#ifdef WII
 #include "s_sound.h"
+#else
+#include "doom/s_sound.h"
+#endif
+
 #include "sha1.h"
 #include "v_trans.h"
 #include "w_wad.h"
@@ -141,9 +148,10 @@ extern int tracknum;
 extern int mus_engine;
 
 extern boolean mus_cheat_used;
+/*
 extern boolean usb;
 extern boolean sd;
-
+*/
 // Given a time string (for LOOP_START/LOOP_END), parse it and return
 // the time (in # samples since start of track) it represents.
 static unsigned int ParseVorbisTime(unsigned int samplerate_hz, char *value)
@@ -581,10 +589,21 @@ static void LoadSubstituteConfigs(void)
     char *path;
     unsigned int i;
 
+#ifdef WII
     if(usb)
         musicdir = "usb:/apps/wiidoom/";
     else if(sd)
         musicdir = "sd:/apps/wiidoom/";
+#else
+    if (!strcmp(configdir, ""))
+    {
+        musicdir = M_StringDuplicate("");
+    }
+    else
+    {
+        musicdir = M_StringJoin(configdir, "music", DIR_SEPARATOR_S, NULL);
+    }
+#endif
 
     // Load all music packs. We always load all music substitution packs for
     // all games. Why? Suppose we have a Doom PWAD that reuses some music from
@@ -709,10 +728,12 @@ static boolean WriteWrapperTimidityConfig(char *write_path)
     char *p, *path;
     FILE *fstream;
 
+#ifdef WII
     if(usb)
         timidity_cfg_path = "usb:/apps/wiidoom/";
     else if(sd)
         timidity_cfg_path = "sd:/apps/wiidoom/";
+#endif
 
     if (!strcmp(timidity_cfg_path, ""))
     {
@@ -746,10 +767,12 @@ void I_InitTimidityConfig(void)
     char *env_string;
     boolean success;
 
+#ifdef WII
     if(usb)
         temp_timidity_cfg = "usb:/apps/wiidoom/temptimi.cfg";
     else if(sd)
         temp_timidity_cfg = "sd:/apps/wiidoom/temptimi.cfg";
+#endif
 
     if (snd_musicdevice == SNDDEVICE_GUS)
     {
@@ -828,6 +851,7 @@ static boolean I_SDL_InitMusic(void)
     // music config file to the specified filename and quit.
     //
 
+#ifdef WII
     if(mus_engine == 3)
     {
         if(usb)
@@ -857,6 +881,23 @@ static boolean I_SDL_InitMusic(void)
                 DumpSubstituteConfig("sd:/apps/wiidoom/hacx-music.cfg");
         }
     }
+#else
+    //!
+    // @arg <output filename>
+    //
+    // Read all MIDI files from loaded WAD files, dump an example substitution
+    // music config file to the specified filename and quit.
+    //
+
+    int i = M_CheckParmWithArgs("-dumpsubstconfig", 1);
+
+    if (i > 0)
+    {
+        DumpSubstituteConfig(myargv[i + 1]);
+    }
+
+#endif
+
     // If SDL_mixer is not initialized, we have to initialize it
     // and have the responsibility to shut it down later on.
 
@@ -1242,28 +1283,7 @@ void I_SDL_PollMusic(void)
             {
                 if(gamestate == GS_LEVEL)
                 {
-                    if(gamemode == commercial && gamemission == pack_nerve)
-                    {
-                        if(gamemap == 1)
-                            S_ChangeMusic(mus_messag, true);
-                        else if(gamemap == 2)
-                            S_ChangeMusic(mus_ddtblu, true);
-                        else if(gamemap == 3)
-                            S_ChangeMusic(mus_doom, true);
-                        else if(gamemap == 4)
-                            S_ChangeMusic(mus_shawn, true);
-                        else if(gamemap == 5)
-                            S_ChangeMusic(mus_in_cit, true);
-                        else if(gamemap == 6)
-                            S_ChangeMusic(mus_the_da, true);
-                        else if(gamemap == 7)
-                            S_ChangeMusic(mus_in_cit, true);
-                        else if(gamemap == 8)
-                            S_ChangeMusic(mus_shawn2, true);
-                        else if(gamemap == 9)
-                            S_ChangeMusic(mus_ddtbl2, true);
-                    }
-                    else if(gamemode == commercial)
+                    if(gamemode == commercial)
                         S_ChangeMusic(gamemap + 32, true);
                     else
                     {

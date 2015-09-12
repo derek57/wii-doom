@@ -50,6 +50,7 @@
 #include "m_controls.h"
 #include "m_menu.h"
 #include "m_misc.h"
+#include "m_random.h"
 #include "p_local.h"
 #include "p_saveg.h"
 #include "r_local.h"
@@ -63,9 +64,9 @@
 #include "v_video.h"
 #include "w_wad.h"
 #include "z_zone.h"
-
+#ifdef WII
 #include <wiiuse/wpad.h>
-
+#endif
 #define FIRSTKEY_MAX                        0
 #define SKULLXOFF                           -32
 #define LINEHEIGHT                          16
@@ -775,6 +776,12 @@ char *stupidtable[] =
     "Z"
 };
 
+char *stupidtable2[] =
+{
+    "1","2","3","4","5",
+    "6","7","8","9","0"
+};
+
 char *Key2String (int ch)
 {
 // S.A.: return "[" or "]" or "\"" doesn't work
@@ -786,6 +793,7 @@ char *Key2String (int ch)
 //
     switch (ch)
     {
+#ifdef WII
         case CLASSIC_CONTROLLER_UP:       return "UP ARROW";
         case CLASSIC_CONTROLLER_DOWN:     return "DOWN ARROW";
         case CLASSIC_CONTROLLER_LEFT:     return "LEFT ARROW";
@@ -803,13 +811,85 @@ char *Key2String (int ch)
         case CLASSIC_CONTROLLER_R:        return "RIGHT TRIGGER";
         case CONTROLLER_1:                return "1";
         case CONTROLLER_2:                return "2";
+#else
+	case KEYP_MULTIPLY:	return "*";
+	case KEY_PRTSCR:	return "PRINT SCREEN";
+	case KEY_SCRLCK:	return "SCREENLOCK";
+	case KEY_NUMLOCK:	return "NUMLOCK";
+	case KEY_CAPSLOCK:	return "CAPSLOCK";
+	case KEY_LEFTBRACKET:	return "LEFT BRACKET";
+	case KEY_RIGHTBRACKET:	return "RIGHT BRACKET";
+	case KEY_BACKQUOTE:	return "BACK QUOTE";
+	case KEY_QUOTE:		return "'";
+	case KEY_QUOTEDBL:	return "DOUBLE QUOTE";
+	case KEY_SEMICOLON:	return ";";
+	case KEY_MINUS:		return "-";
+	case KEYP_PLUS:		return "+";
+	case KEY_PERIOD:	return ".";
+	case KEY_COMMA:		return ",";
+	case '/':		return "/";
+	case KEY_BACKSLASH:	return "BACKSLASH";
+	case KEY_TAB:		return "TAB";
+	case KEY_EQUALS:	return "=";
+	case KEY_ESCAPE:	return "ESCAPE";
+	case KEY_RIGHTARROW:	return "RIGHT ARROW";
+	case KEY_LEFTARROW:	return "LEFT ARROW";
+	case KEY_DOWNARROW:	return "DOWN ARROW";
+	case KEY_UPARROW:	return "UP ARROW";
+	case KEY_ENTER:		return "ENTER";
+	case KEY_PGUP:		return "PAGE UP";
+	case KEY_PGDN:		return "PAGE DOWN";
+	case KEY_INS:		return "INSERT";
+	case KEY_HOME:		return "HOME";
+	case KEY_END:		return "END";
+	case KEY_DEL:		return "DELETE";
+	case KEY_F12:		return "F12";
+	case KEY_TILDE:		return "TILDE";
+	case ' ':		return "SPACE";
+	case KEY_RSHIFT:	return "SHIFT";
+	case KEY_RALT:		return "ALT";
+	case KEY_RCTRL:		return "CTRL";
+	case '1':		return "1";
+	case '2':		return "2";
+	case '3':		return "3";
+	case '4':		return "4";
+	case '5':		return "5";
+	case '6':		return "6";
+	case '7':		return "7";
+	case '8':		return "8";
+	case '9':		return "9";
+	case '0':		return "0";
+	case KEY_F1:		return "F1";
+	case KEY_F2:		return "F2";
+	case KEY_F3:		return "F3";
+	case KEY_F4:		return "F4";
+	case KEY_F5:		return "F5";
+	case KEY_F6:		return "F6";
+	case KEY_F7:		return "F7";
+	case KEY_F8:		return "F8";
+	case KEY_F9:		return "F9";
+	case KEY_F10:		return "F10";
+	case KEY_F11:		return "F11";
+/*							// FIXME: NOT YET WORKING (MOUSE BINDINGS)
+	case 0x01:		return "MOUSE BTN LEFT";
+	case 0x02:		return "MOUSE BTN RIGHT";
+	case 0x04:		return "MOUSE BTN MIDDLE";
+	case 0x08:		return "MOUSE WHL UP";
+	case 0x10:		return "MOUSE WHL DOWN";
+*/
+#endif
     }
 
     // Handle letter keys
     // S.A.: could also be done with toupper
     if (ch >= 'a' && ch <= 'z')
         return stupidtable[(ch - 'a')];
-
+#ifndef WII
+    else if(ch >= '1' && ch <= '0')
+        return stupidtable2[(ch - '1')];
+    else
+        return "?";                // Everything else
+#endif
     return "?";                // Everything else
 }
 
@@ -866,7 +946,11 @@ int                        coordinates_info = 0;
 int                        timer_info = 0;
 int                        version_info = 0;
 int                        key_controls_start_in_cfg_at_pos = 73;
+#ifdef WII
 int                        key_controls_end_in_cfg_at_pos = 87;
+#else
+int                        key_controls_end_in_cfg_at_pos = 89;
+#endif
 int                        crosshair = 0;
 int                        show_stats = 0;
 int                        tracknum = 1;
@@ -887,6 +971,9 @@ int                        snd_chans = 1;
 int                        sound_channels = 8;
 int                        gore_amount = 4;
 int                        height;
+
+// -1 = no quicksave slot picked!
+int			   quickSaveSlot;
 
 //
 // MENU TYPEDEFS
@@ -943,7 +1030,6 @@ byte                       *blurredscreen;
 byte                       *firescreen;
 
 static boolean             askforkey = false;
-static boolean             fire_good;
 
 static int                 FirstKey = 0;           // SPECIAL MENU FUNCTIONS (ITEMCOUNT)
 static int                 keyaskedfor;
@@ -965,7 +1051,7 @@ extern default_t           doom_defaults_list[];   // KEY BINDINGS
 
 extern patch_t*            hu_font[HU_FONTSIZE];
 
-extern boolean             overlay_trigger;
+//extern boolean             overlay_trigger;
 extern boolean             message_dontfuckwithme;
 extern boolean             chat_on;                // in heads-up code
 extern boolean             BorderNeedRefresh;
@@ -1034,10 +1120,10 @@ void M_DrawThermo(int x,int y,int thermWidth,int thermDot);
 void M_DrawThermoSmall(int x,int y,int thermWidth,int thermDot);
 void M_DrawEmptyCell(menu_t *menu,int item);
 void M_DrawSelCell(menu_t *menu,int item);
-void M_WriteText(int x, int y, char *string);
+//void M_WriteText(int x, int y, char *string);
 void M_StartMessage(char *string,void *routine,boolean input);
 void M_StopMessage(void);
-void M_ClearMenus (void);
+//void M_ClearMenus (void);
 
 void M_MusicType(int choice);
 void M_SoundType(int choice);
@@ -1149,8 +1235,8 @@ void M_Armor(int choice);
 void M_ArmorA(int choice);
 void M_ArmorB(int choice);
 void M_ArmorC(int choice);
-void M_Weapons(int choice);
-void M_Items(int choice);
+//void M_Weapons(int choice);
+//void M_Items(int choice);
 void M_Massacre(int choice);
 void M_Screen(int choice);
 void M_FPSCounter(int choice);
@@ -1159,7 +1245,7 @@ void M_MemoryUsage(int choice);
 void M_ReplaceMissing(int choice);
 void M_Controls(int choice);
 void M_System(int choice);
-void M_Sound(int choice);
+//void M_Sound(int choice);
 void M_Game(int choice);
 void M_Game2(int choice);
 void M_Game3(int choice);
@@ -1184,11 +1270,11 @@ void M_DrawGame2(void);
 void M_DrawGame3(void);
 void M_DrawGame4(void);
 void M_DrawDebug(void);
-void M_DrawSound(void);
+//void M_DrawSound(void);
 void M_DrawCheats(void);
 void M_DrawRecord(void);
 
-int  M_StringWidth(char *string);
+//int  M_StringWidth(char *string);
 int  M_StringHeight(char *string);
 
 
@@ -1200,8 +1286,8 @@ enum
     newgame = 0,
     options,
     gamefiles,
-    readthis,
     credits,
+    readthis,
     quitdoom,
     main_end
 } main_e;
@@ -1212,8 +1298,8 @@ menuitem_t MainGameMenu[]=
     {1,"Options",M_Options,'o'},
     {1,"Game Files",M_GameFiles,'f'},
     // Another hickup with Special edition.
-    {1,"Read This!",M_ReadThis,'r'},
     {1,"Credits",M_Credits,'c'},
+    {1,"Read This!",M_ReadThis,'r'},
     {1,"Quit Game",M_QuitDOOM,'q'}
 };
 
@@ -1667,7 +1753,7 @@ menuitem_t ControlsMenu[]=
     {2,"Strafing",M_StrafingSpeed,'s'},
     {2,"Freelook",M_FreelookSpeed,'f'},
     {2,"Freelook Mode",M_Freelook,'l'},
-    {1,"Key Bindings",M_KeyBindings,'b'}
+    {1,"",M_KeyBindings,'b'}
 };
 
 menu_t  ControlsDef =
@@ -1696,6 +1782,10 @@ enum
     keybindings_run,
     keybindings_console,
     keybindings_screenshots,
+#ifndef WII
+    keybindings_strafeleft,
+    keybindings_straferight,
+#endif
     keybindings_clearall,
     keybindings_reset,
     keybindings_end
@@ -1714,9 +1804,17 @@ menuitem_t KeyBindingsMenu[]=
     {5,"FLY UP",M_KeyBindingsSetKey,8},
     {5,"FLY DOWN",M_KeyBindingsSetKey,9},
     {5,"JUMP",M_KeyBindingsSetKey,'j'},
-    {5,"RUN",M_KeyBindingsSetKey,'r'},
+    {5,"RUN",M_KeyBindingsSetKey,'e'},
+#ifdef WII
     {5,"CONSOLE",M_KeyBindingsSetKey,'c'},
+#else
+    {5,"",M_KeyBindingsSetKey,'c'},
+#endif
     {5,"SCREENSHOTS",M_KeyBindingsSetKey,'s'},
+#ifndef WII
+    {5,"STRAFE LEFT",M_KeyBindingsSetKey,'l'},
+    {5,"STRAFE RIGHT",M_KeyBindingsSetKey,'r'},
+#endif
     {5,"",M_KeyBindingsClearAll,'x'},
     {5,"",M_KeyBindingsReset,'d'}
 };
@@ -2290,6 +2388,9 @@ void M_DoSave(int slot)
 {
     G_SaveGame(slot, savegamestrings[slot], "");
     M_ClearMenus ();
+    // PICK QUICKSAVE SLOT YET?
+    if (quickSaveSlot == -2)
+	quickSaveSlot = slot;
 }
 
 //
@@ -2297,35 +2398,36 @@ void M_DoSave(int slot)
 //
 void M_SaveSelect(int choice)
 {
+    time_t theTime;
+    struct tm *aTime;
+
+    int day;
+    int month;
+    int year;
+    int hour;
+    int min;
+
     // we are going to be intercepting all chars
     saveStringEnter = 1;
     
     saveSlot = choice;
 
-    time_t theTime = time(NULL);
-    struct tm *aTime = localtime(&theTime);
+    theTime = time(NULL);
+    aTime = localtime(&theTime);
 
-    int day = aTime->tm_mday;
-    int month = aTime->tm_mon + 1;
-    int year = aTime->tm_year + 1900;
-    int hour = aTime->tm_hour;
-    int min = aTime->tm_min;
+    day = aTime->tm_mday;
+    month = aTime->tm_mon + 1;
+    year = aTime->tm_year + 1900;
+    hour = aTime->tm_hour;
+    min = aTime->tm_min;
 
     if(gamemode == shareware || gamemode == registered || gamemode == retail)
     {
-        if(extra_wad_loaded == 1)
-            sprintf(savegamestrings[choice], "e%dm%d %d/%d/%d %2.2d:%2.2d *",
-                    gameepisode, gamemap, year, month, day, hour, min);
-        else
             sprintf(savegamestrings[choice], "e%dm%d %d/%d/%d %2.2d:%2.2d",
                     gameepisode, gamemap, year, month, day, hour, min);
     }
     else
     {
-        if(extra_wad_loaded == 1)
-            sprintf(savegamestrings[choice], "map%2.2d %d/%d/%d %2.2d:%2.2d *",
-                    gamemap, year, month, day, hour, min);
-        else
             sprintf(savegamestrings[choice], "map%2.2d %d/%d/%d %2.2d:%2.2d",
                     gamemap, year, month, day, hour, min);
     }
@@ -2351,6 +2453,75 @@ void M_SaveGame (int choice)
         
     M_SetupNextMenu(&SaveDef);
     M_ReadSaveStrings();
+}
+
+//
+//      M_QuickSave
+//
+char    tempstring[80];
+
+void M_QuickSaveResponse(int key)
+{
+    if (key == key_menu_confirm)
+    {
+	M_DoSave(quickSaveSlot);
+	S_StartSound(NULL,sfx_swtchx);
+    }
+}
+
+void M_QuickSave(void)
+{
+    if (!usergame)
+    {
+	S_StartSound(NULL,sfx_oof);
+	return;
+    }
+
+    if (gamestate != GS_LEVEL)
+	return;
+	
+    if (quickSaveSlot < 0)
+    {
+	M_StartControlPanel();
+	M_ReadSaveStrings();
+	M_SetupNextMenu(&SaveDef);
+	quickSaveSlot = -2;	// means to pick a slot now
+	return;
+    }
+    DEH_snprintf(tempstring, 80, QSPROMPT, savegamestrings[quickSaveSlot]);
+    M_StartMessage(tempstring,M_QuickSaveResponse,true);
+}
+
+
+
+//
+// M_QuickLoad
+//
+void M_QuickLoadResponse(int key)
+{
+    if (key == key_menu_confirm)
+    {
+	M_LoadSelect(quickSaveSlot);
+	S_StartSound(NULL,sfx_swtchx);
+    }
+}
+
+
+void M_QuickLoad(void)
+{
+    if (netgame)
+    {
+	M_StartMessage(DEH_String(QLOADNET),NULL,false);
+	return;
+    }
+	
+    if (quickSaveSlot < 0)
+    {
+	M_StartMessage(DEH_String(QSAVESPOT),NULL,false);
+	return;
+    }
+    DEH_snprintf(tempstring, 80, QLPROMPT, savegamestrings[quickSaveSlot]);
+    M_StartMessage(tempstring,M_QuickLoadResponse,true);
 }
 
 //
@@ -2420,7 +2591,7 @@ void M_DrawReadThis1(void)
 
     lumpname = DEH_String(lumpname);
     
-    V_DrawPatchWithShadow (0, 0, W_CacheLumpName(lumpname, PU_CACHE), false);
+    V_DrawPatch (0, 0, W_CacheLumpName(lumpname, PU_CACHE));
 
     ReadDef1.x = skullx;
     ReadDef1.y = skully;
@@ -2454,14 +2625,14 @@ void M_DrawCredits(void)
 
 			width = SCREENWIDTH;
 			height = SCREENHEIGHT;
-			pitch = SCREENWIDTH;
+			pitch = 0;
 
-			from = screens[3] + (height - 3) * pitch;
+//			from = screens[1] + (height - 3) * pitch;
 			for (a = 0; a < width; a++, from++) {
 				*from = *(from + (pitch << 1)) = M_Random();
 			}
 
-			from = screens[3];
+//			from = screens[1];
 			for (b = 0; b < SCREENHEIGHT - 4; b += 2) {
 				byte *pixel = from;
 
@@ -2516,7 +2687,7 @@ void M_DrawCredits(void)
 				case 1:
 					for (b = 0; b < SCREENHEIGHT; b++) {
 						byte *to = I_VideoBuffer + y * SCREENWIDTH + x;
-						from = screens[3] + b * SCREENWIDTH;
+//						from = screens[1] + b * SCREENWIDTH;
 						y += 1;
 
 						for (a = 0; a < SCREENWIDTH; a++, to++, from++) {
@@ -2530,7 +2701,7 @@ void M_DrawCredits(void)
 				case 2:
 					for (b = 0; b < SCREENHEIGHT; b++) {
 						byte *to = I_VideoBuffer + y * SCREENWIDTH + x;
-						from = screens[3] + b * SCREENWIDTH;
+//						from = screens[1] + b * SCREENWIDTH;
 						y += 1;
 
 						for (a = 0; a < SCREENWIDTH; a++, to += 2, from++) {
@@ -2546,7 +2717,7 @@ void M_DrawCredits(void)
 				case 3:
 					for (b = 0; b < SCREENHEIGHT; b++) {
 						byte *to = I_VideoBuffer + y * SCREENWIDTH + x;
-						from = screens[3] + b * SCREENWIDTH;
+//						from = screens[1] + b * SCREENWIDTH;
 						y += 1;
 
 						for (a = 0; a < SCREENWIDTH; a++, to += 3, from++) {
@@ -2564,7 +2735,7 @@ void M_DrawCredits(void)
 				default:
 					for (b = 0; b < SCREENHEIGHT; b++) {
 						byte *to = I_VideoBuffer + y * SCREENWIDTH + x;
-						from = screens[3] + b * SCREENWIDTH;
+//						from = screens[1] + b * SCREENWIDTH;
 						y += 1;
 
 						for (a = 0; a < SCREENWIDTH; a++, to += 4, from++) {
@@ -2885,8 +3056,6 @@ void M_NewGame(int choice)
 //
 //      M_Episode
 //
-int     epi;
-
 void M_DrawEpisode(void)
 {
     M_DarkBackground();
@@ -2896,9 +3065,10 @@ void M_DrawEpisode(void)
 
 void M_VerifyNightmare(int ch)
 {
+#ifdef WII
     if (ch != key_menu_forward)
         return;
-
+#endif
     G_DeferedInitNew(nightmare,epi+1,1);
     M_ClearMenus ();
 }
@@ -3847,20 +4017,20 @@ void M_DrawGame2(void)
         V_ClearDPTranslation();
     }
 
-    if(itemOn == 0 && whichSkull == 1)
+    if(whichSkull == 1)
     {
-        char *string = "YOU MUST START A NEW GAME TO TAKE EFFECT.";
-        int x = 160 - M_StringWidth(string) / 2;
+        int x;
+        char *string = "";
         dp_translation = crx[CRX_GOLD];
-        M_WriteText(x, GameDef2.y + 138, DEH_String(string));
-        V_ClearDPTranslation();
-    }
-
-    if(itemOn == 6 && whichSkull == 1)
-    {
-        char *string = "YOU MUST QUIT AND RESTART TO TAKE EFFECT.";
-        int x = 160 - M_StringWidth(string) / 2;
-        dp_translation = crx[CRX_GOLD];
+        if(itemOn == 0)
+        {
+            string = "YOU MUST START A NEW GAME TO TAKE EFFECT.";
+        }
+        else if(itemOn == 6)
+        {
+            string = "YOU MUST QUIT AND RESTART TO TAKE EFFECT.";
+        }
+        x = 160 - M_StringWidth(string) / 2;
         M_WriteText(x, GameDef2.y + 138, DEH_String(string));
         V_ClearDPTranslation();
     }
@@ -3884,6 +4054,9 @@ void M_DrawGame3(void)
     else
         V_DrawPatchWithShadow(70, 0, W_CacheLumpName(DEH_String("M_GMESET"),
                                                PU_CACHE), false);
+
+    if(d_fixspriteoffsets && modifiedgame)
+        d_fixspriteoffsets = false;
 
     if(crosshair == 1)
     {
@@ -4066,12 +4239,21 @@ void M_DrawGame3(void)
         V_ClearDPTranslation();
     }
 
-    if((itemOn == 7 || itemOn == 8) && whichSkull == 1)
+    if(whichSkull == 1)
     {
-        char *string = "YOU MUST START A NEW GAME TO TAKE EFFECT.";
-        int x = 160 - M_StringWidth(string) / 2;
+        int x;
+        char *string = "";
         dp_translation = crx[CRX_GOLD];
-        M_WriteText(x, GameDef.y + 138, DEH_String(string));
+        if(itemOn == 7)
+        {
+            string = "YOU MUST START A NEW GAME TO TAKE EFFECT.";
+        }
+        else if(itemOn == 8 && modifiedgame)
+        {
+            string = "THIS OPTION IS NOT FOR CUSTOM PWAD FILES.";
+        }
+        x = 160 - M_StringWidth(string) / 2;
+        M_WriteText(x, GameDef3.y + 138, DEH_String(string));
         V_ClearDPTranslation();
     }
 
@@ -4410,18 +4592,6 @@ void M_DrawCheats(void)
             M_WriteText(75, 116, maptext[map+27]);
             V_ClearDPTranslation();
         }
-        else if(epi == 1 && gameversion == exe_chex && !is_chex_2)
-        {
-            dp_translation = crx[CRX_GRAY];
-            M_WriteText(75, 116, maptext[map+132]);
-            V_ClearDPTranslation();
-        }
-        else if(epi == 1 && gameversion == exe_chex && is_chex_2)
-        {
-            dp_translation = crx[CRX_GRAY];
-            M_WriteText(75, 116, maptext[map+137]);
-            V_ClearDPTranslation();
-        }
     }
 
     if((fsize == 14943400 || fsize == 14824716 || fsize == 14612688 ||
@@ -4456,18 +4626,6 @@ void M_DrawCheats(void)
     {
         dp_translation = crx[CRX_GRAY];
         M_WriteText(75, 116, maptext[map+142]);
-        V_ClearDPTranslation();
-    }
-    if(fsize == 12361532 && !is_chex_2)
-    {
-        dp_translation = crx[CRX_GRAY];
-        M_WriteText(75, 116, maptext[map+132]);
-        V_ClearDPTranslation();
-    }
-    if(fsize == 12361532 && is_chex_2)
-    {
-        dp_translation = crx[CRX_GRAY];
-        M_WriteText(75, 116, maptext[map+137]);
         V_ClearDPTranslation();
     }
     if (fsize == 4261144 || fsize == 4271324 || fsize == 4211660 ||
@@ -4554,13 +4712,12 @@ void M_DrawCheats(void)
 
 void M_DrawRecord(void)
 {
+    char buffer_map[2];
+    int offset = 0;
+
     M_DarkBackground();
 
-    char buffer_map[2];
-
     M_snprintf(buffer_map, sizeof(buffer_map), "%d", rmap);
-
-    int offset = 0;
 
     V_DrawPatchWithShadow(58, 15, W_CacheLumpName(DEH_String("M_T_DREC"),
                                                PU_CACHE), false);
@@ -4809,7 +4966,10 @@ void M_Options(int choice)
 void M_ChangeMessages(int choice)
 {
     if(screenSize < 8);
-        ST_doRefresh();
+    {
+        if(usergame)
+            ST_doRefresh();
+    }
 
     blurred = false;
 
@@ -4831,9 +4991,10 @@ void M_ChangeMessages(int choice)
 //
 void M_EndGameResponse(int ch)
 {
+#ifdef WII
     if (ch != key_menu_forward)
         return;
-
+#endif
     currentMenu->lastOn = itemOn;
     M_ClearMenus ();
     D_StartTitle ();
@@ -4943,9 +5104,10 @@ int     quitsounds3[7] =
 
 void M_QuitResponse(int ch)
 {
+#ifdef WII
     if (ch != key_menu_forward)
         return;
-
+#endif
     if (!netgame)
     {
         if (gamemode == commercial)
@@ -4994,7 +5156,10 @@ void M_QuitDOOM(int choice)
             DEH_String(M_SelectEndMessage()));
 
     if(screenSize < 8);
-        ST_doRefresh();
+    {
+        if(usergame)
+            ST_doRefresh();
+    }
 
     M_StartMessage(endstring,M_QuitResponse,true);
 }
@@ -5051,7 +5216,10 @@ void M_StrafingSpeed(int choice)
 void M_ChangeDetail(int choice)
 {
     if(screenSize < 8);
-        ST_doRefresh();
+    {
+        if(usergame)
+            ST_doRefresh();
+    }
 
     blurred = false;
     choice = 0;
@@ -5186,7 +5354,10 @@ void M_SizeDisplay(int choice)
     R_SetViewSize (screenblocks, detailLevel);
 
     if(screenSize < 8);
-        ST_doRefresh();
+    {
+        if(usergame)
+            ST_doRefresh();
+    }
 
     blurred = false;
     skippsprinterp = true;
@@ -5284,7 +5455,10 @@ M_StartMessage
     messageNeedsInput = input;
 
     if(screenSize < 8);
-        ST_doRefresh();
+    {
+        if(usergame)
+            ST_doRefresh();
+    }
 
     blurred = false;
     menuactive = true;
@@ -5392,10 +5566,21 @@ void M_WriteText(int x, int y, char* string)
         if(font_shadow)
             V_DrawPatchWithShadow(cx, cy, hu_font[c], false);
         else
-            V_DrawPatch(cx, cy, 0, hu_font[c]);
+            V_DrawPatch(cx, cy, hu_font[c]);
         cx+=w;
     }
 }
+
+// These keys evaluate to a "null" key in Vanilla Doom that allows weird
+// jumping in the menus. Preserve this behavior for accuracy.
+
+#ifndef WII
+static boolean IsNullKey(int key)
+{
+    return key == KEY_PAUSE || key == KEY_CAPSLOCK
+        || key == KEY_SCRLCK || key == KEY_NUMLOCK;
+}
+#endif
 
 //
 // CONTROL PANEL
@@ -5410,6 +5595,7 @@ boolean M_Responder (event_t* ev)
     int             key;
     int             i;
 
+#ifdef WII
     ch = -1; // will be changed to a legit char if we're going to use it here
 
     // Process joystick input
@@ -5473,30 +5659,77 @@ boolean M_Responder (event_t* ev)
     }
 
     if (askforkey && data->btns_d)                // KEY BINDINGS
+#else
+    if (askforkey && ev->type == ev_keydown)
+#endif
     {
         M_KeyBindingsClearControls(ev->data1);
-        *doom_defaults_list[keyaskedfor + key_controls_start_in_cfg_at_pos + FirstKey].location = ev->data1;
+
+        *doom_defaults_list[keyaskedfor + key_controls_start_in_cfg_at_pos + FirstKey].location =
+                ev->data1;
+
         askforkey = false;
         return true;
     }
-
+/*							// FIXME: NOT YET WORKING (MOUSE BINDINGS)
     if (askforkey && ev->type == ev_mouse)
     {
-        if (ev->data1 & 1)
+        if (ev->data1 & 1 || ev->data1 & 2 || ev->data1 & 4 || ev->data1 & 8 || ev->data1 & 16)
+        {
+            M_KeyBindingsClearControls(ev->data1);
+
+            *doom_defaults_list[keyaskedfor + key_controls_start_in_cfg_at_pos + FirstKey].location =
+                    ev->data1;
+
+            askforkey = false;
             return true;
-        if (ev->data1 & 2)
-            return true;
-        if (ev->data1 & 4)
-            return true;
+        }
         return false;
     }
+*/
+#ifndef WII
+    // "close" button pressed on window?
+    if (ev->type == ev_quit)
+    {
+        // First click on close button = bring up quit confirm message.
+        // Second click on close button = confirm quit
 
+        if (menuactive && messageToPrint && messageRoutine == M_QuitResponse)
+        {
+            M_QuitResponse(key_menu_confirm);
+        }
+        else
+        {
+            S_StartSound(NULL,sfx_swtchn);
+            M_QuitDOOM(0);
+        }
+
+        return true;
+    }
+
+    // key is the key pressed, ch is the actual character typed
+  
+    ch = 0;
+#endif
     key = -1;
+
+    if (ev->type == ev_keydown)
+    {
+	key = ev->data1;
+	ch = ev->data2;
+    }
+
+    if (key == -1)
+	return false;
 
     // Save Game string input
     if (saveStringEnter)
     {
+#ifdef WII
         switch(ch)
+#else
+        switch(key)
+#endif
         {
           case KEY_ESCAPE:
             saveStringEnter = 0;
@@ -5516,7 +5749,7 @@ boolean M_Responder (event_t* ev)
             // it implies the user doesn't care about Vanilla emulation: just
             // use the correct 'data2'.
 
-            ch = key;
+//            ch = key;
 
             ch = toupper(ch);
 
@@ -5544,8 +5777,13 @@ boolean M_Responder (event_t* ev)
     {
         if (messageNeedsInput)
         {
+#ifdef WII
             if (!(ch == key_menu_confirm || ch == key_menu_forward ||
                   ch == key_menu_activate))
+#else
+            if (key != ' ' && key != KEY_ESCAPE
+             && key != key_menu_confirm && key != key_menu_abort)
+#endif
             {
                 return false;
             }
@@ -5561,10 +5799,133 @@ boolean M_Responder (event_t* ev)
         return true;
     }
 
+    if ((devparm && key == key_menu_help) ||
+        (key != 0 && key == key_menu_screenshot))
+    {
+	G_ScreenShot ();
+	return true;
+    }
+#ifndef WII
+    // F-Keys
+    if (!menuactive)
+    {
+	if (key == key_menu_decscreen)      // Screen size down
+        {
+	    if (automapactive)
+		return false;
+	    M_SizeDisplay(0);
+	    S_StartSound(NULL,sfx_stnmov);
+	    return true;
+	}
+        else if (key == KEY_TILDE /*&& !keydown*/)        // Console
+        {
+//            keydown = key;
+            if (consoleheight < CONSOLEHEIGHT && consoledirection == -1 && !inhelpscreens)
+            {
+                consoleheight = MAX(1, consoleheight);
+                consoledirection = 1;
+                return true;
+            }
+            return false;
+        }
+        else if (key == key_menu_incscreen) // Screen size up
+        {
+	    if (automapactive)
+		return false;
+	    M_SizeDisplay(1);
+	    S_StartSound(NULL,sfx_stnmov);
+	    return true;
+	}
+        else if (key == key_menu_help)     // Help key
+        {
+	    M_StartControlPanel ();
+
+	    if ( gamemode == retail )
+	      currentMenu = &ReadDef2;
+	    else
+	      currentMenu = &ReadDef1;
+
+	    itemOn = 0;
+	    S_StartSound(NULL,sfx_swtchn);
+	    return true;
+	}
+        else if (key == key_menu_save)     // Save
+        {
+	    M_StartControlPanel();
+	    S_StartSound(NULL,sfx_swtchn);
+	    M_SaveGame(0);
+	    return true;
+        }
+        else if (key == key_menu_load)     // Load
+        {
+	    M_StartControlPanel();
+	    S_StartSound(NULL,sfx_swtchn);
+	    M_LoadGame(0);
+	    return true;
+        }
+        else if (key == key_menu_volume)   // Sound Volume
+        {
+	    M_StartControlPanel ();
+	    currentMenu = &SoundDef;
+	    itemOn = sfx_vol;
+	    S_StartSound(NULL,sfx_swtchn);
+	    return true;
+	}
+        else if (key == key_menu_detail)   // Detail toggle
+        {
+	    M_ChangeDetail(0);
+	    S_StartSound(NULL,sfx_swtchn);
+	    return true;
+        }
+        else if (key == key_menu_qsave)    // Quicksave
+        {
+	    S_StartSound(NULL,sfx_swtchn);
+	    M_QuickSave();
+	    return true;
+        }
+        else if (key == key_menu_endgame)  // End game
+        {
+	    S_StartSound(NULL,sfx_swtchn);
+	    M_EndGame(0);
+	    return true;
+        }
+        else if (key == key_menu_messages) // Toggle messages
+        {
+	    M_ChangeMessages(0);
+	    S_StartSound(NULL,sfx_swtchn);
+	    return true;
+        }
+        else if (key == key_menu_qload)    // Quickload
+        {
+	    S_StartSound(NULL,sfx_swtchn);
+	    M_QuickLoad();
+	    return true;
+        }
+        else if (key == key_menu_quit)     // Quit DOOM
+        {
+	    S_StartSound(NULL,sfx_swtchn);
+	    M_QuitDOOM(0);
+	    return true;
+        }
+        else if (key == key_menu_gamma)    // gamma toggle
+        {
+	    usegamma++;
+	    if (usegamma > 4)
+		usegamma = 0;
+	    players[consoleplayer].message = DEH_String(gammamsg[usegamma]);
+            I_SetPalette (W_CacheLumpName (DEH_String("PLAYPAL"),PU_CACHE));
+	    return true;
+	}
+    }
+#endif
     // Pop-up menu?
     if (!menuactive)
     {
+#ifdef WII
         if (ch == key_menu_activate)
+#else
+        if (key == key_menu_activate)
+#endif
         {
             M_StartControlPanel ();
             S_StartSound(NULL,sfx_swtchn);
@@ -5575,7 +5936,11 @@ boolean M_Responder (event_t* ev)
 
     // Keys usable within menu
 
+#ifdef WII
     if (ch == key_menu_down)
+#else
+    if (key == key_menu_down)
+#endif
     {
         // Move down to next item
 
@@ -5595,13 +5960,13 @@ boolean M_Responder (event_t* ev)
             }
             else
                 itemOn++;
-
+#ifndef WII
+            if(currentMenu == &KeyBindingsDef && itemOn == 12)
+                itemOn++;
+#endif
             if(!devparm)
             {
-/*
-                if (currentMenu == &KeyBindingsDef && itemOn == 11)
-                    itemOn++;
-                else*/ if (currentMenu == &GameDef && itemOn == 14)
+                if (currentMenu == &GameDef && itemOn == 14)
                     itemOn = 0;
             }
             S_StartSound(NULL,sfx_pstop);
@@ -5610,7 +5975,11 @@ boolean M_Responder (event_t* ev)
 
         return true;
     }
+#ifdef WII
     else if (ch == key_menu_up)
+#else
+    else if (key == key_menu_up)
+#endif
     {
         // Move back up to previous item
 
@@ -5630,11 +5999,13 @@ boolean M_Responder (event_t* ev)
             }
             else
                 itemOn--;
-
+#ifndef WII
+            if(currentMenu == &KeyBindingsDef && itemOn == 12)
+                itemOn--;
+#endif
             if(!devparm)
             {
-                if((currentMenu == &KeyBindingsDef && itemOn == 11) ||
-                        (currentMenu == &GameDef && itemOn == 14))
+                if(currentMenu == &GameDef && itemOn == 14)
                     itemOn--;
             }
             S_StartSound(NULL,sfx_pstop);
@@ -5643,7 +6014,11 @@ boolean M_Responder (event_t* ev)
 
         return true;
     }
+#ifdef WII
     else if (ch == key_menu_left)
+#else
+    else if (key == key_menu_left)
+#endif
     {
         // Slide slider left
 
@@ -5660,7 +6035,11 @@ boolean M_Responder (event_t* ev)
         }
         return true;
     }
+#ifdef WII
     else if (ch == key_menu_right)
+#else
+    else if (key == key_menu_right)
+#endif
     {
         // Slide slider right
 
@@ -5677,7 +6056,11 @@ boolean M_Responder (event_t* ev)
         }
         return true;
     }
+#ifdef WII
     else if (ch == key_menu_forward)
+#else
+    else if (key == key_menu_forward)
+#endif
     {
         // Activate menu item
 
@@ -5703,7 +6086,11 @@ boolean M_Responder (event_t* ev)
         }
         return true;
     }
+#ifdef WII
     else if (ch == key_menu_activate)
+#else
+    else if (key == key_menu_activate)
+#endif
     {
         // Deactivate menu
 
@@ -5712,7 +6099,11 @@ boolean M_Responder (event_t* ev)
         S_StartSound(NULL,sfx_swtchx);
         return true;
     }
+#ifdef WII
     else if (ch == key_menu_back)
+#else
+    else if (key == key_menu_back)
+#endif
     {
         // Go back to previous menu
 
@@ -5729,8 +6120,11 @@ boolean M_Responder (event_t* ev)
     // Keyboard shortcut?
     // Vanilla Doom has a weird behavior where it jumps to the scroll bars
     // when the certain keys are pressed, so emulate this.
-
+#ifdef WII
     else if (ch != 0)
+#else
+    else if (ch != 0 || IsNullKey(key))
+#endif
     {
         for (i = itemOn+1;i < currentMenu->numitems;i++)
         {
@@ -5772,7 +6166,10 @@ void M_StartControlPanel (void)
     itemOn = currentMenu->lastOn;   // JDC
 
     if(screenSize < 8);
-        ST_doRefresh();
+    {
+        if(usergame)
+            ST_doRefresh();
+    }
 
     blurred = false;
 }
@@ -5979,7 +6376,11 @@ void M_Drawer (void)
         y += LINEHEIGHT_SMALL;
 
         // DRAW SKULL
+#ifdef WII
         if(currentMenu == &KeyBindingsDef && itemOn == 15)
+#else
+        if(currentMenu == &KeyBindingsDef && itemOn == 17)
+#endif
             V_DrawPatchWithShadow(x + 280 + CURSORXOFF_SMALL, currentMenu->y - 15 +
                     itemOn*LINEHEIGHT_SMALL, W_CacheLumpName(DEH_String(skullNameSmall[whichSkull]),
                                           PU_CACHE), false);
@@ -6032,7 +6433,10 @@ void M_ClearMenus (void)
     paused = false;
 
     if(screenSize < 8);
-        ST_doRefresh();
+    {
+        if(usergame)
+            ST_doRefresh();
+    }
 
     // if (!netgame && usergame && paused)
     //       sendpause = true;
@@ -6078,6 +6482,7 @@ void M_Init (void)
     messageToPrint = 0;
     messageString = NULL;
     messageLastMenuActive = menuactive;
+    quickSaveSlot = -1;
     tempscreen = Z_Malloc(SCREENWIDTH * SCREENHEIGHT, PU_STATIC, NULL);
     blurredscreen = Z_Malloc(SCREENWIDTH * SCREENHEIGHT, PU_STATIC, NULL);
     firescreen = Z_Malloc(SCREENWIDTH * SCREENHEIGHT, PU_STATIC, NULL);
@@ -6992,7 +7397,7 @@ void M_Rift(int choice)
                 if(map == 21)
                     map = 31;
             }
-            if(!nerve_pwad)
+
             {
                 if (fsize == 14943400 || fsize == 14612688 || fsize == 14607420 ||
                     fsize == 14604584 || fsize == 18195736 || fsize == 18654796 ||
@@ -7011,11 +7416,6 @@ void M_Rift(int choice)
                     if(map <= 29)
                         map++;
                 }
-            }
-            else
-            {
-                if(map < 9)
-                    map++;
             }
             break;
         }
@@ -7361,14 +7761,17 @@ void M_KeyBindingsClearAll (int choice)
 
     for (i = key_controls_start_in_cfg_at_pos; i < key_controls_end_in_cfg_at_pos; i++)
         *doom_defaults_list[i].location = 0;
-
+#ifdef WII
     *doom_defaults_list[key_controls_start_in_cfg_at_pos + 2].location = CLASSIC_CONTROLLER_MINUS;
+#else
+    *doom_defaults_list[key_controls_start_in_cfg_at_pos + 2].location = KEY_ESCAPE;
+#endif
 }
 
 void M_KeyBindingsReset (int choice)
 {
     int i = key_controls_start_in_cfg_at_pos;
-
+#ifdef WII
     *doom_defaults_list[i++].location = CLASSIC_CONTROLLER_R;
     *doom_defaults_list[i++].location = CLASSIC_CONTROLLER_L;
     *doom_defaults_list[i++].location = CLASSIC_CONTROLLER_MINUS;
@@ -7383,13 +7786,31 @@ void M_KeyBindingsReset (int choice)
     *doom_defaults_list[i++].location = CONTROLLER_1;
     *doom_defaults_list[i++].location = CONTROLLER_2;
     *doom_defaults_list[i++].location = CLASSIC_CONTROLLER_X;
+#else
+    *doom_defaults_list[i++].location = KEY_RCTRL;
+    *doom_defaults_list[i++].location = ' ';
+    *doom_defaults_list[i++].location = KEY_ESCAPE;
+    *doom_defaults_list[i++].location = KEY_LEFTBRACKET;
+    *doom_defaults_list[i++].location = KEY_TAB;
+    *doom_defaults_list[i++].location = KEY_RIGHTBRACKET;
+    *doom_defaults_list[i++].location = KEYP_PLUS;
+    *doom_defaults_list[i++].location = KEYP_MINUS;
+    *doom_defaults_list[i++].location = KEY_PGUP;
+    *doom_defaults_list[i++].location = KEY_PGDN;
+    *doom_defaults_list[i++].location = KEY_DEL;
+    *doom_defaults_list[i++].location = KEY_RSHIFT;
+    *doom_defaults_list[i++].location = KEY_TILDE;
+    *doom_defaults_list[i++].location = KEY_F12;
+    *doom_defaults_list[i++].location = KEY_COMMA;
+    *doom_defaults_list[i++].location = KEY_PERIOD;
+#endif
 }
 
 void M_DrawKeyBindings(void)
 {
-    M_DarkBackground();
-
     int i;
+
+    M_DarkBackground();
 
     if(fsize != 19321722)
         V_DrawPatchWithShadow (80, 0, W_CacheLumpName(DEH_String("M_T_BNDS"), PU_CACHE), false);
@@ -7402,33 +7823,65 @@ void M_DrawKeyBindings(void)
             M_WriteText(195, (i*10+20), "???");
         else
             M_WriteText(195, (i*10+20),
-                    Key2String(*(doom_defaults_list[i + FirstKey + key_controls_start_in_cfg_at_pos].location)));
+                    Key2String(*(doom_defaults_list[i + FirstKey +
+                            key_controls_start_in_cfg_at_pos].location)));
     }
 
+#ifndef WII
+    dp_translation = crx[CRX_DARK];
+    M_WriteText(45, 140, "CONSOLE");
+    V_ClearDPTranslation();
+#endif
+
     dp_translation = crx[CRX_GRAY];
+#ifdef WII
     M_WriteText(183, 160, "/");
+#else
+    M_WriteText(183, 180, "/");
+#endif
     V_ClearDPTranslation();
 
     dp_translation = crx[CRX_BLUE];
-
+#ifdef WII
     if(itemOn == 14)
+#else
+    if(itemOn == 16)
+#endif
         dp_translation = crx[CRX_GOLD];
-
+#ifdef WII
     M_WriteText(45, 160, "CLEAR ALL CONTROLS");
+#else
+    M_WriteText(45, 180, "CLEAR ALL CONTROLS");
+#endif
 
+#ifdef WII
     if(itemOn == 14)
+#else
+    if(itemOn == 16)
+#endif
         V_ClearDPTranslation();
 
     V_ClearDPTranslation();
 
     dp_translation = crx[CRX_BLUE];
 
+#ifdef WII
     if(itemOn == 15)
+#else
+    if(itemOn == 17)
+#endif
         dp_translation = crx[CRX_GOLD];
-
+#ifdef WII
     M_WriteText(195, 160, "RESET DEFAULTS");
+#else
+    M_WriteText(195, 180, "RESET DEFAULTS");
+#endif
 
+#ifdef WII
     if(itemOn == 15)
+#else
+    if(itemOn == 17)
+#endif
         V_ClearDPTranslation();
 
     V_ClearDPTranslation();
@@ -7503,7 +7956,9 @@ void M_DrawControls(void)
         M_WriteText(ControlsDef.x + 250, ControlsDef.y + 38, "INVERSE");
         V_ClearDPTranslation();
     }
+    dp_translation = crx[CRX_GREEN];
     M_WriteText(ControlsDef.x, ControlsDef.y - 12, "SPEEDS:");
+    V_ClearDPTranslation();
 
     M_DrawThermoSmall(ControlsDef.x + 55,ControlsDef.y + LINEHEIGHT_SMALL*(mousesens+1),
                  29,forwardmove-19);
@@ -7516,6 +7971,14 @@ void M_DrawControls(void)
 
     M_DrawThermoSmall(ControlsDef.x + 199,ControlsDef.y + LINEHEIGHT_SMALL*(mousespeed+1),
                  11,mspeed);
+
+    if(itemOn == 5)
+        dp_translation = crx[CRX_GOLD];
+    else
+        dp_translation = crx[CRX_GRAY];
+
+    M_WriteText(ControlsDef.x, ControlsDef.y + 48, DEH_String("KEY BINDINGS"));
+    V_ClearDPTranslation();
 }
 
 void M_FPS(int choice)
@@ -7573,12 +8036,12 @@ void M_ReplaceMissing(int choice)
         players[consoleplayer].message = DEH_String("MISSING TEXTURES & FLATS WON'T BE REPLACED");
     }
 }
-
+/*
 u64 GetTicks(void)
 {
     return (u64)SDL_GetTicks();
 }
-
+*/
 void M_DisplayTicker(int choice)
 {
     display_ticker = !display_ticker;
@@ -7594,8 +8057,11 @@ void M_DisplayTicker(int choice)
     }
     I_DisplayFPSDots(display_ticker);
 
-    if(usergame)
-        ST_doRefresh();
+    if(screenSize < 8);
+    {
+        if(usergame)
+            ST_doRefresh();
+    }
 }
 
 void M_Coordinates(int choice)
@@ -8296,7 +8762,7 @@ void M_Offsets(int choice)
         players[consoleplayer].message = DEH_String("SPRITE OFFSETS WON'T BE FIXED");
         break;
     case 1:
-        if (!d_fixspriteoffsets)
+        if (!d_fixspriteoffsets && !modifiedgame)
             d_fixspriteoffsets = true;
         players[consoleplayer].message = DEH_String("SPRITE OFFSETS WILL BE FIXED");
         break;
@@ -8858,22 +9324,23 @@ void M_DrawDebug(void)
     }
 }
 
+extern void A_PainDie(mobj_t *);
+thinker_t *currentthinker;
+
 // jff 2/01/98 kill all monsters
 //static void cheat_massacre()
 void M_Massacre(int choice)
 {
+    int killcount = 0;
     massacre_cheat_used = true;
+
     // jff 02/01/98 'em' cheat - kill all monsters
     // partially taken from Chi's .46 port
 
     // killough 2/7/98: cleaned up code and changed to use dprintf;
     // fixed lost soul bug (Lost Souls left behind when Pain Elementals are killed)
 
-    int killcount = 0;
-
-    extern void A_PainDie(mobj_t *);
-
-    thinker_t *currentthinker = &thinkercap;
+    currentthinker = &thinkercap;
 
     while ((currentthinker=currentthinker->next) != &thinkercap)
     {

@@ -48,10 +48,6 @@
 typedef boolean (*vpatchclipfunc_t)(patch_t *, int, int);
 
 
-// Screen 0 is the screen updated by I_Update screen.
-// Screen 1 is an extra buffer.
-extern byte *screens[5];
-
 extern byte *xlatab;
 extern byte *tinttable;
 extern byte *dp_translation;
@@ -73,7 +69,7 @@ void V_Init (void);
 
 // Draw a block from the specified source screen to the screen.
 
-void V_CopyRect(int srcx, int srcy, byte* srcscrn, int width,
+void V_CopyRect(int srcx, int srcy, byte* source, int width,
                 int height, int destx, int desty) ;
 
 // Draw a linear block of pixels into the view buffer.
@@ -88,7 +84,7 @@ void V_UseBuffer(byte *buffer);
 
 void V_RestoreBuffer(void);
 
-void V_DrawPatch(int x, int y, int scrn, patch_t* patch ) ;
+void V_DrawPatch(int x, int y, patch_t* patch ) ;
 void V_DrawPatchFlipped(int x, int y, patch_t* patch ) ;
 void V_MarkRect(int x, int y, int width, int height);
 void V_DrawConsoleChar(int x, int y, patch_t *patch, byte color, boolean italics, int translucency,

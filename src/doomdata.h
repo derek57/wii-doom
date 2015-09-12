@@ -30,7 +30,11 @@
 #define __DOOMDATA__
 
 // The most basic types we use, portability.
+#ifdef WII
 #include "doomtype.h"
+#else
+#include "../doomtype.h"
+#endif
 
 // Some global defines, that configure the game.
 #include "doomdef.h"

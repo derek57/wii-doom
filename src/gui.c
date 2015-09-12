@@ -1,3 +1,4 @@
+#ifdef WII
 #include <math.h>
 #include <ogc/consol.h>
 #include <ogc/gu.h>
@@ -43,4 +44,5 @@ va_list pArguments;
     printLocatedText(chRow,chColumn,stTexteLocation,"%s",strTextBuffer);
     resetPreviousFontStyle();
 }
+#endif
 

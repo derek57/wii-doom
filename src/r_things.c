@@ -585,6 +585,14 @@ void R_ProjectSprite(mobj_t *thing)
 
     sector_t           *sector = thing->subsector->sector;
 
+    fixed_t            tr_x;
+    fixed_t            tr_y;
+    fixed_t            gxt;
+    fixed_t            gyt;
+    fixed_t            tz;
+    fixed_t            xscale;
+    fixed_t            clipfeet;
+
     // [AM] Interpolate between current and last position,
     // if prudent.
     if (d_uncappedframerate &&
@@ -607,14 +615,14 @@ void R_ProjectSprite(mobj_t *thing)
         interpangle = thing->angle;
     }
 
-    fixed_t            tr_x = interpx - viewx;
-    fixed_t            tr_y = interpy - viewy;
+    tr_x = interpx - viewx;
+    tr_y = interpy - viewy;
     
-    fixed_t            gxt = FixedMul(tr_x,viewcos);
-    fixed_t            gyt = -FixedMul(tr_y,viewsin);
-    fixed_t            tz = gxt-gyt;
+    gxt = FixedMul(tr_x,viewcos);
+    gyt = -FixedMul(tr_y,viewsin);
+    tz = gxt-gyt;
 
-    fixed_t            xscale = FixedDiv(projection, tz);
+    xscale = FixedDiv(projection, tz);
 
     // thing is behind view plane?
     if (tz < MINZ)
@@ -737,7 +745,7 @@ void R_ProjectSprite(mobj_t *thing)
         else
             clipheight = 0;
 
-        fixed_t clipfeet = MIN((spriteheight[lump] >> FRACBITS) / 4,
+        clipfeet = MIN((spriteheight[lump] >> FRACBITS) / 4,
                                clipheight) << FRACBITS;
 
         vis->texturemid = gzt - viewz - clipfeet;
@@ -759,8 +767,9 @@ void R_ProjectSprite(mobj_t *thing)
     iscale = FixedDiv (FRACUNIT, xscale);
 
     // [crispy] flip death sprites and corpses randomly
-    if (!netgame && ((thing->type != MT_CYBORG &&
-        thing->flags & MF_CORPSE && thing->health & 1) || thing->flags2 & MF2_MIRRORED))
+    // except for Cyberdemons and Barrels which are too asymmetrical
+    if((thing->type != MT_CYBORG && thing->type != MT_BARREL &&
+        thing->flags & MF_CORPSE && thing->health & 1) || thing->flags2 & MF2_MIRRORED)
     {
         flip = !!d_flipcorpses;
     }
@@ -810,7 +819,7 @@ void R_ProjectSprite(mobj_t *thing)
 
     // [crispy] colored blood
     if (d_colblood && d_chkblood && thing->target &&
-       (thing->type == MT_BLOOD ||
+       (thing->type == MT_BLOOD || thing->sprite == SPR_POL5 ||
         thing->type == MT_GORE))
     {
         // [crispy] Thorn Things in Hacx bleed green blood
@@ -974,6 +983,11 @@ void R_ProjectShadow(mobj_t *thing)
     fixed_t             interpz;
     fixed_t             interpangle;
 
+    fixed_t             gxt;
+    fixed_t             gyt;
+    fixed_t             gzt;
+    fixed_t             tz;
+
     // [AM] Interpolate between current and last position,
     // if prudent.
     if (d_uncappedframerate &&
@@ -1000,11 +1014,10 @@ void R_ProjectShadow(mobj_t *thing)
     tr_x = interpx - viewx;
     tr_y = interpy - viewy;
         
-    fixed_t             gxt = FixedMul(tr_x, viewcos);
-    fixed_t             gyt = -FixedMul(tr_y, viewsin);
-    fixed_t             gzt;
+    gxt = FixedMul(tr_x, viewcos);
+    gyt = -FixedMul(tr_y, viewsin);
 
-    fixed_t             tz = gxt - gyt;
+    tz = gxt - gyt;
 
     // thing is behind view plane?
     if (tz < MINZ)

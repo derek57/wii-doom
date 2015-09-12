@@ -55,7 +55,7 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.]
  */
-
+#ifdef WII
 #include <stdio.h>
 #include <openssl/opensslv.h>
 #include "md5_locl.h"
@@ -275,5 +275,6 @@ void md5_block_data_order (MD5_CTX *c, const void *data_, size_t num)
         D = c->D += D;
                 }
         }
+#endif
 #endif
 

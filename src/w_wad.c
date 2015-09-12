@@ -24,7 +24,13 @@
 
 #include "c_io.h"
 #include "config.h"
+
+#ifdef WII
 #include "doomdef.h"
+#else
+#include "doom/doomdef.h"
+#endif
+
 #include "doomtype.h"
 #include "i_swap.h"
 #include "i_system.h"
@@ -57,7 +63,7 @@ typedef struct
 
 // Location of each lump on disk.
 
-boolean           disk_indicator = false;
+disk_indicator_e  disk_indicator = false;
 
 int               fsizecq = 0;
 
@@ -341,7 +347,7 @@ void W_ReadLump(lumpindex_t lump, void *dest)
 
     l = lumpinfo[lump];
 
-    disk_indicator = true;
+    disk_indicator = disk_on;
 
     c = W_Read(l->wad_file, l->position, dest, l->size);
 
@@ -566,11 +572,14 @@ void W_CheckSize(int wad)
 
     if(wad == 0)
     {
+#ifdef WII
         if(usb)
             fprw = fopen("usb:/apps/wiidoom/pspdoom.wad", "r");
         else if(sd)
             fprw = fopen("sd:/apps/wiidoom/pspdoom.wad", "r");
-
+#else
+        fprw = fopen("pspdoom.wad", "r");
+#endif
         if (fprw == NULL)
             printf(" ");
         else
@@ -586,10 +595,14 @@ void W_CheckSize(int wad)
     }
     else if(wad == 1)
     {
+#ifdef WII
         if(usb)
             fprw = fopen("usb:/apps/wiidoom/pspchex.wad", "r");
         else if(sd)
             fprw = fopen("sd:/apps/wiidoom/pspchex.wad", "r");
+#else
+        fprw = fopen("pspchex.wad", "r");
+#endif
 
         if (fprw == NULL)
             printf(" ");
@@ -606,10 +619,14 @@ void W_CheckSize(int wad)
     }
     else if(wad == 2)
     {
+#ifdef WII
         if(usb)
             fprw = fopen("usb:/apps/wiidoom/psphacx.wad", "r");
         else if(sd)
             fprw = fopen("sd:/apps/wiidoom/psphacx.wad", "r");
+#else
+        fprw = fopen("psphacx.wad", "r");
+#endif
 
         if (fprw == NULL)
             printf(" ");
@@ -626,10 +643,14 @@ void W_CheckSize(int wad)
     }
     else if(wad == 3)
     {
+#ifdef WII
         if(usb)
             fprw = fopen("usb:/apps/wiidoom/pspfreedoom.wad", "r");
         else if(sd)
             fprw = fopen("sd:/apps/wiidoom/pspfreedoom.wad", "r");
+#else
+        fprw = fopen("pspfreedoom.wad", "r");
+#endif
 
         if (fprw == NULL)
             printf(" ");
@@ -665,11 +686,14 @@ void W_CheckSize(int wad)
     }
     else if(wad == 5)
     {
+#ifdef WII
         if(usb)
             fprw = fopen("usb:/apps/wiidoom/doom1extras.wad", "r");
         else if(sd)
             fprw = fopen("sd:/apps/wiidoom/doom1extras.wad", "r");
-
+#else
+        fprw = fopen("doom1extras.wad", "r");
+#endif
         if (fprw == NULL)
             printf(" ");
         else

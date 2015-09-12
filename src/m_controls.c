@@ -17,33 +17,54 @@
 
 #include <stdio.h>
 
+#ifdef WII
 #include "doomdef.h"
+#else
+#include "doom/doomdef.h"
+#endif
+
 #include "doomfeatures.h"
 #include "doomkeys.h"
+
+#ifdef WII
 #include "doomstat.h"
+#else
+#include "doom/doomstat.h"
+#endif
+
 #include "doomtype.h"
 #include "m_config.h"
 #include "m_misc.h"
+
+#ifdef WII
 #include "r_local.h"
 #include "s_sound.h"
+#else
+#include "doom/r_local.h"
+#include "doom/s_sound.h"
+#endif
+
 #include "v_video.h"
 
-
+/*
 extern boolean am_rotate;
 extern boolean d_recoil;
 extern boolean d_maxgore;
 extern boolean d_thrust;
 extern boolean respawnparm;
 extern boolean fastparm;
+*/
 extern boolean hud;
 extern boolean swap_sound_chans;
 extern boolean randompitch;
 
 extern int display_fps;
+/*
 extern int drawgrid;
 extern int followplayer;
+*/
 extern int showMessages;
-extern int mouseSensitivity;
+//extern int mouseSensitivity;
 extern int wipe_type;
 extern int timer_info;
 
@@ -51,15 +72,17 @@ extern int timer_info;
 
 extern int show_stats;
 extern int screenblocks;
+/*
 extern int sfxVolume;
 extern int musicVolume;
+*/
 extern int forwardmove;
 extern int sidemove;
 extern int turnspeed;
 extern int crosshair;
 extern int mus_engine;
 extern int mouselook;
-extern int autoaim;
+//extern int autoaim;
 extern int runcount;
 extern int chaingun_tics;
 extern int snd_module;
@@ -92,11 +115,16 @@ int key_down = KEY_DOWNARROW;
 int key_left = KEY_LEFTARROW;
 int key_right = KEY_RIGHTARROW;
 int key_invright = KEY_RIGHTBRACKET;
-int key_strafeleft = KEY_ESCAPE;                // FOR PSP: THIS IS RESERVED AS A SPECIAL KEY
+int key_strafeleft = KEY_COMMA;                // FOR PSP: THIS IS RESERVED AS A SPECIAL KEY
+int key_straferight = KEY_PERIOD;              // FOR PSP: THIS IS RESERVED AS A SPECIAL KEY
 int key_useartifact = KEY_ENTER;
-int key_use = KEY_SPACE;
+int key_use = ' ';
 int key_fire = KEY_RCTRL;
-int key_speed; 
+int key_speed = KEY_RSHIFT; 
+int key_flyup = KEY_PGUP; 
+int key_flydown = KEY_PGDN;
+int key_jump = KEY_DEL;
+int key_strafe = KEY_RALT;
 int mspeed = 2;
 
 // Map control keys:
@@ -107,7 +135,7 @@ int key_map_east      = KEY_RIGHTARROW;
 int key_map_west      = KEY_LEFTARROW;
 int key_map_zoomin    = '=';
 int key_map_zoomout   = '-';
-int key_map_toggle    = KEY_DOWNARROW;
+int key_map_toggle    = KEY_TAB;
 
 // menu keys:
 
@@ -120,7 +148,59 @@ int key_menu_back      = KEY_BACKSPACE;
 int key_menu_forward   = KEY_ENTER;
 int key_menu_confirm   = 'y';
 int key_menu_abort     = 'n';
-int key_menu_screenshot = 0;
+
+int key_menu_help      = KEY_F1;
+int key_menu_save      = KEY_F2;
+int key_menu_load      = KEY_F3;
+int key_menu_volume    = KEY_F4;
+int key_menu_detail    = KEY_F5;
+int key_menu_qsave     = KEY_F6;
+int key_menu_endgame   = KEY_F7;
+int key_menu_messages  = KEY_F8;
+int key_menu_qload     = KEY_F9;
+int key_menu_quit      = KEY_F10;
+int key_menu_gamma     = KEY_F11;
+
+int key_menu_incscreen = KEY_EQUALS;
+int key_menu_decscreen = KEY_MINUS;
+int key_menu_screenshot = KEY_F12;
+
+int key_console = KEY_TILDE;
+
+// Control whether if a mouse button is double clicked, it acts like 
+// "use" has been pressed
+
+int dclick_use = 1;
+ 
+// Weapon selection keys:
+
+int key_weapon1 = '1';
+int key_weapon2 = '2';
+int key_weapon3 = '3';
+int key_weapon4 = '4';
+int key_weapon5 = '5';
+int key_weapon6 = '6';
+int key_weapon7 = '7';
+int key_weapon8 = '8';
+int key_prevweapon = 0;
+int key_nextweapon = 0;
+
+//int mousebjump = -1;
+int mousebjump = 2;
+int mousebfire = 0;
+//int mousebforward = 1;
+int mousebforward = -1;
+//int mousebstrafe = 2;
+int mousebstrafe = -1;
+int mousebbackward = -1;
+//int mousebprevweapon = -1;
+int mousebprevweapon = 3;
+//int mousebnextweapon = -1;
+int mousebnextweapon = 4;
+int mousebstrafeleft = -1;
+int mousebstraferight = -1;
+int mousebuse = 1;
+//int mousebuse = -1;
 
 // Joystick controls
 
@@ -203,6 +283,7 @@ void M_BindBaseControls(void)
     M_BindVariable("shadows",                &d_shadows);
     M_BindVariable("offsets",                &d_fixspriteoffsets);
 //    M_BindVariable("memory",                 &memory_usage);
+#ifdef WII
     M_BindVariable("key_shoot",              &joy_r);
     M_BindVariable("key_open",               &joy_l);
     M_BindVariable("key_menu",               &joy_minus);
@@ -217,6 +298,24 @@ void M_BindBaseControls(void)
     M_BindVariable("key_run",                &joy_1);
     M_BindVariable("key_console",            &joy_2);
     M_BindVariable("key_screenshots",        &joy_x);
+#else
+    M_BindVariable("key_shoot",              &key_fire);
+    M_BindVariable("key_open",               &key_use);
+    M_BindVariable("key_menu",               &key_menu_activate);
+    M_BindVariable("key_weapon_left",        &key_prevweapon);
+    M_BindVariable("key_automap",            &key_map_toggle);
+    M_BindVariable("key_weapon_right",       &key_nextweapon);
+    M_BindVariable("key_automap_zoom_in",    &key_map_zoomin);
+    M_BindVariable("key_automap_zoom_out",   &key_map_zoomout);
+    M_BindVariable("key_flyup",              &key_flyup);
+    M_BindVariable("key_flydown",            &key_flydown);
+    M_BindVariable("key_jump",               &key_jump);
+    M_BindVariable("key_run",                &key_speed);
+    M_BindVariable("key_console",            &key_console);
+    M_BindVariable("key_screenshots",        &key_menu_screenshot);
+    M_BindVariable("key_strafe_left",        &key_strafeleft);
+    M_BindVariable("key_strafe_right",       &key_straferight);
+#endif
 //    M_BindVariable("key_aiminghelp",         &joy_plus);
 }
 

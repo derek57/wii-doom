@@ -49,9 +49,9 @@
 
 // Data.
 #include "dstrings.h"
-
+#ifdef WII
 #include <wiiuse/wpad.h>
-
+#endif
 
 // For use if I do walls with outsides/insides
 #define REDS             (256-5*16)
@@ -304,7 +304,7 @@ static boolean     stopped = true;
 boolean            dont_move_backwards = false;
 boolean            automapactive = false;
 
-extern boolean     am_rotate;
+//extern boolean     am_rotate;
 
 extern int         screenSize;
 
@@ -653,7 +653,7 @@ boolean AM_Responder
 ( event_t*  ev )
 {
     int rc;
-
+#ifdef WII
     WPADData *data = WPAD_Data(0);
 
     rc = false;
@@ -711,6 +711,147 @@ boolean AM_Responder
                 m_paninc.y = 0;
         }
     }
+#else
+    int key;
+
+    rc = false;
+
+    if (!automapactive)
+    {
+	if (ev->type == ev_keydown && ev->data1 == key_map_toggle)
+	{
+/*
+	    AM_Start ();
+	    viewactive = false;
+*/
+            AM_Toggle();
+	    rc = true;
+	}
+    }
+    else if (ev->type == ev_keydown)
+    {
+	rc = true;
+        key = ev->data1;
+
+        if (key == key_map_east)          // pan right
+        {
+            if (!followplayer) m_paninc.x = FTOM(F_PANINC);
+            else rc = false;
+        }
+        else if (key == key_map_west)     // pan left
+        {
+            if (!followplayer) m_paninc.x = -FTOM(F_PANINC);
+            else rc = false;
+        }
+        else if (key == key_map_north)    // pan up
+        {
+            if (!followplayer) m_paninc.y = FTOM(F_PANINC);
+            else rc = false;
+        }
+        else if (key == key_map_south)    // pan down
+        {
+            if (!followplayer) m_paninc.y = -FTOM(F_PANINC);
+            else rc = false;
+        }
+        else if (key == key_map_zoomout)  // zoom out
+        {
+            mtof_zoommul = M_ZOOMOUT;
+            ftom_zoommul = M_ZOOMIN;
+        }
+        else if (key == key_map_zoomin)   // zoom in
+        {
+            mtof_zoommul = M_ZOOMIN;
+            ftom_zoommul = M_ZOOMOUT;
+        }
+        else if (key == key_map_toggle)
+        {
+/*
+            viewactive = true;
+            AM_Stop ();
+*/
+            AM_Toggle();
+        }
+/*
+        else if (key == key_map_maxzoom)
+        {
+            bigstate = !bigstate;
+            if (bigstate)
+            {
+                AM_saveScaleAndLoc();
+                AM_minOutWindowScale();
+            }
+            else AM_restoreScaleAndLoc();
+        }
+        else if (key == key_map_follow)
+        {
+            followplayer = !followplayer;
+            f_oldloc.x = INT_MAX;
+            if (followplayer)
+                plr->message = DEH_String(AMSTR_FOLLOWON);
+            else
+                plr->message = DEH_String(AMSTR_FOLLOWOFF);
+        }
+        else if (key == key_map_grid)
+        {
+            grid = !grid;
+            if (grid)
+                plr->message = DEH_String(AMSTR_GRIDON);
+            else
+                plr->message = DEH_String(AMSTR_GRIDOFF);
+        }
+        else if (key == key_map_mark)
+        {
+            M_snprintf(buffer, sizeof(buffer), "%s %d",
+                       DEH_String(AMSTR_MARKEDSPOT), markpointnum);
+            plr->message = buffer;
+            AM_addMark();
+        }
+        else if (key == key_map_clearmark)
+        {
+            AM_clearMarks();
+            plr->message = DEH_String(AMSTR_MARKSCLEARED);
+        }
+*/
+        else
+        {
+            rc = false;
+        }
+/*
+	if (!deathmatch && cht_CheckCheat(&cheat_amap, ev->data2))
+	{
+	    rc = false;
+	    cheating = (cheating+1) % 3;
+	}
+*/
+    }
+    else if (ev->type == ev_keyup)
+    {
+        rc = false;
+        key = ev->data1;
+
+        if (key == key_map_east)
+        {
+            if (!followplayer) m_paninc.x = 0;
+        }
+        else if (key == key_map_west)
+        {
+            if (!followplayer) m_paninc.x = 0;
+        }
+        else if (key == key_map_north)
+        {
+            if (!followplayer) m_paninc.y = 0;
+        }
+        else if (key == key_map_south)
+        {
+            if (!followplayer) m_paninc.y = 0;
+        }
+        else if (key == key_map_zoomout || key == key_map_zoomin)
+        {
+            mtof_zoommul = FRACUNIT;
+            ftom_zoommul = FRACUNIT;
+        }
+    }
+#endif
     return rc;
 }
 
@@ -1285,6 +1426,8 @@ AM_drawThings
     int       i;
     mobj_t*   t;
     fixed_t   radius;
+    fixed_t   x;
+    fixed_t   y;
 
     for (i=0;i<numsectors;i++)
     {
@@ -1293,7 +1436,8 @@ AM_drawThings
         {
             radius = t->radius;
 
-              fixed_t x = t->x, y = t->y;
+              x = t->x;
+              y = t->y;
 
               if (automapactive & am_rotate)
                   AM_rotate(&x, &y, ANG90-plr->mo->angle, plr->mo->x, plr->mo->y);
@@ -1327,7 +1471,7 @@ void AM_drawMarks(void)
 
             if (fx >= f_x && fx <= (f_w >> hires) -                 // HIRES
                         w && fy >= f_y && fy <= (f_h >> hires) - h) // HIRES
-                V_DrawPatch(fx, fy, 0, marknums[i]);
+                V_DrawPatch(fx, fy, marknums[i]);
         }
     }
 

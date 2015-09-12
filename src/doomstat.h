@@ -36,16 +36,26 @@
 // We need globally shared data structures,
 //  for defining the global state variables.
 #include "doomdata.h"
+
+#ifdef WII
 #include "d_loop.h"
+#else
+#include "../d_loop.h"
+#endif
 
 // We need the playr data structure as well.
 #include "d_player.h"
 
 // Game mode/mission
+#ifdef WII
 #include "d_mode.h"
 
 #include "net_defs.h"
+#else
+#include "../d_mode.h"
 
+#include "../net_defs.h"
+#endif
 
 
 // ------------------------

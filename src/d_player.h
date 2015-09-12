@@ -43,10 +43,15 @@
 // Finally, for odd reasons, the player input
 // is buffered within the player data struct,
 // as commands per game tick.
+#ifdef WII
 #include "d_ticcmd.h"
 
 #include "net_defs.h"
+#else
+#include "../d_ticcmd.h"
 
+#include "../net_defs.h"
+#endif
 
 
 

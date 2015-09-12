@@ -1,3 +1,4 @@
+#ifdef WII
 #ifndef _NAND_H_
 #define _NAND_H_
 
@@ -22,3 +23,5 @@ s32 Nand_Enable(nandDevice *);
 s32 Nand_Disable(void);
 
 #endif
+#endif
+

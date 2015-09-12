@@ -24,11 +24,16 @@ extern int key_down;
 extern int key_left;
 extern int key_right;
 extern int key_invright;
-extern int key_strafeleft;
 extern int key_useartifact;
 extern int key_use;
 extern int key_fire;
 extern int key_speed;
+extern int key_jump;
+extern int key_flyup; 
+extern int key_flydown;
+extern int key_strafe;
+extern int key_strafeleft;
+extern int key_straferight;
 extern int key_map_north;
 extern int key_map_south;
 extern int key_map_east;
@@ -38,6 +43,21 @@ extern int key_map_zoomout;
 extern int key_map_toggle;
 
 // menu keys:
+
+extern int key_menu_help;
+extern int key_menu_save;
+extern int key_menu_load;
+extern int key_menu_volume;
+extern int key_menu_detail;
+extern int key_menu_qsave;
+extern int key_menu_endgame;
+extern int key_menu_messages;
+extern int key_menu_qload;
+extern int key_menu_quit;
+extern int key_menu_gamma;
+
+extern int key_menu_incscreen;
+extern int key_menu_decscreen;
 
 extern int key_menu_activate;
 extern int key_menu_up;
@@ -49,6 +69,32 @@ extern int key_menu_forward;
 extern int key_menu_confirm;
 extern int key_menu_abort;
 extern int key_menu_screenshot;
+
+extern int key_console;
+
+extern int dclick_use;
+
+extern int key_weapon1;
+extern int key_weapon2;
+extern int key_weapon3;
+extern int key_weapon4;
+extern int key_weapon5;
+extern int key_weapon6;
+extern int key_weapon7;
+extern int key_weapon8;
+extern int key_nextweapon;
+extern int key_prevweapon;
+
+extern int mousebfire;
+extern int mousebjump;
+extern int mousebstrafeleft;
+extern int mousebstraferight;
+extern int mousebuse;
+extern int mousebbackward;
+extern int mousebforward;
+extern int mousebstrafe;
+extern int mousebprevweapon;
+extern int mousebnextweapon;
 
 extern int joybstrafeleft;
 extern int joybstraferight;

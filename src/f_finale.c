@@ -92,9 +92,7 @@ static textscreen_t textscreens[] =
     { pack_plut, 1, 20, "RROCK07",   P3TEXT},
     { pack_plut, 1, 30, "RROCK17",   P4TEXT},
     { pack_plut, 1, 15, "RROCK13",   P5TEXT},
-    { pack_plut, 1, 31, "RROCK19",   P6TEXT},
-
-    { pack_nerve, 1, 8, "SLIME16",   N1TEXT},
+    { pack_plut, 1, 31, "RROCK19",   P6TEXT}
 };
 
 
@@ -207,9 +205,6 @@ void F_Ticker (void)
 
       if (i < MAXPLAYERS)
       {
-        if (gamemission == pack_nerve && gamemap == 8)
-          F_StartCast ();
-        else
         if (gamemap == 30)
           F_StartCast ();
         else
@@ -311,7 +306,7 @@ void F_TextWrite (void)
         w = SHORT (hu_font[c]->width);
         if (cx+w > ORIGWIDTH)         // CHANGED FOR HIRES
             break;
-        V_DrawPatch(cx, cy, 0, hu_font[c]);
+        V_DrawPatch(cx, cy, hu_font[c]);
         cx+=w;
     }
         
@@ -652,7 +647,7 @@ void F_CastPrint (char* text)
         }
                 
         w = SHORT (hu_font[c]->width);
-        V_DrawPatch(cx, 180, 0, hu_font[c]);
+        V_DrawPatch(cx, 180, hu_font[c]);
         cx+=w;
     }
         
@@ -672,7 +667,7 @@ void F_CastDrawer (void)
     patch_t*         patch;
     
     // erase the entire screen to a background
-    V_DrawPatch (0, 0, 0, W_CacheLumpName (DEH_String("BOSSBACK"), PU_CACHE));
+    V_DrawPatch (0, 0, W_CacheLumpName (DEH_String("BOSSBACK"), PU_CACHE));
 
     if(!beta_skulls)
         F_CastPrint (DEH_String(castorder[castnum].name));
@@ -690,7 +685,7 @@ void F_CastDrawer (void)
     if (flip)
         V_DrawPatchFlipped(160, 170, patch);
     else
-        V_DrawPatch(160, 170, 0, patch);
+        V_DrawPatch(160, 170, patch);
 }
 
 
@@ -776,7 +771,7 @@ void F_BunnyScroll (void)
     {
         V_DrawPatch((ORIGWIDTH - 13 * 8) / 2, // CHANGED FOR HIRES
                     (ORIGHEIGHT - 8 * 8) / 2, // CHANGED FOR HIRES
-                    0, W_CacheLumpName(DEH_String("END0"), PU_CACHE)); // CHANGED FOR HIRES
+                    W_CacheLumpName(DEH_String("END0"), PU_CACHE)); // CHANGED FOR HIRES
         laststage = 0;
         return;
     }
@@ -794,7 +789,7 @@ void F_BunnyScroll (void)
 
     V_DrawPatch((ORIGWIDTH - 13 * 8) / 2, // CHANGED FOR HIRES
                 (ORIGHEIGHT - 8 * 8) / 2, // CHANGED FOR HIRES
-                0, W_CacheLumpName (name,PU_CACHE)); // CHANGED FOR HIRES
+                W_CacheLumpName (name,PU_CACHE)); // CHANGED FOR HIRES
 }
 
 static void F_ArtScreenDrawer(void)
@@ -834,7 +829,7 @@ static void F_ArtScreenDrawer(void)
 
         lumpname = DEH_String(lumpname);
 
-        V_DrawPatch (0, 0, 0, W_CacheLumpName(lumpname, PU_CACHE));
+        V_DrawPatch (0, 0, W_CacheLumpName(lumpname, PU_CACHE));
     }
 }
 

@@ -27,7 +27,13 @@
 
 #include "c_io.h"
 #include "deh_str.h"
+
+#ifdef WII
 #include "doomdef.h"
+#else
+#include "doom/doomdef.h"
+#endif
+
 #include "doomtype.h"
 #include "i_sound.h"
 #include "i_swap.h"

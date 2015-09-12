@@ -41,8 +41,13 @@
 #include "info.h"
 
 // Basics.
+#ifdef WII
 #include "m_fixed.h"
 #include "tables.h"
+#else
+#include "../m_fixed.h"
+#include "../tables.h"
+#endif
 
 
 // killough 11/98:

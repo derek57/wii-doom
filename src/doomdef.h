@@ -33,10 +33,15 @@
 #include <stdio.h>
 #include <string.h>
 
+#ifdef WII
 #include "d_mode.h"
 #include "doomtype.h"
 #include "i_timer.h"
-
+#else
+#include "../d_mode.h"
+#include "../doomtype.h"
+#include "../i_timer.h"
+#endif
 
 //
 // Global parameters/defines.

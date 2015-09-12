@@ -1,3 +1,4 @@
+#ifdef WII
 #ifndef _WPAD_H_
 #define _WPAD_H_
 
@@ -15,4 +16,5 @@ boolean Wpad_TimeButton(void);
 // is mapped to the "SELECT" button on the Gamecube Ctrl. (wiiNinja 5/15/2009)
 u32 WaitButtons(void);
 
+#endif
 #endif

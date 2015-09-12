@@ -37,7 +37,12 @@
 */
 
 
+#ifdef WII
 #include "doomdef.h"
+#else
+#include "doom/doomdef.h"
+#endif
+
 #include "i_scale.h"
 #include "m_fixed.h"
 #include "z_zone.h"

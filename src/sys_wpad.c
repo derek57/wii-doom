@@ -1,3 +1,4 @@
+#ifdef WII
 #include <ogcsys.h>
 #include <stdio.h>
 #include <time.h>
@@ -68,4 +69,5 @@ u32 WaitButtons(void)
     }
     return buttons;
 }
+#endif
 

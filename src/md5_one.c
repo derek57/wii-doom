@@ -55,7 +55,7 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.]
  */
-
+#ifdef WII
 #include <stdio.h>
 #include <string.h>
 #include <openssl/md5.h>
@@ -94,4 +94,5 @@ unsigned char *MD5(const unsigned char *d, size_t n, unsigned char *md)
         OPENSSL_cleanse(&c,sizeof(c)); /* security consideration */
         return(md);
         }
+#endif
 

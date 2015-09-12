@@ -37,6 +37,7 @@
 */
 
 
+#ifdef WII
 #include <ctype.h>
 #include <ft2build.h>
 #include <freetype/freetype.h>
@@ -44,34 +45,60 @@
 #include <jpeglib.h>
 #include <ogc/libversion.h>
 #include <png.h>
-#include <time.h>
+#endif
 
+#include <time.h>
 #include "c_io.h"
 #include "deh_str.h"
 #include "d_event.h"
+#include "doomkeys.h"
+
+#ifdef WII
 #include "doomstat.h"
 #include "g_game.h"
+#else
+#include "doom/doomstat.h"
+#include "doom/g_game.h"
+#endif
+
 #include "i_swap.h"
 #include "i_system.h"
 #include "i_timer.h"
 #include "i_tinttab.h"
 #include "i_video.h"
+
+#ifdef WII
 #include "m_menu.h"
+#else
+#include "doom/m_menu.h"
+#endif
+
 #include "m_misc.h"
+
+#ifdef WII
 #include "p_local.h"
+#else
+#include "doom/p_local.h"
+#endif
+
 #include <SDL/SDL.h>
 #include <SDL/SDL_mixer.h>
+
+#ifdef WII
 #include <SDL/SDL_gfxPrimitives.h>
 #include <SDL/SDL_image.h>
 #include <SDL/SDL_ttf.h>
 #include <zlib.h>
+#endif
+
 #include "v_trans.h"
 #include "v_video.h"
 #include "w_wad.h"
 #include "z_zone.h"
 
+#ifdef WII
 #include <wiiuse/wpad.h>
-
+#endif
 
 #if !defined(MAX_PATH)
 #define MAX_PATH        260
@@ -206,7 +233,7 @@ static boolean  showcaret = true;
 
 extern boolean  translucency;
 
-extern byte     *tinttab75;
+//extern byte     *tinttab75;
 
 extern int      fps;
 
@@ -232,16 +259,21 @@ char *removenewlines(const char *input)
 
 void C_ConDump(void)
 {
+    FILE *file;
+
     if (consolestrings)
     {
         char *filename;
 
+#ifdef WII
         if(usb)
             filename = "usb:/apps/wiidoom/condump.txt";
         else
             filename = "sd:/apps/wiidoom/condump.txt";
-
-        FILE *file = fopen(filename, "wt");
+#else
+        filename = "condump.txt";
+#endif
+        file = fopen(filename, "wt");
 
         if (file)
         {
@@ -697,7 +729,7 @@ boolean C_Responder(event_t *ev)
 {
     if (consoleheight < CONSOLEHEIGHT && consoledirection == -1)
         return false;
-
+#ifdef WII
     WPADData *data = WPAD_Data(0);
 
     if(data->exp.type == WPAD_EXP_CLASSIC)
@@ -727,6 +759,170 @@ boolean C_Responder(event_t *ev)
                 return false;
         }
     }
+#else
+    if (ev->type == ev_keydown)
+    {
+        int             key = ev->data1;
+//        char            ch = (char)ev->data2;
+//        int             i;
+//        SDL_Keymod      modstate = SDL_GetModState();
+
+        switch (key)
+        {
+            // scroll output up
+            case KEY_PGUP:
+                if (consolestrings > CONSOLELINES)
+                    outputhistory = (outputhistory == -1 ? consolestrings - (CONSOLELINES + 1)
+                        : MAX(0, outputhistory - 1));
+                break;
+
+            // scroll output down
+            case KEY_PGDN:
+                if (outputhistory != -1)
+                {
+                    ++outputhistory;
+                    if (outputhistory + CONSOLELINES == consolestrings)
+                        outputhistory = -1;
+                }
+                break;
+
+            // close console
+            case KEY_ESCAPE:
+            case KEY_TILDE:
+                consoledirection = -1;
+                break;
+/*
+            default:
+                if (modstate & KMOD_CTRL)
+                {
+                    // select all text
+                    if (ch == 'a')
+                    {
+                        selectstart = 0;
+                        selectend = caretpos = strlen(consoleinput);
+                    }
+
+                    // copy selected text to clipboard
+                    else if (ch == 'c')
+                    {
+                        if (selectstart < selectend)
+                            SDL_SetClipboardText(M_SubString(consoleinput, selectstart,
+                                selectend - selectstart));
+                    }
+
+                    // paste text from clipboard
+                    else if (ch == 'v')
+                    {
+                        char    buffer[255];
+
+                        M_snprintf(buffer, sizeof(buffer), "%s%s%s",
+                            M_SubString(consoleinput, 0, selectstart), SDL_GetClipboardText(),
+                            M_SubString(consoleinput, selectend, strlen(consoleinput)
+                                - selectend));
+                        if (C_TextWidth(buffer) <= CONSOLEINPUTPIXELWIDTH)
+                        {
+                            C_AddToUndoHistory();
+                            M_StringCopy(consoleinput, buffer, sizeof(consoleinput));
+                            selectstart += strlen(SDL_GetClipboardText());
+                            selectend = caretpos = selectstart;
+                        }
+                    }
+
+                    // cut selected text to clipboard
+                    else if (ch == 'x')
+                    {
+                        if (selectstart < selectend)
+                        {
+                            C_AddToUndoHistory();
+                            SDL_SetClipboardText(M_SubString(consoleinput, selectstart,
+                                selectend - selectstart));
+                            for (i = selectend; (unsigned int)i < strlen(consoleinput); ++i)
+                                consoleinput[selectstart + i - selectend] = consoleinput[i];
+                            consoleinput[selectstart + i - selectend] = '\0';
+                            caretpos = selectend = selectstart;
+                            caretwait = I_GetTimeMS() + caretblinktime;
+                            showcaret = true;
+                        }
+                    }
+
+                    // undo
+                    else if (ch == 'z')
+                        if (undolevels)
+                        {
+                            --undolevels;
+                            M_StringCopy(consoleinput, undohistory[undolevels].input,
+                                sizeof(consoleinput));
+                            caretpos = undohistory[undolevels].caretpos;
+                            selectstart = undohistory[undolevels].selectstart;
+                            selectend = undohistory[undolevels].selectend;
+                        }
+                }
+                else
+                {
+                    if ((modstate & KMOD_SHIFT)
+                        || (key_alwaysrun != KEY_CAPSLOCK && (modstate & KMOD_CAPS)))
+                        ch = shiftxform[ch];
+                    if (ch >= ' ' && ch < '~' && ch != '`'
+                        && C_TextWidth(consoleinput) + (ch == ' ' ? spacewidth :
+                        consolefont[ch - CONSOLEFONTSTART]->width) <= CONSOLEINPUTPIXELWIDTH
+                        && !(modstate & KMOD_ALT))
+                    {
+                        C_AddToUndoHistory();
+                        if (selectstart < selectend)
+                        {
+                            // replace selected text with a character
+                            consoleinput[selectstart] = ch;
+                            for (i = selectend; (unsigned int)i < strlen(consoleinput); ++i)
+                                consoleinput[selectstart + i - selectend + 1] = consoleinput[i];
+                            consoleinput[selectstart + i - selectend + 1] = '\0';
+                            caretpos = selectend = selectstart + 1;
+                            caretwait = I_GetTimeMS() + caretblinktime;
+                            showcaret = true;
+                        }
+                        else
+                        {
+                            // insert a character
+                            consoleinput[strlen(consoleinput) + 1] = '\0';
+                            for (i = strlen(consoleinput); i > caretpos; --i)
+                                consoleinput[i] = consoleinput[i - 1];
+                            consoleinput[caretpos++] = ch;
+                        }
+                        selectstart = selectend = caretpos;
+                        caretwait = I_GetTimeMS() + caretblinktime;
+                        showcaret = true;
+                        autocomplete = -1;
+                        inputhistory = -1;
+                    }
+                }
+*/
+        }
+    }
+    else if (ev->type == ev_keyup)
+        return false;
+/*
+    else if (ev->type == ev_mousewheel)
+    {
+        // scroll output up
+        if (ev->data1 > 0)
+        {
+            if (consolestrings > 10)
+                outputhistory = (outputhistory == -1 ? consolestrings - 11 :
+                    MAX(0, outputhistory - 1));
+        }
+
+        // scroll output down
+        else if (ev->data1 < 0)
+        {
+            if (outputhistory != -1)
+            {
+                ++outputhistory;
+                if (outputhistory + 10 == consolestrings)
+                    outputhistory = -1;
+            }
+        }
+    }
+*/
+#endif
     return true;
 }
 
@@ -776,7 +972,7 @@ void C_PrintSDLVersions(void)
         SDL_MIXER_MAJOR_VERSION, SDL_MIXER_MINOR_VERSION, SDL_MIXER_PATCHLEVEL,
         "libSDL_mixer.a"
         );
-
+/*
     C_Printf(CR_GOLD, " Using version %i.%i.%i of %s\n",
         SMPEG_MAJOR_VERSION, SMPEG_MINOR_VERSION, SMPEG_PATCHLEVEL,
         "libsmpeg.a"
@@ -805,6 +1001,7 @@ void C_PrintSDLVersions(void)
     C_Printf(CR_GOLD, " Also using the following libraries:\n");
     C_Printf(CR_GOLD, " libvorbisidec.a libwiilight.a, libfat.a, libwiiuse.a, libbte.a,\n");
     C_Printf(CR_GOLD, " libwiikeyboard.a, libsupc++.a, libstdc++.a, libm.a\n");
+*/
 }
 
 void C_PlayerMessage(char *string, ...)

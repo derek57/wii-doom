@@ -929,6 +929,7 @@ P_KillMobj
     mobj_t*      mo;
     int          t;
     int          i;
+    int          minhealth;
 
     target->flags &= ~(MF_SHOOTABLE|MF_FLOAT|MF_SKULLFLY);
     target->flags2 &= ~MF2_PASSMOBJ;
@@ -1048,7 +1049,7 @@ P_KillMobj
             target->shadow)
         P_RemoveMobjShadow(target);
 
-    int minhealth = target->info->spawnhealth;
+    minhealth = target->info->spawnhealth;
 
     // Make Lost Soul and Pain Elemental explosions translucent
     if (target->type == MT_BETASKULL ||

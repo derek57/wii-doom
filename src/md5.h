@@ -55,7 +55,7 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.]
  */
-
+#ifdef WII
 #ifndef HEADER_MD5_H
 #define HEADER_MD5_H
 
@@ -115,3 +115,5 @@ void MD5_Transform(MD5_CTX *c, const unsigned char *b);
 #endif
 
 #endif
+#endif
+

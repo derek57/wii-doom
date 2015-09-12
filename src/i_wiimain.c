@@ -1,3 +1,5 @@
+#ifdef WII
+
 #include <fat.h>
 #include "doomtype.h"
 #include <sdcard/wiisd_io.h>
@@ -45,3 +47,5 @@ int wii_main()
 
     return 0;
 }
+
+#endif

@@ -39,7 +39,12 @@
 #if !defined(__C_CONSOLE__)
 #define __C_CONSOLE__
 
+#ifdef WII
 #include "doomstat.h"
+#else
+#include "doom/doomstat.h"
+#endif
+
 #include "doomtype.h"
 #include "d_event.h"
 

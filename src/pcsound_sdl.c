@@ -21,7 +21,7 @@
 #include <SDL/SDL.h>
 #include <SDL/SDL_mixer.h>
 
-#include "c_io.h"
+#include "../src/c_io.h"
 #include "pcsound.h"
 #include "pcsound_internal.h"
 

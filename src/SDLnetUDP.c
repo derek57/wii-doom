@@ -21,7 +21,7 @@
 
 /* $Id$ */
 
-
+#ifdef WII
 #include "c_io.h"
 #include "SDLnetsys.h"
 #include "SDL_net.h"
@@ -636,4 +636,5 @@ extern void SDLNet_UDP_Close(UDPsocket sock)
         free(sock);
     }
 }
+#endif
 

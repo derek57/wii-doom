@@ -45,8 +45,8 @@ char *gus_patch_path = "";
 
 int gus_ram_kb = 1024;
 
-extern boolean usb;
-extern boolean sd;
+//extern boolean usb;
+//extern boolean sd;
 
 static unsigned int MappingIndex(void)
 {
@@ -202,6 +202,8 @@ static char *ReadDMXConfig(void)
     data = Z_Malloc(len + 1, PU_STATIC, NULL);
     W_ReadLump(lumpnum, data);
 
+    data[len] = '\0';
+
     return data;
 }
 
@@ -210,10 +212,12 @@ static boolean WriteTimidityConfig(char *path, gus_config_t *config)
     FILE *fstream;
     unsigned int i;
 
+#ifdef WII
     if(usb)
         gus_patch_path = "usb:/apps/wiidoom/gus";
     else if(sd)
         gus_patch_path = "sd:/apps/wiidoom/gus";
+#endif
 
     fstream = fopen(path, "w");
 
@@ -263,10 +267,12 @@ boolean GUS_WriteConfig(char *path)
     char *dmxconf;
     gus_config_t config;
 
+#ifdef WII
     if(usb)
         gus_patch_path = "usb:/apps/wiidoom/gus";
     else if(sd)
         gus_patch_path = "sd:/apps/wiidoom/gus";
+#endif
 
     if (!strcmp(gus_patch_path, ""))
     {

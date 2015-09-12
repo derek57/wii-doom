@@ -30,7 +30,7 @@
 
 
 #define R_ADDRESS(scrn, px, py) \
-    (screens[scrn] + (viewwindowy + (py)) * SCREENWIDTH + (viewwindowx + (px)))
+    (I_VideoBuffer + (viewwindowy + (py)) * SCREENWIDTH + (viewwindowx + (px)))
 
 
 extern int                dc_x;

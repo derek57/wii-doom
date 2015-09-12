@@ -127,7 +127,7 @@
  *
  *                                        <appro@fy.chalmers.se>
  */
-
+#ifdef WII
 #if !defined(DATA_ORDER_IS_BIG_ENDIAN) && !defined(DATA_ORDER_IS_LITTLE_ENDIAN)
 #error "DATA_ORDER must be defined!"
 #endif
@@ -621,3 +621,5 @@ int HASH_FINAL (unsigned char *md, HASH_CTX *c)
  *                                <appro@fy.chalmers.se>
  */
 #endif
+#endif
+

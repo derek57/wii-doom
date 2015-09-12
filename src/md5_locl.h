@@ -55,7 +55,7 @@
  * copied and put under another distribution licence
  * [including the GNU Public Licence.]
  */
-
+#ifdef WII
 #include <stdlib.h>
 #include <string.h>
 #include <openssl/e_os2.h>
@@ -174,3 +174,5 @@ void md5_block_data_order (MD5_CTX *c, const void *p,size_t num);
         a+=((k)+(t)+I((b),(c),(d))); \
         a=ROTATE(a,s); \
         a+=b; };
+#endif
+

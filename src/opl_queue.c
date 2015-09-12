@@ -20,10 +20,21 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef WII
 #include "c_io.h"
 #include "doomdef.h"
+#else
+#include "../src/c_io.h"
+#include "../src/doom/doomdef.h"
+#endif
+
 #include "opl_queue.h"
+
+#ifdef WII
 #include "v_trans.h"
+#else
+#include "../src/v_trans.h"
+#endif
 
 
 #define MAX_OPL_QUEUE 64

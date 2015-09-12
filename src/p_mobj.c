@@ -66,7 +66,7 @@ static fixed_t floatbobdiffs[64] =
 };
 
 void G_PlayerReborn (int player);
-void P_SpawnMapThing (mapthing_t* mthing);
+//void P_SpawnMapThing (mapthing_t* mthing);
 
 extern int      mouselook;
 extern int      snd_module;
@@ -1344,6 +1344,7 @@ P_SpawnBlood
   mobj_t*        target ) // [crispy] pass thing type
 {
     mobj_t*        th;
+    int            t;        
     int            color = 0;
     mobjinfo_t*    info = &mobjinfo[color];
         
@@ -1391,8 +1392,6 @@ P_SpawnBlood
         // added for colored blood and gore!
         th2->target = target;
 
-        int t;
-        
         th2->z = th->z;
 
         t = P_Random();
@@ -1609,7 +1608,7 @@ P_SpawnPlayerMissile
 
     th->momz = FixedMul( th->info->speed, slope);
 
-    if (type == MT_ROCKET && smoketrails && !load_dehacked)
+    if (type == MT_ROCKET && smoketrails)
     {
         th->flags2 |= MF2_SMOKETRAIL;
         puffcount = 0;

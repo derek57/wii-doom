@@ -335,8 +335,11 @@ boolean PIT_CheckLine (line_t* ld)
         // 1/11/98 killough: remove limit on lines hit, by array doubling
         if (numspechit >= spechit_max)
         {
+#ifdef WII
             int oldspechit = (int)spechit;
-
+#else
+            int oldspechit = (uintptr_t)spechit;
+#endif
             spechit_max = (spechit_max ? spechit_max * 2 : 8);
             spechit = realloc(spechit, sizeof(*spechit) * spechit_max);
 
@@ -1817,6 +1820,9 @@ boolean PIT_ChangeSector (mobj_t*        thing)
         // crunch bodies to giblets
         if (thing->health <= 0)
         {
+	    // [crispy] connect giblet object with the crushed monster
+	    thing->target = thing;
+
             P_SetMobjState (thing, S_GIBS);
 
             if (d_chkblood && d_colblood)

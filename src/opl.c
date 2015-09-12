@@ -20,7 +20,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "c_io.h"
+#include "../src/c_io.h"
 #include "config.h"
 #include "opl.h"
 #include "opl_internal.h"

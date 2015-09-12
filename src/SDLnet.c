@@ -22,7 +22,7 @@
 
 /* $Id$ */
 
-
+#ifdef WII
 #ifdef WITHOUT_SDL
 #include <stdarg.h>
 #include <string.h>
@@ -407,3 +407,4 @@ Uint32 SDLNet_Read32(const void *areap)
 }
 
 #endif /* !defined(WITHOUT_SDL) && !SDL_DATA_ALIGNED */
+#endif

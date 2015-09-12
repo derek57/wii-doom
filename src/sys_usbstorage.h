@@ -1,3 +1,4 @@
+#ifdef WII
 #ifndef _USBSTORAGE_H_
 #define _USBSTORAGE_H_
 
@@ -24,4 +25,5 @@ extern "C" {
 }
 #endif
 
+#endif
 #endif

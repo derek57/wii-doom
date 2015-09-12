@@ -1246,8 +1246,8 @@ void P_UpdateSpecials (void)
     int            pic;
     int            i;
     line_t*        line;
+    mobj_t*        so;
 
-    
     //        LEVEL TIMER
     if (levelTimer == true)
     {
@@ -1317,7 +1317,7 @@ void P_UpdateSpecials (void)
                 }
                 /* don't take the address of the switch's sound origin,
                  * unless in a compatibility mode. */
-                mobj_t *so = (mobj_t *)buttonlist[i].soundorg;
+                so = (mobj_t *)buttonlist[i].soundorg;
 
                 if (d_sound)
                     /* since the buttonlist array is usually zeroed out,

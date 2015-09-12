@@ -490,6 +490,7 @@ void P_LoadLineDefs (int lump)
     vertex_t*       v1;
     vertex_t*       v2;
     int             warn; // [crispy] warn about unknown linedef types
+    int             j;
         
     numlines = W_LumpLength (lump) / sizeof(maplinedef_t);
     lines = Z_Malloc (numlines*sizeof(line_t),PU_LEVEL,0);        
@@ -563,8 +564,6 @@ void P_LoadLineDefs (int lump)
         // cph 2006/09/30 - fix sidedef errors right away.
         // cph 2002/07/20 - these errors are fatal if not fixed, so apply them
         // in compatibility mode - a desync is better than a crash! */
-        int j;
-        
         for (j=0; j < 2; j++)
         {
             if (ld->sidenum[j] != -1 && ld->sidenum[j] >= numsides)
@@ -651,7 +650,15 @@ void P_LoadSideDefs (int lump)
 // [crispy] taken from mbfsrc/P_SETUP.C:547-707, slightly adapted
 static void P_CreateBlockMap(void)
 {
+    typedef struct
+    {
+        int n, nalloc, *list;
+    } bmap_t;  // blocklist structure
+
+    bmap_t *bmap, *bp;
+    unsigned tot;
     register int i;
+    int x, y, adx, ady, dx, dy, diff, b, bend, count, ndx;
 
     fixed_t minx = INT_MAX, miny = INT_MAX, maxx = INT_MIN, maxy = INT_MIN;
 
@@ -694,19 +701,12 @@ static void P_CreateBlockMap(void)
     //     Move to an adjacent block by moving towards the ending block in
     //     either the x or y direction, to the block which contains the linedef.
 
-    typedef struct
-    {
-        int n, nalloc, *list;
-    } bmap_t;  // blocklist structure
+    tot = bmapwidth * bmapheight;            // size of blockmap
 
-    unsigned tot = bmapwidth * bmapheight;            // size of blockmap
-
-    bmap_t *bmap = calloc(sizeof *bmap, tot);         // array of blocklists
+    bmap = calloc(sizeof *bmap, tot);         // array of blocklists
 
     if (!bmap)
         C_Printf(CR_RED, " Unable to create blockmap.\n");
-
-    int x, y, adx, ady, dx, dy, diff, b, bend;
 
     for (i=0; i < numlines; i++)
     {
@@ -769,7 +769,7 @@ static void P_CreateBlockMap(void)
     //
     // 4 words, unused if this routine is called, are reserved at the start.
 
-    int count = tot + 6;  // we need at least 1 word per block, plus reserved's
+    count = tot + 6;  // we need at least 1 word per block, plus reserved's
 
     for (i = 0; i < tot; i++)
         if (bmap[i].n)
@@ -779,8 +779,8 @@ static void P_CreateBlockMap(void)
     blockmaplump = Z_Malloc(sizeof(*blockmaplump) * count, PU_LEVEL, 0);
 
     // Now compress the blockmap.
-    int ndx = tot += 4;         // Advance index to start of linedef lists
-    bmap_t *bp = bmap;          // Start of uncompressed blockmap
+    ndx = tot += 4;         // Advance index to start of linedef lists
+    bp = bmap;          // Start of uncompressed blockmap
 
     blockmaplump[ndx++] = 0;    // Store an empty blockmap list at start
     blockmaplump[ndx++] = -1;   // (Used for compression)
@@ -1241,11 +1241,6 @@ P_SetupLevel
     }
 
     lumpnum = W_GetNumForName (lumpname);
-
-    if (nerve_pwad && gamemission != pack_nerve)
-    {
-        lumpnum = W_GetSecondNumForName (lumpname);
-    }
 
     leveltime = 0;
     animatedliquiddiff = FRACUNIT;

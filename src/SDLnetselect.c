@@ -21,7 +21,7 @@
 
 /* $Id$ */
 
-
+#ifdef WII
 #include "c_io.h"
 #include "SDLnetsys.h"
 #include "SDL_net.h"
@@ -167,4 +167,5 @@ extern void SDLNet_FreeSocketSet(SDLNet_SocketSet set)
         free(set);
     }
 }
+#endif
 

@@ -21,7 +21,7 @@
 */
 
 /* $Id$ */
-
+#ifdef WII
 #ifndef _SDL_NET_H
 #define _SDL_NET_H
 
@@ -443,3 +443,4 @@ static __inline__ Uint32 _SDLNet_Read32(const void *areap)
 #include <SDL/close_code.h>
 
 #endif /* _SDL_NET_H */
+#endif

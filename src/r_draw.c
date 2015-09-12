@@ -189,6 +189,9 @@ void R_DrawColumn (void)
 
     register byte    *dest; // killough
     register fixed_t frac;  // killough
+    register const byte *source;
+    register const lighttable_t *colormap;
+    register int heightmask;
 
     fixed_t          fracstep;
 
@@ -219,9 +222,9 @@ void R_DrawColumn (void)
     // This is as fast as it gets.       (Yeah, right!!! -- killough)
     //
     // killough 2/1/98: more performance tuning
-    register const byte *source = dc_source;
-    register const lighttable_t *colormap = dc_colormap;
-    register int heightmask = dc_texheight-1;
+    source = dc_source;
+    colormap = dc_colormap;
+    heightmask = dc_texheight-1;
 
     // not a power of 2 -- killough
     if (dc_texheight & heightmask)
@@ -1090,37 +1093,37 @@ void R_FillBackScreen (void)
     // COMPLETELY CHANGED FOR HIRES
     for (x=0 ; x<(scaledviewwidth >> hires) ; x+=8)
         V_DrawPatch((viewwindowx >> hires)+x,
-                    (viewwindowy >> hires)-8, 5, W_CacheLumpName(DEH_String("brdr_t"),PU_CACHE));
+                    (viewwindowy >> hires)-8, W_CacheLumpName(DEH_String("brdr_t"),PU_CACHE));
 
     for (x=0 ; x<(scaledviewwidth >> hires) ; x+=8)
         V_DrawPatch((viewwindowx >> hires)+x, (viewwindowy >> hires)+
-                    (scaledviewheight >> hires), 5, W_CacheLumpName(DEH_String("brdr_b"),PU_CACHE));
+                    (scaledviewheight >> hires), W_CacheLumpName(DEH_String("brdr_b"),PU_CACHE));
 
     for (y=0 ; y<(scaledviewheight >> hires) ; y+=8)
         V_DrawPatch((viewwindowx >> hires)-8,
-                    (viewwindowy >> hires)+y, 5, W_CacheLumpName(DEH_String("brdr_l"),PU_CACHE));
+                    (viewwindowy >> hires)+y, W_CacheLumpName(DEH_String("brdr_l"),PU_CACHE));
 
     for (y=0 ; y<(scaledviewheight >> hires); y+=8)
         V_DrawPatch((viewwindowx >> hires)+
                     (scaledviewwidth >> hires),
-                    (viewwindowy >> hires)+y, 5, W_CacheLumpName(DEH_String("brdr_r"),PU_CACHE));
+                    (viewwindowy >> hires)+y, W_CacheLumpName(DEH_String("brdr_r"),PU_CACHE));
 
     // Draw beveled edge. 
     V_DrawPatch((viewwindowx >> hires)-8,
-                (viewwindowy >> hires)-8, 5, W_CacheLumpName(DEH_String("brdr_tl"),PU_CACHE));
+                (viewwindowy >> hires)-8, W_CacheLumpName(DEH_String("brdr_tl"),PU_CACHE));
     
     V_DrawPatch((viewwindowx >> hires)+
                 (scaledviewwidth >> hires),
-                (viewwindowy >> hires)-8, 5, W_CacheLumpName(DEH_String("brdr_tr"),PU_CACHE));
+                (viewwindowy >> hires)-8, W_CacheLumpName(DEH_String("brdr_tr"),PU_CACHE));
     
     V_DrawPatch((viewwindowx >> hires)-8,
                 (viewwindowy >> hires)+
-                (scaledviewheight >> hires), 5, W_CacheLumpName(DEH_String("brdr_bl"),PU_CACHE));
+                (scaledviewheight >> hires), W_CacheLumpName(DEH_String("brdr_bl"),PU_CACHE));
     
     V_DrawPatch((viewwindowx >> hires)+
                 (scaledviewwidth >> hires),
                 (viewwindowy >> hires)+
-                (scaledviewheight >> hires), 5, W_CacheLumpName(DEH_String("brdr_br"),PU_CACHE));
+                (scaledviewheight >> hires), W_CacheLumpName(DEH_String("brdr_br"),PU_CACHE));
 
     V_RestoreBuffer();
 } 

@@ -42,8 +42,9 @@
 #define LONG(x)   ((signed long) SDL_SwapLE32(x))
 
 // Defines for checking the endianness of the system.
-
+#ifdef WII
 #define SYS_BIG_ENDIAN
+#endif
 
 #define doom_swap_l(x) \
         ((long int)((((unsigned long int)(x) & 0x000000ffU) << 24) | \

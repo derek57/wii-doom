@@ -23,7 +23,13 @@
 #include "doomfeatures.h"
 #include "doomtype.h"
 #include "i_system.h"
+
+#ifdef WII
 #include "m_menu.h"
+#else
+#include "doom/m_menu.h"
+#endif
+
 #include "v_trans.h"
 #include "z_zone.h"
 
@@ -67,9 +73,11 @@
 // statistics and tunables.
 //-----------------------------------------------------------------------------
 
-
+#ifdef WII
 #include "doomstat.h"
-
+#else
+#include "doom/doomstat.h"
+#endif
 
 // Uncomment this to see real-time memory allocation
 // statistics, to and enable extra debugging features
@@ -1105,14 +1113,16 @@ Z_Malloc
     {
         if (rover == start)
         {
+#ifdef WII
             // scanned all the way around the list
-//            I_Error ("Z_Malloc: failed on allocation of %i bytes", size);
-
+            I_Error ("Z_Malloc: failed on allocation of %i bytes", size);
+#else
             // [nitr8]: i highly doubt that this is going to work for the Wii port
-            //          as RAM is very limited for that console (let's find out)
+            //          as RAM is very limited for that console, so: PC ONLY!!
 
             // [crispy] allocate another zone twice as big
             Z_Init();
+#endif
         }
         
         if (rover->tag != PU_FREE)
@@ -1450,6 +1460,7 @@ int Z_FreeMemory (void)
 void* Z_MallocAlign (int reqsize, int tag, void **user, int alignbits)
 {
     memblock_t* newblock;
+    void* basedata;
 
     // with the memalloc header
     int         memalloc_size;
@@ -1479,7 +1490,7 @@ void* Z_MallocAlign (int reqsize, int tag, void **user, int alignbits)
     newblock->user = user;
     newblock->size = memalloc_size;
 
-    void* basedata = (byte*)newblock + sizeof(memblock_t);
+    basedata = (byte*)newblock + sizeof(memblock_t);
 
     if (user)
         *user = basedata;
