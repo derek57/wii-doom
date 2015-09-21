@@ -28,33 +28,38 @@
 #include <ogcsys.h>
 #endif
 
+#ifdef SDL2
+#include <SDL2/SDL.h>
+#else
 #include <SDL/SDL.h>
+#endif
+
 #include <stdio.h>
 
-#include "config.h"
-
 #ifdef WII
-#include "d_main.h"
+#include "../wii/config.h"
 #else
-#include "doom/d_main.h"
+#include "config.h"
 #endif
+
+#include "doom/d_main.h"
 
 #include "doomtype.h"
 
 #ifdef WII
-#include "gui.h"
+#include "../wii/gui.h"
 #endif
 
 #include "i_system.h"
 
 #ifdef WII
-#include "i_wiimain.h"
+#include "../wii/i_wiimain.h"
 #endif
 
 #include "m_argv.h"
 
 #ifdef WII
-#include "xmn_main.h"
+#include "../wii/xmn_main.h"
 
 #include <wiiuse/wpad.h>
 #endif
@@ -66,6 +71,7 @@ boolean        devparm_net = false;
 
 // SOLO DEVPARM
 boolean        devparm_nerve = false;
+boolean        devparm_master = false;
 boolean        devparm_doom = false;
 boolean        devparm_doom2 = false;
 boolean        devparm_freedoom2 = false;
@@ -131,8 +137,9 @@ int main(int argc, char **argv)
 #ifndef WII
     myargc = argc;
     myargv = argv;
+
+    M_FindResponseFile();
 #endif
-//    M_FindResponseFile();
 
 #ifdef WII
     // Set RESET/POWER button callback

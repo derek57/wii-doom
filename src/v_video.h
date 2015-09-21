@@ -54,6 +54,8 @@ extern byte *dp_translation;
 
 extern boolean dp_translucent;
 
+void GetPixelSize(void);
+
 static inline void V_ClearDPTranslation(void)
 {
     if (dp_translation)
@@ -100,6 +102,7 @@ void V_GetBlock (int x, int y, int width, int height, byte *dest);
 void V_ScreenShot(char *format);
 void V_LowGraphicDetail(int height);
 void V_DrawPatchWithShadow(int x, int y, patch_t *patch, boolean flag);
+void V_DrawDistortedBackground(char* patchname, byte *back_dest);
 
 #endif
 

@@ -23,12 +23,9 @@
 
 #include "c_io.h"
 
-#ifdef WII
-#include "doomdef.h"
-#else
 #include "doom/doomdef.h"
-#endif
 
+#include "doomfeatures.h"
 #include "doomtype.h"
 #include "i_swap.h"
 #include "midifile.h"
@@ -463,10 +460,13 @@ static boolean ReadTrack(midi_track_t *track, FILE *stream)
     for (;;)
     {
         // Resize the track slightly larger to hold another event:
-
-        new_events = realloc(track->events, 
+#ifdef BOOM_ZONE_HANDLING
+        new_events = Z_Realloc(track->events, 
+                             sizeof(midi_event_t) * (track->num_events + 1), PU_CACHE, NULL);
+#else
+        new_events = Z_Realloc(track->events, 
                              sizeof(midi_event_t) * (track->num_events + 1));
-
+#endif
 /*
         new_events = Z_Realloc(track->events, 
                              sizeof(midi_event_t) * (track->num_events + 1), PU_STATIC, NULL);

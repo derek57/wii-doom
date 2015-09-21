@@ -40,6 +40,7 @@ char**		myargv;
 // or 0 if not present
 //
 
+#ifndef WII
 int M_CheckParmWithArgs(char *check, int num_args)
 {
     int i;
@@ -69,6 +70,7 @@ int M_CheckParm(char *check)
 {
     return M_CheckParmWithArgs(check, 0);
 }
+#endif
 
 #define MAXARGVS        100
 

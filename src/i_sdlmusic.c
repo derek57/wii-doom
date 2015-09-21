@@ -18,15 +18,28 @@
 //
 
 
+#ifdef SDL2
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_mixer.h>
+#else
 #include <SDL/SDL.h>
 #include <SDL/SDL_mixer.h>
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "c_io.h"
+
+#ifdef WII
+#include "../wii/config.h"
+#else
 #include "config.h"
+#endif
+
 #include "deh_str.h"
+#include "doomfeatures.h"
 #include "doomtype.h"
 #include "gusconf.h"
 #include "i_sdlmusic.h"
@@ -39,11 +52,7 @@
 #include "memio.h"
 #include "mus2mid.h"
 
-#ifdef WII
-#include "s_sound.h"
-#else
 #include "doom/s_sound.h"
-#endif
 
 #include "sha1.h"
 #include "v_trans.h"
@@ -393,8 +402,13 @@ static char *GetSubstituteMusicFile(void *data, size_t data_len)
 static void AddSubstituteMusic(subst_music_t *subst)
 {
     ++subst_music_len;
+#ifdef BOOM_ZONE_HANDLING
     subst_music =
-        realloc(subst_music, sizeof(subst_music_t) * subst_music_len);
+        Z_Realloc(subst_music, sizeof(subst_music_t) * subst_music_len, PU_CACHE, NULL);
+#else
+    subst_music =
+        Z_Realloc(subst_music, sizeof(subst_music_t) * subst_music_len);
+#endif
     memcpy(&subst_music[subst_music_len - 1], subst, sizeof(subst_music_t));
 }
 
@@ -1283,7 +1297,28 @@ void I_SDL_PollMusic(void)
             {
                 if(gamestate == GS_LEVEL)
                 {
-                    if(gamemode == commercial)
+                    if(gamemode == commercial && gamemission == pack_nerve)
+                    {
+                        if(gamemap == 1)
+                            S_ChangeMusic(mus_messag, true);
+                        else if(gamemap == 2)
+                            S_ChangeMusic(mus_ddtblu, true);
+                        else if(gamemap == 3)
+                            S_ChangeMusic(mus_doom, true);
+                        else if(gamemap == 4)
+                            S_ChangeMusic(mus_shawn, true);
+                        else if(gamemap == 5)
+                            S_ChangeMusic(mus_in_cit, true);
+                        else if(gamemap == 6)
+                            S_ChangeMusic(mus_the_da, true);
+                        else if(gamemap == 7)
+                            S_ChangeMusic(mus_in_cit, true);
+                        else if(gamemap == 8)
+                            S_ChangeMusic(mus_shawn2, true);
+                        else if(gamemap == 9)
+                            S_ChangeMusic(mus_ddtbl2, true);
+                    }
+                    else if(gamemode == commercial)
                         S_ChangeMusic(gamemap + 32, true);
                     else
                     {

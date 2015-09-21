@@ -36,16 +36,8 @@
 #include "i_system.h"
 #include "i_timer.h"
 #include "i_video.h"
+#include "m_argv.h"
 #include "m_fixed.h"
-/*
-#include "net_client.h"
-#include "net_gui.h"
-#include "net_io.h"
-#include "net_loop.h"
-#include "net_query.h"
-#include "net_server.h"
-#include "net_sdl.h"
-*/
 #include "v_trans.h"
 
 
@@ -120,18 +112,12 @@ int             gametic;
 int             ticdup;
 int             lasttime;
 
-// When set to true, a single tic is run each time TryRunTics() is called.
-// This is used for -timedemo mode.
-
-boolean         singletics = false;
-
 // Amount to offset the timer for game sync.
 
 fixed_t         offsetms;
 
 extern boolean  privateserverflag;
 extern boolean  multiplayerflag;
-//extern boolean  devparm_net;
 
 // 35 fps clock adjusted by offsetms milliseconds
 
@@ -188,20 +174,7 @@ static boolean BuildNewTic(void)
     //printf ("mk:%i ",maketic);
     memset(&cmd, 0, sizeof(ticcmd_t));
     loop_interface->BuildTiccmd(&cmd, maketic);
-/*
-#ifdef FEATURE_MULTIPLAYER
 
-#ifdef NET_DEBUG
-//    printf("BuildNewTic\n");
-#endif
-
-    if (net_client_connected)
-    {
-        NET_CL_SendTiccmd(&cmd, maketic);
-    }
-
-#endif
-*/
     ticdata[maketic % BACKUPTICS].cmds[localplayer] = cmd;
     ticdata[maketic % BACKUPTICS].ingame[localplayer] = true;
 
@@ -221,25 +194,6 @@ void NetUpdate (void)
     int newtics;
     int i;
 
-    // If we are running with singletics (timing a demo), this
-    // is all done separately.
-
-    if (singletics)
-        return;
-/*
-#ifdef FEATURE_MULTIPLAYER
-
-#ifdef NET_DEBUG
-    printf("NetUpdate\n");
-#endif
-
-    // Run network subsystems
-
-    NET_CL_Run();
-    NET_SV_Run();
-
-#endif
-*/
     // check time
     nowtime = GetAdjustedTime() / ticdup;
     newtics = nowtime - lasttime;
@@ -267,54 +221,7 @@ void NetUpdate (void)
         }
     }
 }
-/*
-static void D_Disconnected(void)
-{
-    // In drone mode, the game cannot continue once disconnected.
 
-    if (drone)
-    {
-        I_Error("Disconnected from server in drone mode.");
-    }
-
-    // disconnected from server
-
-    C_Printf(CR_BLUE, " Disconnected from server.\n");
-}
-
-//
-// Invoked by the network engine when a complete set of ticcmds is
-// available.
-//
-
-void D_ReceiveTic(ticcmd_t *ticcmds, boolean *players_mask)
-{
-    int i;
-
-    // Disconnected from server?
-
-    if (ticcmds == NULL && players_mask == NULL)
-    {
-        D_Disconnected();
-        return;
-    }
-
-    for (i = 0; i < NET_MAXPLAYERS; ++i)
-    {
-        if (!drone && i == localplayer)
-        {
-            // This is us.  Don't overwrite it.
-        }
-        else
-        {
-            ticdata[recvtic % BACKUPTICS].cmds[i] = ticcmds[i];
-            ticdata[recvtic % BACKUPTICS].ingame[i] = players_mask[i];
-        }
-    }
-
-    ++recvtic;
-}
-*/
 //
 // Start game loop
 //
@@ -326,33 +233,6 @@ void D_StartGameLoop(void)
     lasttime = GetAdjustedTime() / ticdup;
 }
 
-//
-// Block until the game start message is received from the server.
-//
-/*
-static void BlockUntilStart(net_gamesettings_t *settings,
-                            netgame_startup_callback_t callback)
-{
-    while (!NET_CL_GetSettings(settings))
-    {
-        NET_CL_Run();
-        NET_SV_Run();
-
-        if (!net_client_connected)
-        {
-            I_Error("Lost connection to server");
-        }
-
-        if (callback != NULL && !callback(net_client_wait_data.ready_players,
-                                          net_client_wait_data.num_players))
-        {
-            I_Error("Netgame startup aborted.");
-        }
-
-        I_Sleep(100);
-    }
-}
-*/
 void D_StartNetGame(net_gamesettings_t *settings,
                     netgame_startup_callback_t callback)
 {
@@ -368,10 +248,17 @@ void D_StartNetGame(net_gamesettings_t *settings,
     //!
     // @category net
     //
-    // Use original game sync code.
+    // Use new network client sync code rather than the classic
+    // sync code. This is currently disabled by default because it
+    // has some bugs.
     //
 
-    settings->new_sync = 1;
+#ifndef WII
+    if (M_CheckParm("-newsync") > 0)
+        settings->new_sync = 1;
+    else
+#endif
+        settings->new_sync = 0;
 
     //!
     // @category net
@@ -381,7 +268,14 @@ void D_StartNetGame(net_gamesettings_t *settings,
     // packets.
     //
 
-    settings->extratics = 1;
+#ifndef WII
+    i = M_CheckParmWithArgs("-extratics", 1);
+
+    if (i > 0)
+        settings->extratics = atoi(myargv[i+1]);
+    else
+#endif
+        settings->extratics = 1;
 
     //!
     // @category net
@@ -391,7 +285,14 @@ void D_StartNetGame(net_gamesettings_t *settings,
     // the amount of network bandwidth needed.
     //
 
-    settings->ticdup = 1;
+#ifndef WII
+    i = M_CheckParmWithArgs("-dup", 1);
+
+    if (i > 0)
+        settings->ticdup = atoi(myargv[i+1]);
+    else
+#endif
+        settings->ticdup = 1;
 
     // Set the local player and playeringame[] values.
 
@@ -406,178 +307,21 @@ void D_StartNetGame(net_gamesettings_t *settings,
 
     ticdup = settings->ticdup;
     new_sync = settings->new_sync;
-
+/*
     if (!new_sync)
     {
         C_Printf(CR_BLUE, " Syncing netgames like Vanilla Doom.\n");
     }
+*/
 }
-
-//
-// D_QuitNetGame
-// Called before quitting to leave a net game
-// without hanging the other players
-//
-
-void D_QuitNetGame (void)
-{
-//#ifdef FEATURE_MULTIPLAYER
-
-//#ifdef NET_DEBUG
-//    printf("D_QuitNetGame\n");
-//#endif
-
-//    NET_SV_Shutdown();
-//    NET_CL_Disconnect();
-//#endif
-}
-
-boolean D_InitNetGame(net_connect_data_t *connect_data)
-{
-    boolean result = false;
-
-    // Call D_QuitNetGame on exit:
-
-    I_AtExit(D_QuitNetGame, true);
-
-    player_class = connect_data->player_class;
-
-#ifdef FEATURE_MULTIPLAYER
-
-    net_addr_t *addr = NULL;
-    int i;
-
-#ifdef NET_DEBUG
-    printf("D_InitNetGame\n");
-#endif
-
-    //!
-    // @category net
-    //
-    // Start a multiplayer server, listening for connections.
-    //
-
-    if((privateserverflag || multiplayerflag) && devparm_net)
-    {
-        NET_SV_Init();
-        NET_SV_AddModule(&net_loop_server_module);
-        NET_SV_AddModule(&net_sdl_module);
-        NET_SV_RegisterWithMaster();
-
-        net_loop_client_module.InitClient();
-        addr = net_loop_client_module.ResolveAddress(NULL);
-    }
-
-    if (addr != NULL)
-    {
-        if (!NET_CL_Connect(addr, connect_data))
-        {
-            I_Error("D_InitNetGame: Failed to connect to %s\n",
-                    NET_AddrToString(addr));
-        }
-
-        C_Printf(CR_BLUE, " D_InitNetGame: Connected to %s\n", NET_AddrToString(addr));
-
-        // Wait for launch message received from server.
-
-        NET_WaitForLaunch();
-
-        result = true;
-    }
-#endif
-
-    return result;
-}
-
 
 static int GetLowTic(void)
 {
     int lowtic;
 
     lowtic = maketic;
-/*
-#ifdef FEATURE_MULTIPLAYER
 
-#ifdef NET_DEBUG
-    printf("GetLowTic\n");
-#endif
-
-    if (net_client_connected)
-    {
-        if (drone || recvtic < lowtic)
-        {
-            lowtic = recvtic;
-        }
-    }
-#endif
-*/
     return lowtic;
-}
-/*
-static void OldNetSync(void)
-{
-    unsigned int i;
-    int keyplayer = -1;
-
-    frameon++;
-
-    // ideally maketic should be 1 - 3 tics above lowtic
-    // if we are consistantly slower, speed up time
-
-    for (i=0 ; i<NET_MAXPLAYERS ; i++)
-    {
-        if (local_playeringame[i])
-        {
-            keyplayer = i;
-            break;
-        }
-    }
-
-    if (keyplayer < 0)
-    {
-        // If there are no players, we can never advance anyway
-
-        return;
-    }
-
-    if (localplayer == keyplayer)
-    {
-        // the key player does not adapt
-    }
-    else
-    {
-        if (maketic <= recvtic)
-        {
-            lasttime--;
-            // printf ("-");
-        }
-
-        frameskip[frameon & 3] = oldnettics > recvtic;
-        oldnettics = maketic;
-
-        if (frameskip[0] && frameskip[1] && frameskip[2] && frameskip[3])
-        {
-            skiptics = 1;
-            // printf ("+");
-        }
-    }
-}
-*/
-// Returns true if there are players in the game:
-
-static boolean PlayersInGame(void)
-{
-    boolean result = false;
-
-    // Whether single or multi-player, unless we are running as a drone,
-    // we are in the game.
-
-//    if (!drone)
-    {
-        result = true;
-    }
-
-    return result;
 }
 
 // When using ticdup, certain values must be cleared out when running
@@ -632,17 +376,7 @@ void TryRunTics (void)
     realtics = entertic - oldentertics;
     oldentertics = entertic;
 
-    // in singletics mode, run a single tic every time this function
-    // is called.
-
-    if (singletics)
-    {
-        BuildNewTic();
-    }
-    else
-    {
-        NetUpdate ();
-    }
+    NetUpdate ();
 
     lowtic = GetLowTic();
 
@@ -671,19 +405,13 @@ void TryRunTics (void)
 
         if (counts < 1)
             counts = 1;
-/*
-        if (net_client_connected)
-        {
-            OldNetSync();
-        }
-*/
     }
 
     if (counts < 1)
         counts = 1;
 
     // wait for new tics if needed
-    while (!PlayersInGame() || lowtic < gametic/ticdup + counts)
+    while (lowtic < gametic/ticdup + counts)
     {
         NetUpdate ();
 
@@ -698,6 +426,7 @@ void TryRunTics (void)
             // If we're in a netgame, we might spin forever waiting for
             // new network data to be received. So don't stay in here
             // forever - give the menu a chance to work.
+
             if (I_GetTime() / ticdup - entertic >= MAX_NETGAME_STALL_TICS)
             {
                 return;
@@ -712,17 +441,9 @@ void TryRunTics (void)
     {
         ticcmd_set_t *set;
 
-        if (!PlayersInGame())
-        {
-            return;
-        }
-
         set = &ticdata[(gametic / ticdup) % BACKUPTICS];
 
-//        if (!net_client_connected)
-        {
-            SinglePlayerClear(set);
-        }
+        SinglePlayerClear(set);
 
         for (i=0 ; i<ticdup ; i++)
         {
@@ -747,3 +468,4 @@ void D_RegisterLoopCallbacks(loop_interface_t *i)
 {
     loop_interface = i;
 }
+

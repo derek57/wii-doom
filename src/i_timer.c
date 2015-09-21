@@ -25,7 +25,11 @@
 //-----------------------------------------------------------------------------
 
 
+#ifdef SDL2
+#include <SDL2/SDL.h>
+#else
 #include <SDL/SDL.h>
+#endif
 
 #include "doomtype.h"
 #include "i_timer.h"
@@ -66,6 +70,17 @@ int I_GetTimeMS(void)
         basetime = ticks;
 
     return ticks - basetime;
+}
+
+//
+// Same as I_GetTime, but returns time in milliseconds
+//
+
+int I_StartupTimer(void)
+{
+    Uint32 ticks = SDL_GetTicks();
+
+    return ticks;
 }
 
 // Sleep for a specified number of ms

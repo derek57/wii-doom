@@ -26,7 +26,13 @@
 
 
 #include <fcntl.h>
+
+#ifdef SDL2
+#include <SDL2/SDL.h>
+#else
 #include <SDL/SDL.h>
+#endif
+
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -34,14 +40,16 @@
 #include <unistd.h>
 
 #include "c_io.h"
-#include "config.h"
-#include "deh_str.h"
 
 #ifdef WII
-#include "doomdef.h"
+#include "../wii/config.h"
 #else
-#include "doom/doomdef.h"
+#include "config.h"
 #endif
+
+#include "deh_str.h"
+
+#include "doom/doomdef.h"
 
 #include "doomtype.h"
 #include "i_joystick.h"
@@ -53,24 +61,22 @@
 #include "m_config.h"
 #include "m_misc.h"
 
-#ifdef WII
-#include "s_sound.h"
-#else
 #include "doom/s_sound.h"
-#endif
 
 #include "v_trans.h"
 #include "w_wad.h"
 #include "z_zone.h"
 
-#ifdef WII
-#define DEFAULT_RAM 32 /* MiB */
-#define MIN_RAM     16 /* MiB */
-#else
-#define DEFAULT_RAM 64 /* MiB */
-#define MIN_RAM     32 /* MiB */
-#endif
 
+//#ifdef WII
+#define DEFAULT_RAM 32 // MiB
+#define MIN_RAM     16 // MiB
+/*
+#else
+#define DEFAULT_RAM 64 // MiB
+#define MIN_RAM     32 // MiB
+#endif
+*/
 #define ZENITY_BINARY "/usr/bin/zenity"
 
 
@@ -162,10 +168,28 @@ byte *I_ZoneBase (int *size)
     int min_ram, default_ram;
     static int i = 1;
 
-    default_ram = DEFAULT_RAM;
-    min_ram = MIN_RAM;
+#ifndef WII
+    int p;
 
-//    printf(" DPMI memory: 0x%x, ", default_ram);
+    //!
+    // @arg <mb>
+    //
+    // Specify the heap size, in MiB (default 16).
+    //
+
+    p = M_CheckParmWithArgs("-mb", 1);
+
+    if (p > 0)
+    {
+        default_ram = atoi(myargv[p+1]);
+        min_ram = default_ram;
+    }
+    else
+#endif
+    {
+        default_ram = DEFAULT_RAM;
+        min_ram = MIN_RAM;
+    }
 
     zonemem = AutoAllocMemory(size, default_ram * i, min_ram * i);
 
@@ -249,6 +273,8 @@ void I_Quit (void)
         entry->func();
         entry = entry->next;
     }
+
+    SDL_Quit();
 
     exit(0);
 }
@@ -362,7 +388,7 @@ void I_Error (char *error, ...)
 
     fclose (debugfile);
 
-    C_ConDump();
+//    C_ConDump();
 
     if (already_quitting)
     {
@@ -391,11 +417,11 @@ void I_Error (char *error, ...)
         entry = entry->next;
     }
     error_detected = true;
-
+/*
     S_Shutdown();
 
     I_ShutdownGraphics();
-
+*/
     I_Quit();
 #else
     char msgbuf[512];
@@ -486,10 +512,70 @@ static const unsigned char mem_dump_win98[DOS_MEM_DUMP_SIZE] = {
 static const unsigned char mem_dump_dosbox[DOS_MEM_DUMP_SIZE] = {
   0x00, 0x00, 0x00, 0xF1, 0x00, 0x00, 0x00, 0x00, 0x07, 0x00};
 
+#ifndef WII
+static unsigned char mem_dump_custom[DOS_MEM_DUMP_SIZE];
+#endif
+
 static const unsigned char *dos_mem_dump = mem_dump_dos622;
 
 boolean I_GetMemoryValue(unsigned int offset, void *value, int size)
 {
+#ifndef WII
+    static boolean firsttime = true;
+
+    if (firsttime)
+    {
+        int p, i, val;
+
+        firsttime = false;
+        i = 0;
+
+        //!
+        // @category compat
+        // @arg <version>
+        //
+        // Specify DOS version to emulate for NULL pointer dereference
+        // emulation.  Supported versions are: dos622, dos71, dosbox.
+        // The default is to emulate DOS 7.1 (Windows 98).
+        //
+
+        p = M_CheckParmWithArgs("-setmem", 1);
+
+        if (p > 0)
+        {
+            if (!strcasecmp(myargv[p + 1], "dos622"))
+            {
+                dos_mem_dump = mem_dump_dos622;
+            }
+            if (!strcasecmp(myargv[p + 1], "dos71"))
+            {
+                dos_mem_dump = mem_dump_win98;
+            }
+            else if (!strcasecmp(myargv[p + 1], "dosbox"))
+            {
+                dos_mem_dump = mem_dump_dosbox;
+            }
+            else
+            {
+                for (i = 0; i < DOS_MEM_DUMP_SIZE; ++i)
+                {
+                    ++p;
+
+                    if (p >= myargc || myargv[p][0] == '-')
+                    {
+                        break;
+                    }
+
+                    M_StrToInt(myargv[p], &val);
+                    mem_dump_custom[i++] = (unsigned char) val;
+                }
+
+                dos_mem_dump = mem_dump_custom;
+            }
+        }
+    }
+#endif
+
     switch (size)
     {
     case 1:

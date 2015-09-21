@@ -27,10 +27,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "doomfeatures.h"
 #include "m_misc.h"
 #include "sha1.h"
 #include "w_checksum.h"
 #include "w_wad.h"
+#include "z_zone.h"
 
 
 static wad_file_t **open_wadfiles = NULL;
@@ -53,9 +55,13 @@ static int GetFileNumber(wad_file_t *handle)
 
     // Not found in list.  This is a new file we haven't seen yet.
     // Allocate another slot for this file.
-
-    open_wadfiles = realloc(open_wadfiles,
+#ifdef BOOM_ZONE_HANDLING
+    open_wadfiles = Z_Realloc(open_wadfiles,
+                            sizeof(wad_file_t *) * (num_open_wadfiles + 1), PU_CACHE, NULL);
+#else
+    open_wadfiles = Z_Realloc(open_wadfiles,
                             sizeof(wad_file_t *) * (num_open_wadfiles + 1));
+#endif
     open_wadfiles[num_open_wadfiles] = handle;
 
     result = num_open_wadfiles;

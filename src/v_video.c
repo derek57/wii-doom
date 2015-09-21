@@ -39,11 +39,7 @@
 #include "c_io.h"
 #include "deh_str.h"
 
-#ifdef WII
-#include "doomdef.h"
-#else
 #include "doom/doomdef.h"
-#endif
 
 #include "doomtype.h"
 #include "i_swap.h"
@@ -53,11 +49,8 @@
 #include "m_bbox.h"
 #include "m_misc.h"
 
-#ifdef WII
-#include "r_main.h"
-#else
 #include "doom/r_main.h"
-#endif
+#include "doom/r_plane.h"
 
 #include "v_misc.h"
 #include "v_trans.h"
@@ -114,12 +107,15 @@ static const inline byte drawpatchpx10 (const byte dest, const byte source)
 static const inline byte drawpatchpx11 (const byte dest, const byte source)
 {return tranmap[(dest<<8)+dp_translation[source]];}
 
+char                         *d_lowpixelsize = "2x2";
+
 byte                         *tranmap = NULL;
 
 byte                         *dp_translation = NULL;
 
 int                          dirtybox[4]; 
-
+int                          pixelwidth;
+int                          pixelheight;
 int                          italicize[15] = { 0, 2, 2, 2, 1, 1, 1, 1, 0, 0, 0, 0, -1, -1, -1 };
 
 boolean                      dp_translucent = false;
@@ -469,6 +465,34 @@ V_DrawBlock
     } 
 } 
 
+void GetPixelSize(void)
+{
+    int     width = -1;
+    int     height = -1;
+    char    *left = strtok(strdup(d_lowpixelsize), "x");
+    char    *right = strtok(NULL, "x");
+
+    if (!right)
+        right = "";
+
+    sscanf(left, "%10i", &width);
+    sscanf(right, "%10i", &height);
+
+    if (width >= 2 && width <= SCREENWIDTH && height >= 2 && height <= SCREENHEIGHT)
+    {
+        pixelwidth = width;
+        pixelheight = height;
+    }
+    else
+    {
+        pixelwidth = 2;
+        pixelheight = 2;
+        d_lowpixelsize = "2x2";
+
+//        M_SaveCVARs();
+    }
+}
+
 //
 // V_Init
 // 
@@ -477,6 +501,7 @@ void V_Init (void)
     // no-op!
     // There used to be separate screens that could be drawn to; these are
     // now handled in the upper layers.
+    GetPixelSize();
 }
 
 #pragma GCC diagnostic push
@@ -719,7 +744,7 @@ void V_ColorBlock(int x, int y, int width, int height, byte color)
         dest += SCREENWIDTH;
     }
 
-    R_SetViewSize (screenblocks, detailLevel);
+    R_SetViewSize (screenblocks);
 }
 
 //
@@ -845,12 +870,18 @@ void WritePCXfile(char *filename, byte *data,
 
 static void error_fn(png_structp p, png_const_charp s)
 {
+#ifndef WII
     printf("libpng error: %s\n", s);
+#endif
+    C_Printf(CR_RED, " libpng error: %s\n", s);
 }
 
 static void warning_fn(png_structp p, png_const_charp s)
 {
+#ifndef WII
     printf("libpng warning: %s\n", s);
+#endif
+    C_Printf(CR_GOLD, " libpng warning: %s\n", s);
 }
 
 void WritePNGfile(char *filename, byte *data,
@@ -1001,18 +1032,16 @@ void V_ScreenShot(char *format)
 void V_LowGraphicDetail(int height)
 {
     int x, y;
-    int h = SCREENWIDTH;
-
-    height *= SCREENWIDTH;
+    int h = pixelheight * SCREENWIDTH;
 
     for (y = 0; y < height; y += h)
-        for (x = 0; x < SCREENWIDTH; x += 2)
+        for (x = 0; x < SCREENWIDTH; x += pixelwidth)
         {
             byte        *dot = dest_screen + y + x;
             int         xx, yy;
 
             for (yy = 0; yy < h; yy += SCREENWIDTH)
-                for (xx = 0; xx < 2; xx++)
+                for (xx = 0; xx < pixelwidth; xx++)
                     *(dot + yy + xx) = *dot;
         }
 }
@@ -1078,5 +1107,37 @@ void V_UseBuffer(byte *buffer)
 void V_RestoreBuffer(void)
 {
     dest_screen = I_VideoBuffer;
+}
+
+
+// V_DrawBackground tiles a 64x64 patch over the entire screen,
+// providing the background for the Help and Setup screens.
+
+static void V_TileFlat(byte *src, byte *dest)
+{
+    int x, y;
+
+    V_MarkRect (0, 0, SCREENWIDTH, SCREENHEIGHT);
+
+    for (y = 0; y < SCREENHEIGHT; y++)
+    {
+        for (x = 0; x < SCREENWIDTH / 64; x++)
+	{
+            memcpy (dest, src + ((y & 63) << 6), 64);
+
+            dest += 64;
+	}
+    }
+}
+
+void V_DrawDistortedBackground(char *patchname, byte *dest)
+{
+    char *src;
+
+    V_MarkRect (0, 0, SCREENWIDTH, SCREENHEIGHT);
+
+    src = R_DistortedFlat(R_FlatNumForName(patchname));
+
+    V_TileFlat((byte *)src, dest);
 }
 

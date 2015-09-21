@@ -24,13 +24,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef WII
-#include "doomdef.h"
-#include "doomstat.h"
-#else
 #include "doom/doomdef.h"
 #include "doom/doomstat.h"
-#endif
 
 #include "doomtype.h"
 #include "i_system.h"
@@ -610,11 +605,16 @@ void W_MergeFile(char *filename, boolean automatic)
     if (W_AddFile(filename, automatic) == NULL)
         return;
 
-//    if(devparm)
+    if(devparm)
     {
-//        if(gamemode == shareware || version13 == true)
+        if(gamemode == shareware ||
+#ifdef WII
+           load_extra_wad == 1 ||
+#endif
+           version13 == true
+           )
         {
-//            if(dont_show_adding_of_resource_wad == 0)
+            if(dont_show_adding_of_resource_wad == 0)
                 printf("         merging %s\n", filename);
         }
     }

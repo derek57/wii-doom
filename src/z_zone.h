@@ -189,6 +189,7 @@ enum
 };
         
 
+void         *Z_Realloc(void *ptr, size_t size);
 void         *Z_MallocAlign (int reqsize, int tag, void **user, int alignbits);
 void         *Z_Malloc (int size, int tag, void *ptr);
 void         Z_Init (void);

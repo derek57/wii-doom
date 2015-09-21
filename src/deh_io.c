@@ -15,6 +15,7 @@
 // Dehacked I/O code (does all reads from dehacked files)
 //
 
+
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -28,11 +29,7 @@
 #include "deh_defs.h"
 #include "deh_io.h"
 
-#ifdef WII
-#include "doomdef.h"
-#else
 #include "doom/doomdef.h"
-#endif
 
 
 typedef enum

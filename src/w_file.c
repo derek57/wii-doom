@@ -27,7 +27,12 @@
 
 #include <stdio.h>
 
+#ifdef WII
+#include "../wii/config.h"
+#else
 #include "config.h"
+#endif
+
 #include "doomtype.h"
 #include "w_file.h"
 

@@ -38,8 +38,10 @@
 #include <stdlib.h>
 
 #include "d_event.h"
-#include "d_main.h"
-#include "doomdef.h"
+
+#include "doom/d_main.h"
+#include "doom/doomdef.h"
+
 #include "doomtype.h"
 #include "i_joystick.h"
 

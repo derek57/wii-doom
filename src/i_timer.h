@@ -37,6 +37,9 @@ int I_GetTime (void);
 // returns current time in ms
 int I_GetTimeMS (void);
 
+// returns current time in ms (for startuptimer)
+int I_StartupTimer(void);
+
 // Pause for a specified number of ms
 void I_Sleep(int ms);
 

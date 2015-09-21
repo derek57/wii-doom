@@ -51,15 +51,11 @@
 #include "c_io.h"
 #include "deh_str.h"
 #include "d_event.h"
+#include "doomfeatures.h"
 #include "doomkeys.h"
 
-#ifdef WII
-#include "doomstat.h"
-#include "g_game.h"
-#else
 #include "doom/doomstat.h"
 #include "doom/g_game.h"
-#endif
 
 #include "i_swap.h"
 #include "i_system.h"
@@ -67,22 +63,19 @@
 #include "i_tinttab.h"
 #include "i_video.h"
 
-#ifdef WII
-#include "m_menu.h"
-#else
 #include "doom/m_menu.h"
-#endif
 
 #include "m_misc.h"
 
-#ifdef WII
-#include "p_local.h"
-#else
 #include "doom/p_local.h"
-#endif
 
+#ifdef SDL2
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_mixer.h>
+#else
 #include <SDL/SDL.h>
 #include <SDL/SDL_mixer.h>
+#endif
 
 #ifdef WII
 #include <SDL/SDL_gfxPrimitives.h>
@@ -103,8 +96,6 @@
 #if !defined(MAX_PATH)
 #define MAX_PATH        260
 #endif
-
-#define CONSOLESPEED            (CONSOLEHEIGHT / 12)
 
 #define CONSOLEFONTSTART        ' '
 #define CONSOLEFONTEND          '~'
@@ -213,6 +204,7 @@ char            *upper =
     ":<+>?\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0{\\}^_`ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 };
 
+int             consoleanimindex = 0;
 int             consoleheight = 0;
 int             consoledirection = -1;
 int             consolestrings = 0;
@@ -229,6 +221,18 @@ static int      outputhistory = -1;
 static int      consolewait = 0;
 static int      notabs[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 
+static int      consoleanimdown[] =
+{
+     14,  28,  42,  56,  70,  84,  98, 112, 126, 140, 146,
+    150, 153, 156, 159, 161, 163, 165, 166, 167, 168
+};
+
+static int      consoleanimup[] =
+{
+    154, 140, 126, 112,  98,  84,  70,  56,  42,  28,  22,
+     18,  15,  12,   9,   7,   5,   3,   2,   1,   0
+};
+
 static boolean  showcaret = true;
 
 extern boolean  translucency;
@@ -237,25 +241,6 @@ extern boolean  translucency;
 
 extern int      fps;
 
-
-char *removenewlines(const char *input)
-{
-    char        *p = malloc(strlen(input) + 1);
-
-    if (p)
-    {
-        char    *p2 = p;
-
-        while (*input != '\0')
-            if (*input != '\n')
-                *p2++ = *input++;
-            else
-                ++input;
-        *p2 = '\0';
-    }
-
-    return p;
-}
 
 void C_ConDump(void)
 {
@@ -345,8 +330,11 @@ void C_Printf(stringtype_t type, char *string, ...)
     va_start(argptr, string);
     M_vsnprintf(buffer, sizeof(buffer) - 1, string, argptr);
     va_end(argptr);
-
-    console = realloc(console, (consolestrings + 1) * sizeof(*console));
+#ifdef BOOM_ZONE_HANDLING
+    console = Z_Realloc(console, (consolestrings + 1) * sizeof(*console), PU_CACHE, NULL);
+#else
+    console = Z_Realloc(console, (consolestrings + 1) * sizeof(*console));
+#endif
     console[consolestrings].string = strdup(buffer);
     console[consolestrings].type = type;
     memset(console[consolestrings].tabs, 0, sizeof(console[consolestrings].tabs));
@@ -482,12 +470,14 @@ void C_Init(void)
 void C_HideConsole(void)
 {
     consoledirection = -1;
+    consoleanimindex = 0;
 }
 
 void C_HideConsoleFast(void)
 {
     consoleheight = 0;
     consoledirection = -1;
+    consoleanimindex = 0;
     consoleactive = false;
 }
 
@@ -656,10 +646,16 @@ void C_Drawer(void)
         int     start;
         int     end;
 
+        // adjust console height
         if (consolewait < I_GetTime())
         {
-            consoleheight = BETWEEN(0, consoleheight + CONSOLESPEED * consoledirection,
-                CONSOLEHEIGHT);
+            if (consoledirection == 1)
+            {
+                if (consoleheight < CONSOLEHEIGHT)
+                    consoleheight = consoleanimdown[consoleanimindex++];
+            }
+            else if (consoleheight > 0)
+                consoleheight = consoleanimup[consoleanimindex++];
             consolewait = I_GetTime();
         }
 
@@ -790,9 +786,12 @@ boolean C_Responder(event_t *ev)
             case KEY_ESCAPE:
             case KEY_TILDE:
                 consoledirection = -1;
+                consoleanimindex = 0;
                 break;
-/*
+
             default:
+                return false;
+/*
                 if (modstate & KMOD_CTRL)
                 {
                     // select all text
@@ -1031,8 +1030,11 @@ void C_PlayerMessage(char *string, ...)
     {
         time_t          rawtime;
         struct tm       *timeinfo;
-
-        console = realloc(console, (consolestrings + 1) * sizeof(*console));
+#ifdef BOOM_ZONE_HANDLING
+        console = Z_Realloc(console, (consolestrings + 1) * sizeof(*console), PU_CACHE, NULL);
+#else
+        console = Z_Realloc(console, (consolestrings + 1) * sizeof(*console));
+#endif
         console[consolestrings].string = strdup(buffer);
         console[consolestrings].type = green;
         memset(console[consolestrings].tabs, 0, sizeof(console[consolestrings].tabs));

@@ -16,7 +16,12 @@
 //
 
 
+#ifdef SDL2
+#include <SDL2/SDL_mixer.h>
+#else
 #include <SDL/SDL_mixer.h>
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -27,11 +32,7 @@
 #include "i_video.h"
 #include "m_config.h"
 
-#ifdef WII
-#include "s_sound.h"
-#else
 #include "doom/s_sound.h"
-#endif
 
 #include "v_trans.h"
 

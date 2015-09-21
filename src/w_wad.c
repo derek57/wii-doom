@@ -23,14 +23,16 @@
 #include <string.h>
 
 #include "c_io.h"
-#include "config.h"
 
 #ifdef WII
-#include "doomdef.h"
+#include "../wii/config.h"
 #else
-#include "doom/doomdef.h"
+#include "config.h"
 #endif
 
+#include "doom/doomdef.h"
+
+#include "doomfeatures.h"
 #include "doomtype.h"
 #include "i_swap.h"
 #include "i_system.h"
@@ -190,7 +192,11 @@ wad_file_t *W_AddFile (char *filename, boolean automatic)
 
     startlump = numlumps;
     numlumps += numfilelumps;
-    lumpinfo = realloc(lumpinfo, numlumps * sizeof(lumpinfo_t *));
+#ifdef BOOM_ZONE_HANDLING
+    lumpinfo = Z_Realloc(lumpinfo, numlumps * sizeof(lumpinfo_t *), PU_CACHE, NULL);
+#else
+    lumpinfo = Z_Realloc(lumpinfo, numlumps * sizeof(lumpinfo_t *));
+#endif
     if (lumpinfo == NULL)
     {
         I_Error("Failed to increase lumpinfo[] array size.");
@@ -587,7 +593,7 @@ void W_CheckSize(int wad)
             fseek(fprw, 0, 2);                // file pointer at the end of file
             fsizerw = ftell(fprw);        // take a position of file pointer un size variable
 
-            if(fsizerw != 997015)
+            if(fsizerw != 1026033)
                 print_resource_pwad_error = true;
 
             fclose(fprw);

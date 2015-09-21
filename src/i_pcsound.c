@@ -15,7 +15,13 @@
 //	System interface for PC speaker sound.
 //
 
+
+#ifdef SDL2
+#include <SDL2/SDL.h>
+#else
 #include <SDL/SDL.h>
+#endif
+
 #include <string.h>
 
 #include "doomtype.h"
@@ -26,7 +32,12 @@
 #include "w_wad.h"
 #include "z_zone.h"
 
+#ifdef WII
+#include "../pcsound/pcsound.h"
+#else
 #include "pcsound.h"
+#endif
+
 
 #define TIMER_FREQ 1193181 /* hz */
 

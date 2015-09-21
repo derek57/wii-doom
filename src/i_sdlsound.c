@@ -19,8 +19,15 @@
 
 
 #include <assert.h>
+
+#ifdef SDL2
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_mixer.h>
+#else
 #include <SDL/SDL.h>
 #include <SDL/SDL_mixer.h>
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -28,11 +35,7 @@
 #include "c_io.h"
 #include "deh_str.h"
 
-#ifdef WII
-#include "doomdef.h"
-#else
 #include "doom/doomdef.h"
-#endif
 
 #include "doomtype.h"
 #include "i_sound.h"

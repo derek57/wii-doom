@@ -26,14 +26,11 @@
 #include "deh_defs.h"
 #include "deh_io.h"
 
-#ifdef WII
-#include "doomdef.h"
-#else
 #include "doom/doomdef.h"
-#endif
 
 #include "doomtype.h"
 #include "i_system.h"
+#include "m_argv.h"
 #include "w_wad.h"
 #include "v_trans.h"
 
@@ -96,6 +93,13 @@ static void InitializeSections(void)
 
 static void DEH_Init(void)
 {
+#ifndef WII
+    if (M_CheckParm("-nocheats") > 0) 
+    {
+	deh_apply_cheats = false;
+    }
+#endif
+
     // Call init functions for all the section definitions.
     InitializeSections();
 
@@ -464,4 +468,35 @@ int DEH_LoadLumpByName(char *name, boolean allow_long, boolean allow_error)
 
     return DEH_LoadLump(lumpnum, allow_long, allow_error);
 }
+
+// Check the command line for -deh argument, and others.
+
+#ifndef WII
+void DEH_ParseCommandLine(void)
+{
+    char *filename;
+    int p;
+
+    //!
+    // @arg <files>
+    // @category mod
+    //
+    // Load the given dehacked patch(es)
+    //
+
+    p = M_CheckParm("-deh");
+
+    if (p > 0)
+    {
+        ++p;
+
+        while (p < myargc && myargv[p][0] != '-')
+        {
+            filename = D_TryFindWADByName(myargv[p]);
+            DEH_LoadFile(filename);
+            ++p;
+        }
+    }
+}
+#endif
 

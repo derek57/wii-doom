@@ -26,16 +26,13 @@
 
 #include "c_io.h"
 
-#ifdef WII
-#include "doomdef.h"
-#else
 #include "doom/doomdef.h"
-#endif
 
 #include "doomfeatures.h"
 #include "doomkeys.h"
 #include "doomtype.h"
 #include "i_system.h"
+#include "m_argv.h"
 #include "m_misc.h"
 #include "z_zone.h"
 
@@ -156,6 +153,9 @@ default_t        doom_defaults_list[] =
     CONFIG_VARIABLE_INT                (menu_shadow),
     CONFIG_VARIABLE_INT                (shadows),
     CONFIG_VARIABLE_INT                (offsets),
+    CONFIG_VARIABLE_INT                (pixel_width),
+    CONFIG_VARIABLE_INT                (pixel_height),
+    CONFIG_VARIABLE_INT                (brightmaps),
 //    CONFIG_VARIABLE_INT                (memory),
     CONFIG_VARIABLE_INT                (key_shoot),
     CONFIG_VARIABLE_INT                (key_open),
@@ -445,8 +445,35 @@ void M_SaveDefaultsAlternate(char *main)
 
 void M_LoadDefaults (void)
 {
-    doom_defaults.filename
-        = M_StringJoin(configdir, default_main_config, NULL);
+#ifndef WII
+    int i;
+ 
+    // check for a custom default file
+
+    //!
+    // @arg <file>
+    // @vanilla
+    //
+    // Load main configuration from the specified file, instead of the
+    // default.
+    //
+
+    i = M_CheckParmWithArgs("-config", 1);
+
+    if (i)
+    {
+	doom_defaults.filename = myargv[i+1];
+    }
+    else
+#endif
+    {
+        doom_defaults.filename
+            = M_StringJoin(configdir, default_main_config, NULL);
+    }
+
+#ifndef WII
+    printf("saving config in %s\n", doom_defaults.filename);
+#endif
 
     if (LoadDefaultCollection(&doom_defaults))
         C_Printf(CR_GRAY, " Loaded CVARs from %s.", uppercase(doom_defaults.filename));

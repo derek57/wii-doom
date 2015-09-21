@@ -29,7 +29,13 @@
 #include "memio.h"
 #include "midifile.h"
 #include "mus2mid.h"
+
+#ifdef WII
+#include "../opl/opl.h"
+#else
 #include "opl.h"
+#endif
+
 #include "w_wad.h"
 #include "z_zone.h"
 

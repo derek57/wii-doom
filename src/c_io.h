@@ -39,11 +39,7 @@
 #if !defined(__C_CONSOLE__)
 #define __C_CONSOLE__
 
-#ifdef WII
-#include "doomstat.h"
-#else
 #include "doom/doomstat.h"
-#endif
 
 #include "doomtype.h"
 #include "d_event.h"
@@ -91,6 +87,7 @@ console_t       *console;
 extern boolean  consoleactive;
 extern int      consoleheight;
 extern int      consoledirection;
+extern int      consoleanimindex;
 
 extern char     consolecheat[255];
 extern char     consolecheatparm[3];

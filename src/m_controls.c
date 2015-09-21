@@ -17,32 +17,19 @@
 
 #include <stdio.h>
 
-#ifdef WII
-#include "doomdef.h"
-#else
 #include "doom/doomdef.h"
-#endif
 
 #include "doomfeatures.h"
 #include "doomkeys.h"
 
-#ifdef WII
-#include "doomstat.h"
-#else
 #include "doom/doomstat.h"
-#endif
 
 #include "doomtype.h"
 #include "m_config.h"
 #include "m_misc.h"
 
-#ifdef WII
-#include "r_local.h"
-#include "s_sound.h"
-#else
 #include "doom/r_local.h"
 #include "doom/s_sound.h"
-#endif
 
 #include "v_video.h"
 
@@ -89,6 +76,8 @@ extern int snd_module;
 extern int sound_channels;
 extern int gore_amount;
 extern int png_screenshots;
+extern int pixelwidth;
+extern int pixelheight;
 
 extern int joy_up;
 extern int joy_down;
@@ -282,6 +271,9 @@ void M_BindBaseControls(void)
     M_BindVariable("menu_shadow",            &font_shadow);
     M_BindVariable("shadows",                &d_shadows);
     M_BindVariable("offsets",                &d_fixspriteoffsets);
+    M_BindVariable("pixel_width",            &pixelwidth);
+    M_BindVariable("pixel_height",           &pixelheight);
+    M_BindVariable("brightmaps",             &d_brightmaps);
 //    M_BindVariable("memory",                 &memory_usage);
 #ifdef WII
     M_BindVariable("key_shoot",              &joy_r);

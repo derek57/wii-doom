@@ -24,11 +24,8 @@
 #include "doomtype.h"
 #include "i_system.h"
 
-#ifdef WII
-#include "m_menu.h"
-#else
+#include "m_argv.h"
 #include "doom/m_menu.h"
-#endif
 
 #include "v_trans.h"
 #include "z_zone.h"
@@ -73,11 +70,7 @@
 // statistics and tunables.
 //-----------------------------------------------------------------------------
 
-#ifdef WII
-#include "doomstat.h"
-#else
 #include "doom/doomstat.h"
-#endif
 
 // Uncomment this to see real-time memory allocation
 // statistics, to and enable extra debugging features
@@ -115,7 +108,7 @@
 #define LEAVE_ASIDE     (128 * 1024)
 
 // Minimum RAM machine is assumed to have
-#define MIN_RAM         (32 * 1024 * 1024)
+#define MIN_RAM         (4 * 1024 * 1024)
 
 // Amount to subtract when retrying failed attempts to allocate initial pool
 #define RETRY_AMOUNT    (256 * 1024)
@@ -182,14 +175,18 @@ void Z_DrawStats(void)
     char virt_mem[50];
     char tot_mem[50];
 
+    double s;
+
+    unsigned long total_memory;
+
     if (gamestate != GS_LEVEL)
         return;
 
-    unsigned long total_memory = free_memory + active_memory +
+    total_memory = free_memory + active_memory +
                                  purgable_memory + inactive_memory +
                                  virtual_memory;
 
-    double s = 100.0 / total_memory;
+    s = 100.0 / total_memory;
 
     sprintf(act_mem, "%d\t%6.01f%%\tstatic\n", active_memory, active_memory * s);
     sprintf(pur_mem, "%d\t%6.01f%%\tpurgable\n", purgable_memory, purgable_memory * s);
@@ -752,6 +749,8 @@ void* Z_MallocAlign (int reqsize, int tag, void **user, int alignbits)
 {
     memblock_t* newblock;
 
+    void* basedata;
+
     // with the memalloc header
     int         memalloc_size;
    
@@ -783,7 +782,7 @@ void* Z_MallocAlign (int reqsize, int tag, void **user, int alignbits)
     newblock->user = user;
     newblock->size = memalloc_size;
 
-    void* basedata = (byte*)newblock + sizeof(memblock_t);
+    basedata = (byte*)newblock + sizeof(memblock_t);
 
     if (user)
         *user = basedata;
@@ -876,7 +875,12 @@ typedef struct
 } memzone_t;
 
 
-memzone_t*             mainzone;
+static memzone_t*      mainzone;
+
+#ifndef WII
+static boolean         zero_on_free;
+static boolean         scan_on_free;
+#endif
 
 static const size_t    HEADER_SIZE = (sizeof(memblock_t) + MEM_ALIGN - 1) & ~(MEM_ALIGN - 1);
 
@@ -896,13 +900,17 @@ void Z_DrawStats(void)            // Print allocation statistics
     char free_mem[50];
     char tot_mem[50];
 
+    double s;
+
+    unsigned long total_memory;
+
     if (gamestate != GS_LEVEL)
         return;
 
     if (memory_size > 0)
     {
-        unsigned long total_memory = free_memory + memory_size + active_memory + purgable_memory;
-        double s = 100.0 / total_memory;
+        total_memory = free_memory + memory_size + active_memory + purgable_memory;
+        s = 100.0 / total_memory;
 
         sprintf(act_mem, "%d\t%6.01f%%\tstatic\n", active_memory, active_memory * s);
         sprintf(pur_mem, "%d\t%6.01f%%\tpurgable\n", purgable_memory, purgable_memory * s);
@@ -912,8 +920,8 @@ void Z_DrawStats(void)            // Print allocation statistics
     }
     else
     {
-        unsigned long total_memory = active_memory + purgable_memory;
-        double s = 100.0 / total_memory;
+        total_memory = active_memory + purgable_memory;
+        s = 100.0 / total_memory;
 
         sprintf(act_mem, "%d\t%6.01f%%\tstatic\n", active_memory, active_memory * s);
         sprintf(pur_mem, "%d\t%6.01f%%\tpurgable\n", purgable_memory, purgable_memory * s);
@@ -982,8 +990,74 @@ void Z_Init (void)
     block->tag = PU_FREE;
     
     block->size = mainzone->size - sizeof(memzone_t);
+
+#ifndef WII
+    //!
+    // Zone memory debugging flag. If set, memory is zeroed after it is freed
+    // to deliberately break any code that attempts to use it after free.
+    //
+    zero_on_free = M_ParmExists("-zonezero");
+
+    //!
+    // Zone memory debugging flag. If set, each time memory is freed, the zone
+    // heap is scanned to look for remaining pointers to the freed block.
+    //
+    scan_on_free = M_ParmExists("-zonescan");
+#endif
 }
 
+
+void *Z_Realloc(void *ptr, size_t size)
+{
+    void        *newp = realloc(ptr, size);
+
+    if (!newp)
+        I_Error("Z_Realloc: Failure trying to reallocate %i bytes", size);
+    else
+        ptr = newp;
+
+    return ptr;
+}
+
+// Scan the zone heap for pointers within the specified range, and warn about
+// any remaining pointers.
+
+#ifndef WII
+static void ScanForBlock(void *start, void *end)
+{
+    memblock_t *block;
+    void **mem;
+    int i, len, tag;
+
+    block = mainzone->blocklist.next;
+
+    while (block->next != &mainzone->blocklist)
+    {
+        tag = block->tag;
+
+        if (tag == PU_STATIC || tag == PU_LEVEL || tag == PU_LEVSPEC)
+        {
+            // Scan for pointers on the assumption that pointers are aligned
+            // on word boundaries (word size depending on pointer size):
+            mem = (void **) ((byte *) block + sizeof(memblock_t));
+            len = (block->size - sizeof(memblock_t)) / sizeof(void *);
+
+            for (i = 0; i < len; ++i)
+            {
+                if (start <= mem[i] && mem[i] <= end)
+                {
+                    fprintf(stderr,
+                            "%p has dangling pointer into freed block "
+                            "%p (%p -> %p)\n",
+                            mem, start, &mem[i], mem[i]);
+                }
+            }
+        }
+
+        block = block->next;
+    }
+}
+#endif
 
 //
 // Z_Free
@@ -1008,7 +1082,22 @@ void Z_Free (void* ptr)
     block->tag = PU_FREE;
     block->user = NULL;
     block->id = 0;
-        
+
+#ifndef WII
+    // If the -zonezero flag is provided, we zero out the block on free
+    // to break code that depends on reading freed memory.
+    if (zero_on_free)
+    {
+        memset(ptr, 0, block->size - sizeof(memblock_t));
+    }
+
+    if (scan_on_free)
+    {
+        ScanForBlock(ptr,
+                     (byte *) ptr + block->size - sizeof(memblock_t));
+    }
+#endif
+
     other = block->prev;
 
     free_memory += block->size;
