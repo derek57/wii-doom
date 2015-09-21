@@ -562,3 +562,24 @@ char *commify(int value)
     return strdup(result);
 }
 
+char *M_ExtractFilename(char *path)
+{
+    size_t      len;
+    char        *pdest;
+    char        *inpfile = NULL;
+
+    pdest = strrchr(path, '\\');
+
+    if (!pdest)
+        pdest = strrchr(path, '/');
+    if (!pdest)
+        pdest = path;
+    else
+        pdest++;
+
+    len = strlen(pdest);
+    inpfile = malloc(len + 1);
+    strncpy(inpfile, pdest, len + 1);
+    return inpfile;
+}
+

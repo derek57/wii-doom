@@ -125,6 +125,56 @@ typedef struct
     int         speed;
 } animdef_t;
 
+static struct
+{
+    char        *pwad;
+    char        *texture;
+} exception[] = {
+    { "BTSX_E1.WAD",  "SHNPRT02" },
+    { "BTSX_E2B.WAD", "SHNPRT08" },
+    { "BTSX_E2B.WAD", "SLIME09"  },
+    { "DOOM2.WAD",    "RROCK05"  },
+    { "DOOM2.WAD",    "RROCK06"  },
+    { "DOOM2.WAD",    "RROCK07"  },
+    { "DOOM2.WAD",    "RROCK08"  },
+    { "DOOM2.WAD",    "SLIME09"  },
+    { "DOOM2.WAD",    "SLIME10"  },
+    { "DOOM2.WAD",    "SLIME11"  },
+    { "DOOM2.WAD",    "SLIME12"  },
+    { "MOHU2.WAD",    "DIFL_01"  },
+    { "PLUTONIA.WAD", "RROCK05"  },
+    { "PLUTONIA.WAD", "RROCK06"  },
+    { "PLUTONIA.WAD", "RROCK07"  },
+    { "PLUTONIA.WAD", "RROCK08"  },
+    { "PLUTONIA.WAD", "SLIME09"  },
+    { "PLUTONIA.WAD", "SLIME10"  },
+    { "PLUTONIA.WAD", "SLIME11"  },
+    { "PLUTONIA.WAD", "SLIME12"  },
+    { "RC-DC.WAD",    "BWORM00A" },
+    { "RC-DC.WAD",    "CFAN00A"  },
+    { "RC-DC.WAD",    "CFAN01A"  },
+    { "RC-DC.WAD",    "CFAN00D"  },
+    { "RC-DC.WAD",    "CFAN01D"  },
+    { "REQUIEM.WAD",  "SLIME05"  },
+    { "REQUIEM.WAD",  "SLIME08"  },
+    { "SID.WAD",      "FWATER1"  },
+    { "TNT.WAD",      "RROCK05"  },
+    { "TNT.WAD",      "RROCK06"  },
+    { "TNT.WAD",      "RROCK07"  },
+    { "TNT.WAD",      "RROCK08"  },
+    { "TNT.WAD",      "SLIME09"  },
+    { "TNT.WAD",      "SLIME10"  },
+    { "TNT.WAD",      "SLIME11"  },
+    { "TNT.WAD",      "SLIME12"  },
+    { "UACULTRA.WAD", "RROCK05"  },
+    { "VALIANT.WAD",  "E3SAW_A1" },
+    { "VALIANT.WAD",  "E3SAW_A2" },
+    { "VALIANT.WAD",  "E3SAW_A3" },
+    { "VALIANT.WAD",  "E3SAW_A4" },
+    { "",             ""         }
+};
+
+
 fixed_t animatedliquiddiffs[64] =
 {
      6422,  6422,  6360,  6238,  6054,  5814,  5516,  5164,
@@ -269,6 +319,8 @@ void P_InitPicAnims (void)
         }
         else
         {
+            int j;
+
             if (W_CheckNumForName(startname) == -1)
                 continue;
 
@@ -277,20 +329,27 @@ void P_InitPicAnims (void)
 
             lastanim->numpics = lastanim->picnum - lastanim->basepic + 1;
 
-            if (strcasecmp(animdefs[i].startname, "RROCK05")
-                && strcasecmp(animdefs[i].startname, "SLIME09"))
-            {
-                int     j;
-
-                for (j = 0; j < lastanim->numpics; j++)
-                    isliquid[lastanim->basepic + j] = true;
-            }
+            for (j = 0; j < lastanim->numpics; j++)
+                isliquid[lastanim->basepic + j] = true;
         }
 
         lastanim->istexture = animdefs[i].istexture;
 
         lastanim->speed = animdefs[i].speed;
         lastanim++;
+    }
+
+    i = 0;
+
+    while (exception[i].pwad[0])
+    {
+        int lump = R_CheckFlatNumForName(exception[i].texture);
+ 
+        if (lump >= 0 && !strcasecmp(M_ExtractFilename(lumpinfo[firstflat + lump]->wad_file->path),
+                exception[i].pwad))
+            isliquid[lump] = false;
+
+        ++i;
     }
 }
 

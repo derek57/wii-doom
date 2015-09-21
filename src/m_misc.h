@@ -59,8 +59,8 @@ char *M_StrCaseStr(char *haystack, char *needle);
 char *M_StringJoin(const char *s, ...);
 char *M_OEMToUTF8(const char *ansi);
 char *M_DirName(char *path);
-char *M_StringReplace(const char *haystack, const char *needle,
-                      const char *replacement);
+char *M_StringReplace(const char *haystack, const char *needle, const char *replacement);
+char *M_ExtractFilename(char *path);
 
 #endif
 
