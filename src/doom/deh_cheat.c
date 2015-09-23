@@ -19,26 +19,27 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "am_map.h"
+
 #ifdef WII
-#include "../doomtype.h"
 #include "../deh_defs.h"
 #include "../deh_io.h"
 #include "../deh_main.h"
+#include "../doomtype.h"
 #else
-#include "doomtype.h"
 #include "deh_defs.h"
 #include "deh_io.h"
 #include "deh_main.h"
+#include "doomtype.h"
 #endif
-
-#include "am_map.h"
-#include "st_stuff.h"
 
 #ifdef WII
 #include "../m_cheat.h"
 #else
 #include "m_cheat.h"
 #endif
+
+#include "st_stuff.h"
 
 
 typedef struct 
@@ -47,6 +48,8 @@ typedef struct
     cheatseq_t *seq;
 } deh_cheat_t;
 
+
+#ifdef WII
 cheatseq_t cheat_mus = CHEAT("idmus", 2);
 cheatseq_t cheat_god = CHEAT("iddqd", 0);
 cheatseq_t cheat_ammo = CHEAT("idkfa", 0);
@@ -70,6 +73,7 @@ cheatseq_t cheat_clev = CHEAT("idclev", 2);
 cheatseq_t cheat_mypos = CHEAT("idmypos", 0);
 
 cheatseq_t cheat_amap = CHEAT("iddt", 0);
+#endif
 
 static deh_cheat_t allcheats[] =
 {

@@ -32,6 +32,7 @@
 #define MAX_CHEAT_LEN 25
 #define MAX_CHEAT_PARAMS 5
 
+
 typedef struct
 {
     // settings for this cheat
@@ -46,6 +47,7 @@ typedef struct
     int param_chars_read;
     char parameter_buf[MAX_CHEAT_PARAMS];
 } cheatseq_t;
+
 
 int
 cht_CheckCheat

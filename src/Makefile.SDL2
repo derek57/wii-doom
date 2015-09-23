@@ -102,7 +102,7 @@ am__chocolate-doom_SOURCES_DIST = i_main.c i_system.c i_system.h \
 	deh_str.c deh_str.h i_glscale.c i_glscale.h i_joystick.c \
         i_joystick.h i_scale.c i_scale.h i_swap.h i_sound.c i_sound.h \
         i_timer.c i_timer.h i_tinttab.c i_tinttab.h i_video.c \
-        i_video.h m_bbox.c m_bbox.h m_cheat.h m_config.c m_config.h \
+        i_video.h m_bbox.c m_bbox.h m_cheat.c m_cheat.h m_config.c m_config.h \
         m_controls.c m_controls.h m_fixed.c m_fixed.h sha1.c sha1.h \
         memio.c memio.h tables.c tables.h v_misc.h v_trans.c v_trans.h \
         v_video.c v_video.h v_patch.h w_checksum.c w_checksum.h \
@@ -118,7 +118,7 @@ am__objects_2 = c_io.$(OBJEXT) d_event.$(OBJEXT) d_iwad.$(OBJEXT) \
 	d_loop.$(OBJEXT) d_mode.$(OBJEXT) deh_str.$(OBJEXT) \
         i_glscale.$(OBJEXT) i_joystick.$(OBJEXT) i_scale.$(OBJEXT) \
         i_sound.$(OBJEXT) i_timer.$(OBJEXT) i_tinttab.$(OBJEXT) \
-        i_video.$(OBJEXT) m_bbox.$(OBJEXT) m_config.$(OBJEXT) \
+        i_video.$(OBJEXT) m_bbox.$(OBJEXT) m_cheat.$(OBJEXT) m_config.$(OBJEXT) \
         m_controls.$(OBJEXT) m_fixed.$(OBJEXT) sha1.$(OBJEXT) \
         memio.$(OBJEXT) tables.$(OBJEXT) v_trans.$(OBJEXT) \
         v_video.$(OBJEXT) w_checksum.$(OBJEXT) w_main.$(OBJEXT) \
@@ -408,7 +408,7 @@ i_timer.c            i_timer.h             \
 i_tinttab.c          i_tinttab.h           \
 i_video.c            i_video.h             \
 m_bbox.c             m_bbox.h              \
-                     m_cheat.h             \
+m_cheat.c            m_cheat.h             \
 m_config.c           m_config.h            \
 m_controls.c         m_controls.h          \
 m_fixed.c            m_fixed.h             \
@@ -582,6 +582,7 @@ include ./$(DEPDIR)/i_tinttab.Po
 include ./$(DEPDIR)/i_video.Po
 include ./$(DEPDIR)/m_argv.Po
 include ./$(DEPDIR)/m_bbox.Po
+include ./$(DEPDIR)/m_cheat.Po
 include ./$(DEPDIR)/m_config.Po
 include ./$(DEPDIR)/m_controls.Po
 include ./$(DEPDIR)/m_fixed.Po

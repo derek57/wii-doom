@@ -38,6 +38,10 @@
 #include "doomtype.h"
 #endif
 
+#ifndef WII
+#include "m_cheat.h"
+#endif
+
 
 // Size of statusbar.
 // Now sensitive for scaling.
@@ -120,5 +124,18 @@ extern int      ammohighlight;
 extern int      armorhighlight;
 
 extern byte*    st_backing_screen;
+
+#ifndef WII
+extern cheatseq_t cheat_mus;
+extern cheatseq_t cheat_god;
+extern cheatseq_t cheat_ammo;
+extern cheatseq_t cheat_ammonokey;
+extern cheatseq_t cheat_noclip;
+extern cheatseq_t cheat_commercial_noclip;
+extern cheatseq_t cheat_powerup[7];
+extern cheatseq_t cheat_choppers;
+extern cheatseq_t cheat_clev;
+extern cheatseq_t cheat_mypos;
+#endif
 
 #endif

@@ -265,6 +265,7 @@ boolean         precache = true;        // if true, load all graphics at start
 boolean         joyarray[MAX_JOY_BUTTONS + 1]; 
 boolean         *joybuttons = &joyarray[1]; // allow [-1] 
 boolean         not_walking;
+boolean         turbodetected[MAXPLAYERS];
 
 #ifndef WII
 boolean         longtics;               // cph's doom 1.91 longtics hack
@@ -1485,6 +1486,7 @@ void G_DoLoadLevel (void)
 
     for (i=0 ; i<MAXPLAYERS ; i++) 
     { 
+	turbodetected[i] = false;
         if (playeringame[i] && players[i].playerstate == PST_DEAD) 
             players[i].playerstate = PST_REBORN; 
         memset (players[i].frags,0,sizeof(players[i].frags)); 
@@ -2099,7 +2101,27 @@ void G_Ticker (void)
                 G_ReadDemoTiccmd (cmd); 
             if (demorecording) 
                 G_WriteDemoTiccmd (cmd);
-            
+#ifndef WII
+	    // check for turbo cheats
+
+            // check ~ 4 seconds whether to display the turbo message. 
+            // store if the turbo threshold was exceeded in any tics
+            // over the past 4 seconds.  offset the checking period
+            // for each player so messages are not displayed at the
+            // same time.
+
+            if (cmd->forwardmove > TURBOTHRESHOLD)
+            {
+                turbodetected[i] = true;
+            }
+
+            if ((gametic & 31) == 0 
+             && ((gametic >> 5) % MAXPLAYERS) == i
+             && turbodetected[i])
+            {
+                turbodetected[i] = false;
+            }
+#endif
             if (netgame && !netdemo && !(gametic%ticdup) ) 
             { 
                 if (gametic > BACKUPTICS 

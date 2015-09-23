@@ -34,6 +34,10 @@
 #include "d_event.h"
 #endif
 
+#ifndef WII
+#include "m_cheat.h"
+#endif
+
 
 // Used by ST StatusBar stuff.
 #define AM_MSGHEADER (('a'<<24)+('m'<<16))
@@ -51,6 +55,10 @@
 
 // Called by main loop.
 boolean AM_Responder (event_t* ev);
+
+#ifndef WII
+extern cheatseq_t cheat_amap;
+#endif
 
 // Called by main loop.
 void AM_Ticker (void);

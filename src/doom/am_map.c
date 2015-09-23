@@ -55,6 +55,10 @@
 #include "m_controls.h"
 #endif
 
+#ifndef WII
+#include "m_cheat.h"
+#endif
+
 #include "m_menu.h"
 #include "p_local.h"
 #include "r_state.h"
@@ -226,6 +230,11 @@ mline_t thintriangle_guy[] = {
     { { (fixed_t)(-.5*R), (fixed_t)(.7*R ) }, { (fixed_t)(-.5*R), (fixed_t)(-.7*R) } }
 };
 #undef R
+
+
+#ifndef WII
+cheatseq_t cheat_amap = CHEAT("iddt", 0);
+#endif
 
 
 int                cheating = 0;
@@ -840,13 +849,12 @@ boolean AM_Responder
         {
             rc = false;
         }
-/*
+
 	if (!deathmatch && cht_CheckCheat(&cheat_amap, ev->data2))
 	{
 	    rc = false;
 	    cheating = (cheating+1) % 3;
 	}
-*/
     }
     else if (ev->type == ev_keyup)
     {
@@ -1327,7 +1335,8 @@ void AM_drawWalls(void)
                            != lines[i].frontsector->ceiling_height) {
                     AM_drawMline(&l, CDWALLCOLORS+lightlev); // ceiling level change
                 }
-                else if (cheating) {
+                else if (cheating)
+                {
                     AM_drawMline(&l, TSWALLCOLORS+lightlev);
                 }
             }

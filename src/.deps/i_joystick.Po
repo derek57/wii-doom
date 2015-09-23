@@ -1,0 +1,3 @@
+i_joystick.o: i_joystick.c /usr/include/stdc-predef.h
+
+/usr/include/stdc-predef.h:
