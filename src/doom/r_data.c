@@ -247,6 +247,10 @@ static struct
 };
 
 
+// killough 4/17/98: make firstcolormaplump, lastcolormaplump external
+int              firstcolormaplump;
+int              lastcolormaplump;
+
 int              firstflat;
 int              lastflat;
 int              numflats;
@@ -273,7 +277,7 @@ int              *texturetranslation;
 
 int              tran_filter_pct = 66;       // filter percent
 
-lighttable_t     *colormaps;
+lighttable_t     **colormaps;
 
 texture_t**      textures;
 texture_t**      textures_hashtable;
@@ -289,7 +293,7 @@ fixed_t*         spritetopoffset;
 
 short**          texturecolumnlump;
 
-unsigned**       texturecolumnofs; // [crispy] fix Medusa bug
+unsigned**       texturecolumnofs;  // [crispy] fix Medusa bug
 unsigned**	 texturecolumnofs2; // [crispy] original column offsets for single-patched textures
 
 byte**           texturecomposite;
@@ -1187,16 +1191,29 @@ extern byte V_Colorize (byte *playpal, int cr, byte source);
 
 void R_InitColormaps (void)
 {
-    int        lump;
     boolean    COLORMAP = (W_CheckMultipleLumps("COLORMAP") > 1);
     int        i, j, k;
     byte       *palsrc, *palette, *playpal;
     char       c[3];
 
-    // Load in the light tables, 
-    //  256 byte align tables.
-    lump = W_GetNumForName(DEH_String("COLORMAP"));
-    colormaps = W_CacheLumpNum(lump, PU_STATIC);
+    if (W_CheckNumForName("C_START") >= 0 && W_CheckNumForName("C_END") >= 0)
+    {
+        firstcolormaplump = W_GetNumForName("C_START");
+        lastcolormaplump = W_GetNumForName("C_END");
+        numcolormaps = lastcolormaplump - firstcolormaplump;
+
+        colormaps = Z_Malloc(sizeof(*colormaps) * numcolormaps, PU_STATIC, 0);
+
+        colormaps[0] = W_CacheLumpName("COLORMAP", PU_STATIC);
+
+        for (i = 1; i < numcolormaps; i++)
+            colormaps[i] = W_CacheLumpNum(i + firstcolormaplump, PU_STATIC);
+    }
+    else
+    {
+        colormaps = Z_Malloc(sizeof(*colormaps), PU_STATIC, 0);
+        colormaps[0] = W_CacheLumpName("COLORMAP", PU_STATIC);
+    }
 
     // [BH] There's a typo in dcolors.c, the source code of the utility Id
     // Software used to construct the palettes and colormaps for DOOM (see
@@ -1222,7 +1239,7 @@ void R_InitColormaps (void)
         if (!COLORMAP)
         {
             gray = (1.0f - gray) * 255.0f;
-            colormaps[32 * 256 + i] = FindNearestColor(palette, (int)gray, (int)gray, (int)gray);
+            colormaps[0][32 * 256 + i] = FindNearestColor(palette, (int)gray, (int)gray, (int)gray);
         }
     }
 
@@ -1245,7 +1262,20 @@ void R_InitColormaps (void)
     Z_ChangeTag(playpal, PU_CACHE);
 }
 
+// killough 4/4/98: get colormap number from name
+// killough 4/11/98: changed to return -1 for illegal names
+int R_ColormapNumForName(char *name)
+{
+    register int i = 0;
 
+    if (numcolormaps == 1)
+        return -1;
+
+    if (strncasecmp(name, "COLORMAP", 8))     // COLORMAP predefined to return 0
+        if ((i = W_CheckNumForName(name)) != -1)
+            i -= firstcolormaplump;
+    return i;
+}
 
 //
 // R_InitData
@@ -1632,5 +1662,20 @@ void R_PrecacheLevel (void)
     }
 
     Z_Free(spritepresent);
+}
+
+//
+// R_CheckFlatNumForName
+// Retrieval, get a flat number for a flat name. No error.
+//
+int R_CheckFlatNumForName(char *name)
+{
+    int i;
+
+    for (i = firstflat; i <= lastflat; i++)
+        if (!strncasecmp(lumpinfo[i]->name, name, 8))
+            return (i - firstflat);
+
+    return -1;
 }
 

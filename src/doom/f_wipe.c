@@ -147,7 +147,7 @@ int wipe_CalcBurn (byte *burnarray, int density)
 
     for (a = 0; a < density / 8; a++)
     {
-        unsigned int offs = (a + b) & (FIREWIDTH - 1);
+        unsigned int offs = ((a + b) & (FIREWIDTH - 1));
         unsigned int v = M_Random();
 
         v = MIN(from[offs] + 4 + (v & 15) + (v >> 3) + (M_Random() & 31), 255u);

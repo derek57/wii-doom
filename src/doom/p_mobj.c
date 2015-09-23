@@ -330,7 +330,7 @@ void P_XYMovement (mobj_t* mo)
     } while (xmove || ymove);
     
     // slow down
-    if (player && player->cheats & CF_NOMOMENTUM)
+    if (player && (player->cheats & CF_NOMOMENTUM))
     {
         // debug option for no sliding at all
         mo->momx = mo->momy = 0;
@@ -382,7 +382,7 @@ void P_XYMovement (mobj_t* mo)
     }
     else
     {
-        if (mo->flags2 & MF2_FLY && !(mo->z <= mo->floorz)
+        if ((mo->flags2 & MF2_FLY) && !(mo->z <= mo->floorz)
             && !(mo->flags2 & MF2_ONMOBJ))
         {
             mo->momx = FixedMul(mo->momx, FRICTION_FLY);
@@ -417,7 +417,7 @@ void P_ZMovement (mobj_t* mo)
     // adjust height
     mo->z += mo->momz;
         
-    if ( mo->flags & MF_FLOAT
+    if ((mo->flags & MF_FLOAT)
          && mo->target)
     {
         // float down towards target if too close
@@ -437,8 +437,8 @@ void P_ZMovement (mobj_t* mo)
         
     }
     
-    if (mo->player && mo->flags2 & MF2_FLY && !(mo->z <= mo->floorz)
-        && leveltime & 2)
+    if (mo->player && (mo->flags2 & MF2_FLY) && !(mo->z <= mo->floorz)
+        && (leveltime & 2))
     {
         mo->z += finesine[(FINEANGLES / 20 * leveltime >> 2) & FINEMASK];
     }
@@ -472,7 +472,7 @@ void P_ZMovement (mobj_t* mo)
         
 //        int correct_lost_soul_bounce = gameversion >= exe_ultimate;
 
-        if (correct_lost_soul_bounce && mo->flags & MF_SKULLFLY)
+        if (correct_lost_soul_bounce && (mo->flags & MF_SKULLFLY))
         {
             // the skull slammed into something
             mo->momz = -mo->momz;
@@ -522,7 +522,7 @@ void P_ZMovement (mobj_t* mo)
         // hit by a raising floor this incorrectly reverses its Y momentum.
         //
 
-        if (!correct_lost_soul_bounce && mo->flags & MF_SKULLFLY)
+        if (!correct_lost_soul_bounce && (mo->flags & MF_SKULLFLY))
             mo->momz = -mo->momz;
 
         if ( (mo->flags & MF_MISSILE)
@@ -884,7 +884,7 @@ P_SpawnMobj
             mobj->subsector->sector->heightsec == -1)
         mobj->flags2 |= MF2_FEETARECLIPPED;
 
-    if (mobj->flags2 & MF2_SHADOW && d_shadows)
+    if ((mobj->flags2 & MF2_SHADOW) && d_shadows)
         P_SpawnShadow(mobj);
 
     return mobj;
@@ -1174,7 +1174,7 @@ void P_SpawnMapThing (mapthing_t* mthing)
                  mthing->x, mthing->y);
                 
     // don't spawn keycards and players in deathmatch
-    if (deathmatch && mobjinfo[i].flags & MF_NOTDMATCH)
+    if (deathmatch && (mobjinfo[i].flags & MF_NOTDMATCH))
         return;
 
     if(beta_style)
@@ -1310,7 +1310,7 @@ void P_SpawnMapThing (mapthing_t* mthing)
     // RjY
     // Print a warning when a solid hanging body is used in a sector where
     // the player can walk under it, to help people with map debugging
-    if (!((~mobj->flags) & (MF_SOLID | MF_SPAWNCEILING)) // solid and hanging
+    if (!(~mobj->flags & (MF_SOLID | MF_SPAWNCEILING)) // solid and hanging
         // invert everything, then both bits should be clear
         && mobj->floorz + mobjinfo[MT_PLAYER].height <= mobj->z) // head <= base
         // player under body's head height <= bottom of body
@@ -1500,7 +1500,7 @@ P_SpawnMissile
             break;
     }
 
-    if (source->flags2 & MF2_FEETARECLIPPED && d_footclip &&
+    if ((source->flags2 & MF2_FEETARECLIPPED) && d_footclip &&
             source->subsector->sector->heightsec == -1)
         z -= FOOTCLIPSIZE;
 
@@ -1598,7 +1598,7 @@ P_SpawnPlayerMissile
     z = source->z + 4 * 8 * FRACUNIT +
         ((source->player->lookdir) << FRACBITS) / 173;
         
-    if (source->flags2 & MF2_FEETARECLIPPED && d_footclip &&
+    if ((source->flags2 & MF2_FEETARECLIPPED) && d_footclip &&
             source->subsector->sector->heightsec == -1)
         z -= FOOTCLIPSIZE;
 

@@ -183,6 +183,24 @@ typedef        struct
     // killough 3/7/98: support flat heights drawn at another sector's heights
     int             heightsec;      // other sector, or -1 if no other sector
 
+    // killough 4/4/98: dynamic colormaps
+    int             bottommap, midmap, topmap;
+
+    // killough 3/7/98: floor and ceiling texture offsets
+    fixed_t         floor_xoffs, floor_yoffs;
+    fixed_t         ceiling_xoffs, ceiling_yoffs;
+
+    // killough 4/11/98: support for lightlevels coming from another sector
+    int             floorlightsec, ceilinglightsec;
+
+    // killough 10/98: support skies coming from sidedefs. Allows scrolling
+    // skies and other effects. No "level info" kind of lump is needed,
+    // because you can use an arbitrary number of skies per level with this
+    // method. This field only applies when skyflatnum is used for floorpic
+    // or ceilingpic, because the rest of DOOM needs to know which is sky
+    // and which isn't, etc.
+    int             sky;
+
 } sector_t;
 
 
@@ -209,6 +227,11 @@ typedef struct
     // Sector the SideDef is facing.
     sector_t*      sector;
     
+    // killough 4/4/98, 4/11/98: highest referencing special linedef's type,
+    // or lump number of special effect. Allows texture names to be overloaded
+    // for other functions.
+    int            special;
+
 } side_t;
 
 
@@ -268,6 +291,8 @@ typedef struct line_s
 
     // sound origin for switches/buttons
     degenmobj_t    soundorg;
+
+    int            tranlump;       // killough 4/11/98: translucency filter, -1 == none
 
 } line_t;
 
@@ -522,6 +547,8 @@ typedef struct
     unsigned int     pad4;                // [crispy] hires / 32-bit integer math
 
     sector_t         *sector;             // [BH] Support animated liquid sectors
+
+    fixed_t          xoffs, yoffs;        // killough 2/28/98: Support scrolling flats
 
 } visplane_t;
 

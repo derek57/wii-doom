@@ -39,18 +39,39 @@
 //
 
 // Lighting constants.
-#define LIGHTLEVELS       32
-#define LIGHTSEGSHIFT     3
-#define LIGHTBRIGHT       2
-#define MAXLIGHTSCALE     48
-#define LIGHTSCALESHIFT   12
-#define MAXLIGHTZ         128
-#define LIGHTZSHIFT       20
+/*
+#define LIGHTLEVELS             32
+#define LIGHTSEGSHIFT           3
+#define LIGHTBRIGHT             2
+#define MAXLIGHTSCALE           48
+#define LIGHTSCALESHIFT         12
+#define MAXLIGHTZ               128
+#define LIGHTZSHIFT             20
+*/
+#define LIGHTLEVELS             128
+#define LIGHTSEGSHIFT           1
+#define LIGHTBRIGHT             2
+#define MAXLIGHTSCALE           384
+#define LIGHTSCALESHIFT         12
+#define MAXLIGHTZ               1024
+#define LIGHTZSHIFT             17
+
+#define OLDLIGHTLEVELS          32
+#define OLDLIGHTSEGSHIFT        3
+#define OLDLIGHTBRIGHT          2
+#define OLDMAXLIGHTSCALE        48
+#define OLDLIGHTSCALESHIFT      13
+#define OLDMAXLIGHTZ            2048
+#define OLDLIGHTZSHIFT          16
 
 // Number of diminishing brightness levels.
 // There a 0-31, i.e. 32 LUT in the COLORMAP lump.
 #define NUMCOLORMAPS      32
 
+
+// killough 3/20/98: Support dynamic colormaps, e.g. deep water
+// killough 4/4/98: support dynamic number of them as well
+extern int                numcolormaps;
 
 extern int                viewwindowx;
 extern int                viewwindowy;
@@ -79,10 +100,12 @@ extern fixed_t            projection;
 //      range of [0.0, 1.0).  Used for interpolation.
 extern fixed_t            fractionaltic;
 
-extern lighttable_t*      scalelight[LIGHTLEVELS][MAXLIGHTSCALE];
+extern lighttable_t*      (*scalelight)[MAXLIGHTSCALE];
+extern lighttable_t*      (*psprscalelight)[OLDMAXLIGHTSCALE];
 extern lighttable_t*      scalelightfixed[MAXLIGHTSCALE];
-extern lighttable_t*      zlight[LIGHTLEVELS][MAXLIGHTZ];
+extern lighttable_t*      (*zlight)[MAXLIGHTZ];
 extern lighttable_t*      fixedcolormap;
+extern lighttable_t*      fullcolormap;
 
 
 

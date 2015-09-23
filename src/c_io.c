@@ -515,9 +515,9 @@ static void C_DrawBackground(int height)
 
     for (i = height - 2; i > 1; i -= 3)
     {
-        I_VideoBuffer[i] = colormaps[256 * 6 + I_VideoBuffer[i]];
+        I_VideoBuffer[i] = colormaps[0][256 * 6 + I_VideoBuffer[i]];
         if (((i - 1) % SCREENWIDTH) < SCREENWIDTH - 2)
-            I_VideoBuffer[i + 1] = colormaps[256 * 6 + I_VideoBuffer[i - 1]];
+            I_VideoBuffer[i + 1] = colormaps[0][256 * 6 + I_VideoBuffer[i - 1]];
     }
 
     for (i = height - SCREENWIDTH * 3; i < height - SCREENWIDTH * 2; ++i)
@@ -528,7 +528,7 @@ static void C_DrawBackground(int height)
 
     for (j = 1; j <= 4; ++j)
         for (i = height; i < height + SCREENWIDTH * j; ++i)
-            I_VideoBuffer[i] = colormaps[256 * 4 + I_VideoBuffer[i]];
+            I_VideoBuffer[i] = colormaps[0][256 * 4 + I_VideoBuffer[i]];
 }
 
 #pragma GCC diagnostic push

@@ -232,12 +232,12 @@ R_RenderMaskedSegRange
   int               x1,
   int               x2 )
 {
-    unsigned        index;
     column_t*       col;
     int             lightnum;
     int             texnum;
     fixed_t         texheight;
     int64_t         t;
+    sector_t        tempsec;        // killough 4/13/98
 
     // Calculate light table.
     // Use different light tables
@@ -257,19 +257,16 @@ R_RenderMaskedSegRange
 
     texheight = textureheight[texnum];
         
-    lightnum = (frontsector->lightlevel >> LIGHTSEGSHIFT)+extralight*LIGHTBRIGHT;
+    // killough 4/13/98: get correct lightlevel for 2s normal textures
+    lightnum = (R_FakeFlat(frontsector, &tempsec, NULL, NULL, false)->lightlevel >> LIGHTSEGSHIFT)
+        + extralight * LIGHTBRIGHT;
 
     if (curline->v1->y == curline->v2->y)
         lightnum-=LIGHTBRIGHT;
     else if (curline->v1->x == curline->v2->x)
         lightnum+=LIGHTBRIGHT;
 
-    if (lightnum < 0)                
-        walllights = scalelight[0];
-    else if (lightnum >= LIGHTLEVELS)
-        walllights = scalelight[LIGHTLEVELS-1];
-    else
-        walllights = scalelight[lightnum];
+    walllights = scalelight[BETWEEN(0, lightnum, LIGHTLEVELS - 1)];
 
     maskedtexturecol = ds->maskedtexturecol;
 
@@ -297,6 +294,7 @@ R_RenderMaskedSegRange
         {
             if (!fixedcolormap)
             {
+/*
                 // CHANGED FOR HIRES
                 index = spryscale>>(LIGHTSCALESHIFT - (hires) + hires);
 
@@ -304,6 +302,9 @@ R_RenderMaskedSegRange
                     index = MAXLIGHTSCALE-1;
 
                 dc_colormap = walllights[index];
+*/
+                dc_colormap = walllights[BETWEEN(0, spryscale >> LIGHTSCALESHIFT,
+                    MAXLIGHTSCALE - 1)];
             }
 
             // [crispy] apply Killough's int64 sprtopscreen overflow fix
@@ -355,14 +356,13 @@ R_RenderMaskedSegRange
 void R_RenderSegLoop (void)
 {
     angle_t         angle;
-    unsigned        index;
     int             yl;
     int             yh;
     int             mid;
     fixed_t         texturecolumn;
     int             top;
     int             bottom;
-    boolean         usebrightmaps = (d_brightmaps && !fixedcolormap);
+    boolean         usebrightmaps = (d_brightmaps && !fixedcolormap && fullcolormap == colormaps[0]);
 
     for ( ; rw_x < rw_stopx ; rw_x++)
     {
@@ -421,12 +421,15 @@ void R_RenderSegLoop (void)
             // calculate lighting
 
             // CHANGED FOR HIRES
+/*
             index = rw_scale>>(LIGHTSCALESHIFT - (hires) + hires);
 
             if (index >=  MAXLIGHTSCALE )
                 index = MAXLIGHTSCALE-1;
 
             dc_colormap = walllights[index];
+*/
+            dc_colormap = walllights[BETWEEN(0, rw_scale >> LIGHTSCALESHIFT, MAXLIGHTSCALE - 1)];
             dc_x = rw_x;
             dc_iscale = 0xffffffffu / (unsigned)rw_scale;
         }
@@ -675,7 +678,6 @@ R_StoreWallRange
     fixed_t         hyp;
     fixed_t         sineval;
     angle_t         distangle, offsetangle;
-    int             lightnum;
     int             liquidoffset = 0;
 
     // [crispy] remove MAXDRAWSEGS Vanilla limit
@@ -882,17 +884,31 @@ R_StoreWallRange
             || backsector->floorpic != frontsector->floorpic
             || backsector->lightlevel != frontsector->lightlevel
 
+            // killough 3/7/98: Add checks for (x,y) offsets
+            || backsector->floor_xoffs != frontsector->floor_xoffs
+            || backsector->floor_yoffs != frontsector->floor_yoffs
+
             // killough 4/15/98: prevent 2s normals
             // from bleeding through deep water
-            || frontsector->heightsec != -1);
+            || frontsector->heightsec != -1
+
+            // killough 4/17/98: draw floors if different light levels
+            || backsector->floorlightsec != frontsector->floorlightsec);
 
         markceiling = (worldhigh != worldtop
             || backsector->ceilingpic != frontsector->ceilingpic
             || backsector->lightlevel != frontsector->lightlevel
 
+            // killough 3/7/98: Add checks for (x,y) offsets
+            || backsector->ceiling_xoffs != frontsector->ceiling_xoffs
+            || backsector->ceiling_yoffs != frontsector->ceiling_yoffs
+
             // killough 4/15/98: prevent 2s normals
             // from bleeding through fake ceilings
-            || (frontsector->heightsec != -1 && frontsector->ceilingpic != skyflatnum));
+            || (frontsector->heightsec != -1 && frontsector->ceilingpic != skyflatnum)
+
+            // killough 4/17/98: draw ceilings if different light levels
+            || backsector->ceilinglightsec != frontsector->ceilinglightsec);
 
         if (backsector->interpceilingheight <= frontsector->interpfloorheight
             || backsector->interpfloorheight >= frontsector->interpceilingheight)
@@ -985,19 +1001,17 @@ R_StoreWallRange
         // OPTIMIZE: get rid of LIGHTSEGSHIFT globally
         if (!fixedcolormap)
         {
-            lightnum = (frontsector->lightlevel >> LIGHTSEGSHIFT)+extralight*LIGHTBRIGHT;
+            int lightnum = (frontsector->lightlevel >> LIGHTSEGSHIFT)+extralight*LIGHTBRIGHT;
 
-            if (curline->v1->y == curline->v2->y)
-                lightnum-=LIGHTBRIGHT;
-            else if (curline->v1->x == curline->v2->x)
-                lightnum+=LIGHTBRIGHT;
+            if (frontsector->ceilingpic != skyflatnum)
+            {
+                if (curline->v1->y == curline->v2->y)
+                    lightnum-=LIGHTBRIGHT;
+                else if (curline->v1->x == curline->v2->x)
+                    lightnum+=LIGHTBRIGHT;
+            }
 
-            if (lightnum < 0)                
-                walllights = scalelight[0];
-            else if (lightnum >= LIGHTLEVELS)
-                walllights = scalelight[LIGHTLEVELS-1];
-            else
-                walllights = scalelight[lightnum];
+            walllights = scalelight[BETWEEN(0, lightnum, LIGHTLEVELS - 1)];
         }
     }
     

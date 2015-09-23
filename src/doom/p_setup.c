@@ -129,6 +129,8 @@ int64_t*           blockmaplump; // [crispy] BLOCKMAP limit
 int64_t*           blockmap;     // [crispy] BLOCKMAP limit (int for larger maps)
 
 boolean            createblockmap = false;
+boolean            canmodify;
+boolean            transferredsky;
 
 // REJECT
 // For fast sight rejection.
@@ -384,6 +386,8 @@ void P_LoadSectors (int lump)
 
         // killough 3/7/98:
         ss->heightsec = -1;       // sector used to get floor and ceiling height
+        ss->floorlightsec = -1;   // sector used to get floor lighting
+        ss->ceilinglightsec = -1; // sector used to get ceiling lighting
 
         ss->oldgametic = 0;
     }
@@ -525,6 +529,8 @@ void P_LoadLineDefs (int lump)
     memset (lines, 0, numlines*sizeof(line_t));
     data = W_CacheLumpNum (lump,PU_STATIC);
         
+    transferredsky = false;
+
     mld = (maplinedef_t *)data;
     ld = lines;
     warn = 0; // [crispy] warn about unknown linedef types
@@ -546,6 +552,8 @@ void P_LoadLineDefs (int lump)
         ld->dx = v2->x - v1->x;
         ld->dy = v2->y - v1->y;
         
+        ld->tranlump = -1;   // killough 4/11/98: no translucency by default
+
         if (!ld->dx)
             ld->slopetype = ST_VERTICAL;
         else if (!ld->dy)
@@ -631,6 +639,31 @@ void P_LoadLineDefs (int lump)
         }
         else
             ld->backsector = 0;
+
+        // killough 4/11/98: handle special types
+        switch (ld->special)
+        {
+            int lump;
+
+            case 260:            // killough 4/11/98: translucent 2s textures
+                lump = sides[*ld->sidenum].special;    // translucency from sidedef
+                if (!ld->tag)                          // if tag==0,
+                    ld->tranlump = lump;               // affect this linedef only
+                else
+                {
+                    int j;
+
+                    for (j = 0; j < numlines; j++)     // if tag!=0,
+                        if (lines[j].tag == ld->tag)   // affect all matching linedefs
+                            lines[j].tranlump = lump;
+                }
+                break;
+
+            case 271:
+            case 272:
+                transferredsky = true;
+                break;
+        }
     }
 
     // [crispy] warn about unknown linedef types
@@ -663,17 +696,55 @@ void P_LoadSideDefs (int lump)
     sd = sides;
     for (i=0 ; i<numsides ; i++, msd++, sd++)
     {
+        sector_t        *sec;
+
         sd->textureoffset = SHORT(msd->textureoffset)<<FRACBITS;
         sd->rowoffset = SHORT(msd->rowoffset)<<FRACBITS;
+/*
         sd->toptexture = R_TextureNumForName(msd->toptexture);
         sd->bottomtexture = R_TextureNumForName(msd->bottomtexture);
         sd->midtexture = R_TextureNumForName(msd->midtexture);
-        sd->sector = &sectors[SHORT(msd->sector)];
+*/
+        sd->sector = sec = &sectors[SHORT(msd->sector)];
+
+        // killough 4/4/98: allow sidedef texture names to be overloaded
+        switch (sd->special)
+        {
+            case 242:
+                // variable colormap via 242 linedef
+                sd->bottomtexture =
+                    (sec->bottommap = R_ColormapNumForName(msd->bottomtexture)) < 0 ?
+                    sec->bottommap = 0, R_TextureNumForName(msd->bottomtexture) : 0;
+                sd->midtexture =
+                    (sec->midmap = R_ColormapNumForName(msd->midtexture)) < 0 ?
+                    sec->midmap = 0, R_TextureNumForName(msd->midtexture) : 0;
+                sd->toptexture =
+                    (sec->topmap = R_ColormapNumForName(msd->toptexture)) < 0 ?
+                    sec->topmap = 0, R_TextureNumForName(msd->toptexture) : 0;
+                break;
+
+            case 260:
+                // killough 4/11/98: apply translucency to 2s normal texture
+                sd->midtexture = strncasecmp("TRANMAP", msd->midtexture, 8) ?
+                    (sd->special = W_CheckNumForName(msd->midtexture)) < 0 ||
+                    W_LumpLength(sd->special) != 65536 ?
+                    sd->special = 0, R_TextureNumForName(msd->midtexture) :
+                    (sd->special++, 0) : (sd->special = 0);
+                sd->toptexture = R_TextureNumForName(msd->toptexture);
+                sd->bottomtexture = R_TextureNumForName(msd->bottomtexture);
+                break;
+
+            default:
+                // normal cases
+                sd->midtexture = R_TextureNumForName(msd->midtexture);
+                sd->toptexture = R_TextureNumForName(msd->toptexture);
+                sd->bottomtexture = R_TextureNumForName(msd->bottomtexture);
+                break;
+        }
     }
 
     W_ReleaseLumpNum(lump);
 }
-
 
 // [crispy] taken from mbfsrc/P_SETUP.C:547-707, slightly adapted
 static void P_CreateBlockMap(void)
@@ -1301,16 +1372,16 @@ P_SetupLevel
 
     leveltime = 0;
     animatedliquiddiff = FRACUNIT;
-        
+
     createblockmap = false;
 
-    // note: most of this ordering is important        
-    P_LoadBlockMap (lumpnum+ML_BLOCKMAP);
+    P_LoadBlockMap(lumpnum + ML_BLOCKMAP);
     P_LoadVertexes (lumpnum+ML_VERTEXES);
     P_LoadSectors (lumpnum+ML_SECTORS);
     P_LoadSideDefs (lumpnum+ML_SIDEDEFS);
-
     P_LoadLineDefs (lumpnum+ML_LINEDEFS);
+
+    // note: most of this ordering is important        
 
     // [crispy] (re-)create BLOCKMAP if necessary
     if (createblockmap)

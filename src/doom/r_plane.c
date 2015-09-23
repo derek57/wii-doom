@@ -102,9 +102,11 @@ fixed_t                    cacheddistance[SCREENHEIGHT];
 fixed_t                    cachedxstep[SCREENHEIGHT];
 fixed_t                    cachedystep[SCREENHEIGHT];
 
-size_t                     maxopenings;
+static fixed_t             xoffs, yoffs;                   // killough 2/28/98: flat offsets
 
 static int                 numvisplanes;             // ADDED FOR HIRES
+
+size_t                     maxopenings;
 
 int                        *openings;                // dropoff overflow
 int*                       lastopening;              // [crispy] 32-bit integer math
@@ -151,11 +153,12 @@ R_MapPlane
   int                x1,
   int                x2 )
 {
-    angle_t          angle;
-    fixed_t          distance;
-    fixed_t          length;
-    unsigned         index;
-        
+    fixed_t     distance;
+    int         dx, dy;
+
+    if (y == centery)
+        return;
+
 #ifdef RANGECHECK
     if (x2 < x1
      || x1 < 0
@@ -166,36 +169,21 @@ R_MapPlane
     }
 #endif
 
-    if (planeheight != cachedheight[y])
-    {
-        cachedheight[y] = planeheight;
-        distance = cacheddistance[y] = FixedMul (planeheight, yslope[y]);
-        ds_xstep = cachedxstep[y] = FixedMul (distance,basexscale);
-        ds_ystep = cachedystep[y] = FixedMul (distance,baseyscale);
-    }
-    else
-    {
-        distance = cacheddistance[y];
-        ds_xstep = cachedxstep[y];
-        ds_ystep = cachedystep[y];
-    }
-        
-    length = FixedMul (distance,distscale[x1]);
-    angle = (viewangle + xtoviewangle[x1])>>ANGLETOFINESHIFT;
+    distance = FixedMul(planeheight, yslope[y]);
+
+    dx = x1 - centerx;
+    dy = abs(centery - y);
+    ds_xstep = FixedMul(viewsin, planeheight) / dy;
+    ds_ystep = FixedMul(viewcos, planeheight) / dy;
+
+    ds_xfrac = viewx + xoffs + FixedMul(viewcos, distance) + dx * ds_xstep;
+    ds_yfrac = -viewy + yoffs - FixedMul(viewsin, distance) + dx * ds_ystep;
+/*
     ds_xfrac = viewx + FixedMul(finecosine[angle], length);
     ds_yfrac = -viewy - FixedMul(finesine[angle], length);
-
-    if (fixedcolormap)
-        ds_colormap = fixedcolormap;
-    else
-    {
-        index = distance >> LIGHTZSHIFT;
-        
-        if (index >= MAXLIGHTZ )
-            index = MAXLIGHTZ-1;
-
-        ds_colormap = planezlight[index];
-    }
+*/
+    ds_colormap = (fixedcolormap ? fixedcolormap :
+        planezlight[BETWEEN(0, distance >> LIGHTZSHIFT, MAXLIGHTZ - 1)]);
         
     ds_y = y;
     ds_x1 = x1;
@@ -274,21 +262,22 @@ visplane_t*
 R_FindPlane
 ( fixed_t        height,
   int            picnum,
-  int            lightlevel )
+  int            lightlevel,
+  fixed_t        xoffs,
+  fixed_t        yoffs )
 {
     visplane_t*  check;
         
-    if (picnum == skyflatnum)
-    {
-        height = 0;                        // all skys map together
-        lightlevel = 0;
-    }
+    if (picnum == skyflatnum || (picnum & PL_SKYFLAT))          // killough 10/98
+        height = lightlevel = 0;                // killough 7/19/98: most skies map together
         
     for (check=visplanes; check<lastvisplane; check++)
     {
         if (height == check->height
             && picnum == check->picnum
-            && lightlevel == check->lightlevel)
+            && lightlevel == check->lightlevel
+            && xoffs == check->xoffs
+            && yoffs == check->yoffs)
         {
             break;
         }
@@ -307,6 +296,8 @@ R_FindPlane
     check->lightlevel = lightlevel;
     check->minx = SCREENWIDTH;
     check->maxx = -1;
+    check->xoffs = xoffs;                                      // killough 2/28/98: Save offsets
+    check->yoffs = yoffs;
     
     memset (check->top,0xff,sizeof(check->top));
                 
@@ -371,6 +362,8 @@ R_CheckPlane
     lastvisplane->height = pl->height;
     lastvisplane->picnum = pl->picnum;
     lastvisplane->lightlevel = pl->lightlevel;
+    lastvisplane->xoffs = pl->xoffs;      // killough 2/28/98
+    lastvisplane->yoffs = pl->yoffs;
     
     pl = lastvisplane++;
     pl->minx = start;
@@ -492,7 +485,6 @@ char *R_DistortedFlat(int flatnum)
 void R_DrawPlanes (void)
 {
     visplane_t*         pl;
-    int                 light;
     int                 x;
     int                 stop;
     int                 angle;
@@ -530,7 +522,7 @@ void R_DrawPlanes (void)
             //  i.e. colormaps[0] is used.
             // Because of this hack, sky is not affected
             //  by INVUL inverse mapping.
-            dc_colormap = colormaps;
+            dc_colormap = (fixedcolormap ? fixedcolormap : fullcolormap);
             dc_texturemid = skytexturemid;
             dc_texheight = textureheight[skytexture]>>FRACBITS; // [crispy] Tutti-Frutti fix
             for (x=pl->minx ; x <= pl->maxx ; x++)
@@ -559,20 +551,16 @@ void R_DrawPlanes (void)
                     R_DistortedFlat(picnum): W_CacheLumpNum(lumpnum,
                             PU_STATIC));
 
+            xoffs = pl->xoffs;  // killough 2/28/98: Add offsets
+            yoffs = pl->yoffs;
+
             planeheight = abs(pl->height-viewz);
 #ifdef ANIMATED_FLOOR_LIQUIDS
             if (liquid && pl->sector && pl->sector->animate)
                 planeheight -= pl->sector->animate;
 #endif
-            light = (pl->lightlevel >> LIGHTSEGSHIFT)+extralight*LIGHTBRIGHT;
-
-            if (light >= LIGHTLEVELS)
-                light = LIGHTLEVELS-1;
-
-            if (light < 0)
-                light = 0;
-
-            planezlight = zlight[light];
+            planezlight = zlight[BETWEEN(0, (pl->lightlevel >> LIGHTSEGSHIFT)
+                    + extralight * LIGHTBRIGHT, LIGHTLEVELS - 1)];
 
             pl->top[pl->maxx+1] = 0xffffffffu; // [crispy] hires / 32-bit integer math
             pl->top[pl->minx-1] = 0xffffffffu; // [crispy] hires / 32-bit integer math

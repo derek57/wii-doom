@@ -320,7 +320,7 @@ boolean PIT_CheckLine (line_t* ld)
         if ( ld->flags & ML_BLOCKING )
             return false;        // explicitly blocking everything
 
-        if ( !tmthing->player && ld->flags & ML_BLOCKMONSTERS )
+        if ( !tmthing->player && (ld->flags & ML_BLOCKMONSTERS) )
             return false;        // block monsters only
     }
 
@@ -1591,7 +1591,7 @@ P_LineAttack
 
     shootz = t1->z + (t1->height>>1) + 8*FRACUNIT;
 
-    if (t1->flags2 & MF2_FEETARECLIPPED && d_footclip)
+    if ((t1->flags2 & MF2_FEETARECLIPPED) && d_footclip)
         shootz -= FOOTCLIPSIZE;
 
     attackrange = distance;
@@ -1685,7 +1685,7 @@ boolean PTR_NoWayTraverse(intercept_t *in)
     line_t *ld = in->d.line;
 
     return (ld->special 
-            || !(ld->flags & ML_BLOCKING 
+            || !((ld->flags & ML_BLOCKING) 
                  || (P_LineOpening(ld),
                      openrange <= 0 || 
                      openbottom > usething->z + 24 * FRACUNIT ||

@@ -491,7 +491,7 @@ void D_Display (void)
 	{
 	    for (y = 0; y < SCREENWIDTH * SCREENHEIGHT; y++)
 	    {
-		I_VideoBuffer[y] = colormaps[menushade * 256 + I_VideoBuffer[y]];
+		I_VideoBuffer[y] = colormaps[0][menushade * 256 + I_VideoBuffer[y]];
 	    }
 	}
 

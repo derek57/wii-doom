@@ -63,7 +63,7 @@ extern fixed_t             viewx;
 extern fixed_t             viewy;
 extern fixed_t             viewz;
 
-extern lighttable_t*       colormaps;
+extern lighttable_t**      colormaps;
 
 extern spritedef_t*        sprites;
 extern vertex_t*           vertexes;

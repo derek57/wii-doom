@@ -5679,7 +5679,11 @@ boolean M_Responder (event_t* ev)
 /*							// FIXME: NOT YET WORKING (MOUSE BINDINGS)
     if (askforkey && ev->type == ev_mouse)
     {
-        if (ev->data1 & 1 || ev->data1 & 2 || ev->data1 & 4 || ev->data1 & 8 || ev->data1 & 16)
+        if ((ev->data1 & 1) ||
+            (ev->data1 & 2) ||
+            (ev->data1 & 4) ||
+            (ev->data1 & 8) ||
+            (ev->data1 & 16))
         {
             M_KeyBindingsClearControls(ev->data1);
 
@@ -6254,7 +6258,7 @@ void M_Drawer (void)
 
     // DISPLAYS BLINKING "BETA" MESSAGE
     if ((fsize == 4261144 || fsize == 4271324 || fsize == 4211660 || beta_style) &&
-            !menuactive && leveltime & 16 && gamestate == GS_LEVEL &&
+            !(menuactive && leveltime & 16) && gamestate == GS_LEVEL &&
             consoleheight == 0)
     {
         M_WriteText(140, 12, "BETA");
@@ -9430,7 +9434,7 @@ void M_Massacre(int choice)
     while ((currentthinker=currentthinker->next) != &thinkercap)
     {
         if (currentthinker->function.acp1 == (actionf_p1) P_MobjThinker &&
-           (((mobj_t *) currentthinker)->flags & MF_COUNTKILL ||
+           ((((mobj_t *) currentthinker)->flags & MF_COUNTKILL) ||
             ((mobj_t *) currentthinker)->type == MT_SKULL ||
             ((mobj_t *) currentthinker)->type == MT_BETASKULL))
         {

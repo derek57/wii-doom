@@ -967,7 +967,7 @@ P_KillMobj
         if (target->player)
             source->player->frags[target->player-players]++;
 
-        if (beta_style && !massacre_cheat_used && target->flags & MF_COUNTKILL)
+        if (beta_style && !massacre_cheat_used && (target->flags & MF_COUNTKILL))
         {
             if(target->type == MT_POSSESSED)
                 i = 200;
@@ -1293,7 +1293,7 @@ P_DamageMobj
 
         // killough 3/26/98: make god mode 100% god mode in non-compat mode
         if ((damage < 1000 || (!d_god && (player->cheats & CF_GODMODE))) &&
-            (player->cheats & CF_GODMODE || player->powers[pw_invulnerability]))
+            ((player->cheats & CF_GODMODE) || player->powers[pw_invulnerability]))
         {
             return;
         }

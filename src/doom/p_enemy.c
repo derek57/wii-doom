@@ -343,7 +343,7 @@ static boolean P_Move(mobj_t *actor, boolean dropoff)   // killough 9/12/98
     if (!try_ok)
     {
         // open any specials
-        if (actor->flags & MF_FLOAT && floatok)
+        if ((actor->flags & MF_FLOAT) && floatok)
         {
             // must adjust height
             if (actor->z < tmfloorz)
@@ -941,7 +941,7 @@ void A_Look (mobj_t* actor)
     actor->threshold = 0;        // any shot will wake up
     targ = actor->subsector->sector->soundtarget;
 
-    if(beta_style && actor->flags & MF_COUNTKILL &&
+    if(beta_style && (actor->flags & MF_COUNTKILL) &&
             actor->state->frame == 1 && actor->state->tics > 0)
         actor->state->tics = 0;
 
@@ -1271,6 +1271,7 @@ void A_TroopAttack (mobj_t* actor)
     }
 
     // launch a missile
+    actor->frame |= FF_FULLBRIGHT;
     if(beta_imp)
         P_SpawnMissile (actor, actor->target, MT_TROOPSHOT2);
     else
@@ -1309,6 +1310,7 @@ void A_HeadAttack (mobj_t* actor)
     }
     
     // launch a missile
+    actor->frame |= FF_FULLBRIGHT;
     P_SpawnMissile (actor, actor->target, MT_HEADSHOT);
 }
 
@@ -1343,6 +1345,7 @@ void A_BruisAttack (mobj_t* actor)
     }
     
     // launch a missile
+    actor->frame |= FF_FULLBRIGHT;
     P_SpawnMissile (actor, actor->target, MT_BRUISERSHOT);
 }
 

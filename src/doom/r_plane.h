@@ -32,6 +32,10 @@
 #include "r_data.h"
 
 
+// killough 10/98: special mask indicates sky flat comes from sidedef
+#define PL_SKYFLAT      0x80000000
+
+
 typedef void (*planefunction_t) (int top, int bottom);
 
 extern planefunction_t        floorfunc;
@@ -44,7 +48,7 @@ extern int                    floorclip[SCREENWIDTH];     // [crispy] 32-bit int
 extern int                    ceilingclip[SCREENWIDTH];   // [crispy] 32-bit integer math
 
 // Visplane related.
-extern  int*                  lastopening;                // [crispy] 32-bit integer math
+extern int*                   lastopening;                // [crispy] 32-bit integer math
 
 void R_InitPlanes (void);
 void R_ClearPlanes (void);
@@ -67,9 +71,11 @@ void R_DrawPlanes (void);
 
 visplane_t*
 R_FindPlane
-( fixed_t            height,
-  int                picnum,
-  int                lightlevel );
+( fixed_t        height,
+  int            picnum,
+  int            lightlevel,
+  fixed_t        xoffs,
+  fixed_t        yoffs );
 
 visplane_t*
 R_CheckPlane

@@ -773,7 +773,7 @@ void F_CastDrawer (void)
 
     // draw the current frame in the middle of the screen
     sprdef = &sprites[caststate->sprite];
-    sprframe = &sprdef->spriteframes[ caststate->frame & FF_FRAMEMASK];
+    sprframe = &sprdef->spriteframes[caststate->frame & FF_FRAMEMASK];
 
     if (sprframe->rotate)
         rot = castrot;

@@ -108,5 +108,7 @@ void         R_DrawSpectreShadowColumn(void);
 void         R_DrawSolidShadowColumn(void);
 void         R_DrawFullbrightWallColumn(void);
 void         R_DrawWallColumn(void);
+void         R_DrawSkyColumn(void);
+void         R_DrawFlippedSkyColumn(void);
 
 #endif

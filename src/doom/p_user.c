@@ -113,7 +113,7 @@ void P_CalcHeight (player_t* player)
     if (player->bob>MAXBOB)
         player->bob = MAXBOB;
 
-    if (player->mo->flags2 & MF2_FLY && !onground)
+    if ((player->mo->flags2 & MF2_FLY) && !onground)
     {
         player->bob = FRACUNIT / 2;
     }
@@ -160,7 +160,7 @@ void P_CalcHeight (player_t* player)
     }
     player->viewz = player->mo->z + player->viewheight + bob;
 
-    if (player->mo->flags2 & MF2_FEETARECLIPPED && d_footclip
+    if ((player->mo->flags2 & MF2_FEETARECLIPPED) && d_footclip
         && player->playerstate != PST_DEAD
         && player->mo->z <= player->mo->floorz)
     {
@@ -197,10 +197,10 @@ void P_MovePlayer (player_t* player)
     onground = (player->mo->z <= player->mo->floorz
                 || (player->mo->flags2 & MF2_ONMOBJ));
         
-    if (cmd->forwardmove && (onground || player->mo->flags2 & MF2_FLY))
+    if (cmd->forwardmove && (onground || (player->mo->flags2 & MF2_FLY)))
         P_Thrust (player, player->mo->angle, cmd->forwardmove*2048);
     
-    if (cmd->sidemove && (onground || player->mo->flags2 & MF2_FLY))
+    if (cmd->sidemove && (onground || (player->mo->flags2 & MF2_FLY)))
         P_Thrust (player, player->mo->angle-ANG90, cmd->sidemove*2048);
 
     if ( (cmd->forwardmove || cmd->sidemove) 

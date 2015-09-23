@@ -71,5 +71,10 @@ void R_ClearClipSegs (void);
 void R_ClearDrawSegs (void);
 void R_RenderBSPNode (int bspnum);
 
+sector_t *R_FakeFlat(sector_t *sec,
+                     sector_t *tempsec,
+                     int      *floorlightlevel,
+                     int      *ceilinglightlevel,
+                     boolean  back);
 
 #endif

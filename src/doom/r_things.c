@@ -136,6 +136,8 @@ fixed_t                spryscale;
 
 static lighttable_t    **spritelights;         // killough 1/25/98 made static
 
+static boolean         bflash;
+
 extern boolean         realframe;
 extern boolean         skippsprinterp;
 
@@ -527,7 +529,7 @@ R_DrawVisSprite
         colfunc = tlcolfunc;
     }
 
-    if(d_shadows && vis->mobjflags2 & MF2_SHADOW)
+    if(d_shadows && (vis->mobjflags2 & MF2_SHADOW))
         colfunc = vis->colfunc;
 
     dc_iscale = abs(vis->xiscale)>>(!hires);                // CHANGED FOR HIRES
@@ -595,10 +597,10 @@ void R_ProjectSprite(mobj_t *thing)
     spriteframe_t*     sprframe;
     int                lump;
     
-    unsigned           rot;
+    unsigned           rot = 0;
     boolean            flip;
     
-    int                index;
+//    int                index;
 
     vissprite_t*       vis;
     
@@ -677,7 +679,7 @@ void R_ProjectSprite(mobj_t *thing)
         I_Error ("R_ProjectSprite: invalid sprite frame %i : %i ",
                  thing->sprite, thing->frame);
 #endif
-    sprframe = &sprdef->spriteframes[ thing->frame & FF_FRAMEMASK];
+    sprframe = &sprdef->spriteframes[thing->frame & FF_FRAMEMASK];
 
     if (sprframe->rotate)
     {
@@ -797,8 +799,8 @@ void R_ProjectSprite(mobj_t *thing)
 
     // [crispy] flip death sprites and corpses randomly
     // except for Cyberdemons and Barrels which are too asymmetrical
-    if((thing->type != MT_CYBORG && thing->type != MT_BARREL &&
-        thing->flags & MF_CORPSE && thing->health & 1) || thing->flags2 & MF2_MIRRORED)
+    if ((thing->type != MT_CYBORG && thing->type != MT_BARREL &&
+        (thing->flags & MF_CORPSE) && (thing->health & 1)) || (thing->flags2 & MF2_MIRRORED))
     {
         flip = !!d_flipcorpses;
     }
@@ -820,7 +822,7 @@ void R_ProjectSprite(mobj_t *thing)
     
     // get light level
     // [crispy] do not invalidate colormap if invisibility is rendered translucently
-    if (thing->flags & MF_SHADOW && !d_translucency)
+    if ((thing->flags & MF_SHADOW) && !d_translucency)
     {
         // shadow draw
         vis->colormap = NULL;
@@ -830,11 +832,11 @@ void R_ProjectSprite(mobj_t *thing)
         // fixed map
         vis->colormap = fixedcolormap;
     }
-    else if (thing->frame & FF_FULLBRIGHT)
-    {
-        // full bright
-        vis->colormap = fixedcolormap ? fixedcolormap : colormaps;
-    }
+    else if ((thing->frame & FF_FULLBRIGHT) && (rot <= 3 || rot >= 7))
+        vis->colormap = fullcolormap;           // full bright
+    else                                        // diminished light
+        vis->colormap = spritelights[BETWEEN(0, xscale >> LIGHTSCALESHIFT, MAXLIGHTSCALE - 1)];
+/*
     else
     {
         // diminished light
@@ -845,7 +847,7 @@ void R_ProjectSprite(mobj_t *thing)
 
         vis->colormap = spritelights[index];
     }        
-
+*/
     // [crispy] colored blood
     if (d_colblood && d_chkblood && thing->target &&
        (thing->type == MT_BLOOD || thing->sprite == SPR_POL5 ||
@@ -1122,30 +1124,25 @@ void R_ProjectShadow(mobj_t *thing)
 // R_AddSprites
 // During BSP traversal, this adds sprites by sector.
 //
-void R_AddSprites (sector_t* sec)
+// killough 9/18/98: add lightlevel as parameter, fixing underwater lighting
+void R_AddSprites(sector_t *sec, int lightlevel)
 {
     mobj_t*                thing;
-    int                    lightnum;
     short                  floorpic = sec->floorpic;
 
     // BSP is traversed by subsector.
     // A sector might have been split into several
     //  subsectors during BSP building.
     // Thus we check whether its already added.
+/*
     if (sec->validcount == validcount)
         return;                
 
     // Well, now it will be done.
     sec->validcount = validcount;
-        
-    lightnum = (sec->lightlevel >> LIGHTSEGSHIFT)+extralight*LIGHTBRIGHT;
-
-    if (lightnum < 0)                
-        spritelights = scalelight[0];
-    else if (lightnum >= LIGHTLEVELS)
-        spritelights = scalelight[LIGHTLEVELS-1];
-    else
-        spritelights = scalelight[lightnum];
+*/
+    spritelights = scalelight[BETWEEN(0, (lightlevel >> LIGHTSEGSHIFT) + extralight * LIGHTBRIGHT,
+        LIGHTLEVELS - 1)];
 
     // Handle all things in sector.
     if (fixedcolormap || isliquid[floorpic] || floorpic == skyflatnum || !d_shadows)
@@ -1188,7 +1185,7 @@ void R_DrawPSprite (pspdef_t* psp, psprnum_t psprnum)
         I_Error ("R_DrawPSprite: invalid sprite frame %i : %i ",
                  psp->state->sprite, psp->state->frame);
 #endif
-    sprframe = &sprdef->spriteframes[ psp->state->frame & FF_FRAMEMASK ];
+    sprframe = &sprdef->spriteframes[psp->state->frame & FF_FRAMEMASK];
 
     lump = sprframe->lump[0];
     flip = (boolean)(sprframe->flip & 1);
@@ -1246,7 +1243,7 @@ void R_DrawPSprite (pspdef_t* psp, psprnum_t psprnum)
 
     // [crispy] do not invalidate colormap if invisibility is rendered translucently
     if ((viewplayer->powers[pw_invisibility] > 4*32
-        || viewplayer->powers[pw_invisibility] & 8)
+        || (viewplayer->powers[pw_invisibility] & 8))
         && !d_translucency && !beta_style)
     {
         // shadow draw
@@ -1257,20 +1254,28 @@ void R_DrawPSprite (pspdef_t* psp, psprnum_t psprnum)
         // fixed color
         vis->colormap = fixedcolormap;
     }
-    else if (psp->state->frame & FF_FULLBRIGHT)
-    {
-        // full bright
-        vis->colormap = colormaps;
-    }
     else
     {
-        // local light
-        vis->colormap = spritelights[MAXLIGHTSCALE-1];
+        if (bflash || (psp->state->frame & FF_FULLBRIGHT))
+        {
+            // full bright
+            vis->colormap = fullcolormap;
+        }
+        else
+        {
+            // local light
+//            vis->colormap = spritelights[MAXLIGHTSCALE-1];
+            int lightnum = (viewplayer->mo->subsector->sector->lightlevel >> LIGHTSEGSHIFT)
+                    + extralight * LIGHTBRIGHT;
+
+            vis->colormap = scalelight[BETWEEN(0, lightnum, LIGHTLEVELS - 1)]
+                    [BETWEEN(0, lightnum + 8, MAXLIGHTSCALE - 1)];
+        }
     }
         
     // [crispy] invisibility is rendered translucently
     if ((viewplayer->powers[pw_invisibility] > 4*32 ||
-        viewplayer->powers[pw_invisibility] & 8) &&
+        (viewplayer->powers[pw_invisibility] & 8)) &&
         d_translucency)
     {
         vis->mobjflags |= MF_TRANSLUCENT;
@@ -1333,9 +1338,10 @@ void R_DrawPSprite (pspdef_t* psp, psprnum_t psprnum)
 void R_DrawPlayerSprites (void)
 {
     int                i;
-    int                lightnum;
+//    int                lightnum;
+    int                invisibility = viewplayer->powers[pw_invisibility];
     pspdef_t*          psp;
-    
+/*    
     // get light level
     lightnum =
         (viewplayer->mo->subsector->sector->lightlevel >> LIGHTSEGSHIFT) 
@@ -1347,18 +1353,35 @@ void R_DrawPlayerSprites (void)
         spritelights = scalelight[LIGHTLEVELS-1];
     else
         spritelights = scalelight[lightnum];
-    
+*/
     // clip to screen bounds
     mfloorclip = screenheightarray;
     mceilingclip = negonearray;
     
     // add all active psprites
-    for (i=0, psp=viewplayer->psprites;
-         i<NUMPSPRITES;
-         i++,psp++)
+    if (invisibility > 128 || (invisibility & 8))
     {
-        if (psp->state)
-            R_DrawPSprite (psp, i); // [crispy] pass gun or flash sprite
+        for (i = 0, psp = viewplayer->psprites; i < NUMPSPRITES; i++, psp++)
+            if (psp->state)
+                R_DrawPSprite(psp, i);
+    }
+    else
+    {
+        bflash = false;
+        for (i = 0, psp = viewplayer->psprites; i < NUMPSPRITES; i++, psp++)
+            if (psp->state && (psp->state->frame & FF_FULLBRIGHT))
+                bflash = true;
+
+        for (i=0, psp=viewplayer->psprites; i<NUMPSPRITES; i++,psp++)
+        {
+/*
+            if (psp->state)
+                R_DrawPSprite (psp, i); // [crispy] pass gun or flash sprite
+*/
+            for (i = 0, psp = viewplayer->psprites; i < NUMPSPRITES; i++, psp++)
+                if (psp->state)
+                    R_DrawPSprite(psp, i);
+        }
     }
 }
 
