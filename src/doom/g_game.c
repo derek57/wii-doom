@@ -565,11 +565,17 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
     { 
         if (gamekeydown[key_right] || mousebuttons[mousebstraferight] || gamekeydown[key_straferight]) 
         {
+#ifndef WII
+            not_walking = false;
+#endif
             // fprintf(stderr, "strafe right\n");
             side += sidemove; 
         }
         if (gamekeydown[key_left] || mousebuttons[mousebstrafeleft] || gamekeydown[key_strafeleft]) 
         {
+#ifndef WII
+            not_walking = false;
+#endif
             // fprintf(stderr, "strafe left\n");
             side -= sidemove; 
         }
@@ -615,6 +621,10 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
         // fprintf(stderr, "up\n");
 #ifdef WII
         if(dont_move_forwards == true)
+#else
+        {
+            not_walking = false;
+        }
 #endif
             forward += forwardmove; 
     }
@@ -623,6 +633,10 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
         // fprintf(stderr, "down\n");
 #ifdef WII
         if(dont_move_backwards == true)
+#else
+        {
+            not_walking = false;
+        }
 #endif
             forward -= forwardmove; 
     }
@@ -1116,8 +1130,12 @@ boolean G_Responder (event_t* ev)
  
       case ev_keyup: 
         if (ev->data1 <NUMKEYS) 
+        {
+#ifndef WII
+            not_walking = true;
+#endif
             gamekeydown[ev->data1] = false; 
-
+        }
         return false;   // always let key up events filter down 
                  
       case ev_mouse: 
