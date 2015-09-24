@@ -865,7 +865,7 @@ R_StoreWallRange
         // [BH] animate liquid sectors
 #ifdef ANIMATED_FLOOR_LIQUIDS
         if (backsector->animate
-            && backsector->interpfloorheight > frontsector->interpfloorheight
+            && backsector->interpfloorheight >= frontsector->interpfloorheight
             && (backsector->heightsec == -1
             || viewz > sectors[backsector->heightsec].interpfloorheight))
         {
