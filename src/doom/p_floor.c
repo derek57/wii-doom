@@ -4,8 +4,6 @@
 // Copyright(C) 1993-1996 Id Software, Inc.
 // Copyright(C) 2005 Simon Howard
 //
-// Copyright(C) 2015 by Brad Harding: - (Liquid Sector Animations)
-//
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
 // as published by the Free Software Foundation; either version 2
@@ -63,46 +61,6 @@
 #define    STAIRS_UNINITIALIZED_CRUSH_FIELD_VALUE    10
 
 
-#ifdef ANIMATED_FLOOR_LIQUIDS
-fixed_t         animatedliquiddiff;
-
-static void T_AnimateLiquid(floormove_t *floor)
-{
-    sector_t    *sector = floor->sector;
-
-    sector->animate = (d_swirl && isliquid[sector->floorpic]
-        && sector->ceiling_height != sector->floor_height ? animatedliquiddiff : 0);
-}
-
-static void P_StartAnimatedLiquid(sector_t *sector)
-{
-    thinker_t       *th;
-    floormove_t     *floor;
-
-    for (th = thinkercap.next; th != &thinkercap; th = th->next)
-        if (th->function.acp1 == (actionf_p1) T_AnimateLiquid && ((floormove_t *)th)->sector == sector)
-            return;
-
-    floor = Z_Malloc(sizeof(*floor), PU_LEVSPEC, 0);
-    memset(floor, 0, sizeof(*floor));
-    P_AddThinker(&floor->thinker);
-    floor->thinker.function.acp1 = (actionf_p1) T_AnimateLiquid;
-    floor->sector = sector;
-    T_AnimateLiquid(floor);
-}
-
-void P_InitAnimatedLiquids(void)
-{
-    int         i;
-    sector_t    *sector;
-
-    for (i = 0, sector = sectors; i < numsectors; i++, sector++)
-    {
-        if (isliquid[sector->floorpic])
-            P_StartAnimatedLiquid(sector);
-    }
-}
-#endif
 //
 // FLOORS
 //
@@ -319,10 +277,7 @@ void T_MoveFloor(floormove_t* floor)
               case donutRaise:
                 floor->sector->special = floor->newspecial;
                 floor->sector->floorpic = floor->texture;
-#ifdef ANIMATED_FLOOR_LIQUIDS
-                if (isliquid[floor->sector->floorpic])
-                    P_StartAnimatedLiquid(floor->sector);
-#endif
+
               default:
                 break;
             }
@@ -334,10 +289,7 @@ void T_MoveFloor(floormove_t* floor)
               case lowerAndChange:
                 floor->sector->special = floor->newspecial;
                 floor->sector->floorpic = floor->texture;
-#ifdef ANIMATED_FLOOR_LIQUIDS
-                if (isliquid[floor->sector->floorpic])
-                    P_StartAnimatedLiquid(floor->sector);
-#endif
+
               default:
                 break;
             }

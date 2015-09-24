@@ -175,6 +175,8 @@ static struct
 };
 
 
+fixed_t animatedliquiddiff;
+
 fixed_t animatedliquiddiffs[64] =
 {
      6422,  6422,  6360,  6238,  6054,  5814,  5516,  5164,
@@ -205,8 +207,6 @@ int             levelTimeCount;
 extern boolean  noclip_on;
 
 extern int      snd_module;
-
-extern fixed_t  animatedliquiddiff;
 
 
 //

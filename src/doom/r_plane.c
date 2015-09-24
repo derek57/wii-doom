@@ -124,6 +124,9 @@ int                        spanstop[SCREENHEIGHT];
 
 extern int                 mouselook;
 
+extern fixed_t             animatedliquiddiff;
+
+
 //
 // R_InitPlanes
 // Only at game startup.
@@ -545,7 +548,7 @@ void R_DrawPlanes (void)
             int         picnum = pl->picnum;
             boolean     liquid = isliquid[picnum];
             boolean     swirling = (liquid && d_swirl);
-            int lumpnum = firstflat + flattranslation[picnum];
+            int         lumpnum = firstflat + flattranslation[picnum];
 
             ds_source = (swirling ?
                     R_DistortedFlat(picnum): W_CacheLumpNum(lumpnum,
@@ -556,8 +559,8 @@ void R_DrawPlanes (void)
 
             planeheight = abs(pl->height-viewz);
 #ifdef ANIMATED_FLOOR_LIQUIDS
-            if (liquid && pl->sector && pl->sector->animate)
-                planeheight -= pl->sector->animate;
+            if (liquid && pl->sector && d_swirl && isliquid[pl->sector->floorpic])
+                planeheight -= animatedliquiddiff;
 #endif
             planezlight = zlight[BETWEEN(0, (pl->lightlevel >> LIGHTSEGSHIFT)
                     + extralight * LIGHTBRIGHT, LIGHTLEVELS - 1)];

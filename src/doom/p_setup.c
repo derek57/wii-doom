@@ -1403,9 +1403,7 @@ P_SetupLevel
     
     for (i=0 ; i<MAXPLAYERS ; i++)
         P_InitCards(&players[i]);
-#ifdef ANIMATED_FLOOR_LIQUIDS
-    P_InitAnimatedLiquids();
-#endif
+
     // if deathmatch, randomly spawn the active players
     if (deathmatch)
     {

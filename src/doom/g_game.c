@@ -2453,9 +2453,7 @@ void G_DoLoadGame (void)
  
     // [crispy] restore mobj->target and mobj->tracer pointers
     P_RestoreTargets();
-#ifdef ANIMATED_FLOOR_LIQUIDS
-    P_InitAnimatedLiquids();
-#endif
+
     if (!P_ReadSaveGameEOF())
         I_Error ("Bad savegame");
 

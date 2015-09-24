@@ -141,6 +141,8 @@ static boolean         bflash;
 extern boolean         realframe;
 extern boolean         skippsprinterp;
 
+extern fixed_t         animatedliquiddiff;
+
 
 //
 // R_InstallSpriteLump
@@ -779,8 +781,8 @@ void R_ProjectSprite(mobj_t *thing)
 
         vis->texturemid = gzt - viewz - clipfeet;
 #ifdef ANIMATED_FLOOR_LIQUIDS
-        if ((thing->flags2 & MF2_NOLIQUIDBOB) && sector->animate)
-            clipfeet += sector->animate;
+        if ((thing->flags2 & MF2_NOLIQUIDBOB) && d_swirl && isliquid[sector->floorpic])
+            clipfeet += animatedliquiddiff;
 #endif
         vis->footclip = clipfeet;
     }

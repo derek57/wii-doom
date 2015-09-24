@@ -52,6 +52,7 @@
 #include "i_system.h"
 #endif
 
+#include "p_local.h"
 #include "r_local.h"
 #include "r_sky.h"
 
@@ -129,6 +130,8 @@ fixed_t                topstep;
 fixed_t                bottomstep;
 
 lighttable_t**         walllights;
+
+extern fixed_t         animatedliquiddiff;
 
 
 // [crispy] WiggleFix: add this code block near the top of r_segs.c
@@ -778,9 +781,9 @@ R_StoreWallRange
         
     // [BH] animate liquid sectors
 #ifdef ANIMATED_FLOOR_LIQUIDS
-    if (frontsector->animate && (frontsector->heightsec == -1
+    if (d_swirl && isliquid[frontsector->floorpic] && (frontsector->heightsec == -1
         || viewz > sectors[frontsector->heightsec].interpfloorheight))
-        worldbottom += frontsector->animate;
+        worldbottom += animatedliquiddiff;
 #endif
     midtexture = toptexture = bottomtexture = maskedtexture = 0;
     ds_p->maskedtexturecol = NULL;
@@ -864,12 +867,12 @@ R_StoreWallRange
                 
         // [BH] animate liquid sectors
 #ifdef ANIMATED_FLOOR_LIQUIDS
-        if (backsector->animate
+        if (d_swirl && isliquid[backsector->floorpic]
             && backsector->interpfloorheight >= frontsector->interpfloorheight
             && (backsector->heightsec == -1
             || viewz > sectors[backsector->heightsec].interpfloorheight))
         {
-            liquidoffset = backsector->animate;
+            liquidoffset = animatedliquiddiff;
             worldlow += liquidoffset;
         }
 #endif

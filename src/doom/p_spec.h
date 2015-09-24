@@ -628,7 +628,6 @@ EV_DoFloor
 
 void T_MoveFloor( floormove_t* floor);
 
-void P_InitAnimatedLiquids(void);
 
 //
 // P_TELEPT
