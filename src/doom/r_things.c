@@ -521,15 +521,13 @@ R_DrawVisSprite
         colfunc = transcolfunc;
         dc_translation = vis->translation;
     }
-        
     // [crispy] translucent sprites
-    else if (d_translucency &&
-        ((vis->mobjflags & MF_TRANSLUCENT) || (vis->mobjflags & MF_SHADOW)))
+    else if (d_translucency && (vis->mobjflags & MF_TRANSLUCENT))
     {
         colfunc = tlcolfunc;
     }
 
-    if(d_shadows && (vis->mobjflags2 & MF2_SHADOW))
+    if(d_shadows && (vis->mobjflags2 & MF2_SHADOW) && !(vis->mobjflags & MF_TRANSLUCENT))
         colfunc = vis->colfunc;
 
     dc_iscale = abs(vis->xiscale)>>(!hires);                // CHANGED FOR HIRES
@@ -1034,21 +1032,17 @@ void R_ProjectShadow(mobj_t *thing)
         return;
 
     // decide which patch to use for sprite relative to player
-/*
 #ifdef RANGECHECK
     if ((unsigned int) thing->sprite >= (unsigned int) numsprites)
 	I_Error ("R_ProjectShadow: invalid sprite number %i ",
 		 thing->sprite);
 #endif
-*/
     sprdef = &sprites[thing->sprite];
-/*
 #ifdef RANGECHECK
     if ( (thing->frame&FF_FRAMEMASK) >= sprdef->numframes )
 	I_Error ("R_ProjectShadow: invalid sprite frame %i : %i ",
 		 thing->sprite, thing->frame);
 #endif
-*/
     sprframe = &sprdef->spriteframes[thing->frame & FF_FRAMEMASK];
 
     if (sprframe->rotate)
@@ -1160,6 +1154,8 @@ void R_AddSprites(sector_t *sec, int lightlevel)
 //
 // R_DrawPSprite
 //
+// [crispy] differentiate gun from flash sprites
+//
 void R_DrawPSprite (pspdef_t* psp, psprnum_t psprnum)
 {
     fixed_t            tx;
@@ -1217,7 +1213,8 @@ void R_DrawPSprite (pspdef_t* psp, psprnum_t psprnum)
     vis->mobjflags2 = 0;
     vis->psprite = true;
 
-    vis->texturemid = (BASEYCENTER << FRACBITS) - (psp->sy - spritetopoffset[lump]);
+    // [crispy] weapons drawn 1 pixel too high when player is idle
+    vis->texturemid = (BASEYCENTER<<FRACBITS)/*+FRACUNIT/2*/-(psp->sy-spritetopoffset[lump]);
 
     vis->x1 = x1 < 0 ? 0 : x1;
     vis->x2 = x2 >= viewwidth ? viewwidth-1 : x2;        
