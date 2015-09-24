@@ -476,9 +476,9 @@ void M_LoadDefaults (void)
 #endif
 
     if (LoadDefaultCollection(&doom_defaults))
-        C_Printf(CR_GRAY, " Loaded CVARs from %s.", uppercase(doom_defaults.filename));
+        C_Printf(CR_GRAY, " Loaded VARs from %s.", uppercase(doom_defaults.filename));
     else
-        C_Printf(CR_GRAY, " %s not found. Using defaults for all CVARs and creating %s.",
+        C_Printf(CR_GRAY, " %s not found. Using defaults for all VARs and creating %s.",
             uppercase(doom_defaults.filename), uppercase(doom_defaults.filename));
 }
 
