@@ -506,7 +506,8 @@ R_DrawVisSprite
 
     dc_colormap = vis->colormap;
 
-    if (!dc_colormap)
+    if (!dc_colormap ||
+       (!d_translucency && (vis->mobjflags & MF_TRANSLUCENT) && (vis->mobjflags & MF_COUNTKILL)))
     {
         // NULL colormap = shadow draw
         colfunc = fuzzcolfunc;
@@ -528,9 +529,6 @@ R_DrawVisSprite
     {
         colfunc = tlcolfunc;
     }
-
-    if(d_shadows && (vis->mobjflags2 & MF2_SHADOW) && !(vis->mobjflags & MF_TRANSLUCENT))
-        colfunc = vis->colfunc;
 
     dc_iscale = abs(vis->xiscale)>>(!hires);                // CHANGED FOR HIRES
     dc_texturemid = vis->texturemid;
