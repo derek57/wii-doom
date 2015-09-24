@@ -576,7 +576,9 @@ EV_VerticalDoor
 
     if (line->sidenum[side^1] == -1)
     {
-        I_Error("EV_VerticalDoor: DR special type on 1-sided linedef");
+        // [crispy] do not crash if the wrong side of the door is pushed
+        C_Printf(CR_RED, " EV_VerticalDoor: DR special type on 1-sided linedef\n");
+        return;
     }
 
     sec = sides[ line->sidenum[side^1]] .sector;
