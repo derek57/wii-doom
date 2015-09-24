@@ -1195,6 +1195,7 @@ void R_InitColormaps (void)
     int        i, j, k;
     byte       *palsrc, *palette, *playpal;
     char       c[3];
+    wad_file_t *colormapwad;
 
     if (W_CheckNumForName("C_START") >= 0 && W_CheckNumForName("C_END") >= 0)
     {
@@ -1214,6 +1215,10 @@ void R_InitColormaps (void)
         colormaps = Z_Malloc(sizeof(*colormaps), PU_STATIC, 0);
         colormaps[0] = W_CacheLumpName("COLORMAP", PU_STATIC);
     }
+
+    colormapwad = lumpinfo[W_CheckNumForName("COLORMAP")]->wad_file;
+    C_Printf(CR_GRAY, " Using the COLORMAP lump in %s file %s.",
+        (colormapwad->type == IWAD ? "IWAD" : "PWAD"), uppercase(colormapwad->path));
 
     // [BH] There's a typo in dcolors.c, the source code of the utility Id
     // Software used to construct the palettes and colormaps for DOOM (see
