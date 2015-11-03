@@ -38,6 +38,9 @@
 
 #define NO_INDEX ((unsigned short)(-1))
 
+//jff 3/21/98 Set if line absorbs use by player
+//allow multiple push/switch triggers to be used on one push
+#define ML_PASSUSE              512
 
 //
 // Map level types.
@@ -99,6 +102,55 @@ typedef struct
   short                sidenum[2];                
 } PACKEDATTR maplinedef_t;
 
+typedef struct
+{
+    unsigned short      numsegs;
+    int                 firstseg;
+} PACKEDATTR mapsubsector_v4_t;
+
+typedef struct
+{
+    int                 v1;
+    int                 v2;
+    unsigned short      angle;
+    unsigned short      linedef;
+    short               side;
+    unsigned short      offset;
+} PACKEDATTR mapseg_v4_t;
+
+typedef struct
+{
+    short               x;
+    short               y;
+    short               dx;
+    short               dy;
+    short               bbox[2][4];
+    int                 children[2];
+} PACKEDATTR mapnode_v4_t;
+
+typedef struct
+{
+    unsigned int        v1;
+    unsigned int        v2;
+    unsigned short      linedef;
+    unsigned char       side;
+} PACKEDATTR mapseg_znod_t;
+
+typedef struct
+{
+    short               x;
+    short               y;
+    short               dx;
+    short               dy;
+    short               bbox[2][4];
+    int                 children[2];
+} PACKEDATTR mapnode_znod_t;
+
+typedef struct
+{
+    unsigned int        numsegs;
+} PACKEDATTR mapsubsector_znod_t;
+
 
 //
 // LineDef attributes.
@@ -147,8 +199,8 @@ typedef struct
 // Sector definition, from editing.
 typedef        struct
 {
-  short                floor_height;
-  short                ceiling_height;
+  short                floorheight;
+  short                ceilingheight;
   char                 floorpic[8];
   char                 ceilingpic[8];
   short                lightlevel;
@@ -182,7 +234,7 @@ typedef struct
 // BSP node structure.
 
 // Indicate a leaf.
-#define        NF_SUBSECTOR        0x8000
+#define NF_SUBSECTOR     0x80000000
 
 typedef struct
 {

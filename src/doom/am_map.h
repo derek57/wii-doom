@@ -30,12 +30,12 @@
 
 #ifdef WII
 #include "../d_event.h"
+#include "../m_cheat.h"
+#include "../m_fixed.h"
 #else
 #include "d_event.h"
-#endif
-
-#ifndef WII
 #include "m_cheat.h"
+#include "m_fixed.h"
 #endif
 
 
@@ -53,12 +53,16 @@
 #define AM_ENDKEY       KEY_TAB
 
 
+typedef struct
+{
+    fixed_t x,y;
+} mpoint_t;
+
+
 // Called by main loop.
 boolean AM_Responder (event_t* ev);
 
-#ifndef WII
 extern cheatseq_t cheat_amap;
-#endif
 
 // Called by main loop.
 void AM_Ticker (void);

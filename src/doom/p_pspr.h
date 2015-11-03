@@ -49,6 +49,7 @@
 #define FF_FULLBRIGHT        0x8000        // flag in thing->frame
 #define FF_FRAMEMASK         0x7fff
 
+#define WEAPONTOP            32*FRACUNIT
 
 
 //

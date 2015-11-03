@@ -38,7 +38,7 @@
 #include "config.h"
 #endif
 
-#include "deh_str.h"
+#include "d_deh.h"
 #include "doomfeatures.h"
 #include "doomtype.h"
 #include "gusconf.h"
@@ -124,14 +124,14 @@ static const char *subst_config_filenames[] =
     "strife-music.cfg",
 };
 
-static boolean music_initialized = false;
+static boolean music_initialized;
 
 // If this is true, this module initialized SDL sound and has the 
 // responsibility to shut it down
 
-static boolean sdl_was_initialized = false;
+static boolean sdl_was_initialized;
 
-static boolean musicpaused = false;
+static boolean musicpaused;
 
 // If true, the currently playing track is being played on loop.
 static boolean current_track_loop;
@@ -144,7 +144,7 @@ static int current_music_volume;
 
 char *timidity_cfg_path = "";
 
-static char *temp_timidity_cfg = NULL;
+static char *temp_timidity_cfg;
 
 static file_metadata_t file_metadata;
 
@@ -560,6 +560,9 @@ static char *ParseSubstituteLine(char *filename, char *line)
 }
 
 // Read a substitute music configuration file.
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-result"
 
 static boolean ReadSubstituteConfig(char *filename)
 {
@@ -1176,6 +1179,22 @@ static void *I_SDL_RegisterSong(void *data, int len)
     else if (len > 4 && !memcmp(data, FLAC_HEADER, 4))
     {
         filename = M_TempFile("doom.flac");
+        M_WriteFile(filename, data, len);
+
+        playing_substitute = true;
+        ReadLoopPoints(filename, &file_metadata);
+    }
+    // [crispy] support MP3 music from lumps
+    else if (len > 3 && (!memcmp(data, "ID3", 3) || // [crispy] MP3 file with an ID3v2 tag
+             // [crispy] MP3 file without an ID3 tag or with an ID3v1 tag
+             ((((const char *)data)[0] & 0xff) == 0xff &&
+              (((const char *)data)[1] & 0xf0) == 0xf0 &&
+              (((const char *)data)[2] & 0xf0) != 0x00 &&
+              (((const char *)data)[2] & 0xf0) != 0xf0 &&
+              (((const char *)data)[2] & 0x0c) != 0x0c &&
+              (((const char *)data)[1] & 0x06) != 0x00)))
+    {
+        filename = M_TempFile("doom.mp3");
         M_WriteFile(filename, data, len);
 
         playing_substitute = true;

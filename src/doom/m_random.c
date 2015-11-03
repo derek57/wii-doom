@@ -60,13 +60,16 @@ static const unsigned char rndtable[256] = {
 int        rndindex = 0;
 int        prndindex = 0;
 
+extern int gametic;
+extern int basetic;
+
 // Which one is deterministic?
 int P_Random (void)
 {
     prndindex = (prndindex+1)&0xff;
     return rndtable[prndindex];
 }
-
+/*
 // P_Random is used throughout all the p_xxx game code.
 byte P_Random2 ()
 {
@@ -81,7 +84,7 @@ int P_SignedRandom ()
     int r = P_Random2();
     return r - P_Random2();
 }
-
+*/
 int M_Random (void)
 {
     rndindex = (rndindex+1)&0xff;
@@ -101,35 +104,74 @@ void M_ClearRandom (void)
 
     rndindex = time(NULL) & 0xff;
 }
-
+/*
 rng_t rng;     // the random number state
 
 unsigned long rngseed = 1993;   // killough 3/26/98: The seed
 
 int P_RandomSMMU(pr_class_t pr_class)
 {
-    // killough 2/16/98:  We always update both sets of random number
-    // generators, to ensure repeatability if the demo_compatibility
-    // flag is changed while the program is running. Changing the
-    // demo_compatibility flag does not change the sequences generated,
-    // only which one is selected from.
-    //
-    // All of this RNG stuff is tricky as far as demo sync goes --
-    // it's like playing with explosives :) Lee
+   // killough 2/16/98:  We always update both sets of random number
+   // generators, to ensure repeatability if the demo_compatibility
+   // flag is changed while the program is running. Changing the
+   // demo_compatibility flag does not change the sequences generated,
+   // only which one is selected from.
+   //
+   // All of this RNG stuff is tricky as far as demo sync goes --
+   // it's like playing with explosives :) Lee
 
-    unsigned long boom;
+//   int compat; 
 
-    if (pr_class != pr_misc)      // killough 3/31/98
-        pr_class = pr_all_in_one;
+   unsigned int boom;
 
-    boom = rng.seed[pr_class];
+   // killough 3/31/98:
+   // If demo sync insurance is not requested, use
+   // much more unstable method by putting everything
+   // except pr_misc into pr_all_in_one
 
-    // killough 3/26/98: add pr_class*2 to addend
+//   compat = pr_class == pr_misc ?     // sf: moved here
+//      (rng.prndindex = (rng.prndindex + 1) & 255) :
+//      (rng.rndindex  = (rng.rndindex  + 1) & 255);
 
-    rng.seed[pr_class] = boom * 1664525ul + 221297ul + pr_class*2;
+   if(pr_class != pr_misc 
+//    && !demo_insurance
+      )      // killough 3/31/98
+      pr_class = pr_all_in_one;
 
-    boom >>= 20;
+   boom = rng.seed[pr_class];
 
-    return boom & 255;
+   // killough 3/26/98: add pr_class*2 to addend
+
+   rng.seed[pr_class] = boom * 1664525ul + 221297ul + pr_class*2;
+
+//   if(demo_compatibility)
+//      return rndtable[compat];
+
+   boom >>= 20;
+
+   // killough 3/30/98: use gametic-levelstarttic to shuffle RNG
+   // killough 3/31/98: but only if demo insurance requested,
+   // since it's unnecessary for random shuffling otherwise
+   // killough 9/29/98: but use basetic now instead of levelstarttic
+
+//   if(demo_insurance)
+//      boom += (gametic-basetic)*7;
+
+   return boom & 255;
 }
+
+//
+// P_SubRandom
+//
+// haleyjd 08/05/04: This function eliminates the need to use
+// temporary variables everywhere in order to subtract two random
+// values without incurring order of evaluation problems.
+//
+int P_SubRandom(pr_class_t pr_class)
+{
+   int temp = P_RandomSMMU(pr_class);
+
+   return (temp - P_RandomSMMU(pr_class));
+}
+*/
 

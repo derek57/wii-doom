@@ -76,6 +76,7 @@ typedef enum
     CF_NOMOMENTUM        = 4,
 
     CF_NOTARGET          = 8
+
 } cheat_t;
 
 
@@ -201,6 +202,12 @@ typedef struct player_s
 
     // [RH] Used for falling damage
     fixed_t              oldvelocity[3];
+
+    // killough 10/98: used for realistic bobbing (i.e. not simply overall speed)
+    // mo->momx and mo->momy represent true momenta experienced by player.
+    // This only represents the thrust that the player applies himself.
+    // This avoids anomolies with such things as Boom ice and conveyors.
+    fixed_t              momx, momy;
 
 } player_t;
 

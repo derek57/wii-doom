@@ -68,7 +68,7 @@
 
 
 // when zero, stop the wipe
-static   boolean  go = 0;
+static   boolean  go;
 
 static   int      density;
 static   int      burntime;

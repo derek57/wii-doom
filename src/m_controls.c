@@ -25,6 +25,7 @@
 #include "doom/doomstat.h"
 
 #include "doomtype.h"
+#include "i_video.h"
 #include "m_config.h"
 #include "m_misc.h"
 
@@ -125,6 +126,11 @@ int key_map_west      = KEY_LEFTARROW;
 int key_map_zoomin    = '=';
 int key_map_zoomout   = '-';
 int key_map_toggle    = KEY_TAB;
+int key_map_maxzoom   = '0';
+int key_map_follow    = 'f';
+int key_map_grid      = 'g';
+int key_map_mark      = 'm';
+int key_map_clearmark = 'c';
 
 // menu keys:
 
@@ -155,6 +161,9 @@ int key_menu_decscreen = KEY_MINUS;
 int key_menu_screenshot = KEY_F12;
 
 int key_console = KEY_TILDE;
+int key_spy = KEY_F12;
+int key_demo_quit = 'q';
+int key_pause = KEY_PAUSE;
 
 // Control whether if a mouse button is double clicked, it acts like 
 // "use" has been pressed
@@ -183,9 +192,9 @@ int mousebforward = -1;
 int mousebstrafe = -1;
 int mousebbackward = -1;
 //int mousebprevweapon = -1;
-int mousebprevweapon = 3;
+int mousebprevweapon = 8;
 //int mousebnextweapon = -1;
-int mousebnextweapon = 4;
+int mousebnextweapon = 9;
 int mousebstrafeleft = -1;
 int mousebstraferight = -1;
 int mousebuse = 1;
@@ -218,8 +227,8 @@ void M_BindBaseControls(void)
     M_BindVariable("jump",                   &jumping);
     M_BindVariable("music_engine",           &mus_engine);
     M_BindVariable("recoil",                 &d_recoil);
-    M_BindVariable("monsters_respawn",       &respawnparm);
-    M_BindVariable("fast_monsters",          &fastparm);
+    M_BindVariable("monsters_respawn",       &start_respawnparm);
+    M_BindVariable("fast_monsters",          &start_fastparm);
     M_BindVariable("auto_aim",               &autoaim);
     M_BindVariable("max_gore",               &d_maxgore);
     M_BindVariable("extra_hud",              &hud);
@@ -274,6 +283,20 @@ void M_BindBaseControls(void)
     M_BindVariable("pixel_width",            &pixelwidth);
     M_BindVariable("pixel_height",           &pixelheight);
     M_BindVariable("brightmaps",             &d_brightmaps);
+    M_BindVariable("screenwidth",            &screen_width);
+    M_BindVariable("screenheight",           &screen_height);
+    M_BindVariable("fixmaperrors",           &d_fixmaperrors);
+    M_BindVariable("altlighting",            &d_altlighting);
+    M_BindVariable("infighting",             &allow_infighting);
+    M_BindVariable("lastenemy",              &last_enemy);
+    M_BindVariable("floatitems",             &float_items);
+    M_BindVariable("animate_dropping",       &animated_drop);
+    M_BindVariable("crushing_sound",         &crush_sound);
+    M_BindVariable("no_noise",               &disable_noise);
+    M_BindVariable("nudge_corpses",          &corpses_nudge);
+    M_BindVariable("slide_corpses",          &corpses_slide);
+    M_BindVariable("smearblood_corpses",     &corpses_smearblood);
+    M_BindVariable("diskicon",               &show_diskicon);
 //    M_BindVariable("memory",                 &memory_usage);
 #ifdef WII
     M_BindVariable("key_shoot",              &joy_r);

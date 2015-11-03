@@ -38,7 +38,9 @@
 #include "doomtype.h"
 #endif
 
-#ifndef WII
+#ifdef WII
+#include "../m_cheat.h"
+#else
 #include "m_cheat.h"
 #endif
 
@@ -125,7 +127,6 @@ extern int      armorhighlight;
 
 extern byte*    st_backing_screen;
 
-#ifndef WII
 extern cheatseq_t cheat_mus;
 extern cheatseq_t cheat_god;
 extern cheatseq_t cheat_ammo;
@@ -136,6 +137,5 @@ extern cheatseq_t cheat_powerup[7];
 extern cheatseq_t cheat_choppers;
 extern cheatseq_t cheat_clev;
 extern cheatseq_t cheat_mypos;
-#endif
 
 #endif

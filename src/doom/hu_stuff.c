@@ -30,10 +30,10 @@
 
 #ifdef WII
 #include "../c_io.h"
-#include "../deh_str.h"
+#include "../d_deh.h"
 #else
 #include "c_io.h"
-#include "deh_str.h"
+#include "d_deh.h"
 #endif
 
 #include "doomdef.h"
@@ -90,12 +90,12 @@
 //
 // Locally used constants, shortcuts.
 //
-#define HU_TITLE        (mapnames[(gameepisode-1)*9+gamemap-1])
+#define HU_TITLE        (*mapnames[(gameepisode-1)*9+gamemap-1])
 #define HU_TITLE2       (mapnames_commercial[gamemap-1])
 #define HU_TITLEP       (mapnames_commercial[gamemap-1 + 32])
 #define HU_TITLET       (mapnames_commercial[gamemap-1 + 64])
 #define HU_TITLEN       (mapnames_commercial[gamemap-1 + 96])
-#define HU_TITLEM	(mapnames_commercial[gamemap-1 + 105])
+#define HU_TITLEM       (mapnames_commercial[gamemap-1 + 105])
 #define HU_TITLE_CHEX   (mapnames_chex[(gameepisode-1)*9+gamemap-1])
 #define HU_TITLEHEIGHT  1
 #define HU_TITLEX       0
@@ -204,7 +204,7 @@ static hu_stext_t       w_secret;
 //static boolean          always_off = false;
 static boolean          message_on;
 static boolean          message_nottobefuckedwith;
-static boolean          headsupactive = false;
+static boolean          headsupactive;
 static boolean          secret_on;
 
 static int              message_counter;
@@ -231,7 +231,7 @@ extern boolean          blurred;
 // Builtin map names.
 // The actual names can be found in DStrings.h.
 //
-
+/*
 char*   mapnames[] =    // DOOM shareware/registered/retail (Ultimate) names.
 {
 
@@ -285,7 +285,7 @@ char*   mapnames[] =    // DOOM shareware/registered/retail (Ultimate) names.
     "NEWLEVEL",
     "NEWLEVEL"
 };
-
+*/
 char*   mapnames_chex[] =   // Chex Quest names.
 {
 
@@ -467,7 +467,29 @@ char *mapnames_commercial[] =
     NHUSTR_6,
     NHUSTR_7,
     NHUSTR_8,
-    NHUSTR_9
+    NHUSTR_9,
+
+    MHUSTR_1,
+    MHUSTR_2,
+    MHUSTR_3,
+    MHUSTR_4,
+    MHUSTR_5,
+    MHUSTR_6,
+    MHUSTR_7,
+    MHUSTR_8,
+    MHUSTR_9,
+    MHUSTR_10,
+    MHUSTR_11,
+    MHUSTR_12,
+    MHUSTR_13,
+    MHUSTR_14,
+    MHUSTR_15,
+    MHUSTR_16,
+    MHUSTR_17,
+    MHUSTR_18,
+    MHUSTR_19,
+    MHUSTR_20,
+    MHUSTR_21
 };
 
 void HU_Init(void)
@@ -481,7 +503,7 @@ void HU_Init(void)
     j = HU_FONTSTART;
     for (i=0;i<HU_FONTSIZE;i++)
     {
-        DEH_snprintf(buffer, 9, "STCFN%.3d", j++);
+        M_snprintf(buffer, 9, "STCFN%.3d", j++);
         hu_font[i] = (patch_t *) W_CacheLumpName(buffer, PU_STATIC);
 
         // haleyjd 09/18/10: load beta_hu_font as well
@@ -593,11 +615,11 @@ void HU_Start(void)
           s = HU_TITLE2;
         break;
       case pack_master:
-	if (gamemap <= 21)
-	  s = HU_TITLEM;
-	else
-	  s = HU_TITLE2;
-	break;
+        if (gamemap <= 21)
+          s = HU_TITLEM;
+        else
+          s = HU_TITLE2;
+        break;
       default:
          s = "Unknown level";
          break;
@@ -624,12 +646,6 @@ void HU_Start(void)
     // dehacked substitution to get modified level name
 
     t = hud_monsecstr;
-
-    s = DEH_String(s);
-    
-    t = DEH_String(t);
-
-    u = DEH_String(u);
 
     if((fsize != 12538385 &&
         fsize != 14691821 &&
@@ -668,7 +684,8 @@ void HU_Start(void)
 }
 
 // [crispy] print a bar indicating demo progress at the bottom of the screen
-static void HU_DemoProgressBar (void)
+/*
+static void HU_DemoProgressBar (void)                // FIXME: BUGGY (crashes)
 {
     int i;
     extern char *demo_p, *demobuffer;
@@ -683,7 +700,7 @@ static void HU_DemoProgressBar (void)
     V_DrawHorizLine(0, SCREENHEIGHT - 2, 1, 4);     // [crispy] white start
     V_DrawHorizLine(i - 1, SCREENHEIGHT - 2, 1, 4); // [crispy] white end
 }
-
+*/
 void HU_DrawStats(void)
 {
     const char *t;
@@ -723,9 +740,9 @@ void HU_Drawer(void)
     if(!automapactive && !demoplayback && crosshair == 1)
     {
         if(screenSize < 8)
-            V_DrawPatch(158, 82, W_CacheLumpName(DEH_String("XHAIR"), PU_CACHE));
+            V_DrawPatch(158, 82, W_CacheLumpName("XHAIR", PU_CACHE));
         else
-            V_DrawPatch(158, 98, W_CacheLumpName(DEH_String("XHAIR"), PU_CACHE));
+            V_DrawPatch(158, 98, W_CacheLumpName("XHAIR", PU_CACHE));
     }
 
     // [crispy] translucent messages for translucent HUD
@@ -778,10 +795,11 @@ void HU_Drawer(void)
 
     if (dp_translucent)
         dp_translucent = false;
-
-    // [crispy] demo progress bar
+/*
+    // [crispy] demo progress bar        // FIXME (crashing)
     if (demoplayback)
-	HU_DemoProgressBar();
+        HU_DemoProgressBar();
+*/
 }
 
 void HU_Erase(void)
@@ -887,7 +905,7 @@ boolean HU_Responder(event_t *ev)
 // the console
 void HU_NewLevel()
 {
-    char*       s;
+    char       *s;
 
     switch ( logical_gamemission )
     {
@@ -910,11 +928,11 @@ void HU_NewLevel()
           s = HU_TITLE2;
         break;
       case pack_master:
-	if (gamemap <= 21)
-	  s = HU_TITLEM;
-	else
-	  s = HU_TITLE2;
-	break;
+        if (gamemap <= 21)
+          s = HU_TITLEM;
+        else
+          s = HU_TITLE2;
+        break;
       default:
          s = "Unknown level";
          break;
@@ -935,5 +953,30 @@ void HU_NewLevel()
     C_Printf(CR_GRAY, " %s\n", s);
 
     C_Printf(CR_GRAY, " \n");
+}
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wchar-subscripts"
+
+void HU_PlayerMessage(char *message, boolean ingame)
+{
+    static char buffer[1024];
+    char        lastchar;
+
+    if (message[0] == '%' && message[1] == 's')
+        M_snprintf(buffer, sizeof(buffer), message, playername);
+    else
+        M_StringCopy(buffer, message, sizeof(buffer));
+
+    buffer[0] = toupper(buffer[0]);
+    lastchar = buffer[strlen(buffer) - 1];
+
+    if (plr && !consoleactive && !message_dontfuckwithme)
+        plr->message = buffer;
+
+    if (ingame)
+        C_Printf(CR_GREEN, " %s%s", buffer, (lastchar == '.' || lastchar == '!' ? "" : "."));
+    else
+        C_Printf(CR_GRAY, " %s%s", buffer, (lastchar == '.' || lastchar == '!' ? "" : "."));
 }
 

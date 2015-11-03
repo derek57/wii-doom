@@ -40,6 +40,7 @@
 #define LOADING_DISK_W (16 << hires)
 #define LOADING_DISK_H (16 << hires)
 
+#define GAMMALEVELS             31
 
 typedef struct
 {
@@ -117,7 +118,7 @@ void I_PrepareRead (void);
 void I_BeginRead (void);
 void I_EndRead (void);
 
-void I_SetWindowTitle(void);
+void I_SetWindowTitle(char *title);
 
 void I_CheckIsScreensaver(void);
 void I_SetGrabMouseCallback(grabmouse_callback_t func);
@@ -157,6 +158,9 @@ extern int screen_height;
 extern int screen_bpp;
 extern int fullscreen;
 extern int aspect_ratio_correct;
+
+extern float            r_gamma;
+extern float            gammalevels[GAMMALEVELS];
 
 extern byte *I_VideoBuffer;
 

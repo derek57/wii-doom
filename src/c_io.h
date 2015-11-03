@@ -51,28 +51,30 @@
 #define DIVIDERSTRING   "==================================================" \
                         "================================================="
 
+#define stringize(x)    #x
+
 typedef enum
 {
-    yellow,
-    red,
-    gray,
-    blue,
-    white,
-    green,
-    dark,
-    divider,
+    yellowstring,
+    redstring,
+    graystring,
+    bluestring,
+    whitestring,
+    greenstring,
+    darkstring,
+    dividerstring,
     STRINGTYPES
 } stringtype_t;
 
 
-#define CR_GOLD yellow
-#define CR_RED red
-#define CR_GRAY gray
-#define CR_BLUE blue
-#define CR_WHITE white
-#define CR_GREEN green
-#define CR_DARK dark
-#define CR_DIVIDER divider
+#define CR_GOLD yellowstring
+#define CR_RED redstring
+#define CR_GRAY graystring
+#define CR_BLUE bluestring
+#define CR_WHITE whitestring
+#define CR_GREEN greenstring
+#define CR_DARK darkstring
+#define CR_DIVIDER dividerstring
 
 typedef struct
 {

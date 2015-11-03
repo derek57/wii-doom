@@ -21,7 +21,7 @@
 #include <ctype.h>
 #include <string.h>
 
-#include "deh_str.h"
+#include "d_deh.h"
 #include "doomkeys.h"
 #include "d_iwad.h"
 #include "i_system.h"
@@ -57,9 +57,9 @@ static const iwad_t iwads[] =
 
 #define MAX_IWAD_DIRS 128
 
-static boolean iwad_dirs_built = false;
+static boolean iwad_dirs_built;
 static char *iwad_dirs[MAX_IWAD_DIRS];
-static int num_iwad_dirs = 0;
+static int num_iwad_dirs;
 
 static void AddIWADDir(char *dir)
 {
@@ -494,7 +494,7 @@ static char *SearchDirectoryForIWAD(char *dir, int mask, GameMission_t *mission)
             continue;
         }
 
-        filename = CheckDirectoryHasIWAD(dir, DEH_String(iwads[i].name));
+        filename = CheckDirectoryHasIWAD(dir, iwads[i].name);
 
         if (filename != NULL)
         {

@@ -49,6 +49,9 @@ void D_StartTitle (void);
 void D_DoomMain (void);
 void D_DoomLoop (void);
 
+void LoadDehFile(char *path);
+boolean D_IsDehFile(char *filename);
+
 //
 // GLOBAL VARIABLES
 //

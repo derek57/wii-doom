@@ -41,6 +41,11 @@ extern int key_map_west;
 extern int key_map_zoomin;
 extern int key_map_zoomout;
 extern int key_map_toggle;
+extern int key_map_maxzoom;
+extern int key_map_follow;
+extern int key_map_grid;
+extern int key_map_mark;
+extern int key_map_clearmark;
 
 // menu keys:
 
@@ -71,6 +76,9 @@ extern int key_menu_abort;
 extern int key_menu_screenshot;
 
 extern int key_console;
+extern int key_spy;
+extern int key_demo_quit;
+extern int key_pause;
 
 extern int dclick_use;
 

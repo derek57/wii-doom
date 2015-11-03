@@ -31,6 +31,11 @@
 // We are referring to patches.
 #include "r_defs.h"
 
+#ifdef WII
+#include "../v_patch.h"
+#else
+#include "v_patch.h"
+#endif
 
 //
 // Typedefs of widgets

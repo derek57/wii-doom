@@ -30,6 +30,7 @@
 
 
 #include "p_mobj.h"
+#include "r_defs.h"
 #include "sounds.h"
 
 
@@ -78,7 +79,10 @@ void S_Start(void);
 //  using <sound_id> from sounds.h
 //
 
-void S_StartSound(void *origin, int sound_id);
+//void S_StartSound(void *origin, int sound_id);
+void S_StartSound(mobj_t *mobj, int sfx_id);
+
+void S_StartSectorSound(degenmobj_t *degenmobj, int sfx_id);
 
 // Stop sound for thing at <origin>
 void S_StopSound(mobj_t *origin);

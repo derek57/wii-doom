@@ -71,7 +71,7 @@
 #define PACKAGE_NAME "Chocolate Doom"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "Chocolate Doom 2.2.0"
+#define PACKAGE_STRING "Chocolate PC- & Wii-DOOM v2.2.0 (Release 1)"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "chocolate-doom"

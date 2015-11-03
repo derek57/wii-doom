@@ -31,11 +31,11 @@
 
 #ifdef WII
 #include "../c_io.h"
-#include "../deh_str.h"
+#include "../d_deh.h"
 #include "../doomkeys.h"
 #else
 #include "c_io.h"
-#include "deh_str.h"
+#include "d_deh.h"
 #include "doomkeys.h"
 #endif
 
@@ -55,11 +55,20 @@
 #include "m_controls.h"
 #endif
 
+#include "../i_video.h"
+
 #ifndef WII
 #include "m_cheat.h"
 #endif
 
 #include "m_menu.h"
+
+#ifdef WII
+#include "../m_misc.h"
+#else
+#include "m_misc.h"
+#endif
+
 #include "p_local.h"
 #include "r_state.h"
 #include "st_stuff.h"
@@ -162,11 +171,6 @@ typedef struct
 
 typedef struct
 {
-    fixed_t x,y;
-} mpoint_t;
-
-typedef struct
-{
     mpoint_t a, b;
 } mline_t;
 
@@ -232,9 +236,7 @@ mline_t thintriangle_guy[] = {
 #undef R
 
 
-#ifndef WII
 cheatseq_t cheat_amap = CHEAT("iddt", 0);
-#endif
 
 
 int                cheating = 0;
@@ -242,6 +244,9 @@ int                drawgrid = 0;
 
 // specifies whether to follow the player around
 int                followplayer = 1;
+
+// next point to be assigned
+static int         markpointnum = 0;
 
 // pseudo-frame buffer
 static byte*       fb;
@@ -266,14 +271,11 @@ static int         f_h;
 static int         lightlev;
 static int         amclock;
 
-// next point to be assigned
-static int         markpointnum = 0;
-
 // how far the window pans each tic (map coords)
 static mpoint_t    m_paninc;
 
 // where the points are
-static mpoint_t    markpoints[AM_NUMMARKPOINTS];
+static mpoint_t markpoints[AM_NUMMARKPOINTS]; // where the points are
 
 // how far the window zooms in each tic (map coords)
 fixed_t            mtof_zoommul;
@@ -333,6 +335,8 @@ static player_t    *plr;
 static patch_t     *marknums[10];
 
 static boolean     stopped = true;
+
+static boolean     movement;
 
 boolean            dont_move_backwards = false;
 boolean            automapactive = false;
@@ -559,7 +563,7 @@ void AM_loadPics(void)
   
     for (i=0;i<10;i++)
     {
-        DEH_snprintf(namebuf, 9, "AMMNUM%d", i);
+        M_snprintf(namebuf, 9, "AMMNUM%d", i);
         marknums[i] = W_CacheLumpName(namebuf, PU_STATIC);
     }
 
@@ -572,7 +576,7 @@ void AM_unloadPics(void)
   
     for (i=0;i<10;i++)
     {
-        DEH_snprintf(namebuf, 9, "AMMNUM%d", i);
+        M_snprintf(namebuf, 9, "AMMNUM%d", i);
         W_ReleaseLumpName(namebuf);
     }
 }
@@ -583,6 +587,7 @@ void AM_clearMarks(void)
 
     for (i=0;i<AM_NUMMARKPOINTS;i++)
         markpoints[i].x = -1; // means empty
+
     markpointnum = 0;
 }
 
@@ -631,7 +636,9 @@ void AM_Start (void)
 {
     // FOR PSP (CONDITION):
     // DON'T AUTO-ACTIVATE THE AUTOMAP...
+#ifdef WII
     if(players[consoleplayer].pendingweapon != wp_chainsaw)
+#endif
     {
         static int lastlevel = -1, lastepisode = -1;
 
@@ -747,23 +754,26 @@ boolean AM_Responder
 #else
     int key;
 
+    static int bigstate=0;
+    static char buffer[20];
+
     rc = false;
 
     if (!automapactive)
     {
-	if (ev->type == ev_keydown && ev->data1 == key_map_toggle)
-	{
-/*
-	    AM_Start ();
-	    viewactive = false;
-*/
+        if (ev->type == ev_keydown && ev->data1 == key_map_toggle)
+        {
             AM_Toggle();
-	    rc = true;
-	}
+/*
+            AM_Start ();
+            viewactive = false;
+*/
+            rc = true;
+        }
     }
     else if (ev->type == ev_keydown)
     {
-	rc = true;
+        rc = true;
         key = ev->data1;
 
         if (key == key_map_east)          // pan right
@@ -798,13 +808,13 @@ boolean AM_Responder
         }
         else if (key == key_map_toggle)
         {
+            bigstate = 0;
 /*
             viewactive = true;
             AM_Stop ();
 */
             AM_Toggle();
         }
-/*
         else if (key == key_map_maxzoom)
         {
             bigstate = !bigstate;
@@ -820,41 +830,40 @@ boolean AM_Responder
             followplayer = !followplayer;
             f_oldloc.x = INT_MAX;
             if (followplayer)
-                plr->message = DEH_String(AMSTR_FOLLOWON);
+                plr->message = s_AMSTR_FOLLOWON;
             else
-                plr->message = DEH_String(AMSTR_FOLLOWOFF);
+                plr->message = s_AMSTR_FOLLOWOFF;
         }
         else if (key == key_map_grid)
         {
-            grid = !grid;
-            if (grid)
-                plr->message = DEH_String(AMSTR_GRIDON);
+            drawgrid = !drawgrid;
+            if (drawgrid)
+                plr->message = s_AMSTR_GRIDON;
             else
-                plr->message = DEH_String(AMSTR_GRIDOFF);
+                plr->message = s_AMSTR_GRIDOFF;
         }
         else if (key == key_map_mark)
         {
             M_snprintf(buffer, sizeof(buffer), "%s %d",
-                       DEH_String(AMSTR_MARKEDSPOT), markpointnum);
+                       s_AMSTR_MARKEDSPOT, markpointnum);
             plr->message = buffer;
             AM_addMark();
         }
         else if (key == key_map_clearmark)
         {
             AM_clearMarks();
-            plr->message = DEH_String(AMSTR_MARKSCLEARED);
+            plr->message = s_AMSTR_MARKSCLEARED;
         }
-*/
         else
         {
             rc = false;
         }
 
-	if (!deathmatch && cht_CheckCheat(&cheat_amap, ev->data2))
-	{
-	    rc = false;
-	    cheating = (cheating+1) % 3;
-	}
+        if (!deathmatch && cht_CheckCheat(&cheat_amap, ev->data2))
+        {
+            rc = false;
+            cheating = (cheating+1) % 3;
+        }
     }
     else if (ev->type == ev_keyup)
     {
@@ -881,6 +890,24 @@ boolean AM_Responder
         {
             mtof_zoommul = FRACUNIT;
             ftom_zoommul = FRACUNIT;
+        }
+    }
+    else if (ev->type == ev_mousewheel)
+    {
+        // zoom in
+        if (ev->data1 > 0)
+        {
+            movement = true;
+            mtof_zoommul = M_ZOOMIN;
+            ftom_zoommul = M_ZOOMOUT;
+            bigstate = false;
+        }
+        // zoom out
+        else if (ev->data1 < 0)
+        {
+            movement = true;
+            mtof_zoommul = M_ZOOMOUT;
+            ftom_zoommul = M_ZOOMIN;
         }
     }
 #endif
@@ -977,6 +1004,14 @@ void AM_Ticker (void)
     // Update light level
     // AM_updateLightLev();
 
+    if (movement)
+    {
+        movement = false;
+        m_paninc.x = 0;
+        m_paninc.y = 0;
+        mtof_zoommul = FRACUNIT;
+        ftom_zoommul = FRACUNIT;
+    }
 }
 
 
@@ -1300,11 +1335,11 @@ void AM_drawWalls(void)
         l.b.x = lines[i].v2->x;
         l.b.y = lines[i].v2->y;
 
-            if (automapactive & am_rotate)
-            {
-              AM_rotate(&l.a.x, &l.a.y, ANG90-plr->mo->angle, plr->mo->x, plr->mo->y);
-              AM_rotate(&l.b.x, &l.b.y, ANG90-plr->mo->angle, plr->mo->x, plr->mo->y);
-            }
+        if (automapactive & am_rotate)
+        {
+          AM_rotate(&l.a.x, &l.a.y, ANG90-plr->mo->angle, plr->mo->x, plr->mo->y);
+          AM_rotate(&l.b.x, &l.b.y, ANG90-plr->mo->angle, plr->mo->x, plr->mo->y);
+        }
 
         if (cheating || (lines[i].flags & ML_MAPPED))
         {
@@ -1327,12 +1362,12 @@ void AM_drawWalls(void)
                     else
                         AM_drawMline(&l, WALLCOLORS+lightlev);
                 }
-                else if (lines[i].backsector->floor_height
-                           != lines[i].frontsector->floor_height) {
+                else if (lines[i].backsector->floorheight
+                           != lines[i].frontsector->floorheight) {
                     AM_drawMline(&l, FDWALLCOLORS + lightlev); // floor level change
                 }
-                else if (lines[i].backsector->ceiling_height
-                           != lines[i].frontsector->ceiling_height) {
+                else if (lines[i].backsector->ceilingheight
+                           != lines[i].frontsector->ceilingheight) {
                     AM_drawMline(&l, CDWALLCOLORS+lightlev); // ceiling level change
                 }
                 else if (cheating)
@@ -1591,10 +1626,10 @@ void AM_Drawer (void)
     V_MarkRect(f_x, f_y, f_w, f_h);
 
     if(fsize == 12538385 && gamemap == 10)
-        M_WriteText(0, 160, DEH_String("E1M10: SEWERS"));
+        M_WriteText(0, 160, "E1M10: SEWERS");
 
     if((fsize == 14691821 || fsize == 14677988 || fsize == 14683458) && gamemap == 33)
-        M_WriteText(0, 160, DEH_String("LEVEL 33: BETRAY"));
+        M_WriteText(0, 160, "LEVEL 33: BETRAY");
 }
 
 void AM_DrawWorldTimer(void)

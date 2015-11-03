@@ -13,7 +13,7 @@
 // GNU General Public License for more details.
 //
 // DESCRIPTION:
-//	Cheat code checking.
+//        Cheat code checking.
 //
 
 
@@ -37,7 +37,7 @@ typedef struct
 {
     // settings for this cheat
 
-    char sequence[MAX_CHEAT_LEN];
+    char *sequence;
     size_t sequence_len;
     int parameter_chars;
 
@@ -51,14 +51,14 @@ typedef struct
 
 int
 cht_CheckCheat
-( cheatseq_t*		cht,
-  char			key );
+( cheatseq_t*                cht,
+  char                        key );
 
 
 void
 cht_GetParam
-( cheatseq_t*		cht,
-  char*			buffer );
+( cheatseq_t*                cht,
+  char*                        buffer );
 
 
 #endif

@@ -49,6 +49,8 @@ typedef enum
     CRXMAX
 } crx_t;
 
+byte V_Colorize (byte *playpal, int cr, byte source, boolean keepgray109);
+
 extern byte *crx[CRXMAX];
 extern char **crstr;
 

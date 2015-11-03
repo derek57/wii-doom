@@ -40,12 +40,6 @@
 #include "d_net.h"
 #include "d_main.h"
 
-#ifdef WII
-#include "../deh_main.h"
-#else
-#include "deh_main.h"
-#endif
-
 #include "doomdef.h"
 
 #ifdef WII
@@ -78,6 +72,7 @@
 #endif
 
 
+extern boolean longtics;
 extern boolean lowres_turn;
 
 ticcmd_t *netcmds;
@@ -94,7 +89,7 @@ static void PlayerQuitGame(player_t *player)
     // Do this the same way as Vanilla Doom does, to allow dehacked
     // replacements of this message
 
-    M_StringCopy(exitmsg, DEH_String("Player 1 left the game"),
+    M_StringCopy(exitmsg, "Player 1 left the game",
                  sizeof(exitmsg));
 
     exitmsg[7] += player_num;
@@ -103,11 +98,12 @@ static void PlayerQuitGame(player_t *player)
     players[consoleplayer].message = exitmsg;
 
     // TODO: check if it is sensible to do this:
-
+/*
     if (demorecording) 
     {
         G_CheckDemoStatus ();
     }
+*/
 }
 
 static void RunTic(ticcmd_t *cmds, boolean *ingame)
@@ -156,27 +152,18 @@ static void LoadGameSettings(net_gamesettings_t *settings)
     startmap = settings->map;
     startskill = settings->skill;
     startloadgame = settings->loadgame;
-
-#ifndef WII
     lowres_turn = settings->lowres_turn;
-#endif
-
     nomonsters = settings->nomonsters;
     fastparm = settings->fast_monsters;
     respawnparm = settings->respawn_monsters;
     timelimit = settings->timelimit;
     consoleplayer = settings->consoleplayer;
 
-#ifndef WII
     if (lowres_turn)
     {
-        printf("NOTE: Turning resolution is reduced; this is probably "
-               "because there is a client recording a Vanilla demo.\n");
-
         C_Printf(CR_GOLD, "         NOTE: Turning resolution is reduced; this is probably\n");
         C_Printf(CR_GOLD, "         because there is a client recording a Vanilla demo.\n");
     }
-#endif
 
     for (i = 0; i < MAXPLAYERS; ++i)
     {
@@ -202,11 +189,17 @@ static void SaveGameSettings(net_gamesettings_t *settings)
     settings->fast_monsters = fastparm;
     settings->respawn_monsters = respawnparm;
     settings->timelimit = timelimit;
-
+/*
 #ifndef WII
     settings->lowres_turn = M_CheckParm("-record") > 0
                          && M_CheckParm("-longtics") == 0;
-#endif
+#else
+    if(longtics)
+        settings->lowres_turn = true;
+    else
+*/
+        settings->lowres_turn = false;
+//#endif
 }
 
 //

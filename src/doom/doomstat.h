@@ -349,6 +349,32 @@ extern  boolean         font_shadow;
 extern  boolean         d_shadows;
 extern  boolean         d_fixspriteoffsets;
 extern  boolean         d_brightmaps;
+extern  boolean         d_fixmaperrors;
+extern  boolean         d_altlighting;
+extern  boolean         allow_infighting;
+extern  boolean         last_enemy;
+extern  boolean         float_items;
+extern  boolean         animated_drop;
+extern  boolean         crush_sound;
+extern  boolean         disable_noise;
+extern  boolean         corpses_nudge;
+extern  boolean         corpses_slide;
+extern  boolean         corpses_smearblood;
+extern  boolean         show_diskicon;
+/*
+extern  boolean         nerve;
+extern  boolean         chex;
+*/
+extern  boolean         chexdeh;
+//extern  boolean         hacx;
+extern  boolean         BTSX;
+extern  boolean         BTSXE1;
+extern  boolean         BTSXE2;
+extern  boolean         BTSXE2A;
+extern  boolean         BTSXE2B;
+extern  boolean         BTSXE3;
+extern  boolean         BTSXE3A;
+extern  boolean         BTSXE3B;
 
 extern  int             d_colblood;
 extern  int             d_colblood2;

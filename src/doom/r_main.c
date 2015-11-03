@@ -1,32 +1,42 @@
-// Emacs style mode select   -*- C++ -*- 
-//-----------------------------------------------------------------------------
-//
-// Copyright(C) 1993-1996 Id Software, Inc.
-// Copyright(C) 2005 Simon Howard
-//
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-// 02111-1307, USA.
-//
-// DESCRIPTION:
-//        Rendering main loop and setup functions,
-//        utility functions (BSP, geometry, trigonometry).
-//        See tables.c, too.
-//
-//-----------------------------------------------------------------------------
+/*
+========================================================================
 
+                               DOOM Retro
+         The classic, refined DOOM source port. For Windows PC.
 
+========================================================================
+
+  Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+  Copyright (C) 2013-2015 Brad Harding.
+
+  DOOM Retro is a fork of Chocolate DOOM by Simon Howard.
+  For a complete list of credits, see the accompanying AUTHORS file.
+
+  This file is part of DOOM Retro.
+
+  DOOM Retro is free software: you can redistribute it and/or modify it
+  under the terms of the GNU General Public License as published by the
+  Free Software Foundation, either version 3 of the License, or (at your
+  option) any later version.
+
+  DOOM Retro is distributed in the hope that it will be useful, but
+  WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+  General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with DOOM Retro. If not, see <http://www.gnu.org/licenses/>.
+
+  DOOM is a registered trademark of id Software LLC, a ZeniMax Media
+  company, in the US and/or other countries and is used without
+  permission. All other trademarks are the property of their respective
+  holders. DOOM Retro is in no way affiliated with nor endorsed by
+  id Software LLC.
+
+========================================================================
+*/
+
+#define _USE_MATH_DEFINES
 
 #include <math.h>
 #include <stdlib.h>
@@ -39,103 +49,134 @@
 #include "d_loop.h"
 #endif
 
-#include "d_player.h"
 #include "doomstat.h"
+
+#ifdef WII
+#include "../i_timer.h"
+#include "../m_config.h"
+#else
+#include "i_timer.h"
+#include "m_config.h"
+#endif
+
 #include "m_menu.h"
-#include "r_local.h"
+#include "p_local.h"
 #include "r_sky.h"
 
 #ifdef WII
-#include "../v_trans.h"
 #include "../v_video.h"
 #else
-#include "v_trans.h"
 #include "v_video.h"
 #endif
 
-
 // Fineangles in the SCREENWIDTH wide window.
-#define FIELDOFVIEW        2048        
-#define DISTMAP            2
-
-
-// killough 3/20/98: Support dynamic colormaps, e.g. deep water
-// killough 4/4/98: support dynamic number of them as well
-int                        numcolormaps = 1;
-
-int                        setblocks;
-//int                        setdetail;
-int                        viewangleoffset;
-int                        centerx;
-int                        centery;
+#define FIELDOFVIEW     2048
 
 // increment every time a check is made
-int                        validcount = 1;                
+int                     validcount = 1;
 
-// 0 = high, 1 = low
-//int                        detailshift;        
+lighttable_t            *fixedcolormap;
+extern lighttable_t     **walllights;
+
+int                     centerx;
+int                     centery;
+
+fixed_t                 centerxfrac;
+fixed_t                 centeryfrac;
+fixed_t                 viewheightfrac;
+fixed_t                 projection;
+fixed_t                 projectiony;
+
+fixed_t                 viewx;
+fixed_t                 viewy;
+fixed_t                 viewz;
+
+angle_t                 viewangle;
+
+fixed_t                 viewcos;
+fixed_t                 viewsin;
+
+player_t                *viewplayer;
+
+// [AM] Fractional part of the current tic, in the half-open
+//      range of [0.0, 1.0). Used for interpolation.
+fixed_t                 fractionaltic;
+
+//
+// precalculated math tables
+//
+angle_t                 clipangle;
 
 // The viewangletox[viewangle + FINEANGLES/4] lookup
 // maps the visible view angles to screen X coordinates,
 // flattening the arc to a flat projection plane.
-// There will be many angles mapped to the same X. 
-int                        viewangletox[FINEANGLES/2];
-
-// bumped light from gun blasts
-int                        extralight;                        
-int                        viewpitch;
-
-boolean                    BorderNeedRefresh;
-boolean                    setsizeneeded;
-
-fixed_t                    centerxfrac;
-fixed_t                    centeryfrac;
-fixed_t                    projection;
-fixed_t                    viewx;
-fixed_t                    viewy;
-fixed_t                    viewz;
-fixed_t                    viewcos;
-fixed_t                    viewsin;
-
-// [AM] Fractional part of the current tic, in the half-open
-//      range of [0.0, 1.0).  Used for interpolation.
-fixed_t                    fractionaltic;
-
-angle_t                    viewangle;
-
-// precalculated math tables
-angle_t                    clipangle;
+// There will be many angles mapped to the same X.
+int                     viewangletox[FINEANGLES / 2];
 
 // The xtoviewangleangle[] table maps a screen pixel
 // to the lowest viewangle that maps back to x ranges
 // from clipangle to -clipangle.
-angle_t                    xtoviewangle[SCREENWIDTH+1];
+angle_t                 xtoviewangle[SCREENWIDTH + 1];
 
-lighttable_t*              fixedcolormap;
-lighttable_t*              (*scalelight)[MAXLIGHTSCALE];
-lighttable_t*              (*psprscalelight)[OLDMAXLIGHTSCALE];
-//lighttable_t*              scalelightfixed[MAXLIGHTSCALE];
-lighttable_t*              (*zlight)[MAXLIGHTZ];
-lighttable_t*              (*c_scalelight)[LIGHTLEVELS][MAXLIGHTSCALE];
-lighttable_t*              (*c_zlight)[LIGHTLEVELS][MAXLIGHTZ];
-lighttable_t*              (*c_psprscalelight)[OLDLIGHTLEVELS][OLDMAXLIGHTSCALE];
-lighttable_t*              fullcolormap;
+//fixed_t                 *finecosine = &finesine[FINEANGLES / 4];
 
-player_t*                  viewplayer;
+// killough 3/20/98: Support dynamic colormaps, e.g. deep water
+// killough 4/4/98: support dynamic number of them as well
+int                     numcolormaps = 1;
+lighttable_t            *(*c_scalelight)[LIGHTLEVELS][MAXLIGHTSCALE];
+lighttable_t            *(*c_zlight)[LIGHTLEVELS][MAXLIGHTZ];
+lighttable_t            *(*c_psprscalelight)[OLDLIGHTLEVELS][OLDMAXLIGHTSCALE];
+lighttable_t            *(*scalelight)[MAXLIGHTSCALE];
+lighttable_t            *(*psprscalelight)[OLDMAXLIGHTSCALE];
+lighttable_t            *(*zlight)[MAXLIGHTZ];
+lighttable_t            *fullcolormap;
+lighttable_t            **colormaps;
 
-extern lighttable_t**      walllights;
+// bumped light from gun blasts
+int                     extralight;
+/*
+boolean                r_translucency = r_translucency_default;
+boolean                r_homindicator = r_homindicator_default;
+*/
 
-extern int                 viewheight2;
+boolean                 BorderNeedRefresh;
 
-void (*colfunc) (void);
-void (*basecolfunc) (void);
-void (*fuzzcolfunc) (void);
-void (*transcolfunc) (void);
-void (*tlcolfunc) (void);
-void (*spanfunc) (void);
-void (*fbwallcolfunc)(void);
+int                     r_frame_count;
+
+extern int              screenSize;
+extern int              viewheight2;
+//extern int              gametic;
+extern boolean         canmodify;
+
+extern fixed_t         pspritescale;
+
+void (*colfunc)(void);
 void (*wallcolfunc)(void);
-
+void (*fbwallcolfunc)(void);
+void (*basecolfunc)(void);
+void (*fuzzcolfunc)(void);
+void (*tlcolfunc)(void);
+void (*tl50colfunc)(void);
+void (*tl33colfunc)(void);
+void (*tlgreencolfunc)(void);
+void (*tlredcolfunc)(void);
+void (*tlredwhitecolfunc1)(void);
+void (*tlredwhitecolfunc2)(void);
+void (*tlredwhite50colfunc)(void);
+void (*tlbluecolfunc)(void);
+void (*tlgreen33colfunc)(void);
+void (*tlred33colfunc)(void);
+void (*tlblue33colfunc)(void);
+void (*redtobluecolfunc)(void);
+void (*transcolfunc)(void);
+void (*spanfunc)(void);
+void (*skycolfunc)(void);
+void (*redtogreencolfunc)(void);
+void (*tlredtoblue33colfunc)(void);
+void (*tlredtogreen33colfunc)(void);
+void (*psprcolfunc)(void);
+void (*bloodsplatcolfunc)(void);
+void (*megaspherecolfunc)(void);
 
 //
 // R_PointOnSide
@@ -143,312 +184,133 @@ void (*wallcolfunc)(void);
 //  check point against partition plane.
 // Returns side 0 (front) or 1 (back).
 //
-int
-R_PointOnSide
-( fixed_t        x,
-  fixed_t        y,
-  node_t*        node )
+int R_PointOnSide(fixed_t x, fixed_t y, const node_t *node)
 {
-    fixed_t      dx;
-    fixed_t      dy;
-    fixed_t      left;
-    fixed_t      right;
-        
-    if (!node->dx)
-    {
-        if (x <= node->x)
-            return node->dy > 0;
-        
-        return node->dy < 0;
-    }
-    if (!node->dy)
-    {
-        if (y <= node->y)
-            return node->dx < 0;
-        
-        return node->dx > 0;
-    }
-        
-    dx = (x - node->x);
-    dy = (y - node->y);
-        
-    // Try to quickly decide by looking at sign bits.
-    if ( (node->dy ^ node->dx ^ dx ^ dy)&0x80000000 )
-    {
-        if  ( (node->dy ^ dx) & 0x80000000 )
-        {
-            // (left is negative)
-            return 1;
-        }
-        return 0;
-    }
-
-    left = FixedMul ( node->dy>>FRACBITS , dx );
-    right = FixedMul ( dy , node->dx>>FRACBITS );
-        
-    if (right < left)
-    {
-        // front side
-        return 0;
-    }
-    // back side
-    return 1;                        
+    return ((int64_t)(y - node->y) * node->dx + (int64_t)(node->x - x) * node->dy >= 0);
 }
 
-
-int
-R_PointOnSegSide
-( fixed_t        x,
-  fixed_t        y,
-  seg_t*         line )
+int R_PointOnSegSide(fixed_t x, fixed_t y, seg_t *line)
 {
-    fixed_t      lx;
-    fixed_t      ly;
-    fixed_t      ldx;
-    fixed_t      ldy;
-    fixed_t      dx;
-    fixed_t      dy;
-    fixed_t      left;
-    fixed_t      right;
-        
-    lx = line->v1->x;
-    ly = line->v1->y;
-        
-    ldx = line->v2->x - lx;
-    ldy = line->v2->y - ly;
-        
-    if (!ldx)
-    {
-        if (x <= lx)
-            return ldy > 0;
-        
-        return ldy < 0;
-    }
-    if (!ldy)
-    {
-        if (y <= ly)
-            return ldx < 0;
-        
-        return ldx > 0;
-    }
-        
-    dx = (x - lx);
-    dy = (y - ly);
-        
-    // Try to quickly decide by looking at sign bits.
-    if ( (ldy ^ ldx ^ dx ^ dy)&0x80000000 )
-    {
-        if  ( (ldy ^ dx) & 0x80000000 )
-        {
-            // (left is negative)
-            return 1;
-        }
-        return 0;
-    }
-
-    left = FixedMul ( ldy>>FRACBITS , dx );
-    right = FixedMul ( dy , ldx>>FRACBITS );
-        
-    if (right < left)
-    {
-        // front side
-        return 0;
-    }
-    // back side
-    return 1;                        
+    return ((int64_t)(line->v2->x - line->v1->x) * (y - line->v1->y)
+            - (int64_t)(line->v2->y - line->v1->y) * (x - line->v1->x) >= 0);
 }
 
+int SlopeDiv(unsigned int num, unsigned int den)
+{
+    uint64_t    ans;
+
+    if (den < 512)
+        return SLOPERANGE;
+
+    ans = ((uint64_t)num << 3) / (den >> 8);
+    return (ans <= SLOPERANGE ? (int)ans : SLOPERANGE);
+}
 
 //
 // R_PointToAngle
-// To get a global angle from cartesian coordinates,
-//  the coordinates are flipped until they are in
-//  the first octant of the coordinate system, then
-//  the y (<=x) is scaled and divided by x to get a
-//  tangent (slope) value which is looked up in the
-//  tantoangle[] table.
-angle_t
-R_PointToAngle
-( fixed_t        x,
-  fixed_t        y )
+// To get a global angle from Cartesian coordinates,
+// the coordinates are flipped until they are in the first octant of
+// the coordinate system, then the y (<=x) is scaled and divided by x
+// to get a tangent (slope) value which is looked up in the
+// tantoangle[] table.
+
+// Point (x2,y2) to point (x1,y1) angle.
+angle_t R_PointToAngle2(fixed_t x2, fixed_t y2, fixed_t x1, fixed_t y1)
 {
-    // [crispy] fix overflows for very long distances
-    int64_t y_viewy = (int64_t)y - viewy;
-    int64_t x_viewx = (int64_t)x - viewx;
+    x1 -= x2;
+    y1 -= y2;
 
-    // [crispy] the worst that could happen is e.g. INT_MIN-INT_MAX = 2*INT_MIN
-    if (x_viewx < INT_MIN || x_viewx > INT_MAX ||
-        y_viewy < INT_MIN || y_viewy > INT_MAX)
-    {
-	// [crispy] preserving the angle by halfing the distance in both directions
-	x = x_viewx / 2;
-	y = y_viewy / 2;
-    }
-    else
-    {
-        x -= viewx;
-        y -= viewy;
-    }
-
-    if ( (!x) && (!y) )
+    if (!x1 && !y1)
         return 0;
 
-    if (x>= 0)
-    {
-        // x >=0
-        if (y>= 0)
-        {
-            // y>= 0
+    if (x1 > INT_MAX / 4 || x1 < -INT_MAX / 4 || y1 > INT_MAX / 4 || y1 < -INT_MAX / 4)
+        return (int)(atan2(y1, x1) * ANG180 / M_PI);
 
-            if (x>y)
-            {
-                // octant 0
-                return tantoangle[ SlopeDiv(y,x)];
-            }
-            else
-            {
-                // octant 1
-                return ANG90-1-tantoangle[ SlopeDiv(x,y)];
-            }
-        }
+    if (x1 >= 0)
+    {
+        if (y1 >= 0)
+            return (x1 > y1 ? tantoangle[SlopeDiv(y1, x1)] :
+                ANG90 - 1 - tantoangle[SlopeDiv(x1, y1)]);
         else
         {
-            // y<0
-            y = -y;
-
-            if (x>y)
-            {
-                // octant 8
-                return -tantoangle[SlopeDiv(y,x)];
-            }
-            else
-            {
-                // octant 7
-                return ANG270+tantoangle[ SlopeDiv(x,y)];
-            }
+            y1 = -y1;
+            return (x1 > y1 ? -(int)tantoangle[SlopeDiv(y1, x1)] :
+                ANG270 + tantoangle[SlopeDiv(x1, y1)]);
         }
     }
     else
     {
-        // x<0
+        x1 = -x1;
+        if (y1 >= 0)
+            return (x1 > y1 ? ANG180 - 1 - tantoangle[SlopeDiv(y1, x1)] :
+                ANG90 + tantoangle[SlopeDiv(x1, y1)]);
+        else
+        {
+            y1 = -y1;
+            return (x1 > y1 ? ANG180 + tantoangle[SlopeDiv(y1, x1)] :
+                ANG270 - 1 - tantoangle[SlopeDiv(x1, y1)]);
+        }
+    }
+}
+
+// Point of view (viewx, viewy) to point (x1, y1) angle.
+angle_t R_PointToAngle(fixed_t x, fixed_t y)
+{
+    x -= viewx;
+    y -= viewy;
+
+    if (!x && !y)
+        return 0;
+
+    if (x > INT_MAX / 4 || x < -INT_MAX / 4 || y > INT_MAX / 4 || y < -INT_MAX / 4)
+        return (int)(atan2(y, x) * ANG180 / M_PI);
+
+    if (x >= 0)
+    {
+        if (y >= 0)
+            return (x > y ? tantoangle[SlopeDiv(y, x)] :
+                ANG90 - 1 - tantoangle[SlopeDiv(x, y)]);
+        else
+        {
+            y = -y;
+            return (x > y ? -(int)tantoangle[SlopeDiv(y, x)] :
+                ANG270 + tantoangle[SlopeDiv(x, y)]);
+        }
+    }
+    else
+    {
         x = -x;
-
-        if (y>= 0)
-        {
-            // y>= 0
-            if (x>y)
-            {
-                // octant 3
-                return ANG180-1-tantoangle[ SlopeDiv(y,x)];
-            }
-            else
-            {
-                // octant 2
-                return ANG90+ tantoangle[ SlopeDiv(x,y)];
-            }
-        }
+        if (y >= 0)
+            return (x > y ? ANG180 - 1 - tantoangle[SlopeDiv(y, x)] :
+                ANG90 + tantoangle[SlopeDiv(x, y)]);
         else
         {
-            // y<0
             y = -y;
-
-            if (x>y)
-            {
-                // octant 4
-                return ANG180+tantoangle[ SlopeDiv(y,x)];
-            }
-            else
-            {
-                 // octant 5
-                return ANG270-1-tantoangle[ SlopeDiv(x,y)];
-            }
+            return (x > y ? ANG180 + tantoangle[SlopeDiv(y, x)] :
+                ANG270 - 1 - tantoangle[SlopeDiv(x, y)]);
         }
     }
-    return 0;
 }
 
-
-angle_t
-R_PointToAngle2
-( fixed_t        x1,
-  fixed_t        y1,
-  fixed_t        x2,
-  fixed_t        y2 )
-{        
-    viewx = x1;
-    viewy = y1;
-    
-    return R_PointToAngle (x2, y2);
-}
-
-
-fixed_t
-R_PointToDist
-( fixed_t        x,
-  fixed_t        y )
+fixed_t R_PointToDist(fixed_t x, fixed_t y)
 {
-    int          angle;
-    fixed_t      dx;
-    fixed_t      dy;
-    fixed_t      temp;
-    fixed_t      dist;
-    fixed_t      frac;
-        
-    dx = abs(x - viewx);
-    dy = abs(y - viewy);
-        
-    if (dy>dx)
+    fixed_t     dx = ABS(x - viewx);
+    fixed_t     dy = ABS(y - viewy);
+
+    if (dy > dx)
     {
-        temp = dx;
+        fixed_t t = dx;
+
         dx = dy;
-        dy = temp;
+        dy = t;
     }
 
-    // Fix crashes in udm1.wad
+    if (!dy)
+        return dx;
 
-    if (dx != 0)
-    {
-        frac = FixedDiv(dy, dx);
-    }
-    else
-    {
-        frac = 0;
-    }
-        
-    angle = (tantoangle[frac>>DBITS]+ANG90) >> ANGLETOFINESHIFT;
-
-    // use as cosine
-    dist = FixedDiv (dx, finesine[angle] );        
-        
-    return dist;
+    return (dx ? FixedDiv(dx, finesine[(tantoangle[FixedDiv(dy, dx) >> DBITS]
+        + ANG90) >> ANGLETOFINESHIFT]) : 0);
 }
-
-
-
-
-//
-// R_InitPointToAngle
-//
-void R_InitPointToAngle (void)
-{
-    // UNUSED - now getting from tables.c
-#if 0
-    int        i;
-    long        t;
-    float        f;
-//
-// slope (tangent) to angle lookup
-//
-    for (i=0 ; i<=SLOPERANGE ; i++)
-    {
-        f = atan( (float)i/SLOPERANGE )/(3.141592657*2);
-        t = 0xffffffff*f;
-        tantoangle[i] = t;
-    }
-#endif
-}
-
-
 
 // [AM] Interpolate between two angles.
 angle_t R_InterpolateAngle(angle_t oangle, angle_t nangle, fixed_t scale)
@@ -458,59 +320,70 @@ angle_t R_InterpolateAngle(angle_t oangle, angle_t nangle, fixed_t scale)
     else if (nangle > oangle)
     {
         if (nangle - oangle < ANG270)
-            return oangle + (angle_t)((nangle - oangle) * FIXED2DOUBLE(scale));
-        else // Wrapped around
-            return oangle - (angle_t)((oangle - nangle) * FIXED2DOUBLE(scale));
+            return (oangle + (angle_t)((nangle - oangle) * FIXED2DOUBLE(scale)));
+        else    // Wrapped around
+            return (oangle - (angle_t)((oangle - nangle) * FIXED2DOUBLE(scale)));
     }
-    else // nangle < oangle
+    else        // nangle < oangle
     {
         if (oangle - nangle < ANG270)
-            return oangle - (angle_t)((oangle - nangle) * FIXED2DOUBLE(scale));
-        else // Wrapped around
-            return oangle + (angle_t)((nangle - oangle) * FIXED2DOUBLE(scale));
+            return (oangle - (angle_t)((oangle - nangle) * FIXED2DOUBLE(scale)));
+        else    // Wrapped around
+            return (oangle + (angle_t)((nangle - oangle) * FIXED2DOUBLE(scale)));
     }
 }
-
 
 //
 // R_InitTables
 //
-void R_InitTables (void)
+static void R_InitTables(void)
 {
-    // UNUSED: now getting from tables.c
-#if 0
-    int                i;
-    float        a;
-    float        fv;
-    int                t;
-    
-    // viewangle tangent table
-    for (i=0 ; i<FINEANGLES/2 ; i++)
-    {
-        a = (i-FINEANGLES/4+0.5)*PI*2/FINEANGLES;
-        fv = FRACUNIT*tan (a);
-        t = fv;
-        finetangent[i] = t;
-    }
-    
-    // finesine table
-    for (i=0 ; i<5*FINEANGLES/4 ; i++)
-    {
-        // OPTIMIZE: mirror...
-        a = (i+0.5)*PI*2/FINEANGLES;
-        t = FRACUNIT*sin (a);
-        finesine[i] = t;
-    }
-#endif
+/*
+    int i;
 
+    // viewangle tangent table
+    for (i = 0; i < FINEANGLES / 2; i++)
+        finetangent[i] = (int)(FRACUNIT * tanf((i - FINEANGLES / 4 + 0.5f) * (float)M_PI * 2
+            / FINEANGLES));
+
+    // finesine table
+    for (i = 0; i < 5 * FINEANGLES / 4; i++)
+        finesine[i] = (int)(FRACUNIT * sinf((i + 0.5f) * (float)M_PI * 2 / FINEANGLES));
+*/
 }
 
+static void R_InitPointToAngle(void)
+{
+/*
+    int         i;
 
+    // slope (tangent) to angle lookup
+    for (i = 0; i <= SLOPERANGE; i++)
+    {
+        float   f = atanf((float)i / SLOPERANGE) / ((float)M_PI * 2);
+        long    t = (long)(0xFFFFFFFF * f);
+
+        // this used to have PI (as defined above) written out longhand
+        tantoangle[i] = t;
+    }
+*/
+}
+
+// e6y: caching
+angle_t R_GetVertexViewAngle(vertex_t *v)
+{
+    if (v->angletime != r_frame_count)
+    {
+        v->angletime = r_frame_count;
+        v->viewangle = R_PointToAngle(v->x, v->y);
+    }
+    return v->viewangle;
+}
 
 //
 // R_InitTextureMapping
 //
-void R_InitTextureMapping (void)
+void R_InitTextureMapping(void)
 {
     int         i;
     int         x;
@@ -566,18 +439,17 @@ void R_InitTextureMapping (void)
     clipangle = xtoviewangle[0];
 }
 
-
-
 //
 // R_InitLightTables
 // Only inits the zlight table,
 //  because the scalelight table changes with view size.
 //
+#define DISTMAP 2
 
-void R_InitLightTables (void)
+void R_InitLightTables(void)
 {
-    int                i;
-    
+    int i;
+
     // killough 4/4/98: dynamic colormaps
     c_zlight = malloc(sizeof(*c_zlight) * numcolormaps);
     c_scalelight = malloc(sizeof(*c_scalelight) * numcolormaps);
@@ -585,7 +457,7 @@ void R_InitLightTables (void)
 
     // Calculate the light levels to use
     //  for each level / distance combination.
-    for (i=0 ; i< LIGHTLEVELS ; i++)
+    for (i = 0; i < LIGHTLEVELS; i++)
     {
         int j, startmap = ((LIGHTLEVELS - LIGHTBRIGHT - i) * 2) * NUMCOLORMAPS / LIGHTLEVELS;
 
@@ -602,33 +474,28 @@ void R_InitLightTables (void)
     }
 }
 
-
-
 //
 // R_SetViewSize
 // Do not really change anything here,
 //  because it might be in the middle of a refresh.
 // The change will take effect next refresh.
 //
+boolean        setsizeneeded;
+int             setblocks;
 
-void
-R_SetViewSize
-( int                blocks)
+void R_SetViewSize(int blocks)
 {
     setsizeneeded = true;
     setblocks = blocks;
 }
 
-
 //
 // R_ExecuteSetViewSize
 //
-void R_ExecuteSetViewSize (void)
+void R_ExecuteSetViewSize(void)
 {
-    fixed_t        cosadj;
-    fixed_t        dy;
-    int            i;
-    int            j;
+    int i;
+    int j;
 
     setsizeneeded = false;
 
@@ -636,75 +503,65 @@ void R_ExecuteSetViewSize (void)
     {
         scaledviewwidth = SCREENWIDTH;
         scaledviewheight = SCREENHEIGHT;                   // CHANGED FOR HIRES
+        viewheight = SCREENHEIGHT;
         viewheight2 = SCREENHEIGHT;
     }
     else
     {
+//        scaledviewwidth = setblocks * SCREENWIDTH / 10;
         scaledviewwidth = (setblocks*32)<<hires;           // CHANGED FOR HIRES
         scaledviewheight = ((setblocks*168/10)&~7)<<hires; // CHANGED FOR HIRES
+        viewheight = (setblocks * (SCREENHEIGHT - SBARHEIGHT) / 10) & ~7;
         viewheight2 = SCREENHEIGHT - SBARHEIGHT;
     }
-    
-//    detailshift = setdetail;
+
     viewwidth = scaledviewwidth;
     viewheight = scaledviewheight; // ADDED FOR HIRES
+    viewheightfrac = viewheight << FRACBITS;
 
-    centery = viewheight/2;
-
-    centerx = viewwidth/2;
-    centerxfrac = centerx<<FRACBITS;
-    centeryfrac = centery<<FRACBITS;
+    centery = viewheight / 2;
+    centerx = viewwidth / 2;
+    centerxfrac = centerx << FRACBITS;
+    centeryfrac = centery << FRACBITS;
     projection = centerxfrac;
+    projectiony = ((SCREENHEIGHT * centerx * ORIGWIDTH) / ORIGHEIGHT) / SCREENWIDTH
+        * FRACUNIT;
 
-//    if (!detailshift)
-    {
-        colfunc = basecolfunc = R_DrawColumn;
-        fuzzcolfunc = R_DrawFuzzColumn;
-        transcolfunc = R_DrawTranslatedColumn;
-        spanfunc = R_DrawSpan;
-        tlcolfunc = R_DrawTLColumn;
-    }
-/*
-    else
-    {
-        colfunc = basecolfunc = R_DrawColumnLow;
-        fuzzcolfunc = R_DrawFuzzColumnLow;
-        transcolfunc = R_DrawTranslatedColumnLow;
-        spanfunc = R_DrawSpanLow;
-        tlcolfunc = R_DrawTLColumnLow;
-    }
-*/
-    R_InitBuffer (scaledviewwidth, scaledviewheight); // CHANGED FOR HIRES
-        
-    R_InitTextureMapping ();
-    
+    R_InitBuffer(scaledviewwidth, scaledviewheight);
+
+    R_InitTextureMapping();
+
     // psprite scales
+//    pspritexscale = (centerx << FRACBITS) / (ORIGWIDTH / 2);
+    pspriteyscale = (((SCREENHEIGHT * viewwidth) / SCREENWIDTH) << FRACBITS) / ORIGHEIGHT;
+//    pspriteiscale = FixedDiv(FRACUNIT, pspritexscale);
     pspritescale = FRACUNIT*viewwidth/ORIGWIDTH;      // CHANGED FOR HIRES
     pspriteiscale = FRACUNIT*ORIGWIDTH/viewwidth;     // CHANGED FOR HIRES
-    
-    // thing clipping
-    for (i=0 ; i<viewwidth ; i++)
-        screenheightarray[i] = viewheight;
-    
-    // planes
-    for (i=0 ; i<viewheight ; i++)
-    {
-        dy = ((i-viewheight/2)<<FRACBITS)+FRACUNIT/2;
-        dy = abs(dy);
 
+    // thing clipping
+    for (i = 0; i < viewwidth; i++)
+        screenheightarray[i] = viewheight;
+
+    // planes
+    for (i = 0; i < viewheight; i++)
+    {
+        fixed_t dy = ABS(((i - viewheight / 2) << FRACBITS) + FRACUNIT / 2);
+
+//        yslope[i] = FixedDiv(projectiony, dy);
         // HIRES
         yslope[i] = FixedDiv ( (viewwidth<<!hires)/2*FRACUNIT, dy);
     }
-        
-    for (i=0 ; i<viewwidth ; i++)
+
+    for (i = 0; i < viewwidth; i++)
     {
-        cosadj = abs(finecosine[xtoviewangle[i]>>ANGLETOFINESHIFT]);
-        distscale[i] = FixedDiv (FRACUNIT,cosadj);
+        fixed_t cosadj = ABS(finecosine[xtoviewangle[i] >> ANGLETOFINESHIFT]);
+
+        distscale[i] = FixedDiv(FRACUNIT, cosadj);
     }
-    
+
     // Calculate the light levels to use
     //  for each level / scale combination.
-    for (i=0 ; i< LIGHTLEVELS ; i++)
+    for (i = 0; i < LIGHTLEVELS; i++)
     {
         int     startmap = ((LIGHTLEVELS - LIGHTBRIGHT - i) * 2) * NUMCOLORMAPS / LIGHTLEVELS;
 
@@ -735,96 +592,142 @@ void R_ExecuteSetViewSize (void)
     }
 }
 
-
 void R_InitColumnFunctions(void)
 {
     int i;
 
-//    if (!detailshift)
-        colfunc = basecolfunc = R_DrawColumn;
-/*
+    colfunc = basecolfunc = R_DrawColumn;
+    fuzzcolfunc = R_DrawFuzzColumn;
+    transcolfunc = R_DrawTranslatedColumn;
+
+    if (d_translucency)
+    {
+        tlcolfunc = R_DrawTranslucentColumn;
+        tl50colfunc = R_DrawTranslucent50Column;
+        tl33colfunc = R_DrawTranslucent33Column;
+        tlgreencolfunc = R_DrawTranslucentGreenColumn;
+        tlredcolfunc = R_DrawTranslucentRedColumn;
+        tlredwhitecolfunc1 = R_DrawTranslucentRedWhiteColumn1;
+        tlredwhitecolfunc2 = R_DrawTranslucentRedWhiteColumn2;
+        tlredwhite50colfunc = R_DrawTranslucentRedWhite50Column;
+        tlbluecolfunc = R_DrawTranslucentBlueColumn;
+        tlgreen33colfunc = R_DrawTranslucentGreen33Column;
+        tlred33colfunc = R_DrawTranslucentRed33Column;
+        tlblue33colfunc = R_DrawTranslucentBlue33Column;
+        tlredtoblue33colfunc = R_DrawTranslucentRedToBlue33Column;
+        tlredtogreen33colfunc = R_DrawTranslucentRedToGreen33Column;
+        bloodsplatcolfunc = R_DrawBloodSplatColumn;
+        megaspherecolfunc = R_DrawMegaSphereColumn;
+    }
     else
-        colfunc = basecolfunc = R_DrawColumnLow;
-*/
+    {
+        tlcolfunc = R_DrawColumn;
+        tl50colfunc = R_DrawColumn;
+        tl33colfunc = R_DrawColumn;
+        tlgreencolfunc = R_DrawColumn;
+        tlredcolfunc = R_DrawColumn;
+        tlredwhitecolfunc1 = R_DrawColumn;
+        tlredwhitecolfunc2 = R_DrawColumn;
+        tlredwhite50colfunc = R_DrawColumn;
+        tlbluecolfunc = R_DrawColumn;
+        tlgreen33colfunc = R_DrawColumn;
+        tlred33colfunc = R_DrawColumn;
+        tlblue33colfunc = R_DrawColumn;
+        tlredtoblue33colfunc = R_DrawRedToBlueColumn;
+        tlredtogreen33colfunc = R_DrawRedToGreenColumn;
+        bloodsplatcolfunc = R_DrawSolidBloodSplatColumn;
+        megaspherecolfunc = R_DrawSolidMegaSphereColumn;
+    }
+
+    spanfunc = R_DrawSpan;
+    redtobluecolfunc = R_DrawRedToBlueColumn;
+    redtogreencolfunc = R_DrawRedToGreenColumn;
     wallcolfunc = R_DrawWallColumn;
     fbwallcolfunc = R_DrawFullbrightWallColumn;
+    psprcolfunc = R_DrawPlayerSpriteColumn;
 
     for (i = 0; i < NUMMOBJTYPES; i++)
     {
         mobjinfo_t      *info = &mobjinfo[i];
+        int             flags2 = info->flags2;
 
-        if (info->flags & MF_SHADOW)
+        if (flags2 & MF2_TRANSLUCENT)
+            info->colfunc = tlcolfunc;
+        else if (info->doomednum == MegaSphere && fsize != 19321722)
+            info->colfunc = megaspherecolfunc;
+        else if (info->flags & MF_SHADOW)
             info->colfunc = fuzzcolfunc;
+        else if (flags2 & MF2_TRANSLUCENT_REDONLY)
+            info->colfunc = tlredcolfunc;
+        else if (flags2 & MF2_TRANSLUCENT_GREENONLY)
+            info->colfunc = tlgreencolfunc;
+        else if (flags2 & MF2_TRANSLUCENT_BLUEONLY)
+            info->colfunc = tlbluecolfunc;
+        else if (flags2 & MF2_TRANSLUCENT_33)
+            info->colfunc = tl33colfunc;
+        else if (info->flags & MF_TRANSLUCENT)
+            info->colfunc = tl50colfunc;
+        else if (flags2 & MF2_TRANSLUCENT_REDWHITEONLY)
+            info->colfunc = tlredwhitecolfunc1;
+        else if (flags2 & MF2_TRANSLUCENT_REDTOGREEN_33)
+            info->colfunc = tlredtogreen33colfunc;
+        else if (flags2 & MF2_TRANSLUCENT_REDTOBLUE_33)
+            info->colfunc = tlredtoblue33colfunc;
+        else if (flags2 & MF2_TRANSLUCENT_BLUE_33)
+            info->colfunc = tlblue33colfunc;
+        else if (flags2 & MF2_REDTOGREEN)
+            info->colfunc = redtogreencolfunc;
+        else if (flags2 & MF2_REDTOBLUE)
+            info->colfunc = redtobluecolfunc;
         else
             info->colfunc = basecolfunc;
     }
-}
 
+    if (fsize == 12361532)
+        mobjinfo[MT_BLOOD].blood = GREENBLOOD;
+}
 
 //
 // R_Init
 //
-
-
-
-void R_Init (void)
+void R_Init(void)
 {
-    R_InitData ();
+    R_InitData();
     printf (".");
-    //C_Printf (CR_GRAY, ".");
-
-    R_InitPointToAngle ();
+    R_InitPointToAngle();
     printf (".");
-    //C_Printf (CR_GRAY, ".");
-
-    R_InitTables ();
-    // viewwidth / viewheight are set by the defaults
+    R_InitTables();
     printf (".");
-    //C_Printf (CR_GRAY, ".");
-
-
-    R_SetViewSize (screenblocks);
-    R_InitPlanes ();
+    R_SetViewSize(screenblocks);
+//    printf (".");
+    R_InitLightTables();
     printf (".");
-    //C_Printf (CR_GRAY, ".");
-
-    R_InitLightTables ();
+    R_InitSkyMap();
     printf (".");
-    //C_Printf (CR_GRAY, ".");
-
-    R_InitSkyMap ();
-    R_InitTranslationTables ();
+    R_InitTranslationTables();
     printf (".");
-
     R_InitColumnFunctions();
-    //C_Printf (CR_GRAY, ".");
-    printf("]");
-    //C_Printf (CR_GRAY, "]");
+//    printf (".");
 }
-
 
 //
 // R_PointInSubsector
 //
-subsector_t*
-R_PointInSubsector
-( fixed_t        x,
-  fixed_t        y )
+subsector_t *R_PointInSubsector(fixed_t x, fixed_t y)
 {
-    int          nodenum;
+    int nodenum;
 
     // single subsector is a special case
-    if (!numnodes)                                
+    if (!numnodes)
         return subsectors;
-                
-    nodenum = numnodes-1;
 
-    while (! (nodenum & NF_SUBSECTOR) )
-        nodenum = nodes[nodenum].children[R_PointOnSide(x, y, nodes+nodenum)];
-        
+    nodenum = numnodes - 1;
+
+    while (!(nodenum & NF_SUBSECTOR))
+        nodenum = nodes[nodenum].children[R_PointOnSide(x, y, nodes + nodenum)];
+
     return &subsectors[nodenum & ~NF_SUBSECTOR];
 }
-
 
 //
 // R_SetupPitch
@@ -846,7 +749,7 @@ void R_SetupPitch(player_t* player)
         for (i = 0; i < viewheight; i++)
         {
             yslope[i] = FixedDiv((viewwidth << (!hires)) / 2 * FRACUNIT,
-                                 abs(((i - centery) << FRACBITS) +
+                                 ABS(((i - centery) << FRACBITS) +
                                      FRACUNIT / 2));
         }
     }
@@ -855,10 +758,11 @@ void R_SetupPitch(player_t* player)
 //
 // R_SetupFrame
 //
-void R_SetupFrame (player_t* player)
-{                
-    int          cm;
-    
+void R_SetupFrame(player_t *player)
+{
+    int         cm = 0;
+    mobj_t      *mo = player->mo;
+
     R_SetupPitch(player);
 
     viewplayer = player;
@@ -869,51 +773,45 @@ void R_SetupFrame (player_t* player)
     if (d_uncappedframerate)
         fractionaltic = I_GetTimeMS() * TICRATE % 1000 * FRACUNIT / 1000;
 
-    if (d_uncappedframerate &&
-        // Don't interpolate on the first tic of a level,
-        // otherwise oldviewz might be garbage.
-        leveltime > 1 &&
-        // Don't interpolate if the player did something 
+    if (d_uncappedframerate
+        // Don't interpolate on the first tic of a level, otherwise
+        // oldviewz might be garbage.
+        && leveltime > 1
+        // Don't interpolate if the player did something
         // that would necessitate turning it off for a tic.
-        player->mo->interp == true &&
+        && mo->interp
         // Don't interpolate during a paused state
-        !paused && !menuactive && !consoleactive)
+        && !paused && !menuactive && !consoleactive)
     {
         // Interpolate player camera from their old position to their current one.
-        viewx = player->mo->oldx + FixedMul(player->mo->x -
-                player->mo->oldx, fractionaltic);
-        viewy = player->mo->oldy + FixedMul(player->mo->y -
-                player->mo->oldy, fractionaltic);
-        viewz = player->oldviewz + FixedMul(player->viewz -
-                player->oldviewz, fractionaltic);
-        viewangle = R_InterpolateAngle(player->mo->oldangle,
-                player->mo->angle, fractionaltic) + viewangleoffset;
+        viewx = mo->oldx + FixedMul(mo->x - mo->oldx, fractionaltic);
+        viewy = mo->oldy + FixedMul(mo->y - mo->oldy, fractionaltic);
+        viewz = player->oldviewz + FixedMul(player->viewz - player->oldviewz, fractionaltic);
+        viewangle = R_InterpolateAngle(mo->oldangle, mo->angle, fractionaltic);
     }
     else
     {
-        viewx = player->mo->x;
-        viewy = player->mo->y;
+        viewx = mo->x;
+        viewy = mo->y;
         viewz = player->viewz;
-        viewangle = player->mo->angle + viewangleoffset;
+        viewangle = mo->angle;
     }
 
-    extralight = player->extralight;
+    extralight = player->extralight << 1;
 
-    viewsin = finesine[viewangle>>ANGLETOFINESHIFT];
-    viewcos = finecosine[viewangle>>ANGLETOFINESHIFT];
+    viewsin = finesine[viewangle >> ANGLETOFINESHIFT];
+    viewcos = finecosine[viewangle >> ANGLETOFINESHIFT];
 
     // killough 3/20/98, 4/4/98: select colormap based on player status
-    if (player->mo->subsector->sector->heightsec != -1)
+    if (mo->subsector->sector->heightsec != -1)
     {
-        const sector_t  *s = player->mo->subsector->sector->heightsec + sectors;
+        const sector_t  *s = mo->subsector->sector->heightsec + sectors;
 
         cm = (viewz < s->interpfloorheight ? s->bottommap : (viewz > s->interpceilingheight ?
             s->topmap : s->midmap));
         if (cm < 0 || cm > numcolormaps)
             cm = 0;
     }
-    else
-        cm = 0;
 
     fullcolormap = colormaps[cm];
     zlight = c_zlight[cm];
@@ -922,31 +820,22 @@ void R_SetupFrame (player_t* player)
 
     if (player->fixedcolormap)
     {
-/*
-        fixedcolormap = fullcolormap   // killough 3/20/98: use fullcolormap
-            + player->fixedcolormap * 256 * sizeof(lighttable_t);
-        
-        walllights = scalelightfixed;
-
-        for (i=0 ; i<MAXLIGHTSCALE ; i++)
-            scalelightfixed[i] = fixedcolormap;
-*/
         // killough 3/20/98: localize scalelightfixed (readability/optimization)
         static lighttable_t     *scalelightfixed[MAXLIGHTSCALE];
         int                     i;
 
-        fixedcolormap = fullcolormap   // killough 3/20/98: use fullcolormap
-            + player->fixedcolormap * 256 * sizeof(lighttable_t);
+        // killough 3/20/98: use fullcolormap
+        fixedcolormap = fullcolormap + player->fixedcolormap * 256 * sizeof(lighttable_t);
 
         walllights = scalelightfixed;
 
-        for (i = 0; i < MAXLIGHTSCALE; i++)
+        for (i = 0; i < MAXLIGHTSCALE; ++i)
             scalelightfixed[i] = fixedcolormap;
     }
     else
         fixedcolormap = 0;
-                
-    validcount++;
+
+    ++validcount;
 
     if (BorderNeedRefresh)
     {
@@ -958,62 +847,40 @@ void R_SetupFrame (player_t* player)
     }
 }
 
-
-void R_HOMdrawer()
+//
+// R_RenderPlayerView
+//
+void R_RenderPlayerView(player_t *player)
 {
-    byte colour = (gametic % 20) < 9 ? 40 : 0;
+    ++r_frame_count;
 
-    V_ColorBlock(0, 0, SCREENWIDTH, SCREENHEIGHT - SBARHEIGHT, colour);
-}
-
-
-//
-// R_RenderView
-//
-void R_RenderPlayerView (player_t* player)
-{        
-    R_SetupFrame (player);
+    R_SetupFrame(player);
 
     // Clear buffers.
-    R_ClearClipSegs ();
-    R_ClearDrawSegs ();
-    R_ClearPlanes ();
-    R_ClearSprites ();
-    
+    R_ClearClipSegs();
+    R_ClearDrawSegs();
+    R_ClearPlanes();
+    R_ClearSprites();
+
     if(autodetect_hom && !menuactive)
-        R_HOMdrawer();
+        V_FillRect(viewwindowx, viewwindowy, viewwidth, viewheight,
+                ((gametic % 20) < 9 && !consoleactive && !menuactive && !paused ? 176 : 0));
 
     // check for new console commands.
     NetUpdate ();
 
-    // The head node is the last node output.
-    R_RenderBSPNode (numnodes-1);
-    
+    R_RenderBSPNode(numnodes - 1);
+
     // Check for new console commands.
     NetUpdate ();
-    
-    R_DrawPlanes ();
-    
+
+    R_DrawPlanes();
+
     // Check for new console commands.
     NetUpdate ();
-    
-    R_DrawMasked ();
+
+    R_DrawMasked();
 
     // Check for new console commands.
-    NetUpdate ();                                
+    NetUpdate ();
 }
-
-angle_t R_WadToAngle(int wadangle)
-{
-  // maintain compatibility
-  
-//  if(demo_version < 302)
-    return (wadangle / 45) * ANG45;
-
-  // allows wads to specify angles to
-  // the nearest degree, not nearest 45  
-
-//  return wadangle * (ANG45 / 45);
-}
-
-

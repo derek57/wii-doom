@@ -29,10 +29,10 @@
 
 #ifdef WII
 #include "../c_io.h"
-#include "../deh_str.h"
+#include "../d_deh.h"
 #else
 #include "c_io.h"
-#include "deh_str.h"
+#include "d_deh.h"
 #endif
 
 #include "doomstat.h"
@@ -374,13 +374,13 @@ static int                     me;
 //
 
 // You Are Here graphic
-static patch_t*                yah[3] = { NULL, NULL, NULL }; 
+static patch_t*                yah[3]; 
 
 // You Are Here graphic (BETA)
-static patch_t*                byah[3] = { NULL, NULL, NULL }; 
+static patch_t*                byah[3]; 
 
 // splat
-static patch_t*                splat[2] = { NULL, NULL };
+static patch_t*                splat[2];
 
 // %, : graphics
 static patch_t*                percent;
@@ -433,7 +433,7 @@ static patch_t**               lnames;
 // Buffer storing the backdrop
 static patch_t*                background;
 
-static boolean                 snl_pointeron = false;
+static boolean                 snl_pointeron;
 
 extern boolean                 secretexit;
 extern boolean                 opl;
@@ -449,7 +449,7 @@ void WI_slamBackground(void)
     V_DrawPatch(0, 0, background);
 
     if(beta_style && gameepisode == 1)
-        V_DrawPatch(232, 168, W_CacheLumpName(DEH_String("WILVBX"), PU_CACHE));
+        V_DrawPatch(232, 168, W_CacheLumpName("WILVBX", PU_CACHE));
 }
 
 // The ticker is used to detect keys
@@ -471,25 +471,45 @@ void WI_drawLF(void)
         if(beta_style && gameepisode == 1 && gamemap < 10)
         {
             if(fsize != 12538385 || (fsize == 12538385 && gamemap != 10))
-                V_DrawPatch(232, 176, lnames[wbs->last]);
+            {
+                if(font_shadow)
+                    V_DrawPatchWithShadow(232, 176, lnames[wbs->last], false);
+                else
+                    V_DrawPatch(232, 176, lnames[wbs->last]);
+            }
         }
         else
         {
             if(fsize != 12538385 || (fsize == 12538385 && gamemap != 10))
-                V_DrawPatch((ORIGWIDTH -
-                        SHORT(lnames[wbs->last]->width))/2, // CHANGED FOR HIRES
-                        y, lnames[wbs->last]);              // CHANGED FOR HIRES
+            {
+                if(font_shadow)
+                    V_DrawPatchWithShadow((ORIGWIDTH -
+                            SHORT(lnames[wbs->last]->width))/2, // CHANGED FOR HIRES
+                            y, lnames[wbs->last], false);              // CHANGED FOR HIRES
+                else
+                    V_DrawPatch((ORIGWIDTH -
+                            SHORT(lnames[wbs->last]->width))/2, // CHANGED FOR HIRES
+                            y, lnames[wbs->last]);              // CHANGED FOR HIRES
+            }
             else
-                V_DrawPatch (117, y, W_CacheLumpName(DEH_String("SEWERS"), PU_CACHE));
-
+            {
+                if(font_shadow)
+                    V_DrawPatchWithShadow(117, y, W_CacheLumpName("SEWERS", PU_CACHE), false);
+                else
+                    V_DrawPatch (117, y, W_CacheLumpName("SEWERS", PU_CACHE));
+            }
             // draw "Finished!"
             if(fsize != 12538385 || (fsize == 12538385 && gamemap != 10))
                 y += (5*SHORT(lnames[wbs->last]->height))/4;
             else
                 y = 17;
 
-            V_DrawPatch((ORIGWIDTH - SHORT(finished->width)) / 2,
-                y, finished);        // CHANGED FOR HIRES
+            if(font_shadow)
+                V_DrawPatchWithShadow((ORIGWIDTH - SHORT(finished->width)) / 2,
+                        y, finished, false);        // CHANGED FOR HIRES
+            else
+                V_DrawPatch((ORIGWIDTH - SHORT(finished->width)) / 2,
+                        y, finished);        // CHANGED FOR HIRES
         }
     }
     else if (wbs->last == NUMCMAPS)
@@ -505,7 +525,10 @@ void WI_drawLF(void)
         patch_t tmp = { ORIGWIDTH, ORIGHEIGHT, 1, 1,  // CHANGED FOR HIRES
                         { 0, 0, 0, 0, 0, 0, 0, 0 } }; // CHANGED FOR HIRES
 
-        V_DrawPatch(0, y, &tmp);
+        if(font_shadow)
+            V_DrawPatchWithShadow(0, y, &tmp, false);
+        else
+            V_DrawPatch(0, y, &tmp);
     }
 }
 
@@ -516,15 +539,25 @@ void WI_drawEL(void)
     int y = WI_TITLEY;
 
     // draw "Entering"
-    if(!beta_style)
-        V_DrawPatch((ORIGWIDTH - SHORT(entering->width))/2, // CHANGED FOR HIRES
-                y,
-                entering);
+    if(!beta_style) 
+    {
+        if(font_shadow)
+            V_DrawPatchWithShadow((ORIGWIDTH - SHORT(entering->width))/2, // CHANGED FOR HIRES
+                    y,
+                    entering, false);
+        else
+            V_DrawPatch((ORIGWIDTH - SHORT(entering->width))/2, // CHANGED FOR HIRES
+                    y,
+                    entering);
+    }
 
     // draw level
     if(beta_style && gameepisode == 1 && gamemap < 10)
     {
-        V_DrawPatch(232, 176, lnames[wbs->next]);
+        if(font_shadow)
+            V_DrawPatchWithShadow(232, 176, lnames[wbs->next], false);
+        else
+            V_DrawPatch(232, 176, lnames[wbs->next]);
     }
     else
     {
@@ -535,13 +568,29 @@ void WI_drawEL(void)
 
         if((fsize == 14683458 || fsize == 14677988 || fsize == 14691821) &&
                     gamemode == commercial && gamemap == 2 && secretexit)
-            V_DrawPatch(119, y + 1, W_CacheLumpName("CWILV32", PU_CACHE));
+        {
+            if(font_shadow)
+                V_DrawPatchWithShadow(119, y + 1, W_CacheLumpName("CWILV32", PU_CACHE), false);
+            else
+                V_DrawPatch(119, y + 1, W_CacheLumpName("CWILV32", PU_CACHE));
+        }
         else if(fsize == 12538385 && gamemode == retail && gameepisode == 1 &&
                 gamemap == 1 && secretexit)
-            V_DrawPatch(117, y, W_CacheLumpName("SEWERS", PU_CACHE));
+        {
+            if(font_shadow)
+                V_DrawPatchWithShadow(117, y, W_CacheLumpName("SEWERS", PU_CACHE), false);
+            else
+                V_DrawPatch(117, y, W_CacheLumpName("SEWERS", PU_CACHE));
+        }
         else
-            V_DrawPatch((ORIGWIDTH - SHORT(lnames[wbs->next]->width))/2, // CHANGED FOR HIRES
-                    y, lnames[wbs->next]);
+        {
+            if(font_shadow)
+                V_DrawPatchWithShadow((ORIGWIDTH - SHORT(lnames[wbs->next]->width))/2,
+                        y, lnames[wbs->next], false);
+            else
+                V_DrawPatch((ORIGWIDTH - SHORT(lnames[wbs->next]->width))/2, // CHANGED FOR HIRES
+                        y, lnames[wbs->next]);
+        }
     }
 }
 
@@ -579,7 +628,12 @@ WI_drawOnLnode
 
     if (fits && i<2)
     {
-        V_DrawPatch(lnodes[wbs->epsd][n].x,
+        if(font_shadow)
+            V_DrawPatchWithShadow(lnodes[wbs->epsd][n].x,
+                    lnodes[wbs->epsd][n].y,
+                    c[i], false);
+        else
+            V_DrawPatch(lnodes[wbs->epsd][n].x,
                     lnodes[wbs->epsd][n].y,
                     c[i]);
     }
@@ -748,14 +802,21 @@ WI_drawNum
     while (digits--)
     {
         x -= fontwidth;
-        V_DrawPatch(x, y, num[ n % 10 ]);
+        if(font_shadow)
+            V_DrawPatchWithShadow(x, y, num[ n % 10 ], false);
+        else
+            V_DrawPatch(x, y, num[ n % 10 ]);
         n /= 10;
     }
 
     // draw a minus sign if necessary
     if (neg)
-        V_DrawPatch(x-=8, y, wiminus);
-
+    {
+        if(font_shadow)
+            V_DrawPatchWithShadow(x-=8, y, wiminus, false);
+        else
+            V_DrawPatch(x-=8, y, wiminus);
+    }
     return x;
 
 }
@@ -769,7 +830,10 @@ WI_drawPercent
     if (p < 0)
         return;
 
-    V_DrawPatch(x, y, percent);
+    if(font_shadow)
+        V_DrawPatchWithShadow(x, y, percent, false);
+    else
+        V_DrawPatch(x, y, percent);
     WI_drawNum(x, y, p, -1);
 }
 
@@ -804,14 +868,21 @@ WI_drawTime
 
             // draw
             if (div==60 || t / div)
-                V_DrawPatch(x, y, colon);
-            
+            {
+                if(font_shadow)
+                    V_DrawPatchWithShadow(x, y, colon, true);
+                else
+                    V_DrawPatch(x, y, colon);
+            }
         } while (t / div);
     }
     else
     {
         // "sucks"
-        V_DrawPatch(x - SHORT(sucks->width), y, sucks); 
+        if(font_shadow)
+            V_DrawPatchWithShadow(x - SHORT(sucks->width), y, sucks, false); 
+        else
+            V_DrawPatch(x - SHORT(sucks->width), y, sucks); 
     }
 }
 
@@ -1104,13 +1175,24 @@ void WI_drawDeathmatchStats(void)
     WI_drawLF();
 
     // draw stat titles (top line)
-    V_DrawPatch(DM_TOTALSX-SHORT(total->width)/2,
+    if(font_shadow)
+    {
+        V_DrawPatchWithShadow(DM_TOTALSX-SHORT(total->width)/2,
+                DM_MATRIXY-WI_SPACINGY+10,
+                total, false);
+    
+        V_DrawPatchWithShadow(DM_KILLERSX, DM_KILLERSY, killers, false);
+        V_DrawPatchWithShadow(DM_VICTIMSX, DM_VICTIMSY, victims, false);
+    }
+    else
+    {
+        V_DrawPatch(DM_TOTALSX-SHORT(total->width)/2,
                 DM_MATRIXY-WI_SPACINGY+10,
                 total);
     
-    V_DrawPatch(DM_KILLERSX, DM_KILLERSY, killers);
-    V_DrawPatch(DM_VICTIMSX, DM_VICTIMSY, victims);
-
+        V_DrawPatch(DM_KILLERSX, DM_KILLERSY, killers);
+        V_DrawPatch(DM_VICTIMSX, DM_VICTIMSY, victims);
+    }
     // draw P?
     x = DM_MATRIXX + DM_SPACINGX;
     y = DM_MATRIXY;
@@ -1119,23 +1201,49 @@ void WI_drawDeathmatchStats(void)
     {
         if (playeringame[i])
         {
-            V_DrawPatch(x-SHORT(p[i]->width)/2,
+            if(font_shadow)
+            {
+                V_DrawPatchWithShadow(x-SHORT(p[i]->width)/2,
+                        DM_MATRIXY - WI_SPACINGY,
+                        p[i], false);
+            
+                V_DrawPatchWithShadow(DM_MATRIXX-SHORT(p[i]->width)/2,
+                        y,
+                        p[i], false);
+            }
+            else
+            {
+                V_DrawPatch(x-SHORT(p[i]->width)/2,
                         DM_MATRIXY - WI_SPACINGY,
                         p[i]);
             
-            V_DrawPatch(DM_MATRIXX-SHORT(p[i]->width)/2,
+                V_DrawPatch(DM_MATRIXX-SHORT(p[i]->width)/2,
                         y,
                         p[i]);
+            }
 
             if (i == me)
             {
-                V_DrawPatch(x-SHORT(p[i]->width)/2,
+                if(font_shadow)
+                {
+                    V_DrawPatchWithShadow(x-SHORT(p[i]->width)/2,
+                            DM_MATRIXY - WI_SPACINGY,
+                            bstar, false);
+
+                    V_DrawPatchWithShadow(DM_MATRIXX-SHORT(p[i]->width)/2,
+                            y,
+                            star, false);
+                }
+                else
+                {
+                    V_DrawPatch(x-SHORT(p[i]->width)/2,
                             DM_MATRIXY - WI_SPACINGY,
                             bstar);
 
-                V_DrawPatch(DM_MATRIXX-SHORT(p[i]->width)/2,
+                    V_DrawPatch(DM_MATRIXX-SHORT(p[i]->width)/2,
                             y,
                             star);
+                }
             }
         }
         else
@@ -1371,19 +1479,38 @@ void WI_drawNetgameStats(void)
     WI_drawLF();
 
     // draw stat titles (top line)
-    V_DrawPatch(NG_STATSX+NG_SPACINGX-SHORT(kills->width),
+    if(font_shadow)
+    {
+        V_DrawPatchWithShadow(NG_STATSX+NG_SPACINGX-SHORT(kills->width),
+                NG_STATSY, kills, false);
+
+        V_DrawPatchWithShadow(NG_STATSX+2*NG_SPACINGX-SHORT(items->width),
+                NG_STATSY, items, false);
+
+        V_DrawPatchWithShadow(NG_STATSX+3*NG_SPACINGX-SHORT(secret->width),
+                NG_STATSY, secret, false);
+    }
+    else
+    {
+        V_DrawPatch(NG_STATSX+NG_SPACINGX-SHORT(kills->width),
                 NG_STATSY, kills);
 
-    V_DrawPatch(NG_STATSX+2*NG_SPACINGX-SHORT(items->width),
+        V_DrawPatch(NG_STATSX+2*NG_SPACINGX-SHORT(items->width),
                 NG_STATSY, items);
 
-    V_DrawPatch(NG_STATSX+3*NG_SPACINGX-SHORT(secret->width),
+        V_DrawPatch(NG_STATSX+3*NG_SPACINGX-SHORT(secret->width),
                 NG_STATSY, secret);
-    
-    if (dofrags)
-        V_DrawPatch(NG_STATSX+4*NG_SPACINGX-SHORT(frags->width),
-                    NG_STATSY, frags);
+    }
 
+    if (dofrags)
+    {
+        if(font_shadow)
+            V_DrawPatchWithShadow(NG_STATSX+4*NG_SPACINGX-SHORT(frags->width),
+                    NG_STATSY, frags, false);
+        else
+            V_DrawPatch(NG_STATSX+4*NG_SPACINGX-SHORT(frags->width),
+                    NG_STATSY, frags);
+    }
     // draw stats
     y = NG_STATSY + SHORT(kills->height);
 
@@ -1393,10 +1520,19 @@ void WI_drawNetgameStats(void)
             continue;
 
         x = NG_STATSX;
-        V_DrawPatch(x-SHORT(p[i]->width), y, p[i]);
+
+        if(font_shadow)
+            V_DrawPatchWithShadow(x-SHORT(p[i]->width), y, p[i], false);
+        else
+            V_DrawPatch(x-SHORT(p[i]->width), y, p[i]);
 
         if (i == me)
-            V_DrawPatch(x-SHORT(p[i]->width), y, star);
+        {
+            if(font_shadow)
+                V_DrawPatchWithShadow(x-SHORT(p[i]->width), y, star, false);
+            else
+                V_DrawPatch(x-SHORT(p[i]->width), y, star);
+        }
 
         x += NG_SPACINGX;
         WI_drawPercent(x-pwidth, y+10, cnt_kills[i]);
@@ -1547,26 +1683,41 @@ void WI_drawStats(void)
 
     WI_drawLF();
 
-    V_DrawPatch(SP_STATSX, SP_STATSY, kills);
+    if(font_shadow)
+        V_DrawPatchWithShadow(SP_STATSX, SP_STATSY, kills, false);
+    else
+        V_DrawPatch(SP_STATSX, SP_STATSY, kills);
     // CHANGED FOR HIRES
     WI_drawPercent(ORIGWIDTH - SP_STATSX, SP_STATSY, cnt_kills[0]);
 
-    V_DrawPatch(SP_STATSX, SP_STATSY+lh, items);
+    if(font_shadow)
+        V_DrawPatchWithShadow(SP_STATSX, SP_STATSY+lh, items, false);
+    else
+        V_DrawPatch(SP_STATSX, SP_STATSY+lh, items);
     // CHANGED FOR HIRES
     WI_drawPercent(ORIGWIDTH - SP_STATSX, SP_STATSY+lh, cnt_items[0]);
 
-    V_DrawPatch(SP_STATSX, SP_STATSY+2*lh, sp_secret);
+    if(font_shadow)
+        V_DrawPatchWithShadow(SP_STATSX, SP_STATSY+2*lh, sp_secret, false);
+    else
+        V_DrawPatch(SP_STATSX, SP_STATSY+2*lh, sp_secret);
     // CHANGED FOR HIRES
     WI_drawPercent(ORIGWIDTH - SP_STATSX, SP_STATSY+2*lh, cnt_secret[0]);
 
-    V_DrawPatch(SP_TIMEX, SP_TIMEY, timepatch);
+    if(font_shadow)
+        V_DrawPatchWithShadow(SP_TIMEX, SP_TIMEY, timepatch, false);
+    else
+        V_DrawPatch(SP_TIMEX, SP_TIMEY, timepatch);
     // CHANGED FOR HIRES
     WI_drawTime(ORIGWIDTH/2 - SP_TIMEX, SP_TIMEY, cnt_time);
 
     if (wbs->epsd < 3 && !beta_style)
     {
         // CHANGED FOR HIRES
-        V_DrawPatch(ORIGWIDTH/2 + SP_TIMEX, SP_TIMEY, par);
+        if(font_shadow)
+            V_DrawPatchWithShadow(ORIGWIDTH/2 + SP_TIMEX, SP_TIMEY, par, false);
+        else
+            V_DrawPatch(ORIGWIDTH/2 + SP_TIMEX, SP_TIMEY, par);
         // CHANGED FOR HIRES
         WI_drawTime(ORIGWIDTH - SP_TIMEX, SP_TIMEY, cnt_par);
     }
@@ -1668,7 +1819,7 @@ static void WI_loadUnloadData(load_callback_t callback)
     {
         for (i=0 ; i<9 ; i++)
         {
-            DEH_snprintf(name, 9, "NWILV%2.2d", i);
+            M_snprintf(name, 9, "NWILV%2.2d", i);
             callback(name, &lnames[i]);
         }
     }
@@ -1676,7 +1827,7 @@ static void WI_loadUnloadData(load_callback_t callback)
     {
         for (i=0 ; i<NUMCMAPS ; i++)
         {
-            DEH_snprintf(name, 9, "CWILV%2.2d", i);
+            M_snprintf(name, 9, "CWILV%2.2d", i);
             callback(name, &lnames[i]);
         }
     }
@@ -1685,34 +1836,34 @@ static void WI_loadUnloadData(load_callback_t callback)
         for (i=0 ; i<NUMMAPS ; i++)
         {
             if(beta_style && gameepisode == 1)
-                DEH_snprintf(name, 9, "WIBLV0%d", i);
+                M_snprintf(name, 9, "WIBLV0%d", i);
             else
-                DEH_snprintf(name, 9, "WILV%d%d", wbs->epsd, i);
+                M_snprintf(name, 9, "WILV%d%d", wbs->epsd, i);
             callback(name, &lnames[i]);
         }
 
         if(beta_style)
         {
             // you are here
-            callback(DEH_String("WIBURH0"), &byah[0]);
+            callback("WIBURH0", &byah[0]);
 
             // you are here (alt.)
-            callback(DEH_String("WIBURH0"), &byah[1]);
+            callback("WIBURH0", &byah[1]);
         }
         else
         {
             // you are here
-            callback(DEH_String("WIURH0"), &yah[0]);
+            callback("WIURH0", &yah[0]);
 
             // you are here (alt.)
-            callback(DEH_String("WIURH1"), &yah[1]);
+            callback("WIURH1", &yah[1]);
         }
 
         // splat
         if(beta_style)
-            callback(DEH_String("WIUWH0"), &splat[0]);
+            callback("WIUWH0", &splat[0]);
         else
-            callback(DEH_String("WISPLAT"), &splat[0]);
+            callback("WISPLAT", &splat[0]);
 
         if (wbs->epsd < 3)
         {
@@ -1725,7 +1876,7 @@ static void WI_loadUnloadData(load_callback_t callback)
                     if (wbs->epsd != 1 || j != 8)
                     {
                         // animations
-                        DEH_snprintf(name, 9, "WIA%d%.2d%.2d", wbs->epsd, j, i);
+                        M_snprintf(name, 9, "WIA%d%.2d%.2d", wbs->epsd, j, i);
                         callback(name, &a->p[i]);
                     }
                     else
@@ -1741,79 +1892,79 @@ static void WI_loadUnloadData(load_callback_t callback)
     // More hacks on minus sign.
     if (fsize != 10396254 && fsize != 10399316 && fsize != 10401760 && fsize != 4274218 &&
             fsize != 4225504 && fsize != 4225460 && fsize != 4207819)
-        callback(DEH_String("WIMINUS"), &wiminus);
+        callback("WIMINUS", &wiminus);
 
     for (i=0;i<10;i++)
     {
          // numbers 0-9
-        DEH_snprintf(name, 9, "WINUM%d", i);
+        M_snprintf(name, 9, "WINUM%d", i);
         callback(name, &num[i]);
     }
 
     // percent sign
-    callback(DEH_String("WIPCNT"), &percent);
+    callback("WIPCNT", &percent);
 
     // "finished"
-    callback(DEH_String("WIF"), &finished);
+    callback("WIF", &finished);
 
     // "entering"
-    callback(DEH_String("WIENTER"), &entering);
+    callback("WIENTER", &entering);
 
     // "kills"
-    callback(DEH_String("WIOSTK"), &kills);
+    callback("WIOSTK", &kills);
 
     // "scrt"
-    callback(DEH_String("WIOSTS"), &secret);
+    callback("WIOSTS", &secret);
 
      // "secret"
-    callback(DEH_String("WISCRT2"), &sp_secret);
+    callback("WISCRT2", &sp_secret);
 
     // french wad uses WIOBJ (?)
-    if (W_CheckNumForName(DEH_String("WIOBJ")) >= 0)
+    if (W_CheckNumForName("WIOBJ") >= 0)
     {
             // "items"
             if (netgame && !deathmatch)
-                callback(DEH_String("WIOBJ"), &items);
+                callback("WIOBJ", &items);
             else
-                callback(DEH_String("WIOSTI"), &items);
+                callback("WIOSTI", &items);
     }
     else
     {
-        callback(DEH_String("WIOSTI"), &items);
+        callback("WIOSTI", &items);
     }
 
     // "frgs"
-    callback(DEH_String("WIFRGS"), &frags);
+    callback("WIFRGS", &frags);
 
     // ":"
-    callback(DEH_String("WICOLON"), &colon);
+    callback("WICOLON", &colon);
 
     // "time"
-    callback(DEH_String("WITIME"), &timepatch);
+    callback("WITIME", &timepatch);
 
     // "sucks"
-    callback(DEH_String("WISUCKS"), &sucks);
+    callback("WISUCKS", &sucks);
 
     // "par"
-    callback(DEH_String("WIPAR"), &par);
+    callback("WIPAR", &par);
 
     // "killers" (vertical)
-    callback(DEH_String("WIKILRS"), &killers);
+    callback("WIKILRS", &killers);
 
     // "victims" (horiz)
-    callback(DEH_String("WIVCTMS"), &victims);
+    callback("WIVCTMS", &victims);
 
     // "total"
-    callback(DEH_String("WIMSTT"), &total);
+    callback("WIMSTT", &total);
 
     for (i=0 ; i<MAXPLAYERS ; i++)
     {
         // "1,2,3,4"
-        DEH_snprintf(name, 9, "STPB%d", i);
+        M_snprintf(name, 9, "STPB%d", i);
         callback(name, &p[i]);
 
         // "1,2,3,4"
-        DEH_snprintf(name, 9, "WIBP%d", i+1);
+        M_snprintf(name, 9, "WIBP%d", i+1);
         callback(name, &bp[i]);
     }
 
@@ -1821,20 +1972,20 @@ static void WI_loadUnloadData(load_callback_t callback)
 
     if (gamemode == commercial)
     {
-        M_StringCopy(name, DEH_String("INTERPIC"), 9);
+        M_StringCopy(name, "INTERPIC", 9);
         name[8] = '\0';
     }
     else if (gamemode == retail && wbs->epsd == 3)
     {
-        M_StringCopy(name, DEH_String("INTERPIC"), 9);
+        M_StringCopy(name, "INTERPIC", 9);
         name[8] = '\0';
     }
     else
     {
         if(beta_style && gameepisode == 1)
-            DEH_snprintf(name, 9, "WIBMAP0");
+            M_snprintf(name, 9, "WIBMAP0");
         else
-            DEH_snprintf(name, 9, "WIMAP%d", wbs->epsd);
+            M_snprintf(name, 9, "WIMAP%d", wbs->epsd);
     }
 
     // Draw backdrop and save to a temporary buffer
@@ -1870,10 +2021,10 @@ void WI_loadData(void)
     // them with the status bar code
 
     // your face
-    star = W_CacheLumpName(DEH_String("STFST01"), PU_STATIC);
+    star = W_CacheLumpName("STFST01", PU_STATIC);
 
     // dead face
-    bstar = W_CacheLumpName(DEH_String("STFDEAD0"), PU_STATIC);
+    bstar = W_CacheLumpName("STFDEAD0", PU_STATIC);
 }
 
 static void WI_unloadCallback(char *name, patch_t **variable)

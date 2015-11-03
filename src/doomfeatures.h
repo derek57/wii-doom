@@ -28,9 +28,9 @@
 #define DOOM_FEATURES_H
 
 // Enables wad merging (the '-merge' command line parameter)
-
-//#define FEATURE_WAD_MERGE 1
-
+#ifndef WII
+#define FEATURE_WAD_MERGE 1
+#endif
 // Enables dehacked support ('-deh')
 
 #define FEATURE_DEHACKED 1
@@ -46,8 +46,6 @@
 #define FEATURE_SOUND 1
 
 //#define BOOM_ZONE_HANDLING 1       // FIXME: NOT WORKING FOR LINUX
-
-#define ANIMATED_FLOOR_LIQUIDS 1
 
 #endif /* #ifndef DOOM_FEATURES_H */
 

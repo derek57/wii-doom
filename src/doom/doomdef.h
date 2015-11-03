@@ -228,32 +228,22 @@
 
 #define SBARHEIGHT         (32 * SCREENSCALE)
 
-#define MF2_LOGRAV         0x00000001  // alternate gravity setting
-#define MF2_FLY            0x00000010  // fly mode is active
-#define MF2_BLUEBLOOD      0x00000020  // Object's blood is blue
-#define MF2_GREENBLOOD     0x00000040  // Object's blood is green
-#define MF2_NOTELEPORT     0x00000080  // does not teleport
-#define MF2_RESURRECTING   0x00000400  // Object is a corpse and being resurrected
-#define MF2_ONMOBJ         0x00000800  // mobj is resting on top of another mobj
-#define MF2_FLOATBOB       0x00001000  // Object bobs up and down
-#define MF2_MIRRORED       0x00002000  // object sprite is being displayed mirrored
-#define MF2_FEETARECLIPPED 0x00004000  // a mobj's feet are now being cut
-
-#define MF2_PASSMOBJ       0x00008000  // Enable z block checking.  If on,
-                                       // this flag will allow the mobj to
-                                       // pass over/under other mobjs.
-                                       // FIXME: (was 1000 before)
-
-#define MF2_FALLING        0x00020000
-#define MF2_NOFOOTCLIP     0x00040000  // Object's feet won't be clipped in liquid
-#define MF2_NOLIQUIDBOB    0x00080000  // use float bobbing z movement
-#define MF2_SHADOW         0x00400000  // Object has a shadow
-#define MF2_DRAWFIRST      0x00800000  // Object is drawn first
-#define MF2_SMOKETRAIL     0x02000000  // Object has smoke trail
-#define MF2_DONOTMAP       0x04000000  // Object's thing triangle is not displayed in automap
-
-
 #define TRANSLUCENT_HUD    11
+
+// Index of the special effects (INVUL inverse) map.
+#define INVERSECOLORMAP    32
+
+#define MOUSE_WHEELUP      8
+#define MOUSE_WHEELDOWN    9
+
+// phares 3/20/98:
+//
+// Player friction is variable, based on controlling
+// linedefs. More friction can create mud, sludge,
+// magnetized floors, etc. Less friction can create ice.
+#define MORE_FRICTION_MOMENTUM  15000   // mud factor based on momentum
+#define ORIG_FRICTION           0xE800  // original value
+#define ORIG_FRICTION_FACTOR    2048    // original value
 
 //
 // Difficulty/skill settings/filters.

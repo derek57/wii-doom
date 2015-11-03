@@ -47,7 +47,7 @@
 #include "config.h"
 #endif
 
-#include "deh_str.h"
+#include "d_deh.h"
 
 #include "doom/doomdef.h"
 
@@ -96,7 +96,7 @@ byte *zone_mem;
 
 int memory_size;
 
-static boolean already_quitting = false;
+static boolean already_quitting;
 
 static atexit_listentry_t *exit_funcs = NULL;
 

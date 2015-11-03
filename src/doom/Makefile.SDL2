@@ -89,7 +89,8 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 LIBRARIES = $(noinst_LIBRARIES)
 AR = ar
-ARFLAGS = cru
+ARFLAGS = cr
+#ARFLAGS = cru
 AM_V_AR = $(am__v_AR_$(V))
 am__v_AR_ = $(am__v_AR_$(AM_DEFAULT_VERBOSITY))
 am__v_AR_0 = @echo "  AR      " $@;
@@ -101,8 +102,8 @@ am__objects_1 = am_map.$(OBJEXT) d_items.$(OBJEXT) d_main.$(OBJEXT) \
 	dstrings.$(OBJEXT) f_finale.$(OBJEXT) f_wipe.$(OBJEXT) \
 	g_game.$(OBJEXT) hu_lib.$(OBJEXT) hu_stuff.$(OBJEXT) \
 	info.$(OBJEXT) m_menu.$(OBJEXT) m_random.$(OBJEXT) \
-	p_ceilng.$(OBJEXT) p_doors.$(OBJEXT) p_enemy.$(OBJEXT) \
-	p_floor.$(OBJEXT) p_inter.$(OBJEXT) p_lights.$(OBJEXT) \
+	p_ceilng.$(OBJEXT) p_doors.$(OBJEXT) p_enemy.$(OBJEXT) p_fix.$(OBJEXT)\
+	p_floor.$(OBJEXT) p_genlin.$(OBJEXT) p_inter.$(OBJEXT) p_lights.$(OBJEXT) \
 	p_map.$(OBJEXT) p_maputl.$(OBJEXT) p_mobj.$(OBJEXT) \
 	p_plats.$(OBJEXT) p_pspr.$(OBJEXT) p_saveg.$(OBJEXT) \
 	p_setup.$(OBJEXT) p_sight.$(OBJEXT) p_spec.$(OBJEXT) \
@@ -112,11 +113,7 @@ am__objects_1 = am_map.$(OBJEXT) d_items.$(OBJEXT) d_main.$(OBJEXT) \
 	r_segs.$(OBJEXT) r_sky.$(OBJEXT) r_things.$(OBJEXT) \
 	s_sound.$(OBJEXT) sounds.$(OBJEXT) statdump.$(OBJEXT) \
 	st_lib.$(OBJEXT) st_stuff.$(OBJEXT) wi_stuff.$(OBJEXT)
-am__objects_2 = deh_ammo.$(OBJEXT) deh_bexstr.$(OBJEXT) \
-	deh_cheat.$(OBJEXT) deh_doom.$(OBJEXT) deh_frame.$(OBJEXT) \
-	deh_misc.$(OBJEXT) deh_ptr.$(OBJEXT) deh_sound.$(OBJEXT) \
-	deh_thing.$(OBJEXT) deh_weapon.$(OBJEXT)
-am_libdoom_a_OBJECTS = $(am__objects_1) $(am__objects_2)
+am_libdoom_a_OBJECTS = $(am__objects_1)
 libdoom_a_OBJECTS = $(am_libdoom_a_OBJECTS)
 AM_V_P = $(am__v_P_$(V))
 am__v_P_ = $(am__v_P_$(AM_DEFAULT_VERBOSITY))
@@ -225,7 +222,7 @@ PROGRAM_PREFIX = chocolate-
 RANLIB = ranlib
 SDL2_CONFIG = pkg-config sdl2
 SDLMIXER_LIBS =  -lSDL2_mixer
-SDLNET_LIBS =  -lSDL2_net
+#SDLNET_LIBS =  -lSDL2_net
 SDL_CFLAGS = -D_REENTRANT -I/usr/local/include/SDL2 
 SDL_LIBS = -L/usr/local/lib -Wl,-rpath,/usr/local/lib -lSDL2 
 SDLMIXER_CFLAGS = 
@@ -247,6 +244,7 @@ am__leading_dot = .
 am__quote = 
 am__tar = $${TAR-tar} chof - "$$tardir"
 am__untar = $${TAR-tar} xf -
+bashcompletiondir = ${datarootdir}/bash-completion/completions
 bindir = ${exec_prefix}/bin
 build_alias = 
 builddir = .
@@ -264,6 +262,7 @@ libdir = ${exec_prefix}/lib
 libexecdir = ${exec_prefix}/libexec
 localedir = ${datarootdir}/locale
 localstatedir = ${prefix}/var
+mandir = ${datarootdir}/man
 mkdir_p = $(MKDIR_P)
 oldincludedir = /usr/include
 pdfdir = ${docdir}
@@ -304,7 +303,9 @@ m_random.c         m_random.h   \
 p_ceilng.c                      \
 p_doors.c                       \
 p_enemy.c                       \
+p_fix.c            p_fix.h      \
 p_floor.c                       \
+p_genlin.c                      \
 p_inter.c          p_inter.h    \
 p_lights.c                      \
                    p_local.h    \
@@ -339,20 +340,7 @@ st_lib.c           st_lib.h     \
 st_stuff.c         st_stuff.h   \
 wi_stuff.c         wi_stuff.h
 
-FEATURE_DEHACKED_SOURCE_FILES = \
-deh_ammo.c                                 \
-deh_bexstr.c                               \
-deh_cheat.c                                \
-deh_doom.c                                 \
-deh_frame.c                                \
-deh_misc.c           deh_misc.h            \
-deh_ptr.c                                  \
-deh_sound.c                                \
-deh_thing.c                                \
-deh_weapon.c
-
-libdoom_a_SOURCES = $(SOURCE_FILES)                   \
-                    $(FEATURE_DEHACKED_SOURCE_FILES)
+libdoom_a_SOURCES = $(SOURCE_FILES)
 
 all: all-am
 
@@ -385,16 +373,6 @@ include ./$(DEPDIR)/am_map.Po
 include ./$(DEPDIR)/d_items.Po
 include ./$(DEPDIR)/d_main.Po
 include ./$(DEPDIR)/d_net.Po
-include ./$(DEPDIR)/deh_ammo.Po
-include ./$(DEPDIR)/deh_bexstr.Po
-include ./$(DEPDIR)/deh_cheat.Po
-include ./$(DEPDIR)/deh_doom.Po
-include ./$(DEPDIR)/deh_frame.Po
-include ./$(DEPDIR)/deh_misc.Po
-include ./$(DEPDIR)/deh_ptr.Po
-include ./$(DEPDIR)/deh_sound.Po
-include ./$(DEPDIR)/deh_thing.Po
-include ./$(DEPDIR)/deh_weapon.Po
 include ./$(DEPDIR)/doomdef.Po
 include ./$(DEPDIR)/doomstat.Po
 include ./$(DEPDIR)/dstrings.Po
@@ -409,7 +387,9 @@ include ./$(DEPDIR)/m_random.Po
 include ./$(DEPDIR)/p_ceilng.Po
 include ./$(DEPDIR)/p_doors.Po
 include ./$(DEPDIR)/p_enemy.Po
+#include ./$(DEPDIR)/p_fix.Po
 include ./$(DEPDIR)/p_floor.Po
+include ./$(DEPDIR)/p_genlin.Po
 include ./$(DEPDIR)/p_inter.Po
 include ./$(DEPDIR)/p_lights.Po
 include ./$(DEPDIR)/p_map.Po
@@ -610,6 +590,8 @@ install-info: install-info-am
 
 install-info-am:
 
+install-man:
+
 install-pdf: install-pdf-am
 
 install-pdf-am:
@@ -647,7 +629,7 @@ uninstall-am:
 	dvi-am html html-am info info-am install install-am \
 	install-data install-data-am install-dvi install-dvi-am \
 	install-exec install-exec-am install-html install-html-am \
-	install-info install-info-am install-pdf \
+	install-info install-info-am install-man install-pdf \
 	install-pdf-am install-ps install-ps-am install-strip \
 	installcheck installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-compile \

@@ -255,8 +255,18 @@ typedef enum
     sfx_step3,
     sfx_water,
     sfx_lava,
+
+    // [crispy] play DSSECRET if available
     sfx_secret,
+
     sfx_jump,
+
+    // killough 11/98: dog sounds
+    sfx_dgsit,
+    sfx_dgatk,
+    sfx_dgact,
+    sfx_dgdth,
+    sfx_dgpain,
 
     NUMSFX
 } sfxenum_t;

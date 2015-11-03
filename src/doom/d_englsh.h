@@ -72,11 +72,37 @@
  
 #define DETAILHI       "High detail"
 #define DETAILLO       "Low detail"
-#define GAMMALVL0      "Gamma correction OFF"
-#define GAMMALVL1      "Gamma correction level 1"
-#define GAMMALVL2      "Gamma correction level 2"
-#define GAMMALVL3      "Gamma correction level 3"
-#define GAMMALVL4      "Gamma correction level 4"
+#define GAMMALVL0      "Gamma correction level 0.50"
+#define GAMMALVL1      "Gamma correction level 0.55"
+#define GAMMALVL2      "Gamma correction level 0.60"
+#define GAMMALVL3      "Gamma correction level 0.65"
+#define GAMMALVL4      "Gamma correction level 0.70"
+#define GAMMALVL5      "Gamma correction level 0.75 (DOOMRETRO)"
+#define GAMMALVL6      "Gamma correction level 0.80"
+#define GAMMALVL7      "Gamma correction level 0.85"
+#define GAMMALVL8      "Gamma correction level 0.90"
+#define GAMMALVL9      "Gamma correction level 0.95"
+#define GAMMALVL10     "Gamma correction level 1.00 (DOS DOOM)"
+#define GAMMALVL11     "Gamma correction level 1.05"
+#define GAMMALVL12     "Gamma correction level 1.10"
+#define GAMMALVL13     "Gamma correction level 1.15"
+#define GAMMALVL14     "Gamma correction level 1.20"
+#define GAMMALVL15     "Gamma correction level 1.25"
+#define GAMMALVL16     "Gamma correction level 1.30"
+#define GAMMALVL17     "Gamma correction level 1.35"
+#define GAMMALVL18     "Gamma correction level 1.40"
+#define GAMMALVL19     "Gamma correction level 1.45"
+#define GAMMALVL20     "Gamma correction level 1.50"
+#define GAMMALVL21     "Gamma correction level 1.55"
+#define GAMMALVL22     "Gamma correction level 1.60"
+#define GAMMALVL23     "Gamma correction level 1.65"
+#define GAMMALVL24     "Gamma correction level 1.70"
+#define GAMMALVL25     "Gamma correction level 1.75"
+#define GAMMALVL26     "Gamma correction level 1.80"
+#define GAMMALVL27     "Gamma correction level 1.85"
+#define GAMMALVL28     "Gamma correction level 1.90"
+#define GAMMALVL29     "Gamma correction level 1.95"
+#define GAMMALVL30     "Gamma correction level 2.00"
 #define EMPTYSTRING    "empty slot"
 
 //
@@ -143,11 +169,16 @@
 //        G_game.C
 //
 #define GGSAVED        "game saved."
+#define GSCREENSHOT    "screen shot"        // DOOMRETRO
 
 //
 //        HU_stuff.C
 //
 #define HUSTR_MSGU     "[Message unsent]"
+
+#define HUSTR_31_BFG   "IDKFA"
+#define HUSTR_32_BFG   "Keen"
+#define HUSTR_33_BFG   "Betray"
 
 #define HUSTR_E1M1     "E1M1: Hangar"
 #define HUSTR_E1M2     "E1M2: Nuclear Plant"
@@ -307,6 +338,28 @@
 #define NHUSTR_8       "level 8: Tomb of Malevolence"
 #define NHUSTR_9       "level 9: March of the Demons"
 
+#define MHUSTR_1        "level 1: Attack"
+#define MHUSTR_2        "level 2: Canyon"
+#define MHUSTR_3        "level 3: The Catwalk"
+#define MHUSTR_4        "level 4: The Combine"
+#define MHUSTR_5        "level 5: The Fistula"
+#define MHUSTR_6        "level 6: The Garrison"
+#define MHUSTR_7        "level 7: Titan Manor"
+#define MHUSTR_8        "level 8: Paradox"
+#define MHUSTR_9        "level 9: Subspace"
+#define MHUSTR_10        "level 10: Subterra"
+#define MHUSTR_11        "level 11: Trapped On Titan"
+#define MHUSTR_12        "level 12: Virgil's Lead"
+#define MHUSTR_13        "level 13: Minos' Judgement"
+#define MHUSTR_14        "level 14: Bloodsea Keep"
+#define MHUSTR_15        "level 15: Mephisto's Maosoleum"
+#define MHUSTR_16        "level 16: Nessus"
+#define MHUSTR_17        "level 17: Geryon"
+#define MHUSTR_18        "level 18: Vesperas"
+#define MHUSTR_19        "level 19: Black Tower"
+#define MHUSTR_20        "level 20: The Express Elevator To Hell"
+#define MHUSTR_21        "level 21: Bad Dream"
+
 #define HUSTR_CHATMACRO1        "I'm ready to kick butt!"
 #define HUSTR_CHATMACRO2        "I'm OK."
 #define HUSTR_CHATMACRO3        "I'm not looking too good!"
@@ -326,8 +379,6 @@
 
 #define HUSTR_MESSAGESENT       "[Message Sent]"
 
-#define HUSTR_SECRETFOUND       "A secret is revealed!"
-
 // The following should NOT be changed unless it seems
 // just AWFULLY necessary
 
@@ -335,11 +386,13 @@
 #define HUSTR_PLRINDIGO         "Indigo: "
 #define HUSTR_PLRBROWN          "Brown: "
 #define HUSTR_PLRRED            "Red: "
-
+/*
 #define HUSTR_KEYGREEN          'g'
 #define HUSTR_KEYINDIGO         'i'
 #define HUSTR_KEYBROWN          'b'
 #define HUSTR_KEYRED            'r'
+*/
+#define HUSTR_SECRETFOUND       "A secret is revealed!"
 
 //
 //        AM_map.C
@@ -732,5 +785,47 @@
 #define CC_CYBER      "THE CYBERDEMON"
 #define CC_HERO       "OUR HERO"
 
+// [BH] Banner strings. Here to avoid errors in DeHackEd parsing. Otherwise ignored.
+#define BANNER1                 "                         " \
+                                "DOOM 2: Hell on Earth v%i.%i" \
+                                "                           "
+#define BANNER2                 "                            " \
+                                "DOOM Shareware Startup v%i.%i" \
+                                "                           "
+#define BANNER3                 "                            " \
+                                "DOOM Registered Startup v%i.%i" \
+                                "                           "
+#define BANNER4                 "                          " \
+                                "DOOM System Startup v%i.%i" \
+                                "                          "
+#define BANNER5                 "                         " \
+                                "The Ultimate DOOM Startup v%i.%i" \
+                                "                        "
+#define BANNER6                 "                     " \
+                                "DOOM 2: TNT - Evilution v%i.%i" \
+                                "                           "
+#define BANNER7                 "                   " \
+                                "DOOM 2: Plutonia Experiment v%i.%i" \
+                                "                           "
+
+// [BH] Copyright strings. Here to avoid errors in DeHackEd parsing. Otherwise ignored.
+#define COPYRIGHT1 \
+    "===========================================================================\n" \
+    "ATTENTION:  This version of DOOM has been modified.  If you would like to\n" \
+    "get a copy of the original game, call 1-800-IDGAMES or see the readme file.\n" \
+    "        You will not receive technical support for modified games.\n" \
+    "                      press enter to continue\n" \
+    "===========================================================================\n"
+
+#define COPYRIGHT2 \
+    "===========================================================================\n" \
+    "                 Commercial product - do not distribute!\n" \
+    "         Please report software piracy to the SPA: 1-800-388-PIR8\n" \
+    "===========================================================================\n"
+
+#define COPYRIGHT3 \
+    "===========================================================================\n" \
+    "                                Shareware!\n" \
+    "===========================================================================\n"
 
 #endif

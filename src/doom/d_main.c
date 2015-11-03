@@ -58,11 +58,9 @@
 #include "d_net.h"
 
 #ifdef WII
-#include "../deh_main.h"
-#include "../deh_str.h"
+#include "../d_deh.h"
 #else
-#include "deh_main.h"
-#include "deh_str.h"
+#include "d_deh.h"
 #endif
 
 #include "doomdef.h"
@@ -103,6 +101,7 @@
 #else
 #include "i_joystick.h"
 #include "i_sdlmusic.h"
+#include "i_swap.h"
 #include "i_system.h"
 #include "i_timer.h"
 #include "i_video.h"
@@ -155,6 +154,10 @@
 #include "../z_zone.h"
 #else
 #include "z_zone.h"
+#endif
+
+#if !defined(MAX_PATH)
+#define MAX_PATH        260
 #endif
 
 
@@ -243,6 +246,8 @@ extern int      showMessages;
 extern int      screenSize;
 extern int      sound_channels;
 extern int      startlump;
+extern int      viewheight2;
+extern int      correct_lost_soul_bounce;
 
 extern boolean  merge;
 extern boolean  BorderNeedRefresh;
@@ -277,6 +282,9 @@ skill_t         startskill;
 gamestate_t     wipegamestate = GS_DEMOSCREEN;
 
 
+void (*P_BloodSplatSpawner)(fixed_t, fixed_t, int, int, mobj_t *);
+
+
 //
 // D_ProcessEvents
 // Send all the events of the given timestamp down the responder chain
@@ -302,12 +310,11 @@ void D_ProcessEvents (void)
 // D_Display
 //  draw current display, possibly wiping it from the previous
 //
-extern int                 viewheight2;
 
 void D_Display (void)
 {
-    static  boolean             viewactivestate = false;
-    static  boolean             menuactivestate = false;
+    static  boolean             viewactivestate;
+    static  boolean             menuactivestate;
     static  boolean             inhelpscreensstate = false;
     static  boolean             fullscreen = false;
     static  char                menushade; // [crispy] shade menu background
@@ -318,15 +325,15 @@ void D_Display (void)
     int                         tics;
     int                         wipestart;
     int                         y;
-    boolean			redrawsbar;
-
+    boolean                     redrawsbar;
+/*
 #ifndef WII
     if (nodrawers)
-	return;                    // for comparative timing / profiling
+        return;                    // for comparative timing / profiling
 #endif
-		
+*/                
     // [crispy] catch SlopeDiv overflows
-    SlopeDiv = SlopeDivCrispy;
+//    SlopeDiv = SlopeDivCrispy;
 
     redrawsbar = false;
     
@@ -352,7 +359,7 @@ void D_Display (void)
             display_fps = 0;        // ...UPON WIPING SCREEN WITH ENABLED DISPLAY TICKER
 
         wipe = true;
-	wipe_StartScreen();
+        wipe_StartScreen();
     }
     else
     {
@@ -378,7 +385,7 @@ void D_Display (void)
         if (automapactive)
             AM_Drawer ();
         if (wipe || (scaledviewheight != (200 << hires) && fullscreen) ||
-                disk_indicator == disk_dirty) // HIRES
+                disk_indicator == disk_dirty || (automapactive && screenSize < 8)) // HIRES
             redrawsbar = true;
         if (inhelpscreensstate && !inhelpscreens)
             redrawsbar = true;              // just put away the help screen
@@ -413,7 +420,7 @@ void D_Display (void)
 
     // clean up border stuff
     if (gamestate != oldgamestate && gamestate != GS_LEVEL)
-        I_SetPalette (W_CacheLumpName (DEH_String("PLAYPAL"),PU_CACHE));
+        I_SetPalette (W_CacheLumpName ("PLAYPAL",PU_CACHE));
 
     // see if the border needs to be initially drawn
     if (gamestate == GS_LEVEL /*&& oldgamestate != GS_LEVEL*/)
@@ -463,12 +470,21 @@ void D_Display (void)
     // draw the automap and HUD on top of everything else
     if (automapactive && am_overlay)
     {
-	AM_Drawer ();
-	HU_Drawer ();
+        AM_Drawer ();
+        HU_Drawer ();
 
-	// [crispy] force redraw of status bar and border
-	viewactivestate = false;
-	inhelpscreensstate = true;
+        if(usergame)
+        {
+            if(screenSize < 8)
+            {
+                if(am_overlay)
+                    ST_doRefresh();
+            }
+        }
+
+        // [crispy] force redraw of status bar and border
+        viewactivestate = false;
+        inhelpscreensstate = true;
 
         R_DrawViewBorder ();    // erase old menu stuff
 
@@ -480,20 +496,20 @@ void D_Display (void)
     }
 
     // [crispy] back to Vanilla SlopeDiv
-    SlopeDiv = SlopeDivVanilla;
+//    SlopeDiv = SlopeDivVanilla;
 
     // [crispy] shade background when a menu is active or the game is paused
     if ((paused || menuactive) && background_type == 1)
     {
         static int firsttic;
 
-	if (!automapactive || (automapactive && overlay_trigger))
-	{
-	    for (y = 0; y < SCREENWIDTH * SCREENHEIGHT; y++)
-	    {
-		I_VideoBuffer[y] = colormaps[0][menushade * 256 + I_VideoBuffer[y]];
-	    }
-	}
+        if (!automapactive || (automapactive && overlay_trigger))
+        {
+            for (y = 0; y < SCREENWIDTH * SCREENHEIGHT; y++)
+            {
+                I_VideoBuffer[y] = colormaps[0][menushade * 256 + I_VideoBuffer[y]];
+            }
+        }
 
         if (menushade < 16 && gametic != firsttic)
         {
@@ -510,7 +526,22 @@ void D_Display (void)
 
     if (!wipe)
         C_Drawer();
+#ifndef WII
+    // draw pause pic
+    if (paused)
+    {
+        patch_t     *patch = W_CacheLumpName("M_PAUSE", PU_CACHE);
 
+        M_DarkBackground();
+
+        if(font_shadow)
+            V_DrawPatchWithShadow((ORIGWIDTH - SHORT(patch->width)) / 2,
+                    viewwindowy / 2 + (viewheight / 2 - SHORT(patch->height)) / 2, patch, false);
+        else
+            V_DrawPatch((ORIGWIDTH - SHORT(patch->width)) / 2,
+                    viewwindowy / 2 + (viewheight / 2 - SHORT(patch->height)) / 2, patch);
+    }
+#endif
     // menus go directly to the screen
     M_Drawer ();          // menu is drawn even on top of everything
     NetUpdate ();         // send out any new accumulation
@@ -537,7 +568,7 @@ void D_Display (void)
         } while (tics <= 0);
 
         wipestart = nowtime;
-	done = wipe_ScreenWipe(wipe_type, tics);
+        done = wipe_ScreenWipe(wipe_type, tics);
         blurred = false;
         C_Drawer();
         I_UpdateNoBlit ();
@@ -557,7 +588,9 @@ void D_Display (void)
 
         if(warped == 1)
         {
+#ifdef WII
             paused = true;
+#endif
             currentMenu = &CheatsDef;
             menuactive = 1;
             itemOn = currentMenu->lastOn;
@@ -605,9 +638,10 @@ boolean D_GrabMouseCallback(void)
 
 void D_DoomLoop (void)
 {
+/*
     if (demorecording)
         G_BeginRecording ();
-
+*/
 #ifdef WII
     if(usb)
     {
@@ -626,7 +660,7 @@ void D_DoomLoop (void)
     TryRunTics();
 
 #ifndef WII
-    I_SetWindowTitle();
+    I_SetWindowTitle(gamedescription);
     I_GraphicsCheckCommandLine();
     I_SetGrabMouseCallback(D_GrabMouseCallback);
     I_InitGraphics();
@@ -640,6 +674,12 @@ void D_DoomLoop (void)
 
     D_StartGameLoop();
 
+    // Set title and up icon. This has to be done
+    // before the call to SDL_SetVideoMode.
+#ifndef WII
+    I_InitWindowTitle();
+    I_InitWindowIcon();
+#endif
     while (1)
     {
 #ifdef WII
@@ -740,7 +780,12 @@ void D_DoAdvanceDemo (void)
         else
             pagetic = 170;
         gamestate = GS_DEMOSCREEN;
-        pagename = DEH_String("TITLEPIC");
+
+        if(nerve_pwad)
+            pagename = "INTERPIC";
+        else
+            pagename = "TITLEPIC";
+
         if ( gamemode == commercial )
         {
             S_StartMusic(mus_dm2ttl);
@@ -751,24 +796,33 @@ void D_DoAdvanceDemo (void)
         }
         break;
       case 1:
+/*
         if(devparm)
-            G_DeferedPlayDemo(DEH_String("demo1"));
+            G_DeferedPlayDemo("demo1");
+*/
         break;
       case 2:
         pagetic = 200;
         gamestate = GS_DEMOSCREEN;
-        pagename = DEH_String("CREDIT");
+        pagename = "CREDIT";
         break;
       case 3:
+/*
         if(devparm)
-            G_DeferedPlayDemo(DEH_String("demo2"));
+            G_DeferedPlayDemo("demo2");
+*/
         break;
       case 4:
         gamestate = GS_DEMOSCREEN;
         if ( gamemode == commercial)
         {
             pagetic = TICRATE * 11;
-            pagename = DEH_String("TITLEPIC");
+
+            if(nerve_pwad)
+                pagename = "INTERPIC";
+            else
+                pagename = "TITLEPIC";
+
             S_StartMusic(mus_dm2ttl);
         }
         else
@@ -776,24 +830,28 @@ void D_DoAdvanceDemo (void)
             pagetic = 200;
 
             if ( gamemode == retail )
-              pagename = DEH_String("CREDIT");
+              pagename = "CREDIT";
             else
             {
                 if(fsize != 12361532)
-                    pagename = DEH_String("HELP2");
+                    pagename = "HELP2";
                 else
-                    pagename = DEH_String("HELP1");
+                    pagename = "HELP1";
             }
         }
         break;
       case 5:
+/*
         if(devparm)
-            G_DeferedPlayDemo(DEH_String("demo3"));
+            G_DeferedPlayDemo("demo3");
+*/
         break;
         // THE DEFINITIVE DOOM Special Edition demo
       case 6:
+/*
         if(devparm)
-            G_DeferedPlayDemo(DEH_String("demo4"));
+            G_DeferedPlayDemo("demo4");
+*/
         break;
     }
 
@@ -873,7 +931,7 @@ static char *GetGameName(char *gamename)
     {
         // Has the banner been replaced?
 
-        deh_sub = DEH_String(banners[i]);
+        deh_sub = banners[i];
         
         if (deh_sub != banners[i])
         {
@@ -984,7 +1042,7 @@ static boolean D_AddFile(char *filename, boolean automatic)
 }
 
 // Load the Chex Quest dehacked file, if we are in Chex mode.
-
+/*
 static void LoadChexDeh(void)
 {
     if (gameversion == exe_chex)
@@ -1116,83 +1174,6 @@ static void LoadIwadDeh(void)
 }
 #endif
 
-// [crispy] support loading MASTERLEVELS.WAD alongside DOOM2.WAD
-static void LoadMasterlevelsWad(void)
-{
-    int i, j;
-
-    if (gamemission == doom2 && modifiedgame)
-    {
-	i = W_GetNumForName("map01");
-	j = W_GetNumForName("map21");
-	if (!strcasecmp(lumpinfo[i]->wad_file->path, "masterlevels.wad") &&
-	    !strcasecmp(lumpinfo[j]->wad_file->path, "masterlevels.wad"))
-	{
-	    gamemission = pack_master;
-	}
-    }
-}
-
-static void LoadNerveWad(void)
-{
-    int i;
-    char lumpname[9];
-
-    if (gamemission != doom2)
-        return;
-
-    if (bfgedition && !modifiedgame)
-    {
-#ifndef WII
-        if (strrchr(iwadfile, DIR_SEPARATOR) != NULL)
-        {
-            char *dir;
-            dir = M_DirName(iwadfile);
-            nervewadfile = M_StringJoin(dir, DIR_SEPARATOR_S, "nerve.wad", NULL);
-            free(dir);
-        }
-        else
-        {
-            nervewadfile = M_StringDuplicate("nerve.wad");
-        }
-
-        if (!M_FileExists(nervewadfile))
-        {
-            free(nervewadfile);
-            nervewadfile = D_FindWADByName("nerve.wad");
-        }
-
-        if (nervewadfile == NULL)
-        {
-            return;
-        }
-
-        D_AddFile(nervewadfile, true);
-#endif
-        // [crispy] rename level name patch lumps out of the way
-        for (i = 0; i < 9; i++)
-        {
-            M_snprintf (lumpname, 9, "CWILV%2.2d", i);
-            lumpinfo[W_GetNumForName(lumpname)]->name[0] = 'N';
-        }
-    }
-    else
-    {
-        i = W_GetNumForName("map01");
-#ifndef WII
-	if (!strcasecmp(lumpinfo[i]->wad_file->path, "nerve.wad"))
-#endif
-	{
-	    gamemission = pack_nerve;
-	    DEH_AddStringReplacement ("TITLEPIC", "INTERPIC");
-	}
-    }
-#ifndef WII
-    if(nervewadfile)
-        nerve_pwad = true;
-#endif
-}
-
 static void LoadHacxDeh(void)
 {
     // If this is the HACX IWAD, we need to load the DEHACKED lump.
@@ -1210,7 +1191,7 @@ static void G_CheckDemoStatusAtExit (void)
 {
     G_CheckDemoStatus();
 }
-
+*/
 #ifndef WII
 static void SetMissionForPackName(char *pack_name)
 {
@@ -1245,6 +1226,116 @@ static void SetMissionForPackName(char *pack_name)
 }
 #endif
 
+#define MAXDEHFILES 16
+
+static char     dehfiles[MAXDEHFILES][MAX_PATH];
+static int      dehfilecount;
+
+static void D_ProcessDehInWad(void)
+{
+    int i;
+
+    if (chexdeh 
+#ifndef WII
+        || M_ParmExists("-nodeh")
+#endif
+       )
+        return;
+
+    for (i = 0; i < numlumps; ++i)
+        if (!strncasecmp(lumpinfo[i]->name, "DEHACKED", 8))
+            ProcessDehFile(NULL, i);
+}
+
+boolean DehFileProcessed(char *path)
+{
+    int i;
+
+    for (i = 0; i < dehfilecount; ++i)
+        if (!strcasecmp(path, dehfiles[i]))
+            return true;
+    return false;
+}
+
+void LoadDehFile(char *path)
+{
+    if (
+#ifndef WII
+        !M_ParmExists("-nodeh") &&
+#endif
+        !HasDehackedLump(path))
+    {
+        char            *dehpath = M_StringReplace(path, ".wad", ".bex");
+
+        if (M_FileExists(dehpath) && !DehFileProcessed(dehpath))
+        {
+            if (fsize == 12361532)
+                chexdeh = true;
+            ProcessDehFile(dehpath, 0);
+            if (dehfilecount < MAXDEHFILES)
+                M_StringCopy(dehfiles[dehfilecount++], dehpath, MAX_PATH);
+        }
+        else
+        {
+            char        *dehpath = M_StringReplace(path, ".wad", ".deh");
+
+            if (M_FileExists(dehpath) && !DehFileProcessed(dehpath))
+            {
+                ProcessDehFile(dehpath, 0);
+                if (dehfilecount < MAXDEHFILES)
+                    M_StringCopy(dehfiles[dehfilecount++], dehpath, MAX_PATH);
+            }
+        }
+    }
+}
+
+boolean D_IsDehFile(char *filename)
+{
+    return (!strcasecmp(filename + strlen(filename) - 4, ".deh")
+        || !strcasecmp(filename + strlen(filename) - 4, ".bex"));
+}
+
+static void D_ProcessDehCommandLine(void)
+{
+#ifndef WII
+    int p = M_CheckParm("-deh");
+
+    if (p || (p = M_CheckParm("-bex")))
+#else
+    if (load_dehacked)
+#endif
+    {
+#ifndef WII
+        boolean        deh = true;
+
+        while (++p < myargc)
+            if (*myargv[p] == '-')
+                deh = (!strcasecmp(myargv[p], "-deh") || !strcasecmp(myargv[p], "-bex"));
+            else if (deh)
+                ProcessDehFile(myargv[p], 0);
+#else
+                ProcessDehFile(dehacked_file, 0);
+#endif
+    }
+}
+
+#ifndef WII
+void PrintGameVersion(void)
+{
+    int i;
+
+    for (i=0; gameversions[i].description != NULL; ++i)
+    {
+        if (gameversions[i].version == gameversion)
+        {
+            C_Printf(CR_GRAY, " Emulating the behavior of the "
+                   "'%s' executable.\n", gameversions[i].description);
+            break;
+        }
+    }
+}
+#endif
+
 //
 // D_DoomMain
 //
@@ -1259,7 +1350,7 @@ void D_DoomMain (void)
 #ifndef WII
     FILE *iwad;
     byte *demolump;
-    char demolumpname[6];
+    char demolumpname[9];
     int demoversion;
     int p;
     int i;
@@ -1587,7 +1678,14 @@ void D_DoomMain (void)
 
 #endif
 */
-    modifiedgame = false;
+#ifndef WII
+    devparm = M_CheckParm ("-devparm");
+#endif
+
+    respawnparm = false;
+    fastparm = false;
+
+    D_ProcessDehCommandLine();
 
     //!
     // @vanilla
@@ -1636,8 +1734,6 @@ void D_DoomMain (void)
     //
 
 #ifndef WII
-    devparm = M_CheckParm ("-devparm");
-
     I_DisplayFPSDots(devparm);
 #endif
 
@@ -1691,21 +1787,21 @@ void D_DoomMain (void)
 #ifndef WII
     if ( (p=M_CheckParm ("-turbo")) )
     {
-	int     scale = 200;
-	extern int forwardmove[2];
-	extern int sidemove[2];
-	
-	if (p<myargc-1)
-	    scale = atoi (myargv[p+1]);
-	if (scale < 10)
-	    scale = 10;
-	if (scale > 400)
-	    scale = 400;
-        DEH_printf("turbo scale: %i%%\n", scale);
-	forwardmove[0] = forwardmove[0]*scale/100;
-	forwardmove[1] = forwardmove[1]*scale/100;
-	sidemove[0] = sidemove[0]*scale/100;
-	sidemove[1] = sidemove[1]*scale/100;
+        int     scale = 200;
+        extern int forwardmove[2];
+        extern int sidemove[2];
+        
+        if (p<myargc-1)
+            scale = atoi (myargv[p+1]);
+        if (scale < 10)
+            scale = 10;
+        if (scale > 400)
+            scale = 400;
+        printf("turbo scale: %i%%\n", scale);
+        forwardmove[0] = forwardmove[0]*scale/100;
+        forwardmove[1] = forwardmove[1]*scale/100;
+        sidemove[0] = sidemove[0]*scale/100;
+        sidemove[1] = sidemove[1]*scale/100;
     }
 #endif
     
@@ -1723,9 +1819,6 @@ void D_DoomMain (void)
 
     if (runcount < 32768)
         runcount++;
-
-    respawnparm = false;
-    fastparm = false;
 
     if(!devparm && aiming_help != 0)
         aiming_help = 0;
@@ -1771,6 +1864,8 @@ void D_DoomMain (void)
 
     // Save configuration at exit.
     I_AtExit(M_SaveDefaults, false);
+
+    modifiedgame = false;
 
 #ifndef WII
     setbuf (stdout, NULL);
@@ -2180,6 +2275,8 @@ void D_DoomMain (void)
         }
     }
     
+    correct_lost_soul_bounce = gameversion >= exe_ultimate;
+
     // The original exe does not support retail - 4th episode not supported
 
     if (gameversion < exe_ultimate && gamemode == retail)
@@ -2306,6 +2403,35 @@ void D_DoomMain (void)
     }
 #endif
 
+    if (W_CheckNumForName("dmenupic") >= 0)
+    {
+        bfgedition = true;
+
+        // BFG Edition changes the names of the secret levels to
+        // censor the Wolfenstein references. It also has an extra
+        // secret level (MAP33). In Vanilla Doom (meaning the DOS
+        // version), MAP33 overflows into the Plutonia level names
+        // array, so HUSTR_33 is actually PHUSTR_1.
+/*
+        DEH_AddStringReplacement(HUSTR_31, "level 31: idkfa");
+        DEH_AddStringReplacement(HUSTR_32, "level 32: keen");
+        DEH_AddStringReplacement(PHUSTR_1, "level 33: betray");
+
+        // The BFG edition doesn't have the "low detail" menu option (fair
+        // enough). But bizarrely, it reuses the M_GDHIGH patch as a label
+        // for the options menu (says "Fullscreen:"). Why the perpetrators
+        // couldn't just add a new graphic lump and had to reuse this one,
+        // I don't know.
+        //
+        // The end result is that M_GDHIGH is too wide and causes the game
+        // to crash. As a workaround to get a minimum level of support for
+        // the BFG edition IWADs, use the "ON"/"OFF" graphics instead.
+
+        DEH_AddStringReplacement("M_GDHIGH", "M_MSGON");
+        DEH_AddStringReplacement("M_GDLOW", "M_MSGOFF");
+*/
+    }
+
     dont_show_adding_of_resource_wad = 0;
 
 #ifndef WII
@@ -2376,15 +2502,15 @@ void D_DoomMain (void)
 
     if(devparm)
         C_Printf(CR_GOLD, D_DEVSTR);
-
+/*
     if(show_deh_loading_message == 1)
         printf("         adding %s\n", dehacked_file);
-/*
+
     if(devparm)
         W_PrintDirectory();
-*/
 
 #ifndef WII
+
     //!
     // @arg <demo>
     // @category demo
@@ -2405,7 +2531,7 @@ void D_DoomMain (void)
         // Play back the demo named demo.lmp, determining the framerate
         // of the screen.
         //
-	p = M_CheckParmWithArgs("-timedemo", 1);
+        p = M_CheckParmWithArgs("-timedemo", 1);
 
     }
 
@@ -2422,7 +2548,7 @@ void D_DoomMain (void)
         }
         else
         {
-            DEH_snprintf(file, sizeof(file), "%s.lmp", myargv[p+1]);
+            M_snprintf(file, sizeof(file), "%s.lmp", myargv[p+1]);
         }
 
         free(uc_filename);
@@ -2441,43 +2567,45 @@ void D_DoomMain (void)
             M_StringCopy(demolumpname, myargv[p + 1], sizeof(demolumpname));
         }
 
-        printf("Playing demo %s.\n", file);
+        C_Printf(CR_GOLD, " Playing demo %s.\n", file);
     }
+
 #endif
 
     I_AtExit(G_CheckDemoStatusAtExit, true);
-
+*/
     // Generate the WAD hash table.  Speed things up a bit.
 
     W_GenerateHashTable();
 
     D_SetGameDescription();
     savegamedir = M_GetSaveGameDir(D_SaveGameIWADName(gamemission));
+    D_ProcessDehInWad();
 
 #ifndef WII
     // Check for -file in shareware
     if (modifiedgame)
     {
-	// These are the lumps that will be checked in IWAD,
-	// if any one is not present, execution will be aborted.
-	char name[23][8]=
-	{
-	    "e2m1","e2m2","e2m3","e2m4","e2m5","e2m6","e2m7","e2m8","e2m9",
-	    "e3m1","e3m3","e3m3","e3m4","e3m5","e3m6","e3m7","e3m8","e3m9",
-	    "dphoof","bfgga0","heada1","cybra1","spida1d1"
-	};
-	int i;
-	
-	if ( gamemode == shareware)
-	    I_Error(DEH_String("\nYou cannot -file with the shareware "
-			       "version. Register!"));
+        // These are the lumps that will be checked in IWAD,
+        // if any one is not present, execution will be aborted.
+        char name[23][8]=
+        {
+            "e2m1","e2m2","e2m3","e2m4","e2m5","e2m6","e2m7","e2m8","e2m9",
+            "e3m1","e3m3","e3m3","e3m4","e3m5","e3m6","e3m7","e3m8","e3m9",
+            "dphoof","bfgga0","heada1","cybra1","spida1d1"
+        };
+        int i;
+        
+        if ( gamemode == shareware)
+            I_Error("\nYou cannot -file with the shareware "
+                               "version. Register!");
 
-	// Check for fake IWAD with right name,
-	// but w/o all the lumps of the registered version. 
-	if (gamemode == registered)
-	    for (i = 0;i < 23; i++)
-		if (W_CheckNumForName(name[i])<0)
-		    I_Error(DEH_String("\nThis is not the registered version."));
+        // Check for fake IWAD with right name,
+        // but w/o all the lumps of the registered version. 
+        if (gamemode == registered)
+            for (i = 0;i < 23; i++)
+                if (W_CheckNumForName(name[i])<0)
+                    I_Error("\nThis is not the registered version.");
     }
 
     if (W_CheckNumForName("SS_START") >= 0
@@ -2492,7 +2620,7 @@ void D_DoomMain (void)
 
     if(fsize == 12361532)
     {
-        LoadChexDeh();
+//        LoadChexDeh();        // FIXME
         W_CheckSize(1);
 
         if(d_maxgore)
@@ -2542,7 +2670,7 @@ void D_DoomMain (void)
     }
     else if(fsize == 19321722 /*|| fsize == 9745831 || fsize == 21951805 || fsize == 22102300*/)
     {
-        LoadHacxDeh();
+//        LoadHacxDeh();                // FIXME
         W_CheckSize(2);
 
         if(print_resource_pwad_error)
@@ -2739,15 +2867,15 @@ void D_DoomMain (void)
             wad_message_has_been_shown = 1;
         }
 #else
-	printf (
-	    " ===============================================================================\n"
-	    "    ATTENTION:  This version of DOOM has been modified.  If you would like to   \n"
-	    "   get a copy of the original game, call 1-800-IDGAMES or see the readme file.  \n"
-	    "            You will not receive technical support for modified games.          \n"
+        printf (
+            " ===============================================================================\n"
+            "    ATTENTION:  This version of DOOM has been modified.  If you would like to   \n"
+            "   get a copy of the original game, call 1-800-IDGAMES or see the readme file.  \n"
+            "            You will not receive technical support for modified games.          \n"
             "                             press enter to continue                            \n"
-	    " ==============================================================================="
-	    );
-	getchar ();
+            " ==============================================================================="
+            );
+        getchar ();
 #endif
     }
 
@@ -2765,15 +2893,15 @@ void D_DoomMain (void)
         int i;
         
         if ( gamemode == shareware && gameversion != exe_chex)
-            I_Error(DEH_String("\nYou cannot -file with the shareware "
-                               "version. Register!"));
+            I_Error("\nYou cannot -file with the shareware "
+                               "version. Register!");
 
         // Check for fake IWAD with right name,
         // but w/o all the lumps of the registered version. 
         if (gamemode == registered)
             for (i = 0;i < 23; i++)
                 if (W_CheckNumForName(name[i])<0)
-                    I_Error(DEH_String("\nThis is not the registered version."));
+                    I_Error("\nThis is not the registered version.");
     }
 
     // disable any colored blood in Chex Quest,
@@ -2820,8 +2948,8 @@ void D_DoomMain (void)
 
     if (p)
     {
-	startskill = myargv[p+1][0]-'1';
-	autostart = true;
+        startskill = myargv[p+1][0]-'1';
+        autostart = true;
     }
 #endif
 
@@ -2857,9 +2985,9 @@ void D_DoomMain (void)
 
     if (p)
     {
-	startepisode = myargv[p+1][0]-'0';
-	startmap = 1;
-	autostart = true;
+        startepisode = myargv[p+1][0]-'0';
+        startmap = 1;
+        autostart = true;
     }
 #endif
 
@@ -2878,7 +3006,7 @@ void D_DoomMain (void)
 
     if (p)
     {
-	timelimit = atoi(myargv[p+1]);
+        timelimit = atoi(myargv[p+1]);
     }
 
     //!
@@ -2892,7 +3020,7 @@ void D_DoomMain (void)
 
     if (p)
     {
-	timelimit = 20;
+        timelimit = 20;
     }
 
     //!
@@ -2951,6 +3079,9 @@ void D_DoomMain (void)
         startloadgame = -1;
     }
 
+    P_BloodSplatSpawner = (r_blood == noblood || !r_bloodsplats_max ? P_NullBloodSplatSpawner :
+            (r_bloodsplats_max == r_bloodsplats_max_max ? P_SpawnBloodSplat : P_SpawnBloodSplat2));
+
     printf(" M_Init: Init miscellaneous info.\n");
     C_Printf(CR_GRAY, " M_Init: Init miscellaneous info.\n");
     M_Init ();
@@ -2962,8 +3093,17 @@ void D_DoomMain (void)
     }
     else
     {
-        printf(" R_Init: Init DOOM refresh daemon - ");
-        C_Printf(CR_GRAY, " R_Init: Init DOOM refresh daemon ");
+        if(fsize != 4207819 && fsize != 4274218 && fsize != 4225504 &&
+           fsize != 10396254 && fsize != 10399316)
+        {
+            printf(" R_Init: Init DOOM refresh daemon - ");
+            C_Printf(CR_GRAY, " R_Init: Init DOOM refresh daemon - ");
+        }
+        else
+        {
+            printf(" R_Init: Init DOOM refresh daemon");
+            C_Printf(CR_GRAY, " R_Init: Init DOOM refresh daemon");
+        }
     }
     R_Init ();
 
@@ -3001,7 +3141,9 @@ void D_DoomMain (void)
     printf(" D_CheckNetGame: Checking network game status.\n");
     C_Printf(CR_GRAY, " D_CheckNetGame: Checking network game status.\n");
     D_CheckNetGame ();
-
+#ifndef WII
+    PrintGameVersion();
+#endif
     printf(" S_Init: Setting up sound.\n");
     C_Printf(CR_GRAY, " S_Init: Setting up sound.\n");
     S_Init (sfxVolume * 8, musicVolume * 8);
@@ -3025,7 +3167,7 @@ void D_DoomMain (void)
     if (M_CheckParmWithArgs("-statdump", 1))
     {
         I_AtExit(StatDump, true);
-        DEH_printf("External statistics registered.\n");
+        printf("External statistics registered.\n");
     }
 
     //!
@@ -3035,29 +3177,32 @@ void D_DoomMain (void)
     //
     // Record a demo named x.lmp.
     //
-
+/*
     p = M_CheckParmWithArgs("-record", 1);
 
     if (p)
     {
-	G_RecordDemoCmd (myargv[p+1]);
-	autostart = true;
+        G_RecordDemoCmd (myargv[p+1]);
+        autostart = true;
     }
 
     p = M_CheckParmWithArgs("-playdemo", 1);
+
     if (p)
     {
-	singledemo = true;              // quit after one demo
-	G_DeferedPlayDemo (demolumpname);
-	D_DoomLoop ();  // never returns
+        singledemo = true;              // quit after one demo
+        G_DeferedPlayDemo (demolumpname);
+        D_DoomLoop ();  // never returns
     }
-	
+        
     p = M_CheckParmWithArgs("-timedemo", 1);
+
     if (p)
     {
-	G_TimeDemo (demolumpname);
-	D_DoomLoop ();  // never returns
+        G_TimeDemo (demolumpname);
+        D_DoomLoop ();  // never returns
     }
+*/
 #endif
 
     // Doom 3: BFG Edition includes modified versions of the classic
@@ -3067,10 +3212,10 @@ void D_DoomMain (void)
     // of doom2.wad is missing the TITLEPIC lump.
     // We specifically check for DMENUPIC here, before PWADs have been
     // loaded which could probably include a lump of that name.
-
+/*
     if (W_CheckNumForName("dehacked") >= 0)
         C_Printf(CR_GOLD, " Parsed DEHACKED lump\n");
-
+*/
     if (fsize == 4207819)
         C_Printf(CR_GRAY, " Playing \"DOOM SHAREWARE v1.0\".");
     else if(fsize == 4274218)
@@ -3160,7 +3305,7 @@ void D_DoomMain (void)
     // Disable automatic loading of Dehacked patches for certain
     // IWAD files.
     //
-
+/*
 #ifndef WII
     if (!M_ParmExists("-nodeh"))
     {
@@ -3168,37 +3313,7 @@ void D_DoomMain (void)
         // them to be played properly.
         LoadIwadDeh();
     }
-#endif
 
-    if (W_CheckNumForName("dmenupic") >= 0)
-    {
-        bfgedition = true;
-
-        // BFG Edition changes the names of the secret levels to
-        // censor the Wolfenstein references. It also has an extra
-        // secret level (MAP33). In Vanilla Doom (meaning the DOS
-        // version), MAP33 overflows into the Plutonia level names
-        // array, so HUSTR_33 is actually PHUSTR_1.
-
-        DEH_AddStringReplacement(HUSTR_31, "level 31: idkfa");
-        DEH_AddStringReplacement(HUSTR_32, "level 32: keen");
-        DEH_AddStringReplacement(PHUSTR_1, "level 33: betray");
-
-        // The BFG edition doesn't have the "low detail" menu option (fair
-        // enough). But bizarrely, it reuses the M_GDHIGH patch as a label
-        // for the options menu (says "Fullscreen:"). Why the perpetrators
-        // couldn't just add a new graphic lump and had to reuse this one,
-        // I don't know.
-        //
-        // The end result is that M_GDHIGH is too wide and causes the game
-        // to crash. As a workaround to get a minimum level of support for
-        // the BFG edition IWADs, use the "ON"/"OFF" graphics instead.
-
-        DEH_AddStringReplacement("M_GDHIGH", "M_MSGON");
-        DEH_AddStringReplacement("M_GDLOW", "M_MSGOFF");
-    }
-
-#ifndef WII
 #ifdef FEATURE_DEHACKED
     // Load Dehacked patches specified on the command line with -deh.
     // Note that there's a very careful and deliberate ordering to how
@@ -3208,24 +3323,7 @@ void D_DoomMain (void)
     //  3. PWAD dehacked patches in DEHACKED lumps.
     DEH_ParseCommandLine();
 #endif
-#endif
-
-#ifdef WII
-    if(master_pwad)
-        LoadMasterlevelsWad();
-    else if(nerve_pwad)
-        LoadNerveWad();
-
-    I_InitGraphics();
-#else
-    // [crispy] allow overriding of special-casing
-    if (!M_ParmExists("-nodeh"))
-    {
-	LoadMasterlevelsWad();
-	LoadNerveWad();
-    }
-#endif
-
+*/
     if(d_uncappedframerate)
         C_Printf(CR_GRAY, " The framerate is uncapped.");
     else

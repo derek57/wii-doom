@@ -32,8 +32,10 @@
 
 #ifdef WII
 #include "../c_io.h"
+#include "../d_deh.h"
 #else
 #include "c_io.h"
+#include "d_deh.h"
 #endif
 
 #include "doomdef.h"
@@ -94,6 +96,56 @@ typedef enum
     
 } dirtype_t;
 
+// Codepointer operation types
+/*
+enum
+{
+   CPOP_ASSIGN,
+   CPOP_ADD,
+   CPOP_SUB,
+   CPOP_MUL,
+   CPOP_DIV,
+   CPOP_MOD,
+   CPOP_AND,
+   CPOP_ANDNOT,
+   CPOP_OR,
+   CPOP_XOR,
+   CPOP_RND,
+   CPOP_RNDMOD,
+   CPOP_DAMAGE,
+   CPOP_SHIFTLEFT,
+   CPOP_SHIFTRIGHT,
+
+   // unary operators
+   CPOP_ABS,
+   CPOP_NEGATE,
+   CPOP_NOT,
+   CPOP_INVERT,
+};
+
+// Codepointer comparison types
+
+enum
+{
+   CPC_LESS,
+   CPC_LESSOREQUAL,
+   CPC_GREATER,
+   CPC_GREATEROREQUAL,
+   CPC_EQUAL,
+   CPC_NOTEQUAL,
+   CPC_BITWISEAND,
+   
+   CPC_CNTR_LESS,           // alternate counter versions
+   CPC_CNTR_LESSOREQUAL,
+   CPC_CNTR_GREATER,
+   CPC_CNTR_GREATEROREQUAL,
+   CPC_CNTR_EQUAL,
+   CPC_CNTR_NOTEQUAL,
+   CPC_CNTR_BITWISEAND,
+
+   CPC_NUMIMMEDIATE = CPC_BITWISEAND + 1
+};
+*/
 
 //
 // P_NewChaseDir related LUT.
@@ -123,6 +175,8 @@ mobj_t*           *braintargets;
 
 mobjtype_t        chunk_type;
 
+boolean           on_ground;
+
 int               old_t;
 int               old_u;
 int               TRACEANGLE = 0xc000000;
@@ -132,15 +186,94 @@ int               numsplats;
 
 static int        maxbraintargets;     // [crispy] remove braintargets limit
 
+extern boolean    not_walking;
+
+extern line_t     **spechit;
+
 extern int        numspechit;
 extern int        snd_module;
 extern int        gore_amount;
 
-boolean           on_ground;
+extern void A_ReFire
+( player_t*        player,
+  pspdef_t*        psp );
 
-extern boolean    not_walking;
+//
+// P_IsOnLift
+//
+// killough 9/9/98:
+//
+// Returns true if the object is on a lift. Used for AI,
+// since it may indicate the need for crowded conditions,
+// or that a monster should stay on the lift for a while
+// while it goes up or down.
+//
+static boolean P_IsOnLift(const mobj_t *actor)
+{
+    const sector_t      *sec = actor->subsector->sector;
+    line_t              line;
 
-extern line_t     **spechit;
+    // Short-circuit: it's on a lift which is active.
+    if (sec->floordata && ((thinker_t *)sec->floordata)->function == T_PlatRaise)
+        return true;
+
+    // Check to see if it's in a sector which can be activated as a lift.
+    if ((line.tag = sec->tag))
+    {
+        int     l;
+
+        for (l = -1; (l = P_FindLineFromLineTag(&line, l)) >= 0;)
+            switch (lines[l].special)
+            {
+                case W1_Lift_LowerWaitRaise:
+                case S1_Floor_RaiseBy32_ChangesTexture:
+                case S1_Floor_RaiseBy24_ChangesTexture:
+                case S1_Floor_RaiseToNextHighestFloor_ChangesTexture:
+                case S1_Lift_LowerWaitRaise:
+                case W1_Floor_RaiseToNextHighestFloor_ChangesTexture:
+                case G1_Floor_RaiseToNextHighestFloor_ChangesTexture:
+                case W1_Floor_StartMovingUpAndDown:
+                case SR_Lift_LowerWaitRaise:
+                case SR_Floor_RaiseBy24_ChangesTexture:
+                case SR_Floor_RaiseBy32_ChangesTexture:
+                case SR_Floor_RaiseToNextHighestFloor_ChangesTexture:
+                case WR_Floor_StartMovingUpAndDown:
+                case WR_Lift_LowerWaitRaise:
+                case WR_Floor_RaiseToNextHighestFloor_ChangesTexture:
+                case WR_Lift_LowerWaitRaise_Fast:
+                case W1_Lift_LowerWaitRaise_Fast:
+                case S1_Lift_LowerWaitRaise_Fast:
+                case SR_Lift_LowerWaitRaise_Fast:
+                    return true;
+            }
+        }
+
+    return false;
+}
+
+//
+// P_IsUnderDamage
+//
+// killough 9/9/98:
+//
+// Returns nonzero if the object is under damage based on
+// their current position. Returns 1 if the damage is moderate,
+// -1 if it is serious. Used for AI.
+//
+static int P_IsUnderDamage(mobj_t *actor)
+{
+    const struct msecnode_s     *seclist;
+    int                         dir = 0;
+
+    for (seclist = actor->touching_sectorlist; seclist; seclist = seclist->m_tnext)
+    {
+        const ceiling_t          *cl;    // Crushing ceiling
+
+        if ((cl = seclist->m_sector->ceilingdata) && cl->thinker.function == T_MoveCeiling)
+            dir |= cl->direction;
+    }
+    return dir;
+}
 
 //
 // ENEMY THINKING
@@ -167,6 +300,9 @@ P_RecursiveSound
     line_t*     check;
     sector_t*   other;
         
+    if (players[0].cheats & CF_NOTARGET)
+        return;
+
     // wake up all monsters in this sector
     if (sec->validcount == validcount
         && sec->soundtraversed <= soundblocks+1)
@@ -229,22 +365,25 @@ P_NoiseAlert
 //
 boolean P_CheckMeleeRange (mobj_t*        actor)
 {
-    mobj_t*        pl;
-    fixed_t        dist;
-        
-    if (!actor->target)
-        return false;
-                
-    pl = actor->target;
-    dist = P_AproxDistance (pl->x-actor->x, pl->y-actor->y);
+    mobj_t      *pl = actor->target;
+    fixed_t     dist;
 
-    if (dist >= MELEERANGE-20*FRACUNIT+pl->info->radius)
+    if (!pl)
         return false;
-        
-    if (! P_CheckSight (actor, actor->target) )
+
+    dist = P_AproxDistance(pl->x - actor->x, pl->y - actor->y);
+
+    if (dist >= MELEERANGE - 20 * FRACUNIT + pl->info->radius)
         return false;
-                                                        
-    return true;                
+
+    // [BH] check difference in height as well
+    if (pl->z > actor->z + actor->height || actor->z > pl->z + pl->height)
+        return false;
+
+    if (!P_CheckSight(actor, pl))
+        return false;
+
+    return true;
 }
 
 //
@@ -257,7 +396,7 @@ boolean P_CheckMissileRange (mobj_t* actor)
     if (! P_CheckSight (actor, actor->target) )
         return false;
         
-    if ( actor->flags & MF_JUSTHIT )
+    if (actor->flags & MF_JUSTHIT)
     {
         // the target just hit the enemy,
         // so fight back!
@@ -323,26 +462,81 @@ static boolean P_Move(mobj_t *actor, boolean dropoff)   // killough 9/12/98
 {
     fixed_t        tryx;
     fixed_t        tryy;
+    fixed_t        deltax;
+    fixed_t        deltay;
     
+    int            movefactor = ORIG_FRICTION_FACTOR;   // killough 10/98
+    int            friction = ORIG_FRICTION;
+    int            speed;
+
     // warning: 'catch', 'throw', and 'try'
     // are all C++ reserved words
     boolean        try_ok;
-    boolean        good;
                 
     if (actor->movedir == DI_NODIR)
         return false;
                 
     if ((unsigned)actor->movedir >= 8)
         I_Error ("Weird actor->movedir!");
-                
-    tryx = actor->x + actor->info->speed*xspeed[actor->movedir];
-    tryy = actor->y + actor->info->speed*yspeed[actor->movedir];
 
-    try_ok = P_TryMove (actor, tryx, tryy, dropoff);
+    // [RH] Instead of yanking non-floating monsters to the ground,
+    // let gravity drop them down, unless they're moving down a step.
+    if (!(actor->flags & MF_NOGRAVITY) && actor->z > actor->floorz
+        && !(actor->flags2 & MF2_ONMOBJ))
+    {
+        if (actor->z > actor->floorz + 24 * FRACUNIT)
+            return false;
+        else
+            actor->z = actor->floorz;
+    }
+
+    // killough 10/98: make monsters get affected by ice and sludge too:
+    movefactor = P_GetMoveFactor(actor, &friction);
+    speed = actor->info->speed;
+
+    if (friction < ORIG_FRICTION        // sludge
+        && !(speed = ((ORIG_FRICTION_FACTOR - (ORIG_FRICTION_FACTOR - movefactor) / 2)
+        * speed) / ORIG_FRICTION_FACTOR))
+        speed = 1;                      // always give the monster a little bit of speed
+
+    tryx = actor->x + (deltax = speed * xspeed[actor->movedir]);
+    tryy = actor->y + (deltay = speed * yspeed[actor->movedir]);
+
+    // killough 12/98: rearrange, fix potential for stickiness on ice
+    if (friction <= ORIG_FRICTION)
+        try_ok = P_TryMove(actor, tryx, tryy, dropoff);
+    else
+    {
+        fixed_t x = actor->x;
+        fixed_t y = actor->y;
+        fixed_t floorz = actor->floorz;
+        fixed_t ceilingz = actor->ceilingz;
+        fixed_t dropoffz = actor->dropoffz;
+
+        try_ok = P_TryMove(actor, tryx, tryy, dropoff);
+
+        // killough 10/98:
+        // Let normal momentum carry them, instead of steptoeing them across ice.
+        if (try_ok)
+        {
+            P_UnsetThingPosition(actor);
+            actor->x = x;
+            actor->y = y;
+            actor->floorz = floorz;
+            actor->ceilingz = ceilingz;
+            actor->dropoffz = dropoffz;
+            P_SetThingPosition(actor);
+            movefactor *= FRACUNIT / ORIG_FRICTION_FACTOR / 4;
+            actor->momx += FixedMul(deltax, movefactor);
+            actor->momy += FixedMul(deltay, movefactor);
+        }
+    }
 
     if (!try_ok)
     {
         // open any specials
+        int     good;
+
         if ((actor->flags & MF_FLOAT) && floatok)
         {
             // must adjust height
@@ -377,20 +571,17 @@ static boolean P_Move(mobj_t *actor, boolean dropoff)   // killough 9/12/98
         // back out when they shouldn't, and creates secondary stickiness).
         for (good = false; numspechit--;)
             if (P_UseSpecialLine(actor, spechit[numspechit], 0))
-                good |= (spechit[numspechit] == blockline ? 1 : 2);
+                good |= spechit[numspechit] == blockline ? 1 : 2;
 
         if (!good || d_doorstuck)
             return good;
 
-        return (P_Random() & 3); /* jff 8/13/98 */
+        return good && ((P_Random() >= 230) ^ (good & 1));
     }
     else
-    {
         actor->flags &= ~MF_INFLOAT;
-    }
-        
-        
-    if (! (actor->flags & MF_FLOAT) && !felldown )
+
+    if (!(actor->flags & MF_FLOAT) && !felldown)
     {
         if (actor->z > actor->floorz)
         {
@@ -400,6 +591,37 @@ static boolean P_Move(mobj_t *actor, boolean dropoff)   // killough 9/12/98
         actor->z = actor->floorz;
     }
     return true; 
+}
+
+//
+// P_SmartMove
+//
+// killough 9/12/98: Same as P_Move, except smarter
+//
+static boolean P_SmartMove(mobj_t *actor)
+{
+    mobj_t      *target = actor->target;
+    int         on_lift;
+    int         under_damage;
+
+    // killough 9/12/98: Stay on a lift if target is on one
+    on_lift = (target && target->health > 0
+        && target->subsector->sector->tag == actor->subsector->sector->tag && P_IsOnLift(actor));
+
+    under_damage = P_IsUnderDamage(actor);
+
+    if (!P_Move(actor, false))
+        return false;
+
+    // killough 9/9/98: avoid crushing ceilings or other damaging areas
+    if ((on_lift && P_Random() < 230         // Stay on lift
+         && !P_IsOnLift(actor))
+        || (!under_damage                    // Get away from damage
+            && (under_damage = P_IsUnderDamage(actor))
+            && (under_damage < 0 || P_Random() < 200)))
+        actor->movedir = DI_NODIR;           // avoid the area (most of the time anyway)
+
+    return true;
 }
 
 
@@ -416,7 +638,8 @@ static boolean P_Move(mobj_t *actor, boolean dropoff)   // killough 9/12/98
 //
 boolean P_TryWalk (mobj_t* actor)
 {        
-    if (!P_Move (actor, false))
+//    if (!P_Move (actor, false))
+    if (!P_SmartMove(actor))
     {
         return false;
     }
@@ -456,7 +679,7 @@ static void P_DoNewChaseDir(mobj_t *actor, fixed_t deltax, fixed_t deltay)
         return;
 
     // try other directions
-    if (P_Random() > 200 || abs(deltay) > abs(deltax))
+    if (P_Random() > 200 || ABS(deltay) > ABS(deltax))
     {
         tdir = xdir;
         xdir = ydir;
@@ -515,8 +738,8 @@ static boolean PIT_AvoidDropoff(line_t *line)
         && tmbbox[BOXBOTTOM] < line->bbox[BOXTOP]
         && P_BoxOnLineSide(tmbbox, line) == -1)
     {
-        fixed_t front = line->frontsector->floor_height;
-        fixed_t back = line->backsector->floor_height;
+        fixed_t front = line->frontsector->floorheight;
+        fixed_t back = line->backsector->floorheight;
         angle_t angle;
 
         // The monster must contact one of the two floors,
@@ -594,77 +817,18 @@ static void P_NewChaseDir(mobj_t *actor)
 // If allaround is false, only look 180 degrees in front.
 // Returns true if a player is targeted.
 //
-/*
-boolean
-P_LookForPlayers
-( mobj_t*        actor,
-  boolean        allaround )
-{
-    int          c;
-    int          stop;
-    player_t*    player;
-    angle_t      an;
-    fixed_t      dist;
-
-    c = 0;
-    stop = (actor->lastlook-1)&3;
-        
-    for ( ; ; actor->lastlook = (actor->lastlook+1)&3 )
-    {
-        if (!playeringame[actor->lastlook])
-            continue;
-                        
-        if (c++ == 2
-            || actor->lastlook == stop)
-        {
-            // done looking
-            return false;        
-        }
-        
-        player = &players[actor->lastlook];
-
-        if (player->health <= 0)
-            continue;                // dead
-
-        if (!P_CheckSight (actor, player->mo))
-            continue;                // out of sight
-                        
-        if (!allaround)
-        {
-            an = R_PointToAngle2 (actor->x,
-                                  actor->y, 
-                                  player->mo->x,
-                                  player->mo->y)
-                - actor->angle;
-            
-            if (an > ANG90 && an < ANG270)
-            {
-                dist = P_AproxDistance (player->mo->x - actor->x,
-                                        player->mo->y - actor->y);
-                // if real close, react anyway
-                if (dist > MELEERANGE)
-                    continue;        // behind back
-            }
-        }
-                
-        actor->target = player->mo;
-        return true;
-    }
-
-    return false;
-}
-*/
 static boolean P_LookForMonsters(mobj_t *actor)
 {
     mobj_t      *mo;
-    thinker_t   *th;
+    thinker_t   *think;
 
     if (!P_CheckSight(players[0].mo, actor))
         return false;           // player can't see monster
 
-    for (th = thinkercap.next; th != &thinkercap; th = th->next)
+    for (think = thinkerclasscap[th_mobj].cnext; think != &thinkerclasscap[th_mobj];
+        think = think->cnext)
     {
-        mo = (mobj_t *)th;
+        mo = (mobj_t *)think;
         if (!(mo->flags & MF_COUNTKILL) || mo == actor || mo->health <= 0)
             continue;           // not a valid monster
 
@@ -675,7 +839,9 @@ static boolean P_LookForMonsters(mobj_t *actor)
             continue;           // out of sight
 
         // Found a target monster
-        P_SetTarget(&actor->lastenemy, actor->target);
+        if(last_enemy)
+            P_SetTarget(&actor->lastenemy, actor->target);
+
         P_SetTarget(&actor->target, mo);
         return true;
     }
@@ -702,7 +868,7 @@ static boolean P_LookForPlayers(mobj_t *actor, boolean allaround)
     if (player->health <= 0 || !P_CheckSight(actor, mo))
     {
         // Use last known enemy if no players sighted -- killough 2/15/98
-        if (actor->lastenemy && actor->lastenemy->health > 0)
+        if (actor->lastenemy && actor->lastenemy->health > 0 && last_enemy)
         {
             P_SetTarget(&actor->target, actor->lastenemy);
             P_SetTarget(&actor->lastenemy, NULL);
@@ -723,7 +889,7 @@ static boolean P_LookForPlayers(mobj_t *actor, boolean allaround)
             if (dist > MELEERANGE)
             {
                 // Use last known enemy if no players sighted -- killough 2/15/98
-                if (actor->lastenemy && actor->lastenemy->health > 0)
+                if (actor->lastenemy && actor->lastenemy->health > 0 && last_enemy)
                 {
                     P_SetTarget(&actor->target, actor->lastenemy);
                     P_SetTarget(&actor->lastenemy, NULL);
@@ -748,96 +914,10 @@ static boolean P_LookForPlayers(mobj_t *actor, boolean allaround)
     return true;
 }
 
-//----------------------------------------------------------------------------
-//
-// PROC A_MoreBlood
-//
-//----------------------------------------------------------------------------
-
-void A_MoreBlood(mobj_t * actor)
-{
-    if(d_maxgore && !(actor->flags & MF_NOBLOOD))
-    {
-        int i, t;
-
-        mobj_t *mo = Z_Malloc(sizeof(*mo), PU_LEVEL, NULL);
-        mobjtype_t chunk_type;
-
-        numsplats++;
-
-        if (d_chkblood && d_colblood)
-        {
-            if (actor->type == MT_HEAD ||
-                    actor->type == MT_BETAHEAD)
-                chunk_type = MT_CHUNK_BLUE;
-            else if(actor->type == MT_BRUISER ||
-                    actor->type == MT_BETABRUISER ||
-                    actor->type == MT_KNIGHT)
-                chunk_type = MT_CHUNK_GREEN;
-            else
-                chunk_type = MT_CHUNK;
-        }
-        else
-            chunk_type = MT_CHUNK;
-        
-        if (d_chkblood2 && d_colblood2)
-        {
-            if (actor->type == MT_SKULL ||
-                   actor->type == MT_BETASKULL)
-            {
-                actor->flags |= MF_NOBLOOD;
-                goto skip;
-            }
-        }
-
-        // WARNING: don't go lower than SPLAT_PER_COUNTER !!!
-        for(i = SPLAT_PER_COUNTER; i <= numsplats / SPLAT_PER_COUNTER && numsplats % i == 0; ++i)
-        {
-            memset(mo, 0, sizeof(*mo));
-
-            mo = P_SpawnMobj(actor->x,
-                             actor->y,
-                             actor->z, chunk_type);
-
-            // added for colored blood and gore!
-            mo->target = actor;
-
-            mo->type = chunk_type;
-
-            mo->flags2 = MF2_DONOTMAP;
-
-            if (d_colblood2 && d_chkblood2)
-            {
-                // Spectres bleed spectre blood
-                if(mo->target->type == MT_SHADOWS)
-                    mo->flags |= MF_SHADOW;
-            }
-
-            t = P_Random() % 6;
-
-            if(t == 0 || t == 1 || t == 2 || t == 3 || t == 4 || t == 5)
-                P_SetMobjState(mo, mobjinfo[mo->type].spawnstate + t);
-
-            t = P_Random();
-
-            mo->momx = (t - P_Random()) << 11;
-
-            t = P_Random();
-
-            mo->momy = (t - P_Random()) << 11;
-            mo->momz = (P_Random() << 11) / 2;
-            break;
-        }
-        skip: ;
-    }
-}
-
 void A_Pain (mobj_t* actor)
 {
     if (actor->info->painsound)
         S_StartSound (actor, actor->info->painsound);
-
-    A_MoreBlood(actor);
 }
 
 void A_Fall (mobj_t *actor)
@@ -851,7 +931,9 @@ void A_Fall (mobj_t *actor)
     if(d_maxgore && !(actor->flags & MF_NOBLOOD))
     {
         int i, t;
-        mobj_t *mo;
+        int color = ((d_chkblood && d_colblood) ? actor->blood : MT_BLOOD);
+        mobjinfo_t *info = &mobjinfo[color];
+        mobj_t *mo = Z_Malloc(sizeof(*mo), PU_LEVEL, NULL);
 
         if((actor->type == MT_SKULL ||
                actor->type == MT_BETASKULL) && d_colblood2 && d_chkblood2)
@@ -859,13 +941,31 @@ void A_Fall (mobj_t *actor)
 
         for(i = 0; i < 8; i++)
         {
-            // spray blood in a random direction
-            mo = P_SpawnMobj(actor->x,
-                             actor->y,
-                             actor->z + actor->info->height/2, MT_GORE);
+            mo->type = color;
 
             // added for colored blood and gore!
             mo->target = actor;
+
+            // spray blood in a random direction (colored)
+            if((actor->type == MT_HEAD || actor->type == MT_BETAHEAD) && d_chkblood && d_colblood)
+                mo = P_SpawnMobj(actor->x,
+                                 actor->y,
+                                 actor->z + actor->info->height/2, MT_BLUESPRAY);
+            else if((actor->type == MT_BRUISER || actor->type == MT_BETABRUISER ||
+                    actor->type == MT_KNIGHT) && d_chkblood && d_colblood)
+                mo = P_SpawnMobj(actor->x,
+                                 actor->y,
+                                 actor->z + actor->info->height/2, MT_GREENSPRAY);
+            else if(actor->type == MT_SHADOWS && d_colblood2 && d_chkblood2)
+                mo = P_SpawnMobj(actor->x,
+                                 actor->y,
+                                 actor->z + actor->info->height/2, MT_FUZZYSPRAY);
+            else
+                mo = P_SpawnMobj(actor->x,
+                                 actor->y,
+                                 actor->z + actor->info->height/2, MT_SPRAY);
+
+            mo->colfunc = info->colfunc;
 
             // Spectres bleed spectre blood
             if (d_colblood2 && d_chkblood2) 
@@ -875,6 +975,7 @@ void A_Fall (mobj_t *actor)
             }
 
             t = P_Random() % 3;
+
             if(t > 0)
                 P_SetMobjState(mo, S_SPRAY_00 + t);
 
@@ -883,8 +984,6 @@ void A_Fall (mobj_t *actor)
             t = P_Random();
             mo->momy = (t - P_Random ()) << 11;
             mo->momz = P_Random() << 11;
-
-            A_MoreBlood(actor);
         }
         skip: ;
     }
@@ -906,12 +1005,10 @@ void A_KeenDie (mobj_t* mo)
     
     // scan the remaining thinkers
     // to see if all Keens are dead
-    for (th = thinkercap.next ; th != &thinkercap ; th=th->next)
+    for (th = thinkerclasscap[th_mobj].cnext; th != &thinkerclasscap[th_mobj]; th = th->cnext)
     {
-        if (th->function.acp1 != (actionf_p1)P_MobjThinker)
-            continue;
-
         mo2 = (mobj_t *)th;
+
         if (mo2 != mo
             && mo2->type == mo->type
             && mo2->health > 0)
@@ -922,7 +1019,7 @@ void A_KeenDie (mobj_t* mo)
     }
 
     junk.tag = 666;
-    EV_DoDoor(&junk,open);
+    EV_DoDoor(&junk,doorOpen);
 }
 
 
@@ -946,11 +1043,11 @@ void A_Look (mobj_t* actor)
         actor->state->tics = 0;
 
     if (targ
-        && (targ->flags & MF_SHOOTABLE) )
+        && (targ->flags & MF_SHOOTABLE))
     {
         P_SetTarget(&actor->target, targ);
 
-        if ( actor->flags & MF_AMBUSH )
+        if (actor->flags & MF_AMBUSH)
         {
             if (P_CheckSight (actor, actor->target))
                 goto seeyou;
@@ -1042,7 +1139,7 @@ void A_Chase (mobj_t*        actor)
         actor->shadow->angle = actor->angle;
 
     if (!actor->target
-        || !(actor->target->flags&MF_SHOOTABLE))
+        || !(actor->target->flags & MF_SHOOTABLE))
     {
         // look for a new target
         if (P_LookForPlayers(actor,true))
@@ -1103,7 +1200,8 @@ void A_Chase (mobj_t*        actor)
 
     // chase towards player
     if (--actor->movecount<0
-        || !P_Move (actor, false))
+//        || !P_Move (actor, false))
+        || !P_SmartMove (actor))
     {
         P_NewChaseDir (actor);
     }
@@ -1480,7 +1578,7 @@ boolean PIT_VileCheck (mobj_t*        thing)
     int                maxdist;
     boolean        check;
         
-    if (!(thing->flags & MF_CORPSE) )
+    if (!(thing->flags & MF_CORPSE))
         return true;        // not a monster
     
     if (thing->tics != -1)
@@ -1491,8 +1589,8 @@ boolean PIT_VileCheck (mobj_t*        thing)
     
     maxdist = thing->info->radius + mobjinfo[MT_VILE].radius;
         
-    if ( abs(thing->x - viletryx) > maxdist
-         || abs(thing->y - viletryy) > maxdist )
+    if ( ABS(thing->x - viletryx) > maxdist
+         || ABS(thing->y - viletryy) > maxdist )
         return true;                // not actually touching
                 
     corpsehit = thing;
@@ -1597,9 +1695,15 @@ void A_VileChase (mobj_t* actor)
                     corpsehit->health = info->spawnhealth;
                     P_SetTarget(&corpsehit->target, NULL);
 
+                    if(last_enemy)
+                        P_SetTarget(&corpsehit->lastenemy, NULL);
+
                     // resurrected pools of gore ("ghost monsters") are translucent
                     if (corpsehit->height == 0 && corpsehit->radius == 0)
                         corpsehit->flags |= MF_TRANSLUCENT;
+
+                    // killough 8/29/98: add to appropriate thread
+                    P_UpdateThinker(&corpsehit->thinker);
 
                     return;
                 }
@@ -1845,7 +1949,8 @@ void A_BetaSkullAttack (mobj_t* actor)
     S_StartSound(actor, actor->info->attacksound);
     A_FaceTarget(actor);
 
-    damage = (P_RandomSMMU(pr_skullfly)%8+1)*actor->info->damage;
+//    damage = (P_RandomSMMU(pr_skullfly)%8+1)*actor->info->damage;
+    damage = (P_Random() % 8 + 1) * actor->info->damage;
 
     P_DamageMobj(actor->target, actor, actor, damage);
 }
@@ -1880,9 +1985,9 @@ A_PainShootSkull
     currentthinker = thinkercap.next;
     while (currentthinker != &thinkercap)
     {
-        if (   (currentthinker->function.acp1 == (actionf_p1)P_MobjThinker)
+        if (   (currentthinker->function == P_MobjThinker)
             && (((mobj_t *)currentthinker)->type == MT_SKULL ||
-                ((mobj_t *)currentthinker)->type == MT_SKULL))
+                ((mobj_t *)currentthinker)->type == MT_BETASKULL))
             count++;
         currentthinker = currentthinker->next;
     }
@@ -1912,7 +2017,7 @@ A_PainShootSkull
     y = actor->y + FixedMul (prestep, finesine[an]);
     z = actor->z + 8*FRACUNIT;
 
-    if (!d_blockskulls)   /* killough 10/98: compatibility-optioned */
+    if (!d_blockskulls)   // killough 10/98: compatibility-optioned
     {
         if (beta_skulls)
             newmobj = P_SpawnMobj (x, y, z, MT_BETASKULL);
@@ -1939,8 +2044,8 @@ A_PainShootSkull
         // ceiling of its new sector, or below the floor. If so, kill it.
 
         if ((newmobj->z >
-                (newmobj->subsector->sector->ceiling_height - newmobj->height)) ||
-                (newmobj->z < newmobj->subsector->sector->floor_height))
+                (newmobj->subsector->sector->ceilingheight - newmobj->height)) ||
+                (newmobj->z < newmobj->subsector->sector->floorheight))
         {
             // kill it immediately
             P_DamageMobj(newmobj, actor, actor, 10000);
@@ -1965,6 +2070,72 @@ A_PainShootSkull
 
     P_SetTarget(&newmobj->target, actor->target);
     A_SkullAttack (newmobj);
+/*
+    mobj_t      *newmobj;
+    angle_t     an = angle >> ANGLETOFINESHIFT;
+    int         prestep = 4 * FRACUNIT + 3 * (actor->info->radius + mobjinfo[MT_SKULL].radius) / 2;
+    fixed_t     x = actor->x + FixedMul(prestep, finecosine[an]);
+    fixed_t     y = actor->y + FixedMul(prestep, finesine[an]);
+    fixed_t     z = actor->z + 8 * FRACUNIT;
+
+    if (P_CheckLineSide(actor, x, y))
+        return;
+
+    if (!d_blockskulls)   // killough 10/98: compatibility-optioned
+    {
+        if (beta_skulls)
+            newmobj = P_SpawnMobj (x, y, z, MT_BETASKULL);
+        else
+            newmobj = P_SpawnMobj (x, y, z, MT_SKULL);
+    }
+    else                                                            // phares
+    {
+        // Check whether the Lost Soul is being fired through a 1-sided
+        // wall or an impassible line, or a "monsters can't cross" line.
+        // If it is, then we don't allow the spawn. This is a bug fix, but
+        // it should be considered an enhancement, since it may disturb
+        // existing demos, so don't do it in compatibility mode.
+
+//        if (Check_Sides(actor,x,y))
+//            return;
+
+        if (beta_skulls)
+            newmobj = P_SpawnMobj (x, y, z, MT_BETASKULL);
+        else
+            newmobj = P_SpawnMobj (x, y, z, MT_SKULL);
+
+        // Check to see if the new Lost Soul's z value is above the
+        // ceiling of its new sector, or below the floor. If so, kill it.
+
+        if ((newmobj->z >
+                (newmobj->subsector->sector->ceilingheight - newmobj->height)) ||
+                (newmobj->z < newmobj->subsector->sector->floorheight))
+        {
+            // kill it immediately
+            P_DamageMobj(newmobj, actor, actor, 10000);
+            return;                                                 //   ^
+        }                                                           //   |
+    }
+    newmobj->flags &= ~MF_COUNTKILL;
+
+    if (!P_TryMove(newmobj, newmobj->x, newmobj->y, false))
+    {
+        if (newmobj->shadow)
+            P_RemoveMobjShadow(newmobj);
+        P_RemoveMobj(newmobj);
+    }
+    else
+    {
+        // [crispy] Lost Souls bleed Puffs
+        if (d_colblood2 && d_chkblood2)
+            newmobj->flags |= MF_NOBLOOD;
+        else if (!d_colblood2 && !d_chkblood2)
+            newmobj->flags &= ~MF_NOBLOOD;
+
+        P_SetTarget(&newmobj->target, actor->target);
+        A_SkullAttack(newmobj);
+    }
+*/
 }
 
 
@@ -2141,12 +2312,10 @@ void A_BossDeath (mobj_t* mo)
     
     // scan the remaining thinkers to see
     // if all bosses are dead
-    for (th = thinkercap.next ; th != &thinkercap ; th=th->next)
+    for (th = thinkerclasscap[th_mobj].cnext; th != &thinkerclasscap[th_mobj]; th = th->cnext)
     {
-        if (th->function.acp1 != (actionf_p1)P_MobjThinker)
-            continue;
-        
         mo2 = (mobj_t *)th;
+
         if (mo2 != mo
             && mo2->type == mo->type
             && mo2->health > 0)
@@ -2159,9 +2328,9 @@ void A_BossDeath (mobj_t* mo)
     // victory!
     if ( gamemode == commercial)
     {
-	if (gamemap == 7 ||
-	// [crispy] Master Levels in PC slot 7
-	(gamemission == pack_master && (gamemap == 14 || gamemap == 15 || gamemap == 16)))
+        if (gamemap == 7 ||
+        // [crispy] Master Levels in PC slot 7
+        (gamemission == pack_master && (gamemap == 14 || gamemap == 15 || gamemap == 16)))
         {
             if (mo->type == MT_FATSO)
             {
@@ -2193,7 +2362,7 @@ void A_BossDeath (mobj_t* mo)
             {
               case 6:
                 junk.tag = 666;
-                EV_DoDoor (&junk, blazeOpen);
+                EV_DoDoor (&junk, doorBlazeOpen);
                 return;
                 break;
                 
@@ -2219,7 +2388,7 @@ void A_Footstep (mobj_t* mo)
     if(d_footstep &&
            !mo->player->powers[pw_flight] &&
            !mo->player->jumpTics &&
-           player->mo->z == sector->floor_height)
+           player->mo->z == sector->floorheight)
     {
         int t = P_Random() % 4;
 
@@ -2313,14 +2482,9 @@ void A_BrainAwake (mobj_t* mo)
     numbraintargets = 0;
     braintargeton = 0;
         
-    thinker = thinkercap.next;
-    for (thinker = thinkercap.next ;
-         thinker != &thinkercap ;
-         thinker = thinker->next)
+    for (thinker = thinkerclasscap[th_mobj].cnext; thinker != &thinkerclasscap[th_mobj];
+        thinker = thinker->cnext)
     {
-        if (thinker->function.acp1 != (actionf_p1)P_MobjThinker)
-            continue;        // not a mobj
-
         m = (mobj_t *)thinker;
 
         if (m->type == MT_BOSSTARGET )
@@ -2353,8 +2517,6 @@ void A_BrainAwake (mobj_t* mo)
 
 void A_BrainPain (mobj_t*        mo)
 {
-    A_MoreBlood(mo);
-
     S_StartSound (NULL,sfx_bospn);
 }
 
@@ -2405,7 +2567,8 @@ void A_BrainExplode (mobj_t* mo)
         th->tics = 1;
 
     // [crispy] brain explosions are translucent
-    th->flags |= MF_TRANSLUCENT;
+    if(d_translucency)
+        th->flags |= MF_TRANSLUCENT;
 }
 
 
@@ -2419,7 +2582,7 @@ void A_BrainSpit (mobj_t*        mo)
     mobj_t*        targ;
     mobj_t*        newmobj;
     
-    static int        easy = 0;
+    static int        easy;
         
     easy ^= 1;
     if (gameskill <= sk_easy && (!easy))
@@ -2508,7 +2671,7 @@ void A_SpawnFly (mobj_t* mo)
         P_SetMobjState (newmobj, newmobj->info->seestate);
         
     // telefrag anything in this spot
-    P_TeleportMove (newmobj, newmobj->x, newmobj->y, true); /* killough 8/9/98 */
+    P_TeleportMove (newmobj, newmobj->x, newmobj->y, newmobj->z, true); /* killough 8/9/98 */
 
     if ((mo->z <= mo->floorz) && P_HitFloor(mo) && d_splash)
     {                           // Landed in some sort of liquid
@@ -2578,6 +2741,8 @@ void A_MoreGibs(mobj_t* actor)
             // max gore - ludicrous gibs
             mo = P_SpawnMobj(actor->x, actor->y, actor->z + (24*FRACUNIT), MT_FLESH);
 
+//            printf("Sprite: %d, Frame: %d (MT_FLESH)\n", mo->sprite, mo->frame);
+
             // added for colored blood and gore!
             mo->target = actor;
             mo->flags2 = MF2_DONOTMAP;
@@ -2606,13 +2771,26 @@ void A_MoreGibs(mobj_t* actor)
                     old_u = t;
                 }
             }
-
+/*
             // even more ludicrous gore
             if(d_maxgore && !(actor->flags & MF_NOBLOOD))
             {
-                mobj_t *gore = P_SpawnMobj(actor->x,
-                                           actor->y,
-                                           actor->z + (32*FRACUNIT), MT_GORE);
+                mobj_t *gore;
+
+                if(mo->target->type == MT_HEAD || mo->type == MT_BETAHEAD)
+                    gore = P_SpawnMobj(actor->x,
+                                       actor->y,
+                                       actor->z + (32*FRACUNIT), MT_BLUESPRAY);
+                else if(mo->type == MT_BRUISER || mo->type == MT_BETABRUISER || mo->type == MT_KNIGHT)
+                    gore = P_SpawnMobj(actor->x,
+                                       actor->y,
+                                       actor->z + (32*FRACUNIT), MT_GREENSPRAY);
+                else
+                    gore = P_SpawnMobj(actor->x,
+                                       actor->y,
+                                       actor->z + (32*FRACUNIT), MT_SPRAY);
+
+//                printf("Sprite: %d, Frame: %d (MT_SPRAY)\n", gore->sprite, gore->frame);
 
                 // added for colored blood and gore!
                 gore->target = mo;
@@ -2623,10 +2801,435 @@ void A_MoreGibs(mobj_t* actor)
                 gore->momy = mo->momy;
                 gore->momz = mo->momz;
             }
+*/
         }
         while(--numchunks > 0);
 
         skip: ;
     }
 }
+
+
+// killough 11/98: kill an object
+void A_Die(mobj_t *actor, player_t *player, pspdef_t *psp)
+{
+    P_DamageMobj(actor, NULL, NULL, actor->health);
+}
+
+//
+// A_Detonate
+// killough 8/9/98: same as A_Explode, except that the damage is variable
+//
+void A_Detonate(mobj_t *actor, player_t *player, pspdef_t *psp)
+{
+    P_RadiusAttack(actor, actor->target, actor->info->damage);
+}
+
+//
+// killough 9/98: a mushroom explosion effect, sorta :)
+// Original idea: Linguica
+//
+void A_Mushroom(mobj_t *actor, player_t *player, pspdef_t *psp)
+{
+    int         i;
+    int         j;
+    int         n = actor->info->damage;
+
+    // Mushroom parameters are part of code pointer's state
+    fixed_t     misc1 = (actor->state->misc1 ? actor->state->misc1 : FRACUNIT * 4);
+    fixed_t     misc2 = (actor->state->misc2 ? actor->state->misc2 : FRACUNIT / 2);
+
+    A_Explode(actor);                               // First make normal explosion
+
+    // Now launch mushroom cloud
+    for (i = -n; i <= n; i += 8)
+        for (j = -n; j <= n; j += 8)
+        {
+            mobj_t      target = *actor;
+            mobj_t      *mo;
+
+            target.x += i << FRACBITS;                          // Aim in many directions from source
+            target.y += j << FRACBITS;
+            target.z += P_AproxDistance(i, j) * misc1;         // Aim up fairly high
+            mo = P_SpawnMissile(actor, &target, MT_FATSHOT);    // Launch fireball
+            mo->momx = FixedMul(mo->momx, misc2);
+            mo->momy = FixedMul(mo->momy, misc2);               // Slow down a bit
+            mo->momz = FixedMul(mo->momz, misc2);
+            mo->flags &= ~MF_NOGRAVITY;                         // Make debris fall under gravity
+        }
+}
+
+//
+// killough 11/98
+//
+// The following were inspired by Len Pitre
+//
+// A small set of highly-sought-after code pointers
+//
+void A_Spawn(mobj_t *actor, player_t *player, pspdef_t *psp)
+{
+    if (actor->state->misc1)
+        P_SpawnMobj(actor->x, actor->y, (actor->state->misc2 << FRACBITS) + actor->z,
+            actor->state->misc1 - 1);
+}
+
+void A_Turn(mobj_t *actor, player_t *player, pspdef_t *psp)
+{
+    actor->angle += (unsigned int)(((uint64_t)actor->state->misc1 << 32) / 360);
+}
+
+void A_Face(mobj_t *actor, player_t *player, pspdef_t *psp)
+{
+    actor->angle = (unsigned int)(((uint64_t)actor->state->misc1 << 32) / 360);
+}
+
+void A_Scratch(mobj_t *actor, player_t *player, pspdef_t *psp)
+{
+    (actor->target && (A_FaceTarget(actor), P_CheckMeleeRange(actor)) ?
+        (actor->state->misc2 ? S_StartSound(actor, actor->state->misc2) : (void)0,
+        P_DamageMobj(actor->target, actor, actor, actor->state->misc1)) : (void)0);
+}
+
+void A_PlaySound(mobj_t *actor, player_t *player, pspdef_t *psp)
+{
+    S_StartSound((actor->state->misc2 ? NULL : actor), actor->state->misc1);
+}
+
+void A_RandomJump(mobj_t *actor, player_t *player, pspdef_t *psp)
+{
+    if (psp)
+    {
+        state_t *state = psp->state;
+
+        if (P_Random() < state->misc2)
+            P_SetPsprite(player, psp - &player->psprites[0], state->misc1);
+    }
+    else
+    {
+        state_t *state = actor->state;
+
+        if (P_Random() < state->misc2)
+            P_SetMobjState(actor, state->misc1);
+    }
+}
+
+//
+// This allows linedef effects to be activated inside deh frames.
+//
+void A_LineEffect(mobj_t *actor, player_t *player, pspdef_t *psp)
+{
+    static line_t       junk;
+    player_t            newplayer;
+    player_t            *oldplayer;
+
+    junk = *lines;
+    oldplayer = actor->player;
+    actor->player = &newplayer;
+    newplayer.health = 100;
+    junk.special = (short)actor->state->misc1;
+    if (!junk.special)
+        return;
+    junk.tag = (short)actor->state->misc2;
+    if (!P_UseSpecialLine(actor, &junk, 0))
+        P_CrossSpecialLine(&junk, 0, actor);
+    actor->state->misc1 = junk.special;
+    actor->player = oldplayer;
+}
+
+void A_SkullPop(mobj_t *actor, player_t *player, pspdef_t *psp)
+{
+    mobj_t      *mo;
+
+    S_StartSound(actor, sfx_pldeth);
+
+    actor->flags &= ~MF_SOLID;
+    mo = P_SpawnMobj(actor->x, actor->y, actor->z + 48 * FRACUNIT, MT_GIBDTH);
+    mo->momx = (P_Random() - P_Random()) << 9;
+    mo->momy = (P_Random() - P_Random()) << 9;
+    mo->momz = FRACUNIT * 2 + (P_Random() << 6);
+
+    // Attach player mobj to bloody skull
+    player = actor->player;
+    actor->player = NULL;
+    mo->player = player;
+    mo->health = actor->health;
+    mo->angle = actor->angle;
+    if (player)
+    {
+        player->mo = mo;
+        player->damagecount = 32;
+    }
+}
+/*
+//
+// A_CounterJump
+//
+// Parameterized codepointer for branching based on comparisons
+// against a thing's counter values.
+//
+// args[0] : state number
+// args[1] : comparison type
+// args[2] : immediate value OR counter number
+// args[3] : counter # to use
+//
+void A_CounterJump(mobj_t *mo)
+{
+   boolean branch = false;
+   int statenum   = S_PISCASE_A_FADE1;
+   int checktype  = 0;
+   short value    = (short)(40);
+   int cnum       = 1;
+   int *counter;
+   
+   // validate state number
+//   statenum = E_StateNumForDEHNum(statenum);
+   if(statenum == NUMSTATES)
+      return;
+
+   if(cnum < 0 || cnum >= NUMMOBJCOUNTERS)
+      return; // invalid
+
+   counter = &(mo->counters[cnum]);
+
+   // 08/02/04:
+   // support getting check value from a counter
+   // if checktype is greater than the last immediate operator,
+   // then the comparison value is actually a counter number
+
+   if(checktype >= CPC_NUMIMMEDIATE)
+   {
+      // turn it into the corresponding immediate operation
+      checktype -= CPC_NUMIMMEDIATE;
+
+      if(value < 0 || value >= NUMMOBJCOUNTERS)
+         return; // invalid counter number
+
+      value = mo->counters[value];
+   }
+
+   switch(checktype)
+   {
+   case CPC_LESS:
+      branch = (*counter < value); break;
+   case CPC_LESSOREQUAL:
+      branch = (*counter <= value); break;
+   case CPC_GREATER:
+      branch = (*counter > value); break;
+   case CPC_GREATEROREQUAL:
+      branch = (*counter >= value); break;
+   case CPC_EQUAL:
+      branch = (*counter == value); break;
+   case CPC_NOTEQUAL:
+      branch = (*counter != value); break;
+   case CPC_BITWISEAND:
+      branch = (*counter & value); break;
+   default:
+      break;
+   }
+
+   if(branch)
+      P_SetMobjState(mo, statenum);
+}
+
+//
+// A_FadeOut
+//
+// ZDoom-inspired action function, implemented using wiki docs.
+//
+// args[0] : alpha step
+//
+void A_FadeOut(mobj_t *mo)
+{
+//   mo->translucency -= 0.025;
+   
+//   if(mo->translucency < 0)
+//      mo->translucency = 0;
+//   else if(mo->translucency > FRACUNIT)
+//      mo->translucency = FRACUNIT;
+}
+
+//
+// A_CounterSwitch
+//
+// This powerful codepointer can branch to one of N states
+// depending on the value of the indicated counter, and it
+// remains totally safe at all times. If the entire indicated
+// frame set is not valid, no actions will be taken.
+//
+// args[0] : counter # to use
+// args[1] : DeHackEd number of first frame in consecutive set
+// args[2] : number of frames in consecutive set
+//
+void A_CounterSwitch(mobj_t *mo)
+{
+   int cnum = 1;
+   int startstate = S_PISCASE_A;
+   int numstates  = 4 - 1;
+   int *counter;
+
+   // get counter
+   if(cnum < 0 || cnum >= NUMMOBJCOUNTERS)
+      return; // invalid
+
+   counter = &(mo->counters[cnum]);
+
+   // verify startstate
+//   startstate = E_StateNumForDEHNum(startstate);
+   if(startstate == NUMSTATES)
+      return;
+
+   // verify last state is < NUMSTATES
+   if(startstate + numstates >= NUMSTATES)
+      return;
+
+   // verify counter is in range
+   if(*counter < 0 || *counter > numstates)
+      return;
+
+   // jump!
+   P_SetMobjState(mo, startstate + *counter);
+}
+
+//
+// A_SetCounter
+//
+// Sets the value of the indicated counter variable for the thing.
+// Can perform numerous operations -- this is more like a virtual
+// machine than a codepointer ;)
+//
+// args[0] : counter # to set
+// args[1] : value to utilize
+// args[2] : operation to perform
+//
+void A_SetCounter(mobj_t *mo)
+{
+   int cnum = 1;
+   short value = (short)(4);
+   int specialop = 11;
+   int *counter;
+
+   if(cnum < 0 || cnum >= NUMMOBJCOUNTERS)
+      return; // invalid
+
+   counter = &(mo->counters[cnum]);
+
+   switch(specialop)
+   {
+   case CPOP_ASSIGN:
+      *counter = value; break;
+   case CPOP_ADD:
+      *counter += value; break;
+   case CPOP_SUB:
+      *counter -= value; break;
+   case CPOP_MUL:
+      *counter *= value; break;
+   case CPOP_DIV:
+      if(value) // don't divide by zero
+         *counter /= value;
+      break;
+   case CPOP_MOD:
+      if(value > 0) // only allow modulus by positive values
+         *counter %= value;
+      break;
+   case CPOP_AND:
+      *counter &= value; break;
+   case CPOP_ANDNOT:
+      *counter &= ~value; break; // compound and-not operation
+   case CPOP_OR:
+      *counter |= value; break;
+   case CPOP_XOR:
+      *counter ^= value; break;
+   case CPOP_RND:
+      *counter = P_Random(); break;
+   case CPOP_RNDMOD:
+      if(value > 0)
+         *counter = P_Random() % value; break;
+   case CPOP_SHIFTLEFT:
+      *counter <<= value; break;
+   case CPOP_SHIFTRIGHT:
+      *counter >>= value; break;
+   default:
+      break;
+   }
+}
+
+//
+// A_EjectCasing
+//
+// A pointer meant for spawning bullet casing objects.
+// Parameters:
+//   args[0] : distance in front in 16th's of a unit
+//   args[1] : distance from middle in 16th's of a unit (negative = left)
+//   args[2] : z height relative to player's viewpoint in 16th's of a unit
+//   args[3] : thingtype to toss
+//
+void A_EjectCasing(mobj_t *actor)
+{
+   angle_t     angle = actor->angle;
+   fixed_t     x, y, z;
+   fixed_t     frontdist;
+   int         frontdisti;
+   fixed_t     sidedist;
+   fixed_t     zheight;
+   int         thingtype;
+   mobj_t      *mo;
+
+   frontdisti = 512;
+   
+   frontdist  = frontdisti * FRACUNIT / 16;
+   sidedist   = 64 * FRACUNIT / 16;
+   zheight    = -112 * FRACUNIT / 16;
+
+   // account for mlook - EXPERIMENTAL
+   if(actor->player)
+   {
+      int pitch = actor->player->lookdir;
+            
+      z = actor->z + actor->player->viewheight + zheight;
+      
+      // modify height according to pitch - hack warning.
+      z -= (pitch / ANGLE_1) * ((10 * frontdisti / 256) * FRACUNIT / 32);
+   }
+   else
+      z = actor->z + (0) * FRACUNIT / 16;
+
+   x = actor->x + FixedMul(frontdist, finecosine[angle>>ANGLETOFINESHIFT]);
+   y = actor->y + FixedMul(frontdist, finesine[angle>>ANGLETOFINESHIFT]);
+
+   // adjust x/y along a vector orthogonal to the source object's angle
+   angle = angle - ANG90;
+
+   x += FixedMul(sidedist, finecosine[angle>>ANGLETOFINESHIFT]);
+   y += FixedMul(sidedist, finesine[angle>>ANGLETOFINESHIFT]);
+
+   thingtype = MT_BULLET;
+
+   mo = P_SpawnMobj(x, y, z, thingtype);
+
+   mo->angle = sidedist >= 0 ? angle : angle + ANG180;
+}
+
+//
+// A_CasingThrust
+//
+// A casing-specific thrust function.
+//    args[0] : lateral force in 16ths of a unit
+//    args[1] : z force in 16ths of a unit
+//
+void A_CasingThrust(mobj_t *actor)
+{
+   fixed_t moml, momz;
+
+   moml = 16 * FRACUNIT / 16;
+   momz = 32 * FRACUNIT / 16;
+   
+   actor->momx = FixedMul(moml, finecosine[actor->angle>>ANGLETOFINESHIFT]);
+   actor->momy = FixedMul(moml, finesine[actor->angle>>ANGLETOFINESHIFT]);
+   
+   // randomize
+   actor->momx += P_SubRandom(pr_casing) << 8;
+   actor->momy += P_SubRandom(pr_casing) << 8;
+   actor->momz = momz + (P_SubRandom(pr_casing) << 8);
+}
+*/
 

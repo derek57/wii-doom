@@ -77,6 +77,8 @@ lumpinfo_t        **lumpinfo;
 
 static lumpindex_t *lumphash;
 
+extern int diskicon_readbytes;
+
 // Hash function used for lump names.
 
 #pragma GCC diagnostic push
@@ -134,7 +136,10 @@ wad_file_t *W_AddFile (char *filename, boolean automatic)
         return NULL;
     }
 
-    M_StringCopy(wad_file->path, filename, sizeof(wad_file->path));
+//    M_StringCopy(wad_file->path, filename, sizeof(wad_file->path));
+
+    // [crispy] save the file name
+    wad_file->path = M_BaseName(filename);
 
     if (strcasecmp(filename+strlen(filename)-3 , "wad" ) )
     {
@@ -224,11 +229,16 @@ wad_file_t *W_AddFile (char *filename, boolean automatic)
         Z_Free(lumphash);
         lumphash = NULL;
     }
-
+/*
     C_Printf(CR_GRAY, " %s %s lumps from %.4s file %s\n",
             (automatic ? "Automatically added" : "Added"),
             commify(numlumps - startlump),
             header.identification, uppercase(filename));
+*/
+    C_Printf(CR_GRAY,
+            " %s %s lump%s from %.4s file %s.", (automatic ? "Automatically added" : "Added"),
+                    commify(numlumps - startlump), (numlumps - startlump == 1 ? "" : "s"),
+                            header.identification, uppercase(filename));
 
     return wad_file;
 }
@@ -345,7 +355,7 @@ void W_ReadLump(lumpindex_t lump, void *dest)
 {
     int c;
     lumpinfo_t *l;
-        
+
     if (lump >= numlumps)
     {
         I_Error ("W_ReadLump: %i >= numlumps", lump);
@@ -353,6 +363,7 @@ void W_ReadLump(lumpindex_t lump, void *dest)
 
     l = lumpinfo[lump];
 
+    diskicon_readbytes += l->size;
     disk_indicator = disk_on;
 
     c = W_Read(l->wad_file, l->position, dest, l->size);
@@ -593,7 +604,7 @@ void W_CheckSize(int wad)
             fseek(fprw, 0, 2);                // file pointer at the end of file
             fsizerw = ftell(fprw);        // take a position of file pointer un size variable
 
-            if(fsizerw != 1026033)
+            if(fsizerw != 1120809)
                 print_resource_pwad_error = true;
 
             fclose(fprw);
@@ -728,5 +739,95 @@ int W_CheckMultipleLumps(char *name)
             ++count;
 
     return count;
+}
+
+boolean HasDehackedLump(const char *pwadname)
+{
+    FILE        *fp = fopen(pwadname, "rb");
+    filelump_t  lump;
+    wadinfo_t   header;
+    const char  *n = lump.name;
+    int         result = false;
+
+    if (!fp)
+        return false;
+
+    // read IWAD header
+    if (fread(&header, 1, sizeof(header), fp) == sizeof(header))
+    {
+        fseek(fp, LONG(header.infotableofs), SEEK_SET);
+
+        // Determine game mode from levels present
+        // Must be a full set for whichever mode is present
+        for (header.numlumps = LONG(header.numlumps);
+            header.numlumps && fread(&lump, sizeof(lump), 1, fp); header.numlumps--)
+        {
+            if (*n == 'D' && n[1] == 'E' && n[2] == 'H' && n[3] == 'A' &&
+                n[4] == 'C' && n[5] == 'K' && n[6] == 'E' && n[7] == 'D')
+            {
+                result = true;
+                break;
+            }
+        }
+    }
+
+    fclose(fp);
+
+    return result;
+}
+
+// Go forwards rather than backwards so we get lump from IWAD and not PWAD
+lumpindex_t W_GetNumForName2(char *name)
+{
+    lumpindex_t i;
+
+    for (i = 0; i < numlumps; i++)
+        if (!strncasecmp(lumpinfo[i]->name, name, 8))
+            break;
+
+    if (i == numlumps)
+        I_Error("W_GetNumForName: %s not found!", name);
+
+    return i;
+}
+
+//
+// W_WadType
+// Returns IWAD, PWAD or 0.
+//
+int W_WadType(char *filename)
+{
+    wadinfo_t   header;
+    wad_file_t  *wad_file = W_OpenFile(filename);
+
+    if (!wad_file)
+        return 0;
+
+    W_Read(wad_file, 0, &header, sizeof(header));
+
+    W_CloseFile(wad_file);
+
+    if (!strncmp(header.identification, "IWAD", 4))
+        return IWAD;
+    else if (!strncmp(header.identification, "PWAD", 4))
+        return PWAD;
+    else
+        return 0;
+}
+
+//
+// W_RangeCheckNumForName
+// Linear Search that checks for a lump number ONLY
+// inside a range, not all lumps.
+//
+lumpindex_t W_RangeCheckNumForName(lumpindex_t min, lumpindex_t max, char *name)
+{
+    lumpindex_t i;
+
+    for (i = min; i <= max; i++)
+        if (!strncasecmp(lumpinfo[i]->name, name, 8))
+            return i;
+
+    return -1;
 }
 

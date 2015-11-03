@@ -34,6 +34,7 @@
 #include "doomkeys.h"
 #endif
 
+#include "doomstat.h"
 #include "hu_lib.h"
 
 #ifdef WII
@@ -53,8 +54,6 @@
 
 // boolean : whether the screen is always erased
 #define noterased viewwindowx
-
-extern boolean        automapactive;        // in AM_map.c
 
 void HUlib_init(void)
 {
@@ -127,6 +126,7 @@ HUlib_drawTextLine
     int                 x;
     unsigned char       c;
 
+
     // draw the new stuff
     x = l->x;
     for (i=0;i<l->len;i++)
@@ -139,7 +139,10 @@ HUlib_drawTextLine
             w = SHORT(l->f[c - l->sc]->width);
             if (x+w > ORIGWIDTH)    // CHANGED FOR HIRES
                 break;
-            V_DrawPatch(x, l->y, l->f[c - l->sc]);
+            if(font_shadow)
+                V_DrawPatchWithShadow(x, l->y, l->f[c - l->sc], false);
+            else
+                V_DrawPatch(x, l->y, l->f[c - l->sc]);
             x += w;
         }
         else
@@ -154,7 +157,10 @@ HUlib_drawTextLine
     if (drawcursor                                           // CHANGED FOR HIRES
         && x + SHORT(l->f['_' - l->sc]->width) <= ORIGWIDTH) // CHANGED FOR HIRES
     {
-        V_DrawPatch(x, l->y, l->f['_' - l->sc]);
+        if(font_shadow)
+            V_DrawPatchWithShadow(x, l->y, l->f['_' - l->sc], false);
+        else
+            V_DrawPatch(x, l->y, l->f['_' - l->sc]);
     }
 }
 

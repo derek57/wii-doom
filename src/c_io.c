@@ -49,7 +49,7 @@
 
 #include <time.h>
 #include "c_io.h"
-#include "deh_str.h"
+#include "d_deh.h"
 #include "d_event.h"
 #include "doomfeatures.h"
 #include "doomkeys.h"
@@ -149,24 +149,25 @@ static struct
     { 'b',  '\\', -1 }, { 'b',  '\'', -1 }, { 'b',  'j',  -2 }, { 'c',  '\\', -1 },
     { 'c',  ',',  -1 }, { 'c',  '\"', -1 }, { 'c',  '\'', -1 }, { 'c',  'j',  -2 },
     { 'd',  'j',  -2 }, { 'e',  '\\', -1 }, { 'e',  ',',  -1 }, { 'e',  '\"', -1 },
-    { 'e',  '\'', -1 }, { 'e',  '_',  -1 }, { 'e',  'j',  -2 }, { 'f',  ',',  -2 },
-    { 'f',  '_',  -1 }, { 'f',  'j',  -2 }, { 'h',  '\\', -1 }, { 'h',  '\"', -1 },
-    { 'h',  '\'', -1 }, { 'h',  'j',  -2 }, { 'i',  'j',  -2 }, { 'k',  'j',  -2 },
-    { 'l',  'j',  -2 }, { 'm',  '\"', -1 }, { 'm',  '\\', -1 }, { 'm',  '\'', -1 },
-    { 'm',  'j',  -2 }, { 'n',  '\\', -1 }, { 'n',  '\"', -1 }, { 'n',  '\'', -1 },
-    { 'n',  'j',  -2 }, { 'o',  '\\', -1 }, { 'o',  ',',  -1 }, { 'o',  '\"', -1 },
-    { 'o',  '\'', -1 }, { 'o',  'j',  -2 }, { 'p',  '\\', -1 }, { 'p',  ',',  -1 },
-    { 'p',  '\"', -1 }, { 'p',  '\'', -1 }, { 'p',  'j',  -2 }, { 'r',  ' ',  -1 },
-    { 'r',  '\\', -1 }, { 'r',  '.',  -2 }, { 'r',  ',',  -2 }, { 'r',  '\"', -1 },
-    { 'r',  '\'', -1 }, { 'r',  '_',  -1 }, { 'r',  'a',  -1 }, { 'r',  'j',  -2 },
-    { 's',  ',',  -1 }, { 's',  'j',  -2 }, { 't',  'j',  -2 }, { 'u',  'j',  -2 },
-    { 'v',  ',',  -1 }, { 'v',  'j',  -2 }, { 'w',  'j',  -2 }, { 'x',  'j',  -2 },
-    { 'z',  'j',  -2 }, {  0 ,   0 ,   0 }
+    { 'e',  '\'', -1 }, { 'e',  '_',  -1 }, { 'e',  'j',  -2 }, { 'f',  ' ',  -1 },
+    { 'f',  ',',  -2 }, { 'f',  '_',  -1 }, { 'f',  'j',  -2 }, { 'h',  '\\', -1 },
+    { 'h',  '\"', -1 }, { 'h',  '\'', -1 }, { 'h',  'j',  -2 }, { 'i',  'j',  -2 },
+    { 'k',  'j',  -2 }, { 'l',  'j',  -2 }, { 'm',  '\"', -1 }, { 'm',  '\\', -1 },
+    { 'm',  '\'', -1 }, { 'm',  'j',  -2 }, { 'n',  '\\', -1 }, { 'n',  '\"', -1 },
+    { 'n',  '\'', -1 }, { 'n',  'j',  -2 }, { 'o',  '\\', -1 }, { 'o',  ',',  -1 },
+    { 'o',  '\"', -1 }, { 'o',  '\'', -1 }, { 'o',  'j',  -2 }, { 'p',  '\\', -1 },
+    { 'p',  ',',  -1 }, { 'p',  '\"', -1 }, { 'p',  '\'', -1 }, { 'p',  'j',  -2 },
+    { 'r',  ' ',  -1 }, { 'r',  '\\', -1 }, { 'r',  '.',  -2 }, { 'r',  ',',  -2 },
+    { 'r',  '\"', -1 }, { 'r',  '\'', -1 }, { 'r',  '_',  -1 }, { 'r',  'a',  -1 },
+    { 'r',  'j',  -2 }, { 's',  ',',  -1 }, { 's',  'j',  -2 }, { 't',  'j',  -2 },
+    { 'u',  'j',  -2 }, { 'v',  ',',  -1 }, { 'v',  'j',  -2 }, { 'w',  'j',  -2 },
+    { 'x',  'j',  -2 }, { 'z',  'j',  -2 }, {  0 ,   0 ,   0 }
 };
 
 
 boolean         consoleactive = false;
 boolean         alwaysrun;
+boolean         forceblurredraw = false;
 
 patch_t         *unknownchar;
 patch_t         *consolefont[CONSOLEFONTSIZE];
@@ -216,9 +217,9 @@ int             selectend = 0;
 int             timestampx;
 int             zerowidth;
 
-static int      caretwait = 0;
+static int      caretwait;
 static int      outputhistory = -1;
-static int      consolewait = 0;
+static int      consolewait;
 static int      notabs[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 
 static int      consoleanimdown[] =
@@ -236,6 +237,8 @@ static int      consoleanimup[] =
 static boolean  showcaret = true;
 
 extern boolean  translucency;
+
+extern boolean  wipe;
 
 //extern byte     *tinttab75;
 
@@ -266,7 +269,7 @@ void C_ConDump(void)
 
             for (i = 1; i < consolestrings - 1; ++i)
             {
-                if (console[i].type == divider)
+                if (console[i].type == dividerstring)
                     fprintf(file, "%s\n", DIVIDERSTRING);
                 else
                 {
@@ -322,7 +325,7 @@ void C_ConDump(void)
     }
 }
 
-void C_Printf(stringtype_t type, char *string, ...)
+void C_Printf(stringtype_t typestring, char *string, ...)
 {
     va_list     argptr;
     char        buffer[1024] = "";
@@ -336,7 +339,7 @@ void C_Printf(stringtype_t type, char *string, ...)
     console = Z_Realloc(console, (consolestrings + 1) * sizeof(*console));
 #endif
     console[consolestrings].string = strdup(buffer);
-    console[consolestrings].type = type;
+    console[consolestrings].type = typestring;
     memset(console[consolestrings].tabs, 0, sizeof(console[consolestrings].tabs));
     console[consolestrings].timestamp = "";
     ++consolestrings;
@@ -454,13 +457,13 @@ void C_Init(void)
 
     zerowidth = SHORT(consolefont['0' - CONSOLEFONTSTART]->width);
 
-    consolecolors[yellow] = yellowcolor;   // yellow = 160
-    consolecolors[red] = redcolor;         // red = 40
-    consolecolors[gray] = graycolor;       // gray = 100
-    consolecolors[blue] = bluecolor;       // blue = 200
-    consolecolors[white] = whitecolor;     // white = 80
-    consolecolors[green] = greencolor;     // green = 120
-    consolecolors[divider] = dividercolor; // divider = 0 (linked to red color)
+    consolecolors[yellowstring] = yellowcolor;   // yellow = 160
+    consolecolors[redstring] = redcolor;         // red = 40
+    consolecolors[graystring] = graycolor;       // gray = 100
+    consolecolors[bluestring] = bluecolor;       // blue = 200
+    consolecolors[whitestring] = whitecolor;     // white = 80
+    consolecolors[greenstring] = greencolor;     // green = 120
+    consolecolors[dividerstring] = dividercolor; // divider = 0 (linked to red color)
 
     consoletintcolor <<= 8;
     consoleedgecolor1 <<= 8;
@@ -494,21 +497,30 @@ static void c_blurscreen(int x1, int y1, int x2, int y2, int i)
 
 static void C_DrawBackground(int height)
 {
+    static boolean      blurred;
     int                 i, j;
 
     height = (height + 5) * SCREENWIDTH;
 
-    for (i = 0; i < height; ++i)
-        c_blurredscreen[i] = I_VideoBuffer[i];
+    if (!blurred || forceblurredraw)
+    {
+        forceblurredraw = false;
 
-    c_blurscreen(0, 0, SCREENWIDTH - 1, height, 1);
-    c_blurscreen(1, 0, SCREENWIDTH, height, -1);
-    c_blurscreen(0, 0, SCREENWIDTH - 1, height - SCREENWIDTH, SCREENWIDTH + 1);
-    c_blurscreen(1, SCREENWIDTH, SCREENWIDTH, height, -(SCREENWIDTH + 1));
-    c_blurscreen(0, 0, SCREENWIDTH, height - SCREENWIDTH, SCREENWIDTH);
-    c_blurscreen(0, SCREENWIDTH, SCREENWIDTH, height, -SCREENWIDTH);
-    c_blurscreen(1, 0, SCREENWIDTH, height - SCREENWIDTH, SCREENWIDTH - 1);
-    c_blurscreen(0, SCREENWIDTH, SCREENWIDTH - 1, height, -(SCREENWIDTH - 1));
+        for (i = 0; i < height; ++i)
+            c_blurredscreen[i] = I_VideoBuffer[i];
+
+        c_blurscreen(0, 0, SCREENWIDTH - 1, height, 1);
+        c_blurscreen(1, 0, SCREENWIDTH, height, -1);
+        c_blurscreen(0, 0, SCREENWIDTH - 1, height - SCREENWIDTH, SCREENWIDTH + 1);
+        c_blurscreen(1, SCREENWIDTH, SCREENWIDTH, height, -(SCREENWIDTH + 1));
+        c_blurscreen(0, 0, SCREENWIDTH, height - SCREENWIDTH, SCREENWIDTH);
+        c_blurscreen(0, SCREENWIDTH, SCREENWIDTH, height, -SCREENWIDTH);
+        c_blurscreen(1, 0, SCREENWIDTH, height - SCREENWIDTH, SCREENWIDTH - 1);
+        c_blurscreen(0, SCREENWIDTH, SCREENWIDTH - 1, height, -(SCREENWIDTH - 1));
+    }
+
+    forceblurredraw = true;
+    blurred = (consoleheight == CONSOLEHEIGHT && !wipe);
 
     for (i = 0; i < height; ++i)
         I_VideoBuffer[i] = tinttab50[c_blurredscreen[i] + consoletintcolor];
@@ -534,8 +546,8 @@ static void C_DrawBackground(int height)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wchar-subscripts"
 
-static void C_DrawConsoleText(int x, int y, char *text, byte color, int translucency, int tabs[8],
-    boolean inverted)
+static void C_DrawConsoleText(int x, int y, char *text, int color1, int color2, byte *tinttab,
+    int tabs[8])
 {
     boolean              italics = false;
     size_t               i;
@@ -612,7 +624,7 @@ static void C_DrawConsoleText(int x, int y, char *text, byte color, int transluc
 
             if (patch)
             {
-                V_DrawConsoleChar(x, y, patch, color, italics, translucency, inverted);
+                V_DrawConsoleChar(x, y, patch, color1, color2, italics, tinttab);
                 x += SHORT(patch->width);
             }
         }
@@ -632,7 +644,7 @@ static void C_DrawTimeStamp(int x, int y, char *text)
         patch_t *patch = consolefont[text[i] - CONSOLEFONTSTART];
 
         V_DrawConsoleChar(x + (text[i] == '1' ? (zerowidth - SHORT(patch->width)) / 2 : 0), y,
-                patch, consolebrandingcolor, false, 1, false);
+                patch, consolebrandingcolor, NOBACKGROUNDCOLOR, false, tinttab25);
         x += (isdigit(text[i]) ? zerowidth : SHORT(patch->width));
     }
 }
@@ -666,7 +678,7 @@ void C_Drawer(void)
 
         // draw branding
         C_DrawConsoleText(SCREENWIDTH - C_TextWidth("Wii-DOOM") - CONSOLETEXTX - 1,
-            CONSOLEHEIGHT - 10, "Wii-DOOM", graycolor, 1, notabs, false);
+            CONSOLEHEIGHT - 10, "Wii-DOOM", graycolor, NOBACKGROUNDCOLOR, tinttab25, notabs);
 
         // draw console text
         if (outputhistory == -1)
@@ -684,12 +696,12 @@ void C_Drawer(void)
             int y = CONSOLELINEHEIGHT * (i - start + MAX(0, CONSOLELINES - consolestrings))
                     - CONSOLELINEHEIGHT / 2 + 1;
 
-            if (console[i].type == divider)
+            if (console[i].type == dividerstring)
                 C_DrawDivider(y + 5 - (CONSOLEHEIGHT - consoleheight));
             else
             {
                 C_DrawConsoleText(CONSOLETEXTX, y + (CONSOLELINEHEIGHT / 2), console[i].string,
-                    consolecolors[console[i].type], 0, console[i].tabs, false);
+                    consolecolors[console[i].type], NOBACKGROUNDCOLOR, NULL, console[i].tabs);
 
                 if (console[i].timestamp[0])
                     C_DrawTimeStamp(timestampx, y + (CONSOLELINEHEIGHT / 2), console[i].timestamp);
@@ -703,20 +715,19 @@ void C_Drawer(void)
             caretwait = I_GetTime() + CARETWAIT;
         }
 
-        V_DrawConsoleChar(x, consoleheight - 10, space, inputcolor,
-                false, 0, false);
+        V_DrawConsoleChar(x, consoleheight - 10, space, inputcolor, NOBACKGROUNDCOLOR,
+                false, NULL);
         V_DrawConsoleChar(x + SHORT(space->width), consoleheight - 10, route,
-                inputcolor, false, 0, false);
+                inputcolor, NOBACKGROUNDCOLOR, false, NULL);
 
         if (showcaret)
             V_DrawConsoleChar(x + SHORT(route->width) + 4, consoleheight - 10,
-                    caret, inputcolor, false, 0, false);
+                    caret, inputcolor, NOBACKGROUNDCOLOR, false, NULL);
         x += 3;
 
         // draw the scrollbar
         C_DrawScrollbar();
     }
-
     else
         consoleactive = false;
 }
@@ -898,7 +909,7 @@ boolean C_Responder(event_t *ev)
     }
     else if (ev->type == ev_keyup)
         return false;
-/*
+#ifndef WII
     else if (ev->type == ev_mousewheel)
     {
         // scroll output up
@@ -920,7 +931,7 @@ boolean C_Responder(event_t *ev)
             }
         }
     }
-*/
+#endif
 #endif
     return true;
 }
@@ -1036,7 +1047,7 @@ void C_PlayerMessage(char *string, ...)
         console = Z_Realloc(console, (consolestrings + 1) * sizeof(*console));
 #endif
         console[consolestrings].string = strdup(buffer);
-        console[consolestrings].type = green;
+        console[consolestrings].type = greenstring;
         memset(console[consolestrings].tabs, 0, sizeof(console[consolestrings].tabs));
 
         time(&rawtime);

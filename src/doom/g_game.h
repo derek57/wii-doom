@@ -64,7 +64,7 @@ void G_SaveGame (int slot, char* description, char* name);
 
 // Only called by startup code.
 //void G_RecordDemo (char* name);
-void G_RecordDemo(skill_t skill, int numplayers, int episode, int map);
+void G_RecordDemo(skill_t skill, int episode, int map);
 
 void G_RecordDemoCmd(char *name);
 
@@ -94,5 +94,7 @@ void G_PlayerReborn (int player);
 
 extern int vanilla_savegame_limit;
 extern int vanilla_demo_limit;
+extern boolean canmodify;
+
 #endif
 

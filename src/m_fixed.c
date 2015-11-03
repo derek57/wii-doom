@@ -37,39 +37,38 @@
 
 // Fixme. __USE_C_FIXED__ or something.
 
-fixed_t
-FixedMul
-( fixed_t        a,
-  fixed_t        b )
-{
-    return ((int64_t) a * (int64_t) b) >> FRACBITS;
-}
-
-
-
 //
 // FixedDiv, C version.
 //
 
-fixed_t FixedDiv(fixed_t a, fixed_t b)
+int SIGN(int a)
 {
-    if ((abs(a) >> 14) >= abs(b))
-    {
-        return (a^b) < 0 ? INT_MIN : INT_MAX;
-    }
-    else
-    {
-        int64_t result;
+    return (1 | (a >> 31));
+}
 
-        result = ((int64_t) a << 16) / b;
+int ABS(int a)
+{
+    int b = a >> 31;
 
-        return (fixed_t) result;
-    }
+    return ((a ^ b) - b);
 }
 
 int BETWEEN(int a, int b, int c)
 {
     return MAX(a, MIN(b, c));
+}
+
+fixed_t FixedMul(fixed_t a, fixed_t b)
+{
+    return (((int64_t)a * (int64_t)b) >> FRACBITS);
+}
+
+fixed_t FixedDiv(fixed_t a, fixed_t b)
+{
+    if ((ABS(a) >> 14) >= ABS(b))
+        return ((a ^ b) >> 31) ^ INT_MAX;
+    else
+        return (fixed_t)(((int64_t) a << FRACBITS) / b);
 }
 
 int MIN(int a, int b)

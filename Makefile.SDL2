@@ -274,7 +274,7 @@ PROGRAM_PREFIX = chocolate-
 RANLIB = ranlib
 SDL2_CONFIG = pkg-config sdl2
 SDLMIXER_LIBS =  -lSDL2_mixer
-SDLNET_LIBS =  -lSDL2_net
+#SDLNET_LIBS =  -lSDL2_net
 SDL_CFLAGS = -D_REENTRANT -I/usr/local/include/SDL2 
 SDL_LIBS = -L/usr/local/lib -Wl,-rpath,/usr/local/lib -lSDL2 
 SDLMIXER_CFLAGS = 
@@ -296,6 +296,7 @@ am__leading_dot = .
 am__quote = 
 am__tar = $${TAR-tar} chof - "$$tardir"
 am__untar = $${TAR-tar} xf -
+bashcompletiondir = ${datarootdir}/bash-completion/completions
 bindir = ${exec_prefix}/bin
 build_alias = 
 builddir = .
@@ -374,7 +375,7 @@ EXTRA_DIST = \
 doomdocsdir = ${docdir}/../${PROGRAM_PREFIX}doom
 doomdocs_DATA = $(DOC_FILES) NOT-BUGS
 MAINTAINERCLEANFILES = $(AUX_DIST_GEN)
-SUBDIRS = opl pcsound data src
+SUBDIRS = opl pcsound data src man
 DIST_SUBDIRS = $(SUBDIRS)
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
@@ -846,9 +847,9 @@ uninstall-am: uninstall-doomdocsDATA
 	tags-am uninstall uninstall-am uninstall-doomdocsDATA
 
 
-#INSTALL : man/INSTALL.template man/simplecpp
-#	./man/simplecpp -DDOOM \
-#	                < man/INSTALL.template > $@
+INSTALL : man/INSTALL.template man/simplecpp
+	./man/simplecpp -DDOOM \
+	                < man/INSTALL.template > $@
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

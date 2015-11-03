@@ -80,6 +80,7 @@ lumpindex_t W_GetNumForName(char *name);
 int         W_GetSecondNumForName (char* name);
 int         W_LumpLength(lumpindex_t lump);
 int         W_CheckMultipleLumps(char *name);
+int         W_WadType(char *filename);
 
 void        W_GenerateHashTable(void);
 void        W_ReleaseLumpNum(lumpindex_t lump);
@@ -90,5 +91,10 @@ void        W_ReadLump(lumpindex_t lump, void *dest);
 
 void        *W_CacheLumpNum(lumpindex_t lump, int tag);
 void        *W_CacheLumpName(char *name, int tag);
+
+boolean     HasDehackedLump(const char *pwadname);
+
+lumpindex_t W_GetNumForName2(char *name);
+lumpindex_t W_RangeCheckNumForName(lumpindex_t min, lumpindex_t max, char *name);
 
 #endif

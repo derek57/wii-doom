@@ -166,16 +166,16 @@ static boolean P_CrossSubsector(int num)
         if (line->flags & ML_TWOSIDED)
         {
             // no wall to block sight with?
-            if (front->floor_height == back->floor_height
-                && front->ceiling_height == back->ceiling_height)
+            if (front->floorheight == back->floorheight
+                && front->ceilingheight == back->ceilingheight)
                 continue;
 
             // possible occluder
             // because of ceiling height differences
-            opentop = MIN(front->ceiling_height, back->ceiling_height);
+            opentop = MIN(front->ceilingheight, back->ceilingheight);
 
             // because of floor height differences
-            openbottom = MAX(front->floor_height, back->floor_height);
+            openbottom = MAX(front->floorheight, back->floorheight);
 
             // cph - reject if does not intrude in the z-space of the possible LOS
             if (opentop >= los.maxz && openbottom <= los.minz)
@@ -193,10 +193,10 @@ static boolean P_CrossSubsector(int num)
             // crosses a two sided line
             fixed_t     frac = P_InterceptVector2(&los.strace, &divl);
 
-            if (front->floor_height != back->floor_height)
+            if (front->floorheight != back->floorheight)
                 los.bottomslope = MAX(los.bottomslope, FixedDiv(openbottom - los.sightzstart, frac));
 
-            if (front->ceiling_height != back->ceiling_height)
+            if (front->ceilingheight != back->ceilingheight)
                 los.topslope = MIN(los.topslope, FixedDiv(opentop - los.sightzstart, frac));
 
             if (los.topslope <= los.bottomslope)
@@ -252,15 +252,15 @@ boolean P_CheckSight(mobj_t *t1, mobj_t *t2)
 
     // killough 4/19/98: make fake floors and ceilings block monster view
     if ((s1->heightsec != -1 &&
-        ((t1->z + t1->height <= sectors[s1->heightsec].floor_height &&
-        t2->z >= sectors[s1->heightsec].floor_height) ||
-        (t1->z >= sectors[s1->heightsec].ceiling_height &&
-        t2->z + t1->height <= sectors[s1->heightsec].ceiling_height)))
+        ((t1->z + t1->height <= sectors[s1->heightsec].floorheight &&
+        t2->z >= sectors[s1->heightsec].floorheight) ||
+        (t1->z >= sectors[s1->heightsec].ceilingheight &&
+        t2->z + t1->height <= sectors[s1->heightsec].ceilingheight)))
         || (s2->heightsec != -1 &&
-        ((t2->z + t2->height <= sectors[s2->heightsec].floor_height &&
-        t1->z >= sectors[s2->heightsec].floor_height) ||
-        (t2->z >= sectors[s2->heightsec].ceiling_height &&
-        t1->z + t2->height <= sectors[s2->heightsec].ceiling_height))))
+        ((t2->z + t2->height <= sectors[s2->heightsec].floorheight &&
+        t1->z >= sectors[s2->heightsec].floorheight) ||
+        (t2->z >= sectors[s2->heightsec].ceilingheight &&
+        t1->z + t2->height <= sectors[s2->heightsec].ceilingheight))))
         return false;
 
     // killough 11/98: shortcut for melee situations

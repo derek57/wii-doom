@@ -38,6 +38,15 @@
 #endif
 
 
+typedef enum
+{
+    F_STAGE_TEXT,
+    F_STAGE_ARTSCREEN,
+    F_STAGE_CAST,
+} finalestage_t;
+
+finalestage_t   finalestage;
+
 //
 // FINALE
 //

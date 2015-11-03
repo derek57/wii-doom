@@ -594,7 +594,7 @@ void W_PrintDirectory(void)
 
 // Merge in a file by name
 
-void W_MergeFile(char *filename, boolean automatic)
+boolean W_MergeFile(char *filename, boolean automatic)
 {
     int old_numlumps;
 
@@ -603,7 +603,7 @@ void W_MergeFile(char *filename, boolean automatic)
     // Load PWAD
 
     if (W_AddFile(filename, automatic) == NULL)
-        return;
+        return false;
 
     if(devparm)
     {
@@ -638,5 +638,130 @@ void W_MergeFile(char *filename, boolean automatic)
     // Perform the merge
 
     DoMerge();
+
+    return true;
+}
+
+// Replace lumps in the given list with lumps from the PWAD
+
+static void W_NWTAddLumps(searchlist_t *list)
+{
+    int i;
+
+    // Go through the IWAD list given, replacing lumps with lumps of 
+    // the same name from the PWAD
+
+    for (i=0; i<list->numlumps; ++i)
+    {
+        int index;
+
+        index = FindInList(&pwad, list->lumps[i]->name);
+
+        if (index > 0)
+        {
+            memcpy(&list->lumps[i], &pwad.lumps[index], 
+                   sizeof(lumpinfo_t));
+        }
+    }
+    
+}
+
+// Merge sprites and flats in the way NWT does with its -af and -as 
+// command-line options.
+
+void W_NWTMergeFile(char *filename, int flags)
+{
+    int old_numlumps;
+
+    old_numlumps = numlumps;
+
+    // Load PWAD
+
+    if (W_AddFile(filename, false) == NULL)
+        return;
+
+    // iwad is at the start, pwad was appended to the end
+
+    iwad.lumps = lumpinfo;
+    iwad.numlumps = old_numlumps;
+
+    pwad.lumps = lumpinfo + old_numlumps;
+    pwad.numlumps = numlumps - old_numlumps;
+    
+    // Setup sprite/flat lists
+
+    SetupLists();
+
+    // Merge in flats?
+    
+    if (flags & W_NWT_MERGE_FLATS)
+    {
+        W_NWTAddLumps(&iwad_flats);
+    }
+
+    // Sprites?
+
+    if (flags & W_NWT_MERGE_SPRITES)
+    {
+        W_NWTAddLumps(&iwad_sprites);
+    }
+    
+    // Discard the PWAD
+
+    numlumps = old_numlumps;
+}
+
+// Simulates the NWT -merge command line parameter.  What this does is load
+// a PWAD, then search the IWAD sprites, removing any sprite lumps that also
+// exist in the PWAD.
+
+void W_NWTDashMerge(char *filename)
+{
+    wad_file_t *wad_file;
+    int old_numlumps;
+    int i;
+
+    old_numlumps = numlumps;
+
+    // Load PWAD
+
+    wad_file = W_AddFile(filename, false);
+
+    if (wad_file == NULL)
+    {
+        return;
+    }
+
+    // iwad is at the start, pwad was appended to the end
+
+    iwad.lumps = lumpinfo;
+    iwad.numlumps = old_numlumps;
+
+    pwad.lumps = lumpinfo + old_numlumps;
+    pwad.numlumps = numlumps - old_numlumps;
+    
+    // Setup sprite/flat lists
+
+    SetupLists();
+
+    // Search through the IWAD sprites list.
+
+    for (i=0; i<iwad_sprites.numlumps; ++i)
+    {
+        if (FindInList(&pwad, iwad_sprites.lumps[i]->name) >= 0)
+        {
+            // Replace this entry with an empty string.  This is what
+            // nwt -merge does.
+
+            M_StringCopy(iwad_sprites.lumps[i]->name, "", 8);
+        }
+    }
+
+    // Discard PWAD
+    // The PWAD must now be added in again with -file.
+
+    numlumps = old_numlumps;
+
+    W_CloseFile(wad_file);
 }
 

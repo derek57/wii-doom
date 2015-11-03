@@ -84,6 +84,9 @@ struct sfxinfo_struct
 
     mobj_t *mo;
 
+    // Sfx singularity (only one at a time)
+    int         singularity;
+
     ChanInfo_t chan[8];
 };
 
@@ -237,8 +240,9 @@ typedef struct
 
 // DMX version to emulate for OPL emulation:
 typedef enum {
-    opl_v_old,   // Hexen, Heretic
-    opl_v_new    // Doom, Strife
+    opl_doom1_1_666,    // Doom 1 v1.666
+    opl_doom2_1_666,    // Doom 2 v1.666, Hexen, Heretic
+    opl_doom_1_9        // Doom v1.9, Strife
 } opl_driver_ver_t;
 
 void I_InitMusic(void);
@@ -260,6 +264,7 @@ extern int snd_maxslicetime_ms;
 extern char *snd_musiccmd;
 
 void I_BindSoundVariables(void);
+void I_SetOPLDriverVer(opl_driver_ver_t ver);
 
 #endif
 

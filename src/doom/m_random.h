@@ -36,6 +36,28 @@
 #endif
 
 
+// killough 1/19/98: rewritten to use to use a better random number generator
+// in the new engine, although the old one is available for compatibility.
+
+// killough 2/16/98:
+//
+// Make every random number generator local to each control-equivalent block.
+// Critical for demo sync. Changing the order of this list breaks all previous
+// versions' demos. The random number generators are made local to reduce the
+// chances of sync problems. In Doom, if a single random number generator call
+// was off, it would mess up all random number generators. This reduces the
+// chances of it happening by making each RNG local to a control flow block.
+//
+// Notes to developers: if you want to reduce your demo sync hassles, follow
+// this rule: for each call to P_Random you add, add a new class to the enum
+// type below for each block of code which calls P_Random. If two calls to
+// P_Random are not in "control-equivalent blocks", i.e. there are any cases
+// where one is executed, and the other is not, put them in separate classes.
+//
+// Keep all current entries in this list the same, and in the order
+// indicated by the #'s, because they're critical for preserving demo
+// sync. Do not remove entries simply because they become unused later.
+/*
 typedef enum {
   pr_skullfly,                // #1
   pr_damage,                  // #2
@@ -102,6 +124,108 @@ typedef enum {
   pr_defect,                  // #62
   pr_script,                  // #63: FraggleScript
   // End of new entries
+
+  // Start Eternity classes
+  pr_minatk1,   // Minotaur attacks
+  pr_minatk2,
+  pr_minatk3,
+  pr_mindist,
+  pr_mffire,
+  pr_settics,   // SetTics codepointer
+  pr_volcano,   // Heretic volcano stuff
+  pr_svolcano,  // ditto
+  pr_clrattack,
+  pr_splash,    // TerrainTypes
+  pr_lightning, // lightning flashes
+  pr_nextflash,
+  pr_cloudpick,
+  pr_fogangle,
+  pr_fogcount,
+  pr_fogfloat,
+  pr_floathealth, // floatbobbing seed
+  pr_subtics,     // A_SubTics
+  pr_centauratk,  // A_CentaurAttack
+  pr_dropequip,   // A_DropEquipment
+  pr_bishop1,
+  pr_steamspawn, // steam spawn codepointer 
+  pr_mincharge,  // minotaur inflictor special
+  pr_reflect,    // missile reflection
+  pr_tglitz,     // teleglitter z coord
+  pr_bishop2,
+  pr_custombullets, // parameterized pointers
+  pr_custommisfire,
+  pr_custompunch,
+  pr_tglit,      // teleglitter spawn
+  pr_spawnfloat, // random spawn float z flag
+  pr_mumpunch,   // mummy punches
+  pr_mumpunch2,  
+  pr_hdrop1,     // heretic item drops
+  pr_hdrop2,     
+  pr_hdropmom,   
+  pr_clinkatk,   // clink scratch
+  pr_ghostsneak, // random failure to sight ghost player
+  pr_wizatk,     // wizard attack
+  pr_lookact,    // make seesound instead of active sound
+  pr_sorctele1,  // d'sparil stuff
+  pr_sorctele2,  
+  pr_sorfx1xpl,  
+  pr_soratk1,    
+  pr_soratk2,    
+  pr_bluespark,  
+  pr_podpain,    // pod pain
+  pr_makepod,    // pod spawn
+  pr_knightat1,  // knight scratch
+  pr_knightat2,  // knight projectile choice
+  pr_dripblood,  // for A_DripBlood
+  pr_beastbite,  // beast bite
+  pr_puffy,      // beast ball puff spawn
+  pr_sorc1atk,   // sorcerer serpent attack
+  pr_monbullets, // BulletAttack ptr
+  pr_monmisfire,
+  pr_setcounter, // SetCounter ptr
+  pr_madmelee,   // Heretic mad fighting after player death
+  pr_whirlwind,  // Whirlwind inflictor
+  pr_lichmelee,  // Iron Lich attacks
+  pr_lichattack, 
+  pr_whirlseek,  // Whirlwind seeking
+  pr_impcharge,  // Imp charge attack
+  pr_impmelee,   // Imp melee attack
+  pr_impmelee2,  // Leader imp melee
+  pr_impcrash,   // Imp crash
+  pr_rndwnewdir, // RandomWalk rngs
+  pr_rndwmovect,
+  pr_rndwspawn,
+  pr_weapsetctr, // WeaponSetCtr
+  pr_quake,      // T_QuakeThinker
+  pr_quakedmg,   // quake damage
+  pr_skullpop,   // Heretic skull flying
+  pr_centaurdef, // A_CentaurDefend
+  pr_bishop3,
+  pr_spawnblur,  // A_SpawnBlur
+  pr_chaosbite,  // A_DemonAttack1
+  pr_wraithm,    // A_WraithMelee
+  pr_wraithd, 
+  pr_wraithfx2,
+  pr_wraithfx3,
+  pr_wraithfx4a,
+  pr_wraithfx4b,
+  pr_wraithfx4c,
+  pr_ettin,
+  pr_affritrock, // A_AffritSpawnRock
+  pr_smbounce,   // A_SmBounce
+  pr_affrits,    // A_AffritSplotch
+  pr_icelook,    // A_IceGuyLook
+  pr_icelook2,
+  pr_icechase,   // A_IceGuyChase
+  pr_icechase2, 
+  pr_dragonfx,   // A_DragonFX2
+  pr_dropmace,   // A_DropMace
+  pr_rip,        // ripper missile damage
+  pr_casing,     // A_CasingThrust
+  pr_genrefire,  // A_GenRefire
+  pr_decjump,    // A_Jump
+  pr_decjump2,
+
   NUMPRCLASS                  // MUST be last item in list
 } pr_class_t;
 
@@ -116,9 +240,9 @@ typedef struct {
 extern rng_t rng;                      // The rng's state
 
 extern unsigned long rngseed;          // The starting seed (not part of state)
+*/
 
-
-int P_SignedRandom ();
+//int P_SignedRandom ();
 
 // Returns a number from 0 to 255,
 // from a lookup table.
@@ -128,9 +252,10 @@ int M_RandomInt(int lower, int upper);
 
 // As M_Random, but used only by the play simulation.
 int P_Random (void);
-
+/*
 int P_RandomSMMU(pr_class_t pr_class);
-
+int P_SubRandom(pr_class_t pr_class)
+*/
 // Fix randoms for demos.
 void M_ClearRandom (void);
 

@@ -37,11 +37,11 @@
 
 #ifdef WII
 #include "../c_io.h"
-#include "../deh_str.h"
+#include "../d_deh.h"
 #include "../doomfeatures.h"
 #else
 #include "c_io.h"
-#include "deh_str.h"
+#include "d_deh.h"
 #include "doomfeatures.h"
 #endif
 
@@ -51,14 +51,17 @@
 #include "../doomtype.h"
 #include "../i_sound.h"
 #include "../i_system.h"
+#include "../m_misc.h"
 #else
 #include "doomtype.h"
 #include "i_sound.h"
 #include "i_system.h"
+#include "m_misc.h"
 #endif
 
 #include "m_random.h"
 #include "p_local.h"
+#include "r_defs.h"
 #include "s_sound.h"
 #include "sounds.h"
 
@@ -150,6 +153,22 @@ void S_Init(int sfxVolume, int musicVolume)
 
     I_InitSound(true);
     I_InitMusic();
+
+    if (gameversion == exe_doom_1_666)
+    {
+        if (logical_gamemission == doom)
+        {
+            I_SetOPLDriverVer(opl_doom1_1_666);
+        }
+        else
+        {
+            I_SetOPLDriverVer(opl_doom2_1_666);
+        }
+    }
+    else
+    {
+        I_SetOPLDriverVer(opl_doom_1_9);
+    }
 
     I_PrecacheSounds(S_sfx, NUMSFX);
 
@@ -243,7 +262,7 @@ void S_Start(void)
     // start new music for the level
     mus_paused = 0;
 
-    if (gamemode == commercial && (gamemission == pack_nerve))
+    if (gamemode == commercial && gamemission == pack_nerve)
     {
         int nmus[]=
         {
@@ -289,8 +308,7 @@ void S_Start(void)
         {
             mnum = spmus[gamemap-1];
         }
-    }        
-
+    }
     S_ChangeMusic(mnum, true);
 }        
 
@@ -385,8 +403,8 @@ static int S_AdjustSoundParams(mobj_t *listener, mobj_t *source,
     // calculate the distance to sound origin
     //  and clip it if necessary
 
-    adx = abs(listener->x - source->x);
-    ady = abs(listener->y - source->y);
+    adx = ABS(listener->x - source->x);
+    ady = ABS(listener->y - source->y);
 
     // From _GG1_ p.428. Appox. eucledian distance fast.
     approx_dist = adx + ady - ((adx < ady ? adx : ady)>>1);
@@ -477,13 +495,14 @@ static int Clamp(int x)
     return x;
 }
 
-void S_StartSound(void *origin_p, int sfx_id)
+//void S_StartSound(void *origin_p, int sfx_id)
+void S_StartNewSound(mobj_t *origin, int sfx_id, int pitch)
 {
     sfxinfo_t *sfx;
-    mobj_t *origin;
+//    mobj_t *origin;
     int rc;
     int sep;
-    int pitch;
+//    int pitch;
     int cnum;
     int volume;
     int priority;
@@ -491,7 +510,7 @@ void S_StartSound(void *origin_p, int sfx_id)
     int absy;
     int dist;
 
-    origin = (mobj_t *) origin_p;
+//    origin = (mobj_t *) origin_p;
     volume = snd_SfxVolume;
 
     // check for bogus sound #
@@ -603,8 +622,8 @@ void S_StartSound(void *origin_p, int sfx_id)
             goto skip;
 
         priority = S_sfx[sfx_id].priority;
-        absx = abs(origin->x - listener->x);
-        absy = abs(origin->y - listener->y);
+        absx = ABS(origin->x - listener->x);
+        absy = ABS(origin->y - listener->y);
         dist = absx + absy - (absx > absy ? absy >> 1 : absx >> 1);
 
         dist >>= FRACBITS;
@@ -616,6 +635,16 @@ void S_StartSound(void *origin_p, int sfx_id)
         skip: ;
     }
 }        
+
+void S_StartSound(mobj_t *mobj, int sfx_id)
+{
+    S_StartNewSound(mobj, sfx_id, (mobj ? mobj->pitch : NORM_PITCH));
+}
+
+void S_StartSectorSound(degenmobj_t *degenmobj, int sfx_id)
+{
+    S_StartNewSound((mobj_t *)degenmobj, sfx_id, NORM_PITCH);
+}
 
 //
 // Stop and resume music, during game PAUSE.
@@ -760,7 +789,13 @@ void S_ChangeMusic(int musicnum, int looping)
 
     if (musicnum <= mus_None || musicnum >= NUMMUSIC)
     {
-        I_Error("Bad music number %d", musicnum);
+//        I_Error("Bad music number %d", musicnum);
+        char musicbuf[30];
+        player_t *player = &players[consoleplayer];
+        C_Printf(CR_GOLD, " Bad music number %d", musicnum);
+        sprintf(musicbuf, "Bad music number %d", musicnum);
+        player->message = musicbuf;
+        return;
     }
     else
     {
@@ -780,7 +815,7 @@ void S_ChangeMusic(int musicnum, int looping)
     // get lumpnum if neccessary
     if (!music->lumpnum)
     {
-        sprintf(namebuf, "d_%s", DEH_String(music->name));
+        M_snprintf(namebuf, sizeof(namebuf), "d_%s", music->name);
         music->lumpnum = W_GetNumForName(namebuf);
     }
 /*
@@ -792,6 +827,13 @@ void S_ChangeMusic(int musicnum, int looping)
     music->data = W_CacheLumpNum(music->lumpnum, PU_STATIC);
 
     handle = I_RegisterSong(music->data, W_LumpLength(music->lumpnum));
+
+    if (!handle)
+    {
+        C_Printf(CR_GOLD, " D_%s music lump can't be played.", uppercase(music->name));
+        return;
+    }
+
     music->handle = handle;
 
     I_PlaySong(handle, looping);

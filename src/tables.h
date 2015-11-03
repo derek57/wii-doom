@@ -85,7 +85,7 @@ extern const fixed_t *finecosine;
 extern const fixed_t finetangent[FINEANGLES/2];
 
 // Gamma correction tables.
-extern const byte gammatable[5][256];
+//extern const byte gammatable[5][256];
 
 // Effective size is 2049;
 // The +1 size is to handle the case when x==y
@@ -94,7 +94,7 @@ extern const angle_t tantoangle[SLOPERANGE+1];
 
 // Utility function,
 //  called by R_PointToAngle.
-int (*SlopeDiv)(unsigned int num, unsigned int den);
+//int (*SlopeDiv)(unsigned int num, unsigned int den);
 int SlopeDivVanilla(unsigned int num, unsigned int den);
 int SlopeDivCrispy(unsigned int num, unsigned int den);
 

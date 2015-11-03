@@ -33,7 +33,7 @@
 #include <string.h>
 
 #include "c_io.h"
-#include "deh_str.h"
+#include "d_deh.h"
 
 #include "doom/doomdef.h"
 
@@ -67,12 +67,12 @@ static allocated_sound_t *channels_playing[NUM_CHANNELS];
 
 static int mixer_freq;
 static int mixer_channels;
-static int allocated_sounds_size = 0;
+static int allocated_sounds_size;
 
 static Uint16 mixer_format;
 
 static boolean setpanning_workaround = false;
-static boolean sound_initialized = false;
+static boolean sound_initialized;
 static boolean use_sfx_prefix;
 static boolean (*ExpandSoundData)(sfxinfo_t *sfxinfo,
                                   byte *data,
@@ -83,8 +83,8 @@ static boolean (*ExpandSoundData)(sfxinfo_t *sfxinfo,
 // When a sound is played, it is moved to the head, so that the oldest
 // sounds not used recently are at the tail.
 
-static allocated_sound_t *allocated_sounds_head = NULL;
-static allocated_sound_t *allocated_sounds_tail = NULL;
+static allocated_sound_t *allocated_sounds_head;
+static allocated_sound_t *allocated_sounds_tail;
 
 int use_libsamplerate = 0;
 
@@ -559,11 +559,11 @@ static void GetSfxLumpName(sfxinfo_t *sfx, char *buf, size_t buf_len)
 
     if (use_sfx_prefix)
     {
-        M_snprintf(buf, buf_len, "ds%s", DEH_String(sfx->name));
+        M_snprintf(buf, buf_len, "ds%s", sfx->name);
     }
     else
     {
-        M_StringCopy(buf, DEH_String(sfx->name), buf_len);
+        M_StringCopy(buf, sfx->name, buf_len);
     }
 }
 

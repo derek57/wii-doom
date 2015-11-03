@@ -34,12 +34,18 @@
 
 #include "doomstat.h"
 #include "p_local.h"
+#include "p_tick.h"
 
 #ifdef WII
 #include "../z_zone.h"
 #else
 #include "z_zone.h"
 #endif
+
+
+// killough 8/29/98: we maintain several separate threads, each containing
+// a special class of thinkers, to allow more efficient searches.
+thinker_t       thinkerclasscap[th_all + 1];
 
 
 //
@@ -54,7 +60,7 @@
 int              leveltime;
 
 // Both the head and tail of the thinker list.
-thinker_t        thinkercap;
+//thinker_t        thinkercap;
 
 
 //
@@ -62,6 +68,12 @@ thinker_t        thinkercap;
 //
 void P_InitThinkers (void)
 {
+    int i;
+
+    // killough 8/29/98: initialize threaded lists
+    for (i = 0; i < NUMTHCLASS; i++)
+        thinkerclasscap[i].cprev = thinkerclasscap[i].cnext = &thinkerclasscap[i];
+
     thinkercap.prev = thinkercap.next  = &thinkercap;
 }
 
@@ -79,8 +91,76 @@ void P_AddThinker (thinker_t* thinker)
     thinkercap.prev = thinker;
 
     thinker->references = 0;    // killough 11/98: init reference counter to 0
+
+    // killough 8/29/98: set sentinel pointers, and then add to appropriate list
+    thinker->cnext = thinker->cprev = NULL;
+    P_UpdateThinker(thinker);
 }
 
+//
+// killough 11/98:
+//
+// Make currentthinker external, so that P_RemoveThinkerDelayed
+// can adjust currentthinker when thinkers self-remove.
+
+thinker_t        *currentthinker;
+
+//
+// P_RemoveThinkerDelayed()
+//
+// Called automatically as part of the thinker loop in P_RunThinkers(),
+// on nodes which are pending deletion.
+//
+// If this thinker has no more pointers referencing it indirectly,
+// remove it, and set currentthinker to one node preceding it, so
+// that the next step in P_RunThinkers() will get its successor.
+//
+void P_RemoveThinkerDelayed(thinker_t *thinker)
+{
+    if (!thinker->references)
+    {
+        thinker_t   *next = thinker->next;
+        thinker_t   *th = thinker->cnext;
+
+        // Remove from main thinker list
+        // Note that currentthinker is guaranteed to point to us,
+        // and since we're freeing our memory, we had better change that. So
+        // point it to thinker->prev, so the iterator will correctly move on to
+        // thinker->prev->next = thinker->next
+        (next->prev = currentthinker = thinker->prev)->next = next;
+
+        // Remove from current thinker class list
+        (th->cprev = thinker->cprev)->cnext = th;
+
+        Z_Free(thinker);
+    }
+}
+
+//
+// killough 8/29/98:
+//
+// We maintain separate threads of friends and enemies, to permit more
+// efficient searches.
+//
+void P_UpdateThinker(thinker_t *thinker)
+{
+    thinker_t   *th;
+
+    // find the class the thinker belongs to
+    int class = (thinker->function == P_RemoveThinkerDelayed ? th_delete :
+        (thinker->function == P_MobjThinker ? th_mobj : th_misc));
+
+    // Remove from current thread, if in one
+    if ((th = thinker->cnext))
+        (th->cprev = thinker->cprev)->cnext = th;
+
+    // Add to appropriate thread
+    th = &thinkerclasscap[class];
+    th->cprev->cnext = thinker;
+    thinker->cnext = th;
+    thinker->cprev = th->cprev;
+    th->cprev = thinker;
+}
 
 
 //
@@ -88,10 +168,17 @@ void P_AddThinker (thinker_t* thinker)
 // Deallocation is lazy -- it will not actually be freed
 // until its thinking turn comes up.
 //
+// killough 4/25/98:
+//
+// Instead of marking the function with -1 value cast to a function pointer,
+// set the function to P_RemoveThinkerDelayed(), so that later, it will be
+// removed automatically as part of the thinker process.
+//
 void P_RemoveThinker (thinker_t* thinker)
 {
-    // FIXME: NOP.
-    thinker->function.acv = (actionf_v)(-1);
+    thinker->function = P_RemoveThinkerDelayed;
+
+    P_UpdateThinker(thinker);
 }
 
 
@@ -111,14 +198,15 @@ void P_AllocateThinker (thinker_t*        thinker)
 //
 void P_RunThinkers (void)
 {
-    thinker_t *currentthinker, *nextthinker;
+//    thinker_t *currentthinker, *nextthinker;
 
     currentthinker = thinkercap.next;
     while (currentthinker != &thinkercap)
     {
+/*
         nextthinker = currentthinker->next;
 
-        if ( currentthinker->function.acv == (actionf_v)(-1) )
+        if ( currentthinker->function == NULL)
         {
             // time to remove it
             currentthinker->next->prev = currentthinker->prev;
@@ -127,10 +215,14 @@ void P_RunThinkers (void)
         }
         else
         {
-            if (currentthinker->function.acp1)
-                currentthinker->function.acp1 (currentthinker);
+*/
+            if (currentthinker->function)
+                currentthinker->function (currentthinker);
+/*
         }
         currentthinker = nextthinker;
+*/
+        currentthinker = currentthinker->next;
     }
 }
 
@@ -156,15 +248,16 @@ void P_Ticker (void)
     {
         return;
     }
-    
-                
+
     for (i=0 ; i<MAXPLAYERS ; i++)
         if (playeringame[i])
             P_PlayerThink (&players[i]);
-                        
+
     P_RunThinkers ();
     P_UpdateSpecials ();
     P_RespawnSpecials ();
+
+    P_MapEnd();
 
     // [RH] Apply falling damage
     for (i = 0; i < MAXPLAYERS; i++)

@@ -39,7 +39,7 @@
 #include "config.h"
 #endif
 
-#include "deh_str.h"
+#include "d_deh.h"
 
 #include "doom/doomdef.h"
 
@@ -220,12 +220,31 @@ int png_screenshots = 0;
 
 byte *I_VideoBuffer = NULL;
 
+// Window title
+
+static char *window_title = "";
+
 static int loading_disk_xoffs = 0;
 static int loading_disk_yoffs = 0;
 
+byte                    gammatable[GAMMALEVELS][256];
+
+float                   gammalevels[GAMMALEVELS] =
+{
+    // Darker
+    0.50f, 0.55f, 0.60f, 0.65f, 0.70f, 0.75f, 0.80f, 0.85f, 0.90f, 0.95f,
+
+    // No gamma correction
+    1.0f,
+
+    // Lighter
+    1.05f, 1.10f, 1.15f, 1.20f, 1.25f, 1.30f, 1.35f, 1.40f, 1.45f, 1.50f,
+    1.55f, 1.60f, 1.65f, 1.70f, 1.75f, 1.80f, 1.85f, 1.90f, 1.95f, 2.0f
+};
+
 extern int display_fps;
 
-// Window resize state.					<< NEW
+// Window resize state.                                        << NEW
 
 #ifndef WII
 static boolean need_resize = false;
@@ -241,6 +260,8 @@ static boolean window_focused;
 // If true, game is running as a screensaver
 
 boolean screensaver_mode = false;
+
+boolean mouse_grabbed = false;
 
 // Flag indicating whether the screen is currently visible:
 // when the screen isnt visible, don't render the screen
@@ -343,6 +364,12 @@ static SDL_Rect blit_rect = {
 #else
 static SDL_Surface *screen;
 #endif
+
+// Only display the disk icon if more then this much bytes have been read
+// during the previous tic.
+
+static const int diskicon_threshold = 20*1024;
+int diskicon_readbytes = 0;
 
 // Lookup table for mapping ASCII characters to their equivalent when
 // shift is pressed on an American layout keyboard:
@@ -510,10 +537,10 @@ void I_EnableLoadingDisk(int xoffs, int yoffs)
 
 #ifndef WII
     if (M_CheckParm("-cdrom") > 0)
-        disk_name = DEH_String("STCDROM");
+        disk_name = "STCDROM";
     else
 #endif
-        disk_name = DEH_String("STDISK");
+        disk_name = "STDISK";
 
     disk = W_CacheLumpName(disk_name, PU_STATIC);
 }
@@ -561,31 +588,31 @@ static int TranslateKey(SDL_keysym *sym)
 #else
     switch(sym->sym)
     {
-      case SDLK_LEFT:	return KEY_LEFTARROW;
-      case SDLK_RIGHT:	return KEY_RIGHTARROW;
-      case SDLK_DOWN:	return KEY_DOWNARROW;
-      case SDLK_UP:	return KEY_UPARROW;
-      case SDLK_ESCAPE:	return KEY_ESCAPE;
-      case SDLK_RETURN:	return KEY_ENTER;
-      case SDLK_TAB:	return KEY_TAB;
-      case SDLK_F1:	return KEY_F1;
-      case SDLK_F2:	return KEY_F2;
-      case SDLK_F3:	return KEY_F3;
-      case SDLK_F4:	return KEY_F4;
-      case SDLK_F5:	return KEY_F5;
-      case SDLK_F6:	return KEY_F6;
-      case SDLK_F7:	return KEY_F7;
-      case SDLK_F8:	return KEY_F8;
-      case SDLK_F9:	return KEY_F9;
-      case SDLK_F10:	return KEY_F10;
-      case SDLK_F11:	return KEY_F11;
-      case SDLK_F12:	return KEY_F12;
+      case SDLK_LEFT:        return KEY_LEFTARROW;
+      case SDLK_RIGHT:        return KEY_RIGHTARROW;
+      case SDLK_DOWN:        return KEY_DOWNARROW;
+      case SDLK_UP:        return KEY_UPARROW;
+      case SDLK_ESCAPE:        return KEY_ESCAPE;
+      case SDLK_RETURN:        return KEY_ENTER;
+      case SDLK_TAB:        return KEY_TAB;
+      case SDLK_F1:        return KEY_F1;
+      case SDLK_F2:        return KEY_F2;
+      case SDLK_F3:        return KEY_F3;
+      case SDLK_F4:        return KEY_F4;
+      case SDLK_F5:        return KEY_F5;
+      case SDLK_F6:        return KEY_F6;
+      case SDLK_F7:        return KEY_F7;
+      case SDLK_F8:        return KEY_F8;
+      case SDLK_F9:        return KEY_F9;
+      case SDLK_F10:        return KEY_F10;
+      case SDLK_F11:        return KEY_F11;
+      case SDLK_F12:        return KEY_F12;
       case SDLK_PRINT:  return KEY_PRTSCR;
 
       case SDLK_BACKSPACE: return KEY_BACKSPACE;
-      case SDLK_DELETE:	return KEY_DEL;
+      case SDLK_DELETE:        return KEY_DEL;
 
-      case SDLK_PAUSE:	return KEY_PAUSE;
+      case SDLK_PAUSE:        return KEY_PAUSE;
 
       case SDLK_EQUALS: return KEY_EQUALS;
 
@@ -593,12 +620,12 @@ static int TranslateKey(SDL_keysym *sym)
 
       case SDLK_LSHIFT:
       case SDLK_RSHIFT:
-	return KEY_RSHIFT;
-	
+        return KEY_RSHIFT;
+        
       case SDLK_LCTRL:
       case SDLK_RCTRL:
-	return KEY_RCTRL;
-	
+        return KEY_RCTRL;
+        
       case SDLK_LALT:
       case SDLK_RALT:
       case SDLK_LMETA:
@@ -892,7 +919,9 @@ void I_GetEvent(void)
 {
     SDL_Event sdlevent;
     event_t event;
-
+#ifdef SDL2
+    SDL_Event   *Event = &sdlevent;
+#endif
     // possibly not needed
     
     SDL_PumpEvents();
@@ -967,19 +996,31 @@ void I_GetEvent(void)
 //                break;
 
             case SDL_MOUSEBUTTONDOWN:
-		if (usemouse && !nomouse)
-		{
+                if (usemouse && !nomouse)
+                {
                     UpdateMouseButtonState(sdlevent.button.button, true);
-		}
+                }
                 break;
 
             case SDL_MOUSEBUTTONUP:
-		if (usemouse && !nomouse)
-		{
+                if (usemouse && !nomouse)
+                {
                     UpdateMouseButtonState(sdlevent.button.button, false);
-		}
+                }
                 break;
-
+#ifdef SDL2
+            case SDL_MOUSEWHEEL:
+                if (mouseSensitivity || menuactive || consoleactive)
+                {
+//                    keydown = 0;
+                    event.type = ev_mousewheel;
+                    event.data1 = Event->wheel.y;
+                    event.data2 = 0;
+                    event.data3 = 0;
+                    D_PostEvent(&event);
+                }
+                break;
+#endif
             case SDL_QUIT:
                 C_HideConsoleFast();
                 event.type = ev_quit;
@@ -1150,6 +1191,7 @@ static void UpdateGrab(void)
 
     currently_grabbed = grab;
 
+    mouse_grabbed = currently_grabbed;
 }
 #endif
 
@@ -1206,6 +1248,8 @@ void I_BeginRead(void)
     // Draw the disk to the screen
 
     V_DrawPatch((loading_disk_xoffs >> hires), (loading_disk_yoffs >> hires), disk);
+
+    disk_indicator = disk_dirty;
 }
 
 #ifdef SDL2
@@ -1898,7 +1942,7 @@ static void SetVideoMode(screen_mode_t *mode, int w, int h)
     byte *doompal;
     int flags = 0;
 
-    doompal = W_CacheLumpName(DEH_String("PLAYPAL"), PU_CACHE);
+    doompal = W_CacheLumpName("PLAYPAL", PU_CACHE);
 
     // If we are already running and in a true color mode, we need
     // to free the screenbuffer surface before setting the new mode.
@@ -2331,17 +2375,17 @@ void I_FinishUpdate (void)
 
     if (display_fps_dots)
     {
-	i = I_GetTime();
-	tics = i - lasttic;
-	lasttic = i;
+        i = I_GetTime();
+        tics = i - lasttic;
+        lasttic = i;
 
-	if (tics > 20) tics = 20;
+        if (tics > 20) tics = 20;
 
-	for (i=0 ; i<tics*4 ; i+=4)
-	    I_VideoBuffer[ (SCREENHEIGHT-1)*SCREENWIDTH + i] = 0xff;
+        for (i=0 ; i<tics*4 ; i+=4)
+            I_VideoBuffer[ (SCREENHEIGHT-1)*SCREENWIDTH + i] = 0xff;
 
-	for ( ; i<20*4 ; i+=4)
-	    I_VideoBuffer[ (SCREENHEIGHT-1)*SCREENWIDTH + i] = 0x0;
+        for ( ; i<20*4 ; i+=4)
+            I_VideoBuffer[ (SCREENHEIGHT-1)*SCREENWIDTH + i] = 0x0;
     }
 
     // [AM] Real FPS counter
@@ -2362,16 +2406,19 @@ void I_FinishUpdate (void)
         M_WriteText(ORIGWIDTH - (8 * 3), 0, fpsbuf);
     }
 
-    if (disk_indicator == disk_on)
+    if (show_diskicon && disk_indicator == disk_on)
     {
-        I_BeginRead();
-
-	disk_indicator = disk_dirty;
+	if (diskicon_readbytes >= diskicon_threshold)
+	{
+	    I_BeginRead();
+	}
     }
     else if (disk_indicator == disk_dirty)
     {
-	disk_indicator = disk_off;
+        disk_indicator = disk_off;
     }
+
+    diskicon_readbytes = 0;
 
 #ifndef WII
 #ifndef SDL2
@@ -2506,11 +2553,17 @@ void I_InitWindowIcon(void)
 // the title set with I_SetWindowTitle.
 //
 
-void I_SetWindowTitle(void)
+void I_SetWindowTitle(char *title)
+{
+    window_title = title;
+}
+
+void I_InitWindowTitle(void)
 {
     char *buf;
 
-    buf = M_StringJoin(gamedescription, " - ", PACKAGE_STRING, NULL);
+//    buf = M_StringJoin(gamedescription, " - ", PACKAGE_STRING, NULL);
+    buf = M_StringJoin(window_title, " - ", PACKAGE_STRING, NULL);
 
 #ifdef SDL2
     SDL_SetWindowTitle(screen, buf);
@@ -2519,6 +2572,20 @@ void I_SetWindowTitle(void)
 #endif
 
     free(buf);
+}
+
+void I_InitGammaTables(void)
+{
+    int i;
+    int j;
+
+    for (i = 0; i < GAMMALEVELS; i++)
+        if (gammalevels[i] == 1.0)
+            for (j = 0; j < 256; j++)
+                gammatable[i][j] = j;
+        else
+            for (j = 0; j < 256; j++)
+                gammatable[i][j] = (byte)(pow((j + 1) / 256.0, 1.0 / gammalevels[i]) * 255.0);
 }
 
 void I_InitGraphics(void)
@@ -2554,26 +2621,25 @@ void I_InitGraphics(void)
 
     I_InitTintTables(doompal);
 
+    I_InitGammaTables();
+
     if (SDL_Init(SDL_INIT_VIDEO) < 0) 
     {
         I_Error("Failed to initialize video: %s", SDL_GetError());
     }
 
-    // Set up icon. This has to be done
-    // before the call to SDL_SetVideoMode.
-
-#ifndef WII
-    I_InitWindowIcon();
-
     // If we're using OpenGL, call the preinit function now; if it fails
     // then we have to fall back to software mode.
 
 #ifndef SDL2
-    if (using_opengl && !I_GL_PreInit())
+    if (using_opengl 
+#ifndef WII
+        && !I_GL_PreInit()
+#endif
+       )
     {
         using_opengl = false;
     }
-#endif
 #endif
 
     //
@@ -2629,10 +2695,18 @@ void I_InitGraphics(void)
 
 //    C_Printf(CR_GRAY, "         %s.");
 
-    if(!usegamma)
-        C_Printf(CR_GRAY, " Gamma correction is off.\n");
+    if (usegamma == 10)
+        C_Printf(CR_GRAY, " Gamma correction is off.");
     else
-        C_Printf(CR_GOLD, " Gamma correction is enabled.\n");
+    {
+        static char     buffer[128];
+
+        M_snprintf(buffer, sizeof(buffer), " The gamma correction level is %.2f.",
+            gammalevels[usegamma]);
+        if (buffer[strlen(buffer) - 1] == '0' && buffer[strlen(buffer) - 2] == '0')
+            buffer[strlen(buffer) - 1] = '\0';
+        C_Printf(CR_GOLD, buffer);
+    }
 
 #ifndef WII
 #ifndef SDL2
@@ -2706,13 +2780,13 @@ void I_InitGraphics(void)
 #else
     if (native_surface)
     {
-	I_VideoBuffer = (unsigned char *) screen->pixels;
+        I_VideoBuffer = (unsigned char *) screen->pixels;
 
         I_VideoBuffer += (screen->h - SCREENHEIGHT) / 2;
     }
     else
     {
-	I_VideoBuffer = (unsigned char *) Z_Malloc (SCREENWIDTH * SCREENHEIGHT, 
+        I_VideoBuffer = (unsigned char *) Z_Malloc (SCREENWIDTH * SCREENHEIGHT, 
                                                     PU_STATIC, NULL);
     }
 #endif

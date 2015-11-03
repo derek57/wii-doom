@@ -99,7 +99,7 @@ am__chocolate-doom_SOURCES_DIST = i_main.c i_system.c i_system.h \
 	m_argv.c m_argv.h m_misc.c m_misc.h c_io.c c_io.h d_event.c \
 	d_event.h doomkeys.h doomfeatures.h doomtype.h d_iwad.c \
 	d_iwad.h d_loop.c d_loop.h d_mode.c d_mode.h d_ticcmd.h \
-	deh_str.c deh_str.h i_glscale.c i_glscale.h i_joystick.c \
+	d_deh.c d_deh.h i_glscale.c i_glscale.h i_joystick.c \
         i_joystick.h i_scale.c i_scale.h i_swap.h i_sound.c i_sound.h \
         i_timer.c i_timer.h i_tinttab.c i_tinttab.h i_video.c \
         i_video.h m_bbox.c m_bbox.h m_cheat.c m_cheat.h m_config.c m_config.h \
@@ -109,13 +109,11 @@ am__chocolate-doom_SOURCES_DIST = i_main.c i_system.c i_system.h \
         w_main.c w_main.h w_wad.c w_wad.h w_file.c w_file.h \
         w_file_stdc.c z_zone.c z_zone.h w_merge.c w_merge.h gusconf.c \
         gusconf.h i_pcsound.c i_sdlsound.c i_sdlmusic.c i_oplmusic.c \
-        midifile.c midifile.h mus2mid.c mus2mid.h deh_defs.h deh_io.c \
-        deh_io.h deh_main.c deh_main.h deh_mapping.c deh_mapping.h \
-        deh_text.c resource.rc
+        midifile.c midifile.h mus2mid.c mus2mid.h resource.rc
 am__objects_1 = i_main.$(OBJEXT) i_system.$(OBJEXT) m_argv.$(OBJEXT) \
 	m_misc.$(OBJEXT)
 am__objects_2 = c_io.$(OBJEXT) d_event.$(OBJEXT) d_iwad.$(OBJEXT) \
-	d_loop.$(OBJEXT) d_mode.$(OBJEXT) deh_str.$(OBJEXT) \
+	d_loop.$(OBJEXT) d_mode.$(OBJEXT) d_deh.$(OBJEXT) \
         i_glscale.$(OBJEXT) i_joystick.$(OBJEXT) i_scale.$(OBJEXT) \
         i_sound.$(OBJEXT) i_timer.$(OBJEXT) i_tinttab.$(OBJEXT) \
         i_video.$(OBJEXT) m_bbox.$(OBJEXT) m_cheat.$(OBJEXT) m_config.$(OBJEXT) \
@@ -130,9 +128,7 @@ am__objects_4 = gusconf.$(OBJEXT) i_pcsound.$(OBJEXT) \
 	midifile.$(OBJEXT) mus2mid.$(OBJEXT)
 am__objects_5 = $(am__objects_1) $(am__objects_2) $(am__objects_3) \
 	$(am__objects_4)
-am__objects_6 = deh_io.$(OBJEXT) deh_main.$(OBJEXT) \
-	deh_mapping.$(OBJEXT) deh_text.$(OBJEXT)
-am__objects_7 = $(am__objects_5) $(am__objects_6)
+am__objects_7 = $(am__objects_5)
 am_chocolate-doom_OBJECTS =  \
 	$(am__objects_7)
 #am_chocolate-doom_OBJECTS = $(am__objects_7) \
@@ -241,7 +237,7 @@ am__define_uniq_tagged_files = \
 ETAGS = etags
 CTAGS = ctags
 DIST_SUBDIRS = $(SUBDIRS)
-DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS)
+DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 am__relativize = \
   dir0=`pwd`; \
   sed_first='s,^\([^/]*\)/.*$$,\1,'; \
@@ -319,7 +315,7 @@ PROGRAM_PREFIX = chocolate-
 RANLIB = ranlib
 SDLMIXER_CFLAGS = 
 SDLMIXER_LIBS =  -lSDL_mixer
-SDLNET_LIBS =  -lSDL_net
+#SDLNET_LIBS =  -lSDL_net
 SDL_CFLAGS = -I/usr/local/include/SDL -D_GNU_SOURCE=1 -D_REENTRANT
 SDL_CONFIG = /usr/local/bin/sdl-config
 SDL_LIBS = -L/usr/local/lib -Wl,-rpath,/usr/local/lib -lSDL -lpthread
@@ -341,6 +337,7 @@ am__leading_dot = .
 am__quote = 
 am__tar = $${TAR-tar} chof - "$$tardir"
 am__untar = $${TAR-tar} xf -
+bashcompletiondir = ${datarootdir}/bash-completion/completions
 bindir = ${exec_prefix}/bin
 build_alias = 
 builddir = .
@@ -358,6 +355,7 @@ libdir = ${exec_prefix}/lib
 libexecdir = ${exec_prefix}/libexec
 localedir = ${datarootdir}/locale
 localstatedir = ${prefix}/var
+mandir = ${datarootdir}/man
 mkdir_p = $(MKDIR_P)
 oldincludedir = /usr/include
 pdfdir = ${docdir}
@@ -398,7 +396,7 @@ d_iwad.c             d_iwad.h              \
 d_loop.c             d_loop.h              \
 d_mode.c             d_mode.h              \
                      d_ticcmd.h            \
-deh_str.c            deh_str.h             \
+d_deh.c              d_deh.h               \
 i_glscale.c          i_glscale.h           \
 i_joystick.c         i_joystick.h          \
 i_scale.c            i_scale.h             \
@@ -427,15 +425,6 @@ w_file_stdc.c                              \
 z_zone.c             z_zone.h
 
 
-# source files needed for FEATURE_DEHACKED
-FEATURE_DEHACKED_SOURCE_FILES = \
-deh_defs.h                                 \
-deh_io.c             deh_io.h              \
-deh_main.c           deh_main.h            \
-deh_mapping.c        deh_mapping.h         \
-deh_text.c
-
-
 # source files needed for FEATURE_WAD_MERGE
 FEATURE_WAD_MERGE_SOURCE_FILES = \
 w_merge.c            w_merge.h
@@ -458,14 +447,14 @@ SOURCE_FILES = $(COMMON_SOURCE_FILES)              \
                $(FEATURE_WAD_MERGE_SOURCE_FILES)   \
                $(FEATURE_SOUND_SOURCE_FILES)
 
-SOURCE_FILES_WITH_DEH = $(SOURCE_FILES)                    \
-                        $(FEATURE_DEHACKED_SOURCE_FILES)
+SOURCE_FILES_WITH_DEH = $(SOURCE_FILES)
+
 EXTRA_LIBS = \
                $(top_builddir)/pcsound/libpcsound.a        \
                $(top_builddir)/opl/libopl.a                \
                 -L/usr/local/lib -Wl,-rpath,/usr/local/lib -lSDL -lpthread                                   \
                -L/usr/local/lib -Wl,-rpath,/usr/local/lib -lSDL -lpthread                                  \
-                -lSDL_mixer                             \
+                -lSDL_mixer                             #\
                 -lSDL_net
 
 chocolate-doom_SOURCES = $(SOURCE_FILES_WITH_DEH)
@@ -475,6 +464,9 @@ chocolate-doom_LDADD = doom/libdoom.a $(EXTRA_LIBS)
 appdatadir = $(prefix)/share/appdata
 appdata_DATA = \
         chocolate-doom.appdata.xml
+
+EXTRA_DIST = \
+        icon.c                      
 
 appdir = $(prefix)/share/applications
 app_DATA = \
@@ -561,11 +553,7 @@ include ./$(DEPDIR)/d_event.Po
 include ./$(DEPDIR)/d_iwad.Po
 include ./$(DEPDIR)/d_loop.Po
 include ./$(DEPDIR)/d_mode.Po
-include ./$(DEPDIR)/deh_io.Po
-include ./$(DEPDIR)/deh_main.Po
-include ./$(DEPDIR)/deh_mapping.Po
-include ./$(DEPDIR)/deh_str.Po
-include ./$(DEPDIR)/deh_text.Po
+#include ./$(DEPDIR)/d_deh.Po
 include ./$(DEPDIR)/gusconf.Po
 include ./$(DEPDIR)/i_glscale.Po
 include ./$(DEPDIR)/i_joystick.Po
@@ -912,6 +900,8 @@ install-info: install-info-recursive
 
 install-info-am:
 
+install-man:
+
 install-pdf: install-pdf-recursive
 
 install-pdf-am:
@@ -952,7 +942,7 @@ uninstall-am: uninstall-appDATA uninstall-appdataDATA \
 	install-appdataDATA install-data install-data-am install-dvi \
 	install-dvi-am install-exec install-exec-am \
 	install-execgamesPROGRAMS install-html install-html-am \
-	install-info install-info-am install-pdf \
+	install-info install-info-am install-man install-pdf \
 	install-pdf-am install-ps install-ps-am \
 	install-screensaverDATA install-strip installcheck \
 	installcheck-am installdirs installdirs-am maintainer-clean \
@@ -973,6 +963,9 @@ chocolate-doom-screensaver.desktop: doom-screensaver.desktop
 	$(WINDRES) $< -o $@
 %.o : %.rc
 	$(WINDRES) $< -o $@
+
+icon.c : $(top_builddir)/data/doom.png
+	$(top_builddir)/data/convert-icon $< $@
 
 midiread : midifile.c
 	$(CC) -DTEST $(CFLAGS)  -L/usr/local/lib -Wl,-rpath,/usr/local/lib -lSDL -lpthread $< -o $@

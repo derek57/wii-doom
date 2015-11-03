@@ -89,7 +89,8 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 LIBRARIES = $(noinst_LIBRARIES)
 AR = ar
-ARFLAGS = cru
+ARFLAGS = cr
+#ARFLAGS = cru
 AM_V_AR = $(am__v_AR_$(V))
 am__v_AR_ = $(am__v_AR_$(AM_DEFAULT_VERBOSITY))
 am__v_AR_0 = @echo "  AR      " $@;
@@ -206,7 +207,7 @@ PROGRAM_PREFIX = chocolate-
 RANLIB = ranlib
 SDL2_CONFIG = pkg-config sdl2
 SDLMIXER_LIBS =  -lSDL2_mixer
-SDLNET_LIBS =  -lSDL2_net
+#SDLNET_LIBS =  -lSDL2_net
 SDL_CFLAGS = -D_REENTRANT -I/usr/local/include/SDL2 
 SDL_LIBS = -L/usr/local/lib -Wl,-rpath,/usr/local/lib -lSDL2 
 SDLMIXER_CFLAGS = 
@@ -228,6 +229,7 @@ am__leading_dot = .
 am__quote = 
 am__tar = $${TAR-tar} chof - "$$tardir"
 am__untar = $${TAR-tar} xf -
+bashcompletiondir = ${datarootdir}/bash-completion/completions
 bindir = ${exec_prefix}/bin
 build_alias = 
 builddir = .
@@ -245,6 +247,7 @@ libdir = ${exec_prefix}/lib
 libexecdir = ${exec_prefix}/libexec
 localedir = ${datarootdir}/locale
 localstatedir = ${prefix}/var
+mandir = ${datarootdir}/man
 mkdir_p = $(MKDIR_P)
 oldincludedir = /usr/include
 pdfdir = ${docdir}
@@ -467,6 +470,8 @@ install-info: install-info-am
 
 install-info-am:
 
+install-man:
+
 install-pdf: install-pdf-am
 
 install-pdf-am:
@@ -504,7 +509,7 @@ uninstall-am:
 	dvi-am html html-am info info-am install install-am \
 	install-data install-data-am install-dvi install-dvi-am \
 	install-exec install-exec-am install-html install-html-am \
-	install-info install-info-am install-pdf \
+	install-info install-info-am install-man install-pdf \
 	install-pdf-am install-ps install-ps-am install-strip \
 	installcheck installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-compile \

@@ -55,6 +55,13 @@
 // Whether an object is "sentient" or not. Used for environmental influences.
 #define sentient(mobj)          ((mobj)->health > 0 && (mobj)->info->seestate)
 
+#define REDBLOOD                184
+#define GREENBLOOD              123
+#define BLUEBLOOD               204
+#define FUZZYBLOOD              -1
+#define CORPSEBLOODSPLATS       256
+
+#define NUMMOBJCOUNTERS         8
 
 //
 // NOTES: mobj_t
@@ -210,11 +217,95 @@ typedef enum
     // Hmm ???.
     MF_TRANSSHIFT          = 26,
 
+    MF_TOUCHY              = 0x10000000,   // killough 11/98: dies when solids touch it
+    MF_BOUNCES             = 0x20000000,   // killough 7/11/98: for beta BFG fireballs
+    MF_FRIEND              = 0x40000000,   // killough 7/18/98: friendly monsters
+
     // [crispy] translucent sprite
     MF_TRANSLUCENT         = 0x80000000
 
 } mobjflag_t;
 
+typedef enum
+{
+    // Apply additive translucency
+    MF2_TRANSLUCENT               = 0x00000001,
+    // Apply additive translucency on red only
+    MF2_TRANSLUCENT_REDONLY       = 0x00000002,
+    // Apply additive translucency on green only
+    MF2_TRANSLUCENT_GREENONLY     = 0x00000004,
+    // Apply additive translucency on blue only
+    MF2_TRANSLUCENT_BLUEONLY      = 0x00000008,
+    // Apply 33% alpha translucency
+    MF2_TRANSLUCENT_33            = 0x00000010,
+    // Apply additive translucency on all red to white
+    MF2_TRANSLUCENT_REDWHITEONLY  = 0x00000040,
+    // Convert all red to green, then apply 33% alpha translucency
+    MF2_TRANSLUCENT_REDTOGREEN_33 = 0x00000080,
+    // Convert all red to blue, then apply 33% alpha translucency
+    MF2_TRANSLUCENT_REDTOBLUE_33  = 0x00000100,
+    // Apply 33% alpha translucency on all blue
+    MF2_TRANSLUCENT_BLUE_33       = 0x00000200,
+
+    // Convert all red to green
+    MF2_REDTOGREEN                = 0x00000400,
+    // Convert all green to red
+    MF2_GREENTORED                = 0x00000800,
+    // Convert all red to blue
+    MF2_REDTOBLUE                 = 0x00001000,
+
+    // Object bobs up and down
+    MF2_FLOATBOB                  = 0x00002000,
+
+    // Mirrored horizontally
+    MF2_MIRRORED                  = 0x00004000,
+
+    MF2_FALLING                   = 0x00008000,
+
+    // Object is resting on top of another object
+    MF2_ONMOBJ                    = 0x00010000,
+
+    // Object is allowed to pass over/under other objects
+    MF2_PASSMOBJ                  = 0x00020000,
+
+    // Object is a corpse and being resurrected
+    MF2_RESURRECTING              = 0x00040000,
+
+    // Object's feet won't be clipped in liquid
+    MF2_NOFOOTCLIP                = 0x00080000,
+
+    // Object won't bob in liquid
+    MF2_NOLIQUIDBOB               = 0x00100000,
+
+    // Object's feet are now being clipped
+    // (when applied to object's shadow, shadow isn't drawn)
+    MF2_FEETARECLIPPED            = 0x00200000,
+
+    // Object has a shadow
+    MF2_SHADOW                    = 0x00400000,
+
+    // Object is blood
+    MF2_BLOOD                     = 0x00800000,
+
+    // Object's thing triangle is not displayed in automap
+    MF2_DONOTMAP                  = 0x01000000,
+
+    // Object has smoke trail
+    MF2_SMOKETRAIL                = 0x02000000,
+
+    // Object can be crushed into blood splats by moving sectors
+    MF2_CRUSHABLE                 = 0x04000000,
+
+    // alternate gravity setting
+    MF2_LOGRAV                    = 0x08000000,
+
+    // fly mode is active
+    MF2_FLY                       = 0x10000000,
+
+    // does not teleport
+    MF2_NOTELEPORT                = 0x20000000
+
+} mobjflag2_t;
 
 // Map Object definition.
 typedef struct mobj_s
@@ -229,7 +320,7 @@ typedef struct mobj_s
 
     // More list: links in sector (if needed)
     struct mobj_s*         snext;
-    struct mobj_s*         sprev;
+    struct mobj_s**        sprev;
 
     //More drawing info: to determine current sprite.
     angle_t                angle;        // orientation
@@ -239,7 +330,7 @@ typedef struct mobj_s
     // Interaction info, by BLOCKMAP.
     // Links in blocks (if needed).
     struct mobj_s*         bnext;
-    struct mobj_s*         bprev;
+    struct mobj_s**        bprev;
     
     struct subsector_s*    subsector;
 
@@ -324,6 +415,22 @@ typedef struct mobj_s
     fixed_t                dropoffz;
 
     short                  gear; // killough 11/98: used in torque simulation
+
+    // a linked list of sectors where this object appears
+    struct msecnode_s      *touching_sectorlist;   // phares 3/14/98
+
+    int                    pitch;
+
+    fixed_t                projectilepassheight;
+
+    int                    blood;
+
+    int                    bloodsplats;
+
+    fixed_t                nudge;
+
+    // counters - these were known as special1/2/3 in Heretic and Hexen
+    int                    counters[NUMMOBJCOUNTERS];
 
 } mobj_t;
 

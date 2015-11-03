@@ -34,7 +34,12 @@
 #include "d_event.h"
 #endif
 
-#include "deh_misc.h"
+#ifdef WII
+#include "../d_deh.h"
+#else
+#include "d_deh.h"
+#endif
+
 #include "doomdef.h"
 
 // State.
@@ -59,7 +64,6 @@
 #define LOWERSPEED              FRACUNIT*6
 #define RAISESPEED              FRACUNIT*6
 #define WEAPONBOTTOM            128*FRACUNIT
-#define WEAPONTOP               32*FRACUNIT
 
 
 boolean            skippsprinterp = false;
@@ -136,9 +140,9 @@ P_SetPsprite
         
         // Call action routine.
         // Modified handling.
-        if (state->action.acp2)
+        if (state->action)
         {
-            state->action.acp2(player, psp);
+            state->action(player, psp);
             if (!psp->state)
                 break;
         }
@@ -223,7 +227,7 @@ boolean P_CheckAmmo (player_t* player)
 
     // Minimal amount for one shot varies.
     if (player->readyweapon == wp_bfg)
-        count = deh_bfg_cells_per_shot;
+        count = bfgcells;
     else if (player->readyweapon == wp_supershotgun)
         count = 2;        // Double barrel.
     else
@@ -312,7 +316,8 @@ boolean P_CheckAmmo (player_t* player)
 void P_FireWeapon (player_t* player)
 {
     statenum_t     newstate;
-        
+    weapontype_t   readyweapon = player->readyweapon;
+
     if (!P_CheckAmmo (player))
         return;
         
@@ -326,6 +331,11 @@ void P_FireWeapon (player_t* player)
         newstate = weaponinfo[player->readyweapon].atkstate;
 
     P_SetPsprite (player, ps_weapon, newstate);
+
+    // [BH] no noise alert if not punching a monster
+    if (readyweapon == wp_fist && !linetarget && disable_noise)
+        return;
+
     P_NoiseAlert (player->mo, player->mo);
 }
 
@@ -366,7 +376,6 @@ A_WeaponReady
   pspdef_t*        psp )
 {        
     statenum_t     newstate;
-    int            angle;
     
     // get out of attack state
     if (player->mo->state == &states[S_PLAY_ATK1]
@@ -417,11 +426,19 @@ A_WeaponReady
     else
         player->attackdown = false;
     
-    // bob the weapon based on movement speed
-    angle = (128*leveltime)&FINEMASK;
-    psp->sx = FRACUNIT + FixedMul (player->bob, finecosine[angle]);
-    angle &= FINEANGLES/2-1;
-    psp->sy = WEAPONTOP + (player->bob - FixedMul(player->bob, finecosine[angle * 2 & (FINEANGLES - 1)])) / 2;
+//    if (actor->momx || actor->momy || actor->momz)
+    {
+        // bob the weapon based on movement speed
+        int     angle = (128 * leveltime) & FINEMASK;
+        int     bob = player->bob;
+
+        // [BH] smooth out weapon bob by zeroing out really small bobs
+        if (bob < FRACUNIT / 2)
+            bob = 0;
+
+        psp->sx = FixedMul(bob, finecosine[angle]);
+        psp->sy = WEAPONTOP + FixedMul(bob, finesine[angle & (FINEANGLES / 2 - 1)]);
+    }
 }
 
 
@@ -717,7 +734,7 @@ A_FireBFG
 {
     if(!d_infiniteammo)
         DecreaseAmmo(player, weaponinfo[player->readyweapon].ammo, 
-                 deh_bfg_cells_per_shot);
+                 bfgcells);
 
     P_SpawnPlayerMissile (player->mo, MT_BFG);
 
@@ -761,8 +778,12 @@ void A_FireOldBFG(player_t *player, pspdef_t *psp)
         mobj_t *th, *mo = player->mo;
 
         angle_t an = mo->angle;
+/*
         angle_t an1 = ((P_RandomSMMU(pr_bfg)&127) - 64) * (ANG90/768) + an;
         angle_t an2 = ((P_RandomSMMU(pr_bfg)&127) - 64) * (ANG90/640) + ANG90;
+*/
+        angle_t an1 = ((P_Random() & 127) - 64) * (ANG90 / 768) + an;
+        angle_t an2 = ((P_Random() & 127) - 64) * (ANG90 / 640) + ANG90;
 
         fixed_t slope;
 
@@ -1054,18 +1075,21 @@ A_FireCGun
     if(!d_infiniteammo)
         DecreaseAmmo(player, weaponinfo[player->readyweapon].ammo, 1);
 
-    if(beta_style && player->readyweapon == wp_chaingun)
-        P_SetPsprite (player,
+    if(player->readyweapon == wp_chaingun)
+    {
+        if(beta_style)
+            P_SetPsprite (player,
                       ps_flash,
                       S_BETACHAINFLASH1
                       + psp->state
                       - &states[S_BETACHAIN1] );
-    else
-        P_SetPsprite (player,
+        else
+            P_SetPsprite (player,
                       ps_flash,
                       weaponinfo[player->readyweapon].flashstate
                       + psp->state
                       - &states[S_CHAIN1] );
+    }
 
     psp->state->tics = chaingun_tics;
 

@@ -75,8 +75,8 @@ void T_PlatRaise(plat_t* plat)
         if (plat->type == raiseAndChange
             || plat->type == raiseToNearestAndChange)
         {
-            if (!(leveltime&7))
-                S_StartSound(&plat->sector->soundorg, sfx_stnmov);
+            if (!(leveltime & 7) && plat->sector->floorheight != plat->high)
+                S_StartSectorSound(&plat->sector->soundorg, sfx_stnmov);
         }
         
                                 
@@ -84,25 +84,32 @@ void T_PlatRaise(plat_t* plat)
         {
             plat->count = plat->wait;
             plat->status = down;
-            S_StartSound(&plat->sector->soundorg, sfx_pstart);
+            S_StartSectorSound(&plat->sector->soundorg, sfx_pstart);
         }
         else
         {
             if (res == pastdest)
             {
-                plat->count = plat->wait;
-                plat->status = waiting;
-                S_StartSound(&plat->sector->soundorg, sfx_pstop);
+                // if not an instant toggle type, wait, make plat stop sound
+                if (plat->type != toggleUpDn)
+                {
+                    plat->count = plat->wait;
+                    plat->status = waiting;
+                    S_StartSectorSound(&plat->sector->soundorg, sfx_pstop);
+                }
+                else // else go into stasis awaiting next toggle activation
+                {
+                    plat->oldstatus = plat->status; // jff 3/14/98 after action wait
+                    plat->status = in_stasis;       // for reactivation of toggle
+                }
 
                 switch(plat->type)
                 {
                   case blazeDWUS:
                   case downWaitUpStay:
-                    P_RemoveActivePlat(plat);
-                    break;
-                    
                   case raiseAndChange:
                   case raiseToNearestAndChange:
+                  case genLift:
                     P_RemoveActivePlat(plat);
                     break;
                     
@@ -118,9 +125,18 @@ void T_PlatRaise(plat_t* plat)
 
         if (res == pastdest)
         {
-            plat->count = plat->wait;
-            plat->status = waiting;
-            S_StartSound(&plat->sector->soundorg,sfx_pstop);
+            // if not an instant toggle, start waiting, make plat stop sound
+            if (plat->type != toggleUpDn)           // jff 3/14/98 toggle up down
+            {                                       // is silent, instant, no waiting
+                plat->count = plat->wait;
+                plat->status = waiting;
+                S_StartSectorSound(&plat->sector->soundorg, sfx_pstop);
+            }
+            else    // instant toggles go into stasis awaiting next activation
+            {
+                plat->oldstatus = plat->status;     // jff 3/14/98 after action wait
+                plat->status = in_stasis;           // for reactivation of toggle
+            }
 
             // remove the plat if its a pure raise type
             if (!d_floors)
@@ -140,11 +156,8 @@ void T_PlatRaise(plat_t* plat)
       case        waiting:
         if (!--plat->count)
         {
-            if (plat->sector->floor_height == plat->low)
-                plat->status = up;
-            else
-                plat->status = down;
-            S_StartSound(&plat->sector->soundorg,sfx_pstart);
+            plat->status = (plat->sector->floorheight == plat->low ? up : down);
+            S_StartSectorSound(&plat->sector->soundorg,sfx_pstart);
         }
       case        in_stasis:
         break;
@@ -165,7 +178,7 @@ EV_DoPlat
     plat_t*      plat;
     int          secnum;
     int          rtn;
-    sector_t*    sec;
+    sector_t*    sec = NULL;
         
     secnum = -1;
     rtn = 0;
@@ -178,6 +191,11 @@ EV_DoPlat
         P_ActivateInStasis(line->tag);
         break;
         
+      case toggleUpDn:
+        P_ActivateInStasis(line->tag);
+        rtn = 1;
+        break;
+
       default:
         break;
     }
@@ -186,43 +204,45 @@ EV_DoPlat
     {
         sec = &sectors[secnum];
 
-        if (sec->specialdata)
+        if (P_SectorActive(floor_special, sec))
             continue;
         
         // Find lowest & highest floors around sector
         rtn = 1;
         plat = Z_Malloc( sizeof(*plat), PU_LEVSPEC, 0);
+        memset(plat, 0, sizeof(*plat));
         P_AddThinker(&plat->thinker);
                 
         plat->type = type;
         plat->sector = sec;
-        plat->sector->specialdata = plat;
-        plat->thinker.function.acp1 = (actionf_p1) T_PlatRaise;
+        plat->sector->floordata = plat;
+        plat->thinker.function = T_PlatRaise;
         plat->crush = false;
         plat->tag = line->tag;
+        plat->low = sec->floorheight;
         
         switch(type)
         {
           case raiseToNearestAndChange:
             plat->speed = PLATSPEED/2;
             sec->floorpic = sides[line->sidenum[0]].sector->floorpic;
-            plat->high = P_FindNextHighestFloor(sec,sec->floor_height);
+            plat->high = P_FindNextHighestFloor(sec,sec->floorheight);
             plat->wait = 0;
             plat->status = up;
             // NO MORE DAMAGE, IF APPLICABLE
             sec->special = 0;                
 
-            S_StartSound(&sec->soundorg,sfx_stnmov);
+            S_StartSectorSound(&sec->soundorg,sfx_stnmov);
             break;
             
           case raiseAndChange:
             plat->speed = PLATSPEED/2;
             sec->floorpic = sides[line->sidenum[0]].sector->floorpic;
-            plat->high = sec->floor_height + amount*FRACUNIT;
+            plat->high = sec->floorheight + amount*FRACUNIT;
             plat->wait = 0;
             plat->status = up;
 
-            S_StartSound(&sec->soundorg,sfx_stnmov);
+            S_StartSectorSound(&sec->soundorg,sfx_stnmov);
             break;
             
           case downWaitUpStay:
@@ -232,48 +252,71 @@ EV_DoPlat
                 plat->speed = PLATSPEED * 4;
             plat->low = P_FindLowestFloorSurrounding(sec);
 
-            if (plat->low > sec->floor_height)
-                plat->low = sec->floor_height;
+            if (plat->low > sec->floorheight)
+                plat->low = sec->floorheight;
 
-            plat->high = sec->floor_height;
+            plat->high = sec->floorheight;
             plat->wait = TICRATE*PLATWAIT;
             plat->status = down;
-            S_StartSound(&sec->soundorg,sfx_pstart);
+            S_StartSectorSound(&sec->soundorg,sfx_pstart);
             break;
             
           case blazeDWUS:
             plat->speed = PLATSPEED * 8;
             plat->low = P_FindLowestFloorSurrounding(sec);
 
-            if (plat->low > sec->floor_height)
-                plat->low = sec->floor_height;
+            if (plat->low > sec->floorheight)
+                plat->low = sec->floorheight;
 
-            plat->high = sec->floor_height;
+            plat->high = sec->floorheight;
             plat->wait = TICRATE*PLATWAIT;
             plat->status = down;
-            S_StartSound(&sec->soundorg,sfx_pstart);
+            S_StartSectorSound(&sec->soundorg,sfx_pstart);
             break;
             
           case perpetualRaise:
             plat->speed = PLATSPEED;
             plat->low = P_FindLowestFloorSurrounding(sec);
 
-            if (plat->low > sec->floor_height)
-                plat->low = sec->floor_height;
+            if (plat->low > sec->floorheight)
+                plat->low = sec->floorheight;
 
             plat->high = P_FindHighestFloorSurrounding(sec);
 
-            if (plat->high < sec->floor_height)
-                plat->high = sec->floor_height;
+            if (plat->high < sec->floorheight)
+                plat->high = sec->floorheight;
 
             plat->wait = TICRATE*PLATWAIT;
-            plat->status = P_Random()&1;
+            plat->status = (plat_e)(P_Random() & 1);
 
-            S_StartSound(&sec->soundorg,sfx_pstart);
+            S_StartSectorSound(&sec->soundorg,sfx_pstart);
+            break;
+
+          case toggleUpDn:            // jff 3/14/98 add new type to support instant toggle
+            plat->speed = PLATSPEED;                // not used
+            plat->wait = TICRATE * PLATWAIT;        // not used
+            plat->crush = true;                     // jff 3/14/98 crush anything in the way
+
+            // set up toggling between ceiling, floor inclusive
+            plat->low = sec->ceilingheight;
+            plat->high = sec->floorheight;
+            plat->status = down;
+            break;
+
+          default:
             break;
         }
         P_AddActivePlat(plat);
     }
+
+    if (sec)
+    {
+        int     i;
+
+        for (i = 0; i < sec->linecount; i++)
+            sec->lines[i]->flags &= ~ML_SECRET;
+    }
+
     return rtn;
 }
 
@@ -302,8 +345,11 @@ void P_ActivateInStasis(int tag)
 
         if (plat->tag == tag && plat->status == in_stasis)
         {
-            plat->status = plat->oldstatus;
-            plat->thinker.function.acp1 = (actionf_p1) T_PlatRaise;
+            if (plat->type == toggleUpDn)
+                plat->status = (plat->oldstatus == up ? down : up);
+            else
+                plat->status = plat->oldstatus;
+            plat->thinker.function = T_PlatRaise;
         }
     }
 }
@@ -324,7 +370,7 @@ boolean EV_StopPlat(line_t *line)
         {
             plat->oldstatus = plat->status;                     // put it in stasis
             plat->status = in_stasis;
-            plat->thinker.function.acp1 = NULL;
+            plat->thinker.function = NULL;
         }
     }
     return true;
@@ -336,8 +382,9 @@ boolean EV_StopPlat(line_t *line)
 //
 void P_AddActivePlat(plat_t *plat)
 {
-    platlist_t  *list = malloc(sizeof(*list));
+    platlist_t  *list;
 
+    list = malloc(sizeof(*list));
     list->plat = plat;
     plat->list = list;
     if ((list->next = activeplats))
@@ -354,7 +401,7 @@ void P_RemoveActivePlat(plat_t *plat)
 {
     platlist_t  *list = plat->list;
 
-    plat->sector->specialdata = NULL;
+    plat->sector->floordata = NULL;
     P_RemoveThinker(&plat->thinker);
     if ((*list->prev = list->next))
         list->next->prev = list->prev;

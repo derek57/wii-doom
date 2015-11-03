@@ -78,17 +78,17 @@
 #define KEY_SPACE               (0x80+0x39)
 
 #ifndef SDL2
-#define KEY_BACKQUOTE		96
+#define KEY_BACKQUOTE                96
 #endif
 
-#define KEY_QUOTEDBL		34
-#define KEY_QUOTE		39
-#define KEY_SEMICOLON		59
-#define KEY_PERIOD		46
-#define KEY_COMMA		44
-#define KEY_SLASH		47
+#define KEY_QUOTEDBL                34
+#define KEY_QUOTE                39
+#define KEY_SEMICOLON                59
+#define KEY_PERIOD                46
+#define KEY_COMMA                44
+#define KEY_SLASH                47
 
-#define	KEY_BACKSLASH		92	/* 0x5C */
+#define        KEY_BACKSLASH                92        /* 0x5C */
 #define KEY_CAPSLOCK            (0x80+0x3a)
 #define KEY_NUMLOCK             (0x80+0x45)
 #define KEY_SCRLCK              (0x80+0x46)

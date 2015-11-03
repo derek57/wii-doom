@@ -36,11 +36,10 @@ rcsid[] = "$Id: st_stuff.c,v 1.6 1997/02/03 22:45:13 b1 Exp $";
 
 #ifdef WII
 #include "../c_io.h"
-#include "../deh_str.h"
+#include "../d_deh.h"
 #else
 #include "c_io.h"
-#include "deh_misc.h"
-#include "deh_str.h"
+#include "d_deh.h"
 #endif
 
 #include "doomdef.h"
@@ -504,7 +503,6 @@ static st_number_t            w_ammo[4];
 static st_number_t            w_maxammo[4]; 
 
 
-#ifndef WII
 cheatseq_t cheat_mus = CHEAT("idmus", 2);
 cheatseq_t cheat_god = CHEAT("iddqd", 0);
 cheatseq_t cheat_ammo = CHEAT("idkfa", 0);
@@ -512,7 +510,7 @@ cheatseq_t cheat_ammonokey = CHEAT("idfa", 0);
 cheatseq_t cheat_noclip = CHEAT("idspispopd", 0);
 cheatseq_t cheat_commercial_noclip = CHEAT("idclip", 0);
 
-cheatseq_t	cheat_powerup[7] =
+cheatseq_t        cheat_powerup[7] =
 {
     CHEAT("idbeholdv", 0),
     CHEAT("idbeholds", 0),
@@ -526,12 +524,11 @@ cheatseq_t	cheat_powerup[7] =
 cheatseq_t cheat_choppers = CHEAT("idchoppers", 0);
 cheatseq_t cheat_clev = CHEAT("idclev", 2);
 cheatseq_t cheat_mypos = CHEAT("idmypos", 0);
-#endif
 
 
 patch_t *ST_LoadStatusKeyPatch(int keypicnum)
 {
-    if (W_CheckNumForName(keypic[keypicnum].patchnamea) >= 0)
+    if (dehacked && W_CheckNumForName(keypic[keypicnum].patchnamea) >= 0)
         return W_CacheLumpNum(W_GetNumForName(keypic[keypicnum].patchnamea), PU_CACHE);
     else if (W_CheckNumForName(keypic[keypicnum].patchnameb) >= 0)
         return W_CacheLumpNum(W_GetNumForName(keypic[keypicnum].patchnameb), PU_CACHE);
@@ -542,7 +539,7 @@ patch_t *ST_LoadStatusKeyPatch(int keypicnum)
 
 // graphics are drawn to a backing screen and blitted to the real screen
 byte                *st_backing_screen;
-	    
+            
 boolean             emptytallpercent;
 
 void (*hudfunc)(int, int, patch_t *, byte *);
@@ -550,8 +547,6 @@ void (*hudnumfunc)(int, int, patch_t *, byte *);
 void (*godhudfunc)(int, int, patch_t *, byte *);
 
 extern channel_t    channels[8];
-
-extern char*        mapnames[];
 
 extern boolean      BorderNeedRefresh;
 extern boolean      hud;
@@ -779,21 +774,21 @@ void ST_DrawStatus(void)
             tinttab66 : tinttab25);
 
         if(plyr->readyweapon == wp_pistol)
-            patch = W_CacheLumpName(DEH_String("CLIPA0"), PU_CACHE);
+            patch = W_CacheLumpName("CLIPA0", PU_CACHE);
         else if(plyr->readyweapon == wp_shotgun)
-            patch = W_CacheLumpName(DEH_String("SHELA0"), PU_CACHE);
+            patch = W_CacheLumpName("SHELA0", PU_CACHE);
         else if(plyr->readyweapon == wp_chaingun)
-            patch = W_CacheLumpName(DEH_String("AMMOA0"), PU_CACHE);
+            patch = W_CacheLumpName("AMMOA0", PU_CACHE);
         else if(plyr->readyweapon == wp_missile)
-            patch = W_CacheLumpName(DEH_String("ROCKA0"), PU_CACHE);
+            patch = W_CacheLumpName("ROCKA0", PU_CACHE);
         else if(plyr->readyweapon == wp_plasma)
-            patch = W_CacheLumpName(DEH_String("CELLA0"), PU_CACHE);
+            patch = W_CacheLumpName("CELLA0", PU_CACHE);
         else if(plyr->readyweapon == wp_bfg)
-            patch = W_CacheLumpName(DEH_String("CELPA0"), PU_CACHE);
+            patch = W_CacheLumpName("CELPA0", PU_CACHE);
         else if(plyr->readyweapon == wp_supershotgun)
-            patch = W_CacheLumpName(DEH_String("SBOXA0"), PU_CACHE);
+            patch = W_CacheLumpName("SBOXA0", PU_CACHE);
         else
-            patch = W_CacheLumpName(DEH_String("EMPTY"), PU_CACHE);
+            patch = W_CacheLumpName("TNT1A0", PU_CACHE);
 
         offset_special = 0;
 
@@ -957,7 +952,7 @@ void ST_DrawStatus(void)
 boolean ST_Responder (event_t* ev)
 {
 #ifndef WII
-    int		i;
+    int                i;
 #endif
 
     // Filter automap on/off.
@@ -987,23 +982,27 @@ boolean ST_Responder (event_t* ev)
             // 'dqd' cheat for toggleable god mode
             if (cht_CheckCheat(&cheat_god, ev->data2))
             {
+                // [BH] if player is dead, resurrect them first
+                if (!plyr->health)
+                    P_ResurrectPlayer(plyr);
+
                 plyr->cheats ^= CF_GODMODE;
                 if (plyr->cheats & CF_GODMODE)
                 {
                     if (plyr->mo)
                         plyr->mo->health = 100;
           
-                        plyr->health = deh_god_mode_health;
-                        plyr->message = DEH_String(STSTR_DQDON);
+                        plyr->health = 100;
+                        plyr->message = s_STSTR_DQDON;
                 }
                 else 
-                    plyr->message = DEH_String(STSTR_DQDOFF);
+                    plyr->message = s_STSTR_DQDOFF;
             }
             // 'fa' cheat for killer fucking arsenal
             else if (cht_CheckCheat(&cheat_ammonokey, ev->data2))
             {
-                plyr->armorpoints = deh_idfa_armor;
-                plyr->armortype = deh_idfa_armor_class;
+                plyr->armorpoints = idfa_armor;
+                plyr->armortype = idfa_armor_class;
         
                 for (i=0;i<NUMWEAPONS;i++)
                     plyr->weaponowned[i] = true;
@@ -1011,13 +1010,13 @@ boolean ST_Responder (event_t* ev)
                 for (i=0;i<NUMAMMO;i++)
                     plyr->ammo[i] = plyr->maxammo[i];
         
-                plyr->message = DEH_String(STSTR_FAADDED);
+                plyr->message = s_STSTR_FAADDED;
             }
             // 'kfa' cheat for key full ammo
             else if (cht_CheckCheat(&cheat_ammo, ev->data2))
             {
-                plyr->armorpoints = deh_idkfa_armor;
-                plyr->armortype = deh_idkfa_armor_class;
+                plyr->armorpoints = idkfa_armor;
+                plyr->armortype = idkfa_armor_class;
         
                 for (i=0;i<NUMWEAPONS;i++)
                     plyr->weaponowned[i] = true;
@@ -1030,7 +1029,7 @@ boolean ST_Responder (event_t* ev)
                 for (i=0;i<NUMCARDS;i++)
                     plyr->cards[i] = true;
 */       
-                plyr->message = DEH_String(STSTR_KFAADDED);
+                plyr->message = s_STSTR_KFAADDED;
             }
             // 'mus' cheat for changing music
             else if (cht_CheckCheat(&cheat_mus, ev->data2))
@@ -1039,7 +1038,7 @@ boolean ST_Responder (event_t* ev)
                 char        buf[3];
                 int         musnum;
         
-                plyr->message = DEH_String(STSTR_MUS);
+                plyr->message = s_STSTR_MUS;
                 cht_GetParam(&cheat_mus, buf);
 
                 // Note: The original v1.9 had a bug that tried to play back
@@ -1052,18 +1051,18 @@ boolean ST_Responder (event_t* ev)
                     musnum = mus_runnin + (buf[0]-'0')*10 + buf[1]-'0' - 1;
           
                     if (((buf[0]-'0')*10 + buf[1]-'0') > 35 && gameversion >= exe_doom_1_8)
-                        plyr->message = DEH_String(STSTR_NOMUS);
+                        plyr->message = STSTR_NOMUS;        // FIXME: DEHACKED?
                     else
-                        S_ChangeMusic(musnum, 1);
+                        S_ChangeMusic(musnum, true);
                 }
                 else
                 {
                     musnum = mus_e1m1 + (buf[0]-'1')*9 + (buf[1]-'1');
 
                     if (((buf[0]-'1')*9 + buf[1]-'1') > 31)
-                        plyr->message = DEH_String(STSTR_NOMUS);
+                        plyr->message = STSTR_NOMUS;        // FIXME: DEHACKED?
                     else
-                        S_ChangeMusic(musnum, 1);
+                        S_ChangeMusic(musnum, true);
                 }
             }
             // Noclip cheat.
@@ -1076,9 +1075,15 @@ boolean ST_Responder (event_t* ev)
                 plyr->cheats ^= CF_NOCLIP;
         
                 if (plyr->cheats & CF_NOCLIP)
-                    plyr->message = DEH_String(STSTR_NCON);
+                {
+                    plyr->mo->flags |= MF_NOCLIP;
+                    plyr->message = s_STSTR_NCON;
+                }
                 else
-                    plyr->message = DEH_String(STSTR_NCOFF);
+                {
+                    plyr->mo->flags &= ~MF_NOCLIP;
+                    plyr->message = s_STSTR_NCOFF;
+                }
             }
 
             // 'behold?' power-up cheats
@@ -1093,21 +1098,21 @@ boolean ST_Responder (event_t* ev)
                     else
                         plyr->powers[i] = 0;
 
-                    plyr->message = DEH_String(STSTR_BEHOLDX);
+                    plyr->message = s_STSTR_BEHOLDX;
                 }
             }
 
             // 'behold' power-up menu
             if (cht_CheckCheat(&cheat_powerup[6], ev->data2))
             {
-                plyr->message = DEH_String(STSTR_BEHOLD);
+                plyr->message = s_STSTR_BEHOLD;
             }
             // 'choppers' invulnerability & chainsaw
             else if (cht_CheckCheat(&cheat_choppers, ev->data2))
             {
                 plyr->weaponowned[wp_chainsaw] = true;
                 plyr->powers[pw_invulnerability] = true;
-                plyr->message = DEH_String(STSTR_CHOPPERS);
+                plyr->message = s_STSTR_CHOPPERS;
             }
             // 'mypos' for player position
             else if (cht_CheckCheat(&cheat_mypos, ev->data2))
@@ -1125,6 +1130,7 @@ boolean ST_Responder (event_t* ev)
         if (!netgame && cht_CheckCheat(&cheat_clev, ev->data2))
         {
             char        buf[3];
+            char        lump[6];
             int         epsd;
             int         map;
       
@@ -1134,11 +1140,13 @@ boolean ST_Responder (event_t* ev)
             {
                 epsd = 1;
                 map = (buf[0] - '0')*10 + buf[1] - '0';
+                M_snprintf(lump, sizeof(lump), "MAP%c%c", buf[0], buf[1]);
             }
             else
             {
                 epsd = buf[0] - '0';
                 map = buf[1] - '0';
+                M_snprintf(lump, sizeof(lump), "E%cM%c", buf[0], buf[1]);
 
                 // Chex.exe always warps to episode 1.
 
@@ -1156,30 +1164,57 @@ boolean ST_Responder (event_t* ev)
                 }
             }
 
+            // [BH] only allow MAP01 to MAP09 when NERVE.WAD loaded
+            if (W_CheckNumForName(lump) < 0
+                    || (gamemission == pack_nerve && map > 9)
+                    || (BTSX && W_CheckMultipleLumps(lump) == 1))
+            {
+                plyr->message = "invalid map";
+                return false;
+            }
+
             // Catch invalid maps.
             if (epsd < 1)
+            {
+                plyr->message = "invalid map";
                 return false;
+            }
 
             if (map < 1)
+            {
+                plyr->message = "invalid map";
                 return false;
+            }
 
             // Ohmygod - this is not going to work.
             if ((gamemode == retail) && ((epsd > 4) || (map > 9)))
+            {
+                plyr->message = "invalid map";
                 return false;
+            }
 
             if ((gamemode == registered) && ((epsd > 3) || (map > 9)))
+            {
+                plyr->message = "invalid map";
                 return false;
+            }
 
             if ((gamemode == shareware) && ((epsd > 1) || (map > 9)))
+            {
+                plyr->message = "invalid map";
                 return false;
+            }
 
             // The source release has this check as map > 34. However, Vanilla
             // Doom allows IDCLEV up to MAP40 even though it normally crashes.
             if ((gamemode == commercial) && (( epsd > 1) || (map > 40)))
+            {
+                plyr->message = "invalid map";
                 return false;
+            }
 
             // So be it.
-            plyr->message = DEH_String(STSTR_CLEV);
+            plyr->message = s_STSTR_CLEV;
             G_DeferedInitNew(gameskill, epsd, map);
         }
     }
@@ -1768,52 +1803,52 @@ typedef void (*load_callback_t)(char *lumpname, patch_t **variable);
 static void ST_loadUnloadGraphics(load_callback_t callback)
 {
 
-    int		i;
-    int		j;
-    int		facenum;
+    int                i;
+    int                j;
+    int                facenum;
     
-    char	namebuf[9];
+    char        namebuf[9];
 
     // Load the numbers, tall and short
     for (i=0;i<10;i++)
     {
-	DEH_snprintf(namebuf, 9, "STTNUM%d", i);
+        M_snprintf(namebuf, 9, "STTNUM%d", i);
         callback(namebuf, &tallnum[i]);
 
-	DEH_snprintf(namebuf, 9, "STYSNUM%d", i);
+        M_snprintf(namebuf, 9, "STYSNUM%d", i);
         callback(namebuf, &shortnum[i]);
     }
 
     // Load percent key.
     //Note: why not load STMINUS here, too?
 
-    callback(DEH_String("STTPRCNT"), &tallpercent);
+    callback("STTPRCNT", &tallpercent);
     emptytallpercent = V_EmptyPatch(tallpercent);
 
     // key cards
     for (i=0;i<NUMCARDS;i++)
     {
-	DEH_snprintf(namebuf, 9, "STKEYS%d", i);
+        M_snprintf(namebuf, 9, "STKEYS%d", i);
         callback(namebuf, &keys[i]);
     }
 
     // item background
     if(beta_style)
     {
-        callback(DEH_String("STITEM"), &itembg);
-        callback(DEH_String("STCHAT"), &chatbg);
+        callback("STITEM", &itembg);
+        callback("STCHAT", &chatbg);
     }
     else
     {
         // arms background
-        callback(DEH_String("STARMS"), &armsbg);
+        callback("STARMS", &armsbg);
 
         // arms ownership widgets
         for (i=0; i<6; i++)
         {
-	    DEH_snprintf(namebuf, 9, "STGNUM%d", i+2);
+            M_snprintf(namebuf, 9, "STGNUM%d", i+2);
 
-	    // gray #
+            // gray #
             callback(namebuf, &arms[i][0]);
 
             // yellow #
@@ -1822,9 +1857,9 @@ static void ST_loadUnloadGraphics(load_callback_t callback)
     }
 
     if(beta_style && !netgame)
-        DEH_snprintf(namebuf, 9, "STFB4", consoleplayer);
+        M_snprintf(namebuf, 9, "STFB4", consoleplayer);
     else
-        DEH_snprintf(namebuf, 9, "STFB%d", consoleplayer);
+        M_snprintf(namebuf, 9, "STFB%d", consoleplayer);
 
     // face backgrounds for different color players
     callback(namebuf, &faceback);
@@ -1833,55 +1868,55 @@ static void ST_loadUnloadGraphics(load_callback_t callback)
     // HACK: IF SHAREWARE 1.0 OR 1.1
     if(fsize == 4207819 || fsize == 4274218 || fsize == 10396254)
     {
-        callback(DEH_String("STMBARL"), &sbar_left_oldwad);
-        callback(DEH_String("STMBARR"), &sbar_right_oldwad);
+        callback("STMBARL", &sbar_left_oldwad);
+        callback("STMBARR", &sbar_right_oldwad);
     }
     else
     {
-        callback(DEH_String("STBAR"), &sbar);
+        callback("STBAR", &sbar);
     }
 
     if(beta_style)
     {
-        callback(DEH_String("ST_AMAP"), &sbarmap);
-        callback(DEH_String("STWEAP0"), &sbara_shotgun);
-        callback(DEH_String("STWEAP1"), &sbara_chaingun);
-        callback(DEH_String("STWEAP2"), &sbara_missile);
-        callback(DEH_String("STWEAP3"), &sbara_plasma);
-        callback(DEH_String("STWEAP5"), &sbara_bfg);
-        callback(DEH_String("STWEAP4"), &sbara_chainsaw);
+        callback("ST_AMAP", &sbarmap);
+        callback("STWEAP0", &sbara_shotgun);
+        callback("STWEAP1", &sbara_chaingun);
+        callback("STWEAP2", &sbara_missile);
+        callback("STWEAP3", &sbara_plasma);
+        callback("STWEAP5", &sbara_bfg);
+        callback("STWEAP4", &sbara_chainsaw);
     }
 
     // face states
     facenum = 0;
     for (i=0; i<ST_NUMPAINFACES; i++)
     {
-	for (j=0; j<ST_NUMSTRAIGHTFACES; j++)
-	{
-	    DEH_snprintf(namebuf, 9, "STFST%d%d", i, j);
+        for (j=0; j<ST_NUMSTRAIGHTFACES; j++)
+        {
+            M_snprintf(namebuf, 9, "STFST%d%d", i, j);
             callback(namebuf, &faces[facenum]);
             ++facenum;
-	}
-	DEH_snprintf(namebuf, 9, "STFTR%d0", i);	// turn right
+        }
+        M_snprintf(namebuf, 9, "STFTR%d0", i);        // turn right
         callback(namebuf, &faces[facenum]);
         ++facenum;
-	DEH_snprintf(namebuf, 9, "STFTL%d0", i);	// turn left
+        M_snprintf(namebuf, 9, "STFTL%d0", i);        // turn left
         callback(namebuf, &faces[facenum]);
         ++facenum;
-	DEH_snprintf(namebuf, 9, "STFOUCH%d", i);	// ouch!
+        M_snprintf(namebuf, 9, "STFOUCH%d", i);        // ouch!
         callback(namebuf, &faces[facenum]);
         ++facenum;
-	DEH_snprintf(namebuf, 9, "STFEVL%d", i);	// evil grin ;)
+        M_snprintf(namebuf, 9, "STFEVL%d", i);        // evil grin ;)
         callback(namebuf, &faces[facenum]);
         ++facenum;
-	DEH_snprintf(namebuf, 9, "STFKILL%d", i);	// pissed off
+        M_snprintf(namebuf, 9, "STFKILL%d", i);        // pissed off
         callback(namebuf, &faces[facenum]);
         ++facenum;
     }
 
-    callback(DEH_String("STFGOD0"), &faces[facenum]);
+    callback("STFGOD0", &faces[facenum]);
     ++facenum;
-    callback(DEH_String("STFDEAD0"), &faces[facenum]);
+    callback("STFDEAD0", &faces[facenum]);
     ++facenum;
 }
 
@@ -2159,6 +2194,18 @@ void ST_Start (void)
     ST_initData();
     ST_createWidgets();
     st_stopped = false;
+
+    // [crispy] correctly color the status bar face background in multiplayer
+    // demos recorded by another player than player 1
+    if (netgame && consoleplayer)
+    {
+	char namebuf[8];
+
+	W_ReleaseLumpName("STFB0");
+
+	M_snprintf(namebuf, 7, "STFB%d", consoleplayer);
+	faceback = W_CacheLumpName(namebuf, PU_STATIC);
+    }
 
     if (W_CheckNumForName("MEDIA0"))
         healthpatch = W_CacheLumpNum(W_GetNumForName("MEDIA0"), PU_CACHE);

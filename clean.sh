@@ -1,3 +1,12 @@
+cd data
+make -f Makefile.SDL clean
+cd ..
+cd man
+make -f Makefile.SDL clean
+cd bash-completion
+make -f Makefile.SDL clean
+cd ..
+cd ..
 cd opl
 make -f Makefile.SDL clean
 cd ..

@@ -29,9 +29,9 @@ rcsid[] = "$Id: st_lib.c,v 1.4 1997/02/03 16:47:56 b1 Exp $";
 #include <ctype.h>
 
 #ifdef WII
-#include "../deh_str.h"
+#include "../d_deh.h"
 #else
-#include "deh_str.h"
+#include "d_deh.h"
 #endif
 
 #include "doomdef.h"
@@ -50,10 +50,12 @@ rcsid[] = "$Id: st_lib.c,v 1.4 1997/02/03 16:47:56 b1 Exp $";
 #include "st_stuff.h"
 
 #ifdef WII
+#include "../v_patch.h"
 #include "../v_video.h"
 #include "../w_wad.h"
 #include "../z_zone.h"
 #else
+#include "v_patch.h"
 #include "v_video.h"
 #include "w_wad.h"
 #include "z_zone.h"
@@ -267,7 +269,7 @@ STlib_updateMultIcon
 
             sprintf(namebuf, "STYSNUM%d", i);
             V_DrawPatch(173, 192,
-                    W_CacheLumpName(DEH_String(namebuf), PU_CACHE));
+                    W_CacheLumpName(namebuf, PU_CACHE));
         }
     }
 }

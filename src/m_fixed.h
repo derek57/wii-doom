@@ -46,6 +46,9 @@ fixed_t FixedDiv        (fixed_t a, fixed_t b);
 int BETWEEN(int a, int b, int c);
 int MIN(int a, int b);
 int MAX(int a, int b);
+unsigned int SafeAdd(unsigned int a, unsigned int b);
+int ABS(int a);
+int SIGN(int a);
 
 
 #endif

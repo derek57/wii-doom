@@ -48,7 +48,11 @@
 //
 
 #ifdef __GNUC__
-#define PACKEDATTR __attribute__((packed,gcc_struct))
+#ifdef WII
+#define PACKEDATTR __attribute__((packed,gcc_struct))	// WINDOWS ONLY (NOT FOR PPC / LINUX!!!
+#else
+#define PACKEDATTR __attribute__((packed))
+#endif
 #else
 #define PACKEDATTR
 #endif

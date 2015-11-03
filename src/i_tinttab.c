@@ -82,7 +82,6 @@ static byte CHGF[256] =
 };
 */
 
-byte    *tranmap_solid;
 byte    *tinttab;
 byte    *tinttab25;
 byte    *tinttab33;
@@ -101,7 +100,6 @@ byte    *tinttabred33;
 byte    *tinttabredwhite50;
 byte    *tinttabgreen33;
 byte    *tinttabblue33;
-byte    *tinttabchgf;
 
 
 static byte *GenerateTintTable(byte *palette, int percent, byte filter[256], int colors)

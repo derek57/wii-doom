@@ -259,7 +259,17 @@ sfxinfo_t S_sfx[] =
     SOUND("step3",  64),
     SOUND("water",  96),
     SOUND("lava",   96),
-    SOUND("secret", 64),
+
+    // [crispy] play DSSECRET if available
+    SOUND("secret", 60),
+
     SOUND("jump",   64),
+
+    // killough 11/98: dog sounds
+    SOUND("dgsit",  98),
+    SOUND("dgatk",  70),
+    SOUND("dgact",  120),
+    SOUND("dgdth",  70),
+    SOUND("dgpain", 96)
 };
 

@@ -39,7 +39,7 @@
 //
 // VIDEO
 //
-#define CENTERY                        (SCREENHEIGHT/2)
+//#define CENTERY                        (SCREENHEIGHT/2)
 
 
 // haleyjd 08/28/10: implemented for Strife support
@@ -89,8 +89,8 @@ void V_RestoreBuffer(void);
 void V_DrawPatch(int x, int y, patch_t* patch ) ;
 void V_DrawPatchFlipped(int x, int y, patch_t* patch ) ;
 void V_MarkRect(int x, int y, int width, int height);
-void V_DrawConsoleChar(int x, int y, patch_t *patch, byte color, boolean italics, int translucency,
-                       boolean inverted);
+void V_DrawConsoleChar(int x, int y, patch_t *patch, int color1, int color2, boolean italics,
+    byte *tinttab);
 
 void V_DrawStatusPatch(int x, int y, patch_t *patch, byte *tinttab);
 void V_DrawYellowStatusPatch(int x, int y, patch_t *patch, byte *tinttab);
@@ -103,6 +103,7 @@ void V_ScreenShot(char *format);
 void V_LowGraphicDetail(int height);
 void V_DrawPatchWithShadow(int x, int y, patch_t *patch, boolean flag);
 void V_DrawDistortedBackground(char* patchname, byte *back_dest);
+void V_FillRect(int x, int y, int width, int height, byte color);
 
 #endif
 

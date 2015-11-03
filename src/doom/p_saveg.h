@@ -44,7 +44,8 @@ char *P_SaveGameFile(int slot);
 
 // Savegame file header read/write functions
 
-boolean P_ReadSaveGameHeader(void);
+//boolean P_ReadSaveGameHeader(void);
+boolean P_ReadSaveGameHeader(char *description);
 
 // Savegame end-of-file read/write functions
 
@@ -64,6 +65,9 @@ void P_UnArchiveThinkers (void);
 void P_ArchiveSpecials (void);
 void P_UnArchiveSpecials (void);
 void P_RestoreTargets(void);
+
+void P_ArchiveMap(void);
+void P_UnArchiveMap(void);
 
 extern FILE *save_stream;
 

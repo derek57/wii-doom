@@ -52,6 +52,8 @@
 
 #define HU_MSGTIMEOUT       (4*TICRATE)
 
+#define playername_default  "you"
+
 //
 // HEADS UP TEXT
 //
@@ -67,6 +69,7 @@ char HU_dequeueChatChar(void);
 void HU_Erase(void);
 
 extern char *chat_macros[10];
+extern char *playername;
 
 // hu_newlevel called when we enter a new level
 // determine the level name and display it in
@@ -75,6 +78,8 @@ extern char *chat_macros[10];
 void HU_NewLevel();
 
 void HU_DrawStats(void);
+
+void HU_PlayerMessage(char *message, boolean ingame);
 
 #endif
 

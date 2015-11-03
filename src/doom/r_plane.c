@@ -1,35 +1,41 @@
-// Emacs style mode select   -*- C++ -*- 
-//-----------------------------------------------------------------------------
-//
-// Copyright(C) 1993-1996 Id Software, Inc.
-// Copyright(C) 2005 Simon Howard
-//
-// Copyright(C) 2015 by Brad Harding: - (Liquid Sector Animations)
-//
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// as published by the Free Software Foundation; either version 2
-// of the License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-// 02111-1307, USA.
-//
-// DESCRIPTION:
-//        Here is a core component: drawing the floors and ceilings,
-//        while maintaining a per column clipping list only.
-//        Moreover, the sky areas have to be determined.
-//
-//-----------------------------------------------------------------------------
+/*
+========================================================================
 
+                               DOOM Retro
+         The classic, refined DOOM source port. For Windows PC.
 
-#include <stdio.h>
+========================================================================
+
+  Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
+  Copyright (C) 2013-2015 Brad Harding.
+
+  DOOM Retro is a fork of Chocolate DOOM by Simon Howard.
+  For a complete list of credits, see the accompanying AUTHORS file.
+
+  This file is part of DOOM Retro.
+
+  DOOM Retro is free software: you can redistribute it and/or modify it
+  under the terms of the GNU General Public License as published by the
+  Free Software Foundation, either version 3 of the License, or (at your
+  option) any later version.
+
+  DOOM Retro is distributed in the hope that it will be useful, but
+  WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+  General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with DOOM Retro. If not, see <http://www.gnu.org/licenses/>.
+
+  DOOM is a registered trademark of id Software LLC, a ZeniMax Media
+  company, in the US and/or other countries and is used without
+  permission. All other trademarks are the property of their respective
+  holders. DOOM Retro is in no way affiliated with nor endorsed by
+  id Software LLC.
+
+========================================================================
+*/
+
 #include <stdlib.h>
 
 #ifdef WII
@@ -38,104 +44,81 @@
 #include "c_io.h"
 #endif
 
-#include "doomdef.h"
-
-#ifdef WII
-#include "../doomfeatures.h"
-#else
-#include "doomfeatures.h"
-#endif
-
 #include "doomstat.h"
 
 #ifdef WII
 #include "../i_system.h"
+#include "../i_timer.h"
 #else
 #include "i_system.h"
+#include "i_timer.h"
 #endif
 
-#include "r_defs.h"
-#include "p_spec.h"
+#include "p_local.h"
 #include "r_local.h"
 #include "r_sky.h"
 
 #ifdef WII
-#include "../v_trans.h"
 #include "../w_wad.h"
 #include "../z_zone.h"
 #else
-#include "v_trans.h"
 #include "w_wad.h"
 #include "z_zone.h"
 #endif
 
-
-// Here comes the obnoxious "visplane".
-#define MAXVISPLANES       128*8             // CHANGED FOR HIRES
+//#define MAXVISPLANES    128                           // must be a power of 2
+#define MAXVISPLANES    128*8                         // must be a power of 2
 
 // ?
 #define MAXOPENINGS        SCREENWIDTH*64*4  // CHANGED FOR HIRES
 
+//static visplane_t       *visplanes[MAXVISPLANES];     // killough
+static visplane_t       *visplanes = NULL;              // CHANGED FOR HIRES
 
-planefunction_t            floorfunc;
-planefunction_t            ceilingfunc;
+static visplane_t              *lastvisplane;
+/*
+static visplane_t       *freetail;                      // killough
+static visplane_t       **freehead = &freetail;         // killough
+*/
+visplane_t              *floorplane;
+visplane_t              *ceilingplane;
 
-//
-// opening
-//
+static int                 numvisplanes;                // ADDED FOR HIRES
 
-visplane_t*                visplanes = NULL;   // CHANGED FOR HIRES
-visplane_t*                lastvisplane;
-visplane_t*                floorplane;
-visplane_t*                ceilingplane;
+// killough -- hash function for visplanes
+// Empirically verified to be fairly uniform:
+#define visplane_hash(picnum, lightlevel, height) \
+    (((unsigned int)(picnum) * 3 + (unsigned int)(lightlevel) + \
+    (unsigned int)(height) * 7) & (MAXVISPLANES - 1))
 
-// texture mapping
-lighttable_t**             planezlight;
-
-fixed_t                    planeheight;
-fixed_t                    yslope[SCREENHEIGHT];
-fixed_t                    distscale[SCREENWIDTH];
-fixed_t                    basexscale;
-fixed_t                    baseyscale;
-fixed_t                    cachedheight[SCREENHEIGHT];
-fixed_t                    cacheddistance[SCREENHEIGHT];
-fixed_t                    cachedxstep[SCREENHEIGHT];
-fixed_t                    cachedystep[SCREENHEIGHT];
-
-static fixed_t             xoffs, yoffs;                   // killough 2/28/98: flat offsets
-
-static int                 numvisplanes;             // ADDED FOR HIRES
-
-size_t                     maxopenings;
-
-int                        *openings;                // dropoff overflow
-int*                       lastopening;              // [crispy] 32-bit integer math
+size_t                 maxopenings;
+int                    *openings;                       // dropoff overflow
+int                    *lastopening;                    // dropoff overflow
 
 // Clip values are the solid pixel bounding the range.
 //  floorclip starts out SCREENHEIGHT
 //  ceilingclip starts out -1
-int                        floorclip[SCREENWIDTH];   // [crispy] 32-bit integer math
-int                        ceilingclip[SCREENWIDTH]; // [crispy] 32-bit integer math
+int                     floorclip[SCREENWIDTH];         // dropoff overflow
+int                     ceilingclip[SCREENWIDTH];       // dropoff overflow
 
 // spanstart holds the start of a plane span
 // initialized to 0 at start
-int                        spanstart[SCREENHEIGHT];
-int                        spanstop[SCREENHEIGHT];
+static int              spanstart[SCREENHEIGHT];
 
-extern int                 mouselook;
+// texture mapping
+static lighttable_t     **planezlight;
+static fixed_t          planeheight;
 
-extern fixed_t             animatedliquiddiff;
+static fixed_t          xoffs, yoffs;                   // killough 2/28/98: flat offsets
 
+fixed_t                 yslope[SCREENHEIGHT];
+fixed_t                 distscale[SCREENWIDTH];
 
-//
-// R_InitPlanes
-// Only at game startup.
-//
-void R_InitPlanes (void)
-{
-  // Doh!
-}
+//boolean                r_liquid_swirl = r_liquid_swirl_default;
 
+extern int              mouselook;
+extern fixed_t          animatedliquiddiff;
+//extern boolean         r_liquid_bob;
 
 //
 // R_MapPlane
@@ -143,18 +126,12 @@ void R_InitPlanes (void)
 // Uses global vars:
 //  planeheight
 //  ds_source
-//  basexscale
-//  baseyscale
 //  viewx
 //  viewy
 //
 // BASIC PRIMITIVE
 //
-void
-R_MapPlane
-( int                y,
-  int                x1,
-  int                x2 )
+static void R_MapPlane(int y, int x1, int x2)
 {
     fixed_t     distance;
     int         dx, dy;
@@ -175,59 +152,61 @@ R_MapPlane
     distance = FixedMul(planeheight, yslope[y]);
 
     dx = x1 - centerx;
-    dy = abs(centery - y);
+    dy = ABS(centery - y);
     ds_xstep = FixedMul(viewsin, planeheight) / dy;
     ds_ystep = FixedMul(viewcos, planeheight) / dy;
 
     ds_xfrac = viewx + xoffs + FixedMul(viewcos, distance) + dx * ds_xstep;
     ds_yfrac = -viewy + yoffs - FixedMul(viewsin, distance) + dx * ds_ystep;
-/*
-    ds_xfrac = viewx + FixedMul(finecosine[angle], length);
-    ds_yfrac = -viewy - FixedMul(finesine[angle], length);
-*/
+
     ds_colormap = (fixedcolormap ? fixedcolormap :
         planezlight[BETWEEN(0, distance >> LIGHTZSHIFT, MAXLIGHTZ - 1)]);
-        
+
     ds_y = y;
     ds_x1 = x1;
     ds_x2 = x2;
 
-    // high or low detail
-    spanfunc ();        
+    spanfunc();
 }
-
 
 //
 // R_ClearPlanes
-// At begining of frame.
+// At beginning of frame.
 //
-void R_ClearPlanes (void)
+void R_ClearPlanes(void)
 {
-    int            i;
-    angle_t        angle;
-    
-    // opening / clipping determination
-    for (i=0 ; i<viewwidth ; i++)
+    int i;
+
+    // opening/clipping determination
+    for (i = 0; i < viewwidth; i++)
     {
         floorclip[i] = viewheight;
         ceilingclip[i] = -1;
     }
-
+/*
+    for (i = 0; i < MAXVISPLANES; i++)  // new code -- killough
+        for (*freehead = visplanes[i], visplanes[i] = NULL; *freehead;)
+            freehead = &(*freehead)->next;
+*/
     lastvisplane = visplanes;
     lastopening = openings;
-    
-    // texture calculation
-    memset (cachedheight, 0, sizeof(cachedheight));
-
-    // left to right mapping
-    angle = (viewangle-ANG90)>>ANGLETOFINESHIFT;
-        
-    // scale will be unit scale at SCREENWIDTH/2 distance
-    basexscale = FixedDiv (finecosine[angle],centerxfrac);
-    baseyscale = -FixedDiv (finesine[angle],centerxfrac);
 }
 
+// New function, by Lee Killough
+/*
+static visplane_t *new_visplane(unsigned hash)
+{
+    visplane_t  *check = freetail;
 
+    if (!check)
+        check = calloc(1, sizeof(*check));
+    else if (!(freetail = freetail->next))
+        freehead = &freetail;
+    check->next = visplanes[hash];
+    visplanes[hash] = check;
+    return check;
+}
+*/
 // [crispy] remove MAXVISPLANES Vanilla limit
 static void R_RaiseVisplanes (visplane_t** vp)
 {
@@ -257,36 +236,31 @@ static void R_RaiseVisplanes (visplane_t** vp)
     }
 }
 
-
 //
 // R_FindPlane
 //
-visplane_t*
-R_FindPlane
-( fixed_t        height,
-  int            picnum,
-  int            lightlevel,
-  fixed_t        xoffs,
-  fixed_t        yoffs )
+visplane_t *R_FindPlane(fixed_t height, int picnum, int lightlevel, fixed_t xoffs, fixed_t yoffs)
 {
-    visplane_t*  check;
-        
+    visplane_t          *check;
+//    unsigned int        hash;                                   // killough
+
     if (picnum == skyflatnum || (picnum & PL_SKYFLAT))          // killough 10/98
         height = lightlevel = 0;                // killough 7/19/98: most skies map together
-        
+
+    // New visplane algorithm uses hash table -- killough
+/*
+    hash = visplane_hash(picnum, lightlevel, height);
+
+    for (check = visplanes[hash]; check; check = check->next)   // killough
+*/
     for (check=visplanes; check<lastvisplane; check++)
-    {
-        if (height == check->height
-            && picnum == check->picnum
-            && lightlevel == check->lightlevel
-            && xoffs == check->xoffs
-            && yoffs == check->yoffs)
-        {
+        if (height == check->height && picnum == check->picnum && lightlevel == check->lightlevel
+                && xoffs == check->xoffs && yoffs == check->yoffs)
+//            return check;
             break;
-        }
-    }
-    
-                        
+
+//    check = new_visplane(hash);                                 // killough
+
     if (check < lastvisplane)
         return check;
 
@@ -297,32 +271,27 @@ R_FindPlane
     check->height = height;
     check->picnum = picnum;
     check->lightlevel = lightlevel;
-    check->minx = SCREENWIDTH;
+    check->minx = viewwidth;
     check->maxx = -1;
     check->xoffs = xoffs;                                      // killough 2/28/98: Save offsets
     check->yoffs = yoffs;
-    
-    memset (check->top,0xff,sizeof(check->top));
-                
+
+    memset(check->top, SHRT_MAX, sizeof(check->top));
+
     return check;
 }
-
 
 //
 // R_CheckPlane
 //
-visplane_t*
-R_CheckPlane
-( visplane_t*        pl,
-  int                start,
-  int                stop )
+visplane_t *R_CheckPlane(visplane_t *pl, int start, int stop)
 {
-    int              intrl;
-    int              intrh;
-    int              unionl;
-    int              unionh;
-    int              x;
-        
+    int intrl;
+    int intrh;
+    int unionl;
+    int unionh;
+    int x;
+
     if (start < pl->minx)
     {
         intrl = pl->minx;
@@ -333,7 +302,7 @@ R_CheckPlane
         unionl = pl->minx;
         intrl = start;
     }
-        
+
     if (stop > pl->maxx)
     {
         intrh = pl->maxx;
@@ -345,137 +314,145 @@ R_CheckPlane
         intrh = stop;
     }
 
+//    for (x = intrl; x <= intrh && pl->top[x] == SHRT_MAX; x++);
     for (x=intrl ; x<= intrh ; x++)
         if (pl->top[x] != 0xffffffffu) // [crispy] hires / 32-bit integer math
             break;
 
-    if (x > intrh)
+    // [crispy] fix HOM if ceilingplane and floorplane are the same
+    // visplane (e.g. both skies)
+    if (!(pl == floorplane && markceiling && floorplane == ceilingplane) && x > intrh)
     {
         pl->minx = unionl;
         pl->maxx = unionh;
-
-        // use the same one
-        return pl;                
     }
-        
-    // make a new visplane
+    else
+    {
+/*
+        unsigned int    hash = visplane_hash(pl->picnum, pl->lightlevel, pl->height);
+        visplane_t      *new_pl = new_visplane(hash);
 
-    R_RaiseVisplanes(&pl);                                        // ADDED FOR HIRES
+        new_pl->height = pl->height;
+        new_pl->picnum = pl->picnum;
+        new_pl->lightlevel = pl->lightlevel;
+        new_pl->sector = pl->sector;
+        new_pl->xoffs = pl->xoffs;      // killough 2/28/98
+        new_pl->yoffs = pl->yoffs;
+        pl = new_pl;
+*/
+        // make a new visplane
 
-    lastvisplane->height = pl->height;
-    lastvisplane->picnum = pl->picnum;
-    lastvisplane->lightlevel = pl->lightlevel;
-    lastvisplane->xoffs = pl->xoffs;      // killough 2/28/98
-    lastvisplane->yoffs = pl->yoffs;
+        R_RaiseVisplanes(&pl);                                        // ADDED FOR HIRES
+
+        lastvisplane->height = pl->height;
+        lastvisplane->picnum = pl->picnum;
+        lastvisplane->lightlevel = pl->lightlevel;
+        lastvisplane->xoffs = pl->xoffs;      // killough 2/28/98
+        lastvisplane->yoffs = pl->yoffs;
     
-    pl = lastvisplane++;
-    pl->minx = start;
-    pl->maxx = stop;
+        pl = lastvisplane++;
 
-    memset (pl->top,0xff,sizeof(pl->top));
-                
+        pl->minx = start;
+        pl->maxx = stop;
+        memset(pl->top, SHRT_MAX, sizeof(pl->top));
+    }
+
     return pl;
 }
-
 
 //
 // R_MakeSpans
 //
-void
-R_MakeSpans
-( int                x,
-  unsigned int       t1,  // [crispy] hires / 32-bit integer math
-  unsigned int       b1,  // [crispy] hires / 32-bit integer math
-  unsigned int       t2,  // [crispy] hires / 32-bit integer math
-  unsigned int       b2 ) // [crispy] hires / 32-bit integer math
+static void R_MakeSpans(visplane_t *pl)
 {
-    while (t1 < t2 && t1<=b1)
+    int x;
+
+    for (x = pl->minx; x <= pl->maxx + 1; ++x)
     {
-        R_MapPlane (t1,spanstart[t1],x-1);
-        t1++;
-    }
-    while (b1 > b2 && b1>=t1)
-    {
-        R_MapPlane (b1,spanstart[b1],x-1);
-        b1--;
-    }
-        
-    while (t2 < t1 && t2<=b2)
-    {
-        spanstart[t2] = x;
-        t2++;
-    }
-    while (b2 > b1 && b2>=t2)
-    {
-        spanstart[b2] = x;
-        b2--;
+        unsigned short  t1 = pl->top[x - 1];
+        unsigned short  b1 = pl->bottom[x - 1];
+        unsigned short  t2 = pl->top[x];
+        unsigned short  b2 = pl->bottom[x];
+
+        for (; t1 < t2 && t1 <= b1; ++t1)
+            R_MapPlane(t1, spanstart[t1], x - 1);
+        for (; b1 > b2 && b1 >= t1; --b1)
+            R_MapPlane(b1, spanstart[b1], x - 1);
+        while (t2 < t1 && t2 <= b2)
+            spanstart[t2++] = x;
+        while (b2 > b1 && b2 >= t2)
+            spanstart[b2--] = x;
     }
 }
 
-
-
-#define AMP          2
-#define AMP2         2
-#define SPEED        40
+// Ripple Effect from Eternity Engine (r_ripple.cpp) by Simon Howard
+#define AMP             2
+#define AMP2            2
+#define SPEED           40
 
 // swirl factors determine the number of waves per flat width
 // 1 cycle per 64 units
-
-#define SWIRLFACTOR  (8192/64)
+#define SWIRLFACTOR     (8192 / 64)
 
 // 1 cycle per 32 units (2 in 64)
-#define SWIRLFACTOR2 (8192/32)
+#define SWIRLFACTOR2    (8192 / 32)
 
-static char *normalflat;
-static char distortedflat[4096];
+static byte     *normalflat;
+static byte     distortedflat[4096];
 
-char *R_DistortedFlat(int flatnum)
+//
+// R_DistortedFlat
+//
+// Generates a distorted flat from a normal one using a two-dimensional
+// sine wave pattern.
+//
+byte *R_DistortedFlat(int flatnum)
 {
-    static int lastflat = -1;
-    static int swirltic = -1;
-    static int offset[4096];
-    int        i;
-    int        leveltic = gametic;
+    static int  lastflat = -1;
+    static int  swirltic = -1;
+    static int  offset[4096];
+    int         i;
+    int         leveltic = gametic;
 
     // Already swirled this one?
     if (gametic == swirltic && lastflat == flatnum)
         return distortedflat;
 
     lastflat = flatnum;
-  
-    // built this tic?
 
-    if(gametic != swirltic && !consoleactive && !paused)
+    // built this tic?
+    if (gametic != swirltic && (!consoleactive || swirltic == -1) /*&& !menuactive*/ && !paused)
     {
-        int x, y;
-      
+        int     x, y;
+
         for (x = 0; x < 64; ++x)
             for (y = 0; y < 64; ++y)
             {
-                int x1, y1;
-                int sinvalue, sinvalue2;
+                int     x1, y1;
+                int     sinvalue, sinvalue2;
 
-                sinvalue  = (y * SWIRLFACTOR  + leveltic * SPEED * 5 + 900) & 8191;
+                sinvalue = (y * SWIRLFACTOR + leveltic * SPEED * 5 + 900) & 8191;
                 sinvalue2 = (x * SWIRLFACTOR2 + leveltic * SPEED * 4 + 300) & 8191;
-                x1 = x + 128 + ((finesine[sinvalue]  * AMP)  >> FRACBITS) +
-                               ((finesine[sinvalue2] * AMP2) >> FRACBITS);
+                x1 = x + 128 + ((finesine[sinvalue] * AMP) >> FRACBITS)
+                    + ((finesine[sinvalue2] * AMP2) >> FRACBITS);
 
-                sinvalue  = (x * SWIRLFACTOR  + leveltic * SPEED * 3 + 700) & 8191;
+                sinvalue = (x * SWIRLFACTOR + leveltic * SPEED * 3 + 700) & 8191;
                 sinvalue2 = (y * SWIRLFACTOR2 + leveltic * SPEED * 4 + 1200) & 8191;
-                y1 = y + 128 + ((finesine[sinvalue]  * AMP)  >> FRACBITS) +
-                               ((finesine[sinvalue2] * AMP2) >> FRACBITS);
+                y1 = y + 128 + ((finesine[sinvalue] * AMP) >> FRACBITS)
+                    + ((finesine[sinvalue2] * AMP2) >> FRACBITS);
 
                 x1 &= 63;
                 y1 &= 63;
 
                 offset[(y << 6) + x] = (y1 << 6) + x1;
             }
+
         swirltic = gametic;
     }
 
-    normalflat = W_CacheLumpNum(firstflat + flatnum, PU_STATIC);
+    normalflat = W_CacheLumpNum(firstflat + flatnum, PU_LEVEL);
 
-    for(i = 0; i < 4096; i++)
+    for (i = 0; i < 4096; i++)
         distortedflat[i] = normalflat[offset[i]];
 
     return distortedflat;
@@ -485,16 +462,13 @@ char *R_DistortedFlat(int flatnum)
 // R_DrawPlanes
 // At the end of each frame.
 //
-void R_DrawPlanes (void)
+void R_DrawPlanes(void)
 {
-    visplane_t*         pl;
-    int                 x;
-    int                 stop;
-    int                 angle;
-                                
+//    int i;
+
 #ifdef RANGECHECK
 
-    if (ds_p - drawsegs > numdrawsegs)                          // CHANGED FOR HIRES
+    if (ds_p - drawsegs > maxdrawsegs)                          // CHANGED FOR HIRES
         I_Error ("R_DrawPlanes: drawsegs overflow (%i)",        // CHANGED FOR HIRES
                  ds_p - drawsegs);                              // CHANGED FOR HIRES
     
@@ -507,80 +481,124 @@ void R_DrawPlanes (void)
                  lastopening - openings);
 #endif
 
-    for (pl = visplanes ; pl < lastvisplane ; pl++)
+//    for (i = 0; i < MAXVISPLANES; i++)
     {
-        if (pl->minx > pl->maxx)
-            continue;
+        visplane_t      *pl;
 
-        
-        // sky flat
-        if (pl->picnum == skyflatnum)
+//        for (pl = visplanes[i]; pl; pl = pl->next)
+        for (pl = visplanes ; pl < lastvisplane ; pl++)
         {
-            dc_iscale = pspriteiscale>>(detailshift && !hires);                // CHANGED FOR HIRES
-	    // [crispy] stretch sky
-            if (mouselook > 0)
-                dc_iscale = dc_iscale * 128 / 228;
-            
-            // Sky is allways drawn full bright,
-            //  i.e. colormaps[0] is used.
-            // Because of this hack, sky is not affected
-            //  by INVUL inverse mapping.
-            dc_colormap = (fixedcolormap ? fixedcolormap : fullcolormap);
-            dc_texturemid = skytexturemid;
-            dc_texheight = textureheight[skytexture]>>FRACBITS; // [crispy] Tutti-Frutti fix
-            for (x=pl->minx ; x <= pl->maxx ; x++)
+            if (pl->minx <= pl->maxx)
             {
-                dc_yl = pl->top[x];
-                dc_yh = pl->bottom[x];
+                int     picnum = pl->picnum;
 
-                if ((unsigned) dc_yl <= dc_yh) // [crispy] 32-bit integer math
+                // sky flat
+                if (picnum == skyflatnum || (picnum & PL_SKYFLAT))
                 {
-                    angle = (viewangle + xtoviewangle[x])>>ANGLETOSKYSHIFT;
-                    dc_x = x;
-                    dc_source = R_GetColumn(skytexture, angle, false);
-                    colfunc ();
+                    int         x;
+                    int         texture;
+                    angle_t     an, flip;
+
+                    // killough 10/98: allow skies to come from sidedefs.
+                    // Allows scrolling and/or animated skies, as well as
+                    // arbitrary multiple skies per level without having
+                    // to use info lumps.
+                    an = viewangle;
+
+                    if (picnum & PL_SKYFLAT)
+                    {
+                        // Sky Linedef
+                        const line_t    *l = &lines[picnum & ~PL_SKYFLAT];
+
+                        // Sky transferred from first sidedef
+                        const side_t    *s = *l->sidenum + sides;
+
+                        // Texture comes from upper texture of reference sidedef
+                        texture = texturetranslation[s->toptexture];
+
+                        // Horizontal offset is turned into an angle offset,
+                        // to allow sky rotation as well as careful positioning.
+                        // However, the offset is scaled very small, so that it
+                        // allows a long-period of sky rotation.
+                        an += s->textureoffset;
+
+                        // Vertical offset allows careful sky positioning.
+                        dc_texturemid = s->rowoffset - 28 * FRACUNIT;
+
+                        // We sometimes flip the picture horizontally.
+                        //
+                        // DOOM always flipped the picture, so we make it optional,
+                        // to make it easier to use the new feature, while to still
+                        // allow old sky textures to be used.
+                        flip = (l->special == TransferSkyTextureToTaggedSectors_Flipped ?
+                            0u : ~0u);
+                    }
+                    else        // Normal DOOM sky, only one allowed per level
+                    {
+                        dc_texturemid = skytexturemid;  // Default y-offset
+                        texture = skytexture;           // Default texture
+                        flip = 0;                       // DOOM flips it
+                    }
+
+//                    dc_iscale = pspriteiscale;
+                    dc_iscale = pspriteiscale>>(/*detailshift &&*/ !hires); // CHANGED FOR HIRES
+
+                    // [crispy] stretch sky
+                    if (mouselook > 0)
+                        dc_iscale = dc_iscale * 114 / 228;
+//                        dc_iscale = dc_iscale * 128 / 228;        // FIXME: ORIGINAL (BUGGY)
+
+                    // Sky is always drawn full bright,
+                    //  i.e. colormaps[0] is used.
+                    // Because of this hack, sky is not affected
+                    //  by INVUL inverse mapping.
+                    dc_colormap = (fixedcolormap ? fixedcolormap : fullcolormap);
+
+                    dc_texheight = textureheight[texture] >> FRACBITS;
+//                    dc_iscale = pspriteiscale;
+
+                    for (x = pl->minx; x <= pl->maxx; x++)
+                    {
+                        dc_yl = pl->top[x];
+                        dc_yh = pl->bottom[x];
+
+                        if (dc_yl <= dc_yh)
+                        {
+                            dc_x = x;
+                            dc_source = R_GetColumn(texture,
+                                ((an + xtoviewangle[x]) ^ flip) >> ANGLETOSKYSHIFT, false);
+                            skycolfunc();
+                        }
+                    }
+                }
+                else
+                {
+                    // regular flat
+                    boolean    liquid = isliquid[picnum];
+                    boolean    swirling = (liquid && d_swirl);
+                    int         lumpnum = firstflat + flattranslation[picnum];
+
+                    ds_source = (swirling ? R_DistortedFlat(picnum) :
+                        W_CacheLumpNum(lumpnum, PU_STATIC));
+
+                    xoffs = pl->xoffs;  // killough 2/28/98: Add offsets
+                    yoffs = pl->yoffs;
+                    planeheight = ABS(pl->height - viewz);
+
+                    if (liquid && pl->sector && d_swirl && isliquid[pl->sector->floorpic])
+                        planeheight -= animatedliquiddiff;
+
+                    planezlight = zlight[BETWEEN(0, (pl->lightlevel >> LIGHTSEGSHIFT)
+                        + extralight * LIGHTBRIGHT, LIGHTLEVELS - 1)];
+
+                    pl->top[pl->minx - 1] = pl->top[pl->maxx + 1] = SHRT_MAX;
+
+                    R_MakeSpans(pl);
+
+                    if (!swirling)
+                        W_ReleaseLumpNum(lumpnum);
                 }
             }
-            continue;
-        }
-        else      // regular flat
-        {
-            int         picnum = pl->picnum;
-            boolean     liquid = isliquid[picnum];
-            boolean     swirling = (liquid && d_swirl);
-            int         lumpnum = firstflat + flattranslation[picnum];
-
-            ds_source = (swirling ?
-                    R_DistortedFlat(picnum): W_CacheLumpNum(lumpnum,
-                            PU_STATIC));
-
-            xoffs = pl->xoffs;  // killough 2/28/98: Add offsets
-            yoffs = pl->yoffs;
-
-            planeheight = abs(pl->height-viewz);
-#ifdef ANIMATED_FLOOR_LIQUIDS
-            if (liquid && pl->sector && d_swirl && isliquid[pl->sector->floorpic])
-                planeheight -= animatedliquiddiff;
-#endif
-            planezlight = zlight[BETWEEN(0, (pl->lightlevel >> LIGHTSEGSHIFT)
-                    + extralight * LIGHTBRIGHT, LIGHTLEVELS - 1)];
-
-            pl->top[pl->maxx+1] = 0xffffffffu; // [crispy] hires / 32-bit integer math
-            pl->top[pl->minx-1] = 0xffffffffu; // [crispy] hires / 32-bit integer math
-
-            stop = pl->maxx + 1;
-
-            for (x=pl->minx ; x<= stop ; x++)
-            {
-                R_MakeSpans(x,pl->top[x-1],
-                            pl->bottom[x-1],
-                            pl->top[x],
-                            pl->bottom[x]);
-            }
-
-            if(!swirling)
-                W_ReleaseLumpNum(lumpnum);
         }
     }
 }
-

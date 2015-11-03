@@ -48,9 +48,9 @@
 #include "d_main.h"
 
 #ifdef WII
-#include "../deh_str.h"
+#include "../d_deh.h"
 #else
-#include "deh_str.h"
+#include "d_deh.h"
 #endif
 
 #include "doomdef.h"
@@ -63,6 +63,7 @@
 
 #include "doomstat.h"
 #include "dstrings.h"
+#include "f_finale.h"
 #include "g_game.h"
 #include "hu_stuff.h"
 
@@ -93,6 +94,7 @@
 #include "m_random.h"
 #include "p_local.h"
 #include "p_saveg.h"
+#include "p_tick.h"
 #include "r_local.h"
 #include "s_sound.h"
 
@@ -141,6 +143,8 @@
 #define CONTROLLER_1                        0x8000
 #define CONTROLLER_2                        0x10000
 
+#define MOUSE_LEFTBUTTON                    1
+#define MOUSE_RIGHTBUTTON                   2
 
 void    (*messageRoutine)  (int response);
 
@@ -807,13 +811,42 @@ char *songtextplut[] = {
     "27"
 };
 
-char gammamsg[5][26] =
+char gammamsg[31][40] =
 {
     GAMMALVL0,
     GAMMALVL1,
     GAMMALVL2,
     GAMMALVL3,
-    GAMMALVL4
+    GAMMALVL4,
+    GAMMALVL5,
+    GAMMALVL6,
+    GAMMALVL7,
+    GAMMALVL8,
+    GAMMALVL9,
+
+    GAMMALVL10,
+    GAMMALVL11,
+    GAMMALVL12,
+    GAMMALVL13,
+    GAMMALVL14,
+    GAMMALVL15,
+    GAMMALVL16,
+    GAMMALVL17,
+    GAMMALVL18,
+    GAMMALVL19,
+
+    GAMMALVL20,
+    GAMMALVL21,
+    GAMMALVL22,
+    GAMMALVL23,
+    GAMMALVL24,
+    GAMMALVL25,
+    GAMMALVL26,
+    GAMMALVL27,
+    GAMMALVL28,
+    GAMMALVL29,
+
+    GAMMALVL30
 };
 
 char *stupidtable[] =
@@ -862,72 +895,70 @@ char *Key2String (int ch)
         case CONTROLLER_1:                return "1";
         case CONTROLLER_2:                return "2";
 #else
-	case KEYP_MULTIPLY:	return "*";
-	case KEY_PRTSCR:	return "PRINT SCREEN";
-	case KEY_SCRLCK:	return "SCREENLOCK";
-	case KEY_NUMLOCK:	return "NUMLOCK";
-	case KEY_CAPSLOCK:	return "CAPSLOCK";
-	case KEY_LEFTBRACKET:	return "LEFT BRACKET";
-	case KEY_RIGHTBRACKET:	return "RIGHT BRACKET";
+        case KEYP_MULTIPLY:        return "*";
+        case KEY_PRTSCR:        return "PRINT SCREEN";
+        case KEY_SCRLCK:        return "SCREENLOCK";
+        case KEY_NUMLOCK:        return "NUMLOCK";
+        case KEY_CAPSLOCK:        return "CAPSLOCK";
+        case KEY_LEFTBRACKET:        return "LEFT BRACKET";
+        case KEY_RIGHTBRACKET:        return "RIGHT BRACKET";
 #ifndef SDL2
-	case KEY_BACKQUOTE:	return "BACK QUOTE";
+        case KEY_BACKQUOTE:        return "BACK QUOTE";
 #endif
-	case KEY_QUOTE:		return "'";
-	case KEY_QUOTEDBL:	return "DOUBLE QUOTE";
-	case KEY_SEMICOLON:	return ";";
-	case KEY_MINUS:		return "-";
-	case KEYP_PLUS:		return "+";
-	case KEY_PERIOD:	return ".";
-	case KEY_COMMA:		return ",";
-	case '/':		return "/";
-	case KEY_BACKSLASH:	return "BACKSLASH";
-	case KEY_TAB:		return "TAB";
-	case KEY_EQUALS:	return "=";
-	case KEY_ESCAPE:	return "ESCAPE";
-	case KEY_RIGHTARROW:	return "RIGHT ARROW";
-	case KEY_LEFTARROW:	return "LEFT ARROW";
-	case KEY_DOWNARROW:	return "DOWN ARROW";
-	case KEY_UPARROW:	return "UP ARROW";
-	case KEY_ENTER:		return "ENTER";
-	case KEY_PGUP:		return "PAGE UP";
-	case KEY_PGDN:		return "PAGE DOWN";
-	case KEY_INS:		return "INSERT";
-	case KEY_HOME:		return "HOME";
-	case KEY_END:		return "END";
-	case KEY_DEL:		return "DELETE";
-	case KEY_F12:		return "F12";
-	case KEY_TILDE:		return "TILDE";
-	case ' ':		return "SPACE";
-	case KEY_RSHIFT:	return "SHIFT";
-	case KEY_RALT:		return "ALT";
-	case KEY_RCTRL:		return "CTRL";
-	case '1':		return "1";
-	case '2':		return "2";
-	case '3':		return "3";
-	case '4':		return "4";
-	case '5':		return "5";
-	case '6':		return "6";
-	case '7':		return "7";
-	case '8':		return "8";
-	case '9':		return "9";
-	case '0':		return "0";
-	case KEY_F1:		return "F1";
-	case KEY_F2:		return "F2";
-	case KEY_F3:		return "F3";
-	case KEY_F4:		return "F4";
-	case KEY_F5:		return "F5";
-	case KEY_F6:		return "F6";
-	case KEY_F7:		return "F7";
-	case KEY_F8:		return "F8";
-	case KEY_F9:		return "F9";
-	case KEY_F10:		return "F10";
-	case KEY_F11:		return "F11";
-/*							// FIXME: NOT YET WORKING (MOUSE BINDINGS)
-	case 0x01:		return "MOUSE BTN LEFT";
-	case 0x02:		return "MOUSE BTN RIGHT";
-	case 0x04:		return "MOUSE BTN MIDDLE";
-	case 0x08:		return "MOUSE WHL UP";
-	case 0x10:		return "MOUSE WHL DOWN";
+        case KEY_QUOTE:                return "'";
+        case KEY_QUOTEDBL:        return "DOUBLE QUOTE";
+        case KEY_SEMICOLON:        return ";";
+        case KEY_MINUS:                return "-";
+        case KEYP_PLUS:                return "+";
+        case KEY_PERIOD:        return ".";
+        case KEY_COMMA:                return ",";
+        case '/':                return "/";
+        case KEY_BACKSLASH:        return "BACKSLASH";
+        case KEY_TAB:                return "TAB";
+        case KEY_EQUALS:        return "=";
+        case KEY_ESCAPE:        return "ESCAPE";
+        case KEY_RIGHTARROW:        return "RIGHT ARROW";
+        case KEY_LEFTARROW:        return "LEFT ARROW";
+        case KEY_DOWNARROW:        return "DOWN ARROW";
+        case KEY_UPARROW:        return "UP ARROW";
+        case KEY_ENTER:                return "ENTER";
+        case KEY_PGUP:                return "PAGE UP";
+        case KEY_PGDN:                return "PAGE DOWN";
+        case KEY_INS:                return "INSERT";
+        case KEY_HOME:                return "HOME";
+        case KEY_END:                return "END";
+        case KEY_DEL:                return "DELETE";
+        case KEY_F12:                return "F12";
+        case KEY_TILDE:                return "TILDE";
+        case ' ':                return "SPACE";
+        case KEY_RSHIFT:        return "SHIFT";
+        case KEY_RALT:                return "ALT";
+        case KEY_RCTRL:                return "CTRL";
+        case '1':                return "1";
+        case '2':                return "2";
+        case '3':                return "3";
+        case '4':                return "4";
+        case '5':                return "5";
+        case '6':                return "6";
+        case '7':                return "7";
+        case '8':                return "8";
+        case '9':                return "9";
+        case '0':                return "0";
+        case KEY_F1:                return "F1";
+        case KEY_F2:                return "F2";
+        case KEY_F3:                return "F3";
+        case KEY_F4:                return "F4";
+        case KEY_F5:                return "F5";
+        case KEY_F6:                return "F6";
+        case KEY_F7:                return "F7";
+        case KEY_F8:                return "F8";
+        case KEY_F9:                return "F9";
+        case KEY_F10:                return "F10";
+        case KEY_F11:                return "F11";
+/*                                                        // FIXME: NOT YET WORKING (MOUSE BINDINGS)
+        case 0x01:                return "MOUSE BTN LEFT";
+        case 0x02:                return "MOUSE BTN RIGHT";
+        case 0x04:                return "MOUSE BTN MIDDLE";
 */
 #endif
     }
@@ -953,6 +984,7 @@ char                       msgNames[2][9]    = {"M_MSGOFF","M_MSGON"};
 */
 char                       map_coordinates_textbuffer[50];
 char                       massacre_textbuffer[30];
+char                       flight_counter[10];
 
 // old save description before edit
 char                       saveOldString[SAVESTRINGSIZE];  
@@ -997,11 +1029,11 @@ int                        cheeting;
 int                        coordinates_info = 0;
 int                        timer_info = 0;
 int                        version_info = 0;
-int                        key_controls_start_in_cfg_at_pos = 76;
+int                        key_controls_start_in_cfg_at_pos = 90;
 #ifdef WII
-int                        key_controls_end_in_cfg_at_pos = 90;
+int                        key_controls_end_in_cfg_at_pos = 104;
 #else
-int                        key_controls_end_in_cfg_at_pos = 92;
+int                        key_controls_end_in_cfg_at_pos = 106;
 #endif
 int                        crosshair = 0;
 int                        show_stats = 0;
@@ -1023,9 +1055,12 @@ int                        snd_chans = 1;
 int                        sound_channels = 8;
 int                        gore_amount = 4;
 int                        height;
+int                        expansion = 0;
 
 // -1 = no quicksave slot picked!
-int			   quickSaveSlot;
+int                           quickSaveSlot;
+
+float                      r_gamma = 0.75;
 
 //
 // MENU TYPEDEFS
@@ -1071,6 +1106,7 @@ boolean                    massacre_cheat_used;
 boolean                    randompitch;
 boolean                    memory_usage;
 boolean                    blurred = false;
+boolean                    long_tics = false;
 
 fixed_t                    forwardmove = 29;
 fixed_t                    sidemove = 21; 
@@ -1100,6 +1136,7 @@ extern int                 display_fps;
 extern int                 wipe_type;
 extern int                 correct_lost_soul_bounce;
 extern int                 png_screenshots;
+//extern int                 st_palette;
 
 extern default_t           doom_defaults_list[];   // KEY BINDINGS
 
@@ -1114,9 +1151,12 @@ extern boolean             secret_1;
 extern boolean             secret_2;
 extern boolean             done;
 extern boolean             skippsprinterp;
+extern boolean             longtics;
 
 extern short               songlist[148];
 
+extern char*               nervewadfile;
+extern char*               demoname;
 
 //
 // PROTOTYPES
@@ -1134,6 +1174,7 @@ void M_Credits(int choice);
 void M_QuitDOOM(int choice);
 
 void M_ChangeMessages(int choice);
+void M_ChangeSensitivity(int choice);
 void M_WalkingSpeed(int choice);
 void M_TurningSpeed(int choice);
 void M_StrafingSpeed(int choice);
@@ -1148,6 +1189,7 @@ void M_UncappedFramerate(int choice);
 void M_Screenshots(int choice);
 void M_Background(int choice);
 void M_FontShadow(int choice);
+void M_DiskIcon(int choice);
 void M_SizeDisplay(int choice);
 void M_StartGame(int choice);
 void M_Sound(int choice);
@@ -1186,7 +1228,8 @@ void M_SoundPitch(int choice);
 void M_RestartSong(int choice);
 void M_SoundChannels(int choice);
 void M_GameFiles(int choice);
-void M_Brightness(int choice);
+//void M_Brightness(int choice);
+void M_ChangeGamma(int choice);
 void M_Freelook(int choice);
 void M_FreelookSpeed(int choice);
 
@@ -1247,6 +1290,17 @@ void M_Masked(int choice);
 void M_Quirk(int choice);
 void M_Ouch(int choice);
 void M_Textures(int choice);
+void M_FixMapErrors(int choice);
+void M_AltLighting(int choice);
+void M_Infighting(int choice);
+void M_LastEnemy(int choice);
+void M_Float(int choice);
+void M_Animate(int choice);
+void M_CrushSound(int choice);
+void M_NoNoise(int choice);
+void M_NudgeCorpses(int choice);
+void M_Slide(int choice);
+void M_Smearblood(int choice);
 void M_NoMonsters(int choice);
 void M_AutomapOverlay(int choice);
 
@@ -1305,13 +1359,17 @@ void M_Game(int choice);
 void M_Game2(int choice);
 void M_Game3(int choice);
 void M_Game4(int choice);
+void M_Game5(int choice);
 void M_Expansion(int choice);
 void M_Debug(int choice);
 void M_Cheats(int choice);
+/*
 void M_Record(int choice);
 void M_RMap(int choice);
 void M_RSkill(int choice);
+void M_RecordLong(int choice);
 void M_StartRecord(int choice);
+*/
 void M_DrawFilesMenu(void);
 void M_DrawItems(void);
 void M_DrawArmor(void);
@@ -1325,10 +1383,11 @@ void M_DrawGame(void);
 void M_DrawGame2(void);
 void M_DrawGame3(void);
 void M_DrawGame4(void);
+void M_DrawGame5(void);
 void M_DrawDebug(void);
 //void M_DrawSound(void);
 void M_DrawCheats(void);
-void M_DrawRecord(void);
+//void M_DrawRecord(void);
 
 //int  M_StringWidth(char *string);
 int  M_StringHeight(char *string);
@@ -1375,7 +1434,7 @@ enum
     savegame,
     endgame,
     cheats,
-    demos,
+//    demos,
     files_end
 } files_e;
 
@@ -1384,8 +1443,8 @@ menuitem_t FilesMenu[]=
     {1,"Load Game",M_LoadGame,'l'},
     {1,"Save Game",M_SaveGame,'s'},
     {1,"End Game",M_EndGame,'e'},
-    {1,"Cheats",M_Cheats,'c'},
-    {1,"Record Demo",M_Record,'r'}
+    {1,"Cheats",M_Cheats,'c'}/*,
+    {1,"Record Demo",M_Record,'r'}*/
 };
 
 menu_t  FilesDef =
@@ -1440,18 +1499,18 @@ enum
 
 static menuitem_t ExpansionMenu[]=
 {
-    {1,"Knee-Deep in the Dead", M_Expansion,'k'},
-    {1,"The Shores of Hell", M_Expansion,'t'},
+    {1,"Hell On Earth", M_Expansion,'k'},
+    {1,"No Rest For The Living", M_Expansion,'t'},
 };
 
 static menu_t  ExpDef =
 {
-    ex_end,		// # of menu items
-    &MainDef,		// previous menu
-    ExpansionMenu,	// menuitem_t ->
-    M_DrawEpisode,	// drawing routine ->
-    48,63,              // x,y
-    ex1			// lastOn
+    ex_end,                // # of menu items
+    &MainDef,                // previous menu
+    ExpansionMenu,        // menuitem_t ->
+    M_DrawEpisode,      // drawing routine ->
+    95,73,              // x,y
+    ex1                        // lastOn
 };
 
 //
@@ -1791,12 +1850,13 @@ enum
     screen_shots,
     screen_background,
     screen_shadow,
+    screen_icon,
     screen_end
 } screen_e;
 
 menuitem_t ScreenMenu[]=
 {
-    {2,"Brightness",M_Brightness,'g'},
+    {2,"Brightness",M_ChangeGamma,'g'},
     {2,"Screen Size",M_SizeDisplay,'s'},
     {2,"Detail",M_ChangeDetail,'d'},
     {2,"Translucency",M_Translucency,'t'},
@@ -1804,7 +1864,8 @@ menuitem_t ScreenMenu[]=
     {2,"Uncapped Framerate",M_UncappedFramerate,'u'},
     {2,"Screenshot Format",M_Screenshots,'x'},
     {2,"Menu Main Background",M_Background,'b'},
-    {2,"Menu Font Style",M_FontShadow,'f'}
+    {2,"Menu Font Style",M_FontShadow,'f'},
+    {2,"Show Disk Icon",M_DiskIcon,'i'}
 };
 
 menu_t  ScreenDef =
@@ -1824,17 +1885,19 @@ enum
     strafesens,
     mousespeed,
     controls_freelook,
+    mousesensibility,
     controls_keybindings,
     controls_end
 } controls_e;
 
 menuitem_t ControlsMenu[]=
 {
-    {2,"Walking",M_WalkingSpeed,'m'},
+    {2,"Walking",M_WalkingSpeed,'w'},
     {2,"Turning",M_TurningSpeed,'t'},
     {2,"Strafing",M_StrafingSpeed,'s'},
     {2,"Freelook",M_FreelookSpeed,'f'},
     {2,"Freelook Mode",M_Freelook,'l'},
+    {2,"",M_ChangeSensitivity,'m'},
     {1,"",M_KeyBindings,'b'}
 };
 
@@ -2097,6 +2160,8 @@ enum
     game4_sound,
     game4_ouch,
     game4_textures,
+    game4_errors,
+    game4_game5,
     game4_end
 } game4_e;
 
@@ -2113,7 +2178,9 @@ menuitem_t GameMenu4[]=
     {2,"Two-S. middle textures don't animate",M_Masked,'a'},
     {2,"Retain quirks in Doom's sound code",M_Quirk,'s'},
     {2,"Use Doom's buggy ouch face code",M_Ouch,'o'},
-    {2,"Partially Fullbright Textures",M_Textures,'t'}
+    {2,"Partially Fullbright Textures",M_Textures,'t'},
+    {2,"Fix Map Errors",M_FixMapErrors,'e'},
+    {2,"",M_Game5,'n'}
 };
 
 menu_t  GameDef4 =
@@ -2122,6 +2189,45 @@ menu_t  GameDef4 =
     &GameDef3,
     GameMenu4,
     M_DrawGame4,
+    23,22,
+    0
+};
+
+enum
+{
+    game5_lighting,
+    game5_infighting,
+    game5_enemy,
+    game5_float,
+    game5_animate,
+    game5_sound,
+    game5_noise,
+    game5_nudge,
+    game5_slide,
+    game5_smearblood,
+    game5_end
+} game5_e;
+
+menuitem_t GameMenu5[]=
+{
+    {2,"Alt. Lighting for Player Sprites",M_AltLighting,'l'},
+    {2,"Allow Monsters Infighting",M_Infighting,'i'},
+    {2,"Monsters Remember last enemy",M_LastEnemy,'e'},
+    {2,"Allow floating items",M_Float,'f'},
+    {2,"Animate items dropped by monsters",M_Animate,'a'},
+    {2,"Play sound crushing things to gibs",M_CrushSound,'s'},
+    {2,"Don't alert enemies when firing fist",M_NoNoise,'n'},
+    {2,"Nudge corpses when walking over",M_NudgeCorpses,'c'},
+    {2,"Corpses slide caused by explosions",M_Slide,'x'},
+    {2,"Corpses smear blood when sliding",M_Smearblood,'b'}
+};
+
+menu_t  GameDef5 =
+{
+    game5_end,
+    &GameDef4,
+    GameMenu5,
+    M_DrawGame5,
     23,22,
     0
 };
@@ -2245,7 +2351,7 @@ menu_t  SaveDef =
     75,56,
     0
 };
-
+/*
 enum
 {
     record_map,
@@ -2254,6 +2360,7 @@ enum
     record_skill,
     record_empty3,
     record_empty4,
+    record_longtics,
     record_start,
     record_end
 } record_e;
@@ -2266,6 +2373,7 @@ menuitem_t RecordMenu[]=
     {2,"Choose Skill Level:",M_RSkill,'s'},
     {-1,"",0,'\0'},
     {-1,"",0,'\0'},
+    {2,"Longtics (DOOM.EXE v1.91)",M_RecordLong,'l'},
     {2,"Start Recording",M_StartRecord,'r'}
 };
 
@@ -2275,10 +2383,10 @@ menu_t  RecordDef =
     &FilesDef,
     RecordMenu,
     M_DrawRecord,
-    105,60,
+    55,60,
     0
 };
-
+*/
 static void blurscreen(int x1, int y1, int x2, int y2, int i)
 {
     int x, y;
@@ -2339,6 +2447,10 @@ void M_DarkBackground(void)
 // M_ReadSaveStrings
 //  read the strings from the savegame files
 //
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-result"
+
 void M_ReadSaveStrings(void)
 {
     FILE   *handle;
@@ -2352,7 +2464,7 @@ void M_ReadSaveStrings(void)
         handle = fopen(name, "rb");
         if (handle == NULL)
         {
-            M_StringCopy(&savegamestrings[i][0], EMPTYSTRING, sizeof(savegamestrings));
+            M_StringCopy(&savegamestrings[i][0], s_EMPTYSTRING, SAVESTRINGSIZE);
             LoadMenu[i].status = 0;
             continue;
         }
@@ -2372,13 +2484,13 @@ void M_DrawLoad(void)
 
     M_DarkBackground();
 
-    V_DrawPatchWithShadow(72, 28, W_CacheLumpName(DEH_String("M_T_LGME"), PU_CACHE), false);
+    V_DrawPatchWithShadow(72, 28, W_CacheLumpName("M_T_LGME", PU_CACHE), false);
 
     for (i = 0;i < load_end; i++)
     {
         M_DrawSaveLoadBorder(LoadDef.x+5,LoadDef.y+LINEHEIGHT_SMALL*i);
 
-        if (!strncmp(savegamestrings[i], EMPTYSTRING, strlen(EMPTYSTRING)))
+        if (!strncmp(savegamestrings[i], s_EMPTYSTRING, strlen(s_EMPTYSTRING)))
             dp_translation = crx[CRX_DARK];
 
         M_WriteText(LoadDef.x,LoadDef.y-1+LINEHEIGHT_SMALL*i,savegamestrings[i]);
@@ -2386,10 +2498,21 @@ void M_DrawLoad(void)
         V_ClearDPTranslation();
     }
 
-    dp_translation = crx[CRX_GOLD];
-    M_WriteText(62, 148, "* INDICATES A SAVEGAME THAT WAS");
-    M_WriteText(62, 158, "CREATED USING AN OPTIONAL PWAD!");
-    V_ClearDPTranslation();
+    if(whichSkull == 1)
+    {
+        int x;
+        int x2;
+        char *string = "";
+        char *string2 = "";
+        dp_translation = crx[CRX_GOLD];
+        string = "* INDICATES A SAVEGAME THAT WAS";
+        string2 = "CREATED USING AN OPTIONAL PWAD!";
+        x = 160 - M_StringWidth(string) / 2;
+        x2 = 160 - M_StringWidth(string2) / 2;
+        M_WriteText(x, LoadDef.y + 78, string);
+        M_WriteText(x2, LoadDef.y + 88, string2);
+        V_ClearDPTranslation();
+    }
 }
 
 
@@ -2401,15 +2524,15 @@ void M_DrawSaveLoadBorder(int x,int y)
 {
     int             i;
         
-    V_DrawPatchWithShadow(x - 8, y + 7, W_CacheLumpName(DEH_String("M_LSLEFT"), PU_CACHE), false);
+    V_DrawPatchWithShadow(x - 8, y + 7, W_CacheLumpName("M_LSLEFT", PU_CACHE), false);
         
     for (i = 0;i < 24;i++)
     {
-        V_DrawPatchWithShadow(x, y + 7, W_CacheLumpName(DEH_String("M_LSCNTR"), PU_CACHE), false);
+        V_DrawPatchWithShadow(x, y + 7, W_CacheLumpName("M_LSCNTR", PU_CACHE), false);
         x += 8;
     }
 
-    V_DrawPatchWithShadow(x, y + 7, W_CacheLumpName(DEH_String("M_LSRGHT"), PU_CACHE), false);
+    V_DrawPatchWithShadow(x, y + 7, W_CacheLumpName("M_LSRGHT", PU_CACHE), false);
 }
 
 
@@ -2434,7 +2557,7 @@ void M_LoadGame (int choice)
 {
     if (netgame)
     {
-        M_StartMessage(DEH_String(LOADNET),NULL,false);
+        M_StartMessage(LOADNET,NULL,false);
         return;
     }
     M_SetupNextMenu(&LoadDef);
@@ -2451,7 +2574,7 @@ void M_DrawSave(void)
         
     M_DarkBackground();
 
-    V_DrawPatchWithShadow(72, 28, W_CacheLumpName(DEH_String("M_T_SGME"), PU_CACHE), false);
+    V_DrawPatchWithShadow(72, 28, W_CacheLumpName("M_T_SGME", PU_CACHE), false);
     for (i = 0;i < load_end; i++)
     {
         M_DrawSaveLoadBorder(LoadDef.x+5,LoadDef.y+LINEHEIGHT_SMALL*i);
@@ -2467,10 +2590,21 @@ void M_DrawSave(void)
         V_ClearDPTranslation();
     }
 
-    dp_translation = crx[CRX_GOLD];
-    M_WriteText(62, 148, "* INDICATES A SAVEGAME THAT WAS");
-    M_WriteText(62, 158, "CREATED USING AN OPTIONAL PWAD!");
-    V_ClearDPTranslation();
+    if(whichSkull == 1)
+    {
+        int x;
+        int x2;
+        char *string = "";
+        char *string2 = "";
+        dp_translation = crx[CRX_GOLD];
+        string = "* INDICATES A SAVEGAME THAT WAS";
+        string2 = "CREATED USING AN OPTIONAL PWAD!";
+        x = 160 - M_StringWidth(string) / 2;
+        x2 = 160 - M_StringWidth(string2) / 2;
+        M_WriteText(x, SaveDef.y + 78, string);
+        M_WriteText(x2, SaveDef.y + 88, string2);
+        V_ClearDPTranslation();
+    }
 }
 
 //
@@ -2482,7 +2616,7 @@ void M_DoSave(int slot)
     M_ClearMenus ();
     // PICK QUICKSAVE SLOT YET?
     if (quickSaveSlot == -2)
-	quickSaveSlot = slot;
+        quickSaveSlot = slot;
 }
 
 //
@@ -2515,16 +2649,24 @@ void M_SaveSelect(int choice)
 
     if(gamemode == shareware || gamemode == registered || gamemode == retail)
     {
+        if(modifiedgame)
+            sprintf(savegamestrings[choice], "e%dm%d %d/%d/%d %2.2d:%2.2d *",
+                    gameepisode, gamemap, year, month, day, hour, min);
+        else
             sprintf(savegamestrings[choice], "e%dm%d %d/%d/%d %2.2d:%2.2d",
                     gameepisode, gamemap, year, month, day, hour, min);
     }
     else
     {
+        if(modifiedgame)
+            sprintf(savegamestrings[choice], "map%2.2d %d/%d/%d %2.2d:%2.2d *",
+                    gamemap, year, month, day, hour, min);
+        else
             sprintf(savegamestrings[choice], "map%2.2d %d/%d/%d %2.2d:%2.2d",
                     gamemap, year, month, day, hour, min);
     }
     M_StringCopy(saveOldString,savegamestrings[choice], sizeof(saveOldString));
-    if (!strcmp(savegamestrings[choice],EMPTYSTRING))
+    if (!strcmp(savegamestrings[choice],s_EMPTYSTRING))
         savegamestrings[choice][0] = 0;
     saveCharIndex = strlen(savegamestrings[choice]);
 }
@@ -2536,7 +2678,7 @@ void M_SaveGame (int choice)
 {
     if (!usergame)
     {
-        M_StartMessage(DEH_String(SAVEDEAD),NULL,true);
+        M_StartMessage(SAVEDEAD,NULL,true);
         return;
     }
         
@@ -2556,8 +2698,8 @@ void M_QuickSaveResponse(int key)
 {
     if (key == key_menu_confirm)
     {
-	M_DoSave(quickSaveSlot);
-	S_StartSound(NULL,sfx_swtchx);
+        M_DoSave(quickSaveSlot);
+        S_StartSound(NULL,sfx_swtchx);
     }
 }
 
@@ -2565,22 +2707,22 @@ void M_QuickSave(void)
 {
     if (!usergame)
     {
-	S_StartSound(NULL,sfx_oof);
-	return;
+        S_StartSound(NULL,sfx_oof);
+        return;
     }
 
     if (gamestate != GS_LEVEL)
-	return;
-	
+        return;
+        
     if (quickSaveSlot < 0)
     {
-	M_StartControlPanel();
-	M_ReadSaveStrings();
-	M_SetupNextMenu(&SaveDef);
-	quickSaveSlot = -2;	// means to pick a slot now
-	return;
+        M_StartControlPanel();
+        M_ReadSaveStrings();
+        M_SetupNextMenu(&SaveDef);
+        quickSaveSlot = -2;        // means to pick a slot now
+        return;
     }
-    DEH_snprintf(tempstring, 80, QSPROMPT, savegamestrings[quickSaveSlot]);
+    M_snprintf(tempstring, 80, QSPROMPT, savegamestrings[quickSaveSlot]);
     M_StartMessage(tempstring,M_QuickSaveResponse,true);
 }
 
@@ -2593,8 +2735,8 @@ void M_QuickLoadResponse(int key)
 {
     if (key == key_menu_confirm)
     {
-	M_LoadSelect(quickSaveSlot);
-	S_StartSound(NULL,sfx_swtchx);
+        M_LoadSelect(quickSaveSlot);
+        S_StartSound(NULL,sfx_swtchx);
     }
 }
 
@@ -2603,16 +2745,16 @@ void M_QuickLoad(void)
 {
     if (netgame)
     {
-	M_StartMessage(DEH_String(QLOADNET),NULL,false);
-	return;
+        M_StartMessage(QLOADNET,NULL,false);
+        return;
     }
-	
+        
     if (quickSaveSlot < 0)
     {
-	M_StartMessage(DEH_String(QSAVESPOT),NULL,false);
-	return;
+        M_StartMessage(QSAVESPOT,NULL,false);
+        return;
     }
-    DEH_snprintf(tempstring, 80, QLPROMPT, savegamestrings[quickSaveSlot]);
+    M_snprintf(tempstring, 80, s_QLPROMPT, savegamestrings[quickSaveSlot]);
     M_StartMessage(tempstring,M_QuickLoadResponse,true);
 }
 
@@ -2631,6 +2773,9 @@ void M_DrawReadThis1(void)
 
     switch (gameversion)
     {
+        case exe_doom_1_666:
+        case exe_doom_1_7:
+        case exe_doom_1_8:
         case exe_doom_1_9:
         case exe_hacx:
 
@@ -2677,12 +2822,11 @@ void M_DrawReadThis1(void)
             break;
 
         default:
-            I_Error("Unhandled game version");
+            C_Printf(CR_GOLD, " Unhandled game version");
+//            I_Error("Unhandled game version");
             break;
     }
 
-    lumpname = DEH_String(lumpname);
-    
     V_DrawPatch (0, 0, W_CacheLumpName(lumpname, PU_CACHE));
 
     ReadDef1.x = skullx;
@@ -2701,7 +2845,7 @@ void M_DrawReadThis2(void)
     // We only ever draw the second page if this is 
     // gameversion == exe_doom_1_9 and gamemode == registered
 
-    V_DrawPatchWithShadow(0, 0, W_CacheLumpName(DEH_String("HELP1"), PU_CACHE), false);
+    V_DrawPatch(0, 0, W_CacheLumpName("HELP1", PU_CACHE));
 }
 
 void M_DrawCredits(void)
@@ -2711,7 +2855,7 @@ void M_DrawCredits(void)
     V_DrawDistortedBackground(gamemode == commercial ? "SLIME05" : "NUKAGE1", I_VideoBuffer);
 
     V_DrawPatchWithShadow(CreditsDef.x + CURSORXOFF_SMALL, CreditsDef.y + 180,
-            W_CacheLumpName(DEH_String(skullNameSmall[whichSkull]), PU_CACHE), false);
+            W_CacheLumpName(skullNameSmall[whichSkull], PU_CACHE), false);
 
     M_WriteText(CreditsDef.x, CreditsDef.y - 2, "The id Software Team");
     M_WriteText(CreditsDef.x, CreditsDef.y + 28, "The Chocolate DOOM Team");
@@ -2742,9 +2886,9 @@ void M_DrawSound(void)
     M_DarkBackground();
 
     if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
-        V_DrawPatchWithShadow (65, 15, W_CacheLumpName(DEH_String("M_T_XSET"), PU_CACHE), false);
+        V_DrawPatchWithShadow (65, 15, W_CacheLumpName("M_T_XSET", PU_CACHE), false);
     else
-        V_DrawPatchWithShadow (65, 15, W_CacheLumpName(DEH_String("M_SNDSET"), PU_CACHE), false);
+        V_DrawPatchWithShadow (65, 15, W_CacheLumpName("M_SNDSET", PU_CACHE), false);
 
     M_DrawThermoSmall(SoundDef.x + 95, SoundDef.y + LINEHEIGHT_SMALL * (sfx_vol + 1),
                  16, sfxVolume);
@@ -3001,7 +3145,7 @@ void M_DrawMainMenu(void)
 {
     M_DarkBackground();
 
-    V_DrawPatchWithShadow(94, 2, W_CacheLumpName(DEH_String("M_DOOM"), PU_CACHE), false);
+    V_DrawPatchWithShadow(94, 2, W_CacheLumpName("M_DOOM", PU_CACHE), false);
 }
 
 
@@ -3014,7 +3158,7 @@ void M_DrawNewGame(void)
 {
     M_DarkBackground();
 
-    V_DrawPatchWithShadow(96, 14, W_CacheLumpName(DEH_String("M_NEWG"), PU_CACHE), false);
+    V_DrawPatchWithShadow(96, 14, W_CacheLumpName("M_NEWG", PU_CACHE), false);
     M_WriteText(NewDef.x, NewDef.y - 22, "CHOOSE SKILL LEVEL:");
 }
 
@@ -3022,18 +3166,16 @@ void M_NewGame(int choice)
 {
     if (netgame && !demoplayback)
     {
-        M_StartMessage(DEH_String(NEWGAME),NULL,false);
+        M_StartMessage(NEWGAME,NULL,false);
         return;
     }
 
     // Chex Quest disabled the episode select screen, as did Doom II.
 
-    if (nerve_pwad)
-	M_SetupNextMenu(&ExpDef);
-    else if (gamemode == commercial || gameversion == exe_chex)
+    if (fsize == 12361532)
         M_SetupNextMenu(&NewDef);
     else
-        M_SetupNextMenu(&EpiDef);
+        M_SetupNextMenu(gamemode == commercial ? (nerve_pwad ? &ExpDef : &NewDef) : &EpiDef);
 }
 
 
@@ -3044,13 +3186,16 @@ void M_DrawEpisode(void)
 {
     M_DarkBackground();
 
-    V_DrawPatchWithShadow(75, 38, W_CacheLumpName(DEH_String("M_EPISOD"), PU_CACHE), false);
+    V_DrawPatchWithShadow(75, 38, W_CacheLumpName("M_EPISOD", PU_CACHE), false);
 }
 
 void M_VerifyNightmare(int ch)
 {
 #ifdef WII
     if (ch != key_menu_forward)
+        return;
+#else
+    if (ch != key_menu_confirm)
         return;
 #endif
     G_DeferedInitNew(nightmare,epi+1,1);
@@ -3061,7 +3206,7 @@ void M_ChooseSkill(int choice)
 {
     if (choice == nightmare)
     {
-        M_StartMessage(DEH_String(NIGHTMARE),M_VerifyNightmare,true);
+        M_StartMessage(NIGHTMARE,M_VerifyNightmare,true);
         return;
     }
 
@@ -3083,7 +3228,7 @@ void M_Episode(int choice)
     if ( (gamemode == shareware)
          && choice)
     {
-        M_StartMessage(DEH_String(SWSTRING),NULL,true);
+        M_StartMessage(s_SWSTRING,NULL,true);
         M_SetupNextMenu(&ReadDef1);
         return;
     }
@@ -3110,7 +3255,7 @@ void M_DrawOptions(void)
 {
     M_DarkBackground();
 
-    V_DrawPatchWithShadow(108, 15, W_CacheLumpName(DEH_String("M_OPTTTL"),
+    V_DrawPatchWithShadow(108, 15, W_CacheLumpName("M_OPTTTL",
                                                PU_CACHE), false);
 }
 
@@ -3118,53 +3263,53 @@ void M_DrawItems(void)
 {
     M_DarkBackground();
 
-    V_DrawPatchWithShadow(123, 10, W_CacheLumpName(DEH_String("M_T_ITMS"),
+    V_DrawPatchWithShadow(123, 10, W_CacheLumpName("M_T_ITMS",
                                                PU_CACHE), false);
 
     dp_translation = crx[CRX_GOLD];
-    M_WriteText(80, 50, DEH_String("GIVE THEM ALL AT ONCE"));
+    M_WriteText(80, 50, "GIVE THEM ALL AT ONCE");
     V_ClearDPTranslation();
 
     if(fsize != 12361532 && fsize != 19321722)
     {
         if(itemOn == 2)
             dp_translation = crx[CRX_GOLD];
-        M_WriteText(80, 70, DEH_String("RADIATION SHIELDING SUIT"));
+        M_WriteText(80, 70, "RADIATION SHIELDING SUIT");
         V_ClearDPTranslation();
 
         if(itemOn == 3)
             dp_translation = crx[CRX_GOLD];
-        M_WriteText(80, 80, DEH_String("COMPUTER AREA MAP"));
+        M_WriteText(80, 80, "COMPUTER AREA MAP");
         V_ClearDPTranslation();
 
         if(itemOn == 4)
             dp_translation = crx[CRX_GOLD];
-        M_WriteText(80, 90, DEH_String("LIGHT AMPLIFICATION VISOR"));
+        M_WriteText(80, 90, "LIGHT AMPLIFICATION VISOR");
         V_ClearDPTranslation();
 
         if(itemOn == 7)
             dp_translation = crx[CRX_GOLD];
-        M_WriteText(80, 120, DEH_String("PARTIAL INVISIBILITY"));
+        M_WriteText(80, 120, "PARTIAL INVISIBILITY");
         V_ClearDPTranslation();
 
         if(itemOn == 8)
             dp_translation = crx[CRX_GOLD];
-        M_WriteText(80, 130, DEH_String("INVULNERABILITY!"));
+        M_WriteText(80, 130, "INVULNERABILITY!");
         V_ClearDPTranslation();
 
         if(itemOn == 9)
             dp_translation = crx[CRX_GOLD];
-        M_WriteText(80, 140, DEH_String("BERSERK!"));
+        M_WriteText(80, 140, "BERSERK!");
         V_ClearDPTranslation();
 
         if(itemOn == 10)
             dp_translation = crx[CRX_GOLD];
-        M_WriteText(80, 150, DEH_String("BACKPACK"));
+        M_WriteText(80, 150, "BACKPACK");
         V_ClearDPTranslation();
 
         if(itemOn == 11)
             dp_translation = crx[CRX_GOLD];
-        M_WriteText(80, 160, DEH_String("FLIGHT"));
+        M_WriteText(80, 160, "FLIGHT");
         V_ClearDPTranslation();
     }
 
@@ -3172,42 +3317,42 @@ void M_DrawItems(void)
     {
         if(itemOn == 2)
             dp_translation = crx[CRX_GOLD];
-        M_WriteText(80, 70, DEH_String("VULCAN RUBBER BOOTS"));
+        M_WriteText(80, 70, "VULCAN RUBBER BOOTS");
         V_ClearDPTranslation();
 
         if(itemOn == 3)
             dp_translation = crx[CRX_GOLD];
-        M_WriteText(80, 80, DEH_String("SI ARRAY MAPPING"));
+        M_WriteText(80, 80, "SI ARRAY MAPPING");
         V_ClearDPTranslation();
 
         if(itemOn == 4)
             dp_translation = crx[CRX_GOLD];
-        M_WriteText(80, 90, DEH_String("INFRARED VISOR"));
+        M_WriteText(80, 90, "INFRARED VISOR");
         V_ClearDPTranslation();
 
         if(itemOn == 7)
             dp_translation = crx[CRX_GOLD];
-        M_WriteText(80, 120, DEH_String("ENK BLINDNESS"));
+        M_WriteText(80, 120, "ENK BLINDNESS");
         V_ClearDPTranslation();
 
         if(itemOn == 8)
             dp_translation = crx[CRX_GOLD];
-        M_WriteText(80, 130, DEH_String("FORCE FIELD"));
+        M_WriteText(80, 130, "FORCE FIELD");
         V_ClearDPTranslation();
 
         if(itemOn == 9)
             dp_translation = crx[CRX_GOLD];
-        M_WriteText(80, 140, DEH_String("007 MICROTEL"));
+        M_WriteText(80, 140, "007 MICROTEL");
         V_ClearDPTranslation();
 
         if(itemOn == 10)
             dp_translation = crx[CRX_GOLD];
-        M_WriteText(80, 150, DEH_String("BACKPACK"));
+        M_WriteText(80, 150, "BACKPACK");
         V_ClearDPTranslation();
 
         if(itemOn == 11)
             dp_translation = crx[CRX_GOLD];
-        M_WriteText(80, 160, DEH_String("FLIGHT"));
+        M_WriteText(80, 160, "FLIGHT");
         V_ClearDPTranslation();
     }
 
@@ -3215,27 +3360,27 @@ void M_DrawItems(void)
     {
         if(itemOn == 2)
             dp_translation = crx[CRX_GOLD];
-        M_WriteText(80, 70, DEH_String("SLIME-PROOF SUIT"));
+        M_WriteText(80, 70, "SLIME-PROOF SUIT");
         V_ClearDPTranslation();
 
         if(itemOn == 3)
             dp_translation = crx[CRX_GOLD];
-        M_WriteText(80, 80, DEH_String("COMPUTER AREA MAP"));
+        M_WriteText(80, 80, "COMPUTER AREA MAP");
         V_ClearDPTranslation();
 
         if(itemOn == 4)
             dp_translation = crx[CRX_GOLD];
-        M_WriteText(80, 90, DEH_String("ULTRA GOGGLES"));
+        M_WriteText(80, 90, "ULTRA GOGGLES");
         V_ClearDPTranslation();
 
         if(itemOn == 5)
             dp_translation = crx[CRX_GOLD];
-        M_WriteText(80, 100, DEH_String("BACKPACK"));
+        M_WriteText(80, 100, "BACKPACK");
         V_ClearDPTranslation();
 
         if(itemOn == 6)
             dp_translation = crx[CRX_GOLD];
-        M_WriteText(80, 110, DEH_String("FLIGHT"));
+        M_WriteText(80, 110, "FLIGHT");
         V_ClearDPTranslation();
     }
 }
@@ -3244,23 +3389,23 @@ void M_DrawArmor(void)
 {
     M_DarkBackground();
 
-    V_DrawPatchWithShadow(115, 15, W_CacheLumpName(DEH_String("M_T_ARMR"),
+    V_DrawPatchWithShadow(115, 15, W_CacheLumpName("M_T_ARMR",
                                                PU_CACHE), false);
 
     dp_translation = crx[CRX_GOLD];
-    M_WriteText(80, 55, DEH_String("GIVE THEM BOTH AT ONCE"));
+    M_WriteText(80, 55, "GIVE THEM BOTH AT ONCE");
     V_ClearDPTranslation();
 
     if(fsize != 12361532 && fsize != 19321722)
     {
         if(itemOn == 2)
             dp_translation = crx[CRX_GOLD];
-        M_WriteText(80, 75, DEH_String("GREEN ARMOR"));
+        M_WriteText(80, 75, "GREEN ARMOR");
         V_ClearDPTranslation();
 
         if(itemOn == 3)
             dp_translation = crx[CRX_GOLD];
-        M_WriteText(80, 85, DEH_String("BLUE ARMOR"));
+        M_WriteText(80, 85, "BLUE ARMOR");
         V_ClearDPTranslation();
     }
 
@@ -3268,12 +3413,12 @@ void M_DrawArmor(void)
     {
         if(itemOn == 2)
             dp_translation = crx[CRX_GOLD];
-        M_WriteText(80, 75, DEH_String("CHEX(R) ARMOR"));
+        M_WriteText(80, 75, "CHEX(R) ARMOR");
         V_ClearDPTranslation();
 
         if(itemOn == 2)
             dp_translation = crx[CRX_GOLD];
-        M_WriteText(80, 85, DEH_String("SUPER CHEX(R) ARMOR"));
+        M_WriteText(80, 85, "SUPER CHEX(R) ARMOR");
         V_ClearDPTranslation();
     }
 
@@ -3281,12 +3426,12 @@ void M_DrawArmor(void)
     {
         if(itemOn == 2)
             dp_translation = crx[CRX_GOLD];
-        M_WriteText(80, 75, DEH_String("KEVLAR VEST"));
+        M_WriteText(80, 75, "KEVLAR VEST");
         V_ClearDPTranslation();
 
         if(itemOn == 2)
             dp_translation = crx[CRX_GOLD];
-        M_WriteText(80, 85, DEH_String("SUPER KEVLAR VEST"));
+        M_WriteText(80, 85, "SUPER KEVLAR VEST");
         V_ClearDPTranslation();
     }
 }
@@ -3295,33 +3440,33 @@ void M_DrawWeapons(void)
 {
     M_DarkBackground();
 
-    V_DrawPatchWithShadow(103, 15, W_CacheLumpName(DEH_String("M_T_WPNS"),
+    V_DrawPatchWithShadow(103, 15, W_CacheLumpName("M_T_WPNS",
                                                PU_CACHE), false);
 
     dp_translation = crx[CRX_GOLD];
-    M_WriteText(80, 55, DEH_String("GIVE THEM ALL AT ONCE"));
+    M_WriteText(80, 55, "GIVE THEM ALL AT ONCE");
     V_ClearDPTranslation();
 
     if(fsize != 19321722 && fsize != 12361532)
     {
         if(itemOn == 2)
             dp_translation = crx[CRX_GOLD];
-        M_WriteText(80, 75, DEH_String("CHAINSAW"));
+        M_WriteText(80, 75, "CHAINSAW");
         V_ClearDPTranslation();
 
         if(itemOn == 3)
             dp_translation = crx[CRX_GOLD];
-        M_WriteText(80, 85, DEH_String("SHOTGUN"));
+        M_WriteText(80, 85, "SHOTGUN");
         V_ClearDPTranslation();
 
         if(itemOn == 4)
             dp_translation = crx[CRX_GOLD];
-        M_WriteText(80, 95, DEH_String("CHAINGUN"));
+        M_WriteText(80, 95, "CHAINGUN");
         V_ClearDPTranslation();
 
         if(itemOn == 5)
             dp_translation = crx[CRX_GOLD];
-        M_WriteText(80, 105, DEH_String("ROCKET LAUNCHER"));
+        M_WriteText(80, 105, "ROCKET LAUNCHER");
         V_ClearDPTranslation();
 
         if(fsize != 4261144 && fsize != 4271324 && fsize != 4211660 &&
@@ -3330,12 +3475,12 @@ void M_DrawWeapons(void)
         {
             if(itemOn == 6)
                 dp_translation = crx[CRX_GOLD];
-            M_WriteText(80, 115, DEH_String("PLASMA CANNON"));
+            M_WriteText(80, 115, "PLASMA CANNON");
             V_ClearDPTranslation();
 
             if(itemOn == 7)
                 dp_translation = crx[CRX_GOLD];
-            M_WriteText(80, 125, DEH_String("BFG 9000"));
+            M_WriteText(80, 125, "BFG 9000");
             V_ClearDPTranslation();
         }
 
@@ -3347,7 +3492,7 @@ void M_DrawWeapons(void)
         {
             if(itemOn == 8)
                 dp_translation = crx[CRX_GOLD];
-            M_WriteText(80, 135, DEH_String("SUPER SHOTGUN"));
+            M_WriteText(80, 135, "SUPER SHOTGUN");
             V_ClearDPTranslation();
         }
     }
@@ -3356,37 +3501,37 @@ void M_DrawWeapons(void)
     {
         if(itemOn == 2)
             dp_translation = crx[CRX_GOLD];
-        M_WriteText(80, 75, DEH_String("HOIG REZNATOR"));
+        M_WriteText(80, 75, "HOIG REZNATOR");
         V_ClearDPTranslation();
 
         if(itemOn == 3)
             dp_translation = crx[CRX_GOLD];
-        M_WriteText(80, 85, DEH_String("TAZER"));
+        M_WriteText(80, 85, "TAZER");
         V_ClearDPTranslation();
 
         if(itemOn == 4)
             dp_translation = crx[CRX_GOLD];
-        M_WriteText(80, 95, DEH_String("UZI"));
+        M_WriteText(80, 95, "UZI");
         V_ClearDPTranslation();
 
         if(itemOn == 5)
             dp_translation = crx[CRX_GOLD];
-        M_WriteText(80, 105, DEH_String("PHOTON 'ZOOKA"));
+        M_WriteText(80, 105, "PHOTON 'ZOOKA");
         V_ClearDPTranslation();
 
         if(itemOn == 6)
             dp_translation = crx[CRX_GOLD];
-        M_WriteText(80, 115, DEH_String("STICK"));
+        M_WriteText(80, 115, "STICK");
         V_ClearDPTranslation();
 
         if(itemOn == 7)
             dp_translation = crx[CRX_GOLD];
-        M_WriteText(80, 125, DEH_String("NUKER"));
+        M_WriteText(80, 125, "NUKER");
         V_ClearDPTranslation();
 
         if(itemOn == 8)
             dp_translation = crx[CRX_GOLD];
-        M_WriteText(80, 135, DEH_String("CRYOGUN"));
+        M_WriteText(80, 135, "CRYOGUN");
         V_ClearDPTranslation();
     }
 
@@ -3394,32 +3539,32 @@ void M_DrawWeapons(void)
     {
         if(itemOn == 2)
             dp_translation = crx[CRX_GOLD];
-        M_WriteText(80, 75, DEH_String("SUPER BOOTSPORK"));
+        M_WriteText(80, 75, "SUPER BOOTSPORK");
         V_ClearDPTranslation();
 
         if(itemOn == 3)
             dp_translation = crx[CRX_GOLD];
-        M_WriteText(80, 85, DEH_String("LARGE ZORCHER"));
+        M_WriteText(80, 85, "LARGE ZORCHER");
         V_ClearDPTranslation();
 
         if(itemOn == 4)
             dp_translation = crx[CRX_GOLD];
-        M_WriteText(80, 95, DEH_String("RAPID ZORCHER"));
+        M_WriteText(80, 95, "RAPID ZORCHER");
         V_ClearDPTranslation();
 
         if(itemOn == 5)
             dp_translation = crx[CRX_GOLD];
-        M_WriteText(80, 105, DEH_String("ZORCH PROPULSOR"));
+        M_WriteText(80, 105, "ZORCH PROPULSOR");
         V_ClearDPTranslation();
 
         if(itemOn == 6)
             dp_translation = crx[CRX_GOLD];
-        M_WriteText(80, 115, DEH_String("PHASING ZORCHER"));
+        M_WriteText(80, 115, "PHASING ZORCHER");
         V_ClearDPTranslation();
 
         if(itemOn == 7)
             dp_translation = crx[CRX_GOLD];
-        M_WriteText(80, 125, DEH_String("LARGE AREA ZORCHING DEVICE"));
+        M_WriteText(80, 125, "LARGE AREA ZORCHING DEVICE");
         V_ClearDPTranslation();
     }
 }
@@ -3428,11 +3573,11 @@ void M_DrawKeys(void)
 {
     M_DarkBackground();
 
-    V_DrawPatchWithShadow(125, 15, W_CacheLumpName(DEH_String("M_T_KEYS"),
+    V_DrawPatchWithShadow(125, 15, W_CacheLumpName("M_T_KEYS",
                                                PU_CACHE), false);
 
     dp_translation = crx[CRX_GOLD];
-    M_WriteText(80, 55, DEH_String("GIVE ALL KEYS FOR THIS MAP"));
+    M_WriteText(80, 55, "GIVE ALL KEYS FOR THIS MAP");
     V_ClearDPTranslation();
 }
 
@@ -3441,18 +3586,17 @@ void M_DrawScreen(void)
     M_DarkBackground();
 
     if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
-        V_DrawPatchWithShadow(58, 15, W_CacheLumpName(DEH_String("M_T_SSET"),
+        V_DrawPatchWithShadow(58, 15, W_CacheLumpName("M_T_SSET",
                                                PU_CACHE), false);
     else
-        V_DrawPatchWithShadow(58, 15, W_CacheLumpName(DEH_String("M_SCRSET"),
+        V_DrawPatchWithShadow(58, 15, W_CacheLumpName("M_SCRSET",
                                                PU_CACHE), false);
 
-    M_DrawThermoSmall(ScreenDef.x + 152, ScreenDef.y + LINEHEIGHT_SMALL * (screen_gamma + 1),
-                 5, usegamma);
+    M_DrawThermoSmall(ScreenDef.x + 104, ScreenDef.y + LINEHEIGHT_SMALL * (screen_gamma + 1),
+                 11, usegamma / 3);
 /*
     V_DrawPatchWithShadow(OptionsDef.x + 175, OptionsDef.y + LINEHEIGHT + 11.5 *
-                      screen_detail, W_CacheLumpName(DEH_String
-                      (detailNames[detailLevel]), PU_CACHE), false);
+                      screen_detail, W_CacheLumpName(detailNames[detailLevel], PU_CACHE), false);
 */
     if(detailLevel > 0)
     {
@@ -3563,6 +3707,33 @@ void M_DrawScreen(void)
         M_WriteText(ScreenDef.x + 149, ScreenDef.y + 78, "COLORED");
         V_ClearDPTranslation();
     }
+
+    if(show_diskicon)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(ScreenDef.x + 189, ScreenDef.y + 88, "ON");
+        V_ClearDPTranslation();
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(ScreenDef.x + 181, ScreenDef.y + 88, "OFF");
+        V_ClearDPTranslation();
+    }
+
+    if(whichSkull == 1)
+    {
+        int x;
+        char *string = "";
+        dp_translation = crx[CRX_GOLD];
+        if(itemOn == 3)
+        {
+            string = "START / LOAD A NEW GAME TO TAKE EFFECT.";
+        }
+        x = 160 - M_StringWidth(string) / 2;
+        M_WriteText(x, ScreenDef.y + 105, string);
+        V_ClearDPTranslation();
+    }
 }
 
 void M_DrawGame(void)
@@ -3570,10 +3741,10 @@ void M_DrawGame(void)
     M_DarkBackground();
 
     if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
-        V_DrawPatchWithShadow(70, 0, W_CacheLumpName(DEH_String("M_T_GSET"),
+        V_DrawPatchWithShadow(70, 0, W_CacheLumpName("M_T_GSET",
                                                PU_CACHE), false);
     else
-        V_DrawPatchWithShadow(70, 0, W_CacheLumpName(DEH_String("M_GMESET"),
+        V_DrawPatchWithShadow(70, 0, W_CacheLumpName("M_GMESET",
                                                PU_CACHE), false);
 
     if(devparm)
@@ -3581,189 +3752,189 @@ void M_DrawGame(void)
         if(aiming_help)
         {
             dp_translation = crx[CRX_GREEN];
-            M_WriteText(GameDef.x + 161, GameDef.y + 128, DEH_String("ON"));
+            M_WriteText(GameDef.x + 161, GameDef.y + 128, "ON");
             V_ClearDPTranslation();
         }
         else
         {
             dp_translation = crx[CRX_DARK];
-            M_WriteText(GameDef.x + 153, GameDef.y + 128, DEH_String("OFF"));
+            M_WriteText(GameDef.x + 153, GameDef.y + 128, "OFF");
             V_ClearDPTranslation();
         }
 
         if(itemOn == 13)
             dp_translation = crx[CRX_GOLD];
 
-        M_WriteText(GameDef.x, GameDef.y + 128, DEH_String("AIMING HELP"));
+        M_WriteText(GameDef.x, GameDef.y + 128, "AIMING HELP");
         V_ClearDPTranslation();
     }
 
     if(drawgrid == 1)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef.x + 161, GameDef.y - 2, DEH_String("ON"));
+        M_WriteText(GameDef.x + 161, GameDef.y - 2, "ON");
         V_ClearDPTranslation();
     }
     else if(drawgrid == 0)
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef.x + 153, GameDef.y - 2, DEH_String("OFF"));
+        M_WriteText(GameDef.x + 153, GameDef.y - 2, "OFF");
         V_ClearDPTranslation();
     }
 
     if(am_rotate == true)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef.x + 161, GameDef.y + 8, DEH_String("ON"));
+        M_WriteText(GameDef.x + 161, GameDef.y + 8, "ON");
         V_ClearDPTranslation();
     }
     else if(am_rotate == false)
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef.x + 153, GameDef.y + 8, DEH_String("OFF"));
+        M_WriteText(GameDef.x + 153, GameDef.y + 8, "OFF");
         V_ClearDPTranslation();
     }
 
     if(followplayer == 1)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef.x + 161, GameDef.y + 18, DEH_String("ON"));
+        M_WriteText(GameDef.x + 161, GameDef.y + 18, "ON");
         V_ClearDPTranslation();
     }
     else if(followplayer == 0)
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef.x + 153, GameDef.y + 18, DEH_String("OFF"));
+        M_WriteText(GameDef.x + 153, GameDef.y + 18, "OFF");
         V_ClearDPTranslation();
     }
 
     if(show_stats == 1)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef.x + 161, GameDef.y + 28, DEH_String("ON"));
+        M_WriteText(GameDef.x + 161, GameDef.y + 28, "ON");
         V_ClearDPTranslation();
     }
     else if (show_stats == 0)
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef.x + 153, GameDef.y + 28, DEH_String("OFF"));
+        M_WriteText(GameDef.x + 153, GameDef.y + 28, "OFF");
         V_ClearDPTranslation();
     }
 
     if(overlay_trigger)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef.x + 161, GameDef.y + 38, DEH_String("ON"));
+        M_WriteText(GameDef.x + 161, GameDef.y + 38, "ON");
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef.x + 153, GameDef.y + 38, DEH_String("OFF"));
+        M_WriteText(GameDef.x + 153, GameDef.y + 38, "OFF");
         V_ClearDPTranslation();
     }
 
     if(timer_info)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef.x + 161, GameDef.y + 48, DEH_String("ON"));
+        M_WriteText(GameDef.x + 161, GameDef.y + 48, "ON");
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef.x + 153, GameDef.y + 48, DEH_String("OFF"));
+        M_WriteText(GameDef.x + 153, GameDef.y + 48, "OFF");
         V_ClearDPTranslation();
     }
 
     if(show_authors)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef.x + 161, GameDef.y + 58, DEH_String("ON"));
+        M_WriteText(GameDef.x + 161, GameDef.y + 58, "ON");
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef.x + 153, GameDef.y + 58, DEH_String("OFF"));
+        M_WriteText(GameDef.x + 153, GameDef.y + 58, "OFF");
         V_ClearDPTranslation();
     }
 
     if(showMessages)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef.x + 161, GameDef.y + 68, DEH_String("ON"));
+        M_WriteText(GameDef.x + 161, GameDef.y + 68, "ON");
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef.x + 153, GameDef.y + 68, DEH_String("OFF"));
+        M_WriteText(GameDef.x + 153, GameDef.y + 68, "OFF");
         V_ClearDPTranslation();
     }
 
     if(use_vanilla_weapon_change == 1)
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef.x + 145, GameDef.y + 78, DEH_String("SLOW"));
+        M_WriteText(GameDef.x + 145, GameDef.y + 78, "SLOW");
         V_ClearDPTranslation();
     }
     else if(use_vanilla_weapon_change == 0)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef.x + 146, GameDef.y + 78, DEH_String("FAST"));
+        M_WriteText(GameDef.x + 146, GameDef.y + 78, "FAST");
         V_ClearDPTranslation();
     }
 
     if(d_recoil)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef.x + 161, GameDef.y + 88, DEH_String("ON"));
+        M_WriteText(GameDef.x + 161, GameDef.y + 88, "ON");
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef.x + 153, GameDef.y + 88, DEH_String("OFF"));
+        M_WriteText(GameDef.x + 153, GameDef.y + 88, "OFF");
         V_ClearDPTranslation();
     }
 
     if(d_thrust)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef.x + 161, GameDef.y + 98, DEH_String("ON"));
+        M_WriteText(GameDef.x + 161, GameDef.y + 98, "ON");
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef.x + 153, GameDef.y + 98, DEH_String("OFF"));
+        M_WriteText(GameDef.x + 153, GameDef.y + 98, "OFF");
         V_ClearDPTranslation();
     }
 
     if(respawnparm)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef.x + 161, GameDef.y + 108, DEH_String("ON"));
+        M_WriteText(GameDef.x + 161, GameDef.y + 108, "ON");
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef.x + 153, GameDef.y + 108, DEH_String("OFF"));
+        M_WriteText(GameDef.x + 153, GameDef.y + 108, "OFF");
         V_ClearDPTranslation();
     }
 
     if(fastparm)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef.x + 161, GameDef.y + 118, DEH_String("ON"));
+        M_WriteText(GameDef.x + 161, GameDef.y + 118, "ON");
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef.x + 153, GameDef.y + 118, DEH_String("OFF"));
+        M_WriteText(GameDef.x + 153, GameDef.y + 118, "OFF");
         V_ClearDPTranslation();
     }
 
@@ -3774,7 +3945,7 @@ void M_DrawGame(void)
             char *string = "YOU MUST START A NEW GAME TO TAKE EFFECT.";
             int x = 160 - M_StringWidth(string) / 2;
             dp_translation = crx[CRX_GOLD];
-            M_WriteText(x, GameDef.y + 138, DEH_String(string));
+            M_WriteText(x, GameDef.y + 138, string);
             V_ClearDPTranslation();
         }
         else
@@ -3784,7 +3955,7 @@ void M_DrawGame(void)
             else
                 dp_translation = crx[CRX_GRAY];
 
-            M_WriteText(GameDef.x, GameDef.y + 138, DEH_String("MORE OPTIONS"));
+            M_WriteText(GameDef.x, GameDef.y + 138, "MORE OPTIONS");
             V_ClearDPTranslation();
         }
     }
@@ -3795,7 +3966,7 @@ void M_DrawGame(void)
             char *string = "YOU MUST START A NEW GAME TO TAKE EFFECT.";
             int x = 160 - M_StringWidth(string) / 2;
             dp_translation = crx[CRX_GOLD];
-            M_WriteText(x, GameDef.y + 138, DEH_String(string));
+            M_WriteText(x, GameDef.y + 138, string);
             V_ClearDPTranslation();
         }
 
@@ -3804,7 +3975,7 @@ void M_DrawGame(void)
         else
             dp_translation = crx[CRX_GRAY];
 
-        M_WriteText(GameDef.x, GameDef.y + 128, DEH_String("MORE OPTIONS"));
+        M_WriteText(GameDef.x, GameDef.y + 128, "MORE OPTIONS");
         V_ClearDPTranslation();
     }
 }
@@ -3814,190 +3985,190 @@ void M_DrawGame2(void)
     M_DarkBackground();
 
     if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
-        V_DrawPatchWithShadow(70, 0, W_CacheLumpName(DEH_String("M_T_GSET"),
+        V_DrawPatchWithShadow(70, 0, W_CacheLumpName("M_T_GSET",
                                                PU_CACHE), false);
     else
-        V_DrawPatchWithShadow(70, 0, W_CacheLumpName(DEH_String("M_GMESET"),
+        V_DrawPatchWithShadow(70, 0, W_CacheLumpName("M_GMESET",
                                                PU_CACHE), false);
 
     if(not_monsters)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef2.x + 216, GameDef2.y - 2, DEH_String("ON"));
+        M_WriteText(GameDef2.x + 216, GameDef2.y - 2, "ON");
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef2.x + 208, GameDef2.y - 2, DEH_String("OFF"));
+        M_WriteText(GameDef2.x + 208, GameDef2.y - 2, "OFF");
         V_ClearDPTranslation();
     }
 
     if(hud)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef2.x + 216, GameDef2.y + 8, DEH_String("ON"));
+        M_WriteText(GameDef2.x + 216, GameDef2.y + 8, "ON");
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef2.x + 208, GameDef2.y + 8, DEH_String("OFF"));
+        M_WriteText(GameDef2.x + 208, GameDef2.y + 8, "OFF");
         V_ClearDPTranslation();
     }
 
     if(d_footstep)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef2.x + 216, GameDef2.y + 18, DEH_String("ON"));
+        M_WriteText(GameDef2.x + 216, GameDef2.y + 18, "ON");
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef2.x + 208, GameDef2.y + 18, DEH_String("OFF"));
+        M_WriteText(GameDef2.x + 208, GameDef2.y + 18, "OFF");
         V_ClearDPTranslation();
     }
 
     if(d_footclip)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef2.x + 216, GameDef2.y + 28, DEH_String("ON"));
+        M_WriteText(GameDef2.x + 216, GameDef2.y + 28, "ON");
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef2.x + 208, GameDef2.y + 28, DEH_String("OFF"));
+        M_WriteText(GameDef2.x + 208, GameDef2.y + 28, "OFF");
         V_ClearDPTranslation();
     }
 
     if(d_splash)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef2.x + 216, GameDef2.y + 38, DEH_String("ON"));
+        M_WriteText(GameDef2.x + 216, GameDef2.y + 38, "ON");
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef2.x + 208, GameDef2.y + 38, DEH_String("OFF"));
+        M_WriteText(GameDef2.x + 208, GameDef2.y + 38, "OFF");
         V_ClearDPTranslation();
     }
 
     if(d_swirl)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef2.x + 216, GameDef2.y + 48, DEH_String("ON"));
+        M_WriteText(GameDef2.x + 216, GameDef2.y + 48, "ON");
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef2.x + 208, GameDef2.y + 48, DEH_String("OFF"));
+        M_WriteText(GameDef2.x + 208, GameDef2.y + 48, "OFF");
         V_ClearDPTranslation();
     }
 
     if(beta_style_mode)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef2.x + 216, GameDef2.y + 58, DEH_String("ON"));
+        M_WriteText(GameDef2.x + 216, GameDef2.y + 58, "ON");
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef2.x + 208, GameDef2.y + 58, DEH_String("OFF"));
+        M_WriteText(GameDef2.x + 208, GameDef2.y + 58, "OFF");
         V_ClearDPTranslation();
     }
 
     if(d_flipcorpses)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef2.x + 216, GameDef2.y + 68, DEH_String("ON"));
+        M_WriteText(GameDef2.x + 216, GameDef2.y + 68, "ON");
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef2.x + 208, GameDef2.y + 68, DEH_String("OFF"));
+        M_WriteText(GameDef2.x + 208, GameDef2.y + 68, "OFF");
         V_ClearDPTranslation();
     }
 
     if(d_secrets)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef2.x + 216, GameDef2.y + 78, DEH_String("ON"));
+        M_WriteText(GameDef2.x + 216, GameDef2.y + 78, "ON");
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef2.x + 208, GameDef2.y + 78, DEH_String("OFF"));
+        M_WriteText(GameDef2.x + 208, GameDef2.y + 78, "OFF");
         V_ClearDPTranslation();
     }
 
     if(smoketrails)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef2.x + 216, GameDef2.y + 88, DEH_String("ON"));
+        M_WriteText(GameDef2.x + 216, GameDef2.y + 88, "ON");
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef2.x + 208, GameDef2.y + 88, DEH_String("OFF"));
+        M_WriteText(GameDef2.x + 208, GameDef2.y + 88, "OFF");
         V_ClearDPTranslation();
     }
 
     if(chaingun_tics == 1)
     {
         dp_translation = crx[CRX_BLUE];
-        M_WriteText(GameDef2.x + 192, GameDef2.y + 98, DEH_String("ULTRA"));
+        M_WriteText(GameDef2.x + 192, GameDef2.y + 98, "ULTRA");
         V_ClearDPTranslation();
     }
     else if(chaingun_tics == 2)
     {
         dp_translation = crx[CRX_RED];
-        M_WriteText(GameDef2.x + 166, GameDef2.y + 98, DEH_String("VERY FAST"));
+        M_WriteText(GameDef2.x + 166, GameDef2.y + 98, "VERY FAST");
         V_ClearDPTranslation();
     }
     else if(chaingun_tics == 3)
     {
         dp_translation = crx[CRX_GOLD];
-        M_WriteText(GameDef2.x + 185, GameDef2.y + 98, DEH_String("FASTER"));
+        M_WriteText(GameDef2.x + 185, GameDef2.y + 98, "FASTER");
         V_ClearDPTranslation();
     }
     else if(chaingun_tics == 4)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef2.x + 183, GameDef2.y + 98, DEH_String("NORMAL"));
+        M_WriteText(GameDef2.x + 183, GameDef2.y + 98, "NORMAL");
         V_ClearDPTranslation();
     }
 
     if(d_fallingdamage)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef2.x + 216, GameDef2.y + 108, DEH_String("ON"));
+        M_WriteText(GameDef2.x + 216, GameDef2.y + 108, "ON");
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef2.x + 208, GameDef2.y + 108, DEH_String("OFF"));
+        M_WriteText(GameDef2.x + 208, GameDef2.y + 108, "OFF");
         V_ClearDPTranslation();
     }
 
     if(d_infiniteammo)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef2.x + 216, GameDef2.y + 118, DEH_String("ON"));
+        M_WriteText(GameDef2.x + 216, GameDef2.y + 118, "ON");
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef2.x + 208, GameDef2.y + 118, DEH_String("OFF"));
+        M_WriteText(GameDef2.x + 208, GameDef2.y + 118, "OFF");
         V_ClearDPTranslation();
     }
 
@@ -4015,7 +4186,7 @@ void M_DrawGame2(void)
             string = "YOU MUST QUIT AND RESTART TO TAKE EFFECT.";
         }
         x = 160 - M_StringWidth(string) / 2;
-        M_WriteText(x, GameDef2.y + 138, DEH_String(string));
+        M_WriteText(x, GameDef2.y + 138, string);
         V_ClearDPTranslation();
     }
 
@@ -4024,7 +4195,7 @@ void M_DrawGame2(void)
     else
         dp_translation = crx[CRX_GRAY];
 
-    M_WriteText(GameDef2.x, GameDef2.y + 128, DEH_String("MORE & MORE OPTIONS"));
+    M_WriteText(GameDef2.x, GameDef2.y + 128, "MORE & MORE OPTIONS");
     V_ClearDPTranslation();
 }
 
@@ -4033,10 +4204,10 @@ void M_DrawGame3(void)
     M_DarkBackground();
 
     if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
-        V_DrawPatchWithShadow(70, 0, W_CacheLumpName(DEH_String("M_T_GSET"),
+        V_DrawPatchWithShadow(70, 0, W_CacheLumpName("M_T_GSET",
                                                PU_CACHE), false);
     else
-        V_DrawPatchWithShadow(70, 0, W_CacheLumpName(DEH_String("M_GMESET"),
+        V_DrawPatchWithShadow(70, 0, W_CacheLumpName("M_GMESET",
                                                PU_CACHE), false);
 
     if(d_fixspriteoffsets && modifiedgame)
@@ -4045,181 +4216,181 @@ void M_DrawGame3(void)
     if(crosshair == 1)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef3.x + 266, GameDef3.y -2, DEH_String("ON"));
+        M_WriteText(GameDef3.x + 266, GameDef3.y -2, "ON");
         V_ClearDPTranslation();
     }
     else if (crosshair == 0)
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef3.x + 258, GameDef3.y -2, DEH_String("OFF"));
+        M_WriteText(GameDef3.x + 258, GameDef3.y -2, "OFF");
         V_ClearDPTranslation();
     }
     
     if(autoaim)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef3.x + 266, GameDef3.y + 8, DEH_String("ON"));
+        M_WriteText(GameDef3.x + 266, GameDef3.y + 8, "ON");
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef3.x + 258, GameDef3.y + 8, DEH_String("OFF"));
+        M_WriteText(GameDef3.x + 258, GameDef3.y + 8, "OFF");
         V_ClearDPTranslation();
     }
 
     if(jumping)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef3.x + 266, GameDef3.y + 18, DEH_String("ON"));
+        M_WriteText(GameDef3.x + 266, GameDef3.y + 18, "ON");
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef3.x + 258, GameDef3.y + 18, DEH_String("OFF"));
+        M_WriteText(GameDef3.x + 258, GameDef3.y + 18, "OFF");
         V_ClearDPTranslation();
     }
 
     if(d_maxgore)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef3.x + 266, GameDef3.y + 28, DEH_String("ON"));
+        M_WriteText(GameDef3.x + 266, GameDef3.y + 28, "ON");
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef3.x + 258, GameDef3.y + 28, DEH_String("OFF"));
+        M_WriteText(GameDef3.x + 258, GameDef3.y + 28, "OFF");
         V_ClearDPTranslation();
     }
 
     if(gore_amount == 1)
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef3.x + 257, GameDef3.y + 38, DEH_String("LOW"));
+        M_WriteText(GameDef3.x + 257, GameDef3.y + 38, "LOW");
         V_ClearDPTranslation();
     }
     else if(gore_amount == 2)
     {
         dp_translation = crx[CRX_GOLD];
-        M_WriteText(GameDef3.x + 236, GameDef3.y + 38, DEH_String("MEDIUM"));
+        M_WriteText(GameDef3.x + 236, GameDef3.y + 38, "MEDIUM");
         V_ClearDPTranslation();
     }
     else if(gore_amount == 3)
     {
         dp_translation = crx[CRX_RED];
-        M_WriteText(GameDef3.x + 254, GameDef3.y + 38, DEH_String("HIGH"));
+        M_WriteText(GameDef3.x + 254, GameDef3.y + 38, "HIGH");
         V_ClearDPTranslation();
     }
     else if(gore_amount == 4)
     {
         dp_translation = crx[CRX_RED];
-        M_WriteText(GameDef3.x + 174, GameDef3.y + 38, DEH_String("RIP'EM TO PIECES"));
+        M_WriteText(GameDef3.x + 174, GameDef3.y + 38, "RIP'EM TO PIECES");
         V_ClearDPTranslation();
     }
 
     if(d_colblood)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef3.x + 266, GameDef3.y + 48, DEH_String("ON"));
+        M_WriteText(GameDef3.x + 266, GameDef3.y + 48, "ON");
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef3.x + 258, GameDef3.y + 48, DEH_String("OFF"));
+        M_WriteText(GameDef3.x + 258, GameDef3.y + 48, "OFF");
         V_ClearDPTranslation();
     }
 
     if(d_colblood2)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef3.x + 266, GameDef3.y + 58, DEH_String("ON"));
+        M_WriteText(GameDef3.x + 266, GameDef3.y + 58, "ON");
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef3.x + 258, GameDef3.y + 58, DEH_String("OFF"));
+        M_WriteText(GameDef3.x + 258, GameDef3.y + 58, "OFF");
         V_ClearDPTranslation();
     }
 
     if(d_shadows)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef3.x + 266, GameDef3.y + 68, DEH_String("ON"));
+        M_WriteText(GameDef3.x + 266, GameDef3.y + 68, "ON");
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef3.x + 258, GameDef3.y + 68, DEH_String("OFF"));
+        M_WriteText(GameDef3.x + 258, GameDef3.y + 68, "OFF");
         V_ClearDPTranslation();
     }
 
     if(d_fixspriteoffsets)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef3.x + 266, GameDef3.y + 78, DEH_String("ON"));
+        M_WriteText(GameDef3.x + 266, GameDef3.y + 78, "ON");
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef3.x + 258, GameDef3.y + 78, DEH_String("OFF"));
+        M_WriteText(GameDef3.x + 258, GameDef3.y + 78, "OFF");
         V_ClearDPTranslation();
     }
 
     if(d_telefrag)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef3.x + 266, GameDef3.y + 88, DEH_String("ON"));
+        M_WriteText(GameDef3.x + 266, GameDef3.y + 88, "ON");
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef3.x + 258, GameDef3.y + 88, DEH_String("OFF"));
+        M_WriteText(GameDef3.x + 258, GameDef3.y + 88, "OFF");
         V_ClearDPTranslation();
     }
 
     if(d_doorstuck)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef3.x + 266, GameDef3.y + 98, DEH_String("ON"));
+        M_WriteText(GameDef3.x + 266, GameDef3.y + 98, "ON");
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef3.x + 258, GameDef3.y + 98, DEH_String("OFF"));
+        M_WriteText(GameDef3.x + 258, GameDef3.y + 98, "OFF");
         V_ClearDPTranslation();
     }
 
     if(d_resurrectghosts)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef3.x + 266, GameDef3.y + 108, DEH_String("ON"));
+        M_WriteText(GameDef3.x + 266, GameDef3.y + 108, "ON");
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef3.x + 258, GameDef3.y + 108, DEH_String("OFF"));
+        M_WriteText(GameDef3.x + 258, GameDef3.y + 108, "OFF");
         V_ClearDPTranslation();
     }
 
     if(d_limitedghosts)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef3.x + 266, GameDef3.y + 118, DEH_String("ON"));
+        M_WriteText(GameDef3.x + 266, GameDef3.y + 118, "ON");
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef3.x + 258, GameDef3.y + 118, DEH_String("OFF"));
+        M_WriteText(GameDef3.x + 258, GameDef3.y + 118, "OFF");
         V_ClearDPTranslation();
     }
 
@@ -4232,12 +4403,16 @@ void M_DrawGame3(void)
         {
             string = "YOU MUST START A NEW GAME TO TAKE EFFECT.";
         }
+        else if((itemOn == 3 || itemOn == 4) && dehacked)
+        {
+            string = "THIS OPTION IS NOT FOR ENABLED DEHACKED MODE.";
+        }
         else if(itemOn == 8 && modifiedgame)
         {
             string = "THIS OPTION IS NOT FOR CUSTOM PWAD FILES.";
         }
         x = 160 - M_StringWidth(string) / 2;
-        M_WriteText(x, GameDef3.y + 138, DEH_String(string));
+        M_WriteText(x, GameDef3.y + 138, string);
         V_ClearDPTranslation();
     }
 
@@ -4246,7 +4421,7 @@ void M_DrawGame3(void)
     else
         dp_translation = crx[CRX_GRAY];
 
-    M_WriteText(GameDef3.x, GameDef3.y + 128, DEH_String("EVEN MORE OPTIONS"));
+    M_WriteText(GameDef3.x, GameDef3.y + 128, "EVEN MORE OPTIONS");
     V_ClearDPTranslation();
 }
 
@@ -4255,209 +4430,390 @@ void M_DrawGame4(void)
     M_DarkBackground();
 
     if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
-        V_DrawPatchWithShadow(70, 0, W_CacheLumpName(DEH_String("M_T_GSET"),
+        V_DrawPatchWithShadow(70, 0, W_CacheLumpName("M_T_GSET",
                                                PU_CACHE), false);
     else
-        V_DrawPatchWithShadow(70, 0, W_CacheLumpName(DEH_String("M_GMESET"),
+        V_DrawPatchWithShadow(70, 0, W_CacheLumpName("M_GMESET",
                                                PU_CACHE), false);
 
     if(!d_blockskulls)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef4.x + 266, GameDef4.y - 2, DEH_String("ON"));
+        M_WriteText(GameDef4.x + 266, GameDef4.y - 2, "ON");
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef4.x + 258, GameDef4.y - 2, DEH_String("OFF"));
+        M_WriteText(GameDef4.x + 258, GameDef4.y - 2, "OFF");
         V_ClearDPTranslation();
     }
 
     if(!d_blazingsound)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef4.x + 266, GameDef4.y + 8, DEH_String("ON"));
+        M_WriteText(GameDef4.x + 266, GameDef4.y + 8, "ON");
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef4.x + 258, GameDef4.y + 8, DEH_String("OFF"));
+        M_WriteText(GameDef4.x + 258, GameDef4.y + 8, "OFF");
         V_ClearDPTranslation();
     }
 
     if(d_god)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef4.x + 266, GameDef4.y + 18, DEH_String("ON"));
+        M_WriteText(GameDef4.x + 266, GameDef4.y + 18, "ON");
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef4.x + 258, GameDef4.y + 18, DEH_String("OFF"));
+        M_WriteText(GameDef4.x + 258, GameDef4.y + 18, "OFF");
         V_ClearDPTranslation();
     }
 
     if(d_floors)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef4.x + 266, GameDef4.y + 28, DEH_String("ON"));
+        M_WriteText(GameDef4.x + 266, GameDef4.y + 28, "ON");
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef4.x + 258, GameDef4.y + 28, DEH_String("OFF"));
+        M_WriteText(GameDef4.x + 258, GameDef4.y + 28, "OFF");
         V_ClearDPTranslation();
     }
 
     if(d_moveblock)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef4.x + 266, GameDef4.y + 38, DEH_String("ON"));
+        M_WriteText(GameDef4.x + 266, GameDef4.y + 38, "ON");
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef4.x + 258, GameDef4.y + 38, DEH_String("OFF"));
+        M_WriteText(GameDef4.x + 258, GameDef4.y + 38, "OFF");
         V_ClearDPTranslation();
     }
 
     if(d_model)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef4.x + 266, GameDef4.y + 48, DEH_String("ON"));
+        M_WriteText(GameDef4.x + 266, GameDef4.y + 48, "ON");
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef4.x + 258, GameDef4.y + 48, DEH_String("OFF"));
+        M_WriteText(GameDef4.x + 258, GameDef4.y + 48, "OFF");
         V_ClearDPTranslation();
     }
 
     if(d_666)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef4.x + 266, GameDef4.y + 58, DEH_String("ON"));
+        M_WriteText(GameDef4.x + 266, GameDef4.y + 58, "ON");
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef4.x + 258, GameDef4.y + 58, DEH_String("OFF"));
+        M_WriteText(GameDef4.x + 258, GameDef4.y + 58, "OFF");
         V_ClearDPTranslation();
     }
 
     if(correct_lost_soul_bounce)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef4.x + 266, GameDef4.y + 68, DEH_String("ON"));
+        M_WriteText(GameDef4.x + 266, GameDef4.y + 68, "ON");
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef4.x + 258, GameDef4.y + 68, DEH_String("OFF"));
+        M_WriteText(GameDef4.x + 258, GameDef4.y + 68, "OFF");
         V_ClearDPTranslation();
     }
 
     if(d_maskedanim)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef4.x + 266, GameDef4.y + 78, DEH_String("ON"));
+        M_WriteText(GameDef4.x + 266, GameDef4.y + 78, "ON");
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef4.x + 258, GameDef4.y + 78, DEH_String("OFF"));
+        M_WriteText(GameDef4.x + 258, GameDef4.y + 78, "OFF");
         V_ClearDPTranslation();
     }
 
     if(d_sound)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef4.x + 266, GameDef4.y + 88, DEH_String("ON"));
+        M_WriteText(GameDef4.x + 266, GameDef4.y + 88, "ON");
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef4.x + 258, GameDef4.y + 88, DEH_String("OFF"));
+        M_WriteText(GameDef4.x + 258, GameDef4.y + 88, "OFF");
         V_ClearDPTranslation();
     }
 
     if(d_ouchface)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef4.x + 266, GameDef4.y + 98, DEH_String("ON"));
+        M_WriteText(GameDef4.x + 266, GameDef4.y + 98, "ON");
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef4.x + 258, GameDef4.y + 98, DEH_String("OFF"));
+        M_WriteText(GameDef4.x + 258, GameDef4.y + 98, "OFF");
         V_ClearDPTranslation();
     }
 
     if(d_brightmaps)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef4.x + 266, GameDef4.y + 108, DEH_String("ON"));
+        M_WriteText(GameDef4.x + 266, GameDef4.y + 108, "ON");
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef4.x + 258, GameDef4.y + 108, DEH_String("OFF"));
+        M_WriteText(GameDef4.x + 258, GameDef4.y + 108, "OFF");
+        V_ClearDPTranslation();
+    }
+
+    if(d_fixmaperrors)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(GameDef4.x + 266, GameDef4.y + 118, "ON");
+        V_ClearDPTranslation();
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(GameDef4.x + 258, GameDef4.y + 118, "OFF");
+        V_ClearDPTranslation();
+    }
+
+    if(whichSkull == 1)
+    {
+        int x;
+        char *string = "";
+        dp_translation = crx[CRX_GOLD];
+        if(itemOn == 11)
+        {
+            string = "YOU MAY NEED TO RESTART THE GAME FOR THIS.";
+        }
+        else if(itemOn == 12)
+        {
+            string = "YOU MAY NEED TO RESTART THE MAP FOR THIS.";
+        }
+        x = 160 - M_StringWidth(string) / 2;
+        M_WriteText(x, GameDef3.y + 138, string);
+        V_ClearDPTranslation();
+    }
+
+    if(itemOn == 13)
+        dp_translation = crx[CRX_GOLD];
+    else
+        dp_translation = crx[CRX_GRAY];
+
+    M_WriteText(GameDef4.x, GameDef4.y + 128, "ENDLESS ETERNITY...");
+    V_ClearDPTranslation();
+}
+    
+void M_DrawGame5(void)
+{
+    M_DarkBackground();
+
+    if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
+        V_DrawPatchWithShadow(70, 0, W_CacheLumpName("M_T_GSET",
+                                               PU_CACHE), false);
+    else
+        V_DrawPatchWithShadow(70, 0, W_CacheLumpName("M_GMESET",
+                                               PU_CACHE), false);
+
+    if(d_altlighting)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(GameDef5.x + 266, GameDef5.y - 2, "ON");
+        V_ClearDPTranslation();
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(GameDef5.x + 258, GameDef5.y - 2, "OFF");
+        V_ClearDPTranslation();
+    }
+
+    if(allow_infighting)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(GameDef5.x + 266, GameDef5.y + 8, "ON");
+        V_ClearDPTranslation();
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(GameDef5.x + 258, GameDef5.y + 8, "OFF");
+        V_ClearDPTranslation();
+    }
+
+    if(last_enemy)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(GameDef5.x + 266, GameDef5.y + 18, "ON");
+        V_ClearDPTranslation();
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(GameDef5.x + 258, GameDef5.y + 18, "OFF");
+        V_ClearDPTranslation();
+    }
+
+    if(float_items)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(GameDef5.x + 266, GameDef5.y + 28, "ON");
+        V_ClearDPTranslation();
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(GameDef5.x + 258, GameDef5.y + 28, "OFF");
+        V_ClearDPTranslation();
+    }
+
+    if(animated_drop)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(GameDef5.x + 266, GameDef5.y + 38, "ON");
+        V_ClearDPTranslation();
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(GameDef5.x + 258, GameDef5.y + 38, "OFF");
+        V_ClearDPTranslation();
+    }
+
+    if(crush_sound)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(GameDef5.x + 266, GameDef5.y + 48, "ON");
+        V_ClearDPTranslation();
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(GameDef5.x + 258, GameDef5.y + 48, "OFF");
+        V_ClearDPTranslation();
+    }
+
+    if(disable_noise)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(GameDef5.x + 266, GameDef5.y + 58, "ON");
+        V_ClearDPTranslation();
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(GameDef5.x + 258, GameDef5.y + 58, "OFF");
+        V_ClearDPTranslation();
+    }
+
+    if(corpses_nudge)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(GameDef5.x + 266, GameDef5.y + 68, "ON");
+        V_ClearDPTranslation();
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(GameDef5.x + 258, GameDef5.y + 68, "OFF");
+        V_ClearDPTranslation();
+    }
+
+    if(corpses_slide)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(GameDef5.x + 266, GameDef5.y + 78, "ON");
+        V_ClearDPTranslation();
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(GameDef5.x + 258, GameDef5.y + 78, "OFF");
+        V_ClearDPTranslation();
+    }
+
+    if(corpses_smearblood)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(GameDef5.x + 266, GameDef5.y + 88, "ON");
+        V_ClearDPTranslation();
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(GameDef5.x + 258, GameDef5.y + 88, "OFF");
         V_ClearDPTranslation();
     }
 }
-    
+
 void DetectState(void)
 {
     if(!netgame && !demoplayback && gamestate == GS_LEVEL
         && gameskill != sk_nightmare &&
         players[consoleplayer].playerstate == PST_DEAD)
     {
-        M_StartMessage(DEH_String("CHEATING NOT ALLOWED - YOU'RE DEAD"),
+        M_StartMessage("CHEATING NOT ALLOWED - YOU'RE DEAD",
         NULL, true);
     }
     else if(!netgame && demoplayback && gamestate == GS_LEVEL
         && players[consoleplayer].playerstate == PST_LIVE)
     {
-        M_StartMessage(DEH_String("CHEATING NOT ALLOWED IN DEMO MODE"),
+        M_StartMessage("CHEATING NOT ALLOWED IN DEMO MODE",
         NULL, true);
     }
     else if(!netgame && demoplayback && gamestate == GS_LEVEL
         && players[consoleplayer].playerstate == PST_DEAD)
     {
-        M_StartMessage(DEH_String("CHEATING NOT ALLOWED IN DEMO MODE"),
+        M_StartMessage("CHEATING NOT ALLOWED IN DEMO MODE",
         NULL, true);
     }
     else if(!netgame && demoplayback && gamestate != GS_LEVEL)
     {
-        M_StartMessage(DEH_String("CHEATING NOT ALLOWED IN DEMO MODE"),
+        M_StartMessage("CHEATING NOT ALLOWED IN DEMO MODE",
         NULL, true);
     }
     else if(!netgame && !demoplayback && gamestate != GS_LEVEL)
     {
-        M_StartMessage(DEH_String("CHEATING NOT ALLOWED IN DEMO MODE"),
+        M_StartMessage("CHEATING NOT ALLOWED IN DEMO MODE",
         NULL, true);
     }
     else if(netgame)
     {
-        M_StartMessage(DEH_String("CHEATING NOT ALLOWED FOR NET GAME"),
+        M_StartMessage("CHEATING NOT ALLOWED FOR NET GAME",
         NULL, true);
     }
 
     if(gameskill == sk_nightmare)
     {
-        M_StartMessage(DEH_String("CHEATING DISABLED - NIGHTMARE SKILL"),
+        M_StartMessage("CHEATING DISABLED - NIGHTMARE SKILL",
         NULL, true);
     }
 }
@@ -4467,33 +4823,33 @@ void M_DrawCheats(void)
     M_DarkBackground();
 
     if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
-        V_DrawPatchWithShadow (110, 6, W_CacheLumpName(DEH_String("M_T_CHTS"), PU_CACHE), false);
+        V_DrawPatchWithShadow (110, 6, W_CacheLumpName("M_T_CHTS", PU_CACHE), false);
     else
-        V_DrawPatchWithShadow (110, 6, W_CacheLumpName(DEH_String("M_CHEATS"), PU_CACHE), false);
+        V_DrawPatchWithShadow (110, 6, W_CacheLumpName("M_CHEATS", PU_CACHE), false);
 
     if (players[consoleplayer].cheats & CF_GODMODE)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(223, 26, DEH_String("ON"));
+        M_WriteText(223, 26, "ON");
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(215, 26, DEH_String("OFF"));
+        M_WriteText(215, 26, "OFF");
         V_ClearDPTranslation();
     }
 
     if (players[consoleplayer].cheats & CF_NOCLIP)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(223, 36, DEH_String("ON"));
+        M_WriteText(223, 36, "ON");
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(215, 36, DEH_String("OFF"));
+        M_WriteText(215, 36, "OFF");
         V_ClearDPTranslation();
     }
 
@@ -4501,46 +4857,46 @@ void M_DrawCheats(void)
         dp_translation = crx[CRX_GOLD];
     else
         dp_translation = crx[CRX_GRAY];
-    M_WriteText(75, 46, DEH_String("WEAPONS..."));
+    M_WriteText(75, 46, "WEAPONS...");
     V_ClearDPTranslation();
 
     if(itemOn == 3)
         dp_translation = crx[CRX_GOLD];
     else
         dp_translation = crx[CRX_GRAY];
-    M_WriteText(75, 56, DEH_String("KEYS..."));
+    M_WriteText(75, 56, "KEYS...");
     V_ClearDPTranslation();
 
     if(itemOn == 4)
         dp_translation = crx[CRX_GOLD];
     else
         dp_translation = crx[CRX_GRAY];
-    M_WriteText(75, 66, DEH_String("ARMOR..."));
+    M_WriteText(75, 66, "ARMOR...");
     V_ClearDPTranslation();
 
     if(itemOn == 5)
         dp_translation = crx[CRX_GOLD];
     else
         dp_translation = crx[CRX_GRAY];
-    M_WriteText(75, 76, DEH_String("ITEMS..."));
+    M_WriteText(75, 76, "ITEMS...");
     V_ClearDPTranslation();
 
     if(!cheating)
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(215, 86, DEH_String("OFF"));
+        M_WriteText(215, 86, "OFF");
         V_ClearDPTranslation();
     }
     else if (cheating && cheeting!=2)
     {
         dp_translation = crx[CRX_GOLD];
-        M_WriteText(199, 86, DEH_String("WALLS"));
+        M_WriteText(199, 86, "WALLS");
         V_ClearDPTranslation();
     }
     else if (cheating && cheeting==2)          
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(215, 86, DEH_String("ALL"));
+        M_WriteText(215, 86, "ALL");
         V_ClearDPTranslation();
     }
 
@@ -4704,9 +5060,8 @@ void M_DrawCheats(void)
         M_WriteText(220, 156, songtextplut[tracknum]);
         V_ClearDPTranslation();
     }
-    DetectState();
 }
-
+/*
 void M_DrawRecord(void)
 {
     char buffer_map[2];
@@ -4716,7 +5071,7 @@ void M_DrawRecord(void)
 
     M_snprintf(buffer_map, sizeof(buffer_map), "%d", rmap);
 
-    V_DrawPatchWithShadow(58, 15, W_CacheLumpName(DEH_String("M_T_DREC"),
+    V_DrawPatchWithShadow(58, 15, W_CacheLumpName("M_T_DREC",
                                                PU_CACHE), false);
     if (rmap == 0)
         rmap = 1;
@@ -4865,34 +5220,34 @@ void M_DrawRecord(void)
                 offset = 7;
             if(rmap == 1 || rmap == 11 || rmap == 21 || rmap == 31)
                 V_DrawPatchWithShadow (115 - offset, 68, W_CacheLumpName
-                (DEH_String("WINUM1"), PU_CACHE), false);
+                ("WINUM1", PU_CACHE), false);
             else if(rmap == 2 || rmap == 12 || rmap == 22 || rmap == 32)
                 V_DrawPatchWithShadow (115 - offset, 68, W_CacheLumpName
-                (DEH_String("WINUM2"), PU_CACHE), false);
+                ("WINUM2", PU_CACHE), false);
             else if(rmap == 3 || rmap == 13 || rmap == 23)
                 V_DrawPatchWithShadow (115 - offset, 68, W_CacheLumpName
-                (DEH_String("WINUM3"), PU_CACHE), false);
+                ("WINUM3", PU_CACHE), false);
             else if(rmap == 4 || rmap == 14 || rmap == 24)
                 V_DrawPatchWithShadow (115 - offset, 68, W_CacheLumpName
-                (DEH_String("WINUM4"), PU_CACHE), false);
+                ("WINUM4", PU_CACHE), false);
             else if(rmap == 5 || rmap == 15 || rmap == 25)
                 V_DrawPatchWithShadow (115 - offset, 68, W_CacheLumpName
-                (DEH_String("WINUM5"), PU_CACHE), false);
+                ("WINUM5", PU_CACHE), false);
             else if(rmap == 6 || rmap == 16 || rmap == 26)
                 V_DrawPatchWithShadow (115 - offset, 68, W_CacheLumpName
-                (DEH_String("WINUM6"), PU_CACHE), false);
+                ("WINUM6", PU_CACHE), false);
             else if(rmap == 7 || rmap == 17 || rmap == 27)
                 V_DrawPatchWithShadow (115 - offset, 68, W_CacheLumpName
-                (DEH_String("WINUM7"), PU_CACHE), false);
+                ("WINUM7", PU_CACHE), false);
             else if(rmap == 8 || rmap == 18 || rmap == 28)
                 V_DrawPatchWithShadow (115 - offset, 68, W_CacheLumpName
-                (DEH_String("WINUM8"), PU_CACHE), false);
+                ("WINUM8", PU_CACHE), false);
             else if(rmap == 9 || rmap == 19 || rmap == 29)
                 V_DrawPatchWithShadow (115 - offset, 68, W_CacheLumpName
-                (DEH_String("WINUM9"), PU_CACHE), false);
+                ("WINUM9", PU_CACHE), false);
             else if(rmap == 10 || rmap == 20 || rmap == 30)
                 V_DrawPatchWithShadow (115 - offset, 68, W_CacheLumpName
-                (DEH_String("WINUM0"), PU_CACHE), false);
+                ("WINUM0", PU_CACHE), false);
         }
     }
 
@@ -4901,19 +5256,19 @@ void M_DrawRecord(void)
         if(repi == 1)
         {
             if(rmap == 1)
-                V_DrawPatchWithShadow (55, 68, W_CacheLumpName(DEH_String("WILV00"),
+                V_DrawPatchWithShadow (55, 68, W_CacheLumpName("WILV00",
                 PU_CACHE), false);
             else if(rmap == 2)
-                V_DrawPatchWithShadow (55, 68, W_CacheLumpName(DEH_String("WILV01"),
+                V_DrawPatchWithShadow (55, 68, W_CacheLumpName("WILV01",
                 PU_CACHE), false);
             else if(rmap == 3)
-                V_DrawPatchWithShadow (55, 68, W_CacheLumpName(DEH_String("WILV02"),
+                V_DrawPatchWithShadow (55, 68, W_CacheLumpName("WILV02",
                 PU_CACHE), false);
             else if(rmap == 4)
-                V_DrawPatchWithShadow (55, 68, W_CacheLumpName(DEH_String("WILV03"),
+                V_DrawPatchWithShadow (55, 68, W_CacheLumpName("WILV03",
                 PU_CACHE), false);
             else if(rmap == 5)
-                V_DrawPatchWithShadow (55, 68, W_CacheLumpName(DEH_String("WILV04"),
+                V_DrawPatchWithShadow (55, 68, W_CacheLumpName("WILV04",
                 PU_CACHE), false);
         }
     }
@@ -4933,7 +5288,12 @@ void M_DrawRecord(void)
     else if(rskill == 2)
     {
         dp_translation = crx[CRX_GRAY];
-        M_WriteText(RecordDef.x, RecordDef.y + 38, "Hurt me plenty.");
+
+        if(beta_style)
+            M_WriteText(RecordDef.x, RecordDef.y + 38, "I JUST WANT TO KILL.");
+        else
+            M_WriteText(RecordDef.x, RecordDef.y + 38, "Hurt me plenty.");
+
         V_ClearDPTranslation();
     }
     else if(rskill == 3)
@@ -4948,8 +5308,21 @@ void M_DrawRecord(void)
         M_WriteText(RecordDef.x, RecordDef.y + 38, "Nightmare!");
         V_ClearDPTranslation();
     }
-}
 
+    if(long_tics)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(RecordDef.x + 190, RecordDef.y + 58, "ON");
+        V_ClearDPTranslation();
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(RecordDef.x + 182, RecordDef.y + 58, "OFF");
+        V_ClearDPTranslation();
+    }
+}
+*/
 void M_Options(int choice)
 {
     M_SetupNextMenu(&OptionsDef);
@@ -4976,9 +5349,9 @@ void M_ChangeMessages(int choice)
     showMessages = 1 - showMessages;
         
     if (!showMessages)
-        players[consoleplayer].message = DEH_String(MSGOFF);
+        players[consoleplayer].message = s_MSGOFF;
     else
-        players[consoleplayer].message = DEH_String(MSGON);
+        players[consoleplayer].message = s_MSGON;
 
     message_dontfuckwithme = true;
 }
@@ -4992,6 +5365,9 @@ void M_EndGameResponse(int ch)
 #ifdef WII
     if (ch != key_menu_forward)
         return;
+#else
+    if (ch != key_menu_confirm)
+        return;
 #endif
     currentMenu->lastOn = itemOn;
     M_ClearMenus ();
@@ -5001,7 +5377,7 @@ void M_EndGameResponse(int ch)
 void M_EndGame(int choice)
 {
 /*
-    V_DrawPatchWithShadow(58, 15, W_CacheLumpName(DEH_String("M_T_EGME"),
+    V_DrawPatchWithShadow(58, 15, W_CacheLumpName("M_T_EGME",
                                                PU_CACHE), false);
 */
     choice = 0;
@@ -5013,10 +5389,10 @@ void M_EndGame(int choice)
 
     if (netgame)
     {
-        M_StartMessage(DEH_String(NETEND),NULL,false);
+        M_StartMessage(NETEND,NULL,false);
         return;
     }
-    M_StartMessage(DEH_String(ENDGAME),M_EndGameResponse,true);
+    M_StartMessage(s_ENDGAME,M_EndGameResponse,true);
 }
 
 
@@ -5036,7 +5412,7 @@ void M_ReadThis2(int choice)
     // Doom 1.9 had two menus when playing Doom 1
     // All others had only one
 
-    if (gameversion == exe_doom_1_9 && gamemode != commercial)
+    if (gameversion <= exe_doom_1_9 && gamemode != commercial)
     {
         choice = 0;
         M_SetupNextMenu(&ReadDef2);
@@ -5105,6 +5481,9 @@ void M_QuitResponse(int ch)
 #ifdef WII
     if (ch != key_menu_forward)
         return;
+#else
+    if (ch != key_menu_confirm)
+        return;
 #endif
     if (!netgame)
     {
@@ -5128,30 +5507,15 @@ void M_QuitResponse(int ch)
 
 static char *M_SelectEndMessage(void)
 {
-    char **endmsg;
-
-    if (logical_gamemission == doom)
-    {
-        // Doom 1
-
-        endmsg = doom1_endmsg;
-    }
-    else
-    {
-        // Doom 2
-        
-        endmsg = doom2_endmsg;
-    }
-
-    return endmsg[gametic % NUM_QUITMESSAGES];
+    return *endmsg[M_Random() % NUM_QUITMESSAGES + (gamemission != doom) * NUM_QUITMESSAGES];
 }
 
 
 void M_QuitDOOM(int choice)
 {
     sprintf(endstring,
-            DEH_String("%s\n\n" DOSY),
-            DEH_String(M_SelectEndMessage()));
+            "%s\n\n" DOSY,
+            M_SelectEndMessage());
 /*
     if(screenSize < 8);
     {
@@ -5164,17 +5528,31 @@ void M_QuitDOOM(int choice)
 
 
 
+void M_ChangeSensitivity(int choice)
+{
+    switch(choice)
+    {
+      case 0:
+	if (mouseSensitivity)
+	    mouseSensitivity--;
+	break;
+      case 1:
+	if (mouseSensitivity < 9)
+	    mouseSensitivity++;
+	break;
+    }
+}
 
 void M_WalkingSpeed(int choice)
 {
     switch(choice)
     {
       case 0:
-        if(forwardmove > 19)
+        if(forwardmove > 25)
             forwardmove--;
         break;
       case 1:
-        if(forwardmove < 47)
+        if(forwardmove < 50)
             forwardmove++;
         break;
     }
@@ -5200,11 +5578,11 @@ void M_StrafingSpeed(int choice)
     switch(choice)
     {
       case 0:
-        if(sidemove > 16)
+        if(sidemove > 24)
             sidemove--;
         break;
       case 1:
-        if (sidemove < 32)
+        if (sidemove < 40)
             sidemove++;
         break;
     }
@@ -5229,9 +5607,9 @@ void M_ChangeDetail(int choice)
     GetPixelSize();
 
     if (!detailLevel)
-        players[consoleplayer].message = DEH_String(DETAILHI);
+        players[consoleplayer].message = s_DETAILHI;
     else
-        players[consoleplayer].message = DEH_String(DETAILLO);
+        players[consoleplayer].message = s_DETAILLO;
 }
 
 void M_Translucency(int choice)
@@ -5242,6 +5620,8 @@ void M_Translucency(int choice)
     // translucent HUD?
     if (screenblocks > TRANSLUCENT_HUD)
         M_SizeDisplay(0);
+
+    R_InitColumnFunctions();
 }
 
 void M_ColoredBloodA(int choice)
@@ -5332,6 +5712,21 @@ void M_FontShadow(int choice)
     }
 }
 
+void M_DiskIcon(int choice)
+{
+    switch(choice)
+    {
+      case 0:
+        if (show_diskicon)
+            show_diskicon = false;
+        break;
+      case 1:
+        if (!show_diskicon)
+            show_diskicon = true;
+        break;
+    }
+}
+
 void M_SizeDisplay(int choice)
 {
     switch(choice)
@@ -5385,16 +5780,16 @@ M_DrawThermo
     int                i;
 
     xx = x;
-    V_DrawPatchWithShadow(xx, y, W_CacheLumpName(DEH_String("M_THERML"), PU_CACHE), false);
+    V_DrawPatchWithShadow(xx, y, W_CacheLumpName("M_THERML", PU_CACHE), false);
     xx += 8;
     for (i=0;i<thermWidth;i++)
     {
-        V_DrawPatchWithShadow(xx, y, W_CacheLumpName(DEH_String("M_THERMM"), PU_CACHE), false);
+        V_DrawPatchWithShadow(xx, y, W_CacheLumpName("M_THERMM", PU_CACHE), false);
         xx += 8;
     }
-    V_DrawPatchWithShadow(xx, y, W_CacheLumpName(DEH_String("M_THERMR"), PU_CACHE), false);
+    V_DrawPatchWithShadow(xx, y, W_CacheLumpName("M_THERMR", PU_CACHE), false);
 
-    V_DrawPatchWithShadow((x + 8) + thermDot * 8, y, W_CacheLumpName(DEH_String("M_THERMO"),
+    V_DrawPatchWithShadow((x + 8) + thermDot * 8, y, W_CacheLumpName("M_THERMO",
                       PU_CACHE), false);
 }
 
@@ -5411,17 +5806,17 @@ M_DrawThermoSmall
 
     xx = x;
     yy = y + 6; // +6 to y coordinate
-    V_DrawPatchWithShadow(xx + 3, yy - 18, W_CacheLumpName(DEH_String("M_SLIDEL"), PU_CACHE), false);
+    V_DrawPatchWithShadow(xx + 3, yy - 18, W_CacheLumpName("M_SLIDEL", PU_CACHE), false);
     xx += 8;
     for (i=0;i<thermWidth;i++)
     {
-        V_DrawPatchWithShadow(xx, yy - 18, W_CacheLumpName(DEH_String("M_SLIDEM"), PU_CACHE), false);
+        V_DrawPatchWithShadow(xx, yy - 18, W_CacheLumpName("M_SLIDEM", PU_CACHE), false);
         xx += 8;
     }
-    V_DrawPatchWithShadow(xx, yy - 18, W_CacheLumpName(DEH_String("M_SLIDER"), PU_CACHE), false);
+    V_DrawPatchWithShadow(xx, yy - 18, W_CacheLumpName("M_SLIDER", PU_CACHE), false);
 
     // +2 to initial y coordinate
-    V_DrawPatchWithShadow((x + 9) + thermDot * 8, y - 12, W_CacheLumpName(DEH_String("M_SLIDEO"),
+    V_DrawPatchWithShadow((x + 9) + thermDot * 8, y - 12, W_CacheLumpName("M_SLIDEO",
                      PU_CACHE), false);
 }
 
@@ -5432,7 +5827,7 @@ M_DrawEmptyCell
   int            item )
 {
     V_DrawPatchWithShadow(menu->x-10,
-                          menu->y+item*LINEHEIGHT_SMALL-1, W_CacheLumpName(DEH_String("M_CELL1"),
+                          menu->y+item*LINEHEIGHT_SMALL-1, W_CacheLumpName("M_CELL1",
                           PU_CACHE), false);
 }
 
@@ -5442,7 +5837,7 @@ M_DrawSelCell
   int            item )
 {
     V_DrawPatchWithShadow(menu->x-10,
-                          menu->y+item*LINEHEIGHT_SMALL-1, W_CacheLumpName(DEH_String("M_CELL2"),
+                          menu->y+item*LINEHEIGHT_SMALL-1, W_CacheLumpName("M_CELL2",
                           PU_CACHE), false);
 }
 
@@ -5587,6 +5982,60 @@ static boolean IsNullKey(int key)
 }
 #endif
 
+void M_ChangeGamma(int choice)
+{
+    static int  gammawait;
+
+    if (gammawait >= I_GetTime() || gamestate != GS_LEVEL || inhelpscreens)
+    {
+        switch(choice)
+        {
+        case 0:
+            if (usegamma)
+                usegamma--;
+            break;
+        case 1:
+            if (usegamma < GAMMALEVELS - 1)
+                usegamma++;
+            break;
+        }
+        r_gamma = gammalevels[usegamma];
+
+        S_StartSound(NULL, sfx_stnmov);
+/*
+        if (r_gamma == 1.0f)
+            C_Printf(CR_GRAY, " %s off", stringize(r_gamma));
+        else
+        {
+            static char buf[128];
+
+            M_snprintf(buf, sizeof(buf), " %s %.2f", stringize(r_gamma), r_gamma);
+            if (buf[strlen(buf) - 1] == '0' && buf[strlen(buf) - 2] == '0')
+                buf[strlen(buf) - 1] = '\0';
+            C_Printf(CR_GRAY, buf);
+        }
+*/
+    }
+
+    gammawait = I_GetTime() + HU_MSGTIMEOUT;
+/*
+    if (r_gamma == 1.0f)
+        HU_PlayerMessage(s_GAMMAOFF, false);
+    else
+    {
+        static char buf[128];
+
+        M_snprintf(buf, sizeof(buf), s_GAMMALVL, r_gamma);
+        if (buf[strlen(buf) - 1] == '0' && buf[strlen(buf) - 2] == '0')
+            buf[strlen(buf) - 1] = '\0';
+        HU_PlayerMessage(buf, false);
+    }
+*/
+    players[consoleplayer].message = gammamsg[usegamma];
+    I_SetPalette (W_CacheLumpName ("PLAYPAL",PU_CACHE));
+//    I_SetPalette((byte *)W_CacheLumpName("PLAYPAL", PU_CACHE) + st_palette * 768);
+}
+
 //
 // CONTROL PANEL
 //
@@ -5599,6 +6048,10 @@ boolean M_Responder (event_t* ev)
     int             ch;
     int             key;
     int             i;
+
+#ifndef WII
+    int             mousewait = 0;
+#endif
 
 #ifdef WII
     ch = -1; // will be changed to a legit char if we're going to use it here
@@ -5676,7 +6129,7 @@ boolean M_Responder (event_t* ev)
         askforkey = false;
         return true;
     }
-/*							// FIXME: NOT YET WORKING (MOUSE BINDINGS)
+/*                                                        // FIXME: NOT YET WORKING (MOUSE BINDINGS)
     if (askforkey && ev->type == ev_mouse)
     {
         if ((ev->data1 & 1) ||
@@ -5684,6 +6137,20 @@ boolean M_Responder (event_t* ev)
             (ev->data1 & 4) ||
             (ev->data1 & 8) ||
             (ev->data1 & 16))
+        {
+            M_KeyBindingsClearControls(ev->data1);
+
+            *doom_defaults_list[keyaskedfor + key_controls_start_in_cfg_at_pos + FirstKey].location =
+                    ev->data1;
+
+            askforkey = false;
+            return true;
+        }
+        return false;
+    }
+    else if(askforkey && ev->type == ev_mousewheel)
+    {
+        if ((ev->data1 & 1) || (ev->data1 & -1))
         {
             M_KeyBindingsClearControls(ev->data1);
 
@@ -5724,12 +6191,47 @@ boolean M_Responder (event_t* ev)
 #ifndef WII
     if (ev->type == ev_keydown)
     {
-	key = ev->data1;
-	ch = ev->data2;
+        key = ev->data1;
+        ch = ev->data2;
+    }
+    else if (ev->type == ev_mouse && mousewait < I_GetTime() && menuactive)
+    {
+        // activate menu item
+        if (ev->data1 & MOUSE_LEFTBUTTON)
+        {
+            key = KEY_ENTER;
+            mousewait = I_GetTime() + 5;
+        }
+
+        // previous menu
+        else if (ev->data1 & MOUSE_RIGHTBUTTON)
+        {
+            key = KEY_ESCAPE;
+            mousewait = I_GetTime() + 5;
+        }
+    }
+    else if (ev->type == ev_mousewheel)
+    {
+        if (!messageToPrint)
+        {
+            // select previous menu item
+            if (ev->data1 > 0)
+            {
+                key = KEY_UPARROW;
+                mousewait = I_GetTime() + 3;
+            }
+
+            // select next menu item
+            else if (ev->data1 < 0)
+            {
+                key = KEY_DOWNARROW;
+                mousewait = I_GetTime() + 3;
+            }
+        }
     }
 
     if (key == -1)
-	return false;
+        return false;
 #endif
     // Save Game string input
     if (saveStringEnter)
@@ -5811,22 +6313,22 @@ boolean M_Responder (event_t* ev)
     if ((devparm && key == key_menu_help) ||
         (key != 0 && key == key_menu_screenshot))
     {
-	G_ScreenShot ();
-	return true;
+        G_ScreenShot ();
+        return true;
     }
 
 #ifndef WII
     // F-Keys
     if (!menuactive)
     {
-	if (key == key_menu_decscreen)      // Screen size down
+        if (key == key_menu_decscreen)      // Screen size down
         {
-	    if (automapactive)
-		return false;
-	    M_SizeDisplay(0);
-	    S_StartSound(NULL,sfx_stnmov);
-	    return true;
-	}
+            if (automapactive)
+                return false;
+            M_SizeDisplay(0);
+            S_StartSound(NULL,sfx_stnmov);
+            return true;
+        }
         else if (key == KEY_TILDE /*&& !keydown*/)        // Console
         {
 //            keydown = key;
@@ -5842,92 +6344,98 @@ boolean M_Responder (event_t* ev)
         }
         else if (key == key_menu_incscreen) // Screen size up
         {
-	    if (automapactive)
-		return false;
-	    M_SizeDisplay(1);
-	    S_StartSound(NULL,sfx_stnmov);
-	    return true;
-	}
+            if (automapactive)
+                return false;
+            M_SizeDisplay(1);
+            S_StartSound(NULL,sfx_stnmov);
+            return true;
+        }
         else if (key == key_menu_help)     // Help key
         {
-	    M_StartControlPanel ();
+            M_StartControlPanel ();
 
-	    if ( gamemode == retail )
-	      currentMenu = &ReadDef2;
-	    else
-	      currentMenu = &ReadDef1;
+            if ( gamemode == retail )
+              currentMenu = &ReadDef2;
+            else
+              currentMenu = &ReadDef1;
 
-	    itemOn = 0;
-	    S_StartSound(NULL,sfx_swtchn);
-	    return true;
-	}
+            itemOn = 0;
+            S_StartSound(NULL,sfx_swtchn);
+            return true;
+        }
         else if (key == key_menu_save)     // Save
         {
-	    M_StartControlPanel();
-	    S_StartSound(NULL,sfx_swtchn);
-	    M_SaveGame(0);
-	    return true;
+            M_StartControlPanel();
+            S_StartSound(NULL,sfx_swtchn);
+            M_SaveGame(0);
+            return true;
         }
         else if (key == key_menu_load)     // Load
         {
-	    M_StartControlPanel();
-	    S_StartSound(NULL,sfx_swtchn);
-	    M_LoadGame(0);
-	    return true;
+            M_StartControlPanel();
+            S_StartSound(NULL,sfx_swtchn);
+            M_LoadGame(0);
+            return true;
         }
         else if (key == key_menu_volume)   // Sound Volume
         {
-	    M_StartControlPanel ();
-	    currentMenu = &SoundDef;
-	    itemOn = sfx_vol;
-	    S_StartSound(NULL,sfx_swtchn);
-	    return true;
-	}
+            M_StartControlPanel ();
+            currentMenu = &SoundDef;
+            itemOn = sfx_vol;
+            S_StartSound(NULL,sfx_swtchn);
+            return true;
+        }
         else if (key == key_menu_detail)   // Detail toggle
         {
-	    M_ChangeDetail(0);
-	    S_StartSound(NULL,sfx_swtchn);
-	    return true;
+            M_ChangeDetail(0);
+            S_StartSound(NULL,sfx_swtchn);
+            return true;
         }
         else if (key == key_menu_qsave)    // Quicksave
         {
-	    S_StartSound(NULL,sfx_swtchn);
-	    M_QuickSave();
-	    return true;
+            S_StartSound(NULL,sfx_swtchn);
+            M_QuickSave();
+            return true;
         }
         else if (key == key_menu_endgame)  // End game
         {
-	    S_StartSound(NULL,sfx_swtchn);
-	    M_EndGame(0);
-	    return true;
+            S_StartSound(NULL,sfx_swtchn);
+            M_EndGame(0);
+            return true;
         }
         else if (key == key_menu_messages) // Toggle messages
         {
-	    M_ChangeMessages(0);
-	    S_StartSound(NULL,sfx_swtchn);
-	    return true;
+            M_ChangeMessages(0);
+            S_StartSound(NULL,sfx_swtchn);
+            return true;
         }
         else if (key == key_menu_qload)    // Quickload
         {
-	    S_StartSound(NULL,sfx_swtchn);
-	    M_QuickLoad();
-	    return true;
+            S_StartSound(NULL,sfx_swtchn);
+            M_QuickLoad();
+            return true;
         }
         else if (key == key_menu_quit)     // Quit DOOM
         {
-	    S_StartSound(NULL,sfx_swtchn);
-	    M_QuitDOOM(0);
-	    return true;
+            S_StartSound(NULL,sfx_swtchn);
+            M_QuitDOOM(0);
+            return true;
         }
         else if (key == key_menu_gamma)    // gamma toggle
         {
-	    usegamma++;
-	    if (usegamma > 4)
-		usegamma = 0;
-	    players[consoleplayer].message = DEH_String(gammamsg[usegamma]);
-            I_SetPalette (W_CacheLumpName (DEH_String("PLAYPAL"),PU_CACHE));
-	    return true;
-	}
+/*
+            usegamma++;
+            if (usegamma > 4)
+                usegamma = 0;
+            players[consoleplayer].message = gammamsg[usegamma];
+            I_SetPalette (W_CacheLumpName ("PLAYPAL",PU_CACHE));
+            return true;
+*/
+            if (++usegamma > GAMMALEVELS - 1)
+                usegamma = 0;
+            M_ChangeGamma(1);
+            return false;
+        }
     }
 #endif
 
@@ -5992,6 +6500,9 @@ boolean M_Responder (event_t* ev)
 #ifndef WII
             if(currentMenu == &KeyBindingsDef && itemOn == 12)
                 itemOn++;
+#else
+            if(currentMenu == &ControlsDef && itemOn == 5)
+                itemOn++;
 #endif
             if(!devparm)
             {
@@ -6031,6 +6542,9 @@ boolean M_Responder (event_t* ev)
 #ifndef WII
             if(currentMenu == &KeyBindingsDef && itemOn == 12)
                 itemOn--;
+#else
+            if(currentMenu == &ControlsDef && itemOn == 5)
+                itemOn--;
 #endif
             if(!devparm)
             {
@@ -6062,6 +6576,7 @@ boolean M_Responder (event_t* ev)
             S_StartSound(NULL,sfx_stnmov);
             M_AimingHelp(0);
         }
+
         return true;
     }
 #ifdef WII
@@ -6144,8 +6659,8 @@ boolean M_Responder (event_t* ev)
         currentMenu->lastOn = itemOn;
         if (currentMenu->prevMenu)
         {
-	    if (nerve_pwad && currentMenu == &NewDef)
-	        currentMenu->prevMenu = &ExpDef;
+            if (nerve_pwad && currentMenu == &NewDef)
+                currentMenu->prevMenu = &ExpDef;
 
             currentMenu = currentMenu->prevMenu;
             itemOn = currentMenu->lastOn;
@@ -6230,12 +6745,43 @@ void M_Drawer (void)
 
     if(!increditscreen)
     {
+        int mnum;
+
         if(gamemode == commercial)
         {
             if(gamestate == GS_LEVEL)
-                S_ChangeMusic(gamemap + 32, true);
-            else if(gamestate == GS_FINALE)
+            {
+                if (gamemission == pack_nerve)
+                {
+                    int nmus[]=
+                    {
+                        mus_messag,
+                        mus_ddtblu,
+                        mus_doom,
+                        mus_shawn,
+                        mus_in_cit,
+                        mus_the_da,
+                        mus_in_cit,
+                        mus_shawn2,
+                        mus_ddtbl2,
+                    };
+
+                    mnum = nmus[gamemap - 1];
+
+                    S_ChangeMusic(mnum, true);
+                }
+                else
+                {
+                    if(mus_cheat_used)
+                        S_ChangeMusic(tracknum, true);
+                    else
+                        S_ChangeMusic(gamemap + 32, true);
+                }
+            }
+            else if(gamestate == GS_FINALE && finalestage == F_STAGE_TEXT)
                 S_ChangeMusic(mus_read_m, true);
+            else if(gamestate == GS_FINALE && finalestage == F_STAGE_CAST)
+                S_ChangeMusic(mus_evil, true);
             else if(gamestate == GS_DEMOSCREEN)
                 S_ChangeMusic(mus_dm2ttl, true);
             else if(gamestate == GS_INTERMISSION)
@@ -6244,9 +6790,40 @@ void M_Drawer (void)
         else
         {
             if(gamestate == GS_LEVEL)
-                S_ChangeMusic(gamemap, true);
-            else if(gamestate == GS_FINALE)
+            {
+                int spmus[]=
+                {
+                    // Song - Who? - Where?
+        
+                    mus_e3m4,        // American     e4m1
+                    mus_e3m2,        // Romero       e4m2
+                    mus_e3m3,        // Shawn        e4m3
+                    mus_e1m5,        // American     e4m4
+                    mus_e2m7,        // Tim          e4m5
+                    mus_e2m4,        // Romero       e4m6
+                    mus_e2m6,        // J.Anderson   e4m7 CHIRON.WAD
+                    mus_e2m5,        // Shawn        e4m8
+                    mus_e1m9,        // Tim          e4m9
+                };
+
+                if (gameepisode < 4)
+                {
+                    mnum = mus_e1m1 + (gameepisode - 1) * 9 + gamemap - 1;
+                }
+                else
+                {
+                    mnum = spmus[gamemap - 1];
+                }
+
+                if(mus_cheat_used)
+                    S_ChangeMusic(tracknum, true);
+                else
+                    S_ChangeMusic(mnum, true);
+            }
+            else if(gamestate == GS_FINALE && finalestage == F_STAGE_TEXT)
                 S_ChangeMusic(mus_victor, true);
+            else if(gamestate == GS_FINALE && finalestage == F_STAGE_CAST)
+                S_StartMusic (mus_bunny);
             else if(gamestate == GS_DEMOSCREEN)
                 S_ChangeMusic(mus_intro, true);
             else if(gamestate == GS_INTERMISSION)
@@ -6255,6 +6832,20 @@ void M_Drawer (void)
     }
 
     increditscreen = false;
+
+    if(gamestate == GS_LEVEL && !menuactive)
+    {
+        static player_t* player;
+
+        player = &players[consoleplayer];
+
+        if(player->powers[pw_flight] > 0)
+        {
+            int flight_timer = player->powers[pw_flight] / 35;
+            sprintf(flight_counter, "%d", flight_timer);
+            M_WriteText(299, 5, flight_counter);
+        }
+    }
 
     // DISPLAYS BLINKING "BETA" MESSAGE
     if ((fsize == 4261144 || fsize == 4271324 || fsize == 4211660 || beta_style) &&
@@ -6343,7 +6934,7 @@ void M_Drawer (void)
         char *message_string = "YOU MUST QUIT AND RESTART TO TAKE EFFECT.";
         int message_offset = 160 - M_StringWidth(message_string) / 2;
         dp_translation = crx[CRX_GOLD];
-        M_WriteText(message_offset, 160, DEH_String(message_string));
+        M_WriteText(message_offset, 160, message_string);
         V_ClearDPTranslation();
     }
     else if((fsize == 28422764 || fsize == 19321722 || fsize == 12361532) &&
@@ -6352,7 +6943,7 @@ void M_Drawer (void)
         char *message_string = "NO BETA MODE FOR CHEX, HACX & FREEDOOM.";
         int message_offset = 160 - M_StringWidth(message_string) / 2;
         dp_translation = crx[CRX_GOLD];
-        M_WriteText(message_offset, 160, DEH_String(message_string));
+        M_WriteText(message_offset, 160, message_string);
         V_ClearDPTranslation();
     }
     else if(fsize == 12361532 && currentMenu == &GameDef3 && itemOn == 1 && whichSkull == 1)
@@ -6360,7 +6951,7 @@ void M_Drawer (void)
         char *message_string = "NO EXTRA BLOOD & GORE FOR CHEX QUEST.";
         int message_offset = 160 - M_StringWidth(message_string) / 2;
         dp_translation = crx[CRX_GOLD];
-        M_WriteText(message_offset, 160, DEH_String(message_string));
+        M_WriteText(message_offset, 160, message_string);
         V_ClearDPTranslation();
     }
     else if(fsize == 19321722 && currentMenu == &SoundDef && itemOn == 3 && whichSkull == 1)
@@ -6368,7 +6959,7 @@ void M_Drawer (void)
         char *message_string = "NO PC-SPEAKERS AVAILABLE FOR HACX";
         int message_offset = 160 - M_StringWidth(message_string) / 2;
         dp_translation = crx[CRX_GOLD];
-        M_WriteText(message_offset, 160, DEH_String(message_string));
+        M_WriteText(message_offset, 160, message_string);
         V_ClearDPTranslation();
     }
 
@@ -6411,7 +7002,7 @@ void M_Drawer (void)
     for (i=0;i<max;i++)
     {
         menuitem_t *item = &(currentMenu->menuitems[i]);
-        name = DEH_String(item->name);
+        name = item->name;
 
         if(*name)
         {
@@ -6447,14 +7038,14 @@ void M_Drawer (void)
         if(currentMenu == &KeyBindingsDef && itemOn == 17)
 #endif
             V_DrawPatchWithShadow(x + 280 + CURSORXOFF_SMALL, currentMenu->y - 15 +
-                    itemOn*LINEHEIGHT_SMALL, W_CacheLumpName(DEH_String(skullNameSmall[whichSkull]),
+                    itemOn*LINEHEIGHT_SMALL, W_CacheLumpName(skullNameSmall[whichSkull],
                                           PU_CACHE), false);
         else
             V_DrawPatchWithShadow(x + CURSORXOFF_SMALL, currentMenu->y - 5 +
-                    itemOn*LINEHEIGHT_SMALL, W_CacheLumpName(DEH_String(skullNameSmall[whichSkull]),
+                    itemOn*LINEHEIGHT_SMALL, W_CacheLumpName(skullNameSmall[whichSkull],
                                           PU_CACHE), false);
 /*
-        name = DEH_String(currentMenu->menuitems[i].name);
+        name = currentMenu->menuitems[i].name;
 
         if (name[0])
         {
@@ -6470,7 +7061,7 @@ void M_Drawer (void)
             // DRAW SKULL
             V_DrawPatchWithShadow(x + CURSORXOFF_SMALL, currentMenu->y - 5 +
                         itemOn*LINEHEIGHT_SMALL,
-                        W_CacheLumpName(DEH_String(skullNameSmall[whichSkull]),
+                        W_CacheLumpName(skullNameSmall[whichSkull],
                                               PU_CACHE), false);
         }
 
@@ -6480,7 +7071,7 @@ void M_Drawer (void)
             // DRAW SKULL
             V_DrawPatchWithShadow(x + SKULLXOFF, currentMenu->y - 5 +
                               itemOn*LINEHEIGHT,
-                              W_CacheLumpName(DEH_String(skullName[whichSkull]),
+                              W_CacheLumpName(skullName[whichSkull],
                                               PU_CACHE), false);
         }
 */
@@ -6576,6 +7167,9 @@ void M_Init (void)
       default:
         break;
     }
+
+    if (gamemode == commercial)
+        NewDef.prevMenu = (nerve_pwad ? &ExpDef : &MainDef);
 }
 
 void M_God(int choice)
@@ -6590,14 +7184,13 @@ void M_God(int choice)
             if (players[consoleplayer].mo)
                 players[consoleplayer].mo->health = 100;
             players[consoleplayer].health = 100;
-            players[consoleplayer].message = DEH_String(STSTR_DQDON);
-            }
-            else
-            {
-            players[consoleplayer].message = DEH_String(STSTR_DQDOFF);
-            }
+            players[consoleplayer].message = s_STSTR_DQDON;
+        }
+        else
+        {
+            players[consoleplayer].message = s_STSTR_DQDOFF;
+        }
     }
-    DetectState();
 }
 
 void M_Noclip(int choice)
@@ -6609,18 +7202,17 @@ void M_Noclip(int choice)
         players[consoleplayer].cheats ^= CF_NOCLIP;
         if (players[consoleplayer].cheats & CF_NOCLIP)
         {
-            players[consoleplayer].message = DEH_String(STSTR_NCON);
+            players[consoleplayer].message = s_STSTR_NCON;
             players[consoleplayer].mo->flags |= MF_NOCLIP;
             noclip_on = true;
         }
         else
         {
-            players[consoleplayer].message = DEH_String(STSTR_NCOFF);
+            players[consoleplayer].message = s_STSTR_NCOFF;
             players[consoleplayer].mo->flags &= ~MF_NOCLIP;
             noclip_on = false;
         }
     }
-    DetectState();
 }
 
 void M_ArmorA(int choice)
@@ -6631,9 +7223,8 @@ void M_ArmorA(int choice)
     {
         players[consoleplayer].armorpoints = 200;
         players[consoleplayer].armortype = 2;
-        players[consoleplayer].message = DEH_String("ALL ARMOR ADDED");
+        players[consoleplayer].message = "ALL ARMOR ADDED";
     }
-    DetectState();
 }
 
 void M_ArmorB(int choice)
@@ -6646,13 +7237,12 @@ void M_ArmorB(int choice)
         players[consoleplayer].armortype = 1;
 
         if(fsize != 12361532 && fsize != 19321722)
-            players[consoleplayer].message = DEH_String("GREEN ARMOR ADDED");
+            players[consoleplayer].message = "GREEN ARMOR ADDED";
         if(fsize == 12361532)
-            players[consoleplayer].message = DEH_String("CHEX(R) ARMOR ADDED");
+            players[consoleplayer].message = "CHEX(R) ARMOR ADDED";
         if(fsize == 19321722)
-            players[consoleplayer].message = DEH_String("KEVLAR VEST ADDED");
+            players[consoleplayer].message = "KEVLAR VEST ADDED";
     }
-    DetectState();
 }
 
 void M_ArmorC(int choice)
@@ -6665,13 +7255,12 @@ void M_ArmorC(int choice)
         players[consoleplayer].armortype = 2;
 
         if(fsize != 12361532 && fsize != 19321722)
-            players[consoleplayer].message = DEH_String("BLUE ARMOR ADDED");
+            players[consoleplayer].message = "BLUE ARMOR ADDED";
         if(fsize == 12361532)
-            players[consoleplayer].message = DEH_String("SUPER CHEX(R) ARMOR ADDED");
+            players[consoleplayer].message = "SUPER CHEX(R) ARMOR ADDED";
         if(fsize == 19321722)
-            players[consoleplayer].message = DEH_String("SUPER KEVLAR VEST ADDED");
+            players[consoleplayer].message = "SUPER KEVLAR VEST ADDED";
     }
-    DetectState();
 }
 
 void M_WeaponsA(int choice)
@@ -6704,9 +7293,8 @@ void M_WeaponsA(int choice)
         for (i=0;i<NUMAMMO;i++)
           players[consoleplayer].ammo[i] = players[consoleplayer].maxammo[i];
 
-        players[consoleplayer].message = DEH_String(STSTR_FAADDED);
+        players[consoleplayer].message = s_STSTR_FAADDED;
     }
-    DetectState();
 }
 
 void M_WeaponsB(int choice)
@@ -6719,13 +7307,12 @@ void M_WeaponsB(int choice)
           players[consoleplayer].ammo[1] = players[consoleplayer].maxammo[1];
 
         if(fsize != 19321722 && fsize != 12361532)
-            players[consoleplayer].message = DEH_String("SHOTGUN ADDED");
+            players[consoleplayer].message = "SHOTGUN ADDED";
         if(fsize == 19321722)
-            players[consoleplayer].message = DEH_String("TAZER ADDED");
+            players[consoleplayer].message = "TAZER ADDED";
         if(fsize == 12361532)
-            players[consoleplayer].message = DEH_String("LARGE ZORCHER ADDED");
+            players[consoleplayer].message = "LARGE ZORCHER ADDED";
     }
-    DetectState();
 }
 
 void M_WeaponsC(int choice)
@@ -6738,13 +7325,12 @@ void M_WeaponsC(int choice)
           players[consoleplayer].ammo[1] = players[consoleplayer].maxammo[1];
 
         if(fsize != 19321722 && fsize != 12361532)
-            players[consoleplayer].message = DEH_String("CHAINGUN ADDED");
+            players[consoleplayer].message = "CHAINGUN ADDED";
         if(fsize == 19321722)
-            players[consoleplayer].message = DEH_String("UZI ADDED");
+            players[consoleplayer].message = "UZI ADDED";
         if(fsize == 12361532)
-            players[consoleplayer].message = DEH_String("RAPID ZORCHER ADDED");
+            players[consoleplayer].message = "RAPID ZORCHER ADDED";
     }
-    DetectState();
 }
 
 void M_WeaponsD(int choice)
@@ -6757,13 +7343,12 @@ void M_WeaponsD(int choice)
           players[consoleplayer].ammo[3] = players[consoleplayer].maxammo[3];
 
         if(fsize != 19321722 && fsize != 12361532)
-            players[consoleplayer].message = DEH_String("ROCKET LAUNCHER ADDED");
+            players[consoleplayer].message = "ROCKET LAUNCHER ADDED";
         if(fsize == 19321722)
-            players[consoleplayer].message = DEH_String("PHOTON 'ZOOKA ADDED");
+            players[consoleplayer].message = "PHOTON 'ZOOKA ADDED";
         if(fsize == 12361532)
-            players[consoleplayer].message = DEH_String("ZORCH PROPULSOR ADDED");
+            players[consoleplayer].message = "ZORCH PROPULSOR ADDED";
     }
-    DetectState();
 }
 
 void M_WeaponsE(int choice)
@@ -6776,13 +7361,12 @@ void M_WeaponsE(int choice)
           players[consoleplayer].ammo[2] = players[consoleplayer].maxammo[2];
 
         if(fsize != 19321722 && fsize != 12361532)
-            players[consoleplayer].message = DEH_String("PLASMA RIFLE ADDED");
+            players[consoleplayer].message = "PLASMA RIFLE ADDED";
         if(fsize == 19321722)
-            players[consoleplayer].message = DEH_String("STICK ADDED");
+            players[consoleplayer].message = "STICK ADDED";
         if(fsize == 12361532)
-            players[consoleplayer].message = DEH_String("PHASING ZORCHER ADDED");
+            players[consoleplayer].message = "PHASING ZORCHER ADDED";
     }
-    DetectState();
 }
 
 void M_WeaponsF(int choice)
@@ -6795,14 +7379,13 @@ void M_WeaponsF(int choice)
           players[consoleplayer].ammo[2] = players[consoleplayer].maxammo[2];
 
         if(fsize != 19321722 && fsize != 12361532)
-            players[consoleplayer].message = DEH_String("BFG9000 ADDED");
+            players[consoleplayer].message = "BFG9000 ADDED";
         if(fsize == 19321722)
-            players[consoleplayer].message = DEH_String("NUKER ADDED");
+            players[consoleplayer].message = "NUKER ADDED";
         if(fsize == 12361532)
             players[consoleplayer].message =
-            DEH_String("LARGE AREA ZORCHING DEVICE ADDED");
+            "LARGE AREA ZORCHING DEVICE ADDED";
     }
-    DetectState();
 }
 
 void M_WeaponsG(int choice)
@@ -6814,13 +7397,12 @@ void M_WeaponsG(int choice)
           players[consoleplayer].weaponowned[7] = true;
 
         if(fsize != 19321722 && fsize != 12361532)
-            players[consoleplayer].message = DEH_String("CHAINSAW ADDED");
+            players[consoleplayer].message = "CHAINSAW ADDED";
         if(fsize == 19321722)
-            players[consoleplayer].message = DEH_String("HOIG REZNATOR ADDED");
+            players[consoleplayer].message = "HOIG REZNATOR ADDED";
         if(fsize == 12361532)
-            players[consoleplayer].message = DEH_String("SUPER BOOTSPORK ADDED");
+            players[consoleplayer].message = "SUPER BOOTSPORK ADDED";
     }
-    DetectState();
 }
 
 void M_WeaponsH(int choice)
@@ -6833,11 +7415,10 @@ void M_WeaponsH(int choice)
           players[consoleplayer].ammo[1] = players[consoleplayer].maxammo[1];
 
         if(fsize != 19321722)
-            players[consoleplayer].message = DEH_String("SUPER SHOTGUN ADDED");
+            players[consoleplayer].message = "SUPER SHOTGUN ADDED";
         if(fsize == 19321722)
-            players[consoleplayer].message = DEH_String("CRYOGUN ADDED");
+            players[consoleplayer].message = "CRYOGUN ADDED";
     }
-    DetectState();
 }
 
 void M_KeysA(int choice)
@@ -6849,9 +7430,8 @@ void M_KeysA(int choice)
         players[consoleplayer].playerstate == PST_LIVE)
     {
         P_GiveAllCards(player);
-        players[consoleplayer].message = DEH_String("ALL KEYS FOR THIS MAP ADDED");
+        players[consoleplayer].message = "ALL KEYS FOR THIS MAP ADDED";
     }
-    DetectState();
 }
 
 void M_KeysB(int choice)
@@ -6864,9 +7444,8 @@ void M_KeysB(int choice)
     {
         P_GiveCard (player, it_bluecard);
         
-        players[consoleplayer].message = DEH_String("BLUE KEYCARD ADDED");
+        players[consoleplayer].message = "BLUE KEYCARD ADDED";
     }
-    DetectState();
 }
 
 void M_KeysC(int choice)
@@ -6879,9 +7458,8 @@ void M_KeysC(int choice)
     {
         P_GiveCard (player, it_yellowcard);
         
-        players[consoleplayer].message = DEH_String("YELLOW KEYCARD ADDED");
+        players[consoleplayer].message = "YELLOW KEYCARD ADDED";
     }
-    DetectState();
 }
 
 void M_KeysD(int choice)
@@ -6894,9 +7472,8 @@ void M_KeysD(int choice)
     {
         P_GiveCard (player, it_redcard);
         
-        players[consoleplayer].message = DEH_String("RED KEYCARD ADDED");
+        players[consoleplayer].message = "RED KEYCARD ADDED";
     }
-    DetectState();
 }
 
 void M_KeysE(int choice)
@@ -6909,9 +7486,8 @@ void M_KeysE(int choice)
     {
         P_GiveCard (player, it_blueskull);
         
-        players[consoleplayer].message = DEH_String("BLUE SKULLKEY ADDED");
+        players[consoleplayer].message = "BLUE SKULLKEY ADDED";
     }
-    DetectState();
 }
 
 void M_KeysF(int choice)
@@ -6924,9 +7500,8 @@ void M_KeysF(int choice)
     {
         P_GiveCard (player, it_yellowskull);
         
-        players[consoleplayer].message = DEH_String("YELLOW SKULLKEY ADDED");
+        players[consoleplayer].message = "YELLOW SKULLKEY ADDED";
     }
-    DetectState();
 }
 
 void M_KeysG(int choice)
@@ -6939,9 +7514,8 @@ void M_KeysG(int choice)
     {
         P_GiveCard (player, it_redskull);
         
-        players[consoleplayer].message = DEH_String("RED SKULLKEY ADDED");
+        players[consoleplayer].message = "RED SKULLKEY ADDED";
     }
-    DetectState();
 }
 
 void M_ItemsA(int choice)
@@ -6976,7 +7550,7 @@ void M_ItemsA(int choice)
             }
             for (i=0 ; i<NUMAMMO ; i++)
                 P_GiveAmmo (player, i, 1);
-            player->message = DEH_String(GOTBACKPACK);
+            player->message = GOTBACKPACK;
 
             got_all = true;
         }
@@ -6985,6 +7559,7 @@ void M_ItemsA(int choice)
             players[consoleplayer].powers[0] = 0;
             players[consoleplayer].powers[1] = 0;
             players[consoleplayer].powers[2] = 0;
+            players[consoleplayer].mo->flags &= ~MF_SHADOW;
             players[consoleplayer].powers[3] = 0;
             players[consoleplayer].powers[4] = 0;
             players[consoleplayer].powers[5] = 0;
@@ -6996,9 +7571,8 @@ void M_ItemsA(int choice)
 
             got_all = false;
         }
-        players[consoleplayer].message = DEH_String("ALL ITEMS ADDED");
+        players[consoleplayer].message = "ALL ITEMS ADDED";
     }
-    DetectState();
 }
 
 void M_ItemsB(int choice)
@@ -7009,8 +7583,8 @@ void M_ItemsB(int choice)
     {
         if(!got_invisibility)
         {
-            players[consoleplayer].cheats ^= CF_NOTARGET;
             players[consoleplayer].powers[2] = INVISTICS;
+            players[consoleplayer].cheats ^= CF_NOTARGET;
             players[consoleplayer].mo->flags |= MF_SHADOW;
 
             got_invisibility = true;
@@ -7018,6 +7592,8 @@ void M_ItemsB(int choice)
         else
         {
             players[consoleplayer].powers[2] = 0;
+            players[consoleplayer].cheats &= ~CF_NOTARGET;
+            players[consoleplayer].mo->flags &= ~MF_SHADOW;
 
             got_invisibility = false;
 
@@ -7025,12 +7601,11 @@ void M_ItemsB(int choice)
                 players[consoleplayer].fixedcolormap = 0;
         }
 
-        if(fsize != 19321722)
-            players[consoleplayer].message = DEH_String(GOTINVIS);
         if(fsize == 19321722)
-            players[consoleplayer].message = DEH_String("ENK BLINDNESS ADDED");
+            players[consoleplayer].message = "ENK BLINDNESS ADDED";
+        else
+            players[consoleplayer].message = GOTINVIS;
     }
-    DetectState();
 }
 
 void M_ItemsC(int choice)
@@ -7053,13 +7628,12 @@ void M_ItemsC(int choice)
         }
 
         if(fsize != 12361532 && fsize != 19321722)
-            players[consoleplayer].message = DEH_String(GOTSUIT);
+            players[consoleplayer].message = GOTSUIT;
         if(fsize == 12361532)
-            players[consoleplayer].message = DEH_String("SLIME-PROOF SUIT ADDED");
+            players[consoleplayer].message = "SLIME-PROOF SUIT ADDED";
         if(fsize == 19321722)
-            players[consoleplayer].message = DEH_String("VULCAN RUBBER BOOTS ADDED");
+            players[consoleplayer].message = "VULCAN RUBBER BOOTS ADDED";
     }
-    DetectState();
 }
 
 void M_ItemsD(int choice)
@@ -7082,11 +7656,10 @@ void M_ItemsD(int choice)
         }
 
         if(fsize != 19321722)
-            players[consoleplayer].message = DEH_String(GOTMAP);
+            players[consoleplayer].message = GOTMAP;
         if(fsize == 19321722)
-            players[consoleplayer].message = DEH_String("SI ARRAY MAPPING ADDED");
+            players[consoleplayer].message = "SI ARRAY MAPPING ADDED";
     }
-    DetectState();
 }
 
 void M_ItemsE(int choice)
@@ -7109,13 +7682,12 @@ void M_ItemsE(int choice)
         }
 
         if(fsize != 12361532 && fsize != 19321722)
-            players[consoleplayer].message = DEH_String(GOTVISOR);
+            players[consoleplayer].message = GOTVISOR;
         if(fsize == 12361532)
-            players[consoleplayer].message = DEH_String("ULTRA GOOGLES ADDED");
+            players[consoleplayer].message = "ULTRA GOOGLES ADDED";
         if(fsize == 19321722)
-            players[consoleplayer].message = DEH_String("INFRARED VISOR ADDED");
+            players[consoleplayer].message = "INFRARED VISOR ADDED";
     }
-    DetectState();
 }
 
 void M_ItemsF(int choice)
@@ -7138,11 +7710,10 @@ void M_ItemsF(int choice)
         }
 
         if(fsize != 19321722)
-            players[consoleplayer].message = DEH_String(GOTINVUL);
+            players[consoleplayer].message = GOTINVUL;
         if(fsize == 19321722)
-            players[consoleplayer].message = DEH_String("FORCE FIELD ADDED");
+            players[consoleplayer].message = "FORCE FIELD ADDED";
     }
-    DetectState();
 }
 
 void M_ItemsG(int choice)
@@ -7165,11 +7736,10 @@ void M_ItemsG(int choice)
         }
 
         if(fsize != 19321722)
-            players[consoleplayer].message = DEH_String(GOTBERSERK);
+            players[consoleplayer].message = GOTBERSERK;
         if(fsize == 19321722)
-            players[consoleplayer].message = DEH_String("007 MICROTEL ADDED");
+            players[consoleplayer].message = "007 MICROTEL ADDED";
     }
-    DetectState();
 }
 
 void M_ItemsH(int choice)
@@ -7181,9 +7751,8 @@ void M_ItemsH(int choice)
         if (players[consoleplayer].mo)
             players[consoleplayer].mo->health = 100;
         players[consoleplayer].health = 100;
-        players[consoleplayer].message = DEH_String("GOT FULL HEALTH (100)");
+        players[consoleplayer].message = "GOT FULL HEALTH (100)";
     }
-    DetectState();
 }
 
 void M_ItemsI(int choice)
@@ -7195,9 +7764,8 @@ void M_ItemsI(int choice)
         if (players[consoleplayer].mo)
             players[consoleplayer].mo->health = 200;
         players[consoleplayer].health = 200;
-        players[consoleplayer].message = DEH_String("GOT FULL HEALTH (200)");
+        players[consoleplayer].message = "GOT FULL HEALTH (200)";
     }
-    DetectState();
 }
 
 void M_ItemsJ(int choice)
@@ -7220,9 +7788,8 @@ void M_ItemsJ(int choice)
         }
         for (i=0 ; i<NUMAMMO ; i++)
             P_GiveAmmo (player, i, 1);
-        player->message = DEH_String(GOTBACKPACK);
+        player->message = GOTBACKPACK;
     }
-    DetectState();
 }
 
 void M_ItemsK(int choice)
@@ -7236,9 +7803,8 @@ void M_ItemsK(int choice)
 
         P_UseArtifact(player, arti_fly);
 
-        player->message = DEH_String("FLIGHT ADDED");
+        player->message = "FLIGHT ADDED";
     }
-    DetectState();
 }
 
 void M_Topo(int choice)
@@ -7250,7 +7816,6 @@ void M_Topo(int choice)
             cheating = (cheating+1) % 3;
             cheeting = (cheeting+1) % 3;
     }
-    DetectState();
 }
 
 void M_Rift(int choice)
@@ -7485,7 +8050,6 @@ void M_Rift(int choice)
             break;
         }
     }
-    DetectState();
 }
 
 void M_RiftNow(int choice)
@@ -7497,9 +8061,8 @@ void M_RiftNow(int choice)
         warped = 1;
         menuactive = 0;
         G_DeferedInitNew(gameskill, epi, map);
-        players[consoleplayer].message = DEH_String(STSTR_CLEV);
+        players[consoleplayer].message = s_STSTR_CLEV;
     }
-    DetectState();
 }
 
 void M_Spin(int choice)
@@ -7781,7 +8344,7 @@ void M_Spin(int choice)
             }
             break;
         }
-        players[consoleplayer].message = DEH_String(STSTR_MUS);
+        players[consoleplayer].message = s_STSTR_MUS;
 
         if(mus_engine == 3)
             S_ChangeMusic(tracknum, false);
@@ -7796,11 +8359,12 @@ void M_KeyBindingsSetKey(int choice)
 {
     askforkey = true;
     keyaskedfor = choice;
-
+/*
     if (!netgame && !demoplayback)
     {
         paused = true;
     }
+*/
 }
 
 // XXX (FOR PSP): NOW THIS IS RATHER IMPORTANT: IF...
@@ -7878,9 +8442,9 @@ void M_DrawKeyBindings(void)
     M_DarkBackground();
 
     if(fsize != 19321722)
-        V_DrawPatchWithShadow (80, 0, W_CacheLumpName(DEH_String("M_T_BNDS"), PU_CACHE), false);
+        V_DrawPatchWithShadow (80, 0, W_CacheLumpName("M_T_BNDS", PU_CACHE), false);
     else
-        V_DrawPatchWithShadow (80, 0, W_CacheLumpName(DEH_String("M_KBNDGS"), PU_CACHE), false);
+        V_DrawPatchWithShadow (80, 0, W_CacheLumpName("M_KBNDGS", PU_CACHE), false);
 
     for (i = 0; i < key_controls_end_in_cfg_at_pos - key_controls_start_in_cfg_at_pos; i++)
     {
@@ -7997,11 +8561,17 @@ void M_DrawControls(void)
     M_DarkBackground();
 
     if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
-        V_DrawPatchWithShadow(48, 15, W_CacheLumpName(DEH_String("M_T_CSET"),
+        V_DrawPatchWithShadow(48, 15, W_CacheLumpName("M_T_CSET",
                                                PU_CACHE), false);
     else
-        V_DrawPatchWithShadow(48, 15, W_CacheLumpName(DEH_String("M_CTLSET"),
+        V_DrawPatchWithShadow(48, 15, W_CacheLumpName("M_CTLSET",
                                                PU_CACHE), false);
+#ifndef WII
+    M_WriteText(ControlsDef.x, ControlsDef.y + 48, "MOUSE SENSITIVITY");
+
+    M_DrawThermoSmall(ControlsDef.x + 207,ControlsDef.y + LINEHEIGHT_SMALL*(mousesensibility+1),
+                 10,mouseSensitivity);
+#endif
 
     if(mouselook == 0)
     {
@@ -8025,14 +8595,14 @@ void M_DrawControls(void)
     M_WriteText(ControlsDef.x, ControlsDef.y - 12, "SPEEDS:");
     V_ClearDPTranslation();
 
-    M_DrawThermoSmall(ControlsDef.x + 55,ControlsDef.y + LINEHEIGHT_SMALL*(mousesens+1),
-                 29,forwardmove-19);
+    M_DrawThermoSmall(ControlsDef.x + 79,ControlsDef.y + LINEHEIGHT_SMALL*(mousesens+1),
+                 26,forwardmove-25);
 
     M_DrawThermoSmall(ControlsDef.x + 239,ControlsDef.y + LINEHEIGHT_SMALL*(turnsens+1),
                  6,turnspeed-5);
 
     M_DrawThermoSmall(ControlsDef.x + 151,ControlsDef.y + LINEHEIGHT_SMALL*(strafesens+1),
-                 17,sidemove-16);
+                 17,sidemove-24);
 
     M_DrawThermoSmall(ControlsDef.x + 199,ControlsDef.y + LINEHEIGHT_SMALL*(mousespeed+1),
                  11,mspeed);
@@ -8042,8 +8612,29 @@ void M_DrawControls(void)
     else
         dp_translation = crx[CRX_GRAY];
 
-    M_WriteText(ControlsDef.x, ControlsDef.y + 48, DEH_String("KEY BINDINGS"));
+    M_WriteText(ControlsDef.x, ControlsDef.y + 58, "KEY BINDINGS...");
     V_ClearDPTranslation();
+
+    if(whichSkull == 1)
+    {
+        int x;
+        int x2;
+        int x3;
+        char *string = "";
+        char *string2 = "";
+        char *string3 = "";
+        dp_translation = crx[CRX_GOLD];
+        string = "IF THE BARS FOR WALKING, TURNING & STRAFING";
+        string2 = "ARE AT THEIR HIGHEST LEVEL, IT MEANS THE SAME";
+        string3 = "AS PLAYING THE GAME WHILE HOLDING DOWN [SHIFT]";
+        x = 160 - M_StringWidth(string) / 2;
+        x2 = 160 - M_StringWidth(string2) / 2;
+        x3 = 160 - M_StringWidth(string3) / 2;
+        M_WriteText(x, ControlsDef.y + 78, string);
+        M_WriteText(x2, ControlsDef.y + 88, string2);
+        M_WriteText(x3, ControlsDef.y + 98, string3);
+        V_ClearDPTranslation();
+    }
 }
 
 void M_FPS(int choice)
@@ -8051,12 +8642,12 @@ void M_FPS(int choice)
     if(display_fps < 1)
     {
         display_fps++;
-        players[consoleplayer].message = DEH_String("FPS COUNTER ON");
+        players[consoleplayer].message = "FPS COUNTER ON";
     }
     else if(display_fps)
     {
         display_fps--;
-        players[consoleplayer].message = DEH_String("FPS COUNTER OFF");
+        players[consoleplayer].message = "FPS COUNTER OFF";
     }
 }
 
@@ -8065,12 +8656,12 @@ void M_HOMDetector(int choice)
     if(!autodetect_hom)
     {
         autodetect_hom = true;
-        players[consoleplayer].message = DEH_String("HALL OF MIRRORS DETECTOR ENABLED");
+        players[consoleplayer].message = "HALL OF MIRRORS DETECTOR ENABLED";
     }
     else if(autodetect_hom)
     {
         autodetect_hom = false;
-        players[consoleplayer].message = DEH_String("HALL OF MIRRORS DETECTOR DISABLED");
+        players[consoleplayer].message = "HALL OF MIRRORS DETECTOR DISABLED";
     }
 }
 
@@ -8079,12 +8670,12 @@ void M_MemoryUsage(int choice)
     if(!memory_usage)
     {
         memory_usage = true;
-        players[consoleplayer].message = DEH_String("SHOW MEMORY USAGE ENABLED");
+        players[consoleplayer].message = "SHOW MEMORY USAGE ENABLED";
     }
     else if(memory_usage)
     {
         memory_usage = false;
-        players[consoleplayer].message = DEH_String("SHOW MEMORY USAGE DISABLED");
+        players[consoleplayer].message = "SHOW MEMORY USAGE DISABLED";
     }
 }
 
@@ -8093,12 +8684,12 @@ void M_ReplaceMissing(int choice)
     if(!replace_missing)
     {
         replace_missing = true;
-        players[consoleplayer].message = DEH_String("MISSING TEXTURES & FLATS WILL BE REPLACED");
+        players[consoleplayer].message = "MISSING TEXTURES & FLATS WILL BE REPLACED";
     }
     else if(replace_missing)
     {
         replace_missing = false;
-        players[consoleplayer].message = DEH_String("MISSING TEXTURES & FLATS WON'T BE REPLACED");
+        players[consoleplayer].message = "MISSING TEXTURES & FLATS WON'T BE REPLACED";
     }
 }
 /*
@@ -8113,12 +8704,12 @@ void M_DisplayTicker(int choice)
     if (display_ticker)
     {
         dots_enabled = 1;
-        players[consoleplayer].message = DEH_String("TICKER ON");
+        players[consoleplayer].message = "TICKER ON";
     }
     else
     {
         dots_enabled = 0;
-        players[consoleplayer].message = DEH_String("TICKER OFF");
+        players[consoleplayer].message = "TICKER OFF";
     }
     I_DisplayFPSDots(display_ticker);
 /*
@@ -8219,7 +8810,7 @@ void M_DrawFilesMenu(void)
 {
     M_DarkBackground();
 }
-
+/*
 void M_Brightness(int choice)
 {
     switch(choice)
@@ -8233,10 +8824,10 @@ void M_Brightness(int choice)
             usegamma++;
         break;
     }
-    players[consoleplayer].message = DEH_String(gammamsg[usegamma]);
-    I_SetPalette (W_CacheLumpName (DEH_String("PLAYPAL"),PU_CACHE));
+    players[consoleplayer].message = gammamsg[usegamma];
+    I_SetPalette (W_CacheLumpName ("PLAYPAL",PU_CACHE));
 }
-
+*/
 void M_Armor(int choice)
 {
     M_SetupNextMenu(&ArmorDef);
@@ -8264,14 +8855,16 @@ void M_Screen(int choice)
 
 void M_Cheats(int choice)
 {
+    DetectState();
+
     M_SetupNextMenu(&CheatsDef);
 }
-
+/*
 void M_Record(int choice)
 {
     M_SetupNextMenu(&RecordDef);
 }
-
+*/
 void M_Game(int choice)
 {
     M_SetupNextMenu(&GameDef);
@@ -8292,12 +8885,18 @@ void M_Game4(int choice)
     M_SetupNextMenu(&GameDef4);
 }
 
-void M_Expansion(int choice)
+void M_Game5(int choice)
 {
-    epi = choice;
-    M_SetupNextMenu(&NewDef);
+    M_SetupNextMenu(&GameDef5);
 }
 
+void M_Expansion(int choice)
+{
+    gamemission = (choice == ex1 ? doom2 : pack_nerve);
+
+    M_SetupNextMenu(&NewDef);
+}
+/*
 void M_RMap(int choice)
 {
         switch(choice)
@@ -8492,20 +9091,40 @@ void M_RSkill(int choice)
     }
 }
 
+void M_RecordLong(int choice)
+{
+    switch(choice)
+    {
+    case 0:
+        if (long_tics)
+            long_tics = false;
+        break;
+    case 1:
+        if (!long_tics)
+            long_tics = true;
+        break;
+    }
+}
+
 void M_StartRecord(int choice)
 {
     if(!demoplayback)
     {
         M_ClearMenus();
-        G_RecordDemo(rskill, 1, repi, rmap);
+        G_RecordDemo(rskill, repi, rmap);
         D_DoomLoop();               // never returns
     }
     else if(demoplayback)
     {
-        players[consoleplayer].message = DEH_String("MAP ROTATION DISABLED");
+        players[consoleplayer].message = "MAP ROTATION DISABLED";
     }
-}
 
+    if(long_tics)
+        longtics = true;
+    else
+        longtics = false;
+}
+*/
 void M_Crosshair(int choice)
 {
     switch(choice)
@@ -8543,12 +9162,12 @@ void M_WeaponRecoil(int choice)
     case 0:
         if (d_recoil)
             d_recoil = false;
-        players[consoleplayer].message = DEH_String("WEAPON RECOIL OFF");
+        players[consoleplayer].message = "WEAPON RECOIL OFF";
         break;
     case 1:
         if (d_recoil == false)
             d_recoil = true;
-        players[consoleplayer].message = DEH_String("WEAPON RECOIL ON");
+        players[consoleplayer].message = "WEAPON RECOIL ON";
         break;
     }
 }
@@ -8560,12 +9179,12 @@ void M_PlayerThrust(int choice)
     case 0:
         if (d_thrust)
             d_thrust = false;
-        players[consoleplayer].message = DEH_String("PLAYER THRUST OFF");
+        players[consoleplayer].message = "PLAYER THRUST OFF";
         break;
     case 1:
         if (d_thrust == false)
             d_thrust = true;
-        players[consoleplayer].message = DEH_String("PLAYER THRUST ON");
+        players[consoleplayer].message = "PLAYER THRUST ON";
         break;
     }
 }
@@ -8580,7 +9199,7 @@ void M_RespawnMonsters(int choice)
             start_respawnparm = false;
             respawnparm = false;
         }
-        players[consoleplayer].message = DEH_String("RESPAWN MONSTERS DISABLED");
+        players[consoleplayer].message = "RESPAWN MONSTERS DISABLED";
         break;
     case 1:
         if (respawnparm == false)
@@ -8588,7 +9207,7 @@ void M_RespawnMonsters(int choice)
             start_respawnparm = true;
             respawnparm = true;
         }
-        players[consoleplayer].message = DEH_String("RESPAWN MONSTERS ENABLED");
+        players[consoleplayer].message = "RESPAWN MONSTERS ENABLED";
         break;
     }
 }
@@ -8603,7 +9222,7 @@ void M_FastMonsters(int choice)
             start_fastparm = false;
             fastparm = false;
         }
-        players[consoleplayer].message = DEH_String("FAST MONSTERS DISABLED");
+        players[consoleplayer].message = "FAST MONSTERS DISABLED";
         break;
     case 1:
         if (fastparm == false)
@@ -8611,7 +9230,7 @@ void M_FastMonsters(int choice)
             start_fastparm = true;
             fastparm = true;
         }
-        players[consoleplayer].message = DEH_String("FAST MONSTERS ENABLED");
+        players[consoleplayer].message = "FAST MONSTERS ENABLED";
         break;
     }
 }
@@ -8623,12 +9242,12 @@ void M_Autoaim(int choice)
     case 0:
         if (autoaim)
             autoaim = 0;
-        players[consoleplayer].message = DEH_String("AUTOAIM DISABLED");
+        players[consoleplayer].message = "AUTOAIM DISABLED";
         break;
     case 1:
         if (autoaim == 0)
             autoaim = 1;
-        players[consoleplayer].message = DEH_String("AUTOAIM ENABLED");
+        players[consoleplayer].message = "AUTOAIM ENABLED";
         break;
     }
 }
@@ -8640,12 +9259,12 @@ void M_MaxGore(int choice)
     case 0:
         if (d_maxgore && fsize != 12361532)
             d_maxgore = false;
-        players[consoleplayer].message = DEH_String("MORE GORE DISABLED");
+        players[consoleplayer].message = "MORE GORE DISABLED";
         break;
     case 1:
         if (!d_maxgore && fsize != 12361532)
             d_maxgore = true;
-        players[consoleplayer].message = DEH_String("MORE GORE ENABLED");
+        players[consoleplayer].message = "MORE GORE ENABLED";
         break;
     }
 }
@@ -8657,12 +9276,12 @@ void M_Footstep(int choice)
     case 0:
         if (d_footstep)
             d_footstep = false;
-        players[consoleplayer].message = DEH_String("PLAYER FOOTSTEPS DISABLED");
+        players[consoleplayer].message = "PLAYER FOOTSTEPS DISABLED";
         break;
     case 1:
         if (!d_footstep)
             d_footstep = true;
-        players[consoleplayer].message = DEH_String("PLAYER FOOTSTEPS ENABLED");
+        players[consoleplayer].message = "PLAYER FOOTSTEPS ENABLED";
         break;
     }
 }
@@ -8674,12 +9293,12 @@ void M_Footclip(int choice)
     case 0:
         if (d_footclip)
             d_footclip = false;
-        players[consoleplayer].message = DEH_String("HERETIC FOOTCLIPS DISABLED");
+        players[consoleplayer].message = "HERETIC FOOTCLIPS DISABLED";
         break;
     case 1:
         if (!d_footclip)
             d_footclip = true;
-        players[consoleplayer].message = DEH_String("HERETIC FOOTCLIPS ENABLED");
+        players[consoleplayer].message = "HERETIC FOOTCLIPS ENABLED";
         break;
     }
 }
@@ -8691,12 +9310,12 @@ void M_Splash(int choice)
     case 0:
         if (d_splash)
             d_splash = false;
-        players[consoleplayer].message = DEH_String("HERETIC LIQUID SPLASH DISABLED");
+        players[consoleplayer].message = "HERETIC LIQUID SPLASH DISABLED";
         break;
     case 1:
         if (!d_splash)
             d_splash = true;
-        players[consoleplayer].message = DEH_String("HERETIC LIQUID SPLASH ENABLED");
+        players[consoleplayer].message = "HERETIC LIQUID SPLASH ENABLED";
         break;
     }
 }
@@ -8708,12 +9327,12 @@ void M_Swirl(int choice)
     case 0:
         if (d_swirl)
             d_swirl = 0;
-        players[consoleplayer].message = DEH_String("SWIRLING WATER HACK DISABLED");
+        players[consoleplayer].message = "SWIRLING WATER HACK DISABLED";
         break;
     case 1:
         if (!d_swirl)
             d_swirl = 1;
-        players[consoleplayer].message = DEH_String("SWIRLING WATER HACK ENABLED");
+        players[consoleplayer].message = "SWIRLING WATER HACK ENABLED";
         break;
     }
 }
@@ -8727,14 +9346,14 @@ void M_Beta(int choice)
         {
             beta_style_mode = false;
         }
-        players[consoleplayer].message = DEH_String("PRE-RELEASE MODE DISABLED");
+        players[consoleplayer].message = "PRE-RELEASE MODE DISABLED";
         break;
     case 1:
         if (!beta_style_mode && fsize != 28422764 && fsize != 19321722 && fsize != 12361532)
         {
             beta_style_mode = true;
         }
-        players[consoleplayer].message = DEH_String("PRE-RELEASE MODE ENABLED");
+        players[consoleplayer].message = "PRE-RELEASE MODE ENABLED";
         break;
     }
 }
@@ -8770,7 +9389,7 @@ void M_ChaingunTics(int choice)
             chaingun_tics++;
         break;
     }
-    players[consoleplayer].message = DEH_String("CHAINGUN SPEED HAS BEEN ADJUSTED");
+    players[consoleplayer].message = "CHAINGUN SPEED HAS BEEN ADJUSTED";
 }
 
 void M_FallingDamage(int choice)
@@ -8780,12 +9399,12 @@ void M_FallingDamage(int choice)
     case 0:
         if (d_fallingdamage)
             d_fallingdamage = false;
-        players[consoleplayer].message = DEH_String("FALLING DAMAGE HAS BEEN DISABLED");
+        players[consoleplayer].message = "FALLING DAMAGE HAS BEEN DISABLED";
         break;
     case 1:
         if (!d_fallingdamage)
             d_fallingdamage = true;
-        players[consoleplayer].message = DEH_String("FALLING DAMAGE HAS BEEN ENABLED");
+        players[consoleplayer].message = "FALLING DAMAGE HAS BEEN ENABLED";
         break;
     }
 }
@@ -8797,12 +9416,12 @@ void M_InfiniteAmmo(int choice)
     case 0:
         if (d_infiniteammo)
             d_infiniteammo = false;
-        players[consoleplayer].message = DEH_String("INFINITE AMMO HAS BEEN DISABLED");
+        players[consoleplayer].message = "INFINITE AMMO HAS BEEN DISABLED";
         break;
     case 1:
         if (!d_infiniteammo)
             d_infiniteammo = true;
-        players[consoleplayer].message = DEH_String("INFINITE AMMO HAS BEEN ENABLED");
+        players[consoleplayer].message = "INFINITE AMMO HAS BEEN ENABLED";
         break;
     }
 }
@@ -8814,12 +9433,12 @@ void M_Shadows(int choice)
     case 0:
         if (d_shadows)
             d_shadows = false;
-        players[consoleplayer].message = DEH_String("SHADOWS HAVE BEEN DISABLED");
+        players[consoleplayer].message = "SHADOWS HAVE BEEN DISABLED";
         break;
     case 1:
         if (!d_shadows)
             d_shadows = true;
-        players[consoleplayer].message = DEH_String("SHADOWS HAVE BEEN ENABLED");
+        players[consoleplayer].message = "SHADOWS HAVE BEEN ENABLED";
         break;
     }
 }
@@ -8831,12 +9450,12 @@ void M_Offsets(int choice)
     case 0:
         if (d_fixspriteoffsets)
             d_fixspriteoffsets = false;
-        players[consoleplayer].message = DEH_String("SPRITE OFFSETS WON'T BE FIXED");
+        players[consoleplayer].message = "SPRITE OFFSETS WON'T BE FIXED";
         break;
     case 1:
         if (!d_fixspriteoffsets && !modifiedgame)
             d_fixspriteoffsets = true;
-        players[consoleplayer].message = DEH_String("SPRITE OFFSETS WILL BE FIXED");
+        players[consoleplayer].message = "SPRITE OFFSETS WILL BE FIXED";
         break;
     }
 }
@@ -8848,12 +9467,12 @@ void M_Telefrag(int choice)
     case 0:
         if (d_telefrag)
             d_telefrag = false;
-        players[consoleplayer].message = DEH_String("MONSTERS DON'T TELEFRAG ON MAP30");
+        players[consoleplayer].message = "MONSTERS DON'T TELEFRAG ON MAP30";
         break;
     case 1:
         if (!d_telefrag)
             d_telefrag = true;
-        players[consoleplayer].message = DEH_String("MONSTERS DO TELEFRAG ON MAP30");
+        players[consoleplayer].message = "MONSTERS DO TELEFRAG ON MAP30";
         break;
     }
 }
@@ -8865,12 +9484,12 @@ void M_Doorstuck(int choice)
     case 0:
         if (d_doorstuck)
             d_doorstuck = false;
-        players[consoleplayer].message = DEH_String("MONSTERS WON'T GET STUCK ON DOORTRACKS");
+        players[consoleplayer].message = "MONSTERS WON'T GET STUCK ON DOORTRACKS";
         break;
     case 1:
         if (!d_doorstuck)
             d_doorstuck = true;
-        players[consoleplayer].message = DEH_String("MONSTERS WILL GET STUCK ON DOORTRACKS");
+        players[consoleplayer].message = "MONSTERS WILL GET STUCK ON DOORTRACKS";
         break;
     }
 }
@@ -8882,12 +9501,12 @@ void M_ResurrectGhosts(int choice)
     case 0:
         if (d_resurrectghosts)
             d_resurrectghosts = false;
-        players[consoleplayer].message = DEH_String("ARCH-VILE WON'T RESURRECT GHOSTS");
+        players[consoleplayer].message = "ARCH-VILE WON'T RESURRECT GHOSTS";
         break;
     case 1:
         if (!d_resurrectghosts)
             d_resurrectghosts = true;
-        players[consoleplayer].message = DEH_String("ARCH-VILE WILL RESURRECT GHOSTS");
+        players[consoleplayer].message = "ARCH-VILE WILL RESURRECT GHOSTS";
         break;
     }
 }
@@ -8899,12 +9518,12 @@ void M_LimitedGhosts(int choice)
     case 0:
         if (d_limitedghosts)
             d_limitedghosts = false;
-        players[consoleplayer].message = DEH_String("PAIN ELEMENTALS DO SPIT UNLIMITED GHOSTS");
+        players[consoleplayer].message = "PAIN ELEMENTALS DO SPIT UNLIMITED GHOSTS";
         break;
     case 1:
         if (!d_limitedghosts)
             d_limitedghosts = true;
-        players[consoleplayer].message = DEH_String("PAIN ELEMENTALS DON'T SPIT UNLIMITED GHOSTS");
+        players[consoleplayer].message = "PAIN ELEMENTALS DON'T SPIT UNLIMITED GHOSTS";
         break;
     }
 }
@@ -8916,12 +9535,12 @@ void M_BlockSkulls(int choice)
     case 0:
         if (d_blockskulls)
             d_blockskulls = false;
-        players[consoleplayer].message = DEH_String("LOST SOULS WILL GET STUCK BEHIND WALLS");
+        players[consoleplayer].message = "LOST SOULS WILL GET STUCK BEHIND WALLS";
         break;
     case 1:
         if (!d_blockskulls)
             d_blockskulls = true;
-        players[consoleplayer].message = DEH_String("LOST SOULS WON'T GET STUCK BEHIND WALLS");
+        players[consoleplayer].message = "LOST SOULS WON'T GET STUCK BEHIND WALLS";
         break;
     }
 }
@@ -8933,12 +9552,12 @@ void M_BlazingDoors(int choice)
     case 0:
         if (d_blazingsound)
             d_blazingsound = false;
-        players[consoleplayer].message = DEH_String("BLAZING DOORS PLAY DOUBLE CLOSING SOUND");
+        players[consoleplayer].message = "BLAZING DOORS PLAY DOUBLE CLOSING SOUND";
         break;
     case 1:
         if (!d_blazingsound)
             d_blazingsound = true;
-        players[consoleplayer].message = DEH_String("BLAZING DOORS DON'T PLAY DOUBLE CLOSING SOUND");
+        players[consoleplayer].message = "BLAZING DOORS DON'T PLAY DOUBLE CLOSING SOUND";
         break;
     }
 }
@@ -8950,12 +9569,12 @@ void M_GodAbsolute(int choice)
     case 0:
         if (d_god)
             d_god = false;
-        players[consoleplayer].message = DEH_String("GOD MODE IS ABSOLUTE");
+        players[consoleplayer].message = "GOD MODE IS ABSOLUTE";
         break;
     case 1:
         if (!d_god)
             d_god = true;
-        players[consoleplayer].message = DEH_String("GOD MODE IS NOT ABSOLUTE");
+        players[consoleplayer].message = "GOD MODE IS NOT ABSOLUTE";
         break;
     }
 }
@@ -8967,12 +9586,12 @@ void M_Floor(int choice)
     case 0:
         if (d_floors)
             d_floors = false;
-        players[consoleplayer].message = DEH_String("Don't use Doom's floor motion behavior");
+        players[consoleplayer].message = "Don't use Doom's floor motion behavior";
         break;
     case 1:
         if (!d_floors)
             d_floors = true;
-        players[consoleplayer].message = DEH_String("Use Doom's floor motion behavior");
+        players[consoleplayer].message = "Use Doom's floor motion behavior";
         break;
     }
 }
@@ -8984,12 +9603,12 @@ void M_Clipping(int choice)
     case 0:
         if (d_moveblock)
             d_moveblock = false;
-        players[consoleplayer].message = DEH_String("Don't use Doom's movement clipping code");
+        players[consoleplayer].message = "Don't use Doom's movement clipping code";
         break;
     case 1:
         if (!d_moveblock)
             d_moveblock = true;
-        players[consoleplayer].message = DEH_String("Use Doom's movement clipping code");
+        players[consoleplayer].message = "Use Doom's movement clipping code";
         break;
     }
 }
@@ -9001,12 +9620,12 @@ void M_Model(int choice)
     case 0:
         if (d_model)
             d_model = false;
-        players[consoleplayer].message = DEH_String("Don't use Doom's linedef trigger model");
+        players[consoleplayer].message = "Don't use Doom's linedef trigger model";
         break;
     case 1:
         if (!d_model)
             d_model = true;
-        players[consoleplayer].message = DEH_String("Use Doom's linedef trigger model");
+        players[consoleplayer].message = "Use Doom's linedef trigger model";
         break;
     }
 }
@@ -9018,12 +9637,12 @@ void M_BossDeath(int choice)
     case 0:
         if (d_666)
             d_666 = false;
-        players[consoleplayer].message = DEH_String("Don't emulate pre-Ultimate Boss Death");
+        players[consoleplayer].message = "Don't emulate pre-Ultimate Boss Death";
         break;
     case 1:
         if (!d_666)
             d_666 = true;
-        players[consoleplayer].message = DEH_String("Emulate pre-Ultimate Boss Death");
+        players[consoleplayer].message = "Emulate pre-Ultimate Boss Death";
         break;
     }
 }
@@ -9035,12 +9654,12 @@ void M_Bounce(int choice)
     case 0:
         if (correct_lost_soul_bounce == 1)
             correct_lost_soul_bounce = 0;
-        players[consoleplayer].message = DEH_String("Lost souls don't bounce off flats");
+        players[consoleplayer].message = "Lost souls don't bounce off flats";
         break;
     case 1:
         if (correct_lost_soul_bounce == 0)
             correct_lost_soul_bounce = 1;
-        players[consoleplayer].message = DEH_String("Lost souls will bounce off flats");
+        players[consoleplayer].message = "Lost souls will bounce off flats";
         break;
     }
 }
@@ -9052,12 +9671,12 @@ void M_Masked(int choice)
     case 0:
         if (d_maskedanim)
             d_maskedanim = false;
-        players[consoleplayer].message = DEH_String("2S middle textures won't animate");
+        players[consoleplayer].message = "2S middle textures won't animate";
         break;
     case 1:
         if (!d_maskedanim)
             d_maskedanim = true;
-        players[consoleplayer].message = DEH_String("2S middle textures will be animated");
+        players[consoleplayer].message = "2S middle textures will be animated";
         break;
     }
 }
@@ -9069,12 +9688,12 @@ void M_Quirk(int choice)
     case 0:
         if (d_sound)
             d_sound = false;
-        players[consoleplayer].message = DEH_String("Quirks in the sound code will be retained");
+        players[consoleplayer].message = "Quirks in the sound code will be retained";
         break;
     case 1:
         if (!d_sound)
             d_sound = true;
-        players[consoleplayer].message = DEH_String("Quirks in the sound code won't be retained");
+        players[consoleplayer].message = "Quirks in the sound code won't be retained";
         break;
     }
 }
@@ -9086,12 +9705,12 @@ void M_Ouch(int choice)
     case 0:
         if (d_ouchface)
             d_ouchface = false;
-        players[consoleplayer].message = DEH_String("Don't use Doom's buggy ouch face code");
+        players[consoleplayer].message = "Don't use Doom's buggy ouch face code";
         break;
     case 1:
         if (!d_ouchface)
             d_ouchface = true;
-        players[consoleplayer].message = DEH_String("Use Doom's buggy ouch face code");
+        players[consoleplayer].message = "Use Doom's buggy ouch face code";
         break;
     }
 }
@@ -9103,12 +9722,199 @@ void M_Textures(int choice)
     case 0:
         if (d_brightmaps)
             d_brightmaps = false;
-        players[consoleplayer].message = DEH_String("Partially Fullbright Textures disabled");
+        players[consoleplayer].message = "Partially Fullbright Textures disabled";
         break;
     case 1:
         if (!d_brightmaps)
             d_brightmaps = true;
-        players[consoleplayer].message = DEH_String("Partially Fullbright Textures enabled");
+        players[consoleplayer].message = "Partially Fullbright Textures enabled";
+        break;
+    }
+}
+
+void M_FixMapErrors(int choice)
+{
+    switch(choice)
+    {
+    case 0:
+        if (d_fixmaperrors)
+            d_fixmaperrors = false;
+        players[consoleplayer].message = "Fixing map errors has been disabled";
+        break;
+    case 1:
+        if (!d_fixmaperrors)
+            d_fixmaperrors = true;
+        players[consoleplayer].message = "Fixing map errors has been enabled";
+        break;
+    }
+}
+
+void M_AltLighting(int choice)
+{
+    switch(choice)
+    {
+    case 0:
+        if (d_altlighting)
+            d_altlighting = false;
+        players[consoleplayer].message = "Alternate Player Sprites Lighting disabled";
+        break;
+    case 1:
+        if (!d_altlighting)
+            d_altlighting = true;
+        players[consoleplayer].message = "Alternate Player Sprites Lighting enabled";
+        break;
+    }
+}
+
+void M_Infighting(int choice)
+{
+    switch(choice)
+    {
+    case 0:
+        if (allow_infighting)
+            allow_infighting = false;
+        players[consoleplayer].message = "Monsters infighting disabled";
+        break;
+    case 1:
+        if (!allow_infighting)
+            allow_infighting = true;
+        players[consoleplayer].message = "Monsters infighting enabled";
+        break;
+    }
+}
+
+void M_LastEnemy(int choice)
+{
+    switch(choice)
+    {
+    case 0:
+        if (last_enemy)
+            last_enemy = false;
+        players[consoleplayer].message = "Monsters Will Remember Their Last Enemy";
+        break;
+    case 1:
+        if (!last_enemy)
+            last_enemy = true;
+        players[consoleplayer].message = "Monsters Won't Remember Their Last Enemy";
+        break;
+    }
+}
+
+void M_Float(int choice)
+{
+    switch(choice)
+    {
+    case 0:
+        if (float_items)
+            float_items = false;
+        players[consoleplayer].message = "Floating Items disabled";
+        break;
+    case 1:
+        if (!float_items)
+            float_items = true;
+        players[consoleplayer].message = "Floating Items enabled";
+        break;
+    }
+}
+
+void M_Animate(int choice)
+{
+    switch(choice)
+    {
+    case 0:
+        if (animated_drop)
+            animated_drop = false;
+        players[consoleplayer].message = "Items dropped by monsters will be animated";
+        break;
+    case 1:
+        if (!animated_drop)
+            animated_drop = true;
+        players[consoleplayer].message = "Items dropped by monsters won't be animated";
+        break;
+    }
+}
+
+void M_CrushSound(int choice)
+{
+    switch(choice)
+    {
+    case 0:
+        if (crush_sound)
+            crush_sound = false;
+        players[consoleplayer].message = "Extra crushing sound disabled";
+        break;
+    case 1:
+        if (!crush_sound)
+            crush_sound = true;
+        players[consoleplayer].message = "Extra crushing sound enabled";
+        break;
+    }
+}
+
+void M_NoNoise(int choice)
+{
+    switch(choice)
+    {
+    case 0:
+        if (disable_noise)
+            disable_noise = false;
+        players[consoleplayer].message = "Monsters will be alerted when firing fist";
+        break;
+    case 1:
+        if (!disable_noise)
+            disable_noise = true;
+        players[consoleplayer].message = "Monsters won't be alerted when firing fist";
+        break;
+    }
+}
+
+void M_NudgeCorpses(int choice)
+{
+    switch(choice)
+    {
+    case 0:
+        if (corpses_nudge)
+            corpses_nudge = false;
+        players[consoleplayer].message = "Corpses will be nudged";
+        break;
+    case 1:
+        if (!corpses_nudge)
+            corpses_nudge = true;
+        players[consoleplayer].message = "Corpses won't be nudged";
+        break;
+    }
+}
+
+void M_Slide(int choice)
+{
+    switch(choice)
+    {
+    case 0:
+        if (corpses_slide)
+            corpses_slide = false;
+        players[consoleplayer].message = "Corpses will slide caused by explosions";
+        break;
+    case 1:
+        if (!corpses_slide)
+            corpses_slide = true;
+        players[consoleplayer].message = "Corpses won't slide caused by explosions";
+        break;
+    }
+}
+
+void M_Smearblood(int choice)
+{
+    switch(choice)
+    {
+    case 0:
+        if (corpses_smearblood)
+            corpses_smearblood = false;
+        players[consoleplayer].message = "Corpses will smear blood when sliding";
+        break;
+    case 1:
+        if (!corpses_smearblood)
+            corpses_smearblood = true;
+        players[consoleplayer].message = "Corpses won't smear blood when sliding";
         break;
     }
 }
@@ -9126,7 +9932,7 @@ void M_GoreAmount(int choice)
             gore_amount++;
         break;
     }
-    players[consoleplayer].message = DEH_String("THE AMOUNT OF GORE HAS BEEN ADJUSTED");
+    players[consoleplayer].message = "THE AMOUNT OF GORE HAS BEEN ADJUSTED";
 }
 
 void M_NoMonsters(int choice)
@@ -9136,12 +9942,12 @@ void M_NoMonsters(int choice)
     case 0:
         if (not_monsters)
             not_monsters = false;
-        players[consoleplayer].message = DEH_String("NO MONSTERS OPTION HAS BEEN DISABLED");
+        players[consoleplayer].message = "NO MONSTERS OPTION HAS BEEN DISABLED";
         break;
     case 1:
         if (!not_monsters)
             not_monsters = true;
-        players[consoleplayer].message = DEH_String("NO MONSTERS OPTION HAS BEEN ENABLED");
+        players[consoleplayer].message = "NO MONSTERS OPTION HAS BEEN ENABLED";
         break;
     }
 }
@@ -9153,12 +9959,12 @@ void M_AutomapOverlay(int choice)
     case 0:
         if (overlay_trigger)
             overlay_trigger = false;
-        players[consoleplayer].message = DEH_String("AUTOMAP OVERLAY MODE HAS BEEN DISABLED");
+        players[consoleplayer].message = "AUTOMAP OVERLAY MODE HAS BEEN DISABLED";
         break;
     case 1:
         if (!overlay_trigger)
             overlay_trigger = true;
-        players[consoleplayer].message = DEH_String("AUTOMAP OVERLAY MODE HAS BEEN ENABLED");
+        players[consoleplayer].message = "AUTOMAP OVERLAY MODE HAS BEEN ENABLED";
         break;
     }
 }
@@ -9173,9 +9979,9 @@ void M_DrawSystem(void)
     M_DarkBackground();
 
     if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
-        V_DrawPatchWithShadow (62, 20, W_CacheLumpName(DEH_String("M_T_YSET"), PU_CACHE), false);
+        V_DrawPatchWithShadow (62, 20, W_CacheLumpName("M_T_YSET", PU_CACHE), false);
     else
-        V_DrawPatchWithShadow (62, 20, W_CacheLumpName(DEH_String("M_SYSSET"), PU_CACHE), false);
+        V_DrawPatchWithShadow (62, 20, W_CacheLumpName("M_SYSSET", PU_CACHE), false);
 
     if(display_fps)
     {
@@ -9250,12 +10056,12 @@ void M_HUD(int choice)
     case 0:
         if (hud)
             hud = false;
-        players[consoleplayer].message = DEH_String("EXTRA HUD ENABLED");
+        players[consoleplayer].message = "EXTRA HUD ENABLED";
         break;
     case 1:
         if (hud == false)
             hud = true;
-        players[consoleplayer].message = DEH_String("EXTRA HUD ENABLED");
+        players[consoleplayer].message = "EXTRA HUD ENABLED";
         break;
     }
 }
@@ -9267,12 +10073,12 @@ void M_MapGrid(int choice)
     case 0:
         if (drawgrid)
             drawgrid--;
-        players[consoleplayer].message = DEH_String(AMSTR_GRIDOFF);
+        players[consoleplayer].message = s_AMSTR_GRIDOFF;
         break;
     case 1:
         if (drawgrid < 1)
             drawgrid++;
-        players[consoleplayer].message = DEH_String(AMSTR_GRIDON);
+        players[consoleplayer].message = s_AMSTR_GRIDON;
         break;
     }
 }
@@ -9284,12 +10090,12 @@ void M_MapRotation(int choice)
     case 0:
         if (am_rotate)
             am_rotate = false;
-        players[consoleplayer].message = DEH_String("MAP ROTATION DISABLED");
+        players[consoleplayer].message = "MAP ROTATION DISABLED";
         break;
     case 1:
         if (am_rotate == false)
             am_rotate = true;
-        players[consoleplayer].message = DEH_String("MAP ROTATION ENABLED");
+        players[consoleplayer].message = "MAP ROTATION ENABLED";
         break;
     }
 }
@@ -9302,13 +10108,13 @@ void M_WeaponChange(int choice)
         if (use_vanilla_weapon_change == 1)
             use_vanilla_weapon_change = 0;
         players[consoleplayer].message =
-        DEH_String("ORIGINAL WEAPON CHANGING STYLE DISABLED");
+        "ORIGINAL WEAPON CHANGING STYLE DISABLED";
         break;
     case 1:
         if (use_vanilla_weapon_change == 0)
             use_vanilla_weapon_change = 1;
         players[consoleplayer].message =
-        DEH_String("ORIGINAL WEAPON CHANGING STYLE ENABLED");
+        "ORIGINAL WEAPON CHANGING STYLE ENABLED";
         break;
     }
 }
@@ -9320,12 +10126,12 @@ void M_AimingHelp(int choice)
     case 0:
         if (aiming_help)
             aiming_help = false;
-        players[consoleplayer].message = DEH_String("AIMING HELP DISABLED");
+        players[consoleplayer].message = "AIMING HELP DISABLED";
         break;
     case 1:
         if (!aiming_help)
             aiming_help = true;
-        players[consoleplayer].message = DEH_String("AIMING HELP ENABLED");
+        players[consoleplayer].message = "AIMING HELP ENABLED";
         break;
     }
 }
@@ -9337,12 +10143,12 @@ void M_FollowMode(int choice)
     case 0:
         if (followplayer)
             followplayer--;
-        players[consoleplayer].message = DEH_String(AMSTR_FOLLOWOFF);
+        players[consoleplayer].message = s_AMSTR_FOLLOWOFF;
         break;
     case 1:
         if (followplayer < 1)
             followplayer++;
-        players[consoleplayer].message = DEH_String(AMSTR_FOLLOWON);
+        players[consoleplayer].message = s_AMSTR_FOLLOWON;
         break;
     }
 }
@@ -9354,12 +10160,12 @@ void M_Statistics(int choice)
     case 0:
         if (show_stats)
             show_stats--;
-        players[consoleplayer].message = DEH_String("LEVEL STATISTICS OFF");
+        players[consoleplayer].message = "LEVEL STATISTICS OFF";
         break;
     case 1:
         if (show_stats < 1)
             show_stats++;
-        players[consoleplayer].message = DEH_String("LEVEL STATISTICS ON");
+        players[consoleplayer].message = "LEVEL STATISTICS ON";
         break;
     }
 }
@@ -9369,9 +10175,9 @@ void M_DrawDebug(void)
     M_DarkBackground();
 
     if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
-        V_DrawPatchWithShadow (67, 15, W_CacheLumpName(DEH_String("M_T_DSET"), PU_CACHE), false);
+        V_DrawPatchWithShadow (67, 15, W_CacheLumpName("M_T_DSET", PU_CACHE), false);
     else
-        V_DrawPatchWithShadow (67, 15, W_CacheLumpName(DEH_String("M_DBGSET"), PU_CACHE), false);
+        V_DrawPatchWithShadow (67, 15, W_CacheLumpName("M_DBGSET", PU_CACHE), false);
 
     if(coordinates_info)
     {
@@ -9414,12 +10220,13 @@ void M_DrawDebug(void)
 }
 
 extern void A_PainDie(mobj_t *);
-thinker_t *currentthinker;
+//extern thinker_t *currentthinker;
 
 // jff 2/01/98 kill all monsters
 //static void cheat_massacre()
 void M_Massacre(int choice)
 {
+    thinker_t *thinker;
     int killcount = 0;
     massacre_cheat_used = true;
 
@@ -9429,30 +10236,30 @@ void M_Massacre(int choice)
     // killough 2/7/98: cleaned up code and changed to use dprintf;
     // fixed lost soul bug (Lost Souls left behind when Pain Elementals are killed)
 
-    currentthinker = &thinkercap;
+    thinker = &thinkercap;
 
-    while ((currentthinker=currentthinker->next) != &thinkercap)
+    while ((thinker=thinker->next) != &thinkercap)
     {
-        if (currentthinker->function.acp1 == (actionf_p1) P_MobjThinker &&
-           ((((mobj_t *) currentthinker)->flags & MF_COUNTKILL) ||
-            ((mobj_t *) currentthinker)->type == MT_SKULL ||
-            ((mobj_t *) currentthinker)->type == MT_BETASKULL))
+        if (thinker->function == P_MobjThinker &&
+           ((((mobj_t *) thinker)->flags & MF_COUNTKILL) ||
+            ((mobj_t *) thinker)->type == MT_SKULL ||
+            ((mobj_t *) thinker)->type == MT_BETASKULL))
         {
             // killough 3/6/98: kill even if Pain Elemental is dead
 
-            if (((mobj_t *) currentthinker)->health > 0)
+            if (((mobj_t *) thinker)->health > 0)
             {
                 killcount++;
 
-                P_DamageMobj((mobj_t *)currentthinker, NULL, NULL, 10000);
+                P_DamageMobj((mobj_t *)thinker, NULL, NULL, 10000);
             }
-            if (((mobj_t *) currentthinker)->type == MT_PAIN)
+            if (((mobj_t *) thinker)->type == MT_PAIN)
             {
                 // killough 2/8/98
 
-                A_PainDie((mobj_t *) currentthinker);
+                A_PainDie((mobj_t *) thinker);
 
-                P_SetMobjState ((mobj_t *) currentthinker, S_PAIN_DIE6);
+                P_SetMobjState ((mobj_t *) thinker, S_PAIN_DIE6);
             }
         }
     }
@@ -9464,7 +10271,7 @@ void M_Massacre(int choice)
     sprintf(massacre_textbuffer, "%d MONSTER%s KILLED",
         killcount, killcount == 1 ? "" : "S");
 
-    players[consoleplayer].message = DEH_String(massacre_textbuffer);
+    players[consoleplayer].message = massacre_textbuffer;
 
     massacre_cheat_used = false;
 }

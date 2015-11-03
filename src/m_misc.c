@@ -35,7 +35,7 @@
 #include <sys/types.h>
 
 #include "c_io.h"
-#include "deh_str.h"
+#include "d_deh.h"
 #include "doomtype.h"
 #include "i_swap.h"
 #include "i_system.h"
@@ -499,6 +499,8 @@ int M_snprintf(char *buf, size_t buf_len, const char *s, ...)
     return result;
 }
 
+// [crispy] portable pendant to libgen.h's dirname()
+// does not modify its argument
 char *M_DirName(char *path)
 {
     char *src, *res;
@@ -539,7 +541,7 @@ char *commify(int value)
     char result[64];
 
     M_snprintf(result, sizeof(result), "%i", value);
-    if (abs(value) >= 1000)
+    if (ABS(value) >= 1000)
     {
         char        *pt;
         int         n;
@@ -581,5 +583,21 @@ char *M_ExtractFilename(char *path)
     inpfile = malloc(len + 1);
     strncpy(inpfile, pdest, len + 1);
     return inpfile;
+}
+
+// [crispy] portable pendant to libgen.h's basename()
+char *M_BaseName(char *path)
+{
+    char *src;
+
+    src = path + strlen(path) - 1;
+
+    // back up until a \ or the start
+    while (src != path && *(src - 1) != DIR_SEPARATOR)
+    {
+        src--;
+    }
+
+    return src;
 }
 

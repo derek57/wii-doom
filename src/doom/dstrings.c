@@ -25,9 +25,14 @@
 //-----------------------------------------------------------------------------
 
 
+#ifdef WII
+#include "../d_deh.h"
+#else
+#include "d_deh.h"
+#endif
 
 #include "dstrings.h"
-
+/*
 char *doom1_endmsg[] =
 {
   "are you sure you want to\nquit this great game?",
@@ -52,7 +57,7 @@ char *doom2_endmsg[] =
   "just leave. when you come\nback, i'll be waiting with a bat.",
   "you're lucky i don't smack\nyou for thinking about leaving.",
 };
-
+*/
 #if 0
 
 // UNUSED messages included in the source release
@@ -77,5 +82,26 @@ char* endmsg[] =
 #endif
 
   
+char **endmsg[] =
+{
+    // DOOM1
+    &s_QUITMSG,
+    &s_DOOM_ENDMSG1,
+    &s_DOOM_ENDMSG2,
+    &s_DOOM_ENDMSG3,
+    &s_DOOM_ENDMSG4,
+    &s_DOOM_ENDMSG5,
+    &s_DOOM_ENDMSG6,
+    &s_DOOM_ENDMSG7,
 
+    // QuitDOOM II messages
+    &s_QUITMSG,
+    &s_DOOM2_ENDMSG1,
+    &s_DOOM2_ENDMSG2,
+    &s_DOOM2_ENDMSG3,
+    &s_DOOM2_ENDMSG4,
+    &s_DOOM2_ENDMSG5,
+    &s_DOOM2_ENDMSG6,
+    &s_DOOM2_ENDMSG7
+};
 

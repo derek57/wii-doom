@@ -48,9 +48,6 @@
 
 #define ANG5                    (ANG90/18)
 
-// Index of the special effects (INVUL inverse) map.
-#define INVERSECOLORMAP         32
-
 // 16 pixels of bob
 #define MAXBOB                  0x100000        
 
@@ -86,8 +83,20 @@ P_Thrust
     }
 }
 
-
-
+// P_Bob
+// Same as P_Thrust, but only affects bobbing.
+//
+// killough 10/98: We apply thrust separately between the real physical player
+// and the part which affects bobbing. This way, bobbing only comes from player
+// motion, nothing external, avoiding many problems, e.g. bobbing should not
+// occur on conveyors, unless the player walks on one, and bobbing should be
+// reduced at a regular rate, even on ice (where the player coasts).
+//
+void P_Bob(player_t *player, angle_t angle, fixed_t move)
+{
+    player->momx += FixedMul(move, finecosine[angle >>= ANGLETOFINESHIFT]);
+    player->momy += FixedMul(move, finesine[angle]);
+}
 
 //
 // P_CalcHeight
@@ -95,47 +104,22 @@ P_Thrust
 //
 void P_CalcHeight (player_t* player) 
 {
-    int            angle;
-    fixed_t        bob;
-    
-    // Regular movement bobbing
-    // (needs to be calculated for gun swing
-    // even if not on ground)
-    // OPTIMIZE: tablify angle
-    // Note: a LUT allows for effects
-    //  like a ramp with low health.
-    player->bob =
-        FixedMul (player->mo->momx, player->mo->momx)
-        + FixedMul (player->mo->momy,player->mo->momy);
-    
-    player->bob >>= 2;
-
-    if (player->bob>MAXBOB)
-        player->bob = MAXBOB;
-
-    if ((player->mo->flags2 & MF2_FLY) && !onground)
+    if (!onground)
+        player->viewz = MIN(player->mo->z + VIEWHEIGHT, player->mo->ceilingz - 4 * FRACUNIT);
+    else if (player->playerstate == PST_LIVE)
     {
-        player->bob = FRACUNIT / 2;
-    }
+        int     angle = (FINEANGLES / 20 * leveltime) & FINEMASK;
+        fixed_t bob = ((FixedMul(player->momx, player->momx)
+            + FixedMul(player->momy, player->momy)) >> 2);
 
-    if ((player->cheats & CF_NOMOMENTUM) || !onground)
-    {
-        player->viewz = player->mo->z + VIEWHEIGHT;
+        // Regular movement bobbing
+        // (needs to be calculated for gun swing
+        // even if not on ground)
+        player->bob = MIN(bob, MAXBOB) * 75 / 100;
+        
+        bob = FixedMul(player->bob / 2, finesine[angle]);
 
-        if (player->viewz > player->mo->ceilingz-4*FRACUNIT)
-            player->viewz = player->mo->ceilingz-4*FRACUNIT;
-
-        player->viewz = player->mo->z + player->viewheight;
-        return;
-    }
-                
-    angle = (FINEANGLES/20*leveltime)&FINEMASK;
-    bob = FixedMul ( player->bob/2, finesine[angle]);
-
-    
-    // move viewheight
-    if (player->playerstate == PST_LIVE)
-    {
+        // move viewheight
         player->viewheight += player->deltaviewheight;
 
         if (player->viewheight > VIEWHEIGHT)
@@ -144,36 +128,61 @@ void P_CalcHeight (player_t* player)
             player->deltaviewheight = 0;
         }
 
-        if (player->viewheight < VIEWHEIGHT/2)
+        if (player->viewheight < VIEWHEIGHT / 2)
         {
-            player->viewheight = VIEWHEIGHT/2;
+            player->viewheight = VIEWHEIGHT / 2;
             if (player->deltaviewheight <= 0)
                 player->deltaviewheight = 1;
         }
-        
-        if (player->deltaviewheight)        
+
+        if (player->deltaviewheight)
         {
-            player->deltaviewheight += FRACUNIT/4;
+            player->deltaviewheight += FRACUNIT / 4;
             if (!player->deltaviewheight)
                 player->deltaviewheight = 1;
         }
+        player->viewz = player->mo->z + player->viewheight + bob;
     }
-    player->viewz = player->mo->z + player->viewheight + bob;
-
+    else
+        player->viewz = player->mo->z + player->viewheight;
+/*
     if ((player->mo->flags2 & MF2_FEETARECLIPPED) && d_footclip
         && player->playerstate != PST_DEAD
         && player->mo->z <= player->mo->floorz)
     {
         player->viewz -= FOOTCLIPSIZE;
     }
+
     if (player->viewz > player->mo->ceilingz - 4 * FRACUNIT)
     {
         player->viewz = player->mo->ceilingz - 4 * FRACUNIT;
     }
+
     if (player->viewz < player->mo->floorz + 4 * FRACUNIT)
     {
         player->viewz = player->mo->floorz + 4 * FRACUNIT;
     }
+*/
+    if ((player->mo->flags2 & MF2_FEETARECLIPPED) && d_footclip
+        && player->playerstate != PST_DEAD
+        && player->mo->z <= player->mo->floorz)
+    {
+        boolean                     liquid = true;
+        const struct msecnode_s     *seclist;
+
+        for (seclist = player->mo->touching_sectorlist; seclist; seclist = seclist->m_tnext)
+            if (!isliquid[seclist->m_sector->floorpic] || seclist->m_sector->heightsec != -1)
+            {
+                liquid = false;
+                break;
+            }
+
+        if (liquid)
+            player->viewz -= FOOTCLIPSIZE;
+    }
+
+    player->viewz = BETWEEN(player->mo->floorz + 4 * FRACUNIT,
+            player->viewz, player->mo->ceilingz - 4 * FRACUNIT);
 }
 
 
@@ -197,16 +206,33 @@ void P_MovePlayer (player_t* player)
     onground = (player->mo->z <= player->mo->floorz
                 || (player->mo->flags2 & MF2_ONMOBJ));
         
-    if (cmd->forwardmove && (onground || (player->mo->flags2 & MF2_FLY)))
-        P_Thrust (player, player->mo->angle, cmd->forwardmove*2048);
-    
-    if (cmd->sidemove && (onground || (player->mo->flags2 & MF2_FLY)))
-        P_Thrust (player, player->mo->angle-ANG90, cmd->sidemove*2048);
-
-    if ( (cmd->forwardmove || cmd->sidemove) 
-         && player->mo->state == &states[S_PLAY] )
+    if (cmd->forwardmove | cmd->sidemove)                   // killough 10/98
     {
-        P_SetMobjState (player->mo, S_PLAY_RUN1);
+        if (onground || (player->mo->flags2 & MF2_FLY))     // killough 8/9/98
+        {
+            int friction;
+            int movefactor = P_GetMoveFactor(player->mo, &friction);
+ 
+            // killough 11/98:
+            // On sludge, make bobbing depend on efficiency.
+            // On ice, make it depend on effort.
+            int bobfactor = (friction < ORIG_FRICTION ? movefactor : ORIG_FRICTION_FACTOR);
+ 
+            if (cmd->forwardmove)
+            {
+                P_Bob(player, player->mo->angle, cmd->forwardmove * bobfactor);
+                P_Thrust(player, player->mo->angle, cmd->forwardmove * movefactor);
+            }
+ 
+            if (cmd->sidemove)
+            {
+                P_Bob(player, player->mo->angle - ANG90, cmd->sidemove * bobfactor);
+                P_Thrust(player, player->mo->angle - ANG90, cmd->sidemove * movefactor);
+            }
+        }
+
+        if (player->mo->state == states + S_PLAY)
+            P_SetMobjState(player->mo, S_PLAY_RUN1);
     }
 
     look = cmd->lookfly & 15;
@@ -239,7 +265,7 @@ void P_MovePlayer (player_t* player)
         {
             player->lookdir += 8;
         }
-        if (abs(player->lookdir) < 8)
+        if (ABS(player->lookdir) < 8)
         {
             player->lookdir = 0;
             player->centering = false;
@@ -293,7 +319,8 @@ void P_DeathThink (player_t* player)
     angle_t    angle;
     angle_t   delta;
 
-    infight = true;
+    if(allow_infighting)
+        infight = true;
 
     P_MovePsprites (player);
         
@@ -316,7 +343,7 @@ void P_DeathThink (player_t* player)
         player->lookdir += 6;
     }
 
-    if (abs(player->lookdir) < 6)
+    if (ABS(player->lookdir) < 6)
     {
         player->lookdir = 0;
     }
@@ -357,6 +384,41 @@ void P_DeathThink (player_t* player)
 }
 
 
+void P_ResurrectPlayer(player_t *player)
+{
+    fixed_t     x, y;
+    int         angle;
+    mobj_t      *thing;
+
+    // remove player's corpse
+    P_RemoveMobj(player->mo);
+
+    // spawn a teleport fog
+    x = player->mo->x;
+    y = player->mo->y;
+    angle = player->mo->angle >> ANGLETOFINESHIFT;
+    thing = P_SpawnMobj(x + 20 * finecosine[angle], y + 20 * finesine[angle],
+        ONFLOORZ, MT_TFOG);
+    thing->angle = player->mo->angle;
+    S_StartSound(thing, sfx_telept);
+
+    // telefrag anything in this spot
+    P_TeleportMove(thing, thing->x, thing->y, thing->z, true);
+
+    // respawn the player.
+    thing = P_SpawnMobj(x, y, ONFLOORZ, MT_PLAYER);
+    thing->angle = player->mo->angle;
+    thing->player = player;
+    thing->health = 100;
+    thing->reactiontime = 18;
+    player->mo = thing;
+    player->playerstate = PST_LIVE;
+    player->viewheight = VIEWHEIGHT;
+    player->health = 100;
+    infight = false;
+    P_SetupPsprites(player);
+    P_MapEnd();
+}
 
 //
 // P_PlayerThink
@@ -388,13 +450,13 @@ void P_PlayerThink (player_t* player)
     }
 
     player->worldTimer++;
-        
+
     if (player->playerstate == PST_DEAD)
     {
         P_DeathThink (player);
         return;
     }
-    
+
     if(jumping)
     {
         if (player->jumpTics)

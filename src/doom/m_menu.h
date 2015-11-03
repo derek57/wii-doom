@@ -74,6 +74,7 @@ void M_WriteText (int x, int y, char *string);
 int M_StringWidth(char* string);
 
 void M_ClearMenus (void);
+void M_DarkBackground(void);
 
 //extern int      detailLevel;
 extern int      screenblocks;

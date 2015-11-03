@@ -77,24 +77,24 @@ int SlopeDivCrispy(unsigned int num, unsigned int den)
 
     if (den < 512)
     {
-	return SLOPERANGE;
+        return SLOPERANGE;
     }
     else
     {
-	ans = ((uint64_t) num << 3) / (den >> 8);
+        ans = ((uint64_t) num << 3) / (den >> 8);
 
-	if (ans <= SLOPERANGE)
-	{
-	    return (int) ans;
-	}
-	else
-	{
-	    return SLOPERANGE;
-	}
+        if (ans <= SLOPERANGE)
+        {
+            return (int) ans;
+        }
+        else
+        {
+            return SLOPERANGE;
+        }
     }
 }
 
-int (* SlopeDiv)(unsigned int num, unsigned int den) = SlopeDivVanilla;
+//int (* SlopeDiv)(unsigned int num, unsigned int den) = SlopeDivVanilla;
 
 
 const int finetangent[4096] =
@@ -2162,6 +2162,7 @@ const angle_t tantoangle[2049] =
 };
 
 // Now where did these came from?
+/*
 const byte gammatable[5][256] =
 {
     {
@@ -2260,4 +2261,5 @@ const byte gammatable[5][256] =
         247,248,248,249,249,250,250,251,251,252,252,253,254,254,255,255
     }
 };
+*/
 

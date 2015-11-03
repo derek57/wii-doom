@@ -25,8 +25,11 @@
 
 #include "doomfeatures.h"
 #include "d_iwad.h"
+#include "doom/d_main.h"
+#include "doom/doomstat.h"
 #include "i_system.h"
 #include "m_argv.h"
+#include "m_misc.h"
 #include "w_main.h"
 #include "w_merge.h"
 #include "w_wad.h"
@@ -63,12 +66,34 @@ boolean W_ParseCommandLine(void)
         {
             char *filename;
 
-            modifiedgame = true;
-
             filename = D_TryFindWADByName(myargv[p]);
 
-            printf("         merging %s\n", filename);
-            W_MergeFile(filename);
+            if (W_MergeFile(filename, false))
+            {
+                modifiedgame = true;
+
+                if (D_IsDehFile(filename))
+                    LoadDehFile(filename);
+
+                printf("         merging %s\n", filename);
+            }
+
+            if (!strcasecmp(filename, "nerve.wad"))
+            {
+                int i;
+
+                nerve_pwad = true;
+                gamemission = pack_nerve;
+
+                // [crispy] rename level name patch lumps out of the way
+                for (i = 0; i < 9; i++)
+                {
+                    char lumpname[9];
+
+                    M_snprintf (lumpname, 9, "CWILV%2.2d", i);
+                    lumpinfo[W_GetNumForName(lumpname)]->name[0] = 'N';
+                }
+            }
         }
     }
 
@@ -187,17 +212,48 @@ boolean W_ParseCommandLine(void)
     p = M_CheckParmWithArgs ("-file", 1);
     if (p)
     {
-	// the parms after p are wadfile/lump names,
-	// until end of parms or another - preceded parm
-	modifiedgame = true;            // homebrew levels
-	while (++p != myargc && myargv[p][0] != '-')
+        // the parms after p are wadfile/lump names,
+        // until end of parms or another - preceded parm
+        modifiedgame = true;            // homebrew levels
+        while (++p != myargc && myargv[p][0] != '-')
         {
+            int i, j;
+
             char *filename;
 
             filename = D_TryFindWADByName(myargv[p]);
 
             printf("         adding %s\n", filename);
-	    W_AddFile(filename, true);
+
+            if (D_IsDehFile(filename))
+                LoadDehFile(filename);
+
+            W_AddFile(filename, true);
+
+            i = W_GetNumForName("map01");
+
+            if (!strcasecmp(lumpinfo[i]->wad_file->path, "nerve.wad"))
+            {
+                nerve_pwad = true;
+                gamemission = pack_nerve;
+
+                // [crispy] rename level name patch lumps out of the way
+                for (i = 0; i < 9; i++)
+                {
+                    char lumpname[9];
+
+                    M_snprintf (lumpname, 9, "CWILV%2.2d", i);
+                    lumpinfo[W_GetNumForName(lumpname)]->name[0] = 'N';
+                }
+            }
+
+             j = W_GetNumForName("map21");
+
+            if (!strcasecmp(lumpinfo[i]->wad_file->path, "masterlevels.wad") &&
+                !strcasecmp(lumpinfo[j]->wad_file->path, "masterlevels.wad"))
+            {
+                gamemission = pack_master;
+            }
         }
     }
 

@@ -156,6 +156,20 @@ default_t        doom_defaults_list[] =
     CONFIG_VARIABLE_INT                (pixel_width),
     CONFIG_VARIABLE_INT                (pixel_height),
     CONFIG_VARIABLE_INT                (brightmaps),
+    CONFIG_VARIABLE_INT                (screenwidth),
+    CONFIG_VARIABLE_INT                (screenheight),
+    CONFIG_VARIABLE_INT                (fixmaperrors),
+    CONFIG_VARIABLE_INT                (altlighting),
+    CONFIG_VARIABLE_INT                (infighting),
+    CONFIG_VARIABLE_INT                (lastenemy),
+    CONFIG_VARIABLE_INT                (floatitems),
+    CONFIG_VARIABLE_INT                (animate_dropping),
+    CONFIG_VARIABLE_INT                (crushing_sound),
+    CONFIG_VARIABLE_INT                (no_noise),
+    CONFIG_VARIABLE_INT                (nudge_corpses),
+    CONFIG_VARIABLE_INT                (slide_corpses),
+    CONFIG_VARIABLE_INT                (smearblood_corpses),
+    CONFIG_VARIABLE_INT                (diskicon),
 //    CONFIG_VARIABLE_INT                (memory),
     CONFIG_VARIABLE_INT                (key_shoot),
     CONFIG_VARIABLE_INT                (key_open),
@@ -462,7 +476,7 @@ void M_LoadDefaults (void)
 
     if (i)
     {
-	doom_defaults.filename = myargv[i+1];
+        doom_defaults.filename = myargv[i+1];
     }
     else
 #endif
@@ -470,11 +484,11 @@ void M_LoadDefaults (void)
         doom_defaults.filename
             = M_StringJoin(configdir, default_main_config, NULL);
     }
-
+/*
 #ifndef WII
     printf("saving config in %s\n", doom_defaults.filename);
 #endif
-
+*/
     if (LoadDefaultCollection(&doom_defaults))
         C_Printf(CR_GRAY, " Loaded VARs from %s.", uppercase(doom_defaults.filename));
     else

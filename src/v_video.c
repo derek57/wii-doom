@@ -37,7 +37,7 @@
 #include <string.h>
 
 #include "c_io.h"
-#include "deh_str.h"
+#include "d_deh.h"
 
 #include "doom/doomdef.h"
 
@@ -90,7 +90,7 @@ byte redtoyellow[] =
 
 // The screen buffer that the v_video.c code draws to.
 
-static byte                  *dest_screen = NULL;
+/*static*/ byte                  *dest_screen = NULL;
 
 // [crispy] four different rendering functions
 // for each possible combination of dp_translation and dp_translucent:
@@ -137,11 +137,22 @@ void V_MarkRect(int x, int y, int width, int height)
     }
 } 
  
-
+/*
 void V_DrawHorizLine(int x, int y, int w, int c)
 {
     uint8_t *buf;
     int x1;
+
+#ifdef RANGECHECK 
+    if (x < 0
+     || x + w > SCREENWIDTH
+     || y < 0
+     || y > SCREENHEIGHT)
+    {
+        C_Printf(CR_RED, " Bad V_DrawHorizLine: (%d,%d,%d,%d)\n"
+                , x, x+w, y);
+    }
+#endif 
 
     buf = I_VideoBuffer + SCREENWIDTH * y + x;
 
@@ -150,7 +161,7 @@ void V_DrawHorizLine(int x, int y, int w, int c)
         *buf++ = c;
     }
 }
-
+*/
 //
 // V_CopyRect 
 // 
@@ -478,7 +489,8 @@ void GetPixelSize(void)
     sscanf(left, "%10i", &width);
     sscanf(right, "%10i", &height);
 
-    if (width >= 2 && width <= SCREENWIDTH && height >= 2 && height <= SCREENHEIGHT)
+    if (width > 0 && width <= SCREENWIDTH && height > 0 && height <= SCREENHEIGHT
+        && (width >= 2 || height >= 2))
     {
         pixelwidth = width;
         pixelheight = height;
@@ -507,8 +519,8 @@ void V_Init (void)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-value"
 
-void V_DrawConsoleChar(int x, int y, patch_t *patch, byte color, boolean italics, int translucency,
-    boolean inverted)
+void V_DrawConsoleChar(int x, int y, patch_t *patch, int color1, int color2, boolean italics,
+    byte *tinttab)
 {
     int         col = 0;
     byte        *desttop = dest_screen + y * SCREENWIDTH + x;
@@ -517,31 +529,41 @@ void V_DrawConsoleChar(int x, int y, patch_t *patch, byte color, boolean italics
     for (; col < w; col++, desttop++)
     {
         column_t        *column = (column_t *)((byte *)patch + LONG(patch->columnofs[col]));
+        byte            topdelta;
 
         // step through the posts in a column
-        while (column->topdelta != 0xff)
+        while ((topdelta = column->topdelta) != 0xff)
         {
             byte        *source = (byte *)column + 3;
-            byte        *dest = desttop + column->topdelta * SCREENWIDTH;
-            int         count = column->length;
+            byte        *dest = desttop + topdelta * SCREENWIDTH;
+            byte        length = column->length;
+            int         count = length;
 
             while (count--)
             {
-                if (y + column->topdelta + column->length - count > CONSOLETOP)
+                int     height = topdelta + length - count;
+
+                if (y + height > CONSOLETOP)
                 {
-                    if ((*source && !inverted) || (!*source && inverted))
+                    if (color2 == -1)
                     {
-                        if (italics)
-                            *(dest + italicize[column->topdelta + column->length - count]) = color;
-                        else
-                            *dest = (translucency == 1 ? tinttab25[(color << 8) + *dest] :
-                            (translucency == 2 ? tinttab25[(*dest << 8) + color] : color));
+                        if (*source)
+                        {
+                            if (italics)
+                                *(dest + italicize[height]) = color1;
+                            else
+                                *dest = (!tinttab ? color1 : tinttab[(color1 << 8) + *dest]);
+                        }
                     }
+                    else if (*source == 4) // (4 = WHITE)
+                        *dest = color1;
+                    else if (*dest != color1)
+                        *dest = color2;
                 }
-                *(source++);
+                ++source;
                 dest += SCREENWIDTH;
             }
-            column = (column_t *)((byte *)column + column->length + 4);
+            column = (column_t *)((byte *)column + length + 4);
         }
     }
 }
@@ -781,28 +803,28 @@ void V_GetBlock (int x, int y, int width, int height, byte *dest)
 
 typedef struct
 {
-    char		manufacturer;
-    char		version;
-    char		encoding;
-    char		bits_per_pixel;
+    char                manufacturer;
+    char                version;
+    char                encoding;
+    char                bits_per_pixel;
 
-    unsigned short	xmin;
-    unsigned short	ymin;
-    unsigned short	xmax;
-    unsigned short	ymax;
+    unsigned short        xmin;
+    unsigned short        ymin;
+    unsigned short        xmax;
+    unsigned short        ymax;
     
-    unsigned short	hres;
-    unsigned short	vres;
+    unsigned short        hres;
+    unsigned short        vres;
 
-    unsigned char	palette[48];
+    unsigned char        palette[48];
     
-    char		reserved;
-    char		color_planes;
-    unsigned short	bytes_per_line;
-    unsigned short	palette_type;
+    char                reserved;
+    char                color_planes;
+    unsigned short        bytes_per_line;
+    unsigned short        palette_type;
     
-    char		filler[58];
-    unsigned char	data;		// unbounded
+    char                filler[58];
+    unsigned char        data;                // unbounded
 } PACKEDATTR pcx_t;
 
 
@@ -814,17 +836,17 @@ void WritePCXfile(char *filename, byte *data,
                   int width, int height,
                   byte *palette)
 {
-    int		i;
-    int		length;
-    pcx_t*	pcx;
-    byte*	pack;
-	
+    int                i;
+    int                length;
+    pcx_t*        pcx;
+    byte*        pack;
+        
     pcx = Z_Malloc (width*height*2+1000, PU_STATIC, NULL);
 
-    pcx->manufacturer = 0x0a;		// PCX id
-    pcx->version = 5;			// 256 color
-    pcx->encoding = 1;			// uncompressed
-    pcx->bits_per_pixel = 8;		// 256 color
+    pcx->manufacturer = 0x0a;                // PCX id
+    pcx->version = 5;                        // 256 color
+    pcx->encoding = 1;                        // uncompressed
+    pcx->bits_per_pixel = 8;                // 256 color
     pcx->xmin = 0;
     pcx->ymin = 0;
     pcx->xmax = SHORT(width-1);
@@ -832,29 +854,29 @@ void WritePCXfile(char *filename, byte *data,
     pcx->hres = SHORT(width);
     pcx->vres = SHORT(height);
     memset (pcx->palette,0,sizeof(pcx->palette));
-    pcx->color_planes = 1;		// chunky image
+    pcx->color_planes = 1;                // chunky image
     pcx->bytes_per_line = SHORT(width);
-    pcx->palette_type = SHORT(2);	// not a grey scale
+    pcx->palette_type = SHORT(2);        // not a grey scale
     memset (pcx->filler,0,sizeof(pcx->filler));
 
     // pack the image
     pack = &pcx->data;
-	
+        
     for (i=0 ; i<width*height ; i++)
     {
-	if ( (*data & 0xc0) != 0xc0)
-	    *pack++ = *data++;
-	else
-	{
-	    *pack++ = 0xc1;
-	    *pack++ = *data++;
-	}
+        if ( (*data & 0xc0) != 0xc0)
+            *pack++ = *data++;
+        else
+        {
+            *pack++ = 0xc1;
+            *pack++ = *data++;
+        }
     }
     
     // write the palette
-    *pack++ = 0x0c;	// palette ID byte
+    *pack++ = 0x0c;        // palette ID byte
     for (i=0 ; i<768 ; i++)
-	*pack++ = *palette++;
+        *pack++ = *palette++;
     
     // write output file
     length = pack - (byte *)pcx;
@@ -1017,7 +1039,7 @@ void V_ScreenShot(char *format)
     {
         WritePNGfile(lbmname, I_VideoBuffer,
                 SCREENWIDTH, SCREENHEIGHT,
-                W_CacheLumpName (DEH_String("PLAYPAL"), PU_CACHE));
+                W_CacheLumpName("PLAYPAL", PU_CACHE));
     }
     else
 //#endif
@@ -1025,7 +1047,7 @@ void V_ScreenShot(char *format)
         // save the pcx file
         WritePCXfile(lbmname, I_VideoBuffer,
                 SCREENWIDTH, SCREENHEIGHT,
-                W_CacheLumpName (DEH_String("PLAYPAL"), PU_CACHE));
+                W_CacheLumpName("PLAYPAL", PU_CACHE));
     }
 }
 
@@ -1122,22 +1144,37 @@ static void V_TileFlat(byte *src, byte *dest)
     for (y = 0; y < SCREENHEIGHT; y++)
     {
         for (x = 0; x < SCREENWIDTH / 64; x++)
-	{
+        {
             memcpy (dest, src + ((y & 63) << 6), 64);
 
             dest += 64;
-	}
+        }
     }
 }
 
 void V_DrawDistortedBackground(char *patchname, byte *dest)
 {
-    char *src;
+    byte *src;
 
     V_MarkRect (0, 0, SCREENWIDTH, SCREENHEIGHT);
 
     src = R_DistortedFlat(R_FlatNumForName(patchname));
 
-    V_TileFlat((byte *)src, dest);
+    V_TileFlat(src, dest);
+}
+
+//
+// V_FillRect
+//
+
+void V_FillRect(int x, int y, int width, int height, byte color)
+{
+    byte        *dest = I_VideoBuffer + y * SCREENWIDTH + x;
+
+    while (height--)
+    {
+        memset(dest, color, width);
+        dest += SCREENWIDTH;
+    }
 }
 
