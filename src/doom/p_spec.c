@@ -2085,12 +2085,9 @@ void P_UpdateSpecials (void)
 
     animatedliquiddiff += animatedliquiddiffs[leveltime & 63];
     animatedliquidxoffs += animatedliquidxdir;
-
     if (animatedliquidxoffs > 64 * FRACUNIT)
         animatedliquidxoffs = 0;
-
     animatedliquidyoffs += animatedliquidydir;
-
     if (animatedliquidyoffs > 64 * FRACUNIT)
         animatedliquidyoffs = 0;
     
@@ -3041,30 +3038,4 @@ boolean P_SectorActive(special_e t, sector_t *sec)
         (t == lighting_special ? !!sec->lightingdata :   // type is active
         true)));        // don't know which special, must be active, shouldn't be here
 }
-
-//----------------------------------------------------------------------------
-//
-// PROC P_InitTerrainTypes
-//
-//----------------------------------------------------------------------------
-/*
-void P_InitTerrainTypes(void)
-{
-    int i;
-    int lump;
-    int size;
-
-    size = (numflats + 1) * sizeof(int);
-    TerrainTypes = Z_Malloc(size, PU_STATIC, 0);
-    memset(TerrainTypes, 0, size);
-    for (i = 0; TerrainTypeDefs[i].type != -1; i++)
-    {
-        lump = W_CheckNumForName(TerrainTypeDefs[i].name);
-        if (lump != -1)
-        {
-            TerrainTypes[lump - firstflat] = TerrainTypeDefs[i].type;
-        }
-    }
-}
-*/
 

@@ -412,6 +412,7 @@ EV_DoFloor
         // new floor thinker
         rtn = 1;
         floor = Z_Malloc (sizeof(*floor), PU_LEVSPEC, 0);
+        memset(floor, 0, sizeof(*floor));
         P_AddThinker (&floor->thinker);
         sec->floordata = floor;
         floor->thinker.function = T_MoveFloor;

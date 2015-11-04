@@ -687,12 +687,17 @@ void R_StoreWallRange(int start, int stop)
     worldbottom = frontsector->interpfloorheight - viewz;
 
     // [BH] animate liquid sectors
-    if (d_swirl && isliquid[frontsector->floorpic] && (frontsector->heightsec == -1
-        || viewz > sectors[frontsector->heightsec].interpfloorheight))
+    if (isliquid[frontsector->floorpic])
     {
-        worldbottom += animatedliquiddiff;
-        frontsector->floor_xoffs = animatedliquidxoffs;
-        frontsector->floor_yoffs = animatedliquidyoffs;
+        if (d_swirl && (frontsector->heightsec == -1
+            || viewz > sectors[frontsector->heightsec].interpfloorheight))
+            worldbottom += animatedliquiddiff;
+
+//        if (r_liquid_current)
+        {
+            frontsector->floor_xoffs = animatedliquidxoffs;
+            frontsector->floor_yoffs = animatedliquidyoffs;
+        }
     }
 
     R_FixWiggle(frontsector);

@@ -129,6 +129,7 @@ extern texture_t        **textures;
 //
 // P_InitSwitchList
 // Only called at game initialization.
+// For each SW1xxxxx texture we look for a corresponding SW2xxxxx texture. (JAD 27/09/11)
 //
 void P_InitSwitchList(void)
 {

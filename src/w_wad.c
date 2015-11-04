@@ -235,7 +235,8 @@ wad_file_t *W_AddFile (char *filename, boolean automatic)
             commify(numlumps - startlump),
             header.identification, uppercase(filename));
 */
-    C_Printf(CR_GRAY,
+    if (!strncmp(header.identification, "IWAD", 4) || !strncmp(header.identification, "PWAD", 4))
+        C_Printf(CR_GRAY,
             " %s %s lump%s from %.4s file %s.", (automatic ? "Automatically added" : "Added"),
                     commify(numlumps - startlump), (numlumps - startlump == 1 ? "" : "s"),
                             header.identification, uppercase(filename));
@@ -811,6 +812,10 @@ int W_WadType(char *filename)
         return IWAD;
     else if (!strncmp(header.identification, "PWAD", 4))
         return PWAD;
+/*
+    else if (!strncmp(header.identification, "Patch File for DeHackEd", 23))
+        return DEH;
+*/
     else
         return 0;
 }

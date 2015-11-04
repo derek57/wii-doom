@@ -164,8 +164,8 @@ void P_CalcHeight (player_t* player)
     }
 */
     if ((player->mo->flags2 & MF2_FEETARECLIPPED) && d_footclip
-        && player->playerstate != PST_DEAD
-        && player->mo->z <= player->mo->floorz)
+/*        && player->playerstate != PST_DEAD
+        && player->mo->z <= player->mo->floorz*/)
     {
         boolean                     liquid = true;
         const struct msecnode_s     *seclist;
@@ -181,8 +181,7 @@ void P_CalcHeight (player_t* player)
             player->viewz -= FOOTCLIPSIZE;
     }
 
-    player->viewz = BETWEEN(player->mo->floorz + 4 * FRACUNIT,
-            player->viewz, player->mo->ceilingz - 4 * FRACUNIT);
+    player->viewz = BETWEEN(player->mo->floorz + 4 * FRACUNIT, player->viewz, player->mo->ceilingz - 4 * FRACUNIT);
 }
 
 

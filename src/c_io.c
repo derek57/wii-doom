@@ -973,10 +973,18 @@ void C_PrintCompileDate(void)
 
 void C_PrintSDLVersions(void)
 {
-    C_Printf(CR_GOLD, " Using version %i.%i.%i of %s\n",
-        SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_PATCHLEVEL,
-        "libSDL.a"
-        );
+    int revision = SDL_GetRevisionNumber();
+
+    if (revision)
+        C_Printf(CR_GOLD, " Using version %i.%i.%i (Revision %i) of %s\n",
+            SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_PATCHLEVEL, revision,
+            "libSDL.a"
+            );
+    else
+        C_Printf(CR_GOLD, " Using version %i.%i.%i of %s\n",
+            SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_PATCHLEVEL,
+            "libSDL.a"
+            );
 
     C_Printf(CR_GOLD, " Using version %i.%i.%i of %s\n",
         SDL_MIXER_MAJOR_VERSION, SDL_MIXER_MINOR_VERSION, SDL_MIXER_PATCHLEVEL,

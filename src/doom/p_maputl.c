@@ -455,9 +455,10 @@ static void check_intercept(void)
         num_intercepts = (num_intercepts ? num_intercepts * 2 : 128);
         intercepts = Z_Realloc(intercepts, sizeof(*intercepts) * num_intercepts);
         intercept_p = intercepts + offset;
+/*
         memset(intercepts + num_intercepts_old, 0,
                 (num_intercepts - num_intercepts_old) * sizeof(*intercepts));
-
+*/
         if (num_intercepts_old != 0)
             C_Printf(CR_GOLD, " Check_Intercept: MaxIntercepts limit at %d, raised to %u\n",
                     num_intercepts_old, num_intercepts);

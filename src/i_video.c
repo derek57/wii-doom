@@ -1939,10 +1939,16 @@ static char *WindowBoxType(screen_mode_t *mode, int w, int h)
 
 static void SetVideoMode(screen_mode_t *mode, int w, int h)
 {
-    byte *doompal;
+    byte *doompal = W_CacheLumpName("PLAYPAL", PU_CACHE);
     int flags = 0;
 
-    doompal = W_CacheLumpName("PLAYPAL", PU_CACHE);
+#ifdef SDL2
+    SDL_RendererInfo        rendererinfo;
+
+    const char *displayname = SDL_GetDisplayName(0);
+
+    C_Printf(CR_GRAY, " Using display called \"%s\".", displayname);
+#endif
 
     // If we are already running and in a true color mode, we need
     // to free the screenbuffer surface before setting the new mode.
@@ -2088,6 +2094,20 @@ static void SetVideoMode(screen_mode_t *mode, int w, int h)
         I_Error("Error creating renderer for video mode %ix%i: %s\n",
                 w, h, SDL_GetError());
     }
+
+#ifdef SDL2
+    SDL_GetRendererInfo(renderer, &rendererinfo);
+/*
+    if (!strcasecmp(rendererinfo.name, "direct3d"))
+        C_Printf(CR_GRAY, " The screen is rendered using hardware acceleration with the Direct3D 9 "
+            "API.");
+    else*/ if (!strcasecmp(rendererinfo.name, "opengl"))
+        C_Printf(CR_GRAY, " The screen is rendered using hardware acceleration with the OpenGL API.");
+    else if (!strcasecmp(rendererinfo.name, "software"))
+        C_Printf(CR_GRAY, " The screen is rendered in software.");
+#endif
+
+    C_Printf(CR_GRAY, " The %ix%i screen is scaled up to %ix%i", SCREENWIDTH, SCREENHEIGHT, h * 4 / 3, h);
 
     // Important: Set the "logical size" of the rendering context. At the same
     // time this also defines the aspect ratio that is preserved while scaling
@@ -2689,7 +2709,7 @@ void I_InitGraphics(void)
         SetVideoMode(screen_mode, w, h);
     }
 
-    C_Printf(CR_GRAY, " Scaling to aspect ratio 16:9 in software mode\n");
+    C_Printf(CR_GRAY, " Scaling to aspect ratio 16:9\n");
     C_Printf(CR_GRAY, " Using 256-color palette from PLAYPAL lump in %s file %s",
             (playpalwad->type == IWAD ? "IWAD" : "PWAD"), uppercase(playpalwad->path));
 

@@ -1021,6 +1021,7 @@ char *M_GetSaveGameDir(char *iwadname)
 
         free(topdir);
 #endif
+        C_Printf(CR_GRAY, " Savegames will be saved and loaded in %s.", uppercase(savegamedir));
     }
 
     return savegamedir;

@@ -322,7 +322,7 @@ static void R_GenerateComposite(int texnum)
     byte                *marks = calloc(texture->width, texture->height);
     byte                *source;
 
-    boolean            tekwall1 = (texnum == R_CheckTextureNumForName("TEKWALL1"));
+    boolean             tekwall1 = (texnum == R_CheckTextureNumForName("TEKWALL1"));
 
     // [crispy] initialize composite background to black (index 0)
     memset(block, 0, texturecompositesize[texnum]);

@@ -30,6 +30,7 @@
 
 #define IWAD 1
 #define PWAD 2
+#define DEH  3
 
 
 //
