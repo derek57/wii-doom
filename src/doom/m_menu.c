@@ -1433,7 +1433,9 @@ enum
     loadgame,
     savegame,
     endgame,
+#ifdef WII
     cheats,
+#endif
 //    demos,
     files_end
 } files_e;
@@ -1442,8 +1444,12 @@ menuitem_t FilesMenu[]=
 {
     {1,"Load Game",M_LoadGame,'l'},
     {1,"Save Game",M_SaveGame,'s'},
-    {1,"End Game",M_EndGame,'e'},
-    {1,"Cheats",M_Cheats,'c'}/*,
+    {1,"End Game",M_EndGame,'e'}
+#ifdef WII
+    ,
+    {1,"Cheats",M_Cheats,'c'}
+#endif
+/*,
     {1,"Record Demo",M_Record,'r'}*/
 };
 
@@ -6974,10 +6980,18 @@ void M_Drawer (void)
         currentMenu->numitems = 5;
 
     if(!netgame && !devparm && currentMenu == &FilesDef)
+#ifdef WII
         currentMenu->numitems = 4;
+#else
+        currentMenu->numitems = 3;
+#endif
 
     if(netgame && currentMenu == &FilesDef)
+#ifdef WII
         currentMenu->numitems = 3;
+#else
+        currentMenu->numitems = 2;
+#endif
 
     // HACK: ALL ELSE THAN SHAREWARE 1.0 & 1.1 && REG 1.1
     if((fsize == 4207819 || fsize == 4274218 || fsize == 10396254) &&

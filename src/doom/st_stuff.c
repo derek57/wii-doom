@@ -79,6 +79,7 @@ rcsid[] = "$Id: st_stuff.c,v 1.6 1997/02/03 22:45:13 b1 Exp $";
 #include "m_random.h"
 #include "p_inter.h"
 #include "p_local.h"
+#include "p_tick.h"
 #include "r_local.h"
 #include "s_sound.h"
 #include "sounds.h"
@@ -504,6 +505,7 @@ static st_number_t            w_maxammo[4];
 
 
 cheatseq_t cheat_mus = CHEAT("idmus", 2);
+cheatseq_t cheat_massacre = CHEAT("idmassacre", 0);
 cheatseq_t cheat_god = CHEAT("iddqd", 0);
 cheatseq_t cheat_ammo = CHEAT("idkfa", 0);
 cheatseq_t cheat_ammonokey = CHEAT("idfa", 0);
@@ -553,11 +555,16 @@ extern boolean      hud;
 extern boolean      in_slime;
 extern boolean      show_chat_bar;
 extern boolean      done;
+extern boolean      massacre_cheat_used;
+
+extern char         massacre_textbuffer[30];
 
 extern int          screenSize;
 //extern int          load_dehacked;
 extern int          cardsfound;
 extern int          snd_chans;
+
+extern void         A_PainDie(mobj_t *);
 
 int                 prio = 0;
 int                 healthhighlight = 0;
@@ -980,7 +987,59 @@ boolean ST_Responder (event_t* ev)
         if (!netgame && gameskill != sk_nightmare)
         {
             // 'dqd' cheat for toggleable god mode
-            if (cht_CheckCheat(&cheat_god, ev->data2))
+            if (cht_CheckCheat(&cheat_massacre, ev->data2))
+            {
+                thinker_t *thinker;
+                int killcount = 0;
+                massacre_cheat_used = true;
+
+                // jff 02/01/98 'em' cheat - kill all monsters
+                // partially taken from Chi's .46 port
+
+                // killough 2/7/98: cleaned up code and changed to use dprintf;
+                // fixed lost soul bug (Lost Souls left behind when Pain Elementals are killed)
+
+                thinker = &thinkercap;
+
+                while ((thinker=thinker->next) != &thinkercap)
+                {
+                    if (thinker->function == P_MobjThinker &&
+                       ((((mobj_t *) thinker)->flags & MF_COUNTKILL) ||
+                        ((mobj_t *) thinker)->type == MT_SKULL ||
+                        ((mobj_t *) thinker)->type == MT_BETASKULL))
+                    {
+                        // killough 3/6/98: kill even if Pain Elemental is dead
+
+                        if (((mobj_t *) thinker)->health > 0)
+                        {
+                            killcount++;
+
+                            P_DamageMobj((mobj_t *)thinker, NULL, NULL, 10000);
+                        }
+                        if (((mobj_t *) thinker)->type == MT_PAIN)
+                        {
+                            // killough 2/8/98
+
+                            A_PainDie((mobj_t *) thinker);
+
+                            P_SetMobjState ((mobj_t *) thinker, S_PAIN_DIE6);
+                        }
+                    }
+                }
+
+                // killough 3/22/98: make more intelligent about plural
+
+                // Ty 03/27/98 - string(s) *not* externalized
+
+                sprintf(massacre_textbuffer, "%d MONSTER%s KILLED",
+                    killcount, killcount == 1 ? "" : "S");
+
+                players[consoleplayer].message = massacre_textbuffer;
+
+                massacre_cheat_used = false;
+            }
+            // 'dqd' cheat for toggleable god mode
+            else if (cht_CheckCheat(&cheat_god, ev->data2))
             {
                 // [BH] if player is dead, resurrect them first
                 if (!plyr->health)

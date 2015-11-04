@@ -973,6 +973,7 @@ void C_PrintCompileDate(void)
 
 void C_PrintSDLVersions(void)
 {
+#ifdef SDL2
     int revision = SDL_GetRevisionNumber();
 
     if (revision)
@@ -981,6 +982,7 @@ void C_PrintSDLVersions(void)
             "libSDL.a"
             );
     else
+#endif
         C_Printf(CR_GOLD, " Using version %i.%i.%i of %s\n",
             SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_PATCHLEVEL,
             "libSDL.a"
