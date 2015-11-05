@@ -950,7 +950,10 @@ void HU_NewLevel()
 
     C_Printf(CR_GRAY, "\n");
 
-    C_Printf(CR_GRAY, " %s\n", s);
+    if(gameepisode == 1 && gamemap == 10 && fsize == 12538385)
+        C_Printf(CR_GRAY, " %s\n", "E1M10: Sewers");
+    else
+        C_Printf(CR_GRAY, " %s\n", s);
 
     C_Printf(CR_GRAY, " \n");
 }

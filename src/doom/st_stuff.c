@@ -525,6 +525,7 @@ cheatseq_t        cheat_powerup[7] =
 
 cheatseq_t cheat_choppers = CHEAT("idchoppers", 0);
 cheatseq_t cheat_clev = CHEAT("idclev", 2);
+cheatseq_t cheat_clev10 = CHEAT("idclev10", 0);
 cheatseq_t cheat_mypos = CHEAT("idmypos", 0);
 
 
@@ -1185,6 +1186,13 @@ boolean ST_Responder (event_t* ev)
             }
         }
 
+        // 'clev10' change-level cheat
+        if (!netgame && cht_CheckCheat(&cheat_clev10, ev->data2) && fsize == 12538385)
+        {
+            plyr->message = s_STSTR_CLEV;
+            G_DeferedInitNew(gameskill, 1, 10);
+        }
+
         // 'clev' change-level cheat
         if (!netgame && cht_CheckCheat(&cheat_clev, ev->data2))
         {
@@ -1266,7 +1274,7 @@ boolean ST_Responder (event_t* ev)
 
             // The source release has this check as map > 34. However, Vanilla
             // Doom allows IDCLEV up to MAP40 even though it normally crashes.
-            if ((gamemode == commercial) && (( epsd > 1) || (map > 40)))
+            if ((gamemode == commercial) && ((epsd > 1) || (map > 40)))
             {
                 plyr->message = "invalid map";
                 return false;
