@@ -70,7 +70,7 @@
 #define FC_LASTVALUE    0x8e
 
 
-boolean V_IsPrint(char c);
+dboolean V_IsPrint(char c);
 
 
 #endif

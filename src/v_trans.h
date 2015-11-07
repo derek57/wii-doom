@@ -34,7 +34,7 @@
 #define __V_TRANS__
 
 
-typedef uint8_t byte;
+//typedef uint8_t byte;
 
 
 typedef enum
@@ -49,11 +49,9 @@ typedef enum
     CRXMAX
 } crx_t;
 
-byte V_Colorize (byte *playpal, int cr, byte source, boolean keepgray109);
+byte V_Colorize (byte *playpal, int cr, byte source, dboolean keepgray109);
 
 extern byte *crx[CRXMAX];
 extern char **crstr;
-
-extern byte *tranmap;
 
 #endif // __V_TRANS__

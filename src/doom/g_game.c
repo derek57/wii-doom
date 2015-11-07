@@ -245,36 +245,36 @@ int             joybinvleft = 14;
 int             joybspeed = 15;
 int             joybconsole = 16;
 #endif
-boolean         secret_1 = false;
-boolean         secret_2 = false;
-boolean         secretexit; 
-boolean         respawnmonsters;
-boolean         paused; 
-boolean         sendpause;              // send a pause event next tic 
-boolean         sendsave;               // send a save event next tic 
-boolean         usergame;               // ok to save / end game 
-//boolean         timingdemo;             // if true, exit with report on completion  
-boolean         viewactive; 
-boolean         deathmatch;             // only if started as net death 
-boolean         netgame;                // only true if packets are broadcast 
-boolean         playeringame[MAXPLAYERS]; 
+dboolean         secret_1 = false;
+dboolean         secret_2 = false;
+dboolean         secretexit; 
+dboolean         respawnmonsters;
+dboolean         paused; 
+dboolean         sendpause;              // send a pause event next tic 
+dboolean         sendsave;               // send a save event next tic 
+dboolean         usergame;               // ok to save / end game 
+//dboolean         timingdemo;             // if true, exit with report on completion  
+dboolean         viewactive; 
+dboolean         deathmatch;             // only if started as net death 
+dboolean         netgame;                // only true if packets are broadcast 
+dboolean         playeringame[MAXPLAYERS]; 
 
-boolean         demorecording; 
-boolean         demoplayback; 
-boolean         netdemo; 
-boolean         singledemo;             // quit after playing a demo from cmdline  
-boolean         precache = true;        // if true, load all graphics at start 
+dboolean         demorecording; 
+dboolean         demoplayback; 
+dboolean         netdemo; 
+dboolean         singledemo;             // quit after playing a demo from cmdline  
+dboolean         precache = true;        // if true, load all graphics at start 
 #ifdef WII
-boolean         joyarray[MAX_JOY_BUTTONS + 1]; 
-boolean         *joybuttons = &joyarray[1]; // allow [-1] 
+dboolean         joyarray[MAX_JOY_BUTTONS + 1]; 
+dboolean         *joybuttons = &joyarray[1]; // allow [-1] 
 #endif
-boolean         not_walking;
-boolean         turbodetected[MAXPLAYERS];
-boolean         lowres_turn;            // low resolution turning for longtics
+dboolean         not_walking;
+dboolean         turbodetected[MAXPLAYERS];
+dboolean         lowres_turn;            // low resolution turning for longtics
 /*
-boolean         longtics;               // cph's doom 1.91 longtics hack
+dboolean         longtics;               // cph's doom 1.91 longtics hack
 #ifndef WII
-boolean         nodrawers;              // for comparative timing purposes 
+dboolean         nodrawers;              // for comparative timing purposes 
 #endif
 
 char            *demoname;
@@ -288,10 +288,10 @@ byte*           demoend;
 */
 byte            consistancy[MAXPLAYERS][BACKUPTICS]; 
 
-static boolean  mousearray[MAX_MOUSE_BUTTONS + 1];
-static boolean  *mousebuttons = &mousearray[1];  // allow [-1]
-static boolean  dclickstate;
-static boolean  dclickstate2;
+static dboolean  mousearray[MAX_MOUSE_BUTTONS + 1];
+static dboolean  *mousebuttons = &mousearray[1];  // allow [-1]
+static dboolean  dclickstate;
+static dboolean  dclickstate2;
 
 static char     savedescription[32]; 
 
@@ -346,15 +346,15 @@ extern int      mspeed;
 extern int      turnspeed;
 extern int      messageToPrint;
 
-extern boolean  done;
-extern boolean  netgameflag;
-extern boolean  aiming_help;
-extern boolean  messageNeedsInput;
-extern boolean  setsizeneeded;
-extern boolean  map_flag;
-extern boolean  transferredsky;
-extern boolean  long_tics;
-extern boolean  mouse_grabbed;
+extern dboolean  done;
+extern dboolean  netgameflag;
+extern dboolean  aiming_help;
+extern dboolean  messageNeedsInput;
+extern dboolean  setsizeneeded;
+extern dboolean  map_flag;
+extern dboolean  transferredsky;
+extern dboolean  long_tics;
+extern dboolean  mouse_grabbed;
 
 extern fixed_t  forwardmove; 
 extern fixed_t  sidemove; 
@@ -370,26 +370,15 @@ extern short    itemOn;       // menu item skull is on
 extern char*    pagename; 
 
 
-int G_CmdChecksum (ticcmd_t* cmd) 
-{ 
-    size_t      i;
-    int         sum = 0; 
-         
-    for (i=0 ; i< sizeof(*cmd)/4 - 1 ; i++) 
-        sum += ((int *)cmd)[i]; 
-                 
-    return sum; 
-} 
-
 void ChangeWeaponRight(void)
 {
     static player_t*    plyrweap;
     static event_t      kbevent;
 
-    weapontype_t        num;
-
     if (gamestate == GS_LEVEL && !menuactive)
     {
+        weapontype_t    num;
+
         plyrweap = &players[consoleplayer];
 
         num = plyrweap->readyweapon;
@@ -424,10 +413,10 @@ void ChangeWeaponLeft(void)
     static player_t*    plyrweap;
     static event_t      kbevent;
 
-    weapontype_t        num;
-
     if (gamestate == GS_LEVEL && !menuactive)
     {
+        weapontype_t    num;
+
         plyrweap = &players[consoleplayer];
 
         num = plyrweap->readyweapon;
@@ -461,7 +450,7 @@ void ChangeWeaponLeft(void)
 }
 
 #ifndef WII
-static boolean WeaponSelectable(weapontype_t weapon)
+static dboolean WeaponSelectable(weapontype_t weapon)
 {
     // Can't select the super shotgun in Doom 1.
 
@@ -543,11 +532,11 @@ static int G_NextWeapon(int direction)
 
 void G_BuildTiccmd (ticcmd_t* cmd, int maketic) 
 { 
-    boolean     strafe,
+    dboolean     strafe
 #ifdef WII
-    use,
+    ,use
 #endif
-    bstrafe;
+    ;
 
 #ifndef WII
     int         i, speed;
@@ -557,8 +546,6 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
     int         side;
     int         look;
     int         flyheight;
-
-    float newlookdir;
 
     memset(cmd, 0, sizeof(ticcmd_t));
 
@@ -633,8 +620,8 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
     else
         not_walking = true;
 
-//    extern boolean dont_move_forwards;
-//    extern boolean dont_move_backwards;
+//    extern dboolean dont_move_forwards;
+//    extern dboolean dont_move_backwards;
 
     if (gamekeydown[key_up]) 
     {
@@ -942,6 +929,8 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
 
     if (dclick_use)
     {
+        dboolean bstrafe;
+
         // forward double click
         if (mousebuttons[mousebforward] != dclickstate && dclicktime > 1 ) 
         { 
@@ -1038,6 +1027,9 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
         // We'll directly change the viewing pitch of the console player.
         float adj = 0;
 
+        // initialiser added to prevent compiler warning
+        float newlookdir = 0;
+
         if(!menuactive && !demoplayback)
         {
 #ifdef WII
@@ -1046,9 +1038,6 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
             adj = ((mousey * 0x4) << 16) / (float) 0x80000000*180*110.0/85.0;
 #endif
         }
-
-        // initialiser added to prevent compiler warning
-        newlookdir = 0;
 
 //        extern int mspeed;
 
@@ -1141,7 +1130,7 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
 // G_Responder  
 // Get info needed to make ticcmd_ts for the players.
 // 
-boolean G_Responder (event_t* ev) 
+dboolean G_Responder (event_t* ev) 
 { 
 #ifndef WII
     // allow spy mode changes even during the demo
@@ -1182,8 +1171,10 @@ boolean G_Responder (event_t* ev)
             return true; 
         } 
 #endif 
+/*
         if (HU_Responder (ev)) 
             return true;        // chat ate the event 
+*/
         if (ST_Responder (ev)) 
             return true;        // status window ate it 
         if (AM_Responder (ev)) 
@@ -1428,19 +1419,20 @@ void G_WriteDemoTiccmd (ticcmd_t* cmd)
 // because something is occupying it 
 //
  
-boolean
+dboolean
 G_CheckSpot
 ( int                playernum,
   mapthing_t*        mthing ) 
 { 
-    fixed_t                x;
-    fixed_t                y; 
-    subsector_t*        ss; 
-    mobj_t*                mo; 
-    int                        i;
+    fixed_t          x;
+    fixed_t          y; 
+    subsector_t*     ss; 
+    mobj_t*          mo; 
         
     if (!players[playernum].mo)
     {
+        int i;
+
         // first spawn of level, before corpses
         for (i=0 ; i<playernum ; i++)
             if (players[i].mo->x == mthing->x << FRACBITS
@@ -1535,8 +1527,6 @@ G_CheckSpot
 // 
 void G_DoReborn (int playernum) 
 { 
-    int                             i; 
-         
     if (!netgame)
     {
         // reload the level from scratch
@@ -1544,6 +1534,8 @@ void G_DoReborn (int playernum)
     }
     else 
     {
+        int i; 
+         
         // respawn at the start
 
         // first dissasociate the corpse 
@@ -2415,7 +2407,7 @@ void G_InitPlayer (int player)
 //
 void G_DeathMatchSpawnPlayer (int playernum) 
 { 
-    int     i, j; 
+    int     j; 
     int     selections; 
          
     selections = deathmatch_p - deathmatchstarts; 
@@ -2424,7 +2416,8 @@ void G_DeathMatchSpawnPlayer (int playernum)
  
     for (j=0 ; j<20 ; j++) 
     { 
-        i = P_Random() % selections; 
+        int i = P_Random() % selections; 
+
         if (G_CheckSpot (playernum, &deathmatchstarts[i]) ) 
         { 
             deathmatchstarts[i].type = playernum+1; 
@@ -2747,7 +2740,7 @@ G_InitNew
     gamemap = map;
     gameskill = skill;
 
-    viewactive = true;
+//    viewactive = true;
 
     // Set the sky to use.
     //
@@ -2933,7 +2926,7 @@ void G_TimeDemo (char* name)
 //= Returns true if a new demo loop action will take place 
 //=================== 
  
-boolean G_CheckDemoStatus (void) 
+dboolean G_CheckDemoStatus (void) 
 { 
     int             endtime; 
          

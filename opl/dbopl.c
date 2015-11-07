@@ -1332,15 +1332,15 @@ void Chip__Setup(Chip *self, Bit32u rate ) {
 
         //With higher octave this gets shifted up
         //-1 since the freqCreateTable = *2
+
+        freqScale = (Bit32u)( 0.5 + scale * ( 1 << ( WAVE_SH - 1 - 10)));
+        for ( i = 0; i < 16; i++ ) {
+                self->freqMul[i] = freqScale * FreqCreateTable[ i ];
+        }
 #ifdef WAVE_PRECISION
         double freqScale = ( 1 << 7 ) * scale * ( 1 << ( WAVE_SH - 1 - 10));
         for ( i = 0; i < 16; i++ ) {
                 self->freqMul[i] = (Bit32u)( 0.5 + freqScale * FreqCreateTable[ i ] );
-        }
-#else
-        freqScale = (Bit32u)( 0.5 + scale * ( 1 << ( WAVE_SH - 1 - 10)));
-        for ( i = 0; i < 16; i++ ) {
-                self->freqMul[i] = freqScale * FreqCreateTable[ i ];
         }
 #endif
 

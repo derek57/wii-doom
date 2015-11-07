@@ -53,9 +53,9 @@ extern int      ceilingclip[];
 extern fixed_t  yslope[];
 extern fixed_t  distscale[];
 
-extern boolean markceiling;
+extern dboolean markceiling;
 
-extern boolean r_brightmaps;
+extern dboolean r_brightmaps;
 
 void R_ClearPlanes(void);
 

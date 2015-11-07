@@ -101,7 +101,7 @@ typedef struct
 // Structure containing parsed metadata read from a digital music track:
 typedef struct
 {
-    boolean valid;
+    dboolean valid;
     unsigned int samplerate_hz;
     int start_time, end_time;
 } file_metadata_t;
@@ -124,21 +124,21 @@ static const char *subst_config_filenames[] =
     "strife-music.cfg",
 };
 
-static boolean music_initialized;
+static dboolean music_initialized;
 
 // If this is true, this module initialized SDL sound and has the 
 // responsibility to shut it down
 
-static boolean sdl_was_initialized;
+static dboolean sdl_was_initialized;
 
-static boolean musicpaused;
+static dboolean musicpaused;
 
 // If true, the currently playing track is being played on loop.
-static boolean current_track_loop;
+static dboolean current_track_loop;
 
 // If true, we are playing a substitute digital track rather than in-WAD
 // MIDI/MUS track, and file_metadata contains loop metadata.
-static boolean playing_substitute = false;
+static dboolean playing_substitute = false;
 
 static int current_music_volume;
 
@@ -151,15 +151,15 @@ static file_metadata_t file_metadata;
 // Currently playing music track.
 static Mix_Music *current_track_music = NULL;
 
-boolean change_anyway;
+dboolean change_anyway;
 
 extern int tracknum;
 extern int mus_engine;
 
-extern boolean mus_cheat_used;
+extern dboolean mus_cheat_used;
 /*
-extern boolean usb;
-extern boolean sd;
+extern dboolean usb;
+extern dboolean sd;
 */
 // Given a time string (for LOOP_START/LOOP_END), parse it and return
 // the time (in # samples since start of track) it represents.
@@ -228,8 +228,7 @@ static void ParseVorbisComment(file_metadata_t *metadata, char *comment)
 static void ParseVorbisComments(file_metadata_t *metadata, FILE *fs)
 {
     uint32_t buf;
-    unsigned int num_comments, i, comment_len;
-    char *comment;
+    unsigned int num_comments, i;
 
     // We must have read the sample rate already from an earlier header.
     if (metadata->samplerate_hz == 0)
@@ -257,6 +256,10 @@ static void ParseVorbisComments(file_metadata_t *metadata, FILE *fs)
     // Read each individual comment.
     for (i = 0; i < num_comments; ++i)
     {
+        char *comment;
+
+        unsigned int comment_len;
+
         // Read length of comment.
         if (fread(&buf, 4, 1, fs) < 1)
         {
@@ -564,11 +567,10 @@ static char *ParseSubstituteLine(char *filename, char *line)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-result"
 
-static boolean ReadSubstituteConfig(char *filename)
+static dboolean ReadSubstituteConfig(char *filename)
 {
     char line[128];
     FILE *fs;
-    char *error;
     int linenum = 1;
 
     fs = fopen(filename, "r");
@@ -580,6 +582,8 @@ static boolean ReadSubstituteConfig(char *filename)
 
     while (!feof(fs))
     {
+        char *error;
+
         M_StringCopy(line, "", sizeof(line));
         fgets(line, sizeof(line), fs);
 
@@ -650,10 +654,10 @@ static void LoadSubstituteConfigs(void)
 // Identifying music lumps by name is not feasible; some games (eg.
 // Heretic, Hexen) don't have a common naming pattern for music lumps.
 
-static boolean IsMusicLump(int lumpnum)
+static dboolean IsMusicLump(int lumpnum)
 {
     byte *data;
-    boolean result;
+    dboolean result;
 
     if (W_LumpLength(lumpnum) < 4)
     {
@@ -740,9 +744,9 @@ static void DumpSubstituteConfig(char *filename)
 // is needed to inject a "dir" command so that the patches are read
 // relative to the actual config file.
 
-static boolean WriteWrapperTimidityConfig(char *write_path)
+static dboolean WriteWrapperTimidityConfig(char *write_path)
 {
-    char *p, *path;
+    char *p;
     FILE *fstream;
 
 #ifdef WII
@@ -767,7 +771,7 @@ static boolean WriteWrapperTimidityConfig(char *write_path)
     p = strrchr(timidity_cfg_path, DIR_SEPARATOR);
     if (p != NULL)
     {
-        path = M_StringDuplicate(timidity_cfg_path);
+        char    *path = M_StringDuplicate(timidity_cfg_path);
         path[p - timidity_cfg_path] = '\0';
         fprintf(fstream, "dir %s\n", path);
         free(path);
@@ -781,8 +785,7 @@ static boolean WriteWrapperTimidityConfig(char *write_path)
 
 void I_InitTimidityConfig(void)
 {
-    char *env_string;
-    boolean success;
+    dboolean success;
 
 #ifdef WII
     if(usb)
@@ -805,7 +808,7 @@ void I_InitTimidityConfig(void)
 
     if (success)
     {
-        env_string = M_StringJoin("TIMIDITY_CFG=", temp_timidity_cfg, NULL);
+        char *env_string = M_StringJoin("TIMIDITY_CFG=", temp_timidity_cfg, NULL);
         putenv(env_string);
     }
     else
@@ -843,7 +846,7 @@ static void I_SDL_ShutdownMusic(void)
     }
 }
 
-static boolean SDLIsInitialized(void)
+static dboolean SDLIsInitialized(void)
 {
     int freq, channels;
     Uint16 format;
@@ -859,7 +862,7 @@ void TrackPositionCallback(int chan, void *stream, int len, void *udata)
 }
 
 // Initialize music subsystem
-static boolean I_SDL_InitMusic(void)
+static dboolean I_SDL_InitMusic(void)
 {
     //!
     // @arg <output filename>
@@ -1001,7 +1004,7 @@ static void I_SDL_SetMusicVolume(int volume)
 
 // Start playing a mid
 
-static void I_SDL_PlaySong(void *handle, boolean looping)
+static void I_SDL_PlaySong(void *handle, dboolean looping)
 {
     int loops;
 
@@ -1088,12 +1091,12 @@ static void I_SDL_UnRegisterSong(void *handle)
 
 // Determine whether memory block is a .mid file 
 
-static boolean IsMid(byte *mem, int len)
+static dboolean IsMid(byte *mem, int len)
 {
     return len > 4 && !memcmp(mem, "MThd", 4);
 }
 
-static boolean ConvertMus(byte *musdata, int len, char *filename)
+static dboolean ConvertMus(byte *musdata, int len, char *filename)
 {
     MEMFILE *instream;
     MEMFILE *outstream;
@@ -1236,7 +1239,7 @@ static void *I_SDL_RegisterSong(void *data, int len)
 }
 
 // Is the song playing?
-static boolean I_SDL_MusicIsPlaying(void)
+static dboolean I_SDL_MusicIsPlaying(void)
 {
     if (!music_initialized)
     {

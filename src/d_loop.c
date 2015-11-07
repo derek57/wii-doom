@@ -46,7 +46,7 @@
 typedef struct
 {
     ticcmd_t cmds[NET_MAXPLAYERS];
-    boolean ingame[NET_MAXPLAYERS];
+    dboolean ingame[NET_MAXPLAYERS];
 } ticcmd_set_t;
 
 // Maximum time that we wait in TryRunTics() for netgame data to be
@@ -90,11 +90,11 @@ static int      player_class;
 // This is distinct from playeringame[] used by the game code, which may
 // modify playeringame[] when playing back multiplayer demos.
 
-static boolean  local_playeringame[NET_MAXPLAYERS];
+static dboolean  local_playeringame[NET_MAXPLAYERS];
 
 // Use new client syncronisation code
 
-static boolean  new_sync = true;
+static dboolean  new_sync = true;
 
 // Callback functions for loop code.
 
@@ -116,8 +116,8 @@ int             lasttime;
 
 fixed_t         offsetms;
 
-extern boolean  privateserverflag;
-extern boolean  multiplayerflag;
+extern dboolean  privateserverflag;
+extern dboolean  multiplayerflag;
 
 // 35 fps clock adjusted by offsetms milliseconds
 
@@ -138,7 +138,7 @@ static int GetAdjustedTime(void)
     return (time_ms * TICRATE) / 1000;
 }
 
-static boolean BuildNewTic(void)
+static dboolean BuildNewTic(void)
 {
     int      gameticdiv;
     ticcmd_t cmd;
@@ -329,12 +329,11 @@ static int GetLowTic(void)
 
 static void TicdupSquash(ticcmd_set_t *set)
 {
-    ticcmd_t *cmd;
     unsigned int i;
 
     for (i = 0; i < NET_MAXPLAYERS ; ++i)
     {
-        cmd = &set->cmds[i];
+        ticcmd_t *cmd = &set->cmds[i];
         cmd->chatchar = 0;
         if (cmd->buttons & BT_SPECIAL)
             cmd->buttons = 0;
@@ -365,15 +364,14 @@ void TryRunTics (void)
 {
     int i;
     int lowtic;
-    int entertic;
-    static int oldentertics;
-    int realtics;
     int availabletics;
-    int counts;
+    static int oldentertics;
 
     // get real tics
-    entertic = I_GetTime() / ticdup;
-    realtics = entertic - oldentertics;
+    int entertic = I_GetTime() / ticdup;
+    int counts;
+
+    int realtics = entertic - oldentertics;
     oldentertics = entertic;
 
     NetUpdate ();

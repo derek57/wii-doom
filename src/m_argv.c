@@ -61,7 +61,7 @@ int M_CheckParmWithArgs(char *check, int num_args)
 // line arguments, false if not.
 //
 
-boolean M_ParmExists(char *check)
+dboolean M_ParmExists(char *check)
 {
     return M_CheckParm(check) != 0;
 }

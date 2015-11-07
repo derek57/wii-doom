@@ -146,11 +146,11 @@ int                *blockmap;
 
 const byte         *rejectmatrix;          // cph - const*
 
-//boolean            createblockmap = false;
-boolean            canmodify;
-boolean            transferredsky;
-boolean            boomlinespecials;
-boolean            blockmaprecreated;
+//dboolean            createblockmap = false;
+dboolean            canmodify;
+dboolean            transferredsky;
+dboolean            boomlinespecials;
+dboolean            blockmaprecreated;
 
 // REJECT
 // For fast sight rejection.
@@ -160,8 +160,8 @@ boolean            blockmaprecreated;
 //  used as a PVS lookup as well.
 //
 
-extern boolean     mus_cheat_used;
-extern boolean     finale_music;
+extern dboolean     mus_cheat_used;
+extern dboolean     finale_music;
 
 extern int         numsplats;
 
@@ -970,8 +970,8 @@ void P_LoadThings (int lump)
 {
     const mapthing_t    *data = (const mapthing_t *)W_CacheLumpNum(lump, PU_STATIC);
     int                 i;
-    boolean             done = false;
-    boolean             debug = false;
+    dboolean             done = false;
+    dboolean             debug = false;
 
     sizethings = W_LumpLength(lump);
     numthings = sizethings / sizeof(mapthing_t);
@@ -981,7 +981,7 @@ void P_LoadThings (int lump)
     for (i = 0; i < numthings; i++)
     {
         mapthing_t      mt = data[i];
-        boolean         spawn = true;
+        dboolean         spawn = true;
 
         // Do not spawn cool, new monsters if !commercial
         if (gamemode != commercial)
@@ -1910,16 +1910,20 @@ P_SetupLevel
         || (nerve_pwad && gamemission == doom2)) && fsize != 28422764);
 
     leveltime = 0;
-    animatedliquiddiff = FRACUNIT;
-    animatedliquidxdir = M_RandomInt(-1, 1) * FRACUNIT / 12;
-    animatedliquidydir = M_RandomInt(-1, 1) * FRACUNIT / 12;
-    if (!animatedliquidxdir && !animatedliquidydir)
+
+    if(d_swirl)
     {
-        animatedliquidxdir = FRACUNIT / 12;
-        animatedliquidydir = FRACUNIT / 12;
+        animatedliquiddiff = FRACUNIT;
+        animatedliquidxdir = M_RandomInt(-1, 1) * FRACUNIT / 12;
+        animatedliquidydir = M_RandomInt(-1, 1) * FRACUNIT / 12;
+        if (!animatedliquidxdir && !animatedliquidydir)
+        {
+            animatedliquidxdir = FRACUNIT / 12;
+            animatedliquidydir = FRACUNIT / 12;
+        }
+        animatedliquidxoffs = 0;
+        animatedliquidyoffs = 0;
     }
-    animatedliquidxoffs = 0;
-    animatedliquidyoffs = 0;
 
     // e6y: speedup of level reloading
     // Most of level's structures now are allocated with PU_STATIC instead of PU_LEVEL

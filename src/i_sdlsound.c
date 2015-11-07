@@ -71,10 +71,10 @@ static int allocated_sounds_size;
 
 static Uint16 mixer_format;
 
-static boolean setpanning_workaround = false;
-static boolean sound_initialized;
-static boolean use_sfx_prefix;
-static boolean (*ExpandSoundData)(sfxinfo_t *sfxinfo,
+static dboolean setpanning_workaround = false;
+static dboolean sound_initialized;
+static dboolean use_sfx_prefix;
+static dboolean (*ExpandSoundData)(sfxinfo_t *sfxinfo,
                                   byte *data,
                                   int samplerate,
                                   int length) = NULL;
@@ -96,8 +96,8 @@ int use_libsamplerate = 0;
 
 float libsamplerate_scale = 0.65;
 
-extern boolean swap_sound_chans;
-extern boolean randompitch;
+extern dboolean swap_sound_chans;
+extern dboolean randompitch;
 
 // Hook a sound into the linked list at the head.
 
@@ -158,7 +158,7 @@ static void FreeAllocatedSound(allocated_sound_t *snd)
 // and free a sound that is not in use, to free up memory.  Return true
 // for success.
 
-static boolean FindAndFreeSound(void)
+static dboolean FindAndFreeSound(void)
 {
     allocated_sound_t *snd;
 
@@ -307,7 +307,7 @@ static allocated_sound_t * GetAllocatedSoundBySfxInfoAndPitch(sfxinfo_t *sfxinfo
 static allocated_sound_t * PitchShift(allocated_sound_t *insnd, int pitch)
 {
     allocated_sound_t * outsnd;
-    Sint16 *inp, *outp;
+    Sint16 *outp;
     Sint16 *srcbuf, *dstbuf;
     Uint32 srclen, dstlen;
 
@@ -335,7 +335,7 @@ static allocated_sound_t * PitchShift(allocated_sound_t *insnd, int pitch)
     // loop over output buffer. find corresponding input cell, copy over
     for(outp = dstbuf; outp < dstbuf + dstlen / 2; ++outp)
     {
-        inp = srcbuf + (int)((float)(outp - dstbuf) / dstlen * srclen);
+        Sint16 *inp = srcbuf + (int)((float)(outp - dstbuf) / dstlen * srclen);
         *outp = *inp;
     }
 
@@ -367,7 +367,7 @@ static void ReleaseSoundOnChannel(int channel)
     }
 }
 
-static boolean ConvertibleRatio(int freq1, int freq2)
+static dboolean ConvertibleRatio(int freq1, int freq2)
 {
     int ratio;
 
@@ -399,7 +399,7 @@ static boolean ConvertibleRatio(int freq1, int freq2)
 // Generic sound expansion function for any sample rate.
 // Returns number of clipped samples (always 0).
 
-static boolean ExpandSoundData_SDL(sfxinfo_t *sfxinfo,
+static dboolean ExpandSoundData_SDL(sfxinfo_t *sfxinfo,
                                    byte *data,
                                    int samplerate,
                                    int length)
@@ -482,7 +482,7 @@ static boolean ExpandSoundData_SDL(sfxinfo_t *sfxinfo,
 // Load and convert a sound effect
 // Returns true if successful
 
-static boolean CacheSFX(sfxinfo_t *sfxinfo)
+static dboolean CacheSFX(sfxinfo_t *sfxinfo)
 {
     int lumpnum;
     unsigned int lumplen;
@@ -574,7 +574,7 @@ static void I_SDL_PrecacheSounds(sfxinfo_t *sounds, int num_sounds)
 
 // Load a SFX chunk into memory and ensure that it is locked.
 
-static boolean LockSound(sfxinfo_t *sfxinfo)
+static dboolean LockSound(sfxinfo_t *sfxinfo)
 {
     // If the sound isn't loaded, load it now
 
@@ -737,7 +737,7 @@ static void I_SDL_StopSound(int handle)
 }
 
 
-static boolean I_SDL_SoundIsPlaying(int handle)
+static dboolean I_SDL_SoundIsPlaying(int handle)
 {
     if (!sound_initialized || handle < 0 || handle >= NUM_CHANNELS)
     {
@@ -809,7 +809,7 @@ static int GetSliceSize(void)
     return 1024;
 }
 
-/*static*/ boolean I_SDL_InitSound(boolean _use_sfx_prefix)
+/*static*/ dboolean I_SDL_InitSound(dboolean _use_sfx_prefix)
 {
     int i;
 

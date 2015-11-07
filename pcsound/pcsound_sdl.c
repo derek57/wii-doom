@@ -191,13 +191,13 @@ static int GetSliceSize(void)
 
 static int PCSound_SDL_Init(pcsound_callback_func callback_func)
 {
-    int slicesize;
-
     // Check if SDL_mixer has been opened already
     // If not, we must initialize it now
 
     if (!SDLIsInitialized())
     {
+        int slicesize;
+
         if (SDL_Init(SDL_INIT_AUDIO) < 0)
         {
             C_Printf(CR_RED, " Unable to set up sound.\n");

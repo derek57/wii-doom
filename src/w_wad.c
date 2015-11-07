@@ -113,12 +113,11 @@ unsigned int W_LumpNameHash(const char *s)
 // Other files are single lumps with the base filename
 //  for the lump name.
 
-wad_file_t *W_AddFile (char *filename, boolean automatic)
+wad_file_t *W_AddFile (char *filename, dboolean automatic)
 {
     wadinfo_t header;
     lumpindex_t i;
     wad_file_t *wad_file;
-    int length;
     int startlump;
     filelump_t *fileinfo;
     filelump_t *filerover;
@@ -162,6 +161,8 @@ wad_file_t *W_AddFile (char *filename, boolean automatic)
     }
     else
     {
+        int length;
+
         // WAD file
         W_Read(wad_file, 0, &header, sizeof(header));
 
@@ -549,8 +550,6 @@ void W_Profile (void)
 
 void W_GenerateHashTable(void)
 {
-    lumpindex_t i;
-
     // Free the old hash table, if there is one
 
     if (lumphash != NULL)
@@ -561,6 +560,8 @@ void W_GenerateHashTable(void)
     // Generate hash table
     if (numlumps > 0)
     {
+        lumpindex_t i;
+
         lumphash = Z_Malloc(sizeof(lumpindex_t) * numlumps, PU_STATIC, NULL);
 
         for (i = 0; i < numlumps; ++i)
@@ -742,7 +743,7 @@ int W_CheckMultipleLumps(char *name)
     return count;
 }
 
-boolean HasDehackedLump(const char *pwadname)
+dboolean HasDehackedLump(const char *pwadname)
 {
     FILE        *fp = fopen(pwadname, "rb");
     filelump_t  lump;

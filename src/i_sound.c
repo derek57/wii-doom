@@ -65,8 +65,8 @@ static music_module_t *music_module;
 
 // Sound modules
 
-boolean I_PCS_InitSound(boolean _use_sfx_prefix);
-boolean I_SDL_InitSound(boolean _use_sfx_prefix);
+dboolean I_PCS_InitSound(dboolean _use_sfx_prefix);
+dboolean I_SDL_InitSound(dboolean _use_sfx_prefix);
 
 extern void I_InitTimidityConfig(void);
 
@@ -109,7 +109,7 @@ static music_module_t *music_modules[] =
 
 // Check if a sound device is in the given list of devices
 
-static boolean SndDeviceInList(snddevice_t device, snddevice_t *list,
+static dboolean SndDeviceInList(snddevice_t device, snddevice_t *list,
                                int len)
 {
     int i;
@@ -128,7 +128,7 @@ static boolean SndDeviceInList(snddevice_t device, snddevice_t *list,
 // Find and initialize a sound_module_t appropriate for the setting
 // in snd_sfxdevice.
 
-static void InitSfxModule(boolean use_sfx_prefix)
+static void InitSfxModule(dboolean use_sfx_prefix)
 {
     extern int snd_module;
 
@@ -184,7 +184,7 @@ static void InitMusicModule(void)
 //  allocates channel buffer, sets S_sfx lookup.
 //
 
-void I_InitSound(boolean use_sfx_prefix)
+void I_InitSound(dboolean use_sfx_prefix)
 {  
     // Initialize the sound subsystem.
 #ifndef WII
@@ -277,7 +277,7 @@ void I_StopSound(int channel)
     }
 }
 
-boolean I_SoundIsPlaying(int channel)
+dboolean I_SoundIsPlaying(int channel)
 {
     if (sound_module != NULL)
     {
@@ -365,7 +365,7 @@ void I_UnRegisterSong(void *handle)
     }
 }
 
-void I_PlaySong(void *handle, boolean looping)
+void I_PlaySong(void *handle, dboolean looping)
 {
     if (music_module != NULL)
     {
@@ -381,7 +381,7 @@ void I_StopSong(void)
     }
 }
 
-boolean I_MusicIsPlaying(void)
+dboolean I_MusicIsPlaying(void)
 {
     if (music_module != NULL)
     {

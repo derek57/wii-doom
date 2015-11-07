@@ -45,8 +45,8 @@ char *gus_patch_path = "";
 
 int gus_ram_kb = 1024;
 
-//extern boolean usb;
-//extern boolean sd;
+//extern dboolean usb;
+//extern dboolean sd;
 
 static unsigned int MappingIndex(void)
 {
@@ -207,7 +207,7 @@ static char *ReadDMXConfig(void)
     return data;
 }
 
-static boolean WriteTimidityConfig(char *path, gus_config_t *config)
+static dboolean WriteTimidityConfig(char *path, gus_config_t *config)
 {
     FILE *fstream;
     unsigned int i;
@@ -237,7 +237,8 @@ static boolean WriteTimidityConfig(char *path, gus_config_t *config)
         if (config->mapping[i] >= 0 && config->mapping[i] < MAX_INSTRUMENTS
          && config->patch_names[config->mapping[i]] != NULL)
         {
-            fprintf(fstream, "%i %s\n",
+//            fprintf(fstream, "%i %s\n",
+            fprintf(fstream, "%u %s\n",
                     i, config->patch_names[config->mapping[i]]);
         }
     }
@@ -261,9 +262,9 @@ static boolean WriteTimidityConfig(char *path, gus_config_t *config)
     return true;
 }
 
-boolean GUS_WriteConfig(char *path)
+dboolean GUS_WriteConfig(char *path)
 {
-    boolean result;
+    dboolean result;
     char *dmxconf;
     gus_config_t config;
 

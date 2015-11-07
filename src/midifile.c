@@ -87,10 +87,10 @@ struct midi_file_s
 
 // Check the header of a chunk:
 
-static boolean CheckChunkHeader(chunk_header_t *chunk,
+static dboolean CheckChunkHeader(chunk_header_t *chunk,
                                 char *expected_id)
 {
-    boolean result;
+    dboolean result;
     
     result = (memcmp((char *) chunk->chunk_id, expected_id, 4) == 0);
 
@@ -108,7 +108,7 @@ static boolean CheckChunkHeader(chunk_header_t *chunk,
 
 // Read a single byte.  Returns false on error.
 
-static boolean ReadByte(byte *result, FILE *stream)
+static dboolean ReadByte(byte *result, FILE *stream)
 {
     int c;
 
@@ -129,7 +129,7 @@ static boolean ReadByte(byte *result, FILE *stream)
 
 // Read a variable-length value.
 
-static boolean ReadVariableLength(unsigned int *result, FILE *stream)
+static dboolean ReadVariableLength(unsigned int *result, FILE *stream)
 {
     int i;
     byte b = 0;
@@ -201,8 +201,8 @@ static void *ReadByteSequence(unsigned int num_bytes, FILE *stream)
 // two_param indicates that the event type takes two parameters
 // (three byte) otherwise it is single parameter (two byte)
 
-static boolean ReadChannelEvent(midi_event_t *event,
-                                byte event_type, boolean two_param,
+static dboolean ReadChannelEvent(midi_event_t *event,
+                                byte event_type, dboolean two_param,
                                 FILE *stream)
 {
     byte b = 0;
@@ -242,7 +242,7 @@ static boolean ReadChannelEvent(midi_event_t *event,
 
 // Read sysex event:
 
-static boolean ReadSysExEvent(midi_event_t *event, int event_type,
+static dboolean ReadSysExEvent(midi_event_t *event, int event_type,
                               FILE *stream)
 {
     event->event_type = event_type;
@@ -269,7 +269,7 @@ static boolean ReadSysExEvent(midi_event_t *event, int event_type,
 
 // Read meta event:
 
-static boolean ReadMetaEvent(midi_event_t *event, FILE *stream)
+static dboolean ReadMetaEvent(midi_event_t *event, FILE *stream)
 {
     byte b = 0;
 
@@ -307,7 +307,7 @@ static boolean ReadMetaEvent(midi_event_t *event, FILE *stream)
     return true;
 }
 
-static boolean ReadEvent(midi_event_t *event, unsigned int *last_event_type,
+static dboolean ReadEvent(midi_event_t *event, unsigned int *last_event_type,
                          FILE *stream)
 {
     byte event_type = 0;
@@ -412,7 +412,7 @@ static void FreeEvent(midi_event_t *event)
 
 // Read and check the track chunk header
 
-static boolean ReadTrackHeader(midi_track_t *track, FILE *stream)
+static dboolean ReadTrackHeader(midi_track_t *track, FILE *stream)
 {
     size_t records_read;
     chunk_header_t chunk_header;
@@ -436,10 +436,9 @@ static boolean ReadTrackHeader(midi_track_t *track, FILE *stream)
     return true;
 }
 
-static boolean ReadTrack(midi_track_t *track, FILE *stream)
+static dboolean ReadTrack(midi_track_t *track, FILE *stream)
 {
     midi_event_t *new_events;
-    midi_event_t *event;
     unsigned int last_event_type;
 
     track->num_events = 0;
@@ -459,6 +458,8 @@ static boolean ReadTrack(midi_track_t *track, FILE *stream)
 
     for (;;)
     {
+        midi_event_t *event;
+
         // Resize the track slightly larger to hold another event:
 #ifdef BOOM_ZONE_HANDLING
         new_events = Z_Realloc(track->events, 
@@ -517,7 +518,7 @@ static void FreeTrack(midi_track_t *track)
     free(track->events);
 }
 
-static boolean ReadAllTracks(midi_file_t *file, FILE *stream)
+static dboolean ReadAllTracks(midi_file_t *file, FILE *stream)
 {
     unsigned int i;
 
@@ -549,7 +550,7 @@ static boolean ReadAllTracks(midi_file_t *file, FILE *stream)
 
 // Read and check the header chunk.
 
-static boolean ReadFileHeader(midi_file_t *file, FILE *stream)
+static dboolean ReadFileHeader(midi_file_t *file, FILE *stream)
 {
     size_t records_read;
     unsigned int format_type;
@@ -587,10 +588,10 @@ static boolean ReadFileHeader(midi_file_t *file, FILE *stream)
 
 void MIDI_FreeFile(midi_file_t *file)
 {
-    int i;
-
     if (file->tracks != NULL)
     {
+        unsigned int    i;
+
         for (i=0; i<file->num_tracks; ++i)
         {
             FreeTrack(&file->tracks[i]);

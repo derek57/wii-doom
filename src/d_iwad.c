@@ -57,7 +57,7 @@ static const iwad_t iwads[] =
 
 #define MAX_IWAD_DIRS 128
 
-static boolean iwad_dirs_built;
+static dboolean iwad_dirs_built;
 static char *iwad_dirs[MAX_IWAD_DIRS];
 static int num_iwad_dirs;
 
@@ -275,7 +275,6 @@ static void CheckUninstallStrings(void)
     for (i=0; i<arrlen(uninstall_values); ++i)
     {
         char *val;
-        char *path;
         char *unstr;
 
         val = GetRegistryString(&uninstall_values[i]);
@@ -293,6 +292,8 @@ static void CheckUninstallStrings(void)
         }
         else
         {
+            char *path;
+
             path = unstr + strlen(UNINSTALLER_STRING);
 
             AddIWADDir(path);
@@ -304,15 +305,13 @@ static void CheckUninstallStrings(void)
 
 static void CheckInstallRootPaths(void)
 {
-    unsigned int i;
+    size_t i;
 
     for (i=0; i<arrlen(root_path_keys); ++i)
     {
-        char *install_path;
-        char *subpath;
-        unsigned int j;
+        char *install_path = GetRegistryString(&root_path_keys[i]);
 
-        install_path = GetRegistryString(&root_path_keys[i]);
+        size_t j;
 
         if (install_path == NULL)
         {
@@ -321,9 +320,7 @@ static void CheckInstallRootPaths(void)
 
         for (j=0; j<arrlen(root_path_subdirs); ++j)
         {
-            subpath = M_StringJoin(install_path, DIR_SEPARATOR_S,
-                                   root_path_subdirs[j], NULL);
-            AddIWADDir(subpath);
+            AddIWADDir(M_StringJoin(install_path, DIR_SEPARATOR_S, root_path_subdirs[j], NULL));
         }
 
         free(install_path);
@@ -336,7 +333,6 @@ static void CheckInstallRootPaths(void)
 static void CheckSteamEdition(void)
 {
     char *install_path;
-    char *subpath;
     size_t i;
 
     install_path = GetRegistryString(&steam_install_location);
@@ -348,10 +344,7 @@ static void CheckSteamEdition(void)
 
     for (i=0; i<arrlen(steam_install_subdirs); ++i)
     {
-        subpath = M_StringJoin(install_path, DIR_SEPARATOR_S,
-                               steam_install_subdirs[i], NULL);
-
-        AddIWADDir(subpath);
+        AddIWADDir(M_StringJoin(install_path, DIR_SEPARATOR_S, steam_install_subdirs[i], NULL));
     }
 
     free(install_path);
@@ -427,7 +420,7 @@ static void CheckDOSDefaults(void)
 // Returns true if the specified path is a path to a file
 // of the specified name.
 
-static boolean DirIsFile(char *path, char *filename)
+static dboolean DirIsFile(char *path, char *filename)
 {
     size_t path_len;
     size_t filename_len;
@@ -696,7 +689,6 @@ static void BuildIWADDirList(void)
 
 char *D_FindWADByName(char *name)
 {
-    char *path;
     int i;
     
     // Absolute path?
@@ -712,6 +704,8 @@ char *D_FindWADByName(char *name)
 
     for (i=0; i<num_iwad_dirs; ++i)
     {
+        char *path;
+
         // As a special case, if this is in DOOMWADDIR or DOOMWADPATH,
         // the "directory" may actually refer directly to an IWAD
         // file.
@@ -772,9 +766,7 @@ char *D_TryFindWADByName(char *filename)
 char *D_FindIWAD(int mask, GameMission_t *mission)
 {
     char *result;
-    char *iwadfile;
     int iwadparm;
-    int i;
 
     // Check for the -iwad parameter
 
@@ -788,6 +780,8 @@ char *D_FindIWAD(int mask, GameMission_t *mission)
 
     if (iwadparm)
     {
+        char *iwadfile;
+
         // Search through IWAD dirs for an IWAD with the given name.
 
         iwadfile = myargv[iwadparm + 1];
@@ -803,6 +797,8 @@ char *D_FindIWAD(int mask, GameMission_t *mission)
     }
     else
     {
+        int i;
+
         // Search through the list and look for an IWAD
 
         result = NULL;

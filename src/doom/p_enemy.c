@@ -175,7 +175,7 @@ mobj_t*           *braintargets;
 
 mobjtype_t        chunk_type;
 
-boolean           on_ground;
+dboolean           on_ground;
 
 int               old_t;
 int               old_u;
@@ -186,7 +186,7 @@ int               numsplats;
 
 static int        maxbraintargets;     // [crispy] remove braintargets limit
 
-extern boolean    not_walking;
+extern dboolean    not_walking;
 
 extern line_t     **spechit;
 
@@ -208,7 +208,7 @@ extern void A_ReFire
 // or that a monster should stay on the lift for a while
 // while it goes up or down.
 //
-static boolean P_IsOnLift(const mobj_t *actor)
+static dboolean P_IsOnLift(const mobj_t *actor)
 {
     const sector_t      *sec = actor->subsector->sector;
     line_t              line;
@@ -246,7 +246,7 @@ static boolean P_IsOnLift(const mobj_t *actor)
                 case SR_Lift_LowerWaitRaise_Fast:
                     return true;
             }
-        }
+    }
 
     return false;
 }
@@ -297,7 +297,6 @@ P_RecursiveSound
   int           soundblocks )
 {
     int         i;
-    line_t*     check;
     sector_t*   other;
         
     if (players[0].cheats & CF_NOTARGET)
@@ -316,7 +315,7 @@ P_RecursiveSound
         
     for (i=0 ;i<sec->linecount ; i++)
     {
-        check = sec->lines[i];
+        line_t *check = sec->lines[i];
         if (! (check->flags & ML_TWOSIDED) )
             continue;
         
@@ -363,7 +362,7 @@ P_NoiseAlert
 //
 // P_CheckMeleeRange
 //
-boolean P_CheckMeleeRange (mobj_t*        actor)
+dboolean P_CheckMeleeRange (mobj_t*        actor)
 {
     mobj_t      *pl = actor->target;
     fixed_t     dist;
@@ -389,7 +388,7 @@ boolean P_CheckMeleeRange (mobj_t*        actor)
 //
 // P_CheckMissileRange
 //
-boolean P_CheckMissileRange (mobj_t* actor)
+dboolean P_CheckMissileRange (mobj_t* actor)
 {
     fixed_t        dist;
         
@@ -458,7 +457,7 @@ boolean P_CheckMissileRange (mobj_t* actor)
 // returns false if the move is blocked.
 //
 
-static boolean P_Move(mobj_t *actor, boolean dropoff)   // killough 9/12/98
+static dboolean P_Move(mobj_t *actor, dboolean dropoff)   // killough 9/12/98
 {
     fixed_t        tryx;
     fixed_t        tryy;
@@ -471,7 +470,7 @@ static boolean P_Move(mobj_t *actor, boolean dropoff)   // killough 9/12/98
 
     // warning: 'catch', 'throw', and 'try'
     // are all C++ reserved words
-    boolean        try_ok;
+    dboolean        try_ok;
                 
     if (actor->movedir == DI_NODIR)
         return false;
@@ -598,7 +597,7 @@ static boolean P_Move(mobj_t *actor, boolean dropoff)   // killough 9/12/98
 //
 // killough 9/12/98: Same as P_Move, except smarter
 //
-static boolean P_SmartMove(mobj_t *actor)
+static dboolean P_SmartMove(mobj_t *actor)
 {
     mobj_t      *target = actor->target;
     int         on_lift;
@@ -636,7 +635,7 @@ static boolean P_SmartMove(mobj_t *actor)
 // If a door is in the way,
 // an OpenDoor call is made to start it opening.
 //
-boolean P_TryWalk (mobj_t* actor)
+dboolean P_TryWalk (mobj_t* actor)
 {        
 //    if (!P_Move (actor, false))
     if (!P_SmartMove(actor))
@@ -729,7 +728,7 @@ static fixed_t  dropoff_deltax;
 static fixed_t  dropoff_deltay;
 static fixed_t  floorz;
 
-static boolean PIT_AvoidDropoff(line_t *line)
+static dboolean PIT_AvoidDropoff(line_t *line)
 {
     if (line->backsector                                // Ignore one-sided linedefs
         && tmbbox[BOXRIGHT]  > line->bbox[BOXLEFT]
@@ -817,9 +816,8 @@ static void P_NewChaseDir(mobj_t *actor)
 // If allaround is false, only look 180 degrees in front.
 // Returns true if a player is targeted.
 //
-static boolean P_LookForMonsters(mobj_t *actor)
+static dboolean P_LookForMonsters(mobj_t *actor)
 {
-    mobj_t      *mo;
     thinker_t   *think;
 
     if (!P_CheckSight(players[0].mo, actor))
@@ -828,7 +826,7 @@ static boolean P_LookForMonsters(mobj_t *actor)
     for (think = thinkerclasscap[th_mobj].cnext; think != &thinkerclasscap[th_mobj];
         think = think->cnext)
     {
-        mo = (mobj_t *)think;
+        mobj_t *mo = (mobj_t *)think;
         if (!(mo->flags & MF_COUNTKILL) || mo == actor || mo->health <= 0)
             continue;           // not a valid monster
 
@@ -848,7 +846,7 @@ static boolean P_LookForMonsters(mobj_t *actor)
     return false;
 }
 
-static boolean P_LookForPlayers(mobj_t *actor, boolean allaround)
+static dboolean P_LookForPlayers(mobj_t *actor, dboolean allaround)
 {
     player_t    *player;
     mobj_t      *mo;
@@ -998,7 +996,6 @@ void A_Fall (mobj_t *actor)
 void A_KeenDie (mobj_t* mo)
 {
     thinker_t*  th;
-    mobj_t*     mo2;
     line_t      junk;
 
     A_Fall (mo);
@@ -1007,7 +1004,7 @@ void A_KeenDie (mobj_t* mo)
     // to see if all Keens are dead
     for (th = thinkerclasscap[th_mobj].cnext; th != &thinkerclasscap[th_mobj]; th = th->cnext)
     {
-        mo2 = (mobj_t *)th;
+        mobj_t *mo2 = (mobj_t *)th;
 
         if (mo2 != mo
             && mo2->type == mo->type
@@ -1263,9 +1260,7 @@ void A_PosAttack (mobj_t* actor)
 void A_SPosAttack (mobj_t* actor)
 {
     int                i;
-    int                angle;
     int                bangle;
-    int                damage;
     int                slope;
         
     if (!actor->target)
@@ -1278,8 +1273,8 @@ void A_SPosAttack (mobj_t* actor)
 
     for (i=0 ; i<3 ; i++)
     {
-        angle = bangle + ((P_Random()-P_Random())<<20);
-        damage = ((P_Random()%5)+1)*3;
+        int angle = bangle + ((P_Random()-P_Random())<<20);
+        int damage = ((P_Random()%5)+1)*3;
         P_LineAttack (actor, angle, MISSILERANGE, slope, damage);
     }
 }
@@ -1354,16 +1349,14 @@ void A_BspiAttack (mobj_t *actor)
 //
 void A_TroopAttack (mobj_t* actor)
 {
-    int                damage;
-        
     if (!actor->target)
         return;
                 
     A_FaceTarget (actor);
     if (P_CheckMeleeRange (actor))
     {
+        int damage = (P_Random()%8+1)*3;
         S_StartSound (actor, sfx_claw);
-        damage = (P_Random()%8+1)*3;
         P_DamageMobj (actor->target, actor, actor, damage);
         return;
     }
@@ -1379,30 +1372,26 @@ void A_TroopAttack (mobj_t* actor)
 
 void A_SargAttack (mobj_t* actor)
 {
-    int                damage;
-
     if (!actor->target)
         return;
                 
     A_FaceTarget (actor);
     if (P_CheckMeleeRange (actor))
     {
-        damage = ((P_Random()%10)+1)*4;
+        int damage = ((P_Random()%10)+1)*4;
         P_DamageMobj (actor->target, actor, actor, damage);
     }
 }
 
 void A_HeadAttack (mobj_t* actor)
 {
-    int                damage;
-        
     if (!actor->target)
         return;
                 
     A_FaceTarget (actor);
     if (P_CheckMeleeRange (actor))
     {
-        damage = (P_Random()%6+1)*10;
+        int damage = (P_Random()%6+1)*10;
         P_DamageMobj (actor->target, actor, actor, damage);
         return;
     }
@@ -1429,15 +1418,13 @@ void A_CyberAttack (mobj_t* actor)
 
 void A_BruisAttack (mobj_t* actor)
 {
-    int                damage;
-        
     if (!actor->target)
         return;
                 
     if (P_CheckMeleeRange (actor))
     {
+        int damage = (P_Random()%8+1)*10;
         S_StartSound (actor, sfx_claw);
-        damage = (P_Random()%8+1)*10;
         P_DamageMobj (actor->target, actor, actor, damage);
         return;
     }
@@ -1551,8 +1538,6 @@ void A_SkelWhoosh (mobj_t*        actor)
 
 void A_SkelFist (mobj_t*        actor)
 {
-    int                damage;
-
     if (!actor->target)
         return;
                 
@@ -1560,7 +1545,7 @@ void A_SkelFist (mobj_t*        actor)
         
     if (P_CheckMeleeRange (actor))
     {
-        damage = ((P_Random()%10)+1)*6;
+        int damage = ((P_Random()%10)+1)*6;
         S_StartSound (actor, sfx_skepch);
         P_DamageMobj (actor->target, actor, actor, damage);
     }
@@ -1573,10 +1558,10 @@ void A_SkelFist (mobj_t*        actor)
 // Detect a corpse that could be raised.
 //
 
-boolean PIT_VileCheck (mobj_t*        thing)
+dboolean PIT_VileCheck (mobj_t*        thing)
 {
-    int                maxdist;
-    boolean        check;
+    int            maxdist;
+    dboolean        check;
         
     if (!(thing->flags & MF_CORPSE))
         return true;        // not a monster
@@ -1633,19 +1618,15 @@ boolean PIT_VileCheck (mobj_t*        thing)
 //
 void A_VileChase (mobj_t* actor)
 {
-    int                        xl;
-    int                        xh;
-    int                        yl;
-    int                        yh;
-    
-    int                        bx;
-    int                        by;
-
     mobjinfo_t*                info;
     mobj_t*                    temp;
         
     if (actor->movedir != DI_NODIR)
     {
+        int                        xl, xh;
+        int                        yl, yh;
+        int                        bx, by;
+
         // check for corpses to raise
         viletryx =
             actor->x + actor->info->speed*xspeed[actor->movedir];
@@ -2223,7 +2204,7 @@ void A_Explode (mobj_t* thingy)
 // This behavior changed in v1.9, the most notable effect of which
 // was to break uac_dead.wad
 
-static boolean CheckBossEnd(mobjtype_t motype)
+static dboolean CheckBossEnd(mobjtype_t motype)
 {
     if (gameversion < exe_ultimate || d_666)
     {
@@ -2281,9 +2262,8 @@ static boolean CheckBossEnd(mobjtype_t motype)
 void A_BossDeath (mobj_t* mo)
 {
     thinker_t*        th;
-    mobj_t*        mo2;
-    line_t        junk;
-    int                i;
+    line_t            junk;
+    int               i;
                 
     if ( gamemode == commercial)
     {
@@ -2314,7 +2294,7 @@ void A_BossDeath (mobj_t* mo)
     // if all bosses are dead
     for (th = thinkerclasscap[th_mobj].cnext; th != &thinkerclasscap[th_mobj]; th = th->cnext)
     {
-        mo2 = (mobj_t *)th;
+        mobj_t *mo2 = (mobj_t *)th;
 
         if (mo2 != mo
             && mo2->type == mo->type
@@ -2524,14 +2504,12 @@ void A_BrainPain (mobj_t*        mo)
 void A_BrainScream (mobj_t*        mo)
 {
     int                x;
-    int                y;
-    int                z;
-    mobj_t*        th;
+    mobj_t*            th;
         
     for (x=mo->x - 196*FRACUNIT ; x< mo->x + 320*FRACUNIT ; x+= FRACUNIT*8)
     {
-        y = mo->y - 320*FRACUNIT;
-        z = 128 + P_Random()*2*FRACUNIT;
+        int y = mo->y - 320*FRACUNIT;
+        int z = 128 + P_Random()*2*FRACUNIT;
         th = P_SpawnMobj (x,y,z, MT_ROCKET);
         th->momz = P_Random()*512;
 
@@ -2974,7 +2952,7 @@ void A_SkullPop(mobj_t *actor, player_t *player, pspdef_t *psp)
 //
 void A_CounterJump(mobj_t *mo)
 {
-   boolean branch = false;
+   dboolean branch = false;
    int statenum   = S_PISCASE_A_FADE1;
    int checktype  = 0;
    short value    = (short)(40);

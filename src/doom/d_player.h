@@ -110,7 +110,7 @@ typedef struct player_s
     // Power ups. invinc and invis are tic counters.
     int                  powers[NUMPOWERS];
     int                  cards[NUMCARDS];
-    boolean              backpack;
+    dboolean              backpack;
     
     // Frags, kills of other players.
     int                  frags[MAXPLAYERS];
@@ -166,7 +166,7 @@ typedef struct player_s
     pspdef_t             psprites[NUMPSPRITES];
 
     // True if secret level has been done.
-    boolean              didsecret;        
+    dboolean              didsecret;        
 
     // delay the next jump for a moment
     unsigned int         jumpTics;
@@ -176,7 +176,7 @@ typedef struct player_s
 
     int                  lookdir;
 
-    boolean              centering;
+    dboolean              centering;
 
     int                  recoilpitch;
 
@@ -218,7 +218,7 @@ typedef struct player_s
 //
 typedef struct
 {
-    boolean              in;        // whether the player is in game
+    dboolean              in;        // whether the player is in game
     
     // Player stats, kills, collected items etc.
     int                  skills;
@@ -235,7 +235,7 @@ typedef struct
     int                  epsd;        // episode # (0-2)
 
     // if true, splash the secret level
-    boolean              didsecret;
+    dboolean              didsecret;
     
     // previous and next levels, origin 0
     int                  last;

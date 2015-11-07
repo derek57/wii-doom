@@ -316,9 +316,9 @@ static const unsigned int volume_mapping_table[] = {
 };
 
 static opl_driver_ver_t opl_drv_ver = opl_doom_1_9;
-static boolean music_initialized = false;
+static dboolean music_initialized = false;
 
-//static boolean musicpaused = false;
+//static dboolean musicpaused = false;
 static int start_music_volume;
 static int current_music_volume;
 
@@ -343,7 +343,7 @@ static int num_opl_voices;
 static opl_track_data_t *tracks;
 static unsigned int num_tracks = 0;
 static unsigned int running_tracks = 0;
-static boolean song_looping;
+static dboolean song_looping;
 
 // Tempo control variables
 
@@ -363,7 +363,7 @@ int opl_type = 0;
 
 // Load instrument table from GENMIDI lump:
 
-static boolean LoadInstrumentTable(void)
+static dboolean LoadInstrumentTable(void)
 {
     byte *lump;
 
@@ -455,7 +455,7 @@ static void ReleaseVoice(opl_voice_t *voice)
 {
     opl_voice_t **rover;
     opl_voice_t *next;
-    boolean double_voice;
+    dboolean double_voice;
 
     voice->channel = NULL;
     voice->note = 0;
@@ -489,7 +489,7 @@ static void ReleaseVoice(opl_voice_t *voice)
 // Load data to the specified operator
 
 static void LoadOperatorData(int operator, genmidi_op_t *data,
-                             boolean max_level)
+                             dboolean max_level)
 {
     int level;
 
@@ -567,7 +567,6 @@ static void SetVoiceVolume(opl_voice_t *voice, unsigned int volume)
     unsigned int midi_volume;
     unsigned int full_volume;
     unsigned int car_volume;
-    unsigned int mod_volume;
 
     voice->note_volume = volume;
 
@@ -598,7 +597,8 @@ static void SetVoiceVolume(opl_voice_t *voice, unsigned int volume)
         if ((opl_voice->feedback & 0x01) != 0
          && opl_voice->modulator.level != 0x3f)
         {
-            mod_volume = 0x3f - opl_voice->modulator.level;
+            unsigned int mod_volume = 0x3f - opl_voice->modulator.level;
+
             if (mod_volume >= car_volume)
             {
                 mod_volume = car_volume;
@@ -648,7 +648,7 @@ static void InitVoices(void)
 }
 
 static void SetChannelVolume(opl_channel_data_t *channel, unsigned int volume,
-                             boolean clip_start)
+                             dboolean clip_start)
 {
     unsigned int i;
 
@@ -1038,7 +1038,7 @@ static void KeyOnEvent(opl_track_data_t *track, midi_event_t *event)
     genmidi_instr_t *instrument;
     opl_channel_data_t *channel;
     unsigned int note, key, volume, voicenum;
-    boolean double_voice;
+    dboolean double_voice;
 
 /*
     printf("note on: channel %i, %i, %i\n",
@@ -1054,7 +1054,7 @@ static void KeyOnEvent(opl_track_data_t *track, midi_event_t *event)
     // A volume of zero means key off. Some MIDI tracks, eg. the ones
     // in AV.wad, use a second key on with a volume of zero to mean
     // key off.
-    if (volume <= 0)
+    if (!volume)
     {
         KeyOffEvent(track, event);
         return;
@@ -1164,11 +1164,10 @@ static void ProgramChangeEvent(opl_track_data_t *track, midi_event_t *event)
 
 static void SetChannelPan(opl_channel_data_t *channel, unsigned int pan)
 {
-    unsigned int reg_pan;
-    unsigned int i;
-
     if (opl_opl3mode)
     {
+        unsigned int reg_pan;
+
         if (pan >= 96)
         {
             reg_pan = 0x10;
@@ -1183,6 +1182,8 @@ static void SetChannelPan(opl_channel_data_t *channel, unsigned int pan)
         }
         if (channel->pan != reg_pan)
         {
+            unsigned int i;
+
             channel->pan = reg_pan;
             for (i = 0; i < num_opl_voices; i++)
             {
@@ -1263,7 +1264,8 @@ static void ControllerEvent(opl_track_data_t *track, midi_event_t *event)
 
         default:
 #ifdef OPL_MIDI_DEBUG
-            fprintf(stderr, "Unknown MIDI controller type: %i\n", controller);
+//            fprintf(stderr, "Unknown MIDI controller type: %i\n", controller);
+            fprintf(stderr, "Unknown MIDI controller type: %u\n", controller);
 #endif
             break;
     }
@@ -1336,7 +1338,8 @@ static void MetaEvent(opl_track_data_t *track, midi_event_t *event)
 
         default:
 #ifdef OPL_MIDI_DEBUG
-            fprintf(stderr, "Unknown MIDI meta event type: %i\n",
+//            fprintf(stderr, "Unknown MIDI meta event type: %i\n",
+            fprintf(stderr, "Unknown MIDI meta event type: %u\n",
                             event->data.meta.type);
 #endif
             break;
@@ -1461,7 +1464,7 @@ static void TrackTimerCallback(void *arg)
         // to lock up in an infinite loop. (5ms should be short
         // enough not to be noticeable by the listener).
 
-        if (running_tracks <= 0 && song_looping)
+        if (!running_tracks && song_looping)
         {
             OPL_SetCallback(5000, RestartSong, NULL);
         }
@@ -1512,7 +1515,7 @@ static void StartTrack(midi_file_t *file, unsigned int track_num)
 
 // Start playing a mid
 
-static void I_OPL_PlaySong(void *handle, boolean looping)
+static void I_OPL_PlaySong(void *handle, dboolean looping)
 {
     midi_file_t *file;
     unsigned int i;
@@ -1639,12 +1642,12 @@ static void I_OPL_UnRegisterSong(void *handle)
 
 // Determine whether memory block is a .mid file
 
-static boolean IsMid(byte *mem, int len)
+static dboolean IsMid(byte *mem, int len)
 {
     return len > 4 && !memcmp(mem, "MThd", 4);
 }
 
-static boolean ConvertMus(byte *musdata, int len, char *filename)
+static dboolean ConvertMus(byte *musdata, int len, char *filename)
 {
     MEMFILE *instream;
     MEMFILE *outstream;
@@ -1714,7 +1717,7 @@ static void *I_OPL_RegisterSong(void *data, int len)
 
 // Is the song playing?
 
-static boolean I_OPL_MusicIsPlaying(void)
+static dboolean I_OPL_MusicIsPlaying(void)
 {
     if (!music_initialized)
     {
@@ -1746,7 +1749,7 @@ static void I_OPL_ShutdownMusic(void)
 
 // Initialize music subsystem
 
-static boolean I_OPL_InitMusic(void)
+static dboolean I_OPL_InitMusic(void)
 {
     opl_init_result_t opl_chip_type;
 

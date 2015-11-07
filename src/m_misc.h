@@ -33,13 +33,13 @@
 
 #include "doomtype.h"
 
-boolean M_WriteFile(char *name, void *source, int length);
-boolean M_FileExists(char *file);
-boolean M_StrToInt(const char *str, int *result);
-boolean M_StringCopy(char *dest, const char *src, size_t dest_size);
-boolean M_StringConcat(char *dest, const char *src, size_t dest_size);
-boolean M_StringStartsWith(const char *s, const char *prefix);
-boolean M_StringEndsWith(const char *s, const char *suffix);
+dboolean M_WriteFile(char *name, void *source, int length);
+dboolean M_FileExists(char *file);
+dboolean M_StrToInt(const char *str, int *result);
+dboolean M_StringCopy(char *dest, const char *src, size_t dest_size);
+dboolean M_StringConcat(char *dest, const char *src, size_t dest_size);
+dboolean M_StringStartsWith(const char *s, const char *prefix);
+dboolean M_StringEndsWith(const char *s, const char *suffix);
 
 int M_ReadFile(char *name, byte **buffer);
 int M_vsnprintf(char *buf, size_t buf_len, const char *s, va_list args);

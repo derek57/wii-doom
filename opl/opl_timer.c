@@ -135,9 +135,6 @@ static uint64_t GetNextTime(void)
 
 static int ThreadFunction(void *unused)
 {
-    uint64_t next_time;
-    uint64_t now;
-
     // Keep running until OPL_Timer_StopThread is called.
 
     while (timer_thread_state == THREAD_STATE_RUNNING)
@@ -145,8 +142,8 @@ static int ThreadFunction(void *unused)
         // Get the next time that we must sleep until, and
         // wait until that time.
 
-        next_time = GetNextTime();
-        now = SDL_GetTicks() * OPL_MS;
+        uint64_t next_time = GetNextTime();
+        uint64_t now = SDL_GetTicks() * OPL_MS;
 
         if (next_time > now)
         {

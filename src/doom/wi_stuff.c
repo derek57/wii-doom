@@ -433,10 +433,10 @@ static patch_t**               lnames;
 // Buffer storing the backdrop
 static patch_t*                background;
 
-static boolean                 snl_pointeron;
+static dboolean                 snl_pointeron;
 
-extern boolean                 secretexit;
-extern boolean                 opl;
+extern dboolean                 secretexit;
+extern dboolean                 opl;
 
 
 //
@@ -454,7 +454,7 @@ void WI_slamBackground(void)
 
 // The ticker is used to detect keys
 //  because of timing issues in netgames.
-boolean WI_Responder(event_t* ev)
+dboolean WI_Responder(event_t* ev)
 {
     return false;
 }
@@ -601,19 +601,15 @@ WI_drawOnLnode
 {
 
     int           i;
-    int           left;
-    int           top;
-    int           right;
-    int           bottom;
-    boolean       fits = false;
+    dboolean       fits = false;
 
     i = 0;
     do
     {
-        left = lnodes[wbs->epsd][n].x - SHORT(c[i]->leftoffset);
-        top = lnodes[wbs->epsd][n].y - SHORT(c[i]->topoffset);
-        right = left + SHORT(c[i]->width);
-        bottom = top + SHORT(c[i]->height);
+        int left = lnodes[wbs->epsd][n].x - SHORT(c[i]->leftoffset);
+        int top = lnodes[wbs->epsd][n].y - SHORT(c[i]->topoffset);
+        int right = left + SHORT(c[i]->width);
+        int bottom = top + SHORT(c[i]->height);
 
         if (left >= 0 && right < ORIGWIDTH      // CHANGED FOR HIRES
             && top >= 0 && bottom < ORIGHEIGHT) // CHANGED FOR HIRES
@@ -649,7 +645,6 @@ WI_drawOnLnode
 void WI_initAnimatedBack(void)
 {
     int           i;
-    anim_t*       a;
 
     if (gamemode == commercial)
         return;
@@ -659,7 +654,7 @@ void WI_initAnimatedBack(void)
 
     for (i=0;i<NUMANIMS[wbs->epsd];i++)
     {
-        a = &anims[wbs->epsd][i];
+        anim_t* a = &anims[wbs->epsd][i];
 
         // init variables
         a->ctr = -1;
@@ -678,7 +673,6 @@ void WI_initAnimatedBack(void)
 void WI_updateAnimatedBack(void)
 {
     int           i;
-    anim_t*       a;
 
     if (gamemode == commercial)
         return;
@@ -688,7 +682,7 @@ void WI_updateAnimatedBack(void)
 
     for (i=0;i<NUMANIMS[wbs->epsd];i++)
     {
-        a = &anims[wbs->epsd][i];
+        anim_t* a = &anims[wbs->epsd][i];
 
         if (bcnt == a->nexttic)
         {
@@ -732,7 +726,6 @@ void WI_updateAnimatedBack(void)
 void WI_drawAnimatedBack(void)
 {
     int           i;
-    anim_t*       a;
 
     if (gamemode == commercial)
         return;
@@ -742,7 +735,7 @@ void WI_drawAnimatedBack(void)
 
     for (i=0 ; i<NUMANIMS[wbs->epsd] ; i++)
     {
-        a = &anims[wbs->epsd][i];
+        anim_t* a = &anims[wbs->epsd][i];
 
         if (a->ctr >= 0)
             V_DrawPatch(a->loc.x, a->loc.y, a->p[a->ctr]);
@@ -767,7 +760,6 @@ WI_drawNum
 
     int           fontwidth = SHORT(num[0]->width);
     int           neg;
-    int           temp;
 
     if (digits < 0)
     {
@@ -778,9 +770,10 @@ WI_drawNum
         }
         else
         {
+            int temp = n;
+
             // figure out # of digits in #
             digits = 0;
-            temp = n;
 
             while (temp)
             {
@@ -849,21 +842,16 @@ WI_drawTime
   int             y,
   int             t )
 {
-
-    int           div;
-    int           n;
-
     if (t<0)
         return;
 
     if (t <= 61*59)
     {
-        div = 1;
+        int div = 1;
 
         do
         {
-            n = (t / div) % 60;
-            x = WI_drawNum(x, y, n, 2) - SHORT(colon->width);
+            x = WI_drawNum(x, y, (t / div) % 60, 2) - SHORT(colon->width);
             div *= 60;
 
             // draw
@@ -938,10 +926,6 @@ void WI_updateShowNextLoc(void)
 
 void WI_drawShowNextLoc(void)
 {
-
-    int           i;
-    int           last;
-
     WI_slamBackground();
 
     // draw animated background
@@ -949,6 +933,9 @@ void WI_drawShowNextLoc(void)
 
     if ( gamemode != commercial)
     {
+        int           i;
+        int           last;
+
         if (wbs->epsd > 2)
         {
             WI_drawEL();
@@ -967,8 +954,8 @@ void WI_drawShowNextLoc(void)
         // splat the secret level?
         if (wbs->didsecret)
         {
-            extern boolean secret_1;
-            extern boolean secret_2;
+            extern dboolean secret_1;
+            extern dboolean secret_2;
 
             if(secret_2)
                 WI_drawOnLnode(8, splat);
@@ -1063,7 +1050,7 @@ void WI_updateDeathmatchStats(void)
     int           i;
     int           j;
     
-    boolean       stillticking;
+    dboolean       stillticking;
 
     WI_updateAnimatedBack();
 
@@ -1315,7 +1302,7 @@ void WI_updateNetgameStats(void)
     int           i;
     int           fsum;
     
-    boolean       stillticking;
+    dboolean       stillticking;
 
     WI_updateAnimatedBack();
 
@@ -1811,7 +1798,7 @@ void WI_Ticker(void)
 
 static void WI_loadUnloadData(load_callback_t callback)
 {
-    int     i, j;
+    int     i;
     char    name[9];
     anim_t  *a;
 
@@ -1867,6 +1854,8 @@ static void WI_loadUnloadData(load_callback_t callback)
 
         if (wbs->epsd < 3)
         {
+            int j;
+
             for (j=0;j<NUMANIMS[wbs->epsd];j++)
             {
                 a = &anims[wbs->epsd][j];
@@ -1922,11 +1911,11 @@ static void WI_loadUnloadData(load_callback_t callback)
     // french wad uses WIOBJ (?)
     if (W_CheckNumForName("WIOBJ") >= 0)
     {
-            // "items"
-            if (netgame && !deathmatch)
-                callback("WIOBJ", &items);
-            else
-                callback("WIOSTI", &items);
+        // "items"
+        if (netgame && !deathmatch)
+            callback("WIOBJ", &items);
+        else
+            callback("WIOSTI", &items);
     }
     else
     {

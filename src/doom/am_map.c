@@ -334,14 +334,14 @@ static player_t    *plr;
 // numbers used for marking by the automap
 static patch_t     *marknums[10];
 
-static boolean     stopped = true;
+static dboolean     stopped = true;
 
-static boolean     movement;
+static dboolean     movement;
 
-boolean            dont_move_backwards = false;
-boolean            automapactive = false;
+dboolean            dont_move_backwards = false;
+dboolean            automapactive = false;
 
-//extern boolean     am_rotate;
+//extern dboolean     am_rotate;
 
 extern int         screenSize;
 
@@ -502,7 +502,6 @@ void AM_changeWindowLoc(void)
 //
 void AM_initVariables(void)
 {
-    int pnum;
     static event_t st_notify = { ev_keyup, AM_MSGENTERED, 0, 0 };
 
     automapactive = true;
@@ -526,6 +525,8 @@ void AM_initVariables(void)
     }
     else
     {
+        int pnum;
+
         plr = &players[0];
 
         for (pnum=0;pnum<MAXPLAYERS;pnum++)
@@ -689,7 +690,7 @@ void AM_maxOutWindowScale(void)
 //
 // Passed an input event, returns true if its handled
 //
-boolean AM_Responder
+dboolean AM_Responder
 ( event_t*  ev )
 {
     int rc;
@@ -966,11 +967,12 @@ void AM_updateLightLev(void)
     static int nexttic = 0;
     //static int litelevels[] = { 0, 3, 5, 6, 6, 7, 7, 7 };
     static int litelevels[] = { 0, 4, 7, 10, 12, 14, 15, 15 };
-    static int litelevelscnt = 0;
    
     // Change light level
     if (amclock>nexttic)
     {
+        static int litelevelscnt = 0;
+
         lightlev = litelevels[litelevelscnt++];
         if (litelevelscnt == arrlen(litelevels)) litelevelscnt = 0;
         nexttic = amclock + 6 - (amclock % 6);
@@ -1031,7 +1033,7 @@ void AM_clearFB(int color)
 // faster reject and precalculated slopes.  If the speed is needed,
 // use a hash algorithm to handle  the common cases.
 //
-boolean
+dboolean
 AM_clipMline
 ( mline_t*        ml,
   fline_t*        fl )
@@ -1173,14 +1175,13 @@ AM_drawFline
     register int ay;
     register int d;
     
-    static int   fuck = 0;
-
     // For debugging only
     if (      fl->a.x < 0 || fl->a.x >= f_w
            || fl->a.y < 0 || fl->a.y >= f_h
            || fl->b.x < 0 || fl->b.x >= f_w
            || fl->b.y < 0 || fl->b.y >= f_h)
     {
+        static int   fuck = 0;
         C_Printf(CR_RED, "fuck %d \r", fuck++);
         return;
     }
@@ -1640,7 +1641,6 @@ void AM_DrawWorldTimer(void)
     int seconds;
     int worldTimer;
     char timeBuffer[15];
-    char dayBuffer[20];
 
     worldTimer = players[consoleplayer].worldTimer;
 
@@ -1660,6 +1660,8 @@ void AM_DrawWorldTimer(void)
 
     if (days)
     {
+        char dayBuffer[20];
+
         if (days == 1)
         {
             sprintf(dayBuffer, "%.2d DAY", days);

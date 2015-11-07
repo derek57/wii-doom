@@ -34,18 +34,22 @@
 #endif
 
 #include "doomtype.h"
+#include "m_argv.h"
 #include "w_file.h"
 
 
 extern wad_file_class_t stdc_wad_file;
 
+#ifndef WII
 static wad_file_class_t *wad_file_classes[] = 
 {
     &stdc_wad_file,
 };
+#endif
 
 wad_file_t *W_OpenFile(char *path)
 {
+#ifndef WII
     wad_file_t *result;
     int i;
 
@@ -54,10 +58,12 @@ wad_file_t *W_OpenFile(char *path)
     // directly into memory.
     //
 
-    return stdc_wad_file.OpenFile(path);
+    if (!M_CheckParm("-mmap"))
+#endif
+        return stdc_wad_file.OpenFile(path);
 
     // Try all classes in order until we find one that works
-
+#ifndef WII
     result = NULL;
 
     for (i=0; i<arrlen(wad_file_classes); ++i)
@@ -71,6 +77,7 @@ wad_file_t *W_OpenFile(char *path)
     }
 
     return result;
+#endif
 }
 
 void W_CloseFile(wad_file_t *wad)

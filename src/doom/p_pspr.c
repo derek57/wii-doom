@@ -66,11 +66,12 @@
 #define WEAPONBOTTOM            128*FRACUNIT
 
 
-boolean            skippsprinterp = false;
+dboolean            skippsprinterp = false;
 
 int                use_vanilla_weapon_change = 1;
+int                bfglook = 1;
 
-extern boolean     aiming_help;
+extern dboolean     aiming_help;
 
 extern int         chaingun_tics;
 
@@ -218,7 +219,7 @@ void P_BringUpWeapon (player_t* player)
 // Returns true if there is enough ammo to shoot.
 // If not, selects the next weapon to use.
 //
-boolean P_CheckAmmo (player_t* player)
+dboolean P_CheckAmmo (player_t* player)
 {
     ammotype_t     ammo;
     int            count;
@@ -374,9 +375,7 @@ void
 A_WeaponReady
 ( player_t*        player,
   pspdef_t*        psp )
-{        
-    statenum_t     newstate;
-    
+{            
     // get out of attack state
     if (player->mo->state == &states[S_PLAY_ATK1]
         || player->mo->state == &states[S_PLAY_ATK2] )
@@ -398,6 +397,8 @@ A_WeaponReady
     //  if player is dead, put the weapon away
     if (player->pendingweapon != wp_nochange || !player->health)
     {
+        statenum_t     newstate;
+
         // change weapon
         //  (pending weapon should allready be validated)
         if(beta_style && player->readyweapon == wp_chaingun)
@@ -800,7 +801,7 @@ void A_FireOldBFG(player_t *player, pspdef_t *psp)
 
             if (!linetarget)
                 // sf: looking up/down
-                slope = 1 == 1 ? player->lookdir * LOOKSLOPE : 0, an = mo->angle;
+                slope = bfglook == 1 ? player->lookdir * LOOKSLOPE : 0, an = mo->angle;
 
             an1 += an - mo->angle;
 
@@ -812,7 +813,7 @@ void A_FireOldBFG(player_t *player, pspdef_t *psp)
         }
         else
         {
-            slope = 1 == 1 ? player->lookdir * LOOKSLOPE : 0;
+            slope = bfglook == 1 ? player->lookdir * LOOKSLOPE : 0;
             an2 += slope<0 ? -tantoangle[-slope >> DBITS] :
                               tantoangle[slope >> DBITS];
         }
@@ -831,7 +832,7 @@ void A_FireOldBFG(player_t *player, pspdef_t *psp)
 
         P_CheckMissileSpawn(th);
     }
-    while ((type != MT_PLASMA2) && (type = MT_PLASMA2)); //killough: obfuscated!
+    while (type != MT_PLASMA2 && (type = MT_PLASMA2)); //killough: obfuscated!
 }
 
 //
@@ -916,7 +917,7 @@ void P_BulletSlope (mobj_t*        mo)
 
         if (!linetarget)
         {
-            an += 2 << 26;
+//            an += 2 << 26;
             bulletslope = (mo->player->lookdir << FRACBITS) / 173;
         }
     }
@@ -929,7 +930,7 @@ void P_BulletSlope (mobj_t*        mo)
 void
 P_GunShot
 ( mobj_t*        mo,
-  boolean        accurate )
+  dboolean        accurate )
 {
     angle_t      angle;
     int          damage;
@@ -1022,8 +1023,6 @@ A_FireShotgun2
 {
     int            i;
     angle_t        angle;
-    int            damage;
-                
         
     S_StartSound (player->mo, sfx_dshtgn);
     P_SetMobjState (player->mo, S_PLAY_ATK2);
@@ -1039,7 +1038,7 @@ A_FireShotgun2
         
     for (i=0 ; i<20 ; i++)
     {
-        damage = 5*(P_Random ()%3+1);
+        int damage = 5*(P_Random ()%3+1);
         angle = player->mo->angle;
         angle += (P_Random()-P_Random())<<19;
         P_LineAttack (player->mo,
@@ -1207,11 +1206,12 @@ void P_MovePsprites (player_t* player)
 {
     int          i;
     pspdef_t*    psp;
-    state_t*     state;
         
     psp = &player->psprites[0];
     for (i=0 ; i<NUMPSPRITES ; i++, psp++)
     {
+        state_t*     state;
+
         // a null state means not active
         if ( (state = psp->state) )        
         {

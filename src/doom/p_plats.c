@@ -358,7 +358,7 @@ void P_ActivateInStasis(int tag)
 // EV_StopPlat()
 // Handler for "stop perpetual floor" linedef type
 //
-boolean EV_StopPlat(line_t *line)
+dboolean EV_StopPlat(line_t *line)
 {
     platlist_t  *platlist;
 

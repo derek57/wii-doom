@@ -85,22 +85,22 @@ typedef struct atexit_listentry_s atexit_listentry_t;
 struct atexit_listentry_s
 {
     atexit_func_t func;
-    boolean run_on_error;
+    dboolean run_on_error;
     atexit_listentry_t *next;
 };
 
 
 byte *zone_mem;
 
-//extern boolean devparm;
+//extern dboolean devparm;
 
 int memory_size;
 
-static boolean already_quitting;
+static dboolean already_quitting;
 
 static atexit_listentry_t *exit_funcs = NULL;
 
-void I_AtExit(atexit_func_t func, boolean run_on_error)
+void I_AtExit(atexit_func_t func, dboolean run_on_error)
 {
     atexit_listentry_t *entry;
 
@@ -245,7 +245,7 @@ void I_PrintStartupBanner(char *gamedescription)
 // Returns true if stdout is a real console, false if it is a file
 //
 
-boolean I_ConsoleStdout(void)
+dboolean I_ConsoleStdout(void)
 {
     return isatty(fileno(stdout));
 }
@@ -427,7 +427,7 @@ void I_Error (char *error, ...)
     char msgbuf[512];
     va_list argptr;
     atexit_listentry_t *entry;
-    boolean exit_gui_popup;
+    dboolean exit_gui_popup;
 
     if (already_quitting)
     {
@@ -518,10 +518,10 @@ static unsigned char mem_dump_custom[DOS_MEM_DUMP_SIZE];
 
 static const unsigned char *dos_mem_dump = mem_dump_dos622;
 
-boolean I_GetMemoryValue(unsigned int offset, void *value, int size)
+dboolean I_GetMemoryValue(unsigned int offset, void *value, int size)
 {
 #ifndef WII
-    static boolean firsttime = true;
+    static dboolean firsttime = true;
 
     if (firsttime)
     {

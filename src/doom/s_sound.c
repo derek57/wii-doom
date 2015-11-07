@@ -105,8 +105,8 @@
 short songlist[148];
 short currentsong = 0;
 
-extern boolean fake;
-extern boolean change_anyway;
+extern dboolean fake;
+extern dboolean change_anyway;
 
 extern int faketracknum;
 extern int tracknum;
@@ -118,7 +118,7 @@ static int snd_SfxVolume;
 
 // Whether songs are mus_paused
 
-static boolean mus_paused;        
+static dboolean mus_paused;        
 
 // Music currently being played
 
@@ -206,13 +206,14 @@ void S_Shutdown(void)
 
 static void S_StopChannel(int cnum)
 {
-    int i;
     channel_t *c;
 
     c = &channels[cnum];
 
     if (c->sfxinfo)
     {
+        int i;
+
         // stop the sound playing
 
         if (I_SoundIsPlaying(c->handle))
@@ -505,10 +506,6 @@ void S_StartNewSound(mobj_t *origin, int sfx_id, int pitch)
 //    int pitch;
     int cnum;
     int volume;
-    int priority;
-    int absx;
-    int absy;
-    int dist;
 
 //    origin = (mobj_t *) origin_p;
     volume = snd_SfxVolume;
@@ -616,6 +613,11 @@ void S_StartNewSound(mobj_t *origin, int sfx_id, int pitch)
 
     if(!menuactive && devparm && !automapactive && sound_info && gamestate == GS_LEVEL && usergame)
     {
+        int priority;
+        int absx;
+        int absy;
+        int dist;
+
         mobj_t *listener = GetSoundListener();
 
         if(listener == NULL || origin == NULL)
@@ -678,11 +680,11 @@ void S_UpdateSounds(mobj_t *listener)
     int                cnum;
     int                volume;
     int                sep;
-    sfxinfo_t*        sfx;
-    channel_t*        c;
+    channel_t*         c;
 
     for (cnum=0; cnum<snd_channels; cnum++)
     {
+        sfxinfo_t* sfx;
         c = &channels[cnum];
         sfx = c->sfxinfo;
 
@@ -770,7 +772,6 @@ void S_StartMusic(int m_id)
 void S_ChangeMusic(int musicnum, int looping)
 {
     musicinfo_t *music = NULL;
-    char namebuf[9];
     void *handle;
 
     // The Doom IWAD file has two versions of the intro music: d_intro
@@ -815,6 +816,8 @@ void S_ChangeMusic(int musicnum, int looping)
     // get lumpnum if neccessary
     if (!music->lumpnum)
     {
+        char namebuf[9];
+
         M_snprintf(namebuf, sizeof(namebuf), "d_%s", music->name);
         music->lumpnum = W_GetNumForName(namebuf);
     }
@@ -841,7 +844,7 @@ void S_ChangeMusic(int musicnum, int looping)
     mus_playing = music;
 }
 
-boolean S_MusicPlaying(void)
+dboolean S_MusicPlaying(void)
 {
     return I_MusicIsPlaying();
 }

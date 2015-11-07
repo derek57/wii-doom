@@ -40,9 +40,9 @@
 // Returns true if at least one file was added.
 
 #ifndef WII
-boolean W_ParseCommandLine(void)
+dboolean W_ParseCommandLine(void)
 {
-    boolean modifiedgame = false;
+    dboolean modifiedgame = false;
     int p;
 
 #ifdef FEATURE_WAD_MERGE

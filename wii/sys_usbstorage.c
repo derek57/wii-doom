@@ -202,12 +202,12 @@ s32 USBStorage_WriteSectors(u32 sector, u32 numSectors, const void *buffer)
     return ret;
 }
 
-static boolean __io_usb_Startup(void)
+static dboolean __io_usb_Startup(void)
 {
     return USBStorage_Init() >= 0;
 }
 
-static boolean __io_usb_IsInserted(void)
+static dboolean __io_usb_IsInserted(void)
 {
     s32 ret;
     if (fd < 0) return false;
@@ -216,30 +216,30 @@ static boolean __io_usb_IsInserted(void)
         return true;
 }
 
-boolean __io_usb_ReadSectors(u32 sector, u32 count, void *buffer)
+dboolean __io_usb_ReadSectors(u32 sector, u32 count, void *buffer)
 {
     s32 ret = USBStorage_ReadSectors(sector, count, buffer);
     return ret > 0;
 }
 
-boolean __io_usb_WriteSectors(u32 sector, u32 count, void *buffer)
+dboolean __io_usb_WriteSectors(u32 sector, u32 count, void *buffer)
 {
     s32 ret = USBStorage_WriteSectors(sector, count, buffer);
     return ret > 0;
 }
 
-static boolean __io_usb_ClearStatus(void)
+static dboolean __io_usb_ClearStatus(void)
 {
     return true;
 }
 
-static boolean __io_usb_Shutdown(void)
+static dboolean __io_usb_Shutdown(void)
 {
     // do nothing
     return true;
 }
 
-static boolean __io_usb_NOP(void)
+static dboolean __io_usb_NOP(void)
 {
     // do nothing
     return true;
@@ -316,7 +316,6 @@ s32 USBStorage_WBFS_SetDevice(int dev)
 {
     s32 ret;
     static s32 retval = 0;
-    retval = 0;
     USBStorage_Init();
     // Device not opened
     if (fd < 0)
@@ -342,17 +341,17 @@ s32 USBStorage_WBFS_SetFragList(void *p, int size)
     return ret;
 }
 
-boolean umsio_Startup()
+dboolean umsio_Startup()
 {
     return USBStorage_Init() == 0;
 }
 
-boolean umsio_IsInserted()
+dboolean umsio_IsInserted()
 {
     return true; // allways true
 }
 
-boolean umsio_ReadSectors(sec_t sector, sec_t numSectors, u8 *buffer)
+dboolean umsio_ReadSectors(sec_t sector, sec_t numSectors, u8 *buffer)
 {
     u32 cnt = 0;
     s32 ret;
@@ -377,7 +376,7 @@ boolean umsio_ReadSectors(sec_t sector, sec_t numSectors, u8 *buffer)
     return true;
 }
 
-boolean umsio_WriteSectors(sec_t sector, sec_t numSectors, const u8* buffer)
+dboolean umsio_WriteSectors(sec_t sector, sec_t numSectors, const u8* buffer)
 {
     u32 cnt = 0;
     s32 ret;
@@ -403,12 +402,12 @@ boolean umsio_WriteSectors(sec_t sector, sec_t numSectors, const u8* buffer)
     return true;
 }
 
-boolean umsio_ClearStatus(void)
+dboolean umsio_ClearStatus(void)
 {
     return true;
 }
 
-boolean umsio_Shutdown()
+dboolean umsio_Shutdown()
 {
     USBStorage_Deinit();
     return true;

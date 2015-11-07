@@ -88,7 +88,7 @@
 int gl_max_scale = 4;
 
 // Simulate fake scanlines?
-static boolean scanline_mode = false;
+static dboolean scanline_mode = false;
 
 // Screen dimensions:
 static int screen_w, screen_h;
@@ -176,7 +176,7 @@ static int SetGLFunctions(void)
 }
 
 // Returns true if the specified GL extension is available.
-static boolean HaveExtension(char *extname)
+static dboolean HaveExtension(char *extname)
 {
     const GLubyte *last_ext_start;
     const GLubyte *extensions;
@@ -219,7 +219,7 @@ static boolean HaveExtension(char *extname)
 
 // Check we have all the required extensions, otherwise this
 // isn't going to work.
-static boolean CheckExtensions(void)
+static dboolean CheckExtensions(void)
 {
     return HaveExtension("GL_ARB_texture_non_power_of_two")
         && HaveExtension("GL_EXT_framebuffer_object");
@@ -318,7 +318,7 @@ static void CalculateWindowSize(void)
 }
 
 // Create the OpenGL textures used for scaling.
-static boolean CreateTextures(void)
+static dboolean CreateTextures(void)
 {
     // Unscaled texture for input:
     if (unscaled_data == NULL)
@@ -354,9 +354,9 @@ static boolean CreateTextures(void)
     return true;
 }
 
-static boolean SetupFramebuffer(void)
+static dboolean SetupFramebuffer(void)
 {
-    boolean result = true;
+    dboolean result = true;
 
     // Framebuffer for scaled texture:
     if (scaled_framebuffer == 0)
@@ -477,7 +477,7 @@ static void DrawScreen(void)
     _glEnd();
 }
 
-boolean I_GL_PreInit(void)
+dboolean I_GL_PreInit(void)
 {
     if (SDL_GL_LoadLibrary(NULL) < 0)
     {
@@ -492,7 +492,7 @@ boolean I_GL_PreInit(void)
     return true;
 }
 
-boolean I_GL_InitScale(int w, int h)
+dboolean I_GL_InitScale(int w, int h)
 {
     if (!SetGLFunctions() || !CheckExtensions())
     {

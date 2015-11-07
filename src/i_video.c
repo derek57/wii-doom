@@ -144,16 +144,16 @@ static SDL_Surface *screenbuffer = NULL;
 // Palette:
 
 static SDL_Color palette[256];
-static boolean palette_to_set;
+static dboolean palette_to_set;
 
 // display has been set up?
 
-static boolean initialized = false;
+static dboolean initialized = false;
 
 // if true, screen buffer is screen->pixels
 
 #ifndef SDL2
-static boolean native_surface;
+static dboolean native_surface;
 
 // Color depth.
 
@@ -186,12 +186,12 @@ static int startup_delay = 1000;
 // If true, we display dots at the bottom of the screen to 
 // indicate FPS.
 
-static boolean display_fps_dots;
+static dboolean display_fps_dots;
 
 // If this is true, the screen is rendered but not blitted to the
 // video buffer.
 
-static boolean noblit;
+static dboolean noblit;
 
 // disk image patch (either STDISK or STCDROM) and
 // background overwritten by the disk to be restored by EndRead
@@ -247,7 +247,7 @@ extern int display_fps;
 // Window resize state.                                        << NEW
 
 #ifndef WII
-static boolean need_resize = false;
+static dboolean need_resize = false;
 static unsigned int resize_w, resize_h;
 static unsigned int last_resize_time;
 
@@ -255,28 +255,28 @@ static unsigned int last_resize_time;
 
 static int shiftdown = 0;
 
-static boolean window_focused;
+static dboolean window_focused;
 
 // If true, game is running as a screensaver
 
-boolean screensaver_mode = false;
+dboolean screensaver_mode = false;
 
-boolean mouse_grabbed = false;
+dboolean mouse_grabbed = false;
 
 // Flag indicating whether the screen is currently visible:
 // when the screen isnt visible, don't render the screen
 
 #ifdef SDL2
-boolean screenvisible = true;
+dboolean screenvisible = true;
 #else
-boolean screenvisible;
+dboolean screenvisible;
 #endif
 
 extern int screenSize;
 
 // disable mouse?
 
-static boolean nomouse = false;
+static dboolean nomouse = false;
 int usemouse = 1;
 
 // Bit mask of mouse button state.
@@ -323,15 +323,15 @@ static char *window_position = "";
 char *video_driver = "";
 #endif
 
-extern boolean blurred;
+extern dboolean blurred;
 
 // If true, we are rendering the screen using OpenGL hardware scaling
 // rather than software mode.
 
 #ifdef WII
-static boolean using_opengl = false;
+static dboolean using_opengl = false;
 #elif !defined SDL2
-static boolean using_opengl = true;
+static dboolean using_opengl = true;
 #endif
 
 // These are (1) the window (or the full screen) that our game is rendered to
@@ -414,7 +414,7 @@ static const char shiftxform[] =
     '{', '|', '}', '~', 127
 };
 
-static boolean MouseShouldBeGrabbed()
+static dboolean MouseShouldBeGrabbed()
 {
     // never grab the mouse when in screensaver mode
    
@@ -468,7 +468,7 @@ void I_SetGrabMouseCallback(grabmouse_callback_t func)
 
 // Set the variable controlling FPS dots.
 
-void I_DisplayFPSDots(boolean dots_on)
+void I_DisplayFPSDots(dboolean dots_on)
 {
     display_fps_dots = dots_on;
 }
@@ -506,7 +506,7 @@ static void UpdateFocus(void)
 // Show or hide the mouse cursor. We have to use different techniques
 // depending on the OS.
 
-static void SetShowCursor(boolean show)
+static void SetShowCursor(dboolean show)
 {
     // On Windows, using SDL_ShowCursor() adds lag to the mouse input,
     // so work around this by setting an invisible cursor instead. On
@@ -702,7 +702,7 @@ void I_StartFrame (void)
 }
 
 #ifndef WII
-static void UpdateMouseButtonState(unsigned int button, boolean on)
+static void UpdateMouseButtonState(unsigned int button, dboolean on)
 {
     event_t event;
 
@@ -795,7 +795,6 @@ static int GetTypedChar(SDL_Event *event)
         }
     }
 #else
-    int key;
 
     // If Vanilla keyboard mapping enabled, the keyboard
     // scan code is used to give the character typed.
@@ -809,7 +808,7 @@ static int GetTypedChar(SDL_Event *event)
 
     if (vanilla_keyboard_mapping)
     {
-        key = TranslateKey(&event->key.keysym);
+        int key = TranslateKey(&event->key.keysym);
 
         // Is shift held down?  If so, perform a translation.
 
@@ -1151,8 +1150,8 @@ void I_UpdateNoBlit (void)
 #ifndef WII
 static void UpdateGrab(void)
 {
-    static boolean currently_grabbed = false;
-    boolean grab;
+    static dboolean currently_grabbed = false;
+    dboolean grab;
 
     grab = MouseShouldBeGrabbed();
 
@@ -1202,10 +1201,10 @@ static void UpdateGrab(void)
 // Return true if blit was successful.
 
 #ifndef SDL2
-static boolean BlitArea(int x1, int y1, int x2, int y2)
+static dboolean BlitArea(int x1, int y1, int x2, int y2)
 {
     int x_offset, y_offset;
-    boolean result;
+    dboolean result;
 
     // No blit needed on native surface
 
@@ -1408,11 +1407,10 @@ static screen_mode_t *I_FindScreenMode(int w, int h)
 // Adjust to an appropriate fullscreen mode.
 // Returns true if successful.
 
-static boolean AutoAdjustFullscreen(void)
+static dboolean AutoAdjustFullscreen(void)
 {
     SDL_Rect **modes;
     SDL_Rect *best_mode;
-    screen_mode_t *screen_mode;
     int diff, best_diff;
     int i;
 
@@ -1433,6 +1431,8 @@ static boolean AutoAdjustFullscreen(void)
 
     for (i=0; modes[i] != NULL; ++i)
     {
+        screen_mode_t *screen_mode;
+
         //printf("%ix%i?\n", modes[i]->w, modes[i]->h);
 
         // What screen_mode_t would be used for this video mode?
@@ -1895,7 +1895,6 @@ static void SetSDLVideoDriver(void)
 
 static void SetWindowPositionVars(void)
 {
-    char buf[64];
     int x, y;
 
     if (window_position == NULL || !strcmp(window_position, ""))
@@ -1907,8 +1906,10 @@ static void SetWindowPositionVars(void)
     {
         putenv("SDL_VIDEO_CENTERED=1");
     }
-    else if (sscanf(window_position, "%i,%i", &x, &y) == 2)
+    else if (sscanf(window_position, "%10i,%10i", &x, &y) == 2)
     {
+        char buf[64];
+
         M_snprintf(buf, sizeof(buf), "SDL_VIDEO_WINDOW_POS=%i,%i", x, y);
         putenv(buf);
     }
@@ -2349,15 +2350,7 @@ static void FinishUpdateSoftware(void)
 //
 void I_FinishUpdate (void)
 {
-    static int  lasttic;
-    static int  lastmili;
-    static int  fpscount;
-
-    static char fpsbuf[5];
-
-    int         tics;
     int         i;
-    int         mili;
 
     if (!initialized)
         return;
@@ -2395,6 +2388,9 @@ void I_FinishUpdate (void)
 
     if (display_fps_dots)
     {
+        static int  lasttic;
+        int         tics;
+
         i = I_GetTime();
         tics = i - lasttic;
         lasttic = i;
@@ -2411,6 +2407,11 @@ void I_FinishUpdate (void)
     // [AM] Real FPS counter
     if (display_fps)
     {
+        static int  lastmili;
+        static int  fpscount;
+        static char fpsbuf[5];
+        int         mili;
+
         fpscount += 1;
         i = SDL_GetTicks();
         mili = i - lastmili;
@@ -2488,14 +2489,14 @@ void I_SetPalette (byte *doompalette)
 
 int I_GetPaletteIndex(int r, int g, int b)
 {
-    int best, best_diff, diff;
+    int best, best_diff;
     int i;
 
     best = 0; best_diff = INT_MAX;
 
     for (i = 0; i < 256; ++i)
     {
-        diff = (r - palette[i].r) * (r - palette[i].r)
+        int diff = (r - palette[i].r) * (r - palette[i].r)
              + (g - palette[i].g) * (g - palette[i].g)
              + (b - palette[i].b) * (b - palette[i].b);
 

@@ -7,7 +7,7 @@
 /* Prototypes */
 s32  Wpad_Init(void);
 
-boolean Wpad_TimeButton(void);
+dboolean Wpad_TimeButton(void);
 
 // Routine to wait for a button from either the Wiimote or a gamecube
 // controller. The return value will mimic the WPAD buttons to minimize

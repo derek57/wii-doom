@@ -112,7 +112,7 @@
 //
 typedef struct
 {
-    boolean     istexture;
+    dboolean     istexture;
     int         picnum;
     int         basepic;
     int         numpics;
@@ -216,9 +216,9 @@ line_t*         linespeciallist[MAXLINEANIMS];
 
 anim_t*         lastanim;
 
-boolean         in_slime;
-boolean         levelTimer;
-boolean         *isliquid;
+dboolean         in_slime;
+dboolean         levelTimer;
+dboolean         *isliquid;
 
 char            *playername = playername_default;
 
@@ -231,7 +231,7 @@ msecnode_t      *headsecnode = NULL;
 msecnode_t      *sector_list = NULL;    // phares 3/16/98
 
 
-extern boolean  noclip_on;
+extern dboolean  noclip_on;
 
 extern int      snd_module;
 
@@ -310,7 +310,7 @@ void P_InitPicAnims (void)
     int         i;
     int         lump = W_GetNumForName2("ANIMATED");
     animdef_t   *animdefs = W_CacheLumpNum(lump, PU_STATIC);
-    int         size = (numflats + 1) * sizeof(boolean);
+    int         size = (numflats + 1) * sizeof(dboolean);
 
     isliquid = Z_Malloc(size, PU_STATIC, 0);
     memset(isliquid, false, size);
@@ -688,7 +688,7 @@ int P_FindMinSurroundingLight(sector_t *sector, int min)
 //  generalized locked doors
 //
 // killough 11/98: reformatted
-boolean P_CanUnlockGenDoor(line_t *line, player_t *player)
+dboolean P_CanUnlockGenDoor(line_t *line, player_t *player)
 {
     static char buffer[1024];
 
@@ -976,7 +976,7 @@ sector_t *P_FindModelCeilingSector(fixed_t ceildestheight, int secnum)
 //
 // jff 2/27/98 Added to check for zero tag allowed for regular special types
 //
-boolean P_CheckTag(line_t *line)
+dboolean P_CheckTag(line_t *line)
 {
     // tag not zero, allowed
     if (line->tag)
@@ -1079,7 +1079,7 @@ void P_CrossSpecialLine(line_t *line, int side, mobj_t *thing)
     {
         // pointer to line function is NULL by default, set non-null if
         // line special is walkover generalized linedef type
-        boolean (*linefunc)(line_t *) = NULL;
+        dboolean (*linefunc)(line_t *) = NULL;
 
         // check each range of generalized linedefs
         if ((unsigned int)line->special >= GenFloorBase)
@@ -1157,7 +1157,7 @@ void P_CrossSpecialLine(line_t *line, int side, mobj_t *thing)
 
     if (!thing->player)
     {
-        int okay = 0;
+        dboolean okay = false;
         switch(line->special)
         {
             case W1_Door_OpenWaitClose:
@@ -1179,7 +1179,7 @@ void P_CrossSpecialLine(line_t *line, int side, mobj_t *thing)
             case WR_TeleportToLineWithSameTag_MonstersOnly_Silent:
             case W1_Teleport_MonstersOnly_Silent:
             case WR_Teleport_MonstersOnly_Silent:
-                okay = 1;
+                okay = true;
                 break;
         }
         if (!okay)
@@ -1779,7 +1779,7 @@ P_ShootSpecialLine
     {
         // pointer to line function is NULL by default, set non-null if
         // line special is gun triggered generalized linedef type
-        boolean (*linefunc)(line_t *line) = NULL;
+        dboolean (*linefunc)(line_t *line) = NULL;
 
         // check each range of generalized linedefs
         if ((unsigned int)line->special >= GenFloorBase)
@@ -2083,14 +2083,17 @@ void P_UpdateSpecials (void)
         }
     }
 
-    animatedliquiddiff += animatedliquiddiffs[leveltime & 63];
-    animatedliquidxoffs += animatedliquidxdir;
-    if (animatedliquidxoffs > 64 * FRACUNIT)
-        animatedliquidxoffs = 0;
-    animatedliquidyoffs += animatedliquidydir;
-    if (animatedliquidyoffs > 64 * FRACUNIT)
-        animatedliquidyoffs = 0;
-    
+    if(d_swirl)
+    {
+        animatedliquiddiff += animatedliquiddiffs[leveltime & 63];
+        animatedliquidxoffs += animatedliquidxdir;
+        if (animatedliquidxoffs > 64 * FRACUNIT)
+            animatedliquidxoffs = 0;
+        animatedliquidyoffs += animatedliquidydir;
+        if (animatedliquidyoffs > 64 * FRACUNIT)
+            animatedliquidyoffs = 0;
+    }
+
     //        DO BUTTONS
     for (i = 0; i < MAXBUTTONS; i++)
         if (buttonlist[i].btimer)
@@ -2100,17 +2103,17 @@ void P_UpdateSpecials (void)
             {
                 switch(buttonlist[i].where)
                 {
-                  case top:
+                  case at_top:
                     sides[buttonlist[i].line->sidenum[0]].toptexture =
                         buttonlist[i].btexture;
                     break;
                     
-                  case middle:
+                  case at_middle:
                     sides[buttonlist[i].line->sidenum[0]].midtexture =
                         buttonlist[i].btexture;
                     break;
                     
-                  case bottom:
+                  case at_bottom:
                     sides[buttonlist[i].line->sidenum[0]].bottomtexture =
                         buttonlist[i].btexture;
                     break;
@@ -2137,13 +2140,13 @@ void P_UpdateSpecials (void)
 //
 // Special Stuff that can not be categorized
 //
-boolean EV_DoDonut(line_t*       line)
+dboolean EV_DoDonut(line_t*       line)
 {
     sector_t*                s1;
     sector_t*                s2;
     sector_t*                s3;
     int                      secnum;
-    boolean                  rtn;
+    dboolean                  rtn;
     int                      i;
     floormove_t*             floor;
 
@@ -2540,7 +2543,7 @@ static void Add_Pusher(int type, int x_mag, int y_mag, mobj_t *source, int affec
 
 pusher_t        *tmpusher;      // pusher structure for blockmap searches
 
-boolean PIT_PushThing(mobj_t* thing)
+dboolean PIT_PushThing(mobj_t* thing)
 {
     if ((sentient(thing) || (thing->flags & MF_SHOOTABLE)) && !(thing->flags & MF_NOCLIP))
     {
@@ -3031,7 +3034,7 @@ int P_FindLineFromLineTag(const line_t *line, int start)
 //
 // killough 11/98: reformatted
 
-boolean P_SectorActive(special_e t, sector_t *sec)
+dboolean P_SectorActive(special_e t, sector_t *sec)
 {
     return (t == floor_special ? !!sec->floordata :     // return whether
         (t == ceiling_special ? !!sec->ceilingdata :     // thinker of same

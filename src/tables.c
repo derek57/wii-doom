@@ -47,16 +47,14 @@
 // the case when x==y without additional checking.
 
 int SlopeDivVanilla(unsigned int num, unsigned int den)
-{
-    unsigned ans;
-    
+{    
     if (den < 512)
     {
         return SLOPERANGE;
     }
     else
     {
-        ans = (num << 3) / (den >> 8);
+        unsigned ans = (num << 3) / (den >> 8);
 
         if (ans <= SLOPERANGE)
         {
@@ -73,7 +71,6 @@ int SlopeDivVanilla(unsigned int num, unsigned int den)
 int SlopeDivCrispy(unsigned int num, unsigned int den)
 {
     // catch overflow for very big enumerators
-    uint64_t ans;
 
     if (den < 512)
     {
@@ -81,7 +78,7 @@ int SlopeDivCrispy(unsigned int num, unsigned int den)
     }
     else
     {
-        ans = ((uint64_t) num << 3) / (den >> 8);
+        uint64_t ans = ((uint64_t) num << 3) / (den >> 8);
 
         if (ans <= SLOPERANGE)
         {

@@ -68,7 +68,7 @@
 
 
 // when zero, stop the wipe
-static   boolean  go;
+static   dboolean  go;
 
 static   int      density;
 static   int      burntime;
@@ -84,7 +84,7 @@ unsigned int      Col2RGB8[65][256];
 
 extern   byte     *transtables;
 
-extern   boolean  usergame;
+extern   dboolean  usergame;
 
 extern   int      screenSize;
 extern   int      wipe_type;
@@ -240,7 +240,7 @@ int wipe_CalcBurn (byte *burnarray, int density)
 
 int wipe_doBurn (int ticks)
 {
-    boolean       done;
+    dboolean       done;
 
     fixed_t       xstep;
     fixed_t       ystep;
@@ -328,7 +328,7 @@ int wipe_exitBurn (int ticks)
     Z_Free(wipe_scr_end);
 
     // we DEFINITELY need to do this
-    if(screenSize < 8);
+    if(screenSize < 8)
     {
         if(usergame)
         {
@@ -349,10 +349,8 @@ int wipe_initFade(int ticks)
 
 int wipe_doFade(int ticks)
 {
-    boolean       changed;
+    dboolean       changed;
 
-    byte*         w;
-    byte*         e;
     byte          newval;
 
     changed = true;
@@ -361,8 +359,8 @@ int wipe_doFade(int ticks)
 
     while (ticks--)
     {        
-        w = wipe_scr;
-        e = wipe_scr_end;        
+        byte* w = wipe_scr;
+        byte* e = wipe_scr_end;        
         
         while (w != wipe_scr + SCREENWIDTH * SCREENHEIGHT)
         {
@@ -401,7 +399,6 @@ int wipe_exitFade(int ticks)
 int wipe_initMelt(int ticks)
 {
     int           i;
-    int           r;
     
     // copy start screen to main screen
     memcpy(wipe_scr, wipe_scr_start, SCREENWIDTH * SCREENHEIGHT);
@@ -418,7 +415,7 @@ int wipe_initMelt(int ticks)
 
     for (i = 1; i < SCREENWIDTH; i++)
     {
-        r = (M_Random() % 3) - 1;
+        int r = (M_Random() % 3) - 1;
 
         y[i] = y[i - 1] + r;
 
@@ -443,7 +440,7 @@ int wipe_doMelt(int ticks)
     short         *s;
     short         *d;
 
-    boolean       done = true;
+    dboolean       done = true;
 
     while (ticks--)
     {
@@ -543,7 +540,7 @@ int wipe_ScreenWipe(int wipeno, int ticks)
     if (wipeno == wipe_None)
     {
         // we DEFINITELY need to do this
-        if(screenSize < 8);
+        if(screenSize < 8)
         {
             if(usergame)
             {

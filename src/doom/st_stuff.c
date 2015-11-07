@@ -336,7 +336,7 @@ static struct
 static player_t*              plyr; 
 
 // ST_Start() has just been called
-static boolean                st_firsttime;
+static dboolean                st_firsttime;
 
 // lump number for PLAYPAL
 static int                    lu_palette;
@@ -380,39 +380,39 @@ static st_chatstateenum_t     st_chatstate;
 static st_stateenum_t         st_gamestate;
 
 // whether left-side main status bar is active
-static boolean                st_statusbaron;
+static dboolean                st_statusbaron;
 
 // whether status bar chat is active
-static boolean                st_chat;
+static dboolean                st_chat;
 
 // value of st_chat before message popped up
-static boolean                st_oldchat;
+static dboolean                st_oldchat;
 
 // whether chat window has the cursor on
-static boolean                st_cursoron;
+static dboolean                st_cursoron;
 
 // !deathmatch
-static boolean                st_notdeathmatch; 
+static dboolean                st_notdeathmatch; 
 
 // !deathmatch && st_statusbaron
-static boolean                st_armson;
+static dboolean                st_armson;
 
 // !deathmatch
-static boolean                st_fragson; 
+static dboolean                st_fragson; 
 
 // !deathmatch
-static boolean                st_itemon; 
+static dboolean                st_itemon; 
 
 // !deathmatch
-static boolean                st_chaton; 
+static dboolean                st_chaton; 
 
 // !deathmatch
-static boolean                st_scoreon; 
+static dboolean                st_scoreon; 
 
 // used for evil grin
-static boolean                oldweaponsowned[NUMWEAPONS]; 
+static dboolean                oldweaponsowned[NUMWEAPONS]; 
 
-static boolean                st_stopped = true;
+static dboolean                st_stopped = true;
 
 // main bar left
 static patch_t*               sbar;
@@ -543,7 +543,7 @@ patch_t *ST_LoadStatusKeyPatch(int keypicnum)
 // graphics are drawn to a backing screen and blitted to the real screen
 byte                *st_backing_screen;
             
-boolean             emptytallpercent;
+dboolean             emptytallpercent;
 
 void (*hudfunc)(int, int, patch_t *, byte *);
 void (*hudnumfunc)(int, int, patch_t *, byte *);
@@ -551,12 +551,12 @@ void (*godhudfunc)(int, int, patch_t *, byte *);
 
 extern channel_t    channels[8];
 
-extern boolean      BorderNeedRefresh;
-extern boolean      hud;
-extern boolean      in_slime;
-extern boolean      show_chat_bar;
-extern boolean      done;
-extern boolean      massacre_cheat_used;
+extern dboolean      BorderNeedRefresh;
+extern dboolean      hud;
+extern dboolean      in_slime;
+extern dboolean      show_chat_bar;
+extern dboolean      done;
+extern dboolean      massacre_cheat_used;
 
 extern char         massacre_textbuffer[30];
 
@@ -697,17 +697,10 @@ void ST_DrawStatus(void)
     static int      healthwait = 0;
     byte            *tinttab;
     int             invulnerability = plyr->powers[pw_invulnerability];
-    static boolean  healthanim = false;
+    static dboolean  healthanim = false;
     patch_t         *patch;
     int             currenttics = I_GetTime();
-    boolean         gamepaused = (menuactive || paused || consoleactive);
-    int             offset_special;
-    int             offset_width;
-    int             offset_height;
-    int             half_patch_width;
-    int             half_patch_height;
-    int             ammo_x;
-    int             ammo_y;
+    dboolean         gamepaused = (menuactive || paused || consoleactive);
 
     if (d_translucency)
     {
@@ -776,10 +769,15 @@ void ST_DrawStatus(void)
     if (health && ammo && ammotype != am_noammo)
     {
         static int          ammowait = 0;
-        static boolean      ammoanim = false;
+        static dboolean      ammoanim = false;
+        int                 offset_special = 0;
+        int                 ammo_x;
 
         tinttab = ((ammo <= ST_AMMO_MIN && ammoanim) || ammo > ST_AMMO_MIN || gamepaused ?
             tinttab66 : tinttab25);
+
+        if (ammo < 200 && ammo > 99)
+            offset_special = 3;
 
         if(plyr->readyweapon == wp_pistol)
             patch = W_CacheLumpName("CLIPA0", PU_CACHE);
@@ -798,24 +796,12 @@ void ST_DrawStatus(void)
         else
             patch = W_CacheLumpName("TNT1A0", PU_CACHE);
 
-        offset_special = 0;
+        ammo_x = ST_AMMO_X + 15 - (SHORT(patch->width) / 2);
 
-        offset_width = ST_AMMO_X + 15;
-        offset_height = ST_AMMO_Y + 8;
-
-        half_patch_width = (SHORT(patch->width) / 2);
-        half_patch_height = (SHORT(patch->height) / 2);
-
-        ammo_x = offset_width - half_patch_width;
-        ammo_y = offset_height - half_patch_height;
-
-        if (ammo < 200 && ammo > 99)
-            offset_special = 3;
-
-        if (patch)
+//        if (patch)	// FIXME: IS THIS ONE REALLY REQUIRED??
         {
-            hudfunc(ammo_x, ammo_y, patch, tinttab);
-            ammo_x += offset_width + half_patch_width - (ORIGHEIGHT / 2) + offset_special;
+            hudfunc(ammo_x, (ST_AMMO_Y + 8 - (SHORT(patch->height) / 2)), patch, tinttab);
+            ammo_x += ST_AMMO_X + 15 + (SHORT(patch->width) / 2) - (ORIGHEIGHT / 2) + offset_special;
         }
 
         if (ammohighlight)
@@ -855,7 +841,7 @@ void ST_DrawStatus(void)
     {
         int                 keypic_x = ST_KEYS_X - 20 * (key - 1);
         static int          keywait = 0;
-        static boolean      showkey = false;
+        static dboolean      showkey = false;
 
         if (!armor)
             keypic_x += 114;
@@ -957,12 +943,8 @@ void ST_DrawStatus(void)
 
 // Respond to keyboard input events,
 //  intercept cheats.
-boolean ST_Responder (event_t* ev)
+dboolean ST_Responder (event_t* ev)
 {
-#ifndef WII
-    int                i;
-#endif
-
     // Filter automap on/off.
     if (ev->type == ev_keyup
             && ((ev->data1 & 0xffff0000) == AM_MSGHEADER))
@@ -987,6 +969,8 @@ boolean ST_Responder (event_t* ev)
     {
         if (!netgame && gameskill != sk_nightmare)
         {
+            int i;
+
             // 'dqd' cheat for toggleable god mode
             if (cht_CheckCheat(&cheat_massacre, ev->data2))
             {
@@ -1322,9 +1306,6 @@ void ST_updateFaceWidget(void)
     angle_t            badguyangle;
     angle_t            diffang;
 
-    boolean            doevilgrin;
-
-    static int         lastattackdown = -1;
     static int         priority = 0;
 
     if (priority < 10)
@@ -1342,8 +1323,9 @@ void ST_updateFaceWidget(void)
     {
         if (plyr->bonuscount)
         {
+            dboolean doevilgrin = false;
+
             // picking up bonus
-            doevilgrin = false;
 
             for (i=0;i<NUMWEAPONS;i++)
             {
@@ -1470,6 +1452,8 @@ void ST_updateFaceWidget(void)
   
     if (priority < 6)
     {
+        static int lastattackdown = -1;
+
         // rapid firing
         if (plyr->attackdown)
         {
@@ -1607,14 +1591,14 @@ void ST_doPaletteStuff(void)
 {
 
     int                palette;
-    byte*              pal;
     int                cnt;
-    int                bzc;
 
     cnt = plyr->damagecount;
 
     if (plyr->powers[pw_strength] && !beta_style)
     {
+        int                bzc;
+
         // slowly fade the berzerk out
         bzc = 12 - (plyr->powers[pw_strength]>>6);
 
@@ -1655,6 +1639,8 @@ void ST_doPaletteStuff(void)
 
     if (palette != st_palette)
     {
+        byte*              pal;
+
         st_palette = palette;
         pal = (byte *) W_CacheLumpNum (lu_palette, PU_CACHE)+palette*768;
         I_SetPalette (pal);
@@ -1666,12 +1652,12 @@ void ST_doPaletteStuff(void)
 // Completely changed for PRE-BETA functionality
 // maybe needs more optimization but at least it's working
 //
-void ST_drawWidgets(boolean refresh)
+void ST_drawWidgets(dboolean refresh)
 {
-    int                i;
-
     if((beta_style && !automapactive) || !beta_style)
     {
+        int                i;
+
         // used by w_arms[] widgets
         st_armson = st_statusbaron && !deathmatch;
 
@@ -1760,12 +1746,13 @@ void ST_diffDraw(void)
 void ST_GetChannelInfo(sfxinfo_t *s)
 {
     int i;
-    ChanInfo_t *c;
 
     s->numchannels = 8;
     s->volume = sfxVolume;
     for (i = 0; i < 8; i++)
     {
+        ChanInfo_t *c;
+
         c = &s->chan[i];
         c->id = channels[i].sound_id;
         c->priority = channels[i].priority;
@@ -1787,10 +1774,8 @@ void ST_DrawSoundInfo(void)
 {
     int i;
     sfxinfo_t s;
-    ChanInfo_t *c;
     char text[32];
     int x;
-    int y;
     int xPos[7] = { 1, 75, 112, 156, 200, 230, 260 };
 
     if (leveltime & 16)
@@ -1812,6 +1797,9 @@ void ST_DrawSoundInfo(void)
     M_WriteText(xPos[x++], 30, "DIST");
     for (i = 0; i < s.numchannels; i++)
     {
+        ChanInfo_t *c;
+        int y;
+
         c = &s.chan[i];
         x = 0;
         y = 40 + i * 10;
@@ -1840,7 +1828,7 @@ void ST_DrawSoundInfo(void)
     BorderNeedRefresh = true;
 }
 
-void ST_Drawer (boolean fullscreen, boolean refresh)
+void ST_Drawer (dboolean fullscreen, dboolean refresh)
 {
     st_statusbaron = (!fullscreen) || automapactive;
     st_firsttime = st_firsttime || refresh;
@@ -1851,7 +1839,7 @@ void ST_Drawer (boolean fullscreen, boolean refresh)
     // If just after ST_Start(), refresh all
     if (st_firsttime || beta_style || (scaledviewheight == SCREENHEIGHT && viewactive))
     {
-        if(screenSize < 8);
+        if(screenSize < 8)
         {
             if(usergame)
                 ST_doRefresh();

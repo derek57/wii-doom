@@ -93,8 +93,8 @@ void G_PlayerReborn (int player);
 extern int          mouselook;
 extern int          snd_module;
 
-extern boolean      not_walking;
-extern boolean      in_slime;
+extern dboolean      not_walking;
+extern dboolean      in_slime;
 
 extern fixed_t      animatedliquiddiffs[64];
 extern fixed_t      attackrange;
@@ -115,7 +115,7 @@ mapthing_t          itemrespawnque[ITEMQUESIZE];
 void                (*P_BloodSplatSpawner)(fixed_t, fixed_t, int, int, mobj_t *);
 
 
-boolean P_IsVoodooDoll(mobj_t *mobj)
+dboolean P_IsVoodooDoll(mobj_t *mobj)
 {
     return (mobj->player && mobj->player->mo != mobj);
 }
@@ -124,7 +124,7 @@ boolean P_IsVoodooDoll(mobj_t *mobj)
 // P_SetMobjState
 // Returns true if the mobj is still present.
 //
-boolean P_SetMobjState(mobj_t *mobj, statenum_t state)
+dboolean P_SetMobjState(mobj_t *mobj, statenum_t state)
 {
     state_t             *st;
 
@@ -133,7 +133,7 @@ boolean P_SetMobjState(mobj_t *mobj, statenum_t state)
     statenum_t          *seenstate = seenstate_tab;             // pointer to table
     static int          recursion;                              // detects recursion
     statenum_t          i = state;                              // initial state
-    boolean             ret = true;                             // return value
+    dboolean             ret = true;                             // return value
     statenum_t          tempstate[NUMSTATES];                   // for use with recursion
     mobj_t              *shadow = mobj->shadow;
 
@@ -220,7 +220,7 @@ void P_XYMovement (mobj_t* mo)
     fixed_t        xmove;
     fixed_t        ymove;
     player_t*      player;
-    boolean        corpse = ((mo->flags & MF_CORPSE) && mo->type != MT_BARREL);
+    dboolean        corpse = ((mo->flags & MF_CORPSE) && mo->type != MT_BARREL);
 
     if (!(mo->momx | mo->momy))
     {
@@ -1034,7 +1034,7 @@ void P_RespawnSpecials (void)
     // only respawn items in deathmatch
 
     if (deathmatch != 2)
-        return;        // 
+        return;
 
     // nothing left to respawn?
     if (iquehead == iquetail)
@@ -1058,7 +1058,8 @@ void P_RespawnSpecials (void)
         S_StartSound (mo, sfx_itmbk);
 
     // find which type to spawn
-    for (i=0 ; i< NUMMOBJTYPES ; i++)
+//    for (i=0 ; i< NUMMOBJTYPES; i++)
+    for (i=0 ; i< NUMMOBJTYPES - 1 ; i++)
     {
         if (mthing->type == mobjinfo[i].doomednum)
             break;
@@ -1089,8 +1090,6 @@ void P_SpawnPlayer (mapthing_t* mthing)
     player_t    *p;
     fixed_t     x, y, z;
     mobj_t      *mobj;
-
-    int         i;
 
     if (mthing->type == 0)
     {
@@ -1140,8 +1139,12 @@ void P_SpawnPlayer (mapthing_t* mthing)
     
     // give all cards in death match mode
     if (deathmatch)
+    {
+        int i;
+
         for (i=0 ; i<NUMCARDS ; i++)
             p->cards[i] = true;
+    }
 
     if (mthing->type-1 == consoleplayer)
     {
@@ -1402,7 +1405,7 @@ void P_SpawnMapThing(mapthing_t *mthing, int index)
                 mthing->x, mthing->y, mobj->name);
     }
 
-    if (d_flipcorpses && (i == MT_SUPERSHOTGUN || (i >= MT_SHOTGUN && i <= MT_MISC25))
+    if (d_flipcorpses && (type == SuperShotgun || (type >= Shotgun && type <= BFG9000))
             && (rand() & 1))
         mobj->flags2 |= MF2_MIRRORED;
 
@@ -1467,7 +1470,14 @@ void P_SpawnBlood(fixed_t x, fixed_t y, fixed_t z, angle_t angle, int damage, mo
 
     if(target->type != MT_BARREL && target->type != MT_BETABARREL)
     {
-        for (i = (damage >> 2) + 1; i; i--)
+        int j;
+
+        if(d_maxgore)
+            j = (damage >> 2) + 1;
+        else
+            j = 1;
+
+        for (i = j; i; i--)
         {
             mobj_t      *th = Z_Malloc(sizeof(*th), PU_LEVEL, NULL);
             state_t     *st;

@@ -51,34 +51,34 @@
 // ------------------------
 // Command line parameters.
 //
-extern  boolean         nomonsters;      // checkparm of -nomonsters
-extern  boolean         respawnparm;     // checkparm of -respawn
-extern  boolean         fastparm;        // checkparm of -fast
+extern  dboolean         nomonsters;      // checkparm of -nomonsters
+extern  dboolean         respawnparm;     // checkparm of -respawn
+extern  dboolean         fastparm;        // checkparm of -fast
 
 // MAIN DEVPARM
-extern  boolean         devparm;
-extern  boolean         devparm_net;
+extern  dboolean         devparm;
+extern  dboolean         devparm_net;
 
 // NETWORK DEVPARM
-extern  boolean         devparm_net_nerve;
-extern  boolean         devparm_net_doom;
-extern  boolean         devparm_net_doom2;
-extern  boolean         devparm_net_freedoom2;
-extern  boolean         devparm_net_tnt;
-extern  boolean         devparm_net_plutonia;
-extern  boolean         devparm_net_chex;
-extern  boolean         devparm_net_hacx;
+extern  dboolean         devparm_net_nerve;
+extern  dboolean         devparm_net_doom;
+extern  dboolean         devparm_net_doom2;
+extern  dboolean         devparm_net_freedoom2;
+extern  dboolean         devparm_net_tnt;
+extern  dboolean         devparm_net_plutonia;
+extern  dboolean         devparm_net_chex;
+extern  dboolean         devparm_net_hacx;
 
 // SOLO DEVPARM
-extern  boolean         devparm_nerve;
-extern  boolean         devparm_master;
-extern  boolean         devparm_doom;
-extern  boolean         devparm_doom2;
-extern  boolean         devparm_freedoom2;
-extern  boolean         devparm_tnt;
-extern  boolean         devparm_plutonia;
-extern  boolean         devparm_chex;
-extern  boolean         devparm_hacx;
+extern  dboolean         devparm_nerve;
+extern  dboolean         devparm_master;
+extern  dboolean         devparm_doom;
+extern  dboolean         devparm_doom2;
+extern  dboolean         devparm_freedoom2;
+extern  dboolean         devparm_tnt;
+extern  dboolean         devparm_plutonia;
+extern  dboolean         devparm_chex;
+extern  dboolean         devparm_hacx;
 
 
 // -----------------------------------------------------
@@ -90,9 +90,9 @@ extern  GameVersion_t   gameversion;
 extern  char            *gamedescription;
 
 // If true, we're using one of the mangled BFG edition IWADs.
-extern  boolean         bfgedition;
-extern  boolean         nerve_pwad;
-extern  boolean         master_pwad;
+extern  dboolean         bfgedition;
+extern  dboolean         nerve_pwad;
+extern  dboolean         master_pwad;
 
 // Convenience macro.
 // 'gamemission' can be equal to pack_chex or pack_hacx, but these are
@@ -104,7 +104,7 @@ extern  boolean         master_pwad;
      gamemission == pack_hacx ? doom2 : gamemission)
 
 // Set if homebrew PWAD stuff has been added.
-extern  boolean         modifiedgame;
+extern  dboolean         modifiedgame;
 
 
 // -------------------------------------------
@@ -121,7 +121,7 @@ extern  int             startmap;
 
 extern  int             startloadgame;
 
-extern  boolean         autostart;
+extern  dboolean         autostart;
 
 // Selected by user. 
 extern  skill_t         gameskill;
@@ -132,13 +132,13 @@ extern  int             gamemap;
 extern  int             timelimit;
 
 // Nightmare mode flag, single player.
-extern  boolean         respawnmonsters;
+extern  dboolean         respawnmonsters;
 
 // Netgame? Only true if >1 player.
-extern  boolean         netgame;
+extern  dboolean         netgame;
 
 // 0=Cooperative; 1=Deathmatch; 2=Altdeath
-extern  boolean         deathmatch;
+extern  dboolean         deathmatch;
 
 // -------------------------
 // Internal parameters for sound rendering.
@@ -171,16 +171,16 @@ extern  int             snd_DesiredSfxDevice;
 // Depending on view size - no status bar?
 // Note that there is no way to disable the
 //  status bar explicitely.
-extern  boolean         statusbaractive;
+extern  dboolean         statusbaractive;
 
-extern  boolean         automapactive;        // In AutoMap mode?
-extern  boolean         menuactive;        // Menu overlayed?
-extern  boolean         paused;                // Game Pause?
+extern  dboolean         automapactive;        // In AutoMap mode?
+extern  dboolean         menuactive;        // Menu overlayed?
+extern  dboolean         paused;                // Game Pause?
 
 
-extern  boolean         viewactive;
+extern  dboolean         viewactive;
 
-extern  boolean         nodrawers;
+extern  dboolean         nodrawers;
 
 
 // This one is related to the 3-screen display mode.
@@ -210,14 +210,14 @@ extern  int             leveltime;        // tics in game play for par
 // DEMO playback/recording related stuff.
 // No demo, there is a human player in charge?
 // Disable save/end game?
-extern  boolean         usergame;
+extern  dboolean         usergame;
 
 //?
-extern  boolean         demoplayback;
-extern  boolean         demorecording;
+extern  dboolean         demoplayback;
+extern  dboolean         demorecording;
 
 // Quit after playing a demo from cmdline.
-extern  boolean         singledemo;        
+extern  dboolean         singledemo;        
 
 
 
@@ -242,7 +242,7 @@ extern  gamestate_t     gamestate;
 extern  player_t        players[MAXPLAYERS];
 
 // Alive? Disconnected?
-extern  boolean         playeringame[MAXPLAYERS];
+extern  dboolean         playeringame[MAXPLAYERS];
 
 
 // Player spawn spots for deathmatch.
@@ -272,7 +272,7 @@ extern  char *          savegamedir;
 extern  char            basedefault[1024];
 
 // if true, load all graphics at level load
-extern  boolean         precache;
+extern  dboolean         precache;
 
 
 // wipegamestate can be set to -1
@@ -299,82 +299,82 @@ extern  int             rndindex;
 
 extern  ticcmd_t        *netcmds;
 
-extern  boolean         am_overlay;
-extern  boolean         memory_usage;
+extern  dboolean         am_overlay;
+extern  dboolean         memory_usage;
 
-extern  boolean         d_recoil;
-extern  boolean         start_respawnparm;
-extern  boolean         start_fastparm;
-extern  boolean         d_maxgore;
-extern  boolean         d_thrust;
-extern  boolean         d_footstep;
-extern  boolean         d_footclip;
-extern  boolean         d_splash;
-extern  boolean         beta_bfg;
-extern  boolean         beta_skulls;
-extern  boolean         beta_plasma;
-extern  boolean         beta_imp;
-extern  boolean         d_translucency;
-extern  boolean         d_chkblood;
-extern  boolean         d_chkblood2;
-extern  boolean         d_uncappedframerate;
-extern  boolean         d_flipcorpses;
-extern  boolean         d_secrets;
-extern  boolean         beta_style;
-extern  boolean         beta_style_mode;
-extern  boolean         smoketrails;
-extern  boolean         sound_info;
-extern  boolean         autodetect_hom;
-extern  boolean         d_fallingdamage;
-extern  boolean         d_infiniteammo;
-extern  boolean         not_monsters;
-extern  boolean         overlay_trigger;
-extern  boolean         replace_missing;
-extern  boolean         d_telefrag;
-extern  boolean         d_doorstuck;
-extern  boolean         d_resurrectghosts;
-extern  boolean         d_limitedghosts;
-extern  boolean         d_blockskulls;
-extern  boolean         d_blazingsound;
-extern  boolean         d_god;
-extern  boolean         d_floors;
-extern  boolean         d_moveblock;
-extern  boolean         d_model;
-extern  boolean         d_666;
-extern  boolean         d_maskedanim;
-extern  boolean         d_sound;
-extern  boolean         d_ouchface;
-extern  boolean         show_authors;
-extern  boolean         font_shadow;
-extern  boolean         d_shadows;
-extern  boolean         d_fixspriteoffsets;
-extern  boolean         d_brightmaps;
-extern  boolean         d_fixmaperrors;
-extern  boolean         d_altlighting;
-extern  boolean         allow_infighting;
-extern  boolean         last_enemy;
-extern  boolean         float_items;
-extern  boolean         animated_drop;
-extern  boolean         crush_sound;
-extern  boolean         disable_noise;
-extern  boolean         corpses_nudge;
-extern  boolean         corpses_slide;
-extern  boolean         corpses_smearblood;
-extern  boolean         show_diskicon;
+extern  dboolean         d_recoil;
+extern  dboolean         start_respawnparm;
+extern  dboolean         start_fastparm;
+extern  dboolean         d_maxgore;
+extern  dboolean         d_thrust;
+extern  dboolean         d_footstep;
+extern  dboolean         d_footclip;
+extern  dboolean         d_splash;
+extern  dboolean         beta_bfg;
+extern  dboolean         beta_skulls;
+extern  dboolean         beta_plasma;
+extern  dboolean         beta_imp;
+extern  dboolean         d_translucency;
+extern  dboolean         d_chkblood;
+extern  dboolean         d_chkblood2;
+extern  dboolean         d_uncappedframerate;
+extern  dboolean         d_flipcorpses;
+extern  dboolean         d_secrets;
+extern  dboolean         beta_style;
+extern  dboolean         beta_style_mode;
+extern  dboolean         smoketrails;
+extern  dboolean         sound_info;
+extern  dboolean         autodetect_hom;
+extern  dboolean         d_fallingdamage;
+extern  dboolean         d_infiniteammo;
+extern  dboolean         not_monsters;
+extern  dboolean         overlay_trigger;
+extern  dboolean         replace_missing;
+extern  dboolean         d_telefrag;
+extern  dboolean         d_doorstuck;
+extern  dboolean         d_resurrectghosts;
+extern  dboolean         d_limitedghosts;
+extern  dboolean         d_blockskulls;
+extern  dboolean         d_blazingsound;
+extern  dboolean         d_god;
+extern  dboolean         d_floors;
+extern  dboolean         d_moveblock;
+extern  dboolean         d_model;
+extern  dboolean         d_666;
+extern  dboolean         d_maskedanim;
+extern  dboolean         d_sound;
+extern  dboolean         d_ouchface;
+extern  dboolean         show_authors;
+extern  dboolean         font_shadow;
+extern  dboolean         d_shadows;
+extern  dboolean         d_fixspriteoffsets;
+extern  dboolean         d_brightmaps;
+extern  dboolean         d_fixmaperrors;
+extern  dboolean         d_altlighting;
+extern  dboolean         allow_infighting;
+extern  dboolean         last_enemy;
+extern  dboolean         float_items;
+extern  dboolean         animated_drop;
+extern  dboolean         crush_sound;
+extern  dboolean         disable_noise;
+extern  dboolean         corpses_nudge;
+extern  dboolean         corpses_slide;
+extern  dboolean         corpses_smearblood;
+extern  dboolean         show_diskicon;
 /*
-extern  boolean         nerve;
-extern  boolean         chex;
+extern  dboolean         nerve;
+extern  dboolean         chex;
 */
-extern  boolean         chexdeh;
-//extern  boolean         hacx;
-extern  boolean         BTSX;
-extern  boolean         BTSXE1;
-extern  boolean         BTSXE2;
-extern  boolean         BTSXE2A;
-extern  boolean         BTSXE2B;
-extern  boolean         BTSXE3;
-extern  boolean         BTSXE3A;
-extern  boolean         BTSXE3B;
+extern  dboolean         chexdeh;
+//extern  dboolean         hacx;
+extern  dboolean         BTSX;
+extern  dboolean         BTSXE1;
+extern  dboolean         BTSXE2;
+extern  dboolean         BTSXE2A;
+extern  dboolean         BTSXE2B;
+extern  dboolean         BTSXE3;
+extern  dboolean         BTSXE3A;
+extern  dboolean         BTSXE3B;
 
 extern  int             d_colblood;
 extern  int             d_colblood2;

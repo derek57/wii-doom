@@ -109,25 +109,25 @@ int                             numsprites;
 static spriteframe_t            sprtemp[MAX_SPRITE_FRAMES];
 static int                      maxframe;
 /*
-boolean                         r_liquid_clipsprites = r_liquid_clipsprites_default;
-boolean                         r_playersprites = r_playersprites_default;
+dboolean                         r_liquid_clipsprites = r_liquid_clipsprites_default;
+dboolean                         r_playersprites = r_playersprites_default;
 */
 extern fixed_t                  animatedliquiddiff;
-extern boolean                  inhelpscreens;
+extern dboolean                  inhelpscreens;
 /*
-extern boolean                  r_liquid_bob;
-extern boolean                  r_shadows;
-extern boolean                  r_translucency;
+extern dboolean                  r_liquid_bob;
+extern dboolean                  r_shadows;
+extern dboolean                  r_translucency;
 */
-extern boolean                  skippsprinterp;
-extern boolean                  realframe;
+extern dboolean                  skippsprinterp;
+extern dboolean                  realframe;
 
 //
 // R_InstallSpriteLump
 // Local function for R_InitSprites.
 //
 static void R_InstallSpriteLump(lumpinfo_t *lump, int lumpnum, unsigned int frame, char rot,
-    boolean flipped)
+    dboolean flipped)
 {
     unsigned int        rotation;
 
@@ -578,8 +578,6 @@ int     fuzzpos;
 //
 void R_DrawVisSprite(vissprite_t *vis)
 {
-    column_t*   column;
-    int         texturecolumn;
     fixed_t     frac = vis->startfrac;
     fixed_t     xiscale = vis->xiscale;
     fixed_t     x2 = vis->x2;
@@ -651,9 +649,10 @@ void R_DrawVisSprite(vissprite_t *vis)
 
     for (dc_x = vis->x1; dc_x <= x2; dc_x++, frac += xiscale)
     {
-        static boolean error = 0;
-        texturecolumn = frac>>FRACBITS;
+        column_t*   column;
+        int         texturecolumn = frac>>FRACBITS;
 #ifdef RANGECHECK
+        static dboolean error = 0;
         if (texturecolumn < 0 || texturecolumn >= SHORT(patch->width))
         {
             // [crispy] make non-fatal
@@ -734,7 +733,7 @@ void R_ProjectSprite(mobj_t *thing)
     spriteframe_t       *sprframe;
     int                 lump;
 
-    boolean             flip;
+    dboolean             flip;
 
     vissprite_t         *vis;
 
@@ -834,13 +833,13 @@ void R_ProjectSprite(mobj_t *thing)
         else
             rot = (ang - fangle + (angle_t)(ANG45 / 2) * 9 - (angle_t)(ANG180 / 16)) >> 28;
         lump = sprframe->lump[rot];
-        flip = ((boolean)(sprframe->flip & (1 << rot)) || (flags2 & MF2_MIRRORED));
+        flip = ((dboolean)(sprframe->flip & (1 << rot)) || (flags2 & MF2_MIRRORED));
     }
     else
     {
         // use single rotation for all views
         lump = sprframe->lump[0];
-        flip = ((boolean)(sprframe->flip & 1) || (flags2 & MF2_MIRRORED));
+        flip = ((dboolean)(sprframe->flip & 1) || (flags2 & MF2_MIRRORED));
     }
 
     if (thing->state->dehacked)
@@ -1117,7 +1116,7 @@ void R_ProjectShadow(mobj_t *thing)
     spriteframe_t       *sprframe;
     int                 lump;
 
-    boolean             flip;
+    dboolean             flip;
 
     vissprite_t         *vis;
 
@@ -1177,13 +1176,13 @@ void R_ProjectShadow(mobj_t *thing)
         else
             rot = (ang - thing->angle + (angle_t)(ANG45 / 2) * 9 - (angle_t)(ANG180 / 16)) >> 28;
         lump = sprframe->lump[rot];
-        flip = ((boolean)(sprframe->flip & (1 << rot)) || (thing->flags2 & MF2_MIRRORED));
+        flip = ((dboolean)(sprframe->flip & (1 << rot)) || (thing->flags2 & MF2_MIRRORED));
     }
     else
     {
         // use single rotation for all views
         lump = sprframe->lump[0];
-        flip = ((boolean)(sprframe->flip & 1) || (thing->flags2 & MF2_MIRRORED));
+        flip = ((dboolean)(sprframe->flip & 1) || (thing->flags2 & MF2_MIRRORED));
     }
 
     // calculate edges of the shape
@@ -1262,9 +1261,9 @@ void R_AddSprites(sector_t *sec, int lightlevel)
 //
 // R_DrawPSprite
 //
-static boolean bflash;
+static dboolean bflash;
 
-static void R_DrawPSprite(pspdef_t *psp, boolean invisibility)
+static void R_DrawPSprite(pspdef_t *psp, dboolean invisibility)
 {
     fixed_t             tx;
     int                 x1, x2;
@@ -1273,7 +1272,7 @@ static void R_DrawPSprite(pspdef_t *psp, boolean invisibility)
     long                frame;
     spriteframe_t       *sprframe;
     int                 lump;
-    boolean             flip;
+    dboolean             flip;
     vissprite_t         *vis;
     vissprite_t         avis;
     state_t             *state;
@@ -1296,7 +1295,7 @@ static void R_DrawPSprite(pspdef_t *psp, boolean invisibility)
     sprframe = &sprdef->spriteframes[frame & FF_FRAMEMASK];
 
     lump = sprframe->lump[0];
-    flip = (boolean)(sprframe->flip & 1);
+    flip = (dboolean)(sprframe->flip & 1);
 
     // calculate edges of the shape
     tx = psp->sx - ORIGWIDTH / 2 * FRACUNIT - (state->dehacked ? spriteoffset[lump] :

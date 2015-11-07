@@ -66,25 +66,37 @@
 // standard and defined to include stdint.h, so include this. 
 
 #include <inttypes.h>
-#ifdef WII
-#include <gctypes.h>                // FIXME: WARNING, THE WII DEVKITPRO (DEVKITPPC)
-#else                               // HAS A PROBLEM WITH THE "BOOLEAN" TYPEDEF HERE
-#ifdef __cplusplus                  // SO WE USE THE DEFINES FROM THE DEVKIT INSTEAD
-                                    // OF THOSE DEFINED RIGHT HERE FROM CHOCOLATE.
+
+#ifdef __cplusplus
+
 // Use builtin bool type with C++.
 
-typedef bool boolean;
+typedef bool dboolean;
 
 #else
+
+#ifdef WII
+#ifdef FALSE
+#undef FALSE
+#endif
+#ifdef false
+#undef false
+#endif
+#ifdef TRUE
+#undef TRUE
+#endif
+#ifdef true
+#undef true
+#endif
+#endif
 
 typedef enum
 {
     false, 
     true
-} boolean;
+} dboolean;
+#endif
 
-#endif
-#endif
 typedef uint8_t byte;
 
 typedef struct {

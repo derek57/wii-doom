@@ -73,7 +73,7 @@ extern unsigned int numlumps;
 extern unsigned int W_LumpNameHash(const char *s);
 
 
-wad_file_t *W_AddFile (char *filename, boolean automatic);
+wad_file_t *W_AddFile (char *filename, dboolean automatic);
 
 lumpindex_t W_CheckNumForName(char *name);
 lumpindex_t W_GetNumForName(char *name);
@@ -93,7 +93,7 @@ void        W_ReadLump(lumpindex_t lump, void *dest);
 void        *W_CacheLumpNum(lumpindex_t lump, int tag);
 void        *W_CacheLumpName(char *name, int tag);
 
-boolean     HasDehackedLump(const char *pwadname);
+dboolean     HasDehackedLump(const char *pwadname);
 
 lumpindex_t W_GetNumForName2(char *name);
 lumpindex_t W_RangeCheckNumForName(lumpindex_t min, lumpindex_t max, char *name);

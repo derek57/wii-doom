@@ -878,8 +878,8 @@ typedef struct
 static memzone_t*      mainzone;
 
 #ifndef WII
-static boolean         zero_on_free;
-static boolean         scan_on_free;
+static dboolean         zero_on_free;
+static dboolean         scan_on_free;
 #endif
 
 static const size_t    HEADER_SIZE = (sizeof(memblock_t) + MEM_ALIGN - 1) & ~(MEM_ALIGN - 1);
@@ -1027,13 +1027,13 @@ static void ScanForBlock(void *start, void *end)
 {
     memblock_t *block;
     void **mem;
-    int i, len, tag;
+    int i, len;
 
     block = mainzone->blocklist.next;
 
     while (block->next != &mainzone->blocklist)
     {
-        tag = block->tag;
+        int tag = block->tag;
 
         if (tag == PU_STATIC || tag == PU_LEVEL || tag == PU_LEVSPEC)
         {
@@ -1557,7 +1557,7 @@ void* Z_MallocAlign (int reqsize, int tag, void **user, int alignbits)
     // choose safe interpretation
     if( tag == PU_FREE )
     {
-       tag = PU_LEVEL;
+        tag = PU_LEVEL;
     }
 
     // alloc rounded up to next 4 byte alignment

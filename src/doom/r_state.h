@@ -121,8 +121,8 @@ typedef enum
 
 extern mapformat_t      mapformat;
 
-extern boolean         boomlinespecials;
-extern boolean         blockmaprecreated;
+extern dboolean         boomlinespecials;
+extern dboolean         blockmaprecreated;
 //
 // POV data.
 //

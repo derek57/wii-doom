@@ -66,29 +66,29 @@
 
 
 // MAIN DEVPARM
-boolean        devparm = false;
-boolean        devparm_net = false;
+dboolean        devparm = false;
+dboolean        devparm_net = false;
 
 // SOLO DEVPARM
-boolean        devparm_nerve = false;
-boolean        devparm_master = false;
-boolean        devparm_doom = false;
-boolean        devparm_doom2 = false;
-boolean        devparm_freedoom2 = false;
-boolean        devparm_tnt = false;
-boolean        devparm_plutonia = false;
-boolean        devparm_chex = false;
-boolean        devparm_hacx = false;
+dboolean        devparm_nerve = false;
+dboolean        devparm_master = false;
+dboolean        devparm_doom = false;
+dboolean        devparm_doom2 = false;
+dboolean        devparm_freedoom2 = false;
+dboolean        devparm_tnt = false;
+dboolean        devparm_plutonia = false;
+dboolean        devparm_chex = false;
+dboolean        devparm_hacx = false;
 
 // NETWORK DEVPARM
-boolean        devparm_net_nerve = false;
-boolean        devparm_net_doom = false;
-boolean        devparm_net_doom2 = false;
-boolean        devparm_net_freedoom2 = false;
-boolean        devparm_net_tnt = false;
-boolean        devparm_net_plutonia = false;
-boolean        devparm_net_chex = false;
-boolean        devparm_net_hacx = false;
+dboolean        devparm_net_nerve = false;
+dboolean        devparm_net_doom = false;
+dboolean        devparm_net_doom2 = false;
+dboolean        devparm_net_freedoom2 = false;
+dboolean        devparm_net_tnt = false;
+dboolean        devparm_net_plutonia = false;
+dboolean        devparm_net_chex = false;
+dboolean        devparm_net_hacx = false;
 
 
 int exit_by_reset = 0;

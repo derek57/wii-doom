@@ -315,17 +315,17 @@ typedef enum
 } change_e;
 
 
-extern boolean   *isliquid;
-extern boolean   *isteleport;
+extern dboolean   *isliquid;
+extern dboolean   *isteleport;
 
 
-boolean EV_DoGenFloor(line_t *line);
-boolean EV_DoGenCeiling(line_t *line);
-boolean EV_DoGenLift(line_t *line);
-boolean EV_DoGenStairs(line_t *line);
-boolean EV_DoGenCrusher(line_t *line);
-boolean EV_DoGenDoor(line_t *line);
-boolean EV_DoGenLockedDoor(line_t *line);
+dboolean EV_DoGenFloor(line_t *line);
+dboolean EV_DoGenCeiling(line_t *line);
+dboolean EV_DoGenLift(line_t *line);
+dboolean EV_DoGenStairs(line_t *line);
+dboolean EV_DoGenCrusher(line_t *line);
+dboolean EV_DoGenDoor(line_t *line);
+dboolean EV_DoGenLockedDoor(line_t *line);
 
 
 //
@@ -511,14 +511,14 @@ typedef struct
 {
     thinker_t    thinker;
     floor_e      type;
-    boolean      crush;
+    dboolean      crush;
     sector_t*    sector;
     int          direction;
     int          newspecial;
     short        texture;
     fixed_t      floordestheight;
     fixed_t      speed;
-    boolean      stopsound;
+    dboolean      stopsound;
 
 } floormove_t;
 
@@ -568,7 +568,7 @@ typedef struct
     fixed_t                     bottomheight;
     fixed_t                     topheight;
     fixed_t                     speed;
-    boolean                     crush;
+    dboolean                     crush;
 
     // 1 = up, 0 = waiting, -1 = down
     int                         direction;
@@ -606,9 +606,9 @@ typedef struct
 
 typedef enum
 {
-    top,
-    middle,
-    bottom
+    at_top,
+    at_middle,
+    at_bottom
 
 } bwhere_e;
 
@@ -664,7 +664,7 @@ typedef struct
     int          count;
     plat_e       status;
     plat_e       oldstatus;
-    boolean      crush;
+    dboolean      crush;
     int          tag;
     plattype_e   type;
     
@@ -766,7 +766,7 @@ mobj_t *P_GetPushThing(int);
 //
 // End-level timer (-TIMER option)
 //
-extern boolean    levelTimer;
+extern dboolean    levelTimer;
 
 extern int        levelTimeCount;
 
@@ -786,7 +786,7 @@ void    P_UpdateSpecials (void);
 void P_ResurrectPlayer(player_t *player);
 
 // when needed
-boolean
+dboolean
 P_UseSpecialLine
 ( mobj_t*        thing,
   line_t*        line,
@@ -847,7 +847,7 @@ getNextSector
 //
 // SPECIAL
 //
-boolean EV_DoDonut(line_t* line);
+dboolean EV_DoDonut(line_t* line);
 
 void    P_SpawnFireFlicker (sector_t* sector);
 void    T_LightFlash (lightflash_t* flash);
@@ -889,7 +889,7 @@ EV_DoPlat
 
 void    P_AddActivePlat(plat_t* plat);
 void    P_RemoveActivePlat(plat_t* plat);
-boolean    EV_StopPlat(line_t* line);
+dboolean    EV_StopPlat(line_t* line);
 void    P_ActivateInStasis(int tag);
 
 void
@@ -908,9 +908,9 @@ void
 P_SpawnDoorRaiseIn5Mins
 ( sector_t*      sec);
 
-boolean P_CheckLineSide(mobj_t *actor, fixed_t x, fixed_t y);
+dboolean P_CheckLineSide(mobj_t *actor, fixed_t x, fixed_t y);
 
-boolean P_CheckTag(line_t *line);
+dboolean P_CheckTag(line_t *line);
 
 
 #if 0 // UNUSED
@@ -1000,14 +1000,14 @@ int EV_DoCeiling(line_t *line, ceiling_e type);
 void    T_MoveCeiling (ceiling_t* ceiling);
 void    P_AddActiveCeiling(ceiling_t* c);
 void    P_RemoveActiveCeiling(ceiling_t* c);
-boolean    EV_CeilingCrushStop(line_t* line);
-boolean    P_ActivateInStasisCeiling(line_t* line);
+dboolean    EV_CeilingCrushStop(line_t* line);
+dboolean    P_ActivateInStasisCeiling(line_t* line);
 
 void P_RemoveAllActiveCeilings(void);
 void P_RemoveAllActivePlats(void);
 
 
-result_e T_MovePlane(sector_t *sector, fixed_t speed, fixed_t dest, boolean crush,
+result_e T_MovePlane(sector_t *sector, fixed_t speed, fixed_t dest, dboolean crush,
     int floorOrCeiling, int direction);
 
 int EV_BuildStairs(line_t *line, stair_e type);
@@ -1019,8 +1019,8 @@ void T_MoveElevator(elevator_t *elevator);
 void T_Scroll(scroll_t *s);
 void T_FireFlicker(fireflicker_t *flick);
 
-boolean EV_SilentTeleport(line_t *line, int side, mobj_t *thing);
-boolean EV_SilentLineTeleport(line_t *line, int side, mobj_t *thing, boolean reverse);
+dboolean EV_SilentTeleport(line_t *line, int side, mobj_t *thing);
+dboolean EV_SilentLineTeleport(line_t *line, int side, mobj_t *thing, dboolean reverse);
 
 fixed_t P_FindNextLowestCeiling(sector_t *sec, int currentheight); // jff 2/04/98
 fixed_t P_FindNextHighestCeiling(sector_t *sec, int currentheight); // jff 2/04/98
@@ -1028,10 +1028,10 @@ fixed_t P_FindShortestTextureAround(int secnum); // jff 2/04/98
 fixed_t P_FindShortestUpperAround(int secnum); // jff 2/04/98
 sector_t *P_FindModelFloorSector(fixed_t floordestheight, int secnum); //jff 02/04/98
 sector_t *P_FindModelCeilingSector(fixed_t ceildestheight, int secnum); //jff 02/04/98 
-boolean P_CanUnlockGenDoor(line_t *line, player_t *player);
-boolean P_SectorActive(special_e t, sector_t *sec);
-boolean EV_DoChange(line_t *line, change_e changetype);
-boolean EV_DoElevator(line_t *line, elevator_e elevtype);
+dboolean P_CanUnlockGenDoor(line_t *line, player_t *player);
+dboolean P_SectorActive(special_e t, sector_t *sec);
+dboolean EV_DoChange(line_t *line, change_e changetype);
+dboolean EV_DoElevator(line_t *line, elevator_e elevtype);
 void P_StartButton(line_t *line, bwhere_e w, int texture, int time);
 
 //

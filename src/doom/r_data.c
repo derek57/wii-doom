@@ -128,7 +128,7 @@ fixed_t         *newspriteoffset;
 fixed_t         *newspritetopoffset;
 
 extern char     *iwadfile;
-//boolean        r_fixspriteoffsets = r_fixspriteoffsets_default;
+//dboolean        r_fixspriteoffsets = r_fixspriteoffsets_default;
 
 enum {
     r, g, b
@@ -233,7 +233,7 @@ static struct
     { "ZELDOOR",  redonly        }, { "",         0              }
 };
 
-//extern boolean r_brightmaps;
+//extern dboolean r_brightmaps;
 
 //
 // MAPTEXTURE_T CACHING
@@ -253,7 +253,7 @@ static struct
 //  from a patch into a cached post.
 //
 void R_DrawColumnInCache(const column_t *patch, byte *cache, int originy, int cacheheight,
-    byte *marks, boolean oldmethod)
+    byte *marks, dboolean oldmethod)
 {
     int td;
     int topdelta = -1;
@@ -322,7 +322,7 @@ static void R_GenerateComposite(int texnum)
     byte                *marks = calloc(texture->width, texture->height);
     byte                *source;
 
-    boolean             tekwall1 = (texnum == R_CheckTextureNumForName("TEKWALL1"));
+    dboolean             tekwall1 = (texnum == R_CheckTextureNumForName("TEKWALL1"));
 
     // [crispy] initialize composite background to black (index 0)
     memset(block, 0, texturecompositesize[texnum]);
@@ -523,7 +523,7 @@ static void R_GenerateLookup(int texnum)
 //
 // R_GetColumn
 //
-byte *R_GetColumn(int tex, int col, boolean opaque)
+byte *R_GetColumn(int tex, int col, dboolean opaque)
 {
     int lump;
 
@@ -1023,6 +1023,7 @@ void R_InitSpriteLumps(void)
 // [crispy] Initialize translucency filter map
 // based in parts on the implementation from boom202s/R_DATA.C:676-787
 //
+/*
 void R_InitTranMap()
 {
     int lump = W_CheckNumForName("TRANMAP");
@@ -1158,7 +1159,7 @@ void R_InitTranMap()
         Z_ChangeTag(playpal, PU_CACHE);
     }
 }
-
+*/
 //
 // R_InitColormaps
 //
@@ -1171,8 +1172,8 @@ byte grays[256];
 
 void R_InitColormaps(void)
 {
-    boolean keepgray = false;
-    boolean    COLORMAP = (W_CheckMultipleLumps("COLORMAP") > 1);
+    dboolean keepgray = false;
+    dboolean    COLORMAP = (W_CheckMultipleLumps("COLORMAP") > 1);
     int        i, j, k;
     byte       *palsrc, *palette, *playpal;
     char       c[3];
@@ -1277,7 +1278,7 @@ void R_InitData(void)
     R_InitTextures();
     R_InitFlats();
     R_InitSpriteLumps();
-    R_InitTranMap(); // [crispy] prints a mark itself
+//    R_InitTranMap(); // [crispy] prints a mark itself
     R_InitColormaps();
 }
 

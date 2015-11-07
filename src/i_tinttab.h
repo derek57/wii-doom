@@ -41,6 +41,7 @@
 #define __I_TINTTAB__
 
 
+extern byte             *tranmap;
 extern byte             *tinttab;
 extern byte             *tinttab25;
 extern byte             *tinttab33;

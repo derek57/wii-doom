@@ -114,11 +114,11 @@ static fixed_t          xoffs, yoffs;                   // killough 2/28/98: fla
 fixed_t                 yslope[SCREENHEIGHT];
 fixed_t                 distscale[SCREENWIDTH];
 
-//boolean                r_liquid_swirl = r_liquid_swirl_default;
+//dboolean                r_liquid_swirl = r_liquid_swirl_default;
 
 extern int              mouselook;
 extern fixed_t          animatedliquiddiff;
-//extern boolean         r_liquid_bob;
+//extern dboolean         r_liquid_bob;
 
 //
 // R_MapPlane
@@ -574,8 +574,8 @@ void R_DrawPlanes(void)
                 else
                 {
                     // regular flat
-                    boolean    liquid = isliquid[picnum];
-                    boolean    swirling = (liquid && d_swirl);
+                    dboolean    liquid = isliquid[picnum];
+                    dboolean    swirling = (liquid && d_swirl);
                     int         lumpnum = firstflat + flattranslation[picnum];
 
                     ds_source = (swirling ? R_DistortedFlat(picnum) :

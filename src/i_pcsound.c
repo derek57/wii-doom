@@ -41,10 +41,10 @@
 
 #define TIMER_FREQ 1193181 /* hz */
 
-static boolean pcs_initialized = false;
+static dboolean pcs_initialized = false;
 
 static SDL_mutex *sound_lock;
-static boolean use_sfx_prefix;
+static dboolean use_sfx_prefix;
 
 static uint8_t *current_sound_lump = NULL;
 static uint8_t *current_sound_pos = NULL;
@@ -74,8 +74,6 @@ static const uint16_t divisors[] = {
 
 static void PCSCallbackFunc(int *duration, int *freq)
 {
-    unsigned int tone;
-
     *duration = 1000 / 140;
 
     if (SDL_LockMutex(sound_lock) < 0)
@@ -86,6 +84,8 @@ static void PCSCallbackFunc(int *duration, int *freq)
 
     if (current_sound_lump != NULL && current_sound_remaining > 0)
     {
+        unsigned int tone;
+
         // Read the next tone
 
         tone = *current_sound_pos;
@@ -114,7 +114,7 @@ static void PCSCallbackFunc(int *duration, int *freq)
     SDL_UnlockMutex(sound_lock);
 }
 
-static boolean CachePCSLump(sfxinfo_t *sfxinfo)
+static dboolean CachePCSLump(sfxinfo_t *sfxinfo)
 {
     int lumplen;
     int headerlen;
@@ -159,7 +159,7 @@ static boolean CachePCSLump(sfxinfo_t *sfxinfo)
 // Heretic source code, where there are remnants of this left over
 // from Doom.
 
-static boolean IsDisabledSound(sfxinfo_t *sfxinfo)
+static dboolean IsDisabledSound(sfxinfo_t *sfxinfo)
 {
     int i;
     const char *disabled_sounds[] = {
@@ -268,7 +268,7 @@ static int I_PCS_GetSfxLumpNum(sfxinfo_t* sfx)
 }
 
 
-static boolean I_PCS_SoundIsPlaying(int handle)
+static dboolean I_PCS_SoundIsPlaying(int handle)
 {
     if (!pcs_initialized)
     {
@@ -283,7 +283,7 @@ static boolean I_PCS_SoundIsPlaying(int handle)
     return current_sound_lump != NULL && current_sound_remaining > 0;
 }
 
-/*static*/ boolean I_PCS_InitSound(boolean _use_sfx_prefix)
+/*static*/ dboolean I_PCS_InitSound(dboolean _use_sfx_prefix)
 {
     use_sfx_prefix = _use_sfx_prefix;
 

@@ -77,7 +77,7 @@ void I_InitScale(byte *_src_buffer, byte *_dest_buffer, int _dest_pitch)
 // 1x scale doesn't really do any scaling: it just copies the buffer
 // a line at a time for when pitch != SCREENWIDTH (!native_surface)
 
-static boolean I_Scale1x(int x1, int y1, int x2, int y2)
+static dboolean I_Scale1x(int x1, int y1, int x2, int y2)
 {
     byte *bufp, *screenp;
     int y;
@@ -107,7 +107,7 @@ screen_mode_t mode_scale_1x = {
 
 // 2x scale (640x400)
 
-static boolean I_Scale2x(int x1, int y1, int x2, int y2)
+static dboolean I_Scale2x(int x1, int y1, int x2, int y2)
 {
     byte *bufp, *screenp, *screenp2;
     int x, y;
@@ -148,7 +148,7 @@ screen_mode_t mode_scale_2x = {
 
 // 3x scale (960x600)
 
-static boolean I_Scale3x(int x1, int y1, int x2, int y2)
+static dboolean I_Scale3x(int x1, int y1, int x2, int y2)
 {
     byte *bufp, *screenp, *screenp2, *screenp3;
     int x, y;
@@ -193,7 +193,7 @@ screen_mode_t mode_scale_3x = {
 
 // 4x scale (1280x800)
 
-static boolean I_Scale4x(int x1, int y1, int x2, int y2)
+static dboolean I_Scale4x(int x1, int y1, int x2, int y2)
 {
     byte *bufp, *screenp, *screenp2, *screenp3, *screenp4;
     int x, y;
@@ -242,7 +242,7 @@ screen_mode_t mode_scale_4x = {
 
 // 5x scale (1600x1000)
 
-static boolean I_Scale5x(int x1, int y1, int x2, int y2)
+static dboolean I_Scale5x(int x1, int y1, int x2, int y2)
 {
     byte *bufp, *screenp, *screenp2, *screenp3, *screenp4, *screenp5;
     int x, y;
@@ -299,10 +299,8 @@ screen_mode_t mode_scale_5x = {
 // [crispy] share with v_trans.c:V_Colorize() and r_data.c:R_InitTranMap()
 int FindNearestColor(byte *palette, int r, int g, int b)
 {
-    byte *col;
     int best;
     int best_diff;
-    int diff;
     int i;
 
     best = 0;
@@ -310,8 +308,8 @@ int FindNearestColor(byte *palette, int r, int g, int b)
 
     for (i=0; i<256; ++i)
     {
-        col = palette + i * 3;
-        diff = (r - col[0]) * (r - col[0])
+        byte *col = palette + i * 3;
+        int diff = (r - col[0]) * (r - col[0])
              + (g - col[1]) * (g - col[1])
              + (b - col[2]) * (b - col[2]);
 
@@ -490,7 +488,7 @@ static inline void WriteBlendedLine1x(byte *dest, byte *src1, byte *src2,
 
 // 1x stretch (320x240)
 
-static boolean I_Stretch1x(int x1, int y1, int x2, int y2)
+static dboolean I_Stretch1x(int x1, int y1, int x2, int y2)
 {
     byte *bufp, *screenp;
     int y;
@@ -564,11 +562,10 @@ static inline void WriteBlendedLine2x(byte *dest, byte *src1, byte *src2,
                                byte *stretch_table)
 {
     int x;
-    int val;
 
     for (x=0; x<SCREENWIDTH; ++x)
     {
-        val = stretch_table[*src1 * 256 + *src2];
+        int val = stretch_table[*src1 * 256 + *src2];
         dest[0] = val;
         dest[1] = val;
         dest += 2;
@@ -579,7 +576,7 @@ static inline void WriteBlendedLine2x(byte *dest, byte *src1, byte *src2,
 
 // 2x stretch (640x480)
 
-static boolean I_Stretch2x(int x1, int y1, int x2, int y2)
+static dboolean I_Stretch2x(int x1, int y1, int x2, int y2)
 {
     byte *bufp, *screenp;
     int y;
@@ -678,11 +675,10 @@ static inline void WriteBlendedLine3x(byte *dest, byte *src1, byte *src2,
                                byte *stretch_table)
 {
     int x;
-    int val;
 
     for (x=0; x<SCREENWIDTH; ++x)
     {
-        val = stretch_table[*src1 * 256 + *src2];
+        int val = stretch_table[*src1 * 256 + *src2];
         dest[0] = val;
         dest[1] = val;
         dest[2] = val;
@@ -694,7 +690,7 @@ static inline void WriteBlendedLine3x(byte *dest, byte *src1, byte *src2,
 
 // 3x stretch (960x720)
 
-static boolean I_Stretch3x(int x1, int y1, int x2, int y2)
+static dboolean I_Stretch3x(int x1, int y1, int x2, int y2)
 {
     byte *bufp, *screenp;
     int y;
@@ -818,11 +814,10 @@ static inline void WriteBlendedLine4x(byte *dest, byte *src1, byte *src2,
                                byte *stretch_table)
 {
     int x;
-    int val;
 
     for (x=0; x<SCREENWIDTH; ++x)
     {
-        val = stretch_table[*src1 * 256 + *src2];
+        int val = stretch_table[*src1 * 256 + *src2];
         dest[0] = val;
         dest[1] = val;
         dest[2] = val;
@@ -835,7 +830,7 @@ static inline void WriteBlendedLine4x(byte *dest, byte *src1, byte *src2,
 
 // 4x stretch (1280x960)
 
-static boolean I_Stretch4x(int x1, int y1, int x2, int y2)
+static dboolean I_Stretch4x(int x1, int y1, int x2, int y2)
 {
     byte *bufp, *screenp;
     int y;
@@ -982,7 +977,7 @@ static inline void WriteLine5x(byte *dest, byte *src)
 
 // 5x stretch (1600x1200)
 
-static boolean I_Stretch5x(int x1, int y1, int x2, int y2)
+static dboolean I_Stretch5x(int x1, int y1, int x2, int y2)
 {
     byte *bufp, *screenp;
     int y;
@@ -1085,7 +1080,7 @@ static inline void WriteSquashedLine1x(byte *dest, byte *src)
 
 // 1x squashed (256x200)
 
-static boolean I_Squash1x(int x1, int y1, int x2, int y2)
+static dboolean I_Squash1x(int x1, int y1, int x2, int y2)
 {
     byte *bufp, *screenp;
     int y;
@@ -1175,7 +1170,7 @@ static inline void WriteSquashedLine1p5x(byte *dest, byte *src)
     }
 }
 
-static boolean I_Squash1p5x(int x1, int y1, int x2, int y2)
+static dboolean I_Squash1p5x(int x1, int y1, int x2, int y2)
 {
     byte *bufp, *screenp;
     int y;
@@ -1216,7 +1211,7 @@ screen_mode_t mode_squash_1p5x = {
 static inline void WriteSquashedLine2x(byte *dest, byte *src)
 {
     byte *dest2;
-    int x, c;
+    int x;
 
     dest2 = dest + dest_pitch;
 
@@ -1226,7 +1221,7 @@ static inline void WriteSquashedLine2x(byte *dest, byte *src)
 
         // 100% pixel 0
 
-        c = src[0];
+        int c = src[0];
         DRAW_PIXEL2;
 
         // 60% pixel 0, 40% pixel 1
@@ -1271,7 +1266,7 @@ static inline void WriteSquashedLine2x(byte *dest, byte *src)
 
 // 2x squash (512x400)
 
-static boolean I_Squash2x(int x1, int y1, int x2, int y2)
+static dboolean I_Squash2x(int x1, int y1, int x2, int y2)
 {
     byte *bufp, *screenp;
     int y;
@@ -1311,13 +1306,15 @@ screen_mode_t mode_squash_2x = {
 static inline void WriteSquashedLine3x(byte *dest, byte *src)
 {
     byte *dest2, *dest3;
-    int x, c;
+    int x;
 
     dest2 = dest + dest_pitch;
     dest3 = dest + dest_pitch * 2;
 
     for (x=0; x<SCREENWIDTH; )
     {
+        int c;
+
         // Every 2 pixels is expanded to 5 pixels
 
         // 100% pixel 0 x2
@@ -1354,7 +1351,7 @@ static inline void WriteSquashedLine3x(byte *dest, byte *src)
 // exactly.
 //
 
-static boolean I_Squash3x(int x1, int y1, int x2, int y2)
+static dboolean I_Squash3x(int x1, int y1, int x2, int y2)
 {
     byte *bufp, *screenp;
     int y;
@@ -1393,7 +1390,6 @@ screen_mode_t mode_squash_3x = {
 static inline void WriteSquashedLine4x(byte *dest, byte *src)
 {
     int x;
-    int c;
     byte *dest2, *dest3, *dest4;
 
     dest2 = dest + dest_pitch;
@@ -1402,6 +1398,8 @@ static inline void WriteSquashedLine4x(byte *dest, byte *src)
 
     for (x=0; x<SCREENWIDTH; )
     {
+        int c;
+
         // Draw in blocks of 5
 
         // 100% pixel 0  x3
@@ -1465,7 +1463,7 @@ static inline void WriteSquashedLine4x(byte *dest, byte *src)
 // 4x squashed (1024x800)
 //
 
-static boolean I_Squash4x(int x1, int y1, int x2, int y2)
+static dboolean I_Squash4x(int x1, int y1, int x2, int y2)
 {
     byte *bufp, *screenp;
     int y;

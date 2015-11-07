@@ -193,25 +193,25 @@ char *          nervewadfile = NULL;
 
 char            *pagename;
 
-boolean         wipe;
-boolean         done;
-boolean         nomonsters;     // checkparm of -nomonsters
-boolean         start_respawnparm;
-boolean         start_fastparm;
-boolean         autostart;
-boolean         advancedemo;
+dboolean         wipe;
+dboolean         done;
+dboolean         nomonsters;     // checkparm of -nomonsters
+dboolean         start_respawnparm;
+dboolean         start_fastparm;
+dboolean         autostart;
+dboolean         advancedemo;
 
 // Store demo, do not accept any inputs
-boolean         storedemo;
+dboolean         storedemo;
 
 // "BFG Edition" version of doom2.wad does not include TITLEPIC.
-boolean         bfgedition;
+dboolean         bfgedition;
 
 // If true, the main game loop has started.
-boolean         main_loop_started = false;
+dboolean         main_loop_started = false;
 
-boolean         version13 = false;
-boolean         realframe;
+dboolean         version13 = false;
+dboolean         realframe;
 
 int             wipe_type = 3;
 int             startepisode;
@@ -249,27 +249,27 @@ extern int      startlump;
 extern int      viewheight2;
 extern int      correct_lost_soul_bounce;
 
-extern boolean  merge;
-extern boolean  BorderNeedRefresh;
-extern boolean  skillflag;
-extern boolean  nomonstersflag;
-extern boolean  fastflag;
-extern boolean  respawnflag;
-extern boolean  warpflag;
-extern boolean  multiplayerflag;
-extern boolean  deathmatchflag;
-extern boolean  altdeathflag;
-extern boolean  locallanflag;
-extern boolean  searchflag;
-extern boolean  queryflag;
-extern boolean  dedicatedflag;
-extern boolean  setsizeneeded;
-extern boolean  hud;
-extern boolean  inhelpscreens;
-extern boolean  finale_music;
-extern boolean  aiming_help;
-extern boolean  show_chat_bar;
-extern boolean  blurred;
+extern dboolean  merge;
+extern dboolean  BorderNeedRefresh;
+extern dboolean  skillflag;
+extern dboolean  nomonstersflag;
+extern dboolean  fastflag;
+extern dboolean  respawnflag;
+extern dboolean  warpflag;
+extern dboolean  multiplayerflag;
+extern dboolean  deathmatchflag;
+extern dboolean  altdeathflag;
+extern dboolean  locallanflag;
+extern dboolean  searchflag;
+extern dboolean  queryflag;
+extern dboolean  dedicatedflag;
+extern dboolean  setsizeneeded;
+extern dboolean  hud;
+extern dboolean  inhelpscreens;
+extern dboolean  finale_music;
+extern dboolean  aiming_help;
+extern dboolean  show_chat_bar;
+extern dboolean  blurred;
 
 extern menu_t*  currentMenu;                          
 extern menu_t   CheatsDef;
@@ -313,10 +313,10 @@ void D_ProcessEvents (void)
 
 void D_Display (void)
 {
-    static  boolean             viewactivestate;
-    static  boolean             menuactivestate;
-    static  boolean             inhelpscreensstate = false;
-    static  boolean             fullscreen = false;
+    static  dboolean             viewactivestate;
+    static  dboolean             menuactivestate;
+    static  dboolean             inhelpscreensstate = false;
+    static  dboolean             fullscreen = false;
     static  char                menushade; // [crispy] shade menu background
     static  gamestate_t         oldgamestate = -1;
     static  int                 borderdrawcount;
@@ -324,8 +324,7 @@ void D_Display (void)
     int                         nowtime;
     int                         tics;
     int                         wipestart;
-    int                         y;
-    boolean                     redrawsbar;
+    dboolean                     redrawsbar;
 /*
 #ifndef WII
     if (nodrawers)
@@ -505,6 +504,8 @@ void D_Display (void)
 
         if (!automapactive || (automapactive && overlay_trigger))
         {
+            int y;
+
             for (y = 0; y < SCREENWIDTH * SCREENHEIGHT; y++)
             {
                 I_VideoBuffer[y] = colormaps[0][menushade * 256 + I_VideoBuffer[y]];
@@ -614,7 +615,7 @@ void D_BindVariables(void)
 // Called to determine whether to grab the mouse pointer
 //
 
-boolean D_GrabMouseCallback(void)
+dboolean D_GrabMouseCallback(void)
 {
     // when menu is active or game is paused, release the mouse 
  
@@ -925,10 +926,11 @@ static char *banners[] =
 static char *GetGameName(char *gamename)
 {
     size_t i;
-    char *deh_sub;
     
     for (i=0; i<arrlen(banners); ++i)
     {
+        char *deh_sub;
+
         // Has the banner been replaced?
 
         deh_sub = banners[i];
@@ -968,7 +970,7 @@ static char *GetGameName(char *gamename)
 
 void D_SetGameDescription(void)
 {
-    boolean is_freedoom = W_CheckNumForName("FREEDOOM") >= 0,
+    dboolean is_freedoom = W_CheckNumForName("FREEDOOM") >= 0,
             is_freedm = W_CheckNumForName("FREEDM") >= 0;
 
     gamedescription = "Unknown";
@@ -1020,7 +1022,7 @@ void D_SetGameDescription(void)
     }
 }
 
-static boolean D_AddFile(char *filename, boolean automatic)
+static dboolean D_AddFile(char *filename, dboolean automatic)
 {
     wad_file_t *handle;
 
@@ -1247,7 +1249,7 @@ static void D_ProcessDehInWad(void)
             ProcessDehFile(NULL, i);
 }
 
-boolean DehFileProcessed(char *path)
+dboolean DehFileProcessed(char *path)
 {
     int i;
 
@@ -1289,7 +1291,7 @@ void LoadDehFile(char *path)
     }
 }
 
-boolean D_IsDehFile(char *filename)
+dboolean D_IsDehFile(char *filename)
 {
     return (!strcasecmp(filename + strlen(filename) - 4, ".deh")
         || !strcasecmp(filename + strlen(filename) - 4, ".bex"));
@@ -1306,7 +1308,7 @@ static void D_ProcessDehCommandLine(void)
 #endif
     {
 #ifndef WII
-        boolean        deh = true;
+        dboolean        deh = true;
 
         while (++p < myargc)
             if (*myargv[p] == '-')
@@ -1345,7 +1347,7 @@ void PrintGameVersion(void)
 
 void D_DoomMain (void)
 {
-    FILE *fprw;
+    FILE *fprw = NULL;
 
 #ifndef WII
     FILE *iwad;
@@ -1354,9 +1356,8 @@ void D_DoomMain (void)
     int demoversion;
     int p;
     int i;
-    boolean status;
+    dboolean status;
 #endif
-    char            file[256];
 
     if(devparm_doom || devparm_net_doom)
         fsize = 10399316;
@@ -2585,17 +2586,7 @@ void D_DoomMain (void)
 #ifndef WII
     // Check for -file in shareware
     if (modifiedgame)
-    {
-        // These are the lumps that will be checked in IWAD,
-        // if any one is not present, execution will be aborted.
-        char name[23][8]=
-        {
-            "e2m1","e2m2","e2m3","e2m4","e2m5","e2m6","e2m7","e2m8","e2m9",
-            "e3m1","e3m3","e3m3","e3m4","e3m5","e3m6","e3m7","e3m8","e3m9",
-            "dphoof","bfgga0","heada1","cybra1","spida1d1"
-        };
-        int i;
-        
+    {        
         if ( gamemode == shareware)
             I_Error("\nYou cannot -file with the shareware "
                                "version. Register!");
@@ -2603,9 +2594,24 @@ void D_DoomMain (void)
         // Check for fake IWAD with right name,
         // but w/o all the lumps of the registered version. 
         if (gamemode == registered)
+        {
+            int i;
+
             for (i = 0;i < 23; i++)
+            {
+                // These are the lumps that will be checked in IWAD,
+                // if any one is not present, execution will be aborted.
+                char name[23][8]=
+                {
+                    "e2m1","e2m2","e2m3","e2m4","e2m5","e2m6","e2m7","e2m8","e2m9",
+                    "e3m1","e3m3","e3m3","e3m4","e3m5","e3m6","e3m7","e3m8","e3m9",
+                    "dphoof","bfgga0","heada1","cybra1","spida1d1"
+                };
+
                 if (W_CheckNumForName(name[i])<0)
                     I_Error("\nThis is not the registered version.");
+            }
+        }
     }
 
     if (W_CheckNumForName("SS_START") >= 0
@@ -2881,17 +2887,7 @@ void D_DoomMain (void)
 
     // Check for -file in shareware
     if (modifiedgame)
-    {
-        // These are the lumps that will be checked in IWAD,
-        // if any one is not present, execution will be aborted.
-        char name[23][8]=
-        {
-            "e2m1","e2m2","e2m3","e2m4","e2m5","e2m6","e2m7","e2m8","e2m9",
-            "e3m1","e3m3","e3m3","e3m4","e3m5","e3m6","e3m7","e3m8","e3m9",
-            "dphoof","bfgga0","heada1","cybra1","spida1d1"
-        };
-        int i;
-        
+    {        
         if ( gamemode == shareware && gameversion != exe_chex)
             I_Error("\nYou cannot -file with the shareware "
                                "version. Register!");
@@ -2899,9 +2895,24 @@ void D_DoomMain (void)
         // Check for fake IWAD with right name,
         // but w/o all the lumps of the registered version. 
         if (gamemode == registered)
+        {
+            int i;
+
             for (i = 0;i < 23; i++)
+            {
+                // These are the lumps that will be checked in IWAD,
+                // if any one is not present, execution will be aborted.
+                char name[23][8]=
+                {
+                    "e2m1","e2m2","e2m3","e2m4","e2m5","e2m6","e2m7","e2m8","e2m9",
+                    "e3m1","e3m3","e3m3","e3m4","e3m5","e3m6","e3m7","e3m8","e3m9",
+                    "dphoof","bfgga0","heada1","cybra1","spida1d1"
+                };
+
                 if (W_CheckNumForName(name[i])<0)
                     I_Error("\nThis is not the registered version.");
+            }
+        }
     }
 
     // disable any colored blood in Chex Quest,
@@ -3331,6 +3342,7 @@ void D_DoomMain (void)
 
     if (startloadgame >= 0)
     {
+        char file[256];
         M_StringCopy(file, P_SaveGameFile(startloadgame), sizeof(file));
         G_LoadGame (file);
     }

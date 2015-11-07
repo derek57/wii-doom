@@ -238,7 +238,7 @@ typedef struct line_s
     // Animation related.
     unsigned short      flags;
 
-    boolean            hidden;
+    dboolean            hidden;
 
     short               special;
     short               tag;
@@ -911,7 +911,7 @@ typedef struct vissprite_s
     // killough 3/27/98: height sector for underwater/fake ceiling support
     int                 heightsec;
 
-    boolean             psprite;            // true if psprite (required for freelook)
+    dboolean             psprite;            // true if psprite (required for freelook)
 
     // [crispy] color translation table for blood colored by monster class
     byte*               translation;

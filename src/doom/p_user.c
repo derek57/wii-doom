@@ -55,7 +55,7 @@
 // Movement.
 //
 
-boolean           onground;
+dboolean           onground;
 
 extern int        prio;
 
@@ -71,16 +71,8 @@ P_Thrust
 {
     angle >>= ANGLETOFINESHIFT;
     
-    if (player->powers[pw_flight] && !(player->mo->z <= player->mo->floorz))
-    {
-        player->mo->momx += FixedMul(move, finecosine[angle]);
-        player->mo->momy += FixedMul(move, finesine[angle]);
-    }
-    else
-    {
-        player->mo->momx += FixedMul(move, finecosine[angle]); 
-        player->mo->momy += FixedMul(move, finesine[angle]);
-    }
+    player->mo->momx += FixedMul(move, finecosine[angle]);
+    player->mo->momy += FixedMul(move, finesine[angle]);
 }
 
 // P_Bob
@@ -167,7 +159,7 @@ void P_CalcHeight (player_t* player)
 /*        && player->playerstate != PST_DEAD
         && player->mo->z <= player->mo->floorz*/)
     {
-        boolean                     liquid = true;
+        dboolean                     liquid = true;
         const struct msecnode_s     *seclist;
 
         for (seclist = player->mo->touching_sectorlist; seclist; seclist = seclist->m_tnext)
@@ -425,7 +417,6 @@ void P_ResurrectPlayer(player_t *player)
 void P_PlayerThink (player_t* player)
 {
     ticcmd_t*           cmd;
-    weapontype_t        newweapon;
 
     // [AM] Assume we can interpolate at the beginning
     //      of the tic.
@@ -498,10 +489,10 @@ void P_PlayerThink (player_t* player)
                 
     if (cmd->buttons & BT_CHANGE)
     {
+        weapontype_t newweapon = (cmd->buttons&BT_WEAPONMASK)>>BT_WEAPONSHIFT;
         // The actual changing of the weapon is done
         //  when the weapon psprite can do it
         //  (read: not in the middle of an attack).
-        newweapon = (cmd->buttons&BT_WEAPONMASK)>>BT_WEAPONSHIFT;
         
         if (newweapon == wp_fist
             && player->weaponowned[wp_chainsaw]
@@ -681,7 +672,7 @@ void P_AimingHelp (player_t* player)
 //
 //----------------------------------------------------------------------------
 
-boolean P_UseArtifact(player_t * player, artitype_t arti)
+dboolean P_UseArtifact(player_t * player, artitype_t arti)
 {
     switch (arti)
     {
@@ -703,7 +694,6 @@ boolean P_UseArtifact(player_t * player, artitype_t arti)
 void P_FallingDamage (mobj_t *mo)
 {
     float    delta;
-    int      damage;
 
     if (!mo->player)
         return;        // not a player
@@ -737,7 +727,7 @@ void P_FallingDamage (mobj_t *mo)
 
     if (delta > 30)
     {
-        damage = (int)((delta-30)/2);
+        int damage = (int)((delta-30)/2);
         if (damage < 1)
             damage = 1;
 

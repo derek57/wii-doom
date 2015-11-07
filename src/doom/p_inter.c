@@ -90,7 +90,7 @@ int                     clipammo[NUMAMMO] = {10, 4, 20, 1};
 int                     cardsfound;
 int                     species_infighting = 0;
 
-extern boolean          massacre_cheat_used;
+extern dboolean          massacre_cheat_used;
 
 extern int              snd_module;
 
@@ -105,7 +105,7 @@ extern int              snd_module;
 // Returns false if the ammo can't be picked up at all
 //
 
-boolean
+dboolean
 P_GiveAmmo
 ( player_t*        player,
   ammotype_t        ammo,
@@ -202,14 +202,14 @@ P_GiveAmmo
 // P_GiveWeapon
 // The weapon name may have a MF_DROPPED flag ored in.
 //
-boolean
+dboolean
 P_GiveWeapon
 ( player_t*        player,
   weapontype_t        weapon,
-  boolean        dropped )
+  dboolean        dropped )
 {
-    boolean        gaveammo;
-    boolean        gaveweapon;
+    dboolean        gaveammo;
+    dboolean        gaveweapon;
 
     if (netgame
         && (deathmatch!=2)
@@ -269,7 +269,7 @@ P_GiveWeapon
 // P_GiveBody
 // Returns false if the body isn't needed at all
 //
-boolean
+dboolean
 P_GiveBody
 ( player_t*        player,
   int                num )
@@ -294,7 +294,7 @@ P_GiveBody
 // Returns false if the armor is worse
 // than the current armor.
 //
-boolean
+dboolean
 P_GiveArmor
 ( player_t*        player,
   int                armortype )
@@ -426,7 +426,7 @@ void P_GiveAllCards(player_t *player)
 //
 // P_GivePower
 //
-boolean
+dboolean
 P_GivePower
 ( player_t*        player,
   int /*powertype_t*/        power )
@@ -961,9 +961,8 @@ P_KillMobj
     mobjtype_t   item;
     mobj_t*      mo;
     int          t;
-    int          i;
     int          minhealth;
-    boolean      e6y = false;
+    dboolean      e6y = false;
   
     if (target->player && source && target->health < -target->info->spawnhealth &&
             !demorecording && !demoplayback)
@@ -1017,6 +1016,8 @@ P_KillMobj
 
         if (beta_style && !massacre_cheat_used && (target->flags & MF_COUNTKILL))
         {
+            int i;
+
             if(target->type == MT_POSSESSED)
                 i = 200;
 
@@ -1245,7 +1246,7 @@ void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, int damage)
     player_t    *splayer = NULL;
     player_t    *tplayer;
     int         flags = target->flags;
-    boolean     corpse = (flags & MF_CORPSE);
+    dboolean     corpse = (flags & MF_CORPSE);
     int         type = target->type;
 
     if (!(flags & MF_SHOOTABLE) && (!corpse || !corpses_slide))

@@ -58,7 +58,7 @@ void M_MakeDirectory(char *path)
 
 // Check if a file exists
 
-boolean M_FileExists(char *filename)
+dboolean M_FileExists(char *filename)
 {
     FILE *fstream;
 
@@ -104,7 +104,7 @@ long M_FileLength(FILE *handle)
 // M_WriteFile
 //
 
-boolean M_WriteFile(char *name, void *source, int length)
+dboolean M_WriteFile(char *name, void *source, int length)
 {
     FILE *handle;
     int count;
@@ -177,12 +177,12 @@ char *M_TempFile(char *s)
     return M_StringJoin(tempdir, DIR_SEPARATOR_S, s, NULL);
 }
 
-boolean M_StrToInt(const char *str, int *result)
+dboolean M_StrToInt(const char *str, int *result)
 {
-    return sscanf(str, " 0x%x", result) == 1
-        || sscanf(str, " 0X%x", result) == 1
-        || sscanf(str, " 0%o", result) == 1
-        || sscanf(str, " %d", result) == 1;
+    return sscanf(str, " 0x%2x", result) == 1
+        || sscanf(str, " 0X%2x", result) == 1
+        || sscanf(str, " 0%3o", result) == 1
+        || sscanf(str, " %10d", result) == 1;
 }
 
 void M_ExtractFileBase(char *path, char *dest)
@@ -361,7 +361,7 @@ char *M_StringReplace(const char *haystack, const char *needle,
 // Safe string copy function that works like OpenBSD's strlcpy().
 // Returns true if the string was not truncated.
 
-boolean M_StringCopy(char *dest, const char *src, size_t dest_size)
+dboolean M_StringCopy(char *dest, const char *src, size_t dest_size)
 {
     size_t len;
 
@@ -382,7 +382,7 @@ boolean M_StringCopy(char *dest, const char *src, size_t dest_size)
 // Safe string concat function that works like OpenBSD's strlcat().
 // Returns true if string not truncated.
 
-boolean M_StringConcat(char *dest, const char *src, size_t dest_size)
+dboolean M_StringConcat(char *dest, const char *src, size_t dest_size)
 {
     size_t offset;
 
@@ -397,7 +397,7 @@ boolean M_StringConcat(char *dest, const char *src, size_t dest_size)
 
 // Returns true if 's' begins with the specified prefix.
 
-boolean M_StringStartsWith(const char *s, const char *prefix)
+dboolean M_StringStartsWith(const char *s, const char *prefix)
 {
     return strlen(s) > strlen(prefix)
         && strncmp(s, prefix, strlen(prefix)) == 0;
@@ -405,7 +405,7 @@ boolean M_StringStartsWith(const char *s, const char *prefix)
 
 // Returns true if 's' ends with the specified suffix.
 
-boolean M_StringEndsWith(const char *s, const char *suffix)
+dboolean M_StringEndsWith(const char *s, const char *suffix)
 {
     return strlen(s) >= strlen(suffix)
         && strcmp(s + strlen(s) - strlen(suffix), suffix) == 0;

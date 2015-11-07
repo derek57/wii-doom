@@ -59,7 +59,7 @@ typedef struct
     // Function to call to draw the screen from the source buffer.
     // Return true if draw was successful.
 
-    boolean (*DrawScreen)(int x1, int y1, int x2, int y2);
+    dboolean (*DrawScreen)(int x1, int y1, int x2, int y2);
 
     // If true, this is a "poor quality" mode.  The autoadjust
     // code should always attempt to use a different mode to this
@@ -91,10 +91,10 @@ typedef struct
     // that even higher resolutions would be needed before it would
     // look acceptable, but it turned out to be okay even at 640x480.
 
-    boolean poor_quality;
+    dboolean poor_quality;
 } screen_mode_t;
 
-typedef boolean (*grabmouse_callback_t)(void);
+typedef dboolean (*grabmouse_callback_t)(void);
 
 // Called by D_DoomMain,
 // determines the hardware configuration
@@ -123,7 +123,7 @@ void I_SetWindowTitle(char *title);
 void I_CheckIsScreensaver(void);
 void I_SetGrabMouseCallback(grabmouse_callback_t func);
 
-void I_DisplayFPSDots(boolean dots_on);
+void I_DisplayFPSDots(dboolean dots_on);
 void I_BindVideoVariables(void);
 
 void I_InitWindowTitle(void);
@@ -145,8 +145,8 @@ void I_EnableLoadingDisk(int xoffs, int yoffs);
 
 extern char *video_driver;
 
-extern boolean screenvisible;
-extern boolean screensaver_mode;
+extern dboolean screenvisible;
+extern dboolean screensaver_mode;
 
 extern float mouse_acceleration;
 

@@ -165,9 +165,9 @@ static struct
 };
 
 
-boolean         consoleactive = false;
-boolean         alwaysrun;
-boolean         forceblurredraw = false;
+dboolean         consoleactive = false;
+dboolean         alwaysrun;
+dboolean         forceblurredraw = false;
 
 patch_t         *unknownchar;
 patch_t         *consolefont[CONSOLEFONTSIZE];
@@ -234,11 +234,11 @@ static int      consoleanimup[] =
      18,  15,  12,   9,   7,   5,   3,   2,   1,   0
 };
 
-static boolean  showcaret = true;
+static dboolean  showcaret = true;
 
-extern boolean  translucency;
+extern dboolean  translucency;
 
-extern boolean  wipe;
+extern dboolean  wipe;
 
 //extern byte     *tinttab75;
 
@@ -247,11 +247,11 @@ extern int      fps;
 
 void C_ConDump(void)
 {
-    FILE *file;
-
     if (consolestrings)
     {
         char *filename;
+
+        FILE *file;
 
 #ifdef WII
         if(usb)
@@ -261,6 +261,7 @@ void C_ConDump(void)
 #else
         filename = "condump.txt";
 #endif
+
         file = fopen(filename, "wt");
 
         if (file)
@@ -497,7 +498,7 @@ static void c_blurscreen(int x1, int y1, int x2, int y2, int i)
 
 static void C_DrawBackground(int height)
 {
-    static boolean      blurred;
+    static dboolean      blurred;
     int                 i, j;
 
     height = (height + 5) * SCREENWIDTH;
@@ -549,7 +550,7 @@ static void C_DrawBackground(int height)
 static void C_DrawConsoleText(int x, int y, char *text, int color1, int color2, byte *tinttab,
     int tabs[8])
 {
-    boolean              italics = false;
+    dboolean              italics = false;
     size_t               i;
     int                  tab = -1;
     size_t               len = strlen(text);
@@ -723,7 +724,7 @@ void C_Drawer(void)
         if (showcaret)
             V_DrawConsoleChar(x + SHORT(route->width) + 4, consoleheight - 10,
                     caret, inputcolor, NOBACKGROUNDCOLOR, false, NULL);
-        x += 3;
+//        x += 3;
 
         // draw the scrollbar
         C_DrawScrollbar();
@@ -732,7 +733,7 @@ void C_Drawer(void)
         consoleactive = false;
 }
 
-boolean C_Responder(event_t *ev)
+dboolean C_Responder(event_t *ev)
 {
     if (consoleheight < CONSOLEHEIGHT && consoledirection == -1)
         return false;

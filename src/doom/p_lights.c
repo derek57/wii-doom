@@ -253,9 +253,9 @@ int EV_TurnTagLightsOff(line_t* line)
 int
 EV_LightTurnOn
 ( line_t*        line,
-  int                bright )
+  int            bright )
 {
-    int                i;
+    int          i;
 
     // search all sectors for ones with same tag as activating line
 

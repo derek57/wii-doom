@@ -70,9 +70,9 @@ void I_UpdateJoystick(void)
 
     WPAD_IR(0, &ir);
 
-    int nun_x, nun_y, center, min, max, btn_a, btn_b, btn_c, btn_z,
-        btn_1, btn_2, btn_l, btn_r, btn_d, btn_u, btn_p, btn_m, btn_h,
-        btn_x, btn_y, btn_plus, btn_minus;
+    int btn_a, btn_b, btn_c, btn_z;
+    int btn_1, btn_2, btn_l, btn_r, btn_d, btn_u, btn_p, btn_m, btn_h;
+    int btn_x, btn_y, btn_plus, btn_minus;
 
     event_t ev;
 
@@ -99,14 +99,14 @@ void I_UpdateJoystick(void)
     //Classic Controller
     if(data->exp.type == WPAD_EXP_CLASSIC)
     {  
-        nun_x = data->exp.classic.ljs.pos.x;
-        nun_y = data->exp.classic.ljs.pos.y;
+        int nun_x = data->exp.classic.ljs.pos.x;
+        int nun_y = data->exp.classic.ljs.pos.y;
 
-        center = data->exp.classic.ljs.center.x;
+        int center = data->exp.classic.ljs.center.x;
 
-        min = data->exp.classic.ljs.min.x;
+        int min = data->exp.classic.ljs.min.x;
 
-        max = data->exp.classic.ljs.max.x;
+        int max = data->exp.classic.ljs.max.x;
 
         if (nun_x < center - ((center - min) * 0.1f)) //Left
             axis_x = (1.0f * center - nun_x) / (center - min) * -50.0f;

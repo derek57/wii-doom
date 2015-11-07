@@ -75,7 +75,7 @@ T_MovePlane
 ( sector_t*      sector,
   fixed_t        speed,
   fixed_t        dest,
-  boolean        crush,
+  dboolean        crush,
   int            floorOrCeiling,
   int            direction )
 {
@@ -216,8 +216,9 @@ T_MovePlane
             }
             else
             {
-                lastpos = sector->ceilingheight;
+//                lastpos = sector->ceilingheight;
                 sector->ceilingheight += speed;
+                P_ChangeSector(sector, crush);		// FIXME: TAKEN FROM DOOMRETRO
 //                flag = P_ChangeSector(sector,crush);
 // UNUSED
 #if 0
@@ -243,15 +244,16 @@ T_MovePlane
 //
 void T_MoveFloor(floormove_t* floor)
 {
-    result_e        res;
+    sector_t    *sec = floor->sector;
+    result_e    res;
         
-    res = T_MovePlane(floor->sector,
+    res = T_MovePlane(sec,
                       floor->speed,
                       floor->floordestheight,
                       floor->crush,0,floor->direction);
     
     if (!(leveltime&7))
-        S_StartSectorSound(&floor->sector->soundorg, sfx_stnmov);
+        S_StartSectorSound(&sec->soundorg, sfx_stnmov);
     
     if (res == pastdest)
     {
@@ -259,18 +261,20 @@ void T_MoveFloor(floormove_t* floor)
         {
             switch(floor->type)
             {
+/*
               case donutRaise:
-                floor->sector->special = floor->newspecial;
-                floor->sector->floorpic = floor->texture;
-
+                sec->special = floor->newspecial;
+                sec->floorpic = floor->texture;
+*/
+              case donutRaise:
               case genFloorChgT:
               case genFloorChg0:
-                floor->sector->special = floor->newspecial;
+                sec->special = floor->newspecial;
                 // fall thru
 
               case genFloorChg:
-                floor->sector->floorpic = floor->texture;
-                P_ChangeSector(floor->sector, false);
+                sec->floorpic = floor->texture;
+                P_ChangeSector(sec, false);
                 break;
 
               default:
@@ -281,18 +285,20 @@ void T_MoveFloor(floormove_t* floor)
         {
             switch(floor->type)
             {
+/*
               case lowerAndChange:
-                floor->sector->special = floor->newspecial;
-                floor->sector->floorpic = floor->texture;
-
+                sec->special = floor->newspecial;
+                sec->floorpic = floor->texture;
+*/
+              case lowerAndChange:
               case genFloorChgT:
               case genFloorChg0:
-                floor->sector->special = floor->newspecial;
+                sec->special = floor->newspecial;
                 // fall thru
 
               case genFloorChg:
-                floor->sector->floorpic = floor->texture;
-                P_ChangeSector(floor->sector, false);
+                sec->floorpic = floor->texture;
+                P_ChangeSector(sec, false);
                 break;
 
               default:
@@ -304,30 +310,30 @@ void T_MoveFloor(floormove_t* floor)
 
         // jff 2/26/98 implement stair retrigger lockout while still building
         // note this only applies to the retriggerable generalized stairs
-        if (floor->sector->stairlock == -2)               // if this sector is stairlocked
+        if (sec->stairlock == -2)               // if this sector is stairlocked
         {
-            floor->sector->stairlock = -1;                // thinker done, promote lock to -1
+            sec->stairlock = -1;                // thinker done, promote lock to -1
 
-            while (floor->sector->prevsec != -1 && sectors[floor->sector->prevsec].stairlock != -2)
-                floor->sector = &sectors[floor->sector->prevsec];   // search for a non-done thinker
-            if (floor->sector->prevsec == -1)             // if all thinkers previous are done
+            while (sec->prevsec != -1 && sectors[sec->prevsec].stairlock != -2)
+                sec = &sectors[sec->prevsec];   // search for a non-done thinker
+            if (sec->prevsec == -1)             // if all thinkers previous are done
             {
-                floor->sector = floor->sector;            // search forward
-                while (floor->sector->nextsec != -1 && sectors[floor->sector->nextsec].stairlock != -2)
-                    floor->sector = &sectors[floor->sector->nextsec];
-                if (floor->sector->nextsec == -1)         // if all thinkers ahead are done too
+                sec = floor->sector;            // search forward
+                while (sec->nextsec != -1 && sectors[sec->nextsec].stairlock != -2)
+                    sec = &sectors[sec->nextsec];
+                if (sec->nextsec == -1)         // if all thinkers ahead are done too
                 {
-                    while (floor->sector->prevsec != -1)  // clear all locks
+                    while (sec->prevsec != -1)  // clear all locks
                     {
-                        floor->sector->stairlock = 0;
-                        floor->sector = &sectors[floor->sector->prevsec];
+                        sec->stairlock = 0;
+                        sec = &sectors[sec->prevsec];
                     }
-                    floor->sector->stairlock = 0;
+                    sec->stairlock = 0;
                 }
             }
         }
 
-        S_StartSectorSound(&floor->sector->soundorg, sfx_pstop);
+        S_StartSectorSound(&sec->soundorg, sfx_pstop);
     }
 
 }
@@ -633,10 +639,10 @@ EV_DoFloor
 //
 // jff 3/15/98 added to better support generalized sector types
 //
-boolean EV_DoChange(line_t *line, change_e changetype)
+dboolean EV_DoChange(line_t *line, change_e changetype)
 {
     int         secnum;
-    boolean     rtn;
+    dboolean     rtn;
     sector_t    *secm;
 
     secnum = -1;
@@ -694,7 +700,7 @@ EV_BuildStairs
 {
     int         ssec = -1;
     int         minssec = -1;
-    boolean     rtn = false;
+    dboolean     rtn = false;
 
     while ((ssec = P_FindSectorFromLineTagWithLowerBound(line, ssec, minssec)) >= 0)
     {
@@ -703,8 +709,8 @@ EV_BuildStairs
         floormove_t     *floor;
         fixed_t         stairsize = 0;
         fixed_t         speed = 0;
-        boolean         crushing = false;
-        boolean         okay;
+        dboolean         crushing = false;
+        dboolean         okay;
         int             height;
         int             texture;
 
@@ -814,10 +820,10 @@ EV_BuildStairs
 //
 // jff 2/22/98 new type to move floor and ceiling in parallel
 //
-boolean EV_DoElevator(line_t *line, elevator_e elevtype)
+dboolean EV_DoElevator(line_t *line, elevator_e elevtype)
 {
     int         secnum;
-    boolean     rtn;
+    dboolean     rtn;
     sector_t    *sec;
     elevator_t  *elevator;
 

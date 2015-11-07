@@ -55,7 +55,7 @@
 #define CONFIG_VARIABLE_STRING(name) \
     CONFIG_VARIABLE_GENERIC(name, DEFAULT_STRING)
 
-//extern boolean devparm;
+//extern dboolean devparm;
 
 extern int key_right;
 extern int key_left;
@@ -311,7 +311,7 @@ static int ParseIntParameter(char *strparm)
     if (strparm[0] == '0' && strparm[1] == 'x')
         sscanf(strparm+2, "%x", &parm);
     else
-        sscanf(strparm, "%i", &parm);
+        sscanf(strparm, "%10i", &parm);
 
     return parm;
 }
@@ -354,7 +354,7 @@ static void SetVariable(default_t *def, char *value)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wchar-subscripts"
 
-static boolean LoadDefaultCollection(default_collection_t *collection)
+static dboolean LoadDefaultCollection(default_collection_t *collection)
 {
     FILE *f;
     default_t *def;
@@ -533,7 +533,7 @@ void M_BindVariable(char *name, void *location)
 // Set the value of a particular variable; an API function for other
 // parts of the program to assign values to config variables by name.
 
-boolean M_SetVariable(char *name, char *value)
+dboolean M_SetVariable(char *name, char *value)
 {
     default_t *variable;
 
@@ -609,12 +609,13 @@ static char *GetDefaultConfigDir(void)
     // save in the current directory.
 
     char *homedir;
-    char *result;
 
     homedir = getenv("HOME");
 
     if (homedir != NULL)
     {
+        char *result;
+
         // put all configuration in a config directory off the
         // homedir
 

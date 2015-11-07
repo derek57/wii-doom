@@ -201,19 +201,19 @@ static hu_stext_t       w_message_2;
 
 static hu_stext_t       w_secret;
 
-//static boolean          always_off = false;
-static boolean          message_on;
-static boolean          message_nottobefuckedwith;
-static boolean          headsupactive;
-static boolean          secret_on;
+//static dboolean          always_off = false;
+static dboolean          message_on;
+static dboolean          message_nottobefuckedwith;
+static dboolean          headsupactive;
+static dboolean          secret_on;
 
 static int              message_counter;
 static int              secret_counter;
 
 static char             hud_monsecstr[80];     // ADDED FOR PSP-STATS
 
-boolean                 message_dontfuckwithme;
-boolean                 show_chat_bar;
+dboolean                 message_dontfuckwithme;
+dboolean                 show_chat_bar;
 
 patch_t*                hu_font[HU_FONTSIZE];
 patch_t*                beta_hu_font[HU_FONTSIZE];
@@ -225,7 +225,7 @@ extern int              show_stats;
 extern int              screenSize;
 extern int              timer_info;
 
-extern boolean          blurred;
+extern dboolean          blurred;
 
 //
 // Builtin map names.
@@ -704,10 +704,10 @@ static void HU_DemoProgressBar (void)                // FIXME: BUGGY (crashes)
 void HU_DrawStats(void)
 {
     const char *t;
-
+/*
     M_StringCopy(hud_monsecstr, "", sizeof(hud_monsecstr));
     t = hud_monsecstr;
-
+*/
     // clear the internal widget text buffer
     HUlib_clearTextLine(&w_monsec);
 
@@ -884,12 +884,13 @@ void HU_Ticker(void)
 
     } // else message_on = false;
 }
-
-boolean HU_Responder(event_t *ev)
+/*
+dboolean HU_Responder(event_t *ev)
 {
-    boolean       eatkey = false;
+    dboolean       eatkey = false;
 
     int           i;
+
     int           numplayers;
     
     numplayers = 0;
@@ -899,7 +900,7 @@ boolean HU_Responder(event_t *ev)
 
     return eatkey;
 }
-
+*/
 // hu_newlevel called when we enter a new level
 // determine the level name and display it in
 // the console
@@ -961,7 +962,7 @@ void HU_NewLevel()
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wchar-subscripts"
 
-void HU_PlayerMessage(char *message, boolean ingame)
+void HU_PlayerMessage(char *message, dboolean ingame)
 {
     static char buffer[1024];
     char        lastchar;

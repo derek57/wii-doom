@@ -61,7 +61,7 @@
 void HU_Init(void);
 void HU_Start(void);
 
-boolean HU_Responder(event_t* ev);
+dboolean HU_Responder(event_t* ev);
 
 void HU_Ticker(void);
 void HU_Drawer(void);
@@ -79,7 +79,7 @@ void HU_NewLevel();
 
 void HU_DrawStats(void);
 
-void HU_PlayerMessage(char *message, boolean ingame);
+void HU_PlayerMessage(char *message, dboolean ingame);
 
 #endif
 

@@ -63,8 +63,6 @@ static GameMission_t discovered_gamemission = none;
 
 static void DiscoverGamemode(wbstartstruct_t *stats, int num_stats)
 {
-    int partime;
-    int level;
     int i;
 
     if (discovered_gamemission != none)
@@ -74,6 +72,9 @@ static void DiscoverGamemode(wbstartstruct_t *stats, int num_stats)
 
     for (i=0; i<num_stats; ++i)
     {
+        int partime;
+        int level;
+
         level = stats[i].last;
 
         /* If episode 2, 3 or 4, this is Doom 1. */
@@ -309,7 +310,6 @@ void StatCopy(wbstartstruct_t *stats)
 
 void StatDump(void)
 {
-    FILE *dumpfile;
     int i;
 
     //!
@@ -325,6 +325,8 @@ void StatDump(void)
 
     if (i > 0)
     {
+        FILE *dumpfile;
+
         printf("Statistics captured for %i level(s)\n", num_captured_stats);
 
         // We actually know what the real gamemission is, but this has

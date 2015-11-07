@@ -389,7 +389,7 @@ typedef struct mobj_s
     struct mobj_s*         tracer;        
     
     // [AM] If true, ok to interpolate this tic.
-    boolean                interp;
+    dboolean                interp;
 
     // [AM] Previous position of mobj before think.
     //      Used to interpolate between positions.

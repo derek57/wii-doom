@@ -35,16 +35,16 @@
 #include "v_video.h"
 
 /*
-extern boolean am_rotate;
-extern boolean d_recoil;
-extern boolean d_maxgore;
-extern boolean d_thrust;
-extern boolean respawnparm;
-extern boolean fastparm;
+extern dboolean am_rotate;
+extern dboolean d_recoil;
+extern dboolean d_maxgore;
+extern dboolean d_thrust;
+extern dboolean respawnparm;
+extern dboolean fastparm;
 */
-extern boolean hud;
-extern boolean swap_sound_chans;
-extern boolean randompitch;
+extern dboolean hud;
+extern dboolean swap_sound_chans;
+extern dboolean randompitch;
 
 extern int display_fps;
 /*

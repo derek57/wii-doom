@@ -118,7 +118,7 @@ int                          pixelwidth;
 int                          pixelheight;
 int                          italicize[15] = { 0, 2, 2, 2, 1, 1, 1, 1, 0, 0, 0, 0, -1, -1, -1 };
 
-boolean                      dp_translucent = false;
+dboolean                      dp_translucent = false;
 
 extern int                   screenblocks;
 
@@ -519,7 +519,7 @@ void V_Init (void)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-value"
 
-void V_DrawConsoleChar(int x, int y, patch_t *patch, int color1, int color2, boolean italics,
+void V_DrawConsoleChar(int x, int y, patch_t *patch, int color1, int color2, dboolean italics,
     byte *tinttab)
 {
     int         col = 0;
@@ -717,7 +717,7 @@ void V_DrawTranslucentYellowStatusPatch(int x, int y, patch_t *patch, byte *tint
     }
 }
 
-boolean V_EmptyPatch(patch_t *patch)
+dboolean V_EmptyPatch(patch_t *patch)
 {
     int col = 0;
     int w = SHORT(patch->width);
@@ -914,7 +914,7 @@ void WritePNGfile(char *filename, byte *data,
     png_infop pinfo;
     png_colorp pcolor;
     FILE *handle;
-    int i, j;
+    int i;
     int width, height;
     byte *rowbuf;
 
@@ -932,6 +932,8 @@ void WritePNGfile(char *filename, byte *data,
                                    error_fn, warning_fn);
     if (!ppng)
     {
+        fclose(handle);
+
         return;
     }
 
@@ -939,6 +941,9 @@ void WritePNGfile(char *filename, byte *data,
     if (!pinfo)
     {
         png_destroy_write_struct(&ppng, NULL);
+
+        fclose(handle);
+
         return;
     }
 
@@ -973,6 +978,8 @@ void WritePNGfile(char *filename, byte *data,
     {
         for (i = 0; i < SCREENHEIGHT; i++)
         {
+            int j;
+
             // expand the row 5x
             for (j = 0; j < SCREENWIDTH; j++)
             {
@@ -1068,7 +1075,7 @@ void V_LowGraphicDetail(int height)
         }
 }
 
-void V_DrawPatchWithShadow(int x, int y, patch_t *patch, boolean flag)
+void V_DrawPatchWithShadow(int x, int y, patch_t *patch, dboolean flag)
 {
     int         col = 0;
     byte        *desttop;

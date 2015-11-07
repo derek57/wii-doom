@@ -86,7 +86,7 @@ typedef struct
 
 console_t       *console;
 
-extern boolean  consoleactive;
+extern dboolean  consoleactive;
 extern int      consoleheight;
 extern int      consoledirection;
 extern int      consoleanimindex;
@@ -96,7 +96,7 @@ extern char     consolecheatparm[3];
 extern char     consolecmdparm[255];
 
 #if defined(WIN32)
-extern boolean  showmemory;
+extern dboolean  showmemory;
 #endif
 
 void C_Printf(stringtype_t type, char *string, ...);
@@ -110,7 +110,7 @@ void C_Init(void);
 void C_HideConsole(void);
 void C_HideConsoleFast(void);
 void C_Drawer(void);
-boolean C_Responder(event_t *ev);
+dboolean C_Responder(event_t *ev);
 void C_PrintCompileDate(void);
 void C_PrintSDLVersions(void);
 void C_ConDump(void);

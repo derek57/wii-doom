@@ -73,7 +73,6 @@ void OPL_Queue_Push(opl_callback_queue_t *queue,
                     uint64_t time)
 {
     int entry_id;
-    int parent_id;
 
     if (queue->num_entries >= MAX_OPL_QUEUE)
     {
@@ -90,7 +89,7 @@ void OPL_Queue_Push(opl_callback_queue_t *queue,
 
     while (entry_id > 0)
     {
-        parent_id = (entry_id - 1) / 2;
+        int parent_id = (entry_id - 1) / 2;
 
         // Is the heap condition satisfied?
 
@@ -121,12 +120,11 @@ int OPL_Queue_Pop(opl_callback_queue_t *queue,
                   opl_callback_t *callback, void **data)
 {
     opl_queue_entry_t *entry;
-    int child1, child2;
     int i, next_i;
 
     // Empty?
 
-    if (queue->num_entries <= 0)
+    if (!queue->num_entries)
     {
         return 0;
     }
@@ -148,8 +146,8 @@ int OPL_Queue_Pop(opl_callback_queue_t *queue,
 
     for (;;)
     {
-        child1 = i * 2 + 1;
-        child2 = i * 2 + 2;
+        int child1 = i * 2 + 1;
+        int child2 = i * 2 + 2;
 
         if (child1 < queue->num_entries
          && queue->entries[child1].time < entry->time)
@@ -210,12 +208,11 @@ uint64_t OPL_Queue_Peek(opl_callback_queue_t *queue)
 void OPL_Queue_AdjustCallbacks(opl_callback_queue_t *queue,
                                uint64_t time, float factor)
 {
-    int64_t offset;
     int i;
 
     for (i = 0; i < queue->num_entries; ++i)
     {
-        offset = queue->entries[i].time - time;
+        int64_t offset = queue->entries[i].time - time;
         queue->entries[i].time = time + (uint64_t) (offset * factor);
     }
 }

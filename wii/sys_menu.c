@@ -59,12 +59,12 @@ int               extra_wad_loaded = 0;
 int               load_extra_wad = 0;
 int               load_dehacked = 0;
 
-boolean           multiplayer = false;
-boolean           multiplayer_flag = false;
-boolean           merge = false;
+dboolean           multiplayer = false;
+dboolean           multiplayer_flag = false;
+dboolean           merge = false;
 
-extern boolean    nerve_pwad;
-extern boolean    master_pwad;
+extern dboolean    nerve_pwad;
+extern dboolean    master_pwad;
 
 extern char       picdata[];
 extern int        piclength;
@@ -254,7 +254,7 @@ static s32 __Menu_RetrieveList(char *inPath, fatFile **outbuf, u32 *outlen)
         // Get entries
         for (cnt = 0; (entry = readdir(dir));)
         {
-            boolean addFlag = false;
+            dboolean addFlag = false;
 
             if (entry->d_type == DT_DIR) 
             {
@@ -453,7 +453,7 @@ static void Menu_FatDevice(void)
 
 static void Menu_WadList(void)
 {
-    boolean     md5_check = false;
+    dboolean     md5_check = false;
 
     char        buffer[4];
     char        check[MAXPATH];
@@ -1451,9 +1451,11 @@ static void Menu_WadList(void)
 
                 if (tmpCurPath != NULL)
                 {
+/*
                     if(gDirLevel>1)
                         sprintf(tmpPath, "%s%s", tmpCurPath, tmpFile->filename);
                     else
+*/
                         sprintf(tmpPath, "%s%s", tmpCurPath, tmpFile->filename);
 
                     strcat(tmpPath, "/");
@@ -2247,7 +2249,8 @@ static void Menu_WadList(void)
             }
             memset(buffer, 0, sizeof(buffer));
 
-            fclose(file);
+            if(file)
+                fclose(file);
         }
     }
 

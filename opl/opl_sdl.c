@@ -225,7 +225,6 @@ static void OPL_Mix_Callback(void *udata,
 
     while (filled < buffer_len)
     {
-        uint64_t next_callback_time;
         uint64_t nsamples;
 
         SDL_LockMutex(callback_queue_mutex);
@@ -240,7 +239,7 @@ static void OPL_Mix_Callback(void *udata,
         }
         else
         {
-            next_callback_time = OPL_Queue_Peek(callback_queue) + pause_offset;
+            uint64_t next_callback_time = OPL_Queue_Peek(callback_queue) + pause_offset;
 
             nsamples = (next_callback_time - current_time) * mixing_freq;
             nsamples = (nsamples + OPL_SECOND - 1) / OPL_SECOND;
@@ -424,14 +423,12 @@ static unsigned int OPL_SDL_PortRead(opl_port_t port)
 
 static void OPLTimer_CalculateEndTime(opl_timer_t *timer)
 {
-    int tics;
-
     // If the timer is enabled, calculate the time when the timer
     // will expire.
 
     if (timer->enabled)
     {
-        tics = 0x100 - timer->value;
+        int tics = 0x100 - timer->value;
         timer->expire_time = current_time
                            + ((uint64_t) tics * OPL_SECOND) / timer->rate;
     }

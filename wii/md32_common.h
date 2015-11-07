@@ -401,7 +401,7 @@ int HASH_UPDATE (HASH_CTX *c, const void *data_, size_t len)
         const unsigned char *data=data_;
         register HASH_LONG * p;
         register HASH_LONG l;
-        size_t sw,sc,ew,ec;
+        size_t sw,ew,ec;
 
         if (len==0) return 1;
 
@@ -417,7 +417,7 @@ int HASH_UPDATE (HASH_CTX *c, const void *data_, size_t len)
                 {
                 p=c->data;
                 sw=c->num>>2;
-                sc=c->num&0x03;
+                size_t sc=c->num&0x03;
 
                 if ((c->num+len) >= HASH_CBLOCK)
                         {

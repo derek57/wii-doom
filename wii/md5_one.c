@@ -78,11 +78,10 @@ unsigned char *MD5(const unsigned char *d, size_t n, unsigned char *md)
 #else
         {
                 char temp[1024];
-                unsigned long chunk;
 
                 while (n > 0)
                 {
-                        chunk = (n > sizeof(temp)) ? sizeof(temp) : n;
+                        unsigned long chunk = (n > sizeof(temp)) ? sizeof(temp) : n;
                         ebcdic2ascii(temp, d, chunk);
                         MD5_Update(&c,temp,chunk);
                         n -= chunk;

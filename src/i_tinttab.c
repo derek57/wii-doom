@@ -40,7 +40,9 @@
 #include "doom/doomdef.h"
 
 #include "i_scale.h"
+#include "i_tinttab.h"
 #include "m_fixed.h"
+#include "w_wad.h"
 #include "z_zone.h"
 
 
@@ -158,6 +160,8 @@ static byte *GenerateTintTable(byte *palette, int percent, byte filter[256], int
 
 void I_InitTintTables(byte *palette)
 {
+    int lump;
+
     tinttab = GenerateTintTable(palette, ADDITIVE, general, ALL);
 
     tinttab25 = GenerateTintTable(palette, 25, general, ALL);
@@ -168,6 +172,9 @@ void I_InitTintTables(byte *palette)
     tinttab66 = GenerateTintTable(palette, 66, general, ALL);
     tinttab75 = GenerateTintTable(palette, 75, general, ALL);
     tinttab80 = GenerateTintTable(palette, 80, general, ALL);
+
+    tranmap = ((lump = W_CheckNumForName("TRANMAP")) != -1 ? W_CacheLumpNum(lump, PU_STATIC) :
+        tinttab50);
 
     tinttabred = GenerateTintTable(palette, ADDITIVE, general, REDS);
     tinttabredwhite1 = GenerateTintTable(palette, ADDITIVE, general, (REDS | WHITES));

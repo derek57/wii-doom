@@ -52,7 +52,7 @@
 #include "v_video.h"
 #endif
 
-// boolean : whether the screen is always erased
+// dboolean : whether the screen is always erased
 #define noterased viewwindowx
 
 void HUlib_init(void)
@@ -81,7 +81,7 @@ HUlib_initTextLine
     HUlib_clearTextLine(t);
 }
 
-boolean
+dboolean
 HUlib_addCharToTextLine
 ( hu_textline_t*        t,
   char                  ch )
@@ -99,7 +99,7 @@ HUlib_addCharToTextLine
 
 }
 
-boolean HUlib_delCharFromTextLine(hu_textline_t* t)
+dboolean HUlib_delCharFromTextLine(hu_textline_t* t)
 {
 
     if (!t->len) return false;
@@ -118,20 +118,20 @@ boolean HUlib_delCharFromTextLine(hu_textline_t* t)
 void
 HUlib_drawTextLine
 ( hu_textline_t*        l,
-  boolean               drawcursor )
+  dboolean               drawcursor )
 {
 
     int                 i;
     int                 w;
     int                 x;
-    unsigned char       c;
 
 
     // draw the new stuff
     x = l->x;
     for (i=0;i<l->len;i++)
     {
-        c = toupper(l->l[i]);
+        unsigned char c = toupper(l->l[i]);
+
         if (c != ' '
             && c >= l->sc
             && c <= '_')
@@ -173,7 +173,7 @@ HUlib_initSText
   int           h,
   patch_t**     font,
   int           startchar,
-  boolean*      on )
+  dboolean*      on )
 {
 
     int i;
@@ -222,8 +222,7 @@ HUlib_addMessageToSText
 
 void HUlib_drawSText(hu_stext_t* s)
 {
-    int i, idx;
-    hu_textline_t *l;
+    int i;
 
     if (!*s->on)
         return; // if not on, don't draw
@@ -231,7 +230,9 @@ void HUlib_drawSText(hu_stext_t* s)
     // draw everything
     for (i=0 ; i<s->h ; i++)
     {
-        idx = s->cl - i;
+        int             idx = s->cl - i;
+        hu_textline_t   *l;
+
         if (idx < 0)
             idx += s->h; // handle queue of lines
         
@@ -264,7 +265,7 @@ HUlib_initIText
   int           y,
   patch_t**     font,
   int           startchar,
-  boolean*      on )
+  dboolean*      on )
 {
     it->lm = 0; // default left margin is start of text
     it->on = on;
@@ -305,7 +306,7 @@ HUlib_addPrefixToIText
 
 // wrapper function for handling general keyed input.
 // returns true if it ate the key
-boolean
+dboolean
 HUlib_keyInIText
 ( hu_itext_t*   it,
   unsigned char ch )

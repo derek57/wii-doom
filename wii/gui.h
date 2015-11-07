@@ -2,7 +2,7 @@
 #ifndef _GUI_H_
 #define _GUI_H_
 
-#include <gctypes.h>
+#include "../src/doomtype.h"
 #include "video.h"
 #include <ogc/lwp.h>
 #include <ogc/mutex.h>
@@ -14,7 +14,7 @@ struct stConsoleCursorLocation stTexteLocation;
 struct stTimer
 {
     unsigned short int intInterval;
-    boolean blnRunning;
+    dboolean blnRunning;
 };
 
 u8 getTextBoxRow(u8 chRow);

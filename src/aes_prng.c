@@ -737,7 +737,7 @@ static int AES_ExpandKey(aes_context_t *ctx, const uint8_t *in_key,
                          unsigned int key_len)
 {
     const uint32_t *key = (const uint32_t *)in_key;
-    uint32_t i, t, u, v, w, j;
+    uint32_t i, t, u, v, w;
 
     if (key_len != AES_KEYSIZE_128 && key_len != AES_KEYSIZE_192 &&
         key_len != AES_KEYSIZE_256)
@@ -781,7 +781,7 @@ static int AES_ExpandKey(aes_context_t *ctx, const uint8_t *in_key,
     ctx->key_dec[3] = ctx->key_enc[key_len + 27];
 
     for (i = 4; i < key_len + 24; ++i) {
-        j = key_len + 24 - (i & ~3) + (i & 3);
+        uint32_t j = key_len + 24 - (i & ~3) + (i & 3);
         imix_col(ctx->key_dec[j], ctx->key_enc[i]);
     }
     return 0;
@@ -880,7 +880,7 @@ static void AES_Encrypt(aes_context_t *ctx, uint8_t *out,
     dst[3] = cpu_to_le32(b0[3]);
 }
 
-static boolean prng_enabled = false;
+static dboolean prng_enabled = false;
 static aes_context_t prng_context;
 static uint32_t prng_input_counter;
 static uint32_t prng_values[4];

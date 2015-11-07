@@ -130,9 +130,6 @@ EV_Teleport
 
                 if (P_TeleportMove(thing, m->x, m->y, m->z, false))     // killough 8/9/98
                 {
-                    mobj_t          *fog;
-                    unsigned int    an;
-
                     // The first Final Doom executable does not set thing->z
                     // when teleporting. This quirk is unique to this
                     // particular version; the later version included in
@@ -163,10 +160,10 @@ EV_Teleport
                     // spawn teleport fog at source and destination
                     if(!beta_style)
                     {
-                        fog = P_SpawnMobj (oldx, oldy, oldz, MT_TFOG);
+                        mobj_t *fog = P_SpawnMobj (oldx, oldy, oldz, MT_TFOG);
+                        unsigned int an = (m->angle >> ANGLETOFINESHIFT);
                         fog->angle = thing->angle;
                         S_StartSound (fog, sfx_telept);
-                        an = (m->angle >> ANGLETOFINESHIFT);
                         fog = P_SpawnMobj (m->x+20*finecosine[an], m->y+20*finesine[an]
                                            , thing->z, MT_TFOG);
                         fog->angle = m->angle;
@@ -218,7 +215,7 @@ EV_Teleport
 // Silent TELEPORTATION, by Lee Killough
 // Primarily for rooms-over-rooms etc.
 //
-boolean EV_SilentTeleport(line_t *line, int side, mobj_t *thing)
+dboolean EV_SilentTeleport(line_t *line, int side, mobj_t *thing)
 {
     int         i;
     mobj_t      *m;
@@ -301,7 +298,7 @@ boolean EV_SilentTeleport(line_t *line, int side, mobj_t *thing)
 // maximum fixed_t units to move object to avoid hiccups
 #define FUDGEFACTOR 10
 
-boolean EV_SilentLineTeleport(line_t *line, int side, mobj_t *thing, boolean reverse)
+dboolean EV_SilentLineTeleport(line_t *line, int side, mobj_t *thing, dboolean reverse)
 {
     int         i;
     line_t      *l;
@@ -340,7 +337,7 @@ boolean EV_SilentLineTeleport(line_t *line, int side, mobj_t *thing, boolean rev
             player_t    *player = (thing->player && thing->player->mo == thing ? thing->player : NULL);
 
             // Whether walking towards first side of exit linedef steps down
-            boolean     stepdown = (l->frontsector->floorheight < l->backsector->floorheight);
+            dboolean     stepdown = (l->frontsector->floorheight < l->backsector->floorheight);
 
             // Height of thing above ground
             fixed_t z = thing->z - thing->floorz;

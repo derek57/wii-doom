@@ -72,8 +72,8 @@
 #endif
 
 
-extern boolean longtics;
-extern boolean lowres_turn;
+extern dboolean longtics;
+extern dboolean lowres_turn;
 
 ticcmd_t *netcmds;
 
@@ -106,9 +106,9 @@ static void PlayerQuitGame(player_t *player)
 */
 }
 
-static void RunTic(ticcmd_t *cmds, boolean *ingame)
+static void RunTic(ticcmd_t *cmds, dboolean *ingame)
 {
-    extern boolean advancedemo;
+    extern dboolean advancedemo;
     unsigned int i;
 
     // Check for player quits.

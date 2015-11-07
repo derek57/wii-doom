@@ -45,14 +45,14 @@
 // haleyjd 08/28/10: implemented for Strife support
 // haleyjd 08/28/10: Patch clipping callback, implemented to support Choco
 // Strife.
-typedef boolean (*vpatchclipfunc_t)(patch_t *, int, int);
+typedef dboolean (*vpatchclipfunc_t)(patch_t *, int, int);
 
 
 extern byte *xlatab;
 extern byte *tinttable;
 extern byte *dp_translation;
 
-extern boolean dp_translucent;
+extern dboolean dp_translucent;
 
 void GetPixelSize(void);
 
@@ -62,7 +62,7 @@ static inline void V_ClearDPTranslation(void)
         dp_translation = NULL;
 }
 
-boolean V_EmptyPatch(patch_t *patch);
+dboolean V_EmptyPatch(patch_t *patch);
 
 void V_DrawHorizLine(int x, int y, int w, int c);
 
@@ -89,7 +89,7 @@ void V_RestoreBuffer(void);
 void V_DrawPatch(int x, int y, patch_t* patch ) ;
 void V_DrawPatchFlipped(int x, int y, patch_t* patch ) ;
 void V_MarkRect(int x, int y, int width, int height);
-void V_DrawConsoleChar(int x, int y, patch_t *patch, int color1, int color2, boolean italics,
+void V_DrawConsoleChar(int x, int y, patch_t *patch, int color1, int color2, dboolean italics,
     byte *tinttab);
 
 void V_DrawStatusPatch(int x, int y, patch_t *patch, byte *tinttab);
@@ -101,7 +101,7 @@ void V_ColorBlock(int x, int y, int width, int height, byte color);
 void V_GetBlock (int x, int y, int width, int height, byte *dest);
 void V_ScreenShot(char *format);
 void V_LowGraphicDetail(int height);
-void V_DrawPatchWithShadow(int x, int y, patch_t *patch, boolean flag);
+void V_DrawPatchWithShadow(int x, int y, patch_t *patch, dboolean flag);
 void V_DrawDistortedBackground(char* patchname, byte *back_dest);
 void V_FillRect(int x, int y, int width, int height, byte color);
 

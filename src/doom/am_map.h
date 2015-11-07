@@ -60,7 +60,7 @@ typedef struct
 
 
 // Called by main loop.
-boolean AM_Responder (event_t* ev);
+dboolean AM_Responder (event_t* ev);
 
 extern cheatseq_t cheat_amap;
 

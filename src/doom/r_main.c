@@ -135,18 +135,18 @@ lighttable_t            **colormaps;
 // bumped light from gun blasts
 int                     extralight;
 /*
-boolean                r_translucency = r_translucency_default;
-boolean                r_homindicator = r_homindicator_default;
+dboolean                r_translucency = r_translucency_default;
+dboolean                r_homindicator = r_homindicator_default;
 */
 
-boolean                 BorderNeedRefresh;
+dboolean                 BorderNeedRefresh;
 
 int                     r_frame_count;
 
 extern int              screenSize;
 extern int              viewheight2;
 //extern int              gametic;
-extern boolean         canmodify;
+extern dboolean         canmodify;
 
 extern fixed_t         pspritescale;
 
@@ -480,7 +480,7 @@ void R_InitLightTables(void)
 //  because it might be in the middle of a refresh.
 // The change will take effect next refresh.
 //
-boolean        setsizeneeded;
+dboolean        setsizeneeded;
 int             setblocks;
 
 void R_SetViewSize(int blocks)
@@ -699,7 +699,7 @@ void R_Init(void)
     R_InitTables();
     printf (".");
     R_SetViewSize(screenblocks);
-//    printf (".");
+    printf (".");
     R_InitLightTables();
     printf (".");
     R_InitSkyMap();
@@ -736,7 +736,6 @@ subsector_t *R_PointInSubsector(fixed_t x, fixed_t y)
 //
 void R_SetupPitch(player_t* player)
 {
-    int i;
     int tempCentery;
 
     tempCentery = (viewheight / 2) + ((player->recoilpitch / (SCREENWIDTH * 32)) +
@@ -744,6 +743,8 @@ void R_SetupPitch(player_t* player)
 
     if (centery != tempCentery)
     {
+        int i;
+
         centery = tempCentery;
         centeryfrac = centery << FRACBITS;
         for (i = 0; i < viewheight; i++)

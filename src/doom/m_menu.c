@@ -1071,42 +1071,42 @@ short                      skullAnimCounter;        // skull animation counter
 short                      whichSkull;              // which skull to draw
 
 // timed message = no input from user
-boolean                    messageNeedsInput;
-boolean                    map_flag = false;
-boolean                    inhelpscreens;
-boolean                    increditscreen;
-boolean                    menuactive;
-boolean                    fake = false;
-boolean                    mus_cheat_used = false;
-boolean                    got_invisibility = false;
-boolean                    got_radiation_suit = false;
-boolean                    got_berserk = false;
-boolean                    got_invulnerability = false;
-boolean                    got_map = false;
-boolean                    got_light_amp = false;
-boolean                    got_all = false;
-boolean                    aiming_help;
-boolean                    hud;
-boolean                    swap_sound_chans;
-boolean                    skillflag = true;
-boolean                    nomonstersflag;
-boolean                    fastflag;
-boolean                    respawnflag = true;
-boolean                    warpflag = true;
-boolean                    multiplayerflag = true;
-boolean                    deathmatchflag = true;
-boolean                    altdeathflag;
-boolean                    locallanflag;
-boolean                    searchflag;
-boolean                    queryflag;
-boolean                    noclip_on;
-boolean                    dedicatedflag = true;
-boolean                    privateserverflag;
-boolean                    massacre_cheat_used;
-boolean                    randompitch;
-boolean                    memory_usage;
-boolean                    blurred = false;
-boolean                    long_tics = false;
+dboolean                    messageNeedsInput;
+dboolean                    map_flag = false;
+dboolean                    inhelpscreens;
+dboolean                    increditscreen;
+dboolean                    menuactive;
+dboolean                    fake = false;
+dboolean                    mus_cheat_used = false;
+dboolean                    got_invisibility = false;
+dboolean                    got_radiation_suit = false;
+dboolean                    got_berserk = false;
+dboolean                    got_invulnerability = false;
+dboolean                    got_map = false;
+dboolean                    got_light_amp = false;
+dboolean                    got_all = false;
+dboolean                    aiming_help;
+dboolean                    hud;
+dboolean                    swap_sound_chans;
+dboolean                    skillflag = true;
+dboolean                    nomonstersflag;
+dboolean                    fastflag;
+dboolean                    respawnflag = true;
+dboolean                    warpflag = true;
+dboolean                    multiplayerflag = true;
+dboolean                    deathmatchflag = true;
+dboolean                    altdeathflag;
+dboolean                    locallanflag;
+dboolean                    searchflag;
+dboolean                    queryflag;
+dboolean                    noclip_on;
+dboolean                    dedicatedflag = true;
+dboolean                    privateserverflag;
+dboolean                    massacre_cheat_used;
+dboolean                    randompitch;
+dboolean                    memory_usage;
+dboolean                    blurred = false;
+dboolean                    long_tics = false;
 
 fixed_t                    forwardmove = 29;
 fixed_t                    sidemove = 21; 
@@ -1117,7 +1117,7 @@ menu_t                     *currentMenu;
 byte                       *tempscreen;
 byte                       *blurredscreen;
 
-static boolean             askforkey = false;
+static dboolean             askforkey = false;
 
 static int                 FirstKey = 0;           // SPECIAL MENU FUNCTIONS (ITEMCOUNT)
 static int                 keyaskedfor;
@@ -1142,16 +1142,16 @@ extern default_t           doom_defaults_list[];   // KEY BINDINGS
 
 extern patch_t*            hu_font[HU_FONTSIZE];
 
-//extern boolean             overlay_trigger;
-extern boolean             message_dontfuckwithme;
-extern boolean             chat_on;                // in heads-up code
-extern boolean             BorderNeedRefresh;
-extern boolean             sendpause;
-extern boolean             secret_1;
-extern boolean             secret_2;
-extern boolean             done;
-extern boolean             skippsprinterp;
-extern boolean             longtics;
+//extern dboolean             overlay_trigger;
+extern dboolean             message_dontfuckwithme;
+extern dboolean             chat_on;                // in heads-up code
+extern dboolean             BorderNeedRefresh;
+extern dboolean             sendpause;
+extern dboolean             secret_1;
+extern dboolean             secret_2;
+extern dboolean             done;
+extern dboolean             skippsprinterp;
+extern dboolean             longtics;
 
 extern short               songlist[148];
 
@@ -1217,7 +1217,7 @@ void M_DrawThermoSmall(int x,int y,int thermWidth,int thermDot);
 void M_DrawEmptyCell(menu_t *menu,int item);
 void M_DrawSelCell(menu_t *menu,int item);
 //void M_WriteText(int x, int y, char *string);
-void M_StartMessage(char *string,void *routine,boolean input);
+void M_StartMessage(char *string,void *routine,dboolean input);
 void M_StopMessage(void);
 //void M_ClearMenus (void);
 
@@ -2459,12 +2459,13 @@ void M_DarkBackground(void)
 
 void M_ReadSaveStrings(void)
 {
-    FILE   *handle;
     int     i;
     char    name[256];
 
     for (i = 0;i < load_end;i++)
     {
+        FILE   *handle;
+
         M_StringCopy(name, P_SaveGameFile(i), sizeof(name));
 
         handle = fopen(name, "rb");
@@ -2508,8 +2509,8 @@ void M_DrawLoad(void)
     {
         int x;
         int x2;
-        char *string = "";
-        char *string2 = "";
+        char *string;
+        char *string2;
         dp_translation = crx[CRX_GOLD];
         string = "* INDICATES A SAVEGAME THAT WAS";
         string2 = "CREATED USING AN OPTIONAL PWAD!";
@@ -2600,8 +2601,8 @@ void M_DrawSave(void)
     {
         int x;
         int x2;
-        char *string = "";
-        char *string2 = "";
+        char *string;
+        char *string2;
         dp_translation = crx[CRX_GOLD];
         string = "* INDICATES A SAVEGAME THAT WAS";
         string2 = "CREATED USING AN OPTIONAL PWAD!";
@@ -5350,8 +5351,6 @@ void M_ChangeMessages(int choice)
 */
     blurred = false;
 
-    // warning: unused parameter `int choice'
-    choice = 0;
     showMessages = 1 - showMessages;
         
     if (!showMessages)
@@ -5386,7 +5385,6 @@ void M_EndGame(int choice)
     V_DrawPatchWithShadow(58, 15, W_CacheLumpName("M_T_EGME",
                                                PU_CACHE), false);
 */
-    choice = 0;
     if (!usergame)
     {
         S_StartSound(NULL,sfx_oof);
@@ -5409,7 +5407,6 @@ void M_EndGame(int choice)
 //
 void M_ReadThis(int choice)
 {
-    choice = 0;
     M_SetupNextMenu(&ReadDef1);
 }
 
@@ -5420,7 +5417,6 @@ void M_ReadThis2(int choice)
 
     if (gameversion <= exe_doom_1_9 && gamemode != commercial)
     {
-        choice = 0;
         M_SetupNextMenu(&ReadDef2);
     }
     else
@@ -5433,14 +5429,12 @@ void M_ReadThis2(int choice)
 
 void M_FinishReadThis(int choice)
 {
-    choice = 0;
     M_SetupNextMenu(&MainDef);
 }
 
 
 void M_Credits(int choice)
 {
-    choice = 0;
     M_SetupNextMenu(&CreditsDef);
 }
 
@@ -5604,7 +5598,6 @@ void M_ChangeDetail(int choice)
     }
 */
     blurred = false;
-    choice = 0;
 
     detailLevel = !detailLevel;
 
@@ -5620,7 +5613,6 @@ void M_ChangeDetail(int choice)
 
 void M_Translucency(int choice)
 {
-    choice = 0;
     d_translucency = !d_translucency;
 
     // translucent HUD?
@@ -5635,7 +5627,6 @@ void M_ColoredBloodA(int choice)
     if (!d_chkblood)
         return;
 
-    choice = 0;
     d_colblood = 1 - !!d_colblood;
 }
 
@@ -5644,7 +5635,6 @@ void M_ColoredBloodB(int choice)
     if (!d_chkblood2)
         return;
 
-    choice = 0;
     d_colblood2 = 1 - !!d_colblood2;
 }
 
@@ -5669,7 +5659,6 @@ void M_WipeType(int choice)
 
 void M_UncappedFramerate(int choice)
 {
-    choice = 0;
     d_uncappedframerate = !d_uncappedframerate;
 }
 
@@ -5852,7 +5841,7 @@ void
 M_StartMessage
 ( char*          string,
   void*          routine,
-  boolean        input )
+  dboolean        input )
 {
     messageLastMenuActive = menuactive;
     messageToPrint = 1;
@@ -5889,11 +5878,11 @@ int M_StringWidth(char* string)
 {
     size_t          i;
     int             w = 0;
-    int             c;
         
     for (i = 0;i < strlen(string);i++)
     {
-        c = toupper(string[i]) - HU_FONTSTART;
+        int c = toupper(string[i]) - HU_FONTSTART;
+
         if (c < 0 || c >= HU_FONTSIZE)
             w += 4;
         else
@@ -5930,7 +5919,6 @@ void M_WriteText(int x, int y, char* string)
 {
     int                w;
     char*              ch;
-    int                c;
     int                cx;
     int                cy;
                 
@@ -5941,9 +5929,11 @@ void M_WriteText(int x, int y, char* string)
         
     while(1)
     {
-        c = *ch++;
+        int c = *ch++;
+
         if (!c)
             break;
+
         if (c == '\n')
         {
             cx = x;
@@ -5981,7 +5971,7 @@ void M_WriteText(int x, int y, char* string)
 // jumping in the menus. Preserve this behavior for accuracy.
 
 #ifndef WII
-static boolean IsNullKey(int key)
+static dboolean IsNullKey(int key)
 {
     return key == KEY_PAUSE || key == KEY_CAPSLOCK
         || key == KEY_SCRLCK || key == KEY_NUMLOCK;
@@ -6049,14 +6039,14 @@ void M_ChangeGamma(int choice)
 //
 // M_Responder
 //
-boolean M_Responder (event_t* ev)
+dboolean M_Responder (event_t* ev)
 {
     int             ch;
     int             key;
     int             i;
 
 #ifndef WII
-    int             mousewait = 0;
+    static int      mousewait = 0;
 #endif
 
 #ifdef WII
@@ -6743,9 +6733,6 @@ void M_Drawer (void)
     static short        y;
     unsigned int        i;
     unsigned int        max;
-    char                string[80];
-    char                *name;
-    int                 start;
 
     inhelpscreens = false;
 
@@ -6891,9 +6878,11 @@ void M_Drawer (void)
     // Horiz. & Vertically center string and print it.
     if (messageToPrint)
     {
+        char                string[80];
+        int                 start = 0;
+
         M_DarkBackground();
 
-        start = 0;
         y = 100 - M_StringHeight(messageString) / 2;
         while (messageString[start] != '\0')
         {
@@ -7015,6 +7004,8 @@ void M_Drawer (void)
 
     for (i=0;i<max;i++)
     {
+        char                *name;
+
         menuitem_t *item = &(currentMenu->menuitems[i]);
         name = item->name;
 
@@ -7279,12 +7270,12 @@ void M_ArmorC(int choice)
 
 void M_WeaponsA(int choice)
 {
-    int i;
-
     if(!netgame && !demoplayback && gamestate == GS_LEVEL
         && gameskill != sk_nightmare &&
         players[consoleplayer].playerstate == PST_LIVE)
     {
+        int i;
+
         if(fsize == 4261144 || fsize == 4271324 || fsize == 4211660 ||
                 fsize == 4207819 || fsize == 4274218 || fsize == 4225504 ||
                 fsize == 4225460 || fsize == 4234124 || fsize == 4196020)
@@ -7538,14 +7529,14 @@ void M_ItemsA(int choice)
         && gameskill != sk_nightmare &&
         players[consoleplayer].playerstate == PST_LIVE)
     {
-            int i;
+        static player_t* player;
 
-            static player_t* player;
-
-            player = &players[consoleplayer];
+        player = &players[consoleplayer];
 
         if(!got_all)
         {
+            int i;
+
             players[consoleplayer].powers[0] = INVULNTICS;
             players[consoleplayer].powers[1] = 1;
             players[consoleplayer].powers[2] = INVISTICS;
@@ -7562,8 +7553,10 @@ void M_ItemsA(int choice)
                     player->maxammo[i] *= 2;
                 player->backpack = true;
             }
+
             for (i=0 ; i<NUMAMMO ; i++)
                 P_GiveAmmo (player, i, 1);
+
             player->message = GOTBACKPACK;
 
             got_all = true;
@@ -8634,9 +8627,9 @@ void M_DrawControls(void)
         int x;
         int x2;
         int x3;
-        char *string = "";
-        char *string2 = "";
-        char *string3 = "";
+        char *string;
+        char *string2;
+        char *string3;
         dp_translation = crx[CRX_GOLD];
         string = "IF THE BARS FOR WALKING, TURNING & STRAFING";
         string2 = "ARE AT THEIR HIGHEST LEVEL, IT MEANS THE SAME";
@@ -9374,19 +9367,16 @@ void M_Beta(int choice)
 
 void M_Corpses(int choice)
 {
-    choice = 0;
     d_flipcorpses = 1 - !!d_flipcorpses;
 }
 
 void M_Secrets(int choice)
 {
-    choice = 0;
     d_secrets = !d_secrets;
 }
 
 void M_Trails(int choice)
 {
-    choice = 0;
     smoketrails = !smoketrails;
 }
 

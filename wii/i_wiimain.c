@@ -11,12 +11,12 @@
 #include "i_wiimain.h"
 
 
-boolean sd = false;
-boolean usb = false;
+dboolean sd = false;
+dboolean usb = false;
 
 int wii_main()
 {
-    FILE * fp2;
+    FILE *fp2;
 
     PAD_Init();
 
@@ -43,6 +43,9 @@ int wii_main()
 
     if(fp2 && !sd)
         usb = true;
+
+    if(fp2)
+        fclose(fp2);
 
     return 0;
 }

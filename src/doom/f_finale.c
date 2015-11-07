@@ -143,14 +143,14 @@ state_t*        caststate;
 
 extern patch_t  *hu_font[HU_FONTSIZE];
 
-extern boolean  opl;
+extern dboolean  opl;
 
 unsigned int    finalecount;
 
-boolean         finale_music;
-boolean         castdeath;
-boolean         castattacking;
-boolean         castdeathflip;
+dboolean         finale_music;
+dboolean         castdeath;
+dboolean         castattacking;
+dboolean         castdeathflip;
 
 char*           finaletext;
 char*           finaleflat;
@@ -283,7 +283,7 @@ void F_StartFinale (void)
 // F_CastResponder
 //
 
-boolean F_CastResponder (event_t* ev)
+dboolean F_CastResponder (event_t* ev)
 {
     mobjtype_t  type;
 
@@ -361,7 +361,7 @@ boolean F_CastResponder (event_t* ev)
     return true;
 }
 
-boolean F_Responder (event_t *event)
+dboolean F_Responder (event_t *event)
 {
     if (finalestage == F_STAGE_CAST)
         return F_CastResponder (event);
@@ -607,9 +607,7 @@ void F_CastTicker (void)
 // F_Ticker
 //
 void F_Ticker (void)
-{
-    size_t i;
-    
+{    
     if (menuactive || paused || consoleactive)
         return;
 
@@ -617,6 +615,8 @@ void F_Ticker (void)
     if ( (gamemode == commercial)
       && ( finalecount > 50) )
     {
+      size_t i;
+
       // go on to the next level
       for (i=0 ; i<MAXPLAYERS ; i++)
         if (players[i].cmd.buttons)
@@ -675,7 +675,6 @@ void F_TextWrite (void)
     int         x,y,w;
     signed int  count;
     char*       ch;
-    int         c;
     int         cx;
     int         cy;
     
@@ -709,9 +708,11 @@ void F_TextWrite (void)
         count = 0;
     for ( ; count ; count-- )
     {
-        c = *ch++;
+        int c = *ch++;
+
         if (!c)
             break;
+
         if (c == '\n')
         {
             cx = 10;
@@ -809,7 +810,7 @@ void F_CastDrawer (void)
     spritedef_t*     sprdef;
     spriteframe_t*   sprframe;
     int              lump;
-    boolean          flip;
+    dboolean          flip;
     patch_t*         patch;
     int              rot = 0;
     
@@ -829,8 +830,8 @@ void F_CastDrawer (void)
         rot = castrot;
 
     lump = sprframe->lump[rot];
-//    flip = (boolean)sprframe->flip[0];
-    flip = (boolean)(sprframe->flip & (1 << rot));
+//    flip = (dboolean)sprframe->flip[0];
+    flip = (dboolean)(sprframe->flip & (1 << rot));
 
     patch = W_CacheLumpNum (lump+firstspritelump, PU_CACHE);
     if (flip || castdeathflip)
@@ -853,7 +854,7 @@ F_DrawPatchCol
     byte*       source;
     byte*       dest;
     byte*       desttop;
-    int         count, f;     // CHANGED FOR HIRES
+    int         f;     // CHANGED FOR HIRES
 
     column = (column_t *)((byte *)patch + LONG(patch->columnofs[col]));
     desttop = I_VideoBuffer + x;
@@ -861,12 +862,13 @@ F_DrawPatchCol
     // step through the posts in a column
     while (column->topdelta != 0xff )
     {
+        int count = column->length;
+
         for (f = 0; f <= hires; f++) // ADDED FOR HIRES
         {                            // ADDED FOR HIRES
             source = (byte *)column + 3;
             dest = desttop + column->topdelta*
                    (SCREENWIDTH << hires) + (x * hires) + f; // CHANGED FOR HIRES
-            count = column->length;
                 
             while (count--)
             {
@@ -952,15 +954,15 @@ void F_BunnyScroll (void)
 }
 
 static void F_ArtScreenDrawer(void)
-{
-    char *lumpname;
-    
+{    
     if (gameepisode == 3)
     {
         F_BunnyScroll();
     }
     else
     {
+        char *lumpname;
+
         switch (gameepisode)
         {
             case 1:

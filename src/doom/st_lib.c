@@ -63,7 +63,7 @@ rcsid[] = "$Id: st_lib.c,v 1.4 1997/02/03 16:47:56 b1 Exp $";
 
 
 // in AM_map.c
-//extern boolean          automapactive; 
+//extern dboolean          automapactive; 
 
 //
 // Hack display negative frags.
@@ -88,7 +88,7 @@ STlib_initNum
   int                   y,
   patch_t**             pl,
   int*                  num,
-  boolean*              on,
+  dboolean*              on,
   int                   width )
 {
     n->x        = x;
@@ -109,7 +109,7 @@ STlib_initNum
 void
 STlib_drawNum
 ( st_number_t*  n,
-  boolean       refresh )
+  dboolean       refresh )
 {
 
     int         numdigits = n->width;
@@ -171,7 +171,7 @@ STlib_drawNum
 void
 STlib_updateNum
 ( st_number_t*          n,
-  boolean               refresh )
+  dboolean               refresh )
 {
     if (*n->on) STlib_drawNum(n, refresh);
 }
@@ -185,7 +185,7 @@ STlib_initPercent
   int                   y,
   patch_t**             pl,
   int*                  num,
-  boolean*              on,
+  dboolean*              on,
   patch_t*              percent )
 {
     STlib_initNum(&p->n, x, y, pl, num, on, 3);
@@ -215,7 +215,7 @@ STlib_initMultIcon
   int                   y,
   patch_t**             il,
   int*                  inum,
-  boolean*              on )
+  dboolean*              on )
 {
     i->x        = x;
     i->y        = y;
@@ -230,23 +230,18 @@ STlib_initMultIcon
 void
 STlib_updateMultIcon
 ( st_multicon_t*        mi,
-  boolean               refresh )
+  dboolean               refresh )
 {
-    int                 w;
-    int                 h;
-    int                 x;
-    int                 y;
-
     if (*mi->on
         && (mi->oldinum != *mi->inum || refresh)
         && (*mi->inum!=-1))
     {
         if (mi->oldinum != -1)
         {
-            x = mi->x - SHORT(mi->p[mi->oldinum]->leftoffset);
-            y = mi->y - SHORT(mi->p[mi->oldinum]->topoffset);
-            w = SHORT(mi->p[mi->oldinum]->width);
-            h = SHORT(mi->p[mi->oldinum]->height);
+            int                 w = SHORT(mi->p[mi->oldinum]->width);
+            int                 h = SHORT(mi->p[mi->oldinum]->height);
+            int                 x = mi->x - SHORT(mi->p[mi->oldinum]->leftoffset);
+            int                 y = mi->y - SHORT(mi->p[mi->oldinum]->topoffset);
 
             if (y - ST_Y < 0)
                 I_Error("updateMultIcon: y - ST_Y < 0");
@@ -262,7 +257,7 @@ STlib_updateMultIcon
         player_t *player = &players[consoleplayer];
 
         // "3" = standard lifes in the pre-beta version of the game
-        if(3 + player->extra_lifes < 10);
+        if(3 + player->extra_lifes < 10)
         {
             int             i = 3 + player->extra_lifes;
             char            namebuf[9];
@@ -282,8 +277,8 @@ STlib_initBinIcon
   int                   x,
   int                   y,
   patch_t*              i,
-  boolean*              val,
-  boolean*              on )
+  dboolean*              val,
+  dboolean*              on )
 {
     b->x        = x;
     b->y        = y;
@@ -298,20 +293,15 @@ STlib_initBinIcon
 void
 STlib_updateBinIcon
 ( st_binicon_t*         bi,
-  boolean               refresh )
+  dboolean               refresh )
 {
-    int                 x;
-    int                 y;
-    int                 w;
-    int                 h;
-
     if (*bi->on
         && (bi->oldval != *bi->val || refresh))
     {
-        x = bi->x - SHORT(bi->p->leftoffset);
-        y = bi->y - SHORT(bi->p->topoffset);
-        w = SHORT(bi->p->width);
-        h = SHORT(bi->p->height);
+        int x = bi->x - SHORT(bi->p->leftoffset);
+        int y = bi->y - SHORT(bi->p->topoffset);
+        int w = SHORT(bi->p->width);
+        int h = SHORT(bi->p->height);
 
         if (y - ST_Y < 0)
             I_Error("updateBinIcon: y - ST_Y < 0");

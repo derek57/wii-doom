@@ -292,7 +292,7 @@ typedef struct
 
     // If true, this config variable has been bound to a variable
     // and is being used.
-    boolean        bound;
+    dboolean        bound;
 
 } default_t;
 
@@ -458,9 +458,9 @@ typedef enum
     
 } powerduration_t;
 
-extern boolean     dont_move_backwards;
-extern boolean     sd;
-extern boolean     usb;
+extern dboolean     dont_move_backwards;
+extern dboolean     sd;
+extern dboolean     usb;
 
 extern int         fsize;
 extern int         fsizerw;
@@ -488,14 +488,14 @@ int                extra_wad_slot_1_loaded;
 int                extra_wad_slot_2_loaded;
 int                extra_wad_slot_3_loaded;
 
-boolean            jumping;
-boolean            dont_move_forwards;
-boolean            error_detected;
-boolean            print_resource_pwad_error;
-boolean            print_resource_pwad2_error;
-boolean            display_ticker;
-boolean            gamekeydown[NUMKEYS]; 
-boolean            am_rotate;
+dboolean            jumping;
+dboolean            dont_move_forwards;
+dboolean            error_detected;
+dboolean            print_resource_pwad_error;
+dboolean            print_resource_pwad2_error;
+dboolean            display_ticker;
+dboolean            gamekeydown[NUMKEYS]; 
+dboolean            am_rotate;
 
 FILE               *debugfile;
 FILE               *statsfile;

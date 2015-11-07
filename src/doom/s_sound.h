@@ -113,7 +113,7 @@ void S_SetSfxVolume(int volume);
 void S_StartMP3Music(int type, int mode);
 
 // query if music is playing
-boolean S_MusicPlaying(void);
+dboolean S_MusicPlaying(void);
 
 extern int snd_channels;
 

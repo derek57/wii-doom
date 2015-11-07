@@ -82,13 +82,13 @@
 //
 
 // Called by main loop.
-boolean ST_Responder (event_t* ev);
+dboolean ST_Responder (event_t* ev);
 
 // Called by main loop.
 void ST_Ticker (void);
 
 // Called by main loop.
-void ST_Drawer (boolean fullscreen, boolean refresh);
+void ST_Drawer (dboolean fullscreen, dboolean refresh);
 
 // Called when the console player is spawned on each level.
 void ST_Start (void);

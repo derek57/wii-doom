@@ -70,12 +70,12 @@
 
 // killough 1/6/98: replaced globals with statics where appropriate
 
-static boolean segtextured;            // True if any of the segs textures might be visible.
+static dboolean segtextured;            // True if any of the segs textures might be visible.
 
-static boolean markfloor;              // False if the back side is the same plane.
-boolean        markceiling;
+static dboolean markfloor;              // False if the back side is the same plane.
+dboolean        markceiling;
 
-static boolean maskedtexture;
+static dboolean maskedtexture;
 static int      toptexture;
 static int      midtexture;
 static int      bottomtexture;
@@ -124,15 +124,15 @@ lighttable_t    **walllights;
 
 static int      *maskedtexturecol;      // dropoff overflow
 
-//boolean        r_brightmaps = r_brightmaps_default;
+//dboolean        r_brightmaps = r_brightmaps_default;
 
 extern fixed_t  animatedliquiddiff;
 extern fixed_t  animatedliquidxoffs;
 extern fixed_t  animatedliquidyoffs;
 /*
-extern boolean doorclosed;
-extern boolean r_liquid_bob;
-extern boolean r_translucency;
+extern dboolean doorclosed;
+extern dboolean r_liquid_bob;
+extern dboolean r_translucency;
 */
 //
 // R_FixWiggle()
@@ -362,7 +362,7 @@ void R_RenderMaskedSegRange(drawseg_t *ds, int x1, int x2)
 void R_RenderSegLoop(void)
 {
     fixed_t     texturecolumn = 0;      // shut up compiler warning
-    boolean    usebrightmaps = (d_brightmaps && !fixedcolormap && fullcolormap == colormaps[0]);
+    dboolean    usebrightmaps = (d_brightmaps && !fixedcolormap && fullcolormap == colormaps[0]);
 
     for (; rw_x < rw_stopx; ++rw_x)
     {
@@ -373,7 +373,7 @@ void R_RenderSegLoop(void)
         // no space above wall?
         int             bottom;
         int             top = ceilingclip[rw_x] + 1;
-        boolean        bottomclipped = false;
+        dboolean         bottomclipped = false;
 
         yl = MAX(yl, top);
 
@@ -788,7 +788,7 @@ void R_StoreWallRange(int start, int stop)
         //
         // killough 4/7/98: make doorclosed external variable
         {
-            extern boolean     doorclosed;
+            extern dboolean     doorclosed;
 
             if (doorclosed || backsector->interpceilingheight <= frontsector->interpfloorheight)
             {
