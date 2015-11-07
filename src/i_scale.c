@@ -376,15 +376,11 @@ static void I_InitStretchTables(byte *palette)
     // mix 60%  =  stretch_tables[1] used backwards
     // mix 80%  =  stretch_tables[0] used backwards
     // mix 100% =  just write line 2
-#ifndef WII
-    printf("I_InitStretchTables: Generating lookup tables..");
-#endif
+
     C_Printf(CR_GOLD, " I_InitStretchTables: Generating lookup tables..");
     fflush(stdout);
     stretch_tables[0] = GenerateStretchTable(palette, 20);
-#ifndef WII
-    printf("..");
-#endif
+
     C_Printf(CR_GOLD, " ..");
     fflush(stdout);
     stretch_tables[1] = GenerateStretchTable(palette, 40);
@@ -400,15 +396,11 @@ static void I_InitSquashTable(byte *palette)
         return;
     }
 
-#ifndef WII
-    printf("I_InitSquashTable: Generating lookup tables..");
-#endif
+
     C_Printf(CR_GOLD, " I_InitSquashTable: Generating lookup tables..");
     fflush(stdout);
     half_stretch_table = GenerateStretchTable(palette, 50);
-#ifndef WII
-    printf("..");
-#endif
+
     C_Printf(CR_GOLD, " ..");
     fflush(stdout);
 
@@ -433,9 +425,6 @@ void I_ResetScaleTables(byte *palette)
         Z_Free(stretch_tables[0]);
         Z_Free(stretch_tables[1]);
 
-#ifndef WII
-        printf("I_ResetScaleTables: Regenerating lookup tables..\n");
-#endif
         C_Printf(CR_GOLD, " I_ResetScaleTables: Regenerating lookup tables..\n");
         stretch_tables[0] = GenerateStretchTable(palette, 20);
         stretch_tables[1] = GenerateStretchTable(palette, 40);
@@ -445,9 +434,6 @@ void I_ResetScaleTables(byte *palette)
     {
         Z_Free(half_stretch_table);
 
-#ifndef WII
-        printf("I_ResetScaleTables: Regenerating lookup table..\n");
-#endif
         C_Printf(CR_GOLD, " I_ResetScaleTables: Regenerating lookup table..\n");
         half_stretch_table = GenerateStretchTable(palette, 50);
     }
@@ -456,9 +442,6 @@ void I_ResetScaleTables(byte *palette)
     {
         Z_Free(quarter_stretch_table);
 
-#ifndef WII
-        printf("I_ResetScaleTables: Regenerating lookup table..\n");
-#endif
         C_Printf(CR_GOLD, " I_ResetScaleTables: Regenerating lookup table..\n");
         quarter_stretch_table = GenerateStretchTable(palette, 25);
     }

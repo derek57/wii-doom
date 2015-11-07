@@ -706,28 +706,28 @@ dboolean AM_Responder
 
         if (ev->data2 > 0)
         {
-            if (!(automapactive & followplayer))
+            if (!(automapactive && followplayer))
                 m_paninc.x = FTOM(F_PANINC);
             else
                 rc = false;
         }
         else if (ev->data2 < 0)
         {
-            if (!(automapactive & followplayer))
+            if (!(automapactive && followplayer))
                 m_paninc.x = -FTOM(F_PANINC);
             else
                 rc = false;
         }
         else if (ev->data3 > 0)
         {
-            if (!(automapactive & followplayer))
+            if (!(automapactive && followplayer))
                 m_paninc.y = FTOM(F_PANINC);
             else
                 rc = false;
         }
         else if (ev->data3 < 0)
         {
-            if (!(automapactive & followplayer))
+            if (!(automapactive && followplayer))
                 m_paninc.y = -FTOM(F_PANINC);
             else
                 rc = false;
@@ -742,13 +742,13 @@ dboolean AM_Responder
 
         if (ev->data2 == 0)
         {
-            if (!(automapactive & followplayer))
+            if (!(automapactive && followplayer))
                 m_paninc.x = 0;
         }
 
         if (ev->data3 == 0)
         {
-            if (!(automapactive & followplayer))
+            if (!(automapactive && followplayer))
                 m_paninc.y = 0;
         }
     }
@@ -1336,10 +1336,10 @@ void AM_drawWalls(void)
         l.b.x = lines[i].v2->x;
         l.b.y = lines[i].v2->y;
 
-        if (automapactive & am_rotate)
+        if (automapactive && am_rotate)
         {
-          AM_rotate(&l.a.x, &l.a.y, ANG90-plr->mo->angle, plr->mo->x, plr->mo->y);
-          AM_rotate(&l.b.x, &l.b.y, ANG90-plr->mo->angle, plr->mo->x, plr->mo->y);
+            AM_rotate(&l.a.x, &l.a.y, ANG90-plr->mo->angle, plr->mo->x, plr->mo->y);
+            AM_rotate(&l.b.x, &l.b.y, ANG90-plr->mo->angle, plr->mo->x, plr->mo->y);
         }
 
         if (cheating || (lines[i].flags & ML_MAPPED))
@@ -1397,7 +1397,7 @@ AM_drawLineCharacter
     int          i;
     mline_t      l;
 
-    if (automapactive & am_rotate)
+    if (automapactive && am_rotate)
         angle -= plr->mo->angle - ANG90; // cph
 
     for (i=0;i<lineguylines;i++)
@@ -1471,8 +1471,8 @@ void AM_drawPlayers(void)
             if (playeringame[i])
         {
                   fixed_t x = p->mo->x, y = p->mo->y;
-                  if (automapactive & am_rotate)
-            AM_rotate(&x, &y, ANG90-plr->mo->angle, plr->mo->x, plr->mo->y);
+            if (automapactive && am_rotate)
+                AM_rotate(&x, &y, ANG90-plr->mo->angle, plr->mo->x, plr->mo->y);
         }
 
         if (p->powers[pw_invisibility])
@@ -1533,7 +1533,7 @@ AM_drawThings
                     x = t->x;
                     y = t->y;
 
-                    if (automapactive & am_rotate)
+                    if (automapactive && am_rotate)
                         AM_rotate(&x, &y, ANG90-plr->mo->angle, plr->mo->x, plr->mo->y);
 
                     AM_drawLineCharacter(thintriangle_guy, arrlen(thintriangle_guy),
@@ -1562,7 +1562,7 @@ void AM_drawMarks(void)
             fx = (CXMTOF(markpoints[i].x) >> hires) - 1; // CHANGED FOR HIRES
             fy = (CYMTOF(markpoints[i].y) >> hires) - 2; // CHANGED FOR HIRES
 
-              if (automapactive & am_rotate)
+              if (automapactive && am_rotate)
                 AM_rotate(&fx, &fy, ANG90-plr->mo->angle, plr->mo->x, plr->mo->y);
 
             if (fx >= f_x && fx <= (f_w >> hires) -                 // HIRES

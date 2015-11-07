@@ -27,6 +27,9 @@
 
 /* Define to 1 if you have the `samplerate' library (-lsamplerate). */
 /* #undef HAVE_LIBSAMPLERATE */
+#ifndef WII
+#define HAVE_LIBSAMPLERATE 1
+#endif
 
 /* Define to 1 if you have the `z' library (-lz). */
 #define HAVE_LIBZ 1

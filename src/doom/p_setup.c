@@ -1072,11 +1072,13 @@ static void P_LoadLineDefs(int lump)
 {
     const byte  *data = W_CacheLumpNum(lump, PU_STATIC);
     int         i;
+    int         warn; // [crispy] warn about unknown linedef types
 
     sizelines = W_LumpLength(lump);
     numlines = sizelines / sizeof(maplinedef_t);
     lines = calloc_IfSameLevel(lines, numlines, sizeof(line_t));
 
+    warn = 0; // [crispy] warn about unknown linedef types
     for (i = 0; i < numlines; i++)
     {
         const maplinedef_t      *mld = (const maplinedef_t *)data + i;
@@ -1087,6 +1089,13 @@ static void P_LoadLineDefs(int lump)
         ld->hidden = false;
 
         ld->special = SHORT(mld->special);
+
+	// [crispy] warn about unknown linedef types
+	if ((unsigned short) ld->special >= BOOMLINESPECIALS)
+	{
+	    C_Printf(CR_RED, " P_LoadLineDefs: Unknown special %d at line %d\n", ld->special, i);
+	    warn++;
+	}
 
         ld->tag = SHORT(mld->tag);
         v1 = ld->v1 = &vertexes[(unsigned short)SHORT(mld->v1)];
@@ -1132,6 +1141,13 @@ static void P_LoadLineDefs(int lump)
         // killough 4/4/98: support special sidedef interpretation below
         if (ld->sidenum[0] != NO_INDEX && ld->special)
             sides[*ld->sidenum].special = ld->special;
+    }
+
+    // [crispy] warn about unknown linedef types
+    if (warn)
+    {
+        C_Printf(CR_RED, " P_LoadLineDefs: Found %d line%s with unknown linedef type.\n", warn, (warn > 1) ? "s" : "");
+        C_Printf(CR_RED, " THIS MAP MAY NOT WORK AS EXPECTED!\n");
     }
 
     W_ReleaseLumpNum(lump);

@@ -20,6 +20,8 @@
 
 #ifdef HAVE_IOPERM
 
+#include "../src/c_io.h"
+
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
@@ -38,24 +40,14 @@ static int OPL_Linux_Init(unsigned int port_base)
 
     if (ioperm(port_base, 2, 1) < 0)
     {
-#ifndef WII
-        fprintf(stderr, "\n Failed to get I/O port permissions for 0x%x: %s\n\n",
-                        port_base, strerror(errno));
-#else
         C_Printf(CR_RED, "\n Failed to get I/O port permissions for 0x%x: %s\n\n",
                         port_base, strerror(errno));
-#endif
+
         if (errno == EPERM)
         {
-#ifndef WII
-            fprintf(stderr,
-                    "\tYou may need to run the program as root in order\n"
-                    "\tto acquire I/O port permissions for OPL MIDI playback.\n\n");
-#else
             C_Printf(CR_RED,
                     "\tYou may need to run the program as root in order\n"
                     "\tto acquire I/O port permissions for OPL MIDI playback.\n\n");
-#endif
         }
 
         return 0;

@@ -2617,10 +2617,9 @@ void D_DoomMain (void)
     if (W_CheckNumForName("SS_START") >= 0
      || W_CheckNumForName("FF_END") >= 0)
     {
-        I_PrintDivider();
-        printf(" WARNING: The loaded WAD file contains modified sprites or\n"
-               " floor textures.  You may want to use the '-merge' command\n"
-               " line option instead of '-file'.\n");
+//        I_PrintDivider();
+        C_Printf(CR_GOLD, " WARNING: The loaded WAD file contains modified sprites or floor textures.");
+        C_Printf(CR_GOLD, " You may want to use the '-merge' command line option instead of '-file'.");
     }
 #endif
 
@@ -3155,11 +3154,11 @@ void D_DoomMain (void)
 #ifndef WII
     PrintGameVersion();
 #endif
-    printf(" S_Init: Setting up sound.\n");
+    printf(" S_Init: Setting up sound.");
     C_Printf(CR_GRAY, " S_Init: Setting up sound.\n");
     S_Init (sfxVolume * 8, musicVolume * 8);
 
-    printf(" HU_Init: Setting up heads up display.\n");
+    printf("\n HU_Init: Setting up heads up display.\n");
     C_Printf(CR_GRAY, " HU_Init: Setting up heads up display.\n");
     HU_Init ();
 

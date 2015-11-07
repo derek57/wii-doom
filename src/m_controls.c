@@ -99,6 +99,7 @@ extern int joy_1;
 extern int joy_2;
 
 extern int opl_type;
+extern int use_libsamplerate;
 
 int key_up = KEY_UPARROW;
 int key_down = KEY_DOWNARROW; 
@@ -297,6 +298,7 @@ void M_BindBaseControls(void)
     M_BindVariable("slide_corpses",          &corpses_slide);
     M_BindVariable("smearblood_corpses",     &corpses_smearblood);
     M_BindVariable("diskicon",               &show_diskicon);
+    M_BindVariable("samplerate",             &use_libsamplerate);
 //    M_BindVariable("memory",                 &memory_usage);
 #ifdef WII
     M_BindVariable("key_shoot",              &joy_r);

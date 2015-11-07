@@ -221,6 +221,12 @@ void D_CheckNetGame (void)
     D_StartNetGame(&settings, NULL);
     LoadGameSettings(&settings);
 
+    C_Printf(CR_GRAY, " startskill %i  deathmatch: %i  startmap: %i  startepisode: %i\n",
+               startskill, deathmatch, startmap, startepisode);
+
+    C_Printf(CR_GRAY, " player %i of %i (%i nodes)\n",
+               consoleplayer+1, settings.num_players, settings.num_players);
+
     // Show players here; the server might have specified a time limit
 
     if (timelimit > 0 && deathmatch)

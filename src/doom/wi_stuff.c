@@ -1050,8 +1050,6 @@ void WI_updateDeathmatchStats(void)
     int           i;
     int           j;
     
-    dboolean       stillticking;
-
     WI_updateAnimatedBack();
 
     if (acceleratestage && dm_state != 4)
@@ -1078,6 +1076,8 @@ void WI_updateDeathmatchStats(void)
     
     if (dm_state == 2)
     {
+        dboolean stillticking;
+
         if (!(bcnt&3))
             S_StartSound(0, sfx_pistol);
         

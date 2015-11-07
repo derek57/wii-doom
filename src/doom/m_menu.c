@@ -1029,11 +1029,11 @@ int                        cheeting;
 int                        coordinates_info = 0;
 int                        timer_info = 0;
 int                        version_info = 0;
-int                        key_controls_start_in_cfg_at_pos = 90;
+int                        key_controls_start_in_cfg_at_pos = 91;
 #ifdef WII
-int                        key_controls_end_in_cfg_at_pos = 104;
+int                        key_controls_end_in_cfg_at_pos = 105;
 #else
-int                        key_controls_end_in_cfg_at_pos = 106;
+int                        key_controls_end_in_cfg_at_pos = 107;
 #endif
 int                        crosshair = 0;
 int                        show_stats = 0;
@@ -1056,6 +1056,7 @@ int                        sound_channels = 8;
 int                        gore_amount = 4;
 int                        height;
 int                        expansion = 0;
+int                        use_libsamplerate = 0;
 
 // -1 = no quicksave slot picked!
 int                           quickSaveSlot;
@@ -1225,6 +1226,7 @@ void M_MusicType(int choice);
 void M_SoundType(int choice);
 void M_SoundOutput(int choice);
 void M_SoundPitch(int choice);
+void M_Samplerate(int choice);
 void M_RestartSong(int choice);
 void M_SoundChannels(int choice);
 void M_GameFiles(int choice);
@@ -2277,6 +2279,9 @@ enum
     channels,
     output,
     pitch,
+#ifndef WII
+    lsr,
+#endif
     sound_end
 } sound_e;
 
@@ -2289,6 +2294,10 @@ menuitem_t SoundMenu[]=
     {2,"Number of Sound Channels",M_SoundChannels,'c'},
     {2,"Switch Left / Right Output",M_SoundOutput,'o'},
     {2,"v1.1 Random Sound Pitch",M_SoundPitch,'p'}
+#ifndef WII
+    ,
+    {2,"Libsamplerate",M_Samplerate,'r'}
+#endif
 };
 
 menu_t  SoundDef =
@@ -2979,6 +2988,59 @@ void M_DrawSound(void)
         M_WriteText(SoundDef.x + 212, SoundDef.y + 58, "OFF");
         V_ClearDPTranslation();
     }
+
+#ifndef WII
+    if(use_libsamplerate == 0)
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(SoundDef.x + 212, SoundDef.y + 68, "OFF");
+        V_ClearDPTranslation();
+    }
+    else if(use_libsamplerate == 1)
+    {
+        dp_translation = crx[CRX_GRAY];
+        M_WriteText(SoundDef.x + 192, SoundDef.y + 68, "LINEAR");
+        V_ClearDPTranslation();
+    }
+    else if(use_libsamplerate == 2)
+    {
+        dp_translation = crx[CRX_RED];
+        M_WriteText(SoundDef.x + 117, SoundDef.y + 68, "ZERO_ORDER_HOLD");
+        V_ClearDPTranslation();
+    }
+    else if(use_libsamplerate == 3)
+    {
+        dp_translation = crx[CRX_GOLD];
+        M_WriteText(SoundDef.x + 182, SoundDef.y + 68, "FASTEST");
+        V_ClearDPTranslation();
+    }
+    else if(use_libsamplerate == 4)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(SoundDef.x + 130, SoundDef.y + 68, "MEDIUM_QUALITY");
+        V_ClearDPTranslation();
+    }
+    else if(use_libsamplerate == 5)
+    {
+        dp_translation = crx[CRX_BLUE];
+        M_WriteText(SoundDef.x + 145, SoundDef.y + 68, "BEST_QUALITY");
+        V_ClearDPTranslation();
+    }
+
+    if(whichSkull == 1)
+    {
+        int x;
+        char *string = "";
+        dp_translation = crx[CRX_GOLD];
+        if(itemOn == 7)
+        {
+            string = "YOU MUST QUIT AND RESTART TO TAKE EFFECT.";
+        }
+        x = 160 - M_StringWidth(string) / 2;
+        M_WriteText(x, GameDef2.y + 138, string);
+        V_ClearDPTranslation();
+    }
+#endif
 }
 
 void M_Sound(int choice)
@@ -3112,6 +3174,21 @@ void M_SoundPitch(int choice)
         {
             randompitch = true;
         }
+        break;
+    }
+}
+
+void M_Samplerate(int choice)
+{
+    switch(choice)
+    {
+      case 0:
+        if (use_libsamplerate)
+            use_libsamplerate--;
+        break;
+      case 1:
+        if (use_libsamplerate < 5)
+            use_libsamplerate++;
         break;
     }
 }

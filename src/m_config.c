@@ -170,6 +170,7 @@ default_t        doom_defaults_list[] =
     CONFIG_VARIABLE_INT                (slide_corpses),
     CONFIG_VARIABLE_INT                (smearblood_corpses),
     CONFIG_VARIABLE_INT                (diskicon),
+    CONFIG_VARIABLE_INT                (samplerate),
 //    CONFIG_VARIABLE_INT                (memory),
     CONFIG_VARIABLE_INT                (key_shoot),
     CONFIG_VARIABLE_INT                (key_open),
