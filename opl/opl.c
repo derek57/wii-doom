@@ -39,7 +39,7 @@
 
 //#define OPL_DEBUG_TRACE
 
-#ifdef HAVE_IOPERM
+#if (defined(__i386__) || defined(__x86_64__)) && defined(HAVE_IOPERM)
 #ifndef WII
 extern opl_driver_t opl_linux_driver;
 #endif
@@ -56,7 +56,7 @@ extern int opl_type;
 
 static opl_driver_t *drivers[] =
 {
-#ifdef HAVE_IOPERM
+#if (defined(__i386__) || defined(__x86_64__)) && defined(HAVE_IOPERM)
 #ifndef WII
     &opl_linux_driver,
 #endif
