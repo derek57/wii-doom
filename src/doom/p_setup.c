@@ -203,7 +203,8 @@ dboolean            canmodify;
 dboolean            transferredsky;
 dboolean            boomlinespecials;
 dboolean            blockmaprecreated;
-dboolean            MAPINFO; 
+dboolean            MAPINFO;
+dboolean            mapinfo_lump;
 
 // REJECT
 // For fast sight rejection.
@@ -2106,6 +2107,8 @@ static void InitMapInfo(void)
 
     if (!(MAPINFO = (W_CheckNumForName(MAPINFO_SCRIPT_NAME) >= 0)))
         return;
+    else
+        mapinfo_lump = true;
 
     info = mapinfo;
 
@@ -2268,15 +2271,10 @@ int P_GetMapMusic(int map)
     return (MAPINFO ? mapinfo[QualifyMap(map)].music : 0); 
 }
 
-//
-// [nitr8] UNUSED
-//
-/*
 char *P_GetMapName(int map)
 {
     return (MAPINFO ? mapinfo[QualifyMap(map)].name : ""); 
 }
-*/
 
 int P_GetMapNext(int map)
 {

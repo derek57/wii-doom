@@ -978,6 +978,7 @@ char *Key2String (int ch)
     return "?";                // Everything else
 }
 
+char                       *creditstext;
 char                       savegamestrings[10][SAVESTRINGSIZE];
 char                       endstring[160];
 /*
@@ -998,6 +999,8 @@ char                       *messageString;
 // warning: initializer-string for array of chars is too long
 //char                       *skullName[2]      = {"M_SKULL1","M_SKULL2"};
 char                       *skullNameSmall[2] = {"M_SKULL3","M_SKULL4"};
+
+unsigned int               creditscount;
 
 // defaulted values
 int                        mouseSensitivity = 5;
@@ -1061,7 +1064,7 @@ int                        expansion = 0;
 int                        use_libsamplerate = 0;
 
 // -1 = no quicksave slot picked!
-int                           quickSaveSlot;
+int                        quickSaveSlot;
 
 float                      r_gamma = 0.75;
 
@@ -2416,8 +2419,6 @@ menu_t  RecordDef =
 };
 */
 
-unsigned int    creditscount;
-char*           creditstext;
 //
 // M_TextWrite
 //
@@ -2940,31 +2941,13 @@ void M_DrawCredits(void)
 {
     increditscreen = true;
 
-    M_TextWrite();
+    creditscount++;
 
-//    V_DrawDistortedBackground(gamemode == commercial ? "SLIME05" : "NUKAGE1", I_VideoBuffer);
+    M_TextWrite();
 
     V_DrawPatchWithShadow(CreditsDef.x + CURSORXOFF_SMALL, CreditsDef.y + 180,
             W_CacheLumpName(skullNameSmall[whichSkull], PU_CACHE), false);
-/*
-    M_WriteText(CreditsDef.x, CreditsDef.y - 2, "The id Software Team");
-    M_WriteText(CreditsDef.x, CreditsDef.y + 28, "The Chocolate DOOM Team");
-    M_WriteText(CreditsDef.x, CreditsDef.y + 58, "Fabian Greffrath / Crispy-DOOM");
-    M_WriteText(CreditsDef.x, CreditsDef.y + 88, "Brad Harding / DOOMretro");
-    M_WriteText(CreditsDef.x, CreditsDef.y + 118, "The PRBoom Team");
-    M_WriteText(CreditsDef.x, CreditsDef.y + 148, "The DOOM Legacy Team");
-    M_WriteText(CreditsDef.x, CreditsDef.y + 178, "The ZDOOM Team");
 
-    dp_translation = crx[CRX_GRAY];
-    M_WriteText(CreditsDef.x, CreditsDef.y + 8, "http://www.idsoftware.com");
-    M_WriteText(CreditsDef.x, CreditsDef.y + 38, "http://www.chocolate-doom.org");
-    M_WriteText(CreditsDef.x, CreditsDef.y + 68, "http://fabiangreffrath.github.io/crispy-doom");
-    M_WriteText(CreditsDef.x, CreditsDef.y + 98, "http://www.doomretro.com");
-    M_WriteText(CreditsDef.x, CreditsDef.y + 128, "http://prboom.sourceforge.net");
-    M_WriteText(CreditsDef.x, CreditsDef.y + 158, "http://doomlegacy.sourceforge.net");
-    M_WriteText(CreditsDef.x, CreditsDef.y + 188, "http://www.zdoom.org");
-    V_ClearDPTranslation();
-*/
     S_ChangeMusic(mus_credit, true, false);
 }
 
@@ -7362,8 +7345,6 @@ void M_Ticker (void)
     // advance animation
 
     creditstext = CREDITTEXT;
-
-    creditscount++;
 
     if (creditscount>strlen (creditstext)*TEXTSPEED + TEXTWAIT)
     {

@@ -64,6 +64,7 @@
 #include "m_misc.h"
 #endif
 
+#include "p_setup.h"
 #include "s_sound.h"
 #include "sounds.h"
 #include "st_stuff.h"
@@ -228,6 +229,7 @@ extern int              screenSize;
 extern int              timer_info;
 
 extern dboolean         blurred;
+extern dboolean         mapinfo_lump;
 
 //
 // Builtin map names.
@@ -632,6 +634,11 @@ void HU_Start(void)
         s = HU_TITLE_CHEX;
     }
 
+    if (!s && mapinfo_lump)
+        s = P_GetMapName((gameepisode - 1) * 10 + gamemap);
+    else if (!s && !mapinfo_lump)
+        s = "Unknown level";
+
     if (gamemission == pack_nerve)
     {
         u = NERVE_AUTHORS;
@@ -948,6 +955,11 @@ void HU_NewLevel()
         s = HU_TITLE_CHEX;
     }
     // print the new level name into the console
+
+    if (!s && mapinfo_lump)
+        s = P_GetMapName((gameepisode - 1) * 10 + gamemap);
+    else if (!s && !mapinfo_lump)
+        s = "Unknown level";
 
     C_Printf(CR_GRAY, "\n");
 

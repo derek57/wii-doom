@@ -65,7 +65,7 @@ typedef struct
 
 // Location of each lump on disk.
 
-disk_indicator_e  disk_indicator = false;
+disk_indicator_e  disk_indicator = disk_off;
 
 int               fsizecq = 0;
 
