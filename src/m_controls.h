@@ -108,7 +108,6 @@ extern int joybstrafeleft;
 extern int joybstraferight;
 
 void M_BindBaseControls(void);
-void M_BindStrifeControls(void);
 
 #endif /* #ifndef __M_CONTROLS_H__ */
 

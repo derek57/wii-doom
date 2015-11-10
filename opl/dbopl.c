@@ -1265,6 +1265,10 @@ void Chip__WriteReg(Chip *self, Bit32u reg, Bit8u val ) {
         }
 }
 
+//
+// [nitr8] UNUSED
+//
+/*
 Bit32u Chip__WriteAddr(Chip *self, Bit32u port, Bit8u val ) {
         switch ( port & 3 ) {
         case 0:
@@ -1277,7 +1281,7 @@ Bit32u Chip__WriteAddr(Chip *self, Bit32u port, Bit8u val ) {
         }
         return 0;
 }
-
+*/
 void Chip__GenerateBlock2(Chip *self, Bitu total, Bit32s* output ) {
         while ( total > 0 ) {
                 Channel *ch;

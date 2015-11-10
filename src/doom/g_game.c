@@ -245,36 +245,36 @@ int             joybinvleft = 14;
 int             joybspeed = 15;
 int             joybconsole = 16;
 #endif
-dboolean         secret_1 = false;
-dboolean         secret_2 = false;
-dboolean         secretexit; 
-dboolean         respawnmonsters;
-dboolean         paused; 
-dboolean         sendpause;              // send a pause event next tic 
-dboolean         sendsave;               // send a save event next tic 
-dboolean         usergame;               // ok to save / end game 
-//dboolean         timingdemo;             // if true, exit with report on completion  
-dboolean         viewactive; 
-dboolean         deathmatch;             // only if started as net death 
-dboolean         netgame;                // only true if packets are broadcast 
-dboolean         playeringame[MAXPLAYERS]; 
+dboolean        secret_1 = false;
+dboolean        secret_2 = false;
+dboolean        secretexit; 
+dboolean        respawnmonsters;
+dboolean        paused; 
+dboolean        sendpause;              // send a pause event next tic 
+dboolean        sendsave;               // send a save event next tic 
+dboolean        usergame;               // ok to save / end game 
+//dboolean        timingdemo;             // if true, exit with report on completion  
+dboolean        viewactive; 
+dboolean        deathmatch;             // only if started as net death 
+dboolean        netgame;                // only true if packets are broadcast 
+dboolean        playeringame[MAXPLAYERS]; 
 
-dboolean         demorecording; 
-dboolean         demoplayback; 
-dboolean         netdemo; 
-dboolean         singledemo;             // quit after playing a demo from cmdline  
-dboolean         precache = true;        // if true, load all graphics at start 
+dboolean        demorecording; 
+dboolean        demoplayback; 
+dboolean        netdemo; 
+dboolean        singledemo;             // quit after playing a demo from cmdline  
+dboolean        precache = true;        // if true, load all graphics at start 
 #ifdef WII
-dboolean         joyarray[MAX_JOY_BUTTONS + 1]; 
-dboolean         *joybuttons = &joyarray[1]; // allow [-1] 
+dboolean        joyarray[MAX_JOY_BUTTONS + 1]; 
+dboolean        *joybuttons = &joyarray[1]; // allow [-1] 
 #endif
-dboolean         not_walking;
-dboolean         turbodetected[MAXPLAYERS];
-dboolean         lowres_turn;            // low resolution turning for longtics
+dboolean        not_walking;
+dboolean        turbodetected[MAXPLAYERS];
+dboolean        lowres_turn;            // low resolution turning for longtics
 /*
-dboolean         longtics;               // cph's doom 1.91 longtics hack
+dboolean        longtics;               // cph's doom 1.91 longtics hack
 #ifndef WII
-dboolean         nodrawers;              // for comparative timing purposes 
+dboolean        nodrawers;              // for comparative timing purposes 
 #endif
 
 char            *demoname;
@@ -288,10 +288,10 @@ byte*           demoend;
 */
 byte            consistancy[MAXPLAYERS][BACKUPTICS]; 
 
-static dboolean  mousearray[MAX_MOUSE_BUTTONS + 1];
-static dboolean  *mousebuttons = &mousearray[1];  // allow [-1]
-static dboolean  dclickstate;
-static dboolean  dclickstate2;
+static dboolean mousearray[MAX_MOUSE_BUTTONS + 1];
+static dboolean *mousebuttons = &mousearray[1];  // allow [-1]
+static dboolean dclickstate;
+static dboolean dclickstate2;
 
 static char     savedescription[32]; 
 
@@ -342,19 +342,21 @@ static const struct
     { wp_bfg,             wp_bfg }
 };
 
+extern char     *mapnumandtitle;
+
 extern int      mspeed;
 extern int      turnspeed;
 extern int      messageToPrint;
 
-extern dboolean  done;
-extern dboolean  netgameflag;
-extern dboolean  aiming_help;
-extern dboolean  messageNeedsInput;
-extern dboolean  setsizeneeded;
-extern dboolean  map_flag;
-extern dboolean  transferredsky;
-extern dboolean  long_tics;
-extern dboolean  mouse_grabbed;
+extern dboolean done;
+extern dboolean netgameflag;
+extern dboolean aiming_help;
+extern dboolean messageNeedsInput;
+extern dboolean setsizeneeded;
+extern dboolean map_flag;
+extern dboolean transferredsky;
+extern dboolean long_tics;
+extern dboolean mouse_grabbed;
 
 extern fixed_t  forwardmove; 
 extern fixed_t  sidemove; 
@@ -1575,7 +1577,9 @@ void G_DoReborn (int playernum)
 //
 void G_DoLoadLevel (void) 
 { 
-    int             i, ep; 
+    int         i, ep; 
+    int         map = (gameepisode - 1) * 10 + gamemap;
+    char        *author = P_GetMapAuthor(map);
 
     // Set the sky map.
     // First thing, we have a dummy sky texture name,
@@ -1587,6 +1591,7 @@ void G_DoLoadLevel (void)
 
     // The "Sky never changes in Doom II" bug was fixed in
     // the id Anthology version of doom2.exe for Final Doom.
+/*
     if ((gamemode == commercial) && (gameversion == exe_final2 || gameversion == exe_chex))
     {
         char *skytexturename;
@@ -1606,6 +1611,39 @@ void G_DoLoadLevel (void)
 
         skytexture = R_TextureNumForName(skytexturename);
     }
+*/
+    skytexture = P_GetMapSky1Texture(map);
+    if (!skytexture)
+    {
+        if ((gamemode == commercial) && (gameversion == exe_final2 || gameversion == exe_chex))
+        {
+            skytexture = R_TextureNumForName("SKY3");
+            if (gamemap < 12)
+                 skytexture = R_TextureNumForName("SKY1");
+            else if (gamemap < 21)
+                 skytexture = R_TextureNumForName("SKY2");
+        }
+        else
+        {
+            switch (gameepisode)
+            {
+                default:
+                case 1:
+                    skytexture = R_TextureNumForName("SKY1");
+                    break;
+                case 2:
+                    skytexture = R_TextureNumForName("SKY2");
+                    break;
+                case 3:
+                    skytexture = R_TextureNumForName("SKY3");
+                    break;
+                case 4:                             // Special Edition sky
+                    skytexture = R_TextureNumForName("SKY4");
+                    break;
+            }
+        }
+    }
+    skyscrolldelta = P_GetMapSky1ScrollDelta(map);
 
     levelstarttic = gametic;        // for time calculation
     
@@ -1629,6 +1667,11 @@ void G_DoLoadLevel (void)
     P_FreeSecNodeList();
 
     ep = (gamemode == commercial ? (gamemission == pack_nerve ? 2 : 1) : gameepisode);
+
+    if (author[0])
+        C_Printf(CR_GRAY, "%s by %s", mapnumandtitle, author);
+    else
+        C_Printf(CR_GRAY, mapnumandtitle);
 
     P_SetupLevel (ep, gamemap);
 
@@ -1865,8 +1908,12 @@ void G_PlayerFinishLevel (int player)
 
 void G_DoCompleted (void) 
 { 
-    int             i; 
-         
+    int         i;          
+    int         map = (gameepisode - 1) * 10 + gamemap;
+    int         nextmap = P_GetMapNext(map);
+    int         par = P_GetMapPar(map);
+    int         secretnextmap = P_GetMapSecretNext(map);
+
     gameaction = ga_nothing; 
  
     for (i=0 ; i<MAXPLAYERS ; i++) 
@@ -1965,7 +2012,11 @@ void G_DoCompleted (void)
     {
         wminfo.next = gamemap;
     }
-    else if ( gamemode == commercial)
+    else if (secretexit && secretnextmap)
+        wminfo.next = secretnextmap - 1;
+    else if (nextmap)
+        wminfo.next = nextmap - 1;
+    else if (gamemode == commercial)
     {
         if (secretexit)
             switch(gamemap)
@@ -2031,6 +2082,7 @@ void G_DoCompleted (void)
     // Set par time. Doom episode 4 doesn't have a par time, so this
     // overflows into the cpars array. It's necessary to emulate this
     // for statcheck regression testing.
+/*
     if (gamemap == 33 || (gameepisode == 1 && gamemap == 10) || gamemission == pack_master)
         // map 33 par time sucks
         wminfo.partime = INT_MAX;
@@ -2044,11 +2096,54 @@ void G_DoCompleted (void)
         wminfo.partime = TICRATE*e4pars[gamemap];
     else
         wminfo.partime = TICRATE*cpars[gamemap];
+*/
+    if (par)
+        wminfo.partime = TICRATE * par;
+    else
+    {
+        char lump[5];
 
+        // [BH] have no par time if this level is from a PWAD
+        if (gamemode == commercial)
+            M_snprintf(lump, sizeof(lump), "MAP%02i", gamemap);
+        else
+        {
+            M_snprintf(lump, sizeof(lump), "E%iM%i", gameepisode, gamemap);
+
+            if(gameepisode == 1 && gamemap == 10)
+                wminfo.partime = INT_MAX;
+        }
+
+        if (BTSX || (W_CheckMultipleLumps(lump) > 1 && (!nerve_pwad || gamemap > 9) && fsize != 28422764))
+            wminfo.partime = 0;
+        else if (gamemode == commercial)
+        {
+            // [BH] get correct par time for No Rest For The Living
+            //  and have no par time for TNT and Plutonia
+            if (gamemission == pack_nerve && gamemap <= 9)
+                wminfo.partime = TICRATE * npars[gamemap - 1];
+            else if (gamemission == pack_tnt || gamemission == pack_plut)
+                wminfo.partime = 0;
+            else if (gamemap == 33 || gamemission == pack_master)
+                // map 33 par time sucks
+                wminfo.partime = INT_MAX;
+            else
+                wminfo.partime = TICRATE * cpars[gamemap - 1];
+        }
+        else if (gameepisode < 4 && gameepisode != 1 && gamemap != 10)
+            wminfo.partime = TICRATE * pars[gameepisode][gamemap];
+        else if (gameepisode == 4)
+            wminfo.partime = TICRATE * e4pars[gamemap];
+/*
+        else
+            wminfo.partime = TICRATE * pars[gameepisode][gamemap];
+*/
+    }
+/*
     if (modifiedgame ||
            (gamemode == commercial && (gamemission == pack_tnt || gamemission == pack_plut)))
         wminfo.partime = 0;
-
+*/
     wminfo.pnum = consoleplayer; 
  
     for (i=0 ; i<MAXPLAYERS ; i++) 
@@ -2393,12 +2488,15 @@ void G_PlayerReborn (int player)
 // Called at the start.
 // Called by the game initialization functions.
 //
+// nitr8 [UNUSED]
+//
+/*
 void G_InitPlayer (int player) 
 {
     // clear everything else to defaults
     G_PlayerReborn (player); 
 }
-
+*/
 
 //
 // G_DeathMatchSpawnPlayer 

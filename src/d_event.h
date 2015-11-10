@@ -92,29 +92,6 @@ typedef enum
   
 } buttoncode_t;
 
-// villsa [STRIFE] Strife specific buttons
-// TODO - not finished
-typedef enum
-{
-    // Player view look up
-    BT2_LOOKUP          = 1,
-    // Player view look down
-    BT2_LOOKDOWN        = 2,
-    // Center player's view
-    BT2_CENTERVIEW      = 4,
-    // Use inventory item
-    BT2_INVUSE          = 8,
-    // Drop inventory item
-    BT2_INVDROP         = 16,
-    // Jump up and down
-    BT2_JUMP            = 32,
-    // Use medkit
-    BT2_HEALTH          = 128,
-  
-} buttoncode2_t;
-
-
-
 
 // Called by IO functions when input is detected.
 void D_PostEvent (event_t *ev);

@@ -111,7 +111,7 @@ am__objects_1 = am_map.$(OBJEXT) d_items.$(OBJEXT) d_main.$(OBJEXT) \
 	p_user.$(OBJEXT) r_bsp.$(OBJEXT) r_data.$(OBJEXT) \
 	r_draw.$(OBJEXT) r_main.$(OBJEXT) r_plane.$(OBJEXT) \
 	r_segs.$(OBJEXT) r_sky.$(OBJEXT) r_things.$(OBJEXT) \
-	s_sound.$(OBJEXT) sounds.$(OBJEXT) statdump.$(OBJEXT) \
+	s_sound.$(OBJEXT) sc_man.$(OBJEXT) sounds.$(OBJEXT) statdump.$(OBJEXT) \
 	st_lib.$(OBJEXT) st_stuff.$(OBJEXT) wi_stuff.$(OBJEXT)
 am_libdoom_a_OBJECTS = $(am__objects_1)
 libdoom_a_OBJECTS = $(am_libdoom_a_OBJECTS)
@@ -199,7 +199,7 @@ INSTALL_SCRIPT = ${INSTALL}
 INSTALL_STRIP_PROGRAM = $(install_sh) -c -s
 LDFLAGS =  -L/usr/local/lib -Wl,-rpath,/usr/local/lib -lSDL2 
 LIBOBJS = 
-LIBS = -lm -lpng -lz 
+LIBS = -lm -lpng -lz -lsamplerate
 LTLIBOBJS = 
 MAKEINFO = ${SHELL} /home/user/TEST/chocolate-doom/autotools/missing makeinfo
 MKDIR_P = /bin/mkdir -p
@@ -334,6 +334,7 @@ r_sky.c            r_sky.h      \
                    r_state.h    \
 r_things.c         r_things.h   \
 s_sound.c          s_sound.h    \
+sc_man.c           sc_man.h     \
 sounds.c           sounds.h     \
 statdump.c         statdump.h   \
 st_lib.c           st_lib.h     \
@@ -414,6 +415,7 @@ include ./$(DEPDIR)/r_segs.Po
 include ./$(DEPDIR)/r_sky.Po
 include ./$(DEPDIR)/r_things.Po
 include ./$(DEPDIR)/s_sound.Po
+#include ./$(DEPDIR)/sc_man.Po
 include ./$(DEPDIR)/sounds.Po
 include ./$(DEPDIR)/statdump.Po
 include ./$(DEPDIR)/st_lib.Po

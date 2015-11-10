@@ -166,10 +166,15 @@ void mem_fclose(MEMFILE *stream)
         Z_Free(stream);
 }
 
+//
+// [nitr8] UNUSED
+//
+/*
 long mem_ftell(MEMFILE *stream)
 {
         return stream->position;
 }
+*/
 
 int mem_fseek(MEMFILE *stream, signed long position, mem_rel_t whence)
 {

@@ -78,6 +78,8 @@
 #include "p_local.h"
 #include "r_local.h"
 
+#include "r_sky.h"
+
 // State.
 #include "r_state.h"
 
@@ -2093,6 +2095,8 @@ void P_UpdateSpecials (void)
         if (animatedliquidyoffs > 64 * FRACUNIT)
             animatedliquidyoffs = 0;
     }
+
+    skycolumnoffset += skyscrolldelta;
 
     //        DO BUTTONS
     for (i = 0; i < MAXBUTTONS; i++)

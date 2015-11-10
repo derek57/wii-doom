@@ -202,18 +202,20 @@ static hu_stext_t       w_message_2;
 static hu_stext_t       w_secret;
 
 //static dboolean          always_off = false;
-static dboolean          message_on;
-static dboolean          message_nottobefuckedwith;
-static dboolean          headsupactive;
-static dboolean          secret_on;
+static dboolean         message_on;
+static dboolean         message_nottobefuckedwith;
+static dboolean         headsupactive;
+static dboolean         secret_on;
 
 static int              message_counter;
 static int              secret_counter;
 
 static char             hud_monsecstr[80];     // ADDED FOR PSP-STATS
 
-dboolean                 message_dontfuckwithme;
-dboolean                 show_chat_bar;
+char                    *mapnumandtitle;
+
+dboolean                message_dontfuckwithme;
+dboolean                show_chat_bar;
 
 patch_t*                hu_font[HU_FONTSIZE];
 patch_t*                beta_hu_font[HU_FONTSIZE];
@@ -225,7 +227,7 @@ extern int              show_stats;
 extern int              screenSize;
 extern int              timer_info;
 
-extern dboolean          blurred;
+extern dboolean         blurred;
 
 //
 // Builtin map names.
@@ -906,7 +908,9 @@ dboolean HU_Responder(event_t *ev)
 // the console
 void HU_NewLevel()
 {
-    char       *s;
+    char       *s = NULL;
+
+    mapnumandtitle = s;
 
     switch ( logical_gamemission )
     {

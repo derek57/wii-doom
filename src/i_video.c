@@ -79,7 +79,12 @@
 #define WII_LIGHT_ON   1
 
 
+//
 // WiiLightControl
+//
+// [nitr8] UNUSED
+//
+/*
 void WiiLightControl (int state)
 {
     switch (state)
@@ -99,6 +104,7 @@ void WiiLightControl (int state)
             break;
     }
 }
+*/
 #endif
 
 // Non aspect ratio-corrected modes (direct multiples of 320x200)
@@ -2485,8 +2491,12 @@ void I_SetPalette (byte *doompalette)
     palette_to_set = true;
 }
 
+//
 // Given an RGB value, find the closest matching palette index.
-
+//
+// [nitr8] UNUSED
+//
+/*
 int I_GetPaletteIndex(int r, int g, int b)
 {
     int best, best_diff;
@@ -2514,6 +2524,7 @@ int I_GetPaletteIndex(int r, int g, int b)
 
     return best;
 }
+*/
 
 // Set the application icon
 

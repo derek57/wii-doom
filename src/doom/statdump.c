@@ -25,7 +25,6 @@
 #include <string.h>
 
 #include "d_player.h"
-#include "d_mode.h"
 #include "m_argv.h"
 
 #include "statdump.h"
@@ -298,6 +297,10 @@ static void PrintStats(FILE *stream, wbstartstruct_t *stats)
     fprintf(stream, "\n");
 }
 
+//
+// [nitr8] UNUSED
+//
+/*
 void StatCopy(wbstartstruct_t *stats)
 {
     if (M_ParmExists("-statdump") && num_captured_stats < MAX_CAPTURES)
@@ -307,6 +310,7 @@ void StatCopy(wbstartstruct_t *stats)
         ++num_captured_stats;
     }
 }
+*/
 
 void StatDump(void)
 {

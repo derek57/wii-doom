@@ -1097,7 +1097,7 @@ dboolean ST_Responder (event_t* ev)
                     if (((buf[0]-'0')*10 + buf[1]-'0') > 35 && gameversion >= exe_doom_1_8)
                         plyr->message = STSTR_NOMUS;        // FIXME: DEHACKED?
                     else
-                        S_ChangeMusic(musnum, true);
+                        S_ChangeMusic(musnum, true, false);
                 }
                 else
                 {
@@ -1106,7 +1106,7 @@ dboolean ST_Responder (event_t* ev)
                     if (((buf[0]-'1')*9 + buf[1]-'1') > 31)
                         plyr->message = STSTR_NOMUS;        // FIXME: DEHACKED?
                     else
-                        S_ChangeMusic(musnum, true);
+                        S_ChangeMusic(musnum, true, false);
                 }
             }
             // Noclip cheat.
@@ -1991,6 +1991,10 @@ void ST_loadData(void)
     ST_loadGraphics();
 }
 
+//
+// [nitr8] UNUSED
+//
+/*
 static void ST_unloadCallback(char *lumpname, patch_t **variable)
 {
     W_ReleaseLumpName(lumpname);
@@ -2006,6 +2010,7 @@ void ST_unloadData(void)
 {
     ST_unloadGraphics();
 }
+*/
 
 void ST_initData(void)
 {

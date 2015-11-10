@@ -3136,6 +3136,10 @@ void D_DoomMain (void)
     printf(" I_StartupKeyboard\n");
     C_Printf(CR_GRAY, " I_StartupKeyboard\n");
 
+#ifndef WII
+    I_CheckIsScreensaver();
+#endif
+
     printf(" I_StartupTimer\n");
     C_Printf(CR_GRAY, " I_StartupTimer\n");
     I_InitTimer();
@@ -3151,9 +3155,11 @@ void D_DoomMain (void)
     printf(" D_CheckNetGame: Checking network game status.\n");
     C_Printf(CR_GRAY, " D_CheckNetGame: Checking network game status.\n");
     D_CheckNetGame ();
+
 #ifndef WII
     PrintGameVersion();
 #endif
+
     printf(" S_Init: Setting up sound.");
     C_Printf(CR_GRAY, " S_Init: Setting up sound.\n");
     S_Init (sfxVolume * 8, musicVolume * 8);

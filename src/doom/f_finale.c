@@ -81,8 +81,6 @@
 #endif
 
 
-#define TEXTSPEED       3
-#define TEXTWAIT        250
 #define MAX_CASTORDER   19
 
 
@@ -176,11 +174,11 @@ void F_StartFinale (void)
 
     if (logical_gamemission == doom)
     {
-        S_ChangeMusic(mus_victor, true);
+        S_ChangeMusic(mus_victor, true, false);
     }
     else
     {
-        S_ChangeMusic(mus_read_m, true);
+        S_ChangeMusic(mus_read_m, true, false);
     }
 
     // Find the right screen and set the text and background
@@ -429,7 +427,7 @@ void F_StartCast (void)
     castonmelee = 0;
     castattacking = false;
 
-    S_ChangeMusic(mus_evil, true);
+    S_ChangeMusic(mus_evil, true, false);
 }
 
 //

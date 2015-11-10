@@ -187,11 +187,13 @@ void P_RemoveThinker (thinker_t* thinker)
 // P_AllocateThinker
 // Allocates memory and adds a new thinker at the end of the list.
 //
+// [nitr8] UNUSED
+//
+/*
 void P_AllocateThinker (thinker_t*        thinker)
 {
 }
-
-
+*/
 
 //
 // P_RunThinkers

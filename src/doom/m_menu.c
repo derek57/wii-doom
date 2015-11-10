@@ -86,8 +86,10 @@
 #include "m_menu.h"
 
 #ifdef WII
+#include "../m_argv.h"
 #include "../m_misc.h"
 #else
+#include "m_argv.h"
 #include "m_misc.h"
 #endif
 
@@ -1029,11 +1031,11 @@ int                        cheeting;
 int                        coordinates_info = 0;
 int                        timer_info = 0;
 int                        version_info = 0;
-int                        key_controls_start_in_cfg_at_pos = 91;
+int                        key_controls_start_in_cfg_at_pos = 92;
 #ifdef WII
-int                        key_controls_end_in_cfg_at_pos = 105;
+int                        key_controls_end_in_cfg_at_pos = 106;
 #else
-int                        key_controls_end_in_cfg_at_pos = 107;
+int                        key_controls_end_in_cfg_at_pos = 108;
 #endif
 int                        crosshair = 0;
 int                        show_stats = 0;
@@ -1072,42 +1074,42 @@ short                      skullAnimCounter;        // skull animation counter
 short                      whichSkull;              // which skull to draw
 
 // timed message = no input from user
-dboolean                    messageNeedsInput;
-dboolean                    map_flag = false;
-dboolean                    inhelpscreens;
-dboolean                    increditscreen;
-dboolean                    menuactive;
-dboolean                    fake = false;
-dboolean                    mus_cheat_used = false;
-dboolean                    got_invisibility = false;
-dboolean                    got_radiation_suit = false;
-dboolean                    got_berserk = false;
-dboolean                    got_invulnerability = false;
-dboolean                    got_map = false;
-dboolean                    got_light_amp = false;
-dboolean                    got_all = false;
-dboolean                    aiming_help;
-dboolean                    hud;
-dboolean                    swap_sound_chans;
-dboolean                    skillflag = true;
-dboolean                    nomonstersflag;
-dboolean                    fastflag;
-dboolean                    respawnflag = true;
-dboolean                    warpflag = true;
-dboolean                    multiplayerflag = true;
-dboolean                    deathmatchflag = true;
-dboolean                    altdeathflag;
-dboolean                    locallanflag;
-dboolean                    searchflag;
-dboolean                    queryflag;
-dboolean                    noclip_on;
-dboolean                    dedicatedflag = true;
-dboolean                    privateserverflag;
-dboolean                    massacre_cheat_used;
-dboolean                    randompitch;
-dboolean                    memory_usage;
-dboolean                    blurred = false;
-dboolean                    long_tics = false;
+dboolean                   messageNeedsInput;
+dboolean                   map_flag = false;
+dboolean                   inhelpscreens;
+dboolean                   increditscreen;
+dboolean                   menuactive;
+dboolean                   fake = false;
+dboolean                   mus_cheat_used = false;
+dboolean                   got_invisibility = false;
+dboolean                   got_radiation_suit = false;
+dboolean                   got_berserk = false;
+dboolean                   got_invulnerability = false;
+dboolean                   got_map = false;
+dboolean                   got_light_amp = false;
+dboolean                   got_all = false;
+dboolean                   aiming_help;
+dboolean                   hud;
+dboolean                   swap_sound_chans;
+dboolean                   skillflag = true;
+dboolean                   nomonstersflag;
+dboolean                   fastflag;
+dboolean                   respawnflag = true;
+dboolean                   warpflag = true;
+dboolean                   multiplayerflag = true;
+dboolean                   deathmatchflag = true;
+dboolean                   altdeathflag;
+dboolean                   locallanflag;
+dboolean                   searchflag;
+dboolean                   queryflag;
+dboolean                   noclip_on;
+dboolean                   dedicatedflag = true;
+dboolean                   privateserverflag;
+dboolean                   massacre_cheat_used;
+dboolean                   randompitch;
+dboolean                   memory_usage;
+dboolean                   blurred = false;
+dboolean                   long_tics = false;
 
 fixed_t                    forwardmove = 29;
 fixed_t                    sidemove = 21; 
@@ -1118,7 +1120,8 @@ menu_t                     *currentMenu;
 byte                       *tempscreen;
 byte                       *blurredscreen;
 
-static dboolean             askforkey = false;
+static dboolean            askforkey = false;
+static dboolean            opldev;
 
 static int                 FirstKey = 0;           // SPECIAL MENU FUNCTIONS (ITEMCOUNT)
 static int                 keyaskedfor;
@@ -1143,16 +1146,16 @@ extern default_t           doom_defaults_list[];   // KEY BINDINGS
 
 extern patch_t*            hu_font[HU_FONTSIZE];
 
-//extern dboolean             overlay_trigger;
-extern dboolean             message_dontfuckwithme;
-extern dboolean             chat_on;                // in heads-up code
-extern dboolean             BorderNeedRefresh;
-extern dboolean             sendpause;
-extern dboolean             secret_1;
-extern dboolean             secret_2;
-extern dboolean             done;
-extern dboolean             skippsprinterp;
-extern dboolean             longtics;
+//extern dboolean            overlay_trigger;
+extern dboolean            message_dontfuckwithme;
+extern dboolean            chat_on;                // in heads-up code
+extern dboolean            BorderNeedRefresh;
+extern dboolean            sendpause;
+extern dboolean            secret_1;
+extern dboolean            secret_2;
+extern dboolean            done;
+extern dboolean            skippsprinterp;
+extern dboolean            longtics;
 
 extern short               songlist[148];
 
@@ -1213,14 +1216,18 @@ void M_DrawSave(void);
 
 void M_DrawSaveLoadBorder(int x,int y);
 void M_SetupNextMenu(menu_t *menudef);
-void M_DrawThermo(int x,int y,int thermWidth,int thermDot);
 void M_DrawThermoSmall(int x,int y,int thermWidth,int thermDot);
+/*
+void M_DrawThermo(int x,int y,int thermWidth,int thermDot);
 void M_DrawEmptyCell(menu_t *menu,int item);
 void M_DrawSelCell(menu_t *menu,int item);
-//void M_WriteText(int x, int y, char *string);
+void M_WriteText(int x, int y, char *string);
+*/
 void M_StartMessage(char *string,void *routine,dboolean input);
-void M_StopMessage(void);
-//void M_ClearMenus (void);
+/*
+/void M_StopMessage(void);
+void M_ClearMenus (void);
+*/
 
 void M_MusicType(int choice);
 void M_SoundType(int choice);
@@ -1228,6 +1235,7 @@ void M_SoundOutput(int choice);
 void M_SoundPitch(int choice);
 void M_Samplerate(int choice);
 void M_RestartSong(int choice);
+void M_OPLDev(int choice);
 void M_SoundChannels(int choice);
 void M_GameFiles(int choice);
 //void M_Brightness(int choice);
@@ -1303,6 +1311,7 @@ void M_NoNoise(int choice);
 void M_NudgeCorpses(int choice);
 void M_Slide(int choice);
 void M_Smearblood(int choice);
+void M_ColoredCorpses(int choice);
 void M_NoMonsters(int choice);
 void M_AutomapOverlay(int choice);
 
@@ -1565,7 +1574,7 @@ enum
     sound,
     sys,
     game,
-    debug,
+    options_debug,
     opt_end
 } options_e;
 
@@ -2213,6 +2222,7 @@ enum
     game5_nudge,
     game5_slide,
     game5_smearblood,
+    game5_coloredcorpses,
     game5_end
 } game5_e;
 
@@ -2227,7 +2237,8 @@ menuitem_t GameMenu5[]=
     {2,"Don't alert enemies when firing fist",M_NoNoise,'n'},
     {2,"Nudge corpses when walking over",M_NudgeCorpses,'c'},
     {2,"Corpses slide caused by explosions",M_Slide,'x'},
-    {2,"Corpses smear blood when sliding",M_Smearblood,'b'}
+    {2,"Corpses smear blood when sliding",M_Smearblood,'b'},
+    {2,"Randomly colored player corpses",M_ColoredCorpses,'r'},
 };
 
 menu_t  GameDef5 =
@@ -2246,6 +2257,7 @@ enum
     debug_version,
     debug_sound,
     debug_restart,
+    debug_opl,
     debug_end
 } debug_e;
 
@@ -2254,7 +2266,8 @@ menuitem_t DebugMenu[]=
     {2,"Show Coordinates",M_Coordinates,'c'},
     {2,"Show Version",M_Version,'v'},
     {2,"Show Sound Info",M_SoundInfo,'s'},
-    {2,"Restart Current MAP-Music Track",M_RestartSong,'r'}
+    {2,"Restart Current MAP-Music Track",M_RestartSong,'r'},
+    {2,"Show OPL Developer Info",M_OPLDev,'o'}
 };
 
 menu_t  DebugDef =
@@ -2402,6 +2415,65 @@ menu_t  RecordDef =
     0
 };
 */
+
+unsigned int    creditscount;
+char*           creditstext;
+//
+// M_TextWrite
+//
+void M_TextWrite (void)
+{    
+    int         w;
+    signed int  count;
+    char*       ch;
+    int         cx;
+    int         cy;
+    
+    // erase the entire screen to a tiled background
+    V_DrawDistortedBackground(gamemode == commercial ? "SLIME05" : "NUKAGE1", I_VideoBuffer);
+
+    // draw some of the text onto the screen
+    cx = 0;
+    cy = 0;
+    ch = creditstext;
+        
+    count = ((signed int) creditscount - 10) / TEXTSPEED;
+    if (count < 0)
+        count = 0;
+    for ( ; count ; count-- )
+    {
+        int c = *ch++;
+
+        if (!c)
+            break;
+
+        if (c == '\n')
+        {
+            cx = 0;
+            cy += 10;
+            continue;
+        }
+                
+        c = toupper(c) - HU_FONTSTART;
+        if (c < 0 || c> HU_FONTSIZE)
+        {
+            cx += 4;
+            continue;
+        }
+                
+        w = SHORT (hu_font[c]->width);
+        if (cx+w > ORIGWIDTH)         // CHANGED FOR HIRES
+            break;
+        
+        if(font_shadow)
+            V_DrawPatchWithShadow(cx, cy, hu_font[c], false);
+        else
+            V_DrawPatch(cx, cy, hu_font[c]);
+        cx+=w;
+    }
+        
+}
+
 static void blurscreen(int x1, int y1, int x2, int y2, int i)
 {
     int x, y;
@@ -2868,11 +2940,13 @@ void M_DrawCredits(void)
 {
     increditscreen = true;
 
-    V_DrawDistortedBackground(gamemode == commercial ? "SLIME05" : "NUKAGE1", I_VideoBuffer);
+    M_TextWrite();
+
+//    V_DrawDistortedBackground(gamemode == commercial ? "SLIME05" : "NUKAGE1", I_VideoBuffer);
 
     V_DrawPatchWithShadow(CreditsDef.x + CURSORXOFF_SMALL, CreditsDef.y + 180,
             W_CacheLumpName(skullNameSmall[whichSkull], PU_CACHE), false);
-
+/*
     M_WriteText(CreditsDef.x, CreditsDef.y - 2, "The id Software Team");
     M_WriteText(CreditsDef.x, CreditsDef.y + 28, "The Chocolate DOOM Team");
     M_WriteText(CreditsDef.x, CreditsDef.y + 58, "Fabian Greffrath / Crispy-DOOM");
@@ -2890,8 +2964,8 @@ void M_DrawCredits(void)
     M_WriteText(CreditsDef.x, CreditsDef.y + 158, "http://doomlegacy.sourceforge.net");
     M_WriteText(CreditsDef.x, CreditsDef.y + 188, "http://www.zdoom.org");
     V_ClearDPTranslation();
-
-    S_ChangeMusic(mus_credit, true);
+*/
+    S_ChangeMusic(mus_credit, true, false);
 }
 
 //
@@ -3196,7 +3270,26 @@ void M_Samplerate(int choice)
 void M_RestartSong(int choice)
 {
     S_StopMusic();
-    S_ChangeMusic(gamemap, true);
+    S_ChangeMusic(gamemap, true, true);
+}
+
+void M_OPLDev(int choice)
+{
+    switch(choice)
+    {
+    case 0:
+        if(opldev == true)
+        {
+            opldev = false;
+        }
+        break;
+    case 1:
+        if(opldev == false)
+        {
+            opldev = true;
+        }
+        break;
+    }
 }
 
 void M_SoundChannels(int choice)
@@ -4856,6 +4949,19 @@ void M_DrawGame5(void)
         M_WriteText(GameDef5.x + 258, GameDef5.y + 88, "OFF");
         V_ClearDPTranslation();
     }
+
+    if(randomly_colored_playercorpses)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(GameDef5.x + 266, GameDef5.y + 98, "ON");
+        V_ClearDPTranslation();
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(GameDef5.x + 258, GameDef5.y + 98, "OFF");
+        V_ClearDPTranslation();
+    }
 }
 
 void DetectState(void)
@@ -5841,6 +5947,9 @@ void M_SizeDisplay(int choice)
 //
 //      Menu Functions
 //
+// [nitr8] UNUSED
+//
+/*
 void
 M_DrawThermo
 ( int        x,
@@ -5864,6 +5973,7 @@ M_DrawThermo
     V_DrawPatchWithShadow((x + 8) + thermDot * 8, y, W_CacheLumpName("M_THERMO",
                       PU_CACHE), false);
 }
+*/
 
 void
 M_DrawThermoSmall
@@ -5892,7 +6002,10 @@ M_DrawThermoSmall
                      PU_CACHE), false);
 }
 
-
+//
+// [nitr8] UNUSED
+//
+/*
 void
 M_DrawEmptyCell
 ( menu_t*        menu,
@@ -5912,7 +6025,7 @@ M_DrawSelCell
                           menu->y+item*LINEHEIGHT_SMALL-1, W_CacheLumpName("M_CELL2",
                           PU_CACHE), false);
 }
-
+*/
 
 void
 M_StartMessage
@@ -5937,13 +6050,16 @@ M_StartMessage
     return;
 }
 
-
+//
+// [nitr8] UNUSED
+//
+/*
 void M_StopMessage(void)
 {
     menuactive = messageLastMenuActive;
     messageToPrint = 0;
 }
-
+*/
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wchar-subscripts"
@@ -6799,6 +6915,40 @@ void M_StartControlPanel (void)
     blurred = false;
 }
 
+// Display OPL debug messages - hack for GENMIDI development.
+
+static void M_DrawOPLDev(void)
+{
+    extern void I_OPL_DevMessages(char *, size_t);
+    char debug[1024];
+    char *curr, *p;
+    int line;
+
+    I_OPL_DevMessages(debug, sizeof(debug));
+    curr = debug;
+    line = 0;
+
+    for (;;)
+    {
+        p = strchr(curr, '\n');
+
+        if (p != NULL)
+        {
+            *p = '\0';
+        }
+
+        M_WriteText(0, line * 8, curr);
+        ++line;
+
+        if (p == NULL)
+        {
+            break;
+        }
+
+        curr = p + 1;
+    }
+}
+
 //
 // M_Drawer
 // Called after the view has been rendered,
@@ -6838,24 +6988,24 @@ void M_Drawer (void)
 
                     mnum = nmus[gamemap - 1];
 
-                    S_ChangeMusic(mnum, true);
+                    S_ChangeMusic(mnum, true, true);
                 }
                 else
                 {
                     if(mus_cheat_used)
-                        S_ChangeMusic(tracknum, true);
+                        S_ChangeMusic(tracknum, true, true);
                     else
-                        S_ChangeMusic(gamemap + 32, true);
+                        S_ChangeMusic(gamemap + 32, true, true);
                 }
             }
             else if(gamestate == GS_FINALE && finalestage == F_STAGE_TEXT)
-                S_ChangeMusic(mus_read_m, true);
+                S_ChangeMusic(mus_read_m, true, false);
             else if(gamestate == GS_FINALE && finalestage == F_STAGE_CAST)
-                S_ChangeMusic(mus_evil, true);
+                S_ChangeMusic(mus_evil, true, false);
             else if(gamestate == GS_DEMOSCREEN)
-                S_ChangeMusic(mus_dm2ttl, true);
+                S_ChangeMusic(mus_dm2ttl, true, false);
             else if(gamestate == GS_INTERMISSION)
-                S_ChangeMusic(mus_dm2int, true);
+                S_ChangeMusic(mus_dm2int, true, false);
         }
         else
         {
@@ -6886,18 +7036,18 @@ void M_Drawer (void)
                 }
 
                 if(mus_cheat_used)
-                    S_ChangeMusic(tracknum, true);
+                    S_ChangeMusic(tracknum, true, true);
                 else
-                    S_ChangeMusic(mnum, true);
+                    S_ChangeMusic(mnum, true, true);
             }
             else if(gamestate == GS_FINALE && finalestage == F_STAGE_TEXT)
-                S_ChangeMusic(mus_victor, true);
+                S_ChangeMusic(mus_victor, true, false);
             else if(gamestate == GS_FINALE && finalestage == F_STAGE_CAST)
                 S_StartMusic (mus_bunny);
             else if(gamestate == GS_DEMOSCREEN)
-                S_ChangeMusic(mus_intro, true);
+                S_ChangeMusic(mus_intro, true, false);
             else if(gamestate == GS_INTERMISSION)
-                S_ChangeMusic(mus_inter, true);
+                S_ChangeMusic(mus_inter, true, false);
         }
     }
 
@@ -6987,6 +7137,11 @@ void M_Drawer (void)
         }
 
         return;
+    }
+
+    if (opldev)
+    {
+        M_DrawOPLDev();
     }
 
     if (!menuactive)
@@ -7203,6 +7358,17 @@ void M_Ticker (void)
         whichSkull ^= 1;
         skullAnimCounter = 8;
     }
+
+    // advance animation
+
+    creditstext = CREDITTEXT;
+
+    creditscount++;
+
+    if (creditscount>strlen (creditstext)*TEXTSPEED + TEXTWAIT)
+    {
+        creditscount = 0;
+    }
 }
 
 
@@ -7252,6 +7418,10 @@ void M_Init (void)
 
     if (gamemode == commercial)
         NewDef.prevMenu = (nerve_pwad ? &ExpDef : &MainDef);
+
+#ifndef WII
+    opldev = M_CheckParm("-opldev") > 0;
+#endif
 }
 
 void M_God(int choice)
@@ -8431,9 +8601,9 @@ void M_Spin(int choice)
         players[consoleplayer].message = s_STSTR_MUS;
 
         if(mus_engine == 3)
-            S_ChangeMusic(tracknum, false);
+            S_ChangeMusic(tracknum, false, true);
         else if(mus_engine == 1 || mus_engine == 2)
-            S_ChangeMusic(tracknum, true);
+            S_ChangeMusic(tracknum, true, true);
 
         mus_cheat_used = true;
     }
@@ -10000,6 +10170,23 @@ void M_Smearblood(int choice)
     }
 }
 
+void M_ColoredCorpses(int choice)
+{
+    switch(choice)
+    {
+    case 0:
+        if (randomly_colored_playercorpses)
+            randomly_colored_playercorpses = false;
+        players[consoleplayer].message = "Player Corpses will be colored randomly";
+        break;
+    case 1:
+        if (!randomly_colored_playercorpses)
+            randomly_colored_playercorpses = true;
+        players[consoleplayer].message = "Player Corpses won't be colored randomly";
+        break;
+    }
+}
+
 void M_GoreAmount(int choice)
 {
     switch(choice)
@@ -10296,6 +10483,19 @@ void M_DrawDebug(void)
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(DebugDef.x + 169, DebugDef.y + 18, "OFF");
+        V_ClearDPTranslation();
+    }
+
+    if(opldev)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(DebugDef.x + 177, DebugDef.y + 28, "ON");
+        V_ClearDPTranslation();
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(DebugDef.x + 169, DebugDef.y + 28, "OFF");
         V_ClearDPTranslation();
     }
 }

@@ -567,6 +567,10 @@ static void DoMerge(void)
 
 }
 
+//
+// [nitr8] UNUSED
+//
+/*
 void W_PrintDirectory(void)
 {
     unsigned int i, n;
@@ -591,6 +595,7 @@ void W_PrintDirectory(void)
 //        I_Sleep(2);
     }
 }
+*/
 
 // Merge in a file by name
 

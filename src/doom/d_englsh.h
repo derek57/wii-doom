@@ -828,4 +828,26 @@
     "                                Shareware!\n" \
     "===========================================================================\n"
 
+#define CREDITTEXT \
+"The id Software Team\n"\
+"www.idsoftware.com\n"\
+"\n"\
+"The Chocolate DOOM Team\n"\
+"www.chocolate-doom.org\n"\
+"\n"\
+"Fabian Greffrath / Crispy-DOOM\n"\
+"fabiangreffrath.github.io/crispy-doom\n"\
+"\n"\
+"Brad Harding / DOOMretro\n"\
+"www.doomretro.com\n"\
+"\n"\
+"The PRBoom Team\n"\
+"prboom.sourceforge.net\n"\
+"\n"\
+"The DOOM Legacy Team\n"\
+"doomlegacy.sourceforge.net\n"\
+"\n"\
+"The ZDOOM Team\n"\
+"www.zdoom.org"
+
 #endif

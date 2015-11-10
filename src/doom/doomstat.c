@@ -101,6 +101,7 @@ dboolean         corpses_nudge = false;
 dboolean         corpses_slide = false;
 dboolean         corpses_smearblood = false;
 dboolean         show_diskicon = true;
+dboolean         randomly_colored_playercorpses = false;
 /*
 dboolean         nerve = false;
 dboolean         chex = false;

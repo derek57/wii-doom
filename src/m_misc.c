@@ -133,7 +133,9 @@ dboolean M_WriteFile(char *name, void *source, int length)
 //
 // M_ReadFile
 //
-
+// [nitr8] UNUSED
+//
+/*
 int M_ReadFile(char *name, byte **buffer)
 {
     FILE *handle;
@@ -162,6 +164,7 @@ int M_ReadFile(char *name, byte **buffer)
     *buffer = buf;
     return length;
 }
+*/
 
 // Returns the path to a temporary file of the given name, stored
 // inside the system temporary directory.
@@ -501,6 +504,10 @@ int M_snprintf(char *buf, size_t buf_len, const char *s, ...)
 
 // [crispy] portable pendant to libgen.h's dirname()
 // does not modify its argument
+//
+// [nitr8] UNUSED
+//
+/*
 char *M_DirName(char *path)
 {
     char *src, *res;
@@ -523,6 +530,7 @@ char *M_DirName(char *path)
     free(res);
     return M_StringDuplicate(".");
 }
+*/
 
 char *uppercase(char *str)
 {

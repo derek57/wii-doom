@@ -381,6 +381,10 @@ void I_StopSong(void)
     }
 }
 
+//
+// [nitr8] UNUSED
+//
+/*
 dboolean I_MusicIsPlaying(void)
 {
     if (music_module != NULL)
@@ -396,4 +400,5 @@ dboolean I_MusicIsPlaying(void)
 void I_BindSoundVariables(void)
 {
 }
+*/
 

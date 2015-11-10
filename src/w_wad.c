@@ -315,6 +315,10 @@ lumpindex_t W_GetNumForName (char* name)
     return i;
 }
 
+//
+// [nitr8] UNUSED
+//
+/*
 int W_GetSecondNumForName (char* name)
 {
     int        i, j;
@@ -331,6 +335,7 @@ int W_GetSecondNumForName (char* name)
 
     return i;
 }
+*/
 
 //
 // W_LumpLength

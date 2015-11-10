@@ -13,27 +13,31 @@
 
 int start;
 
+//
+// [nitr8] UNUSED
+//
+/*
 static void __Wpad_PowerCallback(s32 chan)
 {
-    /* Poweroff console */
+    // Poweroff console
     Sys_Shutdown();
 }
-
 
 s32 Wpad_Init(void)
 {
     s32 ret;
 
-    /* Initialize Wiimote subsystem */
+    // Initialize Wiimote subsystem
     ret = WPAD_Init();
     if (ret < 0)
         return ret;
 
-    /* Set POWER button callback */
+    // Set POWER button callback
     WPAD_SetPowerButtonCallback(__Wpad_PowerCallback);
 
     return ret;
 }
+*/
 
 static u32 Wpad_GetButtons(void)
 {

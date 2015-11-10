@@ -159,6 +159,9 @@ P_SetPsprite
 //
 // P_CalcSwing
 //        
+// [nitr8] UNUSED
+//
+/*
 fixed_t                swingx;
 fixed_t                swingy;
 
@@ -179,7 +182,7 @@ void P_CalcSwing (player_t*        player)
     angle = (FINEANGLES/70*leveltime+FINEANGLES/2)&FINEMASK;
     swingy = -FixedMul ( swingx, finesine[angle]);
 }
-
+*/
 
 
 //

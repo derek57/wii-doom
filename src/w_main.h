@@ -18,8 +18,6 @@
 #ifndef W_MAIN_H
 #define W_MAIN_H
 
-#include "d_mode.h"
-
 dboolean W_ParseCommandLine(void);
 //void W_CheckCorrectIWAD(GameMission_t mission);
 

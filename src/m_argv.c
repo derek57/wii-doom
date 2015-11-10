@@ -244,7 +244,10 @@ void M_FindResponseFile(void)
 }
 
 // Return the name of the executable used to start the program:
-
+//
+// [nitr8] UNUSED
+//
+/*
 char *M_GetExecutableName(void)
 {
     char *sep;
@@ -260,5 +263,6 @@ char *M_GetExecutableName(void)
         return sep + 1;
     }
 }
+*/
 #endif
 

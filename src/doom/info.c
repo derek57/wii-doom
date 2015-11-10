@@ -161,6 +161,8 @@ void A_Die();
 void A_Detonate();
 void A_Mushroom();
 void A_SkullPop();
+void A_Footstep();
+void A_MoreGibs();
 
 state_t states[NUMSTATES] =
 {
@@ -356,10 +358,10 @@ state_t states[NUMSTATES] =
 
     // Player (MT_PLAYER)
     { SPR_PLAY,  0,                               -1,               NULL,              S_NULL          }, // S_PLAY
-    { SPR_PLAY,  0,                                4,               NULL,              S_PLAY_RUN2     }, // S_PLAY_RUN1
-    { SPR_PLAY,  1,                                4,               NULL,              S_PLAY_RUN3     }, // S_PLAY_RUN2
-    { SPR_PLAY,  2,                                4,               NULL,              S_PLAY_RUN4     }, // S_PLAY_RUN3
-    { SPR_PLAY,  3,                                4,               NULL,              S_PLAY_RUN1     }, // S_PLAY_RUN4
+    { SPR_PLAY,  0,                                4,               A_Footstep,        S_PLAY_RUN2     }, // S_PLAY_RUN1
+    { SPR_PLAY,  1,                                4,               A_Footstep,        S_PLAY_RUN3     }, // S_PLAY_RUN2
+    { SPR_PLAY,  2,                                4,               A_Footstep,        S_PLAY_RUN4     }, // S_PLAY_RUN3
+    { SPR_PLAY,  3,                                4,               A_Footstep,        S_PLAY_RUN1     }, // S_PLAY_RUN4
     { SPR_PLAY,  4,                               12,               NULL,              S_PLAY          }, // S_PLAY_ATK1
     { SPR_PLAY,  5 | FF_FULLBRIGHT,                6,               NULL,              S_PLAY_ATK1     }, // S_PLAY_ATK2
     { SPR_PLAY,  6,                                4,               NULL,              S_PLAY_PAIN2    }, // S_PLAY_PAIN
@@ -373,13 +375,13 @@ state_t states[NUMSTATES] =
 
     // Player Death (MT_MISC62)
     { SPR_PLAY, 13,                               -1,               NULL,              S_NULL          }, // S_PLAY_DIE7
-    { SPR_PLAY, 14,                                5,               NULL,              S_PLAY_XDIE2    }, // S_PLAY_XDIE1
+    { SPR_PLAY, 14,                                5,               A_MoreGibs,        S_PLAY_XDIE2    }, // S_PLAY_XDIE1
     { SPR_PLAY, 15,                                5,               A_XScream,         S_PLAY_XDIE3    }, // S_PLAY_XDIE2
     { SPR_PLAY, 16,                                5,               A_Fall,            S_PLAY_XDIE4    }, // S_PLAY_XDIE3
-    { SPR_PLAY, 17,                                5,               NULL,              S_PLAY_XDIE5    }, // S_PLAY_XDIE4
-    { SPR_PLAY, 18,                                5,               NULL,              S_PLAY_XDIE6    }, // S_PLAY_XDIE5
-    { SPR_PLAY, 19,                                5,               NULL,              S_PLAY_XDIE7    }, // S_PLAY_XDIE6
-    { SPR_PLAY, 20,                                5,               NULL,              S_PLAY_XDIE8    }, // S_PLAY_XDIE7
+    { SPR_PLAY, 17,                                5,               A_MoreGibs,        S_PLAY_XDIE5    }, // S_PLAY_XDIE4
+    { SPR_PLAY, 18,                                5,               A_MoreGibs,        S_PLAY_XDIE6    }, // S_PLAY_XDIE5
+    { SPR_PLAY, 19,                                5,               A_MoreGibs,        S_PLAY_XDIE7    }, // S_PLAY_XDIE6
+    { SPR_PLAY, 20,                                5,               A_MoreGibs,        S_PLAY_XDIE8    }, // S_PLAY_XDIE7
     { SPR_PLAY, 21,                                5,               NULL,              S_PLAY_XDIE9    }, // S_PLAY_XDIE8
 
     // Player Corpse (MT_MISC68 and MT_MISC69)
@@ -408,13 +410,13 @@ state_t states[NUMSTATES] =
 
     // Zombieman Death (MT_MISC63)
     { SPR_POSS, 11,                               -1,               NULL,              S_NULL          }, // S_POSS_DIE5
-    { SPR_POSS, 12,                                5,               NULL,              S_POSS_XDIE2    }, // S_POSS_XDIE1
+    { SPR_POSS, 12,                                5,               A_MoreGibs,        S_POSS_XDIE2    }, // S_POSS_XDIE1
     { SPR_POSS, 13,                                5,               A_XScream,         S_POSS_XDIE3    }, // S_POSS_XDIE2
     { SPR_POSS, 14,                                5,               A_Fall,            S_POSS_XDIE4    }, // S_POSS_XDIE3
-    { SPR_POSS, 15,                                5,               NULL,              S_POSS_XDIE5    }, // S_POSS_XDIE4
-    { SPR_POSS, 16,                                5,               NULL,              S_POSS_XDIE6    }, // S_POSS_XDIE5
-    { SPR_POSS, 17,                                5,               NULL,              S_POSS_XDIE7    }, // S_POSS_XDIE6
-    { SPR_POSS, 18,                                5,               NULL,              S_POSS_XDIE8    }, // S_POSS_XDIE7
+    { SPR_POSS, 15,                                5,               A_MoreGibs,        S_POSS_XDIE5    }, // S_POSS_XDIE4
+    { SPR_POSS, 16,                                5,               A_MoreGibs,        S_POSS_XDIE6    }, // S_POSS_XDIE5
+    { SPR_POSS, 17,                                5,               A_MoreGibs,        S_POSS_XDIE7    }, // S_POSS_XDIE6
+    { SPR_POSS, 18,                                5,               A_MoreGibs,        S_POSS_XDIE8    }, // S_POSS_XDIE7
     { SPR_POSS, 19,                                5,               NULL,              S_POSS_XDIE9    }, // S_POSS_XDIE8
     { SPR_POSS, 20,                               -1,               NULL,              S_NULL          }, // S_POSS_XDIE9
     { SPR_POSS, 10,                                5,               NULL,              S_POSS_RAISE2   }, // S_POSS_RAISE1
@@ -445,13 +447,13 @@ state_t states[NUMSTATES] =
 
     // Shotgun Guy Death (MT_MISC67)
     { SPR_SPOS, 11,                               -1,               NULL,              S_NULL          }, // S_SPOS_DIE5
-    { SPR_SPOS, 12,                                5,               NULL,              S_SPOS_XDIE2    }, // S_SPOS_XDIE1
+    { SPR_SPOS, 12,                                5,               A_MoreGibs,        S_SPOS_XDIE2    }, // S_SPOS_XDIE1
     { SPR_SPOS, 13,                                5,               A_XScream,         S_SPOS_XDIE3    }, // S_SPOS_XDIE2
     { SPR_SPOS, 14,                                5,               A_Fall,            S_SPOS_XDIE4    }, // S_SPOS_XDIE3
-    { SPR_SPOS, 15,                                5,               NULL,              S_SPOS_XDIE5    }, // S_SPOS_XDIE4
-    { SPR_SPOS, 16,                                5,               NULL,              S_SPOS_XDIE6    }, // S_SPOS_XDIE5
-    { SPR_SPOS, 17,                                5,               NULL,              S_SPOS_XDIE7    }, // S_SPOS_XDIE6
-    { SPR_SPOS, 18,                                5,               NULL,              S_SPOS_XDIE8    }, // S_SPOS_XDIE7
+    { SPR_SPOS, 15,                                5,               A_MoreGibs,        S_SPOS_XDIE5    }, // S_SPOS_XDIE4
+    { SPR_SPOS, 16,                                5,               A_MoreGibs,        S_SPOS_XDIE6    }, // S_SPOS_XDIE5
+    { SPR_SPOS, 17,                                5,               A_MoreGibs,        S_SPOS_XDIE7    }, // S_SPOS_XDIE6
+    { SPR_SPOS, 18,                                5,               A_MoreGibs,        S_SPOS_XDIE8    }, // S_SPOS_XDIE7
     { SPR_SPOS, 19,                                5,               NULL,              S_SPOS_XDIE9    }, // S_SPOS_XDIE8
     { SPR_SPOS, 20,                               -1,               NULL,              S_NULL          }, // S_SPOS_XDIE9
     { SPR_SPOS, 11,                                5,               NULL,              S_SPOS_RAISE2   }, // S_SPOS_RAISE1
@@ -663,10 +665,10 @@ state_t states[NUMSTATES] =
     { SPR_CPOS, 11,                                5,               NULL,              S_CPOS_DIE6     }, // S_CPOS_DIE5
     { SPR_CPOS, 12,                                5,               NULL,              S_CPOS_DIE7     }, // S_CPOS_DIE6
     { SPR_CPOS, 13,                               -1,               NULL,              S_NULL          }, // S_CPOS_DIE7
-    { SPR_CPOS, 14,                                5,               NULL,              S_CPOS_XDIE2    }, // S_CPOS_XDIE1
+    { SPR_CPOS, 14,                                5,               A_MoreGibs,        S_CPOS_XDIE2    }, // S_CPOS_XDIE1
     { SPR_CPOS, 15,                                5,               A_XScream,         S_CPOS_XDIE3    }, // S_CPOS_XDIE2
     { SPR_CPOS, 16,                                5,               A_Fall,            S_CPOS_XDIE4    }, // S_CPOS_XDIE3
-    { SPR_CPOS, 17,                                5,               NULL,              S_CPOS_XDIE5    }, // S_CPOS_XDIE4
+    { SPR_CPOS, 17,                                5,               A_MoreGibs,        S_CPOS_XDIE5    }, // S_CPOS_XDIE4
     { SPR_CPOS, 18,                                5,               NULL,              S_CPOS_XDIE6    }, // S_CPOS_XDIE5
     { SPR_CPOS, 19,                               -1,               NULL,              S_NULL          }, // S_CPOS_XDIE6
     { SPR_CPOS, 13,                                5,               NULL,              S_CPOS_RAISE2   }, // S_CPOS_RAISE1
@@ -700,12 +702,12 @@ state_t states[NUMSTATES] =
 
     // Imp Death (MT_MISC66)
     { SPR_TROO, 12,                               -1,               NULL,              S_NULL          }, // S_TROO_DIE5
-    { SPR_TROO, 13,                                5,               NULL,              S_TROO_XDIE2    }, // S_TROO_XDIE1
+    { SPR_TROO, 13,                                5,               A_MoreGibs,        S_TROO_XDIE2    }, // S_TROO_XDIE1
     { SPR_TROO, 14,                                5,               A_XScream,         S_TROO_XDIE3    }, // S_TROO_XDIE2
-    { SPR_TROO, 15,                                5,               NULL,              S_TROO_XDIE4    }, // S_TROO_XDIE3
+    { SPR_TROO, 15,                                5,               A_MoreGibs,        S_TROO_XDIE4    }, // S_TROO_XDIE3
     { SPR_TROO, 16,                                5,               A_Fall,            S_TROO_XDIE5    }, // S_TROO_XDIE4
-    { SPR_TROO, 17,                                5,               NULL,              S_TROO_XDIE6    }, // S_TROO_XDIE5
-    { SPR_TROO, 18,                                5,               NULL,              S_TROO_XDIE7    }, // S_TROO_XDIE6
+    { SPR_TROO, 17,                                5,               A_MoreGibs,        S_TROO_XDIE6    }, // S_TROO_XDIE5
+    { SPR_TROO, 18,                                5,               A_MoreGibs,        S_TROO_XDIE7    }, // S_TROO_XDIE6
     { SPR_TROO, 19,                                5,               NULL,              S_TROO_XDIE8    }, // S_TROO_XDIE7
     { SPR_TROO, 20,                               -1,               NULL,              S_NULL          }, // S_TROO_XDIE8
     { SPR_TROO, 12,                                8,               NULL,              S_TROO_RAISE2   }, // S_TROO_RAISE1
@@ -1017,13 +1019,13 @@ state_t states[NUMSTATES] =
     { SPR_SSWV, 10,                                5,               A_Fall,            S_SSWV_DIE4     }, // S_SSWV_DIE3
     { SPR_SSWV, 11,                                5,               NULL,              S_SSWV_DIE5     }, // S_SSWV_DIE4
     { SPR_SSWV, 12,                               -1,               NULL,              S_NULL          }, // S_SSWV_DIE5
-    { SPR_SSWV, 13,                                5,               NULL,              S_SSWV_XDIE2    }, // S_SSWV_XDIE1
+    { SPR_SSWV, 13,                                5,               A_MoreGibs,        S_SSWV_XDIE2    }, // S_SSWV_XDIE1
     { SPR_SSWV, 14,                                5,               A_XScream,         S_SSWV_XDIE3    }, // S_SSWV_XDIE2
     { SPR_SSWV, 15,                                5,               A_Fall,            S_SSWV_XDIE4    }, // S_SSWV_XDIE3
-    { SPR_SSWV, 16,                                5,               NULL,              S_SSWV_XDIE5    }, // S_SSWV_XDIE4
-    { SPR_SSWV, 17,                                5,               NULL,              S_SSWV_XDIE6    }, // S_SSWV_XDIE5
-    { SPR_SSWV, 18,                                5,               NULL,              S_SSWV_XDIE7    }, // S_SSWV_XDIE6
-    { SPR_SSWV, 19,                                5,               NULL,              S_SSWV_XDIE8    }, // S_SSWV_XDIE7
+    { SPR_SSWV, 16,                                5,               A_MoreGibs,        S_SSWV_XDIE5    }, // S_SSWV_XDIE4
+    { SPR_SSWV, 17,                                5,               A_MoreGibs,        S_SSWV_XDIE6    }, // S_SSWV_XDIE5
+    { SPR_SSWV, 18,                                5,               A_MoreGibs,        S_SSWV_XDIE7    }, // S_SSWV_XDIE6
+    { SPR_SSWV, 19,                                5,               A_MoreGibs,        S_SSWV_XDIE8    }, // S_SSWV_XDIE7
     { SPR_SSWV, 20,                                5,               NULL,              S_SSWV_XDIE9    }, // S_SSWV_XDIE8
     { SPR_SSWV, 21,                               -1,               NULL,              S_NULL          }, // S_SSWV_XDIE9
     { SPR_SSWV, 12,                                5,               NULL,              S_SSWV_RAISE2   }, // S_SSWV_RAISE1

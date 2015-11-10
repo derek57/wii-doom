@@ -133,6 +133,10 @@ err:
 }
 
 /** Hermes **/
+//
+// [nitr8] UNUSED
+//
+/*
 s32 USBStorage_Watchdog(u32 on_off)
 {
     if (fd >= 0)
@@ -158,6 +162,7 @@ s32 USBStorage_Umount(void)
 
     return IPC_ENOENT;
 }
+*/
 
 void USBStorage_Deinit(void)
 {
@@ -222,11 +227,16 @@ dboolean __io_usb_ReadSectors(u32 sector, u32 count, void *buffer)
     return ret > 0;
 }
 
+//
+// [nitr8] UNUSED
+//
+/*
 dboolean __io_usb_WriteSectors(u32 sector, u32 count, void *buffer)
 {
     s32 ret = USBStorage_WriteSectors(sector, count, buffer);
     return ret > 0;
 }
+*/
 
 static dboolean __io_usb_ClearStatus(void)
 {
@@ -256,13 +266,17 @@ const DISC_INTERFACE __io_usbstorage_ro = {
         (FN_MEDIUM_SHUTDOWN)     &__io_usb_Shutdown
 };
 
+//
+// [nitr8] UNUSED
+//
+/*
 s32 USBStorage_WBFS_Open(char *buffer)
 {
     u32   len = 8;
 
     s32 ret;
 
-    /* Device not opened */
+    // Device not opened
     if (fd < 0)
         return fd;
 
@@ -270,7 +284,7 @@ s32 USBStorage_WBFS_Open(char *buffer)
 
     u32 part = wbfs_part_lba;
 
-    /* Read data */
+    // Read data
     ret = IOS_IoctlvFormat(hid, fd, USB_IOCTL_WBFS_OPEN_DISC,
                            "dd:", buffer, len, &part, 4);
 
@@ -283,11 +297,11 @@ s32 USBStorage_WBFS_Read(u32 woffset, u32 len, void *buffer)
     s32 ret;
 
     USBStorage_Init();
-    /* Device not opened */
+    // Device not opened
     if (fd < 0)
         return fd;
 
-    /* Read data */
+    // Read data
     ret = IOS_IoctlvFormat(hid, fd, USB_IOCTL_WBFS_READ_DISC,
                            "ii:d", woffset, len, buffer, len);
 
@@ -300,11 +314,11 @@ s32 USBStorage_WBFS_ReadDebug(u32 off, u32 size, void *buffer)
     s32 ret;
 
     USBStorage_Init();
-    /* Device not opened */
+    // Device not opened
     if (fd < 0)
         return fd;
 
-    /* Read data */
+    // Read data
     ret = IOS_IoctlvFormat(hid, fd, USB_IOCTL_WBFS_READ_DEBUG,
                            "ii:d", off, size, buffer, size);
 
@@ -340,6 +354,7 @@ s32 USBStorage_WBFS_SetFragList(void *p, int size)
                            "d:", p, size);
     return ret;
 }
+*/
 
 dboolean umsio_Startup()
 {

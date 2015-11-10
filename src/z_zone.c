@@ -227,6 +227,10 @@ static int  line_history[NUM_HISTORY_TYPES][ZONE_HISTORY];
 static int  history_index[NUM_HISTORY_TYPES];
 static char *desc[NUM_HISTORY_TYPES] = { "malloc()'s", "free()'s" };
 
+//
+// [nitr8] UNUSED
+//
+/*
 void Z_DumpHistory(char *buf)
 {
     int i, j;
@@ -251,12 +255,18 @@ void Z_DumpHistory(char *buf)
         }
     }
 }
+*/
 
 #else
 
+//
+// [nitr8] UNUSED
+//
+/*
 void Z_DumpHistory(char *buf)
 {
 }
+*/
 
 #endif
 
@@ -684,6 +694,10 @@ void (Z_ChangeTag)(void *ptr, int tag, char *file, int line)
     block->tag = tag;
 }
 
+//
+// [nitr8] UNUSED
+//
+/*
 void Z_ChangeUser(void *ptr, void **user)
 {
     memblock_t* block;
@@ -700,6 +714,7 @@ void Z_ChangeUser(void *ptr, void **user)
     block->user = user;
     *user = ptr;
 }
+*/
 
 void *(Z_Realloc)(void *ptr, size_t n, int tag, void **user, char *file, int line)
 {
@@ -1349,6 +1364,9 @@ Z_FreeTags
 // Z_DumpHeap
 // Note: TFileDumpHeap( stdout ) ?
 //
+// [nitr8] UNUSED
+//
+/*
 void
 Z_DumpHeap
 ( int                lowtag,
@@ -1416,7 +1434,7 @@ void Z_FileDumpHeap (FILE* f)
             fprintf (f,"ERROR: two consecutive free blocks\n");
     }
 }
-
+*/
 
 
 //
@@ -1479,6 +1497,10 @@ void Z_ChangeTag2(void *ptr, int tag, char *file, int line)
     block->tag = tag;
 }
 
+//
+// [nitr8] UNUSED
+//
+/*
 void Z_ChangeUser(void *ptr, void **user)
 {
     memblock_t*        block;
@@ -1493,30 +1515,32 @@ void Z_ChangeUser(void *ptr, void **user)
     block->user = user;
     *user = ptr;
 }
-
+*/
 
 
 //
 // Z_FreeMemory
 //
+// [nitr8] UNUSED
+//
+/*
 int Z_FreeMemory (void)
 {
-/*
-    memblock_t*                block;
-    int                        free;
+//    memblock_t*                block;
+//    int                        free;
         
-    free = 0;
+//    free = 0;
     
-    for (block = mainzone->blocklist.next ;
-         block != &mainzone->blocklist;
-         block = block->next)
-    {
-        if (block->tag == PU_FREE || block->tag >= PU_PURGELEVEL)
-            free += block->size;
-    }
+//    for (block = mainzone->blocklist.next ;
+//         block != &mainzone->blocklist;
+//         block = block->next)
+//    {
+//        if (block->tag == PU_FREE || block->tag >= PU_PURGELEVEL)
+//            free += block->size;
+//    }
 
-    return free;
-*/
+//    return free;
+
     memblock_t*         block;
     int                 free = 0;
 
@@ -1545,6 +1569,7 @@ int Z_FreeMemory (void)
     }
     return free;
 }
+*/
 
 void* Z_MallocAlign (int reqsize, int tag, void **user, int alignbits)
 {

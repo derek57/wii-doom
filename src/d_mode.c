@@ -22,7 +22,10 @@
 
 // Valid game mode/mission combinations, with the number of
 // episodes/maps for each.
-
+//
+// nitr8 [UNUSED]
+//
+/*
 static struct
 {
     GameMission_t mission;
@@ -113,9 +116,14 @@ int D_GetNumEpisodes(GameMission_t mission, GameMode_t mode)
 
     return episode - 1;
 }
+*/
 
+//
 // Table of valid versions
-
+//
+// [nitr8] UNUSED
+//
+/*
 static struct {
     GameMission_t mission;
     GameVersion_t version;
@@ -209,4 +217,5 @@ char *D_GameMissionString(GameMission_t mission)
             return "strife";
     }
 }
+*/
 

@@ -23,12 +23,16 @@ s32 Fat_Mount(fatDevice *dev)
     return 0;
 }
 
+//
+// [nitr8] UNUSED
+//
+/*
 void Fat_Unmount(fatDevice *dev)
 {
-    /* Unmount device */
+    // Unmount device
     fatUnmount(dev->mount);
 
-    /* Shutdown interface */
+    // Shutdown interface
     dev->interface->shutdown();
 }
 
@@ -38,16 +42,16 @@ char *Fat_ToFilename(const char *filename)
 
     u32 cnt, idx, len;
 
-    /* Clear buffer */
+    // Clear buffer
     memset(buffer, 0, sizeof(buffer));
 
-    /* Get filename length */
+    // Get filename length
     len = strlen(filename);
 
     for (cnt = idx = 0; idx < len; idx++) {
         char c = filename[idx];
 
-        /* Valid characters */
+        // Valid characters
         if ( (c >= '#' && c <= ')') || (c >= '-' && c <= '.') ||
              (c >= '0' && c <= '9') || (c >= 'A' && c <= 'z') ||
              (c >= 'a' && c <= 'z') || (c == '!') )
@@ -56,5 +60,7 @@ char *Fat_ToFilename(const char *filename)
 
     return buffer;
 }
+*/
+
 #endif
 

@@ -93,8 +93,8 @@ void G_PlayerReborn (int player);
 extern int          mouselook;
 extern int          snd_module;
 
-extern dboolean      not_walking;
-extern dboolean      in_slime;
+extern dboolean     not_walking;
+extern dboolean     in_slime;
 
 extern fixed_t      animatedliquiddiffs[64];
 extern fixed_t      attackrange;
@@ -1415,6 +1415,15 @@ void P_SpawnMapThing(mapthing_t *mthing, int index)
         mobj->bloodsplats = CORPSEBLOODSPLATS;
         if (d_maxgore)
             P_SpawnMoreBlood(mobj);
+    }
+
+    // [crispy] randomly colorize space marine corpse objects
+    if (!netgame &&
+        (randomly_colored_playercorpses) &&
+        (mobj->info->spawnstate == S_PLAY_DIE7 ||
+         mobj->info->spawnstate == S_PLAY_XDIE9))
+    {
+        mobj->flags |= (mobj->lastlook << MF_TRANSSHIFT);
     }
 }
 

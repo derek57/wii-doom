@@ -113,10 +113,14 @@ void I_AtExit(atexit_func_t func, dboolean run_on_error)
 }
 
 // Tactile feedback function, probably used for the Logitech Cyberman
-
+//
+// [nitr8] UNUSED
+//
+/*
 void I_Tactile(int on, int off, int total)
 {
 }
+*/
 
 // Zone memory auto-allocation function that allocates the zone size
 // by trying progressively smaller zone sizes until one is found that
@@ -201,6 +205,10 @@ byte *I_ZoneBase (int *size)
     return zonemem;
 }
 
+//
+// [nitr8] UNUSED
+//
+/*
 void I_PrintBanner(char *msg)
 {
     int i;
@@ -238,6 +246,7 @@ void I_PrintStartupBanner(char *gamedescription)
 
     I_PrintDivider();
 }
+*/
 
 // 
 // I_ConsoleStdout
@@ -512,6 +521,10 @@ static const unsigned char mem_dump_win98[DOS_MEM_DUMP_SIZE] = {
 static const unsigned char mem_dump_dosbox[DOS_MEM_DUMP_SIZE] = {
   0x00, 0x00, 0x00, 0xF1, 0x00, 0x00, 0x00, 0x00, 0x07, 0x00};
 
+//
+// nitr8 [UNUSED]
+//
+/*
 #ifndef WII
 static unsigned char mem_dump_custom[DOS_MEM_DUMP_SIZE];
 #endif
@@ -595,4 +608,5 @@ dboolean I_GetMemoryValue(unsigned int offset, void *value, int size)
 
     return false;
 }
+*/
 

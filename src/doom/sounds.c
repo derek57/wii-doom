@@ -120,7 +120,7 @@ musicinfo_t S_music[] =
     MUSIC("read_m"),
     MUSIC("dm2ttl"),
     MUSIC("dm2int"), 
-    MUSIC("credit") 
+    MUSIC("credit")
 };
 
 

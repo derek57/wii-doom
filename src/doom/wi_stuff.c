@@ -49,6 +49,7 @@
 #endif
 
 #include "m_random.h"
+#include "p_setup.h"
 #include "r_local.h"
 #include "s_sound.h"
 
@@ -454,81 +455,100 @@ void WI_slamBackground(void)
 
 // The ticker is used to detect keys
 //  because of timing issues in netgames.
+//
+// [nitr8] UNUSED
+//
+/*
 dboolean WI_Responder(event_t* ev)
 {
     return false;
 }
-
+*/
 
 // Draws "<Levelname> Finished!"
 void WI_drawLF(void)
 {
     int y = WI_TITLEY;
+    int titlepatch = P_GetMapTitlePatch(wbs->epsd * 10 + wbs->last + 1); 
 
-    if (gamemode != commercial || wbs->last < NUMCMAPS)
+    if (titlepatch)
     {
-        // draw <LevelName> 
-        if(beta_style && gameepisode == 1 && gamemap < 10)
-        {
-            if(fsize != 12538385 || (fsize == 12538385 && gamemap != 10))
-            {
-                if(font_shadow)
-                    V_DrawPatchWithShadow(232, 176, lnames[wbs->last], false);
-                else
-                    V_DrawPatch(232, 176, lnames[wbs->last]);
-            }
-        }
-        else
-        {
-            if(fsize != 12538385 || (fsize == 12538385 && gamemap != 10))
-            {
-                if(font_shadow)
-                    V_DrawPatchWithShadow((ORIGWIDTH -
-                            SHORT(lnames[wbs->last]->width))/2, // CHANGED FOR HIRES
-                            y, lnames[wbs->last], false);              // CHANGED FOR HIRES
-                else
-                    V_DrawPatch((ORIGWIDTH -
-                            SHORT(lnames[wbs->last]->width))/2, // CHANGED FOR HIRES
-                            y, lnames[wbs->last]);              // CHANGED FOR HIRES
-            }
-            else
-            {
-                if(font_shadow)
-                    V_DrawPatchWithShadow(117, y, W_CacheLumpName("SEWERS", PU_CACHE), false);
-                else
-                    V_DrawPatch (117, y, W_CacheLumpName("SEWERS", PU_CACHE));
-            }
-            // draw "Finished!"
-            if(fsize != 12538385 || (fsize == 12538385 && gamemap != 10))
-                y += (5*SHORT(lnames[wbs->last]->height))/4;
-            else
-                y = 17;
-
-            if(font_shadow)
-                V_DrawPatchWithShadow((ORIGWIDTH - SHORT(finished->width)) / 2,
-                        y, finished, false);        // CHANGED FOR HIRES
-            else
-                V_DrawPatch((ORIGWIDTH - SHORT(finished->width)) / 2,
-                        y, finished);        // CHANGED FOR HIRES
-        }
-    }
-    else if (wbs->last == NUMCMAPS)
-    {
-        // MAP33 - nothing is displayed!
-    }
-    else if (wbs->last > NUMCMAPS)
-    {
-        // > MAP33.  Doom bombs out here with a Bad V_DrawPatch error.
-        // I'm pretty sure that doom2.exe is just reading into random
-        // bits of memory at this point, but let's try to be accurate
-        // anyway.  This deliberately triggers a V_DrawPatch error.
-        patch_t tmp = { ORIGWIDTH, ORIGHEIGHT, 1, 1,  // CHANGED FOR HIRES
-                        { 0, 0, 0, 0, 0, 0, 0, 0 } }; // CHANGED FOR HIRES
+        patch_t *patch = W_CacheLumpNum(titlepatch, PU_STATIC);
 
         if(font_shadow)
-            V_DrawPatchWithShadow(0, y, &tmp, false);
+            V_DrawPatchWithShadow((ORIGWIDTH - SHORT(patch->width)) / 2 + 1, y + 1, patch, false);
         else
-            V_DrawPatch(0, y, &tmp);
+            V_DrawPatch((ORIGWIDTH - SHORT(patch->width)) / 2 + 1, y + 1, patch);
+
+        y += SHORT(patch->height) + 2;
+    }
+    else
+    {
+        if (gamemode != commercial || wbs->last < NUMCMAPS)
+        {
+            // draw <LevelName> 
+            if(beta_style && gameepisode == 1 && gamemap < 10)
+            {
+                if(fsize != 12538385 || (fsize == 12538385 && gamemap != 10))
+                {
+                    if(font_shadow)
+                        V_DrawPatchWithShadow(232, 176, lnames[wbs->last], false);
+                    else
+                        V_DrawPatch(232, 176, lnames[wbs->last]);
+                }
+            }
+            else
+            {
+                if(fsize != 12538385 || (fsize == 12538385 && gamemap != 10))
+                {
+                    if(font_shadow)
+                        V_DrawPatchWithShadow((ORIGWIDTH -
+                                SHORT(lnames[wbs->last]->width))/2, // CHANGED FOR HIRES
+                                y, lnames[wbs->last], false);       // CHANGED FOR HIRES
+                    else
+                        V_DrawPatch((ORIGWIDTH -
+                                SHORT(lnames[wbs->last]->width))/2, // CHANGED FOR HIRES
+                                y, lnames[wbs->last]);              // CHANGED FOR HIRES
+                }
+                else
+                {
+                    if(font_shadow)
+                        V_DrawPatchWithShadow(117, y, W_CacheLumpName("SEWERS", PU_CACHE), false);
+                    else
+                        V_DrawPatch (117, y, W_CacheLumpName("SEWERS", PU_CACHE));
+                }
+                // draw "Finished!"
+                if(fsize != 12538385 || (fsize == 12538385 && gamemap != 10))
+                    y += (5*SHORT(lnames[wbs->last]->height))/4;
+                else
+                    y = 17;
+    
+                if(font_shadow)
+                    V_DrawPatchWithShadow((ORIGWIDTH - SHORT(finished->width)) / 2,
+                            y, finished, false);        // CHANGED FOR HIRES
+                else
+                    V_DrawPatch((ORIGWIDTH - SHORT(finished->width)) / 2,
+                            y, finished);        // CHANGED FOR HIRES
+            }
+        }
+        else if (wbs->last == NUMCMAPS)
+        {
+            // MAP33 - nothing is displayed!
+        }
+        else if (wbs->last > NUMCMAPS)
+        {
+            // > MAP33.  Doom bombs out here with a Bad V_DrawPatch error.
+            // I'm pretty sure that doom2.exe is just reading into random
+            // bits of memory at this point, but let's try to be accurate
+            // anyway.  This deliberately triggers a V_DrawPatch error.
+            patch_t tmp = { ORIGWIDTH, ORIGHEIGHT, 1, 1,  // CHANGED FOR HIRES
+                            { 0, 0, 0, 0, 0, 0, 0, 0 } }; // CHANGED FOR HIRES
+
+            if(font_shadow)
+                V_DrawPatchWithShadow(0, y, &tmp, false);
+            else
+                V_DrawPatch(0, y, &tmp);
+        }
     }
 }
 
@@ -537,59 +557,72 @@ void WI_drawLF(void)
 void WI_drawEL(void)
 {
     int y = WI_TITLEY;
+    int titlepatch = P_GetMapTitlePatch(wbs->epsd * 10 + wbs->next + 1);
 
     // draw "Entering"
-    if(!beta_style) 
+    if (titlepatch)
     {
-        if(font_shadow)
-            V_DrawPatchWithShadow((ORIGWIDTH - SHORT(entering->width))/2, // CHANGED FOR HIRES
-                    y,
-                    entering, false);
-        else
-            V_DrawPatch((ORIGWIDTH - SHORT(entering->width))/2, // CHANGED FOR HIRES
-                    y,
-                    entering);
-    }
+        patch_t *patch = W_CacheLumpNum(titlepatch, PU_STATIC);
 
-    // draw level
-    if(beta_style && gameepisode == 1 && gamemap < 10)
-    {
         if(font_shadow)
-            V_DrawPatchWithShadow(232, 176, lnames[wbs->next], false);
+            V_DrawPatchWithShadow((ORIGWIDTH - SHORT(patch->width)) / 2 + 1, y + 1, patch, false);
         else
-            V_DrawPatch(232, 176, lnames[wbs->next]);
+            V_DrawPatch((ORIGWIDTH - SHORT(patch->width)) / 2 + 1, y + 1, patch);
     }
     else
     {
-        if(fsize == 12538385 && gamemap == 1 && secretexit)
-            y = 17;
-        else
-            y += (5*SHORT(lnames[wbs->next]->height))/4;
+        if(!beta_style) 
+        {
+            if(font_shadow)
+                V_DrawPatchWithShadow((ORIGWIDTH - SHORT(entering->width))/2, // CHANGED FOR HIRES
+                        y,
+                        entering, false);
+            else
+                V_DrawPatch((ORIGWIDTH - SHORT(entering->width))/2, // CHANGED FOR HIRES
+                        y,
+                        entering);
+        }
 
-        if((fsize == 14683458 || fsize == 14677988 || fsize == 14691821) &&
-                    gamemode == commercial && gamemap == 2 && secretexit)
+        // draw level
+        if(beta_style && gameepisode == 1 && gamemap < 10)
         {
             if(font_shadow)
-                V_DrawPatchWithShadow(119, y + 1, W_CacheLumpName("CWILV32", PU_CACHE), false);
+                V_DrawPatchWithShadow(232, 176, lnames[wbs->next], false);
             else
-                V_DrawPatch(119, y + 1, W_CacheLumpName("CWILV32", PU_CACHE));
-        }
-        else if(fsize == 12538385 && gamemode == retail && gameepisode == 1 &&
-                gamemap == 1 && secretexit)
-        {
-            if(font_shadow)
-                V_DrawPatchWithShadow(117, y, W_CacheLumpName("SEWERS", PU_CACHE), false);
-            else
-                V_DrawPatch(117, y, W_CacheLumpName("SEWERS", PU_CACHE));
+                V_DrawPatch(232, 176, lnames[wbs->next]);
         }
         else
         {
-            if(font_shadow)
-                V_DrawPatchWithShadow((ORIGWIDTH - SHORT(lnames[wbs->next]->width))/2,
-                        y, lnames[wbs->next], false);
+            if(fsize == 12538385 && gamemap == 1 && secretexit)
+                y = 17;
             else
-                V_DrawPatch((ORIGWIDTH - SHORT(lnames[wbs->next]->width))/2, // CHANGED FOR HIRES
-                        y, lnames[wbs->next]);
+                y += (5*SHORT(lnames[wbs->next]->height))/4;
+    
+            if((fsize == 14683458 || fsize == 14677988 || fsize == 14691821) &&
+                        gamemode == commercial && gamemap == 2 && secretexit)
+            {
+                if(font_shadow)
+                    V_DrawPatchWithShadow(119, y + 1, W_CacheLumpName("CWILV32", PU_CACHE), false);
+                else
+                    V_DrawPatch(119, y + 1, W_CacheLumpName("CWILV32", PU_CACHE));
+            }
+            else if(fsize == 12538385 && gamemode == retail && gameepisode == 1 &&
+                    gamemap == 1 && secretexit)
+            {
+                if(font_shadow)
+                    V_DrawPatchWithShadow(117, y, W_CacheLumpName("SEWERS", PU_CACHE), false);
+                else
+                    V_DrawPatch(117, y, W_CacheLumpName("SEWERS", PU_CACHE));
+            }
+            else
+            {
+                if(font_shadow)
+                    V_DrawPatchWithShadow((ORIGWIDTH - SHORT(lnames[wbs->next]->width))/2,
+                        y, lnames[wbs->next], false);
+                else
+                    V_DrawPatch((ORIGWIDTH - SHORT(lnames[wbs->next]->width))/2, // CHANGED FOR HIRES
+                            y, lnames[wbs->next]);
+            }
         }
     }
 }
@@ -1561,8 +1594,8 @@ void WI_updateStats(void)
         cnt_kills[0] = (plrs[me].skills * 100) / wbs->maxkills;
         cnt_items[0] = (plrs[me].sitems * 100) / wbs->maxitems;
         cnt_secret[0] = (plrs[me].ssecret * 100) / wbs->maxsecret;
-        cnt_time = plrs[me].stime / TICRATE;
-        cnt_par = wbs->partime / TICRATE;
+        cnt_time = (int)plrs[me].stime / TICRATE;
+        cnt_par = (int)wbs->partime / TICRATE;
         S_StartSound(0, sfx_barexp);
         sp_state = 10;
     }
@@ -1659,9 +1692,7 @@ void WI_updateStats(void)
 void WI_drawStats(void)
 {
     // line height
-    int lh;        
-
-    lh = (3*SHORT(num[0]->height))/2;
+    int lh = 3 * SHORT(num[0]->height) / 2;
 
     WI_slamBackground();
 
@@ -1760,11 +1791,11 @@ void WI_Ticker(void)
         // intermission music
         if ( gamemode == commercial )
         {
-            S_ChangeMusic(mus_dm2int, true);
+            S_ChangeMusic(mus_dm2int, true, false);
         }
         else
         {
-            S_ChangeMusic(mus_inter, true); 
+            S_ChangeMusic(mus_inter, true, false); 
         }
     }
 

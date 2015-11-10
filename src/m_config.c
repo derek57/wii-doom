@@ -436,7 +436,9 @@ void M_SaveDefaults (void)
 //
 // Save defaults to alternate filenames
 //
-
+// [nitr8] UNUSED
+//
+/*
 void M_SaveDefaultsAlternate(char *main)
 {
     char *orig_main;
@@ -453,6 +455,7 @@ void M_SaveDefaultsAlternate(char *main)
 
     doom_defaults.filename = orig_main;
 }
+*/
 
 //
 // M_LoadDefaults
@@ -551,7 +554,10 @@ dboolean M_SetVariable(char *name, char *value)
 }
 
 // Get the value of a variable.
-
+//
+// [nitr8] UNUSED
+//
+/*
 int M_GetIntVariable(char *name)
 {
     default_t *variable;
@@ -596,6 +602,7 @@ float M_GetFloatVariable(char *name)
 
     return *((float *) variable->location);
 }
+*/
 
 // Get the path to the default configuration dir to use, if NULL
 // is passed to M_SetConfigDir.

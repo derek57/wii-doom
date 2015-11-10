@@ -635,6 +635,10 @@ dboolean PIT_CheckThing (mobj_t* thing)
 // Then check the PE and LS to see if they're on different
 // sides of the blocking line. If so, return true, otherwise
 // false.
+//
+// [nitr8] UNUSED
+//
+/*
 dboolean P_CheckLineSide(mobj_t *actor, fixed_t x, fixed_t y)
 {
     int bx;
@@ -668,6 +672,7 @@ dboolean P_CheckLineSide(mobj_t *actor, fixed_t x, fixed_t y)
                 return true;
     return false;
 }
+*/
 
 //
 // PIT_CheckOnmobjZ

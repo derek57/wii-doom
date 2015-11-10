@@ -37,6 +37,16 @@ P_SetupLevel
 ( int                ep,
   int                map);
 
+char *P_GetMapAuthor(int map);
+int P_GetMapMusic(int map);
+char *P_GetMapName(int map);
+int P_GetMapNext(int map);
+int P_GetMapPar(int map);
+int P_GetMapSecretNext(int map);
+int P_GetMapSky1Texture(int map);
+int P_GetMapSky1ScrollDelta(int map);
+int P_GetMapTitlePatch(int map); 
+
 // Called by startup code.
 void P_Init (void);
 

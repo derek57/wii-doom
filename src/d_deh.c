@@ -1727,6 +1727,10 @@ static const deh_bexptr deh_bexptrs[] =
 // to hold startup code pointers from INFO.C
 static actionf_t deh_codeptr[NUMSTATES];
 
+//
+// [nitr8] UNUSED
+//
+/*
 dboolean CheckPackageWADVersion(void)
 {
     DEHFILE     infile, *filein = &infile;
@@ -1757,7 +1761,7 @@ dboolean CheckPackageWADVersion(void)
         }
     return false;
 }
-
+*/
 // ====================================================================
 // ProcessDehFile
 // Purpose: Read and process a DEH or BEX file

@@ -42,9 +42,6 @@
 // We need the playr data structure as well.
 #include "d_player.h"
 
-// Game mode/mission
-#include "../d_mode.h"
-
 #include "../net_defs.h"
 
 
@@ -361,6 +358,7 @@ extern  dboolean         corpses_nudge;
 extern  dboolean         corpses_slide;
 extern  dboolean         corpses_smearblood;
 extern  dboolean         show_diskicon;
+extern  dboolean         randomly_colored_playercorpses;
 /*
 extern  dboolean         nerve;
 extern  dboolean         chex;

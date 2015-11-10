@@ -118,10 +118,7 @@ static const char *subst_config_filenames[] =
 {
     "doom1-music.cfg",
     "doom2-music.cfg",
-    "tnt-music.cfg",
-    "heretic-music.cfg",
-    "hexen-music.cfg",
-    "strife-music.cfg",
+    "tnt-music.cfg"
 };
 
 static dboolean music_initialized;
@@ -1322,74 +1319,74 @@ void I_SDL_PollMusic(void)
                     if(gamemode == commercial && gamemission == pack_nerve)
                     {
                         if(gamemap == 1)
-                            S_ChangeMusic(mus_messag, true);
+                            S_ChangeMusic(mus_messag, true, true);
                         else if(gamemap == 2)
-                            S_ChangeMusic(mus_ddtblu, true);
+                            S_ChangeMusic(mus_ddtblu, true, true);
                         else if(gamemap == 3)
-                            S_ChangeMusic(mus_doom, true);
+                            S_ChangeMusic(mus_doom, true, true);
                         else if(gamemap == 4)
-                            S_ChangeMusic(mus_shawn, true);
+                            S_ChangeMusic(mus_shawn, true, true);
                         else if(gamemap == 5)
-                            S_ChangeMusic(mus_in_cit, true);
+                            S_ChangeMusic(mus_in_cit, true, true);
                         else if(gamemap == 6)
-                            S_ChangeMusic(mus_the_da, true);
+                            S_ChangeMusic(mus_the_da, true, true);
                         else if(gamemap == 7)
-                            S_ChangeMusic(mus_in_cit, true);
+                            S_ChangeMusic(mus_in_cit, true, true);
                         else if(gamemap == 8)
-                            S_ChangeMusic(mus_shawn2, true);
+                            S_ChangeMusic(mus_shawn2, true, true);
                         else if(gamemap == 9)
-                            S_ChangeMusic(mus_ddtbl2, true);
+                            S_ChangeMusic(mus_ddtbl2, true, true);
                     }
                     else if(gamemode == commercial)
-                        S_ChangeMusic(gamemap + 32, true);
+                        S_ChangeMusic(gamemap + 32, true, true);
                     else
                     {
                         if(gameepisode == 1)
-                            S_ChangeMusic(gamemap, true);
+                            S_ChangeMusic(gamemap, true, true);
                         else if(gameepisode == 2)
-                            S_ChangeMusic(gamemap + 9, true);
+                            S_ChangeMusic(gamemap + 9, true, true);
                         else if(gameepisode == 3)
-                            S_ChangeMusic(gamemap + 18, true);
+                            S_ChangeMusic(gamemap + 18, true, true);
                         else if(gameepisode == 4)
                         {
                             if(gamemap == 1)
-                                S_ChangeMusic(mus_e3m4, true);
+                                S_ChangeMusic(mus_e3m4, true, true);
                             else if(gamemap == 2)
-                                S_ChangeMusic(mus_e3m2, true);
+                                S_ChangeMusic(mus_e3m2, true, true);
                             else if(gamemap == 3)
-                                S_ChangeMusic(mus_e3m3, true);
+                                S_ChangeMusic(mus_e3m3, true, true);
                             else if(gamemap == 4)
-                                S_ChangeMusic(mus_e1m5, true);
+                                S_ChangeMusic(mus_e1m5, true, true);
                             else if(gamemap == 5)
-                                S_ChangeMusic(mus_e2m7, true);
+                                S_ChangeMusic(mus_e2m7, true, true);
                             else if(gamemap == 6)
-                                S_ChangeMusic(mus_e2m4, true);
+                                S_ChangeMusic(mus_e2m4, true, true);
                             else if(gamemap == 7)
-                                S_ChangeMusic(mus_e2m6, true);
+                                S_ChangeMusic(mus_e2m6, true, true);
                             else if(gamemap == 8)
-                                S_ChangeMusic(mus_e2m5, true);
+                                S_ChangeMusic(mus_e2m5, true, true);
                             else if(gamemap == 9)
-                                S_ChangeMusic(mus_e1m9, true);
+                                S_ChangeMusic(mus_e1m9, true, true);
                         }
                     }
                 }
                 else if(gamestate == GS_INTERMISSION)
                 {
                     if(gamemode == commercial)
-                        S_ChangeMusic(mus_dm2int, true);
+                        S_ChangeMusic(mus_dm2int, true, false);
                     else
-                        S_ChangeMusic(mus_inter, true);
+                        S_ChangeMusic(mus_inter, true, false);
                 }
                 else if(gamestate == GS_FINALE)
                 {
                     if(logical_gamemission == doom)
-                        S_ChangeMusic(mus_victor, true);
+                        S_ChangeMusic(mus_victor, true, false);
                     else
-                        S_ChangeMusic(mus_read_m, true);
+                        S_ChangeMusic(mus_read_m, true, false);
                 }
             }
             else
-                S_ChangeMusic(tracknum, true);
+                S_ChangeMusic(tracknum, true, true);
         }
     }
 }

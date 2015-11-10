@@ -40,11 +40,14 @@
 //
 // FixedDiv, C version.
 //
-
+// [nitr8] UNUSED
+//
+/*
 int SIGN(int a)
 {
     return (1 | (a >> 31));
 }
+*/
 
 int ABS(int a)
 {

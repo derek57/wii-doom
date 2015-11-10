@@ -45,7 +45,10 @@
 // the y (<=x) is scaled and divided by x to get a tangent (slope) value
 // which is looked up in the tantoangle[] table.  The +1 size is to handle
 // the case when x==y without additional checking.
-
+//
+// [nitr8] UNUSED
+//
+/*
 int SlopeDivVanilla(unsigned int num, unsigned int den)
 {    
     if (den < 512)
@@ -67,7 +70,9 @@ int SlopeDivVanilla(unsigned int num, unsigned int den)
     }
 }
 
+//
 // [crispy] catch SlopeDiv overflows, only used in rendering
+//
 int SlopeDivCrispy(unsigned int num, unsigned int den)
 {
     // catch overflow for very big enumerators
@@ -90,7 +95,7 @@ int SlopeDivCrispy(unsigned int num, unsigned int den)
         }
     }
 }
-
+*/
 //int (* SlopeDiv)(unsigned int num, unsigned int den) = SlopeDivVanilla;
 
 

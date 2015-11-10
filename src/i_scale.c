@@ -417,7 +417,10 @@ static void I_InitSquashTable(byte *palette)
 // Destroy the scaling lookup tables. This should only ever be called
 // if switching to a completely different palette from the normal one
 // (in which case the mappings no longer make any sense).
-
+//
+// [nitr8] ONLY USED FOR HERETIC
+//
+/*
 void I_ResetScaleTables(byte *palette)
 {
     if (stretch_tables[0] != NULL)
@@ -446,7 +449,7 @@ void I_ResetScaleTables(byte *palette)
         quarter_stretch_table = GenerateStretchTable(palette, 25);
     }
 }
-
+*/
 
 // 
 // Aspect ratio correcting scale up functions.

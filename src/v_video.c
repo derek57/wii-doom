@@ -64,9 +64,6 @@
 #define RANGECHECK
 
 
-// villsa [STRIFE] Blending table used for Strife
-byte *xlatab = NULL;
-
 byte redtoyellow[] =
 {
       0,   1,   2,   3,   4,   5,   6,   7,   8,   9,  10,  11,  12,  13,  14,  15,
@@ -744,6 +741,9 @@ dboolean V_EmptyPatch(patch_t *patch)
 //
 // Draws a block of solid color.
 //
+// [nitr8] UNUSED
+//
+/*
 void V_ColorBlock(int x, int y, int width, int height, byte color)
 {
     byte *dest;
@@ -796,6 +796,7 @@ void V_GetBlock (int x, int y, int width, int height, byte *dest)
         dest += width;
     }
 }
+*/
 
 //
 // SCREEN SHOTS

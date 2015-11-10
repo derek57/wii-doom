@@ -20,7 +20,11 @@
 
 #include <assert.h>
 
+#ifdef WII
+#include "../config.h"
+#else
 #include "config.h"
+#endif
 
 #ifdef SDL2
 #include <SDL2/SDL.h>

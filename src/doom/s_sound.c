@@ -61,6 +61,7 @@
 
 #include "m_random.h"
 #include "p_local.h"
+#include "p_setup.h"
 #include "r_defs.h"
 #include "s_sound.h"
 #include "sounds.h"
@@ -310,7 +311,7 @@ void S_Start(void)
             mnum = spmus[gamemap-1];
         }
     }
-    S_ChangeMusic(mnum, true);
+    S_ChangeMusic(mnum, true, true);
 }        
 
 void S_StopSound(mobj_t *origin)
@@ -682,6 +683,8 @@ void S_UpdateSounds(mobj_t *listener)
     int                sep;
     channel_t*         c;
 
+    I_UpdateSound();
+
     for (cnum=0; cnum<snd_channels; cnum++)
     {
         sfxinfo_t* sfx;
@@ -764,43 +767,44 @@ void S_SetSfxVolume(int volume)
 // Starts some music with the music id found in sounds.h.
 //
 
-void S_StartMusic(int m_id)
+void S_StartMusic(int music_id)
 {
-    S_ChangeMusic(m_id, false);
+    S_ChangeMusic(music_id, false, false);
 }
 
-void S_ChangeMusic(int musicnum, int looping)
+void S_ChangeMusic(int music_id, int looping, dboolean mapstart)
 {
     musicinfo_t *music = NULL;
-    void *handle;
+    void        *handle;
+    int         mapinfomusic; 
 
     // The Doom IWAD file has two versions of the intro music: d_intro
     // and d_introa.  The latter is used for OPL playback.
 
-    if (musicnum == mus_intro && (snd_musicdevice == SNDDEVICE_ADLIB
+    if (music_id == mus_intro && (snd_musicdevice == SNDDEVICE_ADLIB
                                || snd_musicdevice == SNDDEVICE_SB))
     {
         // HACK: NOT FOR SHARE 1.0 & 1.1 & REG 1.1
         if(fsize != 4207819 && fsize != 4274218 && fsize != 10396254)
-            musicnum = mus_introa;
+            music_id = mus_introa;
         // HACK: IF SHAREWARE 1.0 OR 1.1
         else
-            musicnum = mus_intro;
+            music_id = mus_intro;
     }
 
-    if (musicnum <= mus_None || musicnum >= NUMMUSIC)
+    if (music_id <= mus_None || music_id >= NUMMUSIC)
     {
-//        I_Error("Bad music number %d", musicnum);
+//        I_Error("Bad music number %d", music_id);
         char musicbuf[30];
         player_t *player = &players[consoleplayer];
-        C_Printf(CR_GOLD, " Bad music number %d", musicnum);
-        sprintf(musicbuf, "Bad music number %d", musicnum);
+        C_Printf(CR_GOLD, " Bad music number %d", music_id);
+        sprintf(musicbuf, "Bad music number %d", music_id);
         player->message = musicbuf;
         return;
     }
     else
     {
-        music = &S_music[musicnum];
+        music = &S_music[music_id];
     }
 
     if (mus_playing == music && !change_anyway)
@@ -814,7 +818,9 @@ void S_ChangeMusic(int musicnum, int looping)
     S_StopMusic();
 
     // get lumpnum if neccessary
-    if (!music->lumpnum)
+    if (mapstart && (mapinfomusic = P_GetMapMusic((gameepisode - 1) * 10 + gamemap))) 
+        music->lumpnum = mapinfomusic;
+    else if (!music->lumpnum)
     {
         char namebuf[9];
 
@@ -834,6 +840,7 @@ void S_ChangeMusic(int musicnum, int looping)
     if (!handle)
     {
         C_Printf(CR_GOLD, " D_%s music lump can't be played.", uppercase(music->name));
+        C_Printf(CR_GOLD, " Maybe you forgot running the game with the 'sudo' command");
         return;
     }
 
@@ -844,10 +851,15 @@ void S_ChangeMusic(int musicnum, int looping)
     mus_playing = music;
 }
 
+//
+// [nitr8] UNUSED
+//
+/*
 dboolean S_MusicPlaying(void)
 {
     return I_MusicIsPlaying();
 }
+*/
 
 void S_StopMusic(void)
 {

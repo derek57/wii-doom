@@ -65,7 +65,9 @@
 #include "m_random.h"
 #include "p_fix.h"
 #include "p_local.h"
+#include "p_setup.h"
 #include "s_sound.h"
+#include "sc_man.h"
 
 #ifdef WII
 #include "../v_trans.h"
@@ -79,13 +81,63 @@
 
 
 // Maintain single and multi player starting spots.
-#define MAX_DEATHMATCH_STARTS        10
+#define MAX_DEATHMATCH_STARTS   10
+#define MAPINFO_SCRIPT_NAME     "MAPINFO"
 
+#define MCMD_AUTHOR             1
+#define MCMD_MUSIC              2
+#define MCMD_NEXT               3
+#define MCMD_PAR                4
+#define MCMD_SECRETNEXT         5
+#define MCMD_SKY1               6
+#define MCMD_TITLEPATCH         7
+
+
+typedef struct mapinfo_s mapinfo_t;
+
+struct mapinfo_s
+{
+    char        author[128];
+    int         music;
+    char        name[128];
+    int         next;
+    int         par;
+    int         secretnext;
+    int         sky1texture;
+    int         sky1scrolldelta;
+    int         titlepatch;
+};
+
+static mapinfo_t mapinfo[99];
+
+static char *mapcmdnames[] =
+{
+    "AUTHOR",
+    "MUSIC",
+    "NEXT",
+    "PAR",
+    "SECRETNEXT",
+    "SKY1",
+    "TITLEPATCH", 
+    NULL
+};
+
+static int mapcmdids[] =
+{
+    MCMD_AUTHOR,
+    MCMD_MUSIC,
+    MCMD_NEXT,
+    MCMD_PAR,
+    MCMD_SECRETNEXT,
+    MCMD_SKY1,
+    MCMD_TITLEPATCH 
+};
 
 //
 // MAP related Lookup tables.
 // Store VERTEXES, LINEDEFS, SIDEDEFS, etc.
 //
+int                mapcount;
 int                numvertexes;
 int                sizevertexes;
 int                numsegs;
@@ -151,6 +203,7 @@ dboolean            canmodify;
 dboolean            transferredsky;
 dboolean            boomlinespecials;
 dboolean            blockmaprecreated;
+dboolean            MAPINFO; 
 
 // REJECT
 // For fast sight rejection.
@@ -2043,13 +2096,224 @@ P_SetupLevel
 
 }
 
+static void InitMapInfo(void)
+{
+    int         episode;
+    int         map;
+    int         mapmax = 1;
+    int         mcmdvalue;
+    mapinfo_t   *info;
 
+    if (!(MAPINFO = (W_CheckNumForName(MAPINFO_SCRIPT_NAME) >= 0)))
+        return;
+
+    info = mapinfo;
+
+    info->author[0] = '\0';
+    info->music = 0;
+    info->name[0] = '\0';
+    info->next = 0;
+    info->par = 0;
+    info->secretnext = 0;
+    info->sky1texture = 0;
+    info->sky1scrolldelta = 0;
+    info->titlepatch = 0;
+
+    SC_Open(MAPINFO_SCRIPT_NAME);
+    while (SC_GetString())
+    {
+        if (!SC_Compare("MAP"))
+            continue;
+        SC_MustGetString();
+        map = strtol(sc_String, NULL, 0);
+        if (map < 1 || map > 99)
+        {
+            char        *mapnum = uppercase(sc_String);
+
+            if (gamemode == commercial)
+            {
+                episode = 1;
+                sscanf(mapnum, "MAP0%1i", &map);
+                if (!map)
+                    sscanf(mapnum, "MAP%2i", &map);
+            }
+            else
+            {
+                sscanf(mapnum, "E%1iM%1i", &episode, &map);
+                map += (episode - 1) * 10;
+            }
+        }
+        if (map < 1 || map > 99)
+            SC_ScriptError(NULL);
+
+        info = &mapinfo[map];
+
+        // Copy defaults to current map definition
+        memcpy(info, &mapinfo[0], sizeof(*info));
+
+        // Map name must follow the number
+        SC_MustGetString();
+        if (!SC_Compare("LOOKUP"))
+            M_StringCopy(info->name, sc_String, sizeof(info->name));
+
+        // Process optional tokens
+        while (SC_GetString())
+        {
+            if (SC_Compare("MAP"))
+            {
+                SC_UnGet();
+                break;
+            }
+            if ((mcmdvalue = SC_MatchString(mapcmdnames)) >= 0)
+            {
+                switch (mapcmdids[mcmdvalue])
+                {
+                    case MCMD_AUTHOR:
+                        SC_MustGetString();
+                        M_StringCopy(info->author, sc_String, sizeof(info->author));
+                        break;
+
+                    case MCMD_MUSIC:
+                        SC_MustGetString();
+                        info->music = W_GetNumForName(sc_String);
+                        break;
+
+                    case MCMD_NEXT:
+                    {
+                        int     nextepisode = 0;
+                        int     nextmap = 0;
+
+                        SC_MustGetString();
+                        nextmap = strtol(sc_String, (char **)NULL, 10);
+                        if (nextmap < 1 || nextmap > 99)
+                        {
+                            char        *mapnum = uppercase(sc_String);
+
+                            if (gamemode == commercial)
+                            {
+                                nextepisode = 1;
+                                sscanf(mapnum, "MAP0%1i", &nextmap);
+                                if (!nextmap)
+                                    sscanf(mapnum, "MAP%2i", &nextmap);
+                            }
+                            else
+                                sscanf(mapnum, "E%1iM%1i", &nextepisode, &nextmap);
+                        }
+                        info->next = (nextepisode - 1) * 10 + nextmap;
+                        break;
+                    }
+
+                    case MCMD_PAR:
+                        SC_MustGetNumber();
+                        info->par = sc_Number;
+                        break;
+
+                    case MCMD_SECRETNEXT:
+                    {
+                        int     nextepisode = 0;
+                        int     nextmap = 0;
+
+                        SC_MustGetString();
+                        nextmap = strtol(sc_String, (char **)NULL, 10);
+                        if (nextmap < 1 || nextmap > 99)
+                        {
+                            char        *mapnum = uppercase(sc_String);
+
+                            if (gamemode == commercial)
+                            {
+                                nextepisode = 1;
+                                sscanf(mapnum, "MAP0%1i", &nextmap);
+                                if (!nextmap)
+                                    sscanf(mapnum, "MAP%2i", &nextmap);
+                            }
+                            else
+                                sscanf(mapnum, "E%1iM%1i", &nextepisode, &nextmap);
+                        }
+                        info->secretnext = (nextepisode - 1) * 10 + nextmap;
+                        break;
+                    }
+
+                    case MCMD_SKY1:
+                        SC_MustGetString();
+                        info->sky1texture = R_TextureNumForName(sc_String);
+                        SC_MustGetNumber();
+                        info->sky1scrolldelta = sc_Number << 8;
+                        break;
+
+                    case MCMD_TITLEPATCH:
+                        SC_MustGetString();
+                        info->titlepatch = W_GetNumForName(sc_String);
+                        break;
+                }
+            }
+        }
+        mapmax = MAX(map, mapmax);
+    }
+    SC_Close();
+    mapcount = mapmax;
+}
+
+static int QualifyMap(int map)
+{
+    return (map < 1 || map > mapcount ? 0 : map);
+}
+
+char *P_GetMapAuthor(int map)
+{
+    return (MAPINFO ? mapinfo[QualifyMap(map)].author : ""); 
+}
+
+int P_GetMapMusic(int map)
+{
+    return (MAPINFO ? mapinfo[QualifyMap(map)].music : 0); 
+}
+
+//
+// [nitr8] UNUSED
+//
+/*
+char *P_GetMapName(int map)
+{
+    return (MAPINFO ? mapinfo[QualifyMap(map)].name : ""); 
+}
+*/
+
+int P_GetMapNext(int map)
+{
+    return (MAPINFO ? mapinfo[QualifyMap(map)].next : 0); 
+}
+
+int P_GetMapPar(int map)
+{
+    return (MAPINFO ? mapinfo[QualifyMap(map)].par : 0); 
+}
+
+int P_GetMapSecretNext(int map)
+{
+    return (MAPINFO ? mapinfo[QualifyMap(map)].secretnext : 0); 
+}
+
+int P_GetMapSky1Texture(int map)
+{
+    return (MAPINFO ? mapinfo[QualifyMap(map)].sky1texture : 0); 
+}
+
+int P_GetMapSky1ScrollDelta(int map)
+{
+    return (MAPINFO ? mapinfo[QualifyMap(map)].sky1scrolldelta : 0); 
+}
+
+int P_GetMapTitlePatch(int map)
+{
+    return (MAPINFO ? mapinfo[QualifyMap(map)].titlepatch : 0); 
+}
 
 //
 // P_Init
 //
 void P_Init (void)
 {
+    InitMapInfo();
     P_InitSwitchList ();
     P_InitPicAnims ();
     R_InitSprites (sprnames);

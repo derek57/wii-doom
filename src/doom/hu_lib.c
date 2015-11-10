@@ -55,9 +55,14 @@
 // dboolean : whether the screen is always erased
 #define noterased viewwindowx
 
+//
+// [nitr8] UNUSED
+//
+/*
 void HUlib_init(void)
 {
 }
+*/
 
 void HUlib_clearTextLine(hu_textline_t* t)
 {
@@ -99,6 +104,10 @@ HUlib_addCharToTextLine
 
 }
 
+//
+// nitr8 [UNUSED]
+//
+/*
 dboolean HUlib_delCharFromTextLine(hu_textline_t* t)
 {
 
@@ -111,6 +120,7 @@ dboolean HUlib_delCharFromTextLine(hu_textline_t* t)
     }
 
 }
+*/
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wchar-subscripts"

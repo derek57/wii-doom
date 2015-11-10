@@ -33,7 +33,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "../d_mode.h"
 #include "../doomtype.h"
 #include "../i_timer.h"
 
@@ -257,6 +256,8 @@
 // Deaf monsters/do not react to sound.
 #define        MTF_AMBUSH              8
 
+#define TEXTSPEED                      3
+#define TEXTWAIT                       250
 
 typedef enum 
 {
@@ -441,6 +442,62 @@ typedef enum
     
 } powertype_t;
 
+// The "mission" controls what game we are playing.
+
+typedef enum
+{
+    doom,            // Doom 1
+    doom2,           // Doom 2
+    pack_tnt,        // Final Doom: TNT: Evilution
+    pack_plut,       // Final Doom: The Plutonia Experiment
+    pack_chex,       // Chex Quest (modded doom)
+    pack_hacx,       // Hacx (modded doom2)
+    pack_nerve,      // Doom 2: No Rest For The Living
+    pack_master,     // Master Levels for Doom 2
+
+    none
+} GameMission_t;
+
+// The "mode" allows more accurate specification of the game mode we are
+// in: eg. shareware vs. registered.  So doom1.wad and doom.wad are the
+// same mission, but a different mode.
+
+typedef enum
+{
+    shareware,       // Doom/Heretic shareware
+    registered,      // Doom/Heretic registered
+    commercial,      // Doom II/Hexen
+    retail,          // Ultimate Doom
+    indetermined     // Unknown.
+} GameMode_t;
+
+// What version are we emulating?
+
+typedef enum
+{
+    exe_doom_1_2,    // Doom 1.2: shareware and registered
+    exe_doom_1_666,  // Doom 1.666: for shareware, registered and commercial
+    exe_doom_1_7,    // Doom 1.7/1.7a: "
+    exe_doom_1_8,    // Doom 1.8: "
+    exe_doom_1_9,    // Doom 1.9: "
+    exe_hacx,        // Hacx
+    exe_ultimate,    // Ultimate Doom (retail)
+    exe_final,       // Final Doom
+    exe_final2,      // Final Doom (alternate exe)
+    exe_chex         // Chex Quest executable (based on Final Doom)
+} GameVersion_t;
+
+// Skill level.
+
+typedef enum
+{
+    sk_noitems = -1,        // the "-skill 0" hack
+    sk_baby = 0,
+    sk_easy,
+    sk_medium,
+    sk_hard,
+    sk_nightmare
+} skill_t;
 
 
 //

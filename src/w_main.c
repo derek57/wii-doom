@@ -264,17 +264,17 @@ dboolean W_ParseCommandLine(void)
 #endif
 
 // Lump names that are unique to particular game types. This lets us check
-// the user is not trying to play with the wrong executable, eg.
-// chocolate-doom -iwad hexen.wad.
+// the user is not trying to play with the wrong executable
+//
+// [nitr8] UNUSED
+//
+/*
 static const struct
 {
     GameMission_t mission;
     char *lumpname;
 } unique_lumps[] = {
-    { doom,    "POSSA1" },
-    { heretic, "IMPXA1" },
-    { hexen,   "ETTNA1" },
-    { strife,  "AGRDA1" },
+    { doom,    "POSSA1" }
 };
 
 void W_CheckCorrectIWAD(GameMission_t mission)
@@ -303,4 +303,5 @@ void W_CheckCorrectIWAD(GameMission_t mission)
         }
     }
 }
+*/
 

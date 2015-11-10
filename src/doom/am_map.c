@@ -174,11 +174,15 @@ typedef struct
     mpoint_t a, b;
 } mline_t;
 
+//
+// [nitr8] UNUSED
+//
+/*
 typedef struct
 {
     fixed_t slp, islp;
 } islope_t;
-
+*/
 
 
 //
@@ -349,7 +353,9 @@ extern int         screenSize;
 // Calculates the slope and slope according to the x-axis of a line
 // segment in map coordinates (with the upright y-axis n' all) so
 // that it can be used with the brain-dead drawing stuff.
-
+//
+// [nitr8] UNUSED
+/*
 void
 AM_getIslope
 ( mline_t*        ml,
@@ -365,6 +371,7 @@ AM_getIslope
     else is->slp = FixedDiv(dy, dx);
 
 }
+*/
 
 //
 //
@@ -637,7 +644,7 @@ void AM_Start (void)
 {
     // FOR PSP (CONDITION):
     // DON'T AUTO-ACTIVATE THE AUTOMAP...
-#ifdef WII
+#ifdef WII							// FIXME: I DON'T LIKE THIS... :-/
     if(players[consoleplayer].pendingweapon != wp_chainsaw)
 #endif
     {
@@ -962,6 +969,9 @@ void AM_doFollowPlayer(void)
 //
 //
 //
+//
+// [nitr8] UNUSED
+/*
 void AM_updateLightLev(void)
 {
     static int nexttic = 0;
@@ -979,7 +989,7 @@ void AM_updateLightLev(void)
     }
 
 }
-
+*/
 
 //
 // Updates on Game Tick

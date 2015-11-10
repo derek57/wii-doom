@@ -340,9 +340,12 @@ void M_BindBaseControls(void)
 // Apply custom patches to the default values depending on the
 // platform we are running on.
 //
-
+// [nitr8] UNUSED
+//
+/*
 void M_ApplyPlatformDefaults(void)
 {
     // no-op. Add your platform-specific patches here.
 }
+*/
 

@@ -98,14 +98,14 @@ PROGRAMS = $(execgames_PROGRAMS)
 am__chocolate-doom_SOURCES_DIST = i_main.c i_system.c i_system.h \
 	m_argv.c m_argv.h m_misc.c m_misc.h c_io.c c_io.h d_event.c \
 	d_event.h doomkeys.h doomfeatures.h doomtype.h d_iwad.c \
-	d_iwad.h d_loop.c d_loop.h d_mode.c d_mode.h d_ticcmd.h \
+	d_iwad.h d_loop.c d_loop.h d_ticcmd.h \
 	d_deh.c d_deh.h i_glscale.c i_glscale.h i_joystick.c \
         i_joystick.h i_scale.c i_scale.h i_swap.h i_sound.c i_sound.h \
         i_timer.c i_timer.h i_tinttab.c i_tinttab.h i_video.c \
         i_video.h m_bbox.c m_bbox.h m_cheat.c m_cheat.h m_config.c m_config.h \
         m_controls.c m_controls.h m_fixed.c m_fixed.h sha1.c sha1.h \
         memio.c memio.h tables.c tables.h v_misc.h v_trans.c v_trans.h \
-        v_video.c v_video.h v_patch.h w_checksum.c w_checksum.h \
+        v_video.c v_video.h v_patch.h \
         w_main.c w_main.h w_wad.c w_wad.h w_file.c w_file.h \
         w_file_stdc.c z_zone.c z_zone.h w_merge.c w_merge.h gusconf.c \
         gusconf.h i_pcsound.c i_sdlsound.c i_sdlmusic.c i_oplmusic.c \
@@ -113,13 +113,13 @@ am__chocolate-doom_SOURCES_DIST = i_main.c i_system.c i_system.h \
 am__objects_1 = i_main.$(OBJEXT) i_system.$(OBJEXT) m_argv.$(OBJEXT) \
 	m_misc.$(OBJEXT)
 am__objects_2 = c_io.$(OBJEXT) d_event.$(OBJEXT) d_iwad.$(OBJEXT) \
-	d_loop.$(OBJEXT) d_mode.$(OBJEXT) d_deh.$(OBJEXT) \
+	d_loop.$(OBJEXT) d_deh.$(OBJEXT) \
         i_glscale.$(OBJEXT) i_joystick.$(OBJEXT) i_scale.$(OBJEXT) \
         i_sound.$(OBJEXT) i_timer.$(OBJEXT) i_tinttab.$(OBJEXT) \
         i_video.$(OBJEXT) m_bbox.$(OBJEXT) m_cheat.$(OBJEXT) m_config.$(OBJEXT) \
         m_controls.$(OBJEXT) m_fixed.$(OBJEXT) sha1.$(OBJEXT) \
         memio.$(OBJEXT) tables.$(OBJEXT) v_trans.$(OBJEXT) \
-        v_video.$(OBJEXT) w_checksum.$(OBJEXT) w_main.$(OBJEXT) \
+        v_video.$(OBJEXT) w_main.$(OBJEXT) \
         w_wad.$(OBJEXT) w_file.$(OBJEXT) w_file_stdc.$(OBJEXT) \
         z_zone.$(OBJEXT)
 am__objects_3 = w_merge.$(OBJEXT)
@@ -292,7 +292,7 @@ INSTALL_SCRIPT = ${INSTALL}
 INSTALL_STRIP_PROGRAM = $(install_sh) -c -s
 LDFLAGS =  -L/usr/local/lib -Wl,-rpath,/usr/local/lib -lSDL2 
 LIBOBJS = 
-LIBS = -lm -lpng -lz 
+LIBS = -lm -lpng -lz -lsamplerate
 LTLIBOBJS = 
 MAKEINFO = ${SHELL} /home/user/TEST/chocolate-doom/autotools/missing makeinfo
 MKDIR_P = /bin/mkdir -p
@@ -394,7 +394,6 @@ d_event.c            d_event.h             \
                      doomtype.h            \
 d_iwad.c             d_iwad.h              \
 d_loop.c             d_loop.h              \
-d_mode.c             d_mode.h              \
                      d_ticcmd.h            \
 d_deh.c              d_deh.h               \
 i_glscale.c          i_glscale.h           \
@@ -417,7 +416,6 @@ tables.c             tables.h              \
 v_trans.c            v_trans.h             \
 v_video.c            v_video.h             \
                      v_patch.h             \
-w_checksum.c         w_checksum.h          \
 w_main.c             w_main.h              \
 w_wad.c              w_wad.h               \
 w_file.c             w_file.h              \
@@ -552,7 +550,6 @@ include ./$(DEPDIR)/c_io.Po
 include ./$(DEPDIR)/d_event.Po
 include ./$(DEPDIR)/d_iwad.Po
 include ./$(DEPDIR)/d_loop.Po
-include ./$(DEPDIR)/d_mode.Po
 #include ./$(DEPDIR)/d_deh.Po
 include ./$(DEPDIR)/gusconf.Po
 include ./$(DEPDIR)/i_glscale.Po
@@ -582,7 +579,6 @@ include ./$(DEPDIR)/sha1.Po
 include ./$(DEPDIR)/tables.Po
 include ./$(DEPDIR)/v_trans.Po
 include ./$(DEPDIR)/v_video.Po
-include ./$(DEPDIR)/w_checksum.Po
 include ./$(DEPDIR)/w_file.Po
 include ./$(DEPDIR)/w_file_stdc.Po
 include ./$(DEPDIR)/w_main.Po

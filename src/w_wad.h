@@ -23,8 +23,8 @@
 
 #include <stdio.h>
 
+#include "doom/doomdef.h"
 #include "doomtype.h"
-#include "d_mode.h"
 #include "w_file.h"
 
 

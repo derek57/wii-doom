@@ -42,12 +42,6 @@
 //#define CENTERY                        (SCREENHEIGHT/2)
 
 
-// haleyjd 08/28/10: implemented for Strife support
-// haleyjd 08/28/10: Patch clipping callback, implemented to support Choco
-// Strife.
-typedef dboolean (*vpatchclipfunc_t)(patch_t *, int, int);
-
-
 extern byte *xlatab;
 extern byte *tinttable;
 extern byte *dp_translation;

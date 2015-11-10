@@ -58,7 +58,6 @@
 #include "../i_video.h"
 #include "../m_misc.h"
 #include "../v_trans.h"
-#include "../w_checksum.h"
 #include "../w_wad.h"
 #else
 #include "i_system.h"
@@ -67,7 +66,6 @@
 #include "m_argv.h"
 #include "m_misc.h"
 #include "v_trans.h"
-#include "w_checksum.h"
 #include "w_wad.h"
 #endif
 

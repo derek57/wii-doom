@@ -43,12 +43,7 @@ static const iwad_t iwads[] =
     { "hacx.wad",     pack_hacx, commercial, "Hacx" },
     { "freedm.wad",   doom2,     commercial, "FreeDM" },
     { "freedoom2.wad", doom2,    commercial, "Freedoom: Phase 2" },
-    { "freedoom1.wad", doom,     retail,     "Freedoom: Phase 1" },
-    { "heretic.wad",  heretic,   retail,     "Heretic" },
-    { "heretic1.wad", heretic,   shareware,  "Heretic Shareware" },
-    { "hexen.wad",    hexen,     commercial, "Hexen" },
-    //{ "strife0.wad",  strife,    commercial, "Strife" }, // haleyjd: STRIFE-FIXME
-    { "strife1.wad",  strife,    commercial, "Strife" },
+    { "freedoom1.wad", doom,     retail,     "Freedoom: Phase 1" }
 };
 
 // Array of locations to search for IWAD files
@@ -208,17 +203,10 @@ static char *steam_install_subdirs[] =
     "steamapps\\common\\doom 2\\base",
     "steamapps\\common\\final doom\\base",
     "steamapps\\common\\ultimate doom\\base",
-    "steamapps\\common\\heretic shadow of the serpent riders\\base",
-    "steamapps\\common\\hexen\\base",
-    "steamapps\\common\\hexen deathkings of the dark citadel\\base",
 
     // From Doom 3: BFG Edition:
 
     "steamapps\\common\\DOOM 3 BFG Edition\\base\\wads",
-
-    // From Strife: Veteran Edition:
-
-    "steamapps\\common\\Strife",
 };
 
 #define STEAM_BFG_GUS_PATCHES \
@@ -405,14 +393,6 @@ static void CheckDOSDefaults(void)
     AddIWADDir("\\doom");               // Shareware / Registered Doom
     AddIWADDir("\\dooms");              // Shareware versions
     AddIWADDir("\\doomsw");
-
-    AddIWADDir("\\heretic");            // Heretic
-    AddIWADDir("\\hrtic_se");           // Heretic Shareware from Quake disc
-
-    AddIWADDir("\\hexen");              // Hexen
-    AddIWADDir("\\hexendk");            // Hexen Deathkings of the Dark Citadel
-
-    AddIWADDir("\\strife");             // Strife
 }
 
 #endif
@@ -815,8 +795,12 @@ char *D_FindIWAD(int mask, GameMission_t *mission)
 }
 #endif
 
+//
 // Find all IWADs in the IWAD search path matching the given mask.
-
+//
+// [nitr8] UNUSED
+//
+/*
 const iwad_t **D_FindAllIWADs(int mask)
 {
     const iwad_t **result;
@@ -851,6 +835,7 @@ const iwad_t **D_FindAllIWADs(int mask)
 
     return result;
 }
+*/
 
 //
 // Get the IWAD name used for savegames.
@@ -880,6 +865,10 @@ char *D_SaveGameIWADName(GameMission_t gamemission)
     return "unknown.wad";
 }
 
+//
+// [nitr8] UNUSED
+//
+/*
 char *D_SuggestIWADName(GameMission_t mission, GameMode_t mode)
 {
     int i;
@@ -910,4 +899,5 @@ char *D_SuggestGameName(GameMission_t mission, GameMode_t mode)
 
     return "Unknown game?";
 }
+*/
 
