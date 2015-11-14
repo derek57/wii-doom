@@ -1571,7 +1571,7 @@ int Z_FreeMemory (void)
 }
 */
 
-void* Z_MallocAlign (int reqsize, int tag, void **user, int alignbits)
+void* Z_MallocAlign (int reqsize, int32_t tag, void **user, int alignbits)
 {
     memblock_t* newblock;
     void* basedata;

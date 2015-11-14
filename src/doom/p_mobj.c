@@ -768,8 +768,6 @@ void P_MobjThinker (mobj_t* mobj)
     
     // cycle through states,
     // calling action functions at transitions
-    // cycle through states,
-    // calling action functions at transitions
     if (mobj->tics != -1)
     {
 	mobj->tics--;

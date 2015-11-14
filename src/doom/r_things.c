@@ -942,6 +942,15 @@ void R_ProjectSprite(mobj_t *thing)
     vis->x1 = MAX(0, x1);
     vis->x2 = MIN(x2, viewwidth - 1);
 
+    // [crispy] flip death sprites and corpses randomly
+    // except for Cyberdemons and Barrels which are too asymmetrical
+    if (((thing->type != MT_CYBORG && thing->type != MT_BARREL &&
+        thing->flags & MF_CORPSE) || (thing->info->spawnstate == S_PLAY_DIE7 ||
+        thing->info->spawnstate == S_PLAY_XDIE9)) && thing->health & 1)
+    {
+        flip = !!d_flipcorpses;
+    }
+
     if (flip)
     {
         vis->startfrac = spritewidth[lump] - 1;
