@@ -1080,35 +1080,35 @@ void V_DrawPatchWithShadow(int x, int y, patch_t *patch, dboolean flag)
 {
     int         col = 0;
     byte        *desttop;
-    int         w = SHORT(patch->width) << 16;
-    fixed_t     DX = (SCREENWIDTH << 16) / ORIGWIDTH;
-    fixed_t     DXI = (ORIGWIDTH << 16) / SCREENWIDTH;
-    fixed_t     DY = (SCREENHEIGHT << 16) / ORIGHEIGHT;
-    fixed_t     DYI = (ORIGHEIGHT << 16) / SCREENHEIGHT;
+    int         w = SHORT(patch->width) << FRACBITS;
+    fixed_t     DX = (SCREENWIDTH << FRACBITS) / ORIGWIDTH;
+    fixed_t     DXI = (ORIGWIDTH << FRACBITS) / SCREENWIDTH;
+    fixed_t     DY = (SCREENHEIGHT << FRACBITS) / ORIGHEIGHT;
+    fixed_t     DYI = (ORIGHEIGHT << FRACBITS) / SCREENHEIGHT;
 
     y -= SHORT(patch->topoffset);
     x -= SHORT(patch->leftoffset);
 
-    desttop = dest_screen + ((y * DY) >> 16) * SCREENWIDTH + ((x * DX) >> 16);
+    desttop = dest_screen + ((y * DY) >> FRACBITS) * SCREENWIDTH + ((x * DX) >> FRACBITS);
 
     for (; col < w; col += DXI, desttop++)
     {
-        column_t        *column = (column_t *)((byte *)patch + LONG(patch->columnofs[col >> 16]));
+        column_t        *column = (column_t *)((byte *)patch + LONG(patch->columnofs[col >> FRACBITS]));
 
         // step through the posts in a column
         while (column->topdelta != 0xff)
         {
             byte        *source = (byte *)column + 3;
-            byte        *dest = desttop + ((column->topdelta * DY) >> 16) * SCREENWIDTH;
-            int         count = (column->length * DY) >> 16;
+            byte        *dest = desttop + ((column->topdelta * DY) >> FRACBITS) * SCREENWIDTH;
+            int         count = (column->length * DY) >> FRACBITS;
             int         srccol = 0;
 
             while (count--)
             {
-                int     height = (((y + column->topdelta + column->length) * DY) >> 16) - count;
+                int     height = (((y + column->topdelta + column->length) * DY) >> FRACBITS) - count;
 
                 if (height > 0)
-                    *dest = source[srccol >> 16];
+                    *dest = source[srccol >> FRACBITS];
                 dest += SCREENWIDTH;
                 if (height + 2 > 0)
                 {

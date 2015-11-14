@@ -2596,8 +2596,8 @@ void M_DrawLoad(void)
         dp_translation = crx[CRX_GOLD];
         string = "* INDICATES A SAVEGAME THAT WAS";
         string2 = "CREATED USING AN OPTIONAL PWAD!";
-        x = 160 - M_StringWidth(string) / 2;
-        x2 = 160 - M_StringWidth(string2) / 2;
+        x = ORIGWIDTH/2 - M_StringWidth(string) / 2;
+        x2 = ORIGWIDTH/2 - M_StringWidth(string2) / 2;
         M_WriteText(x, LoadDef.y + 78, string);
         M_WriteText(x2, LoadDef.y + 88, string2);
         V_ClearDPTranslation();
@@ -2688,8 +2688,8 @@ void M_DrawSave(void)
         dp_translation = crx[CRX_GOLD];
         string = "* INDICATES A SAVEGAME THAT WAS";
         string2 = "CREATED USING AN OPTIONAL PWAD!";
-        x = 160 - M_StringWidth(string) / 2;
-        x2 = 160 - M_StringWidth(string2) / 2;
+        x = ORIGWIDTH/2 - M_StringWidth(string) / 2;
+        x2 = ORIGWIDTH/2 - M_StringWidth(string2) / 2;
         M_WriteText(x, SaveDef.y + 78, string);
         M_WriteText(x2, SaveDef.y + 88, string2);
         V_ClearDPTranslation();
@@ -3093,7 +3093,7 @@ void M_DrawSound(void)
         {
             string = "YOU MUST QUIT AND RESTART TO TAKE EFFECT.";
         }
-        x = 160 - M_StringWidth(string) / 2;
+        x = ORIGWIDTH/2 - M_StringWidth(string) / 2;
         M_WriteText(x, GameDef2.y + 138, string);
         V_ClearDPTranslation();
     }
@@ -3890,7 +3890,7 @@ void M_DrawScreen(void)
         {
             string = "START / LOAD A NEW GAME TO TAKE EFFECT.";
         }
-        x = 160 - M_StringWidth(string) / 2;
+        x = ORIGWIDTH/2 - M_StringWidth(string) / 2;
         M_WriteText(x, ScreenDef.y + 105, string);
         V_ClearDPTranslation();
     }
@@ -4103,7 +4103,7 @@ void M_DrawGame(void)
         if((itemOn == 11 || itemOn == 12) && whichSkull == 1)
         {
             char *string = "YOU MUST START A NEW GAME TO TAKE EFFECT.";
-            int x = 160 - M_StringWidth(string) / 2;
+            int x = ORIGWIDTH/2 - M_StringWidth(string) / 2;
             dp_translation = crx[CRX_GOLD];
             M_WriteText(x, GameDef.y + 138, string);
             V_ClearDPTranslation();
@@ -4124,7 +4124,7 @@ void M_DrawGame(void)
         if((itemOn == 11 || itemOn == 12) && whichSkull == 1)
         {
             char *string = "YOU MUST START A NEW GAME TO TAKE EFFECT.";
-            int x = 160 - M_StringWidth(string) / 2;
+            int x = ORIGWIDTH/2 - M_StringWidth(string) / 2;
             dp_translation = crx[CRX_GOLD];
             M_WriteText(x, GameDef.y + 138, string);
             V_ClearDPTranslation();
@@ -4345,7 +4345,7 @@ void M_DrawGame2(void)
         {
             string = "YOU MUST QUIT AND RESTART TO TAKE EFFECT.";
         }
-        x = 160 - M_StringWidth(string) / 2;
+        x = ORIGWIDTH/2 - M_StringWidth(string) / 2;
         M_WriteText(x, GameDef2.y + 138, string);
         V_ClearDPTranslation();
     }
@@ -4571,7 +4571,7 @@ void M_DrawGame3(void)
         {
             string = "THIS OPTION IS NOT FOR CUSTOM PWAD FILES.";
         }
-        x = 160 - M_StringWidth(string) / 2;
+        x = ORIGWIDTH/2 - M_StringWidth(string) / 2;
         M_WriteText(x, GameDef3.y + 138, string);
         V_ClearDPTranslation();
     }
@@ -4778,7 +4778,7 @@ void M_DrawGame4(void)
         {
             string = "YOU MAY NEED TO RESTART THE MAP FOR THIS.";
         }
-        x = 160 - M_StringWidth(string) / 2;
+        x = ORIGWIDTH/2 - M_StringWidth(string) / 2;
         M_WriteText(x, GameDef3.y + 138, string);
         V_ClearDPTranslation();
     }
@@ -7093,7 +7093,7 @@ void M_Drawer (void)
 
         M_DarkBackground();
 
-        y = 100 - M_StringHeight(messageString) / 2;
+        y = ORIGHEIGHT/2 - M_StringHeight(messageString) / 2;
         while (messageString[start] != '\0')
         {
             int foundnewline = 0;
@@ -7114,7 +7114,7 @@ void M_Drawer (void)
                 start += strlen(string);
             }
 
-            x = 160 - M_StringWidth(string) / 2;
+            x = ORIGWIDTH/2 - M_StringWidth(string) / 2;
             M_WriteText(x, y, string);
             y += SHORT(hu_font[0]->height);
         }
@@ -7142,7 +7142,7 @@ void M_Drawer (void)
         currentMenu == &SoundDef && itemOn > 1 && itemOn < 5 && whichSkull == 1)
     {
         char *message_string = "YOU MUST QUIT AND RESTART TO TAKE EFFECT.";
-        int message_offset = 160 - M_StringWidth(message_string) / 2;
+        int message_offset = ORIGWIDTH/2 - M_StringWidth(message_string) / 2;
         dp_translation = crx[CRX_GOLD];
         M_WriteText(message_offset, 160, message_string);
         V_ClearDPTranslation();
@@ -7151,7 +7151,7 @@ void M_Drawer (void)
             currentMenu == &GameDef2 && itemOn == 6 && whichSkull == 1)
     {
         char *message_string = "NO BETA MODE FOR CHEX, HACX & FREEDOOM.";
-        int message_offset = 160 - M_StringWidth(message_string) / 2;
+        int message_offset = ORIGWIDTH/2 - M_StringWidth(message_string) / 2;
         dp_translation = crx[CRX_GOLD];
         M_WriteText(message_offset, 160, message_string);
         V_ClearDPTranslation();
@@ -7159,7 +7159,7 @@ void M_Drawer (void)
     else if(fsize == 12361532 && currentMenu == &GameDef3 && itemOn == 1 && whichSkull == 1)
     {
         char *message_string = "NO EXTRA BLOOD & GORE FOR CHEX QUEST.";
-        int message_offset = 160 - M_StringWidth(message_string) / 2;
+        int message_offset = ORIGWIDTH/2 - M_StringWidth(message_string) / 2;
         dp_translation = crx[CRX_GOLD];
         M_WriteText(message_offset, 160, message_string);
         V_ClearDPTranslation();
@@ -7167,7 +7167,7 @@ void M_Drawer (void)
     else if(fsize == 19321722 && currentMenu == &SoundDef && itemOn == 3 && whichSkull == 1)
     {
         char *message_string = "NO PC-SPEAKERS AVAILABLE FOR HACX";
-        int message_offset = 160 - M_StringWidth(message_string) / 2;
+        int message_offset = ORIGWIDTH/2 - M_StringWidth(message_string) / 2;
         dp_translation = crx[CRX_GOLD];
         M_WriteText(message_offset, 160, message_string);
         V_ClearDPTranslation();
@@ -8868,9 +8868,9 @@ void M_DrawControls(void)
         string = "IF THE BARS FOR WALKING, TURNING & STRAFING";
         string2 = "ARE AT THEIR HIGHEST LEVEL, IT MEANS THE SAME";
         string3 = "AS PLAYING THE GAME WHILE HOLDING DOWN [SHIFT]";
-        x = 160 - M_StringWidth(string) / 2;
-        x2 = 160 - M_StringWidth(string2) / 2;
-        x3 = 160 - M_StringWidth(string3) / 2;
+        x = ORIGWIDTH/2 - M_StringWidth(string) / 2;
+        x2 = ORIGWIDTH/2 - M_StringWidth(string2) / 2;
+        x3 = ORIGWIDTH/2 - M_StringWidth(string3) / 2;
         M_WriteText(x, ControlsDef.y + 78, string);
         M_WriteText(x2, ControlsDef.y + 88, string2);
         M_WriteText(x3, ControlsDef.y + 98, string3);

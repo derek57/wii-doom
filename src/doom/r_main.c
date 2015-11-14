@@ -826,7 +826,7 @@ void R_SetupFrame(player_t *player)
         int                     i;
 
         // killough 3/20/98: use fullcolormap
-        fixedcolormap = fullcolormap + player->fixedcolormap * 256 * sizeof(lighttable_t);
+        fixedcolormap = fullcolormap + player->fixedcolormap * 256 /* * sizeof(lighttable_t)*/;
 
         walllights = scalelightfixed;
 

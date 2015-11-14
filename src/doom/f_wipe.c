@@ -97,7 +97,7 @@ void wipe_shittyColMajorXform(short *array)
 
     short         *dest;
 
-    dest = (short *) Z_Malloc((SCREENWIDTH / 2) * SCREENHEIGHT * 2, PU_STATIC, 0);
+    dest = (short *) Z_Malloc((SCREENWIDTH / 2) * SCREENHEIGHT * sizeof(*dest), PU_STATIC, 0);
 
     for(y = 0; y < SCREENHEIGHT; y++)
     {
@@ -107,7 +107,7 @@ void wipe_shittyColMajorXform(short *array)
         }
     }
 
-    memcpy(array, dest, (SCREENWIDTH / 2) * SCREENHEIGHT * 2);
+    memcpy(array, dest, (SCREENWIDTH / 2) * SCREENHEIGHT * sizeof(*dest));
 
     Z_Free(dest);
 }

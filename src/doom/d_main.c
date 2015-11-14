@@ -383,15 +383,15 @@ void D_Display (void)
             R_RenderPlayerView (&players[consoleplayer]);
         if (automapactive)
             AM_Drawer ();
-        if (wipe || (scaledviewheight != (200 << hires) && fullscreen) ||
+        if (wipe || (scaledviewheight != (ORIGWIDTH << hires) && fullscreen) ||
                 disk_indicator == disk_dirty || (automapactive && screenSize < 8)) // HIRES
             redrawsbar = true;
         if (inhelpscreensstate && !inhelpscreens)
             redrawsbar = true;              // just put away the help screen
 
-        ST_Drawer (scaledviewheight == (200 << hires), redrawsbar );     // HIRES
+        ST_Drawer (scaledviewheight == (ORIGWIDTH << hires), redrawsbar );     // HIRES
 
-        fullscreen = scaledviewheight == (200 << hires); // CHANGED FOR HIRES
+        fullscreen = scaledviewheight == (ORIGWIDTH << hires); // CHANGED FOR HIRES
         break;
 
       case GS_INTERMISSION:

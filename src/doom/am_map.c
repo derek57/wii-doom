@@ -138,9 +138,8 @@
 #define F_PANINC         4
 
 // translates between frame-buffer and map distances
-// [crispy] fix int overflow that causes map and grid lines to disappear
-#define FTOM(x) (fixed_t)(((uint64_t)((x)<<16) * scale_ftom) >> FRACBITS)
-#define MTOF(x) (fixed_t)((((uint64_t)(x) * scale_mtof) >> FRACBITS)>>16)
+#define FTOM(x) FixedMul(((x)<<FRACBITS),scale_ftom)
+#define MTOF(x) (FixedMul((x),scale_mtof)>>FRACBITS)
 
 // translates between frame-buffer and map coordinates
 #define CXMTOF(x)        (f_x + MTOF((x)-m_x))

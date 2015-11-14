@@ -1307,7 +1307,7 @@ static void R_DrawPSprite(pspdef_t *psp, dboolean invisibility)
     flip = (dboolean)(sprframe->flip & 1);
 
     // calculate edges of the shape
-    tx = psp->sx - ORIGWIDTH / 2 * FRACUNIT - (state->dehacked ? spriteoffset[lump] :
+    tx = psp->sx - (ORIGWIDTH / 2) * FRACUNIT - (state->dehacked ? spriteoffset[lump] :
         newspriteoffset[lump]);
 //    x1 = (centerxfrac + FRACUNIT / 2 + FixedMul(tx, pspritexscale)) >> FRACBITS;
     x1 = (centerxfrac + FixedMul (tx,pspritescale) ) >>FRACBITS;

@@ -1172,12 +1172,12 @@ byte grays[256];
 
 void R_InitColormaps(void)
 {
-    dboolean keepgray = false;
-    dboolean    COLORMAP = (W_CheckMultipleLumps("COLORMAP") > 1);
+    dboolean   keepgray = false;
+    dboolean   COLORMAP = (W_CheckMultipleLumps("COLORMAP") > 1);
     int        i, j, k;
     byte       *palsrc, *palette, *playpal;
     char       c[3];
-    wad_file_t  *colormapwad;
+    wad_file_t *colormapwad;
 
     if (W_CheckNumForName("C_START") >= 0 && W_CheckNumForName("C_END") >= 0)
     {

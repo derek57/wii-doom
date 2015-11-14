@@ -413,7 +413,7 @@ dboolean P_CheckMissileRange (mobj_t* actor)
     if (!actor->info->meleestate)
         dist -= 128*FRACUNIT;        // no melee attack, so fire more
 
-    dist >>= 16;
+    dist >>= FRACBITS;
 
     if (actor->type == MT_VILE)
     {
