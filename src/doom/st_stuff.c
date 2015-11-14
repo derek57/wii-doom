@@ -1839,7 +1839,7 @@ void ST_Drawer (dboolean fullscreen, dboolean refresh)
     // If just after ST_Start(), refresh all
     if (st_firsttime || beta_style || (scaledviewheight == SCREENHEIGHT && viewactive))
     {
-        if(screenSize < 8)
+//        if(screenSize < 8)	// FIXME: automap has status bar shown ALWAYS
         {
             if(usergame)
                 ST_doRefresh();
@@ -1858,9 +1858,9 @@ typedef void (*load_callback_t)(char *lumpname, patch_t **variable);
 static void ST_loadUnloadGraphics(load_callback_t callback)
 {
 
-    int                i;
-    int                j;
-    int                facenum;
+    int         i;
+    int         j;
+    int         facenum;
     
     char        namebuf[9];
 

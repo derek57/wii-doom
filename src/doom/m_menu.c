@@ -7052,7 +7052,7 @@ void M_Drawer (void)
 
     // DISPLAYS BLINKING "BETA" MESSAGE
     if ((fsize == 4261144 || fsize == 4271324 || fsize == 4211660 || beta_style) &&
-            !(menuactive && leveltime & 16) && gamestate == GS_LEVEL &&
+            (!menuactive && (leveltime & 16)) && gamestate == GS_LEVEL &&
             consoleheight == 0)
     {
         M_WriteText(140, 12, "BETA");
@@ -8802,7 +8802,13 @@ void M_DrawControls(void)
         V_DrawPatchWithShadow(48, 15, W_CacheLumpName("M_CTLSET",
                                                PU_CACHE), false);
 #ifndef WII
+    if(itemOn == 5)
+        dp_translation = crx[CRX_GOLD];
+    else
+        dp_translation = crx[CRX_RED];
+
     M_WriteText(ControlsDef.x, ControlsDef.y + 48, "MOUSE SENSITIVITY");
+    V_ClearDPTranslation();
 
     M_DrawThermoSmall(ControlsDef.x + 207,ControlsDef.y + LINEHEIGHT_SMALL*(mousesensibility+1),
                  10,mouseSensitivity);
@@ -8842,7 +8848,7 @@ void M_DrawControls(void)
     M_DrawThermoSmall(ControlsDef.x + 199,ControlsDef.y + LINEHEIGHT_SMALL*(mousespeed+1),
                  11,mspeed);
 
-    if(itemOn == 5)
+    if(itemOn == 6)
         dp_translation = crx[CRX_GOLD];
     else
         dp_translation = crx[CRX_GRAY];

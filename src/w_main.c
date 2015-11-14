@@ -36,6 +36,11 @@
 #include "z_zone.h"
 
 
+extern dboolean     version13;
+
+extern int          dont_show_adding_of_resource_wad;
+
+
 // Parse the command line, merging WAD files that are sppecified.
 // Returns true if at least one file was added.
 
@@ -60,7 +65,12 @@ dboolean W_ParseCommandLine(void)
 
     p = M_CheckParmWithArgs("-merge", 1);
 
-    if (p > 0)
+    if (p > 0 || gamemode == shareware
+#ifdef WII
+        || load_extra_wad == 1
+#endif
+        || version13 == true
+        )
     {
         for (p = p + 1; p<myargc && myargv[p][0] != '-'; ++p)
         {
@@ -75,7 +85,8 @@ dboolean W_ParseCommandLine(void)
                 if (D_IsDehFile(filename))
                     LoadDehFile(filename);
 
-                printf("         merging %s\n", filename);
+                if(dont_show_adding_of_resource_wad == 0)
+                    printf("         merging %s\n", filename);
             }
 
             if (!strcasecmp(filename, "nerve.wad"))

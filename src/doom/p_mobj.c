@@ -133,7 +133,7 @@ dboolean P_SetMobjState(mobj_t *mobj, statenum_t state)
     statenum_t          *seenstate = seenstate_tab;             // pointer to table
     static int          recursion;                              // detects recursion
     statenum_t          i = state;                              // initial state
-    dboolean             ret = true;                             // return value
+    dboolean            ret = true;                             // return value
     statenum_t          tempstate[NUMSTATES];                   // for use with recursion
     mobj_t              *shadow = mobj->shadow;
 
@@ -167,7 +167,7 @@ dboolean P_SetMobjState(mobj_t *mobj, statenum_t state)
 
         state = st->nextstate;
     } while (!mobj->tics && !seenstate[state]);                 // killough 4/9/98
-                                
+
     if (!--recursion)
         for (; (state = seenstate[i]); i = state - 1)
             seenstate[i] = 0;                           // killough 4/9/98: erase memory of states
@@ -768,14 +768,19 @@ void P_MobjThinker (mobj_t* mobj)
     
     // cycle through states,
     // calling action functions at transitions
+    // cycle through states,
+    // calling action functions at transitions
     if (mobj->tics != -1)
     {
-        // you can cycle through multiple states in a tic
-        if (!--mobj->tics)
-            P_SetMobjState(mobj, mobj->state->nextstate);
-                
+	mobj->tics--;
+
         if (beta_style && mobj->state->nextstate == S_ARM1)
             mobj->state->nextstate = S_ARM1A;
+
+	// you can cycle through multiple states in a tic
+	if (!mobj->tics)
+	    if (!P_SetMobjState (mobj, mobj->state->nextstate) )
+		return;		// freed itself
     }
     else
     {

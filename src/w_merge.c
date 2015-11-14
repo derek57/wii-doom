@@ -609,7 +609,7 @@ dboolean W_MergeFile(char *filename, dboolean automatic)
 
     if (W_AddFile(filename, automatic) == NULL)
         return false;
-
+/*
     if(devparm)
     {
         if(gamemode == shareware ||
@@ -623,7 +623,7 @@ dboolean W_MergeFile(char *filename, dboolean automatic)
                 printf("         merging %s\n", filename);
         }
     }
-
+*/
     // iwad is at the start, pwad was appended to the end
 
     iwad.lumps = lumpinfo;

@@ -1290,6 +1290,25 @@ int R_FlatNumForName(char *name)
 {
     int  i;
 
+    if(beta_style && gamemode != shareware && gamemode != commercial)
+    {
+        if (name[0] == 'F' &&
+            name[1] == 'L' &&
+            name[2] == 'A' &&
+            name[3] == 'T' &&
+            name[4] == '2' &&
+            name[5] == '2')
+            name = "BFLAT22";
+
+        else if (name[0] == 'D' &&
+            name[1] == 'E' &&
+            name[2] == 'M' &&
+            name[3] == '1' &&
+            name[4] == '_' &&
+            name[5] == '5')
+            name = "BDEM1_5";
+    }
+
     i = W_RangeCheckNumForName(firstflat, lastflat, name);
 
     if (i == -1)
@@ -1361,7 +1380,136 @@ int R_CheckTextureNumForName(char *name)
 //
 int R_TextureNumForName(char *name)
 {
-    int i = R_CheckTextureNumForName(name);
+    int i;
+
+    if(beta_style && gamemode != shareware && gamemode != commercial)
+    {
+        if (name[0] == 'A' &&
+            name[1] == 'A' &&
+            name[2] == 'S' &&
+            name[3] == 'T' &&
+            name[4] == 'I' &&
+            name[5] == 'N' &&
+            name[6] == 'K' &&
+            name[7] == 'Y')
+            i = R_CheckTextureNumForName ("BASTINKY");
+
+        else if (name[0] == 'C' &&
+            name[1] == 'O' &&
+            name[2] == 'M' &&
+            name[3] == 'P' &&
+            name[4] == 'U' &&
+            name[5] == 'T' &&
+            name[6] == 'E' &&
+            name[7] == '2')
+            i = R_CheckTextureNumForName ("BCMPUTE2");
+
+        else if (name[0] == 'B' &&
+            name[1] == 'I' &&
+            name[2] == 'G' &&
+            name[3] == 'D' &&
+            name[4] == 'O' &&
+            name[5] == 'O' &&
+            name[6] == 'R' &&
+            name[7] == '2')
+            i = R_CheckTextureNumForName ("BDOOR102");
+
+        else if (name[0] == 'M' &&
+            name[1] == 'A' &&
+            name[2] == 'R' &&
+            name[3] == 'B' &&
+            name[4] == 'F' &&
+            name[5] == 'A' &&
+            name[6] == 'C' &&
+            name[7] == 'E')
+            i = R_CheckTextureNumForName ("BMWALL41");
+
+        else if (name[0] == 'S' &&
+            name[1] == 'K' &&
+            name[2] == 'Y' &&
+            name[3] == '1')
+            i = R_CheckTextureNumForName ("BSKY1");
+
+        else if (name[0] == 'S' &&
+            name[1] == 'T' &&
+            name[2] == 'E' &&
+            name[3] == 'P' &&
+            name[4] == '4')
+            i = R_CheckTextureNumForName ("BSTEP4");
+
+        else if (name[0] == 'S' &&
+            name[1] == 'W' &&
+            name[2] == '1' &&
+            name[3] == 'D' &&
+            name[4] == 'I' &&
+            name[5] == 'R' &&
+            name[6] == 'T')
+            i = R_CheckTextureNumForName ("BSW1DIRT");
+
+        else if (name[0] == 'S' &&
+            name[1] == 'W' &&
+            name[2] == '2' &&
+            name[3] == 'D' &&
+            name[4] == 'I' &&
+            name[5] == 'R' &&
+            name[6] == 'T')
+            i = R_CheckTextureNumForName ("BSW2DIRT");
+
+        else if (name[0] == 'W' &&
+            name[1] == 'A' &&
+            name[2] == 'L' &&
+            name[3] == 'L' &&
+            name[4] == '5' &&
+            name[5] == '7' &&
+            name[6] == '_' &&
+            name[7] == '2')
+            i = R_CheckTextureNumForName ("BWALL572");
+
+        else if (name[0] == 'W' &&
+            name[1] == 'A' &&
+            name[2] == 'L' &&
+            name[3] == 'L' &&
+            name[4] == '5' &&
+            name[5] == '7' &&
+            name[6] == '_' &&
+            name[7] == '3')
+            i = R_CheckTextureNumForName ("BWALL573");
+
+        else if (name[0] == 'W' &&
+            name[1] == 'A' &&
+            name[2] == 'L' &&
+            name[3] == 'L' &&
+            name[4] == '5' &&
+            name[5] == '7' &&
+            name[6] == '_' &&
+            name[7] == '4')
+            i = R_CheckTextureNumForName ("BWALL574");
+
+        else if (name[0] == 'W' &&
+            name[1] == 'A' &&
+            name[2] == 'L' &&
+            name[3] == 'L' &&
+            name[4] == '6' &&
+            name[5] == '3' &&
+            name[6] == '_' &&
+            name[7] == '1')
+            i = R_CheckTextureNumForName ("BWALL631");
+
+        else if (name[0] == 'W' &&
+            name[1] == 'A' &&
+            name[2] == 'L' &&
+            name[3] == 'L' &&
+            name[4] == '6' &&
+            name[5] == '3' &&
+            name[6] == '_' &&
+            name[7] == '2')
+            i = R_CheckTextureNumForName ("BWALL632");
+
+        else
+            i = R_CheckTextureNumForName (name);
+    }
+    else
+        i = R_CheckTextureNumForName (name);
 
     if (i == -1)
     {

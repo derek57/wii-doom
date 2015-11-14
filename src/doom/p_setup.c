@@ -1145,7 +1145,7 @@ static void P_LoadLineDefs(int lump)
         ld->special = SHORT(mld->special);
 
 	// [crispy] warn about unknown linedef types
-	if ((unsigned short) ld->special >= BOOMLINESPECIALS)
+	if ((unsigned short) ld->special == 270 || (unsigned short) ld->special > 272)
 	{
 	    C_Printf(CR_RED, " P_LoadLineDefs: Unknown special %d at line %d\n", ld->special, i);
 	    warn++;

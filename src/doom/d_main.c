@@ -2440,18 +2440,7 @@ void D_DoomMain (void)
     modifiedgame |= W_ParseCommandLine(); // [crispy] OR'ed
 #endif
 
-#ifdef WII
-    if(usb)
-        W_MergeFile("usb:/apps/wiidoom/pspdoom.wad", true);
-    else if(sd)
-        W_MergeFile("sd:/apps/wiidoom/pspdoom.wad", true);
-#else
-    W_MergeFile("pspdoom.wad", true);
-#endif
-
-    C_Init();
-
-    if(beta_style && gamemode != shareware && gamemode != commercial)
+    if(beta_style /*&& gamemode != shareware && gamemode != commercial*/)
     {
         W_CheckSize(5);
 
@@ -2469,6 +2458,17 @@ void D_DoomMain (void)
         else
             print_resource_pwad2_error = true;
     }
+
+#ifdef WII
+    if(usb)
+        W_MergeFile("usb:/apps/wiidoom/pspdoom.wad", true);
+    else if(sd)
+        W_MergeFile("sd:/apps/wiidoom/pspdoom.wad", true);
+#else
+    W_MergeFile("pspdoom.wad", true);
+#endif
+
+    C_Init();
 
     if(print_resource_pwad2_error)
     {
