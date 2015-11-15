@@ -193,25 +193,25 @@ char *          nervewadfile = NULL;
 
 char            *pagename;
 
-dboolean         wipe;
-dboolean         done;
-dboolean         nomonsters;     // checkparm of -nomonsters
-dboolean         start_respawnparm;
-dboolean         start_fastparm;
-dboolean         autostart;
-dboolean         advancedemo;
+dboolean        wipe;
+dboolean        done;
+dboolean        nomonsters;     // checkparm of -nomonsters
+dboolean        start_respawnparm;
+dboolean        start_fastparm;
+dboolean        autostart;
+dboolean        advancedemo;
 
 // Store demo, do not accept any inputs
-dboolean         storedemo;
+dboolean        storedemo;
 
 // "BFG Edition" version of doom2.wad does not include TITLEPIC.
-dboolean         bfgedition;
+dboolean        bfgedition;
 
 // If true, the main game loop has started.
-dboolean         main_loop_started = false;
+dboolean        main_loop_started = false;
 
-dboolean         version13 = false;
-dboolean         realframe;
+dboolean        version13 = false;
+dboolean        realframe;
 
 int             wipe_type = 3;
 int             startepisode;
@@ -1680,7 +1680,8 @@ void D_DoomMain (void)
 #endif
 */
 #ifndef WII
-    devparm = M_CheckParm ("-devparm");
+    if(M_CheckParm ("-devparm"))
+        devparm = true;
 #endif
 
     respawnparm = false;
@@ -1872,7 +1873,25 @@ void D_DoomMain (void)
     setbuf (stdout, NULL);
 
     // Find main IWAD file and load it.
-    iwadfile = D_FindIWAD(IWAD_MASK_DOOM, &gamemission);
+    if(!devparm)
+        iwadfile = D_FindIWAD(IWAD_MASK_DOOM, &gamemission);
+    else 
+    {
+        if(devparm_doom)
+            iwadfile = "/home/user/WIIDOOM/src/IWAD/DOOM/Reg/v12/DOOM.WAD";
+        else if(devparm_doom2)
+            iwadfile = "/home/user/WIIDOOM/src/IWAD/DOOM2/v1666/DOOM2.WAD";
+        else if(devparm_chex)
+            iwadfile = "/home/user/WIIDOOM/src/IWAD/CHEX/CHEX.WAD";
+        else if(devparm_hacx)
+            iwadfile = "/home/user/WIIDOOM/src/IWAD/HACX/v12/HACX.WAD";
+        else if(devparm_freedoom2)
+            iwadfile = "/home/user/WIIDOOM/src/IWAD/FREEDOOM/v08p2/FREEDOOM2.WAD";
+        else if(devparm_tnt)
+            iwadfile = "/home/user/WIIDOOM/src/IWAD/TNT/v19_NEW/TNT.WAD";
+        else if(devparm_plutonia)
+            iwadfile = "/home/user/WIIDOOM/src/IWAD/PLUTONIA/v19_NEW/PLUTONIA.WAD";
+    }
 
     // None found?
 
@@ -2502,7 +2521,7 @@ void D_DoomMain (void)
     }
 
     if(devparm)
-        C_Printf(CR_GOLD, D_DEVSTR);
+        C_Printf(CR_GOLD, s_D_DEVSTR);
 /*
     if(show_deh_loading_message == 1)
         printf("         adding %s\n", dehacked_file);

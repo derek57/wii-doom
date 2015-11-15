@@ -51,6 +51,7 @@ void M_ForceUppercase(char *text);
 
 long M_FileLength(FILE *handle);
 
+char *titlecase(const char *str);
 char *uppercase(char *str);
 char *commify(int value);
 char *M_StringDuplicate(const char *orig);

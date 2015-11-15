@@ -1165,6 +1165,9 @@ extern short               songlist[148];
 extern char*               nervewadfile;
 extern char*               demoname;
 
+extern void                A_PainDie(mobj_t *);
+
+
 //
 // PROTOTYPES
 //
@@ -2646,7 +2649,7 @@ void M_LoadGame (int choice)
 {
     if (netgame)
     {
-        M_StartMessage(LOADNET,NULL,false);
+        M_StartMessage(s_LOADNET,NULL,false);
         return;
     }
     M_SetupNextMenu(&LoadDef);
@@ -2767,7 +2770,7 @@ void M_SaveGame (int choice)
 {
     if (!usergame)
     {
-        M_StartMessage(SAVEDEAD,NULL,true);
+        M_StartMessage(s_SAVEDEAD,NULL,true);
         return;
     }
         
@@ -2811,7 +2814,7 @@ void M_QuickSave(void)
         quickSaveSlot = -2;        // means to pick a slot now
         return;
     }
-    M_snprintf(tempstring, 80, QSPROMPT, savegamestrings[quickSaveSlot]);
+    M_snprintf(tempstring, 80, s_QSPROMPT, savegamestrings[quickSaveSlot]);
     M_StartMessage(tempstring,M_QuickSaveResponse,true);
 }
 
@@ -2834,13 +2837,13 @@ void M_QuickLoad(void)
 {
     if (netgame)
     {
-        M_StartMessage(QLOADNET,NULL,false);
+        M_StartMessage(s_QLOADNET,NULL,false);
         return;
     }
         
     if (quickSaveSlot < 0)
     {
-        M_StartMessage(QSAVESPOT,NULL,false);
+        M_StartMessage(s_QSAVESPOT,NULL,false);
         return;
     }
     M_snprintf(tempstring, 80, s_QLPROMPT, savegamestrings[quickSaveSlot]);
@@ -3326,7 +3329,7 @@ void M_NewGame(int choice)
 {
     if (netgame && !demoplayback)
     {
-        M_StartMessage(NEWGAME,NULL,false);
+        M_StartMessage(s_NEWGAME,NULL,false);
         return;
     }
 
@@ -3366,7 +3369,7 @@ void M_ChooseSkill(int choice)
 {
     if (choice == nightmare)
     {
-        M_StartMessage(NIGHTMARE,M_VerifyNightmare,true);
+        M_StartMessage(s_NIGHTMARE,M_VerifyNightmare,true);
         return;
     }
 
@@ -5559,7 +5562,7 @@ void M_EndGame(int choice)
 
     if (netgame)
     {
-        M_StartMessage(NETEND,NULL,false);
+        M_StartMessage(s_NETEND,NULL,false);
         return;
     }
     M_StartMessage(s_ENDGAME,M_EndGameResponse,true);
@@ -7407,1187 +7410,1013 @@ void M_Init (void)
 
 void M_God(int choice)
 {
-    if(!netgame && !demoplayback && gamestate == GS_LEVEL
-        && gameskill != sk_nightmare &&
-        players[consoleplayer].playerstate == PST_LIVE)
+    players[consoleplayer].cheats ^= CF_GODMODE;
+    if (players[consoleplayer].cheats & CF_GODMODE)
     {
-        players[consoleplayer].cheats ^= CF_GODMODE;
-        if (players[consoleplayer].cheats & CF_GODMODE)
-        {
-            if (players[consoleplayer].mo)
-                players[consoleplayer].mo->health = 100;
-            players[consoleplayer].health = 100;
-            players[consoleplayer].message = s_STSTR_DQDON;
-        }
-        else
-        {
-            players[consoleplayer].message = s_STSTR_DQDOFF;
-        }
+        if (players[consoleplayer].mo)
+            players[consoleplayer].mo->health = 100;
+        players[consoleplayer].health = 100;
+        players[consoleplayer].message = s_STSTR_DQDON;
+    }
+    else
+    {
+        players[consoleplayer].message = s_STSTR_DQDOFF;
     }
 }
 
 void M_Noclip(int choice)
 {
-    if(!netgame && !demoplayback && gamestate == GS_LEVEL
-        && gameskill != sk_nightmare &&
-        players[consoleplayer].playerstate == PST_LIVE)
+    players[consoleplayer].cheats ^= CF_NOCLIP;
+    if (players[consoleplayer].cheats & CF_NOCLIP)
     {
-        players[consoleplayer].cheats ^= CF_NOCLIP;
-        if (players[consoleplayer].cheats & CF_NOCLIP)
-        {
-            players[consoleplayer].message = s_STSTR_NCON;
-            players[consoleplayer].mo->flags |= MF_NOCLIP;
-            noclip_on = true;
-        }
-        else
-        {
-            players[consoleplayer].message = s_STSTR_NCOFF;
-            players[consoleplayer].mo->flags &= ~MF_NOCLIP;
-            noclip_on = false;
-        }
+        players[consoleplayer].message = s_STSTR_NCON;
+        players[consoleplayer].mo->flags |= MF_NOCLIP;
+        noclip_on = true;
+    }
+    else
+    {
+        players[consoleplayer].message = s_STSTR_NCOFF;
+        players[consoleplayer].mo->flags &= ~MF_NOCLIP;
+        noclip_on = false;
     }
 }
 
 void M_ArmorA(int choice)
 {
-    if(!netgame && !demoplayback && gamestate == GS_LEVEL
-        && gameskill != sk_nightmare &&
-        players[consoleplayer].playerstate == PST_LIVE)
-    {
-        players[consoleplayer].armorpoints = 200;
-        players[consoleplayer].armortype = 2;
-        players[consoleplayer].message = "ALL ARMOR ADDED";
-    }
+    players[consoleplayer].armorpoints = 200;
+    players[consoleplayer].armortype = 2;
+    players[consoleplayer].message = "ALL ARMOR ADDED";
 }
 
 void M_ArmorB(int choice)
 {
-    if(!netgame && !demoplayback && gamestate == GS_LEVEL
-        && gameskill != sk_nightmare &&
-        players[consoleplayer].playerstate == PST_LIVE)
-    {
-        players[consoleplayer].armorpoints = 100;
-        players[consoleplayer].armortype = 1;
+    players[consoleplayer].armorpoints = 100;
+    players[consoleplayer].armortype = 1;
 
-        if(fsize != 12361532 && fsize != 19321722)
-            players[consoleplayer].message = "GREEN ARMOR ADDED";
-        if(fsize == 12361532)
-            players[consoleplayer].message = "CHEX(R) ARMOR ADDED";
-        if(fsize == 19321722)
-            players[consoleplayer].message = "KEVLAR VEST ADDED";
-    }
+    if(fsize != 12361532 && fsize != 19321722)
+        players[consoleplayer].message = "GREEN ARMOR ADDED";
+    if(fsize == 12361532)
+        players[consoleplayer].message = "CHEX(R) ARMOR ADDED";
+    if(fsize == 19321722)
+        players[consoleplayer].message = "KEVLAR VEST ADDED";
 }
 
 void M_ArmorC(int choice)
 {
-    if(!netgame && !demoplayback && gamestate == GS_LEVEL
-        && gameskill != sk_nightmare &&
-        players[consoleplayer].playerstate == PST_LIVE)
-    {
-        players[consoleplayer].armorpoints = 200;
-        players[consoleplayer].armortype = 2;
+    players[consoleplayer].armorpoints = 200;
+    players[consoleplayer].armortype = 2;
 
-        if(fsize != 12361532 && fsize != 19321722)
-            players[consoleplayer].message = "BLUE ARMOR ADDED";
-        if(fsize == 12361532)
-            players[consoleplayer].message = "SUPER CHEX(R) ARMOR ADDED";
-        if(fsize == 19321722)
-            players[consoleplayer].message = "SUPER KEVLAR VEST ADDED";
-    }
+    if(fsize != 12361532 && fsize != 19321722)
+        players[consoleplayer].message = "BLUE ARMOR ADDED";
+    if(fsize == 12361532)
+        players[consoleplayer].message = "SUPER CHEX(R) ARMOR ADDED";
+    if(fsize == 19321722)
+        players[consoleplayer].message = "SUPER KEVLAR VEST ADDED";
 }
 
 void M_WeaponsA(int choice)
 {
-    if(!netgame && !demoplayback && gamestate == GS_LEVEL
-        && gameskill != sk_nightmare &&
-        players[consoleplayer].playerstate == PST_LIVE)
+    int i;
+
+    if(fsize == 4261144 || fsize == 4271324 || fsize == 4211660 ||
+            fsize == 4207819 || fsize == 4274218 || fsize == 4225504 ||
+            fsize == 4225460 || fsize == 4234124 || fsize == 4196020)
     {
-        int i;
-
-        if(fsize == 4261144 || fsize == 4271324 || fsize == 4211660 ||
-                fsize == 4207819 || fsize == 4274218 || fsize == 4225504 ||
-                fsize == 4225460 || fsize == 4234124 || fsize == 4196020)
-        {
-            for (i=0;i<NUMWEAPONS-4;i++)
-                players[consoleplayer].weaponowned[i] = true;
-                players[consoleplayer].weaponowned[7] = true;
-        }
-        else if(fsize == 10396254 || fsize == 10399316 || fsize == 10401760 ||
-                fsize == 11159840 || fsize == 12408292 || gameversion == exe_chex)
-        {
-            for (i=0;i<NUMWEAPONS-1;i++)
-                players[consoleplayer].weaponowned[i] = true;
-        }
-        else
-        {
-            for (i=0;i<NUMWEAPONS;i++)
-                players[consoleplayer].weaponowned[i] = true;
-        }
-        for (i=0;i<NUMAMMO;i++)
-          players[consoleplayer].ammo[i] = players[consoleplayer].maxammo[i];
-
-        players[consoleplayer].message = s_STSTR_FAADDED;
+        for (i=0;i<NUMWEAPONS-4;i++)
+            players[consoleplayer].weaponowned[i] = true;
+            players[consoleplayer].weaponowned[7] = true;
     }
+    else if(fsize == 10396254 || fsize == 10399316 || fsize == 10401760 ||
+            fsize == 11159840 || fsize == 12408292 || gameversion == exe_chex)
+    {
+        for (i=0;i<NUMWEAPONS-1;i++)
+            players[consoleplayer].weaponowned[i] = true;
+    }
+    else
+    {
+        for (i=0;i<NUMWEAPONS;i++)
+            players[consoleplayer].weaponowned[i] = true;
+    }
+    for (i=0;i<NUMAMMO;i++)
+      players[consoleplayer].ammo[i] = players[consoleplayer].maxammo[i];
+
+    players[consoleplayer].message = s_STSTR_FAADDED;
 }
 
 void M_WeaponsB(int choice)
 {
-    if(!netgame && !demoplayback && gamestate == GS_LEVEL
-        && gameskill != sk_nightmare &&
-        players[consoleplayer].playerstate == PST_LIVE)
-    {
-          players[consoleplayer].weaponowned[2] = true;
-          players[consoleplayer].ammo[1] = players[consoleplayer].maxammo[1];
+    players[consoleplayer].weaponowned[2] = true;
+    players[consoleplayer].ammo[1] = players[consoleplayer].maxammo[1];
 
-        if(fsize != 19321722 && fsize != 12361532)
-            players[consoleplayer].message = "SHOTGUN ADDED";
-        if(fsize == 19321722)
-            players[consoleplayer].message = "TAZER ADDED";
-        if(fsize == 12361532)
-            players[consoleplayer].message = "LARGE ZORCHER ADDED";
-    }
+    if(fsize != 19321722 && fsize != 12361532)
+        players[consoleplayer].message = "SHOTGUN ADDED";
+    if(fsize == 19321722)
+        players[consoleplayer].message = "TAZER ADDED";
+    if(fsize == 12361532)
+        players[consoleplayer].message = "LARGE ZORCHER ADDED";
 }
 
 void M_WeaponsC(int choice)
 {
-    if(!netgame && !demoplayback && gamestate == GS_LEVEL
-        && gameskill != sk_nightmare &&
-        players[consoleplayer].playerstate == PST_LIVE)
-    {
-          players[consoleplayer].weaponowned[3] = true;
-          players[consoleplayer].ammo[1] = players[consoleplayer].maxammo[1];
+    players[consoleplayer].weaponowned[3] = true;
+    players[consoleplayer].ammo[1] = players[consoleplayer].maxammo[1];
 
-        if(fsize != 19321722 && fsize != 12361532)
-            players[consoleplayer].message = "CHAINGUN ADDED";
-        if(fsize == 19321722)
-            players[consoleplayer].message = "UZI ADDED";
-        if(fsize == 12361532)
-            players[consoleplayer].message = "RAPID ZORCHER ADDED";
-    }
+    if(fsize != 19321722 && fsize != 12361532)
+        players[consoleplayer].message = "CHAINGUN ADDED";
+    if(fsize == 19321722)
+        players[consoleplayer].message = "UZI ADDED";
+    if(fsize == 12361532)
+        players[consoleplayer].message = "RAPID ZORCHER ADDED";
 }
 
 void M_WeaponsD(int choice)
 {
-    if(!netgame && !demoplayback && gamestate == GS_LEVEL
-        && gameskill != sk_nightmare &&
-        players[consoleplayer].playerstate == PST_LIVE)
-    {
-          players[consoleplayer].weaponowned[4] = true;
-          players[consoleplayer].ammo[3] = players[consoleplayer].maxammo[3];
+    players[consoleplayer].weaponowned[4] = true;
+    players[consoleplayer].ammo[3] = players[consoleplayer].maxammo[3];
 
-        if(fsize != 19321722 && fsize != 12361532)
-            players[consoleplayer].message = "ROCKET LAUNCHER ADDED";
-        if(fsize == 19321722)
-            players[consoleplayer].message = "PHOTON 'ZOOKA ADDED";
-        if(fsize == 12361532)
-            players[consoleplayer].message = "ZORCH PROPULSOR ADDED";
-    }
+    if(fsize != 19321722 && fsize != 12361532)
+        players[consoleplayer].message = "ROCKET LAUNCHER ADDED";
+    if(fsize == 19321722)
+        players[consoleplayer].message = "PHOTON 'ZOOKA ADDED";
+    if(fsize == 12361532)
+        players[consoleplayer].message = "ZORCH PROPULSOR ADDED";
 }
 
 void M_WeaponsE(int choice)
 {
-    if(!netgame && !demoplayback && gamestate == GS_LEVEL
-        && gameskill != sk_nightmare &&
-        players[consoleplayer].playerstate == PST_LIVE)
-    {
-          players[consoleplayer].weaponowned[5] = true;
-          players[consoleplayer].ammo[2] = players[consoleplayer].maxammo[2];
+    players[consoleplayer].weaponowned[5] = true;
+    players[consoleplayer].ammo[2] = players[consoleplayer].maxammo[2];
 
-        if(fsize != 19321722 && fsize != 12361532)
-            players[consoleplayer].message = "PLASMA RIFLE ADDED";
-        if(fsize == 19321722)
-            players[consoleplayer].message = "STICK ADDED";
-        if(fsize == 12361532)
-            players[consoleplayer].message = "PHASING ZORCHER ADDED";
-    }
+    if(fsize != 19321722 && fsize != 12361532)
+        players[consoleplayer].message = "PLASMA RIFLE ADDED";
+    if(fsize == 19321722)
+        players[consoleplayer].message = "STICK ADDED";
+    if(fsize == 12361532)
+        players[consoleplayer].message = "PHASING ZORCHER ADDED";
 }
 
 void M_WeaponsF(int choice)
 {
-    if(!netgame && !demoplayback && gamestate == GS_LEVEL
-        && gameskill != sk_nightmare &&
-        players[consoleplayer].playerstate == PST_LIVE)
-    {
-          players[consoleplayer].weaponowned[6] = true;
-          players[consoleplayer].ammo[2] = players[consoleplayer].maxammo[2];
+    players[consoleplayer].weaponowned[6] = true;
+    players[consoleplayer].ammo[2] = players[consoleplayer].maxammo[2];
 
-        if(fsize != 19321722 && fsize != 12361532)
-            players[consoleplayer].message = "BFG9000 ADDED";
-        if(fsize == 19321722)
-            players[consoleplayer].message = "NUKER ADDED";
-        if(fsize == 12361532)
-            players[consoleplayer].message =
-            "LARGE AREA ZORCHING DEVICE ADDED";
-    }
+    if(fsize != 19321722 && fsize != 12361532)
+        players[consoleplayer].message = "BFG9000 ADDED";
+    if(fsize == 19321722)
+        players[consoleplayer].message = "NUKER ADDED";
+    if(fsize == 12361532)
+        players[consoleplayer].message =
+        "LARGE AREA ZORCHING DEVICE ADDED";
 }
 
 void M_WeaponsG(int choice)
 {
-    if(!netgame && !demoplayback && gamestate == GS_LEVEL
-        && gameskill != sk_nightmare &&
-        players[consoleplayer].playerstate == PST_LIVE)
-    {
-          players[consoleplayer].weaponowned[7] = true;
+    players[consoleplayer].weaponowned[7] = true;
 
-        if(fsize != 19321722 && fsize != 12361532)
-            players[consoleplayer].message = "CHAINSAW ADDED";
-        if(fsize == 19321722)
-            players[consoleplayer].message = "HOIG REZNATOR ADDED";
-        if(fsize == 12361532)
-            players[consoleplayer].message = "SUPER BOOTSPORK ADDED";
-    }
+    if(fsize != 19321722 && fsize != 12361532)
+        players[consoleplayer].message = "CHAINSAW ADDED";
+    if(fsize == 19321722)
+        players[consoleplayer].message = "HOIG REZNATOR ADDED";
+    if(fsize == 12361532)
+        players[consoleplayer].message = "SUPER BOOTSPORK ADDED";
 }
 
 void M_WeaponsH(int choice)
 {
-    if(!netgame && !demoplayback && gamestate == GS_LEVEL
-        && gameskill != sk_nightmare &&
-        players[consoleplayer].playerstate == PST_LIVE)
-    {
-          players[consoleplayer].weaponowned[8] = true;
-          players[consoleplayer].ammo[1] = players[consoleplayer].maxammo[1];
+    players[consoleplayer].weaponowned[8] = true;
+    players[consoleplayer].ammo[1] = players[consoleplayer].maxammo[1];
 
-        if(fsize != 19321722)
-            players[consoleplayer].message = "SUPER SHOTGUN ADDED";
-        if(fsize == 19321722)
-            players[consoleplayer].message = "CRYOGUN ADDED";
-    }
+    if(fsize != 19321722)
+        players[consoleplayer].message = "SUPER SHOTGUN ADDED";
+    if(fsize == 19321722)
+        players[consoleplayer].message = "CRYOGUN ADDED";
 }
 
 void M_KeysA(int choice)
 {
     player_t *player = &players[consoleplayer];
 
-    if(!netgame && !demoplayback && gamestate == GS_LEVEL
-        && gameskill != sk_nightmare &&
-        players[consoleplayer].playerstate == PST_LIVE)
-    {
-        P_GiveAllCards(player);
-        players[consoleplayer].message = "ALL KEYS FOR THIS MAP ADDED";
-    }
+    P_GiveAllCards(player);
+
+    players[consoleplayer].message = "ALL KEYS FOR THIS MAP ADDED";
 }
 
 void M_KeysB(int choice)
 {
     player_t *player = &players[consoleplayer];
 
-    if(!netgame && !demoplayback && gamestate == GS_LEVEL
-        && gameskill != sk_nightmare &&
-        players[consoleplayer].playerstate == PST_LIVE)
-    {
-        P_GiveCard (player, it_bluecard);
-        
-        players[consoleplayer].message = "BLUE KEYCARD ADDED";
-    }
+    P_GiveCard (player, it_bluecard);
+
+    players[consoleplayer].message = "BLUE KEYCARD ADDED";
 }
 
 void M_KeysC(int choice)
 {
     player_t *player = &players[consoleplayer];
 
-    if(!netgame && !demoplayback && gamestate == GS_LEVEL
-        && gameskill != sk_nightmare &&
-        players[consoleplayer].playerstate == PST_LIVE)
-    {
-        P_GiveCard (player, it_yellowcard);
-        
-        players[consoleplayer].message = "YELLOW KEYCARD ADDED";
-    }
+    P_GiveCard (player, it_yellowcard);
+
+    players[consoleplayer].message = "YELLOW KEYCARD ADDED";
 }
 
 void M_KeysD(int choice)
 {
     player_t *player = &players[consoleplayer];
 
-    if(!netgame && !demoplayback && gamestate == GS_LEVEL
-        && gameskill != sk_nightmare &&
-        players[consoleplayer].playerstate == PST_LIVE)
-    {
-        P_GiveCard (player, it_redcard);
-        
-        players[consoleplayer].message = "RED KEYCARD ADDED";
-    }
+    P_GiveCard (player, it_redcard);
+
+    players[consoleplayer].message = "RED KEYCARD ADDED";
 }
 
 void M_KeysE(int choice)
 {
     player_t *player = &players[consoleplayer];
 
-    if(!netgame && !demoplayback && gamestate == GS_LEVEL
-        && gameskill != sk_nightmare &&
-        players[consoleplayer].playerstate == PST_LIVE)
-    {
-        P_GiveCard (player, it_blueskull);
-        
-        players[consoleplayer].message = "BLUE SKULLKEY ADDED";
-    }
+    P_GiveCard (player, it_blueskull);
+
+    players[consoleplayer].message = "BLUE SKULLKEY ADDED";
 }
 
 void M_KeysF(int choice)
 {
     player_t *player = &players[consoleplayer];
 
-    if(!netgame && !demoplayback && gamestate == GS_LEVEL
-        && gameskill != sk_nightmare &&
-        players[consoleplayer].playerstate == PST_LIVE)
-    {
-        P_GiveCard (player, it_yellowskull);
-        
-        players[consoleplayer].message = "YELLOW SKULLKEY ADDED";
-    }
+    P_GiveCard (player, it_yellowskull);
+
+    players[consoleplayer].message = "YELLOW SKULLKEY ADDED";
 }
 
 void M_KeysG(int choice)
 {
     player_t *player = &players[consoleplayer];
 
-    if(!netgame && !demoplayback && gamestate == GS_LEVEL
-        && gameskill != sk_nightmare &&
-        players[consoleplayer].playerstate == PST_LIVE)
-    {
-        P_GiveCard (player, it_redskull);
-        
-        players[consoleplayer].message = "RED SKULLKEY ADDED";
-    }
+    P_GiveCard (player, it_redskull);
+
+    players[consoleplayer].message = "RED SKULLKEY ADDED";
 }
 
 void M_ItemsA(int choice)
 {
-    if(!netgame && !demoplayback && gamestate == GS_LEVEL
-        && gameskill != sk_nightmare &&
-        players[consoleplayer].playerstate == PST_LIVE)
-    {
-        static player_t* player;
+    static player_t* player;
 
-        player = &players[consoleplayer];
+    player = &players[consoleplayer];
 
-        if(!got_all)
-        {
-            int i;
-
-            players[consoleplayer].powers[0] = INVULNTICS;
-            players[consoleplayer].powers[1] = 1;
-            players[consoleplayer].powers[2] = INVISTICS;
-            players[consoleplayer].mo->flags |= MF_SHADOW;
-            players[consoleplayer].powers[3] = IRONTICS;
-            players[consoleplayer].powers[4] = 1;
-            players[consoleplayer].powers[5] = INFRATICS;
-            players[consoleplayer].powers[6] = FLIGHTTICS;
-            player->cheats ^= CF_NOTARGET;
-
-            if (!player->backpack)
-            {
-                for (i=0 ; i<NUMAMMO ; i++)
-                    player->maxammo[i] *= 2;
-                player->backpack = true;
-            }
-
-            for (i=0 ; i<NUMAMMO ; i++)
-                P_GiveAmmo (player, i, 1);
-
-            player->message = GOTBACKPACK;
-
-            got_all = true;
-        }
-        else
-        {
-            players[consoleplayer].powers[0] = 0;
-            players[consoleplayer].powers[1] = 0;
-            players[consoleplayer].powers[2] = 0;
-            players[consoleplayer].mo->flags &= ~MF_SHADOW;
-            players[consoleplayer].powers[3] = 0;
-            players[consoleplayer].powers[4] = 0;
-            players[consoleplayer].powers[5] = 0;
-            players[consoleplayer].powers[6] = 0;
-            player->cheats &= ~CF_NOTARGET;
-
-            if(beta_style)
-                players[consoleplayer].fixedcolormap = 0;
-
-            got_all = false;
-        }
-        players[consoleplayer].message = "ALL ITEMS ADDED";
-    }
-}
-
-void M_ItemsB(int choice)
-{
-    if(!netgame && !demoplayback && gamestate == GS_LEVEL
-        && gameskill != sk_nightmare &&
-        players[consoleplayer].playerstate == PST_LIVE)
-    {
-        if(!got_invisibility)
-        {
-            players[consoleplayer].powers[2] = INVISTICS;
-            players[consoleplayer].cheats ^= CF_NOTARGET;
-            players[consoleplayer].mo->flags |= MF_SHADOW;
-
-            got_invisibility = true;
-        }
-        else
-        {
-            players[consoleplayer].powers[2] = 0;
-            players[consoleplayer].cheats &= ~CF_NOTARGET;
-            players[consoleplayer].mo->flags &= ~MF_SHADOW;
-
-            got_invisibility = false;
-
-            if(beta_style)
-                players[consoleplayer].fixedcolormap = 0;
-        }
-
-        if(fsize == 19321722)
-            players[consoleplayer].message = "ENK BLINDNESS ADDED";
-        else
-            players[consoleplayer].message = GOTINVIS;
-    }
-}
-
-void M_ItemsC(int choice)
-{
-    if(!netgame && !demoplayback && gamestate == GS_LEVEL
-        && gameskill != sk_nightmare &&
-        players[consoleplayer].playerstate == PST_LIVE)
-    {
-        if(!got_radiation_suit)
-        {
-            players[consoleplayer].powers[3] = IRONTICS;
-
-            got_radiation_suit = true;
-        }
-        else
-        {
-            players[consoleplayer].powers[3] = 0;
-
-            got_radiation_suit = false;
-        }
-
-        if(fsize != 12361532 && fsize != 19321722)
-            players[consoleplayer].message = GOTSUIT;
-        if(fsize == 12361532)
-            players[consoleplayer].message = "SLIME-PROOF SUIT ADDED";
-        if(fsize == 19321722)
-            players[consoleplayer].message = "VULCAN RUBBER BOOTS ADDED";
-    }
-}
-
-void M_ItemsD(int choice)
-{
-    if(!netgame && !demoplayback && gamestate == GS_LEVEL
-        && gameskill != sk_nightmare &&
-        players[consoleplayer].playerstate == PST_LIVE)
-    {
-        if(!got_map)
-        {
-            players[consoleplayer].powers[4] = 1;
-
-            got_map = true;
-        }
-        else
-        {
-            players[consoleplayer].powers[4] = 0;
-
-            got_map = false;
-        }
-
-        if(fsize != 19321722)
-            players[consoleplayer].message = GOTMAP;
-        if(fsize == 19321722)
-            players[consoleplayer].message = "SI ARRAY MAPPING ADDED";
-    }
-}
-
-void M_ItemsE(int choice)
-{
-    if(!netgame && !demoplayback && gamestate == GS_LEVEL
-        && gameskill != sk_nightmare &&
-        players[consoleplayer].playerstate == PST_LIVE)
-    {
-        if(!got_light_amp)
-        {
-            players[consoleplayer].powers[5] = INFRATICS;
-
-            got_light_amp = true;
-        }
-        else
-        {
-            players[consoleplayer].powers[5] = 0;
-
-            got_light_amp = false;
-        }
-
-        if(fsize != 12361532 && fsize != 19321722)
-            players[consoleplayer].message = GOTVISOR;
-        if(fsize == 12361532)
-            players[consoleplayer].message = "ULTRA GOOGLES ADDED";
-        if(fsize == 19321722)
-            players[consoleplayer].message = "INFRARED VISOR ADDED";
-    }
-}
-
-void M_ItemsF(int choice)
-{
-    if(!netgame && !demoplayback && gamestate == GS_LEVEL
-        && gameskill != sk_nightmare &&
-        players[consoleplayer].playerstate == PST_LIVE)
-    {
-        if(!got_invulnerability)
-        {
-            players[consoleplayer].powers[0] = INVULNTICS;
-
-            got_invulnerability = true;
-        }
-        else
-        {
-            players[consoleplayer].powers[0] = 0;
-
-            got_invulnerability = false;
-        }
-
-        if(fsize != 19321722)
-            players[consoleplayer].message = GOTINVUL;
-        if(fsize == 19321722)
-            players[consoleplayer].message = "FORCE FIELD ADDED";
-    }
-}
-
-void M_ItemsG(int choice)
-{
-    if(!netgame && !demoplayback && gamestate == GS_LEVEL
-        && gameskill != sk_nightmare &&
-        players[consoleplayer].playerstate == PST_LIVE)
-    {
-        if(!got_berserk)
-        {
-            players[consoleplayer].powers[1] = 1;
-
-            got_berserk = true;
-        }
-        else
-        {
-            players[consoleplayer].powers[1] = 0;
-
-            got_berserk = false;
-        }
-
-        if(fsize != 19321722)
-            players[consoleplayer].message = GOTBERSERK;
-        if(fsize == 19321722)
-            players[consoleplayer].message = "007 MICROTEL ADDED";
-    }
-}
-
-void M_ItemsH(int choice)
-{
-    if(!netgame && !demoplayback && gamestate == GS_LEVEL
-        && gameskill != sk_nightmare &&
-        players[consoleplayer].playerstate == PST_LIVE)
-    {
-        if (players[consoleplayer].mo)
-            players[consoleplayer].mo->health = 100;
-        players[consoleplayer].health = 100;
-        players[consoleplayer].message = "GOT FULL HEALTH (100)";
-    }
-}
-
-void M_ItemsI(int choice)
-{
-    if(!netgame && !demoplayback && gamestate == GS_LEVEL
-        && gameskill != sk_nightmare &&
-        players[consoleplayer].playerstate == PST_LIVE)
-    {
-        if (players[consoleplayer].mo)
-            players[consoleplayer].mo->health = 200;
-        players[consoleplayer].health = 200;
-        players[consoleplayer].message = "GOT FULL HEALTH (200)";
-    }
-}
-
-void M_ItemsJ(int choice)
-{
-    if(!netgame && !demoplayback && gamestate == GS_LEVEL
-        && gameskill != sk_nightmare &&
-        players[consoleplayer].playerstate == PST_LIVE)
+    if(!got_all)
     {
         int i;
 
-        static player_t* player;
-
-        player = &players[consoleplayer];
+        players[consoleplayer].powers[0] = INVULNTICS;
+        players[consoleplayer].powers[1] = 1;
+        players[consoleplayer].powers[2] = INVISTICS;
+        players[consoleplayer].mo->flags |= MF_SHADOW;
+        players[consoleplayer].powers[3] = IRONTICS;
+        players[consoleplayer].powers[4] = 1;
+        players[consoleplayer].powers[5] = INFRATICS;
+        players[consoleplayer].powers[6] = FLIGHTTICS;
+        player->cheats ^= CF_NOTARGET;
 
         if (!player->backpack)
         {
             for (i=0 ; i<NUMAMMO ; i++)
-                player->maxammo[i] *= 2;
+            player->maxammo[i] *= 2;
             player->backpack = true;
         }
+
         for (i=0 ; i<NUMAMMO ; i++)
             P_GiveAmmo (player, i, 1);
-        player->message = GOTBACKPACK;
+
+        player->message = s_GOTBACKPACK;
+
+        got_all = true;
     }
+    else
+    {
+        players[consoleplayer].powers[0] = 0;
+        players[consoleplayer].powers[1] = 0;
+        players[consoleplayer].powers[2] = 0;
+        players[consoleplayer].mo->flags &= ~MF_SHADOW;
+        players[consoleplayer].powers[3] = 0;
+        players[consoleplayer].powers[4] = 0;
+        players[consoleplayer].powers[5] = 0;
+        players[consoleplayer].powers[6] = 0;
+        player->cheats &= ~CF_NOTARGET;
+
+        if(beta_style)
+            players[consoleplayer].fixedcolormap = 0;
+
+        got_all = false;
+    }
+    players[consoleplayer].message = "ALL ITEMS ADDED";
+}
+
+void M_ItemsB(int choice)
+{
+    if(!got_invisibility)
+    {
+        players[consoleplayer].powers[2] = INVISTICS;
+        players[consoleplayer].cheats ^= CF_NOTARGET;
+        players[consoleplayer].mo->flags |= MF_SHADOW;
+
+        got_invisibility = true;
+    }
+    else
+    {
+        players[consoleplayer].powers[2] = 0;
+        players[consoleplayer].cheats &= ~CF_NOTARGET;
+        players[consoleplayer].mo->flags &= ~MF_SHADOW;
+
+        got_invisibility = false;
+
+        if(beta_style)
+            players[consoleplayer].fixedcolormap = 0;
+    }
+
+    if(fsize == 19321722)
+        players[consoleplayer].message = "ENK BLINDNESS ADDED";
+    else
+        players[consoleplayer].message = s_GOTINVIS;
+}
+
+void M_ItemsC(int choice)
+{
+    if(!got_radiation_suit)
+    {
+        players[consoleplayer].powers[3] = IRONTICS;
+
+        got_radiation_suit = true;
+    }
+    else
+    {
+        players[consoleplayer].powers[3] = 0;
+
+        got_radiation_suit = false;
+    }
+
+    if(fsize != 12361532 && fsize != 19321722)
+        players[consoleplayer].message = s_GOTSUIT;
+    if(fsize == 12361532)
+        players[consoleplayer].message = "SLIME-PROOF SUIT ADDED";
+    if(fsize == 19321722)
+        players[consoleplayer].message = "VULCAN RUBBER BOOTS ADDED";
+}
+
+void M_ItemsD(int choice)
+{
+    if(!got_map)
+    {
+        players[consoleplayer].powers[4] = 1;
+
+        got_map = true;
+    }
+    else
+    {
+        players[consoleplayer].powers[4] = 0;
+
+        got_map = false;
+    }
+
+    if(fsize != 19321722)
+        players[consoleplayer].message = s_GOTMAP;
+    if(fsize == 19321722)
+        players[consoleplayer].message = "SI ARRAY MAPPING ADDED";
+}
+
+void M_ItemsE(int choice)
+{
+    if(!got_light_amp)
+    {
+        players[consoleplayer].powers[5] = INFRATICS;
+
+        got_light_amp = true;
+    }
+    else
+    {
+        players[consoleplayer].powers[5] = 0;
+
+        got_light_amp = false;
+    }
+
+    if(fsize != 12361532 && fsize != 19321722)
+        players[consoleplayer].message = s_GOTVISOR;
+    if(fsize == 12361532)
+        players[consoleplayer].message = "ULTRA GOOGLES ADDED";
+    if(fsize == 19321722)
+        players[consoleplayer].message = "INFRARED VISOR ADDED";
+}
+
+void M_ItemsF(int choice)
+{
+    if(!got_invulnerability)
+    {
+        players[consoleplayer].powers[0] = INVULNTICS;
+
+        got_invulnerability = true;
+    }
+    else
+    {
+        players[consoleplayer].powers[0] = 0;
+
+        got_invulnerability = false;
+    }
+
+    if(fsize != 19321722)
+        players[consoleplayer].message = s_GOTINVUL;
+    if(fsize == 19321722)
+        players[consoleplayer].message = "FORCE FIELD ADDED";
+}
+
+void M_ItemsG(int choice)
+{
+    if(!got_berserk)
+    {
+        players[consoleplayer].powers[1] = 1;
+
+        got_berserk = true;
+    }
+    else
+    {
+        players[consoleplayer].powers[1] = 0;
+
+        got_berserk = false;
+    }
+
+    if(fsize != 19321722)
+        players[consoleplayer].message = s_GOTBERSERK;
+    if(fsize == 19321722)
+        players[consoleplayer].message = "007 MICROTEL ADDED";
+}
+
+void M_ItemsH(int choice)
+{
+    if (players[consoleplayer].mo)
+        players[consoleplayer].mo->health = 100;
+    players[consoleplayer].health = 100;
+    players[consoleplayer].message = "GOT FULL HEALTH (100)";
+}
+
+void M_ItemsI(int choice)
+{
+    if (players[consoleplayer].mo)
+        players[consoleplayer].mo->health = 200;
+    players[consoleplayer].health = 200;
+    players[consoleplayer].message = "GOT FULL HEALTH (200)";
+}
+
+void M_ItemsJ(int choice)
+{
+    int i;
+
+    static player_t* player;
+
+    player = &players[consoleplayer];
+
+    if (!player->backpack)
+    {
+        for (i=0 ; i<NUMAMMO ; i++)
+            player->maxammo[i] *= 2;
+        player->backpack = true;
+    }
+    for (i=0 ; i<NUMAMMO ; i++)
+        P_GiveAmmo (player, i, 1);
+    player->message = s_GOTBACKPACK;
 }
 
 void M_ItemsK(int choice)
 {
-    if(!netgame && !demoplayback && gamestate == GS_LEVEL
-        && gameskill != sk_nightmare &&
-        players[consoleplayer].playerstate == PST_LIVE)
-    {
-        static player_t* player;
-        player = &players[consoleplayer];
+    static player_t* player;
+    player = &players[consoleplayer];
 
-        P_UseArtifact(player, arti_fly);
+    P_UseArtifact(player, arti_fly);
 
-        player->message = "FLIGHT ADDED";
-    }
+    player->message = "FLIGHT ADDED";
 }
 
 void M_Topo(int choice)
 {
-    if(!netgame && !demoplayback && gamestate == GS_LEVEL
-        && gameskill != sk_nightmare &&
-        players[consoleplayer].playerstate == PST_LIVE)
-    {
-            cheating = (cheating+1) % 3;
-            cheeting = (cheeting+1) % 3;
-    }
+    cheating = (cheating+1) % 3;
+    cheeting = (cheeting+1) % 3;
 }
 
 void M_Rift(int choice)
 {
-    if(!netgame && !demoplayback && gamestate == GS_LEVEL
-        && gameskill != sk_nightmare &&
-        players[consoleplayer].playerstate == PST_LIVE)
+    switch(choice)
     {
-        switch(choice)
+    case 0:
+        if (fsize == 4261144 || fsize == 4271324 || fsize == 4211660 ||
+            fsize == 4207819 || fsize == 4274218 || fsize == 4225504 ||
+            fsize == 4225460 || fsize == 4234124 || fsize == 4196020 ||
+            fsize == 12361532)
         {
-        case 0:
-            if (fsize == 4261144 || fsize == 4271324 || fsize == 4211660 ||
-                fsize == 4207819 || fsize == 4274218 || fsize == 4225504 ||
-                fsize == 4225460 || fsize == 4234124 || fsize == 4196020 ||
-                fsize == 12361532)
-            {
-                if(epi >= 1 && map >= 1)
-                    map--;
-            }
-            else if(fsize == 10396254 || fsize == 10399316 || fsize == 10401760 ||
-                    fsize == 11159840)
-            {
-                if(epi >= 1 && map >= 1)
-                {
-                    map--;
-                    if(epi == 3 && map == 0)
-                    {
-                        epi = 2;
-                        map = 9;
-                    }
-                    else if(epi == 2 && map == 0)
-                    {
-                        epi = 1;
-                        map = 9;
-                    }
-                }
-            }
-            else if(fsize == 12408292 || fsize == 12474561 || fsize == 12487824)
-            {
-                if(epi >= 1 && map >= 1)
-                {
-                    map--;
-                    if(epi == 4 && map == 0)
-                    {
-                        epi = 3;
-                        map = 9;
-                    }
-                    else if(epi == 3 && map == 0)
-                    {
-                        epi = 2;
-                        map = 9;
-                    }
-                    else if(epi == 2 && map == 0)
-                    {
-                        epi = 1;
-                        map = 9;
-                    }
-                }
-            }
-            else if(fsize == 12538385)
-            {
-                if(epi >= 1 && map >= 1)
-                {
-                    map--;
-                    if(epi == 4 && map == 0)
-                    {
-                        epi = 3;
-                        map = 9;
-                    }
-                    else if(epi == 3 && map == 0)
-                    {
-                        epi = 2;
-                        map = 9;
-                    }
-                    else if(epi == 2 && map == 0)
-                    {
-                        epi = 1;
-                        map = 10;
-                        map_flag = true;
-                    }
-                }
-            }
-            else if(fsize == 14943400 || fsize == 14824716 || fsize == 14612688 ||
-                    fsize == 14607420 || fsize == 14604584 || fsize == 18195736 ||
-                    fsize == 18654796 || fsize == 18240172 || fsize == 17420824 ||
-                    fsize == 28422764 || fsize == 14677988 || fsize == 14683458 ||
-                    fsize == 14691821)
-            {
-                if(map >= 2)
-                    map--;
-            }
-            else if(fsize == 19321722)
-            {
-                if(map >= 2)
-                    map--;
-                if(map == 30)
-                    map = 20;
-            }
-            break;
-            case 1:
-            if (fsize == 4261144 || fsize == 4271324 || fsize == 4211660 ||
-                fsize == 4207819 || fsize == 4274218 || fsize == 4225504 ||
-                fsize == 4225460 || fsize == 4234124 || fsize == 4196020)
-            {
-                if(epi <= 1 && map <= 9)
-                {
-                    map++;
-                    if(epi == 1 && map == 10)
-                    {
-                        epi = 1;
-                        map = 9;
-                    }
-                }
-            }
-            else if(fsize == 12361532)
-            {
-                if(epi <= 1 && map <= 5)
-                {
-                    map++;
-                    if(epi == 1 && map == 6)
-                    {
-                        epi = 1;
-                        map = 5;
-                    }
-                }
-            }
-            else if(fsize == 10396254 || fsize == 10399316 || fsize == 10401760 ||
-                    fsize == 11159840)
-            {
-                if(epi <= 3 && map <= 9)
-                {
-                    map++;
-                    if(epi == 1 && map == 10)
-                    {
-                        epi = 2;
-                        map = 1;
-                    }
-                    else if(epi == 2 && map == 10)
-                    {
-                        epi = 3;
-                        map = 1;
-                    }
-                    else if(epi == 3 && map == 10)
-                    {
-                        epi = 3;
-                        map = 9;
-                    }
-                }
-            }
-            else if(fsize == 12408292 || fsize == 12474561 || fsize == 12487824)
-            {
-                if(epi <= 4 && map <= 9)
-                {
-                    map++;
-                    if(epi == 1 && map == 10)
-                    {
-                        epi = 2;
-                        map = 1;
-                    }
-                    else if(epi == 2 && map == 10)
-                    {
-                        epi = 3;
-                        map = 1;
-                    }
-                    else if(epi == 3 && map == 10)
-                    {
-                        epi = 4;
-                        map = 1;
-                    }
-                    else if(epi == 4 && map == 10)
-                    {
-                        epi = 4;
-                        map = 9;
-                    }
-                }
-            }
-            else if(fsize == 12538385)
-            {
-                if(epi <= 4 && map <= 10)
-                {
-                    map++;
-                    if(epi == 1 && map == 11)
-                    {
-                        epi = 2;
-                        map = 1;
-                    }
-                    else if(epi == 2 && map == 10)
-                    {
-                        epi = 3;
-                        map = 1;
-                    }
-                    else if(epi == 3 && map == 10)
-                    {
-                        epi = 4;
-                        map = 1;
-                    }
-                    else if(epi == 4 && map == 10)
-                    {
-                        epi = 4;
-                        map = 9;
-                    }
-                }
-            }
-            else if(fsize == 19321722)
-            {
-                if(map <= 30)
-                    map++;
-                if(map == 21)
-                    map = 31;
-            }
-
-            if(!nerve_pwad)
-            {
-                if (fsize == 14943400 || fsize == 14612688 || fsize == 14607420 ||
-                    fsize == 14604584 || fsize == 18195736 || fsize == 18654796 ||
-                    fsize == 18240172 || fsize == 17420824 || fsize == 28422764)
-                {
-                    if(map <= 31)
-                        map++;
-                }
-                else if(fsize == 14677988 || fsize == 14683458 || fsize == 14691821)
-                {
-                    if(map <= 32)
-                        map++;
-                }
-                else if(fsize == 14824716)
-                {
-                    if(map <= 29)
-                        map++;
-                }
-            }
-            break;
+            if(epi >= 1 && map >= 1)
+                map--;
         }
+        else if(fsize == 10396254 || fsize == 10399316 || fsize == 10401760 ||
+                fsize == 11159840)
+        {
+            if(epi >= 1 && map >= 1)
+            {
+                map--;
+                if(epi == 3 && map == 0)
+                {
+                    epi = 2;
+                    map = 9;
+                }
+                else if(epi == 2 && map == 0)
+                {
+                    epi = 1;
+                    map = 9;
+                }
+            }
+        }
+        else if(fsize == 12408292 || fsize == 12474561 || fsize == 12487824)
+        {
+            if(epi >= 1 && map >= 1)
+            {
+                map--;
+                if(epi == 4 && map == 0)
+                {
+                    epi = 3;
+                    map = 9;
+                }
+                else if(epi == 3 && map == 0)
+                {
+                    epi = 2;
+                    map = 9;
+                }
+                else if(epi == 2 && map == 0)
+                {
+                    epi = 1;
+                    map = 9;
+                }
+            }
+        }
+        else if(fsize == 12538385)
+        {
+            if(epi >= 1 && map >= 1)
+            {
+                map--;
+                if(epi == 4 && map == 0)
+                {
+                    epi = 3;
+                    map = 9;
+                }
+                else if(epi == 3 && map == 0)
+                {
+                    epi = 2;
+                    map = 9;
+                }
+                else if(epi == 2 && map == 0)
+                {
+                    epi = 1;
+                    map = 10;
+                    map_flag = true;
+                }
+            }
+        }
+        else if(fsize == 14943400 || fsize == 14824716 || fsize == 14612688 ||
+                fsize == 14607420 || fsize == 14604584 || fsize == 18195736 ||
+                fsize == 18654796 || fsize == 18240172 || fsize == 17420824 ||
+                fsize == 28422764 || fsize == 14677988 || fsize == 14683458 ||
+                fsize == 14691821)
+        {
+            if(map >= 2)
+                map--;
+        }
+        else if(fsize == 19321722)
+        {
+            if(map >= 2)
+                map--;
+            if(map == 30)
+                map = 20;
+        }
+        break;
+    case 1:
+        if (fsize == 4261144 || fsize == 4271324 || fsize == 4211660 ||
+            fsize == 4207819 || fsize == 4274218 || fsize == 4225504 ||
+            fsize == 4225460 || fsize == 4234124 || fsize == 4196020)
+        {
+            if(epi <= 1 && map <= 9)
+            {
+                map++;
+                if(epi == 1 && map == 10)
+                {
+                    epi = 1;
+                    map = 9;
+                }
+            }
+        }
+        else if(fsize == 12361532)
+        {
+            if(epi <= 1 && map <= 5)
+            {
+                map++;
+                if(epi == 1 && map == 6)
+                {
+                    epi = 1;
+                    map = 5;
+                }
+            }
+        }
+        else if(fsize == 10396254 || fsize == 10399316 || fsize == 10401760 ||
+                fsize == 11159840)
+        {
+            if(epi <= 3 && map <= 9)
+            {
+                map++;
+                if(epi == 1 && map == 10)
+                {
+                    epi = 2;
+                    map = 1;
+                }
+                else if(epi == 2 && map == 10)
+                {
+                    epi = 3;
+                    map = 1;
+                }
+                else if(epi == 3 && map == 10)
+                {
+                    epi = 3;
+                    map = 9;
+                }
+            }
+        }
+        else if(fsize == 12408292 || fsize == 12474561 || fsize == 12487824)
+        {
+            if(epi <= 4 && map <= 9)
+            {
+                map++;
+                if(epi == 1 && map == 10)
+                {
+                    epi = 2;
+                    map = 1;
+                }
+                else if(epi == 2 && map == 10)
+                {
+                    epi = 3;
+                    map = 1;
+                }
+                else if(epi == 3 && map == 10)
+                {
+                    epi = 4;
+                    map = 1;
+                }
+                else if(epi == 4 && map == 10)
+                {
+                    epi = 4;
+                    map = 9;
+                }
+            }
+        }
+        else if(fsize == 12538385)
+        {
+            if(epi <= 4 && map <= 10)
+            {
+                map++;
+                if(epi == 1 && map == 11)
+                {
+                    epi = 2;
+                    map = 1;
+                }
+                else if(epi == 2 && map == 10)
+                {
+                    epi = 3;
+                    map = 1;
+                }
+                else if(epi == 3 && map == 10)
+                {
+                    epi = 4;
+                    map = 1;
+                }
+                else if(epi == 4 && map == 10)
+                {
+                    epi = 4;
+                    map = 9;
+                }
+            }
+        }
+        else if(fsize == 19321722)
+        {
+            if(map <= 30)
+                map++;
+            if(map == 21)
+                map = 31;
+        }
+
+        if(!nerve_pwad)
+        {
+            if (fsize == 14943400 || fsize == 14612688 || fsize == 14607420 ||
+                fsize == 14604584 || fsize == 18195736 || fsize == 18654796 ||
+                fsize == 18240172 || fsize == 17420824 || fsize == 28422764)
+            {
+                if(map <= 31)
+                    map++;
+            }
+            else if(fsize == 14677988 || fsize == 14683458 || fsize == 14691821)
+            {
+                if(map <= 32)
+                    map++;
+            }
+            else if(fsize == 14824716)
+            {
+                if(map <= 29)
+                    map++;
+            }
+        }
+        break;
     }
 }
 
 void M_RiftNow(int choice)
 {
-    if(!netgame && !demoplayback && gamestate == GS_LEVEL
-        && gameskill != sk_nightmare &&
-        players[consoleplayer].playerstate == PST_LIVE)
-    {
-        warped = 1;
-        menuactive = 0;
-        G_DeferedInitNew(gameskill, epi, map);
-        players[consoleplayer].message = s_STSTR_CLEV;
-    }
+    warped = 1;
+    menuactive = 0;
+    G_DeferedInitNew(gameskill, epi, map);
+    players[consoleplayer].message = s_STSTR_CLEV;
 }
 
 void M_Spin(int choice)
 {
-    if(!netgame && !demoplayback && gamestate == GS_LEVEL
-        && gameskill != sk_nightmare &&
-        players[consoleplayer].playerstate == PST_LIVE)
+    switch(choice)
     {
-        switch(choice)
+    case 0:
+        if (fsize == 4261144 || fsize == 4271324 || fsize == 4211660 ||
+            fsize == 4207819 || fsize == 4274218 || fsize == 4225504 ||
+            fsize == 4225460 || fsize == 4234124 || fsize == 4196020)
         {
-        case 0:
-            if (fsize == 4261144 || fsize == 4271324 || fsize == 4211660 ||
-                fsize == 4207819 || fsize == 4274218 || fsize == 4225504 ||
-                fsize == 4225460 || fsize == 4234124 || fsize == 4196020)
+            if(tracknum > 1)
             {
-                if(tracknum > 1)
+                tracknum--;
+                if(tracknum == 30)
+                    tracknum = 29;
+                else if(tracknum == 27)
+                    tracknum = 9;
+            }
+        }
+        else if(fsize == 10396254 || fsize == 10399316 || fsize == 10401760 ||
+                fsize == 11159840 || fsize == 12408292 || fsize == 12361532 ||
+                fsize == 12474561 || fsize == 12538385 || fsize == 12487824)
+        {
+            if(tracknum > 1)
+            {
+                tracknum--;
+                if(fsize == 12361532)
                 {
-                    tracknum--;
                     if(tracknum == 30)
                         tracknum = 29;
                     else if(tracknum == 27)
-                        tracknum = 9;
-                }
-            }
-            else if(fsize == 10396254 || fsize == 10399316 || fsize == 10401760 ||
-                    fsize == 11159840 || fsize == 12408292 || fsize == 12361532 ||
-                    fsize == 12474561 || fsize == 12538385 || fsize == 12487824)
-            {
-                if(tracknum > 1)
-                {
-                    tracknum--;
-                    if(fsize == 12361532)
-                    {
-                        if(tracknum == 30)
-                            tracknum = 29;
-                        else if(tracknum == 27)
-                            tracknum = 5;
-                    }
-                    else
-                    {
-                        if(tracknum == 28)
-                            tracknum = 26;
-                        else if(tracknum == 25)
-                            tracknum = 21;
-                        else if(tracknum == 19)
-                            tracknum = 18;
-                        else if(tracknum == 14)
-                            tracknum = 13;
-                    }
-                }
-            }
-            else if(fsize == 14943400 || fsize == 14824716 || fsize == 14612688 ||
-                    fsize == 14607420 || fsize == 14604584 || fsize == 19321722 ||
-                    fsize == 28422764 || fsize == 14677988 || fsize == 14683458 ||
-                    fsize == 14691821)
-            {
-                if(fsize == 19321722)
-                {
-                    if(tracknum > 33)
-                    {
-                        tracknum--;
-                        if(tracknum == 64)
-                            tracknum = 63;
-                        else if(tracknum == 62)
-                            tracknum = 53;
-                        else if(tracknum == 51)
-                            tracknum = 50;
-                        else if(tracknum == 46)
-                            tracknum = 45;
-                    }
-                }
-                else if(fsize == 28422764)
-                {
-                    if(tracknum > 33)
-                    {
-                        tracknum--;
-                        if(tracknum == 65)
-                            tracknum = 64;
-                        else if(tracknum == 60)
-                            tracknum = 56;
-                        else if(tracknum == 55)
-                            tracknum = 51;
-                        else if(tracknum == 47)
-                            tracknum = 42;
-                        else if(tracknum == 41)
-                            tracknum = 40;
-                        else if(tracknum == 39)
-                            tracknum = 38;
-                        else if(tracknum == 37)
-                            tracknum = 36;
-                    }
+                        tracknum = 5;
                 }
                 else
                 {
-                    if(tracknum > 33)
-                    {
-                        tracknum--;
-                        if(tracknum == 61)
-                            tracknum = 60;
-                        else if(tracknum == 59)
-                            tracknum = 57;
-                        else if(tracknum == 56)
-                            tracknum = 55;
-                        else if(tracknum == 54)
-                            tracknum = 52;
-                        else if(tracknum == 51)
-                            tracknum = 50;
-                        else if(tracknum == 49)
-                            tracknum = 42;
-                    }
+                    if(tracknum == 28)
+                        tracknum = 26;
+                    else if(tracknum == 25)
+                        tracknum = 21;
+                    else if(tracknum == 19)
+                        tracknum = 18;
+                    else if(tracknum == 14)
+                        tracknum = 13;
                 }
             }
-            else if(fsize == 18195736 || fsize == 18654796)
+        }
+        else if(fsize == 14943400 || fsize == 14824716 || fsize == 14612688 ||
+                fsize == 14607420 || fsize == 14604584 || fsize == 19321722 ||
+                fsize == 28422764 || fsize == 14677988 || fsize == 14683458 ||
+                fsize == 14691821)
+        {
+            if(fsize == 19321722)
             {
                 if(tracknum > 33)
                 {
                     tracknum--;
-                    if(tracknum == 65)
+                    if(tracknum == 64)
                         tracknum = 63;
                     else if(tracknum == 62)
-                        tracknum = 57;
-                    else if(tracknum == 50)
-                        tracknum = 48;
-                    else if(tracknum == 47)
-                        tracknum = 46;
-                    else if(tracknum == 45)
-                        tracknum = 44;
-                    else if(tracknum == 41)
-                        tracknum = 40;
+                        tracknum = 53;
+                    else if(tracknum == 51)
+                        tracknum = 50;
+                    else if(tracknum == 46)
+                        tracknum = 45;
                 }
             }
-            else if(fsize == 18240172 || fsize == 17420824)
+            else if(fsize == 28422764)
             {
                 if(tracknum > 33)
                 {
                     tracknum--;
                     if(tracknum == 65)
-                        tracknum = 62;
-                    else if(tracknum == 61)
-                        tracknum = 57;
-                    else if(tracknum == 50)
-                        tracknum = 49;
+                        tracknum = 64;
+                    else if(tracknum == 60)
+                        tracknum = 56;
+                    else if(tracknum == 55)
+                        tracknum = 51;
+                    else if(tracknum == 47)
+                        tracknum = 42;
+                    else if(tracknum == 41)
+                        tracknum = 40;
+                    else if(tracknum == 39)
+                        tracknum = 38;
+                    else if(tracknum == 37)
+                        tracknum = 36;
                 }
             }
-            break;
-            case 1:
-            if (fsize == 4261144 || fsize == 4271324 || fsize == 4211660 ||
-                fsize == 4207819 || fsize == 4274218 || fsize == 4225504 ||
-                fsize == 4225460 || fsize == 4234124 || fsize == 4196020)
+            else
             {
-                if(tracknum < 31)
+                if(tracknum > 33)
                 {
-                    tracknum++;
-                    if(tracknum == 10)
+                    tracknum--;
+                    if(tracknum == 61)
+                        tracknum = 60;
+                    else if(tracknum == 59)
+                        tracknum = 57;
+                    else if(tracknum == 56)
+                        tracknum = 55;
+                    else if(tracknum == 54)
+                        tracknum = 52;
+                    else if(tracknum == 51)
+                        tracknum = 50;
+                    else if(tracknum == 49)
+                        tracknum = 42;
+                }
+            }
+        }
+        else if(fsize == 18195736 || fsize == 18654796)
+        {
+            if(tracknum > 33)
+            {
+                tracknum--;
+                if(tracknum == 65)
+                    tracknum = 63;
+                else if(tracknum == 62)
+                    tracknum = 57;
+                else if(tracknum == 50)
+                    tracknum = 48;
+                else if(tracknum == 47)
+                    tracknum = 46;
+                else if(tracknum == 45)
+                    tracknum = 44;
+                else if(tracknum == 41)
+                    tracknum = 40;
+            }
+        }
+        else if(fsize == 18240172 || fsize == 17420824)
+        {
+            if(tracknum > 33)
+            {
+                tracknum--;
+                if(tracknum == 65)
+                    tracknum = 62;
+                else if(tracknum == 61)
+                    tracknum = 57;
+                else if(tracknum == 50)
+                    tracknum = 49;
+            }
+        }
+        break;
+        case 1:
+        if (fsize == 4261144 || fsize == 4271324 || fsize == 4211660 ||
+            fsize == 4207819 || fsize == 4274218 || fsize == 4225504 ||
+            fsize == 4225460 || fsize == 4234124 || fsize == 4196020)
+        {
+            if(tracknum < 31)
+            {
+                tracknum++;
+                if(tracknum == 10)
+                    tracknum = 28;
+                else if(tracknum == 30)
+                        tracknum = 31;
+            }
+        }
+        else if(fsize == 10396254 || fsize == 10399316 || fsize == 10401760 ||
+                fsize == 11159840 || fsize == 12408292 || fsize == 12361532 ||
+                fsize == 12474561 || fsize == 12538385 || fsize == 12487824)
+        {
+            if(tracknum < 31)
+            {
+                tracknum++;
+                if(fsize == 12361532)
+                {
+                    if(tracknum == 6)
                         tracknum = 28;
                     else if(tracknum == 30)
-                            tracknum = 31;
-                }
-            }
-            else if(fsize == 10396254 || fsize == 10399316 || fsize == 10401760 ||
-                    fsize == 11159840 || fsize == 12408292 || fsize == 12361532 ||
-                    fsize == 12474561 || fsize == 12538385 || fsize == 12487824)
-            {
-                if(tracknum < 31)
-                {
-                    tracknum++;
-                    if(fsize == 12361532)
-                    {
-                        if(tracknum == 6)
-                            tracknum = 28;
-                        else if(tracknum == 30)
-                            tracknum = 31;
-                    }
-                    else
-                    {
-                        if(tracknum == 14)
-                            tracknum = 15;
-                        else if(tracknum == 19)
-                            tracknum = 20;
-                        else if(tracknum == 22)
-                            tracknum = 26;
-                        else if(tracknum == 27)
-                            tracknum = 29;
-                    }
-                }
-            }
-            else if(fsize == 14943400 || fsize == 14824716 || fsize == 14612688 ||
-                    fsize == 14607420 || fsize == 14604584 || fsize == 19321722 ||
-                    fsize == 28422764 || fsize == 14677988 || fsize == 14683458 ||
-                    fsize == 14691821)
-            {
-                if(fsize == 19321722)
-                {
-                    if(tracknum < 67)
-                    {
-                        tracknum++;
-                        if(tracknum == 46)
-                            tracknum = 47;
-                        else if(tracknum == 51)
-                            tracknum = 52;
-                        else if(tracknum == 54)
-                            tracknum = 63;
-                        else if(tracknum == 64)
-                            tracknum = 65;
-                    }
-                }
-                else if(fsize == 28422764)
-                {
-                    if(tracknum < 67)
-                    {
-                        tracknum++;
-                        if(tracknum == 37)
-                            tracknum = 38;
-                        else if(tracknum == 39)
-                            tracknum = 40;
-                        else if(tracknum == 41)
-                            tracknum = 42;
-                        else if(tracknum == 43)
-                            tracknum = 48;
-                        else if(tracknum == 52)
-                            tracknum = 56;
-                        else if(tracknum == 57)
-                            tracknum = 61;
-                        else if(tracknum == 65)
-                            tracknum = 66;
-                    }
+                        tracknum = 31;
                 }
                 else
                 {
-                    if(tracknum < 67)
-                    {
-                        tracknum++;
-                        if(tracknum == 43)
-                            tracknum = 50;
-                        else if(tracknum == 51)
-                            tracknum = 52;
-                        else if(tracknum == 53)
-                            tracknum = 55;
-                        else if(tracknum == 56)
-                            tracknum = 57;
-                        else if(tracknum == 58)
-                            tracknum = 60;
-                        else if(tracknum == 61)
-                            tracknum = 62;
-                    }
+                    if(tracknum == 14)
+                        tracknum = 15;
+                    else if(tracknum == 19)
+                        tracknum = 20;
+                    else if(tracknum == 22)
+                        tracknum = 26;
+                    else if(tracknum == 27)
+                        tracknum = 29;
                 }
             }
-            else if(fsize == 18195736 || fsize == 18654796)
-            {
-                if(tracknum < 66)
-                {
-                    tracknum++;
-                    if(tracknum == 41)
-                        tracknum = 42;
-                    else if(tracknum == 45)
-                        tracknum = 46;
-                    else if(tracknum == 47)
-                        tracknum = 48;
-                    else if(tracknum == 49)
-                        tracknum = 51;
-                    else if(tracknum == 58)
-                        tracknum = 63;
-                    else if(tracknum == 64)
-                        tracknum = 66;
-                }
-            }
-            else if(fsize == 18240172 || fsize == 17420824)
+        }
+        else if(fsize == 14943400 || fsize == 14824716 || fsize == 14612688 ||
+                fsize == 14607420 || fsize == 14604584 || fsize == 19321722 ||
+                fsize == 28422764 || fsize == 14677988 || fsize == 14683458 ||
+                fsize == 14691821)
+        {
+            if(fsize == 19321722)
             {
                 if(tracknum < 67)
                 {
                     tracknum++;
-                    if(tracknum == 50)
-                        tracknum = 51;
-                    else if(tracknum == 58)
-                        tracknum = 62;
-                    else if(tracknum == 63)
+                    if(tracknum == 46)
+                        tracknum = 47;
+                    else if(tracknum == 51)
+                        tracknum = 52;
+                    else if(tracknum == 54)
+                        tracknum = 63;
+                    else if(tracknum == 64)
+                        tracknum = 65;
+                }
+            }
+            else if(fsize == 28422764)
+            {
+                if(tracknum < 67)
+                {
+                    tracknum++;
+                    if(tracknum == 37)
+                        tracknum = 38;
+                    else if(tracknum == 39)
+                        tracknum = 40;
+                    else if(tracknum == 41)
+                        tracknum = 42;
+                    else if(tracknum == 43)
+                        tracknum = 48;
+                    else if(tracknum == 52)
+                        tracknum = 56;
+                    else if(tracknum == 57)
+                        tracknum = 61;
+                    else if(tracknum == 65)
                         tracknum = 66;
                 }
             }
-            break;
+            else
+            {
+                if(tracknum < 67)
+                {
+                    tracknum++;
+                    if(tracknum == 43)
+                        tracknum = 50;
+                    else if(tracknum == 51)
+                        tracknum = 52;
+                    else if(tracknum == 53)
+                        tracknum = 55;
+                    else if(tracknum == 56)
+                        tracknum = 57;
+                    else if(tracknum == 58)
+                        tracknum = 60;
+                    else if(tracknum == 61)
+                        tracknum = 62;
+                }
+            }
         }
-        players[consoleplayer].message = s_STSTR_MUS;
-
-        if(mus_engine == 3)
-            S_ChangeMusic(tracknum, false, true);
-        else if(mus_engine == 1 || mus_engine == 2)
-            S_ChangeMusic(tracknum, true, true);
-
-        mus_cheat_used = true;
+        else if(fsize == 18195736 || fsize == 18654796)
+        {
+            if(tracknum < 66)
+            {
+                tracknum++;
+                if(tracknum == 41)
+                    tracknum = 42;
+                else if(tracknum == 45)
+                    tracknum = 46;
+                else if(tracknum == 47)
+                    tracknum = 48;
+                else if(tracknum == 49)
+                    tracknum = 51;
+                else if(tracknum == 58)
+                    tracknum = 63;
+                else if(tracknum == 64)
+                    tracknum = 66;
+            }
+        }
+        else if(fsize == 18240172 || fsize == 17420824)
+        {
+            if(tracknum < 67)
+            {
+                tracknum++;
+                if(tracknum == 50)
+                    tracknum = 51;
+                else if(tracknum == 58)
+                    tracknum = 62;
+                else if(tracknum == 63)
+                    tracknum = 66;
+            }
+        }
+        break;
     }
+    players[consoleplayer].message = s_STSTR_MUS;
+
+    if(mus_engine == 3)
+        S_ChangeMusic(tracknum, false, true);
+    else if(mus_engine == 1 || mus_engine == 2)
+        S_ChangeMusic(tracknum, true, true);
+
+    mus_cheat_used = true;
 }
 
 void M_KeyBindingsSetKey(int choice)
@@ -10476,22 +10305,18 @@ void M_DrawDebug(void)
     if(opldev)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(DebugDef.x + 177, DebugDef.y + 28, "ON");
+        M_WriteText(DebugDef.x + 177, DebugDef.y + 38, "ON");
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(DebugDef.x + 169, DebugDef.y + 28, "OFF");
+        M_WriteText(DebugDef.x + 169, DebugDef.y + 38, "OFF");
         V_ClearDPTranslation();
     }
 }
 
-extern void A_PainDie(mobj_t *);
-//extern thinker_t *currentthinker;
-
 // jff 2/01/98 kill all monsters
-//static void cheat_massacre()
 void M_Massacre(int choice)
 {
     thinker_t *thinker;

@@ -943,7 +943,7 @@ static int dayofweek(int day, int month, int year)
     int m = month + 12 * adjustment - 2;
     int y = year - adjustment;
 
-    return (day + (13 * m - 1) / 5 + y + y / 4 - y / 100 + y / 400) % 7;
+    return ((day + (13 * m - 1) / 5 + y + y / 4 - y / 100 + y / 400) % 7);
 }
 
 void C_PrintCompileDate(void)
@@ -1063,7 +1063,7 @@ void C_PlayerMessage(char *string, ...)
 
         time(&rawtime);
         timeinfo = localtime(&rawtime);
-        strftime(buffer, sizeof(buffer), "%T", timeinfo);
+        strftime(buffer, sizeof(buffer), "%H:%M:%S", timeinfo);
         console[consolestrings].timestamp = strdup(buffer);
 
         ++consolestrings;

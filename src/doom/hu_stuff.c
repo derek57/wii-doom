@@ -230,6 +230,7 @@ extern int              timer_info;
 
 extern dboolean         blurred;
 extern dboolean         mapinfo_lump;
+extern dboolean         dont_message_to_console;
 
 //
 // Builtin map names.
@@ -883,7 +884,13 @@ void HU_Ticker(void)
             else
                 HUlib_addMessageToSText(&w_message, 0, plr->message);
 
+            if(!dont_message_to_console)
+                goto skip;
+
             C_PlayerMessage(" %s\n", plr->message);
+
+            skip: ;
+
             plr->message = 0;
             message_on = true;
             message_counter = HU_MSGTIMEOUT;

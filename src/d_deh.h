@@ -63,6 +63,15 @@ typedef struct
 extern dboolean  dehacked;
 extern deh_strs deh_strlookup[];
 
+extern char     *s_STSTR_NOMUS;
+extern char     *s_NETEND;
+extern char     *s_QSAVESPOT;
+extern char     *s_SAVEDEAD;
+extern char     *s_QSPROMPT;
+extern char     *s_NEWGAME;
+extern char     *s_LOADNET;
+extern char     *s_QLOADNET;
+extern char     *s_D_DEVSTR;
 extern char     *s_PRESSKEY;
 extern char     *s_PRESSYN;
 extern char     *s_PRESSA;

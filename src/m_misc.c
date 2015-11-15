@@ -609,3 +609,21 @@ char *M_BaseName(char *path)
     return src;
 }
 
+char *titlecase(const char *str)
+{
+    char        *newstr = strdup(str);
+    size_t      len = strlen(newstr);
+
+    if (len > 1)
+    {
+        size_t  i;
+
+        newstr[0] = toupper(newstr[0]);
+        for (i = 1; i < len; ++i)
+            if (!isalnum((unsigned char)newstr[i - 1]) && isalnum((unsigned char)newstr[i]))
+                newstr[i] = toupper(newstr[i]);
+    }
+
+    return newstr;
+}
+

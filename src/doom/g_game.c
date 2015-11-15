@@ -245,6 +245,7 @@ int             joybinvleft = 14;
 int             joybspeed = 15;
 int             joybconsole = 16;
 #endif
+dboolean        dont_message_to_console;
 dboolean        secret_1 = false;
 dboolean        secret_2 = false;
 dboolean        secretexit; 
@@ -1613,7 +1614,7 @@ void G_DoLoadLevel (void)
     }
 */
     skytexture = P_GetMapSky1Texture(map);
-    if (!skytexture)
+    if (!skytexture || skytexture == R_TextureNumForName("SKY1TALL"))
     {
         if ((gamemode == commercial) && (gameversion == exe_final2 || gameversion == exe_chex))
         {
@@ -2172,7 +2173,7 @@ void G_DoWorldDone (void)
     gameaction = ga_nothing; 
     viewactive = true; 
 } 
- 
+
 void G_DoSaveGame (void) 
 { 
     char *savegame_file;
@@ -2201,8 +2202,12 @@ void G_DoSaveGame (void)
     {
 	const int time = leveltime / TICRATE;
 
-	C_Printf(CR_RED, " G_DoSaveGame: Episode %d, Map %d, Skill %d, Time %d:%02d.\n",
-	        gameepisode, gamemap, gameskill, time/60, time%60);
+        if(gamemode == commercial)
+            C_Printf(CR_RED, " G_DoSaveGame: Map %d, Skill %d, Time %d:%02d.\n",
+	            gamemap, gameskill, time/60, time%60);
+        else
+            C_Printf(CR_RED, " G_DoSaveGame: Episode %d, Map %d, Skill %d, Time %d:%02d.\n",
+	            gameepisode, gamemap, gameskill, time/60, time%60);
     }
 
     P_ArchivePlayers (); 
@@ -2234,12 +2239,21 @@ void G_DoSaveGame (void)
     if (consoleactive)
         C_Printf(CR_GOLD, " %s saved.", uppercase(savename));
     else
-        C_Printf(CR_GOLD, " \"%s\" saved.", uppercase(savedescription));
+    {
+        static char     buffer[1024];
+
+        M_snprintf(buffer, sizeof(buffer), s_GGSAVED, titlecase(savedescription));
+        HU_PlayerMessage(buffer, false);
+    }
 
     gameaction = ga_nothing; 
     M_StringCopy(savedescription, "", sizeof(savedescription));
 
-    players[consoleplayer].message = GGSAVED;
+    dont_message_to_console = true;
+
+    players[consoleplayer].message = s_GGSAVED;
+
+    dont_message_to_console = false;
 
     // draw the pattern into the back screen
     R_FillBackScreen ();
