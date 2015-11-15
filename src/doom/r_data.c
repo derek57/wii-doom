@@ -1321,7 +1321,7 @@ int R_FlatNumForName(char *name)
         }
         else
         {
-            C_Printf(CR_RED, " R_FlatNumForName: %.8s not found");
+            C_Printf(CR_RED, " R_FlatNumForName: %.8s not found", name);
             return 0;
 //        return skyflatnum;
         }
@@ -1521,7 +1521,7 @@ int R_TextureNumForName(char *name)
         }
         else
         {
-            C_Printf(CR_RED, " R_TextureNumForName: %.8s not found");
+            C_Printf(CR_RED, " R_TextureNumForName: %.8s not found", name);
             return 0;
         }
     }
