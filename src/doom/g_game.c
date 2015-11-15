@@ -1155,7 +1155,7 @@ dboolean G_Responder (event_t* ev)
         (demoplayback || gamestate == GS_DEMOSCREEN) 
         ) 
     { 
-        if (ev->type == ev_keydown ||  
+        if ((ev->type == ev_keydown && ev->data1 != KEY_RSHIFT) ||  
             (ev->type == ev_mouse && ev->data1) || 
             (ev->type == ev_joystick && ev->data1) ) 
         { 
