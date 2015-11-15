@@ -1614,7 +1614,7 @@ void G_DoLoadLevel (void)
     }
 */
     skytexture = P_GetMapSky1Texture(map);
-    if (!skytexture || skytexture == R_TextureNumForName("SKY1TALL"))
+    if (!skytexture || skytexture == R_CheckTextureNumForName("SKY1TALL"))
     {
         if ((gamemode == commercial) && (gameversion == exe_final2 || gameversion == exe_chex))
         {
