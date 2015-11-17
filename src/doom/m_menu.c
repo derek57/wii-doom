@@ -3977,6 +3977,12 @@ void M_DrawScreen(void)
         {
             string = "START / LOAD A NEW GAME TO TAKE EFFECT.";
         }
+#ifndef SDL2
+        else if(itemOn == 4)
+        {
+            string = "OPTION 'BURN' IS ONLY AVAILABLE FOR SDL2";
+        }
+#endif
         x = ORIGWIDTH/2 - M_StringWidth(string) / 2;
         M_WriteText(x, ScreenDef.y + 105, string);
         V_ClearDPTranslation();
