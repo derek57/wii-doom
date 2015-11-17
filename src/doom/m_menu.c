@@ -2494,7 +2494,7 @@ static void blurscreen(int x1, int y1, int x2, int y2, int i)
 //
 void M_DarkBackground(void)
 {
-    if(background_type == 0)
+    if(background_type == 2)
     {
         int i;
 
@@ -3828,6 +3828,8 @@ void M_DrawScreen(void)
 
     if(!show_diskicon)
         dp_translation = crx[CRX_DARK];
+    else if(itemOn == 10 && show_diskicon)
+        dp_translation = crx[CRX_GOLD];
 
     M_WriteText(ScreenDef.x, ScreenDef.y + 98, "Type of Indicator");
     V_ClearDPTranslation();
@@ -3918,14 +3920,20 @@ void M_DrawScreen(void)
 
     if(background_type == 0)
     {
-        dp_translation = crx[CRX_GREEN];
-        M_WriteText(ScreenDef.x + 173, ScreenDef.y + 68, "BLUR");
+        dp_translation = crx[CRX_RED];
+        M_WriteText(ScreenDef.x + 156, ScreenDef.y + 68, "NORMAL");
         V_ClearDPTranslation();
     }
     else if(background_type == 1)
     {
         dp_translation = crx[CRX_GOLD];
         M_WriteText(ScreenDef.x + 166, ScreenDef.y + 68, "SHADE");
+        V_ClearDPTranslation();
+    }
+    else if(background_type == 2)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(ScreenDef.x + 173, ScreenDef.y + 68, "BLUR");
         V_ClearDPTranslation();
     }
 
@@ -4518,10 +4526,10 @@ void M_DrawGame3(void)
         V_ClearDPTranslation();
     }
 
-    if(d_maxgore)
-        dp_translation = crx[CRX_RED];
-    else
+    if(!d_maxgore)
         dp_translation = crx[CRX_DARK];
+    else if(itemOn == 4 && d_maxgore)
+        dp_translation = crx[CRX_GOLD];
 
     M_WriteText(GameDef3.x, GameDef3.y + 38, "Gore Amount");
     V_ClearDPTranslation();
@@ -5021,10 +5029,10 @@ void M_DrawGame5(void)
         V_ClearDPTranslation();
     }
 
-    if(corpses_slide)
-        dp_translation = crx[CRX_RED];
-    else
+    if(!corpses_slide)
         dp_translation = crx[CRX_DARK];
+    else if(itemOn == 9 && corpses_slide)
+        dp_translation = crx[CRX_GOLD];
 
     M_WriteText(GameDef5.x, GameDef5.y + 88, "Corpses smear blood when sliding");
     V_ClearDPTranslation();
@@ -5972,12 +5980,12 @@ void M_Background(int choice)
     switch(choice)
     {
       case 0:
-        if (background_type)
-            background_type = 0;
+        if (background_type > 0)
+            background_type--;
         break;
       case 1:
-        if (background_type == 0)
-            background_type = 1;
+        if (background_type < 2)
+            background_type++;
         break;
     }
 }
@@ -8809,10 +8817,10 @@ void M_DrawControls(void)
     }    
 #endif
 
-    if(mouselook)
-        dp_translation = crx[CRX_RED];
-    else
+    if(!mouselook)
         dp_translation = crx[CRX_DARK];
+    else if(itemOn == 3 && mouselook)
+        dp_translation = crx[CRX_GOLD];
 
     M_WriteText(ControlsDef.x, ControlsDef.y + 28, "FREELOOK");
     V_ClearDPTranslation();
@@ -10133,6 +10141,8 @@ void M_Slide(int choice)
     case 0:
         if (corpses_slide)
             corpses_slide = false;
+        if (corpses_smearblood)
+            corpses_smearblood = false;
         players[consoleplayer].message = "Corpses will slide caused by explosions";
         break;
     case 1:
