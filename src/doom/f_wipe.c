@@ -342,7 +342,7 @@ int wipe_exitBurn (int ticks)
 
 int wipe_initFade(int ticks)
 {
-    memcpy(wipe_scr, wipe_scr_start, SCREENWIDTH * SCREENHEIGHT);
+    memcpy(wipe_scr, wipe_scr_start, SCREENWIDTH * SCREENHEIGHT * sizeof(*wipe_scr));
 
     return 0;
 }
@@ -401,7 +401,7 @@ int wipe_initMelt(int ticks)
     int           i;
     
     // copy start screen to main screen
-    memcpy(wipe_scr, wipe_scr_start, SCREENWIDTH * SCREENHEIGHT);
+    memcpy(wipe_scr, wipe_scr_start, SCREENWIDTH * SCREENHEIGHT * sizeof(*wipe_scr));
     
     // makes this wipe faster (in theory)
     // to have stuff in column-major format
@@ -504,7 +504,7 @@ int wipe_exitMelt(int ticks)
 
 int wipe_StartScreen(void)
 {
-    wipe_scr_start = Z_Malloc(SCREENWIDTH * SCREENHEIGHT, PU_STATIC, NULL);
+    wipe_scr_start = Z_Malloc(SCREENWIDTH * SCREENHEIGHT * sizeof(*wipe_scr_start), PU_STATIC, NULL);
 
     I_ReadScreen(wipe_scr_start);
 
@@ -515,7 +515,7 @@ int wipe_StartScreen(void)
 
 int wipe_EndScreen(void)
 {
-    wipe_scr_end = Z_Malloc(SCREENWIDTH * SCREENHEIGHT, PU_STATIC, NULL);
+    wipe_scr_end = Z_Malloc(SCREENWIDTH * SCREENHEIGHT * sizeof(*wipe_scr_end), PU_STATIC, NULL);
 
 //    V_GetBlock (0, 0, SCREENWIDTH, SCREENHEIGHT, wipe_scr_end);
     I_ReadScreen(wipe_scr_end);

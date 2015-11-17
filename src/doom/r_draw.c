@@ -1442,7 +1442,7 @@ void R_FillBackScreen(void)
         
     if (background_buffer == NULL)
     {
-        background_buffer = Z_Malloc(SCREENWIDTH * (SCREENHEIGHT - SBARHEIGHT),
+        background_buffer = Z_Malloc(SCREENWIDTH * (SCREENHEIGHT - SBARHEIGHT) * sizeof(*background_buffer),
                                      PU_STATIC, NULL);
     }
 
@@ -1523,7 +1523,7 @@ void R_VideoErase(unsigned int ofs, int count)
     //  at one point.
     if (background_buffer != NULL)
     {
-        memcpy(I_VideoBuffer + ofs, background_buffer + ofs, count);
+        memcpy(I_VideoBuffer + ofs, background_buffer + ofs, count * sizeof(*I_VideoBuffer));
     }
 }
 
