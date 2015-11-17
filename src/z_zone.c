@@ -74,7 +74,7 @@
 
 // Uncomment this to see real-time memory allocation
 // statistics, to and enable extra debugging features
-//#define INSTRUMENTED_MEMORY
+#define INSTRUMENTED_MEMORY
 
 // Uncomment this to detect source of error
 #define INSTRUMENTED_CODE
@@ -82,7 +82,7 @@
 // Uncomment this to exhaustively run memory checks
 // while the game is running (this is EXTREMELY slow).
 // Only useful if INSTRUMENTED is also defined.
-//#define CHECKHEAP
+#define CHECKHEAP
 
 // Uncomment this to perform id checks on zone blocks,
 // to detect corrupted and illegally freed blocks
@@ -95,8 +95,8 @@
 // Alignment of zone memory (benefit may be negated by HEADER_SIZE, CHUNK_SIZE)
 #define CACHE_ALIGN     32
 
-// size of block header
-#define HEADER_SIZE     32
+// size of block header (ought to be a value of 32)
+#define HEADER_SIZE     64
 
 // Minimum chunk size at which blocks are allocated
 #define CHUNK_SIZE      32
@@ -188,11 +188,11 @@ void Z_DrawStats(void)
 
     s = 100.0 / total_memory;
 
-    sprintf(act_mem, "%d\t%6.01f%%\tstatic\n", active_memory, active_memory * s);
-    sprintf(pur_mem, "%d\t%6.01f%%\tpurgable\n", purgable_memory, purgable_memory * s);
-    sprintf(free_mem, "%d\t%6.01f%%\tfree\n", free_memory, free_memory * s);
-    sprintf(frag_mem, "%d\t%6.01f%%\tfragmentable\n", inactive_memory, inactive_memory * s);
-    sprintf(virt_mem, "%d\t%6.01f%%\tvirtual\n", virtual_memory, virtual_memory * s);
+    sprintf(act_mem, "%zu\t%6.01f%%\tstatic\n", active_memory, active_memory * s);
+    sprintf(pur_mem, "%zu\t%6.01f%%\tpurgable\n", purgable_memory, purgable_memory * s);
+    sprintf(free_mem, "%zu\t%6.01f%%\tfree\n", free_memory, free_memory * s);
+    sprintf(frag_mem, "%zu\t%6.01f%%\tfragmentable\n", inactive_memory, inactive_memory * s);
+    sprintf(virt_mem, "%zu\t%6.01f%%\tvirtual\n", virtual_memory, virtual_memory * s);
     sprintf(tot_mem, "%lu\t\ttotal\n", total_memory);
 
     if(leveltime & 16)
@@ -225,12 +225,12 @@ enum {
 static char *file_history[NUM_HISTORY_TYPES][ZONE_HISTORY];
 static int  line_history[NUM_HISTORY_TYPES][ZONE_HISTORY];
 static int  history_index[NUM_HISTORY_TYPES];
+/*
 static char *desc[NUM_HISTORY_TYPES] = { "malloc()'s", "free()'s" };
 
 //
 // [nitr8] UNUSED
 //
-/*
 void Z_DumpHistory(char *buf)
 {
     int i, j;
@@ -327,7 +327,7 @@ void Z_Init(void)
 // Z_Malloc
 // You can pass a NULL user if the tag is < PU_PURGELEVEL.
 
-void *(Z_Malloc)(size_t size, int tag, void **user, char *file, int line)
+void *(Z_Malloc)(size_t size, int32_t tag, void **user, char *file, int line)
 {
     register memblock_t *block;
 
@@ -569,7 +569,7 @@ void (Z_Free)(void *p, char *file, int line)
     }
 }
 
-void (Z_FreeTags)(int lowtag, int hightag, char *file, int line)
+void (Z_FreeTags)(int32_t lowtag, int32_t hightag, char *file, int line)
 {
     memblock_t *block = zone;
 
@@ -624,7 +624,7 @@ void (Z_FreeTags)(int lowtag, int hightag, char *file, int line)
     }
 }
 
-void (Z_ChangeTag)(void *ptr, int tag, char *file, int line)
+void (Z_ChangeTag)(void *ptr, int32_t tag, char *file, int line)
 {
     memblock_t *block = (memblock_t *)((char *) ptr - HEADER_SIZE);
 
@@ -760,7 +760,7 @@ void (Z_CheckHeap)(char *file, int line)
     } while ((block = block->next) != zone);
 }
 
-void* Z_MallocAlign (int reqsize, int tag, void **user, int alignbits)
+void* Z_MallocAlign (int reqsize, int32_t tag, void **user, int alignbits)
 {
     memblock_t* newblock;
 
@@ -1155,11 +1155,7 @@ void Z_Free (void* ptr)
 // You can pass a NULL user if the tag is < PU_PURGELEVEL.
 //
 
-void*
-Z_Malloc
-( int                  size,
-  int                  tag,
-  void*                user )
+void* Z_Malloc(int size, int32_t tag, void* user)
 {
     int                extra;
     memblock_t*        start;
@@ -1308,10 +1304,7 @@ Z_Malloc
 //
 // Z_FreeTags
 //
-void
-Z_FreeTags
-( int                lowtag,
-  int                hightag )
+void Z_FreeTags(int32_t lowtag, int32_t hightag)
 {
     memblock_t*        block;
     memblock_t*        next;
@@ -1465,11 +1458,11 @@ void Z_CheckHeap (void)
 
 
 
-
+/*
 //
 // Z_ChangeTag
 //
-void Z_ChangeTag2(void *ptr, int tag, char *file, int line)
+void Z_ChangeTag2(void *ptr, int32_t tag, char *file, int line)
 {
     memblock_t*        block;
         
@@ -1496,6 +1489,7 @@ void Z_ChangeTag2(void *ptr, int tag, char *file, int line)
 
     block->tag = tag;
 }
+*/
 
 //
 // [nitr8] UNUSED
@@ -1574,6 +1568,7 @@ int Z_FreeMemory (void)
 void* Z_MallocAlign (int reqsize, int32_t tag, void **user, int alignbits)
 {
     memblock_t* newblock;
+
     void* basedata;
 
     // with the memalloc header
@@ -1613,4 +1608,35 @@ void* Z_MallocAlign (int reqsize, int32_t tag, void **user, int alignbits)
 }
 
 #endif // CHOCOLATE_ZONE_HANDLING
+
+//
+// Z_ChangeTag
+//
+void Z_ChangeTag2(void *ptr, int32_t tag, char *file, int line)
+{
+    memblock_t*        block;
+        
+    block = (memblock_t *) ((byte *)ptr - sizeof(memblock_t));
+
+    if (block->id != ZONEID)
+        I_Error("%s:%i: Z_ChangeTag: block without a ZONEID!",
+                file, line);
+
+    if (tag >= PU_PURGELEVEL && block->user == NULL)
+        I_Error("%s:%i: Z_ChangeTag: an owner is required "
+                "for purgable blocks", file, line);
+
+    if (block->tag < PU_PURGELEVEL && tag >= PU_PURGELEVEL)
+    {
+        active_memory -= block->size;
+        purgable_memory += block->size;
+    }
+    else if (block->tag >= PU_PURGELEVEL && tag < PU_PURGELEVEL)
+    {
+        active_memory += block->size;
+        purgable_memory -= block->size;
+    }
+
+    block->tag = tag;
+}
 

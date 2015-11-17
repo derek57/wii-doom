@@ -222,11 +222,7 @@ patch_t*                hu_font[HU_FONTSIZE];
 patch_t*                beta_hu_font[HU_FONTSIZE];
 
 extern int              screenblocks;
-extern int              showMessages;
-extern int              crosshair;
-extern int              show_stats;
 extern int              screenSize;
-extern int              timer_info;
 
 extern dboolean         blurred;
 extern dboolean         mapinfo_lump;

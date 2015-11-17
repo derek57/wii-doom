@@ -516,9 +516,9 @@ typedef enum
     
 } powerduration_t;
 
-extern dboolean     dont_move_backwards;
-extern dboolean     sd;
-extern dboolean     usb;
+extern dboolean    dont_move_backwards;
+extern dboolean    sd;
+extern dboolean    usb;
 
 extern int         fsize;
 extern int         fsizerw;
@@ -526,12 +526,9 @@ extern int         fsizerw2;
 extern int         fsizecq;
 extern int         is_chex_2;
 extern int         show_deh_loading_message;
-extern int         followplayer;
-extern int         drawgrid;
 extern int         extra_wad_loaded;
 extern int         load_extra_wad;
 extern int         load_dehacked;
-extern int         use_vanilla_weapon_change;
 
 char               extra_wad_1[256];
 char               extra_wad_2[256];
@@ -546,14 +543,12 @@ int                extra_wad_slot_1_loaded;
 int                extra_wad_slot_2_loaded;
 int                extra_wad_slot_3_loaded;
 
-dboolean            jumping;
-dboolean            dont_move_forwards;
-dboolean            error_detected;
-dboolean            print_resource_pwad_error;
-dboolean            print_resource_pwad2_error;
-dboolean            display_ticker;
-dboolean            gamekeydown[NUMKEYS]; 
-dboolean            am_rotate;
+dboolean           dont_move_forwards;
+dboolean           error_detected;
+dboolean           print_resource_pwad_error;
+dboolean           print_resource_pwad2_error;
+dboolean           display_ticker;
+dboolean           gamekeydown[NUMKEYS]; 
 
 FILE               *debugfile;
 FILE               *statsfile;

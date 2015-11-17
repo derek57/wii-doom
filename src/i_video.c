@@ -541,11 +541,14 @@ void I_EnableLoadingDisk(int xoffs, int yoffs)
     loading_disk_xoffs = xoffs;
     loading_disk_yoffs = yoffs;
 
+    if (
 #ifndef WII
-    if (M_CheckParm("-cdrom") > 0)
+        M_CheckParm("-cdrom") > 0 ||
+#endif
+        icontype == 1
+       )
         disk_name = "STCDROM";
     else
-#endif
         disk_name = "STDISK";
 
     disk = W_CacheLumpName(disk_name, PU_STATIC);

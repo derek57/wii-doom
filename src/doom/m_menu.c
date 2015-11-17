@@ -1005,9 +1005,6 @@ unsigned int               creditscount;
 // defaulted values
 int                        mouseSensitivity = 5;
 
-// Show messages has default, 0 = off, 1 = on
-int                        showMessages = 1;        
-
 // Blocky mode, has default, 0 = high, 1 = normal
 int                        detailLevel = 0;
 int                        screenblocks = 9;
@@ -1032,16 +1029,13 @@ int                        map = 1;
 int                        musnum = 1;
 int                        cheeting;
 int                        coordinates_info = 0;
-int                        timer_info = 0;
 int                        version_info = 0;
-int                        key_controls_start_in_cfg_at_pos = 92;
+int                        key_controls_start_in_cfg_at_pos = 95;
 #ifdef WII
-int                        key_controls_end_in_cfg_at_pos = 106;
+int                        key_controls_end_in_cfg_at_pos = 109;
 #else
-int                        key_controls_end_in_cfg_at_pos = 108;
+int                        key_controls_end_in_cfg_at_pos = 111;
 #endif
-int                        crosshair = 0;
-int                        show_stats = 0;
 int                        tracknum = 1;
 int                        epi = 1;
 int                        repi = 1;
@@ -1054,7 +1048,6 @@ int                        mp_skill = 4;
 int                        warpepi = 2;
 int                        warplev = 2;
 int                        turnspeed = 7;
-int                        chaingun_tics = 4;
 int                        snd_module = 0;
 int                        snd_chans = 1;
 int                        sound_channels = 8;
@@ -1092,7 +1085,6 @@ dboolean                   got_map = false;
 dboolean                   got_light_amp = false;
 dboolean                   got_all = false;
 dboolean                   aiming_help;
-dboolean                   hud;
 dboolean                   swap_sound_chans;
 dboolean                   skillflag = true;
 dboolean                   nomonstersflag;
@@ -1185,9 +1177,11 @@ void M_QuitDOOM(int choice);
 
 void M_ChangeMessages(int choice);
 void M_ChangeSensitivity(int choice);
+void M_MouseWalk(int choice);
 void M_WalkingSpeed(int choice);
 void M_TurningSpeed(int choice);
 void M_StrafingSpeed(int choice);
+void M_GeneralSound(int choice);
 void M_SfxVol(int choice);
 void M_MusicVol(int choice);
 void M_ChangeDetail(int choice);
@@ -1200,6 +1194,7 @@ void M_Screenshots(int choice);
 void M_Background(int choice);
 void M_FontShadow(int choice);
 void M_DiskIcon(int choice);
+void M_IconType(int choice);
 void M_SizeDisplay(int choice);
 void M_StartGame(int choice);
 void M_Sound(int choice);
@@ -1402,11 +1397,9 @@ void M_DrawGame3(void);
 void M_DrawGame4(void);
 void M_DrawGame5(void);
 void M_DrawDebug(void);
-//void M_DrawSound(void);
 void M_DrawCheats(void);
 //void M_DrawRecord(void);
 
-//int  M_StringWidth(char *string);
 int  M_StringHeight(char *string);
 
 
@@ -1874,6 +1867,7 @@ enum
     screen_background,
     screen_shadow,
     screen_icon,
+    screen_type,
     screen_end
 } screen_e;
 
@@ -1881,14 +1875,15 @@ menuitem_t ScreenMenu[]=
 {
     {2,"Brightness",M_ChangeGamma,'g'},
     {2,"Screen Size",M_SizeDisplay,'s'},
-    {2,"Detail",M_ChangeDetail,'d'},
+    {2,"Detail",M_ChangeDetail,'r'},
     {2,"Translucency",M_Translucency,'t'},
     {2,"Wipe Type",M_WipeType,'w'},
     {2,"Uncapped Framerate",M_UncappedFramerate,'u'},
     {2,"Screenshot Format",M_Screenshots,'x'},
     {2,"Menu Main Background",M_Background,'b'},
     {2,"Menu Font Style",M_FontShadow,'f'},
-    {2,"Show Disk Icon",M_DiskIcon,'i'}
+    {2,"Show Loading Indicator",M_DiskIcon,'d'},
+    {2,"",M_IconType,'i'}
 };
 
 menu_t  ScreenDef =
@@ -1909,6 +1904,7 @@ enum
     mousespeed,
     controls_freelook,
     mousesensibility,
+    mousewalking,
     controls_keybindings,
     controls_end
 } controls_e;
@@ -1918,9 +1914,10 @@ menuitem_t ControlsMenu[]=
     {2,"Walking",M_WalkingSpeed,'w'},
     {2,"Turning",M_TurningSpeed,'t'},
     {2,"Strafing",M_StrafingSpeed,'s'},
-    {2,"Freelook",M_FreelookSpeed,'f'},
+    {2,"",M_FreelookSpeed,'f'},
     {2,"Freelook Mode",M_Freelook,'l'},
     {2,"",M_ChangeSensitivity,'m'},
+    {2,"",M_MouseWalk,'n'},
     {1,"",M_KeyBindings,'b'}
 };
 
@@ -2147,7 +2144,7 @@ menuitem_t GameMenu3[]=
     {2,"AUTOAIM",M_Autoaim,'a'},
     {2,"JUMPING",M_Jumping,'j'},
     {2,"MORE BLOOD & GORE",M_MaxGore,'o'},
-    {2,"Gore Amount",M_GoreAmount,'g'},
+    {2,"",M_GoreAmount,'g'},
     {2,"Enable Colored Blood",M_ColoredBloodA,'1'},
     {2,"Fix Monster Blood",M_ColoredBloodB,'2'},
     {2,"Shadows for Monsters and Items",M_Shadows,'s'},
@@ -2243,7 +2240,7 @@ menuitem_t GameMenu5[]=
     {2,"Don't alert enemies when firing fist",M_NoNoise,'n'},
     {2,"Nudge corpses when walking over",M_NudgeCorpses,'c'},
     {2,"Corpses slide caused by explosions",M_Slide,'x'},
-    {2,"Corpses smear blood when sliding",M_Smearblood,'b'},
+    {2,"",M_Smearblood,'b'},
     {2,"Randomly colored player corpses",M_ColoredCorpses,'r'},
 };
 
@@ -2291,6 +2288,7 @@ menu_t  DebugDef =
 //
 enum
 {
+    snd,
     sfx_vol,
     music_vol,
     mus_type,
@@ -2306,8 +2304,9 @@ enum
 
 menuitem_t SoundMenu[]=
 {
-    {2,"Sound Volume",M_SfxVol,'v'},
-    {2,"Music Volume",M_MusicVol,'m'},
+    {2,"General Sound and Music",M_GeneralSound,'g'},
+    {2,"",M_SfxVol,'v'},
+    {2,"",M_MusicVol,'m'},
     {2,"Music Type",M_MusicType,'t'},
     {2,"Sound Type",M_SoundType,'s'},
     {2,"Number of Sound Channels",M_SoundChannels,'c'},
@@ -2972,71 +2971,87 @@ void M_DrawSound(void)
     M_DrawThermoSmall(SoundDef.x + 95, SoundDef.y + LINEHEIGHT_SMALL * (music_vol + 1),
                  16, musicVolume);
 
+    if(itemOn == 1 && general_sound)
+        dp_translation = crx[CRX_GOLD];
+    else if(!general_sound)
+        dp_translation = crx[CRX_DARK];
+
+    M_WriteText(SoundDef.x, SoundDef.y + 8, "SOUND VOLUME");
+    V_ClearDPTranslation();
+
+    if(itemOn == 2 && general_sound)
+        dp_translation = crx[CRX_GOLD];
+    else if(!general_sound)
+        dp_translation = crx[CRX_DARK];
+
+    M_WriteText(SoundDef.x, SoundDef.y + 18, "MUSIC VOLUME");
+    V_ClearDPTranslation();
+
+    if(general_sound)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(SoundDef.x + 220, SoundDef.y - 2, "ON");
+        V_ClearDPTranslation();
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(SoundDef.x + 212, SoundDef.y - 2, "OFF");
+        V_ClearDPTranslation();
+    }
+
     if(mus_engine == 1)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(SoundDef.x + 204, SoundDef.y + 18, "OPL2");
+        M_WriteText(SoundDef.x + 204, SoundDef.y + 28, "OPL2");
         V_ClearDPTranslation();
     }
     else if(mus_engine == 2)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(SoundDef.x + 204, SoundDef.y + 18, "OPL3");
+        M_WriteText(SoundDef.x + 204, SoundDef.y + 28, "OPL3");
         V_ClearDPTranslation();
     }
     else if(mus_engine == 3)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(SoundDef.x + 212, SoundDef.y + 18, "OGG");
+        M_WriteText(SoundDef.x + 212, SoundDef.y + 28, "OGG");
         V_ClearDPTranslation();
     }
     else if(mus_engine == 4)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(SoundDef.x + 183, SoundDef.y + 18, "TIMIDITY");
+        M_WriteText(SoundDef.x + 183, SoundDef.y + 28, "TIMIDITY");
         V_ClearDPTranslation();
     }
 
     if(snd_module)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(SoundDef.x + 159, SoundDef.y + 28, "PC-SPEAKER");
+        M_WriteText(SoundDef.x + 159, SoundDef.y + 38, "PC-SPEAKER");
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(SoundDef.x + 213, SoundDef.y + 28, "SDL");
+        M_WriteText(SoundDef.x + 213, SoundDef.y + 38, "SDL");
         V_ClearDPTranslation();
     }
 
     if(sound_channels == 8)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(SoundDef.x + 228, SoundDef.y + 38, "8");
+        M_WriteText(SoundDef.x + 228, SoundDef.y + 48, "8");
         V_ClearDPTranslation();
     }
     else if(sound_channels == 16)
     {
         dp_translation = crx[CRX_GOLD];
-        M_WriteText(SoundDef.x + 223, SoundDef.y + 38, "16");
+        M_WriteText(SoundDef.x + 223, SoundDef.y + 48, "16");
         V_ClearDPTranslation();
     }
 
     if(swap_sound_chans)
-    {
-        dp_translation = crx[CRX_GREEN];
-        M_WriteText(SoundDef.x + 220, SoundDef.y + 48, "ON");
-        V_ClearDPTranslation();
-    }
-    else
-    {
-        dp_translation = crx[CRX_DARK];
-        M_WriteText(SoundDef.x + 212, SoundDef.y + 48, "OFF");
-        V_ClearDPTranslation();
-    }
-
-    if(randompitch)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(SoundDef.x + 220, SoundDef.y + 58, "ON");
@@ -3049,41 +3064,54 @@ void M_DrawSound(void)
         V_ClearDPTranslation();
     }
 
-#ifndef WII
-    if(use_libsamplerate == 0)
+    if(randompitch)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(SoundDef.x + 220, SoundDef.y + 68, "ON");
+        V_ClearDPTranslation();
+    }
+    else
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(SoundDef.x + 212, SoundDef.y + 68, "OFF");
         V_ClearDPTranslation();
     }
+
+#ifndef WII
+    if(use_libsamplerate == 0)
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(SoundDef.x + 212, SoundDef.y + 78, "OFF");
+        V_ClearDPTranslation();
+    }
     else if(use_libsamplerate == 1)
     {
         dp_translation = crx[CRX_GRAY];
-        M_WriteText(SoundDef.x + 192, SoundDef.y + 68, "LINEAR");
+        M_WriteText(SoundDef.x + 192, SoundDef.y + 78, "LINEAR");
         V_ClearDPTranslation();
     }
     else if(use_libsamplerate == 2)
     {
         dp_translation = crx[CRX_RED];
-        M_WriteText(SoundDef.x + 117, SoundDef.y + 68, "ZERO_ORDER_HOLD");
+        M_WriteText(SoundDef.x + 117, SoundDef.y + 78, "ZERO_ORDER_HOLD");
         V_ClearDPTranslation();
     }
     else if(use_libsamplerate == 3)
     {
         dp_translation = crx[CRX_GOLD];
-        M_WriteText(SoundDef.x + 182, SoundDef.y + 68, "FASTEST");
+        M_WriteText(SoundDef.x + 182, SoundDef.y + 78, "FASTEST");
         V_ClearDPTranslation();
     }
     else if(use_libsamplerate == 4)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(SoundDef.x + 130, SoundDef.y + 68, "MEDIUM_QUALITY");
+        M_WriteText(SoundDef.x + 130, SoundDef.y + 78, "MEDIUM_QUALITY");
         V_ClearDPTranslation();
     }
     else if(use_libsamplerate == 5)
     {
         dp_translation = crx[CRX_BLUE];
-        M_WriteText(SoundDef.x + 145, SoundDef.y + 68, "BEST_QUALITY");
+        M_WriteText(SoundDef.x + 145, SoundDef.y + 78, "BEST_QUALITY");
         V_ClearDPTranslation();
     }
 
@@ -3092,7 +3120,7 @@ void M_DrawSound(void)
         int x;
         char *string = "";
         dp_translation = crx[CRX_GOLD];
-        if(itemOn == 7)
+        if(itemOn == 8)
         {
             string = "YOU MUST QUIT AND RESTART TO TAKE EFFECT.";
         }
@@ -3108,36 +3136,65 @@ void M_Sound(int choice)
     M_SetupNextMenu(&SoundDef);
 }
 
-void M_SfxVol(int choice)
+void M_GeneralSound(int choice)
 {
     switch(choice)
     {
-      case 0:
-        if (sfxVolume)
-            sfxVolume--;
+    case 0:
+        if(general_sound == true)
+        {
+            general_sound = false;
+            S_SetSfxVolume(0 * 8);
+            S_SetMusicVolume(0 * 8);
+        }
         break;
-      case 1:
-        if (sfxVolume < 15)
-            sfxVolume++;
+    case 1:
+        if(general_sound == false)
+        {
+            general_sound = true;
+            S_SetSfxVolume(sfxVolume * 8);
+            S_SetMusicVolume(musicVolume * 8);
+        }
         break;
     }
-    S_SetSfxVolume(sfxVolume * 8);
+}
+
+void M_SfxVol(int choice)
+{
+    if(general_sound)
+    {
+        switch(choice)
+        {
+          case 0:
+            if (sfxVolume)
+                sfxVolume--;
+            break;
+          case 1:
+            if (sfxVolume < 15)
+                sfxVolume++;
+            break;
+        }
+        S_SetSfxVolume(sfxVolume * 8);
+    }
 }
 
 void M_MusicVol(int choice)
 {
-    switch(choice)
+    if(general_sound)
     {
-      case 0:
-        if (musicVolume)
-            musicVolume--;
-        break;
-      case 1:
-        if (musicVolume < 15)
-            musicVolume++;
-        break;
+        switch(choice)
+        {
+          case 0:
+            if (musicVolume)
+                musicVolume--;
+            break;
+          case 1:
+            if (musicVolume < 15)
+                musicVolume++;
+            break;
+        }
+        S_SetMusicVolume(musicVolume * 8);
     }
-    S_SetMusicVolume(musicVolume * 8);
 }
 
 void M_SoundType(int choice)
@@ -3761,6 +3818,20 @@ void M_DrawScreen(void)
     V_DrawPatchWithShadow(OptionsDef.x + 175, OptionsDef.y + LINEHEIGHT + 11.5 *
                       screen_detail, W_CacheLumpName(detailNames[detailLevel], PU_CACHE), false);
 */
+    if(gamemode == commercial || fsize == 4234124 || fsize == 4196020 ||
+            fsize == 12474561 || fsize == 12487824 || fsize == 11159840 ||
+            fsize == 12408292 || fsize == 12538385 || fsize == 12361532 ||
+            fsize == 7585664)
+        dp_translation = crx[CRX_RED];
+    else
+        dp_translation = crx[CRX_DARK];
+
+    if(!show_diskicon)
+        dp_translation = crx[CRX_DARK];
+
+    M_WriteText(ScreenDef.x, ScreenDef.y + 98, "Type of Indicator");
+    V_ClearDPTranslation();
+
     if(detailLevel > 0)
     {
         dp_translation = crx[CRX_DARK];
@@ -3881,6 +3952,19 @@ void M_DrawScreen(void)
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(ScreenDef.x + 181, ScreenDef.y + 88, "OFF");
+        V_ClearDPTranslation();
+    }
+
+    if(icontype == 1)
+    {
+        dp_translation = crx[CRX_GRAY];
+        M_WriteText(ScreenDef.x + 158, ScreenDef.y + 98, "CD-ROM");
+        V_ClearDPTranslation();
+    }
+    else
+    {
+        dp_translation = crx[CRX_BLUE];
+        M_WriteText(ScreenDef.x + 146, ScreenDef.y + 98, "DISKETTE");
         V_ClearDPTranslation();
     }
 
@@ -4428,6 +4512,14 @@ void M_DrawGame3(void)
         V_ClearDPTranslation();
     }
 
+    if(d_maxgore)
+        dp_translation = crx[CRX_RED];
+    else
+        dp_translation = crx[CRX_DARK];
+
+    M_WriteText(GameDef3.x, GameDef3.y + 38, "Gore Amount");
+    V_ClearDPTranslation();
+
     if(gore_amount == 1)
     {
         dp_translation = crx[CRX_DARK];
@@ -4922,6 +5014,14 @@ void M_DrawGame5(void)
         M_WriteText(GameDef5.x + 258, GameDef5.y + 78, "OFF");
         V_ClearDPTranslation();
     }
+
+    if(corpses_slide)
+        dp_translation = crx[CRX_RED];
+    else
+        dp_translation = crx[CRX_DARK];
+
+    M_WriteText(GameDef5.x, GameDef5.y + 88, "Corpses smear blood when sliding");
+    V_ClearDPTranslation();
 
     if(corpses_smearblood)
     {
@@ -5712,6 +5812,21 @@ void M_ChangeSensitivity(int choice)
     }
 }
 
+void M_MouseWalk(int choice)
+{
+    switch(choice)
+    {
+      case 0:
+        if (mousewalk)
+            mousewalk = false;
+        break;
+      case 1:
+        if (!mousewalk)
+            mousewalk = true;
+        break;
+    }
+}
+
 void M_WalkingSpeed(int choice)
 {
     switch(choice)
@@ -5888,6 +6003,27 @@ void M_DiskIcon(int choice)
         if (!show_diskicon)
             show_diskicon = true;
         break;
+    }
+}
+
+void M_IconType(int choice)
+{
+    if((gamemode == commercial || fsize == 4234124 || fsize == 4196020 ||
+        fsize == 12474561 || fsize == 12487824 || fsize == 11159840 ||
+        fsize == 12408292 || fsize == 12538385 || fsize == 12361532 ||
+        fsize == 7585664) && show_diskicon)
+    {
+        switch(choice)
+        {
+          case 0:
+            if (icontype == 1)
+                icontype = 0;
+            break;
+          case 1:
+            if (icontype == 0)
+                icontype = 1;
+            break;
+        }
     }
 }
 
@@ -7142,7 +7278,7 @@ void M_Drawer (void)
     max = currentMenu->numitems;
 
     if (fsize != 28422764 && fsize != 19321722 && fsize != 12361532 &&
-        currentMenu == &SoundDef && itemOn > 1 && itemOn < 5 && whichSkull == 1)
+        currentMenu == &SoundDef && itemOn > 2 && itemOn < 6 && whichSkull == 1)
     {
         char *message_string = "YOU MUST QUIT AND RESTART TO TAKE EFFECT.";
         int message_offset = ORIGWIDTH/2 - M_StringWidth(message_string) / 2;
@@ -7167,7 +7303,7 @@ void M_Drawer (void)
         M_WriteText(message_offset, 160, message_string);
         V_ClearDPTranslation();
     }
-    else if(fsize == 19321722 && currentMenu == &SoundDef && itemOn == 3 && whichSkull == 1)
+    else if(fsize == 19321722 && currentMenu == &SoundDef && itemOn == 4 && whichSkull == 1)
     {
         char *message_string = "NO PC-SPEAKERS AVAILABLE FOR HACX";
         int message_offset = ORIGWIDTH/2 - M_StringWidth(message_string) / 2;
@@ -8602,16 +8738,19 @@ void M_Freelook(int choice)
 
 void M_FreelookSpeed(int choice)
 {
-    switch(choice)
+    if(mouselook)
     {
-    case 0:
-        if (mspeed)
-            mspeed--;
-        break;
-    case 1:
-        if (mspeed < 10)
-            mspeed++;
-        break;
+        switch(choice)
+        {
+        case 0:
+            if (mspeed)
+                mspeed--;
+            break;
+        case 1:
+            if (mspeed < 10)
+                mspeed++;
+            break;
+        }
     }
 }
 
@@ -8641,7 +8780,36 @@ void M_DrawControls(void)
 
     M_DrawThermoSmall(ControlsDef.x + 207,ControlsDef.y + LINEHEIGHT_SMALL*(mousesensibility+1),
                  10,mouseSensitivity);
+
+    if(itemOn == 6)
+        dp_translation = crx[CRX_GOLD];
+    else
+        dp_translation = crx[CRX_RED];
+
+    M_WriteText(ControlsDef.x, ControlsDef.y + 58, "MOUSE WALKING (FREELOOK MUST BE OFF)");
+    V_ClearDPTranslation();
+
+    if(mousewalk)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(ControlsDef.x + 284, ControlsDef.y + 58, "ON");
+        V_ClearDPTranslation();
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(ControlsDef.x + 276, ControlsDef.y + 58, "OFF");
+        V_ClearDPTranslation();
+    }    
 #endif
+
+    if(mouselook)
+        dp_translation = crx[CRX_RED];
+    else
+        dp_translation = crx[CRX_DARK];
+
+    M_WriteText(ControlsDef.x, ControlsDef.y + 28, "FREELOOK");
+    V_ClearDPTranslation();
 
     if(mouselook == 0)
     {
@@ -8677,12 +8845,12 @@ void M_DrawControls(void)
     M_DrawThermoSmall(ControlsDef.x + 199,ControlsDef.y + LINEHEIGHT_SMALL*(mousespeed+1),
                  11,mspeed);
 
-    if(itemOn == 6)
+    if(itemOn == 7)
         dp_translation = crx[CRX_GOLD];
     else
         dp_translation = crx[CRX_GRAY];
 
-    M_WriteText(ControlsDef.x, ControlsDef.y + 58, "KEY BINDINGS...");
+    M_WriteText(ControlsDef.x, ControlsDef.y + 68, "KEY BINDINGS...");
     V_ClearDPTranslation();
 
     if(whichSkull == 1)
@@ -9971,18 +10139,21 @@ void M_Slide(int choice)
 
 void M_Smearblood(int choice)
 {
-    switch(choice)
+    if(corpses_slide)
     {
-    case 0:
-        if (corpses_smearblood)
-            corpses_smearblood = false;
-        players[consoleplayer].message = "Corpses will smear blood when sliding";
-        break;
-    case 1:
-        if (!corpses_smearblood)
-            corpses_smearblood = true;
-        players[consoleplayer].message = "Corpses won't smear blood when sliding";
-        break;
+        switch(choice)
+        {
+        case 0:
+            if (corpses_smearblood)
+                corpses_smearblood = false;
+            players[consoleplayer].message = "Corpses will smear blood when sliding";
+            break;
+        case 1:
+            if (!corpses_smearblood)
+                corpses_smearblood = true;
+            players[consoleplayer].message = "Corpses won't smear blood when sliding";
+            break;
+        }
     }
 }
 
@@ -10005,18 +10176,21 @@ void M_ColoredCorpses(int choice)
 
 void M_GoreAmount(int choice)
 {
-    switch(choice)
+    if(d_maxgore)
     {
-    case 0:
-        if (gore_amount > 1)
-            gore_amount--;
-        break;
-    case 1:
-        if (gore_amount < 4)
-            gore_amount++;
-        break;
+        switch(choice)
+        {
+        case 0:
+            if (gore_amount > 1)
+                gore_amount--;
+            break;
+        case 1:
+            if (gore_amount < 4)
+                gore_amount++;
+            break;
+        }
+        players[consoleplayer].message = "THE AMOUNT OF GORE HAS BEEN ADJUSTED";
     }
-    players[consoleplayer].message = "THE AMOUNT OF GORE HAS BEEN ADJUSTED";
 }
 
 void M_NoMonsters(int choice)

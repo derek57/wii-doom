@@ -195,9 +195,6 @@ char            *pagename;
 
 dboolean        wipe;
 dboolean        done;
-dboolean        nomonsters;     // checkparm of -nomonsters
-dboolean        start_respawnparm;
-dboolean        start_fastparm;
 dboolean        autostart;
 dboolean        advancedemo;
 
@@ -234,42 +231,38 @@ int             startuptimer;
 extern byte     *zone_mem;
 
 extern int      exit_by_reset;
-extern int      show_stats;
-extern int      timer_info;
 extern int      opl_type;
 extern int      mp_skill;
 extern int      warpepi;
 extern int      warplev;
 extern int      mus_engine;
 extern int      warped;
-extern int      showMessages;
 extern int      screenSize;
 extern int      sound_channels;
 extern int      startlump;
 extern int      viewheight2;
 extern int      correct_lost_soul_bounce;
 
-extern dboolean  merge;
-extern dboolean  BorderNeedRefresh;
-extern dboolean  skillflag;
-extern dboolean  nomonstersflag;
-extern dboolean  fastflag;
-extern dboolean  respawnflag;
-extern dboolean  warpflag;
-extern dboolean  multiplayerflag;
-extern dboolean  deathmatchflag;
-extern dboolean  altdeathflag;
-extern dboolean  locallanflag;
-extern dboolean  searchflag;
-extern dboolean  queryflag;
-extern dboolean  dedicatedflag;
-extern dboolean  setsizeneeded;
-extern dboolean  hud;
-extern dboolean  inhelpscreens;
-extern dboolean  finale_music;
-extern dboolean  aiming_help;
-extern dboolean  show_chat_bar;
-extern dboolean  blurred;
+extern dboolean merge;
+extern dboolean BorderNeedRefresh;
+extern dboolean skillflag;
+extern dboolean nomonstersflag;
+extern dboolean fastflag;
+extern dboolean respawnflag;
+extern dboolean warpflag;
+extern dboolean multiplayerflag;
+extern dboolean deathmatchflag;
+extern dboolean altdeathflag;
+extern dboolean locallanflag;
+extern dboolean searchflag;
+extern dboolean queryflag;
+extern dboolean dedicatedflag;
+extern dboolean setsizeneeded;
+extern dboolean inhelpscreens;
+extern dboolean finale_music;
+extern dboolean aiming_help;
+extern dboolean show_chat_bar;
+extern dboolean blurred;
 
 extern menu_t*  currentMenu;                          
 extern menu_t   CheatsDef;
@@ -666,8 +659,6 @@ void D_DoomLoop (void)
     I_SetGrabMouseCallback(D_GrabMouseCallback);
     I_InitGraphics();
 #endif
-
-    I_EnableLoadingDisk(SCREENWIDTH - LOADING_DISK_W, SCREENHEIGHT - LOADING_DISK_H);
 
     V_RestoreBuffer();
 
@@ -1841,25 +1832,13 @@ void D_DoomMain (void)
 
     snd_channels = sound_channels;
 
-    if(fsize == 28422764 || fsize == 19321722 || fsize == 12361532)
-        beta_style_mode = false;
-
     if(beta_style_mode)
-    {
         beta_style = true;
-        beta_skulls = true;
-        beta_imp = true;
-        beta_bfg = true;
-        beta_plasma = true;
-    }
     else
-    {
         beta_style = false;
-        beta_skulls = false;
-        beta_imp = false;
-        beta_bfg = false;
-        beta_plasma = false;
-    }
+
+    if(fsize == 28422764 || fsize == 19321722 || fsize == 12361532)
+        beta_style = false;
 
     if(beta_style && screenSize > 7)
         screenSize = 7;
@@ -2303,6 +2282,14 @@ void D_DoomMain (void)
     {
         gamemode = registered;
     }
+
+    if (gamemode != commercial && fsize != 4234124 && fsize != 4196020 &&
+            fsize != 12474561 && fsize != 12487824 && fsize != 11159840 &&
+            fsize != 12408292 && fsize != 12538385 && fsize != 12361532 &&
+            fsize != 7585664)
+        icontype = 0;
+
+    I_EnableLoadingDisk(SCREENWIDTH - LOADING_DISK_W, SCREENHEIGHT - LOADING_DISK_H);
 
     // EXEs prior to the Final Doom exes do not support Final Doom.
 

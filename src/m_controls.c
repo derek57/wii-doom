@@ -34,45 +34,21 @@
 
 #include "v_video.h"
 
-/*
-extern dboolean am_rotate;
-extern dboolean d_recoil;
-extern dboolean d_maxgore;
-extern dboolean d_thrust;
-extern dboolean respawnparm;
-extern dboolean fastparm;
-*/
-extern dboolean hud;
 extern dboolean swap_sound_chans;
 extern dboolean randompitch;
 
 extern int display_fps;
-/*
-extern int drawgrid;
-extern int followplayer;
-*/
-extern int showMessages;
-//extern int mouseSensitivity;
 extern int wipe_type;
-extern int timer_info;
 
 // Bind all of the common controls used by Doom and all other games.
 
-extern int show_stats;
 extern int screenblocks;
-/*
-extern int sfxVolume;
-extern int musicVolume;
-*/
 extern int forwardmove;
 extern int sidemove;
 extern int turnspeed;
-extern int crosshair;
 extern int mus_engine;
 extern int mouselook;
-//extern int autoaim;
 extern int runcount;
-extern int chaingun_tics;
 extern int snd_module;
 extern int sound_channels;
 extern int gore_amount;
@@ -184,22 +160,16 @@ int key_weapon8 = '8';
 int key_prevweapon = 0;
 int key_nextweapon = 0;
 
-//int mousebjump = -1;
 int mousebjump = 2;
 int mousebfire = 0;
-//int mousebforward = 1;
 int mousebforward = -1;
-//int mousebstrafe = 2;
 int mousebstrafe = -1;
 int mousebbackward = -1;
-//int mousebprevweapon = -1;
 int mousebprevweapon = 8;
-//int mousebnextweapon = -1;
 int mousebnextweapon = 9;
 int mousebstrafeleft = -1;
 int mousebstraferight = -1;
 int mousebuse = 1;
-//int mousebuse = -1;
 
 // Joystick controls
 
@@ -299,7 +269,9 @@ void M_BindBaseControls(void)
     M_BindVariable("smearblood_corpses",     &corpses_smearblood);
     M_BindVariable("diskicon",               &show_diskicon);
     M_BindVariable("samplerate",             &use_libsamplerate);
-//    M_BindVariable("memory",                 &memory_usage);
+    M_BindVariable("mouse_walk",             &mousewalk);
+    M_BindVariable("generalsound",           &general_sound);
+    M_BindVariable("icon_type",              &icontype);
 #ifdef WII
     M_BindVariable("key_shoot",              &joy_r);
     M_BindVariable("key_open",               &joy_l);

@@ -66,14 +66,11 @@
 #define WEAPONBOTTOM            128*FRACUNIT
 
 
-dboolean            skippsprinterp = false;
+dboolean           skippsprinterp = false;
 
-int                use_vanilla_weapon_change = 1;
 int                bfglook = 1;
 
-extern dboolean     aiming_help;
-
-extern int         chaingun_tics;
+extern dboolean    aiming_help;
 
 extern void        P_Thrust (player_t* player, angle_t angle, fixed_t move);
 
@@ -125,7 +122,7 @@ P_SetPsprite
         }
         
         // killough 7/19/98: Pre-Beta BFG
-        if (stnum == S_BFG1 && beta_bfg)
+        if (stnum == S_BFG1 && beta_style)
             stnum = S_OLDBFG1; // Skip to alternate weapon frame
 
         state = &states[stnum];
@@ -861,7 +858,7 @@ A_FirePlasma
                       ps_flash,
                       weaponinfo[player->readyweapon].flashstate+(P_Random ()&1) );
 
-    if(beta_plasma)
+    if(beta_style)
     {
         int t = 0;
 

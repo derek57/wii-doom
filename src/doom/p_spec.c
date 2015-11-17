@@ -325,8 +325,11 @@ void P_InitPicAnims (void)
         if (lastanim >= anims + maxanims)
         {
             size_t      newmax = (maxanims ? maxanims * 2 : MAXANIMS);
-
+#ifdef BOOM_ZONE_HANDLING
+            anims = Z_Realloc(anims, newmax * sizeof(*anims), PU_LEVEL, NULL);
+#else
             anims = Z_Realloc(anims, newmax * sizeof(*anims));
+#endif
             lastanim = anims + maxanims;
             maxanims = newmax;
         }
@@ -1917,8 +1920,6 @@ P_ShootSpecialLine
 //
 void P_PlayerInSpecialSector (player_t* player)
 {
-    extern int       showMessages;
-
     sector_t*        sector = player->mo->subsector->sector;
 
     // Falling, not all the way down yet?

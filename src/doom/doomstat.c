@@ -30,14 +30,31 @@
 
 
 // Game Mode - identify IWAD as shareware, retail etc.
-GameMode_t      gamemode = indetermined;
-GameMission_t   gamemission = doom;
-GameVersion_t   gameversion = exe_final2;
+GameMode_t       gamemode = indetermined;
+GameMission_t    gamemission = doom;
+GameVersion_t    gameversion = exe_final2;
 
-char            *gamedescription;
+char             *gamedescription;
+
+// Show messages has default, 0 = off, 1 = on
+int              showMessages = 1;        
+
+// specifies whether to follow the player around
+int              drawgrid = 0;
+int              followplayer = 1;
+int              show_stats = 0;
+int              timer_info = 0;
+int              use_vanilla_weapon_change = 1;
+int              chaingun_tics = 4;
+int              crosshair = 0;
 
 // Set if homebrew PWAD stuff has been added.
 dboolean         modifiedgame;
+dboolean         start_respawnparm;
+dboolean         start_fastparm;
+dboolean         nomonsters;     // checkparm of -nomonsters
+dboolean         hud;
+
 dboolean         am_overlay = false;
 dboolean         nerve_pwad = false;
 dboolean         master_pwad = false;
@@ -50,10 +67,6 @@ dboolean         fastparm = false;          // checkparm of -fast
 dboolean         d_footstep = false;
 dboolean         d_footclip = false;
 dboolean         d_splash = false;
-dboolean         beta_bfg = false;
-dboolean         beta_skulls = false;
-dboolean         beta_plasma = false;
-dboolean         beta_imp = false;
 dboolean         d_translucency = false;
 dboolean         d_chkblood = false;
 dboolean         d_chkblood2 = false;
@@ -102,6 +115,10 @@ dboolean         corpses_slide = false;
 dboolean         corpses_smearblood = false;
 dboolean         show_diskicon = true;
 dboolean         randomly_colored_playercorpses = false;
+dboolean         mousewalk = false;
+dboolean         am_rotate = false;
+dboolean         jumping = false;
+dboolean         general_sound = true;
 /*
 dboolean         nerve = false;
 dboolean         chex = false;
@@ -117,9 +134,10 @@ dboolean         BTSXE3 = false;
 dboolean         BTSXE3A = false;
 dboolean         BTSXE3B = false;
 
-int             d_colblood = 0;
-int             d_colblood2 = 0;
-int             d_swirl;
-int             autoaim = false;
-int             background_type = 1;
+int              d_colblood = 0;
+int              d_colblood2 = 0;
+int              d_swirl;
+int              autoaim = false;
+int              background_type = 1;
+int              icontype = 0;
 

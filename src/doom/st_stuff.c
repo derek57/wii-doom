@@ -543,7 +543,7 @@ patch_t *ST_LoadStatusKeyPatch(int keypicnum)
 // graphics are drawn to a backing screen and blitted to the real screen
 byte                *st_backing_screen;
             
-dboolean             emptytallpercent;
+dboolean            emptytallpercent;
 
 void (*hudfunc)(int, int, patch_t *, byte *);
 void (*hudnumfunc)(int, int, patch_t *, byte *);
@@ -551,12 +551,11 @@ void (*godhudfunc)(int, int, patch_t *, byte *);
 
 extern channel_t    channels[8];
 
-extern dboolean      BorderNeedRefresh;
-extern dboolean      hud;
-extern dboolean      in_slime;
-extern dboolean      show_chat_bar;
-extern dboolean      done;
-extern dboolean      massacre_cheat_used;
+extern dboolean     BorderNeedRefresh;
+extern dboolean     in_slime;
+extern dboolean     show_chat_bar;
+extern dboolean     done;
+extern dboolean     massacre_cheat_used;
 
 extern char         massacre_textbuffer[30];
 

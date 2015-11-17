@@ -371,8 +371,13 @@ void R_ClearSprites(void)
     if (num_vissprite >= num_vissprite_alloc)
     {
         num_vissprite_alloc += 128;
+#ifdef BOOM_ZONE_HANDLING
+        vissprites = Z_Realloc(vissprites, num_vissprite_alloc * sizeof(vissprite_t), PU_LEVEL, NULL);
+        vissprite_ptrs = Z_Realloc(vissprite_ptrs, num_vissprite_alloc * sizeof(vissprite_t *), PU_LEVEL, NULL);
+#else
         vissprites = Z_Realloc(vissprites, num_vissprite_alloc * sizeof(vissprite_t));
         vissprite_ptrs = Z_Realloc(vissprite_ptrs, num_vissprite_alloc * sizeof(vissprite_t *));
+#endif
     }
 
     num_vissprite = 0;

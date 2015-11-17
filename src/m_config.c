@@ -55,7 +55,6 @@
 #define CONFIG_VARIABLE_STRING(name) \
     CONFIG_VARIABLE_GENERIC(name, DEFAULT_STRING)
 
-//extern dboolean devparm;
 
 extern int key_right;
 extern int key_left;
@@ -64,6 +63,7 @@ extern int key_down;
 extern int key_strafeleft;
 extern int key_invright;
 extern int key_useartifact;
+
 
 //
 // DEFAULTS
@@ -171,7 +171,9 @@ default_t        doom_defaults_list[] =
     CONFIG_VARIABLE_INT                (smearblood_corpses),
     CONFIG_VARIABLE_INT                (diskicon),
     CONFIG_VARIABLE_INT                (samplerate),
-//    CONFIG_VARIABLE_INT                (memory),
+    CONFIG_VARIABLE_INT                (mouse_walk),
+    CONFIG_VARIABLE_INT                (generalsound),
+    CONFIG_VARIABLE_INT                (icon_type),
     CONFIG_VARIABLE_INT                (key_shoot),
     CONFIG_VARIABLE_INT                (key_open),
     CONFIG_VARIABLE_INT                (key_menu),
@@ -488,11 +490,7 @@ void M_LoadDefaults (void)
         doom_defaults.filename
             = M_StringJoin(configdir, default_main_config, NULL);
     }
-/*
-#ifndef WII
-    printf("saving config in %s\n", doom_defaults.filename);
-#endif
-*/
+
     if (LoadDefaultCollection(&doom_defaults))
         C_Printf(CR_GRAY, " Loaded VARs from %s.", uppercase(doom_defaults.filename));
     else

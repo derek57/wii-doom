@@ -335,7 +335,7 @@ void C_Printf(stringtype_t typestring, char *string, ...)
     M_vsnprintf(buffer, sizeof(buffer) - 1, string, argptr);
     va_end(argptr);
 #ifdef BOOM_ZONE_HANDLING
-    console = Z_Realloc(console, (consolestrings + 1) * sizeof(*console), PU_CACHE, NULL);
+    console = Z_Realloc(console, (consolestrings + 1) * sizeof(*console), PU_STATIC, NULL);
 #else
     console = Z_Realloc(console, (consolestrings + 1) * sizeof(*console));
 #endif

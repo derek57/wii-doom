@@ -1363,7 +1363,7 @@ void A_TroopAttack (mobj_t* actor)
 
     // launch a missile
     actor->frame |= FF_FULLBRIGHT;
-    if(beta_imp)
+    if(beta_style)
         P_SpawnMissile (actor, actor->target, MT_TROOPSHOT2);
     else
         P_SpawnMissile (actor, actor->target, MT_TROOPSHOT);
@@ -1982,7 +1982,7 @@ A_PainShootSkull
     // okay, there's playe for another one
     an = angle >> ANGLETOFINESHIFT;
     
-    if(beta_skulls)
+    if(beta_style)
     {
         prestep =
             4*FRACUNIT
@@ -2000,7 +2000,7 @@ A_PainShootSkull
 
     if (!d_blockskulls)   // killough 10/98: compatibility-optioned
     {
-        if (beta_skulls)
+        if (beta_style)
             newmobj = P_SpawnMobj (x, y, z, MT_BETASKULL);
         else
             newmobj = P_SpawnMobj (x, y, z, MT_SKULL);
@@ -2016,7 +2016,7 @@ A_PainShootSkull
         if (Check_Sides(actor,x,y))
             return;
 
-        if (beta_skulls)
+        if (beta_style)
             newmobj = P_SpawnMobj (x, y, z, MT_BETASKULL);
         else
             newmobj = P_SpawnMobj (x, y, z, MT_SKULL);
@@ -2064,7 +2064,7 @@ A_PainShootSkull
 
     if (!d_blockskulls)   // killough 10/98: compatibility-optioned
     {
-        if (beta_skulls)
+        if (beta_style)
             newmobj = P_SpawnMobj (x, y, z, MT_BETASKULL);
         else
             newmobj = P_SpawnMobj (x, y, z, MT_SKULL);
@@ -2080,7 +2080,7 @@ A_PainShootSkull
 //        if (Check_Sides(actor,x,y))
 //            return;
 
-        if (beta_skulls)
+        if (beta_style)
             newmobj = P_SpawnMobj (x, y, z, MT_BETASKULL);
         else
             newmobj = P_SpawnMobj (x, y, z, MT_SKULL);

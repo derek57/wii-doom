@@ -191,7 +191,7 @@ int             timelimit;
 
 // mouse values are used once 
 int             mousex;
-int             mousey;         
+int             mousey;
 
 //int                defdemosize;            // [crispy] demo progress bar
 int             d_episode; 
@@ -1017,7 +1017,7 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
 #ifdef WII
     forward += mousey; 
 #else
-    if(!mouselook)
+    if(!mouselook && mousewalk)
         forward += mousey; 
 #endif
     // mouselook, but not when paused
@@ -2253,10 +2253,10 @@ void G_DoSaveGame (void)
 
     players[consoleplayer].message = s_GGSAVED;
 
-    dont_message_to_console = false;
-
     // draw the pattern into the back screen
     R_FillBackScreen ();
+
+    dont_message_to_console = false;
 } 
 
 //

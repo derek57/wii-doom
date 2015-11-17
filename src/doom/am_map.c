@@ -243,10 +243,6 @@ cheatseq_t cheat_amap = CHEAT("iddt", 0);
 
 
 int                cheating = 0;
-int                drawgrid = 0;
-
-// specifies whether to follow the player around
-int                followplayer = 1;
 
 // next point to be assigned
 static int         markpointnum = 0;
@@ -337,14 +333,12 @@ static player_t    *plr;
 // numbers used for marking by the automap
 static patch_t     *marknums[10];
 
-static dboolean     stopped = true;
+static dboolean    stopped = true;
 
-static dboolean     movement;
+static dboolean    movement;
 
-dboolean            dont_move_backwards = false;
-dboolean            automapactive = false;
-
-//extern dboolean     am_rotate;
+dboolean           dont_move_backwards = false;
+dboolean           automapactive = false;
 
 extern int         screenSize;
 

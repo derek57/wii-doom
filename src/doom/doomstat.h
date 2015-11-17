@@ -81,10 +81,10 @@ extern  dboolean         devparm_hacx;
 // -----------------------------------------------------
 // Game Mode - identify IWAD as shareware, retail etc.
 //
-extern  GameMode_t      gamemode;
-extern  GameMission_t   gamemission;
-extern  GameVersion_t   gameversion;
-extern  char            *gamedescription;
+extern  GameMode_t       gamemode;
+extern  GameMission_t    gamemission;
+extern  GameVersion_t    gameversion;
+extern  char             *gamedescription;
 
 // If true, we're using one of the mangled BFG edition IWADs.
 extern  dboolean         bfgedition;
@@ -109,24 +109,24 @@ extern  dboolean         modifiedgame;
 //
 
 // Defaults for menu, methinks.
-extern  skill_t         startskill;
-extern  int             startepisode;
-extern  int             startmap;
+extern  skill_t          startskill;
+extern  int              startepisode;
+extern  int              startmap;
 
 // Savegame slot to load on startup.  This is the value provided to
 // the -loadgame option.  If this has not been provided, this is -1.
 
-extern  int             startloadgame;
+extern  int              startloadgame;
 
 extern  dboolean         autostart;
 
 // Selected by user. 
-extern  skill_t         gameskill;
-extern  int             gameepisode;
-extern  int             gamemap;
+extern  skill_t          gameskill;
+extern  int              gameepisode;
+extern  int              gamemap;
 
 // If non-zero, exit the level after this number of minutes
-extern  int             timelimit;
+extern  int              timelimit;
 
 // Nightmare mode flag, single player.
 extern  dboolean         respawnmonsters;
@@ -147,18 +147,19 @@ extern  dboolean         deathmatch;
 //  Sound FX volume has default, 0 - 15
 //  Music volume has default, 0 - 15
 // These are multiplied by 8.
-extern  int             sfxVolume;
-extern  int             musicVolume;
+extern  int              sfxVolume;
+extern  int              musicVolume;
 
 // Current music/sfx card - index useless
 //  w/o a reference LUT in a sound module.
 // Ideally, this would use indices found
 //  in: /usr/include/linux/soundcard.h
-extern  int             snd_MusicDevice;
-extern  int             snd_SfxDevice;
+extern  int              snd_MusicDevice;
+extern  int              snd_SfxDevice;
+
 // Config file? Same disclaimer as above.
-extern  int             snd_DesiredMusicDevice;
-extern  int             snd_DesiredSfxDevice;
+extern  int              snd_DesiredMusicDevice;
+extern  int              snd_DesiredSfxDevice;
 
 
 // -------------------------
@@ -182,24 +183,24 @@ extern  dboolean         nodrawers;
 
 // This one is related to the 3-screen display mode.
 // ANG90 = left side, ANG270 = right
-extern  int             viewangleoffset;
+extern  int              viewangleoffset;
 
 // Player taking events, and displaying.
-extern  int             consoleplayer;        
-extern  int             displayplayer;
+extern  int              consoleplayer;        
+extern  int              displayplayer;
 
 
 // -------------------------------------
 // Scores, rating.
 // Statistics on a given map, for intermission.
 //
-extern  int             totalkills;
-extern  int             totalitems;
-extern  int             totalsecret;
+extern  int              totalkills;
+extern  int              totalitems;
+extern  int              totalsecret;
 
 // Timer, for scores.
-extern  int             levelstarttic;        // gametic at level start
-extern  int             leveltime;        // tics in game play for par
+extern  int              levelstarttic;        // gametic at level start
+extern  int              leveltime;        // tics in game play for par
 
 
 
@@ -220,7 +221,7 @@ extern  dboolean         singledemo;
 
 
 //?
-extern  gamestate_t     gamestate;
+extern  gamestate_t      gamestate;
 
 
 
@@ -236,23 +237,23 @@ extern  gamestate_t     gamestate;
 
 
 // Bookkeeping on players - state.
-extern  player_t        players[MAXPLAYERS];
+extern  player_t         players[MAXPLAYERS];
 
 // Alive? Disconnected?
 extern  dboolean         playeringame[MAXPLAYERS];
 
 
 // Player spawn spots for deathmatch.
-#define MAX_DM_STARTS   10
-extern  mapthing_t      deathmatchstarts[MAX_DM_STARTS];
-extern  mapthing_t*     deathmatch_p;
+#define MAX_DM_STARTS    10
+extern  mapthing_t       deathmatchstarts[MAX_DM_STARTS];
+extern  mapthing_t*      deathmatch_p;
 
 // Player spawn spots.
-extern  mapthing_t      playerstarts[MAXPLAYERS];
+extern  mapthing_t       playerstarts[MAXPLAYERS];
 
 // Intermission stats.
 // Parameters for world map / intermission.
-extern  wbstartstruct_t wminfo;        
+extern  wbstartstruct_t  wminfo;        
 
 
 
@@ -265,8 +266,8 @@ extern  wbstartstruct_t wminfo;
 //
 
 // File handling stuff.
-extern  char *          savegamedir;
-extern  char            basedefault[1024];
+extern  char *           savegamedir;
+extern  char             basedefault[1024];
 
 // if true, load all graphics at level load
 extern  dboolean         precache;
@@ -274,31 +275,33 @@ extern  dboolean         precache;
 
 // wipegamestate can be set to -1
 //  to force a wipe on the next draw
-extern  gamestate_t     wipegamestate;
+extern  gamestate_t      wipegamestate;
 
-extern  int             mouseSensitivity;
+extern  int              mouseSensitivity;
 
-extern  int             bodyqueslot;
+extern  int              bodyqueslot;
 
 
 
 // Needed to store the number of the dummy sky flat.
 // Used for rendering,
 //  as well as tracking projectiles etc.
-extern  int             skyflatnum;
+extern  int              skyflatnum;
 
 
 
 // Netgame stuff (buffers and pointers, i.e. indices).
 
 
-extern  int             rndindex;
+extern  int              rndindex;
 
-extern  ticcmd_t        *netcmds;
+extern  ticcmd_t         *netcmds;
 
 extern  dboolean         am_overlay;
 extern  dboolean         memory_usage;
 
+extern  dboolean         am_rotate;
+extern  dboolean         hud;
 extern  dboolean         d_recoil;
 extern  dboolean         start_respawnparm;
 extern  dboolean         start_fastparm;
@@ -307,10 +310,6 @@ extern  dboolean         d_thrust;
 extern  dboolean         d_footstep;
 extern  dboolean         d_footclip;
 extern  dboolean         d_splash;
-extern  dboolean         beta_bfg;
-extern  dboolean         beta_skulls;
-extern  dboolean         beta_plasma;
-extern  dboolean         beta_imp;
 extern  dboolean         d_translucency;
 extern  dboolean         d_chkblood;
 extern  dboolean         d_chkblood2;
@@ -359,6 +358,9 @@ extern  dboolean         corpses_slide;
 extern  dboolean         corpses_smearblood;
 extern  dboolean         show_diskicon;
 extern  dboolean         randomly_colored_playercorpses;
+extern  dboolean         mousewalk;
+extern  dboolean         jumping;
+extern  dboolean         general_sound;
 /*
 extern  dboolean         nerve;
 extern  dboolean         chex;
@@ -374,11 +376,20 @@ extern  dboolean         BTSXE3;
 extern  dboolean         BTSXE3A;
 extern  dboolean         BTSXE3B;
 
-extern  int             d_colblood;
-extern  int             d_colblood2;
-extern  int             d_swirl;
-extern  int             autoaim;
-extern  int             background_type;
+extern  int              d_colblood;
+extern  int              d_colblood2;
+extern  int              d_swirl;
+extern  int              autoaim;
+extern  int              background_type;
+extern  int              drawgrid;
+extern  int              followplayer;
+extern  int              show_stats;
+extern  int              timer_info;
+extern  int              showMessages;
+extern  int              use_vanilla_weapon_change;
+extern  int              chaingun_tics;
+extern  int              crosshair;
+extern  int              icontype;
 
 void A_MoreGibs(mobj_t* actor);
 

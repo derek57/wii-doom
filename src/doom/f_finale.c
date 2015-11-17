@@ -336,7 +336,7 @@ dboolean F_CastResponder (event_t* ev)
     if (d_flipcorpses && type != MT_CHAINGUY && type != MT_CYBORG)
         castdeathflip = rand() & 1;
 
-    if(!beta_skulls)
+    if(!beta_style)
     {
         caststate = &states[mobjinfo[castorder[castnum].type].deathstate];
         casttics = caststate->tics;
@@ -414,7 +414,7 @@ void F_StartCast (void)
 
     wipegamestate = -1;    // force a screen wipe
     castnum = 0;
-    if(!beta_skulls)
+    if(!beta_style)
         caststate = &states[mobjinfo[castorder[castnum].type].seestate];
     else
         caststate = &states[mobjinfo[castorderbeta[castnum].type].seestate];
@@ -447,7 +447,7 @@ void F_CastTicker (void)
         castnum++;
         castdeath = false;
         castdeathflip = false;
-        if(!beta_skulls)
+        if(!beta_style)
         {
             if (castorder[castnum].name == NULL)
                 castnum = 0;
@@ -470,7 +470,7 @@ void F_CastTicker (void)
         // just advance to next state in animation
         if (caststate == &states[S_PLAY_ATK1])
         {
-            if(!beta_skulls)
+            if(!beta_style)
                 goto stopattack;    // Oh, gross hack!
             else
                 goto stopattackbeta;    // Oh, gross hack!
@@ -534,7 +534,7 @@ void F_CastTicker (void)
     {
         // go into attack frame
         castattacking = true;
-        if(!beta_skulls)
+        if(!beta_style)
         {
             if (castonmelee)
                 caststate=&states[mobjinfo[castorder[castnum].type].meleestate];
@@ -572,7 +572,7 @@ void F_CastTicker (void)
         
     if (castattacking)
     {
-        if(!beta_skulls)
+        if(!beta_style)
         {
             if (castframes == 24
                 || caststate == &states[mobjinfo[castorder[castnum].type].seestate] )
@@ -815,7 +815,7 @@ void F_CastDrawer (void)
     // erase the entire screen to a background
     V_DrawPatch (0, 0, W_CacheLumpName (bgcastcall, PU_CACHE));
 
-    if(!beta_skulls)
+    if(!beta_style)
         F_CastPrint (castorder[castnum].name);
     else
         F_CastPrint (castorderbeta[castnum].name);

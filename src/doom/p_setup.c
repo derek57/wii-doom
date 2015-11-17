@@ -1464,8 +1464,13 @@ static void P_CreateBlockMap(void)
                 bmap_t  *bp = &bmap[b];
 
                 // Increase size of allocated list if necessary
+#ifdef BOOM_ZONE_HANDLING
+                if (bp->n >= bp->nalloc && !(bp->list = Z_Realloc(bp->list,
+                    (bp->nalloc = bp->nalloc ? bp->nalloc * 2 : 8) * sizeof(*bp->list), PU_LEVEL, NULL)))
+#else
                 if (bp->n >= bp->nalloc && !(bp->list = Z_Realloc(bp->list,
                     (bp->nalloc = bp->nalloc ? bp->nalloc * 2 : 8) * sizeof(*bp->list))))
+#endif
                     I_Error("Unable to create blockmap.");
 
                 // Add linedef to end of list

@@ -199,7 +199,7 @@ wad_file_t *W_AddFile (char *filename, dboolean automatic)
     startlump = numlumps;
     numlumps += numfilelumps;
 #ifdef BOOM_ZONE_HANDLING
-    lumpinfo = Z_Realloc(lumpinfo, numlumps * sizeof(lumpinfo_t *), PU_CACHE, NULL);
+    lumpinfo = Z_Realloc(lumpinfo, numlumps * sizeof(lumpinfo_t *), PU_STATIC, NULL);
 #else
     lumpinfo = Z_Realloc(lumpinfo, numlumps * sizeof(lumpinfo_t *));
 #endif
