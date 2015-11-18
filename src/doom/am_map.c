@@ -762,7 +762,8 @@ dboolean AM_Responder
     {
         if (ev->type == ev_keydown && ev->data1 == key_map_toggle)
         {
-            AM_Toggle();
+            if(!menuactive)
+                AM_Toggle();
 /*
             AM_Start ();
             viewactive = false;
@@ -812,7 +813,8 @@ dboolean AM_Responder
             viewactive = true;
             AM_Stop ();
 */
-            AM_Toggle();
+            if(!menuactive)
+                AM_Toggle();
         }
         else if (key == key_map_maxzoom)
         {
