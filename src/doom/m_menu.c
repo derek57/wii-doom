@@ -3789,7 +3789,14 @@ void M_DrawScreen(void)
             fsize == 12474561 || fsize == 12487824 || fsize == 11159840 ||
             fsize == 12408292 || fsize == 12538385 || fsize == 12361532 ||
             fsize == 7585664)
-        dp_translation = crx[CRX_RED];
+    {
+        if(gamemission == pack_hacx)
+            dp_translation = crx[CRX_BLUE];
+        else if(gamemission == pack_chex)
+            dp_translation = crx[CRX_GREEN];
+        else
+            dp_translation = crx[CRX_RED];
+    }
     else
         dp_translation = crx[CRX_DARK];
 
@@ -8696,7 +8703,14 @@ void M_DrawControls(void)
     if(itemOn == 5)
         dp_translation = crx[CRX_GOLD];
     else
-        dp_translation = crx[CRX_RED];
+    {
+        if(gamemission == pack_hacx)
+            dp_translation = crx[CRX_BLUE];
+        else if(gamemission == pack_chex)
+            dp_translation = crx[CRX_GREEN];
+        else
+            dp_translation = crx[CRX_RED];
+    }
 
     M_WriteText(ControlsDef.x, ControlsDef.y + 48, "MOUSE SENSITIVITY");
     V_ClearDPTranslation();
@@ -8707,7 +8721,14 @@ void M_DrawControls(void)
     if(itemOn == 6)
         dp_translation = crx[CRX_GOLD];
     else
-        dp_translation = crx[CRX_RED];
+    {
+        if(gamemission == pack_hacx)
+            dp_translation = crx[CRX_BLUE];
+        else if(gamemission == pack_chex)
+            dp_translation = crx[CRX_GREEN];
+        else
+            dp_translation = crx[CRX_RED];
+    }
 
     M_WriteText(ControlsDef.x, ControlsDef.y + 58, "MOUSE WALK (TURNS FREELOOK MODE OFF)");
     V_ClearDPTranslation();
