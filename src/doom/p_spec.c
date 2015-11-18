@@ -1931,24 +1931,23 @@ void P_PlayerInSpecialSector (player_t* player)
 
         switch (sector->special)
         {
+          in_slime = true;
           case DamageNegative5Or10PercentHealth:
             // HELLSLIME DAMAGE
             if (!player->powers[pw_ironfeet])
+            {
                 if (!(leveltime&0x1f))
-                {
-                    in_slime = true;
                     P_DamageMobj (player->mo, NULL, NULL, 10);
-                }
+            }
             break;
         
           case DamageNegative2Or5PercentHealth:
             // NUKAGE DAMAGE
             if (!player->powers[pw_ironfeet])
+            {
                 if (!(leveltime&0x1f))
-                {
-                    in_slime = true;
                     P_DamageMobj (player->mo, NULL, NULL, 5);
-                }
+            }
             break;
         
           case DamageNegative10Or20PercentHealth:
@@ -1958,13 +1957,10 @@ void P_PlayerInSpecialSector (player_t* player)
                 || (P_Random()<5) )
             {
                 if (!(leveltime&0x1f))
-                {
-                    in_slime = true;
                     P_DamageMobj (player->mo, NULL, NULL, 20);
-                }
             }
             break;
-                        
+
           case Secret:
             // SECRET SECTOR
             // [crispy] show centered "Secret Revealed!" message
@@ -1990,24 +1986,24 @@ void P_PlayerInSpecialSector (player_t* player)
             for (i = 0; i < sector->linecount; i++)
                 sector->lines[i]->flags &= ~ML_SECRET;
 
+            in_slime = false;
+
             break;
-                        
+
           case DamageNegative10Or20PercentHealthAndEndLevel:
             // EXIT SUPER DAMAGE! (for E1M8 finale)
             if (d_god) /* killough 2/21/98: add compatibility switch */
                 player->cheats &= ~CF_GODMODE; // on godmode cheat clearing
                                                // does not affect invulnerability
             if (!(leveltime&0x1f))
-            {
-                in_slime = true;
                 P_DamageMobj (player->mo, NULL, NULL, 20);
-            }
 
             if (player->health <= 10)
                 G_ExitLevel();
             break;
-                        
+
           default:
+            in_slime = false;
             break;
         }
     }
@@ -2015,18 +2011,25 @@ void P_PlayerInSpecialSector (player_t* player)
     {
         switch ((sector->special & DAMAGE_MASK) >> DAMAGE_SHIFT)
         {
+            in_slime = true;
             case 0: // no damage
+                in_slime = false;
                 break;
+
             case 1: // 2/5 damage per 31 ticks
                 if (!player->powers[pw_ironfeet])
+                {
                     if (!(leveltime & 0x1f))
                         P_DamageMobj(player->mo, NULL, NULL, 5);
+                }
                 break;
 
             case 2: // 5/10 damage per 31 ticks
                 if (!player->powers[pw_ironfeet])
+                {
                     if (!(leveltime & 0x1f))
                         P_DamageMobj(player->mo, NULL, NULL, 10);
+                }
                 break;
 
             case 3: // 10/20 damage per 31 ticks
@@ -2044,7 +2047,7 @@ void P_PlayerInSpecialSector (player_t* player)
             sector->special &= ~SECRET_MASK;
             if (sector->special < 32)   // if all extended bits clear,
                 sector->special = 0;    // sector is not special anymore
-         }
+        }
     }
 }
 

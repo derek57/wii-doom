@@ -251,14 +251,14 @@ sfxinfo_t S_sfx[] =
     SOUND("splsh7", 60),
     SOUND("splsh8", 60),
     SOUND("splsh9", 60),
-    SOUND("burn",   10),
-    SOUND("gloop",  10),
+    SOUND("burn",   10), // landing in slime
+    SOUND("gloop",  10), // landing in water
     SOUND("step0",  64),
     SOUND("step1",  64),
     SOUND("step2",  64),
     SOUND("step3",  64),
-    SOUND("water",  96),
-    SOUND("lava",   96),
+    SOUND("water",  96), // walking inside water
+    SOUND("lava",   96), // walking inside slime
 
     // [crispy] play DSSECRET if available
     SOUND("secret", 60),
