@@ -52,46 +52,26 @@ EV_Teleport
   mobj_t*        thing )
 {
     int          i;
-/*
-    int          tag;
-    mobj_t*      m;
-    mobj_t*      fog;
-    unsigned     an;
-*/
+
     thinker_t*   thinker;
-/*
-    sector_t*    sector;
-    fixed_t      oldx;
-    fixed_t      oldy;
-    fixed_t      oldz;
-*/
+
     fixed_t      aboveFloor = thing->z - thing->floorz;
 
     if (thing->flags2 & MF2_NOTELEPORT)
     {
-        return (false);
+        return 0;
     }
 
     // don't teleport missiles, blood and gibs
     //
     // don't teleport if hit back of line,
     //  so you can get out of teleporter.
-    if((thing->flags & MF_MISSILE) ||
-       thing->type == MT_FLESH ||
-       thing->type == MT_SPRAY ||
-       thing->type == MT_BLOODSPLAT || side)
+    if((thing->flags & MF_MISSILE) || thing->type == MT_BLOODSPLAT
+                                   || thing->type == MT_FLESH
+                                   || thing->type == MT_SPRAY
+                                   || side)
         return 0;
-/*
-    tag = line->tag;
-    for (i = 0; i < numsectors; i++)
-    {
-        if (sectors[ i ].tag == tag )
-        {
-            thinker = thinkercap.next;
-            for (thinker = thinkercap.next;
-                 thinker != &thinkercap;
-                 thinker = thinker->next)
-*/
+printf("%d\n", thing->type);
     // killough 1/31/98: improve performance by using
     // P_FindSectorFromLineTag instead of simple linear search.
     for (i = -1; (i = P_FindSectorFromLineTag(line, i)) >= 0;)
@@ -104,22 +84,6 @@ EV_Teleport
             if ((m = (mobj_t *)thinker)->type == MT_TELEPORTMAN
                 && m->subsector->sector - sectors == i)
             {
-/*
-                // not a mobj
-                if (thinker->function != P_MobjThinker)
-                    continue;        
-
-                m = (mobj_t *)thinker;
-                
-                // not a teleportman
-                if (m->type != MT_TELEPORTMAN )
-                    continue;                
-
-                sector = m->subsector->sector;
-                // wrong sector
-                if (sector-sectors != i )
-                    continue;        
-*/
                 fixed_t     oldx = thing->x;
                 fixed_t     oldy = thing->y;
                 fixed_t     oldz = thing->z;
@@ -226,6 +190,20 @@ dboolean EV_SilentTeleport(line_t *line, int side, mobj_t *thing)
     // so you can get out of teleporter.
     if (side || (thing->flags & MF_MISSILE))
         return false;
+
+    if (thing->flags2 & MF2_NOTELEPORT)
+    {
+        return false;
+    }
+
+    // don't teleport missiles, blood and gibs
+    //
+    // don't teleport if hit back of line,
+    //  so you can get out of teleporter.
+    if((thing->flags & MF_MISSILE) || thing->type == MT_BLOODSPLAT
+                                   || thing->type == MT_FLESH
+                                   || thing->type == MT_SPRAY
+                                   || side)
 
     for (i = -1; (i = P_FindSectorFromLineTag(line, i)) >= 0;)
         for (th = thinkerclasscap[th_mobj].cnext; th != &thinkerclasscap[th_mobj]; th = th->cnext)
