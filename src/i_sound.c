@@ -79,7 +79,6 @@ extern music_module_t music_opl_module;
 // For OPL module:
 
 extern int opl_io_port;
-extern int mus_engine;
 
 // For native music module:
 
@@ -130,8 +129,6 @@ static dboolean SndDeviceInList(snddevice_t device, snddevice_t *list,
 
 static void InitSfxModule(dboolean use_sfx_prefix)
 {
-    extern int snd_module;
-
     if(snd_module)
         I_PCS_InitSound(use_sfx_prefix);
     else

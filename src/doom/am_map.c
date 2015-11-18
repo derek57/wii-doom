@@ -340,8 +340,6 @@ static dboolean    movement;
 dboolean           dont_move_backwards = false;
 dboolean           automapactive = false;
 
-extern int         screenSize;
-
 
 // Calculates the slope and slope according to the x-axis of a line
 // segment in map coordinates (with the upright y-axis n' all) so

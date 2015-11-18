@@ -52,7 +52,6 @@ extern opl_driver_t opl_win32_driver;
 #endif
 extern opl_driver_t opl_sdl_driver;
 
-extern int opl_type;
 
 static opl_driver_t *drivers[] =
 {

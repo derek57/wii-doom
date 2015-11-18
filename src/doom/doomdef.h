@@ -538,7 +538,6 @@ char               target[MAXPATH];
 char               path_tmp[MAXPATH];
 char               temp[MAXPATH];
 
-int                detailLevel;
 int                extra_wad_slot_1_loaded;
 int                extra_wad_slot_2_loaded;
 int                extra_wad_slot_3_loaded;
@@ -547,7 +546,6 @@ dboolean           dont_move_forwards;
 dboolean           error_detected;
 dboolean           print_resource_pwad_error;
 dboolean           print_resource_pwad2_error;
-dboolean           display_ticker;
 dboolean           gamekeydown[NUMKEYS]; 
 
 FILE               *debugfile;

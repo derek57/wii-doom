@@ -143,7 +143,6 @@ dboolean                 BorderNeedRefresh;
 
 int                     r_frame_count;
 
-extern int              screenSize;
 extern int              viewheight2;
 //extern int              gametic;
 extern dboolean         canmodify;

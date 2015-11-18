@@ -149,7 +149,7 @@ HUlib_drawTextLine
             w = SHORT(l->f[c - l->sc]->width);
             if (x+w > ORIGWIDTH)    // CHANGED FOR HIRES
                 break;
-            if(font_shadow)
+            if(font_shadow == 1)
                 V_DrawPatchWithShadow(x, l->y, l->f[c - l->sc], false);
             else
                 V_DrawPatch(x, l->y, l->f[c - l->sc]);
@@ -167,7 +167,7 @@ HUlib_drawTextLine
     if (drawcursor                                           // CHANGED FOR HIRES
         && x + SHORT(l->f['_' - l->sc]->width) <= ORIGWIDTH) // CHANGED FOR HIRES
     {
-        if(font_shadow)
+        if(font_shadow == 1)
             V_DrawPatchWithShadow(x, l->y, l->f['_' - l->sc], false);
         else
             V_DrawPatch(x, l->y, l->f['_' - l->sc]);

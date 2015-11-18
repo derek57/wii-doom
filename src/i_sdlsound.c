@@ -98,8 +98,6 @@ static allocated_sound_t *allocated_sounds_tail;
 
 extern int lib_sample_rate;
 
-extern int use_libsamplerate;
-
 // Scale factor used when converting libsamplerate floating point numbers
 // to integers. Too high means the sounds can clip; too low means they
 // will be too quiet. This is an amount that should avoid clipping most
@@ -107,9 +105,6 @@ extern int use_libsamplerate;
 // is used, clipping might occur.
 
 float libsamplerate_scale = 0.65;
-
-extern dboolean swap_sound_chans;
-extern dboolean randompitch;
 
 // Hook a sound into the linked list at the head.
 

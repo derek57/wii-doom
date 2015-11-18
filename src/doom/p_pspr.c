@@ -1231,8 +1231,6 @@ void P_MovePsprites (player_t* player)
     player->psprites[ps_flash].sy = player->psprites[ps_weapon].sy;
 }
 /*
-extern int mouselook;
-
 void A_Bullet (player_t *player)
 {
 //    if(d_casing)

@@ -117,7 +117,6 @@ int                          italicize[15] = { 0, 2, 2, 2, 1, 1, 1, 1, 0, 0, 0, 
 
 dboolean                      dp_translucent = false;
 
-extern int                   screenblocks;
 
 //
 // V_MarkRect 

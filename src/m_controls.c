@@ -34,24 +34,10 @@
 
 #include "v_video.h"
 
-extern dboolean swap_sound_chans;
-extern dboolean randompitch;
-
-extern int display_fps;
-extern int wipe_type;
 
 // Bind all of the common controls used by Doom and all other games.
 
-extern int screenblocks;
-extern int forwardmove;
-extern int sidemove;
-extern int turnspeed;
-extern int mus_engine;
-extern int mouselook;
 extern int runcount;
-extern int snd_module;
-extern int sound_channels;
-extern int gore_amount;
 extern int png_screenshots;
 extern int pixelwidth;
 extern int pixelheight;
@@ -74,8 +60,6 @@ extern int joy_y;
 extern int joy_1;
 extern int joy_2;
 
-extern int opl_type;
-extern int use_libsamplerate;
 
 int key_up = KEY_UPARROW;
 int key_down = KEY_DOWNARROW; 
@@ -92,7 +76,6 @@ int key_flyup = KEY_PGUP;
 int key_flydown = KEY_PGDN;
 int key_jump = KEY_DEL;
 int key_strafe = KEY_RALT;
-int mspeed = 2;
 
 // Map control keys:
 

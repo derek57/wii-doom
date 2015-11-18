@@ -151,7 +151,6 @@ static Mix_Music *current_track_music = NULL;
 dboolean change_anyway;
 
 extern int tracknum;
-extern int mus_engine;
 
 extern dboolean mus_cheat_used;
 /*

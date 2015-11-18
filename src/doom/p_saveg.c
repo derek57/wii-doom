@@ -597,10 +597,10 @@ static void saveg_write_mobj_t(mobj_t *str)
 static void saveg_read_ticcmd_t(ticcmd_t *str)
 {
     // signed char forwardmove
-    str->forwardmove = saveg_read8();
+    str->forwardmov = saveg_read8();
 
     // signed char sidemove
-    str->sidemove = saveg_read8();
+    str->sidemov = saveg_read8();
 
     // short angleturn
     str->angleturn = saveg_read16();
@@ -621,10 +621,10 @@ static void saveg_read_ticcmd_t(ticcmd_t *str)
 static void saveg_write_ticcmd_t(ticcmd_t *str)
 {
     // signed char forwardmove
-    saveg_write8(str->forwardmove);
+    saveg_write8(str->forwardmov);
 
     // signed char sidemove
-    saveg_write8(str->sidemove);
+    saveg_write8(str->sidemov);
 
     // short angleturn
     saveg_write16(str->angleturn);

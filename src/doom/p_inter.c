@@ -92,7 +92,6 @@ int                     species_infighting = 0;
 
 extern dboolean          massacre_cheat_used;
 
-extern int              snd_module;
 
 //
 // GET STUFF

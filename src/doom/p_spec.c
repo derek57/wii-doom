@@ -235,8 +235,6 @@ msecnode_t      *sector_list = NULL;    // phares 3/16/98
 
 extern dboolean  noclip_on;
 
-extern int      snd_module;
-
 
 //
 // P_InitPicAnims

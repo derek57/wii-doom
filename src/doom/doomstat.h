@@ -341,7 +341,6 @@ extern  dboolean         d_maskedanim;
 extern  dboolean         d_sound;
 extern  dboolean         d_ouchface;
 extern  dboolean         show_authors;
-extern  dboolean         font_shadow;
 extern  dboolean         d_shadows;
 extern  dboolean         d_fixspriteoffsets;
 extern  dboolean         d_brightmaps;
@@ -360,7 +359,10 @@ extern  dboolean         show_diskicon;
 extern  dboolean         randomly_colored_playercorpses;
 extern  dboolean         mousewalk;
 extern  dboolean         jumping;
+extern  dboolean         swap_sound_chans;
+extern  dboolean         randompitch;
 extern  dboolean         general_sound;
+extern  dboolean         display_ticker;
 /*
 extern  dboolean         nerve;
 extern  dboolean         chex;
@@ -376,6 +378,11 @@ extern  dboolean         BTSXE3;
 extern  dboolean         BTSXE3A;
 extern  dboolean         BTSXE3B;
 
+extern  fixed_t          forwardmove; 
+extern  fixed_t          sidemove; 
+
+extern  int              display_fps;
+extern  int              turnspeed;
 extern  int              d_colblood;
 extern  int              d_colblood2;
 extern  int              d_swirl;
@@ -390,6 +397,21 @@ extern  int              use_vanilla_weapon_change;
 extern  int              chaingun_tics;
 extern  int              crosshair;
 extern  int              icontype;
+extern  int              wipe_type;
+extern  int              usegamma;
+extern  int              screenSize;
+extern  int              screenblocks;
+extern  int              detailLevel;
+extern  int              mouselook;
+extern  int              mspeed;
+extern  int              mus_engine;
+extern  int              snd_module;
+extern  int              snd_chans;
+extern  int              sound_channels;
+extern  int              opl_type;
+extern  int              use_libsamplerate;
+extern  int              gore_amount;
+extern  int              font_shadow;
 
 void A_MoreGibs(mobj_t* actor);
 

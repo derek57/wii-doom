@@ -359,7 +359,6 @@ static unsigned int last_perc_count;
 // adlib chip.
 
 int opl_io_port = 0x388;
-int opl_type = 0;
 
 // Load instrument table from GENMIDI lump:
 

@@ -197,7 +197,7 @@ void P_MovePlayer (player_t* player)
     onground = (player->mo->z <= player->mo->floorz
                 || (player->mo->flags2 & MF2_ONMOBJ));
         
-    if (cmd->forwardmove | cmd->sidemove)                   // killough 10/98
+    if (cmd->forwardmov | cmd->sidemov)                   // killough 10/98
     {
         if (onground || (player->mo->flags2 & MF2_FLY))     // killough 8/9/98
         {
@@ -209,16 +209,16 @@ void P_MovePlayer (player_t* player)
             // On ice, make it depend on effort.
             int bobfactor = (friction < ORIG_FRICTION ? movefactor : ORIG_FRICTION_FACTOR);
  
-            if (cmd->forwardmove)
+            if (cmd->forwardmov)
             {
-                P_Bob(player, player->mo->angle, cmd->forwardmove * bobfactor);
-                P_Thrust(player, player->mo->angle, cmd->forwardmove * movefactor);
+                P_Bob(player, player->mo->angle, cmd->forwardmov * bobfactor);
+                P_Thrust(player, player->mo->angle, cmd->forwardmov * movefactor);
             }
  
-            if (cmd->sidemove)
+            if (cmd->sidemov)
             {
-                P_Bob(player, player->mo->angle - ANG90, cmd->sidemove * bobfactor);
-                P_Thrust(player, player->mo->angle - ANG90, cmd->sidemove * movefactor);
+                P_Bob(player, player->mo->angle - ANG90, cmd->sidemov * bobfactor);
+                P_Thrust(player, player->mo->angle - ANG90, cmd->sidemov * movefactor);
             }
         }
 
@@ -434,8 +434,8 @@ void P_PlayerThink (player_t* player)
     if (player->mo->flags & MF_JUSTATTACKED)
     {
         cmd->angleturn = 0;
-        cmd->forwardmove = 0xc800/512;
-        cmd->sidemove = 0;
+        cmd->forwardmov = 0xc800/512;
+        cmd->sidemov = 0;
         player->mo->flags &= ~MF_JUSTATTACKED;
     }
 

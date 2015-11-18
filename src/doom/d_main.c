@@ -210,7 +210,6 @@ dboolean        main_loop_started = false;
 dboolean        version13 = false;
 dboolean        realframe;
 
-int             wipe_type = 3;
 int             startepisode;
 int             startmap;
 int             startloadgame;
@@ -221,7 +220,6 @@ int             wad_message_has_been_shown = 0;
 int             dont_show_adding_of_resource_wad = 0;
 int             dots_enabled = 0;
 int             fps_enabled = 0;
-int             display_fps = 0;
 int             resource_wad_exists = 0;
 int             demosequence;
 int             pagetic;
@@ -231,14 +229,10 @@ int             startuptimer;
 extern byte     *zone_mem;
 
 extern int      exit_by_reset;
-extern int      opl_type;
 extern int      mp_skill;
 extern int      warpepi;
 extern int      warplev;
-extern int      mus_engine;
 extern int      warped;
-extern int      screenSize;
-extern int      sound_channels;
 extern int      startlump;
 extern int      viewheight2;
 extern int      correct_lost_soul_bounce;
@@ -528,7 +522,7 @@ void D_Display (void)
 
         M_DarkBackground();
 
-        if(font_shadow)
+        if(font_shadow == 1)
             V_DrawPatchWithShadow((ORIGWIDTH - SHORT(patch->width)) / 2,
                     viewwindowy / 2 + (viewheight / 2 - SHORT(patch->height)) / 2, patch, false);
         else
@@ -1768,7 +1762,7 @@ void D_DoomMain (void)
     // Auto-detect the configuration dir.
 
     M_SetConfigDir(NULL);
-
+/*					// FIXME: forwardmove / sidemove
     //!
     // @arg <x>
     // @vanilla
@@ -1797,7 +1791,7 @@ void D_DoomMain (void)
         sidemove[1] = sidemove[1]*scale/100;
     }
 #endif
-    
+*/    
     // init subsystems
     V_Init ();
 

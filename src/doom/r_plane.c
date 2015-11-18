@@ -116,7 +116,6 @@ fixed_t                 distscale[SCREENWIDTH];
 
 //dboolean                r_liquid_swirl = r_liquid_swirl_default;
 
-extern int              mouselook;
 extern fixed_t          animatedliquiddiff;
 //extern dboolean         r_liquid_bob;
 

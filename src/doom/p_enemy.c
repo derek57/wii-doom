@@ -191,8 +191,6 @@ extern dboolean    not_walking;
 extern line_t     **spechit;
 
 extern int        numspechit;
-extern int        snd_module;
-extern int        gore_amount;
 
 extern void A_ReFire
 ( player_t*        player,

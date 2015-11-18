@@ -54,6 +54,10 @@ dboolean         start_respawnparm;
 dboolean         start_fastparm;
 dboolean         nomonsters;     // checkparm of -nomonsters
 dboolean         hud;
+dboolean         randompitch;
+dboolean         swap_sound_chans;
+dboolean         display_ticker;
+dboolean         memory_usage;
 
 dboolean         am_overlay = false;
 dboolean         nerve_pwad = false;
@@ -83,10 +87,10 @@ dboolean         d_infiniteammo = false;
 dboolean         not_monsters = false;
 dboolean         overlay_trigger = false;
 dboolean         replace_missing = false;
-dboolean         d_telefrag = false;
+dboolean         d_telefrag = true;
 dboolean         d_doorstuck = false;
 dboolean         d_resurrectghosts = false;
-dboolean         d_limitedghosts = false;
+dboolean         d_limitedghosts = true;
 dboolean         d_blockskulls = false;
 dboolean         d_blazingsound = false;
 dboolean         d_god = true;
@@ -98,7 +102,6 @@ dboolean         d_maskedanim = false;
 dboolean         d_sound = false;
 dboolean         d_ouchface = false;
 dboolean         show_authors = false;
-dboolean         font_shadow = false;
 dboolean         d_shadows = false;
 dboolean         d_fixspriteoffsets = false;
 dboolean         d_brightmaps = false;
@@ -134,10 +137,41 @@ dboolean         BTSXE3 = false;
 dboolean         BTSXE3A = false;
 dboolean         BTSXE3B = false;
 
+fixed_t          forwardmove = 29;
+fixed_t          sidemove = 24; 
+
+int              turnspeed = 7;
+
+// Blocky mode, has default, 0 = high, 1 = normal
+int              detailLevel = 0;
+
+// temp for screenblocks (0-9)
+int              screenSize;
+int              screenblocks = 9;
+
+// Gamma correction level to use
+int              usegamma = 10;
+
 int              d_colblood = 0;
 int              d_colblood2 = 0;
 int              d_swirl;
-int              autoaim = false;
-int              background_type = 1;
+int              autoaim = true;
+int              background_type = 0;
 int              icontype = 0;
+int              wipe_type = 2;
+int              mouselook;
+int              mspeed = 2;
+int              mus_engine = 1;
+int              snd_module = 0;
+int              snd_chans = 1;
+int              sound_channels = 8;
+int              opl_type = 0;
+int              use_libsamplerate = 0;
+int              gore_amount = 1;
+int              display_fps = 0;
+int              font_shadow = 0;
+
+// defaulted values
+int              mouseSensitivity = 5;
+
 

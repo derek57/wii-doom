@@ -221,9 +221,6 @@ dboolean                show_chat_bar;
 patch_t*                hu_font[HU_FONTSIZE];
 patch_t*                beta_hu_font[HU_FONTSIZE];
 
-extern int              screenblocks;
-extern int              screenSize;
-
 extern dboolean         blurred;
 extern dboolean         mapinfo_lump;
 extern dboolean         dont_message_to_console;

@@ -29,6 +29,8 @@
 
 #include "doomdef.h"
 
+#include "doomstat.h"
+
 #ifdef WII
 #include "../doomtype.h"
 #else
@@ -83,11 +85,6 @@ static   byte     RGB32k[32 * 32 * 32];
 unsigned int      Col2RGB8[65][256];
 
 extern   byte     *transtables;
-
-extern   dboolean  usergame;
-
-extern   int      screenSize;
-extern   int      wipe_type;
 
 
 void wipe_shittyColMajorXform(short *array)

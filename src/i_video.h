@@ -152,7 +152,6 @@ extern float mouse_acceleration;
 
 extern int mouse_threshold;
 extern int vanilla_keyboard_mapping;
-extern int usegamma;
 extern int screen_width;
 extern int screen_height;
 extern int screen_bpp;

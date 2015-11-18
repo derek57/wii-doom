@@ -729,7 +729,7 @@ void F_TextWrite (void)
         if (cx+w > ORIGWIDTH)         // CHANGED FOR HIRES
             break;
         
-        if(font_shadow)
+        if(font_shadow == 1)
             V_DrawPatchWithShadow(cx, cy, hu_font[c], false);
         else
             V_DrawPatch(cx, cy, hu_font[c]);
@@ -789,7 +789,7 @@ void F_CastPrint (char* text)
                 
         w = SHORT (hu_font[c]->width);
 
-        if(font_shadow)
+        if(font_shadow == 1)
             V_DrawPatchWithShadow(cx, 180, hu_font[c], false);
         else
             V_DrawPatch(cx, 180, hu_font[c]);
@@ -920,7 +920,7 @@ void F_BunnyScroll (void)
         return;
     if (finalecount < 1180)
     {
-        if(font_shadow)
+        if(font_shadow == 1)
             V_DrawPatchWithShadow((ORIGWIDTH - 13 * 8) / 2 + 1, (ORIGHEIGHT - 8 * 8) / 2 + 1,
                     W_CacheLumpName("END0", PU_CACHE), false);
         else
@@ -942,7 +942,7 @@ void F_BunnyScroll (void)
         
     M_snprintf(name, 10, "END%i", stage);
 
-    if(font_shadow)
+    if(font_shadow == 1)
         V_DrawPatchWithShadow((ORIGWIDTH - 13 * 8) / 2 + 1, (ORIGHEIGHT - 8 * 8) / 2 + 1,
                 W_CacheLumpName(name, PU_CACHE), false);
     else

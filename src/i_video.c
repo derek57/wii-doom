@@ -214,10 +214,6 @@ static screen_mode_t *screen_mode;
 
 int vanilla_keyboard_mapping = true;
 
-// Gamma correction level to use
-
-int usegamma = 0;
-
 // Save screenshots in PNG format.
 
 int png_screenshots = 0;
@@ -248,7 +244,6 @@ float                   gammalevels[GAMMALEVELS] =
     1.55f, 1.60f, 1.65f, 1.70f, 1.75f, 1.80f, 1.85f, 1.90f, 1.95f, 2.0f
 };
 
-extern int display_fps;
 
 // Window resize state.                                        << NEW
 
@@ -277,8 +272,6 @@ dboolean screenvisible = true;
 #else
 dboolean screenvisible;
 #endif
-
-extern int screenSize;
 
 // disable mouse?
 

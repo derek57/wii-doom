@@ -1002,16 +1002,6 @@ char                       *skullNameSmall[2] = {"M_SKULL3","M_SKULL4"};
 
 unsigned int               creditscount;
 
-// defaulted values
-int                        mouseSensitivity = 5;
-
-// Blocky mode, has default, 0 = high, 1 = normal
-int                        detailLevel = 0;
-int                        screenblocks = 9;
-
-// temp for screenblocks (0-9)
-int                        screenSize;
-
  // 1 = message to be printed
 int                        messageToPrint;
 
@@ -1030,11 +1020,11 @@ int                        musnum = 1;
 int                        cheeting;
 int                        coordinates_info = 0;
 int                        version_info = 0;
-int                        key_controls_start_in_cfg_at_pos = 95;
+int                        key_controls_start_in_cfg_at_pos = 94;
 #ifdef WII
-int                        key_controls_end_in_cfg_at_pos = 109;
+int                        key_controls_end_in_cfg_at_pos = 108;
 #else
-int                        key_controls_end_in_cfg_at_pos = 111;
+int                        key_controls_end_in_cfg_at_pos = 110;
 #endif
 int                        tracknum = 1;
 int                        epi = 1;
@@ -1043,18 +1033,11 @@ int                        rmap = 1;
 int                        rskill = 0;
 int                        warped = 0;
 int                        faketracknum = 1;
-int                        mus_engine = 1;
 int                        mp_skill = 4;
 int                        warpepi = 2;
 int                        warplev = 2;
-int                        turnspeed = 7;
-int                        snd_module = 0;
-int                        snd_chans = 1;
-int                        sound_channels = 8;
-int                        gore_amount = 4;
 int                        height;
 int                        expansion = 0;
-int                        use_libsamplerate = 0;
 
 // -1 = no quicksave slot picked!
 int                        quickSaveSlot;
@@ -1085,7 +1068,6 @@ dboolean                   got_map = false;
 dboolean                   got_light_amp = false;
 dboolean                   got_all = false;
 dboolean                   aiming_help;
-dboolean                   swap_sound_chans;
 dboolean                   skillflag = true;
 dboolean                   nomonstersflag;
 dboolean                   fastflag;
@@ -1101,13 +1083,8 @@ dboolean                   noclip_on;
 dboolean                   dedicatedflag = true;
 dboolean                   privateserverflag;
 dboolean                   massacre_cheat_used;
-dboolean                   randompitch;
-dboolean                   memory_usage;
 dboolean                   blurred = false;
 dboolean                   long_tics = false;
-
-fixed_t                    forwardmove = 29;
-fixed_t                    sidemove = 21; 
 
 // current menudef
 menu_t                     *currentMenu;                          
@@ -1123,16 +1100,9 @@ static int                 keyaskedfor;
 
 extern char                *d_lowpixelsize;
 
-extern int                 opl_type;
 extern int                 cheating;
-extern int                 mspeed;
-extern int                 left;
-extern int                 right;
-extern int                 mouselook;
 extern int                 dots_enabled;
 extern int                 dont_show;
-extern int                 display_fps;
-extern int                 wipe_type;
 extern int                 correct_lost_soul_bounce;
 extern int                 png_screenshots;
 //extern int                 st_palette;
@@ -2468,7 +2438,7 @@ void M_TextWrite (void)
         if (cx+w > ORIGWIDTH)         // CHANGED FOR HIRES
             break;
         
-        if(font_shadow)
+        if(font_shadow == 1)
             V_DrawPatchWithShadow(cx, cy, hu_font[c], false);
         else
             V_DrawPatch(cx, cy, hu_font[c]);
@@ -3814,10 +3784,7 @@ void M_DrawScreen(void)
 
     M_DrawThermoSmall(ScreenDef.x + 104, ScreenDef.y + LINEHEIGHT_SMALL * (screen_gamma + 1),
                  11, usegamma / 3);
-/*
-    V_DrawPatchWithShadow(OptionsDef.x + 175, OptionsDef.y + LINEHEIGHT + 11.5 *
-                      screen_detail, W_CacheLumpName(detailNames[detailLevel], PU_CACHE), false);
-*/
+
     if(gamemode == commercial || fsize == 4234124 || fsize == 4196020 ||
             fsize == 12474561 || fsize == 12487824 || fsize == 11159840 ||
             fsize == 12408292 || fsize == 12538385 || fsize == 12361532 ||
@@ -3937,13 +3904,19 @@ void M_DrawScreen(void)
         V_ClearDPTranslation();
     }
 
-    if(font_shadow)
+    if(font_shadow == 0)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(ScreenDef.x + 156, ScreenDef.y + 78, "NORMAL");
+        V_ClearDPTranslation();
+    }
+    else if(font_shadow == 1)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(ScreenDef.x + 141, ScreenDef.y + 78, "SHADOWED");
         V_ClearDPTranslation();
     }
-    else
+    else if(font_shadow == 2)
     {
         dp_translation = crx[CRX_GOLD];
         M_WriteText(ScreenDef.x + 149, ScreenDef.y + 78, "COLORED");
@@ -5625,13 +5598,6 @@ void M_Options(int choice)
 //
 void M_ChangeMessages(int choice)
 {
-/*
-    if(screenSize < 8);
-    {
-        if(usergame)
-            ST_doRefresh();
-    }
-*/
     blurred = false;
 
     showMessages = 1 - showMessages;
@@ -5799,13 +5765,7 @@ void M_QuitDOOM(int choice)
     sprintf(endstring,
             "%s\n\n" DOSY,
             M_SelectEndMessage());
-/*
-    if(screenSize < 8);
-    {
-        if(usergame)
-            ST_doRefresh();
-    }
-*/
+
     M_StartMessage(endstring,M_QuitResponse,true);
 }
 
@@ -5837,6 +5797,8 @@ void M_MouseWalk(int choice)
       case 1:
         if (!mousewalk)
             mousewalk = true;
+        if (mousewalk)
+            mouselook = false;
         break;
     }
 }
@@ -5888,13 +5850,6 @@ void M_StrafingSpeed(int choice)
 
 void M_ChangeDetail(int choice)
 {
-/*
-    if(screenSize < 8);
-    {
-        if(usergame)
-            ST_doRefresh();
-    }
-*/
     blurred = false;
 
     detailLevel = !detailLevel;
@@ -5995,12 +5950,12 @@ void M_FontShadow(int choice)
     switch(choice)
     {
       case 0:
-        if (font_shadow)
-            font_shadow = false;
+        if (font_shadow > 0)
+            font_shadow--;
         break;
       case 1:
-        if (!font_shadow)
-            font_shadow = true;
+        if (font_shadow < 2)
+            font_shadow++;
         break;
     }
 }
@@ -6066,13 +6021,13 @@ void M_SizeDisplay(int choice)
         break;
     }
     R_SetViewSize (screenblocks);
-/*
-    if(screenSize < 8);
+
+    if(screenSize < 8)		// FIXME: WAS DISABLED
     {
         if(usergame)
             ST_doRefresh();
     }
-*/
+
     blurred = false;
     skippsprinterp = true;
 }
@@ -6174,13 +6129,7 @@ M_StartMessage
     messageString = string;
     messageRoutine = routine;
     messageNeedsInput = input;
-/*
-    if(screenSize < 8);
-    {
-        if(usergame)
-            ST_doRefresh();
-    }
-*/
+
     blurred = false;
     menuactive = true;
     return;
@@ -6288,7 +6237,10 @@ void M_WriteText(int x, int y, char* string)
         if (cx+w > ORIGWIDTH)                // CHANGED FOR HIRES
             break;
 
-        if(font_shadow)
+        if(dp_translation && font_shadow == 0)
+            V_ClearDPTranslation();
+
+        if(font_shadow == 1)
             V_DrawPatchWithShadow(cx, cy, hu_font[c], false);
         else
             V_DrawPatch(cx, cy, hu_font[c]);
@@ -6327,35 +6279,9 @@ void M_ChangeGamma(int choice)
         r_gamma = gammalevels[usegamma];
 
         S_StartSound(NULL, sfx_stnmov);
-/*
-        if (r_gamma == 1.0f)
-            C_Printf(CR_GRAY, " %s off", stringize(r_gamma));
-        else
-        {
-            static char buf[128];
-
-            M_snprintf(buf, sizeof(buf), " %s %.2f", stringize(r_gamma), r_gamma);
-            if (buf[strlen(buf) - 1] == '0' && buf[strlen(buf) - 2] == '0')
-                buf[strlen(buf) - 1] = '\0';
-            C_Printf(CR_GRAY, buf);
-        }
-*/
     }
 
     gammawait = I_GetTime() + HU_MSGTIMEOUT;
-/*
-    if (r_gamma == 1.0f)
-        HU_PlayerMessage(s_GAMMAOFF, false);
-    else
-    {
-        static char buf[128];
-
-        M_snprintf(buf, sizeof(buf), s_GAMMALVL, r_gamma);
-        if (buf[strlen(buf) - 1] == '0' && buf[strlen(buf) - 2] == '0')
-            buf[strlen(buf) - 1] = '\0';
-        HU_PlayerMessage(buf, false);
-    }
-*/
     players[consoleplayer].message = gammamsg[usegamma];
     I_SetPalette (W_CacheLumpName ("PLAYPAL",PU_CACHE));
 //    I_SetPalette((byte *)W_CacheLumpName("PLAYPAL", PU_CACHE) + st_palette * 768);
@@ -6748,14 +6674,6 @@ dboolean M_Responder (event_t* ev)
         }
         else if (key == key_menu_gamma)    // gamma toggle
         {
-/*
-            usegamma++;
-            if (usegamma > 4)
-                usegamma = 0;
-            players[consoleplayer].message = gammamsg[usegamma];
-            I_SetPalette (W_CacheLumpName ("PLAYPAL",PU_CACHE));
-            return true;
-*/
             if (++usegamma > GAMMALEVELS - 1)
                 usegamma = 0;
             M_ChangeGamma(1);
@@ -7041,13 +6959,7 @@ void M_StartControlPanel (void)
     menuactive = 1;
     currentMenu = &MainDef;         // JDC
     itemOn = currentMenu->lastOn;   // JDC
-/*
-    if(screenSize < 8);
-    {
-        if(usergame)
-            ST_doRefresh();
-    }
-*/
+
     blurred = false;
 }
 
@@ -7460,13 +7372,7 @@ void M_ClearMenus (void)
     menuactive = 0;
 
     paused = false;
-/*
-    if(screenSize < 8);
-    {
-        if(usergame)
-            ST_doRefresh();
-    }
-*/
+
     // if (!netgame && usergame && paused)
     //       sendpause = true;
 }
@@ -8737,16 +8643,19 @@ void M_KeyBindings(int choice)
 
 void M_Freelook(int choice)
 {
-    switch(choice)
+    if(!mousewalk)
     {
-    case 0:
-        if (mouselook)
-            mouselook--;
-        break;
-    case 1:
-        if (mouselook < 2)
-            mouselook++;
-        break;
+        switch(choice)
+        {
+        case 0:
+            if (mouselook)
+                mouselook--;
+            break;
+        case 1:
+            if (mouselook < 2)
+                mouselook++;
+            break;
+        }
     }
 }
 
@@ -8800,7 +8709,7 @@ void M_DrawControls(void)
     else
         dp_translation = crx[CRX_RED];
 
-    M_WriteText(ControlsDef.x, ControlsDef.y + 58, "MOUSE WALKING (FREELOOK MUST BE OFF)");
+    M_WriteText(ControlsDef.x, ControlsDef.y + 58, "MOUSE WALK (TURNS FREELOOK MODE OFF)");
     V_ClearDPTranslation();
 
     if(mousewalk)
@@ -8944,12 +8853,7 @@ void M_ReplaceMissing(int choice)
         players[consoleplayer].message = "MISSING TEXTURES & FLATS WON'T BE REPLACED";
     }
 }
-/*
-u64 GetTicks(void)
-{
-    return (u64)SDL_GetTicks();
-}
-*/
+
 void M_DisplayTicker(int choice)
 {
     display_ticker = !display_ticker;
@@ -8964,13 +8868,6 @@ void M_DisplayTicker(int choice)
         players[consoleplayer].message = "TICKER OFF";
     }
     I_DisplayFPSDots(display_ticker);
-/*
-    if(screenSize < 8);
-    {
-        if(usergame)
-            ST_doRefresh();
-    }
-*/
 }
 
 void M_Coordinates(int choice)
@@ -9062,24 +8959,7 @@ void M_DrawFilesMenu(void)
 {
     M_DarkBackground();
 }
-/*
-void M_Brightness(int choice)
-{
-    switch(choice)
-    {
-    case 0:
-        if (usegamma)
-            usegamma--;
-        break;
-    case 1:
-        if (usegamma < 4)
-            usegamma++;
-        break;
-    }
-    players[consoleplayer].message = gammamsg[usegamma];
-    I_SetPalette (W_CacheLumpName ("PLAYPAL",PU_CACHE));
-}
-*/
+
 void M_Armor(int choice)
 {
     M_SetupNextMenu(&ArmorDef);

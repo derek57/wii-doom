@@ -559,10 +559,8 @@ extern dboolean     massacre_cheat_used;
 
 extern char         massacre_textbuffer[30];
 
-extern int          screenSize;
 //extern int          load_dehacked;
 extern int          cardsfound;
-extern int          snd_chans;
 
 extern void         A_PainDie(mobj_t *);
 

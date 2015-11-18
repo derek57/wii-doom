@@ -90,9 +90,6 @@ static fixed_t floatbobdiffs[64] =
 void G_PlayerReborn (int player);
 //void P_SpawnMapThing (mapthing_t* mthing);
 
-extern int          mouselook;
-extern int          snd_module;
-
 extern dboolean     not_walking;
 extern dboolean     in_slime;
 
@@ -378,7 +375,7 @@ void P_XYMovement (mobj_t* mo)
 
     if (mo->momx > -STOPSPEED && mo->momx < STOPSPEED
         && mo->momy > -STOPSPEED && mo->momy < STOPSPEED
-        && (!player || (!player->cmd.forwardmove && !player->cmd.sidemove) || P_IsVoodooDoll(mo)))
+        && (!player || (!player->cmd.forwardmov && !player->cmd.sidemov) || P_IsVoodooDoll(mo)))
     {
         // if in a walking frame, stop moving
         if (player && !P_IsVoodooDoll(mo)

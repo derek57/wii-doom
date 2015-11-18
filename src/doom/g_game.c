@@ -203,7 +203,6 @@ int             consoleplayer;          // player taking events and displaying
 int             displayplayer;          // view being displayed 
 int             levelstarttic;          // gametic at level start 
 int             totalkills, totalitems, totalsecret;    // for intermission 
-int             mouselook;
 int             turnspd;
 int             joy_a = 1;              // 0
 int             joy_r = 2;              // 1
@@ -345,8 +344,6 @@ static const struct
 
 extern char     *mapnumandtitle;
 
-extern int      mspeed;
-extern int      turnspeed;
 extern int      messageToPrint;
 
 extern dboolean done;
@@ -359,8 +356,6 @@ extern dboolean transferredsky;
 extern dboolean long_tics;
 extern dboolean mouse_grabbed;
 
-extern fixed_t  forwardmove; 
-extern fixed_t  sidemove; 
 extern fixed_t  mtof_zoommul; // how far the window zooms in each tic (map coords)
 extern fixed_t  ftom_zoommul; // how far the window zooms in each tic (fb coords)
 
@@ -1072,8 +1067,8 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
     else if (side < -MAXPLMOVE) 
         side = -MAXPLMOVE; 
  
-    cmd->forwardmove += forward; 
-    cmd->sidemove += side;
+    cmd->forwardmov += forward; 
+    cmd->sidemov += side;
 
     if (players[consoleplayer].playerstate == PST_LIVE)
     {
@@ -2348,7 +2343,7 @@ void G_Ticker (void)
             // for each player so messages are not displayed at the
             // same time.
 
-            if (cmd->forwardmove > TURBOTHRESHOLD)
+            if (cmd->forwardmov > TURBOTHRESHOLD)
             {
                 turbodetected[i] = true;
             }
