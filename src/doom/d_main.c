@@ -398,7 +398,7 @@ void D_Display (void)
     I_UpdateNoBlit ();
 
     // draw the view directly
-    if (gamestate == GS_LEVEL && (!automapactive || (automapactive && am_overlay)) && gametic)
+    if (gamestate == GS_LEVEL && (!automapactive || am_overlay) && gametic)
     {
         // [crispy] update automap while playing
         R_RenderPlayerView (&players[displayplayer]);
@@ -417,7 +417,7 @@ void D_Display (void)
 
     // see if the border needs to be updated to the screen
     if  (gamestate == GS_LEVEL && (!automapactive ||
-        (automapactive && am_overlay)) /*&& scaledviewwidth != (320 << hires)*/)
+        am_overlay) /*&& scaledviewwidth != (320 << hires)*/)
     {
         if (menuactive || menuactivestate || !viewactivestate || consoleheight > CONSOLETOP)
             borderdrawcount = 3;
@@ -432,14 +432,14 @@ void D_Display (void)
 
     // [crispy] in automap overlay mode,
     // the HUD is drawn on top of everything else
-    if (gamestate == GS_LEVEL && gametic && !(automapactive && am_overlay))
+    if (gamestate == GS_LEVEL && gametic && !automapactive)
         HU_Drawer ();
     
     if (gamestate == GS_LEVEL && usergame)
     {
         if (hud && screenSize == 8)
         {
-            if((am_overlay && automapactive) || !automapactive)
+            if(am_overlay || !automapactive)
                 ST_DrawStatus();
         }
 
@@ -454,7 +454,7 @@ void D_Display (void)
 
     // [crispy] in automap overlay mode,
     // draw the automap and HUD on top of everything else
-    if (automapactive && am_overlay)
+    if (am_overlay)
     {
         AM_Drawer ();
         HU_Drawer ();
