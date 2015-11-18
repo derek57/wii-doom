@@ -359,9 +359,9 @@ state_t states[NUMSTATES] =
     // Player (MT_PLAYER)
     { SPR_PLAY,  0,                               -1,               NULL,              S_NULL             }, // S_PLAY
     { SPR_PLAY,  0,                                4,               A_Footstep,        S_PLAY_RUN2        }, // S_PLAY_RUN1
-    { SPR_PLAY,  1,                                4,               A_Footstep,        S_PLAY_RUN3        }, // S_PLAY_RUN2
-    { SPR_PLAY,  2,                                4,               A_Footstep,        S_PLAY_RUN4        }, // S_PLAY_RUN3
-    { SPR_PLAY,  3,                                4,               A_Footstep,        S_PLAY_RUN1        }, // S_PLAY_RUN4
+    { SPR_PLAY,  1,                                4,               NULL,              S_PLAY_RUN3        }, // S_PLAY_RUN2
+    { SPR_PLAY,  2,                                4,               NULL,              S_PLAY_RUN4        }, // S_PLAY_RUN3
+    { SPR_PLAY,  3,                                4,               NULL,              S_PLAY_RUN1        }, // S_PLAY_RUN4
     { SPR_PLAY,  4,                               12,               NULL,              S_PLAY             }, // S_PLAY_ATK1
     { SPR_PLAY,  5 | FF_FULLBRIGHT,                6,               NULL,              S_PLAY_ATK1        }, // S_PLAY_ATK2
     { SPR_PLAY,  6,                                4,               NULL,              S_PLAY_PAIN2       }, // S_PLAY_PAIN
