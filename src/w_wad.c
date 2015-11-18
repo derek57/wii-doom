@@ -306,7 +306,14 @@ lumpindex_t W_GetNumForName (char* name)
     lumpindex_t i;
 
     i = W_CheckNumForName (name);
-    
+
+    // This is a temporary fix for HACX
+    if (gamemission == pack_hacx && name[0] == '$' && name[1] == 'M' && name[2] == 'U'
+            && name[3] == 'S' && name[4] == 'I' && name[5] == 'C' && name[6] == '_'
+            && name[7] == 'R' && name[8] == 'E' && name[9] == 'A' && name[10] == 'D'
+            && name[11] == '_' && name[12] == 'M')
+        return 0;
+
     if (i < 0)
     {
         I_Error ("W_GetNumForName: %s not found!", name);
@@ -793,7 +800,7 @@ lumpindex_t W_GetNumForName2(char *name)
             break;
 
     if (i == numlumps)
-        I_Error("W_GetNumForName: %s not found!", name);
+        I_Error("W_GetNumForName2: %s not found!", name);
 
     return i;
 }

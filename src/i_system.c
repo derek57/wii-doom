@@ -487,7 +487,9 @@ void I_Error (char *error, ...)
     }
 
     // abort();
-
+#ifdef SDL2
+    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Wii-DOOM", msgbuf, NULL);
+#endif
     SDL_Quit();
 
     exit(-1);

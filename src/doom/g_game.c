@@ -1698,10 +1698,7 @@ void G_DoNewGame (void)
     demoplayback = false; 
     netdemo = false;
     netgame = false;
-/*
-    if(netgameflag)        // FIXME: WHAT IS THIS???
-        netgame = true;
-*/
+
     deathmatch = false;
 
     playeringame[1] = playeringame[2] = playeringame[3] = 0;

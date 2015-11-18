@@ -1029,7 +1029,6 @@ static dboolean D_AddFile(char *filename, dboolean automatic)
 }
 
 // Load the Chex Quest dehacked file, if we are in Chex mode.
-/*
 static void LoadChexDeh(void)
 {
     if (gameversion == exe_chex)
@@ -1080,16 +1079,13 @@ static void LoadChexDeh(void)
                     "   utils/exe_edit/patches/chexdeh.zip");
         }
 
-        if (!DEH_LoadFile(chex_deh))
-        {
-            I_Error("Failed to load chex.deh needed for emulating chex.exe.");
-        }
+        LoadDehFile(chex_deh);
 #endif
     }
 }
 
 // Load dehacked patches needed for certain IWADs.
-
+/*
 #ifndef WII
 static void LoadIwadDeh(void)
 {
@@ -1161,19 +1157,6 @@ static void LoadIwadDeh(void)
 }
 #endif
 
-static void LoadHacxDeh(void)
-{
-    // If this is the HACX IWAD, we need to load the DEHACKED lump.
-    if (gameversion == exe_hacx)
-    {
-        if (!DEH_LoadLumpByName("DEHACKED", true, false))
-        {
-            I_Error("DEHACKED lump not found.  Please check that this is the "
-                    "Hacx v1.2 IWAD.");
-        }
-    }
-}
-
 static void G_CheckDemoStatusAtExit (void)
 {
     G_CheckDemoStatus();
@@ -1230,8 +1213,27 @@ static void D_ProcessDehInWad(void)
         return;
 
     for (i = 0; i < numlumps; ++i)
+    {
         if (!strncasecmp(lumpinfo[i]->name, "DEHACKED", 8))
             ProcessDehFile(NULL, i);
+/*
+        else
+        {
+            if(gameversion == exe_hacx && gamemission == pack_hacx)
+                I_Error("DEHACKED lump not found.  Please check that this is the "
+                        "Hacx v1.2 IWAD.");
+        }
+*/
+    }
+}
+
+static void LoadHacxDeh(void)
+{
+    // If this is the HACX IWAD, we need to load the DEHACKED lump.
+    if (gameversion == exe_hacx)
+    {
+        D_ProcessDehInWad();
+    }
 }
 
 dboolean DehFileProcessed(char *path)
@@ -1246,6 +1248,9 @@ dboolean DehFileProcessed(char *path)
 
 void LoadDehFile(char *path)
 {
+    if ((gameversion == exe_chex || gamemission == pack_chex) && !path)
+        I_Error("Failed to load chex.deh needed for emulating chex.exe.");
+
     if (
 #ifndef WII
         !M_ParmExists("-nodeh") &&
@@ -2143,6 +2148,7 @@ void D_DoomMain (void)
         gameversion = exe_chex;
         nerve_pwad = false;
         master_pwad = false;
+        LoadChexDeh();
     }
     else if(
 /*
@@ -2625,7 +2631,6 @@ void D_DoomMain (void)
 
     if(fsize == 12361532)
     {
-//        LoadChexDeh();        // FIXME
         W_CheckSize(1);
 
         if(d_maxgore)
@@ -2675,7 +2680,6 @@ void D_DoomMain (void)
     }
     else if(fsize == 19321722 /*|| fsize == 9745831 || fsize == 21951805 || fsize == 22102300*/)
     {
-//        LoadHacxDeh();                // FIXME
         W_CheckSize(2);
 
         if(print_resource_pwad_error)
