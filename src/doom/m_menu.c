@@ -5907,12 +5907,10 @@ void M_WipeType(int choice)
             wipe_type--;
         break;
       case 1:
-#ifdef SDL2
-        if (wipe_type < 3)
-#else
         if (wipe_type < 2)
-#endif
             wipe_type++;
+        if(!devparm && wipe_type > 2)
+            wipe_type = 2;
         break;
     }
 }
