@@ -2673,6 +2673,13 @@ void M_DrawSave(void)
 //
 void M_DoSave(int slot)
 {
+    if(players[consoleplayer].playerstate == PST_DEAD)
+    {
+        M_ClearMenus ();
+        M_StartMessage("YOU CANNOT SAVE A GAME - YOU'RE DEAD",NULL,true);
+        return;
+    }
+
     G_SaveGame(slot, savegamestrings[slot], "");
     M_ClearMenus ();
     // PICK QUICKSAVE SLOT YET?
