@@ -159,8 +159,8 @@ static void LoadGameSettings(net_gamesettings_t *settings)
 
     if (lowres_turn)
     {
-        C_Printf(CR_GOLD, "         NOTE: Turning resolution is reduced; this is probably\n");
-        C_Printf(CR_GOLD, "         because there is a client recording a Vanilla demo.\n");
+        C_Warning("         NOTE: Turning resolution is reduced; this is probably");
+        C_Warning("         because there is a client recording a Vanilla demo.");
     }
 
     for (i = 0; i < MAXPLAYERS; ++i)
@@ -219,10 +219,10 @@ void D_CheckNetGame (void)
     D_StartNetGame(&settings, NULL);
     LoadGameSettings(&settings);
 
-    C_Printf(CR_GRAY, " startskill %i  deathmatch: %i  startmap: %i  startepisode: %i\n",
+    C_Output(" startskill %i  deathmatch: %i  startmap: %i  startepisode: %i",
                startskill, deathmatch, startmap, startepisode);
 
-    C_Printf(CR_GRAY, " player %i of %i (%i nodes)\n",
+    C_Output(" player %i of %i (%i nodes)",
                consoleplayer+1, settings.num_players, settings.num_players);
 
     // Show players here; the server might have specified a time limit
@@ -230,10 +230,10 @@ void D_CheckNetGame (void)
     if (timelimit > 0 && deathmatch)
     {
         // Gross hack to work like Vanilla:
-        C_Printf(CR_BLUE, " Levels will end after %d minute", timelimit);
+        C_Network(" Levels will end after %d minute", timelimit);
         if (timelimit > 1)
-            C_Printf(CR_BLUE, "s");
-        C_Printf(CR_BLUE, ".\n");
+            C_Network("s");
+        C_Network(".");
     }
 }
 

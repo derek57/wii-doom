@@ -277,11 +277,9 @@ dboolean GUS_WriteConfig(char *path)
 
     if (!strcmp(gus_patch_path, ""))
     {
-        C_Printf(CR_GOLD, " You haven't configured gus_patch_path.\n");
-        C_Printf(CR_GOLD, " gus_patch_path needs to point to the location of "
-               "your GUS patch set.\n"
-               "To get a copy of the \"standard\" GUS patches, "
-               "download a copy of dgguspat.zip.\n");
+        C_Warning(" You haven't configured gus_patch_path.");
+        C_Warning(" gus_patch_path needs to point to the location of your GUS patch set.");
+        C_Warning(" To get a copy of the \"standard\" GUS patches, download a copy of dgguspat.zip.");
 
         return false;
     }

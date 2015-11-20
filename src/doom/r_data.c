@@ -484,7 +484,7 @@ static void R_GenerateLookup(int texnum)
 
         if (!x)
         {
-            C_Printf (CR_GOLD, " R_GenerateLookup: column without a patch (%s)\n",
+            C_Warning(" R_GenerateLookup: column without a patch (%s)",
                     texture->name);
             // [crispy] do not return yet
             /*
@@ -735,7 +735,7 @@ void R_InitTextures(void)
             patchlookup[k++] = W_CheckNumForName(name);
 
             if (patchlookup[k] == -1)
-                C_Printf(CR_GOLD, " R_InitTextures: Patch %.8s, index %d does not exist", name, k);
+                C_Warning(" R_InitTextures: Patch %.8s, index %d does not exist", name, k);
         }
 
     // [crispy] calculate total number of textures
@@ -859,7 +859,7 @@ void R_InitTextures(void)
                 memcpy(texturename, texture->name, 8);
 
                 // [crispy] make non-fatal
-                C_Printf(CR_GOLD, " R_InitTextures: The %s texture has a missing patch.", texturename);
+                C_Warning(" R_InitTextures: The %s texture has a missing patch.", texturename);
                 patch->patch = 0;
             }
         }
@@ -1210,7 +1210,7 @@ void R_InitColormaps(void)
         colormaps[0] = W_CacheLumpName("COLORMAP", PU_STATIC);
     }
     colormapwad = lumpinfo[W_CheckNumForName("COLORMAP")]->wad_file;
-    C_Printf(CR_GRAY, " R_InitColormaps: Using the COLORMAP lump in %s file %s.",
+    C_Output(" R_InitColormaps: Using the COLORMAP lump in %s file %s.",
         (colormapwad->type == IWAD ? "IWAD" : "PWAD"), uppercase(colormapwad->path));
 
     // [BH] There's a typo in dcolors.c, the source code of the utility Id
@@ -1329,11 +1329,11 @@ int R_FlatNumForName(char *name)
         if(replace_missing)
         {
             i = W_CheckNumForName ("FLOOR0_1");
-            C_Printf(CR_RED, " R_FlatNumForName: %.8s not found (replaced with FLOOR0_1)", name);
+            C_Error(" R_FlatNumForName: %.8s not found (replaced with FLOOR0_1)", name);
         }
         else
         {
-            C_Printf(CR_RED, " R_FlatNumForName: %.8s not found", name);
+            C_Error(" R_FlatNumForName: %.8s not found", name);
             return 0;
 //        return skyflatnum;
         }
@@ -1529,11 +1529,11 @@ int R_TextureNumForName(char *name)
         if(replace_missing)
         {
             i = R_CheckTextureNumForName ("BROWN1");
-            C_Printf(CR_RED, " R_TextureNumForName: %.8s not found (replaced with BROWN1)", name);
+            C_Error(" R_TextureNumForName: %.8s not found (replaced with BROWN1)", name);
         }
         else
         {
-            C_Printf(CR_RED, " R_TextureNumForName: %.8s not found", name);
+            C_Error(" R_TextureNumForName: %.8s not found", name);
             return 0;
         }
     }

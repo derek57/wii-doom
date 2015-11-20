@@ -1479,7 +1479,7 @@ static dboolean AutoAdjustFullscreen(void)
         return false;
     }
 
-    C_Printf(CR_GRAY, " I_InitGraphics: %i x %i mode not supported on this machine.\n",
+    C_Output(" I_InitGraphics: %i x %i mode not supported on this machine.",
            screen_width, screen_height);
 
     screen_width = best_mode->w;
@@ -1510,7 +1510,7 @@ static void AutoAdjustWindowed(void)
 
     if (best_mode->width != screen_width || best_mode->height != screen_height)
     {
-        C_Printf(CR_GRAY, " I_InitGraphics: Cannot run at specified mode: %i x %i\n",
+        C_Output(" I_InitGraphics: Cannot run at specified mode: %i x %i",
                screen_width, screen_height);
 
         screen_width = best_mode->width;
@@ -1560,7 +1560,7 @@ static void AutoAdjustColorDepth(void)
 
     if (modes == NULL)
     {
-        C_Printf(CR_GRAY, " I_InitGraphics: %i bpp color depth not supported.\n",
+        C_Output(" I_InitGraphics: %i bpp color depth not supported.",
                screen_bpp);
 
         info = SDL_GetVideoInfo();
@@ -1607,10 +1607,10 @@ static void I_AutoAdjustSettings(void)
     if (screen_width != old_screen_w || screen_height != old_screen_h
      || screen_bpp != old_screen_bpp)
     {
-        C_Printf(CR_GRAY, " I_InitGraphics: Auto-adjusted to %i x %i x %i bpp.\n",
+        C_Output(" I_InitGraphics: Auto-adjusted to %i x %i x %i bpp.",
                screen_width, screen_height, screen_bpp);
 
-        C_Printf(CR_GOLD, " NOTE: Your video settings have been adjusted.\n");
+        C_Warning(" NOTE: Your video settings have been adjusted.");
     }
 }
 #endif
@@ -1950,7 +1950,7 @@ static void SetVideoMode(screen_mode_t *mode, int w, int h)
 
     const char *displayname = SDL_GetDisplayName(0);
 
-    C_Printf(CR_GRAY, " Using display called \"%s\".", displayname);
+    C_Output(" Using display called \"%s\".", displayname);
 #endif
 
     // If we are already running and in a true color mode, we need
@@ -2102,15 +2102,15 @@ static void SetVideoMode(screen_mode_t *mode, int w, int h)
     SDL_GetRendererInfo(renderer, &rendererinfo);
 /*
     if (!strcasecmp(rendererinfo.name, "direct3d"))
-        C_Printf(CR_GRAY, " The screen is rendered using hardware acceleration with the Direct3D 9 "
+        C_Output(" The screen is rendered using hardware acceleration with the Direct3D 9 "
             "API.");
     else*/ if (!strcasecmp(rendererinfo.name, "opengl"))
-        C_Printf(CR_GRAY, " The screen is rendered using hardware acceleration with the OpenGL API.");
+        C_Output(" The screen is rendered using hardware acceleration with the OpenGL API.");
     else if (!strcasecmp(rendererinfo.name, "software"))
-        C_Printf(CR_GRAY, " The screen is rendered in software.");
+        C_Output(" The screen is rendered in software.");
 #endif
 
-    C_Printf(CR_GRAY, " The %ix%i screen is scaled up to %ix%i", SCREENWIDTH, SCREENHEIGHT, h * 4 / 3, h);
+    C_Output(" The %ix%i screen is scaled up to %ix%i", SCREENWIDTH, SCREENHEIGHT, h * 4 / 3, h);
 
     // Important: Set the "logical size" of the rendering context. At the same
     // time this also defines the aspect ratio that is preserved while scaling
@@ -2139,9 +2139,9 @@ static void SetVideoMode(screen_mode_t *mode, int w, int h)
 
         if (!I_GL_InitScale(screen->w, screen->h))
         {
-            C_Printf(CR_RED,
+            C_Print(graystring,
                     " Failed to initialize in OpenGL mode. "
-                    " Falling back to software mode instead.\n");
+                    " Falling back to software mode instead.");
             using_opengl = false;
 
             // TODO: This leaves us in window with borders around it.
@@ -2257,8 +2257,7 @@ static void ApplyWindowResize(unsigned int w, unsigned int h)
 
     // Reset mode to resize window.
 
-    printf("Resize to %ix%i\n", mode->width, mode->height);
-    C_Printf(CR_GOLD, " Resize to %ix%i\n", mode->width, mode->height);
+    C_Warning(" Resize to %ix%i", mode->width, mode->height);
     SetVideoMode(mode, mode->width, mode->height);
 
     // Save settings.
@@ -2708,7 +2707,7 @@ void I_InitGraphics(void)
 
         if (w != screen_mode->width || h != screen_mode->height)
         {
-            C_Printf(CR_GRAY, " I_InitGraphics: %s (%i x %i within %i x %i)\n",
+            C_Output(" I_InitGraphics: %s (%i x %i within %i x %i)",
                   WindowBoxType(screen_mode, w, h),
                   screen_mode->width, screen_mode->height, w, h);
         }
@@ -2717,14 +2716,14 @@ void I_InitGraphics(void)
         SetVideoMode(screen_mode, w, h);
     }
 
-    C_Printf(CR_GRAY, " Scaling to aspect ratio 16:9\n");
-    C_Printf(CR_GRAY, " Using 256-color palette from PLAYPAL lump in %s file %s",
+    C_Output(" Scaling to aspect ratio 16:9");
+    C_Output(" Using 256-color palette from PLAYPAL lump in %s file %s",
             (playpalwad->type == IWAD ? "IWAD" : "PWAD"), uppercase(playpalwad->path));
 
-//    C_Printf(CR_GRAY, "         %s.");
+//    C_Output("         %s.");
 
     if (usegamma == 10)
-        C_Printf(CR_GRAY, " Gamma correction is off.");
+        C_Output(" Gamma correction is off.");
     else
     {
         static char     buffer[128];
@@ -2733,7 +2732,7 @@ void I_InitGraphics(void)
             gammalevels[usegamma]);
         if (buffer[strlen(buffer) - 1] == '0' && buffer[strlen(buffer) - 2] == '0')
             buffer[strlen(buffer) - 1] = '\0';
-        C_Printf(CR_GOLD, buffer);
+        C_Warning(buffer);
     }
 
 #ifndef WII

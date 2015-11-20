@@ -238,11 +238,11 @@ void I_PrintStartupBanner(char *gamedescription)
     I_PrintBanner(gamedescription);
     I_PrintDivider();
     
-    C_Printf(CR_GRAY, 
-    " Wii-DOOM is free software, covered by the GNU General Public\n"
-    " License.  There is NO warranty; not even for MERCHANTABILITY or FITNESS\n"
-    " FOR A PARTICULAR PURPOSE. You are welcome to change and distribute\n"
-    " copies under certain conditions. See the source for more information.\n");
+    C_Output(
+    " Wii-DOOM is free software, covered by the GNU General Public"
+    " License.  There is NO warranty; not even for MERCHANTABILITY or FITNESS"
+    " FOR A PARTICULAR PURPOSE. You are welcome to change and distribute"
+    " copies under certain conditions. See the source for more information.");
 
     I_PrintDivider();
 }
@@ -401,7 +401,7 @@ void I_Error (char *error, ...)
 
     if (already_quitting)
     {
-        C_Printf(CR_GOLD, " Warning: recursive call to I_Error detected.\n");
+        C_Warning(" Warning: recursive call to I_Error detected.");
 
         error_detected = true;
 

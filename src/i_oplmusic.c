@@ -1703,7 +1703,7 @@ static void *I_OPL_RegisterSong(void *data, int len)
 
     if (result == NULL)
     {
-        C_Printf(CR_RED, " I_OPL_RegisterSong: Failed to load MID.\n");
+        C_Error(" I_OPL_RegisterSong: Failed to load MID.");
     }
 
     // remove file now
@@ -1757,7 +1757,7 @@ static dboolean I_OPL_InitMusic(void)
     opl_chip_type = OPL_Init(opl_io_port);
     if (opl_chip_type == OPL_INIT_NONE)
     {
-        C_Printf(CR_GOLD, " Dude.  The Adlib isn't responding.\n");
+        C_Warning(" Dude.  The Adlib isn't responding.");
         return false;
     }
 

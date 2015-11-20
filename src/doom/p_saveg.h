@@ -69,6 +69,8 @@ void P_RestoreTargets(void);
 void P_ArchiveMap(void);
 void P_UnArchiveMap(void);
 
+uint32_t P_ThinkerToIndex(thinker_t *thinker);
+
 extern FILE *save_stream;
 
 extern dboolean savegame_error;

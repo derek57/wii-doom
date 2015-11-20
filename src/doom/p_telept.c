@@ -71,7 +71,7 @@ EV_Teleport
                                    || thing->type == MT_SPRAY
                                    || side)
         return 0;
-printf("%d\n", thing->type);
+
     // killough 1/31/98: improve performance by using
     // P_FindSectorFromLineTag instead of simple linear search.
     for (i = -1; (i = P_FindSectorFromLineTag(line, i)) >= 0;)

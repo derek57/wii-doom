@@ -377,11 +377,11 @@ static void I_InitStretchTables(byte *palette)
     // mix 80%  =  stretch_tables[0] used backwards
     // mix 100% =  just write line 2
 
-    C_Printf(CR_GOLD, " I_InitStretchTables: Generating lookup tables..");
+    C_Warning(" I_InitStretchTables: Generating lookup tables..");
     fflush(stdout);
     stretch_tables[0] = GenerateStretchTable(palette, 20);
 
-    C_Printf(CR_GOLD, " ..");
+    C_Warning(" ..");
     fflush(stdout);
     stretch_tables[1] = GenerateStretchTable(palette, 40);
     puts("");
@@ -397,11 +397,11 @@ static void I_InitSquashTable(byte *palette)
     }
 
 
-    C_Printf(CR_GOLD, " I_InitSquashTable: Generating lookup tables..");
+    C_Warning(" I_InitSquashTable: Generating lookup tables..");
     fflush(stdout);
     half_stretch_table = GenerateStretchTable(palette, 50);
 
-    C_Printf(CR_GOLD, " ..");
+    C_Warning(" ..");
     fflush(stdout);
 
     if (quarter_stretch_table != NULL)
@@ -428,7 +428,7 @@ void I_ResetScaleTables(byte *palette)
         Z_Free(stretch_tables[0]);
         Z_Free(stretch_tables[1]);
 
-        C_Printf(CR_GOLD, " I_ResetScaleTables: Regenerating lookup tables..\n");
+        C_Warning(" I_ResetScaleTables: Regenerating lookup tables..");
         stretch_tables[0] = GenerateStretchTable(palette, 20);
         stretch_tables[1] = GenerateStretchTable(palette, 40);
     }
@@ -437,7 +437,7 @@ void I_ResetScaleTables(byte *palette)
     {
         Z_Free(half_stretch_table);
 
-        C_Printf(CR_GOLD, " I_ResetScaleTables: Regenerating lookup table..\n");
+        C_Warning(" I_ResetScaleTables: Regenerating lookup table..");
         half_stretch_table = GenerateStretchTable(palette, 50);
     }
 
@@ -445,7 +445,7 @@ void I_ResetScaleTables(byte *palette)
     {
         Z_Free(quarter_stretch_table);
 
-        C_Printf(CR_GOLD, " I_ResetScaleTables: Regenerating lookup table..\n");
+        C_Warning(" I_ResetScaleTables: Regenerating lookup table..");
         quarter_stretch_table = GenerateStretchTable(palette, 25);
     }
 }

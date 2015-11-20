@@ -113,6 +113,8 @@ extern int faketracknum;
 extern int tracknum;
 
 
+dboolean sound_warning_printed;
+
 // Internal volume level, ranging from 0-127
 
 static int snd_SfxVolume;
@@ -797,7 +799,7 @@ void S_ChangeMusic(int music_id, int looping, dboolean mapstart)
 //        I_Error("Bad music number %d", music_id);
         char musicbuf[30];
         player_t *player = &players[consoleplayer];
-        C_Printf(CR_GOLD, " Bad music number %d", music_id);
+        C_Warning(" Bad music number %d", music_id);
         sprintf(musicbuf, "Bad music number %d", music_id);
         player->message = musicbuf;
         return;
@@ -829,18 +831,19 @@ void S_ChangeMusic(int music_id, int looping, dboolean mapstart)
     }
 /*
     if(looping)
-        C_Printf(CR_GRAY, " S_ChangeMusic: d_%s (loop = yes)\n", music->name);
+        C_Output(" S_ChangeMusic: d_%s (loop = yes)", music->name);
     else
-        C_Printf(CR_GRAY, " S_ChangeMusic: d_%s (loop = no)\n", music->name);
+        C_Output(" S_ChangeMusic: d_%s (loop = no)", music->name);
 */
     music->data = W_CacheLumpNum(music->lumpnum, PU_STATIC);
 
     handle = I_RegisterSong(music->data, W_LumpLength(music->lumpnum));
 
-    if (!handle)
+    if (!handle && !sound_warning_printed)
     {
-        C_Printf(CR_GOLD, " D_%s music lump can't be played.", uppercase(music->name));
-        C_Printf(CR_GOLD, " Maybe you forgot running the game with the 'sudo' command");
+        C_Warning(" D_%s music lump can't be played.", uppercase(music->name));
+        C_Warning(" Maybe you forgot running the game with the 'sudo' command");
+        sound_warning_printed = true;
         return;
     }
 

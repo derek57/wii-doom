@@ -125,8 +125,8 @@ static byte saveg_read8(void)
     {
         if (!savegame_error)
         {
-            C_Printf(CR_RED, " saveg_read8: Unexpected end of file while "
-                            "reading save game\n");
+            C_Error(" saveg_read8: Unexpected end of file while "
+                            "reading save game");
 
             savegame_error = true;
         }
@@ -141,7 +141,7 @@ static void saveg_write8(byte value)
     {
         if (!savegame_error)
         {
-            C_Printf(CR_RED, " saveg_write8: Error while writing save game\n");
+            C_Error(" saveg_write8: Error while writing save game");
 
             savegame_error = true;
         }
@@ -214,23 +214,6 @@ static void *saveg_readp(void)
 static void saveg_writep(void *p)
 {
     saveg_write32((intptr_t)p);
-}
-
-// By Fabian Greffrath. See http://www.doomworld.com/vb/post/1294860.
-uint32_t P_ThinkerToIndex(thinker_t *thinker)
-{
-    thinker_t   *th;
-    uint32_t    i;
-
-    if (!thinker)
-        return 0;
-
-    for (th = thinkerclasscap[th_mobj].cnext, i = 1; th != &thinkerclasscap[th_mobj];
-        th = th->cnext, ++i)
-        if (th == thinker)
-            return i;
-
-    return 0;
 }
 
 // Enum values are 32-bit integers.
@@ -1734,7 +1717,7 @@ dboolean P_ReadSaveGameHeader(char *description)
         menuactive = false;
         consoleheight = 1;
         consoledirection = 1;
-        C_Printf(CR_RED, " This savegame requires %s.", read_vcheck);
+        C_Error(" This savegame requires %s.", read_vcheck);
         return false;   // bad version
     }
 
@@ -2053,6 +2036,23 @@ void P_UnArchiveThinkers(void)
     }
 }
 
+// By Fabian Greffrath. See http://www.doomworld.com/vb/post/1294860.
+uint32_t P_ThinkerToIndex(thinker_t *thinker)
+{
+    thinker_t   *th;
+    uint32_t    i;
+
+    if (!thinker)
+        return 0;
+
+    for (th = thinkerclasscap[th_mobj].cnext, i = 1; th != &thinkerclasscap[th_mobj];
+        th = th->cnext, ++i)
+        if (th == thinker)
+            return i;
+
+    return 0;
+}
+
 thinker_t *P_IndexToThinker(uint32_t index)
 {
     thinker_t   *th;
@@ -2086,7 +2086,7 @@ void P_RestoreTargets(void)
 
     if (restoretargets_fail)
     {
-        C_Printf (CR_RED, " P_RestoreTargets: Failed to restore %d target pointers.\n",
+        C_Error(" P_RestoreTargets: Failed to restore %d target pointers.",
                 restoretargets_fail);
         restoretargets_fail = 0;
     }

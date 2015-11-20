@@ -931,7 +931,7 @@ P_TouchSpecialThing
         break;
 
       default:
-            C_Printf(CR_RED, " P_SpecialThing: Unknown gettable thing\n");
+            C_Error(" P_SpecialThing: Unknown gettable thing");
             return;
 //        I_Error ("P_SpecialThing: Unknown gettable thing");
     }

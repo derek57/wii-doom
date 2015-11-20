@@ -1072,11 +1072,11 @@ static void LoadChexDeh(void)
         // Still not found?
         if (chex_deh == NULL)
         {
-            I_Error("Unable to find Chex Quest dehacked file (chex.deh).\n"
+            I_Error("\nUnable to find Chex Quest dehacked file (chex.deh).\n"
                     "The dehacked file is required in order to emulate\n"
                     "chex.exe correctly.  It can be found in your nearest\n"
                     "/idgames repository mirror at:\n\n"
-                    "   utils/exe_edit/patches/chexdeh.zip");
+                    "   utils/exe_edit/patches/chexdeh.zip\n");
         }
 
         LoadDehFile(chex_deh);
@@ -1226,7 +1226,7 @@ static void D_ProcessDehInWad(void)
 */
     }
 }
-
+/*
 static void LoadHacxDeh(void)
 {
     // If this is the HACX IWAD, we need to load the DEHACKED lump.
@@ -1235,7 +1235,7 @@ static void LoadHacxDeh(void)
         D_ProcessDehInWad();
     }
 }
-
+*/
 dboolean DehFileProcessed(char *path)
 {
     int i;
@@ -1320,8 +1320,8 @@ void PrintGameVersion(void)
     {
         if (gameversions[i].version == gameversion)
         {
-            C_Printf(CR_GRAY, " Emulating the behavior of the "
-                   "'%s' executable.\n", gameversions[i].description);
+            C_Output(" Emulating the behavior of the "
+                   "'%s' executable.", gameversions[i].description);
             break;
         }
     }
@@ -2052,9 +2052,9 @@ void D_DoomMain (void)
     printf(" W_Init: Init WADfiles.\n");
 
     if (runcount < 2)
-        C_Printf(CR_GRAY, " Wii-DOOM has been run %s\n", (!runcount ? "once" : "twice"));
+        C_Output(" ~Wii-DOOM~ has been run %s", (!runcount ? "once" : "twice"));
     else
-        C_Printf(CR_GRAY, " Wii-DOOM has been run %s times\n", commify(runcount + 1));
+        C_Output(" ~Wii-DOOM~ has been run %s times", commify(runcount + 1));
 
     D_AddFile(iwadfile, true);
 #endif
@@ -2508,7 +2508,7 @@ void D_DoomMain (void)
     }
 
     if(devparm)
-        C_Printf(CR_GOLD, s_D_DEVSTR);
+        C_Warning(s_D_DEVSTR);
 /*
     if(show_deh_loading_message == 1)
         printf("         adding %s\n", dehacked_file);
@@ -2574,7 +2574,7 @@ void D_DoomMain (void)
             M_StringCopy(demolumpname, myargv[p + 1], sizeof(demolumpname));
         }
 
-        C_Printf(CR_GOLD, " Playing demo %s.\n", file);
+        C_Warning(" Playing demo %s.", file);
     }
 
 #endif
@@ -2624,8 +2624,8 @@ void D_DoomMain (void)
      || W_CheckNumForName("FF_END") >= 0)
     {
 //        I_PrintDivider();
-        C_Printf(CR_GOLD, " WARNING: The loaded WAD file contains modified sprites or floor textures.");
-        C_Printf(CR_GOLD, " You may want to use the '-merge' command line option instead of '-file'.");
+        C_Warning(" WARNING: The loaded WAD file contains modified sprites or floor textures.");
+        C_Warning(" You may want to use the '-merge' command line option instead of '-file'.");
     }
 #endif
 
@@ -2771,26 +2771,26 @@ void D_DoomMain (void)
         }
     }
 
-    C_Printf(CR_GRAY, " V_Init: allocate screens.\n");
-    C_Printf(CR_GRAY, " M_LoadDefaults: Load system defaults.\n");
-    C_Printf(CR_GRAY, " Z_Init: Init zone memory allocation daemon. \n");
-    C_Printf(CR_GRAY, " heap size: 0x3cdb000 \n");
-    C_Printf(CR_GRAY, " W_Init: Init WADfiles.\n");
+    C_Output(" V_Init: allocate screens.");
+    C_Output(" M_LoadDefaults: Load system defaults.");
+    C_Output(" Z_Init: Init zone memory allocation daemon. ");
+    C_Output(" heap size: 0x3cdb000 ");
+    C_Output(" W_Init: Init WADfiles.");
 
     if(gamemode == shareware && gameversion != exe_chex)
     {
         printf("         shareware version.\n");
-        C_Printf(CR_GRAY, "         shareware version.\n");
+        C_Output("         shareware version.");
     }
     else if((gamemode == shareware && gameversion == exe_chex) || gamemode == registered)
     {
         printf("         registered version.\n");
-        C_Printf(CR_GRAY, "         registered version.\n");
+        C_Output("         registered version.");
     }
     else
     {
         printf("         commercial version.\n");
-        C_Printf(CR_GRAY, "         commercial version.\n");
+        C_Output("         commercial version.");
     }
     if(gamemode == retail || gamemode == registered)
     {
@@ -2810,10 +2810,10 @@ void D_DoomMain (void)
 #ifndef WII
         printf("\n");
 #endif
-        C_Printf(CR_GRAY, " ===============================================================================\n");
-        C_Printf(CR_GRAY, "                 This version is NOT SHAREWARE, do not distribute!              \n");
-        C_Printf(CR_GRAY, "             Please report software piracy to the SPA: 1-800-388-PIR8           \n");
-        C_Printf(CR_GRAY, " ===============================================================================\n");
+        C_Output(" ===============================================================================");
+        C_Output("                 This version is NOT SHAREWARE, do not distribute!              ");
+        C_Output("             Please report software piracy to the SPA: 1-800-388-PIR8           ");
+        C_Output(" ===============================================================================");
     }
     else if(gamemode == commercial)
     {
@@ -2833,10 +2833,10 @@ void D_DoomMain (void)
 #ifndef WII
         printf("\n");
 #endif
-        C_Printf(CR_GRAY, " ===============================================================================\n");
-        C_Printf(CR_GRAY, "                                Do not distribute!                              \n");
-        C_Printf(CR_GRAY, "             Please report software piracy to the SPA: 1-800-388-PIR8           \n");
-        C_Printf(CR_GRAY, " ===============================================================================\n");
+        C_Output(" ===============================================================================");
+        C_Output("                                Do not distribute!                              ");
+        C_Output("             Please report software piracy to the SPA: 1-800-388-PIR8           ");
+        C_Output(" ===============================================================================");
     }
 
     if(modifiedgame)
@@ -2854,12 +2854,12 @@ void D_DoomMain (void)
             printf("                             press enter to continue                            ");
             printf(" ===============================================================================");
 #endif
-            C_Printf(CR_GRAY, " ===============================================================================");
-            C_Printf(CR_GRAY, "    ATTENTION:  This version of DOOM has been modified.  If you would like to   ");
-            C_Printf(CR_GRAY, "   get a copy of the original game, call 1-800-IDGAMES or see the readme file.  ");
-            C_Printf(CR_GRAY, "            You will not receive technical support for modified games.          ");
-            C_Printf(CR_GRAY, "                             press enter to continue                            ");
-            C_Printf(CR_GRAY, " ===============================================================================");
+            C_Output(" ===============================================================================");
+            C_Output("    ATTENTION:  This version of DOOM has been modified.  If you would like to   ");
+            C_Output("   get a copy of the original game, call 1-800-IDGAMES or see the readme file.  ");
+            C_Output("            You will not receive technical support for modified games.          ");
+            C_Output("                             press enter to continue                            ");
+            C_Output(" ===============================================================================");
 
 #ifdef WII
             skip_showing_message:
@@ -3097,13 +3097,13 @@ void D_DoomMain (void)
             (r_bloodsplats_max == r_bloodsplats_max_max ? P_SpawnBloodSplat : P_SpawnBloodSplat2));
 
     printf(" M_Init: Init miscellaneous info.\n");
-    C_Printf(CR_GRAY, " M_Init: Init miscellaneous info.\n");
+    C_Output(" M_Init: Init miscellaneous info.");
     M_Init ();
 
     if(gameversion == exe_chex)
     {
         printf(" R_Init: Init Chex(R) Quest refresh daemon - ");
-        C_Printf(CR_GRAY, " R_Init: Init Chex(R) Quest refresh daemon - ");
+        C_Output(" R_Init: Init Chex(R) Quest refresh daemon - ");
     }
     else
     {
@@ -3111,53 +3111,53 @@ void D_DoomMain (void)
            fsize != 10396254 && fsize != 10399316)
         {
             printf(" R_Init: Init DOOM refresh daemon - ");
-            C_Printf(CR_GRAY, " R_Init: Init DOOM refresh daemon - ");
+            C_Output(" R_Init: Init DOOM refresh daemon - ");
         }
         else
         {
             printf(" R_Init: Init DOOM refresh daemon");
-            C_Printf(CR_GRAY, " R_Init: Init DOOM refresh daemon");
+            C_Output(" R_Init: Init DOOM refresh daemon");
         }
     }
     R_Init ();
 
     printf("\n P_Init: Init Playloop state.\n");
-    C_Printf(CR_GRAY, " P_Init: Init Playloop state.\n");
+    C_Output(" P_Init: Init Playloop state.");
     P_Init ();
 
     printf(" I_Init: Setting up machine state.\n");
-    C_Printf(CR_GRAY, " I_Init: Setting up machine state.\n");
+    C_Output(" I_Init: Setting up machine state.");
 
     printf(" I_StartupDPMI\n");
-    C_Printf(CR_GRAY, " I_StartupDPMI\n");
+    C_Output(" I_StartupDPMI");
 
     printf(" I_StartupMouse\n");
-    C_Printf(CR_GRAY, " I_StartupMouse\n");
+    C_Output(" I_StartupMouse");
 
     printf(" I_StartupJoystick\n");
-    C_Printf(CR_GRAY, " I_StartupJoystick\n");
+    C_Output(" I_StartupJoystick");
 
     printf(" I_StartupKeyboard\n");
-    C_Printf(CR_GRAY, " I_StartupKeyboard\n");
+    C_Output(" I_StartupKeyboard");
 
 #ifndef WII
     I_CheckIsScreensaver();
 #endif
 
     printf(" I_StartupTimer\n");
-    C_Printf(CR_GRAY, " I_StartupTimer\n");
+    C_Output(" I_StartupTimer");
     I_InitTimer();
 
     startuptimer = I_StartupTimer();
 
     printf(" I_StartupSound\n");
-    C_Printf(CR_GRAY, " I_StartupSound\n");
+    C_Output(" I_StartupSound");
 
     printf(" calling DMX_Init\n");
-    C_Printf(CR_GRAY, " calling DMX_Init\n");
+    C_Output(" calling DMX_Init");
 
     printf(" D_CheckNetGame: Checking network game status.\n");
-    C_Printf(CR_GRAY, " D_CheckNetGame: Checking network game status.\n");
+    C_Output(" D_CheckNetGame: Checking network game status.");
     D_CheckNetGame ();
 
 #ifndef WII
@@ -3165,15 +3165,15 @@ void D_DoomMain (void)
 #endif
 
     printf(" S_Init: Setting up sound.");
-    C_Printf(CR_GRAY, " S_Init: Setting up sound.\n");
+    C_Output(" S_Init: Setting up sound.");
     S_Init (sfxVolume * 8, musicVolume * 8);
 
     printf("\n HU_Init: Setting up heads up display.\n");
-    C_Printf(CR_GRAY, " HU_Init: Setting up heads up display.\n");
+    C_Output(" HU_Init: Setting up heads up display.");
     HU_Init ();
 
     printf(" ST_Init: Init status bar.\n");
-    C_Printf(CR_GRAY, " ST_Init: Init status bar.\n");
+    C_Output(" ST_Init: Init status bar.");
     ST_Init ();
 
     // If Doom II without a MAP01 lump, this is a store demo.
@@ -3234,90 +3234,90 @@ void D_DoomMain (void)
     // loaded which could probably include a lump of that name.
 /*
     if (W_CheckNumForName("dehacked") >= 0)
-        C_Printf(CR_GOLD, " Parsed DEHACKED lump\n");
+        C_Warning(" Parsed DEHACKED lump\n");
 */
     if (fsize == 4207819)
-        C_Printf(CR_GRAY, " Playing \"DOOM SHAREWARE v1.0\".");
+        C_Output(" Playing \"DOOM SHAREWARE v1.0\".");
     else if(fsize == 4274218)
-        C_Printf(CR_GRAY, " Playing \"DOOM SHAREWARE v1.1\".");
+        C_Output(" Playing \"DOOM SHAREWARE v1.1\".");
     else if(fsize == 4225504)
-        C_Printf(CR_GRAY, " Playing \"DOOM SHAREWARE v1.2\".");
+        C_Output(" Playing \"DOOM SHAREWARE v1.2\".");
     else if(fsize == 4225460)
-        C_Printf(CR_GRAY, " Playing \"DOOM SHAREWARE v1.25 (SYBEX RELEASE)\".");
+        C_Output(" Playing \"DOOM SHAREWARE v1.25 (SYBEX RELEASE)\".");
     else if(fsize == 4234124)
-        C_Printf(CR_GRAY, " Playing \"DOOM SHAREWARE v1.666\".");
+        C_Output(" Playing \"DOOM SHAREWARE v1.666\".");
     else if(fsize == 4196020)
-        C_Printf(CR_GRAY, " Playing \"DOOM SHAREWARE v1.8\".");
+        C_Output(" Playing \"DOOM SHAREWARE v1.8\".");
     else if(fsize == 4261144)
-        C_Printf(CR_GRAY, " Playing \"DOOM BETA v1.4\".");
+        C_Output(" Playing \"DOOM BETA v1.4\".");
     else if(fsize == 4271324)
-        C_Printf(CR_GRAY, " Playing \"DOOM BETA v1.5\".");
+        C_Output(" Playing \"DOOM BETA v1.5\".");
     else if(fsize == 4211660)
-        C_Printf(CR_GRAY, " Playing \"DOOM BETA v1.6\".");
+        C_Output(" Playing \"DOOM BETA v1.6\".");
     else if(fsize == 10396254)
-        C_Printf(CR_GRAY, " Playing \"DOOM REGISTERED v1.1\".");
+        C_Output(" Playing \"DOOM REGISTERED v1.1\".");
     else if(fsize == 10399316)
-        C_Printf(CR_GRAY, " Playing \"DOOM REGISTERED v1.2\".");
+        C_Output(" Playing \"DOOM REGISTERED v1.2\".");
     else if(fsize == 10401760)
-        C_Printf(CR_GRAY, " Playing \"DOOM REGISTERED v1.6\".");
+        C_Output(" Playing \"DOOM REGISTERED v1.6\".");
     else if(fsize == 11159840)
-        C_Printf(CR_GRAY, " Playing \"DOOM REGISTERED v1.8\".");
+        C_Output(" Playing \"DOOM REGISTERED v1.8\".");
     else if(fsize == 12408292)
-        C_Printf(CR_GRAY, " Playing \"DOOM REGISTERED v1.9 (THE ULTIMATE DOOM)\".");
+        C_Output(" Playing \"DOOM REGISTERED v1.9 (THE ULTIMATE DOOM)\".");
     else if(fsize == 12538385)
-        C_Printf(CR_GRAY, " Playing \"DOOM REGISTERED (XBOX EDITION)\".");
+        C_Output(" Playing \"DOOM REGISTERED (XBOX EDITION)\".");
     else if(fsize == 12487824)
-        C_Printf(CR_GRAY, " Playing \"DOOM REGISTERED (BFG-PC EDITION)\".");
+        C_Output(" Playing \"DOOM REGISTERED (BFG-PC EDITION)\".");
     else if(fsize == 12474561)
-        C_Printf(CR_GRAY, " Playing \"DOOM REGISTERED (BFG-XBOX360 EDITION)\".");
+        C_Output(" Playing \"DOOM REGISTERED (BFG-XBOX360 EDITION)\".");
     else if(fsize == 19362644)
-        C_Printf(CR_GRAY, " Playing \"FREEDOOM v0.8 PHASE 1\".");
+        C_Output(" Playing \"FREEDOOM v0.8 PHASE 1\".");
     else if(fsize == 14943400)
-        C_Printf(CR_GRAY, " Playing \"DOOM 2 REGISTERED v1.666\".");
+        C_Output(" Playing \"DOOM 2 REGISTERED v1.666\".");
     else if(fsize == 14824716)
-        C_Printf(CR_GRAY, " Playing \"DOOM 2 REGISTERED v1.666 (GERMAN VERSION)\".");
+        C_Output(" Playing \"DOOM 2 REGISTERED v1.666 (GERMAN VERSION)\".");
     else if(fsize == 14612688)
-        C_Printf(CR_GRAY, " Playing \"DOOM 2 REGISTERED v1.7\".");
+        C_Output(" Playing \"DOOM 2 REGISTERED v1.7\".");
     else if(fsize == 14607420)
-        C_Printf(CR_GRAY, " Playing \"DOOM 2 REGISTERED v1.8 (FRENCH VERSION)\".");
+        C_Output(" Playing \"DOOM 2 REGISTERED v1.8 (FRENCH VERSION)\".");
     else if(fsize == 14604584)
-        C_Printf(CR_GRAY, " Playing \"DOOM 2 REGISTERED v1.9\".");
+        C_Output(" Playing \"DOOM 2 REGISTERED v1.9\".");
     else if(fsize == 14677988)
-        C_Printf(CR_GRAY, " Playing \"DOOM 2 REGISTERED (BFG-PSN EDITION)\".");
+        C_Output(" Playing \"DOOM 2 REGISTERED (BFG-PSN EDITION)\".");
     else if(fsize == 14691821)
-        C_Printf(CR_GRAY, " Playing \"DOOM 2 REGISTERED (BFG-PC EDITION)\".");
+        C_Output(" Playing \"DOOM 2 REGISTERED (BFG-PC EDITION)\".");
     else if(fsize == 14683458)
-        C_Printf(CR_GRAY, " Playing \"DOOM 2 REGISTERED (XBOX EDITION)\".");
+        C_Output(" Playing \"DOOM 2 REGISTERED (XBOX EDITION)\".");
     else if(fsize == 19801320)
-        C_Printf(CR_GRAY, " Playing \"FREEDOOM v0.6.4\".");
+        C_Output(" Playing \"FREEDOOM v0.6.4\".");
     else if(fsize == 27704188)
-        C_Printf(CR_GRAY, " Playing \"FREEDOOM v0.7 RC 1\".");
+        C_Output(" Playing \"FREEDOOM v0.7 RC 1\".");
     else if(fsize == 27625596)
-        C_Printf(CR_GRAY, " Playing \"FREEDOOM v0.7\".");
+        C_Output(" Playing \"FREEDOOM v0.7\".");
     else if(fsize == 28144744)
-        C_Printf(CR_GRAY, " Playing \"FREEDOOM v0.8 BETA 1\".");
+        C_Output(" Playing \"FREEDOOM v0.8 BETA 1\".");
     else if(fsize == 28592816)
-        C_Printf(CR_GRAY, " Playing \"FREEDOOM v0.8\".");
+        C_Output(" Playing \"FREEDOOM v0.8\".");
     else if(fsize == 28422764)
-        C_Printf(CR_GRAY, " Playing \"FREEDOOM v0.8 PHASE 2\".");
+        C_Output(" Playing \"FREEDOOM v0.8 PHASE 2\".");
     else if(fsize == 18195736)
-        C_Printf(CR_GRAY, " Playing \"FINAL DOOM - TNT v1.9 (WITH YELLOW KEYCARD BUG)\".");
+        C_Output(" Playing \"FINAL DOOM - TNT v1.9 (WITH YELLOW KEYCARD BUG)\".");
     else if(fsize == 18654796)
-        C_Printf(CR_GRAY, " Playing \"FINAL DOOM - TNT v1.9 (WITHOUT YELLOW KEYCARD BUG)\".");
+        C_Output(" Playing \"FINAL DOOM - TNT v1.9 (WITHOUT YELLOW KEYCARD BUG)\".");
     else if(fsize == 18240172)
-        C_Printf(CR_GRAY, " Playing \"FINAL DOOM - PLUTONIA v1.9 (WITH DEATHMATCH STARTS)\".");
+        C_Output(" Playing \"FINAL DOOM - PLUTONIA v1.9 (WITH DEATHMATCH STARTS)\".");
     else if(fsize == 17420824)
-        C_Printf(CR_GRAY, " Playing \"FINAL DOOM - PLUTONIA v1.9 (WITHOUT DEATHMATCH STARTS)\".");
+        C_Output(" Playing \"FINAL DOOM - PLUTONIA v1.9 (WITHOUT DEATHMATCH STARTS)\".");
     else if(fsize == 12361532)
-        C_Printf(CR_GRAY, " Playing \"CHEX QUEST\".");
+        C_Output(" Playing \"CHEX QUEST\".");
     else if(fsize == 9745831)
-        C_Printf(CR_GRAY, " Playing \"HACX SHAREWARE v1.0\".");
+        C_Output(" Playing \"HACX SHAREWARE v1.0\".");
     else if(fsize == 21951805)
-        C_Printf(CR_GRAY, " Playing \"HACX REGISTERED v1.0\".");
+        C_Output(" Playing \"HACX REGISTERED v1.0\".");
     else if(fsize == 22102300)
-        C_Printf(CR_GRAY, " Playing \"HACX REGISTERED v1.1\".");
+        C_Output(" Playing \"HACX REGISTERED v1.1\".");
     else if(fsize == 19321722)
-        C_Printf(CR_GRAY, " Playing \"HACX REGISTERED v1.2\".");
+        C_Output(" Playing \"HACX REGISTERED v1.2\".");
 
     //!
     // @category mod
@@ -3345,9 +3345,9 @@ void D_DoomMain (void)
 #endif
 */
     if(d_uncappedframerate)
-        C_Printf(CR_GRAY, " The framerate is uncapped.");
+        C_Output(" The framerate is uncapped.");
     else
-        C_Printf(CR_GRAY, " The framerate is capped at %i FPS.", TICRATE);
+        C_Output(" The framerate is capped at %i FPS.", TICRATE);
 
     if (startloadgame >= 0)
     {
@@ -3366,7 +3366,7 @@ void D_DoomMain (void)
 
     startuptimer = I_StartupTimer() - startuptimer;
 
-    C_Printf(CR_GRAY, " Startup took %02i:%02i:%02i.%i to complete.\n",
+    C_Output(" Startup took %02i:%02i:%02i.%i to complete.",
         (startuptimer / (1000 * 60 * 60)) % 24,
         (startuptimer / (1000 * 60)) % 60,
         (startuptimer / 1000) % 60,

@@ -456,7 +456,7 @@ static dboolean PIT_CheckLine(line_t *ld)
             spechit = Z_Realloc(spechit, sizeof(*spechit) * spechit_max);
 #endif
             if (spechit != 0)
-                C_Printf(CR_GOLD, " PIT_CheckLine: Hit MaxSpecHit limit at %d, raised to %u\n",
+                C_Warning(" PIT_CheckLine: Hit MaxSpecHit limit at %d, raised to %u",
                         spechit_max / 2, spechit_max);
         }
         spechit[numspechit++] = ld;

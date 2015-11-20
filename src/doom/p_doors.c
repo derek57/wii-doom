@@ -615,7 +615,7 @@ EV_VerticalDoor
     if (line->sidenum[side^1] == -1)
     {
         // [crispy] do not crash if the wrong side of the door is pushed
-        C_Printf(CR_RED, " EV_VerticalDoor: DR special type on 1-sided linedef\n");
+        C_Error(" EV_VerticalDoor: DR special type on 1-sided linedef");
         return;
     }
 
@@ -666,8 +666,8 @@ EV_VerticalDoor
                 {
                     // This isn't a door OR a plat.  Now we're in trouble.
 
-                    C_Printf(CR_GOLD, "EV_VerticalDoor: Tried to close "
-                                    "something that wasn't a door.\n");
+                    C_Warning("EV_VerticalDoor: Tried to close "
+                                    "something that wasn't a door.");
 
                     // Try closing it anyway. At least it will work on 32-bit
                     // machines.

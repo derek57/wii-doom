@@ -1665,9 +1665,9 @@ void G_DoLoadLevel (void)
     ep = (gamemode == commercial ? (gamemission == pack_nerve ? 2 : 1) : gameepisode);
 
     if (author[0])
-        C_Printf(CR_GRAY, "%s by %s", mapnumandtitle, author);
+        C_Output("%s by %s", mapnumandtitle, author);
     else
-        C_Printf(CR_GRAY, mapnumandtitle);
+        C_Output(mapnumandtitle);
 
     P_SetupLevel (ep, gamemap);
 
@@ -1818,11 +1818,11 @@ void G_DoPlayDemo (void)
         }
         else
         {
-            C_Printf(CR_RED, " Demo is from a different game version!\n");
-            C_Printf(CR_RED, " (read %i, should be %i)\n", demoversion, G_VanillaVersionCode());
-            C_Printf(CR_RED, " *** You may need to upgrade your version of Doom to v1.9. ***\n");
-            C_Printf(CR_RED, " See: http://doomworld.com/files/patches.shtml\n");
-            C_Printf(CR_RED, " This appears to be %s.", DemoVersionDescription(demoversion));
+            C_Error(" Demo is from a different game version!");
+            C_Error(" (read %i, should be %i)", demoversion, G_VanillaVersionCode());
+            C_Error(" *** You may need to upgrade your version of Doom to v1.9. ***");
+            C_Error(" See: http://doomworld.com/files/patches.shtml");
+            C_Error(" This appears to be %s.", DemoVersionDescription(demoversion));
             gameaction = ga_nothing;
             return;
         }
@@ -2168,8 +2168,8 @@ void G_DoWorldDone (void)
 
 void G_DoSaveGame (void) 
 { 
-    char *savegame_file;
-    char *temp_savegame_file;
+    char        *savegame_file;
+    char        *temp_savegame_file;
 
     temp_savegame_file = P_TempSaveGameFile();
     savegame_file = (consoleactive ? savename : P_SaveGameFile(savegameslot));
@@ -2178,13 +2178,10 @@ void G_DoSaveGame (void)
     // and then rename it at the end if it was successfully written.
     // This prevents an existing savegame from being overwritten by 
     // a corrupted one, or if a savegame buffer overrun occurs.
-
     save_stream = fopen(temp_savegame_file, "wb");
 
-    if (save_stream == NULL)
-    {
+    if (!save_stream)
         return;
-    }
 
     savegame_error = false;
 
@@ -2195,10 +2192,10 @@ void G_DoSaveGame (void)
 	const int time = leveltime / TICRATE;
 
         if(gamemode == commercial)
-            C_Printf(CR_RED, " G_DoSaveGame: Map %d, Skill %d, Time %d:%02d.\n",
+            C_Error(" G_DoSaveGame: Map %d, Skill %d, Time %d:%02d.",
 	            gamemap, gameskill, time/60, time%60);
         else
-            C_Printf(CR_RED, " G_DoSaveGame: Episode %d, Map %d, Skill %d, Time %d:%02d.\n",
+            C_Error(" G_DoSaveGame: Episode %d, Map %d, Skill %d, Time %d:%02d.",
 	            gameepisode, gamemap, gameskill, time/60, time%60);
     }
 
@@ -2229,7 +2226,7 @@ void G_DoSaveGame (void)
     rename(temp_savegame_file, savegame_file);
     
     if (consoleactive)
-        C_Printf(CR_GOLD, " %s saved.", uppercase(savename));
+        C_Warning(" %s saved.", uppercase(savename));
     else
     {
         static char     buffer[1024];
@@ -2545,7 +2542,7 @@ void G_ExitLevel (void)
     player_t *player = &players[consoleplayer];
     player->item = 0;
 
-//    C_Printf(CR_GOLD, " G_ExitLevel: Free Memory (0x%x)\n", Z_FreeMemory());
+//    C_Warning(" G_ExitLevel: Free Memory (0x%x)", Z_FreeMemory());
 
     if(consoleactive)
         C_HideConsoleFast();
@@ -2560,7 +2557,7 @@ void G_ExitLevel (void)
 // Here's for the german edition.
 void G_SecretExitLevel (void) 
 { 
-//    C_Printf(CR_GOLD, " G_SecretExitLevel: Free Memory (0x%x)\n", Z_FreeMemory());
+//    C_Warning(" G_SecretExitLevel: Free Memory (0x%x)", Z_FreeMemory());
 
     // IF NO WOLF3D LEVELS, NO SECRET EXIT!
     if ( (gamemode == commercial)
@@ -2635,16 +2632,14 @@ void G_LoadGame (char* name)
 
 void G_DoLoadGame (void) 
 { 
-    int savedleveltime;
+    int         savedleveltime;
          
     gameaction = ga_nothing; 
          
     save_stream = fopen(savename, "rb");
 
-    if (save_stream == NULL)
-    {
+    if (!save_stream)
         return;
-    }
 
     savegame_error = false;
 
@@ -2686,7 +2681,7 @@ void G_DoLoadGame (void)
 
     if (consoleactive)
     {
-        C_Printf(CR_GRAY, " %s loaded.", uppercase(savename));
+        C_Output(" %s loaded.", uppercase(savename));
         C_HideConsoleFast();
     }
 } 

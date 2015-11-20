@@ -214,8 +214,9 @@ dboolean            mapinfo_lump;
 //  used as a PVS lookup as well.
 //
 
-extern dboolean     mus_cheat_used;
-extern dboolean     finale_music;
+extern dboolean    mus_cheat_used;
+extern dboolean    finale_music;
+extern dboolean    sound_warning_printed;
 
 extern int         numsplats;
 
@@ -355,7 +356,7 @@ void P_LoadSegs (int lump)
         // e6y: fix wrong side index
         if (side != 0 && side != 1)
         {
-            C_Printf(CR_GOLD, " Seg %s has a wrong side index of %s. It has been replaced with 1.",
+            C_Warning(" Seg %s has a wrong side index of %s. It has been replaced with 1.",
                 commify(i), commify(side));
             side = 1;
         }
@@ -374,7 +375,7 @@ void P_LoadSegs (int lump)
             li->frontsector = sides[ldef->sidenum[side]].sector;
         else
         {
-            C_Printf(CR_GOLD, " The front of seg %s has no sidedef.", commify(i));
+            C_Warning(" The front of seg %s has no sidedef.", commify(i));
             li->frontsector = NULL;
         }
 
@@ -396,9 +397,9 @@ void P_LoadSegs (int lump)
             char buffer[] = " Seg %s references an invalid vertex of %s.";
 
             if (v1 >= numvertexes)
-                C_Printf(CR_GOLD, buffer, commify(i), commify(v1));
+                C_Warning(buffer, commify(i), commify(v1));
             if (v2 >= numvertexes)
-                C_Printf(CR_GOLD, buffer, commify(i), commify(v2));
+                C_Warning(buffer, commify(i), commify(v2));
 
             if (li->sidedef == &sides[li->linedef->sidenum[0]])
             {
@@ -512,7 +513,7 @@ static void P_LoadSegs_V4(int lump)
         // e6y: fix wrong side index
         if (side != 0 && side != 1)
         {
-            C_Printf(CR_GOLD, " Seg %s has a wrong side index of %s. It has been replaced with 1.",
+            C_Warning(" Seg %s has a wrong side index of %s. It has been replaced with 1.",
                 commify(i), commify(side));
             side = 1;
         }
@@ -531,7 +532,7 @@ static void P_LoadSegs_V4(int lump)
             li->frontsector = sides[ldef->sidenum[side]].sector;
         else
         {
-            C_Printf(CR_GOLD, " The front of seg %s has no sidedef.", commify(i));
+            C_Warning(" The front of seg %s has no sidedef.", commify(i));
             li->frontsector = NULL;
         }
 
@@ -553,9 +554,9 @@ static void P_LoadSegs_V4(int lump)
             char buffer[] = " Seg %s references an invalid vertex of %s.";
 
             if (v1 >= numvertexes)
-                C_Printf(CR_GOLD, buffer, commify(i), commify(v1));
+                C_Warning(buffer, commify(i), commify(v1));
             if (v2 >= numvertexes)
-                C_Printf(CR_GOLD, buffer, commify(i), commify(v2));
+                C_Warning(buffer, commify(i), commify(v2));
 
             if (li->sidedef == &sides[li->linedef->sidenum[0]])
             {
@@ -723,7 +724,7 @@ void P_LoadNodes (int lump)
     if (!data || !numnodes)
     {
         if (numsubsectors == 1)
-            C_Printf(CR_GOLD, " This map has no nodes and only one subsector.");
+            C_Warning(" This map has no nodes and only one subsector.");
         else
             I_Error("This map has no nodes.");
     }
@@ -755,7 +756,7 @@ void P_LoadNodes (int lump)
                 // haleyjd 11/06/10: check for invalid subsector reference
                 if (no->children[j] >= numsubsectors)
                 {
-                    C_Printf(CR_GOLD, " Node %s references an invalid subsector of %s.",
+                    C_Warning(" Node %s references an invalid subsector of %s.",
                         commify(i), commify(no->children[j]));
                     no->children[j] = 0;
                 }
@@ -787,7 +788,7 @@ static void P_LoadNodes_V4(int lump)
     if (!data || !numnodes)
     {
         if (numsubsectors == 1)
-            C_Printf(CR_GOLD, " This map has no nodes and only one subsector.");
+            C_Warning(" This map has no nodes and only one subsector.");
         else
             I_Error("This map has no nodes.");
     }
@@ -847,14 +848,14 @@ static void P_LoadZSegs(const byte *data)
         // e6y: fix wrong side index
         if (side != 0 && side != 1)
         {
-            C_Printf(CR_GOLD, " Seg %s has a wrong side index of %s. It has been replaced with 1.",
+            C_Warning(" Seg %s has a wrong side index of %s. It has been replaced with 1.",
                 commify(i), commify(side));
             side = 1;
         }
 
         // e6y: check for wrong indexes
         if ((unsigned int)ldef->sidenum[side] >= (unsigned int)numsides)
-            C_Printf(CR_GOLD, " Linedef %s for seg %s references an invalid sidedef of %s.",
+            C_Warning(" Linedef %s for seg %s references an invalid sidedef of %s.",
                 commify(linedef), commify(i), commify(ldef->sidenum[side]));
 
         li->sidedef = &sides[ldef->sidenum[side]];
@@ -866,7 +867,7 @@ static void P_LoadZSegs(const byte *data)
             li->frontsector = sides[ldef->sidenum[side]].sector;
         else
         {
-            C_Printf(CR_GOLD, " The front of seg %s has no sidedef.", commify(i));
+            C_Warning(" The front of seg %s has no sidedef.", commify(i));
             li->frontsector = NULL;
         }
 
@@ -1147,7 +1148,7 @@ static void P_LoadLineDefs(int lump)
 	// [crispy] warn about unknown linedef types
 	if ((unsigned short) ld->special == 270 || (unsigned short) ld->special > 272)
 	{
-	    C_Printf(CR_RED, " P_LoadLineDefs: Unknown special %d at line %d\n", ld->special, i);
+	    C_Error(" P_LoadLineDefs: Unknown special %d at line %d", ld->special, i);
 	    warn++;
 	}
 
@@ -1200,8 +1201,8 @@ static void P_LoadLineDefs(int lump)
     // [crispy] warn about unknown linedef types
     if (warn)
     {
-        C_Printf(CR_RED, " P_LoadLineDefs: Found %d line%s with unknown linedef type.\n", warn, (warn > 1) ? "s" : "");
-        C_Printf(CR_RED, " THIS MAP MAY NOT WORK AS EXPECTED!\n");
+        C_Error(" P_LoadLineDefs: Found %d line%s with unknown linedef type.", warn, (warn > 1) ? "s" : "");
+        C_Error(" THIS MAP MAY NOT WORK AS EXPECTED!");
     }
 
     W_ReleaseLumpNum(lump);
@@ -1224,7 +1225,7 @@ static void P_LoadLineDefs2(int lump)
             for (j = 0; j < 2; j++)
                 if (ld->sidenum[j] != NO_INDEX && ld->sidenum[j] >= numsides)
                 {
-                    C_Printf(CR_GOLD, " Linedef %s references an invalid sidedef of %s.",
+                    C_Warning(" Linedef %s references an invalid sidedef of %s.",
                         commify(i), commify(ld->sidenum[j]));
                     ld->sidenum[j] = NO_INDEX;
                 }
@@ -1233,13 +1234,13 @@ static void P_LoadLineDefs2(int lump)
             if (ld->sidenum[0] == NO_INDEX)
             {
                 ld->sidenum[0] = 0;  // Substitute dummy sidedef for missing right side
-                C_Printf(CR_GOLD, " Linedef %s is missing its first sidedef.", commify(i));
+                C_Warning(" Linedef %s is missing its first sidedef.", commify(i));
             }
 
             if (ld->sidenum[1] == NO_INDEX && (ld->flags & ML_TWOSIDED))
             {
                 ld->flags &= ~ML_TWOSIDED;  // Clear 2s flag for missing left side
-                C_Printf(CR_GOLD, " Linedef %s has the two-sided flag set but has no second sidedef.",
+                C_Warning(" Linedef %s has the two-sided flag set but has no second sidedef.",
                     commify(i));
             }
         }
@@ -1304,7 +1305,7 @@ static void P_LoadSideDefs2(int lump)
         // cph 2006/09/30 - catch out-of-range sector numbers; use sector 0 instead
         if (sector_num >= numsectors)
         {
-            C_Printf(CR_GOLD, " Sidedef %s references an invalid sector of %s.",
+            C_Warning(" Sidedef %s references an invalid sector of %s.",
                 commify(i), commify(sector_num));
             sector_num = 0;
         }
@@ -1873,21 +1874,21 @@ static mapformat_t P_CheckMapFormat(int lumpnum)
 
     if ((b = lumpnum+ML_BLOCKMAP+1) < numlumps &&
             !strncasecmp(lumpinfo[b]->name, "BEHAVIOR", 8))
-        C_Printf(CR_GOLD, " Hexen map format, ");
+        C_Warning(" Hexen map format, ");
     else
-        C_Printf(CR_GOLD, " Doom map format, ");
+        C_Warning(" Doom map format, ");
 
     if (!((b = lumpnum+ML_NODES) < numlumps && (nodes = W_CacheLumpNum(b, PU_CACHE)) &&
             W_LumpLength(b) > 0))
-        C_Printf(CR_GOLD, " No nodes.\n");
+        C_Warning(" No nodes.");
     else if (!memcmp(nodes, "xNd4\0\0\0\0", 8))
-        C_Printf(CR_GOLD, " DeePBSP nodes.\n");
+        C_Warning(" DeePBSP nodes.");
     else if (!memcmp(nodes, "XNOD", 4))
-        C_Printf(CR_GOLD, " Uncompressed ZDBSP nodes.\n");
+        C_Warning(" Uncompressed ZDBSP nodes.");
     else if (!memcmp(nodes, "ZNOD", 4))
-        C_Printf(CR_GOLD, " Compressed ZDBSP nodes.\n");
+        C_Warning(" Compressed ZDBSP nodes.");
     else
-        C_Printf(CR_GOLD, " Normal BSP nodes.\n");
+        C_Warning(" Normal BSP nodes.");
 
     if (nodes)
         W_ReleaseLumpNum(b);
@@ -1909,6 +1910,7 @@ P_SetupLevel
         
     mus_cheat_used = false;
     finale_music = false;
+    sound_warning_printed = false;
 
     numsplats = 0;
 
@@ -2095,7 +2097,7 @@ P_SetupLevel
     if (precache)
         R_PrecacheLevel ();
 
-//    C_Printf(CR_GOLD, " P_SetupLevel: Free Memory (0x%x)\n", Z_FreeMemory());
+//    C_Warning(" P_SetupLevel: Free Memory (0x%x)", Z_FreeMemory());
     //printf ("free memory: 0x%x\n", Z_FreeMemory());
 
     HU_NewLevel();

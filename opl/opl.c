@@ -106,7 +106,7 @@ static opl_init_result_t InitDriver(opl_driver_t *_driver,
     result2 = OPL_Detect();
     if (result1 == OPL_INIT_NONE || result2 == OPL_INIT_NONE)
     {
-        C_Printf(CR_RED, " OPL_Init: No OPL detected using '%s' driver...\n", _driver->name);
+        C_Error(" OPL_Init: No OPL detected using '%s' driver...", _driver->name);
         _driver->shutdown_func();
         driver = NULL;
         return OPL_INIT_NONE;
@@ -115,9 +115,9 @@ static opl_init_result_t InitDriver(opl_driver_t *_driver,
     init_stage_reg_writes = 0;
 
     if(opl_type)
-        C_Printf(CR_GRAY, " OPL_Init: Using driver '%s' (OPL3).\n", driver->name);
+        C_Output(" OPL_Init: Using driver '%s' (OPL3).", driver->name);
     else
-        C_Printf(CR_GRAY, " OPL_Init: Using driver '%s' (OPL2).\n", driver->name);
+        C_Output(" OPL_Init: Using driver '%s' (OPL2).", driver->name);
 
     return result2;
 }
@@ -138,7 +138,7 @@ static opl_init_result_t AutoSelectDriver(unsigned int port_base)
         }
     }
 
-    C_Printf(CR_RED, " OPL_Init: Failed to find a working driver.\n");
+    C_Error(" OPL_Init: Failed to find a working driver.");
 
     return OPL_INIT_NONE;
 }
@@ -169,14 +169,13 @@ opl_init_result_t OPL_Init(unsigned int port_base)
                 }
                 else
                 {
-                    C_Printf(CR_RED, " OPL_Init: Failed to initialize "
-                           "driver: '%s'.\n", driver_name);
+                    C_Error(" OPL_Init: Failed to initialize driver: '%s'.", driver_name);
                     return OPL_INIT_NONE;
                 }
             }
         }
 
-        C_Printf(CR_GOLD, " OPL_Init: unknown driver: '%s'.\n", driver_name);
+        C_Warning(" OPL_Init: unknown driver: '%s'.", driver_name);
 
         return OPL_INIT_NONE;
     }

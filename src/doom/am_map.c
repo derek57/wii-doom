@@ -1185,7 +1185,7 @@ AM_drawFline
            || fl->b.y < 0 || fl->b.y >= f_h)
     {
         static int   fuck = 0;
-        C_Printf(CR_RED, "fuck %d \r", fuck++);
+        C_Error("fuck %d \r", fuck++);
         return;
     }
 

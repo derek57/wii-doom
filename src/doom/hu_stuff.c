@@ -880,7 +880,7 @@ void HU_Ticker(void)
             if(!dont_message_to_console)
                 goto skip;
 
-            C_PlayerMessage(" %s\n", plr->message);
+            C_PlayerMessage(" %s", plr->message);
 
             skip: ;
 
@@ -961,18 +961,18 @@ void HU_NewLevel()
     else if (!s && !mapinfo_lump)
         s = "Unknown level";
 
-    C_Printf(CR_GRAY, "\n");
+    C_Output("");
 
     C_AddConsoleDivider();
 
-    C_Printf(CR_GRAY, "\n");
+    C_Output("");
 
     if(gameepisode == 1 && gamemap == 10 && fsize == 12538385)
-        C_Printf(CR_GRAY, " %s\n", "E1M10: Sewers");
+        C_Output(" %s", "E1M10: Sewers");
     else
-        C_Printf(CR_GRAY, " %s\n", uppercase(s));
+        C_Output(" %s", uppercase(s));
 
-    C_Printf(CR_GRAY, " \n");
+    C_Output(" ");
 }
 
 #pragma GCC diagnostic push
@@ -995,8 +995,8 @@ void HU_PlayerMessage(char *message, dboolean ingame)
         plr->message = buffer;
 
     if (ingame)
-        C_Printf(CR_GREEN, " %s%s", buffer, (lastchar == '.' || lastchar == '!' ? "" : "."));
+        C_Print(graystring, " %s%s", buffer, (lastchar == '.' || lastchar == '!' ? "" : "."));
     else
-        C_Printf(CR_GRAY, " %s%s", buffer, (lastchar == '.' || lastchar == '!' ? "" : "."));
+        C_Output(" %s%s", buffer, (lastchar == '.' || lastchar == '!' ? "" : "."));
 }
 

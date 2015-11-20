@@ -514,7 +514,7 @@ static dboolean ExpandSoundData_SRC(sfxinfo_t *sfxinfo,
 
     if (clipped > 0)
     {
-        C_Printf(CR_RED, " Sound '%s': clipped %u samples (%0.2f %%)\n", 
+        C_Error(" Sound '%s': clipped %u samples (%0.2f %%)", 
                         sfxinfo->name, clipped,
                         400.0 * clipped / chunk->alen);
     }
@@ -740,7 +740,7 @@ static void I_SDL_PrecacheSounds(sfxinfo_t *sounds, int num_sounds)
 	return;
     }
 
-    C_Printf(CR_GRAY, " I_SDL_PrecacheSounds: Precaching all sound effects..");
+    C_Output(" I_SDL_PrecacheSounds: Precaching all sound effects..");
 
     for (i=0; i<num_sounds; ++i)
     {
@@ -760,7 +760,7 @@ static void I_SDL_PrecacheSounds(sfxinfo_t *sounds, int num_sounds)
         }
     }
 
-    C_Printf(CR_GRAY, " \n");
+    C_Output(" ");
 }
 
 #else
@@ -1024,13 +1024,13 @@ static int GetSliceSize(void)
 
     if (SDL_Init(SDL_INIT_AUDIO) < 0)
     {
-        C_Printf(CR_RED, " Unable to set up sound.\n");
+        C_Error(" Unable to set up sound.");
         return false;
     }
 
     if (Mix_OpenAudio(snd_samplerate, AUDIO_S16SYS, 2, GetSliceSize()) < 0)
     {
-        C_Printf(CR_RED, " Error initialising SDL_mixer: %s\n", Mix_GetError());
+        C_Error(" Error initialising SDL_mixer: %s", Mix_GetError());
         return false;
     }
 
@@ -1051,9 +1051,7 @@ static int GetSliceSize(void)
 #else
     if (use_libsamplerate != 0)
     {
-        C_Printf(CR_RED, " I_SDL_InitSound: use_libsamplerate=%i, but "
-                        "libsamplerate support not compiled in.\n",
-                        use_libsamplerate);
+        C_Error(" I_SDL_InitSound: use_libsamplerate = %i, but libsamplerate support not compiled in.", use_libsamplerate);
     }
 #endif
 
@@ -1074,12 +1072,9 @@ static int GetSliceSize(void)
         if (v <= SDL_VERSIONNUM(1, 2, 8))
         {
             setpanning_workaround = true;
-            C_Printf(CR_GOLD, "\n"
-              " ATTENTION: You are using an old version of SDL_mixer!\n"
-              "            This version has a bug that may cause "
-                          "your sound to stutter.\n"
-              "            Please upgrade to a newer version!\n"
-              "\n");
+            C_Warning(" ATTENTION: You are using an old version of SDL_mixer!");
+            C_Warning(" \tThis version has a bug that may cause your sound to stutter.");
+            C_Warning(" \tPlease upgrade to a newer version!");
         }
     }
 

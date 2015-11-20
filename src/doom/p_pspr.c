@@ -199,7 +199,7 @@ void P_BringUpWeapon (player_t* player)
         S_StartSound (player->mo, sfx_sawup);
                 
     if (player->pendingweapon >= NUMWEAPONS)
-        C_Printf(CR_RED, " P_BringUpWeapon: weaponinfo overrun has occured.\n");
+        C_Error(" P_BringUpWeapon: weaponinfo overrun has occured.");
 
     if(beta_style && player->pendingweapon == wp_chaingun)
         newstate = S_BETACHAINUP;

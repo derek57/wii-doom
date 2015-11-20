@@ -2883,7 +2883,7 @@ void M_DrawReadThis1(void)
             break;
 
         default:
-            C_Printf(CR_GOLD, " Unhandled game version");
+            C_Warning(" Unhandled game version");
 //            I_Error("Unhandled game version");
             break;
     }
@@ -3427,7 +3427,7 @@ void M_Episode(int choice)
     if ( (gamemode == registered)
          && (choice > 2))
     {
-      C_Printf(CR_RED, " M_Episode: 4th episode requires Ultimate DOOM\n");
+      C_Error(" M_Episode: 4th episode requires Ultimate DOOM");
       choice = 0;
     }
          

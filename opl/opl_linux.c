@@ -40,14 +40,12 @@ static int OPL_Linux_Init(unsigned int port_base)
 
     if (ioperm(port_base, 2, 1) < 0)
     {
-        C_Printf(CR_RED, "\n Failed to get I/O port permissions for 0x%x: %s\n\n",
-                        port_base, strerror(errno));
+        C_Error(" Failed to get I/O port permissions for 0x%x: %s", port_base, strerror(errno));
 
         if (errno == EPERM)
         {
-            C_Printf(CR_RED,
-                    "\tYou may need to run the program as root in order\n"
-                    "\tto acquire I/O port permissions for OPL MIDI playback.\n\n");
+            C_Print(graystring, "\tYou may need to run the program as root in order");
+            C_Print(graystring, "\tto acquire I/O port permissions for OPL MIDI playback.");
         }
 
         return 0;

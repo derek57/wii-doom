@@ -587,7 +587,7 @@ static dboolean ReadSubstituteConfig(char *filename)
 
         if (error != NULL)
         {
-            C_Printf(CR_RED, " %s:%i: Error: %s\n", filename, linenum, error);
+            C_Error(" %s:%i: Error: %s", filename, linenum, error);
         }
 
         ++linenum;
@@ -732,7 +732,7 @@ static void DumpSubstituteConfig(char *filename)
     fprintf(fs, "\n");
     fclose(fs);
 
-    C_Printf(CR_GRAY, " Substitute MIDI config file written to %s.\n", filename);
+    C_Output(" Substitute MIDI config file written to %s.", filename);
 }
 
 // If the temp_timidity_cfg config variable is set, generate a "wrapper"
@@ -925,14 +925,14 @@ static dboolean I_SDL_InitMusic(void)
     {
         if (SDL_Init(SDL_INIT_AUDIO) < 0)
         {
-            C_Printf(CR_RED, " Unable to set up sound.\n");
+            C_Error(" Unable to set up sound.");
         }
         else if (Mix_OpenAudio(snd_samplerate, AUDIO_S16SYS, 2, 4096) < 0)
         {
-            C_Printf(CR_RED, " Error initializing SDL_mixer: %s\n",
+            C_Error(" Error initializing SDL_mixer: %s",
                     Mix_GetError());
 
-            C_Printf(CR_RED, " couldn't open audio with desired format\n");
+            C_Error(" couldn't open audio with desired format");
 
             SDL_QuitSubSystem(SDL_INIT_AUDIO);
         }
@@ -1141,7 +1141,7 @@ static void *I_SDL_RegisterSong(void *data, int len)
         {
             // Fall through and play MIDI normally, but print an error
             // message.
-            C_Printf(CR_RED, " Failed to load substitute music file: %s: %s\n",
+            C_Error(" Failed to load substitute music file: %s: %s",
                     filename, Mix_GetError());
         }
         else
@@ -1200,7 +1200,7 @@ static void *I_SDL_RegisterSong(void *data, int len)
         {
             // Failed to load
 
-            C_Printf(CR_RED, " Error loading midi: %s\n", Mix_GetError());
+            C_Error(" Error loading midi: %s", Mix_GetError());
         }
     }
 

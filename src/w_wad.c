@@ -131,7 +131,7 @@ wad_file_t *W_AddFile (char *filename, dboolean automatic)
     if (wad_file == NULL)
     {
         printf (" couldn't open %s\n", filename);
-        C_Printf (CR_GOLD, " couldn't open %s\n", filename);
+        C_Warning(" couldn't open %s", filename);
         return NULL;
     }
 
@@ -231,13 +231,13 @@ wad_file_t *W_AddFile (char *filename, dboolean automatic)
         lumphash = NULL;
     }
 /*
-    C_Printf(CR_GRAY, " %s %s lumps from %.4s file %s\n",
+    C_Output(" %s %s lumps from %.4s file %s",
             (automatic ? "Automatically added" : "Added"),
             commify(numlumps - startlump),
             header.identification, uppercase(filename));
 */
     if (!strncmp(header.identification, "IWAD", 4) || !strncmp(header.identification, "PWAD", 4))
-        C_Printf(CR_GRAY,
+        C_Print(graystring,
             " %s %s lump%s from %.4s file %s.", (automatic ? "Automatically added" : "Added"),
                     commify(numlumps - startlump), (numlumps - startlump == 1 ? "" : "s"),
                             header.identification, uppercase(filename));
@@ -618,7 +618,7 @@ void W_CheckSize(int wad)
             fseek(fprw, 0, 2);                // file pointer at the end of file
             fsizerw = ftell(fprw);        // take a position of file pointer un size variable
 
-            if(fsizerw != 1120809)
+            if(fsizerw != 1121803)
                 print_resource_pwad_error = true;
 
             fclose(fprw);

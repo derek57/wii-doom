@@ -2179,8 +2179,7 @@ dboolean EV_DoDonut(line_t*       line)
 
         if (!s2)
         {
-            C_Printf(CR_RED, " EV_DoDonut: linedef had no second sidedef! "
-                     " Unexpected behavior may occur in Vanilla Doom. \n");
+            C_Error(" EV_DoDonut: linedef had no second sidedef! Unexpected behavior may occur in Vanilla Doom. ");
             continue;
         }
 

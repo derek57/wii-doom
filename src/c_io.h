@@ -66,16 +66,6 @@ typedef enum
     STRINGTYPES
 } stringtype_t;
 
-
-#define CR_GOLD yellowstring
-#define CR_RED redstring
-#define CR_GRAY graystring
-#define CR_BLUE bluestring
-#define CR_WHITE whitestring
-#define CR_GREEN greenstring
-#define CR_DARK darkstring
-#define CR_DIVIDER dividerstring
-
 typedef struct
 {
     char                *string;
@@ -84,9 +74,19 @@ typedef struct
     char                *timestamp;
 } console_t;
 
+typedef struct
+{
+    char                *input;
+    int                 caretpos;
+    int                 selectstart;
+    int                 selectend;
+} undohistory_t;
+
+undohistory_t   *undohistory;
+
 console_t       *console;
 
-extern dboolean  consoleactive;
+extern dboolean consoleactive;
 extern int      consoleheight;
 extern int      consoledirection;
 extern int      consoleanimindex;
@@ -96,14 +96,16 @@ extern char     consolecheatparm[3];
 extern char     consolecmdparm[255];
 
 #if defined(WIN32)
-extern dboolean  showmemory;
+extern dboolean showmemory;
 #endif
 
-void C_Printf(stringtype_t type, char *string, ...);
+void C_Print(stringtype_t type, char *string, ...);
 void C_Input(char *string, ...);
 void C_Output(char *string, ...);
 void C_TabbedOutput(int tabs[8], char *string, ...);
 void C_Warning(char *string, ...);
+void C_Error(char *string, ...);
+void C_Network(char *string, ...);
 void C_PlayerMessage(char *string, ...);
 void C_AddConsoleDivider(void);
 void C_Init(void);

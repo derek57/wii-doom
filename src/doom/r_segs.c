@@ -633,7 +633,7 @@ void R_StoreWallRange(int start, int stop)
         memset(ds_p, 0, (maxdrawsegs - maxdrawsegs_old) * sizeof(*drawsegs));
 
         if (maxdrawsegs_old)
-            C_Printf(CR_GOLD, " R_StoreWallRange: Hit MAXDRAWSEGS limit at %d, raised to %d.\n",
+            C_Warning(" R_StoreWallRange: Hit MAXDRAWSEGS limit at %d, raised to %d.",
                     maxdrawsegs_old, maxdrawsegs);
     }
 
@@ -678,7 +678,7 @@ void R_StoreWallRange(int start, int stop)
             lastopening = openings + pos;
 
             if(oldopenings != 0)
-                C_Printf(CR_GOLD, " R_StoreWallRange: Hit MaxOpenings limit at %d, raised to %u\n",
+                C_Warning(" R_StoreWallRange: Hit MaxOpenings limit at %d, raised to %u",
                         (maxopenings / 2), maxopenings);
 
             // jff 8/9/98 borrowed fix for openings from ZDOOM1.14

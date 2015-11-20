@@ -15,6 +15,8 @@
 //    PC speaker driver for Linux.
 //
 
+#include "src/c_io.h"
+
 #ifndef WII
 #include "config.h"
 
@@ -130,8 +132,7 @@ static int PCSound_Linux_Init(pcsound_callback_func callback_func)
     {
         // Don't have permissions for the console device?
 
-	fprintf(stderr, "PCSound_Linux_Init: Failed to open '%s': %s\n",
-			CONSOLE_DEVICE, strerror(errno));
+	C_Error(" PCSound_Linux_Init: Failed to open '%s': %s", CONSOLE_DEVICE, strerror(errno));
         return 0;
     }
 

@@ -330,13 +330,13 @@ static int OPL_SDL_Init(unsigned int port_base)
     {
         if (SDL_Init(SDL_INIT_AUDIO) < 0)
         {
-            C_Printf(CR_RED, " Unable to set up sound.\n");
+            C_Error(" Unable to set up sound.");
             return 0;
         }
 
         if (Mix_OpenAudio(opl_sample_rate, AUDIO_S16SYS, 2, GetSliceSize()) < 0)
         {
-            C_Printf(CR_RED, " Error initialising SDL_mixer: %s\n", Mix_GetError());
+            C_Error(" Error initialising SDL_mixer: %s", Mix_GetError());
 
             SDL_QuitSubSystem(SDL_INIT_AUDIO);
             return 0;
@@ -370,8 +370,7 @@ static int OPL_SDL_Init(unsigned int port_base)
 
     if (mixing_format != AUDIO_S16SYS || mixing_channels != 2)
     {
-        C_Printf(CR_RED, " OPL_SDL only supports native signed 16-bit LSB, "
-                "stereo format!\n");
+        C_Error(" OPL_SDL only supports native signed 16-bit LSB, stereo format!");
 
         OPL_SDL_Shutdown();
         return 0;

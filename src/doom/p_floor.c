@@ -149,7 +149,7 @@ T_MovePlane
                         //e6y: warning about potential desynch
                         if (crush == STAIRS_UNINITIALIZED_CRUSH_FIELD_VALUE)
                         {
-                            C_Printf(CR_GOLD, " T_MovePlane: Stairs which can potentially crush may lead to desynch.\n");
+                            C_Warning(" T_MovePlane: Stairs which can potentially crush may lead to desynch.");
                         }
                         if (crush == true)
                             return crushed;
