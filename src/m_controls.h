@@ -74,6 +74,7 @@ extern int key_menu_forward;
 extern int key_menu_confirm;
 extern int key_menu_abort;
 extern int key_menu_screenshot;
+extern int key_menu_screenshot_beta;
 
 extern int key_console;
 extern int key_spy;

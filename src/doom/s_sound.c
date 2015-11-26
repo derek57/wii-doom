@@ -778,7 +778,7 @@ void S_ChangeMusic(int music_id, int looping, dboolean mapstart)
 {
     musicinfo_t *music = NULL;
     void        *handle;
-    int         mapinfomusic; 
+//    int         mapinfomusic; 
 
     // The Doom IWAD file has two versions of the intro music: d_intro
     // and d_introa.  The latter is used for OPL playback.
@@ -820,14 +820,17 @@ void S_ChangeMusic(int music_id, int looping, dboolean mapstart)
     S_StopMusic();
 
     // get lumpnum if neccessary
-    if (mapstart && (mapinfomusic = P_GetMapMusic((gameepisode - 1) * 10 + gamemap))) 
+
+    /*if (mapstart && (mapinfomusic = P_GetMapMusic((gameepisode - 1) * 10 + gamemap)))     // FIXME (BUG)
         music->lumpnum = mapinfomusic;
-    else if (!music->lumpnum)
+    else*/ if (!music->lumpnum)
     {
         char namebuf[9];
 
         M_snprintf(namebuf, sizeof(namebuf), "d_%s", music->name);
         music->lumpnum = W_GetNumForName(namebuf);
+
+        C_Output(" Playing Music '%s'", namebuf);
     }
 /*
     if(looping)

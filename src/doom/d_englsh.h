@@ -108,26 +108,38 @@
 //
 //        P_inter.C
 //
-#define GOTARMOR       "Picked up the armor."
-#define GOTMEGA        "Picked up the MegaArmor!"
-#define GOTHTHBONUS    "Picked up a health bonus."
-#define GOTARMBONUS    "Picked up an armor bonus."
-#define GOTSTIM        "Picked up a stimpack."
-#define GOTMEDINEED    "Picked up a medikit that you REALLY need!"
-#define GOTMEDIKIT     "Picked up a medikit."
-#define GOTSUPER       "Supercharge!"
+#define GOTARMOR        "Picked up the armor."
+#define GOTMEGA         "Picked up the MegaArmor!"
+#define GOTHTHBONUS     "Picked up a health bonus."
+#define GOTARMBONUS     "Picked up an armor bonus."
+#define GOTSTIM         "Picked up a stimpack."
+#define GOTMEDINEED     "Picked up a medikit that you REALLY need!"
+#define GOTMEDIKIT      "Picked up a medikit."
+#define GOTSUPER        "Supercharge!"
 
-#define GOTDAGGER      "You pick up a demonic dagger."
-#define GOTSKULLCHEST  "You pick up a skull chest."
-#define GOTBIBLE       "You pick up an unholy bible."
-#define GOTSCEPTRE     "You pick up an evil sceptre."
+#define GOTARMORBETA    "You pick up the armor."
+#define GOTMEGABETA     "You got the MegaArmor!"
+#define GOTSTIMBETA     "You pick up a stimpack."
+#define GOTMEDINEEDBETA "You pick up a medikit that you REALLY need!"
+#define GOTMEDIKITBETA  "You pick up a medikit."
+#define GOTDAGGER       "You pick up a demonic dagger."
+#define GOTSKULLCHEST   "You pick up a skull chest."
+#define GOTBIBLE        "You pick up an unholy bible."
+#define GOTSCEPTRE      "You pick up an evil sceptre."
+#define GOTBLUECARDBETA "You pick up a blue keycard."
+#define GOTYELWCARDBETA "You pick up a yellow keycard."
+#define GOTREDCARDBETA  "You pick up a red keycard."
+#define GOTBLUESKULBETA "You pick up a blue skull key."
+#define GOTYELWSKULBETA "You pick up a yellow skull key."
+#define GOTREDSKULLBETA "You pick up a red skull key."
+#define GOTSUPERBETA    "Full health and an extra life!"
 
-#define GOTBLUECARD    "Picked up a blue keycard."
-#define GOTYELWCARD    "Picked up a yellow keycard."
-#define GOTREDCARD     "Picked up a red keycard."
-#define GOTBLUESKUL    "Picked up a blue skull key."
-#define GOTYELWSKUL    "Picked up a yellow skull key."
-#define GOTREDSKULL    "Picked up a red skull key."
+#define GOTBLUECARD     "Picked up a blue keycard."
+#define GOTYELWCARD     "Picked up a yellow keycard."
+#define GOTREDCARD      "Picked up a red keycard."
+#define GOTBLUESKUL     "Picked up a blue skull key."
+#define GOTYELWSKUL     "Picked up a yellow skull key."
+#define GOTREDSKULL     "Picked up a red skull key."
 
 #define GOTINVUL       "Invulnerability!"
 #define GOTBERSERK     "Berserk!"
@@ -415,6 +427,12 @@
 #define STSTR_NOMUS         "IMPOSSIBLE SELECTION"
 #define STSTR_DQDON         "Degreelessness Mode On"
 #define STSTR_DQDOFF        "Degreelessness Mode Off"
+
+#define STSTR_DQDONBETA     "God Mode ON"
+#define STSTR_DQDOFFBETA    "God Mode OFF"
+#define STSTR_NCONBETA      "No Clipping ON"
+#define STSTR_NCOFFBETA     "No Clipping OFF"
+#define STSTR_KFAADDEDBETA  "Ammo ADDED"
 
 #define STSTR_KFAADDED      "Very Happy Ammo Added"
 #define STSTR_FAADDED       "Ammo (no keys) Added"
@@ -828,26 +846,20 @@
     "                                Shareware!\n" \
     "===========================================================================\n"
 
-#define CREDITTEXT \
-"The id Software Team\n"\
-"www.idsoftware.com\n"\
-"\n"\
-"The Chocolate DOOM Team\n"\
-"www.chocolate-doom.org\n"\
-"\n"\
-"Fabian Greffrath / Crispy-DOOM\n"\
-"fabiangreffrath.github.io/crispy-doom\n"\
-"\n"\
-"Brad Harding / DOOMretro\n"\
-"www.doomretro.com\n"\
-"\n"\
-"The PRBoom Team\n"\
-"prboom.sourceforge.net\n"\
-"\n"\
-"The DOOM Legacy Team\n"\
-"doomlegacy.sourceforge.net\n"\
-"\n"\
-"The ZDOOM Team\n"\
-"www.zdoom.org"
+#define CREDITTEXT1 "The id Software Team"
+#define CREDITTEXT2 "The Chocolate DOOM Team"
+#define CREDITTEXT3 "Fabian Greffrath / Crispy-DOOM"
+#define CREDITTEXT4 "Brad Harding / DOOMretro"
+#define CREDITTEXT5 "The PRBoom Team"
+#define CREDITTEXT6 "The DOOM Legacy Team"
+#define CREDITTEXT7 "The ZDOOM Team"
+
+#define CREDITURL1 "www.idsoftware.com"
+#define CREDITURL2 "www.chocolate-doom.org"
+#define CREDITURL3 "fabiangreffrath.github.io/crispy-doom"
+#define CREDITURL4 "www.doomretro.com"
+#define CREDITURL5 "prboom.sourceforge.net"
+#define CREDITURL6 "doomlegacy.sourceforge.net"
+#define CREDITURL7 "www.zdoom.org"
 
 #endif

@@ -48,7 +48,7 @@ extern int          dont_show_adding_of_resource_wad;
 dboolean W_ParseCommandLine(void)
 {
     dboolean modifiedgame = false;
-    int p;
+    int p = 0;
 
 #ifdef FEATURE_WAD_MERGE
 
@@ -63,7 +63,8 @@ dboolean W_ParseCommandLine(void)
     // into the main IWAD.  Multiple files may be specified.
     //
 
-    p = M_CheckParmWithArgs("-merge", 1);
+    if(!beta_style)
+        p = M_CheckParmWithArgs("-merge", 1);
 
     if (p > 0 || gamemode == shareware
 #ifdef WII
@@ -119,7 +120,8 @@ dboolean W_ParseCommandLine(void)
     // Simulates the behavior of NWT's -merge option.  Multiple files
     // may be specified.
 
-    p = M_CheckParmWithArgs("-nwtmerge", 1);
+    if(!beta_style)
+        p = M_CheckParmWithArgs("-nwtmerge", 1);
 
     if (p > 0)
     {
@@ -146,7 +148,8 @@ dboolean W_ParseCommandLine(void)
     // the main IWAD directory.  Multiple files may be specified.
     //
 
-    p = M_CheckParmWithArgs("-af", 1);
+    if(!beta_style)
+        p = M_CheckParmWithArgs("-af", 1);
 
     if (p > 0)
     {
@@ -171,7 +174,8 @@ dboolean W_ParseCommandLine(void)
     // into the main IWAD directory.  Multiple files may be specified.
     //
 
-    p = M_CheckParmWithArgs("-as", 1);
+    if(!beta_style)
+        p = M_CheckParmWithArgs("-as", 1);
 
     if (p > 0)
     {
@@ -194,7 +198,8 @@ dboolean W_ParseCommandLine(void)
     // Equivalent to "-af <files> -as <files>".
     //
 
-    p = M_CheckParmWithArgs("-aa", 1);
+    if(!beta_style)
+        p = M_CheckParmWithArgs("-aa", 1);
 
     if (p > 0)
     {
@@ -221,6 +226,7 @@ dboolean W_ParseCommandLine(void)
     //
 
     p = M_CheckParmWithArgs ("-file", 1);
+
     if (p)
     {
         // the parms after p are wadfile/lump names,

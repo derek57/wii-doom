@@ -95,7 +95,7 @@ CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(execgamesdir)" "$(DESTDIR)$(appdir)" \
 	"$(DESTDIR)$(appdatadir)" "$(DESTDIR)$(screensaverdir)"
 PROGRAMS = $(execgames_PROGRAMS)
-am__chocolate-doom_SOURCES_DIST = i_main.c i_system.c i_system.h \
+am__chocolate-doom_SOURCES_DIST = i_endoom.c i_endoom.h i_main.c i_system.c i_system.h \
 	m_argv.c m_argv.h m_misc.c m_misc.h c_io.c c_io.h d_event.c \
 	d_event.h doomkeys.h doomfeatures.h doomtype.h d_iwad.c \
 	d_iwad.h d_loop.c d_loop.h d_ticcmd.h \
@@ -110,7 +110,7 @@ am__chocolate-doom_SOURCES_DIST = i_main.c i_system.c i_system.h \
         w_file_stdc.c z_zone.c z_zone.h w_merge.c w_merge.h gusconf.c \
         gusconf.h i_pcsound.c i_sdlsound.c i_sdlmusic.c i_oplmusic.c \
         midifile.c midifile.h mus2mid.c mus2mid.h resource.rc
-am__objects_1 = i_main.$(OBJEXT) i_system.$(OBJEXT) m_argv.$(OBJEXT) \
+am__objects_1 = i_endoom.$(OBJEXT) i_main.$(OBJEXT) i_system.$(OBJEXT) m_argv.$(OBJEXT) \
 	m_misc.$(OBJEXT)
 am__objects_2 = c_io.$(OBJEXT) d_event.$(OBJEXT) d_iwad.$(OBJEXT) \
 	d_loop.$(OBJEXT) d_deh.$(OBJEXT) \
@@ -134,7 +134,8 @@ am_chocolate-doom_OBJECTS =  \
 #am_chocolate-doom_OBJECTS = $(am__objects_7) \
 #	resource.$(OBJEXT)
 chocolate-doom_OBJECTS = $(am_chocolate-doom_OBJECTS)
-am__DEPENDENCIES_1 = $(top_builddir)/pcsound/libpcsound.a \
+am__DEPENDENCIES_1 = $(top_builddir)/textscreen/libtextscreen.a \
+	$(top_builddir)/pcsound/libpcsound.a \
 	$(top_builddir)/opl/libopl.a
 chocolate-doom_DEPENDENCIES = doom/libdoom.a \
 	$(am__DEPENDENCIES_1)
@@ -372,13 +373,15 @@ top_builddir = ..
 top_srcdir = ..
 SUBDIRS = doom 
 execgamesdir = ${exec_prefix}/games
-AM_CFLAGS = -I$(top_srcdir)/opl                   \
+AM_CFLAGS = -I$(top_srcdir)/textscreen            \
+            -I$(top_srcdir)/opl                   \
             -I$(top_srcdir)/pcsound               \
              
 
 
 # Common source files used by absolutely everything:
 COMMON_SOURCE_FILES = \
+i_endoom.c           i_endoom.h            \
 i_main.c                                   \
 i_system.c           i_system.h            \
 m_argv.c             m_argv.h              \
@@ -448,6 +451,7 @@ SOURCE_FILES = $(COMMON_SOURCE_FILES)              \
 SOURCE_FILES_WITH_DEH = $(SOURCE_FILES)
 
 EXTRA_LIBS = \
+               $(top_builddir)/textscreen/libtextscreen.a  \
                $(top_builddir)/pcsound/libpcsound.a        \
                $(top_builddir)/opl/libopl.a                \
                 -L/usr/local/lib -Wl,-rpath,/usr/local/lib -lSDL -lpthread                                   \
@@ -552,6 +556,7 @@ include ./$(DEPDIR)/d_iwad.Po
 include ./$(DEPDIR)/d_loop.Po
 #include ./$(DEPDIR)/d_deh.Po
 include ./$(DEPDIR)/gusconf.Po
+include ./$(DEPDIR)/i_endoom.Po
 include ./$(DEPDIR)/i_glscale.Po
 include ./$(DEPDIR)/i_joystick.Po
 include ./$(DEPDIR)/i_main.Po

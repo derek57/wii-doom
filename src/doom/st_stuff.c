@@ -318,20 +318,6 @@ rcsid[] = "$Id: st_stuff.c,v 1.6 1997/02/03 22:45:13 b1 Exp $";
 #define ST_MAPHEIGHT                1
 
 
-static struct
-{
-    char        *patchnamea;
-    char        *patchnameb;
-    patch_t     *patch;
-} keypic[NUMCARDS] = {
-    { "BKEYA0", "BKEYB0", NULL },
-    { "YKEYA0", "YKEYB0", NULL },
-    { "RKEYA0", "RKEYB0", NULL },
-    { "BSKUA0", "BSKUB0", NULL },
-    { "YSKUA0", "YSKUB0", NULL },
-    { "RSKUA0", "RSKUB0", NULL }
-};
-
 // main player in game
 static player_t*              plyr; 
 
@@ -417,10 +403,6 @@ static dboolean                st_stopped = true;
 // main bar left
 static patch_t*               sbar;
 
-static patch_t*               healthpatch;
-static patch_t*               berserkpatch;
-static patch_t*               greenarmorpatch;
-static patch_t*               bluearmorpatch;
 static patch_t*               sbarmap;
 static patch_t*               sbar_left_oldwad;
 static patch_t*               sbar_right_oldwad;
@@ -430,12 +412,6 @@ static patch_t*               sbara_missile;
 static patch_t*               sbara_plasma;
 static patch_t*               sbara_bfg;
 static patch_t*               sbara_chainsaw;
-
-// 0-9, tall numbers
-static patch_t*               tallnum[10];
-
-// tall % sign
-static patch_t*               tallpercent;
 
 // 0-9, short, yellow (,different!) numbers
 static patch_t*               shortnum[10];
@@ -503,13 +479,22 @@ static st_number_t            w_ammo[4];
 // max ammo widgets
 static st_number_t            w_maxammo[4]; 
 
+// 0-9, tall numbers
+patch_t*                      tallnum[10];
+
+// tall % sign
+patch_t*                      tallpercent;
 
 cheatseq_t cheat_mus = CHEAT("idmus", 2);
 cheatseq_t cheat_massacre = CHEAT("idmassacre", 0);
 cheatseq_t cheat_god = CHEAT("iddqd", 0);
+cheatseq_t cheat_god_beta = CHEAT("tst", 0);
+cheatseq_t cheat_fly = CHEAT("idfly", 0);
 cheatseq_t cheat_ammo = CHEAT("idkfa", 0);
+cheatseq_t cheat_ammo_beta = CHEAT("amo", 0);
 cheatseq_t cheat_ammonokey = CHEAT("idfa", 0);
 cheatseq_t cheat_noclip = CHEAT("idspispopd", 0);
+cheatseq_t cheat_noclip_beta = CHEAT("nc", 0);
 cheatseq_t cheat_commercial_noclip = CHEAT("idclip", 0);
 
 cheatseq_t        cheat_powerup[7] =
@@ -529,25 +514,15 @@ cheatseq_t cheat_clev10 = CHEAT("idclev10", 0);
 cheatseq_t cheat_mypos = CHEAT("idmypos", 0);
 
 
-patch_t *ST_LoadStatusKeyPatch(int keypicnum)
-{
-    if (dehacked && W_CheckNumForName(keypic[keypicnum].patchnamea) >= 0)
-        return W_CacheLumpNum(W_GetNumForName(keypic[keypicnum].patchnamea), PU_CACHE);
-    else if (W_CheckNumForName(keypic[keypicnum].patchnameb) >= 0)
-        return W_CacheLumpNum(W_GetNumForName(keypic[keypicnum].patchnameb), PU_CACHE);
-    else
-        return NULL;
-}
-
-
 // graphics are drawn to a backing screen and blitted to the real screen
 byte                *st_backing_screen;
-            
-dboolean            emptytallpercent;
 
-void (*hudfunc)(int, int, patch_t *, byte *);
-void (*hudnumfunc)(int, int, patch_t *, byte *);
-void (*godhudfunc)(int, int, patch_t *, byte *);
+int                 prio = 0;
+int                 healthhighlight = 0;
+int                 ammohighlight = 0;
+int                 armorhighlight = 0;
+
+dboolean            fly_used;
 
 extern channel_t    channels[8];
 
@@ -559,16 +534,9 @@ extern dboolean     massacre_cheat_used;
 
 extern char         massacre_textbuffer[30];
 
-//extern int          load_dehacked;
-extern int          cardsfound;
-
 extern void         A_PainDie(mobj_t *);
 
-int                 prio = 0;
-int                 healthhighlight = 0;
-int                 ammohighlight = 0;
-int                 armorhighlight = 0;
-            
+
 //
 // STATUS BAR CODE
 //
@@ -642,302 +610,6 @@ void ST_refreshBackground(void)
     }
 }
 
-static void DrawStatusNumber(int *x, int y, int val, byte *tinttab,
-                          void (*hudnumfunc)(int, int, patch_t *, byte *))
-{
-    int         oldval = val;
-    patch_t     *patch;
-
-    if (val > 99)
-    {
-        patch = tallnum[val / 100];
-        hudnumfunc(*x, y, patch, tinttab);
-        *x += SHORT(patch->width);
-    }
-    val %= 100;
-    if (val > 9 || oldval > 99)
-    {
-        patch = tallnum[val / 10];
-        hudnumfunc(*x, y, patch, tinttab);
-        *x += SHORT(patch->width);
-    }
-    val %= 10;
-    patch = tallnum[val];
-    hudnumfunc(*x, y, patch, tinttab);
-    *x += SHORT(patch->width);
-}
-
-static int StatusNumberWidth(int val)
-{
-    int oldval = val;
-    int width = 0;
-
-    if (val > 99)
-        width += SHORT(tallnum[val / 100]->width);
-    val %= 100;
-    if (val > 9 || oldval > 99)
-        width += SHORT(tallnum[val / 10]->width);
-    val %= 10;
-    width += SHORT(tallnum[val]->width);
-    return width;
-}
-
-void ST_DrawStatus(void)
-{
-    int             health = MAX(0, plyr->mo->health);
-    int             ammotype = weaponinfo[plyr->readyweapon].ammo;
-    int             ammo = plyr->ammo[ammotype];
-    int             armor = plyr->armorpoints;
-    int             health_x = ST_HEALTH_X;
-    int             key = 0;
-    int             i = 0;
-    static int      healthwait = 0;
-    byte            *tinttab;
-    int             invulnerability = plyr->powers[pw_invulnerability];
-    static dboolean  healthanim = false;
-    patch_t         *patch;
-    int             currenttics = I_GetTime();
-    dboolean         gamepaused = (menuactive || paused || consoleactive);
-
-    if (d_translucency)
-    {
-        hudfunc = V_DrawTranslucentStatusPatch;
-        hudnumfunc = V_DrawTranslucentStatusNumberPatch;
-        godhudfunc = V_DrawTranslucentYellowStatusPatch;
-    }
-    else
-    {
-        hudfunc = V_DrawStatusPatch;
-        hudnumfunc = V_DrawStatusPatch;
-        godhudfunc = V_DrawYellowStatusPatch;
-    }
-
-    tinttab = (!health || (health <= ST_HEALTH_MIN && healthanim) || health > ST_HEALTH_MIN
-        || gamepaused ? tinttab66 : tinttab25);
-
-    patch = (((plyr->readyweapon == wp_fist && plyr->pendingweapon == wp_nochange)
-        || plyr->pendingweapon == wp_fist) && plyr->powers[pw_strength] ? berserkpatch : healthpatch);
-
-    if (patch)
-    {
-        if ((plyr->cheats & CF_GODMODE) || invulnerability > 128 || (invulnerability & 8))
-            godhudfunc(health_x, ST_HEALTH_Y - (SHORT(patch->height) - 17), patch, tinttab);
-        else
-            hudfunc(health_x, ST_HEALTH_Y - (SHORT(patch->height) - 17), patch, tinttab);
-        health_x += SHORT(patch->width) + 8;
-    }
-
-    if (healthhighlight)
-    {
-        if (healthhighlight < currenttics)
-            healthhighlight = 0;
-
-        DrawStatusNumber(&health_x, ST_HEALTH_Y, health, tinttab, V_DrawStatusPatch);
-        if (!emptytallpercent)
-            V_DrawStatusPatch(health_x, ST_HEALTH_Y, tallpercent, tinttab);
-    }
-    else
-    {
-        DrawStatusNumber(&health_x, ST_HEALTH_Y, health, tinttab, hudnumfunc);
-        if (!emptytallpercent)
-            hudnumfunc(health_x, ST_HEALTH_Y, tallpercent, tinttab);
-    }
-
-    if (health <= ST_HEALTH_MIN && !gamepaused)
-    {
-        if (healthwait < currenttics)
-        {
-            healthanim = !healthanim;
-            healthwait = currenttics + ST_HEALTH_WAIT * health / ST_HEALTH_MIN + 4;
-        }
-    }
-    else
-    {
-        healthanim = false;
-        healthwait = 0;
-    }
-
-    if (plyr->pendingweapon != wp_nochange)
-    {
-        ammotype = weaponinfo[plyr->pendingweapon].ammo;
-        ammo = plyr->ammo[ammotype];
-    }
-
-    if (health && ammo && ammotype != am_noammo)
-    {
-        static int          ammowait = 0;
-        static dboolean      ammoanim = false;
-        int                 offset_special = 0;
-        int                 ammo_x;
-
-        tinttab = ((ammo <= ST_AMMO_MIN && ammoanim) || ammo > ST_AMMO_MIN || gamepaused ?
-            tinttab66 : tinttab25);
-
-        if (ammo < 200 && ammo > 99)
-            offset_special = 3;
-
-        if(plyr->readyweapon == wp_pistol)
-            patch = W_CacheLumpName("CLIPA0", PU_CACHE);
-        else if(plyr->readyweapon == wp_shotgun)
-            patch = W_CacheLumpName("SHELA0", PU_CACHE);
-        else if(plyr->readyweapon == wp_chaingun)
-            patch = W_CacheLumpName("AMMOA0", PU_CACHE);
-        else if(plyr->readyweapon == wp_missile)
-            patch = W_CacheLumpName("ROCKA0", PU_CACHE);
-        else if(plyr->readyweapon == wp_plasma)
-            patch = W_CacheLumpName("CELLA0", PU_CACHE);
-        else if(plyr->readyweapon == wp_bfg)
-            patch = W_CacheLumpName("CELPA0", PU_CACHE);
-        else if(plyr->readyweapon == wp_supershotgun)
-            patch = W_CacheLumpName("SBOXA0", PU_CACHE);
-        else
-            patch = W_CacheLumpName("TNT1A0", PU_CACHE);
-
-        ammo_x = ST_AMMO_X + 15 - (SHORT(patch->width) / 2);
-
-//        if (patch)	// FIXME: IS THIS ONE REALLY REQUIRED??
-        {
-            hudfunc(ammo_x, (ST_AMMO_Y + 8 - (SHORT(patch->height) / 2)), patch, tinttab);
-            ammo_x += ST_AMMO_X + 15 + (SHORT(patch->width) / 2) - (ORIGHEIGHT / 2) + offset_special;
-        }
-
-        if (ammohighlight)
-        {
-            if (ammohighlight < currenttics)
-                ammohighlight = 0;
-
-            DrawStatusNumber(&ammo_x, ST_AMMO_Y, ammo, tinttab, V_DrawStatusPatch);
-        }
-        else
-        {
-            DrawStatusNumber(&ammo_x, ST_AMMO_Y, ammo, tinttab, hudnumfunc);
-        }
-
-        if (ammo <= ST_AMMO_MIN && !gamepaused)
-        {
-            if (ammowait < currenttics)
-            {
-                ammoanim = !ammoanim;
-                ammowait = currenttics + ST_AMMO_WAIT * ammo / ST_AMMO_MIN + 4;
-            }
-        }
-        else
-        {
-            ammoanim = false;
-            ammowait = 0;
-        }
-    }
-
-    while (i < NUMCARDS)
-    {
-        if (plyr->cards[i++] > 0)
-            key++;
-    }
-
-    if (key || plyr->neededcardflash)
-    {
-        int                 keypic_x = ST_KEYS_X - 20 * (key - 1);
-        static int          keywait = 0;
-        static dboolean      showkey = false;
-
-        if (!armor)
-            keypic_x += 114;
-        else
-        {
-            if (emptytallpercent)
-                keypic_x += SHORT(tallpercent->width);
-            if (armor < 10)
-                keypic_x += 26;
-            else if (armor < 100)
-                keypic_x += 12;
-        }
-
-        if (plyr->neededcardflash)
-        {
-            patch_t     *patch = keypic[plyr->neededcard].patch;
-
-            if (patch)
-            {
-                if (!gamepaused)
-                {
-                    if (keywait < currenttics)
-                    {
-                        showkey = !showkey;
-                        keywait = currenttics + ST_KEY_WAIT;
-                        plyr->neededcardflash--;
-                    }
-                }
-                if (showkey)
-                    hudfunc(keypic_x - (SHORT(patch->width) + 6), ST_KEYS_Y, patch, tinttab66);
-            }
-        }
-        else
-        {
-            showkey = false;
-            keywait = 0;
-        }
-
-        for (i = 0; i < NUMCARDS; i++)
-        {
-            if (plyr->cards[i] > 0)
-            {
-                patch_t     *patch = keypic[i].patch;
-
-                if (patch)
-                    hudfunc(keypic_x + (SHORT(patch->width) + 6) * (cardsfound - plyr->cards[i]),
-                        ST_KEYS_Y, patch, tinttab66);
-            }
-        }
-    }
-
-    if (armor)
-    {
-        patch_t     *patch = (plyr->armortype == 1 ? greenarmorpatch : bluearmorpatch);
-        int         armor_x = ST_ARMOR_X;
-
-        if (patch)
-        {
-            armor_x -= SHORT(patch->width);
-            hudfunc(armor_x, ST_ARMOR_Y - (SHORT(patch->height) - 16), patch, tinttab66);
-            armor_x -= 7;
-        }
-
-        if (armorhighlight)
-        {
-            if (armorhighlight < currenttics)
-                armorhighlight = 0;
-
-            if (emptytallpercent)
-            {
-                armor_x -= StatusNumberWidth(armor);
-                DrawStatusNumber(&armor_x, ST_ARMOR_Y, armor, tinttab66, V_DrawStatusPatch);
-            }
-            else
-            {
-                armor_x -= SHORT(tallpercent->width);
-                V_DrawStatusPatch(armor_x, ST_ARMOR_Y, tallpercent, tinttab66);
-                armor_x -= StatusNumberWidth(armor);
-                DrawStatusNumber(&armor_x, ST_ARMOR_Y, armor, tinttab66, V_DrawStatusPatch);
-            }
-        }
-        else
-        {
-            if (emptytallpercent)
-            {
-                armor_x -= StatusNumberWidth(armor);
-                DrawStatusNumber(&armor_x, ST_ARMOR_Y, armor, tinttab66, hudnumfunc);
-            }
-            else
-            {
-                armor_x -= SHORT(tallpercent->width);
-                hudnumfunc(armor_x, ST_ARMOR_Y, tallpercent, tinttab66);
-                armor_x -= StatusNumberWidth(armor);
-                DrawStatusNumber(&armor_x, ST_ARMOR_Y, armor, tinttab66, hudnumfunc);
-            }
-        }
-    }
-}
-
 // Respond to keyboard input events,
 //  intercept cheats.
 dboolean ST_Responder (event_t* ev)
@@ -968,8 +640,8 @@ dboolean ST_Responder (event_t* ev)
         {
             int i;
 
-            // 'dqd' cheat for toggleable god mode
-            if (cht_CheckCheat(&cheat_massacre, ev->data2))
+            // 'massacre' cheat for monsters instant death
+            if (cht_CheckCheat(&cheat_massacre, ev->data2) && !beta_style)
             {
                 thinker_t *thinker;
                 int killcount = 0;
@@ -1020,8 +692,26 @@ dboolean ST_Responder (event_t* ev)
 
                 massacre_cheat_used = false;
             }
+            // 'fly' cheat for player flying
+            else if (cht_CheckCheat(&cheat_fly, ev->data2) && !beta_style)
+            {
+                if (!fly_used)
+                {
+                    P_UseArtifact(plyr, arti_fly);
+                    players[consoleplayer].mo->flags2 |= MF2_FLY;
+                    players[consoleplayer].mo->flags |= MF_NOGRAVITY;
+                    fly_used = true;
+                }
+                else
+                {
+                    plyr[consoleplayer].powers[6] = 0;
+                    players[consoleplayer].mo->flags2 &= ~MF2_FLY;
+                    players[consoleplayer].mo->flags &= ~MF_NOGRAVITY;
+                    fly_used = false;
+                }
+            }
             // 'dqd' cheat for toggleable god mode
-            else if (cht_CheckCheat(&cheat_god, ev->data2))
+            else if (cht_CheckCheat(&cheat_god, ev->data2) && !beta_style)
             {
                 // [BH] if player is dead, resurrect them first
                 if (!plyr->health)
@@ -1034,13 +724,34 @@ dboolean ST_Responder (event_t* ev)
                         plyr->mo->health = 100;
           
                         plyr->health = 100;
+
                         plyr->message = s_STSTR_DQDON;
                 }
                 else 
                     plyr->message = s_STSTR_DQDOFF;
             }
+            // 'tst' cheat for toggleable god mode in beta
+            else if (cht_CheckCheat(&cheat_god_beta, ev->data2) && beta_style)
+            {
+                // [BH] if player is dead, resurrect them first
+                if (!plyr->health)
+                    P_ResurrectPlayer(plyr);
+
+                plyr->cheats ^= CF_GODMODE;
+                if (plyr->cheats & CF_GODMODE)
+                {
+                    if (plyr->mo)
+                        plyr->mo->health = 100;
+          
+                        plyr->health = 100;
+                        
+                        plyr->message = STSTR_DQDONBETA;
+                }
+                else 
+                    plyr->message = STSTR_DQDOFFBETA;
+            }
             // 'fa' cheat for killer fucking arsenal
-            else if (cht_CheckCheat(&cheat_ammonokey, ev->data2))
+            else if (cht_CheckCheat(&cheat_ammonokey, ev->data2) && !beta_style)
             {
                 plyr->armorpoints = idfa_armor;
                 plyr->armortype = idfa_armor_class;
@@ -1054,7 +765,7 @@ dboolean ST_Responder (event_t* ev)
                 plyr->message = s_STSTR_FAADDED;
             }
             // 'kfa' cheat for key full ammo
-            else if (cht_CheckCheat(&cheat_ammo, ev->data2))
+            else if (cht_CheckCheat(&cheat_ammo, ev->data2) && !beta_style)
             {
                 plyr->armorpoints = idkfa_armor;
                 plyr->armortype = idkfa_armor_class;
@@ -1066,14 +777,28 @@ dboolean ST_Responder (event_t* ev)
                     plyr->ammo[i] = plyr->maxammo[i];
 
                 P_GiveAllCards(plyr);
-/*
-                for (i=0;i<NUMCARDS;i++)
-                    plyr->cards[i] = true;
-*/       
+       
                 plyr->message = s_STSTR_KFAADDED;
             }
+            // 'amo' cheat for key full ammo in beta
+            else if (cht_CheckCheat(&cheat_ammo_beta, ev->data2) && beta_style)
+            {
+                plyr->armorpoints = idkfa_armor;
+                plyr->armortype = idkfa_armor_class;
+        
+                for (i=0;i<NUMWEAPONS;i++)
+                    plyr->weaponowned[i] = true;
+        
+                for (i=0;i<NUMAMMO;i++)
+                    plyr->ammo[i] = plyr->maxammo[i];
+
+                for (i=0;i<NUMCARDS - 3;i++)
+                    plyr->cards[i] = true;
+
+                plyr->message = STSTR_KFAADDEDBETA;
+            }
             // 'mus' cheat for changing music
-            else if (cht_CheckCheat(&cheat_mus, ev->data2))
+            else if (cht_CheckCheat(&cheat_mus, ev->data2) && !beta_style)
             {
         
                 char        buf[3];
@@ -1108,10 +833,10 @@ dboolean ST_Responder (event_t* ev)
             }
             // Noclip cheat.
             // For Doom 1, use the idspipsopd cheat; for all others, use idclip
-            else if ( (logical_gamemission == doom &&
+            else if (((logical_gamemission == doom &&
                                 cht_CheckCheat(&cheat_noclip, ev->data2)) ||
                       (logical_gamemission != doom &&
-                                cht_CheckCheat(&cheat_commercial_noclip, ev->data2)))
+                                cht_CheckCheat(&cheat_commercial_noclip, ev->data2))) && !beta_style)
             {
                 plyr->cheats ^= CF_NOCLIP;
         
@@ -1126,11 +851,27 @@ dboolean ST_Responder (event_t* ev)
                     plyr->message = s_STSTR_NCOFF;
                 }
             }
+            // Noclip cheat in beta.
+            else if (cht_CheckCheat(&cheat_noclip_beta, ev->data2) && beta_style)
+            {
+                plyr->cheats ^= CF_NOCLIP;
+        
+                if (plyr->cheats & CF_NOCLIP)
+                {
+                    plyr->mo->flags |= MF_NOCLIP;
+                    plyr->message = STSTR_NCONBETA;
+                }
+                else
+                {
+                    plyr->mo->flags &= ~MF_NOCLIP;
+                    plyr->message = STSTR_NCOFFBETA;
+                }
+            }
 
             // 'behold?' power-up cheats
             for (i=0;i<6;i++)
             {
-                if (cht_CheckCheat(&cheat_powerup[i], ev->data2))
+                if (cht_CheckCheat(&cheat_powerup[i], ev->data2) && !beta_style)
                 {
                     if (!plyr->powers[i])
                         P_GivePower( plyr, i);
@@ -1144,19 +885,19 @@ dboolean ST_Responder (event_t* ev)
             }
 
             // 'behold' power-up menu
-            if (cht_CheckCheat(&cheat_powerup[6], ev->data2))
+            if (cht_CheckCheat(&cheat_powerup[6], ev->data2) && !beta_style)
             {
                 plyr->message = s_STSTR_BEHOLD;
             }
             // 'choppers' invulnerability & chainsaw
-            else if (cht_CheckCheat(&cheat_choppers, ev->data2))
+            else if (cht_CheckCheat(&cheat_choppers, ev->data2) && !beta_style)
             {
                 plyr->weaponowned[wp_chainsaw] = true;
                 plyr->powers[pw_invulnerability] = true;
                 plyr->message = s_STSTR_CHOPPERS;
             }
             // 'mypos' for player position
-            else if (cht_CheckCheat(&cheat_mypos, ev->data2))
+            else if (cht_CheckCheat(&cheat_mypos, ev->data2) && !beta_style)
             {
                 static char buf[ST_MSGWIDTH];
                 M_snprintf(buf, sizeof(buf), "ang=0x%x;x,y=(0x%x,0x%x)",
@@ -1168,14 +909,14 @@ dboolean ST_Responder (event_t* ev)
         }
 
         // 'clev10' change-level cheat
-        if (!netgame && cht_CheckCheat(&cheat_clev10, ev->data2) && fsize == 12538385)
+        if (!netgame && cht_CheckCheat(&cheat_clev10, ev->data2) && fsize == 12538385 && !beta_style)
         {
             plyr->message = s_STSTR_CLEV;
             G_DeferedInitNew(gameskill, 1, 10);
         }
 
         // 'clev' change-level cheat
-        if (!netgame && cht_CheckCheat(&cheat_clev, ev->data2))
+        if (!netgame && cht_CheckCheat(&cheat_clev, ev->data2) && !beta_style)
         {
             char        buf[3];
             char        lump[6];
@@ -1300,9 +1041,6 @@ void ST_updateFaceWidget(void)
 
     int                i;
 
-    angle_t            badguyangle;
-    angle_t            diffang;
-
     static int         priority = 0;
 
     if (priority < 10)
@@ -1372,7 +1110,8 @@ void ST_updateFaceWidget(void)
             }
             else
             {
-                badguyangle = R_PointToAngle2(plyr->mo->x,
+                angle_t diffang;
+                angle_t badguyangle = R_PointToAngle2(plyr->mo->x,
                                               plyr->mo->y,
                                               plyr->attacker->x,
                                               plyr->attacker->y);
@@ -1536,7 +1275,8 @@ void ST_updateWidgets(void)
 
     // refresh everything if this is him coming back to life
     // [BH] but only if not paused and no menu
-    if (!paused && !menuactive && !consoleactive)
+    // FIXME: disabled as it makes the game more stock to the original release
+//    if (!paused && !menuactive && !consoleactive)
         ST_updateFaceWidget();
 
     // used by the w_armsbg & w_itembg & w_chatbg widget
@@ -1875,7 +1615,6 @@ static void ST_loadUnloadGraphics(load_callback_t callback)
     //Note: why not load STMINUS here, too?
 
     callback("STTPRCNT", &tallpercent);
-    emptytallpercent = V_EmptyPatch(tallpercent);
 
     // key cards
     for (i=0;i<NUMCARDS;i++)
@@ -2262,31 +2001,6 @@ void ST_Start (void)
 
 	M_snprintf(namebuf, 7, "STFB%d", consoleplayer);
 	faceback = W_CacheLumpName(namebuf, PU_STATIC);
-    }
-
-    if (W_CheckNumForName("MEDIA0"))
-        healthpatch = W_CacheLumpNum(W_GetNumForName("MEDIA0"), PU_CACHE);
-
-    if (gamemode != shareware && W_CheckNumForName("PSTRA0"))
-        berserkpatch = W_CacheLumpNum(W_GetNumForName("PSTRA0"), PU_CACHE);
-    else
-        berserkpatch = healthpatch;
-
-    if (W_CheckNumForName("ARM1A0"))
-        greenarmorpatch = W_CacheLumpNum(W_GetNumForName("ARM1A0"), PU_CACHE);
-
-    if (W_CheckNumForName("ARM2A0"))
-        bluearmorpatch = W_CacheLumpNum(W_GetNumForName("ARM2A0"), PU_CACHE);
-
-    keypic[it_bluecard].patch = ST_LoadStatusKeyPatch(it_bluecard);
-    keypic[it_yellowcard].patch = ST_LoadStatusKeyPatch(exe_hacx ? it_yellowcard : it_yellowskull);
-    keypic[it_redcard].patch = ST_LoadStatusKeyPatch(it_redcard);
-
-    if (gamemode != shareware)
-    {
-        keypic[it_blueskull].patch = ST_LoadStatusKeyPatch(it_blueskull);
-        keypic[it_yellowskull].patch = ST_LoadStatusKeyPatch(it_yellowskull);
-        keypic[it_redskull].patch = ST_LoadStatusKeyPatch(it_redskull);
     }
 }
 

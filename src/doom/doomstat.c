@@ -170,6 +170,7 @@ int              use_libsamplerate = 0;
 int              gore_amount = 1;
 int              display_fps = 0;
 int              font_shadow = 0;
+int              show_endoom = 1;
 
 // defaulted values
 int              mouseSensitivity = 5;

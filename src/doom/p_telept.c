@@ -204,6 +204,7 @@ dboolean EV_SilentTeleport(line_t *line, int side, mobj_t *thing)
                                    || thing->type == MT_FLESH
                                    || thing->type == MT_SPRAY
                                    || side)
+        return false;
 
     for (i = -1; (i = P_FindSectorFromLineTag(line, i)) >= 0;)
         for (th = thinkerclasscap[th_mobj].cnext; th != &thinkerclasscap[th_mobj]; th = th->cnext)

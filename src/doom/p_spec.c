@@ -150,6 +150,17 @@ static struct
     { "DOOM2.WAD",    "SLIME11"  },
     { "DOOM2.WAD",    "SLIME12"  },
     { "MOHU2.WAD",    "DIFL_01"  },
+    { "ETERNALL.WAD", "NUKAGE1"  },
+    { "ETERNALL.WAD", "NUKAGE2"  },
+    { "ETERNALL.WAD", "NUKAGE3"  },
+    { "ETERNALL.WAD", "RROCK05"  },
+    { "ETERNALL.WAD", "RROCK06"  },
+    { "ETERNALL.WAD", "RROCK07"  },
+    { "ETERNALL.WAD", "RROCK08"  },
+    { "ETERNALL.WAD", "SLIME09"  },
+    { "ETERNALL.WAD", "SLIME10"  },
+    { "ETERNALL.WAD", "SLIME11"  },
+    { "ETERNALL.WAD", "SLIME12"  },
     { "PLUTONIA.WAD", "RROCK05"  },
     { "PLUTONIA.WAD", "RROCK06"  },
     { "PLUTONIA.WAD", "RROCK07"  },
@@ -376,20 +387,16 @@ void P_InitPicAnims (void)
     {
         int     lump = R_CheckFlatNumForName(exception[i].texture);
 
-        if (lump >= 0 && !strcasecmp(M_ExtractFilename(lumpinfo[firstflat + lump]->wad_file->path),
+        if (lump >= 0 && M_StringCompare(M_ExtractFilename(lumpinfo[firstflat + lump]->wad_file->path),
             exception[i].pwad))
             isliquid[lump] = false;
         ++i;
     }
 }
 
-
-
 //
 // UTILITIES
 //
-
-
 
 //
 // getSide()
@@ -402,7 +409,6 @@ side_t *getSide(int currentSector, int line, int side)
     return &sides[(sectors[currentSector].lines[line])->sidenum[side]];
 }
 
-
 //
 // getSector()
 // Will return a sector_t*
@@ -413,7 +419,6 @@ sector_t *getSector(int currentSector, int line, int side)
 {
     return sides[(sectors[currentSector].lines[line])->sidenum[side]].sector;
 }
-
 
 //
 // twoSided()
@@ -426,9 +431,6 @@ int twoSided(int sector, int line)
     // has two sidedefs, rather than whether the 2S flag is set
     return (sectors[sector].lines[line]->sidenum[1] != NO_INDEX);
 }
-
-
-
 
 //
 // getNextSector()
@@ -446,8 +448,6 @@ sector_t *getNextSector(line_t *line, sector_t *sec)
         line->frontsector);
 }
 
-
-
 //
 // P_FindLowestFloorSurrounding()
 // FIND LOWEST FLOOR HEIGHT IN SURROUNDING SECTORS
@@ -464,8 +464,6 @@ fixed_t P_FindLowestFloorSurrounding(sector_t *sec)
     return floor;
 }
 
-
-
 //
 // P_FindHighestFloorSurrounding()
 // FIND HIGHEST FLOOR HEIGHT IN SURROUNDING SECTORS
@@ -474,7 +472,7 @@ fixed_t P_FindHighestFloorSurrounding(sector_t *sec)
 {
     int         i;
     sector_t    *other;
-    fixed_t     floor = -32000 << FRACBITS;
+    fixed_t     floor = -32000 * FRACUNIT;
 
     for (i = 0; i < sec->linecount; i++)
         if ((other = getNextSector(sec->lines[i], sec)) && other->floorheight > floor)
@@ -482,16 +480,10 @@ fixed_t P_FindHighestFloorSurrounding(sector_t *sec)
     return floor;
 }
 
-
-
 //
 // P_FindNextHighestFloor
 // FIND NEXT HIGHEST FLOOR IN SURROUNDING SECTORS
-// Note: this should be doable w/o a fixed array.
-
-// Thanks to entryway for the Vanilla overflow emulation.
-
-// 20 adjoining sectors max!
+//
 fixed_t P_FindNextHighestFloor(sector_t *sec, int currentheight)
 {
     int         i;
@@ -534,6 +526,7 @@ fixed_t P_FindNextLowestFloor(sector_t *sec, int currentheight)
     return currentheight;
 }
 
+//
 // P_FindNextLowestCeiling()
 //
 // Passed a sector and a ceiling height, returns the fixed point value
@@ -545,8 +538,8 @@ fixed_t P_FindNextLowestFloor(sector_t *sec, int currentheight)
 
 fixed_t P_FindNextLowestCeiling(sector_t *sec, int currentheight)
 {
-    sector_t *other;
-    int i;
+    int         i;
+    sector_t    *other;
 
     for (i = 0; i < sec->linecount; i++)
         if ((other = getNextSector(sec->lines[i], sec)) &&
@@ -575,8 +568,8 @@ fixed_t P_FindNextLowestCeiling(sector_t *sec, int currentheight)
 
 fixed_t P_FindNextHighestCeiling(sector_t *sec, int currentheight)
 {
-    sector_t *other;
-    int i;
+    int         i;
+    sector_t    *other;
 
     for (i = 0; i < sec->linecount; i++)
         if ((other = getNextSector(sec->lines[i], sec)) &&
@@ -600,14 +593,13 @@ fixed_t P_FindLowestCeilingSurrounding(sector_t *sec)
 {
     int         i;
     sector_t    *other;
-    fixed_t     height = 32000 << FRACBITS;
+    fixed_t     height = 32000 * FRACUNIT;
 
     for (i = 0; i < sec->linecount; i++)
         if ((other = getNextSector(sec->lines[i], sec)) && other->ceilingheight < height)
             height = other->ceilingheight;
     return height;
 }
-
 
 //
 // FIND HIGHEST CEILING IN THE SURROUNDING SECTORS
@@ -616,230 +608,12 @@ fixed_t P_FindHighestCeilingSurrounding(sector_t *sec)
 {
     int         i;
     sector_t    *other;
-    fixed_t     height = -32000 << FRACBITS;
+    fixed_t     height = -32000 * FRACUNIT;
 
     for (i = 0; i < sec->linecount; i++)
         if ((other = getNextSector(sec->lines[i], sec)) && other->ceilingheight > height)
             height = other->ceilingheight;
     return height;
-}
-
-
-
-// Find the next sector with the same tag as a linedef.
-// Rewritten by Lee Killough to use chained hashing to improve speed
-int P_FindSectorFromLineTag(const line_t *line, int start)
-{
-    start = (start >= 0 ? sectors[start].nexttag :
-        sectors[(unsigned int)line->tag % (unsigned int)numsectors].firsttag);
-    while (start >= 0 && sectors[start].tag != line->tag)
-        start = sectors[start].nexttag;
-    return start;
-}
-
-
-// Hash the sector tags across the sectors and linedefs.
-static void P_InitTagLists(void)
-{
-    int i;
-
-    for (i = numsectors; --i >= 0;)     // Initially make all slots empty.
-        sectors[i].firsttag = -1;
-    for (i = numsectors; --i >= 0;)     // Proceed from last to first sector
-    {                                   // so that lower sectors appear first
-        int     j = (unsigned int)sectors[i].tag % (unsigned int)numsectors;    // Hash func
-
-        sectors[i].nexttag = sectors[j].firsttag;     // Prepend sector to chain
-        sectors[j].firsttag = i;
-    }
-
-    // killough 4/17/98: same thing, only for linedefs
-    for (i = numlines; --i >= 0;)       // Initially make all slots empty.
-        lines[i].firsttag = -1;
-    for (i = numlines; --i >= 0;)       // Proceed from last to first linedef
-    {                                   // so that lower linedefs appear first
-        int     j = (unsigned int)lines[i].tag % (unsigned int)numlines;        // Hash func
-
-        lines[i].nexttag = lines[j].firsttag;   // Prepend linedef to chain
-        lines[j].firsttag = i;
-    }
-}
-
-//
-// Find minimum light from an adjacent sector
-//
-int P_FindMinSurroundingLight(sector_t *sector, int min)
-{
-    int         i;
-    sector_t    *check;
-
-    for (i = 0; i < sector->linecount; i++)
-        if ((check = getNextSector(sector->lines[i], sector)) && check->lightlevel < min)
-            min = check->lightlevel;
-    return min;
-}
-
-// P_CanUnlockGenDoor()
-//
-// Passed a generalized locked door linedef and a player, returns whether
-// the player has the keys necessary to unlock that door.
-//
-// Note: The linedef passed MUST be a generalized locked door type
-//       or results are undefined.
-//
-// jff 02/05/98 routine added to test for unlockability of
-//  generalized locked doors
-//
-// killough 11/98: reformatted
-dboolean P_CanUnlockGenDoor(line_t *line, player_t *player)
-{
-    static char buffer[1024];
-
-    // does this line special distinguish between skulls and keys?
-    int         skulliscard = (line->special & LockedNKeys) >> LockedNKeysShift;
-
-    // determine for each case of lock type if player's keys are adequate
-    switch ((line->special & LockedKey) >> LockedKeyShift)
-    {
-        case AnyKey:
-            if (player->cards[it_redcard] <= 0 && player->cards[it_redskull] <= 0
-                && player->cards[it_bluecard] <= 0 && player->cards[it_blueskull] <= 0
-                && player->cards[it_yellowcard] <= 0 && player->cards[it_yellowskull] <= 0)
-            {
-                M_snprintf(buffer, sizeof(buffer), s_PD_ANY, playername,
-                    (!strcasecmp(playername, playername_default) ? "" : "s"));
-                HU_PlayerMessage(buffer, true);
-                S_StartSound(player->mo, sfx_noway);
-                return false;
-            }
-            break;
-
-        case RCard:
-            if (player->cards[it_redcard] <= 0
-                && (!skulliscard || player->cards[it_redskull] <= 0))
-            {
-                if (!player->neededcardflash || player->neededcard != it_redcard)
-                {
-                    player->neededcard = it_redcard;
-                    player->neededcardflash = NEEDEDCARDFLASH;
-                }
-                M_snprintf(buffer, sizeof(buffer), (skulliscard ? s_PD_REDK : s_PD_REDC),
-                    playername, (!strcasecmp(playername, playername_default) ? "" : "s"));
-                HU_PlayerMessage(buffer, true);
-                S_StartSound(player->mo, sfx_noway);
-                return false;
-            }
-            break;
-
-        case BCard:
-            if (player->cards[it_bluecard] <= 0
-                && (!skulliscard || player->cards[it_blueskull] <= 0))
-            {
-                if (!player->neededcardflash || player->neededcard != it_bluecard)
-                {
-                    player->neededcard = it_bluecard;
-                    player->neededcardflash = NEEDEDCARDFLASH;
-                }
-                M_snprintf(buffer, sizeof(buffer), (skulliscard ? s_PD_BLUEK : s_PD_BLUEC),
-                    playername,  (!strcasecmp(playername, playername_default) ? "" : "s"));
-                HU_PlayerMessage(buffer, true);
-                S_StartSound(player->mo, sfx_noway);
-                return false;
-            }
-            break;
-
-        case YCard:
-            if (player->cards[it_yellowcard] <= 0
-                && (!skulliscard || player->cards[it_yellowskull] <= 0))
-            {
-                if (!player->neededcardflash || player->neededcard != it_yellowcard)
-                {
-                    player->neededcard = it_yellowcard;
-                    player->neededcardflash = NEEDEDCARDFLASH;
-                }
-                M_snprintf(buffer, sizeof(buffer), (skulliscard ? s_PD_YELLOWK : s_PD_YELLOWC),
-                    playername, (!strcasecmp(playername, playername_default) ? "" : "s"));
-                HU_PlayerMessage(buffer, true);
-                S_StartSound(player->mo, sfx_noway);
-                return false;
-            }
-            break;
-
-        case RSkull:
-            if (player->cards[it_redskull] <= 0
-                && (!skulliscard || player->cards[it_redcard] <= 0))
-            {
-                if (!player->neededcardflash || player->neededcard != it_redskull)
-                {
-                    player->neededcard = it_redskull;
-                    player->neededcardflash = NEEDEDCARDFLASH;
-                }
-                M_snprintf(buffer, sizeof(buffer), (skulliscard ? s_PD_REDK : s_PD_REDS),
-                    playername, (!strcasecmp(playername, playername_default) ? "" : "s"));
-                HU_PlayerMessage(buffer, true);
-                S_StartSound(player->mo, sfx_noway);
-                return false;
-            }
-            break;
-
-        case BSkull:
-            if (player->cards[it_blueskull] <= 0
-                && (!skulliscard || player->cards[it_bluecard] <= 0))
-            {
-                if (!player->neededcardflash || player->neededcard != it_blueskull)
-                {
-                    player->neededcard = it_blueskull;
-                    player->neededcardflash = NEEDEDCARDFLASH;
-                }
-                M_snprintf(buffer, sizeof(buffer), (skulliscard ? s_PD_BLUEK : s_PD_BLUES),
-                    playername, (!strcasecmp(playername, playername_default) ? "" : "s"));
-                HU_PlayerMessage(buffer, true);
-                S_StartSound(player->mo, sfx_noway);
-                return false;
-            }
-            break;
-
-        case YSkull:
-            if (player->cards[it_yellowskull] <= 0
-                && (!skulliscard || player->cards[it_yellowcard] <= 0))
-            {
-                if (!player->neededcardflash || player->neededcard != it_yellowskull)
-                {
-                    player->neededcard = it_yellowskull;
-                    player->neededcardflash = NEEDEDCARDFLASH;
-                }
-                M_snprintf(buffer, sizeof(buffer), (skulliscard ? s_PD_YELLOWK : s_PD_YELLOWS),
-                    playername, (!strcasecmp(playername, playername_default) ? "" : "s"));
-                HU_PlayerMessage(buffer, true);
-                S_StartSound(player->mo, sfx_noway);
-                return false;
-            }
-            break;
-
-        case AllKeys:
-            if (!skulliscard && (player->cards[it_redcard] <= 0 || player->cards[it_redskull] <= 0
-                || player->cards[it_bluecard] <= 0 || player->cards[it_blueskull] <= 0
-                || player->cards[it_yellowcard] <= 0 || player->cards[it_yellowskull] <= 0))
-            {
-                M_snprintf(buffer, sizeof(buffer), s_PD_ALL3, playername,
-                    (!strcasecmp(playername, playername_default) ? "" : "s"));
-                HU_PlayerMessage(buffer, true);
-                S_StartSound(player->mo, sfx_noway);
-                return false;
-            }
-            if (skulliscard && ((player->cards[it_redcard] <= 0 && player->cards[it_redskull] <= 0)
-                || (player->cards[it_bluecard] <= 0 && player->cards[it_blueskull] <= 0)
-                || (player->cards[it_yellowcard] <= 0 && player->cards[it_yellowskull] <= 0)))
-            {
-                M_snprintf(buffer, sizeof(buffer), s_PD_ALL3, playername,
-                    (!strcasecmp(playername, playername_default) ? "" : "s"));
-                HU_PlayerMessage(buffer, true);
-                S_StartSound(player->mo, sfx_noway);
-                return false;
-            }
-            break;
-    }
-    return true;
 }
 
 //
@@ -857,7 +631,7 @@ dboolean P_CanUnlockGenDoor(line_t *line, player_t *player)
 fixed_t P_FindShortestTextureAround(int secnum)
 {
     const sector_t      *sec = &sectors[secnum];
-    int                 i, minsize = 32000 << FRACBITS;
+    int                 i, minsize = 32000 * FRACUNIT;
 
     for (i = 0; i < sec->linecount; i++)
         if (twoSided(secnum, i))
@@ -890,10 +664,9 @@ fixed_t P_FindShortestTextureAround(int secnum)
 fixed_t P_FindShortestUpperAround(int secnum)
 {
     const sector_t      *sec = &sectors[secnum];
-    int                 i, minsize = 32000 << FRACBITS;
+    int                 i, minsize = 32000 * FRACBITS;
 
-    // in height calcs
-    for (i = 0; i < sec->linecount; i++)
+    for (i = 0; i < sec->linecount; i++)    // in height calcs
         if (twoSided(secnum, i))
         {
             const side_t        *side;
@@ -966,6 +739,257 @@ sector_t *P_FindModelCeilingSector(fixed_t ceildestheight, int secnum)
             return sec;
 
     return NULL;
+}
+
+//
+// RETURN NEXT SECTOR # THAT LINE TAG REFERS TO
+//
+
+// Find the next sector with the same tag as a linedef.
+// Rewritten by Lee Killough to use chained hashing to improve speed
+int P_FindSectorFromLineTag(const line_t *line, int start)
+{
+    start = (start >= 0 ? sectors[start].nexttag :
+        sectors[(unsigned int)line->tag % (unsigned int)numsectors].firsttag);
+    while (start >= 0 && sectors[start].tag != line->tag)
+        start = sectors[start].nexttag;
+    return start;
+}
+
+// killough 4/16/98: Same thing, only for linedefs
+int P_FindLineFromLineTag(const line_t *line, int start)
+{
+    start = (start >= 0 ? lines[start].nexttag :
+        lines[(unsigned int)line->tag % (unsigned int)numlines].firsttag);
+    while (start >= 0 && lines[start].tag != line->tag)
+        start = lines[start].nexttag;
+    return start;
+}
+
+// Hash the sector tags across the sectors and linedefs.
+static void P_InitTagLists(void)
+{
+    int i;
+
+    for (i = numsectors; --i >= 0;)     // Initially make all slots empty.
+        sectors[i].firsttag = -1;
+    for (i = numsectors; --i >= 0;)     // Proceed from last to first sector
+    {                                   // so that lower sectors appear first
+        int     j = (unsigned int)sectors[i].tag % (unsigned int)numsectors;    // Hash func
+
+        sectors[i].nexttag = sectors[j].firsttag;     // Prepend sector to chain
+        sectors[j].firsttag = i;
+    }
+
+    // killough 4/17/98: same thing, only for linedefs
+    for (i = numlines; --i >= 0;)       // Initially make all slots empty.
+        lines[i].firsttag = -1;
+    for (i = numlines; --i >= 0;)       // Proceed from last to first linedef
+    {                                   // so that lower linedefs appear first
+        int     j = (unsigned int)lines[i].tag % (unsigned int)numlines;        // Hash func
+
+        lines[i].nexttag = lines[j].firsttag;   // Prepend linedef to chain
+        lines[j].firsttag = i;
+    }
+}
+
+//
+// Find minimum light from an adjacent sector
+//
+int P_FindMinSurroundingLight(sector_t *sector, int min)
+{
+    int         i;
+    sector_t    *check;
+
+    for (i = 0; i < sector->linecount; i++)
+        if ((check = getNextSector(sector->lines[i], sector)) && check->lightlevel < min)
+            min = check->lightlevel;
+    return min;
+}
+
+//
+// P_CanUnlockGenDoor()
+//
+// Passed a generalized locked door linedef and a player, returns whether
+// the player has the keys necessary to unlock that door.
+//
+// Note: The linedef passed MUST be a generalized locked door type
+//       or results are undefined.
+//
+// jff 02/05/98 routine added to test for unlockability of
+//  generalized locked doors
+//
+// killough 11/98: reformatted
+dboolean P_CanUnlockGenDoor(line_t *line, player_t *player)
+{
+    static char buffer[1024];
+
+    // does this line special distinguish between skulls and keys?
+    int         skulliscard = (line->special & LockedNKeys) >> LockedNKeysShift;
+
+    // determine for each case of lock type if player's keys are adequate
+    switch ((line->special & LockedKey) >> LockedKeyShift)
+    {
+        case AnyKey:
+            if (player->cards[it_redcard] <= 0 && player->cards[it_redskull] <= 0
+                && player->cards[it_bluecard] <= 0 && player->cards[it_blueskull] <= 0
+                && player->cards[it_yellowcard] <= 0 && player->cards[it_yellowskull] <= 0)
+            {
+                M_snprintf(buffer, sizeof(buffer), s_PD_ANY, playername,
+                    (M_StringCompare(playername, playername_default) ? "" : "s"));
+                HU_PlayerMessage(buffer, true);
+                S_StartSound(player->mo, sfx_noway);
+                return false;
+            }
+            break;
+
+        case RCard:
+            if (player->cards[it_redcard] <= 0
+                && (!skulliscard || player->cards[it_redskull] <= 0))
+            {
+                if (!player->neededcardflash || player->neededcard != it_redcard)
+                {
+                    player->neededcard = it_redcard;
+                    player->neededcardflash = NEEDEDCARDFLASH;
+                }
+                M_snprintf(buffer, sizeof(buffer), (skulliscard ? s_PD_REDK : s_PD_REDC),
+                    playername, (M_StringCompare(playername, playername_default) ? "" : "s"));
+                HU_PlayerMessage(buffer, true);
+                S_StartSound(player->mo, sfx_noway);
+                return false;
+            }
+            break;
+
+        case BCard:
+            if (player->cards[it_bluecard] <= 0
+                && (!skulliscard || player->cards[it_blueskull] <= 0))
+            {
+                if (!player->neededcardflash || player->neededcard != it_bluecard)
+                {
+                    player->neededcard = it_bluecard;
+                    player->neededcardflash = NEEDEDCARDFLASH;
+                }
+                M_snprintf(buffer, sizeof(buffer), (skulliscard ? s_PD_BLUEK : s_PD_BLUEC),
+                    playername,  (M_StringCompare(playername, playername_default) ? "" : "s"));
+                HU_PlayerMessage(buffer, true);
+                S_StartSound(player->mo, sfx_noway);
+                return false;
+            }
+            break;
+
+        case YCard:
+            if (player->cards[it_yellowcard] <= 0
+                && (!skulliscard || player->cards[it_yellowskull] <= 0))
+            {
+                if (!player->neededcardflash || player->neededcard != it_yellowcard)
+                {
+                    player->neededcard = it_yellowcard;
+                    player->neededcardflash = NEEDEDCARDFLASH;
+                }
+                M_snprintf(buffer, sizeof(buffer), (skulliscard ? s_PD_YELLOWK : s_PD_YELLOWC),
+                    playername, (M_StringCompare(playername, playername_default) ? "" : "s"));
+                HU_PlayerMessage(buffer, true);
+                S_StartSound(player->mo, sfx_noway);
+                return false;
+            }
+            break;
+
+        case RSkull:
+            if (player->cards[it_redskull] <= 0
+                && (!skulliscard || player->cards[it_redcard] <= 0))
+            {
+                if (!player->neededcardflash || player->neededcard != it_redskull)
+                {
+                    player->neededcard = it_redskull;
+                    player->neededcardflash = NEEDEDCARDFLASH;
+                }
+                M_snprintf(buffer, sizeof(buffer), (skulliscard ? s_PD_REDK : s_PD_REDS),
+                    playername, (M_StringCompare(playername, playername_default) ? "" : "s"));
+                HU_PlayerMessage(buffer, true);
+                S_StartSound(player->mo, sfx_noway);
+                return false;
+            }
+            break;
+
+        case BSkull:
+            if (player->cards[it_blueskull] <= 0
+                && (!skulliscard || player->cards[it_bluecard] <= 0))
+            {
+                if (!player->neededcardflash || player->neededcard != it_blueskull)
+                {
+                    player->neededcard = it_blueskull;
+                    player->neededcardflash = NEEDEDCARDFLASH;
+                }
+                M_snprintf(buffer, sizeof(buffer), (skulliscard ? s_PD_BLUEK : s_PD_BLUES),
+                    playername, (M_StringCompare(playername, playername_default) ? "" : "s"));
+                HU_PlayerMessage(buffer, true);
+                S_StartSound(player->mo, sfx_noway);
+                return false;
+            }
+            break;
+
+        case YSkull:
+            if (player->cards[it_yellowskull] <= 0
+                && (!skulliscard || player->cards[it_yellowcard] <= 0))
+            {
+                if (!player->neededcardflash || player->neededcard != it_yellowskull)
+                {
+                    player->neededcard = it_yellowskull;
+                    player->neededcardflash = NEEDEDCARDFLASH;
+                }
+                M_snprintf(buffer, sizeof(buffer), (skulliscard ? s_PD_YELLOWK : s_PD_YELLOWS),
+                    playername, (M_StringCompare(playername, playername_default) ? "" : "s"));
+                HU_PlayerMessage(buffer, true);
+                S_StartSound(player->mo, sfx_noway);
+                return false;
+            }
+            break;
+
+        case AllKeys:
+            if (!skulliscard && (player->cards[it_redcard] <= 0 || player->cards[it_redskull] <= 0
+                || player->cards[it_bluecard] <= 0 || player->cards[it_blueskull] <= 0
+                || player->cards[it_yellowcard] <= 0 || player->cards[it_yellowskull] <= 0))
+            {
+                M_snprintf(buffer, sizeof(buffer), s_PD_ALL3, playername,
+                    (M_StringCompare(playername, playername_default) ? "" : "s"));
+                HU_PlayerMessage(buffer, true);
+                S_StartSound(player->mo, sfx_noway);
+                return false;
+            }
+            if (skulliscard && ((player->cards[it_redcard] <= 0 && player->cards[it_redskull] <= 0)
+                || (player->cards[it_bluecard] <= 0 && player->cards[it_blueskull] <= 0)
+                || (player->cards[it_yellowcard] <= 0 && player->cards[it_yellowskull] <= 0)))
+            {
+                M_snprintf(buffer, sizeof(buffer), s_PD_ALL3, playername,
+                    (M_StringCompare(playername, playername_default) ? "" : "s"));
+                HU_PlayerMessage(buffer, true);
+                S_StartSound(player->mo, sfx_noway);
+                return false;
+            }
+            break;
+    }
+    return true;
+}
+
+//
+// P_SectorActive()
+//
+// Passed a linedef special class (floor, ceiling, lighting) and a sector
+// returns whether the sector is already busy with a linedef special of the
+// same class. If old demo compatibility true, all linedef special classes
+// are the same.
+//
+// jff 2/23/98 added to prevent old demos from
+//  succeeding in starting multiple specials on one sector
+//
+// killough 11/98: reformatted
+
+dboolean P_SectorActive(special_e t, sector_t *sec)
+{
+    return (t == floor_special ? !!sec->floordata :     // return whether
+        (t == ceiling_special ? !!sec->ceilingdata :     // thinker of same
+        (t == lighting_special ? !!sec->lightingdata :   // type is active
+        true)));        // don't know which special, must be active, shouldn't be here
 }
 
 //
@@ -1068,8 +1092,13 @@ void P_CrossSpecialLine(line_t *line, int side, mobj_t *thing)
           case MT_TROOPSHOT:
           case MT_HEADSHOT:
           case MT_BRUISERSHOT:
+          case MT_BETABRUISERSHOT:
           case MT_PLASMA1:    // killough 8/28/98: exclude beta fireballs
           case MT_PLASMA2:
+          case MT_TRACER:
+          case MT_FATSHOT:
+          case MT_SPAWNSHOT:
+          case MT_ARACHPLAZ:
             return;
             break;
             
@@ -1161,6 +1190,7 @@ void P_CrossSpecialLine(line_t *line, int side, mobj_t *thing)
     if (!thing->player)
     {
         dboolean okay = false;
+
         switch(line->special)
         {
             case W1_Door_OpenWaitClose:
@@ -1192,12 +1222,9 @@ void P_CrossSpecialLine(line_t *line, int side, mobj_t *thing)
     if (!P_CheckTag(line))      // jff 2/27/98 disallow zero tag on some types
         return;
 
-    // Note: could use some const's here.
-    switch (line->special)
+    switch (line->special)    // Note: could use some const's here.
     {
-        // TRIGGERS.
-        // All from here to RETRIGGERS.
-        // Triggers
+        // Triggers (All from here to RETRIGGERS).
         case W1_Door_OpenStay:
             if (EV_DoDoor(line, doorOpen))
             {
@@ -1256,7 +1283,10 @@ void P_CrossSpecialLine(line_t *line, int side, mobj_t *thing)
 
         case W1_Lift_LowerWaitRaise:
             if (EV_DoPlat(line, downWaitUpStay, 0))
-                line->special = 0;
+            {
+                if(!beta_style)
+                    line->special = 0;
+            }
             break;
 
         case W1_Light_ChangeToBrightestAdjacent:
@@ -1406,9 +1436,8 @@ void P_CrossSpecialLine(line_t *line, int side, mobj_t *thing)
             break;
 
         case W1_ExitLevel_GoesToSecretLevel:
-            // killough 10/98: prevent zombies from exiting levels
+            // killough 10/98: prevent zombies from exiting levels (Disabled because the sliding doors use the same line type...)
             if (!(thing->player && thing->player->health <= 0))
-                // Disabled because the sliding doors use the same line type...
                 G_SecretExitLevel();
             break;
 
@@ -1767,16 +1796,11 @@ void P_CrossSpecialLine(line_t *line, int side, mobj_t *thing)
     }
 }
 
-
-
 //
 // P_ShootSpecialLine - IMPACT SPECIALS
 // Called when a thing shoots a special line.
 //
-void
-P_ShootSpecialLine
-( mobj_t*        thing,
-  line_t*        line )
+void P_ShootSpecialLine(mobj_t *thing, line_t *line)
 {    
     // jff 02/04/98 add check here for generalized linedef
     {
@@ -1865,7 +1889,7 @@ P_ShootSpecialLine
             }
     }
 
-    //        Impacts that other things can activate.
+    // Impacts that other things can activate.
     if (!thing->player && line->special != GR_Door_OpenStay)
         return;
 
@@ -1909,25 +1933,24 @@ P_ShootSpecialLine
     }
 }
 
-
-
 //
 // P_PlayerInSpecialSector
 // Called every tic frame
 //  that the player origin is in a special sector
 //
-void P_PlayerInSpecialSector (player_t* player)
+void P_PlayerInSpecialSector (player_t *player)
 {
-    sector_t*        sector = player->mo->subsector->sector;
+    sector_t    *sector = player->mo->subsector->sector;
 
     // Falling, not all the way down yet?
     if (player->mo->z != sector->floorheight)
         return;        
 
     // Has hitten ground.
+    //jff add if to handle old vs generalized types
     if (sector->special < 32) // regular sector specials
     {
-        int i;
+        int     i;
 
         switch (sector->special)
         {
@@ -2009,9 +2032,9 @@ void P_PlayerInSpecialSector (player_t* player)
     }
     else
     {
+        in_slime = true;
         switch ((sector->special & DAMAGE_MASK) >> DAMAGE_SHIFT)
         {
-            in_slime = true;
             case 0: // no damage
                 in_slime = false;
                 break;
@@ -2051,9 +2074,6 @@ void P_PlayerInSpecialSector (player_t* player)
     }
 }
 
-
-
-
 //
 // P_UpdateSpecials
 // Animate planes, scroll walls, etc.
@@ -2074,12 +2094,12 @@ void P_UpdateSpecials (void)
             G_ExitLevel();
     }
     
-    //        ANIMATE FLATS AND TEXTURES GLOBALLY
-    for (anim = anims ; anim < lastanim ; anim++)
+    // ANIMATE FLATS AND TEXTURES GLOBALLY
+    for (anim = anims; anim < lastanim; anim++)
     {
-        for (i=anim->basepic ; i<anim->basepic+anim->numpics ; i++)
+        for (i = anim->basepic; i < anim->basepic + anim->numpics; i++)
         {
-            pic = anim->basepic + ( (leveltime/anim->speed + i)%anim->numpics );
+            pic = anim->basepic + ((leveltime / anim->speed + i) % anim->numpics);
             if (anim->istexture)
                 texturetranslation[i] = pic;
             else
@@ -2100,8 +2120,9 @@ void P_UpdateSpecials (void)
 
     skycolumnoffset += skyscrolldelta;
 
-    //        DO BUTTONS
+    // DO BUTTONS
     for (i = 0; i < MAXBUTTONS; i++)
+    {
         if (buttonlist[i].btimer)
         {
             buttonlist[i].btimer--;
@@ -2140,24 +2161,22 @@ void P_UpdateSpecials (void)
                 memset(&buttonlist[i],0,sizeof(button_t));
             }
         }
+    }
 }
-
 
 //
 // Special Stuff that can not be categorized
 //
-dboolean EV_DoDonut(line_t*       line)
+dboolean EV_DoDonut(line_t *line)
 {
-    sector_t*                s1;
-    sector_t*                s2;
-    sector_t*                s3;
-    int                      secnum;
-    dboolean                  rtn;
-    int                      i;
-    floormove_t*             floor;
+    sector_t    *s1;
+    sector_t    *s2;
+    sector_t    *s3;
+    int         secnum = -1;
+    dboolean    rtn = false;
+    int         i;
+    floormove_t *floor;
 
-    secnum = -1;
-    rtn = 0;
     while ((secnum = P_FindSectorFromLineTag(line,secnum)) >= 0)
     {
         s1 = &sectors[secnum];
@@ -2195,7 +2214,7 @@ dboolean EV_DoDonut(line_t*       line)
 
             rtn = true;
 
-            //        Spawn rising slime
+            // Spawn rising slime
             floor = Z_Malloc (sizeof(*floor), PU_LEVSPEC, 0);
             P_AddThinker (&floor->thinker);
             s2->floordata = floor;
@@ -2210,7 +2229,7 @@ dboolean EV_DoDonut(line_t*       line)
             floor->floordestheight = s3->floorheight;
             floor->stopsound = (floor->sector->floorheight != floor->floordestheight);
             
-            //        Spawn lowering donut-hole
+            // Spawn lowering donut-hole
             floor = Z_Malloc (sizeof(*floor), PU_LEVSPEC, 0);
             P_AddThinker (&floor->thinker);
             s1->floordata = floor;
@@ -2247,7 +2266,6 @@ dboolean EV_DoDonut(line_t*       line)
 //
 // This is the main scrolling code
 // killough 3/7/98
-
 void T_Scroll(scroll_t *s)
 {
     fixed_t     dx = s->dx, dy = s->dy;
@@ -2408,19 +2426,19 @@ static void P_SpawnScrollers(void)
         //
         // killough 3/15/98: Add acceleration. Types 214-218 are the same but
         // are accelerative.
-        if (special >= 245
-            && special <= 249)      // displacement scrollers
+        if (special >= Scroll_ScrollCeilingWhenSectorChangesHeight
+            && special <= Scroll_ScrollWallWhenSectorChangesHeight)      // displacement scrollers
         {
-            special += 250
-                - 245;
+            special += Scroll_ScrollCeilingAccordingToLineVector
+                - Scroll_ScrollCeilingWhenSectorChangesHeight;
             control = sides[*l->sidenum].sector - sectors;
         }
-        else if (special >= 214
-            && special <= 218) // accelerative scrollers
+        else if (special >= Scroll_CeilingAcceleratesWhenSectorHeightChanges
+            && special <= Scroll_WallAcceleratesWhenSectorHeightChanges) // accelerative scrollers
         {
             accel = 1;
-            special += 250
-                - 214;
+            special += Scroll_ScrollCeilingAccordingToLineVector
+                - Scroll_CeilingAcceleratesWhenSectorHeightChanges;
             control = sides[*l->sidenum].sector - sectors;
         }
 
@@ -2552,7 +2570,6 @@ dboolean PIT_PushThing(mobj_t* thing)
 {
     if ((sentient(thing) || (thing->flags & MF_SHOOTABLE)) && !(thing->flags & MF_NOCLIP))
     {
-        angle_t pushangle;
         fixed_t speed;
         fixed_t sx = tmpusher->x;
         fixed_t sy = tmpusher->y;
@@ -2577,7 +2594,7 @@ dboolean PIT_PushThing(mobj_t* thing)
         // to be able to see the push/pull source point.
         if (speed > 0 && P_CheckSight(thing, tmpusher->source))
         {
-            pushangle = R_PointToAngle2(thing->x, thing->y, sx, sy);
+            angle_t pushangle = R_PointToAngle2(thing->x, thing->y, sx, sy);
             if (tmpusher->source->type == MT_PUSH)
                 pushangle += ANG180;    // away
             pushangle >>= ANGLETOFINESHIFT;
@@ -2624,8 +2641,8 @@ void T_Pusher(pusher_t *p)
     {
         // Seek out all pushable things within the force radius of this
         // point pusher. Crosses sectors, so use blockmap.
-        int         xl, xh, yl, yh, bx, by;
-        int         radius;
+        int     xl, xh, yl, yh, bx, by;
+        int     radius;
 
         tmpusher = p;                                   // MT_PUSH/MT_PULL point source
         radius = p->radius;                             // where force goes to zero
@@ -2827,7 +2844,7 @@ static void P_SpawnFriction(void)
     }
 
     for (i = 0; i < numlines; i++, l++)
-        if (l->special == 223)
+        if (l->special == FrictionTaggedSector)
         {
             int length = P_AproxDistance(l->dx, l->dy) >> FRACBITS;
             int friction = (0x1EB8 * length) / 0x80 + 0xD000;
@@ -2878,8 +2895,8 @@ static void P_SpawnFriction(void)
 // Parses command line parameters.
 void P_SpawnSpecials (void)
 {
-    sector_t*          sector;
-    int                i;
+    sector_t    *sector;
+    int         i;
 
     // See if -TIMER was specified.
 
@@ -2893,9 +2910,9 @@ void P_SpawnSpecials (void)
         levelTimer = false;
     }
 
-    //        Init special SECTORs.
+    // Init special SECTORs.
     sector = sectors;
-    for (i=0 ; i<numsectors ; i++, sector++)
+    for (i = 0; i < numsectors; i++, sector++)
     {
         if (!sector->special)
             continue;
@@ -2949,32 +2966,34 @@ void P_SpawnSpecials (void)
         }
     }
 
-    P_RemoveAllActiveCeilings();
-    P_RemoveAllActivePlats();
+    P_RemoveAllActiveCeilings();        // jff 2/22/98 use killough's scheme
+
+    P_RemoveAllActivePlats();           // killough
     
-    for (i = 0;i < MAXBUTTONS;i++)
-        memset(&buttonlist[i],0,sizeof(button_t));
+    for (i = 0; i < MAXBUTTONS; i++)
+        memset(&buttonlist[i], 0, sizeof(button_t));
 
     // P_InitTagLists() must be called before P_FindSectorFromLineTag()
     // or P_FindLineFromLineTag() can be called.
 
     P_InitTagLists();                   // killough 1/30/98: Create xref tables for tags
+
     P_SpawnScrollers();                 // killough 3/7/98: Add generalized scrollers
+
     P_SpawnFriction();                  // phares 3/12/98: New friction model using linedefs
+
     P_SpawnPushers();                   // phares 3/20/98: New pusher model using linedefs
 
-    //        Init line EFFECTs
-//    numlinespecials = 0;
-    for (i = 0;i < numlines; i++)
+    for (i = 0; i < numlines; i++)       // Init line EFFECTs
     {
         int sec;
         int s;
 
-        switch(lines[i].special)
+        switch (lines[i].special)
         {
-          // killough 3/7/98:
-          // support for drawn heights coming from different sector
-          case CreateFakeCeilingAndFloor:
+            // killough 3/7/98:
+            // support for drawn heights coming from different sector
+            case CreateFakeCeilingAndFloor:
                 sec = sides[*lines[i].sidenum].sector - sectors;
                 for (s = -1; (s = P_FindSectorFromLineTag(lines + i, s)) >= 0;)
                     sectors[s].heightsec = sec;
@@ -2982,7 +3001,7 @@ void P_SpawnSpecials (void)
 
             // killough 3/16/98: Add support for setting
             // floor lighting independently (e.g. lava)
-          case Floor_ChangeBrightnessToThisBrightness:
+            case Floor_ChangeBrightnessToThisBrightness:
                 sec = sides[*lines[i].sidenum].sector - sectors;
                 for (s = -1; (s = P_FindSectorFromLineTag(lines + i, s)) >= 0;)
                     sectors[s].floorlightsec = sec;
@@ -2990,60 +3009,29 @@ void P_SpawnSpecials (void)
 
             // killough 4/11/98: Add support for setting
             // ceiling lighting independently
-          case Ceiling_ChangeBrightnessToThisBrightness:
-            sec = sides[*lines[i].sidenum].sector - sectors;
-            for (s = -1; (s = P_FindSectorFromLineTag(lines + i, s)) >= 0;)
-                sectors[s].ceilinglightsec = sec;
-            break;
+            case Ceiling_ChangeBrightnessToThisBrightness:
+                sec = sides[*lines[i].sidenum].sector - sectors;
+                for (s = -1; (s = P_FindSectorFromLineTag(lines + i, s)) >= 0;)
+                    sectors[s].ceilinglightsec = sec;
+                break;
 
-          // killough 10/98:
-          //
-          // Support for sky textures being transferred from sidedefs.
-          // Allows scrolling and other effects (but if scrolling is
-          // used, then the same sector tag needs to be used for the
-          // sky sector, the sky-transfer linedef, and the scroll-effect
-          // linedef). Still requires user to use F_SKY1 for the floor
-          // or ceiling texture, to distinguish floor and ceiling sky.
-          case TransferSkyTextureToTaggedSectors:
-          case TransferSkyTextureToTaggedSectors_Flipped:
-            for (s = -1; (s = P_FindSectorFromLineTag(lines + i, s)) >= 0;)
-                sectors[s].sky = i | PL_SKYFLAT;
-            break;
+            // killough 10/98:
+            //
+            // Support for sky textures being transferred from sidedefs.
+            // Allows scrolling and other effects (but if scrolling is
+            // used, then the same sector tag needs to be used for the
+            // sky sector, the sky-transfer linedef, and the scroll-effect
+            // linedef). Still requires user to use F_SKY1 for the floor
+            // or ceiling texture, to distinguish floor and ceiling sky.
+            case TransferSkyTextureToTaggedSectors:
+            case TransferSkyTextureToTaggedSectors_Flipped:
+                for (s = -1; (s = P_FindSectorFromLineTag(lines + i, s)) >= 0;)
+                    sectors[s].sky = i | PL_SKYFLAT;
+                break;
         }
     }
 
     // UNUSED: no horizontal sliders.
     //P_InitSlidingDoorFrames();
-}
-
-// killough 4/16/98: Same thing, only for linedefs
-int P_FindLineFromLineTag(const line_t *line, int start)
-{
-    start = (start >= 0 ? lines[start].nexttag :
-        lines[(unsigned int)line->tag % (unsigned int)numlines].firsttag);
-    while (start >= 0 && lines[start].tag != line->tag)
-        start = lines[start].nexttag;
-    return start;
-}
-
-//
-// P_SectorActive()
-//
-// Passed a linedef special class (floor, ceiling, lighting) and a sector
-// returns whether the sector is already busy with a linedef special of the
-// same class. If old demo compatibility true, all linedef special classes
-// are the same.
-//
-// jff 2/23/98 added to prevent old demos from
-//  succeeding in starting multiple specials on one sector
-//
-// killough 11/98: reformatted
-
-dboolean P_SectorActive(special_e t, sector_t *sec)
-{
-    return (t == floor_special ? !!sec->floordata :     // return whether
-        (t == ceiling_special ? !!sec->ceilingdata :     // thinker of same
-        (t == lighting_special ? !!sec->lightingdata :   // type is active
-        true)));        // don't know which special, must be active, shouldn't be here
 }
 

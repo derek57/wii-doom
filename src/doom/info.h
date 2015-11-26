@@ -235,6 +235,8 @@ typedef enum
     // killough 7/19/98: second of two plasma fireballs in the beta
     SPR_BPL2,
 
+    SPR_BBL4,
+
 //    SPR_CAS2,
 //    SPR_PSHE,
 
@@ -1585,6 +1587,12 @@ typedef enum
     S_BPL2BALLX2,
     S_BPL2BALLX3,
 
+    S_BRBBALL1,
+    S_BRBBALL2,
+    S_BRBBALLX1,
+    S_BRBBALLX2,
+    S_BRBBALLX3,
+
     S_PLAY_GDIE1,
     S_PLAY_GDIE2,
     S_PLAY_GDIE3,
@@ -1793,6 +1801,8 @@ typedef enum
 
     MT_PLASMA1, // killough 7/11/98: first  of alternating beta plasma fireballs
     MT_PLASMA2, // killough 7/11/98: second of alternating beta plasma fireballs
+
+    MT_BETABRUISERSHOT,
 
     // nitr8 10/10/2015: extra rotation states for VALIANT.WAD
     MT_VALIANT1,

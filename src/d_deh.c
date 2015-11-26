@@ -1750,7 +1750,7 @@ dboolean CheckPackageWADVersion(void)
                 if (!*inbuffer || *inbuffer == '#' || *inbuffer == ' ')
                     continue;   // Blank line or comment line
 
-                if (!strcasecmp(inbuffer, "Wii-DOOM"))
+                if (M_StringCompare(inbuffer, "Wii-DOOM"))
                 {
                     Z_ChangeTag(infile.lump, PU_CACHE);
                     return true;
@@ -1939,7 +1939,7 @@ void deh_procBexCodePointers(DEHFILE *fpin, char *line)
 
         // killough 8/98: allow hex numbers in input:
         if ((3 != sscanf(inbuffer, "%31s %10i = %31s", key, &indexnum, mnemonic))
-            || strcasecmp(key, "FRAME"))        // NOTE: different format from normal
+            || !M_StringCompare(key, "FRAME"))        // NOTE: different format from normal
         {
             C_Warning(" Invalid BEX codepointer line - must start with \"FRAME\": \"%s\".",
                 inbuffer);
@@ -1958,7 +1958,7 @@ void deh_procBexCodePointers(DEHFILE *fpin, char *line)
 
         while (!found && deh_bexptrs[i].lookup)
         {
-            if (!strcasecmp(key, deh_bexptrs[i].lookup))
+            if (M_StringCompare(key, deh_bexptrs[i].lookup))
             {   // Ty 06/01/98  - add to states[].action for new djgcc version
                 states[indexnum].action = deh_bexptrs[i].cptr;  // assign
                 if (devparm)
@@ -2037,14 +2037,14 @@ void deh_procThing(DEHFILE *fpin, char *line)
 
         for (ix = 0; ix < DEH_MOBJINFOMAX; ix++)
         {
-            if (strcasecmp(key, deh_mobjinfo[ix]))
+            if (!M_StringCompare(key, deh_mobjinfo[ix]))
                 continue;
 
-            if (strcasecmp(key, "Bits"))
+            if (!M_StringCompare(key, "Bits"))
             {
                 pix = (int *)&mobjinfo[indexnum];
                 pix[ix] = (int)value;
-                if (!strcasecmp(key, "Height"))
+                if (M_StringCompare(key, "Height"))
                     mobjinfo[indexnum].projectilepassheight = 0;
             }
             else
@@ -2068,7 +2068,7 @@ void deh_procThing(DEHFILE *fpin, char *line)
 
                         for (iy = 0; iy < DEH_MOBJFLAGMAX; iy++)
                         {
-                            if (strcasecmp(strval, deh_mobjflags[iy].name))
+                            if (!M_StringCompare(strval, deh_mobjflags[iy].name))
                                 continue;
                             if (devparm)
                                 C_Output(" ORed value 0x%08lx %s.",
@@ -2130,45 +2130,45 @@ void deh_procFrame(DEHFILE *fpin, char *line)
             C_Warning(" Bad data pair in \"%s\".", inbuffer);
             continue;
         }
-        if (!strcasecmp(key, deh_state[0]))                     // Sprite number
+        if (M_StringCompare(key, deh_state[0]))                     // Sprite number
         {
             if (devparm)
                 C_Output("  - sprite = %ld", value);
             states[indexnum].sprite = (spritenum_t)value;
             states[indexnum].dehacked = dehacked = !BTSX;
         }
-        else if (!strcasecmp(key, deh_state[1]))                // Sprite subnumber
+        else if (M_StringCompare(key, deh_state[1]))                // Sprite subnumber
         {
             if (devparm)
                 C_Output("  - frame = %ld", value);
             states[indexnum].frame = value;                     // long
             states[indexnum].dehacked = dehacked = !BTSX;
         }
-        else if (!strcasecmp(key, deh_state[2]))                // Duration
+        else if (M_StringCompare(key, deh_state[2]))                // Duration
         {
             if (devparm)
                 C_Output("  - tics = %ld", value);
             states[indexnum].tics = value;                      // long
             states[indexnum].dehacked = dehacked = !BTSX;
         }
-        else if (!strcasecmp(key, deh_state[3]))                // Next frame
+        else if (M_StringCompare(key, deh_state[3]))                // Next frame
         {
             if (devparm)
                 C_Output("  - nextstate = %ld", value);
             states[indexnum].nextstate = value;
             states[indexnum].dehacked = dehacked = !BTSX;
         }
-        else if (!strcasecmp(key, deh_state[4]))                // Codep frame
+        else if (M_StringCompare(key, deh_state[4]))                // Codep frame
                                                                 // (not set in Frame deh block)
             C_Warning(" Codep frame should not be set in Frame section.");
-        else if (!strcasecmp(key, deh_state[5]))                // Unknown 1
+        else if (M_StringCompare(key, deh_state[5]))                // Unknown 1
         {
             if (devparm)
                 C_Output("  - misc1 = %ld", value);
             states[indexnum].misc1 = value;                     // long
             states[indexnum].dehacked = dehacked = !BTSX;
         }
-        else if (!strcasecmp(key, deh_state[6]))                // Unknown 2
+        else if (M_StringCompare(key, deh_state[6]))                // Unknown 2
         {
             if (devparm)
                 C_Output("  - misc2 = %ld", value);
@@ -2233,7 +2233,7 @@ void deh_procPointer(DEHFILE *fpin, char *line)
             return;
         }
 
-        if (!strcasecmp(key, deh_state[4]))     // Codep frame (not set in Frame deh block)
+        if (M_StringCompare(key, deh_state[4]))     // Codep frame (not set in Frame deh block)
         {
             states[indexnum].action = deh_codeptr[value];
             if (devparm)
@@ -2292,19 +2292,19 @@ void deh_procSounds(DEHFILE *fpin, char *line)
             C_Warning(" Bad data pair in \"%s\"", inbuffer);
             continue;
         }
-        if (!strcasecmp(key, deh_sfxinfo[0]))           // Offset
+        if (M_StringCompare(key, deh_sfxinfo[0]))           // Offset
             /* nop */;                                  // we don't know what this is, I don't think
-        else if (!strcasecmp(key, deh_sfxinfo[1]))      // Zero/One
+        else if (M_StringCompare(key, deh_sfxinfo[1]))      // Zero/One
             S_sfx[indexnum].singularity = value;
-        else if (!strcasecmp(key, deh_sfxinfo[2]))      // Value
+        else if (M_StringCompare(key, deh_sfxinfo[2]))      // Value
             S_sfx[indexnum].priority = value;
-        else if (!strcasecmp(key, deh_sfxinfo[3]))      // Zero 1
+        else if (M_StringCompare(key, deh_sfxinfo[3]))      // Zero 1
             S_sfx[indexnum].link = (sfxinfo_t *)value;
-        else if (!strcasecmp(key, deh_sfxinfo[4]))      // Zero 3
+        else if (M_StringCompare(key, deh_sfxinfo[4]))      // Zero 3
             S_sfx[indexnum].volume = value;
-        else if (!strcasecmp(key, deh_sfxinfo[5]))      // Neg. One 1
+        else if (M_StringCompare(key, deh_sfxinfo[5]))      // Neg. One 1
             /* nop */;
-        else if (!strcasecmp(key, deh_sfxinfo[6]))      // Neg. One 2
+        else if (M_StringCompare(key, deh_sfxinfo[6]))      // Neg. One 2
             S_sfx[indexnum].lumpnum = value;
         else if (devparm)
             C_Output(" Invalid sound string index for \"%s\"", key);
@@ -2347,9 +2347,9 @@ void deh_procAmmo(DEHFILE *fpin, char *line)
             C_Warning(" Bad data pair in \"%s\".", inbuffer);
             continue;
         }
-        if (!strcasecmp(key, deh_ammo[0]))                      // Max ammo
+        if (M_StringCompare(key, deh_ammo[0]))                      // Max ammo
             maxammo[indexnum] = value;
-        else if (!strcasecmp(key, deh_ammo[1]))                 // Per ammo
+        else if (M_StringCompare(key, deh_ammo[1]))                 // Per ammo
             clipammo[indexnum] = value;
         else
             C_Warning(" Invalid ammo string index for \"%s\".", key);
@@ -2392,17 +2392,17 @@ void deh_procWeapon(DEHFILE *fpin, char *line)
             C_Warning(" Bad data pair in \"%s\".", inbuffer);
             continue;
         }
-        if (!strcasecmp(key, deh_weapon[0]))                    // Ammo type
+        if (M_StringCompare(key, deh_weapon[0]))                    // Ammo type
             weaponinfo[indexnum].ammo = value;
-        else if (!strcasecmp(key, deh_weapon[1]))               // Deselect frame
+        else if (M_StringCompare(key, deh_weapon[1]))               // Deselect frame
             weaponinfo[indexnum].upstate = value;
-        else if (!strcasecmp(key, deh_weapon[2]))               // Select frame
+        else if (M_StringCompare(key, deh_weapon[2]))               // Select frame
             weaponinfo[indexnum].downstate = value;
-        else if (!strcasecmp(key, deh_weapon[3]))               // Bobbing frame
+        else if (M_StringCompare(key, deh_weapon[3]))               // Bobbing frame
             weaponinfo[indexnum].readystate = value;
-        else if (!strcasecmp(key, deh_weapon[4]))               // Shooting frame
+        else if (M_StringCompare(key, deh_weapon[4]))               // Shooting frame
             weaponinfo[indexnum].atkstate = value;
-        else if (!strcasecmp(key, deh_weapon[5]))               // Firing frame
+        else if (M_StringCompare(key, deh_weapon[5]))               // Firing frame
             weaponinfo[indexnum].flashstate = value;
         else
             C_Warning(" Invalid weapon string index for \"%s\".", key);
@@ -2580,7 +2580,7 @@ void deh_procCheat(DEHFILE *fpin, char *line)
         }
 
         // Otherwise we got a (perhaps valid) cheat name
-        if (!strcasecmp(key, deh_cheat[0]))
+        if (M_StringCompare(key, deh_cheat[0]))
         {
             for (iy = 0; strval[iy]; iy++)
                 strval[iy] = (strval[iy] == (char)0xFF ? '\0' : strval[iy]);
@@ -2591,7 +2591,7 @@ void deh_procCheat(DEHFILE *fpin, char *line)
 //            cheat_mus_xy.sequence = strdup(p);
             success = true;
         }
-        else if (!strcasecmp(key, deh_cheat[1]))
+        else if (M_StringCompare(key, deh_cheat[1]))
         {
             for (iy = 0; strval[iy]; iy++)
                 strval[iy] = (strval[iy] == (char)0xFF ? '\0' : strval[iy]);
@@ -2601,7 +2601,7 @@ void deh_procCheat(DEHFILE *fpin, char *line)
             cheat_choppers.sequence = strdup(p);
             success = true;
         }
-        else if (!strcasecmp(key, deh_cheat[2]))
+        else if (M_StringCompare(key, deh_cheat[2]))
         {
             for (iy = 0; strval[iy]; iy++)
                 strval[iy] = (strval[iy] == (char)0xFF ? '\0' : strval[iy]);
@@ -2611,7 +2611,7 @@ void deh_procCheat(DEHFILE *fpin, char *line)
             cheat_god.sequence = strdup(p);
             success = true;
         }
-        else if (!strcasecmp(key, deh_cheat[3]))
+        else if (M_StringCompare(key, deh_cheat[3]))
         {
             for (iy = 0; strval[iy]; iy++)
                 strval[iy] = (strval[iy] == (char)0xFF ? '\0' : strval[iy]);
@@ -2621,7 +2621,7 @@ void deh_procCheat(DEHFILE *fpin, char *line)
             cheat_ammo.sequence = strdup(p);
             success = true;
         }
-        else if (!strcasecmp(key, deh_cheat[4]))
+        else if (M_StringCompare(key, deh_cheat[4]))
         {
             for (iy = 0; strval[iy]; iy++)
                 strval[iy] = (strval[iy] == (char)0xFF ? '\0' : strval[iy]);
@@ -2631,7 +2631,7 @@ void deh_procCheat(DEHFILE *fpin, char *line)
             cheat_ammonokey.sequence = strdup(p);
             success = true;
         }
-        else if (!strcasecmp(key, deh_cheat[5]))
+        else if (M_StringCompare(key, deh_cheat[5]))
         {
             for (iy = 0; strval[iy]; iy++)
                 strval[iy] = (strval[iy] == (char)0xFF ? '\0' : strval[iy]);
@@ -2641,7 +2641,7 @@ void deh_procCheat(DEHFILE *fpin, char *line)
             cheat_noclip.sequence = strdup(p);
             success = true;
         }
-        else if (!strcasecmp(key, deh_cheat[6]))
+        else if (M_StringCompare(key, deh_cheat[6]))
         {
             for (iy = 0; strval[iy]; iy++)
                 strval[iy] = (strval[iy] == (char)0xFF ? '\0' : strval[iy]);
@@ -2651,7 +2651,7 @@ void deh_procCheat(DEHFILE *fpin, char *line)
             cheat_commercial_noclip.sequence = strdup(p);
             success = true;
         }
-        else if (!strcasecmp(key, deh_cheat[7]))
+        else if (M_StringCompare(key, deh_cheat[7]))
         {
             for (iy = 0; strval[iy]; iy++)
                 strval[iy] = (strval[iy] == (char)0xFF ? '\0' : strval[iy]);
@@ -2661,7 +2661,7 @@ void deh_procCheat(DEHFILE *fpin, char *line)
             cheat_powerup[0].sequence = strdup(p);
             success = true;
         }
-        else if (!strcasecmp(key, deh_cheat[8]))
+        else if (M_StringCompare(key, deh_cheat[8]))
         {
             for (iy = 0; strval[iy]; iy++)
                 strval[iy] = (strval[iy] == (char)0xFF ? '\0' : strval[iy]);
@@ -2671,7 +2671,7 @@ void deh_procCheat(DEHFILE *fpin, char *line)
             cheat_powerup[1].sequence = strdup(p);
             success = true;
         }
-        else if (!strcasecmp(key, deh_cheat[9]))
+        else if (M_StringCompare(key, deh_cheat[9]))
         {
             for (iy = 0; strval[iy]; iy++)
                 strval[iy] = (strval[iy] == (char)0xFF ? '\0' : strval[iy]);
@@ -2681,7 +2681,7 @@ void deh_procCheat(DEHFILE *fpin, char *line)
             cheat_powerup[2].sequence = strdup(p);
             success = true;
         }
-        else if (!strcasecmp(key, deh_cheat[10]))
+        else if (M_StringCompare(key, deh_cheat[10]))
         {
             for (iy = 0; strval[iy]; iy++)
                 strval[iy] = (strval[iy] == (char)0xFF ? '\0' : strval[iy]);
@@ -2691,7 +2691,7 @@ void deh_procCheat(DEHFILE *fpin, char *line)
             cheat_powerup[3].sequence = strdup(p);
             success = true;
         }
-        else if (!strcasecmp(key, deh_cheat[11]))
+        else if (M_StringCompare(key, deh_cheat[11]))
         {
             for (iy = 0; strval[iy]; iy++)
                 strval[iy] = (strval[iy] == (char)0xFF ? '\0' : strval[iy]);
@@ -2701,7 +2701,7 @@ void deh_procCheat(DEHFILE *fpin, char *line)
             cheat_powerup[4].sequence = strdup(p);
             success = true;
         }
-        else if (!strcasecmp(key, deh_cheat[12]))
+        else if (M_StringCompare(key, deh_cheat[12]))
         {
             for (iy = 0; strval[iy]; iy++)
                 strval[iy] = (strval[iy] == (char)0xFF ? '\0' : strval[iy]);
@@ -2711,7 +2711,7 @@ void deh_procCheat(DEHFILE *fpin, char *line)
             cheat_powerup[5].sequence = strdup(p);
             success = true;
         }
-        else if (!strcasecmp(key, deh_cheat[13]))
+        else if (M_StringCompare(key, deh_cheat[13]))
         {
             for (iy = 0; strval[iy]; iy++)
                 strval[iy] = (strval[iy] == (char)0xFF ? '\0' : strval[iy]);
@@ -2721,7 +2721,7 @@ void deh_procCheat(DEHFILE *fpin, char *line)
             cheat_powerup[6].sequence = strdup(p);
             success = true;
         }
-        else if (!strcasecmp(key, deh_cheat[14]))
+        else if (M_StringCompare(key, deh_cheat[14]))
         {
             for (iy = 0; strval[iy]; iy++)
                 strval[iy] = (strval[iy] == (char)0xFF ? '\0' : strval[iy]);
@@ -2732,7 +2732,7 @@ void deh_procCheat(DEHFILE *fpin, char *line)
 //            cheat_clev_xy.sequence = strdup(p);
             success = true;
         }
-        else if (!strcasecmp(key, deh_cheat[15]))
+        else if (M_StringCompare(key, deh_cheat[15]))
         {
             for (iy = 0; strval[iy]; iy++)
                 strval[iy] = (strval[iy] == (char)0xFF ? '\0' : strval[iy]);
@@ -2783,37 +2783,37 @@ void deh_procMisc(DEHFILE *fpin, char *line)
         if (devparm)
             C_Output(" Processing Misc item '%s'", key);
 
-        if (!strcasecmp(key, deh_misc[0]))                      // Initial Health
+        if (M_StringCompare(key, deh_misc[0]))                      // Initial Health
             initial_health = value;
-        else if (!strcasecmp(key, deh_misc[1]))                 // Initial Bullets
+        else if (M_StringCompare(key, deh_misc[1]))                 // Initial Bullets
             initial_bullets = value;
-        else if (!strcasecmp(key, deh_misc[2]))                 // Max Health
+        else if (M_StringCompare(key, deh_misc[2]))                 // Max Health
             maxhealth = value;
-        else if (!strcasecmp(key, deh_misc[3]))                 // Max Armor
+        else if (M_StringCompare(key, deh_misc[3]))                 // Max Armor
             max_armor = value;
-        else if (!strcasecmp(key, deh_misc[4]))                 // Green Armor Class
+        else if (M_StringCompare(key, deh_misc[4]))                 // Green Armor Class
             green_armor_class = value;
-        else if (!strcasecmp(key, deh_misc[5]))                 // Blue Armor Class
+        else if (M_StringCompare(key, deh_misc[5]))                 // Blue Armor Class
             blue_armor_class = value;
-        else if (!strcasecmp(key, deh_misc[6]))                 // Max Soulsphere
+        else if (M_StringCompare(key, deh_misc[6]))                 // Max Soulsphere
             max_soul = value;
-        else if (!strcasecmp(key, deh_misc[7]))                 // Soulsphere Health
+        else if (M_StringCompare(key, deh_misc[7]))                 // Soulsphere Health
             soul_health = value;
-        else if (!strcasecmp(key, deh_misc[8]))                 // Megasphere Health
+        else if (M_StringCompare(key, deh_misc[8]))                 // Megasphere Health
             mega_health = value;
-        else if (!strcasecmp(key, deh_misc[9]))                 // God Mode Health
+        else if (M_StringCompare(key, deh_misc[9]))                 // God Mode Health
             god_health = value;
-        else if (!strcasecmp(key, deh_misc[10]))                // IDFA Armor
+        else if (M_StringCompare(key, deh_misc[10]))                // IDFA Armor
             idfa_armor = value;
-        else if (!strcasecmp(key, deh_misc[11]))                // IDFA Armor Class
+        else if (M_StringCompare(key, deh_misc[11]))                // IDFA Armor Class
             idfa_armor_class = value;
-        else if (!strcasecmp(key, deh_misc[12]))                // IDKFA Armor
+        else if (M_StringCompare(key, deh_misc[12]))                // IDKFA Armor
             idkfa_armor = value;
-        else if (!strcasecmp(key, deh_misc[13]))                // IDKFA Armor Class
+        else if (M_StringCompare(key, deh_misc[13]))                // IDKFA Armor Class
             idkfa_armor_class = value;
-        else if (!strcasecmp(key, deh_misc[14]))                // BFG Cells/Shot
+        else if (M_StringCompare(key, deh_misc[14]))                // BFG Cells/Shot
             bfgcells = value;
-        else if (!strcasecmp(key, deh_misc[15]))                // Monsters Infight
+        else if (M_StringCompare(key, deh_misc[15]))                // Monsters Infight
             species_infighting = value;
         else
             C_Warning(" Invalid misc item string index for \"%s\".", key);
@@ -3071,8 +3071,8 @@ dboolean deh_procStringSub(char *key, char *lookfor, char *newstring)
 
     for (i = 0; i < deh_numstrlookup; i++)
     {
-        found = (lookfor ? !strcasecmp(*deh_strlookup[i].ppstr, lookfor) :
-            !strcasecmp(deh_strlookup[i].lookup, key));
+        found = (lookfor ? M_StringCompare(*deh_strlookup[i].ppstr, lookfor) :
+            M_StringCompare(deh_strlookup[i].lookup, key));
 
         if (found)
         {
@@ -3101,25 +3101,20 @@ dboolean deh_procStringSub(char *key, char *lookfor, char *newstring)
                 *t = '\0';              // cap off the target string
             }
 
-            if (key)
-                if (devparm)
+            if (devparm)
+            {
+                if (key)
                     C_Output(" Assigned key %s to \"%s\"", key, newstring);
-
-            if (!key)
-                if (devparm)
-                    C_Output(" Assigned \"%.12s%s\" to \"%.12s%s\" at key %s",
-                        lookfor, (strlen(lookfor) > 12 ? "..." : ""),
-                        newstring, (strlen(newstring) > 12 ? "..." : ""),
-                        deh_strlookup[i].lookup);
-
-            if (!key)   // must have passed an old style string so show BEX
-                if (devparm)
+                else
                 {
+                    C_Output("Assigned \"%.12s%s\" to \"%.12s%s\" at key %s", lookfor,
+                        (strlen(lookfor) > 12 ? "..." : ""), newstring,
+                        (strlen(newstring) > 12 ? "..." : ""), deh_strlookup[i].lookup);
                     C_Output(" *BEX FORMAT:");
                     C_Output(" %s = %s", deh_strlookup[i].lookup, dehReformatStr(newstring));
                     C_Output(" *END BEX");
                 }
-
+            }
             deh_strlookup[i].assigned = true;
 
             if (M_StrCaseStr(deh_strlookup[i].lookup, "HUSTR"))

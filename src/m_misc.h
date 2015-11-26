@@ -63,6 +63,8 @@ char *M_DirName(char *path);
 char *M_StringReplace(const char *haystack, const char *needle, const char *replacement);
 char *M_ExtractFilename(char *path);
 char *M_BaseName(char *path);
+dboolean M_StringCompare(const char *str1, const char *str2);
+dboolean isvowel(const char ch);
 
 #endif
 

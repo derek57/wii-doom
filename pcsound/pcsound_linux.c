@@ -15,10 +15,11 @@
 //    PC speaker driver for Linux.
 //
 
-#include "src/c_io.h"
+#include "../src/c_io.h"
 
 #ifndef WII
 #include "config.h"
+#endif
 
 #ifdef HAVE_LINUX_KD_H
 
@@ -173,5 +174,4 @@ pcsound_driver_t pcsound_linux_driver =
 };
 
 #endif /* #ifdef HAVE_LINUX_KD_H */
-#endif
 

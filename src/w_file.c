@@ -33,6 +33,7 @@
 #include "config.h"
 #endif
 
+#include "doom/doomstat.h"
 #include "doomtype.h"
 #include "m_argv.h"
 #include "w_file.h"
@@ -58,7 +59,7 @@ wad_file_t *W_OpenFile(char *path)
     // directly into memory.
     //
 
-    if (!M_CheckParm("-mmap"))
+    if (!M_CheckParm("-mmap") && !beta_style)
 #endif
         return stdc_wad_file.OpenFile(path);
 

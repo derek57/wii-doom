@@ -140,7 +140,7 @@ wad_file_t *W_AddFile (char *filename, dboolean automatic)
     // [crispy] save the file name
     wad_file->path = M_BaseName(filename);
 
-    if (strcasecmp(filename+strlen(filename)-3 , "wad" ) )
+    if (!M_StringCompare(filename+strlen(filename)-3 , "wad" ) )
     {
         // single lump file
 
@@ -618,7 +618,7 @@ void W_CheckSize(int wad)
             fseek(fprw, 0, 2);                // file pointer at the end of file
             fsizerw = ftell(fprw);        // take a position of file pointer un size variable
 
-            if(fsizerw != 1121803)
+            if(fsizerw != 1138380)
                 print_resource_pwad_error = true;
 
             fclose(fprw);

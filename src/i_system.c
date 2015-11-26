@@ -173,7 +173,7 @@ byte *I_ZoneBase (int *size)
     static int i = 1;
 
 #ifndef WII
-    int p;
+    int p = 0;
 
     //!
     // @arg <mb>
@@ -181,7 +181,8 @@ byte *I_ZoneBase (int *size)
     // Specify the heap size, in MiB (default 16).
     //
 
-    p = M_CheckParmWithArgs("-mb", 1);
+    if(!beta_style)
+        p = M_CheckParmWithArgs("-mb", 1);
 
     if (p > 0)
     {

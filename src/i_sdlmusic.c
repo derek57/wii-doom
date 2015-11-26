@@ -905,7 +905,7 @@ static dboolean I_SDL_InitMusic(void)
     // music config file to the specified filename and quit.
     //
 
-    int i = M_CheckParmWithArgs("-dumpsubstconfig", 1);
+    int i = (M_CheckParmWithArgs("-dumpsubstconfig", 1) && !beta_style);
 
     if (i > 0)
     {

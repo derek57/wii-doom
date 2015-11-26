@@ -420,7 +420,9 @@ byte *R_DistortedFlat(int flatnum)
     lastflat = flatnum;
 
     // built this tic?
-    if (gametic != swirltic && (!consoleactive || swirltic == -1) /*&& !menuactive*/ && !paused)
+    // FIXME: (consoleactive || swirltic == -1) might be wrong (it isn't included in DOOMRetro)
+    if (gametic != swirltic && ((consoleactive || swirltic == -1) ||
+                               (!consoleactive || swirltic == -1)) /*&& !menuactive*/ && !paused)
     {
         int     x, y;
 

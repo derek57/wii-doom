@@ -112,7 +112,9 @@ default_t        doom_defaults_list[] =
     CONFIG_VARIABLE_INT                (footclip),
     CONFIG_VARIABLE_INT                (splash),
     CONFIG_VARIABLE_INT                (swirl),
+#ifdef WII
     CONFIG_VARIABLE_INT                (pr_beta),
+#endif
     CONFIG_VARIABLE_INT                (translucency),
     CONFIG_VARIABLE_INT                (colored_blood),
     CONFIG_VARIABLE_INT                (fixed_blood),
@@ -174,6 +176,8 @@ default_t        doom_defaults_list[] =
     CONFIG_VARIABLE_INT                (mouse_walk),
     CONFIG_VARIABLE_INT                (generalsound),
     CONFIG_VARIABLE_INT                (icon_type),
+    CONFIG_VARIABLE_INT                (colored_player_corpses),
+    CONFIG_VARIABLE_INT                (endoom_screen),
     CONFIG_VARIABLE_INT                (key_shoot),
     CONFIG_VARIABLE_INT                (key_open),
     CONFIG_VARIABLE_INT                (key_menu),
@@ -466,7 +470,7 @@ void M_SaveDefaultsAlternate(char *main)
 void M_LoadDefaults (void)
 {
 #ifndef WII
-    int i;
+    int i = 0;
  
     // check for a custom default file
 
@@ -478,7 +482,8 @@ void M_LoadDefaults (void)
     // default.
     //
 
-    i = M_CheckParmWithArgs("-config", 1);
+    if(!beta_style)
+        i = M_CheckParmWithArgs("-config", 1);
 
     if (i)
     {

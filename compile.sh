@@ -7,6 +7,9 @@ cd ..
 cd pcsound
 make -f Makefile.SDL
 cd ..
+cd textscreen
+make -f Makefile.SDL
+cd ..
 cd src
 cd doom
 make -f Makefile.SDL

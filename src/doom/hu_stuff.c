@@ -54,11 +54,13 @@
 
 #ifdef WII
 #include "../i_swap.h"
+#include "../i_tinttab.h"
 #include "../i_video.h"
 #include "../m_controls.h"
 #include "../m_misc.h"
 #else
 #include "i_swap.h"
+#include "i_tinttab.h"
 #include "i_video.h"
 #include "m_controls.h"
 #include "m_misc.h"
@@ -217,13 +219,38 @@ char                    *mapnumandtitle;
 
 dboolean                message_dontfuckwithme;
 dboolean                show_chat_bar;
+dboolean                emptytallpercent;
 
 patch_t*                hu_font[HU_FONTSIZE];
-patch_t*                beta_hu_font[HU_FONTSIZE];
+patch_t*                beta_hu_font[HU_FONTSIZEBETA];
+
+extern int              cardsfound;
 
 extern dboolean         blurred;
 extern dboolean         mapinfo_lump;
 extern dboolean         dont_message_to_console;
+
+static patch_t*         healthpatch;
+static patch_t*         berserkpatch;
+static patch_t*         greenarmorpatch;
+static patch_t*         bluearmorpatch;
+
+extern patch_t*         tallnum[10];
+extern patch_t*         tallpercent;
+
+static struct
+{
+    char        *patchnamea;
+    char        *patchnameb;
+    patch_t     *patch;
+} keypic[NUMCARDS] = {
+    { "BKEYA0", "BKEYB0", NULL },
+    { "YKEYA0", "YKEYB0", NULL },
+    { "RKEYA0", "RKEYB0", NULL },
+    { "BSKUA0", "BSKUB0", NULL },
+    { "YSKUA0", "YSKUB0", NULL },
+    { "RSKUA0", "RSKUB0", NULL }
+};
 
 //
 // Builtin map names.
@@ -490,6 +517,10 @@ char *mapnames_commercial[] =
     MHUSTR_21
 };
 
+void (*hudfunc)(int, int, patch_t *, byte *);
+void (*hudnumfunc)(int, int, patch_t *, byte *);
+void (*godhudfunc)(int, int, patch_t *, byte *);
+
 void HU_Init(void)
 {
 
@@ -503,9 +534,12 @@ void HU_Init(void)
     {
         M_snprintf(buffer, 9, "STCFN%.3d", j++);
         hu_font[i] = (patch_t *) W_CacheLumpName(buffer, PU_STATIC);
+    }
 
-        // haleyjd 09/18/10: load beta_hu_font as well
-        buffer[2] = 'B';
+    j = HU_FONTSTART;
+    for (i=0;i<HU_FONTSIZEBETA;i++)
+    {
+        M_snprintf(buffer, 9, "STBFN%.3d", j++);
         beta_hu_font[i] = (patch_t *) W_CacheLumpName(buffer, PU_STATIC);
     }
 }
@@ -513,6 +547,16 @@ void HU_Init(void)
 void HU_Stop(void)
 {
     headsupactive = false;
+}
+
+patch_t *HU_LoadStatusKeyPatch(int keypicnum)
+{
+    if (dehacked && W_CheckNumForName(keypic[keypicnum].patchnamea) >= 0)
+        return W_CacheLumpNum(W_GetNumForName(keypic[keypicnum].patchnamea), PU_CACHE);
+    else if (W_CheckNumForName(keypic[keypicnum].patchnameb) >= 0)
+        return W_CacheLumpNum(W_GetNumForName(keypic[keypicnum].patchnameb), PU_CACHE);
+    else
+        return NULL;
 }
 
 void HU_Start(void)
@@ -525,6 +569,8 @@ void HU_Start(void)
 
     if (headsupactive)
         HU_Stop();
+
+    emptytallpercent = V_EmptyPatch(tallpercent);
 
     plr = &players[consoleplayer];
     message_on = false;
@@ -682,6 +728,31 @@ void HU_Start(void)
     for (i=0 ; i<MAXPLAYERS ; i++)
         HUlib_initIText(&w_inputbuffer[i], 0, 0, 0, 0, &always_off);
 */
+    if (W_CheckNumForName("MEDIA0"))
+        healthpatch = W_CacheLumpNum(W_GetNumForName("MEDIA0"), PU_CACHE);
+
+    if (gamemode != shareware && W_CheckNumForName("PSTRA0"))
+        berserkpatch = W_CacheLumpNum(W_GetNumForName("PSTRA0"), PU_CACHE);
+    else
+        berserkpatch = healthpatch;
+
+    if (W_CheckNumForName("ARM1A0"))
+        greenarmorpatch = W_CacheLumpNum(W_GetNumForName("ARM1A0"), PU_CACHE);
+
+    if (W_CheckNumForName("ARM2A0"))
+        bluearmorpatch = W_CacheLumpNum(W_GetNumForName("ARM2A0"), PU_CACHE);
+
+    keypic[it_bluecard].patch = HU_LoadStatusKeyPatch(it_bluecard);
+    keypic[it_yellowcard].patch = HU_LoadStatusKeyPatch(exe_hacx ? it_yellowcard : it_yellowskull);
+    keypic[it_redcard].patch = HU_LoadStatusKeyPatch(it_redcard);
+
+    if (gamemode != shareware)
+    {
+        keypic[it_blueskull].patch = HU_LoadStatusKeyPatch(it_blueskull);
+        keypic[it_yellowskull].patch = HU_LoadStatusKeyPatch(it_yellowskull);
+        keypic[it_redskull].patch = HU_LoadStatusKeyPatch(it_redskull);
+    }
+
     headsupactive = true;
 
 }
@@ -737,6 +808,300 @@ void HU_DrawStats(void)
         HUlib_drawTextLine(&w_monsec, false);
 }
 
+static void DrawHUDNumber(int *x, int y, int val, byte *tinttab,
+                          void (*hudnumfunc)(int, int, patch_t *, byte *))
+{
+    int         oldval = val;
+    patch_t     *patch;
+
+    if (val > 99)
+    {
+        patch = tallnum[val / 100];
+        hudnumfunc(*x, y, patch, tinttab);
+        *x += SHORT(patch->width);
+    }
+    val %= 100;
+    if (val > 9 || oldval > 99)
+    {
+        patch = tallnum[val / 10];
+        hudnumfunc(*x, y, patch, tinttab);
+        *x += SHORT(patch->width);
+    }
+    val %= 10;
+    patch = tallnum[val];
+    hudnumfunc(*x, y, patch, tinttab);
+    *x += SHORT(patch->width);
+}
+
+static int HUDNumberWidth(int val)
+{
+    int oldval = val;
+    int width = 0;
+
+    if (val > 99)
+        width += SHORT(tallnum[val / 100]->width);
+    val %= 100;
+    if (val > 9 || oldval > 99)
+        width += SHORT(tallnum[val / 10]->width);
+    val %= 10;
+    width += SHORT(tallnum[val]->width);
+    return width;
+}
+
+void HU_DrawStatus(void)
+{
+    int             health = MAX(0, plr->mo->health);
+    int             ammotype = weaponinfo[plr->readyweapon].ammo;
+    int             ammo = plr->ammo[ammotype];
+    int             armor = plr->armorpoints;
+    int             health_x = ST_HEALTH_X;
+    int             key = 0;
+    int             i = 0;
+    static int      healthwait = 0;
+    byte            *tinttab;
+    int             invulnerability = plr->powers[pw_invulnerability];
+    static dboolean healthanim = false;
+    patch_t         *patch;
+    int             currenttics = I_GetTime();
+    dboolean        gamepaused = (menuactive || paused || consoleactive);
+
+    if (d_translucency)
+    {
+        hudfunc = V_DrawTranslucentStatusPatch;
+        hudnumfunc = V_DrawTranslucentStatusNumberPatch;
+        godhudfunc = V_DrawTranslucentYellowStatusPatch;
+    }
+    else
+    {
+        hudfunc = V_DrawStatusPatch;
+        hudnumfunc = V_DrawStatusPatch;
+        godhudfunc = V_DrawYellowStatusPatch;
+    }
+
+    tinttab = (!health || (health <= ST_HEALTH_MIN && healthanim) || health > ST_HEALTH_MIN
+        || gamepaused ? tinttab66 : tinttab25);
+
+    patch = (((plr->readyweapon == wp_fist && plr->pendingweapon == wp_nochange)
+        || plr->pendingweapon == wp_fist) && plr->powers[pw_strength] ? berserkpatch : healthpatch);
+
+    if (patch)
+    {
+        if ((plr->cheats & CF_GODMODE) || invulnerability > 128 || (invulnerability & 8))
+            godhudfunc(health_x, ST_HEALTH_Y - (SHORT(patch->height) - 17), patch, tinttab);
+        else
+            hudfunc(health_x, ST_HEALTH_Y - (SHORT(patch->height) - 17), patch, tinttab);
+        health_x += SHORT(patch->width) + 8;
+    }
+
+    if (healthhighlight)
+    {
+        if (healthhighlight < currenttics)
+            healthhighlight = 0;
+
+        DrawHUDNumber(&health_x, ST_HEALTH_Y, health, tinttab, V_DrawStatusPatch);
+        if (!emptytallpercent)
+            V_DrawStatusPatch(health_x, ST_HEALTH_Y, tallpercent, tinttab);
+    }
+    else
+    {
+        DrawHUDNumber(&health_x, ST_HEALTH_Y, health, tinttab, hudnumfunc);
+        if (!emptytallpercent)
+            hudnumfunc(health_x, ST_HEALTH_Y, tallpercent, tinttab);
+    }
+
+    if (health <= ST_HEALTH_MIN && !gamepaused)
+    {
+        if (healthwait < currenttics)
+        {
+            healthanim = !healthanim;
+            healthwait = currenttics + ST_HEALTH_WAIT * health / ST_HEALTH_MIN + 4;
+        }
+    }
+    else
+    {
+        healthanim = false;
+        healthwait = 0;
+    }
+
+    if (plr->pendingweapon != wp_nochange)
+    {
+        ammotype = weaponinfo[plr->pendingweapon].ammo;
+        ammo = plr->ammo[ammotype];
+    }
+
+    if (health && ammo && ammotype != am_noammo)
+    {
+        static int          ammowait = 0;
+        static dboolean     ammoanim = false;
+        int                 offset_special = 0;
+        int                 ammo_x;
+
+        tinttab = (ammoanim || gamepaused ? tinttab66 : tinttab25); 
+
+        if (ammo < 200 && ammo > 99)
+            offset_special = 3;
+
+        if(plr->readyweapon == wp_pistol)
+            patch = W_CacheLumpName("CLIPA0", PU_CACHE);
+        else if(plr->readyweapon == wp_shotgun)
+            patch = W_CacheLumpName("SHELA0", PU_CACHE);
+        else if(plr->readyweapon == wp_chaingun)
+            patch = W_CacheLumpName("AMMOA0", PU_CACHE);
+        else if(plr->readyweapon == wp_missile)
+            patch = W_CacheLumpName("ROCKA0", PU_CACHE);
+        else if(plr->readyweapon == wp_plasma)
+            patch = W_CacheLumpName("CELLA0", PU_CACHE);
+        else if(plr->readyweapon == wp_bfg)
+            patch = W_CacheLumpName("CELPA0", PU_CACHE);
+        else if(plr->readyweapon == wp_supershotgun)
+            patch = W_CacheLumpName("SBOXA0", PU_CACHE);
+        else
+            patch = W_CacheLumpName("TNT1A0", PU_CACHE);
+
+        ammo_x = ST_AMMO_X + 15 - (SHORT(patch->width) / 2);
+
+//        if (patch)	// FIXME: IS THIS ONE REALLY REQUIRED??
+        {
+            hudfunc(ammo_x, (ST_AMMO_Y + 8 - (SHORT(patch->height) / 2)), patch, tinttab);
+            ammo_x += ST_AMMO_X + 15 + (SHORT(patch->width) / 2) - (ORIGHEIGHT / 2) + offset_special;
+        }
+
+        if (ammohighlight)
+        {
+            if (ammohighlight < currenttics)
+                ammohighlight = 0;
+
+            DrawHUDNumber(&ammo_x, ST_AMMO_Y, ammo, tinttab, V_DrawStatusPatch);
+        }
+        else
+        {
+            DrawHUDNumber(&ammo_x, ST_AMMO_Y, ammo, tinttab, hudnumfunc);
+        }
+
+        if (ammo <= ST_AMMO_MIN && !gamepaused)
+        {
+            if (ammowait < currenttics)
+            {
+                ammoanim = !ammoanim;
+                ammowait = currenttics + ST_AMMO_WAIT * ammo / ST_AMMO_MIN + 4;
+            }
+        }
+        else
+        {
+            ammoanim = false;
+            ammowait = 0;
+        }
+    }
+
+    while (i < NUMCARDS)
+    {
+        if (plr->cards[i++] > 0)
+            key++;
+    }
+
+    if (key || plr->neededcardflash)
+    {
+        int                 keypic_x = ST_KEYS_X - 20 * (key - 1);
+        static int          keywait = 0;
+        static dboolean      showkey = false;
+
+        if (!armor)
+            keypic_x += 114;
+        else
+        {
+            if (emptytallpercent)
+                keypic_x += SHORT(tallpercent->width);
+            if (armor < 10)
+                keypic_x += 26;
+            else if (armor < 100)
+                keypic_x += 12;
+        }
+
+        if (plr->neededcardflash)
+        {
+            patch_t     *patch = keypic[plr->neededcard].patch;
+
+            if (patch)
+            {
+                if (!gamepaused)
+                {
+                    if (keywait < currenttics)
+                    {
+                        showkey = !showkey;
+                        keywait = currenttics + ST_KEY_WAIT;
+                        plr->neededcardflash--;
+                    }
+                }
+                if (showkey)
+                    hudfunc(keypic_x - (SHORT(patch->width) + 6), ST_KEYS_Y, patch, tinttab66);
+            }
+        }
+        else
+        {
+            showkey = false;
+            keywait = 0;
+        }
+
+        for (i = 0; i < NUMCARDS; i++)
+        {
+            if (plr->cards[i] > 0)
+            {
+                patch_t     *patch = keypic[i].patch;
+
+                if (patch)
+                    hudfunc(keypic_x + (SHORT(patch->width) + 6) * (cardsfound - plr->cards[i]),
+                        ST_KEYS_Y, patch, tinttab66);
+            }
+        }
+    }
+
+    if (armor)
+    {
+        patch_t     *patch = (plr->armortype == 1 ? greenarmorpatch : bluearmorpatch);
+        int         armor_x = ST_ARMOR_X;
+
+        if (patch)
+        {
+            armor_x -= SHORT(patch->width);
+            hudfunc(armor_x, ST_ARMOR_Y - (SHORT(patch->height) - 16), patch, tinttab66);
+            armor_x -= 7;
+        }
+
+        if (armorhighlight)
+        {
+            if (armorhighlight < currenttics)
+                armorhighlight = 0;
+
+            if (emptytallpercent)
+            {
+                armor_x -= HUDNumberWidth(armor);
+                DrawHUDNumber(&armor_x, ST_ARMOR_Y, armor, tinttab66, V_DrawStatusPatch);
+            }
+            else
+            {
+                armor_x -= SHORT(tallpercent->width);
+                V_DrawStatusPatch(armor_x, ST_ARMOR_Y, tallpercent, tinttab66);
+                armor_x -= HUDNumberWidth(armor);
+                DrawHUDNumber(&armor_x, ST_ARMOR_Y, armor, tinttab66, V_DrawStatusPatch);
+            }
+        }
+        else
+        {
+            if (emptytallpercent)
+            {
+                armor_x -= HUDNumberWidth(armor);
+                DrawHUDNumber(&armor_x, ST_ARMOR_Y, armor, tinttab66, hudnumfunc);
+            }
+            else
+            {
+                armor_x -= SHORT(tallpercent->width);
+                hudnumfunc(armor_x, ST_ARMOR_Y, tallpercent, tinttab66);
+                armor_x -= HUDNumberWidth(armor);
+                DrawHUDNumber(&armor_x, ST_ARMOR_Y, armor, tinttab66, hudnumfunc);
+            }
+        }
+    }
+}
 
 void HU_Drawer(void)
 {
@@ -770,7 +1135,8 @@ void HU_Drawer(void)
 
     if (automapactive)
     {
-        HUlib_drawTextLine(&w_title, false);
+        if(!beta_style)
+            HUlib_drawTextLine(&w_title, false);
 
         if (((!am_overlay ||
              ((am_overlay && screenSize > 6 && (show_authors 
@@ -877,12 +1243,7 @@ void HU_Ticker(void)
             else
                 HUlib_addMessageToSText(&w_message, 0, plr->message);
 
-            if(!dont_message_to_console)
-                goto skip;
-
             C_PlayerMessage(" %s", plr->message);
-
-            skip: ;
 
             plr->message = 0;
             message_on = true;

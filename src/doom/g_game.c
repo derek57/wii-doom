@@ -244,7 +244,6 @@ int             joybinvleft = 14;
 int             joybspeed = 15;
 int             joybconsole = 16;
 #endif
-dboolean        dont_message_to_console;
 dboolean        secret_1 = false;
 dboolean        secret_2 = false;
 dboolean        secretexit; 
@@ -1669,6 +1668,9 @@ void G_DoLoadLevel (void)
     else
         C_Output(mapnumandtitle);
 
+    if(beta_style && ep == 1 && gamemap == 3)
+            I_Error("W_GetNumForName: E1M3 not found!");
+
     P_SetupLevel (ep, gamemap);
 
     skycolfunc = (canmodify && (textureheight[skytexture] >> FRACBITS) == 128 && !transferredsky
@@ -1676,7 +1678,10 @@ void G_DoLoadLevel (void)
 
     displayplayer = consoleplayer;                // view the guy you are playing    
     gameaction = ga_nothing; 
+
+#if defined WII || defined BOOM_ZONE_HANDLING
     Z_CheckHeap ();
+#endif
 
     // clear cmd building stuff
 
@@ -2150,6 +2155,14 @@ void G_DoCompleted (void)
                 , sizeof(wminfo.plyr[i].frags)); 
     } 
  
+    if(beta_style)
+    {
+        if(gameepisode == 3 && gamemap == 5)
+            I_Error("W_GetNumForName: E2M6 not found!");
+        else if(gameepisode == 2 && gamemap == 2)
+            I_Error("W_GetNumForName: E3M3 not found!");
+    }
+
     gamestate = GS_INTERMISSION; 
     viewactive = false; 
     automapactive = false; 
@@ -2238,14 +2251,10 @@ void G_DoSaveGame (void)
     gameaction = ga_nothing; 
     M_StringCopy(savedescription, "", sizeof(savedescription));
 
-    dont_message_to_console = true;
-
     players[consoleplayer].message = s_GGSAVED;
 
     // draw the pattern into the back screen
     R_FillBackScreen ();
-
-    dont_message_to_console = false;
 } 
 
 //
@@ -2814,6 +2823,7 @@ G_InitNew
         for (i=S_SARG_RUN1 ; i<=S_SARG_PAIN2 ; i++)
             states[i].tics >>= 1;
         mobjinfo[MT_BRUISERSHOT].speed = 20*FRACUNIT;
+        mobjinfo[MT_BETABRUISERSHOT].speed = 20*FRACUNIT;
         mobjinfo[MT_HEADSHOT].speed = 20*FRACUNIT;
         mobjinfo[MT_TROOPSHOT].speed = 20*FRACUNIT;
     }
@@ -2822,6 +2832,7 @@ G_InitNew
         for (i=S_SARG_RUN1 ; i<=S_SARG_PAIN2 ; i++)
             states[i].tics <<= 1;
         mobjinfo[MT_BRUISERSHOT].speed = 15*FRACUNIT;
+        mobjinfo[MT_BETABRUISERSHOT].speed = 15*FRACUNIT;
         mobjinfo[MT_HEADSHOT].speed = 10*FRACUNIT;
         mobjinfo[MT_TROOPSHOT].speed = 10*FRACUNIT;
     }

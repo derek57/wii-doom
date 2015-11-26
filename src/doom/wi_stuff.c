@@ -345,6 +345,9 @@ static int                     bcnt;
 // signals to refresh everything for one frame
 static int                     firstrefresh; 
 
+static int                     cnt_bonus;
+static int                     cnt_score;
+
 static int                     cnt_kills[MAXPLAYERS];
 static int                     cnt_items[MAXPLAYERS];
 static int                     cnt_secret[MAXPLAYERS];
@@ -407,6 +410,8 @@ static patch_t*                kills;
 static patch_t*                secret;
 static patch_t*                items;
 static patch_t*                frags;
+static patch_t*                bonus;
+static patch_t*                score;
 
 // Time sucks.
 static patch_t*                timepatch;
@@ -465,6 +470,52 @@ dboolean WI_Responder(event_t* ev)
 }
 */
 
+void
+WI_drawOnLnode
+( int             n,
+  patch_t*        c[] )
+{
+
+    int           i;
+    dboolean       fits = false;
+
+    i = 0;
+    do
+    {
+        int left = lnodes[wbs->epsd][n].x - SHORT(c[i]->leftoffset);
+        int top = lnodes[wbs->epsd][n].y - SHORT(c[i]->topoffset);
+        int right = left + SHORT(c[i]->width);
+        int bottom = top + SHORT(c[i]->height);
+
+        if (left >= 0 && right < ORIGWIDTH      // CHANGED FOR HIRES
+            && top >= 0 && bottom < ORIGHEIGHT) // CHANGED FOR HIRES
+        {
+            fits = true;
+        }
+        else
+        {
+            i++;
+        }
+    } while (!fits && i!=2 && c[i] != NULL);
+
+    if (fits && i<2)
+    {
+        if(font_shadow == 1)
+            V_DrawPatchWithShadow(lnodes[wbs->epsd][n].x,
+                    lnodes[wbs->epsd][n].y,
+                    c[i], false);
+        else
+            V_DrawPatch(lnodes[wbs->epsd][n].x,
+                    lnodes[wbs->epsd][n].y,
+                    c[i]);
+    }
+    else
+    {
+        // DEBUG
+        C_Error(" Could not place patch on level %d", n+1); 
+    }
+}
+
 // Draws "<Levelname> Finished!"
 void WI_drawLF(void)
 {
@@ -517,19 +568,25 @@ void WI_drawLF(void)
                     else
                         V_DrawPatch (117, y, W_CacheLumpName("SEWERS", PU_CACHE));
                 }
-                // draw "Finished!"
-                if(fsize != 12538385 || (fsize == 12538385 && gamemap != 10))
-                    y += (5*SHORT(lnames[wbs->last]->height))/4;
+            }
+
+            // draw "Finished!"
+            if((fsize != 12538385 || (fsize == 12538385 && gamemap != 10)) && !beta_style)
+                y += (5*SHORT(lnames[wbs->last]->height))/4;
+            else
+            {
+                if(beta_style)
+                    y = 9;
                 else
                     y = 17;
-    
-                if(font_shadow == 1)
-                    V_DrawPatchWithShadow((ORIGWIDTH - SHORT(finished->width)) / 2,
-                            y, finished, false);        // CHANGED FOR HIRES
-                else
-                    V_DrawPatch((ORIGWIDTH - SHORT(finished->width)) / 2,
-                            y, finished);        // CHANGED FOR HIRES
             }
+    
+            if(font_shadow == 1)
+                V_DrawPatchWithShadow((ORIGWIDTH - SHORT(finished->width)) / 2,
+                        y, finished, false);        // CHANGED FOR HIRES
+            else
+                V_DrawPatch((ORIGWIDTH - SHORT(finished->width)) / 2,
+                        y, finished);        // CHANGED FOR HIRES
         }
         else if (wbs->last == NUMCMAPS)
         {
@@ -549,6 +606,15 @@ void WI_drawLF(void)
             else
                 V_DrawPatch(0, y, &tmp);
         }
+    }
+
+    // draw a splat on taken cities.
+    if(beta_style)
+    {
+        int i;
+        int last = gamemap - 1;
+        for (i=1 ; i<=last ; i++)
+            WI_drawOnLnode(i, splat);
     }
 }
 
@@ -626,53 +692,6 @@ void WI_drawEL(void)
         }
     }
 }
-
-void
-WI_drawOnLnode
-( int             n,
-  patch_t*        c[] )
-{
-
-    int           i;
-    dboolean       fits = false;
-
-    i = 0;
-    do
-    {
-        int left = lnodes[wbs->epsd][n].x - SHORT(c[i]->leftoffset);
-        int top = lnodes[wbs->epsd][n].y - SHORT(c[i]->topoffset);
-        int right = left + SHORT(c[i]->width);
-        int bottom = top + SHORT(c[i]->height);
-
-        if (left >= 0 && right < ORIGWIDTH      // CHANGED FOR HIRES
-            && top >= 0 && bottom < ORIGHEIGHT) // CHANGED FOR HIRES
-        {
-            fits = true;
-        }
-        else
-        {
-            i++;
-        }
-    } while (!fits && i!=2 && c[i] != NULL);
-
-    if (fits && i<2)
-    {
-        if(font_shadow == 1)
-            V_DrawPatchWithShadow(lnodes[wbs->epsd][n].x,
-                    lnodes[wbs->epsd][n].y,
-                    c[i], false);
-        else
-            V_DrawPatch(lnodes[wbs->epsd][n].x,
-                    lnodes[wbs->epsd][n].y,
-                    c[i]);
-    }
-    else
-    {
-        // DEBUG
-        C_Error(" Could not place patch on level %d", n+1); 
-    }
-}
-
 
 
 void WI_initAnimatedBack(void)
@@ -907,6 +926,23 @@ WI_drawTime
     }
 }
 
+//
+// Display level completion bonus and score,
+//  or "sucks" message if overflow.
+//
+void
+WI_drawExtra
+( int             x,
+  int             y,
+  int             t )
+{
+    if (t<0)
+        return;
+
+    do
+        x = WI_drawNum(x, y, t, 3);
+    while (t);
+}
 
 void WI_End(void)
 {
@@ -981,8 +1017,9 @@ void WI_drawShowNextLoc(void)
             last = (wbs->last == 8) ? wbs->next - 1 : wbs->last;
 
         // draw a splat on taken cities.
-        for (i=0 ; i<=last ; i++)
-            WI_drawOnLnode(i, splat);
+        if(!beta_style)
+            for (i=0 ; i<=last ; i++)
+                WI_drawOnLnode(i, splat);
 
         // splat the secret level?
         if (wbs->didsecret)
@@ -998,13 +1035,12 @@ void WI_drawShowNextLoc(void)
         }
 
         // draw flashing ptr
-        if (snl_pointeron)
+        if (snl_pointeron && !beta_style)
         {
-            if(beta_style)
-                WI_drawOnLnode(wbs->next, byah); 
-            else
-                WI_drawOnLnode(wbs->next, yah); 
+            WI_drawOnLnode(wbs->next, yah); 
         }
+        else if(beta_style)
+            WI_drawOnLnode(wbs->next, byah); 
     }
 
     if ((
@@ -1577,8 +1613,12 @@ void WI_initStats(void)
     acceleratestage = 0;
     sp_state = 1;
     cnt_kills[0] = cnt_items[0] = cnt_secret[0] = -1;
-    cnt_time = cnt_par = -1;
-    cnt_pause = TICRATE;
+    cnt_time = cnt_par = cnt_bonus = cnt_score = -1;
+
+    if(beta_style)
+        cnt_pause = (TICRATE / 2);
+    else
+        cnt_pause = TICRATE;
 
     WI_initAnimatedBack();
 }
@@ -1591,6 +1631,7 @@ void WI_updateStats(void)
     if (acceleratestage && sp_state != 10)
     {
         acceleratestage = 0;
+        cnt_bonus = cnt_score = 500;
         cnt_kills[0] = (plrs[me].skills * 100) / wbs->maxkills;
         cnt_items[0] = (plrs[me].sitems * 100) / wbs->maxitems;
         cnt_secret[0] = (plrs[me].ssecret * 100) / wbs->maxsecret;
@@ -1683,7 +1724,11 @@ void WI_updateStats(void)
         if (!--cnt_pause)
         {
             sp_state++;
-            cnt_pause = TICRATE;
+
+            if(beta_style)
+                cnt_pause = (TICRATE / 2);
+            else
+                cnt_pause = TICRATE;
         }
     }
 
@@ -1704,30 +1749,74 @@ void WI_drawStats(void)
     if(font_shadow == 1)
         V_DrawPatchWithShadow(SP_STATSX, SP_STATSY, kills, false);
     else
-        V_DrawPatch(SP_STATSX, SP_STATSY, kills);
+    {
+        if(beta_style)
+            V_DrawPatch(95, 37 , kills);
+        else
+            V_DrawPatch(SP_STATSX, SP_STATSY, kills);
+    }
+
     // CHANGED FOR HIRES
-    WI_drawPercent(ORIGWIDTH - SP_STATSX, SP_STATSY, cnt_kills[0]);
+    if(beta_style)
+        WI_drawPercent(ORIGWIDTH - SP_STATSX - 138, SP_STATSY + 7, cnt_kills[0]);
+    else
+        WI_drawPercent(ORIGWIDTH - SP_STATSX, SP_STATSY, cnt_kills[0]);
 
     if(font_shadow == 1)
         V_DrawPatchWithShadow(SP_STATSX, SP_STATSY+lh, items, false);
     else
-        V_DrawPatch(SP_STATSX, SP_STATSY+lh, items);
-    // CHANGED FOR HIRES
-    WI_drawPercent(ORIGWIDTH - SP_STATSX, SP_STATSY+lh, cnt_items[0]);
+    {
+        if(beta_style)
+            V_DrawPatch(151, 37 , items);
+        else
+            V_DrawPatch(SP_STATSX, SP_STATSY+lh, items);
+    }
 
-    if(font_shadow == 1)
-        V_DrawPatchWithShadow(SP_STATSX, SP_STATSY+2*lh, sp_secret, false);
-    else
-        V_DrawPatch(SP_STATSX, SP_STATSY+2*lh, sp_secret);
     // CHANGED FOR HIRES
-    WI_drawPercent(ORIGWIDTH - SP_STATSX, SP_STATSY+2*lh, cnt_secret[0]);
+    if(beta_style)
+        WI_drawPercent(ORIGWIDTH - SP_STATSX - 82, SP_STATSY + 7, cnt_items[0]);
+    else
+        WI_drawPercent(ORIGWIDTH - SP_STATSX, SP_STATSY+lh, cnt_items[0]);
+
+    if(!beta_style)
+    {
+        if(font_shadow == 1)
+            V_DrawPatchWithShadow(SP_STATSX, SP_STATSY+2*lh, sp_secret, false);
+        else
+            V_DrawPatch(SP_STATSX, SP_STATSY+2*lh, sp_secret);
+    }
+    else
+        V_DrawPatch(205, 37, secret);
+
+    // CHANGED FOR HIRES
+    if(beta_style)
+        WI_drawPercent(ORIGWIDTH - SP_STATSX - 27, SP_STATSY + 7, cnt_secret[0]);
+    else
+        WI_drawPercent(ORIGWIDTH - SP_STATSX, SP_STATSY+2*lh, cnt_secret[0]);
 
     if(font_shadow == 1)
         V_DrawPatchWithShadow(SP_TIMEX, SP_TIMEY, timepatch, false);
     else
-        V_DrawPatch(SP_TIMEX, SP_TIMEY, timepatch);
+    {
+        if(beta_style)
+        {
+            V_DrawPatch(7, SP_TIMEY - 24, timepatch);
+            V_DrawPatch(13, SP_TIMEY - 6, bonus);
+            V_DrawPatch(16, SP_TIMEY + 10, score);
+        }
+        else
+            V_DrawPatch(SP_TIMEX, SP_TIMEY, timepatch);
+    }
+printf("%d\n",cnt_bonus);
     // CHANGED FOR HIRES
-    WI_drawTime(ORIGWIDTH/2 - SP_TIMEX, SP_TIMEY, cnt_time);
+    if(beta_style)
+    {
+        WI_drawTime(ORIGWIDTH/2 - SP_TIMEX, SP_TIMEY - 24, cnt_time);
+        WI_drawExtra(ORIGWIDTH/2 - SP_TIMEX + 100, SP_TIMEY - 6, cnt_bonus);
+        WI_drawExtra(ORIGWIDTH/2 - SP_TIMEX + 99, SP_TIMEY + 10, cnt_score);
+    }
+    else
+        WI_drawTime(ORIGWIDTH/2 - SP_TIMEX, SP_TIMEY, cnt_time);
 
     if (wbs->epsd < 3 && !beta_style)
     {
@@ -1952,6 +2041,12 @@ static void WI_loadUnloadData(load_callback_t callback)
     {
         callback("WIOSTI", &items);
     }
+
+    // "score"
+    callback("WISCORE", &score);
+
+    // "frgs"
+    callback("WIBONUS", &bonus);
 
     // "frgs"
     callback("WIFRGS", &frags);

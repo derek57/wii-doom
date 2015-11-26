@@ -692,19 +692,26 @@ void R_InitColumnFunctions(void)
 void R_Init(void)
 {
     R_InitData();
-    printf (".");
+    if(!beta_style)
+        printf (".");
     R_InitPointToAngle();
-    printf (".");
+    if(!beta_style)
+        printf (".");
     R_InitTables();
-    printf (".");
+    if(!beta_style)
+        printf (".");
     R_SetViewSize(screenblocks);
-    printf (".");
+    if(!beta_style)
+        printf (".");
     R_InitLightTables();
-    printf (".");
+    if(!beta_style)
+        printf (".");
     R_InitSkyMap();
-    printf (".");
+    if(!beta_style)
+        printf (".");
     R_InitTranslationTables();
-    printf (".");
+    if(!beta_style)
+        printf (".");
     R_InitColumnFunctions();
 //    printf (".");
 }

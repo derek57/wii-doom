@@ -119,6 +119,7 @@ int key_menu_gamma     = KEY_F11;
 int key_menu_incscreen = KEY_EQUALS;
 int key_menu_decscreen = KEY_MINUS;
 int key_menu_screenshot = KEY_F12;
+int key_menu_screenshot_beta = KEY_F11;
 
 int key_console = KEY_TILDE;
 int key_spy = KEY_F12;
@@ -193,7 +194,9 @@ void M_BindBaseControls(void)
     M_BindVariable("footclip",               &d_footclip);
     M_BindVariable("splash",                 &d_splash);
     M_BindVariable("swirl",                  &d_swirl);
+#ifdef WII
     M_BindVariable("pr_beta",                &beta_style_mode);
+#endif
     M_BindVariable("translucency",           &d_translucency);
     M_BindVariable("colored_blood",          &d_colblood);
     M_BindVariable("fixed_blood",            &d_colblood2);
@@ -255,6 +258,8 @@ void M_BindBaseControls(void)
     M_BindVariable("mouse_walk",             &mousewalk);
     M_BindVariable("generalsound",           &general_sound);
     M_BindVariable("icon_type",              &icontype);
+    M_BindVariable("colored_player_corpses", &randomly_colored_playercorpses);
+    M_BindVariable("endoom_screen",          &show_endoom);
 #ifdef WII
     M_BindVariable("key_shoot",              &joy_r);
     M_BindVariable("key_open",               &joy_l);

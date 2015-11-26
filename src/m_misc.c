@@ -31,6 +31,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <strings.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 
@@ -625,5 +626,46 @@ char *titlecase(const char *str)
     }
 
     return newstr;
+}
+
+//
+// [nitr8] UNUSED
+//
+/*
+int stricmp(const char *string1, const char *string2)
+{
+    char src[4096];
+    char dest[4096];
+    int i;
+
+    for (i=0; i<strlen(string1); i++)
+        if (string1[i] >= 'A' && string1[i] <= 'Z')
+            src[i] = string1[i] + 32;
+        else
+            src[i] = string1[i];
+    src[i] = 0;
+
+    for (i=0; i<strlen(string2); i++)
+        if (string2[i] >= 'A' && string2[i] <= 'Z')
+            dest[i] = string2[i] + 32;
+        else
+            dest[i] = string2[i];
+    dest[i] = 0;
+
+    return strcmp(src, dest);
+}
+*/
+
+// Returns true if 'str1' and 'str2' are the same.
+// (Case-insensitive, return value reverse of stricmp() to avoid confusion.
+dboolean M_StringCompare(const char *str1, const char *str2)
+{
+//    return !stricmp(str1, str2);    // FIXME: stricmp() is missing in standard C headers
+    return !strcasecmp(str1, str2);
+}
+
+dboolean isvowel(const char ch)
+{
+    return (!!strchr("aeiou", ch));
 }
 

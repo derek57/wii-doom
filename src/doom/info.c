@@ -73,7 +73,7 @@ char *sprnames[] =
     "FLSH","SPRY","SPSH","LVAS","SLDG","BND1","BND2","BPL3","BPL5","BBSK",
     "BRSK","BYSK","BSHL","BCLL","BBOX","BBXP","BPNS","BPNV","BBSS","BCL1",
     "BELC","BPL4","BPL7","BPL6","BSMT","BHED","BPSS","BSPS","BCHG","BCHF",
-    "BPLG","BPLF","BMSL","BPL1","BPL2",/*"CAS2",
+    "BPLG","BPLF","BMSL","BPL1","BPL2","BBL4",/*"CAS2",
 
     "PBUL","PSHE",*/
 
@@ -1813,6 +1813,12 @@ state_t states[NUMSTATES] =
     { SPR_BPL2,  2 | FF_FULLBRIGHT,                6,               NULL,              S_BPL2BALLX2       }, // S_BPL2BALLX1
     { SPR_BPL2,  3 | FF_FULLBRIGHT,                6,               NULL,              S_BPL2BALLX3       }, // S_BPL2BALLX2
     { SPR_BPL2,  4 | FF_FULLBRIGHT,                6,               NULL,              S_NULL             }, // S_BPL2BALLX3
+
+    { SPR_BBL4,  0 | FF_FULLBRIGHT,                4,               NULL,              S_BRBBALL2         }, // S_BRBBALL1
+    { SPR_BBL4,  1 | FF_FULLBRIGHT,                4,               NULL,              S_BRBBALL1         }, // S_BRBBALL2
+    { SPR_BBL4,  2 | FF_FULLBRIGHT,                6,               NULL,              S_BRBBALLX2        }, // S_BRBBALLX1
+    { SPR_BBL4,  3 | FF_FULLBRIGHT,                6,               NULL,              S_BRBBALLX3        }, // S_BRBBALLX2
+    { SPR_BBL4,  4 | FF_FULLBRIGHT,                6,               NULL,              S_NULL             }, // S_BRBBALLX3
 
     { SPR_PLAY, 14,                                5,               NULL,              S_PLAY_GDIE2       }, // S_PLAY_GDIE1
     { SPR_PLAY, 15,                                5,               A_SkullPop,        S_PLAY_GDIE3       }, // S_PLAY_GDIE2
@@ -6970,6 +6976,42 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] =
         /* plural2              */ ""
     },
 
+    // Beta Bruiser Projectile (MT_BETABRUISERSHOT)
+    {
+        /* doomednum            */ -1,
+        /* spawnstate           */ S_BRBBALL1,
+        /* spawnhealth          */ 1000,
+        /* seestate             */ S_NULL,
+        /* seesound             */ sfx_firsht,
+        /* reactiontime         */ 8,
+        /* attacksound          */ sfx_None,
+        /* painstate            */ S_NULL,
+        /* painchance           */ 0,
+        /* painsound            */ sfx_None,
+        /* meleestate           */ S_NULL,
+        /* missilestate         */ S_NULL,
+        /* deathstate           */ S_BRBBALLX1,
+        /* xdeathstate          */ S_NULL,
+        /* deathsound           */ sfx_firxpl,
+        /* speed                */ 10 * FRACUNIT,
+        /* radius               */ 6 * FRACUNIT,
+        /* height               */ 8 * FRACUNIT,
+        /* projectilepassheight */ 0,
+        /* mass                 */ 100,
+        /* damage               */ 3,
+        /* activesound          */ sfx_None,
+        /* flags                */ MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY,
+        /* flags2               */ MF2_TRANSLUCENT | MF2_NOFOOTCLIP,
+        /* raisestate           */ S_NULL,
+        /* frames               */ 0,
+        /* blood                */ 0,
+        /* shadowoffset         */ 0,
+        /* name1                */ "beta bruiser projectile",
+        /* plural1              */ "",
+        /* name2                */ "",
+        /* plural2              */ ""
+    },
+
     // MT_VALIANT1
     {
         /* doomednum            */ -1,
@@ -8522,7 +8564,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] =
     {
         /* doomednum            */ -1,
         /* spawnstate           */ S_BETAHEAD_STND,
-        /* spawnhealth          */ 1000,
+        /* spawnhealth          */ 400,
         /* seestate             */ S_BETAHEAD_RUN1,
         /* seesound             */ sfx_cacsit,
         /* reactiontime         */ 8,
@@ -8558,7 +8600,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] =
     {
         /* doomednum            */ -1,
         /* spawnstate           */ S_BETAPOSS_STND,
-        /* spawnhealth          */ 1000,
+        /* spawnhealth          */ 20,
         /* seestate             */ S_BETAPOSS_RUN1,
         /* seesound             */ sfx_posit1,
         /* reactiontime         */ 8,
@@ -8594,7 +8636,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] =
     {
         /* doomednum            */ -1,
         /* spawnstate           */ S_BETASPOS_STND,
-        /* spawnhealth          */ 1000,
+        /* spawnhealth          */ 30,
         /* seestate             */ S_BETASPOS_RUN1,
         /* seesound             */ sfx_posit2,
         /* reactiontime         */ 8,

@@ -236,7 +236,7 @@ void D_StartGameLoop(void)
 void D_StartNetGame(net_gamesettings_t *settings,
                     netgame_startup_callback_t callback)
 {
-    int i;
+    int i = 0;
 
     offsetms = 0;
     recvtic = 0;
@@ -254,7 +254,7 @@ void D_StartNetGame(net_gamesettings_t *settings,
     //
 
 #ifndef WII
-    if (M_CheckParm("-newsync") > 0)
+    if (M_CheckParm("-newsync") > 0 && !beta_style)
         settings->new_sync = 1;
     else
 #endif
@@ -269,7 +269,8 @@ void D_StartNetGame(net_gamesettings_t *settings,
     //
 
 #ifndef WII
-    i = M_CheckParmWithArgs("-extratics", 1);
+    if(!beta_style)
+        i = M_CheckParmWithArgs("-extratics", 1);
 
     if (i > 0)
         settings->extratics = atoi(myargv[i+1]);
@@ -286,7 +287,8 @@ void D_StartNetGame(net_gamesettings_t *settings,
     //
 
 #ifndef WII
-    i = M_CheckParmWithArgs("-dup", 1);
+    if(!beta_style)
+        i = M_CheckParmWithArgs("-dup", 1);
 
     if (i > 0)
         settings->ticdup = atoi(myargv[i+1]);

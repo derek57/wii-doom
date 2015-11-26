@@ -25,6 +25,7 @@
 #include <string.h>
 
 #include "d_player.h"
+#include "doomstat.h"
 #include "m_argv.h"
 
 #include "statdump.h"
@@ -314,7 +315,7 @@ void StatCopy(wbstartstruct_t *stats)
 
 void StatDump(void)
 {
-    int i;
+    int i = 0;
 
     //!
     // @category compat
@@ -325,7 +326,8 @@ void StatDump(void)
     // from statdump.exe (see ctrlapi.zip in the /idgames archive).
     //
 
-    i = M_CheckParmWithArgs("-statdump", 1);
+    if(!beta_style)
+        i = M_CheckParmWithArgs("-statdump", 1);
 
     if (i > 0)
     {

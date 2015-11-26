@@ -66,15 +66,18 @@
 #define WEAPONBOTTOM            128*FRACUNIT
 
 
-dboolean           skippsprinterp = false;
+fixed_t            bulletslope;
 
+dboolean           skippsprinterp = false;
+dboolean           beta_plasma_refired;
+
+int                beta_plasma_counter;
 int                bfglook = 1;
 
 extern dboolean    aiming_help;
 
 extern void        P_Thrust (player_t* player, angle_t angle, fixed_t move);
 
-fixed_t            bulletslope;
 
 // [crispy] weapon recoil {thrust, pitch} values
 // thrust values from prboom-plus/src/p_pspr.c:73-83
@@ -443,7 +446,6 @@ A_WeaponReady
 }
 
 
-
 //
 // A_ReFire
 // The player can re-fire the weapon
@@ -452,16 +454,22 @@ A_WeaponReady
 void A_ReFire
 ( player_t*        player,
   pspdef_t*        psp )
-{
-    
+{    
     // check for fire
     //  (if a weaponchange is pending, let it go through instead)
     if ( (player->cmd.buttons & BT_ATTACK) 
          && player->pendingweapon == wp_nochange
          && player->health)
     {
+        if(beta_style)
+        {
+            if(player->readyweapon == wp_plasma)
+                beta_plasma_refired = true;
+        }
+
         player->refire++;
         P_FireWeapon (player);
+        beta_plasma_refired = false;
     }
     else
     {
@@ -839,8 +847,6 @@ void A_FireOldBFG(player_t *player, pspdef_t *psp)
 // A_FirePlasma
 //
 
-int old_v;
-
 void
 A_FirePlasma
 ( player_t*        player,
@@ -860,14 +866,16 @@ A_FirePlasma
 
     if(beta_style)
     {
-        int t = 0;
-
-        if(old_v == t)
-            t = 1;
-
-        P_SpawnPlayerMissile (player->mo, MT_PLASMA1 + t);
-
-        old_v = t;
+        if(beta_plasma_refired && (beta_plasma_counter % 2))
+        {
+            beta_plasma_counter = 1;
+            P_SpawnPlayerMissile (player->mo, MT_PLASMA2);
+        }
+        else
+        {
+            P_SpawnPlayerMissile (player->mo, MT_PLASMA1);
+            beta_plasma_counter = 0;
+        }
     }
     else
         P_SpawnPlayerMissile (player->mo, MT_PLASMA);
@@ -877,6 +885,9 @@ A_FirePlasma
 
     if(d_thrust)
         A_Recoil (player);
+
+    if(beta_style && player->attackdown)
+        beta_plasma_counter++;
 }
 
 

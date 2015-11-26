@@ -239,14 +239,14 @@ void P_Ticker (void)
     int         i;
     
     // run the tic
-    if (paused || menuactive /*|| consoleactive*/)
+    if ((paused || menuactive) && !beta_style /*|| consoleactive*/)
         return;
                 
     // pause if in menu and at least one tic has been run
     if ( !netgame
          && menuactive
          && !demoplayback
-         && players[consoleplayer].viewz != 1)
+         && players[consoleplayer].viewz != 1 && !beta_style)
     {
         return;
     }

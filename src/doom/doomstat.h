@@ -381,6 +381,7 @@ extern  dboolean         BTSXE3B;
 extern  fixed_t          forwardmove; 
 extern  fixed_t          sidemove; 
 
+extern  int              show_endoom;
 extern  int              display_fps;
 extern  int              turnspeed;
 extern  int              d_colblood;

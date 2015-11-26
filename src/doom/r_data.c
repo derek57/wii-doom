@@ -808,7 +808,8 @@ void R_InitTextures(void)
         int             offset;
 
         if (!(i&63))
-            printf (".");
+            if(!beta_style)
+                printf (".");
 
         if (!i || i == texturelump->sumtextures)
         {
@@ -903,14 +904,11 @@ void R_InitTextures(void)
         i = 0;
         while (fullbright[i].colormask)
         {
-            if (fullbright[i].texture)
-            {
-                int num = R_CheckTextureNumForName(fullbright[i].texture);
+            int num = R_CheckTextureNumForName(fullbright[i].texture);
 
-                if (num != -1)
-                    texturefullbright[num] = fullbright[i].colormask;
-                i++;
-            }
+            if (num != -1)
+                texturefullbright[num] = fullbright[i].colormask;
+            i++;
         }
     }
 
@@ -961,7 +959,8 @@ void R_InitSpriteLumps(void)
         patch_t *patch = W_CacheLumpNum(firstspritelump + i, PU_CACHE);
 
         if (!(i&63))
-            printf (".");
+            if(!beta_style)
+                printf (".");
 
         if (patch)
         {

@@ -140,13 +140,21 @@ HUlib_drawTextLine
     x = l->x;
     for (i=0;i<l->len;i++)
     {
-        unsigned char c = toupper(l->l[i]);
+        unsigned char c = 0;
+
+        if(beta_style)
+            c = l->l[i];
+        else
+            c = toupper(l->l[i]);
 
         if (c != ' '
             && c >= l->sc
-            && c <= '_')
+            && ((c <= '_' && !beta_style) || (c <= '}' && beta_style)))
         {
-            w = SHORT(l->f[c - l->sc]->width);
+            if(beta_style)
+                w = SHORT(l->f[c - l->sc]->width) + 1;
+            else
+                w = SHORT(l->f[c - l->sc]->width);
             if (x+w > ORIGWIDTH)    // CHANGED FOR HIRES
                 break;
             if(font_shadow == 1)

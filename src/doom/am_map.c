@@ -240,6 +240,7 @@ mline_t thintriangle_guy[] = {
 
 
 cheatseq_t cheat_amap = CHEAT("iddt", 0);
+cheatseq_t cheat_amap_beta = CHEAT("eek", 0);
 
 
 int                cheating = 0;
@@ -860,7 +861,12 @@ dboolean AM_Responder
             rc = false;
         }
 
-        if (!deathmatch && cht_CheckCheat(&cheat_amap, ev->data2))
+        if (!deathmatch && cht_CheckCheat(&cheat_amap, ev->data2) && !beta_style)
+        {
+            rc = false;
+            cheating = (cheating+1) % 3;
+        }
+        else if (!deathmatch && cht_CheckCheat(&cheat_amap_beta, ev->data2) && beta_style)
         {
             rc = false;
             cheating = (cheating+1) % 3;

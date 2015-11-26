@@ -254,7 +254,7 @@ void C_Warning(char *string, ...)
     M_vsnprintf(buffer, sizeof(buffer) - 1, string, argptr);
     va_end(argptr);
 
-    if (consolestrings && strcasecmp(console[consolestrings - 1].string, buffer))
+    if (consolestrings && !M_StringCompare(console[consolestrings - 1].string, buffer))
     {
 #ifdef BOOM_ZONE_HANDLING
         console = Z_Realloc(console, (consolestrings + 1) * sizeof(*console), PU_STATIC, NULL);
@@ -279,7 +279,7 @@ void C_PlayerMessage(char *string, ...)
     M_vsnprintf(buffer, sizeof(buffer) - 1, string, argptr);
     va_end(argptr);
 
-    if (consolestrings && !strcasecmp(console[consolestrings - 1].string, buffer))
+    if (consolestrings && M_StringCompare(console[consolestrings - 1].string, buffer))
     {
         M_snprintf(buffer, sizeof(buffer), "%s (2)", console[consolestrings - 1].string);
         console[consolestrings - 1].string = strdup(buffer);
@@ -318,7 +318,7 @@ void C_PlayerMessage(char *string, ...)
 
 void C_AddConsoleDivider(void)
 {
-    if (!consolestrings || strcasecmp(console[consolestrings - 1].string, DIVIDER))
+    if (!consolestrings || !M_StringCompare(console[consolestrings - 1].string, DIVIDER))
         C_Print(dividerstring, DIVIDER);
 }
 
@@ -347,32 +347,33 @@ static struct
     { '\"', 's',  -1 }, { '\'', 'a',  -1 }, { '\'', 'c',  -1 }, { '\'', 'd',  -1 },
     { '\'', 'e',  -1 }, { '\'', 'g',  -1 }, { '\'', 'j',  -2 }, { '\'', 'o',  -1 },
     { '\"', 'q',  -1 }, { '\'', 's',  -1 }, { '.',  '\\', -1 }, { '.',  '7',  -1 },
-    { '/',  'o',  -1 }, { ':', '\\',  -1 }, { '_',  'f',  -1 }, { '0',  ',',  -1 },
-    { '0',  'j',  -2 }, { '1',  '\"', -1 }, { '1',  '\'', -1 }, { '1',  'j',  -2 },
-    { '2',  'j',  -2 }, { '3',  ',',  -1 }, { '3',  'j',  -2 }, { '4',  'j',  -2 },
-    { '5',  ',',  -1 }, { '5',  'j',  -2 }, { '6',  ',',  -1 }, { '6',  'j',  -2 },
-    { '7',  ',',  -2 }, { '7',  'j',  -2 }, { '8',  ',',  -1 }, { '8',  'j',  -2 },
-    { '9',  ',',  -1 }, { '9',  'j',  -2 }, { 'F',  '.',  -1 }, { 'F',  ',',  -1 },
-    { 'L',  '\\', -1 }, { 'L',  '\"', -1 }, { 'L',  '\'', -1 }, { 'P',  '.',  -1 },
-    { 'P',  ',',  -1 }, { 'T',  '.',  -1 }, { 'T',  ',',  -1 }, { 'V',  '.',  -1 },
-    { 'V',  ',',  -1 }, { 'Y',  '.',  -1 }, { 'Y',  ',',  -1 }, { 'a',  '\"', -1 },
-    { 'a',  '\'', -1 }, { 'a',  'j',  -2 }, { 'b',  ',',  -1 }, { 'b',  '\"', -1 },
-    { 'b',  '\\', -1 }, { 'b',  '\'', -1 }, { 'b',  'j',  -2 }, { 'c',  '\\', -1 },
-    { 'c',  ',',  -1 }, { 'c',  '\"', -1 }, { 'c',  '\'', -1 }, { 'c',  'j',  -2 },
-    { 'd',  'j',  -2 }, { 'e',  '\\', -1 }, { 'e',  ',',  -1 }, { 'e',  '\"', -1 },
-    { 'e',  '\'', -1 }, { 'e',  '_',  -1 }, { 'e',  'j',  -2 }, { 'f',  ' ',  -1 },
-    { 'f',  ',',  -2 }, { 'f',  '_',  -1 }, { 'f',  'a',  -1 }, { 'f',  'j',  -2 },
-    { 'h',  '\\', -1 }, { 'h',  '\"', -1 }, { 'h',  '\'', -1 }, { 'h',  'j',  -2 },
-    { 'i',  'j',  -2 }, { 'k',  'j',  -2 }, { 'l',  'j',  -2 }, { 'm',  '\"', -1 },
-    { 'm',  '\\', -1 }, { 'm',  '\'', -1 }, { 'm',  'j',  -2 }, { 'n',  '\\', -1 },
-    { 'n',  '\"', -1 }, { 'n',  '\'', -1 }, { 'n',  'j',  -2 }, { 'o',  '\\', -1 },
-    { 'o',  ',',  -1 }, { 'o',  '\"', -1 }, { 'o',  '\'', -1 }, { 'o',  'j',  -2 },
-    { 'p',  '\\', -1 }, { 'p',  ',',  -1 }, { 'p',  '\"', -1 }, { 'p',  '\'', -1 },
-    { 'p',  'j',  -2 }, { 'r',  ' ',  -1 }, { 'r',  '\\', -1 }, { 'r',  '.',  -2 },
-    { 'r',  ',',  -2 }, { 'r',  '\"', -1 }, { 'r',  '\'', -1 }, { 'r',  '_',  -1 },
-    { 'r',  'a',  -1 }, { 'r',  'j',  -2 }, { 's',  ',',  -1 }, { 's',  'j',  -2 },
-    { 't',  'j',  -2 }, { 'u',  'j',  -2 }, { 'v',  ',',  -1 }, { 'v',  'j',  -2 },
-    { 'w',  'j',  -2 }, { 'x',  'j',  -2 }, { 'z',  'j',  -2 }, {  0 ,   0 ,   0 }
+    { ',',  '4',  -1 }, { '/',  'o',  -1 }, { ':', '\\',  -1 }, { '_',  'f',  -1 },
+    { '0',  ',',  -1 }, { '0',  'j',  -2 }, { '1',  '\"', -1 }, { '1',  '\'', -1 },
+    { '1',  'j',  -2 }, { '2',  'j',  -2 }, { '3',  ',',  -1 }, { '3',  'j',  -2 },
+    { '4',  'j',  -2 }, { '5',  ',',  -1 }, { '5',  'j',  -2 }, { '6',  ',',  -1 },
+    { '6',  'j',  -2 }, { '7',  ',',  -2 }, { '7',  'j',  -2 }, { '8',  ',',  -1 },
+    { '8',  'j',  -2 }, { '9',  ',',  -1 }, { '9',  'j',  -2 }, { 'F',  '.',  -1 },
+    { 'F',  ',',  -1 }, { 'L',  '\\', -1 }, { 'L',  '\"', -1 }, { 'L',  '\'', -1 },
+    { 'P',  '.',  -1 }, { 'P',  ',',  -1 }, { 'T',  '.',  -1 }, { 'T',  ',',  -1 },
+    { 'V',  '.',  -1 }, { 'V',  ',',  -1 }, { 'Y',  '.',  -1 }, { 'Y',  ',',  -1 },
+    { 'a',  '\"', -1 }, { 'a',  '\'', -1 }, { 'a',  'j',  -2 }, { 'b',  ',',  -1 },
+    { 'b',  '\"', -1 }, { 'b',  '\\', -1 }, { 'b',  '\'', -1 }, { 'b',  'j',  -2 },
+    { 'c',  '\\', -1 }, { 'c',  ',',  -1 }, { 'c',  '\"', -1 }, { 'c',  '\'', -1 },
+    { 'c',  'j',  -2 }, { 'd',  'j',  -2 }, { 'e',  '\\', -1 }, { 'e',  ',',  -1 },
+    { 'e',  '\"', -1 }, { 'e',  '\'', -1 }, { 'e',  '_',  -1 }, { 'e',  'j',  -2 },
+    { 'f',  ' ',  -1 }, { 'f',  ',',  -2 }, { 'f',  '_',  -1 }, { 'f',  'a',  -1 },
+    { 'f',  'j',  -2 }, { 'h',  '\\', -1 }, { 'h',  '\"', -1 }, { 'h',  '\'', -1 },
+    { 'h',  'j',  -2 }, { 'i',  'j',  -2 }, { 'k',  'j',  -2 }, { 'l',  'j',  -2 },
+    { 'm',  '\"', -1 }, { 'm',  '\\', -1 }, { 'm',  '\'', -1 }, { 'm',  'j',  -2 },
+    { 'n',  '\\', -1 }, { 'n',  '\"', -1 }, { 'n',  '\'', -1 }, { 'n',  'j',  -2 },
+    { 'o',  '\\', -1 }, { 'o',  ',',  -1 }, { 'o',  '\"', -1 }, { 'o',  '\'', -1 },
+    { 'o',  'j',  -2 }, { 'p',  '\\', -1 }, { 'p',  ',',  -1 }, { 'p',  '\"', -1 },
+    { 'p',  '\'', -1 }, { 'p',  'j',  -2 }, { 'r',  ' ',  -1 }, { 'r',  '\\', -1 },
+    { 'r',  '.',  -2 }, { 'r',  ',',  -2 }, { 'r',  '\"', -1 }, { 'r',  '\'', -1 },
+    { 'r',  '_',  -1 }, { 'r',  'a',  -1 }, { 'r',  'j',  -2 }, { 's',  ',',  -1 },
+    { 's',  'j',  -2 }, { 't',  'j',  -2 }, { 'u',  'j',  -2 }, { 'v',  ',',  -1 },
+    { 'v',  'j',  -2 }, { 'w',  'j',  -2 }, { 'x',  'j',  -2 }, { 'z',  'j',  -2 },
+    {  0 ,   0 ,   0 }
 };
 
 static int C_TextWidth(char *text)
@@ -616,6 +617,8 @@ static void C_DrawConsoleText(int x, int y, char *text, int color1, int color2, 
                     patch = lsquote;
                 else if (letter == '\"')
                     patch = ldquote;
+                else if (letter == '\n')
+                    I_Error("Wrong letter detected.");
             }
 
             if (!italics)
@@ -1124,7 +1127,7 @@ void C_Error(char *string, ...)
     M_vsnprintf(buffer, sizeof(buffer) - 1, string, argptr);
     va_end(argptr);
 
-    if (consolestrings && strcasecmp(console[consolestrings - 1].string, buffer))
+    if (consolestrings && !M_StringCompare(console[consolestrings - 1].string, buffer))
     {
 #ifdef BOOM_ZONE_HANDLING
         console = Z_Realloc(console, (consolestrings + 1) * sizeof(*console), PU_STATIC, NULL);
@@ -1149,7 +1152,7 @@ void C_Network(char *string, ...)
     M_vsnprintf(buffer, sizeof(buffer) - 1, string, argptr);
     va_end(argptr);
 
-    if (consolestrings && strcasecmp(console[consolestrings - 1].string, buffer))
+    if (consolestrings && !M_StringCompare(console[consolestrings - 1].string, buffer))
     {
 #ifdef BOOM_ZONE_HANDLING
         console = Z_Realloc(console, (consolestrings + 1) * sizeof(*console), PU_STATIC, NULL);

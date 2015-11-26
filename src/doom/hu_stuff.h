@@ -39,9 +39,11 @@
 //
 #define HU_FONTSTART        '!'        // the first font characters
 #define HU_FONTEND          '_'        // the last font characters
+#define HU_FONTENDBETA      '}'
 
 // Calculate # of glyphs in font.
 #define HU_FONTSIZE         (HU_FONTEND - HU_FONTSTART + 1)        
+#define HU_FONTSIZEBETA     (HU_FONTENDBETA - HU_FONTSTART + 1)        
 
 #define HU_BROADCAST        5
 
@@ -78,6 +80,8 @@ extern char *playername;
 void HU_NewLevel();
 
 void HU_DrawStats(void);
+
+void HU_DrawStatus(void);
 
 void HU_PlayerMessage(char *message, dboolean ingame);
 

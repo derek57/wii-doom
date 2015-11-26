@@ -978,7 +978,26 @@ char *Key2String (int ch)
     return "?";                // Everything else
 }
 
-char                       *creditstext;
+// SHAREWARE ONLY HAS "NUKAGE1" FLAT
+char *registered_flats[4] = {
+    "LAVA1",
+    "FWATER1",
+    "NUKAGE1",
+    "BLOOD1"
+};
+
+char *commercial_flats[9] = {
+    "LAVA1",
+    "FWATER1",
+    "NUKAGE1",
+    "BLOOD1",
+    "SLIME01",
+    "SLIME05",
+    "SLIME06",
+    "SLIME07",
+    "SLIME08"
+};
+
 char                       savegamestrings[10][SAVESTRINGSIZE];
 char                       endstring[160];
 /*
@@ -1020,11 +1039,12 @@ int                        musnum = 1;
 int                        cheeting;
 int                        coordinates_info = 0;
 int                        version_info = 0;
-int                        key_controls_start_in_cfg_at_pos = 94;
 #ifdef WII
-int                        key_controls_end_in_cfg_at_pos = 108;
-#else
+int                        key_controls_start_in_cfg_at_pos = 96;
 int                        key_controls_end_in_cfg_at_pos = 110;
+#else
+int                        key_controls_start_in_cfg_at_pos = 95;
+int                        key_controls_end_in_cfg_at_pos = 111;
 #endif
 int                        tracknum = 1;
 int                        epi = 1;
@@ -1038,6 +1058,7 @@ int                        warpepi = 2;
 int                        warplev = 2;
 int                        height;
 int                        expansion = 0;
+int                        flat_index;
 
 // -1 = no quicksave slot picked!
 int                        quickSaveSlot;
@@ -1283,6 +1304,7 @@ void M_NudgeCorpses(int choice);
 void M_Slide(int choice);
 void M_Smearblood(int choice);
 void M_ColoredCorpses(int choice);
+void M_EndoomScreen(int choice);
 void M_NoMonsters(int choice);
 void M_AutomapOverlay(int choice);
 
@@ -1403,6 +1425,33 @@ menu_t  MainDef =
     main_end,
     NULL,
     MainGameMenu,
+    M_DrawMainMenu,
+    122,74,
+    0
+};
+
+enum
+{
+    demo_map_1 = 0,
+    demo_map_2,
+    demo_map_3,
+    demo_quit,
+    beta_main_end
+} beta_main_e;
+
+menuitem_t BetaMainGameMenu[]=
+{
+    {1,"Demo Map 1",M_NewGame,'1'},
+    {1,"Demo Map 2",M_NewGame,'2'},
+    {1,"Demo Map 3",M_NewGame,'3'},
+    {1,"Quit Game",M_QuitDOOM,'q'}
+};
+
+menu_t  BetaMainDef =
+{
+    beta_main_end,
+    NULL,
+    BetaMainGameMenu,
     M_DrawMainMenu,
     122,74,
     0
@@ -1970,7 +2019,6 @@ enum
     system_ticker,
     system_hom,
     system_replace,
-    system_mem,
     system_end
 } system_e;
 
@@ -1979,8 +2027,7 @@ menuitem_t SystemMenu[]=
     {2,"FPS Counter",M_FPS,'f'},
     {2,"Display Ticker",M_DisplayTicker,'t'},
     {2,"Hall of Mirrors Detector",M_HOMDetector,'h'},
-    {2,"Replace Missing Textures",M_ReplaceMissing,'r'},
-    {2,"Show Memory Usage",M_MemoryUsage,'m'}
+    {2,"Replace Missing Textures",M_ReplaceMissing,'r'}
 };
 
 menu_t  SystemDef =
@@ -2050,7 +2097,7 @@ enum
     game2_footclip,
     game2_splash,
     game2_swirl,
-    game2_prbeta,
+    game2_endoom,
     game2_corpses,
     game2_secrets,
     game2_trails,
@@ -2069,7 +2116,7 @@ menuitem_t GameMenu2[]=
     {2,"HERETIC FOOTCLIPS",M_Footclip,'c'},
     {2,"HERETIC LIQUID SPLASH",M_Splash,'l'},
     {2,"SWIRLING WATER HACK",M_Swirl,'w'},
-    {2,"PRE-RELEASE BETA MODE",M_Beta,'b'},
+    {2,"Show Endoom Screen on quit game",M_EndoomScreen,'q'},
     {2,"RANDOMLY FLIP CORPSES & GUNS",M_Corpses,'d'},
     {2,"SHOW REVEALED SECRETS",M_Secrets,'z'},
     {2,"ROCKET TRAILS",M_Trails,'r'},
@@ -2196,6 +2243,9 @@ enum
     game5_slide,
     game5_smearblood,
     game5_coloredcorpses,
+#ifdef WII
+    game5_prbeta,
+#endif
     game5_end
 } game5_e;
 
@@ -2212,6 +2262,9 @@ menuitem_t GameMenu5[]=
     {2,"Corpses slide caused by explosions",M_Slide,'x'},
     {2,"",M_Smearblood,'b'},
     {2,"Randomly colored player corpses",M_ColoredCorpses,'r'},
+#ifdef WII
+    {2,"PRE-RELEASE BETA MODE",M_Beta,'b'},
+#endif
 };
 
 menu_t  GameDef5 =
@@ -2231,6 +2284,7 @@ enum
     debug_sound,
     debug_restart,
     debug_opl,
+    debug_mem,
     debug_end
 } debug_e;
 
@@ -2240,7 +2294,8 @@ menuitem_t DebugMenu[]=
     {2,"Show Version",M_Version,'v'},
     {2,"Show Sound Info",M_SoundInfo,'s'},
     {2,"Restart Current MAP-Music Track",M_RestartSong,'r'},
-    {2,"Show OPL Developer Info",M_OPLDev,'o'}
+    {2,"Show OPL Developer Info",M_OPLDev,'o'},
+    {2,"Show Memory Usage",M_MemoryUsage,'m'}
 };
 
 menu_t  DebugDef =
@@ -2394,23 +2449,13 @@ menu_t  RecordDef =
 //
 // M_TextWrite
 //
-void M_TextWrite (void)
+void M_TextWrite (int x, int y, char* ch)
 {    
     int         w;
     signed int  count;
-    char*       ch;
-    int         cx;
-    int         cy;
-    
-    // erase the entire screen to a tiled background
-    V_DrawDistortedBackground(gamemode == commercial ? "SLIME05" : "NUKAGE1", I_VideoBuffer);
 
-    // draw some of the text onto the screen
-    cx = 0;
-    cy = 0;
-    ch = creditstext;
-        
     count = ((signed int) creditscount - 10) / TEXTSPEED;
+
     if (count < 0)
         count = 0;
     for ( ; count ; count-- )
@@ -2422,27 +2467,27 @@ void M_TextWrite (void)
 
         if (c == '\n')
         {
-            cx = 0;
-            cy += 10;
+            x = 0;
+            y += 8;
             continue;
         }
                 
         c = toupper(c) - HU_FONTSTART;
         if (c < 0 || c> HU_FONTSIZE)
         {
-            cx += 4;
+            x += 4;
             continue;
         }
                 
         w = SHORT (hu_font[c]->width);
-        if (cx+w > ORIGWIDTH)         // CHANGED FOR HIRES
+        if (x+w > ORIGWIDTH)         // CHANGED FOR HIRES
             break;
         
         if(font_shadow == 1)
-            V_DrawPatchWithShadow(cx, cy, hu_font[c], false);
+            V_DrawPatchWithShadow(x, y, hu_font[c], false);
         else
-            V_DrawPatch(cx, cy, hu_font[c]);
-        cx+=w;
+            V_DrawPatch(x, y, hu_font[c]);
+        x+=w;
     }
         
 }
@@ -2918,11 +2963,75 @@ void M_DrawReadThis2(void)
 
 void M_DrawCredits(void)
 {
+    int x;
+    char *string;
+
     increditscreen = true;
 
-    creditscount++;
+    // erase the entire screen to a tiled background
+    V_DrawDistortedBackground(gamemode == commercial ?
+            commercial_flats[flat_index] : registered_flats[flat_index], I_VideoBuffer);
 
-    M_TextWrite();
+    dp_translation = crx[CRX_GOLD];
+    string = "IT ALSO IS THEIR WORK, SO...";
+    x = ORIGWIDTH/2 - M_StringWidth(string) / 2;
+    M_TextWrite(x, 0, string);
+
+    string = "...I'D LIKE TO SAY 'THANKS', SENDING GREETS AND...";
+    x = ORIGWIDTH/2 - M_StringWidth(string) / 2;
+    M_TextWrite(x, 8, string);
+    V_ClearDPTranslation();
+
+    string = "...CREDITS FOR THIS PORT OUT TO:";
+    x = ORIGWIDTH/2 - M_StringWidth(string) / 2;
+
+    dp_translation = crx[CRX_GREEN];
+    M_TextWrite(x, 24, string);
+    V_ClearDPTranslation();
+
+    x = ORIGWIDTH/2 - M_StringWidth(CREDITTEXT1) / 2;
+    M_TextWrite(x, 40, CREDITTEXT1);
+
+    x = ORIGWIDTH/2 - M_StringWidth(CREDITTEXT2) / 2;
+    M_TextWrite(x, 64, CREDITTEXT2);
+
+    x = ORIGWIDTH/2 - M_StringWidth(CREDITTEXT3) / 2;
+    M_TextWrite(x, 88, CREDITTEXT3);
+
+    x = ORIGWIDTH/2 - M_StringWidth(CREDITTEXT4) / 2;
+    M_TextWrite(x, 112, CREDITTEXT4);
+
+    x = ORIGWIDTH/2 - M_StringWidth(CREDITTEXT5) / 2;
+    M_TextWrite(x, 136, CREDITTEXT5);
+
+    x = ORIGWIDTH/2 - M_StringWidth(CREDITTEXT6) / 2;
+    M_TextWrite(x, 160, CREDITTEXT6);
+
+    x = ORIGWIDTH/2 - M_StringWidth(CREDITTEXT7) / 2;
+    M_TextWrite(x, 184, CREDITTEXT7);
+
+    dp_translation = crx[CRX_GRAY];
+    x = ORIGWIDTH/2 - M_StringWidth(CREDITURL1) / 2;
+    M_TextWrite(x, 48, CREDITURL1);
+
+    x = ORIGWIDTH/2 - M_StringWidth(CREDITURL2) / 2;
+    M_TextWrite(x, 72, CREDITURL2);
+
+    x = ORIGWIDTH/2 - M_StringWidth(CREDITURL3) / 2;
+    M_TextWrite(x, 96, CREDITURL3);
+
+    x = ORIGWIDTH/2 - M_StringWidth(CREDITURL4) / 2;
+    M_TextWrite(x, 120, CREDITURL4);
+
+    x = ORIGWIDTH/2 - M_StringWidth(CREDITURL5) / 2;
+    M_TextWrite(x, 144, CREDITURL5);
+
+    x = ORIGWIDTH/2 - M_StringWidth(CREDITURL6) / 2;
+    M_TextWrite(x, 168, CREDITURL6);
+
+    x = ORIGWIDTH/2 - M_StringWidth(CREDITURL7) / 2;
+    M_TextWrite(x, 192, CREDITURL7);
+    V_ClearDPTranslation();
 
     V_DrawPatchWithShadow(CreditsDef.x + CURSORXOFF_SMALL, CreditsDef.y + 180,
             W_CacheLumpName(skullNameSmall[whichSkull], PU_CACHE), false);
@@ -3347,7 +3456,6 @@ void M_DrawMainMenu(void)
 
 
 
-
 //
 // M_NewGame
 //
@@ -3369,10 +3477,24 @@ void M_NewGame(int choice)
 
     // Chex Quest disabled the episode select screen, as did Doom II.
 
-    if (fsize == 12361532)
-        M_SetupNextMenu(&NewDef);
+    if(!beta_style)
+    {
+        if (fsize == 12361532)
+            M_SetupNextMenu(&NewDef);
+        else
+            M_SetupNextMenu(gamemode == commercial ? (nerve_pwad ? &ExpDef : &NewDef) : &EpiDef);
+    }
     else
-        M_SetupNextMenu(gamemode == commercial ? (nerve_pwad ? &ExpDef : &NewDef) : &EpiDef);
+    {
+        if(itemOn == 0)
+            G_InitNew (startskill, 1, 2);
+        else if(itemOn == 1)
+            G_InitNew (startskill, 3, 5);
+        else if(itemOn == 2)
+            G_InitNew (startskill, 2, 2);
+
+//        M_ClearMenus ();
+    }
 }
 
 
@@ -3959,7 +4081,7 @@ void M_DrawScreen(void)
     else
     {
         dp_translation = crx[CRX_BLUE];
-        M_WriteText(ScreenDef.x + 146, ScreenDef.y + 98, "DISKETTE");
+        M_WriteText(ScreenDef.x + 126, ScreenDef.y + 98, "FLOPPY DISK");
         V_ClearDPTranslation();
     }
 
@@ -4317,16 +4439,16 @@ void M_DrawGame2(void)
         V_ClearDPTranslation();
     }
 
-    if(beta_style_mode)
+    if(show_endoom)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef2.x + 216, GameDef2.y + 58, "ON");
+        M_WriteText(GameDef2.x + 266, GameDef2.y + 58, "ON");
         V_ClearDPTranslation();
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef2.x + 208, GameDef2.y + 58, "OFF");
+        M_WriteText(GameDef2.x + 258, GameDef2.y + 58, "OFF");
         V_ClearDPTranslation();
     }
 
@@ -4428,10 +4550,6 @@ void M_DrawGame2(void)
         if(itemOn == 0)
         {
             string = "YOU MUST START A NEW GAME TO TAKE EFFECT.";
-        }
-        else if(itemOn == 6)
-        {
-            string = "YOU MUST QUIT AND RESTART TO TAKE EFFECT.";
         }
         x = ORIGWIDTH/2 - M_StringWidth(string) / 2;
         M_WriteText(x, GameDef2.y + 138, string);
@@ -5049,6 +5167,34 @@ void M_DrawGame5(void)
         M_WriteText(GameDef5.x + 258, GameDef5.y + 98, "OFF");
         V_ClearDPTranslation();
     }
+#ifdef WII
+    if(beta_style_mode)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(GameDef5.x + 216, GameDef5.y + 108, "ON");
+        V_ClearDPTranslation();
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(GameDef5.x + 208, GameDef5.y + 108, "OFF");
+        V_ClearDPTranslation();
+    }
+
+    if(whichSkull == 1)
+    {
+        int x;
+        char *string = "";
+        dp_translation = crx[CRX_GOLD];
+        if(itemOn == 6)
+        {
+            string = "YOU MUST QUIT AND RESTART TO TAKE EFFECT.";
+        }
+        x = ORIGWIDTH/2 - M_StringWidth(string) / 2;
+        M_WriteText(x, GameDef5.y + 138, string);
+        V_ClearDPTranslation();
+    }
+#endif
 }
 
 void DetectState(void)
@@ -5698,6 +5844,9 @@ void M_FinishReadThis(int choice)
 
 void M_Credits(int choice)
 {
+    creditscount = 0;
+    flat_index = (gamemode == commercial ? (rand() % 9) : (rand() % 4));
+
     M_SetupNextMenu(&CreditsDef);
 }
 
@@ -5776,11 +5925,16 @@ static char *M_SelectEndMessage(void)
 
 void M_QuitDOOM(int choice)
 {
-    sprintf(endstring,
-            "%s\n\n" DOSY,
-            M_SelectEndMessage());
+    if(!beta_style)
+    {
+        sprintf(endstring,
+                "%s\n\n" DOSY,
+                M_SelectEndMessage());
 
-    M_StartMessage(endstring,M_QuitResponse,true);
+        M_StartMessage(endstring,M_QuitResponse,true);
+    }
+    else
+        I_Quit();
 }
 
 
@@ -6574,7 +6728,8 @@ dboolean M_Responder (event_t* ev)
     }
 
     if ((devparm && key == key_menu_help) ||
-        (key != 0 && key == key_menu_screenshot))
+        (key != 0 && key == key_menu_screenshot && !beta_style) ||
+        (key != 0 && key == key_menu_screenshot_beta && beta_style))
     {
         G_ScreenShot ();
         return true;
@@ -6582,7 +6737,7 @@ dboolean M_Responder (event_t* ev)
 
 #ifndef WII
     // F-Keys
-    if (!menuactive)
+    if (!menuactive && !beta_style)
     {
         if (key == key_menu_decscreen)      // Screen size down
         {
@@ -6886,6 +7041,13 @@ dboolean M_Responder (event_t* ev)
         else if(increditscreen)
         {
             currentMenu = currentMenu->prevMenu;
+
+            if(screenSize < 8)
+            {
+                if(usergame)
+                    ST_doRefresh();
+            }
+
             S_StartSound(NULL,sfx_swtchx);
         }
         return true;
@@ -6920,6 +7082,15 @@ dboolean M_Responder (event_t* ev)
             currentMenu = currentMenu->prevMenu;
             itemOn = currentMenu->lastOn;
             S_StartSound(NULL,sfx_swtchn);
+
+            if(increditscreen)
+            {
+                if(screenSize < 8)
+                {
+                    if(usergame)
+                        ST_doRefresh();
+                }
+            }
         }
         return true;
     }
@@ -6969,7 +7140,12 @@ void M_StartControlPanel (void)
         return;
 
     menuactive = 1;
-    currentMenu = &MainDef;         // JDC
+
+    if(!beta_style)
+        currentMenu = &MainDef;         // JDC
+    else
+        currentMenu = &BetaMainDef;         // JDC
+
     itemOn = currentMenu->lastOn;   // JDC
 
     blurred = false;
@@ -7126,16 +7302,18 @@ void M_Drawer (void)
             M_WriteText(299, 5, flight_counter);
         }
     }
-
+/*
     // DISPLAYS BLINKING "BETA" MESSAGE
     if ((fsize == 4261144 || fsize == 4271324 || fsize == 4211660 || beta_style) &&
             (!menuactive && (leveltime & 16)) && gamestate == GS_LEVEL &&
             consoleheight == 0)
     {
-        M_WriteText(140, 12, "BETA");
+        char *string = "PR BETA MODE ENABLED";
+        int x = ORIGWIDTH/2 - M_StringWidth(string) / 2;
+        M_WriteText(x, 12, string);
         BorderNeedRefresh = true;
     }
-
+*/
     if(coordinates_info)
     {
         if(gamestate == GS_LEVEL)
@@ -7385,6 +7563,12 @@ void M_ClearMenus (void)
 
     paused = false;
 
+    if(screenSize < 8)
+    {
+        if(usergame)
+            ST_doRefresh();
+    }
+
     // if (!netgame && usergame && paused)
     //       sendpause = true;
 }
@@ -7415,12 +7599,8 @@ void M_Ticker (void)
 
     // advance animation
 
-    creditstext = CREDITTEXT;
-
-    if (creditscount>strlen (creditstext)*TEXTSPEED + TEXTWAIT)
-    {
-        creditscount = 0;
-    }
+    if (increditscreen)
+        creditscount++;
 }
 
 
@@ -7472,7 +7652,8 @@ void M_Init (void)
         NewDef.prevMenu = (nerve_pwad ? &ExpDef : &MainDef);
 
 #ifndef WII
-    opldev = M_CheckParm("-opldev") > 0;
+    if(!beta_style)
+        opldev = M_CheckParm("-opldev") > 0;
 #endif
 }
 
@@ -7484,11 +7665,17 @@ void M_God(int choice)
         if (players[consoleplayer].mo)
             players[consoleplayer].mo->health = 100;
         players[consoleplayer].health = 100;
-        players[consoleplayer].message = s_STSTR_DQDON;
+        if(beta_style)
+            players[consoleplayer].message = STSTR_DQDONBETA;
+        else
+            players[consoleplayer].message = s_STSTR_DQDON;
     }
     else
     {
-        players[consoleplayer].message = s_STSTR_DQDOFF;
+        if(beta_style)
+            players[consoleplayer].message = STSTR_DQDOFFBETA;
+        else
+            players[consoleplayer].message = s_STSTR_DQDOFF;
     }
 }
 
@@ -7497,13 +7684,19 @@ void M_Noclip(int choice)
     players[consoleplayer].cheats ^= CF_NOCLIP;
     if (players[consoleplayer].cheats & CF_NOCLIP)
     {
-        players[consoleplayer].message = s_STSTR_NCON;
+        if(beta_style)
+            players[consoleplayer].message = STSTR_NCONBETA;
+        else
+            players[consoleplayer].message = s_STSTR_NCON;
         players[consoleplayer].mo->flags |= MF_NOCLIP;
         noclip_on = true;
     }
     else
     {
-        players[consoleplayer].message = s_STSTR_NCOFF;
+        if(beta_style)
+            players[consoleplayer].message = STSTR_NCOFFBETA;
+        else
+            players[consoleplayer].message = s_STSTR_NCOFF;
         players[consoleplayer].mo->flags &= ~MF_NOCLIP;
         noclip_on = false;
     }
@@ -7741,6 +7934,8 @@ void M_ItemsA(int choice)
         players[consoleplayer].powers[4] = 1;
         players[consoleplayer].powers[5] = INFRATICS;
         players[consoleplayer].powers[6] = FLIGHTTICS;
+        players[consoleplayer].mo->flags2 |= MF2_FLY;
+        players[consoleplayer].mo->flags |= MF_NOGRAVITY;
         player->cheats ^= CF_NOTARGET;
 
         if (!player->backpack)
@@ -7767,6 +7962,8 @@ void M_ItemsA(int choice)
         players[consoleplayer].powers[4] = 0;
         players[consoleplayer].powers[5] = 0;
         players[consoleplayer].powers[6] = 0;
+        players[consoleplayer].mo->flags2 &= ~MF2_FLY;
+        players[consoleplayer].mo->flags &= ~MF_NOGRAVITY;
         player->cheats &= ~CF_NOTARGET;
 
         if(beta_style)
@@ -10096,6 +10293,23 @@ void M_ColoredCorpses(int choice)
     }
 }
 
+void M_EndoomScreen(int choice)
+{
+    switch(choice)
+    {
+    case 0:
+        if (show_endoom)
+            show_endoom = 0;
+        players[consoleplayer].message = "Endoom Screen will be shown on quit";
+        break;
+    case 1:
+        if (!show_endoom)
+            show_endoom = 1;
+        players[consoleplayer].message = "Endoom Screen won't be shown on quit";
+        break;
+    }
+}
+
 void M_GoreAmount(int choice)
 {
     if(d_maxgore)
@@ -10212,19 +10426,6 @@ void M_DrawSystem(void)
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(SystemDef.x + 190, SystemDef.y + 28, "OFF");
-        V_ClearDPTranslation();
-    }
-
-    if(memory_usage)
-    {
-        dp_translation = crx[CRX_GREEN];
-        M_WriteText(SystemDef.x + 198, SystemDef.y + 38, "ON");
-        V_ClearDPTranslation();
-    }
-    else
-    {
-        dp_translation = crx[CRX_DARK];
-        M_WriteText(SystemDef.x + 190, SystemDef.y + 38, "OFF");
         V_ClearDPTranslation();
     }
 }
@@ -10408,6 +10609,19 @@ void M_DrawDebug(void)
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(DebugDef.x + 169, DebugDef.y + 38, "OFF");
+        V_ClearDPTranslation();
+    }
+
+    if(memory_usage)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(DebugDef.x + 177, DebugDef.y + 48, "ON");
+        V_ClearDPTranslation();
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(DebugDef.x + 169, DebugDef.y + 48, "OFF");
         V_ClearDPTranslation();
     }
 }

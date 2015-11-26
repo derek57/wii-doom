@@ -524,13 +524,19 @@ P_TouchSpecialThing
       case SPR_ARM1:
         if (!P_GiveArmor (player, green_armor_class))
             return;
-        player->message = s_GOTARMOR;
+        if(beta_style)
+            player->message = GOTARMORBETA;
+        else
+            player->message = s_GOTARMOR;
         break;
                 
       case SPR_ARM2:
         if (!P_GiveArmor (player, blue_armor_class))
             return;
-        player->message = s_GOTMEGA;
+        if(beta_style)
+            player->message = GOTMEGABETA;
+        else
+            player->message = s_GOTMEGA;
         break;
         
         // bonus items
@@ -572,7 +578,10 @@ P_TouchSpecialThing
             if (player->health > max_soul)
                 player->health = max_soul;
             player->mo->health = player->health;
-            player->message = s_GOTSUPER;
+            if(beta_style)
+                player->message = GOTSUPERBETA;
+            else
+                player->message = s_GOTSUPER;
         }
 
         if(fsize != 10396254 && fsize != 10399316 && fsize != 10401760 &&
@@ -608,7 +617,10 @@ P_TouchSpecialThing
       case SPR_BKEY:
         if (player->cards[it_bluecard] <= 0)
         {
-            player->message = s_GOTBLUECARD;
+            if(beta_style)
+                player->message = GOTBLUECARDBETA;
+            else
+                player->message = s_GOTBLUECARD;
             P_GiveCard (player, it_bluecard);
 
             if (!netgame)
@@ -619,7 +631,10 @@ P_TouchSpecialThing
       case SPR_YKEY:
         if (player->cards[it_yellowcard] <= 0)
         {
-            player->message = s_GOTYELWCARD;
+            if(beta_style)
+                player->message = GOTYELWCARDBETA;
+            else
+                player->message = s_GOTYELWCARD;
             P_GiveCard (player, it_yellowcard);
 
             if (!netgame)
@@ -630,7 +645,10 @@ P_TouchSpecialThing
       case SPR_RKEY:
         if (player->cards[it_redcard] <= 0)
         {
-            player->message = s_GOTREDCARD;
+            if(beta_style)
+                player->message = GOTREDCARDBETA;
+            else
+                player->message = s_GOTREDCARD;
             P_GiveCard (player, it_redcard);
 
             if (!netgame)
@@ -642,7 +660,10 @@ P_TouchSpecialThing
       case SPR_BBSK:
         if (player->cards[it_blueskull] <= 0)
         {
-            player->message = s_GOTBLUESKUL;
+            if(beta_style)
+                player->message = GOTBLUESKULBETA;
+            else
+                player->message = s_GOTBLUESKUL;
             P_GiveCard (player, it_blueskull);
 
             if (!netgame)
@@ -654,7 +675,10 @@ P_TouchSpecialThing
       case SPR_BYSK:
         if (player->cards[it_yellowskull] <= 0)
         {
-            player->message = s_GOTYELWSKUL;
+            if(beta_style)
+                player->message = GOTYELWSKULBETA;
+            else
+                player->message = s_GOTYELWSKUL;
             P_GiveCard (player, it_yellowskull);
 
             if (!netgame)
@@ -666,7 +690,10 @@ P_TouchSpecialThing
       case SPR_BRSK:
         if (player->cards[it_redskull] <= 0)
         {
-            player->message = s_GOTREDSKULL;
+            if(beta_style)
+                player->message = GOTREDSKULLBETA;
+            else
+                player->message = s_GOTREDSKULL;
             P_GiveCard (player, it_redskull);
 
             if (!netgame)
@@ -678,7 +705,10 @@ P_TouchSpecialThing
       case SPR_STIM:
         if (!P_GiveBody (player, 10))
             return;
-        player->message = s_GOTSTIM;
+        if(beta_style)
+            player->message = GOTSTIMBETA;
+        else
+            player->message = s_GOTSTIM;
         break;
         
       case SPR_MEDI:
@@ -686,9 +716,19 @@ P_TouchSpecialThing
             return;
 
         if (player->health < 25)
-            player->message = s_GOTMEDINEED;
+        {
+            if(beta_style)
+                player->message = GOTMEDINEEDBETA;
+            else
+                player->message = s_GOTMEDINEED;
+        }
         else
-            player->message = s_GOTMEDIKIT;
+        {
+            if(beta_style)
+                player->message = GOTMEDIKITBETA;
+            else
+                player->message = s_GOTMEDIKIT;
+        }
         break;
 
         

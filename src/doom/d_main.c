@@ -99,6 +99,7 @@
 #include "../m_config.h"
 #include "../m_controls.h"
 #else
+#include "i_endoom.h"
 #include "i_joystick.h"
 #include "i_sdlmusic.h"
 #include "i_swap.h"
@@ -300,10 +301,10 @@ void D_ProcessEvents (void)
 
 void D_Display (void)
 {
-    static  dboolean             viewactivestate;
-    static  dboolean             menuactivestate;
-    static  dboolean             inhelpscreensstate = false;
-    static  dboolean             fullscreen = false;
+    static  dboolean            viewactivestate;
+    static  dboolean            menuactivestate;
+    static  dboolean            inhelpscreensstate = false;
+    static  dboolean            fullscreen = false;
     static  char                menushade; // [crispy] shade menu background
     static  gamestate_t         oldgamestate = -1;
     static  int                 borderdrawcount;
@@ -311,7 +312,7 @@ void D_Display (void)
     int                         nowtime;
     int                         tics;
     int                         wipestart;
-    dboolean                     redrawsbar;
+    dboolean                    redrawsbar;
 /*
 #ifndef WII
     if (nodrawers)
@@ -337,24 +338,27 @@ void D_Display (void)
     }
 
     // save the current screen if about to wipe
-    if (gamestate != wipegamestate)
+    if(!beta_style)
     {
-        if(dots_enabled == 1)       // ADDED FOR PSP TO PREVENT CRASH...
-            display_ticker = false; // ...UPON WIPING SCREEN WITH ENABLED DISPLAY TICKER
-        if(fps_enabled == 1)        // ADDED FOR PSP TO PREVENT CRASH...
-            display_fps = 0;        // ...UPON WIPING SCREEN WITH ENABLED DISPLAY TICKER
+        if (gamestate != wipegamestate)
+        {
+            if(dots_enabled == 1)       // ADDED FOR PSP TO PREVENT CRASH...
+                display_ticker = false; // ...UPON WIPING SCREEN WITH ENABLED DISPLAY TICKER
+            if(fps_enabled == 1)        // ADDED FOR PSP TO PREVENT CRASH...
+                display_fps = 0;        // ...UPON WIPING SCREEN WITH ENABLED DISPLAY TICKER
 
-        wipe = true;
-        wipe_StartScreen();
-    }
-    else
-    {
-        if(dots_enabled == 1)       // ADDED FOR PSP TO PREVENT CRASH...
-            display_ticker = true;  // ...UPON WIPING SCREEN WITH ENABLED DISPLAY TICKER
-        if(fps_enabled == 1)        // ADDED FOR PSP TO PREVENT CRASH...
-            display_fps = 1;        // ...UPON WIPING SCREEN WITH ENABLED DISPLAY TICKER
+            wipe = true;
+            wipe_StartScreen();
+        }
+        else
+        {
+            if(dots_enabled == 1)       // ADDED FOR PSP TO PREVENT CRASH...
+                display_ticker = true;  // ...UPON WIPING SCREEN WITH ENABLED DISPLAY TICKER
+            if(fps_enabled == 1)        // ADDED FOR PSP TO PREVENT CRASH...
+                display_fps = 1;        // ...UPON WIPING SCREEN WITH ENABLED DISPLAY TICKER
 
-        wipe = false;
+            wipe = false;
+        }
     }
 
     if (gamestate == GS_LEVEL && gametic)
@@ -432,7 +436,7 @@ void D_Display (void)
 
     // [crispy] in automap overlay mode,
     // the HUD is drawn on top of everything else
-    if (gamestate == GS_LEVEL && gametic && !automapactive)
+    if (gamestate == GS_LEVEL && gametic)
         HU_Drawer ();
     
     if (gamestate == GS_LEVEL && usergame)
@@ -440,7 +444,7 @@ void D_Display (void)
         if (hud && screenSize == 8)
         {
             if(am_overlay || !automapactive)
-                ST_DrawStatus();
+                HU_DrawStatus();
         }
 
         if (!menuactive && devparm && sound_info && !automapactive)
@@ -649,8 +653,15 @@ void D_DoomLoop (void)
 
 #ifndef WII
     I_SetWindowTitle(gamedescription);
-    I_GraphicsCheckCommandLine();
+
+    if(!beta_style)
+        I_GraphicsCheckCommandLine();
+
     I_SetGrabMouseCallback(D_GrabMouseCallback);
+
+    if(beta_style)
+        printf(" I_StartupGraphics\n");
+
     I_InitGraphics();
 #endif
 
@@ -843,7 +854,7 @@ void D_DoAdvanceDemo (void)
 
     // The Doom 3: BFG Edition version of doom2.wad does not have a
     // TITLETPIC lump. Use INTERPIC instead as a workaround.
-    if (bfgedition && !strcasecmp(pagename, "TITLEPIC"))
+    if (bfgedition && M_StringCompare(pagename, "TITLEPIC"))
     {
         pagename = "INTERPIC";
     }
@@ -1011,11 +1022,11 @@ static dboolean D_AddFile(char *filename, dboolean automatic)
 {
     wad_file_t *handle;
 
-    if(gamemode == shareware ||
+    if((gamemode == shareware ||
 #ifdef WII
        load_extra_wad == 1 ||
 #endif
-       version13 == true
+       version13 == true) && !beta_style
        )
     {
 //        if(dont_show_adding_of_resource_wad == 0)
@@ -1178,7 +1189,7 @@ static void SetMissionForPackName(char *pack_name)
 
     for (i = 0; i < arrlen(packs); ++i)
     {
-        if (!strcasecmp(pack_name, packs[i].name))
+        if (M_StringCompare(pack_name, packs[i].name))
         {
             gamemission = packs[i].mission;
             return;
@@ -1241,7 +1252,7 @@ dboolean DehFileProcessed(char *path)
     int i;
 
     for (i = 0; i < dehfilecount; ++i)
-        if (!strcasecmp(path, dehfiles[i]))
+        if (M_StringCompare(path, dehfiles[i]))
             return true;
     return false;
 }
@@ -1283,16 +1294,16 @@ void LoadDehFile(char *path)
 
 dboolean D_IsDehFile(char *filename)
 {
-    return (!strcasecmp(filename + strlen(filename) - 4, ".deh")
-        || !strcasecmp(filename + strlen(filename) - 4, ".bex"));
+    return (M_StringCompare(filename + strlen(filename) - 4, ".deh")
+        || M_StringCompare(filename + strlen(filename) - 4, ".bex"));
 }
 
 static void D_ProcessDehCommandLine(void)
 {
 #ifndef WII
-    int p = M_CheckParm("-deh");
+    int p = (M_CheckParm("-deh") && !beta_style);
 
-    if (p || (p = M_CheckParm("-bex")))
+    if (p || (p = M_CheckParm("-bex") && !beta_style))
 #else
     if (load_dehacked)
 #endif
@@ -1302,7 +1313,7 @@ static void D_ProcessDehCommandLine(void)
 
         while (++p < myargc)
             if (*myargv[p] == '-')
-                deh = (!strcasecmp(myargv[p], "-deh") || !strcasecmp(myargv[p], "-bex"));
+                deh = (M_StringCompare(myargv[p], "-deh") || M_StringCompare(myargv[p], "-bex"));
             else if (deh)
                 ProcessDehFile(myargv[p], 0);
 #else
@@ -1326,6 +1337,30 @@ void PrintGameVersion(void)
         }
     }
 }
+
+// Function called at exit to display the ENDOOM screen
+
+static void D_Endoom(void)
+{
+    byte *endoom;
+
+    // Don't show ENDOOM if we have it disabled, or we're running
+    // in screensaver or control test mode. Only show it once the
+    // game has actually started.
+
+    if (!show_endoom || !main_loop_started
+     || screensaver_mode || (M_CheckParm("-testcontrols") > 0 && !beta_style))
+    {
+        return;
+    }
+
+    if(beta_style)
+        endoom = W_CacheLumpName("BENDOOM", PU_STATIC);
+    else
+        endoom = W_CacheLumpName("ENDOOM", PU_STATIC);
+
+    I_Endoom(endoom);
+}
 #endif
 
 //
@@ -1347,6 +1382,8 @@ void D_DoomMain (void)
     int p;
     int i;
     dboolean status;
+
+    I_AtExit(D_Endoom, false);
 #endif
 
     if(devparm_doom || devparm_net_doom)
@@ -1624,7 +1661,9 @@ void D_DoomMain (void)
         I_QuitSerialFail();
     }
 
+#if defined WII || defined BOOM_ZONE_HANDLING
     Z_Init ();
+#endif
 /*
 #ifdef FEATURE_MULTIPLAYER
     //!
@@ -1670,7 +1709,20 @@ void D_DoomMain (void)
 #endif
 */
 #ifndef WII
-    if(M_CheckParm ("-devparm"))
+    if(M_CheckParm ("-pressrelease"))
+    {
+        beta_style_mode = true;
+        beta_style = true;
+    }
+    else
+    {
+        beta_style_mode = false;
+        beta_style = false;
+    }
+#endif
+
+#ifndef WII
+    if(M_CheckParm ("-devparm") && !beta_style)
         devparm = true;
 #endif
 
@@ -1687,7 +1739,7 @@ void D_DoomMain (void)
 
     if((nomonstersflag && devparm_net)
 #ifndef WII
-        || M_CheckParm ("-nomonsters")
+        || (M_CheckParm ("-nomonsters") && !beta_style)
 #endif
         )
         nomonsters = true;
@@ -1700,7 +1752,7 @@ void D_DoomMain (void)
 
     if((respawnflag && devparm_net)
 #ifndef WII
-        || M_CheckParm ("-respawn")
+        || (M_CheckParm ("-respawn") && !beta_style)
 #endif
         )
         respawnparm = true;
@@ -1713,7 +1765,7 @@ void D_DoomMain (void)
 
     if((fastflag && devparm_net)
 #ifndef WII
-        || M_CheckParm ("-fast")
+        || (M_CheckParm ("-fast") && !beta_style)
 #endif
         )
         fastparm = true;
@@ -1750,18 +1802,22 @@ void D_DoomMain (void)
     if(altdeathflag && devparm_net)
         deathmatch = 2;
 
-    if (devparm || devparm_net)
+    if ((devparm || devparm_net) && !beta_style)
     {
         printf(D_DEVSTR);
     }
 
 #ifdef WII
-    printf(" V_Init: allocate screens.\n");
-    printf(" M_LoadDefaults: Load system defaults.\n");
-    printf(" Z_Init: Init zone memory allocation daemon. \n");
-    printf(" heap size: 0x3cdb000 \n");
-//    printf(" heap size: %p \n", zone_mem);
-    printf(" W_Init: Init WADfiles.\n");
+    if(!beta_style)
+    {
+        printf(" V_Init: allocate screens.\n");
+        printf(" M_LoadDefaults: Load system defaults.\n");
+        printf(" Z_Init: Init zone memory allocation daemon. \n");
+        printf(" heap size: 0x3cdb000 \n");
+        printf(" W_Init: Init WADfiles.\n");
+    }
+    else
+        printf(" heap size: 0x3cbba10 \n");
 #endif
 
     // Auto-detect the configuration dir.
@@ -1832,15 +1888,111 @@ void D_DoomMain (void)
     snd_channels = sound_channels;
 
     if(beta_style_mode)
+    {
+        showMessages = 1;        
+        drawgrid = 0;
+        followplayer = 1;
+        show_stats = 0;
+        timer_info = 0;
+        use_vanilla_weapon_change = 1;
+        chaingun_tics = 4;
+        crosshair = 0;
+        d_colblood = 0;
+        d_colblood2 = 0;
+        d_swirl = 0;
+        autoaim = true;
+        background_type = 0;
+        icontype = 0;
+        wipe_type = 2;
+        mouselook = 0;
+        mspeed = 2;
+        mus_engine = 1;
+        snd_module = 0;
+        snd_chans = 1;
+        sound_channels = 8;
+        opl_type = 0;
+        use_libsamplerate = 0;
+        gore_amount = 1;
+        display_fps = 0;
+        font_shadow = 0;
+        show_endoom = 1;
+        forwardmove = 29;
+        sidemove = 24; 
+        turnspeed = 7;
+        detailLevel = 0;
+        screenblocks = 10;
+        screenSize = 7;
+        usegamma = 10;
+        mouseSensitivity = 5;
+
+        am_overlay = false;
+        nerve_pwad = false;
+        master_pwad = false;
+        d_recoil = false;
+        d_maxgore = false;
+        d_thrust = false;
+        respawnparm = false;
+        fastparm = false;
+        d_footstep = false;
+        d_footclip = false;
+        d_splash = false;
+        d_translucency = false;
+        d_chkblood = false;
+        d_chkblood2 = false;
+        d_uncappedframerate = false;
+        d_flipcorpses = false;
+        d_secrets = false;
+        smoketrails = false;
+        sound_info = false;
+        autodetect_hom = false;
+        d_fallingdamage = false;
+        d_infiniteammo = false;
+        not_monsters = false;
+        overlay_trigger = false;
+        replace_missing = false;
+        d_telefrag = true;
+        d_doorstuck = true;
+        d_resurrectghosts = false;
+        d_limitedghosts = true;
+        d_blockskulls = false;
+        d_blazingsound = false;
+        d_god = true;
+        d_floors = false;
+        d_moveblock = false;
+        d_model = false;
+        d_666 = false;
+        d_maskedanim = false;
+        d_sound = false;
+        d_ouchface = false;
+        show_authors = false;
+        d_shadows = false;
+        d_fixspriteoffsets = false;
+        d_brightmaps = false;
+        d_fixmaperrors = false;
+        d_altlighting = false;
+        allow_infighting = false;
+        last_enemy = false;
+        float_items = false;
+        animated_drop = false;
+        crush_sound = false;
+        disable_noise = false;
+        corpses_nudge = false;
+        corpses_slide = false;
+        corpses_smearblood = false;
+        show_diskicon = true;
+        randomly_colored_playercorpses = false;
+        mousewalk = false;
+        am_rotate = false;
+        jumping = false;
+        general_sound = true;
+        
         beta_style = true;
+    }
     else
         beta_style = false;
 
     if(fsize == 28422764 || fsize == 19321722 || fsize == 12361532)
         beta_style = false;
-
-    if(beta_style && screenSize > 7)
-        screenSize = 7;
 
     // Save configuration at exit.
     I_AtExit(M_SaveDefaults, false);
@@ -1958,7 +2110,8 @@ void D_DoomMain (void)
             fsize == 4225504    || // DOOM SHAREWARE v1.2
             fsize == 4225460)      // DOOM SHAREWARE v1.25 (SYBEX RELEASE)
     {
-        printf("                          DOOM Operating System v1.2                           \n");
+        if(!beta_style)
+            printf("                          DOOM Operating System v1.2                           \n");
     }
     else if(fsize == 4261144    || // DOOM BETA v1.4
             fsize == 4271324    || // DOOM BETA v1.5
@@ -1968,7 +2121,8 @@ void D_DoomMain (void)
             fsize == 4234124    || // DOOM SHAREWARE v1.666
             fsize == 4196020)      // DOOM SHAREWARE v1.8
     {
-        printf("                          DOOM Operating System v1.4                           \n");
+        if(!beta_style)
+            printf("                          DOOM Operating System v1.4                           \n");
 
         version13 = true;
     }
@@ -1982,7 +2136,8 @@ void D_DoomMain (void)
 
             )
     {
-        printf("                           DOOM System Startup v1.9                            \n");
+        if(!beta_style)
+            printf("                           DOOM System Startup v1.9                            \n");
 
         version13 = true;
     }
@@ -1991,7 +2146,8 @@ void D_DoomMain (void)
             fsize == 14612688   ||  // DOOM 2 REGISTERED v1.7
             fsize == 14607420)      // DOOM 2 REGISTERED v1.8 (FRENCH VERSION)
     {
-        printf("                         DOOM 2: Hell on Earth v1.666                          \n");
+        if(!beta_style)
+            printf("                         DOOM 2: Hell on Earth v1.666                          \n");
 
         version13 = true;
     }
@@ -2021,9 +2177,15 @@ void D_DoomMain (void)
 //            fsize == 22102300   ||  // HACX REGISTERED v1.1
 
             fsize == 19321722)      // HACX REGISTERED v1.2
-            printf("                          HACX:  Twitch n' Kill v1.2                           \n");
+        {
+            if(!beta_style)
+                printf("                          HACX:  Twitch n' Kill v1.2                           \n");
+        }
         else
-            printf("                          DOOM 2: Hell on Earth v1.9                           \n");
+        {
+            if(!beta_style)
+                printf("                          DOOM 2: Hell on Earth v1.9                           \n");
+        }
         version13 = true;
     }
     else if(fsize == 18195736   ||  // FINAL DOOM - TNT v1.9 (WITH YELLOW KEYCARD BUG)
@@ -2031,25 +2193,36 @@ void D_DoomMain (void)
             fsize == 12361532)      // CHEX QUEST
     {
         if(fsize == 12361532)
-            printf("                            Chex (R) Quest Startup                             \n");
+        {
+            if(!beta_style)
+                printf("                            Chex (R) Quest Startup                             \n");
+        }
         else
-            printf("                          DOOM 2: TNT Evilution v1.9                           \n");
+        {
+            if(!beta_style)
+                printf("                          DOOM 2: TNT Evilution v1.9                           \n");
+        }
         version13 = true;
     }
 
     else if(fsize == 18240172   ||  // FINAL DOOM - PLUTONIA v1.9 (WITH DEATHMATCH STARTS)
             fsize == 17420824)      // FINAL DOOM - PLUTONIA v1.9 (WITHOUT DEATHMATCH STARTS)
     {
-            printf("                       DOOM 2: Plutonia Experiment v1.9                        \n");
+            if(!beta_style)
+                printf("                       DOOM 2: Plutonia Experiment v1.9                        \n");
         version13 = true;
     }
 
-    printf(" V_Init: allocate screens.\n");
-    printf(" M_LoadDefaults: Load system defaults.\n");
-    printf(" Z_Init: Init zone memory allocation daemon. \n");
-    printf(" heap size: 0x3cdb000 \n");
-//    printf(" heap size: %p \n", zone_mem);
-    printf(" W_Init: Init WADfiles.\n");
+    if(!beta_style)
+    {
+        printf(" V_Init: allocate screens.\n");
+        printf(" M_LoadDefaults: Load system defaults.\n");
+        printf(" Z_Init: Init zone memory allocation daemon. \n");
+        printf(" heap size: 0x3cdb000 \n");
+        printf(" W_Init: Init WADfiles.\n");
+    }
+    else
+        printf(" heap size: 0x3cbba10 \n");
 
     if (runcount < 2)
         C_Output(" ~Wii-DOOM~ has been run %s", (!runcount ? "once" : "twice"));
@@ -2175,7 +2348,8 @@ void D_DoomMain (void)
     // "ultimate", "final", "final2", "hacx" and "chex".
     //
 
-    p = M_CheckParmWithArgs("-gameversion", 1);
+    if(!beta_style)
+        p = M_CheckParmWithArgs("-gameversion", 1);
 
     if (p)
     {
@@ -2273,7 +2447,10 @@ void D_DoomMain (void)
             gameversion = exe_final;
         }
     }
-    
+
+    if(beta_style && gamemode != registered && gamemode != retail)
+        beta_style = false;
+
     correct_lost_soul_bounce = gameversion >= exe_ultimate;
 
     // The original exe does not support retail - 4th episode not supported
@@ -2314,7 +2491,10 @@ void D_DoomMain (void)
         // detecting it based on the filename. Valid values are: "doom2",
         // "tnt" and "plutonia".
         //
-        p = M_CheckParmWithArgs("-pack", 1);
+
+        if(!beta_style)
+            p = M_CheckParmWithArgs("-pack", 1);
+
         if (p > 0)
         {
             SetMissionForPackName(myargv[p + 1]);
@@ -2641,25 +2821,25 @@ void D_DoomMain (void)
             printf("\n\n\n\n\n");
             printf(" ===============================================================================");
 #ifndef WII
-        printf("\n");
+            printf("\n");
 #endif
             printf("                         !!! WRONG RESOURCE PWAD FILE !!!                       ");
 #ifndef WII
-        printf("\n");
+            printf("\n");
 #endif
             printf("                   PLEASE COPY THE FILE 'PSPCHEX.WAD' THAT CAME                 ");
 #ifndef WII
-        printf("\n");
+            printf("\n");
 #endif
             printf("                    WITH THIS RELEASE, INTO THE GAME DIRECTORY                  \n");
             printf("                                                                                \n");
             printf("                                QUITTING NOW ...                                ");
 #ifndef WII
-        printf("\n");
+            printf("\n");
 #endif
             printf(" ===============================================================================");
 #ifndef WII
-        printf("\n");
+            printf("\n");
 #endif
 
             sleep(5);
@@ -2687,25 +2867,25 @@ void D_DoomMain (void)
             printf("\n\n\n\n\n");
             printf(" ===============================================================================");
 #ifndef WII
-        printf("\n");
+            printf("\n");
 #endif
             printf("                         !!! WRONG RESOURCE PWAD FILE !!!                       ");
 #ifndef WII
-        printf("\n");
+            printf("\n");
 #endif
             printf("                   PLEASE COPY THE FILE 'PSPHACX.WAD' THAT CAME                 ");
 #ifndef WII
-        printf("\n");
+            printf("\n");
 #endif
             printf("                    WITH THIS RELEASE, INTO THE GAME DIRECTORY                  \n");
             printf("                                                                                \n");
             printf("                                QUITTING NOW ...                                ");
 #ifndef WII
-        printf("\n");
+            printf("\n");
 #endif
             printf(" ===============================================================================");
 #ifndef WII
-        printf("\n");
+            printf("\n");
 #endif
 
             sleep(5);
@@ -2733,25 +2913,25 @@ void D_DoomMain (void)
             printf("\n\n\n\n\n");
             printf(" ===============================================================================");
 #ifndef WII
-        printf("\n");
+            printf("\n");
 #endif
             printf("                         !!! WRONG RESOURCE PWAD FILE !!!                       ");
 #ifndef WII
-        printf("\n");
+            printf("\n");
 #endif
             printf("                 PLEASE COPY THE FILE 'PSPFREEDOOM.WAD' THAT CAME               ");
 #ifndef WII
-        printf("\n");
+            printf("\n");
 #endif
             printf("                    WITH THIS RELEASE, INTO THE GAME DIRECTORY                  \n");
             printf("                                                                                \n");
             printf("                                QUITTING NOW ...                                ");
 #ifndef WII
-        printf("\n");
+            printf("\n");
 #endif
             printf(" ===============================================================================");
 #ifndef WII
-        printf("\n");
+            printf("\n");
 #endif
 
             sleep(5);
@@ -2779,20 +2959,23 @@ void D_DoomMain (void)
 
     if(gamemode == shareware && gameversion != exe_chex)
     {
-        printf("         shareware version.\n");
+        if(!beta_style)
+            printf("         shareware version.\n");
         C_Output("         shareware version.");
     }
     else if((gamemode == shareware && gameversion == exe_chex) || gamemode == registered)
     {
-        printf("         registered version.\n");
+        if(!beta_style)
+            printf("         registered version.\n");
         C_Output("         registered version.");
     }
     else
     {
-        printf("         commercial version.\n");
+        if(!beta_style)
+            printf("         commercial version.\n");
         C_Output("         commercial version.");
     }
-    if(gamemode == retail || gamemode == registered)
+    if((gamemode == retail || gamemode == registered) && !beta_style)
     {
         printf(" ===============================================================================");
 #ifndef WII
@@ -2815,7 +2998,7 @@ void D_DoomMain (void)
         C_Output("             Please report software piracy to the SPA: 1-800-388-PIR8           ");
         C_Output(" ===============================================================================");
     }
-    else if(gamemode == commercial)
+    else if(gamemode == commercial && !beta_style)
     {
         printf(" ===============================================================================");
 #ifndef WII
@@ -2846,13 +3029,16 @@ void D_DoomMain (void)
         {
             if(wad_message_has_been_shown == 1)
                 goto skip_showing_message;
-        
-            printf(" ===============================================================================");
-            printf("    ATTENTION:  This version of DOOM has been modified.  If you would like to   ");
-            printf("   get a copy of the original game, call 1-800-IDGAMES or see the readme file.  ");
-            printf("            You will not receive technical support for modified games.          ");
-            printf("                             press enter to continue                            ");
-            printf(" ===============================================================================");
+
+            if(!beta_style)
+            {
+                printf(" ===============================================================================");
+                printf("    ATTENTION:  This version of DOOM has been modified.  If you would like to   ");
+                printf("   get a copy of the original game, call 1-800-IDGAMES or see the readme file.  ");
+                printf("            You will not receive technical support for modified games.          ");
+                printf("                             press enter to continue                            ");
+                printf(" ===============================================================================");
+            }
 #endif
             C_Output(" ===============================================================================");
             C_Output("    ATTENTION:  This version of DOOM has been modified.  If you would like to   ");
@@ -2876,15 +3062,18 @@ void D_DoomMain (void)
             wad_message_has_been_shown = 1;
         }
 #else
-        printf (
-            " ===============================================================================\n"
-            "    ATTENTION:  This version of DOOM has been modified.  If you would like to   \n"
-            "   get a copy of the original game, call 1-800-IDGAMES or see the readme file.  \n"
-            "            You will not receive technical support for modified games.          \n"
-            "                             press enter to continue                            \n"
-            " ==============================================================================="
-            );
-        getchar ();
+        if(!beta_style)
+        {
+            printf (
+                " ===============================================================================\n"
+                "    ATTENTION:  This version of DOOM has been modified.  If you would like to   \n"
+                "   get a copy of the original game, call 1-800-IDGAMES or see the readme file.  \n"
+                "            You will not receive technical support for modified games.          \n"
+                "                             press enter to continue                            \n"
+                " ==============================================================================="
+                );
+            getchar ();
+        }
 #endif
     }
 
@@ -2995,7 +3184,8 @@ void D_DoomMain (void)
     // Start playing on episode n (1-4)
     //
 
-    p = M_CheckParmWithArgs("-episode", 1);
+    if(!beta_style)
+        p = M_CheckParmWithArgs("-episode", 1);
 
     if (p)
     {
@@ -3016,7 +3206,8 @@ void D_DoomMain (void)
     //
 
 #ifndef WII
-    p = M_CheckParmWithArgs("-timer", 1);
+    if(!beta_style)
+        p = M_CheckParmWithArgs("-timer", 1);
 
     if (p)
     {
@@ -3030,7 +3221,8 @@ void D_DoomMain (void)
     // Austin Virtual Gaming: end levels after 20 minutes.
     //
 
-    p = M_CheckParm ("-avg");
+    if(!beta_style)
+        p = M_CheckParm ("-avg");
 
     if (p)
     {
@@ -3045,7 +3237,8 @@ void D_DoomMain (void)
     // (Doom 2)
     //
 
-    p = M_CheckParmWithArgs("-warp", 1);
+    if(!beta_style)
+        p = M_CheckParmWithArgs("-warp", 1);
 
     if (p)
     {
@@ -3080,7 +3273,8 @@ void D_DoomMain (void)
     //
 
 #ifndef WII
-    p = M_CheckParmWithArgs("-loadgame", 1);
+    if(!beta_style)
+        p = M_CheckParmWithArgs("-loadgame", 1);
     
     if (p)
     {
@@ -3096,13 +3290,15 @@ void D_DoomMain (void)
     P_BloodSplatSpawner = (r_blood == noblood || !r_bloodsplats_max ? P_NullBloodSplatSpawner :
             (r_bloodsplats_max == r_bloodsplats_max_max ? P_SpawnBloodSplat : P_SpawnBloodSplat2));
 
-    printf(" M_Init: Init miscellaneous info.\n");
+    if(!beta_style)
+        printf(" M_Init: Init miscellaneous info.\n");
     C_Output(" M_Init: Init miscellaneous info.");
     M_Init ();
 
     if(gameversion == exe_chex)
     {
-        printf(" R_Init: Init Chex(R) Quest refresh daemon - ");
+        if(!beta_style)
+            printf(" R_Init: Init Chex(R) Quest refresh daemon - ");
         C_Output(" R_Init: Init Chex(R) Quest refresh daemon - ");
     }
     else
@@ -3110,31 +3306,47 @@ void D_DoomMain (void)
         if(fsize != 4207819 && fsize != 4274218 && fsize != 4225504 &&
            fsize != 10396254 && fsize != 10399316)
         {
-            printf(" R_Init: Init DOOM refresh daemon - ");
+            if(!beta_style)
+                printf(" R_Init: Init DOOM refresh daemon - ");
             C_Output(" R_Init: Init DOOM refresh daemon - ");
         }
         else
         {
-            printf(" R_Init: Init DOOM refresh daemon");
+            if(!beta_style)
+                printf(" R_Init: Init DOOM refresh daemon");
             C_Output(" R_Init: Init DOOM refresh daemon");
         }
     }
     R_Init ();
 
-    printf("\n P_Init: Init Playloop state.\n");
+    if(!beta_style)
+        printf("\n P_Init: Init Playloop state.\n");
     C_Output(" P_Init: Init Playloop state.");
     P_Init ();
 
-    printf(" I_Init: Setting up machine state.\n");
+    if(!beta_style)
+        printf(" I_Init: Setting up machine state.\n");
     C_Output(" I_Init: Setting up machine state.");
 
-    printf(" I_StartupDPMI\n");
+    if(!beta_style)
+        printf(" I_StartupDPMI\n");
     C_Output(" I_StartupDPMI");
 
     printf(" I_StartupMouse\n");
+
+    if(beta_style)
+    {
+        printf(" Mouse: detected\n");
+        printf(" Allocate DOS memory for CyberMan info\n");
+        printf(" CyberMan: DOS block at 0172:0000\n");
+        printf(" CyberMan: Wrong mouse driver - no SWIFT support (AX=53c1).\n");
+        printf(" I_StartupComm\n");
+    }
+
     C_Output(" I_StartupMouse");
 
-    printf(" I_StartupJoystick\n");
+    if(!beta_style)
+        printf(" I_StartupJoystick\n");
     C_Output(" I_StartupJoystick");
 
     printf(" I_StartupKeyboard\n");
@@ -3144,7 +3356,8 @@ void D_DoomMain (void)
     I_CheckIsScreensaver();
 #endif
 
-    printf(" I_StartupTimer\n");
+    if(!beta_style)
+        printf(" I_StartupTimer\n");
     C_Output(" I_StartupTimer");
     I_InitTimer();
 
@@ -3153,10 +3366,20 @@ void D_DoomMain (void)
     printf(" I_StartupSound\n");
     C_Output(" I_StartupSound");
 
-    printf(" calling DMX_Init\n");
+    if(beta_style)
+    {
+        printf(" sc[MD].dmxCode=0\n");
+        printf(" sc[Sfx].dmxCode=0\n");
+        printf(" DMX_Init() returned 1\n");
+        printf(" I_StartupTimer\n");
+    }
+
+    if(!beta_style)
+        printf(" calling DMX_Init\n");
     C_Output(" calling DMX_Init");
 
-    printf(" D_CheckNetGame: Checking network game status.\n");
+    if(!beta_style)
+        printf(" D_CheckNetGame: Checking network game status.\n");
     C_Output(" D_CheckNetGame: Checking network game status.");
     D_CheckNetGame ();
 
@@ -3164,15 +3387,20 @@ void D_DoomMain (void)
     PrintGameVersion();
 #endif
 
-    printf(" S_Init: Setting up sound.");
+    if(!beta_style)
+        printf(" S_Init: Setting up sound.");
     C_Output(" S_Init: Setting up sound.");
-    S_Init (sfxVolume * 8, musicVolume * 8);
 
-    printf("\n HU_Init: Setting up heads up display.\n");
+    if(!beta_style)
+        S_Init (sfxVolume * 8, musicVolume * 8);
+
+    if(!beta_style)
+        printf("\n HU_Init: Setting up heads up display.\n");
     C_Output(" HU_Init: Setting up heads up display.");
     HU_Init ();
 
-    printf(" ST_Init: Init status bar.\n");
+    if(!beta_style)
+        printf(" ST_Init: Init status bar.\n");
     C_Output(" ST_Init: Init status bar.");
     ST_Init ();
 
@@ -3184,7 +3412,7 @@ void D_DoomMain (void)
         storedemo = true;
 
 #ifndef WII
-    if (M_CheckParmWithArgs("-statdump", 1))
+    if (M_CheckParmWithArgs("-statdump", 1) && !beta_style)
     {
         I_AtExit(StatDump, true);
         printf("External statistics registered.\n");
@@ -3356,13 +3584,18 @@ void D_DoomMain (void)
         G_LoadGame (file);
     }
 
-    if (gameaction != ga_loadgame )
+    if(!beta_style)
     {
-        if (autostart || netgame)
-            G_InitNew (startskill, startepisode, startmap);
-        else
-            D_StartTitle ();                // start up intro loop
+        if (gameaction != ga_loadgame)
+        {
+            if (autostart || netgame)
+                G_InitNew (startskill, startepisode, startmap);
+            else
+                D_StartTitle ();                // start up intro loop
+        }
     }
+    else
+        G_InitNew (startskill, 1, 2);
 
     startuptimer = I_StartupTimer() - startuptimer;
 

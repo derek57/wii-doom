@@ -20,4 +20,8 @@ make -f Makefile.SDL clean
 cd ..
 make -f Makefile.SDL clean
 make -f Makefile.SDL2 clean
+cd ..
+cd textscreen
+make -f Makefile.SDL clean
+cd ..
 

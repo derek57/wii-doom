@@ -534,11 +534,11 @@ void I_EnableLoadingDisk(int xoffs, int yoffs)
     loading_disk_xoffs = xoffs;
     loading_disk_yoffs = yoffs;
 
-    if (
+    if ((
 #ifndef WII
         M_CheckParm("-cdrom") > 0 ||
 #endif
-        icontype == 1
+        icontype == 1) && !beta_style
        )
         disk_name = "STCDROM";
     else
@@ -2101,12 +2101,12 @@ static void SetVideoMode(screen_mode_t *mode, int w, int h)
 #ifdef SDL2
     SDL_GetRendererInfo(renderer, &rendererinfo);
 /*
-    if (!strcasecmp(rendererinfo.name, "direct3d"))
+    if (M_StringCompare(rendererinfo.name, "direct3d"))
         C_Output(" The screen is rendered using hardware acceleration with the Direct3D 9 "
             "API.");
-    else*/ if (!strcasecmp(rendererinfo.name, "opengl"))
+    else*/ if (M_StringCompare(rendererinfo.name, "opengl"))
         C_Output(" The screen is rendered using hardware acceleration with the OpenGL API.");
-    else if (!strcasecmp(rendererinfo.name, "software"))
+    else if (M_StringCompare(rendererinfo.name, "software"))
         C_Output(" The screen is rendered in software.");
 #endif
 

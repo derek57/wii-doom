@@ -375,7 +375,7 @@ EXTRA_DIST = \
 doomdocsdir = ${docdir}/../${PROGRAM_PREFIX}doom
 doomdocs_DATA = $(DOC_FILES) NOT-BUGS
 MAINTAINERCLEANFILES = $(AUX_DIST_GEN)
-SUBDIRS = opl pcsound data src man
+SUBDIRS = textscreen opl pcsound data src man
 DIST_SUBDIRS = $(SUBDIRS)
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
