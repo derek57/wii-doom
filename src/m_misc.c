@@ -669,3 +669,13 @@ dboolean isvowel(const char ch)
     return (!!strchr("aeiou", ch));
 }
 
+char *removeext(const char *file)
+{
+    char        *newstr = strdup(file);
+    char        *lastdot = strrchr(newstr, '.');
+
+    *lastdot = '\0';
+
+    return newstr;
+}
+

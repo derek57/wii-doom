@@ -33,7 +33,7 @@
 // Screen height used for "stretch" scale functions.
 
 #define SCREENHEIGHT_4_3 (240 << hires)
-#define MAX_MOUSE_BUTTONS 8
+#define MAX_MOUSE_BUTTONS 16
 
 // Dimensions of the flashing "loading" disk icon
 

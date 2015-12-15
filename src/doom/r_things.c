@@ -129,9 +129,8 @@ extern dboolean                  realframe;
 static void R_InstallSpriteLump(lumpinfo_t *lump, int lumpnum, unsigned int frame, char rot,
     dboolean flipped)
 {
-    unsigned int        rotation;
-
-    rotation = (rot >= '0' && rot <= '9' ? rot - '0' : (rot >= 'A' ? rot - 'A' + 10 : 17));
+    unsigned int        rotation = (rot >= '0' && rot <= '9' ? rot - '0' : (rot >= 'A' ?
+        rot - 'A' + 10 : 17));
 
     if (frame >= MAX_SPRITE_FRAMES || rotation > 16)
         I_Error("R_InstallSpriteLump: Bad frame characters in lump %s", lump->name);
@@ -213,7 +212,11 @@ static void R_InitSpriteDefs(char **namelist)
 
     numsprites = (signed int)i;
 
+#ifdef DOOMRETRO_ZONE_HANDLING
+    sprites = Z_Calloc(numsprites, sizeof(*sprites), PU_STATIC, NULL); 
+#else
     sprites = Z_Malloc(numsprites * sizeof(*sprites), PU_STATIC, NULL);
+#endif
 
     // Create hash table based on just the first four letters of each sprite
     // killough 1/31/98
@@ -288,19 +291,19 @@ static void R_InitSpriteDefs(char **namelist)
 
                         case 1:
                             // must have all 8 frames
-                            for (rot = 0; rot < 8; ++rot)
+                            for (rot = 0; rot < 16; rot += 2)
                             {
-                                if (sprtemp[frame].lump[rot * 2 + 1] == -1)
+                                if (sprtemp[frame].lump[rot + 1] == -1)
                                 {
-                                    sprtemp[frame].lump[rot * 2 + 1] = sprtemp[frame].lump[rot * 2];
-                                    if (sprtemp[frame].flip & (1 << (rot * 2)))
-                                        sprtemp[frame].flip |= 1 << (rot * 2 + 1);
+                                    sprtemp[frame].lump[rot + 1] = sprtemp[frame].lump[rot];
+                                    if (sprtemp[frame].flip & (1 << rot))
+                                        sprtemp[frame].flip |= 1 << (rot + 1);
                                 }
-                                if (sprtemp[frame].lump[rot * 2] == -1)
+                                if (sprtemp[frame].lump[rot] == -1)
                                 {
-                                    sprtemp[frame].lump[rot * 2] = sprtemp[frame].lump[rot * 2 + 1];
-                                    if (sprtemp[frame].flip & (1 << (rot * 2 + 1)))
-                                        sprtemp[frame].flip |= 1 << (rot * 2);
+                                    sprtemp[frame].lump[rot] = sprtemp[frame].lump[rot + 1];
+                                    if (sprtemp[frame].flip & (1 << (rot + 1)))
+                                        sprtemp[frame].flip |= 1 << rot;
                                 }
                             }
                             for (rot = 0; rot < 16; ++rot)
@@ -319,13 +322,12 @@ static void R_InitSpriteDefs(char **namelist)
                     }
 
                 // allocate space for the frames present and copy sprtemp to it
-                sprites[i].spriteframes = Z_Malloc(maxframe * sizeof(spriteframe_t),
-                    PU_STATIC, NULL);
+                sprites[i].spriteframes = Z_Malloc(maxframe * sizeof(spriteframe_t), PU_STATIC, NULL);
                 memcpy(sprites[i].spriteframes, sprtemp, maxframe * sizeof(spriteframe_t));
             }
         }
     }
-    free(hash);             // free hash table
+    free(hash); // free hash table
 }
 
 //

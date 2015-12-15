@@ -129,63 +129,63 @@
 
 char *authors[][6] =
 {
-    /*        DOOM  | DOOM | DOOM2 | ULT. | DOOM2 | NERVE
-             SHARE. | REG. |       | DOOM |  BFG  | PACK.
-       00 */ { "",    "",    "",     "",     "",    "" },
-    /* 01 */ { "",    "",    SP,     "",     SP,    RM },
-    /* 02 */ { "",    "",    AM,     "",     AM,    RH },
-    /* 03 */ { "",    "",    AM,     "",     AM,    RM },
-    /* 04 */ { "",    "",    AM,     "",     AM,    RM },
-    /* 05 */ { "",    "",    AM,     "",     AM,    RH },
-    /* 06 */ { "",    "",    AM,     "",     AM,    RH },
-    /* 07 */ { "",    "",    AMSP,   "",     AMSP,  RH },
-    /* 08 */ { "",    "",    SP,     "",     SP,    RH },
-    /* 09 */ { "",    "",    SP,     "",     SP,    RM },
-    /* 10 */ { "",    "",    SPTH,   "",     SPTH,  "" },
-    /* 11 */ { JR,    JR,    JR,     JR,     JR,    "" },
-    /* 12 */ { JR,    JR,    SP,     JR,     SP,    "" },
-    /* 13 */ { JR,    JR,    SP,     JR,     SP,    "" },
-    /* 14 */ { JRTH,  JRTH,  AM,     JRTH,   AM,    "" },
-    /* 15 */ { JR,    JR,    JR,     JR,     JR,    "" },
-    /* 16 */ { JR,    JR,    SP,     JR,     SP,    "" },
-    /* 17 */ { JR,    JR,    JR,     JR,     JR,    "" },
-    /* 18 */ { SPTH,  SPTH,  SP,     SPTH,   SP,    "" },
-    /* 19 */ { JR,    JR,    SP,     JR,     SP,    "" },
-    /* 20 */ { "",    "",    JR,     "",     JR,    "" },
-    /* 21 */ { "",    SPTH,  SP,     SPTH,   SP,    "" },
-    /* 22 */ { "",    SPTH,  AM,     SPTH,   AM,    "" },
-    /* 23 */ { "",    SPTH,  SP,     SPTH,   SP,    "" },
-    /* 24 */ { "",    SPTH,  SP,     SPTH,   SP,    "" },
-    /* 25 */ { "",    SP,    SG,     SP,     SG,    "" },
-    /* 26 */ { "",    SP,    JR,     SP,     JR,    "" },
-    /* 27 */ { "",    SPTH,  SP,     SPTH,   SP,    "" },
-    /* 28 */ { "",    SP,    SP,     SP,     SP,    "" },
-    /* 29 */ { "",    SP,    JR,     SP,     JR,    "" },
-    /* 30 */ { "",    "",    SP,     "",     SP,    "" },
-    /* 31 */ { "",    "",    SP,     "",     SP,    "" },
-    /* 32 */ { "",    "",    SP,     "",     SP,    "" },
-    /* 33 */ { "",    SPTH,  "",     SPTH,   MB,    "" },
-    /* 34 */ { "",    "",    "",     "",     "",    "" },
-    /* 35 */ { "",    "",    "",     "",     "",    "" },
-    /* 36 */ { "",    "",    "",     "",     "",    "" },
-    /* 37 */ { "",    "",    "",     "",     "",    "" },
-    /* 38 */ { "",    "",    "",     "",     "",    "" },
-    /* 39 */ { "",    "",    "",     "",     "",    "" },
-    /* 40 */ { "",    "",    "",     "",     "",    "" },
-    /* 41 */ { "",    "",    "",     AM,     "",    "" },
-    /* 42 */ { "",    "",    "",     JR,     "",    "" },
-    /* 43 */ { "",    "",    "",     SG,     "",    "" },
-    /* 44 */ { "",    "",    "",     AM,     "",    "" },
-    /* 45 */ { "",    "",    "",     TW,     "",    "" },
-    /* 46 */ { "",    "",    "",     JR,     "",    "" },
-    /* 47 */ { "",    "",    "",     JA,     "",    "" },
-    /* 48 */ { "",    "",    "",     SG,     "",    "" },
-    /* 49 */ { "",    "",    "",     TW,     "",    "" }
+    /*        ULT. | DOOM2 | NERVE
+              DOOM |  BFG  | PACK.
+       00 */ { "",     "",    "" },
+    /* 01 */ { "",     SP,    RM },
+    /* 02 */ { "",     AM,    RH },
+    /* 03 */ { "",     AM,    RM },
+    /* 04 */ { "",     AM,    RM },
+    /* 05 */ { "",     AM,    RH },
+    /* 06 */ { "",     AM,    RH },
+    /* 07 */ { "",     AMSP,  RH },
+    /* 08 */ { "",     SP,    RH },
+    /* 09 */ { "",     SP,    RM },
+    /* 10 */ { "",     SPTH,  "" },
+    /* 11 */ { JR,     JR,    "" },
+    /* 12 */ { JR,     SP,    "" },
+    /* 13 */ { JR,     SP,    "" },
+    /* 14 */ { JRTH,   AM,    "" },
+    /* 15 */ { JR,     JR,    "" },
+    /* 16 */ { JR,     SP,    "" },
+    /* 17 */ { JR,     JR,    "" },
+    /* 18 */ { SPTH,   SP,    "" },
+    /* 19 */ { JR,     SP,    "" },
+    /* 20 */ { "",     JR,    "" },
+    /* 21 */ { SPTH,   SP,    "" },
+    /* 22 */ { SPTH,   AM,    "" },
+    /* 23 */ { SPTH,   SP,    "" },
+    /* 24 */ { SPTH,   SP,    "" },
+    /* 25 */ { SP,     SG,    "" },
+    /* 26 */ { SP,     JR,    "" },
+    /* 27 */ { SPTH,   SP,    "" },
+    /* 28 */ { SP,     SP,    "" },
+    /* 29 */ { SP,     JR,    "" },
+    /* 30 */ { "",     SP,    "" },
+    /* 31 */ { "",     SP,    "" },
+    /* 32 */ { "",     SP,    "" },
+    /* 33 */ { SPTH,   MB,    "" },
+    /* 34 */ { "",     "",    "" },
+    /* 35 */ { "",     "",    "" },
+    /* 36 */ { "",     "",    "" },
+    /* 37 */ { "",     "",    "" },
+    /* 38 */ { "",     "",    "" },
+    /* 39 */ { "",     "",    "" },
+    /* 40 */ { "",     "",    "" },
+    /* 41 */ { AM,     "",    "" },
+    /* 42 */ { JR,     "",    "" },
+    /* 43 */ { SG,     "",    "" },
+    /* 44 */ { AM,     "",    "" },
+    /* 45 */ { TW,     "",    "" },
+    /* 46 */ { JR,     "",    "" },
+    /* 47 */ { JA,     "",    "" },
+    /* 48 */ { SG,     "",    "" },
+    /* 49 */ { TW,     "",    "" }
 };
 
-#define NERVE_AUTHORS      authors[gamemap][5]
-#define BFGEDITION_AUTHORS authors[gamemap][4]
-#define GENERAL_AUTHORS    authors[gameepisode * 10 + gamemap][gamemode]
+#define NERVE_AUTHORS   authors[gamemap][2]
+#define DOOM2_AUTHORS   authors[gamemap][1]
+#define UDOOM_AUTHORS   authors[(gameepisode * 10) + gamemap][0]
 
 static player_t*        plr;
 
@@ -212,6 +212,7 @@ static dboolean         secret_on;
 
 static int              message_counter;
 static int              secret_counter;
+static int              hudnumoffset;
 
 static char             hud_monsecstr[80];     // ADDED FOR PSP-STATS
 
@@ -683,13 +684,13 @@ void HU_Start(void)
     {
         u = NERVE_AUTHORS;
     }
-    else if (bfgedition && gamemission == doom2)
+    else if (gamemission == doom2)
     {
-        u = BFGEDITION_AUTHORS;
+        u = DOOM2_AUTHORS;
     }
     else
     {
-        u = GENERAL_AUTHORS;
+        u = UDOOM_AUTHORS;
     }
 
     // dehacked substitution to get modified level name
@@ -755,6 +756,7 @@ void HU_Start(void)
 
     headsupactive = true;
 
+    hudnumoffset = (16 - SHORT(tallnum[0]->height)) / 2;
 }
 
 // [crispy] print a bar indicating demo progress at the bottom of the screen
@@ -848,22 +850,21 @@ static int HUDNumberWidth(int val)
     return width;
 }
 
-void HU_DrawStatus(void)
+void HU_DrawHUD(void)
 {
-    int             health = MAX(0, plr->mo->health);
-    int             ammotype = weaponinfo[plr->readyweapon].ammo;
-    int             ammo = plr->ammo[ammotype];
-    int             armor = plr->armorpoints;
-    int             health_x = ST_HEALTH_X;
-    int             key = 0;
-    int             i = 0;
-    static int      healthwait = 0;
-    byte            *tinttab;
-    int             invulnerability = plr->powers[pw_invulnerability];
-    static dboolean healthanim = false;
-    patch_t         *patch;
-    int             currenttics = I_GetTime();
-    dboolean        gamepaused = (menuactive || paused || consoleactive);
+    int                 health = MAX(0, plr->mo->health);
+    int                 ammotype = weaponinfo[plr->readyweapon].ammo;
+    int                 ammo = plr->ammo[ammotype];
+    int                 armor = plr->armorpoints;
+    int                 health_x = HUD_HEALTH_X;
+    int                 key = 0;
+    int                 i = 0;
+    byte                *tinttab;
+    int                 invulnerability = plr->powers[pw_invulnerability];
+    static dboolean     healthanim = false;
+    patch_t             *patch;
+    dboolean            gamepaused = (menuactive || paused /*|| consoleactive*/);
+    int                 currenttime = I_GetTimeMS();
 
     if (d_translucency)
     {
@@ -878,49 +879,54 @@ void HU_DrawStatus(void)
         godhudfunc = V_DrawYellowStatusPatch;
     }
 
-    tinttab = (!health || (health <= ST_HEALTH_MIN && healthanim) || health > ST_HEALTH_MIN
-        || gamepaused ? tinttab66 : tinttab25);
+    tinttab = (!health || (health <= HUD_HEALTH_MIN && healthanim) || health > HUD_HEALTH_MIN ?
+        tinttab66 : tinttab25);
 
-    patch = (((plr->readyweapon == wp_fist && plr->pendingweapon == wp_nochange)
-        || plr->pendingweapon == wp_fist) && plr->powers[pw_strength] ? berserkpatch : healthpatch);
+    patch = (((plr->readyweapon == wp_fist && plr->pendingweapon == wp_nochange) || plr->pendingweapon == wp_fist)
+        && plr->powers[pw_strength] ? berserkpatch : healthpatch);
 
     if (patch)
     {
         if ((plr->cheats & CF_GODMODE) || invulnerability > 128 || (invulnerability & 8))
-            godhudfunc(health_x, ST_HEALTH_Y - (SHORT(patch->height) - 17), patch, tinttab);
+            godhudfunc(health_x, HUD_HEALTH_Y - (SHORT(patch->height) - 17), patch, tinttab);
         else
-            hudfunc(health_x, ST_HEALTH_Y - (SHORT(patch->height) - 17), patch, tinttab);
+            hudfunc(health_x, HUD_HEALTH_Y - (SHORT(patch->height) - 17), patch, tinttab);
+
         health_x += SHORT(patch->width) + 8;
     }
 
-    if (healthhighlight)
+    if (healthhighlight > currenttime)
     {
-        if (healthhighlight < currenttics)
-            healthhighlight = 0;
+        DrawHUDNumber(&health_x, HUD_HEALTH_Y + hudnumoffset, health, tinttab, V_DrawStatusPatch);
 
-        DrawHUDNumber(&health_x, ST_HEALTH_Y, health, tinttab, V_DrawStatusPatch);
         if (!emptytallpercent)
-            V_DrawStatusPatch(health_x, ST_HEALTH_Y, tallpercent, tinttab);
+            V_DrawStatusPatch(health_x, HUD_HEALTH_Y + hudnumoffset, tallpercent, tinttab);
     }
     else
     {
-        DrawHUDNumber(&health_x, ST_HEALTH_Y, health, tinttab, hudnumfunc);
+        DrawHUDNumber(&health_x, HUD_HEALTH_Y + hudnumoffset, health, tinttab, hudnumfunc);
+
         if (!emptytallpercent)
-            hudnumfunc(health_x, ST_HEALTH_Y, tallpercent, tinttab);
+            hudnumfunc(health_x, HUD_HEALTH_Y + hudnumoffset, tallpercent, tinttab);
     }
 
-    if (health <= ST_HEALTH_MIN && !gamepaused)
+    if (!gamepaused)
     {
-        if (healthwait < currenttics)
+        static int healthwait;
+
+        if (health <= HUD_HEALTH_MIN)
         {
-            healthanim = !healthanim;
-            healthwait = currenttics + ST_HEALTH_WAIT * health / ST_HEALTH_MIN + 4;
+            if (healthwait < currenttime)
+            {
+                healthanim = !healthanim;
+                healthwait = currenttime + HUD_HEALTH_WAIT * health / HUD_HEALTH_MIN + 115;
+            }
         }
-    }
-    else
-    {
-        healthanim = false;
-        healthwait = 0;
+        else
+        {
+            healthanim = false;
+            healthwait = 0;
+        }
     }
 
     if (plr->pendingweapon != wp_nochange)
@@ -931,12 +937,12 @@ void HU_DrawStatus(void)
 
     if (health && ammo && ammotype != am_noammo)
     {
-        static int          ammowait = 0;
         static dboolean     ammoanim = false;
         int                 offset_special = 0;
         int                 ammo_x;
 
-        tinttab = (ammoanim || gamepaused ? tinttab66 : tinttab25); 
+        tinttab = ((ammo <= HUD_AMMO_MIN && ammoanim) || ammo > HUD_AMMO_MIN ? tinttab66 :
+            tinttab25);
 
         if (ammo < 200 && ammo > 99)
             offset_special = 3;
@@ -958,38 +964,36 @@ void HU_DrawStatus(void)
         else
             patch = W_CacheLumpName("TNT1A0", PU_CACHE);
 
-        ammo_x = ST_AMMO_X + 15 - (SHORT(patch->width) / 2);
+        ammo_x = HUD_AMMO_X + 15 - (SHORT(patch->width) / 2);
 
 //        if (patch)	// FIXME: IS THIS ONE REALLY REQUIRED??
         {
-            hudfunc(ammo_x, (ST_AMMO_Y + 8 - (SHORT(patch->height) / 2)), patch, tinttab);
-            ammo_x += ST_AMMO_X + 15 + (SHORT(patch->width) / 2) - (ORIGHEIGHT / 2) + offset_special;
+            hudfunc(ammo_x, (HUD_AMMO_Y + 8 - (SHORT(patch->height) / 2)), patch, tinttab);
+            ammo_x += HUD_AMMO_X + 15 + (SHORT(patch->width) / 2) - (ORIGHEIGHT / 2) + offset_special;
         }
 
-        if (ammohighlight)
-        {
-            if (ammohighlight < currenttics)
-                ammohighlight = 0;
-
-            DrawHUDNumber(&ammo_x, ST_AMMO_Y, ammo, tinttab, V_DrawStatusPatch);
-        }
+        if (ammohighlight > currenttime)
+            DrawHUDNumber(&ammo_x, HUD_AMMO_Y + hudnumoffset, ammo, tinttab, V_DrawStatusPatch);
         else
-        {
-            DrawHUDNumber(&ammo_x, ST_AMMO_Y, ammo, tinttab, hudnumfunc);
-        }
+            DrawHUDNumber(&ammo_x, HUD_AMMO_Y + hudnumoffset, ammo, tinttab, hudnumfunc);
 
-        if (ammo <= ST_AMMO_MIN && !gamepaused)
+        if (!gamepaused)
         {
-            if (ammowait < currenttics)
+            static int ammowait;
+
+            if (ammo <= HUD_AMMO_MIN)
             {
-                ammoanim = !ammoanim;
-                ammowait = currenttics + ST_AMMO_WAIT * ammo / ST_AMMO_MIN + 4;
+                if (ammowait < currenttime)
+                {
+                    ammoanim = !ammoanim;
+                    ammowait = currenttime + HUD_AMMO_WAIT * ammo / HUD_AMMO_MIN + 115;
+                }
             }
-        }
-        else
-        {
-            ammoanim = false;
-            ammowait = 0;
+            else
+            {
+                ammoanim = false;
+                ammowait = 0;
+            }
         }
     }
 
@@ -1001,7 +1005,7 @@ void HU_DrawStatus(void)
 
     if (key || plr->neededcardflash)
     {
-        int                 keypic_x = ST_KEYS_X - 20 * (key - 1);
+        int                 keypic_x = HUD_KEYS_X - 20 * (key - 1);
         static int          keywait = 0;
         static dboolean      showkey = false;
 
@@ -1011,6 +1015,7 @@ void HU_DrawStatus(void)
         {
             if (emptytallpercent)
                 keypic_x += SHORT(tallpercent->width);
+
             if (armor < 10)
                 keypic_x += 26;
             else if (armor < 100)
@@ -1023,17 +1028,15 @@ void HU_DrawStatus(void)
 
             if (patch)
             {
-                if (!gamepaused)
+                if (!gamepaused && keywait < currenttime) 
                 {
-                    if (keywait < currenttics)
-                    {
-                        showkey = !showkey;
-                        keywait = currenttics + ST_KEY_WAIT;
-                        plr->neededcardflash--;
-                    }
+                    showkey = !showkey;
+                    keywait = currenttime + HUD_KEY_WAIT;
+                    plr->neededcardflash--;
                 }
+
                 if (showkey)
-                    hudfunc(keypic_x - (SHORT(patch->width) + 6), ST_KEYS_Y, patch, tinttab66);
+                    hudfunc(keypic_x - (SHORT(patch->width) + 6), HUD_KEYS_Y, patch, tinttab66);
             }
         }
         else
@@ -1050,7 +1053,7 @@ void HU_DrawStatus(void)
 
                 if (patch)
                     hudfunc(keypic_x + (SHORT(patch->width) + 6) * (cardsfound - plr->cards[i]),
-                        ST_KEYS_Y, patch, tinttab66);
+                        HUD_KEYS_Y, patch, tinttab66);
             }
         }
     }
@@ -1058,47 +1061,41 @@ void HU_DrawStatus(void)
     if (armor)
     {
         patch_t     *patch = (plr->armortype == 1 ? greenarmorpatch : bluearmorpatch);
-        int         armor_x = ST_ARMOR_X;
+        int         armor_x = HUD_ARMOR_X;
 
         if (patch)
         {
             armor_x -= SHORT(patch->width);
-            hudfunc(armor_x, ST_ARMOR_Y - (SHORT(patch->height) - 16), patch, tinttab66);
+            hudfunc(armor_x, HUD_ARMOR_Y - (SHORT(patch->height) - 16), patch, tinttab66);
             armor_x -= 7;
         }
 
-        if (armorhighlight)
+        if (armorhighlight > currenttime)
         {
-            if (armorhighlight < currenttics)
-                armorhighlight = 0;
-
             if (emptytallpercent)
             {
                 armor_x -= HUDNumberWidth(armor);
-                DrawHUDNumber(&armor_x, ST_ARMOR_Y, armor, tinttab66, V_DrawStatusPatch);
+                DrawHUDNumber(&armor_x, HUD_ARMOR_Y + hudnumoffset, armor, tinttab66, V_DrawStatusPatch);
             }
             else
             {
                 armor_x -= SHORT(tallpercent->width);
-                V_DrawStatusPatch(armor_x, ST_ARMOR_Y, tallpercent, tinttab66);
+                V_DrawStatusPatch(armor_x, HUD_ARMOR_Y + hudnumoffset, tallpercent, tinttab66);
                 armor_x -= HUDNumberWidth(armor);
-                DrawHUDNumber(&armor_x, ST_ARMOR_Y, armor, tinttab66, V_DrawStatusPatch);
+                DrawHUDNumber(&armor_x, HUD_ARMOR_Y + hudnumoffset, armor, tinttab66, V_DrawStatusPatch);
             }
+        }
+        else if (emptytallpercent)
+        {
+            armor_x -= HUDNumberWidth(armor);
+            DrawHUDNumber(&armor_x, HUD_ARMOR_Y + hudnumoffset, armor, tinttab66, hudnumfunc);
         }
         else
         {
-            if (emptytallpercent)
-            {
-                armor_x -= HUDNumberWidth(armor);
-                DrawHUDNumber(&armor_x, ST_ARMOR_Y, armor, tinttab66, hudnumfunc);
-            }
-            else
-            {
-                armor_x -= SHORT(tallpercent->width);
-                hudnumfunc(armor_x, ST_ARMOR_Y, tallpercent, tinttab66);
-                armor_x -= HUDNumberWidth(armor);
-                DrawHUDNumber(&armor_x, ST_ARMOR_Y, armor, tinttab66, hudnumfunc);
-            }
+            armor_x -= SHORT(tallpercent->width);
+            hudnumfunc(armor_x, HUD_ARMOR_Y + hudnumoffset, tallpercent, tinttab66);
+            armor_x -= HUDNumberWidth(armor);
+            DrawHUDNumber(&armor_x, HUD_ARMOR_Y + hudnumoffset, armor, tinttab66, hudnumfunc);
         }
     }
 }

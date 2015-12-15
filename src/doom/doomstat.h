@@ -300,6 +300,9 @@ extern  ticcmd_t         *netcmds;
 extern  dboolean         am_overlay;
 extern  dboolean         memory_usage;
 
+extern  dboolean         remove_slime_trails;
+extern  dboolean         d_fixwiggle;
+extern  dboolean         lowhealth;
 extern  dboolean         am_rotate;
 extern  dboolean         hud;
 extern  dboolean         d_recoil;
@@ -363,6 +366,7 @@ extern  dboolean         swap_sound_chans;
 extern  dboolean         randompitch;
 extern  dboolean         general_sound;
 extern  dboolean         display_ticker;
+extern  dboolean         d_centerweapon;
 /*
 extern  dboolean         nerve;
 extern  dboolean         chex;

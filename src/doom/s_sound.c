@@ -830,7 +830,7 @@ void S_ChangeMusic(int music_id, int looping, dboolean mapstart)
         M_snprintf(namebuf, sizeof(namebuf), "d_%s", music->name);
         music->lumpnum = W_GetNumForName(namebuf);
 
-        C_Output(" Playing Music '%s'", namebuf);
+        C_Output(" Playing Music '%s'", uppercase(namebuf));
     }
 /*
     if(looping)

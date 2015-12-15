@@ -180,11 +180,16 @@ player_t        players[MAXPLAYERS];
 
 wbstartstruct_t wminfo;                 // parms for world map / intermission 
 
+mobj_t*         bodyque[BODYQUESIZE]; 
+
 fixed_t         forwardmve;
 fixed_t         sidemve;
 fixed_t         angleturn;              // + slow turn 
 
-mobj_t*         bodyque[BODYQUESIZE]; 
+fixed_t         low_health_forwardmove = 17;
+fixed_t         low_health_sidemove = 15;
+
+int		low_health_turnspeed = 5;
 
 // If non-zero, exit the level after this number of minutes.
 int             timelimit;
@@ -665,29 +670,39 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
         mousebuttons[mousebfire]) 
         cmd->buttons |= BT_ATTACK; 
 
-    if (
-#ifdef WII
-        joybuttons[joybspeed]
-#else
-           speed
-#endif
-       )
+    // villsa [STRIFE] disable running if low on health
+    if (players[consoleplayer].health <= 15 && lowhealth)
     {
-        forwardmve = forwardmove * 6;
-        sidemve = sidemove * 6;
-        turnspd = turnspeed * 4;
+	forwardmve = low_health_forwardmove;
+	sidemve = low_health_sidemove;
+	turnspd = low_health_turnspeed;
     }
-    else if(
-#ifdef WII
-            !joybuttons[joybspeed]
-#else
-            !speed
-#endif
-       )
+    else
     {
-        forwardmve = forwardmove;
-        sidemve = sidemove;
-        turnspd = turnspeed;
+        if (
+#ifdef WII
+            joybuttons[joybspeed]
+#else
+               speed
+#endif
+           )
+        {
+            forwardmve = forwardmove * 6;
+            sidemve = sidemove * 6;
+            turnspd = turnspeed * 4;
+        }
+        else if(
+#ifdef WII
+                !joybuttons[joybspeed]
+#else
+                !speed
+#endif
+           )
+        {
+            forwardmve = forwardmove;
+            sidemve = sidemove;
+            turnspd = turnspeed;
+        }
     }
 
     if (forwardmve < -25)
@@ -2181,11 +2196,8 @@ void G_DoWorldDone (void)
 
 void G_DoSaveGame (void) 
 { 
-    char        *savegame_file;
-    char        *temp_savegame_file;
-
-    temp_savegame_file = P_TempSaveGameFile();
-    savegame_file = (consoleactive ? savename : P_SaveGameFile(savegameslot));
+    char        *savegame_file = (consoleactive ? savename : P_SaveGameFile(savegameslot));
+    char        *temp_savegame_file = P_TempSaveGameFile();
 
     // Open the savegame file for writing.  We write to a temporary file
     // and then rename it at the end if it was successfully written.
@@ -2455,30 +2467,25 @@ void G_Ticker (void)
 // almost everything is cleared and initialized 
 //
 void G_PlayerReborn (int player) 
-{ 
-    player_t* p; 
+{
+    player_t* p = &players[player]; 
     int       i; 
     int       frags[MAXPLAYERS]; 
-    int       killcount;
-    int       itemcount;
-    int       secretcount; 
-    unsigned int worldTimer;
-         
-    worldTimer = players[player].worldTimer;
-    memcpy (frags,players[player].frags,sizeof(frags)); 
-    killcount = players[player].killcount; 
-    itemcount = players[player].itemcount; 
-    secretcount = players[player].secretcount; 
-    players[player].worldTimer = worldTimer;
-         
-    p = &players[player]; 
+    int       killcount = p->killcount;
+    int       itemcount = p->itemcount;
+    int       secretcount = p->secretcount; 
+    unsigned int worldTimer = p->worldTimer;
+
+    memcpy (frags,p->frags,sizeof(frags)); 
+    p->worldTimer = worldTimer;
+
     memset (p, 0, sizeof(*p)); 
- 
-    memcpy (players[player].frags, frags, sizeof(players[player].frags)); 
-    players[player].killcount = killcount; 
-    players[player].itemcount = itemcount; 
-    players[player].secretcount = secretcount; 
- 
+
+    memcpy (p->frags, frags, sizeof(p->frags)); 
+    p->killcount = killcount; 
+    p->itemcount = itemcount; 
+    p->secretcount = secretcount; 
+
     p->usedown = p->attackdown = true;  // don't do anything immediately 
     p->playerstate = PST_LIVE;       
     p->health = initial_health;     // Use dehacked value
@@ -2488,7 +2495,7 @@ void G_PlayerReborn (int player)
     p->ammo[am_clip] = initial_bullets; 
     p->lookdir = 0;
     p->recoilpitch = 0;
-         
+
     for (i=0 ; i<NUMAMMO ; i++) 
         p->maxammo[i] = maxammo[i]; 
 
@@ -2569,11 +2576,7 @@ void G_SecretExitLevel (void)
 //    C_Warning(" G_SecretExitLevel: Free Memory (0x%x)", Z_FreeMemory());
 
     // IF NO WOLF3D LEVELS, NO SECRET EXIT!
-    if ( (gamemode == commercial)
-      && (W_CheckNumForName("map31")<0))
-        secretexit = false;
-    else
-        secretexit = true; 
+    secretexit = !(gamemode == commercial && W_CheckNumForName("MAP31") < 0); 
     gameaction = ga_completed; 
 } 
  
@@ -2641,7 +2644,7 @@ void G_LoadGame (char* name)
 
 void G_DoLoadGame (void) 
 { 
-    int         savedleveltime;
+    int savedleveltime = leveltime;
          
     gameaction = ga_nothing; 
          
@@ -2658,8 +2661,6 @@ void G_DoLoadGame (void)
         return;
     }
 
-    savedleveltime = leveltime;
-    
     // load a base level 
     G_InitNew (gameskill, gameepisode, gamemap); 
  

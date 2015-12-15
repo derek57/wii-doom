@@ -84,10 +84,7 @@ static Uint16 mixer_format;
 static dboolean setpanning_workaround = false;
 static dboolean sound_initialized;
 static dboolean use_sfx_prefix;
-static dboolean (*ExpandSoundData)(sfxinfo_t *sfxinfo,
-                                  byte *data,
-                                  int samplerate,
-                                  int length) = NULL;
+static dboolean (*ExpandSoundData)(sfxinfo_t *sfxinfo, byte *data, int samplerate, int length) = NULL;
 
 // Doubly-linked list of allocated sounds.
 // When a sound is played, it is moved to the head, so that the oldest

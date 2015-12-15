@@ -1011,7 +1011,7 @@ void I_GetEvent(void)
                 break;
 #ifdef SDL2
             case SDL_MOUSEWHEEL:
-                if (mouseSensitivity || menuactive || consoleactive)
+                if (mouseSensitivity >= 0 || menuactive || consoleactive)
                 {
 //                    keydown = 0;
                     event.type = ev_mousewheel;
@@ -2607,12 +2607,8 @@ void I_InitGammaTables(void)
     int j;
 
     for (i = 0; i < GAMMALEVELS; i++)
-        if (gammalevels[i] == 1.0)
-            for (j = 0; j < 256; j++)
-                gammatable[i][j] = j;
-        else
-            for (j = 0; j < 256; j++)
-                gammatable[i][j] = (byte)(pow((j + 1) / 256.0, 1.0 / gammalevels[i]) * 255.0);
+        for (j = 0; j < 256; j++)
+            gammatable[i][j] = (byte)(pow(j / 255.0, 1.0 / gammalevels[i]) * 255.0);
 }
 
 void I_InitGraphics(void)

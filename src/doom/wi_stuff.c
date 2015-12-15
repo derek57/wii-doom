@@ -453,9 +453,11 @@ extern dboolean                 opl;
 void WI_slamBackground(void)
 {
     V_DrawPatch(0, 0, background);
-
+/*
+    // THIS IS WORKING AS IT SHOULD BUT IN THE REAL PR BETA, IT WASN'T IMPLEMENTED
     if(beta_style && gameepisode == 1)
         V_DrawPatch(232, 168, W_CacheLumpName("WILVBX", PU_CACHE));
+*/
 }
 
 // The ticker is used to detect keys
@@ -540,6 +542,8 @@ void WI_drawLF(void)
             // draw <LevelName> 
             if(beta_style && gameepisode == 1 && gamemap < 10)
             {
+/*
+                // THIS IS WORKING AS IT SHOULD BUT IN THE REAL PR BETA, IT WASN'T IMPLEMENTED
                 if(fsize != 12538385 || (fsize == 12538385 && gamemap != 10))
                 {
                     if(font_shadow == 1)
@@ -547,6 +551,7 @@ void WI_drawLF(void)
                     else
                         V_DrawPatch(232, 176, lnames[wbs->last]);
                 }
+*/
             }
             else
             {
@@ -652,10 +657,13 @@ void WI_drawEL(void)
         // draw level
         if(beta_style && gameepisode == 1 && gamemap < 10)
         {
+/*
+            // THIS IS WORKING AS IT SHOULD BUT IN THE REAL PR BETA, IT WASN'T IMPLEMENTED
             if(font_shadow == 1)
                 V_DrawPatchWithShadow(232, 176, lnames[wbs->next], false);
             else
                 V_DrawPatch(232, 176, lnames[wbs->next]);
+*/
         }
         else
         {
@@ -1002,7 +1010,6 @@ void WI_drawShowNextLoc(void)
 
     if ( gamemode != commercial)
     {
-        int           i;
         int           last;
 
         if (wbs->epsd > 2)
@@ -1018,8 +1025,12 @@ void WI_drawShowNextLoc(void)
 
         // draw a splat on taken cities.
         if(!beta_style)
+        {
+            int i;
+
             for (i=0 ; i<=last ; i++)
                 WI_drawOnLnode(i, splat);
+        }
 
         // splat the secret level?
         if (wbs->didsecret)
@@ -1807,7 +1818,7 @@ void WI_drawStats(void)
         else
             V_DrawPatch(SP_TIMEX, SP_TIMEY, timepatch);
     }
-printf("%d\n",cnt_bonus);
+
     // CHANGED FOR HIRES
     if(beta_style)
     {
@@ -1818,15 +1829,28 @@ printf("%d\n",cnt_bonus);
     else
         WI_drawTime(ORIGWIDTH/2 - SP_TIMEX, SP_TIMEY, cnt_time);
 
-    if (wbs->epsd < 3 && !beta_style)
+    if (wbs->epsd < 3)
     {
         // CHANGED FOR HIRES
         if(font_shadow == 1)
             V_DrawPatchWithShadow(ORIGWIDTH/2 + SP_TIMEX, SP_TIMEY, par, false);
         else
-            V_DrawPatch(ORIGWIDTH/2 + SP_TIMEX, SP_TIMEY, par);
-        // CHANGED FOR HIRES
-        WI_drawTime(ORIGWIDTH - SP_TIMEX, SP_TIMEY, cnt_par);
+        {
+            if(beta_style)
+            {
+                V_DrawPatch(ORIGWIDTH/2 + SP_TIMEX, SP_TIMEY - 24, par);
+
+                // CHANGED FOR HIRES
+                WI_drawTime(ORIGWIDTH - SP_TIMEX, SP_TIMEY - 24, cnt_par);
+            }
+            else
+            {
+                V_DrawPatch(ORIGWIDTH/2 + SP_TIMEX, SP_TIMEY, par);
+
+                // CHANGED FOR HIRES
+                WI_drawTime(ORIGWIDTH - SP_TIMEX, SP_TIMEY, cnt_par);
+            }
+        }
     }
 
 }
@@ -1942,9 +1966,12 @@ static void WI_loadUnloadData(load_callback_t callback)
     {
         for (i=0 ; i<NUMMAPS ; i++)
         {
+/*
+            // THIS IS WORKING AS IT SHOULD BUT IN THE REAL PR BETA, IT WASN'T IMPLEMENTED
             if(beta_style && gameepisode == 1)
                 M_snprintf(name, 9, "WIBLV0%d", i);
             else
+*/
                 M_snprintf(name, 9, "WILV%d%d", wbs->epsd, i);
             callback(name, &lnames[i]);
         }

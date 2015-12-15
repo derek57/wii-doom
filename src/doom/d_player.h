@@ -209,6 +209,22 @@ typedef struct player_s
     // This avoids anomolies with such things as Boom ice and conveyors.
     fixed_t              momx, momy;
 
+    weapontype_t         preferredshotgun;
+    int                  shotguns;
+    weapontype_t         fistorchainsaw;
+    dboolean             invulnbeforechoppers;
+    dboolean             chainsawbeforechoppers;
+    weapontype_t         weaponbeforechoppers;
+
+    // For playerstats cmd
+    int                  damageinflicted;
+    int                  damagereceived;
+    int                  cheated;
+    int                  shotshit;
+    int                  shotsfired;
+    int                  deaths;
+    int                  mobjcount[NUMMOBJTYPES];
+
 } player_t;
 
 

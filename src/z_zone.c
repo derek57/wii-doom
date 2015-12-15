@@ -958,11 +958,16 @@ void *Z_Malloc(size_t size, int tag, void **user)
     return block;
 }
 
+void *Z_Calloc(size_t n1, size_t n2, int32_t tag, void **user)
+{
+    return ((n1 *= n2) ? memset(Z_Malloc(n1, tag, user), 0, n1) : NULL);
+}
+
 void *Z_Realloc(void *ptr, size_t size)
 {
     void        *newp = realloc(ptr, size);
 
-    if (!newp)
+    if (!newp && size) 
         I_Error("Z_Realloc: Failure trying to reallocate %i bytes", size);
     else
         ptr = newp;
@@ -1935,8 +1940,9 @@ void* Z_MallocAlign (int reqsize, int32_t tag, void **user, int alignbits)
     }
 
 #ifndef DOOMRETRO_ZONE_HANDLING
+#ifndef BOOM_ZONE_HANDLING
     mainzone->size += memalloc_size;
-
+#endif
     newblock->id = ZONEID;
 #endif
 

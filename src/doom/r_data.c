@@ -308,7 +308,7 @@ void R_DrawColumnInCache(const column_t *patch, byte *cache, int originy, int ca
 //
 static void R_GenerateComposite(int texnum)
 {
-    byte                *block = Z_Malloc(texturecompositesize[texnum], PU_STATIC,
+    byte                *block = Z_Calloc(1, texturecompositesize[texnum], PU_STATIC, 
                             (void **)&texturecomposite[texnum]);
     texture_t           *texture = textures[texnum];
 
@@ -323,9 +323,6 @@ static void R_GenerateComposite(int texnum)
     byte                *source;
 
     dboolean             tekwall1 = (texnum == R_CheckTextureNumForName("TEKWALL1"));
-
-    // [crispy] initialize composite background to black (index 0)
-    memset(block, 0, texturecompositesize[texnum]);
 
     for (i = texture->patchcount; --i >= 0; ++patch)
     {
@@ -542,11 +539,9 @@ byte *R_GetColumn(int tex, int col, dboolean opaque)
 
 static void GenerateTextureHashTable(void)
 {
-    int         i;
+    int i;
 
-    textures_hashtable = Z_Malloc(sizeof(texture_t *) * numtextures, PU_STATIC, 0);
-
-    memset(textures_hashtable, 0, sizeof(texture_t *) * numtextures);
+    textures_hashtable = Z_Calloc(numtextures, sizeof(texture_t *), PU_STATIC, 0); 
 
     // Add all textures to hash table
     for (i = 0; i < numtextures; ++i)
@@ -755,8 +750,8 @@ void R_InitTextures(void)
         texturelumps[i].pnamesoffset = 0;
         for (j = 0; j < numpnameslumps; ++j)
             // [crispy] both point to the same WAD file name string?
-            if (lumpinfo[texturelumps[i].lumpnum]->wad_file->path ==
-                lumpinfo[pnameslumps[j].lumpnum]->wad_file->path)
+            if (M_StringCompare(lumpinfo[texturelumps[i].lumpnum]->wad_file->path,
+                lumpinfo[pnameslumps[j].lumpnum]->wad_file->path))
             {
                 texturelumps[i].pnamesoffset = pnameslumps[j].summappatches;
                 break;
@@ -814,7 +809,7 @@ void R_InitTextures(void)
         if (!i || i == texturelump->sumtextures)
         {
             // [crispy] start looking in next texture file
-            texturelump++;
+            ++texturelump;
             maptex = texturelump->maptex;
             maxoff = texturelump->maxoff;
             directory = maptex + 1;
@@ -840,14 +835,12 @@ void R_InitTextures(void)
 
         for (j = 0; j < texture->patchcount; ++j, ++mpatch, ++patch)
         {
-            short       p;
+            // [crispy] apply offset for patches not in the
+            // first available patch offset table
+            short       p = SHORT(mpatch->patch) + texturelump->pnamesoffset;
 
             patch->originx = SHORT(mpatch->originx);
             patch->originy = SHORT(mpatch->originy);
-
-            // [crispy] apply offset for patches not in the
-            // first available patch offset table
-            p = SHORT(mpatch->patch) + texturelump->pnamesoffset;
 
             // [crispy] catch out-of-range patches
             if (p < nummappatches)
@@ -908,7 +901,7 @@ void R_InitTextures(void)
 
             if (num != -1)
                 texturefullbright[num] = fullbright[i].colormask;
-            i++;
+            ++i;
         }
     }
 

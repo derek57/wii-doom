@@ -32,84 +32,84 @@
 #define __P_SPEC__
 
 
-#define GLOWSPEED               8
-#define STROBEBRIGHT            5
-#define FASTDARK                15
-#define SLOWDARK                35
-#define PLATWAIT                3
-#define PLATSPEED               FRACUNIT
-#define MAXPLATS                30*256        // CHANGED FOR HIRES
-#define VDOORSPEED              FRACUNIT*2
-#define VDOORWAIT               150
-#define CEILSPEED               FRACUNIT
-#define CEILWAIT                150
-#define MAXCEILINGS             30
-#define FLOORSPEED              FRACUNIT
+#define GLOWSPEED                  8
+#define STROBEBRIGHT               5
+#define FASTDARK                   15
+#define SLOWDARK                   35
+#define PLATWAIT                   3
+#define PLATSPEED                  FRACUNIT
+#define MAXPLATS                   30*256        // CHANGED FOR HIRES
+#define VDOORSPEED                 FRACUNIT*2
+#define VDOORWAIT                  150
+#define CEILSPEED                  FRACUNIT
+#define CEILWAIT                   150
+#define MAXCEILINGS                30
+#define FLOORSPEED                 FRACUNIT
 
  // max # of wall switches in a level
-#define MAXSWITCHES             100
+#define MAXSWITCHES                100
 
  // 4 players, 4 buttons each at once, max.
-#define MAXBUTTONS              32
+#define MAXBUTTONS                 32
 
  // 1 second, in ticks. 
-#define BUTTONTIME              35             
+#define BUTTONTIME                 35             
 
 //      Define values for map objects
-#define MO_TELEPORTMAN          14
+#define MO_TELEPORTMAN             14
 
-#define FRICTION_MASK           0x100
+#define FRICTION_MASK              0x100
 
-#define ELEVATORSPEED           (FRACUNIT * 4)
+#define ELEVATORSPEED              (FRACUNIT * 4)
 
 // jff 02/04/98 Define masks, shifts, for fields in 
 // generalized linedef types
-#define GenFloorBase          0x6000
-#define GenCeilingBase        0x4000
-#define GenDoorBase           0x3c00
-#define GenLockedBase         0x3800
-#define GenLiftBase           0x3400
-#define GenStairsBase         0x3000
-#define GenCrusherBase        0x2F80
+#define GenFloorBase               0x6000
+#define GenCeilingBase             0x4000
+#define GenDoorBase                0x3c00
+#define GenLockedBase              0x3800
+#define GenLiftBase                0x3400
+#define GenStairsBase              0x3000
+#define GenCrusherBase             0x2F80
 
-#define TriggerType           0x0007
-#define TriggerTypeShift      0
+#define TriggerType                0x0007
+#define TriggerTypeShift           0
 
 // define masks and shifts for the floor type fields
-#define FloorCrush            0x1000
-#define FloorChange           0x0c00
-#define FloorTarget           0x0380
-#define FloorDirection        0x0040
-#define FloorModel            0x0020
-#define FloorSpeed            0x0018
+#define FloorCrush                 0x1000
+#define FloorChange                0x0c00
+#define FloorTarget                0x0380
+#define FloorDirection             0x0040
+#define FloorModel                 0x0020
+#define FloorSpeed                 0x0018
 
-#define FloorCrushShift           12
-#define FloorChangeShift          10
+#define FloorCrushShift            12
+#define FloorChangeShift           10
 #define FloorTargetShift           7
 #define FloorDirectionShift        6
 #define FloorModelShift            5
 #define FloorSpeedShift            3
 
 // define masks and shifts for the ceiling type fields
-#define CeilingCrush          0x1000
-#define CeilingChange         0x0c00
-#define CeilingTarget         0x0380
-#define CeilingDirection      0x0040
-#define CeilingModel          0x0020
-#define CeilingSpeed          0x0018
+#define CeilingCrush               0x1000
+#define CeilingChange              0x0c00
+#define CeilingTarget              0x0380
+#define CeilingDirection           0x0040
+#define CeilingModel               0x0020
+#define CeilingSpeed               0x0018
 
-#define CeilingCrushShift         12
-#define CeilingChangeShift        10
+#define CeilingCrushShift          12
+#define CeilingChangeShift         10
 #define CeilingTargetShift         7
 #define CeilingDirectionShift      6
 #define CeilingModelShift          5
 #define CeilingSpeedShift          3
 
 // define masks and shifts for the lift type fields
-#define LiftTarget            0x0300
-#define LiftDelay             0x00c0
-#define LiftMonster           0x0020
-#define LiftSpeed             0x0018
+#define LiftTarget                 0x0300
+#define LiftDelay                  0x00c0
+#define LiftMonster                0x0020
+#define LiftSpeed                  0x0018
 
 #define LiftTargetShift            8
 #define LiftDelayShift             6
@@ -117,11 +117,11 @@
 #define LiftSpeedShift             3
 
 // define masks and shifts for the stairs type fields
-#define StairIgnore           0x0200
-#define StairDirection        0x0100
-#define StairStep             0x00c0
-#define StairMonster          0x0020
-#define StairSpeed            0x0018
+#define StairIgnore                0x0200
+#define StairDirection             0x0100
+#define StairStep                  0x00c0
+#define StairMonster               0x0020
+#define StairSpeed                 0x0018
 
 #define StairIgnoreShift           9
 #define StairDirectionShift        8
@@ -130,19 +130,19 @@
 #define StairSpeedShift            3
 
 // define masks and shifts for the crusher type fields
-#define CrusherSilent         0x0040
-#define CrusherMonster        0x0020
-#define CrusherSpeed          0x0018
+#define CrusherSilent              0x0040
+#define CrusherMonster             0x0020
+#define CrusherSpeed               0x0018
 
 #define CrusherSilentShift         6
 #define CrusherMonsterShift        5
 #define CrusherSpeedShift          3
 
 // define masks and shifts for the door type fields
-#define DoorDelay             0x0300
-#define DoorMonster           0x0080
-#define DoorKind              0x0060
-#define DoorSpeed             0x0018
+#define DoorDelay                  0x0300
+#define DoorMonster                0x0080
+#define DoorKind                   0x0060
+#define DoorSpeed                  0x0018
 
 #define DoorDelayShift             8
 #define DoorMonsterShift           7
@@ -150,10 +150,10 @@
 #define DoorSpeedShift             3
 
 // define masks and shifts for the locked door type fields
-#define LockedNKeys           0x0200
-#define LockedKey             0x01c0
-#define LockedKind            0x0020
-#define LockedSpeed           0x0018
+#define LockedNKeys                0x0200
+#define LockedKey                  0x01c0
+#define LockedKind                 0x0020
+#define LockedSpeed                0x0018
 
 #define LockedNKeysShift           9
 #define LockedKeyShift             6
@@ -314,20 +314,6 @@ typedef enum
     numChangeOnly
 } change_e;
 
-
-extern dboolean   *isliquid;
-extern dboolean   *isteleport;
-
-
-dboolean EV_DoGenFloor(line_t *line);
-dboolean EV_DoGenCeiling(line_t *line);
-dboolean EV_DoGenLift(line_t *line);
-dboolean EV_DoGenStairs(line_t *line);
-dboolean EV_DoGenCrusher(line_t *line);
-dboolean EV_DoGenDoor(line_t *line);
-dboolean EV_DoGenLockedDoor(line_t *line);
-
-
 //
 // P_LIGHTS
 //
@@ -341,8 +327,6 @@ typedef struct
     
 } fireflicker_t;
 
-
-
 typedef struct
 {
     thinker_t    thinker;
@@ -351,11 +335,9 @@ typedef struct
     int          maxlight;
     int          minlight;
     int          maxtime;
-    int                mintime;
+    int          mintime;
     
 } lightflash_t;
-
-
 
 typedef struct
 {
@@ -368,9 +350,6 @@ typedef struct
     int          brighttime;
     
 } strobe_t;
-
-
-
 
 typedef struct
 {
@@ -407,8 +386,6 @@ typedef enum
     genBlazeCdO
 
 } vldoor_e;
-
-
 
 typedef struct
 {
@@ -495,9 +472,6 @@ typedef enum
 
 } floor_e;
 
-
-
-
 typedef enum
 {
     build8,        // slowly build by 8
@@ -505,24 +479,20 @@ typedef enum
     
 } stair_e;
 
-
-
 typedef struct
 {
     thinker_t    thinker;
     floor_e      type;
-    dboolean      crush;
+    dboolean     crush;
     sector_t*    sector;
     int          direction;
     int          newspecial;
     short        texture;
     fixed_t      floordestheight;
     fixed_t      speed;
-    dboolean      stopsound;
+    dboolean     stopsound;
 
 } floormove_t;
-
-
 
 typedef enum
 {
@@ -557,8 +527,6 @@ typedef enum
     genSilentCrusher
 
 } ceiling_e;
-
-
 
 typedef struct
 {
@@ -612,7 +580,6 @@ typedef enum
 
 } bwhere_e;
 
-
 typedef struct
 {
     line_t*      line;
@@ -622,7 +589,6 @@ typedef struct
     degenmobj_t  *soundorg;
 
 } button_t;
-
 
 //
 // P_PLATS
@@ -636,8 +602,6 @@ typedef enum
 
 } plat_e;
 
-
-
 typedef enum
 {
     perpetualRaise,
@@ -650,8 +614,6 @@ typedef enum
     toggleUpDn
 
 } plattype_e;
-
-
 
 typedef struct
 {
@@ -745,9 +707,12 @@ typedef struct msecnode_s
     struct msecnode_s   *m_tnext;       // next msecnode_t for this thing
     struct msecnode_s   *m_sprev;       // prev msecnode_t for this sector
     struct msecnode_s   *m_snext;       // next msecnode_t for this sector
+    dboolean            visited;        // killough 4/4/98, 4/7/98: used in search algorithms
 } msecnode_t;
 
+
 button_t   buttonlist[MAXBUTTONS]; 
+
 
 // Temporary holder for thing_sectorlist threads
 extern msecnode_t      *sector_list;    // phares 3/16/98
@@ -755,18 +720,12 @@ extern msecnode_t      *sector_list;    // phares 3/16/98
 // Maintain a freelist of msecnode_t's to reduce memory allocs and frees.
 extern msecnode_t      *headsecnode;
 
-void P_CreateSecNodeList(mobj_t *thing, fixed_t x, fixed_t y);
-void P_FreeSecNodeList(void);
-void P_DelSeclist(msecnode_t *node);
-
-void T_Pusher(pusher_t *);      // phares 3/20/98: Push thinker
-mobj_t *P_GetPushThing(int);
-
-
 //
 // End-level timer (-TIMER option)
 //
-extern dboolean    levelTimer;
+extern dboolean   levelTimer;
+extern dboolean   *isliquid;
+extern dboolean   *isteleport;
 
 extern int        levelTimeCount;
 
@@ -774,143 +733,116 @@ extern platlist_t *activeplats; // killough
 
 extern ceilinglist_t* activeceilings;
 
-// at game start
-void    P_InitPicAnims (void);
 
-// at map load
-void    P_SpawnSpecials (void);
+//
+// P_TELEPT
+//
+int         EV_Teleport(line_t* line, int side, mobj_t* thing);
+int         EV_BuildStairs(line_t *line, stair_e type);
+int         EV_DoFloor(line_t *line, floor_e floortype);
+int         twoSided(int sector, int line);
+int         P_FindSectorFromLineTag(const line_t *line, int start);
+int         P_FindMinSurroundingLight(sector_t* sector, int max);
+int         EV_StartLightStrobing(line_t *line);
+int         EV_TurnTagLightsOff(line_t* line);
+int         EV_LightTurnOn(line_t* line, int bright);
+int         EV_DoPlat(line_t* line, plattype_e type, int amount);
+int         EV_DoDoor(line_t *line, vldoor_e type);
+int         EV_DoLockedDoor(line_t *line, vldoor_e type, mobj_t *thing);
+int         EV_DoCeiling(line_t *line, ceiling_e type);
 
-// every tic
-void    P_UpdateSpecials (void);
-
-void P_ResurrectPlayer(player_t *player);
-
-// when needed
-dboolean
-P_UseSpecialLine
-( mobj_t*        thing,
-  line_t*        line,
-  int            side );
-
-void
-P_ShootSpecialLine
-( mobj_t*        thing,
-  line_t*        line );
-
-void P_CrossSpecialLine(line_t *line, int side, mobj_t *thing);
-
-void    P_PlayerInSpecialSector (player_t* player);
-
-int
-twoSided
-( int            sector,
-  int            line );
-
-sector_t*
-getSector
-( int            currentSector,
-  int            line,
-  int            side );
-
-side_t*
-getSide
-( int            currentSector,
-  int            line,
-  int            side );
-
-fixed_t P_FindLowestFloorSurrounding(sector_t* sec);
-fixed_t P_FindHighestFloorSurrounding(sector_t* sec);
-
-fixed_t
-P_FindNextHighestFloor
-( sector_t*      sec,
-  int            currentheight );
-
-fixed_t P_FindNextLowestFloor(sector_t *sec, int currentheight);
-
-fixed_t P_FindLowestCeilingSurrounding(sector_t* sec);
-fixed_t P_FindHighestCeilingSurrounding(sector_t* sec);
-
-int P_FindSectorFromLineTag(const line_t *line, int start);
-
-int
-P_FindMinSurroundingLight
-( sector_t*      sector,
-  int            max );
-
-sector_t*
-getNextSector
-( line_t*        line,
-  sector_t*      sec );
-
+mobj_t      *P_GetPushThing(int);
 
 //
 // SPECIAL
 //
-dboolean EV_DoDonut(line_t* line);
-
-void    P_SpawnFireFlicker (sector_t* sector);
-void    T_LightFlash (lightflash_t* flash);
-void    P_SpawnLightFlash (sector_t* sector);
-void    T_StrobeFlash (strobe_t* flash);
-
-void
-P_SpawnStrobeFlash
-( sector_t*      sector,
-  int            fastOrSlow,
-  int            inSync );
-
-int EV_StartLightStrobing(line_t *line);
-int    EV_TurnTagLightsOff(line_t* line);
-
-int
-EV_LightTurnOn
-( line_t*        line,
-  int            bright );
-
-void    T_Glow(glow_t* g);
-void    P_SpawnGlowingLight(sector_t* sector);
-
-void
-P_ChangeSwitchTexture
-( line_t*        line,
-  int            useAgain );
-
-void P_InitSwitchList(void);
-
-
-void    T_PlatRaise(plat_t*        plat);
-
-int
-EV_DoPlat
-( line_t*        line,
-  plattype_e     type,
-  int            amount );
-
-void    P_AddActivePlat(plat_t* plat);
-void    P_RemoveActivePlat(plat_t* plat);
+dboolean    EV_DoDonut(line_t* line);
+dboolean    EV_SilentTeleport(line_t *line, int side, mobj_t *thing);
+dboolean    EV_SilentLineTeleport(line_t *line, int side, mobj_t *thing, dboolean reverse);
+dboolean    P_CanUnlockGenDoor(line_t *line, player_t *player);
+dboolean    P_SectorActive(special_e t, sector_t *sec);
+dboolean    EV_DoChange(line_t *line, change_e changetype);
+dboolean    EV_DoElevator(line_t *line, elevator_e elevtype);
 dboolean    EV_StopPlat(line_t* line);
-void    P_ActivateInStasis(int tag);
+dboolean    P_CheckLineSide(mobj_t *actor, fixed_t x, fixed_t y);
+dboolean    P_CheckTag(line_t *line);
+dboolean    EV_CeilingCrushStop(line_t* line);
+dboolean    P_ActivateInStasisCeiling(line_t* line);
 
-void
-EV_VerticalDoor
-( line_t*        line,
-  mobj_t*        thing );
+// when needed
+dboolean    P_UseSpecialLine(mobj_t* thing, line_t* line, int side);
+dboolean    EV_DoGenFloor(line_t *line);
+dboolean    EV_DoGenCeiling(line_t *line);
+dboolean    EV_DoGenLift(line_t *line);
+dboolean    EV_DoGenStairs(line_t *line);
+dboolean    EV_DoGenCrusher(line_t *line);
+dboolean    EV_DoGenDoor(line_t *line);
+dboolean    EV_DoGenLockedDoor(line_t *line);
 
-int EV_DoDoor(line_t *line, vldoor_e type);
+// at game start
+void        P_InitPicAnims (void);
 
-int EV_DoLockedDoor(line_t *line, vldoor_e type, mobj_t *thing);
+// at map load
+void        P_SpawnSpecials (void);
+void        P_SetLiquids(void); 
 
-void    T_VerticalDoor (vldoor_t* door);
-void    P_SpawnDoorCloseIn30 (sector_t* sec);
+// every tic
+void        P_UpdateSpecials (void);
+void        P_ResurrectPlayer(player_t *player);
+void        P_ShootSpecialLine(mobj_t* thing, line_t* line);
+void        P_CrossSpecialLine(line_t *line, int side, mobj_t *thing);
+void        P_PlayerInSpecialSector (player_t* player);
+void        P_SpawnFireFlicker (sector_t* sector);
+void        T_LightFlash (lightflash_t* flash);
+void        P_SpawnLightFlash (sector_t* sector);
+void        T_StrobeFlash (strobe_t* flash);
+void        P_SpawnStrobeFlash(sector_t* sector, int fastOrSlow, int inSync);
+void        T_Glow(glow_t* g);
+void        P_SpawnGlowingLight(sector_t* sector);
+void        P_ChangeSwitchTexture(line_t* line, int useAgain);
+void        P_InitSwitchList(void);
+void        T_PlatRaise(plat_t* plat);
+void        P_AddActivePlat(plat_t* plat);
+void        P_RemoveActivePlat(plat_t* plat);
+void        P_ActivateInStasis(int tag);
+void        EV_VerticalDoor(line_t* line, mobj_t* thing);
+void        T_VerticalDoor (vldoor_t* door);
+void        P_SpawnDoorCloseIn30 (sector_t* sec);
+void        P_SpawnDoorRaiseIn5Mins(sector_t* sec);
+void        T_MoveCeiling (ceiling_t* ceiling);
+void        P_AddActiveCeiling(ceiling_t* c);
+void        P_RemoveActiveCeiling(ceiling_t* c);
+void        P_RemoveAllActiveCeilings(void);
+void        P_RemoveAllActivePlats(void);
+void        T_MoveFloor( floormove_t* floor);
+void        T_MoveElevator(elevator_t *elevator);
+void        T_Scroll(scroll_t *s);
+void        T_FireFlicker(fireflicker_t *flick);
+void        P_StartButton(line_t *line, bwhere_e w, int texture, int time);
+void        P_CreateSecNodeList(mobj_t *thing, fixed_t x, fixed_t y);
+void        P_FreeSecNodeList(void);
+void        P_DelSeclist(msecnode_t *node);
+void        T_Pusher(pusher_t *);      // phares 3/20/98: Push thinker
 
-void
-P_SpawnDoorRaiseIn5Mins
-( sector_t*      sec);
+sector_t*   getSector(int currentSector, int line, int side);
+sector_t*   getNextSector(line_t* line, sector_t* sec);
+sector_t*   P_FindModelFloorSector(fixed_t floordestheight, int secnum); //jff 02/04/98
+sector_t*   P_FindModelCeilingSector(fixed_t ceildestheight, int secnum); //jff 02/04/98 
 
-dboolean P_CheckLineSide(mobj_t *actor, fixed_t x, fixed_t y);
+side_t*     getSide(int currentSector, int line, int side);
 
-dboolean P_CheckTag(line_t *line);
+fixed_t     P_FindLowestFloorSurrounding(sector_t* sec);
+fixed_t     P_FindHighestFloorSurrounding(sector_t* sec);
+fixed_t     P_FindNextHighestFloor(sector_t* sec, int currentheight);
+fixed_t     P_FindNextLowestFloor(sector_t *sec, int currentheight);
+fixed_t     P_FindLowestCeilingSurrounding(sector_t* sec);
+fixed_t     P_FindHighestCeilingSurrounding(sector_t* sec);
+fixed_t     P_FindNextLowestCeiling(sector_t *sec, int currentheight); // jff 2/04/98
+fixed_t     P_FindNextHighestCeiling(sector_t *sec, int currentheight); // jff 2/04/98
+fixed_t     P_FindShortestTextureAround(int secnum); // jff 2/04/98
+fixed_t     P_FindShortestUpperAround(int secnum); // jff 2/04/98
+
+result_e    T_MovePlane(sector_t *sector, fixed_t speed, fixed_t dest, dboolean crush, int floorOrCeiling, int direction);
 
 
 #if 0 // UNUSED
@@ -994,53 +926,5 @@ EV_SlidingDoor
   mobj_t*        thing );
 #endif
 
-
-int EV_DoCeiling(line_t *line, ceiling_e type);
-
-void    T_MoveCeiling (ceiling_t* ceiling);
-void    P_AddActiveCeiling(ceiling_t* c);
-void    P_RemoveActiveCeiling(ceiling_t* c);
-dboolean    EV_CeilingCrushStop(line_t* line);
-dboolean    P_ActivateInStasisCeiling(line_t* line);
-
-void P_RemoveAllActiveCeilings(void);
-void P_RemoveAllActivePlats(void);
-
-
-result_e T_MovePlane(sector_t *sector, fixed_t speed, fixed_t dest, dboolean crush,
-    int floorOrCeiling, int direction);
-
-int EV_BuildStairs(line_t *line, stair_e type);
-
-int EV_DoFloor(line_t *line, floor_e floortype);
-
-void T_MoveFloor( floormove_t* floor);
-void T_MoveElevator(elevator_t *elevator);
-void T_Scroll(scroll_t *s);
-void T_FireFlicker(fireflicker_t *flick);
-
-dboolean EV_SilentTeleport(line_t *line, int side, mobj_t *thing);
-dboolean EV_SilentLineTeleport(line_t *line, int side, mobj_t *thing, dboolean reverse);
-
-fixed_t P_FindNextLowestCeiling(sector_t *sec, int currentheight); // jff 2/04/98
-fixed_t P_FindNextHighestCeiling(sector_t *sec, int currentheight); // jff 2/04/98
-fixed_t P_FindShortestTextureAround(int secnum); // jff 2/04/98
-fixed_t P_FindShortestUpperAround(int secnum); // jff 2/04/98
-sector_t *P_FindModelFloorSector(fixed_t floordestheight, int secnum); //jff 02/04/98
-sector_t *P_FindModelCeilingSector(fixed_t ceildestheight, int secnum); //jff 02/04/98 
-dboolean P_CanUnlockGenDoor(line_t *line, player_t *player);
-dboolean P_SectorActive(special_e t, sector_t *sec);
-dboolean EV_DoChange(line_t *line, change_e changetype);
-dboolean EV_DoElevator(line_t *line, elevator_e elevtype);
-void P_StartButton(line_t *line, bwhere_e w, int texture, int time);
-
-//
-// P_TELEPT
-//
-int
-EV_Teleport
-( line_t*        line,
-  int            side,
-  mobj_t*        thing );
 
 #endif

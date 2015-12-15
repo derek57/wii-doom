@@ -72,13 +72,17 @@ extern int key_useartifact;
 // Location where all configuration data is stored - 
 // default.cfg, savegames, etc.
 
-char *configdir;
+char        *configdir;
 
 // Default filenames for configuration files.
 
 static char *default_main_config;
 
-default_t        doom_defaults_list[] =
+
+extern char *pwadfile;
+
+
+default_t   doom_defaults_list[] =
 {
     CONFIG_VARIABLE_INT                (sfx_volume),
     CONFIG_VARIABLE_INT                (music_volume),
@@ -178,6 +182,12 @@ default_t        doom_defaults_list[] =
     CONFIG_VARIABLE_INT                (icon_type),
     CONFIG_VARIABLE_INT                (colored_player_corpses),
     CONFIG_VARIABLE_INT                (endoom_screen),
+    CONFIG_VARIABLE_INT                (low_health),
+    CONFIG_VARIABLE_INT                (wiggle_fix),
+    CONFIG_VARIABLE_INT                (mouse_sensitivity),
+    CONFIG_VARIABLE_INT                (slime_trails),
+    CONFIG_VARIABLE_INT                (max_bloodsplats),
+    CONFIG_VARIABLE_INT                (center_weapon),
     CONFIG_VARIABLE_INT                (key_shoot),
     CONFIG_VARIABLE_INT                (key_open),
     CONFIG_VARIABLE_INT                (key_menu),
@@ -676,7 +686,6 @@ void M_SetConfigDir(char *dir)
 // Calculate the path to the directory to use to store save games.
 // Creates the directory as necessary.
 //
-
 char *M_GetSaveGameDir(char *iwadname)
 {
     char *savegamedir = NULL;
@@ -1033,6 +1042,13 @@ char *M_GetSaveGameDir(char *iwadname)
 
         free(topdir);
 #endif
+
+        if(modifiedgame)
+            savegamedir = M_StringJoin(savegamedir, pwadfile,
+                DIR_SEPARATOR_S, NULL);
+
+        M_MakeDirectory(savegamedir);
+
         C_Output(" Savegames will be saved and loaded in %s.", uppercase(savegamedir));
     }
 

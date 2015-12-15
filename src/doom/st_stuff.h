@@ -44,6 +44,7 @@
 #include "m_cheat.h"
 #endif
 
+#include "v_patch.h"
 
 // Size of statusbar.
 // Now sensitive for scaling.
@@ -51,30 +52,6 @@
 
 #define ST_WIDTH                      ORIGWIDTH
 #define ST_Y                          (ORIGHEIGHT - ST_HEIGHT)
-
-#define ST_X_COORD                    10 * SCREENSCALE / 2
-#define ST_Y_COORD                    311 * SCREENSCALE / 2 + SBARHEIGHT
-
-#define ST_HEALTH_X                   ST_X_COORD
-#define ST_HEALTH_Y                   ST_Y_COORD - 8
-#define ST_HEALTH_MIN                 20
-#define ST_HEALTH_WAIT                8
-#define ST_HEALTH_HIGHLIGHT_WAIT      6
-
-#define ST_AMMO_X                     (ST_X_COORD + 100 * SCREENSCALE / 2)
-#define ST_AMMO_Y                     ST_HEALTH_Y
-#define ST_AMMO_MIN                   20
-#define ST_AMMO_WAIT                  8
-#define ST_AMMO_HIGHLIGHT_WAIT        6
-
-#define ST_KEYS_X                     (SCREENWIDTH - ST_X_COORD - 128 * SCREENSCALE / 2)
-#define ST_KEYS_Y                     ST_HEALTH_Y
-
-#define ST_ARMOR_X                    (SCREENWIDTH - ST_X_COORD)
-#define ST_ARMOR_Y                    ST_HEALTH_Y
-#define ST_ARMOR_HIGHLIGHT_WAIT       6
-
-#define ST_KEY_WAIT                   8
 
 
 //
@@ -119,11 +96,11 @@ typedef enum
 } st_chatstateenum_t;
 
 
-extern int      healthhighlight;
-extern int      ammohighlight;
-extern int      armorhighlight;
+extern int        healthhighlight;
+extern int        ammohighlight;
+extern int        armorhighlight;
 
-extern byte*    st_backing_screen;
+extern byte*      st_backing_screen;
 
 extern cheatseq_t cheat_mus;
 extern cheatseq_t cheat_massacre;
@@ -136,5 +113,15 @@ extern cheatseq_t cheat_powerup[7];
 extern cheatseq_t cheat_choppers;
 extern cheatseq_t cheat_clev;
 extern cheatseq_t cheat_mypos;
+
+extern patch_t    *grnrock;
+extern patch_t    *brdr_t;
+extern patch_t    *brdr_b;
+extern patch_t    *brdr_l;
+extern patch_t    *brdr_r;
+extern patch_t    *brdr_tl;
+extern patch_t    *brdr_tr;
+extern patch_t    *brdr_bl;
+extern patch_t    *brdr_br;
 
 #endif

@@ -1248,6 +1248,7 @@ void A_FaceTarget (mobj_t* actor)
     if (actor->target->flags & MF_SHADOW)
         actor->angle += (P_Random()-P_Random())<<21;
 
+    // [BH] update shadow angle 
     if (actor->shadow)
         actor->shadow->angle = actor->angle;
 }
@@ -1264,8 +1265,8 @@ void A_PosAttack (mobj_t* actor)
     A_FaceTarget (actor);
 
     S_StartSound (actor, sfx_pistol);
-    P_LineAttack(actor, actor->angle, MISSILERANGE,
-        P_AimLineAttack(actor, actor->angle + ((P_Random() - P_Random()) << 20), MISSILERANGE),
+    P_LineAttack(actor, actor->angle, MISSILERANGE, P_AimLineAttack(actor,
+        actor->angle + ((P_Random() - P_Random()) << 20), MISSILERANGE),
         ((P_Random() % 5) + 1) * 3);
 }
 
@@ -1280,9 +1281,8 @@ void A_SPosAttack (mobj_t* actor)
     A_FaceTarget (actor);
 
     for (i=0 ; i<3 ; i++)
-        P_LineAttack(actor, actor->angle + ((P_Random() - P_Random()) << 20),
-            MISSILERANGE, P_AimLineAttack(actor, actor->angle, MISSILERANGE),
-            ((P_Random() % 5) + 1) * 3);
+        P_LineAttack(actor, actor->angle + ((P_Random() - P_Random()) << 20), MISSILERANGE,
+            P_AimLineAttack(actor, actor->angle, MISSILERANGE), ((P_Random() % 5) + 1) * 3);
 }
 
 void A_CPosAttack (mobj_t* actor)
@@ -1358,8 +1358,10 @@ void A_TroopAttack (mobj_t* actor)
         return;
     }
 
-    // launch a missile
+    // [BH] make imp fullbright when launching missile 
     actor->frame |= FF_FULLBRIGHT;
+
+    // launch a missile 
     if(beta_style)
         P_SpawnMissile (actor, actor->target, MT_TROOPSHOT2);
     else
@@ -1389,8 +1391,11 @@ void A_HeadAttack (mobj_t* actor)
         return;
     }
     
-    // launch a missile
+    // [BH] make cacodemon fullbright when launching missile here instead of in its
+    // S_HEAD_ATK3 state so its not fullbright when during its melee attack above.
     actor->frame |= FF_FULLBRIGHT;
+
+    // launch a missile 
     P_SpawnMissile (actor, actor->target, MT_HEADSHOT);
 }
 
@@ -1404,6 +1409,7 @@ void A_CyberAttack (mobj_t* actor)
     A_FaceTarget (actor);
     mo = P_SpawnMissile (actor, actor->target, MT_ROCKET);
 
+    // [BH] give cyberdemon rockets smoke trails 
     if (smoketrails)
         mo->flags2 |= MF2_SMOKETRAIL;
 }
@@ -1421,9 +1427,10 @@ void A_BruisAttack (mobj_t* actor)
         return;
     }
     
-    // launch a missile
+    // [BH] fix baron nobles not facing targets correctly when attacking 
     actor->frame |= FF_FULLBRIGHT;
 
+    // launch a missile
     if(beta_style)
         P_SpawnMissile (actor, actor->target, MT_BETABRUISERSHOT);
     else
@@ -1586,6 +1593,7 @@ dboolean PIT_VileCheck (mobj_t*        thing)
     {
         int height, radius;
 
+        // [BH] fix potential of corpse being resurrected as a "ghost" 
         height = corpsehit->height; // save temporarily
         radius = corpsehit->radius; // save temporarily
         corpsehit->height = corpsehit->info->height;
@@ -1659,8 +1667,9 @@ void A_VileChase (mobj_t* actor)
                         corpsehit->height <<= 2;                      //   |
                     else                                              //   V
                     {
-                        corpsehit->height = info->height; // fix Ghost bug
-                        corpsehit->radius = info->radius; // fix Ghost bug
+                        // fix potential of corpse being resurrected as a "ghost" 
+                        corpsehit->height = info->height;
+                        corpsehit->radius = info->radius;
                     }                                                 // phares
 
                     corpsehit->flags = info->flags;
@@ -1898,7 +1907,6 @@ void A_SkullAttack (mobj_t* actor)
 {
     mobj_t*                dest;
     angle_t                an;
-    int                        dist;
 
     if (!actor->target)
         return;
@@ -1911,18 +1919,13 @@ void A_SkullAttack (mobj_t* actor)
     an = actor->angle >> ANGLETOFINESHIFT;
     actor->momx = FixedMul (SKULLSPEED, finecosine[an]);
     actor->momy = FixedMul (SKULLSPEED, finesine[an]);
-    dist = P_AproxDistance (dest->x - actor->x, dest->y - actor->y);
-    dist = dist / SKULLSPEED;
-    
-    if (dist < 1)
-        dist = 1;
-    actor->momz = (dest->z+(dest->height>>1) - actor->z) / dist;
+
+    actor->momz = (dest->z + (dest->height >> 1) - actor->z) /
+        MAX(1, P_AproxDistance(dest->x - actor->x, dest->y - actor->y) / SKULLSPEED);
 }
 
 void A_BetaSkullAttack (mobj_t* actor)
 {
-    int damage;
-
     if (!actor->target || actor->target->type == MT_SKULL ||
                           actor->target->type == MT_BETASKULL)
         return;
@@ -1930,10 +1933,7 @@ void A_BetaSkullAttack (mobj_t* actor)
     S_StartSound(actor, actor->info->attacksound);
     A_FaceTarget(actor);
 
-//    damage = (P_RandomSMMU(pr_skullfly)%8+1)*actor->info->damage;
-    damage = (P_Random() % 8 + 1) * actor->info->damage;
-
-    P_DamageMobj(actor->target, actor, actor, damage);
+    P_DamageMobj(actor->target, actor, actor, (P_Random() % 8 + 1) * actor->info->damage); 
 }
 
 void A_Stop(mobj_t *actor)
@@ -2451,23 +2451,20 @@ void A_CloseShotgun2 (player_t* player, pspdef_t* psp )
     A_ReFire(player,psp);
 }
 
-
-
-void A_BrainAwake (mobj_t* mo)
+void A_BrainAwake(mobj_t *actor)
 {
-    thinker_t*        thinker;
-    mobj_t*        m;
-        
+    thinker_t           *thinker;
+
     // find all the target spots
     numbraintargets = 0;
     braintargeton = 0;
-        
+
     for (thinker = thinkerclasscap[th_mobj].cnext; thinker != &thinkerclasscap[th_mobj];
         thinker = thinker->cnext)
     {
-        m = (mobj_t *)thinker;
+        mobj_t      *mo = (mobj_t *)thinker;
 
-        if (m->type == MT_BOSSTARGET )
+        if (mo->type == MT_BOSSTARGET)
         {
             // [crispy] remove braintargets limit
             if (numbraintargets == maxbraintargets)
@@ -2482,90 +2479,76 @@ void A_BrainAwake (mobj_t* mo)
                     C_Warning(" R_BrainAwake: Raised braintargets limit to %d.", maxbraintargets);
             }
 
-            braintargets[numbraintargets] = m;
+            braintargets[numbraintargets] = mo;
             numbraintargets++;
         }
     }
-        
-    S_StartSound (NULL,sfx_bossit);
+
+    S_StartSound(NULL, sfx_bossit);
 
     // [crispy] no spawn spots available
     if (numbraintargets == 0)
         numbraintargets = INT_MIN;
 }
 
-
-void A_BrainPain (mobj_t*        mo)
+void A_BrainPain(mobj_t *actor)
 {
-    S_StartSound (NULL,sfx_bospn);
+    S_StartSound(NULL, sfx_bospn);
 }
 
-
-void A_BrainScream (mobj_t*        mo)
+void A_BrainScream(mobj_t *actor)
 {
-    int                x;
-    mobj_t*            th;
-        
-    for (x=mo->x - 196*FRACUNIT ; x< mo->x + 320*FRACUNIT ; x+= FRACUNIT*8)
+    int         x;
+
+    // [BH] explosions are correctly centered
+    for (x = actor->x - 258 * FRACUNIT; x < actor->x + 258 * FRACUNIT; x += FRACUNIT * 8)
     {
-        int y = mo->y - 320*FRACUNIT;
-        int z = 128 + P_Random()*2*FRACUNIT;
-        th = P_SpawnMobj (x,y,z, MT_ROCKET);
-        th->momz = P_Random()*512;
+        int     y = actor->y - 320 * FRACUNIT;
+        int     z = 128 + P_Random() * 2 * FRACUNIT;
+        mobj_t  *th = P_SpawnMobj(x, y, z, MT_ROCKET);
 
-        P_SetMobjState (th, S_BRAINEXPLODE1);
-
-        th->tics -= P_Random()&7;
-        if (th->tics < 1)
-            th->tics = 1;
+        th->momz = P_Random() * 512;
+        P_SetMobjState(th, S_BRAINEXPLODE1);
+        th->tics = MAX(1, th->tics - (P_Random() & 7));
     }
-        
-    S_StartSound (NULL,sfx_bosdth);
+
+    S_StartSound(NULL, sfx_bosdth);
 }
 
-
-
-void A_BrainExplode (mobj_t* mo)
+void A_BrainExplode(mobj_t *actor)
 {
-    int                x;
-    int                y;
-    int                z;
-    mobj_t*        th;
-        
-    x = mo->x + (P_Random () - P_Random ())*2048;
-    y = mo->y;
-    z = 128 + P_Random()*2*FRACUNIT;
-    th = P_SpawnMobj (x,y,z, MT_ROCKET);
-    th->momz = P_Random()*512;
+    int         x = actor->x + (P_Random() - P_Random()) * 2048;
+    int         y = actor->y;
+    int         z = 128 + P_Random() * 2 * FRACUNIT;
+    mobj_t      *th = P_SpawnMobj(x, y, z, MT_ROCKET);
 
-    P_SetMobjState (th, S_BRAINEXPLODE1);
-
-    th->tics -= P_Random()&7;
-    if (th->tics < 1)
-        th->tics = 1;
+    th->momz = P_Random() * 512;
+    P_SetMobjState(th, S_BRAINEXPLODE1);
+    th->tics = MAX(1, th->tics - (P_Random() & 7));
 
     // [crispy] brain explosions are translucent
     if(d_translucency)
         th->flags |= MF_TRANSLUCENT;
 }
 
-
-void A_BrainDie (mobj_t*        mo)
+void A_BrainDie(mobj_t *actor)
 {
-    G_ExitLevel ();
+    G_ExitLevel();
 }
 
-void A_BrainSpit (mobj_t*        mo)
+void A_BrainSpit(mobj_t *actor)
 {
-    mobj_t*        targ;
-    mobj_t*        newmobj;
-    
-    static int     easy;
-        
+    mobj_t      *targ;
+
+    static int  easy;
+
     easy ^= 1;
-    if (gameskill <= sk_easy && (!easy))
+    if (gameskill <= sk_easy && !easy)
         return;
-                
+
+    if (nomonsters)
+        return;
+
     // [crispy] avoid division by zero by recalculating the number of spawn spots
     if (numbraintargets == 0)
         A_BrainAwake(NULL);
@@ -2578,99 +2561,120 @@ void A_BrainSpit (mobj_t*        mo)
     targ = braintargets[braintargeton];
     braintargeton = (braintargeton+1)%numbraintargets;
 
-    // spawn brain missile
-    newmobj = P_SpawnMissile (mo, targ, MT_SPAWNSHOT);
-    P_SetTarget(&newmobj->target, targ);
-    newmobj->reactiontime =
-        ((targ->y - mo->y)/newmobj->momy) / newmobj->state->tics;
-
-    S_StartSound(NULL, sfx_bospit);
-}
-
-
-void A_SpawnFly (mobj_t* mo)
-{
-    mobj_t*        newmobj;
-    mobj_t*        fog;
-    mobj_t*        targ;
-    int                r;
-    mobjtype_t        type;
-        
-    if (--mo->reactiontime)
-        return;        // still flying
-        
-    targ = P_SubstNullMobj(mo->target);
-
-    // First spawn teleport fog.
-    fog = P_SpawnMobj (targ->x, targ->y, targ->z, MT_SPAWNFIRE);
-    S_StartSound (fog, sfx_telept);
-
-    // Randomly select monster to spawn.
-    r = P_Random ();
-
-    // Probability distribution (kind of :),
-    // decreasing likelihood.
-    if ( r<50 )
-        type = MT_TROOP;
-    else if (r<90)
-        type = MT_SERGEANT;
-    else if (r<120)
-        type = MT_SHADOWS;
-    else if (r<130)
-        type = MT_PAIN;
-    else if (r<160)
+    if (targ)
     {
-        if(beta_style)
-            type = MT_BETAHEAD;
-        else
-            type = MT_HEAD;
-    }
-    else if (r<162)
-        type = MT_VILE;
-    else if (r<172)
-        type = MT_UNDEAD;
-    else if (r<192)
-        type = MT_BABY;
-    else if (r<222)
-        type = MT_FATSO;
-    else if (r<246)
-        type = MT_KNIGHT;
-    else
-    {
-        if(beta_style)
-            type = MT_BETABRUISER;
-        else
-            type = MT_BRUISER;
-    }
+        // spawn brain missile
+        mobj_t  *newmobj = P_SpawnMissile(actor, targ, MT_SPAWNSHOT);
 
-    newmobj = P_SpawnMobj (targ->x, targ->y, targ->z, type);
+        P_SetTarget(&newmobj->target, targ);
 
-    if (P_LookForPlayers (newmobj, true) )
-        P_SetMobjState (newmobj, newmobj->info->seestate);
-        
-    // telefrag anything in this spot
-    P_TeleportMove (newmobj, newmobj->x, newmobj->y, newmobj->z, true); /* killough 8/9/98 */
+        // Use the reactiontime to hold the distance (squared)
+        // from the target after the next move.
+        newmobj->reactiontime = P_AproxDistance(targ->x - (actor->x + actor->momx),
+            targ->y - (actor->y + actor->momy));
 
-    if ((mo->z <= mo->floorz) && P_HitFloor(mo) && d_splash)
-    {                           // Landed in some sort of liquid
-        if (mo->shadow)
-            P_RemoveMobjShadow(mo);
+        // killough 8/29/98: add to appropriate thread
+        P_UpdateThinker(&newmobj->thinker);
 
-        // remove self (i.e., cube).
-        P_RemoveMobj (mo);
+        S_StartSound(NULL, sfx_bospit);
     }
 }
 
-
-// travelling cube sound
-void A_SpawnSound (mobj_t* mo)        
+void A_SpawnFly(mobj_t *actor)
 {
-    S_StartSound (mo,sfx_boscub);
-    A_SpawnFly(mo);
+    mobj_t      *targ = actor->target;
+
+    if (targ)
+    {
+        int     dist;
+
+        // Will the next move put the cube closer to
+        // the target point than it is now?
+        dist = P_AproxDistance(targ->x - (actor->x + actor->momx),
+            targ->y - (actor->y + actor->momy));
+        if ((unsigned int)dist < (unsigned int)actor->reactiontime)
+        {
+            actor->reactiontime = dist; // Yes. Still flying
+            return;
+        }
+
+        if (!nomonsters)
+        {
+            mobj_t      *fog;
+            mobj_t      *newmobj;
+            int         r;
+            mobjtype_t  type;
+
+            // First spawn teleport fog.
+            fog = P_SpawnMobj(targ->x, targ->y, targ->z, MT_SPAWNFIRE);
+            S_StartSound(fog, sfx_telept);
+
+            // Randomly select monster to spawn.
+            r = P_Random();
+
+            // Probability distribution (kind of :),
+            // decreasing likelihood.
+            if (r < 50)
+                type = MT_TROOP;
+            else if (r < 90)
+                type = MT_SERGEANT;
+            else if (r < 120)
+                type = MT_SHADOWS;
+            else if (r < 130)
+                type = MT_PAIN;
+            else if (r < 160)
+            {
+                if(beta_style)
+                    type = MT_BETAHEAD;
+                else
+                    type = MT_HEAD;
+            }
+            else if (r < 162)
+                type = MT_VILE;
+            else if (r < 172)
+                type = MT_UNDEAD;
+            else if (r < 192)
+                type = MT_BABY;
+            else if (r < 222)
+                type = MT_FATSO;
+            else if (r < 246)
+                type = MT_KNIGHT;
+            else
+            {
+                if(beta_style)
+                    type = MT_BETABRUISER;
+                else
+                    type = MT_BRUISER;
+            }
+
+            newmobj = P_SpawnMobj(targ->x, targ->y, targ->z, type);
+
+//            newmobj->flags &= ~MF_COUNTKILL;
+
+            // killough 8/29/98: add to appropriate thread
+            P_UpdateThinker(&newmobj->thinker);
+
+            if (!(P_LookForPlayers(newmobj, true))
+                || P_SetMobjState(newmobj, newmobj->info->seestate))
+                // telefrag anything in this spot
+                P_TeleportMove(newmobj, newmobj->x, newmobj->y, newmobj->z, true);
+
+            totalkills++;
+        }
+    }
+
+    // remove self (i.e., cube).
+    if (actor->shadow)
+        P_RemoveMobjShadow(actor);
+    P_RemoveMobj(actor);
 }
 
-
-
+// traveling cube sound
+void A_SpawnSound(mobj_t *actor)
+{
+    S_StartSound(actor, sfx_boscub);
+    A_SpawnFly(actor);
+}
 
 void A_PlayerScream (mobj_t* mo)
 {
@@ -2880,6 +2884,7 @@ void A_PlaySound(mobj_t *actor, player_t *player, pspdef_t *psp)
 
 void A_RandomJump(mobj_t *actor, player_t *player, pspdef_t *psp)
 {
+    // [BH] allow A_RandomJump to work for weapon states as well 
     if (psp)
     {
         state_t *state = psp->state;

@@ -84,13 +84,17 @@
 #define MAX_DEATHMATCH_STARTS   10
 #define MAPINFO_SCRIPT_NAME     "MAPINFO"
 
+#define NUMLIQUIDS              256 
+
 #define MCMD_AUTHOR             1
-#define MCMD_MUSIC              2
-#define MCMD_NEXT               3
-#define MCMD_PAR                4
-#define MCMD_SECRETNEXT         5
-#define MCMD_SKY1               6
-#define MCMD_TITLEPATCH         7
+#define MCMD_LIQUID             2 
+#define MCMD_MUSIC              3
+#define MCMD_NEXT               4
+#define MCMD_NOLIQUID           5 
+#define MCMD_PAR                6
+#define MCMD_SECRETNEXT         7
+#define MCMD_SKY1               8
+#define MCMD_TITLEPATCH         9
 
 
 typedef struct mapinfo_s mapinfo_t;
@@ -98,9 +102,11 @@ typedef struct mapinfo_s mapinfo_t;
 struct mapinfo_s
 {
     char        author[128];
+    int         liquid[NUMLIQUIDS]; 
     int         music;
     char        name[128];
     int         next;
+    int         noliquid[NUMLIQUIDS]; 
     int         par;
     int         secretnext;
     int         sky1texture;
@@ -113,8 +119,10 @@ static mapinfo_t mapinfo[99];
 static char *mapcmdnames[] =
 {
     "AUTHOR",
+    "LIQUID", 
     "MUSIC",
     "NEXT",
+    "NOLIQUID", 
     "PAR",
     "SECRETNEXT",
     "SKY1",
@@ -125,13 +133,18 @@ static char *mapcmdnames[] =
 static int mapcmdids[] =
 {
     MCMD_AUTHOR,
+    MCMD_LIQUID, 
     MCMD_MUSIC,
     MCMD_NEXT,
+    MCMD_NOLIQUID, 
     MCMD_PAR,
     MCMD_SECRETNEXT,
     MCMD_SKY1,
     MCMD_TITLEPATCH 
 };
+
+int                liquidlumps = 0;
+int                noliquidlumps = 0;
 
 //
 // MAP related Lookup tables.
@@ -1845,13 +1858,13 @@ static void P_CalcSegsLength(void)
     for (i = 0; i < numsegs; i++)
     {
         seg_t   *li = segs + i;
-        fixed_t dx = li->v2->x - li->v1->x;
-        fixed_t dy = li->v2->y - li->v1->y;
+        int64_t dx = (int64_t)li->v2->x - li->v1->x;
+        int64_t dy = (int64_t)li->v2->y - li->v1->y;
 
-        li->length = (fixed_t)sqrt((double)dx * dx + (double)dy * dy);
+        li->length = (int64_t)sqrt((double)dx * dx + (double)dy * dy); 
 
         // [crispy] re-calculate angle used for rendering
-        li->angle = R_PointToAngle2(li->v1->x, li->v1->y, li->v2->x, li->v2->y);
+        li->angle = R_PointToAngleEx2(li->v1->x, li->v1->y, li->v2->x, li->v2->y); 
     }
 }
 
@@ -2055,7 +2068,8 @@ P_SetupLevel
     P_LoadReject(lumpnum, P_GroupLines());
 
     // [crispy] remove slime trails
-    P_RemoveSlimeTrails();
+    if(remove_slime_trails)
+        P_RemoveSlimeTrails();
 
     P_CalcSegsLength();
 
@@ -2064,6 +2078,10 @@ P_SetupLevel
 
     bodyqueslot = 0;
     deathmatch_p = deathmatchstarts;
+
+    P_SetLiquids(); 
+    P_GetMapLiquids((ep - 1) * 10 + map);
+    P_GetMapNoLiquids((ep - 1) * 10 + map);
 
     P_LoadThings (lumpnum+ML_THINGS);
 
@@ -2083,8 +2101,8 @@ P_SetupLevel
     }
 
     // clear special respawning que
-    iquehead = iquetail = 0;                
-        
+    iquehead = iquetail = 0;
+
     // set up world state
     P_SpawnSpecials ();
 
@@ -2106,6 +2124,7 @@ P_SetupLevel
 
 static void InitMapInfo(void)
 {
+    int         i; 
     int         episode;
     int         map;
     int         mapmax = 1;
@@ -2128,6 +2147,12 @@ static void InitMapInfo(void)
     info->sky1texture = 0;
     info->sky1scrolldelta = 0;
     info->titlepatch = 0;
+
+    for (i = 0; i < NUMLIQUIDS; ++i)
+    {
+        info->liquid[i] = -1;
+        info->noliquid[i] = -1;
+    }
 
     SC_Open(MAPINFO_SCRIPT_NAME);
     while (SC_GetString())
@@ -2183,9 +2208,19 @@ static void InitMapInfo(void)
                         M_StringCopy(info->author, sc_String, sizeof(info->author));
                         break;
 
+                    case MCMD_LIQUID:
+                    {
+                        int     lump;
+
+                        SC_MustGetString();
+                        if ((lump = R_CheckFlatNumForName(sc_String)) >= 0)
+                            info->liquid[liquidlumps++] = lump; 
+                        break;
+                    }
+
                     case MCMD_MUSIC:
                         SC_MustGetString();
-                        info->music = W_GetNumForName(sc_String);
+                        info->music = W_CheckNumForName(sc_String);
                         break;
 
                     case MCMD_NEXT:
@@ -2210,6 +2245,16 @@ static void InitMapInfo(void)
                                 sscanf(mapnum, "E%1iM%1i", &nextepisode, &nextmap);
                         }
                         info->next = (nextepisode - 1) * 10 + nextmap;
+                        break;
+                    }
+
+                    case MCMD_NOLIQUID:
+                    {
+                        int     lump;
+
+                        SC_MustGetString();
+                        if ((lump = R_CheckFlatNumForName(sc_String)) >= 0)
+                            info->noliquid[noliquidlumps++] = lump; 
                         break;
                     }
 
@@ -2245,14 +2290,14 @@ static void InitMapInfo(void)
 
                     case MCMD_SKY1:
                         SC_MustGetString();
-                        info->sky1texture = R_TextureNumForName(sc_String);
+                        info->sky1texture = R_CheckTextureNumForName(sc_String);
                         SC_MustGetNumber();
                         info->sky1scrolldelta = sc_Number << 8;
                         break;
 
                     case MCMD_TITLEPATCH:
                         SC_MustGetString();
-                        info->titlepatch = W_GetNumForName(sc_String);
+                        info->titlepatch = W_CheckNumForName(sc_String);
                         break;
                 }
             }
@@ -2273,6 +2318,14 @@ char *P_GetMapAuthor(int map)
     return (MAPINFO ? mapinfo[QualifyMap(map)].author : ""); 
 }
 
+void P_GetMapLiquids(int map)
+{
+    int i = 0;
+
+    for (i = 0; i < liquidlumps; ++i)
+        isliquid[mapinfo[QualifyMap(map)].liquid[i]] = true;
+}
+
 int P_GetMapMusic(int map)
 {
     return (MAPINFO ? mapinfo[QualifyMap(map)].music : 0); 
@@ -2286,6 +2339,14 @@ char *P_GetMapName(int map)
 int P_GetMapNext(int map)
 {
     return (MAPINFO ? mapinfo[QualifyMap(map)].next : 0); 
+}
+
+void P_GetMapNoLiquids(int map)
+{
+    int i = 0;
+
+    for (i = 0; i < noliquidlumps; ++i)
+        isliquid[mapinfo[QualifyMap(map)].noliquid[i]] = false;
 }
 
 int P_GetMapPar(int map)
@@ -2318,9 +2379,9 @@ int P_GetMapTitlePatch(int map)
 //
 void P_Init (void)
 {
-    InitMapInfo();
     P_InitSwitchList ();
     P_InitPicAnims ();
+    InitMapInfo();
     R_InitSprites (sprnames);
 }
 

@@ -92,7 +92,7 @@ char *P_TempSaveGameFile(void)
     static char *filename;
 
     if (!filename)
-        filename = M_StringJoin(savegamedir, "temp.save", NULL);
+        filename = M_StringJoin(savegamedir, "temp.dsg", NULL);
 
     return filename;
 }
@@ -110,7 +110,7 @@ char *P_SaveGameFile(int slot)
         filename = malloc(filename_size);
     }
 
-    M_snprintf(basename, 32, "wii-doom%d.save", slot);
+    M_snprintf(basename, 32, "wii-doom%d.dsg", slot);
     M_snprintf(filename, filename_size, "%s%s", savegamedir, basename);
 
     return filename;

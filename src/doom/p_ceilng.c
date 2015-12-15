@@ -77,7 +77,9 @@ void T_MoveCeiling (ceiling_t* ceiling)
                           ceiling->topheight,
                           false,1,ceiling->direction);
         
-        if (!(leveltime & 7) && ceiling->sector->ceilingheight != ceiling->topheight)
+        if (!(leveltime & 7)
+            // [BH] don't make sound once ceiling is at its destination height
+            && ceiling->sector->ceilingheight != ceiling->topheight)
         {
             switch(ceiling->type)
             {
@@ -133,7 +135,9 @@ void T_MoveCeiling (ceiling_t* ceiling)
                           ceiling->bottomheight,
                           ceiling->crush,1,ceiling->direction);
         
-        if (!(leveltime & 7) && ceiling->sector->ceilingheight != ceiling->bottomheight)
+        if (!(leveltime & 7)
+            // [BH] don't make sound once ceiling is at its destination height
+            && ceiling->sector->ceilingheight != ceiling->bottomheight)
         {
             switch(ceiling->type)
             {
@@ -191,28 +195,25 @@ void T_MoveCeiling (ceiling_t* ceiling)
                 break;
             }
         }
-        else // ( res != pastdest )
+        else if (res == crushed)
         {
-            if (res == crushed)
+            switch(ceiling->type)
             {
-                switch(ceiling->type)
-                {
-                  // jff 02/08/98 slow down slow crushers on obstacle
-                  case genCrusher:
-                  case genSilentCrusher:
-                    if (ceiling->oldspeed < CEILSPEED * 3)
-                        ceiling->speed = CEILSPEED / 8;
-                    break;
-
-                  case silentCrushAndRaise:
-                  case crushAndRaise:
-                  case lowerAndCrush:
+              // jff 02/08/98 slow down slow crushers on obstacle
+              case genCrusher:
+              case genSilentCrusher:
+                if (ceiling->oldspeed < CEILSPEED * 3)
                     ceiling->speed = CEILSPEED / 8;
-                    break;
+                break;
 
-                  default:
-                    break;
-                }
+              case silentCrushAndRaise:
+              case crushAndRaise:
+              case lowerAndCrush:
+                ceiling->speed = CEILSPEED / 8;
+                break;
+
+              default:
+                break;
             }
         }
         break;
@@ -251,10 +252,9 @@ EV_DoCeiling
         if (P_SectorActive(ceiling_special, sec))
             continue;
         
-        // new door thinker
+        // new ceiling thinker
         rtn = true;
-        ceiling = Z_Malloc (sizeof(*ceiling), PU_LEVSPEC, 0);
-        memset(ceiling, 0, sizeof(*ceiling));
+        ceiling = Z_Calloc(1, sizeof(*ceiling), PU_LEVSPEC, 0); 
         P_AddThinker (&ceiling->thinker);
         sec->ceilingdata = ceiling;
         ceiling->thinker.function = T_MoveCeiling;

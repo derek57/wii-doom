@@ -341,6 +341,16 @@ void P_FireWeapon (player_t* player)
         return;
 
     P_NoiseAlert (player->mo, player->mo);
+
+    // [crispy] center the weapon sprite horizontally
+    if (d_centerweapon)
+    {
+	// [crispy] do not override state's misc1 if set
+	if (!player->psprites[ps_weapon].state->misc1)
+	{
+	    player->psprites[ps_weapon].sx = FRACUNIT;
+	}
+    }
 }
 
 

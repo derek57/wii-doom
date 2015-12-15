@@ -84,9 +84,9 @@
 #define CARDNOTINMAP        0
 #define BONUSADD            6
 
-#define r_blood_min                             noblood
-#define r_blood_default                         allbloodcolors
-#define r_blood_max                             allbloodcolors
+#define r_blood_min                             r_blood_none
+#define r_blood_default                         r_blood_all
+#define r_blood_max                             r_blood_all
 
 #define r_bloodsplats_max_min                   0
 #define r_bloodsplats_max_default               32768
@@ -200,11 +200,10 @@ typedef dboolean (*traverser_t) (intercept_t *in);
 
 typedef enum
 {
-    noblood,
-    redbloodonly,
-    allbloodcolors
+    r_blood_none,
+    r_blood_redonly,
+    r_blood_all
 } r_blood_values_e;
-
 
 fixed_t P_AproxDistance (fixed_t dx, fixed_t dy);
 int     P_PointOnLineSide (fixed_t x, fixed_t y, line_t* line);
@@ -248,6 +247,7 @@ dboolean P_CheckPosition (mobj_t *thing, fixed_t x, fixed_t y);
 dboolean P_TryMove (mobj_t* thing, fixed_t x, fixed_t y, dboolean dropoff);
 dboolean P_TeleportMove(mobj_t *thing, fixed_t x, fixed_t y, fixed_t z, dboolean boss);
 dboolean P_CheckSight (mobj_t* t1, mobj_t* t2);
+dboolean P_CheckSector(sector_t* sector,dboolean crunch);
 dboolean P_ChangeSector (sector_t* sector, dboolean crunch);
 mobj_t *P_CheckOnmobj(mobj_t * thing);
 
@@ -311,7 +311,6 @@ extern dboolean            r_corpses_smearblood;
 
 void P_SetBloodSplatPosition(mobj_t *splat);
 void P_SpawnBloodSplat(fixed_t x, fixed_t y, int blood, int maxheight, mobj_t *target);
-void P_SpawnBloodSplat2(fixed_t x, fixed_t y, int blood, int maxheight, mobj_t *target);
 void P_NullBloodSplatSpawner(fixed_t x, fixed_t y, int blood, int maxheight, mobj_t *target);
 void P_TouchSpecialThing (mobj_t* special, mobj_t* toucher);
 

@@ -99,10 +99,10 @@ T_MovePlane
             {
                 lastpos = sector->floorheight;
                 sector->floorheight = dest;
-                if (P_ChangeSector(sector, crush))
+                if (P_CheckSector(sector, crush))
                 {
                     sector->floorheight =lastpos;
-                    P_ChangeSector(sector,crush);
+                    P_CheckSector(sector,crush);
                     //return crushed;
                 }
                 return pastdest;
@@ -111,7 +111,7 @@ T_MovePlane
             {
                 lastpos = sector->floorheight;
                 sector->floorheight -= speed;
-                if (P_ChangeSector(sector, crush) && d_floors)
+                if (P_CheckSector(sector, crush) && d_floors)
                 {
                     sector->floorheight = lastpos;
                     P_ChangeSector(sector,crush);
@@ -128,10 +128,10 @@ T_MovePlane
             {
                 lastpos = sector->floorheight;
                 sector->floorheight = destheight;
-                if (P_ChangeSector(sector, crush))
+                if (P_CheckSector(sector, crush))
                 {
                     sector->floorheight = lastpos;
-                    P_ChangeSector(sector,crush);
+                    P_CheckSector(sector,crush);
                     //return crushed;
                 }
                 return pastdest;
@@ -141,7 +141,7 @@ T_MovePlane
                 // COULD GET CRUSHED
                 lastpos = sector->floorheight;
                 sector->floorheight += speed;
-                if (P_ChangeSector(sector, crush))
+                if (P_CheckSector(sector, crush))
                 {
                     /* jff 1/25/98 fix floor crusher */
                     if (d_floors)
@@ -155,7 +155,7 @@ T_MovePlane
                             return crushed;
                     }
                     sector->floorheight = lastpos;
-                    P_ChangeSector(sector,crush);      //jff 3/19/98 use faster chk
+                    P_CheckSector(sector,crush);      //jff 3/19/98 use faster chk
                     return crushed;
                 }
             }
@@ -176,10 +176,10 @@ T_MovePlane
             {
                 lastpos = sector->ceilingheight;
                 sector->ceilingheight = destheight;
-                if (P_ChangeSector(sector, crush))
+                if (P_CheckSector(sector, crush))
                 {
                     sector->ceilingheight = lastpos;
-                    P_ChangeSector(sector,crush);
+                    P_CheckSector(sector,crush);
                     //return crushed;
                 }
                 return pastdest;
@@ -189,12 +189,12 @@ T_MovePlane
                 // COULD GET CRUSHED
                 lastpos = sector->ceilingheight;
                 sector->ceilingheight -= speed;
-                if (P_ChangeSector(sector, crush))
+                if (P_CheckSector(sector, crush))
                 {
                     if (crush == true)
                         return crushed;
                     sector->ceilingheight = lastpos;
-                    P_ChangeSector(sector,crush);
+                    P_CheckSector(sector,crush);
                     return crushed;
                 }
             }
@@ -206,10 +206,10 @@ T_MovePlane
             {
                 lastpos = sector->ceilingheight;
                 sector->ceilingheight = dest;
-                if (P_ChangeSector(sector, crush))
+                if (P_CheckSector(sector, crush))
                 {
                     sector->ceilingheight = lastpos;
-                    P_ChangeSector(sector,crush);
+                    P_CheckSector(sector,crush);
                     //return crushed;
                 }
                 return pastdest;
@@ -218,7 +218,7 @@ T_MovePlane
             {
 //                lastpos = sector->ceilingheight;
                 sector->ceilingheight += speed;
-                P_ChangeSector(sector, crush);		// FIXME: TAKEN FROM DOOMRETRO
+                P_CheckSector(sector, crush);
 //                flag = P_ChangeSector(sector,crush);
 // UNUSED
 #if 0
@@ -252,8 +252,9 @@ void T_MoveFloor(floormove_t* floor)
                       floor->floordestheight,
                       floor->crush,0,floor->direction);
     
-    if (!(leveltime&7))
-        S_StartSectorSound(&sec->soundorg, sfx_stnmov);
+    if (!(leveltime & 7)
+        // [BH] don't make sound once floor is at its destination height
+        && sec->floorheight != floor->floordestheight)
     
     if (res == pastdest)
     {
@@ -417,8 +418,7 @@ EV_DoFloor
         
         // new floor thinker
         rtn = 1;
-        floor = Z_Malloc (sizeof(*floor), PU_LEVSPEC, 0);
-        memset(floor, 0, sizeof(*floor));
+        floor = Z_Calloc(1, sizeof(*floor), PU_LEVSPEC, 0); 
         P_AddThinker (&floor->thinker);
         sec->floordata = floor;
         floor->thinker.function = T_MoveFloor;
@@ -623,8 +623,9 @@ EV_DoFloor
           default:
             break;
         }
-        for (i = 0; i < floor->sector->linecount; i++)
-            floor->sector->lines[i]->flags &= ~ML_SECRET;
+        // [BH] floor is no longer secret
+        for (i = 0; i < sec->linecount; i++)
+            sec->lines[i]->flags &= ~ML_SECRET;
     }
     return rtn;
 }
@@ -720,8 +721,7 @@ EV_BuildStairs
 
         // new floor thinker
         rtn = true;
-        floor = Z_Malloc(sizeof(*floor), PU_LEVSPEC, 0);
-        memset(floor, 0, sizeof(*floor));
+        floor = Z_Calloc(1, sizeof(*floor), PU_LEVSPEC, 0); 
         P_AddThinker(&floor->thinker);
         sec->floordata = floor;
         floor->thinker.function = T_MoveFloor;
@@ -789,8 +789,7 @@ EV_BuildStairs
 
                 sec = tsec;
                 secnum = newsecnum;
-                floor = Z_Malloc(sizeof(*floor), PU_LEVSPEC, 0);
-                memset(floor, 0, sizeof(*floor));
+                floor = Z_Calloc(1, sizeof(*floor), PU_LEVSPEC, 0); 
                 P_AddThinker(&floor->thinker);
 
                 sec->floordata = floor;

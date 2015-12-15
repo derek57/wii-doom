@@ -65,17 +65,25 @@ typedef struct
 
 // Location of each lump on disk.
 
-disk_indicator_e  disk_indicator = disk_off;
+disk_indicator_e   disk_indicator = disk_off;
 
-int               fsizecq = 0;
+int                fsizecq = 0;
 
-unsigned int      numlumps = 0;
+unsigned int       numlumps = 0;
 
-lumpinfo_t        **lumpinfo;                
+lumpinfo_t         **lumpinfo;                
 
 // Hash table for fast lookups
 
 static lumpindex_t *lumphash;
+
+// Variables for the reload hack: filename of the PWAD to reload, and the
+// lumps from WADs before the reload file, so we can resent numlumps and
+// load the file again.
+static wad_file_t  *reloadhandle = NULL;
+static lumpinfo_t  *reloadlumps = NULL;
+static char        *reloadname = NULL;
+static int         reloadlump = -1;
 
 extern int diskicon_readbytes;
 
@@ -123,6 +131,25 @@ wad_file_t *W_AddFile (char *filename, dboolean automatic)
     filelump_t *filerover;
     lumpinfo_t *filelumps;
     int numfilelumps;
+
+    // If the filename begins with a ~, it indicates that we should use the
+    // reload hack.
+    if (filename[0] == '~')
+    {
+        if (reloadname != NULL)
+        {
+            I_Error("Prefixing a WAD filename with '~' indicates that the "
+                    "WAD should be reloaded\n"
+                    "on each level restart, for use by level authors for "
+                    "rapid development. You\n"
+                    "can only reload one WAD file, and it must be the last "
+                    "file in the -file list.");
+        }
+
+        reloadname = strdup(filename);
+        reloadlump = numlumps;
+        ++filename;
+    }
 
     // open the file and add to directory
 
@@ -242,6 +269,15 @@ wad_file_t *W_AddFile (char *filename, dboolean automatic)
                     commify(numlumps - startlump), (numlumps - startlump == 1 ? "" : "s"),
                             header.identification, uppercase(filename));
 
+
+    // If this is the reload file, we need to save some details about the
+    // file so that we can close it later on when we do a reload.
+    if (reloadname)
+    {
+        reloadhandle = wad_file;
+        reloadlumps = filelumps;
+    }
+
     return wad_file;
 }
 
@@ -306,13 +342,6 @@ lumpindex_t W_GetNumForName (char* name)
     lumpindex_t i;
 
     i = W_CheckNumForName (name);
-
-    // This is a temporary fix for HACX
-    if (gamemission == pack_hacx && name[0] == '$' && name[1] == 'M' && name[2] == 'U'
-            && name[3] == 'S' && name[4] == 'I' && name[5] == 'C' && name[6] == '_'
-            && name[7] == 'R' && name[8] == 'E' && name[9] == 'A' && name[10] == 'D'
-            && name[11] == '_' && name[12] == 'M')
-        return 0;
 
     if (i < 0)
     {
@@ -642,7 +671,7 @@ void W_CheckSize(int wad)
             fseek(fprw, 0, 2);                // file pointer at the end of file
             fsizerw = ftell(fprw);        // take a position of file pointer un size variable
 
-            if(fsizerw != 29995)
+            if(fsizerw != 89150)
                 print_resource_pwad_error = true;
 
             fclose(fprw);
@@ -666,7 +695,7 @@ void W_CheckSize(int wad)
             fseek(fprw, 0, 2);                // file pointer at the end of file
             fsizerw = ftell(fprw);        // take a position of file pointer un size variable
 
-            if(fsizerw != 42617)
+            if(fsizerw != 137490)
                 print_resource_pwad_error = true;
 
             fclose(fprw);
@@ -690,7 +719,7 @@ void W_CheckSize(int wad)
             fseek(fprw, 0, 2);            // file pointer at the end of file
             fsizerw = ftell(fprw);        // take a position of file pointer un size variable
 
-            if(fsizerw != 42278)
+            if(fsizerw != 135015)
                 print_resource_pwad_error = true;
 
             fclose(fprw);
@@ -847,5 +876,50 @@ lumpindex_t W_RangeCheckNumForName(lumpindex_t min, lumpindex_t max, char *name)
             return i;
 
     return -1;
+}
+
+// The Doom reload hack. The idea here is that if you give a WAD file to -file
+// prefixed with the ~ hack, that WAD file will be reloaded each time a new
+// level is loaded. This lets you use a level editor in parallel and make
+// incremental changes to the level you're working on without having to restart
+// the game after every change.
+// But: the reload feature is a fragile hack...
+void W_Reload(void)
+{
+    char *filename;
+    lumpindex_t i;
+
+    if (reloadname == NULL)
+    {
+        return;
+    }
+
+    // We must free any lumps being cached from the PWAD we're about to reload:
+    for (i = reloadlump; i < numlumps; ++i)
+    {
+        if (lumpinfo[i]->cache != NULL)
+        {
+            Z_Free(lumpinfo[i]->cache);
+        }
+    }
+
+    // Reset numlumps to remove the reload WAD file:
+    numlumps = reloadlump;
+
+    // Now reload the WAD file.
+    filename = reloadname;
+
+    W_CloseFile(reloadhandle);
+    free(reloadlumps);
+
+    reloadname = NULL;
+    reloadlump = -1;
+    reloadhandle = NULL;
+    W_AddFile(filename, false);
+    free(filename);
+
+    // The WAD directory has changed, so we have to regenerate the
+    // fast lookup hashtable:
+    W_GenerateHashTable();
 }
 

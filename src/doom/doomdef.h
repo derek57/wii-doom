@@ -233,8 +233,8 @@
 // Index of the special effects (INVUL inverse) map.
 #define INVERSECOLORMAP    32
 
-#define MOUSE_WHEELUP      8
-#define MOUSE_WHEELDOWN    9
+#define MOUSE_WHEELUP      MAX_MOUSE_BUTTONS
+#define MOUSE_WHEELDOWN    (MAX_MOUSE_BUTTONS + 1)
 
 // phares 3/20/98:
 //

@@ -444,7 +444,7 @@ void D_Display (void)
         if (hud && screenSize == 8)
         {
             if(am_overlay || !automapactive)
-                HU_DrawStatus();
+                HU_DrawHUD();
         }
 
         if (!menuactive && devparm && sound_info && !automapactive)
@@ -1661,7 +1661,7 @@ void D_DoomMain (void)
         I_QuitSerialFail();
     }
 
-#if defined WII || defined BOOM_ZONE_HANDLING
+#ifndef DOOMRETRO_ZONE_HANDLING
     Z_Init ();
 #endif
 /*
@@ -1816,8 +1816,6 @@ void D_DoomMain (void)
         printf(" heap size: 0x3cdb000 \n");
         printf(" W_Init: Init WADfiles.\n");
     }
-    else
-        printf(" heap size: 0x3cbba10 \n");
 #endif
 
     // Auto-detect the configuration dir.
@@ -1985,7 +1983,10 @@ void D_DoomMain (void)
         am_rotate = false;
         jumping = false;
         general_sound = true;
-        
+        lowhealth = false;
+        d_fixwiggle = false;
+        d_centerweapon = false;
+
         beta_style = true;
     }
     else
@@ -1995,7 +1996,8 @@ void D_DoomMain (void)
         beta_style = false;
 
     // Save configuration at exit.
-    I_AtExit(M_SaveDefaults, false);
+    if(!beta_style)
+        I_AtExit(M_SaveDefaults, false);
 
     modifiedgame = false;
 
@@ -2040,189 +2042,6 @@ void D_DoomMain (void)
 
         fclose(iwad);
     }
-
-    if (fsize != 4261144  &&  // DOOM BETA v1.4
-        fsize != 4271324  &&  // DOOM BETA v1.5
-        fsize != 4211660  &&  // DOOM BETA v1.6
-        fsize != 10396254 &&  // DOOM REGISTERED v1.1
-        fsize != 10399316 &&  // DOOM REGISTERED v1.2
-        fsize != 10401760 &&  // DOOM REGISTERED v1.6
-        fsize != 11159840 &&  // DOOM REGISTERED v1.8
-        fsize != 12408292 &&  // DOOM REGISTERED v1.9 (THE ULTIMATE DOOM)
-        fsize != 12474561 &&  // DOOM REGISTERED (BFG-XBOX360 EDITION)
-        fsize != 12487824 &&  // DOOM REGISTERED (BFG-PC EDITION)
-        fsize != 12538385 &&  // DOOM REGISTERED (XBOX EDITION)
-        fsize != 4207819  &&  // DOOM SHAREWARE v1.0
-        fsize != 4274218  &&  // DOOM SHAREWARE v1.1
-        fsize != 4225504  &&  // DOOM SHAREWARE v1.2
-        fsize != 4225460  &&  // DOOM SHAREWARE v1.25 (SYBEX RELEASE)
-        fsize != 4234124  &&  // DOOM SHAREWARE v1.666
-        fsize != 4196020  &&  // DOOM SHAREWARE v1.8
-        fsize != 14943400 &&  // DOOM 2 REGISTERED v1.666
-        fsize != 14824716 &&  // DOOM 2 REGISTERED v1.666 (GERMAN VERSION)
-        fsize != 14612688 &&  // DOOM 2 REGISTERED v1.7
-        fsize != 14607420 &&  // DOOM 2 REGISTERED v1.8 (FRENCH VERSION)
-        fsize != 14604584 &&  // DOOM 2 REGISTERED v1.9
-        fsize != 14677988 &&  // DOOM 2 REGISTERED (BFG-PSN EDITION)
-        fsize != 14691821 &&  // DOOM 2 REGISTERED (BFG-PC EDITION)
-        fsize != 14683458 &&  // DOOM 2 REGISTERED (XBOX EDITION)
-        fsize != 18195736 &&  // FINAL DOOM - TNT v1.9 (WITH YELLOW KEYCARD BUG)
-        fsize != 18654796 &&  // FINAL DOOM - TNT v1.9 (WITHOUT YELLOW KEYCARD BUG)
-        fsize != 18240172 &&  // FINAL DOOM - PLUTONIA v1.9 (WITH DEATHMATCH STARTS)
-        fsize != 17420824 &&  // FINAL DOOM - PLUTONIA v1.9 (WITHOUT DEATHMATCH STARTS)
-
-//        fsize != 19801320 &&  // FREEDOOM v0.6.4
-//        fsize != 27704188 &&  // FREEDOOM v0.7 RC 1
-//        fsize != 27625596 &&  // FREEDOOM v0.7
-//        fsize != 28144744 &&  // FREEDOOM v0.8 BETA 1
-//        fsize != 28592816 &&  // FREEDOOM v0.8
-//        fsize != 19362644 &&  // FREEDOOM v0.8 PHASE 1
-
-        fsize != 28422764 &&  // FREEDOOM v0.8 PHASE 2
-        fsize != 12361532 &&  // CHEX QUEST
-
-//        fsize != 9745831  &&  // HACX SHAREWARE v1.0
-//        fsize != 21951805 &&  // HACX REGISTERED v1.0
-//        fsize != 22102300 &&  // HACX REGISTERED v1.1
-
-        fsize != 19321722)    // HACX REGISTERED v1.2
-    {
-        printf("\n\n\n\n\n");
-        printf(" ===============================================================================");
-        printf("\n");
-        printf("            WARNING: DOOM / DOOM 2 / TNT / PLUTONIA IWAD FILE MISSING,          ");
-        printf("\n");
-        printf("                         NOT SELECTED OR WRONG IWAD !!!                         \n");
-        printf("                                                                                \n");
-        printf("                                QUITTING NOW ...                                ");
-        printf("\n");
-        printf(" ===============================================================================");
-        printf("\n");
-
-        sleep(5);
-
-        I_QuitSerialFail();
-    }
-    else if(fsize == 10396254   || // DOOM REGISTERED v1.1
-            fsize == 10399316   || // DOOM REGISTERED v1.2
-            fsize == 4207819    || // DOOM SHAREWARE v1.0
-            fsize == 4274218    || // DOOM SHAREWARE v1.1
-            fsize == 4225504    || // DOOM SHAREWARE v1.2
-            fsize == 4225460)      // DOOM SHAREWARE v1.25 (SYBEX RELEASE)
-    {
-        if(!beta_style)
-            printf("                          DOOM Operating System v1.2                           \n");
-    }
-    else if(fsize == 4261144    || // DOOM BETA v1.4
-            fsize == 4271324    || // DOOM BETA v1.5
-            fsize == 4211660    || // DOOM BETA v1.6
-            fsize == 10401760   || // DOOM REGISTERED v1.6
-            fsize == 11159840   || // DOOM REGISTERED v1.8
-            fsize == 4234124    || // DOOM SHAREWARE v1.666
-            fsize == 4196020)      // DOOM SHAREWARE v1.8
-    {
-        if(!beta_style)
-            printf("                          DOOM Operating System v1.4                           \n");
-
-        version13 = true;
-    }
-    else if(fsize == 12408292   || // DOOM REGISTERED v1.9 (THE ULTIMATE DOOM)
-            fsize == 12538385   || // DOOM REGISTERED (XBOX EDITION)
-            fsize == 12487824   || // DOOM REGISTERED (BFG-PC EDITION)
-            fsize == 12474561      // DOOM REGISTERED (BFG-XBOX360 EDITION)
-
-//                                ||
-//            fsize == 19362644      // FREEDOOM v0.8 PHASE 1
-
-            )
-    {
-        if(!beta_style)
-            printf("                           DOOM System Startup v1.9                            \n");
-
-        version13 = true;
-    }
-    else if(fsize == 14943400   ||  // DOOM 2 REGISTERED v1.666
-            fsize == 14824716   ||  // DOOM 2 REGISTERED v1.666 (GERMAN VERSION)
-            fsize == 14612688   ||  // DOOM 2 REGISTERED v1.7
-            fsize == 14607420)      // DOOM 2 REGISTERED v1.8 (FRENCH VERSION)
-    {
-        if(!beta_style)
-            printf("                         DOOM 2: Hell on Earth v1.666                          \n");
-
-        version13 = true;
-    }
-    else if(fsize == 14604584   ||  // DOOM 2 REGISTERED v1.9
-            fsize == 14677988   ||  // DOOM 2 REGISTERED (BFG-PSN EDITION)
-            fsize == 14691821   ||  // DOOM 2 REGISTERED (BFG-PC EDITION)
-            fsize == 14683458   ||  // DOOM 2 REGISTERED (XBOX EDITION)
-
-//            fsize == 9745831    ||  // HACX SHAREWARE v1.0
-//            fsize == 21951805   ||  // HACX REGISTERED v1.0
-//            fsize == 22102300   ||  // HACX REGISTERED v1.1
-
-            fsize == 19321722   ||  // HACX REGISTERED v1.2
-
-//            fsize == 19801320   ||  // FREEDOOM v0.6.4
-//            fsize == 27704188   ||  // FREEDOOM v0.7 RC 1
-//            fsize == 27625596   ||  // FREEDOOM v0.7
-//            fsize == 28144744   ||  // FREEDOOM v0.8 BETA 1
-//            fsize == 28592816   ||  // FREEDOOM v0.8
-
-            fsize == 28422764)      // FREEDOOM v0.8 PHASE 2
-    {
-        if (
-
-//            fsize == 9745831    ||  // HACX SHAREWARE v1.0
-//            fsize == 21951805   ||  // HACX REGISTERED v1.0
-//            fsize == 22102300   ||  // HACX REGISTERED v1.1
-
-            fsize == 19321722)      // HACX REGISTERED v1.2
-        {
-            if(!beta_style)
-                printf("                          HACX:  Twitch n' Kill v1.2                           \n");
-        }
-        else
-        {
-            if(!beta_style)
-                printf("                          DOOM 2: Hell on Earth v1.9                           \n");
-        }
-        version13 = true;
-    }
-    else if(fsize == 18195736   ||  // FINAL DOOM - TNT v1.9 (WITH YELLOW KEYCARD BUG)
-            fsize == 18654796   ||  // FINAL DOOM - TNT v1.9 (WITHOUT YELLOW KEYCARD BUG)
-            fsize == 12361532)      // CHEX QUEST
-    {
-        if(fsize == 12361532)
-        {
-            if(!beta_style)
-                printf("                            Chex (R) Quest Startup                             \n");
-        }
-        else
-        {
-            if(!beta_style)
-                printf("                          DOOM 2: TNT Evilution v1.9                           \n");
-        }
-        version13 = true;
-    }
-
-    else if(fsize == 18240172   ||  // FINAL DOOM - PLUTONIA v1.9 (WITH DEATHMATCH STARTS)
-            fsize == 17420824)      // FINAL DOOM - PLUTONIA v1.9 (WITHOUT DEATHMATCH STARTS)
-    {
-            if(!beta_style)
-                printf("                       DOOM 2: Plutonia Experiment v1.9                        \n");
-        version13 = true;
-    }
-
-    if(!beta_style)
-    {
-        printf(" V_Init: allocate screens.\n");
-        printf(" M_LoadDefaults: Load system defaults.\n");
-        printf(" Z_Init: Init zone memory allocation daemon. \n");
-        printf(" heap size: 0x3cdb000 \n");
-        printf(" W_Init: Init WADfiles.\n");
-    }
-    else
-        printf(" heap size: 0x3cbba10 \n");
 
     if (runcount < 2)
         C_Output(" ~Wii-DOOM~ has been run %s", (!runcount ? "once" : "twice"));
@@ -2448,8 +2267,208 @@ void D_DoomMain (void)
         }
     }
 
-    if(beta_style && gamemode != registered && gamemode != retail)
-        beta_style = false;
+    if(beta_style)
+    {
+        if(gamemode != registered && gamemode != retail)
+        {
+#ifdef SDL2
+            char *msgbuf = "WARNING: YOU ARE TRYING TO RUN IN PR BETA MODE, USING A 'NON-DOOM 1-IWAD'.\n"
+                           "YOU NEED TO HAVE AT LEAST THE REGISTERED VERSION OF DOOM 1!\n"
+                           "BETA MODE WILL BE DISABLED!";
+
+            SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Wii-DOOM", msgbuf, NULL);
+#else
+            printf("\n WARNING: YOU ARE TRYING TO RUN IN PR BETA MODE, USING A 'NON-DOOM 1-IWAD'.");
+            printf("\n YOU NEED TO HAVE AT LEAST THE REGISTERED VERSION OF DOOM 1!");
+            printf("\n BETA MODE WILL BE DISABLED!\n\n");
+#endif
+            beta_style = false;
+        }
+
+        if(beta_style)
+            printf(" heap size: 0x3cbba10 \n");
+    }
+
+    if (fsize != 4261144  &&  // DOOM BETA v1.4
+        fsize != 4271324  &&  // DOOM BETA v1.5
+        fsize != 4211660  &&  // DOOM BETA v1.6
+        fsize != 10396254 &&  // DOOM REGISTERED v1.1
+        fsize != 10399316 &&  // DOOM REGISTERED v1.2
+        fsize != 10401760 &&  // DOOM REGISTERED v1.6
+        fsize != 11159840 &&  // DOOM REGISTERED v1.8
+        fsize != 12408292 &&  // DOOM REGISTERED v1.9 (THE ULTIMATE DOOM)
+        fsize != 12474561 &&  // DOOM REGISTERED (BFG-XBOX360 EDITION)
+        fsize != 12487824 &&  // DOOM REGISTERED (BFG-PC EDITION)
+        fsize != 12538385 &&  // DOOM REGISTERED (XBOX EDITION)
+        fsize != 4207819  &&  // DOOM SHAREWARE v1.0
+        fsize != 4274218  &&  // DOOM SHAREWARE v1.1
+        fsize != 4225504  &&  // DOOM SHAREWARE v1.2
+        fsize != 4225460  &&  // DOOM SHAREWARE v1.25 (SYBEX RELEASE)
+        fsize != 4234124  &&  // DOOM SHAREWARE v1.666
+        fsize != 4196020  &&  // DOOM SHAREWARE v1.8
+        fsize != 14943400 &&  // DOOM 2 REGISTERED v1.666
+        fsize != 14824716 &&  // DOOM 2 REGISTERED v1.666 (GERMAN VERSION)
+        fsize != 14612688 &&  // DOOM 2 REGISTERED v1.7
+        fsize != 14607420 &&  // DOOM 2 REGISTERED v1.8 (FRENCH VERSION)
+        fsize != 14604584 &&  // DOOM 2 REGISTERED v1.9
+        fsize != 14677988 &&  // DOOM 2 REGISTERED (BFG-PSN EDITION)
+        fsize != 14691821 &&  // DOOM 2 REGISTERED (BFG-PC EDITION)
+        fsize != 14683458 &&  // DOOM 2 REGISTERED (XBOX EDITION)
+        fsize != 18195736 &&  // FINAL DOOM - TNT v1.9 (WITH YELLOW KEYCARD BUG)
+        fsize != 18654796 &&  // FINAL DOOM - TNT v1.9 (WITHOUT YELLOW KEYCARD BUG)
+        fsize != 18240172 &&  // FINAL DOOM - PLUTONIA v1.9 (WITH DEATHMATCH STARTS)
+        fsize != 17420824 &&  // FINAL DOOM - PLUTONIA v1.9 (WITHOUT DEATHMATCH STARTS)
+
+//        fsize != 19801320 &&  // FREEDOOM v0.6.4
+//        fsize != 27704188 &&  // FREEDOOM v0.7 RC 1
+//        fsize != 27625596 &&  // FREEDOOM v0.7
+//        fsize != 28144744 &&  // FREEDOOM v0.8 BETA 1
+//        fsize != 28592816 &&  // FREEDOOM v0.8
+//        fsize != 19362644 &&  // FREEDOOM v0.8 PHASE 1
+
+        fsize != 28422764 &&  // FREEDOOM v0.8 PHASE 2
+        fsize != 12361532 &&  // CHEX QUEST
+
+//        fsize != 9745831  &&  // HACX SHAREWARE v1.0
+//        fsize != 21951805 &&  // HACX REGISTERED v1.0
+//        fsize != 22102300 &&  // HACX REGISTERED v1.1
+
+        fsize != 19321722)    // HACX REGISTERED v1.2
+    {
+        printf("\n\n\n\n\n");
+        printf(" ===============================================================================");
+        printf("\n");
+        printf("            WARNING: DOOM / DOOM 2 / TNT / PLUTONIA IWAD FILE MISSING,          ");
+        printf("\n");
+        printf("                         NOT SELECTED OR WRONG IWAD !!!                         \n");
+        printf("                                                                                \n");
+        printf("                                QUITTING NOW ...                                ");
+        printf("\n");
+        printf(" ===============================================================================");
+        printf("\n");
+
+        sleep(5);
+
+        I_QuitSerialFail();
+    }
+    else if(fsize == 10396254   || // DOOM REGISTERED v1.1
+            fsize == 10399316   || // DOOM REGISTERED v1.2
+            fsize == 4207819    || // DOOM SHAREWARE v1.0
+            fsize == 4274218    || // DOOM SHAREWARE v1.1
+            fsize == 4225504    || // DOOM SHAREWARE v1.2
+            fsize == 4225460)      // DOOM SHAREWARE v1.25 (SYBEX RELEASE)
+    {
+        if(!beta_style)
+            printf("                          DOOM Operating System v1.2                           \n");
+    }
+    else if(fsize == 4261144    || // DOOM BETA v1.4
+            fsize == 4271324    || // DOOM BETA v1.5
+            fsize == 4211660    || // DOOM BETA v1.6
+            fsize == 10401760   || // DOOM REGISTERED v1.6
+            fsize == 11159840   || // DOOM REGISTERED v1.8
+            fsize == 4234124    || // DOOM SHAREWARE v1.666
+            fsize == 4196020)      // DOOM SHAREWARE v1.8
+    {
+        if(!beta_style)
+            printf("                          DOOM Operating System v1.4                           \n");
+
+        version13 = true;
+    }
+    else if(fsize == 12408292   || // DOOM REGISTERED v1.9 (THE ULTIMATE DOOM)
+            fsize == 12538385   || // DOOM REGISTERED (XBOX EDITION)
+            fsize == 12487824   || // DOOM REGISTERED (BFG-PC EDITION)
+            fsize == 12474561      // DOOM REGISTERED (BFG-XBOX360 EDITION)
+
+//                                ||
+//            fsize == 19362644      // FREEDOOM v0.8 PHASE 1
+
+            )
+    {
+        if(!beta_style)
+            printf("                           DOOM System Startup v1.9                            \n");
+
+        version13 = true;
+    }
+    else if(fsize == 14943400   ||  // DOOM 2 REGISTERED v1.666
+            fsize == 14824716   ||  // DOOM 2 REGISTERED v1.666 (GERMAN VERSION)
+            fsize == 14612688   ||  // DOOM 2 REGISTERED v1.7
+            fsize == 14607420)      // DOOM 2 REGISTERED v1.8 (FRENCH VERSION)
+    {
+        if(!beta_style)
+            printf("                         DOOM 2: Hell on Earth v1.666                          \n");
+
+        version13 = true;
+    }
+    else if(fsize == 14604584   ||  // DOOM 2 REGISTERED v1.9
+            fsize == 14677988   ||  // DOOM 2 REGISTERED (BFG-PSN EDITION)
+            fsize == 14691821   ||  // DOOM 2 REGISTERED (BFG-PC EDITION)
+            fsize == 14683458   ||  // DOOM 2 REGISTERED (XBOX EDITION)
+
+//            fsize == 9745831    ||  // HACX SHAREWARE v1.0
+//            fsize == 21951805   ||  // HACX REGISTERED v1.0
+//            fsize == 22102300   ||  // HACX REGISTERED v1.1
+
+            fsize == 19321722   ||  // HACX REGISTERED v1.2
+
+//            fsize == 19801320   ||  // FREEDOOM v0.6.4
+//            fsize == 27704188   ||  // FREEDOOM v0.7 RC 1
+//            fsize == 27625596   ||  // FREEDOOM v0.7
+//            fsize == 28144744   ||  // FREEDOOM v0.8 BETA 1
+//            fsize == 28592816   ||  // FREEDOOM v0.8
+
+            fsize == 28422764)      // FREEDOOM v0.8 PHASE 2
+    {
+        if (
+
+//            fsize == 9745831    ||  // HACX SHAREWARE v1.0
+//            fsize == 21951805   ||  // HACX REGISTERED v1.0
+//            fsize == 22102300   ||  // HACX REGISTERED v1.1
+
+            fsize == 19321722)      // HACX REGISTERED v1.2
+        {
+            if(!beta_style)
+                printf("                          HACX:  Twitch n' Kill v1.2                           \n");
+        }
+        else
+        {
+            if(!beta_style)
+                printf("                          DOOM 2: Hell on Earth v1.9                           \n");
+        }
+        version13 = true;
+    }
+    else if(fsize == 18195736   ||  // FINAL DOOM - TNT v1.9 (WITH YELLOW KEYCARD BUG)
+            fsize == 18654796   ||  // FINAL DOOM - TNT v1.9 (WITHOUT YELLOW KEYCARD BUG)
+            fsize == 12361532)      // CHEX QUEST
+    {
+        if(fsize == 12361532)
+        {
+            if(!beta_style)
+                printf("                            Chex (R) Quest Startup                             \n");
+        }
+        else
+        {
+            if(!beta_style)
+                printf("                          DOOM 2: TNT Evilution v1.9                           \n");
+        }
+        version13 = true;
+    }
+
+    else if(fsize == 18240172   ||  // FINAL DOOM - PLUTONIA v1.9 (WITH DEATHMATCH STARTS)
+            fsize == 17420824)      // FINAL DOOM - PLUTONIA v1.9 (WITHOUT DEATHMATCH STARTS)
+    {
+            if(!beta_style)
+                printf("                       DOOM 2: Plutonia Experiment v1.9                        \n");
+        version13 = true;
+    }
+
+    if(!beta_style)
+    {
+        printf(" V_Init: allocate screens.\n");
+        printf(" M_LoadDefaults: Load system defaults.\n");
+        printf(" Z_Init: Init zone memory allocation daemon. \n");
+        printf(" heap size: 0x3cdb000 \n");
+        printf(" W_Init: Init WADfiles.\n");
+    }
 
     correct_lost_soul_bounce = gameversion >= exe_ultimate;
 
@@ -2478,7 +2497,7 @@ void D_DoomMain (void)
 
     if(gamemode == commercial)
     {
-        int p;
+        int p = 0;
 
         // We can manually override the gamemission that we got from the
         // IWAD detection code. This allows us to eg. play Plutonia 2
@@ -3287,8 +3306,7 @@ void D_DoomMain (void)
         startloadgame = -1;
     }
 
-    P_BloodSplatSpawner = (r_blood == noblood || !r_bloodsplats_max ? P_NullBloodSplatSpawner :
-            (r_bloodsplats_max == r_bloodsplats_max_max ? P_SpawnBloodSplat : P_SpawnBloodSplat2));
+    P_BloodSplatSpawner = (r_blood == r_blood_none || !r_bloodsplats_max ? P_NullBloodSplatSpawner : P_SpawnBloodSplat);
 
     if(!beta_style)
         printf(" M_Init: Init miscellaneous info.\n");

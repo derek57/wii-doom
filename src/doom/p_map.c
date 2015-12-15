@@ -219,12 +219,13 @@ int P_GetFriction(const mobj_t *mo, int *frictionfactor)
 // killough 8/28/98: rewritten
 int P_GetMoveFactor(const mobj_t *mo, int *frictionp)
 {
-    int movefactor, friction;
+    int movefactor;
+    int friction = P_GetFriction(mo, &movefactor);
 
     // If the floor is icy or muddy, it's harder to get moving. This is where
     // the different friction factors are applied to 'trying to move'. In
     // p_mobj.c, the friction factors are applied as you coast and slow down.
-    if ((friction = P_GetFriction(mo, &movefactor)) < ORIG_FRICTION)
+    if (friction < ORIG_FRICTION)
     {
         // phares 3/11/98: you start off slowly, then increase as
         // you get better footing
@@ -283,7 +284,7 @@ dboolean P_TeleportMove(mobj_t *thing, fixed_t x, fixed_t y, fixed_t z, dboolean
     tmfloorz = tmdropoffz = newsec->floorheight;
     tmceilingz = newsec->ceilingheight;
                         
-    validcount++;
+    ++validcount;
     numspechit = 0;
     
     // stomp on any things contacted
@@ -292,8 +293,8 @@ dboolean P_TeleportMove(mobj_t *thing, fixed_t x, fixed_t y, fixed_t z, dboolean
     yl = (tmbbox[BOXBOTTOM] - bmaporgy - MAXRADIUS) >> MAPBLOCKSHIFT;
     yh = (tmbbox[BOXTOP] - bmaporgy + MAXRADIUS) >> MAPBLOCKSHIFT;
 
-    for (bx = xl; bx <= xh; bx++)
-        for (by = yl; by <= yh; by++)
+    for (bx = xl; bx <= xh; ++bx)
+        for (by = yl; by <= yh; ++by)
             if (!P_BlockThingsIterator(bx, by, PIT_StompThing))
                 return false;
     
@@ -781,8 +782,8 @@ dboolean P_CheckPosition(mobj_t *thing, fixed_t x, fixed_t y)
     // will adjust them.
     tmfloorz = tmdropoffz = newsubsec->sector->floorheight;
     tmceilingz = newsubsec->sector->ceilingheight;
-                        
-    validcount++;
+
+    ++validcount;
     numspechit = 0;
 
     if (tmthing->flags & MF_NOCLIP)
@@ -798,8 +799,8 @@ dboolean P_CheckPosition(mobj_t *thing, fixed_t x, fixed_t y)
     yl = (tmbbox[BOXBOTTOM] - bmaporgy - MAXRADIUS) >> MAPBLOCKSHIFT;
     yh = (tmbbox[BOXTOP] - bmaporgy + MAXRADIUS) >> MAPBLOCKSHIFT;
 
-    for (bx = xl; bx <= xh; bx++)
-        for (by = yl; by <= yh; by++)
+    for (bx = xl; bx <= xh; ++bx)
+        for (by = yl; by <= yh; ++by)
             if (!P_BlockThingsIterator(bx, by, PIT_CheckThing))
                 return false;
     
@@ -809,8 +810,8 @@ dboolean P_CheckPosition(mobj_t *thing, fixed_t x, fixed_t y)
     yl = (tmbbox[BOXBOTTOM] - bmaporgy) >> MAPBLOCKSHIFT;
     yh = (tmbbox[BOXTOP] - bmaporgy) >> MAPBLOCKSHIFT;
 
-    for (bx = xl; bx <= xh; bx++)
-        for (by = yl; by <= yh; by++)
+    for (bx = xl; bx <= xh; ++bx)
+        for (by = yl; by <= yh; ++by)
             if (!P_BlockLinesIterator(bx, by, PIT_CheckLine))
                 return false;
 
@@ -902,7 +903,7 @@ mobj_t *P_CheckOnmobj(mobj_t * thing)
     tmfloorz = tmdropoffz = newsubsec->sector->floorheight;
     tmceilingz = newsubsec->sector->ceilingheight;
 
-    validcount++;
+    ++validcount;
     numspechit = 0;
 
     if (tmthing->flags & MF_NOCLIP)
@@ -917,8 +918,8 @@ mobj_t *P_CheckOnmobj(mobj_t * thing)
     yl = (tmbbox[BOXBOTTOM] - bmaporgy - MAXRADIUS) >> MAPBLOCKSHIFT;
     yh = (tmbbox[BOXTOP] - bmaporgy + MAXRADIUS) >> MAPBLOCKSHIFT;
 
-    for (bx = xl; bx <= xh; bx++)
-        for (by = yl; by <= yh; by++)
+    for (bx = xl; bx <= xh; ++bx)
+        for (by = yl; by <= yh; ++by)
             if (!P_BlockThingsIterator(bx, by, PIT_CheckOnmobjZ))
             {
                 *tmthing = oldmo;
@@ -1013,6 +1014,7 @@ dboolean P_TryMove(mobj_t *thing, fixed_t x, fixed_t y, dboolean dropoff)
 
     newsec = thing->subsector->sector;
 
+    // [BH] check if new sector is liquid and clip/unclip feet as necessary 
     if (!(thing->flags2 & MF2_NOFOOTCLIP) && isliquid[newsec->floorpic])
         thing->flags2 |= MF2_FEETARECLIPPED;
     else
@@ -1032,6 +1034,7 @@ dboolean P_TryMove(mobj_t *thing, fixed_t x, fixed_t y, dboolean dropoff)
         }
     }
 
+    // [BH] update shadow position as well 
     if (thing->shadow)
     {
         P_UnsetThingPosition(thing->shadow);
@@ -1775,7 +1778,7 @@ hitline:
 
         if ((type == MT_SKULL || type == MT_BETASKULL) && d_colblood2 && d_chkblood2)
             P_SpawnPuff(x, y, z - FRACUNIT * 8, shootangle);
-        else if (r_blood != noblood)
+        else if (r_blood != r_blood_none)
         {
             if (type != MT_PLAYER)
                 P_SpawnBlood(x, y, z, shootangle, la_damage, th);
@@ -1833,7 +1836,7 @@ fixed_t P_AimLineAttack(mobj_t *t1, angle_t angle, fixed_t distance)
     attackrange = distance;
     linetarget = NULL;
         
-    P_PathTraverse(t1->x, t1->y, x2, y2, PT_ADDLINES | PT_ADDTHINGS, PTR_AimTraverse);
+    P_PathTraverse(t1->x, t1->y, x2, y2, (PT_ADDLINES | PT_ADDTHINGS), PTR_AimTraverse);
                 
     if (linetarget)
         return aimslope;
@@ -1896,7 +1899,7 @@ void P_LineAttack(mobj_t *t1, angle_t angle, fixed_t distance, fixed_t slope, in
 
     // test lines only if damage is <= 0
     if(damage >= 1)
-        traverseflags = (PT_ADDLINES|PT_ADDTHINGS);
+        traverseflags = (PT_ADDLINES | PT_ADDTHINGS);
     else
         traverseflags = PT_ADDLINES;
 
@@ -2000,9 +2003,9 @@ int     bombdamage;
 //
 dboolean PIT_RadiusAttack(mobj_t* thing)
 {
-    fixed_t     dx, dy;
     fixed_t     dist;
 
+    // [BH] allow corpses to react to blast damage 
     if (!(thing->flags & MF_SHOOTABLE) && !(thing->flags & MF_CORPSE))
         return true;
 
@@ -2011,10 +2014,7 @@ dboolean PIT_RadiusAttack(mobj_t* thing)
     if (thing->type == MT_CYBORG || thing->type == MT_SPIDER)
         return true;
 
-    dx = ABS(thing->x - bombspot->x);
-    dy = ABS(thing->y - bombspot->y);
-
-    dist = MAX(dx, dy) - thing->radius;
+    dist = MAX(ABS(thing->x - bombspot->x), ABS(thing->y - bombspot->y)) - thing->radius; 
 
     if (thing->type == MT_BOSSBRAIN)
     {
@@ -2034,10 +2034,9 @@ dboolean PIT_RadiusAttack(mobj_t* thing)
         if (dist >= bombdamage)
             return true;        // out of range
 
-        if (thing->floorz > bombspot->z && bombspot->ceilingz < thing->z)
-            return true;
-
-        if (thing->ceilingz < bombspot->z && bombspot->floorz > thing->z)
+        // [BH] check z height for blast damage
+        if ((thing->floorz > bombspot->z && bombspot->ceilingz < thing->z)
+                || (thing->ceilingz < bombspot->z && bombspot->floorz > thing->z))
             return true;
     }
 
@@ -2067,8 +2066,8 @@ void P_RadiusAttack(mobj_t *spot, mobj_t *source, int damage)
     bombsource = source;
     bombdamage = damage;
 
-    for (y = yl; y <= yh; y++)
-        for (x = xl; x <= xh; x++)
+    for (y = yl; y <= yh; ++y)
+        for (x = xl; x <= xh; ++x)
             P_BlockThingsIterator(x, y, PIT_RadiusAttack);
 }
 
@@ -2098,6 +2097,9 @@ dboolean PIT_ChangeSector (mobj_t *thing)
 {
     int flags = thing->flags;
     int flags2 = thing->flags2;
+
+    //printf("name1 = %s\n",thing->info->name1);
+    //printf("doomednum = %d\n",thing->info->doomednum);
 
     if (isliquidsector && !(flags2 & MF2_NOFOOTCLIP))
         thing->flags2 |= MF2_FEETARECLIPPED;
@@ -2215,12 +2217,116 @@ dboolean PIT_ChangeSector (mobj_t *thing)
 }
 
 //
-// P_ChangeSector
+// P_CheckSector
 // jff 3/19/98 added to just check monsters on the periphery
 // of a moving sector instead of all in bounding box of the
 // sector. Both more accurate and faster.
-// [BH] renamed from P_CheckSector to P_ChangeSector to replace old one entirely
 //
+dboolean P_CheckSector(sector_t* sector, dboolean crunch)
+{
+    msecnode_t *n;
+    mobj_t     *mobj;
+    mobjtype_t type;
+
+    nofit = false;
+    crushchange = crunch;
+    isliquidsector = isliquid[sector->floorpic];
+
+    // killough 4/4/98: scan list front-to-back until empty or exhausted,
+    // restarting from beginning after each thing is processed. Avoids
+    // crashes, and is sure to examine all things in the sector, and only
+    // the things which are in the sector, until a steady-state is reached.
+    // Things can arbitrarily be inserted and removed and it won't mess up.
+    //
+    // killough 4/7/98: simplified to avoid using complicated counter
+
+    // Mark all things invalid
+
+    for (n = sector->touching_thinglist; n; n = n->m_snext)
+    {
+        n->visited = false;
+    }
+
+    do
+    {
+        if (isliquidsector)
+        {
+            // go through list
+            for (n = sector->touching_thinglist; n; n = n->m_snext)
+            {
+                // unprocessed thing found
+                if (!n->visited)
+                {
+                    // mark thing as processed
+                    n->visited = true;
+
+                    mobj = n->m_thing;
+
+                    if (mobj)
+                    {
+                        type = mobj->type;
+
+                        // jff 4/7/98 don't do these
+                        if (type != MT_SHADOW && !(mobj->flags & MF_NOBLOCKMAP))
+                        {
+                            // process it
+                            PIT_ChangeSector(mobj);
+                        }
+                        else if (type == MT_BLOODSPLAT)
+                        {
+                            P_UnsetThingPosition(mobj);
+                            --r_bloodsplats_total;
+                        }
+
+                        // exit and start over
+                        break;
+                    }
+                }
+            }
+        }
+        else
+        {
+            sector->floor_xoffs = 0;
+            sector->floor_yoffs = 0;
+
+            // go through list
+            for (n = sector->touching_thinglist; n; n = n->m_snext)
+            {
+                // unprocessed thing found
+                if (!n->visited)
+                {
+                    // mark thing as processed
+                    n->visited = true;
+
+                    mobj = n->m_thing;
+
+                    if (mobj)
+                    {
+                        type = mobj->type;
+
+                        // jff 4/7/98 don't do these
+                        if (type != MT_BLOODSPLAT && type != MT_SHADOW && !(mobj->flags & MF_NOBLOCKMAP))
+                        {
+                            // process it
+                            PIT_ChangeSector(mobj);
+                        }
+
+                        // exit and start over
+                        break;
+                    }
+                }
+            }
+        }
+    // repeat from scratch until all things left are marked valid
+    } while (n);
+
+    return nofit;
+}
+
+//
+// P_ChangeSector
+//
+/*
 dboolean P_ChangeSector(sector_t *sector, dboolean crunch)
 {
     msecnode_t  *n;
@@ -2231,6 +2337,7 @@ dboolean P_ChangeSector(sector_t *sector, dboolean crunch)
     crushchange = crunch;
     isliquidsector = isliquid[sector->floorpic];
 
+    // re-check heights for all things near the moving sector
     if (isliquidsector)
     {
         for (n = sector->touching_thinglist; n; n = n->m_snext) // go through list
@@ -2265,6 +2372,31 @@ dboolean P_ChangeSector(sector_t *sector, dboolean crunch)
             }
         }
     }
+    return nofit;
+}
+*/
+
+//
+// P_ChangeSector
+//
+dboolean P_ChangeSector(sector_t* sector, dboolean crunch)
+{
+    int   x;
+    int   y;
+
+    nofit = false;
+    crushchange = crunch;
+
+    // ARRGGHHH!!!!
+    // This is horrendously slow!!!
+    // killough 3/14/98
+
+    // re-check heights for all things near the moving sector
+
+    for (x = sector->blockbox[BOXLEFT]; x <= sector->blockbox[BOXRIGHT]; x++)
+        for (y = sector->blockbox[BOXBOTTOM]; y <= sector->blockbox[BOXTOP]; y++)
+            P_BlockThingsIterator(x, y, PIT_ChangeSector);
+
     return nofit;
 }
 
@@ -2322,6 +2454,9 @@ static msecnode_t *P_AddSecnode(sector_t *s, mobj_t *thing, msecnode_t *nextnode
     // Couldn't find an existing node for this sector. Add one at the head
     // of the list.
     node = P_GetSecnode();
+
+    // killough 4/4/98, 4/7/98: mark new nodes unvisited.
+    node->visited = 0;
 
     node->m_sector = s;                         // sector
     node->m_thing = thing;                      // mobj
@@ -2436,10 +2571,19 @@ static dboolean PIT_GetSectors(line_t *ld)
 // killough 11/98: reformatted
 void P_CreateSecNodeList(mobj_t *thing, fixed_t x, fixed_t y)
 {
-    int         xl, xh, yl, yh, bx, by;
+    int         xl;
+    int         xh;
+    int         yl;
+    int         yh;
+    int         bx;
+    int         by;
+
     msecnode_t  *node = sector_list;
+
     mobj_t      *saved_tmthing = tmthing;
-    fixed_t     saved_tmx = tmx, saved_tmy = tmy;
+
+    fixed_t     saved_tmx = tmx;
+    fixed_t     saved_tmy = tmy;
     fixed_t     radius = thing->radius;
 
     // First, clear out the existing m_thing fields. As each node is
@@ -2462,15 +2606,15 @@ void P_CreateSecNodeList(mobj_t *thing, fixed_t x, fixed_t y)
     tmbbox[BOXRIGHT] = x + radius;
     tmbbox[BOXLEFT] = x - radius;
 
-    validcount++;       // used to make sure we only process a line once
+    ++validcount;       // used to make sure we only process a line once
 
     xl = (tmbbox[BOXLEFT] - bmaporgx) >> MAPBLOCKSHIFT;
     xh = (tmbbox[BOXRIGHT] - bmaporgx) >> MAPBLOCKSHIFT;
     yl = (tmbbox[BOXBOTTOM] - bmaporgy) >> MAPBLOCKSHIFT;
     yh = (tmbbox[BOXTOP] - bmaporgy) >> MAPBLOCKSHIFT;
 
-    for (bx = xl; bx <= xh; bx++)
-        for (by = yl; by <= yh; by++)
+    for (bx = xl; bx <= xh; ++bx)
+        for (by = yl; by <= yh; ++by)
             P_BlockLinesIterator(bx, by, PIT_GetSectors);
 
     // Add the sector of the (x,y) point to sector_list.

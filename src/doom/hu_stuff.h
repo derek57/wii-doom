@@ -37,24 +37,48 @@
 //
 // Globally visible constants.
 //
-#define HU_FONTSTART        '!'        // the first font characters
-#define HU_FONTEND          '_'        // the last font characters
-#define HU_FONTENDBETA      '}'
+#define HU_FONTSTART                  '!'        // the first font characters
+#define HU_FONTEND                    '_'        // the last font characters
+#define HU_FONTENDBETA                '}'
 
 // Calculate # of glyphs in font.
-#define HU_FONTSIZE         (HU_FONTEND - HU_FONTSTART + 1)        
-#define HU_FONTSIZEBETA     (HU_FONTENDBETA - HU_FONTSTART + 1)        
+#define HU_FONTSIZE                   (HU_FONTEND - HU_FONTSTART + 1)        
+#define HU_FONTSIZEBETA               (HU_FONTENDBETA - HU_FONTSTART + 1)        
 
-#define HU_BROADCAST        5
+#define HU_BROADCAST                  5
 
-#define HU_MSGX             0
-#define HU_MSGY             0
-#define HU_MSGWIDTH         64         // in characters
-#define HU_MSGHEIGHT        1          // in lines
+#define HU_MSGX                       0
+#define HU_MSGY                       0
+#define HU_MSGWIDTH                   64         // in characters
+#define HU_MSGHEIGHT                  1          // in lines
 
-#define HU_MSGTIMEOUT       (4*TICRATE)
+#define HU_MSGTIMEOUT                 (4*TICRATE)
 
-#define playername_default  "you"
+#define HUD_X_COORD                   10 * SCREENSCALE / 2
+#define HUD_Y_COORD                   311 * SCREENSCALE / 2 + SBARHEIGHT
+
+#define HUD_HEALTH_X                  HUD_X_COORD
+#define HUD_HEALTH_Y                  HUD_Y_COORD - 8
+#define HUD_HEALTH_MIN                20
+#define HUD_HEALTH_WAIT               8
+#define HUD_HEALTH_HIGHLIGHT_WAIT     6
+
+#define HUD_AMMO_X                    (HUD_X_COORD + 100 * SCREENSCALE / 2)
+#define HUD_AMMO_Y                    HUD_HEALTH_Y
+#define HUD_AMMO_MIN                  20
+#define HUD_AMMO_WAIT                 8
+#define HUD_AMMO_HIGHLIGHT_WAIT       6
+
+#define HUD_KEYS_X                    (SCREENWIDTH - HUD_X_COORD - 128 * SCREENSCALE / 2)
+#define HUD_KEYS_Y                    HUD_HEALTH_Y
+
+#define HUD_ARMOR_X                   (SCREENWIDTH - HUD_X_COORD)
+#define HUD_ARMOR_Y                   HUD_HEALTH_Y
+#define HUD_ARMOR_HIGHLIGHT_WAIT      6
+
+#define HUD_KEY_WAIT                  8
+
+#define playername_default            "you"
 
 //
 // HEADS UP TEXT
@@ -81,7 +105,7 @@ void HU_NewLevel();
 
 void HU_DrawStats(void);
 
-void HU_DrawStatus(void);
+void HU_DrawHUD(void);
 
 void HU_PlayerMessage(char *message, dboolean ingame);
 

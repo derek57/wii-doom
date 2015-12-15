@@ -822,9 +822,7 @@ void P_MobjThinker (mobj_t* mobj)
 //
 void P_SpawnShadow(mobj_t *actor)
 {
-    mobj_t      *mobj = Z_Malloc(sizeof(*mobj), PU_LEVEL, NULL);
-
-    memset(mobj, 0, sizeof(*mobj));
+    mobj_t      *mobj = Z_Calloc(1, sizeof(*mobj), PU_LEVEL, NULL); 
 
     mobj->type = MT_SHADOW;
     mobj->info = &mobjinfo[MT_SHADOW];
@@ -851,12 +849,10 @@ void P_SpawnShadow(mobj_t *actor)
 //
 mobj_t *P_SpawnMobj(fixed_t x, fixed_t y, fixed_t z, mobjtype_t type)
 {
-    mobj_t      *mobj = Z_Malloc(sizeof(*mobj), PU_LEVEL, NULL);
+    mobj_t      *mobj = Z_Calloc(1, sizeof(*mobj), PU_LEVEL, NULL); 
     state_t     *st;
     mobjinfo_t  *info = &mobjinfo[type];
     sector_t    *sector;
-
-    memset (mobj, 0, sizeof (*mobj));
 
     mobj->type = type;
     mobj->info = info;
@@ -1524,7 +1520,7 @@ void P_SpawnBlood(fixed_t x, fixed_t y, fixed_t z, angle_t angle, int damage, mo
 
         for (i = j; i; i--)
         {
-            mobj_t      *th = Z_Malloc(sizeof(*th), PU_LEVEL, NULL);
+            mobj_t      *th = Z_Calloc(1, sizeof(*th), PU_LEVEL, NULL); 
             state_t     *st;
 
             if (d_colblood2 && d_chkblood2)
@@ -1535,8 +1531,6 @@ void P_SpawnBlood(fixed_t x, fixed_t y, fixed_t z, angle_t angle, int damage, mo
                     goto skip;
                 }
             }
-
-            memset(th, 0, sizeof(*th));
 
             th->type = color;
             th->info = info;
@@ -1644,60 +1638,7 @@ void P_SpawnBloodSplat(fixed_t x, fixed_t y, int blood, int maxheight, mobj_t *t
 
     if (!isliquid[floorpic] && sec->floorheight <= maxheight && floorpic != skyflatnum)
     {
-        mobj_t  *newsplat = calloc(1, sizeof(*newsplat)); 
-
-        newsplat->type = MT_BLOODSPLAT;
-        newsplat->sprite = SPR_BLD2;
-        newsplat->frame = rand() & 7;
-
-        if(d_flipcorpses)
-            newsplat->flags2 = (MF2_DONOTMAP | (rand() & 1) * MF2_MIRRORED);
-        else
-            newsplat->flags2 = (MF2_DONOTMAP);
-
-        if (blood == FUZZYBLOOD)
-        {
-            newsplat->flags = MF_SHADOW;
-/*
-            if (d_translucency)                // FIXME: Translucent blood for spectres is
-            {                                // rendered gold on map E4M1 of "THE ULTIMATE DOOM".
-                newsplat->colfunc = tlcolfunc;
-            }
-            else
-*/
-            {
-                newsplat->colfunc = fuzzcolfunc;
-            }
-        }
-        else
-        {
-            newsplat->colfunc = bloodsplatcolfunc;
-        }
-
-        newsplat->projectfunc = R_ProjectBloodSplat;
-        newsplat->blood = blood;
-
-        newsplat->x = x;
-        newsplat->y = y;
-        newsplat->subsector = subsec;
-        P_SetBloodSplatPosition(newsplat);
-
-        ++r_bloodsplats_total;
-
-        if (target)
-            target->bloodsplats = MAX(0, target->bloodsplats - 1);
-    }
-}
-
-void P_SpawnBloodSplat2(fixed_t x, fixed_t y, int blood, int maxheight, mobj_t *target)
-{
-    subsector_t *subsec = R_PointInSubsector(x, y);
-    sector_t    *sec = subsec->sector;
-    short       floorpic = sec->floorpic;
-
-    if (!isliquid[floorpic] && sec->floorheight <= maxheight && floorpic != skyflatnum)
-    {
-        mobj_t  *newsplat = calloc(1, sizeof(*newsplat)); 
+        mobj_t  *newsplat = Z_Calloc(1, sizeof(*newsplat), PU_LEVEL, NULL); 
 
         newsplat->type = MT_BLOODSPLAT;
         newsplat->sprite = SPR_BLD2;

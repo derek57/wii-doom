@@ -311,9 +311,11 @@ EV_DoLockedDoor
             return 0;
         if (p->cards[it_bluecard] <= 0 && p->cards[it_blueskull] <= 0)
         {
+            // [BH] display player message distinguishing between keycard and skull key
+            // [BH] flash needed key on hud
             if (p->cards[it_bluecard] == CARDNOTFOUNDYET)
             {
-                if (!p->neededcardflash || p->neededcard != it_bluecard)
+                if (hud && (!p->neededcardflash || p->neededcard != it_bluecard))
                 {
                     p->neededcard = it_bluecard;
                     p->neededcardflash = NEEDEDCARDFLASH;
@@ -322,14 +324,15 @@ EV_DoLockedDoor
             }
             else if (p->cards[it_blueskull] == CARDNOTFOUNDYET)
             {
-                if (!p->neededcardflash || p->neededcard != it_blueskull)
+                if (hud && (!p->neededcardflash || p->neededcard != it_blueskull))
                 {
                     p->neededcard = it_blueskull;
                     p->neededcardflash = NEEDEDCARDFLASH;
                 }
                 p->message = s_PD_BLUEO;
             }
-            S_StartSound(NULL,sfx_oof);
+            //  [BH] use sfx_noway instead of sfx_oof
+            S_StartSound(p->mo, sfx_noway);
             return 0;
         }
         break;
@@ -342,7 +345,7 @@ EV_DoLockedDoor
         {
             if (p->cards[it_redcard] == CARDNOTFOUNDYET)
             {
-                if (!p->neededcardflash || p->neededcard != it_redcard)
+                if (hud && (!p->neededcardflash || p->neededcard != it_redcard))
                 {
                     p->neededcard = it_redcard;
                     p->neededcardflash = NEEDEDCARDFLASH;
@@ -351,14 +354,15 @@ EV_DoLockedDoor
             }
             else if (p->cards[it_redskull] == CARDNOTFOUNDYET)
             {
-                if (!p->neededcardflash || p->neededcard != it_redskull)
+                if (hud && (!p->neededcardflash || p->neededcard != it_redskull))
                 {
                     p->neededcard = it_redskull;
                     p->neededcardflash = NEEDEDCARDFLASH;
                 }
                 p->message = s_PD_REDO;
             }
-            S_StartSound(NULL,sfx_oof);
+            //  [BH] use sfx_noway instead of sfx_oof
+            S_StartSound(p->mo, sfx_noway);
             return 0;
         }
         break;
@@ -371,7 +375,7 @@ EV_DoLockedDoor
         {
             if (p->cards[it_yellowcard] == CARDNOTFOUNDYET)
             {
-                if (!p->neededcardflash || p->neededcard != it_yellowcard)
+                if (hud && (!p->neededcardflash || p->neededcard != it_yellowcard))
                 {
                     p->neededcard = it_yellowcard;
                     p->neededcardflash = NEEDEDCARDFLASH;
@@ -380,14 +384,15 @@ EV_DoLockedDoor
             }
             else if (p->cards[it_yellowskull] == CARDNOTFOUNDYET)
             {
-                if (!p->neededcardflash || p->neededcard != it_yellowskull)
+                if (hud && (!p->neededcardflash || p->neededcard != it_yellowskull))
                 {
                     p->neededcard = it_yellowskull;
                     p->neededcardflash = NEEDEDCARDFLASH;
                 }
                 p->message = s_PD_YELLOWO;
             }
-            S_StartSound(NULL,sfx_oof);
+            //  [BH] use sfx_noway instead of sfx_oof
+            S_StartSound(p->mo, sfx_noway);
             return 0;
         }
         break;        
@@ -521,7 +526,7 @@ EV_VerticalDoor
         {
             if (player->cards[it_bluecard] == CARDNOTFOUNDYET)
             {
-                if (!player->neededcardflash || player->neededcard != it_bluecard)
+                if (hud && (!player->neededcardflash || player->neededcard != it_bluecard))
                 {
                     player->neededcard = it_bluecard;
                     player->neededcardflash = NEEDEDCARDFLASH;
@@ -530,14 +535,15 @@ EV_VerticalDoor
             }
             else if (player->cards[it_blueskull] == CARDNOTFOUNDYET)
             {
-                if (!player->neededcardflash || player->neededcard != it_blueskull)
+                if (hud && (!player->neededcardflash || player->neededcard != it_blueskull))
                 {
                     player->neededcard = it_blueskull;
                     player->neededcardflash = NEEDEDCARDFLASH;
                 }
                 player->message = s_PD_BLUEK;
             }
-            S_StartSound(NULL,sfx_oof);
+            //  [BH] use sfx_noway instead of sfx_oof
+            S_StartSound(player->mo, sfx_noway);
             return;
         }
         break;
@@ -551,7 +557,7 @@ EV_VerticalDoor
         {
             if (player->cards[it_yellowcard] == CARDNOTFOUNDYET)
             {
-                if (!player->neededcardflash || player->neededcard != it_yellowcard)
+                if (hud && (!player->neededcardflash || player->neededcard != it_yellowcard))
                 {
                     player->neededcard = it_yellowcard;
                     player->neededcardflash = NEEDEDCARDFLASH;
@@ -560,14 +566,15 @@ EV_VerticalDoor
             }
             else if (player->cards[it_yellowskull] == CARDNOTFOUNDYET)
             {
-                if (!player->neededcardflash || player->neededcard != it_yellowskull)
+                if (hud && (!player->neededcardflash || player->neededcard != it_yellowskull))
                 {
                     player->neededcard = it_yellowskull;
                     player->neededcardflash = NEEDEDCARDFLASH;
                 }
                 player->message = s_PD_YELLOWK;
             }
-            S_StartSound(NULL,sfx_oof);
+            //  [BH] use sfx_noway instead of sfx_oof
+            S_StartSound(player->mo, sfx_noway);
             return;
         }
         break;
@@ -581,7 +588,7 @@ EV_VerticalDoor
         {
             if (player->cards[it_redcard] == CARDNOTFOUNDYET)
             {
-                if (!player->neededcardflash || player->neededcard != it_redcard)
+                if (hud && (!player->neededcardflash || player->neededcard != it_redcard))
                 {
                     player->neededcard = it_redcard;
                     player->neededcardflash = NEEDEDCARDFLASH;
@@ -590,14 +597,15 @@ EV_VerticalDoor
             }
             else if (player->cards[it_redskull] == CARDNOTFOUNDYET)
             {
-                if (!player->neededcardflash || player->neededcard != it_redskull)
+                if (hud && (!player->neededcardflash || player->neededcard != it_redskull))
                 {
                     player->neededcard = it_redskull;
                     player->neededcardflash = NEEDEDCARDFLASH;
                 }
                 player->message = s_PD_REDK;
             }
-            S_StartSound(NULL,sfx_oof);
+            //  [BH] use sfx_noway instead of sfx_oof
+            S_StartSound(player->mo, sfx_noway);
             return;
         }
         break;
@@ -606,21 +614,13 @@ EV_VerticalDoor
     // if the wrong side of door is pushed, give oof sound
     if (line->sidenum[1] == NO_INDEX)           // killough
     {
-        S_StartSound(player->mo, sfx_oof);    // killough 3/20/98
-        return;
-    }
-
-    // if the sector has an active thinker, use it
-/*
-    if (line->sidenum[side^1] == -1)
-    {
+        // [BH] use sfx_noway instead of sfx_oof
         // [crispy] do not crash if the wrong side of the door is pushed
         C_Error(" EV_VerticalDoor: DR special type on 1-sided linedef");
+        S_StartSound(player->mo, sfx_noway);    // killough 3/20/98
         return;
     }
 
-    sec = sides[ line->sidenum[side^1]] .sector;
-*/
     sec = sides[line->sidenum[1]].sector;
 
     if (sec->ceilingdata)
@@ -634,7 +634,15 @@ EV_VerticalDoor
           case DR_Door_Red_OpenWaitClose:
           case DR_Door_OpenWaitClose_Fast:
             if (door->direction == -1)
+            {
                 door->direction = 1;        // go back up
+
+                // [BH] play correct door sound
+                if (door->type == doorBlazeRaise)
+                    S_StartSectorSound(&door->sector->soundorg, sfx_bdcls);
+                else
+                    S_StartSectorSound(&door->sector->soundorg, sfx_dorcls);
+            }
             else
             {
                 if (!thing->player)
@@ -647,6 +655,12 @@ EV_VerticalDoor
                 if (door->thinker.function == T_VerticalDoor)
                 {
                     door->direction = -1;        // start going down immediately
+
+                    // [BH] play correct door sound
+                    if (door->type == doorBlazeRaise)
+                        S_StartSectorSound(&door->sector->soundorg, sfx_bdcls);
+                    else
+                        S_StartSectorSound(&door->sector->soundorg, sfx_dorcls);
                 }
                 else if (door->thinker.function == T_PlatRaise)
                 {
@@ -747,6 +761,7 @@ EV_VerticalDoor
     // find the top and bottom of the movement range
     door->topheight = P_FindLowestCeilingSurrounding(sec) - 4 * FRACUNIT;
 
+    // [BH] door is no longer secret 
     for (i = 0; i < sec->linecount; i++)
         sec->lines[i]->flags &= ~ML_SECRET;
 }

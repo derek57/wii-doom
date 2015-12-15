@@ -138,66 +138,29 @@ static struct
     char        *pwad;
     char        *texture;
 } exception[] = {
-    { "BTSX_E1.WAD",  "SHNPRT02" },
-    { "BTSX_E2B.WAD", "SHNPRT08" },
-    { "BTSX_E2B.WAD", "SLIME09"  },
-    { "DOOM2.WAD",    "RROCK05"  },
-    { "DOOM2.WAD",    "RROCK06"  },
-    { "DOOM2.WAD",    "RROCK07"  },
-    { "DOOM2.WAD",    "RROCK08"  },
-    { "DOOM2.WAD",    "SLIME09"  },
-    { "DOOM2.WAD",    "SLIME10"  },
-    { "DOOM2.WAD",    "SLIME11"  },
-    { "DOOM2.WAD",    "SLIME12"  },
-    { "MOHU2.WAD",    "DIFL_01"  },
-    { "ETERNALL.WAD", "NUKAGE1"  },
-    { "ETERNALL.WAD", "NUKAGE2"  },
-    { "ETERNALL.WAD", "NUKAGE3"  },
-    { "ETERNALL.WAD", "RROCK05"  },
-    { "ETERNALL.WAD", "RROCK06"  },
-    { "ETERNALL.WAD", "RROCK07"  },
-    { "ETERNALL.WAD", "RROCK08"  },
-    { "ETERNALL.WAD", "SLIME09"  },
-    { "ETERNALL.WAD", "SLIME10"  },
-    { "ETERNALL.WAD", "SLIME11"  },
-    { "ETERNALL.WAD", "SLIME12"  },
-    { "PLUTONIA.WAD", "RROCK05"  },
-    { "PLUTONIA.WAD", "RROCK06"  },
-    { "PLUTONIA.WAD", "RROCK07"  },
-    { "PLUTONIA.WAD", "RROCK08"  },
-    { "PLUTONIA.WAD", "SLIME09"  },
-    { "PLUTONIA.WAD", "SLIME10"  },
-    { "PLUTONIA.WAD", "SLIME11"  },
-    { "PLUTONIA.WAD", "SLIME12"  },
-    { "RC-DC.WAD",    "BWORM00A" },
-    { "RC-DC.WAD",    "CFAN00A"  },
-    { "RC-DC.WAD",    "CFAN01A"  },
-    { "RC-DC.WAD",    "CFAN00D"  },
-    { "RC-DC.WAD",    "CFAN01D"  },
-    { "REQUIEM.WAD",  "SLIME05"  },
-    { "REQUIEM.WAD",  "SLIME08"  },
-    { "SID.WAD",      "FWATER1"  },
-    { "SUNLUST.WAD",  "RROCK05"  },
-    { "SUNLUST.WAD",  "RROCK06"  },
-    { "SUNLUST.WAD",  "RROCK07"  },
-    { "SUNLUST.WAD",  "RROCK08"  },
-    { "SUNLUST.WAD",  "SLIME09"  },
-    { "SUNLUST.WAD",  "SLIME10"  },
-    { "SUNLUST.WAD",  "SLIME11"  },
-    { "SUNLUST.WAD",  "SLIME12"  },
-    { "TNT.WAD",      "RROCK05"  },
-    { "TNT.WAD",      "RROCK06"  },
-    { "TNT.WAD",      "RROCK07"  },
-    { "TNT.WAD",      "RROCK08"  },
-    { "TNT.WAD",      "SLIME09"  },
-    { "TNT.WAD",      "SLIME10"  },
-    { "TNT.WAD",      "SLIME11"  },
-    { "TNT.WAD",      "SLIME12"  },
-    { "UACULTRA.WAD", "RROCK05"  },
-    { "VALIANT.WAD",  "E3SAW_A1" },
-    { "VALIANT.WAD",  "E3SAW_A2" },
-    { "VALIANT.WAD",  "E3SAW_A3" },
-    { "VALIANT.WAD",  "E3SAW_A4" },
+    { "BTSX_E1.WAD",  "SHNPRT02" }, { "BTSX_E1.WAD",  "SLIME05"  }, { "BTSX_E2B.WAD", "SHNPRT08" },
+    { "BTSX_E2B.WAD", "SLIME09"  }, { "DOOM2.WAD",    "RROCK05"  }, { "DOOM2.WAD",    "RROCK06"  },
+    { "DOOM2.WAD",    "RROCK07"  }, { "DOOM2.WAD",    "RROCK08"  }, { "DOOM2.WAD",    "SLIME09"  },
+    { "DOOM2.WAD",    "SLIME10"  }, { "DOOM2.WAD",    "SLIME11"  }, { "DOOM2.WAD",    "SLIME12"  },
+    { "MOHU2.WAD",    "DIFL_01"  }, { "ETERNALL.WAD", "NUKAGE1"  }, { "ETERNALL.WAD", "NUKAGE2"  },
+    { "ETERNALL.WAD", "NUKAGE3"  }, { "ETERNALL.WAD", "RROCK05"  }, { "ETERNALL.WAD", "RROCK06"  },
+    { "ETERNALL.WAD", "RROCK07"  }, { "ETERNALL.WAD", "RROCK08"  }, { "ETERNALL.WAD", "SLIME09"  },
+    { "ETERNALL.WAD", "SLIME10"  }, { "ETERNALL.WAD", "SLIME11"  }, { "ETERNALL.WAD", "SLIME12"  },
+    { "PLUTONIA.WAD", "RROCK05"  }, { "PLUTONIA.WAD", "RROCK06"  }, { "PLUTONIA.WAD", "RROCK07"  },
+    { "PLUTONIA.WAD", "RROCK08"  }, { "PLUTONIA.WAD", "SLIME09"  }, { "PLUTONIA.WAD", "SLIME10"  },
+    { "PLUTONIA.WAD", "SLIME11"  }, { "PLUTONIA.WAD", "SLIME12"  }, { "RC-DC.WAD",    "BWORM00A" },
+    { "RC-DC.WAD",    "CFAN00A"  }, { "RC-DC.WAD",    "CFAN01A"  }, { "RC-DC.WAD",    "CFAN00D"  },
+    { "RC-DC.WAD",    "CFAN01D"  }, { "REQUIEM.WAD",  "SLIME05"  }, { "REQUIEM.WAD",  "SLIME08"  },
+    { "SID.WAD",      "FWATER1"  }, { "SUNLUST.WAD",  "RROCK05"  }, { "SUNLUST.WAD",  "RROCK06"  },
+    { "SUNLUST.WAD",  "RROCK07"  }, { "SUNLUST.WAD",  "RROCK08"  }, { "SUNLUST.WAD",  "SLIME09"  },
+    { "SUNLUST.WAD",  "SLIME10"  }, { "SUNLUST.WAD",  "SLIME11"  }, { "SUNLUST.WAD",  "SLIME12"  },
+    { "TNT.WAD",      "RROCK05"  }, { "TNT.WAD",      "RROCK06"  }, { "TNT.WAD",      "RROCK07"  },
+    { "TNT.WAD",      "RROCK08"  }, { "TNT.WAD",      "SLIME09"  }, { "TNT.WAD",      "SLIME10"  },
+    { "TNT.WAD",      "SLIME11"  }, { "TNT.WAD",      "SLIME12"  }, { "TVR!.WAD",     "SLIME05"  },
+    { "TVR!.WAD",     "SLIME06"  }, { "TVR!.WAD",     "SLIME07"  }, { "TVR!.WAD",     "SLIME08"  },
+    { "TVR!.WAD",     "SLIME09"  }, { "TVR!.WAD",     "SLIME10"  }, { "TVR!.WAD",     "SLIME11"  },
+    { "TVR!.WAD",     "SLIME12"  }, { "UACULTRA.WAD", "RROCK05"  }, { "VALIANT.WAD",  "E3SAW_A1" },
+    { "VALIANT.WAD",  "E3SAW_A2" }, { "VALIANT.WAD",  "E3SAW_A3" }, { "VALIANT.WAD",  "E3SAW_A4" },
     { "",             ""         }
 };
 
@@ -318,13 +281,22 @@ struct
 //
 void P_InitPicAnims (void)
 {
+    int size = (numflats + 1) * sizeof(dboolean);
+
+    isliquid = Z_Malloc(size, PU_STATIC, 0);
+}
+
+//
+// P_GetLiquids
+//
+void P_SetLiquids(void)
+{
     int         i;
     int         lump = W_GetNumForName2("ANIMATED");
     animdef_t   *animdefs = W_CacheLumpNum(lump, PU_STATIC);
-    int         size = (numflats + 1) * sizeof(dboolean);
 
-    isliquid = Z_Malloc(size, PU_STATIC, 0);
-    memset(isliquid, false, size);
+    for (i = 0; i < numflats; ++i)
+        isliquid[i] = false;
 
     // Init animation
     lastanim = anims;
@@ -1168,6 +1140,13 @@ void P_CrossSpecialLine(line_t *line, int side, mobj_t *thing)
                     return;             // monsters disallowed
             linefunc = EV_DoGenStairs;
         }
+        else if ((unsigned int)line->special >= GenCrusherBase)
+        {
+            if (!thing->player)
+                if (!(line->special & CrusherMonster))
+                    return;             // monsters disallowed
+            linefunc = EV_DoGenCrusher;
+        }
 
         // if it was a valid generalized type
         if (linefunc)
@@ -1803,92 +1782,89 @@ void P_CrossSpecialLine(line_t *line, int side, mobj_t *thing)
 void P_ShootSpecialLine(mobj_t *thing, line_t *line)
 {    
     // jff 02/04/98 add check here for generalized linedef
+    // pointer to line function is NULL by default, set non-null if
+    // line special is gun triggered generalized linedef type
+    dboolean (*linefunc)(line_t *line) = NULL;
+
+    // check each range of generalized linedefs
+    if ((unsigned int)line->special >= GenFloorBase)
     {
-        // pointer to line function is NULL by default, set non-null if
-        // line special is gun triggered generalized linedef type
-        dboolean (*linefunc)(line_t *line) = NULL;
-
-        // check each range of generalized linedefs
-        if ((unsigned int)line->special >= GenFloorBase)
+        if (!thing->player)
+            if ((line->special & FloorChange) || !(line->special & FloorModel))
+                return;             // FloorModel is "Allow Monsters" if FloorChange is 0
+        linefunc = EV_DoGenFloor;
+    }
+    else if ((unsigned int)line->special >= GenCeilingBase)
+    {
+        if (!thing->player)
+            if ((line->special & CeilingChange) || !(line->special & CeilingModel))
+                return;             // CeilingModel is "Allow Monsters" if CeilingChange is 0
+        linefunc = EV_DoGenCeiling;
+    }
+    else if ((unsigned int)line->special >= GenDoorBase)
+    {
+        if (!thing->player)
         {
-            if (!thing->player)
-                if ((line->special & FloorChange) || !(line->special & FloorModel))
-                    return;             // FloorModel is "Allow Monsters" if FloorChange is 0
-            linefunc = EV_DoGenFloor;
-        }
-        else if ((unsigned int)line->special >= GenCeilingBase)
-        {
-            if (!thing->player)
-                if ((line->special & CeilingChange) || !(line->special & CeilingModel))
-                    return;             // CeilingModel is "Allow Monsters" if CeilingChange is 0
-            linefunc = EV_DoGenCeiling;
-        }
-        else if ((unsigned int)line->special >= GenDoorBase)
-        {
-            if (!thing->player)
-            {
-                if (!(line->special & DoorMonster))
-                    return;                     // monsters disallowed from this door
-                if (line->flags & ML_SECRET)    // they can't open secret doors either
-                    return;
-            }
-            linefunc = EV_DoGenDoor;
-        }
-        else if ((unsigned int)line->special >= GenLockedBase)
-        {
-            if (!thing->player)
-                return;                 // monsters disallowed from unlocking doors
-            if (((line->special & TriggerType) == GunOnce)
-                || ((line->special & TriggerType) == GunMany))
-            {
-                // jff 4/1/98 check for being a gun type before reporting door type
-                if (!P_CanUnlockGenDoor(line, thing->player))
-                    return;
-            }
-            else
+            if (!(line->special & DoorMonster))
+                return;                     // monsters disallowed from this door
+            if (line->flags & ML_SECRET)    // they can't open secret doors either
                 return;
-            linefunc = EV_DoGenLockedDoor;
         }
-        else if ((unsigned int)line->special >= GenLiftBase)
+        linefunc = EV_DoGenDoor;
+    }
+    else if ((unsigned int)line->special >= GenLockedBase)
+    {
+        if (!thing->player)
+            return;                 // monsters disallowed from unlocking doors
+        if ((line->special & TriggerType) == GunOnce || (line->special & TriggerType) == GunMany) 
         {
-            if (!thing->player)
-                if (!(line->special & LiftMonster))
-                    return;             // monsters disallowed
-            linefunc = EV_DoGenLift;
+            // jff 4/1/98 check for being a gun type before reporting door type
+            if (!P_CanUnlockGenDoor(line, thing->player))
+                return;
         }
-        else if ((unsigned int)line->special >= GenStairsBase)
-        {
-            if (!thing->player)
-                if (!(line->special & StairMonster))
-                    return;             // monsters disallowed
-            linefunc = EV_DoGenStairs;
-        }
-        else if ((unsigned int)line->special >= GenCrusherBase)
-        {
-            if (!thing->player)
-                if (!(line->special & StairMonster))
-                    return;             // monsters disallowed
-            linefunc = EV_DoGenCrusher;
-        }
-
-        if (linefunc)
-            switch ((line->special & TriggerType) >> TriggerTypeShift)
-            {
-                case GunOnce:
-                    if (linefunc(line))
-                        P_ChangeSwitchTexture(line, 0);
-                    return;
-
-                case GunMany:
-                    if (linefunc(line))
-                        P_ChangeSwitchTexture(line, 1);
-                    return;
-
-                default:                // if not a gun type, do nothing here
-                    return;
-            }
+        else
+            return;
+        linefunc = EV_DoGenLockedDoor;
+    }
+    else if ((unsigned int)line->special >= GenLiftBase)
+    {
+        if (!thing->player)
+            if (!(line->special & LiftMonster))
+                return;             // monsters disallowed
+        linefunc = EV_DoGenLift;
+    }
+    else if ((unsigned int)line->special >= GenStairsBase)
+    {
+        if (!thing->player)
+            if (!(line->special & StairMonster))
+                return;             // monsters disallowed
+        linefunc = EV_DoGenStairs;
+    }
+    else if ((unsigned int)line->special >= GenCrusherBase)
+    {
+        if (!thing->player)
+            if (!(line->special & CrusherMonster))
+                return;             // monsters disallowed
+        linefunc = EV_DoGenCrusher;
     }
 
+    if (linefunc)
+        switch ((line->special & TriggerType) >> TriggerTypeShift)
+        {
+            case GunOnce:
+                if (linefunc(line))
+                    P_ChangeSwitchTexture(line, 0);
+                return;
+
+            case GunMany:
+                if (linefunc(line))
+                    P_ChangeSwitchTexture(line, 1);
+                return;
+
+            default:                // if not a gun type, do nothing here
+                return;
+        }
+ 
     // Impacts that other things can activate.
     if (!thing->player && line->special != GR_Door_OpenStay)
         return;

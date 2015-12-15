@@ -41,6 +41,7 @@ extern int runcount;
 extern int png_screenshots;
 extern int pixelwidth;
 extern int pixelheight;
+extern int r_bloodsplats_max;
 
 extern int joy_up;
 extern int joy_down;
@@ -260,6 +261,12 @@ void M_BindBaseControls(void)
     M_BindVariable("icon_type",              &icontype);
     M_BindVariable("colored_player_corpses", &randomly_colored_playercorpses);
     M_BindVariable("endoom_screen",          &show_endoom);
+    M_BindVariable("low_health",             &lowhealth);
+    M_BindVariable("wiggle_fix",             &d_fixwiggle);
+    M_BindVariable("mouse_sensitivity",      &mouseSensitivity);
+    M_BindVariable("slime_trails",           &remove_slime_trails);
+    M_BindVariable("max_bloodsplats",        &r_bloodsplats_max);
+    M_BindVariable("center_weapon",          &d_centerweapon);
 #ifdef WII
     M_BindVariable("key_shoot",              &joy_r);
     M_BindVariable("key_open",               &joy_l);

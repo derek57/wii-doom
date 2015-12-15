@@ -63,6 +63,9 @@ dboolean         am_overlay = false;
 dboolean         nerve_pwad = false;
 dboolean         master_pwad = false;
 
+dboolean         remove_slime_trails = false;
+dboolean         d_fixwiggle = false;
+dboolean         lowhealth = false;
 dboolean         d_recoil = false;
 dboolean         d_maxgore = false;
 dboolean         d_thrust = false;
@@ -122,6 +125,7 @@ dboolean         mousewalk = false;
 dboolean         am_rotate = false;
 dboolean         jumping = false;
 dboolean         general_sound = true;
+dboolean         d_centerweapon = false;
 /*
 dboolean         nerve = false;
 dboolean         chex = false;

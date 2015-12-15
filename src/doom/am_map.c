@@ -341,6 +341,29 @@ static dboolean    movement;
 dboolean           dont_move_backwards = false;
 dboolean           automapactive = false;
 
+//jff 1/7/98 default automap colors added
+int mapcolor_back = 247;  // map background
+int mapcolor_grid = 104;  // grid lines color
+int mapcolor_wall = 23;   // normal 1s wall color
+int mapcolor_fchg = 55;   // line at floor height change color
+int mapcolor_cchg = 215;  // line at ceiling height change color
+int mapcolor_clsd = 208;  // line at sector with floor=ceiling color
+int mapcolor_rkey = 175;  // red key color
+int mapcolor_bkey = 204;  // blue key color
+int mapcolor_ykey = 231;  // yellow key color
+int mapcolor_rdor = 175;  // red door color  (diff from keys to allow option)
+int mapcolor_bdor = 204;  // blue door color (of enabling one but not other)
+int mapcolor_ydor = 231;  // yellow door color
+int mapcolor_tele = 119;  // teleporter line color
+int mapcolor_secr = 252;  // secret sector boundary color
+int mapcolor_exit = 0;    // jff 4/23/98 add exit line color
+int mapcolor_unsn = 104;  // computer map unseen line color
+int mapcolor_flat = 88;   // line with no floor/ceiling changes
+int mapcolor_sprt = 112;  // general sprite color
+int mapcolor_hair = 208;  // crosshair color
+int mapcolor_sngl = 208;  // single player arrow color
+int mapcolor_plyr = 112;  // color for player arrow
+int mapcolor_frnd = 252;  // colors for friends of player
 
 // Calculates the slope and slope according to the x-axis of a line
 // segment in map coordinates (with the upright y-axis n' all) so
@@ -1535,9 +1558,6 @@ AM_drawThings
                 {
                     fixed_t   x;
                     fixed_t   y;
-                    fixed_t   radius;
-
-                    radius = t->radius;
 
                     x = t->x;
                     y = t->y;
@@ -1546,7 +1566,7 @@ AM_drawThings
                         AM_rotate(&x, &y, ANG90-plr->mo->angle, plr->mo->x, plr->mo->y);
 
                     AM_drawLineCharacter(thintriangle_guy, arrlen(thintriangle_guy),
-                            radius, t->angle, colors, x, y);
+                            16<<FRACBITS, t->angle, colors, x, y);
 
                 }
                 t = t->snext;
