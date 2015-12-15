@@ -84,7 +84,7 @@ dboolean EV_DoGenFloor(line_t *line)
 
     if (Trig == PushOnce || Trig == PushMany)
     {
-        if (!line || !(sec = line->backsector))
+        if (!(sec = line->backsector))
             return rtn;
         secnum = sec - sectors;
         manual = true;
@@ -101,9 +101,10 @@ manual_floor:
         // Do not start another function if floor already moving
         if (P_SectorActive(floor_special, sec))
         {
-            if (manual)
+            if (!manual)
+                continue;
+            else
                 return rtn;
-            continue; 
         }
 
         // new floor thinker
@@ -270,8 +271,8 @@ manual_floor:
 dboolean EV_DoGenCeiling(line_t *line)
 {
     int                 secnum;
-    dboolean            rtn;
-    dboolean            manual;
+    dboolean            rtn = false;
+    dboolean            manual = false;
     fixed_t             targheight;
     sector_t            *sec;
     ceiling_t           *ceiling;
@@ -286,13 +287,10 @@ dboolean EV_DoGenCeiling(line_t *line)
     int                 Sped = (value & CeilingSpeed) >> CeilingSpeedShift;
     int                 Trig = (value & TriggerType) >> TriggerTypeShift;
 
-    rtn = false;
-
     // check if a manual trigger, if so do just the sector on the backside
-    manual = false;
     if (Trig == PushOnce || Trig == PushMany)
     {
-        if (!(sec = line->backsector))
+        if (!line || !(sec = line->backsector))
             return rtn;
         secnum = sec - sectors;
         manual = true;
@@ -310,16 +308,14 @@ manual_ceiling:
         // Do not start another function if ceiling already moving
         if (P_SectorActive(ceiling_special, sec))
         {
-            if (!manual)
-                continue;
-            else
+            if (manual)
                 return rtn;
+            continue;
         }
 
         // new ceiling thinker
         rtn = true;
         ceiling = Z_Malloc(sizeof(*ceiling), PU_LEVSPEC, 0);
-        memset(ceiling, 0, sizeof(*ceiling));
         P_AddThinker(&ceiling->thinker);
         sec->ceilingdata = ceiling;
         ceiling->thinker.function = T_MoveCeiling;
@@ -643,9 +639,9 @@ dboolean EV_DoGenStairs(line_t *line)
     int                 i;
     int                 newsecnum;
     int                 texture;
-    int                 okay;
-    dboolean             rtn;
-    dboolean             manual;
+    dboolean            okay;
+    dboolean            rtn;
+    dboolean            manual;
 
     sector_t            *sec;
     sector_t            *tsec;
@@ -764,7 +760,7 @@ manual_stair:
         // 2. Other side is the next sector to raise
         do
         {
-            okay = 0;
+            okay = false;
             for (i = 0; i < sec->linecount; i++)
             {
                 if (!((sec->lines[i])->backsector))
@@ -814,7 +810,7 @@ manual_stair:
                 floor->crush = false;
                 floor->type = genBuildStair;    // jff 3/31/98 do not leave uninited
 
-                okay = 1;
+                okay = true;
                 break;
             }
         } while (okay);

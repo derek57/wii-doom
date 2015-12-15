@@ -1018,7 +1018,6 @@ void AM_updateLightLev(void)
 //
 void AM_Ticker (void)
 {
-
     if (!automapactive)
         return;
 
@@ -1684,8 +1683,9 @@ void AM_DrawWorldTimer(void)
 
     sprintf(timeBuffer, "%.2d : %.2d : %.2d", hours, minutes, seconds);
 
-    if(!am_overlay || (am_overlay && screenSize > 6))
-        M_WriteText(240, 8, timeBuffer);
+    if(gamestate == GS_LEVEL && automapactive)
+        if(!am_overlay || (am_overlay && screenSize > 6))
+            M_WriteText(240, 8, timeBuffer);
 
     if (days)
     {

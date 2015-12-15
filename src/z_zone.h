@@ -261,6 +261,7 @@ enum
 };
         
 
+void         *Z_Calloc(size_t n1, size_t n2, int32_t tag, void **user); 
 void         *Z_Realloc(void *ptr, size_t size);
 void         *Z_Malloc (int size, int tag, void *ptr);
 void         Z_Init (void);

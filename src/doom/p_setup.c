@@ -116,6 +116,10 @@ struct mapinfo_s
 
 static mapinfo_t mapinfo[99];
 
+//
+// [nitr8] UNUSED
+//
+/*
 static char *mapcmdnames[] =
 {
     "AUTHOR",
@@ -142,6 +146,7 @@ static int mapcmdids[] =
     MCMD_SKY1,
     MCMD_TITLEPATCH 
 };
+*/
 
 int                liquidlumps = 0;
 int                noliquidlumps = 0;
@@ -1955,6 +1960,9 @@ P_SetupLevel
     // UNUSED W_Profile ();
     P_InitThinkers ();
            
+    // if working with a devlopment map, reload it
+    W_Reload ();
+
     // find map name
     if ( gamemode == commercial)
     {
@@ -2122,6 +2130,10 @@ P_SetupLevel
 
 }
 
+//
+// [nitr8] UNUSED
+//
+/*
 static void InitMapInfo(void)
 {
     int         i; 
@@ -2307,6 +2319,7 @@ static void InitMapInfo(void)
     SC_Close();
     mapcount = mapmax;
 }
+*/
 
 static int QualifyMap(int map)
 {
@@ -2381,7 +2394,7 @@ void P_Init (void)
 {
     P_InitSwitchList ();
     P_InitPicAnims ();
-    InitMapInfo();
+    //InitMapInfo();
     R_InitSprites (sprnames);
 }
 

@@ -412,43 +412,45 @@ void D_Display (void)
     if (gamestate != oldgamestate && gamestate != GS_LEVEL)
         I_SetPalette (W_CacheLumpName ("PLAYPAL",PU_CACHE));
 
-    // see if the border needs to be initially drawn
-    if (gamestate == GS_LEVEL /*&& oldgamestate != GS_LEVEL*/)
-    {
-        viewactivestate = false;        // view was not active
-        R_FillBackScreen ();    // draw the pattern into the back screen
-    }
-
-    // see if the border needs to be updated to the screen
-    if  (gamestate == GS_LEVEL && (!automapactive ||
-        am_overlay) /*&& scaledviewwidth != (320 << hires)*/)
-    {
-        if (menuactive || menuactivestate || !viewactivestate || consoleheight > CONSOLETOP)
-            borderdrawcount = 3;
-        if (detailLevel)
-            V_LowGraphicDetail(viewheight2 * SCREENWIDTH);
-        if (borderdrawcount)
-        {
-            R_DrawViewBorder ();    // erase old menu stuff
-            borderdrawcount--;
-        }
-    }
-
     // [crispy] in automap overlay mode,
     // the HUD is drawn on top of everything else
-    if (gamestate == GS_LEVEL && gametic)
-        HU_Drawer ();
-    
-    if (gamestate == GS_LEVEL && usergame)
+    if (gamestate == GS_LEVEL)
     {
-        if (hud && screenSize == 8)
+        // see if the border needs to be initially drawn
+//        if (oldgamestate != GS_LEVEL)
         {
-            if(am_overlay || !automapactive)
-                HU_DrawHUD();
+            viewactivestate = false;        // view was not active
+            R_FillBackScreen ();    // draw the pattern into the back screen
         }
 
-        if (!menuactive && devparm && sound_info && !automapactive)
-            ST_DrawSoundInfo();
+        // see if the border needs to be updated to the screen
+        if ((!automapactive || am_overlay) /*&& scaledviewwidth != (320 << hires)*/)
+        {
+            if (menuactive || menuactivestate || !viewactivestate || consoleheight > CONSOLETOP)
+                borderdrawcount = 3;
+            if (detailLevel)
+                V_LowGraphicDetail(viewheight2 * SCREENWIDTH);
+            if (borderdrawcount)
+            {
+                R_DrawViewBorder ();    // erase old menu stuff
+                borderdrawcount--;
+            }
+        }
+
+        if (gametic)
+            HU_Drawer ();
+
+        if (usergame)
+        {
+            if (hud && screenSize == 8)
+            {
+                if(am_overlay || !automapactive)
+                    HU_DrawHUD();
+            }
+
+            if (!menuactive && devparm && sound_info && !automapactive)
+                ST_DrawSoundInfo();
+        }
     }
 
     menuactivestate = menuactive;
@@ -467,8 +469,7 @@ void D_Display (void)
         {
             if(screenSize < 8)
             {
-                if(am_overlay)
-                    ST_doRefresh();
+                ST_doRefresh();
             }
         }
 

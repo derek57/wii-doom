@@ -806,8 +806,9 @@ void HU_DrawStats(void)
         HUlib_addCharToTextLine(&w_monsec, *(t++));
 
     // display the kills/items/secrets each frame, if optioned
-    if(!am_overlay || (am_overlay && screenSize > 6))
-        HUlib_drawTextLine(&w_monsec, false);
+    if(gamestate == GS_LEVEL && automapactive)
+        if(!am_overlay || (am_overlay && screenSize > 6))
+            HUlib_drawTextLine(&w_monsec, false);
 }
 
 static void DrawHUDNumber(int *x, int y, int val, byte *tinttab,
@@ -1124,7 +1125,12 @@ void HU_Drawer(void)
         HUlib_drawSText(&w_message_2);
     }
     else
-        HUlib_drawSText(&w_message);
+    {
+        if(gamestate == GS_LEVEL)
+            HUlib_drawSText(&w_message);
+        else
+            HU_Erase();
+    }
 
     dp_translation = crx[CRX_GOLD];
     HUlib_drawSText(&w_secret);
@@ -1205,7 +1211,6 @@ void HU_Ticker(void)
 
     if (showMessages || message_dontfuckwithme)
     {
-
         // display message if necessary
         if (plr->message
             && !strncmp(plr->message, HUSTR_SECRETFOUND, 21))
@@ -1314,10 +1319,13 @@ void HU_NewLevel()
     }
     // print the new level name into the console
 
-    if (!s && mapinfo_lump)
-        s = P_GetMapName((gameepisode - 1) * 10 + gamemap);
-    else if (!s && !mapinfo_lump)
-        s = "Unknown level";
+    if (!s)
+    {
+        if (mapinfo_lump)
+            s = P_GetMapName((gameepisode - 1) * 10 + gamemap);
+        else
+            s = "Unknown level";
+    }
 
     C_Output("");
 

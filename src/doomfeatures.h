@@ -46,11 +46,11 @@
 #define FEATURE_SOUND 1
 
 //#define BOOM_ZONE_HANDLING 1       // FIXME: NOT WORKING FOR LINUX
-
+/*
 #ifndef WII
 #define DOOMRETRO_ZONE_HANDLING 1
 #endif
-
+*/
 #endif /* #ifndef DOOM_FEATURES_H */
 
 

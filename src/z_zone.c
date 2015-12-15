@@ -1177,7 +1177,7 @@ static const size_t    HEADER_SIZE = (sizeof(memblock_t) + MEM_ALIGN - 1) & ~(ME
 //static int             active_memory = 0;
 //static int             purgable_memory = 0;
 
-extern int             memory_size;
+//extern int             memory_size;
 
 
 void Z_DrawStats(void)            // Print allocation statistics
@@ -1201,7 +1201,7 @@ void Z_DrawStats(void)            // Print allocation statistics
 
         sprintf(act_mem, "%zu\t%6.01f%%\tstatic\n", active_memory, active_memory * s);
         sprintf(pur_mem, "%zu\t%6.01f%%\tpurgable\n", purgable_memory, purgable_memory * s);
-        sprintf(free_mem, "%d\t%6.01f%%\tfree\n", (free_memory + memory_size),
+        sprintf(free_mem, "%zu\t%6.01f%%\tfree\n", (free_memory + memory_size),
                (free_memory + memory_size) * s);
         sprintf(tot_mem, "%lu\t\ttotal\n", total_memory);
     }
@@ -1293,6 +1293,10 @@ void Z_Init (void)
 #endif
 }
 
+void *Z_Calloc(size_t n1, size_t n2, int32_t tag, void **user)
+{
+    return ((n1 *= n2) ? memset(Z_Malloc(n1, tag, user), 0, n1) : NULL);
+}
 
 void *Z_Realloc(void *ptr, size_t size)
 {

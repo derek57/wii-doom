@@ -1694,7 +1694,7 @@ void G_DoLoadLevel (void)
     displayplayer = consoleplayer;                // view the guy you are playing    
     gameaction = ga_nothing; 
 
-#if defined WII || defined BOOM_ZONE_HANDLING
+#ifndef DOOMRETRO_ZONE_HANDLING
     Z_CheckHeap ();
 #endif
 
@@ -2179,6 +2179,7 @@ void G_DoCompleted (void)
     }
 
     gamestate = GS_INTERMISSION; 
+
     viewactive = false; 
     automapactive = false; 
  
@@ -2278,7 +2279,7 @@ void G_Ticker (void)
     int        i;
     int        buf; 
     ticcmd_t*  cmd;
-    
+
     // do player reborns if needed
     for (i=0 ; i<MAXPLAYERS ; i++) 
         if (playeringame[i] && players[i].playerstate == PST_REBORN) 

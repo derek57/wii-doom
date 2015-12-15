@@ -255,6 +255,7 @@ void T_MoveFloor(floormove_t* floor)
     if (!(leveltime & 7)
         // [BH] don't make sound once floor is at its destination height
         && sec->floorheight != floor->floordestheight)
+        S_StartSectorSound(&sec->soundorg, sfx_stnmov);
     
     if (res == pastdest)
     {
