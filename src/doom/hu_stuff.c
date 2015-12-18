@@ -1350,7 +1350,7 @@ void HU_PlayerMessage(char *message, dboolean ingame)
 {
     static char buffer[1024];
     char        lastchar;
-
+printf("%s\n",message);
     if (message[0] == '%' && message[1] == 's')
         M_snprintf(buffer, sizeof(buffer), message, playername);
     else
@@ -1363,7 +1363,7 @@ void HU_PlayerMessage(char *message, dboolean ingame)
         plr->message = buffer;
 
     if (ingame)
-        C_Print(graystring, " %s%s", buffer, (lastchar == '.' || lastchar == '!' ? "" : "."));
+        C_PlayerMessage("%s%s", buffer, (lastchar == '.' || lastchar == '!' ? "" : "."));
     else
         C_Output(" %s%s", buffer, (lastchar == '.' || lastchar == '!' ? "" : "."));
 }
