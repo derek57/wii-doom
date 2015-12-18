@@ -564,7 +564,7 @@ void V_DrawConsoleChar(int x, int y, patch_t *patch, int color1, int color2, dbo
     }
 }
 
-void V_DrawStatusPatch(int x, int y, patch_t *patch, byte *tinttab)
+void V_DrawHUDPatch(int x, int y, patch_t *patch, byte *tinttab)
 {
     int         col = 0;
     byte        *desttop;
@@ -597,7 +597,7 @@ void V_DrawStatusPatch(int x, int y, patch_t *patch, byte *tinttab)
     }
 }
 
-void V_DrawYellowStatusPatch(int x, int y, patch_t *patch, byte *tinttab)
+void V_DrawYellowHUDPatch(int x, int y, patch_t *patch, byte *tinttab)
 {
     int         col = 0;
     byte        *desttop;
@@ -630,7 +630,7 @@ void V_DrawYellowStatusPatch(int x, int y, patch_t *patch, byte *tinttab)
     }
 }
 
-void V_DrawTranslucentStatusPatch(int x, int y, patch_t *patch, byte *tinttab)
+void V_DrawTranslucentHUDPatch(int x, int y, patch_t *patch, byte *tinttab)
 {
     int         col = 0;
     byte        *desttop = dest_screen + y * SCREENWIDTH + x;
@@ -657,7 +657,7 @@ void V_DrawTranslucentStatusPatch(int x, int y, patch_t *patch, byte *tinttab)
     }
 }
 
-void V_DrawTranslucentStatusNumberPatch(int x, int y, patch_t *patch, byte *tinttab)
+void V_DrawTranslucentHUDNumberPatch(int x, int y, patch_t *patch, byte *tinttab)
 {
     int         col = 0;
     byte        *desttop = dest_screen + y * SCREENWIDTH + x;
@@ -686,7 +686,7 @@ void V_DrawTranslucentStatusNumberPatch(int x, int y, patch_t *patch, byte *tint
     }
 }
 
-void V_DrawTranslucentYellowStatusPatch(int x, int y, patch_t *patch, byte *tinttab)
+void V_DrawTranslucentYellowHUDPatch(int x, int y, patch_t *patch, byte *tinttab)
 {
     int         col = 0;
     byte        *desttop = dest_screen + y * SCREENWIDTH + x;

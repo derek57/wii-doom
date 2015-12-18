@@ -86,11 +86,11 @@ void V_MarkRect(int x, int y, int width, int height);
 void V_DrawConsoleChar(int x, int y, patch_t *patch, int color1, int color2, dboolean italics,
     byte *tinttab);
 
-void V_DrawStatusPatch(int x, int y, patch_t *patch, byte *tinttab);
-void V_DrawYellowStatusPatch(int x, int y, patch_t *patch, byte *tinttab);
-void V_DrawTranslucentStatusPatch(int x, int y, patch_t *patch, byte *tinttab);
-void V_DrawTranslucentStatusNumberPatch(int x, int y, patch_t *patch, byte *tinttab);
-void V_DrawTranslucentYellowStatusPatch(int x, int y, patch_t *patch, byte *tinttab);
+void V_DrawHUDPatch(int x, int y, patch_t *patch, byte *tinttab);
+void V_DrawYellowHUDPatch(int x, int y, patch_t *patch, byte *tinttab);
+void V_DrawTranslucentHUDPatch(int x, int y, patch_t *patch, byte *tinttab);
+void V_DrawTranslucentHUDNumberPatch(int x, int y, patch_t *patch, byte *tinttab);
+void V_DrawTranslucentYellowHUDPatch(int x, int y, patch_t *patch, byte *tinttab);
 void V_ColorBlock(int x, int y, int width, int height, byte color);
 void V_GetBlock (int x, int y, int width, int height, byte *dest);
 void V_ScreenShot(char *format);

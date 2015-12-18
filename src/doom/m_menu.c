@@ -2275,7 +2275,7 @@ menuitem_t GameMenu5[]=
     {2,"",M_Smearblood,'b'},
     {2,"Randomly colored player corpses",M_ColoredCorpses,'r'},
     {2,"Player walks slower if health < 15%",M_LowHealth,'h'},
-    {2,"Fix Sprite Offsets",M_Offsets,'x'},
+    {2,"",M_Offsets,'x'},
     {1,"",M_Game6,'6'}
 };
 
@@ -3223,7 +3223,7 @@ void M_DrawSound(void)
         if(itemOn == 8 || (fsize != 28422764 && fsize != 19321722 && fsize != 12361532 && itemOn > 2 && itemOn < 6))
             string = "YOU MUST QUIT AND RESTART TO TAKE EFFECT.";
         else if(fsize == 19321722 && itemOn == 4)
-            string = "NO PC-SPEAKERS AVAILABLE FOR HACX";
+            string = "PC-SPEAKER OPTION NOT AVAILABLE FOR HACX";
         x = ORIGWIDTH/2 - M_StringWidth(string) / 2;
         M_WriteText(x, GameDef2.y + 138, string);
     }
@@ -4636,11 +4636,11 @@ void M_DrawGame3(void)
         int x;
         char *string = "";
         dp_translation = crx[CRX_GOLD];
-        if((itemOn == 3 || itemOn == 4) && dehacked)
+        /*if((itemOn == 3 || itemOn == 4) && dehacked)
             string = "THIS OPTION IS NOT FOR ENABLED DEHACKED MODE.";
         else if(itemOn == 8 && modifiedgame)
             string = "THIS OPTION IS NOT FOR CUSTOM PWAD FILES.";
-        else if(itemOn == 1 && fsize == 12361532)
+        else*/ if(itemOn == 1 && fsize == 12361532)
             string = "NO EXTRA BLOOD & GORE FOR CHEX QUEST.";
 
         x = ORIGWIDTH/2 - M_StringWidth(string) / 2;
@@ -4979,6 +4979,13 @@ void M_DrawGame5(void)
         dp_translation = crx[CRX_DARK];
         M_WriteText(GameDef5.x + 258, GameDef5.y + 108, "OFF");
     }
+
+    if(modifiedgame)
+        dp_translation = crx[CRX_DARK];
+    else if(itemOn == 12 && !modifiedgame)
+        dp_translation = crx[CRX_GOLD];
+
+    M_WriteText(GameDef5.x, GameDef5.y + 118, "Fix Sprite Offsets");
 
     if(d_fixspriteoffsets)
     {

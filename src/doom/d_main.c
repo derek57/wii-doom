@@ -859,8 +859,6 @@ void D_DoAdvanceDemo (void)
     {
         pagename = "INTERPIC";
     }
-
-//    C_InstaPopup();       // make console go away
 }
 
 //
@@ -872,7 +870,6 @@ void D_StartTitle (void)
     gameaction = ga_nothing;
     demosequence = -1;
     D_AdvanceDemo ();
-//    C_InstaPopup();       // make console go away
 }
 
 // Strings for dehacked replacements of the startup banner
@@ -1096,79 +1093,10 @@ static void LoadChexDeh(void)
     }
 }
 
-// Load dehacked patches needed for certain IWADs.
+//
+// [nitr8] UNUSED
+//
 /*
-#ifndef WII
-static void LoadIwadDeh(void)
-{
-    // The Freedoom IWADs have DEHACKED lumps that must be loaded.
-    if (W_CheckNumForName("FREEDOOM") >= 0)
-    {
-        // Old versions of Freedoom (before 2014-09) did not have technically
-        // valid DEHACKED lumps, so ignore errors and just continue if this
-        // is an old IWAD.
-        DEH_LoadLumpByName("DEHACKED", false, true);
-    }
-
-    // If this is the HACX IWAD, we need to load the DEHACKED lump.
-    if (gameversion == exe_hacx)
-    {
-        if (!DEH_LoadLumpByName("DEHACKED", true, false))
-        {
-            I_Error("DEHACKED lump not found.  Please check that this is the "
-                    "Hacx v1.2 IWAD.");
-        }
-    }
-
-    // Chex Quest needs a separate Dehacked patch which must be downloaded
-    // and installed next to the IWAD.
-    if (gameversion == exe_chex)
-    {
-        char *chex_deh = NULL;
-        char *sep;
-
-        // Look for chex.deh in the same directory as the IWAD file.
-        sep = strrchr(iwadfile, DIR_SEPARATOR);
-
-        if (sep != NULL)
-        {
-            size_t chex_deh_len = strlen(iwadfile) + 9;
-            chex_deh = malloc(chex_deh_len);
-            M_StringCopy(chex_deh, iwadfile, chex_deh_len);
-            chex_deh[sep - iwadfile + 1] = '\0';
-            M_StringConcat(chex_deh, "chex.deh", chex_deh_len);
-        }
-        else
-        {
-            chex_deh = M_StringDuplicate("chex.deh");
-        }
-
-        // If the dehacked patch isn't found, try searching the WAD
-        // search path instead.  We might find it...
-        if (!M_FileExists(chex_deh))
-        {
-            free(chex_deh);
-            chex_deh = D_FindWADByName("chex.deh");
-        }
-
-        // Still not found?
-        if (chex_deh == NULL)
-        {
-            I_Error("Unable to find Chex Quest dehacked file (chex.deh).\n"
-                    "The dehacked file is required in order to emulate\n"
-                    "chex.exe correctly.  It can be found in your nearest\n"
-                    "/idgames repository mirror at:\n\n"
-                    "   utils/exe_edit/patches/chexdeh.zip");
-        }
-
-        if (!DEH_LoadFile(chex_deh))
-        {
-            I_Error("Failed to load chex.deh needed for emulating chex.exe.");
-        }
-    }
-}
-#endif
-
 static void G_CheckDemoStatusAtExit (void)
 {
     G_CheckDemoStatus();
@@ -1228,26 +1156,9 @@ static void D_ProcessDehInWad(void)
     {
         if (!strncasecmp(lumpinfo[i]->name, "DEHACKED", 8))
             ProcessDehFile(NULL, i);
-/*
-        else
-        {
-            if(gameversion == exe_hacx && gamemission == pack_hacx)
-                I_Error("DEHACKED lump not found.  Please check that this is the "
-                        "Hacx v1.2 IWAD.");
-        }
-*/
     }
 }
-/*
-static void LoadHacxDeh(void)
-{
-    // If this is the HACX IWAD, we need to load the DEHACKED lump.
-    if (gameversion == exe_hacx)
-    {
-        D_ProcessDehInWad();
-    }
-}
-*/
+
 dboolean DehFileProcessed(char *path)
 {
     int i;
@@ -2010,19 +1921,19 @@ void D_DoomMain (void)
         iwadfile = D_FindIWAD(IWAD_MASK_DOOM, &gamemission);
     else 
     {
-        if(devparm_doom)
+        if(M_CheckParm ("-devparm_doom"))
             iwadfile = "/home/user/WIIDOOM/src/IWAD/DOOM/Reg/v12/DOOM.WAD";
-        else if(devparm_doom2)
+        else if(M_CheckParm ("-devparm_doom2"))
             iwadfile = "/home/user/WIIDOOM/src/IWAD/DOOM2/v1666/DOOM2.WAD";
-        else if(devparm_chex)
+        else if(M_CheckParm ("-devparm_chex"))
             iwadfile = "/home/user/WIIDOOM/src/IWAD/CHEX/CHEX.WAD";
-        else if(devparm_hacx)
+        else if(M_CheckParm ("-devparm_hacx"))
             iwadfile = "/home/user/WIIDOOM/src/IWAD/HACX/v12/HACX.WAD";
-        else if(devparm_freedoom2)
+        else if(M_CheckParm ("-devparm_freedoom2"))
             iwadfile = "/home/user/WIIDOOM/src/IWAD/FREEDOOM/v08p2/FREEDOOM2.WAD";
-        else if(devparm_tnt)
+        else if(M_CheckParm ("-devparm_tnt"))
             iwadfile = "/home/user/WIIDOOM/src/IWAD/TNT/v19_NEW/TNT.WAD";
-        else if(devparm_plutonia)
+        else if(M_CheckParm ("-devparm_plutonia"))
             iwadfile = "/home/user/WIIDOOM/src/IWAD/PLUTONIA/v19_NEW/PLUTONIA.WAD";
     }
 
@@ -2710,9 +2621,6 @@ void D_DoomMain (void)
     if(devparm)
         C_Warning(s_D_DEVSTR);
 /*
-    if(show_deh_loading_message == 1)
-        printf("         adding %s\n", dehacked_file);
-
     if(devparm)
         W_PrintDirectory();
 
@@ -3479,10 +3387,7 @@ void D_DoomMain (void)
     // of doom2.wad is missing the TITLEPIC lump.
     // We specifically check for DMENUPIC here, before PWADs have been
     // loaded which could probably include a lump of that name.
-/*
-    if (W_CheckNumForName("dehacked") >= 0)
-        C_Warning(" Parsed DEHACKED lump\n");
-*/
+
     if (fsize == 4207819)
         C_Output(" Playing \"DOOM SHAREWARE v1.0\".");
     else if(fsize == 4274218)
@@ -3566,31 +3471,6 @@ void D_DoomMain (void)
     else if(fsize == 19321722)
         C_Output(" Playing \"HACX REGISTERED v1.2\".");
 
-    //!
-    // @category mod
-    //
-    // Disable automatic loading of Dehacked patches for certain
-    // IWAD files.
-    //
-/*
-#ifndef WII
-    if (!M_ParmExists("-nodeh"))
-    {
-        // Some IWADs have dehacked patches that need to be loaded for
-        // them to be played properly.
-        LoadIwadDeh();
-    }
-
-#ifdef FEATURE_DEHACKED
-    // Load Dehacked patches specified on the command line with -deh.
-    // Note that there's a very careful and deliberate ordering to how
-    // Dehacked patches are loaded. The order we use is:
-    //  1. IWAD dehacked patches.
-    //  2. Command line dehacked patches specified with -deh.
-    //  3. PWAD dehacked patches in DEHACKED lumps.
-    DEH_ParseCommandLine();
-#endif
-*/
     if(d_uncappedframerate)
         C_Output(" The framerate is uncapped.");
     else

@@ -550,12 +550,14 @@ void HU_Stop(void)
     headsupactive = false;
 }
 
-patch_t *HU_LoadStatusKeyPatch(int keypicnum)
+patch_t *HU_LoadHUDKeyPatch(int keypicnum)
 {
-    if (dehacked && W_CheckNumForName(keypic[keypicnum].patchnamea) >= 0)
-        return W_CacheLumpNum(W_GetNumForName(keypic[keypicnum].patchnamea), PU_CACHE);
-    else if (W_CheckNumForName(keypic[keypicnum].patchnameb) >= 0)
-        return W_CacheLumpNum(W_GetNumForName(keypic[keypicnum].patchnameb), PU_CACHE);
+    int lump;
+
+    if (dehacked && (lump = W_CheckNumForName(keypic[keypicnum].patchnamea)) >= 0)
+        return W_CacheLumpNum(lump, PU_CACHE);
+    else if ((lump = W_CheckNumForName(keypic[keypicnum].patchnameb)) >= 0)
+        return W_CacheLumpNum(lump, PU_CACHE);
     else
         return NULL;
 }
@@ -743,15 +745,15 @@ void HU_Start(void)
     if (W_CheckNumForName("ARM2A0"))
         bluearmorpatch = W_CacheLumpNum(W_GetNumForName("ARM2A0"), PU_CACHE);
 
-    keypic[it_bluecard].patch = HU_LoadStatusKeyPatch(it_bluecard);
-    keypic[it_yellowcard].patch = HU_LoadStatusKeyPatch(exe_hacx ? it_yellowcard : it_yellowskull);
-    keypic[it_redcard].patch = HU_LoadStatusKeyPatch(it_redcard);
+    keypic[it_bluecard].patch = HU_LoadHUDKeyPatch(it_bluecard);
+    keypic[it_yellowcard].patch = HU_LoadHUDKeyPatch(exe_hacx ? it_yellowcard : it_yellowskull);
+    keypic[it_redcard].patch = HU_LoadHUDKeyPatch(it_redcard);
 
     if (gamemode != shareware)
     {
-        keypic[it_blueskull].patch = HU_LoadStatusKeyPatch(it_blueskull);
-        keypic[it_yellowskull].patch = HU_LoadStatusKeyPatch(it_yellowskull);
-        keypic[it_redskull].patch = HU_LoadStatusKeyPatch(it_redskull);
+        keypic[it_blueskull].patch = HU_LoadHUDKeyPatch(it_blueskull);
+        keypic[it_yellowskull].patch = HU_LoadHUDKeyPatch(it_yellowskull);
+        keypic[it_redskull].patch = HU_LoadHUDKeyPatch(it_redskull);
     }
 
     headsupactive = true;
@@ -869,15 +871,15 @@ void HU_DrawHUD(void)
 
     if (d_translucency)
     {
-        hudfunc = V_DrawTranslucentStatusPatch;
-        hudnumfunc = V_DrawTranslucentStatusNumberPatch;
-        godhudfunc = V_DrawTranslucentYellowStatusPatch;
+        hudfunc = V_DrawTranslucentHUDPatch;
+        hudnumfunc = V_DrawTranslucentHUDNumberPatch;
+        godhudfunc = V_DrawTranslucentYellowHUDPatch;
     }
     else
     {
-        hudfunc = V_DrawStatusPatch;
-        hudnumfunc = V_DrawStatusPatch;
-        godhudfunc = V_DrawYellowStatusPatch;
+        hudfunc = V_DrawHUDPatch;
+        hudnumfunc = V_DrawHUDPatch;
+        godhudfunc = V_DrawYellowHUDPatch;
     }
 
     tinttab = (!health || (health <= HUD_HEALTH_MIN && healthanim) || health > HUD_HEALTH_MIN ?
@@ -898,10 +900,10 @@ void HU_DrawHUD(void)
 
     if (healthhighlight > currenttime)
     {
-        DrawHUDNumber(&health_x, HUD_HEALTH_Y + hudnumoffset, health, tinttab, V_DrawStatusPatch);
+        DrawHUDNumber(&health_x, HUD_HEALTH_Y + hudnumoffset, health, tinttab, V_DrawHUDPatch);
 
         if (!emptytallpercent)
-            V_DrawStatusPatch(health_x, HUD_HEALTH_Y + hudnumoffset, tallpercent, tinttab);
+            V_DrawHUDPatch(health_x, HUD_HEALTH_Y + hudnumoffset, tallpercent, tinttab);
     }
     else
     {
@@ -974,7 +976,7 @@ void HU_DrawHUD(void)
         }
 
         if (ammohighlight > currenttime)
-            DrawHUDNumber(&ammo_x, HUD_AMMO_Y + hudnumoffset, ammo, tinttab, V_DrawStatusPatch);
+            DrawHUDNumber(&ammo_x, HUD_AMMO_Y + hudnumoffset, ammo, tinttab, V_DrawHUDPatch);
         else
             DrawHUDNumber(&ammo_x, HUD_AMMO_Y + hudnumoffset, ammo, tinttab, hudnumfunc);
 
@@ -1076,14 +1078,14 @@ void HU_DrawHUD(void)
             if (emptytallpercent)
             {
                 armor_x -= HUDNumberWidth(armor);
-                DrawHUDNumber(&armor_x, HUD_ARMOR_Y + hudnumoffset, armor, tinttab66, V_DrawStatusPatch);
+                DrawHUDNumber(&armor_x, HUD_ARMOR_Y + hudnumoffset, armor, tinttab66, V_DrawHUDPatch);
             }
             else
             {
                 armor_x -= SHORT(tallpercent->width);
-                V_DrawStatusPatch(armor_x, HUD_ARMOR_Y + hudnumoffset, tallpercent, tinttab66);
+                V_DrawHUDPatch(armor_x, HUD_ARMOR_Y + hudnumoffset, tallpercent, tinttab66);
                 armor_x -= HUDNumberWidth(armor);
-                DrawHUDNumber(&armor_x, HUD_ARMOR_Y + hudnumoffset, armor, tinttab66, V_DrawStatusPatch);
+                DrawHUDNumber(&armor_x, HUD_ARMOR_Y + hudnumoffset, armor, tinttab66, V_DrawHUDPatch);
             }
         }
         else if (emptytallpercent)

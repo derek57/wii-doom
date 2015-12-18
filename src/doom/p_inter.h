@@ -29,6 +29,7 @@
 #define __P_INTER__
 
 
+extern dboolean message_dontfuckwithme;
 
 
 dboolean        P_GivePower(player_t*, int);

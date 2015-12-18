@@ -2098,8 +2098,10 @@ dboolean PIT_ChangeSector (mobj_t *thing)
     int flags = thing->flags;
     int flags2 = thing->flags2;
 
-    //printf("name1 = %s\n",thing->info->name1);
-    //printf("doomednum = %d\n",thing->info->doomednum);
+    /*
+    printf("name1 = %s\n",thing->info->name1);
+    printf("doomednum = %d\n",thing->info->doomednum);
+    */
 
     if (isliquidsector && !(flags2 & MF2_NOFOOTCLIP))
         thing->flags2 |= MF2_FEETARECLIPPED;

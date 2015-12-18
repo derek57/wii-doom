@@ -962,25 +962,34 @@ typedef struct
 //
 typedef struct visplane_s
 {
-    struct visplane_s   *next;          // Next visplane in hash chain -- killough
+    // Next visplane in hash chain -- killough
+    struct visplane_s   *next;
+
     int                 picnum;
     int                 lightlevel;
     int                 minx;
     int                 maxx;
     fixed_t             height;
-    fixed_t             xoffs, yoffs;   // killough 2/28/98: Support scrolling flats
+
+    // killough 2/28/98: Support scrolling flats
+    fixed_t             xoffs, yoffs;
+
     // leave pads for [minx-1]/[maxx+1]
     unsigned short      pad1;
+
     // Here lies the rub for all
     //  dynamic resize/change of resolution.
     unsigned short      top[SCREENWIDTH];
+
     unsigned short      pad2;
     unsigned short      pad3;
-    // See above.
+
     unsigned short      bottom[SCREENWIDTH];
+ 
     unsigned short      pad4;
 
-    sector_t            *sector;        // [BH] Support animated liquid sectors
+    // [BH] Support animated liquid sectors
+    sector_t            *sector;
 } visplane_t;
 
 #endif

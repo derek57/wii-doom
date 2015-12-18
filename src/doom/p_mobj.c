@@ -397,9 +397,9 @@ void P_XYMovement (mobj_t* mo)
         if (player && player->mo == mo)
             player->momx = player->momy = 0;
     }
-        // [BH] reduce friction for corpses in water 
     else if ((mo->flags2 & MF2_FEETARECLIPPED) && corpse && !player)
     {
+        // [BH] reduce friction for corpses in water 
         mo->momx = FixedMul(mo->momx, WATERFRICTION);
         mo->momy = FixedMul(mo->momy, WATERFRICTION);
     }
@@ -868,10 +868,9 @@ mobj_t *P_SpawnMobj(fixed_t x, fixed_t y, fixed_t z, mobjtype_t type)
 
     if (gameskill != sk_nightmare)
         mobj->reactiontime = info->reactiontime;
-    
     mobj->lastlook = P_Random () % MAXPLAYERS;
-    // do not set the state with P_SetMobjState,
-    // because action routines can not be called yet
+
+    // do not set the state with P_SetMobjState, because action routines can not be called yet
     st = &states[info->spawnstate];
 
     // [BH] initialize certain mobj's animations to random start frame
@@ -1003,7 +1002,6 @@ void P_RemoveMobjShadow(mobj_t *mobj)
 
 //
 // P_FindDoomedNum
-//
 // Finds a mobj type with a matching doomednum
 // killough 8/24/98: rewrote to use hashing
 //

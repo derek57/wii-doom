@@ -6,11 +6,11 @@
 
 ========================================================================
 
-  Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
-  Copyright (C) 2013-2015 Brad Harding.
+  Copyright © 1993-2012 id Software LLC, a ZeniMax Media company.
+  Copyright © 2013-2016 Brad Harding.
 
-  DOOM Retro is a fork of Chocolate DOOM by Simon Howard.
-  For a complete list of credits, see the accompanying AUTHORS file.
+  DOOM Retro is a fork of Chocolate DOOM.
+  For a list of credits, see the accompanying AUTHORS file.
 
   This file is part of DOOM Retro.
 
@@ -31,7 +31,7 @@
   company, in the US and/or other countries and is used without
   permission. All other trademarks are the property of their respective
   holders. DOOM Retro is in no way affiliated with nor endorsed by
-  id Software LLC.
+  id Software.
 
 ========================================================================
 */
@@ -52,7 +52,6 @@
 #include "doom/p_local.h"
 #include "doom/sounds.h"
 #include "doom/st_stuff.h"
-//#include "version.h"
 #include "w_wad.h"
 #include "z_zone.h"
 
@@ -1762,6 +1761,7 @@ dboolean CheckPackageWADVersion(void)
     return false;
 }
 */
+
 // ====================================================================
 // ProcessDehFile
 // Purpose: Read and process a DEH or BEX file
@@ -1798,7 +1798,7 @@ void ProcessDehFile(char *filename, int lumpnum)
     }
 
     {
-        static int      i;  // killough 10/98: only run once, by keeping index static
+        static int      i;      // killough 10/98: only run once, by keeping index static
 
         // remember what they start as for deh xref
         for (; i < EXTRASTATES; i++)  
@@ -2050,7 +2050,8 @@ void deh_procThing(DEHFILE *fpin, char *line)
             else
             {
                 // bit set
-                // e6y: Correction of wrong processing of Bits parameter if its value is equal to zero
+                // e6y: Correction of wrong processing of Bits parameter if its value is equal to
+                // zero
                 if (bGetData == 1)
                     mobjinfo[indexnum].flags = value;
                 else
@@ -2071,8 +2072,8 @@ void deh_procThing(DEHFILE *fpin, char *line)
                             if (!M_StringCompare(strval, deh_mobjflags[iy].name))
                                 continue;
                             if (devparm)
-                                C_Output(" ORed value 0x%08lx %s.",
-                                        deh_mobjflags[iy].value, strval);
+                                C_Output(" ORed value 0x%08lx %s.", deh_mobjflags[iy].value,
+                                    strval);
 
                             value |= deh_mobjflags[iy].value;
                             break;
@@ -2088,8 +2089,7 @@ void deh_procThing(DEHFILE *fpin, char *line)
                 }
             }
             if (devparm)
-                C_Output(" Assigned %d to %s (%d) at index %d.",
-                        (int)value, key, indexnum, ix);
+                C_Output(" Assigned %d to %s (%d) at index %d.", (int)value, key, indexnum, ix);
         }
     }
     return;
@@ -2130,45 +2130,44 @@ void deh_procFrame(DEHFILE *fpin, char *line)
             C_Warning(" Bad data pair in \"%s\".", inbuffer);
             continue;
         }
-        if (M_StringCompare(key, deh_state[0]))                     // Sprite number
+        if (M_StringCompare(key, deh_state[0]))                 // Sprite number
         {
             if (devparm)
                 C_Output("  - sprite = %ld", value);
             states[indexnum].sprite = (spritenum_t)value;
             states[indexnum].dehacked = dehacked = !BTSX;
         }
-        else if (M_StringCompare(key, deh_state[1]))                // Sprite subnumber
+        else if (M_StringCompare(key, deh_state[1]))            // Sprite subnumber
         {
             if (devparm)
                 C_Output("  - frame = %ld", value);
             states[indexnum].frame = value;                     // long
             states[indexnum].dehacked = dehacked = !BTSX;
         }
-        else if (M_StringCompare(key, deh_state[2]))                // Duration
+        else if (M_StringCompare(key, deh_state[2]))            // Duration
         {
             if (devparm)
                 C_Output("  - tics = %ld", value);
             states[indexnum].tics = value;                      // long
             states[indexnum].dehacked = dehacked = !BTSX;
         }
-        else if (M_StringCompare(key, deh_state[3]))                // Next frame
+        else if (M_StringCompare(key, deh_state[3]))            // Next frame
         {
             if (devparm)
                 C_Output("  - nextstate = %ld", value);
             states[indexnum].nextstate = value;
             states[indexnum].dehacked = dehacked = !BTSX;
         }
-        else if (M_StringCompare(key, deh_state[4]))                // Codep frame
-                                                                // (not set in Frame deh block)
+        else if (M_StringCompare(key, deh_state[4]))    // Codep frame (not set in Frame deh block)
             C_Warning(" Codep frame should not be set in Frame section.");
-        else if (M_StringCompare(key, deh_state[5]))                // Unknown 1
+        else if (M_StringCompare(key, deh_state[5]))            // Unknown 1
         {
             if (devparm)
                 C_Output("  - misc1 = %ld", value);
             states[indexnum].misc1 = value;                     // long
             states[indexnum].dehacked = dehacked = !BTSX;
         }
-        else if (M_StringCompare(key, deh_state[6]))                // Unknown 2
+        else if (M_StringCompare(key, deh_state[6]))            // Unknown 2
         {
             if (devparm)
                 C_Output("  - misc2 = %ld", value);
@@ -2289,11 +2288,11 @@ void deh_procSounds(DEHFILE *fpin, char *line)
             break;      // killough 11/98
         if (!deh_GetData(inbuffer, key, &value, NULL))   // returns TRUE if ok
         {
-            C_Warning(" Bad data pair in \"%s\"", inbuffer);
+            C_Warning(" Bad data pair in \"%s\"\n", inbuffer);
             continue;
         }
         if (M_StringCompare(key, deh_sfxinfo[0]))           // Offset
-            /* nop */;                                  // we don't know what this is, I don't think
+            /* nop */;                          // we don't know what this is, I don't think
         else if (M_StringCompare(key, deh_sfxinfo[1]))      // Zero/One
             S_sfx[indexnum].singularity = value;
         else if (M_StringCompare(key, deh_sfxinfo[2]))      // Value
@@ -2588,7 +2587,6 @@ void deh_procCheat(DEHFILE *fpin, char *line)
             while (*p == ' ')
                 ++p;
             cheat_mus.sequence = strdup(p);
-//            cheat_mus_xy.sequence = strdup(p);
             success = true;
         }
         else if (M_StringCompare(key, deh_cheat[1]))
@@ -2729,7 +2727,6 @@ void deh_procCheat(DEHFILE *fpin, char *line)
             while (*p == ' ')
                 ++p;
             cheat_clev.sequence = strdup(p);
-//            cheat_clev_xy.sequence = strdup(p);
             success = true;
         }
         else if (M_StringCompare(key, deh_cheat[15]))
@@ -3029,7 +3026,7 @@ void deh_procStrings(DEHFILE *fpin, char *line)
         }
 
         // concatenate the whole buffer if continuation or the value if first
-        strcat(holdstring, ptr_lstrip((*holdstring ? inbuffer : strval)));
+        strcat(holdstring, ptr_lstrip(*holdstring ? inbuffer : strval));
         rstrip(holdstring);
 
         // delete any trailing blanks past the backslash
@@ -3089,7 +3086,6 @@ dboolean deh_procStringSub(char *key, char *lookfor, char *newstring)
                 char    *s;
 
                 for (s = *deh_strlookup[i].ppstr; *s; ++s, ++t)
-                {
                     if (*s == '\\' && (s[1] == 'n' || s[1] == 'N'))     // found one
                     {
                         ++s;
@@ -3097,7 +3093,6 @@ dboolean deh_procStringSub(char *key, char *lookfor, char *newstring)
                     }
                     else
                         *t = *s;
-                }
                 *t = '\0';              // cap off the target string
             }
 
@@ -3107,7 +3102,7 @@ dboolean deh_procStringSub(char *key, char *lookfor, char *newstring)
                     C_Output(" Assigned key %s to \"%s\"", key, newstring);
                 else
                 {
-                    C_Output("Assigned \"%.12s%s\" to \"%.12s%s\" at key %s", lookfor,
+                    C_Output(" Assigned \"%.12s%s\" to \"%.12s%s\" at key %s", lookfor,
                         (strlen(lookfor) > 12 ? "..." : ""), newstring,
                         (strlen(newstring) > 12 ? "..." : ""), deh_strlookup[i].lookup);
                     C_Output(" *BEX FORMAT:");
@@ -3115,6 +3110,7 @@ dboolean deh_procStringSub(char *key, char *lookfor, char *newstring)
                     C_Output(" *END BEX");
                 }
             }
+
             deh_strlookup[i].assigned = true;
 
             if (M_StrCaseStr(deh_strlookup[i].lookup, "HUSTR"))

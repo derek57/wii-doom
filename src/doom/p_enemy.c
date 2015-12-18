@@ -2793,7 +2793,7 @@ void A_MoreGibs(mobj_t* actor)
 
 
 // killough 11/98: kill an object
-void A_Die(mobj_t *actor, player_t *player, pspdef_t *psp)
+void A_Die(mobj_t *actor)
 {
     P_DamageMobj(actor, NULL, NULL, actor->health);
 }
@@ -2802,7 +2802,7 @@ void A_Die(mobj_t *actor, player_t *player, pspdef_t *psp)
 // A_Detonate
 // killough 8/9/98: same as A_Explode, except that the damage is variable
 //
-void A_Detonate(mobj_t *actor, player_t *player, pspdef_t *psp)
+void A_Detonate(mobj_t *actor)
 {
     P_RadiusAttack(actor, actor->target, actor->info->damage);
 }
@@ -2811,7 +2811,7 @@ void A_Detonate(mobj_t *actor, player_t *player, pspdef_t *psp)
 // killough 9/98: a mushroom explosion effect, sorta :)
 // Original idea: Linguica
 //
-void A_Mushroom(mobj_t *actor, player_t *player, pspdef_t *psp)
+void A_Mushroom(mobj_t *actor)
 {
     int         i;
     int         j;
@@ -2848,7 +2848,7 @@ void A_Mushroom(mobj_t *actor, player_t *player, pspdef_t *psp)
 //
 // A small set of highly-sought-after code pointers
 //
-void A_Spawn(mobj_t *actor, player_t *player, pspdef_t *psp)
+void A_Spawn(mobj_t *actor)
 {
     state_t     *state = actor->state;
 
@@ -2856,17 +2856,17 @@ void A_Spawn(mobj_t *actor, player_t *player, pspdef_t *psp)
         P_SpawnMobj(actor->x, actor->y, (state->misc2 << FRACBITS) + actor->z, state->misc1 - 1);
 }
 
-void A_Turn(mobj_t *actor, player_t *player, pspdef_t *psp)
+void A_Turn(mobj_t *actor)
 {
     actor->angle += (unsigned int)(((uint64_t)actor->state->misc1 << 32) / 360);
 }
 
-void A_Face(mobj_t *actor, player_t *player, pspdef_t *psp)
+void A_Face(mobj_t *actor)
 {
     actor->angle = (unsigned int)(((uint64_t)actor->state->misc1 << 32) / 360);
 }
 
-void A_Scratch(mobj_t *actor, player_t *player, pspdef_t *psp)
+void A_Scratch(mobj_t *actor)
 {
     state_t     *state = actor->state;
 
@@ -2875,16 +2875,17 @@ void A_Scratch(mobj_t *actor, player_t *player, pspdef_t *psp)
             state->misc1)) : (void)0);
 }
 
-void A_PlaySound(mobj_t *actor, player_t *player, pspdef_t *psp)
+void A_PlaySound(mobj_t *actor)
 {
     state_t     *state = actor->state;
 
     S_StartSound((state->misc2 ? NULL : actor), state->misc1);
 }
 
-void A_RandomJump(mobj_t *actor, player_t *player, pspdef_t *psp)
+void A_RandomJump(mobj_t *actor)
 {
     // [BH] allow A_RandomJump to work for weapon states as well 
+/*
     if (psp)
     {
         state_t *state = psp->state;
@@ -2893,6 +2894,7 @@ void A_RandomJump(mobj_t *actor, player_t *player, pspdef_t *psp)
             P_SetPsprite(player, psp - &player->psprites[0], state->misc1);
     }
     else
+*/
     {
         state_t *state = actor->state;
 
@@ -2904,7 +2906,7 @@ void A_RandomJump(mobj_t *actor, player_t *player, pspdef_t *psp)
 //
 // This allows linedef effects to be activated inside deh frames.
 //
-void A_LineEffect(mobj_t *actor, player_t *player, pspdef_t *psp)
+void A_LineEffect(mobj_t *actor)
 {
     static line_t       junk;
     player_t            newplayer;
@@ -2924,7 +2926,7 @@ void A_LineEffect(mobj_t *actor, player_t *player, pspdef_t *psp)
     actor->player = oldplayer;
 }
 
-void A_SkullPop(mobj_t *actor, player_t *player, pspdef_t *psp)
+void A_SkullPop(mobj_t *actor, player_t *player)
 {
     mobj_t      *mo;
 
