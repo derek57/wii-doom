@@ -76,7 +76,7 @@ void OPL_Queue_Push(opl_callback_queue_t *queue,
 
     if (queue->num_entries >= MAX_OPL_QUEUE)
     {
-        C_Warning(" OPL_Queue_Push: Exceeded maximum callbacks");
+        C_Warning("OPL_Queue_Push: Exceeded maximum callbacks");
         return;
     }
 

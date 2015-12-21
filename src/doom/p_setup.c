@@ -116,10 +116,6 @@ struct mapinfo_s
 
 static mapinfo_t mapinfo[99];
 
-//
-// [nitr8] UNUSED
-//
-/*
 static char *mapcmdnames[] =
 {
     "AUTHOR",
@@ -146,7 +142,6 @@ static int mapcmdids[] =
     MCMD_SKY1,
     MCMD_TITLEPATCH 
 };
-*/
 
 int                liquidlumps = 0;
 int                noliquidlumps = 0;
@@ -232,6 +227,7 @@ dboolean            mapinfo_lump;
 //  used as a PVS lookup as well.
 //
 
+extern dboolean    mus_cheated;
 extern dboolean    mus_cheat_used;
 extern dboolean    finale_music;
 extern dboolean    sound_warning_printed;
@@ -374,7 +370,7 @@ void P_LoadSegs (int lump)
         // e6y: fix wrong side index
         if (side != 0 && side != 1)
         {
-            C_Warning(" Seg %s has a wrong side index of %s. It has been replaced with 1.",
+            C_Warning("Seg %s has a wrong side index of %s. It has been replaced with 1.",
                 commify(i), commify(side));
             side = 1;
         }
@@ -393,7 +389,7 @@ void P_LoadSegs (int lump)
             li->frontsector = sides[ldef->sidenum[side]].sector;
         else
         {
-            C_Warning(" The front of seg %s has no sidedef.", commify(i));
+            C_Warning("The front of seg %s has no sidedef.", commify(i));
             li->frontsector = NULL;
         }
 
@@ -531,7 +527,7 @@ static void P_LoadSegs_V4(int lump)
         // e6y: fix wrong side index
         if (side != 0 && side != 1)
         {
-            C_Warning(" Seg %s has a wrong side index of %s. It has been replaced with 1.",
+            C_Warning("Seg %s has a wrong side index of %s. It has been replaced with 1.",
                 commify(i), commify(side));
             side = 1;
         }
@@ -550,7 +546,7 @@ static void P_LoadSegs_V4(int lump)
             li->frontsector = sides[ldef->sidenum[side]].sector;
         else
         {
-            C_Warning(" The front of seg %s has no sidedef.", commify(i));
+            C_Warning("The front of seg %s has no sidedef.", commify(i));
             li->frontsector = NULL;
         }
 
@@ -742,7 +738,7 @@ void P_LoadNodes (int lump)
     if (!data || !numnodes)
     {
         if (numsubsectors == 1)
-            C_Warning(" This map has no nodes and only one subsector.");
+            C_Warning("This map has no nodes and only one subsector.");
         else
             I_Error("This map has no nodes.");
     }
@@ -774,7 +770,7 @@ void P_LoadNodes (int lump)
                 // haleyjd 11/06/10: check for invalid subsector reference
                 if (no->children[j] >= numsubsectors)
                 {
-                    C_Warning(" Node %s references an invalid subsector of %s.",
+                    C_Warning("Node %s references an invalid subsector of %s.",
                         commify(i), commify(no->children[j]));
                     no->children[j] = 0;
                 }
@@ -806,7 +802,7 @@ static void P_LoadNodes_V4(int lump)
     if (!data || !numnodes)
     {
         if (numsubsectors == 1)
-            C_Warning(" This map has no nodes and only one subsector.");
+            C_Warning("This map has no nodes and only one subsector.");
         else
             I_Error("This map has no nodes.");
     }
@@ -866,14 +862,14 @@ static void P_LoadZSegs(const byte *data)
         // e6y: fix wrong side index
         if (side != 0 && side != 1)
         {
-            C_Warning(" Seg %s has a wrong side index of %s. It has been replaced with 1.",
+            C_Warning("Seg %s has a wrong side index of %s. It has been replaced with 1.",
                 commify(i), commify(side));
             side = 1;
         }
 
         // e6y: check for wrong indexes
         if ((unsigned int)ldef->sidenum[side] >= (unsigned int)numsides)
-            C_Warning(" Linedef %s for seg %s references an invalid sidedef of %s.",
+            C_Warning("Linedef %s for seg %s references an invalid sidedef of %s.",
                 commify(linedef), commify(i), commify(ldef->sidenum[side]));
 
         li->sidedef = &sides[ldef->sidenum[side]];
@@ -885,7 +881,7 @@ static void P_LoadZSegs(const byte *data)
             li->frontsector = sides[ldef->sidenum[side]].sector;
         else
         {
-            C_Warning(" The front of seg %s has no sidedef.", commify(i));
+            C_Warning("The front of seg %s has no sidedef.", commify(i));
             li->frontsector = NULL;
         }
 
@@ -1166,7 +1162,7 @@ static void P_LoadLineDefs(int lump)
 	// [crispy] warn about unknown linedef types
 	if ((unsigned short) ld->special == 270 || (unsigned short) ld->special > 272)
 	{
-	    C_Error(" P_LoadLineDefs: Unknown special %d at line %d", ld->special, i);
+	    C_Error("P_LoadLineDefs: Unknown special %d at line %d", ld->special, i);
 	    warn++;
 	}
 
@@ -1219,8 +1215,8 @@ static void P_LoadLineDefs(int lump)
     // [crispy] warn about unknown linedef types
     if (warn)
     {
-        C_Error(" P_LoadLineDefs: Found %d line%s with unknown linedef type.", warn, (warn > 1) ? "s" : "");
-        C_Error(" THIS MAP MAY NOT WORK AS EXPECTED!");
+        C_Error("P_LoadLineDefs: Found %d line%s with unknown linedef type.", warn, (warn > 1) ? "s" : "");
+        C_Error("THIS MAP MAY NOT WORK AS EXPECTED!");
     }
 
     W_ReleaseLumpNum(lump);
@@ -1243,7 +1239,7 @@ static void P_LoadLineDefs2(int lump)
             for (j = 0; j < 2; j++)
                 if (ld->sidenum[j] != NO_INDEX && ld->sidenum[j] >= numsides)
                 {
-                    C_Warning(" Linedef %s references an invalid sidedef of %s.",
+                    C_Warning("Linedef %s references an invalid sidedef of %s.",
                         commify(i), commify(ld->sidenum[j]));
                     ld->sidenum[j] = NO_INDEX;
                 }
@@ -1252,13 +1248,13 @@ static void P_LoadLineDefs2(int lump)
             if (ld->sidenum[0] == NO_INDEX)
             {
                 ld->sidenum[0] = 0;  // Substitute dummy sidedef for missing right side
-                C_Warning(" Linedef %s is missing its first sidedef.", commify(i));
+                C_Warning("Linedef %s is missing its first sidedef.", commify(i));
             }
 
             if (ld->sidenum[1] == NO_INDEX && (ld->flags & ML_TWOSIDED))
             {
                 ld->flags &= ~ML_TWOSIDED;  // Clear 2s flag for missing left side
-                C_Warning(" Linedef %s has the two-sided flag set but has no second sidedef.",
+                C_Warning("Linedef %s has the two-sided flag set but has no second sidedef.",
                     commify(i));
             }
         }
@@ -1323,7 +1319,7 @@ static void P_LoadSideDefs2(int lump)
         // cph 2006/09/30 - catch out-of-range sector numbers; use sector 0 instead
         if (sector_num >= numsectors)
         {
-            C_Warning(" Sidedef %s references an invalid sector of %s.",
+            C_Warning("Sidedef %s references an invalid sector of %s.",
                 commify(i), commify(sector_num));
             sector_num = 0;
         }
@@ -1880,33 +1876,34 @@ static mapformat_t P_CheckMapFormat(int lumpnum)
     int         b;
 
     if ((b = lumpnum + ML_NODES) < numlumps && (nodes = W_CacheLumpNum(b, PU_CACHE))
-        && W_LumpLength(b) > 0)
+        && W_LumpLength(b))
     {
         if (!memcmp(nodes, "xNd4\0\0\0\0", 8))
             format = DEEPBSP;
-        else if (!memcmp(nodes, "XNOD", 4) && !W_LumpLength(lumpnum + ML_SEGS)) 
-                format = ZDBSPX;
+        else if (!memcmp(nodes, "XNOD", 4) && !W_LumpLength(lumpnum + ML_SEGS)
+            && W_LumpLength(lumpnum + ML_NODES) >= 12)
+            format = ZDBSPX;
         else if (!memcmp(nodes, "ZNOD", 4))
             I_Error("Compressed ZDoom nodes are not supported.");
     }
 
     if ((b = lumpnum+ML_BLOCKMAP+1) < numlumps &&
             !strncasecmp(lumpinfo[b]->name, "BEHAVIOR", 8))
-        C_Warning(" Hexen map format, ");
+        C_Warning("Hexen map format, ");
     else
-        C_Warning(" Doom map format, ");
+        C_Warning("Doom map format, ");
 
     if (!((b = lumpnum+ML_NODES) < numlumps && (nodes = W_CacheLumpNum(b, PU_CACHE)) &&
             W_LumpLength(b) > 0))
-        C_Warning(" No nodes.");
+        C_Warning("No nodes.");
     else if (!memcmp(nodes, "xNd4\0\0\0\0", 8))
-        C_Warning(" DeePBSP nodes.");
+        C_Warning("DeePBSP nodes.");
     else if (!memcmp(nodes, "XNOD", 4))
-        C_Warning(" Uncompressed ZDBSP nodes.");
+        C_Warning("Uncompressed ZDBSP nodes.");
     else if (!memcmp(nodes, "ZNOD", 4))
-        C_Warning(" Compressed ZDBSP nodes.");
+        C_Warning("Compressed ZDBSP nodes.");
     else
-        C_Warning(" Normal BSP nodes.");
+        C_Warning("Normal BSP nodes.");
 
     if (nodes)
         W_ReleaseLumpNum(b);
@@ -1926,6 +1923,7 @@ P_SetupLevel
     char             lumpname[9];
     int              lumpnum;
         
+    mus_cheated = false;
     mus_cheat_used = false;
     finale_music = false;
     sound_warning_printed = false;
@@ -2123,17 +2121,13 @@ P_SetupLevel
     if (precache)
         R_PrecacheLevel ();
 
-//    C_Warning(" P_SetupLevel: Free Memory (0x%x)", Z_FreeMemory());
+//    C_Warning("P_SetupLevel: Free Memory (0x%x)", Z_FreeMemory());
     //printf ("free memory: 0x%x\n", Z_FreeMemory());
 
     HU_NewLevel();
 
 }
 
-//
-// [nitr8] UNUSED
-//
-/*
 static void InitMapInfo(void)
 {
     int         i; 
@@ -2256,7 +2250,10 @@ static void InitMapInfo(void)
                             else
                                 sscanf(mapnum, "E%1iM%1i", &nextepisode, &nextmap);
                         }
-                        info->next = (nextepisode - 1) * 10 + nextmap;
+                        if(gamemode == commercial)
+                            info->secretnext = (nextepisode - 2) * 10 + nextmap;
+                        else
+                            info->secretnext = (nextepisode - 1) * 10 + nextmap;
                         break;
                     }
 
@@ -2296,7 +2293,10 @@ static void InitMapInfo(void)
                             else
                                 sscanf(mapnum, "E%1iM%1i", &nextepisode, &nextmap);
                         }
-                        info->secretnext = (nextepisode - 1) * 10 + nextmap;
+                        if(gamemode == commercial)
+                            info->secretnext = (nextepisode - 2) * 10 + nextmap;
+                        else
+                            info->secretnext = (nextepisode - 1) * 10 + nextmap;
                         break;
                     }
 
@@ -2309,7 +2309,10 @@ static void InitMapInfo(void)
 
                     case MCMD_TITLEPATCH:
                         SC_MustGetString();
-                        info->titlepatch = W_CheckNumForName(sc_String);
+                        if(gamemode == commercial)
+                            info->titlepatch = W_CheckNumForName(sc_String) - 10;
+                        else
+                            info->titlepatch = W_CheckNumForName(sc_String);
                         break;
                 }
             }
@@ -2319,7 +2322,6 @@ static void InitMapInfo(void)
     SC_Close();
     mapcount = mapmax;
 }
-*/
 
 static int QualifyMap(int map)
 {
@@ -2394,7 +2396,10 @@ void P_Init (void)
 {
     P_InitSwitchList ();
     P_InitPicAnims ();
-    //InitMapInfo();
+
+    if(!devparm)
+        InitMapInfo();
+
     R_InitSprites (sprnames);
 }
 

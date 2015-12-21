@@ -46,6 +46,7 @@
 #endif
 
 #include "doomstat.h"
+#include "hu_stuff.h"
 
 #ifdef WII
 #include "../doomtype.h"
@@ -108,6 +109,7 @@ short currentsong = 0;
 
 extern dboolean fake;
 extern dboolean change_anyway;
+extern dboolean mus_cheat_used;
 
 extern int faketracknum;
 extern int tracknum;
@@ -769,44 +771,40 @@ void S_SetSfxVolume(int volume)
 // Starts some music with the music id found in sounds.h.
 //
 
-void S_StartMusic(int music_id)
+void S_StartMusic(int m_id)
 {
-    S_ChangeMusic(music_id, false, false);
+    S_ChangeMusic(m_id, false, false);
 }
 
-void S_ChangeMusic(int music_id, int looping, dboolean mapstart)
+void S_ChangeMusic(int musicnum, int looping, dboolean mapstart)
 {
     musicinfo_t *music = NULL;
     void        *handle;
-//    int         mapinfomusic; 
+    int         mapinfomusic; 
+    int         gameepi;
 
     // The Doom IWAD file has two versions of the intro music: d_intro
     // and d_introa.  The latter is used for OPL playback.
 
-    if (music_id == mus_intro && (snd_musicdevice == SNDDEVICE_ADLIB
+    if (musicnum == mus_intro && (snd_musicdevice == SNDDEVICE_ADLIB
                                || snd_musicdevice == SNDDEVICE_SB))
     {
         // HACK: NOT FOR SHARE 1.0 & 1.1 & REG 1.1
         if(fsize != 4207819 && fsize != 4274218 && fsize != 10396254)
-            music_id = mus_introa;
+            musicnum = mus_introa;
         // HACK: IF SHAREWARE 1.0 OR 1.1
         else
-            music_id = mus_intro;
+            musicnum = mus_intro;
     }
 
-    if (music_id <= mus_None || music_id >= NUMMUSIC)
+    if (musicnum <= mus_None || musicnum >= NUMMUSIC)
     {
-//        I_Error("Bad music number %d", music_id);
-        char musicbuf[30];
-        player_t *player = &players[consoleplayer];
-        C_Warning(" Bad music number %d", music_id);
-        sprintf(musicbuf, "Bad music number %d", music_id);
-        player->message = musicbuf;
+        //I_Error("Bad music number %d", musicnum);
         return;
     }
     else
     {
-        music = &S_music[music_id];
+        music = &S_music[musicnum];
     }
 
     if (mus_playing == music && !change_anyway)
@@ -821,22 +819,25 @@ void S_ChangeMusic(int music_id, int looping, dboolean mapstart)
 
     // get lumpnum if neccessary
 
-    /*if (mapstart && (mapinfomusic = P_GetMapMusic((gameepisode - 1) * 10 + gamemap)))     // FIXME (BUG)
+    if(gamemode == commercial)
+        gameepi = gameepisode - 1;
+    else
+        gameepi = gameepisode;
+
+    if (mapstart && (mapinfomusic = P_GetMapMusic((gameepi - 1) * 10 + gamemap)))     // FIXME (BUG)
         music->lumpnum = mapinfomusic;
-    else*/ if (!music->lumpnum)
+    else if (!music->lumpnum)
     {
         char namebuf[9];
 
         M_snprintf(namebuf, sizeof(namebuf), "d_%s", music->name);
         music->lumpnum = W_GetNumForName(namebuf);
-
-        C_Output(" Playing Music '%s'", uppercase(namebuf));
     }
 /*
     if(looping)
-        C_Output(" S_ChangeMusic: d_%s (loop = yes)", music->name);
+        C_Output("S_ChangeMusic: d_%s (loop = yes)", music->name);
     else
-        C_Output(" S_ChangeMusic: d_%s (loop = no)", music->name);
+        C_Output("S_ChangeMusic: d_%s (loop = no)", music->name);
 */
     music->data = W_CacheLumpNum(music->lumpnum, PU_STATIC);
 
@@ -844,8 +845,8 @@ void S_ChangeMusic(int music_id, int looping, dboolean mapstart)
 
     if (!handle && !sound_warning_printed)
     {
-        C_Warning(" D_%s music lump can't be played.", uppercase(music->name));
-        C_Warning(" Maybe you forgot running the game with the 'sudo' command");
+        C_Warning("D_%s music lump can't be played.", uppercase(music->name));
+        C_Warning("Maybe you forgot running the game with the 'sudo' command");
         sound_warning_printed = true;
         return;
     }

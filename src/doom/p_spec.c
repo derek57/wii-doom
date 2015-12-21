@@ -964,6 +964,17 @@ dboolean P_SectorActive(special_e t, sector_t *sec)
         true)));        // don't know which special, must be active, shouldn't be here
 }
 
+// P_SectorHasLightSpecial()
+//
+// [BH] Returns true if sector has a light special
+dboolean P_SectorHasLightSpecial(sector_t *sec)
+{
+    short special = sec->special;
+
+    return (special && special != Secret && special != Door_CloseStay_After30sec
+        && special != Door_OpenClose_OpensAfter5Min);
+}
+
 //
 // P_CheckTag()
 //
@@ -1975,7 +1986,7 @@ void P_PlayerInSpecialSector (player_t *player)
                     else
                         sfx_id = sfx_itmbk;
                 }
-                player->message = HUSTR_SECRETFOUND;
+                HU_PlayerMessage(HUSTR_SECRETFOUND, true);
                 if (player == &players[consoleplayer] && !snd_module)
                     S_StartSound(NULL, sfx_secret);
             }
@@ -2174,7 +2185,7 @@ dboolean EV_DoDonut(line_t *line)
 
         if (!s2)
         {
-            C_Error(" EV_DoDonut: linedef had no second sidedef! Unexpected behavior may occur in Vanilla Doom. ");
+            C_Error("EV_DoDonut: linedef had no second sidedef! Unexpected behavior may occur in Vanilla Doom. ");
             continue;
         }
 

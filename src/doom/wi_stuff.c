@@ -514,7 +514,7 @@ WI_drawOnLnode
     else
     {
         // DEBUG
-        C_Error(" Could not place patch on level %d", n+1); 
+        C_Error("Could not place patch on level %d", n+1); 
     }
 }
 

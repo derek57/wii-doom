@@ -1281,7 +1281,7 @@ void P_SpawnMapThing(mapthing_t *mthing, int index)
     if (i == NUMMOBJTYPES)
     {
         // [BH] make unknown thing type non-fatal and show console warning instead 
-        C_Warning(" Thing %i at (%i,%i) has an unknown type of %i.",
+        C_Warning("Thing %i at (%i,%i) has an unknown type of %i.",
             index, mthing->x, mthing->y, type);
         return;
     }
@@ -1426,7 +1426,7 @@ void P_SpawnMapThing(mapthing_t *mthing, int index)
         && mobj->floorz + mobjinfo[MT_PLAYER].height <= mobj->z) // head height <= base
         // player under body's head height <= bottom of body
     {
-        C_Warning(" P_SpawnMapThing: solid hanging body in tall sector at %d,%d (%s)",
+        C_Warning("P_SpawnMapThing: solid hanging body in tall sector at %d,%d (%s)",
                 mthing->x, mthing->y, mobj->name);
     }
 

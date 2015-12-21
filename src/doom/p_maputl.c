@@ -465,7 +465,7 @@ static void check_intercept(void)
                 (num_intercepts - num_intercepts_old) * sizeof(*intercepts));
 */
         if (num_intercepts_old != 0)
-            C_Warning(" Check_Intercept: MaxIntercepts limit at %d, raised to %u",
+            C_Warning("Check_Intercept: MaxIntercepts limit at %d, raised to %u",
                     num_intercepts_old, num_intercepts);
     }
 }

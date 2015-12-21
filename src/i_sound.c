@@ -136,7 +136,7 @@ static void InitSfxModule(dboolean use_sfx_prefix)
 
     sound_module = sound_modules[snd_module];
 
-    C_Output(" SFX playing at a sample rate of %.1fkHz on %i channels using %s module.",
+    C_Output("SFX playing at a sample rate of %.1fkHz on %i channels using %s module.",
             snd_samplerate / 1000.0f, snd_channels, snd_module == 1 ? "PC-SPEAKER" : "SDL");
 }
 
@@ -162,11 +162,11 @@ static void InitMusicModule(void)
             if (music_modules[i]->Init())
             {
                 if(mus_engine == 1 || mus_engine == 2)
-                    C_Output(" Using MIDI playback for music.");
+                    C_Output("Using MIDI playback for music.");
                 else if(mus_engine == 3)
-                    C_Output(" Using OGG playback for music.");
+                    C_Output("Using OGG playback for music.");
                 else if(mus_engine == 4)
-                    C_Output(" Using TIMIDITY for music playback.");
+                    C_Output("Using TIMIDITY for music playback.");
 
                 music_module = music_modules[i];
                 return;

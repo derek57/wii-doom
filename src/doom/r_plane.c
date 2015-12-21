@@ -227,7 +227,7 @@ static void R_RaiseVisplanes (visplane_t** vp)
         ceilingplane = visplanes + (ceilingplane - visplanes_old);
 
         if (numvisplanes_old)
-            C_Warning(" R_FindPlane: Hit MAXVISPLANES limit at %d, raised to %d.", numvisplanes_old, numvisplanes);
+            C_Warning("R_FindPlane: Hit MAXVISPLANES limit at %d, raised to %d.", numvisplanes_old, numvisplanes);
 
         // keep the pointer passed as argument in relation to the visplanes pointer
         if (vp)

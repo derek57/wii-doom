@@ -457,7 +457,7 @@ static dboolean PIT_CheckLine(line_t *ld)
             spechit = Z_Realloc(spechit, sizeof(*spechit) * spechit_max);
 #endif
             if (spechit != 0)
-                C_Warning(" PIT_CheckLine: Hit MaxSpecHit limit at %d, raised to %u",
+                C_Warning("PIT_CheckLine: Hit MaxSpecHit limit at %d, raised to %u",
                         spechit_max / 2, spechit_max);
         }
         spechit[numspechit++] = ld;
@@ -2219,116 +2219,12 @@ dboolean PIT_ChangeSector (mobj_t *thing)
 }
 
 //
-// P_CheckSector
+// P_ChangeSector
 // jff 3/19/98 added to just check monsters on the periphery
 // of a moving sector instead of all in bounding box of the
 // sector. Both more accurate and faster.
+// [BH] renamed from P_CheckSector to P_ChangeSector to replace old one entirely
 //
-dboolean P_CheckSector(sector_t* sector, dboolean crunch)
-{
-    msecnode_t *n;
-    mobj_t     *mobj;
-    mobjtype_t type;
-
-    nofit = false;
-    crushchange = crunch;
-    isliquidsector = isliquid[sector->floorpic];
-
-    // killough 4/4/98: scan list front-to-back until empty or exhausted,
-    // restarting from beginning after each thing is processed. Avoids
-    // crashes, and is sure to examine all things in the sector, and only
-    // the things which are in the sector, until a steady-state is reached.
-    // Things can arbitrarily be inserted and removed and it won't mess up.
-    //
-    // killough 4/7/98: simplified to avoid using complicated counter
-
-    // Mark all things invalid
-
-    for (n = sector->touching_thinglist; n; n = n->m_snext)
-    {
-        n->visited = false;
-    }
-
-    do
-    {
-        if (isliquidsector)
-        {
-            // go through list
-            for (n = sector->touching_thinglist; n; n = n->m_snext)
-            {
-                // unprocessed thing found
-                if (!n->visited)
-                {
-                    // mark thing as processed
-                    n->visited = true;
-
-                    mobj = n->m_thing;
-
-                    if (mobj)
-                    {
-                        type = mobj->type;
-
-                        // jff 4/7/98 don't do these
-                        if (type != MT_SHADOW && !(mobj->flags & MF_NOBLOCKMAP))
-                        {
-                            // process it
-                            PIT_ChangeSector(mobj);
-                        }
-                        else if (type == MT_BLOODSPLAT)
-                        {
-                            P_UnsetThingPosition(mobj);
-                            --r_bloodsplats_total;
-                        }
-
-                        // exit and start over
-                        break;
-                    }
-                }
-            }
-        }
-        else
-        {
-            sector->floor_xoffs = 0;
-            sector->floor_yoffs = 0;
-
-            // go through list
-            for (n = sector->touching_thinglist; n; n = n->m_snext)
-            {
-                // unprocessed thing found
-                if (!n->visited)
-                {
-                    // mark thing as processed
-                    n->visited = true;
-
-                    mobj = n->m_thing;
-
-                    if (mobj)
-                    {
-                        type = mobj->type;
-
-                        // jff 4/7/98 don't do these
-                        if (type != MT_BLOODSPLAT && type != MT_SHADOW && !(mobj->flags & MF_NOBLOCKMAP))
-                        {
-                            // process it
-                            PIT_ChangeSector(mobj);
-                        }
-
-                        // exit and start over
-                        break;
-                    }
-                }
-            }
-        }
-    // repeat from scratch until all things left are marked valid
-    } while (n);
-
-    return nofit;
-}
-
-//
-// P_ChangeSector
-//
-/*
 dboolean P_ChangeSector(sector_t *sector, dboolean crunch)
 {
     msecnode_t  *n;
@@ -2339,65 +2235,55 @@ dboolean P_ChangeSector(sector_t *sector, dboolean crunch)
     crushchange = crunch;
     isliquidsector = isliquid[sector->floorpic];
 
-    // re-check heights for all things near the moving sector
+    // Mark all things invalid
+    for (n = sector->touching_thinglist; n; n = n->m_snext)
+        n->visited = false;
+
     if (isliquidsector)
     {
-        for (n = sector->touching_thinglist; n; n = n->m_snext) // go through list
-        {
-            mobj = n->m_thing;
-            if (mobj)
-            {
-                type = mobj->type;
-                if (type == MT_BLOODSPLAT && d_maxgore)
+        do
+            for (n = sector->touching_thinglist; n; n = n->m_snext)     // go through list
+                if (!n->visited)                                        // unprocessed thing found
                 {
-                    P_UnsetThingPosition(mobj);
-                    --r_bloodsplats_total;
+                    n->visited = true;                                  // mark thing as processed
+                    mobj = n->m_thing;
+                    if (mobj)
+                    {
+                        type = mobj->type;
+                        if (type == MT_BLOODSPLAT)
+                        {
+                            P_UnsetThingPosition(mobj);
+                            --r_bloodsplats_total;
+                        }
+                        else if (type != MT_SHADOW && !(mobj->flags & MF_NOBLOCKMAP))
+                            PIT_ChangeSector(mobj);                     // process it
+                    }
+                    break;                                              // exit and start over
                 }
-                else if (type != MT_SHADOW && !(mobj->flags & MF_NOBLOCKMAP))
-                    PIT_ChangeSector(mobj);                     // process it
-            }
-        }
+        while (n);      // repeat from scratch until all things left are marked valid
     }
     else
     {
         sector->floor_xoffs = 0;
         sector->floor_yoffs = 0;
 
-        for (n = sector->touching_thinglist; n; n = n->m_snext) // go through list
-        {
-            mobj = n->m_thing;
-            if (mobj)
-            {
-                type = mobj->type;
-                if (type != MT_BLOODSPLAT && type != MT_SHADOW && !(mobj->flags & MF_NOBLOCKMAP))
-                    PIT_ChangeSector(mobj);                     // process it
-            }
-        }
+        do
+            for (n = sector->touching_thinglist; n; n = n->m_snext)     // go through list
+                if (!n->visited)                                        // unprocessed thing found
+                {
+                    n->visited = true;                                  // mark thing as processed
+                    mobj = n->m_thing;
+                    if (mobj)
+                    {
+                        type = mobj->type;
+                        if (type != MT_BLOODSPLAT && type != MT_SHADOW
+                            && !(mobj->flags & MF_NOBLOCKMAP))
+                            PIT_ChangeSector(mobj);                     // process it
+                    }
+                    break;                                              // exit and start over
+                }
+        while (n);      // repeat from scratch until all things left are marked valid
     }
-    return nofit;
-}
-*/
-
-//
-// P_ChangeSector
-//
-dboolean P_ChangeSector(sector_t* sector, dboolean crunch)
-{
-    int   x;
-    int   y;
-
-    nofit = false;
-    crushchange = crunch;
-
-    // ARRGGHHH!!!!
-    // This is horrendously slow!!!
-    // killough 3/14/98
-
-    // re-check heights for all things near the moving sector
-
-    for (x = sector->blockbox[BOXLEFT]; x <= sector->blockbox[BOXRIGHT]; x++)
-        for (y = sector->blockbox[BOXBOTTOM]; y <= sector->blockbox[BOXTOP]; y++)
-            P_BlockThingsIterator(x, y, PIT_ChangeSector);
 
     return nofit;
 }

@@ -312,7 +312,7 @@ void D_StartNetGame(net_gamesettings_t *settings,
 /*
     if (!new_sync)
     {
-        C_Network(" Syncing netgames like Vanilla Doom.");
+        C_Network("Syncing netgames like Vanilla Doom.");
     }
 */
 }

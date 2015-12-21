@@ -162,5 +162,6 @@ extern float            r_gamma;
 extern float            gammalevels[GAMMALEVELS];
 
 extern byte *I_VideoBuffer;
+extern byte gammatable[GAMMALEVELS][256];
 
 #endif

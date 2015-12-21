@@ -677,9 +677,15 @@ void HU_Start(void)
         s = HU_TITLE_CHEX;
     }
 
-    if (!s && mapinfo_lump)
-        s = P_GetMapName((gameepisode - 1) * 10 + gamemap);
-    else if (!s && !mapinfo_lump)
+    if (mapinfo_lump)
+    {
+        if(gamemode == commercial)
+            s = P_GetMapName(gamemap);
+        else
+            s = P_GetMapName((gameepisode - 1) * 10 + gamemap);
+    }
+
+    if (!s)
         s = "Unknown level";
 
     if (gamemission == pack_nerve)
@@ -860,7 +866,7 @@ void HU_DrawHUD(void)
     int                 ammo = plr->ammo[ammotype];
     int                 armor = plr->armorpoints;
     int                 health_x = HUD_HEALTH_X;
-    int                 key = 0;
+    int                 keys = 0;
     int                 i = 0;
     byte                *tinttab;
     int                 invulnerability = plr->powers[pw_invulnerability];
@@ -982,7 +988,7 @@ void HU_DrawHUD(void)
 
         if (!gamepaused)
         {
-            static int ammowait;
+            static int  ammowait;
 
             if (ammo <= HUD_AMMO_MIN)
             {
@@ -1001,16 +1007,14 @@ void HU_DrawHUD(void)
     }
 
     while (i < NUMCARDS)
-    {
         if (plr->cards[i++] > 0)
-            key++;
-    }
+            keys++;
 
-    if (key || plr->neededcardflash)
+    if (keys || plr->neededcardflash)
     {
-        int                 keypic_x = HUD_KEYS_X - 20 * (key - 1);
-        static int          keywait = 0;
-        static dboolean      showkey = false;
+        int                 keypic_x = HUD_KEYS_X - 20 * (keys - 1);
+        static int          keywait;
+        static dboolean     showkey;
 
         if (!armor)
             keypic_x += 114;
@@ -1049,7 +1053,6 @@ void HU_DrawHUD(void)
         }
 
         for (i = 0; i < NUMCARDS; i++)
-        {
             if (plr->cards[i] > 0)
             {
                 patch_t     *patch = keypic[i].patch;
@@ -1058,7 +1061,6 @@ void HU_DrawHUD(void)
                     hudfunc(keypic_x + (SHORT(patch->width) + 6) * (cardsfound - plr->cards[i]),
                         HUD_KEYS_Y, patch, tinttab66);
             }
-        }
     }
 
     if (armor)
@@ -1247,8 +1249,6 @@ void HU_Ticker(void)
             else
                 HUlib_addMessageToSText(&w_message, 0, plr->message);
 
-            C_PlayerMessage(" %s", plr->message);
-
             plr->message = 0;
             message_on = true;
             message_counter = HU_MSGTIMEOUT;
@@ -1321,13 +1321,16 @@ void HU_NewLevel()
     }
     // print the new level name into the console
 
-    if (!s)
+    if (mapinfo_lump)
     {
-        if (mapinfo_lump)
-            s = P_GetMapName((gameepisode - 1) * 10 + gamemap);
+        if(gamemode == commercial)
+            s = P_GetMapName(gamemap);
         else
-            s = "Unknown level";
+            s = P_GetMapName((gameepisode - 1) * 10 + gamemap);
     }
+
+    if (!s)
+        s = "Unknown level";
 
     C_Output("");
 
@@ -1336,11 +1339,11 @@ void HU_NewLevel()
     C_Output("");
 
     if(gameepisode == 1 && gamemap == 10 && fsize == 12538385)
-        C_Output(" %s", "E1M10: Sewers");
+        C_Output("%s", "E1M10: Sewers");
     else
-        C_Output(" %s", uppercase(s));
+        C_Output("%s", uppercase(s));
 
-    C_Output(" ");
+    C_Output("");
 }
 
 #pragma GCC diagnostic push
@@ -1350,7 +1353,7 @@ void HU_PlayerMessage(char *message, dboolean ingame)
 {
     static char buffer[1024];
     char        lastchar;
-printf("%s\n",message);
+
     if (message[0] == '%' && message[1] == 's')
         M_snprintf(buffer, sizeof(buffer), message, playername);
     else
@@ -1365,6 +1368,6 @@ printf("%s\n",message);
     if (ingame)
         C_PlayerMessage("%s%s", buffer, (lastchar == '.' || lastchar == '!' ? "" : "."));
     else
-        C_Output(" %s%s", buffer, (lastchar == '.' || lastchar == '!' ? "" : "."));
+        C_Output("%s%s", buffer, (lastchar == '.' || lastchar == '!' ? "" : "."));
 }
 

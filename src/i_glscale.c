@@ -142,7 +142,7 @@ static void *GetGLFunction(char *name)
 
     if (ptr == NULL)
     {
-        C_Error(" Failed to find GL function: %s", name);
+        C_Error("Failed to find GL function: %s", name);
     }
 
     return ptr;
@@ -186,7 +186,7 @@ static dboolean HaveExtension(char *extname)
 
     if (extensions == NULL)
     {
-        C_Error(" Failed to read GL extensions");
+        C_Error("Failed to read GL extensions");
         return false;
     }
 
@@ -213,7 +213,7 @@ static dboolean HaveExtension(char *extname)
         }
     }
 
-    C_Warning(" Missing GL extension: %s", extname);
+    C_Warning("Missing GL extension: %s", extname);
     return false;
 }
 
@@ -371,7 +371,7 @@ static dboolean SetupFramebuffer(void)
 
     if (_glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
     {
-        C_Error(" Failed to set up framebuffer.");
+        C_Error("Failed to set up framebuffer.");
         result = false;
     }
 

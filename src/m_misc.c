@@ -114,7 +114,7 @@ dboolean M_WriteFile(char *name, void *source, int length)
 
     if (handle == NULL)
     {
-        C_Error(" M_WriteFile: name handle is NULL");
+        C_Error("M_WriteFile: name handle is NULL");
         return false;
     }
 
@@ -123,7 +123,7 @@ dboolean M_WriteFile(char *name, void *source, int length)
         
     if (count < length)
     {
-        C_Error(" M_WriteFile: count < length for file %c", name);
+        C_Error("M_WriteFile: count < length for file %c", name);
         return false;
     }
                 
@@ -217,7 +217,7 @@ void M_ExtractFileBase(char *path, char *dest)
     {
         if (length >= 8)
         {
-            C_Warning(" Warning: Truncated '%s' lump name to '%.8s'.",
+            C_Warning("Warning: Truncated '%s' lump name to '%.8s'.",
                    filename, dest);
             break;
         }

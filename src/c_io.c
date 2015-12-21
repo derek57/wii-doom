@@ -136,7 +136,6 @@ patch_t         *degree;
 patch_t         *multiply;
 patch_t         *caret;
 patch_t         *route;
-patch_t         *space;
 
 byte            c_tempscreen[SCREENWIDTH * SCREENHEIGHT];
 byte            c_blurscreen[SCREENWIDTH * SCREENHEIGHT];
@@ -455,7 +454,6 @@ void C_Init(void)
     }
 
     caret = W_CacheLumpName("CARET", PU_STATIC);
-    space = W_CacheLumpName("DRFON032", PU_STATIC);
     route = W_CacheLumpName("DRFON036", PU_STATIC);
 
     lsquote = W_CacheLumpName("DRFON145", PU_STATIC);
@@ -729,13 +727,11 @@ void C_Drawer(void)
             caretwait = I_GetTime() + CARETWAIT;
         }
 
-        V_DrawConsoleChar(x, consoleheight - 10, space, inputcolor, NOBACKGROUNDCOLOR,
-                false, NULL);
-        V_DrawConsoleChar(x + SHORT(space->width), consoleheight - 10, route,
+        V_DrawConsoleChar(x, consoleheight - 10, route,
                 inputcolor, NOBACKGROUNDCOLOR, false, NULL);
 
         if (showcaret)
-            V_DrawConsoleChar(x + SHORT(route->width) + 4, consoleheight - 10,
+            V_DrawConsoleChar(x + SHORT(route->width), consoleheight - 10,
                     caret, inputcolor, NOBACKGROUNDCOLOR, false, NULL);
 //        x += SHORT(caret->width);
 
@@ -978,7 +974,7 @@ void C_PrintCompileDate(void)
     sscanf(__TIME__, "%2d:%2d:%*d", &hour, &minute);
     month = (strstr(mths, mth) - mths) / 3;
 
-    C_Output(" This %i-bit %s binary of ~Wii-DOOM~ was built on %s, %s %i, "
+    C_Output("This %i-bit %s binary of ~Wii-DOOM~ was built on %s, %s %i, "
         "%i at %i:%02i%s", (sizeof(intptr_t) == 4 ? 32 : 64), "Linux",
         days[dayofweek(day, month + 1, year)], months[month], day, year,
         (hour > 12 ? hour - 12 : hour), minute, (hour < 12 ? "am" : "pm"));
@@ -990,50 +986,50 @@ void C_PrintSDLVersions(void)
     int revision = SDL_GetRevisionNumber();
 
     if (revision)
-        C_Warning(" Using version %i.%i.%i (Revision %i) of %s",
+        C_Warning("Using version %i.%i.%i (Revision %i) of %s",
             SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_PATCHLEVEL, revision,
             "libSDL.a"
             );
     else
 #endif
-        C_Warning(" Using version %i.%i.%i of %s",
+        C_Warning("Using version %i.%i.%i of %s",
             SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_PATCHLEVEL,
             "libSDL.a"
             );
 
-    C_Warning(" Using version %i.%i.%i of %s",
+    C_Warning("Using version %i.%i.%i of %s",
         SDL_MIXER_MAJOR_VERSION, SDL_MIXER_MINOR_VERSION, SDL_MIXER_PATCHLEVEL,
         "libSDL_mixer.a"
         );
 #ifdef WII
-    C_Warning(" Using version %i.%i.%i of %s",
+    C_Warning("Using version %i.%i.%i of %s",
         SMPEG_MAJOR_VERSION, SMPEG_MINOR_VERSION, SMPEG_PATCHLEVEL,
         "libsmpeg.a"
         );
 
-    C_Warning(" Using version %i.%i.%i of %s",
+    C_Warning("Using version %i.%i.%i of %s",
         _V_MAJOR_, _V_MINOR_, _V_PATCH_,
         "libogc.a"
         );
 
-    C_Warning(" Using version %i.%i.%i of %s",
+    C_Warning("Using version %i.%i.%i of %s",
         PNG_LIBPNG_VER_MAJOR, PNG_LIBPNG_VER_MINOR, PNG_LIBPNG_VER_RELEASE,
         "libpng15.a"
         );
 
-    C_Warning(" Using version %i (6b) of %s",
+    C_Warning("Using version %i (6b) of %s",
         JPEG_LIB_VERSION,
         "libjpeg.a"
         );
 
-    C_Warning(" Using version %i.%i.%i.%i of %s",
+    C_Warning("Using version %i.%i.%i.%i of %s",
         ZLIB_VER_MAJOR, ZLIB_VER_MINOR, ZLIB_VER_REVISION, ZLIB_VER_SUBREVISION,
         "libz.a"
         );
 
-    C_Warning(" Also using the following libraries:");
-    C_Warning(" libvorbisidec.a libwiilight.a, libfat.a, libwiiuse.a, libbte.a,");
-    C_Warning(" libwiikeyboard.a, libsupc++.a, libstdc++.a, libm.a");
+    C_Warning("Also using the following libraries:");
+    C_Warning("libvorbisidec.a libwiilight.a, libfat.a, libwiiuse.a, libbte.a,");
+    C_Warning("libwiikeyboard.a, libsupc++.a, libstdc++.a, libm.a");
 #endif
 }
 

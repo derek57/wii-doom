@@ -1036,7 +1036,6 @@ int                        saveSlot;             // which slot to save in
 int                        saveCharIndex;        // which char we're editing
 
 int                        map = 1;
-int                        musnum = 1;
 int                        cheeting;
 int                        coordinates_info = 0;
 int                        version_info = 0;
@@ -1122,6 +1121,7 @@ static int                 keyaskedfor;
 
 extern char                *d_lowpixelsize;
 
+extern int                 cheat_musnum;
 extern int                 cheating;
 extern int                 dots_enabled;
 extern int                 dont_show;
@@ -1143,6 +1143,7 @@ extern dboolean            secret_2;
 extern dboolean            done;
 extern dboolean            skippsprinterp;
 extern dboolean            longtics;
+extern dboolean            mus_cheated;
 
 extern short               songlist[148];
 
@@ -2973,7 +2974,7 @@ void M_DrawReadThis1(void)
             break;
 
         default:
-            C_Warning(" Unhandled game version");
+            C_Warning("Unhandled game version");
 //            I_Error("Unhandled game version");
             break;
     }
@@ -3568,7 +3569,7 @@ void M_Episode(int choice)
     if ( (gamemode == registered)
          && (choice > 2))
     {
-      C_Error(" M_Episode: 4th episode requires Ultimate DOOM");
+      C_Error("M_Episode: 4th episode requires Ultimate DOOM");
       choice = 0;
     }
          
@@ -7181,7 +7182,9 @@ void M_Drawer (void)
                 {
                     if(mus_cheat_used)
                         S_ChangeMusic(tracknum, true, true);
-                    else
+                    else if(mus_cheated && !beta_style)
+                        S_ChangeMusic(cheat_musnum, true, true);
+                    else if(!mus_cheat_used && !mus_cheated)
                         S_ChangeMusic(gamemap + 32, true, true);
                 }
             }
@@ -7224,7 +7227,9 @@ void M_Drawer (void)
 
                 if(mus_cheat_used)
                     S_ChangeMusic(tracknum, true, true);
-                else
+                else if(mus_cheated && !beta_style)
+                    S_ChangeMusic(cheat_musnum, true, true);
+                else if(!mus_cheat_used && !mus_cheated)
                     S_ChangeMusic(mnum, true, true);
             }
             else if(gamestate == GS_FINALE && finalestage == F_STAGE_TEXT)
@@ -7829,7 +7834,7 @@ void M_ItemsA(int choice)
         for (i=0 ; i<NUMAMMO ; i++)
             P_GiveAmmo (player, i, 1);
 
-        player->message = s_GOTBACKPACK;
+        HU_PlayerMessage(s_GOTBACKPACK, true);
 
         got_all = true;
     }
@@ -8024,7 +8029,7 @@ void M_ItemsJ(int choice)
     }
     for (i=0 ; i<NUMAMMO ; i++)
         P_GiveAmmo (player, i, 1);
-    player->message = s_GOTBACKPACK;
+    HU_PlayerMessage(s_GOTBACKPACK, true);
 }
 
 void M_ItemsK(int choice)
@@ -8034,7 +8039,7 @@ void M_ItemsK(int choice)
 
     P_UseArtifact(player, arti_fly);
 
-    player->message = "FLIGHT ADDED";
+    HU_PlayerMessage("FLIGHT ADDED", true);
 }
 
 void M_Topo(int choice)

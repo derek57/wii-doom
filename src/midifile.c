@@ -96,7 +96,7 @@ static dboolean CheckChunkHeader(chunk_header_t *chunk,
 
     if (!result)
     {
-        C_Error(" CheckChunkHeader: Expected '%s' chunk header, "
+        C_Error("CheckChunkHeader: Expected '%s' chunk header, "
                         "got '%c%c%c%c'",
                         expected_id,
                         chunk->chunk_id[0], chunk->chunk_id[1],
@@ -116,7 +116,7 @@ static dboolean ReadByte(byte *result, FILE *stream)
 
     if (c == EOF)
     {
-        C_Error(" ReadByte: Unexpected end of file");
+        C_Error("ReadByte: Unexpected end of file");
         return false;
     }
     else
@@ -140,7 +140,7 @@ static dboolean ReadVariableLength(unsigned int *result, FILE *stream)
     {
         if (!ReadByte(&b, stream))
         {
-            C_Error(" ReadVariableLength: Error while reading "
+            C_Error("ReadVariableLength: Error while reading "
                             "variable-length value");
             return false;
         }
@@ -158,7 +158,7 @@ static dboolean ReadVariableLength(unsigned int *result, FILE *stream)
         }
     }
 
-    C_Error(" ReadVariableLength: Variable-length value too "
+    C_Error("ReadVariableLength: Variable-length value too "
                     "long: maximum of four bytes");
     return false;
 }
@@ -177,7 +177,7 @@ static void *ReadByteSequence(unsigned int num_bytes, FILE *stream)
 
     if (result == NULL)
     {
-        C_Error(" ReadByteSequence: Failed to allocate buffer");
+        C_Error("ReadByteSequence: Failed to allocate buffer");
         return NULL;
     }
 
@@ -187,7 +187,7 @@ static void *ReadByteSequence(unsigned int num_bytes, FILE *stream)
     {
         if (!ReadByte(&result[i], stream))
         {
-            C_Error(" ReadByteSequence: Error while reading byte %u",
+            C_Error("ReadByteSequence: Error while reading byte %u",
                             i);
             free(result);
             return NULL;
@@ -216,7 +216,7 @@ static dboolean ReadChannelEvent(midi_event_t *event,
 
     if (!ReadByte(&b, stream))
     {
-        C_Error(" ReadChannelEvent: Error while reading channel "
+        C_Error("ReadChannelEvent: Error while reading channel "
                         "event parameters");
         return false;
     }
@@ -229,7 +229,7 @@ static dboolean ReadChannelEvent(midi_event_t *event,
     {
         if (!ReadByte(&b, stream))
         {
-            C_Error(" ReadChannelEvent: Error while reading channel "
+            C_Error("ReadChannelEvent: Error while reading channel "
                             "event parameters");
             return false;
         }
@@ -249,7 +249,7 @@ static dboolean ReadSysExEvent(midi_event_t *event, int event_type,
 
     if (!ReadVariableLength(&event->data.sysex.length, stream))
     {
-        C_Error(" ReadSysExEvent: Failed to read length of "
+        C_Error("ReadSysExEvent: Failed to read length of "
                                         "SysEx block");
         return false;
     }
@@ -260,7 +260,7 @@ static dboolean ReadSysExEvent(midi_event_t *event, int event_type,
 
     if (event->data.sysex.data == NULL)
     {
-        C_Error(" ReadSysExEvent: Failed while reading SysEx event");
+        C_Error("ReadSysExEvent: Failed while reading SysEx event");
         return false;
     }
 
@@ -279,7 +279,7 @@ static dboolean ReadMetaEvent(midi_event_t *event, FILE *stream)
 
     if (!ReadByte(&b, stream))
     {
-        C_Error(" ReadMetaEvent: Failed to read meta event type");
+        C_Error("ReadMetaEvent: Failed to read meta event type");
         return false;
     }
 
@@ -289,7 +289,7 @@ static dboolean ReadMetaEvent(midi_event_t *event, FILE *stream)
 
     if (!ReadVariableLength(&event->data.meta.length, stream))
     {
-        C_Error(" ReadSysExEvent: Failed to read length of "
+        C_Error("ReadSysExEvent: Failed to read length of "
                                         "SysEx block");
         return false;
     }
@@ -300,7 +300,7 @@ static dboolean ReadMetaEvent(midi_event_t *event, FILE *stream)
 
     if (event->data.meta.data == NULL)
     {
-        C_Error(" ReadSysExEvent: Failed while reading SysEx event");
+        C_Error("ReadSysExEvent: Failed while reading SysEx event");
         return false;
     }
 
@@ -314,13 +314,13 @@ static dboolean ReadEvent(midi_event_t *event, unsigned int *last_event_type,
 
     if (!ReadVariableLength(&event->delta_time, stream))
     {
-        C_Error(" ReadEvent: Failed to read event timestamp");
+        C_Error("ReadEvent: Failed to read event timestamp");
         return false;
     }
 
     if (!ReadByte(&event_type, stream))
     {
-        C_Error(" ReadEvent: Failed to read event type");
+        C_Error("ReadEvent: Failed to read event type");
         return false;
     }
 
@@ -335,7 +335,7 @@ static dboolean ReadEvent(midi_event_t *event, unsigned int *last_event_type,
 
         if (fseek(stream, -1, SEEK_CUR) < 0)
         {
-            C_Error(" ReadEvent: Unable to seek in stream");
+            C_Error("ReadEvent: Unable to seek in stream");
             return false;
         }
     }
@@ -382,7 +382,7 @@ static dboolean ReadEvent(midi_event_t *event, unsigned int *last_event_type,
             break;
     }
 
-    C_Error(" ReadEvent: Unknown MIDI event type: 0x%x", event_type);
+    C_Error("ReadEvent: Unknown MIDI event type: 0x%x", event_type);
     return false;
 }
 
@@ -421,13 +421,13 @@ static dboolean ReadTrackHeader(midi_track_t *track, FILE *stream)
 
     if (records_read < 1)
     {
-        C_Error(" ReadTrackHeader: records_read is < 1");
+        C_Error("ReadTrackHeader: records_read is < 1");
         return false;
     }
 
     if (!CheckChunkHeader(&chunk_header, TRACK_CHUNK_ID))
     {
-        C_Error(" ReadTrackHeader: Error (CheckChunkHeader)");
+        C_Error("ReadTrackHeader: Error (CheckChunkHeader)");
         return false;
     }
 
@@ -448,7 +448,7 @@ static dboolean ReadTrack(midi_track_t *track, FILE *stream)
 
     if (!ReadTrackHeader(track, stream))
     {
-        C_Error(" ReadTrack: Error (Read the header)");
+        C_Error("ReadTrack: Error (Read the header)");
         return false;
     }
 
@@ -474,8 +474,8 @@ static dboolean ReadTrack(midi_track_t *track, FILE *stream)
 */
         if (new_events == NULL)
         {
-            C_Error(" ReadTrack: Error (new_events is NULL)");
-            C_Error(" ReadTrack: Error (track->num_events is %d)", track->num_events);
+            C_Error("ReadTrack: Error (new_events is NULL)");
+            C_Error("ReadTrack: Error (track->num_events is %d)", track->num_events);
             return false;
         }
 
@@ -486,7 +486,7 @@ static dboolean ReadTrack(midi_track_t *track, FILE *stream)
         event = &track->events[track->num_events];
         if (!ReadEvent(event, &last_event_type, stream))
         {
-            C_Error(" ReadTrack: Error (Read the next event)");
+            C_Error("ReadTrack: Error (Read the next event)");
             return false;
         }
 
@@ -528,7 +528,7 @@ static dboolean ReadAllTracks(midi_file_t *file, FILE *stream)
 
     if (file->tracks == NULL)
     {
-        C_Error(" ReadAllTracks: file->tracks is NULL");
+        C_Error("ReadAllTracks: file->tracks is NULL");
         return false;
     }
 
@@ -540,7 +540,7 @@ static dboolean ReadAllTracks(midi_file_t *file, FILE *stream)
     {
         if (!ReadTrack(&file->tracks[i], stream))
         {
-            C_Error(" ReadAllTracks: Error (Read each track)");
+            C_Error("ReadAllTracks: Error (Read each track)");
             return false;
         }
     }
@@ -559,14 +559,14 @@ static dboolean ReadFileHeader(midi_file_t *file, FILE *stream)
 
     if (records_read < 1)
     {
-        C_Error(" ReadFileHeader: records_read is < 1");
+        C_Error("ReadFileHeader: records_read is < 1");
         return false;
     }
 
     if (!CheckChunkHeader(&file->header.chunk_header, HEADER_CHUNK_ID)
      || SDL_SwapBE32(file->header.chunk_header.chunk_size) != 6)
     {
-        C_Error(" ReadFileHeader: Invalid MIDI chunk header! "
+        C_Error("ReadFileHeader: Invalid MIDI chunk header! "
                         "chunk_size=%i",
                         SDL_SwapBE32(file->header.chunk_header.chunk_size));
         return false;
@@ -578,7 +578,7 @@ static dboolean ReadFileHeader(midi_file_t *file, FILE *stream)
     if ((format_type != 0 && format_type != 1)
      || file->num_tracks < 1)
     {
-        C_Error(" ReadFileHeader: Only type 0/1 "
+        C_Error("ReadFileHeader: Only type 0/1 "
                                          "MIDI files supported!");
         return false;
     }
@@ -612,7 +612,7 @@ midi_file_t *MIDI_LoadFile(char *filename)
 
     if (file == NULL)
     {
-        C_Error(" MIDI_LoadFile: file is NULL for file %c", filename);
+        C_Error("MIDI_LoadFile: file is NULL for file %c", filename);
         return NULL;
     }
 
@@ -627,7 +627,7 @@ midi_file_t *MIDI_LoadFile(char *filename)
 
     if (stream == NULL)
     {
-        C_Error(" MIDI_LoadFile: Failed to open '%s'", filename);
+        C_Error("MIDI_LoadFile: Failed to open '%s'", filename);
         MIDI_FreeFile(file);
         return NULL;
     }
@@ -636,7 +636,7 @@ midi_file_t *MIDI_LoadFile(char *filename)
 
     if (!ReadFileHeader(file, stream))
     {
-        C_Error(" MIDI_LoadFile: Error (Read MIDI file header)");
+        C_Error("MIDI_LoadFile: Error (Read MIDI file header)");
         fclose(stream);
         MIDI_FreeFile(file);
         return NULL;
@@ -646,7 +646,7 @@ midi_file_t *MIDI_LoadFile(char *filename)
 
     if (!ReadAllTracks(file, stream))
     {
-        C_Error(" MIDI_LoadFile: Error (Read all tracks)");
+        C_Error("MIDI_LoadFile: Error (Read all tracks)");
         fclose(stream);
         MIDI_FreeFile(file);
         return NULL;

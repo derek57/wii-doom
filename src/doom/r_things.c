@@ -665,7 +665,7 @@ void R_DrawVisSprite(vissprite_t *vis)
             // [crispy] make non-fatal
             if (!error)
             {
-                C_Warning(" R_DrawSpriteRange: bad texturecolumn");
+                C_Warning("R_DrawSpriteRange: bad texturecolumn");
                 error = true;
             }
             continue;

@@ -125,7 +125,7 @@ static byte saveg_read8(void)
     {
         if (!savegame_error)
         {
-            C_Error(" saveg_read8: Unexpected end of file while "
+            C_Error("saveg_read8: Unexpected end of file while "
                             "reading save game");
 
             savegame_error = true;
@@ -141,7 +141,7 @@ static void saveg_write8(byte value)
     {
         if (!savegame_error)
         {
-            C_Error(" saveg_write8: Error while writing save game");
+            C_Error("saveg_write8: Error while writing save game");
 
             savegame_error = true;
         }
@@ -1717,7 +1717,7 @@ dboolean P_ReadSaveGameHeader(char *description)
         menuactive = false;
         consoleheight = 1;
         consoledirection = 1;
-        C_Error(" This savegame requires %s.", read_vcheck);
+        C_Error("This savegame requires %s.", read_vcheck);
         return false;   // bad version
     }
 
@@ -2086,7 +2086,7 @@ void P_RestoreTargets(void)
 
     if (restoretargets_fail)
     {
-        C_Error(" P_RestoreTargets: Failed to restore %d target pointers.",
+        C_Error("P_RestoreTargets: Failed to restore %d target pointers.",
                 restoretargets_fail);
         restoretargets_fail = 0;
     }

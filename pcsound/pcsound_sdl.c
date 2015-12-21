@@ -200,7 +200,7 @@ static int PCSound_SDL_Init(pcsound_callback_func callback_func)
 
         if (SDL_Init(SDL_INIT_AUDIO) < 0)
         {
-            C_Error(" Unable to set up sound.");
+            C_Error("Unable to set up sound.");
             return 0;
         }
 
@@ -208,7 +208,7 @@ static int PCSound_SDL_Init(pcsound_callback_func callback_func)
 
         if (Mix_OpenAudio(pcsound_sample_rate, AUDIO_S16SYS, 2, slicesize) < 0)
         {
-            C_Error(" Error initializing SDL_mixer: %s", Mix_GetError());
+            C_Error("Error initializing SDL_mixer: %s", Mix_GetError());
 
             SDL_QuitSubSystem(SDL_INIT_AUDIO);
             return 0;
@@ -230,7 +230,7 @@ static int PCSound_SDL_Init(pcsound_callback_func callback_func)
 
     if (mixing_format != AUDIO_S16SYS || mixing_channels != 2)
     {
-        C_Warning(" PCSound_SDL only supports native signed 16-bit LSB stereo format!");
+        C_Warning("PCSound_SDL only supports native signed 16-bit LSB stereo format!");
 
         PCSound_SDL_Shutdown();
         return 0;

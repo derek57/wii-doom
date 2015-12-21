@@ -402,7 +402,8 @@ void I_Error (char *error, ...)
 
     if (already_quitting)
     {
-        C_Warning(" Warning: recursive call to I_Error detected.");
+        C_Warning("Warning: recursive call to I_Error detected.");
+        printf("\n Warning: recursive call to I_Error detected.\n");
 
         error_detected = true;
 
@@ -441,7 +442,7 @@ void I_Error (char *error, ...)
 
     if (already_quitting)
     {
-        fprintf(stderr, "Warning: recursive call to I_Error detected.\n");
+        fprintf(stderr, "\nWarning: recursive call to I_Error detected.\n");
         exit(-1);
     }
     else
@@ -486,6 +487,8 @@ void I_Error (char *error, ...)
     {
         ZenityErrorBox(msgbuf);
     }
+
+    printf("\n Warning: Game exited safely (possible crash detected).\n");
 
     // abort();
 #ifdef SDL2

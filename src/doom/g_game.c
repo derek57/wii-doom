@@ -1838,11 +1838,11 @@ void G_DoPlayDemo (void)
         }
         else
         {
-            C_Error(" Demo is from a different game version!");
-            C_Error(" (read %i, should be %i)", demoversion, G_VanillaVersionCode());
-            C_Error(" *** You may need to upgrade your version of Doom to v1.9. ***");
-            C_Error(" See: http://doomworld.com/files/patches.shtml");
-            C_Error(" This appears to be %s.", DemoVersionDescription(demoversion));
+            C_Error("Demo is from a different game version!");
+            C_Error("(read %i, should be %i)", demoversion, G_VanillaVersionCode());
+            C_Error("*** You may need to upgrade your version of Doom to v1.9. ***");
+            C_Error("See: http://doomworld.com/files/patches.shtml");
+            C_Error("This appears to be %s.", DemoVersionDescription(demoversion));
             gameaction = ga_nothing;
             return;
         }
@@ -2218,10 +2218,10 @@ void G_DoSaveGame (void)
 	const int time = leveltime / TICRATE;
 
         if(gamemode == commercial)
-            C_Error(" G_DoSaveGame: Map %d, Skill %d, Time %d:%02d.",
+            C_Error("G_DoSaveGame: Map %d, Skill %d, Time %d:%02d.",
 	            gamemap, gameskill, time/60, time%60);
         else
-            C_Error(" G_DoSaveGame: Episode %d, Map %d, Skill %d, Time %d:%02d.",
+            C_Error("G_DoSaveGame: Episode %d, Map %d, Skill %d, Time %d:%02d.",
 	            gameepisode, gamemap, gameskill, time/60, time%60);
     }
 
@@ -2252,7 +2252,7 @@ void G_DoSaveGame (void)
     rename(temp_savegame_file, savegame_file);
     
     if (consoleactive)
-        C_Warning(" %s saved.", uppercase(savename));
+        C_Warning("%s saved.", uppercase(savename));
     else
     {
         static char     buffer[1024];
@@ -2559,7 +2559,7 @@ void G_ExitLevel (void)
     player_t *player = &players[consoleplayer];
     player->item = 0;
 
-//    C_Warning(" G_ExitLevel: Free Memory (0x%x)", Z_FreeMemory());
+//    C_Warning("G_ExitLevel: Free Memory (0x%x)", Z_FreeMemory());
 
     if(consoleactive)
         C_HideConsoleFast();
@@ -2574,7 +2574,7 @@ void G_ExitLevel (void)
 // Here's for the german edition.
 void G_SecretExitLevel (void) 
 { 
-//    C_Warning(" G_SecretExitLevel: Free Memory (0x%x)", Z_FreeMemory());
+//    C_Warning("G_SecretExitLevel: Free Memory (0x%x)", Z_FreeMemory());
 
     // IF NO WOLF3D LEVELS, NO SECRET EXIT!
     secretexit = !(gamemode == commercial && W_CheckNumForName("MAP31") < 0); 
@@ -2692,7 +2692,7 @@ void G_DoLoadGame (void)
 
     if (consoleactive)
     {
-        C_Output(" %s loaded.", uppercase(savename));
+        C_Output("%s loaded.", uppercase(savename));
         C_HideConsoleFast();
     }
 } 

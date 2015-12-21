@@ -507,9 +507,9 @@ void M_LoadDefaults (void)
     }
 
     if (LoadDefaultCollection(&doom_defaults))
-        C_Output(" Loaded VARs from %s.", uppercase(doom_defaults.filename));
+        C_Output("Loaded VARs from %s.", uppercase(doom_defaults.filename));
     else
-        C_Output(" %s not found. Using defaults for all VARs and creating %s.",
+        C_Output("%s not found. Using defaults for all VARs and creating %s.",
             uppercase(doom_defaults.filename), uppercase(doom_defaults.filename));
 }
 
@@ -1049,7 +1049,7 @@ char *M_GetSaveGameDir(char *iwadname)
 
         M_MakeDirectory(savegamedir);
 
-        C_Output(" Savegames will be saved and loaded in %s.", uppercase(savegamedir));
+        C_Output("Savegames will be saved and loaded in %s.", uppercase(savegamedir));
     }
 
     return savegamedir;

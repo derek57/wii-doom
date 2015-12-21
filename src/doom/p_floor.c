@@ -99,10 +99,10 @@ T_MovePlane
             {
                 lastpos = sector->floorheight;
                 sector->floorheight = dest;
-                if (P_CheckSector(sector, crush))
+                if (P_ChangeSector(sector, crush))
                 {
                     sector->floorheight =lastpos;
-                    P_CheckSector(sector,crush);
+                    P_ChangeSector(sector,crush);
                     //return crushed;
                 }
                 return pastdest;
@@ -111,7 +111,7 @@ T_MovePlane
             {
                 lastpos = sector->floorheight;
                 sector->floorheight -= speed;
-                if (P_CheckSector(sector, crush) && d_floors)
+                if (P_ChangeSector(sector, crush) && d_floors)
                 {
                     sector->floorheight = lastpos;
                     P_ChangeSector(sector,crush);
@@ -128,10 +128,10 @@ T_MovePlane
             {
                 lastpos = sector->floorheight;
                 sector->floorheight = destheight;
-                if (P_CheckSector(sector, crush))
+                if (P_ChangeSector(sector, crush))
                 {
                     sector->floorheight = lastpos;
-                    P_CheckSector(sector,crush);
+                    P_ChangeSector(sector,crush);
                     //return crushed;
                 }
                 return pastdest;
@@ -141,7 +141,7 @@ T_MovePlane
                 // COULD GET CRUSHED
                 lastpos = sector->floorheight;
                 sector->floorheight += speed;
-                if (P_CheckSector(sector, crush))
+                if (P_ChangeSector(sector, crush))
                 {
                     /* jff 1/25/98 fix floor crusher */
                     if (d_floors)
@@ -149,13 +149,13 @@ T_MovePlane
                         //e6y: warning about potential desynch
                         if (crush == STAIRS_UNINITIALIZED_CRUSH_FIELD_VALUE)
                         {
-                            C_Warning(" T_MovePlane: Stairs which can potentially crush may lead to desynch.");
+                            C_Warning("T_MovePlane: Stairs which can potentially crush may lead to desynch.");
                         }
                         if (crush == true)
                             return crushed;
                     }
                     sector->floorheight = lastpos;
-                    P_CheckSector(sector,crush);      //jff 3/19/98 use faster chk
+                    P_ChangeSector(sector,crush);      //jff 3/19/98 use faster chk
                     return crushed;
                 }
             }
@@ -176,10 +176,10 @@ T_MovePlane
             {
                 lastpos = sector->ceilingheight;
                 sector->ceilingheight = destheight;
-                if (P_CheckSector(sector, crush))
+                if (P_ChangeSector(sector, crush))
                 {
                     sector->ceilingheight = lastpos;
-                    P_CheckSector(sector,crush);
+                    P_ChangeSector(sector,crush);
                     //return crushed;
                 }
                 return pastdest;
@@ -189,12 +189,12 @@ T_MovePlane
                 // COULD GET CRUSHED
                 lastpos = sector->ceilingheight;
                 sector->ceilingheight -= speed;
-                if (P_CheckSector(sector, crush))
+                if (P_ChangeSector(sector, crush))
                 {
                     if (crush == true)
                         return crushed;
                     sector->ceilingheight = lastpos;
-                    P_CheckSector(sector,crush);
+                    P_ChangeSector(sector,crush);
                     return crushed;
                 }
             }
@@ -206,10 +206,10 @@ T_MovePlane
             {
                 lastpos = sector->ceilingheight;
                 sector->ceilingheight = dest;
-                if (P_CheckSector(sector, crush))
+                if (P_ChangeSector(sector, crush))
                 {
                     sector->ceilingheight = lastpos;
-                    P_CheckSector(sector,crush);
+                    P_ChangeSector(sector,crush);
                     //return crushed;
                 }
                 return pastdest;
@@ -218,7 +218,7 @@ T_MovePlane
             {
 //                lastpos = sector->ceilingheight;
                 sector->ceilingheight += speed;
-                P_CheckSector(sector, crush);
+                P_ChangeSector(sector, crush);
 //                flag = P_ChangeSector(sector,crush);
 // UNUSED
 #if 0

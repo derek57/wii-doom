@@ -47,6 +47,8 @@
 // Data.
 #include "dstrings.h"
 
+#include "hu_stuff.h"
+
 #ifdef WII
 #include "../i_system.h"
 #include "../m_controls.h"
@@ -855,29 +857,29 @@ dboolean AM_Responder
             followplayer = !followplayer;
             f_oldloc.x = INT_MAX;
             if (followplayer)
-                plr->message = s_AMSTR_FOLLOWON;
+                HU_PlayerMessage(s_AMSTR_FOLLOWON, true);
             else
-                plr->message = s_AMSTR_FOLLOWOFF;
+                HU_PlayerMessage(s_AMSTR_FOLLOWOFF, true);
         }
         else if (key == key_map_grid)
         {
             drawgrid = !drawgrid;
             if (drawgrid)
-                plr->message = s_AMSTR_GRIDON;
+                HU_PlayerMessage(s_AMSTR_GRIDON, true);
             else
-                plr->message = s_AMSTR_GRIDOFF;
+                HU_PlayerMessage(s_AMSTR_GRIDOFF, true);
         }
         else if (key == key_map_mark)
         {
             M_snprintf(buffer, sizeof(buffer), "%s %d",
                        s_AMSTR_MARKEDSPOT, markpointnum);
-            plr->message = buffer;
+            HU_PlayerMessage(buffer, true);
             AM_addMark();
         }
         else if (key == key_map_clearmark)
         {
             AM_clearMarks();
-            plr->message = s_AMSTR_MARKSCLEARED;
+            HU_PlayerMessage(s_AMSTR_MARKSCLEARED, true);
         }
         else
         {

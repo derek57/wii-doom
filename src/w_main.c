@@ -237,29 +237,28 @@ dboolean W_ParseCommandLine(void)
 
     if (p)
     {
-        // the parms after p are wadfile/lump names,
-        // until end of parms or another - preceded parm
-        modifiedgame = true;            // homebrew levels
-        while (++p != myargc && myargv[p][0] != '-')
+        for (p = p + 1; p<myargc && myargv[p][0] != '-'; ++p)
         {
-            int i, j;
-
             char *filename;
 
             filename = D_TryFindWADByName(myargv[p]);
             pwadfile = uppercase(removeext(M_ExtractFilename(filename)));
 
-            printf("         adding %s\n", filename);
-
-            if (D_IsDehFile(filename))
-                LoadDehFile(filename);
-
-            W_AddFile(filename, true);
-
-            i = W_GetNumForName("map01");
-
-            if (!strcasecmp(lumpinfo[i]->wad_file->path, "nerve.wad"))
+            if (W_MergeFile(filename, false))
             {
+                modifiedgame = true;
+
+                if (D_IsDehFile(filename))
+                    LoadDehFile(filename);
+
+                if(dont_show_adding_of_resource_wad == 0)
+                    printf("         adding %s\n", filename);
+            }
+
+            if (!strcasecmp(filename, "nerve.wad"))
+            {
+                int i;
+
                 nerve_pwad = true;
                 gamemission = pack_nerve;
 
@@ -271,14 +270,6 @@ dboolean W_ParseCommandLine(void)
                     M_snprintf (lumpname, 9, "CWILV%2.2d", i);
                     lumpinfo[W_GetNumForName(lumpname)]->name[0] = 'N';
                 }
-            }
-
-             j = W_GetNumForName("map21");
-
-            if (!strcasecmp(lumpinfo[i]->wad_file->path, "masterlevels.wad") &&
-                !strcasecmp(lumpinfo[j]->wad_file->path, "masterlevels.wad"))
-            {
-                gamemission = pack_master;
             }
         }
     }

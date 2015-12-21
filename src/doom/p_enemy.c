@@ -1265,9 +1265,8 @@ void A_PosAttack (mobj_t* actor)
     A_FaceTarget (actor);
 
     S_StartSound (actor, sfx_pistol);
-    P_LineAttack(actor, actor->angle, MISSILERANGE, P_AimLineAttack(actor,
-        actor->angle + ((P_Random() - P_Random()) << 20), MISSILERANGE),
-        ((P_Random() % 5) + 1) * 3);
+    P_LineAttack(actor, actor->angle + ((P_Random() - P_Random()) << 20), MISSILERANGE,
+        P_AimLineAttack(actor, actor->angle, MISSILERANGE), ((P_Random() % 5) + 1) * 3);
 }
 
 void A_SPosAttack (mobj_t* actor)
@@ -2476,7 +2475,7 @@ void A_BrainAwake(mobj_t *actor)
                 braintargets = Z_Realloc(braintargets, maxbraintargets * sizeof(*braintargets));
 #endif
                 if (maxbraintargets > 32)
-                    C_Warning(" R_BrainAwake: Raised braintargets limit to %d.", maxbraintargets);
+                    C_Warning("R_BrainAwake: Raised braintargets limit to %d.", maxbraintargets);
             }
 
             braintargets[numbraintargets] = mo;

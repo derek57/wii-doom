@@ -185,13 +185,13 @@ void P_InitSwitchList(void)
             texture1 = R_CheckTextureNumForName(alphSwitchList[i].name1);
 
             if (texture1 < 0)
-                C_Error(" P_InitSwitchList: unknown texture %s",
+                C_Error("P_InitSwitchList: unknown texture %s",
                         alphSwitchList[i].name1);
 
             texture2 = R_CheckTextureNumForName(alphSwitchList[i].name2);
 
             if (texture2 < 0)
-                C_Error(" P_InitSwitchList: unknown texture %s",
+                C_Error("P_InitSwitchList: unknown texture %s",
                         alphSwitchList[i].name2);
 
             if (texture1 != -1 && texture2 != -1)

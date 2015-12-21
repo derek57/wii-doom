@@ -765,6 +765,7 @@ dboolean    EV_DoChange(line_t *line, change_e changetype);
 dboolean    EV_DoElevator(line_t *line, elevator_e elevtype);
 dboolean    EV_StopPlat(line_t* line);
 dboolean    P_CheckLineSide(mobj_t *actor, fixed_t x, fixed_t y);
+dboolean    P_SectorHasLightSpecial(sector_t *sec); 
 dboolean    P_CheckTag(line_t *line);
 dboolean    EV_CeilingCrushStop(line_t* line);
 dboolean    P_ActivateInStasisCeiling(line_t* line);

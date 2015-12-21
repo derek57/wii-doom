@@ -145,7 +145,7 @@ void V_DrawHorizLine(int x, int y, int w, int c)
      || y < 0
      || y > SCREENHEIGHT)
     {
-        C_Error(" Bad V_DrawHorizLine: (%d,%d,%d,%d)"
+        C_Error("Bad V_DrawHorizLine: (%d,%d,%d,%d)"
                 , x, x+w, y);
     }
 #endif 
@@ -191,7 +191,7 @@ V_CopyRect
      || desty < 0
      || desty /* + height */ > SCREENHEIGHT)
     {
-        C_Error(" Bad V_CopyRect: Patch (%d,%d)-(%d,%d) / Dest.: (%d,%d) exceeds LFB"
+        C_Error("Bad V_CopyRect: Patch (%d,%d)-(%d,%d) / Dest.: (%d,%d) exceeds LFB"
                 , srcx, srcy, srcx + width, srcy + height, destx, desty);
     }
 #endif 
@@ -249,7 +249,7 @@ V_DrawPatch
      || y < 0
      || y + SHORT(patch->height) > ORIGHEIGHT)
     {
-        C_Error(" Bad V_DrawPatch: Patch (%d,%d) exceeds LFB", x, y);
+        C_Error("Bad V_DrawPatch: Patch (%d,%d) exceeds LFB", x, y);
     }
 #endif
 
@@ -355,7 +355,7 @@ V_DrawPatchFlipped
      || y < 0
      || y + SHORT(patch->height) > ORIGHEIGHT)
     {
-        C_Error(" Bad V_DrawPatchFlipped: Patch (%d,%d)-(%d,%d) exceeds LFB"
+        C_Error("Bad V_DrawPatchFlipped: Patch (%d,%d)-(%d,%d) exceeds LFB"
                 , x, y, x + SHORT(patch->width), y + SHORT(patch->height));
     }
 #endif
@@ -455,7 +455,7 @@ V_DrawBlock
      || y < 0
      || y + height > SCREENHEIGHT)
     {
-        C_Error(" Bad V_DrawBlock: Patch (%d,%d)-(%d,%d) exceeds LFB"
+        C_Error("Bad V_DrawBlock: Patch (%d,%d)-(%d,%d) exceeds LFB"
                 , x, y, x + width, y + height);
     }
 #endif 
@@ -753,7 +753,7 @@ void V_ColorBlock(int x, int y, int width, int height, byte color)
      || y < 0
      || y + height > SCREENHEIGHT)
     {
-        C_Error(" V_ColorBlock: block exceeds buffer boundaries.");
+        C_Error("V_ColorBlock: block exceeds buffer boundaries.");
     }
 #endif
 
@@ -782,7 +782,7 @@ void V_GetBlock (int x, int y, int width, int height, byte *dest)
      || y < 0
      || y + height > SCREENHEIGHT)
     {
-        C_Error(" Bad V_GetBlock");
+        C_Error("Bad V_GetBlock");
     }
 #endif
 
@@ -895,7 +895,7 @@ static void error_fn(png_structp p, png_const_charp s)
 #ifndef WII
     printf("libpng error: %s\n", s);
 #endif
-    C_Error(" libpng error: %s", s);
+    C_Error("libpng error: %s", s);
 }
 
 static void warning_fn(png_structp p, png_const_charp s)
@@ -903,7 +903,7 @@ static void warning_fn(png_structp p, png_const_charp s)
 #ifndef WII
     printf("libpng warning: %s\n", s);
 #endif
-    C_Warning(" libpng warning: %s", s);
+    C_Warning("libpng warning: %s", s);
 }
 
 void WritePNGfile(char *filename, byte *data,
@@ -1006,10 +1006,10 @@ void WritePNGfile(char *filename, byte *data,
 // V_ScreenShot
 //
 
+    char lbmname[60]; // haleyjd 20110213: BUG FIX - 12 is too small!
 void V_ScreenShot(char *format)
 {
     int i;
-    char lbmname[60]; // haleyjd 20110213: BUG FIX - 12 is too small!
     char *ext;
     
     // find a file name to save it to

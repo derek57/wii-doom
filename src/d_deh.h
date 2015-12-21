@@ -57,21 +57,12 @@ typedef struct
 {
     char        **ppstr;        // doubly indirect pointer to string
     char        *lookup;        // pointer to lookup string name
-    dboolean     assigned;       // [BH] flag indicating string has been assigned
+    dboolean    assigned;       // [BH] flag indicating string has been assigned
 } deh_strs;
 
-extern dboolean  dehacked;
+extern dboolean dehacked;
 extern deh_strs deh_strlookup[];
 
-extern char     *s_STSTR_NOMUS;
-extern char     *s_NETEND;
-extern char     *s_QSAVESPOT;
-extern char     *s_SAVEDEAD;
-extern char     *s_QSPROMPT;
-extern char     *s_NEWGAME;
-extern char     *s_LOADNET;
-extern char     *s_QLOADNET;
-extern char     *s_D_DEVSTR;
 extern char     *s_PRESSKEY;
 extern char     *s_PRESSYN;
 extern char     *s_PRESSA;
@@ -469,6 +460,16 @@ extern char     *startup4;
 extern char     *startup5;
 
 extern char     **mapnames[];     // DOOM shareware/registered/retail (Ultimate) names.
+
+extern char     *s_STSTR_NOMUS;
+extern char     *s_NETEND;
+extern char     *s_QSAVESPOT;
+extern char     *s_SAVEDEAD;
+extern char     *s_QSPROMPT;
+extern char     *s_NEWGAME;
+extern char     *s_LOADNET;
+extern char     *s_QLOADNET;
+extern char     *s_D_DEVSTR;
 
 void ProcessDehFile(char *filename, int lumpnum);
 

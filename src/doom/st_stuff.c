@@ -51,6 +51,7 @@ rcsid[] = "$Id: st_stuff.c,v 1.6 1997/02/03 22:45:13 b1 Exp $";
 #include "dstrings.h"
 
 #include "g_game.h"
+#include "hu_stuff.h"
 
 #ifdef WII
 #include "../i_swap.h"
@@ -317,6 +318,64 @@ rcsid[] = "$Id: st_stuff.c,v 1.6 1997/02/03 22:45:13 b1 Exp $";
 #define ST_MAPTITLEY                0
 #define ST_MAPHEIGHT                1
 
+#define NONE                        -1
+#define IDMUS_MAX                   50
+
+int mus[IDMUS_MAX][6] =
+{
+    /* xy      shareware    registered   commercial   retail      bfgedition   nerve      */
+    /* 00 */ { NONE,        NONE,        NONE,        NONE,       NONE,        NONE       },
+    /* 01 */ { NONE,        NONE,        mus_runnin,  NONE,       mus_runnin,  mus_messag },
+    /* 02 */ { NONE,        NONE,        mus_stalks,  NONE,       mus_stalks,  mus_ddtblu },
+    /* 03 */ { NONE,        NONE,        mus_countd,  NONE,       mus_countd,  mus_doom   },
+    /* 04 */ { NONE,        NONE,        mus_betwee,  NONE,       mus_betwee,  mus_shawn  },
+    /* 05 */ { NONE,        NONE,        mus_doom,    NONE,       mus_doom,    mus_in_cit },
+    /* 06 */ { NONE,        NONE,        mus_the_da,  NONE,       mus_the_da,  mus_the_da },
+    /* 07 */ { NONE,        NONE,        mus_shawn,   NONE,       mus_shawn,   mus_in_cit },
+    /* 08 */ { NONE,        NONE,        mus_ddtblu,  NONE,       mus_ddtblu,  mus_shawn  },
+    /* 09 */ { NONE,        NONE,        mus_in_cit,  NONE,       mus_in_cit,  mus_ddtblu },
+    /* 10 */ { NONE,        NONE,        mus_dead,    NONE,       mus_dead,    NONE       },
+    /* 11 */ { mus_e1m1,    mus_e1m1,    mus_stlks2,  mus_e1m1,   mus_stlks2,  NONE       },
+    /* 12 */ { mus_e1m2,    mus_e1m2,    mus_theda2,  mus_e1m2,   mus_theda2,  NONE       },
+    /* 13 */ { mus_e1m3,    mus_e1m3,    mus_doom2,   mus_e1m3,   mus_doom2,   NONE       },
+    /* 14 */ { mus_e1m4,    mus_e1m4,    mus_ddtbl2,  mus_e1m4,   mus_ddtbl2,  NONE       },
+    /* 15 */ { mus_e1m5,    mus_e1m5,    mus_runni2,  mus_e1m5,   mus_runni2,  NONE       },
+    /* 16 */ { mus_e1m6,    mus_e1m6,    mus_dead2,   mus_e1m6,   mus_dead2,   NONE       },
+    /* 17 */ { mus_e1m7,    mus_e1m7,    mus_stlks3,  mus_e1m7,   mus_stlks3,  NONE       },
+    /* 18 */ { mus_e1m8,    mus_e1m8,    mus_romero,  mus_e1m8,   mus_romero,  NONE       },
+    /* 19 */ { mus_e1m9,    mus_e1m9,    mus_shawn2,  mus_e1m9,   mus_shawn2,  NONE       },
+    /* 20 */ { NONE,        NONE,        mus_messag,  NONE,       mus_messag,  NONE       },
+    /* 21 */ { NONE,        mus_e2m1,    mus_count2,  mus_e2m1,   mus_count2,  NONE       },
+    /* 22 */ { NONE,        mus_e2m2,    mus_ddtbl3,  mus_e2m2,   mus_ddtbl3,  NONE       },
+    /* 23 */ { NONE,        mus_e2m3,    mus_ampie,   mus_e2m3,   mus_ampie,   NONE       },
+    /* 24 */ { NONE,        mus_e2m4,    mus_theda3,  mus_e2m4,   mus_theda3,  NONE       },
+    /* 25 */ { NONE,        mus_e2m5,    mus_adrian,  mus_e2m5,   mus_adrian,  NONE       },
+    /* 26 */ { NONE,        mus_e2m6,    mus_messg2,  mus_e2m6,   mus_messg2,  NONE       },
+    /* 27 */ { NONE,        mus_e2m7,    mus_romer2,  mus_e2m7,   mus_romer2,  NONE       },
+    /* 28 */ { NONE,        mus_e2m8,    mus_tense,   mus_e2m8,   mus_tense,   NONE       },
+    /* 29 */ { NONE,        mus_e2m9,    mus_shawn3,  mus_e2m9,   mus_shawn3,  NONE       },
+    /* 30 */ { NONE,        NONE,        mus_openin,  NONE,       mus_openin,  NONE       },
+    /* 31 */ { NONE,        mus_e3m1,    mus_evil,    mus_e3m1,   mus_evil,    NONE       },
+    /* 32 */ { NONE,        mus_e3m2,    mus_ultima,  mus_e3m2,   mus_ultima,  NONE       },
+    /* 33 */ { NONE,        mus_e3m3,    NONE,        mus_e3m3,   mus_read_m,  NONE       },
+    /* 34 */ { NONE,        mus_e3m4,    NONE,        mus_e3m4,   NONE,        NONE       },
+    /* 35 */ { NONE,        mus_e3m5,    NONE,        mus_e3m5,   NONE,        NONE       },
+    /* 36 */ { NONE,        mus_e3m6,    NONE,        mus_e3m6,   NONE,        NONE       },
+    /* 37 */ { NONE,        mus_e3m7,    NONE,        mus_e3m7,   NONE,        NONE       },
+    /* 38 */ { NONE,        mus_e3m8,    NONE,        mus_e3m8,   NONE,        NONE       },
+    /* 39 */ { NONE,        mus_e3m9,    NONE,        mus_e3m9,   NONE,        NONE       },
+    /* 40 */ { NONE,        NONE,        NONE,        NONE,       NONE,        NONE       },
+    /* 41 */ { NONE,        NONE,        NONE,        mus_e3m4,   NONE,        NONE       },
+    /* 42 */ { NONE,        NONE,        NONE,        mus_e3m2,   NONE,        NONE       },
+    /* 43 */ { NONE,        NONE,        NONE,        mus_e3m3,   NONE,        NONE       },
+    /* 44 */ { NONE,        NONE,        NONE,        mus_e1m5,   NONE,        NONE       },
+    /* 45 */ { NONE,        NONE,        NONE,        mus_e2m7,   NONE,        NONE       },
+    /* 46 */ { NONE,        NONE,        NONE,        mus_e2m4,   NONE,        NONE       },
+    /* 47 */ { NONE,        NONE,        NONE,        mus_e2m6,   NONE,        NONE       },
+    /* 48 */ { NONE,        NONE,        NONE,        mus_e2m5,   NONE,        NONE       },
+    /* 49 */ { NONE,        NONE,        NONE,        mus_e1m9,   NONE,        NONE       }
+};
+
 
 // main player in game
 static player_t*              plyr; 
@@ -521,7 +580,9 @@ int                 prio = 0;
 int                 healthhighlight = 0;
 int                 ammohighlight = 0;
 int                 armorhighlight = 0;
+int                 cheat_musnum;
 
+dboolean            mus_cheated;
 dboolean            fly_used;
 
 extern channel_t    channels[8];
@@ -531,6 +592,7 @@ extern dboolean     in_slime;
 extern dboolean     show_chat_bar;
 extern dboolean     done;
 extern dboolean     massacre_cheat_used;
+extern dboolean     mus_cheat_used;
 
 extern char         massacre_textbuffer[30];
 
@@ -725,10 +787,10 @@ dboolean ST_Responder (event_t* ev)
           
                         plyr->health = 100;
 
-                        plyr->message = s_STSTR_DQDON;
+                        HU_PlayerMessage(s_STSTR_DQDON, true);
                 }
                 else 
-                    plyr->message = s_STSTR_DQDOFF;
+                    HU_PlayerMessage(s_STSTR_DQDOFF, true);
             }
             // 'tst' cheat for toggleable god mode in beta
             else if (cht_CheckCheat(&cheat_god_beta, ev->data2) && beta_style)
@@ -745,10 +807,10 @@ dboolean ST_Responder (event_t* ev)
           
                         plyr->health = 100;
                         
-                        plyr->message = STSTR_DQDONBETA;
+                        HU_PlayerMessage(STSTR_DQDONBETA, true);
                 }
                 else 
-                    plyr->message = STSTR_DQDOFFBETA;
+                    HU_PlayerMessage(STSTR_DQDOFFBETA, true);
             }
             // 'fa' cheat for killer fucking arsenal
             else if (cht_CheckCheat(&cheat_ammonokey, ev->data2) && !beta_style)
@@ -762,7 +824,7 @@ dboolean ST_Responder (event_t* ev)
                 for (i=0;i<NUMAMMO;i++)
                     plyr->ammo[i] = plyr->maxammo[i];
         
-                plyr->message = s_STSTR_FAADDED;
+                HU_PlayerMessage(s_STSTR_FAADDED, true);
             }
             // 'kfa' cheat for key full ammo
             else if (cht_CheckCheat(&cheat_ammo, ev->data2) && !beta_style)
@@ -778,7 +840,7 @@ dboolean ST_Responder (event_t* ev)
 
                 P_GiveAllCards(plyr);
        
-                plyr->message = s_STSTR_KFAADDED;
+                HU_PlayerMessage(s_STSTR_KFAADDED, true);
             }
             // 'amo' cheat for key full ammo in beta
             else if (cht_CheckCheat(&cheat_ammo_beta, ev->data2) && beta_style)
@@ -795,40 +857,47 @@ dboolean ST_Responder (event_t* ev)
                 for (i=0;i<NUMCARDS - 3;i++)
                     plyr->cards[i] = true;
 
-                plyr->message = STSTR_KFAADDEDBETA;
+                HU_PlayerMessage(STSTR_KFAADDEDBETA, true);
             }
             // 'mus' cheat for changing music
             else if (cht_CheckCheat(&cheat_mus, ev->data2) && !beta_style)
             {
-        
                 char        buf[3];
-                int         musnum;
-        
-                plyr->message = s_STSTR_MUS;
+
                 cht_GetParam(&cheat_mus, buf);
 
-                // Note: The original v1.9 had a bug that tried to play back
-                // the Doom II music regardless of gamemode.  This was fixed
-                // in the Ultimate Doom executable so that it would work for
-                // the Doom 1 music as well.
-
-                if (gamemode == commercial || gameversion < exe_ultimate)
+                // [BH] rewritten to use mus[] LUT
+                // [BH] fix crash if IDMUS0y and IDMUSx0 entered in DOOM,
+                //  IDMUS21 to IDMUS39 entered in shareware, and IDMUS00
+                //  entered in DOOM II
+                if (buf[0] >= '0' && buf[0] <= '9' && buf[1] >= '0' && buf[1] <= '9')
                 {
-                    musnum = mus_runnin + (buf[0]-'0')*10 + buf[1]-'0' - 1;
-          
-                    if (((buf[0]-'0')*10 + buf[1]-'0') > 35 && gameversion >= exe_doom_1_8)
-                        plyr->message = s_STSTR_NOMUS;
-                    else
-                        S_ChangeMusic(musnum, true, false);
-                }
-                else
-                {
-                    musnum = mus_e1m1 + (buf[0]-'1')*9 + (buf[1]-'1');
+                    int musnum = (buf[0] - '0') * 10 + (buf[1] - '0');
 
-                    if (((buf[0]-'1')*9 + buf[1]-'1') > 31)
-                        plyr->message = s_STSTR_NOMUS;
+                    if (musnum < IDMUS_MAX)
+                    {
+                        if (gamemission == pack_nerve)
+                            musnum = mus[musnum][5];
+                        else if (bfgedition && gamemission == doom2)
+                            musnum = mus[musnum][4];
+                        else
+                            musnum = mus[musnum][gamemode];
+
+                        cheat_musnum = musnum;
+                        mus_cheated = true;
+
+                        if (musnum != NONE)
+                        {
+                            static char msg[80];
+
+                            S_ChangeMusic(musnum, true, false);
+
+                            M_snprintf(msg, sizeof(msg), s_STSTR_MUS, S_music[musnum].name);
+                            HU_PlayerMessage(msg, true);
+                        }
+                    }
                     else
-                        S_ChangeMusic(musnum, true, false);
+                        HU_PlayerMessage("invalid music", true);
                 }
             }
             // Noclip cheat.
@@ -843,12 +912,12 @@ dboolean ST_Responder (event_t* ev)
                 if (plyr->cheats & CF_NOCLIP)
                 {
                     plyr->mo->flags |= MF_NOCLIP;
-                    plyr->message = s_STSTR_NCON;
+                    HU_PlayerMessage(s_STSTR_NCON, true);
                 }
                 else
                 {
                     plyr->mo->flags &= ~MF_NOCLIP;
-                    plyr->message = s_STSTR_NCOFF;
+                    HU_PlayerMessage(s_STSTR_NCOFF, true);
                 }
             }
             // Noclip cheat in beta.
@@ -859,12 +928,12 @@ dboolean ST_Responder (event_t* ev)
                 if (plyr->cheats & CF_NOCLIP)
                 {
                     plyr->mo->flags |= MF_NOCLIP;
-                    plyr->message = STSTR_NCONBETA;
+                    HU_PlayerMessage(STSTR_NCONBETA, true);
                 }
                 else
                 {
                     plyr->mo->flags &= ~MF_NOCLIP;
-                    plyr->message = STSTR_NCOFFBETA;
+                    HU_PlayerMessage(STSTR_NCOFFBETA, true);
                 }
             }
 
@@ -880,21 +949,21 @@ dboolean ST_Responder (event_t* ev)
                     else
                         plyr->powers[i] = 0;
 
-                    plyr->message = s_STSTR_BEHOLDX;
+                    HU_PlayerMessage(s_STSTR_BEHOLDX, true);
                 }
             }
 
             // 'behold' power-up menu
             if (cht_CheckCheat(&cheat_powerup[6], ev->data2) && !beta_style)
             {
-                plyr->message = s_STSTR_BEHOLD;
+                HU_PlayerMessage(s_STSTR_BEHOLD, true);
             }
             // 'choppers' invulnerability & chainsaw
             else if (cht_CheckCheat(&cheat_choppers, ev->data2) && !beta_style)
             {
                 plyr->weaponowned[wp_chainsaw] = true;
                 plyr->powers[pw_invulnerability] = true;
-                plyr->message = s_STSTR_CHOPPERS;
+                HU_PlayerMessage(s_STSTR_CHOPPERS, true);
             }
             // 'mypos' for player position
             else if (cht_CheckCheat(&cheat_mypos, ev->data2) && !beta_style)
@@ -904,14 +973,14 @@ dboolean ST_Responder (event_t* ev)
                         players[consoleplayer].mo->angle,
                         players[consoleplayer].mo->x,
                         players[consoleplayer].mo->y);
-                plyr->message = buf;
+                HU_PlayerMessage(buf, true);
             }
         }
 
         // 'clev10' change-level cheat
         if (!netgame && cht_CheckCheat(&cheat_clev10, ev->data2) && fsize == 12538385 && !beta_style)
         {
-            plyr->message = s_STSTR_CLEV;
+            HU_PlayerMessage(s_STSTR_CLEV, true);
             G_DeferedInitNew(gameskill, 1, 10);
         }
 
@@ -958,39 +1027,39 @@ dboolean ST_Responder (event_t* ev)
                     || (gamemission == pack_nerve && map > 9)
                     || (BTSX && W_CheckMultipleLumps(lump) == 1))
             {
-                plyr->message = "invalid map";
+                HU_PlayerMessage("invalid map", true);
                 return false;
             }
 
             // Catch invalid maps.
             if (epsd < 1)
             {
-                plyr->message = "invalid map";
+                HU_PlayerMessage("invalid map", true);
                 return false;
             }
 
             if (map < 1)
             {
-                plyr->message = "invalid map";
+                HU_PlayerMessage("invalid map", true);
                 return false;
             }
 
             // Ohmygod - this is not going to work.
             if ((gamemode == retail) && ((epsd > 4) || (map > 9)))
             {
-                plyr->message = "invalid map";
+                HU_PlayerMessage("invalid map", true);
                 return false;
             }
 
             if ((gamemode == registered) && ((epsd > 3) || (map > 9)))
             {
-                plyr->message = "invalid map";
+                HU_PlayerMessage("invalid map", true);
                 return false;
             }
 
             if ((gamemode == shareware) && ((epsd > 1) || (map > 9)))
             {
-                plyr->message = "invalid map";
+                HU_PlayerMessage("invalid map", true);
                 return false;
             }
 
@@ -998,12 +1067,12 @@ dboolean ST_Responder (event_t* ev)
             // Doom allows IDCLEV up to MAP40 even though it normally crashes.
             if ((gamemode == commercial) && ((epsd > 1) || (map > 40)))
             {
-                plyr->message = "invalid map";
+                HU_PlayerMessage("invalid map", true);
                 return false;
             }
 
             // So be it.
-            plyr->message = s_STSTR_CLEV;
+            HU_PlayerMessage(s_STSTR_CLEV, true);
             G_DeferedInitNew(gameskill, epsd, map);
         }
     }
