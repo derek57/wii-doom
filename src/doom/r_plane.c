@@ -215,7 +215,7 @@ static void R_RaiseVisplanes (visplane_t** vp)
         visplane_t* visplanes_old = visplanes;
 
         numvisplanes = numvisplanes ? 2 * numvisplanes : MAXVISPLANES;
-#ifdef BOOM_ZONE_HANDLING
+#if defined BOOM_ZONE_HANDLING || defined WIIDOOM_ZONE_HANDLING
         visplanes = Z_Realloc(visplanes, numvisplanes * sizeof(*visplanes), PU_CACHE, NULL);
 #else
         visplanes = Z_Realloc(visplanes, numvisplanes * sizeof(*visplanes));

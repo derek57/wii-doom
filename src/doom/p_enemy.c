@@ -2469,7 +2469,7 @@ void A_BrainAwake(mobj_t *actor)
             if (numbraintargets == maxbraintargets)
             {
                 maxbraintargets = maxbraintargets ? 2 * maxbraintargets : 32;
-#ifdef BOOM_ZONE_HANDLING
+#if defined BOOM_ZONE_HANDLING || defined WIIDOOM_ZONE_HANDLING
                 braintargets = Z_Realloc(braintargets, maxbraintargets * sizeof(*braintargets), PU_LEVEL, NULL);
 #else
                 braintargets = Z_Realloc(braintargets, maxbraintargets * sizeof(*braintargets));

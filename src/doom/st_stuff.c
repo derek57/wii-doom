@@ -807,10 +807,10 @@ dboolean ST_Responder (event_t* ev)
           
                         plyr->health = 100;
                         
-                        HU_PlayerMessage(STSTR_DQDONBETA, true);
+                        plyr->message = STSTR_DQDONBETA;
                 }
                 else 
-                    HU_PlayerMessage(STSTR_DQDOFFBETA, true);
+                    plyr->message = STSTR_DQDOFFBETA;
             }
             // 'fa' cheat for killer fucking arsenal
             else if (cht_CheckCheat(&cheat_ammonokey, ev->data2) && !beta_style)
@@ -857,7 +857,7 @@ dboolean ST_Responder (event_t* ev)
                 for (i=0;i<NUMCARDS - 3;i++)
                     plyr->cards[i] = true;
 
-                HU_PlayerMessage(STSTR_KFAADDEDBETA, true);
+                plyr->message = STSTR_KFAADDEDBETA;
             }
             // 'mus' cheat for changing music
             else if (cht_CheckCheat(&cheat_mus, ev->data2) && !beta_style)
@@ -928,12 +928,12 @@ dboolean ST_Responder (event_t* ev)
                 if (plyr->cheats & CF_NOCLIP)
                 {
                     plyr->mo->flags |= MF_NOCLIP;
-                    HU_PlayerMessage(STSTR_NCONBETA, true);
+                    plyr->message = STSTR_NCONBETA;
                 }
                 else
                 {
                     plyr->mo->flags &= ~MF_NOCLIP;
-                    HU_PlayerMessage(STSTR_NCOFFBETA, true);
+                    plyr->message = STSTR_NCOFFBETA;
                 }
             }
 

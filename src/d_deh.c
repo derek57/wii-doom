@@ -359,15 +359,62 @@ char    *s_THUSTR_29 = THUSTR_29;
 char    *s_THUSTR_30 = THUSTR_30;
 char    *s_THUSTR_31 = THUSTR_31;
 char    *s_THUSTR_32 = THUSTR_32;
-char    *s_NHUSTR_1 = "";
-char    *s_NHUSTR_2 = "";
-char    *s_NHUSTR_3 = "";
-char    *s_NHUSTR_4 = "";
-char    *s_NHUSTR_5 = "";
-char    *s_NHUSTR_6 = "";
-char    *s_NHUSTR_7 = "";
-char    *s_NHUSTR_8 = "";
-char    *s_NHUSTR_9 = "";
+char    *s_NHUSTR_1 = NHUSTR_1;
+char    *s_NHUSTR_2 = NHUSTR_2;
+char    *s_NHUSTR_3 = NHUSTR_3;
+char    *s_NHUSTR_4 = NHUSTR_4;
+char    *s_NHUSTR_5 = NHUSTR_5;
+char    *s_NHUSTR_6 = NHUSTR_6;
+char    *s_NHUSTR_7 = NHUSTR_7;
+char    *s_NHUSTR_8 = NHUSTR_8;
+char    *s_NHUSTR_9 = NHUSTR_9;
+char    *s_MHUSTR_1 = "";
+char    *s_MHUSTR_2 = "";
+char    *s_MHUSTR_3 = "";
+char    *s_MHUSTR_4 = "";
+char    *s_MHUSTR_5 = "";
+char    *s_MHUSTR_6 = "";
+char    *s_MHUSTR_7 = "";
+char    *s_MHUSTR_8 = "";
+char    *s_MHUSTR_9 = "";
+char    *s_MHUSTR_10 = "";
+char    *s_MHUSTR_11 = "";
+char    *s_MHUSTR_12 = "";
+char    *s_MHUSTR_13 = "";
+char    *s_MHUSTR_14 = "";
+char    *s_MHUSTR_15 = "";
+char    *s_MHUSTR_16 = "";
+char    *s_MHUSTR_17 = "";
+char    *s_MHUSTR_18 = "";
+char    *s_MHUSTR_19 = "";
+char    *s_MHUSTR_20 = "";
+char    *s_MHUSTR_21 = "";
+char    *s_HHUSTR_1 = HHUSTR_1;
+char    *s_HHUSTR_2 = HHUSTR_2;
+char    *s_HHUSTR_3 = HHUSTR_3;
+char    *s_HHUSTR_4 = HHUSTR_4;
+char    *s_HHUSTR_5 = HHUSTR_5;
+char    *s_HHUSTR_6 = HHUSTR_6;
+char    *s_HHUSTR_7 = HHUSTR_7;
+char    *s_HHUSTR_8 = HHUSTR_8;
+char    *s_HHUSTR_9 = HHUSTR_9;
+char    *s_HHUSTR_10 = HHUSTR_10;
+char    *s_HHUSTR_11 = HHUSTR_11;
+char    *s_HHUSTR_12 = HHUSTR_12;
+char    *s_HHUSTR_13 = HHUSTR_13;
+char    *s_HHUSTR_14 = HHUSTR_14;
+char    *s_HHUSTR_15 = HHUSTR_15;
+char    *s_HHUSTR_16 = HHUSTR_16;
+char    *s_HHUSTR_17 = HHUSTR_17;
+char    *s_HHUSTR_18 = HHUSTR_18;
+char    *s_HHUSTR_19 = HHUSTR_19;
+char    *s_HHUSTR_20 = HHUSTR_20;
+
+char    *s_CHUSTR_1 = CHUSTR_1;
+char    *s_CHUSTR_2 = CHUSTR_2;
+char    *s_CHUSTR_3 = CHUSTR_3;
+char    *s_CHUSTR_4 = CHUSTR_4;
+char    *s_CHUSTR_5 = CHUSTR_5;
 
 char    *s_HUSTR_CHATMACRO1 = HUSTR_CHATMACRO1;
 char    *s_HUSTR_CHATMACRO2 = HUSTR_CHATMACRO2;
@@ -830,6 +877,52 @@ deh_strs deh_strlookup[] =
     { &s_NHUSTR_7,             "NHUSTR_7",             false },
     { &s_NHUSTR_8,             "NHUSTR_8",             false },
     { &s_NHUSTR_9,             "NHUSTR_9",             false },
+    { &s_MHUSTR_1,             "MHUSTR_1",             false },
+    { &s_MHUSTR_2,             "MHUSTR_2",             false },
+    { &s_MHUSTR_3,             "MHUSTR_3",             false },
+    { &s_MHUSTR_4,             "MHUSTR_4",             false },
+    { &s_MHUSTR_5,             "MHUSTR_5",             false },
+    { &s_MHUSTR_6,             "MHUSTR_6",             false },
+    { &s_MHUSTR_7,             "MHUSTR_7",             false },
+    { &s_MHUSTR_8,             "MHUSTR_8",             false },
+    { &s_MHUSTR_9,             "MHUSTR_9",             false },
+    { &s_MHUSTR_10,            "MHUSTR_10",            false },
+    { &s_MHUSTR_11,            "MHUSTR_11",            false },
+    { &s_MHUSTR_12,            "MHUSTR_12",            false },
+    { &s_MHUSTR_13,            "MHUSTR_13",            false },
+    { &s_MHUSTR_14,            "MHUSTR_14",            false },
+    { &s_MHUSTR_15,            "MHUSTR_15",            false },
+    { &s_MHUSTR_16,            "MHUSTR_16",            false },
+    { &s_MHUSTR_17,            "MHUSTR_17",            false },
+    { &s_MHUSTR_18,            "MHUSTR_18",            false },
+    { &s_MHUSTR_19,            "MHUSTR_19",            false },
+    { &s_MHUSTR_20,            "MHUSTR_20",            false },
+    { &s_MHUSTR_21,            "MHUSTR_21",            false },
+    { &s_HHUSTR_1,             "HHUSTR_1",             false },
+    { &s_HHUSTR_2,             "HHUSTR_2",             false },
+    { &s_HHUSTR_3,             "HHUSTR_3",             false },
+    { &s_HHUSTR_4,             "HHUSTR_4",             false },
+    { &s_HHUSTR_5,             "HHUSTR_5",             false },
+    { &s_HHUSTR_6,             "HHUSTR_6",             false },
+    { &s_HHUSTR_7,             "HHUSTR_7",             false },
+    { &s_HHUSTR_8,             "HHUSTR_8",             false },
+    { &s_HHUSTR_9,             "HHUSTR_9",             false },
+    { &s_HHUSTR_10,            "HHUSTR_10",            false },
+    { &s_HHUSTR_11,            "HHUSTR_11",            false },
+    { &s_HHUSTR_12,            "HHUSTR_12",            false },
+    { &s_HHUSTR_13,            "HHUSTR_13",            false },
+    { &s_HHUSTR_14,            "HHUSTR_14",            false },
+    { &s_HHUSTR_15,            "HHUSTR_15",            false },
+    { &s_HHUSTR_16,            "HHUSTR_16",            false },
+    { &s_HHUSTR_17,            "HHUSTR_17",            false },
+    { &s_HHUSTR_18,            "HHUSTR_18",            false },
+    { &s_HHUSTR_19,            "HHUSTR_19",            false },
+    { &s_HHUSTR_20,            "HHUSTR_20",            false },
+    { &s_CHUSTR_1,             "CHUSTR_1",             false },
+    { &s_CHUSTR_2,             "CHUSTR_2",             false },
+    { &s_CHUSTR_3,             "CHUSTR_3",             false },
+    { &s_CHUSTR_4,             "CHUSTR_4",             false },
+    { &s_CHUSTR_5,             "CHUSTR_5",             false },
 
     { &s_HUSTR_CHATMACRO1,     "HUSTR_CHATMACRO1",     false },
     { &s_HUSTR_CHATMACRO2,     "HUSTR_CHATMACRO2",     false },
@@ -1238,6 +1331,64 @@ char **mapnamesn[] =    // Nerve WAD map names.
     &s_NHUSTR_7,
     &s_NHUSTR_8,
     &s_NHUSTR_9
+};
+
+char **mapnamesm[] =    // Master Levels WAD map names.
+{
+    &s_MHUSTR_1,
+    &s_MHUSTR_2,
+    &s_MHUSTR_3,
+    &s_MHUSTR_4,
+    &s_MHUSTR_5,
+    &s_MHUSTR_6,
+    &s_MHUSTR_7,
+    &s_MHUSTR_8,
+    &s_MHUSTR_9,
+    &s_MHUSTR_10,
+    &s_MHUSTR_11,
+    &s_MHUSTR_12,
+    &s_MHUSTR_13,
+    &s_MHUSTR_14,
+    &s_MHUSTR_15,
+    &s_MHUSTR_16,
+    &s_MHUSTR_17,
+    &s_MHUSTR_18,
+    &s_MHUSTR_19,
+    &s_MHUSTR_20,
+    &s_MHUSTR_21
+};
+
+char **mapnamesh[] =    // HACX WAD map names.
+{
+    &s_HHUSTR_1,
+    &s_HHUSTR_2,
+    &s_HHUSTR_3,
+    &s_HHUSTR_4,
+    &s_HHUSTR_5,
+    &s_HHUSTR_6,
+    &s_HHUSTR_7,
+    &s_HHUSTR_8,
+    &s_HHUSTR_9,
+    &s_HHUSTR_10,
+    &s_HHUSTR_11,
+    &s_HHUSTR_12,
+    &s_HHUSTR_13,
+    &s_HHUSTR_14,
+    &s_HHUSTR_15,
+    &s_HHUSTR_16,
+    &s_HHUSTR_17,
+    &s_HHUSTR_18,
+    &s_HHUSTR_19,
+    &s_HHUSTR_20
+};
+
+char **mapnamesc[] =    // CHEX WAD map names.
+{
+    &s_CHUSTR_1,
+    &s_CHUSTR_2,
+    &s_CHUSTR_3,
+    &s_CHUSTR_4,
+    &s_CHUSTR_5
 };
 
 // Function prototypes
@@ -3018,7 +3169,7 @@ void deh_procStrings(DEHFILE *fpin, char *line)
             if (devparm)
                 C_Output("* increased buffer from to %d for buffer size %d",
                     maxstrlen, (int)strlen(inbuffer));
-#ifdef BOOM_ZONE_HANDLING
+#if defined BOOM_ZONE_HANDLING || defined WIIDOOM_ZONE_HANDLING
             holdstring = Z_Realloc(holdstring, maxstrlen * sizeof(*holdstring), PU_CACHE, NULL);
 #else
             holdstring = Z_Realloc(holdstring, maxstrlen * sizeof(*holdstring));

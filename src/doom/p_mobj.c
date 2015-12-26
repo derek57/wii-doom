@@ -397,7 +397,7 @@ void P_XYMovement (mobj_t* mo)
         if (player && player->mo == mo)
             player->momx = player->momy = 0;
     }
-    else if ((mo->flags2 & MF2_FEETARECLIPPED) && corpse && !player)
+    else if ((mo->flags2 & MF2_FEETARECLIPPED) && corpse && !player && !beta_style)
     {
         // [BH] reduce friction for corpses in water 
         mo->momx = FixedMul(mo->momx, WATERFRICTION);

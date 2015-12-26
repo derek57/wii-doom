@@ -306,7 +306,7 @@ void P_SetLiquids(void)
         if (lastanim >= anims + maxanims)
         {
             size_t      newmax = (maxanims ? maxanims * 2 : MAXANIMS);
-#ifdef BOOM_ZONE_HANDLING
+#if defined BOOM_ZONE_HANDLING || defined WIIDOOM_ZONE_HANDLING
             anims = Z_Realloc(anims, newmax * sizeof(*anims), PU_LEVEL, NULL);
 #else
             anims = Z_Realloc(anims, newmax * sizeof(*anims));
@@ -798,7 +798,7 @@ dboolean P_CanUnlockGenDoor(line_t *line, player_t *player)
 
     // does this line special distinguish between skulls and keys?
     int         skulliscard = (line->special & LockedNKeys) >> LockedNKeysShift;
-
+printf("skulliscard = %d\n",skulliscard);
     // determine for each case of lock type if player's keys are adequate
     switch ((line->special & LockedKey) >> LockedKeyShift)
     {
@@ -2882,6 +2882,7 @@ static void P_SpawnFriction(void)
 // Parses command line parameters.
 void P_SpawnSpecials (void)
 {
+    line_t      *line; 
     sector_t    *sector;
     int         i;
 
@@ -2971,34 +2972,35 @@ void P_SpawnSpecials (void)
 
     P_SpawnPushers();                   // phares 3/20/98: New pusher model using linedefs
 
-    for (i = 0; i < numlines; i++)       // Init line EFFECTs
+    // Init line EFFECTs
+    for (line = lines, i = 0; i < numlines; ++i, ++line) 
     {
         int sec;
         int s;
 
-        switch (lines[i].special)
+        switch (line->special) 
         {
             // killough 3/7/98:
             // support for drawn heights coming from different sector
             case CreateFakeCeilingAndFloor:
-                sec = sides[*lines[i].sidenum].sector - sectors;
-                for (s = -1; (s = P_FindSectorFromLineTag(lines + i, s)) >= 0;)
+                sec = sides[*line->sidenum].sector - sectors; 
+                for (s = -1; (s = P_FindSectorFromLineTag(line, s)) >= 0;) 
                     sectors[s].heightsec = sec;
                 break;
 
             // killough 3/16/98: Add support for setting
             // floor lighting independently (e.g. lava)
             case Floor_ChangeBrightnessToThisBrightness:
-                sec = sides[*lines[i].sidenum].sector - sectors;
-                for (s = -1; (s = P_FindSectorFromLineTag(lines + i, s)) >= 0;)
+                sec = sides[*line->sidenum].sector - sectors; 
+                for (s = -1; (s = P_FindSectorFromLineTag(line, s)) >= 0;) 
                     sectors[s].floorlightsec = sec;
                 break;
 
             // killough 4/11/98: Add support for setting
             // ceiling lighting independently
             case Ceiling_ChangeBrightnessToThisBrightness:
-                sec = sides[*lines[i].sidenum].sector - sectors;
-                for (s = -1; (s = P_FindSectorFromLineTag(lines + i, s)) >= 0;)
+                sec = sides[*line->sidenum].sector - sectors; 
+                for (s = -1; (s = P_FindSectorFromLineTag(line, s)) >= 0;) 
                     sectors[s].ceilinglightsec = sec;
                 break;
 
@@ -3012,7 +3014,7 @@ void P_SpawnSpecials (void)
             // or ceiling texture, to distinguish floor and ceiling sky.
             case TransferSkyTextureToTaggedSectors:
             case TransferSkyTextureToTaggedSectors_Flipped:
-                for (s = -1; (s = P_FindSectorFromLineTag(lines + i, s)) >= 0;)
+                for (s = -1; (s = P_FindSectorFromLineTag(line, s)) >= 0;) 
                     sectors[s].sky = i | PL_SKYFLAT;
                 break;
         }

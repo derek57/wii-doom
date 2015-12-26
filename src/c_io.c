@@ -209,7 +209,7 @@ void C_Print(stringtype_t typestring, char *string, ...)
     va_start(argptr, string);
     M_vsnprintf(buffer, sizeof(buffer) - 1, string, argptr);
     va_end(argptr);
-#ifdef BOOM_ZONE_HANDLING
+#if defined BOOM_ZONE_HANDLING || defined WIIDOOM_ZONE_HANDLING
     console = Z_Realloc(console, (consolestrings + 1) * sizeof(*console), PU_STATIC, NULL);
 #else
     console = Z_Realloc(console, (consolestrings + 1) * sizeof(*console));
@@ -231,7 +231,7 @@ void C_Output(char *string, ...)
     M_vsnprintf(buffer, sizeof(buffer) - 1, string, argptr);
     va_end(argptr);
 
-#ifdef BOOM_ZONE_HANDLING
+#if defined BOOM_ZONE_HANDLING || defined WIIDOOM_ZONE_HANDLING
     console = Z_Realloc(console, (consolestrings + 1) * sizeof(*console), PU_STATIC, NULL);
 #else
     console = Z_Realloc(console, (consolestrings + 1) * sizeof(*console));
@@ -255,7 +255,7 @@ void C_Warning(char *string, ...)
 
     if (consolestrings && !M_StringCompare(console[consolestrings - 1].string, buffer))
     {
-#ifdef BOOM_ZONE_HANDLING
+#if defined BOOM_ZONE_HANDLING || defined WIIDOOM_ZONE_HANDLING
         console = Z_Realloc(console, (consolestrings + 1) * sizeof(*console), PU_STATIC, NULL);
 #else
         console = Z_Realloc(console, (consolestrings + 1) * sizeof(*console));
@@ -296,7 +296,7 @@ void C_PlayerMessage(char *string, ...)
     {
         time_t          rawtime;
         struct tm       *timeinfo;
-#ifdef BOOM_ZONE_HANDLING
+#if defined BOOM_ZONE_HANDLING || defined WIIDOOM_ZONE_HANDLING
         console = Z_Realloc(console, (consolestrings + 1) * sizeof(*console), PU_CACHE, NULL);
 #else
         console = Z_Realloc(console, (consolestrings + 1) * sizeof(*console));
@@ -1125,7 +1125,7 @@ void C_Error(char *string, ...)
 
     if (consolestrings && !M_StringCompare(console[consolestrings - 1].string, buffer))
     {
-#ifdef BOOM_ZONE_HANDLING
+#if defined BOOM_ZONE_HANDLING || defined WIIDOOM_ZONE_HANDLING
         console = Z_Realloc(console, (consolestrings + 1) * sizeof(*console), PU_STATIC, NULL);
 #else
         console = Z_Realloc(console, (consolestrings + 1) * sizeof(*console));
@@ -1150,7 +1150,7 @@ void C_Network(char *string, ...)
 
     if (consolestrings && !M_StringCompare(console[consolestrings - 1].string, buffer))
     {
-#ifdef BOOM_ZONE_HANDLING
+#if defined BOOM_ZONE_HANDLING || defined WIIDOOM_ZONE_HANDLING
         console = Z_Realloc(console, (consolestrings + 1) * sizeof(*console), PU_STATIC, NULL);
 #else
         console = Z_Realloc(console, (consolestrings + 1) * sizeof(*console));

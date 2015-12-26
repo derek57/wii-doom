@@ -2264,8 +2264,6 @@ void G_DoSaveGame (void)
     gameaction = ga_nothing; 
     M_StringCopy(savedescription, "", sizeof(savedescription));
 
-    players[consoleplayer].message = s_GGSAVED;
-
     // draw the pattern into the back screen
     R_FillBackScreen ();
 } 

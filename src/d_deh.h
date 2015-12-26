@@ -298,6 +298,52 @@ extern char     *s_NHUSTR_6;
 extern char     *s_NHUSTR_7;
 extern char     *s_NHUSTR_8;
 extern char     *s_NHUSTR_9;
+extern char     *s_MHUSTR_1;
+extern char     *s_MHUSTR_2;
+extern char     *s_MHUSTR_3;
+extern char     *s_MHUSTR_4;
+extern char     *s_MHUSTR_5;
+extern char     *s_MHUSTR_6;
+extern char     *s_MHUSTR_7;
+extern char     *s_MHUSTR_8;
+extern char     *s_MHUSTR_9;
+extern char     *s_MHUSTR_10;
+extern char     *s_MHUSTR_11;
+extern char     *s_MHUSTR_12;
+extern char     *s_MHUSTR_13;
+extern char     *s_MHUSTR_14;
+extern char     *s_MHUSTR_15;
+extern char     *s_MHUSTR_16;
+extern char     *s_MHUSTR_17;
+extern char     *s_MHUSTR_18;
+extern char     *s_MHUSTR_19;
+extern char     *s_MHUSTR_20;
+extern char     *s_MHUSTR_21;
+extern char     *s_HHUSTR_1;
+extern char     *s_HHUSTR_2;
+extern char     *s_HHUSTR_3;
+extern char     *s_HHUSTR_4;
+extern char     *s_HHUSTR_5;
+extern char     *s_HHUSTR_6;
+extern char     *s_HHUSTR_7;
+extern char     *s_HHUSTR_8;
+extern char     *s_HHUSTR_9;
+extern char     *s_HHUSTR_10;
+extern char     *s_HHUSTR_11;
+extern char     *s_HHUSTR_12;
+extern char     *s_HHUSTR_13;
+extern char     *s_HHUSTR_14;
+extern char     *s_HHUSTR_15;
+extern char     *s_HHUSTR_16;
+extern char     *s_HHUSTR_17;
+extern char     *s_HHUSTR_18;
+extern char     *s_HHUSTR_19;
+extern char     *s_HHUSTR_20;
+extern char     *s_CHUSTR_1;
+extern char     *s_CHUSTR_2;
+extern char     *s_CHUSTR_3;
+extern char     *s_CHUSTR_4;
+extern char     *s_CHUSTR_5;
 
 extern char     *s_AMSTR_FOLLOWON;
 extern char     *s_AMSTR_FOLLOWOFF;
@@ -459,7 +505,15 @@ extern char     *startup3;
 extern char     *startup4;
 extern char     *startup5;
 
-extern char     **mapnames[];     // DOOM shareware/registered/retail (Ultimate) names.
+extern char     **mapnames[];      // DOOM   shareware/registered/retail (Ultimate) names.
+extern char     **mapnames2[];     // DOOM 2 names.
+extern char     **mapnames2_bfg[]; // DOOM 2 (BFG Edition) names.
+extern char     **mapnamesp[];     // Final DOOM (Plutonia) names.
+extern char     **mapnamest[];     // Final DOOM (TNT) names.
+extern char     **mapnamesn[];     // NERVE PACK names.
+extern char     **mapnamesm[];     // DOOM 2 Master Levels names.
+extern char     **mapnamesh[];     // HACX names.
+extern char     **mapnamesc[];     // CHEX names.
 
 extern char     *s_STSTR_NOMUS;
 extern char     *s_NETEND;

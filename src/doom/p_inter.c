@@ -105,7 +105,7 @@ extern dboolean          massacre_cheat_used;
 // Returns false if the ammo can't be picked up at all
 //
 
-dboolean
+int
 P_GiveAmmo
 ( player_t*        player,
   ammotype_t        ammo,
@@ -114,13 +114,13 @@ P_GiveAmmo
     int                oldammo;
         
     if (ammo == am_noammo)
-        return false;
+        return 0;
                 
     if (ammo > NUMAMMO)
         I_Error ("P_GiveAmmo: bad type %i", ammo);
                 
     if ( player->ammo[ammo] == player->maxammo[ammo]  )
-        return false;
+        return 0;
                 
     if (num)
         num *= clipammo[ammo];
@@ -149,7 +149,7 @@ P_GiveAmmo
     // don't change up weapons,
     // player was lower on purpose.
     if (oldammo)
-        return true;        
+        return num;        
 
     // We were down to zero,
     // so select a new weapon.
@@ -194,7 +194,7 @@ P_GiveAmmo
         break;
     }
         
-    return true;
+    return num;
 }
 
 
@@ -398,10 +398,7 @@ void P_InitCards(player_t *player)
 //
 // P_GiveCard
 //
-void
-P_GiveCard
-( player_t*        player,
-  card_t        card )
+void P_GiveCard(player_t *player, card_t card)
 {
     player->bonuscount = BONUSADD;
     player->cards[card] = ++cardsfound;
@@ -413,15 +410,26 @@ P_GiveCard
 void P_GiveAllCards(player_t *player)
 {
     int         i;
+    dboolean    skulliscard = true;
 
-    cardsfound = 0;
-    for (i = NUMCARDS - 1; i >= 0; i--)
-    {
-        if (player->cards[i] != CARDNOTINMAP)
+    for (i = 0; i < numlines; ++i)
+        if (lines[i].special >= GenLockedBase
+            && !((lines[i].special & LockedNKeys) >> LockedNKeysShift))
         {
+            skulliscard = false;
+            break;
+        }
+
+    for (i = NUMCARDS - 1; i >= 0; --i)
+        if (player->cards[i] != CARDNOTINMAP && player->cards[i] == CARDNOTFOUNDYET)
+        {
+            if (skulliscard && ((i == it_blueskull && player->cards[it_bluecard] == CARDNOTFOUNDYET)
+                || (i == it_redskull && player->cards[it_redcard] == CARDNOTFOUNDYET)
+                || (i == it_yellowskull && player->cards[it_yellowcard] == CARDNOTFOUNDYET)))
+                continue;
+
             P_GiveCard(player, i);
         }
-    }
 }
 
 //
@@ -528,7 +536,7 @@ P_TouchSpecialThing
         if (!P_GiveArmor (player, green_armor_class))
             return;
         if(beta_style)
-            HU_PlayerMessage(GOTARMORBETA, true);
+            player->message = GOTARMORBETA;
         else
             HU_PlayerMessage(s_GOTARMOR, true);
         break;
@@ -537,7 +545,7 @@ P_TouchSpecialThing
         if (!P_GiveArmor (player, blue_armor_class))
             return;
         if(beta_style)
-            HU_PlayerMessage(GOTMEGABETA, true);
+            player->message = GOTMEGABETA;
         else
             HU_PlayerMessage(s_GOTMEGA, true);
         break;
@@ -550,7 +558,10 @@ P_TouchSpecialThing
         else
             healthhighlight = I_GetTime() + HUD_HEALTH_HIGHLIGHT_WAIT;
         player->mo->health = player->health;
-        HU_PlayerMessage(s_GOTHTHBONUS, true);
+        if(beta_style)
+            player->message = GOTHTHBONUS;
+        else
+            HU_PlayerMessage(s_GOTHTHBONUS, true);
         break;
         
       case SPR_BON2:
@@ -563,7 +574,10 @@ P_TouchSpecialThing
         // for the armor helmets, armortype 1 is always used.
         if (!player->armortype)
             player->armortype = 1;
-        HU_PlayerMessage(s_GOTARMBONUS, true);
+        if(beta_style)
+            player->message = GOTARMBONUS;
+        else
+            HU_PlayerMessage(s_GOTARMBONUS, true);
         break;
         
       case SPR_SOUL:
@@ -573,7 +587,7 @@ P_TouchSpecialThing
             player->mo->health = player->health;
             healthhighlight = I_GetTime() + HUD_HEALTH_HIGHLIGHT_WAIT;
             player->extra_lifes++;
-//            ST_doRefresh();
+            player->message = GOTSUPERBETA;
         }
         else
         {
@@ -581,10 +595,7 @@ P_TouchSpecialThing
             if (player->health > max_soul)
                 player->health = max_soul;
             player->mo->health = player->health;
-            if(beta_style)
-                HU_PlayerMessage(GOTSUPERBETA, true);
-            else
-                HU_PlayerMessage(s_GOTSUPER, true);
+            HU_PlayerMessage(s_GOTSUPER, true);
         }
 
         if(fsize != 10396254 && fsize != 10399316 && fsize != 10401760 &&
@@ -621,7 +632,7 @@ P_TouchSpecialThing
         if (player->cards[it_bluecard] <= 0)
         {
             if(beta_style)
-                HU_PlayerMessage(GOTBLUECARDBETA, true);
+                player->message = GOTBLUECARDBETA;
             else
                 HU_PlayerMessage(s_GOTBLUECARD, true);
             P_GiveCard (player, it_bluecard);
@@ -635,7 +646,7 @@ P_TouchSpecialThing
         if (player->cards[it_yellowcard] <= 0)
         {
             if(beta_style)
-                HU_PlayerMessage(GOTYELWCARDBETA, true);
+                player->message = GOTYELWCARDBETA;
             else
                 HU_PlayerMessage(s_GOTYELWCARD, true);
             P_GiveCard (player, it_yellowcard);
@@ -649,7 +660,7 @@ P_TouchSpecialThing
         if (player->cards[it_redcard] <= 0)
         {
             if(beta_style)
-                HU_PlayerMessage(GOTREDCARDBETA, true);
+                player->message = GOTREDCARDBETA;
             else
                 HU_PlayerMessage(s_GOTREDCARD, true);
             P_GiveCard (player, it_redcard);
@@ -664,7 +675,7 @@ P_TouchSpecialThing
         if (player->cards[it_blueskull] <= 0)
         {
             if(beta_style)
-                HU_PlayerMessage(GOTBLUESKULBETA, true);
+                player->message = GOTBLUESKULBETA;
             else
                 HU_PlayerMessage(s_GOTBLUESKUL, true);
             P_GiveCard (player, it_blueskull);
@@ -679,7 +690,7 @@ P_TouchSpecialThing
         if (player->cards[it_yellowskull] <= 0)
         {
             if(beta_style)
-                HU_PlayerMessage(GOTYELWSKULBETA, true);
+                player->message = GOTYELWSKULBETA;
             else
                 HU_PlayerMessage(s_GOTYELWSKUL, true);
             P_GiveCard (player, it_yellowskull);
@@ -694,7 +705,7 @@ P_TouchSpecialThing
         if (player->cards[it_redskull] <= 0)
         {
             if(beta_style)
-                HU_PlayerMessage(GOTREDSKULLBETA, true);
+                player->message = GOTREDSKULLBETA;
             else
                 HU_PlayerMessage(s_GOTREDSKULL, true);
             P_GiveCard (player, it_redskull);
@@ -709,7 +720,7 @@ P_TouchSpecialThing
         if (!P_GiveBody (player, 10))
             return;
         if(beta_style)
-            HU_PlayerMessage(GOTSTIMBETA, true);
+            player->message = GOTSTIMBETA;
         else
             HU_PlayerMessage(s_GOTSTIM, true);
         break;
@@ -721,14 +732,14 @@ P_TouchSpecialThing
         if (player->health < 25)
         {
             if(beta_style)
-                HU_PlayerMessage(GOTMEDINEEDBETA, true);
+                player->message = GOTMEDINEEDBETA;
             else
                 HU_PlayerMessage(s_GOTMEDINEED, true);
         }
         else
         {
             if(beta_style)
-                HU_PlayerMessage(GOTMEDIKITBETA, true);
+                player->message = GOTMEDIKITBETA;
             else
                 HU_PlayerMessage(s_GOTMEDIKIT, true);
         }
@@ -740,7 +751,10 @@ P_TouchSpecialThing
       case SPR_BPNV:
         if (!P_GivePower (player, pw_invulnerability))
             return;
-        HU_PlayerMessage(s_GOTINVUL, true);
+        if(beta_style)
+            player->message = GOTINVUL;
+        else
+            HU_PlayerMessage(s_GOTINVUL, true);
 
         if(fsize != 10396254 && fsize != 10399316 && fsize != 10401760 &&
                 fsize != 4261144 && fsize != 4271324 && fsize != 4211660 &&
@@ -754,7 +768,10 @@ P_TouchSpecialThing
       case SPR_PSTR:
         if (!P_GivePower (player, pw_strength))
             return;
-        HU_PlayerMessage(s_GOTBERSERK, true);
+        if(beta_style)
+            player->message = GOTBERSERK;
+        else
+            HU_PlayerMessage(s_GOTBERSERK, true);
         if (player->readyweapon != wp_fist)
             player->pendingweapon = wp_fist;
 
@@ -771,7 +788,10 @@ P_TouchSpecialThing
       case SPR_BPNS:
         if (!P_GivePower (player, pw_invisibility))
             return;
-        HU_PlayerMessage(s_GOTINVIS, true);
+        if(beta_style)
+            player->message = GOTINVIS;
+        else
+            HU_PlayerMessage(s_GOTINVIS, true);
 
         if(fsize != 10396254 && fsize != 10399316 && fsize != 10401760 &&
                 fsize != 4261144 && fsize != 4271324 && fsize != 4211660 &&
@@ -785,7 +805,10 @@ P_TouchSpecialThing
       case SPR_SUIT:
         if (!P_GivePower (player, pw_ironfeet))
             return;
-        HU_PlayerMessage(s_GOTSUIT, true);
+        if(beta_style)
+            player->message = GOTSUIT;
+        else
+            HU_PlayerMessage(s_GOTSUIT, true);
 
         if(fsize != 10396254 && fsize != 10399316 && fsize != 10401760 &&
                 fsize != 4261144 && fsize != 4271324 && fsize != 4211660 &&
@@ -799,7 +822,10 @@ P_TouchSpecialThing
       case SPR_PMAP:
         if (!P_GivePower (player, pw_allmap))
             return;
-        HU_PlayerMessage(s_GOTMAP, true);
+        if(beta_style)
+            player->message = GOTMAP;
+        else
+            HU_PlayerMessage(s_GOTMAP, true);
 
         if(fsize != 10396254 && fsize != 10399316 && fsize != 10401760 &&
                 fsize != 4261144 && fsize != 4271324 && fsize != 4211660 &&
@@ -813,7 +839,10 @@ P_TouchSpecialThing
       case SPR_PVIS:
         if (!P_GivePower (player, pw_infrared))
             return;
-        HU_PlayerMessage(s_GOTVISOR, true);
+        if(beta_style)
+            player->message = GOTVISOR;
+        else
+            HU_PlayerMessage(s_GOTVISOR, true);
 
         if(fsize != 10396254 && fsize != 10399316 && fsize != 10401760 &&
                 fsize != 4261144 && fsize != 4271324 && fsize != 4211660 &&
@@ -828,47 +857,71 @@ P_TouchSpecialThing
       case SPR_CLIP:
         if (!(ammo = P_GiveAmmo(player, am_clip, (special->flags & MF_DROPPED) == 0)))
             return;
-        if (ammo == clipammo[am_clip] || (deh_strlookup[p_GOTCLIP].assigned && dehacked))
-            HU_PlayerMessage(s_GOTCLIP, true);
+        if(beta_style)
+            player->message = GOTCLIP;
         else
-            HU_PlayerMessage((ammo == clipammo[am_clip] / 2 ? s_GOTHALFCLIP : s_GOTCLIPX2), true);
+        {
+            if (ammo == clipammo[am_clip] || (deh_strlookup[p_GOTCLIP].assigned && dehacked))
+                HU_PlayerMessage(s_GOTCLIP, true);
+            else
+                HU_PlayerMessage((ammo == clipammo[am_clip] / 2 ? s_GOTHALFCLIP : s_GOTCLIPX2), true);
+        }
         break;
         
       case SPR_AMMO:
         if (!P_GiveAmmo (player, am_clip,5))
             return;
-        HU_PlayerMessage(s_GOTCLIPBOX, true);
+        if(beta_style)
+            player->message = GOTCLIPBOX;
+        else
+            HU_PlayerMessage(s_GOTCLIPBOX, true);
         break;
         
       case SPR_ROCK:
         if (!(ammo = P_GiveAmmo(player, am_misl, 1)))
             return;
-        if (ammo == clipammo[am_misl] || (deh_strlookup[p_GOTROCKET].assigned && dehacked))
-            HU_PlayerMessage(s_GOTROCKET, true);
+        if(beta_style)
+            player->message = GOTROCKET;
         else
-            HU_PlayerMessage(s_GOTROCKETX2, true);
+        {
+            if (ammo == clipammo[am_misl] || (deh_strlookup[p_GOTROCKET].assigned && dehacked))
+                HU_PlayerMessage(s_GOTROCKET, true);
+            else
+                HU_PlayerMessage(s_GOTROCKETX2, true);
+        }
         break;
         
       case SPR_BROK:
         if (!P_GiveAmmo (player, am_misl,5))
             return;
-        HU_PlayerMessage(s_GOTROCKBOX, true);
+        if(beta_style)
+            player->message = GOTROCKBOX;
+        else
+            HU_PlayerMessage(s_GOTROCKBOX, true);
         break;
         
       case SPR_CELL:
       case SPR_BCLL:
         if (!(ammo = P_GiveAmmo(player, am_cell, 1)))
             return;
-        if (ammo == clipammo[am_cell] || (deh_strlookup[p_GOTCELL].assigned && dehacked))
-            HU_PlayerMessage(s_GOTCELL, true);
+        if(beta_style)
+            player->message = GOTCELL;
         else
-            HU_PlayerMessage(s_GOTCELLX2, true);
+        {
+            if (ammo == clipammo[am_cell] || (deh_strlookup[p_GOTCELL].assigned && dehacked))
+                HU_PlayerMessage(s_GOTCELL, true);
+            else
+                HU_PlayerMessage(s_GOTCELLX2, true);
+        }
         break;
         
       case SPR_CELP:
         if (!P_GiveAmmo (player, am_cell,5))
             return;
-        HU_PlayerMessage(s_GOTCELLBOX, true);
+        if(beta_style)
+            player->message = GOTCELLBOX;
+        else
+            HU_PlayerMessage(s_GOTCELLBOX, true);
         break;
         
       case SPR_SHEL:
@@ -877,10 +930,15 @@ P_TouchSpecialThing
             return;
         if (!message_dontfuckwithme)
         {
-            if (ammo == clipammo[am_shell] || (deh_strlookup[p_GOTSHELLS].assigned && dehacked))
-                HU_PlayerMessage(s_GOTSHELLS, true);
+            if(beta_style)
+                player->message = GOTSHELLS;
             else
-                HU_PlayerMessage(s_GOTSHELLSX2, true);
+            {
+                if (ammo == clipammo[am_shell] || (deh_strlookup[p_GOTSHELLS].assigned && dehacked))
+                    HU_PlayerMessage(s_GOTSHELLS, true);
+                else
+                    HU_PlayerMessage(s_GOTSHELLSX2, true);
+            }
         }
         break;
         
@@ -888,7 +946,10 @@ P_TouchSpecialThing
       case SPR_BBOX:
         if (!P_GiveAmmo (player, am_shell,5))
             return;
-        HU_PlayerMessage(s_GOTSHELLBOX, true);
+        if(beta_style)
+            player->message = GOTSHELLBOX;
+        else
+            HU_PlayerMessage(s_GOTSHELLBOX, true);
         break;
         
       case SPR_BPAK:
@@ -900,14 +961,20 @@ P_TouchSpecialThing
         }
         for (i=0 ; i<NUMAMMO ; i++)
             P_GiveAmmo (player, i, 1);
-        HU_PlayerMessage(s_GOTBACKPACK, true);
+        if(beta_style)
+            player->message = GOTBACKPACK;
+        else
+            HU_PlayerMessage(s_GOTBACKPACK, true);
         break;
         
         // weapons
       case SPR_BFUG:
         if (!P_GiveWeapon (player, wp_bfg, false) )
             return;
-        HU_PlayerMessage(s_GOTBFG9000, true);
+        if(beta_style)
+            player->message = GOTBFG9000;
+        else
+            HU_PlayerMessage(s_GOTBFG9000, true);
         sound = sfx_wpnup;
         break;
         
@@ -915,28 +982,40 @@ P_TouchSpecialThing
         if (!P_GiveWeapon (player, wp_chaingun,
             (special->flags & MF_DROPPED) != 0) )
             return;
-        HU_PlayerMessage(s_GOTCHAINGUN, true);
+        if(beta_style)
+            player->message = GOTCHAINGUN;
+        else
+            HU_PlayerMessage(s_GOTCHAINGUN, true);
         sound = sfx_wpnup;        
         break;
         
       case SPR_CSAW:
         if (!P_GiveWeapon (player, wp_chainsaw, false) )
             return;
-        HU_PlayerMessage(s_GOTCHAINSAW, true);
+        if(beta_style)
+            player->message = GOTCHAINSAW;
+        else
+            HU_PlayerMessage(s_GOTCHAINSAW, true);
         sound = sfx_wpnup;        
         break;
         
       case SPR_LAUN:
         if (!P_GiveWeapon (player, wp_missile, false) )
             return;
-        HU_PlayerMessage(s_GOTLAUNCHER, true);
+        if(beta_style)
+            player->message = GOTLAUNCHER;
+        else
+            HU_PlayerMessage(s_GOTLAUNCHER, true);
         sound = sfx_wpnup;        
         break;
         
       case SPR_PLAS:
         if (!P_GiveWeapon (player, wp_plasma, false) )
             return;
-        HU_PlayerMessage(s_GOTPLASMA, true);
+        if(beta_style)
+            player->message = GOTPLASMA;
+        else
+            HU_PlayerMessage(s_GOTPLASMA, true);
         sound = sfx_wpnup;        
         break;
         
@@ -944,7 +1023,10 @@ P_TouchSpecialThing
         if (!P_GiveWeapon (player, wp_shotgun,
             (special->flags & MF_DROPPED) != 0) )
             return;
-        HU_PlayerMessage(s_GOTSHOTGUN, true);
+        if(beta_style)
+            player->message = GOTSHOTGUN;
+        else
+            HU_PlayerMessage(s_GOTSHOTGUN, true);
         sound = sfx_wpnup;        
         break;
                 
@@ -959,25 +1041,37 @@ P_TouchSpecialThing
       case SPR_BND1:
         if(player->item < 100);
             player->item++;
-        HU_PlayerMessage(GOTDAGGER, true);
+        if(beta_style)
+            player->message = GOTDAGGER;
+        else
+            HU_PlayerMessage(GOTDAGGER, true);
         break;
 
       case SPR_BND2:
         if(player->item < 100);
             player->item++;
-        HU_PlayerMessage(GOTSKULLCHEST, true);
+        if(beta_style)
+            player->message = GOTSKULLCHEST;
+        else
+            HU_PlayerMessage(GOTSKULLCHEST, true);
         break;
 
       case SPR_BON3:
         if(player->item < 100);
             player->item++;
-        HU_PlayerMessage(GOTSCEPTRE, true);
+        if(beta_style)
+            player->message = GOTSCEPTRE;
+        else
+            HU_PlayerMessage(GOTSCEPTRE, true);
         break;
 
       case SPR_BON4:
         if(player->item < 100);
             player->item++;
-        HU_PlayerMessage(GOTBIBLE, true);
+        if(beta_style)
+            player->message = GOTBIBLE;
+        else
+            HU_PlayerMessage(GOTBIBLE, true);
         break;
 
       default:

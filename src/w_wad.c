@@ -225,7 +225,7 @@ wad_file_t *W_AddFile (char *filename, dboolean automatic)
 
     startlump = numlumps;
     numlumps += numfilelumps;
-#ifdef BOOM_ZONE_HANDLING
+#if defined BOOM_ZONE_HANDLING || defined WIIDOOM_ZONE_HANDLING
     lumpinfo = Z_Realloc(lumpinfo, numlumps * sizeof(lumpinfo_t *), PU_STATIC, NULL);
 #else
     lumpinfo = Z_Realloc(lumpinfo, numlumps * sizeof(lumpinfo_t *));
@@ -647,7 +647,7 @@ void W_CheckSize(int wad)
             fseek(fprw, 0, 2);                // file pointer at the end of file
             fsizerw = ftell(fprw);        // take a position of file pointer un size variable
 
-            if(fsizerw != 1062954)
+            if(fsizerw != 1064178)
                 print_resource_pwad_error = true;
 
             fclose(fprw);

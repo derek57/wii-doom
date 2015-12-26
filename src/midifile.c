@@ -461,7 +461,7 @@ static dboolean ReadTrack(midi_track_t *track, FILE *stream)
         midi_event_t *event;
 
         // Resize the track slightly larger to hold another event:
-#ifdef BOOM_ZONE_HANDLING
+#if defined BOOM_ZONE_HANDLING || defined WIIDOOM_ZONE_HANDLING
         new_events = Z_Realloc(track->events, 
                              sizeof(midi_event_t) * (track->num_events + 1), PU_CACHE, NULL);
 #else

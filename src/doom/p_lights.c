@@ -68,10 +68,6 @@ void P_SpawnFireFlicker (sector_t*        sector)
 {
     fireflicker_t       *flick = Z_Malloc(sizeof(*flick), PU_LEVSPEC, 0);
 
-    // Note that we are resetting sector attributes.
-    // Nothing special about it during gameplay.
-    sector->special &= ~31;     // jff 3/14/98 clear non-generalized sector type
-
     P_AddThinker(&flick->thinker);
 
     flick->thinker.function = T_FireFlicker;
@@ -122,9 +118,6 @@ void P_SpawnLightFlash (sector_t*        sector)
 {
     lightflash_t        *flash = Z_Malloc(sizeof(*flash), PU_LEVSPEC, 0);
 
-    // nothing special about it during gameplay
-    sector->special &= ~31;     // jff 3/14/98 clear non-generalized sector type
-        
     P_AddThinker (&flash->thinker);
 
     flash->thinker.function = T_LightFlash;
@@ -191,9 +184,6 @@ P_SpawnStrobeFlash
                 
     if (flash->minlight == flash->maxlight)
         flash->minlight = 0;
-
-    // nothing special about it during gameplay
-    sector->special &= ~31;     // jff 3/14/98 clear non-generalized sector type
 
     flash->count = (inSync ? 1 : (P_Random() & 7) + 1);
 }
@@ -328,8 +318,6 @@ void P_SpawnGlowingLight(sector_t*        sector)
     g->maxlight = sector->lightlevel;
     g->thinker.function = T_Glow;
     g->direction = -1;
-
-    sector->special &= ~31;     // jff 3/14/98 clear non-generalized sector type
 }
 
 // killough 10/98:
