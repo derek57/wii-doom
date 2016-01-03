@@ -1,4 +1,3 @@
-#ifdef WII
 #ifndef _MENU_H_
 #define _MENU_H_
 
@@ -8,6 +7,5 @@ void drawMain();
 
 int MD5_Check(char *fin);
 
-#endif
 #endif
 

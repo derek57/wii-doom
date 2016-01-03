@@ -30,29 +30,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#ifdef WII
-#include "../c_io.h"
-#else
 #include "c_io.h"
-#endif
-
 #include "doomdef.h"
-
-#ifdef WII
-#include "../doomfeatures.h"
-#else
 #include "doomfeatures.h"
-#endif
-
 #include "doomstat.h"
 #include "hu_stuff.h"
-
-#ifdef WII
-#include "../i_system.h"
-#else
 #include "i_system.h"
-#endif
-
 #include "m_random.h"
 #include "p_local.h"
 #include "p_tick.h"
@@ -60,14 +43,8 @@
 #include "s_sound.h"
 #include "sounds.h"
 #include "st_stuff.h"
-
-#ifdef WII
-#include "../v_trans.h"
-#include "../z_zone.h"
-#else
 #include "v_trans.h"
 #include "z_zone.h"
-#endif
 
 
 #define STOPSPEED               0x1000

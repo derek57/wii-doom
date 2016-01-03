@@ -17,7 +17,6 @@
 //    
 
 
-#ifndef WII
 #ifndef __M_ARGV__
 #define __M_ARGV__
 
@@ -47,6 +46,5 @@ dboolean M_ParmExists(char *check);
 
 char *M_GetExecutableName(void);
 
-#endif
 #endif
 

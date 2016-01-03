@@ -1,4 +1,3 @@
-#ifdef WII
 #ifndef _WPAD_H_
 #define _WPAD_H_
 
@@ -17,4 +16,4 @@ dboolean Wpad_TimeButton(void);
 u32 WaitButtons(void);
 
 #endif
-#endif
+

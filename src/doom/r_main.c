@@ -39,33 +39,15 @@
 #include <math.h>
 #include <stdlib.h>
 
-#ifdef WII
-#include "../c_io.h"
-#include "../d_loop.h"
-#else
 #include "c_io.h"
 #include "d_loop.h"
-#endif
-
 #include "doomstat.h"
-
-#ifdef WII
-#include "../i_timer.h"
-#include "../m_config.h"
-#else
 #include "i_timer.h"
 #include "m_config.h"
-#endif
-
 #include "m_menu.h"
 #include "p_local.h"
 #include "r_sky.h"
-
-#ifdef WII
-#include "../v_video.h"
-#else
 #include "v_video.h"
-#endif
 
 // Fineangles in the SCREENWIDTH wide window.
 #define FIELDOFVIEW     2048
@@ -845,7 +827,7 @@ void R_RenderPlayerView(player_t *player)
     R_ClearSprites();
 
     if(autodetect_hom && !menuactive)
-        V_FillRect(viewwindowx, viewwindowy, viewwidth, viewheight,
+        V_FillRect(viewwindowx, viewwindowy, 0, viewwidth, viewheight,
                 ((gametic % 20) < 9 && !consoleactive && !menuactive && !paused ? 176 : 0));
 
     // check for new console commands.

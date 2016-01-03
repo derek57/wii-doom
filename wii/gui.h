@@ -1,4 +1,3 @@
-#ifdef WII
 #ifndef _GUI_H_
 #define _GUI_H_
 
@@ -30,6 +29,5 @@ void printStyledText(u8 chRow, u8 chColumn, enum CONSOLE_FONT_COLORS FONT_BGCOLO
                      struct stConsoleCursorLocation *stTexteLocation,
                      const char *fmt, ...);
 
-#endif
 #endif
 

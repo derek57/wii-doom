@@ -30,55 +30,28 @@
 
 // Functions.
 
-#ifdef WII
-#include "../c_io.h"
-#else
 #include "c_io.h"
-#endif
 
 // Data.
 #include "d_main.h"
 
-#ifdef WII
-#include "../d_deh.h"
-#include "../doomkeys.h"
-#else
 #include "d_deh.h"
 #include "doomkeys.h"
-#endif
-
 #include "doomstat.h"
 #include "dstrings.h"
 #include "f_finale.h"
 #include "hu_stuff.h"
-
-#ifdef WII
-#include "../i_swap.h"
-#include "../i_system.h"
-#include "../i_video.h"
-#include "../m_controls.h"
-#include "../m_misc.h"
-#else
 #include "i_swap.h"
 #include "i_system.h"
 #include "i_video.h"
 #include "m_controls.h"
 #include "m_misc.h"
-#endif
-
 #include "r_state.h"
 #include "s_sound.h"
 #include "sounds.h"
-
-#ifdef WII
-#include "../v_video.h"
-#include "../w_wad.h"
-#include "../z_zone.h"
-#else
 #include "v_video.h"
 #include "w_wad.h"
 #include "z_zone.h"
-#endif
 
 
 #define MAX_CASTORDER   19
@@ -665,7 +638,7 @@ void F_Ticker (void)
 //
 // F_TextWrite
 //
-void F_TextWrite (void)
+void F_TextWrite (int scrn)
 {
     byte*       src;
     byte*       dest;
@@ -678,7 +651,8 @@ void F_TextWrite (void)
     
     // erase the entire screen to a tiled background
     src = W_CacheLumpName ( finaleflat , PU_CACHE);
-    dest = I_VideoBuffer;
+//    dest = I_VideoBuffer;
+    dest = screens[scrn];
         
     for (y=0 ; y<SCREENHEIGHT ; y++)
     {
@@ -694,7 +668,7 @@ void F_TextWrite (void)
         }
     }
 
-    V_MarkRect (0, 0, SCREENWIDTH, SCREENHEIGHT);
+//    V_MarkRect (0, 0, 0, SCREENWIDTH, SCREENHEIGHT, 0);
     
     // draw some of the text onto the screen
     cx = 10;
@@ -730,9 +704,9 @@ void F_TextWrite (void)
             break;
         
         if(font_shadow == 1)
-            V_DrawPatchWithShadow(cx, cy, hu_font[c], false);
+            V_DrawPatchWithShadow(cx, cy, 0, hu_font[c], false);
         else
-            V_DrawPatch(cx, cy, hu_font[c]);
+            V_DrawPatch(cx, cy, 0, hu_font[c]);
         cx+=w;
     }
         
@@ -790,9 +764,9 @@ void F_CastPrint (char* text)
         w = SHORT (hu_font[c]->width);
 
         if(font_shadow == 1)
-            V_DrawPatchWithShadow(cx, 180, hu_font[c], false);
+            V_DrawPatchWithShadow(cx, 180, 0, hu_font[c], false);
         else
-            V_DrawPatch(cx, 180, hu_font[c]);
+            V_DrawPatch(cx, 180, 0, hu_font[c]);
         cx+=w;
     }
         
@@ -813,7 +787,7 @@ void F_CastDrawer (void)
     int              rot = 0;
     
     // erase the entire screen to a background
-    V_DrawPatch (0, 0, W_CacheLumpName (bgcastcall, PU_CACHE));
+    V_DrawPatch (0, 0, 0, W_CacheLumpName (bgcastcall, PU_CACHE));
 
     if(!beta_style)
         F_CastPrint (castorder[castnum].name);
@@ -833,9 +807,9 @@ void F_CastDrawer (void)
 
     patch = W_CacheLumpNum (lump+firstspritelump, PU_CACHE);
     if (flip || castdeathflip)
-        V_DrawPatchFlipped(ORIGWIDTH/2, 170, patch);
+        V_DrawPatchFlipped(ORIGWIDTH/2, 170, 0, patch);
     else
-        V_DrawPatch(ORIGWIDTH/2, 170, patch);
+        V_DrawPatch(ORIGWIDTH/2, 170, 0, patch);
 }
 
 
@@ -845,6 +819,7 @@ void F_CastDrawer (void)
 void
 F_DrawPatchCol
 ( int           x,
+  int           scrn,
   patch_t*      patch,
   int           col )
 {
@@ -855,7 +830,8 @@ F_DrawPatchCol
     int         f;     // CHANGED FOR HIRES
 
     column = (column_t *)((byte *)patch + LONG(patch->columnofs[col]));
-    desttop = I_VideoBuffer + x;
+//    desttop = I_VideoBuffer + x;
+    desttop = screens[scrn] + x;
 
     // step through the posts in a column
     while (column->topdelta != 0xff )
@@ -900,7 +876,7 @@ void F_BunnyScroll (void)
     p1 = W_CacheLumpName ("PFUB2", PU_LEVEL);
     p2 = W_CacheLumpName ("PFUB1", PU_LEVEL);
 
-    V_MarkRect (0, 0, SCREENWIDTH, SCREENHEIGHT);
+//    V_MarkRect (0, 0, 0, SCREENWIDTH, SCREENHEIGHT, 0);
         
     scrolled = (ORIGWIDTH - ((signed int) finalecount-230)/2);
     if (scrolled > ORIGWIDTH)
@@ -911,9 +887,9 @@ void F_BunnyScroll (void)
     for ( x=0 ; x<ORIGWIDTH ; x++) // CHANGED FOR HIRES
     {
         if (x+scrolled < ORIGWIDTH)
-            F_DrawPatchCol (x, p1, x+scrolled);
+            F_DrawPatchCol (x, 0, p1, x+scrolled);
         else
-            F_DrawPatchCol (x, p2, x+scrolled - ORIGWIDTH);                
+            F_DrawPatchCol (x, 0, p2, x+scrolled - ORIGWIDTH);                
     }
         
     if (finalecount < 1130)
@@ -921,11 +897,11 @@ void F_BunnyScroll (void)
     if (finalecount < 1180)
     {
         if(font_shadow == 1)
-            V_DrawPatchWithShadow((ORIGWIDTH - 13 * 8) / 2 + 1, (ORIGHEIGHT - 8 * 8) / 2 + 1,
+            V_DrawPatchWithShadow((ORIGWIDTH - 13 * 8) / 2 + 1, (ORIGHEIGHT - 8 * 8) / 2 + 1, 0,
                     W_CacheLumpName("END0", PU_CACHE), false);
         else
-            V_DrawPatch((ORIGWIDTH - 13 * 8) / 2, // CHANGED FOR HIRES
-                    (ORIGHEIGHT - 8 * 8) / 2, // CHANGED FOR HIRES
+            V_DrawPatch((ORIGWIDTH - 13 * 8) / 2,       // CHANGED FOR HIRES
+                    (ORIGHEIGHT - 8 * 8) / 2, 0,        // CHANGED FOR HIRES
                     W_CacheLumpName("END0", PU_CACHE)); // CHANGED FOR HIRES
         laststage = 0;
         return;
@@ -943,12 +919,12 @@ void F_BunnyScroll (void)
     M_snprintf(name, 10, "END%i", stage);
 
     if(font_shadow == 1)
-        V_DrawPatchWithShadow((ORIGWIDTH - 13 * 8) / 2 + 1, (ORIGHEIGHT - 8 * 8) / 2 + 1,
+        V_DrawPatchWithShadow((ORIGWIDTH - 13 * 8) / 2 + 1, (ORIGHEIGHT - 8 * 8) / 2 + 1, 0,
                 W_CacheLumpName(name, PU_CACHE), false);
     else
-        V_DrawPatch((ORIGWIDTH - 13 * 8) / 2, // CHANGED FOR HIRES
-                (ORIGHEIGHT - 8 * 8) / 2, // CHANGED FOR HIRES
-                W_CacheLumpName (name,PU_CACHE)); // CHANGED FOR HIRES
+        V_DrawPatch((ORIGWIDTH - 13 * 8) / 2,     // CHANGED FOR HIRES
+                (ORIGHEIGHT - 8 * 8) / 2, 0,      // CHANGED FOR HIRES
+                W_CacheLumpName(name, PU_CACHE)); // CHANGED FOR HIRES
 }
 
 static void F_ArtScreenDrawer(void)
@@ -986,7 +962,7 @@ static void F_ArtScreenDrawer(void)
                 return;
         }
 
-        V_DrawPatch (0, 0, W_CacheLumpName(lumpname, PU_CACHE));
+        V_DrawPatch (0, 0, 0, W_CacheLumpName(lumpname, PU_CACHE));
     }
 }
 
@@ -1001,7 +977,7 @@ void F_Drawer (void)
             F_CastDrawer();
             break;
         case F_STAGE_TEXT:
-            F_TextWrite();
+            F_TextWrite(0);
             break;
         case F_STAGE_ARTSCREEN:
             F_ArtScreenDrawer();

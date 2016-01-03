@@ -111,10 +111,6 @@
 
 //#define NoSpecial                                      0
 
-#if defined(_MSC_VER)
-#pragma pack(push, 1)
-#endif
-
 typedef struct
 {
     int         mission;
@@ -180,9 +176,5 @@ typedef struct
 } thingfix_t;
 
 extern thingfix_t thingfix[];
-
-#if defined(_MSC_VER)
-#pragma pack(pop)
-#endif
 
 #endif

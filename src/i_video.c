@@ -220,7 +220,7 @@ int png_screenshots = 0;
 
 // The screen buffer; this is modified to draw things to the screen
 
-byte *I_VideoBuffer = NULL;
+//byte *I_VideoBuffer = NULL;
 
 // Window title
 
@@ -1203,7 +1203,7 @@ static void UpdateGrab(void)
 // Return true if blit was successful.
 
 #ifndef SDL2
-static dboolean BlitArea(int x1, int y1, int x2, int y2)
+static dboolean BlitArea(int x1, int y1, int scrn, int x2, int y2)
 {
     int x_offset, y_offset;
     dboolean result;
@@ -1220,7 +1220,14 @@ static dboolean BlitArea(int x1, int y1, int x2, int y2)
 
     if (SDL_LockSurface(screenbuffer) >= 0)
     {
+/*
         I_InitScale(I_VideoBuffer,
+                    (byte *) screenbuffer->pixels
+                                + (y_offset * screenbuffer->pitch)
+                                + x_offset,
+                    screenbuffer->pitch);
+*/
+        I_InitScale(screens[scrn],
                     (byte *) screenbuffer->pixels
                                 + (y_offset * screenbuffer->pitch)
                                 + x_offset,
@@ -1248,7 +1255,7 @@ void I_BeginRead(void)
 
     // Draw the disk to the screen
 
-    V_DrawPatch((loading_disk_xoffs >> hires), (loading_disk_yoffs >> hires), disk);
+    V_DrawPatch((loading_disk_xoffs >> hires), (loading_disk_yoffs >> hires), 0, disk);
 
     disk_indicator = disk_dirty;
 }
@@ -2275,7 +2282,7 @@ static void FinishUpdateSoftware(void)
     // draw to screen
 
 #ifndef SDL2
-    BlitArea(0, 0, SCREENWIDTH, SCREENHEIGHT);
+    BlitArea(0, 0, 0, SCREENWIDTH, SCREENHEIGHT);
 #endif
 
     if (palette_to_set)
@@ -2349,7 +2356,7 @@ static void FinishUpdateSoftware(void)
 //
 // I_FinishUpdate
 //
-void I_FinishUpdate (void)
+void I_FinishUpdate (int scrn)
 {
     int         i;
 
@@ -2399,10 +2406,12 @@ void I_FinishUpdate (void)
         if (tics > 20) tics = 20;
 
         for (i=0 ; i<tics*4 ; i+=4)
-            I_VideoBuffer[ (SCREENHEIGHT-1)*SCREENWIDTH + i] = 0xff;
+//            I_VideoBuffer[ (SCREENHEIGHT-1)*SCREENWIDTH + i] = 0xff;
+            screens[scrn][ (SCREENHEIGHT-1)*SCREENWIDTH + i] = 0xff;
 
         for ( ; i<20*4 ; i+=4)
-            I_VideoBuffer[ (SCREENHEIGHT-1)*SCREENWIDTH + i] = 0x0;
+//            I_VideoBuffer[ (SCREENHEIGHT-1)*SCREENWIDTH + i] = 0x0;
+            screens[scrn][ (SCREENHEIGHT-1)*SCREENWIDTH + i] = 0x0;
     }
 
     // [AM] Real FPS counter
@@ -2446,7 +2455,8 @@ void I_FinishUpdate (void)
 #ifndef SDL2
     if (using_opengl)
     {
-        I_GL_UpdateScreen(I_VideoBuffer, palette);
+//        I_GL_UpdateScreen(I_VideoBuffer, palette);
+        I_GL_UpdateScreen(screens[scrn], palette);
         SDL_GL_SwapBuffers();
     }
     else
@@ -2460,9 +2470,10 @@ void I_FinishUpdate (void)
 //
 // I_ReadScreen
 //
-void I_ReadScreen (byte* scr)
+void I_ReadScreen(int scrn, byte* scr)
 {
-    memcpy(scr, I_VideoBuffer, SCREENWIDTH * SCREENHEIGHT * sizeof(*scr));
+//    memcpy(scr, I_VideoBuffer, SCREENWIDTH * SCREENHEIGHT * sizeof(*scr));
+    memcpy(scr, screens[scrn], SCREENWIDTH * SCREENHEIGHT * sizeof(*scr));
 }
 
 
@@ -2611,7 +2622,7 @@ void I_InitGammaTables(void)
             gammatable[i][j] = (byte)(pow(j / 255.0, 1.0 / gammalevels[i]) * 255.0 + 0.5);
 }
 
-void I_InitGraphics(void)
+void I_InitGraphics(int scrn)
 {
     SDL_Event dummy;
     byte      *doompal = W_CacheLumpName("PLAYPAL", PU_CACHE);
@@ -2799,26 +2810,37 @@ void I_InitGraphics(void)
     // screen when we do an update
 
 #ifdef SDL2
-    I_VideoBuffer = screenbuffer->pixels;
+//    I_VideoBuffer = screenbuffer->pixels;
+    screens[scrn] = screenbuffer->pixels;
 #else
     if (native_surface)
     {
+/*
         I_VideoBuffer = (unsigned char *) screen->pixels;
 
         I_VideoBuffer += (screen->h - SCREENHEIGHT) / 2;
+*/
+        screens[scrn] = (unsigned char *) screen->pixels;
+
+        screens[scrn] += (screen->h - SCREENHEIGHT) / 2;
     }
     else
     {
+/*
         I_VideoBuffer = (unsigned char *) Z_Malloc (SCREENWIDTH * SCREENHEIGHT, 
                                                     PU_STATIC, NULL);
+*/
+        screens[scrn] = (unsigned char *) Z_Malloc (SCREENWIDTH * SCREENHEIGHT, 
+                                                    PU_STATIC, NULL);
     }
+printf("native_surface = %d\n",native_surface);
 #endif
 
-    V_RestoreBuffer();
+//    V_RestoreBuffer();
 
     // Clear the screen to black.
 
-    memset(I_VideoBuffer, 0, SCREENWIDTH * SCREENHEIGHT);
+//    memset(I_VideoBuffer, 0, SCREENWIDTH * SCREENHEIGHT);
 
     // We need SDL to give us translated versions of keys as well
 

@@ -36,43 +36,20 @@
 ========================================================================
 */
 
-#ifdef WII
-#include "../c_io.h"
-#include "../d_deh.h"
-#else
 #include "c_io.h"
 #include "d_deh.h"
-#endif
-
 #include "doomstat.h"
-
-#ifdef WII
-#include "../i_scale.h"
-#include "../i_swap.h"
-#include "../i_system.h"
-#include "../m_misc.h"
-#else
 #include "i_scale.h"
 #include "i_swap.h"
 #include "i_system.h"
 #include "m_misc.h"
-#endif
-
 #include "p_local.h"
 #include "p_tick.h"
 #include "r_sky.h"
-
-#ifdef WII
-#include "../v_patch.h"
-#include "../v_trans.h"
-#include "../w_wad.h"
-#include "../z_zone.h"
-#else
 #include "v_patch.h"
 #include "v_trans.h"
 #include "w_wad.h"
 #include "z_zone.h"
-#endif
 
 //
 // Graphics.
@@ -921,7 +898,6 @@ void R_InitTextures(void)
             ++i;
         }
     }
-
 }
 
 //
@@ -1258,7 +1234,7 @@ void R_InitColormaps(void)
 
     // [crispy] check for status bar graphics replacements
     i = W_CheckNumForName("sttnum0"); // [crispy] Status Bar '0'
-    keepgray = (i >= 0 && !strcmp(lumpinfo[i]->wad_file->path, M_BaseName(iwadfile)));
+    keepgray = (i >= 0 /*&& !strcmp(lumpinfo[i]->wad_file->path, M_BaseName(iwadfile))*/);
 
     for (j = 0; j < CRXMAX; j++)
     {

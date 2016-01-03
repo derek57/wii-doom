@@ -39,34 +39,15 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef WII
-#include "../c_io.h"
-#else
 #include "c_io.h"
-#endif
-
 #include "doomstat.h"
-
-#ifdef WII
-#include "../i_system.h"
-#include "../m_config.h"
-#else
 #include "i_system.h"
 #include "m_config.h"
-#endif
-
 #include "p_local.h"
 #include "r_local.h"
-
-#ifdef WII
-#include "../v_patch.h"
-#include "../v_trans.h"
-#include "../z_zone.h"
-#else
 #include "v_patch.h"
 #include "v_trans.h"
 #include "z_zone.h"
-#endif
 
 // killough 1/6/98: replaced globals with statics where appropriate
 

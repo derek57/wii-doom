@@ -29,11 +29,7 @@
 #ifndef __D_NET__
 #define __D_NET__
 
-#ifdef WII
-#include "../doomtype.h"
-#else
 #include "doomtype.h"
-#endif
 
 
 //

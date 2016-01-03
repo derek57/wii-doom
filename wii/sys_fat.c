@@ -1,4 +1,3 @@
-#ifdef WII
 #include <stdio.h>
 #include <string.h>
 #include <ogcsys.h>
@@ -61,6 +60,4 @@ char *Fat_ToFilename(const char *filename)
     return buffer;
 }
 */
-
-#endif
 

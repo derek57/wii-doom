@@ -44,12 +44,7 @@
 #include "m_random.h"
 #include "s_sound.h"
 #include "sounds.h"
-
-#ifdef WII
-#include "../z_zone.h"
-#else
 #include "z_zone.h"
-#endif
 
 //
 // EV_DoGenFloor()

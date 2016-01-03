@@ -68,15 +68,8 @@
 #include "z_zone.h"
 
 
-//#ifdef WII
-#define DEFAULT_RAM 32 // MiB
-#define MIN_RAM     16 // MiB
-/*
-#else
-#define DEFAULT_RAM 64 // MiB
-#define MIN_RAM     32 // MiB
-#endif
-*/
+#define DEFAULT_RAM   32 // MiB
+#define MIN_RAM       16 // MiB
 #define ZENITY_BINARY "/usr/bin/zenity"
 
 

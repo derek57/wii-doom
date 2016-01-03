@@ -32,40 +32,18 @@
 
 #include <stdlib.h>
 
-#ifdef WII
-#include "../c_io.h"
-#else
 #include "c_io.h"
-#endif
-
 #include "doomdef.h"
-
-#ifdef WII
-#include "../doomfeatures.h"
-#else
 #include "doomfeatures.h"
-#endif
-
 #include "doomstat.h"
-
-#ifdef WII
-#include "../m_bbox.h"
-#else
 #include "m_bbox.h"
-#endif
-
 #include "p_local.h"
 
 // State.
 #include "r_state.h"
 
-#ifdef WII
-#include "../v_trans.h"
-#include "../z_zone.h"
-#else
 #include "v_trans.h"
 #include "z_zone.h"
-#endif
 
 extern fixed_t bulletslope;
 

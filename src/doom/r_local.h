@@ -40,11 +40,7 @@
 #define __R_LOCAL__
 
 // Binary Angles, sine/cosine/atan lookups.
-#ifdef WII
-#include "../tables.h"
-#else
 #include "tables.h"
-#endif
 
 // Screen size related parameters.
 #include "doomdef.h"

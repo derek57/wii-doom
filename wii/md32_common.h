@@ -127,7 +127,6 @@
  *
  *                                        <appro@fy.chalmers.se>
  */
-#ifdef WII
 #if !defined(DATA_ORDER_IS_BIG_ENDIAN) && !defined(DATA_ORDER_IS_LITTLE_ENDIAN)
 #error "DATA_ORDER must be defined!"
 #endif
@@ -415,9 +414,9 @@ int HASH_UPDATE (HASH_CTX *c, const void *data_, size_t len)
 
         if (c->num != 0)
                 {
+                size_t sc=c->num&0x03;
                 p=c->data;
                 sw=c->num>>2;
-                size_t sc=c->num&0x03;
 
                 if ((c->num+len) >= HASH_CBLOCK)
                         {
@@ -620,6 +619,5 @@ int HASH_FINAL (unsigned char *md, HASH_CTX *c)
  * generates better code.
  *                                <appro@fy.chalmers.se>
  */
-#endif
 #endif
 

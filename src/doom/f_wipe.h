@@ -51,7 +51,7 @@ enum
 
 int wipe_StartScreen(void);
 int wipe_EndScreen(void);
-int wipe_ScreenWipe(int wipeno, int ticks);
+int wipe_ScreenWipe(int wipeno, int ticks, int scrn);
 
 #endif
 

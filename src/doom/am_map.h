@@ -28,15 +28,9 @@
 #ifndef __AMMAP_H__
 #define __AMMAP_H__
 
-#ifdef WII
-#include "../d_event.h"
-#include "../m_cheat.h"
-#include "../m_fixed.h"
-#else
 #include "d_event.h"
 #include "m_cheat.h"
 #include "m_fixed.h"
-#endif
 
 
 // Used by ST StatusBar stuff.

@@ -39,14 +39,10 @@
 #if !defined(__R_DRAW__)
 #define __R_DRAW__
 
-#ifdef WII
-#include "../i_video.h"
-#else
 #include "i_video.h"
-#endif
 
-#define R_ADDRESS(px, py) \
-    (I_VideoBuffer + (viewwindowy + (py)) * SCREENWIDTH + (viewwindowx + (px)))
+#define R_ADDRESS(scrn, px, py) \
+    (screens[scrn] + (viewwindowy + (py)) * SCREENWIDTH + (viewwindowx + (px)))
 
 extern lighttable_t     *dc_colormap;
 extern int              dc_x;
@@ -158,7 +154,7 @@ void R_InitBuffer(int width, int height);
 void R_InitTranslationTables(void);
 
 // Rendering function.
-void R_FillBackScreen(void);
+void R_FillBackScreen(int scrn);
 
 // If the view size is not full screen, draws a border around it.
 void R_DrawViewBorder(void);

@@ -28,35 +28,15 @@
 #include <string.h>
 
 #include "doomdef.h"
-
 #include "doomstat.h"
-
-#ifdef WII
-#include "../doomtype.h"
-#else
 #include "doomtype.h"
-#endif
-
 #include "f_wipe.h"
-
-#ifdef WII
-#include "../i_video.h"
-#include "../m_fixed.h"
-#else
 #include "i_video.h"
 #include "m_fixed.h"
-#endif
-
 #include "m_random.h"
 #include "st_stuff.h"
-
-#ifdef WII
-#include "../v_video.h"
-#include "../z_zone.h"
-#else
 #include "v_video.h"
 #include "z_zone.h"
-#endif
 
 
 // [RH] Fire Wipe
@@ -270,7 +250,8 @@ int wipe_doBurn (int ticks)
     xstep = (FIREWIDTH * FRACUNIT) / SCREENWIDTH;
     ystep = (FIREHEIGHT * FRACUNIT) / SCREENHEIGHT;
 
-    to = I_VideoBuffer;
+//    to = I_VideoBuffer;
+    to = screens[0];
 
     fromold = (byte *) wipe_scr_start;
     fromnew = (byte *) wipe_scr_end;
@@ -503,7 +484,7 @@ int wipe_StartScreen(void)
 {
     wipe_scr_start = Z_Malloc(SCREENWIDTH * SCREENHEIGHT * sizeof(*wipe_scr_start), PU_STATIC, NULL);
 
-    I_ReadScreen(wipe_scr_start);
+    I_ReadScreen(0, wipe_scr_start);
 
 //    V_GetBlock (0, 0, SCREENWIDTH, SCREENHEIGHT, wipe_scr_start);
 
@@ -515,14 +496,14 @@ int wipe_EndScreen(void)
     wipe_scr_end = Z_Malloc(SCREENWIDTH * SCREENHEIGHT * sizeof(*wipe_scr_end), PU_STATIC, NULL);
 
 //    V_GetBlock (0, 0, SCREENWIDTH, SCREENHEIGHT, wipe_scr_end);
-    I_ReadScreen(wipe_scr_end);
+    I_ReadScreen(0, wipe_scr_end);
 
-    V_DrawBlock(0, 0, SCREENWIDTH, SCREENHEIGHT, wipe_scr_start); // restore start scr.
+    V_DrawBlock(0, 0, 0, SCREENWIDTH, SCREENHEIGHT, wipe_scr_start); // restore start scr.
 
     return 0;
 }
 
-int wipe_ScreenWipe(int wipeno, int ticks)
+int wipe_ScreenWipe(int wipeno, int ticks, int scrn)
 {
     int           rc;
 
@@ -558,17 +539,18 @@ int wipe_ScreenWipe(int wipeno, int ticks)
 
         // wipe_scr = (byte *) Z_Malloc(SCREENWIDTH * SCREENHEIGHT, PU_STATIC, 0); // DEBUG
 
-        wipe_scr = I_VideoBuffer;
+//        wipe_scr = I_VideoBuffer;
+        wipe_scr = screens[scrn];
 
         (*wipes[wipeno * 3])(ticks);
     }
 
     // do a piece of wipe-in
-    V_MarkRect(0, 0, SCREENWIDTH, SCREENHEIGHT);
+//    V_MarkRect(0, 0, 1, SCREENWIDTH, SCREENHEIGHT, 0);
 
     rc = (*wipes[wipeno * 3 + 1])(ticks);
 
-    //  V_DrawBlock(x, y, SCREENWIDTH, SCREENHEIGHT, wipe_scr); // DEBUG
+    //  V_DrawBlock(x, y, 0, SCREENWIDTH, SCREENHEIGHT, wipe_scr); // DEBUG
 
     // final stuff
     if (rc)

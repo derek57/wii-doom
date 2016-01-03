@@ -29,11 +29,7 @@
 // We are referring to patches.
 #include "r_defs.h"
 
-#ifdef WII
-#include "../v_patch.h"
-#else
 #include "v_patch.h"
-#endif
 
 // font stuff
 #define HU_CHARERASE        KEY_BACKSPACE

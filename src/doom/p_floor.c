@@ -25,19 +25,9 @@
 //-----------------------------------------------------------------------------
 
 
-#ifdef WII
-#include "../c_io.h"
-#else
 #include "c_io.h"
-#endif
-
 #include "doomdef.h"
-
-#ifdef WII
-#include "../doomfeatures.h"
-#else
 #include "doomfeatures.h"
-#endif
 
 // State.
 #include "doomstat.h"
@@ -49,13 +39,8 @@
 // Data.
 #include "sounds.h"
 
-#ifdef WII
-#include "../v_trans.h"
-#include "../z_zone.h"
-#else
 #include "v_trans.h"
 #include "z_zone.h"
-#endif
 
 
 #define    STAIRS_UNINITIALIZED_CRUSH_FIELD_VALUE    10

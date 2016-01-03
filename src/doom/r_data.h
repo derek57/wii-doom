@@ -42,11 +42,6 @@
 #include "r_defs.h"
 #include "r_state.h"
 
-#if defined(_MSC_VER)
-#pragma pack(push)
-#pragma pack(1)
-#endif
-
 //
 // Texture definition.
 // Each texture is composed of one or more patches,
@@ -79,10 +74,6 @@ typedef struct
     short       patchcount;
     mappatch_t  patches[1];
 } PACKEDATTR maptexture_t;
-
-#if defined(_MSC_VER)
-#pragma pack(pop)
-#endif
 
 // A single patch from a texture definition,
 //  basically a rectangular area within

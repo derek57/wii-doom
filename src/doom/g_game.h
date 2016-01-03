@@ -30,13 +30,8 @@
 
 #include "doomdef.h"
 
-#ifdef WII
-#include "../d_event.h"
-#include "../d_ticcmd.h"
-#else
 #include "d_event.h"
 #include "d_ticcmd.h"
-#endif
 
 
 //

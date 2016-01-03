@@ -40,12 +40,7 @@
 
 #include "doomstat.h"
 
-#ifdef WII
-#include "../m_bbox.h"
-#else
 #include "m_bbox.h"
-#endif
-
 #include "r_main.h"
 #include "r_plane.h"
 #include "r_things.h"

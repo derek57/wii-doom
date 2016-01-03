@@ -38,12 +38,7 @@
 #include "sounds.h"
 
 #include "s_sound.h"
-
-#ifdef WII
-#include "../z_zone.h"
-#else
 #include "z_zone.h"
-#endif
 
 
 //

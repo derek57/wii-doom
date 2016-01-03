@@ -41,6 +41,9 @@
 //
 //#define CENTERY                        (SCREENHEIGHT/2)
 
+// Screen 0 is the screen updated by I_Update screen.
+// Screen 1 is an extra buffer.
+extern byte     *screens[5];
 
 extern byte *xlatab;
 extern byte *tinttable;
@@ -58,46 +61,46 @@ static inline void V_ClearDPTranslation(void)
 
 dboolean V_EmptyPatch(patch_t *patch);
 
-void V_DrawHorizLine(int x, int y, int w, int c);
+//void V_DrawHorizLine(int x, int y, int scrn, int w, int c);
 
 // Allocates buffer screens, call before R_Init.
+
 void V_Init (void);
 
 // Draw a block from the specified source screen to the screen.
 
-void V_CopyRect(int srcx, int srcy, byte* source, int width,
-                int height, int destx, int desty) ;
+void V_CopyRect(int srcx, int srcy, int srcscrn, int width, int height, int destx, int desty, int destscrn);
 
 // Draw a linear block of pixels into the view buffer.
 
-void V_DrawBlock(int x, int y, int width, int height, byte* src ) ;
+void V_DrawBlock(int x, int y, int scrn, int width, int height, byte* src);
 
 // Temporarily switch to using a different buffer to draw graphics, etc.
-
-void V_UseBuffer(byte *buffer);
+/*
+void V_UseBuffer(int srcscrn, int destscrn);
 
 // Return to using the normal screen buffer to draw graphics.
 
-void V_RestoreBuffer(void);
-
-void V_DrawPatch(int x, int y, patch_t* patch ) ;
-void V_DrawPatchFlipped(int x, int y, patch_t* patch ) ;
-void V_MarkRect(int x, int y, int width, int height);
-void V_DrawConsoleChar(int x, int y, patch_t *patch, int color1, int color2, dboolean italics,
-    byte *tinttab);
-
-void V_DrawHUDPatch(int x, int y, patch_t *patch, byte *tinttab);
-void V_DrawYellowHUDPatch(int x, int y, patch_t *patch, byte *tinttab);
-void V_DrawTranslucentHUDPatch(int x, int y, patch_t *patch, byte *tinttab);
-void V_DrawTranslucentHUDNumberPatch(int x, int y, patch_t *patch, byte *tinttab);
-void V_DrawTranslucentYellowHUDPatch(int x, int y, patch_t *patch, byte *tinttab);
-void V_ColorBlock(int x, int y, int width, int height, byte color);
-void V_GetBlock (int x, int y, int width, int height, byte *dest);
-void V_ScreenShot(char *format);
-void V_LowGraphicDetail(int height);
-void V_DrawPatchWithShadow(int x, int y, patch_t *patch, dboolean flag);
-void V_DrawDistortedBackground(char* patchname, byte *back_dest);
-void V_FillRect(int x, int y, int width, int height, byte color);
+void V_RestoreBuffer(int srcscrn, int destscrn);
+*/
+void V_DrawPatch(int x, int y, int scrn, patch_t* patch);
+void V_DrawPatchFlipped(int x, int y, int scrn, patch_t* patch);
+//void V_MarkRect(int x, int y, int srcscrn, int width, int height, int destscrn);
+void V_DrawConsoleChar(int x, int y, int scrn, patch_t *patch, int color1, int color2, dboolean italics, byte *tinttab);
+void V_DrawHUDPatch(int x, int y, int scrn, patch_t *patch, byte *tinttab);
+void V_DrawYellowHUDPatch(int x, int y, int scrn, patch_t *patch, byte *tinttab);
+void V_DrawTranslucentHUDPatch(int x, int y, int scrn, patch_t *patch, byte *tinttab);
+void V_DrawTranslucentHUDNumberPatch(int x, int y, int scrn, patch_t *patch, byte *tinttab);
+void V_DrawTranslucentYellowHUDPatch(int x, int y, int scrn, patch_t *patch, byte *tinttab);
+/*
+void V_ColorBlock(int x, int y, int scrn, int width, int height, byte color);
+void V_GetBlock (int x, int y, int scrn, int width, int height, byte *dest);
+*/
+void V_ScreenShot(int scrn, char *format);
+void V_LowGraphicDetail(int height, int scrn);
+void V_DrawPatchWithShadow(int x, int y, int scrn, patch_t *patch, dboolean flag);
+void V_DrawDistortedBackground(int scrn, char* patchname);
+void V_FillRect(int x, int y, int scrn, int width, int height, byte color);
 
 #endif
 

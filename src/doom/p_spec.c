@@ -33,51 +33,23 @@
 
 #include <stdlib.h>
 
-#ifdef WII
-#include "../c_io.h"
-#else
 #include "c_io.h"
-#endif
-
 #include "d_englsh.h"
-
-#ifdef WII
-#include "../d_deh.h"
-#else
 #include "d_deh.h"
-#endif
-
 #include "doomdef.h"
-
-#ifdef WII
-#include "../doomfeatures.h"
-#else
 #include "doomfeatures.h"
-#endif
-
 #include "doomstat.h"
 #include "g_game.h"
 #include "hu_stuff.h"
-
-#ifdef WII
-#include "../i_swap.h"
-#include "../i_system.h"
-#include "../m_argv.h"
-#include "../m_bbox.h"
-#include "../m_misc.h"
-#else
 #include "i_swap.h"
 #include "i_system.h"
 #include "m_argv.h"
 #include "m_bbox.h"
 #include "m_misc.h"
-#endif
-
 #include "m_random.h"
 #include "p_fix.h"
 #include "p_local.h"
 #include "r_local.h"
-
 #include "r_sky.h"
 
 // State.
@@ -88,15 +60,9 @@
 // Data.
 #include "sounds.h"
 
-#ifdef WII
-#include "../v_trans.h"
-#include "../w_wad.h"
-#include "../z_zone.h"
-#else
 #include "v_trans.h"
 #include "w_wad.h"
 #include "z_zone.h"
-#endif
 
 
 #define DONUT_FLOORHEIGHT_DEFAULT    0x00000000
@@ -138,30 +104,33 @@ static struct
     char        *pwad;
     char        *texture;
 } exception[] = {
-    { "BTSX_E1.WAD",  "SHNPRT02" }, { "BTSX_E1.WAD",  "SLIME05"  }, { "BTSX_E2B.WAD", "SHNPRT08" },
-    { "BTSX_E2B.WAD", "SLIME09"  }, { "DOOM2.WAD",    "RROCK05"  }, { "DOOM2.WAD",    "RROCK06"  },
-    { "DOOM2.WAD",    "RROCK07"  }, { "DOOM2.WAD",    "RROCK08"  }, { "DOOM2.WAD",    "SLIME09"  },
-    { "DOOM2.WAD",    "SLIME10"  }, { "DOOM2.WAD",    "SLIME11"  }, { "DOOM2.WAD",    "SLIME12"  },
-    { "MOHU2.WAD",    "DIFL_01"  }, { "ETERNALL.WAD", "NUKAGE1"  }, { "ETERNALL.WAD", "NUKAGE2"  },
-    { "ETERNALL.WAD", "NUKAGE3"  }, { "ETERNALL.WAD", "RROCK05"  }, { "ETERNALL.WAD", "RROCK06"  },
-    { "ETERNALL.WAD", "RROCK07"  }, { "ETERNALL.WAD", "RROCK08"  }, { "ETERNALL.WAD", "SLIME09"  },
-    { "ETERNALL.WAD", "SLIME10"  }, { "ETERNALL.WAD", "SLIME11"  }, { "ETERNALL.WAD", "SLIME12"  },
-    { "PLUTONIA.WAD", "RROCK05"  }, { "PLUTONIA.WAD", "RROCK06"  }, { "PLUTONIA.WAD", "RROCK07"  },
-    { "PLUTONIA.WAD", "RROCK08"  }, { "PLUTONIA.WAD", "SLIME09"  }, { "PLUTONIA.WAD", "SLIME10"  },
-    { "PLUTONIA.WAD", "SLIME11"  }, { "PLUTONIA.WAD", "SLIME12"  }, { "RC-DC.WAD",    "BWORM00A" },
-    { "RC-DC.WAD",    "CFAN00A"  }, { "RC-DC.WAD",    "CFAN01A"  }, { "RC-DC.WAD",    "CFAN00D"  },
-    { "RC-DC.WAD",    "CFAN01D"  }, { "REQUIEM.WAD",  "SLIME05"  }, { "REQUIEM.WAD",  "SLIME08"  },
-    { "SID.WAD",      "FWATER1"  }, { "SUNLUST.WAD",  "RROCK05"  }, { "SUNLUST.WAD",  "RROCK06"  },
-    { "SUNLUST.WAD",  "RROCK07"  }, { "SUNLUST.WAD",  "RROCK08"  }, { "SUNLUST.WAD",  "SLIME09"  },
-    { "SUNLUST.WAD",  "SLIME10"  }, { "SUNLUST.WAD",  "SLIME11"  }, { "SUNLUST.WAD",  "SLIME12"  },
-    { "TNT.WAD",      "RROCK05"  }, { "TNT.WAD",      "RROCK06"  }, { "TNT.WAD",      "RROCK07"  },
-    { "TNT.WAD",      "RROCK08"  }, { "TNT.WAD",      "SLIME09"  }, { "TNT.WAD",      "SLIME10"  },
-    { "TNT.WAD",      "SLIME11"  }, { "TNT.WAD",      "SLIME12"  }, { "TVR!.WAD",     "SLIME05"  },
-    { "TVR!.WAD",     "SLIME06"  }, { "TVR!.WAD",     "SLIME07"  }, { "TVR!.WAD",     "SLIME08"  },
-    { "TVR!.WAD",     "SLIME09"  }, { "TVR!.WAD",     "SLIME10"  }, { "TVR!.WAD",     "SLIME11"  },
-    { "TVR!.WAD",     "SLIME12"  }, { "UACULTRA.WAD", "RROCK05"  }, { "VALIANT.WAD",  "E3SAW_A1" },
-    { "VALIANT.WAD",  "E3SAW_A2" }, { "VALIANT.WAD",  "E3SAW_A3" }, { "VALIANT.WAD",  "E3SAW_A4" },
-    { "",             ""         }
+    { "BTSX_E1.WAD",   "SHNPRT02" }, { "BTSX_E1.WAD",   "SLIME05"  }, { "BTSX_E2B.WAD",  "SHNPRT08" },
+    { "BTSX_E2B.WAD",  "SLIME09"  }, { "DOOM2.WAD",     "RROCK05"  }, { "DOOM2.WAD",     "RROCK06"  },
+    { "DOOM2.WAD",     "RROCK07"  }, { "DOOM2.WAD",     "RROCK08"  }, { "DOOM2.WAD",     "SLIME09"  },
+    { "DOOM2.WAD",     "SLIME10"  }, { "DOOM2.WAD",     "SLIME11"  }, { "DOOM2.WAD",     "SLIME12"  },
+    { "MOHU2.WAD",     "DIFL_01"  }, { "ETERNALL.WAD",  "NUKAGE1"  }, { "ETERNALL.WAD",  "NUKAGE2"  },
+    { "ETERNALL.WAD",  "NUKAGE3"  }, { "ETERNALL.WAD",  "RROCK05"  }, { "ETERNALL.WAD",  "RROCK06"  },
+    { "ETERNALL.WAD",  "RROCK07"  }, { "ETERNALL.WAD",  "RROCK08"  }, { "ETERNALL.WAD",  "SLIME09"  },
+    { "ETERNALL.WAD",  "SLIME10"  }, { "ETERNALL.WAD",  "SLIME11"  }, { "ETERNALL.WAD",  "SLIME12"  },
+    { "FREEDOOM2.WAD", "RROCK05"  }, { "FREEDOOM2.WAD", "RROCK06"  }, { "FREEDOOM2.WAD", "RROCK07"  },
+    { "FREEDOOM2.WAD", "RROCK08"  }, { "FREEDOOM2.WAD", "SLIME09"  }, { "FREEDOOM2.WAD", "SLIME10"  },
+    { "FREEDOOM2.WAD", "SLIME11"  }, { "FREEDOOM2.WAD", "SLIME12"  },
+    { "PLUTONIA.WAD",  "RROCK05"  }, { "PLUTONIA.WAD",  "RROCK06"  }, { "PLUTONIA.WAD",  "RROCK07"  },
+    { "PLUTONIA.WAD",  "RROCK08"  }, { "PLUTONIA.WAD",  "SLIME09"  }, { "PLUTONIA.WAD",  "SLIME10"  },
+    { "PLUTONIA.WAD",  "SLIME11"  }, { "PLUTONIA.WAD",  "SLIME12"  }, { "RC-DC.WAD",     "BWORM00A" },
+    { "RC-DC.WAD",     "CFAN00A"  }, { "RC-DC.WAD",     "CFAN01A"  }, { "RC-DC.WAD",     "CFAN00D"  },
+    { "RC-DC.WAD",     "CFAN01D"  }, { "REQUIEM.WAD",   "SLIME05"  }, { "REQUIEM.WAD",   "SLIME08"  },
+    { "SID.WAD",       "FWATER1"  }, { "SUNLUST.WAD",   "RROCK05"  }, { "SUNLUST.WAD",   "RROCK06"  },
+    { "SUNLUST.WAD",   "RROCK07"  }, { "SUNLUST.WAD",   "RROCK08"  }, { "SUNLUST.WAD",   "SLIME09"  },
+    { "SUNLUST.WAD",   "SLIME10"  }, { "SUNLUST.WAD",   "SLIME11"  }, { "SUNLUST.WAD",   "SLIME12"  },
+    { "TNT.WAD",       "RROCK05"  }, { "TNT.WAD",       "RROCK06"  }, { "TNT.WAD",       "RROCK07"  },
+    { "TNT.WAD",       "RROCK08"  }, { "TNT.WAD",       "SLIME09"  }, { "TNT.WAD",       "SLIME10"  },
+    { "TNT.WAD",       "SLIME11"  }, { "TNT.WAD",       "SLIME12"  }, { "TVR!.WAD",      "SLIME05"  },
+    { "TVR!.WAD",      "SLIME06"  }, { "TVR!.WAD",      "SLIME07"  }, { "TVR!.WAD",      "SLIME08"  },
+    { "TVR!.WAD",      "SLIME09"  }, { "TVR!.WAD",      "SLIME10"  }, { "TVR!.WAD",      "SLIME11"  },
+    { "TVR!.WAD",      "SLIME12"  }, { "UACULTRA.WAD",  "RROCK05"  }, { "VALIANT.WAD",   "E3SAW_A1" },
+    { "VALIANT.WAD",   "E3SAW_A2" }, { "VALIANT.WAD",   "E3SAW_A3" }, { "VALIANT.WAD",   "E3SAW_A4" },
+    { "",              ""         }
 };
 
 

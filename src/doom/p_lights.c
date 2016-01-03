@@ -35,11 +35,7 @@
 // State.
 #include "r_state.h"
 
-#ifdef WII
-#include "../z_zone.h"
-#else
 #include "z_zone.h"
-#endif
 
 
 //

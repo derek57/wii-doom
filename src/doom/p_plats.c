@@ -33,12 +33,7 @@
 // State.
 #include "doomstat.h"
 
-#ifdef WII
-#include "../i_system.h"
-#else
 #include "i_system.h"
-#endif
-
 #include "m_random.h"
 #include "p_local.h"
 #include "r_state.h"
@@ -47,11 +42,7 @@
 // Data.
 #include "sounds.h"
 
-#ifdef WII
-#include "../z_zone.h"
-#else
 #include "z_zone.h"
-#endif
 
 
 platlist_t *activeplats;        // killough 2/14/98: made global again

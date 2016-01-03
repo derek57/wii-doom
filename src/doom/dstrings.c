@@ -25,12 +25,7 @@
 //-----------------------------------------------------------------------------
 
 
-#ifdef WII
-#include "../d_deh.h"
-#else
 #include "d_deh.h"
-#endif
-
 #include "dstrings.h"
 /*
 char *doom1_endmsg[] =

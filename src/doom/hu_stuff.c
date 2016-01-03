@@ -27,23 +27,10 @@
 #include <ctype.h>
 
 #include "am_map.h"
-
-#ifdef WII
-#include "../c_io.h"
-#include "../d_deh.h"
-#else
 #include "c_io.h"
 #include "d_deh.h"
-#endif
-
 #include "doomdef.h"
-
-#ifdef WII
-#include "../doomkeys.h"
-#else
 #include "doomkeys.h"
-#endif
-
 #include "doomstat.h"
 
 // Data.
@@ -51,36 +38,18 @@
 
 #include "hu_lib.h"
 #include "hu_stuff.h"
-
-#ifdef WII
-#include "../i_swap.h"
-#include "../i_tinttab.h"
-#include "../i_video.h"
-#include "../m_controls.h"
-#include "../m_misc.h"
-#else
 #include "i_swap.h"
 #include "i_tinttab.h"
 #include "i_video.h"
 #include "m_controls.h"
 #include "m_misc.h"
-#endif
 
 #include "p_setup.h"
 #include "s_sound.h"
 #include "sounds.h"
 #include "st_stuff.h"
 
- // [crispy] colored kills/items/secret/etc. messages
-#ifdef WII
-#include "../v_trans.h"
-
- // [crispy] V_ClearDPTranslation()
-#include "../v_video.h"
-
-#include "../w_wad.h"
-#include "../z_zone.h"
-#else
+// [crispy] colored kills/items/secret/etc. messages
 #include "v_trans.h"
 
  // [crispy] V_ClearDPTranslation()
@@ -88,7 +57,6 @@
 
 #include "w_wad.h"
 #include "z_zone.h"
-#endif
 
 //
 // Locally used constants, shortcuts.
@@ -255,9 +223,9 @@ static struct
     { "RSKUA0", "RSKUB0", NULL }
 };
 
-void (*hudfunc)(int, int, patch_t *, byte *);
-void (*hudnumfunc)(int, int, patch_t *, byte *);
-void (*godhudfunc)(int, int, patch_t *, byte *);
+void (*hudfunc)(int, int, int, patch_t *, byte *);
+void (*hudnumfunc)(int, int, int, patch_t *, byte *);
+void (*godhudfunc)(int, int, int, patch_t *, byte *);
 
 void HU_Init(void)
 {
@@ -378,7 +346,7 @@ void HU_Start(void)
                        hu_font,
                        HU_FONTSTART);
 
-    if(!modifiedgame)
+//    if(!modifiedgame)
     {
         switch ( logical_gamemission )
         {
@@ -386,15 +354,10 @@ void HU_Start(void)
             s = HU_TITLE;
             break;
           case doom2:
-            if (gamemap <= 9)
-              s = HU_TITLEN;
-            else
-            {
-              if(bfgedition)
+            if(bfgedition)
                 s = HU_TITLE2_BFG;
-              else
+            else
                 s = HU_TITLE2;
-            }
             break;
           case pack_plut:
             s = HU_TITLEP;
@@ -539,12 +502,12 @@ static void HU_DemoProgressBar (void)                // FIXME: BUGGY (crashes)
 
     i = SCREENWIDTH * (demo_p - demobuffer) / defdemosize;
 
-    V_DrawHorizLine(0, SCREENHEIGHT - 3, i, 4);     // [crispy] white
-    V_DrawHorizLine(0, SCREENHEIGHT - 2, i, 0);     // [crispy] black
-    V_DrawHorizLine(0, SCREENHEIGHT - 1, i, 4);     // [crispy] white
+    V_DrawHorizLine(0, SCREENHEIGHT - 3, 0, i, 4);     // [crispy] white
+    V_DrawHorizLine(0, SCREENHEIGHT - 2, 0, i, 0);     // [crispy] black
+    V_DrawHorizLine(0, SCREENHEIGHT - 1, 0, i, 4);     // [crispy] white
 
-    V_DrawHorizLine(0, SCREENHEIGHT - 2, 1, 4);     // [crispy] white start
-    V_DrawHorizLine(i - 1, SCREENHEIGHT - 2, 1, 4); // [crispy] white end
+    V_DrawHorizLine(0, SCREENHEIGHT - 2, 0, 1, 4);     // [crispy] white start
+    V_DrawHorizLine(i - 1, SCREENHEIGHT - 2, 0, 1, 4); // [crispy] white end
 }
 */
 void HU_DrawStats(void)
@@ -576,13 +539,13 @@ void HU_DrawStats(void)
         HUlib_addCharToTextLine(&w_monsec, *(t++));
 
     // display the kills/items/secrets each frame, if optioned
-    if(gamestate == GS_LEVEL && automapactive)
+    if(gamestate == GS_LEVEL && automapactive && !menuactive)
         if(!am_overlay || (am_overlay && screenSize > 6))
             HUlib_drawTextLine(&w_monsec, false);
 }
 
-static void DrawHUDNumber(int *x, int y, int val, byte *tinttab,
-                          void (*hudnumfunc)(int, int, patch_t *, byte *))
+static void DrawHUDNumber(int *x, int y, int scrn, int val, byte *tinttab,
+                          void (*hudnumfunc)(int, int, int, patch_t *, byte *))
 {
     int         oldval = val;
     patch_t     *patch;
@@ -590,19 +553,19 @@ static void DrawHUDNumber(int *x, int y, int val, byte *tinttab,
     if (val > 99)
     {
         patch = tallnum[val / 100];
-        hudnumfunc(*x, y, patch, tinttab);
+        hudnumfunc(*x, y, scrn, patch, tinttab);
         *x += SHORT(patch->width);
     }
     val %= 100;
     if (val > 9 || oldval > 99)
     {
         patch = tallnum[val / 10];
-        hudnumfunc(*x, y, patch, tinttab);
+        hudnumfunc(*x, y, scrn, patch, tinttab);
         *x += SHORT(patch->width);
     }
     val %= 10;
     patch = tallnum[val];
-    hudnumfunc(*x, y, patch, tinttab);
+    hudnumfunc(*x, y, scrn, patch, tinttab);
     *x += SHORT(patch->width);
 }
 
@@ -659,26 +622,26 @@ void HU_DrawHUD(void)
     if (patch)
     {
         if ((plr->cheats & CF_GODMODE) || invulnerability > 128 || (invulnerability & 8))
-            godhudfunc(health_x, HUD_HEALTH_Y - (SHORT(patch->height) - 17), patch, tinttab);
+            godhudfunc(health_x, HUD_HEALTH_Y - (SHORT(patch->height) - 17), 0, patch, tinttab);
         else
-            hudfunc(health_x, HUD_HEALTH_Y - (SHORT(patch->height) - 17), patch, tinttab);
+            hudfunc(health_x, HUD_HEALTH_Y - (SHORT(patch->height) - 17), 0, patch, tinttab);
 
         health_x += SHORT(patch->width) + 8;
     }
 
     if (healthhighlight > currenttime)
     {
-        DrawHUDNumber(&health_x, HUD_HEALTH_Y + hudnumoffset, health, tinttab, V_DrawHUDPatch);
+        DrawHUDNumber(&health_x, HUD_HEALTH_Y + hudnumoffset, 0, health, tinttab, V_DrawHUDPatch);
 
         if (!emptytallpercent)
-            V_DrawHUDPatch(health_x, HUD_HEALTH_Y + hudnumoffset, tallpercent, tinttab);
+            V_DrawHUDPatch(health_x, HUD_HEALTH_Y + hudnumoffset, 0, tallpercent, tinttab);
     }
     else
     {
-        DrawHUDNumber(&health_x, HUD_HEALTH_Y + hudnumoffset, health, tinttab, hudnumfunc);
+        DrawHUDNumber(&health_x, HUD_HEALTH_Y + hudnumoffset, 0, health, tinttab, hudnumfunc);
 
         if (!emptytallpercent)
-            hudnumfunc(health_x, HUD_HEALTH_Y + hudnumoffset, tallpercent, tinttab);
+            hudnumfunc(health_x, HUD_HEALTH_Y + hudnumoffset, 0, tallpercent, tinttab);
     }
 
     if (!gamepaused)
@@ -739,14 +702,14 @@ void HU_DrawHUD(void)
 
 //        if (patch)	// FIXME: IS THIS ONE REALLY REQUIRED??
         {
-            hudfunc(ammo_x, (HUD_AMMO_Y + 8 - (SHORT(patch->height) / 2)), patch, tinttab);
+            hudfunc(ammo_x, (HUD_AMMO_Y + 8 - (SHORT(patch->height) / 2)), 0, patch, tinttab);
             ammo_x += HUD_AMMO_X + 15 + (SHORT(patch->width) / 2) - (ORIGHEIGHT / 2) + offset_special;
         }
 
         if (ammohighlight > currenttime)
-            DrawHUDNumber(&ammo_x, HUD_AMMO_Y + hudnumoffset, ammo, tinttab, V_DrawHUDPatch);
+            DrawHUDNumber(&ammo_x, HUD_AMMO_Y + hudnumoffset, 0, ammo, tinttab, V_DrawHUDPatch);
         else
-            DrawHUDNumber(&ammo_x, HUD_AMMO_Y + hudnumoffset, ammo, tinttab, hudnumfunc);
+            DrawHUDNumber(&ammo_x, HUD_AMMO_Y + hudnumoffset, 0, ammo, tinttab, hudnumfunc);
 
         if (!gamepaused)
         {
@@ -805,7 +768,7 @@ void HU_DrawHUD(void)
                 }
 
                 if (showkey)
-                    hudfunc(keypic_x - (SHORT(patch->width) + 6), HUD_KEYS_Y, patch, tinttab66);
+                    hudfunc(keypic_x - (SHORT(patch->width) + 6), HUD_KEYS_Y, 0, patch, tinttab66);
             }
         }
         else
@@ -821,7 +784,7 @@ void HU_DrawHUD(void)
 
                 if (patch)
                     hudfunc(keypic_x + (SHORT(patch->width) + 6) * (cardsfound - plr->cards[i]),
-                        HUD_KEYS_Y, patch, tinttab66);
+                        HUD_KEYS_Y, 0, patch, tinttab66);
             }
     }
 
@@ -833,7 +796,7 @@ void HU_DrawHUD(void)
         if (patch)
         {
             armor_x -= SHORT(patch->width);
-            hudfunc(armor_x, HUD_ARMOR_Y - (SHORT(patch->height) - 16), patch, tinttab66);
+            hudfunc(armor_x, HUD_ARMOR_Y - (SHORT(patch->height) - 16), 0, patch, tinttab66);
             armor_x -= 7;
         }
 
@@ -842,27 +805,27 @@ void HU_DrawHUD(void)
             if (emptytallpercent)
             {
                 armor_x -= HUDNumberWidth(armor);
-                DrawHUDNumber(&armor_x, HUD_ARMOR_Y + hudnumoffset, armor, tinttab66, V_DrawHUDPatch);
+                DrawHUDNumber(&armor_x, HUD_ARMOR_Y + hudnumoffset, 0, armor, tinttab66, V_DrawHUDPatch);
             }
             else
             {
                 armor_x -= SHORT(tallpercent->width);
-                V_DrawHUDPatch(armor_x, HUD_ARMOR_Y + hudnumoffset, tallpercent, tinttab66);
+                V_DrawHUDPatch(armor_x, HUD_ARMOR_Y + hudnumoffset, 0, tallpercent, tinttab66);
                 armor_x -= HUDNumberWidth(armor);
-                DrawHUDNumber(&armor_x, HUD_ARMOR_Y + hudnumoffset, armor, tinttab66, V_DrawHUDPatch);
+                DrawHUDNumber(&armor_x, HUD_ARMOR_Y + hudnumoffset, 0, armor, tinttab66, V_DrawHUDPatch);
             }
         }
         else if (emptytallpercent)
         {
             armor_x -= HUDNumberWidth(armor);
-            DrawHUDNumber(&armor_x, HUD_ARMOR_Y + hudnumoffset, armor, tinttab66, hudnumfunc);
+            DrawHUDNumber(&armor_x, HUD_ARMOR_Y + hudnumoffset, 0, armor, tinttab66, hudnumfunc);
         }
         else
         {
             armor_x -= SHORT(tallpercent->width);
-            hudnumfunc(armor_x, HUD_ARMOR_Y + hudnumoffset, tallpercent, tinttab66);
+            hudnumfunc(armor_x, HUD_ARMOR_Y + hudnumoffset, 0, tallpercent, tinttab66);
             armor_x -= HUDNumberWidth(armor);
-            DrawHUDNumber(&armor_x, HUD_ARMOR_Y + hudnumoffset, armor, tinttab66, hudnumfunc);
+            DrawHUDNumber(&armor_x, HUD_ARMOR_Y + hudnumoffset, 0, armor, tinttab66, hudnumfunc);
         }
     }
 }
@@ -872,9 +835,9 @@ void HU_Drawer(void)
     if(!automapactive && !demoplayback && crosshair == 1)
     {
         if(screenSize < 8)
-            V_DrawPatch(158, 82, W_CacheLumpName("XHAIR", PU_CACHE));
+            V_DrawPatch(158, 82, 0, W_CacheLumpName("XHAIR", PU_CACHE));
         else
-            V_DrawPatch(158, 98, W_CacheLumpName("XHAIR", PU_CACHE));
+            V_DrawPatch(158, 98, 0, W_CacheLumpName("XHAIR", PU_CACHE));
     }
 
     // [crispy] translucent messages for translucent HUD
@@ -902,7 +865,7 @@ void HU_Drawer(void)
     HUlib_drawSText(&w_secret);
     V_ClearDPTranslation();
 
-    if (automapactive)
+    if (automapactive && !menuactive)
     {
         if(!beta_style)
             HUlib_drawTextLine(&w_title, false);
@@ -1044,7 +1007,7 @@ void HU_NewLevel()
 {
     char       *s = "Unknown level";
 
-    if(!modifiedgame)
+//    if(!modifiedgame)
     {
         switch ( logical_gamemission )
         {

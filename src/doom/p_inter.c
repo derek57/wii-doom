@@ -31,14 +31,8 @@
 #include <stdlib.h>
 
 #include "am_map.h"
-
-#ifdef WII
-#include "../c_io.h"
-#include "../d_deh.h"
-#else
 #include "c_io.h"
 #include "d_deh.h"
-#endif
 
 // Data.
 #include "doomdef.h"
@@ -47,14 +41,8 @@
 #include "dstrings.h"
 #include "hu_stuff.h"
 
-#ifdef WII
-#include "../i_system.h"
-#include "../i_timer.h"
-#else
 #include "i_system.h"
 #include "i_timer.h"
-#endif
-
 #include "m_random.h"
 #include "p_inter.h"
 #include "p_local.h"
@@ -423,9 +411,9 @@ void P_GiveAllCards(player_t *player)
     for (i = NUMCARDS - 1; i >= 0; --i)
         if (player->cards[i] != CARDNOTINMAP && player->cards[i] == CARDNOTFOUNDYET)
         {
-            if (skulliscard && ((i == it_blueskull && player->cards[it_bluecard] == CARDNOTFOUNDYET)
-                || (i == it_redskull && player->cards[it_redcard] == CARDNOTFOUNDYET)
-                || (i == it_yellowskull && player->cards[it_yellowcard] == CARDNOTFOUNDYET)))
+            if (skulliscard && ((i == it_blueskull && player->cards[it_bluecard] != CARDNOTINMAP)
+                || (i == it_redskull && player->cards[it_redcard] != CARDNOTINMAP)
+                || (i == it_yellowskull && player->cards[it_yellowcard] != CARDNOTINMAP)))
                 continue;
 
             P_GiveCard(player, i);

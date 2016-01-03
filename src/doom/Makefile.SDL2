@@ -113,6 +113,7 @@ am__objects_1 = am_map.$(OBJEXT) d_items.$(OBJEXT) d_main.$(OBJEXT) \
 	r_segs.$(OBJEXT) r_sky.$(OBJEXT) r_things.$(OBJEXT) \
 	s_sound.$(OBJEXT) sc_man.$(OBJEXT) sounds.$(OBJEXT) statdump.$(OBJEXT) \
 	st_lib.$(OBJEXT) st_stuff.$(OBJEXT) wi_stuff.$(OBJEXT)
+
 am_libdoom_a_OBJECTS = $(am__objects_1)
 libdoom_a_OBJECTS = $(am_libdoom_a_OBJECTS)
 AM_V_P = $(am__v_P_$(V))

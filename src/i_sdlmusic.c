@@ -362,6 +362,13 @@ static void ReadLoopPoints(char *filename, file_metadata_t *metadata)
 
     // Only valid if at the very least we read the sample rate.
     metadata->valid = metadata->samplerate_hz > 0;
+
+    // If start and end time are both zero, ignore the loop tags.
+    // This is consistent with other source ports.
+    if (metadata->start_time == 0 && metadata->end_time == 0)
+    {
+        metadata->valid = false;
+    }
 }
 
 // Given a MUS lump, look up a substitute MUS file to play instead
@@ -371,6 +378,7 @@ static char *GetSubstituteMusicFile(void *data, size_t data_len)
 {
     sha1_context_t context;
     sha1_digest_t hash;
+    char *filename;
     unsigned int i;
 
     // Don't bother doing a hash if we're never going to find anything.
@@ -384,16 +392,30 @@ static char *GetSubstituteMusicFile(void *data, size_t data_len)
     SHA1_Final(hash, &context);
 
     // Look for a hash that matches.
+    // The substitute mapping list can (intentionally) contain multiple
+    // filename mappings for the same hash. This allows us to try
+    // different files and fall back if our first choice isn't found.
+
+    filename = NULL;
 
     for (i = 0; i < subst_music_len; ++i)
     {
         if (memcmp(hash, subst_music[i].hash, sizeof(hash)) == 0)
         {
-            return subst_music[i].filename;
+            filename = subst_music[i].filename;
+
+            // If the file exists, then use this file in preference to
+            // any fallbacks. But we always return a filename if it's
+            // in the list, even if it's just so we can print an error
+            // message to the user saying it doesn't exist.
+            if (M_FileExists(filename))
+            {
+                break;
+            }
         }
     }
 
-    return NULL;
+    return filename;
 }
 
 // Add a substitute music file to the lookup list.
@@ -409,6 +431,27 @@ static void AddSubstituteMusic(subst_music_t *subst)
         Z_Realloc(subst_music, sizeof(subst_music_t) * subst_music_len);
 #endif
     memcpy(&subst_music[subst_music_len - 1], subst, sizeof(subst_music_t));
+}
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wchar-subscripts"
+
+static int ParseHexDigit(char c)
+{
+    c = tolower(c);
+
+    if (c >= '0' && c <= '9')
+    {
+        return c - '0';
+    }
+    else if (c >= 'a' && c <= 'f')
+    {
+        return 10 + (c - 'a');
+    }
+    else
+    {
+        return -1;
+    }
 }
 
 static char *GetFullPath(char *base_filename, char *path)
@@ -445,27 +488,6 @@ static char *GetFullPath(char *base_filename, char *path)
     free(path);
 
     return result;
-}
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wchar-subscripts"
-
-static int ParseHexDigit(char c)
-{
-    c = tolower(c);
-
-    if (c >= '0' && c <= '9')
-    {
-        return c - '0';
-    }
-    else if (c >= 'a' && c <= 'f')
-    {
-        return 10 + (c - 'a');
-    }
-    else
-    {
-        return -1;
-    }
 }
 
 // Parse a line from substitute music configuration file; returns error
@@ -618,10 +640,9 @@ static void LoadSubstituteConfigs(void)
     }
     else
     {
-        musicdir = M_StringJoin(configdir, "music", DIR_SEPARATOR_S, NULL);
+        musicdir = configdir;
     }
 #endif
-
     // Load all music packs. We always load all music substitution packs for
     // all games. Why? Suppose we have a Doom PWAD that reuses some music from
     // Heretic. If we have the Heretic music pack loaded, then we get an
@@ -673,7 +694,7 @@ static dboolean IsMusicLump(int lumpnum)
 // Dump an example config file containing checksums for all MIDI music
 // found in the WAD directory.
 
-static void DumpSubstituteConfig(char *filename)
+/*static*/ void DumpSubstituteConfig(char *filename)
 {
     sha1_context_t context;
     sha1_digest_t digest;
@@ -897,6 +918,7 @@ static dboolean I_SDL_InitMusic(void)
                 DumpSubstituteConfig("sd:/apps/wiidoom/hacx-music.cfg");
         }
     }
+/*
 #else
     //!
     // @arg <output filename>
@@ -911,7 +933,7 @@ static dboolean I_SDL_InitMusic(void)
     {
         DumpSubstituteConfig(myargv[i + 1]);
     }
-
+*/
 #endif
 
     // If SDL_mixer is not initialized, we have to initialize it
@@ -927,7 +949,11 @@ static dboolean I_SDL_InitMusic(void)
         {
             C_Error("Unable to set up sound.");
         }
+#ifdef WII
         else if (Mix_OpenAudio(snd_samplerate, AUDIO_S16SYS, 2, 4096) < 0)
+#else
+        else if (Mix_OpenAudio(snd_samplerate, AUDIO_S16SYS, 2, 1024) < 0)
+#endif
         {
             C_Error("Error initializing SDL_mixer: %s",
                     Mix_GetError());
@@ -962,7 +988,10 @@ static dboolean I_SDL_InitMusic(void)
     Mix_RegisterEffect(MIX_CHANNEL_POST, TrackPositionCallback, NULL, NULL);
 
     // If we're in GENMIDI mode, try to load sound packs.
-    LoadSubstituteConfigs();
+//    if (snd_musicdevice == SNDDEVICE_GENMIDI)
+    {
+        LoadSubstituteConfigs();
+    }
 
     return music_initialized;
 }
@@ -1017,13 +1046,27 @@ static void I_SDL_PlaySong(void *handle, dboolean looping)
     current_track_music = (Mix_Music *) handle;
     current_track_loop = looping;
 
+#ifdef WII
     loops = 1;
+#else
+    if (looping)
+    {
+        loops = -1;
+    }
+    else
+    {
+        loops = 1;
+    }
+#endif
 
     // Don't loop when playing substitute music, as we do it
     // ourselves instead.
 
     if (playing_substitute && file_metadata.valid)
     {
+#ifndef WII
+        loops = 1;
+#endif
         SDL_LockAudio();
         current_track_pos = 0;  // start of track
         SDL_UnlockAudio();
@@ -1141,24 +1184,21 @@ static void *I_SDL_RegisterSong(void *data, int len)
         {
             // Fall through and play MIDI normally, but print an error
             // message.
-            C_Error("Failed to load substitute music file: %s: %s",
-                    filename, Mix_GetError());
+            C_Error("Failed to load substitute music file: %s", filename);
+            C_Error("%s", Mix_GetError());
         }
         else
         {
             // Read loop point metadata from the file so that we know where
             // to loop the music.
             playing_substitute = true;
-
             ReadLoopPoints(filename, &file_metadata);
-
             return music;
         }
     }
 
     // MUS files begin with "MUS"
     // Reject anything which doesnt have this signature
-
     filename = M_TempFile("doom.mid");
 
     // [crispy] remove MID file size limit
@@ -1252,7 +1292,9 @@ static void RestartCurrentTrack(void)
 
     // If the track is playing on loop then reset to the start point.
     // Otherwise we need to stop the track.
+#ifdef WII
     if (current_track_loop)
+#endif
     {
         // If the track finished we need to restart it.
         if (current_track_music != NULL)
@@ -1265,19 +1307,28 @@ static void RestartCurrentTrack(void)
         current_track_pos = file_metadata.start_time;
         SDL_UnlockAudio();
     }
+#ifdef WII
     else
     {
         Mix_HaltMusic();
         current_track_music = NULL;
         playing_substitute = false;
     }
+#endif
 }
 
 // Poll music position; if we have passed the loop point end position
 // then we need to go back.
 void I_SDL_PollMusic(void)
 {
+    // When playing substitute tracks, loop tags only apply if we're playing
+    // a looping track. Tracks like the title screen music have the loop
+    // tags ignored.
+#ifdef WII
     if (playing_substitute && file_metadata.valid)
+#else
+    if (current_track_loop && playing_substitute && file_metadata.valid)
+#endif
     {
         double end = (double) file_metadata.end_time
                    / file_metadata.samplerate_hz;
@@ -1292,6 +1343,7 @@ void I_SDL_PollMusic(void)
             current_track_loop = true;
 
         // Have we reached the actual end of track (not loop end)?
+#ifdef WII
         if (!Mix_PlayingMusic() && current_track_loop)
         {
             change_anyway = true;
@@ -1372,6 +1424,12 @@ void I_SDL_PollMusic(void)
             else
                 S_ChangeMusic(tracknum, true, true);
         }
+#else
+        if (!Mix_PlayingMusic())
+        {
+            RestartCurrentTrack();
+        }
+#endif
     }
 }
 

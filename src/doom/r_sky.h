@@ -39,11 +39,7 @@
 #if !defined(__R_SKY__)
 #define __R_SKY__
 
-#ifdef WII
-#include "../m_fixed.h"
-#else
 #include "m_fixed.h"
-#endif
 
 // SKY, store the number for name.
 #define SKYFLATNAME     "F_SKY1"

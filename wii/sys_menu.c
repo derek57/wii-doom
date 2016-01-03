@@ -1,4 +1,3 @@
-#ifdef WII
 #include <jpgogc.h>
 #include <malloc.h>
 #include <ogcsys.h>
@@ -311,6 +310,8 @@ static void Menu_FatDevice(void)
     {
         for ( ; ; )
         {
+            u32 buttons = WaitButtons();
+
             // Clear console
             Con_Clear();
 
@@ -345,8 +346,6 @@ static void Menu_FatDevice(void)
                         CONSOLE_FONT_BOLD,&stTexteLocation,
             "  ----------------------------------------------------------------------------  ");
 
-            u32 buttons = WaitButtons();
-
             // LEFT/RIGHT buttons
             if (buttons & WPAD_CLASSIC_BUTTON_LEFT)
             {
@@ -371,11 +370,11 @@ static void Menu_FatDevice(void)
     }
     else
     {
+        JPEGIMG about;
+
         sleep(3);
 
         Initialise();
-
-        JPEGIMG about;
 
         memset(&about, 0, sizeof(JPEGIMG));
 
@@ -470,12 +469,14 @@ static void Menu_WadList(void)
     const char  *iwad_ver = NULL;
     const char  *shareware_warn = NULL;
 
+/*
     extern char path_tmp[MAXPATH];
     extern char target[MAXPATH];
     extern char extra_wad_1[256];
     extern char extra_wad_2[256];
     extern char extra_wad_3[256];
     extern char dehacked_file[256];
+*/
     extern char calculated_md5_string[33];
     extern char known_md5_string_chex_quest_iwad[33];
     extern char known_md5_string_doom_beta_1_4_iwad[33];
@@ -528,14 +529,14 @@ static void Menu_WadList(void)
     extern char known_md5_string_nerve_xbox360_pwad[33];
     extern char known_md5_string_master_levels_pwad[33];
 
-    int         i, c;
-
+    int         i, c, counter;
+/*
     extern int  extra_wad_slot_1_loaded;
     extern int  extra_wad_slot_2_loaded;
     extern int  extra_wad_slot_3_loaded;
     extern int  fsize;
     extern int  fsizecq;
-
+*/
     FILE        *file;
 
     fatFile     *fileList = NULL;
@@ -547,6 +548,8 @@ static void Menu_WadList(void)
     s32         start = 0;
 
     char        *tmpPath = malloc (MAX_FILE_PATH_LEN);
+
+    u32         buttons = WaitButtons();
 
     // wiiNinja: check for malloc error
     if (tmpPath == NULL)
@@ -609,7 +612,6 @@ static void Menu_WadList(void)
     }
 
     // Set install-values to 0 - Leathl
-    int counter;
 
     for (counter = 0; counter < fileCnt; counter++)
     {
@@ -1361,7 +1363,6 @@ static void Menu_WadList(void)
                         "-");
 
     //* Controls *
-    u32 buttons = WaitButtons();
 
     // UP button
     if (buttons & WPAD_CLASSIC_BUTTON_UP)
@@ -2257,12 +2258,12 @@ static void Menu_WadList(void)
     // B button
     if (buttons & WPAD_CLASSIC_BUTTON_B)
     {
+        char *tmpCurPath;
+
         if(gDirLevel <= 1)
         {
             return;
         }
-
-        char *tmpCurPath;
 
         selected = 0;
 
@@ -2343,5 +2344,4 @@ void Menu_Loop(void)
         Menu_WadList();
     }
 }
-#endif
 

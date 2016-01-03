@@ -99,7 +99,7 @@ typedef dboolean (*grabmouse_callback_t)(void);
 // Called by D_DoomMain,
 // determines the hardware configuration
 // and sets up the video mode
-void I_InitGraphics (void);
+void I_InitGraphics (int scrn);
 
 void I_GraphicsCheckCommandLine(void);
 
@@ -110,9 +110,9 @@ void I_SetPalette (byte* palette);
 int I_GetPaletteIndex(int r, int g, int b);
 
 void I_UpdateNoBlit (void);
-void I_FinishUpdate (void);
+void I_FinishUpdate (int scrn);
 
-void I_ReadScreen (byte* scr);
+void I_ReadScreen (int scrn, byte* scr);
 
 void I_PrepareRead (void);
 void I_BeginRead (void);
@@ -161,7 +161,7 @@ extern int aspect_ratio_correct;
 extern float            r_gamma;
 extern float            gammalevels[GAMMALEVELS];
 
-extern byte *I_VideoBuffer;
+//extern byte *I_VideoBuffer;
 extern byte gammatable[GAMMALEVELS][256];
 
 #endif

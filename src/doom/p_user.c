@@ -30,14 +30,8 @@
 
 #include <stdlib.h>
 
-#ifdef WII
-#include "../c_io.h"
-#include "../d_event.h"
-#else
 #include "c_io.h"
 #include "d_event.h"
-#endif
-
 #include "doomdef.h"
 #include "doomstat.h"
 #include "p_inter.h"

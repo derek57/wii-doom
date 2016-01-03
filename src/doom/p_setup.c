@@ -30,54 +30,26 @@
 #include <math.h>
 #include <time.h>
 
-#ifdef WII
-#include "../c_io.h"
-#include "../d_deh.h"
-#else
 #include "c_io.h"
 #include "d_deh.h"
-#endif
-
 #include "doomdef.h"
-
-#ifdef WII
-#include "../doomfeatures.h"
-#else
 #include "doomfeatures.h"
-#endif
-
 #include "doomstat.h"
 #include "g_game.h"
 #include "hu_stuff.h"
-
-#ifdef WII
-#include "../i_swap.h"
-#include "../i_system.h"
-#include "../m_bbox.h"
-#include "../m_misc.h"
-#else
 #include "i_swap.h"
 #include "i_system.h"
 #include "m_bbox.h"
 #include "m_misc.h"
-#endif
-
 #include "m_random.h"
 #include "p_fix.h"
 #include "p_local.h"
 #include "p_setup.h"
 #include "s_sound.h"
 #include "sc_man.h"
-
-#ifdef WII
-#include "../v_trans.h"
-#include "../w_wad.h"
-#include "../z_zone.h"
-#else
 #include "v_trans.h"
 #include "w_wad.h"
 #include "z_zone.h"
-#endif
 
 
 // Maintain single and multi player starting spots.

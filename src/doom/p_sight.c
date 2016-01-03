@@ -36,12 +36,7 @@
 ========================================================================
 */
 
-#ifdef WII
-#include "../m_bbox.h"
-#else
 #include "m_bbox.h"
-#endif
-
 #include "p_local.h"
 
 //

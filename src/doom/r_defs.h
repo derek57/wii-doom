@@ -785,10 +785,6 @@ typedef struct
     int                 children[2];
 } node_t;
 
-#if defined(_MSC_VER)
-#pragma pack(push)
-#pragma pack(1)
-#endif
 /*
 // posts are runs of non masked source pixels
 typedef struct
@@ -797,13 +793,10 @@ typedef struct
     byte               length;          // length data bytes follows
 } PACKEDATTR post_t;
 
-#if defined(_MSC_VER)
-#pragma pack(pop)
-#endif
-
 // column_t is a list of 0 or more post_t, (byte)-1 terminated
 typedef post_t column_t;
 */
+
 //
 // OTHER TYPES
 //
@@ -841,10 +834,6 @@ typedef struct drawseg_s
     int                 *maskedtexturecol;
 } drawseg_t;
 
-#if defined(_MSC_VER)
-#pragma pack(push)
-#pragma pack(1)
-#endif
 /*
 // Patches.
 // A patch holds one or more columns.
@@ -861,9 +850,6 @@ typedef struct
     // the [0] is &columnofs[width]
 } PACKEDATTR patch_t;
 */
-#if defined(_MSC_VER)
-#pragma pack(pop)
-#endif
 
 // A vissprite_t is a thing
 //  that will be drawn during a refresh.

@@ -39,7 +39,22 @@
 #if !defined(__R_THINGS__)
 #define __R_THINGS__
 
+
+// OK, now this is an intersting point:
+//
+// DOOM Retro uses "#define NUMVISSPRITES   0x20000" here as default.
+// It's the same as if we would use "16384 * 8" (131072) instead.
+//
+// BUT WARNING: THIS IS NOT WORKING FOR THE WII AS IT WON'T RUN THE
+// COMPILED "BOOT.DOL" (ELF) FILE WITH THOSE VALUES!
+//
+// SO WE LOWER THIS TO "8192 * 8" (65536) which is the same as 0x10000.
+
+#ifdef WII
+#define NUMVISSPRITES   0x10000
+#else
 #define NUMVISSPRITES   0x20000
+#endif
 
 // Constant arrays used for psprite clipping
 //  and initializing clipping.

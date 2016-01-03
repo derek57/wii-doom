@@ -38,61 +38,26 @@
 #include <time.h>
 
 #include "am_map.h"
-
-#ifdef WII
-#include "../c_io.h"
-#else
 #include "c_io.h"
-#endif
-
 #include "d_main.h"
-
-#ifdef WII
-#include "../d_deh.h"
-#else
 #include "d_deh.h"
-#endif
-
 #include "doomdef.h"
-
-#ifdef WII
-#include "../doomkeys.h"
-#else
 #include "doomkeys.h"
-#endif
-
 #include "doomstat.h"
 #include "dstrings.h"
 #include "f_finale.h"
 #include "g_game.h"
 #include "hu_stuff.h"
-
-#ifdef WII
-#include "../i_swap.h"
-#include "../i_system.h"
-#include "../i_timer.h"
-#include "../i_tinttab.h"
-#include "../i_video.h"
-#include "../m_controls.h"
-#else
+#include "i_sdlmusic.h"
 #include "i_swap.h"
 #include "i_system.h"
 #include "i_timer.h"
 #include "i_tinttab.h"
 #include "i_video.h"
 #include "m_controls.h"
-#endif
-
 #include "m_menu.h"
-
-#ifdef WII
-#include "../m_argv.h"
-#include "../m_misc.h"
-#else
 #include "m_argv.h"
 #include "m_misc.h"
-#endif
-
 #include "m_random.h"
 #include "p_local.h"
 #include "p_saveg.h"
@@ -104,18 +69,10 @@
 #include "sounds.h"
 
 #include "st_stuff.h"
-
-#ifdef WII
-#include "../v_trans.h"
-#include "../v_video.h"
-#include "../w_wad.h"
-#include "../z_zone.h"
-#else
 #include "v_trans.h"
 #include "v_video.h"
 #include "w_wad.h"
 #include "z_zone.h"
-#endif
 
 #ifdef WII
 #include <wiiuse/wpad.h>
@@ -1230,6 +1187,7 @@ void M_MusicType(int choice);
 void M_SoundType(int choice);
 void M_SoundOutput(int choice);
 void M_SoundPitch(int choice);
+void M_DumpSubstituteConfig(int choice);
 void M_Samplerate(int choice);
 void M_RestartSong(int choice);
 void M_OPLDev(int choice);
@@ -1910,7 +1868,7 @@ menuitem_t ScreenMenu[]=
     {2,"Wipe Type",M_WipeType,'w'},
     {2,"Uncapped Framerate",M_UncappedFramerate,'u'},
     {2,"Screenshot Format",M_Screenshots,'x'},
-    {2,"Menu Background Style",M_Background,'b'},
+    {2,"Menu Background",M_Background,'b'},
     {2,"Menu Font Style",M_FontShadow,'f'},
     {2,"Show Loading Indicator",M_DiskIcon,'d'},
     {2,"",M_IconType,'i'},
@@ -2129,7 +2087,11 @@ menuitem_t GameMenu2[]=
     {2,"HERETIC FOOTCLIPS",M_Footclip,'c'},
     {2,"HERETIC LIQUID SPLASH",M_Splash,'l'},
     {2,"SWIRLING WATER HACK",M_Swirl,'w'},
+#ifdef WII
+    {2,"",M_EndoomScreen,'q'},
+#else
     {2,"Show Endoom Screen on quit",M_EndoomScreen,'q'},
+#endif
     {2,"RANDOMLY FLIP CORPSES & GUNS",M_Corpses,'d'},
     {2,"SHOW REVEALED SECRETS",M_Secrets,'z'},
     {2,"ROCKET TRAILS",M_Trails,'r'},
@@ -2301,10 +2263,10 @@ enum
 
 menuitem_t GameMenu6[]=
 {
-    {2,"Center Weapon when firing",M_CenterWeapon,'c'},
+    {2,"Center Weapon when firing",M_CenterWeapon,'c'}
 #ifdef WII
     ,
-    {2,"PRE-RELEASE BETA MODE",M_Beta,'b'},
+    {2,"PRE-RELEASE BETA MODE",M_Beta,'b'}
 #endif
 };
 
@@ -2363,6 +2325,7 @@ enum
     output,
     pitch,
 #ifndef WII
+    dsc,
     lsr,
 #endif
     sound_end
@@ -2380,6 +2343,7 @@ menuitem_t SoundMenu[]=
     {2,"v1.1 Random Sound Pitch",M_SoundPitch,'p'}
 #ifndef WII
     ,
+    {2,"Dump Substitute Config",M_DumpSubstituteConfig,'d'},
     {2,"Libsamplerate",M_Samplerate,'r'}
 #endif
 };
@@ -2390,7 +2354,7 @@ menu_t  SoundDef =
     &OptionsDef,
     SoundMenu,
     M_DrawSound,
-    45,70,
+    45,60,
     0
 };
 
@@ -2525,9 +2489,9 @@ void M_TextWrite (int x, int y, char* ch)
             break;
         
         if(font_shadow == 1)
-            V_DrawPatchWithShadow(x, y, hu_font[c], false);
+            V_DrawPatchWithShadow(x, y, 0, hu_font[c], false);
         else
-            V_DrawPatch(x, y, hu_font[c]);
+            V_DrawPatch(x, y, 0, hu_font[c]);
         x+=w;
     }
         
@@ -2548,7 +2512,7 @@ static void blurscreen(int x1, int y1, int x2, int y2, int i)
 // M_DarkBackground
 //  darken and blur background while menu is displayed
 //
-void M_DarkBackground(void)
+void M_DarkBackground(int scrn)
 {
     if(background_type == 2)
     {
@@ -2567,7 +2531,8 @@ void M_DarkBackground(void)
         if (!blurred)
         {
             for (i = 0; i < height; ++i)
-                blurredscreen[i] = grays[I_VideoBuffer[i]];
+//                blurredscreen[i] = grays[I_VideoBuffer[i]];
+                blurredscreen[i] = grays[screens[scrn][i]];
 
             blurscreen(0, 0, SCREENWIDTH - 1, height, 1);
             blurscreen(1, 0, SCREENWIDTH, height, -1);
@@ -2582,10 +2547,11 @@ void M_DarkBackground(void)
         }
 
         for (i = 0; i < height; ++i)
-            I_VideoBuffer[i] = tinttab50[blurredscreen[i]];
+//            I_VideoBuffer[i] = tinttab50[blurredscreen[i]];
+            screens[scrn][i] = tinttab50[blurredscreen[i]];
 
         if (detailLevel)
-            V_LowGraphicDetail(height);
+            V_LowGraphicDetail(0, height);
     }
 }
 
@@ -2629,9 +2595,9 @@ void M_DrawLoad(void)
 {
     int             i;
 
-    M_DarkBackground();
+    M_DarkBackground(0);
 
-    V_DrawPatchWithShadow(72, 28, W_CacheLumpName("M_T_LGME", PU_CACHE), false);
+    V_DrawPatchWithShadow(72, 28, 0, W_CacheLumpName("M_T_LGME", PU_CACHE), false);
 
     for (i = 0;i < load_end; i++)
     {
@@ -2670,15 +2636,15 @@ void M_DrawSaveLoadBorder(int x,int y)
 {
     int             i;
         
-    V_DrawPatchWithShadow(x - 8, y + 7, W_CacheLumpName("M_LSLEFT", PU_CACHE), false);
+    V_DrawPatchWithShadow(x - 8, y + 7, 0, W_CacheLumpName("M_LSLEFT", PU_CACHE), false);
         
     for (i = 0;i < 24;i++)
     {
-        V_DrawPatchWithShadow(x, y + 7, W_CacheLumpName("M_LSCNTR", PU_CACHE), false);
+        V_DrawPatchWithShadow(x, y + 7, 0, W_CacheLumpName("M_LSCNTR", PU_CACHE), false);
         x += 8;
     }
 
-    V_DrawPatchWithShadow(x, y + 7, W_CacheLumpName("M_LSRGHT", PU_CACHE), false);
+    V_DrawPatchWithShadow(x, y + 7, 0, W_CacheLumpName("M_LSRGHT", PU_CACHE), false);
 }
 
 
@@ -2718,9 +2684,9 @@ void M_DrawSave(void)
 {
     int             i;
         
-    M_DarkBackground();
+    M_DarkBackground(0);
 
-    V_DrawPatchWithShadow(72, 28, W_CacheLumpName("M_T_SGME", PU_CACHE), false);
+    V_DrawPatchWithShadow(72, 28, 0, W_CacheLumpName("M_T_SGME", PU_CACHE), false);
     for (i = 0;i < load_end; i++)
     {
         M_DrawSaveLoadBorder(LoadDef.x+5,LoadDef.y+LINEHEIGHT_SMALL*i);
@@ -2979,7 +2945,7 @@ void M_DrawReadThis1(void)
             break;
     }
 
-    V_DrawPatch (0, 0, W_CacheLumpName(lumpname, PU_CACHE));
+    V_DrawPatch (0, 0, 0, W_CacheLumpName(lumpname, PU_CACHE));
 
     ReadDef1.x = skullx;
     ReadDef1.y = skully;
@@ -2997,7 +2963,7 @@ void M_DrawReadThis2(void)
     // We only ever draw the second page if this is 
     // gameversion == exe_doom_1_9 and gamemode == registered
 
-    V_DrawPatch(0, 0, W_CacheLumpName("HELP1", PU_CACHE));
+    V_DrawPatch(0, 0, 0, W_CacheLumpName("HELP1", PU_CACHE));
 }
 
 void M_DrawCredits(void)
@@ -3008,8 +2974,8 @@ void M_DrawCredits(void)
     increditscreen = true;
 
     // erase the entire screen to a tiled background
-    V_DrawDistortedBackground(gamemode == commercial ?
-            commercial_flats[flat_index] : registered_flats[flat_index], I_VideoBuffer);
+    V_DrawDistortedBackground(0, gamemode == commercial ?
+            commercial_flats[flat_index] : registered_flats[flat_index]);
 
     dp_translation = crx[CRX_GOLD];
     string = "IT ALSO IS THEIR WORK, SO...";
@@ -3069,7 +3035,7 @@ void M_DrawCredits(void)
     x = ORIGWIDTH/2 - M_StringWidth(CREDITURL7) / 2;
     M_TextWrite(x, 192, CREDITURL7);
 
-    V_DrawPatchWithShadow(CreditsDef.x + CURSORXOFF_SMALL, CreditsDef.y + 180,
+    V_DrawPatchWithShadow(CreditsDef.x + CURSORXOFF_SMALL, CreditsDef.y + 180, 0,
             W_CacheLumpName(skullNameSmall[whichSkull], PU_CACHE), false);
 
     S_ChangeMusic(mus_credit, true, false);
@@ -3080,12 +3046,12 @@ void M_DrawCredits(void)
 //
 void M_DrawSound(void)
 {
-    M_DarkBackground();
+    M_DarkBackground(0);
 
     if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
-        V_DrawPatchWithShadow (65, 15, W_CacheLumpName("M_T_XSET", PU_CACHE), false);
+        V_DrawPatchWithShadow (65, 15, 0, W_CacheLumpName("M_T_XSET", PU_CACHE), false);
     else
-        V_DrawPatchWithShadow (65, 15, W_CacheLumpName("M_SNDSET", PU_CACHE), false);
+        V_DrawPatchWithShadow (65, 15, 0, W_CacheLumpName("M_SNDSET", PU_CACHE), false);
 
     M_DrawThermoSmall(SoundDef.x + 95, SoundDef.y + LINEHEIGHT_SMALL * (sfx_vol + 1),
                  16, sfxVolume);
@@ -3187,32 +3153,32 @@ void M_DrawSound(void)
     if(use_libsamplerate == 0)
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(SoundDef.x + 212, SoundDef.y + 78, "OFF");
+        M_WriteText(SoundDef.x + 212, SoundDef.y + 88, "OFF");
     }
     else if(use_libsamplerate == 1)
     {
         dp_translation = crx[CRX_GRAY];
-        M_WriteText(SoundDef.x + 192, SoundDef.y + 78, "LINEAR");
+        M_WriteText(SoundDef.x + 192, SoundDef.y + 88, "LINEAR");
     }
     else if(use_libsamplerate == 2)
     {
         dp_translation = crx[CRX_RED];
-        M_WriteText(SoundDef.x + 117, SoundDef.y + 78, "ZERO_ORDER_HOLD");
+        M_WriteText(SoundDef.x + 117, SoundDef.y + 88, "ZERO_ORDER_HOLD");
     }
     else if(use_libsamplerate == 3)
     {
         dp_translation = crx[CRX_GOLD];
-        M_WriteText(SoundDef.x + 182, SoundDef.y + 78, "FASTEST");
+        M_WriteText(SoundDef.x + 182, SoundDef.y + 88, "FASTEST");
     }
     else if(use_libsamplerate == 4)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(SoundDef.x + 130, SoundDef.y + 78, "MEDIUM_QUALITY");
+        M_WriteText(SoundDef.x + 130, SoundDef.y + 88, "MEDIUM_QUALITY");
     }
     else if(use_libsamplerate == 5)
     {
         dp_translation = crx[CRX_BLUE];
-        M_WriteText(SoundDef.x + 145, SoundDef.y + 78, "BEST_QUALITY");
+        M_WriteText(SoundDef.x + 145, SoundDef.y + 88, "BEST_QUALITY");
     }
 #endif
 
@@ -3221,10 +3187,12 @@ void M_DrawSound(void)
         int x;
         char *string = "";
         dp_translation = crx[CRX_GOLD];
-        if(itemOn == 8 || (fsize != 28422764 && fsize != 19321722 && fsize != 12361532 && itemOn > 2 && itemOn < 6))
+        if(itemOn == 9 || (fsize != 28422764 && fsize != 19321722 && fsize != 12361532 && itemOn > 2 && itemOn < 6))
             string = "YOU MUST QUIT AND RESTART TO TAKE EFFECT.";
         else if(fsize == 19321722 && itemOn == 4)
             string = "PC-SPEAKER OPTION NOT AVAILABLE FOR HACX";
+        else if(itemOn == 8)
+            string = "DUMPS A CONFIG FILE FOR USE WITH OGG-MUSIC.";
         x = ORIGWIDTH/2 - M_StringWidth(string) / 2;
         M_WriteText(x, GameDef2.y + 138, string);
     }
@@ -3394,6 +3362,11 @@ void M_SoundPitch(int choice)
     }
 }
 
+void M_DumpSubstituteConfig(int choice)
+{
+    DumpSubstituteConfig("oggmusic.cfg");
+}
+
 void M_Samplerate(int choice)
 {
     switch(choice)
@@ -3462,9 +3435,12 @@ void M_SoundChannels(int choice)
 //
 void M_DrawMainMenu(void)
 {
-    M_DarkBackground();
+    M_DarkBackground(0);
 
-    V_DrawPatchWithShadow(94, 2, W_CacheLumpName("M_DOOM", PU_CACHE), false);
+    if (beta_style || !font_shadow)
+        V_DrawPatch(94, 2, 0, W_CacheLumpName("M_DOOM", PU_CACHE));
+    else
+        V_DrawPatchWithShadow(94, 2, 0, W_CacheLumpName("M_DOOM", PU_CACHE), false);
 }
 
 
@@ -3474,9 +3450,9 @@ void M_DrawMainMenu(void)
 //
 void M_DrawNewGame(void)
 {
-    M_DarkBackground();
+    M_DarkBackground(0);
 
-    V_DrawPatchWithShadow(96, 14, W_CacheLumpName("M_NEWG", PU_CACHE), false);
+    V_DrawPatchWithShadow(96, 14, 0, W_CacheLumpName("M_NEWG", PU_CACHE), false);
     M_WriteText(NewDef.x, NewDef.y - 22, "CHOOSE SKILL LEVEL:");
 }
 
@@ -3516,9 +3492,9 @@ void M_NewGame(int choice)
 //
 void M_DrawEpisode(void)
 {
-    M_DarkBackground();
+    M_DarkBackground(0);
 
-    V_DrawPatchWithShadow(75, 38, W_CacheLumpName("M_EPISOD", PU_CACHE), false);
+    V_DrawPatchWithShadow(75, 38, 0, W_CacheLumpName("M_EPISOD", PU_CACHE), false);
 }
 
 void M_VerifyNightmare(int ch)
@@ -3585,17 +3561,17 @@ void M_Episode(int choice)
 
 void M_DrawOptions(void)
 {
-    M_DarkBackground();
+    M_DarkBackground(0);
 
-    V_DrawPatchWithShadow(108, 15, W_CacheLumpName("M_OPTTTL",
+    V_DrawPatchWithShadow(108, 15, 0, W_CacheLumpName("M_OPTTTL",
                                                PU_CACHE), false);
 }
 
 void M_DrawItems(void)
 {
-    M_DarkBackground();
+    M_DarkBackground(0);
 
-    V_DrawPatchWithShadow(123, 10, W_CacheLumpName("M_T_ITMS",
+    V_DrawPatchWithShadow(123, 10, 0, W_CacheLumpName("M_T_ITMS",
                                                PU_CACHE), false);
 
     dp_translation = crx[CRX_GOLD];
@@ -3697,9 +3673,9 @@ void M_DrawItems(void)
 
 void M_DrawArmor(void)
 {
-    M_DarkBackground();
+    M_DarkBackground(0);
 
-    V_DrawPatchWithShadow(115, 15, W_CacheLumpName("M_T_ARMR",
+    V_DrawPatchWithShadow(115, 15, 0, W_CacheLumpName("M_T_ARMR",
                                                PU_CACHE), false);
 
     dp_translation = crx[CRX_GOLD];
@@ -3741,9 +3717,9 @@ void M_DrawArmor(void)
 
 void M_DrawWeapons(void)
 {
-    M_DarkBackground();
+    M_DarkBackground(0);
 
-    V_DrawPatchWithShadow(103, 15, W_CacheLumpName("M_T_WPNS",
+    V_DrawPatchWithShadow(103, 15, 0, W_CacheLumpName("M_T_WPNS",
                                                PU_CACHE), false);
 
     dp_translation = crx[CRX_GOLD];
@@ -3853,9 +3829,9 @@ void M_DrawWeapons(void)
 
 void M_DrawKeys(void)
 {
-    M_DarkBackground();
+    M_DarkBackground(0);
 
-    V_DrawPatchWithShadow(125, 15, W_CacheLumpName("M_T_KEYS",
+    V_DrawPatchWithShadow(125, 15, 0, W_CacheLumpName("M_T_KEYS",
                                                PU_CACHE), false);
 
     dp_translation = crx[CRX_GOLD];
@@ -3864,13 +3840,13 @@ void M_DrawKeys(void)
 
 void M_DrawScreen(void)
 {
-    M_DarkBackground();
+    M_DarkBackground(0);
 
     if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
-        V_DrawPatchWithShadow(58, 5, W_CacheLumpName("M_T_SSET",
+        V_DrawPatchWithShadow(58, 5, 0, W_CacheLumpName("M_T_SSET",
                                                PU_CACHE), false);
     else
-        V_DrawPatchWithShadow(58, 5, W_CacheLumpName("M_SCRSET",
+        V_DrawPatchWithShadow(58, 5, 0, W_CacheLumpName("M_SCRSET",
                                                PU_CACHE), false);
 
     M_DrawThermoSmall(ScreenDef.x + 104, ScreenDef.y + LINEHEIGHT_SMALL * (screen_gamma + 1),
@@ -3978,12 +3954,12 @@ void M_DrawScreen(void)
     else if(background_type == 1)
     {
         dp_translation = crx[CRX_GOLD];
-        M_WriteText(ScreenDef.x + 166, ScreenDef.y + 68, "SHADE");
+        M_WriteText(ScreenDef.x + 158, ScreenDef.y + 68, "SHADED");
     }
     else if(background_type == 2)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(ScreenDef.x + 173, ScreenDef.y + 68, "BLUR");
+        M_WriteText(ScreenDef.x + 149, ScreenDef.y + 68, "BLURRED");
     }
 
     if(font_shadow == 0)
@@ -4053,10 +4029,12 @@ void M_DrawScreen(void)
         dp_translation = crx[CRX_GOLD];
         if(itemOn == 3 || itemOn == 12)
             string = "START / LOAD A NEW GAME TO TAKE EFFECT.";
+/*
 #ifndef SDL2
         else if(itemOn == 4)
             string = "OPTION 'BURN' IS ONLY AVAILABLE FOR SDL2";
 #endif
+*/
         else if(itemOn == 10 && (gamemode == retail || gamemode == registered || gamemode == shareware))
             string = "THIS IS ONLY CHANGEABLE FOR DOOM 2";
         x = ORIGWIDTH/2 - M_StringWidth(string) / 2;
@@ -4066,13 +4044,13 @@ void M_DrawScreen(void)
 
 void M_DrawGame(void)
 {
-    M_DarkBackground();
+    M_DarkBackground(0);
 
     if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
-        V_DrawPatchWithShadow(70, 0, W_CacheLumpName("M_T_GSET",
+        V_DrawPatchWithShadow(70, 0, 0, W_CacheLumpName("M_T_GSET",
                                                PU_CACHE), false);
     else
-        V_DrawPatchWithShadow(70, 0, W_CacheLumpName("M_GMESET",
+        V_DrawPatchWithShadow(70, 0, 0, W_CacheLumpName("M_GMESET",
                                                PU_CACHE), false);
 
     if(devparm)
@@ -4277,13 +4255,13 @@ void M_DrawGame(void)
 
 void M_DrawGame2(void)
 {
-    M_DarkBackground();
+    M_DarkBackground(0);
 
     if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
-        V_DrawPatchWithShadow(70, 0, W_CacheLumpName("M_T_GSET",
+        V_DrawPatchWithShadow(70, 0, 0, W_CacheLumpName("M_T_GSET",
                                                PU_CACHE), false);
     else
-        V_DrawPatchWithShadow(70, 0, W_CacheLumpName("M_GMESET",
+        V_DrawPatchWithShadow(70, 0, 0, W_CacheLumpName("M_GMESET",
                                                PU_CACHE), false);
 
     if(not_monsters)
@@ -4351,6 +4329,15 @@ void M_DrawGame2(void)
         dp_translation = crx[CRX_DARK];
         M_WriteText(GameDef2.x + 208, GameDef2.y + 48, "OFF");
     }
+
+#ifdef WII
+    if(itemOn == 6)
+        dp_translation = crx[CRX_GOLD];
+    else
+        dp_translation = crx[CRX_DARK];
+
+    M_WriteText(GameDef2.x, GameDef2.y + 58, "Show Endoom Screen on quit");
+#endif
 
     if(show_endoom)
     {
@@ -4446,6 +4433,10 @@ void M_DrawGame2(void)
         dp_translation = crx[CRX_GOLD];
         if(itemOn == 0)
             string = "YOU MUST START A NEW GAME TO TAKE EFFECT.";
+#ifdef WII
+        else if(itemOn == 6)
+            string = "THIS OPTION IS NOT AVAILABLE FOR THE WII.";
+#endif
         x = ORIGWIDTH/2 - M_StringWidth(string) / 2;
         M_WriteText(x, GameDef2.y + 138, string);
     }
@@ -4460,13 +4451,13 @@ void M_DrawGame2(void)
 
 void M_DrawGame3(void)
 {
-    M_DarkBackground();
+    M_DarkBackground(0);
 
     if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
-        V_DrawPatchWithShadow(70, 0, W_CacheLumpName("M_T_GSET",
+        V_DrawPatchWithShadow(70, 0, 0, W_CacheLumpName("M_T_GSET",
                                                PU_CACHE), false);
     else
-        V_DrawPatchWithShadow(70, 0, W_CacheLumpName("M_GMESET",
+        V_DrawPatchWithShadow(70, 0, 0, W_CacheLumpName("M_GMESET",
                                                PU_CACHE), false);
 
     if(d_fixspriteoffsets && modifiedgame)
@@ -4658,13 +4649,13 @@ void M_DrawGame3(void)
 
 void M_DrawGame4(void)
 {
-    M_DarkBackground();
+    M_DarkBackground(0);
 
     if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
-        V_DrawPatchWithShadow(70, 0, W_CacheLumpName("M_T_GSET",
+        V_DrawPatchWithShadow(70, 0, 0, W_CacheLumpName("M_T_GSET",
                                                PU_CACHE), false);
     else
-        V_DrawPatchWithShadow(70, 0, W_CacheLumpName("M_GMESET",
+        V_DrawPatchWithShadow(70, 0, 0, W_CacheLumpName("M_GMESET",
                                                PU_CACHE), false);
 
     if(!d_blockskulls)
@@ -4833,13 +4824,13 @@ void M_DrawGame4(void)
 
 void M_DrawGame5(void)
 {
-    M_DarkBackground();
+    M_DarkBackground(0);
 
     if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
-        V_DrawPatchWithShadow(70, 0, W_CacheLumpName("M_T_GSET",
+        V_DrawPatchWithShadow(70, 0, 0, W_CacheLumpName("M_T_GSET",
                                                PU_CACHE), false);
     else
-        V_DrawPatchWithShadow(70, 0, W_CacheLumpName("M_GMESET",
+        V_DrawPatchWithShadow(70, 0, 0, W_CacheLumpName("M_GMESET",
                                                PU_CACHE), false);
 
     if(d_altlighting)
@@ -5025,13 +5016,13 @@ void M_DrawGame5(void)
 
 void M_DrawGame6(void)
 {
-    M_DarkBackground();
+    M_DarkBackground(0);
 
     if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
-        V_DrawPatchWithShadow(70, 0, W_CacheLumpName("M_T_GSET",
+        V_DrawPatchWithShadow(70, 0, 0, W_CacheLumpName("M_T_GSET",
                                                PU_CACHE), false);
     else
-        V_DrawPatchWithShadow(70, 0, W_CacheLumpName("M_GMESET",
+        V_DrawPatchWithShadow(70, 0, 0, W_CacheLumpName("M_GMESET",
                                                PU_CACHE), false);
 
     if(d_centerweapon)
@@ -5049,12 +5040,12 @@ void M_DrawGame6(void)
     if(beta_style_mode)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef6.x + 216, GameDef6.y + 118, "ON");
+        M_WriteText(GameDef6.x + 266, GameDef6.y + 8, "ON");
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef6.x + 208, GameDef6.y + 118, "OFF");
+        M_WriteText(GameDef6.x + 258, GameDef6.y + 8, "OFF");
     }
 
     if(whichSkull == 1)
@@ -5122,12 +5113,12 @@ void DetectState(void)
 
 void M_DrawCheats(void)
 {
-    M_DarkBackground();
+    M_DarkBackground(0);
 
     if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
-        V_DrawPatchWithShadow (110, 6, W_CacheLumpName("M_T_CHTS", PU_CACHE), false);
+        V_DrawPatchWithShadow (110, 6, 0, W_CacheLumpName("M_T_CHTS", PU_CACHE), false);
     else
-        V_DrawPatchWithShadow (110, 6, W_CacheLumpName("M_CHEATS", PU_CACHE), false);
+        V_DrawPatchWithShadow (110, 6, 0, W_CacheLumpName("M_CHEATS", PU_CACHE), false);
 
     if (players[consoleplayer].cheats & CF_GODMODE)
     {
@@ -5340,11 +5331,11 @@ void M_DrawRecord(void)
     char buffer_map[2];
     int offset = 0;
 
-    M_DarkBackground();
+    M_DarkBackground(0);
 
     M_snprintf(buffer_map, sizeof(buffer_map), "%d", rmap);
 
-    V_DrawPatchWithShadow(58, 15, W_CacheLumpName("M_T_DREC",
+    V_DrawPatchWithShadow(58, 15, 0, W_CacheLumpName("M_T_DREC",
                                                PU_CACHE), false);
     if (rmap == 0)
         rmap = 1;
@@ -5509,19 +5500,19 @@ void M_DrawRecord(void)
         if(repi == 1)
         {
             if(rmap == 1)
-                V_DrawPatchWithShadow (55, 68, W_CacheLumpName("WILV00",
+                V_DrawPatchWithShadow (55, 68, 0, W_CacheLumpName("WILV00",
                 PU_CACHE), false);
             else if(rmap == 2)
-                V_DrawPatchWithShadow (55, 68, W_CacheLumpName("WILV01",
+                V_DrawPatchWithShadow (55, 68, 0, W_CacheLumpName("WILV01",
                 PU_CACHE), false);
             else if(rmap == 3)
-                V_DrawPatchWithShadow (55, 68, W_CacheLumpName("WILV02",
+                V_DrawPatchWithShadow (55, 68, 0, W_CacheLumpName("WILV02",
                 PU_CACHE), false);
             else if(rmap == 4)
-                V_DrawPatchWithShadow (55, 68, W_CacheLumpName("WILV03",
+                V_DrawPatchWithShadow (55, 68, 0, W_CacheLumpName("WILV03",
                 PU_CACHE), false);
             else if(rmap == 5)
-                V_DrawPatchWithShadow (55, 68, W_CacheLumpName("WILV04",
+                V_DrawPatchWithShadow (55, 68, 0, W_CacheLumpName("WILV04",
                 PU_CACHE), false);
         }
     }
@@ -5619,7 +5610,7 @@ void M_EndGameResponse(int ch)
 void M_EndGame(int choice)
 {
 /*
-    V_DrawPatchWithShadow(58, 15, W_CacheLumpName("M_T_EGME",
+    V_DrawPatchWithShadow(58, 15, 0, W_CacheLumpName("M_T_EGME",
                                                PU_CACHE), false);
 */
     if (!usergame)
@@ -5977,7 +5968,7 @@ void M_WipeType(int choice)
             wipe_type--;
         break;
       case 1:
-        if (wipe_type < 2)
+        if (wipe_type < 3)
             wipe_type++;
         if(!devparm && wipe_type > 2)
             wipe_type = 2;
@@ -6137,7 +6128,7 @@ void M_SizeDisplay(int choice)
     }
     R_SetViewSize (screenblocks);
 
-    if(screenSize < 8)		// FIXME: WAS DISABLED
+    if(screenSize < 8)
     {
         if(usergame)
             ST_doRefresh();
@@ -6167,16 +6158,16 @@ M_DrawThermo
     int                i;
 
     xx = x;
-    V_DrawPatchWithShadow(xx, y, W_CacheLumpName("M_THERML", PU_CACHE), false);
+    V_DrawPatchWithShadow(xx, y, 0, W_CacheLumpName("M_THERML", PU_CACHE), false);
     xx += 8;
     for (i=0;i<thermWidth;i++)
     {
-        V_DrawPatchWithShadow(xx, y, W_CacheLumpName("M_THERMM", PU_CACHE), false);
+        V_DrawPatchWithShadow(xx, y, 0, W_CacheLumpName("M_THERMM", PU_CACHE), false);
         xx += 8;
     }
-    V_DrawPatchWithShadow(xx, y, W_CacheLumpName("M_THERMR", PU_CACHE), false);
+    V_DrawPatchWithShadow(xx, y, 0, W_CacheLumpName("M_THERMR", PU_CACHE), false);
 
-    V_DrawPatchWithShadow((x + 8) + thermDot * 8, y, W_CacheLumpName("M_THERMO",
+    V_DrawPatchWithShadow((x + 8) + thermDot * 8, y, 0, W_CacheLumpName("M_THERMO",
                       PU_CACHE), false);
 }
 */
@@ -6194,17 +6185,17 @@ M_DrawThermoSmall
 
     xx = x;
     yy = y + 6; // +6 to y coordinate
-    V_DrawPatchWithShadow(xx + 3, yy - 18, W_CacheLumpName("M_SLIDEL", PU_CACHE), false);
+    V_DrawPatchWithShadow(xx + 3, yy - 18, 0, W_CacheLumpName("M_SLIDEL", PU_CACHE), false);
     xx += 8;
     for (i=0;i<thermWidth;i++)
     {
-        V_DrawPatchWithShadow(xx, yy - 18, W_CacheLumpName("M_SLIDEM", PU_CACHE), false);
+        V_DrawPatchWithShadow(xx, yy - 18, 0, W_CacheLumpName("M_SLIDEM", PU_CACHE), false);
         xx += 8;
     }
-    V_DrawPatchWithShadow(xx, yy - 18, W_CacheLumpName("M_SLIDER", PU_CACHE), false);
+    V_DrawPatchWithShadow(xx, yy - 18, 0, W_CacheLumpName("M_SLIDER", PU_CACHE), false);
 
     // +2 to initial y coordinate
-    V_DrawPatchWithShadow((x + 9) + thermDot * 8, y - 12, W_CacheLumpName("M_SLIDEO",
+    V_DrawPatchWithShadow((x + 9) + thermDot * 8, y - 12, 0, W_CacheLumpName("M_SLIDEO",
                      PU_CACHE), false);
 }
 
@@ -6218,7 +6209,7 @@ M_DrawEmptyCell
   int            item )
 {
     V_DrawPatchWithShadow(menu->x-10,
-                          menu->y+item*LINEHEIGHT_SMALL-1, W_CacheLumpName("M_CELL1",
+                          menu->y+item*LINEHEIGHT_SMALL-1, 0, W_CacheLumpName("M_CELL1",
                           PU_CACHE), false);
 }
 
@@ -6228,7 +6219,7 @@ M_DrawSelCell
   int            item )
 {
     V_DrawPatchWithShadow(menu->x-10,
-                          menu->y+item*LINEHEIGHT_SMALL-1, W_CacheLumpName("M_CELL2",
+                          menu->y+item*LINEHEIGHT_SMALL-1, 0, W_CacheLumpName("M_CELL2",
                           PU_CACHE), false);
 }
 */
@@ -6356,9 +6347,9 @@ void M_WriteText(int x, int y, char* string)
             V_ClearDPTranslation();
 
         if(font_shadow == 1)
-            V_DrawPatchWithShadow(cx, cy, hu_font[c], false);
+            V_DrawPatchWithShadow(cx, cy, 0, hu_font[c], false);
         else
-            V_DrawPatch(cx, cy, hu_font[c]);
+            V_DrawPatch(cx, cy, 0, hu_font[c]);
         cx+=w;
     }
 
@@ -6423,6 +6414,8 @@ dboolean M_Responder (event_t* ev)
 #endif
 
 #ifdef WII
+    WPADData *data = WPAD_Data(0);
+
     ch = -1; // will be changed to a legit char if we're going to use it here
 
     // Process joystick input
@@ -6430,8 +6423,6 @@ dboolean M_Responder (event_t* ev)
     // doesn't work when using the twilight hack to launch wiidoom. At the same
     // time, it works fine if you're using the homebrew channel. I don't know
     // why this is so for the meantime I'm polling the wii remote directly.
-
-    WPADData *data = WPAD_Data(0);
 
     //Classic Controls
     if(data->exp.type == WPAD_EXP_CLASSIC)
@@ -6864,7 +6855,7 @@ dboolean M_Responder (event_t* ev)
                 itemOn++;
 #else
             if(currentMenu == &ControlsDef && itemOn == 5)
-                itemOn++;
+                itemOn += 2;
 #endif
             if(!devparm)
             {
@@ -6905,8 +6896,8 @@ dboolean M_Responder (event_t* ev)
             if(currentMenu == &KeyBindingsDef && itemOn == 12)
                 itemOn--;
 #else
-            if(currentMenu == &ControlsDef && itemOn == 5)
-                itemOn--;
+            if(currentMenu == &ControlsDef && itemOn == 6)
+                itemOn -= 2;
 #endif
             if(!devparm)
             {
@@ -7302,7 +7293,7 @@ void M_Drawer (void)
         char                string[80];
         int                 start = 0;
 
-        M_DarkBackground();
+        M_DarkBackground(0);
 
         y = ORIGHEIGHT/2 - M_StringHeight(messageString) / 2;
         while (messageString[start] != '\0')
@@ -7429,13 +7420,27 @@ void M_Drawer (void)
 #else
         if(currentMenu == &KeyBindingsDef && itemOn == 17)
 #endif
-            V_DrawPatchWithShadow(x + 280 + CURSORXOFF_SMALL, currentMenu->y - 15 +
-                    itemOn*LINEHEIGHT_SMALL, W_CacheLumpName(skullNameSmall[whichSkull],
-                                          PU_CACHE), false);
+        {
+            if(!beta_style)
+                V_DrawPatchWithShadow(x + 280 + CURSORXOFF_SMALL, currentMenu->y - 15 +
+                        itemOn*LINEHEIGHT_SMALL, 0, W_CacheLumpName(skullNameSmall[whichSkull],
+                                              PU_CACHE), false);
+            else
+                V_DrawPatch(x + 280 + CURSORXOFF_SMALL, currentMenu->y - 15 +
+                        itemOn*LINEHEIGHT_SMALL, 0, W_CacheLumpName(skullNameSmall[whichSkull],
+                                              PU_CACHE));
+        }
         else
-            V_DrawPatchWithShadow(x + CURSORXOFF_SMALL, currentMenu->y - 5 +
-                    itemOn*LINEHEIGHT_SMALL, W_CacheLumpName(skullNameSmall[whichSkull],
-                                          PU_CACHE), false);
+        {
+            if(!beta_style)
+                V_DrawPatchWithShadow(x + CURSORXOFF_SMALL, currentMenu->y - 5 +
+                        itemOn*LINEHEIGHT_SMALL, 0, W_CacheLumpName(skullNameSmall[whichSkull],
+                                              PU_CACHE), false);
+            else
+                V_DrawPatch(x + CURSORXOFF_SMALL, currentMenu->y - 5 +
+                        itemOn*LINEHEIGHT_SMALL, 0, W_CacheLumpName(skullNameSmall[whichSkull],
+                                              PU_CACHE));
+        }
     }
 }
 
@@ -7454,6 +7459,9 @@ void M_ClearMenus (void)
         if(usergame)
             ST_doRefresh();
     }
+
+    if(dp_translation)
+        V_ClearDPTranslation();
 
     // if (!netgame && usergame && paused)
     //       sendpause = true;
@@ -8654,12 +8662,12 @@ void M_DrawKeyBindings(void)
 {
     int i;
 
-    M_DarkBackground();
+    M_DarkBackground(0);
 
     if(fsize != 19321722)
-        V_DrawPatchWithShadow (80, 0, W_CacheLumpName("M_T_BNDS", PU_CACHE), false);
+        V_DrawPatchWithShadow (80, 0, 0, W_CacheLumpName("M_T_BNDS", PU_CACHE), false);
     else
-        V_DrawPatchWithShadow (80, 0, W_CacheLumpName("M_KBNDGS", PU_CACHE), false);
+        V_DrawPatchWithShadow (80, 0, 0, W_CacheLumpName("M_KBNDGS", PU_CACHE), false);
 
     for (i = 0; i < key_controls_end_in_cfg_at_pos - key_controls_start_in_cfg_at_pos; i++)
     {
@@ -8774,13 +8782,13 @@ void M_Controls(int choice)
 
 void M_DrawControls(void)
 {
-    M_DarkBackground();
+    M_DarkBackground(0);
 
     if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
-        V_DrawPatchWithShadow(48, 15, W_CacheLumpName("M_T_CSET",
+        V_DrawPatchWithShadow(48, 15, 0, W_CacheLumpName("M_T_CSET",
                                                PU_CACHE), false);
     else
-        V_DrawPatchWithShadow(48, 15, W_CacheLumpName("M_CTLSET",
+        V_DrawPatchWithShadow(48, 15, 0, W_CacheLumpName("M_CTLSET",
                                                PU_CACHE), false);
 #ifndef WII
     if(itemOn == 5)
@@ -8797,7 +8805,7 @@ void M_DrawControls(void)
 
     M_WriteText(ControlsDef.x, ControlsDef.y + 48, "MOUSE SENSITIVITY");
 
-    M_DrawThermoSmall(ControlsDef.x + 207,ControlsDef.y + LINEHEIGHT_SMALL*(mousesensibility+1),
+    M_DrawThermoSmall(ControlsDef.x + 205,ControlsDef.y + LINEHEIGHT_SMALL*(mousesensibility+1),
                  10,mouseSensitivity);
 
     if(itemOn == 6)
@@ -8845,16 +8853,16 @@ void M_DrawControls(void)
     dp_translation = crx[CRX_GREEN];
     M_WriteText(ControlsDef.x, ControlsDef.y - 12, "SPEEDS:");
 
-    M_DrawThermoSmall(ControlsDef.x + 79,ControlsDef.y + LINEHEIGHT_SMALL*(mousesens+1),
+    M_DrawThermoSmall(ControlsDef.x + 77,ControlsDef.y + LINEHEIGHT_SMALL*(mousesens+1),
                  26,forwardmove-25);
 
-    M_DrawThermoSmall(ControlsDef.x + 239,ControlsDef.y + LINEHEIGHT_SMALL*(turnsens+1),
+    M_DrawThermoSmall(ControlsDef.x + 237,ControlsDef.y + LINEHEIGHT_SMALL*(turnsens+1),
                  6,turnspeed-5);
 
-    M_DrawThermoSmall(ControlsDef.x + 151,ControlsDef.y + LINEHEIGHT_SMALL*(strafesens+1),
+    M_DrawThermoSmall(ControlsDef.x + 149,ControlsDef.y + LINEHEIGHT_SMALL*(strafesens+1),
                  17,sidemove-24);
 
-    M_DrawThermoSmall(ControlsDef.x + 199,ControlsDef.y + LINEHEIGHT_SMALL*(mousespeed+1),
+    M_DrawThermoSmall(ControlsDef.x + 197,ControlsDef.y + LINEHEIGHT_SMALL*(mousespeed+1),
                  11,mspeed);
 
     if(itemOn == 7)
@@ -9063,7 +9071,7 @@ void M_GameFiles(int choice)
 
 void M_DrawFilesMenu(void)
 {
-    M_DarkBackground();
+    M_DarkBackground(0);
 }
 
 void M_Armor(int choice)
@@ -9571,14 +9579,12 @@ void M_Beta(int choice)
         {
             beta_style_mode = false;
         }
-        players[consoleplayer].message = "PRE-RELEASE MODE DISABLED";
         break;
       case 1:
         if (!beta_style_mode && fsize != 28422764 && fsize != 19321722 && fsize != 12361532)
         {
             beta_style_mode = true;
         }
-        players[consoleplayer].message = "PRE-RELEASE MODE ENABLED";
         break;
     }
 }
@@ -10167,8 +10173,10 @@ void M_EndoomScreen(int choice)
             show_endoom = 0;
         break;
       case 1:
+#ifndef WII
         if (!show_endoom)
             show_endoom = 1;
+#endif
         break;
     }
 }
@@ -10228,12 +10236,12 @@ void M_Debug(int choice)
 
 void M_DrawSystem(void)
 {
-    M_DarkBackground();
+    M_DarkBackground(0);
 
     if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
-        V_DrawPatchWithShadow (62, 20, W_CacheLumpName("M_T_YSET", PU_CACHE), false);
+        V_DrawPatchWithShadow (62, 20, 0, W_CacheLumpName("M_T_YSET", PU_CACHE), false);
     else
-        V_DrawPatchWithShadow (62, 20, W_CacheLumpName("M_SYSSET", PU_CACHE), false);
+        V_DrawPatchWithShadow (62, 20, 0, W_CacheLumpName("M_SYSSET", PU_CACHE), false);
 
     if(display_fps)
     {
@@ -10389,12 +10397,12 @@ void M_Statistics(int choice)
 
 void M_DrawDebug(void)
 {
-    M_DarkBackground();
+    M_DarkBackground(0);
 
     if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
-        V_DrawPatchWithShadow (67, 15, W_CacheLumpName("M_T_DSET", PU_CACHE), false);
+        V_DrawPatchWithShadow (67, 15, 0, W_CacheLumpName("M_T_DSET", PU_CACHE), false);
     else
-        V_DrawPatchWithShadow (67, 15, W_CacheLumpName("M_DBGSET", PU_CACHE), false);
+        V_DrawPatchWithShadow (67, 15, 0, W_CacheLumpName("M_DBGSET", PU_CACHE), false);
 
     if(coordinates_info)
     {

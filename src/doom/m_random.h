@@ -29,11 +29,7 @@
 #define __M_RANDOM__
 
 
-#ifdef WII
-#include "../doomtype.h"
-#else
 #include "doomtype.h"
-#endif
 
 
 // killough 1/19/98: rewritten to use to use a better random number generator

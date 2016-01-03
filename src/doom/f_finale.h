@@ -29,13 +29,8 @@
 #define __F_FINALE__
 
 
-#ifdef WII
-#include "../doomtype.h"
-#include "../d_event.h"
-#else
 #include "doomtype.h"
 #include "d_event.h"
-#endif
 
 
 typedef enum

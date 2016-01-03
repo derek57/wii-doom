@@ -1,4 +1,3 @@
-#ifdef WII
 #ifndef _FAT_H_
 #define _FAT_H_
 
@@ -43,6 +42,5 @@ s32   Fat_Mount(fatDevice *);
 void  Fat_Unmount(fatDevice *);
 char *Fat_ToFilename(const char *);
 
-#endif
 #endif
 

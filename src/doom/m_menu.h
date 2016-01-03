@@ -29,11 +29,7 @@
 #define __M_MENU__
 
 
-#ifdef WII
-#include "../d_event.h"
-#else
 #include "d_event.h"
-#endif
 
 
 //
@@ -74,7 +70,7 @@ void M_WriteText (int x, int y, char *string);
 int M_StringWidth(char* string);
 
 void M_ClearMenus (void);
-void M_DarkBackground(void);
+void M_DarkBackground(int scrn);
 
 
 extern byte     grays[256];

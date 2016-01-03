@@ -27,11 +27,7 @@
 #ifndef __HU_STUFF_H__
 #define __HU_STUFF_H__
 
-#ifdef WII
-#include "../d_event.h"
-#else
 #include "d_event.h"
-#endif
 
 
 //

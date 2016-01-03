@@ -33,15 +33,8 @@ rcsid[] = "$Id: st_stuff.c,v 1.6 1997/02/03 22:45:13 b1 Exp $";
 #include <stdio.h>
 
 #include "am_map.h"
-
-#ifdef WII
-#include "../c_io.h"
-#include "../d_deh.h"
-#else
 #include "c_io.h"
 #include "d_deh.h"
-#endif
-
 #include "doomdef.h"
 
 // State.
@@ -52,31 +45,17 @@ rcsid[] = "$Id: st_stuff.c,v 1.6 1997/02/03 22:45:13 b1 Exp $";
 
 #include "g_game.h"
 #include "hu_stuff.h"
-
-#ifdef WII
-#include "../i_swap.h"
-#include "../i_system.h"
-#include "../i_tinttab.h"
-#include "../i_video.h"
-#else
 #include "i_swap.h"
 #include "i_system.h"
 #include "i_tinttab.h"
 #include "i_video.h"
-#endif
 
 #ifndef WII
 #include "m_cheat.h"
 #endif
 
 #include "m_menu.h"
-
-#ifdef WII
-#include "../m_misc.h"
-#else
 #include "m_misc.h"
-#endif
-
 #include "m_random.h"
 #include "p_inter.h"
 #include "p_local.h"
@@ -88,18 +67,10 @@ rcsid[] = "$Id: st_stuff.c,v 1.6 1997/02/03 22:45:13 b1 Exp $";
 #include "st_stuff.h"
 
 // Needs access to LFB.
-
-#ifdef WII
-#include "../v_video.h"
-
-#include "../w_wad.h"
-#include "../z_zone.h"
-#else
 #include "v_video.h"
 
 #include "w_wad.h"
 #include "z_zone.h"
-#endif
 
 //
 // STATUS BAR DATA
@@ -574,7 +545,7 @@ cheatseq_t cheat_mypos = CHEAT("idmypos", 0);
 
 
 // graphics are drawn to a backing screen and blitted to the real screen
-byte                *st_backing_screen;
+//byte                *st_backing_screen;
 
 int                 prio = 0;
 int                 healthhighlight = 0;
@@ -618,57 +589,57 @@ void ST_refreshBackground(void)
 
     if (st_statusbaron)
     {
-        V_UseBuffer(st_backing_screen);
+//        V_UseBuffer(st_backing_screen);
 
         if(beta_style)
         {
             if(automapactive)
             {
-                V_DrawPatch(ST_X, 0, sbarmap);
+                V_DrawPatch(ST_X, 0, 4, sbarmap);
 
                 if(plyr->weaponowned[wp_shotgun])
-                    V_DrawPatch(110, 4, sbara_shotgun);
+                    V_DrawPatch(110, 4, 4, sbara_shotgun);
                 if(plyr->weaponowned[wp_chaingun])
-                    V_DrawPatch(110, 10, sbara_chaingun);
+                    V_DrawPatch(110, 10, 4, sbara_chaingun);
                 if(plyr->weaponowned[wp_missile])
-                    V_DrawPatch(135, 3, sbara_missile);
+                    V_DrawPatch(135, 3, 4, sbara_missile);
                 if(plyr->weaponowned[wp_plasma])
-                    V_DrawPatch(135, 10, sbara_plasma);
+                    V_DrawPatch(135, 10, 4, sbara_plasma);
                 if(plyr->weaponowned[wp_bfg])
-                    V_DrawPatch(185, 3, sbara_bfg);
+                    V_DrawPatch(185, 3, 4, sbara_bfg);
                 if(plyr->weaponowned[wp_chainsaw])
-                    V_DrawPatch(160, 5, sbara_chainsaw);
+                    V_DrawPatch(160, 5, 4, sbara_chainsaw);
             }
             else
             {
                 if(fsize == 4207819 || fsize == 4274218 || fsize == 10396254)
                 {
-                    V_DrawPatch(ST_X, 0, sbar_left_oldwad);
-                    V_DrawPatch(104, 0, sbar_right_oldwad);
+                    V_DrawPatch(ST_X, 0, 4, sbar_left_oldwad);
+                    V_DrawPatch(104, 0, 4, sbar_right_oldwad);
                 }
                 else
-                    V_DrawPatch(ST_X, 0, sbar);
+                    V_DrawPatch(ST_X, 0, 4, sbar);
             }
         }
         else
         {
             if(fsize == 4207819 || fsize == 4274218 || fsize == 10396254)
             {
-                V_DrawPatch(ST_X, 0, sbar_left_oldwad);
-                V_DrawPatch(104, 0, sbar_right_oldwad);
+                V_DrawPatch(ST_X, 0, 4, sbar_left_oldwad);
+                V_DrawPatch(104, 0, 4, sbar_right_oldwad);
             }
             else
-                V_DrawPatch(ST_X, 0, sbar);
+                V_DrawPatch(ST_X, 0, 4, sbar);
         }
 
         if (netgame)
-            V_DrawPatch(ST_FX, 0, faceback);
+            V_DrawPatch(ST_FX, 0, 4, faceback);
         else if(beta_style && !automapactive)
-            V_DrawPatch(ST_FX - 1, 1, faceback);
+            V_DrawPatch(ST_FX - 1, 1, 4, faceback);
 
-        V_RestoreBuffer();
+//        V_RestoreBuffer();
 
-        V_CopyRect(ST_X, 0, st_backing_screen, ST_WIDTH, ST_HEIGHT, ST_X, ST_Y);
+        V_CopyRect(ST_X, 0, 4, ST_WIDTH, ST_HEIGHT, ST_X, ST_Y, 0);
     }
 }
 
@@ -2077,5 +2048,6 @@ void ST_Init (void)
 {
     ST_loadData();
 
-    st_backing_screen = Z_Malloc((ST_WIDTH << hires) * (ST_HEIGHT << hires) * sizeof(*st_backing_screen), PU_STATIC, 0);
+//    st_backing_screen = Z_Malloc((ST_WIDTH << hires) * (ST_HEIGHT << hires) * sizeof(*st_backing_screen), PU_STATIC, 0);
+    screens[4] = Z_Malloc((ST_WIDTH << hires) * (ST_HEIGHT << hires) * sizeof(*screens[4]), PU_STATIC, 0);
 }

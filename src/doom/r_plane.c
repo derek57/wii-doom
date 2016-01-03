@@ -38,52 +38,34 @@
 
 #include <stdlib.h>
 
-#ifdef WII
-#include "../c_io.h"
-#else
 #include "c_io.h"
-#endif
-
 #include "doomstat.h"
-
-#ifdef WII
-#include "../i_system.h"
-#include "../i_timer.h"
-#else
 #include "i_system.h"
 #include "i_timer.h"
-#endif
-
 #include "p_local.h"
 #include "r_local.h"
 #include "r_sky.h"
-
-#ifdef WII
-#include "../w_wad.h"
-#include "../z_zone.h"
-#else
 #include "w_wad.h"
 #include "z_zone.h"
-#endif
 
-//#define MAXVISPLANES    128                           // must be a power of 2
-#define MAXVISPLANES    128*8                         // must be a power of 2
+#define MAXVISPLANES    128                           // must be a power of 2
+//#define MAXVISPLANES    128*8                         // must be a power of 2
 
 // ?
 #define MAXOPENINGS        SCREENWIDTH*64*4  // CHANGED FOR HIRES
 
-//static visplane_t       *visplanes[MAXVISPLANES];     // killough
-static visplane_t       *visplanes = NULL;              // CHANGED FOR HIRES
+static visplane_t       *visplanes[MAXVISPLANES];     // killough
+//static visplane_t       *visplanes = NULL;              // CHANGED FOR HIRES
 
-static visplane_t              *lastvisplane;
-/*
+//static visplane_t              *lastvisplane;
+
 static visplane_t       *freetail;                      // killough
 static visplane_t       **freehead = &freetail;         // killough
-*/
+
 visplane_t              *floorplane;
 visplane_t              *ceilingplane;
 
-static int                 numvisplanes;                // ADDED FOR HIRES
+//static int                 numvisplanes;                // ADDED FOR HIRES
 
 // killough -- hash function for visplanes
 // Empirically verified to be fairly uniform:
@@ -182,17 +164,16 @@ void R_ClearPlanes(void)
         floorclip[i] = viewheight;
         ceilingclip[i] = -1;
     }
-/*
+
     for (i = 0; i < MAXVISPLANES; i++)  // new code -- killough
         for (*freehead = visplanes[i], visplanes[i] = NULL; *freehead;)
             freehead = &(*freehead)->next;
-*/
-    lastvisplane = visplanes;
+
+//    lastvisplane = visplanes;
     lastopening = openings;
 }
 
 // New function, by Lee Killough
-/*
 static visplane_t *new_visplane(unsigned hash)
 {
     visplane_t  *check = freetail;
@@ -205,8 +186,12 @@ static visplane_t *new_visplane(unsigned hash)
     visplanes[hash] = check;
     return check;
 }
-*/
+
 // [crispy] remove MAXVISPLANES Vanilla limit
+//
+// [nitr8] UNUSED
+//
+/*
 static void R_RaiseVisplanes (visplane_t** vp)
 {
     if (lastvisplane - visplanes == numvisplanes)
@@ -234,6 +219,7 @@ static void R_RaiseVisplanes (visplane_t** vp)
             *vp = visplanes + (*vp - visplanes_old);
     }
 }
+*/
 
 //
 // R_FindPlane
@@ -241,32 +227,30 @@ static void R_RaiseVisplanes (visplane_t** vp)
 visplane_t *R_FindPlane(fixed_t height, int picnum, int lightlevel, fixed_t xoffs, fixed_t yoffs)
 {
     visplane_t          *check;
-//    unsigned int        hash;                                   // killough
+    unsigned int        hash;                                   // killough
 
     if (picnum == skyflatnum || (picnum & PL_SKYFLAT))          // killough 10/98
         height = lightlevel = 0;                // killough 7/19/98: most skies map together
 
     // New visplane algorithm uses hash table -- killough
-/*
     hash = visplane_hash(picnum, lightlevel, height);
 
     for (check = visplanes[hash]; check; check = check->next)   // killough
-*/
-    for (check=visplanes; check<lastvisplane; check++)
+//    for (check=visplanes; check<lastvisplane; check++)
         if (height == check->height && picnum == check->picnum && lightlevel == check->lightlevel
                 && xoffs == check->xoffs && yoffs == check->yoffs)
-//            return check;
-            break;
+            return check;
+//            break;
 
-//    check = new_visplane(hash);                                 // killough
-
+    check = new_visplane(hash);                                 // killough
+/*
     if (check < lastvisplane)
         return check;
 
     R_RaiseVisplanes(&check);
 
     lastvisplane++;
-
+*/
     check->height = height;
     check->picnum = picnum;
     check->lightlevel = lightlevel;
@@ -313,11 +297,12 @@ visplane_t *R_CheckPlane(visplane_t *pl, int start, int stop)
         intrh = stop;
     }
 
-//    for (x = intrl; x <= intrh && pl->top[x] == SHRT_MAX; x++);
+    for (x = intrl; x <= intrh && pl->top[x] == SHRT_MAX; x++);
+/*
     for (x=intrl ; x<= intrh ; x++)
         if (pl->top[x] != 0xffffffffu) // [crispy] hires / 32-bit integer math
             break;
-
+*/
     // [crispy] fix HOM if ceilingplane and floorplane are the same
     // visplane (e.g. both skies)
     if (!(pl == floorplane && markceiling && floorplane == ceilingplane) && x > intrh)
@@ -327,7 +312,6 @@ visplane_t *R_CheckPlane(visplane_t *pl, int start, int stop)
     }
     else
     {
-/*
         unsigned int    hash = visplane_hash(pl->picnum, pl->lightlevel, pl->height);
         visplane_t      *new_pl = new_visplane(hash);
 
@@ -338,9 +322,9 @@ visplane_t *R_CheckPlane(visplane_t *pl, int start, int stop)
         new_pl->xoffs = pl->xoffs;      // killough 2/28/98
         new_pl->yoffs = pl->yoffs;
         pl = new_pl;
-*/
-        // make a new visplane
 
+        // make a new visplane
+/*
         R_RaiseVisplanes(&pl);                                        // ADDED FOR HIRES
 
         lastvisplane->height = pl->height;
@@ -350,7 +334,7 @@ visplane_t *R_CheckPlane(visplane_t *pl, int start, int stop)
         lastvisplane->yoffs = pl->yoffs;
     
         pl = lastvisplane++;
-
+*/
         pl->minx = start;
         pl->maxx = stop;
         memset(pl->top, SHRT_MAX, sizeof(pl->top));
@@ -463,29 +447,29 @@ byte *R_DistortedFlat(int flatnum)
 //
 void R_DrawPlanes(void)
 {
-//    int i;
+    int i;
 
 #ifdef RANGECHECK
 
     if (ds_p - drawsegs > maxdrawsegs)                          // CHANGED FOR HIRES
         I_Error ("R_DrawPlanes: drawsegs overflow (%i)",        // CHANGED FOR HIRES
                  ds_p - drawsegs);                              // CHANGED FOR HIRES
-    
+/*    
     if (lastvisplane - visplanes > numvisplanes)                // CHANGED FOR HIRES
         I_Error ("R_DrawPlanes: visplane overflow (%i)",        // CHANGED FOR HIRES
                  lastvisplane - visplanes);                     // CHANGED FOR HIRES
-
+*/
     if (lastopening - openings > MAXOPENINGS)
         I_Error ("R_DrawPlanes: opening overflow (%i)",
                  lastopening - openings);
 #endif
 
-//    for (i = 0; i < MAXVISPLANES; i++)
+    for (i = 0; i < MAXVISPLANES; i++)
     {
         visplane_t      *pl;
 
-//        for (pl = visplanes[i]; pl; pl = pl->next)
-        for (pl = visplanes ; pl < lastvisplane ; pl++)
+        for (pl = visplanes[i]; pl; pl = pl->next)
+//        for (pl = visplanes ; pl < lastvisplane ; pl++)
         {
             if (pl->minx <= pl->maxx)
             {

@@ -30,37 +30,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#ifdef WII
-#include "../c_io.h"
-#include "../d_deh.h"
-#else
 #include "c_io.h"
 #include "d_deh.h"
-#endif
-
 #include "doomdef.h"
-
-#ifdef WII
-#include "../doomfeatures.h"
-#else
 #include "doomfeatures.h"
-#endif
 
 // State.
 #include "doomstat.h"
 
 #include "g_game.h"
 
-#ifdef WII
-#include "../i_system.h"
-#include "../m_bbox.h"
-#include "../m_misc.h"
-#else
 #include "i_system.h"
 #include "m_bbox.h"
 #include "m_misc.h"
-#endif
-
 #include "m_random.h"
 #include "p_local.h"
 #include "p_tick.h"
@@ -70,11 +52,7 @@
 // Data.
 #include "sounds.h"
 
-#ifdef WII
-#include "../z_zone.h"
-#else
 #include "z_zone.h"
-#endif
 
 
 #define        FATSPREAD            (ANG90/8)

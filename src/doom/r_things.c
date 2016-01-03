@@ -36,43 +36,17 @@
 ========================================================================
 */
 
-#ifdef WII
-#include "../c_io.h"
-#else
 #include "c_io.h"
-#endif
-
-#ifdef WII
-#include "../doomfeatures.h"
-#else
 #include "doomfeatures.h"
-#endif
-
 #include "doomstat.h"
-
-#ifdef WII
-#include "../i_swap.h"
-#include "../i_system.h"
-#include "../i_tinttab.h"
-#else
 #include "i_swap.h"
 #include "i_system.h"
 #include "i_tinttab.h"
-#endif
-
 #include "p_local.h"
-
-#ifdef WII
-#include "../v_trans.h"
-#include "../v_video.h"
-#include "../w_wad.h"
-#include "../z_zone.h"
-#else
 #include "v_trans.h"
 #include "v_video.h"
 #include "w_wad.h"
 #include "z_zone.h"
-#endif
 
 
 #define MAX_SPRITE_FRAMES       29
@@ -1367,15 +1341,15 @@ static void R_DrawPSprite(pspdef_t *psp, dboolean invisibility)
         vis->startfrac += vis->xiscale * (vis->x1 - x1);
 
     vis->patch = lump;
-/*
-    if (invisibility)
-    {
-        // shadow draw
-        vis->colfunc = psprcolfunc;
-        vis->colormap = NULL;
-    }
-    else
-*/
+
+//    if (invisibility)
+//    {
+//        // shadow draw
+//        vis->colfunc = psprcolfunc;
+//        vis->colormap = NULL;
+//    }
+//    else
+
     // [crispy] do not invalidate colormap if invisibility is rendered translucently
     if ((viewplayer->powers[pw_invisibility] > 4*32
         || (viewplayer->powers[pw_invisibility] & 8))
@@ -1385,7 +1359,7 @@ static void R_DrawPSprite(pspdef_t *psp, dboolean invisibility)
         vis->colfunc = fuzzcolfunc;
         vis->colormap = NULL;
     }
-    else /*if (fixedcolormap)*/
+    else //if (fixedcolormap)
     {
         if (spr == SPR_SHT2 && (!frame || frame >= 8))
             vis->colfunc = R_DrawSuperShotgunColumn;
@@ -1395,22 +1369,22 @@ static void R_DrawPSprite(pspdef_t *psp, dboolean invisibility)
             {
                 void (*colfuncs[])(void) =
                 {
-                    /* n/a      */ NULL,
-                    /* SPR_SHTG */ basecolfunc,
-                    /* SPR_PUNG */ basecolfunc,
-                    /* SPR_PISG */ basecolfunc,
-                    /* SPR_PISF */ tlcolfunc,
-                    /* SPR_SHTF */ tlcolfunc,
-                    /* SPR_SHT2 */ tlredwhitecolfunc1,
-                    /* SPR_CHGG */ basecolfunc,
-                    /* SPR_CHGF */ tlredwhitecolfunc2,
-                    /* SPR_MISG */ basecolfunc,
-                    /* SPR_MISF */ tlcolfunc,
-                    /* SPR_SAWG */ basecolfunc,
-                    /* SPR_PLSG */ basecolfunc,
-                    /* SPR_PLSF */ tlcolfunc,
-                    /* SPR_BFGG */ basecolfunc,
-                    /* SPR_BFGF */ tlcolfunc
+                    NULL,               // n/a
+                    basecolfunc,        // SPR_SHTG
+                    basecolfunc,        // SPR_PUNG
+                    basecolfunc,        // SPR_PISG
+                    tlcolfunc,          // SPR_PISF
+                    tlcolfunc,          // SPR_SHTF
+                    tlredwhitecolfunc1, // SPR_SHT2
+                    basecolfunc,        // SPR_CHGG
+                    tlredwhitecolfunc2, // SPR_CHGF
+                    basecolfunc,        // SPR_MISG
+                    tlcolfunc,          // SPR_MISF
+                    basecolfunc,        // SPR_SAWG
+                    basecolfunc,        // SPR_PLSG
+                    tlcolfunc,          // SPR_PLSF
+                    basecolfunc,        // SPR_BFGG
+                    tlcolfunc           // SPR_BFGF
                 };
                 vis->colfunc = (bflash && spr <= SPR_BFGF && !state->dehacked ? colfuncs[spr] :
                         basecolfunc);
@@ -1419,22 +1393,22 @@ static void R_DrawPSprite(pspdef_t *psp, dboolean invisibility)
             {
                 void (*colfuncs[])(void) =
                 {
-                    /* n/a      */ NULL,
-                    /* SPR_SHTG */ basecolfunc,
-                    /* SPR_PUNG */ basecolfunc,
-                    /* SPR_PISG */ basecolfunc,
-                    /* SPR_PISF */ basecolfunc,
-                    /* SPR_SHTF */ basecolfunc,
-                    /* SPR_SHT2 */ basecolfunc,
-                    /* SPR_CHGG */ basecolfunc,
-                    /* SPR_CHGF */ basecolfunc,
-                    /* SPR_MISG */ basecolfunc,
-                    /* SPR_MISF */ basecolfunc,
-                    /* SPR_SAWG */ basecolfunc,
-                    /* SPR_PLSG */ basecolfunc,
-                    /* SPR_PLSF */ basecolfunc,
-                    /* SPR_BFGG */ basecolfunc,
-                    /* SPR_BFGF */ basecolfunc
+                    NULL,               // n/a
+                    basecolfunc,        // SPR_SHTG
+                    basecolfunc,        // SPR_PUNG
+                    basecolfunc,        // SPR_PISG
+                    basecolfunc,        // SPR_PISF
+                    basecolfunc,        // SPR_SHTF
+                    basecolfunc,        // SPR_SHT2
+                    basecolfunc,        // SPR_CHGG
+                    basecolfunc,        // SPR_CHGF
+                    basecolfunc,        // SPR_MISG
+                    basecolfunc,        // SPR_MISF
+                    basecolfunc,        // SPR_SAWG
+                    basecolfunc,        // SPR_PLSG
+                    basecolfunc,        // SPR_PLSF
+                    basecolfunc,        // SPR_BFGG
+                    basecolfunc         // SPR_BFGF
                 };
                 vis->colfunc = (bflash && spr <= SPR_BFGF && !state->dehacked ? colfuncs[spr] :
                         basecolfunc);
@@ -1537,12 +1511,12 @@ void R_DrawPlayerSprites(void)
         for (i = 0, psp = viewplayer->psprites; i < NUMPSPRITES; i++, psp++)
             if (psp->state)
                 R_DrawPSprite(psp, true);
-/*
-        if (menuactive || paused || consoleactive)
-            R_DrawPausedFuzzColumns();
-        else
-            R_DrawFuzzColumns();
-*/
+
+//        if (menuactive || paused || consoleactive)
+//            R_DrawPausedFuzzColumns();
+//        else
+//            R_DrawFuzzColumns();
+
     }
     else
     {
@@ -1842,6 +1816,6 @@ void R_DrawMasked(void)
             R_RenderMaskedSegRange(ds, ds->x1, ds->x2);
 
     // draw the psprites on top of everything
-    if (/*r_playersprites &&*/ !inhelpscreens)
+    if (!inhelpscreens)
         R_DrawPlayerSprites();
 }

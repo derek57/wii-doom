@@ -27,7 +27,6 @@ distribution.
 -------------------------------------------------------------*/
 
 
-#ifdef WII
 #include <gccore.h>
 #include <malloc.h>
 #include <stdio.h>
@@ -449,5 +448,4 @@ const DISC_INTERFACE __io_wiiums_ro = {
     (FN_MEDIUM_CLEARSTATUS)                &umsio_ClearStatus,
     (FN_MEDIUM_SHUTDOWN)                   &umsio_Shutdown
 };
-#endif
 

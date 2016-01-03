@@ -21,6 +21,7 @@
 #include "doomtype.h"
 
 void I_SDL_PollMusic(void);
+/*static*/ void DumpSubstituteConfig(char *filename);
 
 #endif /* #ifndef __I_SDLMUSIC_H__ */
 

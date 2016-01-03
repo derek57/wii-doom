@@ -31,12 +31,7 @@
 #include "m_misc.h"
 #include "w_wad.h"
 #include "z_zone.h"
-
-#ifdef WII
-#include "../pcsound/pcsound.h"
-#else
 #include "pcsound.h"
-#endif
 
 
 #define TIMER_FREQ 1193181 /* hz */

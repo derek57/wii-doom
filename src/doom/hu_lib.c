@@ -28,29 +28,13 @@
 
 #include "doomdef.h"
 
-#ifdef WII
-#include "../doomkeys.h"
-#else
 #include "doomkeys.h"
-#endif
-
 #include "doomstat.h"
 #include "hu_lib.h"
-
-#ifdef WII
-#include "../i_swap.h"
-#else
 #include "i_swap.h"
-#endif
-
 #include "r_draw.h"
 #include "r_local.h"
-
-#ifdef WII
-#include "../v_video.h"
-#else
 #include "v_video.h"
-#endif
 
 // dboolean : whether the screen is always erased
 #define noterased viewwindowx
@@ -158,9 +142,9 @@ HUlib_drawTextLine
             if (x+w > ORIGWIDTH)    // CHANGED FOR HIRES
                 break;
             if(font_shadow == 1)
-                V_DrawPatchWithShadow(x, l->y, l->f[c - l->sc], false);
+                V_DrawPatchWithShadow(x, l->y, 0, l->f[c - l->sc], false);
             else
-                V_DrawPatch(x, l->y, l->f[c - l->sc]);
+                V_DrawPatch(x, l->y, 0, l->f[c - l->sc]);
             x += w;
         }
         else
@@ -176,9 +160,9 @@ HUlib_drawTextLine
         && x + SHORT(l->f['_' - l->sc]->width) <= ORIGWIDTH) // CHANGED FOR HIRES
     {
         if(font_shadow == 1)
-            V_DrawPatchWithShadow(x, l->y, l->f['_' - l->sc], false);
+            V_DrawPatchWithShadow(x, l->y, 0, l->f['_' - l->sc], false);
         else
-            V_DrawPatch(x, l->y, l->f['_' - l->sc]);
+            V_DrawPatch(x, l->y, 0, l->f['_' - l->sc]);
     }
 }
 

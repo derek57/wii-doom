@@ -28,12 +28,7 @@
 
 #include <stdlib.h>
 
-#ifdef WII
-#include "../doomtype.h"
-#else
 #include "doomtype.h"
-#endif
-
 #include "sounds.h"
 
 

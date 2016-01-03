@@ -29,37 +29,15 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#ifdef WII
-#include "../c_io.h"
-#include "../d_loop.h"
-#else
 #include "c_io.h"
 #include "d_loop.h"
-#endif
-
 #include "d_net.h"
 #include "d_main.h"
-
 #include "doomdef.h"
-
-#ifdef WII
-#include "../doomfeatures.h"
-#else
 #include "doomfeatures.h"
-#endif
-
 #include "doomstat.h"
 #include "g_game.h"
 #include "m_menu.h"
-
-#ifdef WII
-#include "../i_system.h"
-#include "../i_timer.h"
-#include "../i_video.h"
-#include "../m_misc.h"
-#include "../v_trans.h"
-#include "../w_wad.h"
-#else
 #include "i_system.h"
 #include "i_timer.h"
 #include "i_video.h"
@@ -67,7 +45,6 @@
 #include "m_misc.h"
 #include "v_trans.h"
 #include "w_wad.h"
-#endif
 
 
 extern dboolean longtics;

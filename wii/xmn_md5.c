@@ -1,11 +1,10 @@
-#ifdef WII
 #include <stdio.h>
 
 #include "../src/doom/doomdef.h"
 #include "md5.h"
 
 
-extern char                target[MAXPATH];
+//extern char                target[MAXPATH];
 
 char calculated_md5_string[33];
 char known_md5_string_chex_quest_iwad[33] = "25485721882b050afa96a56e5758dd52";
@@ -85,5 +84,4 @@ int MD5_Check(char *fin)
 
     return 0;
 }
-#endif
 

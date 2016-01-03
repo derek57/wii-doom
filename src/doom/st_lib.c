@@ -28,38 +28,18 @@ rcsid[] = "$Id: st_lib.c,v 1.4 1997/02/03 16:47:56 b1 Exp $";
 
 #include <ctype.h>
 
-#ifdef WII
-#include "../d_deh.h"
-#else
 #include "d_deh.h"
-#endif
-
 #include "doomdef.h"
 #include "doomstat.h"
-
-#ifdef WII
-#include "../i_swap.h"
-#include "../i_system.h"
-#else
 #include "i_swap.h"
 #include "i_system.h"
-#endif
-
 #include "r_local.h"
 #include "st_lib.h"
 #include "st_stuff.h"
-
-#ifdef WII
-#include "../v_patch.h"
-#include "../v_video.h"
-#include "../w_wad.h"
-#include "../z_zone.h"
-#else
 #include "v_patch.h"
 #include "v_video.h"
 #include "w_wad.h"
 #include "z_zone.h"
-#endif
 
 
 // in AM_map.c
@@ -140,7 +120,7 @@ STlib_drawNum
     if (n->y - ST_Y < 0)
         I_Error("drawNum: n->y - ST_Y < 0");
 
-    V_CopyRect(x, n->y - ST_Y, st_backing_screen, w*numdigits, h, x, n->y);
+    V_CopyRect(x, n->y - ST_Y, 4, w*numdigits, h, x, n->y, 0);
 
     // if non-number, do not draw it
     if (num == 1994)
@@ -150,19 +130,19 @@ STlib_drawNum
 
     // in the special case of 0, you draw 0
     if (!num)
-        V_DrawPatch(x - w, n->y, n->p[ 0 ]);
+        V_DrawPatch(x - w, n->y, 0, n->p[ 0 ]);
 
     // draw the new number
     while (num && numdigits--)
     {
         x -= w;
-        V_DrawPatch(x, n->y, n->p[ num % 10 ]);
+        V_DrawPatch(x, n->y, 0, n->p[ num % 10 ]);
         num /= 10;
     }
 
     // draw a minus sign if necessary
     if (neg)
-        V_DrawPatch(x - 8, n->y, sttminus);
+        V_DrawPatch(x - 8, n->y, 0, sttminus);
 }
 
 
@@ -200,7 +180,7 @@ STlib_updatePercent
   int                   refresh )
 {
     if (refresh && *per->n.on)
-        V_DrawPatch(per->n.x, per->n.y, per->p);
+        V_DrawPatch(per->n.x, per->n.y, 0, per->p);
     
     STlib_updateNum(&per->n, refresh);
 }
@@ -245,9 +225,9 @@ STlib_updateMultIcon
             if (y - ST_Y < 0)
                 I_Error("updateMultIcon: y - ST_Y < 0");
 
-            V_CopyRect(x, y-ST_Y, st_backing_screen, w, h, x, y);
+            V_CopyRect(x, y-ST_Y, 4, w, h, x, y, 0);
         }
-        V_DrawPatch(mi->x, mi->y, mi->p[*mi->inum]);
+        V_DrawPatch(mi->x, mi->y, 0, mi->p[*mi->inum]);
         mi->oldinum = *mi->inum;
     }
 
@@ -262,7 +242,7 @@ STlib_updateMultIcon
             char            namebuf[9];
 
             sprintf(namebuf, "STYSNUM%d", i);
-            V_DrawPatch(173, 192,
+            V_DrawPatch(173, 192, 0,
                     W_CacheLumpName(namebuf, PU_CACHE));
         }
     }
@@ -306,9 +286,9 @@ STlib_updateBinIcon
             I_Error("updateBinIcon: y - ST_Y < 0");
 
         if (*bi->val)
-            V_DrawPatch(bi->x, bi->y, bi->p);
+            V_DrawPatch(bi->x, bi->y, 0, bi->p);
         else
-            V_CopyRect(x, y-ST_Y, st_backing_screen, w, h, x, y);
+            V_CopyRect(x, y-ST_Y, 4, w, h, x, y, 0);
 
         bi->oldval = *bi->val;
     }

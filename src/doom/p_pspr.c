@@ -26,20 +26,9 @@
 //-----------------------------------------------------------------------------
 
 
-#ifdef WII
-#include "../c_io.h"
-#include "../d_event.h"
-#else
 #include "c_io.h"
 #include "d_event.h"
-#endif
-
-#ifdef WII
-#include "../d_deh.h"
-#else
 #include "d_deh.h"
-#endif
-
 #include "doomdef.h"
 
 // State.
@@ -54,11 +43,7 @@
 // Data.
 #include "sounds.h"
 
-#ifdef WII
-#include "../v_trans.h"
-#else
 #include "v_trans.h"
-#endif
 
 
 #define LOWERSPEED              FRACUNIT*6

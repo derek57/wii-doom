@@ -89,6 +89,9 @@ byte redtoyellow[] =
 
 /*static*/ byte                  *dest_screen = NULL;
 
+// Each screen is [SCREENWIDTH * SCREENHEIGHT];
+byte            *screens[5];
+
 // [crispy] four different rendering functions
 // for each possible combination of dp_translation and dp_translucent:
 // (1) normal, opaque patch
@@ -121,20 +124,23 @@ dboolean                      dp_translucent = false;
 //
 // V_MarkRect 
 // 
-void V_MarkRect(int x, int y, int width, int height) 
+// [nitr8] UNUSED
+//
+/*
+void V_MarkRect(int x, int y, int srcscrn, int width, int height, int destscrn) 
 { 
     // If we are temporarily using an alternate screen, do not 
     // affect the update box.
 
-    if (dest_screen == I_VideoBuffer)
+//    if (dest_screen == I_VideoBuffer)
+    if (screens[srcscrn] == screens[destscrn])
     {
         M_AddToBox (dirtybox, x, y); 
         M_AddToBox (dirtybox, x + width-1, y + height-1); 
     }
 } 
  
-/*
-void V_DrawHorizLine(int x, int y, int w, int c)
+void V_DrawHorizLine(int x, int y, int scrn, int w, int c)
 {
     uint8_t *buf;
     int x1;
@@ -150,7 +156,8 @@ void V_DrawHorizLine(int x, int y, int w, int c)
     }
 #endif 
 
-    buf = I_VideoBuffer + SCREENWIDTH * y + x;
+//    buf = I_VideoBuffer + SCREENWIDTH * y + x;
+    buf = screens[scrn] + SCREENWIDTH * y + x;
 
     for (x1 = 0; x1 < w; ++x1)
     {
@@ -158,6 +165,7 @@ void V_DrawHorizLine(int x, int y, int w, int c)
     }
 }
 */
+
 //
 // V_CopyRect 
 // 
@@ -165,11 +173,13 @@ void
 V_CopyRect
 ( int        srcx,
   int        srcy,
-  byte*      source,
+  int        srcscrn,
+//  byte*      source,
   int        width,
   int        height,
   int        destx,
-  int        desty) 
+  int        desty,
+  int        destscrn) 
 { 
     byte *src;
     byte *dest; 
@@ -201,11 +211,14 @@ V_CopyRect
         width = SCREENWIDTH - destx;
     if (desty + height > SCREENHEIGHT)
         height = SCREENHEIGHT - desty;
-
-    V_MarkRect(destx, desty, width, height); 
+/*
+    V_MarkRect(destx, desty, 0, width, height); 
 
     src = source + SCREENWIDTH * srcy + srcx;
     dest = dest_screen + SCREENWIDTH * desty + destx;
+*/
+    src = screens[srcscrn] + SCREENWIDTH * srcy + srcx;
+    dest = screens[destscrn] + SCREENWIDTH * desty + destx;
 
     for ( ; height>0 ; height--) 
     { 
@@ -224,6 +237,7 @@ void
 V_DrawPatch
 ( int        x,
   int        y,
+  int        scrn,
   patch_t*   patch ) 
 { 
     int count;
@@ -253,11 +267,12 @@ V_DrawPatch
     }
 #endif
 
-    V_MarkRect(x, y, SHORT(patch->width), SHORT(patch->height));
+//    V_MarkRect(x, y, 0, SHORT(patch->width), SHORT(patch->height));
 
     col = 0;
 
-    desttop = dest_screen + (y << hires) * SCREENWIDTH + x;
+//    desttop = dest_screen + (y << hires) * SCREENWIDTH + x;
+    desttop = screens[scrn] + (y << hires) * SCREENWIDTH + x;
 
     w = SHORT(patch->width);
 
@@ -336,6 +351,7 @@ void
 V_DrawPatchFlipped
 ( int        x,
   int        y,
+  int        scrn,
   patch_t*   patch ) 
 {
     int count;
@@ -360,10 +376,11 @@ V_DrawPatchFlipped
     }
 #endif
 
-    V_MarkRect (x, y, SHORT(patch->width), SHORT(patch->height));
+//    V_MarkRect (x, y, 0, SHORT(patch->width), SHORT(patch->height));
 
     col = 0;
-    desttop = dest_screen + (y << hires) * SCREENWIDTH + x;
+//    desttop = dest_screen + (y << hires) * SCREENWIDTH + x;
+    desttop = screens[scrn] + (y << hires) * SCREENWIDTH + x;
 
     w = SHORT(patch->width);
 
@@ -443,6 +460,7 @@ void
 V_DrawBlock
 ( int        x,
   int        y,
+  int        scrn,
   int        width,
   int        height,
   byte*      src ) 
@@ -459,10 +477,12 @@ V_DrawBlock
                 , x, y, x + width, y + height);
     }
 #endif 
- 
-    V_MarkRect (x, y, width, height); 
+/*
+    V_MarkRect (x, y, 0, width, height); 
  
     dest = dest_screen + (y << hires) * SCREENWIDTH + x;
+*/
+    dest = screens[scrn] + (y << hires) * SCREENWIDTH + x;
 
     while (height--) 
     { 
@@ -509,17 +529,24 @@ void V_Init (void)
     // no-op!
     // There used to be separate screens that could be drawn to; these are
     // now handled in the upper layers.
+
+    int         i;
+    byte        *base = Z_Malloc(SCREENWIDTH * SCREENHEIGHT * 4, PU_STATIC, NULL);
+
+    for (i = 0; i < 4; i++)
+        screens[i] = base + i * SCREENWIDTH * SCREENHEIGHT;
+
     GetPixelSize();
 }
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-value"
 
-void V_DrawConsoleChar(int x, int y, patch_t *patch, int color1, int color2, dboolean italics,
-    byte *tinttab)
+void V_DrawConsoleChar(int x, int y, int scrn, patch_t *patch, int color1, int color2, dboolean italics, byte *tinttab)
 {
     int         col = 0;
-    byte        *desttop = dest_screen + y * SCREENWIDTH + x;
+//    byte        *desttop = dest_screen + y * SCREENWIDTH + x;
+    byte        *desttop = screens[scrn] + y * SCREENWIDTH + x;
     int         w = SHORT(patch->width);
 
     for (; col < w; col++, desttop++)
@@ -564,7 +591,7 @@ void V_DrawConsoleChar(int x, int y, patch_t *patch, int color1, int color2, dbo
     }
 }
 
-void V_DrawHUDPatch(int x, int y, patch_t *patch, byte *tinttab)
+void V_DrawHUDPatch(int x, int y, int scrn, patch_t *patch, byte *tinttab)
 {
     int         col = 0;
     byte        *desttop;
@@ -573,7 +600,8 @@ void V_DrawHUDPatch(int x, int y, patch_t *patch, byte *tinttab)
     if (!tinttab)
         return;
 
-    desttop = dest_screen + y * SCREENWIDTH + x;
+//    desttop = dest_screen + y * SCREENWIDTH + x;
+    desttop = screens[scrn] + y * SCREENWIDTH + x;
     w = SHORT(patch->width);
 
     for (; col < w; col++, desttop++)
@@ -597,7 +625,7 @@ void V_DrawHUDPatch(int x, int y, patch_t *patch, byte *tinttab)
     }
 }
 
-void V_DrawYellowHUDPatch(int x, int y, patch_t *patch, byte *tinttab)
+void V_DrawYellowHUDPatch(int x, int y, int scrn, patch_t *patch, byte *tinttab)
 {
     int         col = 0;
     byte        *desttop;
@@ -606,7 +634,8 @@ void V_DrawYellowHUDPatch(int x, int y, patch_t *patch, byte *tinttab)
     if (!tinttab)
         return;
 
-    desttop = dest_screen + y * SCREENWIDTH + x;
+//    desttop = dest_screen + y * SCREENWIDTH + x;
+    desttop = screens[scrn] + y * SCREENWIDTH + x;
     w = SHORT(patch->width);
 
     for (; col < w; col++, desttop++)
@@ -630,10 +659,11 @@ void V_DrawYellowHUDPatch(int x, int y, patch_t *patch, byte *tinttab)
     }
 }
 
-void V_DrawTranslucentHUDPatch(int x, int y, patch_t *patch, byte *tinttab)
+void V_DrawTranslucentHUDPatch(int x, int y, int scrn, patch_t *patch, byte *tinttab)
 {
     int         col = 0;
-    byte        *desttop = dest_screen + y * SCREENWIDTH + x;
+//    byte        *desttop = dest_screen + y * SCREENWIDTH + x;
+    byte        *desttop = screens[scrn] + y * SCREENWIDTH + x;
     int         w = SHORT(patch->width);
 
     for (; col < w; col++, desttop++)
@@ -657,10 +687,11 @@ void V_DrawTranslucentHUDPatch(int x, int y, patch_t *patch, byte *tinttab)
     }
 }
 
-void V_DrawTranslucentHUDNumberPatch(int x, int y, patch_t *patch, byte *tinttab)
+void V_DrawTranslucentHUDNumberPatch(int x, int y, int scrn, patch_t *patch, byte *tinttab)
 {
     int         col = 0;
-    byte        *desttop = dest_screen + y * SCREENWIDTH + x;
+//    byte        *desttop = dest_screen + y * SCREENWIDTH + x;
+    byte        *desttop = screens[scrn] + y * SCREENWIDTH + x;
     int         w = SHORT(patch->width);
 
     for (; col < w; col++, desttop++)
@@ -686,10 +717,11 @@ void V_DrawTranslucentHUDNumberPatch(int x, int y, patch_t *patch, byte *tinttab
     }
 }
 
-void V_DrawTranslucentYellowHUDPatch(int x, int y, patch_t *patch, byte *tinttab)
+void V_DrawTranslucentYellowHUDPatch(int x, int y, int scrn, patch_t *patch, byte *tinttab)
 {
     int         col = 0;
-    byte        *desttop = dest_screen + y * SCREENWIDTH + x;
+//    byte        *desttop = dest_screen + y * SCREENWIDTH + x;
+    byte        *desttop = screens[scrn] + y * SCREENWIDTH + x;
     int         w = SHORT(patch->width);
 
     for (; col < w; col++, desttop++)
@@ -743,7 +775,7 @@ dboolean V_EmptyPatch(patch_t *patch)
 // [nitr8] UNUSED
 //
 /*
-void V_ColorBlock(int x, int y, int width, int height, byte color)
+void V_ColorBlock(int x, int y, int scrn, int width, int height, byte color)
 {
     byte *dest;
 
@@ -757,7 +789,8 @@ void V_ColorBlock(int x, int y, int width, int height, byte color)
     }
 #endif
 
-    dest = dest_screen + y * SCREENWIDTH + x;
+//    dest = dest_screen + y * SCREENWIDTH + x;
+    dest = screens[scrn] + y * SCREENWIDTH + x;
    
     while(height--)
     {
@@ -772,7 +805,7 @@ void V_ColorBlock(int x, int y, int width, int height, byte color)
 // V_GetBlock
 // Gets a linear block of pixels from the view buffer.
 //
-void V_GetBlock (int x, int y, int width, int height, byte *dest)
+void V_GetBlock (int x, int y, int scrn, int width, int height, byte *dest)
 {
     byte *src;
 
@@ -786,7 +819,8 @@ void V_GetBlock (int x, int y, int width, int height, byte *dest)
     }
 #endif
 
-    src = dest_screen + y * SCREENWIDTH + x;
+//    src = dest_screen + y * SCREENWIDTH + x;
+    src = screens[scrn] + y * SCREENWIDTH + x;
 
     while(height--)
     {
@@ -1007,7 +1041,7 @@ void WritePNGfile(char *filename, byte *data,
 //
 
     char lbmname[60]; // haleyjd 20110213: BUG FIX - 12 is too small!
-void V_ScreenShot(char *format)
+void V_ScreenShot(int scrn, char *format)
 {
     int i;
     char *ext;
@@ -1044,7 +1078,12 @@ void V_ScreenShot(char *format)
 //#ifdef HAVE_LIBPNG
     if (png_screenshots)
     {
+/*
         WritePNGfile(lbmname, I_VideoBuffer,
+                SCREENWIDTH, SCREENHEIGHT,
+                W_CacheLumpName("PLAYPAL", PU_CACHE));
+*/
+        WritePNGfile(lbmname, screens[scrn],
                 SCREENWIDTH, SCREENHEIGHT,
                 W_CacheLumpName("PLAYPAL", PU_CACHE));
     }
@@ -1052,13 +1091,18 @@ void V_ScreenShot(char *format)
 //#endif
     {
         // save the pcx file
+/*
         WritePCXfile(lbmname, I_VideoBuffer,
+                SCREENWIDTH, SCREENHEIGHT,
+                W_CacheLumpName("PLAYPAL", PU_CACHE));
+*/
+        WritePCXfile(lbmname, screens[scrn],
                 SCREENWIDTH, SCREENHEIGHT,
                 W_CacheLumpName("PLAYPAL", PU_CACHE));
     }
 }
 
-void V_LowGraphicDetail(int height)
+void V_LowGraphicDetail(int scrn, int height)
 {
     int x, y;
     int h = pixelheight * SCREENWIDTH;
@@ -1066,7 +1110,8 @@ void V_LowGraphicDetail(int height)
     for (y = 0; y < height; y += h)
         for (x = 0; x < SCREENWIDTH; x += pixelwidth)
         {
-            byte        *dot = dest_screen + y + x;
+//            byte        *dot = dest_screen + y + x;
+            byte        *dot = screens[scrn] + y + x;
             int         xx, yy;
 
             for (yy = 0; yy < h; yy += SCREENWIDTH)
@@ -1075,7 +1120,7 @@ void V_LowGraphicDetail(int height)
         }
 }
 
-void V_DrawPatchWithShadow(int x, int y, patch_t *patch, dboolean flag)
+void V_DrawPatchWithShadow(int x, int y, int scrn, patch_t *patch, dboolean flag)
 {
     int         col = 0;
     byte        *desttop;
@@ -1088,7 +1133,8 @@ void V_DrawPatchWithShadow(int x, int y, patch_t *patch, dboolean flag)
     y -= SHORT(patch->topoffset);
     x -= SHORT(patch->leftoffset);
 
-    desttop = dest_screen + ((y * DY) >> FRACBITS) * SCREENWIDTH + ((x * DX) >> FRACBITS);
+//    desttop = dest_screen + ((y * DY) >> FRACBITS) * SCREENWIDTH + ((x * DX) >> FRACBITS);
+    desttop = screens[scrn] + ((y * DY) >> FRACBITS) * SCREENWIDTH + ((x * DX) >> FRACBITS);
 
     for (; col < w; col += DXI, desttop++)
     {
@@ -1125,19 +1171,24 @@ void V_DrawPatchWithShadow(int x, int y, patch_t *patch, dboolean flag)
 }
 
 // Set the buffer that the code draws to.
-
-void V_UseBuffer(byte *buffer)
+//
+// [nitr8] UNUSED
+//
+/*
+void V_UseBuffer(int srcscrn, int destscrn)
 {
-    dest_screen = buffer;
+//    dest_screen = buffer;
+    screens[srcscrn] = screens[destscrn];
 }
 
 // Restore screen buffer to the i_video screen buffer.
 
-void V_RestoreBuffer(void)
+void V_RestoreBuffer(int srcscrn, int destscrn)
 {
-    dest_screen = I_VideoBuffer;
+//    dest_screen = I_VideoBuffer;
+    screens[srcscrn] = screens[destscrn];
 }
-
+*/
 
 // V_DrawBackground tiles a 64x64 patch over the entire screen,
 // providing the background for the Help and Setup screens.
@@ -1146,7 +1197,7 @@ static void V_TileFlat(byte *src, byte *dest)
 {
     int x, y;
 
-    V_MarkRect (0, 0, SCREENWIDTH, SCREENHEIGHT);
+//    V_MarkRect (0, 0, 0, SCREENWIDTH, SCREENHEIGHT);
 
     for (y = 0; y < SCREENHEIGHT; y++)
     {
@@ -1159,24 +1210,25 @@ static void V_TileFlat(byte *src, byte *dest)
     }
 }
 
-void V_DrawDistortedBackground(char *patchname, byte *dest)
+void V_DrawDistortedBackground(int scrn, char *patchname)
 {
     byte *src;
 
-    V_MarkRect (0, 0, SCREENWIDTH, SCREENHEIGHT);
+//    V_MarkRect (0, 0, 0, SCREENWIDTH, SCREENHEIGHT);
 
     src = R_DistortedFlat(R_FlatNumForName(patchname));
 
-    V_TileFlat(src, dest);
+    V_TileFlat(src, screens[scrn]);
 }
 
 //
 // V_FillRect
 //
 
-void V_FillRect(int x, int y, int width, int height, byte color)
+void V_FillRect(int x, int y, int scrn, int width, int height, byte color)
 {
-    byte        *dest = I_VideoBuffer + y * SCREENWIDTH + x;
+//    byte        *dest = I_VideoBuffer + y * SCREENWIDTH + x;
+    byte        *dest = screens[scrn] + y * SCREENWIDTH + x;
 
     while (height--)
     {

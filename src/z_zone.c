@@ -1092,7 +1092,7 @@ void Z_DrawStats(void)            // Print allocation statistics
 
         sprintf(act_mem, "%zu\t%6.01f%%\tstatic\n", active_memory, active_memory * s);
         sprintf(pur_mem, "%zu\t%6.01f%%\tpurgable\n", purgable_memory, purgable_memory * s);
-        sprintf(free_mem, "%lu\t%6.01f%%\tfree\n", (free_memory + memory_size),
+        sprintf(free_mem, "%zu\t%6.01f%%\tfree\n", (free_memory + memory_size),
                (free_memory + memory_size) * s);
         sprintf(tot_mem, "%lu\t\ttotal\n", total_memory);
     }
@@ -2556,11 +2556,13 @@ void Z_ChangeTag2(void *ptr, int32_t tag, char *file, int line)
     memblock_t*        block;
         
     block = (memblock_t *) ((byte *)ptr - sizeof(memblock_t));
+/*
 #ifdef WII
     if (block->id != ZONEID)
         I_Error("%s:%i: Z_ChangeTag: block without a ZONEID!",
                 file, line);
 #endif
+*/
     if (tag >= PU_PURGELEVEL && block->user == NULL)
         I_Error("%s:%i: Z_ChangeTag: an owner is required "
                 "for purgable blocks", file, line);
@@ -2607,15 +2609,15 @@ void* Z_MallocAlign (int reqsize, int32_t tag, void **user, int alignbits)
         I_Error ("Z_Malloc: malloc failed on allocation of %i bytes\n");
     }
 
-#ifndef DOOMRETRO_ZONE_HANDLING
-#ifndef BOOM_ZONE_HANDLING
-#ifndef WIIDOOM_ZONE_HANDLING
-    mainzone->size += memalloc_size;
+//#ifndef DOOMRETRO_ZONE_HANDLING
+//#ifndef BOOM_ZONE_HANDLING
+//#ifndef WIIDOOM_ZONE_HANDLING
+//    mainzone->size += memalloc_size;
 //#endif
-    newblock->id = ZONEID;
-#endif
-#endif
-#endif
+//    newblock->id = ZONEID;
+//#endif
+//#endif
+//#endif
 
     newblock->user = user;
     newblock->size = memalloc_size;

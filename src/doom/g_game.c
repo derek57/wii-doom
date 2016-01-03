@@ -31,30 +31,12 @@
 
 #include "am_map.h"
 
-#ifdef WII
-#include "../c_io.h"
-#else
 #include "c_io.h"
-#endif
-
 #include "d_main.h"
-
-#ifdef WII
-#include "../d_deh.h"
-#else
 #include "d_deh.h"
-#endif
-
 #include "doomdef.h"
-
-#ifdef WII
-#include "../doomfeatures.h"
-#include "../doomkeys.h"
-#else
 #include "doomfeatures.h"
 #include "doomkeys.h"
-#endif
-
 #include "doomstat.h"
 
 // Data.
@@ -63,29 +45,13 @@
 #include "f_finale.h"
 #include "g_game.h"
 #include "hu_stuff.h"
-
-#ifdef WII
-#include "../i_system.h"
-#include "../i_timer.h"
-#include "../i_video.h"
-#include "../m_argv.h"
-#include "../m_controls.h"
-#else
 #include "i_system.h"
 #include "i_timer.h"
 #include "i_video.h"
 #include "m_argv.h"
 #include "m_controls.h"
-#endif
-
 #include "m_menu.h"
-
-#ifdef WII
-#include "../m_misc.h"
-#else
 #include "m_misc.h"
-#endif
-
 #include "m_random.h"
 #include "p_local.h" 
 #include "p_saveg.h"
@@ -101,21 +67,10 @@
 #include "st_stuff.h"
 
 // Needs access to LFB.
-#ifdef WII
-#include "../v_video.h"
-#include "../w_wad.h"
-#else
 #include "v_video.h"
 #include "w_wad.h"
-#endif
-
 #include "wi_stuff.h"
-
-#ifdef WII
-#include "../z_zone.h"
-#else
 #include "z_zone.h"
-#endif
 
 #ifdef WII
 #include <wiiuse/wpad.h>
@@ -542,6 +497,8 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
 
 #ifndef WII
     int         i, speed;
+#else
+    WPADData *data = WPAD_Data(0);
 #endif
 
     int         forward;
@@ -771,7 +728,6 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
     }
 
 #ifdef WII
-    WPADData *data = WPAD_Data(0);
 
     if(data->exp.type == WPAD_EXP_CLASSIC)
     {
@@ -2265,7 +2221,7 @@ void G_DoSaveGame (void)
     M_StringCopy(savedescription, "", sizeof(savedescription));
 
     // draw the pattern into the back screen
-    R_FillBackScreen ();
+    R_FillBackScreen (1);
 } 
 
 //
@@ -2317,11 +2273,11 @@ void G_Ticker (void)
           case ga_screenshot: 
 #ifdef WII
             if(usb)
-                V_ScreenShot("usb:/apps/wiidoom/screenshots/DOOM%02i.%s"); 
+                V_ScreenShot(0, "usb:/apps/wiidoom/screenshots/DOOM%02i.%s"); 
             else if(sd)
-                V_ScreenShot("sd:/apps/wiidoom/screenshots/DOOM%02i.%s"); 
+                V_ScreenShot(0, "sd:/apps/wiidoom/screenshots/DOOM%02i.%s"); 
 #else
-            V_ScreenShot("DOOM%02i.%s"); 
+            V_ScreenShot(0, "DOOM%02i.%s"); 
 #endif
             players[consoleplayer].message = "screen shot";
             gameaction = ga_nothing; 
@@ -2686,7 +2642,7 @@ void G_DoLoadGame (void)
         R_ExecuteSetViewSize ();
     
     // draw the pattern into the back screen
-    R_FillBackScreen ();   
+    R_FillBackScreen (1);   
 
     if (consoleactive)
     {

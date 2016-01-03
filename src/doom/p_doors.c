@@ -24,47 +24,26 @@
 //-----------------------------------------------------------------------------
 
 
-#ifdef WII
-#include "../c_io.h"
-#else
 #include "c_io.h"
-#endif
 
 // Data.
 #include "dstrings.h"
 
-#ifdef WII
-#include "../d_deh.h"
-#else
 #include "d_deh.h"
-#endif
-
 #include "doomdef.h"
 
 // State.
 #include "doomstat.h"
 #include "hu_stuff.h"
 
-#ifdef WII
-#include "../i_system.h"
-#include "../m_misc.h"
-#else
 #include "i_system.h"
 #include "m_misc.h"
-#endif
-
 #include "p_local.h"
 #include "r_state.h"
 #include "s_sound.h"
 #include "sounds.h"
-
-#ifdef WII
-#include "../v_trans.h"
-#include "../z_zone.h"
-#else
 #include "v_trans.h"
 #include "z_zone.h"
-#endif
 
 
 #if 0
@@ -742,7 +721,7 @@ EV_VerticalDoor
         
     
     // new door thinker
-    door = Z_Malloc (sizeof(*door), PU_LEVSPEC, 0);
+    door = Z_Calloc(1, sizeof(*door), PU_LEVSPEC, 0); 
     P_AddThinker (&door->thinker);
     sec->ceilingdata = door;
     door->thinker.function = T_VerticalDoor;
@@ -803,9 +782,7 @@ EV_VerticalDoor
 //
 void P_SpawnDoorCloseIn30 (sector_t* sec)
 {
-    vldoor_t*        door;
-        
-    door = Z_Malloc ( sizeof(*door), PU_LEVSPEC, 0);
+    vldoor_t    *door = Z_Calloc(1, sizeof(*door), PU_LEVSPEC, 0); 
 
     P_AddThinker (&door->thinker);
 
@@ -829,9 +806,7 @@ void
 P_SpawnDoorRaiseIn5Mins
 ( sector_t*        sec)
 {
-    vldoor_t*      door;
-        
-    door = Z_Malloc ( sizeof(*door), PU_LEVSPEC, 0);
+    vldoor_t    *door = Z_Calloc(1, sizeof(*door), PU_LEVSPEC, 0); 
     
     P_AddThinker (&door->thinker);
 

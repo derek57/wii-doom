@@ -17,7 +17,9 @@
 
 #include "../src/c_io.h"
 
-#ifndef WII
+#ifdef WII
+#include "../wii/config.h"
+#else
 #include "config.h"
 #endif
 

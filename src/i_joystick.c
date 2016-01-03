@@ -60,15 +60,9 @@ int usejoystick;
 
 void I_UpdateJoystick(void)
 {
-    PAD_ScanPads();
-
-    WPAD_ScanPads();
-
     WPADData *data = WPAD_Data(0);
 
     ir_t ir;
-
-    WPAD_IR(0, &ir);
 
     int btn_a, btn_b, btn_c, btn_z;
     int btn_1, btn_2, btn_l, btn_r, btn_d, btn_u, btn_p, btn_m, btn_h;
@@ -78,6 +72,12 @@ void I_UpdateJoystick(void)
 
     Sint16 axis_x, axis_y;
   
+    PAD_ScanPads();
+
+    WPAD_ScanPads();
+
+    WPAD_IR(0, &ir);
+
     btn_a     = 0;
     btn_b     = 0;
     btn_c     = 0;

@@ -30,20 +30,9 @@
 #ifndef __STSTUFF_H__
 #define __STSTUFF_H__
 
-#ifdef WII
-#include "../d_event.h"
-#include "../doomtype.h"
-#else
 #include "d_event.h"
 #include "doomtype.h"
-#endif
-
-#ifdef WII
-#include "../m_cheat.h"
-#else
 #include "m_cheat.h"
-#endif
-
 #include "v_patch.h"
 
 // Size of statusbar.
@@ -100,7 +89,7 @@ extern int        healthhighlight;
 extern int        ammohighlight;
 extern int        armorhighlight;
 
-extern byte*      st_backing_screen;
+//extern byte*      st_backing_screen;
 
 extern cheatseq_t cheat_mus;
 extern cheatseq_t cheat_massacre;

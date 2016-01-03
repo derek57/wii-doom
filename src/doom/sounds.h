@@ -29,11 +29,7 @@
 #ifndef __SOUNDS__
 #define __SOUNDS__
 
-#ifdef WII
-#include "../i_sound.h"
-#else
 #include "i_sound.h"
-#endif
 
 
 // the complete set of sound effects

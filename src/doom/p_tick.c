@@ -26,21 +26,11 @@
 //-----------------------------------------------------------------------------
 
 
-#ifdef WII
-#include "../c_io.h"
-#else
 #include "c_io.h"
-#endif
-
 #include "doomstat.h"
 #include "p_local.h"
 #include "p_tick.h"
-
-#ifdef WII
-#include "../z_zone.h"
-#else
 #include "z_zone.h"
-#endif
 
 
 // killough 8/29/98: we maintain several separate threads, each containing

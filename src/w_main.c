@@ -78,9 +78,7 @@ dboolean W_ParseCommandLine(void)
     {
         for (p = p + 1; p<myargc && myargv[p][0] != '-'; ++p)
         {
-            char *filename;
-
-            filename = D_TryFindWADByName(myargv[p]);
+            char *filename = D_TryFindWADByName(myargv[p]);
             pwadfile = uppercase(removeext(M_ExtractFilename(filename)));
 
             if (W_MergeFile(filename, false))
@@ -92,22 +90,22 @@ dboolean W_ParseCommandLine(void)
 
                 if(dont_show_adding_of_resource_wad == 0)
                     printf("         merging %s\n", filename);
-            }
 
-            if (!strcasecmp(filename, "nerve.wad"))
-            {
-                int i;
-
-                nerve_pwad = true;
-                gamemission = pack_nerve;
-
-                // [crispy] rename level name patch lumps out of the way
-                for (i = 0; i < 9; i++)
+                if (search_string(filename, "nerve.wad") > -1)
                 {
-                    char lumpname[9];
+                    int i;
 
-                    M_snprintf (lumpname, 9, "CWILV%2.2d", i);
-                    lumpinfo[W_GetNumForName(lumpname)]->name[0] = 'N';
+                    nerve_pwad = true;
+                    gamemission = pack_nerve;
+
+                    // [crispy] rename level name patch lumps out of the way
+                    for (i = 0; i < 9; i++)
+                    {
+                        char lumpname[9];
+
+                        M_snprintf (lumpname, 9, "CWILV%2.2d", i);
+                        lumpinfo[W_GetNumForName(lumpname)]->name[0] = 'N';
+                    }
                 }
             }
         }
@@ -239,9 +237,7 @@ dboolean W_ParseCommandLine(void)
     {
         for (p = p + 1; p<myargc && myargv[p][0] != '-'; ++p)
         {
-            char *filename;
-
-            filename = D_TryFindWADByName(myargv[p]);
+            char *filename = D_TryFindWADByName(myargv[p]);
             pwadfile = uppercase(removeext(M_ExtractFilename(filename)));
 
             if (W_MergeFile(filename, false))
@@ -253,22 +249,22 @@ dboolean W_ParseCommandLine(void)
 
                 if(dont_show_adding_of_resource_wad == 0)
                     printf("         adding %s\n", filename);
-            }
 
-            if (!strcasecmp(filename, "nerve.wad"))
-            {
-                int i;
-
-                nerve_pwad = true;
-                gamemission = pack_nerve;
-
-                // [crispy] rename level name patch lumps out of the way
-                for (i = 0; i < 9; i++)
+                if (search_string(filename, "nerve.wad") > -1)
                 {
-                    char lumpname[9];
+                    int i;
 
-                    M_snprintf (lumpname, 9, "CWILV%2.2d", i);
-                    lumpinfo[W_GetNumForName(lumpname)]->name[0] = 'N';
+                    nerve_pwad = true;
+                    gamemission = pack_nerve;
+
+                    // [crispy] rename level name patch lumps out of the way
+                    for (i = 0; i < 9; i++)
+                    {
+                        char lumpname[9];
+
+                        M_snprintf (lumpname, 9, "CWILV%2.2d", i);
+                        lumpinfo[W_GetNumForName(lumpname)]->name[0] = 'N';
+                    }
                 }
             }
         }

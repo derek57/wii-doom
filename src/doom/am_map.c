@@ -28,17 +28,9 @@
 #include <stdio.h>
 
 #include "am_map.h"
-
-#ifdef WII
-#include "../c_io.h"
-#include "../d_deh.h"
-#include "../doomkeys.h"
-#else
 #include "c_io.h"
 #include "d_deh.h"
 #include "doomkeys.h"
-#endif
-
 #include "doomdef.h"
 
 // State.
@@ -48,15 +40,8 @@
 #include "dstrings.h"
 
 #include "hu_stuff.h"
-
-#ifdef WII
-#include "../i_system.h"
-#include "../m_controls.h"
-#else
 #include "i_system.h"
 #include "m_controls.h"
-#endif
-
 #include "../i_video.h"
 
 #ifndef WII
@@ -64,28 +49,16 @@
 #endif
 
 #include "m_menu.h"
-
-#ifdef WII
-#include "../m_misc.h"
-#else
 #include "m_misc.h"
-#endif
-
 #include "p_local.h"
 #include "r_state.h"
 #include "st_stuff.h"
 
-#ifdef WII
-// Needs access to LFB.
-#include "../v_video.h"
-#include "../w_wad.h"
-#include "../z_zone.h"
-#else
 // Needs access to LFB.
 #include "v_video.h"
+
 #include "w_wad.h"
 #include "z_zone.h"
-#endif
 
 #ifdef WII
 #include <wiiuse/wpad.h>
@@ -524,12 +497,13 @@ void AM_changeWindowLoc(void)
 //
 //
 //
-void AM_initVariables(void)
+void AM_initVariables(int scrn)
 {
     static event_t st_notify = { ev_keyup, AM_MSGENTERED, 0, 0 };
 
     automapactive = true;
-    fb = I_VideoBuffer;
+//    fb = I_VideoBuffer;
+    fb = screens[scrn];
 
     f_oldloc.x = INT_MAX;
     amclock = 0;
@@ -678,7 +652,7 @@ void AM_Start (void)
             lastlevel = gamemap;
             lastepisode = gameepisode;
         }
-        AM_initVariables();
+        AM_initVariables(0);
         AM_loadPics();
     }
 }
@@ -1597,7 +1571,7 @@ void AM_drawMarks(void)
 
             if (fx >= f_x && fx <= (f_w >> hires) -                 // HIRES
                         w && fy >= f_y && fy <= (f_h >> hires) - h) // HIRES
-                V_DrawPatch(fx, fy, marknums[i]);
+                V_DrawPatch(fx, fy, 0, marknums[i]);
         }
     }
 
@@ -1654,7 +1628,7 @@ void AM_Drawer (void)
 
     AM_drawMarks();
 
-    V_MarkRect(f_x, f_y, f_w, f_h);
+//    V_MarkRect(f_x, f_y, 1, f_w, f_h, 0);
 
     if(fsize == 12538385 && gamemap == 10)
         M_WriteText(0, 160, "E1M10: SEWERS");

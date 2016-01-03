@@ -1,4 +1,3 @@
-#ifdef WII
 #include <fat.h>
 #include <sdcard/wiisd_io.h>
 #include <stdio.h>
@@ -50,4 +49,3 @@ int wii_main()
     return 0;
 }
 
-#endif

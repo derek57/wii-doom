@@ -37,25 +37,12 @@ id Software.
 
 #include <stdlib.h>
 
-#ifdef WII
-#include "../doomtype.h"
-#include "../i_system.h"
-#include "../m_misc.h"
-#else
 #include "doomtype.h"
 #include "i_system.h"
 #include "m_misc.h"
-#endif
-
 #include "sc_man.h"
-
-#ifdef WII
-#include "../w_wad.h"
-#include "../z_zone.h"
-#else
 #include "w_wad.h"
 #include "z_zone.h"
-#endif
 
 #define MAX_STRING_SIZE 256
 #define ASCII_COMMENT   ';'

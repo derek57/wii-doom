@@ -48,11 +48,13 @@
 //
 
 #ifdef __GNUC__
-#ifdef WII
-#define PACKEDATTR __attribute__((packed,gcc_struct))	// WINDOWS ONLY (NOT FOR PPC / LINUX!!!
+
+#if defined(_WIN32) && !defined(__clang__)
+#define PACKEDATTR __attribute__((packed,gcc_struct))
 #else
 #define PACKEDATTR __attribute__((packed))
 #endif
+
 #else
 #define PACKEDATTR
 #endif
@@ -67,14 +69,14 @@
 
 #include <inttypes.h>
 
-#ifdef __cplusplus
+#if defined(__cplusplus) || defined(__bool_true_false_are_defined)
 
 // Use builtin bool type with C++.
 
 typedef bool dboolean;
 
 #else
-
+/*
 #ifdef WII
 #ifdef FALSE
 #undef FALSE
@@ -89,7 +91,7 @@ typedef bool dboolean;
 #undef true
 #endif
 #endif
-
+*/
 typedef enum
 {
     false, 
@@ -98,18 +100,6 @@ typedef enum
 #endif
 
 typedef uint8_t byte;
-
-typedef struct {
-  byte checksum;       // Simple checksum of the entire packet
-  byte type;           /* Type of packet */
-  byte reserved[2];        /* Was random in prboom <=2.2.4, now 0 */
-  unsigned int tic;        // Timestamp
-} PACKEDATTR packet_header_t;
-
-typedef unsigned long ULONG;
-typedef unsigned short USHORT;
-
-#define INT64  long long
 
 #include <limits.h>
 

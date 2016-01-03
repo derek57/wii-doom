@@ -60,7 +60,6 @@
 
 #ifdef WII
 #include "../wii/xmn_main.h"
-
 #include <wiiuse/wpad.h>
 #endif
 

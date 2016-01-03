@@ -35,47 +35,24 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#ifdef WII
-#include "../c_io.h"
-#include "../d_deh.h"
-#include "../doomfeatures.h"
-#else
 #include "c_io.h"
 #include "d_deh.h"
 #include "doomfeatures.h"
-#endif
-
 #include "doomstat.h"
 #include "hu_stuff.h"
-
-#ifdef WII
-#include "../doomtype.h"
-#include "../i_sound.h"
-#include "../i_system.h"
-#include "../m_misc.h"
-#else
 #include "doomtype.h"
 #include "i_sound.h"
 #include "i_system.h"
 #include "m_misc.h"
-#endif
-
 #include "m_random.h"
 #include "p_local.h"
 #include "p_setup.h"
 #include "r_defs.h"
 #include "s_sound.h"
 #include "sounds.h"
-
-#ifdef WII
-#include "../v_trans.h"
-#include "../w_wad.h"
-#include "../z_zone.h"
-#else
 #include "v_trans.h"
 #include "w_wad.h"
 #include "z_zone.h"
-#endif
 
 
 // when to clip out sounds

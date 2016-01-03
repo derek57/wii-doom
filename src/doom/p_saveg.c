@@ -39,37 +39,17 @@
 #include <stdlib.h>
 
 #include "am_map.h"
-
-#ifdef WII
-#include "../c_io.h"
-#include "../d_deh.h"
-#else
 #include "c_io.h"
 #include "d_deh.h"
-#endif
-
 #include "doomstat.h"
 #include "dstrings.h"
-
-#ifdef WII
-#include "../i_system.h"
-#include "../m_misc.h"
-#else
 #include "i_system.h"
 #include "m_misc.h"
-#endif
-
 #include "p_local.h"
 #include "p_saveg.h"
 #include "p_spec.h"
 #include "p_tick.h"
-//#include "version.h"
-
-#ifdef WII
-#include "../z_zone.h"
-#else
 #include "z_zone.h"
-#endif
 
 #define SAVEGAME_EOF    0x1D
 

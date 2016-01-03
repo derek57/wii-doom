@@ -21,7 +21,6 @@
 //
 //-----------------------------------------------------------------------------
 
-#ifndef WII
 #ifndef I_GLSCALE_H
 #define I_GLSCALE_H
 
@@ -32,5 +31,4 @@ void I_GL_UpdateScreen(byte *screendata, SDL_Color *palette);
 extern int gl_max_scale;
 
 #endif /* #ifndef I_GLSCALE_H */
-#endif
 

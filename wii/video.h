@@ -1,4 +1,3 @@
-#ifdef WII
 #ifndef _VIDEO_H_
 #define _VIDEO_H_
 
@@ -92,4 +91,4 @@ u8 getSavedConsoleRow();
 u8 getSavedConsoleColumn();
 
 #endif
-#endif
+

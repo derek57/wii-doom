@@ -18,15 +18,15 @@ include $(DEVKITPPC)/wii_rules
 TARGET		:=	boot
 BUILD		:=	build
 SOURCES		:=	opl pcsound src src/doom wii
-DATA		:=	 
-INCLUDES	:=	
+DATA		:=	
+INCLUDES	:=	opl pcsound src src/doom wii
 DIST		:=	dist/apps/WiiDoom
 
 #---------------------------------------------------------------------------------
 # options for code generation
 #---------------------------------------------------------------------------------
 
-CFLAGS	= -g -O2 -Wall $(MACHDEP) $(INCLUDE) -DHAVE_CONFIG_H -DWII
+CFLAGS	= -O2 -g -Wall -Wdeclaration-after-statement -Wredundant-decls $(MACHDEP) $(INCLUDE) -D_GNU_SOURCE=1 -D_REENTRANT -DHAVE_CONFIG_H -DWII
 CXXFLAGS	=	$(CFLAGS)
 
 LDFLAGS	=	-g $(MACHDEP) -Wl,-Map,$(notdir $@).map
@@ -39,7 +39,6 @@ LIBS	:=                    \
                 -lsmpeg       \
                 -lSDL         \
                 -lvorbisidec  \
-                -lwiilight    \
                 -lpng         \
                 -lfat         \
                 -lwiiuse      \
@@ -47,10 +46,12 @@ LIBS	:=                    \
                 -lwiikeyboard \
                 -logc         \
                 -ljpeg        \
-                -lsupc++      \
                 -lstdc++      \
                 -lm           \
                 -lz           
+
+#                -lwiilight    \
+#                -lsupc++      \
 
 #                -lSDL_net     \
 #                -lSDL_gfx     \

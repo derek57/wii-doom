@@ -28,14 +28,7 @@
 
 #include <stdio.h>
 
-#ifdef WII
-#include "../c_io.h"
-//#include "../deh_main.h"
-#else
 #include "c_io.h"
-//#include "deh_main.h"
-#endif
-
 #include "doomdef.h"
 
 // State.
@@ -43,12 +36,7 @@
 
 #include "g_game.h"
 
-#ifdef WII
-#include "../i_system.h"
-#else
 #include "i_system.h"
-#endif
-
 #include "p_fix.h"
 #include "p_local.h"
 #include "r_state.h"
@@ -57,11 +45,7 @@
 // Data.
 #include "sounds.h"
 
-#ifdef WII
-#include "../v_trans.h"
-#else
 #include "v_trans.h"
-#endif
 
 
 //
