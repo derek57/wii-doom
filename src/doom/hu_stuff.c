@@ -200,6 +200,7 @@ extern int              cardsfound;
 extern dboolean         blurred;
 extern dboolean         mapinfo_lump;
 extern dboolean         dont_message_to_console;
+extern dboolean         increditscreen;
 
 static patch_t*         healthpatch;
 static patch_t*         berserkpatch;
@@ -391,7 +392,7 @@ void HU_Start(void)
     }
     else if (logical_gamemission == doom2 && gameversion == exe_hacx)
     {
-        if (gamemap <= 20 && gamemap != 31)
+        if (gamemap <= 20)
             s = HU_TITLE_HACX;
         else if(gamemap == 31)
             s = "Desiccant Room";
@@ -600,6 +601,9 @@ void HU_DrawHUD(void)
     dboolean            gamepaused = (menuactive || paused /*|| consoleactive*/);
     int                 currenttime = I_GetTimeMS();
 
+    if (increditscreen)
+        return;
+
     if (d_translucency)
     {
         hudfunc = V_DrawTranslucentHUDPatch;
@@ -700,7 +704,7 @@ void HU_DrawHUD(void)
 
         ammo_x = HUD_AMMO_X + 15 - (SHORT(patch->width) / 2);
 
-//        if (patch)	// FIXME: IS THIS ONE REALLY REQUIRED??
+//        if (patch)        // FIXME: IS THIS ONE REALLY REQUIRED??
         {
             hudfunc(ammo_x, (HUD_AMMO_Y + 8 - (SHORT(patch->height) / 2)), 0, patch, tinttab);
             ammo_x += HUD_AMMO_X + 15 + (SHORT(patch->width) / 2) - (ORIGHEIGHT / 2) + offset_special;
@@ -832,7 +836,7 @@ void HU_DrawHUD(void)
 
 void HU_Drawer(void)
 {
-    if(!automapactive && !demoplayback && crosshair == 1)
+    if(!automapactive && !demoplayback && crosshair == 1 && !increditscreen)
     {
         if(screenSize < 8)
             V_DrawPatch(158, 82, 0, W_CacheLumpName("XHAIR", PU_CACHE));
@@ -878,7 +882,7 @@ void HU_Drawer(void)
               ))) ||
               (show_authors && nerve_pwad) || (show_authors && master_pwad))))
         {
-            if(!modifiedgame)
+            if(!modifiedgame || (modifiedgame && nerve_pwad))
             {
                 HUlib_drawTextLine(&w_author_title, false);
                 HUlib_drawTextLine(&w_authors, false);
@@ -1057,7 +1061,7 @@ void HU_NewLevel()
     }
     else if (logical_gamemission == doom2 && gameversion == exe_hacx)
     {
-        if (gamemap <= 20 && gamemap != 31)
+        if (gamemap <= 20)
             s = HU_TITLE_HACX;
         else if(gamemap == 31)
             s = "Desiccant Room";

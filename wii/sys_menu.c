@@ -119,7 +119,7 @@ static void Initialise()
     VIDEO_Init();
 
     rmode = VIDEO_GetPreferredMode(NULL);
-	
+
     xfb = MEM_K0_TO_K1(SYS_AllocateFramebuffer(rmode));
 
     console_init(xfb, 20, 20, rmode->fbWidth, 359, rmode->fbWidth * VI_DISPLAY_PIX_SZ);
@@ -310,7 +310,7 @@ static void Menu_FatDevice(void)
     {
         for ( ; ; )
         {
-            u32 buttons = WaitButtons();
+            u32 buttons;
 
             // Clear console
             Con_Clear();
@@ -345,6 +345,8 @@ static void Menu_FatDevice(void)
             printStyledText(11, 0, CONSOLE_FONT_BLACK, CONSOLE_FONT_WHITE,
                         CONSOLE_FONT_BOLD,&stTexteLocation,
             "  ----------------------------------------------------------------------------  ");
+
+            buttons = WaitButtons();
 
             // LEFT/RIGHT buttons
             if (buttons & WPAD_CLASSIC_BUTTON_LEFT)
@@ -468,7 +470,6 @@ static void Menu_WadList(void)
 
     const char  *iwad_ver = NULL;
     const char  *shareware_warn = NULL;
-
 /*
     extern char path_tmp[MAXPATH];
     extern char target[MAXPATH];
@@ -549,7 +550,7 @@ static void Menu_WadList(void)
 
     char        *tmpPath = malloc (MAX_FILE_PATH_LEN);
 
-    u32         buttons = WaitButtons();
+    u32         buttons;
 
     // wiiNinja: check for malloc error
     if (tmpPath == NULL)
@@ -612,6 +613,7 @@ static void Menu_WadList(void)
     }
 
     // Set install-values to 0 - Leathl
+//    int counter;
 
     for (counter = 0; counter < fileCnt; counter++)
     {
@@ -1363,6 +1365,7 @@ static void Menu_WadList(void)
                         "-");
 
     //* Controls *
+    buttons = WaitButtons();
 
     // UP button
     if (buttons & WPAD_CLASSIC_BUTTON_UP)
@@ -1415,8 +1418,8 @@ static void Menu_WadList(void)
         console_init(xfb, 20, 20, rmode->fbWidth, rmode->xfbHeight,
                      rmode->fbWidth * VI_DISPLAY_PIX_SZ);
 
-	// Clear the part of the screen that is being overdrawn by the JPEG image
-	Video_Clear(COLOR_BLACK);
+        // Clear the part of the screen that is being overdrawn by the JPEG image
+        Video_Clear(COLOR_BLACK);
 
         // START DOOM
         D_DoomMain();

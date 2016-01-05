@@ -1616,7 +1616,7 @@ void ST_Drawer (dboolean fullscreen, dboolean refresh)
     // If just after ST_Start(), refresh all
     if (st_firsttime || beta_style || (scaledviewheight == SCREENHEIGHT && viewactive))
     {
-//        if(screenSize < 8)	// FIXME: automap has status bar shown ALWAYS
+//        if(screenSize < 8)        // FIXME: automap has status bar shown ALWAYS
         {
             if(usergame)
                 ST_doRefresh();
@@ -2035,19 +2035,19 @@ void ST_Start (void)
     // demos recorded by another player than player 1
     if (netgame && consoleplayer)
     {
-	char namebuf[8];
+        char namebuf[8];
 
-	W_ReleaseLumpName("STFB0");
+        W_ReleaseLumpName("STFB0");
 
-	M_snprintf(namebuf, 7, "STFB%d", consoleplayer);
-	faceback = W_CacheLumpName(namebuf, PU_STATIC);
+        M_snprintf(namebuf, 7, "STFB%d", consoleplayer);
+        faceback = W_CacheLumpName(namebuf, PU_STATIC);
     }
 }
 
-void ST_Init (void)
+void ST_Init (int scrn)
 {
     ST_loadData();
 
-//    st_backing_screen = Z_Malloc((ST_WIDTH << hires) * (ST_HEIGHT << hires) * sizeof(*st_backing_screen), PU_STATIC, 0);
-    screens[4] = Z_Malloc((ST_WIDTH << hires) * (ST_HEIGHT << hires) * sizeof(*screens[4]), PU_STATIC, 0);
+//    st_backing_screen = Z_Malloc((ST_WIDTH << hires) * (ST_HEIGHT << hires) * sizeof(*st_backing_screen), PU_STATIC, NULL);
+    screens[scrn] = Z_Malloc((ST_WIDTH << hires) * (ST_HEIGHT << hires) * sizeof(*screens[scrn]), PU_STATIC, NULL);
 }

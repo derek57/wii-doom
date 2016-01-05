@@ -95,6 +95,7 @@ extern dboolean                  r_translucency;
 */
 extern dboolean                  skippsprinterp;
 extern dboolean                  realframe;
+extern dboolean                  increditscreen;
 
 //
 // R_InstallSpriteLump
@@ -1004,6 +1005,8 @@ void R_ProjectBloodSplat(mobj_t *thing)
 
     int                 lump;
 
+    spritedef_t         *sprdef;
+
     vissprite_t         *vis;
 
     fixed_t             fx = thing->x;
@@ -1037,6 +1040,18 @@ void R_ProjectBloodSplat(mobj_t *thing)
     // too far off the side?
     if (ABS(tx) > (tz << 2))
         return;
+
+#ifdef RANGECHECK
+    if ((unsigned int) thing->sprite >= (unsigned int) numsprites)
+        I_Error ("R_ProjectBloodsplat: invalid sprite number %i ",
+                 thing->sprite);
+#endif
+    sprdef = &sprites[thing->sprite];
+#ifdef RANGECHECK
+    if ( (thing->frame&FF_FRAMEMASK) >= sprdef->numframes )
+        I_Error ("R_ProjectBloodsplat: invalid sprite frame %i : %i ",
+                 thing->sprite, thing->frame);
+#endif
 
     // decide which patch to use for sprite relative to player
     lump = sprites[SPR_BLD2].spriteframes[thing->frame].lump[0];
@@ -1509,7 +1524,7 @@ void R_DrawPlayerSprites(void)
     {
 //        V_FillRect(viewwindowx, viewwindowy, viewwidth, viewheight, 251);
         for (i = 0, psp = viewplayer->psprites; i < NUMPSPRITES; i++, psp++)
-            if (psp->state)
+            if (psp->state && !increditscreen)
                 R_DrawPSprite(psp, true);
 
 //        if (menuactive || paused || consoleactive)
@@ -1525,7 +1540,7 @@ void R_DrawPlayerSprites(void)
             if (psp->state && (psp->state->frame & FF_FULLBRIGHT))
                 bflash = true;
         for (i = 0, psp = viewplayer->psprites; i < NUMPSPRITES; i++, psp++)
-            if (psp->state)
+            if (psp->state && !increditscreen)
                 R_DrawPSprite(psp, false);
     }
 }
@@ -1543,7 +1558,7 @@ static void R_DrawBloodSprite(vissprite_t *spr)
     int         x2 = spr->x2;
 
     // [RH] Quickly reject sprites with bad x ranges.
-    if (x1 > x2)
+    if (x1 > x2 || increditscreen)
         return;
 
     for (x = x1; x <= x2; x++)
@@ -1615,7 +1630,7 @@ static void R_DrawShadowSprite(vissprite_t *spr)
     int         x2 = spr->x2;
 
     // [RH] Quickly reject sprites with bad x ranges.
-    if (x1 > x2)
+    if (x1 > x2 || increditscreen)
         return;
 
     for (x = x1; x <= x2; x++)
@@ -1680,7 +1695,7 @@ static void R_DrawSprite(vissprite_t *spr)
     int         x1 = spr->x1;
     int         x2 = spr->x2;
 
-    if (x1 > x2)
+    if (x1 > x2 || increditscreen)
         return;
 
     for (x = x1; x <= x2; x++)

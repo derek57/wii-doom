@@ -113,7 +113,6 @@ void I_AtExit(atexit_func_t func, dboolean run_on_error)
 void I_Tactile(int on, int off, int total)
 {
 }
-*/
 
 // Zone memory auto-allocation function that allocates the zone size
 // by trying progressively smaller zone sizes until one is found that
@@ -199,10 +198,6 @@ byte *I_ZoneBase (int *size)
     return zonemem;
 }
 
-//
-// [nitr8] UNUSED
-//
-/*
 void I_PrintBanner(char *msg)
 {
     int i;

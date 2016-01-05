@@ -60,7 +60,7 @@ void ST_Drawer (dboolean fullscreen, dboolean refresh);
 void ST_Start (void);
 
 // Called by startup code.
-void ST_Init (void);
+void ST_Init (int scrn);
 
 void ST_doRefresh(void);
 

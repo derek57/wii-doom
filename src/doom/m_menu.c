@@ -107,6 +107,307 @@
 
 void    (*messageRoutine)  (int response);
 
+static int credits_start_time;
+//static char **credits;
+
+static char *credits[] =
+{
+	"",
+	"",
+	"",
+	"*WII-/Linux-DOOM WITH BOOM (MBF) SUPPORT",
+	"",
+	"*PROGRAMMING / PORTING",
+	"Ronald Lasmanowicz ('derek57'/'nitr8')",
+	"",
+	"+DOOM / DOOM 2 - HELL ON EARTH",
+	"",
+	"*PROGRAMMING",
+	"",
+	"+(ID SOFTWARE)",
+        "+www.idsoftware.com",
+	"John Carmack",
+	"John Romero",
+	"Dave Taylor",
+	"",
+	"*ARTISTS",
+	"Adrian Carmack",
+	"Kevin Cloud",
+	"",
+	"*LEVEL DESIGN",
+	"Tim Willits",
+	"American McGee",
+	"Sandy Petersen",
+	"Shawn Green",
+	"John Romero",
+	"John Anderson",
+	"",
+	"*BIZ",
+	"Jay Wilbur",
+	"",
+	"*SPECIAL THANKS",
+	"Gregor Punchatz",
+	"Bernd Kreimeier",
+	"",
+	"#--------------------------------------",
+	"",
+	"+(Raven SOFTWARE)",
+        "+www.ravensoftware.com",
+	"",
+	"*PROGRAMMING",
+	"Ben Gokey",
+	"Chris Rhineheart",
+	"",
+	"#--------------------------------------",
+	"",
+	"+(Rogue Entertainment, Inc.)",
+	"+www.rogue-ent.com",
+	"",
+	"*PROGRAMMING",
+	"James Monroe",
+	"Peter Mack",
+	"",
+	"#--------------------------------------",
+	"",
+	"+(PRBOOM)",
+        "+prboom.sourceforge.net",
+	"",
+	"*PROGRAMMING",
+	"Florian 'PROFF' Schulze",
+	"Colin 'CPH' Phipps",
+	"Rob 'RjY' Young",
+	"Andrey Budko",
+	"",
+	"#--------------------------------------",
+	"",
+	"+(TEAMTNT)",
+        "+www.teamtnt.com",
+	"Gregg 'GRANNY' Anderson",
+	"Dave Armstrong",
+	"Andre ''HARKLE' Arsenault",
+	"Nick 'NICK_PDOX' Baker",
+	"J.C. 'Sailor Scout' Bengston",
+	"Bill 'DSQUID' Bessette",
+	"Dave Brachman",
+	"Mike Bristol",
+	"Chris 'BonesBro' Brown",
+	"David Bruni",
+	"Chris Buteau",
+	"Derek 'NFSfreak' Cadwell",
+	"Thomas Elliot 'Myscha' Cannon",
+	"Ross Carlson",
+	"Dario 'Number 6' Casali",
+	"Milo Casali",
+	"Rick 'Wildman' Clark",
+	"Chris Couleur",
+	"Charles 'Mange' Cox",
+	"Billy 'porkypig' Daniel",
+	"Jesper 'Jeda' Danielsen",
+	"Paul 'Maduin' DeBruyne",
+	"Jim 'Derf' Dethlefsen",
+	"Yonatan Donner",
+	"Andrew 'SlashWho' Dowswell",
+	"Jeremy Doyle",
+	"Jonathan 'Biz' El-Bizri",
+	"Jim 'H2H' Elson",
+	"Bob 'Odessa' Evans",
+	"Thomas 'XeneX' Evans",
+	"Paul 'Moe' Fleschute",
+	"Jim Flynn",
+	"Jeffrey Galinovsky",
+	"David 'Blitzr4' Gevert",
+	"Steve 'Shriker' Gill",
+	"Gary Gosson",
+	"Tom 'Timon' Grieve",
+	"Andrew 'Hungry Donner' Griffiths",
+	"Stan 'SkullBane' Gula",
+	"Ty Halderman",
+	"Dale 'Cadaver' Harris",
+	"Mark 'Hatty' Hatton",
+	"David 'Mentzer' Hill",
+	"Donald R. 'Don' Howard",
+	"Steffen 'Addict' Itterheim",
+	"Gregory 'JAX-N' Jackson",
+	"Richard 'Styx' Jaspars",
+	"Mattias Johannson",
+	"Dean Johnson",
+	"James 'JJ' Joplin",
+	"Jim 'The Prof' Kennedy",
+	"Brian 'The Kid' Kidby",
+	"Lee Killough",
+	"Bob Kircher",
+	"Mark Klem",
+	"Sverre Kvernmo",
+	"Adam Landefeld",
+	"Bruce Lewis",
+	"Charles Li",
+	"Wayne 'Opium Joe' Loudon",
+	"Jim 'Symbol' Lowell",
+	"Justin Madigan",
+	"Andre Majorel",
+	"Kim 'Mutator' Malde",
+	"Mike 'Krusty' Marcotte",
+	"Josh Martel",
+	"Andrew 'Flatline' Martin",
+	"Paul 'Nowotny' Maurone",
+	"Steve McCrea",
+	"John 'Mischief' Minadeo",
+	"Lisa 'Pup' Moore",
+	"Tom 'Paradox' Mustaine",
+	"Rich 'Weeds' Nagel",
+	"Steve 'Funkymonk' Noonan",
+	"David Nordlund",
+	"Drake 'numena' O'Brien",
+	"Robin Patenall",
+	"Bobby 'Xcalibur' Pavlock",
+	"Michael 'Codex' Pearce",
+	"Rand Phares",
+	"Steven Phares",
+	"Tommie 'Fatal' Quick",
+	"Keith Reid",
+	"Roger Ritenour",
+	"Eric James 'Ricrob' Roberts",
+	"Casey Robinson",
+	"Adam Ross",
+	"Mike 'Gripp' Ruete",
+	"Jani 'Sir Robin' Saksa",
+	"Cole 'MaNCeR' Savage",
+	"Paul Schmitz",
+	"Florian 'PROFF' Schulze",
+	"Randy 'Screaming In Digital' Seacat",
+	"David 'Tolwyn' Shaw",
+	"Jimmy 'Evil Genius' Sieben",
+	"L.A. 'Evil Genius' Sieben",
+	"Ken 'Enigma' Simpson",
+	"Eugene 'ED' Smozhevsky",
+	"Mark 'Kram Llens' Snell",
+	"Anthony 'swedish fish' Soto",
+	"Harold 'Swaff' Swaffield",
+	"Robert 'Bobcat' Taylor",
+	"Peter 'Kniggit' Tomaselli",
+	"Paul 'Stenger' Turnbull",
+	"Jeromy 'Manna' Visser",
+	"Jeremy 'Iron Lich' Wagner",
+	"John 'Single Malt' Wakelin",
+	"Dietmar 'DIA' Westerteicher",
+	"Bill Whitaker",
+	"David 'Hakx' Wood",
+	"",
+	"#--------------------------------------",
+	"",
+	"+(ZDOOM)",
+        "+www.zdoom.org",
+	"",
+	"*PROGRAMMING",
+	"RANDY HEIT",
+	"",
+	"#--------------------------------------",
+	"",
+	"+(DOOM LEGACY)",
+        "+doomlegacy.sourceforge.net",
+	"",
+	"*PROGRAMMING",
+	"Boris Pereira",
+	"Fabrice 'Fab' Denis",
+	"Thierry 'Hurdler' Van Elsuwe",
+	"Stephen 'SoM' McGranahan",
+	"Stephane Dierickx",
+	"Robert Bauml",
+	"Bell Kin",
+	"",
+	"#--------------------------------------",
+	"",
+	"+(CHOCOLATE DOOM)",
+        "+www.chocolate-doom.org",
+	"",
+	"*PROGRAMMING",
+	"SIMON 'Fraggle' HOWARD",
+	"James 'Quasar' Haley",
+	"Samuel 'Kaiser' Villarreal",
+	"",
+	"#--------------------------------------",
+	"",
+	"+(CRISPY DOOM)",
+        "+fabiangreffrath.github.io/crispy-doom",
+	"",
+	"*PROGRAMMING",
+	"FABIAN GREFFRATH",
+	"",
+	"#--------------------------------------",
+	"",
+	"+(DOOM RETRO)",
+        "+www.doomretro.com",
+	"",
+	"*PROGRAMMING",
+	"BRAD HARDING",
+	"",
+	"#--------------------------------------",
+	"",
+	"*ADDITIONAL THANKS",
+	"Alex Mayfield",
+	"",
+	"Alexandre-Xavier Labonte-Lamoureux",
+        "('AXDOOMER')",
+	"",
+	"Alexey Lysiuk ('alexey.lysiuk')",
+	"Alun Bestor ('viggles')",
+	"Andrew Stine ('Linguica')",
+	"'AnotherLife'/'VGA'",
+	"'arneolavhal'",
+	"'Brewtal_Legend'",
+	"'Da Werecat'",
+	"Dani Ventas",
+	"Darren Mason",
+	"'Hoodie'",
+	"Iain Macfarlane",
+	"Jeff Doggett",
+	"'jewellds'",
+	"Jon Krazov",
+	"Jonathan Bergeron ('LazyLazurus')",
+	"Jonathan Dowland ('jmtd')",
+	"'kb1'",
+	"'L3gend'",
+	"Luke Jones ('Luke-Nukem')",
+	"Mike Swanson ('chungy')",
+	"'Noxat'",
+	"'ryan-sg'",
+	"'sgt dopey'",
+	"Claude Freeman ('ConSiGno'/'sneakernets')",
+	"'TheLonerD'",
+	"'vesperas'",
+	"Charles Gunyon",
+	"Ioan Chera",
+	"'Dr. Sean' Leonard",
+	"Sam Lantinga et al.",
+	"Sam Lantinga",
+	"Stephane Peter",
+	"Ryan Gordon",
+	"Chi Hoang",
+	"",
+	"*ADDITIONAL SUPPORT",
+	"",
+	"*SOUND CODE (DOS VERSION)",
+	"Paul Radek",
+	"",
+	"#(C)1994-2002 Id Software, Inc.",
+	"#All Rights Reserved. Published",
+        "#and Distributed by Activision,",
+        "#Inc. and it's affiliates under",
+        "#license. DOOM, DOOM II, the id",
+        "#Software name and the id logo",
+        "#are either registered trademarks",
+        "#or trademarks of Id Software, Inc.",
+        "#in the United States and/or other",
+        "#countries. Activision(R) is a",
+        "#registered trademark of Activision,",
+        "#Inc. and it's affiliates. All other",
+        "#trademarks and trade names are",
+        "#properties of their respective owners.",
+	"",
+	"",
+	"THANKS FOR PLAYING THIS PORT"
+};
+
 char *maptext[] = {
     " ",
     "E1M1: HANGAR",
@@ -977,8 +1278,6 @@ char                       *messageString;
 //char                       *skullName[2]      = {"M_SKULL1","M_SKULL2"};
 char                       *skullNameSmall[2] = {"M_SKULL3","M_SKULL4"};
 
-unsigned int               creditscount;
-
  // 1 = message to be printed
 int                        messageToPrint;
 
@@ -1016,6 +1315,7 @@ int                        warplev = 2;
 int                        height;
 int                        expansion = 0;
 int                        flat_index;
+int                        colorize_to;
 
 // -1 = no quicksave slot picked!
 int                        quickSaveSlot;
@@ -1320,6 +1620,7 @@ void M_Screen(int choice);
 void M_FPSCounter(int choice);
 void M_HOMDetector(int choice);
 void M_MemoryUsage(int choice);
+void M_ConDump(int choice);
 void M_ReplaceMissing(int choice);
 void M_Controls(int choice);
 void M_System(int choice);
@@ -1370,7 +1671,7 @@ enum
     newgame = 0,
     options,
     gamefiles,
-    credits,
+    credit,
     readthis,
     quitdoom,
     main_end
@@ -2288,6 +2589,7 @@ enum
     debug_restart,
     debug_opl,
     debug_mem,
+    debug_dump,
     debug_end
 } debug_e;
 
@@ -2298,7 +2600,8 @@ menuitem_t DebugMenu[]=
     {2,"Show Sound Info",M_SoundInfo,'s'},
     {2,"Restart Current MAP-Music Track",M_RestartSong,'r'},
     {2,"Show OPL Developer Info",M_OPLDev,'o'},
-    {2,"Show Memory Usage",M_MemoryUsage,'m'}
+    {2,"Show Memory Usage",M_MemoryUsage,'m'},
+    {2,"Dump Console Output",M_ConDump,'d'}
 };
 
 menu_t  DebugDef =
@@ -2450,52 +2753,6 @@ menu_t  RecordDef =
     0
 };
 */
-
-//
-// M_TextWrite
-//
-void M_TextWrite (int x, int y, char* ch)
-{    
-    int         w;
-    signed int  count;
-
-    count = ((signed int) creditscount - 10) / TEXTSPEED;
-
-    if (count < 0)
-        count = 0;
-    for ( ; count ; count-- )
-    {
-        int c = *ch++;
-
-        if (!c)
-            break;
-
-        if (c == '\n')
-        {
-            x = 0;
-            y += 8;
-            continue;
-        }
-                
-        c = toupper(c) - HU_FONTSTART;
-        if (c < 0 || c> HU_FONTSIZE)
-        {
-            x += 4;
-            continue;
-        }
-                
-        w = SHORT (hu_font[c]->width);
-        if (x+w > ORIGWIDTH)         // CHANGED FOR HIRES
-            break;
-        
-        if(font_shadow == 1)
-            V_DrawPatchWithShadow(x, y, 0, hu_font[c], false);
-        else
-            V_DrawPatch(x, y, 0, hu_font[c]);
-        x+=w;
-    }
-        
-}
 
 static void blurscreen(int x1, int y1, int x2, int y2, int i)
 {
@@ -2968,72 +3225,50 @@ void M_DrawReadThis2(void)
 
 void M_DrawCredits(void)
 {
-    int x;
-    char *string;
+    int i, y;
 
     increditscreen = true;
 
-    // erase the entire screen to a tiled background
-    V_DrawDistortedBackground(0, gamemode == commercial ?
-            commercial_flats[flat_index] : registered_flats[flat_index]);
+    viewheight = SCREENHEIGHT;
 
-    dp_translation = crx[CRX_GOLD];
-    string = "IT ALSO IS THEIR WORK, SO...";
-    x = ORIGWIDTH/2 - M_StringWidth(string) / 2;
-    M_TextWrite(x, 0, string);
+    // draw the credits
+    for (i = 0, y = ORIGHEIGHT - ((gametic - credits_start_time) / 2); credits[i] && y < ORIGHEIGHT; y += 10, i++)
+    {
+        int j;
+        int stringoffset = 0;
 
-    string = "...I'D LIKE TO SAY 'THANKS', SENDING GREETS AND...";
-    x = ORIGWIDTH/2 - M_StringWidth(string) / 2;
-    M_TextWrite(x, 8, string);
+        if (y <= -8)
+            continue;
 
-    string = "...CREDITS FOR THIS PORT OUT TO:";
-    x = ORIGWIDTH/2 - M_StringWidth(string) / 2;
+        if (credits[i][0] == '+')
+            colorize_to = 1;
+        else if (credits[i][0] == '*')
+            colorize_to = 2;
+        else if (credits[i][0] == '#')
+            colorize_to = 3;
+        else
+            colorize_to = 0;
 
-    dp_translation = crx[CRX_GREEN];
-    M_TextWrite(x, 24, string);
+        if (colorize_to > 0)
+            stringoffset = 1;
 
-    x = ORIGWIDTH/2 - M_StringWidth(CREDITTEXT1) / 2;
-    M_TextWrite(x, 40, CREDITTEXT1);
+        for (j = 0; credits[i][j + stringoffset]; j++)
+        {
+            int x = ORIGWIDTH / 2 - M_StringWidth(credits[i]) / 2;
 
-    x = ORIGWIDTH/2 - M_StringWidth(CREDITTEXT2) / 2;
-    M_TextWrite(x, 64, CREDITTEXT2);
+            if (colorize_to == 1)
+                x += 2;
+            else if (colorize_to == 2)
+                x += 4;
+            else if (colorize_to == 3)
+                x += 3;
 
-    x = ORIGWIDTH/2 - M_StringWidth(CREDITTEXT3) / 2;
-    M_TextWrite(x, 88, CREDITTEXT3);
+            M_WriteText(x, y, &credits[i][stringoffset]);
+        }
+    }
 
-    x = ORIGWIDTH/2 - M_StringWidth(CREDITTEXT4) / 2;
-    M_TextWrite(x, 112, CREDITTEXT4);
-
-    x = ORIGWIDTH/2 - M_StringWidth(CREDITTEXT5) / 2;
-    M_TextWrite(x, 136, CREDITTEXT5);
-
-    x = ORIGWIDTH/2 - M_StringWidth(CREDITTEXT6) / 2;
-    M_TextWrite(x, 160, CREDITTEXT6);
-
-    x = ORIGWIDTH/2 - M_StringWidth(CREDITTEXT7) / 2;
-    M_TextWrite(x, 184, CREDITTEXT7);
-
-    dp_translation = crx[CRX_GRAY];
-    x = ORIGWIDTH/2 - M_StringWidth(CREDITURL1) / 2;
-    M_TextWrite(x, 48, CREDITURL1);
-
-    x = ORIGWIDTH/2 - M_StringWidth(CREDITURL2) / 2;
-    M_TextWrite(x, 72, CREDITURL2);
-
-    x = ORIGWIDTH/2 - M_StringWidth(CREDITURL3) / 2;
-    M_TextWrite(x, 96, CREDITURL3);
-
-    x = ORIGWIDTH/2 - M_StringWidth(CREDITURL4) / 2;
-    M_TextWrite(x, 120, CREDITURL4);
-
-    x = ORIGWIDTH/2 - M_StringWidth(CREDITURL5) / 2;
-    M_TextWrite(x, 144, CREDITURL5);
-
-    x = ORIGWIDTH/2 - M_StringWidth(CREDITURL6) / 2;
-    M_TextWrite(x, 168, CREDITURL6);
-
-    x = ORIGWIDTH/2 - M_StringWidth(CREDITURL7) / 2;
-    M_TextWrite(x, 192, CREDITURL7);
+    if (y < 0)
+        credits_start_time = gametic;
 
     V_DrawPatchWithShadow(CreditsDef.x + CURSORXOFF_SMALL, CreditsDef.y + 180, 0,
             W_CacheLumpName(skullNameSmall[whichSkull], PU_CACHE), false);
@@ -5577,13 +5812,13 @@ void M_ChangeMessages(int choice)
     switch(choice)
     {
       case 0:
-	if (showMessages == 1)
-	    showMessages = 0;
-	break;
+        if (showMessages == 1)
+            showMessages = 0;
+        break;
       case 1:
-	if (showMessages == 0)
-	    showMessages = 1;
-	break;
+        if (showMessages == 0)
+            showMessages = 1;
+        break;
     }
 
     message_dontfuckwithme = true;
@@ -5663,8 +5898,9 @@ void M_FinishReadThis(int choice)
 
 void M_Credits(int choice)
 {
-    creditscount = 0;
     flat_index = (gamemode == commercial ? (rand() % 9) : (rand() % 4));
+//    credits = portcredits;	
+    credits_start_time = gametic;
 
     M_SetupNextMenu(&CreditsDef);
 }
@@ -5763,13 +5999,13 @@ void M_ChangeSensitivity(int choice)
     switch(choice)
     {
       case 0:
-	if (mouseSensitivity)
-	    mouseSensitivity--;
-	break;
+        if (mouseSensitivity)
+            mouseSensitivity--;
+        break;
       case 1:
-	if (mouseSensitivity < 9)
-	    mouseSensitivity++;
-	break;
+        if (mouseSensitivity < 9)
+            mouseSensitivity++;
+        break;
     }
 }
 
@@ -6333,20 +6569,22 @@ void M_WriteText(int x, int y, char* string)
         }
                 
         c = toupper(c) - HU_FONTSTART;
+
         if (c < 0 || c>= HU_FONTSIZE)
         {
             cx += 4;
             continue;
         }
-                
+
         w = SHORT (hu_font[c]->width);
+
         if (cx+w > ORIGWIDTH)                // CHANGED FOR HIRES
             break;
 
         if(dp_translation && font_shadow != 2)
             V_ClearDPTranslation();
 
-        if(font_shadow == 1)
+        if(font_shadow == 1 || increditscreen)
             V_DrawPatchWithShadow(cx, cy, 0, hu_font[c], false);
         else
             V_DrawPatch(cx, cy, 0, hu_font[c]);
@@ -7232,6 +7470,9 @@ void M_Drawer (void)
             else if(gamestate == GS_INTERMISSION)
                 S_ChangeMusic(mus_inter, true, false);
         }
+
+        if (screenSize < 8 && usergame)
+            R_ExecuteSetViewSize();
     }
 
     increditscreen = false;
@@ -7492,9 +7733,6 @@ void M_Ticker (void)
     }
 
     // advance animation
-
-    if (increditscreen)
-        creditscount++;
 }
 
 
@@ -8945,6 +9183,12 @@ void M_MemoryUsage(int choice)
             memory_usage = true;
         break;
     }
+}
+
+void M_ConDump(int choice)
+{
+    C_ConDump();
+    players[consoleplayer].message = "Console Output has been dumped.";
 }
 
 void M_ReplaceMissing(int choice)

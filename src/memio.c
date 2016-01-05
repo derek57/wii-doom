@@ -53,7 +53,7 @@ MEMFILE *mem_fopen_read(void *buf, size_t buflen)
 {
         MEMFILE *file;
 
-        file = Z_Malloc(sizeof(MEMFILE), PU_STATIC, 0);
+        file = Z_Malloc(sizeof(MEMFILE), PU_STATIC, NULL);
 
         file->buf = (unsigned char *) buf;
         file->buflen = buflen;
@@ -101,10 +101,10 @@ MEMFILE *mem_fopen_write(void)
 {
         MEMFILE *file;
 
-        file = Z_Malloc(sizeof(MEMFILE), PU_STATIC, 0);
+        file = Z_Malloc(sizeof(MEMFILE), PU_STATIC, NULL);
 
         file->alloced = 1024;
-        file->buf = Z_Malloc(file->alloced, PU_STATIC, 0);
+        file->buf = Z_Malloc(file->alloced, PU_STATIC, NULL);
         file->buflen = 0;
         file->position = 0;
         file->mode = MODE_WRITE;
@@ -132,7 +132,7 @@ size_t mem_fwrite(const void *ptr, size_t size, size_t nmemb, MEMFILE *stream)
         {
                 unsigned char *newbuf;
 
-                newbuf = Z_Malloc(stream->alloced * 2, PU_STATIC, 0);
+                newbuf = Z_Malloc(stream->alloced * 2, PU_STATIC, NULL);
                 memcpy(newbuf, stream->buf, stream->alloced);
                 Z_Free(stream->buf);
                 stream->buf = newbuf;

@@ -124,7 +124,7 @@ void R_DrawPausedFuzzColumns(void);
 //  Green/Red/Blue/Indigo shirts.
 void R_DrawTranslatedColumn(void);
 
-void R_VideoErase(unsigned int ofs, int count);
+void R_VideoErase(unsigned int ofs, int count, int srcscrn, int destscrn);
 
 extern int              ds_y;
 extern int              ds_x1;

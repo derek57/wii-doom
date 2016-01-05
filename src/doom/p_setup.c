@@ -1131,12 +1131,12 @@ static void P_LoadLineDefs(int lump)
 
         ld->special = SHORT(mld->special);
 
-	// [crispy] warn about unknown linedef types
-	if ((unsigned short) ld->special == 270 || (unsigned short) ld->special > 272)
-	{
-	    C_Error("P_LoadLineDefs: Unknown special %d at line %d", ld->special, i);
-	    warn++;
-	}
+        // [crispy] warn about unknown linedef types
+        if ((unsigned short) ld->special == 270 || (unsigned short) ld->special > 272)
+        {
+            C_Error("P_LoadLineDefs: Unknown special %d at line %d", ld->special, i);
+            warn++;
+        }
 
         ld->tag = SHORT(mld->tag);
         v1 = ld->v1 = &vertexes[(unsigned short)SHORT(mld->v1)];
@@ -1678,7 +1678,7 @@ static int P_GroupLines(void)
 
     // allocate line tables for each sector
     {
-        line_t  **linebuffer = Z_Malloc(total * sizeof(line_t *), PU_LEVEL, 0);
+        line_t  **linebuffer = Z_Malloc(total * sizeof(line_t *), PU_LEVEL, NULL);
 
         for (i = 0, sector = sectors; i < numsectors; i++, sector++)
         {

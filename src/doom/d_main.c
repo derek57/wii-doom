@@ -447,7 +447,7 @@ void D_Display (int scrn)
 //    SlopeDiv = SlopeDivVanilla;
 
     // [crispy] shade background when a menu is active or the game is paused
-    if ((paused || menuactive) && background_type == 1)
+    if ((paused || menuactive) && (background_type == 1 || increditscreen))
     {
         static int firsttic;
 
@@ -666,9 +666,6 @@ void D_DoomLoop (void)
         if (screenvisible)
 #endif
             D_Display (0);
-#ifndef WII
-        C_ConDump();
-#endif
     }
 }
 
@@ -904,7 +901,7 @@ static char *GetGameName(char *gamename)
             // We also need to cut off spaces to get the basic name
 
             gamename_size = strlen(deh_sub) + 10;
-            gamename = Z_Malloc(gamename_size, PU_STATIC, 0);
+            gamename = Z_Malloc(gamename_size, PU_STATIC, NULL);
 //            version = G_VanillaVersionCode();
             M_snprintf(gamename, gamename_size, deh_sub);
 
@@ -1498,7 +1495,7 @@ void D_DoomMain (void)
     // Auto-detect the configuration dir.
 
     M_SetConfigDir(NULL);
-/*					// FIXME: forwardmove / sidemove
+/*                                        // FIXME: forwardmove / sidemove
     //!
     // @arg <x>
     // @vanilla
@@ -3297,7 +3294,7 @@ void D_DoomMain (void)
     if(!beta_style)
         printf(" ST_Init: Init status bar.\n");
     C_Output("ST_Init: Init status bar.");
-    ST_Init ();
+    ST_Init (4);
 
     // If Doom II without a MAP01 lump, this is a store demo.
     // Moved this here so that MAP01 isn't constantly looked up

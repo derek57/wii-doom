@@ -457,7 +457,7 @@ static Bits Operator__TemplateVolume(Operator *self, OperatorState yes) {
                 }
                 //In sustain phase, but not sustaining, do regular release
         case RELEASE: 
-                vol += Operator__RateForward( self, self->releaseAdd );;
+                vol += Operator__RateForward( self, self->releaseAdd );
                 if ( GCC_UNLIKELY(vol >= ENV_MAX) ) {
                         self->volume = ENV_MAX;
                         Operator__SetState( self, OFF );

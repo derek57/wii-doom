@@ -252,7 +252,7 @@ void P_InitPicAnims (void)
 {
     int size = (numflats + 1) * sizeof(dboolean);
 
-    isliquid = Z_Malloc(size, PU_STATIC, 0);
+    isliquid = Z_Malloc(size, PU_STATIC, NULL);
 }
 
 //
@@ -2171,7 +2171,7 @@ dboolean EV_DoDonut(line_t *line)
             rtn = true;
 
             // Spawn rising slime
-            floor = Z_Malloc (sizeof(*floor), PU_LEVSPEC, 0);
+            floor = Z_Calloc(1, sizeof(*floor), PU_LEVSPEC, NULL); 
             P_AddThinker (&floor->thinker);
             s2->floordata = floor;
             floor->thinker.function = T_MoveFloor;
@@ -2186,7 +2186,7 @@ dboolean EV_DoDonut(line_t *line)
             floor->stopsound = (floor->sector->floorheight != floor->floordestheight);
             
             // Spawn lowering donut-hole
-            floor = Z_Malloc (sizeof(*floor), PU_LEVSPEC, 0);
+            floor = Z_Calloc(1, sizeof(*floor), PU_LEVSPEC, NULL); 
             P_AddThinker (&floor->thinker);
             s1->floordata = floor;
             floor->thinker.function = T_MoveFloor;
@@ -2319,7 +2319,7 @@ void T_Scroll(scroll_t *s)
 //
 static void Add_Scroller(int type, fixed_t dx, fixed_t dy, int control, int affectee, int accel)
 {
-    scroll_t    *s = Z_Malloc(sizeof *s, PU_LEVSPEC, 0);
+    scroll_t    *s = Z_Calloc(1, sizeof(*s), PU_LEVSPEC, NULL); 
 
     s->thinker.function = T_Scroll;
     s->type = type;
@@ -2494,7 +2494,7 @@ static void P_SpawnScrollers(void)
 // Add a push thinker to the thinker list
 static void Add_Pusher(int type, int x_mag, int y_mag, mobj_t *source, int affectee)
 {
-    pusher_t *p = Z_Malloc(sizeof *p, PU_LEVSPEC, 0);
+    pusher_t    *p = Z_Calloc(1, sizeof(*p), PU_LEVSPEC, NULL); 
 
     p->thinker.function = T_Pusher;
     p->source = source;

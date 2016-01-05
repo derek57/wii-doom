@@ -2439,10 +2439,10 @@ void I_FinishUpdate (int scrn)
 
     if (show_diskicon && disk_indicator == disk_on)
     {
-	if (diskicon_readbytes >= diskicon_threshold)
-	{
-	    I_BeginRead();
-	}
+        if (diskicon_readbytes >= diskicon_threshold)
+        {
+            I_BeginRead();
+        }
     }
     else if (disk_indicator == disk_dirty)
     {

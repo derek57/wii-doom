@@ -760,15 +760,15 @@ void P_MobjThinker (mobj_t* mobj)
     // calling action functions at transitions
     if (mobj->tics != -1)
     {
-	mobj->tics--;
+        mobj->tics--;
 
         if (beta_style && mobj->state->nextstate == S_ARM1)
             mobj->state->nextstate = S_ARM1A;
 
-	// you can cycle through multiple states in a tic
-	if (!mobj->tics)
-	    if (!P_SetMobjState (mobj, mobj->state->nextstate) )
-		return;		// freed itself
+        // you can cycle through multiple states in a tic
+        if (!mobj->tics)
+            if (!P_SetMobjState (mobj, mobj->state->nextstate) )
+                return;        // freed itself
     }
     else
     {

@@ -1280,7 +1280,7 @@ void R_InitTranslationTables(void)
     W_ReadLump( W_GetNumForName("TRANSMED"), transtables );
     W_ReadLump( W_GetNumForName("TRANSMOR"), transtables+0x10000 );
 
-    translationtables = Z_Malloc(256 * 3, PU_STATIC, 0);
+    translationtables = Z_Malloc(256 * 3, PU_STATIC, NULL);
 
     // translate just the 16 green colors
     for (i = 0; i < 256; i++)
@@ -1501,7 +1501,7 @@ void R_FillBackScreen(int scrn)
 //
 // Copy a screen buffer.
 //
-void R_VideoErase(unsigned int ofs, int count)
+void R_VideoErase(unsigned int ofs, int count, int srcscrn, int destscrn)
 {
     // LFB copy.
     // This might not be a good idea if memcpy
@@ -1514,7 +1514,7 @@ void R_VideoErase(unsigned int ofs, int count)
         memcpy(I_VideoBuffer + ofs, background_buffer + ofs, count * sizeof(*I_VideoBuffer));
     }
 */
-    memcpy(screens[0] + ofs, screens[1] + ofs, count);
+    memcpy(screens[destscrn] + ofs, screens[srcscrn] + ofs, count);
 }
 
 //
@@ -1536,11 +1536,11 @@ void R_DrawViewBorder(void)
     side = (SCREENWIDTH-scaledviewwidth)/2; 
  
     // copy top and one line of left side 
-    R_VideoErase (0, top*SCREENWIDTH+side); 
+    R_VideoErase (0, top*SCREENWIDTH+side, 1, 0); 
  
     // copy one line of right side and bottom 
     ofs = (scaledviewheight+top)*SCREENWIDTH-side;        // CHANGED FOR HIRES
-    R_VideoErase (ofs, top*SCREENWIDTH+side); 
+    R_VideoErase (ofs, top*SCREENWIDTH+side, 1, 0); 
  
     // copy sides using wraparound 
     ofs = top*SCREENWIDTH + SCREENWIDTH-side; 
@@ -1548,7 +1548,7 @@ void R_DrawViewBorder(void)
     
     for (i=1 ; i<scaledviewheight ; i++)                  // CHANGED FOR HIRES
     { 
-        R_VideoErase (ofs, side); 
+        R_VideoErase (ofs, side, 1, 0); 
         ofs += SCREENWIDTH; 
     } 
 

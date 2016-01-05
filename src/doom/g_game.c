@@ -144,7 +144,7 @@ fixed_t         angleturn;              // + slow turn
 fixed_t         low_health_forwardmove = 17;
 fixed_t         low_health_sidemove = 15;
 
-int		low_health_turnspeed = 5;
+int             low_health_turnspeed = 5;
 
 // If non-zero, exit the level after this number of minutes.
 int             timelimit;
@@ -630,9 +630,9 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
     // villsa [STRIFE] disable running if low on health
     if (players[consoleplayer].health <= 15 && lowhealth)
     {
-	forwardmve = low_health_forwardmove;
-	sidemve = low_health_sidemove;
-	turnspd = low_health_turnspeed;
+        forwardmve = low_health_forwardmove;
+        sidemve = low_health_sidemove;
+        turnspd = low_health_turnspeed;
     }
     else
     {
@@ -1315,7 +1315,7 @@ static void IncreaseDemoBuffer(void)
     // Generate a new buffer twice the size
     new_length = current_length * 2;
     
-    new_demobuffer = Z_Malloc(new_length, PU_STATIC, 0);
+    new_demobuffer = Z_Malloc(new_length, PU_STATIC, NULL);
     new_demop = new_demobuffer + (demo_p - demobuffer);
 
     // Copy over the old data
@@ -2171,14 +2171,14 @@ void G_DoSaveGame (void)
  
     // [crispy] some logging when saving
     {
-	const int time = leveltime / TICRATE;
+        const int time = leveltime / TICRATE;
 
         if(gamemode == commercial)
             C_Error("G_DoSaveGame: Map %d, Skill %d, Time %d:%02d.",
-	            gamemap, gameskill, time/60, time%60);
+                    gamemap, gameskill, time/60, time%60);
         else
             C_Error("G_DoSaveGame: Episode %d, Map %d, Skill %d, Time %d:%02d.",
-	            gameepisode, gamemap, gameskill, time/60, time%60);
+                    gameepisode, gamemap, gameskill, time/60, time%60);
     }
 
     P_ArchivePlayers (); 

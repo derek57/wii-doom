@@ -91,7 +91,8 @@ dboolean W_ParseCommandLine(void)
                 if(dont_show_adding_of_resource_wad == 0)
                     printf("         merging %s\n", filename);
 
-                if (search_string(filename, "nerve.wad") > -1)
+                if ((search_string(filename, "nerve.wad") > -1) ||
+                    (search_string(filename, "NERVE.WAD") > -1))
                 {
                     int i;
 
@@ -250,7 +251,8 @@ dboolean W_ParseCommandLine(void)
                 if(dont_show_adding_of_resource_wad == 0)
                     printf("         adding %s\n", filename);
 
-                if (search_string(filename, "nerve.wad") > -1)
+                if ((search_string(filename, "nerve.wad") > -1) ||
+                    (search_string(filename, "NERVE.WAD") > -1))
                 {
                     int i;
 

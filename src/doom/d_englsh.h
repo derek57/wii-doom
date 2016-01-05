@@ -875,20 +875,4 @@
     "                                Shareware!\n" \
     "===========================================================================\n"
 
-#define CREDITTEXT1 "The id Software Team"
-#define CREDITTEXT2 "The Chocolate DOOM Team"
-#define CREDITTEXT3 "Fabian Greffrath / Crispy-DOOM"
-#define CREDITTEXT4 "Brad Harding / DOOMretro"
-#define CREDITTEXT5 "The PRBoom Team"
-#define CREDITTEXT6 "The DOOM Legacy Team"
-#define CREDITTEXT7 "The ZDOOM Team"
-
-#define CREDITURL1 "www.idsoftware.com"
-#define CREDITURL2 "www.chocolate-doom.org"
-#define CREDITURL3 "fabiangreffrath.github.io/crispy-doom"
-#define CREDITURL4 "www.doomretro.com"
-#define CREDITURL5 "prboom.sourceforge.net"
-#define CREDITURL6 "doomlegacy.sourceforge.net"
-#define CREDITURL7 "www.zdoom.org"
-
 #endif

@@ -74,7 +74,7 @@ void wipe_shittyColMajorXform(short *array)
 
     short         *dest;
 
-    dest = (short *) Z_Malloc((SCREENWIDTH / 2) * SCREENHEIGHT * sizeof(*dest), PU_STATIC, 0);
+    dest = (short *) Z_Malloc((SCREENWIDTH / 2) * SCREENHEIGHT * sizeof(*dest), PU_STATIC, NULL);
 
     for(y = 0; y < SCREENHEIGHT; y++)
     {
@@ -93,7 +93,7 @@ void wipe_shittyColMajorXform(short *array)
 
 int wipe_initBurn (int ticks)
 {
-    burnarray = Z_Malloc(FIREWIDTH * (FIREHEIGHT + 5), PU_STATIC, 0);
+    burnarray = Z_Malloc(FIREWIDTH * (FIREHEIGHT + 5), PU_STATIC, NULL);
 
     memset(burnarray, 0, FIREWIDTH * (FIREHEIGHT + 5));
 
@@ -388,7 +388,7 @@ int wipe_initMelt(int ticks)
     
     // setup initial column positions
     // (y<0 => not ready to scroll yet)
-    y = (int *) Z_Malloc(SCREENWIDTH * sizeof(int), PU_STATIC, 0);
+    y = (int *) Z_Malloc(SCREENWIDTH * sizeof(int), PU_STATIC, NULL);
     y[0] = -(M_Random() % 16);
 
     for (i = 1; i < SCREENWIDTH; i++)
@@ -537,7 +537,7 @@ int wipe_ScreenWipe(int wipeno, int ticks, int scrn)
     {
         go = 1;
 
-        // wipe_scr = (byte *) Z_Malloc(SCREENWIDTH * SCREENHEIGHT, PU_STATIC, 0); // DEBUG
+        // wipe_scr = (byte *) Z_Malloc(SCREENWIDTH * SCREENHEIGHT, PU_STATIC, NULL); // DEBUG
 
 //        wipe_scr = I_VideoBuffer;
         wipe_scr = screens[scrn];

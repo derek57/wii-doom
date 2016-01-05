@@ -417,7 +417,7 @@ EV_DoDoor
 
         // new door thinker
         rtn = 1;
-        door = Z_Malloc (sizeof(*door), PU_LEVSPEC, 0);
+        door = Z_Calloc(1, sizeof(*door), PU_LEVSPEC, NULL); 
         P_AddThinker (&door->thinker);
         sec->ceilingdata = door;
 
@@ -721,7 +721,7 @@ EV_VerticalDoor
         
     
     // new door thinker
-    door = Z_Calloc(1, sizeof(*door), PU_LEVSPEC, 0); 
+    door = Z_Calloc(1, sizeof(*door), PU_LEVSPEC, NULL); 
     P_AddThinker (&door->thinker);
     sec->ceilingdata = door;
     door->thinker.function = T_VerticalDoor;
@@ -782,7 +782,7 @@ EV_VerticalDoor
 //
 void P_SpawnDoorCloseIn30 (sector_t* sec)
 {
-    vldoor_t    *door = Z_Calloc(1, sizeof(*door), PU_LEVSPEC, 0); 
+    vldoor_t    *door = Z_Calloc(1, sizeof(*door), PU_LEVSPEC, NULL); 
 
     P_AddThinker (&door->thinker);
 
@@ -806,7 +806,7 @@ void
 P_SpawnDoorRaiseIn5Mins
 ( sector_t*        sec)
 {
-    vldoor_t    *door = Z_Calloc(1, sizeof(*door), PU_LEVSPEC, 0); 
+    vldoor_t    *door = Z_Calloc(1, sizeof(*door), PU_LEVSPEC, NULL); 
     
     P_AddThinker (&door->thinker);
 
@@ -1019,7 +1019,7 @@ EV_SlidingDoor
     // Init sliding door vars
     if (!door)
     {
-        door = Z_Malloc (sizeof(*door), PU_LEVSPEC, 0);
+        door = Z_Malloc (sizeof(*door), PU_LEVSPEC, NULL);
         P_AddThinker (&door->thinker);
         sec->specialdata = door;
                 

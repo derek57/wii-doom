@@ -87,10 +87,10 @@ byte redtoyellow[] =
 
 // The screen buffer that the v_video.c code draws to.
 
-/*static*/ byte                  *dest_screen = NULL;
+//byte                       *dest_screen = NULL;
 
 // Each screen is [SCREENWIDTH * SCREENHEIGHT];
-byte            *screens[5];
+byte                         *screens[5];
 
 // [crispy] four different rendering functions
 // for each possible combination of dp_translation and dp_translucent:
@@ -120,6 +120,12 @@ int                          italicize[15] = { 0, 2, 2, 2, 1, 1, 1, 1, 0, 0, 0, 
 
 dboolean                      dp_translucent = false;
 
+extern dboolean              increditscreen;
+
+extern byte                  redtoblue[];
+extern byte                  redtogreen[];
+
+extern int                   colorize_to;
 
 //
 // V_MarkRect 
@@ -1153,7 +1159,18 @@ void V_DrawPatchWithShadow(int x, int y, int scrn, patch_t *patch, dboolean flag
                 int     height = (((y + column->topdelta + column->length) * DY) >> FRACBITS) - count;
 
                 if (height > 0)
+                {
                     *dest = source[srccol >> FRACBITS];
+                    if (increditscreen)
+                    {
+                        if (colorize_to == 1)
+                            *dest = redtogreen[source[srccol >> FRACBITS]];
+                        else if (colorize_to == 2)
+                            *dest = redtoblue[source[srccol >> FRACBITS]];
+                        else if (colorize_to == 3)
+                            *dest = redtoyellow[source[srccol >> FRACBITS]];
+                    }
+                }
                 dest += SCREENWIDTH;
                 if (height + 2 > 0)
                 {

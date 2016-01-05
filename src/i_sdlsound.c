@@ -734,7 +734,7 @@ static void I_SDL_PrecacheSounds(sfxinfo_t *sounds, int num_sounds)
 
     if (use_libsamplerate == 0)
     {
-	return;
+        return;
     }
 
     C_Output("I_SDL_PrecacheSounds: Precaching all sound effects..");

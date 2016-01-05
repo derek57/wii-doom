@@ -249,7 +249,7 @@ EV_DoCeiling
         
         // new ceiling thinker
         rtn = true;
-        ceiling = Z_Calloc(1, sizeof(*ceiling), PU_LEVSPEC, 0); 
+        ceiling = Z_Calloc(1, sizeof(*ceiling), PU_LEVSPEC, NULL); 
         P_AddThinker (&ceiling->thinker);
         sec->ceilingdata = ceiling;
         ceiling->thinker.function = T_MoveCeiling;

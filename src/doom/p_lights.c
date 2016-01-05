@@ -62,7 +62,7 @@ void T_FireFlicker (fireflicker_t* flick)
 //
 void P_SpawnFireFlicker (sector_t*        sector)
 {
-    fireflicker_t       *flick = Z_Malloc(sizeof(*flick), PU_LEVSPEC, 0);
+    fireflicker_t       *flick = Z_Calloc(1, sizeof(*flick), PU_LEVSPEC, NULL); 
 
     P_AddThinker(&flick->thinker);
 
@@ -112,7 +112,7 @@ void T_LightFlash (lightflash_t* flash)
 //
 void P_SpawnLightFlash (sector_t*        sector)
 {
-    lightflash_t        *flash = Z_Malloc(sizeof(*flash), PU_LEVSPEC, 0);
+    lightflash_t        *flash = Z_Calloc(1, sizeof(*flash), PU_LEVSPEC, NULL); 
 
     P_AddThinker (&flash->thinker);
 
@@ -167,7 +167,7 @@ P_SpawnStrobeFlash
   int                fastOrSlow,
   int                inSync )
 {
-    strobe_t    *flash = Z_Malloc(sizeof(*flash), PU_LEVSPEC, 0);
+    strobe_t    *flash = Z_Calloc(1, sizeof(*flash), PU_LEVSPEC, NULL); 
         
     P_AddThinker (&flash->thinker);
 
@@ -305,15 +305,15 @@ void T_Glow(glow_t*        g)
 
 void P_SpawnGlowingLight(sector_t*        sector)
 {
-    glow_t*        g = Z_Malloc( sizeof(*g), PU_LEVSPEC, 0);;
+    glow_t      *glow = Z_Calloc(1, sizeof(*glow), PU_LEVSPEC, NULL); 
         
-    P_AddThinker(&g->thinker);
+    P_AddThinker(&glow->thinker);
 
-    g->sector = sector;
-    g->minlight = P_FindMinSurroundingLight(sector,sector->lightlevel);
-    g->maxlight = sector->lightlevel;
-    g->thinker.function = T_Glow;
-    g->direction = -1;
+    glow->sector = sector;
+    glow->minlight = P_FindMinSurroundingLight(sector,sector->lightlevel);
+    glow->maxlight = sector->lightlevel;
+    glow->thinker.function = T_Glow;
+    glow->direction = -1;
 }
 
 // killough 10/98:

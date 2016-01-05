@@ -683,10 +683,11 @@ int search_string(char src[], char str[])
 {
     int i = 0;
     int j = 0;
-    int firstOcc;
 
     while (src[i] != '\0')
     {
+        int firstOcc;
+
         while (src[i] != str[0] && src[i] != '\0')
             i++;
  

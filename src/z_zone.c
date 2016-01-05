@@ -2551,18 +2551,21 @@ void* Z_MallocAlign (int reqsize, int32_t tag, void **user, int alignbits)
 //
 // Z_ChangeTag
 //
+// [nitr8] UNUSED
+//
+/*
 void Z_ChangeTag2(void *ptr, int32_t tag, char *file, int line)
 {
     memblock_t*        block;
         
     block = (memblock_t *) ((byte *)ptr - sizeof(memblock_t));
-/*
-#ifdef WII
-    if (block->id != ZONEID)
-        I_Error("%s:%i: Z_ChangeTag: block without a ZONEID!",
-                file, line);
-#endif
-*/
+
+//#ifdef WII
+//    if (block->id != ZONEID)
+//        I_Error("%s:%i: Z_ChangeTag: block without a ZONEID!",
+//                file, line);
+//#endif
+
     if (tag >= PU_PURGELEVEL && block->user == NULL)
         I_Error("%s:%i: Z_ChangeTag: an owner is required "
                 "for purgable blocks", file, line);
@@ -2580,6 +2583,7 @@ void Z_ChangeTag2(void *ptr, int32_t tag, char *file, int line)
 
     block->tag = tag;
 }
+*/
 
 void* Z_MallocAlign (int reqsize, int32_t tag, void **user, int alignbits)
 {
