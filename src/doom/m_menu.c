@@ -1296,11 +1296,11 @@ int                        cheeting;
 int                        coordinates_info = 0;
 int                        version_info = 0;
 #ifdef WII
-int                        key_controls_start_in_cfg_at_pos = 102;
-int                        key_controls_end_in_cfg_at_pos = 116;
-#else
-int                        key_controls_start_in_cfg_at_pos = 101;
+int                        key_controls_start_in_cfg_at_pos = 103;
 int                        key_controls_end_in_cfg_at_pos = 117;
+#else
+int                        key_controls_start_in_cfg_at_pos = 102;
+int                        key_controls_end_in_cfg_at_pos = 118;
 #endif
 int                        tracknum = 1;
 int                        epi = 1;
@@ -1569,6 +1569,7 @@ void M_Smearblood(int choice);
 void M_ColoredCorpses(int choice);
 void M_LowHealth(int choice);
 void M_CenterWeapon(int choice);
+void M_EjectCasings(int choice);
 void M_EndoomScreen(int choice);
 void M_NoMonsters(int choice);
 void M_AutomapOverlay(int choice);
@@ -2556,6 +2557,7 @@ menu_t  GameDef5 =
 enum
 {
     game6_centerweapon,
+    game6_casings,
 #ifdef WII
     game6_prbeta,
 #endif
@@ -2564,7 +2566,8 @@ enum
 
 menuitem_t GameMenu6[]=
 {
-    {2,"Center Weapon when firing",M_CenterWeapon,'c'}
+    {2,"Center Weapon when firing",M_CenterWeapon,'c'},
+    {2,"Eject Weapon Casings",M_EjectCasings,'e'}
 #ifdef WII
     ,
     {2,"PRE-RELEASE BETA MODE",M_Beta,'b'}
@@ -5271,8 +5274,7 @@ void M_DrawGame6(void)
         M_WriteText(GameDef6.x + 258, GameDef6.y - 2, "OFF");
     }
 
-#ifdef WII
-    if(beta_style_mode)
+    if(d_ejectcasings)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef6.x + 266, GameDef6.y + 8, "ON");
@@ -5283,13 +5285,25 @@ void M_DrawGame6(void)
         M_WriteText(GameDef6.x + 258, GameDef6.y + 8, "OFF");
     }
 
+#ifdef WII
+    if(beta_style_mode)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(GameDef6.x + 266, GameDef6.y + 18, "ON");
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(GameDef6.x + 258, GameDef6.y + 18, "OFF");
+    }
+
     if(whichSkull == 1)
     {
         int x;
         char *string = "";
         dp_translation = crx[CRX_GOLD];
 
-        if(itemOn == 13)
+        if(itemOn == 2)
         {
             if(fsize != 28422764 && fsize != 19321722 && fsize != 12361532)
                 string = "YOU MUST QUIT AND RESTART TO TAKE EFFECT.";
@@ -10404,6 +10418,21 @@ void M_CenterWeapon(int choice)
       case 1:
         if (!d_centerweapon)
             d_centerweapon = true;
+        break;
+    }
+}
+
+void M_EjectCasings(int choice)
+{
+    switch(choice)
+    {
+      case 0:
+        if (d_ejectcasings)
+            d_ejectcasings = false;
+        break;
+      case 1:
+        if (!d_ejectcasings)
+            d_ejectcasings = true;
         break;
     }
 }

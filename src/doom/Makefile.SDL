@@ -388,7 +388,7 @@ include ./$(DEPDIR)/m_random.Po
 include ./$(DEPDIR)/p_ceilng.Po
 include ./$(DEPDIR)/p_doors.Po
 include ./$(DEPDIR)/p_enemy.Po
-#include ./$(DEPDIR)/p_fix.Po
+include ./$(DEPDIR)/p_fix.Po
 include ./$(DEPDIR)/p_floor.Po
 include ./$(DEPDIR)/p_genlin.Po
 include ./$(DEPDIR)/p_inter.Po
@@ -415,7 +415,7 @@ include ./$(DEPDIR)/r_segs.Po
 include ./$(DEPDIR)/r_sky.Po
 include ./$(DEPDIR)/r_things.Po
 include ./$(DEPDIR)/s_sound.Po
-#include ./$(DEPDIR)/sc_man.Po
+include ./$(DEPDIR)/sc_man.Po
 include ./$(DEPDIR)/sounds.Po
 include ./$(DEPDIR)/statdump.Po
 include ./$(DEPDIR)/st_lib.Po

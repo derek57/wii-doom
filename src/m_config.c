@@ -188,6 +188,7 @@ default_t   doom_defaults_list[] =
     CONFIG_VARIABLE_INT                (slime_trails),
     CONFIG_VARIABLE_INT                (max_bloodsplats),
     CONFIG_VARIABLE_INT                (center_weapon),
+    CONFIG_VARIABLE_INT                (eject_casings),
     CONFIG_VARIABLE_INT                (key_shoot),
     CONFIG_VARIABLE_INT                (key_open),
     CONFIG_VARIABLE_INT                (key_menu),

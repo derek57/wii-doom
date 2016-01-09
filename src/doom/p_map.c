@@ -385,7 +385,7 @@ static dboolean PIT_CheckLine(line_t *ld)
             && FixedMul(tmx - tmthing->x, ld->dy) > FixedMul(tmy - tmthing->y, ld->dx));
     }
 
-    if (!(tmthing->flags & MF_MISSILE))
+    if (!(tmthing->flags & (MF_MISSILE | MF_BOUNCES)))
     {
         if ( ld->flags & ML_BLOCKING )                  // explicitly blocking everything
             return (tmunstuck && !untouched(ld));       // killough 8/1/98: allow escape
@@ -514,7 +514,7 @@ dboolean PIT_CheckThing (mobj_t* thing)
     }
 
     // missiles can hit other things
-    if (tmflags & MF_MISSILE)
+    if ((tmthing->flags & MF_MISSILE) || ((tmthing->flags & MF_BOUNCES) && !(tmthing->flags & MF_SOLID)))
     {
         int clipheight = (thing->projectilepassheight ?
                 thing->projectilepassheight : thing->height);
@@ -961,6 +961,11 @@ dboolean P_TryMove(mobj_t *thing, fixed_t x, fixed_t y, dboolean dropoff)
                 felldown = (!(thing->flags & MF_NOGRAVITY) && thing->z - tmfloorz > 24 * FRACUNIT);
             }
         }
+
+        if (thing->flags & MF_BOUNCES &&    // killough 8/13/98
+            !(thing->flags & (MF_MISSILE|MF_NOGRAVITY)) &&
+	    !sentient(thing) && tmfloorz - thing->z > 16*FRACUNIT)
+            return false; // too big a step up for bouncers under gravity
 
         // killough 11/98: prevent falling objects from going up too many steps
         if ((thing->flags2 & MF2_FALLING)
@@ -1979,7 +1984,7 @@ dboolean PIT_RadiusAttack(mobj_t* thing)
     fixed_t     dist;
 
     // [BH] allow corpses to react to blast damage 
-    if (!(thing->flags & MF_SHOOTABLE) && !(thing->flags & MF_CORPSE))
+    if (!(thing->flags & (MF_SHOOTABLE | MF_BOUNCES)) && !(thing->flags & MF_CORPSE))
         return true;
 
     // Boss spider and cyborg

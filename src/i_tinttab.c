@@ -85,14 +85,27 @@ static byte CHGF[256] =
 */
 
 byte    *tinttab;
+byte    *tinttab5;
+byte    *tinttab10;
+byte    *tinttab15;
+byte    *tinttab20;
 byte    *tinttab25;
+byte    *tinttab30;
 byte    *tinttab33;
+byte    *tinttab35;
 byte    *tinttab40;
+byte    *tinttab45;
 byte    *tinttab50;
+byte    *tinttab55;
 byte    *tinttab60;
+byte    *tinttab65;
 byte    *tinttab66;
+byte    *tinttab70;
 byte    *tinttab75;
 byte    *tinttab80;
+byte    *tinttab85;
+byte    *tinttab90;
+byte    *tinttab95;
 byte    *tinttabred;
 byte    *tinttabredwhite1;
 byte    *tinttabredwhite2;
@@ -164,14 +177,27 @@ void I_InitTintTables(byte *palette)
 
     tinttab = GenerateTintTable(palette, ADDITIVE, general, ALL);
 
+    tinttab5 = GenerateTintTable(palette, 5, general, ALL);
+    tinttab10 = GenerateTintTable(palette, 10, general, ALL);
+    tinttab15 = GenerateTintTable(palette, 15, general, ALL);
+    tinttab20 = GenerateTintTable(palette, 20, general, ALL);
     tinttab25 = GenerateTintTable(palette, 25, general, ALL);
+    tinttab30 = GenerateTintTable(palette, 30, general, ALL);
     tinttab33 = GenerateTintTable(palette, 33, general, ALL);
+    tinttab35 = GenerateTintTable(palette, 35, general, ALL);
     tinttab40 = GenerateTintTable(palette, 40, general, ALL);
+    tinttab45 = GenerateTintTable(palette, 45, general, ALL);
     tinttab50 = GenerateTintTable(palette, 50, general, ALL);
+    tinttab55 = GenerateTintTable(palette, 55, general, ALL);
     tinttab60 = GenerateTintTable(palette, 60, general, ALL);
+    tinttab65 = GenerateTintTable(palette, 65, general, ALL);
     tinttab66 = GenerateTintTable(palette, 66, general, ALL);
+    tinttab70 = GenerateTintTable(palette, 70, general, ALL);
     tinttab75 = GenerateTintTable(palette, 75, general, ALL);
     tinttab80 = GenerateTintTable(palette, 80, general, ALL);
+    tinttab85 = GenerateTintTable(palette, 85, general, ALL);
+    tinttab90 = GenerateTintTable(palette, 90, general, ALL);
+    tinttab95 = GenerateTintTable(palette, 95, general, ALL);
 
     tranmap = ((lump = W_CheckNumForName("TRANMAP")) != -1 ? W_CacheLumpNum(lump, PU_STATIC) :
         tinttab50);

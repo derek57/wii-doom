@@ -267,6 +267,7 @@ void M_BindBaseControls(void)
     M_BindVariable("slime_trails",           &remove_slime_trails);
     M_BindVariable("max_bloodsplats",        &r_bloodsplats_max);
     M_BindVariable("center_weapon",          &d_centerweapon);
+    M_BindVariable("eject_casings",          &d_ejectcasings);
 #ifdef WII
     M_BindVariable("key_shoot",              &joy_r);
     M_BindVariable("key_open",               &joy_l);

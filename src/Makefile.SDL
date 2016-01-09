@@ -554,7 +554,7 @@ include ./$(DEPDIR)/c_io.Po
 include ./$(DEPDIR)/d_event.Po
 include ./$(DEPDIR)/d_iwad.Po
 include ./$(DEPDIR)/d_loop.Po
-#include ./$(DEPDIR)/d_deh.Po
+include ./$(DEPDIR)/d_deh.Po
 include ./$(DEPDIR)/gusconf.Po
 include ./$(DEPDIR)/i_endoom.Po
 include ./$(DEPDIR)/i_glscale.Po
@@ -965,14 +965,15 @@ chocolate-doom-screensaver.desktop: doom-screensaver.desktop
 %.o : %.rc
 	$(WINDRES) $< -o $@
 
-icon.c : $(top_builddir)/data/doom.png
-	$(top_builddir)/data/convert-icon $< $@
+icon.c : $(top_builddir)/data/doom8.ico
+	$(top_builddir)/data/convert-icon $(top_builddir)/data/doom8.ico $@
 
 midiread : midifile.c
-	$(CC) -DTEST $(CFLAGS)  -L/usr/local/lib -Wl,-rpath,/usr/local/lib -lSDL -lpthread $< -o $@
+	$(CC) -DTEST $(CFLAGS)  -L/usr/local/lib -Wl,-rpath,/usr/local/lib -lSDL -lpthread midifile.c -o $@
 
-mus2mid : mus2mid.c memio.c i_system.c m_argv.c m_misc.c
-	$(CC) -DSTANDALONE -I$(top_builddir) $(CFLAGS)  -L/usr/local/lib -Wl,-rpath,/usr/local/lib -lSDL -lpthread $^ -o $@
+MUS2MID_SOURCES = mus2mid.c memio.c i_system.c m_argv.c m_misc.c
+mus2mid : $(MUS2MID_SOURCES)
+	$(CC) -DSTANDALONE -I$(top_builddir) $(CFLAGS)  -L/usr/local/lib -Wl,-rpath,/usr/local/lib -lSDL -lpthread $(MUS2MID_SOURCES) -o $@
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

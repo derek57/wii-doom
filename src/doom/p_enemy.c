@@ -27,6 +27,7 @@
 //-----------------------------------------------------------------------------
 
 
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -77,7 +78,6 @@ typedef enum
 } dirtype_t;
 
 // Codepointer operation types
-/*
 enum
 {
    CPOP_ASSIGN,
@@ -125,7 +125,7 @@ enum
 
    CPC_NUMIMMEDIATE = CPC_BITWISEAND + 1
 };
-*/
+
 
 //
 // P_NewChaseDir related LUT.
@@ -2927,7 +2927,7 @@ void A_SkullPop(mobj_t *actor, player_t *player)
         player->damagecount = 32;
     }
 }
-/*
+
 //
 // A_CounterJump
 //
@@ -2941,61 +2941,135 @@ void A_SkullPop(mobj_t *actor, player_t *player)
 //
 void A_CounterJump(mobj_t *mo)
 {
-   dboolean branch = false;
-   int statenum   = S_PISCASE_A_FADE1;
-   int checktype  = 0;
-   short value    = (short)(40);
-   int cnum       = 1;
-   int *counter;
-   
-   // validate state number
-//   statenum = E_StateNumForDEHNum(statenum);
-   if(statenum == NUMSTATES)
-      return;
+    dboolean    branch = false;
+    int         statenum = 0;
+    int         checktype = 0;
+    int         cnum = 1;
+    int         *counter;
+    short       value = (short)(40);
 
-   if(cnum < 0 || cnum >= NUMMOBJCOUNTERS)
-      return; // invalid
+    if (mo->type == MT_BULLET)
+    {
+        if (mo->state->frame == 0)
+            statenum = S_PISCASE_A_FADE1;
+        else if (mo->state->frame == 1)
+            statenum = S_PISCASE_B_FADE1;
+        else if (mo->state->frame == 2)
+            statenum = S_PISCASE_C_FADE1;
+        else if (mo->state->frame == 3)
+            statenum = S_PISCASE_D_FADE1;
+    }
+    else if (mo->type == MT_SHELL)
+    {
+        if (mo->state->frame == 0)
+            statenum = S_SHELLCASE_A_FADE1;
+        else if (mo->state->frame == 1)
+            statenum = S_SHELLCASE_B_FADE1;
+        else if (mo->state->frame == 2)
+            statenum = S_SHELLCASE_C_FADE1;
+        else if (mo->state->frame == 3)
+            statenum = S_SHELLCASE_D_FADE1;
+        else if (mo->state->frame == 4)
+            statenum = S_SHELLCASE_E_FADE1;
+        else if (mo->state->frame == 5)
+            statenum = S_SHELLCASE_F_FADE1;
+        else if (mo->state->frame == 6)
+            statenum = S_SHELLCASE_G_FADE1;
+        else if (mo->state->frame == 7)
+            statenum = S_SHELLCASE_H_FADE1;
+    }
+    else if (mo->type == MT_ROUND)
+    {
+        if (mo->state->frame == 0)
+            statenum = S_RNDCASE_A_FADE1;
+        else if (mo->state->frame == 1)
+            statenum = S_RNDCASE_B_FADE1;
+        else if (mo->state->frame == 2)
+            statenum = S_RNDCASE_C_FADE1;
+        else if (mo->state->frame == 3)
+            statenum = S_RNDCASE_D_FADE1;
+        else if (mo->state->frame == 4)
+            statenum = S_RNDCASE_E_FADE1;
+        else if (mo->state->frame == 5)
+            statenum = S_RNDCASE_F_FADE1;
+    }
 
-   counter = &(mo->counters[cnum]);
+    // validate state number
+    if (statenum == NUMSTATES)
+    {
+        C_Warning("A_CounterJump: invalid statenum (%d)\n", statenum);
+        return;
+    }
 
-   // 08/02/04:
-   // support getting check value from a counter
-   // if checktype is greater than the last immediate operator,
-   // then the comparison value is actually a counter number
+    if (cnum < 0 || cnum >= NUMMOBJCOUNTERS)
+    {
+        C_Warning("A_CounterJump: invalid cnum (%d)\n", cnum);
+        return;
+    }
 
-   if(checktype >= CPC_NUMIMMEDIATE)
-   {
-      // turn it into the corresponding immediate operation
-      checktype -= CPC_NUMIMMEDIATE;
+    counter = &(mo->counters[cnum]);
 
-      if(value < 0 || value >= NUMMOBJCOUNTERS)
-         return; // invalid counter number
+    // 08/02/04:
+    // support getting check value from a counter
+    // if checktype is greater than the last immediate operator,
+    // then the comparison value is actually a counter number
 
-      value = mo->counters[value];
-   }
+    if (checktype >= CPC_NUMIMMEDIATE)
+    {
+        // turn it into the corresponding immediate operation
+        checktype -= CPC_NUMIMMEDIATE;
 
-   switch(checktype)
-   {
-   case CPC_LESS:
-      branch = (*counter < value); break;
-   case CPC_LESSOREQUAL:
-      branch = (*counter <= value); break;
-   case CPC_GREATER:
-      branch = (*counter > value); break;
-   case CPC_GREATEROREQUAL:
-      branch = (*counter >= value); break;
-   case CPC_EQUAL:
-      branch = (*counter == value); break;
-   case CPC_NOTEQUAL:
-      branch = (*counter != value); break;
-   case CPC_BITWISEAND:
-      branch = (*counter & value); break;
-   default:
-      break;
-   }
+        if (value < 0 || value >= NUMMOBJCOUNTERS)
+        {
+            C_Warning("A_CounterJump: invalid value (%d)\n", value);
+            return;
+        }
 
-   if(branch)
-      P_SetMobjState(mo, statenum);
+        value = mo->counters[value];
+    }
+
+    switch (checktype)
+    {
+        case CPC_LESS:
+            branch = (*counter < value);
+            break;
+
+        case CPC_LESSOREQUAL:
+            branch = (*counter <= value);
+            break;
+
+        case CPC_GREATER:
+            branch = (*counter > value);
+            break;
+
+        case CPC_GREATEROREQUAL:
+            branch = (*counter >= value);
+            break;
+
+        case CPC_EQUAL:
+            branch = (*counter == value);
+            break;
+
+        case CPC_NOTEQUAL:
+            branch = (*counter != value);
+            break;
+
+        case CPC_BITWISEAND:
+            branch = (*counter & value);
+            break;
+
+        default:
+            break;
+    }
+
+    if (branch)
+        P_SetMobjState(mo, statenum);
+
+    if (!mo->tics)
+    {
+        mo->casing_counter = 0;
+        P_RemoveMobj(mo);
+    }
 }
 
 //
@@ -3007,12 +3081,46 @@ void A_CounterJump(mobj_t *mo)
 //
 void A_FadeOut(mobj_t *mo)
 {
-//   mo->translucency -= 0.025;
-   
-//   if(mo->translucency < 0)
-//      mo->translucency = 0;
-//   else if(mo->translucency > FRACUNIT)
-//      mo->translucency = FRACUNIT;
+    mo->casing_counter++;
+
+    if (mo->casing_counter == 2)
+        mo->colfunc = tl5colfunc;
+    else if (mo->casing_counter == 4)
+        mo->colfunc = tl10colfunc;
+    else if (mo->casing_counter == 6)
+        mo->colfunc = tl15colfunc;
+    else if (mo->casing_counter == 8)
+        mo->colfunc = tl20colfunc;
+    else if (mo->casing_counter == 10)
+        mo->colfunc = tl25colfunc;
+    else if (mo->casing_counter == 12)
+        mo->colfunc = tl30colfunc;
+    else if (mo->casing_counter == 14)
+        mo->colfunc = tl35colfunc;
+    else if (mo->casing_counter == 16)
+        mo->colfunc = tl40colfunc;
+    else if (mo->casing_counter == 18)
+        mo->colfunc = tl45colfunc;
+    else if (mo->casing_counter == 20)
+        mo->colfunc = tl50colfunc;
+    else if (mo->casing_counter == 22)
+        mo->colfunc = tl55colfunc;
+    else if (mo->casing_counter == 24)
+        mo->colfunc = tl60colfunc;
+    else if (mo->casing_counter == 26)
+        mo->colfunc = tl65colfunc;
+    else if (mo->casing_counter == 28)
+        mo->colfunc = tl70colfunc;
+    else if (mo->casing_counter == 30)
+        mo->colfunc = tl75colfunc;
+    else if (mo->casing_counter == 32)
+        mo->colfunc = tl80colfunc;
+    else if (mo->casing_counter == 34)
+        mo->colfunc = tl85colfunc;
+    else if (mo->casing_counter == 36)
+        mo->colfunc = tl90colfunc;
+    else if (mo->casing_counter == 38)
+        mo->colfunc = tl95colfunc;
 }
 
 //
@@ -3029,32 +3137,64 @@ void A_FadeOut(mobj_t *mo)
 //
 void A_CounterSwitch(mobj_t *mo)
 {
-   int cnum = 1;
-   int startstate = S_PISCASE_A;
-   int numstates  = 4 - 1;
-   int *counter;
+    int    cnum = 1;
+    int    startstate;
+    int    numstates;
+    int    *counter;
 
-   // get counter
-   if(cnum < 0 || cnum >= NUMMOBJCOUNTERS)
-      return; // invalid
+    if (mo->type == MT_BULLET)
+    {
+        startstate = S_PISCASE_A;
+        numstates = 3;
+    }
+    else if (mo->type == MT_SHELL)
+    {
+        startstate = S_SHELLCASE_A;
+        numstates = 7;
+    }
+    else if ( mo->type == MT_ROUND)
+    {
+        startstate = S_RNDCASE_A;
+        numstates = 5;
+    }
+    else
+    {
+        C_Warning("A_CounterSwitch: invalid mobjtype (%d)\n", mo->type);
+        return;
+    }
 
-   counter = &(mo->counters[cnum]);
+    // get counter
+    if (cnum < 0 || cnum >= NUMMOBJCOUNTERS)
+    {
+        C_Warning("A_CounterSwitch: invalid cnum (%d)\n", cnum);
+        return;
+    }
 
-   // verify startstate
-//   startstate = E_StateNumForDEHNum(startstate);
-   if(startstate == NUMSTATES)
-      return;
+    counter = &(mo->counters[cnum]);
 
-   // verify last state is < NUMSTATES
-   if(startstate + numstates >= NUMSTATES)
-      return;
+    // verify startstate
+    if (startstate == NUMSTATES)
+    {
+        C_Warning("A_CounterSwitch: invalid startstate (%d)\n", startstate);
+        return;
+    }
 
-   // verify counter is in range
-   if(*counter < 0 || *counter > numstates)
-      return;
+    // verify last state is < NUMSTATES
+    if (startstate + numstates >= NUMSTATES)
+    {
+        C_Warning("A_CounterSwitch: invalid last state (%d)\n", startstate + numstates);
+        return;
+    }
 
-   // jump!
-   P_SetMobjState(mo, startstate + *counter);
+    // verify counter is in range
+    if (*counter < 0 || *counter > numstates)
+    {
+        C_Warning("A_CounterSwitch: invalid counter (%d)\n", *counter);
+        return;
+    }
+
+    // jump!
+    P_SetMobjState(mo, startstate + *counter);
 }
 
 //
@@ -3070,54 +3210,146 @@ void A_CounterSwitch(mobj_t *mo)
 //
 void A_SetCounter(mobj_t *mo)
 {
-   int cnum = 1;
-   short value = (short)(4);
-   int specialop = 11;
-   int *counter;
+    int      cnum = 1;
+    int      specialop = 0;
+    int      *counter;
+    short    value = (short)(0);
 
-   if(cnum < 0 || cnum >= NUMMOBJCOUNTERS)
-      return; // invalid
+    if (mo->type == MT_BULLET)
+    {
+        if (mo->state->nextstate == S_PISCASE_CALC2)
+        {
+            value = (short)(4);
+            specialop = CPOP_RNDMOD;
+        }
+        else if (mo->state->nextstate == S_PISCASE_A_FADE2 ||
+            mo->state->nextstate == S_PISCASE_B_FADE2 ||
+            mo->state->nextstate == S_PISCASE_C_FADE2 ||
+            mo->state->nextstate == S_PISCASE_D_FADE2)
+        {
+            value = (short)(1);
+            specialop = CPOP_ADD;
+        }
+    }
+    else if (mo->type == MT_SHELL)
+    {
+        if (mo->state->nextstate == S_SHELLCASE_CALC2)
+        {
+            value = (short)(8);
+            specialop = CPOP_RNDMOD;
+        }
+        else if (mo->state->nextstate == S_SHELLCASE_A_FADE2 ||
+            mo->state->nextstate == S_SHELLCASE_B_FADE2 ||
+            mo->state->nextstate == S_SHELLCASE_C_FADE2 ||
+            mo->state->nextstate == S_SHELLCASE_D_FADE2 ||
+            mo->state->nextstate == S_SHELLCASE_E_FADE2 ||
+            mo->state->nextstate == S_SHELLCASE_F_FADE2 ||
+            mo->state->nextstate == S_SHELLCASE_G_FADE2 ||
+            mo->state->nextstate == S_SHELLCASE_H_FADE2)
+        {
+            value = (short)(1);
+            specialop = CPOP_ADD;
+        }
+    }
+    else if (mo->type == MT_ROUND)
+    {
+        if (mo->state->nextstate == S_RNDCASE_CALC2)
+        {
+            value = (short)(6);
+            specialop = CPOP_RNDMOD;
+        }
+        else if (mo->state->nextstate == S_RNDCASE_A_FADE2 ||
+            mo->state->nextstate == S_RNDCASE_B_FADE2 ||
+            mo->state->nextstate == S_RNDCASE_C_FADE2 ||
+            mo->state->nextstate == S_RNDCASE_D_FADE2 ||
+            mo->state->nextstate == S_RNDCASE_E_FADE2 ||
+            mo->state->nextstate == S_RNDCASE_F_FADE2)
+        {
+            value = (short)(1);
+            specialop = CPOP_ADD;
+        }
+    }
+    else
+    {
+        C_Warning("A_SetCounter: invalid mobjtype (%d)\n", mo->type);
+        return;
+    }
 
-   counter = &(mo->counters[cnum]);
+    if (cnum < 0 || cnum >= NUMMOBJCOUNTERS)
+    {
+        C_Warning("A_SetCounter: invalid cnum (%d)\n", cnum);
+        return;
+    }
 
-   switch(specialop)
-   {
-   case CPOP_ASSIGN:
-      *counter = value; break;
-   case CPOP_ADD:
-      *counter += value; break;
-   case CPOP_SUB:
-      *counter -= value; break;
-   case CPOP_MUL:
-      *counter *= value; break;
-   case CPOP_DIV:
-      if(value) // don't divide by zero
-         *counter /= value;
-      break;
-   case CPOP_MOD:
-      if(value > 0) // only allow modulus by positive values
-         *counter %= value;
-      break;
-   case CPOP_AND:
-      *counter &= value; break;
-   case CPOP_ANDNOT:
-      *counter &= ~value; break; // compound and-not operation
-   case CPOP_OR:
-      *counter |= value; break;
-   case CPOP_XOR:
-      *counter ^= value; break;
-   case CPOP_RND:
-      *counter = P_Random(); break;
-   case CPOP_RNDMOD:
-      if(value > 0)
-         *counter = P_Random() % value; break;
-   case CPOP_SHIFTLEFT:
-      *counter <<= value; break;
-   case CPOP_SHIFTRIGHT:
-      *counter >>= value; break;
-   default:
-      break;
-   }
+    counter = &(mo->counters[cnum]);
+
+    switch (specialop)
+    {
+        case CPOP_ASSIGN:
+            *counter = value;
+            break;
+
+        case CPOP_ADD:
+            *counter += value;
+            break;
+
+        case CPOP_SUB:
+            *counter -= value;
+            break;
+
+        case CPOP_MUL:
+            *counter *= value;
+            break;
+
+        case CPOP_DIV:
+            // don't divide by zero
+            if (value)
+                *counter /= value;
+            break;
+
+        case CPOP_MOD:
+            // only allow modulus by positive values
+            if (value > 0)
+                *counter %= value;
+            break;
+
+        case CPOP_AND:
+            *counter &= value;
+            break;
+
+        case CPOP_ANDNOT:
+            // compound and-not operation
+            *counter &= ~value;
+            break;
+
+        case CPOP_OR:
+            *counter |= value;
+            break;
+
+        case CPOP_XOR:
+            *counter ^= value;
+            break;
+
+        case CPOP_RND:
+            *counter = P_Random();
+            break;
+
+        case CPOP_RNDMOD:
+            if (value > 0)
+               *counter = P_Random() % value;
+            break;
+
+        case CPOP_SHIFTLEFT:
+            *counter <<= value;
+            break;
+
+        case CPOP_SHIFTRIGHT:
+            *counter >>= value;
+            break;
+
+        default:
+            break;
+    }
 }
 
 //
@@ -3132,48 +3364,108 @@ void A_SetCounter(mobj_t *mo)
 //
 void A_EjectCasing(mobj_t *actor)
 {
-   angle_t     angle = actor->angle;
-   fixed_t     x, y, z;
-   fixed_t     frontdist;
-   int         frontdisti;
-   fixed_t     sidedist;
-   fixed_t     zheight;
-   int         thingtype;
-   mobj_t      *mo;
+    const double    pi = 4. * atan(1.);
+    angle_t         angle;
+    int             frontdisti = 0;
+    fixed_t         frontdist;
+    fixed_t         sidedist = 0;
+    fixed_t         x;
+    fixed_t         y;
+    fixed_t         z;
+    fixed_t         zheight = 0;
+    mobj_t          *mo;
+    mobjtype_t      type = 0;
+    player_t        *player = &players[consoleplayer];
+    pspdef_t*       psp = player->psprites;
+    statenum_t      stnum = psp->state->nextstate;
 
-   frontdisti = 512;
-   
-   frontdist  = frontdisti * FRACUNIT / 16;
-   sidedist   = 64 * FRACUNIT / 16;
-   zheight    = -112 * FRACUNIT / 16;
+    if (!d_ejectcasings)
+        return;
 
-   // account for mlook - EXPERIMENTAL
-   if(actor->player)
-   {
-      int pitch = actor->player->lookdir;
-            
-      z = actor->z + actor->player->viewheight + zheight;
-      
-      // modify height according to pitch - hack warning.
-      z -= (pitch / ANGLE_1) * ((10 * frontdisti / 256) * FRACUNIT / 32);
-   }
-   else
-      z = actor->z + (0) * FRACUNIT / 16;
+    if (actor->type == MT_PLAYER ||
+        actor->type == MT_SHOTGUY || actor->type == MT_POSSESSED || actor->type == MT_CHAINGUY ||
+        actor->type == MT_WOLFSS || actor->type == MT_SPIDER)
+    {
+        if ((stnum != S_PISTOL4 &&
+            stnum != S_CHAIN2 &&
+            stnum != S_CHAIN3 &&
+            actor->type != MT_POSSESSED &&
+            actor->type != MT_CHAINGUY &&
+            actor->type != MT_WOLFSS &&
+            actor->type != MT_SPIDER) || actor->type == MT_SHOTGUY)
+        {
+            type = MT_SHELL;
+            frontdisti = 768;
+            sidedist = 1 * FRACUNIT / 16;
 
-   x = actor->x + FixedMul(frontdist, finecosine[angle>>ANGLETOFINESHIFT]);
-   y = actor->y + FixedMul(frontdist, finesine[angle>>ANGLETOFINESHIFT]);
+            if (actor->type == MT_PLAYER)
+            {
+                if (stnum == S_SGUN6)
+                    zheight = -192 * FRACUNIT / 16;
+                else
+                    zheight = -224 * FRACUNIT / 16;
+            }
+        }
+        else
+        {
+            if (actor->type == MT_PLAYER)
+                actor = player->mo;
 
-   // adjust x/y along a vector orthogonal to the source object's angle
-   angle = angle - ANG90;
+            if ((actor->type == MT_POSSESSED || actor->type == MT_CHAINGUY || actor->type == MT_WOLFSS || stnum == S_PISTOL4) &&
+                stnum != S_CHAIN2 && stnum != S_CHAIN3)
+            {
+                type = MT_BULLET;
+                frontdisti = 512;
+                sidedist = 64 * FRACUNIT / 16;
 
-   x += FixedMul(sidedist, finecosine[angle>>ANGLETOFINESHIFT]);
-   y += FixedMul(sidedist, finesine[angle>>ANGLETOFINESHIFT]);
+                if (stnum == S_PISTOL4)
+                    zheight = -112 * FRACUNIT / 16;
+            }
+            else if (actor->type == MT_SPIDER || stnum == S_CHAIN2 || stnum == S_CHAIN3)
+            {
+                type = MT_ROUND;
+                frontdisti = 640;
+                sidedist = -192 * FRACUNIT / 16;
 
-   thingtype = MT_BULLET;
+                if (stnum == S_CHAIN2 || stnum == S_CHAIN3)
+                    zheight = -320 * FRACUNIT / 16;
+            }
+        }
+    }
+    else
+    {
+        C_Warning("A_EjectCasing: invalid mobjtype (%d)\n", actor->type);
+        return;
+    }
 
-   mo = P_SpawnMobj(x, y, z, thingtype);
+    angle = actor->angle;
+    frontdist = frontdisti * FRACUNIT / 16;
 
-   mo->angle = sidedist >= 0 ? angle : angle + ANG180;
+    x = actor->x + FixedMul(frontdist, finecosine[angle>>ANGLETOFINESHIFT]);
+    y = actor->y + FixedMul(frontdist, finesine[angle>>ANGLETOFINESHIFT]);
+
+    // account for mlook
+    if (actor->player)
+    {
+        int pitch = actor->player->lookdir;
+
+        z = actor->z + actor->player->viewheight + zheight;
+
+        // modify height according to pitch
+        z += (pitch / pi) * ((10 * frontdisti / 256) * FRACUNIT / 32);
+    }
+    else
+        z = actor->z + 500 * FRACUNIT / 16;
+
+    // adjust x/y along a vector orthogonal to the source object's angle
+    angle = angle - ANG90;
+
+    x += FixedMul(sidedist, finecosine[angle>>ANGLETOFINESHIFT]);
+    y += FixedMul(sidedist, finesine[angle>>ANGLETOFINESHIFT]);
+
+    mo = P_SpawnMobj(x, y, z, type);
+
+    mo->angle = sidedist >= 0 ? angle : angle + ANG180;
 }
 
 //
@@ -3185,18 +3477,31 @@ void A_EjectCasing(mobj_t *actor)
 //
 void A_CasingThrust(mobj_t *actor)
 {
-   fixed_t moml, momz;
+    fixed_t moml = 0;
+    fixed_t momz = 0;
 
-   moml = 16 * FRACUNIT / 16;
-   momz = 32 * FRACUNIT / 16;
+    if (actor->type == MT_BULLET || actor->type == MT_ROUND)
+    {
+        moml = 16 * FRACUNIT / 16;
+        momz = 32 * FRACUNIT / 16;
+    }
+    else if (actor->type == MT_SHELL)
+    {
+        moml = 32 * FRACUNIT / 16;
+        momz = -32 * FRACUNIT / 16;
+    }
+    else
+    {
+        C_Warning("A_CasingThrust: invalid mobjtype (%d)\n", actor->type);
+        return;
+    }
+
+    actor->momx = FixedMul(moml, finecosine[actor->angle>>ANGLETOFINESHIFT]);
+    actor->momy = FixedMul(moml, finesine[actor->angle>>ANGLETOFINESHIFT]);
    
-   actor->momx = FixedMul(moml, finecosine[actor->angle>>ANGLETOFINESHIFT]);
-   actor->momy = FixedMul(moml, finesine[actor->angle>>ANGLETOFINESHIFT]);
-   
-   // randomize
-   actor->momx += P_SubRandom(pr_casing) << 8;
-   actor->momy += P_SubRandom(pr_casing) << 8;
-   actor->momz = momz + (P_SubRandom(pr_casing) << 8);
+    // randomize
+    actor->momx += P_SubRandom(pr_casing) << 8;
+    actor->momy += P_SubRandom(pr_casing) << 8;
+    actor->momz = momz + (P_SubRandom(pr_casing) << 8);
 }
-*/
 

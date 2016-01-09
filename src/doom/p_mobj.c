@@ -64,15 +64,6 @@ static fixed_t floatbobdiffs[64] =
      17277,  19062,  20663,  22066,  23256,  24222,  24955,  25447
 };
 
-void G_PlayerReborn (int player);
-//void P_SpawnMapThing (mapthing_t* mthing);
-
-extern dboolean     not_walking;
-extern dboolean     in_slime;
-
-extern fixed_t      animatedliquiddiffs[64];
-extern fixed_t      attackrange;
-
 int                 itemrespawntime[ITEMQUESIZE];
 int                 iquehead;
 int                 iquetail;
@@ -86,7 +77,16 @@ mobj_t              *bloodsplats[r_bloodsplats_max_max];
 
 mapthing_t          itemrespawnque[ITEMQUESIZE];
 
+void                G_PlayerReborn (int player);
 void                (*P_BloodSplatSpawner)(fixed_t, fixed_t, int, int, mobj_t *);
+
+extern dboolean     not_walking;
+extern dboolean     in_slime;
+
+extern fixed_t      animatedliquiddiffs[64];
+extern fixed_t      attackrange;
+
+extern void         A_EjectCasing(mobj_t *actor);
 
 
 dboolean P_IsVoodooDoll(mobj_t *mobj)
@@ -143,6 +143,14 @@ dboolean P_SetMobjState(mobj_t *mobj, statenum_t state)
         seenstate[state] = 1 + st->nextstate;                   // killough 4/9/98
 
         state = st->nextstate;
+
+        if (state == S_SPID_ATK3 || state == S_SPID_ATK4 ||
+            state == S_SPOS_ATK3 ||
+            state == S_SSWV_ATK4 || state == S_SSWV_ATK6 ||
+            state == S_POSS_ATK3 ||
+            state == S_CPOS_ATK3 || state == S_CPOS_ATK4)
+            A_EjectCasing(mobj);
+
     } while (!mobj->tics && !seenstate[state]);                 // killough 4/9/98
 
     if (!--recursion)
@@ -256,8 +264,8 @@ void P_XYMovement (mobj_t* mo)
             // killough 8/11/98: bouncing off walls
             // killough 10/98:
             // Add ability for objects other than players to bounce on ice
-            if (!(mo->flags & MF_MISSILE) && !player && blockline && mo->z <= mo->floorz
-                && P_GetFriction(mo, NULL) > ORIG_FRICTION)
+            if (!(mo->flags & MF_MISSILE) && ((mo->flags & MF_BOUNCES) || (!player && blockline && mo->z <= mo->floorz
+                && P_GetFriction(mo, NULL) > ORIG_FRICTION)))
             {
                 if (blockline)
                 {
@@ -317,7 +325,14 @@ void P_XYMovement (mobj_t* mo)
     
     if (mo->flags & (MF_MISSILE | MF_SKULLFLY))
         return;         // no friction for missiles or lost souls ever
-                
+
+    // killough 8/11/98: add bouncers
+    // killough 11/98: only include bouncers hanging off ledges
+    if (((mo->flags & MF_BOUNCES && mo->z > mo->dropoffz) || mo->flags & MF_CORPSE) &&
+        (mo->momx > FRACUNIT/4 || mo->momx < -FRACUNIT/4 || mo->momy > FRACUNIT/4 || mo->momy < -FRACUNIT/4) &&
+        mo->floorz != mo->subsector->sector->floorheight)
+        return;  // do not stop sliding if halfway off a step with some momentum
+
     if (mo->z > mo->floorz && !(mo->flags2 & MF2_FLY) && !(mo->flags2 & MF2_ONMOBJ))
         return;         // no friction when airborne
 
@@ -421,6 +436,87 @@ void P_XYMovement (mobj_t* mo)
 //
 void P_ZMovement (mobj_t* mo)
 {
+  if (mo->flags & MF_BOUNCES && mo->momz)
+    {
+      mo->z += mo->momz;
+      if (mo->z <= mo->floorz)                  // bounce off floors
+	{
+	  mo->z = mo->floorz;
+	  if (mo->momz < 0)
+	    {
+	      mo->momz = -mo->momz;
+	      if (!(mo->flags & MF_NOGRAVITY))  // bounce back with decay
+		{
+		  mo->momz = mo->flags & MF_FLOAT ?   // floaters fall slowly
+		    mo->flags & MF_DROPOFF ?          // DROPOFF indicates rate
+		    FixedMul(mo->momz, (fixed_t)(FRACUNIT*.85)) :
+		    FixedMul(mo->momz, (fixed_t)(FRACUNIT*.70)) :
+		    FixedMul(mo->momz, (fixed_t)(FRACUNIT*.45)) ;
+		  
+		  // Bring it to rest below a certain speed
+		  if (abs(mo->momz) <= mo->info->mass*(GRAVITY*4/256))
+		    mo->momz = 0;
+		}
+
+	      // killough 11/98: touchy objects explode on impact
+	      if (mo->flags & MF_TOUCHY &&
+		  mo->health > 0)
+		P_DamageMobj(mo, NULL, NULL, mo->health);
+	      else
+		if (mo->flags & MF_FLOAT && sentient(mo))
+		  goto floater;
+	      return;
+	    }
+	}
+      else
+	if (mo->z >= mo->ceilingz - mo->height)   // bounce off ceilings
+	  {
+	    mo->z = mo->ceilingz - mo->height;
+	    if (mo->momz > 0)
+	      {
+		if (mo->subsector->sector->ceilingpic != skyflatnum)
+		  mo->momz = -mo->momz;    // always bounce off non-sky ceiling
+		else
+		  if (mo->flags & MF_MISSILE)
+		    P_RemoveMobj(mo);      // missiles don't bounce off skies
+		  else
+		    if (mo->flags & MF_NOGRAVITY)
+		      mo->momz = -mo->momz; // bounce unless under gravity
+
+		if (mo->flags & MF_FLOAT && sentient(mo))
+		  goto floater;
+
+		return;
+	      }
+	  }
+	else
+	  {
+	    if (!(mo->flags & MF_NOGRAVITY))      // free-fall under gravity
+	      mo->momz -= mo->info->mass*(GRAVITY/256);
+	    if (mo->flags & MF_FLOAT && sentient(mo))
+	      goto floater;
+	    return;
+	  }
+
+      // came to a stop
+      mo->momz = 0;
+
+      if (mo->flags & MF_MISSILE)
+	{
+	  if (ceilingline &&
+	      ceilingline->backsector &&
+	      ceilingline->backsector->ceilingpic == skyflatnum &&
+	      mo->z > ceilingline->backsector->ceilingheight)
+	    P_RemoveMobj(mo);  // don't explode on skies
+	  else
+	    P_ExplodeMissile(mo);
+	}
+      
+      if (mo->flags & MF_FLOAT && sentient(mo))
+	goto floater;
+      return;
+    }
+
     // check for smooth step up
     // killough 5/12/98: exclude voodoo dolls
     if (mo->player && mo->player->mo == mo && mo->z < mo->floorz)
@@ -432,7 +528,9 @@ void P_ZMovement (mobj_t* mo)
     
     // adjust height
     mo->z += mo->momz;
-        
+
+floater:
+
     // float down towards target if too close
     if (!((mo->flags ^ MF_FLOAT) & (MF_FLOAT | MF_SKULLFLY | MF_INFLOAT))
         && mo->target)  // killough 11/98: simplify

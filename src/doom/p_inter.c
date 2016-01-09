@@ -1380,7 +1380,7 @@ void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, int damage)
     dboolean     corpse = (flags & MF_CORPSE);
     int         type = target->type;
 
-    if (!(flags & MF_SHOOTABLE) && (!corpse || !corpses_slide))
+    if (!(flags & (MF_SHOOTABLE | MF_BOUNCES)) && (!corpse || !corpses_slide))
         return;        // shouldn't happen...
                 
     if (type == MT_BARREL && corpse)

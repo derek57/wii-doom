@@ -73,9 +73,9 @@ char *sprnames[] =
     "FLSH","SPRY","SPSH","LVAS","SLDG","BND1","BND2","BPL3","BPL5","BBSK",
     "BRSK","BYSK","BSHL","BCLL","BBOX","BBXP","BPNS","BPNV","BBSS","BCL1",
     "BELC","BPL4","BPL7","BPL6","BSMT","BHED","BPSS","BSPS","BCHG","BCHF",
-    "BPLG","BPLF","BMSL","BPL1","BPL2","BBL4",/*"CAS2",
+    "BPLG","BPLF","BMSL","BPL1","BPL2","BBL4","CAS1","CAS2","CAS7",
 
-    "PBUL","PSHE",*/
+    /*"PBUL","PSHE",*/
 
     NULL
 };
@@ -163,6 +163,11 @@ void A_Mushroom();
 void A_SkullPop();
 void A_Footstep();
 void A_MoreGibs();
+void A_CasingThrust();
+void A_SetCounter();
+void A_CounterSwitch();
+void A_FadeOut();
+void A_CounterJump();
 
 state_t states[NUMSTATES] =
 {
@@ -1820,6 +1825,117 @@ state_t states[NUMSTATES] =
     { SPR_BBL4,  3 | FF_FULLBRIGHT,                6,               NULL,              S_BRBBALLX3        }, // S_BRBBALLX2
     { SPR_BBL4,  4 | FF_FULLBRIGHT,                6,               NULL,              S_NULL             }, // S_BRBBALLX3
 
+    { SPR_TNT1,  0,                                1,               NULL,              S_SHELLCASE_THRUST }, // S_SHELLCASE_SPAWN
+    { SPR_TNT1,  0,                                0,               A_CasingThrust,    S_SHELLCASE_CALC1  }, // S_SHELLCASE_THRUST
+
+    { SPR_TNT1,  0,                                0,               A_SetCounter,      S_SHELLCASE_CALC2  }, // S_SHELLCASE_CALC1
+    { SPR_TNT1,  0,                                0,               A_CounterSwitch,   S_SHELLCASE_A      }, // S_SHELLCASE_CALC2
+
+    { SPR_CAS1,  0,                              200,               NULL,              S_SHELLCASE_A_FADE1}, // S_SHELLCASE_A
+    { SPR_CAS1,  1,                              200,               NULL,              S_SHELLCASE_B_FADE1}, // S_SHELLCASE_B
+    { SPR_CAS1,  2,                              200,               NULL,              S_SHELLCASE_C_FADE1}, // S_SHELLCASE_C
+    { SPR_CAS1,  3,                              200,               NULL,              S_SHELLCASE_D_FADE1}, // S_SHELLCASE_D
+    { SPR_CAS1,  4,                              200,               NULL,              S_SHELLCASE_E_FADE1}, // S_SHELLCASE_E
+    { SPR_CAS1,  5,                              200,               NULL,              S_SHELLCASE_F_FADE1}, // S_SHELLCASE_F
+    { SPR_CAS1,  6,                              200,               NULL,              S_SHELLCASE_G_FADE1}, // S_SHELLCASE_G
+    { SPR_CAS1,  7,                              200,               NULL,              S_SHELLCASE_H_FADE1}, // S_SHELLCASE_H
+
+    { SPR_CAS1,  0,                                0,               A_SetCounter,      S_SHELLCASE_A_FADE2}, // S_SHELLCASE_A_FADE1
+    { SPR_CAS1,  0,                                1,               A_FadeOut,         S_SHELLCASE_A_FADE3}, // S_SHELLCASE_A_FADE2
+    { SPR_CAS1,  0,                                0,               A_CounterJump,     S_NULL             }, // S_SHELLCASE_A_FADE3
+
+    { SPR_CAS1,  1,                                0,               A_SetCounter,      S_SHELLCASE_B_FADE2}, // S_SHELLCASE_B_FADE1
+    { SPR_CAS1,  1,                                1,               A_FadeOut,         S_SHELLCASE_B_FADE3}, // S_SHELLCASE_B_FADE2
+    { SPR_CAS1,  1,                                0,               A_CounterJump,     S_NULL             }, // S_SHELLCASE_B_FADE3
+
+    { SPR_CAS1,  2,                                0,               A_SetCounter,      S_SHELLCASE_C_FADE2}, // S_SHELLCASE_C_FADE1
+    { SPR_CAS1,  2,                                1,               A_FadeOut,         S_SHELLCASE_C_FADE3}, // S_SHELLCASE_C_FADE2
+    { SPR_CAS1,  2,                                0,               A_CounterJump,     S_NULL             }, // S_SHELLCASE_C_FADE3
+
+    { SPR_CAS1,  3,                                0,               A_SetCounter,      S_SHELLCASE_D_FADE2}, // S_SHELLCASE_D_FADE1
+    { SPR_CAS1,  3,                                1,               A_FadeOut,         S_SHELLCASE_D_FADE3}, // S_SHELLCASE_D_FADE2
+    { SPR_CAS1,  3,                                0,               A_CounterJump,     S_NULL             }, // S_SHELLCASE_D_FADE3
+
+    { SPR_CAS1,  4,                                0,               A_SetCounter,      S_SHELLCASE_E_FADE2}, // S_SHELLCASE_E_FADE1
+    { SPR_CAS1,  4,                                1,               A_FadeOut,         S_SHELLCASE_E_FADE3}, // S_SHELLCASE_E_FADE2
+    { SPR_CAS1,  4,                                0,               A_CounterJump,     S_NULL             }, // S_SHELLCASE_E_FADE3
+
+    { SPR_CAS1,  5,                                0,               A_SetCounter,      S_SHELLCASE_F_FADE2}, // S_SHELLCASE_F_FADE1
+    { SPR_CAS1,  5,                                1,               A_FadeOut,         S_SHELLCASE_F_FADE3}, // S_SHELLCASE_F_FADE2
+    { SPR_CAS1,  5,                                0,               A_CounterJump,     S_NULL             }, // S_SHELLCASE_F_FADE3
+
+    { SPR_CAS1,  6,                                0,               A_SetCounter,      S_SHELLCASE_G_FADE2}, // S_SHELLCASE_G_FADE1
+    { SPR_CAS1,  6,                                1,               A_FadeOut,         S_SHELLCASE_G_FADE3}, // S_SHELLCASE_G_FADE2
+    { SPR_CAS1,  6,                                0,               A_CounterJump,     S_NULL             }, // S_SHELLCASE_G_FADE3
+
+    { SPR_CAS1,  7,                                0,               A_SetCounter,      S_SHELLCASE_H_FADE2}, // S_SHELLCASE_H_FADE1
+    { SPR_CAS1,  7,                                1,               A_FadeOut,         S_SHELLCASE_H_FADE3}, // S_SHELLCASE_H_FADE2
+    { SPR_CAS1,  7,                                0,               A_CounterJump,     S_NULL             }, // S_SHELLCASE_H_FADE3
+
+    { SPR_TNT1,  0,                                1,               NULL,              S_PISCASE_THRUST   }, // S_PISCASE_SPAWN
+    { SPR_TNT1,  0,                                0,               A_CasingThrust,    S_PISCASE_CALC1    }, // S_PISCASE_THRUST
+
+    { SPR_TNT1,  0,                                0,               A_SetCounter,      S_PISCASE_CALC2    }, // S_PISCASE_CALC1
+    { SPR_TNT1,  0,                                0,               A_CounterSwitch,   S_PISCASE_A        }, // S_PISCASE_CALC2
+
+    { SPR_CAS2,  0,                              200,               NULL,              S_PISCASE_A_FADE1  }, // S_PISCASE_A
+    { SPR_CAS2,  1,                              200,               NULL,              S_PISCASE_B_FADE1  }, // S_PISCASE_B
+    { SPR_CAS2,  2,                              200,               NULL,              S_PISCASE_C_FADE1  }, // S_PISCASE_C
+    { SPR_CAS2,  3,                              200,               NULL,              S_PISCASE_D_FADE1  }, // S_PISCASE_D
+
+    { SPR_CAS2,  0,                                0,               A_SetCounter,      S_PISCASE_A_FADE2  }, // S_PISCASE_A_FADE1
+    { SPR_CAS2,  0,                                1,               A_FadeOut,         S_PISCASE_A_FADE3  }, // S_PISCASE_A_FADE2
+    { SPR_CAS2,  0,                                0,               A_CounterJump,     S_NULL             }, // S_PISCASE_A_FADE3
+
+    { SPR_CAS2,  1,                                0,               A_SetCounter,      S_PISCASE_B_FADE2  }, // S_PISCASE_B_FADE1
+    { SPR_CAS2,  1,                                1,               A_FadeOut,         S_PISCASE_B_FADE3  }, // S_PISCASE_B_FADE2
+    { SPR_CAS2,  1,                                0,               A_CounterJump,     S_NULL             }, // S_PISCASE_B_FADE3
+
+    { SPR_CAS2,  2,                                0,               A_SetCounter,      S_PISCASE_C_FADE2  }, // S_PISCASE_C_FADE1
+    { SPR_CAS2,  2,                                1,               A_FadeOut,         S_PISCASE_C_FADE3  }, // S_PISCASE_C_FADE2
+    { SPR_CAS2,  2,                                0,               A_CounterJump,     S_NULL             }, // S_PISCASE_C_FADE3
+
+    { SPR_CAS2,  3,                                0,               A_SetCounter,      S_PISCASE_D_FADE2  }, // S_PISCASE_D_FADE1
+    { SPR_CAS2,  3,                                1,               A_FadeOut,         S_PISCASE_D_FADE3  }, // S_PISCASE_D_FADE2
+    { SPR_CAS2,  3,                                0,               A_CounterJump,     S_NULL             }, // S_PISCASE_D_FADE3
+
+    { SPR_TNT1,  0,                                1,               NULL,              S_RNDCASE_THRUST   }, // S_RNDCASE_SPAWN
+    { SPR_TNT1,  0,                                0,               A_CasingThrust,    S_RNDCASE_CALC1    }, // S_RNDCASE_THRUST
+
+    { SPR_TNT1,  0,                                0,               A_SetCounter,      S_RNDCASE_CALC2    }, // S_RNDCASE_CALC1
+    { SPR_TNT1,  0,                                0,               A_CounterSwitch,   S_RNDCASE_A        }, // S_RNDCASE_CALC2
+
+    { SPR_CAS7,  0,                              200,               NULL,              S_RNDCASE_A_FADE1  }, // S_RNDCASE_A
+    { SPR_CAS7,  1,                              200,               NULL,              S_RNDCASE_B_FADE1  }, // S_RNDCASE_B
+    { SPR_CAS7,  2,                              200,               NULL,              S_RNDCASE_C_FADE1  }, // S_RNDCASE_C
+    { SPR_CAS7,  3,                              200,               NULL,              S_RNDCASE_D_FADE1  }, // S_RNDCASE_D
+    { SPR_CAS7,  4,                              200,               NULL,              S_RNDCASE_E_FADE1  }, // S_RNDCASE_E
+    { SPR_CAS7,  5,                              200,               NULL,              S_RNDCASE_F_FADE1  }, // S_RNDCASE_F
+
+    { SPR_CAS7,  0,                                0,               A_SetCounter,      S_RNDCASE_A_FADE2  }, // S_RNDCASE_A_FADE1
+    { SPR_CAS7,  0,                                1,               A_FadeOut,         S_RNDCASE_A_FADE3  }, // S_RNDCASE_A_FADE2
+    { SPR_CAS7,  0,                                0,               A_CounterJump,     S_NULL             }, // S_RNDCASE_A_FADE3
+
+    { SPR_CAS7,  1,                                0,               A_SetCounter,      S_RNDCASE_B_FADE2  }, // S_RNDCASE_B_FADE1
+    { SPR_CAS7,  1,                                1,               A_FadeOut,         S_RNDCASE_B_FADE3  }, // S_RNDCASE_B_FADE2
+    { SPR_CAS7,  1,                                0,               A_CounterJump,     S_NULL             }, // S_RNDCASE_B_FADE3
+
+    { SPR_CAS7,  2,                                0,               A_SetCounter,      S_RNDCASE_C_FADE2  }, // S_RNDCASE_C_FADE1
+    { SPR_CAS7,  2,                                1,               A_FadeOut,         S_RNDCASE_C_FADE3  }, // S_RNDCASE_C_FADE2
+    { SPR_CAS7,  2,                                0,               A_CounterJump,     S_NULL             }, // S_RNDCASE_C_FADE3
+
+    { SPR_CAS7,  3,                                0,               A_SetCounter,      S_RNDCASE_D_FADE2  }, // S_RNDCASE_D_FADE1
+    { SPR_CAS7,  3,                                1,               A_FadeOut,         S_RNDCASE_D_FADE3  }, // S_RNDCASE_D_FADE2
+    { SPR_CAS7,  3,                                0,               A_CounterJump,     S_NULL             }, // S_RNDCASE_D_FADE3
+
+    { SPR_CAS7,  4,                                0,               A_SetCounter,      S_RNDCASE_E_FADE2  }, // S_RNDCASE_E_FADE1
+    { SPR_CAS7,  4,                                1,               A_FadeOut,         S_RNDCASE_E_FADE3  }, // S_RNDCASE_E_FADE2
+    { SPR_CAS7,  4,                                0,               A_CounterJump,     S_NULL             }, // S_RNDCASE_E_FADE3
+
+    { SPR_CAS7,  5,                                0,               A_SetCounter,      S_RNDCASE_F_FADE2  }, // S_RNDCASE_F_FADE1
+    { SPR_CAS7,  5,                                1,               A_FadeOut,         S_RNDCASE_F_FADE3  }, // S_RNDCASE_F_FADE2
+    { SPR_CAS7,  5,                                0,               A_CounterJump,     S_NULL             }, // S_RNDCASE_F_FADE3
+
     { SPR_PLAY, 14,                                5,               NULL,              S_PLAY_GDIE2       }, // S_PLAY_GDIE1
     { SPR_PLAY, 15,                                5,               A_SkullPop,        S_PLAY_GDIE3       }, // S_PLAY_GDIE2
     { SPR_PLAY, 16,                                5,               A_Fall,            S_PLAY_GDIE4       }, // S_PLAY_GDIE3
@@ -1828,38 +1944,7 @@ state_t states[NUMSTATES] =
     { SPR_PLAY, 19,                                5,               NULL,              S_PLAY_GDIE7       }, // S_PLAY_GDIE6
     { SPR_PLAY, 20,                                5,               NULL,              S_PLAY_GDIE8       }, // S_PLAY_GDIE7
     { SPR_PLAY, 21,                                5,               NULL,              S_PLAY_GDIE9       }, // S_PLAY_GDIE8
-    { SPR_PLAY, 22,                               -1,               NULL,              S_NULL             }/*, // S_PLAY_GDIE9
-
-    {SPR_TNT1,0,1,NULL,S_PISCASE_SPAWN},       // S_PISTOLCASING_01
-    {SPR_TNT1,0,0,A_CasingThrust,S_PISCASE_THRUST},       // S_PISTOLCASING_01
-
-    {SPR_TNT1,0,0,A_SetCounter,S_PISCASE_CALC1},       // S_PISTOLCASING_01
-    {SPR_TNT1,0,0,A_CounterSwitch,S_PISCASE_CALC2},       // S_PISTOLCASING_01
-
-    {SPR_CAS2,0,200,NULL,S_PISCASE_A_FADE1},       // S_PISTOLCASING_01
-    {SPR_CAS2,1,200,NULL,S_PISCASE_B_FADE1},       // S_PISTOLCASING_01
-    {SPR_CAS2,2,200,NULL,S_PISCASE_C_FADE1},       // S_PISTOLCASING_01
-    {SPR_CAS2,3,200,NULL,S_PISCASE_D_FADE1},       // S_PISTOLCASING_01
-
-    {SPR_CAS2,0,0,A_SetCounter,S_PISCASE_A_FADE2},       // S_PISTOLCASING_01
-    {SPR_CAS2,0,1,A_FadeOut,S_PISCASE_A_FADE3},       // S_PISTOLCASING_01
-    {SPR_CAS2,0,0,A_CounterJump,S_NULL},       // S_PISTOLCASING_01
-
-    {SPR_CAS2,1,0,A_SetCounter,S_PISCASE_B_FADE2},       // S_PISTOLCASING_01
-    {SPR_CAS2,1,1,A_FadeOut,S_PISCASE_B_FADE3},       // S_PISTOLCASING_01
-    {SPR_CAS2,1,0,A_CounterJump,S_NULL},       // S_PISTOLCASING_01
-
-    {SPR_CAS2,2,0,A_SetCounter,S_PISCASE_C_FADE2},       // S_PISTOLCASING_01
-    {SPR_CAS2,2,1,A_FadeOut,S_PISCASE_C_FADE3},       // S_PISTOLCASING_01
-    {SPR_CAS2,2,0,A_CounterJump,S_NULL},       // S_PISTOLCASING_01
-
-    {SPR_CAS2,3,0,A_SetCounter,S_PISCASE_D_FADE2},       // S_PISTOLCASING_01
-    {SPR_CAS2,3,1,A_FadeOut,S_PISCASE_D_FADE3},       // S_PISTOLCASING_01
-    {SPR_CAS2,3,0,A_CounterJump,S_NULL},       // S_PISTOLCASING_01
-
-    {SPR_PSHE,0,20,NULL,S_SHELL_01},       // S_SHELL_00
-    {SPR_PSHE,1,20,NULL,S_NULL},       // S_SHELL_01
-*/
+    { SPR_PLAY, 22,                               -1,               NULL,              S_NULL             }  // S_PLAY_GDIE9
 };
 
 mobjinfo_t mobjinfo[NUMMOBJTYPES] =
@@ -8738,78 +8823,115 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] =
         /* plural1              */ "",
         /* name2                */ "",
         /* plural2              */ ""
-    }/*,
+    },
 
-    {           // MT_BULLET
-        -1,             // doomednum
-        S_PISCASE_SPAWN,           // spawnstate
-        1000,           // spawnhealth
-        S_NULL,         // seestate
-        sfx_None,              // seesound
-        8,              // reactiontime
-        sfx_None,              // attacksound
-        S_NULL,         // painstate
-        0,              // painchance
-        sfx_None,              // painsound
-        S_NULL,         // meleestate
-        S_NULL,         // missilestate
-        S_NULL,         // deathstate
-        S_NULL,         // xdeathstate
-        sfx_None,              // deathsound
-        4,              // speed
-        3,         // radius
-        3,         // height
-        0,                // projectilepassheight
-        120,            // mass
-        0,              // damage
-        sfx_None,              // activesound
-        0,              // flags
-        0,                          // flags2
-        S_NULL,          // raisestate
-        0,              // frames
-        0,              // blood
-        0,              // shadowoffset
-        "",       // namepointer 1
-        "",                        // plural 1
-        "",                        // namepointer 2
-        ""                        // plural 2
-    }
+    // Shotgun Projectile (MT_SHELL)
+    {
+        /* doomednum            */ -1,
+        /* spawnstate           */ S_SHELLCASE_SPAWN,
+        /* spawnhealth          */ 1000,
+        /* seestate             */ S_NULL,
+        /* seesound             */ sfx_None,
+        /* reactiontime         */ 8,
+        /* attacksound          */ sfx_None,
+        /* painstate            */ S_NULL,
+        /* painchance           */ 0,
+        /* painsound            */ sfx_None,
+        /* meleestate           */ S_NULL,
+        /* missilestate         */ S_NULL,
+        /* deathstate           */ S_NULL,
+        /* xdeathstate          */ S_NULL,
+        /* deathsound           */ sfx_None,
+        /* speed                */ 4,
+        /* radius               */ 3,
+        /* height               */ 3,
+        /* projectilepassheight */ 0,
+        /* mass                 */ 120,
+        /* damage               */ 0,
+        /* activesound          */ sfx_None,
+        /* flags                */ MF_BOUNCES,
+        /* flags2               */ 0,
+        /* raisestate           */ S_NULL,
+        /* frames               */ 0,
+        /* blood                */ 0,
+        /* shadowoffset         */ 0,
+        /* name1                */ "Shotgun Projectile",
+        /* plural1              */ "",
+        /* name2                */ "",
+        /* plural2              */ ""
+    },
 
-    {           // MT_SHELL
-        -1,             // doomednum
-        S_SHELL_00,            // spawnstate
-        1000,           // spawnhealth
-        S_NULL,         // seestate
-        sfx_None,              // seesound
-        8,              // reactiontime
-        sfx_None,              // attacksound
-        S_NULL,         // painstate
-        0,              // painchance
-        sfx_None,              // painsound
-        S_NULL,         // meleestate
-        S_NULL,         // missilestate
-        S_NULL,         // deathstate
-        S_NULL,         // xdeathstate
-        sfx_None,              // deathsound
-        0,              // speed
-        20 * FRACUNIT,         // radius
-        16 * FRACUNIT,         // height
-        0,                // projectilepassheight
-        100,            // mass
-        0,              // damage
-        sfx_None,              // activesound
-        0,          // flags
-        0,          // flags2
-        S_NULL          // raisestate
-        0,              // frames
-        0,              // blood
-        0,              // shadowoffset
-        NULL,       // namepointer 1
-        "",                        // plural 1
-        "",                        // namepointer 2
-        ""                        // plural 2
+    // Pistol Projectile (MT_BULLET)
+    {
+        /* doomednum            */ -1,
+        /* spawnstate           */ S_PISCASE_SPAWN,
+        /* spawnhealth          */ 1000,
+        /* seestate             */ S_NULL,
+        /* seesound             */ sfx_None,
+        /* reactiontime         */ 8,
+        /* attacksound          */ sfx_None,
+        /* painstate            */ S_NULL,
+        /* painchance           */ 0,
+        /* painsound            */ sfx_None,
+        /* meleestate           */ S_NULL,
+        /* missilestate         */ S_NULL,
+        /* deathstate           */ S_NULL,
+        /* xdeathstate          */ S_NULL,
+        /* deathsound           */ sfx_None,
+        /* speed                */ 4,
+        /* radius               */ 3,
+        /* height               */ 3,
+        /* projectilepassheight */ 0,
+        /* mass                 */ 120,
+        /* damage               */ 0,
+        /* activesound          */ sfx_None,
+        /* flags                */ MF_BOUNCES,
+        /* flags2               */ 0,
+        /* raisestate           */ S_NULL,
+        /* frames               */ 0,
+        /* blood                */ 0,
+        /* shadowoffset         */ 0,
+        /* name1                */ "Pistol Projectile",
+        /* plural1              */ "",
+        /* name2                */ "",
+        /* plural2              */ ""
+    },
+
+    // Chaingun Projectile (MT_ROUND)
+    {
+        /* doomednum            */ -1,
+        /* spawnstate           */ S_RNDCASE_SPAWN,
+        /* spawnhealth          */ 1000,
+        /* seestate             */ S_NULL,
+        /* seesound             */ sfx_None,
+        /* reactiontime         */ 8,
+        /* attacksound          */ sfx_None,
+        /* painstate            */ S_NULL,
+        /* painchance           */ 0,
+        /* painsound            */ sfx_None,
+        /* meleestate           */ S_NULL,
+        /* missilestate         */ S_NULL,
+        /* deathstate           */ S_NULL,
+        /* xdeathstate          */ S_NULL,
+        /* deathsound           */ sfx_None,
+        /* speed                */ 4,
+        /* radius               */ 3,
+        /* height               */ 3,
+        /* projectilepassheight */ 0,
+        /* mass                 */ 120,
+        /* damage               */ 0,
+        /* activesound          */ sfx_None,
+        /* flags                */ MF_BOUNCES,
+        /* flags2               */ 0,
+        /* raisestate           */ S_NULL,
+        /* frames               */ 0,
+        /* blood                */ 0,
+        /* shadowoffset         */ 0,
+        /* name1                */ "Chaingun Projectile",
+        /* plural1              */ "",
+        /* name2                */ "",
+        /* plural2              */ ""
     }
-*/
 };
 
 // [BH] Override offsets in wad file to provide better animation and positioning.

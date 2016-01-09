@@ -43,12 +43,27 @@
 
 extern byte             *tranmap;
 extern byte             *tinttab;
+extern byte             *tinttab5;
+extern byte             *tinttab10;
+extern byte             *tinttab15;
+extern byte             *tinttab20;
 extern byte             *tinttab25;
+extern byte             *tinttab30;
 extern byte             *tinttab33;
+extern byte             *tinttab35;
 extern byte             *tinttab40;
+extern byte             *tinttab45;
 extern byte             *tinttab50;
+extern byte             *tinttab55;
+extern byte             *tinttab60;
+extern byte             *tinttab65;
 extern byte             *tinttab66;
+extern byte             *tinttab70;
 extern byte             *tinttab75;
+extern byte             *tinttab80;
+extern byte             *tinttab85;
+extern byte             *tinttab90;
+extern byte             *tinttab95;
 extern byte             *tinttabred;
 extern byte             *tinttabredwhite1;
 extern byte             *tinttabredwhite2;

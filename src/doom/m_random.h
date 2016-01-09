@@ -53,7 +53,7 @@
 // Keep all current entries in this list the same, and in the order
 // indicated by the #'s, because they're critical for preserving demo
 // sync. Do not remove entries simply because they become unused later.
-/*
+
 typedef enum {
   pr_skullfly,                // #1
   pr_damage,                  // #2
@@ -225,7 +225,6 @@ typedef enum {
   NUMPRCLASS                  // MUST be last item in list
 } pr_class_t;
 
-
 // The random number generator's state.
 typedef struct {
   unsigned long seed[NUMPRCLASS];      // Each block's random seed
@@ -236,7 +235,6 @@ typedef struct {
 extern rng_t rng;                      // The rng's state
 
 extern unsigned long rngseed;          // The starting seed (not part of state)
-*/
 
 //int P_SignedRandom ();
 
@@ -248,10 +246,10 @@ int M_RandomInt(int lower, int upper);
 
 // As M_Random, but used only by the play simulation.
 int P_Random (void);
-/*
+
 int P_RandomSMMU(pr_class_t pr_class);
-int P_SubRandom(pr_class_t pr_class)
-*/
+int P_SubRandom(pr_class_t pr_class);
+
 // Fix randoms for demos.
 void M_ClearRandom (void);
 

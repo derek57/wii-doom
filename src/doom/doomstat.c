@@ -126,6 +126,7 @@ dboolean         am_rotate = false;
 dboolean         jumping = false;
 dboolean         general_sound = true;
 dboolean         d_centerweapon = false;
+dboolean         d_ejectcasings = false;
 /*
 dboolean         nerve = false;
 dboolean         chex = false;

@@ -104,7 +104,7 @@ void M_ClearRandom (void)
 
     rndindex = time(NULL) & 0xff;
 }
-/*
+
 rng_t rng;     // the random number state
 
 unsigned long rngseed = 1993;   // killough 3/26/98: The seed
@@ -173,5 +173,4 @@ int P_SubRandom(pr_class_t pr_class)
 
    return (temp - P_RandomSMMU(pr_class));
 }
-*/
 

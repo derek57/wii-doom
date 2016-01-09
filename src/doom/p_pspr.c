@@ -62,6 +62,7 @@ int                bfglook = 1;
 extern dboolean    aiming_help;
 
 extern void        P_Thrust (player_t* player, angle_t angle, fixed_t move);
+extern void        A_EjectCasing(mobj_t *actor);
 
 
 // [crispy] weapon recoil {thrust, pitch} values
@@ -97,7 +98,7 @@ P_SetPsprite
 {
     pspdef_t*      psp;
     state_t*       state;
-        
+
     psp = &player->psprites[position];
         
     do
@@ -134,7 +135,12 @@ P_SetPsprite
         }
         
         stnum = psp->state->nextstate;
-        
+
+        if (stnum == S_PISTOL4 ||
+            stnum == S_SGUN6 ||
+            stnum == S_DSGUN6 || stnum == S_DSGUN7)
+            A_EjectCasing(player->mo);
+
     } while (!psp->tics);
     // an initial state of 0 could cycle through
 }
@@ -1102,6 +1108,8 @@ A_FireCGun
         
     P_GunShot (player->mo, !player->refire);
 
+    A_EjectCasing(player->mo);
+
     if(d_recoil)
         player->recoilpitch = (8*FRACUNIT);
 
@@ -1229,96 +1237,11 @@ void P_MovePsprites (player_t* player)
                 psp->tics--;
                 if (!psp->tics)
                     P_SetPsprite (player, i, psp->state->nextstate);
-            }                                
+            }
         }
     }
     
     player->psprites[ps_flash].sx = player->psprites[ps_weapon].sx;
     player->psprites[ps_flash].sy = player->psprites[ps_weapon].sy;
 }
-/*
-void A_Bullet (player_t *player)
-{
-//    if(d_casing)
-    {
-        if(player->lookdir < 0)
-            return;
-
-        int          t;
-        int          x_offset;
-        int          y_offset;
-        int          z_offset;
-
-        mobj_t       *mo = NULL;
-
-        mobjtype_t   motype = MT_BULLET;
-
-        angle_t      an;
-
-        fixed_t      x;
-        fixed_t      y;
-        fixed_t      z;
-
-        x_offset = 0;                        // TO THE FRONT / BACK
-        y_offset = 12000000;                // TO THE LEFT / RIGHT
-        z_offset = 4 * 8 * FRACUNIT;
-
-        an = player->mo->angle;
-
-        if(player->readyweapon == wp_shotgun)
-        {
-            x_offset = -500000;                // TO THE FRONT / BACK
-            y_offset = 2000000;                // TO THE LEFT / RIGHT
-            z_offset = 8 * FRACUNIT;
-            motype = MT_SHELL;
-        }
-        else if(player->readyweapon == wp_pistol || player->readyweapon == wp_chaingun)
-        {
-            x_offset = 500000;                // TO THE FRONT / BACK
-            y_offset = 2000000;                // TO THE LEFT / RIGHT
-            z_offset = 8 * FRACUNIT;
-            motype = MT_BULLET;
-        }
-
-        x = player->mo->x + FixedMul(x_offset, finecosine[an >> ANGLETOFINESHIFT]);
-        y = player->mo->y + FixedMul(y_offset, finesine[an >> ANGLETOFINESHIFT]);
-        z = player->mo->z + z_offset;
-
-        // adjust x/y along a vector orthogonal to the source object's angle
-        an = an - ANG90;
-
-        x += FixedMul(x_offset, finecosine[an >> ANGLETOFINESHIFT]);
-        y += FixedMul(x_offset, finesine[an >> ANGLETOFINESHIFT]);
-
-        mo = P_SpawnMobj(x, y, z + (player->lookdir * FRACUNIT), motype);
-
-        if(player->readyweapon == wp_shotgun)
-            P_SetMobjState(mo, S_SHELL_01);
-
-        mo->target = player->mo;
-        mo->angle = x >= 0 ? an : an + ANG180;
-
-        t = P_Random() % 10;
-
-        if(t < 8)
-            t = P_Random() % 10;
-
-        mo->momx = FixedMul(finecosine[(an) >> ANGLETOFINESHIFT], (t & 0x0f) << FRACBITS);
-
-        t = P_Random() % 10;
-
-        if(t < 8)
-            t = P_Random() % 10;
-
-        mo->momy = FixedMul(finesine[(an) >> ANGLETOFINESHIFT], (t & 0x0f) << FRACBITS);
-
-        t = P_Random() % 10;
-
-        if(t < 8)
-            t = P_Random() % 10;
-
-        mo->momz = (t & 0x0f) << FRACBITS;
-    }
-}
-*/
 

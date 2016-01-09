@@ -367,6 +367,7 @@ extern  dboolean         randompitch;
 extern  dboolean         general_sound;
 extern  dboolean         display_ticker;
 extern  dboolean         d_centerweapon;
+extern  dboolean         d_ejectcasings;
 /*
 extern  dboolean         nerve;
 extern  dboolean         chex;

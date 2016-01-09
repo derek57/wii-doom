@@ -237,8 +237,9 @@ typedef enum
 
     SPR_BBL4,
 
-//    SPR_CAS2,
-//    SPR_PSHE,
+    SPR_CAS1,
+    SPR_CAS2,
+    SPR_CAS7,
 
     NUMSPRITES
 } spritenum_t;
@@ -1593,18 +1594,56 @@ typedef enum
     S_BRBBALLX2,
     S_BRBBALLX3,
 
-    S_PLAY_GDIE1,
-    S_PLAY_GDIE2,
-    S_PLAY_GDIE3,
-    S_PLAY_GDIE4,
-    S_PLAY_GDIE5,
-    S_PLAY_GDIE6,
-    S_PLAY_GDIE7,
-    S_PLAY_GDIE8,
-    S_PLAY_GDIE9,
-/*
+    S_SHELLCASE_SPAWN,
+    S_SHELLCASE_THRUST,
+
+    S_SHELLCASE_CALC1,
+    S_SHELLCASE_CALC2,
+
+    S_SHELLCASE_A,
+    S_SHELLCASE_B,
+    S_SHELLCASE_C,
+    S_SHELLCASE_D,
+    S_SHELLCASE_E,
+    S_SHELLCASE_F,
+    S_SHELLCASE_G,
+    S_SHELLCASE_H,
+
+    S_SHELLCASE_A_FADE1,
+    S_SHELLCASE_A_FADE2,
+    S_SHELLCASE_A_FADE3,
+
+    S_SHELLCASE_B_FADE1,
+    S_SHELLCASE_B_FADE2,
+    S_SHELLCASE_B_FADE3,
+
+    S_SHELLCASE_C_FADE1,
+    S_SHELLCASE_C_FADE2,
+    S_SHELLCASE_C_FADE3,
+
+    S_SHELLCASE_D_FADE1,
+    S_SHELLCASE_D_FADE2,
+    S_SHELLCASE_D_FADE3,
+
+    S_SHELLCASE_E_FADE1,
+    S_SHELLCASE_E_FADE2,
+    S_SHELLCASE_E_FADE3,
+
+    S_SHELLCASE_F_FADE1,
+    S_SHELLCASE_F_FADE2,
+    S_SHELLCASE_F_FADE3,
+
+    S_SHELLCASE_G_FADE1,
+    S_SHELLCASE_G_FADE2,
+    S_SHELLCASE_G_FADE3,
+
+    S_SHELLCASE_H_FADE1,
+    S_SHELLCASE_H_FADE2,
+    S_SHELLCASE_H_FADE3,
+
     S_PISCASE_SPAWN,
     S_PISCASE_THRUST,
+
     S_PISCASE_CALC1,
     S_PISCASE_CALC2,
 
@@ -1629,9 +1668,53 @@ typedef enum
     S_PISCASE_D_FADE2,
     S_PISCASE_D_FADE3,
 
-    S_SHELL_00,
-    S_SHELL_01,
-*/
+    S_RNDCASE_SPAWN,
+    S_RNDCASE_THRUST,
+
+    S_RNDCASE_CALC1,
+    S_RNDCASE_CALC2,
+
+    S_RNDCASE_A,
+    S_RNDCASE_B,
+    S_RNDCASE_C,
+    S_RNDCASE_D,
+    S_RNDCASE_E,
+    S_RNDCASE_F,
+
+    S_RNDCASE_A_FADE1,
+    S_RNDCASE_A_FADE2,
+    S_RNDCASE_A_FADE3,
+
+    S_RNDCASE_B_FADE1,
+    S_RNDCASE_B_FADE2,
+    S_RNDCASE_B_FADE3,
+
+    S_RNDCASE_C_FADE1,
+    S_RNDCASE_C_FADE2,
+    S_RNDCASE_C_FADE3,
+
+    S_RNDCASE_D_FADE1,
+    S_RNDCASE_D_FADE2,
+    S_RNDCASE_D_FADE3,
+
+    S_RNDCASE_E_FADE1,
+    S_RNDCASE_E_FADE2,
+    S_RNDCASE_E_FADE3,
+
+    S_RNDCASE_F_FADE1,
+    S_RNDCASE_F_FADE2,
+    S_RNDCASE_F_FADE3,
+
+    S_PLAY_GDIE1,
+    S_PLAY_GDIE2,
+    S_PLAY_GDIE3,
+    S_PLAY_GDIE4,
+    S_PLAY_GDIE5,
+    S_PLAY_GDIE6,
+    S_PLAY_GDIE7,
+    S_PLAY_GDIE8,
+    S_PLAY_GDIE9,
+
     // [BH] extra DeHacked states 1089 to 3999
     EXTRASTATES,
 
@@ -1860,83 +1943,84 @@ typedef enum
     MT_BETASKULL,
     MT_TROOPSHOT2,
 
-//    MT_BULLET,
-//    MT_SHELL,
+    MT_SHELL,
+    MT_BULLET,
+    MT_ROUND,
 
     NUMMOBJTYPES
 } mobjtype_t;
 
 typedef struct
 {
-    int   doomednum;    // Thing number used in id's editor, and now
-                        // probably by every other editor too
+    int   doomednum;     // Thing number used in id's editor, and now
+                         // probably by every other editor too
 
-    int   spawnstate;   // The state (frame) index when this Thing is
-                        // first created
+    int   spawnstate;    // The state (frame) index when this Thing is
+                         // first created
 
-    int   spawnhealth;  // The initial hit points for this Thing
+    int   spawnhealth;   // The initial hit points for this Thing
 
-    int   seestate;     // The state when it sees you or wakes up
+    int   seestate;      // The state when it sees you or wakes up
 
-    int   seesound;     // The sound it makes when waking
+    int   seesound;      // The sound it makes when waking
 
-    int   reactiontime; // How many tics it waits after it wakes up
-                        // before it will start to attack, in normal
-                        // skills (halved for nightmare)
+    int   reactiontime;  // How many tics it waits after it wakes up
+                         // before it will start to attack, in normal
+                         // skills (halved for nightmare)
 
-    int   attacksound;  // The sound it makes when it attacks
+    int   attacksound;   // The sound it makes when it attacks
 
-    int   painstate;    // The state to indicate pain
+    int   painstate;     // The state to indicate pain
 
-    int   painchance;   // A number that is checked against a random
-                        // number 0-255 to see if the Thing is supposed
-                        // to go to its painstate or not.  Note this
-                        // has absolutely nothing to do with the chance
-                        // it will get hurt, just the chance of it
-                        // reacting visibly.
+    int   painchance;    // A number that is checked against a random
+                         // number 0-255 to see if the Thing is supposed
+                         // to go to its painstate or not.  Note this
+                         // has absolutely nothing to do with the chance
+                         // it will get hurt, just the chance of it
+                         // reacting visibly.
 
-    int   painsound;    // The sound it emits when it feels pain
+    int   painsound;     // The sound it emits when it feels pain
 
-    int   meleestate;   // Melee==close attack
+    int   meleestate;    // Melee==close attack
 
-    int   missilestate; // What states to use when it's in the air, if
-                        // in fact it is ever used as a missile
+    int   missilestate;  // What states to use when it's in the air, if
+                         // in fact it is ever used as a missile
 
-    int   deathstate;   // What state begins the death sequence
+    int   deathstate;    // What state begins the death sequence
 
-    int   xdeathstate;  // What state begins the horrible death sequence
-                        // like when a rocket takes out a trooper
+    int   xdeathstate;   // What state begins the horrible death sequence
+                         // like when a rocket takes out a trooper
 
-    int   deathsound;   // The death sound.  See also A_Scream() in
-                        // p_enemy.c for some tweaking that goes on
-                        // for certain monsters
+    int   deathsound;    // The death sound.  See also A_Scream() in
+                         // p_enemy.c for some tweaking that goes on
+                         // for certain monsters
 
-    int   speed;        // How fast it moves.  Too fast and it can miss
-                        // collision logic.
+    int   speed;         // How fast it moves.  Too fast and it can miss
+                         // collision logic.
 
-    int   radius;       // An often incorrect radius
+    int   radius;        // An often incorrect radius
 
-    int   height;       // An often incorrect height, used only to see
-                        // if a monster can enter a sector
+    int   height;        // An often incorrect height, used only to see
+                         // if a monster can enter a sector
 
     int   projectilepassheight;
 
-    int   mass;         // How much an impact will move it.  Cacodemons
-                        // seem to retreat when shot because they have
-                        // very little mass and are moved by impact
+    int   mass;          // How much an impact will move it.  Cacodemons
+                         // seem to retreat when shot because they have
+                         // very little mass and are moved by impact
 
-    int   damage;       // If this is a missile, how much does it hurt?
+    int   damage;        // If this is a missile, how much does it hurt?
 
-    int   activesound;  // What sound it makes wandering around, once
-                        // in a while.  Chance is 3/256 it will.
+    int   activesound;   // What sound it makes wandering around, once
+                         // in a while.  Chance is 3/256 it will.
 
-    int   flags;        // Bit masks for lots of things.  See p_mobj.h
+    int   flags;         // Bit masks for lots of things.  See p_mobj.h
 
     int   flags2;
 
-    int   raisestate;   // The first state for an Archvile or respawn
-                        // resurrection.  Zero means it won't come
-                        // back to life.
+    int   raisestate;    // The first state for an Archvile or respawn
+                         // resurrection.  Zero means it won't come
+                         // back to life.
     int   frames;
     int   blood;
     int   shadowoffset;

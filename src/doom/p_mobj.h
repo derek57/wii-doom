@@ -324,7 +324,7 @@ typedef struct mobj_s
 
     //More drawing info: to determine current sprite.
     angle_t                angle;        // orientation
-    spritenum_t            sprite;        // used to find patch_t and flip value
+    spritenum_t            sprite;       // used to find patch_t and flip value
     int                    frame;        // might be ORed with FF_FULLBRIGHT
 
     // Interaction info, by BLOCKMAP.
@@ -431,6 +431,8 @@ typedef struct mobj_s
 
     // counters - these were known as special1/2/3 in Heretic and Hexen
     int                    counters[NUMMOBJCOUNTERS];
+
+    int                    casing_counter;
 
 } mobj_t;
 
