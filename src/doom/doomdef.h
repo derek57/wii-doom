@@ -228,8 +228,6 @@
 #define ORIGINALSBARHEIGHT 32 
 #define SBARHEIGHT         (ORIGINALSBARHEIGHT * SCREENSCALE)
 
-#define TRANSLUCENT_HUD    11
-
 // Index of the special effects (INVUL inverse) map.
 #define INVERSECOLORMAP    32
 

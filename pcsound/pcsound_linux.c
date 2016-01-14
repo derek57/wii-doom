@@ -15,13 +15,7 @@
 //    PC speaker driver for Linux.
 //
 
-#include "../src/c_io.h"
-
-#ifdef WII
-#include "../wii/config.h"
-#else
 #include "config.h"
-#endif
 
 #ifdef HAVE_LINUX_KD_H
 
@@ -41,6 +35,8 @@
 #include <SDL/SDL.h>
 #include <SDL/SDL_thread.h>
 #endif
+
+#include "../src/c_io.h"
 
 #include "pcsound.h"
 #include "pcsound_internal.h"

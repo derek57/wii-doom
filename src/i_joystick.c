@@ -69,8 +69,6 @@ void I_UpdateJoystick(void)
     int btn_x, btn_y, btn_plus, btn_minus;
 
     event_t ev;
-
-    Sint16 axis_x, axis_y;
   
     PAD_ScanPads();
 
@@ -99,6 +97,8 @@ void I_UpdateJoystick(void)
     //Classic Controller
     if(data->exp.type == WPAD_EXP_CLASSIC)
     {  
+        Sint16 axis_x, axis_y;
+
         int nun_x = data->exp.classic.ljs.pos.x;
         int nun_y = data->exp.classic.ljs.pos.y;
 

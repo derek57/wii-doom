@@ -2939,6 +2939,11 @@ void A_SkullPop(mobj_t *actor, player_t *player)
 // args[2] : immediate value OR counter number
 // args[3] : counter # to use
 //
+// [nitr8] THE FUNCTIONS BELOW NEEDED TO BE MOSTLY REWRITTEN TO
+//         ACCOMPLISH CASINGS FOR PISTOLS, SHOTGUNS AND CHAINGUNS
+//         (FOR THE PLAYER AS WELL AS ZOMBIEMAN (POSSESSED),
+//         SHOTGUN GUY, CHAINGUNNER AND SPIDER MASTERMIND)
+//
 void A_CounterJump(mobj_t *mo)
 {
     dboolean    branch = false;
@@ -3455,7 +3460,7 @@ void A_EjectCasing(mobj_t *actor)
         z += (pitch / pi) * ((10 * frontdisti / 256) * FRACUNIT / 32);
     }
     else
-        z = actor->z + 500 * FRACUNIT / 16;
+        z = actor->z * FRACUNIT / 16;
 
     // adjust x/y along a vector orthogonal to the source object's angle
     angle = angle - ANG90;

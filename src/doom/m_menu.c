@@ -112,300 +112,312 @@ static int credits_start_time;
 
 static char *credits[] =
 {
-	"",
-	"",
-	"",
-	"*WII-/Linux-DOOM WITH BOOM (MBF) SUPPORT",
-	"",
-	"*PROGRAMMING / PORTING",
-	"Ronald Lasmanowicz ('derek57'/'nitr8')",
-	"",
-	"+DOOM / DOOM 2 - HELL ON EARTH",
-	"",
-	"*PROGRAMMING",
-	"",
-	"+(ID SOFTWARE)",
-        "+www.idsoftware.com",
-	"John Carmack",
-	"John Romero",
-	"Dave Taylor",
-	"",
-	"*ARTISTS",
-	"Adrian Carmack",
-	"Kevin Cloud",
-	"",
-	"*LEVEL DESIGN",
-	"Tim Willits",
-	"American McGee",
-	"Sandy Petersen",
-	"Shawn Green",
-	"John Romero",
-	"John Anderson",
-	"",
-	"*BIZ",
-	"Jay Wilbur",
-	"",
-	"*SPECIAL THANKS",
-	"Gregor Punchatz",
-	"Bernd Kreimeier",
-	"",
-	"#--------------------------------------",
-	"",
-	"+(Raven SOFTWARE)",
-        "+www.ravensoftware.com",
-	"",
-	"*PROGRAMMING",
-	"Ben Gokey",
-	"Chris Rhineheart",
-	"",
-	"#--------------------------------------",
-	"",
-	"+(Rogue Entertainment, Inc.)",
-	"+www.rogue-ent.com",
-	"",
-	"*PROGRAMMING",
-	"James Monroe",
-	"Peter Mack",
-	"",
-	"#--------------------------------------",
-	"",
-	"+(PRBOOM)",
-        "+prboom.sourceforge.net",
-	"",
-	"*PROGRAMMING",
-	"Florian 'PROFF' Schulze",
-	"Colin 'CPH' Phipps",
-	"Rob 'RjY' Young",
-	"Andrey Budko",
-	"",
-	"#--------------------------------------",
-	"",
-	"+(TEAMTNT)",
-        "+www.teamtnt.com",
-	"Gregg 'GRANNY' Anderson",
-	"Dave Armstrong",
-	"Andre ''HARKLE' Arsenault",
-	"Nick 'NICK_PDOX' Baker",
-	"J.C. 'Sailor Scout' Bengston",
-	"Bill 'DSQUID' Bessette",
-	"Dave Brachman",
-	"Mike Bristol",
-	"Chris 'BonesBro' Brown",
-	"David Bruni",
-	"Chris Buteau",
-	"Derek 'NFSfreak' Cadwell",
-	"Thomas Elliot 'Myscha' Cannon",
-	"Ross Carlson",
-	"Dario 'Number 6' Casali",
-	"Milo Casali",
-	"Rick 'Wildman' Clark",
-	"Chris Couleur",
-	"Charles 'Mange' Cox",
-	"Billy 'porkypig' Daniel",
-	"Jesper 'Jeda' Danielsen",
-	"Paul 'Maduin' DeBruyne",
-	"Jim 'Derf' Dethlefsen",
-	"Yonatan Donner",
-	"Andrew 'SlashWho' Dowswell",
-	"Jeremy Doyle",
-	"Jonathan 'Biz' El-Bizri",
-	"Jim 'H2H' Elson",
-	"Bob 'Odessa' Evans",
-	"Thomas 'XeneX' Evans",
-	"Paul 'Moe' Fleschute",
-	"Jim Flynn",
-	"Jeffrey Galinovsky",
-	"David 'Blitzr4' Gevert",
-	"Steve 'Shriker' Gill",
-	"Gary Gosson",
-	"Tom 'Timon' Grieve",
-	"Andrew 'Hungry Donner' Griffiths",
-	"Stan 'SkullBane' Gula",
-	"Ty Halderman",
-	"Dale 'Cadaver' Harris",
-	"Mark 'Hatty' Hatton",
-	"David 'Mentzer' Hill",
-	"Donald R. 'Don' Howard",
-	"Steffen 'Addict' Itterheim",
-	"Gregory 'JAX-N' Jackson",
-	"Richard 'Styx' Jaspars",
-	"Mattias Johannson",
-	"Dean Johnson",
-	"James 'JJ' Joplin",
-	"Jim 'The Prof' Kennedy",
-	"Brian 'The Kid' Kidby",
-	"Lee Killough",
-	"Bob Kircher",
-	"Mark Klem",
-	"Sverre Kvernmo",
-	"Adam Landefeld",
-	"Bruce Lewis",
-	"Charles Li",
-	"Wayne 'Opium Joe' Loudon",
-	"Jim 'Symbol' Lowell",
-	"Justin Madigan",
-	"Andre Majorel",
-	"Kim 'Mutator' Malde",
-	"Mike 'Krusty' Marcotte",
-	"Josh Martel",
-	"Andrew 'Flatline' Martin",
-	"Paul 'Nowotny' Maurone",
-	"Steve McCrea",
-	"John 'Mischief' Minadeo",
-	"Lisa 'Pup' Moore",
-	"Tom 'Paradox' Mustaine",
-	"Rich 'Weeds' Nagel",
-	"Steve 'Funkymonk' Noonan",
-	"David Nordlund",
-	"Drake 'numena' O'Brien",
-	"Robin Patenall",
-	"Bobby 'Xcalibur' Pavlock",
-	"Michael 'Codex' Pearce",
-	"Rand Phares",
-	"Steven Phares",
-	"Tommie 'Fatal' Quick",
-	"Keith Reid",
-	"Roger Ritenour",
-	"Eric James 'Ricrob' Roberts",
-	"Casey Robinson",
-	"Adam Ross",
-	"Mike 'Gripp' Ruete",
-	"Jani 'Sir Robin' Saksa",
-	"Cole 'MaNCeR' Savage",
-	"Paul Schmitz",
-	"Florian 'PROFF' Schulze",
-	"Randy 'Screaming In Digital' Seacat",
-	"David 'Tolwyn' Shaw",
-	"Jimmy 'Evil Genius' Sieben",
-	"L.A. 'Evil Genius' Sieben",
-	"Ken 'Enigma' Simpson",
-	"Eugene 'ED' Smozhevsky",
-	"Mark 'Kram Llens' Snell",
-	"Anthony 'swedish fish' Soto",
-	"Harold 'Swaff' Swaffield",
-	"Robert 'Bobcat' Taylor",
-	"Peter 'Kniggit' Tomaselli",
-	"Paul 'Stenger' Turnbull",
-	"Jeromy 'Manna' Visser",
-	"Jeremy 'Iron Lich' Wagner",
-	"John 'Single Malt' Wakelin",
-	"Dietmar 'DIA' Westerteicher",
-	"Bill Whitaker",
-	"David 'Hakx' Wood",
-	"",
-	"#--------------------------------------",
-	"",
-	"+(ZDOOM)",
-        "+www.zdoom.org",
-	"",
-	"*PROGRAMMING",
-	"RANDY HEIT",
-	"",
-	"#--------------------------------------",
-	"",
-	"+(DOOM LEGACY)",
-        "+doomlegacy.sourceforge.net",
-	"",
-	"*PROGRAMMING",
-	"Boris Pereira",
-	"Fabrice 'Fab' Denis",
-	"Thierry 'Hurdler' Van Elsuwe",
-	"Stephen 'SoM' McGranahan",
-	"Stephane Dierickx",
-	"Robert Bauml",
-	"Bell Kin",
-	"",
-	"#--------------------------------------",
-	"",
-	"+(CHOCOLATE DOOM)",
-        "+www.chocolate-doom.org",
-	"",
-	"*PROGRAMMING",
-	"SIMON 'Fraggle' HOWARD",
-	"James 'Quasar' Haley",
-	"Samuel 'Kaiser' Villarreal",
-	"",
-	"#--------------------------------------",
-	"",
-	"+(CRISPY DOOM)",
-        "+fabiangreffrath.github.io/crispy-doom",
-	"",
-	"*PROGRAMMING",
-	"FABIAN GREFFRATH",
-	"",
-	"#--------------------------------------",
-	"",
-	"+(DOOM RETRO)",
-        "+www.doomretro.com",
-	"",
-	"*PROGRAMMING",
-	"BRAD HARDING",
-	"",
-	"#--------------------------------------",
-	"",
-	"*ADDITIONAL THANKS",
-	"Alex Mayfield",
-	"",
-	"Alexandre-Xavier Labonte-Lamoureux",
-        "('AXDOOMER')",
-	"",
-	"Alexey Lysiuk ('alexey.lysiuk')",
-	"Alun Bestor ('viggles')",
-	"Andrew Stine ('Linguica')",
-	"'AnotherLife'/'VGA'",
-	"'arneolavhal'",
-	"'Brewtal_Legend'",
-	"'Da Werecat'",
-	"Dani Ventas",
-	"Darren Mason",
-	"'Hoodie'",
-	"Iain Macfarlane",
-	"Jeff Doggett",
-	"'jewellds'",
-	"Jon Krazov",
-	"Jonathan Bergeron ('LazyLazurus')",
-	"Jonathan Dowland ('jmtd')",
-	"'kb1'",
-	"'L3gend'",
-	"Luke Jones ('Luke-Nukem')",
-	"Mike Swanson ('chungy')",
-	"'Noxat'",
-	"'ryan-sg'",
-	"'sgt dopey'",
-	"Claude Freeman ('ConSiGno'/'sneakernets')",
-	"'TheLonerD'",
-	"'vesperas'",
-	"Charles Gunyon",
-	"Ioan Chera",
-	"'Dr. Sean' Leonard",
-	"Sam Lantinga et al.",
-	"Sam Lantinga",
-	"Stephane Peter",
-	"Ryan Gordon",
-	"Chi Hoang",
-	"",
-	"*ADDITIONAL SUPPORT",
-	"",
-	"*SOUND CODE (DOS VERSION)",
-	"Paul Radek",
-	"",
-	"#(C)1994-2002 Id Software, Inc.",
-	"#All Rights Reserved. Published",
-        "#and Distributed by Activision,",
-        "#Inc. and it's affiliates under",
-        "#license. DOOM, DOOM II, the id",
-        "#Software name and the id logo",
-        "#are either registered trademarks",
-        "#or trademarks of Id Software, Inc.",
-        "#in the United States and/or other",
-        "#countries. Activision(R) is a",
-        "#registered trademark of Activision,",
-        "#Inc. and it's affiliates. All other",
-        "#trademarks and trade names are",
-        "#properties of their respective owners.",
-	"",
-	"",
-	"THANKS FOR PLAYING THIS PORT"
+    "",
+    "",
+    "",
+    "*WII-/Linux-DOOM WITH BOOM (MBF) SUPPORT",
+    "",
+    "*PROGRAMMING / PORTING",
+    "Ronald Lasmanowicz ('derek57'/'nitr8')",
+    "",
+    "+DOOM / DOOM 2 - HELL ON EARTH",
+    "",
+    "*PROGRAMMING",
+    "",
+    "+(ID SOFTWARE)",
+    "+www.idsoftware.com",
+    "John Carmack",
+    "John Romero",
+    "Dave Taylor",
+    "",
+    "*ARTISTS",
+    "Adrian Carmack",
+    "Kevin Cloud",
+    "",
+    "*LEVEL DESIGN",
+    "Tim Willits",
+    "American McGee",
+    "Sandy Petersen",
+    "Shawn Green",
+    "John Romero",
+    "John Anderson",
+    "",
+    "*BIZ",
+    "Jay Wilbur",
+    "",
+    "*SPECIAL THANKS",
+    "Gregor Punchatz",
+    "Bernd Kreimeier",
+    "",
+    "#--------------------------------------",
+    "",
+    "+(Raven SOFTWARE)",
+    "+www.ravensoftware.com",
+    "",
+    "*PROGRAMMING",
+    "Ben Gokey",
+    "Chris Rhineheart",
+    "",
+    "#--------------------------------------",
+    "",
+    "+(Rogue Entertainment, Inc.)",
+    "+www.rogue-ent.com",
+    "",
+    "*PROGRAMMING",
+    "James Monroe",
+    "Peter Mack",
+    "",
+    "#--------------------------------------",
+    "",
+    "+(TEAM ETERNITY)",
+    "+www.doomworld.com/eternity",
+    "",
+    "*PROGRAMMING",
+    "James 'Quasar' Haley",
+    "Stephen 'SoM' McGranahan",
+    "Charles Gunyon",
+    "David Hill",
+    "",
+    "#--------------------------------------",
+    "",
+    "+(PRBOOM)",
+    "+prboom.sourceforge.net",
+    "",
+    "*PROGRAMMING",
+    "Florian 'PROFF' Schulze",
+    "Colin 'CPH' Phipps",
+    "Rob 'RjY' Young",
+    "Andrey Budko",
+    "",
+    "#--------------------------------------",
+    "",
+    "+(TEAMTNT)",
+    "+www.teamtnt.com",
+    "Gregg 'GRANNY' Anderson",
+    "Dave Armstrong",
+    "Andre ''HARKLE' Arsenault",
+    "Nick 'NICK_PDOX' Baker",
+    "J.C. 'Sailor Scout' Bengston",
+    "Bill 'DSQUID' Bessette",
+    "Dave Brachman",
+    "Mike Bristol",
+    "Chris 'BonesBro' Brown",
+    "David Bruni",
+    "Chris Buteau",
+    "Derek 'NFSfreak' Cadwell",
+    "Thomas Elliot 'Myscha' Cannon",
+    "Ross Carlson",
+    "Dario 'Number 6' Casali",
+    "Milo Casali",
+    "Rick 'Wildman' Clark",
+    "Chris Couleur",
+    "Charles 'Mange' Cox",
+    "Billy 'porkypig' Daniel",
+    "Jesper 'Jeda' Danielsen",
+    "Paul 'Maduin' DeBruyne",
+    "Jim 'Derf' Dethlefsen",
+    "Yonatan Donner",
+    "Andrew 'SlashWho' Dowswell",
+    "Jeremy Doyle",
+    "Jonathan 'Biz' El-Bizri",
+    "Jim 'H2H' Elson",
+    "Bob 'Odessa' Evans",
+    "Thomas 'XeneX' Evans",
+    "Paul 'Moe' Fleschute",
+    "Jim Flynn",
+    "Jeffrey Galinovsky",
+    "David 'Blitzr4' Gevert",
+    "Steve 'Shriker' Gill",
+    "Gary Gosson",
+    "Tom 'Timon' Grieve",
+    "Andrew 'Hungry Donner' Griffiths",
+    "Stan 'SkullBane' Gula",
+    "Ty Halderman",
+    "Dale 'Cadaver' Harris",
+    "Mark 'Hatty' Hatton",
+    "David 'Mentzer' Hill",
+    "Donald R. 'Don' Howard",
+    "Steffen 'Addict' Itterheim",
+    "Gregory 'JAX-N' Jackson",
+    "Richard 'Styx' Jaspars",
+    "Mattias Johannson",
+    "Dean Johnson",
+    "James 'JJ' Joplin",
+    "Jim 'The Prof' Kennedy",
+    "Brian 'The Kid' Kidby",
+    "Lee Killough",
+    "Bob Kircher",
+    "Mark Klem",
+    "Sverre Kvernmo",
+    "Adam Landefeld",
+    "Bruce Lewis",
+    "Charles Li",
+    "Wayne 'Opium Joe' Loudon",
+    "Jim 'Symbol' Lowell",
+    "Justin Madigan",
+    "Andre Majorel",
+    "Kim 'Mutator' Malde",
+    "Mike 'Krusty' Marcotte",
+    "Josh Martel",
+    "Andrew 'Flatline' Martin",
+    "Paul 'Nowotny' Maurone",
+    "Steve McCrea",
+    "John 'Mischief' Minadeo",
+    "Lisa 'Pup' Moore",
+    "Tom 'Paradox' Mustaine",
+    "Rich 'Weeds' Nagel",
+    "Steve 'Funkymonk' Noonan",
+    "David Nordlund",
+    "Drake 'numena' O'Brien",
+    "Robin Patenall",
+    "Bobby 'Xcalibur' Pavlock",
+    "Michael 'Codex' Pearce",
+    "Rand Phares",
+    "Steven Phares",
+    "Tommie 'Fatal' Quick",
+    "Keith Reid",
+    "Roger Ritenour",
+    "Eric James 'Ricrob' Roberts",
+    "Casey Robinson",
+    "Adam Ross",
+    "Mike 'Gripp' Ruete",
+    "Jani 'Sir Robin' Saksa",
+    "Cole 'MaNCeR' Savage",
+    "Paul Schmitz",
+    "Florian 'PROFF' Schulze",
+    "Randy 'Screaming In Digital' Seacat",
+    "David 'Tolwyn' Shaw",
+    "Jimmy 'Evil Genius' Sieben",
+    "L.A. 'Evil Genius' Sieben",
+    "Ken 'Enigma' Simpson",
+    "Eugene 'ED' Smozhevsky",
+    "Mark 'Kram Llens' Snell",
+    "Anthony 'swedish fish' Soto",
+    "Harold 'Swaff' Swaffield",
+    "Robert 'Bobcat' Taylor",
+    "Peter 'Kniggit' Tomaselli",
+    "Paul 'Stenger' Turnbull",
+    "Jeromy 'Manna' Visser",
+    "Jeremy 'Iron Lich' Wagner",
+    "John 'Single Malt' Wakelin",
+    "Dietmar 'DIA' Westerteicher",
+    "Bill Whitaker",
+    "David 'Hakx' Wood",
+    "",
+    "#--------------------------------------",
+    "",
+    "+(ZDOOM)",
+    "+www.zdoom.org",
+    "",
+    "*PROGRAMMING",
+    "RANDY HEIT",
+    "",
+    "#--------------------------------------",
+    "",
+    "+(DOOM LEGACY)",
+    "+doomlegacy.sourceforge.net",
+    "",
+    "*PROGRAMMING",
+    "Boris Pereira",
+    "Fabrice 'Fab' Denis",
+    "Thierry 'Hurdler' Van Elsuwe",
+    "Stephen 'SoM' McGranahan",
+    "Stephane Dierickx",
+    "Robert Bauml",
+    "Bell Kin",
+    "",
+    "#--------------------------------------",
+    "",
+    "+(CHOCOLATE DOOM)",
+    "+www.chocolate-doom.org",
+    "",
+    "*PROGRAMMING",
+    "SIMON 'Fraggle' HOWARD",
+    "James 'Quasar' Haley",
+    "Samuel 'Kaiser' Villarreal",
+    "",
+    "#--------------------------------------",
+    "",
+    "+(CRISPY DOOM)",
+    "+fabiangreffrath.github.io/crispy-doom",
+    "",
+    "*PROGRAMMING",
+    "FABIAN GREFFRATH",
+    "",
+    "#--------------------------------------",
+    "",
+    "+(DOOM RETRO)",
+    "+www.doomretro.com",
+    "",
+    "*PROGRAMMING",
+    "BRAD HARDING",
+    "",
+    "#--------------------------------------",
+    "",
+    "*ADDITIONAL THANKS",
+    "Alex Mayfield",
+    "",
+    "Alexandre-Xavier Labonte-Lamoureux",
+    "('AXDOOMER')",
+    "",
+    "Alexey Lysiuk ('alexey.lysiuk')",
+    "Alun Bestor ('viggles')",
+    "Andrew Stine ('Linguica')",
+    "'AnotherLife'/'VGA'",
+    "'arneolavhal'",
+    "'Brewtal_Legend'",
+    "'Da Werecat'",
+    "Dani Ventas",
+    "Darren Mason",
+    "'Hoodie'",
+    "Iain Macfarlane",
+    "Jeff Doggett",
+    "'jewellds'",
+    "Jon Krazov",
+    "Jonathan Bergeron ('LazyLazurus')",
+    "Jonathan Dowland ('jmtd')",
+    "'kb1'",
+    "'L3gend'",
+    "Luke Jones ('Luke-Nukem')",
+    "Mike Swanson ('chungy')",
+    "'Noxat'",
+    "'ryan-sg'",
+    "'sgt dopey'",
+    "Claude Freeman ('ConSiGno'/'sneakernets')",
+    "'TheLonerD'",
+    "'vesperas'",
+    "Charles Gunyon",
+    "Ioan Chera",
+    "'Dr. Sean' Leonard",
+    "Sam Lantinga et al.",
+    "Sam Lantinga",
+    "Stephane Peter",
+    "Ryan Gordon",
+    "Chi Hoang",
+    "",
+    "*ADDITIONAL SUPPORT",
+    "",
+    "*SOUND CODE (DOS VERSION)",
+    "Paul Radek",
+    "",
+    "#(C)1994-2002 Id Software, Inc.",
+    "#All Rights Reserved. Published",
+    "#and Distributed by Activision,",
+    "#Inc. and it's affiliates under",
+    "#license. DOOM, DOOM II, the id",
+    "#Software name and the id logo",
+    "#are either registered trademarks",
+    "#or trademarks of Id Software, Inc.",
+    "#in the United States and/or other",
+    "#countries. Activision(R) is a",
+    "#registered trademark of Activision,",
+    "#Inc. and it's affiliates. All other",
+    "#trademarks and trade names are",
+    "#properties of their respective owners.",
+    "",
+    "",
+    "THANKS FOR PLAYING THIS PORT",
+    0
 };
 
 char *maptext[] = {
@@ -1236,26 +1248,6 @@ char *Key2String (int ch)
     return "?";                // Everything else
 }
 
-// SHAREWARE ONLY HAS "NUKAGE1" FLAT
-char *registered_flats[4] = {
-    "LAVA1",
-    "FWATER1",
-    "NUKAGE1",
-    "BLOOD1"
-};
-
-char *commercial_flats[9] = {
-    "LAVA1",
-    "FWATER1",
-    "NUKAGE1",
-    "BLOOD1",
-    "SLIME01",
-    "SLIME05",
-    "SLIME06",
-    "SLIME07",
-    "SLIME08"
-};
-
 char                       savegamestrings[10][SAVESTRINGSIZE];
 char                       endstring[160];
 /*
@@ -1314,8 +1306,8 @@ int                        warpepi = 2;
 int                        warplev = 2;
 int                        height;
 int                        expansion = 0;
-int                        flat_index;
-int                        colorize_to;
+int                        oldscreenblocks;
+int                        oldscreenSize;
 
 // -1 = no quicksave slot picked!
 int                        quickSaveSlot;
@@ -1334,7 +1326,6 @@ short                      whichSkull;              // which skull to draw
 dboolean                   messageNeedsInput;
 dboolean                   map_flag = false;
 dboolean                   inhelpscreens;
-dboolean                   increditscreen;
 dboolean                   menuactive;
 dboolean                   fake = false;
 dboolean                   mus_cheat_used = false;
@@ -1372,6 +1363,7 @@ byte                       *blurredscreen;
 
 static dboolean            askforkey = false;
 static dboolean            opldev;
+static dboolean            draw_ended;
 
 static int                 FirstKey = 0;           // SPECIAL MENU FUNCTIONS (ITEMCOUNT)
 static int                 keyaskedfor;
@@ -3230,51 +3222,71 @@ void M_DrawCredits(void)
 {
     int i, y;
 
-    increditscreen = true;
+    inhelpscreens = true;
 
-    viewheight = SCREENHEIGHT;
+    if (usergame)
+    {
+        viewheight = SCREENHEIGHT;
+
+        if (automapactive)
+            V_FillRect(0, 0, 0, SCREENWIDTH, SCREENHEIGHT, 245);
+        else
+            players[0].fixedcolormap = 0;
+    }
 
     // draw the credits
-    for (i = 0, y = ORIGHEIGHT - ((gametic - credits_start_time) / 2); credits[i] && y < ORIGHEIGHT; y += 10, i++)
+    for (i = 0, y = SCREENHEIGHT - ((gametic - credits_start_time) / 2); credits[i] && y < SCREENHEIGHT; y += 10, i++)
     {
         int j;
         int stringoffset = 0;
+        int colorize_to = -32;
 
         if (y <= -8)
             continue;
 
         if (credits[i][0] == '+')
-            colorize_to = 1;
+            colorize_to = 32;
         else if (credits[i][0] == '*')
-            colorize_to = 2;
+            colorize_to = 96;
         else if (credits[i][0] == '#')
-            colorize_to = 3;
-        else
-            colorize_to = 0;
+            colorize_to = 160;
 
         if (colorize_to > 0)
             stringoffset = 1;
 
-        for (j = 0; credits[i][j + stringoffset]; j++)
+        for (j = 0; credits[i][j + stringoffset] && !draw_ended; j++)
         {
-            int x = ORIGWIDTH / 2 - M_StringWidth(credits[i]) / 2;
+            int x = (SCREENWIDTH - strlen(credits[i]) * 8 - stringoffset * 8) / 2 + (j + stringoffset) * 8;
 
-            if (colorize_to == 1)
-                x += 2;
-            else if (colorize_to == 2)
-                x += 4;
-            else if (colorize_to == 3)
-                x += 3;
+            if (credits[i][0] == 'T' && credits[i][1] == 'H' && credits[i][2] == 'A' &&
+                credits[i][3] == 'N' && credits[i][4] == 'K' && credits[i][5] == 'S' && y < 200)
+            {
+                if (y <= 0)
+                {
+                    draw_ended = true;
+                    break;
+                }
 
-            M_WriteText(x, y, &credits[i][stringoffset]);
+                y = 200;
+            }
+            R_DrawChar(x, y, 0, uppercase(credits[i])[j + stringoffset] + colorize_to);
+        }
+    }
+
+    if (draw_ended)
+    {
+        int k;
+
+        for (k = 0; k < strlen(credits[304]); k++)
+        {
+            int xx = (SCREENWIDTH - strlen(credits[304]) * 8) / 2 + k * 8;
+
+            R_DrawChar(xx, 200, 0, uppercase(credits[304])[k] - 32);
         }
     }
 
     if (y < 0)
         credits_start_time = gametic;
-
-    V_DrawPatchWithShadow(CreditsDef.x + CURSORXOFF_SMALL, CreditsDef.y + 180, 0,
-            W_CacheLumpName(skullNameSmall[whichSkull], PU_CACHE), false);
 
     S_ChangeMusic(mus_credit, true, false);
 }
@@ -5909,13 +5921,16 @@ void M_FinishReadThis(int choice)
     M_SetupNextMenu(&MainDef);
 }
 
-
 void M_Credits(int choice)
 {
-    flat_index = (gamemode == commercial ? (rand() % 9) : (rand() % 4));
-//    credits = portcredits;	
     credits_start_time = gametic;
+    draw_ended = false;
 
+    oldscreenblocks = screenblocks;
+    oldscreenSize = screenSize;
+    screenblocks = 11;
+    screenSize = 8;
+    R_SetViewSize(screenblocks);
     M_SetupNextMenu(&CreditsDef);
 }
 
@@ -6124,10 +6139,6 @@ void M_Translucency(int choice)
             d_translucency = true;
         break;
     }
-
-    // translucent HUD?
-    if (screenblocks > TRANSLUCENT_HUD)
-        M_SizeDisplay(0);
 
     R_InitColumnFunctions();
 }
@@ -6386,6 +6397,8 @@ void M_SizeDisplay(int choice)
 
     blurred = false;
     skippsprinterp = true;
+    oldscreenSize = screenSize;
+    oldscreenblocks = screenblocks;
 }
 
 
@@ -6598,7 +6611,7 @@ void M_WriteText(int x, int y, char* string)
         if(dp_translation && font_shadow != 2)
             V_ClearDPTranslation();
 
-        if(font_shadow == 1 || increditscreen)
+        if(font_shadow == 1)
             V_DrawPatchWithShadow(cx, cy, 0, hu_font[c], false);
         else
             V_DrawPatch(cx, cy, 0, hu_font[c]);
@@ -6945,8 +6958,7 @@ dboolean M_Responder (event_t* ev)
         else if (key == KEY_TILDE /*&& !keydown*/)        // Console
         {
 //            keydown = key;
-            if (consoleheight < CONSOLEHEIGHT && consoledirection == -1 && !inhelpscreens &&
-                    !increditscreen)
+            if (consoleheight < CONSOLEHEIGHT && consoledirection == -1 && !inhelpscreens)
             {
                 consoleheight = MAX(1, consoleheight);
                 consoledirection = 1;
@@ -7062,20 +7074,7 @@ dboolean M_Responder (event_t* ev)
         }
         return false;
     }
-/*
-    else
-    {
-        if (key == key_menu_forward)
-        {
-            if(increditscreen)
-            {
-                currentMenu = currentMenu->prevMenu;
-                S_StartSound(NULL,sfx_pistol);
-                return false;
-            }
-        }
-    }
-*/
+
     // Keys usable within menu
 
 #ifdef WII
@@ -7233,18 +7232,7 @@ dboolean M_Responder (event_t* ev)
             S_StartSound(NULL,sfx_pistol);
             M_Game2(ch);
         }
-        else if(increditscreen)
-        {
-            currentMenu = currentMenu->prevMenu;
 
-            if(screenSize < 8)
-            {
-                if(usergame)
-                    ST_doRefresh();
-            }
-
-            S_StartSound(NULL,sfx_swtchx);
-        }
         return true;
     }
 #ifdef WII
@@ -7277,15 +7265,6 @@ dboolean M_Responder (event_t* ev)
             currentMenu = currentMenu->prevMenu;
             itemOn = currentMenu->lastOn;
             S_StartSound(NULL,sfx_swtchn);
-
-            if(increditscreen)
-            {
-                if(screenSize < 8)
-                {
-                    if(usergame)
-                        ST_doRefresh();
-                }
-            }
         }
         return true;
     }
@@ -7392,9 +7371,7 @@ void M_Drawer (void)
     unsigned int        i;
     unsigned int        max;
 
-    inhelpscreens = false;
-
-    if(!increditscreen)
+    if(!inhelpscreens)
     {
         int mnum;
 
@@ -7484,12 +7461,9 @@ void M_Drawer (void)
             else if(gamestate == GS_INTERMISSION)
                 S_ChangeMusic(mus_inter, true, false);
         }
-
-        if (screenSize < 8 && usergame)
-            R_ExecuteSetViewSize();
     }
 
-    increditscreen = false;
+    inhelpscreens = false;
 
     if(gamestate == GS_LEVEL && !menuactive)
     {
@@ -7698,7 +7672,6 @@ void M_Drawer (void)
         }
     }
 }
-
 
 //
 // M_ClearMenus

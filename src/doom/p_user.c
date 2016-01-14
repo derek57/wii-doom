@@ -604,21 +604,18 @@ void P_PlayerThink (player_t* player)
 
 void P_AimingHelp (player_t* player)
 {
-    angle_t                angle;
-    angle_t                delta;
-
     if (prio == 7 &&
         player->attacker->health > 0 &&
         player->attacker &&
         player->attacker != player->mo &&
         P_CheckSight (player->mo, player->attacker))
     {
-        angle = R_PointToAngle2 (player->mo->x,
+        angle_t angle = R_PointToAngle2 (player->mo->x,
                                  player->mo->y,
                                  player->attacker->x,
                                  player->attacker->y);
 
-        delta = angle - player->mo->angle;
+        angle_t delta = angle - player->mo->angle;
 
         // Looking at attacker
         if (delta < ANG5 || delta > (unsigned)-ANG5)

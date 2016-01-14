@@ -40,6 +40,7 @@
 
 #include "am_map.h"
 #include "c_io.h"
+#include "config.h"
 #include "d_deh.h"
 #include "doomstat.h"
 #include "dstrings.h"
@@ -1659,7 +1660,7 @@ void P_WriteSaveGameHeader(char *description)
         saveg_write8(0);
 
     memset(name, 0, sizeof(name));
-    strcpy(name, "Wii-DOOM");
+    strcpy(name, PACKAGE_NAME);
 
     for (i = 0; i < 24; ++i)
         saveg_write8(name[i]);
@@ -1691,7 +1692,7 @@ dboolean P_ReadSaveGameHeader(char *description)
         read_vcheck[i] = saveg_read8();
 
     memset(vcheck, 0, sizeof(vcheck));
-    strcpy(vcheck, "Wii-DOOM");
+    strcpy(vcheck, PACKAGE_NAME);
     if (strcmp(read_vcheck, vcheck))
     {
         menuactive = false;

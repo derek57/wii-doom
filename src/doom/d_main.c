@@ -47,13 +47,7 @@
 #include "am_map.h"
 
 #include "c_io.h"
-
-#ifdef WII
-#include "../wii/config.h"
-#else
 #include "config.h"
-#endif
-
 #include "d_main.h"
 #include "d_net.h"
 #include "d_deh.h"
@@ -193,6 +187,8 @@ extern int      warped;
 extern int      startlump;
 extern int      viewheight2;
 extern int      correct_lost_soul_bounce;
+extern int      oldscreenblocks;
+extern int      oldscreenSize;
 
 extern dboolean merge;
 extern dboolean BorderNeedRefresh;
@@ -214,7 +210,6 @@ extern dboolean finale_music;
 extern dboolean aiming_help;
 extern dboolean show_chat_bar;
 extern dboolean blurred;
-extern dboolean increditscreen;
 
 extern menu_t*  currentMenu;                          
 extern menu_t   CheatsDef;
@@ -447,11 +442,11 @@ void D_Display (int scrn)
 //    SlopeDiv = SlopeDivVanilla;
 
     // [crispy] shade background when a menu is active or the game is paused
-    if ((paused || menuactive) && (background_type == 1 || increditscreen))
+    if ((paused || menuactive) && (background_type == 1 || inhelpscreens))
     {
         static int firsttic;
 
-        if (!automapactive || (automapactive && overlay_trigger))
+        if (!automapactive || am_overlay)
         {
             int y;
 
@@ -493,14 +488,22 @@ void D_Display (int scrn)
                     viewwindowy / 2 + (viewheight / 2 - SHORT(patch->height)) / 2, 0, patch);
     }
 #endif
+
     // menus go directly to the screen
     M_Drawer ();          // menu is drawn even on top of everything
     NetUpdate ();         // send out any new accumulation
 
     if(screenSize < 8 && !wipe && !beta_style)
     {
-        if(usergame && !increditscreen && gamestate == GS_LEVEL)
+        if(usergame && !inhelpscreens && gamestate == GS_LEVEL)
             ST_doRefresh();
+    }
+
+    if (usergame && oldscreenblocks && !inhelpscreens && !menuactive && screenSize != oldscreenSize)
+    {
+        screenSize = oldscreenSize;
+        screenblocks = oldscreenblocks;
+        R_SetViewSize(screenblocks);
     }
 
     // normal update
@@ -2153,7 +2156,7 @@ void D_DoomMain (void)
                            "YOU NEED TO HAVE AT LEAST THE REGISTERED VERSION OF DOOM 1!\n"
                            "BETA MODE WILL BE DISABLED!";
 
-            SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Wii-DOOM", msgbuf, NULL);
+            SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, PACKAGE_NAME, msgbuf, NULL);
 #else
             printf("\n WARNING: YOU ARE TRYING TO RUN IN PR BETA MODE, USING A 'NON-DOOM 1-IWAD'.");
             printf("\n YOU NEED TO HAVE AT LEAST THE REGISTERED VERSION OF DOOM 1!");
@@ -2439,7 +2442,7 @@ void D_DoomMain (void)
     else
         D_AddFile(target, false);
 
-    if(gamemode != shareware || (gamemode == shareware && gameversion == exe_chex))
+    if(gamemode != shareware || gameversion == exe_chex)
     {
         if(load_extra_wad == 1)
         {

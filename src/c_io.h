@@ -94,11 +94,11 @@ extern int      consoleanimindex;
 extern char     consolecheat[255];
 extern char     consolecheatparm[3];
 extern char     consolecmdparm[255];
-
+/*
 #if defined(WIN32)
 extern dboolean showmemory;
 #endif
-
+*/
 void C_Print(stringtype_t type, char *string, ...);
 void C_Input(char *string, ...);
 void C_Output(char *string, ...);

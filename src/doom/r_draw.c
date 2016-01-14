@@ -50,7 +50,9 @@
 #include "w_wad.h"
 #include "z_zone.h"
 
-#define NUMTRANSTABLES 2     // how many translucency tables are used
+#define NUMTRANSTABLES          2     // how many translucency tables are used
+
+#define TRANSPARENT_COLOR       0x1C
 
 //
 // All drawing to the view buffer is accomplished in this file.
@@ -60,6 +62,8 @@
 //  and we need only the base address,
 //  and the total size == width*height*depth/8.,
 //
+
+patch_t         *draw_chars;
 
 int             viewwidth;
 int             scaledviewwidth;
@@ -1878,5 +1882,119 @@ void R_DrawViewBorder(void)
 
     // ? 
 //    V_MarkRect (0, 0, 1, SCREENWIDTH, SCREENHEIGHT - SBARHEIGHT, 0); 
+}
+
+/*
+================
+Draw_Char
+
+Draws one 8*8 graphics character
+It can be clipped to the top of the screen to allow the console to be
+smoothly scrolled off.
+================
+*/
+void R_DrawChar(int x, int y, int scrn, int num)
+{
+    byte       *dest;
+    byte       *source;
+
+    int        drawline;
+    int        row;
+    int        col;
+
+    num &= 255;
+
+    // load console characters
+    if (!draw_chars)
+    {
+        byte *pic = NULL;
+
+        int i;
+        int b;
+        int c;
+        int width;
+        int height;
+
+        LoadPCX("conchars.pcx", &pic, NULL, &width, &height);
+
+        c = width * height;
+
+        draw_chars = Z_Malloc(c, PU_STATIC, NULL);
+        draw_chars->pixels[0] = Z_Malloc(c, PU_STATIC, NULL);
+        draw_chars->pic = pic;
+        draw_chars->width = width;
+        draw_chars->height = height;
+
+        for (i = 0; i < c; i++)
+        {
+            b = draw_chars->pic[i];
+            draw_chars->pixels[0][i] = b;
+        }
+    }
+
+    if (num == 32 || num == 32 + 128)
+        return;
+
+    // totally off screen
+    if (y <= -8)
+        return;
+
+    // PGM - status text was missing in sw...
+    if ((y + 8) > SCREENHEIGHT)
+        return;
+
+#ifdef RANGECHECK
+    if (y > SCREENHEIGHT - 8 || x < 0 || x > SCREENWIDTH - 8)
+        C_Error("R_DrawChar: (%i, %i)", x, y);
+
+    if (num < 0 || num > 255)
+        C_Error("R_DrawChar: char %i", num);
+#endif
+
+    row = num >> 4;
+    col = num & 15;
+    source = draw_chars->pixels[0] + (row << 10) + (col << 3);
+
+    // clipped
+    if (y < 0)
+    {
+        drawline = 8 + y;
+        source -= 128 * y;
+        y = 0;
+    }
+    else
+        drawline = 8;
+
+    dest = screens[scrn] + y * SCREENWIDTH + x;
+
+    while (drawline--)
+    {
+        if (source[0] != TRANSPARENT_COLOR)
+            dest[0] = source[0];
+
+        if (source[1] != TRANSPARENT_COLOR)
+            dest[1] = source[1];
+
+        if (source[2] != TRANSPARENT_COLOR)
+            dest[2] = source[2];
+
+        if (source[3] != TRANSPARENT_COLOR)
+            dest[3] = source[3];
+
+        if (source[4] != TRANSPARENT_COLOR)
+            dest[4] = source[4];
+
+        if (source[5] != TRANSPARENT_COLOR)
+            dest[5] = source[5];
+
+        if (source[6] != TRANSPARENT_COLOR)
+            dest[6] = source[6];
+
+        if (source[7] != TRANSPARENT_COLOR)
+            dest[7] = source[7];
+
+        source += 128;
+        dest += SCREENWIDTH;
+    }
 }
 

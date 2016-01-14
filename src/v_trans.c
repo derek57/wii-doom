@@ -190,6 +190,39 @@ static void rgb_to_hsv(vect *rgb, vect *hsv)
     hsv->z = v;
 }
 
+// Search through the given palette, finding the nearest color that matches
+// the given color.
+// [crispy] share with v_trans.c:V_Colorize() and r_data.c:R_InitTranMap()
+int FindNearestColor(byte *palette, int r, int g, int b)
+{
+    int best;
+    int best_diff;
+    int i;
+
+    best = 0;
+    best_diff = INT_MAX;
+
+    for (i=0; i<256; ++i)
+    {
+        byte *col = palette + i * 3;
+        int diff = (r - col[0]) * (r - col[0])
+             + (g - col[1]) * (g - col[1])
+             + (b - col[2]) * (b - col[2]);
+
+        if (diff == 0)
+        {
+            return i;
+        }
+        else if (diff < best_diff)
+        {
+            best = i;
+            best_diff = diff;
+        }
+    }
+
+    return best;
+}
+
 byte V_Colorize (byte *playpal, int cr, byte source, dboolean keepgray109)
 {
     vect rgb, hsv;

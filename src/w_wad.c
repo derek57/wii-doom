@@ -23,12 +23,7 @@
 #include <string.h>
 
 #include "c_io.h"
-
-#ifdef WII
-#include "../wii/config.h"
-#else
 #include "config.h"
-#endif
 
 #include "doom/doomdef.h"
 
@@ -647,7 +642,7 @@ void W_CheckSize(int wad)
             fseek(fprw, 0, 2);                // file pointer at the end of file
             fsizerw = ftell(fprw);        // take a position of file pointer un size variable
 
-            if(fsizerw != 1334071)
+            if(fsizerw != 1083114)
                 print_resource_pwad_error = true;
 
             fclose(fprw);

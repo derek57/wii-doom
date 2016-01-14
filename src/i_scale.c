@@ -18,7 +18,7 @@
 //         Aspect ratio-correcting stretch functions
 //
 
-
+#ifndef SDL2
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -28,8 +28,8 @@
 #include "doom/doomdef.h"
 
 #include "doomtype.h"
-
 #include "i_video.h"
+#include "v_trans.h"
 #include "z_zone.h"
 
 
@@ -293,39 +293,6 @@ screen_mode_t mode_scale_5x = {
     false || hires,
 };
 
-
-// Search through the given palette, finding the nearest color that matches
-// the given color.
-// [crispy] share with v_trans.c:V_Colorize() and r_data.c:R_InitTranMap()
-int FindNearestColor(byte *palette, int r, int g, int b)
-{
-    int best;
-    int best_diff;
-    int i;
-
-    best = 0;
-    best_diff = INT_MAX;
-
-    for (i=0; i<256; ++i)
-    {
-        byte *col = palette + i * 3;
-        int diff = (r - col[0]) * (r - col[0])
-             + (g - col[1]) * (g - col[1])
-             + (b - col[2]) * (b - col[2]);
-
-        if (diff == 0)
-        {
-            return i;
-        }
-        else if (diff < best_diff)
-        {
-            best = i;
-            best_diff = diff;
-        }
-    }
-
-    return best;
-}
 
 // Create a stretch table.  This is a lookup table for blending colors.
 // pct specifies the bias between the two colors: 0 = all y, 100 = all x.
@@ -1490,4 +1457,5 @@ screen_mode_t mode_squash_4x = {
 // windowboxing borders. It also means that the aspect ratio is correct
 // when running at 1280x1024. See bug #460 for more details, or this
 // post: http://www.doomworld.com/vb/post/1316735
+#endif
 

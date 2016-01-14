@@ -145,9 +145,7 @@ dboolean P_SetMobjState(mobj_t *mobj, statenum_t state)
         state = st->nextstate;
 
         if (state == S_SPID_ATK3 || state == S_SPID_ATK4 ||
-            state == S_SPOS_ATK3 ||
             state == S_SSWV_ATK4 || state == S_SSWV_ATK6 ||
-            state == S_POSS_ATK3 ||
             state == S_CPOS_ATK3 || state == S_CPOS_ATK4)
             A_EjectCasing(mobj);
 
@@ -436,85 +434,88 @@ void P_XYMovement (mobj_t* mo)
 //
 void P_ZMovement (mobj_t* mo)
 {
-  if (mo->flags & MF_BOUNCES && mo->momz)
+    if (mo->flags & MF_BOUNCES && mo->momz)
     {
-      mo->z += mo->momz;
-      if (mo->z <= mo->floorz)                  // bounce off floors
-	{
-	  mo->z = mo->floorz;
-	  if (mo->momz < 0)
-	    {
-	      mo->momz = -mo->momz;
-	      if (!(mo->flags & MF_NOGRAVITY))  // bounce back with decay
-		{
-		  mo->momz = mo->flags & MF_FLOAT ?   // floaters fall slowly
-		    mo->flags & MF_DROPOFF ?          // DROPOFF indicates rate
-		    FixedMul(mo->momz, (fixed_t)(FRACUNIT*.85)) :
-		    FixedMul(mo->momz, (fixed_t)(FRACUNIT*.70)) :
-		    FixedMul(mo->momz, (fixed_t)(FRACUNIT*.45)) ;
-		  
-		  // Bring it to rest below a certain speed
-		  if (abs(mo->momz) <= mo->info->mass*(GRAVITY*4/256))
-		    mo->momz = 0;
-		}
+        mo->z += mo->momz;
 
-	      // killough 11/98: touchy objects explode on impact
-	      if (mo->flags & MF_TOUCHY &&
-		  mo->health > 0)
-		P_DamageMobj(mo, NULL, NULL, mo->health);
-	      else
-		if (mo->flags & MF_FLOAT && sentient(mo))
-		  goto floater;
-	      return;
-	    }
-	}
-      else
-	if (mo->z >= mo->ceilingz - mo->height)   // bounce off ceilings
-	  {
-	    mo->z = mo->ceilingz - mo->height;
-	    if (mo->momz > 0)
-	      {
-		if (mo->subsector->sector->ceilingpic != skyflatnum)
-		  mo->momz = -mo->momz;    // always bounce off non-sky ceiling
-		else
-		  if (mo->flags & MF_MISSILE)
-		    P_RemoveMobj(mo);      // missiles don't bounce off skies
-		  else
-		    if (mo->flags & MF_NOGRAVITY)
-		      mo->momz = -mo->momz; // bounce unless under gravity
+        if (mo->z <= mo->floorz)                  // bounce off floors
+        {
+            mo->z = mo->floorz;
 
-		if (mo->flags & MF_FLOAT && sentient(mo))
-		  goto floater;
+            if (mo->momz < 0)
+            {
+                mo->momz = -mo->momz;
 
-		return;
-	      }
-	  }
-	else
-	  {
-	    if (!(mo->flags & MF_NOGRAVITY))      // free-fall under gravity
-	      mo->momz -= mo->info->mass*(GRAVITY/256);
-	    if (mo->flags & MF_FLOAT && sentient(mo))
-	      goto floater;
-	    return;
-	  }
+                if (!(mo->flags & MF_NOGRAVITY))  // bounce back with decay
+                {
+                    mo->momz = (mo->flags & MF_FLOAT) ?   // floaters fall slowly
+                    (mo->flags & MF_DROPOFF) ?          // DROPOFF indicates rate
+                    FixedMul(mo->momz, (fixed_t)(FRACUNIT * .85)) :
+                    FixedMul(mo->momz, (fixed_t)(FRACUNIT * .70)) :
+                    FixedMul(mo->momz, (fixed_t)(FRACUNIT * .45)) ;
 
-      // came to a stop
-      mo->momz = 0;
+                    // Bring it to rest below a certain speed
+                    if (ABS(mo->momz) <= mo->info->mass * (GRAVITY * 4 / 256))
+                        mo->momz = 0;
+                }
 
-      if (mo->flags & MF_MISSILE)
-	{
-	  if (ceilingline &&
-	      ceilingline->backsector &&
-	      ceilingline->backsector->ceilingpic == skyflatnum &&
-	      mo->z > ceilingline->backsector->ceilingheight)
-	    P_RemoveMobj(mo);  // don't explode on skies
-	  else
-	    P_ExplodeMissile(mo);
-	}
+                // killough 11/98: touchy objects explode on impact
+                if (mo->flags & MF_TOUCHY && mo->health > 0)
+                    P_DamageMobj(mo, NULL, NULL, mo->health);
+                else if (mo->flags & MF_FLOAT && sentient(mo))
+                    goto floater;
+
+                return;
+            }
+        }
+        else if (mo->z >= mo->ceilingz - mo->height)   // bounce off ceilings
+        {
+            mo->z = mo->ceilingz - mo->height;
+
+            if (mo->momz > 0)
+            {
+                if (mo->subsector->sector->ceilingpic != skyflatnum)
+                    mo->momz = -mo->momz;    // always bounce off non-sky ceiling
+                else if (mo->flags & MF_MISSILE)
+                    P_RemoveMobj(mo);      // missiles don't bounce off skies
+                else if (mo->flags & MF_NOGRAVITY)
+                    mo->momz = -mo->momz; // bounce unless under gravity
+
+                if (mo->flags & MF_FLOAT && sentient(mo))
+                    goto floater;
+
+                return;
+            }
+        }
+        else
+        {
+            if (!(mo->flags & MF_NOGRAVITY))      // free-fall under gravity
+                mo->momz -= mo->info->mass * (GRAVITY / 256);
+
+            if (mo->flags & MF_FLOAT && sentient(mo))
+                goto floater;
+
+            return;
+        }
+
+        // came to a stop
+        mo->momz = 0;
+
+        if (mo->flags & MF_MISSILE)
+        {
+            if (ceilingline &&
+                ceilingline->backsector &&
+                ceilingline->backsector->ceilingpic == skyflatnum &&
+                mo->z > ceilingline->backsector->ceilingheight)
+                P_RemoveMobj(mo);  // don't explode on skies
+            else
+                P_ExplodeMissile(mo);
+        }
       
-      if (mo->flags & MF_FLOAT && sentient(mo))
-	goto floater;
-      return;
+        if (mo->flags & MF_FLOAT && sentient(mo))
+            goto floater;
+
+        return;
     }
 
     // check for smooth step up

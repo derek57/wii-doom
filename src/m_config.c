@@ -550,7 +550,10 @@ void M_BindVariable(char *name, void *location)
 
 // Set the value of a particular variable; an API function for other
 // parts of the program to assign values to config variables by name.
-
+//
+// [nitr8] UNUSED
+//
+/*
 dboolean M_SetVariable(char *name, char *value)
 {
     default_t *variable;
@@ -568,10 +571,7 @@ dboolean M_SetVariable(char *name, char *value)
 }
 
 // Get the value of a variable.
-//
-// [nitr8] UNUSED
-//
-/*
+
 int M_GetIntVariable(char *name)
 {
     default_t *variable;

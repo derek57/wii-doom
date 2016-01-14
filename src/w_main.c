@@ -17,16 +17,13 @@
 //
 
 
-#ifdef WII
-#include "../wii/config.h"
-#else
 #include "config.h"
-#endif
-
 #include "doomfeatures.h"
 #include "d_iwad.h"
+
 #include "doom/d_main.h"
 #include "doom/doomstat.h"
+
 #include "i_system.h"
 #include "m_argv.h"
 #include "m_misc.h"

@@ -27,13 +27,10 @@
 
 #include <stdio.h>
 
-#ifdef WII
-#include "../wii/config.h"
-#else
 #include "config.h"
-#endif
 
 #include "doom/doomstat.h"
+
 #include "doomtype.h"
 #include "m_argv.h"
 #include "w_file.h"

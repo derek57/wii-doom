@@ -40,6 +40,7 @@
 #include <stdlib.h>
 
 #include "c_io.h"
+#include "config.h"
 #include "d_deh.h"
 #include "doomfeatures.h"
 #include "doom/doomdef.h"
@@ -1900,7 +1901,7 @@ dboolean CheckPackageWADVersion(void)
                 if (!*inbuffer || *inbuffer == '#' || *inbuffer == ' ')
                     continue;   // Blank line or comment line
 
-                if (M_StringCompare(inbuffer, "Wii-DOOM"))
+                if (M_StringCompare(inbuffer, "PACKAGE_NAME"))
                 {
                     Z_ChangeTag(infile.lump, PU_CACHE);
                     return true;

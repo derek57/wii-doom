@@ -95,7 +95,6 @@ extern dboolean                  r_translucency;
 */
 extern dboolean                  skippsprinterp;
 extern dboolean                  realframe;
-extern dboolean                  increditscreen;
 
 //
 // R_InstallSpriteLump
@@ -1524,7 +1523,7 @@ void R_DrawPlayerSprites(void)
     {
 //        V_FillRect(viewwindowx, viewwindowy, viewwidth, viewheight, 251);
         for (i = 0, psp = viewplayer->psprites; i < NUMPSPRITES; i++, psp++)
-            if (psp->state && !increditscreen)
+            if (psp->state && !inhelpscreens)
                 R_DrawPSprite(psp, true);
 
 //        if (menuactive || paused || consoleactive)
@@ -1540,7 +1539,7 @@ void R_DrawPlayerSprites(void)
             if (psp->state && (psp->state->frame & FF_FULLBRIGHT))
                 bflash = true;
         for (i = 0, psp = viewplayer->psprites; i < NUMPSPRITES; i++, psp++)
-            if (psp->state && !increditscreen)
+            if (psp->state && !inhelpscreens)
                 R_DrawPSprite(psp, false);
     }
 }
@@ -1558,7 +1557,7 @@ static void R_DrawBloodSprite(vissprite_t *spr)
     int         x2 = spr->x2;
 
     // [RH] Quickly reject sprites with bad x ranges.
-    if (x1 > x2 || increditscreen)
+    if (x1 > x2 || inhelpscreens)
         return;
 
     for (x = x1; x <= x2; x++)
@@ -1630,7 +1629,7 @@ static void R_DrawShadowSprite(vissprite_t *spr)
     int         x2 = spr->x2;
 
     // [RH] Quickly reject sprites with bad x ranges.
-    if (x1 > x2 || increditscreen)
+    if (x1 > x2 || inhelpscreens)
         return;
 
     for (x = x1; x <= x2; x++)
@@ -1695,7 +1694,7 @@ static void R_DrawSprite(vissprite_t *spr)
     int         x1 = spr->x1;
     int         x2 = spr->x2;
 
-    if (x1 > x2 || increditscreen)
+    if (x1 > x2 || inhelpscreens)
         return;
 
     for (x = x1; x <= x2; x++)

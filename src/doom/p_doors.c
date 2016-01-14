@@ -442,20 +442,25 @@ EV_DoDoor
 
             if(fsize != 10396254 && fsize != 10399316 && fsize != 10401760 && fsize != 4207819 &&
                     fsize != 4274218 && fsize != 4225504 && fsize != 4225460)
-                S_StartSectorSound(&door->sector->soundorg, sfx_bdcls);
+            {
+                if (sec->ceilingheight != sec->floorheight)
+                    S_StartSectorSound(&door->sector->soundorg, sfx_bdcls);
+            }
             break;
             
           case doorClose:
             door->topheight = P_FindLowestCeilingSurrounding(sec);
             door->topheight -= 4*FRACUNIT;
             door->direction = -1;
-            S_StartSectorSound(&door->sector->soundorg, sfx_dorcls);
+            if (sec->ceilingheight != sec->floorheight)
+                S_StartSectorSound(&door->sector->soundorg, sfx_dorcls);
             break;
             
           case doorClose30ThenOpen:
             door->topheight = sec->ceilingheight;
             door->direction = -1;
-            S_StartSectorSound(&door->sector->soundorg, sfx_dorcls);
+            if (sec->ceilingheight != sec->floorheight)
+                S_StartSectorSound(&door->sector->soundorg, sfx_dorcls);
             break;
             
           case doorBlazeRaise:

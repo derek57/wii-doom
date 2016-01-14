@@ -964,7 +964,7 @@ dboolean P_TryMove(mobj_t *thing, fixed_t x, fixed_t y, dboolean dropoff)
 
         if (thing->flags & MF_BOUNCES &&    // killough 8/13/98
             !(thing->flags & (MF_MISSILE|MF_NOGRAVITY)) &&
-	    !sentient(thing) && tmfloorz - thing->z > 16*FRACUNIT)
+            !sentient(thing) && tmfloorz - thing->z > 16*FRACUNIT)
             return false; // too big a step up for bouncers under gravity
 
         // killough 11/98: prevent falling objects from going up too many steps

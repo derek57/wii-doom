@@ -36,11 +36,7 @@
 
 #include <stdio.h>
 
-#ifdef WII
-#include "../wii/config.h"
-#else
 #include "config.h"
-#endif
 
 #include "doom/d_main.h"
 

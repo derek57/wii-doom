@@ -189,11 +189,11 @@ void Z_DrawStats(void)
 
     s = 100.0 / total_memory;
 
-    sprintf(act_mem, "%zu\t%6.01f%%\tstatic\n", active_memory, active_memory * s);
-    sprintf(pur_mem, "%zu\t%6.01f%%\tpurgable\n", purgable_memory, purgable_memory * s);
-    sprintf(free_mem, "%zu\t%6.01f%%\tfree\n", free_memory, free_memory * s);
-    sprintf(frag_mem, "%zu\t%6.01f%%\tfragmentable\n", inactive_memory, inactive_memory * s);
-    sprintf(virt_mem, "%zu\t%6.01f%%\tvirtual\n", virtual_memory, virtual_memory * s);
+    sprintf(act_mem, "%lu\t%6.01f%%\tstatic\n", (unsigned long)active_memory, (unsigned long)active_memory * s);
+    sprintf(pur_mem, "%lu\t%6.01f%%\tpurgable\n", (unsigned long)purgable_memory, (unsigned long)purgable_memory * s);
+    sprintf(free_mem, "%lu\t%6.01f%%\tfree\n", (unsigned long)free_memory, (unsigned long)free_memory * s);
+    sprintf(frag_mem, "%lu\t%6.01f%%\tfragmentable\n", (unsigned long)inactive_memory, (unsigned long)inactive_memory * s);
+    sprintf(virt_mem, "%lu\t%6.01f%%\tvirtual\n", (unsigned long)virtual_memory, (unsigned long)virtual_memory * s);
     sprintf(tot_mem, "%lu\t\ttotal\n", total_memory);
 
     if(leveltime & 16)
@@ -1090,9 +1090,9 @@ void Z_DrawStats(void)            // Print allocation statistics
         total_memory = free_memory + memory_size + active_memory + purgable_memory;
         s = 100.0 / total_memory;
 
-        sprintf(act_mem, "%zu\t%6.01f%%\tstatic\n", active_memory, active_memory * s);
-        sprintf(pur_mem, "%zu\t%6.01f%%\tpurgable\n", purgable_memory, purgable_memory * s);
-        sprintf(free_mem, "%zu\t%6.01f%%\tfree\n", (free_memory + memory_size),
+        sprintf(act_mem, "%lu\t%6.01f%%\tstatic\n", (unsigned long)active_memory, (unsigned long)active_memory * s);
+        sprintf(pur_mem, "%lu\t%6.01f%%\tpurgable\n", (unsigned long)purgable_memory, (unsigned long)purgable_memory * s);
+        sprintf(free_mem, "%lu\t%6.01f%%\tfree\n", (unsigned long)(free_memory + memory_size),
                (free_memory + memory_size) * s);
         sprintf(tot_mem, "%lu\t\ttotal\n", total_memory);
     }
@@ -1101,8 +1101,8 @@ void Z_DrawStats(void)            // Print allocation statistics
         total_memory = active_memory + purgable_memory;
         s = 100.0 / total_memory;
 
-        sprintf(act_mem, "%zu\t%6.01f%%\tstatic\n", active_memory, active_memory * s);
-        sprintf(pur_mem, "%zu\t%6.01f%%\tpurgable\n", purgable_memory, purgable_memory * s);
+        sprintf(act_mem, "%lu\t%6.01f%%\tstatic\n", (unsigned long)active_memory, (unsigned long)active_memory * s);
+        sprintf(pur_mem, "%lu\t%6.01f%%\tpurgable\n", (unsigned long)purgable_memory, (unsigned long)purgable_memory * s);
         sprintf(tot_mem, "%lu\t\ttotal\n", total_memory);
     }
 

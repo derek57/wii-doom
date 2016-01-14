@@ -120,12 +120,10 @@ int                          italicize[15] = { 0, 2, 2, 2, 1, 1, 1, 1, 0, 0, 0, 
 
 dboolean                      dp_translucent = false;
 
-extern dboolean              increditscreen;
+extern dboolean              inhelpscreens;
 
 extern byte                  redtoblue[];
 extern byte                  redtogreen[];
-
-extern int                   colorize_to;
 
 //
 // V_MarkRect 
@@ -925,6 +923,107 @@ void WritePCXfile(char *filename, byte *data,
     Z_Free (pcx);
 }
 
+void LoadPCX(char *filename, byte **pic, byte **palette, int *width, int *height)
+{
+    byte    *raw;
+    byte    *out;
+    byte    *pix;
+
+    pcx_t   *pcx;
+
+    int     x;
+    int     y;
+    int     len;
+    int     dataByte;
+    int     runLength;
+
+    *pic = NULL;
+
+    //
+    // load the file
+    //
+    len = M_ReadFile (filename, &raw);
+
+    if (!raw)
+    {
+        C_Error("Bad PCX file: wrong raw data in file %s\n", filename);
+        return;
+    }
+
+    //
+    // parse the PCX file
+    //
+    pcx = (pcx_t *)raw;
+
+    pcx->xmin = SHORT(pcx->xmin);
+    pcx->ymin = SHORT(pcx->ymin);
+    pcx->xmax = SHORT(pcx->xmax);
+    pcx->ymax = SHORT(pcx->ymax);
+    pcx->hres = SHORT(pcx->hres);
+    pcx->vres = SHORT(pcx->vres);
+    pcx->bytes_per_line = SHORT(pcx->bytes_per_line);
+    pcx->palette_type = SHORT(pcx->palette_type);
+
+    raw = &pcx->data;
+
+    if (pcx->manufacturer != 0x0a
+        || pcx->version != 5
+        || pcx->encoding != 1
+        || pcx->bits_per_pixel != 8
+        || pcx->xmax >= 640
+        || pcx->ymax >= 480)
+    {
+        C_Error("Bad PCX file: wrong format in file %s\n", filename);
+        return;
+    }
+
+    out = malloc((pcx->ymax + 1) * (pcx->xmax + 1));
+
+    *pic = out;
+
+    pix = out;
+
+    if (palette)
+    {
+        *palette = malloc(768);
+        memcpy (*palette, (byte *)pcx + len - 768, 768);
+    }
+
+    if (width)
+        *width = pcx->xmax + 1;
+
+    if (height)
+        *height = pcx->ymax + 1;
+
+    for (y = 0; y <= pcx->ymax; y++, pix += pcx->xmax + 1)
+    {
+        for (x = 0; x <= pcx->xmax;)
+        {
+            dataByte = *raw++;
+
+            if ((dataByte & 0xC0) == 0xC0)
+            {
+                runLength = dataByte & 0x3F;
+                dataByte = *raw++;
+            }
+            else
+                runLength = 1;
+
+            while (runLength-- > 0)
+                pix[x++] = dataByte;
+        }
+    }
+
+    if (raw - (byte *)pcx > len)
+    {
+        C_Error("PCX file %s was malformed", filename);
+        free (*pic);
+        *pic = NULL;
+    }
+
+    Z_Free(pcx);        // FIXME (crashing)
+}
+
 //#ifdef HAVE_LIBPNG
 //
 // WritePNGfile
@@ -1159,19 +1258,10 @@ void V_DrawPatchWithShadow(int x, int y, int scrn, patch_t *patch, dboolean flag
                 int     height = (((y + column->topdelta + column->length) * DY) >> FRACBITS) - count;
 
                 if (height > 0)
-                {
                     *dest = source[srccol >> FRACBITS];
-                    if (increditscreen)
-                    {
-                        if (colorize_to == 1)
-                            *dest = redtogreen[source[srccol >> FRACBITS]];
-                        else if (colorize_to == 2)
-                            *dest = redtoblue[source[srccol >> FRACBITS]];
-                        else if (colorize_to == 3)
-                            *dest = redtoyellow[source[srccol >> FRACBITS]];
-                    }
-                }
+
                 dest += SCREENWIDTH;
+
                 if (height + 2 > 0)
                 {
                     byte        *shadow = dest + SCREENWIDTH + 2;
@@ -1205,10 +1295,11 @@ void V_RestoreBuffer(int srcscrn, int destscrn)
 //    dest_screen = I_VideoBuffer;
     screens[srcscrn] = screens[destscrn];
 }
-*/
 
+//
 // V_DrawBackground tiles a 64x64 patch over the entire screen,
 // providing the background for the Help and Setup screens.
+//
 
 static void V_TileFlat(byte *src, byte *dest)
 {
@@ -1237,6 +1328,7 @@ void V_DrawDistortedBackground(int scrn, char *patchname)
 
     V_TileFlat(src, screens[scrn]);
 }
+*/
 
 //
 // V_FillRect

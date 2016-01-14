@@ -27,12 +27,7 @@
 
 #include "../src/c_io.h"
 
-#ifdef WII
-#include "../wii/config.h"
-#else
 #include "config.h"
-#endif
-
 #include "opl.h"
 #include "opl_internal.h"
 
@@ -47,9 +42,11 @@ extern opl_driver_t opl_linux_driver;
 #if defined(HAVE_LIBI386) || defined(HAVE_LIBAMD64)
 extern opl_driver_t opl_openbsd_driver;
 #endif
+/*
 #ifdef _WIN32
 extern opl_driver_t opl_win32_driver;
 #endif
+*/
 extern opl_driver_t opl_sdl_driver;
 
 
@@ -63,9 +60,11 @@ static opl_driver_t *drivers[] =
 #if defined(HAVE_LIBI386) || defined(HAVE_LIBAMD64)
     &opl_openbsd_driver,
 #endif
+/*
 #ifdef _WIN32
     &opl_win32_driver,
 #endif
+*/
     &opl_sdl_driver,
     NULL
 };
@@ -329,6 +328,7 @@ opl_init_result_t OPL_Detect(void)
     OPL_Delay(1 * OPL_MS);
 
     // Read status
+    // FIXME: Variable 'result2' is assigned a value that is never used.
     result2 = OPL_ReadStatus();
 
     // Reset both timers:

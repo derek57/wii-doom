@@ -259,6 +259,7 @@ visplane_t *R_FindPlane(fixed_t height, int picnum, int lightlevel, fixed_t xoff
     check->xoffs = xoffs;                                      // killough 2/28/98: Save offsets
     check->yoffs = yoffs;
 
+    // FIXME: The 2nd memset() argument '32767' doesn't fit into an 'unsigned char'.
     memset(check->top, SHRT_MAX, sizeof(check->top));
 
     return check;
@@ -337,6 +338,8 @@ visplane_t *R_CheckPlane(visplane_t *pl, int start, int stop)
 */
         pl->minx = start;
         pl->maxx = stop;
+
+        // FIXME: The 2nd memset() argument '32767' doesn't fit into an 'unsigned char'.
         memset(pl->top, SHRT_MAX, sizeof(pl->top));
     }
 

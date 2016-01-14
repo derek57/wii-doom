@@ -32,13 +32,7 @@
 #include <string.h>
 
 #include "c_io.h"
-
-#ifdef WII
-#include "../wii/config.h"
-#else
 #include "config.h"
-#endif
-
 #include "d_deh.h"
 
 #include "doom/doomdef.h"

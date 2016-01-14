@@ -1943,7 +1943,7 @@ P_SetupLevel
     }
     else
     {
-        if(fsize != 12538385 || (fsize == 12538385 && map < 10))
+        if(fsize != 12538385 || map < 10)
         {
             lumpname[0] = 'E';
             lumpname[1] = '0' + ep;

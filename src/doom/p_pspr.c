@@ -1034,7 +1034,6 @@ A_FireShotgun2
   pspdef_t*        psp ) 
 {
     int            i;
-    angle_t        angle;
         
     S_StartSound (player->mo, sfx_dshtgn);
     P_SetMobjState (player->mo, S_PLAY_ATK2);
@@ -1051,7 +1050,7 @@ A_FireShotgun2
     for (i=0 ; i<20 ; i++)
     {
         int damage = 5*(P_Random ()%3+1);
-        angle = player->mo->angle;
+        angle_t angle = player->mo->angle;
         angle += (P_Random()-P_Random())<<ANGLETOFINESHIFT;
         P_LineAttack (player->mo,
                       angle,
@@ -1147,12 +1146,11 @@ void A_BFGSpray (mobj_t* mo)
     int          i;
     int          j;
     int          damage;
-    angle_t      an;
         
     // offset angles from its attack angle
     for (i=0 ; i<40 ; i++)
     {
-        an = mo->angle - ANG90/2 + ANG90/40*i;
+        angle_t an = mo->angle - ANG90/2 + ANG90/40*i;
 
         // mo->target is the originator (player)
         //  of the missile

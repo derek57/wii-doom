@@ -518,7 +518,7 @@ void WI_drawLF(void)
             {
 /*
                 // THIS IS WORKING AS IT SHOULD BUT IN THE REAL PR BETA, IT WASN'T IMPLEMENTED
-                if(fsize != 12538385 || (fsize == 12538385 && gamemap != 10))
+                if(fsize != 12538385 || gamemap != 10)
                 {
                     if(font_shadow == 1)
                         V_DrawPatchWithShadow(232, 176, 0, lnames[wbs->last], false);
@@ -529,7 +529,7 @@ void WI_drawLF(void)
             }
             else
             {
-                if(fsize != 12538385 || (fsize == 12538385 && gamemap != 10))
+                if(fsize != 12538385 || gamemap != 10)
                 {
                     if(font_shadow == 1)
                         V_DrawPatchWithShadow((ORIGWIDTH -
@@ -550,7 +550,7 @@ void WI_drawLF(void)
             }
 
             // draw "Finished!"
-            if((fsize != 12538385 || (fsize == 12538385 && gamemap != 10)) && !beta_style)
+            if((fsize != 12538385 || gamemap != 10) && !beta_style)
                 y += (5*SHORT(lnames[wbs->last]->height))/4;
             else
             {

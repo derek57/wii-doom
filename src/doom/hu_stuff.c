@@ -200,7 +200,7 @@ extern int              cardsfound;
 extern dboolean         blurred;
 extern dboolean         mapinfo_lump;
 extern dboolean         dont_message_to_console;
-extern dboolean         increditscreen;
+extern dboolean         inhelpscreens;
 
 static patch_t*         healthpatch;
 static patch_t*         berserkpatch;
@@ -541,7 +541,7 @@ void HU_DrawStats(void)
 
     // display the kills/items/secrets each frame, if optioned
     if(gamestate == GS_LEVEL && automapactive && !menuactive)
-        if(!am_overlay || (am_overlay && screenSize > 6))
+        if(!am_overlay || screenSize > 6)
             HUlib_drawTextLine(&w_monsec, false);
 }
 
@@ -601,7 +601,7 @@ void HU_DrawHUD(void)
     dboolean            gamepaused = (menuactive || paused /*|| consoleactive*/);
     int                 currenttime = I_GetTimeMS();
 
-    if (increditscreen)
+    if (inhelpscreens)
         return;
 
     if (d_translucency)
@@ -836,20 +836,13 @@ void HU_DrawHUD(void)
 
 void HU_Drawer(void)
 {
-    if(!automapactive && !demoplayback && crosshair == 1 && !increditscreen)
+    if(!automapactive && !demoplayback && crosshair == 1 && !inhelpscreens)
     {
         if(screenSize < 8)
             V_DrawPatch(158, 82, 0, W_CacheLumpName("XHAIR", PU_CACHE));
         else
             V_DrawPatch(158, 98, 0, W_CacheLumpName("XHAIR", PU_CACHE));
     }
-
-    // [crispy] translucent messages for translucent HUD
-    if  (d_translucency && screenblocks > TRANSLUCENT_HUD &&
-            (!automapactive || am_overlay))
-        dp_translucent = true;
-
-    V_ClearDPTranslation();
 
     if(beta_style)
     {
@@ -882,7 +875,7 @@ void HU_Drawer(void)
               ))) ||
               (show_authors && nerve_pwad) || (show_authors && master_pwad))))
         {
-            if(!modifiedgame || (modifiedgame && nerve_pwad))
+            if(!modifiedgame || nerve_pwad)
             {
                 HUlib_drawTextLine(&w_author_title, false);
                 HUlib_drawTextLine(&w_authors, false);

@@ -101,9 +101,6 @@ static char *ExecReadOutput(char **argv)
         {
             result = realloc(result, result_len + bytes + 1);
 
-            if (!result)
-                free(result);
-
             memcpy(result + result_len, buf, bytes);
             result_len += bytes;
             result[result_len] = '\0';
@@ -145,6 +142,7 @@ static char *ExecReadOutput(char **argv)
 //     TXT_UpdateScreen can be run in the background).
 //   * On Windows XP the program exits/crashes when the dialog is
 //     closed.
+/*
 #if defined(_WIN32)
 
 int TXT_CanSelectFiles(void)
@@ -485,7 +483,7 @@ char *TXT_SelectFile(char *window_title, char **extensions)
 }
 
 #else
-
+*/
 // Linux version: invoke the Zenity command line program to pop up a
 // dialog box. This avoids adding Gtk+ as a compile dependency.
 
@@ -570,7 +568,7 @@ char *TXT_SelectFile(char *window_title, char **extensions)
     return result;
 }
 
-#endif
+//#endif
 
 static void TXT_FileSelectSizeCalc(TXT_UNCAST_ARG(fileselect))
 {

@@ -134,9 +134,7 @@ dboolean M_WriteFile(char *name, void *source, int length)
 //
 // M_ReadFile
 //
-// [nitr8] UNUSED
-//
-/*
+
 int M_ReadFile(char *name, byte **buffer)
 {
     FILE *handle;
@@ -165,7 +163,6 @@ int M_ReadFile(char *name, byte **buffer)
     *buffer = buf;
     return length;
 }
-*/
 
 // Returns the path to a temporary file of the given name, stored
 // inside the system temporary directory.

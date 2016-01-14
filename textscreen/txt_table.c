@@ -17,6 +17,7 @@
 #include <string.h>
 
 #include "doomkeys.h"
+#include "m_fixed.h"
 
 #include "txt_desktop.h"
 #include "txt_gui.h"
@@ -1214,7 +1215,7 @@ int TXT_PageTable(TXT_UNCAST_ARG(table), int pagex, int pagey)
 
                 // ...but is it far enough away?
 
-                if (distance >= abs(pagey))
+                if (distance >= ABS(pagey))
                 {
                     break;
                 }

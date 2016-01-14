@@ -26,13 +26,13 @@
 #include "txt_main.h"
 #include "txt_separator.h"
 #include "txt_window.h"
-
+/*
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <shellapi.h>
 #endif
-
+*/
 void TXT_SetWindowAction(txt_window_t *window,
                          txt_horiz_align_t position, 
                          txt_window_action_t *action)
@@ -511,7 +511,7 @@ void TXT_SetWindowHelpURL(txt_window_t *window, char *help_url)
 {
     window->help_url = help_url;
 }
-
+/*
 #ifdef _WIN32
 
 void TXT_OpenURL(char *url)
@@ -520,7 +520,7 @@ void TXT_OpenURL(char *url)
 }
 
 #else
-
+*/
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-result"
 
@@ -531,10 +531,11 @@ void TXT_OpenURL(char *url)
 
     cmd_len = strlen(url) + 30;
     cmd = malloc(cmd_len);
-
+/*
 #if defined(__MACOSX__)
     TXT_snprintf(cmd, cmd_len, "open \"%s\"", url);
 #else
+*/
     // The Unix situation sucks as usual, but the closest thing to a
     // standard that exists is the xdg-utils package.
     if (system("xdg-open --version 2>/dev/null") != 0)
@@ -549,13 +550,13 @@ void TXT_OpenURL(char *url)
     }
 
     TXT_snprintf(cmd, cmd_len, "xdg-open \"%s\"", url);
-#endif
+//#endif
 
     system(cmd);
     free(cmd);
 }
 
-#endif /* #ifndef _WIN32 */
+//#endif /* #ifndef _WIN32 */
 
 void TXT_OpenWindowHelpURL(txt_window_t *window)
 {

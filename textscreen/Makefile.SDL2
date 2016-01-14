@@ -326,7 +326,7 @@ AM_CFLAGS = -I$(top_srcdir)/src
 CTAGS_ARGS = -I TXT_UNCAST_ARG+
 
 # build this directory before the examples directory.
-SUBDIRS = . examples
+SUBDIRS = . #examples
 noinst_LIBRARIES = libtextscreen.a
 EXTRA_DIST = Doxyfile
 libtextscreen_a_SOURCES = \

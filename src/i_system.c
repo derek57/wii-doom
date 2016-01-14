@@ -40,13 +40,7 @@
 #include <unistd.h>
 
 #include "c_io.h"
-
-#ifdef WII
-#include "../wii/config.h"
-#else
 #include "config.h"
-#endif
-
 #include "d_deh.h"
 
 #include "doom/doomdef.h"
@@ -480,7 +474,7 @@ void I_Error (char *error, ...)
 
     // abort();
 #ifdef SDL2
-    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Wii-DOOM", msgbuf, NULL);
+    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, PACKAGE_NAME, msgbuf, NULL);
 #endif
     SDL_Quit();
 

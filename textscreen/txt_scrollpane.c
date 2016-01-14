@@ -18,6 +18,7 @@
 #include <string.h>
 #include <math.h>
 
+#include "m_misc.h"
 #include "txt_scrollpane.h"
 #include "txt_gui.h"
 #include "txt_io.h"

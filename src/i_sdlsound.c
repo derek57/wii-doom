@@ -20,11 +20,7 @@
 
 #include <assert.h>
 
-#ifdef WII
-#include "../config.h"
-#else
 #include "config.h"
-#endif
 
 #ifdef SDL2
 #include <SDL2/SDL.h>
@@ -442,6 +438,7 @@ static dboolean ExpandSoundData_SRC(sfxinfo_t *sfxinfo,
 
     // Do the sound conversion
 
+    // FIXME: Variable 'retn' is assigned a value that is never used.
     retn = src_simple(&src_data, SRC_ConversionMode(), 1);
     assert(retn == 0);
 

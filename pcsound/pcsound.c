@@ -21,12 +21,7 @@
 
 #include "../src/c_io.h"
 
-#ifdef WII
-#include "../wii/config.h"
-#else
 #include "config.h"
-#endif
-
 #include "pcsound.h"
 #include "pcsound_internal.h"
 
@@ -37,11 +32,11 @@
 #ifdef HAVE_DEV_SPEAKER_SPEAKER_H
 #define HAVE_BSD_SPEAKER
 #endif
-
+/*
 #ifdef _WIN32
 extern pcsound_driver_t pcsound_win32_driver;
 #endif
-
+*/
 #ifdef HAVE_BSD_SPEAKER
 extern pcsound_driver_t pcsound_bsd_driver;
 #endif
@@ -64,9 +59,11 @@ static pcsound_driver_t *drivers[] =
 #ifdef HAVE_BSD_SPEAKER
     &pcsound_bsd_driver,
 #endif
+/*
 #ifdef _WIN32
     &pcsound_win32_driver,
 #endif
+*/
     &pcsound_sdl_driver,
     NULL,
 };

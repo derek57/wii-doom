@@ -32,14 +32,8 @@
 
 #include "../src/c_io.h"
 
-#ifdef WII
-#include "../wii/config.h"
-#else
 #include "config.h"
-#endif
-
 #include "dbopl.h"
-
 #include "opl.h"
 #include "opl_internal.h"
 #include "opl_queue.h"

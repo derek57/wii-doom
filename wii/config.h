@@ -44,7 +44,7 @@
 #define PACKAGE_BUGREPORT "fraggle@gmail.com"
 
 /* Define to the full name of this package. */
-#define PACKAGE_NAME "Chocolate Doom"
+#define PACKAGE_NAME "Wii-DOOM"
 
 /* Define to the full name and version of this package. */
 #define PACKAGE_STRING "Chocolate PC- & Wii-DOOM v2.2.0 (Release 1)"

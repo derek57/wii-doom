@@ -281,7 +281,6 @@ static int *weapon_keys[] = {
 // Set to -1 or +1 to switch to the previous or next weapon.
 
 static int next_weapon = 0;
-#endif
 
 // Used for prev/next weapon keys.
 
@@ -300,6 +299,7 @@ static const struct
     { wp_plasma,          wp_plasma },
     { wp_bfg,             wp_bfg }
 };
+#endif
 
 extern char     *mapnumandtitle;
 
@@ -2752,7 +2752,7 @@ G_InitNew
     if (map < 1)
         map = 1;
 
-    if (fsize != 12538385 || (fsize == 12538385 && gameepisode > 1))
+    if (fsize != 12538385 || gameepisode > 1)
     {
         if (map > 9 && gamemode != commercial && !map_flag)
             map = 9;

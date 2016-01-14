@@ -148,14 +148,13 @@ void TXT_DrawDesktopBackground(const char *title)
 void TXT_DrawShadow(int x, int y, int w, int h)
 {
     unsigned char *screendata;
-    unsigned char *p;
     int x1, y1;
 
     screendata = TXT_GetScreenData();
 
     for (y1=y; y1<y+h; ++y1)
     {
-        p = screendata + (y1 * TXT_SCREEN_W + x) * 2;
+        unsigned char *p = screendata + (y1 * TXT_SCREEN_W + x) * 2;
 
         for (x1=x; x1<x+w; ++x1)
         {

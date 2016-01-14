@@ -69,7 +69,7 @@ static void AddIWADDir(char *dir)
 // of installed IWAD files.  The registry is inspected to find special
 // keys installed by the Windows installers for various CD versions
 // of Doom.  From these keys we can deduce where to find an IWAD.
-
+/*
 #if defined(_WIN32) && !defined(_WIN32_WCE)
 
 #define WIN32_LEAN_AND_MEAN
@@ -396,7 +396,7 @@ static void CheckDOSDefaults(void)
 }
 
 #endif
-
+*/
 // Returns true if the specified path is a path to a file
 // of the specified name.
 
@@ -640,7 +640,7 @@ static void BuildIWADDirList(void)
     {
         AddIWADPath(env, "");
     }
-
+/*
 #ifdef _WIN32
 
     // Search the registry and find where IWADs have been installed.
@@ -655,8 +655,9 @@ static void BuildIWADDirList(void)
     CheckSteamGUSPatches();
 
 #else
+*/
     AddXdgDirs();
-#endif
+//#endif
 
     // Don't run this function again.
 

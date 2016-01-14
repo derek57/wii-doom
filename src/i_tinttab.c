@@ -42,6 +42,7 @@
 #include "i_scale.h"
 #include "i_tinttab.h"
 #include "m_fixed.h"
+#include "v_trans.h"
 #include "w_wad.h"
 #include "z_zone.h"
 

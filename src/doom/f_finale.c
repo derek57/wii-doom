@@ -823,38 +823,32 @@ F_DrawPatchCol
   patch_t*      patch,
   int           col )
 {
-    column_t*   column;
-    byte*       source;
-    byte*       dest;
-    byte*       desttop;
-    int         f;     // CHANGED FOR HIRES
-
-    column = (column_t *)((byte *)patch + LONG(patch->columnofs[col]));
-//    desttop = I_VideoBuffer + x;
-    desttop = screens[scrn] + x;
+    column_t*   column = (column_t *)((byte *)patch + LONG(patch->columnofs[col]));
+    byte*       desttop = screens[scrn] + x;
+    int         f;                                           // CHANGED FOR HIRES
 
     // step through the posts in a column
     while (column->topdelta != 0xff )
     {
         int count = column->length;
 
-        for (f = 0; f <= hires; f++) // ADDED FOR HIRES
-        {                            // ADDED FOR HIRES
-            source = (byte *)column + 3;
-            dest = desttop + column->topdelta*
+        for (f = 0; f <= hires; f++)                         // ADDED FOR HIRES
+        {                                                    // ADDED FOR HIRES
+            byte* source = (byte *)column + 3;
+            byte* dest = desttop + column->topdelta*
                    (SCREENWIDTH << hires) + (x * hires) + f; // CHANGED FOR HIRES
                 
             while (count--)
             {
-                if (hires)           // ADDED FOR HIRES
-                {                    // ADDED FOR HIRES
-                    *dest = *source; // ADDED FOR HIRES
-                    dest += SCREENWIDTH; // ADDED FOR HIRES
-                }                    // ADDED FOR HIRES
+                if (hires)                                   // ADDED FOR HIRES
+                {                                            // ADDED FOR HIRES
+                    *dest = *source;                         // ADDED FOR HIRES
+                    dest += SCREENWIDTH;                     // ADDED FOR HIRES
+                }                                            // ADDED FOR HIRES
                 *dest = *source++;
                 dest += SCREENWIDTH;
             }
-        }                            // ADDED FOR HIRES
+        }                                                    // ADDED FOR HIRES
         column = (column_t *)(  (byte *)column + column->length + 4 );
     }
 }

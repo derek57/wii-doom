@@ -168,6 +168,7 @@ void A_SetCounter();
 void A_CounterSwitch();
 void A_FadeOut();
 void A_CounterJump();
+void A_EjectCasing();
 
 state_t states[NUMSTATES] =
 {
@@ -405,7 +406,7 @@ state_t states[NUMSTATES] =
     { SPR_POSS,  3,                                4,               A_Chase,           S_POSS_RUN1        }, // S_POSS_RUN8
     { SPR_POSS,  4,                               10,               A_FaceTarget,      S_POSS_ATK2        }, // S_POSS_ATK1
     { SPR_POSS,  5 | FF_FULLBRIGHT,                8,               A_PosAttack,       S_POSS_ATK3        }, // S_POSS_ATK2
-    { SPR_POSS,  4,                                8,               NULL,              S_POSS_RUN1        }, // S_POSS_ATK3
+    { SPR_POSS,  4,                                8,               A_EjectCasing,     S_POSS_RUN1        }, // S_POSS_ATK3
     { SPR_POSS,  6,                                3,               NULL,              S_POSS_PAIN2       }, // S_POSS_PAIN
     { SPR_POSS,  6,                                3,               A_Pain,            S_POSS_RUN1        }, // S_POSS_PAIN2
     { SPR_POSS,  7,                                5,               NULL,              S_POSS_DIE2        }, // S_POSS_DIE1
@@ -442,7 +443,7 @@ state_t states[NUMSTATES] =
     { SPR_SPOS,  3,                                3,               A_Chase,           S_SPOS_RUN1        }, // S_SPOS_RUN8
     { SPR_SPOS,  4,                               10,               A_FaceTarget,      S_SPOS_ATK2        }, // S_SPOS_ATK1
     { SPR_SPOS,  5 | FF_FULLBRIGHT,               10,               A_SPosAttack,      S_SPOS_ATK3        }, // S_SPOS_ATK2
-    { SPR_SPOS,  4,                               10,               NULL,              S_SPOS_RUN1        }, // S_SPOS_ATK3
+    { SPR_SPOS,  4,                               10,               A_EjectCasing,     S_SPOS_RUN1        }, // S_SPOS_ATK3
     { SPR_SPOS,  6,                                3,               NULL,              S_SPOS_PAIN2       }, // S_SPOS_PAIN
     { SPR_SPOS,  6,                                3,               A_Pain,            S_SPOS_RUN1        }, // S_SPOS_PAIN2
     { SPR_SPOS,  7,                                5,               NULL,              S_SPOS_DIE2        }, // S_SPOS_DIE1
@@ -8842,9 +8843,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] =
         /* deathstate           */ S_NULL,
         /* xdeathstate          */ S_NULL,
         /* deathsound           */ sfx_None,
-        /* speed                */ 4,
-        /* radius               */ 3,
-        /* height               */ 3,
+        /* speed                */ 4 * FRACUNIT,
+        /* radius               */ 3 * FRACUNIT,
+        /* height               */ 3 * FRACUNIT,
         /* projectilepassheight */ 0,
         /* mass                 */ 120,
         /* damage               */ 0,
@@ -8878,9 +8879,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] =
         /* deathstate           */ S_NULL,
         /* xdeathstate          */ S_NULL,
         /* deathsound           */ sfx_None,
-        /* speed                */ 4,
-        /* radius               */ 3,
-        /* height               */ 3,
+        /* speed                */ 4 * FRACUNIT,
+        /* radius               */ 3 * FRACUNIT,
+        /* height               */ 3 * FRACUNIT,
         /* projectilepassheight */ 0,
         /* mass                 */ 120,
         /* damage               */ 0,
@@ -8914,9 +8915,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] =
         /* deathstate           */ S_NULL,
         /* xdeathstate          */ S_NULL,
         /* deathsound           */ sfx_None,
-        /* speed                */ 4,
-        /* radius               */ 3,
-        /* height               */ 3,
+        /* speed                */ 4 * FRACUNIT,
+        /* radius               */ 3 * FRACUNIT,
+        /* height               */ 3 * FRACUNIT,
         /* projectilepassheight */ 0,
         /* mass                 */ 120,
         /* damage               */ 0,

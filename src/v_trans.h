@@ -49,6 +49,7 @@ typedef enum
     CRXMAX
 } crx_t;
 
+int FindNearestColor(byte *palette, int r, int g, int b);
 byte V_Colorize (byte *playpal, int cr, byte source, dboolean keepgray109);
 
 extern byte *crx[CRXMAX];

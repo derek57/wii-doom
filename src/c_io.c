@@ -43,12 +43,19 @@
 #include <freetype/freetype.h>
 #include <mpeg/smpeg.h>
 #include <jpeglib.h>
+
+#ifdef HAVE_STDLIB_H
+#undef HAVE_STDLIB_H
+#endif
+
 #include <ogc/libversion.h>
 #include <png.h>
 #endif
 
 #include <time.h>
+
 #include "c_io.h"
+#include "config.h"
 #include "d_deh.h"
 #include "d_event.h"
 #include "doomfeatures.h"
@@ -695,8 +702,8 @@ void C_Drawer(void)
         C_DrawBackground(consoleheight, 0);
 
         // draw branding
-        C_DrawConsoleText(SCREENWIDTH - C_TextWidth("Wii-DOOM") - CONSOLETEXTX + 1,
-            CONSOLEHEIGHT - 10, "Wii-DOOM", graycolor, NOBACKGROUNDCOLOR, tinttab25, notabs);
+        C_DrawConsoleText(SCREENWIDTH - C_TextWidth(PACKAGE_NAME) - CONSOLETEXTX + 1,
+            CONSOLEHEIGHT - 10, PACKAGE_NAME, graycolor, NOBACKGROUNDCOLOR, tinttab25, notabs);
 
         // draw console text
         if (outputhistory == -1)
