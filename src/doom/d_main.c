@@ -1665,6 +1665,7 @@ void D_DoomMain (void)
         d_centerweapon = false;
         d_ejectcasings = false;
         d_statusmap = true;
+        show_title = true;
 
         beta_style = true;
     }
