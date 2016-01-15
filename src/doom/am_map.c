@@ -1660,9 +1660,13 @@ void AM_DrawWorldTimer(void)
     sprintf(timeBuffer, "%.2d : %.2d : %.2d", hours, minutes, seconds);
 
     if(gamestate == GS_LEVEL && automapactive)
-//        if(!am_overlay || (am_overlay && screenSize > 6))
-        if(!am_overlay || screenSize > 6)
-            M_WriteText(240, 8, timeBuffer);
+    {
+        if((!am_overlay || screenSize > 6) && !d_statusmap)
+        {
+            int x = ORIGWIDTH/2 - M_StringWidth(timeBuffer) / 2;
+            M_WriteText(x, 192, timeBuffer);
+        }
+    }
 
     if (days)
     {

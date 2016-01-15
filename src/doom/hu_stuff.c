@@ -80,8 +80,17 @@
 #define HU_INPUTWIDTH   64
 #define HU_INPUTHEIGHT  1
 
-#define HU_MONSECX       -16
-#define HU_MONSECY      (25 - SHORT(hu_font[0]->height))
+#define HU_STATSX       238
+#define HU_STATSY       -18
+
+#define HU_MONSECX1     HU_STATSX + 0
+#define HU_MONSECX2     HU_STATSX + 30
+#define HU_MONSECX3     HU_STATSX + 40
+#define HU_MONSECX4     HU_STATSX + 70
+
+#define HU_MONSTERSY    HU_STATSY + HU_TITLEY - 20 + (25 - SHORT(hu_font[0]->height))
+#define HU_ITEMSY       HU_STATSY + HU_TITLEY - 20 + (35 - SHORT(hu_font[0]->height))
+#define HU_SECRETSY     HU_STATSY + HU_TITLEY - 20 + (45 - SHORT(hu_font[0]->height))
 
 #define AM              "American McGee"
 #define JA              "John Anderson"
@@ -93,11 +102,11 @@
 #define SP              "Sandy Petersen"
 #define TH              "Tom Hall"
 #define TW              "Tim Willits"
-#define AMSP            AM" and "SP
-#define JRTH            JR" and "TH
-#define SPTH            SP" and "TH
+#define AMSP            AM" & "SP
+#define JRTH            JR" & "TH
+#define SPTH            SP" & "TH
 
-char *authors[][6] =
+char *authors[][3] =
 {
     /*        ULT. | DOOM2 | NERVE
               DOOM |  BFG  | PACK.
@@ -162,7 +171,21 @@ static player_t*        plr;
 static hu_textline_t    w_title;
 static hu_textline_t    w_author_title;
 static hu_textline_t    w_authors;
-static hu_textline_t    w_monsec;              // ADDED FOR PSP-STATS
+
+static hu_textline_t    w_monsters1;              // ADDED FOR PSP-STATS
+static hu_textline_t    w_monsters2;              // ADDED FOR PSP-STATS
+static hu_textline_t    w_monsters3;              // ADDED FOR PSP-STATS
+static hu_textline_t    w_monsters4;              // ADDED FOR PSP-STATS
+
+static hu_textline_t    w_items1;                 // ADDED FOR PSP-STATS
+static hu_textline_t    w_items2;                 // ADDED FOR PSP-STATS
+static hu_textline_t    w_items3;                 // ADDED FOR PSP-STATS
+static hu_textline_t    w_items4;                 // ADDED FOR PSP-STATS
+
+static hu_textline_t    w_secrets1;               // ADDED FOR PSP-STATS
+static hu_textline_t    w_secrets2;               // ADDED FOR PSP-STATS
+static hu_textline_t    w_secrets3;               // ADDED FOR PSP-STATS
+static hu_textline_t    w_secrets4;               // ADDED FOR PSP-STATS
 
 //static hu_itext_t       w_inputbuffer[MAXPLAYERS];
 
@@ -184,7 +207,20 @@ static int              message_counter;
 static int              secret_counter;
 static int              hudnumoffset;
 
-static char             hud_monsecstr[80];     // ADDED FOR PSP-STATS
+static char             monstersstr1[80];    // ADDED FOR PSP-STATS
+static char             monstersstr2[80];    // ADDED FOR PSP-STATS
+static char             monstersstr3[80];    // ADDED FOR PSP-STATS
+static char             monstersstr4[80];    // ADDED FOR PSP-STATS
+
+static char             itemsstr1[80];       // ADDED FOR PSP-STATS
+static char             itemsstr2[80];       // ADDED FOR PSP-STATS
+static char             itemsstr3[80];       // ADDED FOR PSP-STATS
+static char             itemsstr4[80];       // ADDED FOR PSP-STATS
+
+static char             secretsstr1[80];     // ADDED FOR PSP-STATS
+static char             secretsstr2[80];     // ADDED FOR PSP-STATS
+static char             secretsstr3[80];     // ADDED FOR PSP-STATS
+static char             secretsstr4[80];     // ADDED FOR PSP-STATS
 
 char                    *mapnumandtitle;
 
@@ -272,7 +308,22 @@ void HU_Start(void)
 {
 //    int       i;
     char*     s = "Unknown level";
+
     char*     t;
+    char*     y;
+    char*     z;
+    char*     l;
+
+    char*     q;
+    char*     r;
+    char*     w;
+    char*     m;
+
+    char*     o;
+    char*     p;
+    char*     x;
+    char*     n;
+
     char*     u;
     char*     v = "AUTHOR(S):";
 
@@ -319,10 +370,23 @@ void HU_Start(void)
                     HU_FONTSTART, &secret_on);
 
     // create the map title widget
-    HUlib_initTextLine(&w_title,
-                       HU_TITLEX, HU_TITLEY,
-                       hu_font,
-                       HU_FONTSTART);
+    if (show_title)
+    {
+        if (d_statusmap)
+        {
+            HUlib_initTextLine(&w_title,
+                               HU_TITLEX, HU_TITLEY,
+                               hu_font,
+                               HU_FONTSTART);
+        }
+        else
+        {
+            HUlib_initTextLine(&w_title,
+                               HU_TITLEX, HU_TITLEY + 32,
+                               hu_font,
+                               HU_FONTSTART);
+        }
+    }
 
     if ((show_authors && gameversion != exe_chex && gameversion != exe_hacx
 #ifdef WII
@@ -331,21 +395,156 @@ void HU_Start(void)
          ) ||
         (show_authors && nerve_pwad) || (show_authors && master_pwad))
     {
-        HUlib_initTextLine(&w_author_title,
-                           HU_TITLEX, HU_TITLEY - 10,
+        if (d_statusmap)
+        {
+            HUlib_initTextLine(&w_author_title,
+                               HU_TITLEX, HU_TITLEY - 20,
+                               hu_font,
+                               HU_FONTSTART);
+
+            HUlib_initTextLine(&w_authors,
+                               HU_TITLEX, HU_TITLEY - 10,
+                               hu_font,
+                               HU_FONTSTART);
+        }
+        else
+        {
+            HUlib_initTextLine(&w_author_title,
+                               HU_TITLEX, HU_TITLEY + 12,
+                               hu_font,
+                               HU_FONTSTART);
+
+            HUlib_initTextLine(&w_authors,
+                               HU_TITLEX, HU_TITLEY + 22,
+                               hu_font,
+                               HU_FONTSTART);
+        }
+    }
+
+    if (d_statusmap)
+    {
+        HUlib_initTextLine(&w_monsters1,
+                           HU_MONSECX1, HU_MONSTERSY,
                            hu_font,
                            HU_FONTSTART);
 
-        HUlib_initTextLine(&w_authors,
-                           HU_TITLEX + 80, HU_TITLEY - 10,
+        HUlib_initTextLine(&w_monsters2,
+                           HU_MONSECX2, HU_MONSTERSY,
+                           hu_font,
+                           HU_FONTSTART);
+
+        HUlib_initTextLine(&w_monsters3,
+                           HU_MONSECX3, HU_MONSTERSY,
+                           hu_font,
+                           HU_FONTSTART);
+
+        HUlib_initTextLine(&w_monsters4,
+                           HU_MONSECX4, HU_MONSTERSY,
+                           hu_font,
+                           HU_FONTSTART);
+
+        HUlib_initTextLine(&w_items1,
+                           HU_MONSECX1, HU_ITEMSY,
+                           hu_font,
+                           HU_FONTSTART);
+
+        HUlib_initTextLine(&w_items2,
+                           HU_MONSECX2, HU_ITEMSY,
+                           hu_font,
+                           HU_FONTSTART);
+
+        HUlib_initTextLine(&w_items3,
+                           HU_MONSECX3, HU_ITEMSY,
+                           hu_font,
+                           HU_FONTSTART);
+
+        HUlib_initTextLine(&w_items4,
+                           HU_MONSECX4, HU_ITEMSY,
+                           hu_font,
+                           HU_FONTSTART);
+
+        HUlib_initTextLine(&w_secrets1,
+                           HU_MONSECX1, HU_SECRETSY,
+                           hu_font,
+                           HU_FONTSTART);
+
+        HUlib_initTextLine(&w_secrets2,
+                           HU_MONSECX2, HU_SECRETSY,
+                           hu_font,
+                           HU_FONTSTART);
+
+        HUlib_initTextLine(&w_secrets3,
+                           HU_MONSECX3, HU_SECRETSY,
+                           hu_font,
+                           HU_FONTSTART);
+
+        HUlib_initTextLine(&w_secrets4,
+                           HU_MONSECX4, HU_SECRETSY,
                            hu_font,
                            HU_FONTSTART);
     }
+    else
+    {
+        HUlib_initTextLine(&w_monsters1,
+                           HU_MONSECX1, HU_MONSTERSY + 32,
+                           hu_font,
+                           HU_FONTSTART);
 
-    HUlib_initTextLine(&w_monsec,
-                       HU_MONSECX, HU_MONSECY,
-                       hu_font,
-                       HU_FONTSTART);
+        HUlib_initTextLine(&w_monsters2,
+                           HU_MONSECX2, HU_MONSTERSY + 32,
+                           hu_font,
+                           HU_FONTSTART);
+
+        HUlib_initTextLine(&w_monsters3,
+                           HU_MONSECX3, HU_MONSTERSY + 32,
+                           hu_font,
+                           HU_FONTSTART);
+
+        HUlib_initTextLine(&w_monsters4,
+                           HU_MONSECX4, HU_MONSTERSY + 32,
+                           hu_font,
+                           HU_FONTSTART);
+
+        HUlib_initTextLine(&w_items1,
+                           HU_MONSECX1, HU_ITEMSY + 32,
+                           hu_font,
+                           HU_FONTSTART);
+
+        HUlib_initTextLine(&w_items2,
+                           HU_MONSECX2, HU_ITEMSY + 32,
+                           hu_font,
+                           HU_FONTSTART);
+
+        HUlib_initTextLine(&w_items3,
+                           HU_MONSECX3, HU_ITEMSY + 32,
+                           hu_font,
+                           HU_FONTSTART);
+
+        HUlib_initTextLine(&w_items4,
+                           HU_MONSECX4, HU_ITEMSY + 32,
+                           hu_font,
+                           HU_FONTSTART);
+
+        HUlib_initTextLine(&w_secrets1,
+                           HU_MONSECX1, HU_SECRETSY + 32,
+                           hu_font,
+                           HU_FONTSTART);
+
+        HUlib_initTextLine(&w_secrets2,
+                           HU_MONSECX2, HU_SECRETSY + 32,
+                           hu_font,
+                           HU_FONTSTART);
+
+        HUlib_initTextLine(&w_secrets3,
+                           HU_MONSECX3, HU_SECRETSY + 32,
+                           hu_font,
+                           HU_FONTSTART);
+
+        HUlib_initTextLine(&w_secrets4,
+                           HU_MONSECX4, HU_SECRETSY + 32,
+                           hu_font,
+                           HU_FONTSTART);
+    }
 
 //    if(!modifiedgame)
     {
@@ -429,21 +628,67 @@ void HU_Start(void)
 
     // dehacked substitution to get modified level name
 
-    t = hud_monsecstr;
+    t = monstersstr1;
+    y = monstersstr2;
+    z = monstersstr3;
+    l = monstersstr4;
 
-    if((fsize != 12538385 &&
+    q = itemsstr1;
+    r = itemsstr2;
+    w = itemsstr3;
+    m = itemsstr4;
+
+    o = secretsstr1;
+    p = secretsstr2;
+    x = secretsstr3;
+    n = secretsstr4;
+
+    if (((fsize != 12538385 &&
         fsize != 14691821 &&
         fsize != 14677988 &&
         fsize != 14683458) ||
         (fsize == 12538385 && gamemap != 10) ||
-        ((fsize == 14683458 || fsize == 14677988 || fsize == 14691821) && gamemap != 33))
+        ((fsize == 14683458 || fsize == 14677988 || fsize == 14691821) && gamemap != 33)) && show_title)
     {
         while (*s)
             HUlib_addCharToTextLine(&w_title, *(s++));
     }
 
     while (*t)
-        HUlib_addCharToTextLine(&w_monsec, *(t++));
+        HUlib_addCharToTextLine(&w_monsters1, *(t++));
+
+    while (*y)
+        HUlib_addCharToTextLine(&w_monsters2, *(y++));
+
+    while (*z)
+        HUlib_addCharToTextLine(&w_monsters3, *(z++));
+
+    while (*l)
+        HUlib_addCharToTextLine(&w_monsters4, *(l++));
+
+    while (*q)
+        HUlib_addCharToTextLine(&w_items1, *(q++));
+
+    while (*r)
+        HUlib_addCharToTextLine(&w_items2, *(r++));
+
+    while (*w)
+        HUlib_addCharToTextLine(&w_items3, *(w++));
+
+    while (*m)
+        HUlib_addCharToTextLine(&w_items4, *(m++));
+
+    while (*o)
+        HUlib_addCharToTextLine(&w_secrets1, *(o++));
+
+    while (*p)
+        HUlib_addCharToTextLine(&w_secrets2, *(p++));
+
+    while (*x)
+        HUlib_addCharToTextLine(&w_secrets3, *(x++));
+
+    while (*n)
+        HUlib_addCharToTextLine(&w_secrets4, *(n++));
 
     if ((show_authors && gameversion != exe_chex && gameversion != exe_hacx
 #ifdef WII
@@ -513,36 +758,128 @@ static void HU_DemoProgressBar (void)                // FIXME: BUGGY (crashes)
 */
 void HU_DrawStats(void)
 {
+    const char *r;
+    const char *s;
     const char *t;
-/*
-    M_StringCopy(hud_monsecstr, "", sizeof(hud_monsecstr));
-    t = hud_monsecstr;
-*/
+    const char *o;
+
+    const char *u;
+    const char *v;
+    const char *w;
+    const char *p;
+
+    const char *x;
+    const char *y;
+    const char *z;
+    const char *q;
+
     // clear the internal widget text buffer
-    HUlib_clearTextLine(&w_monsec);
+    HUlib_clearTextLine(&w_monsters1);
+    HUlib_clearTextLine(&w_monsters2);
+    HUlib_clearTextLine(&w_monsters3);
+    HUlib_clearTextLine(&w_monsters4);
+
+    HUlib_clearTextLine(&w_items1);
+    HUlib_clearTextLine(&w_items2);
+    HUlib_clearTextLine(&w_items3);
+    HUlib_clearTextLine(&w_items4);
+
+    HUlib_clearTextLine(&w_secrets1);
+    HUlib_clearTextLine(&w_secrets2);
+    HUlib_clearTextLine(&w_secrets3);
+    HUlib_clearTextLine(&w_secrets4);
 
     //jff 3/26/98 use ESC not '\' for paths
     // build the init string with fixed colors
-    sprintf
-    (
-    hud_monsecstr,
-    " \x1b\x3 KILLS: %d/%d \x1b\x3 ITEMS: %d/%d \x1b\x3 SECRETS: %d/%d",
-    plr->killcount,totalkills,
-    plr->itemcount,totalitems,
-    plr->secretcount,totalsecret
-    );
+    sprintf(monstersstr1, "%d", plr->killcount);
+    sprintf(monstersstr2, "/");
+    sprintf(monstersstr3, "%d", totalkills);
+    sprintf(monstersstr4, "K.");
+
+    sprintf(itemsstr1, "%d", plr->itemcount);
+    sprintf(itemsstr2, "/");
+    sprintf(itemsstr3, "%d", totalitems);
+    sprintf(itemsstr4, "I.");
+
+    sprintf(secretsstr1, "%d", plr->secretcount);
+    sprintf(secretsstr2, "/");
+    sprintf(secretsstr3, "%d", totalsecret);
+    sprintf(secretsstr4, "S.");
 
     // transfer the init string to the widget
-    t = hud_monsecstr;
+    r = monstersstr1;
+    s = monstersstr2;
+    t = monstersstr3;
+    o = monstersstr4;
+
+    u = itemsstr1;
+    v = itemsstr2;
+    w = itemsstr3;
+    p = itemsstr4;
+
+    x = secretsstr1;
+    y = secretsstr2;
+    z = secretsstr3;
+    q = secretsstr4;
 
     //jff 2/17/98 initialize kills/items/secret widget
+    while (*r)
+        HUlib_addCharToTextLine(&w_monsters1, *(r++));
+
+    while (*s)
+        HUlib_addCharToTextLine(&w_monsters2, *(s++));
+
     while (*t)
-        HUlib_addCharToTextLine(&w_monsec, *(t++));
+        HUlib_addCharToTextLine(&w_monsters3, *(t++));
+
+    while (*o)
+        HUlib_addCharToTextLine(&w_monsters4, *(o++));
+
+    while (*u)
+        HUlib_addCharToTextLine(&w_items1, *(u++));
+
+    while (*v)
+        HUlib_addCharToTextLine(&w_items2, *(v++));
+
+    while (*w)
+        HUlib_addCharToTextLine(&w_items3, *(w++));
+
+    while (*p)
+        HUlib_addCharToTextLine(&w_items4, *(p++));
+
+    while (*x)
+        HUlib_addCharToTextLine(&w_secrets1, *(x++));
+
+    while (*y)
+        HUlib_addCharToTextLine(&w_secrets2, *(y++));
+
+    while (*z)
+        HUlib_addCharToTextLine(&w_secrets3, *(z++));
+
+    while (*q)
+        HUlib_addCharToTextLine(&w_secrets4, *(q++));
 
     // display the kills/items/secrets each frame, if optioned
     if(gamestate == GS_LEVEL && automapactive && !menuactive)
-        if(!am_overlay || screenSize > 6)
-            HUlib_drawTextLine(&w_monsec, false);
+    {
+        if((!am_overlay || screenSize > 6) && !d_statusmap)
+        {
+            HUlib_drawTextLine(&w_monsters1, false);
+            HUlib_drawTextLine(&w_monsters2, false);
+            HUlib_drawTextLine(&w_monsters3, false);
+            HUlib_drawTextLine(&w_monsters4, false);
+
+            HUlib_drawTextLine(&w_items1, false);
+            HUlib_drawTextLine(&w_items2, false);
+            HUlib_drawTextLine(&w_items3, false);
+            HUlib_drawTextLine(&w_items4, false);
+
+            HUlib_drawTextLine(&w_secrets1, false);
+            HUlib_drawTextLine(&w_secrets2, false);
+            HUlib_drawTextLine(&w_secrets3, false);
+            HUlib_drawTextLine(&w_secrets4, false);
+        }
+    }
 }
 
 static void DrawHUDNumber(int *x, int y, int scrn, int val, byte *tinttab,
@@ -601,7 +938,7 @@ void HU_DrawHUD(void)
     dboolean            gamepaused = (menuactive || paused /*|| consoleactive*/);
     int                 currenttime = I_GetTimeMS();
 
-    if (inhelpscreens)
+    if (inhelpscreens || (am_overlay && (show_authors || show_stats || show_title)))
         return;
 
     if (d_translucency)
@@ -864,9 +1201,6 @@ void HU_Drawer(void)
 
     if (automapactive && !menuactive)
     {
-        if(!beta_style)
-            HUlib_drawTextLine(&w_title, false);
-
         if (((!am_overlay ||
              ((am_overlay && screenSize > 6 && (show_authors 
 #ifdef WII
@@ -875,10 +1209,13 @@ void HU_Drawer(void)
               ))) ||
               (show_authors && nerve_pwad) || (show_authors && master_pwad))))
         {
-            if(!modifiedgame || nerve_pwad)
+            if((!modifiedgame || nerve_pwad) && !d_statusmap)
             {
                 HUlib_drawTextLine(&w_author_title, false);
                 HUlib_drawTextLine(&w_authors, false);
+
+                if(!beta_style && show_title)
+                    HUlib_drawTextLine(&w_title, false);
             }
         }
 

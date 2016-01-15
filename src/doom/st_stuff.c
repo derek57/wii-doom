@@ -1499,6 +1499,9 @@ void ST_drawWidgets(dboolean refresh)
 
 void ST_doRefresh(void)
 {
+    if (!d_statusmap && automapactive)
+        return;
+
     st_firsttime = false;
 
     // draw status bar background to off-screen buff

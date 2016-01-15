@@ -368,6 +368,8 @@ extern  dboolean         general_sound;
 extern  dboolean         display_ticker;
 extern  dboolean         d_centerweapon;
 extern  dboolean         d_ejectcasings;
+extern  dboolean         d_statusmap;
+extern  dboolean         show_title;
 /*
 extern  dboolean         nerve;
 extern  dboolean         chex;

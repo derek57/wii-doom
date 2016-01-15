@@ -127,6 +127,8 @@ dboolean         jumping = false;
 dboolean         general_sound = true;
 dboolean         d_centerweapon = false;
 dboolean         d_ejectcasings = false;
+dboolean         d_statusmap = true;
+dboolean         show_title = true;
 /*
 dboolean         nerve = false;
 dboolean         chex = false;

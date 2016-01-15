@@ -1910,7 +1910,6 @@ void R_DrawChar(int x, int y, int scrn, int num)
         byte *pic = NULL;
 
         int i;
-        int b;
         int c;
         int width;
         int height;
@@ -1927,7 +1926,7 @@ void R_DrawChar(int x, int y, int scrn, int num)
 
         for (i = 0; i < c; i++)
         {
-            b = draw_chars->pic[i];
+            int b = draw_chars->pic[i];
             draw_chars->pixels[0][i] = b;
         }
     }

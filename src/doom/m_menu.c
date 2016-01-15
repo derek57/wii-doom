@@ -1288,11 +1288,11 @@ int                        cheeting;
 int                        coordinates_info = 0;
 int                        version_info = 0;
 #ifdef WII
-int                        key_controls_start_in_cfg_at_pos = 103;
-int                        key_controls_end_in_cfg_at_pos = 117;
+int                        key_controls_start_in_cfg_at_pos = 105;
+int                        key_controls_end_in_cfg_at_pos = 119;
 #else
-int                        key_controls_start_in_cfg_at_pos = 102;
-int                        key_controls_end_in_cfg_at_pos = 118;
+int                        key_controls_start_in_cfg_at_pos = 104;
+int                        key_controls_end_in_cfg_at_pos = 120;
 #endif
 int                        tracknum = 1;
 int                        epi = 1;
@@ -1500,6 +1500,8 @@ void M_DisplayTicker(int choice);
 void M_Coordinates(int choice);
 void M_Timer(int choice);
 void M_Authors(int choice);
+void M_StatusMap(int choice);
+void M_MapName(int choice);
 void M_Version(int choice);
 void M_SoundInfo(int choice);
 void M_HUD(int choice);
@@ -1643,7 +1645,7 @@ void M_DrawScreen(void);
 void M_DrawKeyBindings(void);
 void M_DrawControls(void);
 void M_DrawSystem(void);
-void M_DrawGame(void);
+void M_DrawGame1(void);
 void M_DrawGame2(void);
 void M_DrawGame3(void);
 void M_DrawGame4(void);
@@ -2310,14 +2312,14 @@ enum
     game_mapgrid,
     game_maprotation,
     game_followmode,
-    game_statistics,
     game_overlay,
+    game_statusmap,
+    game_statistics,
     game_timer,
     game_authors,
-    game_messages,
+    game_maptitle,
     game_weapon,
     game_recoil,
-    game_thrust,
     game_respawn,
     game_fast,
     game_aiming,
@@ -2330,14 +2332,14 @@ menuitem_t GameMenu[]=
     {2,"AUTOMAP GRID",M_MapGrid,'g'},
     {2,"AUTOMAP ROTATION",M_MapRotation,'r'},
     {2,"AUTOMAP FOLLOW MODE",M_FollowMode,'f'},
+    {2,"AUTOMAP OVERLAY",M_AutomapOverlay,'o'},
+    {2,"AUTOMAP STATUS BAR",M_StatusMap,'m'},
     {2,"AUTOMAP STATISTICS",M_Statistics,'s'},
-    {2,"AUTOMAP OVERLAY",M_AutomapOverlay,'n'},
     {2,"AUTOMAP TIMER",M_Timer,'t'},
     {2,"AUTOMAP AUTHORS",M_Authors,'a'},
-    {2,"MESSAGES",M_ChangeMessages,'m'},
+    {2,"AUTOMAP MAP TITLE",M_MapName,'n'},
     {2,"WEAPON CHANGE",M_WeaponChange,'w'},
     {2,"WEAPON RECOIL",M_WeaponRecoil,'c'},
-    {2,"PLAYER THRUST",M_PlayerThrust,'p'},
     {2,"RESPAWN MONSTERS",M_RespawnMonsters,'i'},
     {2,"FAST MONSTERS",M_FastMonsters,'d'},
     {2,"",NULL,'0'},
@@ -2349,7 +2351,7 @@ menu_t  GameDef =
     game_end,
     &OptionsDef,
     GameMenu,
-    M_DrawGame,
+    M_DrawGame1,
     75,22,
     0
 };
@@ -2550,6 +2552,8 @@ enum
 {
     game6_centerweapon,
     game6_casings,
+    game6_messages,
+    game6_thrust,
 #ifdef WII
     game6_prbeta,
 #endif
@@ -2559,7 +2563,9 @@ enum
 menuitem_t GameMenu6[]=
 {
     {2,"Center Weapon when firing",M_CenterWeapon,'c'},
-    {2,"Eject Weapon Casings",M_EjectCasings,'e'}
+    {2,"Eject Weapon Casings",M_EjectCasings,'e'},
+    {2,"MESSAGES",M_ChangeMessages,'m'},
+    {2,"PLAYER THRUST",M_PlayerThrust,'p'}
 #ifdef WII
     ,
     {2,"PRE-RELEASE BETA MODE",M_Beta,'b'}
@@ -2864,14 +2870,10 @@ void M_DrawLoad(void)
 
     if(whichSkull == 1)
     {
-        int x;
-        int x2;
-        char *string;
-        char *string2;
-        string = "* INDICATES A SAVEGAME THAT WAS";
-        string2 = "CREATED USING AN OPTIONAL PWAD!";
-        x = ORIGWIDTH/2 - M_StringWidth(string) / 2;
-        x2 = ORIGWIDTH/2 - M_StringWidth(string2) / 2;
+        char *string = "* INDICATES A SAVEGAME THAT WAS";
+        char *string2 = "CREATED USING AN OPTIONAL PWAD!";
+        int x = ORIGWIDTH/2 - M_StringWidth(string) / 2;
+        int x2 = ORIGWIDTH/2 - M_StringWidth(string2) / 2;
         dp_translation = crx[CRX_GOLD];
         M_WriteText(x, LoadDef.y + 78, string);
         dp_translation = crx[CRX_GOLD];
@@ -2955,14 +2957,10 @@ void M_DrawSave(void)
 
     if(whichSkull == 1)
     {
-        int x;
-        int x2;
-        char *string;
-        char *string2;
-        string = "* INDICATES A SAVEGAME THAT WAS";
-        string2 = "CREATED USING AN OPTIONAL PWAD!";
-        x = ORIGWIDTH/2 - M_StringWidth(string) / 2;
-        x2 = ORIGWIDTH/2 - M_StringWidth(string2) / 2;
+        char *string = "* INDICATES A SAVEGAME THAT WAS";
+        char *string2 = "CREATED USING AN OPTIONAL PWAD!";
+        int x = ORIGWIDTH/2 - M_StringWidth(string) / 2;
+        int x2 = ORIGWIDTH/2 - M_StringWidth(string2) / 2;
         dp_translation = crx[CRX_GOLD];
         M_WriteText(x, SaveDef.y + 78, string);
         dp_translation = crx[CRX_GOLD];
@@ -4292,7 +4290,7 @@ void M_DrawScreen(void)
     }
 }
 
-void M_DrawGame(void)
+void M_DrawGame1(void)
 {
     M_DarkBackground(0);
 
@@ -4355,18 +4353,18 @@ void M_DrawGame(void)
         M_WriteText(GameDef.x + 153, GameDef.y + 18, "OFF");
     }
 
-    if(show_stats == 1)
+    if(overlay_trigger)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef.x + 161, GameDef.y + 28, "ON");
     }
-    else if (show_stats == 0)
+    else
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(GameDef.x + 153, GameDef.y + 28, "OFF");
     }
 
-    if(overlay_trigger)
+    if(d_statusmap)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef.x + 161, GameDef.y + 38, "ON");
@@ -4377,18 +4375,18 @@ void M_DrawGame(void)
         M_WriteText(GameDef.x + 153, GameDef.y + 38, "OFF");
     }
 
-    if(timer_info)
+    if(show_stats == 1)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef.x + 161, GameDef.y + 48, "ON");
     }
-    else
+    else if (show_stats == 0)
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(GameDef.x + 153, GameDef.y + 48, "OFF");
     }
 
-    if(show_authors)
+    if(timer_info)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef.x + 161, GameDef.y + 58, "ON");
@@ -4399,7 +4397,7 @@ void M_DrawGame(void)
         M_WriteText(GameDef.x + 153, GameDef.y + 58, "OFF");
     }
 
-    if(showMessages)
+    if(show_authors)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef.x + 161, GameDef.y + 68, "ON");
@@ -4410,29 +4408,29 @@ void M_DrawGame(void)
         M_WriteText(GameDef.x + 153, GameDef.y + 68, "OFF");
     }
 
-    if(use_vanilla_weapon_change == 1)
-    {
-        dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef.x + 145, GameDef.y + 78, "SLOW");
-    }
-    else if(use_vanilla_weapon_change == 0)
+    if(show_title)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef.x + 146, GameDef.y + 78, "FAST");
-    }
-
-    if(d_recoil)
-    {
-        dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef.x + 161, GameDef.y + 88, "ON");
+        M_WriteText(GameDef.x + 161, GameDef.y + 78, "ON");
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef.x + 153, GameDef.y + 88, "OFF");
+        M_WriteText(GameDef.x + 153, GameDef.y + 78, "OFF");
     }
 
-    if(d_thrust)
+    if(use_vanilla_weapon_change == 1)
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(GameDef.x + 145, GameDef.y + 88, "SLOW");
+    }
+    else if(use_vanilla_weapon_change == 0)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(GameDef.x + 146, GameDef.y + 88, "FAST");
+    }
+
+    if(d_recoil)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef.x + 161, GameDef.y + 98, "ON");
@@ -4486,10 +4484,17 @@ void M_DrawGame(void)
     }
     else
     {
-        if((itemOn == 11 || itemOn == 12) && whichSkull == 1)
+        if (whichSkull == 1)
         {
-            char *string = "YOU MUST START A NEW GAME TO TAKE EFFECT.";
-            int x = ORIGWIDTH/2 - M_StringWidth(string) / 2;
+            int x;
+            char *string = "";
+
+            if (itemOn > 4 && itemOn < 9 && d_statusmap)
+                string = "YOU NEED TO DISABLE AUTOMAP STATUS BAR FIRST!";
+            else if ((itemOn == 11 || itemOn == 12))
+                string = "YOU MUST START A NEW GAME TO TAKE EFFECT.";
+
+            x = ORIGWIDTH/2 - M_StringWidth(string) / 2;
             dp_translation = crx[CRX_GOLD];
             M_WriteText(x, GameDef.y + 138, string);
         }
@@ -5297,8 +5302,7 @@ void M_DrawGame6(void)
         M_WriteText(GameDef6.x + 258, GameDef6.y + 8, "OFF");
     }
 
-#ifdef WII
-    if(beta_style_mode)
+    if(showMessages)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef6.x + 266, GameDef6.y + 18, "ON");
@@ -5309,13 +5313,36 @@ void M_DrawGame6(void)
         M_WriteText(GameDef6.x + 258, GameDef6.y + 18, "OFF");
     }
 
+    if(d_thrust)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(GameDef6.x + 266, GameDef6.y + 28, "ON");
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(GameDef6.x + 258, GameDef6.y + 28, "OFF");
+    }
+
+#ifdef WII
+    if(beta_style_mode)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(GameDef6.x + 266, GameDef6.y + 38, "ON");
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(GameDef6.x + 258, GameDef6.y + 38, "OFF");
+    }
+
     if(whichSkull == 1)
     {
         int x;
         char *string = "";
         dp_translation = crx[CRX_GOLD];
 
-        if(itemOn == 2)
+        if(itemOn == 4)
         {
             if(fsize != 28422764 && fsize != 19321722 && fsize != 12361532)
                 string = "YOU MUST QUIT AND RESTART TO TAKE EFFECT.";
@@ -9106,18 +9133,12 @@ void M_DrawControls(void)
 
     if(whichSkull == 1)
     {
-        int x;
-        int x2;
-        int x3;
-        char *string;
-        char *string2;
-        char *string3;
-        string = "IF THE BARS FOR WALKING, TURNING & STRAFING";
-        string2 = "ARE AT THEIR HIGHEST LEVEL, IT MEANS THE SAME";
-        string3 = "AS PLAYING THE GAME WHILE HOLDING DOWN [SHIFT]";
-        x = ORIGWIDTH/2 - M_StringWidth(string) / 2;
-        x2 = ORIGWIDTH/2 - M_StringWidth(string2) / 2;
-        x3 = ORIGWIDTH/2 - M_StringWidth(string3) / 2;
+        char *string = "IF THE BARS FOR WALKING, TURNING & STRAFING";
+        char *string2 = "ARE AT THEIR HIGHEST LEVEL, IT MEANS THE SAME";
+        char *string3 = "AS PLAYING THE GAME WHILE HOLDING DOWN [SHIFT]";
+        int x = ORIGWIDTH/2 - M_StringWidth(string) / 2;
+        int x2 = ORIGWIDTH/2 - M_StringWidth(string2) / 2;
+        int x3 = ORIGWIDTH/2 - M_StringWidth(string3) / 2;
         dp_translation = crx[CRX_GOLD];
         M_WriteText(x, ControlsDef.y + 78, string);
         dp_translation = crx[CRX_GOLD];
@@ -9256,6 +9277,36 @@ void M_Authors(int choice)
       case 1:
         if (!show_authors)
             show_authors = true;
+        break;
+    }
+}
+
+void M_StatusMap(int choice)
+{
+    switch(choice)
+    {
+      case 0:
+        if (d_statusmap)
+            d_statusmap = false;
+        break;
+      case 1:
+        if (!d_statusmap)
+            d_statusmap = true;
+        break;
+    }
+}
+
+void M_MapName(int choice)
+{
+    switch(choice)
+    {
+      case 0:
+        if (show_title)
+            show_title = false;
+        break;
+      case 1:
+        if (!show_title)
+            show_title = true;
         break;
     }
 }

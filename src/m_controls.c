@@ -268,6 +268,8 @@ void M_BindBaseControls(void)
     M_BindVariable("max_bloodsplats",        &r_bloodsplats_max);
     M_BindVariable("center_weapon",          &d_centerweapon);
     M_BindVariable("eject_casings",          &d_ejectcasings);
+    M_BindVariable("status_map",             &d_statusmap);
+    M_BindVariable("show_maptitle",          &show_title);
 #ifdef WII
     M_BindVariable("key_shoot",              &joy_r);
     M_BindVariable("key_open",               &joy_l);
