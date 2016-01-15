@@ -299,6 +299,10 @@ txt_widget_class_t txt_int_inputbox_class =
     TXT_InputBoxFocused,
 };
 
+//
+// [nitr8] UNUSED
+//
+/*
 static txt_inputbox_t *NewInputBox(txt_widget_class_t *widget_class,
                                    void *value, int size)
 {
@@ -328,4 +332,5 @@ txt_inputbox_t *TXT_NewIntInputBox(int *value, int size)
 {
     return NewInputBox(&txt_int_inputbox_class, value, size);
 }
+*/
 

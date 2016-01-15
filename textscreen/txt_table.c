@@ -362,7 +362,10 @@ void TXT_AddWidget(TXT_UNCAST_ARG(table), TXT_UNCAST_ARG(widget))
 }
 
 // Add multiple widgets to a table.
-
+//
+// [nitr8] UNUSED
+//
+/*
 void TXT_AddWidgets(TXT_UNCAST_ARG(table), ...)
 {
     TXT_CAST_ARG(txt_table_t, table);
@@ -386,6 +389,7 @@ void TXT_AddWidgets(TXT_UNCAST_ARG(table), ...)
 
     va_end(args);
 }
+*/
 
 static int SelectableCell(txt_table_t *table, int x, int y)
 {
@@ -895,6 +899,10 @@ void TXT_InitTable(txt_table_t *table, int columns)
     }
 }
 
+//
+// [nitr8] UNUSED
+//
+/*
 txt_table_t *TXT_NewTable(int columns)
 {
     txt_table_t *table;
@@ -907,10 +915,7 @@ txt_table_t *TXT_NewTable(int columns)
 }
 
 // Create a horizontal table from a list of widgets.
-//
-// [nitr8] UNUSED
-//
-/*
+
 txt_table_t *TXT_NewHorizBox(TXT_UNCAST_ARG(first_widget), ...)
 {
     TXT_CAST_ARG(txt_widget_t, first_widget);

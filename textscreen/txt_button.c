@@ -116,7 +116,10 @@ txt_button_t *TXT_NewButton(char *label)
 }
 
 // Button with a callback set automatically
-
+//
+// [nitr8] UNUSED
+//
+/*
 txt_button_t *TXT_NewButton2(char *label, TxtWidgetSignalFunc func,
                              void *user_data)
 {
@@ -128,4 +131,5 @@ txt_button_t *TXT_NewButton2(char *label, TxtWidgetSignalFunc func,
 
     return button;
 }
+*/
 

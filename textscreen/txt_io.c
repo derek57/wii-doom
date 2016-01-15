@@ -100,6 +100,10 @@ void TXT_PutChar(int c)
     PutChar(screen, c);
 }
 
+//
+// [nitr8] UNUSED
+//
+/*
 void TXT_Puts(const char *s)
 {
     unsigned char *screen;
@@ -114,6 +118,7 @@ void TXT_Puts(const char *s)
 
     PutChar(screen, '\n');
 }
+*/
 
 void TXT_GotoXY(int x, int y)
 {

@@ -939,6 +939,10 @@ void TXT_StringCopy(char *dest, const char *src, size_t dest_len)
     strncpy(dest, src, dest_len - 1);
 }
 
+//
+// [nitr8] UNUSED
+//
+/*
 void TXT_StringConcat(char *dest, const char *src, size_t dest_len)
 {
     size_t offset;
@@ -951,8 +955,10 @@ void TXT_StringConcat(char *dest, const char *src, size_t dest_len)
 
     TXT_StringCopy(dest + offset, src, dest_len - offset);
 }
+*/
 
 // Safe, portable vsnprintf().
+
 int TXT_vsnprintf(char *buf, size_t buf_len, const char *s, va_list args)
 {
     int result;

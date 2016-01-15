@@ -118,6 +118,10 @@ void TXT_CloseWindow(txt_window_t *window)
     TXT_DestroyWidget(window);
 }
 
+//
+// [nitr8] UNUSED
+//
+/*
 static void CalcWindowPosition(txt_window_t *window)
 {
     switch (window->horiz_align)
@@ -361,6 +365,7 @@ void TXT_DrawWindow(txt_window_t *window)
         DrawActionArea(window);
     }
 }
+*/
 
 void TXT_SetWindowPosition(txt_window_t *window,
                            txt_horiz_align_t horiz_align,
@@ -373,6 +378,10 @@ void TXT_SetWindowPosition(txt_window_t *window,
     window->y = y;
 }
 
+//
+// [nitr8] UNUSED
+//
+/*
 static int MouseButtonPress(txt_window_t *window, int b)
 {
     int x, y;
@@ -486,6 +495,7 @@ int TXT_WindowKeyPress(txt_window_t *window, int c)
 
     return 0;
 }
+*/
 
 void TXT_SetKeyListener(txt_window_t *window, TxtWindowKeyPress key_listener, 
                         void *user_data)
@@ -507,20 +517,24 @@ void TXT_SetWindowFocus(txt_window_t *window, int focused)
     TXT_SetWidgetFocus(window, focused);
 }
 
+//
+// [nitr8] UNUSED
+//
+/*
 void TXT_SetWindowHelpURL(txt_window_t *window, char *help_url)
 {
     window->help_url = help_url;
 }
-/*
-#ifdef _WIN32
 
-void TXT_OpenURL(char *url)
-{
-    ShellExecute(NULL, "open", url, NULL, NULL, SW_SHOWNORMAL);
-}
+//#ifdef _WIN32
 
-#else
-*/
+//void TXT_OpenURL(char *url)
+//{
+//    ShellExecute(NULL, "open", url, NULL, NULL, SW_SHOWNORMAL);
+//}
+
+//else
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-result"
 
@@ -531,11 +545,11 @@ void TXT_OpenURL(char *url)
 
     cmd_len = strlen(url) + 30;
     cmd = malloc(cmd_len);
-/*
-#if defined(__MACOSX__)
-    TXT_snprintf(cmd, cmd_len, "open \"%s\"", url);
-#else
-*/
+
+//#if defined(__MACOSX__)
+//    TXT_snprintf(cmd, cmd_len, "open \"%s\"", url);
+//#else
+
     // The Unix situation sucks as usual, but the closest thing to a
     // standard that exists is the xdg-utils package.
     if (system("xdg-open --version 2>/dev/null") != 0)
@@ -556,7 +570,7 @@ void TXT_OpenURL(char *url)
     free(cmd);
 }
 
-//#endif /* #ifndef _WIN32 */
+//#endif // #ifndef _WIN32
 
 void TXT_OpenWindowHelpURL(txt_window_t *window)
 {
@@ -566,10 +580,6 @@ void TXT_OpenWindowHelpURL(txt_window_t *window)
     }
 }
 
-//
-// [nitr8] UNUSED
-//
-/*
 txt_window_t *TXT_MessageBox(char *title, char *message, ...)
 {
     txt_window_t *window;

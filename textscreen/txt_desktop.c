@@ -28,15 +28,16 @@
 #define HELP_KEY KEY_F1
 #define MAXWINDOWS 128
 
-static char *desktop_title;
+//static char *desktop_title;
 static txt_window_t *all_windows[MAXWINDOWS];
 static int num_windows = 0;
+/*
 static int main_loop_running = 0;
 
 static TxtIdleCallback periodic_callback = NULL;
 static void *periodic_callback_data;
 static unsigned int periodic_callback_period;
-
+*/
 void TXT_AddDesktopWindow(txt_window_t *win)
 {
     // Previously-top window loses focus:
@@ -146,7 +147,6 @@ int TXT_LowerWindow(txt_window_t *window)
 
     return 0;
 }
-*/
 
 static void DrawDesktopBackground(const char *title)
 {
@@ -316,10 +316,6 @@ void TXT_ExitMainLoop(void)
     main_loop_running = 0;
 }
 
-//
-// [nitr8] UNUSED
-//
-/*
 void TXT_DrawASCIITable(void)
 {
     unsigned char *screendata;
@@ -359,7 +355,6 @@ void TXT_SetPeriodicCallback(TxtIdleCallback callback,
     periodic_callback_data = user_data;
     periodic_callback_period = period;
 }
-*/
 
 void TXT_GUIMainLoop(void)
 {
@@ -392,4 +387,5 @@ void TXT_GUIMainLoop(void)
         }
     }
 }
+*/
 

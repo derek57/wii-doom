@@ -375,6 +375,10 @@ txt_widget_class_t txt_spincontrol_class =
     TXT_SpinControlFocused,
 };
 
+//
+// [nitr8] UNUSED
+//
+/*
 static txt_spincontrol_t *TXT_BaseSpinControl(void)
 {
     txt_spincontrol_t *spincontrol;
@@ -404,10 +408,6 @@ txt_spincontrol_t *TXT_NewSpinControl(int *value, int min, int max)
     return spincontrol;
 }
 
-//
-// [nitr8] UNUSED
-//
-/*
 txt_spincontrol_t *TXT_NewFloatSpinControl(float *value, float min, float max)
 {
     txt_spincontrol_t *spincontrol;

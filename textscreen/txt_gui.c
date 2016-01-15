@@ -143,7 +143,6 @@ void TXT_DrawDesktopBackground(const char *title)
     TXT_DrawString(" ");
     TXT_DrawString(title);
 }
-*/
 
 void TXT_DrawShadow(int x, int y, int w, int h)
 {
@@ -226,6 +225,7 @@ void TXT_DrawWindowFrame(const char *title, int x, int y, int w, int h)
 
     TXT_RestoreColors(&colors);
 }
+*/
 
 void TXT_DrawSeparator(int x, int y, int w)
 {
@@ -482,6 +482,10 @@ void TXT_DrawVertScrollbar(int x, int y, int h, int cursor, int range)
     TXT_RestoreColors(&colors);
 }
 
+//
+// [nitr8] UNUSED
+//
+/*
 void TXT_InitClipArea(void)
 {
     if (cliparea == NULL)
@@ -494,6 +498,7 @@ void TXT_InitClipArea(void)
         cliparea->next = NULL;
     }
 }
+*/
 
 void TXT_PushClipArea(int x1, int x2, int y1, int y2)
 {

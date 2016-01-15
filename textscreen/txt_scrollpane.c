@@ -564,6 +564,10 @@ txt_widget_class_t txt_scrollpane_class =
     TXT_ScrollPaneFocused,
 };
 
+//
+// [nitr8] UNUSED
+//
+/*
 txt_scrollpane_t *TXT_NewScrollPane(int w, int h, TXT_UNCAST_ARG(target))
 {
     TXT_CAST_ARG(txt_widget_t, target);
@@ -585,4 +589,5 @@ txt_scrollpane_t *TXT_NewScrollPane(int w, int h, TXT_UNCAST_ARG(target))
 
     return scrollpane;
 }
+*/
 
