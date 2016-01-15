@@ -1663,6 +1663,7 @@ void D_DoomMain (void)
         lowhealth = false;
         d_fixwiggle = false;
         d_centerweapon = false;
+        d_ejectcasings = false;
 
         beta_style = true;
     }
