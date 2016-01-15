@@ -3384,7 +3384,7 @@ void A_EjectCasing(mobj_t *actor)
     pspdef_t*       psp = player->psprites;
     statenum_t      stnum = psp->state->nextstate;
 
-    if (!d_ejectcasings)
+    if (!d_ejectcasings || beta_style)
         return;
 
     if (actor->type == MT_PLAYER ||
@@ -3460,7 +3460,7 @@ void A_EjectCasing(mobj_t *actor)
         z += (pitch / pi) * ((10 * frontdisti / 256) * FRACUNIT / 32);
     }
     else
-        z = actor->z * FRACUNIT / 16;
+        z = actor->z + 500 * FRACUNIT / 16;
 
     // adjust x/y along a vector orthogonal to the source object's angle
     angle = angle - ANG90;
