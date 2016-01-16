@@ -9294,6 +9294,7 @@ void M_StatusMap(int choice)
             d_statusmap = true;
         break;
     }
+    HU_Start();
 }
 
 void M_MapName(int choice)
