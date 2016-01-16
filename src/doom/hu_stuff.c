@@ -80,13 +80,13 @@
 #define HU_INPUTWIDTH   64
 #define HU_INPUTHEIGHT  1
 
-#define HU_STATSX       238
+#define HU_STATSX       228
 #define HU_STATSY       -18
 
 #define HU_MONSECX1     HU_STATSX + 0
-#define HU_MONSECX2     HU_STATSX + 30
-#define HU_MONSECX3     HU_STATSX + 40
-#define HU_MONSECX4     HU_STATSX + 70
+#define HU_MONSECX2     HU_STATSX + 35
+#define HU_MONSECX3     HU_STATSX + 45
+#define HU_MONSECX4     HU_STATSX + 80
 
 #define HU_MONSTERSY    HU_STATSY + HU_TITLEY - 20 + (25 - SHORT(hu_font[0]->height))
 #define HU_ITEMSY       HU_STATSY + HU_TITLEY - 20 + (35 - SHORT(hu_font[0]->height))
