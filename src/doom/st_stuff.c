@@ -786,16 +786,26 @@ dboolean ST_Responder (event_t* ev)
             // 'fa' cheat for killer fucking arsenal
             else if (cht_CheckCheat(&cheat_ammonokey, ev->data2) && !beta_style)
             {
-                plyr->armorpoints = idfa_armor;
-                plyr->armortype = idfa_armor_class;
+                if (fsize == 11159840 || fsize == 12408292 || fsize == 12474561 ||
+                    fsize == 12487824 || fsize == 12538385 || fsize == 4234124 ||
+                    fsize == 4196020 || fsize == 14943400 || fsize == 14824716 ||
+                    fsize == 14612688 || fsize == 14607420 || fsize == 14604584 ||
+                    fsize == 14677988 || fsize == 14691821 || fsize == 14683458 ||
+                    fsize == 18195736 || fsize == 18654796 || fsize == 18240172 ||
+                    fsize == 17420824 || fsize == 28422764 || fsize == 12361532 ||
+                    fsize == 19321722)
+                {
+                    plyr->armorpoints = idfa_armor;
+                    plyr->armortype = idfa_armor_class;
         
-                for (i=0;i<NUMWEAPONS;i++)
-                    plyr->weaponowned[i] = true;
+                    for (i=0;i<NUMWEAPONS;i++)
+                        plyr->weaponowned[i] = true;
         
-                for (i=0;i<NUMAMMO;i++)
-                    plyr->ammo[i] = plyr->maxammo[i];
+                    for (i=0;i<NUMAMMO;i++)
+                        plyr->ammo[i] = plyr->maxammo[i];
         
-                HU_PlayerMessage(s_STSTR_FAADDED, true);
+                    HU_PlayerMessage(s_STSTR_FAADDED, true);
+                }
             }
             // 'kfa' cheat for key full ammo
             else if (cht_CheckCheat(&cheat_ammo, ev->data2) && !beta_style)
