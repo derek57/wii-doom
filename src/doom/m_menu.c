@@ -2020,7 +2020,7 @@ menuitem_t ItemsMenu[]=
     {2,"",M_ItemsD,'3'},
     {2,"",M_ItemsE,'4'},
     {2,"FULL HEALTH (100)",M_ItemsH,'5'},
-    {2,"FULL HEALTH (200)",M_ItemsI,'6'},
+    {2,"",M_ItemsI,'6'},
     {2,"",M_ItemsB,'7'},
     {2,"",M_ItemsF,'8'},
     {2,"",M_ItemsG,'9'},
@@ -3824,6 +3824,12 @@ void M_DrawItems(void)
 
     dp_translation = crx[CRX_GOLD];
     M_WriteText(80, 50, "GIVE THEM ALL AT ONCE");
+
+    if (fsize == 10396254 || fsize == 10399316 || fsize == 4207819 ||
+        fsize == 4274218 || fsize == 4225504)
+        M_WriteText(80, 110, "FULL HEALTH (199)");
+    else
+        M_WriteText(80, 110, "FULL HEALTH (200)");
 
     if(fsize != 12361532 && fsize != 19321722)
     {
@@ -8267,10 +8273,21 @@ void M_ItemsH(int choice)
 
 void M_ItemsI(int choice)
 {
-    if (players[consoleplayer].mo)
-        players[consoleplayer].mo->health = 200;
-    players[consoleplayer].health = 200;
-    players[consoleplayer].message = "GOT FULL HEALTH (200)";
+    if (fsize == 10396254 || fsize == 10399316 || fsize == 4207819 ||
+        fsize == 4274218 || fsize == 4225504)
+    {
+        if (players[consoleplayer].mo)
+            players[consoleplayer].mo->health = 199;
+        players[consoleplayer].health = 199;
+        players[consoleplayer].message = "GOT FULL HEALTH (199)";
+    }
+    else
+    {
+        if (players[consoleplayer].mo)
+            players[consoleplayer].mo->health = 200;
+        players[consoleplayer].health = 200;
+        players[consoleplayer].message = "GOT FULL HEALTH (200)";
+    }
 }
 
 void M_ItemsJ(int choice)
