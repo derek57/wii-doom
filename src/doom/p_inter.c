@@ -58,7 +58,7 @@
 // strings used in dehacked.
 int initial_health = 100;
 int initial_bullets = 50;
-int maxhealth = 100;
+int maxhealth = 200;
 int max_armor = 200;
 int green_armor_class = 1;
 int blue_armor_class = 2;
@@ -542,7 +542,13 @@ P_TouchSpecialThing
       case SPR_BON1:
         player->health++;                // can go over 100%
         if (player->health > maxhealth)
-            player->health = maxhealth;
+        {
+            if (fsize == 10396254 || fsize == 10399316 || fsize == 4207819 ||
+                fsize == 4274218 || fsize == 4225504)
+                player->health = maxhealth - 1;
+            else
+                player->health = maxhealth;
+        }
         else
             healthhighlight = I_GetTime() + HUD_HEALTH_HIGHLIGHT_WAIT;
         player->mo->health = player->health;
@@ -582,6 +588,9 @@ P_TouchSpecialThing
             player->health += soul_health;
             if (player->health > max_soul)
                 player->health = max_soul;
+            if ((fsize == 10396254 || fsize == 10399316 || fsize == 4207819 ||
+                fsize == 4274218 || fsize == 4225504) && player->health == maxhealth)
+                player->health = player->health - 1;
             player->mo->health = player->health;
             HU_PlayerMessage(s_GOTSUPER, true);
         }
