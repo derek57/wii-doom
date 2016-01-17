@@ -3170,11 +3170,7 @@ void deh_procStrings(DEHFILE *fpin, char *line)
             if (devparm)
                 C_Output("* increased buffer from to %d for buffer size %d",
                     maxstrlen, (int)strlen(inbuffer));
-#if defined BOOM_ZONE_HANDLING || defined WIIDOOM_ZONE_HANDLING
-            holdstring = Z_Realloc(holdstring, maxstrlen * sizeof(*holdstring), PU_CACHE, NULL);
-#else
-            holdstring = Z_Realloc(holdstring, maxstrlen * sizeof(*holdstring));
-#endif
+            holdstring = Z_Realloc(holdstring, maxstrlen * sizeof(*holdstring), PU_STATIC, NULL);
         }
 
         // concatenate the whole buffer if continuation or the value if first

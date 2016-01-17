@@ -275,11 +275,7 @@ void P_SetLiquids(void)
         if (lastanim >= anims + maxanims)
         {
             size_t      newmax = (maxanims ? maxanims * 2 : MAXANIMS);
-#if defined BOOM_ZONE_HANDLING || defined WIIDOOM_ZONE_HANDLING
             anims = Z_Realloc(anims, newmax * sizeof(*anims), PU_LEVEL, NULL);
-#else
-            anims = Z_Realloc(anims, newmax * sizeof(*anims));
-#endif
             lastanim = anims + maxanims;
             maxanims = newmax;
         }

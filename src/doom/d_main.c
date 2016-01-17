@@ -1362,9 +1362,6 @@ void D_DoomMain (void)
         I_QuitSerialFail();
     }
 
-#ifndef DOOMRETRO_ZONE_HANDLING
-    Z_Init ();
-#endif
 /*
 #ifdef FEATURE_MULTIPLAYER
     //!
@@ -1888,9 +1885,9 @@ void D_DoomMain (void)
     setbuf (stdout, NULL);
 
     // Find main IWAD file and load it.
-    if(!devparm)
-        iwadfile = D_FindIWAD(IWAD_MASK_DOOM, &gamemission);
-    else 
+    iwadfile = D_FindIWAD(IWAD_MASK_DOOM, &gamemission);
+
+    if (devparm)
     {
         if(M_CheckParm ("-devparm_doom"))
             iwadfile = "/home/user/WIIDOOM/src/IWAD/DOOM/Reg/v12/DOOM.WAD";
@@ -2450,30 +2447,15 @@ void D_DoomMain (void)
         if(load_extra_wad == 1)
         {
             if(extra_wad_slot_1_loaded == 1)
-            {
-                if(merge)
-                    W_MergeFile(extra_wad_1, false);
-                else
-                    D_AddFile(extra_wad_1, false);
-            }
+                W_MergeFile(extra_wad_1, false);
 
             if(!nerve_pwad && !master_pwad)
             {
                 if(extra_wad_slot_2_loaded == 1)
-                {
-                    if(merge)
-                        W_MergeFile(extra_wad_2, false);
-                    else
-                        D_AddFile(extra_wad_2, false);
-                }
+                    W_MergeFile(extra_wad_2, false);
 
                 if(extra_wad_slot_3_loaded == 1)
-                {
-                    if(merge)
-                        W_MergeFile(extra_wad_3, false);
-                    else
-                        D_AddFile(extra_wad_3, false);
-                }
+                    W_MergeFile(extra_wad_3, false);
             }
 
             modifiedgame = true;

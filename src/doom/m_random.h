@@ -29,6 +29,7 @@
 #define __M_RANDOM__
 
 
+#include "doomfeatures.h"
 #include "doomtype.h"
 
 
@@ -247,7 +248,12 @@ int M_RandomInt(int lower, int upper);
 // As M_Random, but used only by the play simulation.
 int P_Random (void);
 
-int P_RandomSMMU(pr_class_t pr_class);
+//int (P_RandomSMMU)(pr_class_t DA(const char *, int));
+
+#ifdef INSTRUMENTED
+#define P_RandomSMMU(a) (P_RandomSMMU) (a, __FILE__,__LINE__)
+#endif
+
 int P_SubRandom(pr_class_t pr_class);
 
 // Fix randoms for demos.

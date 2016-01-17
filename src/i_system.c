@@ -62,7 +62,7 @@
 #include "z_zone.h"
 
 
-#define DEFAULT_RAM   32 // MiB
+#define DEF_RAM       DEFAULT_RAM // MiB
 #define MIN_RAM       16 // MiB
 #define ZENITY_BINARY "/usr/bin/zenity"
 
@@ -597,4 +597,24 @@ dboolean I_GetMemoryValue(unsigned int offset, void *value, int size)
     return false;
 }
 */
+
+// cphipps - I_SigString
+// Returns a string describing a signal number
+
+const char* I_SigString(char* buf, size_t sz, int signum)
+{
+#if HAVE_DECL_SYS_SIGLIST // NSM: automake defines this symbol as 0 or 1
+    if (strlen(sys_siglist[signum]) < sz)
+        strcpy(buf, sys_siglist[signum]);
+    else
+#endif
+
+#ifdef HAVE_SNPRINTF
+    snprintf(buf, sz, "signal %d", signum);
+#else
+    sprintf(buf, "signal %d", signum);
+#endif
+
+  return buf;
+}
 

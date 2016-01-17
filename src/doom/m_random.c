@@ -28,6 +28,7 @@
 #include <stdlib.h>
 #include <time.h>
 
+#include "doomfeatures.h"
 #include "m_random.h"
 
 //
@@ -109,7 +110,11 @@ rng_t rng;     // the random number state
 
 unsigned long rngseed = 1993;   // killough 3/26/98: The seed
 
-int P_RandomSMMU(pr_class_t pr_class)
+int (P_RandomSMMU)(pr_class_t pr_class
+#ifdef INSTRUMENTED
+     , const char *file, int line
+#endif
+    )
 {
    // killough 2/16/98:  We always update both sets of random number
    // generators, to ensure repeatability if the demo_compatibility

@@ -46,15 +46,20 @@ typedef int lumpindex_t;
 
 struct lumpinfo_s
 {
-    char        name[8];
-    wad_file_t  *wad_file;
-    int         position;
-    int         size;
-    void        *cache;
+    char         name[8];
+    wad_file_t   *wad_file;
+    int          position;
+    int          size;
+    void         *cache;
+    unsigned int locks;
+
+#ifdef TIMEDIAG
+    int          locktic;
+#endif
 
     // Used for hash table lookups
 
-    lumpindex_t next;
+    lumpindex_t  next;
 };
 
 typedef enum
@@ -73,15 +78,10 @@ extern unsigned int numlumps;
 extern unsigned int W_LumpNameHash(const char *s);
 
 
-wad_file_t *W_AddFile (char *filename, dboolean automatic);
+wad_file_t  *W_AddFile (char *filename, dboolean automatic);
 
-lumpindex_t W_CheckNumForName(char *name);
-lumpindex_t W_GetNumForName(char *name);
-
-int         W_GetSecondNumForName (char* name);
-int         W_LumpLength(lumpindex_t lump);
-int         W_CheckMultipleLumps(char *name);
-int         W_WadType(char *filename);
+void        *W_CacheLumpNum(lumpindex_t lump, int tag);
+void        *W_CacheLumpName(char *name, int tag);
 
 void        W_GenerateHashTable(void);
 void        W_ReleaseLumpNum(lumpindex_t lump);
@@ -90,13 +90,19 @@ void        W_CheckCorrectIWAD(GameMission_t mission);
 void        W_CheckSize(int wad);
 void        W_ReadLump(lumpindex_t lump, void *dest);
 
-void        *W_CacheLumpNum(lumpindex_t lump, int tag);
-void        *W_CacheLumpName(char *name, int tag);
-
 void        W_Reload(void);
 
-dboolean     HasDehackedLump(const char *pwadname);
+void        W_PrintLump(FILE* fp, void* p);
 
+int         W_GetSecondNumForName (char* name);
+int         W_LumpLength(lumpindex_t lump);
+int         W_CheckMultipleLumps(char *name);
+int         W_WadType(char *filename);
+
+dboolean    HasDehackedLump(const char *pwadname);
+
+lumpindex_t W_CheckNumForName(char *name);
+lumpindex_t W_GetNumForName(char *name);
 lumpindex_t W_GetNumForName2(char *name);
 lumpindex_t W_RangeCheckNumForName(lumpindex_t min, lumpindex_t max, char *name);
 

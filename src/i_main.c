@@ -34,6 +34,7 @@
 #include <SDL/SDL.h>
 #endif
 
+#include <signal.h>
 #include <stdio.h>
 
 #include "config.h"
@@ -58,6 +59,8 @@
 #include "../wii/xmn_main.h"
 #include <wiiuse/wpad.h>
 #endif
+
+#include "z_zone.h"
 
 
 // MAIN DEVPARM
@@ -85,6 +88,25 @@ dboolean        devparm_net_plutonia = false;
 dboolean        devparm_net_chex = false;
 dboolean        devparm_net_hacx = false;
 
+//
+// e6y: exeptions handling
+//
+
+typedef enum
+{
+  EXEPTION_NONE,
+  EXEPTION_glFramebufferTexture2DEXT,
+  EXEPTION_MAX
+} ExeptionsList_t;
+
+typedef struct
+{
+  const char * error_message;
+} ExeptionParam_t;
+
+static ExeptionParam_t ExeptionsParams[];
+
+static ExeptionsList_t current_exception_index;
 
 int exit_by_reset = 0;
 int return_reset = 2;
@@ -126,6 +148,38 @@ void My_Quit(void)
 }
 #endif
 
+void I_ExeptionProcess(void)
+{
+    if (current_exception_index > EXEPTION_NONE && current_exception_index < EXEPTION_MAX)
+    {
+        I_Error("%s", ExeptionsParams[current_exception_index].error_message);
+    }
+}
+
+// cleanup handling -- killough:
+
+static void I_SignalHandler(int s)
+{
+    char buf[2048];
+
+    // Ignore future instances of this signal.
+    signal(s, SIG_IGN);
+
+    // e6y
+    I_ExeptionProcess();
+
+    strcpy(buf, "Exiting on signal: ");
+
+    I_SigString(buf + strlen(buf), 2000 - strlen(buf), s);
+
+    // If corrupted memory could cause crash, dump memory
+    // allocation history, which points out probable causes
+    if (s == SIGSEGV || s == SIGILL || s == SIGFPE)
+        Z_DumpHistory(buf);
+
+    I_Error("I_SignalHandler: %s", buf);
+}
+
 int main(int argc, char **argv)
 {
     // save arguments
@@ -134,6 +188,22 @@ int main(int argc, char **argv)
     myargv = argv;
 
     M_FindResponseFile();
+#endif
+
+#ifndef PRBOOM_DEBUG
+#ifndef WII
+    if (!M_CheckParm("-devparm"))
+#else
+    if (devparm)
+#endif
+    {
+        signal(SIGSEGV, I_SignalHandler);
+    }
+    signal(SIGTERM, I_SignalHandler);
+    signal(SIGFPE,  I_SignalHandler);
+    signal(SIGILL,  I_SignalHandler);
+    signal(SIGINT,  I_SignalHandler);  /* killough 3/6/98: allow CTRL-BRK during init */
+    signal(SIGABRT, I_SignalHandler);
 #endif
 
 #ifdef WII

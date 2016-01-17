@@ -213,11 +213,7 @@ void C_Print(stringtype_t typestring, char *string, ...)
     va_start(argptr, string);
     M_vsnprintf(buffer, CONSOLETEXTMAXLENGTH - 1, string, argptr);
     va_end(argptr);
-#if defined BOOM_ZONE_HANDLING || defined WIIDOOM_ZONE_HANDLING
     console = Z_Realloc(console, (consolestrings + 1) * sizeof(*console), PU_STATIC, NULL);
-#else
-    console = Z_Realloc(console, (consolestrings + 1) * sizeof(*console));
-#endif
     M_StringCopy(console[consolestrings].string, buffer, CONSOLETEXTMAXLENGTH); 
     console[consolestrings].type = typestring;
     memset(console[consolestrings].tabs, 0, sizeof(console[consolestrings].tabs));
@@ -235,11 +231,7 @@ void C_Output(char *string, ...)
     M_vsnprintf(buffer, CONSOLETEXTMAXLENGTH - 1, string, argptr);
     va_end(argptr);
 
-#if defined BOOM_ZONE_HANDLING || defined WIIDOOM_ZONE_HANDLING
     console = Z_Realloc(console, (consolestrings + 1) * sizeof(*console), PU_STATIC, NULL);
-#else
-    console = Z_Realloc(console, (consolestrings + 1) * sizeof(*console));
-#endif
     M_StringCopy(console[consolestrings].string, buffer, CONSOLETEXTMAXLENGTH); 
     console[consolestrings].type = graystring;
     memset(console[consolestrings].tabs, 0, sizeof(console[consolestrings].tabs));
@@ -259,11 +251,7 @@ void C_Warning(char *string, ...)
 
     if (consolestrings && !M_StringCompare(console[consolestrings - 1].string, buffer))
     {
-#if defined BOOM_ZONE_HANDLING || defined WIIDOOM_ZONE_HANDLING
         console = Z_Realloc(console, (consolestrings + 1) * sizeof(*console), PU_STATIC, NULL);
-#else
-        console = Z_Realloc(console, (consolestrings + 1) * sizeof(*console));
-#endif
         M_StringCopy(console[consolestrings].string, buffer, CONSOLETEXTMAXLENGTH); 
         console[consolestrings].type = yellowstring;
         memset(console[consolestrings].tabs, 0, sizeof(console[consolestrings].tabs));
@@ -303,11 +291,7 @@ void C_PlayerMessage(char *string, ...)
     }
     else
     {
-#if defined BOOM_ZONE_HANDLING || defined WIIDOOM_ZONE_HANDLING
-        console = Z_Realloc(console, (consolestrings + 1) * sizeof(*console), PU_CACHE, NULL);
-#else
-        console = Z_Realloc(console, (consolestrings + 1) * sizeof(*console));
-#endif
+        console = Z_Realloc(console, (consolestrings + 1) * sizeof(*console), PU_STATIC, NULL);
         M_StringCopy(console[consolestrings].string, buffer, CONSOLETEXTMAXLENGTH); 
         console[consolestrings].type = greenstring;
         memset(console[consolestrings].tabs, 0, sizeof(console[consolestrings].tabs));
@@ -1146,11 +1130,7 @@ void C_Error(char *string, ...)
 
     if (consolestrings && !M_StringCompare(console[consolestrings - 1].string, buffer))
     {
-#if defined BOOM_ZONE_HANDLING || defined WIIDOOM_ZONE_HANDLING
         console = Z_Realloc(console, (consolestrings + 1) * sizeof(*console), PU_STATIC, NULL);
-#else
-        console = Z_Realloc(console, (consolestrings + 1) * sizeof(*console));
-#endif
         M_StringCopy(console[consolestrings].string, buffer, CONSOLETEXTMAXLENGTH); 
         console[consolestrings].type = redstring;
         memset(console[consolestrings].tabs, 0, sizeof(console[consolestrings].tabs));
@@ -1171,11 +1151,7 @@ void C_Network(char *string, ...)
 
     if (consolestrings && !M_StringCompare(console[consolestrings - 1].string, buffer))
     {
-#if defined BOOM_ZONE_HANDLING || defined WIIDOOM_ZONE_HANDLING
         console = Z_Realloc(console, (consolestrings + 1) * sizeof(*console), PU_STATIC, NULL);
-#else
-        console = Z_Realloc(console, (consolestrings + 1) * sizeof(*console));
-#endif
         M_StringCopy(console[consolestrings].string, buffer, CONSOLETEXTMAXLENGTH); 
         console[consolestrings].type = bluestring;
         memset(console[consolestrings].tabs, 0, sizeof(console[consolestrings].tabs));

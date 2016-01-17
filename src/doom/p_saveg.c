@@ -2418,7 +2418,7 @@ void P_UnArchiveMap(void)
         while (markpointnum >= markpointnum_max)
         {
             markpointnum_max = (markpointnum_max ? markpointnum_max << 1 : 16);
-            markpoints = Z_Realloc(markpoints, markpointnum_max * sizeof(*markpoints));
+            markpoints = Z_Realloc(markpoints, markpointnum_max * sizeof(*markpoints), PU_LEVEL, NULL);
         }
 
         for (i = 0; i < markpointnum; ++i)

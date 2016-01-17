@@ -417,13 +417,8 @@ static char *GetSubstituteMusicFile(void *data, size_t data_len)
 static void AddSubstituteMusic(subst_music_t *subst)
 {
     ++subst_music_len;
-#if defined BOOM_ZONE_HANDLING || defined WIIDOOM_ZONE_HANDLING
     subst_music =
-        Z_Realloc(subst_music, sizeof(subst_music_t) * subst_music_len, PU_CACHE, NULL);
-#else
-    subst_music =
-        Z_Realloc(subst_music, sizeof(subst_music_t) * subst_music_len);
-#endif
+        Z_Realloc(subst_music, sizeof(subst_music_t) * subst_music_len, PU_STATIC, NULL);
     memcpy(&subst_music[subst_music_len - 1], subst, sizeof(subst_music_t));
 }
 

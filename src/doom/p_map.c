@@ -424,11 +424,7 @@ static dboolean PIT_CheckLine(line_t *ld)
         if (numspechit >= spechit_max)
         {
             spechit_max = (spechit_max ? spechit_max * 2 : 8);
-#if defined BOOM_ZONE_HANDLING || defined WIIDOOM_ZONE_HANDLING
             spechit = Z_Realloc(spechit, sizeof(*spechit) * spechit_max, PU_LEVEL, NULL);
-#else
-            spechit = Z_Realloc(spechit, sizeof(*spechit) * spechit_max);
-#endif
             if (spechit != 0)
                 C_Warning("PIT_CheckLine: Hit MaxSpecHit limit at %d, raised to %u",
                         spechit_max / 2, spechit_max);

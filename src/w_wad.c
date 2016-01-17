@@ -220,11 +220,8 @@ wad_file_t *W_AddFile (char *filename, dboolean automatic)
 
     startlump = numlumps;
     numlumps += numfilelumps;
-#if defined BOOM_ZONE_HANDLING || defined WIIDOOM_ZONE_HANDLING
-    lumpinfo = Z_Realloc(lumpinfo, numlumps * sizeof(lumpinfo_t *), PU_STATIC, NULL);
-#else
-    lumpinfo = Z_Realloc(lumpinfo, numlumps * sizeof(lumpinfo_t *));
-#endif
+    lumpinfo = Z_Realloc(lumpinfo, numlumps * sizeof(lumpinfo_t *), PU_CACHE, NULL);
+
     if (lumpinfo == NULL)
     {
         I_Error("Failed to increase lumpinfo[] array size.");
@@ -263,7 +260,6 @@ wad_file_t *W_AddFile (char *filename, dboolean automatic)
             "%s %s lump%s from %.4s file %s.", (automatic ? "Automatically added" : "Added"),
                     commify(numlumps - startlump), (numlumps - startlump == 1 ? "" : "s"),
                             header.identification, uppercase(filename));
-
 
     // If this is the reload file, we need to save some details about the
     // file so that we can close it later on when we do a reload.
@@ -432,6 +428,7 @@ void *W_CacheLumpNum(lumpindex_t lumpnum, int tag)
 {
     byte *result;
     lumpinfo_t *lump;
+    const int locks = 1;
 
     if ((unsigned)lumpnum >= numlumps)
     {
@@ -457,6 +454,11 @@ void *W_CacheLumpNum(lumpindex_t lumpnum, int tag)
 
         result = lump->cache;
         Z_ChangeTag(lump->cache, tag);
+
+#ifdef TIMEDIAG
+        lump->locktic = gametic;
+#endif
+
     }
     else
     {
@@ -466,7 +468,13 @@ void *W_CacheLumpNum(lumpindex_t lumpnum, int tag)
         W_ReadLump (lumpnum, lump->cache);
         result = lump->cache;
     }
-        
+    lumpinfo[lumpnum]->locks += locks;
+
+#ifdef SIMPLECHECKS
+    if (!((lump->locks + 1) & 0xf))
+        C_Warning("W_CacheLumpNum: High lock on %8s (%d)", lump->name, lump->locks);
+#endif
+
     return result;
 }
 
@@ -493,6 +501,7 @@ void *W_CacheLumpName(char *name, int tag)
 void W_ReleaseLumpNum(lumpindex_t lumpnum)
 {
     lumpinfo_t *lump;
+    const int unlocks = 1;
 
     if ((unsigned)lumpnum >= numlumps)
     {
@@ -500,6 +509,14 @@ void W_ReleaseLumpNum(lumpindex_t lumpnum)
     }
 
     lump = lumpinfo[lumpnum];
+
+#ifdef SIMPLECHECKS
+    if ((signed short)lump->locks < unlocks)
+        C_Warning("W_UnlockLumpNum: Excess unlocks on %8s (%d-%d)",
+	        lump->name, lump->locks, unlocks);
+#endif
+
+    lumpinfo[lumpnum]->locks -= unlocks;
 
     if (lump->wad_file->mapped != NULL)
     {
@@ -917,4 +934,20 @@ void W_Reload(void)
     // fast lookup hashtable:
     W_GenerateHashTable();
 }
+
+#ifdef HEAPDUMP
+void W_PrintLump(FILE* fp, void* p)
+{
+    int i;
+
+    for (i = 0; i < numlumps; i++)
+        if (lumpinfo[i]->cache == p)
+        {
+            fprintf(fp, " %8.8s %6d %2u %6d", lumpinfo[i]->name,
+                    W_LumpLength(i), lumpinfo[i]->locks, gametic - lumpinfo[i]->locktic);
+            return;
+        }
+    fprintf(fp, " not found");
+}
+#endif
 

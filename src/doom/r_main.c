@@ -882,7 +882,7 @@ void R_RenderPlayerView(player_t *player)
 
     if(autodetect_hom && !menuactive)
         V_FillRect(viewwindowx, viewwindowy, 0, viewwidth, viewheight,
-                ((gametic % 20) < 9 && !consoleactive && !menuactive && !paused ? 176 : 0));
+                ((gametic % 20) < 9 && !menuactive && !paused ? 176 : 0));
 
     // check for new console commands.
     NetUpdate ();

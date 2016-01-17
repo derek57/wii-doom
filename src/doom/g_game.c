@@ -1650,10 +1650,6 @@ void G_DoLoadLevel (void)
     displayplayer = consoleplayer;                // view the guy you are playing    
     gameaction = ga_nothing; 
 
-#ifndef DOOMRETRO_ZONE_HANDLING
-    Z_CheckHeap ();
-#endif
-
     // clear cmd building stuff
 
     memset (gamekeydown, 0, sizeof(gamekeydown)); 

@@ -31,6 +31,7 @@
 #include "d_ticcmd.h"
 #include "d_event.h"
 
+#define DEFAULT_RAM 32
 
 typedef void (*atexit_func_t)(void);
 
@@ -89,6 +90,8 @@ void I_PrintBanner(char *text);
 void I_PrintDivider(void);
 
 void I_QuitSerialFail (void);
+
+const char* I_SigString(char* buf, size_t sz, int signum);
 
 #endif
 

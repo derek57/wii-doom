@@ -186,11 +186,7 @@ static void R_InitSpriteDefs(char **namelist)
 
     numsprites = (signed int)i;
 
-#ifdef DOOMRETRO_ZONE_HANDLING
-    sprites = Z_Calloc(numsprites, sizeof(*sprites), PU_STATIC, NULL); 
-#else
     sprites = Z_Malloc(numsprites * sizeof(*sprites), PU_STATIC, NULL);
-#endif
 
     // Create hash table based on just the first four letters of each sprite
     // killough 1/31/98
@@ -347,13 +343,8 @@ void R_ClearSprites(void)
     if (num_vissprite >= num_vissprite_alloc)
     {
         num_vissprite_alloc += 128;
-#if defined BOOM_ZONE_HANDLING || defined WIIDOOM_ZONE_HANDLING
         vissprites = Z_Realloc(vissprites, num_vissprite_alloc * sizeof(vissprite_t), PU_LEVEL, NULL);
         vissprite_ptrs = Z_Realloc(vissprite_ptrs, num_vissprite_alloc * sizeof(vissprite_t *), PU_LEVEL, NULL);
-#else
-        vissprites = Z_Realloc(vissprites, num_vissprite_alloc * sizeof(vissprite_t));
-        vissprite_ptrs = Z_Realloc(vissprite_ptrs, num_vissprite_alloc * sizeof(vissprite_t *));
-#endif
     }
 
     num_vissprite = 0;
@@ -1280,7 +1271,6 @@ static void R_DrawPSprite(pspdef_t *psp, dboolean invisibility)
     vissprite_t         *vis;
     vissprite_t         avis;
     state_t             *state;
-    dboolean            dehacked = weaponinfo[viewplayer->readyweapon].dehacked; 
 
     // decide which patch to use
     state = psp->state;
@@ -1303,7 +1293,7 @@ static void R_DrawPSprite(pspdef_t *psp, dboolean invisibility)
     flip = (dboolean)(sprframe->flip & 1);
 
     // calculate edges of the shape
-    tx = psp->sx - ORIGWIDTH / 2 * FRACUNIT - (dehacked ? spriteoffset[lump] : 
+    tx = psp->sx - (ORIGWIDTH / 2) * FRACUNIT - (state->dehacked ? spriteoffset[lump] :
         newspriteoffset[lump]);
 //    x1 = (centerxfrac + FRACUNIT / 2 + FixedMul(tx, pspritexscale)) >> FRACBITS;
     x1 = (centerxfrac + FixedMul (tx,pspritescale) ) >>FRACBITS;
@@ -1401,7 +1391,8 @@ static void R_DrawPSprite(pspdef_t *psp, dboolean invisibility)
                     basecolfunc,        // SPR_BFGG
                     tlcolfunc           // SPR_BFGF
                 };
-                vis->colfunc = (bflash && spr <= SPR_BFGF && !dehacked ? colfuncs[spr] : basecolfunc); 
+                vis->colfunc = (bflash && spr <= SPR_BFGF && !state->dehacked ? colfuncs[spr] :
+                        basecolfunc);
             }
             else
             {
@@ -1424,7 +1415,8 @@ static void R_DrawPSprite(pspdef_t *psp, dboolean invisibility)
                     basecolfunc,        // SPR_BFGG
                     basecolfunc         // SPR_BFGF
                 };
-                vis->colfunc = (bflash && spr <= SPR_BFGF && !dehacked ? colfuncs[spr] : basecolfunc); 
+                vis->colfunc = (bflash && spr <= SPR_BFGF && !state->dehacked ? colfuncs[spr] :
+                        basecolfunc);
             }
         }
         if (fixedcolormap)
@@ -1536,11 +1528,7 @@ void R_DrawPlayerSprites(void)
         bflash = false;
         for (i = 0, psp = viewplayer->psprites; i < NUMPSPRITES; i++, psp++)
             if (psp->state && (psp->state->frame & FF_FULLBRIGHT))
-            {
                 bflash = true;
-                break;
-            }
-
         for (i = 0, psp = viewplayer->psprites; i < NUMPSPRITES; i++, psp++)
             if (psp->state && !inhelpscreens)
                 R_DrawPSprite(psp, false);

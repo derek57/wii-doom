@@ -69,8 +69,8 @@ static sprite_frame_t *sprite_frames;
 static int            num_sprite_frames;
 static int            sprite_frames_alloced;
 
-//extern dboolean        devparm;
-extern dboolean        version13;
+extern dboolean       merge;
+extern dboolean       version13;
 
 extern int            dont_show_adding_of_resource_wad;
 
@@ -609,21 +609,26 @@ dboolean W_MergeFile(char *filename, dboolean automatic)
 
     if (W_AddFile(filename, automatic) == NULL)
         return false;
-/*
+
+#ifdef WII
     if(devparm)
     {
         if(gamemode == shareware ||
-#ifdef WII
            load_extra_wad == 1 ||
-#endif
            version13 == true
            )
         {
             if(dont_show_adding_of_resource_wad == 0)
-                printf("         merging %s\n", filename);
+            {
+                if (merge)
+                    printf("         merging %s\n", filename);
+                else
+                    printf("         adding %s\n", filename);
+            }
         }
     }
-*/
+#endif
+
     // iwad is at the start, pwad was appended to the end
 
     iwad.lumps = lumpinfo;

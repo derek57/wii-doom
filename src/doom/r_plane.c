@@ -200,11 +200,7 @@ static void R_RaiseVisplanes (visplane_t** vp)
         visplane_t* visplanes_old = visplanes;
 
         numvisplanes = numvisplanes ? 2 * numvisplanes : MAXVISPLANES;
-#if defined BOOM_ZONE_HANDLING || defined WIIDOOM_ZONE_HANDLING
-        visplanes = Z_Realloc(visplanes, numvisplanes * sizeof(*visplanes), PU_CACHE, NULL);
-#else
-        visplanes = Z_Realloc(visplanes, numvisplanes * sizeof(*visplanes));
-#endif
+        visplanes = Z_Realloc(visplanes, numvisplanes * sizeof(*visplanes), PU_LEVEL, NULL);
 //        memset(visplanes + numvisplanes_old, 0, (numvisplanes - numvisplanes_old) * sizeof(*visplanes));
 
         lastvisplane = visplanes + numvisplanes_old;
