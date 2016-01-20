@@ -6995,7 +6995,6 @@ dboolean M_Responder (event_t* ev)
             {
                 consoleheight = MAX(1, consoleheight);
                 consoledirection = 1;
-                consoleanimindex = 0;
                 return true;
             }
             return false;

@@ -134,16 +134,6 @@
 
 dboolean        consoleactive = false;
 dboolean        alwaysrun;
-static dboolean        forceblurredraw = false;
-
-static patch_t         *unknownchar;
-static patch_t         *consolefont[CONSOLEFONTSIZE];
-static patch_t         *lsquote;
-static patch_t         *ldquote;
-static patch_t         *degree;
-static patch_t         *multiply;
-static patch_t         *caret;
-static patch_t         *route;
 
 byte            c_tempscreen[SCREENWIDTH * SCREENHEIGHT];
 byte            c_blurscreen[SCREENWIDTH * SCREENHEIGHT];
@@ -170,37 +160,34 @@ char            *upper =
     ":<+>?\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0{\\}^_`ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 };
 
-int             consoleanimindex = 0;
 int             consoleheight = 0;
 int             consoledirection = -1;
 int             consolestrings = 0;
 int             consoleedgecolor1 = 105;
 int             consoleedgecolor2 = 100;
-static int             timestampx;
-static int             zerowidth;
 int             spacewidth;
 
+static int      timestampx;
+static int      zerowidth;
 static int      caretwait;
 static int      outputhistory = -1;
 static int      consolewait;
 static int      notabs[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 
-static int      consoleanimdown[] =
-{
-     14,  28,  42,  56,  70,  84,  98, 112, 126, 140, 146,
-    150, 153, 156, 159, 161, 163, 165, 166, 167, 168
-};
+static dboolean showcaret = true;
+static dboolean forceblurredraw = false;
 
-static int      consoleanimup[] =
-{
-    154, 140, 126, 112,  98,  84,  70,  56,  42,  28,  22,
-     18,  15,  12,   9,   7,   5,   3,   2,   1,   0
-};
+static patch_t  *unknownchar;
+static patch_t  *consolefont[CONSOLEFONTSIZE];
+static patch_t  *lsquote;
+static patch_t  *ldquote;
+static patch_t  *degree;
+static patch_t  *multiply;
+static patch_t  *caret;
+static patch_t  *route;
 
-static dboolean  showcaret = true;
-
-extern dboolean  translucency;
-extern dboolean  wipe;
+extern dboolean translucency;
+extern dboolean wipe;
 
 extern int      fps;
 
@@ -478,14 +465,12 @@ void C_Init(void)
 void C_HideConsole(void)
 {
     consoledirection = -1;
-    consoleanimindex = 0;
 }
 
 void C_HideConsoleFast(void)
 {
     consoleheight = 0;
     consoledirection = -1;
-    consoleanimindex = 0;
     consoleactive = false;
 }
 
@@ -670,13 +655,8 @@ void C_Drawer(void)
 
         if (consolewait < I_GetTime())
         {
-            if (consoledirection == 1)
-            {
-                if (consoleheight < CONSOLEHEIGHT)
-                    consoleheight = consoleanimdown[consoleanimindex++];
-            }
-            else if (consoleheight > 0)
-                consoleheight = consoleanimup[consoleanimindex++];
+            consoleheight = BETWEEN(0, consoleheight + CONSOLESPEED * consoledirection,
+                CONSOLEHEIGHT);
             consolewait = I_GetTime();
         }
 
@@ -806,7 +786,6 @@ dboolean C_Responder(event_t *ev)
             case KEY_ESCAPE:
             case KEY_TILDE:
                 consoledirection = -1;
-                consoleanimindex = 0;
                 break;
 
             default:
@@ -972,31 +951,37 @@ void C_PrintCompileDate(void)
     sscanf(__DATE__, "%3s %2d %4d", mth, &day, &year);
     sscanf(__TIME__, "%2d:%2d:%*d", &hour, &minute);
     month = (strstr(mths, mth) - mths) / 3;
+
+    C_Output("This %i-bit %s binary of ~Wii-DOOM~ was built on %s, %s %i, "
+        "%i at %i:%02i%s", (sizeof(intptr_t) == 4 ? 32 : 64),
 #ifdef WII
-    C_Output("This %i-bit %s binary of ~Wii-DOOM~ was built on %s, %s %i, "
-        "%i at %i:%02i%s", (sizeof(intptr_t) == 4 ? 32 : 64), "Wii",
-        days[dayofweek(day, month + 1, year)], months[month], day, year,
-        (hour > 12 ? hour - 12 : hour), minute, (hour < 12 ? "am" : "pm"));
+    "Wii",
 #else
-    C_Output("This %i-bit %s binary of ~Wii-DOOM~ was built on %s, %s %i, "
-        "%i at %i:%02i%s", (sizeof(intptr_t) == 4 ? 32 : 64), "Linux",
+     "Linux",
+#endif
         days[dayofweek(day, month + 1, year)], months[month], day, year,
         (hour > 12 ? hour - 12 : hour), minute, (hour < 12 ? "am" : "pm"));
-#endif
 }
 
 void C_PrintSDLVersions(void)
 {
+    int revision = 0;
+
 #ifdef SDL2
-    int revision = SDL_GetRevisionNumber();
+    revision = SDL_GetRevisionNumber();
+
+    C_Warning("Using version %i.%i.%i of %s",
+        SDL_MIXER_MAJOR_VERSION, SDL_MIXER_MINOR_VERSION, SDL_MIXER_PATCHLEVEL,
+        "libSDL2_mixer.a"
+        );
+#endif
 
     if (revision)
         C_Warning("Using version %i.%i.%i (Revision %i) of %s",
             SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_PATCHLEVEL, revision,
-            "libSDL.a"
+            "libSDL2.a"
             );
     else
-#endif
         C_Warning("Using version %i.%i.%i of %s",
             SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_PATCHLEVEL,
             "libSDL.a"
@@ -1006,6 +991,7 @@ void C_PrintSDLVersions(void)
         SDL_MIXER_MAJOR_VERSION, SDL_MIXER_MINOR_VERSION, SDL_MIXER_PATCHLEVEL,
         "libSDL_mixer.a"
         );
+
 #ifdef WII
     C_Warning("Using version %i.%i.%i of %s",
         SMPEG_MAJOR_VERSION, SMPEG_MINOR_VERSION, SMPEG_PATCHLEVEL,
@@ -1033,8 +1019,7 @@ void C_PrintSDLVersions(void)
         );
 
     C_Warning("Also using the following libraries:");
-    C_Warning("libvorbisidec.a libwiilight.a, libfat.a, libwiiuse.a, libbte.a,");
-    C_Warning("libwiikeyboard.a, libsupc++.a, libstdc++.a, libm.a");
+    C_Warning("libvorbisidec.a libfat.a, libwiiuse.a, libbte.a, libwiikeyboard.a, libstdc++.a, libm.a");
 #endif
 }
 
