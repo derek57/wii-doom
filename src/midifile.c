@@ -570,7 +570,7 @@ static dboolean ReadFileHeader(midi_file_t *file, FILE *stream)
     if ((format_type != 0 && format_type != 1)
      || file->num_tracks < 1)
     {
-        C_Error("ReadFileHeader: Only type 0/1 "
+        C_Error("ReadFileHeader: Only type 0 or 1 "
                                          "MIDI files supported!");
         return false;
     }

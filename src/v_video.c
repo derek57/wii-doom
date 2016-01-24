@@ -85,6 +85,35 @@ byte redtoyellow[] =
 };
 
 
+// [crispy] four different rendering functions
+// for each possible combination of dp_translation and dp_translucent:
+// (1) normal, opaque patch
+static const inline byte drawpatchpx00(const byte dest, const byte source)
+{
+    return source;
+}
+
+// (2) color-translated, opaque patch
+static const inline byte drawpatchpx01(const byte dest, const byte source)
+{
+    return dp_translation[source];
+}
+
+// (3) normal, translucent patch
+static const inline byte drawpatchpx10(const byte dest, const byte source)
+{
+    return tranmap[(dest << 8) + source];
+}
+
+// (4) color-translated, translucent patch
+static const inline byte drawpatchpx11(const byte dest, const byte source)
+{
+    return tranmap[(dest << 8) + dp_translation[source]];
+}
+
+
+char                         *d_lowpixelsize = "2x2";
+
 // The screen buffer that the v_video.c code draws to.
 
 //byte                       *dest_screen = NULL;
@@ -92,25 +121,7 @@ byte redtoyellow[] =
 // Each screen is [SCREENWIDTH * SCREENHEIGHT];
 byte                         *screens[5];
 
-// [crispy] four different rendering functions
-// for each possible combination of dp_translation and dp_translucent:
-// (1) normal, opaque patch
-static const inline byte drawpatchpx00 (const byte dest, const byte source)
-{return source;}
-// (2) color-translated, opaque patch
-static const inline byte drawpatchpx01 (const byte dest, const byte source)
-{return dp_translation[source];}
-// (3) normal, translucent patch
-static const inline byte drawpatchpx10 (const byte dest, const byte source)
-{return tranmap[(dest<<8)+source];}
-// (4) color-translated, translucent patch
-static const inline byte drawpatchpx11 (const byte dest, const byte source)
-{return tranmap[(dest<<8)+dp_translation[source]];}
-
-char                         *d_lowpixelsize = "2x2";
-
 byte                         *tranmap = NULL;
-
 byte                         *dp_translation = NULL;
 
 int                          dirtybox[4]; 
@@ -118,12 +129,12 @@ int                          pixelwidth;
 int                          pixelheight;
 int                          italicize[15] = { 0, 2, 2, 2, 1, 1, 1, 1, 0, 0, 0, 0, -1, -1, -1 };
 
-dboolean                      dp_translucent = false;
+dboolean                     dp_translucent = false;
 
-extern dboolean              inhelpscreens;
 
 extern byte                  redtoblue[];
 extern byte                  redtogreen[];
+
 
 //
 // V_MarkRect 
@@ -205,7 +216,7 @@ V_CopyRect
      || desty < 0
      || desty /* + height */ > SCREENHEIGHT)
     {
-        C_Error("Bad V_CopyRect: Patch (%d,%d)-(%d,%d) / Dest.: (%d,%d) exceeds LFB"
+        C_Error("Bad V_CopyRect: Patch (%d,%d)-(%d,%d). Dest.: (%d,%d) exceeds LFB"
                 , srcx, srcy, srcx + width, srcy + height, destx, desty);
     }
 #endif 
@@ -946,7 +957,7 @@ void LoadPCX(char *filename, byte **pic, byte **palette, int *width, int *height
 
     if (!raw)
     {
-        C_Error("Bad PCX file: wrong raw data in file %s\n", filename);
+        C_Error("Bad PCX file: wrong raw data in file %s", filename);
         return;
     }
 
@@ -973,7 +984,7 @@ void LoadPCX(char *filename, byte **pic, byte **palette, int *width, int *height
         || pcx->xmax >= 640
         || pcx->ymax >= 480)
     {
-        C_Error("Bad PCX file: wrong format in file %s\n", filename);
+        C_Error("Bad PCX file: wrong format in file %s", filename);
         return;
     }
 

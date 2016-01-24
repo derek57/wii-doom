@@ -1067,8 +1067,8 @@ static int GetSliceSize(void)
         {
             setpanning_workaround = true;
             C_Warning("ATTENTION: You are using an old version of SDL_mixer!");
-            C_Warning("\tThis version has a bug that may cause your sound to stutter.");
-            C_Warning("\tPlease upgrade to a newer version!");
+            C_Warning("        This version has a bug that may cause your sound to stutter.");
+            C_Warning("        Please upgrade to a newer version!");
         }
     }
 

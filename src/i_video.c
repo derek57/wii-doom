@@ -153,7 +153,7 @@ static dboolean initialized = false;
 // if true, screen buffer is screen->pixels
 
 #ifndef SDL2
-static dboolean native_surface;
+//static dboolean native_surface;
 
 // Color depth.
 
@@ -1203,12 +1203,12 @@ static dboolean BlitArea(int x1, int y1, int scrn, int x2, int y2)
     dboolean result;
 
     // No blit needed on native surface
-
+/*
     if (native_surface)
     {
         return true;
     }
-
+*/
     x_offset = (screenbuffer->w - screen_mode->width) / 2;
     y_offset = (screenbuffer->h - screen_mode->height) / 2;
 
@@ -1951,7 +1951,7 @@ static void SetVideoMode(screen_mode_t *mode, int w, int h)
 
     const char *displayname = SDL_GetDisplayName(0);
 
-    C_Output("Using display called \"%s\".", displayname);
+    C_Output("Using display called '%s'.", displayname);
 #endif
 
     // If we are already running and in a true color mode, we need
@@ -2111,7 +2111,7 @@ static void SetVideoMode(screen_mode_t *mode, int w, int h)
         C_Output("The screen is rendered in software.");
 #endif
 
-    C_Output("The %ix%i screen is scaled up to %ix%i", SCREENWIDTH, SCREENHEIGHT, h * 4 / 3, h);
+    C_Output("The %ix%i screen is scaled up to %i x %i", SCREENWIDTH, SCREENHEIGHT, h * 4 / 3, h);
 
     // Important: Set the "logical size" of the rendering context. At the same
     // time this also defines the aspect ratio that is preserved while scaling
@@ -2258,7 +2258,7 @@ static void ApplyWindowResize(unsigned int w, unsigned int h)
 
     // Reset mode to resize window.
 
-    C_Warning("Resize to %ix%i", mode->width, mode->height);
+    C_Warning("Resize to %i x %i", mode->width, mode->height);
     SetVideoMode(mode, mode->width, mode->height);
 
     // Save settings.
@@ -2787,7 +2787,7 @@ void I_InitGraphics(int scrn)
     // If we have to lock the screen, draw to a buffer and copy
     // Likewise if the screen pitch is not the same as the width
     // If we have to multiply, drawing is done to a separate 320x200 buf
-
+/*
 #ifndef SDL2
     native_surface = 
 #ifndef WII
@@ -2799,42 +2799,42 @@ void I_InitGraphics(int scrn)
                   && screen->pitch == SCREENWIDTH
                   && aspect_ratio_correct;
 #endif
-
+*/
     // If not, allocate a buffer and copy from that buffer to the
     // screen when we do an update
 
 #ifdef SDL2
 //    I_VideoBuffer = screenbuffer->pixels;
     screens[scrn] = screenbuffer->pixels;
+/*
 #else
     if (native_surface)
     {
-/*
-        I_VideoBuffer = (unsigned char *) screen->pixels;
 
-        I_VideoBuffer += (screen->h - SCREENHEIGHT) / 2;
-*/
+//        I_VideoBuffer = (unsigned char *) screen->pixels;
+
+//        I_VideoBuffer += (screen->h - SCREENHEIGHT) / 2;
+
         screens[scrn] = (unsigned char *) screen->pixels;
 
         screens[scrn] += (screen->h - SCREENHEIGHT) / 2;
     }
     else
     {
-/*
-        I_VideoBuffer = (unsigned char *) Z_Malloc (SCREENWIDTH * SCREENHEIGHT, 
-                                                    PU_STATIC, NULL);
-*/
+//        I_VideoBuffer = (unsigned char *) Z_Malloc (SCREENWIDTH * SCREENHEIGHT, 
+//                                                    PU_STATIC, NULL);
+
         screens[scrn] = (unsigned char *) Z_Malloc (SCREENWIDTH * SCREENHEIGHT, 
                                                     PU_STATIC, NULL);
     }
-printf("native_surface = %d\n",native_surface);
+*/
 #endif
 
 //    V_RestoreBuffer();
 
     // Clear the screen to black.
 
-//    memset(I_VideoBuffer, 0, SCREENWIDTH * SCREENHEIGHT);
+    memset(screens[scrn], 0, SCREENWIDTH * SCREENHEIGHT);
 
     // We need SDL to give us translated versions of keys as well
 

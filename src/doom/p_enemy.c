@@ -2998,13 +2998,13 @@ void A_CounterJump(mobj_t *mo)
     // validate state number
     if (statenum == NUMSTATES)
     {
-        C_Warning("A_CounterJump: invalid statenum (%d)\n", statenum);
+        C_Warning("A_CounterJump: invalid statenum (%d)", statenum);
         return;
     }
 
     if (cnum < 0 || cnum >= NUMMOBJCOUNTERS)
     {
-        C_Warning("A_CounterJump: invalid cnum (%d)\n", cnum);
+        C_Warning("A_CounterJump: invalid cnum (%d)", cnum);
         return;
     }
 
@@ -3022,7 +3022,7 @@ void A_CounterJump(mobj_t *mo)
 
         if (value < 0 || value >= NUMMOBJCOUNTERS)
         {
-            C_Warning("A_CounterJump: invalid value (%d)\n", value);
+            C_Warning("A_CounterJump: invalid value (%d)", value);
             return;
         }
 
@@ -3160,14 +3160,14 @@ void A_CounterSwitch(mobj_t *mo)
     }
     else
     {
-        C_Warning("A_CounterSwitch: invalid mobjtype (%d)\n", mo->type);
+        C_Warning("A_CounterSwitch: invalid mobjtype (%d)", mo->type);
         return;
     }
 
     // get counter
     if (cnum < 0 || cnum >= NUMMOBJCOUNTERS)
     {
-        C_Warning("A_CounterSwitch: invalid cnum (%d)\n", cnum);
+        C_Warning("A_CounterSwitch: invalid cnum (%d)", cnum);
         return;
     }
 
@@ -3176,21 +3176,21 @@ void A_CounterSwitch(mobj_t *mo)
     // verify startstate
     if (startstate == NUMSTATES)
     {
-        C_Warning("A_CounterSwitch: invalid startstate (%d)\n", startstate);
+        C_Warning("A_CounterSwitch: invalid startstate (%d)", startstate);
         return;
     }
 
     // verify last state is < NUMSTATES
     if (startstate + numstates >= NUMSTATES)
     {
-        C_Warning("A_CounterSwitch: invalid last state (%d)\n", startstate + numstates);
+        C_Warning("A_CounterSwitch: invalid last state (%d)", startstate + numstates);
         return;
     }
 
     // verify counter is in range
     if (*counter < 0 || *counter > numstates)
     {
-        C_Warning("A_CounterSwitch: invalid counter (%d)\n", *counter);
+        C_Warning("A_CounterSwitch: invalid counter (%d)", *counter);
         return;
     }
 
@@ -3272,13 +3272,13 @@ void A_SetCounter(mobj_t *mo)
     }
     else
     {
-        C_Warning("A_SetCounter: invalid mobjtype (%d)\n", mo->type);
+        C_Warning("A_SetCounter: invalid mobjtype (%d)", mo->type);
         return;
     }
 
     if (cnum < 0 || cnum >= NUMMOBJCOUNTERS)
     {
-        C_Warning("A_SetCounter: invalid cnum (%d)\n", cnum);
+        C_Warning("A_SetCounter: invalid cnum (%d)", cnum);
         return;
     }
 
@@ -3435,7 +3435,7 @@ void A_EjectCasing(mobj_t *actor)
     }
     else
     {
-        C_Warning("A_EjectCasing: invalid mobjtype (%d)\n", actor->type);
+        C_Warning("A_EjectCasing: invalid mobjtype (%d)", actor->type);
         return;
     }
 
@@ -3493,7 +3493,7 @@ void A_CasingThrust(mobj_t *actor)
     }
     else
     {
-        C_Warning("A_CasingThrust: invalid mobjtype (%d)\n", actor->type);
+        C_Warning("A_CasingThrust: invalid mobjtype (%d)", actor->type);
         return;
     }
 

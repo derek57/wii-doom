@@ -110,27 +110,25 @@ static textscreen_t textscreens[] =
 */
 
 // Stage of animation:
-state_t*        caststate;
+state_t*         caststate;
 
-extern patch_t  *hu_font[HU_FONTSIZE];
-
-extern dboolean  opl;
-
-unsigned int    finalecount;
+unsigned int     finalecount;
 
 dboolean         finale_music;
 dboolean         castdeath;
 dboolean         castattacking;
 dboolean         castdeathflip;
 
-char*           finaletext;
-char*           finaleflat;
+char*            finaletext;
+char*            finaleflat;
 
-int             castrot;
-int             castnum;
-int             casttics;
-int             castframes;
-int             castonmelee;
+int              castrot;
+int              castnum;
+int              casttics;
+int              castframes;
+int              castonmelee;
+
+extern dboolean  opl;
 
 
 //

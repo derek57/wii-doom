@@ -28,7 +28,7 @@
 #define __HU_STUFF_H__
 
 #include "d_event.h"
-
+#include "v_patch.h"
 
 //
 // Globally visible constants.
@@ -90,8 +90,10 @@ void HU_Drawer(void);
 char HU_dequeueChatChar(void);
 void HU_Erase(void);
 
-extern char *chat_macros[10];
-extern char *playername;
+extern char     *chat_macros[10];
+extern char     *playername;
+
+extern patch_t  *hu_font[HU_FONTSIZE];
 
 // hu_newlevel called when we enter a new level
 // determine the level name and display it in

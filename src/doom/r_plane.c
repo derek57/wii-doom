@@ -126,7 +126,10 @@ static void R_MapPlane(int y, int x1, int x2)
      || x2 >= viewwidth
      || y > viewheight)
     {
-        I_Error ("R_MapPlane: %i, %i at %i",x1,x2,y);
+//        I_Error ("R_MapPlane: %i, %i at %i",x1,x2,y);
+printf("OOPS!\n");
+        C_Error("R_MapPlane: %i, %i at %i",x1,x2,y);
+        return;
     }
 #endif
 

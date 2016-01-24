@@ -56,6 +56,7 @@
 #include "m_misc.h"
 
 #include "doom/s_sound.h"
+#include "doom/statdump.h"
 
 #include "v_trans.h"
 #include "w_wad.h"
@@ -83,7 +84,7 @@ byte *zone_mem;
 
 int memory_size;
 
-static dboolean already_quitting;
+dboolean already_quitting;
 
 static atexit_listentry_t *exit_funcs = NULL;
 
@@ -250,11 +251,13 @@ void I_Quit (void)
 {
     atexit_listentry_t *entry;
 
-//    if(devparm)
+    if (debugfile)
         fclose (debugfile);
-//    fclose (statsfile);
 
-    C_ConDump();
+    if (statsfile)
+        fclose (statsfile);
+
+//    C_ConDump();
 
     // Run through all exit functions
  
@@ -372,15 +375,20 @@ void I_Error (char *error, ...)
     // Message first.
     va_start(argptr, error);
 
-    vfprintf(debugfile, error, argptr);
-
-    fprintf(debugfile, "\n\n");
+    if (debugfile)
+    {
+        vfprintf(debugfile, error, argptr);
+        fprintf(debugfile, "\n\n");
+    }
 
     va_end(argptr);
 
-    fclose (debugfile);
+    if (debugfile)
+        fclose (debugfile);
 
-//    C_ConDump();
+    C_ConDump();
+    Z_DumpMemory();
+    StatDump();
 
     if (already_quitting)
     {
@@ -509,10 +517,6 @@ static const unsigned char mem_dump_win98[DOS_MEM_DUMP_SIZE] = {
 static const unsigned char mem_dump_dosbox[DOS_MEM_DUMP_SIZE] = {
   0x00, 0x00, 0x00, 0xF1, 0x00, 0x00, 0x00, 0x00, 0x07, 0x00};
 
-//
-// nitr8 [UNUSED]
-//
-/*
 #ifndef WII
 static unsigned char mem_dump_custom[DOS_MEM_DUMP_SIZE];
 #endif
@@ -521,15 +525,15 @@ static const unsigned char *dos_mem_dump = mem_dump_dos622;
 
 dboolean I_GetMemoryValue(unsigned int offset, void *value, int size)
 {
-#ifndef WII
     static dboolean firsttime = true;
 
     if (firsttime)
     {
-        int p, i, val;
+#ifndef WII
+        int p, val;
+#endif
 
         firsttime = false;
-        i = 0;
 
         //!
         // @category compat
@@ -539,7 +543,7 @@ dboolean I_GetMemoryValue(unsigned int offset, void *value, int size)
         // emulation.  Supported versions are: dos622, dos71, dosbox.
         // The default is to emulate DOS 7.1 (Windows 98).
         //
-
+#ifndef WII
         p = M_CheckParmWithArgs("-setmem", 1);
 
         if (p > 0)
@@ -558,6 +562,8 @@ dboolean I_GetMemoryValue(unsigned int offset, void *value, int size)
             }
             else
             {
+                int i;
+
                 for (i = 0; i < DOS_MEM_DUMP_SIZE; ++i)
                 {
                     ++p;
@@ -574,8 +580,10 @@ dboolean I_GetMemoryValue(unsigned int offset, void *value, int size)
                 dos_mem_dump = mem_dump_custom;
             }
         }
-    }
 #endif
+    }
+
+    C_Warning("Read Access Violation emulation.");
 
     switch (size)
     {
@@ -596,7 +604,6 @@ dboolean I_GetMemoryValue(unsigned int offset, void *value, int size)
 
     return false;
 }
-*/
 
 // cphipps - I_SigString
 // Returns a string describing a signal number

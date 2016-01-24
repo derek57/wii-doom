@@ -1216,8 +1216,6 @@ P_KillMobj
 
                 if (source->player->score > 0 && source->player->score < EXTRAPOINTS)
                     source->player->extra_lifes = 0;
-
-//                ST_doRefresh();
             }
         }
     }

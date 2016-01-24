@@ -370,6 +370,10 @@ extern  dboolean         d_centerweapon;
 extern  dboolean         d_ejectcasings;
 extern  dboolean         d_statusmap;
 extern  dboolean         show_title;
+extern  dboolean         dump_mem;
+extern  dboolean         dump_con;
+extern  dboolean         dump_stat;
+extern  dboolean         printdir;
 /*
 extern  dboolean         nerve;
 extern  dboolean         chex;

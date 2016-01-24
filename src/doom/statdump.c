@@ -19,7 +19,6 @@
 
  */
 
-#ifndef WII
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -55,6 +54,8 @@ static wbstartstruct_t captured_stats[MAX_CAPTURES];
 static int num_captured_stats = 0;
 
 static GameMission_t discovered_gamemission = none;
+
+extern dboolean already_quitting;
 
 /* Try to work out whether this is a Doom 1 or Doom 2 game, by looking
  * at the episode and map, and the par times.  This is used to decide
@@ -298,20 +299,20 @@ static void PrintStats(FILE *stream, wbstartstruct_t *stats)
     fprintf(stream, "\n");
 }
 
-//
-// [nitr8] UNUSED
-//
-/*
 void StatCopy(wbstartstruct_t *stats)
 {
-    if (M_ParmExists("-statdump") && num_captured_stats < MAX_CAPTURES)
+    if((
+#ifndef WII
+        M_ParmExists("-statdump") ||
+#endif
+        dump_stat || already_quitting || error_detected) &&
+        num_captured_stats < MAX_CAPTURES)
     {
         memcpy(&captured_stats[num_captured_stats], stats,
                sizeof(wbstartstruct_t));
         ++num_captured_stats;
     }
 }
-*/
 
 void StatDump(void)
 {
@@ -325,13 +326,16 @@ void StatDump(void)
     // that were played. The output from this option matches the output
     // from statdump.exe (see ctrlapi.zip in the /idgames archive).
     //
-
+#ifndef WII
     if(!beta_style)
         i = M_CheckParmWithArgs("-statdump", 1);
 
-    if (i > 0)
+    if (i > 0 || dump_stat || already_quitting || error_detected)
+#endif
     {
-        FILE *dumpfile;
+        FILE *dumpfile = NULL;
+
+        StatCopy(&wminfo);
 
         printf("Statistics captured for %i level(s)\n", num_captured_stats);
 
@@ -341,16 +345,15 @@ void StatDump(void)
         DiscoverGamemode(captured_stats, num_captured_stats);
 
         // Allow "-" as output file, for stdout.
-
-        if (strcmp(myargv[i + 1], "-") != 0)
-        {
-            dumpfile = fopen(myargv[i + 1], "w");
-        }
-        else
-        {
-            dumpfile = NULL;
-        }
-
+#ifndef WII
+        dumpfile = fopen("statdump.txt", "w");
+#else
+        if (usb)
+            dumpfile = fopen("usb:/apps/wiidoom/statdump.txt", "w");
+        else if (sd)
+            dumpfile = fopen("sd:/apps/wiidoom/statdump.txt", "w");
+#endif
+printf("!!!\n");
         for (i = 0; i < num_captured_stats; ++i)
         {
             PrintStats(dumpfile, &captured_stats[i]);
@@ -358,9 +361,8 @@ void StatDump(void)
 
         if (dumpfile != NULL)
         {
-            fclose(dumpfile);
+printf("...\n");            fclose(dumpfile);
         }
     }
 }
-#endif
 

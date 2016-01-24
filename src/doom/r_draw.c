@@ -1857,7 +1857,7 @@ void R_DrawViewBorder(void)
     int                ofs;
     int                i; 
  
-    if (scaledviewwidth == SCREENWIDTH) 
+    if (scaledviewwidth == SCREENWIDTH || am_overlay) 
         return; 
   
     top = ((SCREENHEIGHT-SBARHEIGHT)-scaledviewheight)/2; // CHANGED FOR HIRES
@@ -1911,10 +1911,18 @@ void R_DrawChar(int x, int y, int scrn, int num)
 
         int i;
         int c;
-        int width;
-        int height;
+        int width = 0;
+        int height = 0;
 
+        // FIXME: Try loading the char table from a WAD lump
+#ifdef WII
+        if (usb)
+            LoadPCX("usb:/apps/wiidoom/conchars.pcx", &pic, NULL, &width, &height);
+        else if (sd)
+            LoadPCX("sd:/apps/wiidoom/conchars.pcx", &pic, NULL, &width, &height);
+#else
         LoadPCX("conchars.pcx", &pic, NULL, &width, &height);
+#endif
 
         c = width * height;
 
@@ -1931,9 +1939,6 @@ void R_DrawChar(int x, int y, int scrn, int num)
         }
     }
 
-    if (num == 32 || num == 32 + 128)
-        return;
-
     // totally off screen
     if (y <= -8)
         return;
@@ -1944,10 +1949,16 @@ void R_DrawChar(int x, int y, int scrn, int num)
 
 #ifdef RANGECHECK
     if (y > SCREENHEIGHT - 8 || x < 0 || x > SCREENWIDTH - 8)
+    {
         C_Error("R_DrawChar: (%i, %i)", x, y);
+        return;
+    }
 
     if (num < 0 || num > 255)
+    {
         C_Error("R_DrawChar: char %i", num);
+        return;
+    }
 #endif
 
     row = num >> 4;

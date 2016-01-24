@@ -301,8 +301,6 @@ static const struct
 };
 #endif
 
-extern char     *mapnumandtitle;
-
 extern int      messageToPrint;
 
 extern dboolean done;
@@ -708,6 +706,7 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
             cmd->arti |= AFLAG_JUMP;
     }
 
+#ifndef WII
     if(!demoplayback)
     {
         if(mousebuttons[mousebnextweapon])
@@ -716,6 +715,8 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
         if(mousebuttons[mousebprevweapon])
             ChangeWeaponLeft();
     }
+#endif
+
     // FOR THE WII: UNUSED BUT WORKING
     if((
 #ifdef WII
@@ -1545,7 +1546,6 @@ void G_DoLoadLevel (void)
 { 
     int         i, ep; 
     int         map = (gameepisode - 1) * 10 + gamemap;
-    char        *author = P_GetMapAuthor(map);
 
     // Set the sky map.
     // First thing, we have a dummy sky texture name,
@@ -1633,11 +1633,6 @@ void G_DoLoadLevel (void)
     P_FreeSecNodeList();
 
     ep = (gamemode == commercial ? (gamemission == pack_nerve ? 2 : 1) : gameepisode);
-
-    if (author[0])
-        C_Output("%s by %s", mapnumandtitle, author);
-    else
-        C_Output(mapnumandtitle);
 
     if(beta_style && ep == 1 && gamemap == 3)
             I_Error("W_GetNumForName: E1M3 not found!");

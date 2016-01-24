@@ -605,32 +605,30 @@ void P_PlayerThink (player_t* player)
 void P_AimingHelp (player_t* player)
 {
     if (prio == 7 &&
-        player->attacker->health > 0 &&
-        player->attacker &&
-        player->attacker != player->mo &&
-        P_CheckSight (player->mo, player->attacker))
-    {
-        angle_t angle = R_PointToAngle2 (player->mo->x,
-                                 player->mo->y,
-                                 player->attacker->x,
-                                 player->attacker->y);
-
-        angle_t delta = angle - player->mo->angle;
-
-        // Looking at attacker
-        if (delta < ANG5 || delta > (unsigned)-ANG5)
-            player->mo->angle = angle;
-        else if (delta < ANG180)
-            player->mo->angle += ANG5;
-        else
-            player->mo->angle -= ANG5;
-    }
-
-    if (prio == 7 &&
-        player->attacker->health < 1 &&
         player->attacker &&
         player->attacker != player->mo)
-        prio = 0;
+    {
+        if (player->attacker->health > 0 &&
+            P_CheckSight (player->mo, player->attacker))
+        {
+            angle_t angle = R_PointToAngle2 (player->mo->x,
+                                     player->mo->y,
+                                     player->attacker->x,
+                                     player->attacker->y);
+
+            angle_t delta = angle - player->mo->angle;
+
+            // Looking at attacker
+            if (delta < ANG5 || delta > (unsigned)-ANG5)
+                player->mo->angle = angle;
+            else if (delta < ANG180)
+                player->mo->angle += ANG5;
+            else
+                player->mo->angle -= ANG5;
+        }
+        else if (player->attacker->health < 1)
+            prio = 0;
+    }
 }
 
 //----------------------------------------------------------------------------

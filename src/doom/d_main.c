@@ -322,8 +322,11 @@ void D_Display (int scrn)
       case GS_LEVEL:
         if (!gametic)
             break;
+/*
         if (automapactive && !am_overlay)
+        // draw the view directly
             R_RenderPlayerView (&players[consoleplayer]);
+*/
         if (automapactive)
             AM_Drawer ();
         if (wipe || (scaledviewheight != (ORIGWIDTH << hires) && fullscreen) ||
@@ -442,7 +445,7 @@ void D_Display (int scrn)
 //    SlopeDiv = SlopeDivVanilla;
 
     // [crispy] shade background when a menu is active or the game is paused
-    if ((paused || menuactive) && (background_type == 1 || inhelpscreens))
+    if (((paused || menuactive) && background_type == 1) || inhelpscreens)
     {
         static int firsttic;
 
@@ -480,12 +483,15 @@ void D_Display (int scrn)
 
         M_DarkBackground(0);
 
-        if(font_shadow == 1)
-            V_DrawPatchWithShadow((ORIGWIDTH - SHORT(patch->width)) / 2,
-                    viewwindowy / 2 + (viewheight / 2 - SHORT(patch->height)) / 2, 0, patch, false);
-        else
-            V_DrawPatch((ORIGWIDTH - SHORT(patch->width)) / 2,
-                    viewwindowy / 2 + (viewheight / 2 - SHORT(patch->height)) / 2, 0, patch);
+        if (!inhelpscreens)
+        {
+            if(font_shadow == 1)
+                V_DrawPatchWithShadow((ORIGWIDTH - SHORT(patch->width)) / 2,
+                        viewwindowy / 2 + (viewheight / 2 - SHORT(patch->height)) / 2, 0, patch, false);
+            else
+                V_DrawPatch((ORIGWIDTH - SHORT(patch->width)) / 2,
+                        viewwindowy / 2 + (viewheight / 2 - SHORT(patch->height)) / 2, 0, patch);
+        }
     }
 #endif
 
@@ -499,7 +505,7 @@ void D_Display (int scrn)
             ST_doRefresh();
     }
 
-    if (usergame && oldscreenblocks && !inhelpscreens && !menuactive && screenSize != oldscreenSize)
+    if (usergame && oldscreenblocks && !inhelpscreens && !menuactive && screenSize != oldscreenSize && !am_overlay)
     {
         screenSize = oldscreenSize;
         screenblocks = oldscreenblocks;
@@ -539,7 +545,6 @@ void D_Display (int scrn)
     if(beta_style && done)
     {
         show_chat_bar = false;
-//        ST_doRefresh();
     }
 
     if(done)
@@ -3342,87 +3347,87 @@ void D_DoomMain (void)
     // loaded which could probably include a lump of that name.
 
     if (fsize == 4207819)
-        C_Output("Playing \"DOOM SHAREWARE v1.0\".");
+        C_Output("Playing 'DOOM SHAREWARE v1.0'.");
     else if(fsize == 4274218)
-        C_Output("Playing \"DOOM SHAREWARE v1.1\".");
+        C_Output("Playing 'DOOM SHAREWARE v1.1'.");
     else if(fsize == 4225504)
-        C_Output("Playing \"DOOM SHAREWARE v1.2\".");
+        C_Output("Playing 'DOOM SHAREWARE v1.2'.");
     else if(fsize == 4225460)
-        C_Output("Playing \"DOOM SHAREWARE v1.25 (SYBEX RELEASE)\".");
+        C_Output("Playing 'DOOM SHAREWARE v1.25 (SYBEX RELEASE)'.");
     else if(fsize == 4234124)
-        C_Output("Playing \"DOOM SHAREWARE v1.666\".");
+        C_Output("Playing 'DOOM SHAREWARE v1.666'.");
     else if(fsize == 4196020)
-        C_Output("Playing \"DOOM SHAREWARE v1.8\".");
+        C_Output("Playing 'DOOM SHAREWARE v1.8'.");
     else if(fsize == 4261144)
-        C_Output("Playing \"DOOM BETA v1.4\".");
+        C_Output("Playing 'DOOM BETA v1.4'.");
     else if(fsize == 4271324)
-        C_Output("Playing \"DOOM BETA v1.5\".");
+        C_Output("Playing 'DOOM BETA v1.5'.");
     else if(fsize == 4211660)
-        C_Output("Playing \"DOOM BETA v1.6\".");
+        C_Output("Playing 'DOOM BETA v1.6'.");
     else if(fsize == 10396254)
-        C_Output("Playing \"DOOM REGISTERED v1.1\".");
+        C_Output("Playing 'DOOM REGISTERED v1.1'.");
     else if(fsize == 10399316)
-        C_Output("Playing \"DOOM REGISTERED v1.2\".");
+        C_Output("Playing 'DOOM REGISTERED v1.2'.");
     else if(fsize == 10401760)
-        C_Output("Playing \"DOOM REGISTERED v1.6\".");
+        C_Output("Playing 'DOOM REGISTERED v1.6'.");
     else if(fsize == 11159840)
-        C_Output("Playing \"DOOM REGISTERED v1.8\".");
+        C_Output("Playing 'DOOM REGISTERED v1.8'.");
     else if(fsize == 12408292)
-        C_Output("Playing \"DOOM REGISTERED v1.9 (THE ULTIMATE DOOM)\".");
+        C_Output("Playing 'DOOM REGISTERED v1.9 (THE ULTIMATE DOOM)'.");
     else if(fsize == 12538385)
-        C_Output("Playing \"DOOM REGISTERED (XBOX EDITION)\".");
+        C_Output("Playing 'DOOM REGISTERED (XBOX EDITION)'.");
     else if(fsize == 12487824)
-        C_Output("Playing \"DOOM REGISTERED (BFG-PC EDITION)\".");
+        C_Output("Playing 'DOOM REGISTERED (BFG-PC EDITION)'.");
     else if(fsize == 12474561)
-        C_Output("Playing \"DOOM REGISTERED (BFG-XBOX360 EDITION)\".");
+        C_Output("Playing 'DOOM REGISTERED (BFG-XBOX360 EDITION)'.");
     else if(fsize == 19362644)
-        C_Output("Playing \"FREEDOOM v0.8 PHASE 1\".");
+        C_Output("Playing 'FREEDOOM v0.8 PHASE 1'.");
     else if(fsize == 14943400)
-        C_Output("Playing \"DOOM 2 REGISTERED v1.666\".");
+        C_Output("Playing 'DOOM 2 REGISTERED v1.666'.");
     else if(fsize == 14824716)
-        C_Output("Playing \"DOOM 2 REGISTERED v1.666 (GERMAN VERSION)\".");
+        C_Output("Playing 'DOOM 2 REGISTERED v1.666 (GERMAN VERSION)'.");
     else if(fsize == 14612688)
-        C_Output("Playing \"DOOM 2 REGISTERED v1.7\".");
+        C_Output("Playing 'DOOM 2 REGISTERED v1.7'.");
     else if(fsize == 14607420)
-        C_Output("Playing \"DOOM 2 REGISTERED v1.8 (FRENCH VERSION)\".");
+        C_Output("Playing 'DOOM 2 REGISTERED v1.8 (FRENCH VERSION)'.");
     else if(fsize == 14604584)
-        C_Output("Playing \"DOOM 2 REGISTERED v1.9\".");
+        C_Output("Playing 'DOOM 2 REGISTERED v1.9'.");
     else if(fsize == 14677988)
-        C_Output("Playing \"DOOM 2 REGISTERED (BFG-PSN EDITION)\".");
+        C_Output("Playing 'DOOM 2 REGISTERED (BFG-PSN EDITION)'.");
     else if(fsize == 14691821)
-        C_Output("Playing \"DOOM 2 REGISTERED (BFG-PC EDITION)\".");
+        C_Output("Playing 'DOOM 2 REGISTERED (BFG-PC EDITION)'.");
     else if(fsize == 14683458)
-        C_Output("Playing \"DOOM 2 REGISTERED (XBOX EDITION)\".");
+        C_Output("Playing 'DOOM 2 REGISTERED (XBOX EDITION)'.");
     else if(fsize == 19801320)
-        C_Output("Playing \"FREEDOOM v0.6.4\".");
+        C_Output("Playing 'FREEDOOM v0.6.4'.");
     else if(fsize == 27704188)
-        C_Output("Playing \"FREEDOOM v0.7 RC 1\".");
+        C_Output("Playing 'FREEDOOM v0.7 RC 1'.");
     else if(fsize == 27625596)
-        C_Output("Playing \"FREEDOOM v0.7\".");
+        C_Output("Playing 'FREEDOOM v0.7'.");
     else if(fsize == 28144744)
-        C_Output("Playing \"FREEDOOM v0.8 BETA 1\".");
+        C_Output("Playing 'FREEDOOM v0.8 BETA 1'.");
     else if(fsize == 28592816)
-        C_Output("Playing \"FREEDOOM v0.8\".");
+        C_Output("Playing 'FREEDOOM v0.8'.");
     else if(fsize == 28422764)
-        C_Output("Playing \"FREEDOOM v0.8 PHASE 2\".");
+        C_Output("Playing 'FREEDOOM v0.8 PHASE 2'.");
     else if(fsize == 18195736)
-        C_Output("Playing \"FINAL DOOM - TNT v1.9 (WITH YELLOW KEYCARD BUG)\".");
+        C_Output("Playing 'FINAL DOOM - TNT v1.9 (WITH YELLOW KEYCARD BUG)'.");
     else if(fsize == 18654796)
-        C_Output("Playing \"FINAL DOOM - TNT v1.9 (WITHOUT YELLOW KEYCARD BUG)\".");
+        C_Output("Playing 'FINAL DOOM - TNT v1.9 (WITHOUT YELLOW KEYCARD BUG)'.");
     else if(fsize == 18240172)
-        C_Output("Playing \"FINAL DOOM - PLUTONIA v1.9 (WITH DEATHMATCH STARTS)\".");
+        C_Output("Playing 'FINAL DOOM - PLUTONIA v1.9 (WITH DEATHMATCH STARTS)'.");
     else if(fsize == 17420824)
-        C_Output("Playing \"FINAL DOOM - PLUTONIA v1.9 (WITHOUT DEATHMATCH STARTS)\".");
+        C_Output("Playing 'FINAL DOOM - PLUTONIA v1.9 (WITHOUT DEATHMATCH STARTS)'.");
     else if(fsize == 12361532)
-        C_Output("Playing \"CHEX QUEST\".");
+        C_Output("Playing 'CHEX QUEST'.");
     else if(fsize == 9745831)
-        C_Output("Playing \"HACX SHAREWARE v1.0\".");
+        C_Output("Playing 'HACX SHAREWARE v1.0'.");
     else if(fsize == 21951805)
-        C_Output("Playing \"HACX REGISTERED v1.0\".");
+        C_Output("Playing 'HACX REGISTERED v1.0'.");
     else if(fsize == 22102300)
-        C_Output("Playing \"HACX REGISTERED v1.1\".");
+        C_Output("Playing 'HACX REGISTERED v1.1'.");
     else if(fsize == 19321722)
-        C_Output("Playing \"HACX REGISTERED v1.2\".");
+        C_Output("Playing 'HACX REGISTERED v1.2'.");
 
     if(d_uncappedframerate)
         C_Output("The framerate is uncapped.");

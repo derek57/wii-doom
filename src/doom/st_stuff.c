@@ -961,7 +961,7 @@ dboolean ST_Responder (event_t* ev)
         // 'clev10' change-level cheat
         if (!netgame && cht_CheckCheat(&cheat_clev10, ev->data2) && fsize == 12538385 && !beta_style)
         {
-            HU_PlayerMessage(s_STSTR_CLEV, true);
+            HU_PlayerMessage(STSTR_CLEV, true);
             G_DeferedInitNew(gameskill, 1, 10);
         }
 
@@ -1053,7 +1053,7 @@ dboolean ST_Responder (event_t* ev)
             }
 
             // So be it.
-            HU_PlayerMessage(s_STSTR_CLEV, true);
+            HU_PlayerMessage(STSTR_CLEV, true);
             G_DeferedInitNew(gameskill, epsd, map);
         }
     }
@@ -1509,7 +1509,7 @@ void ST_drawWidgets(dboolean refresh)
 
 void ST_doRefresh(void)
 {
-    if (!d_statusmap && automapactive)
+    if (!d_statusmap && (automapactive || am_overlay))
         return;
 
     st_firsttime = false;
@@ -1566,7 +1566,7 @@ void ST_DrawSoundInfo(void)
     sfxinfo_t s;
     char text[32];
     int x;
-    int xPos[7] = { 1, 75, 112, 156, 200, 230, 260 };
+    int xPos[8] = { 1, 55, 92, 136, 180, 225, 255, 285 };
 
     if (leveltime & 16)
     {
@@ -1582,6 +1582,7 @@ void ST_DrawSoundInfo(void)
     M_WriteText(xPos[x++], 30, "MO.T");
     M_WriteText(xPos[x++], 30, "MO.X");
     M_WriteText(xPos[x++], 30, "MO.Y");
+    M_WriteText(xPos[x++], 30, "MO.Z");
     M_WriteText(xPos[x++], 30, "ID");
     M_WriteText(xPos[x++], 30, "PRI");
     M_WriteText(xPos[x++], 30, "DIST");
@@ -1607,6 +1608,8 @@ void ST_DrawSoundInfo(void)
         M_WriteText(xPos[x++], y, text);
         M_snprintf(text, sizeof(text), "%d", c->mo->y >> FRACBITS);
         M_WriteText(xPos[x++], y, text);
+        M_snprintf(text, sizeof(text), "%d", c->mo->z >> FRACBITS);
+        M_WriteText(xPos[x++], y, text);
         M_snprintf(text, sizeof(text), "%d", (int) c->id);
         M_WriteText(xPos[x++], y, text);
         M_snprintf(text, sizeof(text), "%d", c->priority);
@@ -1629,7 +1632,7 @@ void ST_Drawer (dboolean fullscreen, dboolean refresh)
     // If just after ST_Start(), refresh all
     if (st_firsttime || beta_style || (scaledviewheight == SCREENHEIGHT && viewactive))
     {
-//        if(screenSize < 8)        // FIXME: automap has status bar shown ALWAYS
+//        if(screenSize < 8)
         {
             if(usergame)
                 ST_doRefresh();
@@ -1741,16 +1744,16 @@ static void ST_loadUnloadGraphics(load_callback_t callback)
             callback(namebuf, &faces[facenum]);
             ++facenum;
         }
-        M_snprintf(namebuf, 9, "STFTR%d0", i);        // turn right
+        M_snprintf(namebuf, 9, "STFTR%d0", i);         // turn right
         callback(namebuf, &faces[facenum]);
         ++facenum;
-        M_snprintf(namebuf, 9, "STFTL%d0", i);        // turn left
+        M_snprintf(namebuf, 9, "STFTL%d0", i);         // turn left
         callback(namebuf, &faces[facenum]);
         ++facenum;
         M_snprintf(namebuf, 9, "STFOUCH%d", i);        // ouch!
         callback(namebuf, &faces[facenum]);
         ++facenum;
-        M_snprintf(namebuf, 9, "STFEVL%d", i);        // evil grin ;)
+        M_snprintf(namebuf, 9, "STFEVL%d", i);         // evil grin ;)
         callback(namebuf, &faces[facenum]);
         ++facenum;
         M_snprintf(namebuf, 9, "STFKILL%d", i);        // pissed off
@@ -2049,8 +2052,6 @@ void ST_Start (void)
     if (netgame && consoleplayer)
     {
         char namebuf[8];
-
-        W_ReleaseLumpName("STFB0");
 
         M_snprintf(namebuf, 7, "STFB%d", consoleplayer);
         faceback = W_CacheLumpName(namebuf, PU_STATIC);

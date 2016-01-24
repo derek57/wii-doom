@@ -340,6 +340,9 @@ int mapcolor_sngl = 208;  // single player arrow color
 int mapcolor_plyr = 112;  // color for player arrow
 int mapcolor_frnd = 252;  // colors for friends of player
 
+extern int oldscreenblocks;
+extern int oldscreenSize;
+
 // Calculates the slope and slope according to the x-axis of a line
 // segment in map coordinates (with the upright y-axis n' all) so
 // that it can be used with the brain-dead drawing stuff.
@@ -1189,7 +1192,7 @@ AM_drawFline
            || fl->b.y < 0 || fl->b.y >= f_h)
     {
         static int   fuck = 0;
-        C_Error("fuck %d \r", fuck++);
+        C_Error("fuck %d", fuck++);
         return;
     }
 
@@ -1593,14 +1596,29 @@ void AM_Toggle (void)
         AM_Start ();
 
         if (overlay_trigger)
+        {
+            oldscreenblocks = screenblocks;
+            oldscreenSize = screenSize;
+            screenblocks = 11;
+            screenSize = 8;
+            R_SetViewSize(screenblocks);
+//            viewheight = SCREENHEIGHT;
+//            R_ExecuteSetViewSize();
             am_overlay = true;
+        }
         else
             am_overlay = false;
     }
     else
     {
         if (overlay_trigger && am_overlay)
+        {
+            screenSize = oldscreenSize;
+            screenblocks = oldscreenblocks;
+            R_SetViewSize(screenblocks);
+//            R_ExecuteSetViewSize();
             am_overlay = false;
+        }
         else
             AM_Stop ();
     }
@@ -1661,7 +1679,7 @@ void AM_DrawWorldTimer(void)
 
     if(gamestate == GS_LEVEL && automapactive)
     {
-        if((!am_overlay || screenSize > 6) && !d_statusmap)
+        if((automapactive && !d_statusmap) || am_overlay)
         {
             int x = ORIGWIDTH/2 - M_StringWidth(timeBuffer) / 2;
             M_WriteText(x, 192, timeBuffer);
@@ -1687,3 +1705,4 @@ void AM_DrawWorldTimer(void)
         }
     }
 }
+

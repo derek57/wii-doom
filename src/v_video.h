@@ -45,9 +45,7 @@
 // Screen 1 is an extra buffer.
 extern byte     *screens[5];
 
-extern byte *xlatab;
-extern byte *tinttable;
-extern byte *dp_translation;
+extern byte     *dp_translation;
 
 extern dboolean dp_translucent;
 

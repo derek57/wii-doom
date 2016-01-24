@@ -309,12 +309,11 @@ void D_StartNetGame(net_gamesettings_t *settings,
 
     ticdup = settings->ticdup;
     new_sync = settings->new_sync;
-/*
+
     if (!new_sync)
     {
         C_Network("Syncing netgames like Vanilla Doom.");
     }
-*/
 }
 
 static int GetLowTic(void)

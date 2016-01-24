@@ -64,13 +64,13 @@
 
 
 // MAIN DEVPARM
-dboolean        devparm = false;
+dboolean        devparm = true;
 dboolean        devparm_net = false;
 
 // SOLO DEVPARM
 dboolean        devparm_nerve = false;
 dboolean        devparm_master = false;
-dboolean        devparm_doom = false;
+dboolean        devparm_doom = true;
 dboolean        devparm_doom2 = false;
 dboolean        devparm_freedoom2 = false;
 dboolean        devparm_tnt = false;
@@ -120,13 +120,6 @@ void reset_call()
 void power_call()
 {
     exit_by_reset = 3;
-}
-
-int user_main()
-{
-    drawDirectory();
-
-    return 0;
 }
 
 void My_Quit(void)
@@ -214,16 +207,14 @@ int main(int argc, char **argv)
     wii_main();
 
     atexit (My_Quit);
-#endif
 
     // start doom
-#ifdef WII
     if(devparm || devparm_net)
 #endif
         D_DoomMain ();
 #ifdef WII
     else
-        user_main();
+        drawDirectory();
 #endif
     return 0;
 }

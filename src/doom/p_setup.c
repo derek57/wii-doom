@@ -213,6 +213,25 @@ extern fixed_t     animatedliquidxoffs;
 extern fixed_t     animatedliquidyoffs;
 
 
+//
+// GetSectorAtNullAddress
+//
+static sector_t* GetSectorAtNullAddress(void)
+{
+    static dboolean null_sector_is_initialized = false;
+    static sector_t null_sector;
+
+    if (!null_sector_is_initialized)
+    {
+        memset(&null_sector, 0, sizeof(null_sector));
+        I_GetMemoryValue(0, &null_sector.floorheight, 4);
+        I_GetMemoryValue(4, &null_sector.ceilingheight, 4);
+        null_sector_is_initialized = true;
+    }
+
+    return &null_sector;
+}
+
 static fixed_t GetOffset(vertex_t *v1, vertex_t *v2)
 {
     fixed_t     dx = (v1->x - v2->x) >> FRACBITS;
@@ -524,7 +543,24 @@ static void P_LoadSegs_V4(int lump)
 
         // killough 5/3/98: ignore 2s flag if second sidedef missing:
         if ((ldef->flags & ML_TWOSIDED) && ldef->sidenum[side ^ 1] != -1)
-            li->backsector = sides[ldef->sidenum[side ^ 1]].sector;
+        {
+            // If the sidenum is out of range, this may be a "glass hack"
+            // impassible window.  Point at side #0 (this may not be
+            // the correct Vanilla behavior; however, it seems to work for
+            // OTTAWAU.WAD, which is the one place I've seen this trick
+            // used).
+
+            // FIXME: This case was implemented into Chocolate DOOM at stock.
+            // DOOM RETRO doesn't have it included. Need to research this...
+            if (ldef->sidenum[side ^ 1] < 0 || ldef->sidenum[side ^ 1] >= numsides)
+            {
+                li->backsector = GetSectorAtNullAddress();
+            }
+            else
+            {
+                li->backsector = sides[ldef->sidenum[side ^ 1]].sector;
+            }
+        }
         else
         {
             li->backsector = NULL;
@@ -2092,7 +2128,6 @@ P_SetupLevel
     //printf ("free memory: 0x%x\n", Z_FreeMemory());
 
     HU_NewLevel();
-
 }
 
 static void InitMapInfo(void)

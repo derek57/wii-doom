@@ -567,19 +567,17 @@ static void DoMerge(void)
 
 }
 
-//
-// [nitr8] UNUSED
-//
-/*
 void W_PrintDirectory(void)
 {
     unsigned int i, n;
 
 #ifdef WII
     if(usb)
-        statsfile = fopen("usb:/apps/wiidoom/stats.txt","w");
+        statsfile = fopen("usb:/apps/wiidoom/wadlumps.txt","w");
     else if(sd)
-        statsfile = fopen("sd:/apps/wiidoom/stats.txt","w");
+        statsfile = fopen("sd:/apps/wiidoom/wadlumps.txt","w");
+#else
+    statsfile = fopen("wadlumps.txt","w");
 #endif
 
     // debug
@@ -588,14 +586,13 @@ void W_PrintDirectory(void)
         for (n=0; n<8 && lumpinfo[i]->name[n] != '\0'; ++n)
         {
             putchar(lumpinfo[i]->name[n]);
-            fprintf(statsfile, "%c", putchar(lumpinfo[i]->name[n]));
+            fprintf(statsfile, "%c", lumpinfo[i]->name[n]);
         }
         putchar('\n');
-        fprintf(statsfile, "%c", putchar('\n'));
+        fprintf(statsfile, "%c", '\n');
 //        I_Sleep(2);
     }
 }
-*/
 
 // Merge in a file by name
 

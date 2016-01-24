@@ -102,9 +102,9 @@
 #define SP              "Sandy Petersen"
 #define TH              "Tom Hall"
 #define TW              "Tim Willits"
-#define AMSP            AM" & "SP
-#define JRTH            JR" & "TH
-#define SPTH            SP" & "TH
+#define AMSP            AM", "SP
+#define JRTH            JR", "TH
+#define SPTH            SP", "TH
 
 char *authors[][3] =
 {
@@ -222,8 +222,6 @@ static char             secretsstr2[80];     // ADDED FOR PSP-STATS
 static char             secretsstr3[80];     // ADDED FOR PSP-STATS
 static char             secretsstr4[80];     // ADDED FOR PSP-STATS
 
-char                    *mapnumandtitle;
-
 dboolean                message_dontfuckwithme;
 dboolean                show_chat_bar;
 dboolean                emptytallpercent;
@@ -236,7 +234,6 @@ extern int              cardsfound;
 extern dboolean         blurred;
 extern dboolean         mapinfo_lump;
 extern dboolean         dont_message_to_console;
-extern dboolean         inhelpscreens;
 
 static patch_t*         healthpatch;
 static patch_t*         berserkpatch;
@@ -372,6 +369,7 @@ void HU_Start(void)
     // create the map title widget
     if (show_title)
     {
+/*
         if (d_statusmap)
         {
             HUlib_initTextLine(&w_title,
@@ -380,11 +378,22 @@ void HU_Start(void)
                                HU_FONTSTART);
         }
         else
+*/
         {
-            HUlib_initTextLine(&w_title,
-                               HU_TITLEX, HU_TITLEY + 32,
-                               hu_font,
-                               HU_FONTSTART);
+            if (!modifiedgame)
+            {
+                HUlib_initTextLine(&w_title,
+                                   HU_TITLEX, HU_TITLEY + 32,
+                                   hu_font,
+                                   HU_FONTSTART);
+            }
+            else
+            {
+                HUlib_initTextLine(&w_title,
+                                   HU_TITLEX, HU_MONSTERSY + 32,
+                                   hu_font,
+                                   HU_FONTSTART);
+            }
         }
     }
 
@@ -395,7 +404,7 @@ void HU_Start(void)
          ) ||
         (show_authors && nerve_pwad) || (show_authors && master_pwad))
     {
-        if (d_statusmap)
+        if (d_statusmap && automapactive)
         {
             HUlib_initTextLine(&w_author_title,
                                HU_TITLEX, HU_TITLEY - 20,
@@ -420,7 +429,7 @@ void HU_Start(void)
                                HU_FONTSTART);
         }
     }
-
+/*
     if (d_statusmap)
     {
         HUlib_initTextLine(&w_monsters1,
@@ -484,6 +493,7 @@ void HU_Start(void)
                            HU_FONTSTART);
     }
     else
+*/
     {
         HUlib_initTextLine(&w_monsters1,
                            HU_MONSECX1, HU_MONSTERSY + 32,
@@ -546,7 +556,7 @@ void HU_Start(void)
                            HU_FONTSTART);
     }
 
-//    if(!modifiedgame)
+    if(!modifiedgame)
     {
         switch ( logical_gamemission )
         {
@@ -610,6 +620,26 @@ void HU_Start(void)
                 s = P_GetMapName(gamemap);
             else
                 s = P_GetMapName((gameepisode - 1) * 10 + gamemap);
+        }
+        else
+        {
+            char lump[5];
+
+            if(gamemode == commercial)
+            {
+                if (gamemap < 10)
+                    M_snprintf(lump, sizeof(s), "MAP0%i", gamemap);
+                else if (gamemap > 9 && gamemap < 20)
+                    M_snprintf(lump, sizeof(lump), "MAP1%i", gamemap);
+                else if (gamemap > 19 && gamemap < 30)
+                    M_snprintf(lump, sizeof(lump), "MAP2%i", gamemap);
+                else if (gamemap > 29)
+                    M_snprintf(lump, sizeof(lump), "MAP3%i", gamemap);
+            }
+            else
+                M_snprintf(lump, sizeof(lump), "E%iM%i", gameepisode, gamemap);
+
+            s = lump;
         }
     }
 
@@ -862,7 +892,7 @@ void HU_DrawStats(void)
     // display the kills/items/secrets each frame, if optioned
     if(gamestate == GS_LEVEL && automapactive && !menuactive)
     {
-        if((!am_overlay || screenSize > 6) && !d_statusmap)
+        if(am_overlay || (automapactive && !d_statusmap))
         {
             HUlib_drawTextLine(&w_monsters1, false);
             HUlib_drawTextLine(&w_monsters2, false);
@@ -938,7 +968,7 @@ void HU_DrawHUD(void)
     dboolean            gamepaused = (menuactive || paused /*|| consoleactive*/);
     int                 currenttime = I_GetTimeMS();
 
-    if (inhelpscreens || (am_overlay && (show_authors || show_stats || show_title)))
+    if (am_overlay && (show_authors || show_stats || show_title))
         return;
 
     if (d_translucency)
@@ -1173,7 +1203,7 @@ void HU_DrawHUD(void)
 
 void HU_Drawer(void)
 {
-    if(!automapactive && !demoplayback && crosshair == 1 && !inhelpscreens)
+    if(!automapactive && !demoplayback && crosshair == 1)
     {
         if(screenSize < 8)
             V_DrawPatch(158, 82, 0, W_CacheLumpName("XHAIR", PU_CACHE));
@@ -1199,24 +1229,24 @@ void HU_Drawer(void)
     HUlib_drawSText(&w_secret);
     V_ClearDPTranslation();
 
-    if (automapactive && !menuactive)
+    if (!menuactive)
     {
-        if (((!am_overlay ||
-             ((am_overlay && screenSize > 6 && (show_authors 
+        if (((automapactive ||
+             ((am_overlay && (show_authors 
 #ifdef WII
                && load_extra_wad == 0
 #endif
               ))) ||
               (show_authors && nerve_pwad) || (show_authors && master_pwad))))
         {
-            if((!modifiedgame || nerve_pwad) && !d_statusmap)
+            if(((!modifiedgame || nerve_pwad) && !d_statusmap) || (am_overlay && !modifiedgame))
             {
                 HUlib_drawTextLine(&w_author_title, false);
                 HUlib_drawTextLine(&w_authors, false);
-
-                if(!beta_style && show_title)
-                    HUlib_drawTextLine(&w_title, false);
             }
+
+            if((!beta_style && show_title && automapactive && !d_statusmap) || am_overlay)
+                HUlib_drawTextLine(&w_title, false);
         }
 
         // display the hud kills/items/secret display if optioned
@@ -1263,7 +1293,6 @@ void HU_Ticker(void)
         if(beta_style)
         {
             show_chat_bar = false;
-//            ST_doRefresh();
         }
     }
 
@@ -1303,7 +1332,6 @@ void HU_Ticker(void)
                 HUlib_addMessageToSText(&w_message_2, 0, plr->messages[2]);
 
                 show_chat_bar = true;
-//                ST_doRefresh();
             }
             else
                 HUlib_addMessageToSText(&w_message, 0, plr->message);
@@ -1341,7 +1369,7 @@ void HU_NewLevel()
 {
     char       *s = "Unknown level";
 
-//    if(!modifiedgame)
+    if(!modifiedgame)
     {
         switch ( logical_gamemission )
         {
@@ -1413,9 +1441,27 @@ void HU_NewLevel()
             else
                 s = P_GetMapName((gameepisode - 1) * 10 + gamemap);
         }
-    }
+        else
+        {
+            char lump[5];
 
-    mapnumandtitle = s;
+            if(gamemode == commercial)
+            {
+                if (gamemap < 10)
+                    M_snprintf(lump, sizeof(s), "MAP0%i", gamemap);
+                else if (gamemap > 9 && gamemap < 20)
+                    M_snprintf(lump, sizeof(lump), "MAP1%i", gamemap);
+                else if (gamemap > 19 && gamemap < 30)
+                    M_snprintf(lump, sizeof(lump), "MAP2%i", gamemap);
+                else if (gamemap > 29)
+                    M_snprintf(lump, sizeof(lump), "MAP3%i", gamemap);
+            }
+            else
+                M_snprintf(lump, sizeof(lump), "E%iM%i", gameepisode, gamemap);
+
+            s = lump;
+        }
+    }
 
     C_Output("");
 

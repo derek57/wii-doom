@@ -87,7 +87,6 @@ dboolean                         r_liquid_clipsprites = r_liquid_clipsprites_def
 dboolean                         r_playersprites = r_playersprites_default;
 */
 extern fixed_t                  animatedliquiddiff;
-extern dboolean                  inhelpscreens;
 /*
 extern dboolean                  r_liquid_bob;
 extern dboolean                  r_shadows;
@@ -1384,7 +1383,7 @@ static void R_DrawPSprite(pspdef_t *psp, dboolean invisibility)
                     basecolfunc,        // SPR_CHGG
                     tlredwhitecolfunc2, // SPR_CHGF
                     basecolfunc,        // SPR_MISG
-                    tlcolfunc,          // SPR_MISF
+                    tlredwhitecolfunc1, // SPR_MISF
                     basecolfunc,        // SPR_SAWG
                     basecolfunc,        // SPR_PLSG
                     tlcolfunc,          // SPR_PLSF
@@ -1514,7 +1513,7 @@ void R_DrawPlayerSprites(void)
     {
 //        V_FillRect(viewwindowx, viewwindowy, viewwidth, viewheight, 251);
         for (i = 0, psp = viewplayer->psprites; i < NUMPSPRITES; i++, psp++)
-            if (psp->state && !inhelpscreens)
+            if (psp->state)
                 R_DrawPSprite(psp, true);
 
 //        if (menuactive || paused || consoleactive)
@@ -1530,7 +1529,7 @@ void R_DrawPlayerSprites(void)
             if (psp->state && (psp->state->frame & FF_FULLBRIGHT))
                 bflash = true;
         for (i = 0, psp = viewplayer->psprites; i < NUMPSPRITES; i++, psp++)
-            if (psp->state && !inhelpscreens)
+            if (psp->state)
                 R_DrawPSprite(psp, false);
     }
 }
@@ -1548,7 +1547,7 @@ static void R_DrawBloodSprite(vissprite_t *spr)
     int         x2 = spr->x2;
 
     // [RH] Quickly reject sprites with bad x ranges.
-    if (x1 > x2 || inhelpscreens)
+    if (x1 > x2)
         return;
 
     for (x = x1; x <= x2; x++)
@@ -1620,7 +1619,7 @@ static void R_DrawShadowSprite(vissprite_t *spr)
     int         x2 = spr->x2;
 
     // [RH] Quickly reject sprites with bad x ranges.
-    if (x1 > x2 || inhelpscreens)
+    if (x1 > x2)
         return;
 
     for (x = x1; x <= x2; x++)
@@ -1685,7 +1684,7 @@ static void R_DrawSprite(vissprite_t *spr)
     int         x1 = spr->x1;
     int         x2 = spr->x2;
 
-    if (x1 > x2 || inhelpscreens)
+    if (x1 > x2)
         return;
 
     for (x = x1; x <= x2; x++)
@@ -1821,6 +1820,5 @@ void R_DrawMasked(void)
             R_RenderMaskedSegRange(ds, ds->x1, ds->x2);
 
     // draw the psprites on top of everything
-    if (!inhelpscreens)
-        R_DrawPlayerSprites();
+    R_DrawPlayerSprites();
 }

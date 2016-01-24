@@ -83,6 +83,7 @@ void (Z_ChangeTag)(void *ptr, int32_t tag DA(const char *, int));
 void Z_ChangeUser(void *ptr, void **user);
 void Z_DrawStats(void);            // Print allocation statistics
 void Z_DumpHistory(char *buf);
+void Z_DumpMemory(void);
 
 #ifdef INSTRUMENTED
 /* cph - save space if not debugging, don't require file 

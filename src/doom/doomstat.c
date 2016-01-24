@@ -129,6 +129,10 @@ dboolean         d_centerweapon = false;
 dboolean         d_ejectcasings = false;
 dboolean         d_statusmap = true;
 dboolean         show_title = true;
+dboolean         dump_mem = false;
+dboolean         dump_con = false;
+dboolean         dump_stat = false;
+dboolean         printdir = false;
 /*
 dboolean         nerve = false;
 dboolean         chex = false;

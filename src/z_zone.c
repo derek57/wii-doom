@@ -380,9 +380,8 @@ void (Z_FreeTags)(int32_t lowtag, int32_t hightag
 #endif
      )
 {
-#ifdef HEAPDUMP
-    Z_DumpMemory();
-#endif
+    if (devparm && dump_mem)
+        Z_DumpMemory();
 
     if (lowtag <= PU_FREE)
         lowtag = PU_FREE + 1;
