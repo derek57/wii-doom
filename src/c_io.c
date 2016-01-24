@@ -181,12 +181,13 @@ static patch_t  *unknownchar;
 static patch_t  *consolefont[CONSOLEFONTSIZE];
 static patch_t  *lsquote;
 static patch_t  *ldquote;
+static patch_t  *rdquote;
+static patch_t  *rsquote;
 static patch_t  *degree;
 static patch_t  *multiply;
 static patch_t  *caret;
 static patch_t  *route;
 
-extern dboolean translucency;
 extern dboolean wipe;
 
 extern int      fps;
@@ -438,6 +439,8 @@ void C_Init(void)
 
     lsquote = W_CacheLumpName("DRFON145", PU_STATIC);
     ldquote = W_CacheLumpName("DRFON147", PU_STATIC);
+    rsquote = W_CacheLumpName("DRFON146", PU_STATIC);
+    rdquote = W_CacheLumpName("DRFON148", PU_STATIC);
     degree = W_CacheLumpName("DRFON176", PU_STATIC);
     multiply = W_CacheLumpName("DRFON215", PU_STATIC);
 
@@ -575,6 +578,7 @@ static void C_DrawConsoleText(int x, int y, char *text, int color1, int color2, 
         else
         {
             patch_t     *patch = NULL;
+            int         j; 
 
             if (letter == ITALICS)
                 italics = false;
@@ -587,31 +591,51 @@ static void C_DrawConsoleText(int x, int y, char *text, int color1, int color2, 
             }
             else if (letter == 215)
                 patch = multiply;
+            else if (letter == '\'')
+            {
+                for (j = i + 1; (size_t)j < len; ++j)
+                    if (text[j] == '\'')
+                        patch = lsquote;
+                if (!patch)
+                    for (j = i - 1; j >= 0; --j)
+                        if (text[j] == '\'')
+                         patch = rsquote;
+                if (!patch)
+                    patch = consolefont[c];
+            }
+            else if (letter == '\"')
+            {
+                for (j = i + 1; (size_t)j < len; ++j)
+                    if (text[j] == '\"')
+                        patch = ldquote;
+                if (!patch)
+                    for (j = i - 1; j >= 0; --j)
+                        if (text[j] == '\"')
+                            patch = rdquote;
+                if (!patch)
+                    patch = consolefont[c];
+            }
             else
                 patch = (c < 0 || c >= CONSOLEFONTSIZE ? unknownchar : consolefont[c]);
 
             if (prevletter == ' ' || prevletter == '\t' || prevletter == '(' || !i) 
             {
-                if (letter == '\'')
-                    patch = lsquote;
-                else if (letter == '\"')
-                    patch = ldquote;
-                else if (letter == '\n')
-                    I_Error("Wrong letter detected.");
+                if (letter == '\n')
+                    I_Error("C_DrawConsoleText: Wrong letter detected.");
             }
 
             if (!italics)
             {
-                int     k = 0;
+                int     j = 0;
 
-                while (kern[k].char1)
+                while (kern[j].char1)
                 {
-                    if (prevletter == kern[k].char1 && letter == kern[k].char2)
+                    if (prevletter == kern[j].char1 && letter == kern[j].char2)
                     {
-                        x += kern[k].adjust;
+                        x += kern[j].adjust;
                         break;
                     }
-                    ++k;
+                    ++j;
                 }
             }
 
