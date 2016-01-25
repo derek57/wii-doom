@@ -1914,7 +1914,7 @@ void R_DrawChar(int x, int y, int scrn, int num)
         int width = 0;
         int height = 0;
 
-        // FIXME: Try loading the char table from a WAD lump
+        // TODO: Try loading the char table from a WAD lump
 #ifdef WII
         if (usb)
             LoadPCX("usb:/apps/wiidoom/conchars.pcx", &pic, NULL, &width, &height);

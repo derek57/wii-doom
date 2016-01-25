@@ -1165,8 +1165,10 @@ static void *I_SDL_RegisterSong(void *data, int len)
     // See if we're substituting this MUS for a high-quality replacement.
     filename = GetSubstituteMusicFile(data, len);
 
-    if (filename != NULL)                // FIXME: ON THE WII, M_READFILE SOMETIMES CAUSES THE GAME...
-    {                                    // ...TO CRASH RANDOMLY WHENEVER THE MUSIC IS BEING CHANGED
+    // FIXME: ON THE WII, M_READFILE SOMETIMES CAUSES THE GAME...
+    // ...TO CRASH RANDOMLY WHENEVER THE MUSIC IS BEING CHANGED
+    if (filename != NULL)
+    {
         music = Mix_LoadMUS(filename);
 
         if (music == NULL)

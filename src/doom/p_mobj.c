@@ -613,8 +613,8 @@ floater:
                 if(P_HitFloor(mo) == 0)
                     S_StartSound (mo, sfx_oof);
 
-                // FIXME: write an exception here for monsters / player falling
-                // from high heights onto the ground (spawn blood & play sound)
+                // TODO: write an exception here for monsters / player falling from high
+                // heights onto the ground (spawn blood & play sound like Duke Nukem 3D)
 
                 if (mouselook && !demorecording && !demoplayback)
                 {
@@ -785,7 +785,7 @@ void P_MobjThinker (mobj_t* mobj)
     if (mobj->momx || mobj->momy || (mobj->flags & MF_SKULLFLY))
     {
         P_XYMovement (mobj);
-        // FIXME: decent NOP/NULL/Nil function pointer please.
+
         if (mobj->thinker.function == P_RemoveThinkerDelayed)   // killough
             return;                // mobj was removed
     }
@@ -1661,7 +1661,7 @@ void P_SpawnBlood(fixed_t x, fixed_t y, fixed_t z, angle_t angle, int damage, mo
                 P_SetMobjState(th, th->state->nextstate);
 /*
             // more blood and gore!
-            if(d_maxgore)                // FIXME: MAYBE USE FOR EVEN MORE BLOOD???
+            if(d_maxgore)                // TODO: MAYBE USE FOR EVEN MORE BLOOD???
             {
                 int t;
 
@@ -1726,16 +1726,7 @@ void P_SpawnBloodSplat(fixed_t x, fixed_t y, int blood, int maxheight, mobj_t *t
         if (blood == FUZZYBLOOD)
         {
             newsplat->flags = MF_SHADOW;
-/*
-            if (d_translucency)                // FIXME: Translucent blood for spectres is
-            {                                // rendered gold on map E4M1 of "THE ULTIMATE DOOM".
-                newsplat->colfunc = tlcolfunc;
-            }
-            else
-*/
-            {
-                newsplat->colfunc = fuzzcolfunc;
-            }
+            newsplat->colfunc = fuzzcolfunc;
         }
         else
         {

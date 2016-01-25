@@ -801,7 +801,7 @@ void S_ChangeMusic(int musicnum, int looping, dboolean mapstart)
     else
         gameepi = gameepisode;
 
-    if (mapstart && (mapinfomusic = P_GetMapMusic((gameepi - 1) * 10 + gamemap)))     // FIXME (BUG)
+    if (mapstart && (mapinfomusic = P_GetMapMusic((gameepi - 1) * 10 + gamemap)))
         music->lumpnum = mapinfomusic;
     else if (!music->lumpnum)
     {

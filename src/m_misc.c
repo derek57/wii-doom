@@ -657,7 +657,6 @@ int stricmp(const char *string1, const char *string2)
 // (Case-insensitive, return value reverse of stricmp() to avoid confusion.
 dboolean M_StringCompare(const char *str1, const char *str2)
 {
-//    return !stricmp(str1, str2);    // FIXME: stricmp() is missing in standard C headers
     return !strcasecmp(str1, str2);
 }
 

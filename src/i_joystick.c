@@ -48,9 +48,6 @@
 #include <wiiuse/wpad.h>
 
 
-#define PI 3.14159265
-
-
 int joyleft;
 int joyright;
 int joyup;

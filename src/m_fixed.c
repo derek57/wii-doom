@@ -35,8 +35,6 @@
 
 
 
-// Fixme. __USE_C_FIXED__ or something.
-
 //
 // FixedDiv, C version.
 //

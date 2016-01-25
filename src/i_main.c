@@ -24,6 +24,7 @@
 //
 //-----------------------------------------------------------------------------
 
+
 #ifdef WII
 #include <ogcsys.h>
 #endif
@@ -63,14 +64,31 @@
 #include "z_zone.h"
 
 
+//
+// e6y: exeptions handling
+//
+
+typedef enum
+{
+    EXEPTION_NONE,
+    EXEPTION_glFramebufferTexture2DEXT,
+    EXEPTION_MAX
+} ExeptionsList_t;
+
+typedef struct
+{
+    const char *error_message;
+} ExeptionParam_t;
+
+
 // MAIN DEVPARM
-dboolean        devparm = true;
+dboolean        devparm = false;
 dboolean        devparm_net = false;
 
 // SOLO DEVPARM
 dboolean        devparm_nerve = false;
 dboolean        devparm_master = false;
-dboolean        devparm_doom = true;
+dboolean        devparm_doom = false;
 dboolean        devparm_doom2 = false;
 dboolean        devparm_freedoom2 = false;
 dboolean        devparm_tnt = false;
@@ -88,21 +106,6 @@ dboolean        devparm_net_plutonia = false;
 dboolean        devparm_net_chex = false;
 dboolean        devparm_net_hacx = false;
 
-//
-// e6y: exeptions handling
-//
-
-typedef enum
-{
-  EXEPTION_NONE,
-  EXEPTION_glFramebufferTexture2DEXT,
-  EXEPTION_MAX
-} ExeptionsList_t;
-
-typedef struct
-{
-  const char * error_message;
-} ExeptionParam_t;
 
 static ExeptionParam_t ExeptionsParams[];
 
@@ -110,6 +113,7 @@ static ExeptionsList_t current_exception_index;
 
 int exit_by_reset = 0;
 int return_reset = 2;
+
 
 #ifdef WII
 void reset_call()

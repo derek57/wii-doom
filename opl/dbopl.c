@@ -45,16 +45,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include "dbopl.h"
+#include "../src/doom/doomdef.h"
 
 
 #define GCC_UNLIKELY(x) x
 
 #define TRUE 1
 #define FALSE 0
-
-#ifndef PI
-#define PI             3.14159265358979323846
-#endif
 
 #define OPLRATE        ((double)(14318180.0 / 288.0))
 #define TREMOLO_TABLE  52

@@ -406,9 +406,8 @@ byte *R_DistortedFlat(int flatnum)
     lastflat = flatnum;
 
     // built this tic?
-    // FIXME: (consoleactive || swirltic == -1) might be wrong (it isn't included in DOOMRetro)
     if (leveltic != swirltic && ((consoleactive || swirltic == -1) ||
-                                (!consoleactive || swirltic == -1)) /*&& !menuactive*/ && !paused)
+                                (!consoleactive || swirltic == -1)) && !paused)
     {
         int     x, y;
 
@@ -532,7 +531,6 @@ void R_DrawPlanes(void)
                     // [crispy] stretch sky
                     if (mouselook > 0)
                         dc_iscale = dc_iscale * 114 / 228;
-//                        dc_iscale = dc_iscale * 128 / 228;        // FIXME: ORIGINAL (BUGGY)
 
                     // Sky is always drawn full bright,
                     //  i.e. colormaps[0] is used.

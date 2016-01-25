@@ -270,6 +270,7 @@ void M_BindBaseControls(void)
     M_BindVariable("eject_casings",          &d_ejectcasings);
     M_BindVariable("status_map",             &d_statusmap);
     M_BindVariable("show_maptitle",          &show_title);
+    M_BindVariable("rendermode",             &render_mode);
 #ifdef WII
     M_BindVariable("key_shoot",              &joy_r);
     M_BindVariable("key_open",               &joy_l);

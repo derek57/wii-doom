@@ -248,15 +248,19 @@
 //
 
 // Skill flags.
-#define        MTF_EASY                1
-#define        MTF_NORMAL              2
-#define        MTF_HARD                4
+#define MTF_EASY                       1
+#define MTF_NORMAL                     2
+#define MTF_HARD                       4
 
 // Deaf monsters/do not react to sound.
-#define        MTF_AMBUSH              8
+#define MTF_AMBUSH                     8
 
 #define TEXTSPEED                      3
 #define TEXTWAIT                       250
+
+#ifndef PI
+#define PI                             3.14159265358979323846
+#endif
 
 typedef enum 
 {

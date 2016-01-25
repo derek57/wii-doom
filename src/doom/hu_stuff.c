@@ -770,7 +770,7 @@ void HU_Start(void)
 
 // [crispy] print a bar indicating demo progress at the bottom of the screen
 /*
-static void HU_DemoProgressBar (void)                // FIXME: BUGGY (crashes)
+static void HU_DemoProgressBar (int scrn)                // FIXME: BUGGY (crashes)
 {
     int i;
     extern char *demo_p, *demobuffer;
@@ -778,12 +778,12 @@ static void HU_DemoProgressBar (void)                // FIXME: BUGGY (crashes)
 
     i = SCREENWIDTH * (demo_p - demobuffer) / defdemosize;
 
-    V_DrawHorizLine(0, SCREENHEIGHT - 3, 0, i, 4);     // [crispy] white
-    V_DrawHorizLine(0, SCREENHEIGHT - 2, 0, i, 0);     // [crispy] black
-    V_DrawHorizLine(0, SCREENHEIGHT - 1, 0, i, 4);     // [crispy] white
+    V_DrawHorizLine(0, SCREENHEIGHT - 3, scrn, i, 4);     // [crispy] white
+    V_DrawHorizLine(0, SCREENHEIGHT - 2, scrn, i, 0);     // [crispy] black
+    V_DrawHorizLine(0, SCREENHEIGHT - 1, scrn, i, 4);     // [crispy] white
 
-    V_DrawHorizLine(0, SCREENHEIGHT - 2, 0, 1, 4);     // [crispy] white start
-    V_DrawHorizLine(i - 1, SCREENHEIGHT - 2, 0, 1, 4); // [crispy] white end
+    V_DrawHorizLine(0, SCREENHEIGHT - 2, scrn, 1, 4);     // [crispy] white start
+    V_DrawHorizLine(i - 1, SCREENHEIGHT - 2, scrn, 1, 4); // [crispy] white end
 }
 */
 void HU_DrawStats(void)
@@ -1071,11 +1071,8 @@ void HU_DrawHUD(void)
 
         ammo_x = HUD_AMMO_X + 15 - (SHORT(patch->width) / 2);
 
-//        if (patch)        // FIXME: IS THIS ONE REALLY REQUIRED??
-        {
-            hudfunc(ammo_x, (HUD_AMMO_Y + 8 - (SHORT(patch->height) / 2)), 0, patch, tinttab);
-            ammo_x += HUD_AMMO_X + 15 + (SHORT(patch->width) / 2) - (ORIGHEIGHT / 2) + offset_special;
-        }
+        hudfunc(ammo_x, (HUD_AMMO_Y + 8 - (SHORT(patch->height) / 2)), 0, patch, tinttab);
+        ammo_x += HUD_AMMO_X + 15 + (SHORT(patch->width) / 2) - (ORIGHEIGHT / 2) + offset_special;
 
         if (ammohighlight > currenttime)
             DrawHUDNumber(&ammo_x, HUD_AMMO_Y + hudnumoffset, 0, ammo, tinttab, V_DrawHUDPatch);
@@ -1263,7 +1260,7 @@ void HU_Drawer(void)
 /*
     // [crispy] demo progress bar        // FIXME (crashing)
     if (demoplayback)
-        HU_DemoProgressBar();
+        HU_DemoProgressBar(0);
 */
 }
 

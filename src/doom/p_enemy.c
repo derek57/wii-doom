@@ -3365,7 +3365,7 @@ void A_SetCounter(mobj_t *mo)
 //
 void A_EjectCasing(mobj_t *actor)
 {
-    const double    pi = 4. * atan(1.);
+//    const double    pi = 4. * atan(1.);
     angle_t         angle;
     int             frontdisti = 0;
     fixed_t         frontdist;
@@ -3453,7 +3453,7 @@ void A_EjectCasing(mobj_t *actor)
         z = actor->z + actor->player->viewheight + zheight;
 
         // modify height according to pitch
-        z += (pitch / pi) * ((10 * frontdisti / 256) * FRACUNIT / 32);
+        z += (pitch / PI) * ((10 * frontdisti / 256) * FRACUNIT / 32);
     }
     else
         z = actor->z + 500 * FRACUNIT / 16;

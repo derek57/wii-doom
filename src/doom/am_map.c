@@ -638,7 +638,8 @@ void AM_Start (void)
 {
     // FOR PSP (CONDITION):
     // DON'T AUTO-ACTIVATE THE AUTOMAP...
-#ifdef WII                                                // FIXME: I DON'T LIKE THIS... :-/
+    // FIXME: I DON'T LIKE THIS... :-/
+#ifdef WII
     if(players[consoleplayer].pendingweapon != wp_chainsaw)
 #endif
     {

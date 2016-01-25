@@ -424,6 +424,7 @@ extern  int              opl_type;
 extern  int              use_libsamplerate;
 extern  int              gore_amount;
 extern  int              font_shadow;
+extern  int              render_mode;
 
 void A_MoreGibs(mobj_t* actor);
 

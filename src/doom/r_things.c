@@ -1313,10 +1313,6 @@ static void R_DrawPSprite(pspdef_t *psp, dboolean invisibility)
     vis = &avis;
 
     // [crispy] no color translation
-    //
-    // FIXME: if we set "NULL" here, shadows won't be translucent any longer
-    // if not, the game crashes (if translation is set)
-    //
     vis->translation = NULL;
 
     vis->mobjflags = 0;

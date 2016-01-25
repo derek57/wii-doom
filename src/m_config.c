@@ -191,6 +191,7 @@ default_t   doom_defaults_list[] =
     CONFIG_VARIABLE_INT                (eject_casings),
     CONFIG_VARIABLE_INT                (status_map),
     CONFIG_VARIABLE_INT                (show_maptitle),
+    CONFIG_VARIABLE_INT                (rendermode),
     CONFIG_VARIABLE_INT                (key_shoot),
     CONFIG_VARIABLE_INT                (key_open),
     CONFIG_VARIABLE_INT                (key_menu),

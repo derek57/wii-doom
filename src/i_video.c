@@ -1294,7 +1294,10 @@ static void CreateUpscaledTexture(int w, int h)
     // which looks much softer and smoother than "nearest" but does a better
     // job at downscaling from the upscaled texture to screen.
 
-    SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
+    if (render_mode == 1)
+        SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
+    else if(render_mode == 2)
+        SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "nearest");
 
     texture_upscaled = SDL_CreateTexture(renderer,
                                 SDL_PIXELFORMAT_ARGB8888,
@@ -2199,7 +2202,10 @@ static void SetVideoMode(screen_mode_t *mode, int w, int h)
         // the upscaled texture to "nearest", which is gritty and pixelated and
         // resembles software scaling pretty well.
 
-        SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "nearest");
+        if (render_mode == 1)
+            SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
+        else if(render_mode == 2)
+            SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "nearest");
 
         // Create the intermediate texture that the RGBA surface gets loaded into.
         // The SDL_TEXTUREACCESS_STREAMING flag means that this texture's content

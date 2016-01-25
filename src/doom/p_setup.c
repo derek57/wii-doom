@@ -2398,10 +2398,7 @@ void P_Init (void)
 {
     P_InitSwitchList ();
     P_InitPicAnims ();
-
-    if(!devparm)
-        InitMapInfo();
-
+    InitMapInfo();
     R_InitSprites (sprnames);
 }
 

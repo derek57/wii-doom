@@ -1032,7 +1032,7 @@ void LoadPCX(char *filename, byte **pic, byte **palette, int *width, int *height
         *pic = NULL;
     }
 
-    Z_Free(pcx);        // FIXME (crashing)
+    Z_Free(pcx);
 }
 
 //#ifdef HAVE_LIBPNG

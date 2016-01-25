@@ -1298,11 +1298,11 @@ int                        cheeting;
 int                        coordinates_info = 0;
 int                        version_info = 0;
 #ifdef WII
-int                        key_controls_start_in_cfg_at_pos = 105;
-int                        key_controls_end_in_cfg_at_pos = 119;
-#else
-int                        key_controls_start_in_cfg_at_pos = 104;
+int                        key_controls_start_in_cfg_at_pos = 106;
 int                        key_controls_end_in_cfg_at_pos = 120;
+#else
+int                        key_controls_start_in_cfg_at_pos = 105;
+int                        key_controls_end_in_cfg_at_pos = 121;
 #endif
 int                        tracknum = 1;
 int                        epi = 1;
@@ -1454,6 +1454,7 @@ void M_FontShadow(int choice);
 void M_DiskIcon(int choice);
 void M_FixWiggle(int choice);
 void M_RemoveSlimeTrails(int choice);
+void M_RenderMode(int choice);
 void M_IconType(int choice);
 void M_SizeDisplay(int choice);
 void M_StartGame(int choice);
@@ -2170,6 +2171,9 @@ enum
     screen_type,
     screen_wiggle,
     screen_trails,
+#ifdef SDL2
+    screen_render,
+#endif
     screen_end
 } screen_e;
 
@@ -2177,7 +2181,7 @@ menuitem_t ScreenMenu[]=
 {
     {2,"Brightness",M_ChangeGamma,'g'},
     {2,"Screen Size",M_SizeDisplay,'s'},
-    {2,"Detail",M_ChangeDetail,'r'},
+    {2,"Quality",M_ChangeDetail,'q'},
     {2,"Translucency",M_Translucency,'l'},
     {2,"Wipe Type",M_WipeType,'w'},
     {2,"Uncapped Framerate",M_UncappedFramerate,'u'},
@@ -2188,6 +2192,10 @@ menuitem_t ScreenMenu[]=
     {2,"",M_IconType,'i'},
     {2,"Fix Wiggle Effect",M_FixWiggle,'w'},
     {2,"Remove Slime Trails",M_RemoveSlimeTrails,'t'}
+#ifdef SDL2
+    ,
+    {2,"Render Mode",M_RenderMode,'r'}
+#endif
 };
 
 menu_t  ScreenDef =
@@ -2196,7 +2204,7 @@ menu_t  ScreenDef =
     &OptionsDef,
     ScreenMenu,
     M_DrawScreen,
-    60,33,
+    60,23,
     0
 };
 
@@ -4125,10 +4133,10 @@ void M_DrawScreen(void)
     //M_DarkBackground(0);
 
     if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
-        V_DrawPatchWithShadow(58, 5, 0, W_CacheLumpName("M_T_SSET",
+        V_DrawPatchWithShadow(58, 0, 0, W_CacheLumpName("M_T_SSET",
                                                PU_CACHE), false);
     else
-        V_DrawPatchWithShadow(58, 5, 0, W_CacheLumpName("M_SCRSET",
+        V_DrawPatchWithShadow(58, 0, 0, W_CacheLumpName("M_SCRSET",
                                                PU_CACHE), false);
 
     M_DrawThermoSmall(ScreenDef.x + 104, ScreenDef.y + LINEHEIGHT_SMALL * (screen_gamma + 1),
@@ -4304,6 +4312,19 @@ void M_DrawScreen(void)
         M_WriteText(ScreenDef.x + 181, ScreenDef.y + 118, "OFF");
     }
 
+#ifdef SDL2
+    if(render_mode == 1)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(ScreenDef.x + 161, ScreenDef.y + 128, "LINEAR");
+    }
+    else if (render_mode == 2)
+    {
+        dp_translation = crx[CRX_GOLD];
+        M_WriteText(ScreenDef.x + 150, ScreenDef.y + 128, "NEAREST");
+    }
+#endif
+
     if(whichSkull == 1)
     {
         int x;
@@ -4321,8 +4342,14 @@ void M_DrawScreen(void)
 */
         else if(itemOn == 10 && (gamemode == retail || gamemode == registered || gamemode == shareware))
             string = "THIS IS ONLY CHANGEABLE FOR DOOM 2";
+
+#ifdef SDL2
+        else if(itemOn == 13)
+            string = "YOU MUST RESTART THE GAME TO TAKE EFFECT.";
+#endif
+
         x = ORIGWIDTH/2 - M_StringWidth(string) / 2;
-        M_WriteText(x, ScreenDef.y + 127, string);
+        M_WriteText(x, ScreenDef.y + 137, string);
     }
 }
 
@@ -6402,6 +6429,21 @@ void M_RemoveSlimeTrails(int choice)
       case 1:
         if (!remove_slime_trails)
             remove_slime_trails = true;
+        break;
+    }
+}
+
+void M_RenderMode(int choice)
+{
+    switch(choice)
+    {
+      case 0:
+        if (render_mode > 1)
+            render_mode--;
+        break;
+      case 1:
+        if (render_mode < 2)
+            render_mode++;
         break;
     }
 }
