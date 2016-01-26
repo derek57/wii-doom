@@ -1448,7 +1448,7 @@ void R_DrawPausedFuzzColumn(void)
 // [nitr8] UNUSED
 //
 /*
-void R_DrawFuzzColumns(void)
+void R_DrawFuzzColumns(int srcscrn, int destscrn)
 {
     int         x, y;
     int         w = viewwindowx + viewwidth;
@@ -1459,12 +1459,12 @@ void R_DrawFuzzColumns(void)
         {
             int         i = x + y;
 //            byte        *src = background_buffer + i;
-            byte        *src = screens[1] + i;
+            byte        *src = screens[srcscrn] + i;
 
             if (*src != NOFUZZ)
             {
 //                byte    *dest = I_VideoBuffer + i;
-                byte    *dest = screens[0] + i;
+                byte    *dest = screens[destscrn] + i;
 
                 if (!y || *(src - SCREENWIDTH) == NOFUZZ)
                 {
@@ -1498,7 +1498,7 @@ void R_DrawFuzzColumns(void)
         }
 }
 
-void R_DrawPausedFuzzColumns(void)
+void R_DrawPausedFuzzColumns(int srcscrn, int destscrn)
 {
     int         x, y;
     int         w = viewwindowx + viewwidth;
@@ -1509,12 +1509,12 @@ void R_DrawPausedFuzzColumns(void)
         {
             int         i = x + y;
 //            byte        *src = background_buffer + i;
-            byte        *src = screens[1] + i;
+            byte        *src = screens[srcscrn] + i;
 
             if (*src != NOFUZZ)
             {
 //                byte    *dest = I_VideoBuffer + i;
-                byte    *dest = screens[0] + i;
+                byte    *dest = screens[destscrn] + i;
 
                 if (!y || *(src - SCREENWIDTH) == NOFUZZ)
                 {
@@ -1722,7 +1722,7 @@ void R_InitBuffer(int width, int height)
 //  for variable screen sizes
 // Also draws a beveled edge.
 //
-void R_FillBackScreen(int scrn)
+void R_FillBackScreen(int srcscrn, int destscrn)
 {
     byte*        src;
     byte*        dest; 
@@ -1766,7 +1766,7 @@ void R_FillBackScreen(int scrn)
     
     src = W_CacheLumpName(name, PU_CACHE); 
 //    dest = background_buffer;
-    dest = screens[scrn];
+    dest = screens[destscrn];
          
     for (y=0 ; y<SCREENHEIGHT-SBARHEIGHT ; y++) 
     { 
@@ -1786,7 +1786,7 @@ void R_FillBackScreen(int scrn)
     // Draw screen and bezel; this is done to a separate screen buffer.
 
 //    V_UseBuffer(background_buffer);
-//    V_UseBuffer(screens[1]);
+//    V_UseBuffer(screens[srcscrn]);
 
     // COMPLETELY CHANGED FOR HIRES
     for (x=0 ; x<(scaledviewwidth >> hires) ; x+=8)

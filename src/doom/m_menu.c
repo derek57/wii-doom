@@ -4251,6 +4251,11 @@ void M_DrawScreen(void)
         dp_translation = crx[CRX_GREEN];
         M_WriteText(ScreenDef.x + 149, ScreenDef.y + 68, "BLURRED");
     }
+    else if(background_type == 3)
+    {
+        dp_translation = crx[CRX_BLUE];
+        M_WriteText(ScreenDef.x + 156, ScreenDef.y + 68, "PRBOOM");
+    }
 
     if(font_shadow == 0)
     {
@@ -6367,7 +6372,7 @@ void M_Background(int choice)
             background_type--;
         break;
       case 1:
-        if (background_type < 2)
+        if (background_type < 3)
             background_type++;
         break;
     }
@@ -7466,6 +7471,32 @@ static void M_DrawOPLDev(void)
     }
 }
 
+// [crispy] crispness menu
+static void M_DrawCrispnessBackground(int scrn)
+{
+    static byte *sdest;
+
+    if (!sdest)
+    {
+	byte *src, *dest;
+	int x, y;
+
+	src = W_CacheLumpName("FLOOR4_6", PU_CACHE);
+	dest = Z_Malloc(SCREENWIDTH * SCREENHEIGHT * sizeof(*dest), PU_STATIC, NULL);
+	sdest = dest;
+
+	for (y = 0; y < SCREENHEIGHT; y++)
+	{
+	    for (x = 0; x < SCREENWIDTH; x++)
+	    {
+		*dest++ = src[(y & 63) * 64 + (x & 63)];
+	    }
+	}
+    }
+
+    memcpy(screens[scrn], sdest, SCREENWIDTH * SCREENHEIGHT * sizeof(*screens[scrn]));
+}
+
 //
 // M_Drawer
 // Called after the view has been rendered,
@@ -7478,8 +7509,13 @@ void M_Drawer (void)
     unsigned int        i;
     unsigned int        max;
 
-    if (background_type == 2 && menuactive)
-        M_DarkBackground(0);
+    if (menuactive)
+    {
+        if (background_type == 2)
+            M_DarkBackground(0);
+        else if (background_type == 3)
+            M_DrawCrispnessBackground(0);
+    }
 
     if(!inhelpscreens)
     {

@@ -2212,7 +2212,7 @@ void G_DoSaveGame (void)
     M_StringCopy(savedescription, "", sizeof(savedescription));
 
     // draw the pattern into the back screen
-    R_FillBackScreen (1);
+    R_FillBackScreen (0, 1);
 } 
 
 //
@@ -2633,7 +2633,7 @@ void G_DoLoadGame (void)
         R_ExecuteSetViewSize ();
     
     // draw the pattern into the back screen
-    R_FillBackScreen (1);   
+    R_FillBackScreen (0, 1);   
 
     if (consoleactive)
     {

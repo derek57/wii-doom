@@ -181,7 +181,11 @@ int              use_libsamplerate = 0;
 int              gore_amount = 1;
 int              display_fps = 0;
 int              font_shadow = 0;
+#ifdef WII
+int              show_endoom = 0;
+#else
 int              show_endoom = 1;
+#endif
 int              render_mode = 2;
 
 // defaulted values

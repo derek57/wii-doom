@@ -393,7 +393,7 @@ void D_Display (int scrn)
 //        if (oldgamestate != GS_LEVEL)
         {
             viewactivestate = false;        // view was not active
-            R_FillBackScreen (1);    // draw the pattern into the back screen
+            R_FillBackScreen (0, 1);    // draw the pattern into the back screen
         }
 
         // see if the border needs to be updated to the screen

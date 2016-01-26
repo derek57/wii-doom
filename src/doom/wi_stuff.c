@@ -421,7 +421,7 @@ extern dboolean                 opl;
 //
 
 // slam background
-void WI_slamBackground(void)
+void WI_slamBackground(int srcscrn, int destscrn)
 {
     V_DrawPatch(0, 0, 0, background);
 /*
@@ -431,7 +431,7 @@ void WI_slamBackground(void)
 */
 //    ???
 //
-//    memcpy(screens[0], screens[1], SCREENWIDTH * SCREENHEIGHT);
+//    memcpy(screens[destscrn], screens[srcscrn], SCREENWIDTH * SCREENHEIGHT);
 }
 
 // The ticker is used to detect keys
@@ -977,7 +977,7 @@ void WI_updateShowNextLoc(void)
 
 void WI_drawShowNextLoc(void)
 {
-    WI_slamBackground();
+    WI_slamBackground(1, 0);
 
     // draw animated background
     WI_drawAnimatedBack(); 
@@ -1209,7 +1209,7 @@ void WI_drawDeathmatchStats(void)
     int           y;
     int           w;
 
-    WI_slamBackground();
+    WI_slamBackground(1, 0);
     
     // draw animated background
     WI_drawAnimatedBack(); 
@@ -1512,7 +1512,7 @@ void WI_drawNetgameStats(void)
     int           y;
     int           pwidth = SHORT(percent->width);
 
-    WI_slamBackground();
+    WI_slamBackground(1, 0);
     
     // draw animated background
     WI_drawAnimatedBack(); 
@@ -1724,7 +1724,7 @@ void WI_drawStats(void)
     // line height
     int lh = 3 * SHORT(num[0]->height) / 2;
 
-    WI_slamBackground();
+    WI_slamBackground(1, 0);
 
     // draw animated background
     WI_drawAnimatedBack();
