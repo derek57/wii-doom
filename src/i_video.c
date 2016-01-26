@@ -1620,8 +1620,10 @@ static void I_AutoAdjustSettings(void)
 #endif
 
 // Set video size to a particular scale factor (1x, 2x, 3x, etc.)
-
-#ifndef WII
+//
+// [nitr8] UNUSED
+//
+/*
 static void SetScaleFactor(int factor)
 {
     int w, h;
@@ -1642,10 +1644,12 @@ static void SetScaleFactor(int factor)
     screen_width = w * factor;
     screen_height = h * factor;
 }
+*/
 
+#ifndef WII
 void I_GraphicsCheckCommandLine(void)
 {
-    int i;
+//    int i;
 
     //!
     // @vanilla
@@ -1660,7 +1664,7 @@ void I_GraphicsCheckCommandLine(void)
     //
     // Grab the mouse when running in windowed mode.
     //
-
+/*
     if (M_CheckParm("-grabmouse"))
     {
         grabmouse = true;
@@ -1701,7 +1705,7 @@ void I_GraphicsCheckCommandLine(void)
     {
         fullscreen = true;
     }
-
+*/
     //!
     // @category video 
     //
@@ -1716,7 +1720,7 @@ void I_GraphicsCheckCommandLine(void)
     //
     // Specify the screen width, in pixels.
     //
-
+/*
     i = M_CheckParmWithArgs("-width", 1);
 
     if (i > 0)
@@ -1853,6 +1857,7 @@ void I_GraphicsCheckCommandLine(void)
     {
         novert = false;
     }
+*/
 }
 
 // Check if we have been invoked as a screensaver by xscreensaver.

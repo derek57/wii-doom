@@ -115,6 +115,7 @@
 typedef uint32_t u32;   // < 32bit unsigned integer
 
 #ifndef WII
+/*
 static struct 
 {
     char *description;
@@ -131,6 +132,23 @@ static struct
     {"Final Doom (alt)",     "final2",     exe_final2},
     {"Chex Quest",           "chex",       exe_chex},
     { NULL,                  NULL,         0},
+};
+*/
+static struct 
+{
+    char *description;
+    GameVersion_t version;
+} gameversions[] = {
+    {"Doom 1.666",           exe_doom_1_666},
+    {"Doom 1.7/1.7a",        exe_doom_1_7},
+    {"Doom 1.8",             exe_doom_1_8},
+    {"Doom 1.9",             exe_doom_1_9},
+    {"Hacx",                 exe_hacx},
+    {"Ultimate Doom",        exe_ultimate},
+    {"Final Doom",           exe_final},
+    {"Final Doom (alt)",     exe_final2},
+    {"Chex Quest",           exe_chex},
+    { NULL,                  0},
 };
 #endif
 
@@ -1071,7 +1089,7 @@ static void G_CheckDemoStatusAtExit (void)
 {
     G_CheckDemoStatus();
 }
-*/
+
 #ifndef WII
 static void SetMissionForPackName(char *pack_name)
 {
@@ -1105,6 +1123,7 @@ static void SetMissionForPackName(char *pack_name)
     I_Error("Unknown mission pack name: %s", pack_name);
 }
 #endif
+*/
 
 #define MAXDEHFILES 16
 
@@ -1116,9 +1135,11 @@ static void D_ProcessDehInWad(void)
     int i;
 
     if (chexdeh 
+/*
 #ifndef WII
         || M_ParmExists("-nodeh")
 #endif
+*/
        )
         return;
 
@@ -1145,9 +1166,11 @@ void LoadDehFile(char *path)
         I_Error("Failed to load chex.deh needed for emulating chex.exe.");
 
     if (
+/*
 #ifndef WII
         !M_ParmExists("-nodeh") &&
 #endif
+*/
         !HasDehackedLump(path))
     {
         char            *dehpath = M_StringReplace(path, ".wad", ".bex");
@@ -1180,6 +1203,10 @@ dboolean D_IsDehFile(char *filename)
         || M_StringCompare(filename + strlen(filename) - 4, ".bex"));
 }
 
+//
+// [nitr8] UNUSED
+//
+/*
 static void D_ProcessDehCommandLine(void)
 {
 #ifndef WII
@@ -1203,6 +1230,7 @@ static void D_ProcessDehCommandLine(void)
 #endif
     }
 }
+*/
 
 #ifndef WII
 void PrintGameVersion(void)
@@ -1231,7 +1259,7 @@ static void D_Endoom(void)
     // game has actually started.
 
     if (!show_endoom || !main_loop_started
-     || screensaver_mode || (M_CheckParm("-testcontrols") > 0 && !beta_style))
+     || screensaver_mode /*|| (M_CheckParm("-testcontrols") > 0 && !beta_style)*/)
     {
         return;
     }
@@ -1259,11 +1287,7 @@ void D_DoomMain (void)
 #ifndef WII
     FILE *iwad;
     byte *demolump;
-    char demolumpname[9];
-    int demoversion;
     int p;
-    int i;
-    dboolean status;
 
     I_AtExit(D_Endoom, false);
 #endif
@@ -1424,7 +1448,7 @@ void D_DoomMain (void)
     respawnparm = false;
     fastparm = false;
 
-    D_ProcessDehCommandLine();
+//    D_ProcessDehCommandLine();
 
     //!
     // @vanilla
@@ -1668,6 +1692,7 @@ void D_DoomMain (void)
         d_ejectcasings = false;
         d_statusmap = true;
         show_title = false;
+        render_mode = 2;
 
         beta_style = true;
     }
@@ -1858,7 +1883,6 @@ void D_DoomMain (void)
         }
         version13 = true;
     }
-#endif
 
     if ((devparm || devparm_net) && !beta_style)
     {
@@ -1866,7 +1890,6 @@ void D_DoomMain (void)
         printf("\n");
     }
 
-#ifdef WII
     if(!beta_style)
     {
         printf(" V_Init: allocate screens.\n");
@@ -2051,7 +2074,7 @@ void D_DoomMain (void)
     // Emulate a specific version of Doom.  Valid values are "1.9",
     // "ultimate", "final", "final2", "hacx" and "chex".
     //
-
+/*
     if(!beta_style)
         p = M_CheckParmWithArgs("-gameversion", 1);
 
@@ -2080,6 +2103,7 @@ void D_DoomMain (void)
         }
     }
     else
+*/
     {
         // Determine automatically
 
@@ -2098,6 +2122,11 @@ void D_DoomMain (void)
         else if (gamemode == shareware || gamemode == registered
               || (gamemode == commercial && gamemission == doom2))
         {
+            char demolumpname[9];
+            int demoversion;
+            int i;
+            dboolean status;
+
             // original
             gameversion = exe_doom_1_9;
 
@@ -2346,6 +2375,12 @@ void D_DoomMain (void)
         version13 = true;
     }
 
+    if ((devparm || devparm_net) && !beta_style)
+    {
+        printf(D_DEVSTR);
+        printf("\n");
+    }
+
     if(!beta_style)
     {
         printf(" V_Init: allocate screens.\n");
@@ -2379,7 +2414,7 @@ void D_DoomMain (void)
     {
         gamemission = doom2;
     }
-
+/*
     if(gamemode == commercial)
     {
         int p = 0;
@@ -2404,7 +2439,7 @@ void D_DoomMain (void)
             SetMissionForPackName(myargv[p + 1]);
         }
     }
-
+*/
 #else
 
     if(devparm || devparm_net)
@@ -3295,8 +3330,9 @@ void D_DoomMain (void)
 
     if (gamemode == commercial && W_CheckNumForName("map01") < 0)
         storedemo = true;
-
+/*
 #ifndef WII
+
     if (M_CheckParmWithArgs("-statdump", 1) && !beta_style)
     {
         I_AtExit(StatDump, true);
@@ -3310,7 +3346,7 @@ void D_DoomMain (void)
     //
     // Record a demo named x.lmp.
     //
-/*
+
     p = M_CheckParmWithArgs("-record", 1);
 
     if (p)
@@ -3335,9 +3371,9 @@ void D_DoomMain (void)
         G_TimeDemo (demolumpname);
         D_DoomLoop ();  // never returns
     }
-*/
-#endif
 
+#endif
+*/
     // Doom 3: BFG Edition includes modified versions of the classic
     // IWADs which can be identified by an additional DMENUPIC lump.
     // Furthermore, the M_GDHIGH lumps have been modified in a way that

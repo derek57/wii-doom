@@ -37,16 +37,17 @@
 
 
 extern wad_file_class_t stdc_wad_file;
-
+/*
 #ifndef WII
 static wad_file_class_t *wad_file_classes[] = 
 {
     &stdc_wad_file,
 };
 #endif
-
+*/
 wad_file_t *W_OpenFile(char *path)
 {
+/*
 #ifndef WII
     wad_file_t *result;
     int i;
@@ -58,8 +59,9 @@ wad_file_t *W_OpenFile(char *path)
 
     if (!M_CheckParm("-mmap") && !beta_style)
 #endif
+*/
         return stdc_wad_file.OpenFile(path);
-
+/*
     // Try all classes in order until we find one that works
 #ifndef WII
     result = NULL;
@@ -76,6 +78,7 @@ wad_file_t *W_OpenFile(char *path)
 
     return result;
 #endif
+*/
 }
 
 void W_CloseFile(wad_file_t *wad)

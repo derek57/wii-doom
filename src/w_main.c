@@ -49,7 +49,7 @@ dboolean W_ParseCommandLine(void)
 {
     dboolean modifiedgame = false;
     int p = 0;
-
+/*
 #ifdef FEATURE_WAD_MERGE
 
     // Merged PWADs are loaded first, because they are supposed to be 
@@ -221,7 +221,7 @@ dboolean W_ParseCommandLine(void)
     }
 
 #endif
-
+*/
     //!
     // @arg <files>
     // @vanilla

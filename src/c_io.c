@@ -74,6 +74,7 @@
 
 #include "m_misc.h"
 
+#include "doom/m_random.h"
 #include "doom/p_local.h"
 
 #ifdef SDL2
@@ -519,6 +520,9 @@ static void C_DrawBackground(int height, int scrn)
     for (i = 0; i < height; ++i)
 //        I_VideoBuffer[i] = tinttab50[c_blurscreen[i] + consoletintcolor];
         screens[scrn][i] = tinttab50[c_blurscreen[i] + consoletintcolor];
+
+    for (i = 0; i < height; ++i)
+        screens[0][i] = colormaps[0][256 * M_RandomInt(0, 10) + screens[0][i]];
 
     for (i = height - 2; i > 1; i -= 3)
     {

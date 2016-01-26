@@ -52,7 +52,7 @@ int              crosshair = 0;
 dboolean         modifiedgame;
 dboolean         start_respawnparm;
 dboolean         start_fastparm;
-dboolean         nomonsters;     // checkparm of -nomonsters
+dboolean         nomonsters;
 dboolean         hud;
 dboolean         randompitch;
 dboolean         swap_sound_chans;
@@ -69,8 +69,8 @@ dboolean         lowhealth = false;
 dboolean         d_recoil = false;
 dboolean         d_maxgore = false;
 dboolean         d_thrust = false;
-dboolean         respawnparm = false;       // checkparm of -respawn
-dboolean         fastparm = false;          // checkparm of -fast
+dboolean         respawnparm = false;
+dboolean         fastparm = false;
 dboolean         d_footstep = false;
 dboolean         d_footclip = false;
 dboolean         d_splash = false;
@@ -182,7 +182,7 @@ int              gore_amount = 1;
 int              display_fps = 0;
 int              font_shadow = 0;
 int              show_endoom = 1;
-int              render_mode = 1;
+int              render_mode = 2;
 
 // defaulted values
 int              mouseSensitivity = 5;

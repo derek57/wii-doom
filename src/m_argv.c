@@ -59,11 +59,14 @@ int M_CheckParmWithArgs(char *check, int num_args)
 // Returns true if the given parameter exists in the program's command
 // line arguments, false if not.
 //
-
+// [nitr8] UNUSED
+//
+/*
 dboolean M_ParmExists(char *check)
 {
     return M_CheckParm(check) != 0;
 }
+*/
 
 int M_CheckParm(char *check)
 {

@@ -650,7 +650,10 @@ dboolean W_MergeFile(char *filename, dboolean automatic)
 }
 
 // Replace lumps in the given list with lumps from the PWAD
-
+//
+// [nitr8] UNUSED
+//
+/*
 static void W_NWTAddLumps(searchlist_t *list)
 {
     int i;
@@ -771,4 +774,5 @@ void W_NWTDashMerge(char *filename)
 
     W_CloseFile(wad_file);
 }
+*/
 

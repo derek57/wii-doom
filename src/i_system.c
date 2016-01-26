@@ -468,7 +468,8 @@ void I_Error (char *error, ...)
         entry = entry->next;
     }
 
-    exit_gui_popup = !M_ParmExists("-nogui");
+//    exit_gui_popup = !M_ParmExists("-nogui");
+    exit_gui_popup = true;
 
     // Pop up a GUI dialog box to show the error message, if the
     // game was not run from the console (and the user will
@@ -516,11 +517,11 @@ static const unsigned char mem_dump_win98[DOS_MEM_DUMP_SIZE] = {
   0x9E, 0x0F, 0xC9, 0x00, 0x65, 0x04, 0x70, 0x00, 0x16, 0x00};
 static const unsigned char mem_dump_dosbox[DOS_MEM_DUMP_SIZE] = {
   0x00, 0x00, 0x00, 0xF1, 0x00, 0x00, 0x00, 0x00, 0x07, 0x00};
-
+/*
 #ifndef WII
 static unsigned char mem_dump_custom[DOS_MEM_DUMP_SIZE];
 #endif
-
+*/
 static const unsigned char *dos_mem_dump = mem_dump_dos622;
 
 dboolean I_GetMemoryValue(unsigned int offset, void *value, int size)
@@ -529,10 +530,11 @@ dboolean I_GetMemoryValue(unsigned int offset, void *value, int size)
 
     if (firsttime)
     {
+/*
 #ifndef WII
         int p, val;
 #endif
-
+*/
         firsttime = false;
 
         //!
@@ -543,6 +545,7 @@ dboolean I_GetMemoryValue(unsigned int offset, void *value, int size)
         // emulation.  Supported versions are: dos622, dos71, dosbox.
         // The default is to emulate DOS 7.1 (Windows 98).
         //
+/*
 #ifndef WII
         p = M_CheckParmWithArgs("-setmem", 1);
 
@@ -581,6 +584,7 @@ dboolean I_GetMemoryValue(unsigned int offset, void *value, int size)
             }
         }
 #endif
+*/
     }
 
     C_Warning("Read Access Violation emulation.");

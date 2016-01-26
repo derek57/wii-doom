@@ -2204,7 +2204,7 @@ menu_t  ScreenDef =
     &OptionsDef,
     ScreenMenu,
     M_DrawScreen,
-    60,23,
+    60,25,
     0
 };
 
@@ -4133,10 +4133,10 @@ void M_DrawScreen(void)
     //M_DarkBackground(0);
 
     if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
-        V_DrawPatchWithShadow(58, 0, 0, W_CacheLumpName("M_T_SSET",
+        V_DrawPatchWithShadow(58, 7, 0, W_CacheLumpName("M_T_SSET",
                                                PU_CACHE), false);
     else
-        V_DrawPatchWithShadow(58, 0, 0, W_CacheLumpName("M_SCRSET",
+        V_DrawPatchWithShadow(58, 7, 0, W_CacheLumpName("M_SCRSET",
                                                PU_CACHE), false);
 
     M_DrawThermoSmall(ScreenDef.x + 104, ScreenDef.y + LINEHEIGHT_SMALL * (screen_gamma + 1),
@@ -4349,7 +4349,7 @@ void M_DrawScreen(void)
 #endif
 
         x = ORIGWIDTH/2 - M_StringWidth(string) / 2;
-        M_WriteText(x, ScreenDef.y + 137, string);
+        M_WriteText(x, ScreenDef.y + 136, string);
     }
 }
 
@@ -7893,11 +7893,12 @@ void M_Init (void)
 
     if (gamemode == commercial)
         NewDef.prevMenu = (nerve_pwad ? &ExpDef : &MainDef);
-
+/*
 #ifndef WII
     if(!beta_style)
         opldev = M_CheckParm("-opldev") > 0;
 #endif
+*/
 }
 
 void M_God(int choice)

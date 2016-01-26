@@ -302,9 +302,11 @@ static void PrintStats(FILE *stream, wbstartstruct_t *stats)
 void StatCopy(wbstartstruct_t *stats)
 {
     if((
+/*
 #ifndef WII
         M_ParmExists("-statdump") ||
 #endif
+*/
         dump_stat || already_quitting || error_detected) &&
         num_captured_stats < MAX_CAPTURES)
     {
@@ -316,8 +318,6 @@ void StatCopy(wbstartstruct_t *stats)
 
 void StatDump(void)
 {
-    int i = 0;
-
     //!
     // @category compat
     // @arg <filename>
@@ -326,13 +326,16 @@ void StatDump(void)
     // that were played. The output from this option matches the output
     // from statdump.exe (see ctrlapi.zip in the /idgames archive).
     //
+/*
 #ifndef WII
     if(!beta_style)
         i = M_CheckParmWithArgs("-statdump", 1);
-
-    if (i > 0 || dump_stat || already_quitting || error_detected)
-#endif
+*/
+    if (/*i > 0 ||*/ dump_stat || already_quitting || error_detected)
+//#endif
     {
+        int i;
+
         FILE *dumpfile = NULL;
 
         StatCopy(&wminfo);

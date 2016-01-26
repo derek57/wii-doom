@@ -2330,10 +2330,15 @@ static int QualifyMap(int map)
     return (map < 1 || map > mapcount ? 0 : map);
 }
 
+//
+// [nitr8] UNUSED
+//
+/*
 char *P_GetMapAuthor(int map)
 {
     return (MAPINFO ? mapinfo[QualifyMap(map)].author : ""); 
 }
+*/
 
 void P_GetMapLiquids(int map)
 {

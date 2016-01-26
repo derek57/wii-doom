@@ -252,12 +252,13 @@ void D_StartNetGame(net_gamesettings_t *settings,
     // sync code. This is currently disabled by default because it
     // has some bugs.
     //
-
+/*
 #ifndef WII
     if (M_CheckParm("-newsync") > 0 && !beta_style)
         settings->new_sync = 1;
     else
 #endif
+*/
         settings->new_sync = 0;
 
     //!
@@ -267,7 +268,7 @@ void D_StartNetGame(net_gamesettings_t *settings,
     // Send n extra tics in every packet as insurance against dropped
     // packets.
     //
-
+/*
 #ifndef WII
     if(!beta_style)
         i = M_CheckParmWithArgs("-extratics", 1);
@@ -276,6 +277,7 @@ void D_StartNetGame(net_gamesettings_t *settings,
         settings->extratics = atoi(myargv[i+1]);
     else
 #endif
+*/
         settings->extratics = 1;
 
     //!
@@ -285,7 +287,7 @@ void D_StartNetGame(net_gamesettings_t *settings,
     // Reduce the resolution of the game by a factor of n, reducing
     // the amount of network bandwidth needed.
     //
-
+/*
 #ifndef WII
     if(!beta_style)
         i = M_CheckParmWithArgs("-dup", 1);
@@ -294,6 +296,7 @@ void D_StartNetGame(net_gamesettings_t *settings,
         settings->ticdup = atoi(myargv[i+1]);
     else
 #endif
+*/
         settings->ticdup = 1;
 
     // Set the local player and playeringame[] values.

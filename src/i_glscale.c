@@ -502,8 +502,8 @@ dboolean I_GL_InitScale(int w, int h)
     // Scanline hack. Don't enable at less than half the 1600x1200
     // intermediate buffer size or horrible aliasing effects will
     // occur.
-    scanline_mode = M_ParmExists("-scanline")
-                 && h > (SCREENHEIGHT * 3);
+    scanline_mode = /*M_ParmExists("-scanline")
+                 &&*/ h > (SCREENHEIGHT * 3);
 
     _glEnable(GL_TEXTURE_2D);
     _glShadeModel(GL_SMOOTH);
