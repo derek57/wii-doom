@@ -108,8 +108,29 @@
 #include "z_zone.h"
 
 #if !defined(MAX_PATH)
-#define MAX_PATH        260
+#define MAX_PATH           260
 #endif
+
+#define COLORIZE_CMD       "\033["
+#define COLORIZE_NORMAL    "0"
+
+#define TEXT_BLACK         "30m"
+#define TEXT_RED           "31m"
+#define TEXT_GREEN         "32m"
+#define TEXT_YELLOW        "33m"
+#define TEXT_BLUE          "34m"
+#define TEXT_MAGENTA       "35m"
+#define TEXT_CYAN          "36m"
+#define TEXT_WHITE         "37m"
+
+#define BACKGROUND_BLACK   "40"
+#define BACKGROUND_RED     "41"
+#define BACKGROUND_GREEN   "42"
+#define BACKGROUND_YELLOW  "43"
+#define BACKGROUND_BLUE    "44"
+#define BACKGROUND_MAGENTA "45"
+#define BACKGROUND_CYAN    "46"
+#define BACKGROUND_WHITE   "47"
 
 
 typedef uint32_t u32;   // < 32bit unsigned integer
@@ -2273,7 +2294,8 @@ void D_DoomMain (void)
             fsize == 4225460)      // DOOM SHAREWARE v1.25 (SYBEX RELEASE)
     {
         if(!beta_style)
-            printf("                          DOOM Operating System v1.2                           \n");
+            printf("%s%s;%s                          DOOM Operating System v1.2                           %s%sm\n",
+                COLORIZE_CMD,BACKGROUND_BLUE,TEXT_YELLOW,COLORIZE_CMD,COLORIZE_NORMAL);
     }
     else if(fsize == 4261144    || // DOOM BETA v1.4
             fsize == 4271324    || // DOOM BETA v1.5
@@ -2284,7 +2306,8 @@ void D_DoomMain (void)
             fsize == 4196020)      // DOOM SHAREWARE v1.8
     {
         if(!beta_style)
-            printf("                          DOOM Operating System v1.4                           \n");
+            printf("%s%s;%s                           DOOM System Startup v1.4                            %s%sm\n",
+                COLORIZE_CMD,BACKGROUND_RED,TEXT_WHITE,COLORIZE_CMD,COLORIZE_NORMAL);
 
         version13 = true;
     }
@@ -2299,7 +2322,8 @@ void D_DoomMain (void)
             )
     {
         if(!beta_style)
-            printf("                           DOOM System Startup v1.9                            \n");
+            printf("%s%s;%s                           DOOM System Startup v1.9                            %s%sm\n",
+                COLORIZE_CMD,BACKGROUND_WHITE,TEXT_RED,COLORIZE_CMD,COLORIZE_NORMAL);
 
         version13 = true;
     }
@@ -2309,7 +2333,8 @@ void D_DoomMain (void)
             fsize == 14607420)      // DOOM 2 REGISTERED v1.8 (FRENCH VERSION)
     {
         if(!beta_style)
-            printf("                         DOOM 2: Hell on Earth v1.666                          \n");
+            printf("%s%s;%s                         DOOM 2: Hell on Earth v1.666                          %s%sm\n",
+                COLORIZE_CMD,BACKGROUND_RED,TEXT_WHITE,COLORIZE_CMD,COLORIZE_NORMAL);
 
         version13 = true;
     }
@@ -2341,12 +2366,14 @@ void D_DoomMain (void)
             fsize == 19321722)      // HACX REGISTERED v1.2
         {
             if(!beta_style)
-                printf("                          HACX:  Twitch n' Kill v1.2                           \n");
+                printf("%s%s;%s                          HACX:  Twitch n' Kill v1.2                           %s%sm\n",
+                    COLORIZE_CMD,BACKGROUND_WHITE,TEXT_RED,COLORIZE_CMD,COLORIZE_NORMAL);
         }
         else
         {
             if(!beta_style)
-                printf("                          DOOM 2: Hell on Earth v1.9                           \n");
+                printf("%s%s;%s                          DOOM 2: Hell on Earth v1.9                           %s%sm\n",
+                    COLORIZE_CMD,BACKGROUND_WHITE,TEXT_RED,COLORIZE_CMD,COLORIZE_NORMAL);
         }
         version13 = true;
     }
@@ -2357,12 +2384,14 @@ void D_DoomMain (void)
         if(fsize == 12361532)
         {
             if(!beta_style)
-                printf("                            Chex (R) Quest Startup                             \n");
+                printf("%s%s;%s                            Chex (R) Quest Startup                             %s%sm\n",
+                    COLORIZE_CMD,BACKGROUND_WHITE,TEXT_BLACK,COLORIZE_CMD,COLORIZE_NORMAL);
         }
         else
         {
             if(!beta_style)
-                printf("                          DOOM 2: TNT Evilution v1.9                           \n");
+                printf("%s%s;%s                          DOOM 2: TNT Evilution v1.9                           %s%sm\n",
+                    COLORIZE_CMD,BACKGROUND_WHITE,TEXT_BLACK,COLORIZE_CMD,COLORIZE_NORMAL);
         }
         version13 = true;
     }
@@ -2371,7 +2400,8 @@ void D_DoomMain (void)
             fsize == 17420824)      // FINAL DOOM - PLUTONIA v1.9 (WITHOUT DEATHMATCH STARTS)
     {
             if(!beta_style)
-                printf("                       DOOM 2: Plutonia Experiment v1.9                        \n");
+                printf("%s%s;%s                       DOOM 2: Plutonia Experiment v1.9                        %s%sm\n",
+                    COLORIZE_CMD,BACKGROUND_WHITE,TEXT_BLACK,COLORIZE_CMD,COLORIZE_NORMAL);
         version13 = true;
     }
 

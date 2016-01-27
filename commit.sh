@@ -15,6 +15,7 @@ cd src
 cp Makefile.* /home/user/GitHub/WIIDOOM/wii-doom.git/trunk/src
 cp *.c /home/user/GitHub/WIIDOOM/wii-doom.git/trunk/src
 cp *.h /home/user/GitHub/WIIDOOM/wii-doom.git/trunk/src
+cp *.wad /home/user/GitHub/WIIDOOM/wii-doom.git/trunk/src
 cd doom
 cp Makefile.* /home/user/GitHub/WIIDOOM/wii-doom.git/trunk/src/doom
 cp *.c /home/user/GitHub/WIIDOOM/wii-doom.git/trunk/src/doom
