@@ -588,7 +588,8 @@ void V_DrawConsoleChar(int x, int y, int scrn, patch_t *patch, int color1, int c
                         if (*source)
                         {
                             if (italics)
-                                *(dest + italicize[height]) = color1;
+                                *(dest + italicize[height]) = (!tinttab ? color1 :
+                                    tinttab[(color1 << 8) + *(dest + italicize[height])]);
                             else
                                 *dest = (!tinttab ? color1 : tinttab[(color1 << 8) + *dest]);
                         }

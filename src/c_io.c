@@ -131,7 +131,9 @@
 #define CARETWAIT               10
 
 #define NOBACKGROUNDCOLOR       -1
-
+#define NOQUOTE                 0
+#define LDQUOTE                 1
+#define RDQUOTE                 2
 
 dboolean        consoleactive = false;
 dboolean        alwaysrun;
@@ -180,10 +182,8 @@ static dboolean forceblurredraw = false;
 
 static patch_t  *unknownchar;
 static patch_t  *consolefont[CONSOLEFONTSIZE];
-static patch_t  *lsquote;
 static patch_t  *ldquote;
 static patch_t  *rdquote;
-static patch_t  *rsquote;
 static patch_t  *degree;
 static patch_t  *multiply;
 static patch_t  *caret;
@@ -319,12 +319,9 @@ static struct
     char        char2;
     int         adjust;
 } kern[] = {
-    { ' ',  '(',  -1 }, { ' ',  'T',  -1 }, { '\\', 'V',  -1 }, { '\"', '+',  -1 },
-    { '\"', '.',  -1 }, { '\"', 'a',  -1 }, { '\"', 'c',  -1 }, { '\"', 'd',  -1 },
-    { '\"', 'e',  -1 }, { '\"', 'g',  -1 }, { '\"', 'j',  -2 }, { '\"', 'o',  -1 },
-    { '\"', 'q',  -1 }, { '\"', 's',  -1 }, { '\'', 'a',  -1 }, { '\'', 'c',  -1 },
-    { '\'', 'd',  -1 }, { '\'', 'e',  -1 }, { '\'', 'g',  -1 }, { '\'', 'j',  -2 },
-    { '\'', 'o',  -1 }, { '\"', 'q',  -1 }, { '\'', 's',  -1 }, { '.',  '\\', -1 },
+    { ' ',  '(',  -1 }, { ' ',  'T',  -1 }, { '\\', 'V',  -1 }, { '\'', 'a',  -1 },
+    { '\'', 'c',  -1 }, { '\'', 'd',  -1 }, { '\'', 'e',  -1 }, { '\'', 'g',  -1 },
+    { '\'', 'j',  -2 }, { '\'', 'o',  -1 }, { '\'', 's',  -1 }, { '.',  '\\', -1 },
     { '.',  '4',  -1 }, { '.',  '7',  -1 }, { ',',  '4',  -1 }, { '/',  'o',  -1 },
     { ':', '\\',  -1 }, { '_',  'f',  -1 }, { '0',  ',',  -1 }, { '0',  'j',  -2 },
     { '1',  '\"', -1 }, { '1',  '\'', -1 }, { '1',  'j',  -2 }, { '2',  'j',  -2 },
@@ -438,9 +435,7 @@ void C_Init(void)
     caret = W_CacheLumpName("CARET", PU_STATIC);
     route = W_CacheLumpName("DRFON036", PU_STATIC);
 
-    lsquote = W_CacheLumpName("DRFON145", PU_STATIC);
     ldquote = W_CacheLumpName("DRFON147", PU_STATIC);
-    rsquote = W_CacheLumpName("DRFON146", PU_STATIC);
     rdquote = W_CacheLumpName("DRFON148", PU_STATIC);
     degree = W_CacheLumpName("DRFON176", PU_STATIC);
     multiply = W_CacheLumpName("DRFON215", PU_STATIC);
@@ -551,13 +546,14 @@ static void C_DrawBackground(int height, int scrn)
 #pragma GCC diagnostic ignored "-Wchar-subscripts"
 
 static void C_DrawConsoleText(int x, int y, char *text, int color1, int color2, byte *tinttab,
-    int tabs[8])
+    int tabs[8], dboolean matchingquotes)
 {
     dboolean            italics = false;
     size_t              i;
     int                 tab = -1;
     size_t              len = strlen(text);
     unsigned char       prevletter = '\0';
+    int                 prevquote = NOQUOTE; 
 
     y -= CONSOLEHEIGHT - consoleheight; 
 
@@ -582,7 +578,6 @@ static void C_DrawConsoleText(int x, int y, char *text, int color1, int color2, 
         else
         {
             patch_t     *patch = NULL;
-            int         j; 
 
             if (letter == ITALICS)
                 italics = false;
@@ -595,29 +590,25 @@ static void C_DrawConsoleText(int x, int y, char *text, int color1, int color2, 
             }
             else if (letter == 215)
                 patch = multiply;
-            else if (letter == '\'')
+            else if (letter == '\"' && matchingquotes) 
             {
-                for (j = i + 1; (size_t)j < len; ++j)
-                    if (text[j] == '\'')
-                        patch = lsquote;
-                if (!patch)
-                    for (j = i - 1; j >= 0; --j)
-                        if (text[j] == '\'')
-                         patch = rsquote;
-                if (!patch)
-                    patch = consolefont[c];
-            }
-            else if (letter == '\"')
-            {
-                for (j = i + 1; (size_t)j < len; ++j)
-                    if (text[j] == '\"')
-                        patch = ldquote;
-                if (!patch)
-                    for (j = i - 1; j >= 0; --j)
+                if (prevquote == NOQUOTE || prevquote == RDQUOTE)
+                {
+                    int j;
+
+                    for (j = i + 1; (size_t)j < len; ++j)
                         if (text[j] == '\"')
-                            patch = rdquote;
-                if (!patch)
-                    patch = consolefont[c];
+                        {
+                            patch = ldquote;
+                            prevquote = LDQUOTE;
+                            break;
+                        }
+                }
+                else if (prevquote == LDQUOTE)
+                {
+                    patch = rdquote;
+                    prevquote = RDQUOTE;
+                }
             }
             else
                 patch = (c < 0 || c >= CONSOLEFONTSIZE ? unknownchar : consolefont[c]);
@@ -695,7 +686,7 @@ void C_Drawer(void)
 
         // draw branding
         C_DrawConsoleText(SCREENWIDTH - C_TextWidth(PACKAGE_NAME) - CONSOLETEXTX + 1,
-            CONSOLEHEIGHT - 10, PACKAGE_NAME, graycolor, NOBACKGROUNDCOLOR, tinttab25, notabs);
+            CONSOLEHEIGHT - 10, PACKAGE_NAME, graycolor, NOBACKGROUNDCOLOR, tinttab25, notabs, false);
 
         // draw console text
         if (outputhistory == -1)
@@ -718,7 +709,7 @@ void C_Drawer(void)
             else
             {
                 C_DrawConsoleText(CONSOLETEXTX, y + (CONSOLELINEHEIGHT / 2), console[i].string,
-                    consolecolors[console[i].type], NOBACKGROUNDCOLOR, NULL, console[i].tabs);
+                    consolecolors[console[i].type], NOBACKGROUNDCOLOR, tinttab66, console[i].tabs, true);
                 if (console[i].timestamp[0])
                     C_DrawTimeStamp(timestampx, y + (CONSOLELINEHEIGHT / 2), console[i].timestamp);
             }

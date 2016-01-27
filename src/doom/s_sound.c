@@ -87,6 +87,7 @@ short currentsong = 0;
 extern dboolean fake;
 extern dboolean change_anyway;
 extern dboolean mus_cheat_used;
+extern dboolean initialized;
 
 extern int faketracknum;
 extern int tracknum;
@@ -759,6 +760,9 @@ void S_ChangeMusic(int musicnum, int looping, dboolean mapstart)
     void        *handle;
     int         mapinfomusic; 
     int         gameepi;
+
+    if (!initialized)
+        return;
 
     // The Doom IWAD file has two versions of the intro music: d_intro
     // and d_introa.  The latter is used for OPL playback.

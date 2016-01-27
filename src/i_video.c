@@ -148,7 +148,7 @@ static dboolean palette_to_set;
 
 // display has been set up?
 
-static dboolean initialized = false;
+/*static*/ dboolean initialized = false;
 
 // if true, screen buffer is screen->pixels
 

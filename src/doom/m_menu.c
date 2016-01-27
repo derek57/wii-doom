@@ -7560,7 +7560,7 @@ void M_Drawer (void)
             else if(gamestate == GS_FINALE && finalestage == F_STAGE_CAST)
                 S_ChangeMusic(mus_evil, true, false);
             else if(gamestate == GS_DEMOSCREEN)
-                S_ChangeMusic(mus_dm2ttl, true, false);
+                S_ChangeMusic(mus_dm2ttl, false, false);
             else if(gamestate == GS_INTERMISSION)
                 S_ChangeMusic(mus_dm2int, true, false);
         }
@@ -7604,7 +7604,7 @@ void M_Drawer (void)
             else if(gamestate == GS_FINALE && finalestage == F_STAGE_CAST)
                 S_StartMusic (mus_bunny);
             else if(gamestate == GS_DEMOSCREEN)
-                S_ChangeMusic(mus_intro, true, false);
+                S_ChangeMusic(mus_intro, false, false);
             else if(gamestate == GS_INTERMISSION)
                 S_ChangeMusic(mus_inter, true, false);
         }

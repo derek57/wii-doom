@@ -2878,6 +2878,61 @@ void D_DoomMain (void)
     C_Output("heap size: 0x3cdb000 ");
     C_Output("W_Init: Init WADfiles.");
 
+    if(modifiedgame)
+    {
+#ifdef WII
+        while(1)
+        {
+            u32 buttons;
+
+            if(wad_message_has_been_shown == 1)
+                goto skip_showing_message;
+
+            if(!beta_style)
+            {
+                printf(" ===============================================================================");
+                printf("    ATTENTION:  This version of DOOM has been modified.  If you would like to   ");
+                printf("   get a copy of the original game, call 1-800-IDGAMES or see the readme file.  ");
+                printf("            You will not receive technical support for modified games.          ");
+                printf("                             press enter to continue                            ");
+                printf(" ===============================================================================");
+            }
+#endif
+            C_Output("===============================================================================");
+            C_Output("   ATTENTION:  This version of DOOM has been modified.  If you would like to   ");
+            C_Output("  get a copy of the original game, call 1-800-IDGAMES or see the readme file.  ");
+            C_Output("           You will not receive technical support for modified games.          ");
+            C_Output("                            press enter to continue                            ");
+            C_Output("===============================================================================");
+
+#ifdef WII
+            skip_showing_message:
+            {
+            }
+
+            if (buttons & WPAD_CLASSIC_BUTTON_A)
+                break;
+
+            buttons = WaitButtons();
+
+            wad_message_has_been_shown = 1;
+        }
+#else
+        if(!beta_style)
+        {
+            printf (
+                " ===============================================================================\n"
+                "    ATTENTION:  This version of DOOM has been modified.  If you would like to   \n"
+                "   get a copy of the original game, call 1-800-IDGAMES or see the readme file.  \n"
+                "            You will not receive technical support for modified games.          \n"
+                "                             press enter to continue                            \n"
+                " ==============================================================================="
+                );
+            getchar ();
+        }
+#endif
+    }
+
     if(gamemode == shareware && gameversion != exe_chex)
     {
         if(!beta_style)
@@ -2896,6 +2951,7 @@ void D_DoomMain (void)
             printf("         commercial version.\n");
         C_Output("        commercial version.");
     }
+
     if((gamemode == retail || gamemode == registered) && !beta_style)
     {
         printf(" ===============================================================================");
@@ -2941,61 +2997,6 @@ void D_DoomMain (void)
         C_Output("                               Do not distribute!                              ");
         C_Output("            Please report software piracy to the SPA: 1-800-388-PIR8           ");
         C_Output("===============================================================================");
-    }
-
-    if(modifiedgame)
-    {
-#ifdef WII
-        while(1)
-        {
-            u32 buttons = WaitButtons();
-
-            if(wad_message_has_been_shown == 1)
-                goto skip_showing_message;
-
-            if(!beta_style)
-            {
-                printf(" ===============================================================================");
-                printf("    ATTENTION:  This version of DOOM has been modified.  If you would like to   ");
-                printf("   get a copy of the original game, call 1-800-IDGAMES or see the readme file.  ");
-                printf("            You will not receive technical support for modified games.          ");
-                printf("                             press enter to continue                            ");
-                printf(" ===============================================================================");
-            }
-#endif
-            C_Output("===============================================================================");
-            C_Output("   ATTENTION:  This version of DOOM has been modified.  If you would like to   ");
-            C_Output("  get a copy of the original game, call 1-800-IDGAMES or see the readme file.  ");
-            C_Output("           You will not receive technical support for modified games.          ");
-            C_Output("                            press enter to continue                            ");
-            C_Output("===============================================================================");
-
-#ifdef WII
-            skip_showing_message:
-            {
-            }
-
-            if (buttons & WPAD_CLASSIC_BUTTON_A)
-                break;
-
-            WaitButtons();
-
-            wad_message_has_been_shown = 1;
-        }
-#else
-        if(!beta_style)
-        {
-            printf (
-                " ===============================================================================\n"
-                "    ATTENTION:  This version of DOOM has been modified.  If you would like to   \n"
-                "   get a copy of the original game, call 1-800-IDGAMES or see the readme file.  \n"
-                "            You will not receive technical support for modified games.          \n"
-                "                             press enter to continue                            \n"
-                " ==============================================================================="
-                );
-            getchar ();
-        }
-#endif
     }
 
     // Check for -file in shareware
@@ -3047,10 +3048,11 @@ void D_DoomMain (void)
     startskill = sk_medium;
     startepisode = 1;
     startmap = 1;
-
+/*
     if(devparm || devparm_net)
         autostart = true;
     else
+*/
         autostart = false;
 
     //!
