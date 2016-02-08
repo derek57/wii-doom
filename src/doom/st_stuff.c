@@ -1631,7 +1631,7 @@ void ST_Drawer (dboolean fullscreen, dboolean refresh)
     {
 //        if(screenSize < 8)
         {
-            if(usergame)
+            if(usergame && !menuactive)
                 ST_doRefresh();
         }
     }

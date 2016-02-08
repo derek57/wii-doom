@@ -63,6 +63,8 @@
 
 #define NUMMOBJCOUNTERS         8
 
+#define MIF_NOPTCLEVTS          0x00000200 // haleyjd: thing can't trigger particle events
+
 //
 // NOTES: mobj_t
 //
@@ -433,6 +435,16 @@ typedef struct mobj_s
     int                    counters[NUMMOBJCOUNTERS];
 
     int                    casing_counter;
+
+    unsigned int           effects; // particle effect flag field
+
+    int                    effect_flies_start_timer;
+    int                    effect_flies_sound_timer;
+
+    // enemy dead but shot again with flies surrounding
+    dboolean               effect_flies_can_spawn;
+    dboolean               effect_flies_spawned;
+    dboolean               effect_flies_shot;
 
 } mobj_t;
 

@@ -43,6 +43,7 @@
 #include "i_system.h"
 #include "i_tinttab.h"
 #include "p_local.h"
+#include "p_partcl.h"
 #include "v_trans.h"
 #include "v_video.h"
 #include "w_wad.h"
@@ -71,6 +72,13 @@ static lighttable_t             **spritelights;         // killough 1/25/98 made
 //  used for psprite clipping and initializing clipping
 int                             negonearray[SCREENWIDTH];
 int                             screenheightarray[SCREENWIDTH];
+
+// haleyjd: global particle system state
+
+int                             numParticles;
+int                             activeParticles;
+int                             inactiveParticles;
+particle_t                      *Particles;
 
 //
 // INITIALIZATION FUNCTIONS
@@ -544,6 +552,104 @@ static void R_DrawMaskedShadowColumn(column_t *column)
 int     fuzzpos;
 
 //
+// R_DrawParticle
+//
+// haleyjd: this function had to be mostly rewritten
+//
+void R_DrawParticle(vissprite_t *vis)
+{
+    int x1 = vis->x1;
+    int x2 = vis->x2;
+    int ox1 = vis->x1;
+    int ox2 = vis->x2;
+    int xcount;
+    int ycount;
+    int yl;
+    int yh;
+    int spacing;
+
+    byte color;
+    byte *dest;
+
+    if (x1 < 0)
+        x1 = 0;
+
+    if (x2 >= viewwidth)
+        x2 = viewwidth - 1;
+
+    yl = (centeryfrac - FixedMul(vis->texturemid, vis->scale) + FRACUNIT - 1) >> FRACBITS;
+
+    yh = yl + (x2 - x1);
+
+    // due to square shape, it is unnecessary to clip the entire particle
+    if (yh >= mfloorclip[ox1])
+        yh = mfloorclip[ox1] - 1;
+
+    if (yl <= mceilingclip[ox1])
+        yl = mceilingclip[ox1] + 1;
+
+    if (yh >= mfloorclip[ox2])
+        yh = mfloorclip[ox2] - 1;
+
+    if (yl <= mceilingclip[ox2])
+        yl = mceilingclip[ox2] + 1;
+
+    color = vis->colormap[vis->startfrac];
+
+    xcount = x2 - x1 + 1;
+
+    ycount = yh - yl;
+
+    if (ycount < 0)
+        return;
+
+    ++ycount;
+
+    spacing = SCREENWIDTH - xcount;
+    dest = R_ADDRESS(0, x1, yl);
+
+    // haleyjd 02/08/05: rewritten to remove inner loop invariants
+    if (d_translucency)
+    {
+        // step in y
+        do
+        {
+            int count = xcount;
+
+            // step in x
+            do
+            {
+                *dest = tranmap[(*dest << 8) + color];
+                ++dest;
+            }
+            while(--count);
+
+            // go to next row
+            dest += spacing;
+        }
+        while(--ycount);
+    }
+    // opaque (fast, and looks terrible)
+    else
+    {
+        // step in y
+        do
+        {
+            int count = xcount;
+
+            // step in x
+            do
+                *dest++ = color;
+            while(--count);
+
+            // go to next row
+            dest += spacing;
+        }
+        while(--ycount);
+    }
+}
+
+//
 // R_DrawVisSprite
 //  mfloorclip and mceilingclip should also be set.
 //
@@ -553,6 +659,14 @@ void R_DrawVisSprite(vissprite_t *vis)
     fixed_t     xiscale = vis->xiscale;
     fixed_t     x2 = vis->x2;
     patch_t     *patch = W_CacheLumpNum(vis->patch + firstspritelump, PU_CACHE);
+
+    if (vis->patch == -1)
+    {
+        // this vissprite belongs to a particle
+        R_DrawParticle(vis);
+
+        return;
+    }
 
     dc_colormap = vis->colormap;
     colfunc = vis->colfunc;
@@ -1228,6 +1342,165 @@ void R_ProjectShadow(mobj_t *thing)
 }
 
 //
+// R_ProjectParticle
+//
+void R_ProjectParticle(particle_t *particle)
+{
+    int x1;
+    int x2;
+    int heightsec = -1;
+    int globalxscale = (SCREENWIDTH << FRACBITS) / SCREENWIDTH;
+    int addscaleshift = (globalxscale >> FRACBITS) - 1;
+
+    vissprite_t* vis;
+
+    sector_t* sector = NULL;
+
+    fixed_t gzt;
+    fixed_t tx;
+    fixed_t xscale;
+    fixed_t iscale;
+
+    // transform the origin point
+    fixed_t tr_x = particle->x - viewx;
+    fixed_t tr_y = particle->y - viewy;
+
+    fixed_t gxt = FixedMul(tr_x, viewcos);
+    fixed_t gyt = -FixedMul(tr_y, viewsin);
+    fixed_t tz = gxt - gyt;
+
+    // particle is behind view plane?
+    if (tz < MINZ)
+        return;
+   
+    xscale = FixedDiv(projection, tz);
+   
+    gxt = -FixedMul(tr_x, viewsin); 
+    gyt = FixedMul(tr_y, viewcos); 
+
+    tx = -(gyt + gxt); 
+   
+    // too far off the side?
+    if (ABS(tx) > (tz << 2))
+        return;
+   
+    // calculate edges of the shape
+    x1 = (centerxfrac + FixedMul(tx, xscale)) >> FRACBITS;
+   
+    // off the right side?
+    if (x1 >= viewwidth)
+        return;
+   
+    x2 = ((centerxfrac + FixedMul(tx + particle->size * (FRACUNIT / 4), xscale)) >> FRACBITS);
+   
+    // off the left side?
+    if (x2 < 0)
+        return;
+   
+    gzt = particle->z + 1;
+   
+    // killough 3/27/98: exclude things totally separated
+    // from the viewer, by either water or fake ceilings
+    // killough 4/11/98: improve sprite clipping for underwater/fake ceilings   
+    {
+        // haleyjd 02/20/04: use subsector now stored in particle
+        subsector_t *subsector = particle->subsector;
+        sector = subsector->sector;
+        heightsec = sector->heightsec;
+
+        if (particle->z < sector->floorheight || particle->z > sector->ceilingheight)
+            return;
+    }
+   
+    // only clip particles which are in special sectors
+    if (heightsec != -1)
+    {
+        int phs = /*viewcamera ? viewcamera->heightsec :*/
+                  viewplayer->mo->subsector->sector->heightsec;
+      
+        if (phs != -1 && 
+            viewz < sectors[phs].floorheight ?
+                    particle->z >= sectors[heightsec].floorheight :
+                    gzt < sectors[heightsec].floorheight)
+            return;
+
+        if (phs != -1 && 
+            viewz > sectors[phs].ceilingheight ?
+                    gzt < sectors[heightsec].ceilingheight &&
+                      viewz >= sectors[heightsec].ceilingheight :
+                    particle->z >= sectors[heightsec].ceilingheight)
+            return;
+    }
+   
+    // store information in a vissprite
+    if (!(vis = R_NewVisSprite(xscale)))
+        return;
+
+    vis->heightsec = heightsec;
+    vis->scale = xscale;
+    vis->gx = particle->x;
+    vis->gy = particle->y;
+    vis->gz = particle->z;
+    vis->gzt = gzt;
+    vis->texturemid = vis->gzt - viewz;
+    vis->x1 = x1 < 0 ? 0 : x1;
+    vis->x2 = x2 >= viewwidth ? viewwidth - 1 : x2;
+    //vis->translation = NULL;
+    iscale = FixedDiv(FRACUNIT, xscale);
+    vis->startfrac = particle->color;
+    vis->xiscale = iscale;
+    vis->patch = -1;
+    vis->mobjflags = particle->trans;
+   
+    if (fixedcolormap ==
+        fullcolormap + INVERSECOLORMAP * 256 * sizeof(lighttable_t))
+    {
+        vis->colormap = fixedcolormap;
+    } 
+    else
+    {
+        // haleyjd 01/12/02: wow is this code wrong! :)
+        //int index = xscale>>(LIGHTSCALESHIFT + hires);
+        //if(index >= MAXLIGHTSCALE) 
+        //   index = MAXLIGHTSCALE-1;      
+        //vis->colormap = spritelights[index];
+
+        //R_SectorColormap(sector);
+
+        if (d_brightmaps && (particle->styleflags & PS_FULLBRIGHT))
+        {
+            vis->colormap = fullcolormap;
+        }
+        else
+        {
+            lighttable_t **ltable;
+            sector_t tmpsec;
+            int floorlightlevel, ceilinglightlevel, lightnum, index;
+
+            R_FakeFlat(sector, &tmpsec, &floorlightlevel, &ceilinglightlevel, false);
+
+            lightnum = (floorlightlevel + ceilinglightlevel) / 2;
+            lightnum = (lightnum >> LIGHTSEGSHIFT) + extralight;
+         
+            if (lightnum >= LIGHTLEVELS || fixedcolormap)
+                ltable = scalelight[LIGHTLEVELS - 1];      
+            else if (lightnum < 0)
+                ltable = scalelight[0];
+            else
+                ltable = scalelight[lightnum];
+         
+            // SoM: ANYRES
+            index = xscale >> (LIGHTSCALESHIFT + addscaleshift /*- detailshift*/);
+
+            if (index >= MAXLIGHTSCALE)
+                index = MAXLIGHTSCALE - 1;
+         
+            vis->colormap = ltable[index];
+        }
+    }
+}
+
+//
 // R_AddSprites
 // During BSP traversal, this adds sprites by sector.
 //
@@ -1250,6 +1523,15 @@ void R_AddSprites(sector_t *sec, int lightlevel)
     else
         for (thing = sec->thinglist; thing; thing = thing->snext)
             thing->projectfunc(thing);
+
+    // haleyjd 02/20/04: Handle all particles in sector.
+    if (d_drawparticles)
+    {
+        particle_t  *ptcl;
+
+        for (ptcl = sec->ptcllist; ptcl; ptcl = (particle_t *)(ptcl->seclinks.next))
+            R_ProjectParticle(ptcl);
+    }
 }
 
 //
@@ -1798,6 +2080,18 @@ void R_DrawMasked(void)
     drawseg_t   *ds;
     int         i;
 
+    if (d_drawparticles)
+    {
+        int j = activeParticles;
+
+        while (j != -1)
+        {
+            R_ProjectParticle(Particles + j);
+
+            j = Particles[j].next;
+        }
+    }
+
     // draw all blood splats
     for (i = num_bloodvissprite; --i >= 0;)
         R_DrawBloodSprite(&bloodvissprites[i]);
@@ -1818,3 +2112,77 @@ void R_DrawMasked(void)
     // draw the psprites on top of everything
     R_DrawPlayerSprites();
 }
+
+//=====================================================================
+//
+// haleyjd 09/30/01
+//
+// Particle Rendering
+// This incorporates itself mostly seamlessly within the
+// vissprite system, incurring only minor changes to the functions
+// above.
+
+//
+// newParticle
+//
+// Tries to find an inactive particle in the Particles list
+// Returns NULL on failure
+//
+particle_t *newParticle(void)
+{
+    particle_t *result = NULL;
+
+    if (inactiveParticles != -1)
+    {
+        result = Particles + inactiveParticles;
+        inactiveParticles = result->next;
+        result->next = activeParticles;
+        activeParticles = result - Particles;
+    }
+
+    return result;
+}
+
+//
+// R_ClearParticles
+//
+// set up the particle list
+//
+void R_ClearParticles(void)
+{
+    int i;
+   
+    memset(Particles, 0, numParticles * sizeof(particle_t));
+    activeParticles = -1;
+    inactiveParticles = 0;
+
+    for (i = 0; i < numParticles - 1; i++)
+        Particles[i].next = i + 1;
+
+    Particles[i].next = -1;
+}
+
+//
+// R_InitParticles
+//
+// Allocate the particle list and initialize it
+//
+void R_InitParticles(void)
+{
+//    int i;
+
+    numParticles = 0;
+/*
+    if ((i = M_CheckParm("-numparticles")) && i < myargc - 1)
+        numParticles = atoi(myargv[i + 1]);
+*/   
+    // assume default
+    if (numParticles == 0)
+        numParticles = 4000;
+    else if (numParticles < 100)
+        numParticles = 100;
+   
+    Particles = (particle_t *)(Z_Malloc(numParticles * sizeof(particle_t), PU_STATIC, NULL));
+    R_ClearParticles();
+}
+

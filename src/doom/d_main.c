@@ -2940,10 +2940,10 @@ void D_DoomMain (void)
             {
             }
 
+            buttons = WaitButtons();
+
             if (buttons & WPAD_CLASSIC_BUTTON_A)
                 break;
-
-            buttons = WaitButtons();
 
             wad_message_has_been_shown = 1;
         }

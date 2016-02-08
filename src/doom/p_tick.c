@@ -231,7 +231,7 @@ void P_Ticker (void)
     // run the tic
     if ((paused || menuactive) && !beta_style /*|| consoleactive*/)
         return;
-                
+
     // pause if in menu and at least one tic has been run
     if ( !netgame
          && menuactive
@@ -240,6 +240,8 @@ void P_Ticker (void)
     {
         return;
     }
+
+    P_ParticleThinker(); // haleyjd: think for particles
 
     for (i=0 ; i<MAXPLAYERS ; i++)
         if (playeringame[i])
@@ -266,6 +268,8 @@ void P_Ticker (void)
 
     // for par times
     leveltime++;        
+
+    P_RunEffects(); // haleyjd: run particle effects
 }
 
 //

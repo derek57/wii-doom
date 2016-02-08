@@ -374,6 +374,13 @@ extern  dboolean         dump_mem;
 extern  dboolean         dump_con;
 extern  dboolean         dump_stat;
 extern  dboolean         printdir;
+extern  dboolean         d_drawparticles;
+extern  dboolean         d_drawbfgcloud;
+extern  dboolean         d_drawrockettrails;
+extern  dboolean         d_drawrocketexplosions;
+extern  dboolean         d_drawbfgexplosions;
+extern  dboolean         d_spawnflies;
+extern  dboolean         d_dripblood;
 /*
 extern  dboolean         nerve;
 extern  dboolean         chex;
@@ -425,6 +432,9 @@ extern  int              use_libsamplerate;
 extern  int              gore_amount;
 extern  int              font_shadow;
 extern  int              render_mode;
+extern  int              bloodsplat_particle;
+extern  int              bulletpuff_particle;
+extern  int              teleport_particle;
 
 void A_MoreGibs(mobj_t* actor);
 

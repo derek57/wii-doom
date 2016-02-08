@@ -1626,6 +1626,9 @@ void G_DoLoadLevel (void)
         memset (players[i].frags,0,sizeof(players[i].frags)); 
     } 
 
+    // clear all particles
+    R_ClearParticles();
+
     // initialize the msecnode_t freelist. phares 3/25/98
     // any nodes in the freelist are gone by now, cleared
     // by Z_FreeTags() when the previous level ended or player
@@ -1850,7 +1853,7 @@ void G_PlayerFinishLevel (int player)
     player_t*  p; 
          
     p = &players[player]; 
-         
+
     memset (p->powers, 0, sizeof (p->powers)); 
     memset (p->cards, 0, sizeof (p->cards)); 
     p->mo->flags &= ~MF_SHADOW; // cancel invisibility 

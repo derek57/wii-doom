@@ -38,6 +38,7 @@
 #include "i_system.h"
 #include "m_random.h"
 #include "p_local.h"
+#include "p_partcl.h"
 #include "p_tick.h"
 #include "r_things.h"
 #include "s_sound.h"
@@ -140,6 +141,10 @@ dboolean P_SetMobjState(mobj_t *mobj, statenum_t state)
         if (st->action)                
             st->action(mobj);        
         
+        // haleyjd 05/20/02: run particle events
+        if (st->particle_evt)
+            P_RunEvent(mobj);
+
         seenstate[state] = 1 + st->nextstate;                   // killough 4/9/98
 
         state = st->nextstate;
@@ -193,8 +198,17 @@ void P_ExplodeMissile (mobj_t* mo)
     // [crispy] missile explosions are translucent
     mo->flags |= MF_TRANSLUCENT;
 
+    if (d_drawrocketexplosions && mo->type == MT_ROCKET)
+        P_RocketExplosion(mo);
+
+    if (d_drawbfgexplosions && mo->type == MT_BFG)
+        P_BFGExplosion(mo);
+
     if (mo->info->deathsound)
         S_StartSound (mo, mo->info->deathsound);
+
+    // haleyjd: disable any particle effects
+    mo->effects = 0;
 }
 
 //
@@ -941,6 +955,8 @@ mobj_t *P_SpawnMobj(fixed_t x, fixed_t y, fixed_t z, mobjtype_t type)
     mobj->flags2 = info->flags2;
     mobj->name = info->name1;
     mobj->health = info->spawnhealth;
+    mobj->effects = info->particlefx;  // haleyjd 07/13/03
+    mobj->effect_flies_can_spawn = true;
 
     if (gameskill != sk_nightmare)
         mobj->reactiontime = info->reactiontime;
@@ -1351,8 +1367,18 @@ void P_SpawnMapThing(mapthing_t *mthing, int index)
         
     // find which type to spawn
 
-    // killough 8/23/98: use table for faster lookup
-    i = P_FindDoomedNum(type);
+    // haleyjd: special thing types that need to undergo the processing
+    // below must be caught here
+    if(mthing->type >= 9027 && mthing->type <= 9033)
+    {
+        C_Warning("Particle Fountain suspected\n");
+
+        // particle fountains
+        i = MT_FOUNTAIN;
+    }
+    else
+        // killough 8/23/98: use table for faster lookup
+        i = P_FindDoomedNum(type);
 
     if (i == NUMMOBJTYPES)
     {
@@ -1528,11 +1554,40 @@ void P_SpawnMapThing(mapthing_t *mthing, int index)
     {
         mobj->flags |= (mobj->lastlook << MF_TRANSSHIFT);
     }
+
+    // haleyjd: set particle fountain color
+    if(mthing->type >= 9027 && mthing->type <= 9033)
+    {
+        C_Warning("Particle Fountain spawned\n");
+
+        mobj->effects |= (mthing->type - 9026u) << FX_FOUNTAINSHIFT;
+    }
 }
 
 //
 // GAME SPAWN FUNCTIONS
 //
+
+//
+// P_SpawnParticle
+//
+void P_SpawnParticle(mobj_t *target, fixed_t x, fixed_t y, fixed_t z, angle_t angle, int updown, dboolean blood)
+{
+    // haleyjd: for demo sync etc we still need to do the above, so
+    // here we'll make the puff invisible and draw particles instead
+    if(d_drawparticles)
+    {
+        if (blood)
+        {
+            P_DrawSplash2(32, x, y, z, angle, 2, target->info->blood | MBC_BLOODMASK);
+        }
+        else
+        {
+            if(attackrange != MELEERANGE)
+                P_DrawSplash2(32, x, y, z, angle, updown, 1);
+        }
+    }
+}
 
 //
 // P_SpawnPuff
@@ -1929,6 +1984,7 @@ mobj_t* P_SpawnPlayerMissile(mobj_t *source, mobjtype_t type)
 
     if (type == MT_ROCKET && smoketrails)
     {
+        th->effects = FX_ROCKET;
         th->flags2 |= MF2_SMOKETRAIL;
         puffcount = 0;
     }
@@ -2036,4 +2092,36 @@ int P_HitFloor(mobj_t * thing)
     }
     return false;
 }
+
+// FIXME: These two functions are left over from an mobj-based
+// particle system attempt in SMMU -- the particle line
+// function could be useful for real particles maybe?
+/*
+void P_SpawnParticle(fixed_t x, fixed_t y, fixed_t z)
+{
+    P_SpawnMobj(x, y, z, MT_PARTICLE);
+}
+
+void P_ParticleLine(mobj_t *source, mobj_t *dest)
+{
+        fixed_t sourcex, sourcey, sourcez;
+        fixed_t destx, desty, destz;
+        int linedetail;
+        int j;
+
+        sourcex = source->x; sourcey = source->y;
+        destx = dest->x; desty = dest->y;
+        sourcez = source->z + (source->info->height/2);
+        destz = dest->z + (dest->info->height/2);
+        linedetail = P_AproxDistance(destx - sourcex, desty - sourcey)
+                                / FRACUNIT;
+
+                // make the line
+       for(j=0; j<linedetail; j++)
+         P_SpawnParticle(
+                sourcex + ((destx - source->x)*j)/linedetail,
+                sourcey + ((desty - source->y)*j)/linedetail,
+                sourcez + ((destz - source->z)*j)/linedetail);
+}
+*/
 

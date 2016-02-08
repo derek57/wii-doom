@@ -687,6 +687,7 @@ void P_LoadSectors (int lump)
         ss->heightsec = -1;     // sector used to get floor and ceiling height
         ss->floorlightsec = -1; // sector used to get floor lighting
         ss->ceilinglightsec = -1;
+        ss->ptcllist = NULL;    // haleyjd 02/20/04: particle list
 
         // Apply any level-specific fixes.
         if (canmodify && d_fixmaperrors)
@@ -1949,6 +1950,9 @@ P_SetupLevel
     // Make sure all sounds are stopped before Z_FreeTags.
     S_Start ();                        
 
+    // haleyjd: stop particle engine
+    R_ClearParticles();
+
     Z_FreeTags (PU_LEVEL, PU_PURGELEVEL-1);
 
     if (rejectlump != -1)
@@ -2401,9 +2405,11 @@ int P_GetMapTitlePatch(int map)
 //
 void P_Init (void)
 {
+    P_InitParticleEffects(); // haleyjd 09/30/01
     P_InitSwitchList ();
     P_InitPicAnims ();
     InitMapInfo();
+    P_InitTerrainTypes();
     R_InitSprites (sprnames);
 }
 

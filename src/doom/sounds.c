@@ -265,6 +265,7 @@ sfxinfo_t S_sfx[] =
     SOUND("dgatk",  70),
     SOUND("dgact",  120),
     SOUND("dgdth",  70),
-    SOUND("dgpain", 96)
+    SOUND("dgpain", 96),
+    SOUND("eefly",  96)
 };
 

@@ -240,6 +240,7 @@ typedef enum
     SPR_CAS1,
     SPR_CAS2,
     SPR_CAS7,
+    SPR_PART,
 
     NUMSPRITES
 } spritenum_t;
@@ -1705,6 +1706,8 @@ typedef enum
     S_RNDCASE_F_FADE2,
     S_RNDCASE_F_FADE3,
 
+    S_PART1,
+
     S_PLAY_GDIE1,
     S_PLAY_GDIE2,
     S_PLAY_GDIE3,
@@ -1730,7 +1733,8 @@ typedef struct
     statenum_t  nextstate;
     long        misc1;
     long        misc2;
-    dboolean     dehacked;
+    dboolean    dehacked;
+    long        particle_evt; // haleyjd: determines an effect to run
 } state_t;
 
 extern state_t  states[NUMSTATES];
@@ -1946,6 +1950,8 @@ typedef enum
     MT_SHELL,
     MT_BULLET,
     MT_ROUND,
+    MT_FOUNTAIN,
+    MT_PARTICLE,
 
     NUMMOBJTYPES
 } mobjtype_t;
@@ -2022,8 +2028,9 @@ typedef struct
                          // resurrection.  Zero means it won't come
                          // back to life.
     int   frames;
-    int   blood;
+    int   blood;         // blood color (may also be used for particles)
     int   shadowoffset;
+    int   particlefx;    // haleyjd 07/13/03: particle effects
     char  name1[100];
     char  plural1[100];
     char  name2[100];

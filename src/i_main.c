@@ -42,6 +42,7 @@
 
 #include "doom/d_main.h"
 
+#include "doomfeatures.h"
 #include "doomtype.h"
 
 #ifdef WII
@@ -171,8 +172,11 @@ static void I_SignalHandler(int s)
 
     // If corrupted memory could cause crash, dump memory
     // allocation history, which points out probable causes
+
+#ifdef INSTRUMENTED
     if (s == SIGSEGV || s == SIGILL || s == SIGFPE)
         Z_DumpHistory(buf);
+#endif
 
     I_Error("I_SignalHandler: %s", buf);
 }

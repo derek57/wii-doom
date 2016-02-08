@@ -263,6 +263,7 @@ typedef enum
     sfx_dgact,
     sfx_dgdth,
     sfx_dgpain,
+    sfx_eefly,  // buzzing flies
 
     NUMSFX
 } sfxenum_t;

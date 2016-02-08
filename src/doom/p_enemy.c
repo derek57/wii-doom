@@ -1388,7 +1388,10 @@ void A_CyberAttack (mobj_t* actor)
 
     // [BH] give cyberdemon rockets smoke trails 
     if (smoketrails)
+    {
+        mo->effects = FX_ROCKET; // particle trails for cyberdemon rockets
         mo->flags2 |= MF2_SMOKETRAIL;
+    }
 }
 
 
@@ -1668,6 +1671,9 @@ void A_VileChase (mobj_t* actor)
                         (isvowel(actor->info->name1[0]) ? "An" : "A"), actor->info->name1,
                         (isvowel(corpsehit->info->name1[0]) ? "an" : "a"),
                         corpsehit->info->name1);
+
+                    // allowing spawning of flies again after being resurrected 
+                    corpsehit->effect_flies_can_spawn = true;
 
                     // killough 8/29/98: add to appropriate thread
                     P_UpdateThinker(&corpsehit->thinker);
@@ -2480,6 +2486,8 @@ void A_BrainScream(mobj_t *actor)
         int     z = 128 + P_Random() * 2 * FRACUNIT;
         mobj_t  *th = P_SpawnMobj(x, y, z, MT_ROCKET);
 
+        // haleyjd 02/21/05: disable particle events/effects for this thing
+        th->effects = 0;
         th->momz = P_Random() * 512;
         P_SetMobjState(th, S_BRAINEXPLODE1);
         th->tics = MAX(1, th->tics - (P_Random() & 7));
@@ -2496,6 +2504,9 @@ void A_BrainExplode(mobj_t *actor)
     mobj_t      *th = P_SpawnMobj(x, y, z, MT_ROCKET);
 
     th->momz = P_Random() * 512;
+
+    // haleyjd 02/21/05: disable particle events/effects for this thing
+    th->effects = 0;
     P_SetMobjState(th, S_BRAINEXPLODE1);
     th->tics = MAX(1, th->tics - (P_Random() & 7));
 

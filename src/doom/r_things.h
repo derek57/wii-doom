@@ -39,7 +39,6 @@
 #if !defined(__R_THINGS__)
 #define __R_THINGS__
 
-
 // OK, now this is an intersting point:
 //
 // DOOM Retro uses "#define NUMVISSPRITES   0x20000" here as default.
@@ -75,7 +74,8 @@ extern fixed_t  viewheightfrac;
 
 extern dboolean r_playersprites;
 
-void R_AddSprites(sector_t *sec, int lightlevel);
+void R_InitParticles(void);
+void R_ClearParticles(void);
 void R_AddPSprites(void);
 void R_DrawSprites(void);
 void R_InitSprites(char **namelist);

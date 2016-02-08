@@ -105,6 +105,7 @@ mobj_t          *onmobj;
 
 void (*P_BloodSplatSpawner)(fixed_t, fixed_t, int, int, mobj_t *);
 
+
 //
 // TELEPORT MOVE
 // 
@@ -1559,11 +1560,12 @@ dboolean PTR_ShootTraverse (intercept_t* in)
     fixed_t     thingbottomslope;
 
     // new vars
-    dboolean     hitplane = false;
+    dboolean    hitplane = false;
     sector_t    *sidesector = NULL;
     fixed_t     hitx;
     fixed_t     hity;
     fixed_t     hitz;
+    int         updown = 2; // haleyjd 05/02: particle puff z dist correction
 
     if (in->isaline)
     {
@@ -1639,6 +1641,7 @@ hitline:
                 }
 
                 num = shootz - sidesector->floorheight;
+                updown = 0; // haleyjd
             }
             else
             {
@@ -1649,6 +1652,7 @@ hitline:
                 }
 
                 num = -shootz + sidesector->ceilingheight;
+                updown = 1; // haleyjd
             }
 
             // position on plane
@@ -1687,29 +1691,36 @@ hitline:
 
         if(la_damage > 0)
         {
-            mobj_t *puff;
-
-            // Test against attack range
-            if(attackrange != 2112*FRACUNIT)
-                puff = P_SpawnPuff(x, y, z, shootangle); // Spawn bullet puffs.
-            else
-                puff = P_SpawnMobj(x, y, z, MT_PUFF);
-
-            // clip to floor or ceiling
-
-            if(puff->z > puff->ceilingz)
+            // Spawn particles.
+            if (bulletpuff_particle == 1 || bulletpuff_particle == 2)
             {
-                puff->z = puff->ceilingz;
-//                puff->prevpos.z = puff->z;
+                P_SpawnParticle(NULL, x, y, z, shootangle, updown, false);
+
+                // haleyjd: for demo sync etc we still need to do the above, so
+                // here we'll make the puff invisible and draw particles instead
+                if (attackrange != MELEERANGE)
+                    P_SmokePuff(32, x, y, z, shootangle, updown);
             }
 
-            if(puff->z < puff->floorz)
+            if (bulletpuff_particle == 0 || bulletpuff_particle == 2)
             {
-                puff->z = puff->floorz;
-//                puff->prevpos.z = puff->z;
-            }
-        }        
+                mobj_t *puff;
 
+                // Test against attack range
+                // Spawn bullet puffs.
+                if(attackrange != 2112*FRACUNIT)
+                    puff = P_SpawnPuff(x, y, z, shootangle);
+                else
+                    puff = P_SpawnMobj(x, y, z, MT_PUFF);
+
+                // clip to floor or ceiling
+                if(puff->z > puff->ceilingz)
+                    puff->z = puff->ceilingz;
+
+                if(puff->z < puff->floorz)
+                    puff->z = puff->floorz;
+            }        
+        }
         // don't go any farther
         return false;   
     }
@@ -1718,6 +1729,9 @@ hitline:
     th = in->d.thing;
     if (th == shootthing)
         return true;                    // can't shoot self
+
+    if (th->effect_flies_spawned == true)
+        th->effect_flies_shot = true;
 
     if (!(th->flags & MF_SHOOTABLE))
         return true;                    // corpse or something
@@ -1745,23 +1759,77 @@ hitline:
     // Spawn bullet puffs or blood spots,
     // depending on target type.
     if (th->flags & MF_NOBLOOD)
-        P_SpawnPuff(x, y, z, shootangle);
+    {
+        // Spawn particles.
+        if (bulletpuff_particle == 1 || bulletpuff_particle == 2)
+        {
+            P_SpawnParticle(NULL, x, y, z, shootangle, 2, false);
+
+            // haleyjd: for demo sync etc we still need to do the above, so
+            // here we'll make the puff invisible and draw particles instead
+            if (attackrange != MELEERANGE)
+                P_SmokePuff(32, x, y, z, shootangle, updown);
+        }
+
+        if (bulletpuff_particle == 0 || bulletpuff_particle == 2)
+            P_SpawnPuff(x, y, z, shootangle);
+    }
     else
     {
         mobjtype_t type = th->type;
 
         if ((type == MT_SKULL || type == MT_BETASKULL) && d_colblood2 && d_chkblood2)
-            P_SpawnPuff(x, y, z - FRACUNIT * 8, shootangle);
+        {
+            // Spawn particles.
+            if (bulletpuff_particle == 1 || bulletpuff_particle == 2)
+            {
+                P_SpawnParticle(NULL, x, y, z - FRACUNIT * 8, shootangle, 2, false);
+
+                // haleyjd: for demo sync etc we still need to do the above, so
+                // here we'll make the puff invisible and draw particles instead
+                if (attackrange != MELEERANGE)
+                    P_SmokePuff(32, x, y, z, shootangle, updown);
+            }
+
+            if (bulletpuff_particle == 0 || bulletpuff_particle == 2)
+                P_SpawnPuff(x, y, z - FRACUNIT * 8, shootangle);
+        }
         else if (r_blood != r_blood_none)
         {
             if (type != MT_PLAYER)
-                P_SpawnBlood(x, y, z, shootangle, la_damage, th);
+            {
+                if (bloodsplat_particle == 1 || bloodsplat_particle == 2)
+                {
+                    P_SpawnParticle(th, x, y, z, shootangle, 2, true);
+
+                    // for demo sync, etc, we still need to do the above, so
+                    // we'll make the sprites above invisible and draw particles
+                    // instead
+                    P_BloodSpray(th, 32, x, y, z, shootangle);
+                }
+
+                if (bloodsplat_particle == 0 || bloodsplat_particle == 2)
+                    P_SpawnBlood(x, y, z, shootangle, la_damage, th);
+            }
             else
             {
                 player_t *player = &players[0];
 
                 if (!player->powers[pw_invulnerability] && !(player->cheats & CF_GODMODE))
-                    P_SpawnBlood(x, y, z + FRACUNIT * M_RandomInt(4, 16), shootangle, la_damage, th);
+                {
+                    if (bloodsplat_particle == 1 || bloodsplat_particle == 2)
+                    {
+                        P_SpawnParticle(th, x, y, z + FRACUNIT * M_RandomInt(4, 16), shootangle, 2, true);
+
+                        // for demo sync, etc, we still need to do the above, so
+                        // we'll make the sprites above invisible and draw particles
+                        // instead
+                        P_BloodSpray(th, 32, x, y, z, shootangle);
+                    }
+
+                    if (bloodsplat_particle == 0 || bloodsplat_particle == 2)
+                        P_SpawnBlood(x, y, z + FRACUNIT * M_RandomInt(4, 16), shootangle, la_damage, th);
+                }
             }
         }
     }
@@ -2162,9 +2230,7 @@ dboolean PIT_ChangeSector (mobj_t *thing)
 
         // spray blood in a random direction
         if(!beta_style && thing->type != MT_BARREL && thing->type != MT_BETABARREL)
-        {
-            mobj_t*        mo;
-        
+        {        
             mobjtype_t type = MT_BLOOD;
 
             if(d_colblood && d_chkblood)
@@ -2176,15 +2242,33 @@ dboolean PIT_ChangeSector (mobj_t *thing)
                     type = MT_GREENBLOOD;
             }
 
-            mo = P_SpawnMobj (thing->x,
-                              thing->y,
-                              thing->z + thing->height/2, type);
+            if(bloodsplat_particle == 0 || bloodsplat_particle == 2)
+            {
+                mobj_t* mo = P_SpawnMobj (thing->x,
+                                          thing->y,
+                                          thing->z + thing->height/2, type);
         
-            // [crispy] connect blood object with the monster that bleeds it
-            mo->target = thing;
+                // [crispy] connect blood object with the monster that bleeds it
+                mo->target = thing;
+                mo->momx = (P_Random() - P_Random ())<<12;
+                mo->momy = (P_Random() - P_Random ())<<12;
+            }
 
-            mo->momx = (P_Random() - P_Random ())<<12;
-            mo->momy = (P_Random() - P_Random ())<<12;
+            if(bloodsplat_particle == 1 || bloodsplat_particle == 2)
+            {
+                angle_t an;
+                an = (M_Random() - 128) << 24;
+
+//                P_DrawSplash2(32, thing->x, thing->y, thing->z + thing->height/2, an, 2, thing->info->bloodcolor | MBC_BLOODMASK); 
+//                P_DrawSplash2(32, thing->x, thing->y, thing->z + thing->height/2, an, 2, 0, mo); 
+
+                P_DrawSplash2(32, thing->x, thing->y, thing->z + thing->height/2, an, 2, thing->info->blood | MBC_BLOODMASK); 
+
+                // for demo sync, etc, we still need to do the above, so
+                // we'll make the sprites above invisible and draw particles
+                // instead
+                P_BloodSpray(thing, 32, thing->x, thing->y, thing->z, an);
+            }
         }
     }
 

@@ -110,11 +110,7 @@ rng_t rng;     // the random number state
 
 unsigned long rngseed = 1993;   // killough 3/26/98: The seed
 
-int (P_RandomSMMU)(pr_class_t pr_class
-#ifdef INSTRUMENTED
-     , const char *file, int line
-#endif
-    )
+int (P_RandomSMMU)(pr_class_t pr_class)
 {
    // killough 2/16/98:  We always update both sets of random number
    // generators, to ensure repeatability if the demo_compatibility
@@ -177,5 +173,15 @@ int P_SubRandom(pr_class_t pr_class)
    int temp = P_RandomSMMU(pr_class);
 
    return (temp - P_RandomSMMU(pr_class));
+}
+
+//
+// P_RangeRandom
+//
+// haleyjd 05/31/06: Returns a random number within a given range.
+//
+int P_RangeRandom(pr_class_t pr_class, int min, int max)
+{
+   return (P_RandomSMMU(pr_class) % (max - min + 1)) + min;
 }
 

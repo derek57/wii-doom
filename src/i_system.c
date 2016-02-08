@@ -45,6 +45,7 @@
 
 #include "doom/doomdef.h"
 
+#include "doomfeatures.h"
 #include "doomtype.h"
 #include "i_joystick.h"
 #include "i_sound.h"
@@ -387,7 +388,11 @@ void I_Error (char *error, ...)
         fclose (debugfile);
 
     C_ConDump();
+
+#ifdef HEAPDUMP
     Z_DumpMemory();
+#endif
+
     StatDump();
 
     if (already_quitting)

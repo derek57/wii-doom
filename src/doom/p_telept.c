@@ -124,16 +124,41 @@ EV_Teleport
                     // spawn teleport fog at source and destination
                     if(!beta_style)
                     {
-                        mobj_t *fog = P_SpawnMobj (oldx, oldy, oldz, MT_TFOG);
+                        mobj_t *fog;
                         unsigned int an = (m->angle >> ANGLETOFINESHIFT);
-                        fog->angle = thing->angle;
-                        S_StartSound (fog, sfx_telept);
-                        fog = P_SpawnMobj (m->x+20*finecosine[an], m->y+20*finesine[an]
+
+                        if (teleport_particle == 0 || teleport_particle == 2)
+                        {
+                            fog = P_SpawnMobj (oldx, oldy, oldz, MT_TFOG);
+                            fog->angle = thing->angle;
+                            S_StartSound (fog, sfx_telept);
+                        }
+
+                        if (teleport_particle == 1 || teleport_particle == 2)
+                        {
+                            P_DisconnectEffect(thing);
+
+                            if (teleport_particle != 2)
+                                S_StartSound (thing, sfx_telept);
+                        }
+
+                        if (teleport_particle == 0 || teleport_particle == 2)
+                        {
+                            fog = P_SpawnMobj (m->x+20*finecosine[an], m->y+20*finesine[an]
                                            , thing->z, MT_TFOG);
-                        fog->angle = m->angle;
+                            fog->angle = m->angle;
+                            S_StartSound (fog, sfx_telept);
+                        }
+
+                        if (teleport_particle == 1 || teleport_particle == 2)
+                        {
+                            P_DisconnectEffect(thing);
+
+                            if (teleport_particle != 2)
+                                S_StartSound (thing, sfx_telept);
+                        }
 
                         // emit sound, where?
-                        S_StartSound (fog, sfx_telept);
                 
                         // don't move for a bit
                         if (thing->player)

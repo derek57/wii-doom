@@ -60,6 +60,19 @@
 #define PACKEDATTR
 #endif
 
+// function inlining is available on most platforms, however,
+// the GNU C __inline__ is too common and conflicts with a 
+// definition in SDL, so it needs to be factored out into a 
+// custom macro definition
+
+#if defined(__GNUC__)
+  #define d_inline __inline__
+#elif defined(_MSC_VER)
+  #define d_inline __inline
+#else
+  #define d_inline
+#endif
+
 // C99 integer types; with gcc we just use this.  Other compilers 
 // should add conditional statements that define the C99 types.
 

@@ -1275,6 +1275,8 @@ P_KillMobj
             if (target->health < -minhealth && -target->info->spawnhealth 
                 && target->info->xdeathstate && !beta_style)
             {
+                // no spawning or flies on bodies in xdeathstate (feels more like Quake 2)
+                target->effect_flies_can_spawn = false;
                 P_SetMobjState (target, target->info->xdeathstate);
             }
             else
@@ -1295,6 +1297,8 @@ P_KillMobj
             if (target->health < -target->info->spawnhealth 
                 && target->info->xdeathstate && !beta_style)
             {
+                // no spawning or flies on bodies in xdeathstate (feels more like Quake 2)
+                target->effect_flies_can_spawn = false;
                 P_SetMobjState (target, target->info->xdeathstate);
             }
             else
@@ -1365,7 +1369,6 @@ P_KillMobj
             mo->shadow->flags2 |= MF2_MIRRORED;
     }
 }
-
 
 
 //
@@ -1512,8 +1515,12 @@ void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, int damage)
         tplayer->damagecount = damagecount;
     }
     
-    // do the damage        
-    target->health -= damage;        
+    // do the damage
+    target->health -= damage;
+
+    if (!(target->effects & FX_DRIP))
+        target->effects |= FX_DRIP;
+
     if (target->health <= 0)
     {
         if (d_chkblood && d_colblood)
@@ -1523,6 +1530,9 @@ void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, int damage)
             else if (type == MT_BARREL || type == MT_PAIN || type == MT_SKULL || type == MT_BETASKULL)
                 target->colfunc = tlredcolfunc;
         }
+
+        if (target->effects & FX_DRIP)
+            target->effects &= ~FX_DRIP;
 
         P_KillMobj (source, target);
         return;

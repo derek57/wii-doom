@@ -271,6 +271,16 @@ void M_BindBaseControls(void)
     M_BindVariable("status_map",             &d_statusmap);
     M_BindVariable("show_maptitle",          &show_title);
     M_BindVariable("rendermode",             &render_mode);
+    M_BindVariable("particles",              &d_drawparticles);
+    M_BindVariable("bloodparticles",         &bloodsplat_particle);
+    M_BindVariable("bulletparticles",        &bulletpuff_particle);
+    M_BindVariable("bfgcloud",               &d_drawbfgcloud);
+    M_BindVariable("rockettrails",           &d_drawrockettrails);
+    M_BindVariable("rocketexplosions",       &d_drawrocketexplosions);
+    M_BindVariable("bfgexplosions",          &d_drawbfgexplosions);
+    M_BindVariable("tele_particle",          &teleport_particle);
+    M_BindVariable("spawn_flies",            &d_spawnflies);
+    M_BindVariable("drip_blood",             &d_dripblood);
 #ifdef WII
     M_BindVariable("key_shoot",              &joy_r);
     M_BindVariable("key_open",               &joy_l);

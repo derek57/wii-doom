@@ -133,6 +133,13 @@ dboolean         dump_mem = false;
 dboolean         dump_con = false;
 dboolean         dump_stat = false;
 dboolean         printdir = false;
+dboolean         d_drawparticles = false;
+dboolean         d_drawbfgcloud = false;
+dboolean         d_drawrockettrails = false;
+dboolean         d_drawrocketexplosions = false;
+dboolean         d_drawbfgexplosions = false;
+dboolean         d_spawnflies = false;
+dboolean         d_dripblood = false;
 /*
 dboolean         nerve = false;
 dboolean         chex = false;
@@ -187,6 +194,9 @@ int              show_endoom = 0;
 int              show_endoom = 1;
 #endif
 int              render_mode = 2;
+int              bloodsplat_particle = 0;
+int              bulletpuff_particle = 0;
+int              teleport_particle = 0;
 
 // defaulted values
 int              mouseSensitivity = 5;

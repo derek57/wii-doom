@@ -164,6 +164,7 @@ anim_t*         lastanim;
 dboolean         in_slime;
 dboolean         levelTimer;
 dboolean         *isliquid;
+dboolean         is_liquid_sector;
 
 char            *playername = playername_default;
 
@@ -2989,5 +2990,77 @@ void P_SpawnSpecials (void)
 
     // UNUSED: no horizontal sliders.
     //P_InitSlidingDoorFrames();
+}
+
+//================================
+//
+// haleyjd 3/17/99: TerrainTypes
+//
+//================================
+
+int numterraindefs;
+int *TerrainTypes = NULL; // return to array model; optimization
+
+// haleyjd 11/20/00: restructuring for purposes of adding a
+// customizable data lump
+
+typedef struct terraintype_s
+{
+   char  name[9];
+   short type;
+} terraintype_t; 
+
+terraintype_t *TerrainTypeDefs = NULL;
+
+// FIXME: this wastes space by allocating an array for all flats,
+// when a hash table could be used
+void P_InitTerrainTypes(void)
+{
+   int i;
+   int size;
+
+   size = (numflats + 1) * sizeof(int);
+   if(TerrainTypes)
+      Z_Free(TerrainTypes);
+   TerrainTypes = Z_Malloc(size, PU_STATIC, NULL);
+   memset(TerrainTypes, 0, size);
+   
+   if(numterraindefs == 0) // no terrain types defined, leave zero
+     return;
+
+   for(i = 0; TerrainTypeDefs[i].type != -1; i++)
+   {
+      // haleyjd 07/01/99
+      // Change this from R_FlatNumForName to W_CheckNumForName.
+      // Restores Ultimate DOOM to functionality without an added 
+      // flat wad.
+
+      int lump = W_CheckNumForName(TerrainTypeDefs[i].name);
+      if(lump != -1)
+      {
+         TerrainTypes[lump-firstflat] = TerrainTypeDefs[i].type;
+      }
+   }
+}
+
+//
+// haleyjd 06/21/02: function to get TerrainType from a point
+//
+int P_GetTerrainTypeForPt(fixed_t x, fixed_t y, int position)
+{
+   subsector_t *subsec = R_PointInSubsector(x, y);
+
+   // can retrieve a TerrainType for either the floor or the
+   // ceiling
+   switch(position)
+   {
+   case 0:
+      is_liquid_sector = isliquid[subsec->sector->floorpic];
+      return (TerrainTypes[subsec->sector->floorpic]);
+   case 1:
+      return (TerrainTypes[subsec->sector->ceilingpic]);
+   default:
+      return FLOOR_SOLID;
+   }
 }
 

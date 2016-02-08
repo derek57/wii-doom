@@ -725,6 +725,7 @@ void R_Init(void)
         printf (".");
     R_InitColumnFunctions();
 //    printf (".");
+    R_InitParticles(); // haleyjd
 }
 
 //

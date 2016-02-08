@@ -156,6 +156,7 @@ void    P_MobjThinker (mobj_t* mobj);
 
 //void
 mobj_t* P_SpawnPuff (fixed_t x, fixed_t y, fixed_t z, angle_t angle);
+void    P_SpawnParticle (mobj_t *target, fixed_t x, fixed_t y, fixed_t z, angle_t angle, int updown, dboolean blood);
 
 void    P_SpawnBlood (fixed_t x, fixed_t y, fixed_t z, angle_t angle, int damage, mobj_t* target);
 mobj_t* P_SpawnMissile (mobj_t* source, mobj_t* dest, mobjtype_t type);
@@ -318,8 +319,6 @@ void P_DamageMobj (mobj_t* target, mobj_t* inflictor, mobj_t* source, int damage
 int  P_GiveAmmo (player_t* player, ammotype_t ammo, int num);
 
 int  P_GetThingFloorType(mobj_t * thing);
-
-void P_InitTerrainTypes(void);
 
 int  P_HitFloor(mobj_t * thing);
 

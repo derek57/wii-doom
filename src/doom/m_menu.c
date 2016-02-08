@@ -42,6 +42,7 @@
 #include "d_main.h"
 #include "d_deh.h"
 #include "doomdef.h"
+#include "doomfeatures.h"
 #include "doomkeys.h"
 #include "doomstat.h"
 #include "dstrings.h"
@@ -1298,11 +1299,11 @@ int                        cheeting;
 int                        coordinates_info = 0;
 int                        version_info = 0;
 #ifdef WII
-int                        key_controls_start_in_cfg_at_pos = 106;
-int                        key_controls_end_in_cfg_at_pos = 120;
+int                        key_controls_start_in_cfg_at_pos = 116;
+int                        key_controls_end_in_cfg_at_pos = 130;
 #else
-int                        key_controls_start_in_cfg_at_pos = 105;
-int                        key_controls_end_in_cfg_at_pos = 121;
+int                        key_controls_start_in_cfg_at_pos = 115;
+int                        key_controls_end_in_cfg_at_pos = 131;
 #endif
 int                        tracknum = 1;
 int                        epi = 1;
@@ -1318,6 +1319,7 @@ int                        height;
 int                        expansion = 0;
 int                        oldscreenblocks;
 int                        oldscreenSize;
+int                        substdumpwait;
 int                        condumpwait;
 int                        memdumpwait;
 int                        statdumpwait;
@@ -1371,6 +1373,7 @@ dboolean                   massacre_cheat_used;
 dboolean                   blurred = false;
 dboolean                   long_tics = false;
 dboolean                   restart_song = false;
+dboolean                   dump_subst = false;
 
 // current menudef
 menu_t                     *currentMenu;                          
@@ -1531,6 +1534,16 @@ void M_Crosshair(int choice);
 void M_Jumping(int choice);
 void M_WeaponRecoil(int choice);
 void M_PlayerThrust(int choice);
+void M_Particles(int choice);
+void M_BloodType(int choice);
+void M_BulletType(int choice);
+void M_TeleportType(int choice);
+void M_BFGCloud(int choice);
+void M_BFGExplosions(int choice);
+void M_RocketParticles(int choice);
+void M_RocketExplosions(int choice);
+void M_SpawnFlies(int choice);
+void M_DripBlood(int choice);
 void M_RespawnMonsters(int choice);
 void M_FastMonsters(int choice);
 void M_Autoaim(int choice);
@@ -1645,6 +1658,7 @@ void M_Game3(int choice);
 void M_Game4(int choice);
 void M_Game5(int choice);
 void M_Game6(int choice);
+void M_Game7(int choice);
 void M_Expansion(int choice);
 void M_Debug(int choice);
 void M_Cheats(int choice);
@@ -1670,6 +1684,7 @@ void M_DrawGame3(void);
 void M_DrawGame4(void);
 void M_DrawGame5(void);
 void M_DrawGame6(void);
+void M_DrawGame7(void);
 void M_DrawDebug(void);
 void M_DrawCheats(void);
 //void M_DrawRecord(void);
@@ -1691,7 +1706,7 @@ enum
     main_end
 } main_e;
 
-menuitem_t MainGameMenu[]=
+static menuitem_t MainGameMenu[]=
 {
     {1,"New Game",M_NewGame,'n'},
     {1,"Options",M_Options,'o'},
@@ -1702,7 +1717,7 @@ menuitem_t MainGameMenu[]=
     {1,"Quit Game",M_QuitDOOM,'q'}
 };
 
-menu_t  MainDef =
+static menu_t  MainDef =
 {
     main_end,
     NULL,
@@ -1721,7 +1736,7 @@ enum
     beta_main_end
 } beta_main_e;
 
-menuitem_t BetaMainGameMenu[]=
+static menuitem_t BetaMainGameMenu[]=
 {
     {1,"Demo Map 1",M_NewGame,'1'},
     {1,"Demo Map 2",M_NewGame,'2'},
@@ -1729,7 +1744,7 @@ menuitem_t BetaMainGameMenu[]=
     {1,"Quit Game",M_QuitDOOM,'q'}
 };
 
-menu_t  BetaMainDef =
+static menu_t  BetaMainDef =
 {
     beta_main_end,
     NULL,
@@ -1751,7 +1766,7 @@ enum
     files_end
 } files_e;
 
-menuitem_t FilesMenu[]=
+static menuitem_t FilesMenu[]=
 {
     {1,"Load Game",M_LoadGame,'l'},
     {1,"Save Game",M_SaveGame,'s'},
@@ -1764,7 +1779,7 @@ menuitem_t FilesMenu[]=
     {1,"Record Demo",M_Record,'r'}*/
 };
 
-menu_t  FilesDef =
+static menu_t  FilesDef =
 {
     files_end,
     &MainDef,
@@ -1786,7 +1801,7 @@ enum
     ep_end
 } episodes_e;
 
-menuitem_t EpisodeMenu[]=
+static menuitem_t EpisodeMenu[]=
 {
     {1,"Knee-Deep in the Dead", M_Episode,'k'},
     {1,"The Shores of Hell", M_Episode,'t'},
@@ -1794,7 +1809,7 @@ menuitem_t EpisodeMenu[]=
     {1,"Thy Flesh Consumed", M_Episode,'t'}
 };
 
-menu_t  EpiDef =
+static menu_t  EpiDef =
 {
     ep_end,                // # of menu items
     &MainDef,              // previous menu
@@ -1843,7 +1858,7 @@ enum
     newg_end
 } newgame_e;
 
-menuitem_t NewGameMenu[]=
+static menuitem_t NewGameMenu[]=
 {
     {1,"I'm too young to die.", M_ChooseSkill, 'i'},
     {1,"Hey, not too rough.", M_ChooseSkill, 'h'},
@@ -1852,7 +1867,7 @@ menuitem_t NewGameMenu[]=
     {1,"Nightmare!",        M_ChooseSkill, 'n'}
 };
 
-menu_t  NewDef =
+static menu_t  NewDef =
 {
     newg_end,           // # of menu items
     &EpiDef,            // previous menu
@@ -1874,11 +1889,11 @@ enum
     sound,
     sys,
     game,
-    options_debug,
+    dbg,
     opt_end
 } options_e;
 
-menuitem_t OptionsMenu[]=
+static menuitem_t OptionsMenu[]=
 {
     {1,"Screen Settings", M_Screen,'s'},
     {1,"Control Settings", M_Controls,'c'},
@@ -1888,7 +1903,7 @@ menuitem_t OptionsMenu[]=
     {1,"Debug Settings", M_Debug,'d'}
 };
 
-menu_t  OptionsDef =
+static menu_t  OptionsDef =
 {
     opt_end,
     &MainDef,
@@ -1907,12 +1922,12 @@ enum
     read1_end
 } read_e;
 
-menuitem_t ReadMenu1[] =
+static menuitem_t ReadMenu1[] =
 {
     {1,"",M_ReadThis2,0}
 };
 
-menu_t  ReadDef1 =
+static menu_t  ReadDef1 =
 {
     read1_end,
     &MainDef,
@@ -1928,12 +1943,12 @@ enum
     read2_end
 } read_e2;
 
-menuitem_t ReadMenu2[]=
+static menuitem_t ReadMenu2[]=
 {
     {1,"",M_FinishReadThis,0}
 };
 
-menu_t  ReadDef2 =
+static menu_t  ReadDef2 =
 {
     read2_end,
     &ReadDef1,
@@ -1949,12 +1964,12 @@ enum
     credits_end
 } credits_e;
 
-menuitem_t CreditsMenu[] =
+static menuitem_t CreditsMenu[] =
 {
 //    {1,"",M_ReadThis2,0}
 };
 
-menu_t  CreditsDef =
+static menu_t  CreditsDef =
 {
     credits_end,
     &MainDef,
@@ -1986,7 +2001,7 @@ enum
     cheats_end
 } cheats_e;
 
-menuitem_t CheatsMenu[]=
+static menuitem_t CheatsMenu[]=
 {
     {2,"GOD MODE",M_God,'g'},
     {2,"NOCLIP",M_Noclip,'n'},
@@ -2031,7 +2046,7 @@ enum
     items_end
 } items_e;
 
-menuitem_t ItemsMenu[]=
+static menuitem_t ItemsMenu[]=
 {
     {2,"",M_ItemsA,'1'},
     {-1,"",0,'\0'},
@@ -2047,7 +2062,7 @@ menuitem_t ItemsMenu[]=
     {2,"",M_ItemsK,'f'}
 };
 
-menu_t  ItemsDef =
+static menu_t  ItemsDef =
 {
     items_end,
     &CheatsDef,
@@ -2070,7 +2085,7 @@ enum
     keys_end
 } keys_e;
 
-menuitem_t KeysMenu[]=
+static menuitem_t KeysMenu[]=
 {
     {2,"",M_KeysA,'1'},
     {-1,"",0,'\0'},
@@ -2082,7 +2097,7 @@ menuitem_t KeysMenu[]=
     {2,"RED SKULL KEY",M_KeysG,'7'}
 };
 
-menu_t  KeysDef =
+static menu_t  KeysDef =
 {
     keys_end,
     &CheatsDef,
@@ -2106,7 +2121,7 @@ enum
     weapons_end
 } weapons_e;
 
-menuitem_t WeaponsMenu[]=
+static menuitem_t WeaponsMenu[]=
 {
     {2,"",M_WeaponsA,'1'},
     {-1,"",0,'\0'},
@@ -2119,7 +2134,7 @@ menuitem_t WeaponsMenu[]=
     {2,"",M_WeaponsH,'8'}
 };
 
-menu_t  WeaponsDef =
+static menu_t  WeaponsDef =
 {
     weapons_end,
     &CheatsDef,
@@ -2138,7 +2153,7 @@ enum
     armor_end
 } armor_e;
 
-menuitem_t ArmorMenu[]=
+static menuitem_t ArmorMenu[]=
 {
     {2,"",M_ArmorA,'1'},
     {-1,"",0,'\0'},
@@ -2146,7 +2161,7 @@ menuitem_t ArmorMenu[]=
     {2,"",M_ArmorC,'3'}
 };
 
-menu_t  ArmorDef =
+static menu_t  ArmorDef =
 {
     armor_end,
     &CheatsDef,
@@ -2177,7 +2192,7 @@ enum
     screen_end
 } screen_e;
 
-menuitem_t ScreenMenu[]=
+static menuitem_t ScreenMenu[]=
 {
     {2,"Brightness",M_ChangeGamma,'g'},
     {2,"Screen Size",M_SizeDisplay,'s'},
@@ -2198,7 +2213,7 @@ menuitem_t ScreenMenu[]=
 #endif
 };
 
-menu_t  ScreenDef =
+static menu_t  ScreenDef =
 {
     screen_end,
     &OptionsDef,
@@ -2221,7 +2236,7 @@ enum
     controls_end
 } controls_e;
 
-menuitem_t ControlsMenu[]=
+static menuitem_t ControlsMenu[]=
 {
     {2,"Walking",M_WalkingSpeed,'w'},
     {2,"Turning",M_TurningSpeed,'t'},
@@ -2233,7 +2248,7 @@ menuitem_t ControlsMenu[]=
     {1,"",M_KeyBindings,'b'}
 };
 
-menu_t  ControlsDef =
+static menu_t  ControlsDef =
 {
     controls_end,
     &OptionsDef,
@@ -2268,7 +2283,7 @@ enum
     keybindings_end
 } keybindings_e;
 
-menuitem_t KeyBindingsMenu[]=
+static menuitem_t KeyBindingsMenu[]=
 {
     {5,"FIRE",M_KeyBindingsSetKey,0},
     {5,"USE / OPEN",M_KeyBindingsSetKey,1},
@@ -2296,7 +2311,7 @@ menuitem_t KeyBindingsMenu[]=
     {5,"",M_KeyBindingsReset,'d'}
 };
 
-menu_t  KeyBindingsDef =
+static menu_t  KeyBindingsDef =
 {
     keybindings_end,
     &ControlsDef,
@@ -2315,7 +2330,7 @@ enum
     system_end
 } system_e;
 
-menuitem_t SystemMenu[]=
+static menuitem_t SystemMenu[]=
 {
     {2,"FPS Counter",M_FPS,'f'},
     {2,"Display Ticker",M_DisplayTicker,'t'},
@@ -2323,7 +2338,7 @@ menuitem_t SystemMenu[]=
     {2,"Replace Missing Textures",M_ReplaceMissing,'r'}
 };
 
-menu_t  SystemDef =
+static menu_t  SystemDef =
 {
     system_end,
     &OptionsDef,
@@ -2353,7 +2368,7 @@ enum
     game_end
 } game_e;
 
-menuitem_t GameMenu[]=
+static menuitem_t GameMenu[]=
 {
     {2,"AUTOMAP GRID",M_MapGrid,'g'},
     {2,"AUTOMAP ROTATION",M_MapRotation,'r'},
@@ -2372,7 +2387,7 @@ menuitem_t GameMenu[]=
     {1,"",M_Game2,'2'}
 };
 
-menu_t  GameDef =
+static menu_t  GameDef =
 {
     game_end,
     &OptionsDef,
@@ -2393,7 +2408,7 @@ enum
     game2_endoom,
     game2_corpses,
     game2_secrets,
-    game2_trails,
+    game2_messages,
     game2_tics,
     game2_falling,
     game2_ammo,
@@ -2401,7 +2416,7 @@ enum
     game2_end
 } game2_e;
 
-menuitem_t GameMenu2[]=
+static menuitem_t GameMenu2[]=
 {
     {2,"NO MONSTERS",M_NoMonsters,'m'},
     {2,"FULLSCREEN HUD",M_HUD,'h'},
@@ -2416,14 +2431,14 @@ menuitem_t GameMenu2[]=
 #endif
     {2,"RANDOMLY FLIP CORPSES & GUNS",M_Corpses,'d'},
     {2,"SHOW REVEALED SECRETS",M_Secrets,'z'},
-    {2,"ROCKET TRAILS",M_Trails,'r'},
+    {2,"MESSAGES",M_ChangeMessages,'m'},
     {2,"CHAINGUN FIRE RATE",M_ChaingunTics,'g'},
     {2,"FALLING DAMAGE",M_FallingDamage,'f'},
     {2,"INFINITE AMMO",M_InfiniteAmmo,'i'},
     {1,"",M_Game3,'n'}
 };
 
-menu_t  GameDef2 =
+static menu_t  GameDef2 =
 {
     game2_end,
     &GameDef,
@@ -2452,7 +2467,7 @@ enum
     game3_end
 } game3_e;
 
-menuitem_t GameMenu3[]=
+static menuitem_t GameMenu3[]=
 {
     {2,"CROSSHAIR",M_Crosshair,'c'},
     {2,"AUTOAIM",M_Autoaim,'a'},
@@ -2470,7 +2485,7 @@ menuitem_t GameMenu3[]=
     {1,"",M_Game4,'n'}
 };
 
-menu_t  GameDef3 =
+static menu_t  GameDef3 =
 {
     game3_end,
     &GameDef2,
@@ -2499,7 +2514,7 @@ enum
     game4_end
 } game4_e;
 
-menuitem_t GameMenu4[]=
+static menuitem_t GameMenu4[]=
 {
     {2,"Lost Souls get stuck behind walls",M_BlockSkulls,'w'},
     {2,"Blazing Doors play double sound",M_BlazingDoors,'d'},
@@ -2517,7 +2532,7 @@ menuitem_t GameMenu4[]=
     {1,"",M_Game5,'n'}
 };
 
-menu_t  GameDef4 =
+static menu_t  GameDef4 =
 {
     game4_end,
     &GameDef3,
@@ -2546,7 +2561,7 @@ enum
     game5_end
 } game5_e;
 
-menuitem_t GameMenu5[]=
+static menuitem_t GameMenu5[]=
 {
     {2,"Alt. Lighting for Player Sprites",M_AltLighting,'l'},
     {2,"Allow Monsters Infighting",M_Infighting,'i'},
@@ -2564,7 +2579,7 @@ menuitem_t GameMenu5[]=
     {1,"",M_Game6,'6'}
 };
 
-menu_t  GameDef5 =
+static menu_t  GameDef5 =
 {
     game5_end,
     &GameDef4,
@@ -2578,32 +2593,73 @@ enum
 {
     game6_centerweapon,
     game6_casings,
-    game6_messages,
     game6_thrust,
-#ifdef WII
-    game6_prbeta,
-#endif
+    game6_particles,
+    game6_bloodparticles,
+    game6_bulletparticles,
+    game6_teleportparticles,
+    game6_bfgcloud,
+    game6_bfgexplosions,
+    game6_rocketparticles,
+    game6_rocketexplosions,
+    game6_spawnflies,
+    game6_dripblood,
+    game6_game7,
     game6_end
 } game6_e;
 
-menuitem_t GameMenu6[]=
+static menuitem_t GameMenu6[]=
 {
-    {2,"Center Weapon when firing",M_CenterWeapon,'c'},
+    {2,"Center Weapon when firing",M_CenterWeapon,'w'},
     {2,"Eject Weapon Casings",M_EjectCasings,'e'},
-    {2,"MESSAGES",M_ChangeMessages,'m'},
-    {2,"PLAYER THRUST",M_PlayerThrust,'p'}
+    {2,"PLAYER THRUST",M_PlayerThrust,'p'},
+    {2,"Draw Particles",M_Particles,'a'},
+    {2,"",M_BloodType,'b'},
+    {2,"",M_BulletType,'c'},
+    {2,"",M_TeleportType,'w'},
+    {2,"",M_BFGCloud,'x'},
+    {2,"",M_BFGExplosions,'y'},
+    {2,"",M_RocketParticles,'r'},
+    {2,"",M_RocketExplosions,'s'},
+    {2,"",M_SpawnFlies,'f'},
+    {2,"",M_DripBlood,'d'},
+    {1,"",M_Game7,'7'}
+};
+
+static menu_t  GameDef6 =
+{
+    game6_end,
+    &GameDef5,
+    GameMenu6,
+    M_DrawGame6,
+    23,22,
+    0
+};
+
+enum
+{
+    game7_trails,
+#ifdef WII
+    game7_prbeta,
+#endif
+    game7_end
+} game7_e;
+
+static menuitem_t GameMenu7[]=
+{
+    {2,"ROCKET SMOKE-TRAILS",M_Trails,'t'}
 #ifdef WII
     ,
     {2,"PRE-RELEASE BETA MODE",M_Beta,'b'}
 #endif
 };
 
-menu_t  GameDef6 =
+static menu_t  GameDef7 =
 {
-    game6_end,
-    &GameDef5,
-    GameMenu6,
-    M_DrawGame6,
+    game7_end,
+    &GameDef6,
+    GameMenu7,
+    M_DrawGame7,
     23,22,
     0
 };
@@ -2617,13 +2673,15 @@ enum
     debug_memusage,
     debug_restart,
     debug_condump,
+#ifdef HEAPDUMP
     debug_memdump,
+#endif
     debug_statdump,
     debug_printdir,
     debug_end
 } debug_e;
 
-menuitem_t DebugMenu[]=
+static menuitem_t DebugMenu[]=
 {
     {2,"Show Coordinates",M_Coordinates,'c'},
     {2,"Show Version",M_Version,'v'},
@@ -2632,12 +2690,14 @@ menuitem_t DebugMenu[]=
     {2,"Show Memory Usage",M_MemoryUsage,'u'},
     {2,"Restart Current MAP-Music Track",M_RestartSong,'r'},
     {2,"Dump current Console Output",M_ConDump,'d'},
+#ifdef HEAPDUMP
     {2,"Dump Memory",M_MemDump,'m'},
+#endif
     {2,"Dump Level Statistics",M_StatDump,'s'},
     {2,"Print WAD contents to textfile",M_PrintDir,'p'}
 };
 
-menu_t  DebugDef =
+static menu_t  DebugDef =
 {
     debug_end,
     &OptionsDef,
@@ -2667,7 +2727,7 @@ enum
     sound_end
 } sound_e;
 
-menuitem_t SoundMenu[]=
+static menuitem_t SoundMenu[]=
 {
     {2,"General Sound and Music",M_GeneralSound,'g'},
     {2,"",M_SfxVol,'v'},
@@ -2684,7 +2744,7 @@ menuitem_t SoundMenu[]=
 #endif
 };
 
-menu_t  SoundDef =
+static menu_t  SoundDef =
 {
     sound_end,
     &OptionsDef,
@@ -2708,7 +2768,7 @@ enum
     load_end
 } load_e;
 
-menuitem_t LoadMenu[]=
+static menuitem_t LoadMenu[]=
 {
     {1,"", M_LoadSelect,'1'},
     {1,"", M_LoadSelect,'2'},
@@ -2718,7 +2778,7 @@ menuitem_t LoadMenu[]=
     {1,"", M_LoadSelect,'6'}
 };
 
-menu_t  LoadDef =
+static menu_t  LoadDef =
 {
     load_end,
     &FilesDef,
@@ -2731,7 +2791,7 @@ menu_t  LoadDef =
 //
 // SAVE GAME MENU
 //
-menuitem_t SaveMenu[]=
+static menuitem_t SaveMenu[]=
 {
     {1,"", M_SaveSelect,'1'},
     {1,"", M_SaveSelect,'2'},
@@ -2741,7 +2801,7 @@ menuitem_t SaveMenu[]=
     {1,"", M_SaveSelect,'6'}
 };
 
-menu_t  SaveDef =
+static menu_t  SaveDef =
 {
     load_end,
     &FilesDef,
@@ -2764,7 +2824,7 @@ enum
     record_end
 } record_e;
 
-menuitem_t RecordMenu[]=
+static menuitem_t RecordMenu[]=
 {
     {2,"Record Map:",M_RMap,'m'},
     {-1,"",0,'\0'},
@@ -2776,7 +2836,7 @@ menuitem_t RecordMenu[]=
     {2,"Start Recording",M_StartRecord,'r'}
 };
 
-menu_t  RecordDef =
+static menu_t  RecordDef =
 {
     record_end,
     &FilesDef,
@@ -3427,6 +3487,20 @@ void M_DrawSound(void)
         M_WriteText(SoundDef.x + 212, SoundDef.y + 68, "OFF");
     }
 
+    if(dump_subst)
+    {
+        if (substdumpwait < 5)
+        {
+            dp_translation = crx[CRX_GREEN];
+            M_WriteText(SoundDef.x + 204, SoundDef.y + 78, "DONE");
+        }
+        else
+        {
+            substdumpwait = 0;
+            dump_subst = false;
+        }
+    }
+
 #ifndef WII
     if(use_libsamplerate == 0)
     {
@@ -3642,6 +3716,7 @@ void M_SoundPitch(int choice)
 
 void M_DumpSubstituteConfig(int choice)
 {
+    dump_subst = true;
     DumpSubstituteConfig("oggmusic.cfg");
 }
 
@@ -4159,8 +4234,6 @@ void M_DrawScreen(void)
 
     if(!show_diskicon)
         dp_translation = crx[CRX_DARK];
-    else if(itemOn == 10 && show_diskicon)
-        dp_translation = crx[CRX_GOLD];
 
     M_WriteText(ScreenDef.x, ScreenDef.y + 98, "Type of Indicator");
 
@@ -4655,10 +4728,7 @@ void M_DrawGame2(void)
     }
 
 #ifdef WII
-    if(itemOn == 6)
-        dp_translation = crx[CRX_GOLD];
-    else
-        dp_translation = crx[CRX_DARK];
+    dp_translation = crx[CRX_DARK];
 
     M_WriteText(GameDef2.x, GameDef2.y + 58, "Show Endoom Screen on quit");
 #endif
@@ -4696,7 +4766,7 @@ void M_DrawGame2(void)
         M_WriteText(GameDef2.x + 208, GameDef2.y + 78, "OFF");
     }
 
-    if(smoketrails)
+    if(showMessages)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef2.x + 216, GameDef2.y + 88, "ON");
@@ -5371,7 +5441,7 @@ void M_DrawGame6(void)
         M_WriteText(GameDef6.x + 258, GameDef6.y + 8, "OFF");
     }
 
-    if(showMessages)
+    if(d_thrust)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef6.x + 266, GameDef6.y + 18, "ON");
@@ -5382,27 +5452,203 @@ void M_DrawGame6(void)
         M_WriteText(GameDef6.x + 258, GameDef6.y + 18, "OFF");
     }
 
-    if(d_thrust)
+    if(d_drawparticles)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef6.x + 266, GameDef6.y + 28, "ON");
     }
     else
     {
+        bloodsplat_particle = 0;
+        bulletpuff_particle = 0;
+        teleport_particle = 0;
+        d_drawbfgcloud = false;
+        d_drawbfgexplosions = false;
+        d_drawrockettrails = false;
+        d_drawrocketexplosions = false;
+        d_spawnflies = false;
+        d_dripblood = false;
         dp_translation = crx[CRX_DARK];
         M_WriteText(GameDef6.x + 258, GameDef6.y + 28, "OFF");
     }
 
-#ifdef WII
-    if(beta_style_mode)
+    if(!d_drawparticles)
+        dp_translation = crx[CRX_DARK];
+    else if(itemOn == 4 && d_drawparticles)
+        dp_translation = crx[CRX_GOLD];
+
+    M_WriteText(GameDef6.x, GameDef6.y + 38, "BLOOD TYPE");
+
+    if(!d_drawparticles)
+        dp_translation = crx[CRX_DARK];
+    else if(itemOn == 5 && d_drawparticles)
+        dp_translation = crx[CRX_GOLD];
+    M_WriteText(GameDef6.x, GameDef6.y + 48, "BULLET TYPE");
+
+    if(!d_drawparticles)
+        dp_translation = crx[CRX_DARK];
+    else if(itemOn == 6 && d_drawparticles)
+        dp_translation = crx[CRX_GOLD];
+
+    M_WriteText(GameDef6.x, GameDef6.y + 58, "TELEPORT TYPE");
+
+    if(!d_drawparticles)
+        dp_translation = crx[CRX_DARK];
+    else if(itemOn == 7 && d_drawparticles)
+        dp_translation = crx[CRX_GOLD];
+    M_WriteText(GameDef6.x, GameDef6.y + 68, "BFG CLOUD WITH PARTICLES");
+
+    if(!d_drawparticles)
+        dp_translation = crx[CRX_DARK];
+    else if(itemOn == 8 && d_drawparticles)
+        dp_translation = crx[CRX_GOLD];
+    M_WriteText(GameDef6.x, GameDef6.y + 78, "BFG Explosion Particles");
+
+    if(!d_drawparticles)
+        dp_translation = crx[CRX_DARK];
+    else if(itemOn == 9 && d_drawparticles)
+        dp_translation = crx[CRX_GOLD];
+    M_WriteText(GameDef6.x, GameDef6.y + 88, "ROCKET PARTICLE-TRAILS");
+
+    if(!d_drawparticles)
+        dp_translation = crx[CRX_DARK];
+    else if(itemOn == 10 && d_drawparticles)
+        dp_translation = crx[CRX_GOLD];
+    M_WriteText(GameDef6.x, GameDef6.y + 98, "Rocket Explosion Particles");
+
+    if(!d_drawparticles)
+        dp_translation = crx[CRX_DARK];
+    else if(itemOn == 11 && d_drawparticles)
+        dp_translation = crx[CRX_GOLD];
+    M_WriteText(GameDef6.x, GameDef6.y + 108, "SPAWN FLIES FOR DEAD MONSTERS");
+
+    if(!d_drawparticles)
+        dp_translation = crx[CRX_DARK];
+    else if(itemOn == 12 && d_drawparticles)
+        dp_translation = crx[CRX_GOLD];
+    M_WriteText(GameDef6.x, GameDef6.y + 118, "Enemies & hangings bleed randomly");
+
+    if(bloodsplat_particle == 0)
+    {
+        if(!d_drawparticles)
+            dp_translation = crx[CRX_DARK];
+        else
+            dp_translation = crx[CRX_GREEN];
+        M_WriteText(GameDef6.x + 232, GameDef6.y + 38, "SPRITES");
+    }
+    else if(bloodsplat_particle == 1)
+    {
+        dp_translation = crx[CRX_GOLD];
+        M_WriteText(GameDef6.x + 215, GameDef6.y + 38, "PARTICLES");
+    }
+    else if(bloodsplat_particle == 2)
+    {
+        dp_translation = crx[CRX_RED];
+        M_WriteText(GameDef6.x + 250, GameDef6.y + 38, "BOTH");
+    }
+
+    if(bulletpuff_particle == 0)
+    {
+        if(!d_drawparticles)
+            dp_translation = crx[CRX_DARK];
+        else
+            dp_translation = crx[CRX_GREEN];
+        M_WriteText(GameDef6.x + 232, GameDef6.y + 48, "SPRITES");
+    }
+    else if(bulletpuff_particle == 1)
+    {
+        dp_translation = crx[CRX_GOLD];
+        M_WriteText(GameDef6.x + 215, GameDef6.y + 48, "PARTICLES");
+    }
+    else if(bulletpuff_particle == 2)
+    {
+        dp_translation = crx[CRX_RED];
+        M_WriteText(GameDef6.x + 250, GameDef6.y + 48, "BOTH");
+    }
+
+    if(teleport_particle == 0)
+    {
+        if(!d_drawparticles)
+            dp_translation = crx[CRX_DARK];
+        else
+            dp_translation = crx[CRX_GREEN];
+        M_WriteText(GameDef6.x + 232, GameDef6.y + 58, "SPRITES");
+    }
+    else if(teleport_particle == 1)
+    {
+        dp_translation = crx[CRX_GOLD];
+        M_WriteText(GameDef6.x + 215, GameDef6.y + 58, "PARTICLES");
+    }
+    else if(teleport_particle == 2)
+    {
+        dp_translation = crx[CRX_RED];
+        M_WriteText(GameDef6.x + 250, GameDef6.y + 58, "BOTH");
+    }
+
+    if(d_drawbfgcloud)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef6.x + 266, GameDef6.y + 38, "ON");
+        M_WriteText(GameDef6.x + 266, GameDef6.y + 68, "ON");
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef6.x + 258, GameDef6.y + 38, "OFF");
+        M_WriteText(GameDef6.x + 258, GameDef6.y + 68, "OFF");
+    }
+
+    if(d_drawbfgexplosions)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(GameDef6.x + 266, GameDef6.y + 78, "ON");
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(GameDef6.x + 258, GameDef6.y + 78, "OFF");
+    }
+
+    if(d_drawrockettrails)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(GameDef6.x + 266, GameDef6.y + 88, "ON");
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(GameDef6.x + 258, GameDef6.y + 88, "OFF");
+    }
+
+    if(d_drawrocketexplosions)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(GameDef6.x + 266, GameDef6.y + 98, "ON");
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(GameDef6.x + 258, GameDef6.y + 98, "OFF");
+    }
+
+    if(d_spawnflies)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(GameDef6.x + 266, GameDef6.y + 108, "ON");
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(GameDef6.x + 258, GameDef6.y + 108, "OFF");
+    }
+
+    if(d_dripblood)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(GameDef6.x + 266, GameDef6.y + 118, "ON");
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(GameDef6.x + 258, GameDef6.y + 118, "OFF");
     }
 
     if(whichSkull == 1)
@@ -5410,18 +5656,81 @@ void M_DrawGame6(void)
         int x;
         char *string = "";
         dp_translation = crx[CRX_GOLD];
-
-        if(itemOn == 4)
+        if (itemOn > 3 && itemOn < 13 && !d_drawparticles)
+            string = "YOU MUST ENABLE 'DRAW PARTICLES' FIRST!";
+#ifdef WII
+        if(itemOn == 12)
         {
             if(fsize != 28422764 && fsize != 19321722 && fsize != 12361532)
                 string = "YOU MUST QUIT AND RESTART TO TAKE EFFECT.";
             else
                 string = "NO BETA MODE FOR CHEX, HACX & FREEDOOM.";
         }
+#endif
         x = ORIGWIDTH/2 - M_StringWidth(string) / 2;
         M_WriteText(x, GameDef6.y + 138, string);
     }
+
+    if(itemOn == 13)
+        dp_translation = crx[CRX_GOLD];
+    else
+        dp_translation = crx[CRX_GRAY];
+
+    M_WriteText(GameDef6.x, GameDef6.y + 128, "I DON'T THINK SO...");
+}
+
+void M_DrawGame7(void)
+{
+    //M_DarkBackground(0);
+
+    if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
+        V_DrawPatchWithShadow(70, 0, 0, W_CacheLumpName("M_T_GSET",
+                                               PU_CACHE), false);
+    else
+        V_DrawPatchWithShadow(70, 0, 0, W_CacheLumpName("M_GMESET",
+                                               PU_CACHE), false);
+
+    if(smoketrails)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(GameDef7.x + 266, GameDef7.y - 2, "ON");
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(GameDef7.x + 258, GameDef7.y - 2, "OFF");
+    }
+
+#ifdef WII
+    if(beta_style_mode)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(GameDef7.x + 266, GameDef7.y + 8, "ON");
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(GameDef7.x + 258, GameDef7.y + 8, "OFF");
+    }
 #endif
+
+    if(whichSkull == 1)
+    {
+        int x;
+        char *string = "";
+        dp_translation = crx[CRX_GOLD];
+#ifdef WII
+        if(itemOn == 1)
+        {
+            if(fsize != 28422764 && fsize != 19321722 && fsize != 12361532)
+                string = "YOU MUST QUIT AND RESTART TO TAKE EFFECT.";
+            else
+                string = "NO BETA MODE FOR CHEX, HACX & FREEDOOM.";
+        }
+#endif
+        x = ORIGWIDTH/2 - M_StringWidth(string) / 2;
+        M_WriteText(x, GameDef7.y + 138, string);
+    }
 }
 
 void DetectState(void)
@@ -7478,20 +7787,20 @@ static void M_DrawCrispnessBackground(int scrn)
 
     if (!sdest)
     {
-	byte *src, *dest;
-	int x, y;
+        byte *src, *dest;
+        int x, y;
 
-	src = W_CacheLumpName("FLOOR4_6", PU_CACHE);
-	dest = Z_Malloc(SCREENWIDTH * SCREENHEIGHT * sizeof(*dest), PU_STATIC, NULL);
-	sdest = dest;
+        src = W_CacheLumpName("FLOOR4_6", PU_CACHE);
+        dest = Z_Malloc(SCREENWIDTH * SCREENHEIGHT * sizeof(*dest), PU_STATIC, NULL);
+        sdest = dest;
 
-	for (y = 0; y < SCREENHEIGHT; y++)
-	{
-	    for (x = 0; x < SCREENWIDTH; x++)
-	    {
-		*dest++ = src[(y & 63) * 64 + (x & 63)];
-	    }
-	}
+        for (y = 0; y < SCREENHEIGHT; y++)
+        {
+            for (x = 0; x < SCREENWIDTH; x++)
+            {
+                *dest++ = src[(y & 63) * 64 + (x & 63)];
+            }
+        }
     }
 
     memcpy(screens[scrn], sdest, SCREENWIDTH * SCREENHEIGHT * sizeof(*screens[scrn]));
@@ -7869,6 +8178,8 @@ void M_Ticker (void)
 
         if (dump_con)
             condumpwait++;
+        else if (dump_subst)
+            substdumpwait++;
         else if (dump_mem)
             memdumpwait++;
         else if (dump_stat)
@@ -9345,12 +9656,14 @@ void M_ConDump(int choice)
     players[consoleplayer].message = "Console Output has been dumped.";
 }
 
+#ifdef HEAPDUMP
 void M_MemDump(int choice)
 {
     dump_mem = true;
     Z_DumpMemory();    
     players[consoleplayer].message = "Memory has been dumped.";
 }
+#endif
 
 void M_StatDump(int choice)
 {
@@ -9592,6 +9905,11 @@ void M_Game5(int choice)
 void M_Game6(int choice)
 {
     M_SetupNextMenu(&GameDef6);
+}
+
+void M_Game7(int choice)
+{
+    M_SetupNextMenu(&GameDef7);
 }
 
 void M_Expansion(int choice)
@@ -9886,6 +10204,183 @@ void M_PlayerThrust(int choice)
         if (d_thrust == false)
             d_thrust = true;
         break;
+    }
+}
+
+void M_Particles(int choice)
+{
+    switch(choice)
+    {
+      case 0:
+        if (d_drawparticles)
+            d_drawparticles = false;
+        break;
+      case 1:
+        if (d_drawparticles == false)
+            d_drawparticles = true;
+        break;
+    }
+}
+
+void M_BloodType(int choice)
+{
+    if (d_drawparticles)
+    {
+        switch(choice)
+        {
+          case 0:
+            if (bloodsplat_particle > 0)
+                bloodsplat_particle--;
+            break;
+          case 1:
+            if (bloodsplat_particle < 2)
+                bloodsplat_particle++;
+            break;
+        }
+    }
+}
+
+void M_BulletType(int choice)
+{
+    if (d_drawparticles)
+    {
+        switch(choice)
+        {
+          case 0:
+            if (bulletpuff_particle > 0)
+                bulletpuff_particle--;
+            break;
+          case 1:
+            if (bulletpuff_particle < 2)
+                bulletpuff_particle++;
+            break;
+        }
+    }
+}
+
+void M_TeleportType(int choice)
+{
+    if (d_drawparticles)
+    {
+        switch(choice)
+        {
+          case 0:
+            if (teleport_particle > 0)
+                teleport_particle--;
+            break;
+          case 1:
+            if (teleport_particle < 2)
+                teleport_particle++;
+            break;
+        }
+    }
+}
+
+void M_BFGCloud(int choice)
+{
+    if (d_drawparticles)
+    {
+        switch(choice)
+        {
+          case 0:
+            if (d_drawbfgcloud)
+                d_drawbfgcloud = false;
+            break;
+          case 1:
+            if (d_drawbfgcloud == false)
+                d_drawbfgcloud = true;
+            break;
+        }
+    }
+}
+
+void M_BFGExplosions(int choice)
+{
+    if (d_drawparticles)
+    {
+        switch(choice)
+        {
+          case 0:
+            if (d_drawbfgexplosions)
+                d_drawbfgexplosions = false;
+            break;
+          case 1:
+            if (d_drawbfgexplosions == false)
+                d_drawbfgexplosions = true;
+            break;
+        }
+    }
+}
+
+void M_RocketParticles(int choice)
+{
+    if (d_drawparticles)
+    {
+        switch(choice)
+        {
+          case 0:
+            if (d_drawrockettrails)
+                d_drawrockettrails = false;
+            break;
+          case 1:
+            if (d_drawrockettrails == false)
+                d_drawrockettrails = true;
+            break;
+        }
+    }
+}
+
+void M_RocketExplosions(int choice)
+{
+    if (d_drawparticles)
+    {
+        switch(choice)
+        {
+          case 0:
+            if (d_drawrocketexplosions)
+                d_drawrocketexplosions = false;
+            break;
+          case 1:
+            if (d_drawrocketexplosions == false)
+                d_drawrocketexplosions = true;
+            break;
+        }
+    }
+}
+
+void M_SpawnFlies(int choice)
+{
+    if (d_drawparticles)
+    {
+        switch(choice)
+        {
+          case 0:
+            if (d_spawnflies)
+                d_spawnflies = false;
+            break;
+          case 1:
+            if (d_spawnflies == false)
+                d_spawnflies = true;
+            break;
+        }
+    }
+}
+
+void M_DripBlood(int choice)
+{
+    if (d_drawparticles)
+    {
+        switch(choice)
+        {
+          case 0:
+            if (d_dripblood)
+                d_dripblood = false;
+            break;
+          case 1:
+            if (d_dripblood == false)
+                d_dripblood = true;
+            break;
+        }
     }
 }
 

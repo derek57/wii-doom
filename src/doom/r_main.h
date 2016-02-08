@@ -178,6 +178,8 @@ void R_ExecuteSetViewSize(void);
 
 void R_InitColumnFunctions(void);
 
+void R_AddSprites(sector_t *sec, int lightlevel);
+
 //
 // REFRESH - the actual rendering functions.
 //

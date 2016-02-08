@@ -406,6 +406,19 @@ static void saveg_read_mobj_t(mobj_t *str)
 
     // int pitch
     str->pitch = saveg_read32();
+
+    // unsigned int effects
+    str->effects = saveg_read32();
+/*
+    // dboolean effect_flies_can_spawn
+    str->effect_flies_can_spawn = saveg_read32();
+
+    // dboolean effect_flies_spawned
+    str->effect_flies_spawned = saveg_read32();
+
+    // dboolean effect_flies_shot
+    str->effect_flies_shot = saveg_read32();
+*/
 }
 
 static void saveg_write_mobj_t(mobj_t *str)
@@ -553,6 +566,19 @@ static void saveg_write_mobj_t(mobj_t *str)
 
     // int pitch
     saveg_write32(str->pitch);
+
+    // unsigned int effects
+    saveg_write32(str->effects);
+/*
+    // dboolean effect_flies_can_spawn
+    saveg_write32(str->effect_flies_can_spawn);
+
+    // dboolean effect_flies_spawned
+    saveg_write32(str->effect_flies_spawned);
+
+    // dboolean effect_flies_shot
+    saveg_write32(str->effect_flies_shot);
+*/
 }
 
 //

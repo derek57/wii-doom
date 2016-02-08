@@ -40,6 +40,7 @@
 #define __R_DEFS__
 
 #include "p_mobj.h"
+#include "p_partcl.h"
 
 // Silhouette, needed for clipping Segs (mainly)
 // and sprites representing things.
@@ -185,6 +186,8 @@ typedef struct
     // thinker_t for reversible actions
     // UNUSED (SLIDING DOOR FRAMES)
     //void                *specialdata;
+
+    particle_t          *ptcllist; // haleyjd 02/20/04: list of particles in sector
 
 } sector_t;
 
@@ -897,10 +900,12 @@ typedef struct vissprite_s
     // killough 3/27/98: height sector for underwater/fake ceiling support
     int                 heightsec;
 
-    dboolean             psprite;            // true if psprite (required for freelook)
+    dboolean            psprite;            // true if psprite (required for freelook)
 
     // [crispy] color translation table for blood colored by monster class
     byte*               translation;
+
+    float               ytop, ybottom;
 
 } vissprite_t;
 
@@ -977,5 +982,11 @@ typedef struct visplane_s
     // [BH] Support animated liquid sectors
     sector_t            *sector;
 } visplane_t;
+
+byte          RGB32k[32][32][32];
+byte          RGB8k[16][32][16];
+
+unsigned int  Col2RGB8[65][256];
+unsigned int  Col2RGB[65][256];
 
 #endif

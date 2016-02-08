@@ -167,6 +167,7 @@ char    *s_GOTYELWCARD = GOTYELWCARD;
 char    *s_GOTREDCARD = GOTREDCARD;
 char    *s_GOTBLUESKUL = GOTBLUESKUL;
 char    *s_GOTYELWSKUL = GOTYELWSKUL;
+char    *s_GOTREDSKUL = GOTREDSKULL;
 char    *s_GOTREDSKULL = GOTREDSKULL;
 
 char    *s_GOTINVUL = GOTINVUL;
@@ -676,6 +677,7 @@ deh_strs deh_strlookup[] =
     { &s_GOTREDCARD,           "GOTREDCARD",           false },
     { &s_GOTBLUESKUL,          "GOTBLUESKUL",          false },
     { &s_GOTYELWSKUL,          "GOTYELWSKUL",          false },
+    { &s_GOTREDSKUL,           "GOTREDSKUL",           false }, 
     { &s_GOTREDSKULL,          "GOTREDSKULL",          false },
 
     { &s_GOTINVUL,             "GOTINVUL",             false },
@@ -1572,7 +1574,8 @@ static char *deh_state[] =
     // This is set in a separate "Pointer" block from Dehacked
     "Codep Frame",      // pointer to first use of action (actionf_t)
     "Unknown 1",        // .misc1 (long)
-    "Unknown 2"         // .misc2 (long)
+    "Unknown 2",        // .misc2 (long)
+    "Particle event"    // haleyjd 08/09/02: particle event num
 };
 
 // SFXINFO_STRUCT - Dehacked block name = "Sounds"
@@ -2310,7 +2313,7 @@ void deh_procFrame(DEHFILE *fpin, char *line)
             states[indexnum].nextstate = value;
             states[indexnum].dehacked = dehacked = !BTSX;
         }
-        else if (M_StringCompare(key, deh_state[4]))    // Codep frame (not set in Frame deh block)
+        else if (M_StringCompare(key, deh_state[4]))            // Codep frame (not set in Frame deh block)
             C_Warning("Codep frame should not be set in Frame section.");
         else if (M_StringCompare(key, deh_state[5]))            // Unknown 1
         {
@@ -2326,6 +2329,13 @@ void deh_procFrame(DEHFILE *fpin, char *line)
             states[indexnum].misc2 = value;                     // long
             states[indexnum].dehacked = dehacked = !BTSX;
         }
+        else if (M_StringCompare(key, deh_state[7]))            // Particle event
+        {
+            // haleyjd 08/09/02: particle event setting
+            if (devparm)
+                C_Output(" - particle_evt = %ld", value);
+            states[indexnum].particle_evt = value;
+      }
         else
             C_Warning("Invalid frame string index for '%s'.", key);
     }
@@ -3263,6 +3273,15 @@ dboolean deh_procStringSub(char *key, char *lookfor, char *newstring)
 
             if (M_StrCaseStr(deh_strlookup[i].lookup, "HUSTR"))
                 addtocount = true;
+
+            // [BH] allow either GOTREDSKUL or GOTREDSKULL
+            if (M_StringCompare(deh_strlookup[i].lookup, "GOTREDSKUL")
+                && !deh_strlookup[p_GOTREDSKULL].assigned)
+            {
+                s_GOTREDSKULL = s_GOTREDSKUL;
+                deh_strlookup[p_GOTREDSKULL].assigned = true;
+                return true;
+            }
 
             break;
         }

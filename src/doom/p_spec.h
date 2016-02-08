@@ -32,6 +32,11 @@
 #define __P_SPEC__
 
 
+#define FLOOR_SOLID                0
+#define FLOOR_WATER                1
+#define FLOOR_LAVA                 2
+#define FLOOR_SLUDGE               3
+
 #define GLOWSPEED                  8
 #define STROBEBRIGHT               5
 #define FASTDARK                   15
@@ -844,6 +849,9 @@ fixed_t     P_FindShortestTextureAround(int secnum); // jff 2/04/98
 fixed_t     P_FindShortestUpperAround(int secnum); // jff 2/04/98
 
 result_e    T_MovePlane(sector_t *sector, fixed_t speed, fixed_t dest, dboolean crush, int floorOrCeiling, int direction);
+
+void P_InitTerrainTypes(void);
+int P_GetTerrainTypeForPt(fixed_t x, fixed_t y, int position);
 
 
 #if 0 // UNUSED

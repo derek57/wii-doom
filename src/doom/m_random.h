@@ -248,16 +248,19 @@ int M_RandomInt(int lower, int upper);
 // As M_Random, but used only by the play simulation.
 int P_Random (void);
 
-//int (P_RandomSMMU)(pr_class_t DA(const char *, int));
-
-#ifdef INSTRUMENTED
-#define P_RandomSMMU(a) (P_RandomSMMU) (a, __FILE__,__LINE__)
-#endif
+int P_RandomSMMU(pr_class_t pr_class);
 
 int P_SubRandom(pr_class_t pr_class);
 
 // Fix randoms for demos.
 void M_ClearRandom (void);
 
+// haleyjd: function to get a random within a given range
+int P_RangeRandom(pr_class_t pr_class, int min, int max);
+
+#define M_RangeRandom(min, max) P_RangeRandom(pr_misc, (min), (max))
+
+// Returns a number from 0 to 255,
+#define M_RandomSMMU() P_RandomSMMU(pr_misc)
 
 #endif
