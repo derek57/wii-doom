@@ -1,6 +1,42 @@
+// Emacs style mode select   -*- C++ -*-
+//-----------------------------------------------------------------------------
 //
-// Particle effects header
+// This module, except for code marked otherwise, is covered by the 
+// zdoom source distribution license, which is included in the 
+// Eternity source distribution, and is compatible with the terms of
+// the GNU General Public License.
 //
+// Copyright (c) 2016 by Ronald Lasmanowicz:
+//
+//   - first base taken from the Eternity Engine ("Gamma" Release v3.29 Final)
+//        which was from July 2002
+//
+//   - then continously updated using codebases: - 3.31.10
+//                                               - 3.33.02
+//                                               - 3.33.33
+//                                               - 3.33.50
+//                                               - 3.35.90
+//                                               - 3.35.92
+//                                               - 3.37.00
+//                                               - 3.39.20
+//
+//        (repository at http://eternity.mancubus.net/ee-old/ was a good help
+//                as GitHub does only list Eternity's code from 2006 onwards)
+//
+//   - then updated once again using the latest codebase at GitHub
+//   - and slightly modified to get flies for corpses and dripping blood
+//             working with this port
+//
+// See the license file for details.
+//
+//----------------------------------------------------------------------------
+//
+// DESCRIPTION:
+//
+//   Code that ties particle effects to map objects, adapted
+//   from zdoom. Thanks to Randy Heit.
+//
+//----------------------------------------------------------------------------
 
 #ifndef __P_PARTCL_H__
 #define __P_PARTCL_H__
