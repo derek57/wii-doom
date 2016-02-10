@@ -502,11 +502,13 @@ P_UseSpecialLine
             break;
 
         case S1_ExitLevel:
+            /*
             if (thing->player && thing->player->health <= 0)
             {
                 S_StartSound(thing, sfx_noway);
                 return false;
             }
+            */
             P_ChangeSwitchTexture(line, 0);
             G_ExitLevel();
             break;
@@ -578,11 +580,13 @@ P_UseSpecialLine
             break;
 
         case S1_ExitLevel_GoesToSecretLevel:
+            /*
             if (thing->player && thing->player->health <= 0)
             {
                 S_StartSound(thing, sfx_noway);
                 return false;
             }
+            */
             P_ChangeSwitchTexture(line, 0);
             G_SecretExitLevel();
             break;

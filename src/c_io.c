@@ -188,6 +188,7 @@ static patch_t  *degree;
 static patch_t  *multiply;
 static patch_t  *caret;
 static patch_t  *route;
+static patch_t  *warning; 
 
 extern dboolean wipe;
 
@@ -439,6 +440,7 @@ void C_Init(void)
     rdquote = W_CacheLumpName("DRFON148", PU_STATIC);
     degree = W_CacheLumpName("DRFON176", PU_STATIC);
     multiply = W_CacheLumpName("DRFON215", PU_STATIC);
+    warning = W_CacheLumpName("DRFONWRN", PU_STATIC); 
 
     spacewidth = SHORT(caret->width);
     timestampx = SCREENWIDTH - C_TextWidth("00:00:00") - CONSOLETEXTX * 2
@@ -514,10 +516,8 @@ static void C_DrawBackground(int height, int scrn)
 
     for (i = 0; i < height; ++i)
 //        I_VideoBuffer[i] = tinttab50[c_blurscreen[i] + consoletintcolor];
-        screens[scrn][i] = tinttab50[c_blurscreen[i] + consoletintcolor];
-
-    for (i = 0; i < height; ++i)
-        screens[scrn][i] = colormaps[0][256 * M_RandomInt(0, 10) + screens[scrn][i]];
+        screens[0][i] = colormaps[0][256 * M_RandomInt(0, 10) + tinttab50[c_blurscreen[i]
+            + consoletintcolor]];
 
     for (i = height - 2; i > 1; i -= 3)
     {
@@ -566,6 +566,12 @@ static void C_DrawConsoleText(int x, int y, char *text, int color1, int color2, 
             text[len + 2] = '\0';
             --len;
         }
+
+    if (color1 == yellowstring)
+    {
+        V_DrawConsoleChar(x, y, 0, warning, color1, color2, false, tinttab);
+        x += SHORT(warning->width) + 2;
+    }
 
     for (i = 0; i < len; ++i)
     {

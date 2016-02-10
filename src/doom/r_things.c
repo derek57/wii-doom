@@ -174,7 +174,7 @@ static void R_InstallSpriteLump(lumpinfo_t *lump, int lumpnum, unsigned int fram
 // properties across standard DOOM sprites:
 #define R_SpriteNameHash(s) ((unsigned int)((s)[0] - ((s)[1] * 3 - (s)[3] * 2 - (s)[2]) * 2))
 
-static void R_InitSpriteDefs(char **namelist)
+static void R_InitSpriteDefs(const char *const *namelist)
 {
     size_t              numentries = lastspritelump - firstspritelump + 1;
     unsigned int        i;
@@ -333,7 +333,7 @@ void R_InitSprites(char **namelist)
     for (i = 0; i < SCREENWIDTH; i++)
         negonearray[i] = -1;
 
-    R_InitSpriteDefs(namelist);
+    R_InitSpriteDefs((const char *const *)namelist);
 
     num_vissprite = 0;
     num_vissprite_alloc = 128;

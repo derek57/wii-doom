@@ -1768,13 +1768,7 @@ void G_DoPlayDemo (void)
         fsize == 12361532 || fsize == 19321722)
     {
         // [crispy] demo progress bar
-        defdemosize = 0;
-        while (*demo_p++ != DEMOMARKER)
-        {
-            defdemosize++;
-        }
-        demo_p = demobuffer;
-
+        defdemosize = lumpinfo[W_GetNumForName(defdemoname)]->size; 
         demoversion = *demo_p++;
 
         if (demoversion == G_VanillaVersionCode())
@@ -2172,8 +2166,15 @@ void G_DoSaveGame (void)
         save_stream = fopen(recovery_savegame_file, "wb");
         if (!save_stream)
         {
+/*
             I_Error("Failed to open either '%s' or '%s' to write savegame.",
                     temp_savegame_file, recovery_savegame_file);
+*/
+            menuactive = false;
+            consoleheight = 1;
+            consoledirection = 1;
+            C_Warning("%s couldn't be saved.", uppercase(savename));
+            return;
         }
     }
 

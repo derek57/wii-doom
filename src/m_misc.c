@@ -710,3 +710,11 @@ int search_string(char src[], char str[])
     return 0;
 }
 
+char *M_SubString(const char *str, size_t begin, size_t len)
+{
+    if (!str|| !strlen(str) || strlen(str) < begin || strlen(str) < begin + len)
+        return 0;
+
+    return strndup(str + begin, len);
+}
+

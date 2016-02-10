@@ -1982,7 +1982,7 @@ mobj_t* P_SpawnPlayerMissile(mobj_t *source, mobjtype_t type)
     th->momy = FixedMul(aim, finesine[an>>ANGLETOFINESHIFT]);
     th->momz = FixedMul(th->info->speed, slope);
 
-    if (type == MT_ROCKET && smoketrails)
+    if (type == MT_ROCKET && smoketrails && fsize != 19321722)
     {
         th->effects = FX_ROCKET;
         th->flags2 |= MF2_SMOKETRAIL;

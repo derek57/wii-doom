@@ -1984,7 +1984,7 @@ void ProcessDehFile(char *filename, int lumpnum)
 
         lfstrip(inbuffer);
         if (devparm)
-            C_Output("Line = '%s'", inbuffer);
+            C_Output("Line = \"%s\"", inbuffer);
         if (!*inbuffer || *inbuffer == '#' || *inbuffer == ' ')
             continue;   // Blank line or comment line
 
@@ -2005,7 +2005,7 @@ void ProcessDehFile(char *filename, int lumpnum)
             // the practice, since the code could otherwise handle it)
             if (infile.lump)
             {
-                C_Warning("No files may be included from wads: '%s'.", inbuffer);
+                C_Warning("No files may be included from wads: \"%s\".", inbuffer);
                 continue;
             }
 
@@ -2096,7 +2096,7 @@ void deh_procBexCodePointers(DEHFILE *fpin, char *line)
         if ((3 != sscanf(inbuffer, "%31s %10i = %31s", key, &indexnum, mnemonic))
             || !M_StringCompare(key, "FRAME"))        // NOTE: different format from normal
         {
-            C_Warning("Invalid BEX codepointer line - must start with 'FRAME': '%s'.",
+            C_Warning("Invalid BEX codepointer line - must start with \"FRAME\": \"%s\".",
                 inbuffer);
             return;     // early return
         }
@@ -2125,7 +2125,7 @@ void deh_procBexCodePointers(DEHFILE *fpin, char *line)
         }
 
         if (!found)
-            C_Warning("Invalid frame pointer mnemonic '%s' at %d.", mnemonic, indexnum);
+            C_Warning("Invalid frame pointer mnemonic \"%s\" at %d.", mnemonic, indexnum);
     }
     return;
 }
@@ -2152,7 +2152,7 @@ void deh_procThing(DEHFILE *fpin, char *line)
 
     strncpy(inbuffer, line, DEH_BUFFERMAX);
     if (devparm)
-        C_Output("Thing line: '%s'", inbuffer);
+        C_Output("Thing line: \"%s\"", inbuffer);
 
     // killough 8/98: allow hex numbers in input:
     ix = sscanf(inbuffer, "%31s %10i", key, &indexnum);
@@ -2186,7 +2186,7 @@ void deh_procThing(DEHFILE *fpin, char *line)
         bGetData = deh_GetData(inbuffer, key, &value, &strval);
         if (!bGetData)
         {
-            C_Warning("Bad data pair in '%s'.", inbuffer);
+            C_Warning("Bad data pair in \"%s\".", inbuffer);
             continue;
         }
 
@@ -2234,7 +2234,7 @@ void deh_procThing(DEHFILE *fpin, char *line)
                             break;
                         }
                         if (iy >= DEH_MOBJFLAGMAX)
-                            C_Warning("Could not find bit mnemonic '%s'.", strval);
+                            C_Warning("Could not find bit mnemonic \"%s\".", strval);
                     }
 
                     // Don't worry about conversion -- simply print values
@@ -2282,7 +2282,7 @@ void deh_procFrame(DEHFILE *fpin, char *line)
             break;                                              // killough 11/98
         if (!deh_GetData(inbuffer, key, &value, NULL))          // returns TRUE if ok
         {
-            C_Warning("Bad data pair in '%s'.", inbuffer);
+            C_Warning("Bad data pair in \"%s\".", inbuffer);
             continue;
         }
         if (M_StringCompare(key, deh_state[0]))                 // Sprite number
@@ -2335,9 +2335,10 @@ void deh_procFrame(DEHFILE *fpin, char *line)
             if (devparm)
                 C_Output(" - particle_evt = %ld", value);
             states[indexnum].particle_evt = value;
-      }
+            states[indexnum].dehacked = dehacked = !BTSX;
+        }
         else
-            C_Warning("Invalid frame string index for '%s'.", key);
+            C_Warning("Invalid frame string index for \"%s\".", key);
     }
     return;
 }
@@ -2363,7 +2364,7 @@ void deh_procPointer(DEHFILE *fpin, char *line)
     // killough 8/98: allow hex numbers in input, fix error case:
     if (sscanf(inbuffer, "%*s %*i (%31s %10i)", key, &indexnum) != 2)
     {
-        C_Warning("Bad data pair in '%s'.", inbuffer);
+        C_Warning("Bad data pair in \"%s\".", inbuffer);
         return;
     }
 
@@ -2384,7 +2385,7 @@ void deh_procPointer(DEHFILE *fpin, char *line)
             break;      // killough 11/98
         if (!deh_GetData(inbuffer, key, &value, NULL))   // returns TRUE if ok
         {
-            C_Warning("Bad data pair in '%s'.", inbuffer);
+            C_Warning("Bad data pair in \"%s\".", inbuffer);
             continue;
         }
 
@@ -2412,7 +2413,7 @@ void deh_procPointer(DEHFILE *fpin, char *line)
                 }
         }
         else
-            C_Warning("Invalid frame pointer index for '%s' at %ld, xref %p.",
+            C_Warning("Invalid frame pointer index for \"%s\" at %ld, xref %p.",
                 key, value, (void *)deh_codeptr[value]);
     }
     return;
@@ -2450,7 +2451,7 @@ void deh_procSounds(DEHFILE *fpin, char *line)
             break;      // killough 11/98
         if (!deh_GetData(inbuffer, key, &value, NULL))   // returns TRUE if ok
         {
-            C_Warning("Bad data pair in '%s'", inbuffer);
+            C_Warning("Bad data pair in \"%s\"\n", inbuffer);
             continue;
         }
         if (M_StringCompare(key, deh_sfxinfo[0]))           // Offset
@@ -2468,7 +2469,7 @@ void deh_procSounds(DEHFILE *fpin, char *line)
         else if (M_StringCompare(key, deh_sfxinfo[6]))      // Neg. One 2
             S_sfx[indexnum].lumpnum = value;
         else if (devparm)
-            C_Output("Invalid sound string index for '%s'", key);
+            C_Output("Invalid sound string index for \"%s\"", key);
     }
     return;
 }
@@ -2505,7 +2506,7 @@ void deh_procAmmo(DEHFILE *fpin, char *line)
             break;                                              // killough 11/98
         if (!deh_GetData(inbuffer, key, &value, NULL))          // returns TRUE if ok
         {
-            C_Warning("Bad data pair in '%s'.", inbuffer);
+            C_Warning("Bad data pair in \"%s\".", inbuffer);
             continue;
         }
         if (M_StringCompare(key, deh_ammo[0]))                      // Max ammo
@@ -2513,7 +2514,7 @@ void deh_procAmmo(DEHFILE *fpin, char *line)
         else if (M_StringCompare(key, deh_ammo[1]))                 // Per ammo
             clipammo[indexnum] = value;
         else
-            C_Warning("Invalid ammo string index for '%s'.", key);
+            C_Warning("Invalid ammo string index for \"%s\".", key);
     }
     return;
 }
@@ -2550,7 +2551,7 @@ void deh_procWeapon(DEHFILE *fpin, char *line)
             break;                                              // killough 11/98
         if (!deh_GetData(inbuffer, key, &value, NULL))          // returns TRUE if ok
         {
-            C_Warning("Bad data pair in '%s'.", inbuffer);
+            C_Warning("Bad data pair in \"%s\".", inbuffer);
             continue;
         }
         if (M_StringCompare(key, deh_weapon[0]))                    // Ammo type
@@ -2566,7 +2567,7 @@ void deh_procWeapon(DEHFILE *fpin, char *line)
         else if (M_StringCompare(key, deh_weapon[5]))               // Firing frame
             weaponinfo[indexnum].flashstate = value;
         else
-            C_Warning("Invalid weapon string index for '%s'.", key);
+            C_Warning("Invalid weapon string index for \"%s\".", key);
     }
     return;
 }
@@ -2590,7 +2591,7 @@ void deh_procSprite(DEHFILE *fpin, char *line) // Not supported
 
     // killough 8/98: allow hex numbers in input:
     sscanf(inbuffer, "%31s %10i", key, &indexnum);
-    C_Warning("Ignoring sprite offset change at index %d: '%s'.", indexnum, key);
+    C_Warning("Ignoring sprite offset change at index %d: \"%s\".", indexnum, key);
     while (!dehfeof(fpin) && *inbuffer && *inbuffer != ' ')
     {
         if (!dehfgets(inbuffer, sizeof(inbuffer), fpin)) break;
@@ -2664,7 +2665,7 @@ void deh_procPars(DEHFILE *fpin, char *line) // extension
         { // not 3
             if (2 != sscanf(inbuffer, "par %10i %10i", &level, &partime))
                 // not 2
-                C_Warning("Invalid par time setting string '%s'.", inbuffer);
+                C_Warning("Invalid par time setting string \"%s\".", inbuffer);
             else
             { // is 2
                 // Ty 07/11/98 - wrong range check, not zero-based
@@ -2736,7 +2737,7 @@ void deh_procCheat(DEHFILE *fpin, char *line)
             break;              // killough 11/98
         if (!deh_GetData(inbuffer, key, &value, &strval))       // returns TRUE if ok
         {
-            C_Warning("Bad data pair in '%s'.", inbuffer);
+            C_Warning("Bad data pair in \"%s\".", inbuffer);
             continue;
         }
 
@@ -2935,7 +2936,7 @@ void deh_procMisc(DEHFILE *fpin, char *line)
             break;                                              // killough 11/98
         if (!deh_GetData(inbuffer, key, &value, NULL))          // returns TRUE if ok
         {
-            C_Warning("Bad data pair in '%s'.", inbuffer);
+            C_Warning("Bad data pair in \"%s\".", inbuffer);
             continue;
         }
         // Otherwise it's ok
@@ -2975,7 +2976,7 @@ void deh_procMisc(DEHFILE *fpin, char *line)
         else if (M_StringCompare(key, deh_misc[15]))                // Monsters Infight
             species_infighting = value;
         else
-            C_Warning("Invalid misc item string index for '%s'.", key);
+            C_Warning("Invalid misc item string index for \"%s\".", key);
     }
     return;
 }
@@ -3101,7 +3102,7 @@ void deh_procText(DEHFILE *fpin, char *line)
     if (!found) // Nothing we want to handle here -- see if strings can deal with it.
     {
         if (devparm)
-            C_Output("Checking text area through strings for '%.12s%s' from = %d to = %d",
+            C_Output("Checking text area through strings for \"%.12s%s\" from = %d to = %d",
                 inbuffer, (strlen(inbuffer) > 12 ? "..." : ""), fromlen, tolen);
         if ((size_t)fromlen <= strlen(inbuffer))
         {
@@ -3123,7 +3124,7 @@ void deh_procError(DEHFILE *fpin, char *line)
     if (!M_StringStartsWith(inbuffer, "Patch File for DeHackEd")
         && !M_StringStartsWith(inbuffer, "Doom version")
         && !M_StringStartsWith(inbuffer, "Patch format"))
-        C_Warning("Ignoring '%s'.", inbuffer);
+        C_Warning("Ignoring \"%s\".", inbuffer);
     return;
 }
 
@@ -3169,7 +3170,7 @@ void deh_procStrings(DEHFILE *fpin, char *line)
         {
             if (!deh_GetData(inbuffer, key, &value, &strval))   // returns TRUE if ok
             {
-                C_Warning("Bad data pair in '%s'.", inbuffer);
+                C_Warning("Bad data pair in \"%s\".", inbuffer);
                 continue;
             }
         }
@@ -3203,7 +3204,7 @@ void deh_procStrings(DEHFILE *fpin, char *line)
             found = deh_procStringSub(key, NULL, holdstring);   // supply key and not search string
 
             if (!found)
-                C_Warning("Invalid string key '%s'. Substitution skipped.", key);
+                C_Warning("Invalid string key \"%s\". Substitution skipped.", key);
 
             *holdstring = '\0';  // empty string for the next one
         }
@@ -3257,10 +3258,10 @@ dboolean deh_procStringSub(char *key, char *lookfor, char *newstring)
             if (devparm)
             {
                 if (key)
-                    C_Output("Assigned key %s to '%s'", key, newstring);
+                    C_Output("Assigned key %s to \"%s\"", key, newstring);
                 else
                 {
-                    C_Output("Assigned '%.12s%s' to '%.12s%s' at key %s", lookfor,
+                    C_Output("Assigned \"%.12s%s\" to \"%.12s%s\" at key %s", lookfor,
                         (strlen(lookfor) > 12 ? "..." : ""), newstring,
                         (strlen(newstring) > 12 ? "..." : ""), deh_strlookup[i].lookup);
                     C_Output("*BEX FORMAT:");
@@ -3287,7 +3288,7 @@ dboolean deh_procStringSub(char *key, char *lookfor, char *newstring)
         }
     }
     if (!found)
-        C_Warning("Couldn't find '%s'.", (key ? key : lookfor));
+        C_Warning("Couldn't find \"%s\".", (key ? key : lookfor));
 
     return found;
 }
@@ -3336,7 +3337,7 @@ void lfstrip(char *s)    // strip the \r and/or \n off of a line
 {
     char        *p = s + strlen(s);
 
-    while (p > s && (*--p=='\r' || *p=='\n'))
+    while (p > s && (*--p == '\r' || *p == '\n'))
         *p = 0;
 }
 
@@ -3401,7 +3402,9 @@ int deh_GetData(char *s, char *k, long *l, char **strval)
             break;
         buffer[i] = *t;                 // copy it
     }
-    buffer[--i] = '\0';                 // terminate the key before the '='
+    if (isspace(buffer[i - 1]))
+        --i;
+    buffer[i] = '\0';                   // terminate the key before the '='
     if (!*t)                            // end of string with no equal sign
         okrc = false;
     else

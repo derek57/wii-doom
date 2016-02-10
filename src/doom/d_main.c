@@ -1224,16 +1224,15 @@ dboolean D_IsDehFile(char *filename)
         || M_StringCompare(filename + strlen(filename) - 4, ".bex"));
 }
 
-//
-// [nitr8] UNUSED
-//
-/*
 static void D_ProcessDehCommandLine(void)
 {
 #ifndef WII
-    int p = (M_CheckParm("-deh") && !beta_style);
+    int p = M_CheckParm("-deh");
 
-    if (p || (p = M_CheckParm("-bex") && !beta_style))
+    if (beta_style)
+        return;
+
+    if (p || (p = M_CheckParm("-bex")))
 #else
     if (load_dehacked)
 #endif
@@ -1251,7 +1250,6 @@ static void D_ProcessDehCommandLine(void)
 #endif
     }
 }
-*/
 
 #ifndef WII
 void PrintGameVersion(void)
@@ -1293,6 +1291,20 @@ static void D_Endoom(void)
     I_Endoom(endoom);
 }
 #endif
+
+void D_ParseStartupString(const char *string)
+{
+    size_t      i;
+    size_t      start;
+    size_t      len = strlen(string);
+
+    for (i = 0, start = 0; i < len; ++i)
+        if (string[i] == '\n' || i == len - 1)
+        {
+            C_Output("%s", M_SubString(string, start, i - start));
+            start = i + 1;
+        }
+}
 
 //
 // D_DoomMain
@@ -1468,8 +1480,6 @@ void D_DoomMain (void)
 
     respawnparm = false;
     fastparm = false;
-
-//    D_ProcessDehCommandLine();
 
     //!
     // @vanilla
@@ -1930,6 +1940,8 @@ void D_DoomMain (void)
 
     modifiedgame = false;
 
+    D_ProcessDehCommandLine();
+
 #ifndef WII
     setbuf (stdout, NULL);
 
@@ -2069,6 +2081,10 @@ void D_DoomMain (void)
         gameversion = exe_chex;
         nerve_pwad = false;
         master_pwad = false;
+
+        if (d_ejectcasings)
+            d_ejectcasings = false;
+
         LoadChexDeh();
     }
     else if(
@@ -3529,6 +3545,23 @@ void D_DoomMain (void)
         (startuptimer / (1000 * 60)) % 60,
         (startuptimer / 1000) % 60,
         (startuptimer % 1000) / 10);
+
+    // Ty 04/08/98 - Add 5 lines of misc. data, only if nonblank
+    // The expectation is that these will be set in a .bex file
+    if (*startup1 || *startup2 || *startup3 || *startup4 || *startup5)
+    {
+        C_AddConsoleDivider();
+        if (*startup1)
+            D_ParseStartupString(startup1);
+        if (*startup2)
+            D_ParseStartupString(startup2);
+        if (*startup3)
+            D_ParseStartupString(startup3);
+        if (*startup4)
+            D_ParseStartupString(startup4);
+        if (*startup5)
+            D_ParseStartupString(startup5);
+    }
 
     D_DoomLoop ();  // never returns
 }

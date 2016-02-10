@@ -67,6 +67,7 @@ dboolean M_StringCompare(const char *str1, const char *str2);
 dboolean isvowel(const char ch);
 char *removeext(const char *file);
 int search_string(char src[], char str[]);
+char *M_SubString(const char *str, size_t begin, size_t len);
 
 #endif
 

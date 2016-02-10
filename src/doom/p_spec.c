@@ -108,7 +108,14 @@ static struct
     { "BTSX_E2B.WAD",  "SLIME09"  }, { "DOOM2.WAD",     "RROCK05"  }, { "DOOM2.WAD",     "RROCK06"  },
     { "DOOM2.WAD",     "RROCK07"  }, { "DOOM2.WAD",     "RROCK08"  }, { "DOOM2.WAD",     "SLIME09"  },
     { "DOOM2.WAD",     "SLIME10"  }, { "DOOM2.WAD",     "SLIME11"  }, { "DOOM2.WAD",     "SLIME12"  },
-    { "MOHU2.WAD",     "DIFL_01"  }, { "ETERNALL.WAD",  "NUKAGE1"  }, { "ETERNALL.WAD",  "NUKAGE2"  },
+    { "MOHU2.WAD",     "DIFL_01"  },
+    { "EPIC2.WAD",     "SLIME01"  }, { "EPIC2.WAD",     "SLIME01A" }, { "EPIC2.WAD",     "SLIME02"  },
+    { "EPIC2.WAD",     "SLIME02A" }, { "EPIC2.WAD",     "SLIME03"  }, { "EPIC2.WAD",     "SLIME03A" },
+    { "EPIC2.WAD",     "SLIME04"  }, { "EPIC2.WAD",     "SLIME05"  }, { "EPIC2.WAD",     "SLIME05A" },
+    { "EPIC2.WAD",     "SLIME06A" }, { "EPIC2.WAD",     "SLIME07"  }, { "EPIC2.WAD",     "SLIME08"  },
+    { "EPIC2.WAD",     "SLIME09"  }, { "EPIC2.WAD",     "SLIME10"  }, { "EPIC2.WAD",     "SLIME11"  },
+    { "EPIC2.WAD",     "SLIME12"  },
+    { "ETERNALL.WAD",  "NUKAGE1"  }, { "ETERNALL.WAD",  "NUKAGE2"  },
     { "ETERNALL.WAD",  "NUKAGE3"  }, { "ETERNALL.WAD",  "RROCK05"  }, { "ETERNALL.WAD",  "RROCK06"  },
     { "ETERNALL.WAD",  "RROCK07"  }, { "ETERNALL.WAD",  "RROCK08"  }, { "ETERNALL.WAD",  "SLIME09"  },
     { "ETERNALL.WAD",  "SLIME10"  }, { "ETERNALL.WAD",  "SLIME11"  }, { "ETERNALL.WAD",  "SLIME12"  },
@@ -1322,7 +1329,7 @@ void P_CrossSpecialLine(line_t *line, int side, mobj_t *thing)
 
         case W1_ExitLevel:
             // killough 10/98: prevent zombies from exiting levels
-            if (!(thing->player && thing->player->health <= 0))
+            //if (!(thing->player && thing->player->health <= 0))
                 G_ExitLevel();
             break;
 
@@ -1393,7 +1400,7 @@ void P_CrossSpecialLine(line_t *line, int side, mobj_t *thing)
 
         case W1_ExitLevel_GoesToSecretLevel:
             // killough 10/98: prevent zombies from exiting levels (Disabled because the sliding doors use the same line type...)
-            if (!(thing->player && thing->player->health <= 0))
+            //if (!(thing->player && thing->player->health <= 0))
                 G_SecretExitLevel();
             break;
 
@@ -1870,16 +1877,16 @@ void P_ShootSpecialLine(mobj_t *thing, line_t *line)
 
         case G1_ExitLevel:
             // killough 10/98: prevent zombies from exiting levels
-            if (thing->player && thing->player->health <= 0)
-                break;
+            //if (thing->player && thing->player->health <= 0)
+            //    break;
             P_ChangeSwitchTexture(line, 0);
             G_ExitLevel();
             break;
 
         case G1_ExitLevel_GoesToSecretLevel:
             // killough 10/98: prevent zombies from exiting levels
-            if (thing->player && thing->player->health <= 0)
-                break;
+            //if (thing->player && thing->player->health <= 0)
+            //    break;
             P_ChangeSwitchTexture(line, 0);
             G_SecretExitLevel();
             break;

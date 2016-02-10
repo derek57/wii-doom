@@ -2575,7 +2575,7 @@ static menuitem_t GameMenu5[]=
     {2,"",M_Smearblood,'b'},
     {2,"Randomly colored player corpses",M_ColoredCorpses,'r'},
     {2,"Player walks slower if health < 15%",M_LowHealth,'h'},
-    {2,"",M_Offsets,'x'},
+    {2,"Fix Sprite Offsets",M_Offsets,'x'},
     {1,"",M_Game6,'6'}
 };
 
@@ -2611,7 +2611,7 @@ enum
 static menuitem_t GameMenu6[]=
 {
     {2,"Center Weapon when firing",M_CenterWeapon,'w'},
-    {2,"Eject Weapon Casings",M_EjectCasings,'e'},
+    {2,"",M_EjectCasings,'e'},
     {2,"PLAYER THRUST",M_PlayerThrust,'p'},
     {2,"Draw Particles",M_Particles,'a'},
     {2,"",M_BloodType,'b'},
@@ -3295,6 +3295,9 @@ void M_DrawReadThis1(void)
     }
 
     V_DrawPatch (0, 0, 0, W_CacheLumpName(lumpname, PU_CACHE));
+
+    if (fsize == 12361532)
+        skullx = 325;
 
     ReadDef1.x = skullx;
     ReadDef1.y = skully;
@@ -4423,7 +4426,7 @@ void M_DrawScreen(void)
 
 #ifdef SDL2
         else if(itemOn == 13)
-            string = "YOU MUST RESTART THE GAME TO TAKE EFFECT.";
+            string = "YOU MUST QUIT AND RESTART TO TAKE EFFECT.";
 #endif
 
         x = ORIGWIDTH/2 - M_StringWidth(string) / 2;
@@ -4854,9 +4857,6 @@ void M_DrawGame3(void)
         V_DrawPatchWithShadow(70, 0, 0, W_CacheLumpName("M_GMESET",
                                                PU_CACHE), false);
 
-    if(d_fixspriteoffsets && modifiedgame)
-        d_fixspriteoffsets = false;
-
     if(crosshair == 1)
     {
         dp_translation = crx[CRX_GREEN];
@@ -5201,7 +5201,7 @@ void M_DrawGame4(void)
         char *string = "";
         dp_translation = crx[CRX_GOLD];
         if(itemOn == 11)
-            string = "YOU MAY NEED TO RESTART THE GAME FOR THIS.";
+            string = "YOU MUST QUIT AND RESTART TO TAKE EFFECT.";
         else if(itemOn == 12)
             string = "YOU MAY NEED TO RESTART THE MAP FOR THIS.";
         x = ORIGWIDTH/2 - M_StringWidth(string) / 2;
@@ -5366,13 +5366,6 @@ void M_DrawGame5(void)
         M_WriteText(GameDef5.x + 258, GameDef5.y + 108, "OFF");
     }
 
-    if(modifiedgame)
-        dp_translation = crx[CRX_DARK];
-    else if(itemOn == 12 && !modifiedgame)
-        dp_translation = crx[CRX_GOLD];
-
-    M_WriteText(GameDef5.x, GameDef5.y + 118, "Fix Sprite Offsets");
-
     if(d_fixspriteoffsets)
     {
         dp_translation = crx[CRX_GREEN];
@@ -5390,12 +5383,7 @@ void M_DrawGame5(void)
         char *string = "";
         dp_translation = crx[CRX_GOLD];
         if(itemOn == 12)
-        {
-            if(modifiedgame)
-                string = "THIS OPTION IS NOT AVAILABLE FOR PWAD's.";
-            else
-                string = "YOU MUST START A NEW GAME TO TAKE EFFECT.";
-        }
+            string = "YOU MUST START A NEW GAME TO TAKE EFFECT.";
         x = ORIGWIDTH/2 - M_StringWidth(string) / 2;
         M_WriteText(x, GameDef5.y + 138, string);
     }
@@ -5429,6 +5417,12 @@ void M_DrawGame6(void)
         dp_translation = crx[CRX_DARK];
         M_WriteText(GameDef6.x + 258, GameDef6.y - 2, "OFF");
     }
+
+    if(!d_ejectcasings && fsize == 12361532)
+        dp_translation = crx[CRX_DARK];
+    else if(itemOn == 1)
+        dp_translation = crx[CRX_GOLD];
+    M_WriteText(GameDef6.x, GameDef6.y + 8, "Eject Weapon Casings");
 
     if(d_ejectcasings)
     {
@@ -5656,6 +5650,8 @@ void M_DrawGame6(void)
         int x;
         char *string = "";
         dp_translation = crx[CRX_GOLD];
+        if (itemOn == 1 && fsize == 12361532)
+            string = "NO WEAPON CASINGS FOR CHEX";
         if (itemOn > 3 && itemOn < 13 && !d_drawparticles)
             string = "YOU MUST ENABLE 'DRAW PARTICLES' FIRST!";
 #ifdef WII
@@ -10651,7 +10647,7 @@ void M_Offsets(int choice)
             d_fixspriteoffsets = false;
         break;
       case 1:
-        if (!d_fixspriteoffsets && !modifiedgame)
+        if (!d_fixspriteoffsets)
             d_fixspriteoffsets = true;
         break;
     }
@@ -11114,16 +11110,19 @@ void M_CenterWeapon(int choice)
 
 void M_EjectCasings(int choice)
 {
-    switch(choice)
+    if (fsize != 12361532)
     {
-      case 0:
-        if (d_ejectcasings)
-            d_ejectcasings = false;
-        break;
-      case 1:
-        if (!d_ejectcasings)
-            d_ejectcasings = true;
-        break;
+        switch(choice)
+        {
+          case 0:
+            if (d_ejectcasings)
+                d_ejectcasings = false;
+            break;
+          case 1:
+            if (!d_ejectcasings)
+                d_ejectcasings = true;
+            break;
+        }
     }
 }
 

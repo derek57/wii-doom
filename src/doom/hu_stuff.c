@@ -778,6 +778,11 @@ static void HU_DemoProgressBar (int scrn)                // FIXME: BUGGY (crashe
 
     i = SCREENWIDTH * (demo_p - demobuffer) / defdemosize;
 
+    if (i > SCREENWIDTH - 1)
+    {
+	i = SCREENWIDTH - 1;
+    }
+
     V_DrawHorizLine(0, SCREENHEIGHT - 3, scrn, i, 4);     // [crispy] white
     V_DrawHorizLine(0, SCREENHEIGHT - 2, scrn, i, 0);     // [crispy] black
     V_DrawHorizLine(0, SCREENHEIGHT - 1, scrn, i, 4);     // [crispy] white

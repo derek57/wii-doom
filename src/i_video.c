@@ -473,17 +473,25 @@ void I_DisplayFPSDots(dboolean dots_on)
 // and we dont move the mouse around if we aren't focused either.
 
 #ifndef WII
-#ifndef SDL2
+//#ifndef SDL2
 static void UpdateFocus(void)
 {
     Uint8 state;
 
+#ifdef SDL2
+    state = SDL_GetWindowFlags(screen);
+#else
     state = SDL_GetAppState();
+#endif
 
     // We should have input (keyboard) focus and be visible 
     // (not minimized)
 
+#ifdef SDL2
+    window_focused = ((state & SDL_WINDOW_INPUT_FOCUS) && (state & SDL_WINDOW_SHOWN));
+#else
     window_focused = (state & SDL_APPINPUTFOCUS) && (state & SDL_APPACTIVE);
+#endif
 
     if (!window_focused && !menuactive && gamestate == GS_LEVEL && !paused && !consoleactive)
     {
@@ -492,9 +500,11 @@ static void UpdateFocus(void)
 
     // Should the screen be grabbed?
 
+#ifndef SDL2
     screenvisible = (state & SDL_APPACTIVE) != 0;
-}
 #endif
+}
+//#endif
 
 // Show or hide the mouse cursor. We have to use different techniques
 // depending on the OS.
@@ -2868,5 +2878,10 @@ void I_InitGraphics(int scrn)
     // Call I_ShutdownGraphics on quit
 
     I_AtExit(I_ShutdownGraphics, true);
+
+#ifdef SDL2
+    UpdateFocus();
+    UpdateGrab();
+#endif
 }
 
