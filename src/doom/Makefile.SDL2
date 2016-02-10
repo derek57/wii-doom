@@ -104,7 +104,7 @@ am__objects_1 = am_map.$(OBJEXT) d_items.$(OBJEXT) d_main.$(OBJEXT) \
 	info.$(OBJEXT) m_menu.$(OBJEXT) m_random.$(OBJEXT) \
 	p_ceilng.$(OBJEXT) p_doors.$(OBJEXT) p_enemy.$(OBJEXT) p_fix.$(OBJEXT)\
 	p_floor.$(OBJEXT) p_genlin.$(OBJEXT) p_inter.$(OBJEXT) p_lights.$(OBJEXT) \
-	p_map.$(OBJEXT) p_maputl.$(OBJEXT) p_mobj.$(OBJEXT) \
+	p_map.$(OBJEXT) p_maputl.$(OBJEXT) p_mobj.$(OBJEXT) p_partcl.$(OBJEXT) \
 	p_plats.$(OBJEXT) p_pspr.$(OBJEXT) p_saveg.$(OBJEXT) \
 	p_setup.$(OBJEXT) p_sight.$(OBJEXT) p_spec.$(OBJEXT) \
 	p_switch.$(OBJEXT) p_telept.$(OBJEXT) p_tick.$(OBJEXT) \
@@ -313,6 +313,7 @@ p_lights.c                      \
 p_map.c                         \
 p_maputl.c                      \
 p_mobj.c           p_mobj.h     \
+p_partcl.c         p_partcl.h   \
 p_plats.c                       \
 p_pspr.c           p_pspr.h     \
 p_saveg.c          p_saveg.h    \
@@ -397,6 +398,7 @@ include ./$(DEPDIR)/p_lights.Po
 include ./$(DEPDIR)/p_map.Po
 include ./$(DEPDIR)/p_maputl.Po
 include ./$(DEPDIR)/p_mobj.Po
+include ./$(DEPDIR)/p_partcl.Po
 include ./$(DEPDIR)/p_plats.Po
 include ./$(DEPDIR)/p_pspr.Po
 include ./$(DEPDIR)/p_saveg.Po

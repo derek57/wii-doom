@@ -270,7 +270,7 @@ static s32 __Menu_RetrieveList(char *inPath, fatFile **outbuf, u32 *outlen)
                 {
                     if (!stricmp(entry->d_name + strlen(entry->d_name) - 4, ".wad") ||
                             !stricmp(entry->d_name + strlen(entry->d_name) - 4, ".deh") ||
-                            !stricmp(entry->d_name + strlen(entry->d_name) - 4, ".txt"))
+                            !stricmp(entry->d_name + strlen(entry->d_name) - 4, ".bex"))
                         addFlag = true;
                 }
             }
@@ -340,8 +340,10 @@ static void Menu_FatDevice(void)
             printf("\n                                 |\n");
             printStyledText(10, 35, CONSOLE_FONT_BLACK, CONSOLE_FONT_GREEN,
                         CONSOLE_FONT_BOLD, &stTexteLocation,".DEH: ");
+/*
             printStyledText(10, 68, CONSOLE_FONT_BLACK, CONSOLE_FONT_YELLOW,
                         CONSOLE_FONT_BOLD, &stTexteLocation,"MERGE: ");
+*/
             printStyledText(11, 0, CONSOLE_FONT_BLACK, CONSOLE_FONT_WHITE,
                         CONSOLE_FONT_BOLD,&stTexteLocation,
             "  ----------------------------------------------------------------------------  ");
@@ -425,9 +427,10 @@ static void Menu_FatDevice(void)
         printf("\n                                 |");
         printStyledText(10, 35, CONSOLE_FONT_BLACK, CONSOLE_FONT_GREEN,
                     CONSOLE_FONT_BOLD, &stTexteLocation, ".DEH: ");
+/*
         printStyledText(10, 68, CONSOLE_FONT_BLACK, CONSOLE_FONT_YELLOW,
                     CONSOLE_FONT_BOLD, &stTexteLocation, "MERGE: ");
-
+*/
         goto err;
     }
     else
@@ -690,7 +693,7 @@ static void Menu_WadList(void)
                         CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,
                         &stTexteLocation,
                         "|");
-
+/*
 //        if(multiplayer)    // MAIN FLAG
         {
             printStyledText(6, 35,CONSOLE_FONT_BLACK,
@@ -711,7 +714,7 @@ static void Menu_WadList(void)
                         &stTexteLocation,
                         " NO");
         }
-
+*/
         printStyledText(6, 35,CONSOLE_FONT_BLACK,
                         CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,
                         &stTexteLocation,
@@ -761,10 +764,12 @@ static void Menu_WadList(void)
                         CONSOLE_FONT_YELLOW,CONSOLE_FONT_BOLD,
                         &stTexteLocation,
                         "  X: Clear Sel.");
+/*
         printStyledText(10, 18,CONSOLE_FONT_BLACK,
                         CONSOLE_FONT_YELLOW,CONSOLE_FONT_BOLD,
                         &stTexteLocation,
                         "Y: Merge  WAD");
+*/
         printStyledText(10, 16,CONSOLE_FONT_BLACK,
                         CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,
                         &stTexteLocation,
@@ -774,10 +779,12 @@ static void Menu_WadList(void)
                         CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,
                         &stTexteLocation,
                         ".DEH: ");
+/*
         printStyledText(10, 68,CONSOLE_FONT_BLACK,
                         CONSOLE_FONT_YELLOW,CONSOLE_FONT_BOLD,
                         &stTexteLocation,
                         "MERGE: ");
+*/
         printStyledText(10, 41,CONSOLE_FONT_BLACK,
                         CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,
                         &stTexteLocation,stripped_dehacked_file);
@@ -2307,6 +2314,7 @@ static void Menu_WadList(void)
     }
 
     // Y button
+/*
     if (buttons & WPAD_CLASSIC_BUTTON_Y)
     {
         if (!merge)
@@ -2314,7 +2322,7 @@ static void Menu_WadList(void)
         else if(merge)
             merge = false;
     }
-
+*/
     // List scrolling
     index = (selected - start);
 

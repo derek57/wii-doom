@@ -1474,7 +1474,7 @@ void D_DoomMain (void)
     else
         beta_style_mode = false;
 
-    if(M_CheckParm ("-devparm") && !beta_style)
+    if(M_CheckParm ("-devparm"))
         devparm = true;
 #endif
 
@@ -1489,7 +1489,7 @@ void D_DoomMain (void)
 
     if((nomonstersflag && devparm_net)
 #ifndef WII
-        || (M_CheckParm ("-nomonsters") && !beta_style)
+        || (M_CheckParm ("-nomonsters"))
 #endif
         )
         nomonsters = true;
@@ -1502,7 +1502,7 @@ void D_DoomMain (void)
 
     if((respawnflag && devparm_net)
 #ifndef WII
-        || (M_CheckParm ("-respawn") && !beta_style)
+        || (M_CheckParm ("-respawn"))
 #endif
         )
         respawnparm = true;
@@ -1515,10 +1515,18 @@ void D_DoomMain (void)
 
     if((fastflag && devparm_net)
 #ifndef WII
-        || (M_CheckParm ("-fast") && !beta_style)
+        || (M_CheckParm ("-fast"))
 #endif
         )
         fastparm = true;
+
+    if (beta_style_mode && devparm)
+    {
+        devparm = false;
+        nomonsters = false;
+        respawnparm = false;
+        fastparm = false;
+    }
 
     //! 
     // @vanilla

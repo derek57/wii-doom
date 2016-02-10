@@ -542,7 +542,7 @@ void I_EnableLoadingDisk(int xoffs, int yoffs)
 #ifndef WII
         M_CheckParm("-cdrom") > 0 ||
 #endif
-        icontype == 1) && !beta_style
+        icontype == 1)
        )
         disk_name = "STCDROM";
     else
