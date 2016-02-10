@@ -339,7 +339,7 @@ static void Menu_FatDevice(void)
             printf("\n  A: continue. / Home: Quit.     |");
             printf("\n                                 |\n");
             printStyledText(10, 35, CONSOLE_FONT_BLACK, CONSOLE_FONT_GREEN,
-                        CONSOLE_FONT_BOLD, &stTexteLocation,".DEH: ");
+                        CONSOLE_FONT_BOLD, &stTexteLocation,".DEH/.BEX: ");
 /*
             printStyledText(10, 68, CONSOLE_FONT_BLACK, CONSOLE_FONT_YELLOW,
                         CONSOLE_FONT_BOLD, &stTexteLocation,"MERGE: ");
@@ -426,7 +426,7 @@ static void Menu_FatDevice(void)
                     CONSOLE_FONT_BOLD, &stTexteLocation, "PWAD3: ");
         printf("\n                                 |");
         printStyledText(10, 35, CONSOLE_FONT_BLACK, CONSOLE_FONT_GREEN,
-                    CONSOLE_FONT_BOLD, &stTexteLocation, ".DEH: ");
+                    CONSOLE_FONT_BOLD, &stTexteLocation, ".DEH/.BEX: ");
 /*
         printStyledText(10, 68, CONSOLE_FONT_BLACK, CONSOLE_FONT_YELLOW,
                     CONSOLE_FONT_BOLD, &stTexteLocation, "MERGE: ");
@@ -769,23 +769,23 @@ static void Menu_WadList(void)
                         CONSOLE_FONT_YELLOW,CONSOLE_FONT_BOLD,
                         &stTexteLocation,
                         "Y: Merge  WAD");
-*/
+
         printStyledText(10, 16,CONSOLE_FONT_BLACK,
                         CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,
                         &stTexteLocation,
                         "/");
-
+*/
         printStyledText(10, 35,CONSOLE_FONT_BLACK,
                         CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,
                         &stTexteLocation,
-                        ".DEH: ");
+                        ".DEH/.BEX: ");
 /*
         printStyledText(10, 68,CONSOLE_FONT_BLACK,
                         CONSOLE_FONT_YELLOW,CONSOLE_FONT_BOLD,
                         &stTexteLocation,
                         "MERGE: ");
 */
-        printStyledText(10, 41,CONSOLE_FONT_BLACK,
+        printStyledText(10, 46,CONSOLE_FONT_BLACK,
                         CONSOLE_FONT_GREEN,CONSOLE_FONT_BOLD,
                         &stTexteLocation,stripped_dehacked_file);
         printStyledText(10, 33,CONSOLE_FONT_BLACK,
@@ -1354,11 +1354,12 @@ static void Menu_WadList(void)
                         CONSOLE_FONT_WHITE,CONSOLE_FONT_BOLD,
                         &stTexteLocation,
                         "  ----------------------------------------------------------------------------  ");
+/*
     printStyledText(18, 0,CONSOLE_FONT_BLACK,
                         CONSOLE_FONT_YELLOW,CONSOLE_FONT_BOLD,
                         &stTexteLocation,
                         "  IF A WAD CONTAINS SPRITES THAT AREN'T REPLACED INSIDE THE GAME, TRY MERGING!  ");
-
+*/
     if (selected < fileCnt - 1)
         printStyledText(8, 32,CONSOLE_FONT_BLACK,
                         CONSOLE_FONT_YELLOW,CONSOLE_FONT_BOLD,
