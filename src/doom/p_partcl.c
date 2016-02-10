@@ -960,6 +960,12 @@ void P_BloodSpray(mobj_t *mo, int count, fixed_t x, fixed_t y, fixed_t z, angle_
     color1 = *(mobjBloodColors[bloodcolor].color1);
     color2 = *(mobjBloodColors[bloodcolor].color2);
 
+    if (fsize == 12361532)
+    {
+        color1 = green;
+        color2 = green1;
+    }
+
     // haleyjd 04/01/05: at random, throw out drops
     // haleyjd 09/10/07: even if a drop is thrown, do the rest of the effect
     if (M_RandomSMMU() < 72)
