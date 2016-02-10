@@ -617,9 +617,11 @@ dboolean W_MergeFile(char *filename, dboolean automatic)
         {
             if(dont_show_adding_of_resource_wad == 0)
             {
+/*
                 if (merge)
                     printf("         merging %s\n", filename);
                 else
+*/
                     printf("         adding %s\n", filename);
             }
         }

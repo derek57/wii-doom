@@ -60,7 +60,7 @@ int               load_dehacked = 0;
 
 dboolean           multiplayer = false;
 dboolean           multiplayer_flag = false;
-dboolean           merge = false;
+//dboolean           merge = false;
 
 extern dboolean    nerve_pwad;
 extern dboolean    master_pwad;
