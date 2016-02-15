@@ -2093,7 +2093,7 @@ int P_HitFloor(mobj_t * thing)
     return false;
 }
 
-// FIXME: These two functions are left over from an mobj-based
+// UNUSED: These two functions are left over from an mobj-based
 // particle system attempt in SMMU -- the particle line
 // function could be useful for real particles maybe?
 /*

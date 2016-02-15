@@ -48,8 +48,27 @@
 #include "r_sky.h"
 #include "v_patch.h"
 #include "v_trans.h"
+#include "v_video.h"
 #include "w_wad.h"
 #include "z_zone.h"
+
+// Generate shading ramps for lighting
+#define PALETTEB_SHADE      (0)
+#define PALETTEF_SHADE      (1<<PALETTEB_SHADE)
+
+// Apply blend color specified in V_SetBlend()
+#define PALETTEB_BLEND      (1)
+#define PALETTEF_BLEND      (1<<PALETTEB_SHADE)
+
+// Default palette when none is specified (Do not set directly!)
+#define PALETTEB_DEFAULT    (30)
+#define PALETTEF_DEFAULT    (1<<PALETTEB_DEFAULT)
+
+#define MAKERGB(r,g,b)      (((r)<<16)|((g)<<8)|(b))
+#define APART(c)            (((c)>>24)&0xff)
+#define RPART(c)            (((c)>>16)&0xff)
+#define GPART(c)            (((c)>>8)&0xff)
+#define BPART(c)            ((c)&0xff)
 
 //
 // Graphics.
@@ -104,12 +123,11 @@ fixed_t         *spritetopoffset;
 fixed_t         *newspriteoffset;
 fixed_t         *newspritetopoffset;
 
-extern char     *iwadfile;
-//dboolean        r_fixspriteoffsets = r_fixspriteoffsets_default;
+byte	newgamma[256];
 
-enum {
-    r, g, b
-} rgb_t;
+extern char     *iwadfile;
+
+//dboolean        r_fixspriteoffsets = r_fixspriteoffsets_default;
 
 static byte notgray[256] =
 {
@@ -1168,6 +1186,64 @@ void R_InitTranMap()
 //
 byte grays[256];
 
+/*
+===============
+BestColor
+(borrowed from Quake2 source: utils3/qdata/images.c)
+===============
+*/
+byte R_BestColor(const unsigned int *palette, const int r, const int g, const int b, const int numcolors)
+{
+    int        i;
+    int        bestdistortion;
+    int        bestcolor;
+
+    // let any color go to 0 as a last resort
+    bestdistortion = 256 * 256 * 4;
+    bestcolor = 0;
+
+    for (i = 0; i < numcolors; i++)
+    {
+        int dr = r - RPART(palette[i]);
+        int dg = g - GPART(palette[i]);
+        int db = b - BPART(palette[i]);
+        int distortion = dr * dr + dg * dg + db * db;
+
+        if (distortion < bestdistortion)
+        {
+            if (!distortion)
+                // perfect match
+                return i;
+
+            bestdistortion = distortion;
+            bestcolor = i;
+        }
+    }
+
+    return bestcolor;
+}
+
+// Build the tables necessary for translucency
+void R_BuildTransTable (unsigned int *palette)
+{
+    int        r, g, b;
+    int        x, y;
+
+    // create the small RGB table
+    for (r = 0; r < 32; r++)
+        for (g = 0; g < 32; g++)
+            for (b = 0; b < 32; b++)
+                RGB32k[r][g][b] = R_BestColor(palette, (r << 3) | (r >> 2),
+                                                     (g << 3) | (g >> 2),
+                                                     (b << 3) | (b >> 2), 256);
+
+    for (x = 0; x < 65; x++)
+        for (y = 0; y < 256; y++)
+            Col2RGB8[x][y] = (((RPART(palette[y]) * x) >> 4) << 20)  |
+                              ((GPART(palette[y]) * x) >> 4)         |
+                             (((BPART(palette[y]) * x) >> 4) << 10);
+}
+
 void R_InitColormaps(void)
 {
     dboolean   keepgray = false;
@@ -1265,6 +1341,89 @@ int R_ColormapNumForName(char *name)
     return i;
 }
 
+/****************************/
+/* Palette management stuff */
+/****************************/
+
+void R_GammaAdjustPalette (palette_t *pal)
+{
+    if (pal->colors && pal->basecolors)
+    {
+        unsigned i;
+
+        for (i = 0; i < pal->numcolors; i++)
+        {
+            unsigned color = pal->basecolors[i];
+            pal->colors[i] = MAKERGB (
+                newgamma[RPART(color)],
+                newgamma[GPART(color)],
+                newgamma[BPART(color)]
+            );
+        }
+    }
+}
+
+dboolean R_InternalCreatePalette (palette_t *palette, char *name, byte *colors,
+                            unsigned numcolors, unsigned flags)
+{
+    unsigned i;
+
+    if (numcolors > 256)
+        numcolors = 256;
+    else if (numcolors == 0)
+        return false;
+
+    strncpy (palette->name.name, name, 8);
+    palette->flags = flags;
+    palette->usecount = 1;
+    palette->maps.colormaps = NULL;
+    palette->basecolors = Z_Malloc(numcolors * 2 * sizeof(unsigned), PU_STATIC, NULL);
+    palette->colors = palette->basecolors + numcolors;
+    palette->numcolors = numcolors;
+
+    if (numcolors == 1)
+        palette->shadeshift = 0;
+    else if (numcolors <= 2)
+        palette->shadeshift = 1;
+    else if (numcolors <= 4)
+        palette->shadeshift = 2;
+    else if (numcolors <= 8)
+        palette->shadeshift = 3;
+    else if (numcolors <= 16)
+        palette->shadeshift = 4;
+    else if (numcolors <= 32)
+        palette->shadeshift = 5;
+    else if (numcolors <= 64)
+        palette->shadeshift = 6;
+    else if (numcolors <= 128)
+        palette->shadeshift = 7;
+    else
+        palette->shadeshift = 8;
+
+    for (i = 0; i < numcolors; i++, colors += 3)
+        palette->basecolors[i] = MAKERGB(colors[0],colors[1],colors[2]);
+
+    R_GammaAdjustPalette (palette);
+
+    return true;
+}
+
+palette_t *R_InitPalettes (char *name)
+{
+    byte *colors;
+
+    if (def_pal.usecount)
+        return &def_pal;
+
+    if ((colors = W_CacheLumpName (name, PU_CACHE)))
+        if (R_InternalCreatePalette(&def_pal, name, colors, 256,
+                                    PALETTEF_SHADE|PALETTEF_BLEND|PALETTEF_DEFAULT))
+        {
+            return &def_pal;
+        }
+    return NULL;
+}
+
 //
 // R_InitData
 // Locates all the lumps
@@ -1277,6 +1436,7 @@ void R_InitData(void)
     R_InitFlats();
     R_InitSpriteLumps();
 //    R_InitTranMap(); // [crispy] prints a mark itself
+
     R_InitColormaps();
 }
 
@@ -1596,3 +1756,4 @@ void R_PrecacheLevel(void)
 
     free(hitlist);
 }
+

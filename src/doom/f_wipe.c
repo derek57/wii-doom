@@ -91,7 +91,7 @@ void wipe_shittyColMajorXform(short *array)
 
 int wipe_initBurn (int ticks)
 {
-    burnarray = Z_Malloc (FIREWIDTH * (FIREHEIGHT+4), PU_STATIC, 0);
+    burnarray = Z_Malloc (FIREWIDTH * (FIREHEIGHT+4), PU_STATIC, NULL);
     memset (burnarray, 0, FIREWIDTH * (FIREHEIGHT+4));
     density = 4;
     burntime = 0;
@@ -121,8 +121,8 @@ int wipe_doBurn (int ticks)
         for (a = 0; a < density/8; a++)
         {
             unsigned int offs = (a+b) % FIREWIDTH;
-            unsigned int v = M_Random();
-            v = from[offs] + 4 + (v & 15) + (v >> 3) + (M_Random() & 31);
+            unsigned int v = M_RandomSMMU();
+            v = from[offs] + 4 + (v & 15) + (v >> 3) + (M_RandomSMMU() & 31);
             if (v > 255)
                 v = 255;
             from[offs] = from[FIREWIDTH*2 + (offs + FIREWIDTH*3/2)%FIREWIDTH] = v;
@@ -409,7 +409,7 @@ int wipe_StartScreen(void)
 
     I_ReadScreen(0, wipe_scr_start);
 
-//    V_GetBlock (0, 0, SCREENWIDTH, SCREENHEIGHT, wipe_scr_start);
+//    V_GetBlock (0, 0, 0, SCREENWIDTH, SCREENHEIGHT, wipe_scr_start);
 
     return 0;
 }
@@ -418,10 +418,11 @@ int wipe_EndScreen(void)
 {
     wipe_scr_end = Z_Malloc(SCREENWIDTH * SCREENHEIGHT * sizeof(*wipe_scr_end), PU_STATIC, NULL);
 
-//    V_GetBlock (0, 0, SCREENWIDTH, SCREENHEIGHT, wipe_scr_end);
+//    V_GetBlock (0, 0, 0, SCREENWIDTH, SCREENHEIGHT, wipe_scr_end);
     I_ReadScreen(0, wipe_scr_end);
 
-    V_DrawBlock(0, 0, 0, SCREENWIDTH, SCREENHEIGHT, wipe_scr_start); // restore start scr.
+    // restore start scr.
+    V_DrawBlock(0, 0, 0, SCREENWIDTH, SCREENHEIGHT, wipe_scr_start);
 
     return 0;
 }

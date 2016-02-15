@@ -42,6 +42,7 @@
 #include "c_io.h"
 #include "d_loop.h"
 #include "doomstat.h"
+#include "i_system.h"
 #include "i_timer.h"
 #include "m_config.h"
 #include "m_menu.h"
@@ -111,6 +112,8 @@ lighttable_t            *(*psprscalelight)[OLDMAXLIGHTSCALE];
 lighttable_t            *(*zlight)[MAXLIGHTZ];
 lighttable_t            *fullcolormap;
 lighttable_t            **colormaps;
+
+byte                    fireremap[256];
 
 // bumped light from gun blasts
 int                     extralight;
@@ -726,6 +729,20 @@ void R_Init(void)
     R_InitColumnFunctions();
 //    printf (".");
     R_InitParticles(); // haleyjd
+
+    // [RH] Initialize palette subsystem
+    if (!(default_palette = R_InitPalettes("PLAYPAL")))
+        I_Error("Could not initialize palette");
+    else
+    {
+        int i;
+
+        R_BuildTransTable(default_palette->basecolors);
+
+        // [RH] Build a palette translation table for the fire
+        for (i = 0; i < 255; i++)
+            fireremap[i] = R_BestColor(default_palette->basecolors, i, 0, 0, default_palette->numcolors);
+    }
 }
 
 //

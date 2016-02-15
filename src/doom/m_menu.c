@@ -1378,8 +1378,18 @@ dboolean                   dump_subst = false;
 // current menudef
 menu_t                     *currentMenu;                          
 
+byte                       *firescreen;
 byte                       *tempscreen1;
 byte                       *blurscreen1;
+
+static char                xc_textbuffer[10];
+static char                yc_textbuffer[10];
+static char                xfac_textbuffer[10];
+static char                yfac_textbuffer[10];
+static char                pitch_textbuffer[10];
+static char                offset_textbuffer[10];
+static char                width_textbuffer[10];
+static char                height_textbuffer[10];
 
 static dboolean            askforkey = false;
 static dboolean            opldev;
@@ -1387,6 +1397,14 @@ static dboolean            draw_ended;
 
 static int                 FirstKey = 0;           // SPECIAL MENU FUNCTIONS (ITEMCOUNT)
 static int                 keyaskedfor;
+static int                 firewidth = 64;
+static int                 fireheight = 69;
+static int                 firepitch = 64;
+static int                 fireoffset = 7;
+static int                 firexfac = 2;
+static int                 fireyfac = 2;
+static int                 firexc = 2;
+static int                 fireyc = 2;
 
 extern char                *d_lowpixelsize;
 
@@ -1661,6 +1679,7 @@ void M_Game6(int choice);
 void M_Game7(int choice);
 void M_Expansion(int choice);
 void M_Debug(int choice);
+void M_Test(int choice);
 void M_Cheats(int choice);
 /*
 void M_Record(int choice);
@@ -1686,6 +1705,7 @@ void M_DrawGame5(void);
 void M_DrawGame6(void);
 void M_DrawGame7(void);
 void M_DrawDebug(void);
+void M_DrawTest(void);
 void M_DrawCheats(void);
 //void M_DrawRecord(void);
 
@@ -1890,6 +1910,7 @@ enum
     sys,
     game,
     dbg,
+    tst,
     opt_end
 } options_e;
 
@@ -1900,7 +1921,8 @@ static menuitem_t OptionsMenu[]=
     {1,"Sound Settings", M_Sound,'v'},
     {1,"System Settings", M_System,'y'},
     {1,"Game Settings", M_Game,'g'},
-    {1,"Debug Settings", M_Debug,'d'}
+    {1,"Debug Settings", M_Debug,'d'},
+    {1,"Testings", M_Test,'t'}
 };
 
 static menu_t  OptionsDef =
@@ -2707,6 +2729,53 @@ static menu_t  DebugDef =
     0
 };
 
+enum
+{
+    tst_pitch,
+    tst_width,
+    tst_height,
+    tst_offset,
+    tst_widthheightpitch,
+    tst_xfac,
+    tst_yfac,
+    tst_xc,
+    tst_yc,
+    tst_end
+} tst_e;
+
+void M_XC(int choice);
+void M_YC(int choice);
+void M_XFac(int choice);
+void M_YFac(int choice);
+void M_Pitch(int choice);
+void M_Offset(int choice);
+void M_Width(int choice);
+void M_Height(int choice);
+void M_WidthHeightPitch(int choice);
+
+static menuitem_t TestMenu[]=
+{
+    {2,"Pitch",M_Pitch,'p'},
+    {2,"Width",M_Width,'w'},
+    {2,"Height",M_Height,'h'},
+    {2,"Offset",M_Offset,'o'},
+    {2,"W. + H. + P.",M_WidthHeightPitch,'+'},
+    {2,"X-Factor",M_XFac,'x'},
+    {2,"Y-Factor",M_YFac,'y'},
+    {2,"X-COORD",M_XC,'h'},
+    {2,"Y-COORD",M_YC,'v'}
+};
+
+static menu_t  TestDef =
+{
+    tst_end,
+    &OptionsDef,
+    TestMenu,
+    M_DrawTest,
+    30,5,
+    0
+};
+
 //
 // SOUND VOLUME MENU
 //
@@ -2719,7 +2788,7 @@ enum
     sfx_type,
     channels,
     output,
-    pitch,
+    sndpitch,
 #ifndef WII
     dsc,
     lsr,
@@ -5510,11 +5579,11 @@ void M_DrawGame6(void)
         dp_translation = crx[CRX_GOLD];
     M_WriteText(GameDef6.x, GameDef6.y + 98, "Rocket Explosion Particles");
 
-    if(!d_drawparticles)
+    if(!d_drawparticles || gamemode != commercial)
         dp_translation = crx[CRX_DARK];
-    else if(itemOn == 11 && d_drawparticles)
+    else if(itemOn == 11 && d_drawparticles && gamemode == commercial)
         dp_translation = crx[CRX_GOLD];
-    M_WriteText(GameDef6.x, GameDef6.y + 108, "SPAWN FLIES FOR DEAD MONSTERS");
+    M_WriteText(GameDef6.x, GameDef6.y + 108, "SPAWN FLIES FOR DEAD CHAINGUNNERS");
 
     if(!d_drawparticles)
         dp_translation = crx[CRX_DARK];
@@ -5654,6 +5723,8 @@ void M_DrawGame6(void)
             string = "NO WEAPON CASINGS FOR CHEX";
         if (itemOn > 3 && itemOn < 13 && !d_drawparticles)
             string = "YOU MUST ENABLE 'DRAW PARTICLES' FIRST!";
+        if (itemOn == 11 && d_drawparticles && (gamemode == retail || gamemode == registered || gamemode == shareware))
+            string = "THIS IS ONLY AVAILABLE FOR DOOM 2";
 #ifdef WII
         if(itemOn == 12)
         {
@@ -6632,8 +6703,6 @@ void M_WipeType(int choice)
       case 1:
         if (wipe_type < 3)
             wipe_type++;
-        if(!devparm && wipe_type > 2)
-            wipe_type = 2;
         break;
     }
 }
@@ -8207,6 +8276,7 @@ void M_Init (void)
     quickSaveSlot = -1;
     tempscreen1 = Z_Malloc(SCREENWIDTH * SCREENHEIGHT, PU_STATIC, NULL);
     blurscreen1 = Z_Malloc(SCREENWIDTH * SCREENHEIGHT, PU_STATIC, NULL);
+    firescreen = Z_Malloc(firewidth * fireheight, PU_STATIC, NULL);
 
     // Here we could catch other version dependencies,
     //  like HELP1/2, and four episodes.
@@ -10346,7 +10416,7 @@ void M_RocketExplosions(int choice)
 
 void M_SpawnFlies(int choice)
 {
-    if (d_drawparticles)
+    if (d_drawparticles && gamemode == commercial)
     {
         switch(choice)
         {
@@ -11197,6 +11267,11 @@ void M_Debug(int choice)
     M_SetupNextMenu(&DebugDef);
 }
 
+void M_Test(int choice)
+{
+    M_SetupNextMenu(&TestDef);
+}
+
 void M_DrawSystem(void)
 {
     //M_DarkBackground(0);
@@ -11491,6 +11566,331 @@ void M_DrawDebug(void)
             printdirwait = 0;
             printdir = false;
         }
+    }
+}
+
+void M_XC(int choice)
+{
+    switch(choice)
+    {
+      case 0:
+        if (firexc > 0)
+            firexc--;
+        break;
+      case 1:
+        firexc++;
+        break;
+    }
+}
+
+void M_YC(int choice)
+{
+    switch(choice)
+    {
+      case 0:
+        if (fireyc > 0)
+            fireyc--;
+        break;
+      case 1:
+        fireyc++;
+        break;
+    }
+}
+
+void M_XFac(int choice)
+{
+    switch(choice)
+    {
+      case 0:
+        if (firexfac > 1)
+            firexfac--;
+        break;
+      case 1:
+        if (firexfac < 4)
+            firexfac++;
+        break;
+    }
+}
+
+void M_YFac(int choice)
+{
+    switch(choice)
+    {
+      case 0:
+        if (fireyfac > 1)
+            fireyfac--;
+        break;
+      case 1:
+        if (fireyfac < 4)
+            fireyfac++;
+        break;
+    }
+}
+
+void M_Pitch(int choice)
+{
+    switch(choice)
+    {
+      case 0:
+        if (firepitch > 0)
+            firepitch--;
+        break;
+      case 1:
+        firepitch++;
+        break;
+    }
+}
+
+void M_Offset(int choice)
+{
+    switch(choice)
+    {
+      case 0:
+        if (fireoffset > 0)
+            fireoffset--;
+        break;
+      case 1:
+        fireoffset++;
+        break;
+    }
+}
+
+void M_Width(int choice)
+{
+    switch(choice)
+    {
+      case 0:
+        if (firewidth > 0)
+            firewidth--;
+        break;
+      case 1:
+        firewidth++;
+        break;
+    }
+}
+
+void M_Height(int choice)
+{
+    switch(choice)
+    {
+      case 0:
+        if (fireheight > 0)
+            fireheight--;
+        break;
+      case 1:
+        fireheight++;
+        break;
+    }
+}
+
+void M_WidthHeightPitch(int choice)
+{
+    switch(choice)
+    {
+      case 0:
+        fireheight--;
+        firewidth--;
+        firepitch--;
+        break;
+      case 1:
+        fireheight++;
+        firewidth++;
+        firepitch++;
+        break;
+    }
+}
+
+void M_DrawTest(void)
+{
+    byte *from;
+
+    // note: width must be divisible by 4
+    int width = firewidth;
+    int height = fireheight;
+    int pitch = firepitch;
+    int CleanXfac = firexfac;
+    int CleanYfac = fireyfac;
+    int x = ORIGHEIGHT - firexc;
+    int y = TestDef.y + fireyc + LINEHEIGHT * 3 - 14;
+    int a;
+    int b;
+
+    sprintf(xc_textbuffer, "%d", firexc);
+    sprintf(yc_textbuffer, "%d", fireyc);
+    sprintf(xfac_textbuffer, "%d", firexfac);
+    sprintf(yfac_textbuffer, "%d", fireyfac);
+    sprintf(pitch_textbuffer, "%d", firepitch);
+    sprintf(width_textbuffer, "%d", firewidth);
+    sprintf(height_textbuffer, "%d", fireheight);
+    sprintf(offset_textbuffer, "%d", fireoffset);
+
+    M_WriteText(TestDef.x + 245, TestDef.y - 2, pitch_textbuffer);
+    M_WriteText(TestDef.x + 245, TestDef.y + 8, width_textbuffer);
+    M_WriteText(TestDef.x + 245, TestDef.y + 18, height_textbuffer);
+    M_WriteText(TestDef.x + 245, TestDef.y + 28, offset_textbuffer);
+    M_WriteText(TestDef.x + 245, TestDef.y + 48, xfac_textbuffer);
+    M_WriteText(TestDef.x + 245, TestDef.y + 58, yfac_textbuffer);
+    M_WriteText(TestDef.x + 245, TestDef.y + 68, xc_textbuffer);
+    M_WriteText(TestDef.x + 245, TestDef.y + 78, yc_textbuffer);
+
+    x = (x - ORIGWIDTH / 2) * CleanXfac + (SCREENWIDTH >> 1);
+    y = (y - ORIGHEIGHT / 2) * CleanYfac + (SCREENHEIGHT >> 1);
+
+    // [RH] The following fire code is based on the PTC fire demo
+    from = firescreen + (height - 3) * pitch;
+
+    for (a = 0; a < width; a++, from++)
+    {
+        *from = *(from + (pitch << 1)) = M_RandomSMMU();
+    }
+
+    from = firescreen;
+
+    for (b = 0; b < fireheight - 4; b += 2)
+    {
+        byte *pixel = from;
+
+        // special case: first pixel on line
+        byte *p = pixel + (pitch << 1);
+
+        unsigned int top = *p + *(p + width - 1) + *(p + 1);
+        unsigned int bottom = *(pixel + (pitch << 2));
+        unsigned int c1 = (top + bottom) >> 2;
+
+        if (c1 > 1)
+            c1--;
+
+        *pixel = c1;
+        *(pixel + pitch) = (c1 + bottom) >> 1;
+        pixel++;
+
+        // main line loop
+        for (a = 1; a < width - 1; a++)
+        {
+            // sum top pixels
+            p = pixel + (pitch << 1);
+            top = *p + *(p - 1) + *(p + 1);
+
+            // bottom pixel
+            bottom = *(pixel + (pitch << 2));
+
+            // combine pixels
+            c1 = (top + bottom) >> 2;
+
+            if (c1 > 1)
+                c1--;
+
+            // store pixels
+            *pixel = c1;
+
+            // interpolate
+            *(pixel + pitch) = (c1 + bottom) >> 1;
+
+            // next pixel
+            pixel++;
+        }
+
+        // special case: last pixel on line
+        p = pixel + (pitch << 1);
+        top = *p + *(p - 1) + *(p - width + 1);
+        bottom = *(pixel + (pitch << 2));
+        c1 = (top + bottom) >> 2;
+
+        if (c1 > 1)
+            c1--;
+
+        *pixel = c1;
+        *(pixel + pitch) = (c1 + bottom) >> 1;
+
+        // next line
+        from += pitch << 1;
+    }
+
+    y--;
+    pitch = SCREENWIDTH;
+
+    switch (CleanXfac)
+    {
+        case 1:
+            for (b = 0; b < fireheight - fireoffset; b++)
+            {
+                byte *to = screens[0] + y * SCREENWIDTH + x;
+                from = firescreen + b * firepitch;
+                y += CleanYfac;
+
+                for (a = 0; a < firewidth; a++, to++, from++)
+                {
+                    int c;
+
+                    for (c = CleanYfac; c; c--)
+                        *(to + pitch * c) = fireremap[*from];
+                }
+            }
+            break;
+
+        case 2:
+            for (b = 0; b < fireheight - fireoffset; b++)
+            {
+                byte *to = screens[0] + y * SCREENWIDTH + x;
+                from = firescreen + b * firepitch;
+                y += CleanYfac;
+
+                for (a = 0; a < firewidth; a++, to += 2, from++)
+                {
+                    int c;
+
+                    for (c = CleanYfac; c; c--)
+                    {
+                        *(to + pitch * c) = fireremap[*from];
+                        *(to + pitch * c + 1) = fireremap[*from];
+                    }
+                }
+            }
+            break;
+
+        case 3:
+            for (b = 0; b < fireheight - fireoffset; b++)
+            {
+                byte *to = screens[0] + y * SCREENWIDTH + x;
+                from = firescreen + b * firepitch;
+                y += CleanYfac;
+
+                for (a = 0; a < firewidth; a++, to += 3, from++)
+                {
+                    int c;
+
+                    for (c = CleanYfac; c; c--)
+                    {
+                        *(to + pitch * c) = fireremap[*from];
+                        *(to + pitch * c + 1) = fireremap[*from];
+                        *(to + pitch * c + 2) = fireremap[*from];
+                    }
+                }
+            }
+            break;
+
+        case 4:
+        default:
+            for (b = 0; b < fireheight - fireoffset; b++)
+            {
+                byte *to = screens[0] + y * SCREENWIDTH + x;
+                from = firescreen + b * firepitch;
+                y += CleanYfac;
+
+                for (a = 0; a < firewidth; a++, to += 4, from++)
+                {
+                    int c;
+
+                    for (c = CleanYfac; c; c--)
+                    {
+                        *(to + pitch * c) = fireremap[*from];
+                        *(to + pitch * c + 1) = fireremap[*from];
+                        *(to + pitch * c + 2) = fireremap[*from];
+                        *(to + pitch * c + 3) = fireremap[*from];
+                    }
+                }
+            }
+            break;
     }
 }
 

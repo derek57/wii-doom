@@ -41,6 +41,7 @@
 
 #include "r_defs.h"
 #include "r_state.h"
+#include "v_video.h"
 
 //
 // Texture definition.
@@ -132,5 +133,8 @@ int R_TextureNumForName(char *name);
 int R_CheckTextureNumForName(char *name);
 
 int R_ColormapNumForName(char *name);   // killough 4/4/98
+byte R_BestColor(const unsigned int *palette, const int r, const int g, const int b, const int numcolors);
+palette_t *R_InitPalettes (char *name);
+void R_BuildTransTable (unsigned int *palette);
 
 #endif

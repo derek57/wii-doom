@@ -353,6 +353,7 @@ void P_ApplyTorque(mobj_t *mo);                         // killough 9/12/98
 
 void P_CalcHeight (player_t* player);
 void P_SetPsprite (player_t* player, int position, statenum_t stnum);
+dboolean P_CheckMeleeRange (mobj_t*        actor);
 
 //
 // P_SPEC

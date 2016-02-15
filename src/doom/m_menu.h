@@ -74,6 +74,7 @@ void M_DarkBackground(int scrn);
 
 
 extern byte     grays[256];
+extern byte     fireremap[256];
 
 
 #endif    

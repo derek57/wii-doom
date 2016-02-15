@@ -63,7 +63,6 @@
 // is common code. Fix this.
 #define RANGECHECK
 
-
 byte redtoyellow[] =
 {
       0,   1,   2,   3,   4,   5,   6,   7,   8,   9,  10,  11,  12,  13,  14,  15,
@@ -170,6 +169,10 @@ void V_DrawHorizLine(int x, int y, int scrn, int w, int c)
                 , x, x+w, y);
     }
 #endif 
+
+    // [crispy] prevent framebuffer overflows
+    if (x + w > SCREENWIDTH)
+        w = SCREENWIDTH - x;
 
 //    buf = I_VideoBuffer + SCREENWIDTH * y + x;
     buf = screens[scrn] + SCREENWIDTH * y + x;

@@ -36,6 +36,43 @@
 #include "v_patch.h"
 
 
+struct palette_s {
+    struct palette_s *next, *prev;
+
+    union
+    {
+        // Which of these is used is determined by screen.is8bit
+        // Colormaps for 8-bit graphics
+        byte        *colormaps;
+
+        // ARGB8888 values for 32-bit graphics
+        unsigned    *shades;
+    } maps;
+
+    byte            *colormapsbase;
+
+    union
+    {
+        //byte        name[8];
+        char        name[8];
+        int         nameint[2];
+    } name;
+
+    // gamma corrected colors
+    unsigned        *colors;
+
+    // non-gamma corrected colors
+    unsigned        *basecolors;
+    unsigned        numcolors;
+    unsigned        flags;
+    unsigned        shadeshift;
+    int             usecount;
+};
+typedef struct palette_s palette_t;
+
+palette_t *default_palette;
+palette_t def_pal;
+
 //
 // VIDEO
 //
@@ -83,17 +120,15 @@ void V_RestoreBuffer(int srcscrn, int destscrn);
 */
 void V_DrawPatch(int x, int y, int scrn, patch_t* patch);
 void V_DrawPatchFlipped(int x, int y, int scrn, patch_t* patch);
-//void V_MarkRect(int x, int y, int srcscrn, int width, int height, int destscrn);
+void V_MarkRect(int x, int y, int srcscrn, int width, int height, int destscrn);
 void V_DrawConsoleChar(int x, int y, int scrn, patch_t *patch, int color1, int color2, dboolean italics, byte *tinttab);
 void V_DrawHUDPatch(int x, int y, int scrn, patch_t *patch, byte *tinttab);
 void V_DrawYellowHUDPatch(int x, int y, int scrn, patch_t *patch, byte *tinttab);
 void V_DrawTranslucentHUDPatch(int x, int y, int scrn, patch_t *patch, byte *tinttab);
 void V_DrawTranslucentHUDNumberPatch(int x, int y, int scrn, patch_t *patch, byte *tinttab);
 void V_DrawTranslucentYellowHUDPatch(int x, int y, int scrn, patch_t *patch, byte *tinttab);
-/*
-void V_ColorBlock(int x, int y, int scrn, int width, int height, byte color);
+//void V_ColorBlock(int x, int y, int scrn, int width, int height, byte color);
 void V_GetBlock (int x, int y, int scrn, int width, int height, byte *dest);
-*/
 void V_ScreenShot(int scrn, char *format);
 void V_LowGraphicDetail(int height, int scrn);
 void V_DrawPatchWithShadow(int x, int y, int scrn, patch_t *patch, dboolean flag);

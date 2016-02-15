@@ -1767,8 +1767,6 @@ void G_DoPlayDemo (void)
         fsize == 18240172 || fsize == 17420824 || fsize == 28422764 ||
         fsize == 12361532 || fsize == 19321722)
     {
-        // [crispy] demo progress bar
-        defdemosize = lumpinfo[W_GetNumForName(defdemoname)]->size; 
         demoversion = *demo_p++;
 
         if (demoversion == G_VanillaVersionCode())
@@ -1835,6 +1833,28 @@ void G_DoPlayDemo (void)
 
     usergame = false; 
     demoplayback = true; 
+
+    // [crispy] demo progress bar
+    {
+	int i, numplayersingame = 0;
+	byte *demo_ptr = demo_p;
+	const int defdemolumpsize = lumpinfo[W_GetNumForName(defdemoname)]->size;
+
+	for (i = 0; i < MAXPLAYERS; i++)
+	{
+	    if (playeringame[i])
+	    {
+		numplayersingame++;
+	    }
+	}
+
+	while (*demo_ptr != DEMOMARKER && (demo_ptr - demobuffer) < defdemolumpsize)
+	{
+	    demo_ptr += numplayersingame * (longtics ? 5 : 4);
+	}
+
+	defdemosize = demo_ptr - demo_p;
+    }
 } 
 */
 

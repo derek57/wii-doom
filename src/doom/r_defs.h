@@ -984,9 +984,7 @@ typedef struct visplane_s
 } visplane_t;
 
 byte          RGB32k[32][32][32];
-byte          RGB8k[16][32][16];
 
 unsigned int  Col2RGB8[65][256];
-unsigned int  Col2RGB[65][256];
 
 #endif

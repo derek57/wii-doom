@@ -1535,9 +1535,12 @@ void D_DoomMain (void)
     // directory.
     //
 
-#ifndef WII
+//#ifndef WII
     I_DisplayFPSDots(devparm);
-#endif
+//#endif
+
+    if (devparm)
+        display_ticker = true;
 
     //!
     // @category net
