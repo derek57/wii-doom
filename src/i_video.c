@@ -2109,7 +2109,7 @@ static void SetVideoMode(screen_mode_t *mode, int w, int h)
     // The SDL_RENDERER_TARGETTEXTURE flag is required to render the
     // intermediate texture into the upscaled texture.
 
-    renderer = SDL_CreateRenderer(screen, -1, SDL_RENDERER_TARGETTEXTURE);
+    renderer = SDL_CreateRenderer(screen, -1, SDL_RENDERER_TARGETTEXTURE | SDL_RENDERER_PRESENTVSYNC);
 
     if (renderer == NULL)
     {
@@ -2117,7 +2117,6 @@ static void SetVideoMode(screen_mode_t *mode, int w, int h)
                 w, h, SDL_GetError());
     }
 
-#ifdef SDL2
     SDL_GetRendererInfo(renderer, &rendererinfo);
 /*
     if (M_StringCompare(rendererinfo.name, "direct3d"))
@@ -2127,7 +2126,27 @@ static void SetVideoMode(screen_mode_t *mode, int w, int h)
         C_Output("The screen is rendered using hardware acceleration with the OpenGL API.");
     else if (M_StringCompare(rendererinfo.name, "software"))
         C_Output("The screen is rendered in software.");
-#endif
+
+    if(d_uncappedframerate == 0)
+        C_Output("The framerate is capped at %i FPS.", TICRATE);
+    else if (rendererinfo.flags & SDL_RENDERER_PRESENTVSYNC)
+    {
+        SDL_DisplayMode displaymode;
+
+        SDL_GetWindowDisplayMode(screen, &displaymode);
+        C_Output("The display's refresh rate is at %iHz.", displaymode.refresh_rate);
+    }
+    else
+    {
+        if (d_vsync)
+        {
+            if (M_StringCompare(rendererinfo.name, "software"))
+                C_Warning("Vertical synchronization can't be enabled in software.");
+            else
+                C_Warning("Vertical synchronization can't be enabled.");
+        }
+        C_Output("The framerate is uncapped.");
+    }
 
     C_Output("The %ix%i screen is scaled up to %i x %i", SCREENWIDTH, SCREENHEIGHT, h * 4 / 3, h);
 
@@ -2159,8 +2178,8 @@ static void SetVideoMode(screen_mode_t *mode, int w, int h)
         if (!I_GL_InitScale(screen->w, screen->h))
         {
             C_Print(graystring,
-                    " Failed to initialize in OpenGL mode. "
-                    " Falling back to software mode instead.");
+                    "Failed to initialize in OpenGL mode. "
+                    "Falling back to software mode instead.");
             using_opengl = false;
 
             // TODO: This leaves us in window with borders around it.

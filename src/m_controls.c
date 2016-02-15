@@ -281,6 +281,7 @@ void M_BindBaseControls(void)
     M_BindVariable("tele_particle",          &teleport_particle);
     M_BindVariable("spawn_flies",            &d_spawnflies);
     M_BindVariable("drip_blood",             &d_dripblood);
+    M_BindVariable("vsync",                  &d_vsync);
 #ifdef WII
     M_BindVariable("key_shoot",              &joy_r);
     M_BindVariable("key_open",               &joy_l);

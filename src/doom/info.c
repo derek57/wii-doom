@@ -44,6 +44,7 @@
 
 char *sprnames[] =
 {
+    // Sprites 0 to 137 
     "TROO", "SHTG", "PUNG", "PISG", "PISF", "SHTF", "SHT2", "CHGG", "CHGF", "MISG",
     "MISF", "SAWG", "PLSG", "PLSF", "BFGG", "BFGF", "BLUD", "PUFF", "BAL1", "BAL2",
     "PLSS", "PLSE", "MISL", "BFS1", "BFE1", "BFE2", "TFOG", "IFOG", "PLAY", "POSS",
@@ -59,6 +60,7 @@ char *sprnames[] =
     "COL5", "TBLU", "TGRN", "TRED", "SMBT", "SMGT", "SMRT", "HDB1", "HDB2", "HDB3",
     "HDB4", "HDB5", "HDB6", "POB1", "POB2", "BRS1", "TLMP", "TLP2",
 
+    // Sprites 138 to 144 
     "TNT1",     // phares   3/09/98: invisible sprite
     "DOGS",     // killough 7/19/98: Marine's best friend :)
     "PLS1",     // killough 7/19/98: first of two plasma fireballs in the beta
@@ -68,14 +70,16 @@ char *sprnames[] =
 
     "BSKL",
 
+    // Sprite 145
     "BLD2",     // [BH] blood splats
 
+    // Sprite 146 to 185
     "FLSH", "SPRY", "SPSH", "LVAS", "SLDG", "BND1", "BND2", "BPL3", "BPL5", "BBSK",
     "BRSK", "BYSK", "BSHL", "BCLL", "BBOX", "BBXP", "BPNS", "BPNV", "BBSS", "BCL1",
     "BELC", "BPL4", "BPL7", "BPL6", "BSMT", "BHED", "BPSS", "BSPS", "BCHG", "BCHF",
     "BPLG", "BPLF", "BMSL", "BPL1", "BPL2", "BBL4", "CAS1", "CAS2", "CAS7", "PART",
 
-    // [BH] 100 extra sprite names to use in DeHackEd patches
+    // [BH] Sprites 186 to 285 (100 extra sprite names to use in DeHackEd patches)
     "SP00", "SP01", "SP02", "SP03", "SP04", "SP05", "SP06", "SP07", "SP08", "SP09",
     "SP10", "SP11", "SP12", "SP13", "SP14", "SP15", "SP16", "SP17", "SP18", "SP19",
     "SP20", "SP21", "SP22", "SP23", "SP24", "SP25", "SP26", "SP27", "SP28", "SP29",

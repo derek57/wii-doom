@@ -1299,11 +1299,11 @@ int                        cheeting;
 int                        coordinates_info = 0;
 int                        version_info = 0;
 #ifdef WII
-int                        key_controls_start_in_cfg_at_pos = 116;
-int                        key_controls_end_in_cfg_at_pos = 130;
-#else
-int                        key_controls_start_in_cfg_at_pos = 115;
+int                        key_controls_start_in_cfg_at_pos = 117;
 int                        key_controls_end_in_cfg_at_pos = 131;
+#else
+int                        key_controls_start_in_cfg_at_pos = 116;
+int                        key_controls_end_in_cfg_at_pos = 132;
 #endif
 int                        tracknum = 1;
 int                        epi = 1;
@@ -1476,6 +1476,7 @@ void M_DiskIcon(int choice);
 void M_FixWiggle(int choice);
 void M_RemoveSlimeTrails(int choice);
 void M_RenderMode(int choice);
+void M_VSync(int choice);
 void M_IconType(int choice);
 void M_SizeDisplay(int choice);
 void M_StartGame(int choice);
@@ -2206,10 +2207,9 @@ enum
     screen_shadow,
     screen_icon,
     screen_type,
-    screen_wiggle,
-    screen_trails,
 #ifdef SDL2
     screen_render,
+    screen_vsync,
 #endif
     screen_end
 } screen_e;
@@ -2226,12 +2226,11 @@ static menuitem_t ScreenMenu[]=
     {2,"Menu Background",M_Background,'b'},
     {2,"Menu Font Style",M_FontShadow,'f'},
     {2,"Show Loading Indicator",M_DiskIcon,'d'},
-    {2,"",M_IconType,'i'},
-    {2,"Fix Wiggle Effect",M_FixWiggle,'w'},
-    {2,"Remove Slime Trails",M_RemoveSlimeTrails,'t'}
+    {2,"",M_IconType,'i'}
 #ifdef SDL2
     ,
-    {2,"Render Mode",M_RenderMode,'r'}
+    {2,"Render Mode",M_RenderMode,'r'},
+    {2,"Vertical Synchronization",M_VSync,'v'}
 #endif
 };
 
@@ -2241,7 +2240,7 @@ static menu_t  ScreenDef =
     &OptionsDef,
     ScreenMenu,
     M_DrawScreen,
-    60,25,
+    60,35,
     0
 };
 
@@ -2660,7 +2659,9 @@ static menu_t  GameDef6 =
 
 enum
 {
-    game7_trails,
+    game7_smoketrails,
+    game7_wiggle,
+    game7_slimetrails,
 #ifdef WII
     game7_prbeta,
 #endif
@@ -2669,7 +2670,9 @@ enum
 
 static menuitem_t GameMenu7[]=
 {
-    {2,"ROCKET SMOKE-TRAILS",M_Trails,'t'}
+    {2,"ROCKET SMOKE-TRAILS",M_Trails,'t'},
+    {2,"Fix Wiggle Effect",M_FixWiggle,'w'},
+    {2,"Remove Slime Trails",M_RemoveSlimeTrails,'t'}
 #ifdef WII
     ,
     {2,"PRE-RELEASE BETA MODE",M_Beta,'b'}
@@ -4452,18 +4455,19 @@ void M_DrawScreen(void)
         M_WriteText(ScreenDef.x + 126, ScreenDef.y + 98, "FLOPPY DISK");
     }
 
-    if(d_fixwiggle)
+#ifdef SDL2
+    if(render_mode == 1)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(ScreenDef.x + 189, ScreenDef.y + 108, "ON");
+        M_WriteText(ScreenDef.x + 161, ScreenDef.y + 108, "LINEAR");
     }
-    else
+    else if (render_mode == 2)
     {
-        dp_translation = crx[CRX_DARK];
-        M_WriteText(ScreenDef.x + 181, ScreenDef.y + 108, "OFF");
+        dp_translation = crx[CRX_GOLD];
+        M_WriteText(ScreenDef.x + 150, ScreenDef.y + 108, "NEAREST");
     }
 
-    if(remove_slime_trails)
+    if(d_vsync)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(ScreenDef.x + 189, ScreenDef.y + 118, "ON");
@@ -4472,18 +4476,6 @@ void M_DrawScreen(void)
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(ScreenDef.x + 181, ScreenDef.y + 118, "OFF");
-    }
-
-#ifdef SDL2
-    if(render_mode == 1)
-    {
-        dp_translation = crx[CRX_GREEN];
-        M_WriteText(ScreenDef.x + 161, ScreenDef.y + 128, "LINEAR");
-    }
-    else if (render_mode == 2)
-    {
-        dp_translation = crx[CRX_GOLD];
-        M_WriteText(ScreenDef.x + 150, ScreenDef.y + 128, "NEAREST");
     }
 #endif
 
@@ -4494,7 +4486,7 @@ void M_DrawScreen(void)
         dp_translation = crx[CRX_GOLD];
         if(itemOn == 1 && am_overlay)
             string = "YOU MUST LEAVE AUTOMAP OVERLAY MODE FIRST!!!";
-        else if(itemOn == 3 || itemOn == 12)
+        else if(itemOn == 3)
             string = "START / LOAD A NEW GAME TO TAKE EFFECT.";
 /*
 #ifndef SDL2
@@ -4506,12 +4498,12 @@ void M_DrawScreen(void)
             string = "THIS IS ONLY CHANGEABLE FOR DOOM 2";
 
 #ifdef SDL2
-        else if(itemOn == 13)
+        else if(itemOn == 11 || itemOn == 12)
             string = "YOU MUST QUIT AND RESTART TO TAKE EFFECT.";
 #endif
 
         x = ORIGWIDTH/2 - M_StringWidth(string) / 2;
-        M_WriteText(x, ScreenDef.y + 136, string);
+        M_WriteText(x, ScreenDef.y + 126, string);
     }
 }
 
@@ -5780,8 +5772,7 @@ void M_DrawGame7(void)
         M_WriteText(GameDef7.x + 258, GameDef7.y - 2, "OFF");
     }
 
-#ifdef WII
-    if(beta_style_mode)
+    if(d_fixwiggle)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef7.x + 266, GameDef7.y + 8, "ON");
@@ -5791,6 +5782,29 @@ void M_DrawGame7(void)
         dp_translation = crx[CRX_DARK];
         M_WriteText(GameDef7.x + 258, GameDef7.y + 8, "OFF");
     }
+
+    if(remove_slime_trails)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(GameDef7.x + 266, GameDef7.y + 18, "ON");
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(GameDef7.x + 258, GameDef7.y + 18, "OFF");
+    }
+
+#ifdef WII
+    if(beta_style_mode)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(GameDef7.x + 266, GameDef7.y + 28, "ON");
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(GameDef7.x + 258, GameDef7.y + 28, "OFF");
+    }
 #endif
 
     if(whichSkull == 1)
@@ -5798,8 +5812,10 @@ void M_DrawGame7(void)
         int x;
         char *string = "";
         dp_translation = crx[CRX_GOLD];
+        if(itemOn == 2)
+            string = "START / LOAD A NEW GAME TO TAKE EFFECT.";
 #ifdef WII
-        if(itemOn == 1)
+        if(itemOn == 3)
         {
             if(fsize != 28422764 && fsize != 19321722 && fsize != 12361532)
                 string = "YOU MUST QUIT AND RESTART TO TAKE EFFECT.";
@@ -6835,6 +6851,21 @@ void M_RenderMode(int choice)
       case 1:
         if (render_mode < 2)
             render_mode++;
+        break;
+    }
+}
+
+void M_VSync(int choice)
+{
+    switch(choice)
+    {
+      case 0:
+        if (d_vsync)
+            d_vsync = false;
+        break;
+      case 1:
+        if (!d_vsync)
+            d_vsync = true;
         break;
     }
 }

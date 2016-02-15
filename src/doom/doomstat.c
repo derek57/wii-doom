@@ -139,6 +139,7 @@ dboolean         d_drawrocketexplosions = false;
 dboolean         d_drawbfgexplosions = false;
 dboolean         d_spawnflies = false;
 dboolean         d_dripblood = false;
+dboolean         d_vsync = false;
 /*
 dboolean         nerve = false;
 dboolean         chex = false;

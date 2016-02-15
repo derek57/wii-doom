@@ -66,9 +66,9 @@ typedef struct
     FILE        *f;
 } DEHFILE;
 
-dboolean addtocount;
-int     dehcount = 0;
-dboolean dehacked = false;
+dboolean        addtocount;
+int             dehcount = 0;
+dboolean        dehacked = false;
 
 // killough 10/98: emulate IO whether input really comes from a file or not
 
@@ -1889,7 +1889,7 @@ static actionf_t deh_codeptr[NUMSTATES];
 dboolean CheckPackageWADVersion(void)
 {
     DEHFILE     infile, *filein = &infile;
-    char        inbuffer[DEH_BUFFERMAX];
+    char        inbuffer[32]; 
     int         i;
 
     for (i = 0; i < numlumps; ++i)
@@ -1938,13 +1938,13 @@ void ProcessDehFile(char *filename, int lumpnum)
     if (filename)
     {
         if (!(infile.f = fopen(filename, "rt")))
-            return;     // should be checked up front anyway
+            return;             // should be checked up front anyway 
         infile.lump = NULL;
         C_Warning("Parsed DeHackEd%s file %s.",
             (M_StringEndsWith(uppercase(filename), "BEX") ? " with BOOM extensions" : ""),
             uppercase(filename));
     }
-    else        // DEH file comes from lump indicated by third argument
+    else                        // DEH file comes from lump indicated by second argument 
     {
         infile.size = W_LumpLength(lumpnum);
         infile.inp = infile.lump = W_CacheLumpNum(lumpnum, PU_STATIC);

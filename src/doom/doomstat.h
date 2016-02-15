@@ -380,6 +380,7 @@ extern  dboolean         d_drawrocketexplosions;
 extern  dboolean         d_drawbfgexplosions;
 extern  dboolean         d_spawnflies;
 extern  dboolean         d_dripblood;
+extern  dboolean         d_vsync;
 /*
 extern  dboolean         nerve;
 extern  dboolean         chex;

@@ -202,6 +202,7 @@ default_t   doom_defaults_list[] =
     CONFIG_VARIABLE_INT                (tele_particle),
     CONFIG_VARIABLE_INT                (spawn_flies),
     CONFIG_VARIABLE_INT                (drip_blood),
+    CONFIG_VARIABLE_INT                (vsync),
     CONFIG_VARIABLE_INT                (key_shoot),
     CONFIG_VARIABLE_INT                (key_open),
     CONFIG_VARIABLE_INT                (key_menu),

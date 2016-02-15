@@ -1390,7 +1390,7 @@ void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, int damage)
     player_t    *splayer = NULL;
     player_t    *tplayer;
     mobjinfo_t  *info = &mobjinfo[type]; 
-    dboolean    corpse = (flags & MF_CORPSE);
+    dboolean    corpse = flags & MF_CORPSE; 
 
     if (!(flags & (MF_SHOOTABLE | MF_BOUNCES)) && (!corpse || !corpses_slide))
         return;        // shouldn't happen...
