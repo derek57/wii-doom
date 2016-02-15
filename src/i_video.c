@@ -2407,6 +2407,21 @@ void I_FinishUpdate (int scrn)
         return;
 #endif
 
+    // [crispy] variable rendering framerate
+    if (d_uncappedframerate > UNCAPPED_ON /*&& !singletics*/)
+    {
+        static int halftics_old;
+        int halftics;
+        extern int GetAdjustedTimeN (const int N);
+
+        while ((halftics = GetAdjustedTimeN(40 + d_uncappedframerate * 10)) == halftics_old)
+        {
+            I_Sleep(1);
+        }
+
+        halftics_old = halftics;
+    }
+
     // draws little dots on the bottom of the screen
 
     if (display_fps_dots)

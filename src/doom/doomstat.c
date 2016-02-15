@@ -77,7 +77,6 @@ dboolean         d_splash = false;
 dboolean         d_translucency = false;
 dboolean         d_chkblood = false;
 dboolean         d_chkblood2 = false;
-dboolean         d_uncappedframerate = false;
 dboolean         d_flipcorpses = false;
 dboolean         d_secrets = false;
 dboolean         beta_style = false;
@@ -197,6 +196,7 @@ int              render_mode = 2;
 int              bloodsplat_particle = 0;
 int              bulletpuff_particle = 0;
 int              teleport_particle = 0;
+int              d_uncappedframerate = 0;
 
 // defaulted values
 int              mouseSensitivity = 5;

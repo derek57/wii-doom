@@ -1682,7 +1682,7 @@ void D_DoomMain (void)
         d_translucency = false;
         d_chkblood = false;
         d_chkblood2 = false;
-        d_uncappedframerate = false;
+        d_uncappedframerate = 0;
         d_flipcorpses = false;
         d_secrets = false;
         smoketrails = false;
@@ -3524,10 +3524,14 @@ void D_DoomMain (void)
     else if(fsize == 19321722)
         C_Output("Playing 'HACX REGISTERED v1.2'.");
 
-    if(d_uncappedframerate)
+    if(d_uncappedframerate == 0)
+        C_Output("The framerate is capped at 35 FPS.");
+    else if(d_uncappedframerate == 1)
         C_Output("The framerate is uncapped.");
-    else
-        C_Output("The framerate is capped at %i FPS.", TICRATE);
+    else if(d_uncappedframerate == 2)
+        C_Output("The framerate is capped at 60 FPS.");
+    else if(d_uncappedframerate == 3)
+        C_Output("The framerate is capped at 70 FPS.");
 
     if (startloadgame >= 0)
     {

@@ -42,6 +42,15 @@
 
 #define GAMMALEVELS             31
 
+enum
+{
+    UNCAPPED_OFF,
+    UNCAPPED_ON,
+    UNCAPPED_60FPS,
+    UNCAPPED_70FPS,
+    NUM_UNCAPPED
+};
+
 typedef struct
 {
     // Screen width and height

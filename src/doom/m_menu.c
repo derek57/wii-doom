@@ -2221,7 +2221,7 @@ static menuitem_t ScreenMenu[]=
     {2,"Quality",M_ChangeDetail,'q'},
     {2,"Translucency",M_Translucency,'l'},
     {2,"Wipe Type",M_WipeType,'w'},
-    {2,"Uncapped Framerate",M_UncappedFramerate,'u'},
+    {2,"Framerate",M_UncappedFramerate,'u'},
     {2,"Screenshot Format",M_Screenshots,'x'},
     {2,"Menu Background",M_Background,'b'},
     {2,"Menu Font Style",M_FontShadow,'f'},
@@ -4307,6 +4307,8 @@ void M_DrawScreen(void)
     if(!show_diskicon)
         dp_translation = crx[CRX_DARK];
 
+    if(itemOn == 10 && show_diskicon && gamemode == commercial)
+        dp_translation = crx[CRX_GOLD];
     M_WriteText(ScreenDef.x, ScreenDef.y + 98, "Type of Indicator");
 
     if(detailLevel > 0)
@@ -4359,15 +4361,25 @@ void M_DrawScreen(void)
         M_WriteText(ScreenDef.x + 173, ScreenDef.y + 38, "BURN");
     }
 
-    if(d_uncappedframerate)
+    if(d_uncappedframerate == 0)
+    {
+        dp_translation = crx[CRX_RED];
+        M_WriteText(ScreenDef.x + 97, ScreenDef.y + 48, "CAPPED (35 FPS)");
+    }
+    else if(d_uncappedframerate == 1)
+    {
+        dp_translation = crx[CRX_GOLD];
+        M_WriteText(ScreenDef.x + 141, ScreenDef.y + 48, "UNCAPPED");
+    }
+    else if(d_uncappedframerate == 2)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(ScreenDef.x + 189, ScreenDef.y + 48, "ON");
+        M_WriteText(ScreenDef.x + 96, ScreenDef.y + 48, "CAPPED (60 FPS)");
     }
-    else
+    else if(d_uncappedframerate == 3)
     {
-        dp_translation = crx[CRX_DARK];
-        M_WriteText(ScreenDef.x + 181, ScreenDef.y + 48, "OFF");
+        dp_translation = crx[CRX_BLUE];
+        M_WriteText(ScreenDef.x + 96, ScreenDef.y + 48, "CAPPED (70 FPS)");
     }
 
     if(png_screenshots)
@@ -6712,12 +6724,12 @@ void M_UncappedFramerate(int choice)
     switch(choice)
     {
       case 0:
-        if (d_uncappedframerate)
-            d_uncappedframerate = false;
+        if (d_uncappedframerate > 0)
+            d_uncappedframerate = (d_uncappedframerate - 1) % NUM_UNCAPPED;
         break;
       case 1:
-        if (d_uncappedframerate == false)
-            d_uncappedframerate = true;
+        if (d_uncappedframerate < 3)
+            d_uncappedframerate = (d_uncappedframerate + 1) % NUM_UNCAPPED;
         break;
     }
 }

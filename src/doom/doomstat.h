@@ -316,7 +316,6 @@ extern  dboolean         d_splash;
 extern  dboolean         d_translucency;
 extern  dboolean         d_chkblood;
 extern  dboolean         d_chkblood2;
-extern  dboolean         d_uncappedframerate;
 extern  dboolean         d_flipcorpses;
 extern  dboolean         d_secrets;
 extern  dboolean         beta_style;
@@ -435,6 +434,7 @@ extern  int              render_mode;
 extern  int              bloodsplat_particle;
 extern  int              bulletpuff_particle;
 extern  int              teleport_particle;
+extern  int              d_uncappedframerate;
 
 void A_MoreGibs(mobj_t* actor);
 
