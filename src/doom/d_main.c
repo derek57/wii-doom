@@ -3524,7 +3524,9 @@ void D_DoomMain (void)
     else if(fsize == 19321722)
         C_Output("Playing 'HACX REGISTERED v1.2'.");
 
-    if(d_uncappedframerate == 1)
+    if(d_uncappedframerate == 0)
+        C_Output("The framerate is capped at 35 FPS.");
+    else if(d_uncappedframerate == 1)
         C_Output("The framerate is uncapped");
     else if(d_uncappedframerate == 2)
         C_Output("The framerate is capped at 60 FPS.");

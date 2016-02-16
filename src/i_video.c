@@ -2125,16 +2125,15 @@ static void SetVideoMode(screen_mode_t *mode, int w, int h)
     else*/ if (M_StringCompare(rendererinfo.name, "opengl"))
         C_Output("The screen is rendered using hardware acceleration with the OpenGL API.");
     else if (M_StringCompare(rendererinfo.name, "software"))
-        C_Output("The screen is rendered in software.");
+        C_Output("The screen is rendered in software mode.");
 
-    if(d_uncappedframerate == 0)
-        C_Output("The framerate is capped at %i FPS.", TICRATE);
-    else if (rendererinfo.flags & SDL_RENDERER_PRESENTVSYNC)
+    if (rendererinfo.flags & SDL_RENDERER_PRESENTVSYNC)
     {
         SDL_DisplayMode displaymode;
 
         SDL_GetWindowDisplayMode(screen, &displaymode);
-        C_Output("The display's refresh rate is at %iHz.", displaymode.refresh_rate);
+        C_Output("The display's refresh is at %iHz.",
+            displaymode.refresh_rate);
     }
     else
     {
