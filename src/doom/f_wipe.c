@@ -92,170 +92,178 @@ void wipe_shittyColMajorXform(short *array)
 
 // Burn -------------------------------------------------------------
 
-int wipe_initBurn (int ticks)
+int wipe_initBurn(int ticks)
 {
-    burnarray = Z_Malloc (FIREWIDTH * (FIREHEIGHT+4), PU_STATIC, NULL);
-    memset (burnarray, 0, FIREWIDTH * (FIREHEIGHT+4));
+    burnarray = Z_Malloc(FIREWIDTH * (FIREHEIGHT + 5), PU_STATIC, NULL);
+    memset(burnarray, 0, FIREWIDTH * (FIREHEIGHT + 5));
     density = 4;
     burntime = 0;
+
     return 0;
 }
 
-int wipe_doBurn (int ticks)
+int wipe_CalcBurn(byte *burnarray, int width, int height, int density)
 {
+    // This is a modified version of the fire that was once used
+    // on the player setup menu.
     static int voop;
-    dboolean   done;
 
-    // This is a modified version of the fire from the player
-    // setup menu.
-    burntime += ticks;
-    ticks *= 2;
+    int        a, b;
+    byte       *from;
 
-    // Make the fire burn
-    while (ticks--)
+    // generator
+    from = &burnarray[width * height];
+    b = voop;
+    voop += density / 3;
+
+    for (a = 0; a < density / 8; a++)
     {
-        int  a, b;
-        byte *from;
+        unsigned int offs = (a + b) & (width - 1);
+        unsigned int v = M_RandomSMMU();
+        v = MIN(from[offs] + 4 + (v & 15) + (v >> 3) + (M_RandomSMMU() & 31), 255u);
+        from[offs] = from[width * 2 + ((offs + width * 3 / 2) & (width - 1))] = v;
+    }
 
-        // generator
-        from = burnarray + FIREHEIGHT * FIREWIDTH;
-        b = voop;
-        voop += density / 3;
+    density = MIN(density + 10, width * 7);
 
-        for (a = 0; a < density / 8; a++)
+    from = burnarray;
+
+    for (b = 0; b <= height; b += 2)
+    {
+        byte *pixel = from;
+
+        // special case: first pixel on line
+        byte *p = pixel + (width << 1);
+
+        unsigned int top = *p + *(p + width - 1) + *(p + 1);
+        unsigned int bottom = *(pixel + (width << 2));
+        unsigned int c1 = (top + bottom) >> 2;
+
+        if (c1 > 1)
+            c1--;
+
+        *pixel = c1;
+        *(pixel + width) = (c1 + bottom) >> 1;
+        pixel++;
+
+        // main line loop
+        for (a = 1; a < width - 1; a++)
         {
-            unsigned int offs = (a + b) % FIREWIDTH;
-            unsigned int v = M_RandomSMMU();
+            // sum top pixels
+            p = pixel + (width << 1);
+            top = *p + *(p - 1) + *(p + 1);
 
-            v = from[offs] + 4 + (v & 15) + (v >> 3) + (M_RandomSMMU() & 31);
+            // bottom pixel
+            bottom = *(pixel + (width << 2));
 
-            if (v > 255)
-                v = 255;
-
-            from[offs] = from[FIREWIDTH * 2 + (offs + FIREWIDTH * 3 / 2) % FIREWIDTH] = v;
-        }
-
-        density += 10;
-
-        if (density > FIREWIDTH * 7)
-            density = FIREWIDTH * 7;
-
-        from = burnarray;
-
-        for (b = 0; b <= FIREHEIGHT; b += 2)
-        {
-            byte *pixel = from;
-
-            // special case: first pixel on line
-            byte *p = pixel + (FIREWIDTH << 1);
-
-            unsigned int top = *p + *(p + FIREWIDTH - 1) + *(p + 1);
-            unsigned int bottom = *(pixel + (FIREWIDTH << 2));
-            unsigned int c1 = (top + bottom) >> 2;
-
-            if (c1 > 1)
-                c1--;
-
-            *pixel = c1;
-            *(pixel + FIREWIDTH) = (c1 + bottom) >> 1;
-            pixel++;
-
-            // main line loop
-            for (a = 1; a < FIREWIDTH - 1; a++)
-            {
-                // sum top pixels
-                p = pixel + (FIREWIDTH << 1);
-                top = *p + *(p - 1) + *(p + 1);
-
-                // bottom pixel
-                bottom = *(pixel + (FIREWIDTH << 2));
-
-                // combine pixels
-                c1 = (top + bottom) >> 2;
-
-                if (c1 > 1)
-                    c1--;
-
-                // store pixels
-                *pixel = c1;
-
-                // interpolate
-                *(pixel + FIREWIDTH) = (c1 + bottom) >> 1;
-
-                // next pixel
-                pixel++;
-            }
-
-            // special case: last pixel on line
-            p = pixel + (FIREWIDTH << 1);
-
-            top = *p + *(p - 1) + *(p - FIREWIDTH + 1);
-            bottom = *(pixel + (FIREWIDTH << 2));
+            // combine pixels
             c1 = (top + bottom) >> 2;
 
             if (c1 > 1)
                 c1--;
 
+            // store pixels
             *pixel = c1;
-            *(pixel + FIREWIDTH) = (c1 + bottom) >> 1;
 
-            // next line
-            from += FIREWIDTH << 1;
+            // interpolate
+            *(pixel + width) = (c1 + bottom) >> 1;
+
+            // next pixel
+            pixel++;
         }
+
+        // special case: last pixel on line
+        p = pixel + (width << 1);
+        top = *p + *(p - 1) + *(p - width + 1);
+        bottom = *(pixel + (width << 2));
+        c1 = (top + bottom) >> 2;
+
+        if (c1 > 1)
+            c1--;
+
+        *pixel = c1;
+        *(pixel + width) = (c1 + bottom) >> 1;
+
+        // next line
+        from += width << 1;
     }
 
-    // Draw the screen
+    // Check for done-ness. (Every pixel with level 126 or higher counts as done.)
+    for (a = width * height, from = burnarray; a != 0; --a, ++from)
     {
-        fixed_t firex, firey;
-        int x, y;
-
-        fixed_t xstep = (FIREWIDTH * FRACUNIT) / SCREENWIDTH;
-        fixed_t ystep = (FIREHEIGHT * FRACUNIT) / SCREENHEIGHT;
-        byte *to = screens[0];
-        byte *fromold = (byte *)wipe_scr_start;
-        byte *fromnew = (byte *)wipe_scr_end;
-        done = true;
-
-        for (y = 0, firey = 0; y < SCREENHEIGHT; y++, firey += ystep)
+        if (*from < 126)
         {
-            for (x = 0, firex = 0; x < SCREENWIDTH; x++, firex += xstep)
-            {
-                int fglevel = burnarray[(firex >> FRACBITS) + (firey >> FRACBITS) * FIREWIDTH] / 2;
-
-                if (fglevel >= 63)
-                {
-                    to[x] = fromnew[x];
-                }
-                else if (fglevel == 0)
-                {
-                    to[x] = fromold[x];
-                    done = false;
-                }
-                else
-                {
-                    int bglevel = 64 - fglevel;
-                    unsigned int *fg2rgb = Col2RGB8[fglevel];
-                    unsigned int *bg2rgb = Col2RGB8[bglevel];
-                    unsigned int fg = fg2rgb[fromnew[x]];
-                    unsigned int bg = bg2rgb[fromold[x]];
-                    fg = (fg + bg) | 0x1f07c1f;
-                    to[x] = RGB32k[0][0][fg & (fg >> 15)];
-                    done = false;
-                }
-            }
-            fromold += SCREENWIDTH;
-            fromnew += SCREENWIDTH;
-            to += SCREENWIDTH;
+            return density;
         }
+    }
+    return -1;
+}
+
+int wipe_doBurn (int ticks)
+{
+    // Draw the screen
+    fixed_t  firex, firey, xstep, ystep;
+    int      x, y;
+    byte     *to, *fromold, *fromnew;
+
+    int done;
+
+    burntime += ticks;
+    ticks *= 2;
+
+    // Make the fire burn
+    done = 0;
+
+    while (done == 0 && ticks--)
+    {
+        density = wipe_CalcBurn(burnarray, FIREWIDTH, FIREHEIGHT, density);
+        done = (density < 0);
+    }
+
+    xstep = (FIREWIDTH * FRACUNIT) / SCREENWIDTH;
+    ystep = (FIREHEIGHT * FRACUNIT) / SCREENHEIGHT;
+    to = screens[0];
+    fromold = (byte *)wipe_scr_start;
+    fromnew = (byte *)wipe_scr_end;
+
+    for (y = 0, firey = 0; y < SCREENHEIGHT; y++, firey += ystep)
+    {
+        for (x = 0, firex = 0; x < SCREENWIDTH; x++, firex += xstep)
+        {
+            int fglevel = burnarray[(firex >> FRACBITS) + (firey >> FRACBITS) * FIREWIDTH] / 2;
+
+            if (fglevel >= 63)
+            {
+                to[x] = fromnew[x];
+            }
+            else if (fglevel == 0)
+            {
+                to[x] = fromold[x];
+                done = 0;
+            }
+            else
+            {
+                int bglevel = 64 - fglevel;
+                uint32_t *fg2rgb = Col2RGB8[fglevel];
+                uint32_t *bg2rgb = Col2RGB8[bglevel];
+                uint32_t fg = fg2rgb[fromnew[x]];
+                uint32_t bg = bg2rgb[fromold[x]];
+
+                fg = (fg + bg) | 0x1f07c1f;
+                to[x] = RGB32k.RGB[0][0][fg & (fg >> 15)];
+                done = 0;
+            }
+        }
+        fromold += SCREENWIDTH;
+        fromnew += SCREENWIDTH;
+        to += SCREENWIDTH;
     }
 
     return done || (burntime > 40);
 }
 
-int wipe_exitBurn (int ticks)
+int wipe_exitBurn(int ticks)
 {
-    Z_Free(wipe_scr_start);
-    Z_Free(wipe_scr_end);
     Z_Free(burnarray);
 
     return 0;
@@ -270,11 +278,11 @@ int wipe_initFade(int ticks)
 
 int wipe_doFade(int ticks)
 {
-    fade += ticks;
+    fade += ticks * 2;
 
     if (fade > 64)
     {
-        V_DrawBlock (0, 0, 0, SCREENWIDTH, SCREENHEIGHT, (byte *)wipe_scr_end);
+        V_DrawBlock(0, 0, 0, SCREENWIDTH, SCREENHEIGHT, (byte *)wipe_scr_end);
 
         return 1;
     }
@@ -282,8 +290,8 @@ int wipe_doFade(int ticks)
     {
         int x, y;
         fixed_t bglevel = 64 - fade;
-        unsigned int *fg2rgb = Col2RGB8[fade];
-        unsigned int *bg2rgb = Col2RGB8[bglevel];
+        uint32_t *fg2rgb = Col2RGB8[fade];
+        uint32_t *bg2rgb = Col2RGB8[bglevel];
         byte *fromnew = (byte *)wipe_scr_end;
         byte *fromold = (byte *)wipe_scr_start;
         byte *to = screens[0];
@@ -292,18 +300,16 @@ int wipe_doFade(int ticks)
         {
             for (x = 0; x < SCREENWIDTH; x++)
             {
-                unsigned int fg = fg2rgb[fromnew[x]];
-                unsigned int bg = bg2rgb[fromold[x]];
+                uint32_t fg = fg2rgb[fromnew[x]];
+                uint32_t bg = bg2rgb[fromold[x]];
                 fg = (fg + bg) | 0x1f07c1f;
-                to[x] = RGB32k[0][0][fg & (fg >> 15)];
+                to[x] = RGB32k.RGB[0][0][fg & (fg >> 15)];
             }
             fromnew += SCREENWIDTH;
             fromold += SCREENWIDTH;
             to += SCREENWIDTH;
         }
     }
-    fade++;
-
     return 0;
 }
 

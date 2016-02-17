@@ -983,8 +983,28 @@ typedef struct visplane_s
     sector_t            *sector;
 } visplane_t;
 
-byte          RGB32k[32][32][32];
+// Translucency tables
 
-unsigned int  Col2RGB8[65][256];
+// RGB32k is a normal R5G5B5 -> palette lookup table.
+
+// Use a union so we can "overflow" without warnings.
+// Otherwise, we get stuff like this from Clang (when compiled
+// with -fsanitize=bounds) while running:
+//   src/v_video.cpp:390:12: runtime error: index 1068 out of bounds for type 'BYTE [32]'
+//   src/r_draw.cpp:273:11: runtime error: index 1057 out of bounds for type 'BYTE [32]'
+typedef struct ColorTable32k_s
+{
+    byte RGB[32][32][32];
+    byte All[32 * 32 * 32];
+} ColorTable32k_t;
+
+ColorTable32k_t RGB32k;
+
+// Col2RGB8 is a pre-multiplied palette for color lookup. It is stored in a
+// special R10B10G10 format for efficient blending computation.
+//		--RRRRRrrr--BBBBBbbb--GGGGGggg--   at level 64
+//		--------rrrr------bbbb------gggg   at level 1
+uint32_t Col2RGB8[65][256];
 
 #endif
+

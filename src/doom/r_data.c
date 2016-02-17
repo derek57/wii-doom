@@ -1233,9 +1233,9 @@ void R_BuildTransTable (unsigned int *palette)
     for (r = 0; r < 32; r++)
         for (g = 0; g < 32; g++)
             for (b = 0; b < 32; b++)
-                RGB32k[r][g][b] = R_BestColor(palette, (r << 3) | (r >> 2),
-                                                     (g << 3) | (g >> 2),
-                                                     (b << 3) | (b >> 2), 256);
+                RGB32k.RGB[r][g][b] = R_BestColor(palette, (r << 3) | (r >> 2),
+                                                           (g << 3) | (g >> 2),
+                                                           (b << 3) | (b >> 2), 256);
 
     for (x = 0; x < 65; x++)
         for (y = 0; y < 256; y++)

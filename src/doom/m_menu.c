@@ -4488,6 +4488,8 @@ void M_DrawScreen(void)
             string = "YOU MUST LEAVE AUTOMAP OVERLAY MODE FIRST!!!";
         else if(itemOn == 3)
             string = "START / LOAD A NEW GAME TO TAKE EFFECT.";
+        else if(itemOn == 5 && d_vsync)
+            string = "DISABLE VSYNC TO UNLOCK 70 FPS & UNCAPPED.";
 /*
 #ifndef SDL2
         else if(itemOn == 4)
@@ -6742,10 +6744,22 @@ void M_UncappedFramerate(int choice)
       case 0:
         if (d_uncappedframerate > 0)
             d_uncappedframerate = (d_uncappedframerate - 1) % NUM_UNCAPPED;
+        if (d_vsync)
+        {
+            if (d_uncappedframerate == 1)
+                d_uncappedframerate--;
+        }
         break;
       case 1:
         if (d_uncappedframerate < 3)
             d_uncappedframerate = (d_uncappedframerate + 1) % NUM_UNCAPPED;
+        if (d_vsync)
+        {
+            if (d_uncappedframerate == 1)
+                d_uncappedframerate++;
+            else if (d_uncappedframerate == 3)
+                d_uncappedframerate = 2;
+        }
         break;
     }
 }
@@ -6866,6 +6880,8 @@ void M_VSync(int choice)
       case 1:
         if (!d_vsync)
             d_vsync = true;
+        if (d_uncappedframerate == 3 || d_uncappedframerate == 1)
+            d_uncappedframerate--;
         break;
     }
 }
