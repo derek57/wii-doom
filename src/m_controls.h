@@ -80,6 +80,7 @@ extern int key_console;
 extern int key_spy;
 extern int key_demo_quit;
 extern int key_pause;
+extern int key_aiming;
 
 extern int dclick_use;
 
@@ -104,6 +105,7 @@ extern int mousebforward;
 extern int mousebstrafe;
 extern int mousebprevweapon;
 extern int mousebnextweapon;
+extern int mousebaiming;
 
 extern int joybstrafeleft;
 extern int joybstraferight;

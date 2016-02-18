@@ -564,6 +564,7 @@ extern dboolean     show_chat_bar;
 extern dboolean     done;
 extern dboolean     massacre_cheat_used;
 extern dboolean     mus_cheat_used;
+extern dboolean     aiming_help;
 
 extern char         massacre_textbuffer[30];
 
@@ -751,6 +752,10 @@ dboolean ST_Responder (event_t* ev)
                     P_ResurrectPlayer(plyr);
 
                 plyr->cheats ^= CF_GODMODE;
+
+                if(aiming_help)
+                    aiming_help = false;
+
                 if (plyr->cheats & CF_GODMODE)
                 {
                     if (plyr->mo)

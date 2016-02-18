@@ -37,6 +37,8 @@
 
 // Bind all of the common controls used by Doom and all other games.
 
+extern dboolean aiming_help;
+
 extern int runcount;
 extern int png_screenshots;
 extern int pixelwidth;
@@ -77,6 +79,7 @@ int key_flyup = KEY_PGUP;
 int key_flydown = KEY_PGDN;
 int key_jump = KEY_DEL;
 int key_strafe = KEY_RALT;
+int key_aiming = 'x';
 
 // Map control keys:
 
@@ -155,6 +158,7 @@ int mousebnextweapon = MOUSE_WHEELDOWN;
 int mousebstrafeleft = -1;
 int mousebstraferight = -1;
 int mousebuse = 1;
+int mousebaiming = -1;
 
 // Joystick controls
 
@@ -282,6 +286,7 @@ void M_BindBaseControls(void)
     M_BindVariable("spawn_flies",            &d_spawnflies);
     M_BindVariable("drip_blood",             &d_dripblood);
     M_BindVariable("vsync",                  &d_vsync);
+    M_BindVariable("aimhelp",                &aiming_help);
 #ifdef WII
     M_BindVariable("key_shoot",              &joy_r);
     M_BindVariable("key_open",               &joy_l);

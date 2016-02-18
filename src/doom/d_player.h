@@ -225,6 +225,8 @@ typedef struct player_s
     int                  deaths;
     int                  mobjcount[NUMMOBJTYPES];
 
+    int                  skin;
+
 } player_t;
 
 

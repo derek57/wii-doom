@@ -720,11 +720,13 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
     // FOR THE WII: UNUSED BUT WORKING
     if((
 #ifdef WII
-        joybuttons[joybaiminghelp] ||
+        joybuttons[joybaiminghelp]
+#else
+        gamekeydown[key_aiming] || mousebuttons[mousebaiming]
 #endif
-        aiming_help) && !demoplayback && devparm)
+        ) && aiming_help && !demoplayback && devparm)
     {
-        player_t* player = &players[consoleplayer];
+        player_t *player = &players[consoleplayer];
         P_AimingHelp(player);
     }
 

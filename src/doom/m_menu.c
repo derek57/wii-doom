@@ -1299,11 +1299,11 @@ int                        cheeting;
 int                        coordinates_info = 0;
 int                        version_info = 0;
 #ifdef WII
-int                        key_controls_start_in_cfg_at_pos = 117;
-int                        key_controls_end_in_cfg_at_pos = 131;
-#else
-int                        key_controls_start_in_cfg_at_pos = 116;
+int                        key_controls_start_in_cfg_at_pos = 118;
 int                        key_controls_end_in_cfg_at_pos = 132;
+#else
+int                        key_controls_start_in_cfg_at_pos = 117;
+int                        key_controls_end_in_cfg_at_pos = 133;
 #endif
 int                        tracknum = 1;
 int                        epi = 1;
@@ -1398,13 +1398,13 @@ static dboolean            draw_ended;
 static int                 FirstKey = 0;           // SPECIAL MENU FUNCTIONS (ITEMCOUNT)
 static int                 keyaskedfor;
 static int                 firewidth = 64;
-static int                 fireheight = 69;
+static int                 fireheight = 79;
 static int                 firepitch = 64;
-static int                 fireoffset = 7;
+static int                 fireoffset = 6;
 static int                 firexfac = 2;
 static int                 fireyfac = 2;
-static int                 firexc = 2;
-static int                 fireyc = 2;
+static int                 firexc = 0;
+static int                 fireyc = 39;
 
 extern char                *d_lowpixelsize;
 
@@ -1432,7 +1432,6 @@ extern dboolean            mus_cheated;
 
 extern short               songlist[148];
 
-extern char*               nervewadfile;
 extern char*               demoname;
 
 extern void                A_PainDie(mobj_t *);
@@ -2384,7 +2383,7 @@ enum
     game_recoil,
     game_respawn,
     game_fast,
-    game_aiming,
+//    game_aiming,
     game_game2,
     game_end
 } game_e;
@@ -2404,7 +2403,7 @@ static menuitem_t GameMenu[]=
     {2,"WEAPON RECOIL",M_WeaponRecoil,'c'},
     {2,"RESPAWN MONSTERS",M_RespawnMonsters,'i'},
     {2,"FAST MONSTERS",M_FastMonsters,'d'},
-    {2,"",NULL,'0'},
+//    {2,"",NULL,'0'},
     {1,"",M_Game2,'2'}
 };
 
@@ -2662,6 +2661,7 @@ enum
     game7_smoketrails,
     game7_wiggle,
     game7_slimetrails,
+    game7_aimbot,
 #ifdef WII
     game7_prbeta,
 #endif
@@ -2672,7 +2672,8 @@ static menuitem_t GameMenu7[]=
 {
     {2,"ROCKET SMOKE-TRAILS",M_Trails,'t'},
     {2,"Fix Wiggle Effect",M_FixWiggle,'w'},
-    {2,"Remove Slime Trails",M_RemoveSlimeTrails,'t'}
+    {2,"Remove Slime Trails",M_RemoveSlimeTrails,'s'},
+    {2,"",M_AimingHelp,'a'}
 #ifdef WII
     ,
     {2,"PRE-RELEASE BETA MODE",M_Beta,'b'}
@@ -4519,7 +4520,7 @@ void M_DrawGame1(void)
     else
         V_DrawPatchWithShadow(70, 0, 0, W_CacheLumpName("M_GMESET",
                                                PU_CACHE), false);
-
+/*
     if(devparm)
     {
         if(aiming_help)
@@ -4538,7 +4539,7 @@ void M_DrawGame1(void)
 
         M_WriteText(GameDef.x, GameDef.y + 128, "AIMING HELP");
     }
-
+*/
     if(drawgrid == 1)
     {
         dp_translation = crx[CRX_GREEN];
@@ -4681,7 +4682,7 @@ void M_DrawGame1(void)
         dp_translation = crx[CRX_DARK];
         M_WriteText(GameDef.x + 153, GameDef.y + 118, "OFF");
     }
-
+/*
     if(devparm)
     {
         if((itemOn == 11 || itemOn == 12) && whichSkull == 1)
@@ -4702,6 +4703,7 @@ void M_DrawGame1(void)
         }
     }
     else
+*/
     {
         if (whichSkull == 1)
         {
@@ -4724,7 +4726,7 @@ void M_DrawGame1(void)
         else
             dp_translation = crx[CRX_GRAY];
 
-        M_WriteText(GameDef.x, GameDef.y + 128, "MORE OPTIONS");
+        M_WriteText(GameDef.x, GameDef.y + 128, "MORE OPTIONS...");
     }
 }
 
@@ -4918,7 +4920,7 @@ void M_DrawGame2(void)
     else
         dp_translation = crx[CRX_GRAY];
 
-    M_WriteText(GameDef2.x, GameDef2.y + 128, "MORE & MORE OPTIONS");
+    M_WriteText(GameDef2.x, GameDef2.y + 128, "MORE & MORE OPTIONS...");
 }
 
 void M_DrawGame3(void)
@@ -5113,7 +5115,7 @@ void M_DrawGame3(void)
     else
         dp_translation = crx[CRX_GRAY];
 
-    M_WriteText(GameDef3.x, GameDef3.y + 128, "EVEN MORE OPTIONS");
+    M_WriteText(GameDef3.x, GameDef3.y + 128, "EVEN MORE OPTIONS...");
 }
 
 void M_DrawGame4(void)
@@ -5796,8 +5798,13 @@ void M_DrawGame7(void)
         M_WriteText(GameDef7.x + 258, GameDef7.y + 18, "OFF");
     }
 
-#ifdef WII
-    if(beta_style_mode)
+    if(players[consoleplayer].cheats & CF_GODMODE)
+        dp_translation = crx[CRX_DARK];
+    else if(itemOn == 3 && (!(players[consoleplayer].cheats & CF_GODMODE)))
+        dp_translation = crx[CRX_GOLD];
+    M_WriteText(GameDef7.x, GameDef7.y + 28, "Aimbot for vulnerable player");
+
+    if(aiming_help)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef7.x + 266, GameDef7.y + 28, "ON");
@@ -5806,6 +5813,18 @@ void M_DrawGame7(void)
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(GameDef7.x + 258, GameDef7.y + 28, "OFF");
+    }
+
+#ifdef WII
+    if(beta_style_mode)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(GameDef7.x + 266, GameDef7.y + 38, "ON");
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(GameDef7.x + 258, GameDef7.y + 38, "OFF");
     }
 #endif
 
@@ -5816,8 +5835,15 @@ void M_DrawGame7(void)
         dp_translation = crx[CRX_GOLD];
         if(itemOn == 2)
             string = "START / LOAD A NEW GAME TO TAKE EFFECT.";
+        else if(itemOn == 3)
+        {
+            if(players[consoleplayer].cheats & CF_GODMODE)
+                string = "YOU NEED TO DISABLE GOD MODE FIRST!";
+            else
+                string = "TO USE, HOLD DOWN 'X' AFTER BEING ATTACKED.";
+        }
 #ifdef WII
-        if(itemOn == 3)
+        if(itemOn == 4)
         {
             if(fsize != 28422764 && fsize != 19321722 && fsize != 12361532)
                 string = "YOU MUST QUIT AND RESTART TO TAKE EFFECT.";
@@ -6086,6 +6112,17 @@ void M_DrawCheats(void)
 
         dp_translation = crx[CRX_GRAY];
         M_WriteText(220, 156, songtextplut[tracknum]);
+    }
+
+    if(whichSkull == 1)
+    {
+        int x;
+        char *string = "";
+        dp_translation = crx[CRX_GOLD];
+        if(itemOn == 0 && aiming_help)
+            string = "IF ENABLED, AIMBOT WILL BE DISABLED!";
+        x = ORIGWIDTH/2 - M_StringWidth(string) / 2;
+        M_WriteText(x, CheatsDef.y + 138, string);
     }
 }
 /*
@@ -7720,12 +7757,13 @@ dboolean M_Responder (event_t* ev)
             S_StartSound(NULL,sfx_stnmov);
             currentMenu->menuitems[itemOn].routine(0);
         }
+/*
         else if(currentMenu == &GameDef && devparm && itemOn == 13)
         {
             S_StartSound(NULL,sfx_stnmov);
             M_AimingHelp(0);
         }
-
+*/
         return true;
     }
 #ifdef WII
@@ -7742,11 +7780,13 @@ dboolean M_Responder (event_t* ev)
             S_StartSound(NULL,sfx_stnmov);
             currentMenu->menuitems[itemOn].routine(1);
         }
+/*
         else if(currentMenu == &GameDef && devparm && itemOn == 13)
         {
             S_StartSound(NULL,sfx_stnmov);
             M_AimingHelp(1);
         }
+*/
         return true;
     }
 #ifdef WII
@@ -8047,9 +8087,7 @@ void M_Drawer (void)
 
     if(gamestate == GS_LEVEL && !menuactive)
     {
-        static player_t* player;
-
-        player = &players[consoleplayer];
+        player_t* player = &players[consoleplayer];
 
         if(player->powers[pw_flight] > 0)
         {
@@ -8074,9 +8112,7 @@ void M_Drawer (void)
     {
         if(gamestate == GS_LEVEL)
         {
-            static player_t* player;
-
-            player = &players[consoleplayer];
+            player_t* player = &players[consoleplayer];
 
             sprintf(coordinates_ang_textbuffer, "ang = 0x%x", player->mo->angle);
             sprintf(coordinates_x_textbuffer, "x = 0x%x", player->mo->x);
@@ -8289,6 +8325,25 @@ void M_SetupNextMenu(menu_t *menudef)
     itemOn = currentMenu->lastOn;
 }
 
+static state_t *mobj_state;
+static int mobj_tics;
+
+void M_PlayerSetupTicker (void)
+{
+    // Based on code in f_finale.c
+    if (--mobj_tics > 0)
+        return;
+
+    if (mobj_state->tics == -1 || mobj_state->nextstate == S_NULL)
+    {
+        mobj_state = &states[mobjinfo[MT_PLAYER].seestate];
+    }
+    else
+    {
+        mobj_state = &states[mobj_state->nextstate];
+    }
+    mobj_tics = mobj_state->tics;
+}
 
 //
 // M_Ticker
@@ -8313,6 +8368,9 @@ void M_Ticker (void)
         else if (printdir)
             printdirwait++;
     }
+
+    if (currentMenu == &TestDef)
+        M_PlayerSetupTicker();
 
     // advance animation
 }
@@ -8376,6 +8434,10 @@ void M_Init (void)
 void M_God(int choice)
 {
     players[consoleplayer].cheats ^= CF_GODMODE;
+
+    if(aiming_help)
+        aiming_help = false;
+
     if (players[consoleplayer].cheats & CF_GODMODE)
     {
         if (players[consoleplayer].mo)
@@ -8634,9 +8696,7 @@ void M_KeysG(int choice)
 
 void M_ItemsA(int choice)
 {
-    static player_t* player;
-
-    player = &players[consoleplayer];
+    player_t* player = &players[consoleplayer];
 
     if(!got_all)
     {
@@ -8858,9 +8918,7 @@ void M_ItemsJ(int choice)
 {
     int i;
 
-    static player_t* player;
-
-    player = &players[consoleplayer];
+    player_t* player = &players[consoleplayer];
 
     if (!player->backpack)
     {
@@ -8875,8 +8933,7 @@ void M_ItemsJ(int choice)
 
 void M_ItemsK(int choice)
 {
-    static player_t* player;
-    player = &players[consoleplayer];
+    player_t* player = &players[consoleplayer];
 
     P_UseArtifact(player, arti_fly);
 
@@ -11329,6 +11386,9 @@ void M_Debug(int choice)
 void M_Test(int choice)
 {
     M_SetupNextMenu(&TestDef);
+
+    mobj_state = &states[mobjinfo[MT_PLAYER].seestate];
+    mobj_tics = mobj_state->tics;
 }
 
 void M_DrawSystem(void)
@@ -11447,18 +11507,19 @@ void M_WeaponChange(int choice)
 
 void M_AimingHelp(int choice)
 {
-    switch(choice)
+    if (!(players[consoleplayer].cheats & CF_GODMODE))
     {
-    case 0:
-        if (aiming_help)
-            aiming_help = false;
-        players[consoleplayer].message = "AIMING HELP DISABLED";
-        break;
-    case 1:
-        if (!aiming_help)
-            aiming_help = true;
-        players[consoleplayer].message = "AIMING HELP ENABLED";
-        break;
+        switch(choice)
+        {
+        case 0:
+            if (aiming_help)
+                aiming_help = false;
+            break;
+        case 1:
+            if (!aiming_help)
+                aiming_help = true;
+            break;
+        }
     }
 }
 
@@ -11633,11 +11694,12 @@ void M_XC(int choice)
     switch(choice)
     {
       case 0:
-        if (firexc > 0)
+        if (firexc > -120)
             firexc--;
         break;
       case 1:
-        firexc++;
+        if (firexc < 120)
+            firexc++;
         break;
     }
 }
@@ -11651,7 +11713,8 @@ void M_YC(int choice)
             fireyc--;
         break;
       case 1:
-        fireyc++;
+        if (fireyc < 113)
+            fireyc++;
         break;
     }
 }
@@ -11761,7 +11824,7 @@ void M_WidthHeightPitch(int choice)
 
 void M_DrawTest(void)
 {
-    byte *from;
+    spriteframe_t *sprframe = &sprites[states[mobjinfo[MT_PLAYER].seestate].sprite].spriteframes[mobj_state->frame & FF_FRAMEMASK];
 
     // note: width must be divisible by 4
     int width = firewidth;
@@ -11769,10 +11832,15 @@ void M_DrawTest(void)
     int pitch = firepitch;
     int CleanXfac = firexfac;
     int CleanYfac = fireyfac;
-    int x = ORIGHEIGHT - firexc;
-    int y = TestDef.y + fireyc + LINEHEIGHT * 3 - 14;
+    int x = ORIGHEIGHT + firexc - 72;
+    int y = TestDef.y - fireyc + LINEHEIGHT * 3 + 64;
+    int lump = sprframe->lump[0];
     int a;
     int b;
+
+    byte *from;
+
+    patch_t* patch = W_CacheLumpNum (lump + firstspritelump, PU_CACHE);
 
     sprintf(xc_textbuffer, "%d", firexc);
     sprintf(yc_textbuffer, "%d", fireyc);
@@ -11951,6 +12019,9 @@ void M_DrawTest(void)
             }
             break;
     }
+
+    V_DrawPatch(160 + firexc, TestDef.y - fireyc + LINEHEIGHT * 3 + 100, 0, W_CacheLumpName ("M_PBOX", PU_CACHE));
+    V_DrawPatch(162 + firexc, TestDef.y - fireyc + LINEHEIGHT * 3 + 124, 0, patch);
 }
 
 // jff 2/01/98 kill all monsters
@@ -11971,9 +12042,9 @@ void M_Massacre(int choice)
     while ((thinker=thinker->next) != &thinkercap)
     {
         if (thinker->function == P_MobjThinker &&
-           ((((mobj_t *) thinker)->flags & MF_COUNTKILL) ||
-            ((mobj_t *) thinker)->type == MT_SKULL ||
-            ((mobj_t *) thinker)->type == MT_BETASKULL))
+            ((((mobj_t *) thinker)->flags & MF_COUNTKILL) ||
+              ((mobj_t *) thinker)->type == MT_SKULL ||
+              ((mobj_t *) thinker)->type == MT_BETASKULL))
         {
             // killough 3/6/98: kill even if Pain Elemental is dead
 
