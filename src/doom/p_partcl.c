@@ -947,7 +947,7 @@ void P_SmokePuff(int count, fixed_t x, fixed_t y, fixed_t z, angle_t angle, int 
 }
 
 // haleyjd 05/08/03: custom particle blood colors
-
+/*
 static struct bloodColor {
     byte *color1;
     byte *color2;
@@ -962,11 +962,12 @@ static struct bloodColor {
     { &grey4,  &white   },
     { &orange, &yorange },
 };
-
+*/
 void P_BloodSpray(mobj_t *mo, int count, fixed_t x, fixed_t y, fixed_t z, angle_t angle)
 {
     byte color1;
     byte color2;
+/*
     int bloodcolor = mo->info->blood;
 
     // get blood colors
@@ -975,11 +976,21 @@ void P_BloodSpray(mobj_t *mo, int count, fixed_t x, fixed_t y, fixed_t z, angle_
 
     color1 = *(mobjBloodColors[bloodcolor].color1);
     color2 = *(mobjBloodColors[bloodcolor].color2);
-
-    if (fsize == 12361532)
+*/
+    if (fsize == 12361532 || mo->type == MT_BRUISER || mo->type == MT_KNIGHT)
     {
         color1 = green;
         color2 = green1;
+    }
+    else if (mo->type == MT_HEAD && fsize != 12361532)
+    {
+        color1 = blue1;
+        color2 = blue;
+    }
+    else
+    {
+        color1 = red;
+        color2 = dred2;
     }
 
     // haleyjd 04/01/05: at random, throw out drops

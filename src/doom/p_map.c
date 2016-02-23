@@ -2185,7 +2185,7 @@ dboolean PIT_ChangeSector (mobj_t *thing)
                 thing->height = 0;
                 thing->radius = 0;
 
-            if (!(flags & MF_SHADOW) && !(flags & MF_NOBLOOD) && d_maxgore)
+            if (!(flags & MF_SHADOW) && !(flags & MF_NOBLOOD) && d_maxgore && (bloodsplat_particle == 0 || bloodsplat_particle == 2))
             {
                 int radius = ((spritewidth[sprites[thing->sprite].spriteframes[0].lump[0]]
                              >> FRACBITS) >> 1) + 12;

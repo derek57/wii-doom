@@ -352,7 +352,8 @@ void P_XYMovement (mobj_t* mo)
 
     // [BH] spawn random blood splats on floor as corpses slide 
     if (corpse && !(mo->flags & MF_NOBLOOD) && corpses_slide && (mo->momx || mo->momy) &&
-                    corpses_smearblood && mo->bloodsplats && r_bloodsplats_max && !mo->nudge)
+                    corpses_smearblood && mo->bloodsplats && r_bloodsplats_max && !mo->nudge &&
+                    (bloodsplat_particle == 0 || bloodsplat_particle == 2))
     {
         int     radius = (spritewidth[sprites[mo->sprite].spriteframes[0].lump[0]] >> FRACBITS) >> 1;
         int     i;
@@ -638,7 +639,7 @@ floater:
     {
         // [BH] remove blood the moment it hits the ground
         //  and spawn a blood splat in its place
-        if (mo->flags2 & MF2_BLOOD && d_maxgore)
+        if (mo->flags2 & MF2_BLOOD && d_maxgore && (bloodsplat_particle == 0 || bloodsplat_particle == 2))
         {
             P_RemoveMobj(mo);
             if (r_bloodsplats_max)
@@ -1649,7 +1650,7 @@ void P_SpawnMapThing(mapthing_t *mthing, int index)
         mobj->flags2 |= MF2_MIRRORED;
 
     // [BH] Spawn blood splats around corpses 
-    if (!(flags & (MF_SHOOTABLE | MF_NOBLOOD)) &&
+    if (!(flags & (MF_SHOOTABLE | MF_NOBLOOD)) && (bloodsplat_particle == 0 || bloodsplat_particle == 2) &&
             mobj->blood && fsize != 12361532 && r_bloodsplats_max)
     {
         mobj->bloodsplats = CORPSEBLOODSPLATS;
