@@ -670,11 +670,13 @@ floater:
                 if (damage < 1)
                     damage = 1;
 
-                if (d_maxgore && !isliquid[mo->subsector->sector->floorpic])
+                if (d_fallingdamage && !isliquid[mo->subsector->sector->floorpic])
                 {
                     P_MonsterFallingDamage (mo);
                     S_StartSound (mo, sfx_squish);
                 }
+                else if (d_splash && isliquid[mo->subsector->sector->floorpic])
+                    P_HitFloor(mo);
             }
             mo->oldvelocity[0] = mo->momx;
             mo->oldvelocity[1] = mo->momy;
