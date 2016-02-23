@@ -1699,7 +1699,12 @@ hitline:
                 // haleyjd: for demo sync etc we still need to do the above, so
                 // here we'll make the puff invisible and draw particles instead
                 if (attackrange != MELEERANGE)
-                    P_SmokePuff(32, x, y, z, shootangle, updown);
+                {
+                    if (isliquid[players[consoleplayer].mo->subsector->sector->floorpic])
+                        P_SmokePuff(32, x, y, z - FOOTCLIPSIZE, shootangle, updown);
+                    else
+                        P_SmokePuff(32, x, y, z, shootangle, updown);
+                }
             }
 
             if (bulletpuff_particle == 0 || bulletpuff_particle == 2)
