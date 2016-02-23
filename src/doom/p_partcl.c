@@ -782,7 +782,7 @@ static void P_BloodDrop(int count, fixed_t x, fixed_t y, fixed_t z, angle_t angl
         p->size = 4;
         p->color = (M_RandomSMMU() & 0x80) ? color1 : color2;
         p->velz = 128 * -3000 + M_RandomSMMU();
-        p->accz = -(800 * 100 / 256);
+        p->accz = -(GRAVITY * 100 / 256);
         p->styleflags = PS_FLOORCLIP | PS_FALLTOGROUND;
         p->z = z + (M_RandomSMMU() - 128) * -2400;
         an = (angle + ((M_RandomSMMU() - 128) << 22)) >> ANGLETOFINESHIFT;
@@ -1287,7 +1287,7 @@ static void P_DripEffect(mobj_t *actor)
     p->size  = randInRange(2, 5);
 
     p->velz = 128 * -3000;
-    p->accz = -800;
+    p->accz = -GRAVITY;
     p->styleflags = PS_FLOORCLIP | PS_FALLTOGROUND;
 
     if (makesplash)

@@ -1643,7 +1643,7 @@ static void R_DrawPSprite(pspdef_t *psp, dboolean invisibility)
     }
     else //if (fixedcolormap)
     {
-        if (spr == SPR_SHT2 && (!frame || frame >= 8))
+        if (spr == SPR_SHT2 && (!frame || frame >= 8) && !state->dehacked) 
             vis->colfunc = R_DrawSuperShotgunColumn;
         else
         {
@@ -1661,7 +1661,7 @@ static void R_DrawPSprite(pspdef_t *psp, dboolean invisibility)
                     basecolfunc,        // SPR_CHGG
                     tlredwhitecolfunc2, // SPR_CHGF
                     basecolfunc,        // SPR_MISG
-                    tlredwhitecolfunc1, // SPR_MISF
+                    tlredwhitecolfunc2, // SPR_MISF
                     basecolfunc,        // SPR_SAWG
                     basecolfunc,        // SPR_PLSG
                     tlcolfunc,          // SPR_PLSF
