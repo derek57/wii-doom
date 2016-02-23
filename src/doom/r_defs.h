@@ -1002,8 +1002,8 @@ ColorTable32k_t RGB32k;
 
 // Col2RGB8 is a pre-multiplied palette for color lookup. It is stored in a
 // special R10B10G10 format for efficient blending computation.
-//		--RRRRRrrr--BBBBBbbb--GGGGGggg--   at level 64
-//		--------rrrr------bbbb------gggg   at level 1
+//              --RRRRRrrr--BBBBBbbb--GGGGGggg--   at level 64
+//              --------rrrr------bbbb------gggg   at level 1
 uint32_t Col2RGB8[65][256];
 
 #endif

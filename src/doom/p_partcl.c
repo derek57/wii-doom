@@ -312,7 +312,8 @@ static void P_BFGEffect(mobj_t *actor);
 static void P_DripEffect(mobj_t *actor);
 static void P_ExplosionParticles(fixed_t, fixed_t, fixed_t, byte, byte);
 
-extern dboolean is_liquid_sector;
+extern dboolean is_liquid_floor;
+extern dboolean is_liquid_ceiling;
 
 //
 // P_GenVelocities
@@ -815,7 +816,7 @@ void P_SmokePuff(int count, fixed_t x, fixed_t y, fixed_t z, angle_t angle, int 
     {
         // 06/21/02: make bullet puff colors responsive to 
         // TerrainTypes -- this is very cool and Quake-2-like ^_^
-        int terrain = P_GetTerrainTypeForPt(x, y, updown);
+        int terrain = P_GetTerrainTypeForPoint(x, y, updown);
 
         switch (terrain)
         {
@@ -829,11 +830,26 @@ void P_SmokePuff(int count, fixed_t x, fixed_t y, fixed_t z, angle_t angle, int 
                 color2 = mdred;
                 break;
 
+            case FLOOR_NUKAGE:
+                color1 = green1;
+                color2 = green;
+                break;
+
+            case FLOOR_BLOOD:
+                color1 = mdred;
+                color2 = red;
+                break;
+
+            case FLOOR_SLIME:
+                color1 = maroon1;
+                color2 = maroon1;
+                break;
+
             default:
                 break;
         }
 
-        if (is_liquid_sector)
+        if (is_liquid_floor || is_liquid_ceiling)
             hitwater = true;
     }
 

@@ -266,6 +266,8 @@ sfxinfo_t S_sfx[] =
     SOUND("dgact",  120),
     SOUND("dgdth",  70),
     SOUND("dgpain", 96),
-    SOUND("eefly",  96)
+    SOUND("eefly",  96),
+    SOUND("muck",   96),  // walking inside sludge
+    SOUND("squish", 96)
 };
 

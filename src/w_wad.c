@@ -513,7 +513,7 @@ void W_ReleaseLumpNum(lumpindex_t lumpnum)
 #ifdef SIMPLECHECKS
     if ((signed short)lump->locks < unlocks)
         C_Warning("W_UnlockLumpNum: Excess unlocks on %8s (%d-%d)",
-	        lump->name, lump->locks, unlocks);
+                lump->name, lump->locks, unlocks);
 #endif
 
     lumpinfo[lumpnum]->locks -= unlocks;
@@ -659,7 +659,7 @@ void W_CheckSize(int wad)
             fseek(fprw, 0, 2);                // file pointer at the end of file
             fsizerw = ftell(fprw);        // take a position of file pointer un size variable
 
-            if(fsizerw != 1097025)
+            if(fsizerw != 993859)
                 print_resource_pwad_error = true;
 
             fclose(fprw);

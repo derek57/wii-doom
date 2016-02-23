@@ -82,10 +82,12 @@ void                G_PlayerReborn (int player);
 void                (*P_BloodSplatSpawner)(fixed_t, fixed_t, int, int, mobj_t *);
 
 extern dboolean     not_walking;
-extern dboolean     in_slime;
+//extern dboolean     in_slime;
 
 extern fixed_t      animatedliquiddiffs[64];
 extern fixed_t      attackrange;
+
+extern int          *TerrainTypes;
 
 extern void         A_EjectCasing(mobj_t *actor);
 
@@ -340,7 +342,7 @@ void P_XYMovement (mobj_t* mo)
 
     // killough 8/11/98: add bouncers
     // killough 11/98: only include bouncers hanging off ledges
-    if (((mo->flags & MF_BOUNCES && mo->z > mo->dropoffz) || mo->flags & MF_CORPSE) &&
+    if ((((mo->flags & MF_BOUNCES) && mo->z > mo->dropoffz) || mo->flags & MF_CORPSE) &&
         (mo->momx > FRACUNIT/4 || mo->momx < -FRACUNIT/4 || mo->momy > FRACUNIT/4 || mo->momy < -FRACUNIT/4) &&
         mo->floorz != mo->subsector->sector->floorheight)
         return;  // do not stop sliding if halfway off a step with some momentum
@@ -443,19 +445,88 @@ void P_XYMovement (mobj_t* mo)
     }
 }
 
+static void P_MonsterFallingDamage (mobj_t *actor)
+{
+    // So change this if corpse objects
+    // are meant to be obstacles.
+
+    if(d_maxgore && !(actor->flags & MF_NOBLOOD))
+    {
+        int i, t;
+        int color = ((d_chkblood && d_colblood) ? actor->blood : MT_BLOOD);
+        mobjinfo_t *info = &mobjinfo[color];
+        mobj_t *mo = Z_Malloc(sizeof(*mo), PU_LEVEL, NULL);
+
+        if((actor->type == MT_SKULL ||
+               actor->type == MT_BETASKULL) && d_colblood2 && d_chkblood2)
+            goto skip;
+
+        for(i = 0; i < 8; i++)
+        {
+            mo->type = color;
+
+            // added for colored blood and gore!
+            mo->target = actor;
+
+            // spray blood in a random direction (colored)
+            if((actor->type == MT_HEAD || actor->type == MT_BETAHEAD) && d_chkblood && d_colblood)
+                mo = P_SpawnMobj(actor->x,
+                                 actor->y,
+                                 actor->z + actor->info->height/2, MT_BLUESPRAY);
+            else if((actor->type == MT_BRUISER || actor->type == MT_BETABRUISER ||
+                    actor->type == MT_KNIGHT) && d_chkblood && d_colblood)
+                mo = P_SpawnMobj(actor->x,
+                                 actor->y,
+                                 actor->z + actor->info->height/2, MT_GREENSPRAY);
+            else if(actor->type == MT_SHADOWS && d_colblood2 && d_chkblood2)
+                mo = P_SpawnMobj(actor->x,
+                                 actor->y,
+                                 actor->z + actor->info->height/2, MT_FUZZYSPRAY);
+            else
+                mo = P_SpawnMobj(actor->x,
+                                 actor->y,
+                                 actor->z + actor->info->height/2, MT_SPRAY);
+
+            mo->colfunc = info->colfunc;
+
+            // Spectres bleed spectre blood
+            if (d_colblood2 && d_chkblood2) 
+            {
+                if(actor->type == MT_SHADOWS)
+                    mo->flags |= MF_SHADOW;
+            }
+
+            t = P_Random() % 3;
+
+            if(t > 0)
+                P_SetMobjState(mo, S_SPRAY_00 + t);
+
+            t = P_Random();
+            mo->momx = (t - P_Random ()) << 11;
+            t = P_Random();
+            mo->momy = (t - P_Random ()) << 11;
+            mo->momz = P_Random() << 11;
+        }
+        skip: ;
+    }
+}
+
 //
 // P_ZMovement
 //
 void P_ZMovement (mobj_t* mo)
 {
-    if (mo->flags & MF_BOUNCES && mo->momz)
+    if ((mo->flags & MF_BOUNCES) && mo->momz)
     {
         mo->z += mo->momz;
 
         if (mo->z <= mo->floorz)                  // bounce off floors
         {
             mo->z = mo->floorz;
-
+/*
+            if (d_splash)
+                P_HitFloor(mo);
+*/
             if (mo->momz < 0)
             {
                 mo->momz = -mo->momz;
@@ -575,6 +646,46 @@ floater:
             return;
         }
 
+        if (!mo->player && mo->health <= 0)
+        {
+            float    delta;
+
+            if ((mo->oldvelocity[2] < 0)
+                && (mo->momz > mo->oldvelocity[2])
+                && (!(mo->flags2 & MF2_ONMOBJ)
+                    || !(mo->z <= mo->floorz)))
+            {
+                delta = (float)mo->oldvelocity[2];
+            }
+            else
+            {
+                delta = (float)(mo->momz - mo->oldvelocity[2]);
+            }
+            delta = delta*delta * 2.03904313e-11f;
+
+            if (delta > 30)
+            {
+                int damage = (int)((delta-30)/2);
+                if (damage < 1)
+                    damage = 1;
+
+                if (d_maxgore && !isliquid[mo->subsector->sector->floorpic])
+                {
+                    P_MonsterFallingDamage (mo);
+                    S_StartSound (mo, sfx_squish);
+                }
+            }
+            mo->oldvelocity[0] = mo->momx;
+            mo->oldvelocity[1] = mo->momy;
+            mo->oldvelocity[2] = mo->momz;
+        }
+/*
+        if(mo->momz < 0 && !(mo->flags & MF_MISSILE) && d_splash)
+        {
+            // haleyjd
+            P_HitFloor(mo);
+        }
+*/
         // hit the floor
 
         // Note (id):
@@ -624,11 +735,11 @@ floater:
                 // and utter appropriate sound.
                 mo->player->deltaviewheight = mo->momz >> 3;
 
-                if(P_HitFloor(mo) == 0)
+                if (!isliquid[mo->subsector->sector->floorpic])
                     S_StartSound (mo, sfx_oof);
 
-                // TODO: write an exception here for monsters / player falling from high
-                // heights onto the ground (spawn blood & play sound like Duke Nukem 3D)
+                if(d_splash)
+                    P_HitFloor(mo);
 
                 if (mouselook && !demorecording && !demoplayback)
                 {
@@ -642,13 +753,13 @@ floater:
             mo->momz = 0;
         }
         mo->z = mo->floorz;
-
+/*
         if (mo->z - mo->momz > mo->floorz)
         {                       // Spawn splashes, etc.
             if(d_splash)
                 P_HitFloor(mo);
         }
-
+*/
         // cph 2001/05/26 -
         // See lost soul bouncing comment above. We need this here for bug
         // compatibility with original Doom2 v1.9 - if a soul is charging and
@@ -1999,7 +2110,162 @@ mobj_t* P_SpawnPlayerMissile(mobj_t *source, mobjtype_t type)
 //
 int P_GetThingFloorType(mobj_t * thing)
 {
-    return (thing->subsector->sector->floorpic);
+    // 07/03/99: function re-simplified by restoring initialized model
+    if(!thing)
+        return FLOOR_SOLID;
+    else
+        //return(isliquid[thing->subsector->sector->floorpic]);
+        return(TerrainTypes[thing->subsector->sector->floorpic]);
+}
+
+// TerrainType implementor functions
+
+//
+// FLOOR_WATER
+//
+void FloorWater(mobj_t *thing, fixed_t currentz)
+{
+    mobj_t *mo;
+    int temp;
+
+    mo = P_SpawnMobj(thing->x, thing->y, currentz, MT_WATERSPLASHBASE);
+
+    if(!snd_module)
+    {
+/*
+        if(in_slime)
+            S_StartSound(mo, sfx_burn);
+        else
+*/
+            S_StartSound(mo, sfx_gloop);
+    }
+   
+    mo = P_SpawnMobj(thing->x, thing->y, currentz, MT_WATERSPLASH);
+    //mo->target = thing;
+    P_SetTarget(&mo->target, thing);
+   
+    // haleyjd 11/20/00: remove dependence on order of evaluation
+    temp = P_RandomSMMU(pr_splash);
+    mo->momx = (temp - P_RandomSMMU(pr_splash))<<8;
+    temp = P_RandomSMMU(pr_splash);
+    mo->momy = (temp - P_RandomSMMU(pr_splash))<<8;
+    mo->momz = 2*FRACUNIT+(P_RandomSMMU(pr_splash)<<8);
+}
+
+//
+// FLOOR_LAVA
+//
+void FloorLava(mobj_t *thing, fixed_t currentz)
+{
+    mobj_t *mo;
+
+    mo = P_SpawnMobj(thing->x, thing->y, currentz, MT_LAVASPLASH);
+
+    if(!snd_module)
+    {
+/*
+        if(in_slime)
+            S_StartSound(mo, sfx_burn);
+        else
+*/
+            S_StartSound(mo, sfx_gloop);
+    }
+
+    mo = P_SpawnMobj(thing->x, thing->y, currentz, MT_LAVASMOKE);
+    mo->momz = FRACUNIT + (P_RandomSMMU(pr_splash)<<7);
+}
+
+//
+// FLOOR_BLOOD
+//
+void FloorBlood(mobj_t *thing, fixed_t currentz)
+{
+    mobj_t *mo;
+    int temp;
+
+    mo = P_SpawnMobj(thing->x, thing->y, currentz, MT_BLOODSPLASH);
+
+    if(!snd_module)
+    {
+/*
+        if(in_slime)
+            S_StartSound(mo, sfx_burn);
+        else
+*/
+            S_StartSound(mo, sfx_gloop);
+    }
+   
+    mo = P_SpawnMobj(thing->x, thing->y, currentz, MT_BLOODCHUNK);
+    P_SetTarget(&mo->target, thing);
+   
+    // haleyjd 11/20/00: remove dependence on order of evaluation
+    temp = P_RandomSMMU(pr_splash);
+    mo->momx = (temp - P_RandomSMMU(pr_splash))<<8;
+    temp = P_RandomSMMU(pr_splash);
+    mo->momy = (temp - P_RandomSMMU(pr_splash))<<8;
+    mo->momz = FRACUNIT+(P_RandomSMMU(pr_splash)<<8);
+}
+
+//
+// FLOOR_SLIME
+//
+void FloorSlime(mobj_t *thing, fixed_t currentz)
+{
+    mobj_t *mo;
+    int temp;
+
+    mo = P_SpawnMobj(thing->x, thing->y, currentz, MT_SLIMESPLASH);
+
+    if(!snd_module)
+    {
+/*
+        if(in_slime)
+            S_StartSound(mo, sfx_burn);
+        else
+*/
+            S_StartSound(mo, sfx_gloop);
+    }
+   
+    mo = P_SpawnMobj(thing->x, thing->y, currentz, MT_SLIMECHUNK);
+    P_SetTarget(&mo->target, thing);
+   
+    // haleyjd 11/20/00: remove dependence on order of evaluation
+    temp = P_RandomSMMU(pr_splash);
+    mo->momx = (temp - P_RandomSMMU(pr_splash))<<8;
+    temp = P_RandomSMMU(pr_splash);
+    mo->momy = (temp - P_RandomSMMU(pr_splash))<<8;
+    mo->momz = FRACUNIT+(P_RandomSMMU(pr_splash)<<8);
+}
+
+//
+// FLOOR_NUKAGE
+//
+void FloorNukage(mobj_t *thing, fixed_t currentz)
+{
+    mobj_t *mo;
+    int temp;
+
+    mo = P_SpawnMobj(thing->x, thing->y, currentz, MT_NUKAGESPLASH);
+
+    if(!snd_module)
+    {
+/*
+        if(in_slime)
+            S_StartSound(mo, sfx_burn);
+        else
+*/
+            S_StartSound(mo, sfx_gloop);
+    }
+   
+    mo = P_SpawnMobj(thing->x, thing->y, currentz, MT_NUKAGECHUNK);
+    P_SetTarget(&mo->target, thing);
+   
+    // haleyjd 11/20/00: remove dependence on order of evaluation
+    temp = P_RandomSMMU(pr_splash);
+    mo->momx = (temp - P_RandomSMMU(pr_splash))<<8;
+    temp = P_RandomSMMU(pr_splash);
+    mo->momy = (temp - P_RandomSMMU(pr_splash))<<8;
+    mo->momz = FRACUNIT+(P_RandomSMMU(pr_splash)<<8);
 }
 
 //
@@ -2007,90 +2273,68 @@ int P_GetThingFloorType(mobj_t * thing)
 //
 int P_HitFloor(mobj_t * thing)
 {
-    mobj_t *mo;
+    fixed_t currentz;
+    subsector_t *subsec;
 
-    if(thing->z > thing->subsector->sector->floorheight || !d_splash)
-    {                           // don't splash if landing on the edge above water/lava/etc....
-        return false;
+    // fixes for deep water sectors
+    int currentsec;
+
+    // just makes me feel better
+    if (!thing || !d_splash)
+        return FLOOR_SOLID;
+   
+    // 07/01/99 -- Aurikan suggested this fix for the bug involving splashing
+    // being triggered on floors not contacted, as in when the player was
+    // hanging over a ledge and was actually "in" the lower sector.
+
+    subsec = R_PointInSubsector(thing->x, thing->y);
+   
+    if (thing->floorz != subsec->sector->floorheight)
+        return FLOOR_SOLID;
+
+    // add low-mass things here
+    if (thing->flags2 & MF2_NOSPLASH)
+        return FLOOR_SOLID;
+
+    // haleyjd 04/29/99: fix deep water sectors
+    currentsec = subsec->sector->heightsec;
+
+    if (currentsec != -1)
+    {
+        currentz = sectors[currentsec].floorheight;
+    }
+    else
+    {
+        currentz = ONFLOORZ;
     }
 
     switch (P_GetThingFloorType(thing))
     {
-        case 69:
-        case 70:
-        case 71:
-        case 72:
-            P_SpawnMobj(thing->x, thing->y, ONFLOORZ, MT_SPLASHBASE);
-            mo = P_SpawnMobj(thing->x, thing->y, ONFLOORZ, MT_SPLASH);
-            mo->target = thing;
-            mo->momx = (P_Random() - P_Random()) << 8;
-            mo->momy = (P_Random() - P_Random()) << 8;
-            mo->momz = 2 * FRACUNIT + (P_Random() << 8);
+        case FLOOR_WATER:
+            FloorWater(thing, currentz);
+            return FLOOR_WATER;
 
-            if(!snd_module)
-            {
-                if(in_slime)
-                    S_StartSound(mo, sfx_burn);
-                else
-                    S_StartSound(mo, sfx_gloop);
-            }
+        case FLOOR_LAVA:
+            FloorLava(thing, currentz);
+            return FLOOR_LAVA;
 
-            return true;
-        case 73:
-        case 74:
-        case 75:
-        case 76:
-        case 89:
-        case 90:
-        case 91:
-        case 144:
-        case 145:
-        case 146:
-        case 147:
-            P_SpawnMobj(thing->x, thing->y, ONFLOORZ, MT_LAVASPLASH);
-            mo = P_SpawnMobj(thing->x, thing->y, ONFLOORZ, MT_LAVASMOKE);
-            mo->momz = FRACUNIT + (P_Random() << 7);
+        case FLOOR_BLOOD:
+            FloorBlood(thing, currentz);
+            return FLOOR_BLOOD;
 
-            if(!snd_module)
-            {
-                if(in_slime)
-                    S_StartSound(mo, sfx_burn);
-                else
-                    S_StartSound(mo, sfx_gloop);
-            }
+        case FLOOR_SLIME:
+            FloorSlime(thing, currentz);
+            return FLOOR_SLIME;
 
-            return true;
-        case 51:
-        case 52:
-        case 53:
-        case 136:
-        case 137:
-        case 138:
-        case 139:
-        case 140:
-        case 141:
-        case 142:
-        case 143:
-            P_SpawnMobj(thing->x, thing->y, ONFLOORZ, MT_SLUDGESPLASH);
-            mo = P_SpawnMobj(thing->x, thing->y, ONFLOORZ, MT_SLUDGECHUNK);
-            mo->target = thing;
-            mo->momx = (P_Random() - P_Random()) << 8;
-            mo->momy = (P_Random() - P_Random()) << 8;
-            mo->momz = FRACUNIT + (P_Random() << 8);
+        case FLOOR_NUKAGE:
+            FloorNukage(thing, currentz);
+            return FLOOR_NUKAGE;
 
-            if(!snd_module)
-            {
-                if(in_slime)
-                    S_StartSound(mo, sfx_burn);
-                else
-                    S_StartSound(mo, sfx_gloop);
-            }
-
-            return true;
         default:
-            return false;
+            break;
     }
-    return false;
+
+    return FLOOR_SOLID;
 }
 
 // UNUSED: These two functions are left over from an mobj-based

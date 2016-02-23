@@ -757,7 +757,7 @@ void S_StartMusic(int m_id)
 void S_ChangeMusic(int musicnum, int looping, dboolean mapstart)
 {
     musicinfo_t *music = NULL;
-    void        *handle;
+    void        *handle = NULL;
     int         mapinfomusic; 
     int         gameepi;
 
@@ -780,6 +780,7 @@ void S_ChangeMusic(int musicnum, int looping, dboolean mapstart)
 
     if (musicnum <= mus_None || musicnum >= NUMMUSIC)
     {
+        C_Warning("Bad music number %d", musicnum);
         //I_Error("Bad music number %d", musicnum);
         return;
     }
@@ -805,7 +806,7 @@ void S_ChangeMusic(int musicnum, int looping, dboolean mapstart)
     else
         gameepi = gameepisode;
 
-    if (mapstart && (mapinfomusic = P_GetMapMusic((gameepi - 1) * 10 + gamemap)))
+    if (mapstart && (mapinfomusic = P_GetMapMusic((gameepi - 1) * 10 + gamemap)) > 0) 
         music->lumpnum = mapinfomusic;
     else if (!music->lumpnum)
     {
@@ -820,9 +821,12 @@ void S_ChangeMusic(int musicnum, int looping, dboolean mapstart)
     else
         C_Output("S_ChangeMusic: d_%s (loop = no)", music->name);
 */
-    music->data = W_CacheLumpNum(music->lumpnum, PU_STATIC);
-
-    handle = I_RegisterSong(music->data, W_LumpLength(music->lumpnum));
+    if (music->lumpnum != -1)
+    {
+        // Load & register it
+        music->data = W_CacheLumpNum(music->lumpnum, PU_STATIC);
+        handle = I_RegisterSong(music->data, W_LumpLength(music->lumpnum));
+    }
 
     if (!handle && !sound_warning_printed)
     {

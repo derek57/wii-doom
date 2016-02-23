@@ -50,8 +50,6 @@
 #include "w_wad.h"
 #include "z_zone.h"
 
-#define NUMTRANSTABLES          2     // how many translucency tables are used
-
 #define TRANSPARENT_COLOR       0x1C
 
 //
@@ -85,8 +83,6 @@ extern int      r_screensize;
 //  (color ramps used for  suit colors).
 //
 byte            translations[3][256];
-
-byte*           transtables;    // translucency tables
 
 byte redtoblue[] =
 {
@@ -1598,15 +1594,6 @@ void R_DrawTranslatedColumn(void)
 void R_InitTranslationTables(void)
 {
     int i;
-
-    //added:11-01-98: load here the transparency lookup tables 'TINTTAB'
-    // NOTE: the TINTTAB resource MUST BE aligned on 64k for the asm optimised
-    //       (in other words, transtables pointer low word is 0)
-    transtables = Z_MallocAlign (NUMTRANSTABLES*0x10000, PU_STATIC, 0, 16);
-
-    // load in translucency tables
-    W_ReadLump( W_GetNumForName("TRANSMED"), transtables );
-    W_ReadLump( W_GetNumForName("TRANSMOR"), transtables+0x10000 );
 
     translationtables = Z_Malloc(256 * 3, PU_STATIC, NULL);
 

@@ -1838,24 +1838,24 @@ void G_DoPlayDemo (void)
 
     // [crispy] demo progress bar
     {
-	int i, numplayersingame = 0;
-	byte *demo_ptr = demo_p;
-	const int defdemolumpsize = lumpinfo[W_GetNumForName(defdemoname)]->size;
+        int i, numplayersingame = 0;
+        byte *demo_ptr = demo_p;
+        const int defdemolumpsize = lumpinfo[W_GetNumForName(defdemoname)]->size;
 
-	for (i = 0; i < MAXPLAYERS; i++)
-	{
-	    if (playeringame[i])
-	    {
-		numplayersingame++;
-	    }
-	}
+        for (i = 0; i < MAXPLAYERS; i++)
+        {
+            if (playeringame[i])
+            {
+            numplayersingame++;
+            }
+        }
 
-	while (*demo_ptr != DEMOMARKER && (demo_ptr - demobuffer) < defdemolumpsize)
-	{
-	    demo_ptr += numplayersingame * (longtics ? 5 : 4);
-	}
+        while (*demo_ptr != DEMOMARKER && (demo_ptr - demobuffer) < defdemolumpsize)
+        {
+            demo_ptr += numplayersingame * (longtics ? 5 : 4);
+        }
 
-	defdemosize = demo_ptr - demo_p;
+        defdemosize = demo_ptr - demo_p;
     }
 } 
 */

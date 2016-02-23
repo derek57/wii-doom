@@ -1361,3 +1361,24 @@ void V_FillRect(int x, int y, int scrn, int width, int height, byte color)
     }
 }
 
+// [RH] Set an area to a specified color
+//
+// [nitr8] UNUSED
+//
+/*
+void V_Clear(int left, int top, int right, int bottom, int scrn, int color)
+{
+    int x, y;
+
+    byte *dest;
+
+    dest = screens[scrn] + top * SCREENWIDTH + left;
+    x = right - left;
+    for (y = top; y < bottom; y++)
+    {
+        memset (dest, color, x);
+        dest += SCREENWIDTH;
+    }
+}
+*/
+

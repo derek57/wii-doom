@@ -1,0 +1,84 @@
+*********************-= Team Eternity Presents =-*************************
+
+                            TerrainEd v1.0
+
+A commandline utility for creating a TERTYPES lump for the Eternity Engine
+
+**************************************************************************
+
+How to Use TerrainEd
+
+After writing a script to the specifications below to define your
+TerrainTypes, run TerrainEd as follows:
+
+terred <scriptfile> <outfile>
+
+where <scriptfile> is the name of the text file in which you saved your
+script, and <outfile> is the name of the file to which you want to write 
+your TERTYPES lump.
+
+Example:
+
+terred script.txt tertypes.lmp
+
+After running the utility, you can use any WAD tool of your choice to
+embed the output into a data lump named TERTYPES.
+
+A WAD file may have any number of these lumps, but only the first will be
+used. If multiple files with TERTYPES lumps are included in the game,
+only the first one in the file last added will be used. TERTYPES lumps
+are not accumulative.
+
+See the Eternity Engine editing page at 
+
+http://www.doomworld.com/eternity/etcengine.html
+
+for more information and for updates and new versions.
+
+**** INPUT FORMAT ***
+
+The input script for TerrainEd may consist of any number of lines less than
+32768 of the following form: 
+
+<flatname> = <typename> 
+
+The = is optional, but there must be at least one space or tab character 
+between the flatname and typename tokens. 
+
+<flatname> is the name of any flat and may be up to 8 characters long. The 
+flat does not have to be present in a wad when this lump is encountered -- 
+types with flats that don't exist will be ignored by the game engine. 
+
+<typename> may be the name of one valid TerrainType, which currently 
+includes the following: 
+
+FLOOR_SOLID - A placeholder type that causes no special terrain effects. 
+Providing a string for <typename> that is invalid will additionally cause 
+it to default to FLOOR_SOLID 
+
+FLOOR_WATER - The water TerrainType. Flats with this type will cause two 
+splash objects to appear and will play the DSSPLASH sound. 
+
+FLOOR_LAVA - New to Eternity v3.29b3 - The lava TerrainType. Flats with 
+this type will cause a fire splash to appear and smoke to rise up, and will 
+play the DSBURN sound. 
+
+FLOOR_SLUDGE - The swamp TerrainType. Flats with this type will cause two 
+sludge splash objects to appear and will play the DSMUCK sound. (This type 
+is not assigned by default to any flats in doom(2).wad, but IS used in 
+Eternity TC. Feel free to make your own uses of it). 
+
+More types will be introduced soon, including sewage, nukage, blood, and a
+special scripted type to allow for completely customizable effects.
+
+**************************************************************************
+
+TerrainEd is Copyright 2001 by James Haley on behalf of Team Eternity
+
+TerrainEd can be used and distributed only in accordance with the terms
+of the GNU General Public License version 2 or later. See the COPYING file 
+for details.
+
+This software is covered by no warranties whatsoever.
+
+**************************************************************************

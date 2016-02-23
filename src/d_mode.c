@@ -22,10 +22,7 @@
 
 // Valid game mode/mission combinations, with the number of
 // episodes/maps for each.
-//
-// nitr8 [UNUSED]
-//
-/*
+
 static struct
 {
     GameMission_t mission;
@@ -33,7 +30,7 @@ static struct
     int episode;
     int map;
 } valid_modes[] = {
-    { pack_chex, shareware,  1, 5 },
+    { pack_chex, retail,     1, 5 },
     { doom,      shareware,  1, 9 },
     { doom,      registered, 3, 9 },
     { doom,      retail,     4, 9 },
@@ -50,7 +47,7 @@ static struct
 
 // Check that a gamemode+gamemission received over the network is valid.
 
-dboolean D_ValidGameMode(GameMission_t mission, GameMode_t mode)
+boolean D_ValidGameMode(GameMission_t mission, GameMode_t mode)
 {
     int i;
 
@@ -65,7 +62,7 @@ dboolean D_ValidGameMode(GameMission_t mission, GameMode_t mode)
     return false;
 }
 
-dboolean D_ValidEpisodeMap(GameMission_t mission, GameMode_t mode,
+boolean D_ValidEpisodeMap(GameMission_t mission, GameMode_t mode,
                           int episode, int map)
 {
     int i;
@@ -116,14 +113,9 @@ int D_GetNumEpisodes(GameMission_t mission, GameMode_t mode)
 
     return episode - 1;
 }
-*/
 
-//
 // Table of valid versions
-//
-// [nitr8] UNUSED
-//
-/*
+
 static struct {
     GameMission_t mission;
     GameVersion_t version;
@@ -143,7 +135,7 @@ static struct {
     { strife,   exe_strife_1_31 },
 };
 
-dboolean D_ValidGameVersion(GameMission_t mission, GameVersion_t version)
+boolean D_ValidGameVersion(GameMission_t mission, GameVersion_t version)
 {
     int i;
 
@@ -169,7 +161,7 @@ dboolean D_ValidGameVersion(GameMission_t mission, GameVersion_t version)
 
 // Does this mission type use ExMy form, rather than MAPxy form?
 
-dboolean D_IsEpisodeMap(GameMission_t mission)
+boolean D_IsEpisodeMap(GameMission_t mission)
 {
     switch (mission)
     {
@@ -217,5 +209,4 @@ char *D_GameMissionString(GameMission_t mission)
             return "strife";
     }
 }
-*/
 

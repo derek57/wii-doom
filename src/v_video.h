@@ -134,6 +134,7 @@ void V_LowGraphicDetail(int height, int scrn);
 void V_DrawPatchWithShadow(int x, int y, int scrn, patch_t *patch, dboolean flag);
 void V_DrawDistortedBackground(int scrn, char* patchname);
 void V_FillRect(int x, int y, int scrn, int width, int height, byte color);
+void V_Clear(int left, int top, int right, int bottom, int scrn, int color);
 
 void LoadPCX (char *filename, byte **pic, byte **palette, int *width, int *height);
 

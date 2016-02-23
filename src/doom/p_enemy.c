@@ -167,6 +167,7 @@ int               numsplats;
 static int        maxbraintargets;     // [crispy] remove braintargets limit
 
 extern dboolean    not_walking;
+//extern dboolean    in_slime;
 
 extern line_t     **spechit;
 
@@ -575,10 +576,9 @@ static dboolean P_Move(mobj_t *actor, dboolean dropoff)   // killough 9/12/98
 
     if (!(actor->flags & MF_FLOAT) && !felldown)
     {
-        if (actor->z > actor->floorz)
+        if (actor->z > actor->floorz && d_splash)
         {
-            if(d_splash)
-                P_HitFloor(actor);
+            P_HitFloor(actor);
         }
         actor->z = actor->floorz;
     }
@@ -918,71 +918,7 @@ void A_Fall (mobj_t *actor)
 {
     // actor is on ground, it can be walked over
     actor->flags &= ~MF_SOLID;
-
-    // So change this if corpse objects
-    // are meant to be obstacles.
-
-    if(d_maxgore && !(actor->flags & MF_NOBLOOD))
-    {
-        int i, t;
-        int color = ((d_chkblood && d_colblood) ? actor->blood : MT_BLOOD);
-        mobjinfo_t *info = &mobjinfo[color];
-        mobj_t *mo = Z_Malloc(sizeof(*mo), PU_LEVEL, NULL);
-
-        if((actor->type == MT_SKULL ||
-               actor->type == MT_BETASKULL) && d_colblood2 && d_chkblood2)
-            goto skip;
-
-        for(i = 0; i < 8; i++)
-        {
-            mo->type = color;
-
-            // added for colored blood and gore!
-            mo->target = actor;
-
-            // spray blood in a random direction (colored)
-            if((actor->type == MT_HEAD || actor->type == MT_BETAHEAD) && d_chkblood && d_colblood)
-                mo = P_SpawnMobj(actor->x,
-                                 actor->y,
-                                 actor->z + actor->info->height/2, MT_BLUESPRAY);
-            else if((actor->type == MT_BRUISER || actor->type == MT_BETABRUISER ||
-                    actor->type == MT_KNIGHT) && d_chkblood && d_colblood)
-                mo = P_SpawnMobj(actor->x,
-                                 actor->y,
-                                 actor->z + actor->info->height/2, MT_GREENSPRAY);
-            else if(actor->type == MT_SHADOWS && d_colblood2 && d_chkblood2)
-                mo = P_SpawnMobj(actor->x,
-                                 actor->y,
-                                 actor->z + actor->info->height/2, MT_FUZZYSPRAY);
-            else
-                mo = P_SpawnMobj(actor->x,
-                                 actor->y,
-                                 actor->z + actor->info->height/2, MT_SPRAY);
-
-            mo->colfunc = info->colfunc;
-
-            // Spectres bleed spectre blood
-            if (d_colblood2 && d_chkblood2) 
-            {
-                if(actor->type == MT_SHADOWS)
-                    mo->flags |= MF_SHADOW;
-            }
-
-            t = P_Random() % 3;
-
-            if(t > 0)
-                P_SetMobjState(mo, S_SPRAY_00 + t);
-
-            t = P_Random();
-            mo->momx = (t - P_Random ()) << 11;
-            t = P_Random();
-            mo->momy = (t - P_Random ()) << 11;
-            mo->momz = P_Random() << 11;
-        }
-        skip: ;
-    }
 }
-
 
 //
 // A_KeenDie
@@ -2177,7 +2113,8 @@ void A_Explode (mobj_t* thingy)
 {
     P_RadiusAttack(thingy, thingy->target, 128);
 
-    if(d_splash)
+    // haleyjd: TerrainTypes
+    if(d_splash && (thingy->z <= thingy->floorz + (128<<FRACBITS)))
         P_HitFloor(thingy);
 }
 
@@ -2360,30 +2297,21 @@ void A_Footstep (mobj_t* mo)
 
         if(!not_walking)
         {
-            if (P_GetThingFloorType(mo) < 51 ||
-                    (P_GetThingFloorType(mo) > 53  && P_GetThingFloorType(mo) < 69)  ||
-                    (P_GetThingFloorType(mo) > 76  && P_GetThingFloorType(mo) < 89)  ||
-                    (P_GetThingFloorType(mo) > 91  && P_GetThingFloorType(mo) < 136) ||
-                    P_GetThingFloorType(mo) > 147)
+            if (!snd_module)
             {
-                if(!snd_module)
-                    S_StartSound (mo, sfx_step0 + t);
-            }
-            else if (P_GetThingFloorType(mo) > 68  && P_GetThingFloorType(mo) < 73)
-            {
-                if(!snd_module)
-                    S_StartSound (mo, sfx_water);
-            }
-            else if((P_GetThingFloorType(mo) > 50  && P_GetThingFloorType(mo) < 54)  ||
-                    (P_GetThingFloorType(mo) > 135 && P_GetThingFloorType(mo) < 144) ||
-                    (P_GetThingFloorType(mo) > 72  && P_GetThingFloorType(mo) < 77)  ||
-                    (P_GetThingFloorType(mo) > 88  && P_GetThingFloorType(mo) < 92)  ||
-                    (P_GetThingFloorType(mo) > 143 && P_GetThingFloorType(mo) < 148))
-            {
-                if(!snd_module)
+/*
+                if (in_slime)
                 {
                     if(!(players[consoleplayer].cheats & CF_GODMODE))
                         S_StartSound (mo, sfx_lava);
+                    else
+                        S_StartSound (mo, sfx_water);
+                }
+                else
+*/
+                {
+                    if(!P_GetThingFloorType(mo))
+                        S_StartSound (mo, sfx_step0 + t);
                     else
                         S_StartSound (mo, sfx_water);
                 }

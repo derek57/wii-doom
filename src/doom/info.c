@@ -78,6 +78,7 @@ char *sprnames[] =
     "BRSK", "BYSK", "BSHL", "BCLL", "BBOX", "BBXP", "BPNS", "BPNV", "BBSS", "BCL1",
     "BELC", "BPL4", "BPL7", "BPL6", "BSMT", "BHED", "BPSS", "BSPS", "BCHG", "BCHF",
     "BPLG", "BPLF", "BMSL", "BPL1", "BPL2", "BBL4", "CAS1", "CAS2", "CAS7", "PART",
+    "BLDS", "NKGS",
 
     // [BH] Sprites 186 to 285 (100 extra sprite names to use in DeHackEd patches)
     "SP00", "SP01", "SP02", "SP03", "SP04", "SP05", "SP06", "SP07", "SP08", "SP09",
@@ -1609,18 +1610,18 @@ state_t states[NUMSTATES] =
     { SPR_SPRY,  5,                                3,               NULL,              S_SPRAY_06         }, // S_SPRAY_05
     { SPR_SPRY,  6,                                2,               NULL,              S_NULL             }, // S_SPRAY_06
 
-    { SPR_SPSH,  0,                                8,               NULL,              S_SPLASH2          }, // S_SPLASH1
-    { SPR_SPSH,  1,                                8,               NULL,              S_SPLASH3          }, // S_SPLASH2
-    { SPR_SPSH,  2,                                8,               NULL,              S_SPLASH4          }, // S_SPLASH3
-    { SPR_SPSH,  3,                               16,               NULL,              S_NULL             }, // S_SPLASH4
-    { SPR_SPSH,  3,                               10,               NULL,              S_NULL             }, // S_SPLASHX
-    { SPR_SPSH,  4,                                5,               NULL,              S_SPLASHBASE2      }, // S_SPLASHBASE1
-    { SPR_SPSH,  5,                                5,               NULL,              S_SPLASHBASE3      }, // S_SPLASHBASE2
-    { SPR_SPSH,  6,                                5,               NULL,              S_SPLASHBASE4      }, // S_SPLASHBASE3
-    { SPR_SPSH,  7,                                5,               NULL,              S_SPLASHBASE5      }, // S_SPLASHBASE4
-    { SPR_SPSH,  8,                                5,               NULL,              S_SPLASHBASE6      }, // S_SPLASHBASE5
-    { SPR_SPSH,  9,                                5,               NULL,              S_SPLASHBASE7      }, // S_SPLASHBASE6
-    { SPR_SPSH, 10,                                5,               NULL,              S_NULL             }, // S_SPLASHBASE7
+    { SPR_SPSH,  0,                                8,               NULL,              S_WATERSPLASH2     }, // S_WATERSPLASH1
+    { SPR_SPSH,  1,                                8,               NULL,              S_WATERSPLASH3     }, // S_WATERSPLASH2
+    { SPR_SPSH,  2,                                8,               NULL,              S_WATERSPLASH4     }, // S_WATERSPLASH3
+    { SPR_SPSH,  3,                               16,               NULL,              S_NULL             }, // S_WATERSPLASH4
+    { SPR_SPSH,  3,                               10,               NULL,              S_NULL             }, // S_WATERSPLASHX
+    { SPR_SPSH,  4,                                5,               NULL,              S_WATERSPLASHBASE2 }, // S_WATERSPLASHBASE1
+    { SPR_SPSH,  5,                                5,               NULL,              S_WATERSPLASHBASE3 }, // S_WATERSPLASHBASE2
+    { SPR_SPSH,  6,                                5,               NULL,              S_WATERSPLASHBASE4 }, // S_WATERSPLASHBASE3
+    { SPR_SPSH,  7,                                5,               NULL,              S_WATERSPLASHBASE5 }, // S_WATERSPLASHBASE4
+    { SPR_SPSH,  8,                                5,               NULL,              S_WATERSPLASHBASE6 }, // S_WATERSPLASHBASE5
+    { SPR_SPSH,  9,                                5,               NULL,              S_WATERSPLASHBASE7 }, // S_WATERSPLASHBASE6
+    { SPR_SPSH, 10,                                5,               NULL,              S_NULL             }, // S_WATERSPLASHBASE7
 
     { SPR_LVAS,  0 | FF_FULLBRIGHT,                5,               NULL,              S_LAVASPLASH2      }, // S_LAVASPLASH1
     { SPR_LVAS,  1 | FF_FULLBRIGHT,                5,               NULL,              S_LAVASPLASH3      }, // S_LAVASPLASH2
@@ -1634,15 +1635,15 @@ state_t states[NUMSTATES] =
     { SPR_LVAS,  9 | FF_FULLBRIGHT,                5,               NULL,              S_LAVASMOKE5       }, // S_LAVASMOKE4
     { SPR_LVAS, 10 | FF_FULLBRIGHT,                5,               NULL,              S_NULL             }, // S_LAVASMOKE5
 
-    { SPR_SLDG,  0,                                8,               NULL,              S_SLUDGECHUNK2     }, // S_SLUDGECHUNK1
-    { SPR_SLDG,  1,                                8,               NULL,              S_SLUDGECHUNK3     }, // S_SLUDGECHUNK2
-    { SPR_SLDG,  2,                                8,               NULL,              S_SLUDGECHUNK4     }, // S_SLUDGECHUNK3
-    { SPR_SLDG,  3,                                8,               NULL,              S_NULL             }, // S_SLUDGECHUNK4
-    { SPR_SLDG,  3,                                6,               NULL,              S_NULL             }, // S_SLUDGECHUNKX
-    { SPR_SLDG,  4,                                5,               NULL,              S_SLUDGESPLASH2    }, // S_SLUDGESPLASH1
-    { SPR_SLDG,  5,                                5,               NULL,              S_SLUDGESPLASH3    }, // S_SLUDGESPLASH2
-    { SPR_SLDG,  6,                                5,               NULL,              S_SLUDGESPLASH4    }, // S_SLUDGESPLASH3
-    { SPR_SLDG,  7,                                5,               NULL,              S_NULL             }, // S_SLUDGESPLASH4
+    { SPR_SLDG,  0,                                8,               NULL,              S_SLIMECHUNK2      }, // S_SLIMECHUNK1
+    { SPR_SLDG,  1,                                8,               NULL,              S_SLIMECHUNK3      }, // S_SLIMECHUNK2
+    { SPR_SLDG,  2,                                8,               NULL,              S_SLIMECHUNK4      }, // S_SLIMECHUNK3
+    { SPR_SLDG,  3,                                8,               NULL,              S_NULL             }, // S_SLIMECHUNK4
+    { SPR_SLDG,  3,                                6,               NULL,              S_NULL             }, // S_SLIMECHUNKX
+    { SPR_SLDG,  4,                                5,               NULL,              S_SLIMESPLASH2     }, // S_SLIMESPLASH1
+    { SPR_SLDG,  5,                                5,               NULL,              S_SLIMESPLASH3     }, // S_SLIMESPLASH2
+    { SPR_SLDG,  6,                                5,               NULL,              S_SLIMESPLASH4     }, // S_SLIMESPLASH3
+    { SPR_SLDG,  7,                                5,               NULL,              S_NULL             }, // S_SLIMESPLASH4
 
     { SPR_BND1,  0,                                6,               NULL,              S_BND1             }, // S_BND1
     { SPR_BND2,  0,                                6,               NULL,              S_BND2             }, // S_BND2
@@ -1952,6 +1953,25 @@ state_t states[NUMSTATES] =
     { SPR_CAS7,  5,                                0,               A_CounterJump,     S_NULL             }, // S_RNDCASE_F_FADE3
 
     { SPR_PART,  0,                                8,               NULL,              S_NULL             }, // S_PART1
+
+    { SPR_BLDS,  0,                                8,               NULL,              S_BLOODCHUNK2      }, // S_BLOODCHUNK1
+    { SPR_BLDS,  1,                                8,               NULL,              S_BLOODCHUNK3      }, // S_BLOODCHUNK2
+    { SPR_BLDS,  2,                                8,               NULL,              S_BLOODCHUNK4      }, // S_BLOODCHUNK3
+    { SPR_BLDS,  3,                                8,               NULL,              S_NULL             }, // S_BLOODCHUNK4
+    { SPR_BLDS,  3,                                6,               NULL,              S_NULL             }, // S_BLOODCHUNKX
+    { SPR_BLDS,  4,                                5,               NULL,              S_BLOODSPLASH2     }, // S_BLOODSPLASH1
+    { SPR_BLDS,  5,                                5,               NULL,              S_BLOODSPLASH3     }, // S_BLOODSPLASH2
+    { SPR_BLDS,  6,                                5,               NULL,              S_BLOODSPLASH4     }, // S_BLOODSPLASH3
+    { SPR_BLDS,  7,                                5,               NULL,              S_NULL             }, // S_BLOODSPLASH4
+    { SPR_NKGS,  0,                                8,               NULL,              S_NUKAGECHUNK2     }, // S_NUKAGECHUNK1
+    { SPR_NKGS,  1,                                8,               NULL,              S_NUKAGECHUNK3     }, // S_NUKAGECHUNK2
+    { SPR_NKGS,  2,                                8,               NULL,              S_NUKAGECHUNK4     }, // S_NUKAGECHUNK3
+    { SPR_NKGS,  3,                                8,               NULL,              S_NULL             }, // S_NUKAGECHUNK4
+    { SPR_NKGS,  3,                                6,               NULL,              S_NULL             }, // S_NUKAGECHUNKX
+    { SPR_NKGS,  4,                                5,               NULL,              S_NUKAGESPLASH2    }, // S_NUKAGESPLASH1
+    { SPR_NKGS,  5,                                5,               NULL,              S_NUKAGESPLASH3    }, // S_NUKAGESPLASH2
+    { SPR_NKGS,  6,                                5,               NULL,              S_NUKAGESPLASH4    }, // S_NUKAGESPLASH3
+    { SPR_NKGS,  7,                                5,               NULL,              S_NULL             }, // S_NUKAGESPLASH4
 
     { SPR_PLAY, 14,                                5,               NULL,              S_PLAY_GDIE2       }, // S_PLAY_GDIE1
     { SPR_PLAY, 15,                                5,               A_SkullPop,        S_PLAY_GDIE3       }, // S_PLAY_GDIE2
@@ -8046,10 +8066,10 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] =
         /* plural2              */ ""
     },
 
-    // Water Splash (MT_SPLASH)
+    // Water Splash (MT_WATERSPLASH)
     {
         /* doomednum            */ -1,
-        /* spawnstate           */ S_SPLASH1,
+        /* spawnstate           */ S_WATERSPLASH1,
         /* spawnhealth          */ 1000,
         /* gibhealth            */ 0,
         /* seestate             */ S_NULL,
@@ -8061,7 +8081,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] =
         /* painsound            */ sfx_None,
         /* meleestate           */ S_NULL,
         /* missilestate         */ S_NULL,
-        /* deathstate           */ S_SPLASHX,
+        /* deathstate           */ S_WATERSPLASHX,
         /* xdeathstate          */ S_NULL,
         /* deathsound           */ sfx_None,
         /* speed                */ 0,
@@ -8084,10 +8104,10 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] =
         /* plural2              */ ""
     },
 
-    // Splash Base (MT_SPLASHBASE)
+    // Splash Base (MT_WATERSPLASHBASE)
     {
         /* doomednum            */ -1,
-        /* spawnstate           */ S_SPLASHBASE1,
+        /* spawnstate           */ S_WATERSPLASHBASE1,
         /* spawnhealth          */ 1000,
         /* gibhealth            */ 0,
         /* seestate             */ S_NULL,
@@ -8148,7 +8168,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] =
         /* damage               */ 0,
         /* activesound          */ sfx_None,
         /* flags                */ MF_NOBLOCKMAP,
-        /* flags2               */ 0,
+        /* flags2               */ MF2_NOSPLASH,
         /* raisestate           */ S_NULL,
         /* frames               */ 0,
         /* blood                */ 0,
@@ -8186,7 +8206,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] =
         /* damage               */ 0,
         /* activesound          */ sfx_None,
         /* flags                */ MF_NOBLOCKMAP | MF_NOGRAVITY,
-        /* flags2               */ MF2_NOLIQUIDBOB,
+        /* flags2               */ MF2_NOLIQUIDBOB | MF2_NOSPLASH,
         /* raisestate           */ S_NULL,
         /* frames               */ 0,
         /* blood                */ 0,
@@ -8198,10 +8218,10 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] =
         /* plural2              */ ""
     },
 
-    // Sludge Chunk (MT_SLUDGECHUNK)
+    // Slime Chunk (MT_SLIMECHUNK)
     {
         /* doomednum            */ -1,
-        /* spawnstate           */ S_SLUDGECHUNK1,
+        /* spawnstate           */ S_SLIMECHUNK1,
         /* spawnhealth          */ 1000,
         /* gibhealth            */ 0,
         /* seestate             */ S_NULL,
@@ -8213,7 +8233,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] =
         /* painsound            */ sfx_None,
         /* meleestate           */ S_NULL,
         /* missilestate         */ S_NULL,
-        /* deathstate           */ S_SLUDGECHUNKX,
+        /* deathstate           */ S_SLIMECHUNKX,
         /* xdeathstate          */ S_NULL,
         /* deathsound           */ sfx_None,
         /* speed                */ 0,
@@ -8224,22 +8244,22 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] =
         /* damage               */ 0,
         /* activesound          */ sfx_None,
         /* flags                */ MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF,
-        /* flags2               */ MF2_NOTELEPORT | MF2_LOGRAV,
+        /* flags2               */ MF2_NOTELEPORT | MF2_LOGRAV | MF2_NOSPLASH,
         /* raisestate           */ S_NULL,
         /* frames               */ 0,
         /* blood                */ 0,
         /* shadowoffset         */ 0,
         /* particlefx           */ 0,
-        /* name1                */ "Sludge Chunk",
+        /* name1                */ "Slime Chunk",
         /* plural1              */ "",
         /* name2                */ "",
         /* plural2              */ ""
     },
 
-    // Sludge Splash (MT_SLUDGESPLASH)
+    // Slime Splash (MT_SLIMESPLASH)
     {
         /* doomednum            */ -1,
-        /* spawnstate           */ S_SLUDGESPLASH1,
+        /* spawnstate           */ S_SLIMESPLASH1,
         /* spawnhealth          */ 1000,
         /* gibhealth            */ 0,
         /* seestate             */ S_NULL,
@@ -8262,13 +8282,13 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] =
         /* damage               */ 0,
         /* activesound          */ sfx_None,
         /* flags                */ MF_NOBLOCKMAP,
-        /* flags2               */ 0,
+        /* flags2               */ MF2_NOSPLASH,
         /* raisestate           */ S_NULL,
         /* frames               */ 0,
         /* blood                */ 0,
         /* shadowoffset         */ 0,
         /* particlefx           */ 0,
-        /* name1                */ "Sludge Splash",
+        /* name1                */ "Slime Splash",
         /* plural1              */ "",
         /* name2                */ "",
         /* plural2              */ ""
@@ -9409,6 +9429,158 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] =
         /* shadowoffset         */ 0,
         /* particlefx           */ 0,
         /* name1                */ "Particle",
+        /* plural1              */ "",
+        /* name2                */ "",
+        /* plural2              */ ""
+    },
+
+    // Blood Chunk (MT_BLOODCHUNK)
+    {
+        /* doomednum            */ -1,
+        /* spawnstate           */ S_BLOODCHUNK1,
+        /* spawnhealth          */ 1000,
+        /* gibhealth            */ 0,
+        /* seestate             */ S_NULL,
+        /* seesound             */ sfx_None,
+        /* reactiontime         */ 8,
+        /* attacksound          */ sfx_None,
+        /* painstate            */ S_NULL,
+        /* painchance           */ 0,
+        /* painsound            */ sfx_None,
+        /* meleestate           */ S_NULL,
+        /* missilestate         */ S_NULL,
+        /* deathstate           */ S_BLOODCHUNKX,
+        /* xdeathstate          */ S_NULL,
+        /* deathsound           */ sfx_None,
+        /* speed                */ 0,
+        /* radius               */ 2 * FRACUNIT,
+        /* height               */ 4 * FRACUNIT,
+        /* projectilepassheight */ 0,
+        /* mass                 */ 100,
+        /* damage               */ 0,
+        /* activesound          */ sfx_None,
+        /* flags                */ MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF,
+        /* flags2               */ MF2_NOTELEPORT | MF2_LOGRAV | MF2_NOSPLASH,
+        /* raisestate           */ S_NULL,
+        /* frames               */ 0,
+        /* blood                */ 0,
+        /* shadowoffset         */ 0,
+        /* particlefx           */ 0,
+        /* name1                */ "Blood Chunk",
+        /* plural1              */ "",
+        /* name2                */ "",
+        /* plural2              */ ""
+    },
+
+    // Blood Splash (MT_BLOODSPLASH)
+    {
+        /* doomednum            */ -1,
+        /* spawnstate           */ S_BLOODSPLASH1,
+        /* spawnhealth          */ 1000,
+        /* gibhealth            */ 0,
+        /* seestate             */ S_NULL,
+        /* seesound             */ sfx_None,
+        /* reactiontime         */ 8,
+        /* attacksound          */ sfx_None,
+        /* painstate            */ S_NULL,
+        /* painchance           */ 0,
+        /* painsound            */ sfx_None,
+        /* meleestate           */ S_NULL,
+        /* missilestate         */ S_NULL,
+        /* deathstate           */ S_NULL,
+        /* xdeathstate          */ S_NULL,
+        /* deathsound           */ sfx_None,
+        /* speed                */ 0,
+        /* radius               */ 20 * FRACUNIT,
+        /* height               */ 16 * FRACUNIT,
+        /* projectilepassheight */ 0,
+        /* mass                 */ 100,
+        /* damage               */ 0,
+        /* activesound          */ sfx_None,
+        /* flags                */ MF_NOBLOCKMAP,
+        /* flags2               */ MF2_NOSPLASH,
+        /* raisestate           */ S_NULL,
+        /* frames               */ 0,
+        /* blood                */ 0,
+        /* shadowoffset         */ 0,
+        /* particlefx           */ 0,
+        /* name1                */ "Blood Splash",
+        /* plural1              */ "",
+        /* name2                */ "",
+        /* plural2              */ ""
+    },
+
+    // Nukage Chunk (MT_NUKAGECHUNK)
+    {
+        /* doomednum            */ -1,
+        /* spawnstate           */ S_NUKAGECHUNK1,
+        /* spawnhealth          */ 1000,
+        /* gibhealth            */ 0,
+        /* seestate             */ S_NULL,
+        /* seesound             */ sfx_None,
+        /* reactiontime         */ 8,
+        /* attacksound          */ sfx_None,
+        /* painstate            */ S_NULL,
+        /* painchance           */ 0,
+        /* painsound            */ sfx_None,
+        /* meleestate           */ S_NULL,
+        /* missilestate         */ S_NULL,
+        /* deathstate           */ S_NUKAGECHUNKX,
+        /* xdeathstate          */ S_NULL,
+        /* deathsound           */ sfx_None,
+        /* speed                */ 0,
+        /* radius               */ 2 * FRACUNIT,
+        /* height               */ 4 * FRACUNIT,
+        /* projectilepassheight */ 0,
+        /* mass                 */ 100,
+        /* damage               */ 0,
+        /* activesound          */ sfx_None,
+        /* flags                */ MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF,
+        /* flags2               */ MF2_NOTELEPORT | MF2_LOGRAV | MF2_NOSPLASH,
+        /* raisestate           */ S_NULL,
+        /* frames               */ 0,
+        /* blood                */ 0,
+        /* shadowoffset         */ 0,
+        /* particlefx           */ 0,
+        /* name1                */ "Nukage Chunk",
+        /* plural1              */ "",
+        /* name2                */ "",
+        /* plural2              */ ""
+    },
+
+    // Nukage Splash (MT_NUKAGESPLASH)
+    {
+        /* doomednum            */ -1,
+        /* spawnstate           */ S_NUKAGESPLASH1,
+        /* spawnhealth          */ 1000,
+        /* gibhealth            */ 0,
+        /* seestate             */ S_NULL,
+        /* seesound             */ sfx_None,
+        /* reactiontime         */ 8,
+        /* attacksound          */ sfx_None,
+        /* painstate            */ S_NULL,
+        /* painchance           */ 0,
+        /* painsound            */ sfx_None,
+        /* meleestate           */ S_NULL,
+        /* missilestate         */ S_NULL,
+        /* deathstate           */ S_NULL,
+        /* xdeathstate          */ S_NULL,
+        /* deathsound           */ sfx_None,
+        /* speed                */ 0,
+        /* radius               */ 20 * FRACUNIT,
+        /* height               */ 16 * FRACUNIT,
+        /* projectilepassheight */ 0,
+        /* mass                 */ 100,
+        /* damage               */ 0,
+        /* activesound          */ sfx_None,
+        /* flags                */ MF_NOBLOCKMAP,
+        /* flags2               */ MF2_NOSPLASH,
+        /* raisestate           */ S_NULL,
+        /* frames               */ 0,
+        /* blood                */ 0,
+        /* shadowoffset         */ 0,
+        /* particlefx           */ 0,
+        /* name1                */ "Nukage Splash",
         /* plural1              */ "",
         /* name2                */ "",
         /* plural2              */ ""

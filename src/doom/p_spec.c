@@ -73,6 +73,7 @@
 #define MAX_ADJOINING_SECTORS        20
 #define ANIMSPEED                    8
 
+#define MAXTERRAINDEF                5
 
 //
 // Animating textures and planes
@@ -171,7 +172,8 @@ anim_t*         lastanim;
 dboolean         in_slime;
 dboolean         levelTimer;
 dboolean         *isliquid;
-dboolean         is_liquid_sector;
+dboolean         is_liquid_floor;
+dboolean         is_liquid_ceiling;
 
 char            *playername = playername_default;
 
@@ -771,7 +773,7 @@ dboolean P_CanUnlockGenDoor(line_t *line, player_t *player)
 
     // does this line special distinguish between skulls and keys?
     int         skulliscard = (line->special & LockedNKeys) >> LockedNKeysShift;
-printf("skulliscard = %d\n",skulliscard);
+
     // determine for each case of lock type if player's keys are adequate
     switch ((line->special & LockedKey) >> LockedKeyShift)
     {
@@ -2999,11 +3001,11 @@ void P_SpawnSpecials (void)
     //P_InitSlidingDoorFrames();
 }
 
-//================================
+//////////////////////////////////
 //
 // haleyjd 3/17/99: TerrainTypes
 //
-//================================
+//////////////////////////////////
 
 int numterraindefs;
 int *TerrainTypes = NULL; // return to array model; optimization
@@ -3019,55 +3021,127 @@ typedef struct terraintype_s
 
 terraintype_t *TerrainTypeDefs = NULL;
 
-// FIXME: this wastes space by allocating an array for all flats,
-// when a hash table could be used
+/*
+   haleyjd 11/20/00: added a really sweet feature, made
+   TerrainTypes editable via the TERTYPES lump. Binary format, needs
+   an external editor utility (which I have written). This code
+   expects to find a lump with the number of terrain definitions,
+   then for each, a 9-character NULL-extended string for the flat
+   name, and a short describing what type of effect to trigger
+   (see p_spec.h, the values are all the same).
+*/
+
+// [nitr8]
+//
+// The tool mentioned by haleyjd above is named "TerrainEd" for the
+// Eternity Engine. It's short name is "TERRED" which i found over
+// at the Doomworld site in someone's private HTTP or FTP folder
+// (i can't remember exactly). I placed it in the WiiDOOM's source
+// folder alongside it's source code, the DOS binary, an example
+// script, a precompiled lump, a precompiled Linux binary and modded
+// it's source code a bit to also match the liquid flats of DOOM 2.
+
+void P_LoadTerrainTypeDefs(void)
+{
+    short *shrtptr, temp;
+    int   lumpnum, i, j;
+    char  *chrptr, name[9];
+
+    if ((lumpnum = W_CheckNumForName("TERTYPES")) == -1)
+    {
+        numterraindefs = 0;
+        return;
+    }
+    else
+    {
+        shrtptr = W_CacheLumpNum(lumpnum, PU_CACHE);
+        numterraindefs = SHORT(*shrtptr);
+        shrtptr++;
+
+        if (TerrainTypeDefs)
+            Z_Free(TerrainTypeDefs);
+
+        TerrainTypeDefs = Z_Malloc((numterraindefs + 1) * sizeof(terraintype_t),
+                             PU_STATIC, NULL);
+
+        chrptr = (char *)shrtptr;
+
+        for (i = 0; i < numterraindefs; i++)
+        {
+            // get null-terminated flat name
+            for (j = 0; j < 9; j++)
+                name[j] = *chrptr++;
+
+            shrtptr = (short *)chrptr;
+            temp = SHORT(*shrtptr);
+            shrtptr++;
+            strcpy(TerrainTypeDefs[i].name, name);
+     
+            if (temp < 0 || temp > MAXTERRAINDEF)
+                temp = 0;
+
+            TerrainTypeDefs[i].type = temp;
+            chrptr = (char *)shrtptr;
+        }
+
+        strcpy(TerrainTypeDefs[numterraindefs].name, "END");
+        TerrainTypeDefs[numterraindefs].type = -1;     
+    }
+}
+
 void P_InitTerrainTypes(void)
 {
-   int i;
-   int size;
+    int i;
+    int size;
 
-   size = (numflats + 1) * sizeof(int);
-   if(TerrainTypes)
-      Z_Free(TerrainTypes);
-   TerrainTypes = Z_Malloc(size, PU_STATIC, NULL);
-   memset(TerrainTypes, 0, size);
+    size = (numflats + 1) * sizeof(int);
+
+    if (TerrainTypes)
+        Z_Free(TerrainTypes);
+
+    TerrainTypes = Z_Malloc(size, PU_STATIC, NULL);
+    memset(TerrainTypes, 0, size);
    
-   if(numterraindefs == 0) // no terrain types defined, leave zero
-     return;
+    // no terrain types defined, leave zero
+    if (numterraindefs == 0)
+        return;
 
-   for(i = 0; TerrainTypeDefs[i].type != -1; i++)
-   {
-      // haleyjd 07/01/99
-      // Change this from R_FlatNumForName to W_CheckNumForName.
-      // Restores Ultimate DOOM to functionality without an added 
-      // flat wad.
+    for (i = 0; TerrainTypeDefs[i].type != -1; i++)
+    {
+        int lump = W_CheckNumForName(TerrainTypeDefs[i].name);
 
-      int lump = W_CheckNumForName(TerrainTypeDefs[i].name);
-      if(lump != -1)
-      {
-         TerrainTypes[lump-firstflat] = TerrainTypeDefs[i].type;
-      }
-   }
+        if (lump != -1)
+        {
+            TerrainTypes[lump - firstflat] = TerrainTypeDefs[i].type;
+        }
+    }
 }
 
 //
 // haleyjd 06/21/02: function to get TerrainType from a point
 //
-int P_GetTerrainTypeForPt(fixed_t x, fixed_t y, int position)
+int P_GetTerrainTypeForPoint(fixed_t x, fixed_t y, int position)
 {
-   subsector_t *subsec = R_PointInSubsector(x, y);
+    subsector_t *subsec = R_PointInSubsector(x, y);
 
-   // can retrieve a TerrainType for either the floor or the
-   // ceiling
-   switch(position)
-   {
-   case 0:
-      is_liquid_sector = isliquid[subsec->sector->floorpic];
-      return (TerrainTypes[subsec->sector->floorpic]);
-   case 1:
-      return (TerrainTypes[subsec->sector->ceilingpic]);
-   default:
-      return FLOOR_SOLID;
-   }
+    int floorpic = subsec->sector->floorpic;
+    int ceilingpic = subsec->sector->ceilingpic;
+
+    is_liquid_floor = isliquid[floorpic];
+    is_liquid_ceiling = isliquid[ceilingpic];
+
+    // can retrieve a TerrainType for either the floor or the
+    // ceiling
+    switch(position)
+    {
+        case 0:
+            return (TerrainTypes[floorpic]);
+
+        case 1:
+            return (TerrainTypes[ceilingpic]);
+
+        default:
+            return FLOOR_SOLID;
+    }
 }
 

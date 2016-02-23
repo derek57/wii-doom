@@ -123,7 +123,7 @@ fixed_t         *spritetopoffset;
 fixed_t         *newspriteoffset;
 fixed_t         *newspritetopoffset;
 
-byte	newgamma[256];
+byte            newgamma[256];
 
 extern char     *iwadfile;
 

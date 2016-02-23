@@ -1642,11 +1642,30 @@ void RejectOverrun(int rejectlump, const byte **rejectmatrix, int totallines)
 //
 static void P_LoadReject(int lumpnum, int totallines)
 {
+    // [RH] Scan the rejectmatrix and see if it actually contains anything
+    int i;
+    int end = (W_LumpLength(lumpnum + ML_REJECT) - 3) / 4;
+
     // dump any old cached reject lump, then cache the new one
     if (rejectlump != -1)
         W_ReleaseLumpNum(rejectlump);
     rejectlump = lumpnum + ML_REJECT;
     rejectmatrix = W_CacheLumpNum(rejectlump, PU_STATIC);
+
+    for (i = 0; i < end; i++)
+    {
+        if (((int *)rejectmatrix)[i])
+        {
+            //rejectempty = false;
+            break;
+        }
+    }
+
+    if (i >= end)
+    {
+        C_Warning("Reject matrix is empty");
+        //rejectempty = true;
+    }
 
     //e6y: check for overflow
     RejectOverrun(rejectlump, &rejectmatrix, totallines);
@@ -2409,6 +2428,7 @@ void P_Init (void)
     P_InitSwitchList ();
     P_InitPicAnims ();
     InitMapInfo();
+    P_LoadTerrainTypeDefs();
     P_InitTerrainTypes();
     R_InitSprites (sprnames);
 }

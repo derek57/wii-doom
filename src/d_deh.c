@@ -1490,7 +1490,7 @@ static char *deh_mobjinfo[DEH_MOBJINFOMAX] =
     "Missile damage",           // .damage
     "Action sound",             // .activesound
     "Bits",                     // .flags
-    "Bits2",                    // .flags2
+    "Retro Bits",               // .flags2 
     "Respawn frame",            // .raisestate
     "Frames",                   // .frames
     "Blood"                     // .blood
@@ -1505,6 +1505,7 @@ static char *deh_mobjinfo[DEH_MOBJINFOMAX] =
 //
 // Convert array to struct to allow multiple values, make array size variable
 #define DEH_MOBJFLAGMAX (sizeof(deh_mobjflags) / sizeof(*deh_mobjflags))
+#define DEH_MOBJFLAG2MAX (sizeof(deh_mobjflags2) / sizeof(*deh_mobjflags2)) 
 
 struct deh_mobjflags_s
 {
@@ -1557,6 +1558,40 @@ static const struct deh_mobjflags_s deh_mobjflags[] =
     { "TRANSLUCENT",  MF_TRANSLUCENT  }     // apply translucency to sprite (BOOM)
 };
 
+static const struct deh_mobjflags_s deh_mobjflags2[] =
+{
+    { "TRANSLUCENT",               MF2_TRANSLUCENT               },
+    { "TRANSLUCENT_REDONLY",       MF2_TRANSLUCENT_REDONLY       },
+    { "TRANSLUCENT_GREENONLY",     MF2_TRANSLUCENT_GREENONLY     },
+    { "TRANSLUCENT_BLUEONLY",      MF2_TRANSLUCENT_BLUEONLY      },
+    { "TRANSLUCENT_33",            MF2_TRANSLUCENT_33            },
+    { "TRANSLUCENT_REDWHITEONLY",  MF2_TRANSLUCENT_REDWHITEONLY  },
+    { "TRANSLUCENT_REDTOGREEN_33", MF2_TRANSLUCENT_REDTOGREEN_33 },
+    { "TRANSLUCENT_REDTOBLUE_33",  MF2_TRANSLUCENT_REDTOBLUE_33  },
+    { "TRANSLUCENT_BLUE_33",       MF2_TRANSLUCENT_BLUE_33       },
+    { "REDTOGREEN",                MF2_TRANSLUCENT               },
+    { "GREENTORED",                MF2_GREENTORED                },
+    { "REDTOBLUE",                 MF2_REDTOBLUE                 },
+    { "FLOATBOB",                  MF2_FLOATBOB                  },
+    { "MIRRORED",                  MF2_MIRRORED                  },
+    { "FALLING",                   MF2_FALLING                   },
+    { "ONMOBJ",                    MF2_ONMOBJ                    },
+    { "PASSMOBJ",                  MF2_PASSMOBJ                  },
+    { "RESURRECTING",              MF2_RESURRECTING              },
+    { "NOFOOTCLIP",                MF2_NOFOOTCLIP                },
+    { "NOLIQUIDBOB",               MF2_NOLIQUIDBOB               },
+    { "MF2_FEETARECLIPPED",        MF2_FEETARECLIPPED            },
+    { "MF2_SHADOW",                MF2_SHADOW                    },
+    { "MF2_BLOOD",                 MF2_BLOOD                     },
+    { "MF2_DONOTMAP",              MF2_DONOTMAP                  },
+    { "MF2_SMOKETRAIL",            MF2_SMOKETRAIL                },
+    { "MF2_CRUSHABLE",             MF2_CRUSHABLE                 },
+    { "MF2_LOGRAV",                MF2_LOGRAV                    },
+    { "MF2_FLY",                   MF2_FLY                       },
+    { "MF2_NOTELEPORT",            MF2_NOTELEPORT                },
+    { "MF2_NOSPLASH",              MF2_NOSPLASH                  }
+};
+
 // STATE - Dehacked block name = "Frame" and "Pointer"
 // Usage: Frame nn
 // Usage: Pointer nn (Frame nn)
@@ -1576,7 +1611,8 @@ static char *deh_state[] =
     "Codep Frame",      // pointer to first use of action (actionf_t)
     "Unknown 1",        // .misc1 (long)
     "Unknown 2",        // .misc2 (long)
-    "Particle event"    // haleyjd 08/09/02: particle event num
+    "Particle event",   // haleyjd 08/09/02: particle event num
+    "Translucent"       // .translucent (dboolean) 
 };
 
 // SFXINFO_STRUCT - Dehacked block name = "Sounds"
@@ -2196,20 +2232,13 @@ void deh_procThing(DEHFILE *fpin, char *line)
             if (!M_StringCompare(key, deh_mobjinfo[ix]))
                 continue;
 
-            if (!M_StringCompare(key, "Bits"))
-            {
-                pix = (int *)&mobjinfo[indexnum];
-                pix[ix] = (int)value;
-                if (M_StringCompare(key, "Height"))
-                    mobjinfo[indexnum].projectilepassheight = 0;
-            }
-            else
+            if (M_StringCompare(key, "Bits")) 
             {
                 // bit set
                 // e6y: Correction of wrong processing of Bits parameter if its value is equal to
                 // zero
                 if (bGetData == 1)
-                    mobjinfo[indexnum].flags = value;
+                    mobjinfo[indexnum].flags = value; 
                 else
                 {
                     // figure out what the bits are
@@ -2243,6 +2272,48 @@ void deh_procThing(DEHFILE *fpin, char *line)
                         C_Output("Bits = 0x%08lX = %ld.", value, value);
                     mobjinfo[indexnum].flags = value; // e6y
                 }
+            }
+            else if (M_StringCompare(key, "Retro Bits"))
+            {
+                // bit set
+                if (bGetData == 1)
+                    mobjinfo[indexnum].flags2 = value;
+                else
+                {
+                    // figure out what the bits are
+                    value = 0;
+
+                    for (; (strval = strtok(strval, ",+| \t\f\r")); strval = NULL)
+                    {
+                        size_t  iy;
+
+                        for (iy = 0; iy < DEH_MOBJFLAG2MAX; iy++)
+                        {
+                            if (!M_StringCompare(strval, deh_mobjflags2[iy].name))
+                                continue;
+                            if (devparm)
+                                C_Output("ORed value 0x%08lx %s.", deh_mobjflags2[iy].value,
+                                    strval);
+
+                            value |= deh_mobjflags[iy].value;
+                            break;
+                        }
+                        if (iy >= DEH_MOBJFLAG2MAX)
+                            C_Warning("Could not find bit mnemonic \"%s\".", strval);
+                    }
+
+                    // Don't worry about conversion -- simply print values
+                    if (devparm)
+                        C_Output("Bits = 0x%08lX = %ld.", value, value);
+                    mobjinfo[indexnum].flags2 = value;
+                }
+            }
+            else
+            {
+                pix = (int *)&mobjinfo[indexnum];
+                pix[ix] = (int)value;
+                if (M_StringCompare(key, "Height"))
+                    mobjinfo[indexnum].projectilepassheight = 0;
             }
             if (devparm)
                 C_Output("Assigned %d to %s (%d) at index %d.", (int)value, key, indexnum, ix);
@@ -2336,6 +2407,13 @@ void deh_procFrame(DEHFILE *fpin, char *line)
             if (devparm)
                 C_Output(" - particle_evt = %ld", value);
             states[indexnum].particle_evt = value;
+            states[indexnum].dehacked = dehacked = !BTSX;
+        }
+        else if (M_StringCompare(key, deh_state[8]))            // Translucent
+        {
+            if (devparm)
+                C_Output(" - translucent = %ld", value);
+            states[indexnum].translucent = (dboolean)value;     // dboolean
             states[indexnum].dehacked = dehacked = !BTSX;
         }
         else
@@ -3122,9 +3200,7 @@ void deh_procError(DEHFILE *fpin, char *line)
     char        inbuffer[DEH_BUFFERMAX];
 
     strncpy(inbuffer, line, DEH_BUFFERMAX);
-    if (!M_StringStartsWith(inbuffer, "Patch File for DeHackEd")
-        && !M_StringStartsWith(inbuffer, "Doom version")
-        && !M_StringStartsWith(inbuffer, "Patch format"))
+    if (devparm) 
         C_Warning("Ignoring \"%s\".", inbuffer);
     return;
 }

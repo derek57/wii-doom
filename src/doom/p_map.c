@@ -959,7 +959,7 @@ dboolean P_TryMove(mobj_t *thing, fixed_t x, fixed_t y, dboolean dropoff)
             }
         }
 
-        if (thing->flags & MF_BOUNCES &&    // killough 8/13/98
+        if ((thing->flags & MF_BOUNCES) &&    // killough 8/13/98
             !(thing->flags & (MF_MISSILE|MF_NOGRAVITY)) &&
             !sentient(thing) && tmfloorz - thing->z > 16*FRACUNIT)
             return false; // too big a step up for bouncers under gravity
@@ -1715,11 +1715,17 @@ hitline:
 
                 // clip to floor or ceiling
                 if(puff->z > puff->ceilingz)
+                {
                     puff->z = puff->ceilingz;
+                    puff->oldz = puff->z;
+                }
 
                 if(puff->z < puff->floorz)
+                {
                     puff->z = puff->floorz;
-            }        
+                    puff->oldz = puff->z;
+                }
+            }
         }
         // don't go any farther
         return false;   
@@ -1899,8 +1905,11 @@ fixed_t P_AimLineAttack(mobj_t *t1, angle_t angle, fixed_t distance)
 //
 void P_LineAttack(mobj_t *t1, angle_t angle, fixed_t distance, fixed_t slope, int damage)
 {
-    fixed_t     x2, y2;
-    int         traverseflags;
+    // [crispy] smooth laser spot movement with uncapped framerate
+    const fixed_t t1x = (damage == INT_MIN ? viewx : t1->x);
+    const fixed_t t1y = (damage == INT_MIN ? viewy : t1->y);
+    fixed_t       x2, y2;
+    int           traverseflags;
 
     shootangle = angle;
     angle >>= ANGLETOFINESHIFT;
@@ -1924,16 +1933,16 @@ void P_LineAttack(mobj_t *t1, angle_t angle, fixed_t distance, fixed_t slope, in
         shootdirx = FixedMul(FixedMul(finecosine[pitch], finecosine[angle]), distance);
         shootdiry = FixedMul(FixedMul(finecosine[pitch], finesine[angle]), distance);
 
-        x2 = t1->x + shootdirx;
-        y2 = t1->y + shootdiry;
+        x2 = t1x + shootdirx;
+        y2 = t1y + shootdiry;
     }
     else
     {
-        x2 = t1->x + (distance >> FRACBITS) * finecosine[angle];
-        y2 = t1->y + (distance >> FRACBITS) * finesine[angle];
+        x2 = t1x + (distance >> FRACBITS) * finecosine[angle];
+        y2 = t1y + (distance >> FRACBITS) * finesine[angle];
 
-        shootdirx = x2 - t1->x;
-        shootdiry = y2 - t1->y;
+        shootdirx = x2 - t1x;
+        shootdiry = y2 - t1y;
     }
 
     // for plane hit detection
@@ -1945,7 +1954,7 @@ void P_LineAttack(mobj_t *t1, angle_t angle, fixed_t distance, fixed_t slope, in
     else
         traverseflags = PT_ADDLINES;
 
-    P_PathTraverse(t1->x, t1->y, x2, y2, traverseflags, PTR_ShootTraverse);
+    P_PathTraverse(t1x, t1y, x2, y2, traverseflags, PTR_ShootTraverse);
 }
  
 
