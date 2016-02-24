@@ -1411,7 +1411,7 @@ void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, int damage)
 
     if (tplayer && gameskill == sk_baby)
         damage >>= (damage > 1);         // take half damage in trainer mode
-                
+
     // Some close combat weapons should not
     // inflict thrust and push the victim out of reach,
     // thus kick away unless using the chainsaw.

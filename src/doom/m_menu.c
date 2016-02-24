@@ -1299,11 +1299,11 @@ int                        cheeting;
 int                        coordinates_info = 0;
 int                        version_info = 0;
 #ifdef WII
-int                        key_controls_start_in_cfg_at_pos = 118;
-int                        key_controls_end_in_cfg_at_pos = 132;
-#else
-int                        key_controls_start_in_cfg_at_pos = 117;
+int                        key_controls_start_in_cfg_at_pos = 119;
 int                        key_controls_end_in_cfg_at_pos = 133;
+#else
+int                        key_controls_start_in_cfg_at_pos = 118;
+int                        key_controls_end_in_cfg_at_pos = 134;
 #endif
 int                        tracknum = 1;
 int                        epi = 1;
@@ -1562,6 +1562,7 @@ void M_RocketParticles(int choice);
 void M_RocketExplosions(int choice);
 void M_SpawnFlies(int choice);
 void M_DripBlood(int choice);
+void M_ParticleSounds(int choice);
 void M_RespawnMonsters(int choice);
 void M_FastMonsters(int choice);
 void M_Autoaim(int choice);
@@ -2613,7 +2614,6 @@ enum
 {
     game6_centerweapon,
     game6_casings,
-    game6_thrust,
     game6_particles,
     game6_bloodparticles,
     game6_bulletparticles,
@@ -2624,6 +2624,7 @@ enum
     game6_rocketexplosions,
     game6_spawnflies,
     game6_dripblood,
+    game6_particlesounds,
     game6_game7,
     game6_end
 } game6_e;
@@ -2632,7 +2633,6 @@ static menuitem_t GameMenu6[]=
 {
     {2,"Center Weapon when firing",M_CenterWeapon,'w'},
     {2,"",M_EjectCasings,'e'},
-    {2,"PLAYER THRUST",M_PlayerThrust,'p'},
     {2,"Draw Particles",M_Particles,'a'},
     {2,"",M_BloodType,'b'},
     {2,"",M_BulletType,'c'},
@@ -2643,6 +2643,7 @@ static menuitem_t GameMenu6[]=
     {2,"",M_RocketExplosions,'s'},
     {2,"",M_SpawnFlies,'f'},
     {2,"",M_DripBlood,'d'},
+    {2,"",M_ParticleSounds,'p'},
     {1,"",M_Game7,'7'}
 };
 
@@ -2662,6 +2663,7 @@ enum
     game7_wiggle,
     game7_slimetrails,
     game7_aimbot,
+    game7_thrust,
 #ifdef WII
     game7_prbeta,
 #endif
@@ -2673,7 +2675,8 @@ static menuitem_t GameMenu7[]=
     {2,"ROCKET SMOKE-TRAILS",M_Trails,'t'},
     {2,"Fix Wiggle Effect",M_FixWiggle,'w'},
     {2,"Remove Slime Trails",M_RemoveSlimeTrails,'s'},
-    {2,"",M_AimingHelp,'a'}
+    {2,"",M_AimingHelp,'a'},
+    {2,"PLAYER THRUST",M_PlayerThrust,'p'}
 #ifdef WII
     ,
     {2,"PRE-RELEASE BETA MODE",M_Beta,'b'}
@@ -5512,21 +5515,10 @@ void M_DrawGame6(void)
         M_WriteText(GameDef6.x + 258, GameDef6.y + 8, "OFF");
     }
 
-    if(d_thrust)
-    {
-        dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef6.x + 266, GameDef6.y + 18, "ON");
-    }
-    else
-    {
-        dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef6.x + 258, GameDef6.y + 18, "OFF");
-    }
-
     if(d_drawparticles)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef6.x + 266, GameDef6.y + 28, "ON");
+        M_WriteText(GameDef6.x + 266, GameDef6.y + 18, "ON");
     }
     else
     {
@@ -5539,65 +5531,72 @@ void M_DrawGame6(void)
         d_drawrocketexplosions = false;
         d_spawnflies = false;
         d_dripblood = false;
+        particle_sounds = false;
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef6.x + 258, GameDef6.y + 28, "OFF");
+        M_WriteText(GameDef6.x + 258, GameDef6.y + 18, "OFF");
     }
+
+    if(!d_drawparticles)
+        dp_translation = crx[CRX_DARK];
+    else if(itemOn == 3 && d_drawparticles)
+        dp_translation = crx[CRX_GOLD];
+
+    M_WriteText(GameDef6.x, GameDef6.y + 28, "BLOOD TYPE");
 
     if(!d_drawparticles)
         dp_translation = crx[CRX_DARK];
     else if(itemOn == 4 && d_drawparticles)
         dp_translation = crx[CRX_GOLD];
-
-    M_WriteText(GameDef6.x, GameDef6.y + 38, "BLOOD TYPE");
+    M_WriteText(GameDef6.x, GameDef6.y + 38, "BULLET TYPE");
 
     if(!d_drawparticles)
         dp_translation = crx[CRX_DARK];
     else if(itemOn == 5 && d_drawparticles)
         dp_translation = crx[CRX_GOLD];
-    M_WriteText(GameDef6.x, GameDef6.y + 48, "BULLET TYPE");
+
+    M_WriteText(GameDef6.x, GameDef6.y + 48, "TELEPORT TYPE");
 
     if(!d_drawparticles)
         dp_translation = crx[CRX_DARK];
     else if(itemOn == 6 && d_drawparticles)
         dp_translation = crx[CRX_GOLD];
-
-    M_WriteText(GameDef6.x, GameDef6.y + 58, "TELEPORT TYPE");
+    M_WriteText(GameDef6.x, GameDef6.y + 58, "BFG CLOUD WITH PARTICLES");
 
     if(!d_drawparticles)
         dp_translation = crx[CRX_DARK];
     else if(itemOn == 7 && d_drawparticles)
         dp_translation = crx[CRX_GOLD];
-    M_WriteText(GameDef6.x, GameDef6.y + 68, "BFG CLOUD WITH PARTICLES");
+    M_WriteText(GameDef6.x, GameDef6.y + 68, "BFG Explosion Particles");
 
     if(!d_drawparticles)
         dp_translation = crx[CRX_DARK];
     else if(itemOn == 8 && d_drawparticles)
         dp_translation = crx[CRX_GOLD];
-    M_WriteText(GameDef6.x, GameDef6.y + 78, "BFG Explosion Particles");
+    M_WriteText(GameDef6.x, GameDef6.y + 78, "ROCKET PARTICLE-TRAILS");
 
     if(!d_drawparticles)
         dp_translation = crx[CRX_DARK];
     else if(itemOn == 9 && d_drawparticles)
         dp_translation = crx[CRX_GOLD];
-    M_WriteText(GameDef6.x, GameDef6.y + 88, "ROCKET PARTICLE-TRAILS");
-
-    if(!d_drawparticles)
-        dp_translation = crx[CRX_DARK];
-    else if(itemOn == 10 && d_drawparticles)
-        dp_translation = crx[CRX_GOLD];
-    M_WriteText(GameDef6.x, GameDef6.y + 98, "Rocket Explosion Particles");
+    M_WriteText(GameDef6.x, GameDef6.y + 88, "Rocket Explosion Particles");
 
     if(!d_drawparticles || gamemode != commercial)
         dp_translation = crx[CRX_DARK];
-    else if(itemOn == 11 && d_drawparticles && gamemode == commercial)
+    else if(itemOn == 10 && d_drawparticles && gamemode == commercial)
         dp_translation = crx[CRX_GOLD];
-    M_WriteText(GameDef6.x, GameDef6.y + 108, "SPAWN FLIES FOR DEAD CHAINGUNNERS");
+    M_WriteText(GameDef6.x, GameDef6.y + 98, "SPAWN FLIES FOR DEAD CHAINGUNNERS");
+
+    if(!d_drawparticles)
+        dp_translation = crx[CRX_DARK];
+    else if(itemOn == 11 && d_drawparticles)
+        dp_translation = crx[CRX_GOLD];
+    M_WriteText(GameDef6.x, GameDef6.y + 108, "Enemies & hangings bleed randomly");
 
     if(!d_drawparticles)
         dp_translation = crx[CRX_DARK];
     else if(itemOn == 12 && d_drawparticles)
         dp_translation = crx[CRX_GOLD];
-    M_WriteText(GameDef6.x, GameDef6.y + 118, "Enemies & hangings bleed randomly");
+    M_WriteText(GameDef6.x, GameDef6.y + 118, "Particle sounds For Bullets & Flies");
 
     if(bloodsplat_particle == 0)
     {
@@ -5605,17 +5604,17 @@ void M_DrawGame6(void)
             dp_translation = crx[CRX_DARK];
         else
             dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef6.x + 232, GameDef6.y + 38, "SPRITES");
+        M_WriteText(GameDef6.x + 232, GameDef6.y + 28, "SPRITES");
     }
     else if(bloodsplat_particle == 1)
     {
         dp_translation = crx[CRX_GOLD];
-        M_WriteText(GameDef6.x + 215, GameDef6.y + 38, "PARTICLES");
+        M_WriteText(GameDef6.x + 215, GameDef6.y + 28, "PARTICLES");
     }
     else if(bloodsplat_particle == 2)
     {
         dp_translation = crx[CRX_RED];
-        M_WriteText(GameDef6.x + 250, GameDef6.y + 38, "BOTH");
+        M_WriteText(GameDef6.x + 250, GameDef6.y + 28, "BOTH");
     }
 
     if(bulletpuff_particle == 0)
@@ -5624,17 +5623,17 @@ void M_DrawGame6(void)
             dp_translation = crx[CRX_DARK];
         else
             dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef6.x + 232, GameDef6.y + 48, "SPRITES");
+        M_WriteText(GameDef6.x + 232, GameDef6.y + 38, "SPRITES");
     }
     else if(bulletpuff_particle == 1)
     {
         dp_translation = crx[CRX_GOLD];
-        M_WriteText(GameDef6.x + 215, GameDef6.y + 48, "PARTICLES");
+        M_WriteText(GameDef6.x + 215, GameDef6.y + 38, "PARTICLES");
     }
     else if(bulletpuff_particle == 2)
     {
         dp_translation = crx[CRX_RED];
-        M_WriteText(GameDef6.x + 250, GameDef6.y + 48, "BOTH");
+        M_WriteText(GameDef6.x + 250, GameDef6.y + 38, "BOTH");
     }
 
     if(teleport_particle == 0)
@@ -5643,20 +5642,31 @@ void M_DrawGame6(void)
             dp_translation = crx[CRX_DARK];
         else
             dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef6.x + 232, GameDef6.y + 58, "SPRITES");
+        M_WriteText(GameDef6.x + 232, GameDef6.y + 48, "SPRITES");
     }
     else if(teleport_particle == 1)
     {
         dp_translation = crx[CRX_GOLD];
-        M_WriteText(GameDef6.x + 215, GameDef6.y + 58, "PARTICLES");
+        M_WriteText(GameDef6.x + 215, GameDef6.y + 48, "PARTICLES");
     }
     else if(teleport_particle == 2)
     {
         dp_translation = crx[CRX_RED];
-        M_WriteText(GameDef6.x + 250, GameDef6.y + 58, "BOTH");
+        M_WriteText(GameDef6.x + 250, GameDef6.y + 48, "BOTH");
     }
 
     if(d_drawbfgcloud)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(GameDef6.x + 266, GameDef6.y + 58, "ON");
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(GameDef6.x + 258, GameDef6.y + 58, "OFF");
+    }
+
+    if(d_drawbfgexplosions)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef6.x + 266, GameDef6.y + 68, "ON");
@@ -5667,7 +5677,7 @@ void M_DrawGame6(void)
         M_WriteText(GameDef6.x + 258, GameDef6.y + 68, "OFF");
     }
 
-    if(d_drawbfgexplosions)
+    if(d_drawrockettrails)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef6.x + 266, GameDef6.y + 78, "ON");
@@ -5678,7 +5688,7 @@ void M_DrawGame6(void)
         M_WriteText(GameDef6.x + 258, GameDef6.y + 78, "OFF");
     }
 
-    if(d_drawrockettrails)
+    if(d_drawrocketexplosions)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef6.x + 266, GameDef6.y + 88, "ON");
@@ -5689,7 +5699,7 @@ void M_DrawGame6(void)
         M_WriteText(GameDef6.x + 258, GameDef6.y + 88, "OFF");
     }
 
-    if(d_drawrocketexplosions)
+    if(d_spawnflies)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef6.x + 266, GameDef6.y + 98, "ON");
@@ -5700,7 +5710,7 @@ void M_DrawGame6(void)
         M_WriteText(GameDef6.x + 258, GameDef6.y + 98, "OFF");
     }
 
-    if(d_spawnflies)
+    if(d_dripblood)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef6.x + 266, GameDef6.y + 108, "ON");
@@ -5711,7 +5721,7 @@ void M_DrawGame6(void)
         M_WriteText(GameDef6.x + 258, GameDef6.y + 108, "OFF");
     }
 
-    if(d_dripblood)
+    if(particle_sounds)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef6.x + 266, GameDef6.y + 118, "ON");
@@ -5729,19 +5739,10 @@ void M_DrawGame6(void)
         dp_translation = crx[CRX_GOLD];
         if (itemOn == 1 && fsize == 12361532)
             string = "NO WEAPON CASINGS FOR CHEX";
-        if (itemOn > 3 && itemOn < 13 && !d_drawparticles)
+        if (itemOn > 2 && itemOn < 12 && !d_drawparticles)
             string = "YOU MUST ENABLE 'DRAW PARTICLES' FIRST!";
-        if (itemOn == 11 && d_drawparticles && (gamemode == retail || gamemode == registered || gamemode == shareware))
+        if (itemOn == 10 && d_drawparticles && (gamemode == retail || gamemode == registered || gamemode == shareware))
             string = "THIS IS ONLY AVAILABLE FOR DOOM 2";
-#ifdef WII
-        if(itemOn == 12)
-        {
-            if(fsize != 28422764 && fsize != 19321722 && fsize != 12361532)
-                string = "YOU MUST QUIT AND RESTART TO TAKE EFFECT.";
-            else
-                string = "NO BETA MODE FOR CHEX, HACX & FREEDOOM.";
-        }
-#endif
         x = ORIGWIDTH/2 - M_StringWidth(string) / 2;
         M_WriteText(x, GameDef6.y + 138, string);
     }
@@ -5815,8 +5816,7 @@ void M_DrawGame7(void)
         M_WriteText(GameDef7.x + 258, GameDef7.y + 28, "OFF");
     }
 
-#ifdef WII
-    if(beta_style_mode)
+    if(d_thrust)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef7.x + 266, GameDef7.y + 38, "ON");
@@ -5825,6 +5825,18 @@ void M_DrawGame7(void)
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(GameDef7.x + 258, GameDef7.y + 38, "OFF");
+    }
+
+#ifdef WII
+    if(beta_style_mode)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(GameDef7.x + 266, GameDef7.y + 48, "ON");
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(GameDef7.x + 258, GameDef7.y + 48, "OFF");
     }
 #endif
 
@@ -5843,7 +5855,7 @@ void M_DrawGame7(void)
                 string = "TO USE, HOLD DOWN 'X' AFTER BEING ATTACKED.";
         }
 #ifdef WII
-        if(itemOn == 4)
+        if(itemOn == 5)
         {
             if(fsize != 28422764 && fsize != 19321722 && fsize != 12361532)
                 string = "YOU MUST QUIT AND RESTART TO TAKE EFFECT.";
@@ -10563,6 +10575,21 @@ void M_DripBlood(int choice)
                 d_dripblood = true;
             break;
         }
+    }
+}
+
+void M_ParticleSounds(int choice)
+{
+    switch(choice)
+    {
+      case 0:
+        if (particle_sounds)
+            particle_sounds = false;
+        break;
+      case 1:
+        if (particle_sounds == false)
+            particle_sounds = true;
+        break;
     }
 }
 

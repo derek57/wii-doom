@@ -9399,7 +9399,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] =
     // Particle (MT_PARTICLE)
     {
         /* doomednum            */ -1,
-        /* spawnstate           */ S_PART1,
+        /* spawnstate           */ S_TNT1,
         /* spawnhealth          */ 1000,
         /* gibhealth            */ 0,
         /* seestate             */ S_NULL,

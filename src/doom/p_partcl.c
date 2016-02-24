@@ -314,6 +314,7 @@ static void P_ExplosionParticles(fixed_t, fixed_t, fixed_t, byte, byte);
 
 extern dboolean is_liquid_floor;
 extern dboolean is_liquid_ceiling;
+extern dboolean water_hit;
 
 //
 // P_GenVelocities
@@ -602,7 +603,8 @@ static void P_RunEffect(mobj_t *actor, unsigned int effects)
 
             if (actor->effect_flies_sound_timer == 60)
             {
-                S_StartSound(actor, sfx_eefly);
+                if (particle_sounds)
+                    S_StartSound(actor, sfx_eefly);
 
                 actor->effect_flies_sound_timer = 0;
             }
@@ -862,11 +864,13 @@ void P_SmokePuff(int count, fixed_t x, fixed_t y, fixed_t z, angle_t angle, int 
         // live longer and accelerate downward faster
         ttl  = 30;
         accz = -FRACUNIT/8;
+        water_hit = true;
     }
     else
     {
         ttl  = 15;
         accz = -FRACUNIT/22;
+        water_hit = false;
     }
 
     for ( ; count; --count)

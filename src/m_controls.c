@@ -287,6 +287,7 @@ void M_BindBaseControls(void)
     M_BindVariable("drip_blood",             &d_dripblood);
     M_BindVariable("vsync",                  &d_vsync);
     M_BindVariable("aimhelp",                &aiming_help);
+    M_BindVariable("particle_sound",         &particle_sounds);
 #ifdef WII
     M_BindVariable("key_shoot",              &joy_r);
     M_BindVariable("key_open",               &joy_l);

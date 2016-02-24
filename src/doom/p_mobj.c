@@ -74,6 +74,9 @@ int                 r_blood = r_blood_default;
 int                 r_bloodsplats_max = r_bloodsplats_max_default;
 int                 r_bloodsplats_total;
 
+dboolean            water_hit;
+dboolean            hit_enemy;
+
 mobj_t              *bloodsplats[r_bloodsplats_max_max];
 
 mapthing_t          itemrespawnque[ITEMQUESIZE];
@@ -82,7 +85,6 @@ void                G_PlayerReborn (int player);
 void                (*P_BloodSplatSpawner)(fixed_t, fixed_t, int, int, mobj_t *);
 
 extern dboolean     not_walking;
-//extern dboolean     in_slime;
 
 extern fixed_t      animatedliquiddiffs[64];
 extern fixed_t      attackrange;
@@ -666,10 +668,6 @@ floater:
 
             if (delta > 30)
             {
-                int damage = (int)((delta-30)/2);
-                if (damage < 1)
-                    damage = 1;
-
                 if (d_fallingdamage && !isliquid[mo->subsector->sector->floorpic])
                 {
                     P_MonsterFallingDamage (mo);
@@ -1699,6 +1697,21 @@ void P_SpawnParticle(mobj_t *target, fixed_t x, fixed_t y, fixed_t z, angle_t an
         {
             if(attackrange != MELEERANGE)
                 P_DrawSplash2(32, x, y, z, angle, updown, 1);
+        }
+
+        if (particle_sounds)
+        {
+            mobj_t *mo = P_SpawnMobj(x, y, z, MT_PARTICLE);
+
+            if (isliquid[mo->subsector->sector->floorpic] && water_hit)
+                S_StartSound(mo, sfx_gloop);
+            else if (!hit_enemy && !isliquid[mo->subsector->sector->floorpic])
+            {
+                int t = P_Random() % 6;
+
+                if (t > 0)
+                    S_StartSound(mo, sfx_ric1 + t);
+            }
         }
     }
 }

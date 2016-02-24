@@ -103,6 +103,9 @@ dboolean         infight;
 mobj_t          *onmobj;
 
 
+extern dboolean hit_enemy;
+
+
 void (*P_BloodSplatSpawner)(fixed_t, fixed_t, int, int, mobj_t *);
 
 
@@ -1739,13 +1742,19 @@ hitline:
     // shoot a thing
     th = in->d.thing;
     if (th == shootthing)
+    {
+        hit_enemy = false;
         return true;                    // can't shoot self
+    }
 
     if (th->effect_flies_spawned == true)
         th->effect_flies_shot = true;
 
     if (!(th->flags & MF_SHOOTABLE))
+    {
+        hit_enemy = false;
         return true;                    // corpse or something
+    }
 
     // check angles to see if the thing can be aimed at
     dist = FixedMul(attackrange, in->frac);
@@ -1766,6 +1775,8 @@ hitline:
     x = trace.x + FixedMul(trace.dx, frac);
     y = trace.y + FixedMul(trace.dy, frac);
     z = shootz + FixedMul(aimslope, FixedMul(frac, attackrange));
+
+    hit_enemy = true;
 
     // Spawn bullet puffs or blood spots,
     // depending on target type.

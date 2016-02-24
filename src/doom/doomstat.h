@@ -381,6 +381,7 @@ extern  dboolean         d_drawbfgexplosions;
 extern  dboolean         d_spawnflies;
 extern  dboolean         d_dripblood;
 extern  dboolean         d_vsync;
+extern  dboolean         particle_sounds;
 /*
 extern  dboolean         nerve;
 extern  dboolean         chex;

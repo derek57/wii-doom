@@ -266,6 +266,12 @@ typedef enum
     sfx_eefly,  // buzzing flies
     sfx_muck,
     sfx_squish,
+    sfx_ric1,
+    sfx_ric2,
+    sfx_ric3,
+    sfx_ric4,
+    sfx_ric5,
+    sfx_ric6,
 
     NUMSFX
 } sfxenum_t;

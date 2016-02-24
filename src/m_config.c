@@ -204,6 +204,7 @@ default_t   doom_defaults_list[] =
     CONFIG_VARIABLE_INT                (drip_blood),
     CONFIG_VARIABLE_INT                (vsync),
     CONFIG_VARIABLE_INT                (aimhelp),
+    CONFIG_VARIABLE_INT                (particle_sound),
     CONFIG_VARIABLE_INT                (key_shoot),
     CONFIG_VARIABLE_INT                (key_open),
     CONFIG_VARIABLE_INT                (key_menu),

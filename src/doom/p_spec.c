@@ -3043,9 +3043,7 @@ terraintype_t *TerrainTypeDefs = NULL;
 
 void P_LoadTerrainTypeDefs(void)
 {
-    short *shrtptr, temp;
-    int   lumpnum, i, j;
-    char  *chrptr, name[9];
+    int   lumpnum;
 
     if ((lumpnum = W_CheckNumForName("TERTYPES")) == -1)
     {
@@ -3054,7 +3052,10 @@ void P_LoadTerrainTypeDefs(void)
     }
     else
     {
-        shrtptr = W_CacheLumpNum(lumpnum, PU_CACHE);
+        int   i, j;
+        char  *chrptr, name[9];
+
+        short *shrtptr = W_CacheLumpNum(lumpnum, PU_CACHE);
         numterraindefs = SHORT(*shrtptr);
         shrtptr++;
 
@@ -3068,6 +3069,8 @@ void P_LoadTerrainTypeDefs(void)
 
         for (i = 0; i < numterraindefs; i++)
         {
+            short temp;
+
             // get null-terminated flat name
             for (j = 0; j < 9; j++)
                 name[j] = *chrptr++;
