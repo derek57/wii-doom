@@ -68,6 +68,7 @@ dboolean isvowel(const char ch);
 char *removeext(const char *file);
 int search_string(char src[], char str[]);
 char *M_SubString(const char *str, size_t begin, size_t len);
+int randInRange(int min, int max);
 
 #endif
 

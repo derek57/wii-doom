@@ -78,7 +78,7 @@ char *sprnames[] =
     "BRSK", "BYSK", "BSHL", "BCLL", "BBOX", "BBXP", "BPNS", "BPNV", "BBSS", "BCL1",
     "BELC", "BPL4", "BPL7", "BPL6", "BSMT", "BHED", "BPSS", "BSPS", "BCHG", "BCHF",
     "BPLG", "BPLF", "BMSL", "BPL1", "BPL2", "BBL4", "CAS1", "CAS2", "CAS7", "PART",
-    "BLDS", "NKGS",
+    "BLDS", "NKGS", "TGLT",
 
     // [BH] Sprites 186 to 285 (100 extra sprite names to use in DeHackEd patches)
     "SP00", "SP01", "SP02", "SP03", "SP04", "SP05", "SP06", "SP07", "SP08", "SP09",
@@ -184,6 +184,8 @@ void A_CounterSwitch();
 void A_FadeOut();
 void A_CounterJump();
 void A_EjectCasing();
+void A_SpawnTeleGlitter();
+void A_AccTeleGlitter();
 
 state_t states[NUMSTATES] =
 {
@@ -1972,6 +1974,18 @@ state_t states[NUMSTATES] =
     { SPR_NKGS,  5,                                5,               NULL,              S_NUKAGESPLASH3    }, // S_NUKAGESPLASH2
     { SPR_NKGS,  6,                                5,               NULL,              S_NUKAGESPLASH4    }, // S_NUKAGESPLASH3
     { SPR_NKGS,  7,                                5,               NULL,              S_NULL             }, // S_NUKAGESPLASH4
+    { SPR_TGLT,  0,                                8,               A_SpawnTeleGlitter,S_TELEGLITGEN1     }, // S_TELEGLITGEN1
+    { SPR_TGLT,  5,                                8,               A_SpawnTeleGlitter,S_TELEGLITGEN2     }, // S_TELEGLITGEN2
+    { SPR_TGLT,  0 | FF_FULLBRIGHT,                2,               NULL,              S_TELEGLITTER1_2   }, // S_TELEGLITTER1_1
+    { SPR_TGLT,  1 | FF_FULLBRIGHT,                2,               A_AccTeleGlitter,  S_TELEGLITTER1_3   }, // S_TELEGLITTER1_2
+    { SPR_TGLT,  2 | FF_FULLBRIGHT,                2,               NULL,              S_TELEGLITTER1_4   }, // S_TELEGLITTER1_3
+    { SPR_TGLT,  3 | FF_FULLBRIGHT,                2,               A_AccTeleGlitter,  S_TELEGLITTER1_5   }, // S_TELEGLITTER1_4
+    { SPR_TGLT,  4 | FF_FULLBRIGHT,                2,               NULL,              S_TELEGLITTER1_1   }, // S_TELEGLITTER1_5
+    { SPR_TGLT,  5 | FF_FULLBRIGHT,                2,               NULL,              S_TELEGLITTER2_2   }, // S_TELEGLITTER2_1
+    { SPR_TGLT,  6 | FF_FULLBRIGHT,                2,               A_AccTeleGlitter,  S_TELEGLITTER2_3   }, // S_TELEGLITTER2_2
+    { SPR_TGLT,  7 | FF_FULLBRIGHT,                2,               NULL,              S_TELEGLITTER2_4   }, // S_TELEGLITTER2_3
+    { SPR_TGLT,  8 | FF_FULLBRIGHT,                2,               A_AccTeleGlitter,  S_TELEGLITTER2_5   }, // S_TELEGLITTER2_4
+    { SPR_TGLT,  9 | FF_FULLBRIGHT,                2,               NULL,              S_TELEGLITTER2_1   }, // S_TELEGLITTER2_5
 
     { SPR_PLAY, 14,                                5,               NULL,              S_PLAY_GDIE2       }, // S_PLAY_GDIE1
     { SPR_PLAY, 15,                                5,               A_SkullPop,        S_PLAY_GDIE3       }, // S_PLAY_GDIE2
@@ -3547,7 +3561,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] =
     // Teleport Destination (MT_TELEPORTMAN)
     {
         /* doomednum            */ TeleportDestination,
-        /* spawnstate           */ S_NULL,
+        /* spawnstate           */ S_TELEGLITGEN1,
         /* spawnhealth          */ 1000,
         /* gibhealth            */ 0,
         /* seestate             */ S_NULL,
@@ -9584,6 +9598,158 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] =
         /* plural1              */ "",
         /* name2                */ "",
         /* plural2              */ ""
+    },
+
+    // Teleport Glitter Generator (MT_TELEGLITGEN)
+    {
+        /* doomednum            */ -1,
+        /* spawnstate           */ S_TELEGLITGEN1,
+        /* spawnhealth          */ 1000,
+        /* gibhealth            */ 0,
+        /* seestate             */ S_NULL,
+        /* seesound             */ sfx_None,
+        /* reactiontime         */ 8,
+        /* attacksound          */ sfx_None,
+        /* painstate            */ S_NULL,
+        /* painchance           */ 0,
+        /* painsound            */ sfx_None,
+        /* meleestate           */ S_NULL,
+        /* missilestate         */ S_NULL,
+        /* deathstate           */ S_NULL,
+        /* xdeathstate          */ S_NULL,
+        /* deathsound           */ sfx_None,
+        /* speed                */ 0,
+        /* radius               */ 20 * FRACUNIT,
+        /* height               */ 16 * FRACUNIT,
+        /* projectilepassheight */ 0,
+        /* mass                 */ 100,
+        /* damage               */ 0,
+        /* activesound          */ sfx_None,
+        /* flags                */ MF_NOBLOCKMAP | MF_NOGRAVITY | MF_NOSECTOR,
+        /* flags2               */ MF2_NOLIQUIDBOB,
+        /* raisestate           */ S_NULL,
+        /* frames               */ 0,
+        /* blood                */ 0,
+        /* shadowoffset         */ 0,
+        /* particlefx           */ 0,
+        /* name1                */ "Teleport Glitter Generator",
+        /* plural1              */ "",
+        /* name2                */ "",
+        /* plural2              */ ""
+    },
+
+    // Teleport Glitter Generator 2 (MT_TELEGLITGEN2)
+    {
+        /* doomednum            */ -1,
+        /* spawnstate           */ S_TELEGLITGEN2,
+        /* spawnhealth          */ 1000,
+        /* gibhealth            */ 0,
+        /* seestate             */ S_NULL,
+        /* seesound             */ sfx_None,
+        /* reactiontime         */ 8,
+        /* attacksound          */ sfx_None,
+        /* painstate            */ S_NULL,
+        /* painchance           */ 0,
+        /* painsound            */ sfx_None,
+        /* meleestate           */ S_NULL,
+        /* missilestate         */ S_NULL,
+        /* deathstate           */ S_NULL,
+        /* xdeathstate          */ S_NULL,
+        /* deathsound           */ sfx_None,
+        /* speed                */ 0,
+        /* radius               */ 20 * FRACUNIT,
+        /* height               */ 16 * FRACUNIT,
+        /* projectilepassheight */ 0,
+        /* mass                 */ 100,
+        /* damage               */ 0,
+        /* activesound          */ sfx_None,
+        /* flags                */ MF_NOBLOCKMAP | MF_NOGRAVITY | MF_NOSECTOR,
+        /* flags2               */ MF2_NOLIQUIDBOB,
+        /* raisestate           */ S_NULL,
+        /* frames               */ 0,
+        /* blood                */ 0,
+        /* shadowoffset         */ 0,
+        /* particlefx           */ 0,
+        /* name1                */ "Teleport Glitter Generator 2",
+        /* plural1              */ "",
+        /* name2                */ "",
+        /* plural2              */ ""
+    },
+
+    // Teleport Glitter (MT_TELEGLITTER)
+    {
+        /* doomednum            */ -1,
+        /* spawnstate           */ S_TELEGLITTER1_1,
+        /* spawnhealth          */ 1000,
+        /* gibhealth            */ 0,
+        /* seestate             */ S_NULL,
+        /* seesound             */ sfx_None,
+        /* reactiontime         */ 8,
+        /* attacksound          */ sfx_None,
+        /* painstate            */ S_NULL,
+        /* painchance           */ 0,
+        /* painsound            */ sfx_None,
+        /* meleestate           */ S_NULL,
+        /* missilestate         */ S_NULL,
+        /* deathstate           */ S_NULL,
+        /* xdeathstate          */ S_NULL,
+        /* deathsound           */ sfx_None,
+        /* speed                */ 0,
+        /* radius               */ 20 * FRACUNIT,
+        /* height               */ 16 * FRACUNIT,
+        /* projectilepassheight */ 0,
+        /* mass                 */ 100,
+        /* damage               */ 0,
+        /* activesound          */ sfx_None,
+        /* flags                */ MF_NOBLOCKMAP | MF_NOGRAVITY | MF_MISSILE,
+        /* flags2               */ MF2_NOLIQUIDBOB,
+        /* raisestate           */ S_NULL,
+        /* frames               */ 0,
+        /* blood                */ 0,
+        /* shadowoffset         */ 0,
+        /* particlefx           */ 0,
+        /* name1                */ "Teleport Glitter",
+        /* plural1              */ "",
+        /* name2                */ "",
+        /* plural2              */ ""
+    },
+
+    // Teleport Glitter 2 (MT_TELEGLITTER2)
+    {
+        /* doomednum            */ -1,
+        /* spawnstate           */ S_TELEGLITTER2_1,
+        /* spawnhealth          */ 1000,
+        /* gibhealth            */ 0,
+        /* seestate             */ S_NULL,
+        /* seesound             */ sfx_None,
+        /* reactiontime         */ 8,
+        /* attacksound          */ sfx_None,
+        /* painstate            */ S_NULL,
+        /* painchance           */ 0,
+        /* painsound            */ sfx_None,
+        /* meleestate           */ S_NULL,
+        /* missilestate         */ S_NULL,
+        /* deathstate           */ S_NULL,
+        /* xdeathstate          */ S_NULL,
+        /* deathsound           */ sfx_None,
+        /* speed                */ 0,
+        /* radius               */ 20 * FRACUNIT,
+        /* height               */ 16 * FRACUNIT,
+        /* projectilepassheight */ 0,
+        /* mass                 */ 100,
+        /* damage               */ 0,
+        /* activesound          */ sfx_None,
+        /* flags                */ MF_NOBLOCKMAP | MF_NOGRAVITY | MF_MISSILE,
+        /* flags2               */ MF2_NOLIQUIDBOB,
+        /* raisestate           */ S_NULL,
+        /* frames               */ 0,
+        /* blood                */ 0,
+        /* shadowoffset         */ 0,
+        /* particlefx           */ 0,
+        /* name1                */ "Teleport Glitter 2",
+        /* plural1              */ "",
+        /* name2                */ "",
+        /* plural2              */ ""
     }
 };
 
@@ -9953,7 +10119,7 @@ offset_t sproffsets[] =
     { "MEGAC0",     12,   40,  25,  25, MT_MEGA         }, //   12,   32
     { "MEGAD0",     12,   40,  25,  25, MT_MEGA         }, //   12,   32
     { "MGUNA0",     27,   14,  54,  16, MT_CHAINGUN     }, //   25,   18
-    { "MISFA0",   -134, -106,  53,  31, NOTYPE          }, // -136, -105
+    { "MISFA0",   -134, -105,  53,  31, NOTYPE          }, // -136, -105
     { "MISFB0",   -123, -101,  73,  51, NOTYPE          }, // -126, -101
     { "MISFC0",   -114,  -94,  88,  58, NOTYPE          }, // -117,  -94
     { "MISFD0",   -109,  -81, 105,  79, NOTYPE          }, // -112,  -81

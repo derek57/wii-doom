@@ -288,6 +288,7 @@ void M_BindBaseControls(void)
     M_BindVariable("vsync",                  &d_vsync);
     M_BindVariable("aimhelp",                &aiming_help);
     M_BindVariable("particle_sound",         &particle_sounds);
+    M_BindVariable("spawn_teleport_glitter", &d_spawnteleglit);
 #ifdef WII
     M_BindVariable("key_shoot",              &joy_r);
     M_BindVariable("key_open",               &joy_l);

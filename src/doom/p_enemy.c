@@ -3445,3 +3445,43 @@ void A_CasingThrust(mobj_t *actor)
     actor->momz = momz + (P_SubRandom(pr_casing) << 8);
 }
 
+//----------------------------------------------------------------------------
+//
+// PROC A_SpawnTeleGlitter
+//
+//----------------------------------------------------------------------------
+
+void A_SpawnTeleGlitter(mobj_t * actor)
+{
+    mobjtype_t type;
+    mobj_t     *mo;
+
+    if (d_spawnteleglit == 1)
+        type = MT_TELEGLITTER;
+    else if (d_spawnteleglit == 2)
+        type = MT_TELEGLITTER2;
+    else if (d_spawnteleglit == 3)
+        type = randInRange(0, 1) ? MT_TELEGLITTER : MT_TELEGLITTER2;
+    else
+        return;
+
+    mo = P_SpawnMobj(actor->x + ((P_Random() & 31) - 16) * FRACUNIT,
+                     actor->y + ((P_Random() & 31) - 16) * FRACUNIT,
+                     actor->subsector->sector->floorheight, type);
+    mo->momz = FRACUNIT / 4;
+}
+
+//----------------------------------------------------------------------------
+//
+// PROC A_AccTeleGlitter
+//
+//----------------------------------------------------------------------------
+
+void A_AccTeleGlitter(mobj_t * actor)
+{
+    if (++actor->health > 35)
+    {
+        actor->momz += actor->momz / 2;
+    }
+}
+

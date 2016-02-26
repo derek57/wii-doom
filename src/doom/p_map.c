@@ -1922,8 +1922,8 @@ fixed_t P_AimLineAttack(mobj_t *t1, angle_t angle, fixed_t distance)
 void P_LineAttack(mobj_t *t1, angle_t angle, fixed_t distance, fixed_t slope, int damage)
 {
     // [crispy] smooth laser spot movement with uncapped framerate
-    const fixed_t t1x = (damage == INT_MIN ? viewx : t1->x);
-    const fixed_t t1y = (damage == INT_MIN ? viewy : t1->y);
+    const fixed_t t1x = (damage == INT_MIN) ? viewx : t1->x;
+    const fixed_t t1y = (damage == INT_MIN) ? viewy : t1->y;
     fixed_t       x2, y2;
     int           traverseflags;
 
@@ -1932,7 +1932,7 @@ void P_LineAttack(mobj_t *t1, angle_t angle, fixed_t distance, fixed_t slope, in
     shootthing = t1;
     la_damage = damage;
 
-    shootz = t1->z + (t1->height >> 1) + 8 * FRACUNIT;
+    shootz = (damage == INT_MIN) ? viewz : t1->z + (t1->height >> 1) + 8 * FRACUNIT; 
 /*
     if((t1->flags2 & MF2_FEETARECLIPPED) && d_footclip)
         shootz -= FOOTCLIPSIZE;

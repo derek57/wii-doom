@@ -169,11 +169,12 @@ line_t*         linespeciallist[MAXLINEANIMS];
 
 anim_t*         lastanim;
 
-dboolean         in_slime;
-dboolean         levelTimer;
-dboolean         *isliquid;
-dboolean         is_liquid_floor;
-dboolean         is_liquid_ceiling;
+dboolean        in_slime;
+dboolean        levelTimer;
+dboolean        *isliquid;
+dboolean        *isteleport;
+dboolean        is_liquid_floor;
+dboolean        is_liquid_ceiling;
 
 char            *playername = playername_default;
 
@@ -186,7 +187,7 @@ msecnode_t      *headsecnode = NULL;
 msecnode_t      *sector_list = NULL;    // phares 3/16/98
 
 
-extern dboolean  noclip_on;
+extern dboolean noclip_on;
 
 
 //
@@ -263,6 +264,42 @@ void P_InitPicAnims (void)
     int size = (numflats + 1) * sizeof(dboolean);
 
     isliquid = Z_Malloc(size, PU_STATIC, NULL);
+    isteleport = Z_Calloc(1, size, PU_STATIC, NULL);
+
+    // [BH] indicate obvious teleport textures
+    if (BTSX)
+    {
+        isteleport[R_CheckFlatNumForName("SLIME09")] = true;
+        isteleport[R_CheckFlatNumForName("SLIME12")] = true;
+        isteleport[R_CheckFlatNumForName("TELEPRT1")] = true;
+        isteleport[R_CheckFlatNumForName("TELEPRT2")] = true;
+        isteleport[R_CheckFlatNumForName("TELEPRT3")] = true;
+        isteleport[R_CheckFlatNumForName("TELEPRT4")] = true;
+        isteleport[R_CheckFlatNumForName("TELEPRT5")] = true;
+        isteleport[R_CheckFlatNumForName("TELEPRT6")] = true;
+        isteleport[R_CheckFlatNumForName("SLIME05")] = true;
+        isteleport[R_CheckFlatNumForName("SHNPRT02")] = true;
+        isteleport[R_CheckFlatNumForName("SHNPRT03")] = true;
+        isteleport[R_CheckFlatNumForName("SHNPRT04")] = true;
+        isteleport[R_CheckFlatNumForName("SHNPRT05")] = true;
+        isteleport[R_CheckFlatNumForName("SHNPRT06")] = true;
+        isteleport[R_CheckFlatNumForName("SHNPRT07")] = true;
+        isteleport[R_CheckFlatNumForName("SHNPRT08")] = true;
+        isteleport[R_CheckFlatNumForName("SHNPRT09")] = true;
+        isteleport[R_CheckFlatNumForName("SHNPRT10")] = true;
+        isteleport[R_CheckFlatNumForName("SHNPRT11")] = true;
+        isteleport[R_CheckFlatNumForName("SHNPRT12")] = true;
+        isteleport[R_CheckFlatNumForName("SHNPRT13")] = true;
+        isteleport[R_CheckFlatNumForName("SHNPRT14")] = true;
+        isteleport[R_CheckFlatNumForName("SLIME08")] = true;
+    }
+    else
+    {
+        isteleport[R_CheckFlatNumForName("GATE1")] = true;
+        isteleport[R_CheckFlatNumForName("GATE2")] = true;
+        isteleport[R_CheckFlatNumForName("GATE3")] = true;
+        isteleport[R_CheckFlatNumForName("GATE4")] = true;
+    }
 }
 
 //

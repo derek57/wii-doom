@@ -199,6 +199,7 @@ int              bloodsplat_particle = 0;
 int              bulletpuff_particle = 0;
 int              teleport_particle = 0;
 int              d_uncappedframerate = 0;
+int              d_spawnteleglit = 0;
 
 // defaulted values
 int              mouseSensitivity = 5;

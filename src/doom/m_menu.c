@@ -1299,11 +1299,11 @@ int                        cheeting;
 int                        coordinates_info = 0;
 int                        version_info = 0;
 #ifdef WII
-int                        key_controls_start_in_cfg_at_pos = 119;
-int                        key_controls_end_in_cfg_at_pos = 133;
-#else
-int                        key_controls_start_in_cfg_at_pos = 118;
+int                        key_controls_start_in_cfg_at_pos = 120;
 int                        key_controls_end_in_cfg_at_pos = 134;
+#else
+int                        key_controls_start_in_cfg_at_pos = 119;
+int                        key_controls_end_in_cfg_at_pos = 135;
 #endif
 int                        tracknum = 1;
 int                        epi = 1;
@@ -1563,6 +1563,7 @@ void M_RocketExplosions(int choice);
 void M_SpawnFlies(int choice);
 void M_DripBlood(int choice);
 void M_ParticleSounds(int choice);
+void M_TeleportGlitter(int choice);
 void M_RespawnMonsters(int choice);
 void M_FastMonsters(int choice);
 void M_Autoaim(int choice);
@@ -2400,7 +2401,7 @@ static menuitem_t GameMenu[]=
     {2,"AUTOMAP TIMER",M_Timer,'t'},
     {2,"AUTOMAP AUTHORS",M_Authors,'a'},
     {2,"AUTOMAP MAP TITLE",M_MapName,'n'},
-    {2,"WEAPON CHANGE",M_WeaponChange,'w'},
+    {2,"",M_WeaponChange,'w'},
     {2,"WEAPON RECOIL",M_WeaponRecoil,'c'},
     {2,"RESPAWN MONSTERS",M_RespawnMonsters,'i'},
     {2,"FAST MONSTERS",M_FastMonsters,'d'},
@@ -2453,7 +2454,7 @@ static menuitem_t GameMenu2[]=
     {2,"RANDOMLY FLIP CORPSES & GUNS",M_Corpses,'d'},
     {2,"SHOW REVEALED SECRETS",M_Secrets,'z'},
     {2,"MESSAGES",M_ChangeMessages,'m'},
-    {2,"CHAINGUN FIRE RATE",M_ChaingunTics,'g'},
+    {2,"",M_ChaingunTics,'g'},
     {2,"FALLING DAMAGE",M_FallingDamage,'f'},
     {2,"INFINITE AMMO",M_InfiniteAmmo,'i'},
     {1,"",M_Game3,'n'}
@@ -2664,6 +2665,7 @@ enum
     game7_slimetrails,
     game7_aimbot,
     game7_thrust,
+    game7_teleportglitter,
 #ifdef WII
     game7_prbeta,
 #endif
@@ -2676,7 +2678,8 @@ static menuitem_t GameMenu7[]=
     {2,"Fix Wiggle Effect",M_FixWiggle,'w'},
     {2,"Remove Slime Trails",M_RemoveSlimeTrails,'s'},
     {2,"",M_AimingHelp,'a'},
-    {2,"PLAYER THRUST",M_PlayerThrust,'p'}
+    {2,"PLAYER THRUST",M_PlayerThrust,'p'},
+    {2,"Teleport Landings glitter type",M_TeleportGlitter,'g'},
 #ifdef WII
     ,
     {2,"PRE-RELEASE BETA MODE",M_Beta,'b'}
@@ -4642,6 +4645,13 @@ void M_DrawGame1(void)
         M_WriteText(GameDef.x + 153, GameDef.y + 78, "OFF");
     }
 
+    if(gameskill == sk_nightmare)
+        dp_translation = crx[CRX_DARK];
+    else if(itemOn == 9 && gameskill != sk_nightmare)
+        dp_translation = crx[CRX_GOLD];
+
+    M_WriteText(GameDef.x, GameDef.y + 88, "WEAPON CHANGE");
+
     if(use_vanilla_weapon_change == 1)
     {
         dp_translation = crx[CRX_DARK];
@@ -4716,6 +4726,8 @@ void M_DrawGame1(void)
             if ((itemOn > 4 && itemOn < 9 && d_statusmap && !modifiedgame) ||
                 (itemOn > 4 && itemOn < 8 && d_statusmap && modifiedgame))
                 string = "YOU NEED TO DISABLE AUTOMAP STATUS BAR FIRST!";
+            else if(itemOn == 9 && gameskill == sk_nightmare)
+                string = "NOT AVAILABLE FOR NIGHTMARE SKILL";
             else if ((itemOn == 11 || itemOn == 12))
                 string = "YOU MUST START A NEW GAME TO TAKE EFFECT.";
 
@@ -4860,6 +4872,13 @@ void M_DrawGame2(void)
         M_WriteText(GameDef2.x + 208, GameDef2.y + 88, "OFF");
     }
 
+    if(gameskill == sk_nightmare)
+        dp_translation = crx[CRX_DARK];
+    else if(itemOn == 10 && gameskill != sk_nightmare)
+        dp_translation = crx[CRX_GOLD];
+
+    M_WriteText(GameDef2.x, GameDef2.y + 98, "CHAINGUN FIRE RATE");
+
     if(chaingun_tics == 1)
     {
         dp_translation = crx[CRX_BLUE];
@@ -4914,6 +4933,8 @@ void M_DrawGame2(void)
         else if(itemOn == 6)
             string = "THIS OPTION IS NOT AVAILABLE FOR THE WII.";
 #endif
+        else if(itemOn == 10 && gameskill == sk_nightmare)
+            string = "NOT AVAILABLE FOR NIGHTMARE SKILL";
         x = ORIGWIDTH/2 - M_StringWidth(string) / 2;
         M_WriteText(x, GameDef2.y + 138, string);
     }
@@ -5799,7 +5820,7 @@ void M_DrawGame7(void)
         M_WriteText(GameDef7.x + 258, GameDef7.y + 18, "OFF");
     }
 
-    if(players[consoleplayer].cheats & CF_GODMODE)
+    if((players[consoleplayer].cheats & CF_GODMODE) || gameskill == sk_nightmare)
         dp_translation = crx[CRX_DARK];
     else if(itemOn == 3 && (!(players[consoleplayer].cheats & CF_GODMODE)))
         dp_translation = crx[CRX_GOLD];
@@ -5827,16 +5848,37 @@ void M_DrawGame7(void)
         M_WriteText(GameDef7.x + 258, GameDef7.y + 38, "OFF");
     }
 
-#ifdef WII
-    if(beta_style_mode)
+    if(d_spawnteleglit == 1)
+    {
+        dp_translation = crx[CRX_RED];
+        M_WriteText(GameDef7.x + 258, GameDef7.y + 48, "RED");
+    }
+    else if(d_spawnteleglit == 2)
+    {
+        dp_translation = crx[CRX_BLUE];
+        M_WriteText(GameDef7.x + 250, GameDef7.y + 48, "BLUE");
+    }
+    else if(d_spawnteleglit == 3)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef7.x + 266, GameDef7.y + 48, "ON");
+        M_WriteText(GameDef7.x + 233, GameDef7.y + 48, "RANDOM");
     }
     else
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(GameDef7.x + 258, GameDef7.y + 48, "OFF");
+    }
+
+#ifdef WII
+    if(beta_style_mode)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(GameDef7.x + 266, GameDef7.y + 68, "ON");
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(GameDef7.x + 258, GameDef7.y + 68, "OFF");
     }
 #endif
 
@@ -5853,9 +5895,12 @@ void M_DrawGame7(void)
                 string = "YOU NEED TO DISABLE GOD MODE FIRST!";
             else
                 string = "TO USE, HOLD DOWN 'X' AFTER BEING ATTACKED.";
+
+            if (gameskill == sk_nightmare)
+                string = "NOT AVAILABLE FOR NIGHTMARE SKILL";
         }
 #ifdef WII
-        if(itemOn == 5)
+        if(itemOn == 7)
         {
             if(fsize != 28422764 && fsize != 19321722 && fsize != 12361532)
                 string = "YOU MUST QUIT AND RESTART TO TAKE EFFECT.";
@@ -10401,6 +10446,21 @@ void M_PlayerThrust(int choice)
     }
 }
 
+void M_TeleportGlitter(int choice)
+{
+    switch(choice)
+    {
+      case 0:
+        if (d_spawnteleglit > 0)
+            d_spawnteleglit--;
+        break;
+      case 1:
+        if (d_spawnteleglit < 3)
+            d_spawnteleglit++;
+        break;
+    }
+}
+
 void M_Particles(int choice)
 {
     switch(choice)
@@ -10793,16 +10853,19 @@ void M_Trails(int choice)
 
 void M_ChaingunTics(int choice)
 {
-    switch(choice)
+    if (gameskill != sk_nightmare)
     {
-      case 0:
-        if (chaingun_tics < 4)
-            chaingun_tics++;
-        break;
-      case 1:
-        if (chaingun_tics > 1)
-            chaingun_tics--;
-        break;
+        switch(choice)
+        {
+          case 0:
+            if (chaingun_tics < 4)
+                chaingun_tics++;
+            break;
+          case 1:
+            if (chaingun_tics > 1)
+                chaingun_tics--;
+            break;
+        }
     }
 }
 
@@ -11519,22 +11582,25 @@ void M_MapRotation(int choice)
 
 void M_WeaponChange(int choice)
 {
-    switch(choice)
+    if (gameskill != sk_nightmare)
     {
-    case 0:
-        if (use_vanilla_weapon_change == 0)
-            use_vanilla_weapon_change = 1;
-        break;
-    case 1:
-        if (use_vanilla_weapon_change == 1)
-            use_vanilla_weapon_change = 0;
-        break;
+        switch(choice)
+        {
+        case 0:
+            if (use_vanilla_weapon_change == 0)
+                use_vanilla_weapon_change = 1;
+            break;
+        case 1:
+            if (use_vanilla_weapon_change == 1)
+                use_vanilla_weapon_change = 0;
+            break;
+        }
     }
 }
 
 void M_AimingHelp(int choice)
 {
-    if (!(players[consoleplayer].cheats & CF_GODMODE))
+    if (!(players[consoleplayer].cheats & CF_GODMODE) && gameskill != sk_nightmare)
     {
         switch(choice)
         {

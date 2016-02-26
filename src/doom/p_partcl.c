@@ -43,6 +43,7 @@
 #include "d_main.h"
 #include "doomstat.h"
 #include "doomtype.h"
+#include "m_misc.h"
 #include "m_random.h"
 #include "p_partcl.h"
 #include "p_setup.h"
@@ -1268,11 +1269,6 @@ static void P_BFGEffect(mobj_t *actor)
 // args[3] = make splash?
 // args[4] = fullbright?
 //
-int randInRange(int min, int max)
-{
-    return min + (int) ((double)rand() / (double)RAND_MAX * (max - min + 1));
-}
-
 static void P_DripEffect(mobj_t *actor)
 {
     dboolean makesplash;

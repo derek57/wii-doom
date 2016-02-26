@@ -437,6 +437,7 @@ extern  int              bloodsplat_particle;
 extern  int              bulletpuff_particle;
 extern  int              teleport_particle;
 extern  int              d_uncappedframerate;
+extern  int              d_spawnteleglit;
 
 void A_MoreGibs(mobj_t* actor);
 

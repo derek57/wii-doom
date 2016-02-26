@@ -2819,6 +2819,13 @@ G_InitNew
     else
         respawnmonsters = false;
 
+    if (skill == sk_nightmare)
+    {
+        chaingun_tics = 4;
+        use_vanilla_weapon_change = 1;
+        aiming_help = false;
+    }
+
     if (fastparm || (skill == sk_nightmare && gameskill != sk_nightmare) )
     {
         for (i=S_SARG_RUN1 ; i<=S_SARG_PAIN2 ; i++)

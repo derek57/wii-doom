@@ -718,3 +718,8 @@ char *M_SubString(const char *str, size_t begin, size_t len)
     return strndup(str + begin, len);
 }
 
+int randInRange(int min, int max)
+{
+    return min + (int) ((double)rand() / (double)RAND_MAX * (max - min + 1));
+}
+

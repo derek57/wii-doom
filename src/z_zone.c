@@ -539,6 +539,7 @@ void Z_DrawStats(void)            // Print allocation statistics
 //
 // [nitr8] UNUSED
 //
+/*
 void *Z_MallocAlign(int reqsize, int32_t tag, void **user, int alignbits)
 {
     memblock_t* newblock;
@@ -573,4 +574,5 @@ void *Z_MallocAlign(int reqsize, int32_t tag, void **user, int alignbits)
 
     return basedata;
 }
+*/
 
