@@ -1644,7 +1644,8 @@ static void R_DrawPSprite(pspdef_t *psp, dboolean invisibility)
     else //if (fixedcolormap)
     {
         if (spr == SPR_SHT2 && (!frame || frame >= 8) && !state->dehacked) 
-            vis->colfunc = R_DrawSuperShotgunColumn;
+            vis->colfunc = (r_translucency ? R_DrawTranslucentSuperShotgunColumn :
+                R_DrawSuperShotgunColumn);
         else
         {
             if(d_translucency)
