@@ -69,6 +69,9 @@ EV_Teleport
     if((thing->flags & MF_MISSILE) || thing->type == MT_BLOODSPLAT
                                    || thing->type == MT_FLESH
                                    || thing->type == MT_SPRAY
+                                   || thing->type == MT_SHELL
+                                   || thing->type == MT_BULLET
+                                   || thing->type == MT_ROUND
                                    || side)
         return 0;
 
@@ -228,6 +231,9 @@ dboolean EV_SilentTeleport(line_t *line, int side, mobj_t *thing)
     if((thing->flags & MF_MISSILE) || thing->type == MT_BLOODSPLAT
                                    || thing->type == MT_FLESH
                                    || thing->type == MT_SPRAY
+                                   || thing->type == MT_SHELL
+                                   || thing->type == MT_BULLET
+                                   || thing->type == MT_ROUND
                                    || side)
         return false;
 
