@@ -141,6 +141,7 @@ dboolean         d_spawnflies = false;
 dboolean         d_dripblood = false;
 dboolean         d_vsync = false;
 dboolean         particle_sounds = false;
+dboolean         map_secret_after = false;
 /*
 dboolean         nerve = false;
 dboolean         chex = false;
@@ -229,4 +230,5 @@ int              mapcolor_enemy = 177; // enemy sprite color
 int              mapcolor_hair = 208;  // crosshair color
 int              mapcolor_sngl = 208;  // single player arrow color
 int              mapcolor_plyr = 112;  // color for player arrow
+int              map_grid_size = 128;
 

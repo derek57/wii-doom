@@ -382,6 +382,7 @@ extern  dboolean         d_spawnflies;
 extern  dboolean         d_dripblood;
 extern  dboolean         d_vsync;
 extern  dboolean         particle_sounds;
+extern  dboolean         map_secret_after;
 /*
 extern  dboolean         nerve;
 extern  dboolean         chex;
@@ -461,6 +462,7 @@ extern  int              mapcolor_enemy; // enemy sprite color
 extern  int              mapcolor_hair;  // crosshair color
 extern  int              mapcolor_sngl;  // single player arrow color
 extern  int              mapcolor_plyr;  // color for player arrow
+extern  int              map_grid_size;
 
 void A_MoreGibs(mobj_t* actor);
 

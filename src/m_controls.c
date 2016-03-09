@@ -318,6 +318,8 @@ void M_BindBaseControls(void)
     M_BindVariable("map_color_crosshair",      &mapcolor_hair);
     M_BindVariable("map_color_single",         &mapcolor_sngl);
     M_BindVariable("map_color_player",         &mapcolor_plyr);
+    M_BindVariable("map_gridsize",             &map_grid_size);
+    M_BindVariable("map_secrets_after",        &map_secret_after);
 #ifdef WII
     M_BindVariable("key_shoot",                &joy_r);
     M_BindVariable("key_open",                 &joy_l);

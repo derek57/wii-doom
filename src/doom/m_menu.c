@@ -1292,6 +1292,7 @@ char                       string_enemy[5];
 char                       string_hair[5];
 char                       string_sngl[5];
 char                       string_plyr[5];
+char                       string_mapgridsize[5];
 
 // old save description before edit
 char                       saveOldString[SAVESTRINGSIZE];  
@@ -1322,11 +1323,11 @@ int                        cheeting;
 int                        coordinates_info = 0;
 int                        version_info = 0;
 #ifdef WII
-int                        key_controls_start_in_cfg_at_pos = 146;
-int                        key_controls_end_in_cfg_at_pos = 160;
+int                        key_controls_start_in_cfg_at_pos = 148;
+int                        key_controls_end_in_cfg_at_pos = 162;
 #else
-int                        key_controls_start_in_cfg_at_pos = 145;
-int                        key_controls_end_in_cfg_at_pos = 161;
+int                        key_controls_start_in_cfg_at_pos = 147;
+int                        key_controls_end_in_cfg_at_pos = 163;
 #endif
 int                        tracknum = 1;
 int                        epi = 1;
@@ -1563,6 +1564,7 @@ void M_Timer(int choice);
 void M_Authors(int choice);
 void M_StatusMap(int choice);
 void M_MapName(int choice);
+void M_MapSecretAfter(int choice);
 void M_Version(int choice);
 void M_SoundInfo(int choice);
 void M_HUD(int choice);
@@ -1591,6 +1593,7 @@ void M_MapColor_Player(int choice);
 void M_MapColor_Multiplayer(int choice);
 void M_MapColor_Standard(int choice);
 void M_MapGrid(int choice);
+void M_MapGridSize(int choice);
 void M_WeaponChange(int choice);
 void M_AimingHelp(int choice);
 void M_MapRotation(int choice);
@@ -2432,6 +2435,7 @@ static menu_t  SystemDef =
 enum
 {
     game_mapgrid,
+    game_mapgridsize,
     game_maprotation,
     game_followmode,
     game_overlay,
@@ -2440,10 +2444,9 @@ enum
     game_timer,
     game_authors,
     game_maptitle,
+    game_secrets,
     game_mapcols,
-    game_recoil,
     game_respawn,
-    game_fast,
 //    game_aiming,
     game_game2,
     game_end
@@ -2452,6 +2455,7 @@ enum
 static menuitem_t GameMenu[]=
 {
     {2,"AUTOMAP GRID",M_MapGrid,'g'},
+    {2,"AUTOMAP GRID SIZE",M_MapGridSize,'c'},
     {2,"AUTOMAP ROTATION",M_MapRotation,'r'},
     {2,"AUTOMAP FOLLOW MODE",M_FollowMode,'f'},
     {2,"AUTOMAP OVERLAY",M_AutomapOverlay,'o'},
@@ -2460,10 +2464,9 @@ static menuitem_t GameMenu[]=
     {2,"AUTOMAP TIMER",M_Timer,'t'},
     {2,"AUTOMAP AUTHORS",M_Authors,'a'},
     {2,"AUTOMAP MAP TITLE",M_MapName,'n'},
+    {2,"ONLY SHOW SECRETS AFTER ENTERING",M_MapSecretAfter,'h'},
     {1,"",M_Automap,'x'},
-    {2,"WEAPON RECOIL",M_WeaponRecoil,'c'},
     {2,"RESPAWN MONSTERS",M_RespawnMonsters,'i'},
-    {2,"FAST MONSTERS",M_FastMonsters,'d'},
 //    {2,"",NULL,'0'},
     {1,"",M_Game2,'2'}
 };
@@ -2474,14 +2477,14 @@ static menu_t  GameDef =
     &OptionsDef,
     GameMenu,
     M_DrawGame1,
-    75,22,
+    23,22,
     0
 };
 
 enum
 {
     game2_monsters,
-    game2_hud,
+    game2_fast,
     game2_footstep,
     game2_footclip,
     game2_splash,
@@ -2500,7 +2503,7 @@ enum
 static menuitem_t GameMenu2[]=
 {
     {2,"NO MONSTERS",M_NoMonsters,'m'},
-    {2,"FULLSCREEN HUD",M_HUD,'h'},
+    {2,"FAST MONSTERS",M_FastMonsters,'e'},
     {2,"PLAYER FOOTSTEPS",M_Footstep,'s'},
     {2,"HERETIC FOOTCLIPS",M_Footclip,'c'},
     {2,"HERETIC LIQUID SPLASH",M_Splash,'l'},
@@ -2525,7 +2528,7 @@ static menu_t  GameDef2 =
     &GameDef,
     GameMenu2,
     M_DrawGame2,
-    40,22,
+    23,22,
     0
 };
 
@@ -2726,6 +2729,8 @@ enum
     game7_thrust,
     game7_teleportglitter,
     game7_weapon,
+    game7_recoil,
+    game7_hud,
 #ifdef WII
     game7_prbeta,
 #endif
@@ -2740,7 +2745,9 @@ static menuitem_t GameMenu7[]=
     {2,"",M_AimingHelp,'a'},
     {2,"PLAYER THRUST",M_PlayerThrust,'p'},
     {2,"Teleport Landings glitter type",M_TeleportGlitter,'g'},
-    {2,"",M_WeaponChange,'w'}
+    {2,"",M_WeaponChange,'w'},
+    {2,"WEAPON RECOIL",M_WeaponRecoil,'c'},
+    {2,"FULLSCREEN HUD",M_HUD,'h'},
 #ifdef WII
     ,
     {2,"PRE-RELEASE BETA MODE",M_Beta,'b'}
@@ -4857,12 +4864,12 @@ void M_DrawGame1(void)
         if(aiming_help)
         {
             dp_translation = crx[CRX_GREEN];
-            M_WriteText(GameDef.x + 161, GameDef.y + 128, "ON");
+            M_WriteText(GameDef.x + 266, GameDef.y + 128, "ON");
         }
         else
         {
             dp_translation = crx[CRX_DARK];
-            M_WriteText(GameDef.x + 153, GameDef.y + 128, "OFF");
+            M_WriteText(GameDef.x + 258, GameDef.y + 128, "OFF");
         }
 
         if(itemOn == 13)
@@ -4874,138 +4881,130 @@ void M_DrawGame1(void)
     if(drawgrid == 1)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef.x + 161, GameDef.y - 2, "ON");
+        M_WriteText(GameDef.x + 266, GameDef.y - 2, "ON");
     }
     else if(drawgrid == 0)
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef.x + 153, GameDef.y - 2, "OFF");
+        M_WriteText(GameDef.x + 258, GameDef.y - 2, "OFF");
     }
+
+    sprintf(string_mapgridsize, "%d", map_grid_size);
+    M_WriteText(GameDef.x + 282 - M_StringWidth(string_mapgridsize), GameDef.y + 8, string_mapgridsize);
 
     if(am_rotate == true)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef.x + 161, GameDef.y + 8, "ON");
+        M_WriteText(GameDef.x + 266, GameDef.y + 18, "ON");
     }
     else if(am_rotate == false)
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef.x + 153, GameDef.y + 8, "OFF");
+        M_WriteText(GameDef.x + 258, GameDef.y + 18, "OFF");
     }
 
     if(followplayer == 1)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef.x + 161, GameDef.y + 18, "ON");
+        M_WriteText(GameDef.x + 266, GameDef.y + 28, "ON");
     }
     else if(followplayer == 0)
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef.x + 153, GameDef.y + 18, "OFF");
+        M_WriteText(GameDef.x + 258, GameDef.y + 28, "OFF");
     }
 
     if(overlay_trigger)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef.x + 161, GameDef.y + 28, "ON");
+        M_WriteText(GameDef.x + 266, GameDef.y + 38, "ON");
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef.x + 153, GameDef.y + 28, "OFF");
+        M_WriteText(GameDef.x + 258, GameDef.y + 38, "OFF");
     }
 
     if(d_statusmap)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef.x + 161, GameDef.y + 38, "ON");
+        M_WriteText(GameDef.x + 266, GameDef.y + 48, "ON");
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef.x + 153, GameDef.y + 38, "OFF");
+        M_WriteText(GameDef.x + 258, GameDef.y + 48, "OFF");
     }
 
     if(show_stats == 1)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef.x + 161, GameDef.y + 48, "ON");
+        M_WriteText(GameDef.x + 266, GameDef.y + 58, "ON");
     }
     else if (show_stats == 0)
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef.x + 153, GameDef.y + 48, "OFF");
+        M_WriteText(GameDef.x + 258, GameDef.y + 58, "OFF");
     }
 
     if(timer_info)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef.x + 161, GameDef.y + 58, "ON");
+        M_WriteText(GameDef.x + 266, GameDef.y + 68, "ON");
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef.x + 153, GameDef.y + 58, "OFF");
+        M_WriteText(GameDef.x + 258, GameDef.y + 68, "OFF");
     }
 
     if(show_authors)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef.x + 161, GameDef.y + 68, "ON");
+        M_WriteText(GameDef.x + 266, GameDef.y + 78, "ON");
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef.x + 153, GameDef.y + 68, "OFF");
+        M_WriteText(GameDef.x + 258, GameDef.y + 78, "OFF");
     }
 
     if(show_title)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef.x + 161, GameDef.y + 78, "ON");
+        M_WriteText(GameDef.x + 266, GameDef.y + 88, "ON");
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef.x + 153, GameDef.y + 78, "OFF");
+        M_WriteText(GameDef.x + 258, GameDef.y + 88, "OFF");
+    }
+
+    if(map_secret_after)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(GameDef.x + 266, GameDef.y + 98, "ON");
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(GameDef.x + 258, GameDef.y + 98, "OFF");
     }
 
     dp_translation = crx[CRX_GRAY];
-    if (itemOn == 9)
+    if (itemOn == 11)
         dp_translation = crx[CRX_GOLD];
-    M_WriteText(GameDef.x, GameDef.y + 88, "AUTOMAP COLORS...");
-
-    if(d_recoil)
-    {
-        dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef.x + 161, GameDef.y + 98, "ON");
-    }
-    else
-    {
-        dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef.x + 153, GameDef.y + 98, "OFF");
-    }
+    M_WriteText(GameDef.x, GameDef.y + 108, "AUTOMAP COLORS...");
 
     if(respawnparm)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef.x + 161, GameDef.y + 108, "ON");
+        M_WriteText(GameDef.x + 266, GameDef.y + 118, "ON");
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef.x + 153, GameDef.y + 108, "OFF");
-    }
-
-    if(fastparm)
-    {
-        dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef.x + 161, GameDef.y + 118, "ON");
-    }
-    else
-    {
-        dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef.x + 153, GameDef.y + 118, "OFF");
+        M_WriteText(GameDef.x + 258, GameDef.y + 118, "OFF");
     }
 /*
     if(devparm)
@@ -5035,10 +5034,10 @@ void M_DrawGame1(void)
             int x;
             char *string = "";
 
-            if ((itemOn > 4 && itemOn < 9 && d_statusmap && !modifiedgame) ||
-                (itemOn > 4 && itemOn < 8 && d_statusmap && modifiedgame))
+            if ((itemOn > 5 && itemOn < 10 && d_statusmap && !modifiedgame) ||
+                (itemOn > 5 && itemOn < 9 && d_statusmap && modifiedgame))
                 string = "YOU NEED TO DISABLE AUTOMAP STATUS BAR FIRST!";
-            else if ((itemOn == 11 || itemOn == 12))
+            else if (itemOn == 12)
                 string = "YOU MUST START A NEW GAME TO TAKE EFFECT.";
 
             x = ORIGINALWIDTH/2 - M_StringWidth(string) / 2;
@@ -5069,67 +5068,67 @@ void M_DrawGame2(void)
     if(not_monsters)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef2.x + 216, GameDef2.y - 2, "ON");
+        M_WriteText(GameDef2.x + 266, GameDef2.y - 2, "ON");
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef2.x + 208, GameDef2.y - 2, "OFF");
+        M_WriteText(GameDef2.x + 258, GameDef2.y - 2, "OFF");
     }
 
-    if(hud)
+    if(fastparm)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef2.x + 216, GameDef2.y + 8, "ON");
+        M_WriteText(GameDef2.x + 266, GameDef2.y + 8, "ON");
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef2.x + 208, GameDef2.y + 8, "OFF");
+        M_WriteText(GameDef2.x + 258, GameDef2.y + 8, "OFF");
     }
 
     if(d_footstep)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef2.x + 216, GameDef2.y + 18, "ON");
+        M_WriteText(GameDef2.x + 266, GameDef2.y + 18, "ON");
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef2.x + 208, GameDef2.y + 18, "OFF");
+        M_WriteText(GameDef2.x + 258, GameDef2.y + 18, "OFF");
     }
 
     if(d_footclip)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef2.x + 216, GameDef2.y + 28, "ON");
+        M_WriteText(GameDef2.x + 266, GameDef2.y + 28, "ON");
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef2.x + 208, GameDef2.y + 28, "OFF");
+        M_WriteText(GameDef2.x + 258, GameDef2.y + 28, "OFF");
     }
 
     if(d_splash)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef2.x + 216, GameDef2.y + 38, "ON");
+        M_WriteText(GameDef2.x + 266, GameDef2.y + 38, "ON");
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef2.x + 208, GameDef2.y + 38, "OFF");
+        M_WriteText(GameDef2.x + 258, GameDef2.y + 38, "OFF");
     }
 
     if(d_swirl)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef2.x + 216, GameDef2.y + 48, "ON");
+        M_WriteText(GameDef2.x + 266, GameDef2.y + 48, "ON");
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef2.x + 208, GameDef2.y + 48, "OFF");
+        M_WriteText(GameDef2.x + 258, GameDef2.y + 48, "OFF");
     }
 
 #ifdef WII
@@ -5141,45 +5140,45 @@ void M_DrawGame2(void)
     if(show_endoom)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef2.x + 216, GameDef2.y + 58, "ON");
+        M_WriteText(GameDef2.x + 266, GameDef2.y + 58, "ON");
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef2.x + 208, GameDef2.y + 58, "OFF");
+        M_WriteText(GameDef2.x + 258, GameDef2.y + 58, "OFF");
     }
 
     if(d_flipcorpses)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef2.x + 216, GameDef2.y + 68, "ON");
+        M_WriteText(GameDef2.x + 266, GameDef2.y + 68, "ON");
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef2.x + 208, GameDef2.y + 68, "OFF");
+        M_WriteText(GameDef2.x + 258, GameDef2.y + 68, "OFF");
     }
 
     if(d_secrets)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef2.x + 216, GameDef2.y + 78, "ON");
+        M_WriteText(GameDef2.x + 266, GameDef2.y + 78, "ON");
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef2.x + 208, GameDef2.y + 78, "OFF");
+        M_WriteText(GameDef2.x + 258, GameDef2.y + 78, "OFF");
     }
 
     if(showMessages)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef2.x + 216, GameDef2.y + 88, "ON");
+        M_WriteText(GameDef2.x + 266, GameDef2.y + 88, "ON");
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef2.x + 208, GameDef2.y + 88, "OFF");
+        M_WriteText(GameDef2.x + 258, GameDef2.y + 88, "OFF");
     }
 
     if(gameskill == sk_nightmare)
@@ -5192,44 +5191,44 @@ void M_DrawGame2(void)
     if(chaingun_tics == 1)
     {
         dp_translation = crx[CRX_BLUE];
-        M_WriteText(GameDef2.x + 192, GameDef2.y + 98, "ULTRA");
+        M_WriteText(GameDef2.x + 242, GameDef2.y + 98, "ULTRA");
     }
     else if(chaingun_tics == 2)
     {
         dp_translation = crx[CRX_RED];
-        M_WriteText(GameDef2.x + 166, GameDef2.y + 98, "VERY FAST");
+        M_WriteText(GameDef2.x + 216, GameDef2.y + 98, "VERY FAST");
     }
     else if(chaingun_tics == 3)
     {
         dp_translation = crx[CRX_GOLD];
-        M_WriteText(GameDef2.x + 185, GameDef2.y + 98, "FASTER");
+        M_WriteText(GameDef2.x + 235, GameDef2.y + 98, "FASTER");
     }
     else if(chaingun_tics == 4)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef2.x + 183, GameDef2.y + 98, "NORMAL");
+        M_WriteText(GameDef2.x + 233, GameDef2.y + 98, "NORMAL");
     }
 
     if(d_fallingdamage)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef2.x + 216, GameDef2.y + 108, "ON");
+        M_WriteText(GameDef2.x + 266, GameDef2.y + 108, "ON");
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef2.x + 208, GameDef2.y + 108, "OFF");
+        M_WriteText(GameDef2.x + 258, GameDef2.y + 108, "OFF");
     }
 
     if(d_infiniteammo)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef2.x + 216, GameDef2.y + 118, "ON");
+        M_WriteText(GameDef2.x + 266, GameDef2.y + 118, "ON");
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef2.x + 208, GameDef2.y + 118, "OFF");
+        M_WriteText(GameDef2.x + 258, GameDef2.y + 118, "OFF");
     }
 
     if(whichSkull == 1)
@@ -5237,7 +5236,7 @@ void M_DrawGame2(void)
         int x;
         char *string = "";
         dp_translation = crx[CRX_GOLD];
-        if(itemOn == 0)
+        if(itemOn == 0 || itemOn == 1)
             string = "YOU MUST START A NEW GAME TO TAKE EFFECT.";
 #ifdef WII
         else if(itemOn == 6)
@@ -6170,7 +6169,7 @@ void M_DrawGame7(void)
     }
     else if(d_spawnteleglit == 3)
     {
-        dp_translation = crx[CRX_GREEN];
+        dp_translation = crx[CRX_GOLD];
         M_WriteText(GameDef7.x + 233, GameDef7.y + 48, "RANDOM");
     }
     else
@@ -6189,16 +6188,15 @@ void M_DrawGame7(void)
     if(use_vanilla_weapon_change == 1)
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef7.x + 93, GameDef7.y + 58, "SLOW");
+        M_WriteText(GameDef7.x + 250, GameDef7.y + 58, "SLOW");
     }
     else if(use_vanilla_weapon_change == 0)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef7.x + 94, GameDef7.y + 58, "FAST");
+        M_WriteText(GameDef7.x + 251, GameDef7.y + 58, "FAST");
     }
 
-#ifdef WII
-    if(beta_style_mode)
+    if(d_recoil)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef7.x + 266, GameDef7.y + 68, "ON");
@@ -6207,6 +6205,29 @@ void M_DrawGame7(void)
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(GameDef7.x + 258, GameDef7.y + 68, "OFF");
+    }
+
+    if(hud)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(GameDef7.x + 266, GameDef7.y + 78, "ON");
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(GameDef7.x + 258, GameDef7.y + 78, "OFF");
+    }
+
+#ifdef WII
+    if(beta_style_mode)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(GameDef7.x + 266, GameDef7.y + 88, "ON");
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(GameDef7.x + 258, GameDef7.y + 88, "OFF");
     }
 #endif
 
@@ -6230,7 +6251,7 @@ void M_DrawGame7(void)
         else if(itemOn == 9 && gameskill == sk_nightmare)
             string = "NOT AVAILABLE FOR NIGHTMARE SKILL";
 #ifdef WII
-        if(itemOn == 8)
+        if(itemOn == 11)
         {
             if(fsize != 28422764 && fsize != 19321722 && fsize != 12361532)
                 string = "YOU MUST QUIT AND RESTART TO TAKE EFFECT.";
@@ -10416,6 +10437,21 @@ void M_MapName(int choice)
     HU_Start();
 }
 
+void M_MapSecretAfter(int choice)
+{
+    switch(choice)
+    {
+      case 0:
+        if (map_secret_after)
+            map_secret_after = false;
+        break;
+      case 1:
+        if (!map_secret_after)
+            map_secret_after = true;
+        break;
+    }
+}
+
 void M_Version(int choice)
 {
     switch(choice)
@@ -12584,6 +12620,21 @@ void M_MapGrid(int choice)
     case 1:
         if (drawgrid < 1)
             drawgrid++;
+        break;
+    }
+}
+
+void M_MapGridSize(int choice)
+{
+    switch(choice)
+    {
+    case 0:
+        if (map_grid_size > 10)
+            map_grid_size--;
+        break;
+    case 1:
+        if (map_grid_size < 256)
+            map_grid_size++;
         break;
     }
 }
