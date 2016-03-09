@@ -428,7 +428,7 @@ static dboolean PIT_CheckLine(line_t *ld)
         if (numspechit >= spechit_max)
         {
             spechit_max = (spechit_max ? spechit_max * 2 : 8);
-            spechit = Z_Realloc(spechit, sizeof(*spechit) * spechit_max, PU_LEVEL, NULL);
+            spechit = Z_Realloc(spechit, sizeof(*spechit) * spechit_max);
             if (spechit != 0)
                 C_Warning("PIT_CheckLine: Hit MaxSpecHit limit at %d, raised to %u",
                         spechit_max / 2, spechit_max);
@@ -1894,8 +1894,8 @@ fixed_t P_AimLineAttack(mobj_t *t1, angle_t angle, fixed_t distance)
     shootz = t1->z + (t1->height >> 1) + 8 * FRACUNIT;
 
     // can't shoot outside view angles
-    topslope = (ORIGHEIGHT/2)*FRACUNIT/(ORIGWIDTH/2);
-    bottomslope = -(ORIGHEIGHT/2)*FRACUNIT/(ORIGWIDTH/2);
+    topslope = (ORIGINALHEIGHT/2)*FRACUNIT/(ORIGINALWIDTH/2);
+    bottomslope = -(ORIGINALHEIGHT/2)*FRACUNIT/(ORIGINALWIDTH/2);
     
     attackrange = distance;
     linetarget = NULL;
@@ -2225,9 +2225,7 @@ dboolean PIT_ChangeSector (mobj_t *thing)
             if(crush_sound)
                 S_StartSound(thing, sfx_slop);
 
-            if (thing->shadow)
-                P_RemoveMobjShadow(thing);
-//            P_RemoveMobj(thing);
+            //P_RemoveMobj(thing);
 
             // keep checking
             return true;                
@@ -2236,8 +2234,6 @@ dboolean PIT_ChangeSector (mobj_t *thing)
         // crunch dropped items
         if (flags & MF_DROPPED)
         {
-            if (thing->shadow)
-                P_RemoveMobjShadow(thing);
             P_RemoveMobj (thing);
         
             // keep checking

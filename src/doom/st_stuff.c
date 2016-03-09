@@ -284,7 +284,7 @@ rcsid[] = "$Id: st_stuff.c,v 1.6 1997/02/03 22:45:13 b1 Exp $";
 
 #define ST_MAPWIDTH                 (strlen(mapnames[(gameepisode-1)*9+(gamemap-1)]))
 
-#define ST_MAPTITLEX                (ORIGWIDTH - ST_MAPWIDTH * ST_CHATFONTWIDTH) // HIRES
+#define ST_MAPTITLEX                (ORIGINALWIDTH - ST_MAPWIDTH * ST_CHATFONTWIDTH) // HIRES
 
 #define ST_MAPTITLEY                0
 #define ST_MAPHEIGHT                1
@@ -568,7 +568,7 @@ extern dboolean     aiming_help;
 
 extern char         massacre_textbuffer[30];
 
-extern void         A_PainDie(mobj_t *);
+extern void         A_PainDie(mobj_t *actor);
 
 
 //

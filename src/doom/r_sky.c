@@ -54,5 +54,5 @@ int skyscrolldelta;
 //
 void R_InitSkyMap(void)
 {
-    skytexturemid = ORIGHEIGHT/2 * FRACUNIT;
+    skytexturemid = ORIGINALHEIGHT/2 * FRACUNIT;
 }

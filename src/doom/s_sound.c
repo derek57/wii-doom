@@ -122,7 +122,7 @@ int musicVolume = 8;
 
 // The set of channels available
 
-/*static*/ channel_t channels[8];
+/*static*/ channel_t channels[64];
 
 //
 // Initializes sound stuff, including volume

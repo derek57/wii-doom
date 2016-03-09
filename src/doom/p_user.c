@@ -381,6 +381,8 @@ void P_ResurrectPlayer(player_t *player)
     infight = false;
     P_SetupPsprites(player);
     P_MapEnd();
+
+    C_HideConsole(); 
 }
 
 //

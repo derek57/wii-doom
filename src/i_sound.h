@@ -25,8 +25,9 @@
 #include "doom/p_mobj.h"
 
 // so that the individual game logic and sound driver code agree
-#define NORM_PITCH 127
+#define NORM_PITCH   127
 
+#define NUM_CHANNELS 64
 
 typedef struct
 {

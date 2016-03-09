@@ -2405,6 +2405,8 @@ void P_UnArchiveSpecials(void)
 //
 // P_ArchiveMap
 //
+// [nitr8] UNUSED
+//
 /*
 void P_ArchiveMap(void)
 {
@@ -2444,7 +2446,7 @@ void P_UnArchiveMap(void)
         while (markpointnum >= markpointnum_max)
         {
             markpointnum_max = (markpointnum_max ? markpointnum_max << 1 : 16);
-            markpoints = Z_Realloc(markpoints, markpointnum_max * sizeof(*markpoints), PU_LEVEL, NULL);
+            markpoints = Z_Realloc(markpoints, markpointnum_max * sizeof(*markpoints));
         }
 
         for (i = 0; i < markpointnum; ++i)

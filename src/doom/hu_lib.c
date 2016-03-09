@@ -139,7 +139,7 @@ HUlib_drawTextLine
                 w = SHORT(l->f[c - l->sc]->width) + 1;
             else
                 w = SHORT(l->f[c - l->sc]->width);
-            if (x+w > ORIGWIDTH)    // CHANGED FOR HIRES
+            if (x+w > ORIGINALWIDTH)    // CHANGED FOR HIRES
                 break;
             if(font_shadow == 1)
                 V_DrawPatchWithShadow(x, l->y, 0, l->f[c - l->sc], false);
@@ -150,14 +150,14 @@ HUlib_drawTextLine
         else
         {
             x += 4;
-            if (x >= ORIGWIDTH)                              // CHANGED FOR HIRES
+            if (x >= ORIGINALWIDTH)                              // CHANGED FOR HIRES
                 break;
         }
     }
 
     // draw the cursor if requested
     if (drawcursor                                           // CHANGED FOR HIRES
-        && x + SHORT(l->f['_' - l->sc]->width) <= ORIGWIDTH) // CHANGED FOR HIRES
+        && x + SHORT(l->f['_' - l->sc]->width) <= ORIGINALWIDTH) // CHANGED FOR HIRES
     {
         if(font_shadow == 1)
             V_DrawPatchWithShadow(x, l->y, 0, l->f['_' - l->sc], false);

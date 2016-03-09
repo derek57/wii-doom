@@ -187,7 +187,11 @@ typedef struct
     // UNUSED (SLIDING DOOR FRAMES)
     //void                *specialdata;
 
-    particle_t          *ptcllist; // haleyjd 02/20/04: list of particles in sector
+    // haleyjd 02/20/04: list of particles in sector
+    particle_t          *ptcllist;
+
+    //jff 2/16/98 remembers if sector WAS secret (automap)
+    short               oldspecial;
 
 } sector_t;
 

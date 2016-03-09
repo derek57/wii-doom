@@ -54,7 +54,6 @@
 
 
 #define LOW_PASS_FILTER
-#define NUM_CHANNELS 16
 
 
 typedef struct allocated_sound_s allocated_sound_t;
@@ -808,16 +807,8 @@ static void I_SDL_UpdateSoundParams(int handle, int vol, int sep)
         return;
     }
 
-    if(swap_sound_chans)
-    {
-        right = ((254 - sep) * vol) / 127;
-        left = ((sep) * vol) / 127;
-    }
-    else
-    {
-        left = ((254 - sep) * vol) / 127;
-        right = ((sep) * vol) / 127;
-    }
+    left = ((254 - sep) * vol) / 127;
+    right = ((sep) * vol) / 127;
 
     if (left < 0) left = 0;
     else if ( left > 255) left = 255;

@@ -499,6 +499,9 @@ typedef struct
     fixed_t      speed;
     dboolean     stopsound;
 
+    //jff 3/14/98 add to fix bug in change transfers
+    int          oldspecial;
+
 } floormove_t;
 
 typedef enum
@@ -552,12 +555,16 @@ typedef struct
     int                         tag;                   
     int                         olddirection;
     
-    struct ceilinglist_s        *list;  // jff 2/22/98 copied from killough's plats
+    // jff 2/22/98 copied from killough's plats
+    struct ceilinglist_s        *list;
 
     //jff 02/04/98 add these to support ceiling changers
     int                         newspecial;
     short                       texture;
     fixed_t                     oldspeed;
+
+    //jff 3/14/98 add to fix bug in change transfers
+    int                         oldspecial;
 
 } ceiling_t;
 
@@ -855,6 +862,8 @@ result_e    T_MovePlane(sector_t *sector, fixed_t speed, fixed_t dest, dboolean 
 void        P_LoadTerrainTypeDefs(void);
 void        P_InitTerrainTypes(void);
 int         P_GetTerrainTypeForPoint(fixed_t x, fixed_t y, int position);
+dboolean    P_IsSecret(const sector_t *sec);
+dboolean    P_WasSecret(const sector_t *sec);
 
 
 #if 0 // UNUSED

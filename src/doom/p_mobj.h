@@ -63,7 +63,8 @@
 
 #define NUMMOBJCOUNTERS         8
 
-#define MIF_NOPTCLEVTS          0x00000200 // haleyjd: thing can't trigger particle events
+// haleyjd: thing can't trigger particle events
+#define MIF_NOPTCLEVTS          0x00000200
 
 //
 // NOTES: mobj_t
@@ -219,9 +220,14 @@ typedef enum
     // Hmm ???.
     MF_TRANSSHIFT          = 26,
 
-    MF_TOUCHY              = 0x10000000,   // killough 11/98: dies when solids touch it
-    MF_BOUNCES             = 0x20000000,   // killough 7/11/98: for beta BFG fireballs
-    MF_FRIEND              = 0x40000000,   // killough 7/18/98: friendly monsters
+    // killough 11/98: dies when solids touch it
+    MF_TOUCHY              = 0x10000000,
+
+    // killough 7/11/98: for beta BFG fireballs
+    MF_BOUNCES             = 0x20000000,
+
+    // killough 7/18/98: friendly monsters
+    MF_FRIEND              = 0x40000000,
 
     // [crispy] translucent sprite
     MF_TRANSLUCENT         = 0x80000000
@@ -328,9 +334,14 @@ typedef struct mobj_s
     struct mobj_s**        sprev;
 
     //More drawing info: to determine current sprite.
-    angle_t                angle;        // orientation
-    spritenum_t            sprite;       // used to find patch_t and flip value
-    int                    frame;        // might be ORed with FF_FULLBRIGHT
+    // orientation
+    angle_t                angle;
+
+    // used to find patch_t and flip value
+    spritenum_t            sprite;
+
+    // might be ORed with FF_FULLBRIGHT
+    int                    frame;
 
     // Interaction info, by BLOCKMAP.
     // Links in blocks (if needed).
@@ -356,17 +367,24 @@ typedef struct mobj_s
     int                    validcount;
 
     mobjtype_t             type;
-    mobjinfo_t*            info;        // &mobjinfo[mobj->type]
+
+    // &mobjinfo[mobj->type]
+    mobjinfo_t*            info;
     
-    int                    tics;        // state tic counter
+    // state tic counter
+    int                    tics;
+
     state_t*               state;
     int                    flags;
     int                    flags2;
     int                    health;
 
     // Movement direction, movement generation (zig-zagging).
-    int                    movedir;        // 0-7
-    int                    movecount;        // when 0, select a new dir
+    // 0-7
+    int                    movedir;
+
+    // when 0, select a new dir
+    int                    movecount;
 
     // Thing being chased/attacked (or NULL),
     // also the originator for missiles.
@@ -419,10 +437,12 @@ typedef struct mobj_s
     // killough 11/98: the lowest floor over all contacted Sectors.
     fixed_t                dropoffz;
 
-    short                  gear; // killough 11/98: used in torque simulation
+    // killough 11/98: used in torque simulation
+    short                  gear;
 
     // a linked list of sectors where this object appears
-    struct msecnode_s      *touching_sectorlist;   // phares 3/14/98
+    // phares 3/14/98
+    struct msecnode_s      *touching_sectorlist;
 
     int                    pitch;
 
@@ -439,7 +459,8 @@ typedef struct mobj_s
 
     int                    casing_counter;
 
-    unsigned int           effects; // particle effect flag field
+    // particle effect flag field
+    unsigned int           effects;
 
     int                    effect_flies_start_timer;
     int                    effect_flies_sound_timer;
@@ -454,5 +475,5 @@ typedef struct mobj_s
 
 } mobj_t;
 
-
 #endif
+

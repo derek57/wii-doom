@@ -52,7 +52,7 @@
 
 #define MAX_SPRITE_FRAMES       29
 #define MINZ                    (FRACUNIT * 4)
-#define BASEYCENTER             (ORIGHEIGHT / 2)
+#define BASEYCENTER             (ORIGINALHEIGHT / 2)
 
 //
 // Sprite rotation 0 is facing the viewer,
@@ -119,7 +119,7 @@ static void R_InstallSpriteLump(lumpinfo_t *lump, int lumpnum, unsigned int fram
     if ((int)frame > maxframe)
         maxframe = frame;
 
-    if (rotation == 0)
+    if (!rotation)
     {
         int r;
 
@@ -193,7 +193,7 @@ static void R_InitSpriteDefs(const char *const *namelist)
 
     numsprites = (signed int)i;
 
-    sprites = Z_Malloc(numsprites * sizeof(*sprites), PU_STATIC, NULL);
+    sprites = Z_Calloc(numsprites, sizeof(*sprites), PU_STATIC, NULL);
 
     // Create hash table based on just the first four letters of each sprite
     // killough 1/31/98
@@ -254,6 +254,7 @@ static void R_InitSpriteDefs(const char *const *namelist)
                     {
                         case -1:
                             // no rotations were found for that frame at all
+                            C_Warning("R_InitSprites: No patches found for %s frame %c", namelist[i], frame+'A');
                             break;
 
                         case 0:
@@ -299,7 +300,8 @@ static void R_InitSpriteDefs(const char *const *namelist)
                     }
 
                 // allocate space for the frames present and copy sprtemp to it
-                sprites[i].spriteframes = Z_Malloc(maxframe * sizeof(spriteframe_t), PU_STATIC, NULL);
+                sprites[i].spriteframes = Z_Malloc(maxframe * sizeof(spriteframe_t), PU_STATIC,
+                    NULL);
                 memcpy(sprites[i].spriteframes, sprtemp, maxframe * sizeof(spriteframe_t));
             }
         }
@@ -350,8 +352,8 @@ void R_ClearSprites(void)
     if (num_vissprite >= num_vissprite_alloc)
     {
         num_vissprite_alloc += 128;
-        vissprites = Z_Realloc(vissprites, num_vissprite_alloc * sizeof(vissprite_t), PU_LEVEL, NULL);
-        vissprite_ptrs = Z_Realloc(vissprite_ptrs, num_vissprite_alloc * sizeof(vissprite_t *), PU_LEVEL, NULL);
+        vissprites = Z_Realloc(vissprites, num_vissprite_alloc * sizeof(vissprite_t));
+        vissprite_ptrs = Z_Realloc(vissprite_ptrs, num_vissprite_alloc * sizeof(vissprite_t *));
     }
 
     num_vissprite = 0;
@@ -427,7 +429,6 @@ static vissprite_t *R_NewVisSprite(fixed_t scale)
             break;
         }
     } while (1);
-
 
     if (num_vissprite >= num_vissprite_alloc)
     {
@@ -685,7 +686,6 @@ void R_DrawVisSprite(vissprite_t *vis)
 
     dc_iscale = ABS(vis->xiscale)>>(!hires);                // CHANGED FOR HIRES
     dc_texturemid = vis->texturemid;
-
     if (vis->mobjflags & MF_TRANSLATION)
     {
         colfunc = transcolfunc;
@@ -818,7 +818,7 @@ void R_ProjectSprite(mobj_t *thing)
     spriteframe_t       *sprframe;
     int                 lump;
 
-    dboolean             flip;
+    dboolean            flip;
 
     vissprite_t         *vis;
 
@@ -918,13 +918,13 @@ void R_ProjectSprite(mobj_t *thing)
         else
             rot = (ang - fangle + (angle_t)(ANG45 / 2) * 9 - (angle_t)(ANG180 / 16)) >> 28;
         lump = sprframe->lump[rot];
-        flip = ((dboolean)(sprframe->flip & (1 << rot)) || (flags2 & MF2_MIRRORED));
+        flip = (!!(sprframe->flip & (1 << rot)) || (flags2 & MF2_MIRRORED));
     }
     else
     {
         // use single rotation for all views
         lump = sprframe->lump[0];
-        flip = ((dboolean)(sprframe->flip & 1) || (flags2 & MF2_MIRRORED));
+        flip = (!!(sprframe->flip & 1) || (flags2 & MF2_MIRRORED));
     }
 
     if (thing->state->dehacked)
@@ -1013,7 +1013,7 @@ void R_ProjectSprite(mobj_t *thing)
 
         vis->texturemid = gzt - viewz - clipfeet;
 
-        if ((flags2 & MF2_NOLIQUIDBOB) && d_swirl && isliquid[sector->floorpic])
+        if (d_swirl && isliquid[sector->floorpic]) 
             clipfeet += animatedliquiddiff;
 
         vis->footclip = clipfeet;
@@ -1224,7 +1224,7 @@ void R_ProjectShadow(mobj_t *thing)
     spriteframe_t       *sprframe;
     int                 lump;
 
-    dboolean             flip;
+    dboolean            flip;
 
     vissprite_t         *vis;
 
@@ -1284,13 +1284,13 @@ void R_ProjectShadow(mobj_t *thing)
         else
             rot = (ang - thing->angle + (angle_t)(ANG45 / 2) * 9 - (angle_t)(ANG180 / 16)) >> 28;
         lump = sprframe->lump[rot];
-        flip = ((dboolean)(sprframe->flip & (1 << rot)) || (thing->flags2 & MF2_MIRRORED));
+        flip = (!!(sprframe->flip & (1 << rot)) || (thing->flags2 & MF2_MIRRORED));
     }
     else
     {
         // use single rotation for all views
         lump = sprframe->lump[0];
-        flip = ((dboolean)(sprframe->flip & 1) || (thing->flags2 & MF2_MIRRORED));
+        flip = (!!(sprframe->flip & 1) || (thing->flags2 & MF2_MIRRORED));
     }
 
     // calculate edges of the shape
@@ -1552,6 +1552,7 @@ static void R_DrawPSprite(pspdef_t *psp, dboolean invisibility)
     vissprite_t         *vis;
     vissprite_t         avis;
     state_t             *state;
+    dboolean            dehacked = weaponinfo[viewplayer->readyweapon].dehacked;
 
     // decide which patch to use
     state = psp->state;
@@ -1571,10 +1572,10 @@ static void R_DrawPSprite(pspdef_t *psp, dboolean invisibility)
     sprframe = &sprdef->spriteframes[frame & FF_FRAMEMASK];
 
     lump = sprframe->lump[0];
-    flip = (dboolean)(sprframe->flip & 1);
+    flip = !!(sprframe->flip & 1);
 
     // calculate edges of the shape
-    tx = psp->sx - (ORIGWIDTH / 2) * FRACUNIT - (state->dehacked ? spriteoffset[lump] :
+    tx = psp->sx - (ORIGINALWIDTH / 2) * FRACUNIT - (dehacked ? spriteoffset[lump] :
         newspriteoffset[lump]);
 //    x1 = (centerxfrac + FRACUNIT / 2 + FixedMul(tx, pspritexscale)) >> FRACBITS;
     x1 = (centerxfrac + FixedMul (tx,pspritescale) ) >>FRACBITS;
@@ -1624,14 +1625,6 @@ static void R_DrawPSprite(pspdef_t *psp, dboolean invisibility)
 
     vis->patch = lump;
 
-//    if (invisibility)
-//    {
-//        // shadow draw
-//        vis->colfunc = psprcolfunc;
-//        vis->colormap = NULL;
-//    }
-//    else
-
     // [crispy] do not invalidate colormap if invisibility is rendered translucently
     if ((viewplayer->powers[pw_invisibility] > 4*32
         || (viewplayer->powers[pw_invisibility] & 8))
@@ -1643,7 +1636,7 @@ static void R_DrawPSprite(pspdef_t *psp, dboolean invisibility)
     }
     else //if (fixedcolormap)
     {
-        if (spr == SPR_SHT2 && (!frame || frame >= 8) && !state->dehacked) 
+        if (spr == SPR_SHT2 && (!frame || frame >= 8) && !dehacked) 
             vis->colfunc = (d_translucency ? R_DrawTranslucentSuperShotgunColumn :
                 R_DrawSuperShotgunColumn);
         else
@@ -1669,7 +1662,7 @@ static void R_DrawPSprite(pspdef_t *psp, dboolean invisibility)
                     basecolfunc,        // SPR_BFGG
                     tlcolfunc           // SPR_BFGF
                 };
-                vis->colfunc = (bflash && spr <= SPR_BFGF && (!state->dehacked || state->translucent) ?
+                vis->colfunc = (bflash && spr <= SPR_BFGF && (!dehacked || state->translucent) ?
                     colfuncs[spr] : basecolfunc);
             }
             else
@@ -1693,7 +1686,7 @@ static void R_DrawPSprite(pspdef_t *psp, dboolean invisibility)
                     basecolfunc,        // SPR_BFGG
                     basecolfunc         // SPR_BFGF
                 };
-                vis->colfunc = (bflash && spr <= SPR_BFGF && (!state->dehacked || state->translucent) ?
+                vis->colfunc = (bflash && spr <= SPR_BFGF && (!dehacked || state->translucent) ?
                     colfuncs[spr] : basecolfunc);
             }
         }
@@ -1790,23 +1783,19 @@ void R_DrawPlayerSprites(void)
     // add all active psprites
     if (invisibility > 128 || (invisibility & 8))
     {
-//        V_FillRect(viewwindowx, viewwindowy, viewwidth, viewheight, 251);
         for (i = 0, psp = viewplayer->psprites; i < NUMPSPRITES; i++, psp++)
             if (psp->state)
                 R_DrawPSprite(psp, true);
-
-//        if (menuactive || paused || consoleactive)
-//            R_DrawPausedFuzzColumns();
-//        else
-//            R_DrawFuzzColumns();
-
     }
     else
     {
         bflash = false;
         for (i = 0, psp = viewplayer->psprites; i < NUMPSPRITES; i++, psp++)
             if (psp->state && (psp->state->frame & FF_FULLBRIGHT))
+            {
                 bflash = true;
+                break;
+            }
         for (i = 0, psp = viewplayer->psprites; i < NUMPSPRITES; i++, psp++)
             if (psp->state)
                 R_DrawPSprite(psp, false);
@@ -2101,7 +2090,7 @@ void R_DrawMasked(void)
     for (i = num_shadowvissprite; --i >= 0;)
         R_DrawShadowSprite(&shadowvissprites[i]);
 
-    // draw all other vissprites, back to front
+    // draw all other vissprites back to front
     for (i = num_vissprite; --i >= 0;)
         R_DrawSprite(vissprite_ptrs[i]);
 

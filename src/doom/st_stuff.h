@@ -39,8 +39,8 @@
 // Now sensitive for scaling.
 #define ST_HEIGHT                     32
 
-#define ST_WIDTH                      ORIGWIDTH
-#define ST_Y                          (ORIGHEIGHT - ST_HEIGHT)
+#define ST_WIDTH                      ORIGINALWIDTH
+#define ST_Y                          (ORIGINALHEIGHT - ST_HEIGHT)
 
 
 //

@@ -220,7 +220,7 @@ wad_file_t *W_AddFile (char *filename, dboolean automatic)
 
     startlump = numlumps;
     numlumps += numfilelumps;
-    lumpinfo = Z_Realloc(lumpinfo, numlumps * sizeof(lumpinfo_t *), PU_CACHE, NULL);
+    lumpinfo = Z_Realloc(lumpinfo, numlumps * sizeof(lumpinfo_t *));
 
     if (lumpinfo == NULL)
     {

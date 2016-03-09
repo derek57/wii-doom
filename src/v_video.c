@@ -277,9 +277,9 @@ V_DrawPatch
 
 #ifdef RANGECHECK
     if (x < 0
-     || x + SHORT(patch->width) > ORIGWIDTH
+     || x + SHORT(patch->width) > ORIGINALWIDTH
      || y < 0
-     || y + SHORT(patch->height) > ORIGHEIGHT)
+     || y + SHORT(patch->height) > ORIGINALHEIGHT)
     {
         C_Error("Bad V_DrawPatch: Patch (%d,%d) exceeds LFB", x, y);
     }
@@ -317,7 +317,7 @@ V_DrawPatch
                 }
 
                 // [crispy] too far right / width
-                if (x >= ORIGWIDTH)
+                if (x >= ORIGINALWIDTH)
                 {
                     break;
                 }
@@ -332,7 +332,7 @@ V_DrawPatch
                 }
 
                 // [crispy] too low / height
-                while (tmpy + count > ORIGHEIGHT)
+                while (tmpy + count > ORIGINALHEIGHT)
                 {
                     count--;
                 }
@@ -385,9 +385,9 @@ V_DrawPatchFlipped
 
 #ifdef RANGECHECK
     if (x < 0
-     || x + SHORT(patch->width) > ORIGWIDTH
+     || x + SHORT(patch->width) > ORIGINALWIDTH
      || y < 0
-     || y + SHORT(patch->height) > ORIGHEIGHT)
+     || y + SHORT(patch->height) > ORIGINALHEIGHT)
     {
         C_Error("Bad V_DrawPatchFlipped: Patch (%d,%d)-(%d,%d) exceeds LFB"
                 , x, y, x + SHORT(patch->width), y + SHORT(patch->height));
@@ -426,7 +426,7 @@ V_DrawPatchFlipped
                 }
 
                 // [crispy] too far right / width
-                if (x >= ORIGWIDTH)
+                if (x >= ORIGINALWIDTH)
                 {
                     break;
                 }
@@ -441,7 +441,7 @@ V_DrawPatchFlipped
                 }
 
                 // [crispy] too low / height
-                while (tmpy + count > ORIGHEIGHT)
+                while (tmpy + count > ORIGINALHEIGHT)
                 {
                     count--;
                 }
@@ -1245,10 +1245,10 @@ void V_DrawPatchWithShadow(int x, int y, int scrn, patch_t *patch, dboolean flag
     int         col = 0;
     byte        *desttop;
     int         w = SHORT(patch->width) << FRACBITS;
-    fixed_t     DX = (SCREENWIDTH << FRACBITS) / ORIGWIDTH;
-    fixed_t     DXI = (ORIGWIDTH << FRACBITS) / SCREENWIDTH;
-    fixed_t     DY = (SCREENHEIGHT << FRACBITS) / ORIGHEIGHT;
-    fixed_t     DYI = (ORIGHEIGHT << FRACBITS) / SCREENHEIGHT;
+    fixed_t     DX = (SCREENWIDTH << FRACBITS) / ORIGINALWIDTH;
+    fixed_t     DXI = (ORIGINALWIDTH << FRACBITS) / SCREENWIDTH;
+    fixed_t     DY = (SCREENHEIGHT << FRACBITS) / ORIGINALHEIGHT;
+    fixed_t     DYI = (ORIGINALHEIGHT << FRACBITS) / SCREENHEIGHT;
 
     y -= SHORT(patch->topoffset);
     x -= SHORT(patch->leftoffset);

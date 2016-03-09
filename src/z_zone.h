@@ -76,7 +76,7 @@ enum
 void *(Z_Malloc)(size_t size, int32_t tag, void **user DA(const char *, int));
 void *Z_MallocAlign(int reqsize, int32_t tag, void **user, int alignbits);
 void *(Z_Calloc)(size_t n1, size_t n2, int32_t tag, void **user DA(const char *, int)); 
-void *(Z_Realloc)(void *ptr, size_t size, int tag, void **user DA(const char *, int));
+void *(Z_Realloc)(void *ptr, size_t size DA(const char *, int));
 void (Z_Free)(void *ptr DA(const char *, int));
 void (Z_FreeTags)(int32_t lowtag, int32_t hightag DA(const char *, int));
 void (Z_ChangeTag)(void *ptr, int32_t tag DA(const char *, int));
@@ -93,6 +93,6 @@ void Z_DumpMemory(void);
 #define Z_ChangeTag(a,b)   (Z_ChangeTag)(a,b,    __FILE__,__LINE__)
 #define Z_Malloc(a,b,c)    (Z_Malloc)   (a,b,c,  __FILE__,__LINE__)
 #define Z_Calloc(a,b,c,d)  (Z_Calloc)   (a,b,c,d,__FILE__,__LINE__)
-#define Z_Realloc(a,b,c,d) (Z_Realloc)  (a,b,c,d,__FILE__,__LINE__)
+#define Z_Realloc(a,b)     (Z_Realloc)  (a,b,    __FILE__,__LINE__)
 #endif
 

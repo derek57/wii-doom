@@ -33,8 +33,8 @@
 #include "../src/c_io.h"
 
 #include "config.h"
-#include "dbopl.h"
 #include "opl.h"
+#include "opl3.h"
 #include "opl_internal.h"
 #include "opl_queue.h"
 
@@ -78,7 +78,7 @@ static uint64_t pause_offset;
 
 // OPL software emulator structure.
 
-static Chip opl_chip;
+static opl3_chip opl_chip; 
 static int opl_opl3mode;
 
 // Temporary mixing buffer used by the mixing callback.
@@ -165,38 +165,13 @@ static void AdvanceTime(unsigned int nsamples)
 
 static void FillBuffer(int16_t *buffer, unsigned int nsamples)
 {
-    unsigned int i;
-
     // This seems like a reasonable assumption.  mix_buffer is
     // 1 second long, which should always be much longer than the
     // SDL mix buffer.
 
     assert(nsamples < mixing_freq);
 
-    if (opl_opl3mode)
-    {
-        Chip__GenerateBlock3(&opl_chip, nsamples, mix_buffer);
-
-        // Mix into the destination buffer, doubling up into stereo.
-
-        for (i=0; i<nsamples; ++i)
-        {
-            buffer[i * 2] = (int16_t) mix_buffer[i * 2];
-            buffer[i * 2 + 1] = (int16_t) mix_buffer[i * 2 + 1];
-        }
-    }
-    else
-    {
-        Chip__GenerateBlock2(&opl_chip, nsamples, mix_buffer);
-
-        // Mix into the destination buffer, doubling up into stereo.
-
-        for (i=0; i<nsamples; ++i)
-        {
-            buffer[i * 2] = (int16_t) mix_buffer[i];
-            buffer[i * 2 + 1] = (int16_t) mix_buffer[i];
-        }
-    }
+    OPL3_GenerateStream(&opl_chip, buffer, nsamples); 
 }
 
 // Callback function to fill a new sound buffer:
@@ -366,6 +341,8 @@ static int OPL_SDL_Init(unsigned int port_base)
     {
         C_Error("OPL_SDL only supports native signed 16-bit LSB, stereo format!");
 
+
+
         OPL_SDL_Shutdown();
         return 0;
     }
@@ -376,9 +353,7 @@ static int OPL_SDL_Init(unsigned int port_base)
 
     // Create the emulator structure:
 
-    DBOPL_InitTables();
-    Chip__Chip(&opl_chip);
-    Chip__Setup(&opl_chip, mixing_freq);
+    OPL3_Reset(&opl_chip, mixing_freq); 
     opl_opl3mode = 0;
 
     callback_mutex = SDL_CreateMutex();
@@ -468,7 +443,7 @@ static void WriteRegister(unsigned int reg_num, unsigned int value)
             opl_opl3mode = value & 0x01;
 
         default:
-            Chip__WriteReg(&opl_chip, reg_num, value);
+            OPL3_WriteRegBuffered(&opl_chip, reg_num, value); 
             break;
     }
 }

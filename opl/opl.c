@@ -39,14 +39,6 @@
 extern opl_driver_t opl_linux_driver;
 #endif
 #endif
-#if defined(HAVE_LIBI386) || defined(HAVE_LIBAMD64)
-extern opl_driver_t opl_openbsd_driver;
-#endif
-/*
-#ifdef _WIN32
-extern opl_driver_t opl_win32_driver;
-#endif
-*/
 extern opl_driver_t opl_sdl_driver;
 
 
@@ -57,14 +49,6 @@ static opl_driver_t *drivers[] =
     &opl_linux_driver,
 #endif
 #endif
-#if defined(HAVE_LIBI386) || defined(HAVE_LIBAMD64)
-    &opl_openbsd_driver,
-#endif
-/*
-#ifdef _WIN32
-    &opl_win32_driver,
-#endif
-*/
     &opl_sdl_driver,
     NULL
 };
@@ -126,7 +110,6 @@ static opl_init_result_t InitDriver(opl_driver_t *_driver,
 static opl_init_result_t AutoSelectDriver(unsigned int port_base)
 {
     int i;
-//    opl_init_result_t result;
 
     for (i=0; drivers[i] != NULL; ++i)
     {
@@ -142,8 +125,8 @@ static opl_init_result_t AutoSelectDriver(unsigned int port_base)
     return OPL_INIT_NONE;
 }
 
-// Initialize the OPL library.  Returns true if initialized
-// successfully.
+// Initialize the OPL library. Return value indicates type of OPL chip
+// detected, if any.
 
 opl_init_result_t OPL_Init(unsigned int port_base)
 {

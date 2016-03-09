@@ -46,6 +46,7 @@
 #include "i_video.h"
 #include "m_controls.h"
 #include "m_misc.h"
+#include "m_random.h"
 #include "r_state.h"
 #include "s_sound.h"
 #include "sounds.h"
@@ -64,9 +65,10 @@ typedef struct
 } castinfo_t;
 
 castinfo_t      castorder[MAX_CASTORDER];
+/*
 castinfo_t      castorderbeta[MAX_CASTORDER];
 
-/*
+
 typedef struct
 {
     GameMission_t mission;
@@ -109,6 +111,8 @@ static textscreen_t textscreens[] =
 };
 */
 
+extern void      A_RandomJump(mobj_t *actor); 
+
 // Stage of animation:
 state_t*         caststate;
 
@@ -127,6 +131,7 @@ int              castnum;
 int              casttics;
 int              castframes;
 int              castonmelee;
+
 
 extern dboolean  opl;
 
@@ -170,18 +175,22 @@ void F_StartFinale (void)
                     finaleflat = bgflatE1;
                     finaletext = s_E1TEXT;
                     break;
+
                 case 2:
                     finaleflat = bgflatE2;
                     finaletext = s_E2TEXT;
                     break;
+
                 case 3:
                     finaleflat = bgflatE3;
                     finaletext = s_E3TEXT;
                     break;
+
                 case 4:
                     finaleflat = bgflatE4;
                     finaletext = s_E4TEXT;
                     break;
+
                 default:
                     break;
             }
@@ -197,37 +206,44 @@ void F_StartFinale (void)
                     finaletext = (gamemission == pack_tnt ? s_T1TEXT :
                         (gamemission == pack_plut ? s_P1TEXT : s_C1TEXT));
                     break;
+
                 case 8:
                     if (gamemission == pack_nerve)
                     {
                         finaleflat = bgflat06;
                         finaletext = s_N1TEXT;
                     }
+
                 case 11:
                     finaleflat = bgflat11;
                     finaletext = (gamemission == pack_tnt ? s_T2TEXT :
                         (gamemission == pack_plut ? s_P2TEXT : s_C2TEXT));
                     break;
+
                 case 20:
                     finaleflat = bgflat20;
                     finaletext = (gamemission == pack_tnt ? s_T3TEXT :
                         (gamemission == pack_plut ? s_P3TEXT : s_C3TEXT));
                     break;
+
                 case 30:
                     finaleflat = bgflat30;
                     finaletext = (gamemission == pack_tnt ? s_T4TEXT :
                         (gamemission == pack_plut ? s_P4TEXT : s_C4TEXT));
                     break;
+
                 case 15:
                     finaleflat = bgflat15;
                     finaletext = (gamemission == pack_tnt ? s_T5TEXT :
                         (gamemission == pack_plut ? s_P5TEXT : s_C5TEXT));
                     break;
+
                 case 31:
                     finaleflat = bgflat31;
                     finaletext = (gamemission == pack_tnt ? s_T6TEXT :
                         (gamemission == pack_plut ? s_P6TEXT : s_C6TEXT));
                     break;
+
                 default:
                     // Ouch.
                     break;
@@ -283,18 +299,12 @@ dboolean F_CastResponder (event_t* ev)
         // rotate (taken from Eternity Engine)
         if (ev->data1 == KEY_LEFTARROW)
         {
-            if (castrot == 14)
-                castrot = 0;
-            else
-                castrot += 2;
+            castrot = (castrot == 14 ? 0 : castrot + 2); 
             return true;
         }
-        if (ev->data1 == KEY_RIGHTARROW)
+        else if (ev->data1 == KEY_RIGHTARROW)
         {
-            if (castrot == 0)
-                castrot = 14;
-            else
-                castrot -= 2;
+            castrot = (!castrot ? 014 : castrot - 2); 
             return true;
         }
     }
@@ -307,16 +317,25 @@ dboolean F_CastResponder (event_t* ev)
     if (d_flipcorpses && type != MT_CHAINGUY && type != MT_CYBORG)
         castdeathflip = rand() & 1;
 
-    if(!beta_style)
+//    if(!beta_style)
     {
         caststate = &states[mobjinfo[castorder[castnum].type].deathstate];
         casttics = caststate->tics;
+        if (casttics == -1 && caststate->action == A_RandomJump)
+        {
+            if (P_Random() < caststate->misc2)
+                caststate = &states [caststate->misc1];
+            else
+                caststate = &states [caststate->nextstate];
+            casttics = caststate->tics;
+        }
         castrot = 0;
         castframes = 0;
         castattacking = false;
         if (mobjinfo[castorder[castnum].type].deathsound)
-            S_StartSound (NULL, mobjinfo[castorder[castnum].type].deathsound);
+            S_StartSound(NULL, mobjinfo[castorder[castnum].type].deathsound);
     }
+/*
     else    
     {
         caststate = &states[mobjinfo[castorderbeta[castnum].type].deathstate];
@@ -325,8 +344,9 @@ dboolean F_CastResponder (event_t* ev)
         castframes = 0;
         castattacking = false;
         if (mobjinfo[castorderbeta[castnum].type].deathsound)
-            S_StartSound (NULL, mobjinfo[castorderbeta[castnum].type].deathsound);
+            S_StartSound(NULL, mobjinfo[castorderbeta[castnum].type].deathsound);
     }
+*/
     return true;
 }
 
@@ -362,7 +382,7 @@ void F_StartCast (void)
     castorder[16].name = s_CC_CYBER,  castorder[16].type = MT_CYBORG;
     castorder[17].name = s_CC_HERO,   castorder[17].type = MT_PLAYER;
     castorder[18].name = NULL,        castorder[18].type = 0;
-
+/*
     castorderbeta[0].name = s_CC_ZOMBIE,  castorderbeta[0].type = MT_BETAPOSSESSED;
     castorderbeta[1].name = s_CC_SHOTGUN, castorderbeta[1].type = MT_BETASHOTGUY;
     castorderbeta[2].name = s_CC_HEAVY,   castorderbeta[2].type = MT_CHAINGUY;
@@ -382,13 +402,15 @@ void F_StartCast (void)
     castorderbeta[16].name = s_CC_CYBER,  castorderbeta[16].type = MT_CYBORG;
     castorderbeta[17].name = s_CC_HERO,   castorderbeta[17].type = MT_PLAYER;
     castorderbeta[18].name = NULL,        castorderbeta[18].type = 0;
-
+*/
     wipegamestate = -1;    // force a screen wipe
     castnum = 0;
-    if(!beta_style)
+//    if(!beta_style)
         caststate = &states[mobjinfo[castorder[castnum].type].seestate];
+/*
     else
         caststate = &states[mobjinfo[castorderbeta[castnum].type].seestate];
+*/
     casttics = caststate->tics;
     castrot = 0;
     castdeath = false;
@@ -405,10 +427,7 @@ void F_StartCast (void)
 // F_CastTicker
 //
 void F_CastTicker (void)
-{
-    int         st;
-    int         sfx = 0;
-        
+{        
     if (--casttics > 0)
         return;         // not time to change state yet
                 
@@ -418,7 +437,7 @@ void F_CastTicker (void)
         castnum++;
         castdeath = false;
         castdeathflip = false;
-        if(!beta_style)
+//        if(!beta_style)
         {
             if (castorder[castnum].name == NULL)
                 castnum = 0;
@@ -426,6 +445,7 @@ void F_CastTicker (void)
                 S_StartSound (NULL, mobjinfo[castorder[castnum].type].seesound);
             caststate = &states[mobjinfo[castorder[castnum].type].seestate];
         }
+/*
         else
         {
             if (castorderbeta[castnum].name == NULL)
@@ -434,78 +454,137 @@ void F_CastTicker (void)
                 S_StartSound (NULL, mobjinfo[castorderbeta[castnum].type].seesound);
             caststate = &states[mobjinfo[castorderbeta[castnum].type].seestate];
         }
+*/
         castframes = 0;
     }
     else
     {
+        int         st;
+        int         sfx = 0;
+
         // just advance to next state in animation
-        if (caststate == &states[S_PLAY_ATK1])
+        if (!castdeath && caststate == &states[S_PLAY_ATK1]) 
         {
-            if(!beta_style)
-                goto stopattack;    // Oh, gross hack!
+            // Oh, gross hack!
+//            if(!beta_style)
+                goto stopattack;
+/*
             else
-                goto stopattackbeta;    // Oh, gross hack!
+                goto stopattackbeta;
+*/
         }
-        st = caststate->nextstate;
+        if (caststate->action == A_RandomJump && P_Random() < caststate->misc2) 
+            st = caststate->misc1;
+        else
+            st = caststate->nextstate;
         caststate = &states[st];
         castframes++;
         
         // sound hacks....
         switch (st)
         {
-          case S_PLAY_ATK1:     sfx = sfx_dshtgn; break;
-          case S_BETAPOSS_ATK2:     
-          case S_POSS_ATK2:     sfx = sfx_pistol; break;
-          case S_BETASPOS_ATK2:     
-          case S_SPOS_ATK2:     sfx = sfx_shotgn; break;
-          case S_VILE_ATK2:     sfx = sfx_vilatk; break;
-          case S_SKEL_FIST2:    sfx = sfx_skeswg; break;
-          case S_SKEL_FIST4:    sfx = sfx_skepch; break;
-          case S_SKEL_MISS2:    sfx = sfx_skeatk; break;
-          case S_FATT_ATK8:
-          case S_FATT_ATK5:
-          case S_FATT_ATK2:     sfx = sfx_firsht; break;
-          case S_CPOS_ATK2:
-          case S_CPOS_ATK3:
-          case S_CPOS_ATK4:     sfx = sfx_shotgn; break;
-          case S_TROO_ATK3:     sfx = sfx_claw; break;
-          case S_SARG_ATK2:     sfx = sfx_sgtatk; break;
-          case S_BETABOSS_ATK2:
-          case S_BOSS_ATK2:
-          case S_BOS2_ATK2:
-          case S_BETAHEAD_ATK2:     
-          case S_HEAD_ATK2:     sfx = sfx_firsht; break;
-          case S_BSKUL_ATK2:    
-          case S_SKULL_ATK2:    sfx = sfx_sklatk; break;
-          case S_SPID_ATK2:
-          case S_SPID_ATK3:     sfx = sfx_shotgn; break;
-          case S_BSPI_ATK2:
+            case S_PLAY_ATK1:
+                sfx = sfx_dshtgn;
+                break;
 
-               if (fsize != 4261144 && fsize != 4271324 && fsize != 4211660 && fsize != 4207819 &&
-                   fsize != 4274218 && fsize != 4225504 && fsize != 4196020 && fsize != 4225460 &&
-                   fsize != 4234124)
-                   sfx = sfx_plasma; break;
-          case S_CYBER_ATK2:
-          case S_CYBER_ATK4:
-          case S_CYBER_ATK6:    sfx = sfx_rlaunc; break;
-          case S_PAIN_ATK3:
+//            case S_BETAPOSS_ATK2:     
+            case S_POSS_ATK2:
+                sfx = sfx_pistol;
+                break;
 
-                if(fsize != 4261144 && fsize != 4271324 && fsize != 4211660 && fsize != 4207819 &&
-                        fsize != 4274218 && fsize != 4225504 && fsize != 4196020 && fsize != 4225460 &&
-                        fsize != 4234124)
-                    sfx = sfx_sklatk; break;
-          default: sfx = 0; break;
+//            case S_BETASPOS_ATK2:     
+            case S_SPOS_ATK2:
+                sfx = sfx_shotgn;
+                break;
+
+            case S_VILE_ATK2:
+                sfx = sfx_vilatk;
+                break;
+
+            case S_SKEL_FIST2:
+               sfx = sfx_skeswg;
+                break;
+
+            case S_SKEL_FIST4:
+               sfx = sfx_skepch;
+                break;
+
+            case S_SKEL_MISS2:
+               sfx = sfx_skeatk;
+                break;
+
+            case S_FATT_ATK8:
+            case S_FATT_ATK5:
+            case S_FATT_ATK2:
+                sfx = sfx_firsht;
+                break;
+
+            case S_CPOS_ATK2:
+            case S_CPOS_ATK3:
+            case S_CPOS_ATK4:
+                sfx = sfx_shotgn;
+                break;
+
+            case S_TROO_ATK3:
+                sfx = sfx_claw;
+                break;
+
+            case S_SARG_ATK2:
+                sfx = sfx_sgtatk;
+                break;
+
+//            case S_BETABOSS_ATK2:
+            case S_BOSS_ATK2:
+            case S_BOS2_ATK2:
+//            case S_BETAHEAD_ATK2:     
+            case S_HEAD_ATK2:
+                sfx = sfx_firsht;
+                break;
+
+            case S_BSKUL_ATK2:    
+            case S_SKULL_ATK2:
+               sfx = sfx_sklatk;
+                break;
+
+            case S_SPID_ATK2:
+            case S_SPID_ATK3:
+                sfx = sfx_shotgn;
+                break;
+
+            case S_BSPI_ATK2:
+                if (fsize != 4261144 && fsize != 4271324 && fsize != 4211660 && fsize != 4207819 &&
+                    fsize != 4274218 && fsize != 4225504 && fsize != 4196020 && fsize != 4225460 &&
+                    fsize != 4234124)
+                    sfx = sfx_plasma;
+                break;
+
+            case S_CYBER_ATK2:
+            case S_CYBER_ATK4:
+            case S_CYBER_ATK6:
+                sfx = sfx_rlaunc;
+                break;
+
+            case S_PAIN_ATK3:
+                if (fsize != 4261144 && fsize != 4271324 && fsize != 4211660 && fsize != 4207819 &&
+                    fsize != 4274218 && fsize != 4225504 && fsize != 4196020 && fsize != 4225460 &&
+                    fsize != 4234124)
+                    sfx = sfx_sklatk;
+                break;
+
+            default:
+                sfx = 0;
+                break;
         }
                 
         if (sfx)
             S_StartSound (NULL, sfx);
     }
         
-    if (castframes == 12)
+    if (!castdeath && castframes == 12) 
     {
         // go into attack frame
         castattacking = true;
-        if(!beta_style)
+//        if(!beta_style)
         {
             if (castonmelee)
                 caststate=&states[mobjinfo[castorder[castnum].type].meleestate];
@@ -522,6 +601,7 @@ void F_CastTicker (void)
                         &states[mobjinfo[castorder[castnum].type].missilestate];
             }
         }
+/*
         else
         {
             if (castonmelee)
@@ -539,11 +619,12 @@ void F_CastTicker (void)
                         &states[mobjinfo[castorderbeta[castnum].type].missilestate];
             }
         }
+*/
     }
         
     if (castattacking)
     {
-        if(!beta_style)
+//        if(!beta_style)
         {
             if (castframes == 24
                 || caststate == &states[mobjinfo[castorder[castnum].type].seestate] )
@@ -554,6 +635,7 @@ void F_CastTicker (void)
                 caststate = &states[mobjinfo[castorder[castnum].type].seestate];
             }
         }
+/*
         else
         {
             if (castframes == 24
@@ -565,11 +647,23 @@ void F_CastTicker (void)
                 caststate = &states[mobjinfo[castorderbeta[castnum].type].seestate];
             }
         }
+*/
     }
         
     casttics = caststate->tics;
     if (casttics == -1)
-        casttics = 15;
+    {
+        if (caststate->action == A_RandomJump)
+        {
+            if (P_Random() < caststate->misc2)
+                caststate = &states[caststate->misc1];
+            else
+                caststate = &states[caststate->nextstate];
+            casttics = caststate->tics;
+        }
+        if (casttics == -1)
+            casttics = 15;
+   }
 }
 
 //
@@ -698,7 +792,7 @@ void F_TextWrite (int scrn)
         }
                 
         w = SHORT (hu_font[c]->width);
-        if (cx+w > ORIGWIDTH)         // CHANGED FOR HIRES
+        if (cx+w > ORIGINALWIDTH)         // CHANGED FOR HIRES
             break;
         
         if(font_shadow == 1)
@@ -745,7 +839,7 @@ void F_CastPrint (char* text)
     }
     
     // draw it
-    cx = ORIGWIDTH/2-width/2;
+    cx = ORIGINALWIDTH/2-width/2;
     ch = text;
     while (ch)
     {
@@ -787,11 +881,12 @@ void F_CastDrawer (void)
     // erase the entire screen to a background
     V_DrawPatch (0, 0, 0, W_CacheLumpName (bgcastcall, PU_CACHE));
 
-    if(!beta_style)
+//    if(!beta_style)
         F_CastPrint (castorder[castnum].name);
+/*
     else
         F_CastPrint (castorderbeta[castnum].name);
-
+*/
     // draw the current frame in the middle of the screen
     sprdef = &sprites[caststate->sprite];
     sprframe = &sprdef->spriteframes[caststate->frame & FF_FRAMEMASK];
@@ -801,13 +896,13 @@ void F_CastDrawer (void)
 
     lump = sprframe->lump[rot];
 //    flip = (dboolean)sprframe->flip[0];
-    flip = (dboolean)(sprframe->flip & (1 << rot));
+    flip = !!(sprframe->flip & (1 << rot));
 
     patch = W_CacheLumpNum (lump+firstspritelump, PU_CACHE);
     if (flip || castdeathflip)
-        V_DrawPatchFlipped(ORIGWIDTH/2, 170, 0, patch);
+        V_DrawPatchFlipped(ORIGINALWIDTH/2, 170, 0, patch);
     else
-        V_DrawPatch(ORIGWIDTH/2, 170, 0, patch);
+        V_DrawPatch(ORIGINALWIDTH/2, 170, 0, patch);
 }
 
 
@@ -870,18 +965,18 @@ void F_BunnyScroll (void)
 
 //    V_MarkRect (0, 0, 0, SCREENWIDTH, SCREENHEIGHT, 0);
         
-    scrolled = (ORIGWIDTH - ((signed int) finalecount-230)/2);
-    if (scrolled > ORIGWIDTH)
-        scrolled = ORIGWIDTH;
+    scrolled = (ORIGINALWIDTH - ((signed int) finalecount-230)/2);
+    if (scrolled > ORIGINALWIDTH)
+        scrolled = ORIGINALWIDTH;
     if (scrolled < 0)
         scrolled = 0;
                 
-    for ( x=0 ; x<ORIGWIDTH ; x++) // CHANGED FOR HIRES
+    for ( x=0 ; x<ORIGINALWIDTH ; x++) // CHANGED FOR HIRES
     {
-        if (x+scrolled < ORIGWIDTH)
+        if (x+scrolled < ORIGINALWIDTH)
             F_DrawPatchCol (x, 0, p1, x+scrolled);
         else
-            F_DrawPatchCol (x, 0, p2, x+scrolled - ORIGWIDTH);                
+            F_DrawPatchCol (x, 0, p2, x+scrolled - ORIGINALWIDTH);                
     }
         
     if (finalecount < 1130)
@@ -889,11 +984,11 @@ void F_BunnyScroll (void)
     if (finalecount < 1180)
     {
         if(font_shadow == 1)
-            V_DrawPatchWithShadow((ORIGWIDTH - 13 * 8) / 2 + 1, (ORIGHEIGHT - 8 * 8) / 2 + 1, 0,
+            V_DrawPatchWithShadow((ORIGINALWIDTH - 13 * 8) / 2 + 1, (ORIGINALHEIGHT - 8 * 8) / 2 + 1, 0,
                     W_CacheLumpName("END0", PU_CACHE), false);
         else
-            V_DrawPatch((ORIGWIDTH - 13 * 8) / 2,       // CHANGED FOR HIRES
-                    (ORIGHEIGHT - 8 * 8) / 2, 0,        // CHANGED FOR HIRES
+            V_DrawPatch((ORIGINALWIDTH - 13 * 8) / 2,       // CHANGED FOR HIRES
+                    (ORIGINALHEIGHT - 8 * 8) / 2, 0,        // CHANGED FOR HIRES
                     W_CacheLumpName("END0", PU_CACHE)); // CHANGED FOR HIRES
         laststage = 0;
         return;
@@ -911,11 +1006,11 @@ void F_BunnyScroll (void)
     M_snprintf(name, 10, "END%i", stage);
 
     if(font_shadow == 1)
-        V_DrawPatchWithShadow((ORIGWIDTH - 13 * 8) / 2 + 1, (ORIGHEIGHT - 8 * 8) / 2 + 1, 0,
+        V_DrawPatchWithShadow((ORIGINALWIDTH - 13 * 8) / 2 + 1, (ORIGINALHEIGHT - 8 * 8) / 2 + 1, 0,
                 W_CacheLumpName(name, PU_CACHE), false);
     else
-        V_DrawPatch((ORIGWIDTH - 13 * 8) / 2,     // CHANGED FOR HIRES
-                (ORIGHEIGHT - 8 * 8) / 2, 0,      // CHANGED FOR HIRES
+        V_DrawPatch((ORIGINALWIDTH - 13 * 8) / 2,     // CHANGED FOR HIRES
+                (ORIGINALHEIGHT - 8 * 8) / 2, 0,      // CHANGED FOR HIRES
                 W_CacheLumpName(name, PU_CACHE)); // CHANGED FOR HIRES
 }
 
@@ -944,12 +1039,15 @@ static void F_ArtScreenDrawer(void)
                         lumpname = "HELP1";
                 }
                 break;
+
             case 2:
                 lumpname = "VICTORY2";
                 break;
+
             case 4:
                 lumpname = "ENDPIC";
                 break;
+
             default:
                 return;
         }
@@ -968,9 +1066,11 @@ void F_Drawer (void)
         case F_STAGE_CAST:
             F_CastDrawer();
             break;
+
         case F_STAGE_TEXT:
             F_TextWrite(0);
             break;
+
         case F_STAGE_ARTSCREEN:
             F_ArtScreenDrawer();
             break;

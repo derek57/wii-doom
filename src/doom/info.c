@@ -60,136 +60,131 @@ char *sprnames[] =
     "COL5", "TBLU", "TGRN", "TRED", "SMBT", "SMGT", "SMRT", "HDB1", "HDB2", "HDB3",
     "HDB4", "HDB5", "HDB6", "POB1", "POB2", "BRS1", "TLMP", "TLP2",
 
-    // Sprites 138 to 144 
-    "TNT1",     // phares   3/09/98: invisible sprite
+    // Sprites 138 to 143
+    "TNT1",     // invisible sprite     phares 3/9/98
     "DOGS",     // killough 7/19/98: Marine's best friend :)
     "PLS1",     // killough 7/19/98: first of two plasma fireballs in the beta
     "PLS2",     // killough 7/19/98: second of two plasma fireballs in the beta
     "BON3",     // killough 7/11/98: evil sceptre in the beta version
     "BON4",     // killough 7/11/98: unholy bible in the beta version
 
-    "BSKL",
-
-    // Sprite 145
+    // Sprite 144
     "BLD2",     // [BH] blood splats
 
-    // Sprite 146 to 185
-    "FLSH", "SPRY", "SPSH", "LVAS", "SLDG", "BND1", "BND2", "BPL3", "BPL5", "BBSK",
-    "BRSK", "BYSK", "BSHL", "BCLL", "BBOX", "BBXP", "BPNS", "BPNV", "BBSS", "BCL1",
-    "BELC", "BPL4", "BPL7", "BPL6", "BSMT", "BHED", "BPSS", "BSPS", "BCHG", "BCHF",
-    "BPLG", "BPLF", "BMSL", "BPL1", "BPL2", "BBL4", "CAS1", "CAS2", "CAS7", "PART",
-    "BLDS", "NKGS", "TGLT",
-
-    // [BH] Sprites 186 to 285 (100 extra sprite names to use in DeHackEd patches)
-    "SP00", "SP01", "SP02", "SP03", "SP04", "SP05", "SP06", "SP07", "SP08", "SP09",
-    "SP10", "SP11", "SP12", "SP13", "SP14", "SP15", "SP16", "SP17", "SP18", "SP19",
-    "SP20", "SP21", "SP22", "SP23", "SP24", "SP25", "SP26", "SP27", "SP28", "SP29",
-    "SP30", "SP31", "SP32", "SP33", "SP34", "SP35", "SP36", "SP37", "SP38", "SP39",
-    "SP40", "SP41", "SP42", "SP43", "SP44", "SP45", "SP46", "SP47", "SP48", "SP49",
-    "SP50", "SP51", "SP52", "SP53", "SP54", "SP55", "SP56", "SP57", "SP58", "SP59",
-    "SP60", "SP61", "SP62", "SP63", "SP64", "SP65", "SP66", "SP67", "SP68", "SP69",
-    "SP70", "SP71", "SP72", "SP73", "SP74", "SP75", "SP76", "SP77", "SP78", "SP79",
-    "SP80", "SP81", "SP82", "SP83", "SP84", "SP85", "SP86", "SP87", "SP88", "SP89",
-    "SP90", "SP91", "SP92", "SP93", "SP94", "SP95", "SP96", "SP97", "SP98", "SP99",
+    // Sprite 245 to 288
+    "BSKL", "FLSH", "SPRY", "SPSH", "LVAS", "SLDG", "BND1", "BND2", "BPL3", "BPL5",
+    "BBSK", "BRSK", "BYSK", "BSHL", "BCLL", "BBOX", "BBXP", "BPNS", "BPNV", "BBSS",
+    "BCL1", "BELC", "BPL4", "BPL7", "BPL6", "BSMT", "BHED", "BPSS", "BSPS", "BCHG",
+    "BCHF", "BPLG", "BPLF", "BMSL", "BPL1", "BPL2", "BBL4", "CAS1", "CAS2", "CAS7",
+    "PART", "BLDS", "NKGS", "TGLT",
 
     NULL
 };
 
-void A_Light0();
-void A_WeaponReady();
-void A_Lower();
-void A_Raise();
-void A_Punch();
-void A_ReFire();
-void A_FirePistol();
-void A_Light1();
-void A_FireShotgun();
-void A_Light2();
-void A_FireShotgun2();
-void A_CheckReload();
-void A_OpenShotgun2();
-void A_LoadShotgun2();
-void A_CloseShotgun2();
-void A_FireCGun();
-void A_GunFlash();
-void A_FireMissile();
-void A_Saw();
-void A_FirePlasma();
-void A_BFGsound();
-void A_FireBFG();
-void A_FireOldBFG();
-void A_BFGSpray();
-void A_Explode();
-void A_Pain();
-void A_PlayerScream();
-void A_Fall();
-void A_XScream();
-void A_Look();
-void A_Chase();
-void A_FaceTarget();
-void A_PosAttack();
-void A_Scream();
-void A_SPosAttack();
-void A_VileChase();
-void A_VileStart();
-void A_VileTarget();
-void A_VileAttack();
-void A_StartFire();
-void A_Fire();
-void A_FireCrackle();
-void A_Tracer();
-void A_SkelWhoosh();
-void A_SkelFist();
-void A_SkelMissile();
-void A_FatRaise();
-void A_FatAttack1();
-void A_FatAttack2();
-void A_FatAttack3();
-void A_BossDeath();
-void A_CPosAttack();
-void A_CPosRefire();
-void A_TroopAttack();
-void A_SargAttack();
-void A_HeadAttack();
-void A_BruisAttack();
-void A_BetaSkullAttack();
-void A_Stop();
-void A_SkullAttack();
-void A_Metal();
-void A_SpidRefire();
-void A_BabyMetal();
-void A_BspiAttack();
-void A_Hoof();
-void A_CyberAttack();
-void A_PainAttack();
-void A_PainDie();
-void A_KeenDie();
-void A_BrainPain();
-void A_BrainScream();
-void A_BrainDie();
-void A_BrainAwake();
-void A_BrainSpit();
-void A_SpawnSound();
-void A_SpawnFly();
-void A_BrainExplode();
-void A_Die();
-void A_Detonate();
-void A_Mushroom();
-void A_SkullPop();
-void A_Footstep();
-void A_MoreGibs();
-void A_CasingThrust();
-void A_SetCounter();
-void A_CounterSwitch();
-void A_FadeOut();
-void A_CounterJump();
-void A_EjectCasing();
-void A_SpawnTeleGlitter();
-void A_AccTeleGlitter();
+void A_Light0(mobj_t *actor);
+void A_WeaponReady(mobj_t *actor);
+void A_Lower(mobj_t *actor);
+void A_Raise(mobj_t *actor);
+void A_Punch(mobj_t *actor);
+void A_ReFire(mobj_t *actor);
+void A_FirePistol(mobj_t *actor);
+void A_Light1(mobj_t *actor);
+void A_FireShotgun(mobj_t *actor);
+void A_Light2(mobj_t *actor);
+void A_FireShotgun2(mobj_t *actor);
+void A_CheckReload(mobj_t *actor);
+void A_OpenShotgun2(mobj_t *actor);
+void A_LoadShotgun2(mobj_t *actor);
+void A_CloseShotgun2(mobj_t *actor);
+void A_FireCGun(mobj_t *actor);
+void A_GunFlash(mobj_t *actor);
+void A_FireMissile(mobj_t *actor);
+void A_Saw(mobj_t *actor);
+void A_FirePlasma(mobj_t *actor);
+void A_BFGsound(mobj_t *actor);
+void A_FireBFG(mobj_t *actor);
+void A_BFGSpray(mobj_t *actor);
+void A_Explode(mobj_t *actor);
+void A_Pain(mobj_t *actor);
+void A_PlayerScream(mobj_t *actor);
+void A_Fall(mobj_t *actor);
+void A_XScream(mobj_t *actor);
+void A_Look(mobj_t *actor);
+void A_Chase(mobj_t *actor);
+void A_FaceTarget(mobj_t *actor);
+void A_PosAttack(mobj_t *actor);
+void A_Scream(mobj_t *actor);
+void A_SPosAttack(mobj_t *actor);
+void A_VileChase(mobj_t *actor);
+void A_VileStart(mobj_t *actor);
+void A_VileTarget(mobj_t *actor);
+void A_VileAttack(mobj_t *actor);
+void A_StartFire(mobj_t *actor);
+void A_Fire(mobj_t *actor);
+void A_FireCrackle(mobj_t *actor);
+void A_Tracer(mobj_t *actor);
+void A_SkelWhoosh(mobj_t *actor);
+void A_SkelFist(mobj_t *actor);
+void A_SkelMissile(mobj_t *actor);
+void A_FatRaise(mobj_t *actor);
+void A_FatAttack1(mobj_t *actor);
+void A_FatAttack2(mobj_t *actor);
+void A_FatAttack3(mobj_t *actor);
+void A_BossDeath(mobj_t *actor);
+void A_CPosAttack(mobj_t *actor);
+void A_CPosRefire(mobj_t *actor);
+void A_TroopAttack(mobj_t *actor);
+void A_SargAttack(mobj_t *actor);
+void A_HeadAttack(mobj_t *actor);
+void A_BruisAttack(mobj_t *actor);
+void A_SkullAttack(mobj_t *actor);
+void A_Metal(mobj_t *actor);
+void A_SpidRefire(mobj_t *actor);
+void A_BabyMetal(mobj_t *actor);
+void A_BspiAttack(mobj_t *actor);
+void A_Hoof(mobj_t *actor);
+void A_CyberAttack(mobj_t *actor);
+void A_PainAttack(mobj_t *actor);
+void A_PainDie(mobj_t *actor);
+void A_KeenDie(mobj_t *actor);
+void A_BrainPain(mobj_t *actor);
+void A_BrainScream(mobj_t *actor);
+void A_BrainDie(mobj_t *actor);
+void A_BrainAwake(mobj_t *actor);
+void A_BrainSpit(mobj_t *actor);
+void A_SpawnSound(mobj_t *actor);
+void A_SpawnFly(mobj_t *actor);
+void A_BrainExplode(mobj_t *actor);
+void A_Detonate(mobj_t *actor);
+void A_Mushroom(mobj_t *actor);
+void A_SkullPop(mobj_t *actor);
+void A_Die(mobj_t *actor);
+void A_Spawn(mobj_t *actor);
+void A_Turn(mobj_t *actor);
+void A_Face(mobj_t *actor);
+void A_Scratch(mobj_t *actor);
+void A_PlaySound(mobj_t *actor);
+void A_RandomJump(mobj_t *actor);
+void A_CounterJump(mobj_t *actor);
+void A_LineEffect(mobj_t *actor);
+void A_FireOldBFG(mobj_t *actor);
+void A_BetaSkullAttack(mobj_t *actor);
+void A_Stop(mobj_t *actor);
+
+void A_Footstep(mobj_t *actor);
+void A_MoreGibs(mobj_t *actor);
+void A_CasingThrust(mobj_t *actor);
+void A_SetCounter(mobj_t *actor);
+void A_CounterSwitch(mobj_t *actor);
+void A_FadeOut(mobj_t *actor);
+void A_CasingJump(mobj_t *actor);
+void A_EjectCasing(mobj_t *actor);
+void A_SpawnTeleGlitter(mobj_t *actor);
+void A_AccTeleGlitter(mobj_t *actor);
 
 state_t states[NUMSTATES] =
 {
-  //  sprite     frame                           tics               action             nextstate             state
+    //  sprite   frame                             tics             action             nextstate                state
     { SPR_TROO,  0,                               -1,               NULL,              S_NULL             }, // S_NULL
 
     { SPR_SHTG,  4,                                0,               A_Light0,          S_NULL             }, // S_LIGHTDONE
@@ -1860,35 +1855,35 @@ state_t states[NUMSTATES] =
 
     { SPR_CAS1,  0,                                0,               A_SetCounter,      S_SHELLCASE_A_FADE2}, // S_SHELLCASE_A_FADE1
     { SPR_CAS1,  0,                                1,               A_FadeOut,         S_SHELLCASE_A_FADE3}, // S_SHELLCASE_A_FADE2
-    { SPR_CAS1,  0,                                0,               A_CounterJump,     S_NULL             }, // S_SHELLCASE_A_FADE3
+    { SPR_CAS1,  0,                                0,               A_CasingJump,      S_NULL             }, // S_SHELLCASE_A_FADE3
 
     { SPR_CAS1,  1,                                0,               A_SetCounter,      S_SHELLCASE_B_FADE2}, // S_SHELLCASE_B_FADE1
     { SPR_CAS1,  1,                                1,               A_FadeOut,         S_SHELLCASE_B_FADE3}, // S_SHELLCASE_B_FADE2
-    { SPR_CAS1,  1,                                0,               A_CounterJump,     S_NULL             }, // S_SHELLCASE_B_FADE3
+    { SPR_CAS1,  1,                                0,               A_CasingJump,      S_NULL             }, // S_SHELLCASE_B_FADE3
 
     { SPR_CAS1,  2,                                0,               A_SetCounter,      S_SHELLCASE_C_FADE2}, // S_SHELLCASE_C_FADE1
     { SPR_CAS1,  2,                                1,               A_FadeOut,         S_SHELLCASE_C_FADE3}, // S_SHELLCASE_C_FADE2
-    { SPR_CAS1,  2,                                0,               A_CounterJump,     S_NULL             }, // S_SHELLCASE_C_FADE3
+    { SPR_CAS1,  2,                                0,               A_CasingJump,      S_NULL             }, // S_SHELLCASE_C_FADE3
 
     { SPR_CAS1,  3,                                0,               A_SetCounter,      S_SHELLCASE_D_FADE2}, // S_SHELLCASE_D_FADE1
     { SPR_CAS1,  3,                                1,               A_FadeOut,         S_SHELLCASE_D_FADE3}, // S_SHELLCASE_D_FADE2
-    { SPR_CAS1,  3,                                0,               A_CounterJump,     S_NULL             }, // S_SHELLCASE_D_FADE3
+    { SPR_CAS1,  3,                                0,               A_CasingJump,      S_NULL             }, // S_SHELLCASE_D_FADE3
 
     { SPR_CAS1,  4,                                0,               A_SetCounter,      S_SHELLCASE_E_FADE2}, // S_SHELLCASE_E_FADE1
     { SPR_CAS1,  4,                                1,               A_FadeOut,         S_SHELLCASE_E_FADE3}, // S_SHELLCASE_E_FADE2
-    { SPR_CAS1,  4,                                0,               A_CounterJump,     S_NULL             }, // S_SHELLCASE_E_FADE3
+    { SPR_CAS1,  4,                                0,               A_CasingJump,      S_NULL             }, // S_SHELLCASE_E_FADE3
 
     { SPR_CAS1,  5,                                0,               A_SetCounter,      S_SHELLCASE_F_FADE2}, // S_SHELLCASE_F_FADE1
     { SPR_CAS1,  5,                                1,               A_FadeOut,         S_SHELLCASE_F_FADE3}, // S_SHELLCASE_F_FADE2
-    { SPR_CAS1,  5,                                0,               A_CounterJump,     S_NULL             }, // S_SHELLCASE_F_FADE3
+    { SPR_CAS1,  5,                                0,               A_CasingJump,      S_NULL             }, // S_SHELLCASE_F_FADE3
 
     { SPR_CAS1,  6,                                0,               A_SetCounter,      S_SHELLCASE_G_FADE2}, // S_SHELLCASE_G_FADE1
     { SPR_CAS1,  6,                                1,               A_FadeOut,         S_SHELLCASE_G_FADE3}, // S_SHELLCASE_G_FADE2
-    { SPR_CAS1,  6,                                0,               A_CounterJump,     S_NULL             }, // S_SHELLCASE_G_FADE3
+    { SPR_CAS1,  6,                                0,               A_CasingJump,      S_NULL             }, // S_SHELLCASE_G_FADE3
 
     { SPR_CAS1,  7,                                0,               A_SetCounter,      S_SHELLCASE_H_FADE2}, // S_SHELLCASE_H_FADE1
     { SPR_CAS1,  7,                                1,               A_FadeOut,         S_SHELLCASE_H_FADE3}, // S_SHELLCASE_H_FADE2
-    { SPR_CAS1,  7,                                0,               A_CounterJump,     S_NULL             }, // S_SHELLCASE_H_FADE3
+    { SPR_CAS1,  7,                                0,               A_CasingJump,      S_NULL             }, // S_SHELLCASE_H_FADE3
 
     { SPR_TNT1,  0,                                1,               NULL,              S_PISCASE_THRUST   }, // S_PISCASE_SPAWN
     { SPR_TNT1,  0,                                0,               A_CasingThrust,    S_PISCASE_CALC1    }, // S_PISCASE_THRUST
@@ -1903,19 +1898,19 @@ state_t states[NUMSTATES] =
 
     { SPR_CAS2,  0,                                0,               A_SetCounter,      S_PISCASE_A_FADE2  }, // S_PISCASE_A_FADE1
     { SPR_CAS2,  0,                                1,               A_FadeOut,         S_PISCASE_A_FADE3  }, // S_PISCASE_A_FADE2
-    { SPR_CAS2,  0,                                0,               A_CounterJump,     S_NULL             }, // S_PISCASE_A_FADE3
+    { SPR_CAS2,  0,                                0,               A_CasingJump,      S_NULL             }, // S_PISCASE_A_FADE3
 
     { SPR_CAS2,  1,                                0,               A_SetCounter,      S_PISCASE_B_FADE2  }, // S_PISCASE_B_FADE1
     { SPR_CAS2,  1,                                1,               A_FadeOut,         S_PISCASE_B_FADE3  }, // S_PISCASE_B_FADE2
-    { SPR_CAS2,  1,                                0,               A_CounterJump,     S_NULL             }, // S_PISCASE_B_FADE3
+    { SPR_CAS2,  1,                                0,               A_CasingJump,      S_NULL             }, // S_PISCASE_B_FADE3
 
     { SPR_CAS2,  2,                                0,               A_SetCounter,      S_PISCASE_C_FADE2  }, // S_PISCASE_C_FADE1
     { SPR_CAS2,  2,                                1,               A_FadeOut,         S_PISCASE_C_FADE3  }, // S_PISCASE_C_FADE2
-    { SPR_CAS2,  2,                                0,               A_CounterJump,     S_NULL             }, // S_PISCASE_C_FADE3
+    { SPR_CAS2,  2,                                0,               A_CasingJump,      S_NULL             }, // S_PISCASE_C_FADE3
 
     { SPR_CAS2,  3,                                0,               A_SetCounter,      S_PISCASE_D_FADE2  }, // S_PISCASE_D_FADE1
     { SPR_CAS2,  3,                                1,               A_FadeOut,         S_PISCASE_D_FADE3  }, // S_PISCASE_D_FADE2
-    { SPR_CAS2,  3,                                0,               A_CounterJump,     S_NULL             }, // S_PISCASE_D_FADE3
+    { SPR_CAS2,  3,                                0,               A_CasingJump,      S_NULL             }, // S_PISCASE_D_FADE3
 
     { SPR_TNT1,  0,                                1,               NULL,              S_RNDCASE_THRUST   }, // S_RNDCASE_SPAWN
     { SPR_TNT1,  0,                                0,               A_CasingThrust,    S_RNDCASE_CALC1    }, // S_RNDCASE_THRUST
@@ -1932,27 +1927,27 @@ state_t states[NUMSTATES] =
 
     { SPR_CAS7,  0,                                0,               A_SetCounter,      S_RNDCASE_A_FADE2  }, // S_RNDCASE_A_FADE1
     { SPR_CAS7,  0,                                1,               A_FadeOut,         S_RNDCASE_A_FADE3  }, // S_RNDCASE_A_FADE2
-    { SPR_CAS7,  0,                                0,               A_CounterJump,     S_NULL             }, // S_RNDCASE_A_FADE3
+    { SPR_CAS7,  0,                                0,               A_CasingJump,      S_NULL             }, // S_RNDCASE_A_FADE3
 
     { SPR_CAS7,  1,                                0,               A_SetCounter,      S_RNDCASE_B_FADE2  }, // S_RNDCASE_B_FADE1
     { SPR_CAS7,  1,                                1,               A_FadeOut,         S_RNDCASE_B_FADE3  }, // S_RNDCASE_B_FADE2
-    { SPR_CAS7,  1,                                0,               A_CounterJump,     S_NULL             }, // S_RNDCASE_B_FADE3
+    { SPR_CAS7,  1,                                0,               A_CasingJump,      S_NULL             }, // S_RNDCASE_B_FADE3
 
     { SPR_CAS7,  2,                                0,               A_SetCounter,      S_RNDCASE_C_FADE2  }, // S_RNDCASE_C_FADE1
     { SPR_CAS7,  2,                                1,               A_FadeOut,         S_RNDCASE_C_FADE3  }, // S_RNDCASE_C_FADE2
-    { SPR_CAS7,  2,                                0,               A_CounterJump,     S_NULL             }, // S_RNDCASE_C_FADE3
+    { SPR_CAS7,  2,                                0,               A_CasingJump,      S_NULL             }, // S_RNDCASE_C_FADE3
 
     { SPR_CAS7,  3,                                0,               A_SetCounter,      S_RNDCASE_D_FADE2  }, // S_RNDCASE_D_FADE1
     { SPR_CAS7,  3,                                1,               A_FadeOut,         S_RNDCASE_D_FADE3  }, // S_RNDCASE_D_FADE2
-    { SPR_CAS7,  3,                                0,               A_CounterJump,     S_NULL             }, // S_RNDCASE_D_FADE3
+    { SPR_CAS7,  3,                                0,               A_CasingJump,      S_NULL             }, // S_RNDCASE_D_FADE3
 
     { SPR_CAS7,  4,                                0,               A_SetCounter,      S_RNDCASE_E_FADE2  }, // S_RNDCASE_E_FADE1
     { SPR_CAS7,  4,                                1,               A_FadeOut,         S_RNDCASE_E_FADE3  }, // S_RNDCASE_E_FADE2
-    { SPR_CAS7,  4,                                0,               A_CounterJump,     S_NULL             }, // S_RNDCASE_E_FADE3
+    { SPR_CAS7,  4,                                0,               A_CasingJump,      S_NULL             }, // S_RNDCASE_E_FADE3
 
     { SPR_CAS7,  5,                                0,               A_SetCounter,      S_RNDCASE_F_FADE2  }, // S_RNDCASE_F_FADE1
     { SPR_CAS7,  5,                                1,               A_FadeOut,         S_RNDCASE_F_FADE3  }, // S_RNDCASE_F_FADE2
-    { SPR_CAS7,  5,                                0,               A_CounterJump,     S_NULL             }, // S_RNDCASE_F_FADE3
+    { SPR_CAS7,  5,                                0,               A_CasingJump,      S_NULL             }, // S_RNDCASE_F_FADE3
 
     { SPR_PART,  0,                                8,               NULL,              S_NULL             }, // S_PART1
 
@@ -7396,120 +7391,6 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] =
         /* plural2              */ ""
     },
 
-    // Beta Bruiser Projectile (MT_BETABRUISERSHOT)
-    {
-        /* doomednum            */ -1,
-        /* spawnstate           */ S_BRBBALL1,
-        /* spawnhealth          */ 1000,
-        /* gibhealth            */ 0,
-        /* seestate             */ S_NULL,
-        /* seesound             */ sfx_firsht,
-        /* reactiontime         */ 8,
-        /* attacksound          */ sfx_None,
-        /* painstate            */ S_NULL,
-        /* painchance           */ 0,
-        /* painsound            */ sfx_None,
-        /* meleestate           */ S_NULL,
-        /* missilestate         */ S_NULL,
-        /* deathstate           */ S_BRBBALLX1,
-        /* xdeathstate          */ S_NULL,
-        /* deathsound           */ sfx_firxpl,
-        /* speed                */ 10 * FRACUNIT,
-        /* radius               */ 6 * FRACUNIT,
-        /* height               */ 8 * FRACUNIT,
-        /* projectilepassheight */ 0,
-        /* mass                 */ 100,
-        /* damage               */ 3,
-        /* activesound          */ sfx_None,
-        /* flags                */ MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY,
-        /* flags2               */ MF2_TRANSLUCENT | MF2_NOFOOTCLIP,
-        /* raisestate           */ S_NULL,
-        /* frames               */ 0,
-        /* blood                */ 0,
-        /* shadowoffset         */ 0,
-        /* particlefx           */ 0,
-        /* name1                */ "beta bruiser projectile",
-        /* plural1              */ "",
-        /* name2                */ "",
-        /* plural2              */ ""
-    },
-
-    // MT_VALIANT1
-    {
-        /* doomednum            */ -1,
-        /* spawnstate           */ S_PLS1BALL,
-        /* spawnhealth          */ 1000,
-        /* gibhealth            */ 0,
-        /* seestate             */ S_NULL,
-        /* seesound             */ sfx_plasma,
-        /* reactiontime         */ 8,
-        /* attacksound          */ sfx_None,
-        /* painstate            */ S_NULL,
-        /* painchance           */ 0,
-        /* painsound            */ sfx_None,
-        /* meleestate           */ S_NULL,
-        /* missilestate         */ S_NULL,
-        /* deathstate           */ S_PLS1EXP,
-        /* xdeathstate          */ S_NULL,
-        /* deathsound           */ sfx_firxpl,
-        /* speed                */ 25 * FRACUNIT,
-        /* radius               */ 13 * FRACUNIT,
-        /* height               */ 8 * FRACUNIT,
-        /* projectilepassheight */ 0,
-        /* mass                 */ 100,
-        /* damage               */ 4,
-        /* activesound          */ sfx_None,
-        /* flags                */ MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY,
-        /* flags2               */ MF2_NOLIQUIDBOB | MF2_TRANSLUCENT,
-        /* raisestate           */ S_NULL,
-        /* frames               */ 0,
-        /* blood                */ 0,
-        /* shadowoffset         */ 0,
-        /* particlefx           */ 0,
-        /* name1                */ "",
-        /* plural1              */ "",
-        /* name2                */ "",
-        /* plural2              */ ""
-    },
-
-    // MT_VALIANT2
-    {
-        /* doomednum            */ -1,
-        /* spawnstate           */ S_PLS2BALL,
-        /* spawnhealth          */ 1000,
-        /* gibhealth            */ 0,
-        /* seestate             */ S_NULL,
-        /* seesound             */ sfx_plasma,
-        /* reactiontime         */ 8,
-        /* attacksound          */ sfx_None,
-        /* painstate            */ S_NULL,
-        /* painchance           */ 0,
-        /* painsound            */ sfx_None,
-        /* meleestate           */ S_NULL,
-        /* missilestate         */ S_NULL,
-        /* deathstate           */ S_PLS2BALLX1,
-        /* xdeathstate          */ S_NULL,
-        /* deathsound           */ sfx_firxpl,
-        /* speed                */ 25 * FRACUNIT,
-        /* radius               */ 6 * FRACUNIT,
-        /* height               */ 8 * FRACUNIT,
-        /* projectilepassheight */ 0,
-        /* mass                 */ 100,
-        /* damage               */ 4,
-        /* activesound          */ sfx_None,
-        /* flags                */ MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY,
-        /* flags2               */ MF2_NOLIQUIDBOB | MF2_TRANSLUCENT,
-        /* raisestate           */ S_NULL,
-        /* frames               */ 0,
-        /* blood                */ 0,
-        /* shadowoffset         */ 0,
-        /* particlefx           */ 0,
-        /* name1                */ "",
-        /* plural1              */ "",
-        /* name2                */ "",
-        /* plural2              */ ""
-    },
-
     // MT_SCEPTRE
     {
         /* doomednum            */ 2016,
@@ -7700,44 +7581,6 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] =
         /* plural2              */ ""
     },
 
-    // Blue Spray (MT_BLUESPRAY)
-    {
-        /* doomednum            */ -1,
-        /* spawnstate           */ S_SPRAY_00,
-        /* spawnhealth          */ 1000,
-        /* gibhealth            */ 0,
-        /* seestate             */ S_NULL,
-        /* seesound             */ sfx_None,
-        /* reactiontime         */ 8,
-        /* attacksound          */ sfx_None,
-        /* painstate            */ S_NULL,
-        /* painchance           */ 0,
-        /* painsound            */ sfx_None,
-        /* meleestate           */ S_NULL,
-        /* missilestate         */ S_NULL,
-        /* deathstate           */ S_NULL,
-        /* xdeathstate          */ S_NULL,
-        /* deathsound           */ sfx_None,
-        /* speed                */ 0,
-        /* radius               */ 12 * FRACUNIT,
-        /* height               */ 16 * FRACUNIT,
-        /* projectilepassheight */ 0,
-        /* mass                 */ 100,
-        /* damage               */ 0,
-        /* activesound          */ sfx_None,
-        /* flags                */ 0,
-        /* flags2               */ MF2_BLOOD | MF2_NOFOOTCLIP | MF2_TRANSLUCENT_REDTOBLUE_33,
-        /* raisestate           */ S_NULL,
-        /* frames               */ 0,
-        /* blood                */ BLUEBLOOD,
-        /* shadowoffset         */ 0,
-        /* particlefx           */ 0,
-        /* name1                */ "blue spray",
-        /* plural1              */ "",
-        /* name2                */ "",
-        /* plural2              */ ""
-    },
-
     // Green Blood (MT_GREENBLOOD)
     {
         /* doomednum            */ -1,
@@ -7776,44 +7619,6 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] =
         /* plural2              */ ""
     },
 
-    // Green Spray (MT_GREENSPRAY)
-    {
-        /* doomednum            */ -1,
-        /* spawnstate           */ S_SPRAY_00,
-        /* spawnhealth          */ 1000,
-        /* gibhealth            */ 0,
-        /* seestate             */ S_NULL,
-        /* seesound             */ sfx_None,
-        /* reactiontime         */ 8,
-        /* attacksound          */ sfx_None,
-        /* painstate            */ S_NULL,
-        /* painchance           */ 0,
-        /* painsound            */ sfx_None,
-        /* meleestate           */ S_NULL,
-        /* missilestate         */ S_NULL,
-        /* deathstate           */ S_NULL,
-        /* xdeathstate          */ S_NULL,
-        /* deathsound           */ sfx_None,
-        /* speed                */ 0,
-        /* radius               */ 12 * FRACUNIT,
-        /* height               */ 16 * FRACUNIT,
-        /* projectilepassheight */ 0,
-        /* mass                 */ 100,
-        /* damage               */ 0,
-        /* activesound          */ sfx_None,
-        /* flags                */ 0,
-        /* flags2               */ MF2_BLOOD | MF2_NOFOOTCLIP | MF2_TRANSLUCENT_REDTOGREEN_33,
-        /* raisestate           */ S_NULL,
-        /* frames               */ 0,
-        /* blood                */ GREENBLOOD,
-        /* shadowoffset         */ 0,
-        /* particlefx           */ 0,
-        /* name1                */ "green spray",
-        /* plural1              */ "",
-        /* name2                */ "",
-        /* plural2              */ ""
-    },
-
     // Fuzzy Blood (MT_FUZZYBLOOD)
     {
         /* doomednum            */ -1,
@@ -7847,44 +7652,6 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] =
         /* shadowoffset         */ 0,
         /* particlefx           */ 0,
         /* name1                */ "fuzzy blood",
-        /* plural1              */ "",
-        /* name2                */ "",
-        /* plural2              */ ""
-    },
-
-    // Fuzzy Spray (MT_FUZZYSPRAY)
-    {
-        /* doomednum            */ -1,
-        /* spawnstate           */ S_SPRAY_00,
-        /* spawnhealth          */ 1000,
-        /* gibhealth            */ 0,
-        /* seestate             */ S_NULL,
-        /* seesound             */ sfx_None,
-        /* reactiontime         */ 8,
-        /* attacksound          */ sfx_None,
-        /* painstate            */ S_NULL,
-        /* painchance           */ 0,
-        /* painsound            */ sfx_None,
-        /* meleestate           */ S_NULL,
-        /* missilestate         */ S_NULL,
-        /* deathstate           */ S_NULL,
-        /* xdeathstate          */ S_NULL,
-        /* deathsound           */ sfx_None,
-        /* speed                */ 0,
-        /* radius               */ 12 * FRACUNIT,
-        /* height               */ 16 * FRACUNIT,
-        /* projectilepassheight */ 0,
-        /* mass                 */ 100,
-        /* damage               */ 0,
-        /* activesound          */ sfx_None,
-        /* flags                */ MF_SHADOW | MF_TRANSLUCENT,
-        /* flags2               */ MF2_BLOOD | MF2_NOFOOTCLIP,
-        /* raisestate           */ S_NULL,
-        /* frames               */ 0,
-        /* blood                */ FUZZYBLOOD,
-        /* shadowoffset         */ 0,
-        /* particlefx           */ 0,
-        /* name1                */ "fuzzy spray",
         /* plural1              */ "",
         /* name2                */ "",
         /* plural2              */ ""
@@ -7999,6 +7766,158 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] =
         /* shadowoffset         */ 0,
         /* particlefx           */ 0,
         /* name1                */ "shadow",
+        /* plural1              */ "",
+        /* name2                */ "",
+        /* plural2              */ ""
+    },
+
+    // Blue Spray (MT_BLUESPRAY)
+    {
+        /* doomednum            */ -1,
+        /* spawnstate           */ S_SPRAY_00,
+        /* spawnhealth          */ 1000,
+        /* gibhealth            */ 0,
+        /* seestate             */ S_NULL,
+        /* seesound             */ sfx_None,
+        /* reactiontime         */ 8,
+        /* attacksound          */ sfx_None,
+        /* painstate            */ S_NULL,
+        /* painchance           */ 0,
+        /* painsound            */ sfx_None,
+        /* meleestate           */ S_NULL,
+        /* missilestate         */ S_NULL,
+        /* deathstate           */ S_NULL,
+        /* xdeathstate          */ S_NULL,
+        /* deathsound           */ sfx_None,
+        /* speed                */ 0,
+        /* radius               */ 12 * FRACUNIT,
+        /* height               */ 16 * FRACUNIT,
+        /* projectilepassheight */ 0,
+        /* mass                 */ 100,
+        /* damage               */ 0,
+        /* activesound          */ sfx_None,
+        /* flags                */ 0,
+        /* flags2               */ MF2_BLOOD | MF2_NOFOOTCLIP | MF2_TRANSLUCENT_REDTOBLUE_33,
+        /* raisestate           */ S_NULL,
+        /* frames               */ 0,
+        /* blood                */ BLUEBLOOD,
+        /* shadowoffset         */ 0,
+        /* particlefx           */ 0,
+        /* name1                */ "blue spray",
+        /* plural1              */ "",
+        /* name2                */ "",
+        /* plural2              */ ""
+    },
+
+    // Green Spray (MT_GREENSPRAY)
+    {
+        /* doomednum            */ -1,
+        /* spawnstate           */ S_SPRAY_00,
+        /* spawnhealth          */ 1000,
+        /* gibhealth            */ 0,
+        /* seestate             */ S_NULL,
+        /* seesound             */ sfx_None,
+        /* reactiontime         */ 8,
+        /* attacksound          */ sfx_None,
+        /* painstate            */ S_NULL,
+        /* painchance           */ 0,
+        /* painsound            */ sfx_None,
+        /* meleestate           */ S_NULL,
+        /* missilestate         */ S_NULL,
+        /* deathstate           */ S_NULL,
+        /* xdeathstate          */ S_NULL,
+        /* deathsound           */ sfx_None,
+        /* speed                */ 0,
+        /* radius               */ 12 * FRACUNIT,
+        /* height               */ 16 * FRACUNIT,
+        /* projectilepassheight */ 0,
+        /* mass                 */ 100,
+        /* damage               */ 0,
+        /* activesound          */ sfx_None,
+        /* flags                */ 0,
+        /* flags2               */ MF2_BLOOD | MF2_NOFOOTCLIP | MF2_TRANSLUCENT_REDTOGREEN_33,
+        /* raisestate           */ S_NULL,
+        /* frames               */ 0,
+        /* blood                */ GREENBLOOD,
+        /* shadowoffset         */ 0,
+        /* particlefx           */ 0,
+        /* name1                */ "green spray",
+        /* plural1              */ "",
+        /* name2                */ "",
+        /* plural2              */ ""
+    },
+
+    // Fuzzy Spray (MT_FUZZYSPRAY)
+    {
+        /* doomednum            */ -1,
+        /* spawnstate           */ S_SPRAY_00,
+        /* spawnhealth          */ 1000,
+        /* gibhealth            */ 0,
+        /* seestate             */ S_NULL,
+        /* seesound             */ sfx_None,
+        /* reactiontime         */ 8,
+        /* attacksound          */ sfx_None,
+        /* painstate            */ S_NULL,
+        /* painchance           */ 0,
+        /* painsound            */ sfx_None,
+        /* meleestate           */ S_NULL,
+        /* missilestate         */ S_NULL,
+        /* deathstate           */ S_NULL,
+        /* xdeathstate          */ S_NULL,
+        /* deathsound           */ sfx_None,
+        /* speed                */ 0,
+        /* radius               */ 12 * FRACUNIT,
+        /* height               */ 16 * FRACUNIT,
+        /* projectilepassheight */ 0,
+        /* mass                 */ 100,
+        /* damage               */ 0,
+        /* activesound          */ sfx_None,
+        /* flags                */ MF_SHADOW | MF_TRANSLUCENT,
+        /* flags2               */ MF2_BLOOD | MF2_NOFOOTCLIP,
+        /* raisestate           */ S_NULL,
+        /* frames               */ 0,
+        /* blood                */ FUZZYBLOOD,
+        /* shadowoffset         */ 0,
+        /* particlefx           */ 0,
+        /* name1                */ "fuzzy spray",
+        /* plural1              */ "",
+        /* name2                */ "",
+        /* plural2              */ ""
+    },
+
+    // Beta Bruiser Projectile (MT_BETABRUISERSHOT)
+    {
+        /* doomednum            */ -1,
+        /* spawnstate           */ S_BRBBALL1,
+        /* spawnhealth          */ 1000,
+        /* gibhealth            */ 0,
+        /* seestate             */ S_NULL,
+        /* seesound             */ sfx_firsht,
+        /* reactiontime         */ 8,
+        /* attacksound          */ sfx_None,
+        /* painstate            */ S_NULL,
+        /* painchance           */ 0,
+        /* painsound            */ sfx_None,
+        /* meleestate           */ S_NULL,
+        /* missilestate         */ S_NULL,
+        /* deathstate           */ S_BRBBALLX1,
+        /* xdeathstate          */ S_NULL,
+        /* deathsound           */ sfx_firxpl,
+        /* speed                */ 10 * FRACUNIT,
+        /* radius               */ 6 * FRACUNIT,
+        /* height               */ 8 * FRACUNIT,
+        /* projectilepassheight */ 0,
+        /* mass                 */ 100,
+        /* damage               */ 3,
+        /* activesound          */ sfx_None,
+        /* flags                */ MF_NOBLOCKMAP | MF_MISSILE | MF_DROPOFF | MF_NOGRAVITY,
+        /* flags2               */ MF2_TRANSLUCENT | MF2_NOFOOTCLIP,
+        /* raisestate           */ S_NULL,
+        /* frames               */ 0,
+        /* blood                */ 0,
+        /* shadowoffset         */ 0,
+        /* particlefx           */ 0,
+        /* name1                */ "beta bruiser projectile",
         /* plural1              */ "",
         /* name2                */ "",
         /* plural2              */ ""

@@ -184,7 +184,7 @@ typedef enum
     SPR_TLMP,
     SPR_TLP2,
 
-    // Sprites 138 to 144 
+    // Sprites 138 to 143
     SPR_TNT1,   // add invisible sprite phares 3/8/98
     SPR_DOGS,   // killough 7/19/98: Marine's best friend :)
     SPR_PLS1,   // killough 7/19/98: first of two plasma fireballs in the beta
@@ -192,12 +192,11 @@ typedef enum
     SPR_BON3,   // killough 7/11/98: evil sceptre in beta version
     SPR_BON4,   // killough 7/11/98: unholy bible in beta version
 
-    SPR_BSKL,
-
-    // Sprite 145
+    // Sprite 144
     SPR_BLD2,   // [BH] blood splats
 
-    // Sprite 146 to 185
+    // Sprite 245 to 288
+    SPR_BSKL,
     SPR_FLSH,
     SPR_SPRY,
     SPR_SPSH,
@@ -226,7 +225,6 @@ typedef enum
     SPR_BHED,
     SPR_BPSS,
     SPR_BSPS,
-
     SPR_BCHG,
     SPR_BCHF,
     SPR_BPLG,
@@ -240,7 +238,6 @@ typedef enum
     SPR_BPL2,
 
     SPR_BBL4,
-
     SPR_CAS1,
     SPR_CAS2,
     SPR_CAS7,
@@ -248,18 +245,6 @@ typedef enum
     SPR_BLDS,
     SPR_NKGS,
     SPR_TGLT,
-
-    // [BH] Sprites 186 to 285 (100 extra sprite names to use in DeHackEd patches)
-    SPR_SP00, SPR_SP01, SPR_SP02, SPR_SP03, SPR_SP04, SPR_SP05, SPR_SP06, SPR_SP07, SPR_SP08, SPR_SP09,
-    SPR_SP10, SPR_SP11, SPR_SP12, SPR_SP13, SPR_SP14, SPR_SP15, SPR_SP16, SPR_SP17, SPR_SP18, SPR_SP19,
-    SPR_SP20, SPR_SP21, SPR_SP22, SPR_SP23, SPR_SP24, SPR_SP25, SPR_SP26, SPR_SP27, SPR_SP28, SPR_SP29,
-    SPR_SP30, SPR_SP31, SPR_SP32, SPR_SP33, SPR_SP34, SPR_SP35, SPR_SP36, SPR_SP37, SPR_SP38, SPR_SP39,
-    SPR_SP40, SPR_SP41, SPR_SP42, SPR_SP43, SPR_SP44, SPR_SP45, SPR_SP46, SPR_SP47, SPR_SP48, SPR_SP49,
-    SPR_SP50, SPR_SP51, SPR_SP52, SPR_SP53, SPR_SP54, SPR_SP55, SPR_SP56, SPR_SP57, SPR_SP58, SPR_SP59,
-    SPR_SP60, SPR_SP61, SPR_SP62, SPR_SP63, SPR_SP64, SPR_SP65, SPR_SP66, SPR_SP67, SPR_SP68, SPR_SP69,
-    SPR_SP70, SPR_SP71, SPR_SP72, SPR_SP73, SPR_SP74, SPR_SP75, SPR_SP76, SPR_SP77, SPR_SP78, SPR_SP79,
-    SPR_SP80, SPR_SP81, SPR_SP82, SPR_SP83, SPR_SP84, SPR_SP85, SPR_SP86, SPR_SP87, SPR_SP88, SPR_SP89,
-    SPR_SP90, SPR_SP91, SPR_SP92, SPR_SP93, SPR_SP94, SPR_SP95, SPR_SP96, SPR_SP97, SPR_SP98, SPR_SP99,
 
     NUMSPRITES
 } spritenum_t;
@@ -366,7 +351,7 @@ typedef enum
     S_TBALL1,
     S_TBALL2,
     S_TBALLX1,
-    S_TBALLX2,
+    S_TBALLX2, // 100
     S_TBALLX3,
     S_RBALL1,
     S_RBALL2,
@@ -466,7 +451,7 @@ typedef enum
     S_POSS_XDIE4,
     S_POSS_XDIE5,
     S_POSS_XDIE6,
-    S_POSS_XDIE7,
+    S_POSS_XDIE7, // 200
     S_POSS_XDIE8,
     S_POSS_XDIE9,
     S_POSS_RAISE1,
@@ -566,7 +551,7 @@ typedef enum
     S_FIRE17,
     S_FIRE18,
     S_FIRE19,
-    S_FIRE20,
+    S_FIRE20, // 300
     S_FIRE21,
     S_FIRE22,
     S_FIRE23,
@@ -666,7 +651,7 @@ typedef enum
     S_FATT_DIE10,
     S_FATT_RAISE1,
     S_FATT_RAISE2,
-    S_FATT_RAISE3,
+    S_FATT_RAISE3, // 400
     S_FATT_RAISE4,
     S_FATT_RAISE5,
     S_FATT_RAISE6,
@@ -766,7 +751,7 @@ typedef enum
     S_SARG_RAISE2,
     S_SARG_RAISE3,
     S_SARG_RAISE4,
-    S_SARG_RAISE5,
+    S_SARG_RAISE5, // 500
     S_SARG_RAISE6,
     S_HEAD_STND,
     S_HEAD_RUN1,
@@ -866,7 +851,7 @@ typedef enum
     S_SKULL_DIE3,
     S_SKULL_DIE4,
     S_SKULL_DIE5,
-    S_SKULL_DIE6,
+    S_SKULL_DIE6, // 600
     S_SPID_STND,
     S_SPID_STND2,
     S_SPID_RUN1,
@@ -966,7 +951,7 @@ typedef enum
     S_CYBER_DIE7,
     S_CYBER_DIE8,
     S_CYBER_DIE9,
-    S_CYBER_DIE10,
+    S_CYBER_DIE10, // 700
     S_PAIN_STND,
     S_PAIN_RUN1,
     S_PAIN_RUN2,
@@ -1066,7 +1051,7 @@ typedef enum
     S_SPAWNFIRE7,
     S_SPAWNFIRE8,
     S_BRAINEXPLODE1,
-    S_BRAINEXPLODE2,
+    S_BRAINEXPLODE2, // 800
     S_BRAINEXPLODE3,
     S_ARM1,
     S_ARM1A,
@@ -1166,7 +1151,7 @@ typedef enum
     S_HEADCANDLES,
     S_HEADCANDLES2,
     S_DEADSTICK,
-    S_LIVESTICK,
+    S_LIVESTICK, // 900
     S_LIVESTICK2,
     S_MEAT2,
     S_MEAT3,
@@ -1276,7 +1261,7 @@ typedef enum
 
     // killough 7/11/98: the old BFG's 43 firing frames
     S_OLDBFG1,
-    S_OLDBFG2,
+    S_OLDBFG2, // 1000
     S_OLDBFG3,
     S_OLDBFG4,
     S_OLDBFG5,
@@ -1380,6 +1365,7 @@ typedef enum
     S_TRAIL3,
     S_TRAIL4,
 
+    // extra states for the Wii-DOOM port
     S_FLESH_00,
     S_FLESH_01,
     S_FLESH_02,
@@ -1391,7 +1377,7 @@ typedef enum
     S_FLESH_08,
     S_FLESH_09,
     S_FLESH_10,
-    S_FLESH_11,
+    S_FLESH_11, // 1100
     S_FLESH_12,
     S_FLESH_13,
     S_FLESH_14,
@@ -1439,10 +1425,8 @@ typedef enum
     S_SLIMESPLASH2,
     S_SLIMESPLASH3,
     S_SLIMESPLASH4,
-
     S_BND1,
     S_BND2,
-
     S_BETAHEADCANDLES,
     S_BETAHEADCANDLES2,
     S_BETAGIBS,
@@ -1468,7 +1452,6 @@ typedef enum
     S_BETAPINV2,
     S_BETAPINV3,
     S_BETAPINV4,
-
     S_BETABOSS_STND,
     S_BETABOSS_STND2,
     S_BETABOSS_RUN1,
@@ -1494,7 +1477,7 @@ typedef enum
     S_BETABOSS_RAISE3,
     S_BETABOSS_RAISE4,
     S_BETABOSS_RAISE5,
-    S_BETABOSS_RAISE6,
+    S_BETABOSS_RAISE6, // 1200
     S_BETABOSS_RAISE7,
     S_BETATALLGRNCOL,
     S_BETATECHPILLAR,
@@ -1572,7 +1555,6 @@ typedef enum
     S_BETASPOS_RAISE3,
     S_BETASPOS_RAISE4,
     S_BETASPOS_RAISE5,
-
     S_BETACHAIN,
     S_BETACHAINDOWN,
     S_BETACHAINUP,
@@ -1581,7 +1563,6 @@ typedef enum
     S_BETACHAIN3,
     S_BETACHAINFLASH1,
     S_BETACHAINFLASH2,
-
     S_BETAPLASMA,
     S_BETAPLASMADOWN,
     S_BETAPLASMAUP,
@@ -1598,7 +1579,7 @@ typedef enum
     S_BPL1EXP,
     S_BPL1EXP2,
     S_BPL1EXP3,
-    S_BPL1EXP4,
+    S_BPL1EXP4, // 1300
     S_BPL1EXP5,
 
     // killough 7/19/98: second plasma fireball in the beta
@@ -1607,19 +1588,15 @@ typedef enum
     S_BPL2BALLX1,
     S_BPL2BALLX2,
     S_BPL2BALLX3,
-
     S_BRBBALL1,
     S_BRBBALL2,
     S_BRBBALLX1,
     S_BRBBALLX2,
     S_BRBBALLX3,
-
     S_SHELLCASE_SPAWN,
     S_SHELLCASE_THRUST,
-
     S_SHELLCASE_CALC1,
     S_SHELLCASE_CALC2,
-
     S_SHELLCASE_A,
     S_SHELLCASE_B,
     S_SHELLCASE_C,
@@ -1628,109 +1605,83 @@ typedef enum
     S_SHELLCASE_F,
     S_SHELLCASE_G,
     S_SHELLCASE_H,
-
     S_SHELLCASE_A_FADE1,
     S_SHELLCASE_A_FADE2,
     S_SHELLCASE_A_FADE3,
-
     S_SHELLCASE_B_FADE1,
     S_SHELLCASE_B_FADE2,
     S_SHELLCASE_B_FADE3,
-
     S_SHELLCASE_C_FADE1,
     S_SHELLCASE_C_FADE2,
     S_SHELLCASE_C_FADE3,
-
     S_SHELLCASE_D_FADE1,
     S_SHELLCASE_D_FADE2,
     S_SHELLCASE_D_FADE3,
-
     S_SHELLCASE_E_FADE1,
     S_SHELLCASE_E_FADE2,
     S_SHELLCASE_E_FADE3,
-
     S_SHELLCASE_F_FADE1,
     S_SHELLCASE_F_FADE2,
     S_SHELLCASE_F_FADE3,
-
     S_SHELLCASE_G_FADE1,
     S_SHELLCASE_G_FADE2,
     S_SHELLCASE_G_FADE3,
-
     S_SHELLCASE_H_FADE1,
     S_SHELLCASE_H_FADE2,
     S_SHELLCASE_H_FADE3,
-
     S_PISCASE_SPAWN,
     S_PISCASE_THRUST,
-
     S_PISCASE_CALC1,
     S_PISCASE_CALC2,
-
     S_PISCASE_A,
     S_PISCASE_B,
     S_PISCASE_C,
     S_PISCASE_D,
-
     S_PISCASE_A_FADE1,
     S_PISCASE_A_FADE2,
     S_PISCASE_A_FADE3,
-
     S_PISCASE_B_FADE1,
     S_PISCASE_B_FADE2,
     S_PISCASE_B_FADE3,
-
     S_PISCASE_C_FADE1,
     S_PISCASE_C_FADE2,
     S_PISCASE_C_FADE3,
-
     S_PISCASE_D_FADE1,
     S_PISCASE_D_FADE2,
     S_PISCASE_D_FADE3,
-
     S_RNDCASE_SPAWN,
     S_RNDCASE_THRUST,
-
     S_RNDCASE_CALC1,
     S_RNDCASE_CALC2,
-
     S_RNDCASE_A,
     S_RNDCASE_B,
     S_RNDCASE_C,
     S_RNDCASE_D,
     S_RNDCASE_E,
     S_RNDCASE_F,
-
     S_RNDCASE_A_FADE1,
     S_RNDCASE_A_FADE2,
     S_RNDCASE_A_FADE3,
-
     S_RNDCASE_B_FADE1,
     S_RNDCASE_B_FADE2,
     S_RNDCASE_B_FADE3,
-
     S_RNDCASE_C_FADE1,
     S_RNDCASE_C_FADE2,
     S_RNDCASE_C_FADE3,
-
     S_RNDCASE_D_FADE1,
     S_RNDCASE_D_FADE2,
     S_RNDCASE_D_FADE3,
-
     S_RNDCASE_E_FADE1,
     S_RNDCASE_E_FADE2,
     S_RNDCASE_E_FADE3,
-
     S_RNDCASE_F_FADE1,
     S_RNDCASE_F_FADE2,
     S_RNDCASE_F_FADE3,
-
     S_PART1,
-
     S_BLOODCHUNK1,
     S_BLOODCHUNK2,
     S_BLOODCHUNK3,
-    S_BLOODCHUNK4,
+    S_BLOODCHUNK4, // 1400
     S_BLOODCHUNKX,
     S_BLOODSPLASH1,
     S_BLOODSPLASH2,
@@ -1757,7 +1708,6 @@ typedef enum
     S_TELEGLITTER2_3,
     S_TELEGLITTER2_4,
     S_TELEGLITTER2_5,
-
     S_PLAY_GDIE1,
     S_PLAY_GDIE2,
     S_PLAY_GDIE3,
@@ -1768,10 +1718,8 @@ typedef enum
     S_PLAY_GDIE8,
     S_PLAY_GDIE9,
 
-    // [BH] extra DeHacked states 1089 to 3999
-    EXTRASTATES,
+    NUMSTATES
 
-    NUMSTATES = 4000
 } statenum_t;
 
 typedef struct
@@ -1783,9 +1731,12 @@ typedef struct
     statenum_t  nextstate;
     long        misc1;
     long        misc2;
-    dboolean    dehacked;
-    long        particle_evt; // haleyjd: determines an effect to run
     dboolean    translucent; 
+    dboolean    dehacked;
+    int         num;
+
+    // haleyjd: determines an effect to run
+    long        particle_evt;
 } state_t;
 
 extern state_t  states[NUMSTATES];
@@ -1894,7 +1845,7 @@ typedef enum
     MT_MISC47,
     MT_MISC48,
     MT_MISC49,
-    MT_MISC50,
+    MT_MISC50, // 100
     MT_MISC51,
     MT_MISC52,
     MT_MISC53,
@@ -1939,31 +1890,23 @@ typedef enum
 
     MT_PLASMA1, // killough 7/11/98: first  of alternating beta plasma fireballs
     MT_PLASMA2, // killough 7/11/98: second of alternating beta plasma fireballs
-
-    MT_BETABRUISERSHOT,
-
-    // nitr8 10/10/2015: extra rotation states for VALIANT.WAD
-    MT_VALIANT1,
-
-    // nitr8 10/10/2015: extra rotation states for VALIANT.WAD
-    MT_VALIANT2,
-
-    MT_EVILSCEPTRE, // killough 7/11/98: evil sceptre in beta version
-    MT_UNHOLYBIBLE,   // killough 7/11/98: unholy bible in beta version
+    MT_SCEPTRE, // killough 7/11/98: evil sceptre in beta version
+    MT_BIBLE,   // killough 7/11/98: unholy bible in beta version
 
     MT_MUSICSOURCE,
     MT_GIBDTH,
 
     MT_BLUEBLOOD,
-    MT_BLUESPRAY,
     MT_GREENBLOOD,
-    MT_GREENSPRAY,
     MT_FUZZYBLOOD,
-    MT_FUZZYSPRAY,
     MT_BLOODSPLAT,
     MT_TRAIL,
     MT_SHADOW,
 
+    MT_BLUESPRAY,
+    MT_GREENSPRAY,
+    MT_FUZZYSPRAY,
+    MT_BETABRUISERSHOT,
     MT_FLESH,
     MT_SPRAY,
     MT_WATERSPLASH,
@@ -2009,7 +1952,7 @@ typedef enum
     MT_NUKAGESPLASH,
     MT_TELEGLITGEN,
     MT_TELEGLITGEN2,
-    MT_TELEGLITTER,
+    MT_TELEGLITTER, // 200
     MT_TELEGLITTER2,
 
     NUMMOBJTYPES
@@ -2017,86 +1960,90 @@ typedef enum
 
 typedef struct
 {
-    int   doomednum;     // Thing number used in id's editor, and now
-                         // probably by every other editor too
+    int          doomednum;     // Thing number used in id's editor, and now
+                                // probably by every other editor too
 
-    int   spawnstate;    // The state (frame) index when this Thing is
-                         // first created
+    int          spawnstate;    // The state (frame) index when this Thing is
+                                // first created
 
-    int   spawnhealth;   // The initial hit points for this Thing
+    int          spawnhealth;   // The initial hit points for this Thing
 
-    int   gibhealth;
+    int          gibhealth;     // haleyjd 09/12/13: health at which actor gibs
 
-    int   seestate;      // The state when it sees you or wakes up
+    int          seestate;      // The state when it sees you or wakes up
 
-    int   seesound;      // The sound it makes when waking
+    int          seesound;      // The sound it makes when waking
 
-    int   reactiontime;  // How many tics it waits after it wakes up
-                         // before it will start to attack, in normal
-                         // skills (halved for nightmare)
+    int          reactiontime;  // How many tics it waits after it wakes up
+                                // before it will start to attack, in normal
+                                // skills (halved for nightmare)
 
-    int   attacksound;   // The sound it makes when it attacks
+    int          attacksound;   // The sound it makes when it attacks
 
-    int   painstate;     // The state to indicate pain
+    int          painstate;     // The state to indicate pain
 
-    int   painchance;    // A number that is checked against a random
-                         // number 0-255 to see if the Thing is supposed
-                         // to go to its painstate or not.  Note this
-                         // has absolutely nothing to do with the chance
-                         // it will get hurt, just the chance of it
-                         // reacting visibly.
+    int          painchance;    // A number that is checked against a random
+                                // number 0-255 to see if the Thing is supposed
+                                // to go to its painstate or not.  Note this
+                                // has absolutely nothing to do with the chance
+                                // it will get hurt, just the chance of it
+                                // reacting visibly.
 
-    int   painsound;     // The sound it emits when it feels pain
+    int          painsound;     // The sound it emits when it feels pain
 
-    int   meleestate;    // Melee==close attack
+    int          meleestate;    // Melee==close attack
 
-    int   missilestate;  // What states to use when it's in the air, if
-                         // in fact it is ever used as a missile
+    int          missilestate;  // What states to use when it's in the air, if
+                                // in fact it is ever used as a missile
 
-    int   deathstate;    // What state begins the death sequence
+    int          deathstate;    // What state begins the death sequence
 
-    int   xdeathstate;   // What state begins the horrible death sequence
-                         // like when a rocket takes out a trooper
+    int          xdeathstate;   // What state begins the horrible death sequence
+                                // like when a rocket takes out a trooper
 
-    int   deathsound;    // The death sound.  See also A_Scream() in
-                         // p_enemy.c for some tweaking that goes on
-                         // for certain monsters
+    int          deathsound;    // The death sound.  See also A_Scream() in
+                                // p_enemy.c for some tweaking that goes on
+                                // for certain monsters
 
-    int   speed;         // How fast it moves.  Too fast and it can miss
-                         // collision logic.
+    int          speed;         // How fast it moves.  Too fast and it can miss
+                                // collision logic.
 
-    int   radius;        // An often incorrect radius
+    int          radius;        // An often incorrect radius
 
-    int   height;        // An often incorrect height, used only to see
-                         // if a monster can enter a sector
+    int          height;        // An often incorrect height, used only to see
+                                // if a monster can enter a sector
 
-    int   projectilepassheight;
+    int          projectilepassheight;
 
-    int   mass;          // How much an impact will move it.  Cacodemons
-                         // seem to retreat when shot because they have
-                         // very little mass and are moved by impact
+    int          mass;          // How much an impact will move it.  Cacodemons
+                                // seem to retreat when shot because they have
+                                // very little mass and are moved by impact
 
-    int   damage;        // If this is a missile, how much does it hurt?
+    int          damage;        // If this is a missile, how much does it hurt?
 
-    int   activesound;   // What sound it makes wandering around, once
-                         // in a while.  Chance is 3/256 it will.
+    int          activesound;   // What sound it makes wandering around, once
+                                // in a while.  Chance is 3/256 it will.
 
-    int   flags;         // Bit masks for lots of things.  See p_mobj.h
+    int          flags;         // Bit masks for lots of things.  See p_mobj.h
 
-    int   flags2;
+    int          flags2;
 
-    int   raisestate;    // The first state for an Archvile or respawn
-                         // resurrection.  Zero means it won't come
-                         // back to life.
-    int   frames;
-    int   blood;         // blood color (may also be used for particles)
-    int   shadowoffset;
-    int   particlefx;    // haleyjd 07/13/03: particle effects
-    char  name1[100];
-    char  plural1[100];
-    char  name2[100];
-    char  plural2[100];
-    void  (*colfunc)(void);
+    int          raisestate;    // The first state for an Archvile or respawn
+                                // resurrection.  Zero means it won't come
+                                // back to life.
+    int          frames;
+
+    int          blood;         // blood color (may also be used for particles)
+
+    int          shadowoffset;
+
+    unsigned int particlefx;    // haleyjd 07/13/03: particle effects
+
+    char         name1[100];
+    char         plural1[100];
+    char         name2[100];
+    char         plural2[100];
+    void         (*colfunc)(void);
 } mobjinfo_t;
 
 extern mobjinfo_t       mobjinfo[NUMMOBJTYPES];

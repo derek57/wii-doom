@@ -591,7 +591,6 @@ static void SetVoiceVolume(opl_voice_t *voice, unsigned int volume)
          && opl_voice->modulator.level != 0x3f)
         {
             unsigned int mod_volume = 0x3f - opl_voice->modulator.level;
-
             if (mod_volume >= car_volume)
             {
                 mod_volume = car_volume;
@@ -1047,7 +1046,7 @@ static void KeyOnEvent(opl_track_data_t *track, midi_event_t *event)
     // A volume of zero means key off. Some MIDI tracks, eg. the ones
     // in AV.wad, use a second key on with a volume of zero to mean
     // key off.
-    if (!volume)
+    if (volume <= 0)
     {
         KeyOffEvent(track, event);
         return;
@@ -1157,6 +1156,15 @@ static void ProgramChangeEvent(opl_track_data_t *track, midi_event_t *event)
 
 static void SetChannelPan(opl_channel_data_t *channel, unsigned int pan)
 {
+    // The DMX library has the stereo channels backwards, maybe because
+    // Paul Radek had a Soundblaster card with the channels reversed, or
+    // perhaps it was just a bug in the OPL3 support that was never
+    // finished. By default we preserve this bug.
+    if (opl_stereo_correct)
+    {
+        pan = 144 - pan;
+    }
+
     if (opl_opl3mode)
     {
         unsigned int reg_pan;
@@ -1257,7 +1265,6 @@ static void ControllerEvent(opl_track_data_t *track, midi_event_t *event)
 
         default:
 #ifdef OPL_MIDI_DEBUG
-//            fprintf(stderr, "Unknown MIDI controller type: %i\n", controller);
             fprintf(stderr, "Unknown MIDI controller type: %u\n", controller);
 #endif
             break;
@@ -1331,7 +1338,6 @@ static void MetaEvent(opl_track_data_t *track, midi_event_t *event)
 
         default:
 #ifdef OPL_MIDI_DEBUG
-//            fprintf(stderr, "Unknown MIDI meta event type: %i\n",
             fprintf(stderr, "Unknown MIDI meta event type: %u\n",
                             event->data.meta.type);
 #endif
@@ -1394,12 +1400,10 @@ static void InitChannel(opl_track_data_t *track, opl_channel_data_t *channel)
     channel->instrument = &main_instrs[0];
     channel->volume = current_music_volume;
     channel->volume_base = 100;
-
     if (channel->volume > channel->volume_base)
     {
         channel->volume = channel->volume_base;
     }
-
     channel->pan = 0x30;
     channel->bend = 0;
 }
@@ -1418,7 +1422,6 @@ static void RestartSong(void *unused)
     {
         MIDI_RestartIterator(tracks[i].iter);
         ScheduleTrack(&tracks[i]);
-
         for (j = 0; j < MIDI_CHANNELS_PER_TRACK; ++j)
         {
             InitChannel(&tracks[i], &tracks[i].channels[j]);
@@ -1457,7 +1460,7 @@ static void TrackTimerCallback(void *arg)
         // to lock up in an infinite loop. (5ms should be short
         // enough not to be noticeable by the listener).
 
-        if (!running_tracks && song_looping)
+        if (running_tracks <= 0 && song_looping)
         {
             OPL_SetCallback(5000, RestartSong, NULL);
         }
@@ -1744,18 +1747,18 @@ static void I_OPL_ShutdownMusic(void)
 
 static dboolean I_OPL_InitMusic(void)
 {
-    opl_init_result_t opl_chip_type;
+    opl_init_result_t chip_type;
 
     OPL_SetSampleRate(snd_samplerate);
 
-    opl_chip_type = OPL_Init(opl_io_port);
-    if (opl_chip_type == OPL_INIT_NONE)
+    chip_type = OPL_Init(opl_io_port);
+    if (chip_type == OPL_INIT_NONE)
     {
         C_Warning("Dude.  The Adlib isn't responding.");
         return false;
     }
 
-    if (opl_chip_type == OPL_INIT_OPL3 && opl_type)
+    if (chip_type == OPL_INIT_OPL3 && opl_type)
     {
         opl_opl3mode = 1;
         num_opl_voices = OPL_NUM_VOICES * 2;

@@ -203,7 +203,7 @@ static void R_RaiseVisplanes (visplane_t** vp)
         visplane_t* visplanes_old = visplanes;
 
         numvisplanes = numvisplanes ? 2 * numvisplanes : MAXVISPLANES;
-        visplanes = Z_Realloc(visplanes, numvisplanes * sizeof(*visplanes), PU_LEVEL, NULL);
+        visplanes = Z_Realloc(visplanes, numvisplanes * sizeof(*visplanes));
 //        memset(visplanes + numvisplanes_old, 0, (numvisplanes - numvisplanes_old) * sizeof(*visplanes));
 
         lastvisplane = visplanes + numvisplanes_old;

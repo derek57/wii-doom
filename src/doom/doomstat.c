@@ -55,7 +55,7 @@ dboolean         start_fastparm;
 dboolean         nomonsters;
 dboolean         hud;
 dboolean         randompitch;
-dboolean         swap_sound_chans;
+dboolean         opl_stereo_correct;
 dboolean         display_ticker;
 dboolean         memory_usage;
 
@@ -204,4 +204,29 @@ int              d_spawnteleglit = 0;
 // defaulted values
 int              mouseSensitivity = 5;
 
+
+//jff 1/7/98 default automap colors added
+int              mapcolor_back = 247;  // map background
+int              mapcolor_grid = 104;  // grid lines color
+int              mapcolor_wall = 23;   // normal 1s wall color
+int              mapcolor_fchg = 55;   // line at floor height change color
+int              mapcolor_cchg = 215;  // line at ceiling height change color
+int              mapcolor_clsd = 208;  // line at sector with floor=ceiling color
+int              mapcolor_rkey = 175;  // red key color
+int              mapcolor_bkey = 204;  // blue key color
+int              mapcolor_ykey = 231;  // yellow key color
+int              mapcolor_rdor = 175;  // red door color  (diff from keys to allow option)
+int              mapcolor_bdor = 204;  // blue door color (of enabling one but not other)
+int              mapcolor_ydor = 231;  // yellow door color
+int              mapcolor_tele = 119;  // teleporter line color
+int              mapcolor_secr = 252;  // secret sector boundary color
+int              mapcolor_exit = 0;    // jff 4/23/98 add exit line color
+int              mapcolor_unsn = 104;  // computer map unseen line color
+int              mapcolor_flat = 88;   // line with no floor/ceiling changes
+int              mapcolor_sprt = 112;  // general sprite color
+int              mapcolor_item = 231;  // item sprite color
+int              mapcolor_enemy = 177; // enemy sprite color
+int              mapcolor_hair = 208;  // crosshair color
+int              mapcolor_sngl = 208;  // single player arrow color
+int              mapcolor_plyr = 112;  // color for player arrow
 

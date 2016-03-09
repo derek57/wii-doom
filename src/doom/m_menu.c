@@ -1269,6 +1269,29 @@ char                       coordinates_z_textbuffer[50];
 char                       massacre_textbuffer[30];
 char                       flight_counter[10];
 char                       bloodsplats_buffer[10];
+char                       string_back[5];
+char                       string_grid[5];
+char                       string_wall[5];
+char                       string_fchg[5];
+char                       string_cchg[5];
+char                       string_clsd[5];
+char                       string_rkey[5];
+char                       string_bkey[5];
+char                       string_ykey[5];
+char                       string_rdor[5];
+char                       string_bdor[5];
+char                       string_ydor[5];
+char                       string_tele[5];
+char                       string_secr[5];
+char                       string_exit[5];
+char                       string_unsn[5];
+char                       string_flat[5];
+char                       string_sprt[5];
+char                       string_item[5];
+char                       string_enemy[5];
+char                       string_hair[5];
+char                       string_sngl[5];
+char                       string_plyr[5];
 
 // old save description before edit
 char                       saveOldString[SAVESTRINGSIZE];  
@@ -1299,11 +1322,11 @@ int                        cheeting;
 int                        coordinates_info = 0;
 int                        version_info = 0;
 #ifdef WII
-int                        key_controls_start_in_cfg_at_pos = 120;
-int                        key_controls_end_in_cfg_at_pos = 134;
+int                        key_controls_start_in_cfg_at_pos = 146;
+int                        key_controls_end_in_cfg_at_pos = 160;
 #else
-int                        key_controls_start_in_cfg_at_pos = 119;
-int                        key_controls_end_in_cfg_at_pos = 135;
+int                        key_controls_start_in_cfg_at_pos = 145;
+int                        key_controls_end_in_cfg_at_pos = 161;
 #endif
 int                        tracknum = 1;
 int                        epi = 1;
@@ -1429,12 +1452,13 @@ extern dboolean            done;
 extern dboolean            skippsprinterp;
 extern dboolean            longtics;
 extern dboolean            mus_cheated;
+extern dboolean            wipe;
 
 extern short               songlist[148];
 
 extern char*               demoname;
 
-extern void                A_PainDie(mobj_t *);
+extern void                A_PainDie(mobj_t *actor);
 
 
 //
@@ -1542,6 +1566,30 @@ void M_MapName(int choice);
 void M_Version(int choice);
 void M_SoundInfo(int choice);
 void M_HUD(int choice);
+void M_MapColor_Back(int choice);
+void M_MapColor_Grid(int choice);
+void M_MapColor_Wall(int choice);
+void M_MapColor_FCHG(int choice);
+void M_MapColor_CCHG(int choice);
+void M_MapColor_CLSD(int choice);
+void M_MapColor_RKey(int choice);
+void M_MapColor_BKey(int choice);
+void M_MapColor_YKey(int choice);
+void M_MapColor_RDoor(int choice);
+void M_MapColor_BDoor(int choice);
+void M_MapColor_YDoor(int choice);
+void M_MapColor_Teleport(int choice);
+void M_MapColor_Secret(int choice);
+void M_MapColor_Exit(int choice);
+void M_MapColor_Unseen(int choice);
+void M_MapColor_Flat(int choice);
+void M_MapColor_Sprite(int choice);
+void M_MapColor_Item(int choice);
+void M_MapColor_Enemy(int choice);
+void M_MapColor_Crosshair(int choice);
+void M_MapColor_Player(int choice);
+void M_MapColor_Multiplayer(int choice);
+void M_MapColor_Standard(int choice);
 void M_MapGrid(int choice);
 void M_WeaponChange(int choice);
 void M_AimingHelp(int choice);
@@ -1671,7 +1719,7 @@ void M_PrintDir(int choice);
 void M_ReplaceMissing(int choice);
 void M_Controls(int choice);
 void M_System(int choice);
-//void M_Sound(int choice);
+void M_Automap(int choice);
 void M_Game(int choice);
 void M_Game2(int choice);
 void M_Game3(int choice);
@@ -1679,6 +1727,8 @@ void M_Game4(int choice);
 void M_Game5(int choice);
 void M_Game6(int choice);
 void M_Game7(int choice);
+void M_OptSet(int choice);
+void M_DefSet(int choice);
 void M_Expansion(int choice);
 void M_Debug(int choice);
 void M_Test(int choice);
@@ -1699,6 +1749,7 @@ void M_DrawScreen(void);
 void M_DrawKeyBindings(void);
 void M_DrawControls(void);
 void M_DrawSystem(void);
+void M_DrawAutomap(void);
 void M_DrawGame1(void);
 void M_DrawGame2(void);
 void M_DrawGame3(void);
@@ -1911,6 +1962,10 @@ enum
     sound,
     sys,
     game,
+    empty1,
+    optimal_settings,
+    reset_settings,
+    empty2,
     dbg,
     tst,
     opt_end
@@ -1918,13 +1973,17 @@ enum
 
 static menuitem_t OptionsMenu[]=
 {
-    {1,"Screen Settings", M_Screen,'s'},
-    {1,"Control Settings", M_Controls,'c'},
-    {1,"Sound Settings", M_Sound,'v'},
-    {1,"System Settings", M_System,'y'},
-    {1,"Game Settings", M_Game,'g'},
-    {1,"Debug Settings", M_Debug,'d'},
-    {1,"Testings", M_Test,'t'}
+    {1,"", M_Screen,'s'},
+    {1,"", M_Controls,'c'},
+    {1,"", M_Sound,'v'},
+    {1,"", M_System,'y'},
+    {1,"", M_Game,'g'},
+    {-1,"",0,'\0'},
+    {1,"", M_OptSet,'o'},
+    {1,"", M_DefSet,'r'},
+    {-1,"",0,'\0'},
+    {1,"", M_Debug,'d'},
+    {1,"", M_Test,'t'}
 };
 
 static menu_t  OptionsDef =
@@ -1933,7 +1992,7 @@ static menu_t  OptionsDef =
     &MainDef,
     OptionsMenu,
     M_DrawOptions,
-    100,67,
+    100,47,
     0
 };
 
@@ -2339,7 +2398,7 @@ static menu_t  KeyBindingsDef =
     &ControlsDef,
     KeyBindingsMenu,
     M_DrawKeyBindings,
-    45,22,
+    45,18,
     0
 };
 
@@ -2381,7 +2440,7 @@ enum
     game_timer,
     game_authors,
     game_maptitle,
-    game_weapon,
+    game_mapcols,
     game_recoil,
     game_respawn,
     game_fast,
@@ -2401,7 +2460,7 @@ static menuitem_t GameMenu[]=
     {2,"AUTOMAP TIMER",M_Timer,'t'},
     {2,"AUTOMAP AUTHORS",M_Authors,'a'},
     {2,"AUTOMAP MAP TITLE",M_MapName,'n'},
-    {2,"",M_WeaponChange,'w'},
+    {1,"",M_Automap,'x'},
     {2,"WEAPON RECOIL",M_WeaponRecoil,'c'},
     {2,"RESPAWN MONSTERS",M_RespawnMonsters,'i'},
     {2,"FAST MONSTERS",M_FastMonsters,'d'},
@@ -2666,6 +2725,7 @@ enum
     game7_aimbot,
     game7_thrust,
     game7_teleportglitter,
+    game7_weapon,
 #ifdef WII
     game7_prbeta,
 #endif
@@ -2680,6 +2740,7 @@ static menuitem_t GameMenu7[]=
     {2,"",M_AimingHelp,'a'},
     {2,"PLAYER THRUST",M_PlayerThrust,'p'},
     {2,"Teleport Landings glitter type",M_TeleportGlitter,'g'},
+    {2,"",M_WeaponChange,'w'}
 #ifdef WII
     ,
     {2,"PRE-RELEASE BETA MODE",M_Beta,'b'}
@@ -2693,6 +2754,73 @@ static menu_t  GameDef7 =
     GameMenu7,
     M_DrawGame7,
     23,22,
+    0
+};
+
+enum
+{
+    amap_color_back,
+    amap_color_grid,
+    amap_color_wall,
+    amap_color_fchg,
+    amap_color_cchg,
+    amap_color_clsd,
+    amap_color_rkey,
+    amap_color_bkey,
+    amap_color_ykey,
+    amap_color_rdor,
+    amap_color_bdor,
+    amap_color_ydor,
+    amap_color_tele,
+    amap_color_secr,
+    amap_color_exit,
+    amap_color_unsn,
+    amap_color_flat,
+    amap_color_sprt,
+    amap_color_item,
+    amap_color_enemy,
+    amap_color_hair,
+    amap_color_sngl,
+    amap_color_plyr,
+    amap_color_reset,
+    amap_end
+} amap_e;
+
+static menuitem_t AutomapMenu[]=
+{
+    {2,"map Background",M_MapColor_Back,'\0'},
+    {2,"Grid lines",M_MapColor_Grid,'\0'},
+    {2,"normal 1-sided wall",M_MapColor_Wall,'\0'},
+    {2,"line at floor height change",M_MapColor_FCHG,'\0'},
+    {2,"line at Ceiling height change",M_MapColor_CCHG,'\0'},
+    {2,"line at Sector with floor = ceiling",M_MapColor_CLSD,'\0'},
+    {2,"Red Key",M_MapColor_RKey,'\0'},
+    {2,"Blue Key",M_MapColor_BKey,'\0'},
+    {2,"Yellow Key",M_MapColor_YKey,'\0'},
+    {2,"Red Door",M_MapColor_RDoor,'\0'},
+    {2,"Blue Door",M_MapColor_BDoor,'\0'},
+    {2,"Yellow Door",M_MapColor_YDoor,'\0'},
+    {2,"Teleporter Line",M_MapColor_Teleport,'\0'},
+    {2,"Secret sector boundary",M_MapColor_Secret,'\0'},
+    {2,"Exit line",M_MapColor_Exit,'\0'},
+    {2,"computer map unseen line",M_MapColor_Unseen,'\0'},
+    {2,"line with no floor / ceiling changes",M_MapColor_Flat,'\0'},
+    {2,"general sprite",M_MapColor_Sprite,'\0'},
+    {2,"item sprite",M_MapColor_Item,'\0'},
+    {2,"enemy sprite",M_MapColor_Enemy,'\0'},
+    {2,"crosshair",M_MapColor_Crosshair,'\0'},
+    {2,"single player arrow",M_MapColor_Player,'\0'},
+    {2,"player arrows in multiplayer",M_MapColor_Multiplayer,'\0'},
+    {2,"",M_MapColor_Standard,'\0'}
+};
+
+static menu_t  AutomapDef =
+{
+    amap_end,
+    &GameDef,
+    AutomapMenu,
+    M_DrawAutomap,
+    22,24,
     0
 };
 
@@ -3050,8 +3178,8 @@ void M_DrawLoad(void)
     {
         char *string = "* INDICATES A SAVEGAME THAT WAS";
         char *string2 = "CREATED USING AN OPTIONAL PWAD!";
-        int x = ORIGWIDTH/2 - M_StringWidth(string) / 2;
-        int x2 = ORIGWIDTH/2 - M_StringWidth(string2) / 2;
+        int x = ORIGINALWIDTH/2 - M_StringWidth(string) / 2;
+        int x2 = ORIGINALWIDTH/2 - M_StringWidth(string2) / 2;
         dp_translation = crx[CRX_GOLD];
         M_WriteText(x, LoadDef.y + 78, string);
         dp_translation = crx[CRX_GOLD];
@@ -3099,6 +3227,12 @@ void M_LoadSelect(int choice)
 //
 void M_LoadGame (int choice)
 {
+    // [crispy] forbid New Game and (Quick) Load while recording a demo
+    if (demorecording)
+    {
+	return;
+    }
+
     if (netgame)
     {
         M_StartMessage(s_LOADNET,NULL,false);
@@ -3137,8 +3271,8 @@ void M_DrawSave(void)
     {
         char *string = "* INDICATES A SAVEGAME THAT WAS";
         char *string2 = "CREATED USING AN OPTIONAL PWAD!";
-        int x = ORIGWIDTH/2 - M_StringWidth(string) / 2;
-        int x2 = ORIGWIDTH/2 - M_StringWidth(string2) / 2;
+        int x = ORIGINALWIDTH/2 - M_StringWidth(string) / 2;
+        int x2 = ORIGINALWIDTH/2 - M_StringWidth(string2) / 2;
         dp_translation = crx[CRX_GOLD];
         M_WriteText(x, SaveDef.y + 78, string);
         dp_translation = crx[CRX_GOLD];
@@ -3538,16 +3672,26 @@ void M_DrawSound(void)
 
     if(sound_channels == 8)
     {
-        dp_translation = crx[CRX_GREEN];
+        dp_translation = crx[CRX_BLUE];
         M_WriteText(SoundDef.x + 228, SoundDef.y + 48, "8");
     }
     else if(sound_channels == 16)
     {
-        dp_translation = crx[CRX_GOLD];
+        dp_translation = crx[CRX_GREEN];
         M_WriteText(SoundDef.x + 223, SoundDef.y + 48, "16");
     }
+    else if(sound_channels == 32)
+    {
+        dp_translation = crx[CRX_GOLD];
+        M_WriteText(SoundDef.x + 220, SoundDef.y + 48, "32");
+    }
+    else if(sound_channels == 64)
+    {
+        dp_translation = crx[CRX_RED];
+        M_WriteText(SoundDef.x + 221, SoundDef.y + 48, "64");
+    }
 
-    if(swap_sound_chans)
+    if(opl_stereo_correct)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(SoundDef.x + 220, SoundDef.y + 58, "ON");
@@ -3627,7 +3771,7 @@ void M_DrawSound(void)
             string = "PC-SPEAKER OPTION NOT AVAILABLE FOR HACX";
         else if(itemOn == 8)
             string = "DUMPS A CONFIG FILE FOR USE WITH OGG-MUSIC.";
-        x = ORIGWIDTH/2 - M_StringWidth(string) / 2;
+        x = ORIGINALWIDTH/2 - M_StringWidth(string) / 2;
         M_WriteText(x, GameDef2.y + 138, string);
     }
 }
@@ -3763,15 +3907,15 @@ void M_SoundOutput(int choice)
     switch(choice)
     {
     case 0:
-        if(swap_sound_chans == true)
+        if(opl_stereo_correct == true)
         {
-            swap_sound_chans = false;
+            opl_stereo_correct = false;
         }
         break;
     case 1:
-        if(swap_sound_chans == false)
+        if(opl_stereo_correct == false)
         {
-            swap_sound_chans = true;
+            opl_stereo_correct = true;
         }
         break;
     }
@@ -3859,14 +4003,22 @@ void M_SoundChannels(int choice)
             sound_channels = 8;
         else if(snd_chans == 2)
             sound_channels = 16;
+        else if(snd_chans == 3)
+            sound_channels = 32;
+        else if(snd_chans == 4)
+            sound_channels = 64;
         break;
     case 1:
-        if(snd_chans < 2)
+        if(snd_chans < 4)
             snd_chans++;
         if(snd_chans == 1)
             sound_channels = 8;
         else if(snd_chans == 2)
             sound_channels = 16;
+        else if(snd_chans == 3)
+            sound_channels = 32;
+        else if(snd_chans == 4)
+            sound_channels = 64;
         break;
     }
 }
@@ -3899,6 +4051,12 @@ void M_DrawNewGame(void)
 
 void M_NewGame(int choice)
 {
+    // [crispy] forbid New Game and (Quick) Load while recording a demo
+    if (demorecording)
+    {
+	return;
+    }
+
     if (netgame && !demoplayback)
     {
         M_StartMessage(s_NEWGAME,NULL,false);
@@ -4006,6 +4164,73 @@ void M_DrawOptions(void)
 
     V_DrawPatchWithShadow(108, 15, 0, W_CacheLumpName("M_OPTTTL",
                                                PU_CACHE), false);
+
+    dp_translation = crx[CRX_GRAY];
+    if (itemOn == 0)
+        dp_translation = crx[CRX_GOLD];
+    M_WriteText(OptionsDef.x, OptionsDef.y - 2, "SCREEN SETTINGS");
+
+    dp_translation = crx[CRX_GRAY];
+    if (itemOn == 1)
+        dp_translation = crx[CRX_GOLD];
+    M_WriteText(OptionsDef.x, OptionsDef.y + 8, "CONTROL SETTINGS");
+
+    dp_translation = crx[CRX_GRAY];
+    if (itemOn == 2)
+        dp_translation = crx[CRX_GOLD];
+    M_WriteText(OptionsDef.x, OptionsDef.y + 18, "SOUND SETTINGS");
+
+    dp_translation = crx[CRX_GRAY];
+    if (itemOn == 3)
+        dp_translation = crx[CRX_GOLD];
+    M_WriteText(OptionsDef.x, OptionsDef.y + 28, "SYSTEM SETTINGS");
+
+    dp_translation = crx[CRX_GRAY];
+    if (itemOn == 4)
+        dp_translation = crx[CRX_GOLD];
+    M_WriteText(OptionsDef.x, OptionsDef.y + 38, "GAME SETTINGS");
+
+    dp_translation = crx[CRX_BLUE];
+    if (itemOn == 6)
+        dp_translation = crx[CRX_GOLD];
+    M_WriteText(OptionsDef.x, OptionsDef.y + 58, "OPTIMAL SETTINGS");
+
+    dp_translation = crx[CRX_BLUE];
+    if (itemOn == 7)
+        dp_translation = crx[CRX_GOLD];
+    M_WriteText(OptionsDef.x, OptionsDef.y + 68, "RESET DEFAULTS");
+
+    if (devparm)
+    {
+        dp_translation = crx[CRX_GRAY];
+        if (itemOn == 9)
+            dp_translation = crx[CRX_GOLD];
+        M_WriteText(OptionsDef.x, OptionsDef.y + 88, "DEBUG SETTINGS");
+
+        dp_translation = crx[CRX_GRAY];
+        if (itemOn == 10)
+            dp_translation = crx[CRX_GOLD];
+        M_WriteText(OptionsDef.x, OptionsDef.y + 98, "TESTINGS");
+    }
+
+    if(whichSkull == 1)
+    {
+        int x;
+        int x2;
+        char *string = "";
+        char *string2 = "";
+        dp_translation = crx[CRX_GOLD];
+        if(itemOn == 6 || itemOn == 7)
+        {
+            string = "(KEY BINDINGS & AUTOMAP COLORS UNAFFECTED)";
+            string2 = "YOU MUST RESTART THE GAME TO TAKE EFFECT.";
+        }
+        x = ORIGINALWIDTH/2 - M_StringWidth(string) / 2;
+        x2 = ORIGINALWIDTH/2 - M_StringWidth(string2) / 2;
+        M_WriteText(x, OptionsDef.y + 106, string);
+        dp_translation = crx[CRX_GOLD];
+        M_WriteText(x2, OptionsDef.y + 113, string2);
+    }
 }
 
 void M_DrawItems(void)
@@ -4511,9 +4736,109 @@ void M_DrawScreen(void)
             string = "YOU MUST QUIT AND RESTART TO TAKE EFFECT.";
 #endif
 
-        x = ORIGWIDTH/2 - M_StringWidth(string) / 2;
+        x = ORIGINALWIDTH/2 - M_StringWidth(string) / 2;
         M_WriteText(x, ScreenDef.y + 126, string);
     }
+}
+
+void M_DrawAutomap(void)
+{
+    sprintf(string_back, "%d", mapcolor_back);
+    V_FillRect(AutomapDef.x + 550, AutomapDef.y + 20, 0, 10, 10, mapcolor_back);
+    M_WriteText(AutomapDef.x + 273, AutomapDef.y - 2, string_back);
+
+    sprintf(string_grid, "%d", mapcolor_grid);
+    V_FillRect(AutomapDef.x + 550, AutomapDef.y + 32, 0, 10, 10, mapcolor_grid);
+    M_WriteText(AutomapDef.x + 273, AutomapDef.y + 4, string_grid);
+
+    sprintf(string_wall, "%d", mapcolor_wall);
+    V_FillRect(AutomapDef.x + 550, AutomapDef.y + 44, 0, 10, 10, mapcolor_wall);
+    M_WriteText(AutomapDef.x + 273, AutomapDef.y + 10, string_wall);
+
+    sprintf(string_fchg, "%d", mapcolor_fchg);
+    V_FillRect(AutomapDef.x + 550, AutomapDef.y + 56, 0, 10, 10, mapcolor_fchg);
+    M_WriteText(AutomapDef.x + 273, AutomapDef.y + 16, string_fchg);
+
+    sprintf(string_cchg, "%d", mapcolor_cchg);
+    V_FillRect(AutomapDef.x + 550, AutomapDef.y + 68, 0, 10, 10, mapcolor_cchg);
+    M_WriteText(AutomapDef.x + 273, AutomapDef.y + 22, string_cchg);
+
+    sprintf(string_clsd, "%d", mapcolor_clsd);
+    V_FillRect(AutomapDef.x + 550, AutomapDef.y + 80, 0, 10, 10, mapcolor_clsd);
+    M_WriteText(AutomapDef.x + 273, AutomapDef.y + 28, string_clsd);
+
+    sprintf(string_rkey, "%d", mapcolor_rkey);
+    V_FillRect(AutomapDef.x + 550, AutomapDef.y + 92, 0, 10, 10, mapcolor_rkey);
+    M_WriteText(AutomapDef.x + 273, AutomapDef.y + 34, string_rkey);
+
+    sprintf(string_bkey, "%d", mapcolor_bkey);
+    V_FillRect(AutomapDef.x + 550, AutomapDef.y + 104, 0, 10, 10, mapcolor_bkey);
+    M_WriteText(AutomapDef.x + 273, AutomapDef.y + 40, string_bkey);
+
+    sprintf(string_ykey, "%d", mapcolor_ykey);
+    V_FillRect(AutomapDef.x + 550, AutomapDef.y + 116, 0, 10, 10, mapcolor_ykey);
+    M_WriteText(AutomapDef.x + 273, AutomapDef.y + 46, string_ykey);
+
+    sprintf(string_rdor, "%d", mapcolor_rdor);
+    V_FillRect(AutomapDef.x + 550, AutomapDef.y + 128, 0, 10, 10, mapcolor_rdor);
+    M_WriteText(AutomapDef.x + 273, AutomapDef.y + 52, string_rdor);
+
+    sprintf(string_bdor, "%d", mapcolor_bdor);
+    V_FillRect(AutomapDef.x + 550, AutomapDef.y + 140, 0, 10, 10, mapcolor_bdor);
+    M_WriteText(AutomapDef.x + 273, AutomapDef.y + 58, string_bdor);
+
+    sprintf(string_ydor, "%d", mapcolor_ydor);
+    V_FillRect(AutomapDef.x + 550, AutomapDef.y + 152, 0, 10, 10, mapcolor_ydor);
+    M_WriteText(AutomapDef.x + 273, AutomapDef.y + 64, string_ydor);
+
+    sprintf(string_tele, "%d", mapcolor_tele);
+    V_FillRect(AutomapDef.x + 550, AutomapDef.y + 164, 0, 10, 10, mapcolor_tele);
+    M_WriteText(AutomapDef.x + 273, AutomapDef.y + 70, string_tele);
+
+    sprintf(string_secr, "%d", mapcolor_secr);
+    V_FillRect(AutomapDef.x + 550, AutomapDef.y + 176, 0, 10, 10, mapcolor_secr);
+    M_WriteText(AutomapDef.x + 273, AutomapDef.y + 76, string_secr);
+
+    sprintf(string_exit, "%d", mapcolor_exit);
+    V_FillRect(AutomapDef.x + 550, AutomapDef.y + 188, 0, 10, 10, mapcolor_exit);
+    M_WriteText(AutomapDef.x + 273, AutomapDef.y + 82, string_exit);
+
+    sprintf(string_unsn, "%d", mapcolor_unsn);
+    V_FillRect(AutomapDef.x + 550, AutomapDef.y + 200, 0, 10, 10, mapcolor_unsn);
+    M_WriteText(AutomapDef.x + 273, AutomapDef.y + 88, string_unsn);
+
+    sprintf(string_flat, "%d", mapcolor_flat);
+    V_FillRect(AutomapDef.x + 550, AutomapDef.y + 212, 0, 10, 10, mapcolor_flat);
+    M_WriteText(AutomapDef.x + 273, AutomapDef.y + 94, string_flat);
+
+    sprintf(string_sprt, "%d", mapcolor_sprt);
+    V_FillRect(AutomapDef.x + 550, AutomapDef.y + 224, 0, 10, 10, mapcolor_sprt);
+    M_WriteText(AutomapDef.x + 273, AutomapDef.y + 100, string_sprt);
+
+    sprintf(string_item, "%d", mapcolor_item);
+    V_FillRect(AutomapDef.x + 550, AutomapDef.y + 236, 0, 10, 10, mapcolor_item);
+    M_WriteText(AutomapDef.x + 273, AutomapDef.y + 106, string_item);
+
+    sprintf(string_enemy, "%d", mapcolor_enemy);
+    V_FillRect(AutomapDef.x + 550, AutomapDef.y + 248, 0, 10, 10, mapcolor_enemy);
+    M_WriteText(AutomapDef.x + 273, AutomapDef.y + 112, string_enemy);
+
+    sprintf(string_hair, "%d", mapcolor_hair);
+    V_FillRect(AutomapDef.x + 550, AutomapDef.y + 260, 0, 10, 10, mapcolor_hair);
+    M_WriteText(AutomapDef.x + 273, AutomapDef.y + 118, string_hair);
+
+    sprintf(string_sngl, "%d", mapcolor_sngl);
+    V_FillRect(AutomapDef.x + 550, AutomapDef.y + 272, 0, 10, 10, mapcolor_sngl);
+    M_WriteText(AutomapDef.x + 273, AutomapDef.y + 124, string_sngl);
+
+    sprintf(string_plyr, "%d", mapcolor_plyr);
+    V_FillRect(AutomapDef.x + 550, AutomapDef.y + 284, 0, 10, 10, mapcolor_plyr);
+    M_WriteText(AutomapDef.x + 273, AutomapDef.y + 130, string_plyr);
+
+    dp_translation = crx[CRX_BLUE];
+    if (itemOn == 23)
+        dp_translation = crx[CRX_GOLD];
+    M_WriteText(AutomapDef.x, AutomapDef.y + 136, "reset colors to standard");
 }
 
 void M_DrawGame1(void)
@@ -4645,23 +4970,10 @@ void M_DrawGame1(void)
         M_WriteText(GameDef.x + 153, GameDef.y + 78, "OFF");
     }
 
-    if(gameskill == sk_nightmare)
-        dp_translation = crx[CRX_DARK];
-    else if(itemOn == 9 && gameskill != sk_nightmare)
+    dp_translation = crx[CRX_GRAY];
+    if (itemOn == 9)
         dp_translation = crx[CRX_GOLD];
-
-    M_WriteText(GameDef.x, GameDef.y + 88, "WEAPON CHANGE");
-
-    if(use_vanilla_weapon_change == 1)
-    {
-        dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef.x + 145, GameDef.y + 88, "SLOW");
-    }
-    else if(use_vanilla_weapon_change == 0)
-    {
-        dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef.x + 146, GameDef.y + 88, "FAST");
-    }
+    M_WriteText(GameDef.x, GameDef.y + 88, "AUTOMAP COLORS...");
 
     if(d_recoil)
     {
@@ -4701,7 +5013,7 @@ void M_DrawGame1(void)
         if((itemOn == 11 || itemOn == 12) && whichSkull == 1)
         {
             char *string = "YOU MUST START A NEW GAME TO TAKE EFFECT.";
-            int x = ORIGWIDTH/2 - M_StringWidth(string) / 2;
+            int x = ORIGINALWIDTH/2 - M_StringWidth(string) / 2;
             dp_translation = crx[CRX_GOLD];
             M_WriteText(x, GameDef.y + 138, string);
         }
@@ -4726,12 +5038,10 @@ void M_DrawGame1(void)
             if ((itemOn > 4 && itemOn < 9 && d_statusmap && !modifiedgame) ||
                 (itemOn > 4 && itemOn < 8 && d_statusmap && modifiedgame))
                 string = "YOU NEED TO DISABLE AUTOMAP STATUS BAR FIRST!";
-            else if(itemOn == 9 && gameskill == sk_nightmare)
-                string = "NOT AVAILABLE FOR NIGHTMARE SKILL";
             else if ((itemOn == 11 || itemOn == 12))
                 string = "YOU MUST START A NEW GAME TO TAKE EFFECT.";
 
-            x = ORIGWIDTH/2 - M_StringWidth(string) / 2;
+            x = ORIGINALWIDTH/2 - M_StringWidth(string) / 2;
             dp_translation = crx[CRX_GOLD];
             M_WriteText(x, GameDef.y + 138, string);
         }
@@ -4935,7 +5245,7 @@ void M_DrawGame2(void)
 #endif
         else if(itemOn == 10 && gameskill == sk_nightmare)
             string = "NOT AVAILABLE FOR NIGHTMARE SKILL";
-        x = ORIGWIDTH/2 - M_StringWidth(string) / 2;
+        x = ORIGINALWIDTH/2 - M_StringWidth(string) / 2;
         M_WriteText(x, GameDef2.y + 138, string);
     }
 
@@ -5130,7 +5440,7 @@ void M_DrawGame3(void)
         else*/ if(itemOn == 1 && fsize == 12361532)
             string = "NO EXTRA BLOOD & GORE FOR CHEX QUEST.";
 
-        x = ORIGWIDTH/2 - M_StringWidth(string) / 2;
+        x = ORIGINALWIDTH/2 - M_StringWidth(string) / 2;
         M_WriteText(x, GameDef3.y + 138, string);
     }
 
@@ -5305,7 +5615,7 @@ void M_DrawGame4(void)
             string = "YOU MUST QUIT AND RESTART TO TAKE EFFECT.";
         else if(itemOn == 12)
             string = "YOU MAY NEED TO RESTART THE MAP FOR THIS.";
-        x = ORIGWIDTH/2 - M_StringWidth(string) / 2;
+        x = ORIGINALWIDTH/2 - M_StringWidth(string) / 2;
         M_WriteText(x, GameDef3.y + 138, string);
     }
 
@@ -5485,7 +5795,7 @@ void M_DrawGame5(void)
         dp_translation = crx[CRX_GOLD];
         if(itemOn == 12)
             string = "YOU MUST START A NEW GAME TO TAKE EFFECT.";
-        x = ORIGWIDTH/2 - M_StringWidth(string) / 2;
+        x = ORIGINALWIDTH/2 - M_StringWidth(string) / 2;
         M_WriteText(x, GameDef5.y + 138, string);
     }
 
@@ -5764,7 +6074,7 @@ void M_DrawGame6(void)
             string = "YOU MUST ENABLE 'DRAW PARTICLES' FIRST!";
         if (itemOn == 10 && d_drawparticles && (gamemode == retail || gamemode == registered || gamemode == shareware))
             string = "THIS IS ONLY AVAILABLE FOR DOOM 2";
-        x = ORIGWIDTH/2 - M_StringWidth(string) / 2;
+        x = ORIGINALWIDTH/2 - M_StringWidth(string) / 2;
         M_WriteText(x, GameDef6.y + 138, string);
     }
 
@@ -5869,6 +6179,24 @@ void M_DrawGame7(void)
         M_WriteText(GameDef7.x + 258, GameDef7.y + 48, "OFF");
     }
 
+    if(gameskill == sk_nightmare)
+        dp_translation = crx[CRX_DARK];
+    else if(itemOn == 6 && gameskill != sk_nightmare)
+        dp_translation = crx[CRX_GOLD];
+
+    M_WriteText(GameDef7.x, GameDef7.y + 58, "WEAPON CHANGE");
+
+    if(use_vanilla_weapon_change == 1)
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(GameDef7.x + 93, GameDef7.y + 58, "SLOW");
+    }
+    else if(use_vanilla_weapon_change == 0)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(GameDef7.x + 94, GameDef7.y + 58, "FAST");
+    }
+
 #ifdef WII
     if(beta_style_mode)
     {
@@ -5899,8 +6227,10 @@ void M_DrawGame7(void)
             if (gameskill == sk_nightmare)
                 string = "NOT AVAILABLE FOR NIGHTMARE SKILL";
         }
+        else if(itemOn == 9 && gameskill == sk_nightmare)
+            string = "NOT AVAILABLE FOR NIGHTMARE SKILL";
 #ifdef WII
-        if(itemOn == 7)
+        if(itemOn == 8)
         {
             if(fsize != 28422764 && fsize != 19321722 && fsize != 12361532)
                 string = "YOU MUST QUIT AND RESTART TO TAKE EFFECT.";
@@ -5908,7 +6238,7 @@ void M_DrawGame7(void)
                 string = "NO BETA MODE FOR CHEX, HACX & FREEDOOM.";
         }
 #endif
-        x = ORIGWIDTH/2 - M_StringWidth(string) / 2;
+        x = ORIGINALWIDTH/2 - M_StringWidth(string) / 2;
         M_WriteText(x, GameDef7.y + 138, string);
     }
 }
@@ -6178,7 +6508,7 @@ void M_DrawCheats(void)
         dp_translation = crx[CRX_GOLD];
         if(itemOn == 0 && aiming_help)
             string = "IF ENABLED, AIMBOT WILL BE DISABLED!";
-        x = ORIGWIDTH/2 - M_StringWidth(string) / 2;
+        x = ORIGINALWIDTH/2 - M_StringWidth(string) / 2;
         M_WriteText(x, CheatsDef.y + 138, string);
     }
 }
@@ -6459,6 +6789,12 @@ void M_EndGameResponse(int ch)
     if (ch != key_menu_confirm)
         return;
 #endif
+
+    // [crispy] killough 5/26/98: make endgame quit if recording or playing back demo
+/*
+    if (demorecording || singledemo)
+	G_CheckDemoStatus();
+*/
     currentMenu->lastOn = itemOn;
     M_ClearMenus ();
     D_StartTitle ();
@@ -7128,11 +7464,7 @@ M_DrawSelCell
 }
 */
 
-void
-M_StartMessage
-( char*          string,
-  void*          routine,
-  dboolean        input )
+void M_StartMessage(char *string, void *routine, dboolean input)
 {
     messageLastMenuActive = menuactive;
     messageToPrint = 1;
@@ -7142,6 +7474,12 @@ M_StartMessage
 
     blurred = false;
     menuactive = true;
+
+    // [crispy] entering menus while recording demos pauses the game
+    if (demorecording && !paused)
+    {
+        sendpause = true;
+    }
     return;
 }
 
@@ -7246,7 +7584,7 @@ void M_WriteText(int x, int y, char* string)
 
         w = SHORT (hu_font[c]->width);
 
-        if (cx+w > ORIGWIDTH)                // CHANGED FOR HIRES
+        if (cx+w > ORIGINALWIDTH)                // CHANGED FOR HIRES
             break;
 
         if(dp_translation && font_shadow != 2)
@@ -7598,7 +7936,7 @@ dboolean M_Responder (event_t* ev)
         else if (key == KEY_TILDE /*&& !keydown*/)        // Console
         {
 //            keydown = key;
-            if (consoleheight < CONSOLEHEIGHT && consoledirection == -1 && !inhelpscreens)
+            if (consoleheight < CONSOLEHEIGHT && consoledirection == -1 && !inhelpscreens && !wipe)
             {
                 consoleheight = MAX(1, consoleheight);
                 consoledirection = 1;
@@ -7636,10 +7974,18 @@ dboolean M_Responder (event_t* ev)
         }
         else if (key == key_menu_load)     // Load
         {
-            M_StartControlPanel();
-            S_StartSound(NULL,sfx_swtchn);
-            M_LoadGame(0);
-            return true;
+	    // [crispy] forbid New Game and (Quick) Load while recording a demo
+	    if (demorecording)
+	    {
+		S_StartSound(NULL,sfx_oof);
+	    }
+	    else
+	    {
+                M_StartControlPanel();
+                S_StartSound(NULL,sfx_swtchn);
+                M_LoadGame(0);
+                return true;
+            }
         }
         else if (key == key_menu_volume)   // Sound Volume
         {
@@ -7675,9 +8021,17 @@ dboolean M_Responder (event_t* ev)
         }
         else if (key == key_menu_qload)    // Quickload
         {
-            S_StartSound(NULL,sfx_swtchn);
-            M_QuickLoad();
-            return true;
+	    // [crispy] forbid New Game and (Quick) Load while recording a demo
+	    if (demorecording)
+	    {
+		S_StartSound(NULL,sfx_oof);
+	    }
+	    else
+	    {
+                S_StartSound(NULL,sfx_swtchn);
+                M_QuickLoad();
+                return true;
+            }
         }
         else if (key == key_menu_quit)     // Quit DOOM
         {
@@ -8160,7 +8514,7 @@ void M_Drawer (void)
             consoleheight == 0)
     {
         char *string = "PR BETA MODE ENABLED";
-        int x = ORIGWIDTH/2 - M_StringWidth(string) / 2;
+        int x = ORIGINALWIDTH/2 - M_StringWidth(string) / 2;
         M_WriteText(x, 12, string);
         BorderNeedRefresh = true;
     }
@@ -8200,7 +8554,7 @@ void M_Drawer (void)
 
         //M_DarkBackground(0);
 
-        y = ORIGHEIGHT/2 - M_StringHeight(messageString) / 2;
+        y = ORIGINALHEIGHT/2 - M_StringHeight(messageString) / 2;
         while (messageString[start] != '\0')
         {
             int foundnewline = 0;
@@ -8221,7 +8575,7 @@ void M_Drawer (void)
                 start += strlen(string);
             }
 
-            x = ORIGWIDTH/2 - M_StringWidth(string) / 2;
+            x = ORIGINALWIDTH/2 - M_StringWidth(string) / 2;
             M_WriteText(x, y, string);
             y += SHORT(hu_font[0]->height);
         }
@@ -8253,7 +8607,7 @@ void M_Drawer (void)
         currentMenu->numitems = 4;
 */
     if(!devparm && currentMenu == &OptionsDef)
-        currentMenu->numitems = 5;
+        currentMenu->numitems = 8;
 
     if(!netgame && !devparm && currentMenu == &FilesDef)
 #ifdef WII
@@ -8298,9 +8652,10 @@ void M_Drawer (void)
 
         if(*name)
         {
-            if ((currentMenu == &FilesDef && i == savegame && !usergame) ||
-                (currentMenu == &FilesDef && i == endgame && !usergame) ||
-                (currentMenu == &FilesDef && i == loadgame && netgame))
+            if ((currentMenu == &FilesDef && i == savegame && (!usergame || gamestate != GS_LEVEL)) ||
+                (currentMenu == &FilesDef && i == endgame && (!usergame || netgame)) ||
+                (currentMenu == &FilesDef && i == loadgame && (netgame || demorecording)) ||
++	        (currentMenu == &MainDef && i == newgame && (demorecording || (netgame && !demoplayback))))
                 dp_translation = crx[CRX_DARK];
             else if (i == itemOn)
                 dp_translation = crx[CRX_GOLD];
@@ -8323,15 +8678,42 @@ void M_Drawer (void)
 #ifdef WII
         if(currentMenu == &KeyBindingsDef && itemOn == 15)
 #else
+        if(currentMenu == &KeyBindingsDef)
+            y -= 1;
+        else if(currentMenu == &AutomapDef)
+            y -= 4;
+
         if(currentMenu == &KeyBindingsDef && itemOn == 17)
 #endif
         {
             if(!beta_style)
                 V_DrawPatchWithShadow(x + 280 + CURSORXOFF_SMALL, currentMenu->y - 15 +
-                        itemOn*LINEHEIGHT_SMALL, 0, W_CacheLumpName(skullNameSmall[whichSkull],
+                        itemOn*LINEHEIGHT_SMALL-1*itemOn, 0, W_CacheLumpName(skullNameSmall[whichSkull],
                                               PU_CACHE), false);
             else
                 V_DrawPatch(x + 280 + CURSORXOFF_SMALL, currentMenu->y - 15 +
+                        itemOn*LINEHEIGHT_SMALL, 0, W_CacheLumpName(skullNameSmall[whichSkull],
+                                              PU_CACHE));
+        }
+        else if(currentMenu == &KeyBindingsDef && itemOn != 17)
+        {
+            if(!beta_style)
+                V_DrawPatchWithShadow(x + CURSORXOFF_SMALL, currentMenu->y - 5 +
+                        itemOn*LINEHEIGHT_SMALL-1*itemOn, 0, W_CacheLumpName(skullNameSmall[whichSkull],
+                                              PU_CACHE), false);
+            else
+                V_DrawPatch(x + CURSORXOFF_SMALL, currentMenu->y - 5 +
+                        itemOn*LINEHEIGHT_SMALL, 0, W_CacheLumpName(skullNameSmall[whichSkull],
+                                              PU_CACHE));
+        }
+        else if(currentMenu == &AutomapDef)
+        {
+            if(!beta_style)
+                V_DrawPatchWithShadow(x + CURSORXOFF_SMALL, currentMenu->y - 5 +
+                        itemOn*LINEHEIGHT_SMALL-4*itemOn, 0, W_CacheLumpName(skullNameSmall[whichSkull],
+                                              PU_CACHE), false);
+            else
+                V_DrawPatch(x + CURSORXOFF_SMALL, currentMenu->y - 5 +
                         itemOn*LINEHEIGHT_SMALL, 0, W_CacheLumpName(skullNameSmall[whichSkull],
                                               PU_CACHE));
         }
@@ -9619,23 +10001,23 @@ void M_DrawKeyBindings(void)
     for (i = 0; i < key_controls_end_in_cfg_at_pos - key_controls_start_in_cfg_at_pos; i++)
     {
         if (askforkey && keyaskedfor == i)
-            M_WriteText(195, (i*10+20), "???");
+            M_WriteText(195, (i*9+16), "???");
         else
-            M_WriteText(195, (i*10+20),
+            M_WriteText(195, (i*9+16),
                     Key2String(*(doom_defaults_list[i + FirstKey +
                             key_controls_start_in_cfg_at_pos].location)));
     }
 
 #ifndef WII
     dp_translation = crx[CRX_DARK];
-    M_WriteText(45, 140, "CONSOLE");
+    M_WriteText(45, 124, "CONSOLE");
 #endif
 
     dp_translation = crx[CRX_GRAY];
 #ifdef WII
-    M_WriteText(183, 160, "/");
+    M_WriteText(183, 140, "/");
 #else
-    M_WriteText(183, 180, "/");
+    M_WriteText(183, 160, "/");
 #endif
 
     dp_translation = crx[CRX_BLUE];
@@ -9646,9 +10028,9 @@ void M_DrawKeyBindings(void)
 #endif
         dp_translation = crx[CRX_GOLD];
 #ifdef WII
-    M_WriteText(45, 160, "CLEAR ALL CONTROLS");
+    M_WriteText(45, 140, "CLEAR ALL CONTROLS");
 #else
-    M_WriteText(45, 180, "CLEAR ALL CONTROLS");
+    M_WriteText(45, 160, "CLEAR ALL CONTROLS");
 #endif
 /*
 #ifdef WII
@@ -9667,9 +10049,9 @@ void M_DrawKeyBindings(void)
 #endif
         dp_translation = crx[CRX_GOLD];
 #ifdef WII
-    M_WriteText(195, 160, "RESET DEFAULTS");
+    M_WriteText(195, 140, "RESET DEFAULTS");
 #else
-    M_WriteText(195, 180, "RESET DEFAULTS");
+    M_WriteText(195, 160, "RESET DEFAULTS");
 #endif
 /*
 #ifdef WII
@@ -9831,9 +10213,9 @@ void M_DrawControls(void)
         char *string = "IF THE BARS FOR WALKING, TURNING & STRAFING";
         char *string2 = "ARE AT THEIR HIGHEST LEVEL, IT MEANS THE SAME";
         char *string3 = "AS PLAYING THE GAME WHILE HOLDING DOWN [SHIFT]";
-        int x = ORIGWIDTH/2 - M_StringWidth(string) / 2;
-        int x2 = ORIGWIDTH/2 - M_StringWidth(string2) / 2;
-        int x3 = ORIGWIDTH/2 - M_StringWidth(string3) / 2;
+        int x = ORIGINALWIDTH/2 - M_StringWidth(string) / 2;
+        int x2 = ORIGINALWIDTH/2 - M_StringWidth(string2) / 2;
+        int x3 = ORIGINALWIDTH/2 - M_StringWidth(string3) / 2;
         dp_translation = crx[CRX_GOLD];
         M_WriteText(x, ControlsDef.y + 78, string);
         dp_translation = crx[CRX_GOLD];
@@ -10116,6 +10498,11 @@ void M_Record(int choice)
     M_SetupNextMenu(&RecordDef);
 }
 */
+void M_Automap(int choice)
+{
+    M_SetupNextMenu(&AutomapDef);
+}
+
 void M_Game(int choice)
 {
     M_SetupNextMenu(&GameDef);
@@ -10149,6 +10536,270 @@ void M_Game6(int choice)
 void M_Game7(int choice)
 {
     M_SetupNextMenu(&GameDef7);
+}
+
+void M_OptSet(int choice)
+{
+    musicVolume = 15;
+    sfxVolume = 8;
+    showMessages = 1;
+    drawgrid = 0;
+    followplayer = 1;
+    show_stats = 1;
+    timer_info = 1;
+    use_vanilla_weapon_change = 0;
+    chaingun_tics = 1;
+    crosshair = 1;
+    d_colblood = 1;
+    d_colblood2 = 1;
+    d_swirl = 1;
+    autoaim = false;
+    background_type = 1;
+    icontype = 0;
+    wipe_type = 3;
+    mouselook = 1;
+    mspeed = 4;
+    mus_engine = 2;
+    snd_module = 0;
+    snd_chans = 2;
+    sound_channels = 16;
+    opl_type = 1;
+    use_libsamplerate = 0;
+    gore_amount = 4;
+    display_fps = 0;
+    font_shadow = 2;
+    show_endoom = 1;
+    forwardmove = 50;
+    sidemove = 36; 
+    turnspeed = 5;
+    detailLevel = 0;
+    screenblocks = 11;
+    screenSize = 8;
+    usegamma = 5;
+    mouseSensitivity = 4;
+    r_bloodsplats_max = 32768;
+    correct_lost_soul_bounce = true;
+    dots_enabled = 0;
+
+    display_ticker = false;
+    am_overlay = true;
+    nerve_pwad = false;
+    master_pwad = false;
+    d_recoil = true;
+    d_maxgore = true;
+    d_thrust = true;
+    respawnparm = false;
+    fastparm = false;
+    d_footstep = true;
+    d_footclip = true;
+    d_splash = true;
+    d_translucency = true;
+    d_chkblood = true;
+    d_chkblood2 = true;
+    d_uncappedframerate = 2;
+    d_flipcorpses = true;
+    d_secrets = true;
+    smoketrails = false;
+    sound_info = false;
+    autodetect_hom = false;
+    d_fallingdamage = true;
+    d_infiniteammo = false;
+    not_monsters = false;
+    overlay_trigger = true;
+    replace_missing = true;
+    d_telefrag = false;
+    d_doorstuck = false;
+    d_resurrectghosts = false;
+    d_limitedghosts = false;
+    d_blockskulls = true;
+    d_blazingsound = true;
+    d_god = true;
+    d_floors = false;
+    d_moveblock = false;
+    d_model = false;
+    d_666 = false;
+    d_maskedanim = false;
+    d_sound = false;
+    d_ouchface = false;
+    show_authors = true;
+    d_shadows = true;
+    d_fixspriteoffsets = true;
+    d_brightmaps = true;
+    d_fixmaperrors = true;
+    d_altlighting = true;
+    allow_infighting = true;
+    last_enemy = true;
+    float_items = true;
+    animated_drop = true;
+    crush_sound = true;
+    disable_noise = true;
+    corpses_nudge = true;
+    corpses_slide = true;
+    corpses_smearblood = true;
+    show_diskicon = true;
+    randomly_colored_playercorpses = true;
+    mousewalk = false;
+    am_rotate = true;
+    jumping = true;
+    general_sound = true;
+    lowhealth = true;
+    d_fixwiggle = true;
+    d_centerweapon = true;
+    d_ejectcasings = true;
+    d_statusmap = false;
+    show_title = true;
+    render_mode = 1;
+    d_drawparticles = true;
+    d_drawbfgcloud = true;
+    d_drawrockettrails = true;
+    d_drawrocketexplosions = true;
+    d_drawbfgexplosions = true;
+    d_spawnflies = false;
+    d_dripblood = true;
+    d_vsync = true;
+    particle_sounds = true;
+    bloodsplat_particle = 1;
+    bulletpuff_particle = 1;
+    teleport_particle = 1;
+    aiming_help = false;
+    d_spawnteleglit = 3;
+    png_screenshots = true;
+    opl_stereo_correct = true;
+    randompitch = true;
+    hud = true;
+    remove_slime_trails = true;
+}
+
+void M_DefSet(int choice)
+{
+    musicVolume = 8;
+    sfxVolume = 8;
+    showMessages = 1;
+    drawgrid = 0;
+    followplayer = 1;
+    show_stats = 0;
+    timer_info = 0;
+    use_vanilla_weapon_change = 1;
+    chaingun_tics = 4;
+    crosshair = 0;
+    d_colblood = 0;
+    d_colblood2 = 0;
+    d_swirl = 0;
+    autoaim = true;
+    background_type = 0;
+    icontype = 0;
+    wipe_type = 2;
+    mouselook = 0;
+    mspeed = 2;
+    mus_engine = 1;
+    snd_module = 0;
+    snd_chans = 1;
+    sound_channels = 8;
+    opl_type = 0;
+    use_libsamplerate = 0;
+    gore_amount = 1;
+    display_fps = 0;
+    font_shadow = 0;
+    show_endoom = 1;
+    forwardmove = 29;
+    sidemove = 24; 
+    turnspeed = 7;
+    detailLevel = 0;
+    screenblocks = 10;
+    screenSize = 7;
+    usegamma = 10;
+    mouseSensitivity = 5;
+    r_bloodsplats_max = 32768;
+    correct_lost_soul_bounce = true;
+    dots_enabled = 0;
+
+    display_ticker = false;
+    am_overlay = false;
+    nerve_pwad = false;
+    master_pwad = false;
+    d_recoil = false;
+    d_maxgore = false;
+    d_thrust = false;
+    respawnparm = false;
+    fastparm = false;
+    d_footstep = false;
+    d_footclip = false;
+    d_splash = false;
+    d_translucency = false;
+    d_chkblood = false;
+    d_chkblood2 = false;
+    d_uncappedframerate = 0;
+    d_flipcorpses = false;
+    d_secrets = false;
+    smoketrails = false;
+    sound_info = false;
+    autodetect_hom = false;
+    d_fallingdamage = false;
+    d_infiniteammo = false;
+    not_monsters = false;
+    overlay_trigger = false;
+    replace_missing = false;
+    d_telefrag = true;
+    d_doorstuck = false;
+    d_resurrectghosts = false;
+    d_limitedghosts = true;
+    d_blockskulls = false;
+    d_blazingsound = false;
+    d_god = true;
+    d_floors = false;
+    d_moveblock = false;
+    d_model = false;
+    d_666 = false;
+    d_maskedanim = false;
+    d_sound = false;
+    d_ouchface = false;
+    show_authors = false;
+    d_shadows = false;
+    d_fixspriteoffsets = false;
+    d_brightmaps = false;
+    d_fixmaperrors = false;
+    d_altlighting = false;
+    allow_infighting = false;
+    last_enemy = false;
+    float_items = false;
+    animated_drop = false;
+    crush_sound = false;
+    disable_noise = false;
+    corpses_nudge = false;
+    corpses_slide = false;
+    corpses_smearblood = false;
+    show_diskicon = true;
+    randomly_colored_playercorpses = false;
+    mousewalk = true;
+    am_rotate = false;
+    jumping = false;
+    general_sound = true;
+    lowhealth = false;
+    d_fixwiggle = false;
+    d_centerweapon = false;
+    d_ejectcasings = false;
+    d_statusmap = true;
+    show_title = true;
+    render_mode = 2;
+    d_drawparticles = false;
+    d_drawbfgcloud = false;
+    d_drawrockettrails = false;
+    d_drawrocketexplosions = false;
+    d_drawbfgexplosions = false;
+    d_spawnflies = false;
+    d_dripblood = false;
+    d_vsync = false;
+    particle_sounds = false;
+    bloodsplat_particle = 0;
+    bulletpuff_particle = 0;
+    teleport_particle = 0;
+    aiming_help = false;
+    d_spawnteleglit = 0;
+    png_screenshots = false;
+    opl_stereo_correct = false;
+    randompitch = false;
+    hud = false;
+    remove_slime_trails = false;
 }
 
 void M_Expansion(int choice)
@@ -11550,6 +12201,378 @@ void M_HUD(int choice)
     }
 }
 
+void M_MapColor_Back(int choice)
+{
+    switch(choice)
+    {
+    case 0:
+        if (mapcolor_back > 0)
+            mapcolor_back--;
+        break;
+    case 1:
+        if (mapcolor_back < 255)
+            mapcolor_back++;
+        break;
+    }
+}
+
+void M_MapColor_Grid(int choice)
+{
+    switch(choice)
+    {
+    case 0:
+        if (mapcolor_grid > 0)
+            mapcolor_grid--;
+        break;
+    case 1:
+        if (mapcolor_grid < 255)
+            mapcolor_grid++;
+        break;
+    }
+}
+
+void M_MapColor_Wall(int choice)
+{
+    switch(choice)
+    {
+    case 0:
+        if (mapcolor_wall > 0)
+            mapcolor_wall--;
+        break;
+    case 1:
+        if (mapcolor_wall < 255)
+            mapcolor_wall++;
+        break;
+    }
+}
+
+void M_MapColor_FCHG(int choice)
+{
+    switch(choice)
+    {
+    case 0:
+        if (mapcolor_fchg > 0)
+            mapcolor_fchg--;
+        break;
+    case 1:
+        if (mapcolor_fchg < 255)
+            mapcolor_fchg++;
+        break;
+    }
+}
+
+void M_MapColor_CCHG(int choice)
+{
+    switch(choice)
+    {
+    case 0:
+        if (mapcolor_cchg > 0)
+            mapcolor_cchg--;
+        break;
+    case 1:
+        if (mapcolor_cchg < 255)
+            mapcolor_cchg++;
+        break;
+    }
+}
+
+void M_MapColor_CLSD(int choice)
+{
+    switch(choice)
+    {
+    case 0:
+        if (mapcolor_clsd > 0)
+            mapcolor_clsd--;
+        break;
+    case 1:
+        if (mapcolor_clsd < 255)
+            mapcolor_clsd++;
+        break;
+    }
+}
+
+void M_MapColor_RKey(int choice)
+{
+    switch(choice)
+    {
+    case 0:
+        if (mapcolor_rkey > 0)
+            mapcolor_rkey--;
+        break;
+    case 1:
+        if (mapcolor_rkey < 255)
+            mapcolor_rkey++;
+        break;
+    }
+}
+
+void M_MapColor_BKey(int choice)
+{
+    switch(choice)
+    {
+    case 0:
+        if (mapcolor_bkey > 0)
+            mapcolor_bkey--;
+        break;
+    case 1:
+        if (mapcolor_bkey < 255)
+            mapcolor_bkey++;
+        break;
+    }
+}
+
+void M_MapColor_YKey(int choice)
+{
+    switch(choice)
+    {
+    case 0:
+        if (mapcolor_ykey > 0)
+            mapcolor_ykey--;
+        break;
+    case 1:
+        if (mapcolor_ykey < 255)
+            mapcolor_ykey++;
+        break;
+    }
+}
+
+void M_MapColor_RDoor(int choice)
+{
+    switch(choice)
+    {
+    case 0:
+        if (mapcolor_rdor > 0)
+            mapcolor_rdor--;
+        break;
+    case 1:
+        if (mapcolor_rdor < 255)
+            mapcolor_rdor++;
+        break;
+    }
+}
+
+void M_MapColor_BDoor(int choice)
+{
+    switch(choice)
+    {
+    case 0:
+        if (mapcolor_bdor > 0)
+            mapcolor_bdor--;
+        break;
+    case 1:
+        if (mapcolor_bdor < 255)
+            mapcolor_bdor++;
+        break;
+    }
+}
+
+void M_MapColor_YDoor(int choice)
+{
+    switch(choice)
+    {
+    case 0:
+        if (mapcolor_ydor > 0)
+            mapcolor_ydor--;
+        break;
+    case 1:
+        if (mapcolor_ydor < 255)
+            mapcolor_ydor++;
+        break;
+    }
+}
+
+void M_MapColor_Teleport(int choice)
+{
+    switch(choice)
+    {
+    case 0:
+        if (mapcolor_tele > 0)
+            mapcolor_tele--;
+        break;
+    case 1:
+        if (mapcolor_tele < 255)
+            mapcolor_tele++;
+        break;
+    }
+}
+
+void M_MapColor_Secret(int choice)
+{
+    switch(choice)
+    {
+    case 0:
+        if (mapcolor_secr > 0)
+            mapcolor_secr--;
+        break;
+    case 1:
+        if (mapcolor_secr < 255)
+            mapcolor_secr++;
+        break;
+    }
+}
+
+void M_MapColor_Exit(int choice)
+{
+    switch(choice)
+    {
+    case 0:
+        if (mapcolor_exit > 0)
+            mapcolor_exit--;
+        break;
+    case 1:
+        if (mapcolor_exit < 255)
+            mapcolor_exit++;
+        break;
+    }
+}
+
+void M_MapColor_Unseen(int choice)
+{
+    switch(choice)
+    {
+    case 0:
+        if (mapcolor_unsn > 0)
+            mapcolor_unsn--;
+        break;
+    case 1:
+        if (mapcolor_unsn < 255)
+            mapcolor_unsn++;
+        break;
+    }
+}
+
+void M_MapColor_Flat(int choice)
+{
+    switch(choice)
+    {
+    case 0:
+        if (mapcolor_flat > 0)
+            mapcolor_flat--;
+        break;
+    case 1:
+        if (mapcolor_flat < 255)
+            mapcolor_flat++;
+        break;
+    }
+}
+
+void M_MapColor_Sprite(int choice)
+{
+    switch(choice)
+    {
+    case 0:
+        if (mapcolor_sprt > 0)
+            mapcolor_sprt--;
+        break;
+    case 1:
+        if (mapcolor_sprt < 255)
+            mapcolor_sprt++;
+        break;
+    }
+}
+
+void M_MapColor_Item(int choice)
+{
+    switch(choice)
+    {
+    case 0:
+        if (mapcolor_item > 0)
+            mapcolor_item--;
+        break;
+    case 1:
+        if (mapcolor_item < 255)
+            mapcolor_item++;
+        break;
+    }
+}
+
+void M_MapColor_Enemy(int choice)
+{
+    switch(choice)
+    {
+    case 0:
+        if (mapcolor_enemy > 0)
+            mapcolor_enemy--;
+        break;
+    case 1:
+        if (mapcolor_enemy < 255)
+            mapcolor_enemy++;
+        break;
+    }
+}
+
+void M_MapColor_Crosshair(int choice)
+{
+    switch(choice)
+    {
+    case 0:
+        if (mapcolor_hair > 0)
+            mapcolor_hair--;
+        break;
+    case 1:
+        if (mapcolor_hair < 255)
+            mapcolor_hair++;
+        break;
+    }
+}
+
+void M_MapColor_Player(int choice)
+{
+    switch(choice)
+    {
+    case 0:
+        if (mapcolor_sngl > 0)
+            mapcolor_sngl--;
+        break;
+    case 1:
+        if (mapcolor_sngl < 255)
+            mapcolor_sngl++;
+        break;
+    }
+}
+
+void M_MapColor_Multiplayer(int choice)
+{
+    switch(choice)
+    {
+    case 0:
+        if (mapcolor_plyr > 0)
+            mapcolor_plyr--;
+        break;
+    case 1:
+        if (mapcolor_plyr < 255)
+            mapcolor_plyr++;
+        break;
+    }
+}
+
+void M_MapColor_Standard(int choice)
+{
+    mapcolor_back = 247;
+    mapcolor_grid = 104;
+    mapcolor_wall = 23;
+    mapcolor_fchg = 55;
+    mapcolor_cchg = 215;
+    mapcolor_clsd = 208;
+    mapcolor_rkey = 175;
+    mapcolor_bkey = 204;
+    mapcolor_ykey = 231;
+    mapcolor_rdor = 175;
+    mapcolor_bdor = 204;
+    mapcolor_ydor = 231;
+    mapcolor_tele = 119;
+    mapcolor_secr = 252;
+    mapcolor_exit = 0;
+    mapcolor_unsn = 104;
+    mapcolor_flat = 88;
+    mapcolor_sprt = 112;
+    mapcolor_item = 231;
+    mapcolor_enemy = 177;
+    mapcolor_hair = 208;
+    mapcolor_sngl = 208;
+    mapcolor_plyr = 112;
+}
+
 void M_MapGrid(int choice)
 {
     switch(choice)
@@ -11925,7 +12948,7 @@ void M_DrawTest(void)
     int pitch = firepitch;
     int CleanXfac = firexfac;
     int CleanYfac = fireyfac;
-    int x = ORIGHEIGHT + firexc - 72;
+    int x = ORIGINALHEIGHT + firexc - 72;
     int y = TestDef.y - fireyc + LINEHEIGHT * 3 + 64;
     int lump = sprframe->lump[0];
     int a;
@@ -11953,8 +12976,8 @@ void M_DrawTest(void)
     M_WriteText(TestDef.x + 245, TestDef.y + 68, xc_textbuffer);
     M_WriteText(TestDef.x + 245, TestDef.y + 78, yc_textbuffer);
 
-    x = (x - ORIGWIDTH / 2) * CleanXfac + (SCREENWIDTH >> 1);
-    y = (y - ORIGHEIGHT / 2) * CleanYfac + (SCREENHEIGHT >> 1);
+    x = (x - ORIGINALWIDTH / 2) * CleanXfac + (SCREENWIDTH >> 1);
+    y = (y - ORIGINALHEIGHT / 2) * CleanYfac + (SCREENHEIGHT >> 1);
 
     // [RH] The following fire code is based on the PTC fire demo
     from = firescreen + (height - 3) * pitch;

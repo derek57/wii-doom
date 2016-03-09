@@ -135,8 +135,8 @@ void R_DrawSolidMegaSphereColumn(void);
 // The Spectre/Invisibility effect.
 void R_DrawFuzzColumn(void);
 void R_DrawPausedFuzzColumn(void);
-void R_DrawFuzzColumns(void);
-void R_DrawPausedFuzzColumns(void);
+void R_DrawFuzzColumns(int srcscrn, int destscrn);
+void R_DrawPausedFuzzColumns(int srcscrn, int destscrn);
 
 // Draw with color translation tables,
 //  for player sprite rendering,

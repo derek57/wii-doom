@@ -99,7 +99,8 @@ libopl_a_AR = $(AR) $(ARFLAGS)
 libopl_a_LIBADD =
 am_libopl_a_OBJECTS = opl.$(OBJEXT) opl_linux.$(OBJEXT) \
 	opl_queue.$(OBJEXT) opl_sdl.$(OBJEXT) \
-	opl_timer.$(OBJEXT) dbopl.$(OBJEXT)
+	opl_timer.$(OBJEXT) opl3.$(OBJEXT)
+
 libopl_a_OBJECTS = $(am_libopl_a_OBJECTS)
 AM_V_P = $(am__v_P_$(V))
 am__v_P_ = $(am__v_P_$(AM_DEFAULT_VERBOSITY))
@@ -315,7 +316,7 @@ libopl_a_SOURCES = \
         opl_queue.c         opl_queue.h           \
         opl_sdl.c                                 \
         opl_timer.c         opl_timer.h           \
-        dbopl.c             dbopl.h
+        opl3.c              opl3.h
 
 all: all-am
 
@@ -344,8 +345,8 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-include ./$(DEPDIR)/dbopl.Po
 include ./$(DEPDIR)/opl.Po
+include ./$(DEPDIR)/opl3.Po
 include ./$(DEPDIR)/opl_linux.Po
 include ./$(DEPDIR)/opl_queue.Po
 include ./$(DEPDIR)/opl_sdl.Po

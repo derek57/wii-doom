@@ -361,7 +361,7 @@ extern  dboolean         show_diskicon;
 extern  dboolean         randomly_colored_playercorpses;
 extern  dboolean         mousewalk;
 extern  dboolean         jumping;
-extern  dboolean         swap_sound_chans;
+extern  dboolean         opl_stereo_correct;
 extern  dboolean         randompitch;
 extern  dboolean         general_sound;
 extern  dboolean         display_ticker;
@@ -438,6 +438,29 @@ extern  int              bulletpuff_particle;
 extern  int              teleport_particle;
 extern  int              d_uncappedframerate;
 extern  int              d_spawnteleglit;
+extern  int              mapcolor_back;  // map background
+extern  int              mapcolor_grid;  // grid lines color
+extern  int              mapcolor_wall;  // normal 1s wall color
+extern  int              mapcolor_fchg;  // line at floor height change color
+extern  int              mapcolor_cchg;  // line at ceiling height change color
+extern  int              mapcolor_clsd;  // line at sector with floor=ceiling color
+extern  int              mapcolor_rkey;  // red key color
+extern  int              mapcolor_bkey;  // blue key color
+extern  int              mapcolor_ykey;  // yellow key color
+extern  int              mapcolor_rdor;  // red door color  (diff from keys to allow option)
+extern  int              mapcolor_bdor;  // blue door color (of enabling one but not other)
+extern  int              mapcolor_ydor;  // yellow door color
+extern  int              mapcolor_tele;  // teleporter line color
+extern  int              mapcolor_secr;  // secret sector boundary color
+extern  int              mapcolor_exit;  // jff 4/23/98 add exit line color
+extern  int              mapcolor_unsn;  // computer map unseen line color
+extern  int              mapcolor_flat;  // line with no floor/ceiling changes
+extern  int              mapcolor_sprt;  // general sprite color
+extern  int              mapcolor_item;  // item sprite color
+extern  int              mapcolor_enemy; // enemy sprite color
+extern  int              mapcolor_hair;  // crosshair color
+extern  int              mapcolor_sngl;  // single player arrow color
+extern  int              mapcolor_plyr;  // color for player arrow
 
 void A_MoreGibs(mobj_t* actor);
 

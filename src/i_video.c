@@ -165,6 +165,9 @@ int screen_bpp = 0;
 static int autoadjust_video_settings = 1;
 #endif
 
+int                     window_pos_x = 0;
+int                     window_pos_y = 0;
+
 // Screen width and height, from configuration file.
 
 int screen_width = SCREENWIDTH;
@@ -912,6 +915,14 @@ static void HandleWindowEvent(SDL_WindowEvent *event)
         case SDL_WINDOWEVENT_LEAVE:
         case SDL_WINDOWEVENT_FOCUS_LOST:
             window_focused = false;
+            break;
+
+        case SDL_WINDOWEVENT_MOVED:
+            if (!fullscreen)
+            {
+                window_pos_x = event->data1;
+                window_pos_y = event->data2;
+            }
             break;
 
         default:
@@ -1913,7 +1924,10 @@ static void SetSDLVideoDriver(void)
         free(env_string);
     }
 }
+#endif
 
+#ifndef SDL2
+#ifndef WII
 static void SetWindowPositionVars(void)
 {
     int x, y;
@@ -1937,7 +1951,6 @@ static void SetWindowPositionVars(void)
 }
 #endif
 
-#ifndef SDL2
 static char *WindowBoxType(screen_mode_t *mode, int w, int h)
 {
     if (mode->width != w && mode->height != h) 
@@ -1955,6 +1968,23 @@ static char *WindowBoxType(screen_mode_t *mode, int w, int h)
     else
     {
         return "...";
+    }
+}
+#else
+static void GetWindowPosition(void)
+{
+    int x = 0, y = 0;
+
+    if (M_StringCompare(window_position, "centered"))
+    {
+        window_pos_x = 0;
+        window_pos_y = 0;
+    }
+    else if (!sscanf(window_position, "(%10i,%10i)", &x, &y))
+    {
+        window_pos_x = 0;
+        window_pos_y = 0;
+        window_position = "centered";
     }
 }
 #endif
@@ -2067,13 +2097,20 @@ static void SetVideoMode(screen_mode_t *mode, int w, int h)
 #endif
 
 #ifdef SDL2
+    GetWindowPosition();
+
     // Create window and renderer contexts. We set the window title
     // later anyway and leave the window position "undefined". If "flags"
     // contains the fullscreen flag (see above), then w and h are ignored.
 
-    screen = SDL_CreateWindow(NULL, SDL_WINDOWPOS_UNDEFINED,
-                                    SDL_WINDOWPOS_UNDEFINED,
-                                    w, h, flags);
+    if (fullscreen)
+        screen = SDL_CreateWindow(NULL, SDL_WINDOWPOS_UNDEFINED,
+                                        SDL_WINDOWPOS_UNDEFINED,
+                                        w, h, flags);
+    else
+        screen = SDL_CreateWindow(NULL, window_pos_x,
+                                        window_pos_y,
+                                        w, h, flags);
 #else
     screen = SDL_SetVideoMode(w, h, screen_bpp, flags);
 #endif
@@ -2484,8 +2521,8 @@ void I_FinishUpdate (int scrn)
             fpscount = 0;
             lastmili = i;
         }
-        M_WriteText(ORIGWIDTH - 30 - (8 * 3), 0, "FPS: ");
-        M_WriteText(ORIGWIDTH - (8 * 3), 0, fpsbuf);
+        M_WriteText(ORIGINALWIDTH - 30 - (8 * 3), 0, "FPS: ");
+        M_WriteText(ORIGINALWIDTH - (8 * 3), 0, fpsbuf);
     }
 
     if (show_diskicon && disk_indicator == disk_on)
@@ -2701,7 +2738,9 @@ void I_InitGraphics(int scrn)
     }
 
     SetSDLVideoDriver();
+#ifndef SDL2
     SetWindowPositionVars();
+#endif
 #endif
 
     I_InitTintTables(doompal);

@@ -432,7 +432,7 @@ static void check_intercept(void)
     if (offset >= num_intercepts)
     {
         num_intercepts = (num_intercepts ? num_intercepts * 2 : 128);
-        intercepts = Z_Realloc(intercepts, sizeof(*intercepts) * num_intercepts, PU_LEVEL, NULL);
+        intercepts = Z_Realloc(intercepts, sizeof(*intercepts) * num_intercepts);
         intercept_p = intercepts + offset;
 /*
         memset(intercepts + num_intercepts_old, 0,

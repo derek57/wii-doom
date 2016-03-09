@@ -115,6 +115,8 @@ manual_floor:
         floor->sector = sec;
         floor->texture = sec->floorpic;
         floor->newspecial = sec->special;
+        //jff 3/14/98 transfer old special field too
+        floor->oldspecial = sec->oldspecial;
         floor->type = genFloor;
 
         // set the speed of motion
@@ -207,11 +209,15 @@ manual_floor:
                     {
                         case FChgZero:  // zero type
                             floor->newspecial = 0;
+                            //jff 3/14/98 change old field too
+                            floor->oldspecial = 0;
                             floor->type = genFloorChg0;
                             break;
 
                         case FChgTyp:   // copy type
                             floor->newspecial = sec->special;
+                            //jff 3/14/98 change old field too
+                            floor->oldspecial = sec->oldspecial;
                             floor->type = genFloorChgT;
                             break;
 
@@ -231,11 +237,15 @@ manual_floor:
                 {
                     case FChgZero:      // zero type
                         floor->newspecial = 0;
+                        //jff 3/14/98 change old field too
+                        floor->oldspecial = 0;
                         floor->type = genFloorChg0;
                         break;
 
                     case FChgTyp:       // copy type
                         floor->newspecial = line->frontsector->special;
+                        //jff 3/14/98 change old field too
+                        floor->oldspecial = line->frontsector->oldspecial;
                         floor->type = genFloorChgT;
                         break;
 
@@ -321,6 +331,8 @@ manual_ceiling:
         ceiling->sector = sec;
         ceiling->texture = sec->ceilingpic;
         ceiling->newspecial = sec->special;
+        //jff 3/14/98 change old field too
+        ceiling->oldspecial = sec->oldspecial;
         ceiling->tag = sec->tag;
         ceiling->type = genCeiling;
 
@@ -417,11 +429,15 @@ manual_ceiling:
                     {
                         case CChgZero:  // type is zeroed
                             ceiling->newspecial = 0;
+                            //jff 3/14/98 change old field too
+                            ceiling->oldspecial = 0;
                             ceiling->type = genCeilingChg0;
                             break;
 
                         case CChgTyp:   // type is copied
                             ceiling->newspecial = sec->special;
+                            //jff 3/14/98 change old field too
+                            ceiling->oldspecial = sec->oldspecial;
                             ceiling->type = genCeilingChgT;
                             break;
 
@@ -441,11 +457,15 @@ manual_ceiling:
                 {
                     case CChgZero:      // type is zeroed
                         ceiling->newspecial = 0;
+                        //jff 3/14/98 change old field too
+                        ceiling->oldspecial = 0;
                         ceiling->type = genCeilingChg0;
                         break;
 
                     case CChgTyp:       // type is copied
                         ceiling->newspecial = line->frontsector->special;
+                        //jff 3/14/98 change old field too
+                        ceiling->oldspecial = line->frontsector->oldspecial;
                         ceiling->type = genCeilingChgT;
                         break;
 

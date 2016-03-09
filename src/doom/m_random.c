@@ -26,10 +26,10 @@
 
 
 #include <stdlib.h>
-#include <time.h>
 
 #include "doomfeatures.h"
 #include "m_random.h"
+
 
 //
 // M_Random
@@ -99,11 +99,7 @@ int M_RandomInt(int lower, int upper)
 
 void M_ClearRandom (void)
 {
-    prndindex = 0;
-
-    // Seed the M_Random counter from the system time
-
-    rndindex = time(NULL) & 0xff;
+    rndindex = prndindex = 0; 
 }
 
 rng_t rng;     // the random number state

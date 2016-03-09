@@ -21,15 +21,16 @@
 
 #include "c_io.h"
 #include "doomtype.h"
+#include "i_sound.h"
 #include "i_swap.h"
 #include "memio.h"
 #include "mus2mid.h"
 #include "v_trans.h"
 
 
-#define NUM_CHANNELS 16
 #define MIDI_PERCUSSION_CHAN 9
-#define MUS_PERCUSSION_CHAN 15
+#define MUS_PERCUSSION_CHAN  15
+
 
 // MUS event codes
 typedef enum

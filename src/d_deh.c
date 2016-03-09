@@ -1431,7 +1431,7 @@ typedef struct
 // killough 8/9/98: make DEH_BLOCKMAX self-adjusting
 #define DEH_BLOCKMAX    (sizeof(deh_blocks) / sizeof(*deh_blocks))      // size of array
 #define DEH_MAXKEYLEN   32      // as much of any key as we'll look at
-#define DEH_MOBJINFOMAX 28      // number of ints in the mobjinfo_t structure (!)
+#define DEH_MOBJINFOMAX 30      // number of ints in the mobjinfo_t structure (!)
 
 // Put all the block header values, and the function to be called when that
 // one is encountered, in this array:
@@ -1493,7 +1493,9 @@ static char *deh_mobjinfo[DEH_MOBJINFOMAX] =
     "Retro Bits",               // .flags2 
     "Respawn frame",            // .raisestate
     "Frames",                   // .frames
-    "Blood"                     // .blood
+    "Blood",                    // .blood
+    "Shadow offset",            // .shadowoffset
+    "Particle FX"               // .particlefx
 };
 
 // Strings that are used to indicate flags ("Bits" in mobjinfo)
@@ -1611,8 +1613,7 @@ static char *deh_state[] =
     "Codep Frame",      // pointer to first use of action (actionf_t)
     "Unknown 1",        // .misc1 (long)
     "Unknown 2",        // .misc2 (long)
-    "Particle event",   // haleyjd 08/09/02: particle event num
-    "Translucent"       // .translucent (dboolean) 
+    "Particle event"    // haleyjd 08/09/02: particle event num
 };
 
 // SFXINFO_STRUCT - Dehacked block name = "Sounds"
@@ -1724,94 +1725,95 @@ static char *deh_misc[] =
 // FRAME nnn = PointerMnemonic
 
 // External references to action functions scattered about the code
-extern void A_Light0();
-extern void A_WeaponReady();
-extern void A_Lower();
-extern void A_Raise();
-extern void A_Punch();
-extern void A_ReFire();
-extern void A_FirePistol();
-extern void A_Light1();
-extern void A_FireShotgun();
-extern void A_Light2();
-extern void A_FireShotgun2();
-extern void A_CheckReload();
-extern void A_OpenShotgun2();
-extern void A_LoadShotgun2();
-extern void A_CloseShotgun2();
-extern void A_FireCGun();
-extern void A_GunFlash();
-extern void A_FireMissile();
-extern void A_Saw();
-extern void A_FirePlasma();
-extern void A_BFGsound();
-extern void A_FireBFG();
-extern void A_BFGSpray();
-extern void A_Explode();
-extern void A_Pain();
-extern void A_PlayerScream();
-extern void A_Fall();
-extern void A_XScream();
-extern void A_Look();
-extern void A_Chase();
-extern void A_FaceTarget();
-extern void A_PosAttack();
-extern void A_Scream();
-extern void A_SPosAttack();
-extern void A_VileChase();
-extern void A_VileStart();
-extern void A_VileTarget();
-extern void A_VileAttack();
-extern void A_StartFire();
-extern void A_Fire();
-extern void A_FireCrackle();
-extern void A_Tracer();
-extern void A_SkelWhoosh();
-extern void A_SkelFist();
-extern void A_SkelMissile();
-extern void A_FatRaise();
-extern void A_FatAttack1();
-extern void A_FatAttack2();
-extern void A_FatAttack3();
-extern void A_BossDeath();
-extern void A_CPosAttack();
-extern void A_CPosRefire();
-extern void A_TroopAttack();
-extern void A_SargAttack();
-extern void A_HeadAttack();
-extern void A_BruisAttack();
-extern void A_SkullAttack();
-extern void A_Metal();
-extern void A_SpidRefire();
-extern void A_BabyMetal();
-extern void A_BspiAttack();
-extern void A_Hoof();
-extern void A_CyberAttack();
-extern void A_PainAttack();
-extern void A_PainDie();
-extern void A_KeenDie();
-extern void A_BrainPain();
-extern void A_BrainScream();
-extern void A_BrainDie();
-extern void A_BrainAwake();
-extern void A_BrainSpit();
-extern void A_SpawnSound();
-extern void A_SpawnFly();
-extern void A_BrainExplode();
-extern void A_Detonate();
-extern void A_Mushroom();
-extern void A_SkullPop();
-extern void A_Die();
-extern void A_Spawn();
-extern void A_Turn();
-extern void A_Face();
-extern void A_Scratch();
-extern void A_PlaySound();
-extern void A_RandomJump();
-extern void A_LineEffect();
-extern void A_FireOldBFG();
-extern void A_BetaSkullAttack();
-extern void A_Stop();
+void A_Light0(mobj_t *actor);
+void A_WeaponReady(mobj_t *actor);
+void A_Lower(mobj_t *actor);
+void A_Raise(mobj_t *actor);
+void A_Punch(mobj_t *actor);
+void A_ReFire(mobj_t *actor);
+void A_FirePistol(mobj_t *actor);
+void A_Light1(mobj_t *actor);
+void A_FireShotgun(mobj_t *actor);
+void A_Light2(mobj_t *actor);
+void A_FireShotgun2(mobj_t *actor);
+void A_CheckReload(mobj_t *actor);
+void A_OpenShotgun2(mobj_t *actor);
+void A_LoadShotgun2(mobj_t *actor);
+void A_CloseShotgun2(mobj_t *actor);
+void A_FireCGun(mobj_t *actor);
+void A_GunFlash(mobj_t *actor);
+void A_FireMissile(mobj_t *actor);
+void A_Saw(mobj_t *actor);
+void A_FirePlasma(mobj_t *actor);
+void A_BFGsound(mobj_t *actor);
+void A_FireBFG(mobj_t *actor);
+void A_BFGSpray(mobj_t *actor);
+void A_Explode(mobj_t *actor);
+void A_Pain(mobj_t *actor);
+void A_PlayerScream(mobj_t *actor);
+void A_Fall(mobj_t *actor);
+void A_XScream(mobj_t *actor);
+void A_Look(mobj_t *actor);
+void A_Chase(mobj_t *actor);
+void A_FaceTarget(mobj_t *actor);
+void A_PosAttack(mobj_t *actor);
+void A_Scream(mobj_t *actor);
+void A_SPosAttack(mobj_t *actor);
+void A_VileChase(mobj_t *actor);
+void A_VileStart(mobj_t *actor);
+void A_VileTarget(mobj_t *actor);
+void A_VileAttack(mobj_t *actor);
+void A_StartFire(mobj_t *actor);
+void A_Fire(mobj_t *actor);
+void A_FireCrackle(mobj_t *actor);
+void A_Tracer(mobj_t *actor);
+void A_SkelWhoosh(mobj_t *actor);
+void A_SkelFist(mobj_t *actor);
+void A_SkelMissile(mobj_t *actor);
+void A_FatRaise(mobj_t *actor);
+void A_FatAttack1(mobj_t *actor);
+void A_FatAttack2(mobj_t *actor);
+void A_FatAttack3(mobj_t *actor);
+void A_BossDeath(mobj_t *actor);
+void A_CPosAttack(mobj_t *actor);
+void A_CPosRefire(mobj_t *actor);
+void A_TroopAttack(mobj_t *actor);
+void A_SargAttack(mobj_t *actor);
+void A_HeadAttack(mobj_t *actor);
+void A_BruisAttack(mobj_t *actor);
+void A_SkullAttack(mobj_t *actor);
+void A_Metal(mobj_t *actor);
+void A_SpidRefire(mobj_t *actor);
+void A_BabyMetal(mobj_t *actor);
+void A_BspiAttack(mobj_t *actor);
+void A_Hoof(mobj_t *actor);
+void A_CyberAttack(mobj_t *actor);
+void A_PainAttack(mobj_t *actor);
+void A_PainDie(mobj_t *actor);
+void A_KeenDie(mobj_t *actor);
+void A_BrainPain(mobj_t *actor);
+void A_BrainScream(mobj_t *actor);
+void A_BrainDie(mobj_t *actor);
+void A_BrainAwake(mobj_t *actor);
+void A_BrainSpit(mobj_t *actor);
+void A_SpawnSound(mobj_t *actor);
+void A_SpawnFly(mobj_t *actor);
+void A_BrainExplode(mobj_t *actor);
+void A_Detonate(mobj_t *actor);
+void A_Mushroom(mobj_t *actor);
+void A_SkullPop(mobj_t *actor);
+void A_Die(mobj_t *actor);
+void A_Spawn(mobj_t *actor);
+void A_Turn(mobj_t *actor);
+void A_Face(mobj_t *actor);
+void A_Scratch(mobj_t *actor);
+void A_PlaySound(mobj_t *actor);
+void A_RandomJump(mobj_t *actor);
+void A_CounterJump(mobj_t *actor);
+void A_LineEffect(mobj_t *actor);
+void A_FireOldBFG(mobj_t *actor);
+void A_BetaSkullAttack(mobj_t *actor);
+void A_Stop(mobj_t *actor);
 
 typedef struct
 {
@@ -1905,6 +1907,7 @@ static const deh_bexptr deh_bexptrs[] =
     { A_Scratch,         "A_Scratch"         },   // killough 11/98
     { A_PlaySound,       "A_PlaySound"       },   // killough 11/98
     { A_RandomJump,      "A_RandomJump"      },   // killough 11/98
+    { A_CounterJump,     "A_CounterJump"     },   // [BH] 
     { A_LineEffect,      "A_LineEffect"      },   // killough 11/98
 
     { A_FireOldBFG,      "A_FireOldBFG"      },   // killough 7/19/98: classic BFG firing function
@@ -1993,20 +1996,8 @@ void ProcessDehFile(char *filename, int lumpnum)
         static int      i;      // killough 10/98: only run once, by keeping index static
 
         // remember what they start as for deh xref
-        for (; i < EXTRASTATES; i++)  
-            deh_codeptr[i] = states[i].action;
-
-        // [BH] Initialize extra DeHacked states 1089 to 3999
         for (; i < NUMSTATES; i++)
         {
-            states[i].sprite = SPR_TNT1;
-            states[i].frame = 0;
-            states[i].tics = -1;
-            states[i].action = NULL;
-            states[i].nextstate = i;
-            states[i].misc1 = 0;
-            states[i].misc2 = 0;
-            states[i].dehacked = false;
             deh_codeptr[i] = states[i].action;
         }
     }
@@ -2120,8 +2111,8 @@ void deh_procBexCodePointers(DEHFILE *fpin, char *line)
     // for this one, we just read 'em until we hit a blank line
     while (!dehfeof(fpin) && *inbuffer && *inbuffer != ' ')
     {
-        int     i = 0;                          // looper
-        dboolean found = false;                  // know if we found this one during lookup or not
+        int             i = 0;                  // looper
+        dboolean        found = false;          // know if we found this one during lookup or not
 
         if (!dehfgets(inbuffer, sizeof(inbuffer), fpin))
             break;
@@ -2409,11 +2400,11 @@ void deh_procFrame(DEHFILE *fpin, char *line)
             states[indexnum].particle_evt = value;
             states[indexnum].dehacked = dehacked = !BTSX;
         }
-        else if (M_StringCompare(key, deh_state[8]))            // Translucent
+        else if (M_StringCompare(key, "translucent"))           // Translucent
         {
             if (devparm)
                 C_Output(" - translucent = %ld", value);
-            states[indexnum].translucent = (dboolean)value;     // dboolean
+            states[indexnum].translucent = !!value;             // dboolean
             states[indexnum].dehacked = dehacked = !BTSX;
         }
         else
@@ -2829,6 +2820,7 @@ void deh_procCheat(DEHFILE *fpin, char *line)
             while (*p == ' ')
                 ++p;
             cheat_mus.sequence = strdup(p);
+
             success = true;
         }
         else if (M_StringCompare(key, deh_cheat[1]))
@@ -2969,6 +2961,7 @@ void deh_procCheat(DEHFILE *fpin, char *line)
             while (*p == ' ')
                 ++p;
             cheat_clev.sequence = strdup(p);
+
             success = true;
         }
         else if (M_StringCompare(key, deh_cheat[15]))
@@ -3258,7 +3251,7 @@ void deh_procStrings(DEHFILE *fpin, char *line)
             if (devparm)
                 C_Output("* increased buffer from to %d for buffer size %d",
                     maxstrlen, (int)strlen(inbuffer));
-            holdstring = Z_Realloc(holdstring, maxstrlen * sizeof(*holdstring), PU_STATIC, NULL);
+            holdstring = Z_Realloc(holdstring, maxstrlen * sizeof(*holdstring));
         }
 
         // concatenate the whole buffer if continuation or the value if first

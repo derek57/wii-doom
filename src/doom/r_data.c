@@ -318,7 +318,6 @@ static void R_GenerateComposite(int texnum)
 {
     byte                *block = Z_Calloc(1, texturecompositesize[texnum], PU_STATIC, 
                             (void **)&texturecomposite[texnum]); 
-//                            &texturecomposite[texnum]); 
     texture_t           *texture = textures[texnum];
 
     short               width = texture->width;
@@ -334,7 +333,7 @@ static void R_GenerateComposite(int texnum)
     byte                *marks = calloc(width, height); 
     byte                *source;
 
-    dboolean             tekwall1 = (texnum == R_CheckTextureNumForName("TEKWALL1"));
+    dboolean            tekwall1 = (texnum == R_CheckTextureNumForName("TEKWALL1"));
 
     for (i = texture->patchcount; --i >= 0; ++patch)
     {
@@ -669,8 +668,8 @@ void R_InitTextures(void)
     int                 temp3;
 
     // [crispy] allocate memory for the pnameslumps and texturelumps arrays
-    pnameslumps = Z_Realloc(pnameslumps, maxpnameslumps * sizeof(*pnameslumps), PU_STATIC, NULL);
-    texturelumps = Z_Realloc(texturelumps, maxtexturelumps * sizeof(*texturelumps), PU_STATIC, NULL);
+    pnameslumps = Z_Realloc(pnameslumps, maxpnameslumps * sizeof(*pnameslumps));
+    texturelumps = Z_Realloc(texturelumps, maxtexturelumps * sizeof(*texturelumps));
 
     // [crispy] make sure the first available TEXTURE1/2 lumps
     // are always processed first
@@ -690,7 +689,7 @@ void R_InitTextures(void)
             if (numpnameslumps == maxpnameslumps)
             {
                 ++maxpnameslumps;
-                pnameslumps = Z_Realloc(pnameslumps, maxpnameslumps * sizeof(*pnameslumps), PU_STATIC, NULL);
+                pnameslumps = Z_Realloc(pnameslumps, maxpnameslumps * sizeof(*pnameslumps));
             }
 
             pnameslumps[numpnameslumps].lumpnum = i;
@@ -722,7 +721,7 @@ void R_InitTextures(void)
             if (numtexturelumps == maxtexturelumps)
             {
                 ++maxtexturelumps;
-                texturelumps = Z_Realloc(texturelumps, maxtexturelumps * sizeof(*texturelumps), PU_STATIC, NULL);
+                texturelumps = Z_Realloc(texturelumps, maxtexturelumps * sizeof(*texturelumps));
             }
 
             // [crispy] do not proceed any further, yet
@@ -870,9 +869,12 @@ void R_InitTextures(void)
                 patch->patch = 0;
             }
         }
-        texturecolumnlump[i] = Z_Malloc(texture->width * sizeof(**texturecolumnlump), PU_STATIC, NULL);
-        texturecolumnofs[i] = Z_Malloc(texture->width * sizeof(**texturecolumnofs), PU_STATIC, NULL);
-        texturecolumnofs2[i] = Z_Malloc(texture->width * sizeof(**texturecolumnofs2), PU_STATIC, NULL);
+        texturecolumnlump[i] = Z_Malloc(texture->width * sizeof(**texturecolumnlump), PU_STATIC,
+            NULL);
+        texturecolumnofs[i] = Z_Malloc(texture->width * sizeof(**texturecolumnofs), PU_STATIC,
+            NULL);
+        texturecolumnofs2[i] = Z_Malloc(texture->width * sizeof(**texturecolumnofs2), PU_STATIC,
+            NULL);
 
         j = 1;
         while (j * 2 <= texture->width)
@@ -896,7 +898,8 @@ void R_InitTextures(void)
         R_GenerateLookup(i);
 
     // Create translation table for global animation.
-    texturetranslation = Z_Malloc((numtextures + 1) * sizeof(*texturetranslation), PU_STATIC, NULL);
+    texturetranslation = Z_Malloc((numtextures + 1) * sizeof(*texturetranslation), PU_STATIC,
+        NULL);
 
     for (i = 0; i<numtextures; i++)
         texturetranslation[i] = i;
@@ -978,7 +981,7 @@ void R_InitSpriteLumps(void)
             {
                 int j = 0;
 
-                while (sproffsets[j].name[0])
+                while (*sproffsets[j].name)
                 {
                     if (i == W_CheckNumForName(sproffsets[j].name) - firstspritelump
                         && spritewidth[i] == (SHORT(sproffsets[j].width) << FRACBITS)
@@ -1246,12 +1249,12 @@ void R_BuildTransTable (unsigned int *palette)
 
 void R_InitColormaps(void)
 {
-    dboolean   keepgray = false;
-    dboolean   COLORMAP = (W_CheckMultipleLumps("COLORMAP") > 1);
-    int        i, j, k;
-    byte       *palsrc, *palette, *playpal;
-    char       c[3];
-    wad_file_t *colormapwad;
+    dboolean    COLORMAP = (W_CheckMultipleLumps("COLORMAP") > 1);
+    int         i, j, k;
+    byte        *palsrc, *palette, *playpal;
+    wad_file_t  *colormapwad;
+    dboolean    keepgray = false;
+    char        c[3];
 
     if (W_CheckNumForName("C_START") >= 0 && W_CheckNumForName("C_END") >= 0)
     {

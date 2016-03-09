@@ -65,13 +65,8 @@
 #include "z_zone.h"
 
 
-#define DONUT_FLOORHEIGHT_DEFAULT    0x00000000
-#define DONUT_FLOORPIC_DEFAULT       0x16
-
 #define MAXANIMS                     32
 #define MAXLINEANIMS                 64 * 256    // CHANGED FOR HIRES
-#define MAX_ADJOINING_SECTORS        20
-#define ANIMSPEED                    8
 
 #define MAXTERRAINDEF                5
 
@@ -102,42 +97,102 @@ typedef struct
 
 static struct
 {
-    char        *pwad;
     char        *texture;
+    char        *pwad;
 } exception[] = {
-    { "BTSX_E1.WAD",   "SHNPRT02" }, { "BTSX_E1.WAD",   "SLIME05"  }, { "BTSX_E2B.WAD",  "SHNPRT08" },
-    { "BTSX_E2B.WAD",  "SLIME09"  }, { "DOOM2.WAD",     "RROCK05"  }, { "DOOM2.WAD",     "RROCK06"  },
-    { "DOOM2.WAD",     "RROCK07"  }, { "DOOM2.WAD",     "RROCK08"  }, { "DOOM2.WAD",     "SLIME09"  },
-    { "DOOM2.WAD",     "SLIME10"  }, { "DOOM2.WAD",     "SLIME11"  }, { "DOOM2.WAD",     "SLIME12"  },
-    { "MOHU2.WAD",     "DIFL_01"  },
-    { "EPIC2.WAD",     "SLIME01"  }, { "EPIC2.WAD",     "SLIME01A" }, { "EPIC2.WAD",     "SLIME02"  },
-    { "EPIC2.WAD",     "SLIME02A" }, { "EPIC2.WAD",     "SLIME03"  }, { "EPIC2.WAD",     "SLIME03A" },
-    { "EPIC2.WAD",     "SLIME04"  }, { "EPIC2.WAD",     "SLIME05"  }, { "EPIC2.WAD",     "SLIME05A" },
-    { "EPIC2.WAD",     "SLIME06A" }, { "EPIC2.WAD",     "SLIME07"  }, { "EPIC2.WAD",     "SLIME08"  },
-    { "EPIC2.WAD",     "SLIME09"  }, { "EPIC2.WAD",     "SLIME10"  }, { "EPIC2.WAD",     "SLIME11"  },
-    { "EPIC2.WAD",     "SLIME12"  },
-    { "ETERNALL.WAD",  "NUKAGE1"  }, { "ETERNALL.WAD",  "NUKAGE2"  },
-    { "ETERNALL.WAD",  "NUKAGE3"  }, { "ETERNALL.WAD",  "RROCK05"  }, { "ETERNALL.WAD",  "RROCK06"  },
-    { "ETERNALL.WAD",  "RROCK07"  }, { "ETERNALL.WAD",  "RROCK08"  }, { "ETERNALL.WAD",  "SLIME09"  },
-    { "ETERNALL.WAD",  "SLIME10"  }, { "ETERNALL.WAD",  "SLIME11"  }, { "ETERNALL.WAD",  "SLIME12"  },
-    { "FREEDOOM2.WAD", "RROCK05"  }, { "FREEDOOM2.WAD", "RROCK06"  }, { "FREEDOOM2.WAD", "RROCK07"  },
-    { "FREEDOOM2.WAD", "RROCK08"  }, { "FREEDOOM2.WAD", "SLIME09"  }, { "FREEDOOM2.WAD", "SLIME10"  },
-    { "FREEDOOM2.WAD", "SLIME11"  }, { "FREEDOOM2.WAD", "SLIME12"  },
-    { "PLUTONIA.WAD",  "RROCK05"  }, { "PLUTONIA.WAD",  "RROCK06"  }, { "PLUTONIA.WAD",  "RROCK07"  },
-    { "PLUTONIA.WAD",  "RROCK08"  }, { "PLUTONIA.WAD",  "SLIME09"  }, { "PLUTONIA.WAD",  "SLIME10"  },
-    { "PLUTONIA.WAD",  "SLIME11"  }, { "PLUTONIA.WAD",  "SLIME12"  }, { "RC-DC.WAD",     "BWORM00A" },
-    { "RC-DC.WAD",     "CFAN00A"  }, { "RC-DC.WAD",     "CFAN01A"  }, { "RC-DC.WAD",     "CFAN00D"  },
-    { "RC-DC.WAD",     "CFAN01D"  }, { "REQUIEM.WAD",   "SLIME05"  }, { "REQUIEM.WAD",   "SLIME08"  },
-    { "SID.WAD",       "FWATER1"  }, { "SUNLUST.WAD",   "RROCK05"  }, { "SUNLUST.WAD",   "RROCK06"  },
-    { "SUNLUST.WAD",   "RROCK07"  }, { "SUNLUST.WAD",   "RROCK08"  }, { "SUNLUST.WAD",   "SLIME09"  },
-    { "SUNLUST.WAD",   "SLIME10"  }, { "SUNLUST.WAD",   "SLIME11"  }, { "SUNLUST.WAD",   "SLIME12"  },
-    { "TNT.WAD",       "RROCK05"  }, { "TNT.WAD",       "RROCK06"  }, { "TNT.WAD",       "RROCK07"  },
-    { "TNT.WAD",       "RROCK08"  }, { "TNT.WAD",       "SLIME09"  }, { "TNT.WAD",       "SLIME10"  },
-    { "TNT.WAD",       "SLIME11"  }, { "TNT.WAD",       "SLIME12"  }, { "TVR!.WAD",      "SLIME05"  },
-    { "TVR!.WAD",      "SLIME06"  }, { "TVR!.WAD",      "SLIME07"  }, { "TVR!.WAD",      "SLIME08"  },
-    { "TVR!.WAD",      "SLIME09"  }, { "TVR!.WAD",      "SLIME10"  }, { "TVR!.WAD",      "SLIME11"  },
-    { "TVR!.WAD",      "SLIME12"  }, { "UACULTRA.WAD",  "RROCK05"  }, { "VALIANT.WAD",   "E3SAW_A1" },
-    { "VALIANT.WAD",   "E3SAW_A2" }, { "VALIANT.WAD",   "E3SAW_A3" }, { "VALIANT.WAD",   "E3SAW_A4" },
+    { "BWORM00A", "RC-DC.WAD"     },
+    { "CFAN00A" , "RC-DC.WAD"     },
+    { "CFAN01A" , "RC-DC.WAD"     },
+    { "CFAN00D" , "RC-DC.WAD"     },
+    { "CFAN01D" , "RC-DC.WAD"     },
+    { "DIFL_01" , "MOHU2.WAD"     },
+    { "E3SAW_A1", "VALIANT.WAD"   },
+    { "E3SAW_A2", "VALIANT.WAD"   },
+    { "E3SAW_A3", "VALIANT.WAD"   },
+    { "E3SAW_A4", "VALIANT.WAD"   },
+    { "FWATER1" , "SID.WAD"       },
+    { "NUKAGE1" , "ETERNALL.WAD"  },
+    { "NUKAGE2" , "ETERNALL.WAD"  },
+    { "NUKAGE3" , "ETERNALL.WAD"  },
+    { "RROCK05" , "DOOM2.WAD"     },
+    { "RROCK05" , "ETERNALL.WAD"  },
+    { "RROCK05" , "FREEDOOM2.WAD" },
+    { "RROCK05" , "PLUTONIA.WAD"  },
+    { "RROCK05" , "SUNLUST.WAD"   },
+    { "RROCK05" , "TNT.WAD"       },
+    { "RROCK05" , "UACULTRA.WAD"  },
+    { "RROCK06" , "DOOM2.WAD"     },
+    { "RROCK06" , "ETERNALL.WAD"  },
+    { "RROCK06" , "FREEDOOM2.WAD" },
+    { "RROCK06" , "PLUTONIA.WAD"  },
+    { "RROCK06" , "SUNLUST.WAD"   },
+    { "RROCK06" , "TNT.WAD"       },
+    { "RROCK07" , "DOOM2.WAD"     },
+    { "RROCK07" , "ETERNALL.WAD"  },
+    { "RROCK07" , "FREEDOOM2.WAD" },
+    { "RROCK07" , "PLUTONIA.WAD"  },
+    { "RROCK07" , "SUNLUST.WAD"   },
+    { "RROCK07" , "TNT.WAD"       },
+    { "RROCK08" , "DOOM2.WAD"     },
+    { "RROCK08" , "ETERNALL.WAD"  },
+    { "RROCK08" , "FREEDOOM2.WAD" },
+    { "RROCK08" , "PLUTONIA.WAD"  },
+    { "RROCK08" , "SUNLUST.WAD"   },
+    { "RROCK08" , "TNT.WAD"       },
+    { "SHNPRT02", "BTSX_E1.WAD"   },
+    { "SHNPRT08", "BTSX_E2B.WAD"  },
+    { "SLIME01" , "EPIC2.WAD"     },
+    { "SLIME01A", "EPIC2.WAD"     },
+    { "SLIME02" , "EPIC2.WAD"     },
+    { "SLIME02A", "EPIC2.WAD"     },
+    { "SLIME03" , "EPIC2.WAD"     },
+    { "SLIME03A", "EPIC2.WAD"     },
+    { "SLIME04" , "EPIC2.WAD"     },
+    { "SLIME05" , "EPIC2.WAD"     },
+    { "SLIME05" , "BTSX_E1.WAD"   },
+    { "SLIME05" , "REQUIEM.WAD"   },
+    { "SLIME05" , "TVR!.WAD"      },
+    { "SLIME05A", "EPIC2.WAD"     },
+    { "SLIME06" , "TVR!.WAD"      },
+    { "SLIME06A", "EPIC2.WAD"     },
+    { "SLIME07" , "EPIC2.WAD"     },
+    { "SLIME07" , "TVR!.WAD"      },
+    { "SLIME08" , "EPIC2.WAD"     },
+    { "SLIME08" , "REQUIEM.WAD"   },
+    { "SLIME08" , "TVR!.WAD"      },
+    { "SLIME09" , "BTSX_E2B.WAD"  },
+    { "SLIME09" , "DOOM2.WAD"     },
+    { "SLIME09" , "EPIC2.WAD"     },
+    { "SLIME09" , "ETERNALL.WAD"  },
+    { "SLIME09" , "FREEDOOM2.WAD" },
+    { "SLIME09" , "PLUTONIA.WAD"  },
+    { "SLIME09" , "SUNLUST.WAD"   },
+    { "SLIME09" , "TNT.WAD"       },
+    { "SLIME09" , "TVR!.WAD"      },
+    { "SLIME10" , "DOOM2.WAD"     },
+    { "SLIME10" , "EPIC2.WAD"     },
+    { "SLIME10" , "ETERNALL.WAD"  },
+    { "SLIME10" , "FREEDOOM2.WAD" },
+    { "SLIME10" , "PLUTONIA.WAD"  },
+    { "SLIME10" , "SUNLUST.WAD"   },
+    { "SLIME10" , "TNT.WAD"       },
+    { "SLIME10" , "TVR!.WAD"      },
+    { "SLIME11" , "DOOM2.WAD"     },
+    { "SLIME11" , "EPIC2.WAD"     },
+    { "SLIME11" , "ETERNALL.WAD"  },
+    { "SLIME11" , "FREEDOOM2.WAD" },
+    { "SLIME11" , "PLUTONIA.WAD"  },
+    { "SLIME11" , "SUNLUST.WAD"   },
+    { "SLIME11" , "TNT.WAD"       },
+    { "SLIME11" , "TVR!.WAD"      },
+    { "SLIME12" , "DOOM2.WAD"     },
+    { "SLIME12" , "EPIC2.WAD"     },
+    { "SLIME12" , "ETERNALL.WAD"  },
+    { "SLIME12" , "FREEDOOM2.WAD" },
+    { "SLIME12" , "PLUTONIA.WAD"  },
+    { "SLIME12" , "SUNLUST.WAD"   },
+    { "SLIME12" , "TNT.WAD"       },
+    { "SLIME12" , "TVR!.WAD"      },
     { "",              ""         }
 };
 
@@ -322,7 +377,8 @@ void P_SetLiquids(void)
         if (lastanim >= anims + maxanims)
         {
             size_t      newmax = (maxanims ? maxanims * 2 : MAXANIMS);
-            anims = Z_Realloc(anims, newmax * sizeof(*anims), PU_LEVEL, NULL);
+
+            anims = Z_Realloc(anims, newmax * sizeof(*anims));
             lastanim = anims + maxanims;
             maxanims = newmax;
         }
@@ -3183,5 +3239,34 @@ int P_GetTerrainTypeForPoint(fixed_t x, fixed_t y, int position)
         default:
             return FLOOR_SOLID;
     }
+}
+
+//
+// P_IsSecret()
+//
+// Passed a sector, returns if the sector secret type is still active, i.e.
+// secret type is set and the secret has not yet been obtained.
+//
+// jff 3/14/98 added to simplify checks for whether sector is secret
+//  in automap and other places
+//
+dboolean P_IsSecret(const sector_t *sec)
+{
+    return (sec->special == 9 || (sec->special & SECRET_MASK));
+}
+
+
+//
+// P_WasSecret()
+//
+// Passed a sector, returns if the sector secret type is was active, i.e.
+// secret type was set and the secret has been obtained already.
+//
+// jff 3/14/98 added to simplify checks for whether sector is secret
+//  in automap and other places
+//
+dboolean P_WasSecret(const sector_t *sec)
+{
+    return (sec->oldspecial == 9 || (sec->oldspecial & SECRET_MASK));
 }
 

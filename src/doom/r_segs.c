@@ -606,7 +606,7 @@ void R_StoreWallRange(int start, int stop)
         int     maxdrawsegs_old = maxdrawsegs;
 
         maxdrawsegs = (maxdrawsegs ? 2 * maxdrawsegs : MAXDRAWSEGS);
-        drawsegs = Z_Realloc(drawsegs, maxdrawsegs * sizeof(*drawsegs), PU_LEVEL, NULL);
+        drawsegs = Z_Realloc(drawsegs, maxdrawsegs * sizeof(*drawsegs));
         ds_p = drawsegs + maxdrawsegs_old;
         memset(ds_p, 0, (maxdrawsegs - maxdrawsegs_old) * sizeof(*drawsegs));
 
@@ -648,7 +648,7 @@ void R_StoreWallRange(int start, int stop)
             do
                 maxopenings = (maxopenings ? maxopenings * 2 : 16384);
             while (need > maxopenings);
-            openings = Z_Realloc(openings, maxopenings * sizeof(*openings), PU_LEVEL, NULL);
+            openings = Z_Realloc(openings, maxopenings * sizeof(*openings));
             lastopening = openings + pos;
 
             if(oldopenings != 0)

@@ -623,18 +623,14 @@ void HU_Start(void)
         }
         else
         {
-            char lump[5];
+            char lump[6];
 
             if(gamemode == commercial)
             {
                 if (gamemap < 10)
                     M_snprintf(lump, sizeof(s), "MAP0%i", gamemap);
-                else if (gamemap > 9 && gamemap < 20)
-                    M_snprintf(lump, sizeof(lump), "MAP1%i", gamemap);
-                else if (gamemap > 19 && gamemap < 30)
-                    M_snprintf(lump, sizeof(lump), "MAP2%i", gamemap);
-                else if (gamemap > 29)
-                    M_snprintf(lump, sizeof(lump), "MAP3%i", gamemap);
+                else if (gamemap > 9)
+                    M_snprintf(lump, sizeof(lump), "MAP%i", gamemap);
             }
             else
                 M_snprintf(lump, sizeof(lump), "E%iM%i", gameepisode, gamemap);
@@ -1072,7 +1068,7 @@ void HU_DrawHUD(void)
         ammo_x = HUD_AMMO_X + 15 - (SHORT(patch->width) / 2);
 
         hudfunc(ammo_x, (HUD_AMMO_Y + 8 - (SHORT(patch->height) / 2)), 0, patch, tinttab);
-        ammo_x += HUD_AMMO_X + 15 + (SHORT(patch->width) / 2) - (ORIGHEIGHT / 2) + offset_special;
+        ammo_x += HUD_AMMO_X + 15 + (SHORT(patch->width) / 2) - (ORIGINALHEIGHT / 2) + offset_special;
 
         if (ammohighlight > currenttime)
             DrawHUDNumber(&ammo_x, HUD_AMMO_Y + hudnumoffset, 0, ammo, tinttab, V_DrawHUDPatch);
@@ -1440,18 +1436,14 @@ void HU_NewLevel()
         }
         else
         {
-            char lump[5];
+            char lump[6];
 
             if(gamemode == commercial)
             {
                 if (gamemap < 10)
                     M_snprintf(lump, sizeof(s), "MAP0%i", gamemap);
-                else if (gamemap > 9 && gamemap < 20)
-                    M_snprintf(lump, sizeof(lump), "MAP1%i", gamemap);
-                else if (gamemap > 19 && gamemap < 30)
-                    M_snprintf(lump, sizeof(lump), "MAP2%i", gamemap);
-                else if (gamemap > 29)
-                    M_snprintf(lump, sizeof(lump), "MAP3%i", gamemap);
+                else if (gamemap > 9)
+                    M_snprintf(lump, sizeof(lump), "MAP%i", gamemap);
             }
             else
                 M_snprintf(lump, sizeof(lump), "E%iM%i", gameepisode, gamemap);

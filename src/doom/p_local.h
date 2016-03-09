@@ -165,7 +165,7 @@ mobj_t*
 //void
         P_SpawnPlayerMissile (mobj_t* source, mobjtype_t type);
 
-void    P_SpawnPlayer (mapthing_t* mthing);
+void    P_SpawnPlayer(const mapthing_t *mthing);
 
 //
 // P_ENEMY

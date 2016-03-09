@@ -213,6 +213,18 @@ mline_t thintriangle_guy[] = {
 };
 #undef R
 
+//jff 1/5/98 new symbol for keys on automap
+#define R (FRACUNIT)
+mline_t cross_mark[] =
+{
+  { { -R, 0 }, { R, 0} },
+  { { 0, -R }, { 0, R } },
+};
+#undef R
+#define NUMCROSSMARKLINES (sizeof(cross_mark)/sizeof(mline_t))
+
+#define MAPBITS 12
+#define FRACTOMAPBITS (FRACBITS-MAPBITS)
 
 cheatseq_t cheat_amap = CHEAT("iddt", 0);
 cheatseq_t cheat_amap_beta = CHEAT("eek", 0);
@@ -315,30 +327,7 @@ static dboolean    movement;
 
 dboolean           dont_move_backwards = false;
 dboolean           automapactive = false;
-
-//jff 1/7/98 default automap colors added
-int mapcolor_back = 247;  // map background
-int mapcolor_grid = 104;  // grid lines color
-int mapcolor_wall = 23;   // normal 1s wall color
-int mapcolor_fchg = 55;   // line at floor height change color
-int mapcolor_cchg = 215;  // line at ceiling height change color
-int mapcolor_clsd = 208;  // line at sector with floor=ceiling color
-int mapcolor_rkey = 175;  // red key color
-int mapcolor_bkey = 204;  // blue key color
-int mapcolor_ykey = 231;  // yellow key color
-int mapcolor_rdor = 175;  // red door color  (diff from keys to allow option)
-int mapcolor_bdor = 204;  // blue door color (of enabling one but not other)
-int mapcolor_ydor = 231;  // yellow door color
-int mapcolor_tele = 119;  // teleporter line color
-int mapcolor_secr = 252;  // secret sector boundary color
-int mapcolor_exit = 0;    // jff 4/23/98 add exit line color
-int mapcolor_unsn = 104;  // computer map unseen line color
-int mapcolor_flat = 88;   // line with no floor/ceiling changes
-int mapcolor_sprt = 112;  // general sprite color
-int mapcolor_hair = 208;  // crosshair color
-int mapcolor_sngl = 208;  // single player arrow color
-int mapcolor_plyr = 112;  // color for player arrow
-int mapcolor_frnd = 252;  // colors for friends of player
+dboolean           map_secret_after = false;
 
 extern int oldscreenblocks;
 extern int oldscreenSize;
@@ -1332,6 +1321,46 @@ static void AM_rotate(fixed_t* x,  fixed_t* y, angle_t a, fixed_t xorig, fixed_t
 }
 
 //
+// AM_DoorColor()
+//
+// Returns the 'color' or key needed for a door linedef type
+//
+// Passed the type of linedef, returns:
+//   -1 if not a keyed door
+//    0 if a red key required
+//    1 if a blue key required
+//    2 if a yellow key required
+//    3 if a multiple keys required
+//
+// jff 4/3/98 add routine to get color of generalized keyed door
+//
+static int AM_DoorColor(int type)
+{
+  if (GenLockedBase <= type && type< GenDoorBase)
+  {
+    type -= GenLockedBase;
+    type = (type & LockedKey) >> LockedKeyShift;
+    if (!type || type==7)
+      return 3;  //any or all keys
+    else return (type-1)%3;
+  }
+  switch (type)  // closed keyed door
+  {
+    case 26: case 32: case 99: case 133:
+      /*bluekey*/
+      return 1;
+    case 27: case 34: case 136: case 137:
+      /*yellowkey*/
+      return 2;
+    case 28: case 33: case 134: case 135:
+      /*redkey*/
+      return 0;
+    default:
+      return -1; //not a keyed door
+  }
+}
+
+//
 // Determines visible lines, draws them.
 // This is LineDef based, not LineSeg based.
 //
@@ -1357,40 +1386,137 @@ void AM_drawWalls(void)
         {
             if ((lines[i].flags & LINE_NEVERSEE) && !cheating)
                 continue;
+
+            {
+                /* cph - show keyed doors and lines */
+                int amd;
+
+                if ((mapcolor_bdor || mapcolor_ydor || mapcolor_rdor) &&
+                    /* non-secret */
+                    !(lines[i].flags & ML_SECRET) && (amd = AM_DoorColor(lines[i].special)) != -1)
+                {
+                    /* closed keyed door */
+                    switch (amd)
+                    {
+                        case 1:
+                            /*bluekey*/
+                            AM_drawMline(&l, mapcolor_bdor ? mapcolor_bdor : mapcolor_cchg);
+                            continue;
+
+                        case 2:
+                            /*yellowkey*/
+                            AM_drawMline(&l, mapcolor_ydor ? mapcolor_ydor : mapcolor_cchg);
+                            continue;
+
+                        case 0:
+                            /*redkey*/
+                            AM_drawMline(&l, mapcolor_rdor ? mapcolor_rdor : mapcolor_cchg);
+                            continue;
+
+                        case 3:
+                            /*any or all*/
+                            AM_drawMline(&l, mapcolor_clsd ? mapcolor_clsd : mapcolor_cchg);
+                            continue;
+                    }
+                }
+            }
+
+            /* jff 4/23/98 add exit lines to automap */
+            if (mapcolor_exit && (lines[i].special == 11  ||
+                                  lines[i].special == 52  ||
+                                  lines[i].special == 197 ||
+                                  lines[i].special == 51  ||
+                                  lines[i].special == 124 ||
+                                  lines[i].special == 198))
+            {
+                /* exit line */
+                AM_drawMline(&l, mapcolor_exit);
+                continue;
+            }
+
             if (!lines[i].backsector)
             {
-                AM_drawMline(&l, WALLCOLORS+lightlev);
+                // jff 1/10/98 add new color for 1S secret sector boundary
+                // jff 4/3/98 0 is disable
+                if (mapcolor_secr && ((map_secret_after && P_WasSecret(lines[i].frontsector) && !P_IsSecret(lines[i].frontsector)) ||
+                    (!map_secret_after && P_WasSecret(lines[i].frontsector))))
+                    // line bounding secret sector
+                    AM_drawMline(&l, mapcolor_secr);
+                //jff 2/16/98 fixed bug
+                else
+                    // special was cleared
+                    AM_drawMline(&l, mapcolor_wall);
             }
             else
             {
-                if (lines[i].special == 39)
-                { // teleporters
-                    AM_drawMline(&l, WALLCOLORS+WALLRANGE/2);
+                // jff 1/10/98 add color change for all teleporter types
+                if (mapcolor_tele && !(lines[i].flags & ML_SECRET) && (lines[i].special == 39  || lines[i].special == 97 ||
+                                                                       lines[i].special == 125 || lines[i].special == 126))
+                {
+                    // teleporters
+                    AM_drawMline(&l, mapcolor_tele);
                 }
-                else if (lines[i].flags & ML_SECRET) // secret door
+                // secret door
+                else if (lines[i].flags & ML_SECRET)
                 {
                     if (cheating)
-                        AM_drawMline(&l, SECRETWALLCOLORS + lightlev);
+                        AM_drawMline(&l, mapcolor_secr);
                     else
-                        AM_drawMline(&l, WALLCOLORS+lightlev);
+                        // wall color
+                        //AM_drawMline(&l, WALLCOLORS+lightlev);
+                        AM_drawMline(&l, mapcolor_wall);
                 }
-                else if (lines[i].backsector->floorheight
-                           != lines[i].frontsector->floorheight) {
-                    AM_drawMline(&l, FDWALLCOLORS + lightlev); // floor level change
-                }
-                else if (lines[i].backsector->ceilingheight
-                           != lines[i].frontsector->ceilingheight) {
-                    AM_drawMline(&l, CDWALLCOLORS+lightlev); // ceiling level change
-                }
-                else if (cheating)
+                // non-secret closed door
+                else if (mapcolor_clsd && !(lines[i].flags & ML_SECRET) &&
+                        ((lines[i].backsector->floorheight==lines[i].backsector->ceilingheight) ||
+                        (lines[i].frontsector->floorheight==lines[i].frontsector->ceilingheight)))
                 {
-                    AM_drawMline(&l, TSWALLCOLORS+lightlev);
+                    // non-secret closed door
+                    AM_drawMline(&l, mapcolor_clsd);
+                }
+                //jff 1/6/98 show secret sector 2S lines
+                // special was cleared after getting it
+                else if (mapcolor_secr &&
+                        ((map_secret_after &&
+                        ((P_WasSecret(lines[i].frontsector) &&
+                        !P_IsSecret(lines[i].frontsector)) ||
+                        (P_WasSecret(lines[i].backsector) && !P_IsSecret(lines[i].backsector)))) ||
+                        //jff 3/9/98 add logic to not show secret til after entered
+                        // if map_secret_after is true
+                        (!map_secret_after &&
+                        (P_WasSecret(lines[i].frontsector) || P_WasSecret(lines[i].backsector)))))
+                {
+                    // line bounding secret sector
+                    AM_drawMline(&l, mapcolor_secr);
+                }
+                //jff 1/6/98 end secret sector line change
+                else if (lines[i].backsector->floorheight != lines[i].frontsector->floorheight)
+                {
+                    // floor level change
+                    AM_drawMline(&l, mapcolor_fchg);
+                }
+                else if (lines[i].backsector->ceilingheight != lines[i].frontsector->ceilingheight)
+                {
+                    // ceiling level change
+                    AM_drawMline(&l, mapcolor_cchg);
+                }
+                else if (mapcolor_flat && cheating)
+                {
+                    //2S lines that appear only in IDDT
+                    AM_drawMline(&l, mapcolor_flat);
                 }
             }
         }
         else if (plr->powers[pw_allmap])
         {
-            if (!(lines[i].flags & LINE_NEVERSEE)) AM_drawMline(&l, GRAYS+3);
+            if (!(lines[i].flags & ML_DONTDRAW)) // invisible flag lines do not show
+            {
+                if (mapcolor_flat ||
+                    !lines[i].backsector ||
+                    lines[i].backsector->floorheight != lines[i].frontsector->floorheight ||
+                    lines[i].backsector->ceilingheight != lines[i].frontsector->ceilingheight)
+                    AM_drawMline(&l, mapcolor_unsn);
+            }
         }
     }
 }
@@ -1451,26 +1577,22 @@ void AM_drawPlayers(void)
 {
     int                i;
     player_t*          p;
-    static int         their_colors[] = { GREENS, GRAYS, BROWNS, REDS };
-    int                their_color = -1;
-    int                color;
 
     if (!netgame)
     {
         if (cheating)
             AM_drawLineCharacter
                 (cheat_player_arrow, arrlen(cheat_player_arrow), 0,
-                 plr->mo->angle, WHITE, plr->mo->x, plr->mo->y);
+                 plr->mo->angle, mapcolor_sngl, plr->mo->x, plr->mo->y);
         else
             AM_drawLineCharacter
                 (player_arrow, arrlen(player_arrow), 0, plr->mo->angle,
-                 WHITE, plr->mo->x, plr->mo->y);
+                 mapcolor_sngl, plr->mo->x, plr->mo->y);
         return;
     }
 
     for (i=0;i<MAXPLAYERS;i++)
     {
-        their_color++;
         p = &players[i];
 
         if ( (deathmatch && !singledemo) && p != plr)
@@ -1486,22 +1608,18 @@ void AM_drawPlayers(void)
                 AM_rotate(&x, &y, ANG90-plr->mo->angle, plr->mo->x, plr->mo->y);
         }
 
-        if (p->powers[pw_invisibility])
-            color = 246; // *close* to black
-        else
-            color = their_colors[their_color];
-        
         AM_drawLineCharacter
             (player_arrow, arrlen(player_arrow), 0, p->mo->angle,
-             color, p->mo->x, p->mo->y);
+            /* *close* to black */
+            p->powers[pw_invisibility] ? 246 : 
+            //jff 1/6/98 use default color
+            mapcolor_plyr,
+            p->mo->x, p->mo->y);
     }
 
 }
 
-void
-AM_drawThings
-( int         colors,
-  int         colorrange)
+void AM_drawThings(void)
 {
     int       i;
 
@@ -1544,8 +1662,52 @@ AM_drawThings
                     if (automapactive && am_rotate)
                         AM_rotate(&x, &y, ANG90-plr->mo->angle, plr->mo->x, plr->mo->y);
 
+                    //jff 1/5/98 case over doomednum of thing being drawn
+                    if (mapcolor_rkey || mapcolor_ykey || mapcolor_bkey)
+                    {
+                        switch (t->info->doomednum)
+                        {
+                            //jff 1/5/98 treat keys special
+                            case 38:
+                            //jff  red key
+                            case 13:
+                                AM_drawLineCharacter(cross_mark, NUMCROSSMARKLINES,
+                                    16 << FRACBITS,
+                                    t->angle, mapcolor_rkey != -1 ? mapcolor_rkey : mapcolor_sprt, x, y);
+                                    t = t->snext;
+                                continue;
+
+                            case 39:
+                            //jff yellow key
+                            case 6:
+                                AM_drawLineCharacter(cross_mark, NUMCROSSMARKLINES,
+                                    16 << FRACBITS,
+                                    t->angle, mapcolor_ykey != -1 ? mapcolor_ykey : mapcolor_sprt, x, y);
+                                t = t->snext;
+                                continue;
+
+                            case 40:
+                            //jff blue key
+                            case 5:
+                                AM_drawLineCharacter(cross_mark, NUMCROSSMARKLINES,
+                                    16 << FRACBITS,
+                                    t->angle, mapcolor_bkey != -1 ? mapcolor_bkey : mapcolor_sprt, x, y);
+                                t = t->snext;
+                                continue;
+
+                            default:
+                                break;
+                        }
+                    }
+
                     AM_drawLineCharacter(thintriangle_guy, arrlen(thintriangle_guy),
-                            16<<FRACBITS, t->angle, colors, x, y);
+                            //e6y
+                            16 << FRACBITS,
+                            t->angle,
+                            /* cph 2006/07/30 - Show count-as-kills in red. */
+                            ((t->flags & (MF_COUNTKILL | MF_CORPSE)) == MF_COUNTKILL) ? mapcolor_enemy :
+                            /* bbm 2/28/03 Show countable items in yellow. */
+                            (t->flags & MF_COUNTITEM) ? mapcolor_item : mapcolor_sprt, x, y);
 
                 }
                 t = t->snext;
@@ -1632,18 +1794,18 @@ void AM_Drawer (void)
 
     // [crispy] automap-overlay
     if (!am_overlay)
-        AM_clearFB(BACKGROUND);
+        AM_clearFB(mapcolor_back);
 
     if (drawgrid)
-        AM_drawGrid(GRIDCOLORS);
+        AM_drawGrid(mapcolor_grid);
 
     AM_drawWalls();
     AM_drawPlayers();
 
     if (cheating==2)
-        AM_drawThings(THINGCOLORS, THINGRANGE);
+        AM_drawThings();
 
-    AM_drawCrosshair(XHAIRCOLORS);
+    AM_drawCrosshair(mapcolor_hair);
 
     AM_drawMarks();
 
@@ -1682,7 +1844,7 @@ void AM_DrawWorldTimer(void)
     {
         if((automapactive && !d_statusmap) || am_overlay)
         {
-            int x = ORIGWIDTH/2 - M_StringWidth(timeBuffer) / 2;
+            int x = ORIGINALWIDTH/2 - M_StringWidth(timeBuffer) / 2;
             M_WriteText(x, 192, timeBuffer);
         }
     }

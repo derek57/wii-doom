@@ -1461,10 +1461,6 @@ void R_DrawPausedFuzzColumn(void)
     }
 }
 
-//
-// [nitr8] UNUSED
-//
-/*
 void R_DrawFuzzColumns(int srcscrn, int destscrn)
 {
     int         x, y;
@@ -1561,7 +1557,6 @@ void R_DrawPausedFuzzColumns(int srcscrn, int destscrn)
             }
         }
 }
-*/
 
 //
 // R_DrawTranslatedColumn

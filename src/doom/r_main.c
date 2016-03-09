@@ -132,52 +132,6 @@ extern dboolean         canmodify;
 
 extern fixed_t         pspritescale;
 
-void (*colfunc)(void);
-void (*wallcolfunc)(void);
-void (*fbwallcolfunc)(void);
-void (*basecolfunc)(void);
-void (*fuzzcolfunc)(void);
-void (*tlcolfunc)(void);
-void (*tl5colfunc)(void);
-void (*tl10colfunc)(void);
-void (*tl15colfunc)(void);
-void (*tl20colfunc)(void);
-void (*tl25colfunc)(void);
-void (*tl30colfunc)(void);
-void (*tl33colfunc)(void);
-void (*tl35colfunc)(void);
-void (*tl40colfunc)(void);
-void (*tl45colfunc)(void);
-void (*tl50colfunc)(void);
-void (*tl55colfunc)(void);
-void (*tl60colfunc)(void);
-void (*tl65colfunc)(void);
-void (*tl70colfunc)(void);
-void (*tl75colfunc)(void);
-void (*tl80colfunc)(void);
-void (*tl85colfunc)(void);
-void (*tl90colfunc)(void);
-void (*tl95colfunc)(void);
-void (*tlgreencolfunc)(void);
-void (*tlredcolfunc)(void);
-void (*tlredwhitecolfunc1)(void);
-void (*tlredwhitecolfunc2)(void);
-void (*tlredwhite50colfunc)(void);
-void (*tlbluecolfunc)(void);
-void (*tlgreen33colfunc)(void);
-void (*tlred33colfunc)(void);
-void (*tlblue33colfunc)(void);
-void (*redtobluecolfunc)(void);
-void (*transcolfunc)(void);
-void (*spanfunc)(void);
-void (*skycolfunc)(void);
-void (*redtogreencolfunc)(void);
-void (*tlredtoblue33colfunc)(void);
-void (*tlredtogreen33colfunc)(void);
-void (*psprcolfunc)(void);
-void (*bloodsplatcolfunc)(void);
-void (*megaspherecolfunc)(void);
-
 //
 // R_PointOnSide
 // Traverse BSP (sub) tree,
@@ -501,7 +455,7 @@ void R_ExecuteSetViewSize(void)
     centerxfrac = centerx << FRACBITS;
     centeryfrac = centery << FRACBITS;
     projection = centerxfrac;
-    projectiony = ((SCREENHEIGHT * centerx * ORIGWIDTH) / ORIGHEIGHT) / SCREENWIDTH
+    projectiony = ((SCREENHEIGHT * centerx * ORIGINALWIDTH) / ORIGINALHEIGHT) / SCREENWIDTH
         * FRACUNIT;
 
     R_InitBuffer(scaledviewwidth, scaledviewheight);
@@ -509,11 +463,11 @@ void R_ExecuteSetViewSize(void)
     R_InitTextureMapping();
 
     // psprite scales
-//    pspritexscale = (centerx << FRACBITS) / (ORIGWIDTH / 2);
-    pspriteyscale = (((SCREENHEIGHT * viewwidth) / SCREENWIDTH) << FRACBITS) / ORIGHEIGHT;
+//    pspritexscale = (centerx << FRACBITS) / (ORIGINALWIDTH / 2);
+    pspriteyscale = (((SCREENHEIGHT * viewwidth) / SCREENWIDTH) << FRACBITS) / ORIGINALHEIGHT;
 //    pspriteiscale = FixedDiv(FRACUNIT, pspritexscale);
-    pspritescale = FRACUNIT*viewwidth/ORIGWIDTH;      // CHANGED FOR HIRES
-    pspriteiscale = FRACUNIT*ORIGWIDTH/viewwidth;     // CHANGED FOR HIRES
+    pspritescale = FRACUNIT*viewwidth/ORIGINALWIDTH;      // CHANGED FOR HIRES
+    pspriteiscale = FRACUNIT*ORIGINALWIDTH/viewwidth;     // CHANGED FOR HIRES
 
     // thing clipping
     for (i = 0; i < viewwidth; i++)

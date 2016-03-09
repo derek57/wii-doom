@@ -224,6 +224,7 @@ extern int      viewheight2;
 extern int      correct_lost_soul_bounce;
 extern int      oldscreenblocks;
 extern int      oldscreenSize;
+extern int      png_screenshots;
 
 extern dboolean merge;
 extern dboolean BorderNeedRefresh;
@@ -394,7 +395,7 @@ void D_Display(int scrn)
                 AM_Drawer();
             }
 
-            if (wipe || (scaledviewheight != (ORIGWIDTH << hires) && fullscreen) ||
+            if (wipe || (scaledviewheight != (ORIGINALWIDTH << hires) && fullscreen) ||
                 disk_indicator == disk_dirty || (automapactive && screenSize < 8))
             {
                 redrawsbar = true;
@@ -406,9 +407,9 @@ void D_Display(int scrn)
                 redrawsbar = true;
             }
 
-            ST_Drawer(scaledviewheight == (ORIGWIDTH << hires), redrawsbar);
+            ST_Drawer(scaledviewheight == (ORIGINALWIDTH << hires), redrawsbar);
 
-            fullscreen = scaledviewheight == (ORIGWIDTH << hires);
+            fullscreen = scaledviewheight == (ORIGINALWIDTH << hires);
             break;
 
         case GS_INTERMISSION:
@@ -588,12 +589,12 @@ void D_Display(int scrn)
         {
             if (font_shadow == 1)
             {
-                V_DrawPatchWithShadow((ORIGWIDTH - SHORT(patch->width)) / 2,
+                V_DrawPatchWithShadow((ORIGINALWIDTH - SHORT(patch->width)) / 2,
                         viewwindowy / 2 + (viewheight / 2 - SHORT(patch->height)) / 2, 0, patch, false);
             }
             else
             {
-                V_DrawPatch((ORIGWIDTH - SHORT(patch->width)) / 2,
+                V_DrawPatch((ORIGINALWIDTH - SHORT(patch->width)) / 2,
                         viewwindowy / 2 + (viewheight / 2 - SHORT(patch->height)) / 2, 0, patch);
             }
         }
@@ -788,6 +789,8 @@ void D_DoomLoop(void)
         {
             I_SDL_PollMusic();
         }
+
+        snd_channels = sound_channels;
 
         // frame syncronous IO operations
         I_StartFrame();
@@ -1923,10 +1926,10 @@ void D_DoomMain(void)
         snd_musicdevice = SNDDEVICE_GUS;
     }
 
-    snd_channels = sound_channels;
-
     if (beta_style_mode)
     {
+        musicVolume = 8;
+        sfxVolume = 8;
         showMessages = 1;        
         drawgrid = 0;
         followplayer = 1;
@@ -1962,7 +1965,11 @@ void D_DoomMain(void)
         screenSize = 7;
         usegamma = 10;
         mouseSensitivity = 5;
+        r_bloodsplats_max = 32768;
+        correct_lost_soul_bounce = true;
+        dots_enabled = 0;
 
+        display_ticker = false;
         am_overlay = false;
         nerve_pwad = false;
         master_pwad = false;
@@ -2019,10 +2026,10 @@ void D_DoomMain(void)
         corpses_smearblood = false;
         show_diskicon = true;
         randomly_colored_playercorpses = false;
-        mousewalk = false;
+        mousewalk = true;
         am_rotate = false;
         jumping = false;
-        general_sound = true;
+        general_sound = false;
         lowhealth = false;
         d_fixwiggle = false;
         d_centerweapon = false;
@@ -2030,6 +2037,25 @@ void D_DoomMain(void)
         d_statusmap = true;
         show_title = false;
         render_mode = 2;
+        d_drawparticles = false;
+        d_drawbfgcloud = false;
+        d_drawrockettrails = false;
+        d_drawrocketexplosions = false;
+        d_drawbfgexplosions = false;
+        d_spawnflies = false;
+        d_dripblood = false;
+        d_vsync = false;
+        particle_sounds = false;
+        bloodsplat_particle = 0;
+        bulletpuff_particle = 0;
+        teleport_particle = 0;
+        aiming_help = false;
+        d_spawnteleglit = 0;
+        png_screenshots = false;
+        opl_stereo_correct = false;
+        randompitch = false;
+        hud = false;
+        remove_slime_trails = false;
 
         beta_style = true;
     }
