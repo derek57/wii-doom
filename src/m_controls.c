@@ -320,6 +320,7 @@ void M_BindBaseControls(void)
     M_BindVariable("map_color_player",         &mapcolor_plyr);
     M_BindVariable("map_gridsize",             &map_grid_size);
     M_BindVariable("map_secrets_after",        &map_secret_after);
+    M_BindVariable("use_autosave",             &enable_autosave);
 #ifdef WII
     M_BindVariable("key_shoot",                &joy_r);
     M_BindVariable("key_open",                 &joy_l);

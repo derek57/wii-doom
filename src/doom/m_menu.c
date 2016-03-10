@@ -108,10 +108,9 @@
 #define MOUSE_LEFTBUTTON                    1
 #define MOUSE_RIGHTBUTTON                   2
 
+
 void    (*messageRoutine)  (int response);
 
-static int credits_start_time;
-//static char **credits;
 
 static const char *credits[] =
 {
@@ -1145,100 +1144,254 @@ char *stupidtable2[] =
     "6","7","8","9","0"
 };
 
-char *Key2String (int ch)
+char *Key2String(int ch)
 {
-// S.A.: return "[" or "]" or "\"" doesn't work
-// because there are no lumps for these chars,
-// therefore we have to go with "RIGHT BRACKET"
-// and similar for much punctuation.  Probably
-// won't work with international keyboards and
-// dead keys, either.
-//
+    // S.A.: return "[" or "]" or "\"" doesn't work
+    // because there are no lumps for these chars,
+    // therefore we have to go with "RIGHT BRACKET"
+    // and similar for much punctuation.  Probably
+    // won't work with international keyboards and
+    // dead keys, either.
+
     switch (ch)
     {
 #ifdef WII
-        case CLASSIC_CONTROLLER_UP:       return "UP ARROW";
-        case CLASSIC_CONTROLLER_DOWN:     return "DOWN ARROW";
-        case CLASSIC_CONTROLLER_LEFT:     return "LEFT ARROW";
-        case CLASSIC_CONTROLLER_RIGHT:    return "RIGHT ARROW";
-        case CLASSIC_CONTROLLER_MINUS:    return "MINUS";
-        case CLASSIC_CONTROLLER_PLUS:     return "PLUS";
-        case CLASSIC_CONTROLLER_HOME:     return "HOME";
-        case CLASSIC_CONTROLLER_A:        return "A";
-        case CLASSIC_CONTROLLER_B:        return "B";
-        case CLASSIC_CONTROLLER_X:        return "X";
-        case CLASSIC_CONTROLLER_Y:        return "Y";
-        case CLASSIC_CONTROLLER_ZL:       return "ZL";
-        case CLASSIC_CONTROLLER_ZR:       return "ZR";
-        case CLASSIC_CONTROLLER_L:        return "LEFT TRIGGER";
-        case CLASSIC_CONTROLLER_R:        return "RIGHT TRIGGER";
-        case CONTROLLER_1:                return "1";
-        case CONTROLLER_2:                return "2";
+        case CLASSIC_CONTROLLER_UP:
+            return "UP ARROW";
+
+        case CLASSIC_CONTROLLER_DOWN:
+            return "DOWN ARROW";
+
+        case CLASSIC_CONTROLLER_LEFT:
+            return "LEFT ARROW";
+
+        case CLASSIC_CONTROLLER_RIGHT:
+            return "RIGHT ARROW";
+
+        case CLASSIC_CONTROLLER_MINUS:
+            return "MINUS";
+
+        case CLASSIC_CONTROLLER_PLUS:
+            return "PLUS";
+
+        case CLASSIC_CONTROLLER_HOME:
+            return "HOME";
+
+        case CLASSIC_CONTROLLER_A:
+            return "A";
+
+        case CLASSIC_CONTROLLER_B:
+            return "B";
+
+        case CLASSIC_CONTROLLER_X:
+            return "X";
+
+        case CLASSIC_CONTROLLER_Y:
+            return "Y";
+
+        case CLASSIC_CONTROLLER_ZL:
+            return "ZL";
+
+        case CLASSIC_CONTROLLER_ZR:
+            return "ZR";
+
+        case CLASSIC_CONTROLLER_L:
+            return "LEFT TRIGGER";
+
+        case CLASSIC_CONTROLLER_R:
+            return "RIGHT TRIGGER";
+
+        case CONTROLLER_1:
+            return "1";
+
+        case CONTROLLER_2:
+            return "2";
 #else
-        case KEYP_MULTIPLY:        return "*";
-        case KEY_PRTSCR:        return "PRINT SCREEN";
-        case KEY_SCRLCK:        return "SCREENLOCK";
-        case KEY_NUMLOCK:        return "NUMLOCK";
-        case KEY_CAPSLOCK:        return "CAPSLOCK";
-        case KEY_LEFTBRACKET:        return "LEFT BRACKET";
-        case KEY_RIGHTBRACKET:        return "RIGHT BRACKET";
+        case KEYP_MULTIPLY:
+            return "*";
+
+        case KEY_PRTSCR:
+            return "PRINT SCREEN";
+
+        case KEY_SCRLCK:
+            return "SCREENLOCK";
+
+        case KEY_NUMLOCK:
+            return "NUMLOCK";
+
+        case KEY_CAPSLOCK:
+            return "CAPSLOCK";
+
+        case KEY_LEFTBRACKET:
+            return "LEFT BRACKET";
+
+        case KEY_RIGHTBRACKET:
+            return "RIGHT BRACKET";
+
 #ifndef SDL2
-        case KEY_BACKQUOTE:        return "BACK QUOTE";
+        case KEY_BACKQUOTE:
+            return "BACK QUOTE";
 #endif
-        case KEY_QUOTE:                return "'";
-        case KEY_QUOTEDBL:        return "DOUBLE QUOTE";
-        case KEY_SEMICOLON:        return ";";
-        case KEY_MINUS:                return "-";
-        case KEYP_PLUS:                return "+";
-        case KEY_PERIOD:        return ".";
-        case KEY_COMMA:                return ",";
-        case '/':                return "/";
-        case KEY_BACKSLASH:        return "BACKSLASH";
-        case KEY_TAB:                return "TAB";
-        case KEY_EQUALS:        return "=";
-        case KEY_ESCAPE:        return "ESCAPE";
-        case KEY_RIGHTARROW:        return "RIGHT ARROW";
-        case KEY_LEFTARROW:        return "LEFT ARROW";
-        case KEY_DOWNARROW:        return "DOWN ARROW";
-        case KEY_UPARROW:        return "UP ARROW";
-        case KEY_ENTER:                return "ENTER";
-        case KEY_PGUP:                return "PAGE UP";
-        case KEY_PGDN:                return "PAGE DOWN";
-        case KEY_INS:                return "INSERT";
-        case KEY_HOME:                return "HOME";
-        case KEY_END:                return "END";
-        case KEY_DEL:                return "DELETE";
-        case KEY_F12:                return "F12";
-        case KEY_TILDE:                return "TILDE";
-        case ' ':                return "SPACE";
-        case KEY_RSHIFT:        return "SHIFT";
-        case KEY_RALT:                return "ALT";
-        case KEY_RCTRL:                return "CTRL";
-        case '1':                return "1";
-        case '2':                return "2";
-        case '3':                return "3";
-        case '4':                return "4";
-        case '5':                return "5";
-        case '6':                return "6";
-        case '7':                return "7";
-        case '8':                return "8";
-        case '9':                return "9";
-        case '0':                return "0";
-        case KEY_F1:                return "F1";
-        case KEY_F2:                return "F2";
-        case KEY_F3:                return "F3";
-        case KEY_F4:                return "F4";
-        case KEY_F5:                return "F5";
-        case KEY_F6:                return "F6";
-        case KEY_F7:                return "F7";
-        case KEY_F8:                return "F8";
-        case KEY_F9:                return "F9";
-        case KEY_F10:                return "F10";
-        case KEY_F11:                return "F11";
-/*                                                        // FIXME: NOT YET WORKING (MOUSE BINDINGS)
-        case 0x01:                return "MOUSE BTN LEFT";
-        case 0x02:                return "MOUSE BTN RIGHT";
-        case 0x04:                return "MOUSE BTN MIDDLE";
+
+        case KEY_QUOTE:
+            return "'";
+
+        case KEY_QUOTEDBL:
+            return "DOUBLE QUOTE";
+
+        case KEY_SEMICOLON:
+            return ";";
+
+        case KEY_MINUS:
+            return "-";
+
+        case KEYP_PLUS:
+            return "+";
+
+        case KEY_PERIOD:
+            return ".";
+
+        case KEY_COMMA:
+            return ",";
+
+        case '/':
+            return "/";
+
+        case KEY_BACKSLASH:
+            return "BACKSLASH";
+
+        case KEY_TAB:
+            return "TAB";
+
+        case KEY_EQUALS:
+            return "=";
+
+        case KEY_ESCAPE:
+            return "ESCAPE";
+
+        case KEY_RIGHTARROW:
+            return "RIGHT ARROW";
+
+        case KEY_LEFTARROW:
+            return "LEFT ARROW";
+
+        case KEY_DOWNARROW:
+            return "DOWN ARROW";
+
+        case KEY_UPARROW:
+            return "UP ARROW";
+
+        case KEY_ENTER:
+            return "ENTER";
+
+        case KEY_PGUP:
+            return "PAGE UP";
+
+        case KEY_PGDN:
+            return "PAGE DOWN";
+
+        case KEY_INS:
+            return "INSERT";
+
+        case KEY_HOME:
+            return "HOME";
+
+        case KEY_END:
+            return "END";
+
+        case KEY_DEL:
+            return "DELETE";
+
+        case KEY_F12:
+            return "F12";
+
+        case KEY_TILDE:
+            return "TILDE";
+
+        case ' ':
+            return "SPACE";
+
+        case KEY_RSHIFT:
+            return "SHIFT";
+
+        case KEY_RALT:
+            return "ALT";
+
+        case KEY_RCTRL:
+            return "CTRL";
+
+        case '1':
+            return "1";
+
+        case '2':
+            return "2";
+
+        case '3':
+            return "3";
+
+        case '4':
+            return "4";
+
+        case '5':
+            return "5";
+
+        case '6':
+            return "6";
+
+        case '7':
+            return "7";
+
+        case '8':
+            return "8";
+
+        case '9':
+            return "9";
+
+        case '0':
+            return "0";
+
+        case KEY_F1:
+            return "F1";
+
+        case KEY_F2:
+            return "F2";
+
+        case KEY_F3:
+            return "F3";
+
+        case KEY_F4:
+            return "F4";
+
+        case KEY_F5:
+            return "F5";
+
+        case KEY_F6:
+            return "F6";
+
+        case KEY_F7:
+            return "F7";
+
+        case KEY_F8:
+            return "F8";
+
+        case KEY_F9:
+            return "F9";
+
+        case KEY_F10:
+            return "F10";
+
+        case KEY_F11:
+            return "F11";
+/*
+        // FIXME: NOT YET WORKING (MOUSE BINDINGS)
+        case 0x01:
+            return "MOUSE BTN LEFT";
+
+        case 0x02:
+            return "MOUSE BTN RIGHT";
+
+        case 0x04:
+            return "MOUSE BTN MIDDLE";
 */
 #endif
     }
@@ -1247,21 +1400,21 @@ char *Key2String (int ch)
     // S.A.: could also be done with toupper
     if (ch >= 'a' && ch <= 'z')
         return stupidtable[(ch - 'a')];
+
 #ifndef WII
-    else if(ch >= '1' && ch <= '0')
+    else if (ch >= '1' && ch <= '0')
         return stupidtable2[(ch - '1')];
     else
-        return "?";                // Everything else
+        // Everything else
+        return "?";
 #endif
-    return "?";                // Everything else
+
+    // Everything else
+    return "?";
 }
 
 char                       savegamestrings[10][SAVESTRINGSIZE];
 char                       endstring[160];
-/*
-char                       detailNames[2][9] = {"M_GDHIGH","M_GDLOW"};
-char                       msgNames[2][9]    = {"M_MSGOFF","M_MSGON"};
-*/
 char                       coordinates_ang_textbuffer[50];
 char                       coordinates_x_textbuffer[50];
 char                       coordinates_y_textbuffer[50];
@@ -1302,8 +1455,10 @@ char                       *messageString;
 
 // graphic name of skulls
 // warning: initializer-string for array of chars is too long
-//char                       *skullName[2]      = {"M_SKULL1","M_SKULL2"};
-char                       *skullNameSmall[2] = {"M_SKULL3","M_SKULL4"};
+char                       *skullNameSmall[2] = {
+    "M_SKULL3",
+    "M_SKULL4"
+};
 
  // 1 = message to be printed
 int                        messageToPrint;
@@ -1315,19 +1470,23 @@ int                        messageLastMenuActive;
 
 // we are going to be entering a savegame string
 int                        saveStringEnter;              
-int                        saveSlot;             // which slot to save in
-int                        saveCharIndex;        // which char we're editing
+
+// which slot to save in
+int                        saveSlot;
+
+// which char we're editing
+int                        saveCharIndex;
 
 int                        map = 1;
 int                        cheeting;
 int                        coordinates_info = 0;
 int                        version_info = 0;
 #ifdef WII
-int                        key_controls_start_in_cfg_at_pos = 148;
-int                        key_controls_end_in_cfg_at_pos = 162;
-#else
-int                        key_controls_start_in_cfg_at_pos = 147;
+int                        key_controls_start_in_cfg_at_pos = 149;
 int                        key_controls_end_in_cfg_at_pos = 163;
+#else
+int                        key_controls_start_in_cfg_at_pos = 148;
+int                        key_controls_end_in_cfg_at_pos = 164;
 #endif
 int                        tracknum = 1;
 int                        epi = 1;
@@ -1360,9 +1519,14 @@ float                      r_gamma = 0.75;
 // MENU TYPEDEFS
 //
 
-short                      itemOn;                  // menu item skull is on
-short                      skullAnimCounter;        // skull animation counter
-short                      whichSkull;              // which skull to draw
+// menu item skull is on
+short                      itemOn;
+
+// skull animation counter
+short                      skullAnimCounter;
+
+// which skull to draw
+short                      whichSkull;
 
 // timed message = no input from user
 dboolean                   messageNeedsInput;
@@ -1419,7 +1583,9 @@ static dboolean            askforkey = false;
 static dboolean            opldev;
 static dboolean            draw_ended;
 
-static int                 FirstKey = 0;           // SPECIAL MENU FUNCTIONS (ITEMCOUNT)
+// SPECIAL MENU FUNCTIONS (ITEMCOUNT)
+static int                 FirstKey = 0;
+
 static int                 keyaskedfor;
 static int                 firewidth = 64;
 static int                 fireheight = 79;
@@ -1429,6 +1595,7 @@ static int                 firexfac = 2;
 static int                 fireyfac = 2;
 static int                 firexc = 0;
 static int                 fireyc = 39;
+static int                 credits_start_time;
 
 extern char                *d_lowpixelsize;
 
@@ -1438,13 +1605,15 @@ extern int                 dots_enabled;
 extern int                 dont_show;
 extern int                 correct_lost_soul_bounce;
 extern int                 png_screenshots;
-//extern int                 st_palette;
 
-extern default_t           doom_defaults_list[];   // KEY BINDINGS
+// KEY BINDINGS
+extern default_t           doom_defaults_list[];
 
-//extern dboolean            overlay_trigger;
 extern dboolean            message_dontfuckwithme;
-extern dboolean            chat_on;                // in heads-up code
+
+// in heads-up code
+extern dboolean            chat_on;
+
 extern dboolean            BorderNeedRefresh;
 extern dboolean            sendpause;
 extern dboolean            secret_1;
@@ -1457,7 +1626,7 @@ extern dboolean            wipe;
 
 extern short               songlist[148];
 
-extern char*               demoname;
+extern char                *demoname;
 
 extern void                A_PainDie(mobj_t *actor);
 
@@ -1522,20 +1691,10 @@ void M_DrawSound(void);
 void M_DrawLoad(void);
 void M_DrawSave(void);
 
-void M_DrawSaveLoadBorder(int x,int y);
+void M_DrawSaveLoadBorder(int x, int y);
 void M_SetupNextMenu(menu_t *menudef);
-void M_DrawThermoSmall(int x,int y,int thermWidth,int thermDot);
-/*
-void M_DrawThermo(int x,int y,int thermWidth,int thermDot);
-void M_DrawEmptyCell(menu_t *menu,int item);
-void M_DrawSelCell(menu_t *menu,int item);
-void M_WriteText(int x, int y, char *string);
-*/
-void M_StartMessage(char *string,void *routine,dboolean input);
-/*
-/void M_StopMessage(void);
-void M_ClearMenus (void);
-*/
+void M_DrawThermoSmall(int x, int y, int thermWidth, int thermDot);
+void M_StartMessage(char *string, void *routine, dboolean input);
 
 void M_MusicType(int choice);
 void M_SoundType(int choice);
@@ -1547,14 +1706,13 @@ void M_RestartSong(int choice);
 void M_OPLDev(int choice);
 void M_SoundChannels(int choice);
 void M_GameFiles(int choice);
-//void M_Brightness(int choice);
 void M_ChangeGamma(int choice);
 void M_Freelook(int choice);
 void M_FreelookSpeed(int choice);
 
-void M_KeyBindingsClearControls (int ch);
-void M_KeyBindingsClearAll (int choice);
-void M_KeyBindingsReset (int choice);
+void M_KeyBindingsClearControls(int ch);
+void M_KeyBindingsClearAll(int choice);
+void M_KeyBindingsReset(int choice);
 void M_KeyBindingsSetKey(int choice);
 void M_KeyBindings(int choice);
 void M_FPS(int choice);
@@ -1568,6 +1726,7 @@ void M_MapSecretAfter(int choice);
 void M_Version(int choice);
 void M_SoundInfo(int choice);
 void M_HUD(int choice);
+void M_Autosave(int choice);
 void M_MapColor_Back(int choice);
 void M_MapColor_Grid(int choice);
 void M_MapColor_Wall(int choice);
@@ -1591,7 +1750,8 @@ void M_MapColor_Enemy(int choice);
 void M_MapColor_Crosshair(int choice);
 void M_MapColor_Player(int choice);
 void M_MapColor_Multiplayer(int choice);
-void M_MapColor_Standard(int choice);
+void M_MapColor_Standard_DOSDoom(int choice);
+void M_MapColor_Standard_PRBoom(int choice);
 void M_MapGrid(int choice);
 void M_MapGridSize(int choice);
 void M_WeaponChange(int choice);
@@ -1708,8 +1868,6 @@ void M_Armor(int choice);
 void M_ArmorA(int choice);
 void M_ArmorB(int choice);
 void M_ArmorC(int choice);
-//void M_Weapons(int choice);
-//void M_Items(int choice);
 void M_Massacre(int choice);
 void M_Screen(int choice);
 void M_FPSCounter(int choice);
@@ -1784,13 +1942,12 @@ enum
 
 static menuitem_t MainGameMenu[]=
 {
-    {1,"New Game",M_NewGame,'n'},
-    {1,"Options",M_Options,'o'},
-    {1,"Game Files",M_GameFiles,'f'},
-    // Another hickup with Special edition.
-    {1,"Credits",M_Credits,'c'},
-    {1,"Read This!",M_ReadThis,'r'},
-    {1,"Quit Game",M_QuitDOOM,'q'}
+    {1, "New Game"  , M_NewGame  , 'n'},
+    {1, "Options"   , M_Options  , 'o'},
+    {1, "Game Files", M_GameFiles, 'f'},
+    {1, "Credits"   , M_Credits  , 'c'},
+    {1, "Read This!", M_ReadThis , 'r'},
+    {1, "Quit Game" , M_QuitDOOM , 'q'}
 };
 
 static menu_t  MainDef =
@@ -1799,7 +1956,7 @@ static menu_t  MainDef =
     NULL,
     MainGameMenu,
     M_DrawMainMenu,
-    122,74,
+    122, 74,
     0
 };
 
@@ -1814,10 +1971,10 @@ enum
 
 static menuitem_t BetaMainGameMenu[]=
 {
-    {1,"Demo Map 1",M_NewGame,'1'},
-    {1,"Demo Map 2",M_NewGame,'2'},
-    {1,"Demo Map 3",M_NewGame,'3'},
-    {1,"Quit Game",M_QuitDOOM,'q'}
+    {1, "Demo Map 1", M_NewGame , '1'},
+    {1, "Demo Map 2", M_NewGame , '2'},
+    {1, "Demo Map 3", M_NewGame , '3'},
+    {1, "Quit Game" , M_QuitDOOM, 'q'}
 };
 
 static menu_t  BetaMainDef =
@@ -1826,7 +1983,7 @@ static menu_t  BetaMainDef =
     NULL,
     BetaMainGameMenu,
     M_DrawMainMenu,
-    122,74,
+    122, 74,
     0
 };
 
@@ -1844,15 +2001,15 @@ enum
 
 static menuitem_t FilesMenu[]=
 {
-    {1,"Load Game",M_LoadGame,'l'},
-    {1,"Save Game",M_SaveGame,'s'},
-    {1,"End Game",M_EndGame,'e'}
+    {1, "Load Game"  , M_LoadGame, 'l'},
+    {1, "Save Game"  , M_SaveGame, 's'},
+    {1, "End Game"   , M_EndGame , 'e'}
 #ifdef WII
     ,
-    {1,"Cheats",M_Cheats,'c'}
+    {1, "Cheats"     , M_Cheats  , 'c'}
 #endif
-/*,
-    {1,"Record Demo",M_Record,'r'}*/
+/*    ,
+    {1, "Record Demo", M_Record  , 'r'}*/
 };
 
 static menu_t  FilesDef =
@@ -1861,7 +2018,7 @@ static menu_t  FilesDef =
     &MainDef,
     FilesMenu,
     M_DrawFilesMenu,
-    122,65,
+    122, 65,
     0
 };
 
@@ -1879,10 +2036,10 @@ enum
 
 static menuitem_t EpisodeMenu[]=
 {
-    {1,"Knee-Deep in the Dead", M_Episode,'k'},
-    {1,"The Shores of Hell", M_Episode,'t'},
-    {1,"Inferno", M_Episode,'i'},
-    {1,"Thy Flesh Consumed", M_Episode,'t'}
+    {1, "Knee-Deep in the Dead", M_Episode, 'k'},
+    {1, "The Shores of Hell"   , M_Episode, 't'},
+    {1, "Inferno"              , M_Episode, 'i'},
+    {1, "Thy Flesh Consumed"   , M_Episode, 't'}
 };
 
 static menu_t  EpiDef =
@@ -1891,7 +2048,7 @@ static menu_t  EpiDef =
     &MainDef,              // previous menu
     EpisodeMenu,           // menuitem_t ->
     M_DrawEpisode,         // drawing routine ->
-    95,73,                 // x,y
+    95, 73,                // x, y
     ep1                    // lastOn
 };
 
@@ -1907,18 +2064,18 @@ enum
 
 static menuitem_t ExpansionMenu[]=
 {
-    {1,"Hell On Earth", M_Expansion,'k'},
-    {1,"No Rest For The Living", M_Expansion,'t'},
+    {1, "Hell On Earth"         , M_Expansion, 'k'},
+    {1, "No Rest For The Living", M_Expansion, 't'},
 };
 
 static menu_t  ExpDef =
 {
-    ex_end,                // # of menu items
-    &MainDef,                // previous menu
-    ExpansionMenu,        // menuitem_t ->
-    M_DrawEpisode,      // drawing routine ->
-    95,73,              // x,y
-    ex1                        // lastOn
+    ex_end,
+    &MainDef,
+    ExpansionMenu,
+    M_DrawEpisode,
+    95, 73,
+    ex1
 };
 
 //
@@ -1936,21 +2093,21 @@ enum
 
 static menuitem_t NewGameMenu[]=
 {
-    {1,"I'm too young to die.", M_ChooseSkill, 'i'},
-    {1,"Hey, not too rough.", M_ChooseSkill, 'h'},
-    {1,"",  M_ChooseSkill, 'h'},
-    {1,"Ultra-Violence.", M_ChooseSkill, 'u'},
-    {1,"Nightmare!",        M_ChooseSkill, 'n'}
+    {1, "I'm too young to die.", M_ChooseSkill, 'i'},
+    {1, "Hey, not too rough."  , M_ChooseSkill, 'h'},
+    {1, ""                     , M_ChooseSkill, 'h'},
+    {1, "Ultra-Violence."      , M_ChooseSkill, 'u'},
+    {1, "Nightmare!"           , M_ChooseSkill, 'n'}
 };
 
 static menu_t  NewDef =
 {
-    newg_end,           // # of menu items
-    &EpiDef,            // previous menu
-    NewGameMenu,        // menuitem_t ->
-    M_DrawNewGame,      // drawing routine ->
-    88,73,              // x,y
-    hurtme              // lastOn
+    newg_end,
+    &EpiDef,
+    NewGameMenu,
+    M_DrawNewGame,
+    88, 73,
+    hurtme
 };
 
 
@@ -1976,17 +2133,17 @@ enum
 
 static menuitem_t OptionsMenu[]=
 {
-    {1,"", M_Screen,'s'},
-    {1,"", M_Controls,'c'},
-    {1,"", M_Sound,'v'},
-    {1,"", M_System,'y'},
-    {1,"", M_Game,'g'},
-    {-1,"",0,'\0'},
-    {1,"", M_OptSet,'o'},
-    {1,"", M_DefSet,'r'},
-    {-1,"",0,'\0'},
-    {1,"", M_Debug,'d'},
-    {1,"", M_Test,'t'}
+    {1 , "", M_Screen  , 's' },
+    {1 , "", M_Controls, 'c' },
+    {1 , "", M_Sound   , 'v' },
+    {1 , "", M_System  , 'y' },
+    {1 , "", M_Game    , 'g' },
+    {-1, "", 0         , '\0'},
+    {1 , "", M_OptSet  , 'o' },
+    {1 , "", M_DefSet  , 'r' },
+    {-1, "", 0         , '\0'},
+    {1 , "", M_Debug   , 'd' },
+    {1 , "", M_Test    , 't' }
 };
 
 static menu_t  OptionsDef =
@@ -1995,7 +2152,7 @@ static menu_t  OptionsDef =
     &MainDef,
     OptionsMenu,
     M_DrawOptions,
-    100,47,
+    100, 47,
     0
 };
 
@@ -2010,7 +2167,7 @@ enum
 
 static menuitem_t ReadMenu1[] =
 {
-    {1,"",M_ReadThis2,0}
+    {1, "", M_ReadThis2, 0}
 };
 
 static menu_t  ReadDef1 =
@@ -2019,7 +2176,7 @@ static menu_t  ReadDef1 =
     &MainDef,
     ReadMenu1,
     M_DrawReadThis1,
-    280,185,
+    280, 185,
     0
 };
 
@@ -2031,7 +2188,7 @@ enum
 
 static menuitem_t ReadMenu2[]=
 {
-    {1,"",M_FinishReadThis,0}
+    {1, "", M_FinishReadThis, 0}
 };
 
 static menu_t  ReadDef2 =
@@ -2040,19 +2197,17 @@ static menu_t  ReadDef2 =
     &ReadDef1,
     ReadMenu2,
     M_DrawReadThis2,
-    330,175,
+    330, 175,
     0
 };
 
 enum
 {
-//    rdthsempty1,
     credits_end
 } credits_e;
 
 static menuitem_t CreditsMenu[] =
 {
-//    {1,"",M_ReadThis2,0}
 };
 
 static menu_t  CreditsDef =
@@ -2061,7 +2216,7 @@ static menu_t  CreditsDef =
     &MainDef,
     CreditsMenu,
     M_DrawCredits,
-    0,2,
+    0, 2,
     0
 };
 
@@ -2089,20 +2244,20 @@ enum
 
 static menuitem_t CheatsMenu[]=
 {
-    {2,"GOD MODE",M_God,'g'},
-    {2,"NOCLIP",M_Noclip,'n'},
-    {1,"",M_Weapons,'w'}, 
-    {1,"",M_Keys,'k'},
-    {1,"",M_Armor,'a'},
-    {1,"",M_Items,'i'},
-    {2,"AUTOMAP REVEAL:",M_Topo,'t'},
-    {2,"KILL ALL ENEMIES",M_Massacre,'m'},
-    {2,"WARP TO MAP:",M_Rift,'r'},
-    {-1,"",0,'\0'},
-    {-1,"",0,'\0'},
-    {2,"EXECUTE WARPING",M_RiftNow,'e'},
-    {-1,"",0,'\0'},
-    {2,"PLAY MUSIC TITLE:",M_Spin,'s'}
+    {2 , "GOD MODE"         , M_God     , 'g' },
+    {2 , "NOCLIP"           , M_Noclip  , 'n' },
+    {1 , ""                 , M_Weapons , 'w' }, 
+    {1 , ""                 , M_Keys    , 'k' },
+    {1 , ""                 , M_Armor   , 'a' },
+    {1 , ""                 , M_Items   , 'i' },
+    {2 , "AUTOMAP REVEAL:"  , M_Topo    , 't' },
+    {2 , "KILL ALL ENEMIES" , M_Massacre, 'm' },
+    {2 , "WARP TO MAP:"     , M_Rift    , 'r' },
+    {-1, ""                 , 0         , '\0'},
+    {-1, ""                 , 0         , '\0'},
+    {2 , "EXECUTE WARPING"  , M_RiftNow , 'e' },
+    {-1, ""                 , 0         , '\0'},
+    {2 , "PLAY MUSIC TITLE:", M_Spin    , 's' }
 };
 
 menu_t  CheatsDef =
@@ -2111,7 +2266,7 @@ menu_t  CheatsDef =
     &FilesDef,
     CheatsMenu,
     M_DrawCheats,
-    75,28,
+    75, 28,
     0
 };
 
@@ -2134,18 +2289,18 @@ enum
 
 static menuitem_t ItemsMenu[]=
 {
-    {2,"",M_ItemsA,'1'},
-    {-1,"",0,'\0'},
-    {2,"",M_ItemsC,'2'},
-    {2,"",M_ItemsD,'3'},
-    {2,"",M_ItemsE,'4'},
-    {2,"FULL HEALTH (100)",M_ItemsH,'5'},
-    {2,"",M_ItemsI,'6'},
-    {2,"",M_ItemsB,'7'},
-    {2,"",M_ItemsF,'8'},
-    {2,"",M_ItemsG,'9'},
-    {2,"",M_ItemsJ,'0'},
-    {2,"",M_ItemsK,'f'}
+    {2 , ""                 , M_ItemsA, '1' },
+    {-1, ""                 , 0       , '\0'},
+    {2 , ""                 , M_ItemsC, '2' },
+    {2 , ""                 , M_ItemsD, '3' },
+    {2 , ""                 , M_ItemsE, '4' },
+    {2 , "FULL HEALTH (100)", M_ItemsH, '5' },
+    {2 , ""                 , M_ItemsI, '6' },
+    {2 , ""                 , M_ItemsB, '7' },
+    {2 , ""                 , M_ItemsF, '8' },
+    {2 , ""                 , M_ItemsG, '9' },
+    {2 , ""                 , M_ItemsJ, '0' },
+    {2 , ""                 , M_ItemsK, 'f' }
 };
 
 static menu_t  ItemsDef =
@@ -2154,7 +2309,7 @@ static menu_t  ItemsDef =
     &CheatsDef,
     ItemsMenu,
     M_DrawItems,
-    80,52,
+    80, 52,
     0
 };
 
@@ -2173,14 +2328,14 @@ enum
 
 static menuitem_t KeysMenu[]=
 {
-    {2,"",M_KeysA,'1'},
-    {-1,"",0,'\0'},
-    {2,"BLUE KEYCARD",M_KeysB,'2'},
-    {2,"YELLOW KEYCARD",M_KeysC,'3'},
-    {2,"RED KEYCARD",M_KeysD,'4'},
-    {2,"BLUE SKULL KEY",M_KeysE,'5'},
-    {2,"YELLOW SKULL KEY",M_KeysF,'6'},
-    {2,"RED SKULL KEY",M_KeysG,'7'}
+    {2 , ""                , M_KeysA, '1' },
+    {-1, ""                , 0      , '\0'},
+    {2 , "BLUE KEYCARD"    , M_KeysB, '2' },
+    {2 , "YELLOW KEYCARD"  , M_KeysC, '3' },
+    {2 , "RED KEYCARD"     , M_KeysD, '4' },
+    {2 , "BLUE SKULL KEY"  , M_KeysE, '5' },
+    {2 , "YELLOW SKULL KEY", M_KeysF, '6' },
+    {2 , "RED SKULL KEY"   , M_KeysG, '7' }
 };
 
 static menu_t  KeysDef =
@@ -2189,7 +2344,7 @@ static menu_t  KeysDef =
     &CheatsDef,
     KeysMenu,
     M_DrawKeys,
-    80,57,
+    80, 57,
     0
 };
 
@@ -2209,15 +2364,15 @@ enum
 
 static menuitem_t WeaponsMenu[]=
 {
-    {2,"",M_WeaponsA,'1'},
-    {-1,"",0,'\0'},
-    {2,"",M_WeaponsG,'2'},
-    {2,"",M_WeaponsB,'3'},
-    {2,"",M_WeaponsC,'4'},
-    {2,"",M_WeaponsD,'5'},
-    {2,"",M_WeaponsE,'6'},
-    {2,"",M_WeaponsF,'7'},
-    {2,"",M_WeaponsH,'8'}
+    {2 , "", M_WeaponsA, '1' },
+    {-1, "", 0         , '\0'},
+    {2 , "", M_WeaponsG, '2' },
+    {2 , "", M_WeaponsB, '3' },
+    {2 , "", M_WeaponsC, '4' },
+    {2 , "", M_WeaponsD, '5' },
+    {2 , "", M_WeaponsE, '6' },
+    {2 , "", M_WeaponsF, '7' },
+    {2 , "", M_WeaponsH, '8' }
 };
 
 static menu_t  WeaponsDef =
@@ -2226,25 +2381,25 @@ static menu_t  WeaponsDef =
     &CheatsDef,
     WeaponsMenu,
     M_DrawWeapons,
-    80,57,
+    80, 57,
     0
 };
 
 enum
 {
-    Armor1,
-    Armor_empty,
-    Armor2,
-    Armor3,
+    armor1,
+    armor_empty,
+    armor2,
+    armor3,
     armor_end
 } armor_e;
 
 static menuitem_t ArmorMenu[]=
 {
-    {2,"",M_ArmorA,'1'},
-    {-1,"",0,'\0'},
-    {2,"",M_ArmorB,'2'},
-    {2,"",M_ArmorC,'3'}
+    {2 , "", M_ArmorA, '1' },
+    {-1, "", 0       , '\0'},
+    {2 , "", M_ArmorB, '2' },
+    {2 , "", M_ArmorC, '3' }
 };
 
 static menu_t  ArmorDef =
@@ -2253,7 +2408,7 @@ static menu_t  ArmorDef =
     &CheatsDef,
     ArmorMenu,
     M_DrawArmor,
-    80,57,
+    80, 57,
     0
 };
 
@@ -2279,21 +2434,21 @@ enum
 
 static menuitem_t ScreenMenu[]=
 {
-    {2,"Brightness",M_ChangeGamma,'g'},
-    {2,"Screen Size",M_SizeDisplay,'s'},
-    {2,"Quality",M_ChangeDetail,'q'},
-    {2,"Translucency",M_Translucency,'l'},
-    {2,"Wipe Type",M_WipeType,'w'},
-    {2,"Framerate",M_UncappedFramerate,'u'},
-    {2,"Screenshot Format",M_Screenshots,'x'},
-    {2,"Menu Background",M_Background,'b'},
-    {2,"Menu Font Style",M_FontShadow,'f'},
-    {2,"Show Loading Indicator",M_DiskIcon,'d'},
-    {2,"",M_IconType,'i'}
+    {2, "Brightness"              , M_ChangeGamma      , 'g'},
+    {2, "Screen Size"             , M_SizeDisplay      , 's'},
+    {2, "Quality"                 , M_ChangeDetail     , 'q'},
+    {2, "Translucency"            , M_Translucency     , 'l'},
+    {2, "Wipe Type"               , M_WipeType         , 'w'},
+    {2, "Framerate"               , M_UncappedFramerate, 'u'},
+    {2, "Screenshot Format"       , M_Screenshots      , 'x'},
+    {2, "Menu Background"         , M_Background       , 'b'},
+    {2, "Menu Font Style"         , M_FontShadow       , 'f'},
+    {2, "Show Loading Indicator"  , M_DiskIcon         , 'd'},
+    {2, ""                        , M_IconType         , 'i'}
 #ifdef SDL2
     ,
-    {2,"Render Mode",M_RenderMode,'r'},
-    {2,"Vertical Synchronization",M_VSync,'v'}
+    {2, "Render Mode"             , M_RenderMode       , 'r'},
+    {2, "Vertical Synchronization", M_VSync            , 'v'}
 #endif
 };
 
@@ -2303,7 +2458,7 @@ static menu_t  ScreenDef =
     &OptionsDef,
     ScreenMenu,
     M_DrawScreen,
-    60,35,
+    60, 35,
     0
 };
 
@@ -2322,14 +2477,14 @@ enum
 
 static menuitem_t ControlsMenu[]=
 {
-    {2,"Walking",M_WalkingSpeed,'w'},
-    {2,"Turning",M_TurningSpeed,'t'},
-    {2,"Strafing",M_StrafingSpeed,'s'},
-    {2,"",M_FreelookSpeed,'f'},
-    {2,"Freelook Mode",M_Freelook,'l'},
-    {2,"",M_ChangeSensitivity,'m'},
-    {2,"",M_MouseWalk,'n'},
-    {1,"",M_KeyBindings,'b'}
+    {2, "Walking"      , M_WalkingSpeed     , 'w'},
+    {2, "Turning"      , M_TurningSpeed     , 't'},
+    {2, "Strafing"     , M_StrafingSpeed    , 's'},
+    {2, ""             , M_FreelookSpeed    , 'f'},
+    {2, "Freelook Mode", M_Freelook         , 'l'},
+    {2, ""             , M_ChangeSensitivity, 'm'},
+    {2, ""             , M_MouseWalk        , 'n'},
+    {1, ""             , M_KeyBindings      , 'b'}
 };
 
 static menu_t  ControlsDef =
@@ -2338,7 +2493,7 @@ static menu_t  ControlsDef =
     &OptionsDef,
     ControlsMenu,
     M_DrawControls,
-    20,60,
+    20, 60,
     0
 };
 
@@ -2369,30 +2524,30 @@ enum
 
 static menuitem_t KeyBindingsMenu[]=
 {
-    {5,"FIRE",M_KeyBindingsSetKey,0},
-    {5,"USE / OPEN",M_KeyBindingsSetKey,1},
-    {5,"MAIN MENU",M_KeyBindingsSetKey,2},
-    {5,"WEAPON LEFT",M_KeyBindingsSetKey,3},
-    {5,"SHOW AUTOMAP",M_KeyBindingsSetKey,4},
-    {5,"WEAPON RIGHT",M_KeyBindingsSetKey,5},
-    {5,"AUTOMAP ZOOM IN",M_KeyBindingsSetKey,6},
-    {5,"AUTOMAP ZOOM OUT",M_KeyBindingsSetKey,7},
-    {5,"FLY UP",M_KeyBindingsSetKey,8},
-    {5,"FLY DOWN",M_KeyBindingsSetKey,9},
-    {5,"JUMP",M_KeyBindingsSetKey,'j'},
-    {5,"RUN",M_KeyBindingsSetKey,'e'},
+    {5, "FIRE"            , M_KeyBindingsSetKey  , 0 },
+    {5, "USE / OPEN"      , M_KeyBindingsSetKey  , 1 },
+    {5, "MAIN MENU"       , M_KeyBindingsSetKey  , 2 },
+    {5, "WEAPON LEFT"     , M_KeyBindingsSetKey  , 3 },
+    {5, "SHOW AUTOMAP"    , M_KeyBindingsSetKey  , 4 },
+    {5, "WEAPON RIGHT"    , M_KeyBindingsSetKey  , 5 },
+    {5, "AUTOMAP ZOOM IN" , M_KeyBindingsSetKey  , 6 },
+    {5, "AUTOMAP ZOOM OUT", M_KeyBindingsSetKey  , 7 },
+    {5, "FLY UP"          , M_KeyBindingsSetKey  , 8 },
+    {5, "FLY DOWN"        , M_KeyBindingsSetKey  , 9 },
+    {5, "JUMP"            , M_KeyBindingsSetKey  ,'j'},
+    {5, "RUN"             , M_KeyBindingsSetKey  ,'e'},
 #ifdef WII
-    {5,"CONSOLE",M_KeyBindingsSetKey,'c'},
+    {5, "CONSOLE"         , M_KeyBindingsSetKey  ,'c'},
 #else
-    {5,"",M_KeyBindingsSetKey,'c'},
+    {5, ""                , M_KeyBindingsSetKey  ,'c'},
 #endif
-    {5,"SCREENSHOTS",M_KeyBindingsSetKey,'s'},
+    {5, "SCREENSHOTS"     , M_KeyBindingsSetKey  ,'s'},
 #ifndef WII
-    {5,"STRAFE LEFT",M_KeyBindingsSetKey,'l'},
-    {5,"STRAFE RIGHT",M_KeyBindingsSetKey,'r'},
+    {5, "STRAFE LEFT"     , M_KeyBindingsSetKey  ,'l'},
+    {5, "STRAFE RIGHT"    , M_KeyBindingsSetKey  ,'r'},
 #endif
-    {5,"",M_KeyBindingsClearAll,'x'},
-    {5,"",M_KeyBindingsReset,'d'}
+    {5, ""                , M_KeyBindingsClearAll,'x'},
+    {5, ""                , M_KeyBindingsReset   ,'d'}
 };
 
 static menu_t  KeyBindingsDef =
@@ -2401,7 +2556,7 @@ static menu_t  KeyBindingsDef =
     &ControlsDef,
     KeyBindingsMenu,
     M_DrawKeyBindings,
-    45,18,
+    45, 18,
     0
 };
 
@@ -2416,10 +2571,10 @@ enum
 
 static menuitem_t SystemMenu[]=
 {
-    {2,"FPS Counter",M_FPS,'f'},
-    {2,"Display Ticker",M_DisplayTicker,'t'},
-    {2,"Hall of Mirrors Detector",M_HOMDetector,'h'},
-    {2,"Replace Missing Textures",M_ReplaceMissing,'r'}
+    {2, "FPS Counter"             , M_FPS           , 'f'},
+    {2, "Display Ticker"          , M_DisplayTicker , 't'},
+    {2, "Hall of Mirrors Detector", M_HOMDetector   , 'h'},
+    {2, "Replace Missing Textures", M_ReplaceMissing, 'r'}
 };
 
 static menu_t  SystemDef =
@@ -2428,7 +2583,7 @@ static menu_t  SystemDef =
     &OptionsDef,
     SystemMenu,
     M_DrawSystem,
-    57,85,
+    57, 85,
     0
 };
 
@@ -2447,28 +2602,26 @@ enum
     game_secrets,
     game_mapcols,
     game_respawn,
-//    game_aiming,
     game_game2,
     game_end
 } game_e;
 
 static menuitem_t GameMenu[]=
 {
-    {2,"AUTOMAP GRID",M_MapGrid,'g'},
-    {2,"AUTOMAP GRID SIZE",M_MapGridSize,'c'},
-    {2,"AUTOMAP ROTATION",M_MapRotation,'r'},
-    {2,"AUTOMAP FOLLOW MODE",M_FollowMode,'f'},
-    {2,"AUTOMAP OVERLAY",M_AutomapOverlay,'o'},
-    {2,"AUTOMAP STATUS BAR",M_StatusMap,'m'},
-    {2,"AUTOMAP STATISTICS",M_Statistics,'s'},
-    {2,"AUTOMAP TIMER",M_Timer,'t'},
-    {2,"AUTOMAP AUTHORS",M_Authors,'a'},
-    {2,"AUTOMAP MAP TITLE",M_MapName,'n'},
-    {2,"ONLY SHOW SECRETS AFTER ENTERING",M_MapSecretAfter,'h'},
-    {1,"",M_Automap,'x'},
-    {2,"RESPAWN MONSTERS",M_RespawnMonsters,'i'},
-//    {2,"",NULL,'0'},
-    {1,"",M_Game2,'2'}
+    {2, "AUTOMAP GRID"                    , M_MapGrid        , 'g'},
+    {2, "AUTOMAP GRID SIZE"               , M_MapGridSize    , 'c'},
+    {2, "AUTOMAP ROTATION"                , M_MapRotation    , 'r'},
+    {2, "AUTOMAP FOLLOW MODE"             , M_FollowMode     , 'f'},
+    {2, "AUTOMAP OVERLAY"                 , M_AutomapOverlay , 'o'},
+    {2, "AUTOMAP STATUS BAR"              , M_StatusMap      , 'm'},
+    {2, "AUTOMAP STATISTICS"              , M_Statistics     , 's'},
+    {2, "AUTOMAP TIMER"                   , M_Timer          , 't'},
+    {2, "AUTOMAP AUTHORS"                 , M_Authors        , 'a'},
+    {2, "AUTOMAP MAP TITLE"               , M_MapName        , 'n'},
+    {2, "ONLY SHOW SECRETS AFTER ENTERING", M_MapSecretAfter , 'h'},
+    {1, ""                                , M_Automap        , 'x'},
+    {2, "RESPAWN MONSTERS"                , M_RespawnMonsters, 'i'},
+    {1, ""                                , M_Game2          , '2'}
 };
 
 static menu_t  GameDef =
@@ -2477,7 +2630,7 @@ static menu_t  GameDef =
     &OptionsDef,
     GameMenu,
     M_DrawGame1,
-    23,22,
+    23, 22,
     0
 };
 
@@ -2502,24 +2655,24 @@ enum
 
 static menuitem_t GameMenu2[]=
 {
-    {2,"NO MONSTERS",M_NoMonsters,'m'},
-    {2,"FAST MONSTERS",M_FastMonsters,'e'},
-    {2,"PLAYER FOOTSTEPS",M_Footstep,'s'},
-    {2,"HERETIC FOOTCLIPS",M_Footclip,'c'},
-    {2,"HERETIC LIQUID SPLASH",M_Splash,'l'},
-    {2,"SWIRLING WATER HACK",M_Swirl,'w'},
+    {2, "NO MONSTERS"                 , M_NoMonsters    , 'm'},
+    {2, "FAST MONSTERS"               , M_FastMonsters  , 'e'},
+    {2, "PLAYER FOOTSTEPS"            , M_Footstep      , 's'},
+    {2, "HERETIC FOOTCLIPS"           , M_Footclip      , 'c'},
+    {2, "HERETIC LIQUID SPLASH"       , M_Splash        , 'l'},
+    {2, "SWIRLING WATER HACK"         , M_Swirl         , 'w'},
 #ifdef WII
-    {2,"",M_EndoomScreen,'q'},
+    {2, ""                            , M_EndoomScreen  , 'q'},
 #else
-    {2,"Show Endoom Screen on quit",M_EndoomScreen,'q'},
+    {2, "Show Endoom Screen on quit"  , M_EndoomScreen  , 'q'},
 #endif
-    {2,"RANDOMLY FLIP CORPSES & GUNS",M_Corpses,'d'},
-    {2,"SHOW REVEALED SECRETS",M_Secrets,'z'},
-    {2,"MESSAGES",M_ChangeMessages,'m'},
-    {2,"",M_ChaingunTics,'g'},
-    {2,"FALLING DAMAGE",M_FallingDamage,'f'},
-    {2,"INFINITE AMMO",M_InfiniteAmmo,'i'},
-    {1,"",M_Game3,'n'}
+    {2, "RANDOMLY FLIP CORPSES & GUNS", M_Corpses       , 'd'},
+    {2, "SHOW REVEALED SECRETS"       , M_Secrets       , 'z'},
+    {2, "MESSAGES"                    , M_ChangeMessages, 'm'},
+    {2, ""                            , M_ChaingunTics  , 'g'},
+    {2, "FALLING DAMAGE"              , M_FallingDamage , 'f'},
+    {2, "INFINITE AMMO"               , M_InfiniteAmmo  , 'i'},
+    {1, ""                            , M_Game3         , 'n'}
 };
 
 static menu_t  GameDef2 =
@@ -2528,7 +2681,7 @@ static menu_t  GameDef2 =
     &GameDef,
     GameMenu2,
     M_DrawGame2,
-    23,22,
+    23, 22,
     0
 };
 
@@ -2553,20 +2706,20 @@ enum
 
 static menuitem_t GameMenu3[]=
 {
-    {2,"CROSSHAIR",M_Crosshair,'c'},
-    {2,"AUTOAIM",M_Autoaim,'a'},
-    {2,"JUMPING",M_Jumping,'j'},
-    {2,"MORE BLOOD & GORE",M_MaxGore,'o'},
-    {2,"",M_GoreAmount,'g'},
-    {2,"Enable Colored Blood",M_ColoredBloodA,'1'},
-    {2,"Fix Monster Blood",M_ColoredBloodB,'2'},
-    {2,"",M_BloodsplatsAmount,'b'},
-    {2,"Shadows for Monsters and Items",M_Shadows,'s'},
-    {2,"Monsters can Telefrag on MAP30",M_Telefrag,'t'},
-    {2,"Monsters stuck on doortracks",M_Doorstuck,'d'},
-    {2,"ARCH-VILE can resurrect ghosts",M_ResurrectGhosts,'r'},
-    {2,"Pain-Elementals have lost soul limit",M_LimitedGhosts,'l'},
-    {1,"",M_Game4,'n'}
+    {2, "CROSSHAIR"                           , M_Crosshair        , 'c'},
+    {2, "AUTOAIM"                             , M_Autoaim          , 'a'},
+    {2, "JUMPING"                             , M_Jumping          , 'j'},
+    {2, "MORE BLOOD & GORE"                   , M_MaxGore          , 'o'},
+    {2, ""                                    , M_GoreAmount       , 'g'},
+    {2, "Enable Colored Blood"                , M_ColoredBloodA    , '1'},
+    {2, "Fix Monster Blood"                   , M_ColoredBloodB    , '2'},
+    {2, ""                                    , M_BloodsplatsAmount, 'b'},
+    {2, "Shadows for Monsters and Items"      , M_Shadows          , 's'},
+    {2, "Monsters can Telefrag on MAP30"      , M_Telefrag         , 't'},
+    {2, "Monsters stuck on doortracks"        , M_Doorstuck        , 'd'},
+    {2, "ARCH-VILE can resurrect ghosts"      , M_ResurrectGhosts  , 'r'},
+    {2, "Pain-Elementals have lost soul limit", M_LimitedGhosts    , 'l'},
+    {1, ""                                    , M_Game4            , 'n'}
 };
 
 static menu_t  GameDef3 =
@@ -2575,7 +2728,7 @@ static menu_t  GameDef3 =
     &GameDef2,
     GameMenu3,
     M_DrawGame3,
-    23,22,
+    23, 22,
     0
 };
 
@@ -2600,20 +2753,20 @@ enum
 
 static menuitem_t GameMenu4[]=
 {
-    {2,"Lost Souls get stuck behind walls",M_BlockSkulls,'w'},
-    {2,"Blazing Doors play double sound",M_BlazingDoors,'d'},
-    {2,"God mode isn't absolute",M_GodAbsolute,'i'},
-    {2,"Use Doom's floor motion behavior",M_Floor,'f'},
-    {2,"Use Doom's movement clipping code",M_Clipping,'c'},
-    {2,"Use Doom's linedef trigger model",M_Model,'m'},
-    {2,"Emulate pre-Ultimate Boss Death",M_BossDeath,'d'},
-    {2,"Lost souls don't bounce off flats",M_Bounce,'b'},
-    {2,"Two-S. middle textures don't animate",M_Masked,'a'},
-    {2,"Retain quirks in Doom's sound code",M_Quirk,'s'},
-    {2,"Use Doom's buggy ouch face code",M_Ouch,'o'},
-    {2,"Partially Fullbright Textures",M_Textures,'t'},
-    {2,"Fix Map Errors",M_FixMapErrors,'e'},
-    {1,"",M_Game5,'n'}
+    {2, "Lost Souls get stuck behind walls"   , M_BlockSkulls , 'w'},
+    {2, "Blazing Doors play double sound"     , M_BlazingDoors, 'd'},
+    {2, "God mode isn't absolute"             , M_GodAbsolute , 'i'},
+    {2, "Use Doom's floor motion behavior"    , M_Floor       , 'f'},
+    {2, "Use Doom's movement clipping code"   , M_Clipping    , 'c'},
+    {2, "Use Doom's linedef trigger model"    , M_Model       , 'm'},
+    {2, "Emulate pre-Ultimate Boss Death"     , M_BossDeath   , 'd'},
+    {2, "Lost souls don't bounce off flats"   , M_Bounce      , 'b'},
+    {2, "Two-S. middle textures don't animate", M_Masked      , 'a'},
+    {2, "Retain quirks in Doom's sound code"  , M_Quirk       , 's'},
+    {2, "Use Doom's buggy ouch face code"     , M_Ouch        , 'o'},
+    {2, "Partially Fullbright Textures"       , M_Textures    , 't'},
+    {2, "Fix Map Errors"                      , M_FixMapErrors, 'e'},
+    {1, ""                                    , M_Game5       , 'n'}
 };
 
 static menu_t  GameDef4 =
@@ -2622,7 +2775,7 @@ static menu_t  GameDef4 =
     &GameDef3,
     GameMenu4,
     M_DrawGame4,
-    23,22,
+    23, 22,
     0
 };
 
@@ -2647,20 +2800,20 @@ enum
 
 static menuitem_t GameMenu5[]=
 {
-    {2,"Alt. Lighting for Player Sprites",M_AltLighting,'l'},
-    {2,"Allow Monsters Infighting",M_Infighting,'i'},
-    {2,"Monsters Remember last enemy",M_LastEnemy,'e'},
-    {2,"Allow floating items",M_Float,'f'},
-    {2,"Animate items dropped by monsters",M_Animate,'a'},
-    {2,"Play sound crushing things to gibs",M_CrushSound,'s'},
-    {2,"Don't alert enemies when firing fist",M_NoNoise,'n'},
-    {2,"Nudge corpses when walking over",M_NudgeCorpses,'c'},
-    {2,"Corpses slide caused by explosions",M_Slide,'x'},
-    {2,"",M_Smearblood,'b'},
-    {2,"Randomly colored player corpses",M_ColoredCorpses,'r'},
-    {2,"Player walks slower if health < 15%",M_LowHealth,'h'},
-    {2,"Fix Sprite Offsets",M_Offsets,'x'},
-    {1,"",M_Game6,'6'}
+    {2, "Alt. Lighting for Player Sprites"    , M_AltLighting   , 'l'},
+    {2, "Allow Monsters Infighting"           , M_Infighting    , 'i'},
+    {2, "Monsters Remember last enemy"        , M_LastEnemy     , 'e'},
+    {2, "Allow floating items"                , M_Float         , 'f'},
+    {2, "Animate items dropped by monsters"   , M_Animate       , 'a'},
+    {2, "Play sound crushing things to gibs"  , M_CrushSound    , 's'},
+    {2, "Don't alert enemies when firing fist", M_NoNoise       , 'n'},
+    {2, "Nudge corpses when walking over"     , M_NudgeCorpses  , 'c'},
+    {2, "Corpses slide caused by explosions"  , M_Slide         , 'x'},
+    {2, ""                                    , M_Smearblood    , 'b'},
+    {2, "Randomly colored player corpses"     , M_ColoredCorpses, 'r'},
+    {2, "Player walks slower if health < 15%" , M_LowHealth     , 'h'},
+    {2, "Fix Sprite Offsets"                  , M_Offsets       , 'x'},
+    {1, ""                                    , M_Game6         , '6'}
 };
 
 static menu_t  GameDef5 =
@@ -2669,7 +2822,7 @@ static menu_t  GameDef5 =
     &GameDef4,
     GameMenu5,
     M_DrawGame5,
-    23,22,
+    23, 22,
     0
 };
 
@@ -2694,20 +2847,20 @@ enum
 
 static menuitem_t GameMenu6[]=
 {
-    {2,"Center Weapon when firing",M_CenterWeapon,'w'},
-    {2,"",M_EjectCasings,'e'},
-    {2,"Draw Particles",M_Particles,'a'},
-    {2,"",M_BloodType,'b'},
-    {2,"",M_BulletType,'c'},
-    {2,"",M_TeleportType,'w'},
-    {2,"",M_BFGCloud,'x'},
-    {2,"",M_BFGExplosions,'y'},
-    {2,"",M_RocketParticles,'r'},
-    {2,"",M_RocketExplosions,'s'},
-    {2,"",M_SpawnFlies,'f'},
-    {2,"",M_DripBlood,'d'},
-    {2,"",M_ParticleSounds,'p'},
-    {1,"",M_Game7,'7'}
+    {2, "Center Weapon when firing", M_CenterWeapon    , 'w'},
+    {2, ""                         , M_EjectCasings    , 'e'},
+    {2, "Draw Particles"           , M_Particles       , 'a'},
+    {2, ""                         , M_BloodType       , 'b'},
+    {2, ""                         , M_BulletType      , 'c'},
+    {2, ""                         , M_TeleportType    , 'w'},
+    {2, ""                         , M_BFGCloud        , 'x'},
+    {2, ""                         , M_BFGExplosions   , 'y'},
+    {2, ""                         , M_RocketParticles , 'r'},
+    {2, ""                         , M_RocketExplosions, 's'},
+    {2, ""                         , M_SpawnFlies      , 'f'},
+    {2, ""                         , M_DripBlood       , 'd'},
+    {2, ""                         , M_ParticleSounds  , 'p'},
+    {1, ""                         , M_Game7           , '7'}
 };
 
 static menu_t  GameDef6 =
@@ -2716,7 +2869,7 @@ static menu_t  GameDef6 =
     &GameDef5,
     GameMenu6,
     M_DrawGame6,
-    23,22,
+    23, 22,
     0
 };
 
@@ -2731,6 +2884,7 @@ enum
     game7_weapon,
     game7_recoil,
     game7_hud,
+    game7_autosave,
 #ifdef WII
     game7_prbeta,
 #endif
@@ -2739,18 +2893,19 @@ enum
 
 static menuitem_t GameMenu7[]=
 {
-    {2,"ROCKET SMOKE-TRAILS",M_Trails,'t'},
-    {2,"Fix Wiggle Effect",M_FixWiggle,'w'},
-    {2,"Remove Slime Trails",M_RemoveSlimeTrails,'s'},
-    {2,"",M_AimingHelp,'a'},
-    {2,"PLAYER THRUST",M_PlayerThrust,'p'},
-    {2,"Teleport Landings glitter type",M_TeleportGlitter,'g'},
-    {2,"",M_WeaponChange,'w'},
-    {2,"WEAPON RECOIL",M_WeaponRecoil,'c'},
-    {2,"FULLSCREEN HUD",M_HUD,'h'},
+    {2, "ROCKET SMOKE-TRAILS"           , M_Trails           , 't'},
+    {2, "Fix Wiggle Effect"             , M_FixWiggle        , 'w'},
+    {2, "Remove Slime Trails"           , M_RemoveSlimeTrails, 's'},
+    {2, ""                              , M_AimingHelp       , 'a'},
+    {2, "PLAYER THRUST"                 , M_PlayerThrust     , 'p'},
+    {2, "Teleport Landings glitter type", M_TeleportGlitter  , 'g'},
+    {2, ""                              , M_WeaponChange     , 'w'},
+    {2, "WEAPON RECOIL"                 , M_WeaponRecoil     , 'c'},
+    {2, "FULLSCREEN HUD"                , M_HUD              , 'h'},
+    {2, "AUTOSAVE FEATURE"              , M_Autosave         , 'f'},
 #ifdef WII
     ,
-    {2,"PRE-RELEASE BETA MODE",M_Beta,'b'}
+    {2, "PRE-RELEASE BETA MODE"         , M_Beta             , 'b'}
 #endif
 };
 
@@ -2760,7 +2915,7 @@ static menu_t  GameDef7 =
     &GameDef6,
     GameMenu7,
     M_DrawGame7,
-    23,22,
+    23, 22,
     0
 };
 
@@ -2789,36 +2944,38 @@ enum
     amap_color_hair,
     amap_color_sngl,
     amap_color_plyr,
-    amap_color_reset,
+    amap_color_reset_dos,
+    amap_color_reset_prboom,
     amap_end
 } amap_e;
 
 static menuitem_t AutomapMenu[]=
 {
-    {2,"map Background",M_MapColor_Back,'\0'},
-    {2,"Grid lines",M_MapColor_Grid,'\0'},
-    {2,"normal 1-sided wall",M_MapColor_Wall,'\0'},
-    {2,"line at floor height change",M_MapColor_FCHG,'\0'},
-    {2,"line at Ceiling height change",M_MapColor_CCHG,'\0'},
-    {2,"line at Sector with floor = ceiling",M_MapColor_CLSD,'\0'},
-    {2,"Red Key",M_MapColor_RKey,'\0'},
-    {2,"Blue Key",M_MapColor_BKey,'\0'},
-    {2,"Yellow Key",M_MapColor_YKey,'\0'},
-    {2,"Red Door",M_MapColor_RDoor,'\0'},
-    {2,"Blue Door",M_MapColor_BDoor,'\0'},
-    {2,"Yellow Door",M_MapColor_YDoor,'\0'},
-    {2,"Teleporter Line",M_MapColor_Teleport,'\0'},
-    {2,"Secret sector boundary",M_MapColor_Secret,'\0'},
-    {2,"Exit line",M_MapColor_Exit,'\0'},
-    {2,"computer map unseen line",M_MapColor_Unseen,'\0'},
-    {2,"line with no floor / ceiling changes",M_MapColor_Flat,'\0'},
-    {2,"general sprite",M_MapColor_Sprite,'\0'},
-    {2,"item sprite",M_MapColor_Item,'\0'},
-    {2,"enemy sprite",M_MapColor_Enemy,'\0'},
-    {2,"crosshair",M_MapColor_Crosshair,'\0'},
-    {2,"single player arrow",M_MapColor_Player,'\0'},
-    {2,"player arrows in multiplayer",M_MapColor_Multiplayer,'\0'},
-    {2,"",M_MapColor_Standard,'\0'}
+    {2, "map Background"                      , M_MapColor_Back            , '\0'},
+    {2, "Grid lines"                          , M_MapColor_Grid            , '\0'},
+    {2, "normal 1-sided wall"                 , M_MapColor_Wall            , '\0'},
+    {2, "line at floor height change"         , M_MapColor_FCHG            , '\0'},
+    {2, "line at Ceiling height change"       , M_MapColor_CCHG            , '\0'},
+    {2, "line at Sector with floor = ceiling" , M_MapColor_CLSD            , '\0'},
+    {2, "Red Key"                             , M_MapColor_RKey            , '\0'},
+    {2, "Blue Key"                            , M_MapColor_BKey            , '\0'},
+    {2, "Yellow Key"                          , M_MapColor_YKey            , '\0'},
+    {2, "Red Door"                            , M_MapColor_RDoor           , '\0'},
+    {2, "Blue Door"                           , M_MapColor_BDoor           , '\0'},
+    {2, "Yellow Door"                         , M_MapColor_YDoor           , '\0'},
+    {2, "Teleporter Line"                     , M_MapColor_Teleport        , '\0'},
+    {2, "Secret sector boundary"              , M_MapColor_Secret          , '\0'},
+    {2, "Exit line"                           , M_MapColor_Exit            , '\0'},
+    {2, "computer map unseen line"            , M_MapColor_Unseen          , '\0'},
+    {2, "line with no floor / ceiling changes", M_MapColor_Flat            , '\0'},
+    {2, "general sprite"                      , M_MapColor_Sprite          , '\0'},
+    {2, "item sprite"                         , M_MapColor_Item            , '\0'},
+    {2, "enemy sprite"                        , M_MapColor_Enemy           , '\0'},
+    {2, "crosshair"                           , M_MapColor_Crosshair       , '\0'},
+    {2, "single player arrow"                 , M_MapColor_Player          , '\0'},
+    {2, "player arrows in multiplayer"        , M_MapColor_Multiplayer     , '\0'},
+    {2, ""                                    , M_MapColor_Standard_DOSDoom, '\0'},
+    {2, ""                                    , M_MapColor_Standard_PRBoom , '\0'}
 };
 
 static menu_t  AutomapDef =
@@ -2827,7 +2984,7 @@ static menu_t  AutomapDef =
     &GameDef,
     AutomapMenu,
     M_DrawAutomap,
-    22,24,
+    22, 18,
     0
 };
 
@@ -2850,18 +3007,18 @@ enum
 
 static menuitem_t DebugMenu[]=
 {
-    {2,"Show Coordinates",M_Coordinates,'c'},
-    {2,"Show Version",M_Version,'v'},
-    {2,"Show Sound Info",M_SoundInfo,'i'},
-    {2,"Show OPL Developer Info",M_OPLDev,'o'},
-    {2,"Show Memory Usage",M_MemoryUsage,'u'},
-    {2,"Restart Current MAP-Music Track",M_RestartSong,'r'},
-    {2,"Dump current Console Output",M_ConDump,'d'},
+    {2, "Show Coordinates"               , M_Coordinates, 'c'},
+    {2, "Show Version"                   , M_Version    , 'v'},
+    {2, "Show Sound Info"                , M_SoundInfo  , 'i'},
+    {2, "Show OPL Developer Info"        , M_OPLDev     , 'o'},
+    {2, "Show Memory Usage"              , M_MemoryUsage, 'u'},
+    {2, "Restart Current MAP-Music Track", M_RestartSong, 'r'},
+    {2, "Dump current Console Output"    , M_ConDump    , 'd'},
 #ifdef HEAPDUMP
-    {2,"Dump Memory",M_MemDump,'m'},
+    {2, "Dump Memory"                    , M_MemDump    , 'm'},
 #endif
-    {2,"Dump Level Statistics",M_StatDump,'s'},
-    {2,"Print WAD contents to textfile",M_PrintDir,'p'}
+    {2, "Dump Level Statistics"          , M_StatDump   , 's'},
+    {2, "Print WAD contents to textfile" , M_PrintDir   , 'p'}
 };
 
 static menu_t  DebugDef =
@@ -2870,7 +3027,7 @@ static menu_t  DebugDef =
     &OptionsDef,
     DebugMenu,
     M_DrawDebug,
-    30,55,
+    30, 55,
     0
 };
 
@@ -2900,15 +3057,15 @@ void M_WidthHeightPitch(int choice);
 
 static menuitem_t TestMenu[]=
 {
-    {2,"Pitch",M_Pitch,'p'},
-    {2,"Width",M_Width,'w'},
-    {2,"Height",M_Height,'h'},
-    {2,"Offset",M_Offset,'o'},
-    {2,"W. + H. + P.",M_WidthHeightPitch,'+'},
-    {2,"X-Factor",M_XFac,'x'},
-    {2,"Y-Factor",M_YFac,'y'},
-    {2,"X-COORD",M_XC,'h'},
-    {2,"Y-COORD",M_YC,'v'}
+    {2, "Pitch"       , M_Pitch           , 'p'},
+    {2, "Width"       , M_Width           , 'w'},
+    {2, "Height"      , M_Height          , 'h'},
+    {2, "Offset"      , M_Offset          , 'o'},
+    {2, "W. + H. + P.", M_WidthHeightPitch, '+'},
+    {2, "X-Factor"    , M_XFac            , 'x'},
+    {2, "Y-Factor"    , M_YFac            , 'y'},
+    {2, "X-COORD"     , M_XC              , 'h'},
+    {2, "Y-COORD"     , M_YC              , 'v'}
 };
 
 static menu_t  TestDef =
@@ -2917,7 +3074,7 @@ static menu_t  TestDef =
     &OptionsDef,
     TestMenu,
     M_DrawTest,
-    30,5,
+    30, 5,
     0
 };
 
@@ -2943,18 +3100,18 @@ enum
 
 static menuitem_t SoundMenu[]=
 {
-    {2,"General Sound and Music",M_GeneralSound,'g'},
-    {2,"",M_SfxVol,'v'},
-    {2,"",M_MusicVol,'m'},
-    {2,"Music Type",M_MusicType,'t'},
-    {2,"Sound Type",M_SoundType,'s'},
-    {2,"Number of Sound Channels",M_SoundChannels,'c'},
-    {2,"Switch Left / Right Output",M_SoundOutput,'o'},
-    {2,"v1.1 Random Sound Pitch",M_SoundPitch,'p'}
+    {2, "General Sound and Music"   , M_GeneralSound        , 'g'},
+    {2, ""                          , M_SfxVol              , 'v'},
+    {2, ""                          , M_MusicVol            , 'm'},
+    {2, "Music Type"                , M_MusicType           , 't'},
+    {2, "Sound Type"                , M_SoundType           , 's'},
+    {2, "Number of Sound Channels"  , M_SoundChannels       , 'c'},
+    {2, "Switch Left / Right Output", M_SoundOutput         , 'o'},
+    {2, "v1.1 Random Sound Pitch"   , M_SoundPitch          , 'p'}
 #ifndef WII
     ,
-    {2,"Dump Substitute Config",M_DumpSubstituteConfig,'d'},
-    {2,"Libsamplerate",M_Samplerate,'r'}
+    {2, "Dump Substitute Config"    , M_DumpSubstituteConfig, 'd'},
+    {2, "Libsamplerate"             , M_Samplerate          , 'r'}
 #endif
 };
 
@@ -2964,7 +3121,7 @@ static menu_t  SoundDef =
     &OptionsDef,
     SoundMenu,
     M_DrawSound,
-    45,60,
+    45, 60,
     0
 };
 
@@ -2984,12 +3141,12 @@ enum
 
 static menuitem_t LoadMenu[]=
 {
-    {1,"", M_LoadSelect,'1'},
-    {1,"", M_LoadSelect,'2'},
-    {1,"", M_LoadSelect,'3'},
-    {1,"", M_LoadSelect,'4'},
-    {1,"", M_LoadSelect,'5'},
-    {1,"", M_LoadSelect,'6'}
+    {1, "", M_LoadSelect, '1'},
+    {1, "", M_LoadSelect, '2'},
+    {1, "", M_LoadSelect, '3'},
+    {1, "", M_LoadSelect, '4'},
+    {1, "", M_LoadSelect, '5'},
+    {1, "", M_LoadSelect, '6'}
 };
 
 static menu_t  LoadDef =
@@ -2998,7 +3155,7 @@ static menu_t  LoadDef =
     &FilesDef,
     LoadMenu,
     M_DrawLoad,
-    75,56,
+    75, 56,
     0
 };
 
@@ -3007,12 +3164,12 @@ static menu_t  LoadDef =
 //
 static menuitem_t SaveMenu[]=
 {
-    {1,"", M_SaveSelect,'1'},
-    {1,"", M_SaveSelect,'2'},
-    {1,"", M_SaveSelect,'3'},
-    {1,"", M_SaveSelect,'4'},
-    {1,"", M_SaveSelect,'5'},
-    {1,"", M_SaveSelect,'6'}
+    {1, "", M_SaveSelect, '1'},
+    {1, "", M_SaveSelect, '2'},
+    {1, "", M_SaveSelect, '3'},
+    {1, "", M_SaveSelect, '4'},
+    {1, "", M_SaveSelect, '5'},
+    {1, "", M_SaveSelect, '6'}
 };
 
 static menu_t  SaveDef =
@@ -3021,7 +3178,7 @@ static menu_t  SaveDef =
     &FilesDef,
     SaveMenu,
     M_DrawSave,
-    75,56,
+    75, 56,
     0
 };
 /*
@@ -3040,14 +3197,14 @@ enum
 
 static menuitem_t RecordMenu[]=
 {
-    {2,"Record Map:",M_RMap,'m'},
-    {-1,"",0,'\0'},
-    {-1,"",0,'\0'},
-    {2,"Choose Skill Level:",M_RSkill,'s'},
-    {-1,"",0,'\0'},
-    {-1,"",0,'\0'},
-    {2,"Longtics (DOOM.EXE v1.91)",M_RecordLong,'l'},
-    {2,"Start Recording",M_StartRecord,'r'}
+    {2 , "Record Map:"              , M_RMap       , 'm' },
+    {-1, ""                         , 0            , '\0'},
+    {-1, ""                         , 0            , '\0'},
+    {2 , "Choose Skill Level:"      , M_RSkill     , 's' },
+    {-1, ""                         , 0            , '\0'},
+    {-1, ""                         , 0            , '\0'},
+    {2 , "Longtics (DOOM.EXE v1.91)", M_RecordLong , 'l' },
+    {2 , "Start Recording"          , M_StartRecord, 'r' }
 };
 
 static menu_t  RecordDef =
@@ -3056,7 +3213,7 @@ static menu_t  RecordDef =
     &FilesDef,
     RecordMenu,
     M_DrawRecord,
-    55,60,
+    55, 60,
     0
 };
 */
@@ -3092,18 +3249,18 @@ static void BlurScreen(byte *scrn, byte *tempscreen, byte *blurscreen)
 }
 
 //
-// //M_DarkBackground
+// M_DarkBackground
 //  darken and blur background while menu is displayed
 //
 void M_DarkBackground(int scrn)
 {
-    if(background_type == 2)
+    if (background_type == 2)
     {
         int i;
 
-        if(usergame)
+        if (usergame)
         {
-            if(screenSize < 8)
+            if (screenSize < 8)
                 height = (SCREENHEIGHT - SBARHEIGHT) * SCREENWIDTH;
             else
                 height = SCREENHEIGHT * SCREENWIDTH;
@@ -3139,7 +3296,7 @@ void M_ReadSaveStrings(void)
     int     i;
     char    name[256];
 
-    for (i = 0;i < load_end;i++)
+    for (i = 0; i < load_end; i++)
     {
         FILE   *handle;
 
@@ -3158,35 +3315,34 @@ void M_ReadSaveStrings(void)
     }
 }
 
-
 //
 // M_LoadGame & Cie.
 //
 void M_DrawLoad(void)
 {
-    int             i;
+    int     i;
 
     //M_DarkBackground(0);
 
     V_DrawPatchWithShadow(72, 28, 0, W_CacheLumpName("M_T_LGME", PU_CACHE), false);
 
-    for (i = 0;i < load_end; i++)
+    for (i = 0; i < load_end; i++)
     {
-        M_DrawSaveLoadBorder(LoadDef.x+5,LoadDef.y+LINEHEIGHT_SMALL*i);
+        M_DrawSaveLoadBorder(LoadDef.x + 5, LoadDef.y + LINEHEIGHT_SMALL * i);
 
         if (!strncmp(savegamestrings[i], s_EMPTYSTRING, strlen(s_EMPTYSTRING)))
             dp_translation = crx[CRX_DARK];
 
-        M_WriteText(LoadDef.x,LoadDef.y-1+LINEHEIGHT_SMALL*i,savegamestrings[i]);
+        M_WriteText(LoadDef.x, LoadDef.y - 1 + LINEHEIGHT_SMALL * i, savegamestrings[i]);
 
     }
 
-    if(whichSkull == 1)
+    if (whichSkull == 1)
     {
         char *string = "* INDICATES A SAVEGAME THAT WAS";
         char *string2 = "CREATED USING AN OPTIONAL PWAD!";
-        int x = ORIGINALWIDTH/2 - M_StringWidth(string) / 2;
-        int x2 = ORIGINALWIDTH/2 - M_StringWidth(string2) / 2;
+        int x = ORIGINALWIDTH / 2 - M_StringWidth(string) / 2;
+        int x2 = ORIGINALWIDTH / 2 - M_StringWidth(string2) / 2;
         dp_translation = crx[CRX_GOLD];
         M_WriteText(x, LoadDef.y + 78, string);
         dp_translation = crx[CRX_GOLD];
@@ -3194,18 +3350,16 @@ void M_DrawLoad(void)
     }
 }
 
-
-
 //
 // Draw border for the savegame description
 //
-void M_DrawSaveLoadBorder(int x,int y)
+void M_DrawSaveLoadBorder(int x, int y)
 {
-    int             i;
+    int     i;
         
     V_DrawPatchWithShadow(x - 8, y + 7, 0, W_CacheLumpName("M_LSLEFT", PU_CACHE), false);
         
-    for (i = 0;i < 24;i++)
+    for (i = 0; i < 24; i++)
     {
         V_DrawPatchWithShadow(x, y + 7, 0, W_CacheLumpName("M_LSCNTR", PU_CACHE), false);
         x += 8;
@@ -3213,8 +3367,6 @@ void M_DrawSaveLoadBorder(int x,int y)
 
     V_DrawPatchWithShadow(x, y + 7, 0, W_CacheLumpName("M_LSRGHT", PU_CACHE), false);
 }
-
-
 
 //
 // User wants to load this game
@@ -3225,14 +3377,14 @@ void M_LoadSelect(int choice)
         
     M_StringCopy(name, P_SaveGameFile(choice), sizeof(name));
 
-    G_LoadGame (name);
-    M_ClearMenus ();
+    G_LoadGame(name);
+    M_ClearMenus();
 }
 
 //
 // Selected from DOOM menu
 //
-void M_LoadGame (int choice)
+void M_LoadGame(int choice)
 {
     // [crispy] forbid New Game and (Quick) Load while recording a demo
     if (demorecording)
@@ -3242,28 +3394,28 @@ void M_LoadGame (int choice)
 
     if (netgame)
     {
-        M_StartMessage(s_LOADNET,NULL,false);
+        M_StartMessage(s_LOADNET, NULL, false);
         return;
     }
     M_SetupNextMenu(&LoadDef);
     M_ReadSaveStrings();
 }
 
-
 //
 //  M_SaveGame & Cie.
 //
 void M_DrawSave(void)
 {
-    int             i;
+    int     i;
         
     //M_DarkBackground(0);
 
     V_DrawPatchWithShadow(72, 28, 0, W_CacheLumpName("M_T_SGME", PU_CACHE), false);
-    for (i = 0;i < load_end; i++)
+
+    for (i = 0; i < load_end; i++)
     {
-        M_DrawSaveLoadBorder(LoadDef.x+5,LoadDef.y+LINEHEIGHT_SMALL*i);
-        M_WriteText(LoadDef.x,LoadDef.y-1+LINEHEIGHT_SMALL*i,savegamestrings[i]);
+        M_DrawSaveLoadBorder(LoadDef.x + 5, LoadDef.y + LINEHEIGHT_SMALL * i);
+        M_WriteText(LoadDef.x, LoadDef.y - 1 + LINEHEIGHT_SMALL * i, savegamestrings[i]);
     }
         
     if (saveStringEnter)
@@ -3271,15 +3423,15 @@ void M_DrawSave(void)
         i = M_StringWidth(savegamestrings[saveSlot]);
 
         dp_translation = crx[CRX_GRAY];
-        M_WriteText(LoadDef.x + i,LoadDef.y-1+LINEHEIGHT_SMALL*saveSlot,"_");
+        M_WriteText(LoadDef.x + i, LoadDef.y - 1 + LINEHEIGHT_SMALL * saveSlot, "_");
     }
 
-    if(whichSkull == 1)
+    if (whichSkull == 1)
     {
         char *string = "* INDICATES A SAVEGAME THAT WAS";
         char *string2 = "CREATED USING AN OPTIONAL PWAD!";
-        int x = ORIGINALWIDTH/2 - M_StringWidth(string) / 2;
-        int x2 = ORIGINALWIDTH/2 - M_StringWidth(string2) / 2;
+        int x = ORIGINALWIDTH / 2 - M_StringWidth(string) / 2;
+        int x2 = ORIGINALWIDTH / 2 - M_StringWidth(string2) / 2;
         dp_translation = crx[CRX_GOLD];
         M_WriteText(x, SaveDef.y + 78, string);
         dp_translation = crx[CRX_GOLD];
@@ -3292,15 +3444,16 @@ void M_DrawSave(void)
 //
 void M_DoSave(int slot)
 {
-    if(players[consoleplayer].playerstate == PST_DEAD)
+    if (players[consoleplayer].playerstate == PST_DEAD)
     {
-        M_ClearMenus ();
-        M_StartMessage("YOU CANNOT SAVE A GAME - YOU'RE DEAD",NULL,true);
+        M_ClearMenus();
+        M_StartMessage("YOU CANNOT SAVE A GAME - YOU'RE DEAD", NULL, true);
         return;
     }
 
     G_SaveGame(slot, savegamestrings[slot], "");
-    M_ClearMenus ();
+    M_ClearMenus();
+
     // PICK QUICKSAVE SLOT YET?
     if (quickSaveSlot == -2)
         quickSaveSlot = slot;
@@ -3334,9 +3487,9 @@ void M_SaveSelect(int choice)
     hour = aTime->tm_hour;
     min = aTime->tm_min;
 
-    if(gamemode == shareware || gamemode == registered || gamemode == retail)
+    if (gamemode == shareware || gamemode == registered || gamemode == retail)
     {
-        if(modifiedgame)
+        if (modifiedgame)
             sprintf(savegamestrings[choice], "e%dm%d %d/%d/%d %2.2d:%2.2d *",
                     gameepisode, gamemap, year, month, day, hour, min);
         else
@@ -3345,27 +3498,29 @@ void M_SaveSelect(int choice)
     }
     else
     {
-        if(modifiedgame)
+        if (modifiedgame)
             sprintf(savegamestrings[choice], "map%2.2d %d/%d/%d %2.2d:%2.2d *",
                     gamemap, year, month, day, hour, min);
         else
             sprintf(savegamestrings[choice], "map%2.2d %d/%d/%d %2.2d:%2.2d",
                     gamemap, year, month, day, hour, min);
     }
-    M_StringCopy(saveOldString,savegamestrings[choice], sizeof(saveOldString));
-    if (!strcmp(savegamestrings[choice],s_EMPTYSTRING))
+    M_StringCopy(saveOldString, savegamestrings[choice], sizeof(saveOldString));
+
+    if (!strcmp(savegamestrings[choice], s_EMPTYSTRING))
         savegamestrings[choice][0] = 0;
+
     saveCharIndex = strlen(savegamestrings[choice]);
 }
 
 //
 // Selected from DOOM menu
 //
-void M_SaveGame (int choice)
+void M_SaveGame(int choice)
 {
     if (!usergame)
     {
-        M_StartMessage(s_SAVEDEAD,NULL,true);
+        M_StartMessage(s_SAVEDEAD, NULL, true);
         return;
     }
         
@@ -3386,7 +3541,7 @@ void M_QuickSaveResponse(int key)
     if (key == key_menu_confirm)
     {
         M_DoSave(quickSaveSlot);
-        S_StartSound(NULL,sfx_swtchx);
+        S_StartSound(NULL, sfx_swtchx);
     }
 }
 
@@ -3394,7 +3549,7 @@ void M_QuickSave(void)
 {
     if (!usergame)
     {
-        S_StartSound(NULL,sfx_oof);
+        S_StartSound(NULL, sfx_oof);
         return;
     }
 
@@ -3406,14 +3561,14 @@ void M_QuickSave(void)
         M_StartControlPanel();
         M_ReadSaveStrings();
         M_SetupNextMenu(&SaveDef);
-        quickSaveSlot = -2;        // means to pick a slot now
+
+        // means to pick a slot now
+        quickSaveSlot = -2;
         return;
     }
     M_snprintf(tempstring, 80, s_QSPROMPT, savegamestrings[quickSaveSlot]);
-    M_StartMessage(tempstring,M_QuickSaveResponse,true);
+    M_StartMessage(tempstring, M_QuickSaveResponse, true);
 }
-
-
 
 //
 // M_QuickLoad
@@ -3423,26 +3578,25 @@ void M_QuickLoadResponse(int key)
     if (key == key_menu_confirm)
     {
         M_LoadSelect(quickSaveSlot);
-        S_StartSound(NULL,sfx_swtchx);
+        S_StartSound(NULL, sfx_swtchx);
     }
 }
-
 
 void M_QuickLoad(void)
 {
     if (netgame)
     {
-        M_StartMessage(s_QLOADNET,NULL,false);
+        M_StartMessage(s_QLOADNET, NULL, false);
         return;
     }
         
     if (quickSaveSlot < 0)
     {
-        M_StartMessage(s_QSAVESPOT,NULL,false);
+        M_StartMessage(s_QSAVESPOT, NULL, false);
         return;
     }
     M_snprintf(tempstring, 80, s_QLPROMPT, savegamestrings[quickSaveSlot]);
-    M_StartMessage(tempstring,M_QuickLoadResponse,true);
+    M_StartMessage(tempstring, M_QuickLoadResponse, true);
 }
 
 //
@@ -3465,7 +3619,6 @@ void M_DrawReadThis1(void)
         case exe_doom_1_8:
         case exe_doom_1_9:
         case exe_hacx:
-
             if (gamemode == commercial)
             {
                 // Doom 2
@@ -3496,7 +3649,6 @@ void M_DrawReadThis1(void)
             // on Final Doom.
 
             lumpname = "HELP1";
-
             break;
 
         case exe_final:
@@ -3505,16 +3657,14 @@ void M_DrawReadThis1(void)
             // Final Doom always displays "HELP".
 
             lumpname = "HELP";
-
             break;
 
         default:
             C_Warning("Unhandled game version");
-//            I_Error("Unhandled game version");
             break;
     }
 
-    V_DrawPatch (0, 0, 0, W_CacheLumpName(lumpname, PU_CACHE));
+    V_DrawPatch(0, 0, 0, W_CacheLumpName(lumpname, PU_CACHE));
 
     if (fsize == 12361532)
         skullx = 325;
@@ -3522,8 +3672,6 @@ void M_DrawReadThis1(void)
     ReadDef1.x = skullx;
     ReadDef1.y = skully;
 }
-
-
 
 //
 // Read This Menus - optional second page.
@@ -3609,10 +3757,10 @@ void M_DrawSound(void)
 {
     //M_DarkBackground(0);
 
-    if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
-        V_DrawPatchWithShadow (65, 15, 0, W_CacheLumpName("M_T_XSET", PU_CACHE), false);
+    if (fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
+        V_DrawPatchWithShadow(65, 15, 0, W_CacheLumpName("M_T_XSET", PU_CACHE), false);
     else
-        V_DrawPatchWithShadow (65, 15, 0, W_CacheLumpName("M_SNDSET", PU_CACHE), false);
+        V_DrawPatchWithShadow(65, 15, 0, W_CacheLumpName("M_SNDSET", PU_CACHE), false);
 
     M_DrawThermoSmall(SoundDef.x + 95, SoundDef.y + LINEHEIGHT_SMALL * (sfx_vol + 1),
                  16, sfxVolume);
@@ -3620,21 +3768,21 @@ void M_DrawSound(void)
     M_DrawThermoSmall(SoundDef.x + 95, SoundDef.y + LINEHEIGHT_SMALL * (music_vol + 1),
                  16, musicVolume);
 
-    if(itemOn == 1 && general_sound)
+    if (itemOn == 1 && general_sound)
         dp_translation = crx[CRX_GOLD];
-    else if(!general_sound)
+    else if (!general_sound)
         dp_translation = crx[CRX_DARK];
 
     M_WriteText(SoundDef.x, SoundDef.y + 8, "SOUND VOLUME");
 
-    if(itemOn == 2 && general_sound)
+    if (itemOn == 2 && general_sound)
         dp_translation = crx[CRX_GOLD];
-    else if(!general_sound)
+    else if (!general_sound)
         dp_translation = crx[CRX_DARK];
 
     M_WriteText(SoundDef.x, SoundDef.y + 18, "MUSIC VOLUME");
 
-    if(general_sound)
+    if (general_sound)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(SoundDef.x + 220, SoundDef.y - 2, "ON");
@@ -3645,28 +3793,28 @@ void M_DrawSound(void)
         M_WriteText(SoundDef.x + 212, SoundDef.y - 2, "OFF");
     }
 
-    if(mus_engine == 1)
+    if (mus_engine == 1)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(SoundDef.x + 204, SoundDef.y + 28, "OPL2");
     }
-    else if(mus_engine == 2)
+    else if (mus_engine == 2)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(SoundDef.x + 204, SoundDef.y + 28, "OPL3");
     }
-    else if(mus_engine == 3)
+    else if (mus_engine == 3)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(SoundDef.x + 212, SoundDef.y + 28, "OGG");
     }
-    else if(mus_engine == 4)
+    else if (mus_engine == 4)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(SoundDef.x + 183, SoundDef.y + 28, "TIMIDITY");
     }
 
-    if(snd_module)
+    if (snd_module)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(SoundDef.x + 159, SoundDef.y + 38, "PC-SPEAKER");
@@ -3677,28 +3825,28 @@ void M_DrawSound(void)
         M_WriteText(SoundDef.x + 213, SoundDef.y + 38, "SDL");
     }
 
-    if(sound_channels == 8)
+    if (sound_channels == 8)
     {
         dp_translation = crx[CRX_BLUE];
         M_WriteText(SoundDef.x + 228, SoundDef.y + 48, "8");
     }
-    else if(sound_channels == 16)
+    else if (sound_channels == 16)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(SoundDef.x + 223, SoundDef.y + 48, "16");
     }
-    else if(sound_channels == 32)
+    else if (sound_channels == 32)
     {
         dp_translation = crx[CRX_GOLD];
         M_WriteText(SoundDef.x + 220, SoundDef.y + 48, "32");
     }
-    else if(sound_channels == 64)
+    else if (sound_channels == 64)
     {
         dp_translation = crx[CRX_RED];
         M_WriteText(SoundDef.x + 221, SoundDef.y + 48, "64");
     }
 
-    if(opl_stereo_correct)
+    if (opl_stereo_correct)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(SoundDef.x + 220, SoundDef.y + 58, "ON");
@@ -3709,7 +3857,7 @@ void M_DrawSound(void)
         M_WriteText(SoundDef.x + 212, SoundDef.y + 58, "OFF");
     }
 
-    if(randompitch)
+    if (randompitch)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(SoundDef.x + 220, SoundDef.y + 68, "ON");
@@ -3720,7 +3868,7 @@ void M_DrawSound(void)
         M_WriteText(SoundDef.x + 212, SoundDef.y + 68, "OFF");
     }
 
-    if(dump_subst)
+    if (dump_subst)
     {
         if (substdumpwait < 5)
         {
@@ -3735,50 +3883,50 @@ void M_DrawSound(void)
     }
 
 #ifndef WII
-    if(use_libsamplerate == 0)
+    if (use_libsamplerate == 0)
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(SoundDef.x + 212, SoundDef.y + 88, "OFF");
     }
-    else if(use_libsamplerate == 1)
+    else if (use_libsamplerate == 1)
     {
         dp_translation = crx[CRX_GRAY];
         M_WriteText(SoundDef.x + 192, SoundDef.y + 88, "LINEAR");
     }
-    else if(use_libsamplerate == 2)
+    else if (use_libsamplerate == 2)
     {
         dp_translation = crx[CRX_RED];
         M_WriteText(SoundDef.x + 117, SoundDef.y + 88, "ZERO_ORDER_HOLD");
     }
-    else if(use_libsamplerate == 3)
+    else if (use_libsamplerate == 3)
     {
         dp_translation = crx[CRX_GOLD];
         M_WriteText(SoundDef.x + 182, SoundDef.y + 88, "FASTEST");
     }
-    else if(use_libsamplerate == 4)
+    else if (use_libsamplerate == 4)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(SoundDef.x + 130, SoundDef.y + 88, "MEDIUM_QUALITY");
     }
-    else if(use_libsamplerate == 5)
+    else if (use_libsamplerate == 5)
     {
         dp_translation = crx[CRX_BLUE];
         M_WriteText(SoundDef.x + 145, SoundDef.y + 88, "BEST_QUALITY");
     }
 #endif
 
-    if(whichSkull == 1)
+    if (whichSkull == 1)
     {
         int x;
         char *string = "";
         dp_translation = crx[CRX_GOLD];
-        if(itemOn == 9 || (fsize != 28422764 && fsize != 19321722 && fsize != 12361532 && itemOn > 2 && itemOn < 6))
+        if (itemOn == 9 || (fsize != 28422764 && fsize != 19321722 && fsize != 12361532 && itemOn > 2 && itemOn < 6))
             string = "YOU MUST QUIT AND RESTART TO TAKE EFFECT.";
-        else if(fsize == 19321722 && itemOn == 4)
+        else if (fsize == 19321722 && itemOn == 4)
             string = "PC-SPEAKER OPTION NOT AVAILABLE FOR HACX";
-        else if(itemOn == 8)
+        else if (itemOn == 8)
             string = "DUMPS A CONFIG FILE FOR USE WITH OGG-MUSIC.";
-        x = ORIGINALWIDTH/2 - M_StringWidth(string) / 2;
+        x = ORIGINALWIDTH / 2 - M_StringWidth(string) / 2;
         M_WriteText(x, GameDef2.y + 138, string);
     }
 }
@@ -3790,41 +3938,43 @@ void M_Sound(int choice)
 
 void M_GeneralSound(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-    case 0:
-        if(general_sound == true)
-        {
-            general_sound = false;
-            S_SetSfxVolume(0 * 8);
-            S_SetMusicVolume(0 * 8);
-        }
-        break;
-    case 1:
-        if(general_sound == false)
-        {
-            general_sound = true;
-            S_SetSfxVolume(sfxVolume * 8);
-            S_SetMusicVolume(musicVolume * 8);
-        }
-        break;
+        case 0:
+            if (general_sound == true)
+            {
+                general_sound = false;
+                S_SetSfxVolume(0 * 8);
+                S_SetMusicVolume(0 * 8);
+            }
+            break;
+
+        case 1:
+            if (general_sound == false)
+            {
+                general_sound = true;
+                S_SetSfxVolume(sfxVolume * 8);
+                S_SetMusicVolume(musicVolume * 8);
+            }
+            break;
     }
 }
 
 void M_SfxVol(int choice)
 {
-    if(general_sound)
+    if (general_sound)
     {
-        switch(choice)
+        switch (choice)
         {
-          case 0:
-            if (sfxVolume)
-                sfxVolume--;
-            break;
-          case 1:
-            if (sfxVolume < 15)
-                sfxVolume++;
-            break;
+            case 0:
+                if (sfxVolume)
+                    sfxVolume--;
+                break;
+
+            case 1:
+                if (sfxVolume < 15)
+                    sfxVolume++;
+                break;
         }
         S_SetSfxVolume(sfxVolume * 8);
     }
@@ -3832,18 +3982,19 @@ void M_SfxVol(int choice)
 
 void M_MusicVol(int choice)
 {
-    if(general_sound)
+    if (general_sound)
     {
-        switch(choice)
+        switch (choice)
         {
-          case 0:
-            if (musicVolume)
-                musicVolume--;
-            break;
-          case 1:
-            if (musicVolume < 15)
-                musicVolume++;
-            break;
+            case 0:
+                if (musicVolume)
+                    musicVolume--;
+                break;
+
+            case 1:
+                if (musicVolume < 15)
+                    musicVolume++;
+                break;
         }
         S_SetMusicVolume(musicVolume * 8);
     }
@@ -3851,99 +4002,103 @@ void M_MusicVol(int choice)
 
 void M_SoundType(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (snd_module && fsize != 19321722)
-            snd_module = 0;
-        break;
-      case 1:
-        if (!snd_module && fsize != 19321722)
-            snd_module = 1;
-        break;
+        case 0:
+            if (snd_module && fsize != 19321722)
+                snd_module = 0;
+            break;
+
+        case 1:
+            if (!snd_module && fsize != 19321722)
+                snd_module = 1;
+            break;
     }
 }
 
 void M_MusicType(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-    case 0:
-        if(mus_engine > 1)
-        {
-            if(mus_engine == 4)
-                snd_musicdevice = SNDDEVICE_GUS;
-            else if(mus_engine == 3)
-                snd_musicdevice = SNDDEVICE_GENMIDI;
-            else if(mus_engine < 3)
+        case 0:
+            if (mus_engine > 1)
             {
-                if(mus_engine == 2)
-                    opl_type = 1;
-                else
-                    opl_type = 0;
+                if (mus_engine == 4)
+                    snd_musicdevice = SNDDEVICE_GUS;
+                else if (mus_engine == 3)
+                    snd_musicdevice = SNDDEVICE_GENMIDI;
+                else if (mus_engine < 3)
+                {
+                    if (mus_engine == 2)
+                        opl_type = 1;
+                    else
+                        opl_type = 0;
 
-                snd_musicdevice = SNDDEVICE_SB;
+                    snd_musicdevice = SNDDEVICE_SB;
+                }
+                mus_engine--;
             }
-            mus_engine--;
-        }
-        break;
-    case 1:
-        if(mus_engine < 4)
-        {
-            if(mus_engine == 4)
-                snd_musicdevice = SNDDEVICE_GUS;
-            else if(mus_engine == 3)
-                snd_musicdevice = SNDDEVICE_GENMIDI;
-            else if(mus_engine < 3)
+            break;
+
+        case 1:
+            if (mus_engine < 4)
             {
-                if(mus_engine == 2)
-                    opl_type = 1;
-                else
-                    opl_type = 0;
+                if (mus_engine == 4)
+                    snd_musicdevice = SNDDEVICE_GUS;
+                else if (mus_engine == 3)
+                    snd_musicdevice = SNDDEVICE_GENMIDI;
+                else if (mus_engine < 3)
+                {
+                    if (mus_engine == 2)
+                        opl_type = 1;
+                    else
+                        opl_type = 0;
 
-                snd_musicdevice = SNDDEVICE_SB;
+                    snd_musicdevice = SNDDEVICE_SB;
+                }
+                mus_engine++;
             }
-            mus_engine++;
-        }
-        break;
+            break;
     }
 }
 
 void M_SoundOutput(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-    case 0:
-        if(opl_stereo_correct == true)
-        {
-            opl_stereo_correct = false;
-        }
-        break;
-    case 1:
-        if(opl_stereo_correct == false)
-        {
-            opl_stereo_correct = true;
-        }
-        break;
+        case 0:
+            if (opl_stereo_correct == true)
+            {
+                opl_stereo_correct = false;
+            }
+            break;
+
+        case 1:
+            if (opl_stereo_correct == false)
+            {
+                opl_stereo_correct = true;
+            }
+            break;
     }
 }
 
 void M_SoundPitch(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-    case 0:
-        if(randompitch == true)
-        {
-            randompitch = false;
-        }
-        break;
-    case 1:
-        if(randompitch == false)
-        {
-            randompitch = true;
-        }
-        break;
+        case 0:
+            if (randompitch == true)
+            {
+                randompitch = false;
+            }
+            break;
+
+        case 1:
+            if (randompitch == false)
+            {
+                randompitch = true;
+            }
+            break;
     }
 }
 
@@ -3955,16 +4110,17 @@ void M_DumpSubstituteConfig(int choice)
 
 void M_Samplerate(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (use_libsamplerate)
-            use_libsamplerate--;
-        break;
-      case 1:
-        if (use_libsamplerate < 5)
-            use_libsamplerate++;
-        break;
+        case 0:
+            if (use_libsamplerate)
+                use_libsamplerate--;
+            break;
+
+        case 1:
+            if (use_libsamplerate < 5)
+                use_libsamplerate++;
+            break;
     }
 }
 
@@ -3982,51 +4138,55 @@ void M_RestartSong(int choice)
 
 void M_OPLDev(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-    case 0:
-        if(opldev == true)
-        {
-            opldev = false;
-        }
-        break;
-    case 1:
-        if(opldev == false)
-        {
-            opldev = true;
-        }
-        break;
+        case 0:
+            if (opldev == true)
+            {
+                opldev = false;
+            }
+            break;
+
+        case 1:
+            if (opldev == false)
+            {
+                opldev = true;
+            }
+            break;
     }
 }
 
 void M_SoundChannels(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-    case 0:
-        if(snd_chans > 1)
-            snd_chans--;
-        if(snd_chans == 1)
-            sound_channels = 8;
-        else if(snd_chans == 2)
-            sound_channels = 16;
-        else if(snd_chans == 3)
-            sound_channels = 32;
-        else if(snd_chans == 4)
-            sound_channels = 64;
-        break;
-    case 1:
-        if(snd_chans < 4)
-            snd_chans++;
-        if(snd_chans == 1)
-            sound_channels = 8;
-        else if(snd_chans == 2)
-            sound_channels = 16;
-        else if(snd_chans == 3)
-            sound_channels = 32;
-        else if(snd_chans == 4)
-            sound_channels = 64;
-        break;
+        case 0:
+            if (snd_chans > 1)
+                snd_chans--;
+
+            if (snd_chans == 1)
+                sound_channels = 8;
+            else if (snd_chans == 2)
+                sound_channels = 16;
+            else if (snd_chans == 3)
+                sound_channels = 32;
+            else if (snd_chans == 4)
+                sound_channels = 64;
+            break;
+
+        case 1:
+            if (snd_chans < 4)
+                snd_chans++;
+
+            if (snd_chans == 1)
+                sound_channels = 8;
+            else if (snd_chans == 2)
+                sound_channels = 16;
+            else if (snd_chans == 3)
+                sound_channels = 32;
+            else if (snd_chans == 4)
+                sound_channels = 64;
+            break;
     }
 }
 
@@ -4042,8 +4202,6 @@ void M_DrawMainMenu(void)
     else
         V_DrawPatchWithShadow(94, 2, 0, W_CacheLumpName("M_DOOM", PU_CACHE), false);
 }
-
-
 
 //
 // M_NewGame
@@ -4066,13 +4224,13 @@ void M_NewGame(int choice)
 
     if (netgame && !demoplayback)
     {
-        M_StartMessage(s_NEWGAME,NULL,false);
+        M_StartMessage(s_NEWGAME, NULL, false);
         return;
     }
 
     // Chex Quest disabled the episode select screen, as did Doom II.
 
-    if(!beta_style)
+    if (!beta_style)
     {
         if (fsize == 12361532)
             M_SetupNextMenu(&NewDef);
@@ -4081,17 +4239,16 @@ void M_NewGame(int choice)
     }
     else
     {
-        if(itemOn == 0)
+        if (itemOn == 0)
             G_InitNew (startskill, 1, 2);
-        else if(itemOn == 1)
+        else if (itemOn == 1)
             G_InitNew (startskill, 3, 5);
-        else if(itemOn == 2)
+        else if (itemOn == 2)
             G_InitNew (startskill, 2, 2);
 
-//        M_ClearMenus ();
+//        M_ClearMenus();
     }
 }
-
 
 //
 //      M_Episode
@@ -4112,54 +4269,50 @@ void M_VerifyNightmare(int ch)
     if (ch != key_menu_confirm)
         return;
 #endif
-    G_DeferedInitNew(nightmare,epi+1,1);
-    M_ClearMenus ();
+    G_DeferedInitNew(nightmare, epi + 1, 1);
+    M_ClearMenus();
 }
 
 void M_ChooseSkill(int choice)
 {
     if (choice == nightmare)
     {
-        M_StartMessage(s_NIGHTMARE,M_VerifyNightmare,true);
+        M_StartMessage(s_NIGHTMARE, M_VerifyNightmare, true);
         return;
     }
 
-    if(fsize == 12361532)
-        G_DeferedInitNew(choice,epi,1);
+    if (fsize == 12361532)
+        G_DeferedInitNew(choice, epi, 1);
     else
-        G_DeferedInitNew(choice,epi+1,1);
+        G_DeferedInitNew(choice, epi + 1, 1);
 
-    if(gameepisode == 1)
+    if (gameepisode == 1)
         secret_1 = false;
     else
         secret_2 = false;
 
-    M_ClearMenus ();
+    M_ClearMenus();
 }
 
 void M_Episode(int choice)
 {
-    if ( (gamemode == shareware)
-         && choice)
+    if ((gamemode == shareware) && choice)
     {
-        M_StartMessage(s_SWSTRING,NULL,true);
+        M_StartMessage(s_SWSTRING, NULL, true);
         M_SetupNextMenu(&ReadDef1);
         return;
     }
 
     // Yet another hack...
-    if ( (gamemode == registered)
-         && (choice > 2))
+    if ((gamemode == registered) && (choice > 2))
     {
-      C_Error("M_Episode: 4th episode requires Ultimate DOOM");
-      choice = 0;
+        C_Error("M_Episode: 4th episode requires Ultimate DOOM");
+        choice = 0;
     }
          
     epi = choice;
     M_SetupNextMenu(&NewDef);
 }
-
-
 
 //
 // M_Options
@@ -4220,20 +4373,20 @@ void M_DrawOptions(void)
         M_WriteText(OptionsDef.x, OptionsDef.y + 98, "TESTINGS");
     }
 
-    if(whichSkull == 1)
+    if (whichSkull == 1)
     {
         int x;
         int x2;
         char *string = "";
         char *string2 = "";
         dp_translation = crx[CRX_GOLD];
-        if(itemOn == 6 || itemOn == 7)
+        if (itemOn == 6 || itemOn == 7)
         {
             string = "(KEY BINDINGS & AUTOMAP COLORS UNAFFECTED)";
             string2 = "YOU MUST RESTART THE GAME TO TAKE EFFECT.";
         }
-        x = ORIGINALWIDTH/2 - M_StringWidth(string) / 2;
-        x2 = ORIGINALWIDTH/2 - M_StringWidth(string2) / 2;
+        x = ORIGINALWIDTH / 2 - M_StringWidth(string) / 2;
+        x2 = ORIGINALWIDTH / 2 - M_StringWidth(string2) / 2;
         M_WriteText(x, OptionsDef.y + 106, string);
         dp_translation = crx[CRX_GOLD];
         M_WriteText(x2, OptionsDef.y + 113, string2);
@@ -4256,95 +4409,95 @@ void M_DrawItems(void)
     else
         M_WriteText(80, 110, "FULL HEALTH (200)");
 
-    if(fsize != 12361532 && fsize != 19321722)
+    if (fsize != 12361532 && fsize != 19321722)
     {
-        if(itemOn == 2)
+        if (itemOn == 2)
             dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 70, "RADIATION SHIELDING SUIT");
 
-        if(itemOn == 3)
+        if (itemOn == 3)
             dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 80, "COMPUTER AREA MAP");
 
-        if(itemOn == 4)
+        if (itemOn == 4)
             dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 90, "LIGHT AMPLIFICATION VISOR");
 
-        if(itemOn == 7)
+        if (itemOn == 7)
             dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 120, "PARTIAL INVISIBILITY");
 
-        if(itemOn == 8)
+        if (itemOn == 8)
             dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 130, "INVULNERABILITY!");
 
-        if(itemOn == 9)
+        if (itemOn == 9)
             dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 140, "BERSERK!");
 
-        if(itemOn == 10)
+        if (itemOn == 10)
             dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 150, "BACKPACK");
 
-        if(itemOn == 11)
+        if (itemOn == 11)
             dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 160, "FLIGHT");
     }
 
-    if(fsize == 19321722)
+    if (fsize == 19321722)
     {
-        if(itemOn == 2)
+        if (itemOn == 2)
             dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 70, "VULCAN RUBBER BOOTS");
 
-        if(itemOn == 3)
+        if (itemOn == 3)
             dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 80, "SI ARRAY MAPPING");
 
-        if(itemOn == 4)
+        if (itemOn == 4)
             dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 90, "INFRARED VISOR");
 
-        if(itemOn == 7)
+        if (itemOn == 7)
             dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 120, "ENK BLINDNESS");
 
-        if(itemOn == 8)
+        if (itemOn == 8)
             dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 130, "FORCE FIELD");
 
-        if(itemOn == 9)
+        if (itemOn == 9)
             dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 140, "007 MICROTEL");
 
-        if(itemOn == 10)
+        if (itemOn == 10)
             dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 150, "BACKPACK");
 
-        if(itemOn == 11)
+        if (itemOn == 11)
             dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 160, "FLIGHT");
     }
 
-    if(fsize == 12361532)
+    if (fsize == 12361532)
     {
-        if(itemOn == 2)
+        if (itemOn == 2)
             dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 70, "SLIME-PROOF SUIT");
 
-        if(itemOn == 3)
+        if (itemOn == 3)
             dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 80, "COMPUTER AREA MAP");
 
-        if(itemOn == 4)
+        if (itemOn == 4)
             dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 90, "ULTRA GOGGLES");
 
-        if(itemOn == 5)
+        if (itemOn == 5)
             dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 100, "BACKPACK");
 
-        if(itemOn == 6)
+        if (itemOn == 6)
             dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 110, "FLIGHT");
     }
@@ -4360,35 +4513,35 @@ void M_DrawArmor(void)
     dp_translation = crx[CRX_GOLD];
     M_WriteText(80, 55, "GIVE THEM BOTH AT ONCE");
 
-    if(fsize != 12361532 && fsize != 19321722)
+    if (fsize != 12361532 && fsize != 19321722)
     {
-        if(itemOn == 2)
+        if (itemOn == 2)
             dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 75, "GREEN ARMOR");
 
-        if(itemOn == 3)
+        if (itemOn == 3)
             dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 85, "BLUE ARMOR");
     }
 
-    if(fsize == 12361532)
+    if (fsize == 12361532)
     {
-        if(itemOn == 2)
+        if (itemOn == 2)
             dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 75, "CHEX(R) ARMOR");
 
-        if(itemOn == 2)
+        if (itemOn == 2)
             dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 85, "SUPER CHEX(R) ARMOR");
     }
 
-    if(fsize == 19321722)
+    if (fsize == 19321722)
     {
-        if(itemOn == 2)
+        if (itemOn == 2)
             dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 75, "KEVLAR VEST");
 
-        if(itemOn == 2)
+        if (itemOn == 2)
             dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 85, "SUPER KEVLAR VEST");
     }
@@ -4404,103 +4557,103 @@ void M_DrawWeapons(void)
     dp_translation = crx[CRX_GOLD];
     M_WriteText(80, 55, "GIVE THEM ALL AT ONCE");
 
-    if(fsize != 19321722 && fsize != 12361532)
+    if (fsize != 19321722 && fsize != 12361532)
     {
-        if(itemOn == 2)
+        if (itemOn == 2)
             dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 75, "CHAINSAW");
 
-        if(itemOn == 3)
+        if (itemOn == 3)
             dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 85, "SHOTGUN");
 
-        if(itemOn == 4)
+        if (itemOn == 4)
             dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 95, "CHAINGUN");
 
-        if(itemOn == 5)
+        if (itemOn == 5)
             dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 105, "ROCKET LAUNCHER");
 
-        if(fsize != 4261144 && fsize != 4271324 && fsize != 4211660 &&
+        if (fsize != 4261144 && fsize != 4271324 && fsize != 4211660 &&
                 fsize != 4207819 && fsize != 4274218 && fsize != 4225504 &&
                 fsize != 4225460 && fsize != 4234124 && fsize != 4196020)
         {
-            if(itemOn == 6)
+            if (itemOn == 6)
                 dp_translation = crx[CRX_GOLD];
             M_WriteText(80, 115, "PLASMA CANNON");
 
-            if(itemOn == 7)
+            if (itemOn == 7)
                 dp_translation = crx[CRX_GOLD];
             M_WriteText(80, 125, "BFG 9000");
         }
 
-        if(fsize == 14943400 || fsize == 14824716 || fsize == 14612688 ||
+        if (fsize == 14943400 || fsize == 14824716 || fsize == 14612688 ||
                 fsize == 14607420 || fsize == 14604584 || fsize == 18195736 ||
                 fsize == 14683458 || fsize == 18654796 || fsize == 18240172 ||
                 fsize == 17420824 || fsize == 14677988 || fsize == 14691821 ||
                 fsize == 28422764)
         {
-            if(itemOn == 8)
+            if (itemOn == 8)
                 dp_translation = crx[CRX_GOLD];
             M_WriteText(80, 135, "SUPER SHOTGUN");
         }
     }
 
-    if(fsize == 19321722)
+    if (fsize == 19321722)
     {
-        if(itemOn == 2)
+        if (itemOn == 2)
             dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 75, "HOIG REZNATOR");
 
-        if(itemOn == 3)
+        if (itemOn == 3)
             dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 85, "TAZER");
 
-        if(itemOn == 4)
+        if (itemOn == 4)
             dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 95, "UZI");
 
-        if(itemOn == 5)
+        if (itemOn == 5)
             dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 105, "PHOTON 'ZOOKA");
 
-        if(itemOn == 6)
+        if (itemOn == 6)
             dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 115, "STICK");
 
-        if(itemOn == 7)
+        if (itemOn == 7)
             dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 125, "NUKER");
 
-        if(itemOn == 8)
+        if (itemOn == 8)
             dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 135, "CRYOGUN");
     }
 
-    if(fsize == 12361532)
+    if (fsize == 12361532)
     {
-        if(itemOn == 2)
+        if (itemOn == 2)
             dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 75, "SUPER BOOTSPORK");
 
-        if(itemOn == 3)
+        if (itemOn == 3)
             dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 85, "LARGE ZORCHER");
 
-        if(itemOn == 4)
+        if (itemOn == 4)
             dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 95, "RAPID ZORCHER");
 
-        if(itemOn == 5)
+        if (itemOn == 5)
             dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 105, "ZORCH PROPULSOR");
 
-        if(itemOn == 6)
+        if (itemOn == 6)
             dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 115, "PHASING ZORCHER");
 
-        if(itemOn == 7)
+        if (itemOn == 7)
             dp_translation = crx[CRX_GOLD];
         M_WriteText(80, 125, "LARGE AREA ZORCHING DEVICE");
     }
@@ -4521,7 +4674,7 @@ void M_DrawScreen(void)
 {
     //M_DarkBackground(0);
 
-    if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
+    if (fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
         V_DrawPatchWithShadow(58, 7, 0, W_CacheLumpName("M_T_SSET",
                                                PU_CACHE), false);
     else
@@ -4531,14 +4684,14 @@ void M_DrawScreen(void)
     M_DrawThermoSmall(ScreenDef.x + 104, ScreenDef.y + LINEHEIGHT_SMALL * (screen_gamma + 1),
                  11, usegamma / 3);
 
-    if(gamemode == commercial || fsize == 4234124 || fsize == 4196020 ||
+    if (gamemode == commercial || fsize == 4234124 || fsize == 4196020 ||
             fsize == 12474561 || fsize == 12487824 || fsize == 11159840 ||
             fsize == 12408292 || fsize == 12538385 || fsize == 12361532 ||
             fsize == 7585664)
     {
-        if(gamemission == pack_hacx)
+        if (gamemission == pack_hacx)
             dp_translation = crx[CRX_BLUE];
-        else if(gamemission == pack_chex)
+        else if (gamemission == pack_chex)
             dp_translation = crx[CRX_GREEN];
         else
             dp_translation = crx[CRX_RED];
@@ -4546,14 +4699,14 @@ void M_DrawScreen(void)
     else
         dp_translation = crx[CRX_DARK];
 
-    if(!show_diskicon)
+    if (!show_diskicon)
         dp_translation = crx[CRX_DARK];
 
-    if(itemOn == 10 && show_diskicon && gamemode == commercial)
+    if (itemOn == 10 && show_diskicon && gamemode == commercial)
         dp_translation = crx[CRX_GOLD];
     M_WriteText(ScreenDef.x, ScreenDef.y + 98, "Type of Indicator");
 
-    if(detailLevel > 0)
+    if (detailLevel > 0)
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(ScreenDef.x + 180, ScreenDef.y + 18, "LOW");
@@ -4564,7 +4717,7 @@ void M_DrawScreen(void)
         M_WriteText(ScreenDef.x + 177, ScreenDef.y + 18, "HIGH");
     }
 
-    if(d_translucency)
+    if (d_translucency)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(ScreenDef.x + 189, ScreenDef.y + 28, "ON");
@@ -4575,56 +4728,56 @@ void M_DrawScreen(void)
         M_WriteText(ScreenDef.x + 181, ScreenDef.y + 28, "OFF");
     }
 
-    if(beta_style)
+    if (beta_style)
         M_DrawThermoSmall(ScreenDef.x + 128, ScreenDef.y + LINEHEIGHT_SMALL * (screen_size + 1),
                  8, screenSize);
     else
         M_DrawThermoSmall(ScreenDef.x + 120, ScreenDef.y + LINEHEIGHT_SMALL * (screen_size + 1),
                  9, screenSize);
 
-    if(wipe_type == 0)
+    if (wipe_type == 0)
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(ScreenDef.x + 173, ScreenDef.y + 38, "NONE");
     }
-    else if(wipe_type == 1)
+    else if (wipe_type == 1)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(ScreenDef.x + 173, ScreenDef.y + 38, "FADE");
     }
-    else if(wipe_type == 2)
+    else if (wipe_type == 2)
     {
         dp_translation = crx[CRX_GOLD];
         M_WriteText(ScreenDef.x + 172, ScreenDef.y + 38, "MELT");
     }
-    else if(wipe_type == 3)
+    else if (wipe_type == 3)
     {
         dp_translation = crx[CRX_RED];
         M_WriteText(ScreenDef.x + 173, ScreenDef.y + 38, "BURN");
     }
 
-    if(d_uncappedframerate == 0)
+    if (d_uncappedframerate == 0)
     {
         dp_translation = crx[CRX_RED];
         M_WriteText(ScreenDef.x + 97, ScreenDef.y + 48, "CAPPED (35 FPS)");
     }
-    else if(d_uncappedframerate == 1)
+    else if (d_uncappedframerate == 1)
     {
         dp_translation = crx[CRX_GOLD];
         M_WriteText(ScreenDef.x + 141, ScreenDef.y + 48, "UNCAPPED");
     }
-    else if(d_uncappedframerate == 2)
+    else if (d_uncappedframerate == 2)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(ScreenDef.x + 96, ScreenDef.y + 48, "CAPPED (60 FPS)");
     }
-    else if(d_uncappedframerate == 3)
+    else if (d_uncappedframerate == 3)
     {
         dp_translation = crx[CRX_BLUE];
         M_WriteText(ScreenDef.x + 96, ScreenDef.y + 48, "CAPPED (70 FPS)");
     }
 
-    if(png_screenshots)
+    if (png_screenshots)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(ScreenDef.x + 181, ScreenDef.y + 58, "PNG");
@@ -4635,44 +4788,44 @@ void M_DrawScreen(void)
         M_WriteText(ScreenDef.x + 180, ScreenDef.y + 58, "PCX");
     }
 
-    if(background_type == 0)
+    if (background_type == 0)
     {
         dp_translation = crx[CRX_RED];
         M_WriteText(ScreenDef.x + 156, ScreenDef.y + 68, "NORMAL");
     }
-    else if(background_type == 1)
+    else if (background_type == 1)
     {
         dp_translation = crx[CRX_GOLD];
         M_WriteText(ScreenDef.x + 158, ScreenDef.y + 68, "SHADED");
     }
-    else if(background_type == 2)
+    else if (background_type == 2)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(ScreenDef.x + 149, ScreenDef.y + 68, "BLURRED");
     }
-    else if(background_type == 3)
+    else if (background_type == 3)
     {
         dp_translation = crx[CRX_BLUE];
         M_WriteText(ScreenDef.x + 156, ScreenDef.y + 68, "PRBOOM");
     }
 
-    if(font_shadow == 0)
+    if (font_shadow == 0)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(ScreenDef.x + 156, ScreenDef.y + 78, "NORMAL");
     }
-    else if(font_shadow == 1)
+    else if (font_shadow == 1)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(ScreenDef.x + 141, ScreenDef.y + 78, "SHADOWED");
     }
-    else if(font_shadow == 2)
+    else if (font_shadow == 2)
     {
         dp_translation = crx[CRX_GOLD];
         M_WriteText(ScreenDef.x + 149, ScreenDef.y + 78, "COLORED");
     }
 
-    if(show_diskicon)
+    if (show_diskicon)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(ScreenDef.x + 189, ScreenDef.y + 88, "ON");
@@ -4683,7 +4836,7 @@ void M_DrawScreen(void)
         M_WriteText(ScreenDef.x + 181, ScreenDef.y + 88, "OFF");
     }
 
-    if(icontype == 1)
+    if (icontype == 1)
     {
         dp_translation = crx[CRX_GRAY];
         M_WriteText(ScreenDef.x + 158, ScreenDef.y + 98, "CD-ROM");
@@ -4695,7 +4848,7 @@ void M_DrawScreen(void)
     }
 
 #ifdef SDL2
-    if(render_mode == 1)
+    if (render_mode == 1)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(ScreenDef.x + 161, ScreenDef.y + 108, "LINEAR");
@@ -4706,7 +4859,7 @@ void M_DrawScreen(void)
         M_WriteText(ScreenDef.x + 150, ScreenDef.y + 108, "NEAREST");
     }
 
-    if(d_vsync)
+    if (d_vsync)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(ScreenDef.x + 189, ScreenDef.y + 118, "ON");
@@ -4718,32 +4871,32 @@ void M_DrawScreen(void)
     }
 #endif
 
-    if(whichSkull == 1)
+    if (whichSkull == 1)
     {
         int x;
         char *string = "";
         dp_translation = crx[CRX_GOLD];
-        if(itemOn == 1 && am_overlay)
+        if (itemOn == 1 && am_overlay)
             string = "YOU MUST LEAVE AUTOMAP OVERLAY MODE FIRST!!!";
-        else if(itemOn == 3)
+        else if (itemOn == 3)
             string = "START / LOAD A NEW GAME TO TAKE EFFECT.";
-        else if(itemOn == 5 && d_vsync)
+        else if (itemOn == 5 && d_vsync)
             string = "DISABLE VSYNC TO UNLOCK 70 FPS & UNCAPPED.";
 /*
 #ifndef SDL2
-        else if(itemOn == 4)
+        else if (itemOn == 4)
             string = "OPTION 'BURN' IS ONLY AVAILABLE FOR SDL2";
 #endif
 */
-        else if(itemOn == 10 && (gamemode == retail || gamemode == registered || gamemode == shareware))
+        else if (itemOn == 10 && (gamemode == retail || gamemode == registered || gamemode == shareware))
             string = "THIS IS ONLY CHANGEABLE FOR DOOM 2";
 
 #ifdef SDL2
-        else if(itemOn == 11 || itemOn == 12)
+        else if (itemOn == 11 || itemOn == 12)
             string = "YOU MUST QUIT AND RESTART TO TAKE EFFECT.";
 #endif
 
-        x = ORIGINALWIDTH/2 - M_StringWidth(string) / 2;
+        x = ORIGINALWIDTH / 2 - M_StringWidth(string) / 2;
         M_WriteText(x, ScreenDef.y + 126, string);
     }
 }
@@ -4845,23 +4998,28 @@ void M_DrawAutomap(void)
     dp_translation = crx[CRX_BLUE];
     if (itemOn == 23)
         dp_translation = crx[CRX_GOLD];
-    M_WriteText(AutomapDef.x, AutomapDef.y + 136, "reset colors to standard");
+    M_WriteText(AutomapDef.x, AutomapDef.y + 136, "reset colors to dos doom standard");
+
+    dp_translation = crx[CRX_BLUE];
+    if (itemOn == 24)
+        dp_translation = crx[CRX_GOLD];
+    M_WriteText(AutomapDef.x, AutomapDef.y + 142, "reset colors to prboom standard");
 }
 
 void M_DrawGame1(void)
 {
     //M_DarkBackground(0);
 
-    if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
+    if (fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
         V_DrawPatchWithShadow(70, 0, 0, W_CacheLumpName("M_T_GSET",
                                                PU_CACHE), false);
     else
         V_DrawPatchWithShadow(70, 0, 0, W_CacheLumpName("M_GMESET",
                                                PU_CACHE), false);
 /*
-    if(devparm)
+    if (devparm)
     {
-        if(aiming_help)
+        if (aiming_help)
         {
             dp_translation = crx[CRX_GREEN];
             M_WriteText(GameDef.x + 266, GameDef.y + 128, "ON");
@@ -4872,18 +5030,18 @@ void M_DrawGame1(void)
             M_WriteText(GameDef.x + 258, GameDef.y + 128, "OFF");
         }
 
-        if(itemOn == 13)
+        if (itemOn == 13)
             dp_translation = crx[CRX_GOLD];
 
         M_WriteText(GameDef.x, GameDef.y + 128, "AIMING HELP");
     }
 */
-    if(drawgrid == 1)
+    if (drawgrid == 1)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef.x + 266, GameDef.y - 2, "ON");
     }
-    else if(drawgrid == 0)
+    else if (drawgrid == 0)
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(GameDef.x + 258, GameDef.y - 2, "OFF");
@@ -4892,29 +5050,29 @@ void M_DrawGame1(void)
     sprintf(string_mapgridsize, "%d", map_grid_size);
     M_WriteText(GameDef.x + 282 - M_StringWidth(string_mapgridsize), GameDef.y + 8, string_mapgridsize);
 
-    if(am_rotate == true)
+    if (am_rotate == true)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef.x + 266, GameDef.y + 18, "ON");
     }
-    else if(am_rotate == false)
+    else if (am_rotate == false)
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(GameDef.x + 258, GameDef.y + 18, "OFF");
     }
 
-    if(followplayer == 1)
+    if (followplayer == 1)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef.x + 266, GameDef.y + 28, "ON");
     }
-    else if(followplayer == 0)
+    else if (followplayer == 0)
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(GameDef.x + 258, GameDef.y + 28, "OFF");
     }
 
-    if(overlay_trigger)
+    if (overlay_trigger)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef.x + 266, GameDef.y + 38, "ON");
@@ -4925,7 +5083,7 @@ void M_DrawGame1(void)
         M_WriteText(GameDef.x + 258, GameDef.y + 38, "OFF");
     }
 
-    if(d_statusmap)
+    if (d_statusmap)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef.x + 266, GameDef.y + 48, "ON");
@@ -4936,7 +5094,7 @@ void M_DrawGame1(void)
         M_WriteText(GameDef.x + 258, GameDef.y + 48, "OFF");
     }
 
-    if(show_stats == 1)
+    if (show_stats == 1)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef.x + 266, GameDef.y + 58, "ON");
@@ -4947,7 +5105,7 @@ void M_DrawGame1(void)
         M_WriteText(GameDef.x + 258, GameDef.y + 58, "OFF");
     }
 
-    if(timer_info)
+    if (timer_info)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef.x + 266, GameDef.y + 68, "ON");
@@ -4958,7 +5116,7 @@ void M_DrawGame1(void)
         M_WriteText(GameDef.x + 258, GameDef.y + 68, "OFF");
     }
 
-    if(show_authors)
+    if (show_authors)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef.x + 266, GameDef.y + 78, "ON");
@@ -4969,7 +5127,7 @@ void M_DrawGame1(void)
         M_WriteText(GameDef.x + 258, GameDef.y + 78, "OFF");
     }
 
-    if(show_title)
+    if (show_title)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef.x + 266, GameDef.y + 88, "ON");
@@ -4980,7 +5138,7 @@ void M_DrawGame1(void)
         M_WriteText(GameDef.x + 258, GameDef.y + 88, "OFF");
     }
 
-    if(map_secret_after)
+    if (map_secret_after)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef.x + 266, GameDef.y + 98, "ON");
@@ -4996,7 +5154,7 @@ void M_DrawGame1(void)
         dp_translation = crx[CRX_GOLD];
     M_WriteText(GameDef.x, GameDef.y + 108, "AUTOMAP COLORS...");
 
-    if(respawnparm)
+    if (respawnparm)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef.x + 266, GameDef.y + 118, "ON");
@@ -5007,18 +5165,18 @@ void M_DrawGame1(void)
         M_WriteText(GameDef.x + 258, GameDef.y + 118, "OFF");
     }
 /*
-    if(devparm)
+    if (devparm)
     {
-        if((itemOn == 11 || itemOn == 12) && whichSkull == 1)
+        if ((itemOn == 11 || itemOn == 12) && whichSkull == 1)
         {
             char *string = "YOU MUST START A NEW GAME TO TAKE EFFECT.";
-            int x = ORIGINALWIDTH/2 - M_StringWidth(string) / 2;
+            int x = ORIGINALWIDTH / 2 - M_StringWidth(string) / 2;
             dp_translation = crx[CRX_GOLD];
             M_WriteText(x, GameDef.y + 138, string);
         }
         else
         {
-            if(itemOn == 14)
+            if (itemOn == 14)
                 dp_translation = crx[CRX_GOLD];
             else
                 dp_translation = crx[CRX_GRAY];
@@ -5040,12 +5198,12 @@ void M_DrawGame1(void)
             else if (itemOn == 12)
                 string = "YOU MUST START A NEW GAME TO TAKE EFFECT.";
 
-            x = ORIGINALWIDTH/2 - M_StringWidth(string) / 2;
+            x = ORIGINALWIDTH / 2 - M_StringWidth(string) / 2;
             dp_translation = crx[CRX_GOLD];
             M_WriteText(x, GameDef.y + 138, string);
         }
 
-        if(itemOn == 13)
+        if (itemOn == 13)
             dp_translation = crx[CRX_GOLD];
         else
             dp_translation = crx[CRX_GRAY];
@@ -5058,14 +5216,14 @@ void M_DrawGame2(void)
 {
     //M_DarkBackground(0);
 
-    if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
+    if (fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
         V_DrawPatchWithShadow(70, 0, 0, W_CacheLumpName("M_T_GSET",
                                                PU_CACHE), false);
     else
         V_DrawPatchWithShadow(70, 0, 0, W_CacheLumpName("M_GMESET",
                                                PU_CACHE), false);
 
-    if(not_monsters)
+    if (not_monsters)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef2.x + 266, GameDef2.y - 2, "ON");
@@ -5076,7 +5234,7 @@ void M_DrawGame2(void)
         M_WriteText(GameDef2.x + 258, GameDef2.y - 2, "OFF");
     }
 
-    if(fastparm)
+    if (fastparm)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef2.x + 266, GameDef2.y + 8, "ON");
@@ -5087,7 +5245,7 @@ void M_DrawGame2(void)
         M_WriteText(GameDef2.x + 258, GameDef2.y + 8, "OFF");
     }
 
-    if(d_footstep)
+    if (d_footstep)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef2.x + 266, GameDef2.y + 18, "ON");
@@ -5098,7 +5256,7 @@ void M_DrawGame2(void)
         M_WriteText(GameDef2.x + 258, GameDef2.y + 18, "OFF");
     }
 
-    if(d_footclip)
+    if (d_footclip)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef2.x + 266, GameDef2.y + 28, "ON");
@@ -5109,7 +5267,7 @@ void M_DrawGame2(void)
         M_WriteText(GameDef2.x + 258, GameDef2.y + 28, "OFF");
     }
 
-    if(d_splash)
+    if (d_splash)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef2.x + 266, GameDef2.y + 38, "ON");
@@ -5120,7 +5278,7 @@ void M_DrawGame2(void)
         M_WriteText(GameDef2.x + 258, GameDef2.y + 38, "OFF");
     }
 
-    if(d_swirl)
+    if (d_swirl)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef2.x + 266, GameDef2.y + 48, "ON");
@@ -5137,7 +5295,7 @@ void M_DrawGame2(void)
     M_WriteText(GameDef2.x, GameDef2.y + 58, "Show Endoom Screen on quit");
 #endif
 
-    if(show_endoom)
+    if (show_endoom)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef2.x + 266, GameDef2.y + 58, "ON");
@@ -5148,7 +5306,7 @@ void M_DrawGame2(void)
         M_WriteText(GameDef2.x + 258, GameDef2.y + 58, "OFF");
     }
 
-    if(d_flipcorpses)
+    if (d_flipcorpses)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef2.x + 266, GameDef2.y + 68, "ON");
@@ -5159,7 +5317,7 @@ void M_DrawGame2(void)
         M_WriteText(GameDef2.x + 258, GameDef2.y + 68, "OFF");
     }
 
-    if(d_secrets)
+    if (d_secrets)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef2.x + 266, GameDef2.y + 78, "ON");
@@ -5170,7 +5328,7 @@ void M_DrawGame2(void)
         M_WriteText(GameDef2.x + 258, GameDef2.y + 78, "OFF");
     }
 
-    if(showMessages)
+    if (showMessages)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef2.x + 266, GameDef2.y + 88, "ON");
@@ -5181,35 +5339,35 @@ void M_DrawGame2(void)
         M_WriteText(GameDef2.x + 258, GameDef2.y + 88, "OFF");
     }
 
-    if(gameskill == sk_nightmare)
+    if (gameskill == sk_nightmare)
         dp_translation = crx[CRX_DARK];
-    else if(itemOn == 10 && gameskill != sk_nightmare)
+    else if (itemOn == 10 && gameskill != sk_nightmare)
         dp_translation = crx[CRX_GOLD];
 
     M_WriteText(GameDef2.x, GameDef2.y + 98, "CHAINGUN FIRE RATE");
 
-    if(chaingun_tics == 1)
+    if (chaingun_tics == 1)
     {
         dp_translation = crx[CRX_BLUE];
         M_WriteText(GameDef2.x + 242, GameDef2.y + 98, "ULTRA");
     }
-    else if(chaingun_tics == 2)
+    else if (chaingun_tics == 2)
     {
         dp_translation = crx[CRX_RED];
         M_WriteText(GameDef2.x + 216, GameDef2.y + 98, "VERY FAST");
     }
-    else if(chaingun_tics == 3)
+    else if (chaingun_tics == 3)
     {
         dp_translation = crx[CRX_GOLD];
         M_WriteText(GameDef2.x + 235, GameDef2.y + 98, "FASTER");
     }
-    else if(chaingun_tics == 4)
+    else if (chaingun_tics == 4)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef2.x + 233, GameDef2.y + 98, "NORMAL");
     }
 
-    if(d_fallingdamage)
+    if (d_fallingdamage)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef2.x + 266, GameDef2.y + 108, "ON");
@@ -5220,7 +5378,7 @@ void M_DrawGame2(void)
         M_WriteText(GameDef2.x + 258, GameDef2.y + 108, "OFF");
     }
 
-    if(d_infiniteammo)
+    if (d_infiniteammo)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef2.x + 266, GameDef2.y + 118, "ON");
@@ -5231,24 +5389,24 @@ void M_DrawGame2(void)
         M_WriteText(GameDef2.x + 258, GameDef2.y + 118, "OFF");
     }
 
-    if(whichSkull == 1)
+    if (whichSkull == 1)
     {
         int x;
         char *string = "";
         dp_translation = crx[CRX_GOLD];
-        if(itemOn == 0 || itemOn == 1)
+        if (itemOn == 0 || itemOn == 1)
             string = "YOU MUST START A NEW GAME TO TAKE EFFECT.";
 #ifdef WII
-        else if(itemOn == 6)
+        else if (itemOn == 6)
             string = "THIS OPTION IS NOT AVAILABLE FOR THE WII.";
 #endif
-        else if(itemOn == 10 && gameskill == sk_nightmare)
+        else if (itemOn == 10 && gameskill == sk_nightmare)
             string = "NOT AVAILABLE FOR NIGHTMARE SKILL";
-        x = ORIGINALWIDTH/2 - M_StringWidth(string) / 2;
+        x = ORIGINALWIDTH / 2 - M_StringWidth(string) / 2;
         M_WriteText(x, GameDef2.y + 138, string);
     }
 
-    if(itemOn == 13)
+    if (itemOn == 13)
         dp_translation = crx[CRX_GOLD];
     else
         dp_translation = crx[CRX_GRAY];
@@ -5260,14 +5418,14 @@ void M_DrawGame3(void)
 {
     //M_DarkBackground(0);
 
-    if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
+    if (fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
         V_DrawPatchWithShadow(70, 0, 0, W_CacheLumpName("M_T_GSET",
                                                PU_CACHE), false);
     else
         V_DrawPatchWithShadow(70, 0, 0, W_CacheLumpName("M_GMESET",
                                                PU_CACHE), false);
 
-    if(crosshair == 1)
+    if (crosshair == 1)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef3.x + 266, GameDef3.y -2, "ON");
@@ -5278,7 +5436,7 @@ void M_DrawGame3(void)
         M_WriteText(GameDef3.x + 258, GameDef3.y -2, "OFF");
     }
     
-    if(autoaim)
+    if (autoaim)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef3.x + 266, GameDef3.y + 8, "ON");
@@ -5289,7 +5447,7 @@ void M_DrawGame3(void)
         M_WriteText(GameDef3.x + 258, GameDef3.y + 8, "OFF");
     }
 
-    if(jumping)
+    if (jumping)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef3.x + 266, GameDef3.y + 18, "ON");
@@ -5300,7 +5458,7 @@ void M_DrawGame3(void)
         M_WriteText(GameDef3.x + 258, GameDef3.y + 18, "OFF");
     }
 
-    if(d_maxgore)
+    if (d_maxgore)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef3.x + 266, GameDef3.y + 28, "ON");
@@ -5311,35 +5469,35 @@ void M_DrawGame3(void)
         M_WriteText(GameDef3.x + 258, GameDef3.y + 28, "OFF");
     }
 
-    if(!d_maxgore)
+    if (!d_maxgore)
         dp_translation = crx[CRX_DARK];
-    else if(itemOn == 4 && d_maxgore)
+    else if (itemOn == 4 && d_maxgore)
         dp_translation = crx[CRX_GOLD];
 
     M_WriteText(GameDef3.x, GameDef3.y + 38, "Gore Amount");
 
-    if(gore_amount == 1)
+    if (gore_amount == 1)
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(GameDef3.x + 257, GameDef3.y + 38, "LOW");
     }
-    else if(gore_amount == 2)
+    else if (gore_amount == 2)
     {
         dp_translation = crx[CRX_GOLD];
         M_WriteText(GameDef3.x + 236, GameDef3.y + 38, "MEDIUM");
     }
-    else if(gore_amount == 3)
+    else if (gore_amount == 3)
     {
         dp_translation = crx[CRX_RED];
         M_WriteText(GameDef3.x + 254, GameDef3.y + 38, "HIGH");
     }
-    else if(gore_amount == 4)
+    else if (gore_amount == 4)
     {
         dp_translation = crx[CRX_BLUE];
         M_WriteText(GameDef3.x + 174, GameDef3.y + 38, "RIP'EM TO PIECES");
     }
 
-    if(d_colblood)
+    if (d_colblood)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef3.x + 266, GameDef3.y + 48, "ON");
@@ -5350,7 +5508,7 @@ void M_DrawGame3(void)
         M_WriteText(GameDef3.x + 258, GameDef3.y + 48, "OFF");
     }
 
-    if(d_colblood2)
+    if (d_colblood2)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef3.x + 266, GameDef3.y + 58, "ON");
@@ -5361,9 +5519,9 @@ void M_DrawGame3(void)
         M_WriteText(GameDef3.x + 258, GameDef3.y + 58, "OFF");
     }
 
-    if(!d_maxgore)
+    if (!d_maxgore)
         dp_translation = crx[CRX_DARK];
-    else if(itemOn == 7 && d_maxgore)
+    else if (itemOn == 7 && d_maxgore)
         dp_translation = crx[CRX_GOLD];
 
     M_WriteText(GameDef3.x, GameDef3.y + 68, "Max. Number of Bloodsplats");
@@ -5372,7 +5530,7 @@ void M_DrawGame3(void)
 
     M_WriteText(GameDef3.x + 282 - M_StringWidth(bloodsplats_buffer), GameDef3.y + 68, bloodsplats_buffer);
 
-    if(d_shadows)
+    if (d_shadows)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef3.x + 266, GameDef3.y + 78, "ON");
@@ -5383,7 +5541,7 @@ void M_DrawGame3(void)
         M_WriteText(GameDef3.x + 258, GameDef3.y + 78, "OFF");
     }
 
-    if(d_telefrag)
+    if (d_telefrag)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef3.x + 266, GameDef3.y + 88, "ON");
@@ -5394,7 +5552,7 @@ void M_DrawGame3(void)
         M_WriteText(GameDef3.x + 258, GameDef3.y + 88, "OFF");
     }
 
-    if(d_doorstuck)
+    if (d_doorstuck)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef3.x + 266, GameDef3.y + 98, "ON");
@@ -5405,7 +5563,7 @@ void M_DrawGame3(void)
         M_WriteText(GameDef3.x + 258, GameDef3.y + 98, "OFF");
     }
 
-    if(d_resurrectghosts)
+    if (d_resurrectghosts)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef3.x + 266, GameDef3.y + 108, "ON");
@@ -5416,7 +5574,7 @@ void M_DrawGame3(void)
         M_WriteText(GameDef3.x + 258, GameDef3.y + 108, "OFF");
     }
 
-    if(d_limitedghosts)
+    if (d_limitedghosts)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef3.x + 266, GameDef3.y + 118, "ON");
@@ -5427,23 +5585,23 @@ void M_DrawGame3(void)
         M_WriteText(GameDef3.x + 258, GameDef3.y + 118, "OFF");
     }
 
-    if(whichSkull == 1)
+    if (whichSkull == 1)
     {
         int x;
         char *string = "";
         dp_translation = crx[CRX_GOLD];
-        /*if((itemOn == 3 || itemOn == 4) && dehacked)
+        /*if ((itemOn == 3 || itemOn == 4) && dehacked)
             string = "THIS OPTION IS NOT FOR ENABLED DEHACKED MODE.";
-        else if(itemOn == 8 && modifiedgame)
+        else if (itemOn == 8 && modifiedgame)
             string = "THIS OPTION IS NOT FOR CUSTOM PWAD FILES.";
-        else*/ if(itemOn == 1 && fsize == 12361532)
+        else*/ if (itemOn == 1 && fsize == 12361532)
             string = "NO EXTRA BLOOD & GORE FOR CHEX QUEST.";
 
-        x = ORIGINALWIDTH/2 - M_StringWidth(string) / 2;
+        x = ORIGINALWIDTH / 2 - M_StringWidth(string) / 2;
         M_WriteText(x, GameDef3.y + 138, string);
     }
 
-    if(itemOn == 13)
+    if (itemOn == 13)
         dp_translation = crx[CRX_GOLD];
     else
         dp_translation = crx[CRX_GRAY];
@@ -5455,14 +5613,14 @@ void M_DrawGame4(void)
 {
     //M_DarkBackground(0);
 
-    if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
+    if (fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
         V_DrawPatchWithShadow(70, 0, 0, W_CacheLumpName("M_T_GSET",
                                                PU_CACHE), false);
     else
         V_DrawPatchWithShadow(70, 0, 0, W_CacheLumpName("M_GMESET",
                                                PU_CACHE), false);
 
-    if(!d_blockskulls)
+    if (!d_blockskulls)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef4.x + 266, GameDef4.y - 2, "ON");
@@ -5473,7 +5631,7 @@ void M_DrawGame4(void)
         M_WriteText(GameDef4.x + 258, GameDef4.y - 2, "OFF");
     }
 
-    if(!d_blazingsound)
+    if (!d_blazingsound)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef4.x + 266, GameDef4.y + 8, "ON");
@@ -5484,7 +5642,7 @@ void M_DrawGame4(void)
         M_WriteText(GameDef4.x + 258, GameDef4.y + 8, "OFF");
     }
 
-    if(d_god)
+    if (d_god)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef4.x + 266, GameDef4.y + 18, "ON");
@@ -5495,7 +5653,7 @@ void M_DrawGame4(void)
         M_WriteText(GameDef4.x + 258, GameDef4.y + 18, "OFF");
     }
 
-    if(d_floors)
+    if (d_floors)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef4.x + 266, GameDef4.y + 28, "ON");
@@ -5506,7 +5664,7 @@ void M_DrawGame4(void)
         M_WriteText(GameDef4.x + 258, GameDef4.y + 28, "OFF");
     }
 
-    if(d_moveblock)
+    if (d_moveblock)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef4.x + 266, GameDef4.y + 38, "ON");
@@ -5517,7 +5675,7 @@ void M_DrawGame4(void)
         M_WriteText(GameDef4.x + 258, GameDef4.y + 38, "OFF");
     }
 
-    if(d_model)
+    if (d_model)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef4.x + 266, GameDef4.y + 48, "ON");
@@ -5528,7 +5686,7 @@ void M_DrawGame4(void)
         M_WriteText(GameDef4.x + 258, GameDef4.y + 48, "OFF");
     }
 
-    if(d_666)
+    if (d_666)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef4.x + 266, GameDef4.y + 58, "ON");
@@ -5539,7 +5697,7 @@ void M_DrawGame4(void)
         M_WriteText(GameDef4.x + 258, GameDef4.y + 58, "OFF");
     }
 
-    if(correct_lost_soul_bounce)
+    if (correct_lost_soul_bounce)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef4.x + 266, GameDef4.y + 68, "ON");
@@ -5550,7 +5708,7 @@ void M_DrawGame4(void)
         M_WriteText(GameDef4.x + 258, GameDef4.y + 68, "OFF");
     }
 
-    if(d_maskedanim)
+    if (d_maskedanim)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef4.x + 266, GameDef4.y + 78, "ON");
@@ -5561,7 +5719,7 @@ void M_DrawGame4(void)
         M_WriteText(GameDef4.x + 258, GameDef4.y + 78, "OFF");
     }
 
-    if(d_sound)
+    if (d_sound)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef4.x + 266, GameDef4.y + 88, "ON");
@@ -5572,7 +5730,7 @@ void M_DrawGame4(void)
         M_WriteText(GameDef4.x + 258, GameDef4.y + 88, "OFF");
     }
 
-    if(d_ouchface)
+    if (d_ouchface)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef4.x + 266, GameDef4.y + 98, "ON");
@@ -5583,7 +5741,7 @@ void M_DrawGame4(void)
         M_WriteText(GameDef4.x + 258, GameDef4.y + 98, "OFF");
     }
 
-    if(d_brightmaps)
+    if (d_brightmaps)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef4.x + 266, GameDef4.y + 108, "ON");
@@ -5594,7 +5752,7 @@ void M_DrawGame4(void)
         M_WriteText(GameDef4.x + 258, GameDef4.y + 108, "OFF");
     }
 
-    if(d_fixmaperrors)
+    if (d_fixmaperrors)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef4.x + 266, GameDef4.y + 118, "ON");
@@ -5605,20 +5763,20 @@ void M_DrawGame4(void)
         M_WriteText(GameDef4.x + 258, GameDef4.y + 118, "OFF");
     }
 
-    if(whichSkull == 1)
+    if (whichSkull == 1)
     {
         int x;
         char *string = "";
         dp_translation = crx[CRX_GOLD];
-        if(itemOn == 11)
+        if (itemOn == 11)
             string = "YOU MUST QUIT AND RESTART TO TAKE EFFECT.";
-        else if(itemOn == 12)
+        else if (itemOn == 12)
             string = "YOU MAY NEED TO RESTART THE MAP FOR THIS.";
-        x = ORIGINALWIDTH/2 - M_StringWidth(string) / 2;
+        x = ORIGINALWIDTH / 2 - M_StringWidth(string) / 2;
         M_WriteText(x, GameDef3.y + 138, string);
     }
 
-    if(itemOn == 13)
+    if (itemOn == 13)
         dp_translation = crx[CRX_GOLD];
     else
         dp_translation = crx[CRX_GRAY];
@@ -5630,14 +5788,14 @@ void M_DrawGame5(void)
 {
     //M_DarkBackground(0);
 
-    if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
+    if (fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
         V_DrawPatchWithShadow(70, 0, 0, W_CacheLumpName("M_T_GSET",
                                                PU_CACHE), false);
     else
         V_DrawPatchWithShadow(70, 0, 0, W_CacheLumpName("M_GMESET",
                                                PU_CACHE), false);
 
-    if(d_altlighting)
+    if (d_altlighting)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef5.x + 266, GameDef5.y - 2, "ON");
@@ -5648,7 +5806,7 @@ void M_DrawGame5(void)
         M_WriteText(GameDef5.x + 258, GameDef5.y - 2, "OFF");
     }
 
-    if(allow_infighting)
+    if (allow_infighting)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef5.x + 266, GameDef5.y + 8, "ON");
@@ -5659,7 +5817,7 @@ void M_DrawGame5(void)
         M_WriteText(GameDef5.x + 258, GameDef5.y + 8, "OFF");
     }
 
-    if(last_enemy)
+    if (last_enemy)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef5.x + 266, GameDef5.y + 18, "ON");
@@ -5670,7 +5828,7 @@ void M_DrawGame5(void)
         M_WriteText(GameDef5.x + 258, GameDef5.y + 18, "OFF");
     }
 
-    if(float_items)
+    if (float_items)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef5.x + 266, GameDef5.y + 28, "ON");
@@ -5681,7 +5839,7 @@ void M_DrawGame5(void)
         M_WriteText(GameDef5.x + 258, GameDef5.y + 28, "OFF");
     }
 
-    if(animated_drop)
+    if (animated_drop)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef5.x + 266, GameDef5.y + 38, "ON");
@@ -5692,7 +5850,7 @@ void M_DrawGame5(void)
         M_WriteText(GameDef5.x + 258, GameDef5.y + 38, "OFF");
     }
 
-    if(crush_sound)
+    if (crush_sound)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef5.x + 266, GameDef5.y + 48, "ON");
@@ -5703,7 +5861,7 @@ void M_DrawGame5(void)
         M_WriteText(GameDef5.x + 258, GameDef5.y + 48, "OFF");
     }
 
-    if(disable_noise)
+    if (disable_noise)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef5.x + 266, GameDef5.y + 58, "ON");
@@ -5714,7 +5872,7 @@ void M_DrawGame5(void)
         M_WriteText(GameDef5.x + 258, GameDef5.y + 58, "OFF");
     }
 
-    if(corpses_nudge)
+    if (corpses_nudge)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef5.x + 266, GameDef5.y + 68, "ON");
@@ -5725,7 +5883,7 @@ void M_DrawGame5(void)
         M_WriteText(GameDef5.x + 258, GameDef5.y + 68, "OFF");
     }
 
-    if(corpses_slide)
+    if (corpses_slide)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef5.x + 266, GameDef5.y + 78, "ON");
@@ -5736,14 +5894,14 @@ void M_DrawGame5(void)
         M_WriteText(GameDef5.x + 258, GameDef5.y + 78, "OFF");
     }
 
-    if(!corpses_slide)
+    if (!corpses_slide)
         dp_translation = crx[CRX_DARK];
-    else if(itemOn == 9 && corpses_slide)
+    else if (itemOn == 9 && corpses_slide)
         dp_translation = crx[CRX_GOLD];
 
     M_WriteText(GameDef5.x, GameDef5.y + 88, "Corpses smear blood when sliding");
 
-    if(corpses_smearblood)
+    if (corpses_smearblood)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef5.x + 266, GameDef5.y + 88, "ON");
@@ -5754,7 +5912,7 @@ void M_DrawGame5(void)
         M_WriteText(GameDef5.x + 258, GameDef5.y + 88, "OFF");
     }
 
-    if(randomly_colored_playercorpses)
+    if (randomly_colored_playercorpses)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef5.x + 266, GameDef5.y + 98, "ON");
@@ -5765,7 +5923,7 @@ void M_DrawGame5(void)
         M_WriteText(GameDef5.x + 258, GameDef5.y + 98, "OFF");
     }
 
-    if(lowhealth)
+    if (lowhealth)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef5.x + 266, GameDef5.y + 108, "ON");
@@ -5776,7 +5934,7 @@ void M_DrawGame5(void)
         M_WriteText(GameDef5.x + 258, GameDef5.y + 108, "OFF");
     }
 
-    if(d_fixspriteoffsets)
+    if (d_fixspriteoffsets)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef5.x + 266, GameDef5.y + 118, "ON");
@@ -5787,18 +5945,18 @@ void M_DrawGame5(void)
         M_WriteText(GameDef5.x + 258, GameDef5.y + 118, "OFF");
     }
 
-    if(whichSkull == 1)
+    if (whichSkull == 1)
     {
         int x;
         char *string = "";
         dp_translation = crx[CRX_GOLD];
-        if(itemOn == 12)
+        if (itemOn == 12)
             string = "YOU MUST START A NEW GAME TO TAKE EFFECT.";
-        x = ORIGINALWIDTH/2 - M_StringWidth(string) / 2;
+        x = ORIGINALWIDTH / 2 - M_StringWidth(string) / 2;
         M_WriteText(x, GameDef5.y + 138, string);
     }
 
-    if(itemOn == 13)
+    if (itemOn == 13)
         dp_translation = crx[CRX_GOLD];
     else
         dp_translation = crx[CRX_GRAY];
@@ -5810,14 +5968,14 @@ void M_DrawGame6(void)
 {
     //M_DarkBackground(0);
 
-    if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
+    if (fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
         V_DrawPatchWithShadow(70, 0, 0, W_CacheLumpName("M_T_GSET",
                                                PU_CACHE), false);
     else
         V_DrawPatchWithShadow(70, 0, 0, W_CacheLumpName("M_GMESET",
                                                PU_CACHE), false);
 
-    if(d_centerweapon)
+    if (d_centerweapon)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef6.x + 266, GameDef6.y - 2, "ON");
@@ -5828,13 +5986,13 @@ void M_DrawGame6(void)
         M_WriteText(GameDef6.x + 258, GameDef6.y - 2, "OFF");
     }
 
-    if(!d_ejectcasings && fsize == 12361532)
+    if (!d_ejectcasings && fsize == 12361532)
         dp_translation = crx[CRX_DARK];
-    else if(itemOn == 1)
+    else if (itemOn == 1)
         dp_translation = crx[CRX_GOLD];
     M_WriteText(GameDef6.x, GameDef6.y + 8, "Eject Weapon Casings");
 
-    if(d_ejectcasings)
+    if (d_ejectcasings)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef6.x + 266, GameDef6.y + 8, "ON");
@@ -5845,7 +6003,7 @@ void M_DrawGame6(void)
         M_WriteText(GameDef6.x + 258, GameDef6.y + 8, "OFF");
     }
 
-    if(d_drawparticles)
+    if (d_drawparticles)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef6.x + 266, GameDef6.y + 18, "ON");
@@ -5866,126 +6024,126 @@ void M_DrawGame6(void)
         M_WriteText(GameDef6.x + 258, GameDef6.y + 18, "OFF");
     }
 
-    if(!d_drawparticles)
+    if (!d_drawparticles)
         dp_translation = crx[CRX_DARK];
-    else if(itemOn == 3 && d_drawparticles)
+    else if (itemOn == 3 && d_drawparticles)
         dp_translation = crx[CRX_GOLD];
 
     M_WriteText(GameDef6.x, GameDef6.y + 28, "BLOOD TYPE");
 
-    if(!d_drawparticles)
+    if (!d_drawparticles)
         dp_translation = crx[CRX_DARK];
-    else if(itemOn == 4 && d_drawparticles)
+    else if (itemOn == 4 && d_drawparticles)
         dp_translation = crx[CRX_GOLD];
     M_WriteText(GameDef6.x, GameDef6.y + 38, "BULLET TYPE");
 
-    if(!d_drawparticles)
+    if (!d_drawparticles)
         dp_translation = crx[CRX_DARK];
-    else if(itemOn == 5 && d_drawparticles)
+    else if (itemOn == 5 && d_drawparticles)
         dp_translation = crx[CRX_GOLD];
 
     M_WriteText(GameDef6.x, GameDef6.y + 48, "TELEPORT TYPE");
 
-    if(!d_drawparticles)
+    if (!d_drawparticles)
         dp_translation = crx[CRX_DARK];
-    else if(itemOn == 6 && d_drawparticles)
+    else if (itemOn == 6 && d_drawparticles)
         dp_translation = crx[CRX_GOLD];
     M_WriteText(GameDef6.x, GameDef6.y + 58, "BFG CLOUD WITH PARTICLES");
 
-    if(!d_drawparticles)
+    if (!d_drawparticles)
         dp_translation = crx[CRX_DARK];
-    else if(itemOn == 7 && d_drawparticles)
+    else if (itemOn == 7 && d_drawparticles)
         dp_translation = crx[CRX_GOLD];
     M_WriteText(GameDef6.x, GameDef6.y + 68, "BFG Explosion Particles");
 
-    if(!d_drawparticles)
+    if (!d_drawparticles)
         dp_translation = crx[CRX_DARK];
-    else if(itemOn == 8 && d_drawparticles)
+    else if (itemOn == 8 && d_drawparticles)
         dp_translation = crx[CRX_GOLD];
     M_WriteText(GameDef6.x, GameDef6.y + 78, "ROCKET PARTICLE-TRAILS");
 
-    if(!d_drawparticles)
+    if (!d_drawparticles)
         dp_translation = crx[CRX_DARK];
-    else if(itemOn == 9 && d_drawparticles)
+    else if (itemOn == 9 && d_drawparticles)
         dp_translation = crx[CRX_GOLD];
     M_WriteText(GameDef6.x, GameDef6.y + 88, "Rocket Explosion Particles");
 
-    if(!d_drawparticles || gamemode != commercial)
+    if (!d_drawparticles || gamemode != commercial)
         dp_translation = crx[CRX_DARK];
-    else if(itemOn == 10 && d_drawparticles && gamemode == commercial)
+    else if (itemOn == 10 && d_drawparticles && gamemode == commercial)
         dp_translation = crx[CRX_GOLD];
     M_WriteText(GameDef6.x, GameDef6.y + 98, "SPAWN FLIES FOR DEAD CHAINGUNNERS");
 
-    if(!d_drawparticles)
+    if (!d_drawparticles)
         dp_translation = crx[CRX_DARK];
-    else if(itemOn == 11 && d_drawparticles)
+    else if (itemOn == 11 && d_drawparticles)
         dp_translation = crx[CRX_GOLD];
     M_WriteText(GameDef6.x, GameDef6.y + 108, "Enemies & hangings bleed randomly");
 
-    if(!d_drawparticles)
+    if (!d_drawparticles)
         dp_translation = crx[CRX_DARK];
-    else if(itemOn == 12 && d_drawparticles)
+    else if (itemOn == 12 && d_drawparticles)
         dp_translation = crx[CRX_GOLD];
     M_WriteText(GameDef6.x, GameDef6.y + 118, "Particle sounds For Bullets & Flies");
 
-    if(bloodsplat_particle == 0)
+    if (bloodsplat_particle == 0)
     {
-        if(!d_drawparticles)
+        if (!d_drawparticles)
             dp_translation = crx[CRX_DARK];
         else
             dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef6.x + 232, GameDef6.y + 28, "SPRITES");
     }
-    else if(bloodsplat_particle == 1)
+    else if (bloodsplat_particle == 1)
     {
         dp_translation = crx[CRX_GOLD];
         M_WriteText(GameDef6.x + 215, GameDef6.y + 28, "PARTICLES");
     }
-    else if(bloodsplat_particle == 2)
+    else if (bloodsplat_particle == 2)
     {
         dp_translation = crx[CRX_RED];
         M_WriteText(GameDef6.x + 250, GameDef6.y + 28, "BOTH");
     }
 
-    if(bulletpuff_particle == 0)
+    if (bulletpuff_particle == 0)
     {
-        if(!d_drawparticles)
+        if (!d_drawparticles)
             dp_translation = crx[CRX_DARK];
         else
             dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef6.x + 232, GameDef6.y + 38, "SPRITES");
     }
-    else if(bulletpuff_particle == 1)
+    else if (bulletpuff_particle == 1)
     {
         dp_translation = crx[CRX_GOLD];
         M_WriteText(GameDef6.x + 215, GameDef6.y + 38, "PARTICLES");
     }
-    else if(bulletpuff_particle == 2)
+    else if (bulletpuff_particle == 2)
     {
         dp_translation = crx[CRX_RED];
         M_WriteText(GameDef6.x + 250, GameDef6.y + 38, "BOTH");
     }
 
-    if(teleport_particle == 0)
+    if (teleport_particle == 0)
     {
-        if(!d_drawparticles)
+        if (!d_drawparticles)
             dp_translation = crx[CRX_DARK];
         else
             dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef6.x + 232, GameDef6.y + 48, "SPRITES");
     }
-    else if(teleport_particle == 1)
+    else if (teleport_particle == 1)
     {
         dp_translation = crx[CRX_GOLD];
         M_WriteText(GameDef6.x + 215, GameDef6.y + 48, "PARTICLES");
     }
-    else if(teleport_particle == 2)
+    else if (teleport_particle == 2)
     {
         dp_translation = crx[CRX_RED];
         M_WriteText(GameDef6.x + 250, GameDef6.y + 48, "BOTH");
     }
 
-    if(d_drawbfgcloud)
+    if (d_drawbfgcloud)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef6.x + 266, GameDef6.y + 58, "ON");
@@ -5996,7 +6154,7 @@ void M_DrawGame6(void)
         M_WriteText(GameDef6.x + 258, GameDef6.y + 58, "OFF");
     }
 
-    if(d_drawbfgexplosions)
+    if (d_drawbfgexplosions)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef6.x + 266, GameDef6.y + 68, "ON");
@@ -6007,7 +6165,7 @@ void M_DrawGame6(void)
         M_WriteText(GameDef6.x + 258, GameDef6.y + 68, "OFF");
     }
 
-    if(d_drawrockettrails)
+    if (d_drawrockettrails)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef6.x + 266, GameDef6.y + 78, "ON");
@@ -6018,7 +6176,7 @@ void M_DrawGame6(void)
         M_WriteText(GameDef6.x + 258, GameDef6.y + 78, "OFF");
     }
 
-    if(d_drawrocketexplosions)
+    if (d_drawrocketexplosions)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef6.x + 266, GameDef6.y + 88, "ON");
@@ -6029,7 +6187,7 @@ void M_DrawGame6(void)
         M_WriteText(GameDef6.x + 258, GameDef6.y + 88, "OFF");
     }
 
-    if(d_spawnflies)
+    if (d_spawnflies)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef6.x + 266, GameDef6.y + 98, "ON");
@@ -6040,7 +6198,7 @@ void M_DrawGame6(void)
         M_WriteText(GameDef6.x + 258, GameDef6.y + 98, "OFF");
     }
 
-    if(d_dripblood)
+    if (d_dripblood)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef6.x + 266, GameDef6.y + 108, "ON");
@@ -6051,7 +6209,7 @@ void M_DrawGame6(void)
         M_WriteText(GameDef6.x + 258, GameDef6.y + 108, "OFF");
     }
 
-    if(particle_sounds)
+    if (particle_sounds)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef6.x + 266, GameDef6.y + 118, "ON");
@@ -6062,7 +6220,7 @@ void M_DrawGame6(void)
         M_WriteText(GameDef6.x + 258, GameDef6.y + 118, "OFF");
     }
 
-    if(whichSkull == 1)
+    if (whichSkull == 1)
     {
         int x;
         char *string = "";
@@ -6073,11 +6231,11 @@ void M_DrawGame6(void)
             string = "YOU MUST ENABLE 'DRAW PARTICLES' FIRST!";
         if (itemOn == 10 && d_drawparticles && (gamemode == retail || gamemode == registered || gamemode == shareware))
             string = "THIS IS ONLY AVAILABLE FOR DOOM 2";
-        x = ORIGINALWIDTH/2 - M_StringWidth(string) / 2;
+        x = ORIGINALWIDTH / 2 - M_StringWidth(string) / 2;
         M_WriteText(x, GameDef6.y + 138, string);
     }
 
-    if(itemOn == 13)
+    if (itemOn == 13)
         dp_translation = crx[CRX_GOLD];
     else
         dp_translation = crx[CRX_GRAY];
@@ -6089,14 +6247,14 @@ void M_DrawGame7(void)
 {
     //M_DarkBackground(0);
 
-    if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
+    if (fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
         V_DrawPatchWithShadow(70, 0, 0, W_CacheLumpName("M_T_GSET",
                                                PU_CACHE), false);
     else
         V_DrawPatchWithShadow(70, 0, 0, W_CacheLumpName("M_GMESET",
                                                PU_CACHE), false);
 
-    if(smoketrails)
+    if (smoketrails)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef7.x + 266, GameDef7.y - 2, "ON");
@@ -6107,7 +6265,7 @@ void M_DrawGame7(void)
         M_WriteText(GameDef7.x + 258, GameDef7.y - 2, "OFF");
     }
 
-    if(d_fixwiggle)
+    if (d_fixwiggle)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef7.x + 266, GameDef7.y + 8, "ON");
@@ -6118,7 +6276,7 @@ void M_DrawGame7(void)
         M_WriteText(GameDef7.x + 258, GameDef7.y + 8, "OFF");
     }
 
-    if(remove_slime_trails)
+    if (remove_slime_trails)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef7.x + 266, GameDef7.y + 18, "ON");
@@ -6129,13 +6287,13 @@ void M_DrawGame7(void)
         M_WriteText(GameDef7.x + 258, GameDef7.y + 18, "OFF");
     }
 
-    if((players[consoleplayer].cheats & CF_GODMODE) || gameskill == sk_nightmare)
+    if ((players[consoleplayer].cheats & CF_GODMODE) || gameskill == sk_nightmare)
         dp_translation = crx[CRX_DARK];
-    else if(itemOn == 3 && (!(players[consoleplayer].cheats & CF_GODMODE)))
+    else if (itemOn == 3 && (!(players[consoleplayer].cheats & CF_GODMODE)))
         dp_translation = crx[CRX_GOLD];
     M_WriteText(GameDef7.x, GameDef7.y + 28, "Aimbot for vulnerable player");
 
-    if(aiming_help)
+    if (aiming_help)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef7.x + 266, GameDef7.y + 28, "ON");
@@ -6146,7 +6304,7 @@ void M_DrawGame7(void)
         M_WriteText(GameDef7.x + 258, GameDef7.y + 28, "OFF");
     }
 
-    if(d_thrust)
+    if (d_thrust)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef7.x + 266, GameDef7.y + 38, "ON");
@@ -6157,17 +6315,17 @@ void M_DrawGame7(void)
         M_WriteText(GameDef7.x + 258, GameDef7.y + 38, "OFF");
     }
 
-    if(d_spawnteleglit == 1)
+    if (d_spawnteleglit == 1)
     {
         dp_translation = crx[CRX_RED];
         M_WriteText(GameDef7.x + 258, GameDef7.y + 48, "RED");
     }
-    else if(d_spawnteleglit == 2)
+    else if (d_spawnteleglit == 2)
     {
         dp_translation = crx[CRX_BLUE];
         M_WriteText(GameDef7.x + 250, GameDef7.y + 48, "BLUE");
     }
-    else if(d_spawnteleglit == 3)
+    else if (d_spawnteleglit == 3)
     {
         dp_translation = crx[CRX_GOLD];
         M_WriteText(GameDef7.x + 233, GameDef7.y + 48, "RANDOM");
@@ -6178,25 +6336,25 @@ void M_DrawGame7(void)
         M_WriteText(GameDef7.x + 258, GameDef7.y + 48, "OFF");
     }
 
-    if(gameskill == sk_nightmare)
+    if (gameskill == sk_nightmare)
         dp_translation = crx[CRX_DARK];
-    else if(itemOn == 6 && gameskill != sk_nightmare)
+    else if (itemOn == 6 && gameskill != sk_nightmare)
         dp_translation = crx[CRX_GOLD];
 
     M_WriteText(GameDef7.x, GameDef7.y + 58, "WEAPON CHANGE");
 
-    if(use_vanilla_weapon_change == 1)
+    if (use_vanilla_weapon_change == 1)
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(GameDef7.x + 250, GameDef7.y + 58, "SLOW");
     }
-    else if(use_vanilla_weapon_change == 0)
+    else if (use_vanilla_weapon_change == 0)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef7.x + 251, GameDef7.y + 58, "FAST");
     }
 
-    if(d_recoil)
+    if (d_recoil)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef7.x + 266, GameDef7.y + 68, "ON");
@@ -6207,7 +6365,7 @@ void M_DrawGame7(void)
         M_WriteText(GameDef7.x + 258, GameDef7.y + 68, "OFF");
     }
 
-    if(hud)
+    if (hud)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef7.x + 266, GameDef7.y + 78, "ON");
@@ -6218,8 +6376,7 @@ void M_DrawGame7(void)
         M_WriteText(GameDef7.x + 258, GameDef7.y + 78, "OFF");
     }
 
-#ifdef WII
-    if(beta_style_mode)
+    if (enable_autosave)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef7.x + 266, GameDef7.y + 88, "ON");
@@ -6229,18 +6386,30 @@ void M_DrawGame7(void)
         dp_translation = crx[CRX_DARK];
         M_WriteText(GameDef7.x + 258, GameDef7.y + 88, "OFF");
     }
+
+#ifdef WII
+    if (beta_style_mode)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(GameDef7.x + 266, GameDef7.y + 98, "ON");
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(GameDef7.x + 258, GameDef7.y + 98, "OFF");
+    }
 #endif
 
-    if(whichSkull == 1)
+    if (whichSkull == 1)
     {
         int x;
         char *string = "";
         dp_translation = crx[CRX_GOLD];
-        if(itemOn == 2)
+        if (itemOn == 2)
             string = "START / LOAD A NEW GAME TO TAKE EFFECT.";
-        else if(itemOn == 3)
+        else if (itemOn == 3)
         {
-            if(players[consoleplayer].cheats & CF_GODMODE)
+            if (players[consoleplayer].cheats & CF_GODMODE)
                 string = "YOU NEED TO DISABLE GOD MODE FIRST!";
             else
                 string = "TO USE, HOLD DOWN 'X' AFTER BEING ATTACKED.";
@@ -6248,60 +6417,60 @@ void M_DrawGame7(void)
             if (gameskill == sk_nightmare)
                 string = "NOT AVAILABLE FOR NIGHTMARE SKILL";
         }
-        else if(itemOn == 9 && gameskill == sk_nightmare)
+        else if (itemOn == 6 && gameskill == sk_nightmare)
             string = "NOT AVAILABLE FOR NIGHTMARE SKILL";
 #ifdef WII
-        if(itemOn == 11)
+        if (itemOn == 12)
         {
-            if(fsize != 28422764 && fsize != 19321722 && fsize != 12361532)
+            if (fsize != 28422764 && fsize != 19321722 && fsize != 12361532)
                 string = "YOU MUST QUIT AND RESTART TO TAKE EFFECT.";
             else
                 string = "NO BETA MODE FOR CHEX, HACX & FREEDOOM.";
         }
 #endif
-        x = ORIGINALWIDTH/2 - M_StringWidth(string) / 2;
+        x = ORIGINALWIDTH / 2 - M_StringWidth(string) / 2;
         M_WriteText(x, GameDef7.y + 138, string);
     }
 }
 
 void DetectState(void)
 {
-    if(!netgame && !demoplayback && gamestate == GS_LEVEL
+    if (!netgame && !demoplayback && gamestate == GS_LEVEL
         && gameskill != sk_nightmare &&
         players[consoleplayer].playerstate == PST_DEAD)
     {
         M_StartMessage("CHEATING NOT ALLOWED - YOU'RE DEAD",
         NULL, true);
     }
-    else if(!netgame && demoplayback && gamestate == GS_LEVEL
+    else if (!netgame && demoplayback && gamestate == GS_LEVEL
         && players[consoleplayer].playerstate == PST_LIVE)
     {
         M_StartMessage("CHEATING NOT ALLOWED IN DEMO MODE",
         NULL, true);
     }
-    else if(!netgame && demoplayback && gamestate == GS_LEVEL
+    else if (!netgame && demoplayback && gamestate == GS_LEVEL
         && players[consoleplayer].playerstate == PST_DEAD)
     {
         M_StartMessage("CHEATING NOT ALLOWED IN DEMO MODE",
         NULL, true);
     }
-    else if(!netgame && demoplayback && gamestate != GS_LEVEL)
+    else if (!netgame && demoplayback && gamestate != GS_LEVEL)
     {
         M_StartMessage("CHEATING NOT ALLOWED IN DEMO MODE",
         NULL, true);
     }
-    else if(!netgame && !demoplayback && gamestate != GS_LEVEL)
+    else if (!netgame && !demoplayback && gamestate != GS_LEVEL)
     {
         M_StartMessage("CHEATING NOT ALLOWED IN DEMO MODE",
         NULL, true);
     }
-    else if(netgame)
+    else if (netgame)
     {
         M_StartMessage("CHEATING NOT ALLOWED FOR NET GAME",
         NULL, true);
     }
 
-    if(gameskill == sk_nightmare)
+    if (gameskill == sk_nightmare)
     {
         M_StartMessage("CHEATING DISABLED - NIGHTMARE SKILL",
         NULL, true);
@@ -6312,7 +6481,7 @@ void M_DrawCheats(void)
 {
     //M_DarkBackground(0);
 
-    if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
+    if (fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
         V_DrawPatchWithShadow (110, 6, 0, W_CacheLumpName("M_T_CHTS", PU_CACHE), false);
     else
         V_DrawPatchWithShadow (110, 6, 0, W_CacheLumpName("M_CHEATS", PU_CACHE), false);
@@ -6339,31 +6508,31 @@ void M_DrawCheats(void)
         M_WriteText(215, 36, "OFF");
     }
 
-    if(itemOn == 2)
+    if (itemOn == 2)
         dp_translation = crx[CRX_GOLD];
     else
         dp_translation = crx[CRX_GRAY];
     M_WriteText(75, 46, "WEAPONS...");
 
-    if(itemOn == 3)
+    if (itemOn == 3)
         dp_translation = crx[CRX_GOLD];
     else
         dp_translation = crx[CRX_GRAY];
     M_WriteText(75, 56, "KEYS...");
 
-    if(itemOn == 4)
+    if (itemOn == 4)
         dp_translation = crx[CRX_GOLD];
     else
         dp_translation = crx[CRX_GRAY];
     M_WriteText(75, 66, "ARMOR...");
 
-    if(itemOn == 5)
+    if (itemOn == 5)
         dp_translation = crx[CRX_GOLD];
     else
         dp_translation = crx[CRX_GRAY];
     M_WriteText(75, 76, "ITEMS...");
 
-    if(!cheating)
+    if (!cheating)
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(215, 86, "OFF");
@@ -6386,42 +6555,42 @@ void M_DrawCheats(void)
         fsize == 11159840 || fsize == 12408292 || fsize == 12361532 ||
         fsize == 12474561 || fsize == 12538385 || fsize == 12487824)
     {
-        if(epi == 0)
+        if (epi == 0)
             epi = 1;
 
-        if(epi == 1 && map == 0)
+        if (epi == 1 && map == 0)
             map = 1;
-        else if(epi == 4 && map == 10)
+        else if (epi == 4 && map == 10)
             map = 9;
 
-        if(fsize == 12538385 && epi == 1 && map == 10)
+        if (fsize == 12538385 && epi == 1 && map == 10)
         {
             dp_translation = crx[CRX_GRAY];
             M_WriteText(75, 116, "E1M10: SEWERS");
         }
-        if(epi == 1 && gameversion != exe_chex && map != 10)
+        if (epi == 1 && gameversion != exe_chex && map != 10)
         {
             dp_translation = crx[CRX_GRAY];
             M_WriteText(75, 116, maptext[map]);
         }
-        else if(epi == 2 && gameversion != exe_chex)
+        else if (epi == 2 && gameversion != exe_chex)
         {
             dp_translation = crx[CRX_GRAY];
             M_WriteText(75, 116, maptext[map+9]);
         }
-        else if(epi == 3 && gameversion != exe_chex)
+        else if (epi == 3 && gameversion != exe_chex)
         {
             dp_translation = crx[CRX_GRAY];
             M_WriteText(75, 116, maptext[map+18]);
         }
-        else if(epi == 4 && gameversion != exe_chex)
+        else if (epi == 4 && gameversion != exe_chex)
         {
             dp_translation = crx[CRX_GRAY];
             M_WriteText(75, 116, maptext[map+27]);
         }
     }
 
-    if((fsize == 14943400 || fsize == 14824716 || fsize == 14612688 ||
+    if ((fsize == 14943400 || fsize == 14824716 || fsize == 14612688 ||
             fsize == 14607420 || fsize == 14604584 || fsize == 14677988 ||
             fsize == 14683458 || fsize == 14691821 || fsize == 28422764) &&
             map < 33)
@@ -6429,23 +6598,23 @@ void M_DrawCheats(void)
         dp_translation = crx[CRX_GRAY];
         M_WriteText(75, 116, maptext[map+36]);
     }
-    if((fsize == 14677988 || fsize == 14683458 || fsize == 14691821) &&
+    if ((fsize == 14677988 || fsize == 14683458 || fsize == 14691821) &&
         map == 33)
     {
         dp_translation = crx[CRX_GRAY];
         M_WriteText(75, 116, "LEVEL 33: BETRAY");        
     }
-    if(fsize == 18195736 || fsize == 18654796)
+    if (fsize == 18195736 || fsize == 18654796)
     {
         dp_translation = crx[CRX_GRAY];
         M_WriteText(75, 116, maptext[map+68]);
     }
-    if(fsize == 18240175 || fsize == 17420824)
+    if (fsize == 18240175 || fsize == 17420824)
     {
         dp_translation = crx[CRX_GRAY];
         M_WriteText(75, 116, maptext[map+100]);
     }
-    if(fsize == 19321722)
+    if (fsize == 19321722)
     {
         dp_translation = crx[CRX_GRAY];
         M_WriteText(75, 116, maptext[map+142]);
@@ -6454,23 +6623,23 @@ void M_DrawCheats(void)
         fsize == 4207819 || fsize == 4274218 || fsize == 4225504 ||
         fsize == 4225460 || fsize == 4234124 || fsize == 4196020)
     {
-        if(tracknum == 0)
+        if (tracknum == 0)
             tracknum = 1;
 
-        if(faketracknum == 0)
+        if (faketracknum == 0)
             faketracknum = 1;
 
         dp_translation = crx[CRX_GRAY];
         M_WriteText(220, 156, songtextbeta[tracknum]);
     }
-    else if(fsize == 10396254 || fsize == 10399316 || fsize == 10401760 ||
+    else if (fsize == 10396254 || fsize == 10399316 || fsize == 10401760 ||
             fsize == 11159840 || fsize == 12408292 || fsize == 12361532 ||
             fsize == 12474561 || fsize == 12538385 || fsize == 12487824)
     {
-        if(tracknum == 0)
+        if (tracknum == 0)
             tracknum = 1;
 
-        if(fsize == 12361532)
+        if (fsize == 12361532)
         {
             dp_translation = crx[CRX_GRAY];
             M_WriteText(220, 156, songtextchex[tracknum]);
@@ -6481,20 +6650,20 @@ void M_DrawCheats(void)
             M_WriteText(220, 156, songtext[tracknum]);
         }
     }
-    else if(fsize == 14943400 || fsize == 14824716 || fsize == 14612688 ||
+    else if (fsize == 14943400 || fsize == 14824716 || fsize == 14612688 ||
             fsize == 14607420 || fsize == 14604584 || fsize == 19321722 ||
             fsize == 28422764 || fsize == 14677988 || fsize == 14683458 ||
             fsize == 14691821)
     {
-        if(tracknum == 1)
+        if (tracknum == 1)
             tracknum = 33;
 
-        if(fsize == 19321722)
+        if (fsize == 19321722)
         {
             dp_translation = crx[CRX_GRAY];
             M_WriteText(220, 156, songtext2hacx[tracknum]);
         }
-        else if(fsize == 28422764)
+        else if (fsize == 28422764)
         {
             dp_translation = crx[CRX_GRAY];
             M_WriteText(220, 156, songtext2fd[tracknum]);
@@ -6505,31 +6674,31 @@ void M_DrawCheats(void)
             M_WriteText(220, 156, songtext2[tracknum]);
         }
     }
-    else if(fsize == 18195736 || fsize == 18654796)
+    else if (fsize == 18195736 || fsize == 18654796)
     {
-        if(tracknum == 1)
+        if (tracknum == 1)
             tracknum = 33;
 
         dp_translation = crx[CRX_GRAY];
         M_WriteText(220, 156, songtexttnt[tracknum]);
     }
-    else if(fsize == 18240172 || fsize == 17420824)
+    else if (fsize == 18240172 || fsize == 17420824)
     {
-        if(tracknum == 1)
+        if (tracknum == 1)
             tracknum = 33;
 
         dp_translation = crx[CRX_GRAY];
         M_WriteText(220, 156, songtextplut[tracknum]);
     }
 
-    if(whichSkull == 1)
+    if (whichSkull == 1)
     {
         int x;
         char *string = "";
         dp_translation = crx[CRX_GOLD];
-        if(itemOn == 0 && aiming_help)
+        if (itemOn == 0 && aiming_help)
             string = "IF ENABLED, AIMBOT WILL BE DISABLED!";
-        x = ORIGINALWIDTH/2 - M_StringWidth(string) / 2;
+        x = ORIGINALWIDTH / 2 - M_StringWidth(string) / 2;
         M_WriteText(x, CheatsDef.y + 138, string);
     }
 }
@@ -6553,28 +6722,28 @@ void M_DrawRecord(void)
         fsize != 18654796 && fsize != 18240172 && fsize != 17420824 &&
         fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
     {
-        if(repi == 1)
+        if (repi == 1)
         {
             dp_translation = crx[CRX_GRAY];
             M_WriteText(RecordDef.x, RecordDef.y + 8, "E1M");
         }
-        else if(repi == 2)
+        else if (repi == 2)
         {
             dp_translation = crx[CRX_GRAY];
             M_WriteText(RecordDef.x, RecordDef.y + 8, "E2M");
         }
-        else if(repi == 3)
+        else if (repi == 3)
         {
             dp_translation = crx[CRX_GRAY];
             M_WriteText(RecordDef.x, RecordDef.y + 8, "E3M");
         }
-        else if(repi == 4)
+        else if (repi == 4)
         {
             dp_translation = crx[CRX_GRAY];
             M_WriteText(RecordDef.x, RecordDef.y + 8, "E4M");
         }
 
-        if(repi > 1)
+        if (repi > 1)
         {
             dp_translation = crx[CRX_GRAY];
             M_WriteText(RecordDef.x + 25, RecordDef.y + 8, buffer_map);
@@ -6585,82 +6754,82 @@ void M_DrawRecord(void)
             M_WriteText(RecordDef.x + 22, RecordDef.y + 8, buffer_map);
         }
     }
-    else if(fsize != 12361532)
+    else if (fsize != 12361532)
     {
-        if(rmap > 9 && rmap < 20)
+        if (rmap > 9 && rmap < 20)
             offset = 3;
         else
             offset = 0;
 
-        if(rmap < 10)
+        if (rmap < 10)
         {
             dp_translation = crx[CRX_GRAY];
             M_WriteText(RecordDef.x, RecordDef.y + 8, "MAP0");
         }
-        else if(rmap < 20)
+        else if (rmap < 20)
         {
             dp_translation = crx[CRX_GRAY];
             M_WriteText(RecordDef.x, RecordDef.y + 8, "MAP1");
         }
-        else if(rmap < 30)
+        else if (rmap < 30)
         {
             dp_translation = crx[CRX_GRAY];
             M_WriteText(RecordDef.x, RecordDef.y + 8, "MAP2");
         }
-        else if(rmap < 40)
+        else if (rmap < 40)
         {
             dp_translation = crx[CRX_GRAY];
             M_WriteText(RecordDef.x, RecordDef.y + 8, "MAP3");
         }
 
-        if(fsize != 19321722 && fsize != 28422764)
+        if (fsize != 19321722 && fsize != 28422764)
         {
-            if(rmap == 1 || rmap == 11 || rmap == 21 || rmap == 31)
+            if (rmap == 1 || rmap == 11 || rmap == 21 || rmap == 31)
             {
                 dp_translation = crx[CRX_GRAY];
                 M_WriteText(RecordDef.x + 33 - offset, RecordDef.y + 8, "1");
             }
-            else if(rmap == 2 || rmap == 12 || rmap == 22 || rmap == 32)
+            else if (rmap == 2 || rmap == 12 || rmap == 22 || rmap == 32)
             {
                 dp_translation = crx[CRX_GRAY];
                 M_WriteText(RecordDef.x + 33 - offset, RecordDef.y + 8, "2");
             }
-            else if(rmap == 3 || rmap == 13 || rmap == 23)
+            else if (rmap == 3 || rmap == 13 || rmap == 23)
             {
                 dp_translation = crx[CRX_GRAY];
                 M_WriteText(RecordDef.x + 33 - offset, RecordDef.y + 8, "3");
             }
-            else if(rmap == 4 || rmap == 14 || rmap == 24)
+            else if (rmap == 4 || rmap == 14 || rmap == 24)
             {
                 dp_translation = crx[CRX_GRAY];
                 M_WriteText(RecordDef.x + 33 - offset, RecordDef.y + 8, "4");
             }
-            else if(rmap == 5 || rmap == 15 || rmap == 25)
+            else if (rmap == 5 || rmap == 15 || rmap == 25)
             {
                 dp_translation = crx[CRX_GRAY];
                 M_WriteText(RecordDef.x + 33 - offset, RecordDef.y + 8, "5");
             }
-            else if(rmap == 6 || rmap == 16 || rmap == 26)
+            else if (rmap == 6 || rmap == 16 || rmap == 26)
             {
                 dp_translation = crx[CRX_GRAY];
                 M_WriteText(RecordDef.x + 33 - offset, RecordDef.y + 8, "6");
             }
-            else if(rmap == 7 || rmap == 17 || rmap == 27)
+            else if (rmap == 7 || rmap == 17 || rmap == 27)
             {
                 dp_translation = crx[CRX_GRAY];
                 M_WriteText(RecordDef.x + 33 - offset, RecordDef.y + 8, "7");
             }
-            else if(rmap == 8 || rmap == 18 || rmap == 28)
+            else if (rmap == 8 || rmap == 18 || rmap == 28)
             {
                 dp_translation = crx[CRX_GRAY];
                 M_WriteText(RecordDef.x + 33 - offset, RecordDef.y + 8, "8");
             }
-            else if(rmap == 9 || rmap == 19 || rmap == 29)
+            else if (rmap == 9 || rmap == 19 || rmap == 29)
             {
                 dp_translation = crx[CRX_GRAY];
                 M_WriteText(RecordDef.x + 33 - offset, RecordDef.y + 8, "9");
             }
-            else if(rmap == 10 || rmap == 20 || rmap == 30)
+            else if (rmap == 10 || rmap == 20 || rmap == 30)
             {
                 dp_translation = crx[CRX_GRAY];
                 M_WriteText(RecordDef.x + 33 - offset, RecordDef.y + 8, "0");
@@ -6668,95 +6837,95 @@ void M_DrawRecord(void)
         }
         else
         {
-            if(fsize == 28422764)
+            if (fsize == 28422764)
                 offset = 7;
-            if(rmap == 1 || rmap == 11 || rmap == 21 || rmap == 31)
+            if (rmap == 1 || rmap == 11 || rmap == 21 || rmap == 31)
                 V_DrawPatchWithShadow (115 - offset, 68, W_CacheLumpName
                 ("WINUM1", PU_CACHE), false);
-            else if(rmap == 2 || rmap == 12 || rmap == 22 || rmap == 32)
+            else if (rmap == 2 || rmap == 12 || rmap == 22 || rmap == 32)
                 V_DrawPatchWithShadow (115 - offset, 68, W_CacheLumpName
                 ("WINUM2", PU_CACHE), false);
-            else if(rmap == 3 || rmap == 13 || rmap == 23)
+            else if (rmap == 3 || rmap == 13 || rmap == 23)
                 V_DrawPatchWithShadow (115 - offset, 68, W_CacheLumpName
                 ("WINUM3", PU_CACHE), false);
-            else if(rmap == 4 || rmap == 14 || rmap == 24)
+            else if (rmap == 4 || rmap == 14 || rmap == 24)
                 V_DrawPatchWithShadow (115 - offset, 68, W_CacheLumpName
                 ("WINUM4", PU_CACHE), false);
-            else if(rmap == 5 || rmap == 15 || rmap == 25)
+            else if (rmap == 5 || rmap == 15 || rmap == 25)
                 V_DrawPatchWithShadow (115 - offset, 68, W_CacheLumpName
                 ("WINUM5", PU_CACHE), false);
-            else if(rmap == 6 || rmap == 16 || rmap == 26)
+            else if (rmap == 6 || rmap == 16 || rmap == 26)
                 V_DrawPatchWithShadow (115 - offset, 68, W_CacheLumpName
                 ("WINUM6", PU_CACHE), false);
-            else if(rmap == 7 || rmap == 17 || rmap == 27)
+            else if (rmap == 7 || rmap == 17 || rmap == 27)
                 V_DrawPatchWithShadow (115 - offset, 68, W_CacheLumpName
                 ("WINUM7", PU_CACHE), false);
-            else if(rmap == 8 || rmap == 18 || rmap == 28)
+            else if (rmap == 8 || rmap == 18 || rmap == 28)
                 V_DrawPatchWithShadow (115 - offset, 68, W_CacheLumpName
                 ("WINUM8", PU_CACHE), false);
-            else if(rmap == 9 || rmap == 19 || rmap == 29)
+            else if (rmap == 9 || rmap == 19 || rmap == 29)
                 V_DrawPatchWithShadow (115 - offset, 68, W_CacheLumpName
                 ("WINUM9", PU_CACHE), false);
-            else if(rmap == 10 || rmap == 20 || rmap == 30)
+            else if (rmap == 10 || rmap == 20 || rmap == 30)
                 V_DrawPatchWithShadow (115 - offset, 68, W_CacheLumpName
                 ("WINUM0", PU_CACHE), false);
         }
     }
 
-    if(fsize == 12361532)
+    if (fsize == 12361532)
     {
-        if(repi == 1)
+        if (repi == 1)
         {
-            if(rmap == 1)
+            if (rmap == 1)
                 V_DrawPatchWithShadow (55, 68, 0, W_CacheLumpName("WILV00",
                 PU_CACHE), false);
-            else if(rmap == 2)
+            else if (rmap == 2)
                 V_DrawPatchWithShadow (55, 68, 0, W_CacheLumpName("WILV01",
                 PU_CACHE), false);
-            else if(rmap == 3)
+            else if (rmap == 3)
                 V_DrawPatchWithShadow (55, 68, 0, W_CacheLumpName("WILV02",
                 PU_CACHE), false);
-            else if(rmap == 4)
+            else if (rmap == 4)
                 V_DrawPatchWithShadow (55, 68, 0, W_CacheLumpName("WILV03",
                 PU_CACHE), false);
-            else if(rmap == 5)
+            else if (rmap == 5)
                 V_DrawPatchWithShadow (55, 68, 0, W_CacheLumpName("WILV04",
                 PU_CACHE), false);
         }
     }
 
-    if(rskill == 0)
+    if (rskill == 0)
     {
         dp_translation = crx[CRX_GRAY];
         M_WriteText(RecordDef.x, RecordDef.y + 38, "I'm too young to die.");
     }
-    else if(rskill == 1)
+    else if (rskill == 1)
     {
         dp_translation = crx[CRX_GRAY];
         M_WriteText(RecordDef.x, RecordDef.y + 38, "Hey, not too rough.");
     }
-    else if(rskill == 2)
+    else if (rskill == 2)
     {
         dp_translation = crx[CRX_GRAY];
 
-        if(beta_style)
+        if (beta_style)
             M_WriteText(RecordDef.x, RecordDef.y + 38, "I JUST WANT TO KILL.");
         else
             M_WriteText(RecordDef.x, RecordDef.y + 38, "Hurt me plenty.");
 
     }
-    else if(rskill == 3)
+    else if (rskill == 3)
     {
         dp_translation = crx[CRX_GRAY];
         M_WriteText(RecordDef.x, RecordDef.y + 38, "Ultra-Violence.");
     }
-    else if(rskill == 4)
+    else if (rskill == 4)
     {
         dp_translation = crx[CRX_GRAY];
         M_WriteText(RecordDef.x, RecordDef.y + 38, "Nightmare!");
     }
 
-    if(long_tics)
+    if (long_tics)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(RecordDef.x + 190, RecordDef.y + 58, "ON");
@@ -6782,16 +6951,17 @@ void M_ChangeMessages(int choice)
 {
     blurred = false;
 
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (showMessages == 1)
-            showMessages = 0;
-        break;
-      case 1:
-        if (showMessages == 0)
-            showMessages = 1;
-        break;
+        case 0:
+            if (showMessages == 1)
+                showMessages = 0;
+            break;
+
+        case 1:
+            if (showMessages == 0)
+                showMessages = 1;
+            break;
     }
 
     message_dontfuckwithme = true;
@@ -6817,8 +6987,8 @@ void M_EndGameResponse(int ch)
 	G_CheckDemoStatus();
 */
     currentMenu->lastOn = itemOn;
-    M_ClearMenus ();
-    D_StartTitle ();
+    M_ClearMenus();
+    D_StartTitle();
 }
 
 void M_EndGame(int choice)
@@ -6829,16 +6999,16 @@ void M_EndGame(int choice)
 */
     if (!usergame)
     {
-        S_StartSound(NULL,sfx_oof);
+        S_StartSound(NULL, sfx_oof);
         return;
     }
 
     if (netgame)
     {
-        M_StartMessage(s_NETEND,NULL,false);
+        M_StartMessage(s_NETEND, NULL, false);
         return;
     }
-    M_StartMessage(s_ENDGAME,M_EndGameResponse,true);
+    M_StartMessage(s_ENDGAME, M_EndGameResponse, true);
 }
 
 
@@ -6938,19 +7108,19 @@ void M_QuitResponse(int ch)
     {
         if (gamemode == commercial)
         {
-            if(fsize != 10396254 && fsize != 10399316 && fsize != 10401760 &&
+            if (fsize != 10396254 && fsize != 10399316 && fsize != 10401760 &&
                     fsize != 4261144 && fsize != 4271324 && fsize != 4211660 &&
                     fsize != 4207819 && fsize != 4274218 && fsize != 4225504 &&
                     fsize != 4225460)
-                S_StartSound(NULL,quitsounds2[(gametic>>2)&7]);
+                S_StartSound(NULL, quitsounds2[(gametic >> 2) & 7]);
             else
-                S_StartSound(NULL,quitsounds3[(gametic>>2)&7]);
+                S_StartSound(NULL, quitsounds3[(gametic >> 2) & 7]);
         }
         else
-            S_StartSound(NULL,quitsounds[(gametic>>2)&7]);
+            S_StartSound(NULL, quitsounds[(gametic >> 2) & 7]);
         I_WaitVBL(105);
     }
-    I_Quit ();
+    I_Quit();
 }
 
 
@@ -6962,13 +7132,13 @@ static char *M_SelectEndMessage(void)
 
 void M_QuitDOOM(int choice)
 {
-    if(!beta_style)
+    if (!beta_style)
     {
         sprintf(endstring,
                 "%s\n\n" DOSY,
                 M_SelectEndMessage());
 
-        M_StartMessage(endstring,M_QuitResponse,true);
+        M_StartMessage(endstring, M_QuitResponse, true);
     }
     else
         I_Quit();
@@ -6978,46 +7148,50 @@ void M_QuitDOOM(int choice)
 
 void M_ChangeSensitivity(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (mouseSensitivity)
-            mouseSensitivity--;
-        break;
-      case 1:
-        if (mouseSensitivity < 9)
-            mouseSensitivity++;
-        break;
+        case 0:
+            if (mouseSensitivity)
+                mouseSensitivity--;
+            break;
+
+        case 1:
+            if (mouseSensitivity < 9)
+                mouseSensitivity++;
+            break;
     }
 }
 
 void M_MouseWalk(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (mousewalk)
-            mousewalk = false;
-        break;
-      case 1:
-        if (!mousewalk)
-            mousewalk = true;
-        if (mousewalk)
-            mouselook = false;
-        break;
+        case 0:
+            if (mousewalk)
+                mousewalk = false;
+            break;
+
+        case 1:
+            if (!mousewalk)
+                mousewalk = true;
+
+            if (mousewalk)
+                mouselook = false;
+            break;
     }
 }
 
 void M_WalkingSpeed(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if(forwardmove > 25)
+        case 0:
+            if (forwardmove > 25)
             forwardmove--;
-        break;
-      case 1:
-        if(forwardmove < 50)
+            break;
+
+        case 1:
+            if (forwardmove < 50)
             forwardmove++;
         break;
     }
@@ -7025,31 +7199,33 @@ void M_WalkingSpeed(int choice)
 
 void M_TurningSpeed(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if(turnspeed > 5)
-            turnspeed--;
-        break;
-      case 1:
-        if(turnspeed < 10)
-            turnspeed++;
-        break;
+        case 0:
+            if (turnspeed > 5)
+                turnspeed--;
+            break;
+
+        case 1:
+            if (turnspeed < 10)
+                turnspeed++;
+            break;
     }
 }
 
 void M_StrafingSpeed(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if(sidemove > 24)
-            sidemove--;
-        break;
-      case 1:
-        if (sidemove < 40)
-            sidemove++;
-        break;
+        case 0:
+            if (sidemove > 24)
+                sidemove--;
+            break;
+
+        case 1:
+            if (sidemove < 40)
+                sidemove++;
+            break;
     }
 }
 
@@ -7057,16 +7233,17 @@ void M_ChangeDetail(int choice)
 {
     blurred = false;
 
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (detailLevel == 0)
-            detailLevel = 1;
-        break;
-      case 1:
-        if (detailLevel == 1)
-            detailLevel = 0;
-        break;
+        case 0:
+            if (detailLevel == 0)
+                detailLevel = 1;
+            break;
+
+        case 1:
+            if (detailLevel == 1)
+                detailLevel = 0;
+            break;
     }
 
     d_lowpixelsize = "4x4";
@@ -7081,16 +7258,17 @@ void M_ChangeDetail(int choice)
 
 void M_Translucency(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (d_translucency)
-            d_translucency = false;
-        break;
-      case 1:
-        if (!d_translucency)
-            d_translucency = true;
-        break;
+        case 0:
+            if (d_translucency)
+                d_translucency = false;
+            break;
+
+        case 1:
+            if (!d_translucency)
+                d_translucency = true;
+            break;
     }
 
     R_InitColumnFunctions();
@@ -7101,16 +7279,17 @@ void M_ColoredBloodA(int choice)
     if (!d_chkblood)
         return;
 
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (d_colblood)
-            d_colblood = false;
-        break;
-      case 1:
-        if (!d_colblood)
-            d_colblood = true;
-        break;
+        case 0:
+            if (d_colblood)
+                d_colblood = false;
+            break;
+
+        case 1:
+            if (!d_colblood)
+                d_colblood = true;
+            break;
     }
 }
 
@@ -7119,16 +7298,17 @@ void M_ColoredBloodB(int choice)
     if (!d_chkblood2)
         return;
 
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (d_colblood2)
-            d_colblood2 = false;
-        break;
-      case 1:
-        if (!d_colblood2)
-            d_colblood2 = true;
-        break;
+        case 0:
+            if (d_colblood2)
+                d_colblood2 = false;
+            break;
+
+        case 1:
+            if (!d_colblood2)
+                d_colblood2 = true;
+            break;
     }
 }
 
@@ -7137,223 +7317,238 @@ void M_BloodsplatsAmount(int choice)
     if (!d_maxgore)
         return;
 
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (r_bloodsplats_max > 0)
-        {
-            r_bloodsplats_max--;
+        case 0:
+            if (r_bloodsplats_max > 0)
+            {
+                r_bloodsplats_max--;
 
-            if(r_bloodsplats_max < r_bloodsplats_max_max - 99 && r_bloodsplats_max > r_bloodsplats_max_max - 900)
-                r_bloodsplats_max -= 19;
-            else if(r_bloodsplats_max < r_bloodsplats_max_max - 899 && r_bloodsplats_max > r_bloodsplats_max_max - 5000)
-                r_bloodsplats_max -= 99;
-            else if(r_bloodsplats_max < r_bloodsplats_max_max - 4999)
-                r_bloodsplats_max -= 499;
-        }
-        break;
-      case 1:
-        if (r_bloodsplats_max < r_bloodsplats_max_max)
-        {
-            r_bloodsplats_max++;
+                if (r_bloodsplats_max < r_bloodsplats_max_max - 99 && r_bloodsplats_max > r_bloodsplats_max_max - 900)
+                    r_bloodsplats_max -= 19;
+                else if (r_bloodsplats_max < r_bloodsplats_max_max - 899 && r_bloodsplats_max > r_bloodsplats_max_max - 5000)
+                    r_bloodsplats_max -= 99;
+                else if (r_bloodsplats_max < r_bloodsplats_max_max - 4999)
+                    r_bloodsplats_max -= 499;
+            }
+            break;
 
-            if(r_bloodsplats_max < r_bloodsplats_max_max - 99 && r_bloodsplats_max > r_bloodsplats_max_max - 900)
-                r_bloodsplats_max += 19;
-            else if(r_bloodsplats_max < r_bloodsplats_max_max - 899 && r_bloodsplats_max > r_bloodsplats_max_max - 5000)
-                r_bloodsplats_max += 99;
-            else if(r_bloodsplats_max < r_bloodsplats_max_max - 4999)
-                r_bloodsplats_max += 499;
-        }
-        break;
+        case 1:
+            if (r_bloodsplats_max < r_bloodsplats_max_max)
+            {
+                r_bloodsplats_max++;
+
+                if (r_bloodsplats_max < r_bloodsplats_max_max - 99 && r_bloodsplats_max > r_bloodsplats_max_max - 900)
+                    r_bloodsplats_max += 19;
+                else if (r_bloodsplats_max < r_bloodsplats_max_max - 899 && r_bloodsplats_max > r_bloodsplats_max_max - 5000)
+                    r_bloodsplats_max += 99;
+                else if (r_bloodsplats_max < r_bloodsplats_max_max - 4999)
+                    r_bloodsplats_max += 499;
+            }
+            break;
     }
 
-    if(r_bloodsplats_max < 0)
+    if (r_bloodsplats_max < 0)
         r_bloodsplats_max = 0;
-    else if(r_bloodsplats_max > r_bloodsplats_max_max)
+    else if (r_bloodsplats_max > r_bloodsplats_max_max)
         r_bloodsplats_max = r_bloodsplats_max_max;
 }
 
 void M_WipeType(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (wipe_type > 0)
-            wipe_type--;
-        break;
-      case 1:
-        if (wipe_type < 3)
-            wipe_type++;
-        break;
+        case 0:
+            if (wipe_type > 0)
+                wipe_type--;
+            break;
+
+        case 1:
+            if (wipe_type < 3)
+                wipe_type++;
+            break;
     }
 }
 
 void M_UncappedFramerate(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (d_uncappedframerate > 0)
-            d_uncappedframerate = (d_uncappedframerate - 1) % NUM_UNCAPPED;
-        if (d_vsync)
-        {
-            if (d_uncappedframerate == 1)
-                d_uncappedframerate--;
-        }
-        break;
-      case 1:
-        if (d_uncappedframerate < 3)
-            d_uncappedframerate = (d_uncappedframerate + 1) % NUM_UNCAPPED;
-        if (d_vsync)
-        {
-            if (d_uncappedframerate == 1)
-                d_uncappedframerate++;
-            else if (d_uncappedframerate == 3)
-                d_uncappedframerate = 2;
-        }
-        break;
+        case 0:
+            if (d_uncappedframerate > 0)
+                d_uncappedframerate = (d_uncappedframerate - 1) % NUM_UNCAPPED;
+
+            if (d_vsync)
+            {
+                if (d_uncappedframerate == 1)
+                    d_uncappedframerate--;
+            }
+            break;
+
+        case 1:
+            if (d_uncappedframerate < 3)
+                d_uncappedframerate = (d_uncappedframerate + 1) % NUM_UNCAPPED;
+
+            if (d_vsync)
+            {
+                if (d_uncappedframerate == 1)
+                    d_uncappedframerate++;
+                else if (d_uncappedframerate == 3)
+                    d_uncappedframerate = 2;
+            }
+            break;
     }
 }
 
 void M_Screenshots(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (png_screenshots)
-            png_screenshots = 0;
-        break;
-      case 1:
-        if (png_screenshots == 0)
-            png_screenshots = 1;
-        break;
+        case 0:
+            if (png_screenshots)
+                png_screenshots = 0;
+            break;
+
+        case 1:
+            if (png_screenshots == 0)
+                png_screenshots = 1;
+            break;
     }
 }
 
 void M_Background(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (background_type > 0)
-            background_type--;
-        break;
-      case 1:
-        if (background_type < 3)
-            background_type++;
-        break;
+        case 0:
+            if (background_type > 0)
+                background_type--;
+            break;
+
+        case 1:
+            if (background_type < 3)
+                background_type++;
+            break;
     }
 }
 
 void M_FontShadow(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (font_shadow > 0)
-            font_shadow--;
-        break;
-      case 1:
-        if (font_shadow < 2)
-            font_shadow++;
-        break;
+        case 0:
+            if (font_shadow > 0)
+                font_shadow--;
+            break;
+
+        case 1:
+            if (font_shadow < 2)
+                font_shadow++;
+            break;
     }
 }
 
 void M_DiskIcon(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (show_diskicon)
-            show_diskicon = false;
-        break;
-      case 1:
-        if (!show_diskicon)
-            show_diskicon = true;
-        break;
+        case 0:
+            if (show_diskicon)
+                show_diskicon = false;
+            break;
+
+        case 1:
+            if (!show_diskicon)
+                show_diskicon = true;
+            break;
     }
 }
 
 void M_FixWiggle(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (d_fixwiggle)
-            d_fixwiggle = false;
-        break;
-      case 1:
-        if (!d_fixwiggle)
-            d_fixwiggle = true;
-        break;
+        case 0:
+            if (d_fixwiggle)
+                d_fixwiggle = false;
+            break;
+
+        case 1:
+            if (!d_fixwiggle)
+                d_fixwiggle = true;
+            break;
     }
 }
 
 void M_RemoveSlimeTrails(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (remove_slime_trails)
-            remove_slime_trails = false;
-        break;
-      case 1:
-        if (!remove_slime_trails)
-            remove_slime_trails = true;
-        break;
+        case 0:
+            if (remove_slime_trails)
+                remove_slime_trails = false;
+            break;
+
+        case 1:
+            if (!remove_slime_trails)
+                remove_slime_trails = true;
+            break;
     }
 }
 
 void M_RenderMode(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (render_mode > 1)
-            render_mode--;
-        break;
-      case 1:
-        if (render_mode < 2)
-            render_mode++;
-        break;
+        case 0:
+            if (render_mode > 1)
+                render_mode--;
+            break;
+
+        case 1:
+            if (render_mode < 2)
+                render_mode++;
+            break;
     }
 }
 
 void M_VSync(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (d_vsync)
-            d_vsync = false;
-        break;
-      case 1:
-        if (!d_vsync)
-            d_vsync = true;
-        if (d_uncappedframerate == 3 || d_uncappedframerate == 1)
-            d_uncappedframerate--;
-        break;
+        case 0:
+            if (d_vsync)
+                d_vsync = false;
+            break;
+
+        case 1:
+            if (!d_vsync)
+                d_vsync = true;
+
+            if (d_uncappedframerate == 3 || d_uncappedframerate == 1)
+                d_uncappedframerate--;
+            break;
     }
 }
 
 void M_IconType(int choice)
 {
-    if((gamemode == commercial || fsize == 4234124 || fsize == 4196020 ||
+    if ((gamemode == commercial || fsize == 4234124 || fsize == 4196020 ||
         fsize == 12474561 || fsize == 12487824 || fsize == 11159840 ||
         fsize == 12408292 || fsize == 12538385 || fsize == 12361532 ||
         fsize == 7585664) && show_diskicon)
     {
-        switch(choice)
+        switch (choice)
         {
-          case 0:
-            if (icontype == 1)
-                icontype = 0;
-            break;
-          case 1:
-            if (icontype == 0)
-                icontype = 1;
-            break;
+            case 0:
+                if (icontype == 1)
+                    icontype = 0;
+                break;
+
+            case 1:
+                if (icontype == 0)
+                    icontype = 1;
+                break;
         }
     }
 }
@@ -7362,33 +7557,35 @@ void M_SizeDisplay(int choice)
 {
     if (!am_overlay)
     {
-        switch(choice)
+        switch (choice)
         {
-          case 0:
-            if (screenSize > 0)
-            {
-                screenblocks--;
-                screenSize--;
-            }
-            break;
-          case 1:
-            if (screenSize < 8)
-            {
-                screenblocks++;
-                screenSize++;
-            }
-            if (screenSize == 8 && beta_style)
-            {
-                screenblocks--;
-                screenSize--;
-            }
-            break;
+            case 0:
+                if (screenSize > 0)
+                {
+                    screenblocks--;
+                    screenSize--;
+                }
+                break;
+
+            case 1:
+                if (screenSize < 8)
+                {
+                    screenblocks++;
+                    screenSize++;
+                }
+
+                if (screenSize == 8 && beta_style)
+                {
+                    screenblocks--;
+                    screenSize--;
+                }
+                break;
         }
         R_SetViewSize (screenblocks);
 
-        if(screenSize < 8)
+        if (screenSize < 8)
         {
-            if(usergame)
+            if (usergame)
                 ST_doRefresh();
         }
 
@@ -7399,21 +7596,13 @@ void M_SizeDisplay(int choice)
     }
 }
 
-
-
-
 //
 //      Menu Functions
 //
 // [nitr8] UNUSED
 //
 /*
-void
-M_DrawThermo
-( int        x,
-  int        y,
-  int        thermWidth,
-  int        thermDot )
+void M_DrawThermo(int x, int y, int thermWidth, int thermDot)
 {
     int                xx;
     int                i;
@@ -7421,7 +7610,7 @@ M_DrawThermo
     xx = x;
     V_DrawPatchWithShadow(xx, y, 0, W_CacheLumpName("M_THERML", PU_CACHE), false);
     xx += 8;
-    for (i=0;i<thermWidth;i++)
+    for (i = 0; i < thermWidth; i++)
     {
         V_DrawPatchWithShadow(xx, y, 0, W_CacheLumpName("M_THERMM", PU_CACHE), false);
         xx += 8;
@@ -7433,22 +7622,20 @@ M_DrawThermo
 }
 */
 
-void
-M_DrawThermoSmall
-( int        x,
-  int        y,
-  int        thermWidth,
-  int        thermDot )
+void M_DrawThermoSmall(int x, int y, int thermWidth, int thermDot)
 {
     int         xx;
     int         yy;
     int         i;
 
     xx = x;
-    yy = y + 6; // +6 to y coordinate
+
+    // +6 to y coordinate
+    yy = y + 6;
+
     V_DrawPatchWithShadow(xx + 3, yy - 18, 0, W_CacheLumpName("M_SLIDEL", PU_CACHE), false);
     xx += 8;
-    for (i=0;i<thermWidth;i++)
+    for (i = 0; i < thermWidth; i++)
     {
         V_DrawPatchWithShadow(xx, yy - 18, 0, W_CacheLumpName("M_SLIDEM", PU_CACHE), false);
         xx += 8;
@@ -7464,23 +7651,17 @@ M_DrawThermoSmall
 // [nitr8] UNUSED
 //
 /*
-void
-M_DrawEmptyCell
-( menu_t*        menu,
-  int            item )
+void M_DrawEmptyCell(menu_t *menu, int item)
 {
-    V_DrawPatchWithShadow(menu->x-10,
-                          menu->y+item*LINEHEIGHT_SMALL-1, 0, W_CacheLumpName("M_CELL1",
+    V_DrawPatchWithShadow(menu->x - 10,
+                          menu->y + item * LINEHEIGHT_SMALL - 1, 0, W_CacheLumpName("M_CELL1",
                           PU_CACHE), false);
 }
 
-void
-M_DrawSelCell
-( menu_t*        menu,
-  int            item )
+void M_DrawSelCell(menu_t *menu, int item)
 {
-    V_DrawPatchWithShadow(menu->x-10,
-                          menu->y+item*LINEHEIGHT_SMALL-1, 0, W_CacheLumpName("M_CELL2",
+    V_DrawPatchWithShadow(menu->x - 10,
+                          menu->y + item * LINEHEIGHT_SMALL - 1, 0, W_CacheLumpName("M_CELL2",
                           PU_CACHE), false);
 }
 */
@@ -7521,19 +7702,19 @@ void M_StopMessage(void)
 //
 // Find string width from hu_font chars
 //
-int M_StringWidth(char* string)
+int M_StringWidth(char *string)
 {
     size_t          i;
     int             w = 0;
         
-    for (i = 0;i < strlen(string);i++)
+    for (i = 0; i < strlen(string); i++)
     {
         int c = toupper(string[i]) - HU_FONTSTART;
 
         if (c < 0 || c >= HU_FONTSIZE)
             w += 4;
         else
-            w += SHORT (hu_font[c]->width);
+            w += SHORT(hu_font[c]->width);
     }
                 
     return w;
@@ -7544,14 +7725,14 @@ int M_StringWidth(char* string)
 //
 //      Find string height from hu_font chars
 //
-int M_StringHeight(char* string)
+int M_StringHeight(char *string)
 {
     size_t          i;
     int             h;
     int             height = SHORT(hu_font[0]->height);
         
     h = height;
-    for (i = 0;i < strlen(string);i++)
+    for (i = 0; i < strlen(string); i++)
         if (string[i] == '\n')
             h += height;
                 
@@ -7562,10 +7743,10 @@ int M_StringHeight(char* string)
 //
 //      Write a string using the hu_font
 //
-void M_WriteText(int x, int y, char* string)
+void M_WriteText(int x, int y, char *string)
 {
     int                w;
-    char*              ch;
+    char               *ch;
     int                cx;
     int                cy;
                 
@@ -7574,7 +7755,7 @@ void M_WriteText(int x, int y, char* string)
     cx = x;
     cy = y;
         
-    while(1)
+    while (1)
     {
         int c = *ch++;
 
@@ -7591,31 +7772,31 @@ void M_WriteText(int x, int y, char* string)
         if (c == '\x1b')
         {
             c = *ch++;
-            dp_translation = crx[(int) (c - '0')];
+            dp_translation = crx[(int)(c - '0')];
             continue;
         }
                 
         c = toupper(c) - HU_FONTSTART;
 
-        if (c < 0 || c>= HU_FONTSIZE)
+        if (c < 0 || c >= HU_FONTSIZE)
         {
             cx += 4;
             continue;
         }
 
-        w = SHORT (hu_font[c]->width);
+        w = SHORT(hu_font[c]->width);
 
-        if (cx+w > ORIGINALWIDTH)                // CHANGED FOR HIRES
+        if (cx + w > ORIGINALWIDTH)                // CHANGED FOR HIRES
             break;
 
-        if(dp_translation && font_shadow != 2)
+        if (dp_translation && font_shadow != 2)
             V_ClearDPTranslation();
 
-        if(font_shadow == 1)
+        if (font_shadow == 1)
             V_DrawPatchWithShadow(cx, cy, 0, hu_font[c], false);
         else
             V_DrawPatch(cx, cy, 0, hu_font[c]);
-        cx+=w;
+        cx += w;
     }
 
     V_ClearDPTranslation();
@@ -7638,16 +7819,17 @@ void M_ChangeGamma(int choice)
 
     if (gammawait >= I_GetTime() || gamestate != GS_LEVEL || inhelpscreens)
     {
-        switch(choice)
+        switch (choice)
         {
-        case 0:
-            if (usegamma)
-                usegamma--;
-            break;
-        case 1:
-            if (usegamma < GAMMALEVELS - 1)
-                usegamma++;
-            break;
+            case 0:
+                if (usegamma)
+                    usegamma--;
+                break;
+
+            case 1:
+                if (usegamma < GAMMALEVELS - 1)
+                    usegamma++;
+                break;
         }
         r_gamma = gammalevels[usegamma];
 
@@ -7689,7 +7871,7 @@ dboolean M_Responder (event_t* ev)
     // why this is so for the meantime I'm polling the wii remote directly.
 
     //Classic Controls
-    if(data->exp.type == WPAD_EXP_CLASSIC)
+    if (data->exp.type == WPAD_EXP_CLASSIC)
     {
         if (data->btns_d & WPAD_CLASSIC_BUTTON_UP)
         {
@@ -7772,7 +7954,7 @@ dboolean M_Responder (event_t* ev)
         }
         return false;
     }
-    else if(askforkey && ev->type == ev_mousewheel)
+    else if (askforkey && ev->type == ev_mousewheel)
     {
         if ((ev->data1 & 1) || (ev->data1 & -1))
         {
@@ -7800,7 +7982,7 @@ dboolean M_Responder (event_t* ev)
         }
         else
         {
-            S_StartSound(NULL,sfx_swtchn);
+            S_StartSound(NULL, sfx_swtchn);
             M_QuitDOOM(0);
         }
 
@@ -7861,48 +8043,48 @@ dboolean M_Responder (event_t* ev)
     if (saveStringEnter)
     {
 #ifdef WII
-        switch(ch)
+        switch (ch)
 #else
-        switch(key)
+        switch (key)
 #endif
         {
-          case KEY_ESCAPE:
-            saveStringEnter = 0;
-            M_StringCopy(&savegamestrings[saveSlot][0],saveOldString, sizeof(savegamestrings));
-            break;
-                                
-          case KEY_ENTER:
-            saveStringEnter = 0;
-            M_DoSave(saveSlot);
-            break;
-
-          default:
-            // This is complicated.
-            // Vanilla has a bug where the shift key is ignored when entering
-            // a savegame name. If vanilla_keyboard_mapping is on, we want
-            // to emulate this bug by using 'data1'. But if it's turned off,
-            // it implies the user doesn't care about Vanilla emulation: just
-            // use the correct 'data2'.
-#ifdef WII
-            ch = key;
-#endif
-            ch = toupper(ch);
-
-            if (ch != ' '
-             && (ch - HU_FONTSTART < 0 || ch - HU_FONTSTART >= HU_FONTSIZE))
-            {
+            case KEY_ESCAPE:
+                saveStringEnter = 0;
+                M_StringCopy(&savegamestrings[saveSlot][0], saveOldString, sizeof(savegamestrings));
                 break;
-            }
+                                
+            case KEY_ENTER:
+                saveStringEnter = 0;
+                M_DoSave(saveSlot);
+                break;
 
-            if (ch >= 32 && ch <= 127 &&
-                saveCharIndex < SAVESTRINGSIZE-1 &&
-                M_StringWidth(savegamestrings[saveSlot]) <
-                (SAVESTRINGSIZE-2)*8)
-            {
-                savegamestrings[saveSlot][saveCharIndex++] = ch;
-                savegamestrings[saveSlot][saveCharIndex] = 0;
-            }
-            break;
+            default:
+                // This is complicated.
+                // Vanilla has a bug where the shift key is ignored when entering
+                // a savegame name. If vanilla_keyboard_mapping is on, we want
+                // to emulate this bug by using 'data1'. But if it's turned off,
+                // it implies the user doesn't care about Vanilla emulation: just
+                // use the correct 'data2'.
+#ifdef WII
+                ch = key;
+#endif
+                ch = toupper(ch);
+
+                if (ch != ' '
+                   && (ch - HU_FONTSTART < 0 || ch - HU_FONTSTART >= HU_FONTSIZE))
+                {
+                    break;
+                }
+
+                if (ch >= 32 && ch <= 127 &&
+                    saveCharIndex < SAVESTRINGSIZE - 1 &&
+                    M_StringWidth(savegamestrings[saveSlot]) <
+                    (SAVESTRINGSIZE - 2) * 8)
+                {
+                    savegamestrings[saveSlot][saveCharIndex++] = ch;
+                    savegamestrings[saveSlot][saveCharIndex] = 0;
+                }
+                break;
         }
         return true;
     }
@@ -7917,7 +8099,7 @@ dboolean M_Responder (event_t* ev)
                   ch == key_menu_activate))
 #else
             if (key != ' ' && key != KEY_ESCAPE
-             && key != key_menu_confirm && key != key_menu_abort)
+                && key != key_menu_confirm && key != key_menu_abort)
 #endif
             {
                 return false;
@@ -7930,7 +8112,7 @@ dboolean M_Responder (event_t* ev)
             messageRoutine(ch);
 
         menuactive = false;
-        S_StartSound(NULL,sfx_swtchx);
+        S_StartSound(NULL, sfx_swtchx);
         return true;
     }
 
@@ -7938,7 +8120,7 @@ dboolean M_Responder (event_t* ev)
         (key != 0 && key == key_menu_screenshot && !beta_style) ||
         (key != 0 && key == key_menu_screenshot_beta && beta_style))
     {
-        G_ScreenShot ();
+        G_ScreenShot();
         return true;
     }
 
@@ -7951,7 +8133,7 @@ dboolean M_Responder (event_t* ev)
             if (automapactive)
                 return false;
             M_SizeDisplay(0);
-            S_StartSound(NULL,sfx_stnmov);
+            S_StartSound(NULL, sfx_stnmov);
             return true;
         }
         else if (key == KEY_TILDE /*&& !keydown*/)        // Console
@@ -7970,26 +8152,26 @@ dboolean M_Responder (event_t* ev)
             if (automapactive)
                 return false;
             M_SizeDisplay(1);
-            S_StartSound(NULL,sfx_stnmov);
+            S_StartSound(NULL, sfx_stnmov);
             return true;
         }
         else if (key == key_menu_help)     // Help key
         {
-            M_StartControlPanel ();
+            M_StartControlPanel();
 
-            if ( gamemode == retail )
-              currentMenu = &ReadDef2;
+            if (gamemode == retail)
+                currentMenu = &ReadDef2;
             else
-              currentMenu = &ReadDef1;
+                currentMenu = &ReadDef1;
 
             itemOn = 0;
-            S_StartSound(NULL,sfx_swtchn);
+            S_StartSound(NULL, sfx_swtchn);
             return true;
         }
         else if (key == key_menu_save)     // Save
         {
             M_StartControlPanel();
-            S_StartSound(NULL,sfx_swtchn);
+            S_StartSound(NULL, sfx_swtchn);
             M_SaveGame(0);
             return true;
         }
@@ -7998,46 +8180,46 @@ dboolean M_Responder (event_t* ev)
 	    // [crispy] forbid New Game and (Quick) Load while recording a demo
 	    if (demorecording)
 	    {
-		S_StartSound(NULL,sfx_oof);
+		S_StartSound(NULL, sfx_oof);
 	    }
 	    else
 	    {
                 M_StartControlPanel();
-                S_StartSound(NULL,sfx_swtchn);
+                S_StartSound(NULL, sfx_swtchn);
                 M_LoadGame(0);
                 return true;
             }
         }
         else if (key == key_menu_volume)   // Sound Volume
         {
-            M_StartControlPanel ();
+            M_StartControlPanel();
             currentMenu = &SoundDef;
             itemOn = sfx_vol;
-            S_StartSound(NULL,sfx_swtchn);
+            S_StartSound(NULL, sfx_swtchn);
             return true;
         }
         else if (key == key_menu_detail)   // Detail toggle
         {
             M_ChangeDetail(0);
-            S_StartSound(NULL,sfx_swtchn);
+            S_StartSound(NULL, sfx_swtchn);
             return true;
         }
         else if (key == key_menu_qsave)    // Quicksave
         {
-            S_StartSound(NULL,sfx_swtchn);
+            S_StartSound(NULL, sfx_swtchn);
             M_QuickSave();
             return true;
         }
         else if (key == key_menu_endgame)  // End game
         {
-            S_StartSound(NULL,sfx_swtchn);
+            S_StartSound(NULL, sfx_swtchn);
             M_EndGame(0);
             return true;
         }
         else if (key == key_menu_messages) // Toggle messages
         {
             M_ChangeMessages(0);
-            S_StartSound(NULL,sfx_swtchn);
+            S_StartSound(NULL, sfx_swtchn);
             return true;
         }
         else if (key == key_menu_qload)    // Quickload
@@ -8045,18 +8227,18 @@ dboolean M_Responder (event_t* ev)
 	    // [crispy] forbid New Game and (Quick) Load while recording a demo
 	    if (demorecording)
 	    {
-		S_StartSound(NULL,sfx_oof);
+		S_StartSound(NULL, sfx_oof);
 	    }
 	    else
 	    {
-                S_StartSound(NULL,sfx_swtchn);
+                S_StartSound(NULL, sfx_swtchn);
                 M_QuickLoad();
                 return true;
             }
         }
         else if (key == key_menu_quit)     // Quit DOOM
         {
-            S_StartSound(NULL,sfx_swtchn);
+            S_StartSound(NULL, sfx_swtchn);
             M_QuitDOOM(0);
             return true;
         }
@@ -8079,11 +8261,11 @@ dboolean M_Responder (event_t* ev)
         if (key == key_menu_activate)
 #endif
         {
-            if(consoleactive && consoleheight != 0)
+            if (consoleactive && consoleheight != 0)
                 return false;
 
-            M_StartControlPanel ();
-            S_StartSound(NULL,sfx_swtchn);
+            M_StartControlPanel();
+            S_StartSound(NULL, sfx_swtchn);
             return true;
         }
         return false;
@@ -8101,7 +8283,7 @@ dboolean M_Responder (event_t* ev)
 
         do
         {
-            if (itemOn+1 > currentMenu->numitems-1)
+            if (itemOn + 1 > currentMenu->numitems - 1)
             {
                 if (FirstKey == FIRSTKEY_MAX)        // FOR PSP (if too many menu items)
                 {
@@ -8116,20 +8298,20 @@ dboolean M_Responder (event_t* ev)
             else
                 itemOn++;
 #ifndef WII
-            if(currentMenu == &KeyBindingsDef && itemOn == 12)
+            if (currentMenu == &KeyBindingsDef && itemOn == 12)
                 itemOn++;
 #else
-            if(currentMenu == &ControlsDef && itemOn == 5)
+            if (currentMenu == &ControlsDef && itemOn == 5)
                 itemOn += 2;
 #endif
-            if(!devparm)
+            if (!devparm)
             {
                 if (currentMenu == &GameDef && itemOn == 14)
                     itemOn = 0;
             }
-            S_StartSound(NULL,sfx_pstop);
-        } while((currentMenu->menuitems[itemOn].status==-1 && !devparm) ||
-                (currentMenu->menuitems[itemOn].status==-1 && currentMenu != &GameDef && devparm));
+            S_StartSound(NULL, sfx_pstop);
+        } while ((currentMenu->menuitems[itemOn].status == -1 && !devparm) ||
+                 (currentMenu->menuitems[itemOn].status == -1 && currentMenu != &GameDef && devparm));
 
         return true;
     }
@@ -8147,7 +8329,7 @@ dboolean M_Responder (event_t* ev)
             {
                 if (FirstKey == 0)                // FOR PSP (if too many menu items)
                 {
-                    itemOn = currentMenu->numitems-1;
+                    itemOn = currentMenu->numitems - 1;
                     FirstKey = FIRSTKEY_MAX;
                 }
                 else
@@ -8158,20 +8340,20 @@ dboolean M_Responder (event_t* ev)
             else
                 itemOn--;
 #ifndef WII
-            if(currentMenu == &KeyBindingsDef && itemOn == 12)
+            if (currentMenu == &KeyBindingsDef && itemOn == 12)
                 itemOn--;
 #else
-            if(currentMenu == &ControlsDef && itemOn == 6)
+            if (currentMenu == &ControlsDef && itemOn == 6)
                 itemOn -= 2;
 #endif
-            if(!devparm)
+            if (!devparm)
             {
-                if(currentMenu == &GameDef && itemOn == 14)
+                if (currentMenu == &GameDef && itemOn == 14)
                     itemOn--;
             }
-            S_StartSound(NULL,sfx_pstop);
-        } while((currentMenu->menuitems[itemOn].status==-1 && !devparm) ||
-                (currentMenu->menuitems[itemOn].status==-1 && currentMenu != &GameDef && devparm));
+            S_StartSound(NULL, sfx_pstop);
+        } while ((currentMenu->menuitems[itemOn].status == -1 && !devparm) ||
+                 (currentMenu->menuitems[itemOn].status == -1 && currentMenu != &GameDef && devparm));
 
         return true;
     }
@@ -8186,13 +8368,13 @@ dboolean M_Responder (event_t* ev)
         if (currentMenu->menuitems[itemOn].routine &&
             currentMenu->menuitems[itemOn].status == 2)
         {
-            S_StartSound(NULL,sfx_stnmov);
+            S_StartSound(NULL, sfx_stnmov);
             currentMenu->menuitems[itemOn].routine(0);
         }
 /*
-        else if(currentMenu == &GameDef && devparm && itemOn == 13)
+        else if (currentMenu == &GameDef && devparm && itemOn == 13)
         {
-            S_StartSound(NULL,sfx_stnmov);
+            S_StartSound(NULL, sfx_stnmov);
             M_AimingHelp(0);
         }
 */
@@ -8209,13 +8391,13 @@ dboolean M_Responder (event_t* ev)
         if (currentMenu->menuitems[itemOn].routine &&
             currentMenu->menuitems[itemOn].status == 2)
         {
-            S_StartSound(NULL,sfx_stnmov);
+            S_StartSound(NULL, sfx_stnmov);
             currentMenu->menuitems[itemOn].routine(1);
         }
 /*
-        else if(currentMenu == &GameDef && devparm && itemOn == 13)
+        else if (currentMenu == &GameDef && devparm && itemOn == 13)
         {
-            S_StartSound(NULL,sfx_stnmov);
+            S_StartSound(NULL, sfx_stnmov);
             M_AimingHelp(1);
         }
 */
@@ -8236,17 +8418,17 @@ dboolean M_Responder (event_t* ev)
             if (currentMenu->menuitems[itemOn].status == 2)
             {
                 currentMenu->menuitems[itemOn].routine(1);      // right arrow
-                S_StartSound(NULL,sfx_stnmov);
+                S_StartSound(NULL, sfx_stnmov);
             }
             else
             {
                 currentMenu->menuitems[itemOn].routine(itemOn);
-                S_StartSound(NULL,sfx_pistol);
+                S_StartSound(NULL, sfx_pistol);
             }
         }
-        else if(currentMenu == &GameDef && !devparm && itemOn == 13)
+        else if (currentMenu == &GameDef && !devparm && itemOn == 13)
         {
-            S_StartSound(NULL,sfx_pistol);
+            S_StartSound(NULL, sfx_pistol);
             M_Game2(ch);
         }
 
@@ -8261,8 +8443,8 @@ dboolean M_Responder (event_t* ev)
         // Deactivate menu
 
         currentMenu->lastOn = itemOn;
-        M_ClearMenus ();
-        S_StartSound(NULL,sfx_swtchx);
+        M_ClearMenus();
+        S_StartSound(NULL, sfx_swtchx);
         return true;
     }
 #ifdef WII
@@ -8281,7 +8463,7 @@ dboolean M_Responder (event_t* ev)
 
             currentMenu = currentMenu->prevMenu;
             itemOn = currentMenu->lastOn;
-            S_StartSound(NULL,sfx_swtchn);
+            S_StartSound(NULL, sfx_swtchn);
         }
         return true;
     }
@@ -8295,22 +8477,22 @@ dboolean M_Responder (event_t* ev)
     else if (ch != 0 || IsNullKey(key))
 #endif
     {
-        for (i = itemOn+1;i < currentMenu->numitems;i++)
+        for (i = itemOn + 1; i < currentMenu->numitems; i++)
         {
             if (currentMenu->menuitems[i].alphaKey == ch)
             {
                 itemOn = i;
-                S_StartSound(NULL,sfx_pstop);
+                S_StartSound(NULL, sfx_pstop);
                 return true;
             }
         }
 
-        for (i = 0;i <= itemOn;i++)
+        for (i = 0; i <= itemOn; i++)
         {
             if (currentMenu->menuitems[i].alphaKey == ch)
             {
                 itemOn = i;
-                S_StartSound(NULL,sfx_pstop);
+                S_StartSound(NULL, sfx_pstop);
                 return true;
             }
         }
@@ -8332,12 +8514,12 @@ void M_StartControlPanel (void)
 
     menuactive = 1;
 
-    if(!beta_style)
+    if (!beta_style)
         currentMenu = &MainDef;         // JDC
     else
-        currentMenu = &BetaMainDef;         // JDC
+        currentMenu = &BetaMainDef;     // JDC
 
-    itemOn = currentMenu->lastOn;   // JDC
+    itemOn = currentMenu->lastOn;       // JDC
 
     blurred = false;
 }
@@ -8422,13 +8604,13 @@ void M_Drawer (void)
             M_DrawCrispnessBackground(0);
     }
 
-    if(!inhelpscreens)
+    if (!inhelpscreens)
     {
         int mnum;
 
-        if(gamemode == commercial)
+        if (gamemode == commercial)
         {
-            if(gamestate == GS_LEVEL)
+            if (gamestate == GS_LEVEL)
             {
                 if (gamemission == pack_nerve)
                 {
@@ -8452,26 +8634,26 @@ void M_Drawer (void)
                 else
                 {
                     // FIXME: Add case for other game missions here (CHEX, HACX, FINAL DOOM)
-                    if(mus_cheat_used)
+                    if (mus_cheat_used)
                         S_ChangeMusic(tracknum, true, true);
-                    else if(mus_cheated && !beta_style)
+                    else if (mus_cheated && !beta_style)
                         S_ChangeMusic(cheat_musnum, true, true);
-                    else if(!mus_cheat_used && !mus_cheated)
+                    else if (!mus_cheat_used && !mus_cheated)
                         S_ChangeMusic(gamemap + 32, true, true);
                 }
             }
-            else if(gamestate == GS_FINALE && finalestage == F_STAGE_TEXT)
+            else if (gamestate == GS_FINALE && finalestage == F_STAGE_TEXT)
                 S_ChangeMusic(mus_read_m, true, false);
-            else if(gamestate == GS_FINALE && finalestage == F_STAGE_CAST)
+            else if (gamestate == GS_FINALE && finalestage == F_STAGE_CAST)
                 S_ChangeMusic(mus_evil, true, false);
-            else if(gamestate == GS_DEMOSCREEN)
+            else if (gamestate == GS_DEMOSCREEN)
                 S_ChangeMusic(mus_dm2ttl, false, false);
-            else if(gamestate == GS_INTERMISSION)
+            else if (gamestate == GS_INTERMISSION)
                 S_ChangeMusic(mus_dm2int, true, false);
         }
         else
         {
-            if(gamestate == GS_LEVEL)
+            if (gamestate == GS_LEVEL)
             {
                 int spmus[]=
                 {
@@ -8497,31 +8679,31 @@ void M_Drawer (void)
                     mnum = spmus[gamemap - 1];
                 }
 
-                if(mus_cheat_used)
+                if (mus_cheat_used)
                     S_ChangeMusic(tracknum, true, true);
-                else if(mus_cheated && !beta_style)
+                else if (mus_cheated && !beta_style)
                     S_ChangeMusic(cheat_musnum, true, true);
-                else if(!mus_cheat_used && !mus_cheated)
+                else if (!mus_cheat_used && !mus_cheated)
                     S_ChangeMusic(mnum, true, true);
             }
-            else if(gamestate == GS_FINALE && finalestage == F_STAGE_TEXT)
+            else if (gamestate == GS_FINALE && finalestage == F_STAGE_TEXT)
                 S_ChangeMusic(mus_victor, true, false);
-            else if(gamestate == GS_FINALE && finalestage == F_STAGE_CAST)
+            else if (gamestate == GS_FINALE && finalestage == F_STAGE_CAST)
                 S_StartMusic (mus_bunny);
-            else if(gamestate == GS_DEMOSCREEN)
+            else if (gamestate == GS_DEMOSCREEN)
                 S_ChangeMusic(mus_intro, false, false);
-            else if(gamestate == GS_INTERMISSION)
+            else if (gamestate == GS_INTERMISSION)
                 S_ChangeMusic(mus_inter, true, false);
         }
     }
 
     inhelpscreens = false;
 
-    if(gamestate == GS_LEVEL && !menuactive)
+    if (gamestate == GS_LEVEL && !menuactive)
     {
         player_t* player = &players[consoleplayer];
 
-        if(player->powers[pw_flight] > 0)
+        if (player->powers[pw_flight] > 0)
         {
             int flight_timer = player->powers[pw_flight] / 35;
             sprintf(flight_counter, "%d", flight_timer);
@@ -8535,14 +8717,14 @@ void M_Drawer (void)
             consoleheight == 0)
     {
         char *string = "PR BETA MODE ENABLED";
-        int x = ORIGINALWIDTH/2 - M_StringWidth(string) / 2;
+        int x = ORIGINALWIDTH / 2 - M_StringWidth(string) / 2;
         M_WriteText(x, 12, string);
         BorderNeedRefresh = true;
     }
 */
-    if(coordinates_info)
+    if (coordinates_info)
     {
-        if(gamestate == GS_LEVEL)
+        if (gamestate == GS_LEVEL)
         {
             player_t* player = &players[consoleplayer];
 
@@ -8558,13 +8740,13 @@ void M_Drawer (void)
         }
     }
 
-    if(memory_usage && done && consoleheight == 0 && !menuactive)
+    if (memory_usage && done && consoleheight == 0 && !menuactive)
     {
         Z_DrawStats();           // print memory allocation stats
     }
 
     // DISPLAYS BINARY VERSION
-    if(version_info)
+    if (version_info)
         M_WriteText(65, 36, DOOM_VERSIONTEXT);
 
     // Horiz. & Vertically center string and print it.
@@ -8575,7 +8757,7 @@ void M_Drawer (void)
 
         //M_DarkBackground(0);
 
-        y = ORIGINALHEIGHT/2 - M_StringHeight(messageString) / 2;
+        y = ORIGINALHEIGHT / 2 - M_StringHeight(messageString) / 2;
         while (messageString[start] != '\0')
         {
             int foundnewline = 0;
@@ -8596,7 +8778,7 @@ void M_Drawer (void)
                 start += strlen(string);
             }
 
-            x = ORIGINALWIDTH/2 - M_StringWidth(string) / 2;
+            x = ORIGINALWIDTH / 2 - M_StringWidth(string) / 2;
             M_WriteText(x, y, string);
             y += SHORT(hu_font[0]->height);
         }
@@ -8624,20 +8806,20 @@ void M_Drawer (void)
     if (currentMenu->menuitems[itemOn].status == 5)
         max += FirstKey;
 /*
-    if(extra_wad_loaded == 1 && currentMenu == &SoundDef)
+    if (extra_wad_loaded == 1 && currentMenu == &SoundDef)
         currentMenu->numitems = 4;
 */
-    if(!devparm && currentMenu == &OptionsDef)
+    if (!devparm && currentMenu == &OptionsDef)
         currentMenu->numitems = 8;
 
-    if(!netgame && !devparm && currentMenu == &FilesDef)
+    if (!netgame && !devparm && currentMenu == &FilesDef)
 #ifdef WII
         currentMenu->numitems = 4;
 #else
         currentMenu->numitems = 3;
 #endif
 
-    if(netgame && currentMenu == &FilesDef)
+    if (netgame && currentMenu == &FilesDef)
 #ifdef WII
         currentMenu->numitems = 3;
 #else
@@ -8645,33 +8827,33 @@ void M_Drawer (void)
 #endif
 
     // HACK: ALL ELSE THAN SHAREWARE 1.0 & 1.1 && REG 1.1
-    if((fsize == 4207819 || fsize == 4274218 || fsize == 10396254) &&
+    if ((fsize == 4207819 || fsize == 4274218 || fsize == 10396254) &&
             currentMenu == &NewDef)
         currentMenu->numitems = 4;
 
-    if((fsize == 4261144 || fsize == 4271324 || fsize == 4211660 ||
+    if ((fsize == 4261144 || fsize == 4271324 || fsize == 4211660 ||
         fsize == 4207819 || fsize == 4274218 || fsize == 4225504 ||
         fsize == 4225460 || fsize == 4234124 || fsize == 4196020) &&
             currentMenu == &WeaponsDef)
         currentMenu->numitems = 6;
 
-    if(fsize == 12361532 && currentMenu == &ItemsDef)
+    if (fsize == 12361532 && currentMenu == &ItemsDef)
         currentMenu->numitems = 7;
 
-    if((fsize == 10396254 || fsize == 10399316 || fsize == 10401760 ||
+    if ((fsize == 10396254 || fsize == 10399316 || fsize == 10401760 ||
                 fsize == 11159840 || fsize == 12408292 || fsize == 12474561 ||
                 fsize == 12538385 || fsize == 12487824) &&
                 currentMenu == &WeaponsDef)
         currentMenu->numitems = 8;
 
-    for (i=0;i<max;i++)
+    for (i = 0; i < max; i++)
     {
         char                *name;
 
         menuitem_t *item = &(currentMenu->menuitems[i]);
         name = item->name;
 
-        if(*name)
+        if (*name)
         {
             if ((currentMenu == &FilesDef && i == savegame && (!usergame || gamestate != GS_LEVEL)) ||
                 (currentMenu == &FilesDef && i == endgame && (!usergame || netgame)) ||
@@ -8685,7 +8867,7 @@ void M_Drawer (void)
                 if (itemOn == 2)
                     dp_translation = crx[CRX_GOLD];
 /*
-                if(beta_style)
+                if (beta_style)
                     M_WriteText(NewDef.x, NewDef.y + 18, "I JUST WANT TO KILL.");
                 else
 */
@@ -8697,41 +8879,41 @@ void M_Drawer (void)
 
         // DRAW SKULL
 #ifdef WII
-        if(currentMenu == &KeyBindingsDef && itemOn == 15)
+        if (currentMenu == &KeyBindingsDef && itemOn == 15)
 #else
-        if(currentMenu == &KeyBindingsDef)
+        if (currentMenu == &KeyBindingsDef)
             y -= 1;
-        else if(currentMenu == &AutomapDef)
+        else if (currentMenu == &AutomapDef)
             y -= 4;
 
-        if(currentMenu == &KeyBindingsDef && itemOn == 17)
+        if (currentMenu == &KeyBindingsDef && itemOn == 17)
 #endif
         {
-            if(!beta_style)
+            if (!beta_style)
                 V_DrawPatchWithShadow(x + 280 + CURSORXOFF_SMALL, currentMenu->y - 15 +
-                        itemOn*LINEHEIGHT_SMALL-1*itemOn, 0, W_CacheLumpName(skullNameSmall[whichSkull],
+                        itemOn*LINEHEIGHT_SMALL - 1 * itemOn, 0, W_CacheLumpName(skullNameSmall[whichSkull],
                                               PU_CACHE), false);
             else
                 V_DrawPatch(x + 280 + CURSORXOFF_SMALL, currentMenu->y - 15 +
                         itemOn*LINEHEIGHT_SMALL, 0, W_CacheLumpName(skullNameSmall[whichSkull],
                                               PU_CACHE));
         }
-        else if(currentMenu == &KeyBindingsDef && itemOn != 17)
+        else if (currentMenu == &KeyBindingsDef && itemOn != 17)
         {
-            if(!beta_style)
+            if (!beta_style)
                 V_DrawPatchWithShadow(x + CURSORXOFF_SMALL, currentMenu->y - 5 +
-                        itemOn*LINEHEIGHT_SMALL-1*itemOn, 0, W_CacheLumpName(skullNameSmall[whichSkull],
+                        itemOn*LINEHEIGHT_SMALL - 1 * itemOn, 0, W_CacheLumpName(skullNameSmall[whichSkull],
                                               PU_CACHE), false);
             else
                 V_DrawPatch(x + CURSORXOFF_SMALL, currentMenu->y - 5 +
                         itemOn*LINEHEIGHT_SMALL, 0, W_CacheLumpName(skullNameSmall[whichSkull],
                                               PU_CACHE));
         }
-        else if(currentMenu == &AutomapDef)
+        else if (currentMenu == &AutomapDef)
         {
-            if(!beta_style)
+            if (!beta_style)
                 V_DrawPatchWithShadow(x + CURSORXOFF_SMALL, currentMenu->y - 5 +
-                        itemOn*LINEHEIGHT_SMALL-4*itemOn, 0, W_CacheLumpName(skullNameSmall[whichSkull],
+                        itemOn*LINEHEIGHT_SMALL - 4 * itemOn, 0, W_CacheLumpName(skullNameSmall[whichSkull],
                                               PU_CACHE), false);
             else
                 V_DrawPatch(x + CURSORXOFF_SMALL, currentMenu->y - 5 +
@@ -8740,7 +8922,7 @@ void M_Drawer (void)
         }
         else
         {
-            if(!beta_style)
+            if (!beta_style)
                 V_DrawPatchWithShadow(x + CURSORXOFF_SMALL, currentMenu->y - 5 +
                         itemOn*LINEHEIGHT_SMALL, 0, W_CacheLumpName(skullNameSmall[whichSkull],
                                               PU_CACHE), false);
@@ -8761,9 +8943,9 @@ void M_ClearMenus (void)
 
     paused = false;
 
-    if(screenSize < 8)
+    if (screenSize < 8)
     {
-        if(usergame)
+        if (usergame)
             ST_doRefresh();
     }
 
@@ -8859,33 +9041,35 @@ void M_Init (void)
     //  like HELP1/2, and four episodes.
 
   
-    switch ( gamemode )
+    switch (gamemode)
     {
-      case commercial:
-        // Commercial has no "read this" entry.
-        MainGameMenu[readthis] = MainGameMenu[quitdoom];
-        MainDef.numitems--;
-        MainDef.y += 8;
-        NewDef.prevMenu = &MainDef;
-        break;
-      case shareware:
-        // Episode 2 and 3 are handled,
-        //  branching to an ad screen.
-      case registered:
-        // We need to remove the fourth episode.
-        EpiDef.numitems--;
-        break;
-      case retail:
-        // We are fine.
-      default:
-        break;
+        case commercial:
+            // Commercial has no "read this" entry.
+            MainGameMenu[readthis] = MainGameMenu[quitdoom];
+            MainDef.numitems--;
+            MainDef.y += 8;
+            NewDef.prevMenu = &MainDef;
+            break;
+
+        case shareware:
+            // Episode 2 and 3 are handled,
+            //  branching to an ad screen.
+        case registered:
+            // We need to remove the fourth episode.
+            EpiDef.numitems--;
+            break;
+
+        case retail:
+            // We are fine.
+        default:
+            break;
     }
 
     if (gamemode == commercial)
         NewDef.prevMenu = (nerve_pwad ? &ExpDef : &MainDef);
 /*
 #ifndef WII
-    if(!beta_style)
+    if (!beta_style)
         opldev = M_CheckParm("-opldev") > 0;
 #endif
 */
@@ -8895,7 +9079,7 @@ void M_God(int choice)
 {
     players[consoleplayer].cheats ^= CF_GODMODE;
 
-    if(aiming_help)
+    if (aiming_help)
         aiming_help = false;
 
     if (players[consoleplayer].cheats & CF_GODMODE)
@@ -8903,14 +9087,14 @@ void M_God(int choice)
         if (players[consoleplayer].mo)
             players[consoleplayer].mo->health = 100;
         players[consoleplayer].health = 100;
-        if(beta_style)
+        if (beta_style)
             players[consoleplayer].message = STSTR_DQDONBETA;
         else
             players[consoleplayer].message = s_STSTR_DQDON;
     }
     else
     {
-        if(beta_style)
+        if (beta_style)
             players[consoleplayer].message = STSTR_DQDOFFBETA;
         else
             players[consoleplayer].message = s_STSTR_DQDOFF;
@@ -8922,7 +9106,7 @@ void M_Noclip(int choice)
     players[consoleplayer].cheats ^= CF_NOCLIP;
     if (players[consoleplayer].cheats & CF_NOCLIP)
     {
-        if(beta_style)
+        if (beta_style)
             players[consoleplayer].message = STSTR_NCONBETA;
         else
             players[consoleplayer].message = s_STSTR_NCON;
@@ -8931,7 +9115,7 @@ void M_Noclip(int choice)
     }
     else
     {
-        if(beta_style)
+        if (beta_style)
             players[consoleplayer].message = STSTR_NCOFFBETA;
         else
             players[consoleplayer].message = s_STSTR_NCOFF;
@@ -8952,11 +9136,11 @@ void M_ArmorB(int choice)
     players[consoleplayer].armorpoints = 100;
     players[consoleplayer].armortype = 1;
 
-    if(fsize != 12361532 && fsize != 19321722)
+    if (fsize != 12361532 && fsize != 19321722)
         players[consoleplayer].message = "GREEN ARMOR ADDED";
-    if(fsize == 12361532)
+    if (fsize == 12361532)
         players[consoleplayer].message = "CHEX(R) ARMOR ADDED";
-    if(fsize == 19321722)
+    if (fsize == 19321722)
         players[consoleplayer].message = "KEVLAR VEST ADDED";
 }
 
@@ -8965,11 +9149,11 @@ void M_ArmorC(int choice)
     players[consoleplayer].armorpoints = 200;
     players[consoleplayer].armortype = 2;
 
-    if(fsize != 12361532 && fsize != 19321722)
+    if (fsize != 12361532 && fsize != 19321722)
         players[consoleplayer].message = "BLUE ARMOR ADDED";
-    if(fsize == 12361532)
+    if (fsize == 12361532)
         players[consoleplayer].message = "SUPER CHEX(R) ARMOR ADDED";
-    if(fsize == 19321722)
+    if (fsize == 19321722)
         players[consoleplayer].message = "SUPER KEVLAR VEST ADDED";
 }
 
@@ -8977,27 +9161,28 @@ void M_WeaponsA(int choice)
 {
     int i;
 
-    if(fsize == 4261144 || fsize == 4271324 || fsize == 4211660 ||
+    if (fsize == 4261144 || fsize == 4271324 || fsize == 4211660 ||
             fsize == 4207819 || fsize == 4274218 || fsize == 4225504 ||
             fsize == 4225460 || fsize == 4234124 || fsize == 4196020)
     {
-        for (i=0;i<NUMWEAPONS-4;i++)
+        for (i = 0; i < NUMWEAPONS - 4; i++)
             players[consoleplayer].weaponowned[i] = true;
             players[consoleplayer].weaponowned[7] = true;
     }
-    else if(fsize == 10396254 || fsize == 10399316 || fsize == 10401760 ||
+    else if (fsize == 10396254 || fsize == 10399316 || fsize == 10401760 ||
             fsize == 11159840 || fsize == 12408292 || gameversion == exe_chex)
     {
-        for (i=0;i<NUMWEAPONS-1;i++)
+        for (i = 0; i < NUMWEAPONS - 1; i++)
             players[consoleplayer].weaponowned[i] = true;
     }
     else
     {
-        for (i=0;i<NUMWEAPONS;i++)
+        for (i = 0; i < NUMWEAPONS; i++)
             players[consoleplayer].weaponowned[i] = true;
     }
-    for (i=0;i<NUMAMMO;i++)
-      players[consoleplayer].ammo[i] = players[consoleplayer].maxammo[i];
+
+    for (i = 0; i < NUMAMMO; i++)
+        players[consoleplayer].ammo[i] = players[consoleplayer].maxammo[i];
 
     players[consoleplayer].message = s_STSTR_FAADDED;
 }
@@ -9007,11 +9192,11 @@ void M_WeaponsB(int choice)
     players[consoleplayer].weaponowned[2] = true;
     players[consoleplayer].ammo[1] = players[consoleplayer].maxammo[1];
 
-    if(fsize != 19321722 && fsize != 12361532)
+    if (fsize != 19321722 && fsize != 12361532)
         players[consoleplayer].message = "SHOTGUN ADDED";
-    if(fsize == 19321722)
+    if (fsize == 19321722)
         players[consoleplayer].message = "TAZER ADDED";
-    if(fsize == 12361532)
+    if (fsize == 12361532)
         players[consoleplayer].message = "LARGE ZORCHER ADDED";
 }
 
@@ -9020,11 +9205,11 @@ void M_WeaponsC(int choice)
     players[consoleplayer].weaponowned[3] = true;
     players[consoleplayer].ammo[1] = players[consoleplayer].maxammo[1];
 
-    if(fsize != 19321722 && fsize != 12361532)
+    if (fsize != 19321722 && fsize != 12361532)
         players[consoleplayer].message = "CHAINGUN ADDED";
-    if(fsize == 19321722)
+    if (fsize == 19321722)
         players[consoleplayer].message = "UZI ADDED";
-    if(fsize == 12361532)
+    if (fsize == 12361532)
         players[consoleplayer].message = "RAPID ZORCHER ADDED";
 }
 
@@ -9033,11 +9218,11 @@ void M_WeaponsD(int choice)
     players[consoleplayer].weaponowned[4] = true;
     players[consoleplayer].ammo[3] = players[consoleplayer].maxammo[3];
 
-    if(fsize != 19321722 && fsize != 12361532)
+    if (fsize != 19321722 && fsize != 12361532)
         players[consoleplayer].message = "ROCKET LAUNCHER ADDED";
-    if(fsize == 19321722)
+    if (fsize == 19321722)
         players[consoleplayer].message = "PHOTON 'ZOOKA ADDED";
-    if(fsize == 12361532)
+    if (fsize == 12361532)
         players[consoleplayer].message = "ZORCH PROPULSOR ADDED";
 }
 
@@ -9046,11 +9231,11 @@ void M_WeaponsE(int choice)
     players[consoleplayer].weaponowned[5] = true;
     players[consoleplayer].ammo[2] = players[consoleplayer].maxammo[2];
 
-    if(fsize != 19321722 && fsize != 12361532)
+    if (fsize != 19321722 && fsize != 12361532)
         players[consoleplayer].message = "PLASMA RIFLE ADDED";
-    if(fsize == 19321722)
+    if (fsize == 19321722)
         players[consoleplayer].message = "STICK ADDED";
-    if(fsize == 12361532)
+    if (fsize == 12361532)
         players[consoleplayer].message = "PHASING ZORCHER ADDED";
 }
 
@@ -9059,11 +9244,11 @@ void M_WeaponsF(int choice)
     players[consoleplayer].weaponowned[6] = true;
     players[consoleplayer].ammo[2] = players[consoleplayer].maxammo[2];
 
-    if(fsize != 19321722 && fsize != 12361532)
+    if (fsize != 19321722 && fsize != 12361532)
         players[consoleplayer].message = "BFG9000 ADDED";
-    if(fsize == 19321722)
+    if (fsize == 19321722)
         players[consoleplayer].message = "NUKER ADDED";
-    if(fsize == 12361532)
+    if (fsize == 12361532)
         players[consoleplayer].message =
         "LARGE AREA ZORCHING DEVICE ADDED";
 }
@@ -9072,11 +9257,11 @@ void M_WeaponsG(int choice)
 {
     players[consoleplayer].weaponowned[7] = true;
 
-    if(fsize != 19321722 && fsize != 12361532)
+    if (fsize != 19321722 && fsize != 12361532)
         players[consoleplayer].message = "CHAINSAW ADDED";
-    if(fsize == 19321722)
+    if (fsize == 19321722)
         players[consoleplayer].message = "HOIG REZNATOR ADDED";
-    if(fsize == 12361532)
+    if (fsize == 12361532)
         players[consoleplayer].message = "SUPER BOOTSPORK ADDED";
 }
 
@@ -9085,9 +9270,9 @@ void M_WeaponsH(int choice)
     players[consoleplayer].weaponowned[8] = true;
     players[consoleplayer].ammo[1] = players[consoleplayer].maxammo[1];
 
-    if(fsize != 19321722)
+    if (fsize != 19321722)
         players[consoleplayer].message = "SUPER SHOTGUN ADDED";
-    if(fsize == 19321722)
+    if (fsize == 19321722)
         players[consoleplayer].message = "CRYOGUN ADDED";
 }
 
@@ -9158,7 +9343,7 @@ void M_ItemsA(int choice)
 {
     player_t* player = &players[consoleplayer];
 
-    if(!got_all)
+    if (!got_all)
     {
         int i;
 
@@ -9176,12 +9361,12 @@ void M_ItemsA(int choice)
 
         if (!player->backpack)
         {
-            for (i=0 ; i<NUMAMMO ; i++)
+            for (i = 0; i < NUMAMMO; i++)
             player->maxammo[i] *= 2;
             player->backpack = true;
         }
 
-        for (i=0 ; i<NUMAMMO ; i++)
+        for (i = 0; i < NUMAMMO; i++)
             P_GiveAmmo (player, i, 1);
 
         HU_PlayerMessage(s_GOTBACKPACK, true);
@@ -9202,7 +9387,7 @@ void M_ItemsA(int choice)
         players[consoleplayer].mo->flags &= ~MF_NOGRAVITY;
         player->cheats &= ~CF_NOTARGET;
 
-        if(beta_style)
+        if (beta_style)
             players[consoleplayer].fixedcolormap = 0;
 
         got_all = false;
@@ -9212,7 +9397,7 @@ void M_ItemsA(int choice)
 
 void M_ItemsB(int choice)
 {
-    if(!got_invisibility)
+    if (!got_invisibility)
     {
         players[consoleplayer].powers[2] = INVISTICS;
         players[consoleplayer].cheats ^= CF_NOTARGET;
@@ -9228,11 +9413,11 @@ void M_ItemsB(int choice)
 
         got_invisibility = false;
 
-        if(beta_style)
+        if (beta_style)
             players[consoleplayer].fixedcolormap = 0;
     }
 
-    if(fsize == 19321722)
+    if (fsize == 19321722)
         players[consoleplayer].message = "ENK BLINDNESS ADDED";
     else
         players[consoleplayer].message = s_GOTINVIS;
@@ -9240,7 +9425,7 @@ void M_ItemsB(int choice)
 
 void M_ItemsC(int choice)
 {
-    if(!got_radiation_suit)
+    if (!got_radiation_suit)
     {
         players[consoleplayer].powers[3] = IRONTICS;
 
@@ -9253,17 +9438,17 @@ void M_ItemsC(int choice)
         got_radiation_suit = false;
     }
 
-    if(fsize != 12361532 && fsize != 19321722)
+    if (fsize != 12361532 && fsize != 19321722)
         players[consoleplayer].message = s_GOTSUIT;
-    if(fsize == 12361532)
+    if (fsize == 12361532)
         players[consoleplayer].message = "SLIME-PROOF SUIT ADDED";
-    if(fsize == 19321722)
+    if (fsize == 19321722)
         players[consoleplayer].message = "VULCAN RUBBER BOOTS ADDED";
 }
 
 void M_ItemsD(int choice)
 {
-    if(!got_map)
+    if (!got_map)
     {
         players[consoleplayer].powers[4] = 1;
 
@@ -9276,15 +9461,15 @@ void M_ItemsD(int choice)
         got_map = false;
     }
 
-    if(fsize != 19321722)
+    if (fsize != 19321722)
         players[consoleplayer].message = s_GOTMAP;
-    if(fsize == 19321722)
+    if (fsize == 19321722)
         players[consoleplayer].message = "SI ARRAY MAPPING ADDED";
 }
 
 void M_ItemsE(int choice)
 {
-    if(!got_light_amp)
+    if (!got_light_amp)
     {
         players[consoleplayer].powers[5] = INFRATICS;
 
@@ -9297,17 +9482,17 @@ void M_ItemsE(int choice)
         got_light_amp = false;
     }
 
-    if(fsize != 12361532 && fsize != 19321722)
+    if (fsize != 12361532 && fsize != 19321722)
         players[consoleplayer].message = s_GOTVISOR;
-    if(fsize == 12361532)
+    if (fsize == 12361532)
         players[consoleplayer].message = "ULTRA GOOGLES ADDED";
-    if(fsize == 19321722)
+    if (fsize == 19321722)
         players[consoleplayer].message = "INFRARED VISOR ADDED";
 }
 
 void M_ItemsF(int choice)
 {
-    if(!got_invulnerability)
+    if (!got_invulnerability)
     {
         players[consoleplayer].powers[0] = INVULNTICS;
 
@@ -9320,15 +9505,15 @@ void M_ItemsF(int choice)
         got_invulnerability = false;
     }
 
-    if(fsize != 19321722)
+    if (fsize != 19321722)
         players[consoleplayer].message = s_GOTINVUL;
-    if(fsize == 19321722)
+    if (fsize == 19321722)
         players[consoleplayer].message = "FORCE FIELD ADDED";
 }
 
 void M_ItemsG(int choice)
 {
-    if(!got_berserk)
+    if (!got_berserk)
     {
         players[consoleplayer].powers[1] = 1;
 
@@ -9341,9 +9526,9 @@ void M_ItemsG(int choice)
         got_berserk = false;
     }
 
-    if(fsize != 19321722)
+    if (fsize != 19321722)
         players[consoleplayer].message = s_GOTBERSERK;
-    if(fsize == 19321722)
+    if (fsize == 19321722)
         players[consoleplayer].message = "007 MICROTEL ADDED";
 }
 
@@ -9382,11 +9567,11 @@ void M_ItemsJ(int choice)
 
     if (!player->backpack)
     {
-        for (i=0 ; i<NUMAMMO ; i++)
+        for (i = 0; i < NUMAMMO; i++)
             player->maxammo[i] *= 2;
         player->backpack = true;
     }
-    for (i=0 ; i<NUMAMMO ; i++)
+    for (i = 0; i < NUMAMMO; i++)
         P_GiveAmmo (player, i, 1);
     HU_PlayerMessage(s_GOTBACKPACK, true);
 }
@@ -9408,230 +9593,231 @@ void M_Topo(int choice)
 
 void M_Rift(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (fsize == 4261144 || fsize == 4271324 || fsize == 4211660 ||
+        case 0:
+            if (fsize == 4261144 || fsize == 4271324 || fsize == 4211660 ||
             fsize == 4207819 || fsize == 4274218 || fsize == 4225504 ||
             fsize == 4225460 || fsize == 4234124 || fsize == 4196020 ||
             fsize == 12361532)
-        {
-            if(epi >= 1 && map >= 1)
-                map--;
-        }
-        else if(fsize == 10396254 || fsize == 10399316 || fsize == 10401760 ||
-                fsize == 11159840)
-        {
-            if(epi >= 1 && map >= 1)
             {
-                map--;
-                if(epi == 3 && map == 0)
+                if (epi >= 1 && map >= 1)
+                    map--;
+            }
+            else if (fsize == 10396254 || fsize == 10399316 || fsize == 10401760 ||
+                    fsize == 11159840)
+            {
+                if (epi >= 1 && map >= 1)
                 {
-                    epi = 2;
-                    map = 9;
-                }
-                else if(epi == 2 && map == 0)
-                {
-                    epi = 1;
-                    map = 9;
+                    map--;
+                    if (epi == 3 && map == 0)
+                    {
+                        epi = 2;
+                        map = 9;
+                    }
+                    else if (epi == 2 && map == 0)
+                    {
+                        epi = 1;
+                        map = 9;
+                    }
                 }
             }
-        }
-        else if(fsize == 12408292 || fsize == 12474561 || fsize == 12487824)
-        {
-            if(epi >= 1 && map >= 1)
+            else if (fsize == 12408292 || fsize == 12474561 || fsize == 12487824)
             {
-                map--;
-                if(epi == 4 && map == 0)
+                if (epi >= 1 && map >= 1)
                 {
-                    epi = 3;
-                    map = 9;
-                }
-                else if(epi == 3 && map == 0)
-                {
-                    epi = 2;
-                    map = 9;
-                }
-                else if(epi == 2 && map == 0)
-                {
-                    epi = 1;
-                    map = 9;
+                    map--;
+                    if (epi == 4 && map == 0)
+                    {
+                        epi = 3;
+                        map = 9;
+                    }
+                    else if (epi == 3 && map == 0)
+                    {
+                        epi = 2;
+                        map = 9;
+                    }
+                    else if (epi == 2 && map == 0)
+                    {
+                        epi = 1;
+                        map = 9;
+                    }
                 }
             }
-        }
-        else if(fsize == 12538385)
-        {
-            if(epi >= 1 && map >= 1)
+            else if (fsize == 12538385)
             {
-                map--;
-                if(epi == 4 && map == 0)
+                if (epi >= 1 && map >= 1)
                 {
-                    epi = 3;
-                    map = 9;
-                }
-                else if(epi == 3 && map == 0)
-                {
-                    epi = 2;
-                    map = 9;
-                }
-                else if(epi == 2 && map == 0)
-                {
-                    epi = 1;
-                    map = 10;
-                    map_flag = true;
+                    map--;
+                    if (epi == 4 && map == 0)
+                    {
+                        epi = 3;
+                        map = 9;
+                    }
+                    else if (epi == 3 && map == 0)
+                    {
+                        epi = 2;
+                        map = 9;
+                    }
+                    else if (epi == 2 && map == 0)
+                    {
+                        epi = 1;
+                        map = 10;
+                        map_flag = true;
+                    }
                 }
             }
-        }
-        else if(fsize == 14943400 || fsize == 14824716 || fsize == 14612688 ||
-                fsize == 14607420 || fsize == 14604584 || fsize == 18195736 ||
-                fsize == 18654796 || fsize == 18240172 || fsize == 17420824 ||
-                fsize == 28422764 || fsize == 14677988 || fsize == 14683458 ||
-                fsize == 14691821)
-        {
-            if(map >= 2)
-                map--;
-        }
-        else if(fsize == 19321722)
-        {
-            if(map >= 2)
-                map--;
-            if(map == 30)
-                map = 20;
-        }
-        break;
-      case 1:
-        if (fsize == 4261144 || fsize == 4271324 || fsize == 4211660 ||
+            else if (fsize == 14943400 || fsize == 14824716 || fsize == 14612688 ||
+                    fsize == 14607420 || fsize == 14604584 || fsize == 18195736 ||
+                    fsize == 18654796 || fsize == 18240172 || fsize == 17420824 ||
+                    fsize == 28422764 || fsize == 14677988 || fsize == 14683458 ||
+                    fsize == 14691821)
+            {
+                if (map >= 2)
+                    map--;
+            }
+            else if (fsize == 19321722)
+            {
+                if (map >= 2)
+                    map--;
+                if (map == 30)
+                    map = 20;
+            }
+            break;
+
+        case 1:
+            if (fsize == 4261144 || fsize == 4271324 || fsize == 4211660 ||
             fsize == 4207819 || fsize == 4274218 || fsize == 4225504 ||
             fsize == 4225460 || fsize == 4234124 || fsize == 4196020)
-        {
-            if(epi <= 1 && map <= 9)
             {
-                map++;
-                if(epi == 1 && map == 10)
+                if (epi <= 1 && map <= 9)
                 {
-                    epi = 1;
-                    map = 9;
-                }
-            }
-        }
-        else if(fsize == 12361532)
-        {
-            if(epi <= 1 && map <= 5)
-            {
-                map++;
-                if(epi == 1 && map == 6)
-                {
-                    epi = 1;
-                    map = 5;
-                }
-            }
-        }
-        else if(fsize == 10396254 || fsize == 10399316 || fsize == 10401760 ||
-                fsize == 11159840)
-        {
-            if(epi <= 3 && map <= 9)
-            {
-                map++;
-                if(epi == 1 && map == 10)
-                {
-                    epi = 2;
-                    map = 1;
-                }
-                else if(epi == 2 && map == 10)
-                {
-                    epi = 3;
-                    map = 1;
-                }
-                else if(epi == 3 && map == 10)
-                {
-                    epi = 3;
-                    map = 9;
-                }
-            }
-        }
-        else if(fsize == 12408292 || fsize == 12474561 || fsize == 12487824)
-        {
-            if(epi <= 4 && map <= 9)
-            {
-                map++;
-                if(epi == 1 && map == 10)
-                {
-                    epi = 2;
-                    map = 1;
-                }
-                else if(epi == 2 && map == 10)
-                {
-                    epi = 3;
-                    map = 1;
-                }
-                else if(epi == 3 && map == 10)
-                {
-                    epi = 4;
-                    map = 1;
-                }
-                else if(epi == 4 && map == 10)
-                {
-                    epi = 4;
-                    map = 9;
-                }
-            }
-        }
-        else if(fsize == 12538385)
-        {
-            if(epi <= 4 && map <= 10)
-            {
-                map++;
-                if(epi == 1 && map == 11)
-                {
-                    epi = 2;
-                    map = 1;
-                }
-                else if(epi == 2 && map == 10)
-                {
-                    epi = 3;
-                    map = 1;
-                }
-                else if(epi == 3 && map == 10)
-                {
-                    epi = 4;
-                    map = 1;
-                }
-                else if(epi == 4 && map == 10)
-                {
-                    epi = 4;
-                    map = 9;
-                }
-            }
-        }
-        else if(fsize == 19321722)
-        {
-            if(map <= 30)
-                map++;
-            if(map == 21)
-                map = 31;
-        }
-
-        if(!nerve_pwad)
-        {
-            if (fsize == 14943400 || fsize == 14612688 || fsize == 14607420 ||
-                fsize == 14604584 || fsize == 18195736 || fsize == 18654796 ||
-                fsize == 18240172 || fsize == 17420824 || fsize == 28422764)
-            {
-                if(map <= 31)
                     map++;
+                    if (epi == 1 && map == 10)
+                    {
+                        epi = 1;
+                        map = 9;
+                    }
+                }
             }
-            else if(fsize == 14677988 || fsize == 14683458 || fsize == 14691821)
+            else if (fsize == 12361532)
             {
-                if(map <= 32)
+                if (epi <= 1 && map <= 5)
+                {
                     map++;
+                    if (epi == 1 && map == 6)
+                    {
+                        epi = 1;
+                        map = 5;
+                    }
+                }
             }
-            else if(fsize == 14824716)
+            else if (fsize == 10396254 || fsize == 10399316 || fsize == 10401760 ||
+                    fsize == 11159840)
             {
-                if(map <= 29)
+                if (epi <= 3 && map <= 9)
+                {
                     map++;
+                    if (epi == 1 && map == 10)
+                    {
+                        epi = 2;
+                        map = 1;
+                    }
+                    else if (epi == 2 && map == 10)
+                    {
+                        epi = 3;
+                        map = 1;
+                    }
+                    else if (epi == 3 && map == 10)
+                    {
+                        epi = 3;
+                        map = 9;
+                    }
+                }
             }
-        }
-        break;
+            else if (fsize == 12408292 || fsize == 12474561 || fsize == 12487824)
+            {
+                if (epi <= 4 && map <= 9)
+                {
+                    map++;
+                    if (epi == 1 && map == 10)
+                    {
+                        epi = 2;
+                        map = 1;
+                    }
+                    else if (epi == 2 && map == 10)
+                    {
+                        epi = 3;
+                        map = 1;
+                    }
+                    else if (epi == 3 && map == 10)
+                    {
+                        epi = 4;
+                        map = 1;
+                    }
+                    else if (epi == 4 && map == 10)
+                    {
+                        epi = 4;
+                        map = 9;
+                    }
+                }
+            }
+            else if (fsize == 12538385)
+            {
+                if (epi <= 4 && map <= 10)
+                {
+                    map++;
+                    if (epi == 1 && map == 11)
+                    {
+                        epi = 2;
+                        map = 1;
+                    }
+                    else if (epi == 2 && map == 10)
+                    {
+                        epi = 3;
+                        map = 1;
+                    }
+                    else if (epi == 3 && map == 10)
+                    {
+                        epi = 4;
+                        map = 1;
+                    }
+                    else if (epi == 4 && map == 10)
+                    {
+                        epi = 4;
+                        map = 9;
+                    }
+                }
+            }
+            else if (fsize == 19321722)
+            {
+                if (map <= 30)
+                    map++;
+                if (map == 21)
+                    map = 31;
+            }
+    
+            if (!nerve_pwad)
+            {
+                if (fsize == 14943400 || fsize == 14612688 || fsize == 14607420 ||
+                    fsize == 14604584 || fsize == 18195736 || fsize == 18654796 ||
+                    fsize == 18240172 || fsize == 17420824 || fsize == 28422764)
+                {
+                    if (map <= 31)
+                        map++;
+                }
+                else if (fsize == 14677988 || fsize == 14683458 || fsize == 14691821)
+                {
+                    if (map <= 32)
+                        map++;
+                }
+                else if (fsize == 14824716)
+                {
+                    if (map <= 29)
+                        map++;
+                }
+            }
+            break;
     }
 }
 
@@ -9645,284 +9831,285 @@ void M_RiftNow(int choice)
 
 void M_Spin(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (fsize == 4261144 || fsize == 4271324 || fsize == 4211660 ||
+        case 0:
+            if (fsize == 4261144 || fsize == 4271324 || fsize == 4211660 ||
             fsize == 4207819 || fsize == 4274218 || fsize == 4225504 ||
             fsize == 4225460 || fsize == 4234124 || fsize == 4196020)
-        {
-            if(tracknum > 1)
             {
-                tracknum--;
-                if(tracknum == 30)
-                    tracknum = 29;
-                else if(tracknum == 27)
-                    tracknum = 9;
-            }
-        }
-        else if(fsize == 10396254 || fsize == 10399316 || fsize == 10401760 ||
-                fsize == 11159840 || fsize == 12408292 || fsize == 12361532 ||
-                fsize == 12474561 || fsize == 12538385 || fsize == 12487824)
-        {
-            if(tracknum > 1)
-            {
-                tracknum--;
-                if(fsize == 12361532)
+                if (tracknum > 1)
                 {
-                    if(tracknum == 30)
+                    tracknum--;
+                    if (tracknum == 30)
                         tracknum = 29;
-                    else if(tracknum == 27)
-                        tracknum = 5;
+                    else if (tracknum == 27)
+                        tracknum = 9;
+                }
+            }
+            else if (fsize == 10396254 || fsize == 10399316 || fsize == 10401760 ||
+                    fsize == 11159840 || fsize == 12408292 || fsize == 12361532 ||
+                    fsize == 12474561 || fsize == 12538385 || fsize == 12487824)
+            {
+                if (tracknum > 1)
+                {
+                    tracknum--;
+                    if (fsize == 12361532)
+                    {
+                        if (tracknum == 30)
+                            tracknum = 29;
+                        else if (tracknum == 27)
+                            tracknum = 5;
+                    }
+                    else
+                    {
+                        if (tracknum == 28)
+                            tracknum = 26;
+                        else if (tracknum == 25)
+                            tracknum = 21;
+                        else if (tracknum == 19)
+                            tracknum = 18;
+                        else if (tracknum == 14)
+                            tracknum = 13;
+                    }
+                }
+            }
+            else if (fsize == 14943400 || fsize == 14824716 || fsize == 14612688 ||
+                    fsize == 14607420 || fsize == 14604584 || fsize == 19321722 ||
+                    fsize == 28422764 || fsize == 14677988 || fsize == 14683458 ||
+                    fsize == 14691821)
+            {
+                if (fsize == 19321722)
+                {
+                    if (tracknum > 33)
+                    {
+                        tracknum--;
+                        if (tracknum == 64)
+                            tracknum = 63;
+                        else if (tracknum == 62)
+                            tracknum = 53;
+                        else if (tracknum == 51)
+                            tracknum = 50;
+                        else if (tracknum == 46)
+                            tracknum = 45;
+                    }
+                }
+                else if (fsize == 28422764)
+                {
+                    if (tracknum > 33)
+                    {
+                        tracknum--;
+                        if (tracknum == 65)
+                            tracknum = 64;
+                        else if (tracknum == 60)
+                            tracknum = 56;
+                        else if (tracknum == 55)
+                            tracknum = 51;
+                        else if (tracknum == 47)
+                            tracknum = 42;
+                        else if (tracknum == 41)
+                            tracknum = 40;
+                        else if (tracknum == 39)
+                            tracknum = 38;
+                        else if (tracknum == 37)
+                            tracknum = 36;
+                    }
                 }
                 else
                 {
-                    if(tracknum == 28)
-                        tracknum = 26;
-                    else if(tracknum == 25)
-                        tracknum = 21;
-                    else if(tracknum == 19)
-                        tracknum = 18;
-                    else if(tracknum == 14)
-                        tracknum = 13;
+                    if (tracknum > 33)
+                    {
+                        tracknum--;
+                        if (tracknum == 61)
+                            tracknum = 60;
+                        else if (tracknum == 59)
+                            tracknum = 57;
+                        else if (tracknum == 56)
+                            tracknum = 55;
+                        else if (tracknum == 54)
+                            tracknum = 52;
+                        else if (tracknum == 51)
+                            tracknum = 50;
+                        else if (tracknum == 49)
+                            tracknum = 42;
+                    }
                 }
             }
-        }
-        else if(fsize == 14943400 || fsize == 14824716 || fsize == 14612688 ||
-                fsize == 14607420 || fsize == 14604584 || fsize == 19321722 ||
-                fsize == 28422764 || fsize == 14677988 || fsize == 14683458 ||
-                fsize == 14691821)
-        {
-            if(fsize == 19321722)
+            else if (fsize == 18195736 || fsize == 18654796)
             {
-                if(tracknum > 33)
+                if (tracknum > 33)
                 {
                     tracknum--;
-                    if(tracknum == 64)
+                    if (tracknum == 65)
                         tracknum = 63;
-                    else if(tracknum == 62)
-                        tracknum = 53;
-                    else if(tracknum == 51)
-                        tracknum = 50;
-                    else if(tracknum == 46)
-                        tracknum = 45;
-                }
-            }
-            else if(fsize == 28422764)
-            {
-                if(tracknum > 33)
-                {
-                    tracknum--;
-                    if(tracknum == 65)
-                        tracknum = 64;
-                    else if(tracknum == 60)
-                        tracknum = 56;
-                    else if(tracknum == 55)
-                        tracknum = 51;
-                    else if(tracknum == 47)
-                        tracknum = 42;
-                    else if(tracknum == 41)
-                        tracknum = 40;
-                    else if(tracknum == 39)
-                        tracknum = 38;
-                    else if(tracknum == 37)
-                        tracknum = 36;
-                }
-            }
-            else
-            {
-                if(tracknum > 33)
-                {
-                    tracknum--;
-                    if(tracknum == 61)
-                        tracknum = 60;
-                    else if(tracknum == 59)
+                    else if (tracknum == 62)
                         tracknum = 57;
-                    else if(tracknum == 56)
-                        tracknum = 55;
-                    else if(tracknum == 54)
-                        tracknum = 52;
-                    else if(tracknum == 51)
-                        tracknum = 50;
-                    else if(tracknum == 49)
-                        tracknum = 42;
+                    else if (tracknum == 50)
+                        tracknum = 48;
+                    else if (tracknum == 47)
+                        tracknum = 46;
+                    else if (tracknum == 45)
+                        tracknum = 44;
+                    else if (tracknum == 41)
+                        tracknum = 40;
                 }
             }
-        }
-        else if(fsize == 18195736 || fsize == 18654796)
-        {
-            if(tracknum > 33)
+            else if (fsize == 18240172 || fsize == 17420824)
             {
-                tracknum--;
-                if(tracknum == 65)
-                    tracknum = 63;
-                else if(tracknum == 62)
-                    tracknum = 57;
-                else if(tracknum == 50)
-                    tracknum = 48;
-                else if(tracknum == 47)
-                    tracknum = 46;
-                else if(tracknum == 45)
-                    tracknum = 44;
-                else if(tracknum == 41)
-                    tracknum = 40;
+                if (tracknum > 33)
+                {
+                    tracknum--;
+                    if (tracknum == 65)
+                        tracknum = 62;
+                    else if (tracknum == 61)
+                        tracknum = 57;
+                    else if (tracknum == 50)
+                        tracknum = 49;
+                }
             }
-        }
-        else if(fsize == 18240172 || fsize == 17420824)
-        {
-            if(tracknum > 33)
-            {
-                tracknum--;
-                if(tracknum == 65)
-                    tracknum = 62;
-                else if(tracknum == 61)
-                    tracknum = 57;
-                else if(tracknum == 50)
-                    tracknum = 49;
-            }
-        }
-        break;
-      case 1:
-        if (fsize == 4261144 || fsize == 4271324 || fsize == 4211660 ||
+            break;
+
+        case 1:
+            if (fsize == 4261144 || fsize == 4271324 || fsize == 4211660 ||
             fsize == 4207819 || fsize == 4274218 || fsize == 4225504 ||
             fsize == 4225460 || fsize == 4234124 || fsize == 4196020)
-        {
-            if(tracknum < 31)
             {
-                tracknum++;
-                if(tracknum == 10)
-                    tracknum = 28;
-                else if(tracknum == 30)
-                        tracknum = 31;
-            }
-        }
-        else if(fsize == 10396254 || fsize == 10399316 || fsize == 10401760 ||
-                fsize == 11159840 || fsize == 12408292 || fsize == 12361532 ||
-                fsize == 12474561 || fsize == 12538385 || fsize == 12487824)
-        {
-            if(tracknum < 31)
-            {
-                tracknum++;
-                if(fsize == 12361532)
+                if (tracknum < 31)
                 {
-                    if(tracknum == 6)
+                    tracknum++;
+                    if (tracknum == 10)
                         tracknum = 28;
-                    else if(tracknum == 30)
-                        tracknum = 31;
+                    else if (tracknum == 30)
+                            tracknum = 31;
+                }
+            }
+            else if (fsize == 10396254 || fsize == 10399316 || fsize == 10401760 ||
+                    fsize == 11159840 || fsize == 12408292 || fsize == 12361532 ||
+                    fsize == 12474561 || fsize == 12538385 || fsize == 12487824)
+            {
+                if (tracknum < 31)
+                {
+                    tracknum++;
+                    if (fsize == 12361532)
+                    {
+                        if (tracknum == 6)
+                            tracknum = 28;
+                        else if (tracknum == 30)
+                            tracknum = 31;
+                    }
+                    else
+                    {
+                        if (tracknum == 14)
+                            tracknum = 15;
+                        else if (tracknum == 19)
+                            tracknum = 20;
+                        else if (tracknum == 22)
+                            tracknum = 26;
+                        else if (tracknum == 27)
+                            tracknum = 29;
+                    }
+                }
+            }
+            else if (fsize == 14943400 || fsize == 14824716 || fsize == 14612688 ||
+                    fsize == 14607420 || fsize == 14604584 || fsize == 19321722 ||
+                    fsize == 28422764 || fsize == 14677988 || fsize == 14683458 ||
+                    fsize == 14691821)
+            {
+                if (fsize == 19321722)
+                {
+                    if (tracknum < 67)
+                    {
+                        tracknum++;
+                        if (tracknum == 46)
+                            tracknum = 47;
+                        else if (tracknum == 51)
+                            tracknum = 52;
+                        else if (tracknum == 54)
+                            tracknum = 63;
+                        else if (tracknum == 64)
+                            tracknum = 65;
+                    }
+                }
+                else if (fsize == 28422764)
+                {
+                    if (tracknum < 67)
+                    {
+                        tracknum++;
+                        if (tracknum == 37)
+                            tracknum = 38;
+                        else if (tracknum == 39)
+                            tracknum = 40;
+                        else if (tracknum == 41)
+                            tracknum = 42;
+                        else if (tracknum == 43)
+                            tracknum = 48;
+                        else if (tracknum == 52)
+                            tracknum = 56;
+                        else if (tracknum == 57)
+                            tracknum = 61;
+                        else if (tracknum == 65)
+                            tracknum = 66;
+                    }
                 }
                 else
                 {
-                    if(tracknum == 14)
-                        tracknum = 15;
-                    else if(tracknum == 19)
-                        tracknum = 20;
-                    else if(tracknum == 22)
-                        tracknum = 26;
-                    else if(tracknum == 27)
-                        tracknum = 29;
+                    if (tracknum < 67)
+                    {
+                        tracknum++;
+                        if (tracknum == 43)
+                            tracknum = 50;
+                        else if (tracknum == 51)
+                            tracknum = 52;
+                        else if (tracknum == 53)
+                            tracknum = 55;
+                        else if (tracknum == 56)
+                            tracknum = 57;
+                        else if (tracknum == 58)
+                            tracknum = 60;
+                        else if (tracknum == 61)
+                            tracknum = 62;
+                    }
                 }
             }
-        }
-        else if(fsize == 14943400 || fsize == 14824716 || fsize == 14612688 ||
-                fsize == 14607420 || fsize == 14604584 || fsize == 19321722 ||
-                fsize == 28422764 || fsize == 14677988 || fsize == 14683458 ||
-                fsize == 14691821)
-        {
-            if(fsize == 19321722)
+            else if (fsize == 18195736 || fsize == 18654796)
             {
-                if(tracknum < 67)
+                if (tracknum < 66)
                 {
                     tracknum++;
-                    if(tracknum == 46)
-                        tracknum = 47;
-                    else if(tracknum == 51)
-                        tracknum = 52;
-                    else if(tracknum == 54)
-                        tracknum = 63;
-                    else if(tracknum == 64)
-                        tracknum = 65;
-                }
-            }
-            else if(fsize == 28422764)
-            {
-                if(tracknum < 67)
-                {
-                    tracknum++;
-                    if(tracknum == 37)
-                        tracknum = 38;
-                    else if(tracknum == 39)
-                        tracknum = 40;
-                    else if(tracknum == 41)
+                    if (tracknum == 41)
                         tracknum = 42;
-                    else if(tracknum == 43)
+                    else if (tracknum == 45)
+                        tracknum = 46;
+                    else if (tracknum == 47)
                         tracknum = 48;
-                    else if(tracknum == 52)
-                        tracknum = 56;
-                    else if(tracknum == 57)
-                        tracknum = 61;
-                    else if(tracknum == 65)
+                    else if (tracknum == 49)
+                        tracknum = 51;
+                    else if (tracknum == 58)
+                        tracknum = 63;
+                    else if (tracknum == 64)
                         tracknum = 66;
                 }
             }
-            else
+            else if (fsize == 18240172 || fsize == 17420824)
             {
-                if(tracknum < 67)
+                if (tracknum < 67)
                 {
                     tracknum++;
-                    if(tracknum == 43)
-                        tracknum = 50;
-                    else if(tracknum == 51)
-                        tracknum = 52;
-                    else if(tracknum == 53)
-                        tracknum = 55;
-                    else if(tracknum == 56)
-                        tracknum = 57;
-                    else if(tracknum == 58)
-                        tracknum = 60;
-                    else if(tracknum == 61)
+                    if (tracknum == 50)
+                        tracknum = 51;
+                    else if (tracknum == 58)
                         tracknum = 62;
+                    else if (tracknum == 63)
+                        tracknum = 66;
                 }
             }
-        }
-        else if(fsize == 18195736 || fsize == 18654796)
-        {
-            if(tracknum < 66)
-            {
-                tracknum++;
-                if(tracknum == 41)
-                    tracknum = 42;
-                else if(tracknum == 45)
-                    tracknum = 46;
-                else if(tracknum == 47)
-                    tracknum = 48;
-                else if(tracknum == 49)
-                    tracknum = 51;
-                else if(tracknum == 58)
-                    tracknum = 63;
-                else if(tracknum == 64)
-                    tracknum = 66;
-            }
-        }
-        else if(fsize == 18240172 || fsize == 17420824)
-        {
-            if(tracknum < 67)
-            {
-                tracknum++;
-                if(tracknum == 50)
-                    tracknum = 51;
-                else if(tracknum == 58)
-                    tracknum = 62;
-                else if(tracknum == 63)
-                    tracknum = 66;
-            }
-        }
-        break;
+            break;
     }
     players[consoleplayer].message = s_STSTR_MUS;
 
-    if(mus_engine == 3)
+    if (mus_engine == 3)
         S_ChangeMusic(tracknum, false, true);
-    else if(mus_engine == 1 || mus_engine == 2)
+    else if (mus_engine == 1 || mus_engine == 2)
         S_ChangeMusic(tracknum, true, true);
 
     mus_cheat_used = true;
@@ -9946,7 +10133,7 @@ void M_KeyBindingsSetKey(int choice)
 // ...CHANGE THE START- & END-POS INTEGERS AS WELL...
 // ...TO THEIR NEW CORRESPONDING POSITIONS OR ELSE...
 // ...THE KEY BINDINGS MENU WILL BE VERY BUGGY!!!
-void M_KeyBindingsClearControls (int ch)
+void M_KeyBindingsClearControls(int ch)
 {
     int i;
 
@@ -9957,7 +10144,7 @@ void M_KeyBindingsClearControls (int ch)
     }
 }
 
-void M_KeyBindingsClearAll (int choice)
+void M_KeyBindingsClearAll(int choice)
 {
     int i;
 
@@ -9970,7 +10157,7 @@ void M_KeyBindingsClearAll (int choice)
 #endif
 }
 
-void M_KeyBindingsReset (int choice)
+void M_KeyBindingsReset(int choice)
 {
     int i = key_controls_start_in_cfg_at_pos;
 #ifdef WII
@@ -10014,7 +10201,7 @@ void M_DrawKeyBindings(void)
 
     //M_DarkBackground(0);
 
-    if(fsize != 19321722)
+    if (fsize != 19321722)
         V_DrawPatchWithShadow (80, 0, 0, W_CacheLumpName("M_T_BNDS", PU_CACHE), false);
     else
         V_DrawPatchWithShadow (80, 0, 0, W_CacheLumpName("M_KBNDGS", PU_CACHE), false);
@@ -10043,9 +10230,9 @@ void M_DrawKeyBindings(void)
 
     dp_translation = crx[CRX_BLUE];
 #ifdef WII
-    if(itemOn == 14)
+    if (itemOn == 14)
 #else
-    if(itemOn == 16)
+    if (itemOn == 16)
 #endif
         dp_translation = crx[CRX_GOLD];
 #ifdef WII
@@ -10055,18 +10242,18 @@ void M_DrawKeyBindings(void)
 #endif
 /*
 #ifdef WII
-    if(itemOn == 14)
+    if (itemOn == 14)
 #else
-    if(itemOn == 16)
+    if (itemOn == 16)
 #endif
 
 */
     dp_translation = crx[CRX_BLUE];
 
 #ifdef WII
-    if(itemOn == 15)
+    if (itemOn == 15)
 #else
-    if(itemOn == 17)
+    if (itemOn == 17)
 #endif
         dp_translation = crx[CRX_GOLD];
 #ifdef WII
@@ -10076,9 +10263,9 @@ void M_DrawKeyBindings(void)
 #endif
 /*
 #ifdef WII
-    if(itemOn == 15)
+    if (itemOn == 15)
 #else
-    if(itemOn == 17)
+    if (itemOn == 17)
 #endif
 
 */
@@ -10091,36 +10278,38 @@ void M_KeyBindings(int choice)
 
 void M_Freelook(int choice)
 {
-    if(!mousewalk)
+    if (!mousewalk)
     {
-        switch(choice)
+        switch (choice)
         {
-          case 0:
-            if (mouselook)
-                mouselook--;
-            break;
-          case 1:
-            if (mouselook < 2)
-                mouselook++;
-            break;
+            case 0:
+                if (mouselook)
+                    mouselook--;
+                break;
+
+            case 1:
+                if (mouselook < 2)
+                    mouselook++;
+                break;
         }
     }
 }
 
 void M_FreelookSpeed(int choice)
 {
-    if(mouselook)
+    if (mouselook)
     {
-        switch(choice)
+        switch (choice)
         {
-          case 0:
-            if (mspeed)
-                mspeed--;
-            break;
-          case 1:
-            if (mspeed < 10)
-                mspeed++;
-            break;
+            case 0:
+                if (mspeed)
+                    mspeed--;
+                break;
+
+            case 1:
+                if (mspeed < 10)
+                    mspeed++;
+                break;
         }
     }
 }
@@ -10134,20 +10323,20 @@ void M_DrawControls(void)
 {
     //M_DarkBackground(0);
 
-    if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
+    if (fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
         V_DrawPatchWithShadow(48, 15, 0, W_CacheLumpName("M_T_CSET",
                                                PU_CACHE), false);
     else
         V_DrawPatchWithShadow(48, 15, 0, W_CacheLumpName("M_CTLSET",
                                                PU_CACHE), false);
 #ifndef WII
-    if(itemOn == 5)
+    if (itemOn == 5)
         dp_translation = crx[CRX_GOLD];
     else
     {
-        if(gamemission == pack_hacx)
+        if (gamemission == pack_hacx)
             dp_translation = crx[CRX_BLUE];
-        else if(gamemission == pack_chex)
+        else if (gamemission == pack_chex)
             dp_translation = crx[CRX_GREEN];
         else
             dp_translation = crx[CRX_RED];
@@ -10155,16 +10344,16 @@ void M_DrawControls(void)
 
     M_WriteText(ControlsDef.x, ControlsDef.y + 48, "MOUSE SENSITIVITY");
 
-    M_DrawThermoSmall(ControlsDef.x + 205,ControlsDef.y + LINEHEIGHT_SMALL*(mousesensibility+1),
-                 10,mouseSensitivity);
+    M_DrawThermoSmall(ControlsDef.x + 205, ControlsDef.y + LINEHEIGHT_SMALL * (mousesensibility + 1),
+                 10, mouseSensitivity);
 
-    if(itemOn == 6)
+    if (itemOn == 6)
         dp_translation = crx[CRX_GOLD];
     else
     {
-        if(gamemission == pack_hacx)
+        if (gamemission == pack_hacx)
             dp_translation = crx[CRX_BLUE];
-        else if(gamemission == pack_chex)
+        else if (gamemission == pack_chex)
             dp_translation = crx[CRX_GREEN];
         else
             dp_translation = crx[CRX_RED];
@@ -10172,7 +10361,7 @@ void M_DrawControls(void)
 
     M_WriteText(ControlsDef.x, ControlsDef.y + 58, "MOUSE WALK (TURNS FREELOOK MODE OFF)");
 
-    if(mousewalk)
+    if (mousewalk)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(ControlsDef.x + 284, ControlsDef.y + 58, "ON");
@@ -10184,17 +10373,17 @@ void M_DrawControls(void)
     }    
 #endif
 
-    if(mouselook == 0)
+    if (mouselook == 0)
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(ControlsDef.x + 276, ControlsDef.y + 38, "OFF");
     }
-    else if(mouselook == 1)
+    else if (mouselook == 1)
     {
         dp_translation = crx[CRX_GOLD];
         M_WriteText(ControlsDef.x + 251, ControlsDef.y + 38, "NORMAL");
     }
-    else if(mouselook == 2)
+    else if (mouselook == 2)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(ControlsDef.x + 250, ControlsDef.y + 38, "INVERSE");
@@ -10203,40 +10392,40 @@ void M_DrawControls(void)
     dp_translation = crx[CRX_GREEN];
     M_WriteText(ControlsDef.x, ControlsDef.y - 12, "SPEEDS:");
 
-    M_DrawThermoSmall(ControlsDef.x + 77,ControlsDef.y + LINEHEIGHT_SMALL*(mousesens+1),
-                 26,forwardmove-25);
+    M_DrawThermoSmall(ControlsDef.x + 77, ControlsDef.y + LINEHEIGHT_SMALL * (mousesens + 1),
+                 26, forwardmove - 25);
 
-    M_DrawThermoSmall(ControlsDef.x + 237,ControlsDef.y + LINEHEIGHT_SMALL*(turnsens+1),
-                 6,turnspeed-5);
+    M_DrawThermoSmall(ControlsDef.x + 237, ControlsDef.y + LINEHEIGHT_SMALL * (turnsens + 1),
+                 6, turnspeed - 5);
 
-    M_DrawThermoSmall(ControlsDef.x + 149,ControlsDef.y + LINEHEIGHT_SMALL*(strafesens+1),
-                 17,sidemove-24);
+    M_DrawThermoSmall(ControlsDef.x + 149, ControlsDef.y + LINEHEIGHT_SMALL * (strafesens + 1),
+                 17, sidemove - 24);
 
-    M_DrawThermoSmall(ControlsDef.x + 197,ControlsDef.y + LINEHEIGHT_SMALL*(mousespeed+1),
-                 11,mspeed);
+    M_DrawThermoSmall(ControlsDef.x + 197, ControlsDef.y + LINEHEIGHT_SMALL * (mousespeed + 1),
+                 11, mspeed);
 
-    if(itemOn == 7)
+    if (itemOn == 7)
         dp_translation = crx[CRX_GOLD];
     else
         dp_translation = crx[CRX_GRAY];
 
     M_WriteText(ControlsDef.x, ControlsDef.y + 68, "KEY BINDINGS...");
 
-    if(!mouselook)
+    if (!mouselook)
         dp_translation = crx[CRX_DARK];
-    else if(itemOn == 3 && mouselook)
+    else if (itemOn == 3 && mouselook)
         dp_translation = crx[CRX_GOLD];
 
     M_WriteText(ControlsDef.x, ControlsDef.y + 28, "FREELOOK");
 
-    if(whichSkull == 1)
+    if (whichSkull == 1)
     {
         char *string = "IF THE BARS FOR WALKING, TURNING & STRAFING";
         char *string2 = "ARE AT THEIR HIGHEST LEVEL, IT MEANS THE SAME";
         char *string3 = "AS PLAYING THE GAME WHILE HOLDING DOWN [SHIFT]";
-        int x = ORIGINALWIDTH/2 - M_StringWidth(string) / 2;
-        int x2 = ORIGINALWIDTH/2 - M_StringWidth(string2) / 2;
-        int x3 = ORIGINALWIDTH/2 - M_StringWidth(string3) / 2;
+        int x = ORIGINALWIDTH / 2 - M_StringWidth(string) / 2;
+        int x2 = ORIGINALWIDTH / 2 - M_StringWidth(string2) / 2;
+        int x3 = ORIGINALWIDTH / 2 - M_StringWidth(string3) / 2;
         dp_translation = crx[CRX_GOLD];
         M_WriteText(x, ControlsDef.y + 78, string);
         dp_translation = crx[CRX_GOLD];
@@ -10248,46 +10437,49 @@ void M_DrawControls(void)
 
 void M_FPS(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (display_fps)
-            display_fps--;
-        break;
-      case 1:
-        if (display_fps < 1)
-            display_fps++;
-        break;
+        case 0:
+            if (display_fps)
+                display_fps--;
+            break;
+
+        case 1:
+            if (display_fps < 1)
+                display_fps++;
+            break;
     }
 }
 
 void M_HOMDetector(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (autodetect_hom)
-            autodetect_hom = false;
-        break;
-      case 1:
-        if (!autodetect_hom)
-            autodetect_hom = true;
-        break;
+        case 0:
+            if (autodetect_hom)
+                autodetect_hom = false;
+            break;
+
+        case 1:
+            if (!autodetect_hom)
+                autodetect_hom = true;
+            break;
     }
 }
 
 void M_MemoryUsage(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (memory_usage)
-            memory_usage = false;
-        break;
-      case 1:
-        if (!memory_usage)
-            memory_usage = true;
-        break;
+        case 0:
+            if (memory_usage)
+                memory_usage = false;
+            break;
+
+        case 1:
+            if (!memory_usage)
+                memory_usage = true;
+            break;
     }
 }
 
@@ -10323,162 +10515,172 @@ void M_PrintDir(int choice)
 
 void M_ReplaceMissing(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (replace_missing)
-            replace_missing = false;
-        break;
-      case 1:
-        if (!replace_missing)
-            replace_missing = true;
-        break;
+        case 0:
+            if (replace_missing)
+                replace_missing = false;
+            break;
+
+        case 1:
+            if (!replace_missing)
+                replace_missing = true;
+            break;
     }
 }
 
 void M_DisplayTicker(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (display_ticker)
-        {
-            dots_enabled = 0;
-            display_ticker = false;
-        }
-        break;
-      case 1:
-        if (!display_ticker)
-        {
-            dots_enabled = 1;
-            display_ticker = true;
-        }
-        break;
+        case 0:
+            if (display_ticker)
+            {
+                dots_enabled = 0;
+                display_ticker = false;
+            }
+            break;
+
+        case 1:
+            if (!display_ticker)
+            {
+                dots_enabled = 1;
+                display_ticker = true;
+            }
+            break;
     }
     I_DisplayFPSDots(display_ticker);
 }
 
 void M_Coordinates(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (coordinates_info)
-            coordinates_info--;
-        break;
-      case 1:
-        if (coordinates_info < 1)
-            coordinates_info++;
-        break;
+        case 0:
+            if (coordinates_info)
+                coordinates_info--;
+            break;
+
+        case 1:
+            if (coordinates_info < 1)
+                coordinates_info++;
+            break;
     }
 }
 
 void M_Timer(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (timer_info)
-            timer_info--;
-        break;
-      case 1:
-        if (timer_info < 1)
-            timer_info++;
-        break;
+        case 0:
+            if (timer_info)
+                timer_info--;
+            break;
+
+        case 1:
+            if (timer_info < 1)
+                timer_info++;
+            break;
     }
     HU_Start();
 }
 
 void M_Authors(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (show_authors)
-            show_authors = false;
-        break;
-      case 1:
-        if (!show_authors)
-            show_authors = true;
-        break;
+        case 0:
+            if (show_authors)
+                show_authors = false;
+            break;
+
+        case 1:
+            if (!show_authors)
+                show_authors = true;
+            break;
     }
     HU_Start();
 }
 
 void M_StatusMap(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (d_statusmap)
-            d_statusmap = false;
-        break;
-      case 1:
-        if (!d_statusmap)
-            d_statusmap = true;
-        break;
+        case 0:
+            if (d_statusmap)
+                d_statusmap = false;
+            break;
+
+        case 1:
+            if (!d_statusmap)
+                d_statusmap = true;
+            break;
     }
     HU_Start();
 }
 
 void M_MapName(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (show_title)
-            show_title = false;
-        break;
-      case 1:
-        if (!show_title)
-            show_title = true;
-        break;
+        case 0:
+            if (show_title)
+                show_title = false;
+            break;
+
+        case 1:
+            if (!show_title)
+                show_title = true;
+            break;
     }
     HU_Start();
 }
 
 void M_MapSecretAfter(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (map_secret_after)
-            map_secret_after = false;
-        break;
-      case 1:
-        if (!map_secret_after)
-            map_secret_after = true;
-        break;
+        case 0:
+            if (map_secret_after)
+                map_secret_after = false;
+            break;
+
+        case 1:
+            if (!map_secret_after)
+                map_secret_after = true;
+            break;
     }
 }
 
 void M_Version(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (version_info)
-            version_info--;
-        break;
-      case 1:
-        if (version_info < 1)
-            version_info++;
-        break;
+        case 0:
+            if (version_info)
+                version_info--;
+            break;
+
+        case 1:
+            if (version_info < 1)
+                version_info++;
+            break;
     }
 }
 
 void M_SoundInfo(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (sound_info)
-            sound_info = false;
-        break;
-      case 1:
-        if (sound_info == false)
-            sound_info = true;
-        break;
+        case 0:
+            if (sound_info)
+                sound_info = false;
+            break;
+
+        case 1:
+            if (sound_info == false)
+                sound_info = true;
+            break;
     }
 }
 
@@ -10847,168 +11049,169 @@ void M_Expansion(int choice)
 /*
 void M_RMap(int choice)
 {
-        switch(choice)
-        {
-          case 0:
+    switch (choice)
+    {
+        case 0:
             if (fsize == 4261144 || fsize == 4271324 || fsize == 4211660 ||
                 fsize == 4207819 || fsize == 4274218 || fsize == 4225504 ||
                 fsize == 4225460 || fsize == 4234124 || fsize == 4196020)
             {
-                if(repi >= 1 && rmap >= 1)
+                if (repi >= 1 && rmap >= 1)
                     rmap--;
             }
-            else if(fsize == 10396254 || fsize == 10399316 || fsize == 10401760 ||
+            else if (fsize == 10396254 || fsize == 10399316 || fsize == 10401760 ||
                     fsize == 11159840)
             {
-                if(repi >= 1 && rmap >= 1)
+                if (repi >= 1 && rmap >= 1)
                 {
                     rmap--;
-                    if(repi == 3 && rmap == 0)
+                    if (repi == 3 && rmap == 0)
                     {
                         repi = 2;
                         rmap = 9;
                     }
-                    else if(repi == 2 && rmap == 0)
+                    else if (repi == 2 && rmap == 0)
                     {
                         repi = 1;
                         rmap = 9;
                     }
                 }
             }
-            else if(fsize == 12408292)
+            else if (fsize == 12408292)
             {
-                if(repi >= 1 && rmap >= 1)
+                if (repi >= 1 && rmap >= 1)
                 {
                     rmap--;
-                    if(repi == 4 && rmap == 0)
+                    if (repi == 4 && rmap == 0)
                     {
                         repi = 3;
                         rmap = 9;
                     }
-                    else if(repi == 3 && rmap == 0)
+                    else if (repi == 3 && rmap == 0)
                     {
                         repi = 2;
                         rmap = 9;
                     }
-                    else if(repi == 2 && rmap == 0)
+                    else if (repi == 2 && rmap == 0)
                     {
                         repi = 1;
                         rmap = 9;
                     }
                 }
             }
-            else if(fsize == 12361532)
+            else if (fsize == 12361532)
             {
-                if(repi >= 1 && rmap >= 1)
+                if (repi >= 1 && rmap >= 1)
                 {
                     rmap--;
                 }
             }
-            else if(fsize == 14943400 || fsize == 14824716 || fsize == 14612688 ||
+            else if (fsize == 14943400 || fsize == 14824716 || fsize == 14612688 ||
                     fsize == 14607420 || fsize == 14604584 || fsize == 18195736 ||
                     fsize == 18654796 || fsize == 18240172 || fsize == 17420824 ||
                     fsize == 28422764)
             {
-                if(rmap >= 2)
+                if (rmap >= 2)
                     rmap--;
             }
-            else if(fsize == 19321722)
+            else if (fsize == 19321722)
             {
-                if(rmap >= 2)
+                if (rmap >= 2)
                     rmap--;
-                if(rmap == 30)
+                if (rmap == 30)
                     rmap = 20;
             }
             break;
-          case 1:
+
+        case 1:
             if (fsize == 4261144 || fsize == 4271324 || fsize == 4211660 ||
                 fsize == 4207819 || fsize == 4274218 || fsize == 4225504 ||
                 fsize == 4225460 || fsize == 4234124 || fsize == 4196020)
             {
-                if(repi <= 1 && rmap <= 9)
+                if (repi <= 1 && rmap <= 9)
                 {
                     rmap++;
-                    if(repi == 1 && rmap == 10)
+                    if (repi == 1 && rmap == 10)
                     {
                         repi = 1;
                         rmap = 9;
                     }
                 }
             }
-            else if(fsize == 10396254 || fsize == 10399316 || fsize == 10401760 ||
+            else if (fsize == 10396254 || fsize == 10399316 || fsize == 10401760 ||
                     fsize == 11159840)
             {
-                if(repi <= 3 && rmap <= 9)
+                if (repi <= 3 && rmap <= 9)
                 {
                     rmap++;
-                    if(repi == 1 && rmap == 10)
+                    if (repi == 1 && rmap == 10)
                     {
                         repi = 2;
                         rmap = 1;
                     }
-                    else if(repi == 2 && rmap == 10)
+                    else if (repi == 2 && rmap == 10)
                     {
                         repi = 3;
                         rmap = 1;
                     }
-                    else if(repi == 3 && rmap == 10)
+                    else if (repi == 3 && rmap == 10)
                     {
                         repi = 3;
                         rmap = 9;
                     }
                 }
             }
-            else if(fsize == 12408292)
+            else if (fsize == 12408292)
             {
-                if(repi <= 4 && rmap <= 9)
+                if (repi <= 4 && rmap <= 9)
                 {
                     rmap++;
-                    if(repi == 1 && rmap == 10)
+                    if (repi == 1 && rmap == 10)
                     {
                         repi = 2;
                         rmap = 1;
                     }
-                    else if(repi == 2 && rmap == 10)
+                    else if (repi == 2 && rmap == 10)
                     {
                         repi = 3;
                         rmap = 1;
                     }
-                    else if(repi == 3 && rmap == 10)
+                    else if (repi == 3 && rmap == 10)
                     {
                         repi = 4;
                         rmap = 1;
                     }
-                    else if(repi == 4 && rmap == 10)
+                    else if (repi == 4 && rmap == 10)
                     {
                         repi = 4;
                         rmap = 9;
                     }
                 }
             }
-            else if(fsize == 12361532)
+            else if (fsize == 12361532)
             {
-                if(repi <= 1 && rmap <= 4)
+                if (repi <= 1 && rmap <= 4)
                 {
                     rmap++;
                 }
             }
-            else if(fsize == 14943400 || fsize == 14612688 || fsize == 14607420 ||
+            else if (fsize == 14943400 || fsize == 14612688 || fsize == 14607420 ||
                     fsize == 14604584 || fsize == 18195736 || fsize == 18654796 ||
                     fsize == 18240172 || fsize == 17420824 || fsize == 28422764)
             {
-                if(rmap <= 31)
+                if (rmap <= 31)
                     rmap++;
             }
-            else if(fsize == 14824716)
+            else if (fsize == 14824716)
             {
-                if(rmap <= 29)
+                if (rmap <= 29)
                     rmap++;
             }
-            else if(fsize == 19321722)
+            else if (fsize == 19321722)
             {
-                if(rmap <= 30)
+                if (rmap <= 30)
                     rmap++;
-                if(rmap == 21)
+                if (rmap == 21)
                     rmap = 31;
             }
             break;
@@ -11017,57 +11220,59 @@ void M_RMap(int choice)
 
 void M_RSkill(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (rskill)
-            rskill--;
-        break;
-      case 1:
-        // HACK: NOT FOR SHARE 1.0 & 1.1 && REG 1.1
-        if(fsize != 4207819 && fsize != 4274218 && fsize != 10396254)
-        {
-            if (rskill < 4)
-                rskill++;
-        }
-        else
-        {
-            if (rskill < 3)
-                rskill++;
-        }
-        break;
+        case 0:
+            if (rskill)
+                rskill--;
+            break;
+
+        case 1:
+            // HACK: NOT FOR SHARE 1.0 & 1.1 && REG 1.1
+            if (fsize != 4207819 && fsize != 4274218 && fsize != 10396254)
+            {
+                if (rskill < 4)
+                    rskill++;
+            }
+            else
+            {
+                if (rskill < 3)
+                    rskill++;
+            }
+            break;
     }
 }
 
 void M_RecordLong(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (long_tics)
-            long_tics = false;
-        break;
-      case 1:
-        if (!long_tics)
-            long_tics = true;
-        break;
+        case 0:
+            if (long_tics)
+                long_tics = false;
+            break;
+
+        case 1:
+            if (!long_tics)
+                long_tics = true;
+            break;
     }
 }
 
 void M_StartRecord(int choice)
 {
-    if(!demoplayback)
+    if (!demoplayback)
     {
         M_ClearMenus();
         G_RecordDemo(rskill, repi, rmap);
         D_DoomLoop();               // never returns
     }
-    else if(demoplayback)
+    else if (demoplayback)
     {
         players[consoleplayer].message = "MAP ROTATION DISABLED";
     }
 
-    if(long_tics)
+    if (long_tics)
         longtics = true;
     else
         longtics = false;
@@ -11075,91 +11280,97 @@ void M_StartRecord(int choice)
 */
 void M_Crosshair(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (crosshair)
-            crosshair--;
-        break;
-      case 1:
-        if (crosshair < 1)
-            crosshair++;
-        break;
+        case 0:
+            if (crosshair)
+                crosshair--;
+            break;
+
+        case 1:
+            if (crosshair < 1)
+                crosshair++;
+            break;
     }
 }
 
 void M_Jumping(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (jumping)
-            jumping = false;
-        break;
-      case 1:
-        if (jumping == false)
-            jumping = true;
-        break;
+        case 0:
+            if (jumping)
+                jumping = false;
+            break;
+
+        case 1:
+            if (jumping == false)
+                jumping = true;
+            break;
     }
 }
 
 void M_WeaponRecoil(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (d_recoil)
-            d_recoil = false;
-        break;
-      case 1:
-        if (d_recoil == false)
-            d_recoil = true;
-        break;
+        case 0:
+            if (d_recoil)
+                d_recoil = false;
+            break;
+
+        case 1:
+            if (d_recoil == false)
+                d_recoil = true;
+            break;
     }
 }
 
 void M_PlayerThrust(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (d_thrust)
-            d_thrust = false;
-        break;
-      case 1:
-        if (d_thrust == false)
-            d_thrust = true;
-        break;
+        case 0:
+            if (d_thrust)
+                d_thrust = false;
+            break;
+
+        case 1:
+            if (d_thrust == false)
+                d_thrust = true;
+            break;
     }
 }
 
 void M_TeleportGlitter(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (d_spawnteleglit > 0)
-            d_spawnteleglit--;
-        break;
-      case 1:
-        if (d_spawnteleglit < 3)
-            d_spawnteleglit++;
-        break;
+        case 0:
+            if (d_spawnteleglit > 0)
+                d_spawnteleglit--;
+            break;
+
+        case 1:
+            if (d_spawnteleglit < 3)
+                d_spawnteleglit++;
+            break;
     }
 }
 
 void M_Particles(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (d_drawparticles)
-            d_drawparticles = false;
-        break;
-      case 1:
-        if (d_drawparticles == false)
-            d_drawparticles = true;
-        break;
+        case 0:
+            if (d_drawparticles)
+                d_drawparticles = false;
+            break;
+
+        case 1:
+            if (d_drawparticles == false)
+                d_drawparticles = true;
+            break;
     }
 }
 
@@ -11167,16 +11378,17 @@ void M_BloodType(int choice)
 {
     if (d_drawparticles)
     {
-        switch(choice)
+        switch (choice)
         {
-          case 0:
-            if (bloodsplat_particle > 0)
-                bloodsplat_particle--;
-            break;
-          case 1:
-            if (bloodsplat_particle < 2)
-                bloodsplat_particle++;
-            break;
+            case 0:
+                if (bloodsplat_particle > 0)
+                    bloodsplat_particle--;
+                break;
+
+            case 1:
+                if (bloodsplat_particle < 2)
+                    bloodsplat_particle++;
+                break;
         }
     }
 }
@@ -11185,16 +11397,17 @@ void M_BulletType(int choice)
 {
     if (d_drawparticles)
     {
-        switch(choice)
+        switch (choice)
         {
-          case 0:
-            if (bulletpuff_particle > 0)
-                bulletpuff_particle--;
-            break;
-          case 1:
-            if (bulletpuff_particle < 2)
-                bulletpuff_particle++;
-            break;
+            case 0:
+                if (bulletpuff_particle > 0)
+                    bulletpuff_particle--;
+                break;
+
+            case 1:
+                if (bulletpuff_particle < 2)
+                    bulletpuff_particle++;
+                break;
         }
     }
 }
@@ -11203,16 +11416,17 @@ void M_TeleportType(int choice)
 {
     if (d_drawparticles)
     {
-        switch(choice)
+        switch (choice)
         {
-          case 0:
-            if (teleport_particle > 0)
-                teleport_particle--;
-            break;
-          case 1:
-            if (teleport_particle < 2)
-                teleport_particle++;
-            break;
+            case 0:
+                if (teleport_particle > 0)
+                    teleport_particle--;
+                break;
+
+            case 1:
+                if (teleport_particle < 2)
+                    teleport_particle++;
+                break;
         }
     }
 }
@@ -11221,16 +11435,17 @@ void M_BFGCloud(int choice)
 {
     if (d_drawparticles)
     {
-        switch(choice)
+        switch (choice)
         {
-          case 0:
-            if (d_drawbfgcloud)
-                d_drawbfgcloud = false;
-            break;
-          case 1:
-            if (d_drawbfgcloud == false)
-                d_drawbfgcloud = true;
-            break;
+            case 0:
+                if (d_drawbfgcloud)
+                    d_drawbfgcloud = false;
+                break;
+
+            case 1:
+                if (d_drawbfgcloud == false)
+                    d_drawbfgcloud = true;
+                break;
         }
     }
 }
@@ -11239,16 +11454,17 @@ void M_BFGExplosions(int choice)
 {
     if (d_drawparticles)
     {
-        switch(choice)
+        switch (choice)
         {
-          case 0:
-            if (d_drawbfgexplosions)
-                d_drawbfgexplosions = false;
-            break;
-          case 1:
-            if (d_drawbfgexplosions == false)
-                d_drawbfgexplosions = true;
-            break;
+            case 0:
+                if (d_drawbfgexplosions)
+                    d_drawbfgexplosions = false;
+                break;
+
+            case 1:
+                if (d_drawbfgexplosions == false)
+                    d_drawbfgexplosions = true;
+                break;
         }
     }
 }
@@ -11257,16 +11473,17 @@ void M_RocketParticles(int choice)
 {
     if (d_drawparticles)
     {
-        switch(choice)
+        switch (choice)
         {
-          case 0:
-            if (d_drawrockettrails)
-                d_drawrockettrails = false;
-            break;
-          case 1:
-            if (d_drawrockettrails == false)
-                d_drawrockettrails = true;
-            break;
+            case 0:
+                if (d_drawrockettrails)
+                    d_drawrockettrails = false;
+                break;
+
+            case 1:
+                if (d_drawrockettrails == false)
+                    d_drawrockettrails = true;
+                break;
         }
     }
 }
@@ -11275,16 +11492,17 @@ void M_RocketExplosions(int choice)
 {
     if (d_drawparticles)
     {
-        switch(choice)
+        switch (choice)
         {
-          case 0:
-            if (d_drawrocketexplosions)
-                d_drawrocketexplosions = false;
-            break;
+            case 0:
+                if (d_drawrocketexplosions)
+                    d_drawrocketexplosions = false;
+                break;
+
           case 1:
-            if (d_drawrocketexplosions == false)
-                d_drawrocketexplosions = true;
-            break;
+                if (d_drawrocketexplosions == false)
+                    d_drawrocketexplosions = true;
+                break;
         }
     }
 }
@@ -11293,16 +11511,17 @@ void M_SpawnFlies(int choice)
 {
     if (d_drawparticles && gamemode == commercial)
     {
-        switch(choice)
+        switch (choice)
         {
-          case 0:
-            if (d_spawnflies)
-                d_spawnflies = false;
-            break;
-          case 1:
-            if (d_spawnflies == false)
-                d_spawnflies = true;
-            break;
+            case 0:
+                if (d_spawnflies)
+                    d_spawnflies = false;
+                break;
+
+            case 1:
+                if (d_spawnflies == false)
+                    d_spawnflies = true;
+                break;
         }
     }
 }
@@ -11311,230 +11530,244 @@ void M_DripBlood(int choice)
 {
     if (d_drawparticles)
     {
-        switch(choice)
+        switch (choice)
         {
-          case 0:
-            if (d_dripblood)
-                d_dripblood = false;
-            break;
-          case 1:
-            if (d_dripblood == false)
-                d_dripblood = true;
-            break;
+            case 0:
+                if (d_dripblood)
+                    d_dripblood = false;
+                break;
+
+            case 1:
+                if (d_dripblood == false)
+                    d_dripblood = true;
+                break;
         }
     }
 }
 
 void M_ParticleSounds(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (particle_sounds)
-            particle_sounds = false;
-        break;
-      case 1:
-        if (particle_sounds == false)
-            particle_sounds = true;
-        break;
+        case 0:
+            if (particle_sounds)
+                particle_sounds = false;
+            break;
+
+        case 1:
+            if (particle_sounds == false)
+                particle_sounds = true;
+            break;
     }
 }
 
 void M_RespawnMonsters(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (respawnparm)
-        {
-            start_respawnparm = false;
-            respawnparm = false;
-        }
-        break;
-      case 1:
-        if (respawnparm == false)
-        {
-            start_respawnparm = true;
-            respawnparm = true;
-        }
-        break;
+        case 0:
+            if (respawnparm)
+            {
+                start_respawnparm = false;
+                respawnparm = false;
+            }
+            break;
+
+        case 1:
+            if (respawnparm == false)
+            {
+                start_respawnparm = true;
+                respawnparm = true;
+            }
+            break;
     }
 }
 
 void M_FastMonsters(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (fastparm)
-        {
-            start_fastparm = false;
-            fastparm = false;
-        }
-        break;
-      case 1:
-        if (fastparm == false)
-        {
-            start_fastparm = true;
-            fastparm = true;
-        }
-        break;
+        case 0:
+            if (fastparm)
+            {
+                start_fastparm = false;
+                fastparm = false;
+            }
+            break;
+
+        case 1:
+            if (fastparm == false)
+            {
+                start_fastparm = true;
+                fastparm = true;
+            }
+            break;
     }
 }
 
 void M_Autoaim(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (autoaim)
-            autoaim = 0;
-        break;
-      case 1:
-        if (autoaim == 0)
-            autoaim = 1;
-        break;
+        case 0:
+            if (autoaim)
+                autoaim = 0;
+            break;
+
+        case 1:
+            if (autoaim == 0)
+                autoaim = 1;
+            break;
     }
 }
 
 void M_MaxGore(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (d_maxgore && fsize != 12361532)
-            d_maxgore = false;
-        players[consoleplayer].message = "MORE GORE DISABLED";
-        break;
-      case 1:
-        if (!d_maxgore && fsize != 12361532)
-            d_maxgore = true;
-        players[consoleplayer].message = "MORE GORE ENABLED";
-        break;
+        case 0:
+            if (d_maxgore && fsize != 12361532)
+                d_maxgore = false;
+            players[consoleplayer].message = "MORE GORE DISABLED";
+            break;
+
+        case 1:
+            if (!d_maxgore && fsize != 12361532)
+                d_maxgore = true;
+            players[consoleplayer].message = "MORE GORE ENABLED";
+            break;
     }
 }
 
 void M_Footstep(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (d_footstep)
-            d_footstep = false;
-        break;
-      case 1:
-        if (!d_footstep)
-            d_footstep = true;
-        break;
+        case 0:
+            if (d_footstep)
+                d_footstep = false;
+            break;
+
+        case 1:
+            if (!d_footstep)
+                d_footstep = true;
+            break;
     }
 }
 
 void M_Footclip(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (d_footclip)
-            d_footclip = false;
-        break;
-      case 1:
-        if (!d_footclip)
-            d_footclip = true;
-        break;
+        case 0:
+            if (d_footclip)
+                d_footclip = false;
+            break;
+
+        case 1:
+            if (!d_footclip)
+                d_footclip = true;
+            break;
     }
 }
 
 void M_Splash(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (d_splash)
-            d_splash = false;
-        break;
-      case 1:
-        if (!d_splash)
-            d_splash = true;
-        break;
+        case 0:
+            if (d_splash)
+                d_splash = false;
+            break;
+
+        case 1:
+            if (!d_splash)
+                d_splash = true;
+            break;
     }
 }
 
 void M_Swirl(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (d_swirl)
-            d_swirl = 0;
-        break;
-      case 1:
-        if (!d_swirl)
-            d_swirl = 1;
-        break;
+        case 0:
+            if (d_swirl)
+                d_swirl = 0;
+            break;
+
+        case 1:
+            if (!d_swirl)
+                d_swirl = 1;
+            break;
     }
 }
 
 void M_Beta(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (beta_style_mode && fsize != 28422764 && fsize != 19321722 && fsize != 12361532)
-        {
-            beta_style_mode = false;
-        }
-        break;
-      case 1:
-        if (!beta_style_mode && fsize != 28422764 && fsize != 19321722 && fsize != 12361532)
-        {
-            beta_style_mode = true;
-        }
-        break;
+        case 0:
+            if (beta_style_mode && fsize != 28422764 && fsize != 19321722 && fsize != 12361532)
+            {
+                beta_style_mode = false;
+            }
+            break;
+
+        case 1:
+            if (!beta_style_mode && fsize != 28422764 && fsize != 19321722 && fsize != 12361532)
+            {
+                beta_style_mode = true;
+            }
+            break;
     }
 }
 
 void M_Corpses(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (d_flipcorpses)
-            d_flipcorpses = false;
-        break;
-      case 1:
-        if (!d_flipcorpses)
-            d_flipcorpses = true;
-        break;
+        case 0:
+            if (d_flipcorpses)
+                d_flipcorpses = false;
+            break;
+
+        case 1:
+            if (!d_flipcorpses)
+                d_flipcorpses = true;
+            break;
     }
 }
 
 void M_Secrets(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (d_secrets)
-            d_secrets = false;
-        break;
-      case 1:
-        if (!d_secrets)
-            d_secrets = true;
-        break;
+        case 0:
+            if (d_secrets)
+                d_secrets = false;
+            break;
+
+        case 1:
+            if (!d_secrets)
+                d_secrets = true;
+            break;
     }
 }
 
 void M_Trails(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (smoketrails)
-            smoketrails = false;
-        break;
-      case 1:
-        if (!smoketrails)
-            smoketrails = true;
-        break;
+        case 0:
+            if (smoketrails)
+                smoketrails = false;
+            break;
+
+        case 1:
+            if (!smoketrails)
+                smoketrails = true;
+            break;
     }
 }
 
@@ -11542,532 +11775,568 @@ void M_ChaingunTics(int choice)
 {
     if (gameskill != sk_nightmare)
     {
-        switch(choice)
+        switch (choice)
         {
-          case 0:
-            if (chaingun_tics < 4)
-                chaingun_tics++;
-            break;
-          case 1:
-            if (chaingun_tics > 1)
-                chaingun_tics--;
-            break;
+            case 0:
+                if (chaingun_tics < 4)
+                    chaingun_tics++;
+                break;
+
+            case 1:
+                if (chaingun_tics > 1)
+                    chaingun_tics--;
+                break;
         }
     }
 }
 
 void M_FallingDamage(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (d_fallingdamage)
-            d_fallingdamage = false;
-        break;
-      case 1:
-        if (!d_fallingdamage)
-            d_fallingdamage = true;
-        break;
+        case 0:
+            if (d_fallingdamage)
+                d_fallingdamage = false;
+            break;
+
+        case 1:
+            if (!d_fallingdamage)
+                d_fallingdamage = true;
+            break;
     }
 }
 
 void M_InfiniteAmmo(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (d_infiniteammo)
-            d_infiniteammo = false;
-        break;
-      case 1:
-        if (!d_infiniteammo)
-            d_infiniteammo = true;
-        break;
+        case 0:
+            if (d_infiniteammo)
+                d_infiniteammo = false;
+            break;
+
+        case 1:
+            if (!d_infiniteammo)
+                d_infiniteammo = true;
+            break;
     }
 }
 
 void M_Shadows(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (d_shadows)
-            d_shadows = false;
-        break;
-      case 1:
-        if (!d_shadows)
-            d_shadows = true;
-        break;
+        case 0:
+            if (d_shadows)
+                d_shadows = false;
+            break;
+
+        case 1:
+            if (!d_shadows)
+                d_shadows = true;
+            break;
     }
 }
 
 void M_Offsets(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (d_fixspriteoffsets)
-            d_fixspriteoffsets = false;
-        break;
-      case 1:
-        if (!d_fixspriteoffsets)
-            d_fixspriteoffsets = true;
-        break;
+        case 0:
+            if (d_fixspriteoffsets)
+                d_fixspriteoffsets = false;
+            break;
+
+        case 1:
+            if (!d_fixspriteoffsets)
+                d_fixspriteoffsets = true;
+            break;
     }
 }
 
 void M_Telefrag(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (d_telefrag)
-            d_telefrag = false;
-        break;
-      case 1:
-        if (!d_telefrag)
-            d_telefrag = true;
-        break;
+        case 0:
+            if (d_telefrag)
+                d_telefrag = false;
+            break;
+
+        case 1:
+            if (!d_telefrag)
+                d_telefrag = true;
+            break;
     }
 }
 
 void M_Doorstuck(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (d_doorstuck)
-            d_doorstuck = false;
-        break;
-      case 1:
-        if (!d_doorstuck)
-            d_doorstuck = true;
-        break;
+        case 0:
+            if (d_doorstuck)
+                d_doorstuck = false;
+            break;
+
+        case 1:
+            if (!d_doorstuck)
+                d_doorstuck = true;
+            break;
     }
 }
 
 void M_ResurrectGhosts(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (d_resurrectghosts)
-            d_resurrectghosts = false;
-        break;
-      case 1:
-        if (!d_resurrectghosts)
-            d_resurrectghosts = true;
-        break;
+        case 0:
+            if (d_resurrectghosts)
+                d_resurrectghosts = false;
+            break;
+
+        case 1:
+            if (!d_resurrectghosts)
+                d_resurrectghosts = true;
+            break;
     }
 }
 
 void M_LimitedGhosts(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (d_limitedghosts)
-            d_limitedghosts = false;
-        break;
-      case 1:
-        if (!d_limitedghosts)
-            d_limitedghosts = true;
-        break;
+        case 0:
+            if (d_limitedghosts)
+                d_limitedghosts = false;
+            break;
+
+        case 1:
+            if (!d_limitedghosts)
+                d_limitedghosts = true;
+            break;
     }
 }
 
 void M_BlockSkulls(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (!d_blockskulls)
-            d_blockskulls = true;
-        break;
-      case 1:
-        if (d_blockskulls)
-            d_blockskulls = false;
-        break;
+        case 0:
+            if (!d_blockskulls)
+                d_blockskulls = true;
+            break;
+
+        case 1:
+            if (d_blockskulls)
+                d_blockskulls = false;
+            break;
     }
 }
 
 void M_BlazingDoors(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (!d_blazingsound)
-            d_blazingsound = true;
-        break;
-      case 1:
-        if (d_blazingsound)
-            d_blazingsound = false;
-        break;
+        case 0:
+            if (!d_blazingsound)
+                d_blazingsound = true;
+            break;
+
+        case 1:
+            if (d_blazingsound)
+                d_blazingsound = false;
+            break;
     }
 }
 
 void M_GodAbsolute(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (d_god)
-            d_god = false;
-        break;
-      case 1:
-        if (!d_god)
-            d_god = true;
-        break;
+        case 0:
+            if (d_god)
+                d_god = false;
+            break;
+
+        case 1:
+            if (!d_god)
+                d_god = true;
+            break;
     }
 }
 
 void M_Floor(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (d_floors)
-            d_floors = false;
-        break;
-      case 1:
-        if (!d_floors)
-            d_floors = true;
-        break;
+        case 0:
+            if (d_floors)
+                d_floors = false;
+            break;
+
+        case 1:
+            if (!d_floors)
+                d_floors = true;
+            break;
     }
 }
 
 void M_Clipping(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (d_moveblock)
-            d_moveblock = false;
-        break;
-      case 1:
-        if (!d_moveblock)
-            d_moveblock = true;
-        break;
+        case 0:
+            if (d_moveblock)
+                d_moveblock = false;
+            break;
+
+        case 1:
+            if (!d_moveblock)
+                d_moveblock = true;
+            break;
     }
 }
 
 void M_Model(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-    case 0:
-        if (d_model)
-            d_model = false;
-        break;
-    case 1:
-        if (!d_model)
-            d_model = true;
-        break;
+        case 0:
+            if (d_model)
+                d_model = false;
+            break;
+
+        case 1:
+            if (!d_model)
+                d_model = true;
+            break;
     }
 }
 
 void M_BossDeath(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-    case 0:
-        if (d_666)
-            d_666 = false;
-        break;
-    case 1:
-        if (!d_666)
-            d_666 = true;
-        break;
+        case 0:
+            if (d_666)
+                d_666 = false;
+            break;
+
+        case 1:
+            if (!d_666)
+                d_666 = true;
+            break;
     }
 }
 
 void M_Bounce(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-    case 0:
-        if (correct_lost_soul_bounce == 1)
-            correct_lost_soul_bounce = 0;
-        break;
-    case 1:
-        if (correct_lost_soul_bounce == 0)
-            correct_lost_soul_bounce = 1;
-        break;
+        case 0:
+            if (correct_lost_soul_bounce == 1)
+                correct_lost_soul_bounce = 0;
+            break;
+
+        case 1:
+            if (correct_lost_soul_bounce == 0)
+                correct_lost_soul_bounce = 1;
+            break;
     }
 }
 
 void M_Masked(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-    case 0:
-        if (d_maskedanim)
-            d_maskedanim = false;
-        break;
-    case 1:
-        if (!d_maskedanim)
-            d_maskedanim = true;
-        break;
+        case 0:
+            if (d_maskedanim)
+                d_maskedanim = false;
+            break;
+
+        case 1:
+            if (!d_maskedanim)
+                d_maskedanim = true;
+            break;
     }
 }
 
 void M_Quirk(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-    case 0:
-        if (d_sound)
-            d_sound = false;
-        break;
-    case 1:
-        if (!d_sound)
-            d_sound = true;
-        break;
+        case 0:
+            if (d_sound)
+                d_sound = false;
+            break;
+
+        case 1:
+            if (!d_sound)
+                d_sound = true;
+            break;
     }
 }
 
 void M_Ouch(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-    case 0:
-        if (d_ouchface)
-            d_ouchface = false;
-        break;
-    case 1:
-        if (!d_ouchface)
-            d_ouchface = true;
-        break;
+        case 0:
+            if (d_ouchface)
+                d_ouchface = false;
+            break;
+
+        case 1:
+            if (!d_ouchface)
+                d_ouchface = true;
+            break;
     }
 }
 
 void M_Textures(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-    case 0:
-        if (d_brightmaps)
-            d_brightmaps = false;
-        break;
-    case 1:
-        if (!d_brightmaps)
-            d_brightmaps = true;
-        break;
+        case 0:
+            if (d_brightmaps)
+                d_brightmaps = false;
+            break;
+
+        case 1:
+            if (!d_brightmaps)
+                d_brightmaps = true;
+            break;
     }
 }
 
 void M_FixMapErrors(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-    case 0:
-        if (d_fixmaperrors)
-            d_fixmaperrors = false;
-        break;
-    case 1:
-        if (!d_fixmaperrors)
-            d_fixmaperrors = true;
-        break;
+        case 0:
+            if (d_fixmaperrors)
+                d_fixmaperrors = false;
+            break;
+
+        case 1:
+            if (!d_fixmaperrors)
+                d_fixmaperrors = true;
+            break;
     }
 }
 
 void M_AltLighting(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-    case 0:
-        if (d_altlighting)
-            d_altlighting = false;
-        break;
-    case 1:
-        if (!d_altlighting)
-            d_altlighting = true;
-        break;
+        case 0:
+            if (d_altlighting)
+                d_altlighting = false;
+            break;
+
+        case 1:
+            if (!d_altlighting)
+                d_altlighting = true;
+            break;
     }
 }
 
 void M_Infighting(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-    case 0:
-        if (allow_infighting)
-            allow_infighting = false;
-        break;
-    case 1:
-        if (!allow_infighting)
-            allow_infighting = true;
-        break;
+        case 0:
+            if (allow_infighting)
+                allow_infighting = false;
+            break;
+
+        case 1:
+            if (!allow_infighting)
+                allow_infighting = true;
+            break;
     }
 }
 
 void M_LastEnemy(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-    case 0:
-        if (last_enemy)
-            last_enemy = false;
-        break;
-    case 1:
-        if (!last_enemy)
-            last_enemy = true;
-        break;
+        case 0:
+            if (last_enemy)
+                last_enemy = false;
+            break;
+
+        case 1:
+            if (!last_enemy)
+                last_enemy = true;
+            break;
     }
 }
 
 void M_Float(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-    case 0:
-        if (float_items)
-            float_items = false;
-        break;
-    case 1:
-        if (!float_items)
-            float_items = true;
-        break;
+        case 0:
+            if (float_items)
+                float_items = false;
+            break;
+
+        case 1:
+            if (!float_items)
+                float_items = true;
+            break;
     }
 }
 
 void M_Animate(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-    case 0:
-        if (animated_drop)
-            animated_drop = false;
-        break;
-    case 1:
-        if (!animated_drop)
-            animated_drop = true;
-        break;
+        case 0:
+            if (animated_drop)
+                animated_drop = false;
+            break;
+
+        case 1:
+            if (!animated_drop)
+                animated_drop = true;
+            break;
     }
 }
 
 void M_CrushSound(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-    case 0:
-        if (crush_sound)
-            crush_sound = false;
-        break;
-    case 1:
-        if (!crush_sound)
-            crush_sound = true;
-        break;
+        case 0:
+            if (crush_sound)
+                crush_sound = false;
+            break;
+
+        case 1:
+            if (!crush_sound)
+                crush_sound = true;
+            break;
     }
 }
 
 void M_NoNoise(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-    case 0:
-        if (disable_noise)
-            disable_noise = false;
-        break;
-    case 1:
-        if (!disable_noise)
-            disable_noise = true;
-        break;
+        case 0:
+            if (disable_noise)
+                disable_noise = false;
+            break;
+
+        case 1:
+            if (!disable_noise)
+                disable_noise = true;
+            break;
     }
 }
 
 void M_NudgeCorpses(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-    case 0:
-        if (corpses_nudge)
-            corpses_nudge = false;
-        break;
-    case 1:
-        if (!corpses_nudge)
-            corpses_nudge = true;
-        break;
+        case 0:
+            if (corpses_nudge)
+                corpses_nudge = false;
+            break;
+
+        case 1:
+            if (!corpses_nudge)
+                corpses_nudge = true;
+            break;
     }
 }
 
 void M_Slide(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-    case 0:
-        if (corpses_slide)
-            corpses_slide = false;
-        if (corpses_smearblood)
-            corpses_smearblood = false;
-        break;
-    case 1:
-        if (!corpses_slide)
-            corpses_slide = true;
-        break;
+        case 0:
+            if (corpses_slide)
+                corpses_slide = false;
+
+            if (corpses_smearblood)
+                corpses_smearblood = false;
+            break;
+
+        case 1:
+            if (!corpses_slide)
+                corpses_slide = true;
+            break;
     }
 }
 
 void M_Smearblood(int choice)
 {
-    if(corpses_slide)
+    if (corpses_slide)
     {
-        switch(choice)
+        switch (choice)
         {
-        case 0:
-            if (corpses_smearblood)
-                corpses_smearblood = false;
-            break;
-        case 1:
-            if (!corpses_smearblood)
-                corpses_smearblood = true;
-            break;
+            case 0:
+                if (corpses_smearblood)
+                    corpses_smearblood = false;
+                break;
+
+            case 1:
+                if (!corpses_smearblood)
+                    corpses_smearblood = true;
+                break;
         }
     }
 }
 
 void M_ColoredCorpses(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (randomly_colored_playercorpses)
-            randomly_colored_playercorpses = false;
-        break;
-      case 1:
-        if (!randomly_colored_playercorpses)
-            randomly_colored_playercorpses = true;
-        break;
+        case 0:
+            if (randomly_colored_playercorpses)
+                randomly_colored_playercorpses = false;
+            break;
+
+        case 1:
+            if (!randomly_colored_playercorpses)
+                randomly_colored_playercorpses = true;
+            break;
     }
 }
 
 void M_LowHealth(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (lowhealth)
-            lowhealth = false;
-        break;
-      case 1:
-        if (!lowhealth)
-            lowhealth = true;
-        break;
+        case 0:
+            if (lowhealth)
+                lowhealth = false;
+            break;
+
+        case 1:
+            if (!lowhealth)
+                lowhealth = true;
+            break;
     }
 }
 
 void M_CenterWeapon(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (d_centerweapon)
-            d_centerweapon = false;
-        break;
-      case 1:
-        if (!d_centerweapon)
-            d_centerweapon = true;
-        break;
+        case 0:
+            if (d_centerweapon)
+                d_centerweapon = false;
+            break;
+
+        case 1:
+            if (!d_centerweapon)
+                d_centerweapon = true;
+            break;
     }
 }
 
@@ -12075,82 +12344,87 @@ void M_EjectCasings(int choice)
 {
     if (fsize != 12361532)
     {
-        switch(choice)
+        switch (choice)
         {
-          case 0:
-            if (d_ejectcasings)
-                d_ejectcasings = false;
-            break;
-          case 1:
-            if (!d_ejectcasings)
-                d_ejectcasings = true;
-            break;
+            case 0:
+                if (d_ejectcasings)
+                    d_ejectcasings = false;
+                break;
+
+            case 1:
+                if (!d_ejectcasings)
+                    d_ejectcasings = true;
+                break;
         }
     }
 }
 
 void M_EndoomScreen(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (show_endoom)
-            show_endoom = 0;
-        break;
-      case 1:
+        case 0:
+            if (show_endoom)
+                show_endoom = 0;
+            break;
+
+        case 1:
 #ifndef WII
-        if (!show_endoom)
-            show_endoom = 1;
+            if (!show_endoom)
+                show_endoom = 1;
 #endif
-        break;
+            break;
     }
 }
 
 void M_GoreAmount(int choice)
 {
-    if(d_maxgore)
+    if (d_maxgore)
     {
-        switch(choice)
+        switch (choice)
         {
-          case 0:
-            if (gore_amount > 1)
-                gore_amount--;
-            break;
-          case 1:
-            if (gore_amount < 4)
-                gore_amount++;
-            break;
+            case 0:
+                if (gore_amount > 1)
+                    gore_amount--;
+                break;
+
+            case 1:
+                if (gore_amount < 4)
+                    gore_amount++;
+                break;
         }
     }
 }
 
 void M_NoMonsters(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-    case 0:
-        if (not_monsters)
-            not_monsters = false;
-        break;
-    case 1:
-        if (!not_monsters)
-            not_monsters = true;
-        break;
+        case 0:
+            if (not_monsters)
+                not_monsters = false;
+            break;
+
+        case 1:
+            if (!not_monsters)
+                not_monsters = true;
+            break;
     }
 }
 
 void M_AutomapOverlay(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-    case 0:
-        if (overlay_trigger)
-            overlay_trigger = false;
-        break;
-    case 1:
-        if (!overlay_trigger)
-            overlay_trigger = true;
-        break;
+        case 0:
+            if (overlay_trigger)
+                overlay_trigger = false;
+            break;
+
+        case 1:
+            if (!overlay_trigger)
+                overlay_trigger = true;
+            break;
     }
     HU_Start();
 }
@@ -12172,12 +12446,12 @@ void M_DrawSystem(void)
 {
     //M_DarkBackground(0);
 
-    if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
+    if (fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
         V_DrawPatchWithShadow (62, 20, 0, W_CacheLumpName("M_T_YSET", PU_CACHE), false);
     else
         V_DrawPatchWithShadow (62, 20, 0, W_CacheLumpName("M_SYSSET", PU_CACHE), false);
 
-    if(display_fps)
+    if (display_fps)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(SystemDef.x + 198, SystemDef.y - 2, "ON");
@@ -12188,7 +12462,7 @@ void M_DrawSystem(void)
         M_WriteText(SystemDef.x + 190, SystemDef.y - 2, "OFF");
     }
 
-    if(display_ticker)
+    if (display_ticker)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(SystemDef.x + 198, SystemDef.y + 8, "ON");
@@ -12199,7 +12473,7 @@ void M_DrawSystem(void)
         M_WriteText(SystemDef.x + 190, SystemDef.y + 8, "OFF");
     }
 
-    if(autodetect_hom)
+    if (autodetect_hom)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(SystemDef.x + 198, SystemDef.y + 18, "ON");
@@ -12210,7 +12484,7 @@ void M_DrawSystem(void)
         M_WriteText(SystemDef.x + 190, SystemDef.y + 18, "OFF");
     }
 
-    if(replace_missing)
+    if (replace_missing)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(SystemDef.x + 198, SystemDef.y + 28, "ON");
@@ -12224,365 +12498,405 @@ void M_DrawSystem(void)
 
 void M_HUD(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-    case 0:
-        if (hud)
-            hud = false;
-        break;
-    case 1:
-        if (hud == false)
-            hud = true;
-        break;
+        case 0:
+            if (hud)
+                hud = false;
+            break;
+
+        case 1:
+            if (hud == false)
+                hud = true;
+            break;
+    }
+}
+
+void M_Autosave(int choice)
+{
+    switch (choice)
+    {
+        case 0:
+            if (enable_autosave)
+                enable_autosave = false;
+            break;
+
+        case 1:
+            if (enable_autosave == false)
+                enable_autosave = true;
+            break;
     }
 }
 
 void M_MapColor_Back(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-    case 0:
-        if (mapcolor_back > 0)
-            mapcolor_back--;
-        break;
-    case 1:
-        if (mapcolor_back < 255)
-            mapcolor_back++;
-        break;
+        case 0:
+            if (mapcolor_back > 0)
+                mapcolor_back--;
+            break;
+
+        case 1:
+            if (mapcolor_back < 255)
+                mapcolor_back++;
+            break;
     }
 }
 
 void M_MapColor_Grid(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-    case 0:
-        if (mapcolor_grid > 0)
-            mapcolor_grid--;
-        break;
-    case 1:
-        if (mapcolor_grid < 255)
-            mapcolor_grid++;
-        break;
+        case 0:
+            if (mapcolor_grid > 0)
+                mapcolor_grid--;
+            break;
+
+        case 1:
+            if (mapcolor_grid < 255)
+                mapcolor_grid++;
+            break;
     }
 }
 
 void M_MapColor_Wall(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-    case 0:
-        if (mapcolor_wall > 0)
-            mapcolor_wall--;
-        break;
-    case 1:
-        if (mapcolor_wall < 255)
-            mapcolor_wall++;
-        break;
+        case 0:
+            if (mapcolor_wall > 0)
+                mapcolor_wall--;
+            break;
+
+        case 1:
+            if (mapcolor_wall < 255)
+                mapcolor_wall++;
+            break;
     }
 }
 
 void M_MapColor_FCHG(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-    case 0:
-        if (mapcolor_fchg > 0)
-            mapcolor_fchg--;
-        break;
-    case 1:
-        if (mapcolor_fchg < 255)
-            mapcolor_fchg++;
-        break;
+        case 0:
+            if (mapcolor_fchg > 0)
+                mapcolor_fchg--;
+            break;
+
+        case 1:
+            if (mapcolor_fchg < 255)
+                mapcolor_fchg++;
+            break;
     }
 }
 
 void M_MapColor_CCHG(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-    case 0:
-        if (mapcolor_cchg > 0)
-            mapcolor_cchg--;
-        break;
-    case 1:
-        if (mapcolor_cchg < 255)
-            mapcolor_cchg++;
-        break;
+        case 0:
+            if (mapcolor_cchg > 0)
+                mapcolor_cchg--;
+            break;
+
+        case 1:
+            if (mapcolor_cchg < 255)
+                mapcolor_cchg++;
+            break;
     }
 }
 
 void M_MapColor_CLSD(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-    case 0:
-        if (mapcolor_clsd > 0)
-            mapcolor_clsd--;
-        break;
-    case 1:
-        if (mapcolor_clsd < 255)
-            mapcolor_clsd++;
-        break;
+        case 0:
+            if (mapcolor_clsd > 0)
+                mapcolor_clsd--;
+            break;
+
+        case 1:
+            if (mapcolor_clsd < 255)
+                mapcolor_clsd++;
+            break;
     }
 }
 
 void M_MapColor_RKey(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-    case 0:
-        if (mapcolor_rkey > 0)
-            mapcolor_rkey--;
-        break;
-    case 1:
-        if (mapcolor_rkey < 255)
-            mapcolor_rkey++;
-        break;
+        case 0:
+            if (mapcolor_rkey > 0)
+                mapcolor_rkey--;
+            break;
+
+        case 1:
+            if (mapcolor_rkey < 255)
+                mapcolor_rkey++;
+            break;
     }
 }
 
 void M_MapColor_BKey(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-    case 0:
-        if (mapcolor_bkey > 0)
-            mapcolor_bkey--;
-        break;
-    case 1:
-        if (mapcolor_bkey < 255)
-            mapcolor_bkey++;
-        break;
+        case 0:
+            if (mapcolor_bkey > 0)
+                mapcolor_bkey--;
+            break;
+
+        case 1:
+            if (mapcolor_bkey < 255)
+                mapcolor_bkey++;
+            break;
     }
 }
 
 void M_MapColor_YKey(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-    case 0:
-        if (mapcolor_ykey > 0)
-            mapcolor_ykey--;
-        break;
-    case 1:
-        if (mapcolor_ykey < 255)
-            mapcolor_ykey++;
-        break;
+        case 0:
+            if (mapcolor_ykey > 0)
+                mapcolor_ykey--;
+            break;
+
+        case 1:
+            if (mapcolor_ykey < 255)
+                mapcolor_ykey++;
+            break;
     }
 }
 
 void M_MapColor_RDoor(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-    case 0:
-        if (mapcolor_rdor > 0)
-            mapcolor_rdor--;
-        break;
-    case 1:
-        if (mapcolor_rdor < 255)
-            mapcolor_rdor++;
-        break;
+        case 0:
+            if (mapcolor_rdor > 0)
+                mapcolor_rdor--;
+            break;
+
+        case 1:
+            if (mapcolor_rdor < 255)
+                mapcolor_rdor++;
+            break;
     }
 }
 
 void M_MapColor_BDoor(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-    case 0:
-        if (mapcolor_bdor > 0)
-            mapcolor_bdor--;
-        break;
-    case 1:
-        if (mapcolor_bdor < 255)
-            mapcolor_bdor++;
-        break;
+        case 0:
+            if (mapcolor_bdor > 0)
+                mapcolor_bdor--;
+            break;
+
+        case 1:
+            if (mapcolor_bdor < 255)
+                mapcolor_bdor++;
+            break;
     }
 }
 
 void M_MapColor_YDoor(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-    case 0:
-        if (mapcolor_ydor > 0)
-            mapcolor_ydor--;
-        break;
-    case 1:
-        if (mapcolor_ydor < 255)
-            mapcolor_ydor++;
-        break;
+        case 0:
+            if (mapcolor_ydor > 0)
+                mapcolor_ydor--;
+            break;
+
+        case 1:
+            if (mapcolor_ydor < 255)
+                mapcolor_ydor++;
+            break;
     }
 }
 
 void M_MapColor_Teleport(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-    case 0:
-        if (mapcolor_tele > 0)
-            mapcolor_tele--;
-        break;
-    case 1:
-        if (mapcolor_tele < 255)
-            mapcolor_tele++;
-        break;
+        case 0:
+            if (mapcolor_tele > 0)
+                mapcolor_tele--;
+            break;
+
+        case 1:
+            if (mapcolor_tele < 255)
+                mapcolor_tele++;
+            break;
     }
 }
 
 void M_MapColor_Secret(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-    case 0:
-        if (mapcolor_secr > 0)
-            mapcolor_secr--;
-        break;
-    case 1:
-        if (mapcolor_secr < 255)
-            mapcolor_secr++;
-        break;
+        case 0:
+            if (mapcolor_secr > 0)
+                mapcolor_secr--;
+            break;
+
+        case 1:
+            if (mapcolor_secr < 255)
+                mapcolor_secr++;
+            break;
     }
 }
 
 void M_MapColor_Exit(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-    case 0:
-        if (mapcolor_exit > 0)
-            mapcolor_exit--;
-        break;
-    case 1:
-        if (mapcolor_exit < 255)
-            mapcolor_exit++;
-        break;
+        case 0:
+            if (mapcolor_exit > 0)
+                mapcolor_exit--;
+            break;
+
+        case 1:
+            if (mapcolor_exit < 255)
+                mapcolor_exit++;
+            break;
     }
 }
 
 void M_MapColor_Unseen(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-    case 0:
-        if (mapcolor_unsn > 0)
-            mapcolor_unsn--;
-        break;
-    case 1:
-        if (mapcolor_unsn < 255)
-            mapcolor_unsn++;
-        break;
+        case 0:
+            if (mapcolor_unsn > 0)
+                mapcolor_unsn--;
+            break;
+
+        case 1:
+            if (mapcolor_unsn < 255)
+                mapcolor_unsn++;
+            break;
     }
 }
 
 void M_MapColor_Flat(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-    case 0:
-        if (mapcolor_flat > 0)
-            mapcolor_flat--;
-        break;
-    case 1:
-        if (mapcolor_flat < 255)
-            mapcolor_flat++;
-        break;
+        case 0:
+            if (mapcolor_flat > 0)
+                mapcolor_flat--;
+            break;
+
+        case 1:
+            if (mapcolor_flat < 255)
+                mapcolor_flat++;
+            break;
     }
 }
 
 void M_MapColor_Sprite(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-    case 0:
-        if (mapcolor_sprt > 0)
-            mapcolor_sprt--;
-        break;
-    case 1:
-        if (mapcolor_sprt < 255)
-            mapcolor_sprt++;
-        break;
+        case 0:
+            if (mapcolor_sprt > 0)
+                mapcolor_sprt--;
+            break;
+
+        case 1:
+            if (mapcolor_sprt < 255)
+                mapcolor_sprt++;
+            break;
     }
 }
 
 void M_MapColor_Item(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-    case 0:
-        if (mapcolor_item > 0)
-            mapcolor_item--;
-        break;
-    case 1:
-        if (mapcolor_item < 255)
-            mapcolor_item++;
-        break;
+        case 0:
+            if (mapcolor_item > 0)
+                mapcolor_item--;
+            break;
+
+        case 1:
+            if (mapcolor_item < 255)
+                mapcolor_item++;
+            break;
     }
 }
 
 void M_MapColor_Enemy(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-    case 0:
-        if (mapcolor_enemy > 0)
-            mapcolor_enemy--;
-        break;
-    case 1:
-        if (mapcolor_enemy < 255)
-            mapcolor_enemy++;
-        break;
+        case 0:
+            if (mapcolor_enemy > 0)
+                mapcolor_enemy--;
+            break;
+
+        case 1:
+            if (mapcolor_enemy < 255)
+                mapcolor_enemy++;
+            break;
     }
 }
 
 void M_MapColor_Crosshair(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-    case 0:
-        if (mapcolor_hair > 0)
-            mapcolor_hair--;
-        break;
-    case 1:
-        if (mapcolor_hair < 255)
-            mapcolor_hair++;
-        break;
+        case 0:
+            if (mapcolor_hair > 0)
+                mapcolor_hair--;
+            break;
+
+        case 1:
+            if (mapcolor_hair < 255)
+                mapcolor_hair++;
+            break;
     }
 }
 
 void M_MapColor_Player(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-    case 0:
-        if (mapcolor_sngl > 0)
-            mapcolor_sngl--;
-        break;
-    case 1:
-        if (mapcolor_sngl < 255)
-            mapcolor_sngl++;
-        break;
+        case 0:
+            if (mapcolor_sngl > 0)
+                mapcolor_sngl--;
+            break;
+
+        case 1:
+            if (mapcolor_sngl < 255)
+                mapcolor_sngl++;
+            break;
     }
 }
 
 void M_MapColor_Multiplayer(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-    case 0:
-        if (mapcolor_plyr > 0)
-            mapcolor_plyr--;
-        break;
-    case 1:
-        if (mapcolor_plyr < 255)
-            mapcolor_plyr++;
-        break;
+        case 0:
+            if (mapcolor_plyr > 0)
+                mapcolor_plyr--;
+            break;
+
+        case 1:
+            if (mapcolor_plyr < 255)
+                mapcolor_plyr++;
+            break;
     }
 }
 
-void M_MapColor_Standard(int choice)
+void M_MapColor_Standard_PRBoom(int choice)
 {
     mapcolor_back = 247;
     mapcolor_grid = 104;
@@ -12609,48 +12923,78 @@ void M_MapColor_Standard(int choice)
     mapcolor_plyr = 112;
 }
 
+void M_MapColor_Standard_DOSDoom(int choice)
+{
+    mapcolor_back = BACKGROUND;
+    mapcolor_grid = GRIDCOLORS;
+    mapcolor_wall = WALLCOLORS+lightlev;
+    mapcolor_fchg = FDWALLCOLORS+lightlev;
+    mapcolor_cchg = CDWALLCOLORS+lightlev;
+    mapcolor_clsd = CDWALLCOLORS+lightlev;
+    mapcolor_rkey = THINGCOLORS+lightlev;
+    mapcolor_bkey = THINGCOLORS+lightlev;
+    mapcolor_ykey = THINGCOLORS+lightlev;
+    mapcolor_rdor = CDWALLCOLORS+lightlev;
+    mapcolor_bdor = CDWALLCOLORS+lightlev;
+    mapcolor_ydor = CDWALLCOLORS+lightlev;
+    mapcolor_tele = FDWALLCOLORS+lightlev;
+    mapcolor_secr = SECRETWALLCOLORS + lightlev;
+    mapcolor_exit = 0;
+    mapcolor_unsn = GRAYS+3;
+    mapcolor_flat = TSWALLCOLORS+lightlev;
+    mapcolor_sprt = THINGCOLORS+lightlev;
+    mapcolor_item = THINGCOLORS+lightlev;
+    mapcolor_enemy = THINGCOLORS+lightlev;
+    mapcolor_hair = XHAIRCOLORS;
+    mapcolor_sngl = WHITE;
+    mapcolor_plyr = WHITE;
+}
+
 void M_MapGrid(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-    case 0:
-        if (drawgrid)
-            drawgrid--;
-        break;
-    case 1:
-        if (drawgrid < 1)
-            drawgrid++;
-        break;
+        case 0:
+            if (drawgrid)
+                drawgrid--;
+            break;
+
+        case 1:
+            if (drawgrid < 1)
+                drawgrid++;
+            break;
     }
 }
 
 void M_MapGridSize(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-    case 0:
-        if (map_grid_size > 10)
-            map_grid_size--;
-        break;
-    case 1:
-        if (map_grid_size < 256)
-            map_grid_size++;
-        break;
+        case 0:
+            if (map_grid_size > 10)
+                map_grid_size--;
+            break;
+
+        case 1:
+            if (map_grid_size < 256)
+                map_grid_size++;
+            break;
     }
 }
 
 void M_MapRotation(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-    case 0:
-        if (am_rotate)
-            am_rotate = false;
-        break;
-    case 1:
-        if (am_rotate == false)
-            am_rotate = true;
-        break;
+        case 0:
+            if (am_rotate)
+                am_rotate = false;
+            break;
+
+        case 1:
+            if (am_rotate == false)
+                am_rotate = true;
+            break;
     }
 }
 
@@ -12658,16 +13002,17 @@ void M_WeaponChange(int choice)
 {
     if (gameskill != sk_nightmare)
     {
-        switch(choice)
+        switch (choice)
         {
-        case 0:
-            if (use_vanilla_weapon_change == 0)
-                use_vanilla_weapon_change = 1;
-            break;
-        case 1:
-            if (use_vanilla_weapon_change == 1)
-                use_vanilla_weapon_change = 0;
-            break;
+            case 0:
+                if (use_vanilla_weapon_change == 0)
+                    use_vanilla_weapon_change = 1;
+                break;
+
+            case 1:
+                if (use_vanilla_weapon_change == 1)
+                    use_vanilla_weapon_change = 0;
+                break;
         }
     }
 }
@@ -12676,47 +13021,50 @@ void M_AimingHelp(int choice)
 {
     if (!(players[consoleplayer].cheats & CF_GODMODE) && gameskill != sk_nightmare)
     {
-        switch(choice)
+        switch (choice)
         {
-        case 0:
-            if (aiming_help)
-                aiming_help = false;
-            break;
-        case 1:
-            if (!aiming_help)
-                aiming_help = true;
-            break;
+            case 0:
+                if (aiming_help)
+                    aiming_help = false;
+                break;
+
+            case 1:
+                if (!aiming_help)
+                    aiming_help = true;
+                break;
         }
     }
 }
 
 void M_FollowMode(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-    case 0:
-        if (followplayer)
-            followplayer--;
-        break;
-    case 1:
-        if (followplayer < 1)
-            followplayer++;
-        break;
+        case 0:
+            if (followplayer)
+                followplayer--;
+            break;
+
+        case 1:
+            if (followplayer < 1)
+                followplayer++;
+            break;
     }
 }
 
 void M_Statistics(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-    case 0:
-        if (show_stats)
-            show_stats--;
-        break;
-    case 1:
-        if (show_stats < 1)
-            show_stats++;
-        break;
+        case 0:
+            if (show_stats)
+                show_stats--;
+            break;
+
+        case 1:
+            if (show_stats < 1)
+                show_stats++;
+            break;
     }
     HU_Start();
 }
@@ -12725,12 +13073,12 @@ void M_DrawDebug(void)
 {
     //M_DarkBackground(0);
 
-    if(fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
+    if (fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
         V_DrawPatchWithShadow (67, 15, 0, W_CacheLumpName("M_T_DSET", PU_CACHE), false);
     else
         V_DrawPatchWithShadow (67, 15, 0, W_CacheLumpName("M_DBGSET", PU_CACHE), false);
 
-    if(coordinates_info)
+    if (coordinates_info)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(DebugDef.x + 253, DebugDef.y - 2, "ON");
@@ -12741,7 +13089,7 @@ void M_DrawDebug(void)
         M_WriteText(DebugDef.x + 245, DebugDef.y - 2, "OFF");
     }
 
-    if(version_info)
+    if (version_info)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(DebugDef.x + 253, DebugDef.y + 8, "ON");
@@ -12752,7 +13100,7 @@ void M_DrawDebug(void)
         M_WriteText(DebugDef.x + 245, DebugDef.y + 8, "OFF");
     }
 
-    if(sound_info)
+    if (sound_info)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(DebugDef.x + 253, DebugDef.y + 18, "ON");
@@ -12763,7 +13111,7 @@ void M_DrawDebug(void)
         M_WriteText(DebugDef.x + 245, DebugDef.y + 18, "OFF");
     }
 
-    if(opldev)
+    if (opldev)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(DebugDef.x + 253, DebugDef.y + 28, "ON");
@@ -12774,7 +13122,7 @@ void M_DrawDebug(void)
         M_WriteText(DebugDef.x + 245, DebugDef.y + 28, "OFF");
     }
 
-    if(memory_usage)
+    if (memory_usage)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(DebugDef.x + 253, DebugDef.y + 38, "ON");
@@ -12799,7 +13147,7 @@ void M_DrawDebug(void)
         }
     }
 
-    if(dump_con)
+    if (dump_con)
     {
         if (condumpwait < 5)
         {
@@ -12813,7 +13161,7 @@ void M_DrawDebug(void)
         }
     }
 
-    if(dump_mem)
+    if (dump_mem)
     {
         if (memdumpwait < 5)
         {
@@ -12858,134 +13206,143 @@ void M_DrawDebug(void)
 
 void M_XC(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (firexc > -120)
-            firexc--;
-        break;
-      case 1:
-        if (firexc < 120)
-            firexc++;
-        break;
+        case 0:
+            if (firexc > -120)
+                firexc--;
+            break;
+
+        case 1:
+            if (firexc < 120)
+                firexc++;
+            break;
     }
 }
 
 void M_YC(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (fireyc > 0)
-            fireyc--;
-        break;
-      case 1:
-        if (fireyc < 113)
-            fireyc++;
-        break;
+        case 0:
+            if (fireyc > 0)
+                fireyc--;
+            break;
+
+        case 1:
+            if (fireyc < 113)
+                fireyc++;
+            break;
     }
 }
 
 void M_XFac(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (firexfac > 1)
-            firexfac--;
-        break;
-      case 1:
-        if (firexfac < 4)
-            firexfac++;
-        break;
+        case 0:
+            if (firexfac > 1)
+                firexfac--;
+            break;
+
+        case 1:
+            if (firexfac < 4)
+                firexfac++;
+            break;
     }
 }
 
 void M_YFac(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (fireyfac > 1)
-            fireyfac--;
-        break;
-      case 1:
-        if (fireyfac < 4)
-            fireyfac++;
-        break;
+        case 0:
+            if (fireyfac > 1)
+                fireyfac--;
+            break;
+
+        case 1:
+            if (fireyfac < 4)
+                fireyfac++;
+            break;
     }
 }
 
 void M_Pitch(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (firepitch > 0)
-            firepitch--;
-        break;
-      case 1:
-        firepitch++;
-        break;
+        case 0:
+            if (firepitch > 0)
+                firepitch--;
+            break;
+
+        case 1:
+            firepitch++;
+            break;
     }
 }
 
 void M_Offset(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (fireoffset > 0)
-            fireoffset--;
-        break;
-      case 1:
-        fireoffset++;
-        break;
+        case 0:
+            if (fireoffset > 0)
+                fireoffset--;
+            break;
+
+        case 1:
+            fireoffset++;
+            break;
     }
 }
 
 void M_Width(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (firewidth > 0)
-            firewidth--;
-        break;
-      case 1:
-        firewidth++;
-        break;
+        case 0:
+            if (firewidth > 0)
+                firewidth--;
+            break;
+
+        case 1:
+            firewidth++;
+            break;
     }
 }
 
 void M_Height(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        if (fireheight > 0)
-            fireheight--;
-        break;
-      case 1:
-        fireheight++;
-        break;
+        case 0:
+            if (fireheight > 0)
+                fireheight--;
+            break;
+
+        case 1:
+            fireheight++;
+            break;
     }
 }
 
 void M_WidthHeightPitch(int choice)
 {
-    switch(choice)
+    switch (choice)
     {
-      case 0:
-        fireheight--;
-        firewidth--;
-        firepitch--;
-        break;
-      case 1:
-        fireheight++;
-        firewidth++;
-        firepitch++;
-        break;
+        case 0:
+            fireheight--;
+            firewidth--;
+            firepitch--;
+            break;
+
+        case 1:
+            fireheight++;
+            firewidth++;
+            firepitch++;
+            break;
     }
 }
 

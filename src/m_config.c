@@ -234,6 +234,7 @@ default_t   doom_defaults_list[] =
     CONFIG_VARIABLE_INT                (map_color_player),
     CONFIG_VARIABLE_INT                (map_gridsize),
     CONFIG_VARIABLE_INT                (map_secrets_after),
+    CONFIG_VARIABLE_INT                (use_autosave),
     CONFIG_VARIABLE_INT                (key_shoot),
     CONFIG_VARIABLE_INT                (key_open),
     CONFIG_VARIABLE_INT                (key_menu),

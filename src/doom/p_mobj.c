@@ -1698,6 +1698,8 @@ void P_SpawnParticle(mobj_t *target, fixed_t x, fixed_t y, fixed_t z, angle_t an
 
         if (particle_sounds)
         {
+            // FIXME: Ricochet sounds for bullets (player (but not for fists and not for chainsaw) & monsters)
+//            player_t *player = &players[consoleplayer];
             mobj_t *mo = P_SpawnMobj(x, y, z, MT_PARTICLE);
 
             if (isliquid[mo->subsector->sector->floorpic] && water_hit)
@@ -1706,7 +1708,10 @@ void P_SpawnParticle(mobj_t *target, fixed_t x, fixed_t y, fixed_t z, angle_t an
             {
                 int t = P_Random() % 6;
 
-                if (t > 0)
+                if (t > 0 /*&& (player->readyweapon == wp_pistol ||
+                              player->readyweapon == wp_shotgun ||
+                              player->readyweapon == wp_supershotgun ||
+                              player->readyweapon == wp_chaingun)*/)
                     S_StartSound(mo, sfx_ric1 + t);
             }
         }

@@ -142,6 +142,7 @@ dboolean         d_dripblood = false;
 dboolean         d_vsync = false;
 dboolean         particle_sounds = false;
 dboolean         map_secret_after = false;
+dboolean         enable_autosave = false;
 /*
 dboolean         nerve = false;
 dboolean         chex = false;

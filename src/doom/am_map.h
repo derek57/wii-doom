@@ -34,17 +34,53 @@
 
 
 // Used by ST StatusBar stuff.
-#define AM_MSGHEADER (('a'<<24)+('m'<<16))
-#define AM_MSGENTERED (AM_MSGHEADER | ('e'<<8))
-#define AM_MSGEXITED (AM_MSGHEADER | ('x'<<8))
+#define AM_MSGHEADER     (('a'<<24)+('m'<<16))
+#define AM_MSGENTERED    (AM_MSGHEADER | ('e'<<8))
+#define AM_MSGEXITED     (AM_MSGHEADER | ('x'<<8))
 
-#define AM_PANDOWNKEY   0xaf
-#define AM_PANUPKEY     KEY_UPARROW
-#define AM_PANRIGHTKEY  KEY_RIGHTARROW
-#define AM_PANLEFTKEY   KEY_LEFTARROW
-#define AM_ZOOMINKEY    '/'
-#define AM_ZOOMOUTKEY   ' '
-#define AM_ENDKEY       KEY_TAB
+#define AM_PANDOWNKEY    0xaf
+#define AM_PANUPKEY      KEY_UPARROW
+#define AM_PANRIGHTKEY   KEY_RIGHTARROW
+#define AM_PANLEFTKEY    KEY_LEFTARROW
+#define AM_ZOOMINKEY     '/'
+#define AM_ZOOMOUTKEY    ' '
+#define AM_ENDKEY        KEY_TAB
+
+// For use if I do walls with outsides/insides
+#define REDS             (256-5*16)
+#define REDRANGE         16
+#define BLUES            (256-4*16+8)
+#define BLUERANGE        8
+#define GREENS           (7*16)
+#define GREENRANGE       16
+#define GRAYS            (6*16)
+#define GRAYSRANGE       16
+#define BROWNS           (4*16)
+#define BROWNRANGE       16
+#define YELLOWS          (256-32+7)
+#define YELLOWRANGE      1
+#define BLACK            0
+#define WHITE            (256-47)
+
+// Automap colors
+#define BACKGROUND       BLACK
+#define YOURCOLORS       WHITE
+#define YOURRANGE        0
+#define WALLCOLORS       REDS
+#define WALLRANGE        REDRANGE
+#define TSWALLCOLORS     GRAYS
+#define TSWALLRANGE      GRAYSRANGE
+#define FDWALLCOLORS     BROWNS
+#define FDWALLRANGE      BROWNRANGE
+#define CDWALLCOLORS     YELLOWS
+#define CDWALLRANGE      YELLOWRANGE
+#define THINGCOLORS      GREENS
+#define THINGRANGE       GREENRANGE
+#define SECRETWALLCOLORS WALLCOLORS
+#define SECRETWALLRANGE  WALLRANGE
+#define GRIDCOLORS       (GRAYS + GRAYSRANGE/2)
+#define GRIDRANGE        0
+#define XHAIRCOLORS      GRAYS
 
 
 typedef struct
@@ -57,6 +93,8 @@ typedef struct
 dboolean AM_Responder (event_t* ev);
 
 extern cheatseq_t cheat_amap;
+
+extern int        lightlev;
 
 // Called by main loop.
 void AM_Ticker (void);
