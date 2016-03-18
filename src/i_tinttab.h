@@ -41,6 +41,9 @@
 #define __I_TINTTAB__
 
 
+void I_InitTintTables(byte *palette);
+
+
 extern byte             *tranmap;
 extern byte             *tinttab;
 extern byte             *tinttab5;
@@ -75,6 +78,5 @@ extern byte             *tinttabgreen33;
 extern byte             *tinttabblue33;
 
 
-void I_InitTintTables(byte *palette);
-
 #endif
+

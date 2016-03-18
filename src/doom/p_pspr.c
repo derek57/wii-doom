@@ -46,39 +46,58 @@
 #include "v_trans.h"
 
 
-#define LOWERSPEED              FRACUNIT * 6
-#define RAISESPEED              FRACUNIT * 6
-#define WEAPONBOTTOM            128 * FRACUNIT
+#define LOWERSPEED      FRACUNIT * 6
+#define RAISESPEED      FRACUNIT * 6
+#define WEAPONBOTTOM    128 * FRACUNIT
+#define LOOKSLOPE       400
 
 
-fixed_t            bulletslope;
 
-dboolean           skippsprinterp = false;
-dboolean           beta_plasma_refired;
+fixed_t                 bulletslope;
 
-int                beta_plasma_counter;
-int                bfglook = 1;
+dboolean                skippsprinterp = false;
+dboolean                beta_plasma_refired;
+
+int                     beta_plasma_counter;
+int                     bfglook = 1;
 
 
-extern dboolean    aiming_help;
+extern dboolean         aiming_help;
 
-extern void        P_Thrust(player_t *player, angle_t angle, fixed_t move);
-extern void        A_EjectCasing(mobj_t *actor);
+extern void             P_Thrust(player_t *player, angle_t angle, fixed_t move);
+extern void             A_EjectCasing(mobj_t *actor);
 
 
 // [crispy] weapon recoil {thrust, pitch} values
 // thrust values from prboom-plus/src/p_pspr.c:73-83
 static const int recoil_values[][2] =
 {
-    { 10,   0 }, // wp_fist
-    { 10,   4 }, // wp_pistol
-    { 30,  12 }, // wp_shotgun
-    { 10,   4 }, // wp_chaingun
-    { 100, 16 }, // wp_missile
-    { 20,   8 }, // wp_plasma
-    { 100, 16 }, // wp_bfg
-    { 0,   -2 }, // wp_chainsaw
-    { 80,  16 }, // wp_supershotgun
+    // wp_fist
+    { 10,   0 },
+
+    // wp_pistol
+    { 10,   4 },
+
+    // wp_shotgun
+    { 30,  12 },
+
+    // wp_chaingun
+    { 10,   4 },
+
+    // wp_missile
+    { 100, 16 },
+
+    // wp_plasma
+    { 20,   8 },
+
+    // wp_bfg
+    { 100, 16 },
+
+    // wp_chainsaw
+    { 0,   -2 },
+
+    // wp_supershotgun
+    { 80,  16 }
 };
 
 
@@ -247,9 +266,8 @@ dboolean P_CheckAmmo(player_t *player)
         {
             player->pendingweapon = wp_missile;
         }
-        else if (player->weaponowned[wp_bfg]
-                 && player->ammo[am_cell] > 40
-                 && (gamemode != shareware))
+        else if (player->weaponowned[wp_bfg] && (player->ammo[am_cell] >= bfgcells
+            || bfgcells != BFGCELLS) && (gamemode != shareware))
         {
             player->pendingweapon = wp_bfg;
         }
@@ -262,7 +280,6 @@ dboolean P_CheckAmmo(player_t *player)
     } while (player->pendingweapon == wp_nochange);
 
     // Now set appropriate weapon overlay.
-    
     if (beta_style && player->readyweapon == wp_chaingun)
         P_SetPsprite(player,
                      ps_weapon,
@@ -349,7 +366,7 @@ void A_WeaponReady(player_t *player, pspdef_t *psp)
 {            
     // get out of attack state
     if (player->mo->state == &states[S_PLAY_ATK1]
-        || player->mo->state == &states[S_PLAY_ATK2] )
+        || player->mo->state == &states[S_PLAY_ATK2])
     {
         P_SetMobjState(player->mo, S_PLAY);
     }
@@ -399,8 +416,8 @@ void A_WeaponReady(player_t *player, pspdef_t *psp)
     else
         player->attackdown = false;
 
-    // FIXME: ???    
-//    if (actor->momx || actor->momy || actor->momz)
+    // FIXME: ???
+    //if (actor->momx || actor->momy || actor->momz)
     {
         // bob the weapon based on movement speed
         int     angle = (128 * leveltime) & FINEMASK;
@@ -449,8 +466,8 @@ void A_CheckReload(player_t *player, pspdef_t *psp)
 {
     P_CheckAmmo(player);
 #if 0
-    if (player->ammo[am_shell]<2)
-        P_SetPsprite (player, ps_weapon, S_DSNR1);
+    if (player->ammo[am_shell] < 2)
+        P_SetPsprite(player, ps_weapon, S_DSNR1);
 #endif
 }
 
@@ -470,14 +487,14 @@ void A_Lower(player_t *player, pspdef_t *psp)
     psp->sy += LOWERSPEED;
 
     // Is already down.
-    if (use_vanilla_weapon_change == 1 || demoplayback || demorecording
+    if (use_vanilla_weapon_change || demoplayback || demorecording
 #ifndef WII
        || (player->readyweapon == wp_shotgun && player->weaponowned[wp_supershotgun])
        || (player->readyweapon == wp_supershotgun && player->weaponowned[wp_shotgun])
 #endif
        )
     {
-        if (psp->sy < WEAPONBOTTOM )
+        if (psp->sy < WEAPONBOTTOM)
             return;
     }
 
@@ -495,13 +512,13 @@ void A_Lower(player_t *player, pspdef_t *psp)
     if (!player->health)
     {
         // Player is dead, so keep the weapon off screen.
-        P_SetPsprite (player,  ps_weapon, S_NULL);
+        P_SetPsprite(player, ps_weapon, S_NULL);
         return;        
     }
         
     player->readyweapon = player->pendingweapon; 
 
-    P_BringUpWeapon (player);
+    P_BringUpWeapon(player);
 }
 
 //
@@ -513,16 +530,17 @@ void A_Raise(player_t *player, pspdef_t *psp)
         
     psp->sy -= RAISESPEED;
 
-    if (use_vanilla_weapon_change == 1 || demoplayback || demorecording
+    if (use_vanilla_weapon_change || demoplayback || demorecording
 #ifndef WII
        || (player->readyweapon == wp_shotgun && player->weaponowned[wp_supershotgun])
        || (player->readyweapon == wp_supershotgun && player->weaponowned[wp_shotgun])
 #endif
        )
     {
-        if (psp->sy > WEAPONTOP )
+        if (psp->sy > WEAPONTOP)
             return;
     }
+
     psp->sy = WEAPONTOP;
     
     // The weapon has been raised all the way,
@@ -575,10 +593,8 @@ void A_Punch(player_t *player, pspdef_t *psp)
     if (linetarget)
     {
         S_StartSound(player->mo, sfx_punch);
-        player->mo->angle = R_PointToAngle2(player->mo->x,
-                                            player->mo->y,
-                                            linetarget->x,
-                                            linetarget->y);
+        player->mo->angle = R_PointToAngle2(player->mo->x, player->mo->y,
+                                            linetarget->x, linetarget->y);
     }
 }
 
@@ -591,7 +607,7 @@ void A_Saw(player_t *player, pspdef_t *psp)
     int            damage = 2 * (P_Random() % 10 + 1);
     int            slope;
 
-    angle += (P_Random()-P_Random())<<18;
+    angle += (P_Random() - P_Random()) << 18;
     
     // use meleerange + 1 se the puff doesn't skip the flash
     slope = P_AimLineAttack(player->mo, angle, MELEERANGE + 1);
@@ -623,6 +639,7 @@ void A_Saw(player_t *player, pspdef_t *psp)
         else
             player->mo->angle += ANG90 / 20;
     }
+
     player->mo->flags |= MF_JUSTATTACKED;
 }
 
@@ -631,7 +648,6 @@ void A_Saw(player_t *player, pspdef_t *psp)
 // maxammo array and affects that instead.  Through dehacked, for
 // example, it is possible to make a weapon that decreases the max
 // number of ammo for another weapon.  Emulate this.
-
 static void DecreaseAmmo(player_t *player, int ammonum, int amount)
 {
     if (ammonum < NUMAMMO)
@@ -686,9 +702,6 @@ void A_FireBFG(player_t *player, pspdef_t *psp)
 //
 // This code may not be used in other mods without appropriate credit given.
 // Code leeches will be telefragged.
-
-#define LOOKSLOPE 400
-
 void A_FireOldBFG(player_t *player, pspdef_t *psp)
 {
     int type = MT_PLASMA1;
@@ -761,14 +774,13 @@ void A_FireOldBFG(player_t *player, pspdef_t *psp)
         P_CheckMissileSpawn(th);
     }
 
-    //killough: obfuscated!
+    // killough: obfuscated!
     while (type != MT_PLASMA2 && (type = MT_PLASMA2));
 }
 
 //
 // A_FirePlasma
 //
-
 void A_FirePlasma(player_t *player, pspdef_t *psp) 
 {
     if (!d_infiniteammo)
@@ -819,7 +831,7 @@ void P_BulletSlope(mobj_t *mo)
     // see which target is to be aimed at
     angle_t an = mo->angle;
 
-    if (mo->player && !(autoaim))
+    if (mo->player && !autoaim)
     {
         bulletslope = (mo->player->lookdir << FRACBITS) / 173;
 
@@ -835,6 +847,7 @@ void P_BulletSlope(mobj_t *mo)
     {
         an += 1 << 26;
         bulletslope = P_AimLineAttack(mo, an, 16 * 64 * FRACUNIT);
+
         if (!linetarget)
         {
             an -= 2 << 26;
@@ -851,7 +864,7 @@ void P_BulletSlope(mobj_t *mo)
 //
 // P_GunShot
 //
-void P_GunShot(mobj_t *mo, dboolean accurate )
+void P_GunShot(mobj_t *mo, dboolean accurate)
 {
     angle_t      angle = mo->angle;
     int          damage = 5 * (P_Random() % 3 + 1);
@@ -942,9 +955,11 @@ void A_FireShotgun2(player_t *player, pspdef_t *psp)
         
     for (i = 0; i < 20; i++)
     {
-        int damage = 5 * (P_Random() % 3 + 1);
-        angle_t angle = player->mo->angle;
+        int        damage = 5 * (P_Random() % 3 + 1);
+        angle_t    angle = player->mo->angle;
+
         angle += (P_Random() - P_Random()) << ANGLETOFINESHIFT;
+
         P_LineAttack(player->mo,
                      angle,
                      MISSILERANGE,
@@ -1047,6 +1062,7 @@ void A_BFGSpray(mobj_t *mo)
                     MT_EXTRABFG);
         
         damage = 0;
+
         for (j = 0; j < 15; j++)
             damage += (P_Random() & 7) + 1;
 
@@ -1105,6 +1121,7 @@ void P_MovePsprites(player_t *player)
             if (psp->tics != -1)        
             {
                 psp->tics--;
+
                 if (!psp->tics)
                     P_SetPsprite(player, i, psp->state->nextstate);
             }

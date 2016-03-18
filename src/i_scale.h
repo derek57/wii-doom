@@ -16,6 +16,7 @@
 //      Pixel-doubling scale up functions.
 //
 
+
 #ifndef SDL2
 #ifndef __I_SCALE__
 #define __I_SCALE__
@@ -28,10 +29,8 @@
 void I_InitScale(byte *_src_buffer, byte *_dest_buffer, int _dest_pitch);
 void I_ResetScaleTables(byte *palette);
 
-//int FindNearestColor(byte *palette, int r, int g, int b);
 
 // Scaled modes (direct multiples of 320x200)
-
 extern screen_mode_t mode_scale_1x;
 extern screen_mode_t mode_scale_2x;
 extern screen_mode_t mode_scale_3x;
@@ -39,7 +38,6 @@ extern screen_mode_t mode_scale_4x;
 extern screen_mode_t mode_scale_5x;
 
 // Vertically stretched modes (320x200 -> multiples of 320x240)
-
 extern screen_mode_t mode_stretch_1x;
 extern screen_mode_t mode_stretch_2x;
 extern screen_mode_t mode_stretch_3x;
@@ -47,13 +45,14 @@ extern screen_mode_t mode_stretch_4x;
 extern screen_mode_t mode_stretch_5x;
 
 // Horizontally squashed modes (320x200 -> multiples of 256x200)
-
 extern screen_mode_t mode_squash_1x;
-extern screen_mode_t mode_squash_1p5x;                               // ADDED FOR HIRES
+extern screen_mode_t mode_squash_1p5x;
 extern screen_mode_t mode_squash_2x;
 extern screen_mode_t mode_squash_3x;
 extern screen_mode_t mode_squash_4x;
+
 // we don't do 5x.
+
 
 #endif /* #ifndef __I_SCALE__ */
 #endif

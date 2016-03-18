@@ -36,6 +36,7 @@
 ========================================================================
 */
 
+
 #include "doomstat.h"
 #include "m_random.h"
 #include "p_local.h"
@@ -45,6 +46,7 @@
 #include "s_sound.h"
 #include "sounds.h"
 #include "z_zone.h"
+
 
 //
 // EV_DoGenFloor()
@@ -79,22 +81,26 @@ dboolean EV_DoGenFloor(line_t *line)
 
     // check if a manual trigger, if so do just the sector on the backside
     manual = false;
+
     if (Trig == PushOnce || Trig == PushMany)
     {
         if (!(sec = line->backsector))
             return rtn;
+
         secnum = sec - sectors;
         manual = true;
         goto manual_floor;
     }
 
     secnum = -1;
+
     // if not manual do all sectors tagged the same as the line
     while ((secnum = P_FindSectorFromLineTag(line, secnum)) >= 0)
     {
         sec = &sectors[secnum];
 
 manual_floor:
+
         // Do not start another function if floor already moving
         if (P_SectorActive(floor_special, sec))
         {
@@ -115,8 +121,10 @@ manual_floor:
         floor->sector = sec;
         floor->texture = sec->floorpic;
         floor->newspecial = sec->special;
+
         //jff 3/14/98 transfer old special field too
         floor->oldspecial = sec->oldspecial;
+
         floor->type = genFloor;
 
         // set the speed of motion
@@ -169,10 +177,14 @@ manual_floor:
             case FbyST:
                 floor->floordestheight = (floor->sector->floorheight >> FRACBITS)
                     + floor->direction * (P_FindShortestTextureAround(secnum) >> FRACBITS);
-                if (floor->floordestheight > 32000)     // jff 3/13/98 prevent overflow
-                    floor->floordestheight = 32000;     // wraparound in floor height
+
+                // jff 3/13/98 prevent overflow
+                if (floor->floordestheight > 32000)
+                    // wraparound in floor height
+                    floor->floordestheight = 32000;
                 else if (floor->floordestheight < -32000)
                     floor->floordestheight = -32000;
+
                 floor->floordestheight <<= FRACBITS;
                 break;
 
@@ -191,9 +203,11 @@ manual_floor:
         }
 
         // set texture/type change properties
-        if (ChgT)       // if a texture change is indicated
+        // if a texture change is indicated
+        if (ChgT)
         {
-            if (ChgM)   // if a numeric model change
+            // if a numeric model change
+            if (ChgM)
             {
                 sector_t        *sec;
 
@@ -202,26 +216,35 @@ manual_floor:
                 sec = (Targ == FtoLnC || Targ == FtoC ?
                     P_FindModelCeilingSector(floor->floordestheight, secnum) :
                     P_FindModelFloorSector(floor->floordestheight, secnum));
+
                 if (sec)
                 {
                     floor->texture = sec->floorpic;
+
                     switch (ChgT)
                     {
-                        case FChgZero:  // zero type
+                        // zero type
+                        case FChgZero:
                             floor->newspecial = 0;
+
                             //jff 3/14/98 change old field too
                             floor->oldspecial = 0;
+
                             floor->type = genFloorChg0;
                             break;
 
-                        case FChgTyp:   // copy type
+                        // copy type
+                        case FChgTyp:
                             floor->newspecial = sec->special;
+
                             //jff 3/14/98 change old field too
                             floor->oldspecial = sec->oldspecial;
+
                             floor->type = genFloorChgT;
                             break;
 
-                        case FChgTxt:   // leave type be
+                        // leave type be
+                        case FChgTxt:
                             floor->type = genFloorChg;
                             break;
 
@@ -230,26 +253,35 @@ manual_floor:
                     }
                 }
             }
-            else        // else if a trigger model change
+            // else if a trigger model change
+            else
             {
                 floor->texture = line->frontsector->floorpic;
+
                 switch (ChgT)
                 {
-                    case FChgZero:      // zero type
+                    // zero type
+                    case FChgZero:
                         floor->newspecial = 0;
+
                         //jff 3/14/98 change old field too
                         floor->oldspecial = 0;
+
                         floor->type = genFloorChg0;
                         break;
 
-                    case FChgTyp:       // copy type
+                    // copy type
+                    case FChgTyp:
                         floor->newspecial = line->frontsector->special;
+
                         //jff 3/14/98 change old field too
                         floor->oldspecial = line->frontsector->oldspecial;
+
                         floor->type = genFloorChgT;
                         break;
 
-                    case FChgTxt:       // leave type be
+                    // leave type be
+                    case FChgTxt:
                         floor->type = genFloorChg;
                         break;
 
@@ -258,9 +290,11 @@ manual_floor:
                 }
             }
         }
+
         if (manual)
             return rtn;
     }
+
     return rtn;
 }
 
@@ -299,6 +333,7 @@ dboolean EV_DoGenCeiling(line_t *line)
     {
         if (!line || !(sec = line->backsector))
             return rtn;
+
         secnum = sec - sectors;
         manual = true;
         goto manual_ceiling;
@@ -312,11 +347,13 @@ dboolean EV_DoGenCeiling(line_t *line)
         sec = &sectors[secnum];
 
 manual_ceiling:
+
         // Do not start another function if ceiling already moving
         if (P_SectorActive(ceiling_special, sec))
         {
             if (manual)
                 return rtn;
+
             continue;
         }
 
@@ -331,8 +368,10 @@ manual_ceiling:
         ceiling->sector = sec;
         ceiling->texture = sec->ceilingpic;
         ceiling->newspecial = sec->special;
+
         //jff 3/14/98 change old field too
         ceiling->oldspecial = sec->oldspecial;
+
         ceiling->tag = sec->tag;
         ceiling->type = genCeiling;
 
@@ -361,6 +400,7 @@ manual_ceiling:
 
         // set destination target height
         targheight = sec->ceilingheight;
+
         switch (Targ)
         {
             case CtoHnC:
@@ -387,10 +427,14 @@ manual_ceiling:
             case CbyST:
                 targheight = (ceiling->sector->ceilingheight >> FRACBITS)
                     + ceiling->direction * (P_FindShortestUpperAround(secnum) >> FRACBITS);
-                if (targheight > 32000) // jff 3/13/98 prevent overflow
-                    targheight = 32000; // wraparound in ceiling height
+
+                // jff 3/13/98 prevent overflow
+                if (targheight > 32000)
+                    // wraparound in ceiling height
+                    targheight = 32000;
                 else if (targheight < -32000)
                     targheight = -32000;
+
                 targheight <<= FRACBITS;
                 break;
 
@@ -412,9 +456,11 @@ manual_ceiling:
             ceiling->bottomheight = targheight;
 
         // set texture/type change properties
-        if (ChgT)       // if a texture change is indicated
+        // if a texture change is indicated
+        if (ChgT)
         {
-            if (ChgM)   // if a numeric model change
+            // if a numeric model change
+            if (ChgM)
             {
                 sector_t        *sec;
 
@@ -422,26 +468,35 @@ manual_ceiling:
                 sec = (Targ == CtoHnF || Targ == CtoF ?
                     P_FindModelFloorSector(targheight, secnum) :
                     P_FindModelCeilingSector(targheight, secnum));
+
                 if (sec)
                 {
                     ceiling->texture = sec->ceilingpic;
+
                     switch (ChgT)
                     {
-                        case CChgZero:  // type is zeroed
+                        // type is zeroed
+                        case CChgZero:
                             ceiling->newspecial = 0;
+
                             //jff 3/14/98 change old field too
                             ceiling->oldspecial = 0;
+
                             ceiling->type = genCeilingChg0;
                             break;
 
-                        case CChgTyp:   // type is copied
+                        // type is copied
+                        case CChgTyp:
                             ceiling->newspecial = sec->special;
+
                             //jff 3/14/98 change old field too
                             ceiling->oldspecial = sec->oldspecial;
+
                             ceiling->type = genCeilingChgT;
                             break;
 
-                        case CChgTxt:   // type is left alone
+                        // type is left alone
+                        case CChgTxt:
                             ceiling->type = genCeilingChg;
                             break;
 
@@ -450,26 +505,35 @@ manual_ceiling:
                     }
                 }
             }
-            else        // else if a trigger model change
+            // else if a trigger model change
+            else
             {
                 ceiling->texture = line->frontsector->ceilingpic;
+
                 switch (ChgT)
                 {
-                    case CChgZero:      // type is zeroed
+                    // type is zeroed
+                    case CChgZero:
                         ceiling->newspecial = 0;
+
                         //jff 3/14/98 change old field too
                         ceiling->oldspecial = 0;
+
                         ceiling->type = genCeilingChg0;
                         break;
 
-                    case CChgTyp:       // type is copied
+                    // type is copied
+                    case CChgTyp:
                         ceiling->newspecial = line->frontsector->special;
+
                         //jff 3/14/98 change old field too
                         ceiling->oldspecial = line->frontsector->oldspecial;
+
                         ceiling->type = genCeilingChgT;
                         break;
 
-                    case CChgTxt:       // type is left alone
+                    // type is left alone
+                    case CChgTxt:
                         ceiling->type = genCeilingChg;
                         break;
 
@@ -478,10 +542,14 @@ manual_ceiling:
                 }
             }
         }
-        P_AddActiveCeiling(ceiling);    // add this ceiling to the active list
+
+        // add this ceiling to the active list
+        P_AddActiveCeiling(ceiling);
+
         if (manual)
             return rtn;
     }
+
     return rtn;
 }
 
@@ -517,10 +585,12 @@ dboolean EV_DoGenLift(line_t *line)
 
     // check if a manual trigger, if so do just the sector on the backside
     manual = false;
+
     if (Trig == PushOnce || Trig == PushMany)
     {
         if (!(sec = line->backsector))
             return rtn;
+
         secnum = sec - sectors;
         manual = true;
         goto manual_lift;
@@ -532,6 +602,7 @@ dboolean EV_DoGenLift(line_t *line)
         sec = &sectors[secnum];
 
 manual_lift:
+
         // Do not start another function if floor already moving
         if (P_SectorActive(floor_special, sec))
         {
@@ -559,8 +630,10 @@ manual_lift:
         {
             case F2LnF:
                 plat->low = P_FindLowestFloorSurrounding(sec);
+
                 if (plat->low > sec->floorheight)
                     plat->low = sec->floorheight;
+
                 break;
 
             case F2NnF:
@@ -569,18 +642,24 @@ manual_lift:
 
             case F2LnC:
                 plat->low = P_FindLowestCeilingSurrounding(sec);
+
                 if (plat->low > sec->floorheight)
                     plat->low = sec->floorheight;
+
                 break;
 
             case LnF2HnF:
                 plat->type = genPerpetual;
                 plat->low = P_FindLowestFloorSurrounding(sec);
+
                 if (plat->low > sec->floorheight)
                     plat->low = sec->floorheight;
+
                 plat->high = P_FindHighestFloorSurrounding(sec);
+
                 if (plat->high < sec->floorheight)
                     plat->high = sec->floorheight;
+
                 plat->status = P_Random() & 1;
                 break;
 
@@ -632,11 +711,14 @@ manual_lift:
         }
 
         S_StartSectorSound(&sec->soundorg, sfx_pstart);
-        P_AddActivePlat(plat);  // add this plat to the list of active plats
+
+        // add this plat to the list of active plats
+        P_AddActivePlat(plat);
 
         if (manual)
             return rtn;
     }
+
     return rtn;
 }
 
@@ -651,7 +733,10 @@ manual_lift:
 dboolean EV_DoGenStairs(line_t *line)
 {
     int                 secnum;
-    int                 osecnum;        // jff 3/4/98 preserve loop index
+
+    // jff 3/4/98 preserve loop index
+    int                 osecnum;
+
     int                 height;
     int                 i;
     int                 newsecnum;
@@ -681,10 +766,12 @@ dboolean EV_DoGenStairs(line_t *line)
 
     // check if a manual trigger, if so do just the sector on the backside
     manual = false;
+
     if (Trig == PushOnce || Trig == PushMany)
     {
         if (!(sec = line->backsector))
             return rtn;
+
         secnum = sec - sectors;
         manual = true;
         goto manual_stair;
@@ -698,6 +785,7 @@ dboolean EV_DoGenStairs(line_t *line)
         sec = &sectors[secnum];
 
 manual_stair:
+
         // Do not start another function if floor already moving
         // jff 2/26/98 add special lockout condition to wait for entire
         // staircase to build before retriggering
@@ -765,19 +853,26 @@ manual_stair:
         floor->floordestheight = height;
         texture = sec->floorpic;
         floor->crush = false;
-        floor->type = genBuildStair;    // jff 3/31/98 do not leave uninited
 
-        sec->stairlock = -2;            // jff 2/26/98 set up lock on current sector
+        // jff 3/31/98 do not leave uninited
+        floor->type = genBuildStair;
+
+        // jff 2/26/98 set up lock on current sector
+        sec->stairlock = -2;
+
         sec->nextsec = -1;
         sec->prevsec = -1;
 
-        osecnum = secnum;               // jff 3/4/98 preserve loop index
+        // jff 3/4/98 preserve loop index
+        osecnum = secnum;
+
         // Find next sector to raise
         // 1. Find 2-sided line with same sector side[0]
         // 2. Other side is the next sector to raise
         do
         {
             okay = false;
+
             for (i = 0; i < sec->linecount; i++)
             {
                 if (!((sec->lines[i])->backsector))
@@ -807,10 +902,18 @@ manual_stair:
                 // jff 2/26/98
                 // link the stair chain in both directions
                 // lock the stair sector until building complete
-                sec->nextsec = newsecnum;       // link step to next
-                tsec->prevsec = secnum;         // link next back
-                tsec->nextsec = -1;             // set next forward link as end
-                tsec->stairlock = -2;           // lock the step
+
+                // link step to next
+                sec->nextsec = newsecnum;
+
+                // link next back
+                tsec->prevsec = secnum;
+
+                // set next forward link as end
+                tsec->nextsec = -1;
+
+                // lock the step
+                tsec->stairlock = -2;
 
                 sec = tsec;
                 secnum = newsecnum;
@@ -825,19 +928,27 @@ manual_stair:
                 floor->speed = speed;
                 floor->floordestheight = height;
                 floor->crush = false;
-                floor->type = genBuildStair;    // jff 3/31/98 do not leave uninited
+
+                // jff 3/31/98 do not leave uninited
+                floor->type = genBuildStair;
 
                 okay = true;
                 break;
             }
         } while (okay);
+
         if (manual)
             return rtn;
-        secnum = osecnum;                       // jff 3/4/98 restore old loop index
+
+        // jff 3/4/98 restore old loop index
+        secnum = osecnum;
     }
+
     // retriggerable generalized stairs build up or down alternately
     if (rtn)
-        line->special ^= StairDirection;        // alternate dir on succ activations
+        // alternate dir on succ activations
+        line->special ^= StairDirection;
+
     return rtn;
 }
 
@@ -869,22 +980,26 @@ dboolean EV_DoGenCrusher(line_t *line)
 
     // check if a manual trigger, if so do just the sector on the backside
     manual = false;
+
     if (Trig == PushOnce || Trig == PushMany)
     {
         if (!(sec = line->backsector))
             return rtn;
+
         secnum = sec - sectors;
         manual = true;
         goto manual_crusher;
     }
 
     secnum = -1;
+
     // if not manual do all sectors tagged the same as the line
     while ((secnum = P_FindSectorFromLineTag(line, secnum)) >= 0)
     {
         sec = &sectors[secnum];
 
 manual_crusher:
+
         // Do not start another function if ceiling already moving
         if (P_SectorActive(ceiling_special, sec))
         {
@@ -898,7 +1013,10 @@ manual_crusher:
         rtn = true;
         ceiling = Z_Calloc(1, sizeof(*ceiling), PU_LEVSPEC, NULL);
         P_AddThinker(&ceiling->thinker);
-        sec->ceilingdata = ceiling;     // jff 2/22/98
+
+        // jff 2/22/98
+        sec->ceilingdata = ceiling;
+
         ceiling->thinker.function = T_MoveCeiling;
         ceiling->crush = true;
         ceiling->direction = -1;
@@ -932,12 +1050,16 @@ manual_crusher:
             default:
                 break;
         }
+
         ceiling->oldspeed = ceiling->speed;
 
-        P_AddActiveCeiling(ceiling);    // add to list of active ceilings
+        // add to list of active ceilings
+        P_AddActiveCeiling(ceiling);
+
         if (manual)
             return rtn;
     }
+
     return rtn;
 }
 
@@ -967,10 +1089,12 @@ dboolean EV_DoGenLockedDoor(line_t *line)
 
     // check if a manual trigger, if so do just the sector on the backside
     manual = false;
+
     if (Trig == PushOnce || Trig == PushMany)
     {
         if (!(sec = line->backsector))
             return rtn;
+
         secnum = sec - sectors;
         manual = true;
         goto manual_locked;
@@ -983,9 +1107,13 @@ dboolean EV_DoGenLockedDoor(line_t *line)
     while ((secnum = P_FindSectorFromLineTag(line, secnum)) >= 0)
     {
         sec = &sectors[secnum];
+
 manual_locked:
+
         // Do not start another function if ceiling already moving
-        if (P_SectorActive(ceiling_special, sec))   // jff 2/22/98
+
+        // jff 2/22/98
+        if (P_SectorActive(ceiling_special, sec))
         {
             if (!manual)
                 continue;
@@ -997,7 +1125,9 @@ manual_locked:
         rtn = true;
         door = Z_Calloc(1, sizeof(*door), PU_LEVSPEC, NULL);
         P_AddThinker(&door->thinker);
-        sec->ceilingdata = door;        // jff 2/22/98
+
+        // jff 2/22/98
+        sec->ceilingdata = door;
 
         door->thinker.function = T_VerticalDoor;
         door->sector = sec;
@@ -1044,6 +1174,7 @@ manual_locked:
         if (manual)
             return rtn;
     }
+
     return rtn;
 }
 
@@ -1074,10 +1205,12 @@ dboolean EV_DoGenDoor(line_t *line)
 
     // check if a manual trigger, if so do just the sector on the backside
     manual = false;
+
     if (Trig == PushOnce || Trig == PushMany)
     {
         if (!(sec = line->backsector))
             return rtn;
+
         secnum = sec - sectors;
         manual = true;
         goto manual_door;
@@ -1090,7 +1223,9 @@ dboolean EV_DoGenDoor(line_t *line)
     while ((secnum = P_FindSectorFromLineTag(line, secnum)) >= 0)
     {
         sec = &sectors[secnum];
+
 manual_door:
+
         // Do not start another function if ceiling already moving
         if (P_SectorActive(ceiling_special, sec))
         {
@@ -1151,7 +1286,9 @@ manual_door:
                 door->speed = VDOORSPEED * 8;
                 break;
         }
-        door->line = line;      // jff 1/31/98 remember line that triggered us
+
+        // jff 1/31/98 remember line that triggered us
+        door->line = line;
 
         // killough 10/98: implement gradual lighting
         door->lighttag = ((line->special & 6) == 6 &&
@@ -1165,8 +1302,10 @@ manual_door:
                 door->direction = 1;
                 door->topheight = P_FindLowestCeilingSurrounding(sec);
                 door->topheight -= 4 * FRACUNIT;
+
                 if (door->topheight != sec->ceilingheight)
                     S_StartSectorSound(&door->sector->soundorg, sfx_bdopn);
+
                 door->type = (Sped >= SpeedFast ? genBlazeRaise : genRaise);
                 break;
 
@@ -1174,8 +1313,10 @@ manual_door:
                 door->direction = 1;
                 door->topheight = P_FindLowestCeilingSurrounding(sec);
                 door->topheight -= 4 * FRACUNIT;
+
                 if (door->topheight != sec->ceilingheight)
                     S_StartSectorSound(&door->sector->soundorg, sfx_bdopn);
+
                 door->type = (Sped >= SpeedFast ? genBlazeOpen : genOpen);
                 break;
 
@@ -1197,8 +1338,11 @@ manual_door:
             default:
                 break;
         }
+
         if (manual)
             return rtn;
     }
+
     return rtn;
 }
+

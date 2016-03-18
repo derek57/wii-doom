@@ -29,6 +29,7 @@
 #ifndef __D_TICCMD__
 #define __D_TICCMD__
 
+
 #include "doomtype.h"
 
 
@@ -39,28 +40,39 @@
 
 typedef struct
 {
-    signed char        forwardmov;        // *2048 for move
-    signed char        sidemov;           // *2048 for move
-    short              angleturn;         // <<16 for angle delta
+    // *2048 for move
+    signed char        forwardmov;
+
+    // *2048 for move
+    signed char        sidemov;
+
+    // <<16 for angle delta
+    short              angleturn;
+
     byte               chatchar;
     byte               buttons;
 
     // villsa [STRIFE] according to the asm,
     // consistancy is a short, not a byte
-    byte               consistancy;       // checks for net game
+
+    // checks for net game
+    byte               consistancy;
 
     // villsa - Strife specific:
     byte               buttons2;
     int                inventory;
    
     // Heretic/Hexen specific:
-    byte               lookfly;           // look/fly up/down/centering
-    byte               arti;              // artitype_t to use
+    // look or fly up / down / centering
+    byte               lookfly;
+
+    // artitype_t to use
+    byte               arti;
 
     int                lookdir;
 
 } ticcmd_t;
 
 
-
 #endif
+

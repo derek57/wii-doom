@@ -41,7 +41,7 @@
 typedef struct 
 {
     char password[MAX_PASSWORD_LENGTH];
-    char startupPath [256];
+    char startupPath[256];
     int cIOSVersion;
     int fatDeviceIndex;
     int nandDeviceIndex;
@@ -49,6 +49,7 @@ typedef struct
     const char *smbpassword;
     const char *share;
     const char *ip;
+
 } CONFIG;
 
 

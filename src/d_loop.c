@@ -47,7 +47,9 @@ typedef struct
 {
     ticcmd_t cmds[NET_MAXPLAYERS];
     dboolean ingame[NET_MAXPLAYERS];
+
 } ticcmd_set_t;
+
 
 // Maximum time that we wait in TryRunTics() for netgame data to be
 // received before we bail out and render a frame anyway.
@@ -65,59 +67,53 @@ typedef struct
 //
 
 // The index of the next tic to be made (with a call to BuildTiccmd).
-
-static int      maketic;
+static int                 maketic;
 
 // The number of complete tics received from the server so far.
-
-static int      recvtic;
+static int                 recvtic;
 
 // Index of the local player.
-
-static int      localplayer;
+static int                 localplayer;
 
 // Used for original sync code.
-
-static int      skiptics = 0;
+static int                 skiptics = 0;
 
 // Requested player class "sent" to the server on connect.
 // If we are only doing a single player game then this needs to be remembered
 // and saved in the game settings.
-
-static int      player_class;
+static int                 player_class;
 
 // Current players in the multiplayer game.
 // This is distinct from playeringame[] used by the game code, which may
 // modify playeringame[] when playing back multiplayer demos.
-
-static dboolean  local_playeringame[NET_MAXPLAYERS];
+static dboolean            local_playeringame[NET_MAXPLAYERS];
 
 // Use new client syncronisation code
-
-static dboolean  new_sync = true;
+static dboolean            new_sync = true;
 
 // Callback functions for loop code.
+static loop_interface_t    *loop_interface = NULL;
 
-static loop_interface_t *loop_interface = NULL;
+static ticcmd_set_t        ticdata[BACKUPTICS];
 
-static ticcmd_set_t ticdata[BACKUPTICS];
 
 // The number of tics that have been run (using RunTic) so far.
-
-int             gametic;
+int                        gametic;
 
 // Reduce the bandwidth needed by sampling game input less and transmitting
 // less.  If ticdup is 2, sample half normal, 3 = one third normal, etc.
 
-int             ticdup;
-int             lasttime;
+int                        ticdup;
+int                        lasttime;
 
 // Amount to offset the timer for game sync.
 
-fixed_t         offsetms;
+fixed_t                    offsetms;
 
-extern dboolean  privateserverflag;
-extern dboolean  multiplayerflag;
+
+extern dboolean            privateserverflag;
+extern dboolean            multiplayerflag;
+
 
 // 35 fps clock adjusted by offsetms milliseconds
 
@@ -132,7 +128,6 @@ int GetAdjustedTimeN(const int N)
     {
         // Use the adjustments from net_client.c only if we are
         // using the new sync mode.
-
         time_ms += (offsetms / FRACUNIT);
     }
 
@@ -149,32 +144,29 @@ static dboolean BuildNewTic(void)
     int      gameticdiv;
     ticcmd_t cmd;
 
-    gameticdiv = gametic/ticdup;
+    gameticdiv = gametic / ticdup;
 
-    I_StartTic ();
+    I_StartTic();
     loop_interface->ProcessEvents();
 
     // Always run the menu
-
     loop_interface->RunMenu();
 
     if (new_sync)
     {
-       // If playing single player, do not allow tics to buffer
-       // up very far
+        // If playing single player, do not allow tics to buffer
+        // up very far
+        if (maketic - gameticdiv > 2)
+            return false;
 
-       if (maketic - gameticdiv > 2)
-           return false;
-
-       // Never go more than ~200ms ahead
-
-       if (maketic - gameticdiv > 8)
-           return false;
+        // Never go more than ~200ms ahead
+        if (maketic - gameticdiv > 8)
+            return false;
     }
     else
     {
-       if (maketic - gameticdiv >= 5)
-           return false;
+        if (maketic - gameticdiv >= 5)
+            return false;
     }
 
     //printf ("mk:%i ",maketic);
@@ -218,8 +210,7 @@ void NetUpdate (void)
     }
 
     // build new ticcmds for console player
-
-    for (i=0 ; i<newtics ; i++)
+    for (i = 0; i < newtics; i++)
     {
         if (!BuildNewTic())
         {
@@ -233,7 +224,6 @@ void NetUpdate (void)
 //
 // Called after the screen is set but before the game starts running.
 //
-
 void D_StartGameLoop(void)
 {
     lasttime = GetAdjustedTime() / ticdup;
@@ -276,7 +266,7 @@ void D_StartNetGame(net_gamesettings_t *settings,
     //
 /*
 #ifndef WII
-    if(!beta_style)
+    if (!beta_style)
         i = M_CheckParmWithArgs("-extratics", 1);
 
     if (i > 0)
@@ -295,7 +285,7 @@ void D_StartNetGame(net_gamesettings_t *settings,
     //
 /*
 #ifndef WII
-    if(!beta_style)
+    if (!beta_style)
         i = M_CheckParmWithArgs("-dup", 1);
 
     if (i > 0)
@@ -306,7 +296,6 @@ void D_StartNetGame(net_gamesettings_t *settings,
         settings->ticdup = 1;
 
     // Set the local player and playeringame[] values.
-
     localplayer = settings->consoleplayer;
 
     for (i = 0; i < NET_MAXPLAYERS; ++i)
@@ -315,7 +304,6 @@ void D_StartNetGame(net_gamesettings_t *settings,
     }
 
     // Copy settings to global variables.
-
     ticdup = settings->ticdup;
     new_sync = settings->new_sync;
 
@@ -327,16 +315,11 @@ void D_StartNetGame(net_gamesettings_t *settings,
 
 static int GetLowTic(void)
 {
-    int lowtic;
-
-    lowtic = maketic;
-
-    return lowtic;
+    return maketic;
 }
 
 // When using ticdup, certain values must be cleared out when running
 // the duplicate ticcmds.
-
 static void TicdupSquash(ticcmd_set_t *set)
 {
     unsigned int i;
@@ -345,6 +328,7 @@ static void TicdupSquash(ticcmd_set_t *set)
     {
         ticcmd_t *cmd = &set->cmds[i];
         cmd->chatchar = 0;
+
         if (cmd->buttons & BT_SPECIAL)
             cmd->buttons = 0;
     }
@@ -352,7 +336,6 @@ static void TicdupSquash(ticcmd_set_t *set)
 
 // When running in single player mode, clear all the ingame[] array
 // except the local player.
-
 static void SinglePlayerClear(ticcmd_set_t *set)
 {
     unsigned int i;
@@ -369,7 +352,6 @@ static void SinglePlayerClear(ticcmd_set_t *set)
 //
 // TryRunTics
 //
-
 void TryRunTics (void)
 {
     int i;
@@ -384,14 +366,13 @@ void TryRunTics (void)
     int realtics = entertic - oldentertics;
     oldentertics = entertic;
 
-    NetUpdate ();
+    NetUpdate();
 
     lowtic = GetLowTic();
 
-    availabletics = lowtic - gametic/ticdup;
+    availabletics = lowtic - gametic / ticdup;
 
     // decide how many tics to run
-
     if (new_sync)
     {
         counts = availabletics;
@@ -399,8 +380,8 @@ void TryRunTics (void)
     else
     {
         // decide how many tics to run
-        if (realtics < availabletics-1)
-            counts = realtics+1;
+        if (realtics < availabletics - 1)
+            counts = realtics + 1;
         else if (realtics < availabletics)
             counts = realtics;
         else
@@ -419,22 +400,21 @@ void TryRunTics (void)
         counts = 1;
 
     // wait for new tics if needed
-    while (lowtic < gametic/ticdup + counts)
+    while (lowtic < gametic / ticdup + counts)
     {
-        NetUpdate ();
+        NetUpdate();
 
         lowtic = GetLowTic();
 
-        if (lowtic < gametic/ticdup)
+        if (lowtic < gametic / ticdup)
             I_Error ("TryRunTics: lowtic < gametic");
 
         // Still no tics to run? Sleep until some are available.
-        if (lowtic < gametic/ticdup + counts)
+        if (lowtic < gametic / ticdup + counts)
         {
             // If we're in a netgame, we might spin forever waiting for
             // new network data to be received. So don't stay in here
             // forever - give the menu a chance to work.
-
             if (I_GetTime() / ticdup - entertic >= MAX_NETGAME_STALL_TICS)
             {
                 return;
@@ -453,9 +433,9 @@ void TryRunTics (void)
 
         SinglePlayerClear(set);
 
-        for (i=0 ; i<ticdup ; i++)
+        for (i = 0; i < ticdup; i++)
         {
-            if (gametic/ticdup > lowtic)
+            if (gametic / ticdup > lowtic)
                 I_Error ("gametic>lowtic");
 
             memcpy(local_playeringame, set->ingame, sizeof(local_playeringame));
@@ -464,11 +444,11 @@ void TryRunTics (void)
             gametic++;
 
             // modify command for duplicated tics
-
             TicdupSquash(set);
         }
 
-        NetUpdate ();        // check for new console commands
+        // check for new console commands
+        NetUpdate();
     }
 }
 

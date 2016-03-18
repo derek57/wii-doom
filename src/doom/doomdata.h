@@ -26,8 +26,10 @@
 //
 //-----------------------------------------------------------------------------
 
+
 #ifndef __DOOMDATA__
 #define __DOOMDATA__
+
 
 // The most basic types we use, portability.
 #include "../doomtype.h"
@@ -36,125 +38,11 @@
 #include "doomdef.h"
 
 
-#define NO_INDEX ((unsigned short)(-1))
-
-//jff 3/21/98 Set if line absorbs use by player
-//allow multiple push/switch triggers to be used on one push
-#define ML_PASSUSE              512
-
-//
-// Map level types.
-// The following data structures define the persistent format
-// used in the lumps of the WAD files.
-//
-
-// Lump order in a map WAD: each map needs a couple of lumps
-// to provide a complete scene geometry description.
-enum
-{
-  ML_LABEL,                // A separator, name, ExMx or MAPxx
-  ML_THINGS,               // Monsters, items..
-  ML_LINEDEFS,             // LineDefs, from editing
-  ML_SIDEDEFS,             // SideDefs, from editing
-  ML_VERTEXES,             // Vertices, edited and BSP splits generated
-  ML_SEGS,                 // LineSegs, from LineDefs split by BSP
-  ML_SSECTORS,             // SubSectors, list of LineSegs
-  ML_NODES,                // BSP nodes
-  ML_SECTORS,              // Sectors, from editing
-  ML_REJECT,               // LUT, sector-sector visibility        
-  ML_BLOCKMAP              // LUT, motion clipping, walls/grid element
-};
-
-
-// A single Vertex.
-typedef struct
-{
-  short                x;
-  short                y;
-} PACKEDATTR mapvertex_t;
-
-
-// A SideDef, defining the visual appearance of a wall,
-// by setting textures and offsets.
-typedef struct
-{
-  short                textureoffset;
-  short                rowoffset;
-  char                 toptexture[8];
-  char                 bottomtexture[8];
-  char                 midtexture[8];
-  // Front sector, towards viewer.
-  short                sector;
-} PACKEDATTR mapsidedef_t;
-
-
-
-// A LineDef, as used for editing, and as input
-// to the BSP builder.
-typedef struct
-{
-  short                v1;
-  short                v2;
-  short                flags;
-  short                special;
-  short                tag;
-  // sidenum[1] will be -1 if one sided
-  short                sidenum[2];                
-} PACKEDATTR maplinedef_t;
-
-typedef struct
-{
-    unsigned short      numsegs;
-    int                 firstseg;
-} PACKEDATTR mapsubsector_v4_t;
-
-typedef struct
-{
-    int                 v1;
-    int                 v2;
-    unsigned short      angle;
-    unsigned short      linedef;
-    short               side;
-    unsigned short      offset;
-} PACKEDATTR mapseg_v4_t;
-
-typedef struct
-{
-    short               x;
-    short               y;
-    short               dx;
-    short               dy;
-    short               bbox[2][4];
-    int                 children[2];
-} PACKEDATTR mapnode_v4_t;
-
-typedef struct
-{
-    unsigned int        v1;
-    unsigned int        v2;
-    unsigned short      linedef;
-    unsigned char       side;
-} PACKEDATTR mapseg_znod_t;
-
-typedef struct
-{
-    short               x;
-    short               y;
-    short               dx;
-    short               dy;
-    short               bbox[2][4];
-    int                 children[2];
-} PACKEDATTR mapnode_znod_t;
-
-typedef struct
-{
-    unsigned int        numsegs;
-} PACKEDATTR mapsubsector_znod_t;
-
-
 //
 // LineDef attributes.
 //
+
+#define NO_INDEX                ((unsigned short)(-1))
 
 // Solid, is an obstacle.
 #define ML_BLOCKING             1
@@ -193,83 +81,221 @@ typedef struct
 // Set if already seen, thus drawn in automap.
 #define ML_MAPPED               256
 
+//jff 3/21/98 Set if line absorbs use by player
+//allow multiple push/switch triggers to be used on one push
+#define ML_PASSUSE              512
+
+// Indicate a leaf.
+#define NF_SUBSECTOR            0x80000000
 
 
+//
+// Map level types.
+// The following data structures define the persistent format
+// used in the lumps of the WAD files.
+//
+
+// Lump order in a map WAD: each map needs a couple of lumps
+// to provide a complete scene geometry description.
+enum
+{
+    // A separator, name, ExMx or MAPxx
+    ML_LABEL,
+
+    // Monsters, items..
+    ML_THINGS,
+
+    // LineDefs, from editing
+    ML_LINEDEFS,
+
+    // SideDefs, from editing
+    ML_SIDEDEFS,
+
+    // Vertices, edited and BSP splits generated
+    ML_VERTEXES,
+
+    // LineSegs, from LineDefs split by BSP
+    ML_SEGS,
+
+    // SubSectors, list of LineSegs
+    ML_SSECTORS,
+
+    // BSP nodes
+    ML_NODES,
+
+    // Sectors, from editing
+    ML_SECTORS,
+
+    // LUT, sector-sector visibility
+    ML_REJECT,
+
+    // LUT, motion clipping, walls/grid element
+    ML_BLOCKMAP
+};
+
+
+// A single Vertex.
+typedef struct
+{
+    short              x;
+    short              y;
+
+} PACKEDATTR mapvertex_t;
+
+
+// A SideDef, defining the visual appearance of a wall,
+// by setting textures and offsets.
+typedef struct
+{
+    short              textureoffset;
+    short              rowoffset;
+    char               toptexture[8];
+    char               bottomtexture[8];
+    char               midtexture[8];
+
+    // Front sector, towards viewer.
+    short              sector;
+
+} PACKEDATTR mapsidedef_t;
+
+
+
+// A LineDef, as used for editing, and as input
+// to the BSP builder.
+typedef struct
+{
+    short              v1;
+    short              v2;
+    short              flags;
+    short              special;
+    short              tag;
+
+    // sidenum[1] will be -1 if one sided
+    short              sidenum[2];                
+
+} PACKEDATTR maplinedef_t;
+
+typedef struct
+{
+    unsigned short     numsegs;
+    int                firstseg;
+
+} PACKEDATTR mapsubsector_v4_t;
+
+typedef struct
+{
+    int                v1;
+    int                v2;
+    unsigned short     angle;
+    unsigned short     linedef;
+    short              side;
+    unsigned short     offset;
+
+} PACKEDATTR mapseg_v4_t;
+
+typedef struct
+{
+    short              x;
+    short              y;
+    short              dx;
+    short              dy;
+    short              bbox[2][4];
+    int                children[2];
+
+} PACKEDATTR mapnode_v4_t;
+
+typedef struct
+{
+    unsigned int       v1;
+    unsigned int       v2;
+    unsigned short     linedef;
+    unsigned char      side;
+
+} PACKEDATTR mapseg_znod_t;
+
+typedef struct
+{
+    short              x;
+    short              y;
+    short              dx;
+    short              dy;
+    short              bbox[2][4];
+    int                children[2];
+
+} PACKEDATTR mapnode_znod_t;
+
+typedef struct
+{
+    unsigned int       numsegs;
+
+} PACKEDATTR mapsubsector_znod_t;
 
 // Sector definition, from editing.
-typedef        struct
+typedef struct
 {
-  short                floorheight;
-  short                ceilingheight;
-  char                 floorpic[8];
-  char                 ceilingpic[8];
-  short                lightlevel;
-  short                special;
-  short                tag;
+    short              floorheight;
+    short              ceilingheight;
+    char               floorpic[8];
+    char               ceilingpic[8];
+    short              lightlevel;
+    short              special;
+    short              tag;
+
 } PACKEDATTR mapsector_t;
 
 // SubSector, as generated by BSP.
 typedef struct
 {
-  short                numsegs;
-  // Index of first one, segs are stored sequentially.
-  short                firstseg;        
-} PACKEDATTR mapsubsector_t;
+    short              numsegs;
 
+    // Index of first one, segs are stored sequentially.
+    short              firstseg;
+
+} PACKEDATTR mapsubsector_t;
 
 // LineSeg, generated by splitting LineDefs
 // using partition lines selected by BSP builder.
 typedef struct
 {
-  short                v1;
-  short                v2;
-  short                angle;                
-  short                linedef;
-  short                side;
-  short                offset;
+    short              v1;
+    short              v2;
+    short              angle;                
+    short              linedef;
+    short              side;
+    short              offset;
+
 } PACKEDATTR mapseg_t;
 
-
-
 // BSP node structure.
-
-// Indicate a leaf.
-#define NF_SUBSECTOR     0x80000000
-
 typedef struct
 {
-  // Partition line from (x,y) to x+dx,y+dy)
-  short                x;
-  short                y;
-  short                dx;
-  short                dy;
+    // Partition line from (x, y) to x + dx, y + dy)
+    short              x;
+    short              y;
+    short              dx;
+    short              dy;
 
-  // Bounding box for each child,
-  // clip against view frustum.
-  short                bbox[2][4];
+    // Bounding box for each child,
+    // clip against view frustum.
+    short              bbox[2][4];
 
-  // If NF_SUBSECTOR its a subsector,
-  // else it's a node of another subtree.
-  unsigned short       children[2];
+    // If NF_SUBSECTOR its a subsector,
+    // else it's a node of another subtree.
+    unsigned short     children[2];
 
 } PACKEDATTR mapnode_t;
-
-
-
 
 // Thing definition, position, orientation and type,
 // plus skill/visibility flags and attributes.
 typedef struct
 {
-    short                x;
-    short                y;
-    short                angle;
-    short                type;
-    short                options;
+    short              x;
+    short              y;
+    short              angle;
+    short              type;
+    short              options;
+
 } PACKEDATTR mapthing_t;
 
+#endif // __DOOMDATA__
 
-
-
-
-#endif                        // __DOOMDATA__

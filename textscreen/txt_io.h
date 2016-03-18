@@ -24,6 +24,7 @@ typedef struct
 {
     int bgcolor;
     int fgcolor;
+
 } txt_saved_colors_t;
 
 void TXT_PutChar(int c);

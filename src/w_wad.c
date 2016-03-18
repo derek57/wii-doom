@@ -44,22 +44,37 @@ typedef struct
     char                identification[4];                
     int                 numlumps;
     int                 infotableofs;
-} PACKEDATTR wadinfo_t;
 
+} PACKEDATTR wadinfo_t;
 
 typedef struct
 {
     int                 filepos;
     int                 size;
     char                name[8];
+
 } PACKEDATTR filelump_t;
 
 //
 // GLOBALS
 //
 
-// Location of each lump on disk.
+// Hash table for fast lookups
+static lumpindex_t *lumphash;
 
+// Variables for the reload hack: filename of the PWAD to reload, and the
+// lumps from WADs before the reload file, so we can resent numlumps and
+// load the file again.
+static wad_file_t  *reloadhandle = NULL;
+
+static lumpinfo_t  *reloadlumps = NULL;
+
+static char        *reloadname = NULL;
+
+static int         reloadlump = -1;
+
+
+// Location of each lump on disk.
 disk_indicator_e   disk_indicator = disk_off;
 
 int                fsizecq = 0;
@@ -68,19 +83,9 @@ unsigned int       numlumps = 0;
 
 lumpinfo_t         **lumpinfo;                
 
-// Hash table for fast lookups
-
-static lumpindex_t *lumphash;
-
-// Variables for the reload hack: filename of the PWAD to reload, and the
-// lumps from WADs before the reload file, so we can resent numlumps and
-// load the file again.
-static wad_file_t  *reloadhandle = NULL;
-static lumpinfo_t  *reloadlumps = NULL;
-static char        *reloadname = NULL;
-static int         reloadlump = -1;
 
 extern int diskicon_readbytes;
+
 
 // Hash function used for lump names.
 
@@ -91,13 +96,12 @@ unsigned int W_LumpNameHash(const char *s)
 {
     // This is the djb2 string hash function, modded to work on strings
     // that have a maximum length of 8.
-
     unsigned int result = 5381;
     unsigned int i;
 
-    for (i=0; i < 8 && s[i] != '\0'; ++i)
+    for (i = 0; i < 8 && s[i] != '\0'; ++i)
     {
-        result = ((result << 5) ^ result ) ^ toupper(s[i]);
+        result = ((result << 5) ^ result) ^ toupper(s[i]);
     }
 
     return result;
@@ -115,7 +119,6 @@ unsigned int W_LumpNameHash(const char *s)
 //  with multiple lumps.
 // Other files are single lumps with the base filename
 //  for the lump name.
-
 wad_file_t *W_AddFile (char *filename, dboolean automatic)
 {
     wadinfo_t header;
@@ -147,7 +150,6 @@ wad_file_t *W_AddFile (char *filename, dboolean automatic)
     }
 
     // open the file and add to directory
-
     wad_file = W_OpenFile(filename);
 
     if (wad_file == NULL)
@@ -157,12 +159,10 @@ wad_file_t *W_AddFile (char *filename, dboolean automatic)
         return NULL;
     }
 
-//    M_StringCopy(wad_file->path, filename, sizeof(wad_file->path));
-
     // [crispy] save the file name
     wad_file->path = M_BaseName(filename);
 
-    if (!M_StringCompare(filename+strlen(filename)-3 , "wad" ) )
+    if (!M_StringCompare(filename + strlen(filename) - 3 , "wad"))
     {
         // single lump file
 
@@ -170,14 +170,12 @@ wad_file_t *W_AddFile (char *filename, dboolean automatic)
         // parsing code expects a little-endian directory, so will swap
         // them back.  Effectively we're constructing a "fake WAD directory"
         // here, as it would appear on disk.
-
         fileinfo = Z_Malloc(sizeof(filelump_t), PU_STATIC, NULL);
         fileinfo->filepos = LONG(0);
         fileinfo->size = LONG(wad_file->length);
 
         // Name the lump after the base of the filename (without the
         // extension).
-
         M_ExtractFileBase (filename, fileinfo->name);
         numfilelumps = 1;
     }
@@ -213,6 +211,7 @@ wad_file_t *W_AddFile (char *filename, dboolean automatic)
 
     // Increase size of numlumps array to accomodate the new file.
     filelumps = calloc(numfilelumps, sizeof(lumpinfo_t));
+
     if (filelumps == NULL)
     {
         I_Error("Failed to allocate array for lumps from new file.");
@@ -229,7 +228,7 @@ wad_file_t *W_AddFile (char *filename, dboolean automatic)
 
     filerover = fileinfo;
 
-    for (i=startlump; i<numlumps; ++i)
+    for (i = startlump; i < numlumps; ++i)
     {
         lumpinfo_t *lump_p = &filelumps[i - startlump];
         lump_p->wad_file = wad_file;
@@ -249,12 +248,7 @@ wad_file_t *W_AddFile (char *filename, dboolean automatic)
         Z_Free(lumphash);
         lumphash = NULL;
     }
-/*
-    C_Output("%s %s lumps from %.4s file %s",
-            (automatic ? "Automatically added" : "Added"),
-            commify(numlumps - startlump),
-            header.identification, uppercase(filename));
-*/
+
     if (!strncmp(header.identification, "IWAD", 4) || !strncmp(header.identification, "PWAD", 4))
         C_Print(graystring,
             "%s %s lump%s from %.4s file %s.", (automatic ? "Automatically added" : "Added"),
@@ -272,25 +266,20 @@ wad_file_t *W_AddFile (char *filename, dboolean automatic)
     return wad_file;
 }
 
-
-
 //
 // W_CheckNumForName
 // Returns -1 if name not found.
 //
-
-lumpindex_t W_CheckNumForName (char* name)
+lumpindex_t W_CheckNumForName(char *name)
 {
     lumpindex_t i;
 
     // Do we have a hash table yet?
-
     if (lumphash != NULL)
     {
         int hash;
         
         // We do! Excellent.
-
         hash = W_LumpNameHash(name) % numlumps;
         
         for (i = lumphash[hash]; i != -1; i = lumpinfo[i]->next)
@@ -306,8 +295,7 @@ lumpindex_t W_CheckNumForName (char* name)
         // We don't have a hash table generate yet. Linear search :-(
         // 
         // scan backwards so patch lump files take precedence
-
-        for (i=numlumps-1; i >= 0; --i)
+        for (i = numlumps - 1; i >= 0; --i)
         {
             if (!strncasecmp(lumpinfo[i]->name, name, 8))
             {
@@ -317,18 +305,14 @@ lumpindex_t W_CheckNumForName (char* name)
     }
 
     // TFB. Not found.
-
     return -1;
 }
-
-
-
 
 //
 // W_GetNumForName
 // Calls W_CheckNumForName, but bombs out if not found.
 //
-lumpindex_t W_GetNumForName (char* name)
+lumpindex_t W_GetNumForName(char *name)
 {
     lumpindex_t i;
 
@@ -346,7 +330,7 @@ lumpindex_t W_GetNumForName (char* name)
 // [nitr8] UNUSED
 //
 /*
-int W_GetSecondNumForName (char* name)
+int W_GetSecondNumForName(char *name)
 {
     int        i, j;
 
@@ -368,7 +352,7 @@ int W_GetSecondNumForName (char* name)
 // W_LumpLength
 // Returns the buffer size needed to load the given lump.
 //
-int W_LumpLength (lumpindex_t lump)
+int W_LumpLength(lumpindex_t lump)
 {
     if (lump >= numlumps)
     {
@@ -377,8 +361,6 @@ int W_LumpLength (lumpindex_t lump)
 
     return lumpinfo[lump]->size;
 }
-
-
 
 //
 // W_ReadLump
@@ -404,13 +386,10 @@ void W_ReadLump(lumpindex_t lump, void *dest)
 
     if (c < l->size)
     {
-        I_Error ("W_ReadLump: only read %i of %i on lump %i",
+        I_Error("W_ReadLump: only read %i of %i on lump %i",
                  c, l->size, lump);        
     }
 }
-
-
-
 
 //
 // W_CacheLumpNum
@@ -423,7 +402,6 @@ void W_ReadLump(lumpindex_t lump, void *dest)
 // PU_STATIC, it should be released back using W_ReleaseLumpNum
 // when no longer needed (do not use Z_ChangeTag).
 //
-
 void *W_CacheLumpNum(lumpindex_t lumpnum, int tag)
 {
     byte *result;
@@ -441,33 +419,29 @@ void *W_CacheLumpNum(lumpindex_t lumpnum, int tag)
     // file, we can just return a pointer to within the memory-mapped
     // region.  If the lump is in an ordinary file, we may already
     // have it cached; otherwise, load it into memory.
-
     if (lump->wad_file->mapped != NULL)
     {
         // Memory mapped file, return from the mmapped region.
-
         result = lump->wad_file->mapped + lump->position;
     }
     else if (lump->cache != NULL)
     {
         // Already cached, so just switch the zone tag.
-
         result = lump->cache;
         Z_ChangeTag(lump->cache, tag);
 
 #ifdef TIMEDIAG
         lump->locktic = gametic;
 #endif
-
     }
     else
     {
         // Not yet loaded, so load it now
-
         lump->cache = Z_Malloc(W_LumpLength(lumpnum), tag, &lump->cache);
         W_ReadLump (lumpnum, lump->cache);
         result = lump->cache;
     }
+
     lumpinfo[lumpnum]->locks += locks;
 
 #ifdef SIMPLECHECKS
@@ -477,8 +451,6 @@ void *W_CacheLumpNum(lumpindex_t lumpnum, int tag)
 
     return result;
 }
-
-
 
 //
 // W_CacheLumpName
@@ -497,7 +469,6 @@ void *W_CacheLumpName(char *name, int tag)
 // directly, but now that we have WAD mmap, things are a bit more
 // complicated ...
 //
-
 void W_ReleaseLumpNum(lumpindex_t lumpnum)
 {
     lumpinfo_t *lump;
@@ -534,27 +505,26 @@ void W_ReleaseLumpName(char *name)
 }
 
 #if 0
-
 //
 // W_Profile
 //
-int                info[2500][10];
-int                profilecount;
+int              info[2500][10];
+int              profilecount;
 
 void W_Profile (void)
 {
-    int                i;
-    memblock_t*        block;
-    void*        ptr;
-    char        ch;
-    FILE*        f;
-    int                j;
-    char        name[9];
+    int          i;
+    memblock_t   *block;
+    void         *ptr;
+    char         ch;
+    FILE         *f;
+    int          j;
+    char         name[9];
         
-        
-    for (i=0 ; i<numlumps ; i++)
+    for (i = 0; i < numlumps; i++)
     {        
         ptr = lumpinfo[i].cache;
+
         if (!ptr)
         {
             ch = ' ';
@@ -562,49 +532,49 @@ void W_Profile (void)
         }
         else
         {
-            block = (memblock_t *) ( (byte *)ptr - sizeof(memblock_t));
+            block = (memblock_t *)((byte *)ptr - sizeof(memblock_t));
+
             if (block->tag < PU_PURGELEVEL)
                 ch = 'S';
             else
                 ch = 'P';
         }
+
         info[i][profilecount] = ch;
     }
+
     profilecount++;
         
-    f = fopen ("waddump.txt","w");
+    f = fopen("waddump.txt", "w");
     name[8] = 0;
 
-    for (i=0 ; i<numlumps ; i++)
+    for (i = 0; i < numlumps; i++)
     {
-        memcpy (name,lumpinfo[i].name,8);
+        memcpy(name, lumpinfo[i].name, 8);
 
-        for (j=0 ; j<8 ; j++)
+        for (j = 0; j < 8; j++)
             if (!name[j])
                 break;
 
-        for ( ; j<8 ; j++)
+        for (; j < 8; j++)
             name[j] = ' ';
 
-        fprintf (f,"%s ",name);
+        fprintf(f, "%s ", name);
 
-        for (j=0 ; j<profilecount ; j++)
-            fprintf (f,"    %c",info[i][j]);
+        for (j = 0; j < profilecount; j++)
+            fprintf(f, "    %c", info[i][j]);
 
-        fprintf (f,"\n");
+        fprintf(f, "\n");
     }
-    fclose (f);
+
+    fclose(f);
 }
-
-
 #endif
 
 // Generate a hash table for fast lookups
-
 void W_GenerateHashTable(void)
 {
     // Free the old hash table, if there is one
-
     if (lumphash != NULL)
     {
         Z_Free(lumphash);
@@ -629,7 +599,6 @@ void W_GenerateHashTable(void)
             hash = W_LumpNameHash(lumpinfo[i]->name) % numlumps;
 
             // Hook into the hash table
-
             lumpinfo[i]->next = lumphash[hash];
             lumphash[hash] = i;
         }
@@ -642,35 +611,39 @@ void W_CheckSize(int wad)
 {
     FILE *fprw = NULL;
 
-    if(wad == 0)
+    if (wad == 0)
     {
 #ifdef WII
-        if(usb)
+        if (usb)
             fprw = fopen("usb:/apps/wiidoom/pspdoom.wad", "r");
-        else if(sd)
+        else if (sd)
             fprw = fopen("sd:/apps/wiidoom/pspdoom.wad", "r");
 #else
         fprw = fopen("pspdoom.wad", "r");
 #endif
+
         if (fprw == NULL)
             printf(" ");
         else
         {
-            fseek(fprw, 0, 2);                // file pointer at the end of file
-            fsizerw = ftell(fprw);        // take a position of file pointer un size variable
+            // file pointer at the end of file
+            fseek(fprw, 0, 2);
 
-            if(fsizerw != 1055775)
+            // take a position of file pointer un size variable
+            fsizerw = ftell(fprw);
+
+            if (fsizerw != 1131979)
                 print_resource_pwad_error = true;
 
             fclose(fprw);
         }
     }
-    else if(wad == 1)
+    else if (wad == 1)
     {
 #ifdef WII
-        if(usb)
+        if (usb)
             fprw = fopen("usb:/apps/wiidoom/pspchex.wad", "r");
-        else if(sd)
+        else if (sd)
             fprw = fopen("sd:/apps/wiidoom/pspchex.wad", "r");
 #else
         fprw = fopen("pspchex.wad", "r");
@@ -680,21 +653,24 @@ void W_CheckSize(int wad)
             printf(" ");
         else
         {
-            fseek(fprw, 0, 2);                // file pointer at the end of file
-            fsizerw = ftell(fprw);        // take a position of file pointer un size variable
+            // file pointer at the end of file
+            fseek(fprw, 0, 2);
 
-            if(fsizerw != 89150)
+            // take a position of file pointer un size variable
+            fsizerw = ftell(fprw);
+
+            if (fsizerw != 89150)
                 print_resource_pwad_error = true;
 
             fclose(fprw);
         }
     }
-    else if(wad == 2)
+    else if (wad == 2)
     {
 #ifdef WII
-        if(usb)
+        if (usb)
             fprw = fopen("usb:/apps/wiidoom/psphacx.wad", "r");
-        else if(sd)
+        else if (sd)
             fprw = fopen("sd:/apps/wiidoom/psphacx.wad", "r");
 #else
         fprw = fopen("psphacx.wad", "r");
@@ -704,21 +680,24 @@ void W_CheckSize(int wad)
             printf(" ");
         else
         {
-            fseek(fprw, 0, 2);                // file pointer at the end of file
-            fsizerw = ftell(fprw);        // take a position of file pointer un size variable
+            // file pointer at the end of file
+            fseek(fprw, 0, 2);
 
-            if(fsizerw != 137490)
+            // take a position of file pointer un size variable
+            fsizerw = ftell(fprw);
+
+            if (fsizerw != 137490)
                 print_resource_pwad_error = true;
 
             fclose(fprw);
         }
     }
-    else if(wad == 3)
+    else if (wad == 3)
     {
 #ifdef WII
-        if(usb)
+        if (usb)
             fprw = fopen("usb:/apps/wiidoom/pspfreedoom.wad", "r");
-        else if(sd)
+        else if (sd)
             fprw = fopen("sd:/apps/wiidoom/pspfreedoom.wad", "r");
 #else
         fprw = fopen("pspfreedoom.wad", "r");
@@ -728,50 +707,61 @@ void W_CheckSize(int wad)
             printf(" ");
         else
         {
-            fseek(fprw, 0, 2);            // file pointer at the end of file
-            fsizerw = ftell(fprw);        // take a position of file pointer un size variable
+            // file pointer at the end of file
+            fseek(fprw, 0, 2);
 
-            if(fsizerw != 135015)
+            // take a position of file pointer un size variable
+            fsizerw = ftell(fprw);
+
+            if (fsizerw != 135015)
                 print_resource_pwad_error = true;
 
             fclose(fprw);
         }
     }
-    else if(wad == 4)
+    else if (wad == 4)
     {
-        if(extra_wad_slot_1_loaded == 1)
+        if (extra_wad_slot_1_loaded == 1)
             fprw = fopen(extra_wad_1, "r");
-        else if(extra_wad_slot_2_loaded == 1)
+        else if (extra_wad_slot_2_loaded == 1)
             fprw = fopen(extra_wad_2, "r");
-        else if(extra_wad_slot_3_loaded == 1)
+        else if (extra_wad_slot_3_loaded == 1)
             fprw = fopen(extra_wad_3, "r");
 
         if (fprw == NULL)
             printf(" ");
         else
         {
-            fseek(fprw, 0, 2);            // file pointer at the end of file
-            fsizecq = ftell(fprw);        // take a position of file pointer un size variable
+            // file pointer at the end of file
+            fseek(fprw, 0, 2);
+
+            // take a position of file pointer un size variable
+            fsizerw = ftell(fprw);
 
             fclose(fprw);
         }
     }
-    else if(wad == 5)
+    else if (wad == 5)
     {
 #ifdef WII
-        if(usb)
+        if (usb)
             fprw = fopen("usb:/apps/wiidoom/doom1extras.wad", "r");
-        else if(sd)
+        else if (sd)
             fprw = fopen("sd:/apps/wiidoom/doom1extras.wad", "r");
 #else
         fprw = fopen("doom1extras.wad", "r");
 #endif
+
         if (fprw == NULL)
             printf(" ");
         else
         {
-            fseek(fprw, 0, 2);             // file pointer at the end of file
-            fsizerw2 = ftell(fprw);        // take a position of file pointer un size variable
+            // file pointer at the end of file
+            fseek(fprw, 0, 2);
+
+            // take a position of file pointer un size variable
+            fsizerw = ftell(fprw);
+
             fclose(fprw);
         }
     }
@@ -866,10 +856,6 @@ int W_WadType(char *filename)
         return IWAD;
     else if (!strncmp(header.identification, "PWAD", 4))
         return PWAD;
-/*
-    else if (!strncmp(header.identification, "Patch File for DeHackEd", 23))
-        return DEH;
-*/
     else
         return 0;
 }
@@ -936,7 +922,7 @@ void W_Reload(void)
 }
 
 #ifdef HEAPDUMP
-void W_PrintLump(FILE* fp, void* p)
+void W_PrintLump(FILE *fp, void *p)
 {
     int i;
 
@@ -947,6 +933,7 @@ void W_PrintLump(FILE* fp, void* p)
                     W_LumpLength(i), lumpinfo[i]->locks, gametic - lumpinfo[i]->locktic);
             return;
         }
+
     fprintf(fp, " not found");
 }
 #endif

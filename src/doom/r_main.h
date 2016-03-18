@@ -36,30 +36,14 @@
 ========================================================================
 */
 
+
 #if !defined(__R_MAIN__)
 #define __R_MAIN__
+
 
 #include "d_player.h"
 #include "r_data.h"
 
-//
-// POV related.
-//
-extern fixed_t          viewcos;
-extern fixed_t          viewsin;
-
-extern int              viewwindowx;
-extern int              viewwindowy;
-
-extern int              centerx;
-extern int              centery;
-
-extern fixed_t          centerxfrac;
-extern fixed_t          centeryfrac;
-extern fixed_t          projection;
-extern fixed_t          projectiony;
-
-extern int              validcount;
 
 //
 // Lighting LUT.
@@ -84,24 +68,10 @@ extern int              validcount;
 #define OLDMAXLIGHTZ            2048
 #define OLDLIGHTZSHIFT          16
 
-// killough 3/20/98: Allow colormaps to be dynamic (e.g. underwater)
-extern lighttable_t     *(*scalelight)[MAXLIGHTSCALE];
-extern lighttable_t     *(*zlight)[MAXLIGHTZ];
-extern lighttable_t     *(*psprscalelight)[OLDMAXLIGHTSCALE];
-extern lighttable_t     *fullcolormap;
-extern int              numcolormaps;   // killough 4/4/98: dynamic number of maps
-extern lighttable_t     **colormaps;
-
-extern int              extralight;
-extern lighttable_t     *fixedcolormap;
-
 // Number of diminishing brightness levels.
 // There a 0-31, i.e. 32 LUT in the COLORMAP lump.
-#define NUMCOLORMAPS    32
+#define NUMCOLORMAPS            32
 
-// [AM] Fractional part of the current tic, in the half-open
-//      range of [0.0, 1.0). Used for interpolation.
-extern fixed_t          fractionaltic;
 
 //
 // Function pointers to switch refresh/drawing functions.
@@ -157,12 +127,11 @@ void (*megaspherecolfunc)(void);
 
 //
 // Utility functions.
-int R_PointOnSide(fixed_t x, fixed_t y, const node_t *node);
 
-int R_PointOnSegSide(fixed_t x, fixed_t y, seg_t *line);
+// [AM] Interpolate between two angles.
+angle_t R_InterpolateAngle(angle_t oangle, angle_t nangle, fixed_t scale);
 
 angle_t R_PointToAngle(fixed_t x, fixed_t y);
-
 angle_t R_PointToAngle2(fixed_t x1, fixed_t y1, fixed_t x, fixed_t y);
 angle_t R_PointToAngleEx(fixed_t x, fixed_t y);
 angle_t R_PointToAngleEx2(fixed_t x1, fixed_t y1, fixed_t x, fixed_t y);
@@ -170,19 +139,6 @@ angle_t R_PointToAngleEx2(fixed_t x1, fixed_t y1, fixed_t x, fixed_t y);
 fixed_t R_PointToDist(fixed_t x, fixed_t y);
 
 subsector_t *R_PointInSubsector(fixed_t x, fixed_t y);
-
-// [AM] Interpolate between two angles.
-angle_t R_InterpolateAngle(angle_t oangle, angle_t nangle, fixed_t scale);
-
-void R_ExecuteSetViewSize(void);
-
-void R_InitColumnFunctions(void);
-
-void R_AddSprites(sector_t *sec, int lightlevel);
-
-//
-// REFRESH - the actual rendering functions.
-//
 
 // Called by G_Drawer.
 void R_RenderPlayerView(player_t *player);
@@ -193,4 +149,48 @@ void R_Init(void);
 // Called by M_Responder.
 void R_SetViewSize(int blocks);
 
+void R_ExecuteSetViewSize(void);
+void R_InitColumnFunctions(void);
+void R_AddSprites(sector_t *sec, int lightlevel);
+void R_StoreWallRange(int start, int stop);
+
+int R_PointOnSide(fixed_t x, fixed_t y, const node_t *node);
+int R_PointOnSegSide(fixed_t x, fixed_t y, seg_t *line);
+
+
+//
+// POV related.
+//
+extern fixed_t          viewcos;
+extern fixed_t          viewsin;
+
+// [AM] Fractional part of the current tic, in the half-open
+//      range of [0.0, 1.0). Used for interpolation.
+extern fixed_t          fractionaltic;
+
+extern fixed_t          centerxfrac;
+extern fixed_t          centeryfrac;
+extern fixed_t          projection;
+extern fixed_t          projectiony;
+
+// killough 3/20/98: Allow colormaps to be dynamic (e.g. underwater)
+extern lighttable_t     *(*scalelight)[MAXLIGHTSCALE];
+extern lighttable_t     *(*zlight)[MAXLIGHTZ];
+extern lighttable_t     *(*psprscalelight)[OLDMAXLIGHTSCALE];
+extern lighttable_t     *fullcolormap;
+extern lighttable_t     *fixedcolormap;
+extern lighttable_t     **colormaps;
+
+// killough 4/4/98: dynamic number of maps
+extern int              numcolormaps;
+
+extern int              viewwindowx;
+extern int              viewwindowy;
+extern int              centerx;
+extern int              centery;
+extern int              validcount;
+extern int              extralight;
+
+
 #endif
+

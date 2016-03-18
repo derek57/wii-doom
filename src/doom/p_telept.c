@@ -42,19 +42,17 @@
 #include "sounds.h"
 
 
+// maximum fixed_t units to move object to avoid hiccups
+#define FUDGEFACTOR 10
+
+
 //
 // TELEPORTATION
 //
-int
-EV_Teleport
-( line_t*        line,
-  int            side,
-  mobj_t*        thing )
+int EV_Teleport(line_t *line, int side, mobj_t *thing)
 {
     int          i;
-
-    thinker_t*   thinker;
-
+    thinker_t    *thinker;
     fixed_t      aboveFloor = thing->z - thing->floorz;
 
     if (thing->flags2 & MF2_NOTELEPORT)
@@ -66,13 +64,13 @@ EV_Teleport
     //
     // don't teleport if hit back of line,
     //  so you can get out of teleporter.
-    if((thing->flags & MF_MISSILE) || thing->type == MT_BLOODSPLAT
-                                   || thing->type == MT_FLESH
-                                   || thing->type == MT_SPRAY
-                                   || thing->type == MT_SHELL
-                                   || thing->type == MT_BULLET
-                                   || thing->type == MT_ROUND
-                                   || side)
+    if ((thing->flags & MF_MISSILE) || thing->type == MT_BLOODSPLAT
+                                    || thing->type == MT_FLESH
+                                    || thing->type == MT_SPRAY
+                                    || thing->type == MT_SHELL
+                                    || thing->type == MT_BULLET
+                                    || thing->type == MT_ROUND
+                                    || side)
         return 0;
 
     // killough 1/31/98: improve performance by using
@@ -95,7 +93,8 @@ EV_Teleport
                 if (thing->player && thing->player->mo != thing)
                     thing->player = NULL;
 
-                if (P_TeleportMove(thing, m->x, m->y, m->z, false))     // killough 8/9/98
+                // killough 8/9/98
+                if (P_TeleportMove(thing, m->x, m->y, m->z, false))
                 {
                     // The first Final Doom executable does not set thing->z
                     // when teleporting. This quirk is unique to this
@@ -110,10 +109,12 @@ EV_Teleport
                         if (thing->player->powers[pw_flight] && aboveFloor)
                         {
                             thing->z = thing->floorz + aboveFloor;
+
                             if (thing->z + thing->height > thing->ceilingz)
                             {
                                 thing->z = thing->ceilingz - thing->height;
                             }
+
                             thing->player->viewz = thing->z + thing->player->viewheight;
                         }
                         else
@@ -121,11 +122,12 @@ EV_Teleport
                             thing->player->viewz = thing->z + thing->player->viewheight;
                             thing->player->lookdir = 0;
                         }
+
                         thing->player->momx = thing->player->momy = 0;
                     }
 
                     // spawn teleport fog at source and destination
-                    if(!beta_style)
+                    if (!beta_style)
                     {
                         mobj_t *fog;
                         unsigned int an = (m->angle >> ANGLETOFINESHIFT);
@@ -174,6 +176,7 @@ EV_Teleport
                                 for (j = 0; j < line->backsector->linecount; j++)
                                     line->backsector->lines[j]->flags |= ML_TELEPORTTRIGGERED;
                             }
+
                             thing->reactiontime = 18;
 
                             thing->player->psprites[ps_weapon].sx = 0;
@@ -182,6 +185,7 @@ EV_Teleport
                             thing->player->momx = thing->player->momy = 0;
                         }
                     }
+
                     thing->angle = m->angle;
 
                     if (!(thing->flags2 & MF2_NOFOOTCLIP)
@@ -193,6 +197,7 @@ EV_Teleport
                     {
                         thing->flags2 &= ~MF2_FEETARECLIPPED;
                     }
+
                     thing->momx = thing->momy = thing->momz = 0;
 
                     return 1;
@@ -200,6 +205,7 @@ EV_Teleport
             }
         }
     }
+
     return 0;
 }
 
@@ -228,19 +234,19 @@ dboolean EV_SilentTeleport(line_t *line, int side, mobj_t *thing)
     //
     // don't teleport if hit back of line,
     //  so you can get out of teleporter.
-    if((thing->flags & MF_MISSILE) || thing->type == MT_BLOODSPLAT
-                                   || thing->type == MT_FLESH
-                                   || thing->type == MT_SPRAY
-                                   || thing->type == MT_SHELL
-                                   || thing->type == MT_BULLET
-                                   || thing->type == MT_ROUND
-                                   || side)
+    if ((thing->flags & MF_MISSILE) || thing->type == MT_BLOODSPLAT
+                                    || thing->type == MT_FLESH
+                                    || thing->type == MT_SPRAY
+                                    || thing->type == MT_SHELL
+                                    || thing->type == MT_BULLET
+                                    || thing->type == MT_ROUND
+                                    || side)
         return false;
 
     for (i = -1; (i = P_FindSectorFromLineTag(line, i)) >= 0;)
         for (th = thinkerclasscap[th_mobj].cnext; th != &thinkerclasscap[th_mobj]; th = th->cnext)
             if (th->function == P_MobjThinker &&
-                    (m = (mobj_t *)th)->type == MT_TELEPORTMAN
+                (m = (mobj_t *)th)->type == MT_TELEPORTMAN
                 && m->subsector->sector - sectors == i)
             {
                 // Height of thing above ground, in case of mid-air teleports:
@@ -264,7 +270,8 @@ dboolean EV_SilentTeleport(line_t *line, int side, mobj_t *thing)
                 player_t        *player = thing->player;
 
                 // Attempt to teleport, aborting if blocked
-                if (!P_TeleportMove(thing, m->x, m->y, m->z, false))    // killough 8/9/98
+                // killough 8/9/98
+                if (!P_TeleportMove(thing, m->x, m->y, m->z, false))
                     return 0;
 
                 // Rotate thing according to difference in angles
@@ -293,8 +300,10 @@ dboolean EV_SilentTeleport(line_t *line, int side, mobj_t *thing)
                     // Reset the delta to have the same dynamics as before
                     player->deltaviewheight = deltaviewheight;
                 }
+
                 return true;
             }
+
     return false;
 }
 
@@ -304,10 +313,6 @@ dboolean EV_SilentTeleport(line_t *line, int side, mobj_t *thing)
 // This is the complete player-preserving kind of teleporter.
 // It has advantages over the teleporter with thing exits.
 //
-
-// maximum fixed_t units to move object to avoid hiccups
-#define FUDGEFACTOR 10
-
 dboolean EV_SilentLineTeleport(line_t *line, int side, mobj_t *thing, dboolean reverse)
 {
     int         i;
@@ -383,7 +388,8 @@ dboolean EV_SilentLineTeleport(line_t *line, int side, mobj_t *thing, dboolean r
                     x += ((l->dy < 0) != side ? -1 : 1);
 
             // Attempt to teleport, aborting if blocked
-            if (!P_TeleportMove(thing, x, y, z, false)) // killough 8/9/98
+            // killough 8/9/98
+            if (!P_TeleportMove(thing, x, y, z, false))
                 return 0;
 
             // Adjust z position to be same height above ground as before.
@@ -420,6 +426,7 @@ dboolean EV_SilentLineTeleport(line_t *line, int side, mobj_t *thing, dboolean r
 
             return true;
         }
+
     return false;
 }
 

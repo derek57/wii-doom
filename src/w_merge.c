@@ -40,13 +40,15 @@ typedef enum
 { 
     SECTION_NORMAL, 
     SECTION_FLATS, 
-    SECTION_SPRITES,
+    SECTION_SPRITES
+
 } section_t;
 
 typedef struct
 {
     lumpinfo_t **lumps;
     int numlumps;
+
 } searchlist_t;
 
 typedef struct
@@ -54,7 +56,9 @@ typedef struct
     char sprname[4];
     char frame;
     lumpinfo_t *angle_lumps[8];
+
 } sprite_frame_t;
+
 
 static searchlist_t   iwad;
 static searchlist_t   iwad_sprites;
@@ -69,21 +73,22 @@ static sprite_frame_t *sprite_frames;
 static int            num_sprite_frames;
 static int            sprite_frames_alloced;
 
+
 extern dboolean       merge;
 extern dboolean       version13;
 
 extern int            dont_show_adding_of_resource_wad;
 
+
 // Search in a list to find a lump with a particular name
 // Linear search (slow!)
 //
 // Returns -1 if not found
-
 static int FindInList(searchlist_t *list, char *name)
 {
     int i;
 
-    for (i=0; i<list->numlumps; ++i)
+    for (i = 0; i < list->numlumps; ++i)
     {
         if (!strncasecmp(list->lumps[i]->name, name, 8))
             return i;
@@ -127,11 +132,9 @@ static dboolean SetupList(searchlist_t *list, searchlist_t *src_list,
 }
 
 // Sets up the sprite/flat search lists
-
 static void SetupLists(void)
 {
     // IWAD
-
     if (!SetupList(&iwad_flats, &iwad, "F_START", "F_END", NULL, NULL))
     {
         I_Error("Flats section not found in IWAD");
@@ -144,13 +147,11 @@ static void SetupLists(void)
     }
     
     // PWAD
-
     SetupList(&pwad_flats, &pwad, "F_START", "F_END", "FF_START", "FF_END");
     SetupList(&pwad_sprites, &pwad, "S_START", "S_END", "SS_START", "SS_END");
 }
 
 // Initialize the replace list
-
 static void InitSpriteList(void)
 {
     if (sprite_frames == NULL)
@@ -169,20 +170,18 @@ static void InitSpriteList(void)
 static dboolean ValidSpriteLumpName(char *name)
 {
     if (name[0] == '\0' || name[1] == '\0'
-     || name[2] == '\0' || name[3] == '\0')
+        || name[2] == '\0' || name[3] == '\0')
     {
         return false;
     }
 
     // First frame:
-
     if (name[4] == '\0' || !isdigit(name[5]))
     {
         return false;
     }
 
     // Second frame (optional):
-
     if (name[6] != '\0' && !isdigit(name[7]))
     {
         return false;
@@ -192,15 +191,13 @@ static dboolean ValidSpriteLumpName(char *name)
 }
 
 // Find a sprite frame
-
 static sprite_frame_t *FindSpriteFrame(char *name, int frame)
 {
     sprite_frame_t *result;
     int i;
 
     // Search the list and try to find the frame
-
-    for (i=0; i<num_sprite_frames; ++i)
+    for (i = 0; i < num_sprite_frames; ++i)
     {
         sprite_frame_t *cur = &sprite_frames[i];
 
@@ -213,27 +210,27 @@ static sprite_frame_t *FindSpriteFrame(char *name, int frame)
     // Not found in list; Need to add to the list
 
     // Grow list?
-
     if (num_sprite_frames >= sprite_frames_alloced)
     {
         sprite_frame_t *newframes;
 
         newframes = Z_Malloc(sprite_frames_alloced * 2 * sizeof(*sprite_frames),
                              PU_STATIC, NULL);
+
         memcpy(newframes, sprite_frames,
                sprite_frames_alloced * sizeof(*sprite_frames));
+
         Z_Free(sprite_frames);
         sprite_frames_alloced *= 2;
         sprite_frames = newframes;
     }
 
-    // Add to end of list
-    
+    // Add to end of list    
     result = &sprite_frames[num_sprite_frames];
     strncpy(result->sprname, name, 4);
     result->frame = frame;
 
-    for (i=0; i<8; ++i)
+    for (i = 0; i < 8; ++i)
         result->angle_lumps[i] = NULL;
 
     ++num_sprite_frames;
@@ -242,7 +239,6 @@ static sprite_frame_t *FindSpriteFrame(char *name, int frame)
 }
 
 // Check if sprite lump is needed in the new wad
-
 static dboolean SpriteLumpNeeded(lumpinfo_t *lump)
 {
     sprite_frame_t *sprite;
@@ -255,15 +251,13 @@ static dboolean SpriteLumpNeeded(lumpinfo_t *lump)
     }
 
     // check the first frame
-
     sprite = FindSpriteFrame(lump->name, lump->name[4]);
     angle_num = lump->name[5] - '0';
 
     if (angle_num == 0)
     {
         // must check all frames
-
-        for (i=0; i<8; ++i)
+        for (i = 0; i < 8; ++i)
         {
             if (sprite->angle_lumps[i] == lump)
                 return true;
@@ -272,7 +266,6 @@ static dboolean SpriteLumpNeeded(lumpinfo_t *lump)
     else 
     {
         // check if this lump is being used for this frame
-
         if (sprite->angle_lumps[angle_num - 1] == lump)
             return true;
     }
@@ -289,8 +282,7 @@ static dboolean SpriteLumpNeeded(lumpinfo_t *lump)
     if (angle_num == 0)
     {
         // must check all frames
-
-        for (i=0; i<8; ++i)
+        for (i = 0; i < 8; ++i)
         {
             if (sprite->angle_lumps[i] == lump)
                 return true;
@@ -299,7 +291,6 @@ static dboolean SpriteLumpNeeded(lumpinfo_t *lump)
     else 
     {
         // check if this lump is being used for this frame
-
         if (sprite->angle_lumps[angle_num - 1] == lump)
             return true;
     }
@@ -319,13 +310,12 @@ static void AddSpriteLump(lumpinfo_t *lump)
     }
     
     // first angle
-
     sprite = FindSpriteFrame(lump->name, lump->name[4]);
     angle_num = lump->name[5] - '0';
     
     if (angle_num == 0) 
     {
-        for (i=0; i<8; ++i)
+        for (i = 0; i < 8; ++i)
             sprite->angle_lumps[i] = lump;
     }
     else
@@ -336,7 +326,6 @@ static void AddSpriteLump(lumpinfo_t *lump)
     // second angle
 
     // no second angle?
-  
     if (lump->name[6] == '\0')
         return;
     
@@ -345,7 +334,7 @@ static void AddSpriteLump(lumpinfo_t *lump)
     
     if (angle_num == 0) 
     {
-        for (i=0; i<8; ++i)
+        for (i = 0; i < 8; ++i)
             sprite->angle_lumps[i] = lump;
     }
     else
@@ -355,7 +344,6 @@ static void AddSpriteLump(lumpinfo_t *lump)
 }
 
 // Generate the list.  Run at the start, before merging
-
 static void GenerateSpriteList(void)
 {
     int i;
@@ -363,16 +351,14 @@ static void GenerateSpriteList(void)
     InitSpriteList();
     
     // Add all sprites from the IWAD
-    
-    for (i=0; i<iwad_sprites.numlumps; ++i)
+    for (i = 0; i < iwad_sprites.numlumps; ++i)
     {
         AddSpriteLump(iwad_sprites.lumps[i]);
     }
     
     // Add all sprites from the PWAD
     // (replaces IWAD sprites)
-
-    for (i=0; i<pwad_sprites.numlumps; ++i)
+    for (i = 0; i < pwad_sprites.numlumps; ++i)
     {
         AddSpriteLump(pwad_sprites.lumps[i]);
     }
@@ -396,7 +382,6 @@ static void GenerateSpriteList(void)
 // For the PWAD:
 //  * All Sprites and Flats are ignored, with the assumption they have 
 //    already been merged into the IWAD's sections.
-
 static void DoMerge(void)
 {
     section_t current_section;
@@ -412,7 +397,7 @@ static void DoMerge(void)
     // Add IWAD lumps
     current_section = SECTION_NORMAL;
 
-    for (i=0; i<iwad.numlumps; ++i)
+    for (i = 0; i < iwad.numlumps; ++i)
     {
         lumpinfo_t *lump = iwad.lumps[i];
 
@@ -435,13 +420,11 @@ static void DoMerge(void)
             case SECTION_FLATS:
 
                 // Have we reached the end of the section?
-
                 if (!strncasecmp(lump->name, "F_END", 8))
                 {
                     // Add all new flats from the PWAD to the end
                     // of the section
-
-                    for (n=0; n<pwad_flats.numlumps; ++n)
+                    for (n = 0; n < pwad_flats.numlumps; ++n)
                     {
                         newlumps[num_newlumps++] = pwad_flats.lumps[n];
                     }
@@ -457,7 +440,6 @@ static void DoMerge(void)
                     // do not add it now.  All PWAD flats are added to the
                     // end of the section. Otherwise, if it is only in the
                     // IWAD, add it now
-
                     lumpindex = FindInList(&pwad_flats, lump->name);
 
                     if (lumpindex < 0)
@@ -471,12 +453,10 @@ static void DoMerge(void)
             case SECTION_SPRITES:
 
                 // Have we reached the end of the section?
-
                 if (!strncasecmp(lump->name, "S_END", 8))
                 {
                     // add all the pwad sprites
-
-                    for (n=0; n<pwad_sprites.numlumps; ++n)
+                    for (n = 0; n < pwad_sprites.numlumps; ++n)
                     {
                         if (SpriteLumpNeeded(pwad_sprites.lumps[n]))
                         {
@@ -494,7 +474,6 @@ static void DoMerge(void)
                 {
                     // Is this lump holding a sprite to be replaced in the
                     // PWAD? If so, wait until the end to add it.
-
                     if (SpriteLumpNeeded(lump))
                     {
                         newlumps[num_newlumps++] = lump;
@@ -508,7 +487,7 @@ static void DoMerge(void)
     // Add PWAD lumps
     current_section = SECTION_NORMAL;
 
-    for (i=0; i<pwad.numlumps; ++i)
+    for (i = 0; i < pwad.numlumps; ++i)
     {
         lumpinfo_t *lump = pwad.lumps[i];
 
@@ -516,7 +495,7 @@ static void DoMerge(void)
         {
             case SECTION_NORMAL:
                 if (!strncasecmp(lump->name, "F_START", 8)
-                 || !strncasecmp(lump->name, "FF_START", 8))
+                    || !strncasecmp(lump->name, "FF_START", 8))
                 {
                     current_section = SECTION_FLATS;
                 }
@@ -527,44 +506,42 @@ static void DoMerge(void)
                 }
                 else
                 {
-                    // Don't include the headers of sections
-       
+                    // Don't include the headers of sections       
                     newlumps[num_newlumps++] = lump;
                 }
+
                 break;
 
             case SECTION_FLATS:
 
                 // PWAD flats are ignored (already merged)
-  
                 if (!strncasecmp(lump->name, "FF_END", 8)
-                 || !strncasecmp(lump->name, "F_END", 8))
+                    || !strncasecmp(lump->name, "F_END", 8))
                 {
                     // end of section
                     current_section = SECTION_NORMAL;
                 }
+
                 break;
 
             case SECTION_SPRITES:
 
                 // PWAD sprites are ignored (already merged)
-
                 if (!strncasecmp(lump->name, "SS_END", 8)
-                 || !strncasecmp(lump->name, "S_END", 8))
+                    || !strncasecmp(lump->name, "S_END", 8))
                 {
                     // end of section
                     current_section = SECTION_NORMAL;
                 }
+
                 break;
         }
     }
 
     // Switch to the new lumpinfo, and free the old one
-
     free(lumpinfo);
     lumpinfo = newlumps;
     numlumps = num_newlumps;
-
 }
 
 void W_PrintDirectory(void)
@@ -572,30 +549,28 @@ void W_PrintDirectory(void)
     unsigned int i, n;
 
 #ifdef WII
-    if(usb)
-        statsfile = fopen("usb:/apps/wiidoom/wadlumps.txt","w");
-    else if(sd)
-        statsfile = fopen("sd:/apps/wiidoom/wadlumps.txt","w");
+    if (usb)
+        statsfile = fopen("usb:/apps/wiidoom/wadlumps.txt", "w");
+    else if (sd)
+        statsfile = fopen("sd:/apps/wiidoom/wadlumps.txt", "w");
 #else
-    statsfile = fopen("wadlumps.txt","w");
+    statsfile = fopen("wadlumps.txt", "w");
 #endif
 
     // debug
-    for (i=0; i<numlumps; ++i)
+    for (i = 0; i < numlumps; ++i)
     {
-        for (n=0; n<8 && lumpinfo[i]->name[n] != '\0'; ++n)
+        for (n = 0; n < 8 && lumpinfo[i]->name[n] != '\0'; ++n)
         {
             putchar(lumpinfo[i]->name[n]);
             fprintf(statsfile, "%c", lumpinfo[i]->name[n]);
         }
         putchar('\n');
         fprintf(statsfile, "%c", '\n');
-//        I_Sleep(2);
     }
 }
 
 // Merge in a file by name
-
 dboolean W_MergeFile(char *filename, dboolean automatic)
 {
     int old_numlumps;
@@ -603,33 +578,23 @@ dboolean W_MergeFile(char *filename, dboolean automatic)
     old_numlumps = numlumps;
 
     // Load PWAD
-
     if (W_AddFile(filename, automatic) == NULL)
         return false;
 
 #ifdef WII
     if(devparm)
     {
-        if(gamemode == shareware ||
-           load_extra_wad == 1 ||
-           version13 == true
-           )
+        if(gamemode == shareware || load_extra_wad == 1 || version13 == true)
         {
             if(dont_show_adding_of_resource_wad == 0)
             {
-/*
-                if (merge)
-                    printf("         merging %s\n", filename);
-                else
-*/
-                    printf("         adding %s\n", filename);
+                printf("         adding %s\n", filename);
             }
         }
     }
 #endif
 
     // iwad is at the start, pwad was appended to the end
-
     iwad.lumps = lumpinfo;
     iwad.numlumps = old_numlumps;
 
@@ -637,15 +602,12 @@ dboolean W_MergeFile(char *filename, dboolean automatic)
     pwad.numlumps = numlumps - old_numlumps;
     
     // Setup sprite/flat lists
-
     SetupLists();
 
     // Generate list of sprites to be replaced by the PWAD
-
     GenerateSpriteList();
 
     // Perform the merge
-
     DoMerge();
 
     return true;
@@ -662,8 +624,7 @@ static void W_NWTAddLumps(searchlist_t *list)
 
     // Go through the IWAD list given, replacing lumps with lumps of 
     // the same name from the PWAD
-
-    for (i=0; i<list->numlumps; ++i)
+    for (i = 0; i < list->numlumps; ++i)
     {
         int index;
 
@@ -675,12 +636,10 @@ static void W_NWTAddLumps(searchlist_t *list)
                    sizeof(lumpinfo_t));
         }
     }
-    
 }
 
 // Merge sprites and flats in the way NWT does with its -af and -as 
 // command-line options.
-
 void W_NWTMergeFile(char *filename, int flags)
 {
     int old_numlumps;
@@ -688,12 +647,10 @@ void W_NWTMergeFile(char *filename, int flags)
     old_numlumps = numlumps;
 
     // Load PWAD
-
     if (W_AddFile(filename, false) == NULL)
         return;
 
     // iwad is at the start, pwad was appended to the end
-
     iwad.lumps = lumpinfo;
     iwad.numlumps = old_numlumps;
 
@@ -701,32 +658,27 @@ void W_NWTMergeFile(char *filename, int flags)
     pwad.numlumps = numlumps - old_numlumps;
     
     // Setup sprite/flat lists
-
     SetupLists();
 
     // Merge in flats?
-    
     if (flags & W_NWT_MERGE_FLATS)
     {
         W_NWTAddLumps(&iwad_flats);
     }
 
     // Sprites?
-
     if (flags & W_NWT_MERGE_SPRITES)
     {
         W_NWTAddLumps(&iwad_sprites);
     }
     
     // Discard the PWAD
-
     numlumps = old_numlumps;
 }
 
 // Simulates the NWT -merge command line parameter.  What this does is load
 // a PWAD, then search the IWAD sprites, removing any sprite lumps that also
 // exist in the PWAD.
-
 void W_NWTDashMerge(char *filename)
 {
     wad_file_t *wad_file;
@@ -736,7 +688,6 @@ void W_NWTDashMerge(char *filename)
     old_numlumps = numlumps;
 
     // Load PWAD
-
     wad_file = W_AddFile(filename, false);
 
     if (wad_file == NULL)
@@ -745,7 +696,6 @@ void W_NWTDashMerge(char *filename)
     }
 
     // iwad is at the start, pwad was appended to the end
-
     iwad.lumps = lumpinfo;
     iwad.numlumps = old_numlumps;
 
@@ -753,25 +703,21 @@ void W_NWTDashMerge(char *filename)
     pwad.numlumps = numlumps - old_numlumps;
     
     // Setup sprite/flat lists
-
     SetupLists();
 
     // Search through the IWAD sprites list.
-
-    for (i=0; i<iwad_sprites.numlumps; ++i)
+    for (i = 0; i < iwad_sprites.numlumps; ++i)
     {
         if (FindInList(&pwad, iwad_sprites.lumps[i]->name) >= 0)
         {
             // Replace this entry with an empty string.  This is what
             // nwt -merge does.
-
             M_StringCopy(iwad_sprites.lumps[i]->name, "", 8);
         }
     }
 
     // Discard PWAD
     // The PWAD must now be added in again with -file.
-
     numlumps = old_numlumps;
 
     W_CloseFile(wad_file);

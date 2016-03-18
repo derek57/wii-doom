@@ -24,52 +24,45 @@
 //
 //-----------------------------------------------------------------------------
 
+
 #ifndef DOOM_FEATURES_H
 #define DOOM_FEATURES_H
 
-// Enables wad merging (the '-merge' command line parameter)
 
+// Enables wad merging (the '-merge' command line parameter)
 #ifndef WII
 #define FEATURE_WAD_MERGE 1
 #endif
 
 // Enables dehacked support ('-deh')
-
 #define FEATURE_DEHACKED 1
 
 // Enables multiplayer support (network games)
-
 //#define FEATURE_MULTIPLAYER 1
 
 // Prints function names entered when running network mode
-
 //#define NET_DEBUG 1
 
 // Enables sound output
-
 #define FEATURE_SOUND 1
 
 // Prints code file and line in case of error (crash)
-
 #define INSTRUMENTED 1
 
 // Checks memory blocks for ZONEID 
-
 #define ZONEIDCHECK 1
 
 // Dumps memory in case of error 
-
 #define HEAPDUMP 1
 
 #define TIMEDIAG 1
 
 // Enables signal handler
-
 //#define PRBOOM_DEBUG 1
 
 // Reports lump locks to ingame console
-
 //#define SIMPLECHECKS 1
+
 
 #endif /* #ifndef DOOM_FEATURES_H */
 

@@ -15,14 +15,16 @@
 
 void drawMain()
 {
-    printStyledText(2, 0,CONSOLE_FONT_BLUE,CONSOLE_FONT_YELLOW, 
-                    CONSOLE_FONT_BOLD,&stTexteLocation,
+    printStyledText(2, 0, CONSOLE_FONT_BLUE, CONSOLE_FONT_YELLOW, 
+                    CONSOLE_FONT_BOLD, &stTexteLocation,
     "              CHOCOLATE DOOM for NINTENDO WII by NITR8 (RELEASE 1)              ");
-    printStyledText(3, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,
-                    CONSOLE_FONT_BOLD,&stTexteLocation,
+
+    printStyledText(3, 0, CONSOLE_FONT_BLACK, CONSOLE_FONT_WHITE,
+                    CONSOLE_FONT_BOLD, &stTexteLocation,
     "  SELECT THE GAME'S MAIN IWAD. YOU CAN ALSO SELECT A PWAD AND DEH FILE TO LOAD  ");
-    printStyledText(4, 0,CONSOLE_FONT_BLACK,CONSOLE_FONT_WHITE,
-                    CONSOLE_FONT_BOLD,&stTexteLocation,
+
+    printStyledText(4, 0, CONSOLE_FONT_BLACK, CONSOLE_FONT_WHITE,
+                    CONSOLE_FONT_BOLD, &stTexteLocation,
     "  ----------------------------------------------------------------------------  ");
 }
 

@@ -36,6 +36,7 @@
 ========================================================================
 */
 
+
 #include "c_io.h"
 #include "d_deh.h"
 #include "doomstat.h"
@@ -52,82 +53,25 @@
 #include "w_wad.h"
 #include "z_zone.h"
 
+
 // Generate shading ramps for lighting
 #define PALETTEB_SHADE      (0)
-#define PALETTEF_SHADE      (1<<PALETTEB_SHADE)
+#define PALETTEF_SHADE      (1 << PALETTEB_SHADE)
 
 // Apply blend color specified in V_SetBlend()
 #define PALETTEB_BLEND      (1)
-#define PALETTEF_BLEND      (1<<PALETTEB_SHADE)
+#define PALETTEF_BLEND      (1 << PALETTEB_SHADE)
 
 // Default palette when none is specified (Do not set directly!)
 #define PALETTEB_DEFAULT    (30)
-#define PALETTEF_DEFAULT    (1<<PALETTEB_DEFAULT)
+#define PALETTEF_DEFAULT    (1 << PALETTEB_DEFAULT)
 
-#define MAKERGB(r,g,b)      (((r)<<16)|((g)<<8)|(b))
-#define APART(c)            (((c)>>24)&0xff)
-#define RPART(c)            (((c)>>16)&0xff)
-#define GPART(c)            (((c)>>8)&0xff)
-#define BPART(c)            ((c)&0xff)
+#define MAKERGB(r, g, b)    (((r) << 16) | ((g) << 8) | (b))
+#define APART(c)            (((c) >> 24) & 0xff)
+#define RPART(c)            (((c) >> 16) & 0xff)
+#define GPART(c)            (((c) >> 8) & 0xff)
+#define BPART(c)            ((c) & 0xff)
 
-//
-// Graphics.
-// DOOM graphics for walls and sprites
-// is stored in vertical runs of opaque pixels (posts).
-// A column is composed of zero or more posts,
-// a patch or sprite is composed of zero or more columns.
-//
-
-// killough 4/17/98: make firstcolormaplump, lastcolormaplump external
-int             firstcolormaplump;
-int             lastcolormaplump;
-
-int             firstflat;
-int             lastflat;
-int             numflats;
-
-int             firstpatch;
-int             lastpatch;
-int             numpatches;
-
-int             firstspritelump;
-int             lastspritelump;
-int             numspritelumps;
-
-int             numtextures;
-texture_t       **textures;
-texture_t       **textures_hashtable;
-
-int             *texturewidthmask;
-
-// needed for texture pegging
-fixed_t         *textureheight;
-byte            **texturefullbright;
-int             *texturecompositesize;
-short           **texturecolumnlump;
-unsigned int    **texturecolumnofs;
-unsigned int    **texturecolumnofs2; // [crispy] original column offsets for single-patched textures
-byte            **texturecomposite;
-int             tran_filter_pct = 66;       // filter percent
-
-// for global animation
-int             *flattranslation;
-int             *texturetranslation;
-
-// needed for prerendering
-fixed_t         *spritewidth;
-fixed_t         *spriteheight;
-fixed_t         *spriteoffset;
-fixed_t         *spritetopoffset;
-
-fixed_t         *newspriteoffset;
-fixed_t         *newspritetopoffset;
-
-byte            newgamma[256];
-
-extern char     *iwadfile;
-
-//dboolean        r_fixspriteoffsets = r_fixspriteoffsets_default;
 
 static byte notgray[256] =
 {
@@ -241,7 +185,67 @@ static struct
     { "ZELDOOR",  redonly        }, { "",         0              }
 };
 
-//extern dboolean r_brightmaps;
+
+//
+// Graphics.
+// DOOM graphics for walls and sprites
+// is stored in vertical runs of opaque pixels (posts).
+// A column is composed of zero or more posts,
+// a patch or sprite is composed of zero or more columns.
+//
+
+// for global animation
+int             *flattranslation;
+int             *texturetranslation;
+int             *texturewidthmask;
+int             *texturecompositesize;
+
+// filter percent
+//int             tran_filter_pct = 66;
+
+// killough 4/17/98: make firstcolormaplump, lastcolormaplump external
+int             firstcolormaplump;
+int             lastcolormaplump;
+int             firstflat;
+int             lastflat;
+int             numflats;
+int             firstpatch;
+int             lastpatch;
+int             numpatches;
+int             firstspritelump;
+int             lastspritelump;
+int             numspritelumps;
+int             numtextures;
+
+// [crispy] original column offsets for single-patched textures
+unsigned int    **texturecolumnofs2;
+
+unsigned int    **texturecolumnofs;
+
+short           **texturecolumnlump;
+
+texture_t       **textures;
+texture_t       **textures_hashtable;
+
+// needed for texture pegging
+fixed_t         *textureheight;
+
+// needed for prerendering
+fixed_t         *spritewidth;
+fixed_t         *spriteheight;
+fixed_t         *spriteoffset;
+fixed_t         *spritetopoffset;
+fixed_t         *newspriteoffset;
+fixed_t         *newspritetopoffset;
+
+byte            **texturefullbright;
+byte            **texturecomposite;
+byte            newgamma[256];
+byte            grays[256];
+
+
+extern char     *iwadfile;
+
 
 //
 // MAPTEXTURE_T CACHING
@@ -284,8 +288,10 @@ void R_DrawColumnInCache(const column_t *patch, byte *cache, int originy, int ca
         if (position < 0)
         {
             count += position;
+
             if (!oldmethod)
                 source -= position;
+
             position = 0;
         }
 
@@ -326,7 +332,10 @@ static void R_GenerateComposite(int texnum)
     // Composite the columns together.
     texpatch_t          *patch = texture->patches;
     short               *collump = texturecolumnlump[texnum];
-    unsigned int        *colofs = texturecolumnofs[texnum];     // killough 4/9/98: make 32-bit
+
+    // killough 4/9/98: make 32-bit
+    unsigned int        *colofs = texturecolumnofs[texnum];
+
     int                 i;
 
     // killough 4/9/98: marks to identify transparent regions in merged textures
@@ -344,7 +353,8 @@ static void R_GenerateComposite(int texnum)
 
         for (; x1 < x2 ; ++x1)
             // [crispy] generate composites for single-patched textures as well
-            //        if (collump[x1] == -1)     // Column has multiple patches?
+            // Column has multiple patches?
+            //        if (collump[x1] == -1)
             // killough 1/25/98, 4/9/98: Fix Medusa bug.
             R_DrawColumnInCache((column_t *)((byte *)realpatch + LONG(cofs[x1])),
                 block + colofs[x1], patch->originy, height, marks + x1 * height, tekwall1); 
@@ -352,47 +362,65 @@ static void R_GenerateComposite(int texnum)
 
     // killough 4/9/98: Next, convert multipatched columns into true columns,
     // to fix Medusa bug while still allowing for transparent regions.
-    source = malloc(height);                            // temporary column
+    // temporary column
+    source = malloc(height);
+
     for (i = 0; i < width; ++i)
-        if (collump[i] == -1)                           // process only multipatched columns
+        // process only multipatched columns
+        if (collump[i] == -1)
         {
-            column_t    *col = (column_t *)(block + colofs[i] - 3);     // cached column
+            // cached column
+            column_t    *col = (column_t *)(block + colofs[i] - 3);
+
             const byte  *mark = marks + i * height; 
             int         j = 0;
 
             // save column in temporary so we can shuffle it around
             memcpy(source, (byte *)col + 3, height); 
 
-            while (1)  // reconstruct the column by scanning transparency marks
+            // reconstruct the column by scanning transparency marks
+            while (1)
             {
-                unsigned int    len;                    // killough 12/98
+                // killough 12/98
+                unsigned int    len;
 
-                while (j < height && !mark[j])          // skip transparent cells 
+                // skip transparent cells 
+                while (j < height && !mark[j])
                     ++j;
 
-                if (j >= height)                        // if at end of column 
+                // if at end of column 
+                if (j >= height)
                 {
-                    col->topdelta = -1;                 // end-of-column marker
+                    // end-of-column marker
+                    col->topdelta = -1;
                     break;
                 }
 
-                col->topdelta = j;                      // starting offset of post
+                // starting offset of post
+                col->topdelta = j;
 
                 // killough 12/98:
                 // Use 32-bit len counter, to support tall 1s multipatched textures
                 for (len = 0; j < height && mark[j]; ++j) 
-                    ++len;                              // count opaque cells
+                    // count opaque cells
+                    ++len;
 
-                col->length = len; // killough 12/98: intentionally truncate length
+                // killough 12/98: intentionally truncate length
+                col->length = len;
 
                 // copy opaque cells from the temporary back into the column
                 memcpy((byte *)col + 3, source + col->topdelta, len);
-                col = (column_t *)((byte *)col + len + 4);      // next post 
+
+                // next post 
+                col = (column_t *)((byte *)col + len + 4);
             }
         }
 
-    free(source);       // free temporary column
-    free(marks);        // free transparency marks
+    // free temporary column
+    free(source);
+
+    // free transparency marks
+    free(marks);
 
     // Now that the texture has been built in column cache,
     // it is purgeable from zone memory.
@@ -411,15 +439,19 @@ void R_GenerateLookup(int texnum)
     short               height = texture->height;
     byte                *patchcount = (byte *)Z_Malloc(width, PU_STATIC, (void **)&patchcount);
     byte                *postcount = (byte *)Z_Malloc(width, PU_STATIC, (void **)&postcount);
-//    byte                *patchcount = (byte *)Z_Malloc(width, PU_STATIC, &patchcount);
-//    byte                *postcount = (byte *)Z_Malloc(width, PU_STATIC, &postcount);
     texpatch_t          *patch;
     int                 x;
     int                 i;
     short               *collump;
-    unsigned int        *colofs;                // killough 4/9/98: make 32-bit
-    unsigned int        *colofs2;               // [crispy] original column offsets
-    int                 csize = 0;              // killough 10/98
+
+    // killough 4/9/98: make 32-bit
+    unsigned int        *colofs;
+
+    // [crispy] original column offsets
+    unsigned int        *colofs2;
+
+    // killough 10/98
+    int                 csize = 0;
 
     // Composited texture not created yet.
     texturecomposite[texnum] = 0;
@@ -427,7 +459,9 @@ void R_GenerateLookup(int texnum)
     texturecompositesize[texnum] = 0;
     collump = texturecolumnlump[texnum];
     colofs = texturecolumnofs[texnum];
-    colofs2 = texturecolumnofs2[texnum];        // [crispy] original column offsets 
+
+    // [crispy] original column offsets 
+    colofs2 = texturecolumnofs2[texnum];
 
     // Now count the number of columns
     //  that are covered by more than one patch.
@@ -466,7 +500,9 @@ void R_GenerateLookup(int texnum)
     if (texture->patchcount > 1 && height < 256) 
     {
         // killough 12/98: Warn about a common column construction bug
-        unsigned int    limit = height * 3 + 3; // absolute column size limit 
+
+        // absolute column size limit 
+        unsigned int    limit = height * 3 + 3;
 
         for (i = texture->patchcount, patch = texture->patches; --i >= 0;)
         {
@@ -479,7 +515,8 @@ void R_GenerateLookup(int texnum)
             x1 = MAX(0, x1);
 
             for (x = x1; x < x2; ++x)
-                if (patchcount[x] > 1) // Only multipatched columns
+                // Only multipatched columns
+                if (patchcount[x] > 1)
                 {
                     const column_t      *col = (column_t *)((byte *)realpatch + LONG(cofs[x]));
                     const byte          *base = (const byte *)col;
@@ -514,11 +551,17 @@ void R_GenerateLookup(int texnum)
         // per post per patch per column, since we don't
         // yet know how many posts the merged column will
         // require, and it's bounded above by this limit.
-        colofs[x] = csize + 3;          // three header bytes in a column
-                                        // killough 12/98: add room for one extra post
-        csize += 4 * postcount[x] + 5;  // 1 stop byte plus 4 bytes per post
 
-        csize += height;                // height bytes of texture data 
+        // three header bytes in a column
+        colofs[x] = csize + 3;
+
+        // killough 12/98: add room for one extra post
+
+        // 1 stop byte plus 4 bytes per post
+        csize += 4 * postcount[x] + 5;
+
+        // height bytes of texture data 
+        csize += height;
     }
 
     texturecompositesize[texnum] = csize;
@@ -551,6 +594,7 @@ byte *R_GetColumn(int tex, int col, dboolean opaque)
         // If the column is already a single post, then we
         // don't need to generate a composite.
         column = (column_t *)(p - 3);
+
         if (column->length == (textureheight[tex] >> FRACBITS))
             return p;
     }
@@ -657,8 +701,11 @@ void R_InitTextures(void)
     texturelump_t       *texturelumps = NULL;
     texturelump_t       *texturelump;
 
-    int                 maxpnameslumps = 1;     // PNAMES
-    int                 maxtexturelumps = 2;    // TEXTURE1, TEXTURE2
+    // PNAMES
+    int                 maxpnameslumps = 1;
+
+    // TEXTURE1, TEXTURE2
+    int                 maxtexturelumps = 2;
 
     int                 numpnameslumps = 0;
     int                 numtexturelumps = 0;
@@ -674,6 +721,7 @@ void R_InitTextures(void)
     // [crispy] make sure the first available TEXTURE1/2 lumps
     // are always processed first
     texturelumps[numtexturelumps++].lumpnum = W_GetNumForName("TEXTURE1");
+
     if ((i = W_CheckNumForName("TEXTURE2")) != -1)
         texturelumps[numtexturelumps++].lumpnum = i;
     else
@@ -682,6 +730,7 @@ void R_InitTextures(void)
     // [crispy] fill the arrays with all available PNAMES lumps
     // and the remaining available TEXTURE1/2 lumps
     nummappatches = 0;
+
     for (i = numlumps - 1; i >= 0; --i)
     {
         if (!strncasecmp(lumpinfo[i]->name, "PNAMES", 6))
@@ -735,6 +784,7 @@ void R_InitTextures(void)
     // [crispy] fill up the patch lookup table
     name[8] = '\0';
     patchlookup = Z_Malloc(nummappatches * sizeof(*patchlookup), PU_STATIC, NULL);
+
     for (i = 0, k = 0; i < numpnameslumps; i++)
         for (j = 0; j < pnameslumps[i].nummappatches; j++)
         {
@@ -747,6 +797,7 @@ void R_InitTextures(void)
 
     // [crispy] calculate total number of textures
     numtextures = 0;
+
     for (i = 0; i < numtexturelumps; ++i)
     {
         texturelumps[i].maptex = W_CacheLumpNum(texturelumps[i].lumpnum, PU_STATIC);
@@ -760,6 +811,7 @@ void R_InitTextures(void)
 
         // [crispy] link textures to their own WAD's patch lookup table (if any)
         texturelumps[i].pnamesoffset = 0;
+
         for (j = 0; j < numpnameslumps; ++j)
             // [crispy] both point to the same WAD file name string?
             if (lumpinfo[texturelumps[i].lumpnum]->wad_file->path ==
@@ -773,10 +825,12 @@ void R_InitTextures(void)
     // [crispy] release memory allocated for patch lookup tables
     for (i = 0; i < numpnameslumps; ++i)
         W_ReleaseLumpNum(pnameslumps[i].lumpnum);
+
     free(pnameslumps);
 
     // [crispy] pointer to (i.e. actually before) the first texture file
-    texturelump = texturelumps - 1;     // [crispy] gets immediately increased below
+    // [crispy] gets immediately increased below
+    texturelump = texturelumps - 1;
 
     textures = Z_Malloc(numtextures * sizeof(*textures), PU_STATIC, NULL);
     texturecolumnlump = Z_Malloc(numtextures * sizeof(*texturecolumnlump), PU_STATIC, NULL);
@@ -789,22 +843,24 @@ void R_InitTextures(void)
     texturefullbright = Z_Calloc(numtextures, sizeof(*texturefullbright), PU_STATIC, NULL); 
 
     // Really complex printing shit...
-    temp1 = W_GetNumForName ("S_START");  // P_???????
+    // P_???????
+    temp1 = W_GetNumForName ("S_START");
     temp2 = W_GetNumForName ("S_END") - 1;
     temp3 = ((temp2-temp1+63)/64) + ((numtextures+63)/64);
 
-    if(fsize != 4207819 && fsize != 4274218 && fsize != 4225504 &&
+    if (fsize != 4207819 && fsize != 4274218 && fsize != 4225504 &&
            fsize != 10396254 && fsize != 10399316)
     {
         printf("[");
 
-//        for (i = 0; i < temp3; i++)
         for (i = 0; i < temp3 - 2; i++)
             printf(" ");
+
         printf("         ]");
-//        for (i = 0; i < temp3; i++)
+
         for (i = 0; i < temp3 - 2; i++)
             printf("\x8");
+
         printf("\x8\x8\x8\x8\x8\x8\x8\x8\x8\x8");        
     }
 
@@ -815,7 +871,7 @@ void R_InitTextures(void)
         int             offset;
 
         if (!(i&63))
-            if(!beta_style)
+            if (!beta_style)
                 printf (".");
 
         if (!i || i == texturelump->sumtextures)
@@ -857,6 +913,7 @@ void R_InitTextures(void)
             // [crispy] catch out-of-range patches
             if (p < nummappatches)
                 patch->patch = patchlookup[p];
+
             if (patch->patch == -1 || p >= nummappatches)
             {
                 char    texturename[9];
@@ -869,6 +926,7 @@ void R_InitTextures(void)
                 patch->patch = 0;
             }
         }
+
         texturecolumnlump[i] = Z_Malloc(texture->width * sizeof(**texturecolumnlump), PU_STATIC,
             NULL);
         texturecolumnofs[i] = Z_Malloc(texture->width * sizeof(**texturecolumnofs), PU_STATIC,
@@ -877,6 +935,7 @@ void R_InitTextures(void)
             NULL);
 
         j = 1;
+
         while (j * 2 <= texture->width)
             j <<= 1;
 
@@ -891,6 +950,7 @@ void R_InitTextures(void)
     // [crispy] release memory allocated for texture files
     for (i = 0; i < numtexturelumps; ++i)
         W_ReleaseLumpNum(texturelumps[i].lumpnum);
+
     free(texturelumps);
 
     // Precalculate whatever possible.
@@ -910,12 +970,14 @@ void R_InitTextures(void)
     if (d_brightmaps)
     {
         i = 0;
+
         while (fullbright[i].colormask)
         {
             int num = R_CheckTextureNumForName(fullbright[i].texture);
 
             if (num != -1)
                 texturefullbright[num] = fullbright[i].colormask;
+
             ++i;
         }
     }
@@ -966,7 +1028,7 @@ void R_InitSpriteLumps(void)
         patch_t *patch = W_CacheLumpNum(firstspritelump + i, PU_CACHE);
 
         if (!(i&63))
-            if(!beta_style)
+            if (!beta_style)
                 printf (".");
 
         if (patch)
@@ -991,13 +1053,15 @@ void R_InitSpriteLumps(void)
                         newspritetopoffset[i] = SHORT(sproffsets[j].y) << FRACBITS;
                         break;
                     }
+
                     j++;
                 }
             }
         }
     }
 
-    if (fsize == 28422764) // FREEDOOM
+    // FREEDOOM
+    if (fsize == 28422764)
     {
         states[S_BAR1].tics = 0;
         mobjinfo[MT_BARREL].spawnstate = S_BAR2;
@@ -1010,7 +1074,8 @@ void R_InitSpriteLumps(void)
         mobjinfo[MT_BETABRUISER].blood = MT_BLOOD;
         mobjinfo[MT_KNIGHT].blood = MT_BLOOD;
     }
-    else if (fsize == 12361532) // CHEX
+    // CHEX
+    else if (fsize == 12361532)
     {
         states[S_BETAPOSS_DIE5].tics = 0;
         states[S_POSS_DIE5].tics = 0;
@@ -1023,7 +1088,8 @@ void R_InitSpriteLumps(void)
         states[S_SARG_DIE6].tics = 0;
         states[S_BOSS_DIE7].tics = 0;
     }
-    else if (fsize == 19321722) // HACX
+    // HACX
+    else if (fsize == 19321722)
     {
         mobjinfo[MT_HEAD].flags2 |= MF2_DONOTMAP;
         mobjinfo[MT_BETAHEAD].flags2 |= MF2_DONOTMAP;
@@ -1052,7 +1118,9 @@ void R_InitTranMap()
     {
         // Set a pointer to the translucency filter maps.
         tranmap = W_CacheLumpNum(lump, PU_STATIC);
-        printf(":"); // [crispy] loaded from a lump
+
+        // [crispy] loaded from a lump
+        printf(":");
     }
     else
     {
@@ -1064,14 +1132,16 @@ void R_InitTranMap()
         struct
         {
             unsigned char pct;
-            unsigned char playpal[256*3]; // [crispy] a palette has 768 bytes!
+
+            // [crispy] a palette has 768 bytes!
+            unsigned char playpal[256 * 3];
 
         } cache;
 
         // [crispy] open file readable
         FILE *cachefp = fopen(fname = M_StringJoin(configdir, "tranmap.dat", NULL), "r+b");
 
-        tranmap = Z_Malloc(256*256, PU_STATIC, NULL);
+        tranmap = Z_Malloc(256 * 256, PU_STATIC, NULL);
 
         // Use cached translucency filter if it's available
 
@@ -1093,7 +1163,7 @@ void R_InitTranMap()
 
             // [crispy] could not read entire translucency map
 
-            fread(tranmap, 256, 256, cachefp) != 256 )
+            fread(tranmap, 256, 256, cachefp) != 256)
         {
             byte *fg, *bg, blend[3], *tp = tranmap;
             int i, j, btmp;
@@ -1111,8 +1181,8 @@ void R_InitTranMap()
                         continue;
                     }
 
-                    bg = playpal + 3*i;
-                    fg = playpal + 3*j;
+                    bg = playpal + 3 * i;
+                    fg = playpal + 3 * j;
 
                     // [crispy] blended color - emphasize blues
                     // Colour matching in RGB space doesn't work very well with the blues
@@ -1179,22 +1249,12 @@ void R_InitTranMap()
     }
 }
 */
-//
-// R_InitColormaps
-//
-// killough 3/20/98: rewritten to allow dynamic colormaps
-// and to remove unnecessary 256-byte alignment
-//
-// killough 4/4/98: Add support for C_START/C_END markers
-//
-byte grays[256];
 
-/*
-===============
-BestColor
-(borrowed from Quake2 source: utils3/qdata/images.c)
-===============
-*/
+//
+// BestColor
+//
+// (borrowed from Quake2 source: utils3/qdata/images.c)
+//
 byte R_BestColor(const unsigned int *palette, const int r, const int g, const int b, const int numcolors)
 {
     int        i;
@@ -1227,7 +1287,7 @@ byte R_BestColor(const unsigned int *palette, const int r, const int g, const in
 }
 
 // Build the tables necessary for translucency
-void R_BuildTransTable (unsigned int *palette)
+void R_BuildTransTable(unsigned int *palette)
 {
     int        r, g, b;
     int        x, y;
@@ -1247,6 +1307,14 @@ void R_BuildTransTable (unsigned int *palette)
                              (((BPART(palette[y]) * x) >> 4) << 10);
 }
 
+//
+// R_InitColormaps
+//
+// killough 3/20/98: rewritten to allow dynamic colormaps
+// and to remove unnecessary 256-byte alignment
+//
+// killough 4/4/98: Add support for C_START/C_END markers
+//
 void R_InitColormaps(void)
 {
     dboolean    COLORMAP = (W_CheckMultipleLumps("COLORMAP") > 1);
@@ -1274,6 +1342,7 @@ void R_InitColormaps(void)
         colormaps = Z_Malloc(sizeof(*colormaps), PU_STATIC, NULL);
         colormaps[0] = W_CacheLumpName("COLORMAP", PU_STATIC);
     }
+
     colormapwad = lumpinfo[W_CheckNumForName("COLORMAP")]->wad_file;
     C_Output("R_InitColormaps: Using the COLORMAP lump in %s file %s.",
         (colormapwad->type == IWAD ? "IWAD" : "PWAD"), uppercase(colormapwad->path));
@@ -1313,7 +1382,10 @@ void R_InitColormaps(void)
         crstr = malloc(CRXMAX * sizeof(*crstr));
 
     // [crispy] check for status bar graphics replacements
-    i = W_CheckNumForName("sttnum0"); // [crispy] Status Bar '0'
+
+    // [crispy] Status Bar '0'
+    i = W_CheckNumForName("sttnum0");
+
     keepgray = (i >= 0 /*&& !strcmp(lumpinfo[i]->wad_file->path, M_BaseName(iwadfile))*/);
 
     for (j = 0; j < CRXMAX; j++)
@@ -1326,6 +1398,7 @@ void R_InitColormaps(void)
         M_snprintf(c, sizeof(c), "\x1b%c", '0' + j);
         crstr[j] = M_StringDuplicate(c);
     }
+
     Z_ChangeTag(playpal, PU_CACHE);
 }
 
@@ -1338,17 +1411,18 @@ int R_ColormapNumForName(char *name)
     if (numcolormaps == 1)
         return -1;
 
-    if (strncasecmp(name, "COLORMAP", 8))     // COLORMAP predefined to return 0
+    // COLORMAP predefined to return 0
+    if (strncasecmp(name, "COLORMAP", 8))
         if ((i = W_CheckNumForName(name)) != -1)
             i -= firstcolormaplump;
+
     return i;
 }
 
-/****************************/
-/* Palette management stuff */
-/****************************/
-
-void R_GammaAdjustPalette (palette_t *pal)
+//
+// Palette management stuff
+//
+void R_GammaAdjustPalette(palette_t *pal)
 {
     if (pal->colors && pal->basecolors)
     {
@@ -1357,16 +1431,15 @@ void R_GammaAdjustPalette (palette_t *pal)
         for (i = 0; i < pal->numcolors; i++)
         {
             unsigned color = pal->basecolors[i];
-            pal->colors[i] = MAKERGB (
-                newgamma[RPART(color)],
-                newgamma[GPART(color)],
-                newgamma[BPART(color)]
-            );
+
+            pal->colors[i] = MAKERGB(newgamma[RPART(color)],
+                                     newgamma[GPART(color)],
+                                     newgamma[BPART(color)]);
         }
     }
 }
 
-dboolean R_InternalCreatePalette (palette_t *palette, char *name, byte *colors,
+dboolean R_InternalCreatePalette(palette_t *palette, char *name, byte *colors,
                             unsigned numcolors, unsigned flags)
 {
     unsigned i;
@@ -1411,7 +1484,7 @@ dboolean R_InternalCreatePalette (palette_t *palette, char *name, byte *colors,
     return true;
 }
 
-palette_t *R_InitPalettes (char *name)
+palette_t *R_InitPalettes(char *name)
 {
     byte *colors;
 
@@ -1424,6 +1497,7 @@ palette_t *R_InitPalettes (char *name)
         {
             return &def_pal;
         }
+
     return NULL;
 }
 
@@ -1438,7 +1512,9 @@ void R_InitData(void)
     R_InitTextures();
     R_InitFlats();
     R_InitSpriteLumps();
-//    R_InitTranMap(); // [crispy] prints a mark itself
+
+    // [crispy] prints a mark itself
+    //R_InitTranMap();
 
     R_InitColormaps();
 }
@@ -1451,7 +1527,7 @@ int R_FlatNumForName(char *name)
 {
     int  i;
 
-    if(beta_style && gamemode != shareware && gamemode != commercial)
+    if (beta_style && gamemode != shareware && gamemode != commercial)
     {
         if (name[0] == 'F' &&
             name[1] == 'L' &&
@@ -1460,7 +1536,6 @@ int R_FlatNumForName(char *name)
             name[4] == '2' &&
             name[5] == '2')
             name = "BFLAT22";
-
         else if (name[0] == 'D' &&
             name[1] == 'E' &&
             name[2] == 'M' &&
@@ -1475,7 +1550,7 @@ int R_FlatNumForName(char *name)
     if (i == -1)
     {
         // [crispy] make non-fatal
-        if(replace_missing)
+        if (replace_missing)
         {
             i = W_CheckNumForName ("FLOOR0_1");
             C_Error("R_FlatNumForName: %.8s not found (replaced with FLOOR0_1)", name);
@@ -1484,9 +1559,9 @@ int R_FlatNumForName(char *name)
         {
             C_Error("R_FlatNumForName: %.8s not found", name);
             return 0;
-//        return skyflatnum;
         }
     }
+
     return (i - firstflat);
 }
 
@@ -1543,7 +1618,7 @@ int R_TextureNumForName(char *name)
 {
     int i;
 
-    if(beta_style && gamemode != shareware && gamemode != commercial)
+    if (beta_style && gamemode != shareware && gamemode != commercial)
     {
         if (name[0] == 'A' &&
             name[1] == 'A' &&
@@ -1554,7 +1629,6 @@ int R_TextureNumForName(char *name)
             name[6] == 'K' &&
             name[7] == 'Y')
             i = R_CheckTextureNumForName ("BASTINKY");
-
         else if (name[0] == 'C' &&
             name[1] == 'O' &&
             name[2] == 'M' &&
@@ -1564,7 +1638,6 @@ int R_TextureNumForName(char *name)
             name[6] == 'E' &&
             name[7] == '2')
             i = R_CheckTextureNumForName ("BCMPUTE2");
-
         else if (name[0] == 'B' &&
             name[1] == 'I' &&
             name[2] == 'G' &&
@@ -1574,7 +1647,6 @@ int R_TextureNumForName(char *name)
             name[6] == 'R' &&
             name[7] == '2')
             i = R_CheckTextureNumForName ("BDOOR102");
-
         else if (name[0] == 'M' &&
             name[1] == 'A' &&
             name[2] == 'R' &&
@@ -1584,20 +1656,17 @@ int R_TextureNumForName(char *name)
             name[6] == 'C' &&
             name[7] == 'E')
             i = R_CheckTextureNumForName ("BMWALL41");
-
         else if (name[0] == 'S' &&
             name[1] == 'K' &&
             name[2] == 'Y' &&
             name[3] == '1')
             i = R_CheckTextureNumForName ("BSKY1");
-
         else if (name[0] == 'S' &&
             name[1] == 'T' &&
             name[2] == 'E' &&
             name[3] == 'P' &&
             name[4] == '4')
             i = R_CheckTextureNumForName ("BSTEP4");
-
         else if (name[0] == 'S' &&
             name[1] == 'W' &&
             name[2] == '1' &&
@@ -1606,7 +1675,6 @@ int R_TextureNumForName(char *name)
             name[5] == 'R' &&
             name[6] == 'T')
             i = R_CheckTextureNumForName ("BSW1DIRT");
-
         else if (name[0] == 'S' &&
             name[1] == 'W' &&
             name[2] == '2' &&
@@ -1615,7 +1683,6 @@ int R_TextureNumForName(char *name)
             name[5] == 'R' &&
             name[6] == 'T')
             i = R_CheckTextureNumForName ("BSW2DIRT");
-
         else if (name[0] == 'W' &&
             name[1] == 'A' &&
             name[2] == 'L' &&
@@ -1625,7 +1692,6 @@ int R_TextureNumForName(char *name)
             name[6] == '_' &&
             name[7] == '2')
             i = R_CheckTextureNumForName ("BWALL572");
-
         else if (name[0] == 'W' &&
             name[1] == 'A' &&
             name[2] == 'L' &&
@@ -1635,7 +1701,6 @@ int R_TextureNumForName(char *name)
             name[6] == '_' &&
             name[7] == '3')
             i = R_CheckTextureNumForName ("BWALL573");
-
         else if (name[0] == 'W' &&
             name[1] == 'A' &&
             name[2] == 'L' &&
@@ -1645,7 +1710,6 @@ int R_TextureNumForName(char *name)
             name[6] == '_' &&
             name[7] == '4')
             i = R_CheckTextureNumForName ("BWALL574");
-
         else if (name[0] == 'W' &&
             name[1] == 'A' &&
             name[2] == 'L' &&
@@ -1655,7 +1719,6 @@ int R_TextureNumForName(char *name)
             name[6] == '_' &&
             name[7] == '1')
             i = R_CheckTextureNumForName ("BWALL631");
-
         else if (name[0] == 'W' &&
             name[1] == 'A' &&
             name[2] == 'L' &&
@@ -1665,7 +1728,6 @@ int R_TextureNumForName(char *name)
             name[6] == '_' &&
             name[7] == '2')
             i = R_CheckTextureNumForName ("BWALL632");
-
         else
             i = R_CheckTextureNumForName (name);
     }
@@ -1675,7 +1737,7 @@ int R_TextureNumForName(char *name)
     if (i == -1)
     {
         // [crispy] make non-fatal
-        if(replace_missing)
+        if (replace_missing)
         {
             i = R_CheckTextureNumForName ("BROWN1");
             C_Error("R_TextureNumForName: %.8s not found (replaced with BROWN1)", name);
@@ -1686,6 +1748,7 @@ int R_TextureNumForName(char *name)
             return 0;
         }
     }
+
     return i;
 }
 

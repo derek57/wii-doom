@@ -36,6 +36,7 @@
 ========================================================================
 */
 
+
 #include <malloc.h>
 
 #include "c_io.h"
@@ -50,14 +51,16 @@
 #include "w_wad.h"
 #include "z_zone.h"
 
+
 // Number of mallocs & frees kept in history buffer (must be a power of 2)
-#define ZONE_HISTORY 4
+#define ZONE_HISTORY    4
 
 // Minimum chunk size at which blocks are allocated
 #define CHUNK_SIZE      32
 
 // signature for block header
-#define ZONEID  0x931d4a11
+#define ZONEID          0x931d4a11
+
 
 typedef struct memblock
 {
@@ -78,26 +81,38 @@ typedef struct memblock
 
 } memblock_t;
 
-enum {malloc_history, free_history, NUM_HISTORY_TYPES};
+enum
+{
+    malloc_history,
+    free_history,
 
-static const char *file_history[NUM_HISTORY_TYPES][ZONE_HISTORY];
-static int line_history[NUM_HISTORY_TYPES][ZONE_HISTORY];
-static int history_index[NUM_HISTORY_TYPES];
-static const char *const desc[NUM_HISTORY_TYPES] = {"malloc()'s", "free()'s"};
+    NUM_HISTORY_TYPES
+};
 
-static int       free_memory;
-static int       active_memory;
-static int       purgable_memory;
+
+static const char        *file_history[NUM_HISTORY_TYPES][ZONE_HISTORY];
+
+static const char *const desc[NUM_HISTORY_TYPES] = 
+{
+    "malloc()'s",
+    "free()'s"
+};
 
 // size of block header
 // cph - base on sizeof(memblock_t), which can be larger than CHUNK_SIZE on
 // 64bit architectures
-static const size_t     HEADER_SIZE = (sizeof(memblock_t) + CHUNK_SIZE - 1) & ~(CHUNK_SIZE - 1);
+static const size_t      HEADER_SIZE = (sizeof(memblock_t) + CHUNK_SIZE - 1) & ~(CHUNK_SIZE - 1);
 
-static memblock_t       *blockbytag[PU_MAX];
+static int               line_history[NUM_HISTORY_TYPES][ZONE_HISTORY];
+static int               history_index[NUM_HISTORY_TYPES];
+static int               free_memory;
+static int               active_memory;
+static int               purgable_memory;
+
+static memblock_t        *blockbytag[PU_MAX];
+
 
 #ifdef HEAPDUMP
-
 #ifndef HEAPDUMP_DIR
 #define HEAPDUMP_DIR "."
 #endif
@@ -156,11 +171,12 @@ void Z_DumpMemory(void)
 
                     if (block->file)
                     {
-                        if (strstr(block->file,"w_memcache.c"))
+                        if (strstr(block->file, "w_memcache.c"))
                         {
                             W_PrintLump(fp, (char*)block + HEADER_SIZE);
                         }
                     }
+
                     fputc('\n', fp);
                     break;
             }
@@ -194,6 +210,7 @@ void Z_DumpHistory(char *buf)
         for (j = 0; j < ZONE_HISTORY; j++)
         {
             int k = (history_index[i] - j - 1) & (ZONE_HISTORY - 1);
+
             if (file_history[i][k])
             {
                 sprintf(s, "File: %s, Line: %d\n", file_history[i][k], line_history[i][k]);
@@ -226,7 +243,7 @@ void *(Z_Malloc)(size_t size, int32_t tag, void **user
 #ifdef INSTRUMENTED
     file_history[malloc_history][history_index[malloc_history]] = file;
     line_history[malloc_history][history_index[malloc_history]++] = line;
-    history_index[malloc_history] &= ZONE_HISTORY-1;
+    history_index[malloc_history] &= ZONE_HISTORY - 1;
 #endif
 
 #ifdef ZONEIDCHECK
@@ -239,9 +256,11 @@ void *(Z_Malloc)(size_t size, int32_t tag, void **user
 #endif
 
     if (!size)
-        return (user ? (*user = NULL) : NULL);          // malloc(0) returns NULL
+        // malloc(0) returns NULL
+        return (user ? (*user = NULL) : NULL);
 
-    size = (size + CHUNK_SIZE - 1) & ~(CHUNK_SIZE - 1); // round to chunk size
+    // round to chunk size
+    size = (size + CHUNK_SIZE - 1) & ~(CHUNK_SIZE - 1);
 
     while (!(block = malloc(size + HEADER_SIZE)))
     {
@@ -287,14 +306,21 @@ void *(Z_Malloc)(size_t size, int32_t tag, void **user
 #endif
 
 #ifdef ZONEIDCHECK
-    block->id = ZONEID;         // signature required in block header
+    // signature required in block header
+    block->id = ZONEID;
 #endif
 
-    block->tag = tag;                                   // tag
-    block->user = user;                                 // user
+    // tag
+    block->tag = tag;
+
+    // user
+    block->user = user;
     block = (memblock_t *)((char *)block + HEADER_SIZE);
-    if (user)                                           // if there is a user
-        *user = block;                                  // set user to point to new block
+
+    // if there is a user
+    if (user)
+        // set user to point to new block
+        *user = block;
 
     return block;
 }
@@ -317,7 +343,6 @@ void *(Z_Realloc)(void *ptr, size_t size
     void        *newp = realloc(ptr, size);
 
     if (!newp && size) 
-//        I_Error("Z_Realloc: Failure trying to reallocate %i bytes", size);
         I_Error("Z_Realloc: Failure trying to reallocate %i bytes", size DA(file, line));
     else
         ptr = newp;
@@ -336,7 +361,7 @@ void (Z_Free)(void *ptr
 #ifdef INSTRUMENTED
     file_history[free_history][history_index[free_history]] = file;
     line_history[free_history][history_index[free_history]++] = line;
-    history_index[free_history] &= ZONE_HISTORY-1;
+    history_index[free_history] &= ZONE_HISTORY - 1;
 #endif
 
     if (!ptr)
@@ -351,16 +376,19 @@ void (Z_Free)(void *ptr
             , file, line, block->file, block->line
 #endif
            );
-    block->id = 0;              // Nullify id so another free fails
+    // Nullify id so another free fails
+    block->id = 0;
 #endif
 
-    if (block->user)                                    // Nullify user if one exists
+    // Nullify user if one exists
+    if (block->user)
         *block->user = NULL;
 
     if (block == block->next)
         blockbytag[block->tag] = NULL;
     else if (blockbytag[block->tag] == block)
         blockbytag[block->tag] = block->next;
+
     block->prev->next = block->next;
     block->next->prev = block->prev;
 
@@ -387,6 +415,7 @@ void (Z_FreeTags)(int32_t lowtag, int32_t hightag
 
     if (lowtag <= PU_FREE)
         lowtag = PU_FREE + 1;
+
     if (hightag > PU_CACHE)
         hightag = PU_CACHE;
 
@@ -396,9 +425,12 @@ void (Z_FreeTags)(int32_t lowtag, int32_t hightag
         memblock_t      *end_block;
 
         block = blockbytag[lowtag];
+
         if (!block)
             continue;
+
         end_block = block->prev;
+
         while (1)
         {
             memblock_t  *next = block->next;
@@ -411,7 +443,9 @@ void (Z_FreeTags)(int32_t lowtag, int32_t hightag
 
             if (block == end_block)
                 break;
-            block = next;                               // Advance to next block
+
+            // Advance to next block
+            block = next;
         }
     }
 }
@@ -450,13 +484,13 @@ void (Z_ChangeTag)(void *ptr, int32_t tag
              , file, line, block->file, block->line
 #endif
             );
-
-#endif // ZONEIDCHECK
+#endif
 
     if (block == block->next)
         blockbytag[block->tag] = NULL;
     else if (blockbytag[block->tag] == block)
         blockbytag[block->tag] = block->next;
+
     block->prev->next = block->next;
     block->next->prev = block->prev;
 
@@ -502,7 +536,9 @@ void Z_ChangeUser(void *ptr, void **user)
     *user = ptr;
 }
 */
-void Z_DrawStats(void)            // Print allocation statistics
+
+// Print allocation statistics
+void Z_DrawStats(void)
 {
     char act_mem[50];
     char pur_mem[50];
@@ -527,7 +563,7 @@ void Z_DrawStats(void)            // Print allocation statistics
     sprintf(free_mem, "%-5i\t%6.01f%%\tfree\n", free_memory, free_memory * s);
     sprintf(tot_mem, "%-5lu\t\ttotal\n", total_memory);
 
-    if(leveltime & 16)
+    if (leveltime & 16)
         M_WriteText(0, 10, "Memory Heap Info\n");
 
     M_WriteText(0, 20, act_mem);
@@ -542,9 +578,9 @@ void Z_DrawStats(void)            // Print allocation statistics
 /*
 void *Z_MallocAlign(int reqsize, int32_t tag, void **user, int alignbits)
 {
-    memblock_t* newblock;
+    memblock_t  *newblock;
 
-    void*       basedata;
+    void        *basedata;
 
     // with the memalloc header
     int         memalloc_size;
@@ -567,7 +603,7 @@ void *Z_MallocAlign(int reqsize, int32_t tag, void **user, int alignbits)
     newblock->user = user;
     newblock->size = memalloc_size;
 
-    basedata = (byte*)newblock + sizeof(memblock_t);
+    basedata = (byte *)newblock + sizeof(memblock_t);
 
     if (user)
         *user = basedata;

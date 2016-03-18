@@ -36,23 +36,26 @@
 ========================================================================
 */
 
+
 #include "doomdef.h"
 #include "r_sky.h"
+
 
 //
 // sky mapping
 //
-int skyflatnum;
-int skytexture;
-int skytexturemid;
-int skycolumnoffset;
-int skyscrolldelta;
-
 //
 // R_InitSkyMap
 // Called whenever the view size changes.
 //
 void R_InitSkyMap(void)
 {
-    skytexturemid = ORIGINALHEIGHT/2 * FRACUNIT;
+    skytexturemid = ORIGINALHEIGHT / 2 * FRACUNIT;
 }
+
+int skyflatnum;
+int skytexture;
+int skytexturemid;
+int skycolumnoffset;
+int skyscrolldelta;
+

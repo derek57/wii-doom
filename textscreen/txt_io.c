@@ -15,15 +15,20 @@
 // Text mode I/O functions, similar to C stdio
 //
 
+
 #include <stdlib.h>
 #include <string.h>
 
 #include "txt_io.h"
 #include "txt_main.h"
 
-static int cur_x = 0, cur_y = 0;
+
+static int cur_x = 0;
+static int cur_y = 0;
+
 static txt_color_t fgcolor = TXT_COLOR_GREY;
 static txt_color_t bgcolor = TXT_COLOR_BLACK;
+
 
 static void NewLine(unsigned char *screendata)
 {
@@ -36,17 +41,15 @@ static void NewLine(unsigned char *screendata)
         unsigned char *p;
 
         // Scroll the screen up
-
         cur_y = TXT_SCREEN_H - 1;
 
         memmove(screendata, screendata + TXT_SCREEN_W * 2,
                 TXT_SCREEN_W * 2 * (TXT_SCREEN_H -1));
 
         // Clear the bottom line
-
         p = screendata + (TXT_SCREEN_H - 1) * 2 * TXT_SCREEN_W;
 
-        for (i=0; i<TXT_SCREEN_W; ++i) 
+        for (i = 0; i < TXT_SCREEN_W; ++i) 
         {
             *p++ = ' ';
             *p++ = fgcolor | (bgcolor << 4);
@@ -69,14 +72,15 @@ static void PutChar(unsigned char *screendata, int c)
         case '\b':
             // backspace
             --cur_x;
+
             if (cur_x < 0)
                 cur_x = 0;
+
             break;
 
         default:
 
             // Add a new character to the buffer
-
             p[0] = c;
             p[1] = fgcolor | (bgcolor << 4);
 
@@ -111,7 +115,7 @@ void TXT_Puts(const char *s)
 
     screen = TXT_GetScreenData();
 
-    for (p=s; *p != '\0'; ++p)
+    for (p = s; *p != '\0'; ++p)
     {
         PutChar(screen, *p);
     }
@@ -140,6 +144,7 @@ void TXT_FGColor(txt_color_t color)
 void TXT_BGColor(int color, int blinking)
 {
     bgcolor = color;
+
     if (blinking)
         bgcolor |= TXT_COLOR_BLINKING;
 }
@@ -167,7 +172,7 @@ void TXT_ClearScreen(void)
 
     screen = TXT_GetScreenData();
 
-    for (i=0; i<TXT_SCREEN_W * TXT_SCREEN_H; ++i)
+    for (i = 0; i < TXT_SCREEN_W * TXT_SCREEN_H; ++i)
     {
         screen[i * 2] = ' ';
         screen[i * 2 +  1] = (bgcolor << 4) | fgcolor;

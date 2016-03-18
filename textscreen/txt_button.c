@@ -12,16 +12,17 @@
 // GNU General Public License for more details.
 //
 
+
 #include <stdlib.h>
 #include <string.h>
 
 #include "doomkeys.h"
-
 #include "txt_button.h"
 #include "txt_gui.h"
 #include "txt_io.h"
 #include "txt_main.h"
 #include "txt_window.h"
+
 
 static void TXT_ButtonSizeCalc(TXT_UNCAST_ARG(button))
 {
@@ -43,7 +44,7 @@ static void TXT_ButtonDrawer(TXT_UNCAST_ARG(button))
 
     TXT_DrawString(button->label);
 
-    for (i=strlen(button->label); i < w; ++i)
+    for (i = strlen(button->label); i < w; ++i)
     {
         TXT_DrawString(" ");
     }
@@ -76,7 +77,6 @@ static void TXT_ButtonMousePress(TXT_UNCAST_ARG(button), int x, int y, int b)
     if (b == TXT_MOUSE_LEFT)
     {
         // Equivalent to pressing enter
-
         TXT_ButtonKeyPress(button, KEY_ENTER);
     }
 }
@@ -89,7 +89,7 @@ txt_widget_class_t txt_button_class =
     TXT_ButtonKeyPress,
     TXT_ButtonDestructor,
     TXT_ButtonMousePress,
-    NULL,
+    NULL
 };
 
 //

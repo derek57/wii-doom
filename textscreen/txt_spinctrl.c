@@ -12,27 +12,27 @@
 // GNU General Public License for more details.
 //
 
+
 #include <ctype.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
 
 #include "doomkeys.h"
-
-#include "txt_spinctrl.h"
 #include "txt_gui.h"
 #include "txt_io.h"
 #include "txt_main.h"
+#include "txt_spinctrl.h"
 #include "txt_window.h"
 
-// Generate the format string to be used for displaying floats
 
+// Generate the format string to be used for displaying floats
 static void FloatFormatString(float step, char *buf, size_t buf_len)
 {
     int precision;
 
-    precision = (int) ceil(-log(step) / log(10));
+    precision = (int)ceil(-log(step) / log(10));
 
     if (precision > 0)
     {
@@ -45,7 +45,6 @@ static void FloatFormatString(float step, char *buf, size_t buf_len)
 }
 
 // Number of characters needed to represent a character 
-
 static unsigned int IntWidth(int val)
 {
     char buf[25];
@@ -61,12 +60,10 @@ static unsigned int FloatWidth(float val, float step)
     unsigned int result;
 
     // Calculate the width of the int value
-
-    result = IntWidth((int) val);
+    result = IntWidth((int)val);
 
     // Add a decimal part if the precision specifies it
-
-    precision = (unsigned int) ceil(-log(step) / log(10));
+    precision = (unsigned int)ceil(-log(step) / log(10));
 
     if (precision > 0)
     {
@@ -77,7 +74,6 @@ static unsigned int FloatWidth(float val, float step)
 }
 
 // Returns the minimum width of the input box
-
 static unsigned int SpinControlWidth(txt_spincontrol_t *spincontrol)
 {
     unsigned int minw, maxw;
@@ -99,7 +95,6 @@ static unsigned int SpinControlWidth(txt_spincontrol_t *spincontrol)
     
     // Choose the wider of the two values.  Add one so that there is always
     // space for the cursor when editing.
-
     if (minw > maxw)
     {
         return minw;
@@ -131,6 +126,7 @@ static void SetBuffer(txt_spincontrol_t *spincontrol)
 
         case TXT_SPINCONTROL_FLOAT:
             FloatFormatString(spincontrol->step.f, format, sizeof(format));
+
             TXT_snprintf(spincontrol->buffer, spincontrol->buffer_len,
                          format, spincontrol->value->f);
             break;
@@ -155,7 +151,6 @@ static void TXT_SpinControlDrawer(TXT_UNCAST_ARG(spincontrol))
     TXT_RestoreColors(&colors);
 
     // Choose background color
-
     if (focused && spincontrol->editing)
     {
         TXT_BGColor(TXT_COLOR_BLACK, 0);
@@ -227,6 +222,7 @@ static void EnforceLimits(txt_spincontrol_t *spincontrol)
                 spincontrol->value->i = spincontrol->max.i;
             else if (spincontrol->value->i < spincontrol->min.i)
                 spincontrol->value->i = spincontrol->min.i;
+
             break;
 
         case TXT_SPINCONTROL_FLOAT:
@@ -234,6 +230,7 @@ static void EnforceLimits(txt_spincontrol_t *spincontrol)
                 spincontrol->value->f = spincontrol->max.f;
             else if (spincontrol->value->f < spincontrol->min.f)
                 spincontrol->value->f = spincontrol->min.f;
+
             break;
     }
 }
@@ -247,7 +244,7 @@ static void FinishEditing(txt_spincontrol_t *spincontrol)
             break;
 
         case TXT_SPINCONTROL_FLOAT:
-            spincontrol->value->f = (float) atof(spincontrol->buffer);
+            spincontrol->value->f = (float)atof(spincontrol->buffer);
             break;
     }
 
@@ -260,7 +257,6 @@ static int TXT_SpinControlKeyPress(TXT_UNCAST_ARG(spincontrol), int key)
     TXT_CAST_ARG(txt_spincontrol_t, spincontrol);
 
     // Enter to enter edit mode
-
     if (spincontrol->editing)
     {
         if (key == KEY_ENTER)
@@ -291,13 +287,13 @@ static int TXT_SpinControlKeyPress(TXT_UNCAST_ARG(spincontrol), int key)
     else
     {
         // Non-editing mode
-
         if (key == KEY_ENTER)
         {
             spincontrol->editing = 1;
             TXT_StringCopy(spincontrol->buffer, "", spincontrol->buffer_len);
             return 1;
         }
+
         if (key == KEY_LEFTARROW)
         {
             switch (spincontrol->type)
@@ -312,7 +308,6 @@ static int TXT_SpinControlKeyPress(TXT_UNCAST_ARG(spincontrol), int key)
             }
 
             EnforceLimits(spincontrol);
-
             return 1;
         }
         
@@ -330,7 +325,6 @@ static int TXT_SpinControlKeyPress(TXT_UNCAST_ARG(spincontrol), int key)
             }
 
             EnforceLimits(spincontrol);
-
             return 1;
         }
     }
@@ -372,7 +366,7 @@ txt_widget_class_t txt_spincontrol_class =
     TXT_SpinControlDestructor,
     TXT_SpinControlMousePress,
     NULL,
-    TXT_SpinControlFocused,
+    TXT_SpinControlFocused
 };
 
 //
@@ -400,7 +394,7 @@ txt_spincontrol_t *TXT_NewSpinControl(int *value, int min, int max)
 
     spincontrol = TXT_BaseSpinControl();
     spincontrol->type = TXT_SPINCONTROL_INT;
-    spincontrol->value = (void *) value;
+    spincontrol->value = (void *)value;
     spincontrol->min.i = min;
     spincontrol->max.i = max;
     spincontrol->step.i = 1;
@@ -414,7 +408,7 @@ txt_spincontrol_t *TXT_NewFloatSpinControl(float *value, float min, float max)
 
     spincontrol = TXT_BaseSpinControl();
     spincontrol->type = TXT_SPINCONTROL_FLOAT;
-    spincontrol->value = (void *) value;
+    spincontrol->value = (void *)value;
     spincontrol->min.f = min;
     spincontrol->max.f = max;
     spincontrol->step.f = 0.1f;

@@ -36,17 +36,25 @@
 //    
 //-----------------------------------------------------------------------------
 
+
 #ifndef M_DLLIST_H__
 #define M_DLLIST_H__
 
+
 #include "doomtype.h"
+
 
 typedef struct mdllistitem_s
 {
    struct mdllistitem_s *next;
    struct mdllistitem_s **prev;
-   void                 *obj;   // 08/02/09: pointer back to object
-   unsigned int         data;   // 02/07/10: arbitrary data cached at node
+
+   // 08/02/09: pointer back to object
+   void                 *obj;
+
+   // 02/07/10: arbitrary data cached at node
+   unsigned int         data;
+
 } mdllistitem_t;
 
 d_inline static void M_DLListInsert(mdllistitem_t *item, mdllistitem_t **head)
@@ -58,7 +66,8 @@ d_inline static void M_DLListInsert(mdllistitem_t *item, mdllistitem_t **head)
    item->prev = head;
    *head = item;
 
-   item->obj = item; // set to object, which is generally distinct
+   // set to object, which is generally distinct
+   item->obj = item;
 }
 
 d_inline static void M_DLListRemove(mdllistitem_t *item)
@@ -76,6 +85,4 @@ d_inline static void M_DLListRemove(mdllistitem_t *item)
 }
 
 #endif
-
-// EOF
 

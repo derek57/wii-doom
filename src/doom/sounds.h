@@ -29,14 +29,9 @@
 #ifndef __SOUNDS__
 #define __SOUNDS__
 
+
 #include "i_sound.h"
 
-
-// the complete set of sound effects
-extern sfxinfo_t        S_sfx[];
-
-// the complete set of music
-extern musicinfo_t      S_music[];
 
 //
 // Identifiers for all music in game.
@@ -113,9 +108,10 @@ typedef enum
     mus_dm2ttl,
     mus_dm2int,
     mus_credit,
-    NUMMUSIC
-} musicenum_t;
 
+    NUMMUSIC
+
+} musicenum_t;
 
 //
 // Identifiers for all sfx in game.
@@ -263,7 +259,10 @@ typedef enum
     sfx_dgact,
     sfx_dgdth,
     sfx_dgpain,
-    sfx_eefly,  // buzzing flies
+
+    // buzzing flies
+    sfx_eefly,
+
     sfx_muck,
     sfx_squish,
     sfx_ric1,
@@ -274,6 +273,15 @@ typedef enum
     sfx_ric6,
 
     NUMSFX
+
 } sfxenum_t;
 
+
+// the complete set of sound effects
+extern sfxinfo_t        S_sfx[];
+
+// the complete set of music
+extern musicinfo_t      S_music[];
+
 #endif
+

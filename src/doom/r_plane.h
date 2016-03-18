@@ -36,35 +36,38 @@
 ========================================================================
 */
 
+
 #if !defined(__R_PLANE__)
 #define __R_PLANE__
 
+
 #include "r_data.h"
+
 
 // killough 10/98: special mask indicates sky flat comes from sidedef
 #define PL_SKYFLAT      0x80000000
 
+
 // Visplane related.
-extern  int     *lastopening;
+extern int              *lastopening;
 
-extern int      floorclip[];
-extern int      ceilingclip[];
+extern int              floorclip[];
+extern int              ceilingclip[];
 
-extern fixed_t  yslope[];
-extern fixed_t  distscale[];
+extern fixed_t          yslope[];
+extern fixed_t          distscale[];
 
-extern dboolean markceiling;
+extern dboolean         markceiling;
+extern dboolean         r_brightmaps;
 
-extern dboolean r_brightmaps;
 
 void R_ClearPlanes(void);
-
 void R_DrawPlanes(void);
 
 visplane_t *R_FindPlane(fixed_t height, int picnum, int lightlevel, fixed_t xoffs, fixed_t yoffs);
-
 visplane_t *R_CheckPlane(visplane_t *pl, int start, int stop);
 
 byte *R_DistortedFlat(int flatnum);
 
 #endif
+

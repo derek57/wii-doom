@@ -29,36 +29,36 @@
 #define __F_FINALE__
 
 
-#include "doomtype.h"
 #include "d_event.h"
+#include "doomtype.h"
 
 
 typedef enum
 {
     F_STAGE_TEXT,
     F_STAGE_ARTSCREEN,
-    F_STAGE_CAST,
+    F_STAGE_CAST
+
 } finalestage_t;
 
-finalestage_t   finalestage;
 
 //
 // FINALE
 //
 
 // Called by main loop.
-dboolean F_Responder (event_t* ev);
+dboolean F_Responder(event_t *ev);
 
 // Called by main loop.
-void F_Ticker (void);
+void F_Ticker(void);
 
 // Called by main loop.
-void F_Drawer (void);
+void F_Drawer(void);
+
+void F_StartFinale(void);
 
 
-void F_StartFinale (void);
-
-
-
+finalestage_t   finalestage;
 
 #endif
+

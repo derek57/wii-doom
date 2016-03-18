@@ -36,29 +36,92 @@
 ========================================================================
 */
 
+
 #if !defined(__D_DEH__)
 #define __D_DEH__
 
+
 #include "doomtype.h"
+
 
 typedef enum
 {
-    p_GOTARMOR = 33, p_GOTMEGA, p_GOTHTHBONUS, p_GOTARMBONUS, p_GOTSTIM, p_GOTMEDINEED, 
-    p_GOTMEDINEED2, p_GOTMEDIKIT, p_GOTSUPER, p_GOTBLUECARD, p_GOTYELWCARD, p_GOTREDCARD,
-    p_GOTBLUESKUL, p_GOTYELWSKUL, p_GOTREDSKUL, p_GOTREDSKULL, p_GOTINVUL, p_GOTBERSERK,
-    p_GOTINVIS, p_GOTSUIT, p_GOTMAP, p_GOTVISOR, p_GOTCLIP, p_GOTCLIPX2, p_GOTHALFCLIP,
-    p_GOTCLIPBOX, p_GOTROCKET, p_GOTROCKETX2, p_GOTROCKBOX, p_GOTCELL, p_GOTCELLX2, p_GOTCELLBOX,
-    p_GOTSHELLS, p_GOTSHELLSX2, p_GOTSHELLBOX, p_GOTBACKPACK, p_GOTBFG9000, p_GOTCHAINGUN,
-    p_GOTCHAINSAW, p_GOTLAUNCHER, p_GOTMSPHERE, p_GOTPLASMA, p_GOTSHOTGUN, p_GOTSHOTGUN2,
-    p_PD_BLUEO, p_PD_REDO, p_PD_YELLOWO, p_PD_BLUEK, p_PD_REDK, p_PD_YELLOWK
+    p_GOTARMOR = 33,
+    p_GOTMEGA,
+    p_GOTHTHBONUS,
+    p_GOTARMBONUS,
+    p_GOTSTIM,
+    p_GOTMEDINEED,
+    
+    p_GOTMEDINEED2,
+    p_GOTMEDIKIT,
+    p_GOTSUPER,
+    p_GOTBLUECARD,
+    p_GOTYELWCARD,
+    p_GOTREDCARD,
+   
+    p_GOTBLUESKUL,
+    p_GOTYELWSKUL,
+    p_GOTREDSKUL,
+    p_GOTREDSKULL,
+    p_GOTINVUL,
+    p_GOTBERSERK,
+   
+    p_GOTINVIS,
+    p_GOTSUIT,
+    p_GOTMAP,
+    p_GOTVISOR,
+    p_GOTCLIP,
+    p_GOTCLIPX2,
+    p_GOTHALFCLIP,
+   
+    p_GOTCLIPBOX,
+    p_GOTROCKET,
+    p_GOTROCKETX2,
+    p_GOTROCKBOX,
+    p_GOTCELL,
+    p_GOTCELLX2,
+    p_GOTCELLBOX,
+   
+    p_GOTSHELLS,
+    p_GOTSHELLSX2,
+    p_GOTSHELLBOX,
+    p_GOTBACKPACK,
+    p_GOTBFG9000,
+    p_GOTCHAINGUN,
+   
+    p_GOTCHAINSAW,
+    p_GOTLAUNCHER,
+    p_GOTMSPHERE,
+    p_GOTPLASMA,
+    p_GOTSHOTGUN,
+    p_GOTSHOTGUN2,
+   
+    p_PD_BLUEO,
+    p_PD_REDO,
+    p_PD_YELLOWO,
+    p_PD_BLUEK,
+    p_PD_REDK,
+    p_PD_YELLOWK
+
 } pickupmessage_t;
 
 typedef struct
 {
-    char        **ppstr;        // doubly indirect pointer to string
-    char        *lookup;        // pointer to lookup string name
-    dboolean    assigned;       // [BH] flag indicating string has been assigned
+    // doubly indirect pointer to string
+    char        **ppstr;
+
+    // pointer to lookup string name
+    char        *lookup;
+
+    // [BH] flag indicating string has been assigned
+    dboolean    assigned;
+
 } deh_strs;
+
+
+void ProcessDehFile(char *filename, int lumpnum);
+
 
 extern dboolean dehacked;
 extern deh_strs deh_strlookup[];
@@ -507,15 +570,32 @@ extern char     *startup3;
 extern char     *startup4;
 extern char     *startup5;
 
-extern char     **mapnames[];      // DOOM   shareware/registered/retail (Ultimate) names.
-extern char     **mapnames2[];     // DOOM 2 names.
-extern char     **mapnames2_bfg[]; // DOOM 2 (BFG Edition) names.
-extern char     **mapnamesp[];     // Final DOOM (Plutonia) names.
-extern char     **mapnamest[];     // Final DOOM (TNT) names.
-extern char     **mapnamesn[];     // NERVE PACK names.
-extern char     **mapnamesm[];     // DOOM 2 Master Levels names.
-extern char     **mapnamesh[];     // HACX names.
-extern char     **mapnamesc[];     // CHEX names.
+// DOOM   shareware / registered / retail (Ultimate) names.
+extern char     **mapnames[];
+
+// DOOM 2 names.
+extern char     **mapnames2[];
+
+// DOOM 2 (BFG Edition) names.
+extern char     **mapnames2_bfg[];
+
+// Final DOOM (Plutonia) names.
+extern char     **mapnamesp[];
+
+// Final DOOM (TNT) names.
+extern char     **mapnamest[];
+
+// NERVE PACK names.
+extern char     **mapnamesn[];
+
+// DOOM 2 Master Levels names.
+extern char     **mapnamesm[];
+
+// HACX names.
+extern char     **mapnamesh[];
+
+// CHEX names.
+extern char     **mapnamesc[];
 
 extern char     *s_STSTR_NOMUS;
 extern char     *s_NETEND;
@@ -527,6 +607,6 @@ extern char     *s_LOADNET;
 extern char     *s_QLOADNET;
 extern char     *s_D_DEVSTR;
 
-void ProcessDehFile(char *filename, int lumpnum);
 
 #endif
+

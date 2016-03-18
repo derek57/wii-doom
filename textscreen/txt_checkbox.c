@@ -12,23 +12,23 @@
 // GNU General Public License for more details.
 //
 
+
 #include <stdlib.h>
 #include <string.h>
 
 #include "doomkeys.h"
-
 #include "txt_checkbox.h"
 #include "txt_gui.h"
 #include "txt_io.h"
 #include "txt_main.h"
 #include "txt_window.h"
 
+
 static void TXT_CheckBoxSizeCalc(TXT_UNCAST_ARG(checkbox))
 {
     TXT_CAST_ARG(txt_checkbox_t, checkbox);
 
     // Minimum width is the string length + right-side space for padding
-
     checkbox->widget.w = strlen(checkbox->label) + 5;
     checkbox->widget.h = 1;
 }
@@ -65,7 +65,7 @@ static void TXT_CheckBoxDrawer(TXT_UNCAST_ARG(checkbox))
     TXT_SetWidgetBG(checkbox);
     TXT_DrawString(checkbox->label);
 
-    for (i=strlen(checkbox->label); i < w-4; ++i)
+    for (i = strlen(checkbox->label); i < w - 4; ++i)
     {
         TXT_DrawString(" ");
     }
@@ -99,7 +99,6 @@ static void TXT_CheckBoxMousePress(TXT_UNCAST_ARG(checkbox), int x, int y, int b
     if (b == TXT_MOUSE_LEFT)
     {
         // Equivalent to pressing enter
-
         TXT_CheckBoxKeyPress(checkbox, KEY_ENTER);
     }
 }
@@ -112,7 +111,7 @@ txt_widget_class_t txt_checkbox_class =
     TXT_CheckBoxKeyPress,
     TXT_CheckBoxDestructor,
     TXT_CheckBoxMousePress,
-    NULL,
+    NULL
 };
 
 //

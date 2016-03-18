@@ -12,23 +12,23 @@
 // GNU General Public License for more details.
 //
 
+
 #include <stdlib.h>
 #include <string.h>
 
 #include "doomkeys.h"
-
-#include "txt_radiobutton.h"
 #include "txt_gui.h"
 #include "txt_io.h"
 #include "txt_main.h"
+#include "txt_radiobutton.h"
 #include "txt_window.h"
+
 
 static void TXT_RadioButtonSizeCalc(TXT_UNCAST_ARG(radiobutton))
 {
     TXT_CAST_ARG(txt_radiobutton_t, radiobutton);
 
     // Minimum width is the string length + right-side spaces for padding
-
     radiobutton->widget.w = strlen(radiobutton->label) + 5;
     radiobutton->widget.h = 1;
 }
@@ -66,7 +66,7 @@ static void TXT_RadioButtonDrawer(TXT_UNCAST_ARG(radiobutton))
 
     TXT_DrawString(radiobutton->label);
 
-    for (i=strlen(radiobutton->label); i < w-5; ++i)
+    for (i = strlen(radiobutton->label); i < w - 5; ++i)
     {
         TXT_DrawString(" ");
     }
@@ -90,6 +90,7 @@ static int TXT_RadioButtonKeyPress(TXT_UNCAST_ARG(radiobutton), int key)
             *radiobutton->variable = radiobutton->value;
             TXT_EmitSignal(radiobutton, "selected");
         }
+
         return 1;
     }
     
@@ -104,7 +105,6 @@ static void TXT_RadioButtonMousePress(TXT_UNCAST_ARG(radiobutton),
     if (b == TXT_MOUSE_LEFT)
     {
         // Equivalent to pressing enter
-
         TXT_RadioButtonKeyPress(radiobutton, KEY_ENTER);
     }
 }
@@ -117,7 +117,7 @@ txt_widget_class_t txt_radiobutton_class =
     TXT_RadioButtonKeyPress,
     TXT_RadioButtonDestructor,
     TXT_RadioButtonMousePress,
-    NULL,
+    NULL
 };
 
 //

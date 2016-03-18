@@ -57,32 +57,26 @@ typedef int (*TxtWindowMousePress)(txt_window_t *window,
 struct txt_window_s
 {
     // Base class: all windows are tables with one column.
-
     txt_table_t table;
 
     // Window title
-
     char *title;
 
     // Screen coordinates of the window
-
     txt_vert_align_t vert_align;
     txt_horiz_align_t horiz_align;
     int x, y;
 
     // Actions that appear in the box at the bottom of the window
-
     txt_window_action_t *actions[3];
 
     // Callback functions to invoke when keys/mouse buttons are pressed
-
     TxtWindowKeyPress key_listener;
     void *key_listener_data;
     TxtWindowMousePress mouse_listener;
     void *mouse_listener_data;
 
     // These are set automatically when the window is drawn
-
     int window_x, window_y;
     unsigned int window_w, window_h;
 

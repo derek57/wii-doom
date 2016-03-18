@@ -36,6 +36,7 @@
 ========================================================================
 */
 
+
 #include <math.h>
 #include <stdlib.h>
 
@@ -50,43 +51,15 @@
 #include "r_sky.h"
 #include "v_video.h"
 
+
 // Fineangles in the SCREENWIDTH wide window.
 #define FIELDOFVIEW     2048
 
+#define DISTMAP         2
+
+
 // increment every time a check is made
 int                     validcount = 1;
-
-lighttable_t            *fixedcolormap;
-extern lighttable_t     **walllights;
-
-int                     centerx;
-int                     centery;
-
-fixed_t                 centerxfrac;
-fixed_t                 centeryfrac;
-fixed_t                 viewheightfrac;
-fixed_t                 projection;
-fixed_t                 projectiony;
-
-fixed_t                 viewx;
-fixed_t                 viewy;
-fixed_t                 viewz;
-
-angle_t                 viewangle;
-
-fixed_t                 viewcos;
-fixed_t                 viewsin;
-
-player_t                *viewplayer;
-
-// [AM] Fractional part of the current tic, in the half-open
-//      range of [0.0, 1.0). Used for interpolation.
-fixed_t                 fractionaltic;
-
-//
-// precalculated math tables
-//
-angle_t                 clipangle;
 
 // The viewangletox[viewangle + FINEANGLES/4] lookup
 // maps the visible view angles to screen X coordinates,
@@ -94,16 +67,45 @@ angle_t                 clipangle;
 // There will be many angles mapped to the same X.
 int                     viewangletox[FINEANGLES / 2];
 
+// killough 3/20/98: Support dynamic colormaps, e.g. deep water
+// killough 4/4/98: support dynamic number of them as well
+int                     numcolormaps = 1;
+
+int                     centerx;
+int                     centery;
+int                     setblocks;
+int                     r_frame_count;
+
+// bumped light from gun blasts
+int                     extralight;
+
+// [AM] Fractional part of the current tic, in the half-open
+//      range of [0.0, 1.0). Used for interpolation.
+fixed_t                 fractionaltic;
+
+fixed_t                 centerxfrac;
+fixed_t                 centeryfrac;
+fixed_t                 viewheightfrac;
+fixed_t                 projection;
+fixed_t                 projectiony;
+fixed_t                 viewx;
+fixed_t                 viewy;
+fixed_t                 viewz;
+fixed_t                 viewcos;
+fixed_t                 viewsin;
+
 // The xtoviewangleangle[] table maps a screen pixel
 // to the lowest viewangle that maps back to x ranges
 // from clipangle to -clipangle.
 angle_t                 xtoviewangle[SCREENWIDTH + 1];
 
-//fixed_t                 *finecosine = &finesine[FINEANGLES / 4];
+// precalculated math tables
+angle_t                 clipangle;
 
-// killough 3/20/98: Support dynamic colormaps, e.g. deep water
-// killough 4/4/98: support dynamic number of them as well
-int                     numcolormaps = 1;
+angle_t                 viewangle;
+
+player_t                *viewplayer;
+
 lighttable_t            *(*c_scalelight)[LIGHTLEVELS][MAXLIGHTSCALE];
 lighttable_t            *(*c_zlight)[LIGHTLEVELS][MAXLIGHTZ];
 lighttable_t            *(*c_psprscalelight)[OLDLIGHTLEVELS][OLDMAXLIGHTSCALE];
@@ -112,25 +114,22 @@ lighttable_t            *(*psprscalelight)[OLDMAXLIGHTSCALE];
 lighttable_t            *(*zlight)[MAXLIGHTZ];
 lighttable_t            *fullcolormap;
 lighttable_t            **colormaps;
+lighttable_t            *fixedcolormap;
 
 byte                    fireremap[256];
 
-// bumped light from gun blasts
-int                     extralight;
-/*
-dboolean                r_translucency = r_translucency_default;
-dboolean                r_homindicator = r_homindicator_default;
-*/
+dboolean                BorderNeedRefresh;
+dboolean                setsizeneeded;
 
-dboolean                 BorderNeedRefresh;
-
-int                     r_frame_count;
 
 extern int              viewheight2;
-//extern int              gametic;
+
 extern dboolean         canmodify;
 
-extern fixed_t         pspritescale;
+extern fixed_t          pspritescale;
+
+extern lighttable_t     **walllights;
+
 
 //
 // R_PointOnSide
@@ -157,6 +156,7 @@ int SlopeDiv(unsigned int num, unsigned int den)
         return SLOPERANGE;
 
     ans = ((uint64_t)num << 3) / (den >> 8);
+
     return (ans <= SLOPERANGE ? (int)ans : SLOPERANGE);
 }
 
@@ -167,7 +167,6 @@ int SlopeDiv(unsigned int num, unsigned int den)
 // the coordinate system, then the y (<=x) is scaled and divided by x
 // to get a tangent (slope) value which is looked up in the
 // tantoangle[] table.
-
 angle_t R_PointToAngle(fixed_t x, fixed_t y)
 {
     return R_PointToAngle2(viewx, viewy, x, y);
@@ -192,6 +191,7 @@ angle_t R_PointToAngle2(fixed_t x1, fixed_t y1, fixed_t x, fixed_t y)
         else
         {
             y = -y;
+
             return (x > y ? -(int)tantoangle[SlopeDiv(y, x)] :
                 ANG270 + tantoangle[SlopeDiv(x, y)]);
         }
@@ -199,6 +199,7 @@ angle_t R_PointToAngle2(fixed_t x1, fixed_t y1, fixed_t x, fixed_t y)
     else
     {
         x = -x;
+
         if (y >= 0)
             return (x > y ? ANG180 - 1 - tantoangle[SlopeDiv(y, x)] :
                 ANG90 + tantoangle[SlopeDiv(x, y)]);
@@ -263,14 +264,17 @@ angle_t R_InterpolateAngle(angle_t oangle, angle_t nangle, fixed_t scale)
     {
         if (nangle - oangle < ANG270)
             return (oangle + (angle_t)((nangle - oangle) * FIXED2DOUBLE(scale)));
-        else    // Wrapped around
+        // Wrapped around
+        else
             return (oangle - (angle_t)((oangle - nangle) * FIXED2DOUBLE(scale)));
     }
-    else        // nangle < oangle
+    // nangle < oangle
+    else
     {
         if (oangle - nangle < ANG270)
             return (oangle - (angle_t)((oangle - nangle) * FIXED2DOUBLE(scale)));
-        else    // Wrapped around
+        // Wrapped around
+        else
             return (oangle + (angle_t)((nangle - oangle) * FIXED2DOUBLE(scale)));
     }
 }
@@ -316,18 +320,17 @@ static void R_InitPointToAngle(void)
 //
 void R_InitTextureMapping(void)
 {
-    int         i;
-    int         x;
-    int         t;
-    fixed_t     focallength;
+    int             i;
+    int             x;
+    int             t;
+    fixed_t         focallength;
 
     // Use tangent table to generate viewangletox:
     //  viewangletox will give the next greatest x
     //  after the view angle.
-
-    const fixed_t       hitan = finetangent[FINEANGLES / 4 + FIELDOFVIEW / 2];
-    const fixed_t       lotan = finetangent[FINEANGLES / 4 - FIELDOFVIEW / 2];
-    const int           highend = viewwidth + 1;
+    const fixed_t   hitan = finetangent[FINEANGLES / 4 + FIELDOFVIEW / 2];
+    const fixed_t   lotan = finetangent[FINEANGLES / 4 - FIELDOFVIEW / 2];
+    const int       highend = viewwidth + 1;
 
     // Calc focallength
     //  so FIELDOFVIEW angles covers SCREENWIDTH.
@@ -346,6 +349,7 @@ void R_InitTextureMapping(void)
             t = (centerxfrac - FixedMul(tangent, focallength) + FRACUNIT - 1) >> FRACBITS;
             t = BETWEEN(-1, t, highend);
         }
+
         viewangletox[i] = t;
     }
 
@@ -355,7 +359,7 @@ void R_InitTextureMapping(void)
     for (x = 0; x <= viewwidth; x++)
     {
         for (i = 0; viewangletox[i] > x; i++);
-        xtoviewangle[x] = (i << ANGLETOFINESHIFT) - ANG90;
+            xtoviewangle[x] = (i << ANGLETOFINESHIFT) - ANG90;
     }
 
     // Take out the fencepost cases from viewangletox.
@@ -375,8 +379,6 @@ void R_InitTextureMapping(void)
 // Only inits the zlight table,
 //  because the scalelight table changes with view size.
 //
-#define DISTMAP 2
-
 void R_InitLightTables(void)
 {
     int i;
@@ -411,9 +413,6 @@ void R_InitLightTables(void)
 //  because it might be in the middle of a refresh.
 // The change will take effect next refresh.
 //
-dboolean        setsizeneeded;
-int             setblocks;
-
 void R_SetViewSize(int blocks)
 {
     setsizeneeded = true;
@@ -433,21 +432,20 @@ void R_ExecuteSetViewSize(void)
     if (setblocks == 11)
     {
         scaledviewwidth = SCREENWIDTH;
-        scaledviewheight = SCREENHEIGHT;                   // CHANGED FOR HIRES
+        scaledviewheight = SCREENHEIGHT;
         viewheight = SCREENHEIGHT;
         viewheight2 = SCREENHEIGHT;
     }
     else
     {
-//        scaledviewwidth = setblocks * SCREENWIDTH / 10;
-        scaledviewwidth = (setblocks*32)<<hires;           // CHANGED FOR HIRES
-        scaledviewheight = ((setblocks*168/10)&~7)<<hires; // CHANGED FOR HIRES
+        scaledviewwidth = (setblocks * 32)<<hires;
+        scaledviewheight = ((setblocks * 168 / 10) & ~7) << hires;
         viewheight = (setblocks * (SCREENHEIGHT - SBARHEIGHT) / 10) & ~7;
         viewheight2 = SCREENHEIGHT - SBARHEIGHT;
     }
 
     viewwidth = scaledviewwidth;
-    viewheight = scaledviewheight; // ADDED FOR HIRES
+    viewheight = scaledviewheight;
     viewheightfrac = viewheight << FRACBITS;
 
     centery = viewheight / 2;
@@ -463,11 +461,9 @@ void R_ExecuteSetViewSize(void)
     R_InitTextureMapping();
 
     // psprite scales
-//    pspritexscale = (centerx << FRACBITS) / (ORIGINALWIDTH / 2);
     pspriteyscale = (((SCREENHEIGHT * viewwidth) / SCREENWIDTH) << FRACBITS) / ORIGINALHEIGHT;
-//    pspriteiscale = FixedDiv(FRACUNIT, pspritexscale);
-    pspritescale = FRACUNIT*viewwidth/ORIGINALWIDTH;      // CHANGED FOR HIRES
-    pspriteiscale = FRACUNIT*ORIGINALWIDTH/viewwidth;     // CHANGED FOR HIRES
+    pspritescale = FRACUNIT * viewwidth / ORIGINALWIDTH;
+    pspriteiscale = FRACUNIT * ORIGINALWIDTH / viewwidth;
 
     // thing clipping
     for (i = 0; i < viewwidth; i++)
@@ -477,16 +473,12 @@ void R_ExecuteSetViewSize(void)
     for (i = 0; i < viewheight; i++)
     {
         fixed_t dy = ABS(((i - viewheight / 2) << FRACBITS) + FRACUNIT / 2);
-
-//        yslope[i] = FixedDiv(projectiony, dy);
-        // HIRES
-        yslope[i] = FixedDiv ( (viewwidth<<!hires)/2*FRACUNIT, dy);
+        yslope[i] = FixedDiv((viewwidth << !hires) / 2 * FRACUNIT, dy);
     }
 
     for (i = 0; i < viewwidth; i++)
     {
         fixed_t cosadj = ABS(finecosine[xtoviewangle[i] >> ANGLETOFINESHIFT]);
-
         distscale[i] = FixedDiv(FRACUNIT, cosadj);
     }
 
@@ -502,7 +494,7 @@ void R_ExecuteSetViewSize(void)
                 NUMCOLORMAPS - 1) * 256;
 
             // killough 3/20/98: initialize multiple colormaps
-            for (t = 0; t < numcolormaps; t++)     // killough 4/4/98
+            for (t = 0; t < numcolormaps; t++)
                 c_scalelight[t][i][j] = colormaps[t] + level;
         }
     }
@@ -660,29 +652,44 @@ void R_InitColumnFunctions(void)
 void R_Init(void)
 {
     R_InitData();
-    if(!beta_style)
-        printf (".");
+
+    if (!beta_style)
+        printf(".");
+
     R_InitPointToAngle();
-    if(!beta_style)
-        printf (".");
+
+    if (!beta_style)
+        printf(".");
+
     R_InitTables();
-    if(!beta_style)
-        printf (".");
+
+    if (!beta_style)
+        printf(".");
+
     R_SetViewSize(screenblocks);
-    if(!beta_style)
-        printf (".");
+
+    if (!beta_style)
+        printf(".");
+
     R_InitLightTables();
-    if(!beta_style)
-        printf (".");
+
+    if (!beta_style)
+        printf(".");
+
     R_InitSkyMap();
-    if(!beta_style)
-        printf (".");
+
+    if (!beta_style)
+        printf(".");
+
     R_InitTranslationTables();
-    if(!beta_style)
-        printf (".");
+
+    if (!beta_style)
+        printf(".");
+
     R_InitColumnFunctions();
-//    printf (".");
-    R_InitParticles(); // haleyjd
+
+    // haleyjd
+    R_InitParticles();
 
     // [RH] Initialize palette subsystem
     if (!(default_palette = R_InitPalettes("PLAYPAL")))
@@ -723,7 +730,7 @@ subsector_t *R_PointInSubsector(fixed_t x, fixed_t y)
 // villsa [STRIFE] new function
 // Calculate centery/centeryfrac for player viewpitch
 //
-void R_SetupPitch(player_t* player)
+void R_SetupPitch(player_t *player)
 {
     int tempCentery;
 
@@ -736,6 +743,7 @@ void R_SetupPitch(player_t* player)
 
         centery = tempCentery;
         centeryfrac = centery << FRACBITS;
+
         for (i = 0; i < viewheight; i++)
         {
             yslope[i] = FixedDiv((viewwidth << (!hires)) / 2 * FRACUNIT,
@@ -799,6 +807,7 @@ void R_SetupFrame(player_t *player)
 
         cm = (viewz < s->interpfloorheight ? s->bottommap : (viewz > s->interpceilingheight ?
             s->topmap : s->midmap));
+
         if (cm < 0 || cm > numcolormaps)
             cm = 0;
     }
@@ -815,7 +824,7 @@ void R_SetupFrame(player_t *player)
         int                     i;
 
         // killough 3/20/98: use fullcolormap
-        fixedcolormap = fullcolormap + player->fixedcolormap * 256 /* * sizeof(lighttable_t)*/;
+        fixedcolormap = fullcolormap + player->fixedcolormap * 256;
 
         walllights = scalelightfixed;
 
@@ -833,6 +842,7 @@ void R_SetupFrame(player_t *player)
         {
             R_DrawViewBorder();
         }
+
         BorderNeedRefresh = false;
     }
 }
@@ -852,25 +862,26 @@ void R_RenderPlayerView(player_t *player)
     R_ClearPlanes();
     R_ClearSprites();
 
-    if(autodetect_hom && !menuactive)
+    if (autodetect_hom && !menuactive)
         V_FillRect(viewwindowx, viewwindowy, 0, viewwidth, viewheight,
                 ((gametic % 20) < 9 && !menuactive && !paused ? 176 : 0));
 
     // check for new console commands.
-    NetUpdate ();
+    NetUpdate();
 
     R_RenderBSPNode(numnodes - 1);
 
     // Check for new console commands.
-    NetUpdate ();
+    NetUpdate();
 
     R_DrawPlanes();
 
     // Check for new console commands.
-    NetUpdate ();
+    NetUpdate();
 
     R_DrawMasked();
 
     // Check for new console commands.
-    NetUpdate ();
+    NetUpdate();
 }
+

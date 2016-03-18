@@ -15,6 +15,7 @@
 // DESCRIPTION:
 //
 
+
 #ifndef WII
 #include <ctype.h>
 #include <stdio.h>
@@ -23,13 +24,18 @@
 
 #include "doomtype.h"
 #include "i_system.h"
+
+// haleyjd 20110212: warning fix
+#include "m_argv.h"
+
 #include "m_misc.h"
-#include "m_argv.h"  // haleyjd 20110212: warning fix
-
-int                myargc;
-char**                myargv;
 
 
+#define MAXARGVS        100
+
+
+int                     myargc;
+char                    **myargv;
 
 
 //
@@ -39,7 +45,6 @@ char**                myargv;
 // Returns the argument number (1 to argc-1)
 // or 0 if not present
 //
-
 int M_CheckParmWithArgs(char *check, int num_args)
 {
     int i;
@@ -73,18 +78,16 @@ int M_CheckParm(char *check)
     return M_CheckParmWithArgs(check, 0);
 }
 
-#define MAXARGVS        100
-
 static void LoadResponseFile(int argv_index)
 {
     FILE *handle;
-    int size;
+    int  size;
     char *infile;
     char *file;
     char *response_filename;
     char **newargv;
-    int newargc;
-    int i, k;
+    int  newargc;
+    int  i, k;
 
     response_filename = myargv[argv_index] + 1;
 
@@ -105,7 +108,6 @@ static void LoadResponseFile(int argv_index)
     // Allocate one byte extra - this is in case there is an argument
     // at the end of the response file, in which case a '\0' will be
     // needed.
-
     file = malloc(size + 1);
 
     i = 0;
@@ -125,14 +127,12 @@ static void LoadResponseFile(int argv_index)
     fclose(handle);
 
     // Create new arguments list array
-
     newargv = malloc(sizeof(char *) * MAXARGVS);
     newargc = 0;
     memset(newargv, 0, sizeof(char *) * MAXARGVS);
 
     // Copy all the arguments in the list up to the response file
-
-    for (i=0; i<argv_index; ++i)
+    for (i = 0; i < argv_index; ++i)
     {
         newargv[i] = myargv[i];
         ++newargc;
@@ -141,11 +141,10 @@ static void LoadResponseFile(int argv_index)
     infile = file;
     k = 0;
 
-    while(k < size)
+    while (k < size)
     {
         // Skip past space characters to the next argument
-
-        while(k < size && isspace(infile[k]))
+        while (k < size && isspace(infile[k]))
         {
             ++k;
         }
@@ -158,7 +157,6 @@ static void LoadResponseFile(int argv_index)
         // If the next argument is enclosed in quote marks, treat
         // the contents as a single argument.  This allows long filenames
         // to be specified.
-
         if (infile[k] == '\"')
         {
             // Skip the first character(")
@@ -167,7 +165,6 @@ static void LoadResponseFile(int argv_index)
             newargv[newargc++] = &infile[k];
 
             // Read all characters between quotes
-
             while (k < size && infile[k] != '\"' && infile[k] != '\n')
             {
                 ++k;
@@ -180,23 +177,20 @@ static void LoadResponseFile(int argv_index)
             }
 
             // Cut off the string at the closing quote
-
             infile[k] = '\0';
             ++k;
         }
         else
         {
             // Read in the next argument until a space is reached
-
             newargv[newargc++] = &infile[k];
 
-            while(k < size && !isspace(infile[k]))
+            while (k < size && !isspace(infile[k]))
             {
                 ++k;
             }
 
             // Cut off the end of the argument at the first space
-
             infile[k] = '\0';
 
             ++k;
@@ -204,8 +198,7 @@ static void LoadResponseFile(int argv_index)
     }
 
     // Add arguments following the response file argument
-
-    for (i=argv_index + 1; i<myargc; ++i)
+    for (i = argv_index + 1; i < myargc; ++i)
     {
         newargv[newargc] = myargv[i];
         ++newargc;
@@ -220,7 +213,7 @@ static void LoadResponseFile(int argv_index)
 
     printf("%d command-line args:\n", myargc);
 
-    for (k=1; k<myargc; k++)
+    for (k = 1; k < myargc; k++)
     {
         printf("'%s'\n", myargv[k]);
     }
@@ -230,7 +223,6 @@ static void LoadResponseFile(int argv_index)
 //
 // Find a Response File
 //
-
 void M_FindResponseFile(void)
 {
     int             i;

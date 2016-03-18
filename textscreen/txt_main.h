@@ -85,7 +85,8 @@ typedef enum
     TXT_COLOR_BRIGHT_RED,
     TXT_COLOR_BRIGHT_MAGENTA,
     TXT_COLOR_YELLOW,
-    TXT_COLOR_BRIGHT_WHITE,
+    TXT_COLOR_BRIGHT_WHITE
+
 } txt_color_t;
 
 // Modifier keys.
@@ -95,7 +96,9 @@ typedef enum
     TXT_MOD_SHIFT,
     TXT_MOD_CTRL,
     TXT_MOD_ALT,
+
     TXT_NUM_MODIFIERS
+
 } txt_modifier_t;
 
 // Initialize the screen

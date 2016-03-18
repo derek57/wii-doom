@@ -71,11 +71,9 @@ extern int key_useartifact;
 
 // Location where all configuration data is stored - 
 // default.cfg, savegames, etc.
-
 char        *configdir;
 
 // Default filenames for configuration files.
-
 static char *default_main_config;
 
 
@@ -116,9 +114,11 @@ default_t   doom_defaults_list[] =
     CONFIG_VARIABLE_INT                (footclip),
     CONFIG_VARIABLE_INT                (splash),
     CONFIG_VARIABLE_INT                (swirl),
+
 #ifdef WII
     CONFIG_VARIABLE_INT                (pr_beta),
 #endif
+
     CONFIG_VARIABLE_INT                (translucency),
     CONFIG_VARIABLE_INT                (colored_blood),
     CONFIG_VARIABLE_INT                (fixed_blood),
@@ -235,6 +235,7 @@ default_t   doom_defaults_list[] =
     CONFIG_VARIABLE_INT                (map_gridsize),
     CONFIG_VARIABLE_INT                (map_secrets_after),
     CONFIG_VARIABLE_INT                (use_autosave),
+    CONFIG_VARIABLE_INT                (draw_splash),
     CONFIG_VARIABLE_INT                (key_shoot),
     CONFIG_VARIABLE_INT                (key_open),
     CONFIG_VARIABLE_INT                (key_menu),
@@ -249,27 +250,26 @@ default_t   doom_defaults_list[] =
     CONFIG_VARIABLE_INT                (key_run),
     CONFIG_VARIABLE_INT                (key_console),
     CONFIG_VARIABLE_INT                (key_screenshots),
+
 #ifndef WII
     CONFIG_VARIABLE_INT                (key_strafe_left),
-    CONFIG_VARIABLE_INT                (key_strafe_right),
+    CONFIG_VARIABLE_INT                (key_strafe_right)
 #endif
-//    CONFIG_VARIABLE_INT                (key_aiminghelp),
 };
 
 default_collection_t doom_defaults =
 {
     doom_defaults_list,
     arrlen(doom_defaults_list),
-    NULL,
+    NULL
 };
 
 // Search a collection for a variable
-
 static default_t *SearchCollection(default_collection_t *collection, char *name)
 {
     int i;
 
-    for (i=0; i<collection->numdefaults; ++i) 
+    for (i = 0; i < collection->numdefaults; ++i) 
     {
         if (!strcmp(name, collection->defaults[i].name))
         {
@@ -287,31 +287,30 @@ static void SaveDefaultCollection(default_collection_t *collection)
     FILE *f;
         
     f = fopen (collection->filename, "w");
+
     if (!f)
-        return; // can't write the file, but don't complain
+        // can't write the file, but don't complain
+        return;
 
     defaults = collection->defaults;
                 
-    for (i=0 ; i<collection->numdefaults ; i++)
+    for (i = 0; i < collection->numdefaults; i++)
     {
         int chars_written;
 
         // Ignore unbound variables
-
         if (!defaults[i].bound)
         {
             continue;
         }
 
         // Print the name and line up all values at 30 characters
-
         chars_written = fprintf(f, "%s ", defaults[i].name);
 
         for (; chars_written < 30; ++chars_written)
             fprintf(f, " ");
 
         // Print the value
-
         switch (defaults[i].type) 
         {
             case DEFAULT_KEY:
@@ -319,8 +318,7 @@ static void SaveDefaultCollection(default_collection_t *collection)
                 // use the untranslated version if we can, to reduce
                 // the possibility of screwing up the user's config
                 // file
-                
-                v = * (int *) defaults[i].location;
+                v = * (int *)defaults[i].location;
 
                 if (v == KEY_RSHIFT)
                 {
@@ -329,7 +327,6 @@ static void SaveDefaultCollection(default_collection_t *collection)
                     // This overrides the change check below, to fix
                     // configuration files made by old versions that
                     // mistakenly used the scan code for left shift.
-
                     v = 54;
                 }
                 else if (defaults[i].untranslated
@@ -337,37 +334,36 @@ static void SaveDefaultCollection(default_collection_t *collection)
                 {
                     // Has not been changed since the last time we
                     // read the config file.
-
                     v = defaults[i].untranslated;
                 }
+
                 fprintf(f, "%i", v);
                 break;
 
             case DEFAULT_INT:
-                fprintf(f, "%i", * (int *) defaults[i].location);
+                fprintf(f, "%i", * (int *)defaults[i].location);
                 break;
 
             case DEFAULT_INT_HEX:
-                fprintf(f, "0x%x", * (int *) defaults[i].location);
+                fprintf(f, "0x%x", * (int *)defaults[i].location);
                 break;
 
             case DEFAULT_FLOAT:
-                fprintf(f, "%f", * (float *) defaults[i].location);
+                fprintf(f, "%f", * (float *)defaults[i].location);
                 break;
 
             case DEFAULT_STRING:
-                fprintf(f,"\"%s\"", * (char **) (defaults[i].location));
+                fprintf(f,"\"%s\"", * (char **)(defaults[i].location));
                 break;
         }
 
         fprintf(f, "\n");
     }
 
-    fclose (f);
+    fclose(f);
 }
 
 // Parses integer values in the configuration file
-
 static int ParseIntParameter(char *strparm)
 {
     int parm;
@@ -385,32 +381,29 @@ static void SetVariable(default_t *def, char *value)
     int intparm;
 
     // parameter found
-
     switch (def->type)
     {
         case DEFAULT_STRING:
-            * (char **) def->location = M_StringDuplicate(value);
+            *(char **)def->location = M_StringDuplicate(value);
             break;
 
         case DEFAULT_INT:
         case DEFAULT_INT_HEX:
-            * (int *) def->location = ParseIntParameter(value);
+            *(int *)def->location = ParseIntParameter(value);
             break;
 
         case DEFAULT_KEY:
 
             // translate scancodes read from config
             // file (save the old value in untranslated)
-
             intparm = ParseIntParameter(value);
             def->untranslated = intparm;
 
-            * (int *) def->location = intparm;
-
+            *(int *)def->location = intparm;
             break;
 
         case DEFAULT_FLOAT:
-            * (float *) def->location = (float) atof(value);
+            *(float *)def->location = (float) atof(value);
             break;
     }
 }
@@ -432,7 +425,6 @@ static dboolean LoadDefaultCollection(default_collection_t *collection)
     {
         // File not opened, but don't complain. 
         // It's probably just the first time they ran the game.
-
         return false;
     }
 
@@ -441,33 +433,29 @@ static dboolean LoadDefaultCollection(default_collection_t *collection)
         if (fscanf(f, "%79s %99[^\n]\n", defname, strparm) != 2)
         {
             // This line doesn't match
-
             continue;
         }
 
         // Find the setting in the list
-
         def = SearchCollection(collection, defname);
 
         if (def == NULL || !def->bound)
         {
             // Unknown variable?  Unbound variables are also treated
             // as unknown.
-
             continue;
         }
 
         // Strip off trailing non-printable characters (\r characters
         // from DOS text files)
-
-        while (strlen(strparm) > 0 && !isprint(strparm[strlen(strparm)-1]))
+        while (strlen(strparm) > 0 && !isprint(strparm[strlen(strparm) - 1]))
         {
-            strparm[strlen(strparm)-1] = '\0';
+            strparm[strlen(strparm) - 1] = '\0';
         }
 
         // Surrounded by quotes? If so, remove them.
         if (strlen(strparm) >= 2
-         && strparm[0] == '"' && strparm[strlen(strparm) - 1] == '"')
+            && strparm[0] == '"' && strparm[strlen(strparm) - 1] == '"')
         {
             strparm[strlen(strparm) - 1] = '\0';
             memmove(strparm, strparm + 1, sizeof(strparm) - 1);
@@ -476,12 +464,11 @@ static dboolean LoadDefaultCollection(default_collection_t *collection)
         SetVariable(def, strparm);
     }
 
-    fclose (f);
+    fclose(f);
     return true;
 }
 
 // Set the default filenames to use for configuration files.
-
 void M_SetConfigFilenames(char *main_config)
 {
     default_main_config = main_config;
@@ -490,7 +477,6 @@ void M_SetConfigFilenames(char *main_config)
 //
 // M_SaveDefaults
 //
-
 void M_SaveDefaults (void)
 {
     SaveDefaultCollection(&doom_defaults);
@@ -507,7 +493,6 @@ void M_SaveDefaultsAlternate(char *main)
     char *orig_main;
 
     // Temporarily change the filenames
-
     orig_main = doom_defaults.filename;
 
     doom_defaults.filename = main;
@@ -515,7 +500,6 @@ void M_SaveDefaultsAlternate(char *main)
     M_SaveDefaults();
 
     // Restore normal filenames
-
     doom_defaults.filename = orig_main;
 }
 */
@@ -523,7 +507,6 @@ void M_SaveDefaultsAlternate(char *main)
 //
 // M_LoadDefaults
 //
-
 void M_LoadDefaults (void)
 {
 #ifndef WII
@@ -538,13 +521,12 @@ void M_LoadDefaults (void)
     // Load main configuration from the specified file, instead of the
     // default.
     //
-
-    if(!beta_style)
+    if (!beta_style)
         i = M_CheckParmWithArgs("-config", 1);
 
     if (i)
     {
-        doom_defaults.filename = myargv[i+1];
+        doom_defaults.filename = myargv[i + 1];
     }
     else
 #endif
@@ -561,17 +543,14 @@ void M_LoadDefaults (void)
 }
 
 // Get a configuration file variable by its name
-
 static default_t *GetDefaultForName(char *name)
 {
     default_t *result;
 
     // Try the main list and the extras
-
     result = SearchCollection(&doom_defaults, name);
 
     // Not found? Internal error.
-
     if (result == NULL)
     {
         I_Error("Unknown configuration variable: '%s'", name);
@@ -583,7 +562,6 @@ static default_t *GetDefaultForName(char *name)
 //
 // Bind a variable to a given configuration file variable, by name.
 //
-
 void M_BindVariable(char *name, void *location)
 {
     default_t *variable;
@@ -617,7 +595,6 @@ dboolean M_SetVariable(char *name, char *value)
 }
 
 // Get the value of a variable.
-
 int M_GetIntVariable(char *name)
 {
     default_t *variable;
@@ -625,12 +602,12 @@ int M_GetIntVariable(char *name)
     variable = GetDefaultForName(name);
 
     if (variable == NULL || !variable->bound
-     || (variable->type != DEFAULT_INT && variable->type != DEFAULT_INT_HEX))
+        || (variable->type != DEFAULT_INT && variable->type != DEFAULT_INT_HEX))
     {
         return 0;
     }
 
-    return *((int *) variable->location);
+    return *((int *)variable->location);
 }
 
 const char *M_GetStrVariable(char *name)
@@ -640,12 +617,12 @@ const char *M_GetStrVariable(char *name)
     variable = GetDefaultForName(name);
 
     if (variable == NULL || !variable->bound
-     || variable->type != DEFAULT_STRING)
+        || variable->type != DEFAULT_STRING)
     {
         return NULL;
     }
 
-    return *((const char **) variable->location);
+    return *((const char **)variable->location);
 }
 
 float M_GetFloatVariable(char *name)
@@ -655,12 +632,12 @@ float M_GetFloatVariable(char *name)
     variable = GetDefaultForName(name);
 
     if (variable == NULL || !variable->bound
-     || variable->type != DEFAULT_FLOAT)
+        || variable->type != DEFAULT_FLOAT)
     {
         return 0;
     }
 
-    return *((float *) variable->location);
+    return *((float *)variable->location);
 }
 */
 
@@ -675,7 +652,6 @@ static char *GetDefaultConfigDir(void)
     // Configuration settings are stored in ~/.chocolate-doom/,
     // except on Windows, where we behave like Vanilla Doom and
     // save in the current directory.
-
     char *homedir;
 
     homedir = getenv("HOME");
@@ -686,7 +662,6 @@ static char *GetDefaultConfigDir(void)
 
         // put all configuration in a config directory off the
         // homedir
-
         result = M_StringJoin(homedir, DIR_SEPARATOR_S,
                               "." "wii-doom", DIR_SEPARATOR_S, NULL);
 
@@ -695,9 +670,9 @@ static char *GetDefaultConfigDir(void)
     else
     {
 #ifdef WII
-        if(usb)
+        if (usb)
             return M_StringDuplicate("usb:/apps/wiidoom/");
-        else if(sd)
+        else if (sd)
             return M_StringDuplicate("sd:/apps/wiidoom/");
 #else
         return M_StringDuplicate("");
@@ -711,11 +686,9 @@ static char *GetDefaultConfigDir(void)
 // Sets the location of the configuration directory, where configuration
 // files are stored - default.cfg, chocolate-doom.cfg, savegames, etc.
 //
-
 void M_SetConfigDir(char *dir)
 {
     // Use the directory that was passed, or find the default.
-
     if (dir != NULL)
     {
         configdir = dir;
@@ -724,8 +697,8 @@ void M_SetConfigDir(char *dir)
     {
         configdir = GetDefaultConfigDir();
     }
-    // Make the directory if it doesn't already exist:
 
+    // Make the directory if it doesn't already exist:
     M_MakeDirectory(configdir);
 }
 
@@ -739,7 +712,6 @@ char *M_GetSaveGameDir(char *iwadname)
 
     // If not "doing" a configuration directory (Windows), don't "do"
     // a savegame directory, either.
-
     if (!strcmp(configdir, ""))
     {
         savegamedir = M_StringDuplicate("");
@@ -747,6 +719,7 @@ char *M_GetSaveGameDir(char *iwadname)
     else
     {
         // ~/.chocolate-doom/savegames/
+
 #ifdef WII
         char *savegameroot;
 
@@ -757,323 +730,285 @@ char *M_GetSaveGameDir(char *iwadname)
         M_MakeDirectory(savegamedir);
 
         // eg. ~/.chocolate-doom/savegames/doom2.wad/
-
         sprintf(savegamedir + strlen(savegamedir), "%s%c",
                 iwadname, DIR_SEPARATOR);
 
-        if(usb)
+        if (usb)
         {
             savegameroot = SavePathRoot1USB;
-
             M_MakeDirectory(savegameroot);
 
             savegameroot = SavePathRoot2USB;
-
             M_MakeDirectory(savegameroot);
 
             savegameroot = SavePathRoot3USB;
-
             M_MakeDirectory(savegameroot);
 
             savegameroot = SavePathRoot4USB;
-
             M_MakeDirectory(savegameroot);
 
             savegameroot = SavePathRoot5USB;
-
             M_MakeDirectory(savegameroot);
 
             savegameroot = SavePathRoot6USB;
-
             M_MakeDirectory(savegameroot);
 
             savegameroot = SavePathRoot7USB;
-
             M_MakeDirectory(savegameroot);
 
             savegameroot = SavePathRoot8USB;
-
             M_MakeDirectory(savegameroot);
 
             savegameroot = SavePathRootIWADUSB;
-
             M_MakeDirectory(savegameroot);
 
             savegameroot = SavePathRootPWADUSB;
-
             M_MakeDirectory(savegameroot);
 
             savegameroot = SavePathRootD1MusicUSB;
-
             M_MakeDirectory(savegameroot);
 
             savegameroot = SavePathRootD2MusicUSB;
-
             M_MakeDirectory(savegameroot);
 
             savegameroot = SavePathRootTNTMusicUSB;
-
             M_MakeDirectory(savegameroot);
 
             savegameroot = SavePathRootChexMusicUSB;
-
             M_MakeDirectory(savegameroot);
 
             savegameroot = SavePathRootHacxMusicUSB;
-
             M_MakeDirectory(savegameroot);
 
             savegameroot = SavePathScreenshotsUSB;
-
             M_MakeDirectory(savegameroot);
         }
-        else if(sd)
+        else if (sd)
         {
             savegameroot = SavePathRoot1SD;
-
             M_MakeDirectory(savegameroot);
 
             savegameroot = SavePathRoot2SD;
-
             M_MakeDirectory(savegameroot);
 
             savegameroot = SavePathRoot3SD;
-
             M_MakeDirectory(savegameroot);
 
             savegameroot = SavePathRoot4SD;
-
             M_MakeDirectory(savegameroot);
 
             savegameroot = SavePathRoot5SD;
-
             M_MakeDirectory(savegameroot);
 
             savegameroot = SavePathRoot6SD;
-
             M_MakeDirectory(savegameroot);
 
             savegameroot = SavePathRoot7SD;
-
             M_MakeDirectory(savegameroot);
 
             savegameroot = SavePathRoot8SD;
-
             M_MakeDirectory(savegameroot);
 
             savegameroot = SavePathRootIWADSD;
-
             M_MakeDirectory(savegameroot);
 
             savegameroot = SavePathRootPWADSD;
-
             M_MakeDirectory(savegameroot);
 
             savegameroot = SavePathRootD1MusicSD;
-
             M_MakeDirectory(savegameroot);
 
             savegameroot = SavePathRootD2MusicSD;
-
             M_MakeDirectory(savegameroot);
 
             savegameroot = SavePathRootTNTMusicSD;
-
             M_MakeDirectory(savegameroot);
 
             savegameroot = SavePathRootChexMusicSD;
-
             M_MakeDirectory(savegameroot);
 
             savegameroot = SavePathRootHacxMusicSD;
-
             M_MakeDirectory(savegameroot);
 
             savegameroot = SavePathScreenshotsSD;
-
             M_MakeDirectory(savegameroot);
         }
 
-        if(usb)
+        if (usb)
         {
-            if(fsize == 4261144)
+            if (fsize == 4261144)
                 savegamedir = SavePathBeta14USB;
-            else if(fsize == 4271324)
+            else if (fsize == 4271324)
                 savegamedir = SavePathBeta15USB;
-            else if(fsize == 4211660)
+            else if (fsize == 4211660)
                 savegamedir = SavePathBeta16USB;
-            else if(fsize == 4207819)
+            else if (fsize == 4207819)
                 savegamedir = SavePathShare10USB;
-            else if(fsize == 4274218)
+            else if (fsize == 4274218)
                 savegamedir = SavePathShare11USB;
-            else if(fsize == 4225504)
+            else if (fsize == 4225504)
                 savegamedir = SavePathShare12USB;
-            else if(fsize == 4225460)
+            else if (fsize == 4225460)
                 savegamedir = SavePathShare125USB;
-            else if(fsize == 4234124)
+            else if (fsize == 4234124)
                 savegamedir = SavePathShare1666USB;
-            else if(fsize == 4196020)
+            else if (fsize == 4196020)
                 savegamedir = SavePathShare18USB;
-            else if(fsize == 10396254)
+            else if (fsize == 10396254)
                 savegamedir = SavePathReg11USB;
-            else if(fsize == 10399316)
+            else if (fsize == 10399316)
                 savegamedir = SavePathReg12USB;
-            else if(fsize == 10401760)
+            else if (fsize == 10401760)
                 savegamedir = SavePathReg16USB;
-            else if(fsize == 11159840)
+            else if (fsize == 11159840)
                 savegamedir = SavePathReg18USB;
-            else if(fsize == 12408292)
+            else if (fsize == 12408292)
                 savegamedir = SavePathReg19USB;
-            else if(fsize == 12474561)
+            else if (fsize == 12474561)
                 savegamedir = SavePathRegBFGXBOX360USB;
-            else if(fsize == 12487824)
+            else if (fsize == 12487824)
                 savegamedir = SavePathRegBFGPCUSB;
-            else if(fsize == 12538385)
+            else if (fsize == 12538385)
                 savegamedir = SavePathRegXBOXUSB;
-            else if(fsize == 14943400)
+            else if (fsize == 14943400)
                 savegamedir = SavePath2Reg1666USB;
-            else if(fsize == 14824716)
+            else if (fsize == 14824716)
                 savegamedir = SavePath2Reg1666GUSB;
-            else if(fsize == 14612688)
+            else if (fsize == 14612688)
                 savegamedir = SavePath2Reg17USB;
-            else if(fsize == 14607420)
+            else if (fsize == 14607420)
                 savegamedir = SavePath2Reg18FUSB;
-            else if(fsize == 14604584)
+            else if (fsize == 14604584)
                 savegamedir = SavePath2Reg19USB;
-            else if(fsize == 14677988)
+            else if (fsize == 14677988)
                 savegamedir = SavePath2RegBFGPSNUSB;
-            else if(fsize == 14691821)
+            else if (fsize == 14691821)
                 savegamedir = SavePath2RegBFGPCUSB;
-            else if(fsize == 14683458)
+            else if (fsize == 14683458)
                 savegamedir = SavePath2RegXBOXUSB;
-            else if(fsize == 18195736)
+            else if (fsize == 18195736)
                 savegamedir = SavePathTNT191USB;
-            else if(fsize == 18654796)
+            else if (fsize == 18654796)
                 savegamedir = SavePathTNT192USB;
-            else if(fsize == 18240172)
+            else if (fsize == 18240172)
                 savegamedir = SavePathPLUT191USB;
-            else if(fsize == 17420824)
+            else if (fsize == 17420824)
                 savegamedir = SavePathPLUT192USB;
-            else if(fsize == 12361532)
+            else if (fsize == 12361532)
                 savegamedir = SavePathChexUSB;
-
-//            else if(fsize == 9745831)
+//            else if (fsize == 9745831)
 //                savegamedir = SavePathHacxShare10USB;
-//            else if(fsize == 21951805)
+//            else if (fsize == 21951805)
 //                savegamedir = SavePathHacxReg10USB;
-//            else if(fsize == 22102300)
+//            else if (fsize == 22102300)
 //                savegamedir = SavePathHacxReg11USB;
-
-            else if(fsize == 19321722)
+            else if (fsize == 19321722)
                 savegamedir = SavePathHacxReg12USB;
-
-//            else if(fsize == 19801320)
+//            else if (fsize == 19801320)
 //                savegamedir = SavePathFreedoom064USB;
-//            else if(fsize == 27704188)
+//            else if (fsize == 27704188)
 //                savegamedir = SavePathFreedoom07RC1USB;
-//            else if(fsize == 27625596)
+//            else if (fsize == 27625596)
 //                savegamedir = SavePathFreedoom07USB;
-//            else if(fsize == 28144744)
+//            else if (fsize == 28144744)
 //                savegamedir = SavePathFreedoom08B1USB;
-//            else if(fsize == 28592816)
+//            else if (fsize == 28592816)
 //                savegamedir = SavePathFreedoom08USB;
-//            else if(fsize == 19362644)
+//            else if (fsize == 19362644)
 //                savegamedir = SavePathFreedoom08P1USB;
-
-            else if(fsize == 28422764)
+            else if (fsize == 28422764)
                 savegamedir = SavePathFreedoom08P2USB;
         }
-        else if(sd)
+        else if (sd)
         {
-            if(fsize == 4261144)
+            if (fsize == 4261144)
                 savegamedir = SavePathBeta14SD;
-            else if(fsize == 4271324)
+            else if (fsize == 4271324)
                 savegamedir = SavePathBeta15SD;
-            else if(fsize == 4211660)
+            else if (fsize == 4211660)
                 savegamedir = SavePathBeta16SD;
-            else if(fsize == 4207819)
+            else if (fsize == 4207819)
                 savegamedir = SavePathShare10SD;
-            else if(fsize == 4274218)
+            else if (fsize == 4274218)
                 savegamedir = SavePathShare11SD;
-            else if(fsize == 4225504)
+            else if (fsize == 4225504)
                 savegamedir = SavePathShare12SD;
-            else if(fsize == 4225460)
+            else if (fsize == 4225460)
                 savegamedir = SavePathShare125SD;
-            else if(fsize == 4234124)
+            else if (fsize == 4234124)
                 savegamedir = SavePathShare1666SD;
-            else if(fsize == 4196020)
+            else if (fsize == 4196020)
                 savegamedir = SavePathShare18SD;
-            else if(fsize == 10396254)
+            else if (fsize == 10396254)
                 savegamedir = SavePathReg11SD;
-            else if(fsize == 10399316)
+            else if (fsize == 10399316)
                 savegamedir = SavePathReg12SD;
-            else if(fsize == 10401760)
+            else if (fsize == 10401760)
                 savegamedir = SavePathReg16SD;
-            else if(fsize == 11159840)
+            else if (fsize == 11159840)
                 savegamedir = SavePathReg18SD;
-            else if(fsize == 12408292)
+            else if (fsize == 12408292)
                 savegamedir = SavePathReg19SD;
-            else if(fsize == 12474561)
+            else if (fsize == 12474561)
                 savegamedir = SavePathRegBFGXBOX360SD;
-            else if(fsize == 12487824)
+            else if (fsize == 12487824)
                 savegamedir = SavePathRegBFGPCSD;
-            else if(fsize == 12538385)
+            else if (fsize == 12538385)
                 savegamedir = SavePathRegXBOXSD;
-            else if(fsize == 14943400)
+            else if (fsize == 14943400)
                 savegamedir = SavePath2Reg1666SD;
-            else if(fsize == 14824716)
+            else if (fsize == 14824716)
                 savegamedir = SavePath2Reg1666GSD;
-            else if(fsize == 14612688)
+            else if (fsize == 14612688)
                 savegamedir = SavePath2Reg17SD;
-            else if(fsize == 14607420)
+            else if (fsize == 14607420)
                 savegamedir = SavePath2Reg18FSD;
-            else if(fsize == 14604584)
+            else if (fsize == 14604584)
                 savegamedir = SavePath2Reg19SD;
-            else if(fsize == 14677988)
+            else if (fsize == 14677988)
                 savegamedir = SavePath2RegBFGPSNSD;
-            else if(fsize == 14691821)
+            else if (fsize == 14691821)
                 savegamedir = SavePath2RegBFGPCSD;
-            else if(fsize == 14683458)
+            else if (fsize == 14683458)
                 savegamedir = SavePath2RegXBOXSD;
-            else if(fsize == 18195736)
+            else if (fsize == 18195736)
                 savegamedir = SavePathTNT191SD;
-            else if(fsize == 18654796)
+            else if (fsize == 18654796)
                 savegamedir = SavePathTNT192SD;
-            else if(fsize == 18240172)
+            else if (fsize == 18240172)
                 savegamedir = SavePathPLUT191SD;
-            else if(fsize == 17420824)
+            else if (fsize == 17420824)
                 savegamedir = SavePathPLUT192SD;
-            else if(fsize == 12361532)
+            else if (fsize == 12361532)
                 savegamedir = SavePathChexSD;
-
-//            else if(fsize == 9745831)
+//            else if (fsize == 9745831)
 //                savegamedir = SavePathHacxShare10SD;
-//            else if(fsize == 21951805)
+//            else if (fsize == 21951805)
 //                savegamedir = SavePathHacxReg10SD;
-//            else if(fsize == 22102300)
+//            else if (fsize == 22102300)
 //                savegamedir = SavePathHacxReg11SD;
-
-            else if(fsize == 19321722)
+            else if (fsize == 19321722)
                 savegamedir = SavePathHacxReg12SD;
-
-//            else if(fsize == 19801320)
+//            else if (fsize == 19801320)
 //                savegamedir = SavePathFreedoom064SD;
-//            else if(fsize == 27704188)
+//            else if (fsize == 27704188)
 //                savegamedir = SavePathFreedoom07RC1SD;
-//            else if(fsize == 27625596)
+//            else if (fsize == 27625596)
 //                savegamedir = SavePathFreedoom07SD;
-//            else if(fsize == 28144744)
+//            else if (fsize == 28144744)
 //                savegamedir = SavePathFreedoom08B1SD;
-//            else if(fsize == 28592816)
+//            else if (fsize == 28592816)
 //                savegamedir = SavePathFreedoom08SD;
-//            else if(fsize == 19362644)
+//            else if (fsize == 19362644)
 //                savegamedir = SavePathFreedoom08P1SD;
-
-            else if(fsize == 28422764)
+            else if (fsize == 28422764)
                 savegamedir = SavePathFreedoom08P2SD;
         }
+
         M_MakeDirectory(savegamedir);
+
 #else
+
         // ~/.chocolate-doom/savegames
         char *topdir;
 
@@ -1081,16 +1016,16 @@ char *M_GetSaveGameDir(char *iwadname)
         M_MakeDirectory(topdir);
 
         // eg. ~/.chocolate-doom/savegames/doom2.wad/
-
         savegamedir = M_StringJoin(topdir, DIR_SEPARATOR_S, iwadname,
                                    DIR_SEPARATOR_S, NULL);
 
         M_MakeDirectory(savegamedir);
 
         free(topdir);
+
 #endif
 
-        if(modifiedgame)
+        if (modifiedgame)
             savegamedir = M_StringJoin(savegamedir, pwadfile,
                 DIR_SEPARATOR_S, NULL);
 

@@ -36,6 +36,7 @@
 ========================================================================
 */
 
+
 #include <stdlib.h>
 
 #include "am_map.h"
@@ -52,18 +53,18 @@
 #include "p_tick.h"
 #include "z_zone.h"
 
+
 #define SAVEGAME_EOF    0x1D
 
-FILE    *save_stream;
-int     savegamelength;
-dboolean savegame_error;
 
-static int         restoretargets_fail;
-/*
-extern int markpointnum;       // next point to be assigned
-extern int markpointnum_max;       // next point to be assigned
-extern mpoint_t    *markpoints;
-*/
+static int   restoretargets_fail;
+
+FILE         *save_stream;
+
+int          savegamelength;
+
+dboolean     savegame_error;
+
 
 // Get the filename of a temporary file to write the savegame to. After
 // the file has been successfully saved, it will be renamed to the
@@ -930,7 +931,7 @@ static void saveg_write_player_t(player_t *str)
     saveg_write32(str->backpack);
 
     // int frags[MAXPLAYERS];
-    for (i=0; i<MAXPLAYERS; ++i)
+    for (i = 0; i < MAXPLAYERS; ++i)
         saveg_write32(str->frags[i]);
 
     // weapontype_t readyweapon
@@ -1682,6 +1683,7 @@ void P_WriteSaveGameHeader(char *description)
 
     for (i = 0; description[i] != '\0'; ++i)
         saveg_write8(description[i]);
+
     for (; i < SAVESTRINGSIZE; ++i)
         saveg_write8(0);
 
@@ -1719,13 +1721,16 @@ dboolean P_ReadSaveGameHeader(char *description)
 
     memset(vcheck, 0, sizeof(vcheck));
     strcpy(vcheck, PACKAGE_NAME);
+
     if (strcmp(read_vcheck, vcheck))
     {
         menuactive = false;
         consoleheight = 1;
         consoledirection = 1;
         C_Error("This savegame requires %s.", read_vcheck);
-        return false;   // bad version
+
+        // bad version
+        return false;
     }
 
     gameskill = (skill_t)saveg_read8();
@@ -1815,6 +1820,7 @@ void P_ArchiveWorld(void)
         saveg_write16(li->flags);
         saveg_write16(li->special);
         saveg_write16(li->tag);
+
         for (j = 0; j < 2; j++)
         {
             if (li->sidenum[j] == NO_INDEX)
@@ -1864,6 +1870,7 @@ void P_UnArchiveWorld(void)
         li->flags = saveg_read16();
         li->special = saveg_read16();
         li->tag = saveg_read16();
+
         for (j = 0; j < 2; j++)
         {
             if (li->sidenum[j] == NO_INDEX)
@@ -1888,6 +1895,7 @@ typedef enum
     tc_end,
     tc_mobj,
     tc_bloodsplat
+
 } thinkerclass_t;
 
 //
@@ -1907,7 +1915,6 @@ void P_ArchiveThinkers(void)
     }
 
     // save off the bloodsplats
-
     for (i = 0; i < numsectors; ++i)
     {
         mobj_t   *mo = sectors[i].thinglist;
@@ -1920,6 +1927,7 @@ void P_ArchiveThinkers(void)
                 saveg_write_pad();
                 saveg_write_mobj_t(mo);
             }
+
             mo = mo->snext;
         }
     }
@@ -1958,7 +1966,9 @@ void P_UnArchiveThinkers(void)
         if (currentthinker->function == P_MobjThinker)
         {
             P_RemoveMobj((mobj_t *)currentthinker);
-            P_RemoveThinkerDelayed(currentthinker);     // fix mobj leak
+
+            // fix mobj leak
+            P_RemoveThinkerDelayed(currentthinker);
         }
         else
             Z_Free(currentthinker);
@@ -1979,6 +1989,7 @@ void P_UnArchiveThinkers(void)
             mo = mo->snext;
         }
     }
+
     r_bloodsplats_total = 0;
 
     // read in saved thinkers
@@ -1990,7 +2001,8 @@ void P_UnArchiveThinkers(void)
         switch (tclass)
         {
             case tc_end:
-                return;         // end of list
+                // end of list
+                return;
 
             case tc_mobj:
                 saveg_read_pad();
@@ -2011,6 +2023,7 @@ void P_UnArchiveThinkers(void)
                     if (mobj->flags2 & MF2_MIRRORED)
                         mobj->shadow->flags2 |= MF2_MIRRORED;
                 }
+
                 P_AddThinker(&mobj->thinker);
                 break;
 
@@ -2031,10 +2044,12 @@ void P_UnArchiveThinkers(void)
                     }
                     else
                         mobj->colfunc = bloodsplatcolfunc;
+
                     mobj->projectfunc = R_ProjectBloodSplat;
 
                     ++r_bloodsplats_total;
                 }
+
                 break;
 
             default:
@@ -2111,12 +2126,22 @@ enum
     tc_flash,
     tc_strobe,
     tc_glow,
-    tc_elevator,        // jff 2/22/98 new elevator type thinker
-    tc_scroll,          // killough 3/7/98: new scroll effect thinker
-    tc_pusher,          // phares 3/22/98:  new push/pull effect thinker
-    tc_fireflicker,     // killough 10/4/98
+
+    // jff 2/22/98 new elevator type thinker
+    tc_elevator,
+
+    // killough 3/7/98: new scroll effect thinker
+    tc_scroll,
+
+    // phares 3/22/98:  new push/pull effect thinker
+    tc_pusher,
+
+    // killough 10/4/98
+    tc_fireflicker,
+
     tc_button,
     tc_endspecials
+
 } specials_e;
 
 void P_ArchiveSpecials(void)
@@ -2251,6 +2276,7 @@ void P_ArchiveSpecials(void)
 
     button_ptr = buttonlist;
     i = MAXBUTTONS;
+
     do
     {
         if (button_ptr->btimer != 0)
@@ -2259,7 +2285,9 @@ void P_ArchiveSpecials(void)
             saveg_write_pad();
             saveg_write_button_t(button_ptr);
         }
+
         button_ptr++;
+
     } while (--i);
 
     // add a terminating marker
@@ -2292,7 +2320,8 @@ void P_UnArchiveSpecials(void)
         switch (tclass)
         {
             case tc_endspecials:
-                return;          // end of list
+                // end of list
+                return;
 
             case tc_ceiling:
                 saveg_read_pad();

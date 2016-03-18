@@ -16,6 +16,7 @@
 //     can always get the first callback.
 //
 
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -30,11 +31,13 @@
 
 #define MAX_OPL_QUEUE 64
 
+
 typedef struct
 {
     opl_callback_t callback;
     void *data;
     uint64_t time;
+
 } opl_queue_entry_t;
 
 struct opl_callback_queue_s
@@ -42,6 +45,7 @@ struct opl_callback_queue_s
     opl_queue_entry_t entries[MAX_OPL_QUEUE];
     unsigned int num_entries;
 };
+
 
 opl_callback_queue_t *OPL_Queue_Create(void)
 {
@@ -81,36 +85,29 @@ void OPL_Queue_Push(opl_callback_queue_t *queue,
     }
 
     // Add to last queue entry.
-
     entry_id = queue->num_entries;
     ++queue->num_entries;
 
     // Shift existing entries down in the heap.
-
     while (entry_id > 0)
     {
         int parent_id = (entry_id - 1) / 2;
 
         // Is the heap condition satisfied?
-
         if (time >= queue->entries[parent_id].time)
         {
             break;
         }
 
         // Move the existing entry down in the heap.
-
-        memcpy(&queue->entries[entry_id],
-               &queue->entries[parent_id],
+        memcpy(&queue->entries[entry_id], &queue->entries[parent_id],
                sizeof(opl_queue_entry_t));
 
         // Advance to the parent.
-
         entry_id = parent_id;
     }
 
     // Insert new callback data.
-
     queue->entries[entry_id].callback = callback;
     queue->entries[entry_id].data = data;
     queue->entries[entry_id].time = time;
@@ -123,25 +120,21 @@ int OPL_Queue_Pop(opl_callback_queue_t *queue,
     int i, next_i;
 
     // Empty?
-
     if (!queue->num_entries)
     {
         return 0;
     }
 
     // Store the result:
-
     *callback = queue->entries[0].callback;
     *data = queue->entries[0].data;
 
     // Decrease the heap size, and keep pointer to the last entry in
     // the heap, which must now be percolated down from the top.
-
     --queue->num_entries;
     entry = &queue->entries[queue->num_entries];
 
     // Percolate down.
-
     i = 0;
 
     for (;;)
@@ -150,13 +143,12 @@ int OPL_Queue_Pop(opl_callback_queue_t *queue,
         int child2 = i * 2 + 2;
 
         if (child1 < queue->num_entries
-         && queue->entries[child1].time < entry->time)
+            && queue->entries[child1].time < entry->time)
         {
             // Left child is less than entry.
             // Use the minimum of left and right children.
-
             if (child2 < queue->num_entries
-             && queue->entries[child2].time < queue->entries[child1].time)
+                && queue->entries[child2].time < queue->entries[child1].time)
             {
                 next_i = child2;
             }
@@ -169,7 +161,6 @@ int OPL_Queue_Pop(opl_callback_queue_t *queue,
               && queue->entries[child2].time < entry->time)
         {
             // Right child is less than entry.  Go down the right side.
-
             next_i = child2;
         }
         else
@@ -179,15 +170,13 @@ int OPL_Queue_Pop(opl_callback_queue_t *queue,
         }
 
         // Percolate the next value up and advance.
-
-        memcpy(&queue->entries[i],
-               &queue->entries[next_i],
+        memcpy(&queue->entries[i], &queue->entries[next_i],
                sizeof(opl_queue_entry_t));
+
         i = next_i;
     }
 
     // Store the old last-entry at its new position.
-
     memcpy(&queue->entries[i], entry, sizeof(opl_queue_entry_t));
 
     return 1;
@@ -213,6 +202,7 @@ void OPL_Queue_AdjustCallbacks(opl_callback_queue_t *queue,
     for (i = 0; i < queue->num_entries; ++i)
     {
         int64_t offset = queue->entries[i].time - time;
+
         queue->entries[i].time = time + (uint64_t) (offset * factor);
     }
 }

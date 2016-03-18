@@ -35,6 +35,7 @@ id Software.
 ========================================================================
 */
 
+
 #include <stdlib.h>
 
 #include "doomtype.h"
@@ -44,27 +45,35 @@ id Software.
 #include "w_wad.h"
 #include "z_zone.h"
 
+
 #define MAX_STRING_SIZE 256
 #define ASCII_COMMENT   ';'
 #define ASCII_QUOTE     '\"'
 
-static void CheckOpen(void);
 
-char            *sc_String;
-int             sc_Number;
-int             sc_Line;
-dboolean        sc_End;
-dboolean        sc_Crossed;
+static void     CheckOpen(void);
+
+static int      ScriptLumpNum;
+static int      ScriptSize;
 
 static char     ScriptName[16];
 static char     *ScriptBuffer;
 static char     *ScriptPtr;
 static char     *ScriptEndPtr;
 static char     StringBuffer[MAX_STRING_SIZE];
-static int      ScriptLumpNum;
+
 static dboolean ScriptOpen = false;
-static int      ScriptSize;
 static dboolean AlreadyGot = false;
+
+
+char            *sc_String;
+
+int             sc_Number;
+int             sc_Line;
+
+dboolean        sc_End;
+dboolean        sc_Crossed;
+
 
 void SC_Open(char *name)
 {
@@ -90,6 +99,7 @@ void SC_Close(void)
             W_ReleaseLumpNum(ScriptLumpNum);
         else
             Z_Free(ScriptBuffer);
+
         ScriptOpen = false;
     }
 }
@@ -100,18 +110,22 @@ dboolean SC_GetString(void)
     dboolean    foundToken;
 
     CheckOpen();
+
     if (AlreadyGot)
     {
         AlreadyGot = false;
         return true;
     }
+
     foundToken = false;
     sc_Crossed = false;
+
     if (ScriptPtr >= ScriptEndPtr)
     {
         sc_End = true;
         return false;
     }
+
     while (!foundToken)
     {
         while (*ScriptPtr <= 32)
@@ -121,17 +135,20 @@ dboolean SC_GetString(void)
                 sc_End = true;
                 return false;
             }
+
             if (*ScriptPtr++ == '\n')
             {
                 sc_Line++;
                 sc_Crossed = true;
             }
         }
+
         if (ScriptPtr >= ScriptEndPtr)
         {
             sc_End = true;
             return false;
         }
+
         if (*ScriptPtr != ASCII_COMMENT)
             foundToken = true;
         else
@@ -142,20 +159,26 @@ dboolean SC_GetString(void)
                     sc_End = true;
                     return false;
                 }
+
             sc_Line++;
             sc_Crossed = true;
         }
     }
+
     text = sc_String;
+
     if (*ScriptPtr == ASCII_QUOTE)
     {
         ScriptPtr++;
+
         while (*ScriptPtr != ASCII_QUOTE)
         {
             *text++ = *ScriptPtr++;
+
             if (ScriptPtr == ScriptEndPtr || text == &sc_String[MAX_STRING_SIZE - 1])
                 break;
         }
+
         ScriptPtr++;
     }
     else
@@ -163,10 +186,12 @@ dboolean SC_GetString(void)
         while (*ScriptPtr > 32 && *ScriptPtr != ASCII_COMMENT)
         {
             *text++ = *ScriptPtr++;
+
             if (ScriptPtr == ScriptEndPtr || text == &sc_String[MAX_STRING_SIZE - 1])
                 break;
         }
     }
+
     *text = 0;
     return true;
 }
@@ -175,6 +200,7 @@ void SC_MustGetString(void)
 {
     if (!SC_GetString())
         SC_ScriptError("Missing string.");
+
     if (SC_Compare("="))
         SC_GetString();
 }
@@ -182,6 +208,7 @@ void SC_MustGetString(void)
 dboolean SC_GetNumber(void)
 {
     CheckOpen();
+
     if (SC_GetString())
     {
         sc_Number = strtol(sc_String, NULL, 0);
@@ -222,6 +249,7 @@ int SC_MustMatchString(char **strings)
 
     if (i == -1)
         SC_ScriptError(NULL);
+
     return i;
 }
 */
@@ -235,6 +263,7 @@ void SC_ScriptError(char *message)
 {
     if (!message)
         message = "Bad syntax.";
+
     I_Error("Script error, \"%s\" line %d: %s", ScriptName, sc_Line, message);
 }
 

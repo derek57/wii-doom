@@ -15,11 +15,13 @@
 //     Common code to parse command line, identifying WAD files to load.
 //
 
+
 #ifndef W_MAIN_H
 #define W_MAIN_H
 
-dboolean W_ParseCommandLine(void);
-//void W_CheckCorrectIWAD(GameMission_t mission);
 
-#endif /* #ifndef W_MAIN_H */
+dboolean W_ParseCommandLine(void);
+
+
+#endif // #ifndef W_MAIN_H
 

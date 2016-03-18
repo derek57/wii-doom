@@ -58,25 +58,26 @@
 #include "w_wad.h"
 #include "z_zone.h"
 
+
 //
 // Locally used constants, shortcuts.
 //
-#define HU_TITLE        (*mapnames[(gameepisode-1)*9+gamemap-1])
-#define HU_TITLE2       (*mapnames2[gamemap-1])
-#define HU_TITLE2_BFG   (*mapnames2_bfg[gamemap-1])
-#define HU_TITLEP       (*mapnamesp[gamemap-1])
-#define HU_TITLET       (*mapnamest[gamemap-1])
-#define HU_TITLEN       (*mapnamesn[gamemap-1])
-#define HU_TITLEM       (*mapnamesm[gamemap-1])
-#define HU_TITLE_HACX   (*mapnamesh[gamemap-1])
-#define HU_TITLE_CHEX   (*mapnamesc[(gameepisode-1)*9+gamemap-1])
+#define HU_TITLE        (*mapnames[(gameepisode - 1) * 9 + gamemap - 1])
+#define HU_TITLE2       (*mapnames2[gamemap - 1])
+#define HU_TITLE2_BFG   (*mapnames2_bfg[gamemap - 1])
+#define HU_TITLEP       (*mapnamesp[gamemap - 1])
+#define HU_TITLET       (*mapnamest[gamemap - 1])
+#define HU_TITLEN       (*mapnamesn[gamemap - 1])
+#define HU_TITLEM       (*mapnamesm[gamemap - 1])
+#define HU_TITLE_HACX   (*mapnamesh[gamemap - 1])
+#define HU_TITLE_CHEX   (*mapnamesc[(gameepisode - 1) * 9 + gamemap - 1])
 #define HU_TITLEHEIGHT  1
 #define HU_TITLEX       0
 #define HU_TITLEY       (167 - SHORT(hu_font[0]->height))
 
 #define HU_INPUTTOGGLE  't'
 #define HU_INPUTX       HU_MSGX
-#define HU_INPUTY       (HU_MSGY + HU_MSGHEIGHT*(SHORT(hu_font[0]->height) +1))
+#define HU_INPUTY       (HU_MSGY + HU_MSGHEIGHT * (SHORT(hu_font[0]->height) + 1))
 #define HU_INPUTWIDTH   64
 #define HU_INPUTHEIGHT  1
 
@@ -166,26 +167,26 @@ char *authors[][3] =
 #define DOOM2_AUTHORS   authors[gamemap][1]
 #define UDOOM_AUTHORS   authors[(gameepisode * 10) + gamemap][0]
 
-static player_t*        plr;
+static player_t         *plr;
 
 static hu_textline_t    w_title;
 static hu_textline_t    w_author_title;
 static hu_textline_t    w_authors;
 
-static hu_textline_t    w_monsters1;              // ADDED FOR PSP-STATS
-static hu_textline_t    w_monsters2;              // ADDED FOR PSP-STATS
-static hu_textline_t    w_monsters3;              // ADDED FOR PSP-STATS
-static hu_textline_t    w_monsters4;              // ADDED FOR PSP-STATS
+static hu_textline_t    w_monsters1;
+static hu_textline_t    w_monsters2;
+static hu_textline_t    w_monsters3;
+static hu_textline_t    w_monsters4;
 
-static hu_textline_t    w_items1;                 // ADDED FOR PSP-STATS
-static hu_textline_t    w_items2;                 // ADDED FOR PSP-STATS
-static hu_textline_t    w_items3;                 // ADDED FOR PSP-STATS
-static hu_textline_t    w_items4;                 // ADDED FOR PSP-STATS
+static hu_textline_t    w_items1;
+static hu_textline_t    w_items2;
+static hu_textline_t    w_items3;
+static hu_textline_t    w_items4;
 
-static hu_textline_t    w_secrets1;               // ADDED FOR PSP-STATS
-static hu_textline_t    w_secrets2;               // ADDED FOR PSP-STATS
-static hu_textline_t    w_secrets3;               // ADDED FOR PSP-STATS
-static hu_textline_t    w_secrets4;               // ADDED FOR PSP-STATS
+static hu_textline_t    w_secrets1;
+static hu_textline_t    w_secrets2;
+static hu_textline_t    w_secrets3;
+static hu_textline_t    w_secrets4;
 
 //static hu_itext_t       w_inputbuffer[MAXPLAYERS];
 
@@ -197,7 +198,12 @@ static hu_stext_t       w_message_2;
 
 static hu_stext_t       w_secret;
 
-//static dboolean          always_off = false;
+static patch_t          *healthpatch;
+static patch_t          *berserkpatch;
+static patch_t          *greenarmorpatch;
+static patch_t          *bluearmorpatch;
+
+//static dboolean         always_off = false;
 static dboolean         message_on;
 static dboolean         message_nottobefuckedwith;
 static dboolean         headsupactive;
@@ -207,27 +213,27 @@ static int              message_counter;
 static int              secret_counter;
 static int              hudnumoffset;
 
-static char             monstersstr1[80];    // ADDED FOR PSP-STATS
-static char             monstersstr2[80];    // ADDED FOR PSP-STATS
-static char             monstersstr3[80];    // ADDED FOR PSP-STATS
-static char             monstersstr4[80];    // ADDED FOR PSP-STATS
+static char             monstersstr1[80];
+static char             monstersstr2[80];
+static char             monstersstr3[80];
+static char             monstersstr4[80];
 
-static char             itemsstr1[80];       // ADDED FOR PSP-STATS
-static char             itemsstr2[80];       // ADDED FOR PSP-STATS
-static char             itemsstr3[80];       // ADDED FOR PSP-STATS
-static char             itemsstr4[80];       // ADDED FOR PSP-STATS
+static char             itemsstr1[80];
+static char             itemsstr2[80];
+static char             itemsstr3[80];
+static char             itemsstr4[80];
 
-static char             secretsstr1[80];     // ADDED FOR PSP-STATS
-static char             secretsstr2[80];     // ADDED FOR PSP-STATS
-static char             secretsstr3[80];     // ADDED FOR PSP-STATS
-static char             secretsstr4[80];     // ADDED FOR PSP-STATS
+static char             secretsstr1[80];
+static char             secretsstr2[80];
+static char             secretsstr3[80];
+static char             secretsstr4[80];
 
 dboolean                message_dontfuckwithme;
 dboolean                show_chat_bar;
 dboolean                emptytallpercent;
 
-patch_t*                hu_font[HU_FONTSIZE];
-patch_t*                beta_hu_font[HU_FONTSIZEBETA];
+patch_t                 *hu_font[HU_FONTSIZE];
+patch_t                 *beta_hu_font[HU_FONTSIZEBETA];
 
 extern int              cardsfound;
 
@@ -235,13 +241,8 @@ extern dboolean         blurred;
 extern dboolean         mapinfo_lump;
 extern dboolean         dont_message_to_console;
 
-static patch_t*         healthpatch;
-static patch_t*         berserkpatch;
-static patch_t*         greenarmorpatch;
-static patch_t*         bluearmorpatch;
-
-extern patch_t*         tallnum[10];
-extern patch_t*         tallpercent;
+extern patch_t          *tallnum[10];
+extern patch_t          *tallpercent;
 
 static struct
 {
@@ -270,17 +271,19 @@ void HU_Init(void)
 
     // load the heads-up font
     j = HU_FONTSTART;
-    for (i=0;i<HU_FONTSIZE;i++)
+
+    for (i = 0; i < HU_FONTSIZE; i++)
     {
         M_snprintf(buffer, 9, "STCFN%.3d", j++);
-        hu_font[i] = (patch_t *) W_CacheLumpName(buffer, PU_STATIC);
+        hu_font[i] = (patch_t *)W_CacheLumpName(buffer, PU_STATIC);
     }
 
     j = HU_FONTSTART;
-    for (i=0;i<HU_FONTSIZEBETA;i++)
+
+    for (i = 0; i < HU_FONTSIZEBETA; i++)
     {
         M_snprintf(buffer, 9, "STBFN%.3d", j++);
-        beta_hu_font[i] = (patch_t *) W_CacheLumpName(buffer, PU_STATIC);
+        beta_hu_font[i] = (patch_t *)W_CacheLumpName(buffer, PU_STATIC);
     }
 }
 
@@ -304,25 +307,25 @@ patch_t *HU_LoadHUDKeyPatch(int keypicnum)
 void HU_Start(void)
 {
 //    int       i;
-    char*     s = "Unknown level";
+    char     *s = "Unknown level";
 
-    char*     t;
-    char*     y;
-    char*     z;
-    char*     l;
+    char     *t;
+    char     *y;
+    char     *z;
+    char     *l;
 
-    char*     q;
-    char*     r;
-    char*     w;
-    char*     m;
+    char     *q;
+    char     *r;
+    char     *w;
+    char     *m;
 
-    char*     o;
-    char*     p;
-    char*     x;
-    char*     n;
+    char     *o;
+    char     *p;
+    char     *x;
+    char     *n;
 
-    char*     u;
-    char*     v = "AUTHOR(S):";
+    char     *u;
+    char     *v = "AUTHOR(S):";
 
     if (headsupactive)
         HU_Stop();
@@ -336,8 +339,7 @@ void HU_Start(void)
     secret_on = false;
 
     // create the message widget
-
-    if(beta_style)
+    if (beta_style)
     {
         HUlib_initSText(&w_message_0,
                     HU_MSGX + 106, HU_MSGY + 179, HU_MSGHEIGHT,
@@ -369,7 +371,7 @@ void HU_Start(void)
     // create the map title widget
     if (show_title)
     {
-/*
+        /*
         if (d_statusmap)
         {
             HUlib_initTextLine(&w_title,
@@ -378,7 +380,7 @@ void HU_Start(void)
                                HU_FONTSTART);
         }
         else
-*/
+        */
         {
             if (!modifiedgame)
             {
@@ -429,7 +431,7 @@ void HU_Start(void)
                                HU_FONTSTART);
         }
     }
-/*
+    /*
     if (d_statusmap)
     {
         HUlib_initTextLine(&w_monsters1,
@@ -493,7 +495,7 @@ void HU_Start(void)
                            HU_FONTSTART);
     }
     else
-*/
+    */
     {
         HUlib_initTextLine(&w_monsters1,
                            HU_MONSECX1, HU_MONSTERSY + 32,
@@ -556,45 +558,54 @@ void HU_Start(void)
                            HU_FONTSTART);
     }
 
-    if(!modifiedgame)
+    if (!modifiedgame)
     {
-        switch ( logical_gamemission )
+        switch (logical_gamemission)
         {
-          case doom:
-            s = HU_TITLE;
-            break;
-          case doom2:
-            if(bfgedition)
-                s = HU_TITLE2_BFG;
-            else
-                s = HU_TITLE2;
-            break;
-          case pack_plut:
-            s = HU_TITLEP;
-            break;
-          case pack_tnt:
-            s = HU_TITLET;
-            break;
-          case pack_nerve:
-            if (gamemap <= 9)
-              s = HU_TITLEN;
-            else
-              s = HU_TITLE2;
-            break;
-          case pack_master:
-            if (gamemap <= 21)
-              s = HU_TITLEM;
-            else
-              s = HU_TITLE2;
-            break;
-          default:
-            break;
+            case doom:
+                s = HU_TITLE;
+                break;
+
+            case doom2:
+                if (bfgedition)
+                    s = HU_TITLE2_BFG;
+                else
+                    s = HU_TITLE2;
+
+                break;
+
+            case pack_plut:
+                s = HU_TITLEP;
+                break;
+
+            case pack_tnt:
+                s = HU_TITLET;
+                break;
+
+            case pack_nerve:
+                if (gamemap <= 9)
+                    s = HU_TITLEN;
+                else
+                    s = HU_TITLE2;
+
+                break;
+
+            case pack_master:
+                if (gamemap <= 21)
+                    s = HU_TITLEM;
+                else
+                    s = HU_TITLE2;
+
+                break;
+
+            default:
+                break;
         }
     }
 
     if (logical_gamemission == doom && gameversion == exe_chex)
     {
-        if(gamemap <= 5)
+        if (gamemap <= 5)
             s = HU_TITLE_CHEX;
         else
             s = HU_TITLE;
@@ -603,12 +614,12 @@ void HU_Start(void)
     {
         if (gamemap <= 20)
             s = HU_TITLE_HACX;
-        else if(gamemap == 31)
+        else if (gamemap == 31)
             s = "Desiccant Room";
         else
             s = HU_TITLE2;
 
-        if(gamemap == 33)
+        if (gamemap == 33)
             s = HU_TITLE2_BFG;
     }
 
@@ -616,7 +627,7 @@ void HU_Start(void)
     {
         if (mapinfo_lump)
         {
-            if(gamemode == commercial)
+            if (gamemode == commercial)
                 s = P_GetMapName(gamemap);
             else
                 s = P_GetMapName((gameepisode - 1) * 10 + gamemap);
@@ -625,7 +636,7 @@ void HU_Start(void)
         {
             char lump[6];
 
-            if(gamemode == commercial)
+            if (gamemode == commercial)
             {
                 if (gamemap < 10)
                     M_snprintf(lump, sizeof(s), "MAP0%i", gamemap);
@@ -669,12 +680,10 @@ void HU_Start(void)
     x = secretsstr3;
     n = secretsstr4;
 
-    if (((fsize != 12538385 &&
-        fsize != 14691821 &&
-        fsize != 14677988 &&
-        fsize != 14683458) ||
-        (fsize == 12538385 && gamemap != 10) ||
-        ((fsize == 14683458 || fsize == 14677988 || fsize == 14691821) && gamemap != 33)) && show_title)
+    if (((fsize != 12538385 && fsize != 14691821 && fsize != 14677988 &&
+        fsize != 14683458) || (fsize == 12538385 && gamemap != 10) ||
+        ((fsize == 14683458 || fsize == 14677988 || fsize == 14691821) &&
+        gamemap != 33)) && show_title)
     {
         while (*s)
             HUlib_addCharToTextLine(&w_title, *(s++));
@@ -729,11 +738,11 @@ void HU_Start(void)
         while (*v)
             HUlib_addCharToTextLine(&w_author_title, *(v++));
     }
-/*
+    /*
     // create the inputbuffer widgets
-    for (i=0 ; i<MAXPLAYERS ; i++)
+    for (i = 0; i < MAXPLAYERS; i++)
         HUlib_initIText(&w_inputbuffer[i], 0, 0, 0, 0, &always_off);
-*/
+    */
     if (W_CheckNumForName("MEDIA0"))
         healthpatch = W_CacheLumpNum(W_GetNumForName("MEDIA0"), PU_CACHE);
 
@@ -765,8 +774,9 @@ void HU_Start(void)
 }
 
 // [crispy] print a bar indicating demo progress at the bottom of the screen
+// FIXME: BUGGY (crashes)
 /*
-static void HU_DemoProgressBar (int scrn)                // FIXME: BUGGY (crashes)
+static void HU_DemoProgressBar(int scrn)
 {
     int i;
     extern char *demo_p, *demobuffer;
@@ -774,14 +784,23 @@ static void HU_DemoProgressBar (int scrn)                // FIXME: BUGGY (crashe
 
     i = SCREENWIDTH * (demo_p - demobuffer) / defdemosize;
 
-    V_DrawHorizLine(0, SCREENHEIGHT - 3, scrn, i, 4);     // [crispy] white
-    V_DrawHorizLine(0, SCREENHEIGHT - 2, scrn, i, 0);     // [crispy] black
-    V_DrawHorizLine(0, SCREENHEIGHT - 1, scrn, i, 4);     // [crispy] white
+    // [crispy] white
+    V_DrawHorizLine(0, SCREENHEIGHT - 3, scrn, i, 4);
 
-    V_DrawHorizLine(0, SCREENHEIGHT - 2, scrn, 1, 4);     // [crispy] white start
-    V_DrawHorizLine(i - 1, SCREENHEIGHT - 2, scrn, 1, 4); // [crispy] white end
+    // [crispy] black
+    V_DrawHorizLine(0, SCREENHEIGHT - 2, scrn, i, 0);
+
+    // [crispy] white
+    V_DrawHorizLine(0, SCREENHEIGHT - 1, scrn, i, 4);
+
+    // [crispy] white start
+    V_DrawHorizLine(0, SCREENHEIGHT - 2, scrn, 1, 4);
+
+    // [crispy] white end
+    V_DrawHorizLine(i - 1, SCREENHEIGHT - 2, scrn, 1, 4);
 }
 */
+
 void HU_DrawStats(void)
 {
     const char *r;
@@ -815,7 +834,7 @@ void HU_DrawStats(void)
     HUlib_clearTextLine(&w_secrets3);
     HUlib_clearTextLine(&w_secrets4);
 
-    //jff 3/26/98 use ESC not '\' for paths
+    // jff 3/26/98 use ESC not '\' for paths
     // build the init string with fixed colors
     sprintf(monstersstr1, "%d", plr->killcount);
     sprintf(monstersstr2, "/");
@@ -848,7 +867,7 @@ void HU_DrawStats(void)
     z = secretsstr3;
     q = secretsstr4;
 
-    //jff 2/17/98 initialize kills/items/secret widget
+    // jff 2/17/98 initialize kills/items/secret widget
     while (*r)
         HUlib_addCharToTextLine(&w_monsters1, *(r++));
 
@@ -886,9 +905,9 @@ void HU_DrawStats(void)
         HUlib_addCharToTextLine(&w_secrets4, *(q++));
 
     // display the kills/items/secrets each frame, if optioned
-    if(gamestate == GS_LEVEL && automapactive && !menuactive)
+    if (gamestate == GS_LEVEL && automapactive && !menuactive)
     {
-        if(am_overlay || (automapactive && !d_statusmap))
+        if (am_overlay || (automapactive && !d_statusmap))
         {
             HUlib_drawTextLine(&w_monsters1, false);
             HUlib_drawTextLine(&w_monsters2, false);
@@ -920,13 +939,16 @@ static void DrawHUDNumber(int *x, int y, int scrn, int val, byte *tinttab,
         hudnumfunc(*x, y, scrn, patch, tinttab);
         *x += SHORT(patch->width);
     }
+
     val %= 100;
+
     if (val > 9 || oldval > 99)
     {
         patch = tallnum[val / 10];
         hudnumfunc(*x, y, scrn, patch, tinttab);
         *x += SHORT(patch->width);
     }
+
     val %= 10;
     patch = tallnum[val];
     hudnumfunc(*x, y, scrn, patch, tinttab);
@@ -940,11 +962,15 @@ static int HUDNumberWidth(int val)
 
     if (val > 99)
         width += SHORT(tallnum[val / 100]->width);
+
     val %= 100;
+
     if (val > 9 || oldval > 99)
         width += SHORT(tallnum[val / 10]->width);
+
     val %= 10;
     width += SHORT(tallnum[val]->width);
+
     return width;
 }
 
@@ -1048,19 +1074,19 @@ void HU_DrawHUD(void)
         if (ammo < 200 && ammo > 99)
             offset_special = 3;
 
-        if(plr->readyweapon == wp_pistol)
+        if (plr->readyweapon == wp_pistol)
             patch = W_CacheLumpName("CLIPA0", PU_CACHE);
-        else if(plr->readyweapon == wp_shotgun)
+        else if (plr->readyweapon == wp_shotgun)
             patch = W_CacheLumpName("SHELA0", PU_CACHE);
-        else if(plr->readyweapon == wp_chaingun)
+        else if (plr->readyweapon == wp_chaingun)
             patch = W_CacheLumpName("AMMOA0", PU_CACHE);
-        else if(plr->readyweapon == wp_missile)
+        else if (plr->readyweapon == wp_missile)
             patch = W_CacheLumpName("ROCKA0", PU_CACHE);
-        else if(plr->readyweapon == wp_plasma)
+        else if (plr->readyweapon == wp_plasma)
             patch = W_CacheLumpName("CELLA0", PU_CACHE);
-        else if(plr->readyweapon == wp_bfg)
+        else if (plr->readyweapon == wp_bfg)
             patch = W_CacheLumpName("CELPA0", PU_CACHE);
-        else if(plr->readyweapon == wp_supershotgun)
+        else if (plr->readyweapon == wp_supershotgun)
             patch = W_CacheLumpName("SBOXA0", PU_CACHE);
         else
             patch = W_CacheLumpName("TNT1A0", PU_CACHE);
@@ -1196,15 +1222,15 @@ void HU_DrawHUD(void)
 
 void HU_Drawer(void)
 {
-    if(!automapactive && !demoplayback && crosshair == 1)
+    if (!automapactive && !demoplayback && crosshair)
     {
-        if(screenSize < 8)
+        if (screenSize < 8)
             V_DrawPatch(158, 82, 0, W_CacheLumpName("XHAIR", PU_CACHE));
         else
             V_DrawPatch(158, 98, 0, W_CacheLumpName("XHAIR", PU_CACHE));
     }
 
-    if(beta_style)
+    if (beta_style)
     {
         HUlib_drawSText(&w_message_0);
         HUlib_drawSText(&w_message_1);
@@ -1212,7 +1238,7 @@ void HU_Drawer(void)
     }
     else
     {
-        if(gamestate == GS_LEVEL)
+        if (gamestate == GS_LEVEL)
             HUlib_drawSText(&w_message);
         else
             HU_Erase();
@@ -1232,18 +1258,18 @@ void HU_Drawer(void)
               ))) ||
               (show_authors && nerve_pwad) || (show_authors && master_pwad))))
         {
-            if(((!modifiedgame || nerve_pwad) && !d_statusmap) || (am_overlay && !modifiedgame))
+            if (((!modifiedgame || nerve_pwad) && !d_statusmap) || (am_overlay && !modifiedgame))
             {
                 HUlib_drawTextLine(&w_author_title, false);
                 HUlib_drawTextLine(&w_authors, false);
             }
 
-            if((!beta_style && show_title && automapactive && !d_statusmap) || am_overlay)
+            if ((!beta_style && show_title && automapactive && !d_statusmap) || am_overlay)
                 HUlib_drawTextLine(&w_title, false);
         }
 
         // display the hud kills/items/secret display if optioned
-        if (show_stats == 1)
+        if (show_stats)
             HU_DrawStats();
 
         if (timer_info == 1)
@@ -1253,16 +1279,17 @@ void HU_Drawer(void)
 
     if (dp_translucent)
         dp_translucent = false;
-/*
-    // [crispy] demo progress bar        // FIXME (crashing)
+    /*
+    // [crispy] demo progress bar
+    // FIXME (crashing)
     if (demoplayback)
         HU_DemoProgressBar(0);
-*/
+    */
 }
 
 void HU_Erase(void)
 {
-    if(beta_style)
+    if (beta_style)
     {
         HUlib_eraseSText(&w_message_0);
         HUlib_eraseSText(&w_message_1);
@@ -1283,7 +1310,7 @@ void HU_Ticker(void)
         message_nottobefuckedwith = false;
         blurred = false;
 
-        if(beta_style)
+        if (beta_style)
         {
             show_chat_bar = false;
         }
@@ -1297,8 +1324,7 @@ void HU_Ticker(void)
     if (showMessages || message_dontfuckwithme)
     {
         // display message if necessary
-        if (plr->message
-            && !strncmp(plr->message, HUSTR_SECRETFOUND, 21))
+        if (plr->message && !strncmp(plr->message, HUSTR_SECRETFOUND, 21))
         {
             HUlib_addMessageToSText(&w_secret, 0, plr->message);
             plr->message = 0;
@@ -1308,19 +1334,20 @@ void HU_Ticker(void)
         else if ((plr->message && !message_nottobefuckedwith)
             || (plr->message && message_dontfuckwithme))
         {
-            if(beta_style)
+            if (beta_style)
             {
-                if(plr->messages[1])
+                if (plr->messages[1])
                 {
                     plr->messages[0] = plr->messages[1];
                     HUlib_addMessageToSText(&w_message_0, 0, plr->messages[0]);
                 }
 
-                if(plr->messages[2])
+                if (plr->messages[2])
                 {
                     plr->messages[1] = plr->messages[2];
                     HUlib_addMessageToSText(&w_message_1, 0, plr->messages[1]);
                 }
+
                 plr->messages[2] = plr->message;
                 HUlib_addMessageToSText(&w_message_2, 0, plr->messages[2]);
 
@@ -1336,25 +1363,27 @@ void HU_Ticker(void)
             message_dontfuckwithme = 0;
         }
 
-    } // else message_on = false;
+    }
+    //else
+    //  message_on = false;
 }
+
 /*
 dboolean HU_Responder(event_t *ev)
 {
-    dboolean       eatkey = false;
+    dboolean      eatkey = false;
 
     int           i;
 
-    int           numplayers;
-    
-    numplayers = 0;
+    int           numplayers = 0;
 
-    for (i=0 ; i<MAXPLAYERS ; i++)
+    for (i = 0; i < MAXPLAYERS; i++)
         numplayers += playeringame[i];
 
     return eatkey;
 }
 */
+
 // hu_newlevel called when we enter a new level
 // determine the level name and display it in
 // the console
@@ -1362,50 +1391,59 @@ void HU_NewLevel()
 {
     char       *s = "Unknown level";
 
-    if(!modifiedgame)
+    if (!modifiedgame)
     {
-        switch ( logical_gamemission )
+        switch (logical_gamemission)
         {
-          case doom:
-            s = HU_TITLE;
-            break;
-          case doom2:
-             if(bfgedition)
-                 s = HU_TITLE2_BFG;
-             else
-                 s = HU_TITLE2;
-             break;
-          case pack_plut:
-            s = HU_TITLEP;
-            break;
-          case pack_tnt:
-            s = HU_TITLET;
-            break;
-          case pack_nerve:
-            if (gamemap <= 9)
-              s = HU_TITLEN;
-            else
-            {
-              if(bfgedition)
-                s = HU_TITLE2_BFG;
-              else
-                s = HU_TITLE2;
-            }
-            break;
-          case pack_master:
-            if (gamemap <= 21)
-              s = HU_TITLEM;
-            else
-              s = HU_TITLE2;
-            break;
-          default:
-            break;
+            case doom:
+                s = HU_TITLE;
+                break;
+
+            case doom2:
+                if (bfgedition)
+                    s = HU_TITLE2_BFG;
+                else
+                    s = HU_TITLE2;
+
+                break;
+
+            case pack_plut:
+                s = HU_TITLEP;
+                break;
+
+            case pack_tnt:
+                s = HU_TITLET;
+                break;
+
+            case pack_nerve:
+                if (gamemap <= 9)
+                    s = HU_TITLEN;
+                else
+                {
+                    if (bfgedition)
+                        s = HU_TITLE2_BFG;
+                    else
+                        s = HU_TITLE2;
+                }
+
+                break;
+
+            case pack_master:
+                if (gamemap <= 21)
+                    s = HU_TITLEM;
+                else
+                    s = HU_TITLE2;
+
+                break;
+
+            default:
+                break;
         }
     }
 
     if (logical_gamemission == doom && gameversion == exe_chex)
     {
-        if(gamemap <= 5)
+        if (gamemap <= 5)
             s = HU_TITLE_CHEX;
         else
             s = HU_TITLE;
@@ -1414,12 +1452,12 @@ void HU_NewLevel()
     {
         if (gamemap <= 20)
             s = HU_TITLE_HACX;
-        else if(gamemap == 31)
+        else if (gamemap == 31)
             s = "Desiccant Room";
         else
             s = HU_TITLE2;
 
-        if(gamemap == 33)
+        if (gamemap == 33)
             s = HU_TITLE2_BFG;
     }
 
@@ -1429,7 +1467,7 @@ void HU_NewLevel()
     {
         if (mapinfo_lump)
         {
-            if(gamemode == commercial)
+            if (gamemode == commercial)
                 s = P_GetMapName(gamemap);
             else
                 s = P_GetMapName((gameepisode - 1) * 10 + gamemap);
@@ -1438,7 +1476,7 @@ void HU_NewLevel()
         {
             char lump[6];
 
-            if(gamemode == commercial)
+            if (gamemode == commercial)
             {
                 if (gamemap < 10)
                     M_snprintf(lump, sizeof(s), "MAP0%i", gamemap);
@@ -1458,7 +1496,7 @@ void HU_NewLevel()
 
     C_Output("");
 
-    if(gameepisode == 1 && gamemap == 10 && fsize == 12538385)
+    if (gameepisode == 1 && gamemap == 10 && fsize == 12538385)
         C_Output("%s", "E1M10: Sewers");
     else
         C_Output("%s", uppercase(s));

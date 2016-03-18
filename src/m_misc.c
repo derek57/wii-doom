@@ -51,14 +51,12 @@
 //
 // Create a directory
 //
-
 void M_MakeDirectory(char *path)
 {
     mkdir(path, 0755);
 }
 
 // Check if a file exists
-
 dboolean M_FileExists(char *filename)
 {
     FILE *fstream;
@@ -74,7 +72,6 @@ dboolean M_FileExists(char *filename)
     {
         // If we can't open because the file is a directory, the 
         // "file" exists at least!
-
         return errno == EISDIR;
     }
 }
@@ -82,7 +79,6 @@ dboolean M_FileExists(char *filename)
 //
 // Determine the length of an open file.
 //
-
 long M_FileLength(FILE *handle)
 { 
     long savedpos;
@@ -104,7 +100,6 @@ long M_FileLength(FILE *handle)
 //
 // M_WriteFile
 //
-
 dboolean M_WriteFile(char *name, void *source, int length)
 {
     FILE *handle;
@@ -130,11 +125,9 @@ dboolean M_WriteFile(char *name, void *source, int length)
     return true;
 }
 
-
 //
 // M_ReadFile
 //
-
 int M_ReadFile(char *name, byte **buffer)
 {
     FILE *handle;
@@ -142,15 +135,15 @@ int M_ReadFile(char *name, byte **buffer)
     byte *buf;
         
     handle = fopen(name, "rb");
+
     if (handle == NULL)
     {
-         I_Error("Couldn't read file %s", name);
+        I_Error("Couldn't read file %s", name);
         return 0;
     }
 
     // find the size of the file by seeking to the end and
     // reading the current position
-
     length = M_FileLength(handle);
     
     buf = Z_Malloc (length, PU_STATIC, NULL);
@@ -168,7 +161,6 @@ int M_ReadFile(char *name, byte **buffer)
 // inside the system temporary directory.
 //
 // The returned value must be freed with Z_Free after use.
-
 char *M_TempFile(char *s)
 {
     char *tempdir;
@@ -206,7 +198,6 @@ void M_ExtractFileBase(char *path, char *dest)
     // Note: Vanilla Doom exits with an error if a filename is specified
     // with a base of more than eight characters.  To remove the 8.3
     // filename limit, instead we simply truncate the name.
-
     length = 0;
     memset(dest, 0, 8);
 
@@ -249,7 +240,6 @@ void M_ForceUppercase(char *text)
 //
 // Case-insensitive version of strstr()
 //
-
 char *M_StrCaseStr(char *haystack, char *needle)
 {
     unsigned int haystack_len;
@@ -282,7 +272,6 @@ char *M_StrCaseStr(char *haystack, char *needle)
 // Safe version of strdup() that checks the string was successfully
 // allocated.
 //
-
 char *M_StringDuplicate(const char *orig)
 {
     char *result;
@@ -301,7 +290,6 @@ char *M_StringDuplicate(const char *orig)
 //
 // String replace function.
 //
-
 char *M_StringReplace(const char *haystack, const char *needle,
                       const char *replacement)
 {
@@ -318,6 +306,7 @@ char *M_StringReplace(const char *haystack, const char *needle,
     for (;;)
     {
         p = strstr(p, needle);
+
         if (p == NULL)
         {
             break;
@@ -328,8 +317,8 @@ char *M_StringReplace(const char *haystack, const char *needle,
     }
 
     // Construct new string.
-
     result = malloc(result_len);
+
     if (result == NULL)
     {
         I_Error("M_StringReplace: Failed to allocate new string");
@@ -361,7 +350,6 @@ char *M_StringReplace(const char *haystack, const char *needle,
 
 // Safe string copy function that works like OpenBSD's strlcpy().
 // Returns true if the string was not truncated.
-
 dboolean M_StringCopy(char *dest, const char *src, size_t dest_size)
 {
     size_t len;
@@ -382,12 +370,12 @@ dboolean M_StringCopy(char *dest, const char *src, size_t dest_size)
 
 // Safe string concat function that works like OpenBSD's strlcat().
 // Returns true if string not truncated.
-
 dboolean M_StringConcat(char *dest, const char *src, size_t dest_size)
 {
     size_t offset;
 
     offset = strlen(dest);
+
     if (offset > dest_size)
     {
         offset = dest_size;
@@ -397,7 +385,6 @@ dboolean M_StringConcat(char *dest, const char *src, size_t dest_size)
 }
 
 // Returns true if 's' begins with the specified prefix.
-
 dboolean M_StringStartsWith(const char *s, const char *prefix)
 {
     return strlen(s) > strlen(prefix)
@@ -405,7 +392,6 @@ dboolean M_StringStartsWith(const char *s, const char *prefix)
 }
 
 // Returns true if 's' ends with the specified suffix.
-
 dboolean M_StringEndsWith(const char *s, const char *suffix)
 {
     return strlen(s) >= strlen(suffix)
@@ -414,7 +400,6 @@ dboolean M_StringEndsWith(const char *s, const char *suffix)
 
 // Return a newly-malloced string with all the strings given as arguments
 // concatenated together.
-
 char *M_StringJoin(const char *s, ...)
 {
     char *result;
@@ -425,9 +410,11 @@ char *M_StringJoin(const char *s, ...)
     result_len = strlen(s) + 1;
 
     va_start(args, s);
+
     for (;;)
     {
         v = va_arg(args, const char *);
+
         if (v == NULL)
         {
             break;
@@ -435,6 +422,7 @@ char *M_StringJoin(const char *s, ...)
 
         result_len += strlen(v);
     }
+
     va_end(args);
 
     result = malloc(result_len);
@@ -448,9 +436,11 @@ char *M_StringJoin(const char *s, ...)
     M_StringCopy(result, s, result_len);
 
     va_start(args, s);
+
     for (;;)
     {
         v = va_arg(args, const char *);
+
         if (v == NULL)
         {
             break;
@@ -458,6 +448,7 @@ char *M_StringJoin(const char *s, ...)
 
         M_StringConcat(result, v, result_len);
     }
+
     va_end(args);
 
     return result;
@@ -526,6 +517,7 @@ char *M_DirName(char *path)
 
     // path string does not contain a directory separator
     free(res);
+
     return M_StringDuplicate(".");
 }
 */
@@ -536,6 +528,7 @@ char *uppercase(char *str)
     char        *p;
 
     p = newstr = strdup(str);
+
     while ((*p = toupper(*p)))
         p++;
 
@@ -547,16 +540,20 @@ char *commify(int value)
     char result[64];
 
     M_snprintf(result, sizeof(result), "%i", value);
+
     if (ABS(value) >= 1000)
     {
         char        *pt;
         int         n;
 
         for (pt = result; *pt && *pt != '.'; pt++);
+
         n = result + sizeof(result) - pt;
+
         do
         {
             pt -= 3;
+
             if (pt > result)
             {
                 memmove(pt + 1, pt, n);
@@ -565,8 +562,10 @@ char *commify(int value)
             }
             else
                 break;
+
         } while (1);
     }
+
     return strdup(result);
 }
 
@@ -580,6 +579,7 @@ char *M_ExtractFilename(char *path)
 
     if (!pdest)
         pdest = strrchr(path, '/');
+
     if (!pdest)
         pdest = path;
     else
@@ -617,6 +617,7 @@ char *titlecase(const char *str)
         size_t  i;
 
         newstr[0] = toupper(newstr[0]);
+
         for (i = 1; i < len; ++i)
             if (!isalnum((unsigned char)newstr[i - 1]) && isalnum((unsigned char)newstr[i]))
                 newstr[i] = toupper(newstr[i]);
@@ -635,18 +636,20 @@ int stricmp(const char *string1, const char *string2)
     char dest[4096];
     int i;
 
-    for (i=0; i<strlen(string1); i++)
+    for (i = 0; i < strlen(string1); i++)
         if (string1[i] >= 'A' && string1[i] <= 'Z')
             src[i] = string1[i] + 32;
         else
             src[i] = string1[i];
+
     src[i] = 0;
 
-    for (i=0; i<strlen(string2); i++)
+    for (i = 0; i < strlen(string2); i++)
         if (string2[i] >= 'A' && string2[i] <= 'Z')
             dest[i] = string2[i] + 32;
         else
             dest[i] = string2[i];
+
     dest[i] = 0;
 
     return strcmp(src, dest);
@@ -707,6 +710,7 @@ int search_string(char src[], char str[])
         i = firstOcc + 1;
         j = 0;
     }
+
     return 0;
 }
 
@@ -720,6 +724,6 @@ char *M_SubString(const char *str, size_t begin, size_t len)
 
 int randInRange(int min, int max)
 {
-    return min + (int) ((double)rand() / (double)RAND_MAX * (max - min + 1));
+    return min + (int)((double)rand() / (double)RAND_MAX * (max - min + 1));
 }
 

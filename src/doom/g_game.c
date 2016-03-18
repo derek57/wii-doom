@@ -94,31 +94,31 @@
 // DOOM Par Times
 int pars[4][10] = 
 { 
-    {0}, 
-    {0,30,75,120,90,165,180,180,30,165}, 
-    {0,90,90,90,120,90,360,240,30,170}, 
-    {0,90,45,90,150,90,90,165,30,135} 
+    { 0}, 
+    { 0, 30, 75, 120,  90, 165, 180, 180, 30, 165 }, 
+    { 0, 90, 90,  90, 120,  90, 360, 240, 30, 170 }, 
+    { 0, 90, 45,  90, 150,  90,  90, 165, 30, 135 } 
 }; 
 
 // DOOM II Par Times
 int cpars[32] =
 {
-    30,90,120,120,90,150,120,120,270,90,        //  1-10
-    210,150,150,150,210,150,420,150,210,150,    // 11-20
-    240,150,180,150,150,300,330,420,300,180,    // 21-30
-    120,30                                      // 31-32
+     30,  90, 120, 120,  90, 150, 120, 120, 270,  90,    //  1-10
+    210, 150, 150, 150, 210, 150, 420, 150, 210, 150,    // 11-20
+    240, 150, 180, 150, 150, 300, 330, 420, 300, 180,    // 21-30
+    120,  30                                             // 31-32
 };
  
 // [crispy] Episode 4 par times from the BFG Edition
 static int e4pars[10] =
 {
-    0,165,255,135,150,180,390,135,360,180
+    0, 165, 255, 135, 150, 180, 390, 135, 360, 180
 };
 
 // [crispy] No Rest For The Living par times from the BFG Edition
 static int npars[9] =
 {
-    75,105,120,105,210,105,165,105,135
+    75, 105, 120, 105, 210, 105, 165, 105, 135
 };
 
 
@@ -137,7 +137,7 @@ player_t        players[MAXPLAYERS];
 // parms for world map / intermission 
 wbstartstruct_t wminfo;
 
-mobj_t*         bodyque[BODYQUESIZE]; 
+mobj_t          *bodyque[BODYQUESIZE]; 
 
 // + slow turn 
 fixed_t         angleturn;
@@ -178,7 +178,9 @@ int             displayplayer;
 int             levelstarttic;
 
 // for intermission 
-int             totalkills, totalitems, totalsecret;
+int             totalkills;
+int             totalitems;
+int             totalsecret;
 
 int             turnspd;
 int             joy_a = 1;
@@ -283,9 +285,9 @@ dboolean        nodrawers;
 char            *demoname;
 char            *defdemoname; 
 
-byte*           demobuffer;
-byte*           demo_p;
-byte*           demoend; 
+byte            *demobuffer;
+byte            *demo_p;
+byte            *demoend; 
 */
 byte            consistancy[MAXPLAYERS][BACKUPTICS]; 
 
@@ -333,15 +335,15 @@ static const struct
     weapontype_t weapon;
     weapontype_t weapon_num;
 } weapon_order_table[] = {
-    { wp_fist,            wp_fist     },
-    { wp_chainsaw,        wp_fist     },
-    { wp_pistol,          wp_pistol   },
-    { wp_shotgun,         wp_shotgun  },
-    { wp_supershotgun,    wp_shotgun  },
-    { wp_chaingun,        wp_chaingun },
-    { wp_missile,         wp_missile  },
-    { wp_plasma,          wp_plasma   },
-    { wp_bfg,             wp_bfg      }
+    { wp_fist        , wp_fist     },
+    { wp_chainsaw    , wp_fist     },
+    { wp_pistol      , wp_pistol   },
+    { wp_shotgun     , wp_shotgun  },
+    { wp_supershotgun, wp_shotgun  },
+    { wp_chaingun    , wp_chaingun },
+    { wp_missile     , wp_missile  },
+    { wp_plasma      , wp_plasma   },
+    { wp_bfg         , wp_bfg      }
 };
 #endif
 
@@ -357,6 +359,7 @@ extern dboolean map_flag;
 extern dboolean transferredsky;
 extern dboolean long_tics;
 extern dboolean mouse_grabbed;
+extern dboolean splashscreen;
 
 // how far the window zooms in each tic (map coords)
 extern fixed_t  mtof_zoommul;
@@ -371,7 +374,7 @@ extern menu_t   *currentMenu;
 // menu item skull is on
 extern short    itemOn;
 
-extern char*    pagename; 
+extern char     *pagename; 
 
 
 void ChangeWeaponRight(void)
@@ -399,10 +402,10 @@ void ChangeWeaponRight(void)
             if (plyrweap->weaponowned[num])
             {
                 plyrweap->pendingweapon = num;
-
                 break;
             }
         }
+
         kbevent.type = ev_keydown;
         kbevent.data1 = KEY_1 + num;
 
@@ -437,11 +440,11 @@ void ChangeWeaponLeft(void)
             if (plyrweap->weaponowned[num])
             {
                 plyrweap->pendingweapon = num;
-
                 break;
             }
         }
-        if(num == wp_supershotgun)
+
+        if (num == wp_supershotgun)
             num = wp_fist;
 
         kbevent.type = ev_keydown;
@@ -522,6 +525,7 @@ static int G_NextWeapon(int direction)
     {
         i += direction;
         i = (i + arrlen(weapon_order_table)) % arrlen(weapon_order_table);
+
     } while (i != start_i && !WeaponSelectable(weapon_order_table[i].weapon));
 
     return weapon_order_table[i].weapon_num;
@@ -586,6 +590,7 @@ void G_BuildTiccmd(ticcmd_t *cmd, int maketic)
             // fprintf(stderr, "strafe right\n");
             side += sidemve; 
         }
+
         if (gamekeydown[key_left] || mousebuttons[mousebstrafeleft] || gamekeydown[key_strafeleft]) 
         {
 #ifndef WII
@@ -702,13 +707,13 @@ void G_BuildTiccmd(ticcmd_t *cmd, int maketic)
             sidemve = sidemove * 6;
             turnspd = turnspeed * 4;
         }
-        else if(
+        else if (
 #ifdef WII
                 !joybuttons[joybspeed]
 #else
                 !speed
 #endif
-           )
+                )
         {
             forwardmve = forwardmove;
             sidemve = sidemove;
@@ -734,7 +739,7 @@ void G_BuildTiccmd(ticcmd_t *cmd, int maketic)
     if (cmd->angleturn > 1280)
         cmd->angleturn = 1280;
 
-    if(mouselook == 0)
+    if (mouselook == 0)
         look = -8;
 
     // Fly up/down/drop keys
@@ -828,13 +833,13 @@ void G_BuildTiccmd(ticcmd_t *cmd, int maketic)
                 {
                     if (!menuactive)
                     {
-                        M_StartControlPanel ();
+                        M_StartControlPanel();
                         S_StartSound(NULL, sfx_swtchn);
                     }
                     else
                     {
                         currentMenu->lastOn = itemOn;
-                        M_ClearMenus ();
+                        M_ClearMenus();
                         S_StartSound(NULL, sfx_swtchx);
                     }
                 
@@ -844,7 +849,7 @@ void G_BuildTiccmd(ticcmd_t *cmd, int maketic)
                         {
                             if (joybuttons[joybmenu])
                             {
-                                M_ClearMenus ();
+                                M_ClearMenus();
                                 messageToPrint = 0;
                                 menuactive = false;
                                 S_StartSound(NULL, sfx_swtchx);
@@ -1121,6 +1126,7 @@ void G_BuildTiccmd(ticcmd_t *cmd, int maketic)
         {
             look += 16;
         }
+
         cmd->lookfly = look;
     }
 
@@ -1199,8 +1205,10 @@ dboolean G_Responder(event_t *ev)
             (ev->type == ev_joystick && ev->data1)) 
         { 
             M_StartControlPanel(); 
+
             return true; 
-        } 
+        }
+
         return false; 
     } 
 #endif
@@ -1211,6 +1219,7 @@ dboolean G_Responder(event_t *ev)
         if (devparm && ev->type == ev_keydown && ev->data1 == ';') 
         { 
             G_DeathMatchSpawnPlayer(0); 
+
             return true; 
         } 
 #endif 
@@ -1319,6 +1328,7 @@ dboolean G_Responder(event_t *ev)
                         next_weapon = -1;
                 }
             }
+
             return true;
 #else
         case ev_joystick: 
@@ -1368,6 +1378,7 @@ void G_ReadDemoTiccmd(ticcmd_t *cmd)
 
         return; 
     } 
+
     cmd->forwardmove = ((signed char)*demo_p++); 
     cmd->sidemove = ((signed char)*demo_p++); 
 
@@ -1552,6 +1563,7 @@ dboolean G_CheckSpot(int playernum, mapthing_t *mthing)
 
                 // finesine[-4096]
                 ya = finetangent[0];
+
                 break;
 
             // -3072:
@@ -1561,6 +1573,7 @@ dboolean G_CheckSpot(int playernum, mapthing_t *mthing)
 
                 // finesine[-3072]
                 ya = finetangent[1024];
+
                 break;
 
             // -2048:
@@ -1570,6 +1583,7 @@ dboolean G_CheckSpot(int playernum, mapthing_t *mthing)
 
                 // finesine[-2048]
                 ya = finetangent[2048];
+
                 break;
 
             // -1024:
@@ -1579,6 +1593,7 @@ dboolean G_CheckSpot(int playernum, mapthing_t *mthing)
 
                 // finesine[-1024]
                 ya = finetangent[3072];
+
                 break;
 
             case 0:
@@ -1594,6 +1609,7 @@ dboolean G_CheckSpot(int playernum, mapthing_t *mthing)
                 xa = ya = 0;
                 break;
         }
+
         mo = P_SpawnMobj(x + 20 * xa, y + 20 * ya,
                          ss->sector->floorheight, MT_TFOG);
     }
@@ -1648,10 +1664,12 @@ void G_DoReborn(int playernum)
 
                 // restore 
                 playerstarts[i].type = i + 1;
+
                 return; 
             } 
             // he's going to be inside something.  Too bad.
         }
+
         P_SpawnPlayer(&playerstarts[playernum]); 
     } 
 } 
@@ -1785,7 +1803,7 @@ void G_DoNewGame(void)
     respawnparm = start_respawnparm;
     fastparm = start_fastparm;
 
-    if(!not_monsters)
+    if (!not_monsters)
         nomonsters = false;
     else
         nomonsters = true;
@@ -1985,9 +2003,7 @@ void G_DoPlayDemo(void)
 //
 void G_PlayerFinishLevel(int player) 
 { 
-    player_t*  p; 
-         
-    p = &players[player]; 
+    player_t  *p = &players[player]; 
 
     memset(p->powers, 0, sizeof (p->powers)); 
     memset(p->cards, 0, sizeof (p->cards)); 
@@ -2052,12 +2068,14 @@ void G_DoCompleted(void)
                 case 9: 
                     for (i = 0; i < MAXPLAYERS; i++) 
                         players[i].didsecret = true; 
+
                     secret_2 = true;
                     break;
 
                 case 10: 
                     for (i = 0; i < MAXPLAYERS; i++) 
                         players[i].didsecret = true; 
+
                     secret_1 = true;
                     break;
             }
@@ -2069,6 +2087,7 @@ void G_DoCompleted(void)
     {
         // victory 
         gameaction = ga_victory; 
+
         return; 
     } 
 
@@ -2129,12 +2148,13 @@ void G_DoCompleted(void)
         {
             switch (gamemap)
             {
-                if(fsize == 14677988 || fsize == 14683458)
+                if (fsize == 14677988 || fsize == 14683458)
                 {
                     case 2:
                         wminfo.next = 32;
                         break;
                 }
+
                 case 15:
                     wminfo.next = 30;
                     break;
@@ -2148,12 +2168,13 @@ void G_DoCompleted(void)
         {
             switch (gamemap)
             {
-                if(fsize == 14677988 || fsize == 14683458)
+                if (fsize == 14677988 || fsize == 14683458)
                 {
                     case 33:
                         wminfo.next = 2;
                         break;
                 }
+
                 case 31:
                 case 32:
                     wminfo.next = 15;
@@ -2185,12 +2206,15 @@ void G_DoCompleted(void)
                 case 1: 
                     wminfo.next = 3; 
                     break; 
+
                 case 2: 
                     wminfo.next = 5; 
                     break; 
+
                 case 3: 
                     wminfo.next = 6; 
                     break; 
+
                 case 4:
                     wminfo.next = 2;
                     break;
@@ -2464,9 +2488,9 @@ void G_Ticker (void)
 
             case ga_screenshot: 
 #ifdef WII
-                if(usb)
+                if (usb)
                     V_ScreenShot(0, "usb:/apps/wiidoom/screenshots/DOOM%02i.%s"); 
-                else if(sd)
+                else if (sd)
                     V_ScreenShot(0, "sd:/apps/wiidoom/screenshots/DOOM%02i.%s"); 
 #else
                 V_ScreenShot(0, "DOOM%02i.%s"); 
@@ -2494,6 +2518,7 @@ void G_Ticker (void)
 /*
             if (demoplayback) 
                 G_ReadDemoTiccmd(cmd); 
+
             if (demorecording) 
                 G_WriteDemoTiccmd(cmd);
 */
@@ -2550,8 +2575,9 @@ void G_Ticker (void)
                         if (paused) 
                             S_PauseSound(); 
                         else 
-                            S_ResumeSound(); 
-                        break; 
+                            S_ResumeSound();
+
+                        break;
 
                     case BTS_SAVEGAME: 
                         // [crispy] never override savegames by demo playback
@@ -2614,7 +2640,7 @@ void G_Ticker (void)
 //
 void G_PlayerReborn(int player) 
 {
-    player_t*       p = &players[player]; 
+    player_t        *p = &players[player]; 
     int             i; 
     int             frags[MAXPLAYERS]; 
     int             killcount = p->killcount;
@@ -2768,7 +2794,7 @@ void G_WorldDone(void)
             case 11:
             case 20:
             case 30:
-                F_StartFinale ();
+                F_StartFinale();
                 break;
         }
     }
@@ -2945,7 +2971,7 @@ void G_InitNew(skill_t skill, int episode, int map)
     if (skill == sk_nightmare)
     {
         chaingun_tics = 4;
-        use_vanilla_weapon_change = 1;
+        use_vanilla_weapon_change = true;
         aiming_help = false;
     }
 

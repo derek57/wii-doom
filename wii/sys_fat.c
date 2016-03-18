@@ -9,13 +9,15 @@ s32 Fat_Mount(fatDevice *dev)
 {
     s32 ret;
 
-    /* Initialize interface */
+    // Initialize interface
     ret = dev->interface->startup();
+
     if (!ret)
         return -1;
 
-    /* Mount device */
+    // Mount device
     ret = fatMountSimple(dev->mount, dev->interface);
+
     if (!ret)
         return -1;
 
@@ -47,13 +49,14 @@ char *Fat_ToFilename(const char *filename)
     // Get filename length
     len = strlen(filename);
 
-    for (cnt = idx = 0; idx < len; idx++) {
+    for (cnt = idx = 0; idx < len; idx++)
+    {
         char c = filename[idx];
 
         // Valid characters
-        if ( (c >= '#' && c <= ')') || (c >= '-' && c <= '.') ||
-             (c >= '0' && c <= '9') || (c >= 'A' && c <= 'z') ||
-             (c >= 'a' && c <= 'z') || (c == '!') )
+        if ((c >= '#' && c <= ')') || (c >= '-' && c <= '.') ||
+            (c >= '0' && c <= '9') || (c >= 'A' && c <= 'z') ||
+            (c >= 'a' && c <= 'z') || (c == '!'))
             buffer[cnt++] = c;
     }
 

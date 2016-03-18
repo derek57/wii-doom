@@ -45,19 +45,30 @@ typedef enum
     ev_joystick,
     ev_quit,
     ev_mousewheel
+
 } evtype_t;
 
 // Event structure.
 typedef struct
 {
     evtype_t            type;
-    int                 data1;          // keys / mouse/joystick buttons
-    int                 data2;          // mouse/joystick x move
-    int                 data3;          // mouse/joystick y move
-    int                 data4;          // wii ir x
-    int                 data5;          // wii ir y
-} event_t;
 
+    // keys / mouse/joystick buttons
+    int                 data1;
+
+    // mouse/joystick x move
+    int                 data2;
+
+    // mouse/joystick y move
+    int                 data3;
+
+    // wii ir x
+    int                 data4;
+
+    // wii ir y
+    int                 data5;
+
+} event_t;
  
 //
 // Button/action code definitions.
@@ -77,7 +88,7 @@ typedef enum
     // If true, the next 3 bits hold weapon num.
     BT_CHANGE           = 4,
     // The 3bit weapon mask and shift, convenience.
-    BT_WEAPONMASK       = (8+16+32),
+    BT_WEAPONMASK       = (8 + 16 + 32),
     BT_WEAPONSHIFT      = 3,
 
     // Pause the game.
@@ -87,14 +98,14 @@ typedef enum
 
     // Savegame slot numbers
     //  occupy the second byte of buttons.    
-    BTS_SAVEMASK        = (4+8+16),
-    BTS_SAVESHIFT       = 2,
+    BTS_SAVEMASK        = (4 + 8 + 16),
+    BTS_SAVESHIFT       = 2
   
 } buttoncode_t;
 
 
 // Called by IO functions when input is detected.
-void D_PostEvent (event_t *ev);
+void D_PostEvent(event_t *ev);
 
 // Read an event from the event queue
 

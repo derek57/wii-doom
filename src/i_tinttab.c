@@ -63,27 +63,15 @@
 
 static byte general[256] =
 {
-    0,X,0,0,R|B,0,0,0,0,0,0,0,0,0,0,0,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,
-    R,R,R,R,R,R,R,R,R,R,R,R,W,W,W,W,W,W,W,W,W,W,W,W,W,W,W,W,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,X,X,X,R,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,G,G,G,G,G,G,G,G,G,G,G,G,G,G,G,G,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,R,
-    R,R,R,R,R,R,R,R,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,R,R,R,R,R,R,R,R,R,R,R,R,R,
-    R,R,R,R|B,R|B,R,R,R,R,R,R,X,X,X,X,0,0,0,0,B,B,B,B,B,B,B,B,R,R,0,0,0,0,0,0
+    0, X, 0, 0, R | B, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, R, R, R, R, R, R, R, R, R, R, R, R, R, R, R, R, R, R, R, R, 
+    R, R, R, R, R, R, R, R, R, R, R, R, W, W, W, W, W, W, W, W, W, W, W, W, W, W, W, W, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    0, 0, 0, 0, X, X, X, R, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    0, 0, G, G, G, G, G, G, G, G, G, G, G, G, G, G, G, G, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, R, R, R, R, R, R, R, R, R, R, R, R, R, R, R, R, R, R, R, R, R, R, R, R, 
+    R, R, R, R, R, R, R, R, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, R, R, R, R, R, R, R, R, R, R, R, R, R, 
+    R, R, R, R | B, R | B, R, R, R, R, R, R, X, X, X, X, 0, 0, 0, 0, B, B, B, B, B, B, B, B, R, R, 0, 0, 0, 0, 0, 0
 };
-/*
-static byte CHGF[256] =
-{
-    0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-    1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-    1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0
-};
-*/
+
 
 byte    *tinttab;
 byte    *tinttab5;
@@ -157,6 +145,7 @@ static byte *GenerateTintTable(byte *palette, int percent, byte filter[256], int
                     g = ((int)color1[1] * percent + (int)color2[1] * (100 - percent)) / (100 + blues);
                     b = ((int)color1[2] * percent + (int)color2[2] * (100 - percent)) / 100;
                 }
+
                 *(result + (background << 8) + foreground) = FindNearestColor(palette, r, g, b);
             }
         }
@@ -164,11 +153,13 @@ static byte *GenerateTintTable(byte *palette, int percent, byte filter[256], int
             for (background = 0; background < 256; ++background)
                 *(result + (background << 8) + foreground) = foreground;
     }
+
     if (colors == ALL && percent != ADDITIVE)
     {
         *(result + (77 << 8) + 109) = *(result + (109 << 8) + 77) = 77;
         *(result + (78 << 8) + 109) = *(result + (109 << 8) + 78) = 109;
     }
+
     return result;
 }
 
@@ -177,7 +168,6 @@ void I_InitTintTables(byte *palette)
     int lump;
 
     tinttab = GenerateTintTable(palette, ADDITIVE, general, ALL);
-
     tinttab5 = GenerateTintTable(palette, 5, general, ALL);
     tinttab10 = GenerateTintTable(palette, 10, general, ALL);
     tinttab15 = GenerateTintTable(palette, 15, general, ALL);
@@ -214,3 +204,4 @@ void I_InitTintTables(byte *palette)
     tinttabgreen33 = GenerateTintTable(palette, 33, general, GREENS);
     tinttabblue33 = GenerateTintTable(palette, 33, general, BLUES);
 }
+

@@ -12,6 +12,7 @@
 // GNU General Public License for more details.
 //
 
+
 #include <stdlib.h>
 #include <string.h>
 
@@ -20,51 +21,60 @@
 #include "txt_main.h"
 #include "txt_utf8.h"
 
+
 typedef struct txt_cliparea_s txt_cliparea_t;
 
 // Mapping table that converts from the Extended ASCII codes in the
 // CP437 codepage to Unicode character numbers.
-
-static const uint16_t cp437_unicode[] = {
-    0x00c7, 0x00fc, 0x00e9, 0x00e2,         // 80-8f
+static const uint16_t cp437_unicode[] =
+{
+    // 80-8f
+    0x00c7, 0x00fc, 0x00e9, 0x00e2,
     0x00e4, 0x00e0, 0x00e5, 0x00e7,
     0x00ea, 0x00eb, 0x00e8, 0x00ef,
     0x00ee, 0x00ec, 0x00c4, 0x00c5,
 
-    0x00c9, 0x00e6, 0x00c6, 0x00f4,         // 90-9f
+    // 90-9f
+    0x00c9, 0x00e6, 0x00c6, 0x00f4,
     0x00f6, 0x00f2, 0x00fb, 0x00f9,
     0x00ff, 0x00d6, 0x00dc, 0x00a2,
     0x00a3, 0x00a5, 0x20a7, 0x0192,
 
-    0x00e1, 0x00ed, 0x00f3, 0x00fa,         // a0-af
+    // a0-af
+    0x00e1, 0x00ed, 0x00f3, 0x00fa,
     0x00f1, 0x00d1, 0x00aa, 0x00ba,
     0x00bf, 0x2310, 0x00ac, 0x00bd,
     0x00bc, 0x00a1, 0x00ab, 0x00bb,
 
-    0x2591, 0x2592, 0x2593, 0x2502,         // b0-bf
+    // b0-bf
+    0x2591, 0x2592, 0x2593, 0x2502,
     0x2524, 0x2561, 0x2562, 0x2556,
     0x2555, 0x2563, 0x2551, 0x2557,
     0x255D, 0x255C, 0x255B, 0x2510,
 
-    0x2514, 0x2534, 0x252C, 0x251C,         // c0-cf
+    // c0-cf
+    0x2514, 0x2534, 0x252C, 0x251C,
     0x2500, 0x253C, 0x255E, 0x255F,
     0x255A, 0x2554, 0x2569, 0x2566,
     0x2560, 0x2550, 0x256C, 0x2567,
 
-    0x2568, 0x2564, 0x2565, 0x2559,         // d0-df
+    // d0-df
+    0x2568, 0x2564, 0x2565, 0x2559,
     0x2558, 0x2552, 0x2553, 0x256B,
     0x256A, 0x2518, 0x250C, 0x2588,
     0x2584, 0x258C, 0x2590, 0x2580,
 
-    0x03B1, 0x00DF, 0x0393, 0x03C0,         // e0-ef
+    // e0-ef
+    0x03B1, 0x00DF, 0x0393, 0x03C0,
     0x03A3, 0x03C3, 0x00B5, 0x03C4,
     0x03A6, 0x0398, 0x03A9, 0x03B4,
     0x221E, 0x03C6, 0x03B5, 0x2229,
 
-    0x2261, 0x00B1, 0x2265, 0x2264,         // f0-ff
+    // f0-ff
+    0x2261, 0x00B1, 0x2265, 0x2264,
     0x2320, 0x2321, 0x00F7, 0x2248,
     0x00B0, 0x2219, 0x00B7, 0x221A,
-    0x207F, 0x00B2, 0x25A0, 0x00A0,
+    0x207F, 0x00B2, 0x25A0, 0x00A0
 };
 
 struct txt_cliparea_s
@@ -80,19 +90,20 @@ struct txt_cliparea_s
 // | ||
 // +-++
 // +-++
-
 static const int borders[4][4] = 
 {
     {0xda, 0xc4, 0xc2, 0xbf},
     {0xb3, ' ',  0xb3, 0xb3},
     {0xc3, 0xc4, 0xc5, 0xb4},
-    {0xc0, 0xc4, 0xc1, 0xd9},
+    {0xc0, 0xc4, 0xc1, 0xd9}
 };
 
 static txt_cliparea_t *cliparea = NULL;
 
+
 #define VALID_X(x) ((x) >= cliparea->x1 && (x) < cliparea->x2)
 #define VALID_Y(y) ((y) >= cliparea->y1 && (y) < cliparea->y2)
+
 
 //
 // [nitr8] UNUSED
@@ -107,20 +118,18 @@ void TXT_DrawDesktopBackground(const char *title)
     screendata = TXT_GetScreenData();
     
     // Fill the screen with gradient characters
-
     p = screendata;
     
-    for (i=0; i<TXT_SCREEN_W * TXT_SCREEN_H; ++i)
+    for (i = 0; i < TXT_SCREEN_W * TXT_SCREEN_H; ++i)
     {
         *p++ = 0xb1;
         *p++ = TXT_COLOR_GREY | (TXT_COLOR_BLUE << 4);
     }
 
     // Draw the top and bottom banners
-
     p = screendata;
 
-    for (i=0; i<TXT_SCREEN_W; ++i)
+    for (i = 0; i < TXT_SCREEN_W; ++i)
     {
         *p++ = ' ';
         *p++ = TXT_COLOR_BLACK | (TXT_COLOR_GREY << 4);
@@ -128,14 +137,13 @@ void TXT_DrawDesktopBackground(const char *title)
 
     p = screendata + (TXT_SCREEN_H - 1) * TXT_SCREEN_W * 2;
 
-    for (i=0; i<TXT_SCREEN_W; ++i)
+    for (i = 0; i < TXT_SCREEN_W; ++i)
     {
         *p++ = ' ';
         *p++ = TXT_COLOR_BLACK | (TXT_COLOR_GREY << 4);
     }
 
     // Print the title
-
     TXT_GotoXY(0, 0);
     TXT_FGColor(TXT_COLOR_BLACK);
     TXT_BGColor(TXT_COLOR_GREY, 0);
@@ -151,11 +159,11 @@ void TXT_DrawShadow(int x, int y, int w, int h)
 
     screendata = TXT_GetScreenData();
 
-    for (y1=y; y1<y+h; ++y1)
+    for (y1 = y; y1 < y + h; ++y1)
     {
         unsigned char *p = screendata + (y1 * TXT_SCREEN_W + x) * 2;
 
-        for (x1=x; x1<x+w; ++x1)
+        for (x1 = x; x1 < x + w; ++x1)
         {
             if (VALID_X(x1) && VALID_Y(y1))
             {
@@ -175,7 +183,7 @@ void TXT_DrawWindowFrame(const char *title, int x, int y, int w, int h)
     TXT_SaveColors(&colors);
     TXT_FGColor(TXT_COLOR_BRIGHT_CYAN);
 
-    for (y1=y; y1<y+h; ++y1)
+    for (y1 = y; y1 < y + h; ++y1)
     {
         // Select the appropriate row and column in the borders
         // array to pick the appropriate character to draw at
@@ -183,12 +191,11 @@ void TXT_DrawWindowFrame(const char *title, int x, int y, int w, int h)
         //
         // Draw a horizontal line on the third line down, so we
         // draw a box around the title.
-
         int by = y1 == y ? 0 :
              y1 == y + 2 && title != NULL ? 2 :
              y1 == y + h - 1 ? 3 : 1;
 
-        for (x1=x; x1<x+w; ++x1)
+        for (x1 = x; x1 < x + w; ++x1)
         {
             int bx = x1 == x ? 0 :
                  x1 == x + w - 1 ? 3 : 1;
@@ -202,14 +209,13 @@ void TXT_DrawWindowFrame(const char *title, int x, int y, int w, int h)
     }
 
     // Draw the title
-
     if (title != NULL)
     {
         TXT_GotoXY(x + 1, y + 1);
         TXT_BGColor(TXT_COLOR_GREY, 0);
         TXT_FGColor(TXT_COLOR_BLUE);
 
-        for (x1=0; x1<w-2; ++x1)
+        for (x1 = 0; x1 < w - 2; ++x1)
         {
             TXT_DrawString(" ");
         }
@@ -219,7 +225,6 @@ void TXT_DrawWindowFrame(const char *title, int x, int y, int w, int h)
     }
 
     // Draw the window's shadow.
-
     TXT_DrawShadow(x + 2, y + h, w, 1);
     TXT_DrawShadow(x + w, y + 1, 2, h);
 
@@ -245,7 +250,7 @@ void TXT_DrawSeparator(int x, int y, int w)
 
     data += (y * TXT_SCREEN_W + x) * 2;
 
-    for (x1=x; x1<x+w; ++x1)
+    for (x1 = x; x1 < x + w; ++x1)
     {
         int b;
 
@@ -260,7 +265,6 @@ void TXT_DrawSeparator(int x, int y, int w)
             // Read the current value from the screen
             // Check that it matches what the window should look like if
             // there is no separator, then apply the separator
-
             if (*data == borders[1][b])
             {
                 TXT_PutChar(borders[2][b]);
@@ -310,7 +314,6 @@ static void PutUnicodeChar(unsigned int c)
     }
 
     // We can only display this character if it is in the CP437 codepage.
-
     for (i = 0; i < 128; ++i)
     {
         if (cp437_unicode[i] == c)
@@ -321,7 +324,6 @@ static void PutUnicodeChar(unsigned int c)
     }
 
     // Otherwise, print a fallback character (inverted question mark):
-
     TXT_PutChar('\xa8');
 }
 
@@ -411,7 +413,7 @@ void TXT_DrawHorizScrollbar(int x, int y, int w, int cursor, int range)
         cursor_x = x + w - 2;
     }
 
-    for (x1=x+1; x1<x+w-1; ++x1)
+    for (x1 = x + 1; x1 < x + w - 1; ++x1)
     {
         if (VALID_X(x1))
         {
@@ -460,7 +462,7 @@ void TXT_DrawVertScrollbar(int x, int y, int h, int cursor, int range)
         cursor_y += (cursor * (h - 3)) / range;
     }
 
-    for (y1=y+1; y1<y+h-1; ++y1)
+    for (y1 = y + 1; y1 < y + h - 1; ++y1)
     {
         if (VALID_Y(y1))
         {
@@ -508,7 +510,6 @@ void TXT_PushClipArea(int x1, int x2, int y1, int y2)
 
     // Set the new clip area to the intersection of the old
     // area and the new one.
-
     newarea->x1 = cliparea->x1;
     newarea->x2 = cliparea->x2;
     newarea->y1 = cliparea->y1;
@@ -516,19 +517,21 @@ void TXT_PushClipArea(int x1, int x2, int y1, int y2)
 
     if (x1 > newarea->x1)
         newarea->x1 = x1;
+
     if (x2 < newarea->x2)
         newarea->x2 = x2;
+
     if (y1 > newarea->y1)
         newarea->y1 = y1;
+
     if (y2 < newarea->y2)
         newarea->y2 = y2;
 
 #if 0
-    printf("New scrollable area: %i,%i-%i,%i\n", x1, y1, x2, y2);
+    printf("New scrollable area: %i, %i - %i, %i\n", x1, y1, x2, y2);
 #endif
 
     // Hook into the list
-
     newarea->next = cliparea;
     cliparea = newarea;
 }
@@ -538,12 +541,10 @@ void TXT_PopClipArea(void)
     txt_cliparea_t *next_cliparea;
 
     // Never pop the last entry
-
     if (cliparea->next == NULL)
         return;
 
     // Unlink the last entry and delete
-   
     next_cliparea = cliparea->next;
     free(cliparea);
     cliparea = next_cliparea;

@@ -37,83 +37,78 @@
 #include "v_trans.h"
 
 
-int snd_musicdevice = SNDDEVICE_SB;
-int snd_sfxdevice = SNDDEVICE_SB;
+int                      snd_musicdevice = SNDDEVICE_SB;
+int                      snd_sfxdevice = SNDDEVICE_SB;
 
 // Sound sample rate to use for digital output (Hz)
-
-int snd_samplerate = 44100;
+int                      snd_samplerate = 44100;
 
 // Maximum number of bytes to dedicate to allocated sound effects.
 // (Default: 64MB)
-
-int snd_cachesize = 64 * 1024 * 1024;
+int                      snd_cachesize = 64 * 1024 * 1024;
 
 // Config variable that controls the sound buffer size.
 // We default to 28ms (1000 / 35fps = 1 buffer per tic).
-
-int snd_maxslicetime_ms = 28;
+int                      snd_maxslicetime_ms = 28;
 
 // External command to invoke to play back music.
-
-char *snd_musiccmd = "";
+char                     *snd_musiccmd = "";
 
 // Low-level sound and music modules we are using
+static sound_module_t    *sound_module;
+static music_module_t    *music_module;
 
-static sound_module_t *sound_module;
-static music_module_t *music_module;
+extern sound_module_t    sound_sdl_module;
+extern sound_module_t    sound_pcsound_module;
 
-// Sound modules
-
-dboolean I_PCS_InitSound(dboolean _use_sfx_prefix);
-dboolean I_SDL_InitSound(dboolean _use_sfx_prefix);
-
-extern void I_InitTimidityConfig(void);
-
-extern sound_module_t sound_sdl_module;
-extern sound_module_t sound_pcsound_module;
-
-extern music_module_t music_sdl_module;
-extern music_module_t music_opl_module;
+extern music_module_t    music_sdl_module;
+extern music_module_t    music_opl_module;
 
 // For OPL module:
-
-extern int opl_io_port;
+extern int               opl_io_port;
 
 // For native music module:
+extern char              *timidity_cfg_path;
 
-extern char *timidity_cfg_path;
 
 // Compiled-in sound modules:
-
-static sound_module_t *sound_modules[] = 
+static sound_module_t    *sound_modules[] = 
 {
 #ifdef FEATURE_SOUND
     &sound_sdl_module,
-    &sound_pcsound_module,
+    &sound_pcsound_module
 #endif
-    NULL,
+    ,
+    NULL
 };
 
 // Compiled-in music modules:
-
-static music_module_t *music_modules[] =
+static music_module_t    *music_modules[] =
 {
 #ifdef FEATURE_SOUND
     &music_sdl_module,
-    &music_opl_module,
+    &music_opl_module
 #endif
-    NULL,
+    ,
+    NULL
 };
 
-// Check if a sound device is in the given list of devices
 
+// Sound modules
+dboolean I_PCS_InitSound(dboolean _use_sfx_prefix);
+dboolean I_SDL_InitSound(dboolean _use_sfx_prefix);
+
+
+extern void I_InitTimidityConfig(void);
+
+
+// Check if a sound device is in the given list of devices
 static dboolean SndDeviceInList(snddevice_t device, snddevice_t *list,
                                int len)
 {
     int i;
 
-    for (i=0; i<len; ++i)
+    for (i = 0; i < len; ++i)
     {
         if (device == list[i])
         {
@@ -126,10 +121,9 @@ static dboolean SndDeviceInList(snddevice_t device, snddevice_t *list,
 
 // Find and initialize a sound_module_t appropriate for the setting
 // in snd_sfxdevice.
-
 static void InitSfxModule(dboolean use_sfx_prefix)
 {
-    if(snd_module)
+    if (snd_module)
         I_PCS_InitSound(use_sfx_prefix);
     else
         I_SDL_InitSound(use_sfx_prefix);
@@ -141,31 +135,28 @@ static void InitSfxModule(dboolean use_sfx_prefix)
 }
 
 // Initialize music according to snd_musicdevice.
-
 static void InitMusicModule(void)
 {
     int i;
 
     music_module = NULL;
 
-    for (i=0; music_modules[i] != NULL; ++i)
+    for (i = 0; music_modules[i] != NULL; ++i)
     {
         // Is the music device in the list of devices supported
         // by this module?
-
         if (SndDeviceInList(snd_musicdevice, 
                             music_modules[i]->sound_devices,
                             music_modules[i]->num_sound_devices))
         {
             // Initialize the module
-
             if (music_modules[i]->Init())
             {
-                if(mus_engine == 1 || mus_engine == 2)
+                if (mus_engine == 1 || mus_engine == 2)
                     C_Output("Using MIDI playback for music.");
-                else if(mus_engine == 3)
+                else if (mus_engine == 3)
                     C_Output("Using OGG playback for music.");
-                else if(mus_engine == 4)
+                else if (mus_engine == 4)
                     C_Output("Using TIMIDITY for music playback.");
 
                 music_module = music_modules[i];
@@ -180,7 +171,6 @@ static void InitMusicModule(void)
 // Sets channels, SFX and music volume,
 //  allocates channel buffer, sets S_sfx lookup.
 //
-
 void I_InitSound(dboolean use_sfx_prefix)
 {  
     // Initialize the sound subsystem.
@@ -301,8 +291,7 @@ void I_InitMusic(void)
     // This is kind of a hack. If native MIDI is enabled, set up
     // the TIMIDITY_CFG environment variable here before SDL_mixer
     // is opened.
-
-    if (/*!nomusic &&*/ (snd_musicdevice == SNDDEVICE_GENMIDI || snd_musicdevice == SNDDEVICE_GUS))
+    if ((snd_musicdevice == SNDDEVICE_GENMIDI || snd_musicdevice == SNDDEVICE_GUS))
     {
         I_InitTimidityConfig();
     }

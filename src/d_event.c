@@ -28,24 +28,30 @@
 //
 //-----------------------------------------------------------------------------
 
+
 #include <stdlib.h>
+
 #include "d_event.h"
+
 
 #define MAXEVENTS 64
 
+
 static event_t events[MAXEVENTS];
-static int eventhead;
-static int eventtail;
+
+static int     eventhead;
+static int     eventtail;
 
 // Wii ir variables
-static int   joyirx;
-static int   joyiry;
+static int     joyirx;
+static int     joyiry;
+
 
 //
 // D_PostEvent
 // Called by the I/O functions when input is detected
 //
-void D_PostEvent (event_t* ev)
+void D_PostEvent(event_t *ev)
 {
     // Set wii ir variables
     joyirx = ev->data4 + 160;
@@ -56,13 +62,11 @@ void D_PostEvent (event_t* ev)
 }
 
 // Read an event from the queue.
-
 event_t *D_PopEvent(void)
 {
     event_t *result;
 
     // No more events waiting.
-
     if (eventtail == eventhead)
     {
         return NULL;
@@ -71,10 +75,8 @@ event_t *D_PopEvent(void)
     result = &events[eventtail];
 
     // Advance to the next event in the queue.
-
     eventtail = (eventtail + 1) % MAXEVENTS;
 
     return result;
 }
-
 

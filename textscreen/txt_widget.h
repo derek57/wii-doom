@@ -37,14 +37,16 @@ typedef enum
 {
     TXT_VERT_TOP,
     TXT_VERT_CENTER,
-    TXT_VERT_BOTTOM,
+    TXT_VERT_BOTTOM
+
 } txt_vert_align_t;
 
 typedef enum
 {
     TXT_HORIZ_LEFT,
     TXT_HORIZ_CENTER,
-    TXT_HORIZ_RIGHT,
+    TXT_HORIZ_RIGHT
+
 } txt_horiz_align_t;
 
 /**
@@ -95,12 +97,10 @@ struct txt_widget_s
 
     // These are set automatically when the window is drawn and should
     // not be set manually.
-
     int x, y;
     unsigned int w, h;
 
     // Pointer up to parent widget that contains this widget.
-
     txt_widget_t *parent;
 };
 

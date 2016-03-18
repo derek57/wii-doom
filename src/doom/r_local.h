@@ -36,8 +36,10 @@
 ========================================================================
 */
 
+
 #if !defined(__R_LOCAL__)
 #define __R_LOCAL__
+
 
 // Binary Angles, sine/cosine/atan lookups.
 #include "tables.h"
@@ -59,4 +61,6 @@
 #include "r_things.h"
 #include "r_draw.h"
 
+
 #endif
+

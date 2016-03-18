@@ -36,22 +36,34 @@
 ========================================================================
 */
 
+
 #if !defined(__R_STATE__)
 #define __R_STATE__
+
 
 // Need data structure definitions.
 #include "d_player.h"
 #include "r_data.h"
+
+
+typedef enum
+{
+    DOOMBSP = 0,
+    DEEPBSP = 1,
+    ZDBSPX  = 2
+
+} mapformat_t;
+
 
 //
 // Refresh internal data structures,
 //  for rendering.
 //
 
+extern mapformat_t      mapformat;
+
 // needed for texture pegging
 extern fixed_t          *textureheight;
-
-extern byte             **texturefullbright;
 
 // needed for pre rendering (fracs)
 extern fixed_t          *spritewidth;
@@ -61,68 +73,7 @@ extern fixed_t          *spriteoffset;
 extern fixed_t          *spritetopoffset;
 extern fixed_t          *newspriteoffset;
 extern fixed_t          *newspritetopoffset;
-/*
-extern lighttable_t     **colormaps;    // killough 3/20/98, 4/4/98
-extern lighttable_t     *fullcolormap;  // killough 3/20/98
-*/
-extern int              viewwidth;
-extern int              scaledviewwidth;
-extern int              scaledviewheight;   // ADDED FOR HIRES
-extern int              viewheight;
 
-extern int              firstflat;
-
-// for global animation
-extern int              *flattranslation;
-extern int              *texturetranslation;
-
-extern byte             **flatfullbright;
-
-// Sprite....
-extern int              firstspritelump;
-extern int              lastspritelump;
-extern int              numspritelumps;
-
-//
-// Lookup tables for map data.
-//
-extern int              numsprites;
-extern spritedef_t      *sprites;
-
-extern int              numvertexes;
-extern vertex_t         *vertexes;
-
-extern int              numsegs;
-extern seg_t            *segs;
-
-extern int              numsectors;
-extern sector_t         *sectors;
-
-extern int              numsubsectors;
-extern subsector_t      *subsectors;
-
-extern int              numnodes;
-extern node_t           *nodes;
-
-extern int              numlines;
-extern line_t           *lines;
-
-extern int              numsides;
-extern side_t           *sides;
-
-extern int              numthings;
-
-typedef enum
-{
-    DOOMBSP = 0,
-    DEEPBSP = 1,
-    ZDBSPX  = 2
-} mapformat_t;
-
-extern mapformat_t      mapformat;
-
-extern dboolean         boomlinespecials;
-extern dboolean         blockmaprecreated;
 //
 // POV data.
 //
@@ -130,18 +81,69 @@ extern fixed_t          viewx;
 extern fixed_t          viewy;
 extern fixed_t          viewz;
 
-extern angle_t          viewangle;
-extern player_t         *viewplayer;
-
 // ?
 extern angle_t          clipangle;
 
-extern int              viewangletox[FINEANGLES / 2];
 extern angle_t          xtoviewangle[SCREENWIDTH + 1];
-
 extern angle_t          rw_normalangle;
+extern angle_t          viewangle;
+
+extern player_t         *viewplayer;
 
 extern visplane_t       *floorplane;
 extern visplane_t       *ceilingplane;
 
+//
+// Lookup tables for map data.
+//
+extern spritedef_t      *sprites;
+
+extern vertex_t         *vertexes;
+
+extern seg_t            *segs;
+
+extern sector_t         *sectors;
+
+extern subsector_t      *subsectors;
+
+extern node_t           *nodes;
+
+extern line_t           *lines;
+
+extern side_t           *sides;
+
+extern int              numsprites;
+extern int              numvertexes;
+extern int              numsegs;
+extern int              numsectors;
+extern int              numsubsectors;
+extern int              numnodes;
+extern int              numlines;
+extern int              numsides;
+extern int              numthings;
+
+// for global animation
+extern int              *flattranslation;
+extern int              *texturetranslation;
+
+// Sprite....
+extern int              firstspritelump;
+extern int              lastspritelump;
+extern int              numspritelumps;
+
+extern int              viewwidth;
+extern int              scaledviewwidth;
+extern int              scaledviewheight;
+extern int              viewheight;
+extern int              firstflat;
+extern int              viewangletox[FINEANGLES / 2];
+
+extern byte             **flatfullbright;
+extern byte             **texturefullbright;
+
+extern dboolean         boomlinespecials;
+extern dboolean         blockmaprecreated;
+
+
 #endif
+

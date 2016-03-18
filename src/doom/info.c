@@ -71,7 +71,7 @@ char *sprnames[] =
     // Sprite 144
     "BLD2",     // [BH] blood splats
 
-    // Sprite 245 to 288
+    // Sprite 145 to 188
     "BSKL", "FLSH", "SPRY", "SPSH", "LVAS", "SLDG", "BND1", "BND2", "BPL3", "BPL5",
     "BBSK", "BRSK", "BYSK", "BSHL", "BCLL", "BBOX", "BBXP", "BPNS", "BPNV", "BBSS",
     "BCL1", "BELC", "BPL4", "BPL7", "BPL6", "BSMT", "BHED", "BPSS", "BSPS", "BCHG",
@@ -165,12 +165,10 @@ void A_Face(mobj_t *actor);
 void A_Scratch(mobj_t *actor);
 void A_PlaySound(mobj_t *actor);
 void A_RandomJump(mobj_t *actor);
-void A_CounterJump(mobj_t *actor);
 void A_LineEffect(mobj_t *actor);
 void A_FireOldBFG(mobj_t *actor);
 void A_BetaSkullAttack(mobj_t *actor);
 void A_Stop(mobj_t *actor);
-
 void A_Footstep(mobj_t *actor);
 void A_MoreGibs(mobj_t *actor);
 void A_CasingThrust(mobj_t *actor);
@@ -4765,7 +4763,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] =
         /* particlefx           */ 0,
         /* name1                */ "BFG-9000",
         /* plural1              */ "",
-        /* name2                */ "",
+        /* name2                */ "BFG",
         /* plural2              */ ""
     },
 

@@ -43,7 +43,6 @@
 
 // These are deliberately cast to signed values; this is the behaviour
 // of the macros in the original source and some code relies on it.
-
 #define SHORT(x)  ((signed short) SDL_SwapLE16(x))
 #define LONG(x)   ((signed long) SDL_SwapLE32(x))
 

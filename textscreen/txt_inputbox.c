@@ -12,28 +12,30 @@
 // GNU General Public License for more details.
 //
 
+
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "doomkeys.h"
-
-#include "txt_inputbox.h"
 #include "txt_gui.h"
+#include "txt_inputbox.h"
 #include "txt_io.h"
 #include "txt_main.h"
 #include "txt_utf8.h"
 #include "txt_window.h"
 
+
 extern txt_widget_class_t txt_inputbox_class;
 extern txt_widget_class_t txt_int_inputbox_class;
+
 
 static void SetBufferFromValue(txt_inputbox_t *inputbox)
 {
     if (inputbox->widget.widget_class == &txt_inputbox_class)
     {
-        char **value = (char **) inputbox->value;
+        char **value = (char **)inputbox->value;
 
         if (*value != NULL)
         {
@@ -46,7 +48,8 @@ static void SetBufferFromValue(txt_inputbox_t *inputbox)
     }
     else if (inputbox->widget.widget_class == &txt_int_inputbox_class)
     {
-        int *value = (int *) inputbox->value;
+        int *value = (int *)inputbox->value;
+
         TXT_snprintf(inputbox->buffer, inputbox->buffer_len, "%i", *value);
     }
 }
@@ -54,7 +57,6 @@ static void SetBufferFromValue(txt_inputbox_t *inputbox)
 static void StartEditing(txt_inputbox_t *inputbox)
 {
     // Integer input boxes start from an empty buffer:
-
     if (inputbox->widget.widget_class == &txt_int_inputbox_class)
     {
         TXT_StringCopy(inputbox->buffer, "", inputbox->buffer_len);
@@ -75,15 +77,14 @@ static void FinishEditing(txt_inputbox_t *inputbox)
     }
 
     // Save the new value back to the variable.
-
     if (inputbox->widget.widget_class == &txt_inputbox_class)
     {
         free(*((char **)inputbox->value));
-        *((char **) inputbox->value) = strdup(inputbox->buffer);
+        *((char **)inputbox->value) = strdup(inputbox->buffer);
     }
     else if (inputbox->widget.widget_class == &txt_int_inputbox_class)
     {
-        *((int *) inputbox->value) = atoi(inputbox->buffer);
+        *((int *)inputbox->value) = atoi(inputbox->buffer);
     }
 
     TXT_EmitSignal(&inputbox->widget, "changed");
@@ -96,7 +97,6 @@ static void TXT_InputBoxSizeCalc(TXT_UNCAST_ARG(inputbox))
     TXT_CAST_ARG(txt_inputbox_t, inputbox);
 
     // Enough space for the box + cursor
-
     inputbox->widget.w = inputbox->size + 1;
     inputbox->widget.h = 1;
 }
@@ -114,7 +114,6 @@ static void TXT_InputBoxDrawer(TXT_UNCAST_ARG(inputbox))
 
     // Select the background color based on whether we are currently
     // editing, and if not, whether the widget is focused.
-
     if (inputbox->editing && focused)
     {
         TXT_BGColor(TXT_COLOR_BLACK, 0);
@@ -127,18 +126,18 @@ static void TXT_InputBoxDrawer(TXT_UNCAST_ARG(inputbox))
     if (!inputbox->editing)
     {
         // If not editing, use the current value from inputbox->value.
-
         SetBufferFromValue(inputbox);
     }
 
     // If string size exceeds the widget's width, show only the end.
-
     if (TXT_UTF8_Strlen(inputbox->buffer) > w - 1)
     {
         TXT_DrawString("\xae");
+
         TXT_DrawUTF8String(
             TXT_UTF8_SkipChars(inputbox->buffer,
                                TXT_UTF8_Strlen(inputbox->buffer) - w + 2));
+
         chars = w - 1;
     }
     else
@@ -154,7 +153,7 @@ static void TXT_InputBoxDrawer(TXT_UNCAST_ARG(inputbox))
         ++chars;
     }
 
-    for (i=chars; i < w; ++i)
+    for (i = chars; i < w; ++i)
     {
         TXT_DrawString(" ");
     }
@@ -176,6 +175,7 @@ static void Backspace(txt_inputbox_t *inputbox)
     if (len > 0)
     {
         char *p = TXT_UTF8_SkipChars(inputbox->buffer, len - 1);
+
         *p = '\0';
     }
 }
@@ -185,9 +185,9 @@ static void AddCharacter(txt_inputbox_t *inputbox, int key)
     if (TXT_UTF8_Strlen(inputbox->buffer) < inputbox->size)
     {
         // Add character to the buffer
-
         char *end = inputbox->buffer + strlen(inputbox->buffer);
         char *p = TXT_EncodeUTF8(end, key);
+
         *p = '\0';
     }
 }
@@ -206,12 +206,11 @@ static int TXT_InputBoxKeyPress(TXT_UNCAST_ARG(inputbox), int key)
         }
 
         // Backspace or delete erases the contents of the box.
-
         if ((key == KEY_DEL || key == KEY_BACKSPACE)
-         && inputbox->widget.widget_class == &txt_inputbox_class)
+            && inputbox->widget.widget_class == &txt_inputbox_class)
         {
             free(*((char **)inputbox->value));
-            *((char **) inputbox->value) = strdup("");
+            *((char **)inputbox->value) = strdup("");
         }
 
         return 0;
@@ -237,7 +236,7 @@ static int TXT_InputBoxKeyPress(TXT_UNCAST_ARG(inputbox), int key)
     // Add character to the buffer, but only if it's a printable character
     // that we can represent on the screen.
     if (isprint(c)
-     || (c >= 128 && TXT_CanDrawCharacter(c)))
+        || (c >= 128 && TXT_CanDrawCharacter(c)))
     {
         AddCharacter(inputbox, c);
     }
@@ -253,11 +252,9 @@ static void TXT_InputBoxMousePress(TXT_UNCAST_ARG(inputbox),
     if (b == TXT_MOUSE_LEFT)
     {
         // Make mouse clicks start editing the box
-
         if (!inputbox->editing)
         {
             // Send a simulated keypress to start editing
-
             TXT_WidgetKeyPress(inputbox, KEY_ENTER);
         }
     }
@@ -268,7 +265,6 @@ static void TXT_InputBoxFocused(TXT_UNCAST_ARG(inputbox), int focused)
     TXT_CAST_ARG(txt_inputbox_t, inputbox);
 
     // Stop editing when we lose focus.
-
     if (inputbox->editing && !focused)
     {
         FinishEditing(inputbox);
@@ -284,7 +280,7 @@ txt_widget_class_t txt_inputbox_class =
     TXT_InputBoxDestructor,
     TXT_InputBoxMousePress,
     NULL,
-    TXT_InputBoxFocused,
+    TXT_InputBoxFocused
 };
 
 txt_widget_class_t txt_int_inputbox_class =
@@ -296,7 +292,7 @@ txt_widget_class_t txt_int_inputbox_class =
     TXT_InputBoxDestructor,
     TXT_InputBoxMousePress,
     NULL,
-    TXT_InputBoxFocused,
+    TXT_InputBoxFocused
 };
 
 //
@@ -313,6 +309,7 @@ static txt_inputbox_t *NewInputBox(txt_widget_class_t *widget_class,
     TXT_InitWidget(inputbox, widget_class);
     inputbox->value = value;
     inputbox->size = size;
+
     // 'size' is the maximum number of characters that can be entered,
     // but for a UTF-8 string, each character can take up to four
     // characters.

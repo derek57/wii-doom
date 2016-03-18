@@ -15,6 +15,7 @@
 //    PC speaker interface.
 //
 
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -32,11 +33,8 @@
 #ifdef HAVE_DEV_SPEAKER_SPEAKER_H
 #define HAVE_BSD_SPEAKER
 #endif
-/*
-#ifdef _WIN32
-extern pcsound_driver_t pcsound_win32_driver;
-#endif
-*/
+
+
 #ifdef HAVE_BSD_SPEAKER
 extern pcsound_driver_t pcsound_bsd_driver;
 #endif
@@ -49,6 +47,7 @@ extern pcsound_driver_t pcsound_linux_driver;
 
 extern pcsound_driver_t pcsound_sdl_driver;
 
+
 static pcsound_driver_t *drivers[] = 
 {
 #ifdef HAVE_LINUX_KD_H
@@ -56,21 +55,15 @@ static pcsound_driver_t *drivers[] =
     &pcsound_linux_driver,
 #endif
 #endif
-#ifdef HAVE_BSD_SPEAKER
-    &pcsound_bsd_driver,
-#endif
-/*
-#ifdef _WIN32
-    &pcsound_win32_driver,
-#endif
-*/
     &pcsound_sdl_driver,
-    NULL,
+    NULL
 };
 
 static pcsound_driver_t *pcsound_driver = NULL;
 
+
 int pcsound_sample_rate;
+
 
 void PCSound_SetSampleRate(int rate)
 {
@@ -88,17 +81,15 @@ int PCSound_Init(pcsound_callback_func callback_func)
     }
 
     // Check if the environment variable is set
-
     driver_name = getenv("PCSOUND_DRIVER");
 
     if (driver_name != NULL)
     {
-        for (i=0; drivers[i] != NULL; ++i)
+        for (i = 0; drivers[i] != NULL; ++i)
         {
             if (!strcmp(drivers[i]->name, driver_name))
             {
                 // Found the driver!
-
                 if (drivers[i]->init_func(callback_func))
                 {
                     pcsound_driver = drivers[i];
@@ -114,8 +105,7 @@ int PCSound_Init(pcsound_callback_func callback_func)
     else
     {
         // Try all drivers until we find a working one
-
-        for (i=0; drivers[i] != NULL; ++i)
+        for (i = 0; drivers[i] != NULL; ++i)
         {
             if (drivers[i]->init_func(callback_func)) 
             {

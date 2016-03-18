@@ -36,11 +36,14 @@
 ========================================================================
 */
 
+
 #if !defined(__INFO__)
 #define __INFO__
 
+
 #include "../doomtype.h"
 #include "d_think.h"
+
 
 typedef enum
 {
@@ -185,17 +188,29 @@ typedef enum
     SPR_TLP2,
 
     // Sprites 138 to 143
-    SPR_TNT1,   // add invisible sprite phares 3/8/98
-    SPR_DOGS,   // killough 7/19/98: Marine's best friend :)
-    SPR_PLS1,   // killough 7/19/98: first of two plasma fireballs in the beta
-    SPR_PLS2,   // killough 7/19/98: second of two plasma fireballs in the beta
-    SPR_BON3,   // killough 7/11/98: evil sceptre in beta version
-    SPR_BON4,   // killough 7/11/98: unholy bible in beta version
+    // add invisible sprite phares 3/8/98
+    SPR_TNT1,
+
+    // killough 7/19/98: Marine's best friend :)
+    SPR_DOGS,
+
+    // killough 7/19/98: first of two plasma fireballs in the beta
+    SPR_PLS1,
+
+    // killough 7/19/98: second of two plasma fireballs in the beta
+    SPR_PLS2,
+
+    // killough 7/11/98: evil sceptre in beta version
+    SPR_BON3,
+
+    // killough 7/11/98: unholy bible in beta version
+    SPR_BON4,
 
     // Sprite 144
-    SPR_BLD2,   // [BH] blood splats
+    // [BH] blood splats
+    SPR_BLD2,
 
-    // Sprite 245 to 288
+    // Sprite 145 to 188
     SPR_BSKL,
     SPR_FLSH,
     SPR_SPRY,
@@ -247,6 +262,7 @@ typedef enum
     SPR_TGLT,
 
     NUMSPRITES
+
 } spritenum_t;
 
 typedef enum
@@ -351,7 +367,10 @@ typedef enum
     S_TBALL1,
     S_TBALL2,
     S_TBALLX1,
-    S_TBALLX2, // 100
+
+    // 100
+    S_TBALLX2,
+
     S_TBALLX3,
     S_RBALL1,
     S_RBALL2,
@@ -451,7 +470,10 @@ typedef enum
     S_POSS_XDIE4,
     S_POSS_XDIE5,
     S_POSS_XDIE6,
-    S_POSS_XDIE7, // 200
+
+    // 200
+    S_POSS_XDIE7,
+
     S_POSS_XDIE8,
     S_POSS_XDIE9,
     S_POSS_RAISE1,
@@ -551,7 +573,10 @@ typedef enum
     S_FIRE17,
     S_FIRE18,
     S_FIRE19,
-    S_FIRE20, // 300
+
+    // 300
+    S_FIRE20,
+
     S_FIRE21,
     S_FIRE22,
     S_FIRE23,
@@ -651,7 +676,10 @@ typedef enum
     S_FATT_DIE10,
     S_FATT_RAISE1,
     S_FATT_RAISE2,
-    S_FATT_RAISE3, // 400
+
+    // 400
+    S_FATT_RAISE3,
+
     S_FATT_RAISE4,
     S_FATT_RAISE5,
     S_FATT_RAISE6,
@@ -751,7 +779,10 @@ typedef enum
     S_SARG_RAISE2,
     S_SARG_RAISE3,
     S_SARG_RAISE4,
-    S_SARG_RAISE5, // 500
+
+    // 500
+    S_SARG_RAISE5,
+
     S_SARG_RAISE6,
     S_HEAD_STND,
     S_HEAD_RUN1,
@@ -851,7 +882,10 @@ typedef enum
     S_SKULL_DIE3,
     S_SKULL_DIE4,
     S_SKULL_DIE5,
-    S_SKULL_DIE6, // 600
+
+    // 600
+    S_SKULL_DIE6,
+
     S_SPID_STND,
     S_SPID_STND2,
     S_SPID_RUN1,
@@ -951,7 +985,10 @@ typedef enum
     S_CYBER_DIE7,
     S_CYBER_DIE8,
     S_CYBER_DIE9,
-    S_CYBER_DIE10, // 700
+
+    // 700
+    S_CYBER_DIE10,
+
     S_PAIN_STND,
     S_PAIN_RUN1,
     S_PAIN_RUN2,
@@ -1051,7 +1088,10 @@ typedef enum
     S_SPAWNFIRE7,
     S_SPAWNFIRE8,
     S_BRAINEXPLODE1,
-    S_BRAINEXPLODE2, // 800
+
+    // 800
+    S_BRAINEXPLODE2,
+
     S_BRAINEXPLODE3,
     S_ARM1,
     S_ARM1A,
@@ -1151,7 +1191,10 @@ typedef enum
     S_HEADCANDLES,
     S_HEADCANDLES2,
     S_DEADSTICK,
-    S_LIVESTICK, // 900
+
+    // 900
+    S_LIVESTICK,
+
     S_LIVESTICK2,
     S_MEAT2,
     S_MEAT3,
@@ -1219,7 +1262,8 @@ typedef enum
     S_TECH2LAMP3,
     S_TECH2LAMP4,
 
-    // add state for invisible sprite          phares 3/8/98
+    // phares 3/8/98
+    // add state for invisible sprite
     S_TNT1,
 
     // killough 8/9/98: grenade launcher
@@ -1261,7 +1305,10 @@ typedef enum
 
     // killough 7/11/98: the old BFG's 43 firing frames
     S_OLDBFG1,
-    S_OLDBFG2, // 1000
+
+    // 1000
+    S_OLDBFG2,
+
     S_OLDBFG3,
     S_OLDBFG4,
     S_OLDBFG5,
@@ -1377,7 +1424,10 @@ typedef enum
     S_FLESH_08,
     S_FLESH_09,
     S_FLESH_10,
-    S_FLESH_11, // 1100
+
+    // 1100
+    S_FLESH_11,
+
     S_FLESH_12,
     S_FLESH_13,
     S_FLESH_14,
@@ -1477,7 +1527,10 @@ typedef enum
     S_BETABOSS_RAISE3,
     S_BETABOSS_RAISE4,
     S_BETABOSS_RAISE5,
-    S_BETABOSS_RAISE6, // 1200
+
+    // 1200
+    S_BETABOSS_RAISE6,
+
     S_BETABOSS_RAISE7,
     S_BETATALLGRNCOL,
     S_BETATECHPILLAR,
@@ -1579,7 +1632,10 @@ typedef enum
     S_BPL1EXP,
     S_BPL1EXP2,
     S_BPL1EXP3,
-    S_BPL1EXP4, // 1300
+
+    // 1300
+    S_BPL1EXP4,
+
     S_BPL1EXP5,
 
     // killough 7/19/98: second plasma fireball in the beta
@@ -1681,7 +1737,10 @@ typedef enum
     S_BLOODCHUNK1,
     S_BLOODCHUNK2,
     S_BLOODCHUNK3,
-    S_BLOODCHUNK4, // 1400
+
+    // 1400
+    S_BLOODCHUNK4,
+
     S_BLOODCHUNKX,
     S_BLOODSPLASH1,
     S_BLOODSPLASH2,
@@ -1737,10 +1796,8 @@ typedef struct
 
     // haleyjd: determines an effect to run
     long        particle_evt;
-} state_t;
 
-extern state_t  states[NUMSTATES];
-extern char     *sprnames[];
+} state_t;
 
 typedef enum
 {
@@ -1845,7 +1902,10 @@ typedef enum
     MT_MISC47,
     MT_MISC48,
     MT_MISC49,
-    MT_MISC50, // 100
+
+    // 100
+    MT_MISC50,
+
     MT_MISC51,
     MT_MISC52,
     MT_MISC53,
@@ -1883,26 +1943,36 @@ typedef enum
     MT_MISC85,
     MT_MISC86,
 
-    MT_PUSH,    // controls push source                     // phares
-    MT_PULL,    // controls pull source                     // phares 3/20/98
+    // phares 3/20/98
+    // controls push source
+    MT_PUSH,
 
-    MT_DOGS,    /* killough 7/19/98: Marine's best friend */
+    // controls pull source
+    MT_PULL,
 
-    MT_PLASMA1, // killough 7/11/98: first  of alternating beta plasma fireballs
-    MT_PLASMA2, // killough 7/11/98: second of alternating beta plasma fireballs
-    MT_SCEPTRE, // killough 7/11/98: evil sceptre in beta version
-    MT_BIBLE,   // killough 7/11/98: unholy bible in beta version
+    // killough 7/19/98: Marine's best friend
+    MT_DOGS,
+
+    // killough 7/11/98: first  of alternating beta plasma fireballs
+    MT_PLASMA1,
+
+    // killough 7/11/98: second of alternating beta plasma fireballs
+    MT_PLASMA2,
+
+    // killough 7/11/98: evil sceptre in beta version
+    MT_SCEPTRE,
+
+    // killough 7/11/98: unholy bible in beta version
+    MT_BIBLE,
 
     MT_MUSICSOURCE,
     MT_GIBDTH,
-
     MT_BLUEBLOOD,
     MT_GREENBLOOD,
     MT_FUZZYBLOOD,
     MT_BLOODSPLAT,
     MT_TRAIL,
     MT_SHADOW,
-
     MT_BLUESPRAY,
     MT_GREENSPRAY,
     MT_FUZZYSPRAY,
@@ -1940,7 +2010,6 @@ typedef enum
     MT_BETASHOTGUY,
     MT_BETASKULL,
     MT_TROOPSHOT2,
-
     MT_SHELL,
     MT_BULLET,
     MT_ROUND,
@@ -1952,101 +2021,131 @@ typedef enum
     MT_NUKAGESPLASH,
     MT_TELEGLITGEN,
     MT_TELEGLITGEN2,
-    MT_TELEGLITTER, // 200
+
+    // 200
+    MT_TELEGLITTER,
+
     MT_TELEGLITTER2,
 
     NUMMOBJTYPES
+
 } mobjtype_t;
 
 typedef struct
 {
-    int          doomednum;     // Thing number used in id's editor, and now
-                                // probably by every other editor too
+    // Thing number used in id's editor, and now
+    // probably by every other editor too
+    int          doomednum;
 
-    int          spawnstate;    // The state (frame) index when this Thing is
-                                // first created
+    // The state (frame) index when this Thing is
+    // first created
+    int          spawnstate;
 
-    int          spawnhealth;   // The initial hit points for this Thing
+    // The initial hit points for this Thing
+    int          spawnhealth;
 
-    int          gibhealth;     // haleyjd 09/12/13: health at which actor gibs
+    // haleyjd 09/12/13: health at which actor gibs
+    int          gibhealth;
 
-    int          seestate;      // The state when it sees you or wakes up
+    // The state when it sees you or wakes up
+    int          seestate;
 
-    int          seesound;      // The sound it makes when waking
+    // The sound it makes when waking
+    int          seesound;
 
-    int          reactiontime;  // How many tics it waits after it wakes up
-                                // before it will start to attack, in normal
-                                // skills (halved for nightmare)
+    // How many tics it waits after it wakes up
+    // before it will start to attack, in normal
+    // skills (halved for nightmare)
+    int          reactiontime;
 
-    int          attacksound;   // The sound it makes when it attacks
+    // The sound it makes when it attacks
+    int          attacksound;
 
-    int          painstate;     // The state to indicate pain
+    // The state to indicate pain
+    int          painstate;
 
-    int          painchance;    // A number that is checked against a random
-                                // number 0-255 to see if the Thing is supposed
-                                // to go to its painstate or not.  Note this
-                                // has absolutely nothing to do with the chance
-                                // it will get hurt, just the chance of it
-                                // reacting visibly.
+    // A number that is checked against a random
+    // number 0-255 to see if the Thing is supposed
+    // to go to its painstate or not.  Note this
+    // has absolutely nothing to do with the chance
+    // it will get hurt, just the chance of it
+    // reacting visibly.
+    int          painchance;
 
-    int          painsound;     // The sound it emits when it feels pain
+    // The sound it emits when it feels pain
+    int          painsound;
 
-    int          meleestate;    // Melee==close attack
+    // Melee == close attack
+    int          meleestate;
 
-    int          missilestate;  // What states to use when it's in the air, if
-                                // in fact it is ever used as a missile
+    // What states to use when it's in the air, if
+    // in fact it is ever used as a missile
+    int          missilestate;
 
-    int          deathstate;    // What state begins the death sequence
+    // What state begins the death sequence
+    int          deathstate;
 
-    int          xdeathstate;   // What state begins the horrible death sequence
-                                // like when a rocket takes out a trooper
+    // What state begins the horrible death sequence
+    // like when a rocket takes out a trooper
+    int          xdeathstate;
 
-    int          deathsound;    // The death sound.  See also A_Scream() in
-                                // p_enemy.c for some tweaking that goes on
-                                // for certain monsters
+    // The death sound.  See also A_Scream() in
+    // p_enemy.c for some tweaking that goes on
+    // for certain monsters
+    int          deathsound;
 
-    int          speed;         // How fast it moves.  Too fast and it can miss
-                                // collision logic.
+    // How fast it moves.  Too fast and it can miss
+    // collision logic.
+    int          speed;
 
-    int          radius;        // An often incorrect radius
+    // An often incorrect radius
+    int          radius;
 
-    int          height;        // An often incorrect height, used only to see
-                                // if a monster can enter a sector
+    // An often incorrect height, used only to see
+    // if a monster can enter a sector
+    int          height;
 
     int          projectilepassheight;
 
-    int          mass;          // How much an impact will move it.  Cacodemons
-                                // seem to retreat when shot because they have
-                                // very little mass and are moved by impact
+    // How much an impact will move it.  Cacodemons
+    // seem to retreat when shot because they have
+    // very little mass and are moved by impact
+    int          mass;
 
-    int          damage;        // If this is a missile, how much does it hurt?
+    // If this is a missile, how much does it hurt?
+    int          damage;
 
-    int          activesound;   // What sound it makes wandering around, once
-                                // in a while.  Chance is 3/256 it will.
+    // What sound it makes wandering around, once
+    // in a while.  Chance is 3/256 it will.
+    int          activesound;
 
-    int          flags;         // Bit masks for lots of things.  See p_mobj.h
-
+    // Bit masks for lots of things.  See p_mobj.h
+    int          flags;
     int          flags2;
 
-    int          raisestate;    // The first state for an Archvile or respawn
-                                // resurrection.  Zero means it won't come
-                                // back to life.
+    // The first state for an Arch-Vile or respawn
+    // resurrection.  Zero means it won't come
+    // back to life.
+    int          raisestate;
+
     int          frames;
 
-    int          blood;         // blood color (may also be used for particles)
+    // blood color (may also be used for particles)
+    int          blood;
 
     int          shadowoffset;
 
-    unsigned int particlefx;    // haleyjd 07/13/03: particle effects
+    // haleyjd 07/13/03: particle effects
+    unsigned int particlefx;
 
     char         name1[100];
     char         plural1[100];
     char         name2[100];
     char         plural2[100];
-    void         (*colfunc)(void);
-} mobjinfo_t;
 
-extern mobjinfo_t       mobjinfo[NUMMOBJTYPES];
+    void         (*colfunc)(void);
+
+} mobjinfo_t;
 
 typedef struct
 {
@@ -2056,8 +2155,17 @@ typedef struct
     short       width;
     short       height;
     mobjtype_t  type;
+
 } offset_t;
 
-extern offset_t sproffsets[];
+
+extern offset_t        sproffsets[];
+
+extern state_t         states[NUMSTATES];
+
+extern mobjinfo_t      mobjinfo[NUMMOBJTYPES];
+
+extern char            *sprnames[];
 
 #endif
+

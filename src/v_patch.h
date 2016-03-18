@@ -29,15 +29,23 @@
 
 typedef struct 
 { 
-    short                width;            // bounding box size 
+    // bounding box size 
+    short                width;
     short                height; 
-    short                leftoffset;       // pixels to the left of origin 
-    short                topoffset;        // pixels below the origin 
 
-    int                  columnofs[8];     // only [width] used
+    // pixels to the left of origin 
+    short                leftoffset;
+
+    // pixels below the origin 
+    short                topoffset;
+
+    // only [width] used
+    int                  columnofs[8];
+
     // the [0] is &columnofs[width] 
+    byte                 *pixels[4];
 
-    byte                 *pixels[4];       // mip levels
+    // mip levels
     byte                 *pic;
 
 } PACKEDATTR patch_t;
@@ -45,12 +53,17 @@ typedef struct
 // posts are runs of non masked source pixels
 typedef struct
 {
-    byte                 topdelta;         // -1 is the last post in a column
-    byte                 length;           // length data bytes follows
+    // -1 is the last post in a column
+    byte                 topdelta;
+
+    // length data bytes follows
+    byte                 length;
+
 } PACKEDATTR post_t;
 
 // column_t is a list of 0 or more post_t, (byte)-1 terminated
 typedef post_t        column_t;
+
 
 #endif 
 

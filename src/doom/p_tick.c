@@ -35,7 +35,8 @@
 
 // killough 8/29/98: we maintain several separate threads, each containing
 // a special class of thinkers, to allow more efficient searches.
-thinker_t       thinkerclasscap[th_all + 1];
+thinker_t        thinkerclasscap[th_all + 1];
+thinker_t        *currentthinker;
 
 
 //
@@ -46,17 +47,13 @@ thinker_t       thinkerclasscap[th_all + 1];
 // but the first element must be thinker_t.
 //
 
-
 int              leveltime;
-
-// Both the head and tail of the thinker list.
-//thinker_t        thinkercap;
 
 
 //
 // P_InitThinkers
 //
-void P_InitThinkers (void)
+void P_InitThinkers(void)
 {
     int i;
 
@@ -67,20 +64,19 @@ void P_InitThinkers (void)
     thinkercap.prev = thinkercap.next  = &thinkercap;
 }
 
-
-
 //
 // P_AddThinker
 // Adds a new thinker at the end of the list.
 //
-void P_AddThinker (thinker_t* thinker)
+void P_AddThinker(thinker_t *thinker)
 {
     thinkercap.prev->next = thinker;
     thinker->next = &thinkercap;
     thinker->prev = thinkercap.prev;
     thinkercap.prev = thinker;
 
-    thinker->references = 0;    // killough 11/98: init reference counter to 0
+    // killough 11/98: init reference counter to 0
+    thinker->references = 0;
 
     // killough 8/29/98: set sentinel pointers, and then add to appropriate list
     thinker->cnext = thinker->cprev = NULL;
@@ -92,8 +88,6 @@ void P_AddThinker (thinker_t* thinker)
 //
 // Make currentthinker external, so that P_RemoveThinkerDelayed
 // can adjust currentthinker when thinkers self-remove.
-
-thinker_t        *currentthinker;
 
 //
 // P_RemoveThinkerDelayed()
@@ -152,7 +146,6 @@ void P_UpdateThinker(thinker_t *thinker)
     th->cprev = thinker;
 }
 
-
 //
 // P_RemoveThinker
 // Deallocation is lazy -- it will not actually be freed
@@ -164,14 +157,12 @@ void P_UpdateThinker(thinker_t *thinker)
 // set the function to P_RemoveThinkerDelayed(), so that later, it will be
 // removed automatically as part of the thinker process.
 //
-void P_RemoveThinker (thinker_t* thinker)
+void P_RemoveThinker(thinker_t *thinker)
 {
     thinker->function = P_RemoveThinkerDelayed;
 
     P_UpdateThinker(thinker);
 }
-
-
 
 //
 // P_AllocateThinker
@@ -180,7 +171,7 @@ void P_RemoveThinker (thinker_t* thinker)
 // [nitr8] UNUSED
 //
 /*
-void P_AllocateThinker (thinker_t*        thinker)
+void P_AllocateThinker(thinker_t *thinker)
 {
 }
 */
@@ -188,68 +179,66 @@ void P_AllocateThinker (thinker_t*        thinker)
 //
 // P_RunThinkers
 //
-void P_RunThinkers (void)
+void P_RunThinkers(void)
 {
 //    thinker_t *currentthinker, *nextthinker;
 
     currentthinker = thinkercap.next;
+
     while (currentthinker != &thinkercap)
     {
 /*
         nextthinker = currentthinker->next;
 
-        if ( currentthinker->function == NULL)
+        if (currentthinker->function == NULL)
         {
             // time to remove it
             currentthinker->next->prev = currentthinker->prev;
             currentthinker->prev->next = currentthinker->next;
-            Z_Free (currentthinker);
+            Z_Free(currentthinker);
         }
         else
         {
 */
             if (currentthinker->function)
-                currentthinker->function (currentthinker);
+                currentthinker->function(currentthinker);
 /*
         }
+
         currentthinker = nextthinker;
 */
         currentthinker = currentthinker->next;
     }
 }
 
-
-
 //
 // P_Ticker
 //
-
-void P_Ticker (void)
+void P_Ticker(void)
 {
     int         i;
     
     // run the tic
-    if ((paused || menuactive) && !beta_style /*|| consoleactive*/)
+    if ((paused || menuactive) && !beta_style)
         return;
 
     // pause if in menu and at least one tic has been run
-    if ( !netgame
-         && menuactive
-         && !demoplayback
-         && players[consoleplayer].viewz != 1 && !beta_style)
+    if (!netgame && menuactive && !demoplayback
+        && players[consoleplayer].viewz != 1 && !beta_style)
     {
         return;
     }
 
-    P_ParticleThinker(); // haleyjd: think for particles
+    // haleyjd: think for particles
+    P_ParticleThinker();
 
-    for (i=0 ; i<MAXPLAYERS ; i++)
+    for (i = 0; i < MAXPLAYERS; i++)
         if (playeringame[i])
-            P_PlayerThink (&players[i]);
+            P_PlayerThink(&players[i]);
 
-    P_RunThinkers ();
-    P_UpdateSpecials ();
-    P_RespawnSpecials ();
+    P_RunThinkers();
+    P_UpdateSpecials();
+    P_RespawnSpecials();
 
     P_MapEnd();
 
@@ -269,7 +258,8 @@ void P_Ticker (void)
     // for par times
     leveltime++;        
 
-    P_RunEffects(); // haleyjd: run particle effects
+    // haleyjd: run particle effects
+    P_RunEffects();
 }
 
 //
@@ -285,9 +275,12 @@ void P_Ticker (void)
 //
 void P_SetTarget(mobj_t **mop, mobj_t *targ)
 {
-    if (*mop)           // If there was a target already, decrease its refcount
+    if (*mop)
+        // If there was a target already, decrease its refcount
         (*mop)->thinker.references--;
-    if ((*mop = targ))  // Set new target and if non-NULL, increase its counter
+
+    if ((*mop = targ))
+        // Set new target and if non-NULL, increase its counter
         targ->thinker.references++;
 }
 

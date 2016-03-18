@@ -36,10 +36,12 @@
 ========================================================================
 */
 
+
 #if !defined(__R_THINGS__)
 #define __R_THINGS__
 
-// OK, now this is an intersting point:
+
+// OK, now this is an interesting point:
 //
 // DOOM Retro uses "#define NUMVISSPRITES   0x20000" here as default.
 // It's the same as if we would use "16384 * 8" (131072) instead.
@@ -55,24 +57,6 @@
 #define NUMVISSPRITES   0x20000
 #endif
 
-// Constant arrays used for psprite clipping
-//  and initializing clipping.
-extern int      negonearray[SCREENWIDTH];
-extern int      screenheightarray[SCREENWIDTH];
-
-// vars for R_DrawMaskedColumn
-extern int      *mfloorclip;
-extern int      *mceilingclip;
-extern fixed_t  spryscale;
-extern int64_t  sprtopscreen;
-
-extern fixed_t  pspritexscale;
-extern fixed_t  pspriteyscale;
-extern fixed_t  pspriteiscale;
-
-extern fixed_t  viewheightfrac;
-
-extern dboolean r_playersprites;
 
 void R_InitParticles(void);
 void R_ClearParticles(void);
@@ -87,4 +71,26 @@ void R_ProjectSprite(mobj_t *thing);
 void R_ProjectBloodSplat(mobj_t *thing);
 void R_ProjectShadow(mobj_t *thing);
 
+
+// Constant arrays used for psprite clipping
+//  and initializing clipping.
+extern int      negonearray[SCREENWIDTH];
+extern int      screenheightarray[SCREENWIDTH];
+
+// vars for R_DrawMaskedColumn
+extern int      *mfloorclip;
+extern int      *mceilingclip;
+
+extern int64_t  sprtopscreen;
+
+extern fixed_t  spryscale;
+extern fixed_t  pspritexscale;
+extern fixed_t  pspriteyscale;
+extern fixed_t  pspriteiscale;
+extern fixed_t  viewheightfrac;
+
+extern dboolean r_playersprites;
+
+
 #endif
+

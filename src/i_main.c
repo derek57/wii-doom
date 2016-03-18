@@ -68,52 +68,54 @@
 //
 // e6y: exeptions handling
 //
-
 typedef enum
 {
     EXEPTION_NONE,
     EXEPTION_glFramebufferTexture2DEXT,
     EXEPTION_MAX
+
 } ExeptionsList_t;
 
 typedef struct
 {
     const char *error_message;
+
 } ExeptionParam_t;
 
 
+static ExeptionParam_t    ExeptionsParams[];
+
+static ExeptionsList_t    current_exception_index;
+
+
 // MAIN DEVPARM
-dboolean        devparm = false;
-dboolean        devparm_net = false;
+dboolean                  devparm = false;
+dboolean                  devparm_net = false;
 
 // SOLO DEVPARM
-dboolean        devparm_nerve = false;
-dboolean        devparm_master = false;
-dboolean        devparm_doom = false;
-dboolean        devparm_doom2 = false;
-dboolean        devparm_freedoom2 = false;
-dboolean        devparm_tnt = false;
-dboolean        devparm_plutonia = false;
-dboolean        devparm_chex = false;
-dboolean        devparm_hacx = false;
+dboolean                  devparm_nerve = false;
+dboolean                  devparm_master = false;
+dboolean                  devparm_doom = false;
+dboolean                  devparm_doom2 = false;
+dboolean                  devparm_freedoom2 = false;
+dboolean                  devparm_tnt = false;
+dboolean                  devparm_plutonia = false;
+dboolean                  devparm_chex = false;
+dboolean                  devparm_hacx = false;
 
 // NETWORK DEVPARM
-dboolean        devparm_net_nerve = false;
-dboolean        devparm_net_doom = false;
-dboolean        devparm_net_doom2 = false;
-dboolean        devparm_net_freedoom2 = false;
-dboolean        devparm_net_tnt = false;
-dboolean        devparm_net_plutonia = false;
-dboolean        devparm_net_chex = false;
-dboolean        devparm_net_hacx = false;
+dboolean                  devparm_net_nerve = false;
+dboolean                  devparm_net_doom = false;
+dboolean                  devparm_net_doom2 = false;
+dboolean                  devparm_net_freedoom2 = false;
+dboolean                  devparm_net_tnt = false;
+dboolean                  devparm_net_plutonia = false;
+dboolean                  devparm_net_chex = false;
+dboolean                  devparm_net_hacx = false;
 
 
-static ExeptionParam_t ExeptionsParams[];
-
-static ExeptionsList_t current_exception_index;
-
-int exit_by_reset = 0;
-int return_reset = 2;
+int                       exit_by_reset = 0;
+int                       return_reset = 2;
 
 
 #ifdef WII
@@ -136,10 +138,10 @@ void My_Quit(void)
 
     WPAD_Shutdown();
 
-    if(exit_by_reset == 2)
+    if (exit_by_reset == 2)
         SYS_ResetSystem(SYS_RETURNTOMENU, 0, 0);
 
-    if(exit_by_reset == 3)
+    if (exit_by_reset == 3)
         SYS_ResetSystem(SYS_POWEROFF_STANDBY, 0, 0);
 
     return;
@@ -155,7 +157,6 @@ void I_ExeptionProcess(void)
 }
 
 // cleanup handling -- killough:
-
 static void I_SignalHandler(int s)
 {
     char buf[2048];
@@ -184,6 +185,7 @@ static void I_SignalHandler(int s)
 int main(int argc, char **argv)
 {
     // save arguments
+
 #ifndef WII
     myargc = argc;
     myargv = argv;
@@ -200,30 +202,35 @@ int main(int argc, char **argv)
     {
         signal(SIGSEGV, I_SignalHandler);
     }
+
     signal(SIGTERM, I_SignalHandler);
     signal(SIGFPE,  I_SignalHandler);
     signal(SIGILL,  I_SignalHandler);
-    signal(SIGINT,  I_SignalHandler);  /* killough 3/6/98: allow CTRL-BRK during init */
+
+    /* killough 3/6/98: allow CTRL-BRK during init */
+    signal(SIGINT,  I_SignalHandler);
+
     signal(SIGABRT, I_SignalHandler);
 #endif
 
 #ifdef WII
-    // Set RESET/POWER button callback
-    SYS_SetResetCallback(reset_call); // esto es para que puedas salir al pulsar boton de RESET
-    SYS_SetPowerCallback(power_call); // esto para apagar con power
+    // Set RESET / POWER button callback
+    SYS_SetResetCallback(reset_call);
+    SYS_SetPowerCallback(power_call);
 
     wii_main();
 
-    atexit (My_Quit);
+    atexit(My_Quit);
 
     // start doom
-    if(devparm || devparm_net)
+    if (devparm || devparm_net)
 #endif
-        D_DoomMain ();
+        D_DoomMain();
 #ifdef WII
     else
         drawDirectory();
 #endif
+
     return 0;
 }
 

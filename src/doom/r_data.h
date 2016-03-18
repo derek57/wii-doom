@@ -36,12 +36,15 @@
 ========================================================================
 */
 
+
 #if !defined(__R_DATA__)
 #define __R_DATA__
+
 
 #include "r_defs.h"
 #include "r_state.h"
 #include "v_video.h"
+
 
 //
 // Texture definition.
@@ -58,6 +61,7 @@ typedef struct
     short       patch;
     short       stepdir;
     short       colormap;
+
 } PACKEDATTR mappatch_t;
 
 //
@@ -74,6 +78,7 @@ typedef struct
     int         obsolete;
     short       patchcount;
     mappatch_t  patches[1];
+
 } PACKEDATTR maptexture_t;
 
 // A single patch from a texture definition,
@@ -87,6 +92,7 @@ typedef struct
     short       originx;
     short       originy;
     int         patch;
+
 } texpatch_t;
 
 // A maptexturedef_t describes a rectangular texture,
@@ -114,12 +120,17 @@ struct texture_s
     texpatch_t  patches[1];
 };
 
+
 // Retrieve column data for span blitting.
 byte *R_GetColumn(int tex, int col, dboolean opaque);
+
+byte R_BestColor(const unsigned int *palette, const int r, const int g, const int b, const int numcolors);
 
 // I/O, setting up the stuff.
 void R_InitData(void);
 void R_PrecacheLevel(void);
+
+void R_BuildTransTable(unsigned int *palette);
 
 // Retrieval.
 // Floor/ceiling opaque texture tiles,
@@ -132,9 +143,10 @@ int R_CheckFlatNumForName(char *name);
 int R_TextureNumForName(char *name);
 int R_CheckTextureNumForName(char *name);
 
-int R_ColormapNumForName(char *name);   // killough 4/4/98
-byte R_BestColor(const unsigned int *palette, const int r, const int g, const int b, const int numcolors);
-palette_t *R_InitPalettes (char *name);
-void R_BuildTransTable (unsigned int *palette);
+// killough 4/4/98
+int R_ColormapNumForName(char *name);
+
+palette_t *R_InitPalettes(char *name);
 
 #endif
+

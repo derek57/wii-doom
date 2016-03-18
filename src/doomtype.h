@@ -36,8 +36,6 @@
 // #define macros to provide functions missing in Windows.
 // Outside Windows, we use strings.h for str[n]casecmp.
 
-
-
 //
 // The packed attribute forces structures to be packed into the minimum 
 // space necessary.  If this is not done, the compiler may align structure
@@ -48,14 +46,7 @@
 //
 
 #ifdef __GNUC__
-/*
-#if defined(_WIN32) && !defined(__clang__)
-#define PACKEDATTR __attribute__((packed,gcc_struct))
-#else
-*/
 #define PACKEDATTR __attribute__((packed))
-//#endif
-
 #else
 #define PACKEDATTR
 #endif
@@ -66,11 +57,11 @@
 // custom macro definition
 
 #if defined(__GNUC__)
-  #define d_inline __inline__
+#define d_inline __inline__
 #elif defined(_MSC_VER)
-  #define d_inline __inline
+#define d_inline __inline
 #else
-  #define d_inline
+#define d_inline
 #endif
 
 // C99 integer types; with gcc we just use this.  Other compilers 
@@ -90,26 +81,12 @@
 typedef bool dboolean;
 
 #else
-/*
-#ifdef WII
-#ifdef FALSE
-#undef FALSE
-#endif
-#ifdef false
-#undef false
-#endif
-#ifdef TRUE
-#undef TRUE
-#endif
-#ifdef true
-#undef true
-#endif
-#endif
-*/
+
 typedef enum
 {
     false, 
     true
+
 } dboolean;
 #endif
 
@@ -117,9 +94,9 @@ typedef uint8_t byte;
 
 #include <limits.h>
 
-#define DIR_SEPARATOR '/'
+#define DIR_SEPARATOR   '/'
 #define DIR_SEPARATOR_S "/"
-#define PATH_SEPARATOR ':'
+#define PATH_SEPARATOR  ':'
 
 #define arrlen(array) (sizeof(array) / sizeof(*array))
 

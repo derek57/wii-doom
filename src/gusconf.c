@@ -35,18 +35,19 @@
 
 #define MAX_INSTRUMENTS 256
 
+
 typedef struct
 {
     char *patch_names[MAX_INSTRUMENTS];
     int mapping[MAX_INSTRUMENTS];
+
 } gus_config_t;
+
 
 char *gus_patch_path = "";
 
-int gus_ram_kb = 1024;
+int  gus_ram_kb = 1024;
 
-//extern dboolean usb;
-//extern dboolean sd;
 
 static unsigned int MappingIndex(void)
 {
@@ -87,6 +88,7 @@ static int SplitLine(char *line, char **fields, unsigned int max_fields)
             do
             {
                 ++p;
+
             } while (*p != '\0' && isspace(*p));
 
             fields[num_fields] = p;
@@ -107,6 +109,7 @@ static int SplitLine(char *line, char **fields, unsigned int max_fields)
 
     // Strip off trailing whitespace from the end of the line.
     p = fields[num_fields - 1] + strlen(fields[num_fields - 1]);
+
     while (p > fields[num_fields - 1] && isspace(*(p - 1)))
     {
         --p;
@@ -190,7 +193,6 @@ static char *ReadDMXConfig(void)
     char *data;
 
     // TODO: This should be chosen based on gamemode == commercial:
-
     lumpnum = W_CheckNumForName("DMXGUS");
 
     if (lumpnum < 0)
@@ -213,9 +215,9 @@ static dboolean WriteTimidityConfig(char *path, gus_config_t *config)
     unsigned int i;
 
 #ifdef WII
-    if(usb)
+    if (usb)
         gus_patch_path = "usb:/apps/wiidoom/gus";
-    else if(sd)
+    else if (sd)
         gus_patch_path = "sd:/apps/wiidoom/gus";
 #endif
 
@@ -235,9 +237,8 @@ static dboolean WriteTimidityConfig(char *path, gus_config_t *config)
     for (i = 0; i < 128; ++i)
     {
         if (config->mapping[i] >= 0 && config->mapping[i] < MAX_INSTRUMENTS
-         && config->patch_names[config->mapping[i]] != NULL)
+            && config->patch_names[config->mapping[i]] != NULL)
         {
-//            fprintf(fstream, "%i %s\n",
             fprintf(fstream, "%u %s\n",
                     i, config->patch_names[config->mapping[i]]);
         }
@@ -248,7 +249,7 @@ static dboolean WriteTimidityConfig(char *path, gus_config_t *config)
     for (i = 128 + 25; i < MAX_INSTRUMENTS; ++i)
     {
         if (config->mapping[i] >= 0 && config->mapping[i] < MAX_INSTRUMENTS
-         && config->patch_names[config->mapping[i]] != NULL)
+            && config->patch_names[config->mapping[i]] != NULL)
         {
             fprintf(fstream, "%u %s\n",
                     i - 128, config->patch_names[config->mapping[i]]);
@@ -269,9 +270,9 @@ dboolean GUS_WriteConfig(char *path)
     gus_config_t config;
 
 #ifdef WII
-    if(usb)
+    if (usb)
         gus_patch_path = "usb:/apps/wiidoom/gus";
-    else if(sd)
+    else if (sd)
         gus_patch_path = "sd:/apps/wiidoom/gus";
 #endif
 

@@ -12,20 +12,21 @@
 // GNU General Public License for more details.
 //
 
+
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdarg.h>
 #include <string.h>
 
 #include "doomkeys.h"
-
-#include "txt_label.h"
 #include "txt_desktop.h"
 #include "txt_gui.h"
 #include "txt_io.h"
+#include "txt_label.h"
 #include "txt_main.h"
 #include "txt_separator.h"
 #include "txt_window.h"
+
 /*
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
@@ -33,8 +34,8 @@
 #include <shellapi.h>
 #endif
 */
-void TXT_SetWindowAction(txt_window_t *window,
-                         txt_horiz_align_t position, 
+
+void TXT_SetWindowAction(txt_window_t *window, txt_horiz_align_t position, 
                          txt_window_action_t *action)
 {
     if (window->actions[position] != NULL)
@@ -45,7 +46,6 @@ void TXT_SetWindowAction(txt_window_t *window,
     window->actions[position] = action;
 
     // Maintain parent pointer.
-
     if (action != NULL)
     {
         action->widget.parent = &window->table.widget;
@@ -81,13 +81,12 @@ txt_window_t *TXT_NewWindow(char *title)
 
     TXT_AddWidget(win, TXT_NewSeparator(NULL));
 
-    for (i=0; i<3; ++i)
+    for (i = 0; i < 3; ++i)
         win->actions[i] = NULL;
 
     TXT_AddDesktopWindow(win);
 
     // Default actions
-
     TXT_SetWindowAction(win, TXT_HORIZ_LEFT, TXT_NewWindowEscapeAction(win));
     TXT_SetWindowAction(win, TXT_HORIZ_RIGHT, TXT_NewWindowSelectAction(win));
 
@@ -104,8 +103,7 @@ void TXT_CloseWindow(txt_window_t *window)
     free(window->title);
 
     // Destroy all actions
-
-    for (i=0; i<3; ++i)
+    for (i = 0; i < 3; ++i)
     {
         if (window->actions[i] != NULL)
         {
@@ -114,7 +112,6 @@ void TXT_CloseWindow(txt_window_t *window)
     }
 
     // Destroy table and window
-
     TXT_DestroyWidget(window);
 }
 
@@ -129,9 +126,11 @@ static void CalcWindowPosition(txt_window_t *window)
         case TXT_HORIZ_LEFT:
             window->window_x = window->x;
             break;
+
         case TXT_HORIZ_CENTER:
             window->window_x = window->x - (window->window_w / 2);
             break;
+
         case TXT_HORIZ_RIGHT:
             window->window_x = window->x - (window->window_w - 1);
             break;
@@ -142,9 +141,11 @@ static void CalcWindowPosition(txt_window_t *window)
         case TXT_VERT_TOP:
             window->window_y = window->y;
             break;
+
         case TXT_VERT_CENTER:
             window->window_y = window->y - (window->window_h / 2);
             break;
+
         case TXT_VERT_BOTTOM:
             window->window_y = window->y - (window->window_h - 1);
             break;
@@ -160,12 +161,10 @@ static void LayoutActionArea(txt_window_t *window)
     // We need to calculate the available horizontal space for the center
     // action widget, so that we can center it within it.
     // To start with, we have the entire action area available.
-
     space_available = window->window_w;
     space_left_offset = 0;
 
     // Left action
-
     if (window->actions[TXT_HORIZ_LEFT] != NULL)
     {
         widget = (txt_widget_t *) window->actions[TXT_HORIZ_LEFT];
@@ -176,13 +175,11 @@ static void LayoutActionArea(txt_window_t *window)
         widget->y = window->window_y + window->window_h - widget->h - 1;
 
         // Adjust available space:
-
         space_available -= widget->w;
         space_left_offset += widget->w;
     }
 
     // Draw the right action
-
     if (window->actions[TXT_HORIZ_RIGHT] != NULL)
     {
         widget = (txt_widget_t *) window->actions[TXT_HORIZ_RIGHT];
@@ -193,12 +190,10 @@ static void LayoutActionArea(txt_window_t *window)
         widget->y = window->window_y + window->window_h - widget->h - 1;
 
         // Adjust available space:
-
         space_available -= widget->w;
     }
 
     // Draw the center action
-
     if (window->actions[TXT_HORIZ_CENTER] != NULL)
     {
         widget = (txt_widget_t *) window->actions[TXT_HORIZ_CENTER];
@@ -207,10 +202,10 @@ static void LayoutActionArea(txt_window_t *window)
 
         // The left and right widgets have left a space sandwiched between
         // them.  Center this widget within that space.
-
         widget->x = window->window_x
                   + space_left_offset
                   + (space_available - widget->w) / 2;
+
         widget->y = window->window_y + window->window_h - widget->h - 1;
     }
 }
@@ -219,7 +214,7 @@ static void DrawActionArea(txt_window_t *window)
 {
     int i;
 
-    for (i=0; i<3; ++i)
+    for (i = 0; i < 3; ++i)
     {
         if (window->actions[i] != NULL)
         {
@@ -239,8 +234,7 @@ static void CalcActionAreaSize(txt_window_t *window,
 
     // Calculate the width of all the action widgets and use this
     // to create an overall min. width of the action area
-
-    for (i=0; i<3; ++i)
+    for (i = 0; i < 3; ++i)
     {
         widget = (txt_widget_t *) window->actions[i];
 
@@ -258,7 +252,6 @@ static void CalcActionAreaSize(txt_window_t *window,
 }
 
 // Sets size and position of all widgets in a window
-
 void TXT_LayoutWindow(txt_window_t *window)
 {
     txt_widget_t *widgets = (txt_widget_t *) window;
@@ -266,7 +259,6 @@ void TXT_LayoutWindow(txt_window_t *window)
     unsigned int actionarea_w, actionarea_h;
 
     // Calculate size of table
-    
     TXT_CalcWidgetSize(window);
 
     // Widgets area: add one character of padding on each side
@@ -274,26 +266,22 @@ void TXT_LayoutWindow(txt_window_t *window)
 
     // Calculate the size of the action area
     // Make window wide enough to action area
-  
     CalcActionAreaSize(window, &actionarea_w, &actionarea_h);
     
     if (actionarea_w > widgets_w)
         widgets_w = actionarea_w;
 
     // Set the window size based on widgets_w
-   
     window->window_w = widgets_w + 2;
     window->window_h = widgets->h + 1;
 
     // If the window has a title, add an extra two lines
-
     if (window->title != NULL)
     {
         window->window_h += 2;
     }
 
     // If the window has an action area, add extra lines
-
     if (actionarea_h > 0)
     {
         window->window_h += actionarea_h + 1;
@@ -301,11 +289,9 @@ void TXT_LayoutWindow(txt_window_t *window)
 
     // Use the x,y position as the centerpoint and find the location to 
     // draw the window.
-
     CalcWindowPosition(window);
 
     // Set the table size and position
-
     widgets->w = widgets_w - 2;
     // widgets->h        (already set)
     widgets->x = window->window_x + 2;
@@ -317,7 +303,6 @@ void TXT_LayoutWindow(txt_window_t *window)
     }
 
     // Layout the table and action area
-
     LayoutActionArea(window);
     TXT_LayoutWidget(widgets);
 }
@@ -340,37 +325,30 @@ void TXT_DrawWindow(txt_window_t *window)
     TXT_FGColor(TXT_COLOR_BRIGHT_WHITE);
 
     // Draw the window
-
     TXT_DrawWindowFrame(window->title, 
                         window->window_x, window->window_y,
                         window->window_w, window->window_h);
 
     // Draw all widgets
-
     TXT_DrawWidget(window);
 
     // Draw an action area, if we have one
-
     widgets = (txt_widget_t *) window;
 
     if (widgets->y + widgets->h < window->window_y + window->window_h - 1)
     {
         // Separator for action area
-
         TXT_DrawSeparator(window->window_x, widgets->y + widgets->h, 
                           window->window_w);
 
         // Action area at the window bottom
-
         DrawActionArea(window);
     }
 }
 */
 
-void TXT_SetWindowPosition(txt_window_t *window,
-                           txt_horiz_align_t horiz_align,
-                           txt_vert_align_t vert_align,
-                           int x, int y)
+void TXT_SetWindowPosition(txt_window_t *window, txt_horiz_align_t horiz_align,
+                           txt_vert_align_t vert_align, int x, int y)
 {
     window->vert_align = vert_align;
     window->horiz_align = horiz_align;
@@ -389,20 +367,16 @@ static int MouseButtonPress(txt_window_t *window, int b)
     txt_widget_t *widgets;
 
     // Lay out the window, set positions and sizes of all widgets
-
     TXT_LayoutWindow(window);
 
     // Get the current mouse position
-
     TXT_GetMousePosition(&x, &y);
 
     // Try the mouse button listener
     // This happens whether it is in the window range or not
-
     if (window->mouse_listener != NULL)
     {
         // Mouse listener can eat button presses
-
         if (window->mouse_listener(window, x, y, b, 
                                    window->mouse_listener_data))
         {
@@ -411,25 +385,23 @@ static int MouseButtonPress(txt_window_t *window, int b)
     }
 
     // Is it within the table range?
-
     widgets = (txt_widget_t *) window;
 
     if (x >= widgets->x && x < (signed) (widgets->x + widgets->w)
-     && y >= widgets->y && y < (signed) (widgets->y + widgets->h))
+        && y >= widgets->y && y < (signed) (widgets->y + widgets->h))
     {
         TXT_WidgetMousePress(window, x, y, b);
         return 1;
     }
 
     // Was one of the action area buttons pressed?
-
-    for (i=0; i<3; ++i)
+    for (i = 0; i < 3; ++i)
     {
         txt_widget_t *widget = (txt_widget_t *) window->actions[i];
 
         if (widget != NULL
-         && x >= widget->x && x < (signed) (widget->x + widget->w)
-         && y >= widget->y && y < (signed) (widget->y + widget->h))
+            && x >= widget->x && x < (signed) (widget->x + widget->w)
+            && y >= widget->y && y < (signed) (widget->y + widget->h))
         {
             int was_focused;
 
@@ -437,13 +409,11 @@ static int MouseButtonPress(txt_window_t *window, int b)
             // is clicked. This way, any active input boxes that depend
             // on having focus will save their values before the
             // action is performed.
-
             was_focused = window->table.widget.focused;
             TXT_SetWidgetFocus(window, 0);
             TXT_SetWidgetFocus(window, was_focused);
 
             // Pass through mouse press.
-
             TXT_WidgetMousePress(widget, x, y, b);
             return 1;
         }
@@ -457,18 +427,15 @@ int TXT_WindowKeyPress(txt_window_t *window, int c)
     int i;
 
     // Is this a mouse button ?
-
     if (c >= TXT_MOUSE_BASE && c < TXT_MOUSE_BASE + TXT_MAX_MOUSE_BUTTONS)
     {
         return MouseButtonPress(window, c);
     }
 
     // Try the window key spy
-
     if (window->key_listener != NULL)
     {
         // key listener can eat keys
-
         if (window->key_listener(window, c, window->key_listener_data))
         {
             return 1;
@@ -476,18 +443,16 @@ int TXT_WindowKeyPress(txt_window_t *window, int c)
     }
 
     // Send to the currently selected widget:
-
     if (TXT_WidgetKeyPress(window, c))
     {
         return 1;
     }
 
     // Try all of the action buttons
-
-    for (i=0; i<3; ++i)
+    for (i = 0; i < 3; ++i)
     {
         if (window->actions[i] != NULL
-         && TXT_WidgetKeyPress(window->actions[i], c))
+            && TXT_WidgetKeyPress(window->actions[i], c))
         {
             return 1;
         }
@@ -505,8 +470,7 @@ void TXT_SetKeyListener(txt_window_t *window, TxtWindowKeyPress key_listener,
 }
 
 void TXT_SetMouseListener(txt_window_t *window, 
-                          TxtWindowMousePress mouse_listener,
-                          void *user_data)
+                          TxtWindowMousePress mouse_listener, void *user_data)
 {
     window->mouse_listener = mouse_listener;
     window->mouse_listener_data = user_data;
@@ -594,8 +558,10 @@ txt_window_t *TXT_MessageBox(char *title, char *message, ...)
     TXT_AddWidget(window, TXT_NewLabel(buf));
 
     TXT_SetWindowAction(window, TXT_HORIZ_LEFT, NULL);
+
     TXT_SetWindowAction(window, TXT_HORIZ_CENTER, 
                         TXT_NewWindowEscapeAction(window));
+
     TXT_SetWindowAction(window, TXT_HORIZ_RIGHT, NULL);
 
     return window;

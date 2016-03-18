@@ -36,8 +36,10 @@
 ========================================================================
 */
 
+
 #include "m_bbox.h"
 #include "p_local.h"
+
 
 //
 // P_CheckSight
@@ -47,14 +49,22 @@
 // Convert LOS info to struct for reentrancy and efficiency of data locality
 typedef struct los_s
 {
-    fixed_t     sightzstart, t2x, t2y;  // eye z of looker
-    divline_t   strace;                 // from t1 to t2
-    fixed_t     topslope, bottomslope;  // slopes to top and bottom of target
+    // eye z of looker
+    fixed_t     sightzstart, t2x, t2y;
+
+    // from t1 to t2
+    divline_t   strace;
+
+    // slopes to top and bottom of target
+    fixed_t     topslope, bottomslope;
     fixed_t     bbox[4];
-    fixed_t     maxz, minz;             // cph - z optimizations for 2sided lines
+
+    // cph - z optimizations for 2sided lines
+    fixed_t     maxz, minz;
 } los_t;
 
-static los_t    los; // cph - made static
+// cph - made static
+static los_t    los;
 
 //
 // P_DivlineSide
@@ -195,7 +205,8 @@ static dboolean P_CrossSubsector(int num)
                 los.topslope = MIN(los.topslope, FixedDiv(opentop - los.sightzstart, frac));
 
             if (los.topslope <= los.bottomslope)
-                return false;               // stop
+                // stop
+                return false;
         }
     }
 
@@ -217,13 +228,18 @@ static dboolean P_CrossBSPNode(int bspnum)
         int             side2 = P_DivlineSide(los.t2x, los.t2y, (divline_t *)bsp);
 
         if (side1 == side2)
-            bspnum = bsp->children[side1];              // doesn't touch the other side
-        else                                            // the partition plane is crossed here
+            // doesn't touch the other side
+            bspnum = bsp->children[side1];
+        // the partition plane is crossed here
+        else
             if (!P_CrossBSPNode(bsp->children[side1]))
-                return false;                           // cross the starting side
+                // cross the starting side
+                return false;
             else
-                bspnum = bsp->children[side1 ^ 1];      // cross the ending side
+                // cross the ending side
+                bspnum = bsp->children[side1 ^ 1];
     }
+
     return P_CrossSubsector((bspnum == -1 ? 0 : (bspnum & ~NF_SUBSECTOR)));
 }
 
@@ -304,3 +320,4 @@ dboolean P_CheckSight(mobj_t *t1, mobj_t *t2)
     // the head node is the last node output
     return P_CrossBSPNode(numnodes - 1);
 }
+

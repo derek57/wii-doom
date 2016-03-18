@@ -38,6 +38,7 @@
 //
 //----------------------------------------------------------------------------
 
+
 #include <math.h>
 #include "z_zone.h"
 #include "d_main.h"
@@ -59,6 +60,19 @@
 #include "p_tick.h"
 #include "s_sound.h"
 #include "p_spec.h"
+
+
+#define BEAMLENGTH       16
+#define NUMVERTEXNORMALS 162
+
+#define FADEFROMTTL(a)   (FRACUNIT/(a))
+
+#define PARTICLE_VELRND  ((FRACUNIT / 4096)  * (M_RandomSMMU() - 128))
+#define PARTICLE_ACCRND  ((FRACUNIT / 16384) * (M_RandomSMMU() - 128))
+
+
+typedef float vec3_t[3];
+
 
 // static integers to hold particle color values
 static byte grey1;
@@ -129,11 +143,6 @@ static struct particleColorList {
 // copyright 1997 id Software, Inc. Available under the GNU General
 // Public License.
 //
-
-#define BEAMLENGTH       16
-#define NUMVERTEXNORMALS 162
-
-typedef float vec3_t[3];
 
 static vec3_t avelocities[NUMVERTEXNORMALS];
 
@@ -299,7 +308,7 @@ static vec3_t bytedirs[NUMVERTEXNORMALS] = {
     { -0.425325f, 0.688191f,-0.587785f },
     { -0.425325f,-0.688191f,-0.587785f },
     { -0.587785f,-0.425325f,-0.688191f },
-    { -0.688191f,-0.587785f,-0.425325f },
+    { -0.688191f,-0.587785f,-0.425325f }
 };
 
 //
@@ -313,9 +322,11 @@ static void P_BFGEffect(mobj_t *actor);
 static void P_DripEffect(mobj_t *actor);
 static void P_ExplosionParticles(fixed_t, fixed_t, fixed_t, byte, byte);
 
+
 extern dboolean is_liquid_floor;
 extern dboolean is_liquid_ceiling;
 extern dboolean water_hit;
+
 
 //
 // P_GenVelocities
@@ -335,8 +346,8 @@ static void P_GenVelocities(void)
 
 void P_InitParticleEffects(void)
 {
-    byte *palette = W_CacheLumpName("PLAYPAL", PU_STATIC);
-    struct particleColorList *pc = particleColors;
+    byte                        *palette = W_CacheLumpName("PLAYPAL", PU_STATIC);
+    struct particleColorList    *pc = particleColors;
 
     // match particle colors to best fit and write back to
     // static variables
@@ -381,11 +392,11 @@ static void P_SetParticlePosition(particle_t *ptcl)
 
 void P_ParticleThinker(void)
 {
-    int i = activeParticles;
-    particle_t *particle;
-    particle_t *prev = NULL;
-    sector_t *psec;
-    fixed_t floorheight;
+    int           i = activeParticles;
+    particle_t    *particle;
+    particle_t    *prev = NULL;
+    sector_t      *psec;
+    fixed_t       floorheight;
 
     while (i != -1)
     {
@@ -462,19 +473,20 @@ void P_ParticleThinker(void)
                 particle->styleflags |= PS_HITGROUND;
 
                 // some particles make splashes (FIXME)
-                //if(particle->styleflags & PS_SPLASH)
+                //if (particle->styleflags & PS_SPLASH)
                 //   E_PtclTerrainHit(particle);
             }
         }
+
         prev = particle;
     }
 }
 
 void P_RunEffects(void)
 {
-    int snum = 0;
-    thinker_t *currentthinker = &thinkercap;
-/*
+    int          snum = 0;
+    thinker_t    *currentthinker = &thinkercap;
+    /*
     // FIXME???
     if (camera)
     {
@@ -509,11 +521,6 @@ void P_RunEffects(void)
 // about struct member order and alignment in memory
 //
 
-#define FADEFROMTTL(a)  (FRACUNIT/(a))
-
-#define PARTICLE_VELRND ((FRACUNIT / 4096)  * (M_RandomSMMU() - 128))
-#define PARTICLE_ACCRND ((FRACUNIT / 16384) * (M_RandomSMMU() - 128))
-
 static particle_t *JitterParticle(int ttl)
 {
     particle_t *particle = newParticle();
@@ -536,6 +543,7 @@ static particle_t *JitterParticle(int ttl)
         particle->ttl = ttl;
         particle->fade = FADEFROMTTL(ttl);
     }
+
     return particle;
 }
 
@@ -576,6 +584,7 @@ static void MakeFountain(mobj_t *actor, byte color1, byte color2)
             particle->size = 6;
             particle->color = color1;
         }
+
         particle->styleflags = 0;
     }
 }
@@ -614,20 +623,20 @@ static void P_RunEffect(mobj_t *actor, unsigned int effects)
 
     if ((effects & FX_ROCKET) && d_drawrockettrails)
     {
-        int i;
-        int speed;
-        particle_t *particle = JitterParticle(3 + (M_RandomSMMU() & 31));
+        int           i;
+        int           speed;
+        particle_t    *particle = JitterParticle(3 + (M_RandomSMMU() & 31));
 
         // Rocket trail
         fixed_t backx = actor->x - FixedMul(finecosine[(moveangle) >> ANGLETOFINESHIFT], actor->radius * 2);
         fixed_t backy = actor->y - FixedMul(finesine[(moveangle) >> ANGLETOFINESHIFT], actor->radius * 2);
         fixed_t backz = actor->z - (actor->height >> 3) * (actor->momz >> 16) + (2 * actor->height) / 3;
 
-        angle_t an = (moveangle + ANG90) >> ANGLETOFINESHIFT;
+        angle_t       an = (moveangle + ANG90) >> ANGLETOFINESHIFT;
 
         if (particle)
         {
-            fixed_t pathdist = M_RandomSMMU() << 8;
+            fixed_t   pathdist = M_RandomSMMU() << 8;
 
             particle->x = backx - FixedMul(actor->momx, pathdist);
             particle->y = backy - FixedMul(actor->momy, pathdist);
@@ -648,11 +657,11 @@ static void P_RunEffect(mobj_t *actor, unsigned int effects)
 
         for (i = 6; i; --i)
         {
-            particle_t *iparticle = JitterParticle (3 + (M_RandomSMMU() & 31));
+            particle_t    *iparticle = JitterParticle (3 + (M_RandomSMMU() & 31));
 
             if (iparticle)
             {
-                fixed_t pathdist = M_RandomSMMU() << 8;
+                fixed_t   pathdist = M_RandomSMMU() << 8;
 
                 iparticle->x = backx - FixedMul(actor->momx, pathdist);
                 iparticle->y = backy - FixedMul(actor->momy, pathdist);
@@ -661,12 +670,12 @@ static void P_RunEffect(mobj_t *actor, unsigned int effects)
 
                 P_SetParticlePosition(iparticle);
 
-                speed = (M_RandomSMMU() - 128) * (FRACUNIT/200);
+                speed = (M_RandomSMMU() - 128) * (FRACUNIT / 200);
 
                 iparticle->velx += FixedMul(speed, finecosine[an]);
                 iparticle->vely += FixedMul(speed, finesine[an]);
-                iparticle->velz += FRACUNIT/80;
-                iparticle->accz += FRACUNIT/40;
+                iparticle->velz += FRACUNIT / 80;
+                iparticle->accz += FRACUNIT / 40;
                 iparticle->color = (M_RandomSMMU() & 7) ? grey2 : grey1;
                 iparticle->size = 3;
                 iparticle->styleflags = 0;
@@ -680,8 +689,8 @@ static void P_RunEffect(mobj_t *actor, unsigned int effects)
     {
         // Grenade trail
         P_DrawSplash2(6,
-            actor->x - FixedMul (finecosine[(moveangle) >> ANGLETOFINESHIFT], actor->radius * 2),
-            actor->y - FixedMul (finesine[(moveangle) >> ANGLETOFINESHIFT], actor->radius * 2),
+            actor->x - FixedMul(finecosine[(moveangle) >> ANGLETOFINESHIFT], actor->radius * 2),
+            actor->y - FixedMul(finesine[(moveangle) >> ANGLETOFINESHIFT], actor->radius * 2),
             actor->z - (actor->height >> 3) * (actor->momz >> 16) + (2 * actor->height) / 3,
             moveangle + ANG180, 2, 2);
     }
@@ -738,8 +747,8 @@ void P_DrawSplash(int count, fixed_t x, fixed_t y, fixed_t z, angle_t angle, int
 
     for ( ; count; count--)
     {
-        angle_t an;
-        particle_t *p = JitterParticle(10);
+        angle_t       an;
+        particle_t    *p = JitterParticle(10);
 
         if (!p)
             break;
@@ -773,8 +782,8 @@ static void P_BloodDrop(int count, fixed_t x, fixed_t y, fixed_t z, angle_t angl
 {
     for ( ; count; --count)
     {
-        particle_t *p = newParticle();
-        angle_t    an;
+        particle_t    *p = newParticle();
+        angle_t       an;
 
         if (!p)
             break;
@@ -805,11 +814,11 @@ static void P_BloodDrop(int count, fixed_t x, fixed_t y, fixed_t z, angle_t angl
 //
 void P_SmokePuff(int count, fixed_t x, fixed_t y, fixed_t z, angle_t angle, int updown)
 {
-    particle_t *p;
-    angle_t an;
-    int ttl;
-    fixed_t accz;
-    dboolean hitwater = false;
+    particle_t    *p;
+    angle_t       an;
+    int           ttl;
+    fixed_t       accz;
+    dboolean      hitwater = false;
 
     // default: grey puff
     byte color1 = grey1;
@@ -864,13 +873,13 @@ void P_SmokePuff(int count, fixed_t x, fixed_t y, fixed_t z, angle_t angle, int 
     {
         // live longer and accelerate downward faster
         ttl  = 30;
-        accz = -FRACUNIT/8;
+        accz = -FRACUNIT / 8;
         water_hit = true;
     }
     else
     {
         ttl  = 15;
-        accz = -FRACUNIT/22;
+        accz = -FRACUNIT / 22;
         water_hit = false;
     }
 
@@ -879,37 +888,37 @@ void P_SmokePuff(int count, fixed_t x, fixed_t y, fixed_t z, angle_t angle, int 
         if (!(p = newParticle()))
             break;
 
-         p->ttl = ttl;
-         p->fade = FADEFROMTTL(ttl);
-         p->trans = FRACUNIT;
-         p->size = 2 + M_RandomSMMU() % 5;
-         p->color = (M_RandomSMMU() & 0x80) ? color1 : color2;
-         p->velz = M_RandomSMMU() * 512;
+        p->ttl = ttl;
+        p->fade = FADEFROMTTL(ttl);
+        p->trans = FRACUNIT;
+        p->size = 2 + M_RandomSMMU() % 5;
+        p->color = (M_RandomSMMU() & 0x80) ? color1 : color2;
+        p->velz = M_RandomSMMU() * 512;
 
-         // ceiling shot?
-         if (updown == 1)
-             p->velz = -(p->velz / 4);
+        // ceiling shot?
+        if (updown == 1)
+            p->velz = -(p->velz / 4);
 
-         p->accz = accz;
-         p->styleflags = 0;
+        p->accz = accz;
+        p->styleflags = 0;
 
-         an = (angle + ((M_RandomSMMU() - 128) << 23)) >> ANGLETOFINESHIFT;
-         p->velx = (M_RandomSMMU() * finecosine[an]) >> 11;
-         p->vely = (M_RandomSMMU() * finesine[an]) >> 11;
-         p->accx = p->velx >> 4;
-         p->accy = p->vely >> 4;
+        an = (angle + ((M_RandomSMMU() - 128) << 23)) >> ANGLETOFINESHIFT;
+        p->velx = (M_RandomSMMU() * finecosine[an]) >> 11;
+        p->vely = (M_RandomSMMU() * finesine[an]) >> 11;
+        p->accx = p->velx >> 4;
+        p->accy = p->vely >> 4;
 
-         // ceiling shot?
-         if (updown == 1)
-             p->z = z - (M_RandomSMMU() + 72) * 2000;
-         else
-             p->z = z + (M_RandomSMMU() + 72) * 2000;
+        // ceiling shot?
+        if (updown == 1)
+            p->z = z - (M_RandomSMMU() + 72) * 2000;
+        else
+            p->z = z + (M_RandomSMMU() + 72) * 2000;
 
-         an = (angle + ((M_RandomSMMU() - 128) << 22)) >> ANGLETOFINESHIFT;
-         p->x = x + (M_RandomSMMU() & 14) * finecosine[an];
-         p->y = y + (M_RandomSMMU() & 14) * finesine[an];
+        an = (angle + ((M_RandomSMMU() - 128) << 22)) >> ANGLETOFINESHIFT;
+        p->x = x + (M_RandomSMMU() & 14) * finecosine[an];
+        p->y = y + (M_RandomSMMU() & 14) * finesine[an];
 
-         P_SetParticlePosition(p);
+        P_SetParticlePosition(p);
     }
 
     // no sparks on liquids
@@ -965,7 +974,7 @@ static struct bloodColor {
     { &black,  &grey3   },
     { &purple, &purple1 },
     { &grey4,  &white   },
-    { &orange, &yorange },
+    { &orange, &yorange }
 };
 */
 void P_BloodSpray(mobj_t *mo, int count, fixed_t x, fixed_t y, fixed_t z, angle_t angle)
@@ -1007,6 +1016,7 @@ void P_BloodSpray(mobj_t *mo, int count, fixed_t x, fixed_t y, fixed_t z, angle_
     if (color2 < color1)
     {
         int tempcol = color1;
+
         color1  = color2;
         color2  = tempcol;
     }
@@ -1019,8 +1029,8 @@ void P_BloodSpray(mobj_t *mo, int count, fixed_t x, fixed_t y, fixed_t z, angle_
 
     for( ; count; --count)
     {
-        angle_t an;
-        particle_t *p;
+        angle_t       an;
+        particle_t    *p;
 
         if (!(p = newParticle()))
             break;
@@ -1053,11 +1063,11 @@ void P_BloodSpray(mobj_t *mo, int count, fixed_t x, fixed_t y, fixed_t z, angle_
 
 void P_DrawSplash2(int count, fixed_t x, fixed_t y, fixed_t z, angle_t angle, int updown, int kind)
 {
-    byte color1;
-    byte color2;
-    int zvel;
-    int zspread;
-    int zadd;
+    byte      color1;
+    byte      color2;
+    int       zvel;
+    int       zspread;
+    int       zadd;
 
     switch (kind)
     {
@@ -1077,8 +1087,8 @@ void P_DrawSplash2(int count, fixed_t x, fixed_t y, fixed_t z, angle_t angle, in
 
     for ( ; count; count--)
     {
-        particle_t *p = newParticle();
-        angle_t an;
+        particle_t    *p = newParticle();
+        angle_t       an;
 
         if (!p)
             break;
@@ -1144,11 +1154,11 @@ void P_DisconnectEffect(mobj_t *actor)
 //
 static void P_FlyEffect(mobj_t *actor)
 {
-    int i;
-    int count;
-    particle_t *p;
-    vec3_t forward;
-    float ltime = (float)leveltime / 50.0f;
+    int          i;
+    int          count;
+    particle_t   *p;
+    vec3_t       forward;
+    float        ltime = (float)leveltime / 50.0f;
 
     // 07/13/05: ramp flies up over time for flies-on-death effect
     if (actor->effects & FX_FLIESONDEATH)
@@ -1164,12 +1174,12 @@ static void P_FlyEffect(mobj_t *actor)
 
     for (i = 0; i < count; i += 2)
     {
-        float angle;
-        float sp;
-        float sy;
-        float cp;
-        float cy;
-        float dist = 64;
+        float    angle;
+        float    sp;
+        float    sy;
+        float    cp;
+        float    cy;
+        float    dist = 64;
 
         if (!(p = newParticle()))
             break;
@@ -1212,19 +1222,19 @@ static void P_FlyEffect(mobj_t *actor)
 //
 static void P_BFGEffect(mobj_t *actor)
 {
-    int i;
-    particle_t *p;
-    vec3_t forward;
-    float ltime = (float)leveltime / 30.0f;
+    int          i;
+    particle_t   *p;
+    vec3_t       forward;
+    float        ltime = (float)leveltime / 30.0f;
 
     for (i = 0; i < NUMVERTEXNORMALS; i++)
     {
-        float angle;
-        float sp;
-        float sy;
-        float cp;
-        float cy;
-        float dist = 64;
+        float    angle;
+        float    sp;
+        float    sy;
+        float    cp;
+        float    cy;
+        float    dist = 64;
 
         if (!(p = newParticle()))
             break;
@@ -1271,8 +1281,8 @@ static void P_BFGEffect(mobj_t *actor)
 //
 static void P_DripEffect(mobj_t *actor)
 {
-    dboolean makesplash;
-    particle_t *p;
+    dboolean      makesplash;
+    particle_t    *p;
 
     if (randInRange(0, 1))
         makesplash = true;
@@ -1338,7 +1348,7 @@ particle_event_t particleEvents[P_EVENT_NUMEVENTS] =
     { P_RocketExplosion, "pevt_rexpl"   },
 
     // P_EVENT_BFG_EXPLODE
-    { P_BFGExplosion,    "pevt_bfgexpl" },
+    { P_BFGExplosion,    "pevt_bfgexpl" }
 };
 
 //
@@ -1388,8 +1398,8 @@ static void P_ExplosionParticles(fixed_t x, fixed_t y, fixed_t z, byte color1, b
 
     for(i = 0; i < 256; i++)
     {
-        int rnd;
-        particle_t *p = newParticle();
+        int          rnd;
+        particle_t   *p = newParticle();
 
         if (!p)
             break;

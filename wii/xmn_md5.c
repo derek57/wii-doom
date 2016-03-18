@@ -4,8 +4,6 @@
 #include "md5.h"
 
 
-//extern char                target[MAXPATH];
-
 char calculated_md5_string[33];
 char known_md5_string_chex_quest_iwad[33] = "25485721882b050afa96a56e5758dd52";
 char known_md5_string_doom_beta_1_4_iwad[33] = "a21ae40c388cb6f2c3cc1b95589ee693";

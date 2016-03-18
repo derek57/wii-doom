@@ -28,8 +28,9 @@
 #ifndef __F_WIPE_H__
 #define __F_WIPE_H__
 
+
 //
-//                       SCREEN WIPE PACKAGE
+// SCREEN WIPE PACKAGE
 //
 
 enum
@@ -52,6 +53,7 @@ enum
 int wipe_StartScreen(void);
 int wipe_EndScreen(void);
 int wipe_ScreenWipe(int wipeno, int ticks, int scrn);
+
 
 #endif
 

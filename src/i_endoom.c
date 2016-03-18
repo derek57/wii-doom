@@ -15,6 +15,7 @@
 //    Exit text-mode ENDOOM screen.
 //
 
+
 #ifndef WII
 #include <stdio.h>
 #include <string.h>
@@ -25,13 +26,14 @@
 
 #include "textscreen/txt_main.h"
 
+
 #define ENDOOM_W 80
 #define ENDOOM_H 25
+
 
 // 
 // Displays the text mode ending screen after the game quits
 //
-
 void I_Endoom(byte *endoom_data)
 {
     unsigned char *screendata;
@@ -39,18 +41,16 @@ void I_Endoom(byte *endoom_data)
     int indent;
 
     // Set up text mode screen
-
     TXT_Init();
     I_InitWindowTitle();
     I_InitWindowIcon();
 
     // Write the data to the screen memory
-
     screendata = TXT_GetScreenData();
 
     indent = (ENDOOM_W - TXT_SCREEN_W) / 2;
 
-    for (y=0; y<TXT_SCREEN_H; ++y)
+    for (y = 0; y < TXT_SCREEN_H; ++y)
     {
         memcpy(screendata + (y * TXT_SCREEN_W * 2),
                endoom_data + (y * ENDOOM_W + indent) * 2,
@@ -58,7 +58,6 @@ void I_Endoom(byte *endoom_data)
     }
 
     // Wait for a keypress
-
     while (true)
     {
         TXT_UpdateScreen();
@@ -72,9 +71,9 @@ void I_Endoom(byte *endoom_data)
     }
 
     // Shut down text mode screen
-
     TXT_Shutdown();
 }
+
 
 #endif
 

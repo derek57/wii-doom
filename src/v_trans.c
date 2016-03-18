@@ -16,11 +16,24 @@
 // Color translation tables
 //
 
+
 #include <math.h>
 
 #include "doomtype.h"
 #include "i_scale.h"
 #include "v_trans.h"
+
+
+#define CTOLERANCE      (0.0001)
+
+
+typedef struct vect
+{
+    float x;
+    float y;
+    float z;
+
+} vect;
 
 
 // [crispy] here used to be static color translation tables based on
@@ -38,15 +51,16 @@ static byte cr_gold[256];
 static byte cr_red[256];
 static byte cr_blue[256];
 
+
 byte *crx[] =
 {
-    (byte *) &cr_none,
-    (byte *) &cr_dark,
-    (byte *) &cr_gray,
-    (byte *) &cr_green,
-    (byte *) &cr_gold,
-    (byte *) &cr_red,
-    (byte *) &cr_blue
+    (byte *)&cr_none,
+    (byte *)&cr_dark,
+    (byte *)&cr_gray,
+    (byte *)&cr_green,
+    (byte *)&cr_gold,
+    (byte *)&cr_red,
+    (byte *)&cr_blue
 };
 
 char **crstr = 0;
@@ -77,14 +91,6 @@ then, to also use this routine to convert colors *to* gray?
     - Paul Haeberli
 */
 
-#define CTOLERANCE      (0.0001)
-
-typedef struct vect {
-    float x;
-    float y;
-    float z;
-} vect;
-
 static void hsv_to_rgb(vect *hsv, vect *rgb)
 {
     float h, s, v;
@@ -93,48 +99,60 @@ static void hsv_to_rgb(vect *hsv, vect *rgb)
     s = hsv->y;
     v = hsv->z;
     h *= 360.0;
-    if (s<CTOLERANCE) {
+
+    if (s < CTOLERANCE)
+    {
         rgb->x = v;
         rgb->y = v;
         rgb->z = v;
-    } else {
+    }
+    else
+    {
         int i;
         float f, p, q, t;
 
-        if (h>=360.0)
-            h  -= 360.0;
+        if (h >= 360.0)
+            h -= 360.0;
+
         h /= 60.0;
         i = floor(h);
         f = h - i;
-        p = v*(1.0-s);
-        q = v*(1.0-(s*f));
-        t = v*(1.0-(s*(1.0-f)));
-        switch (i) {
+        p = v * (1.0 - s);
+        q = v * (1.0 - (s * f));
+        t = v * (1.0 - (s * (1.0 - f)));
+
+        switch (i)
+        {
             case 0 :
                 rgb->x = v;
                 rgb->y = t;
                 rgb->z = p;
                 break;
+
             case 1 :
                 rgb->x = q;
                 rgb->y = v;
                 rgb->z = p;
                 break;
+
             case 2 :
                 rgb->x = p;
                 rgb->y = v;
                 rgb->z = t;
                 break;
+
             case 3 :
                 rgb->x = p;
                 rgb->y = q;
                 rgb->z = v;
                 break;
+
             case 4 :
                 rgb->x = t;
                 rgb->y = p;
                 rgb->z = v;
                 break;
+
             case 5 :
                 rgb->x = v;
                 rgb->y = p;
@@ -153,39 +171,52 @@ static void rgb_to_hsv(vect *rgb, vect *hsv)
     r = rgb->x;
     g = rgb->y;
     b = rgb->z;
-    /* find the cmax and cmin of r g b */
+
+    // find the cmax and cmin of r g b
     cmax = r;
     cmin = r;
-    cmax = (g>cmax ? g:cmax);
-    cmin = (g<cmin ? g:cmin);
-    cmax = (b>cmax ? b:cmax);
-    cmin = (b<cmin ? b:cmin);
-    v = cmax;           /* value */
-    if (cmax>CTOLERANCE)
-        s = (cmax - cmin)/cmax;
-    else {
+    cmax = (g > cmax ? g : cmax);
+    cmin = (g < cmin ? g : cmin);
+    cmax = (b > cmax ? b : cmax);
+    cmin = (b < cmin ? b : cmin);
+
+    // value
+    v = cmax;
+
+    if (cmax > CTOLERANCE)
+        s = (cmax - cmin) / cmax;
+    else
+    {
         s = 0.0;
         h = 0.0;
     }
-    if (s<CTOLERANCE)
+
+    if (s < CTOLERANCE)
         h = 0.0;
-    else {
-        float cdelta = cmax-cmin;
-        float rc = (cmax-r)/cdelta;
-        float gc = (cmax-g)/cdelta;
-        float bc = (cmax-b)/cdelta;
-        if (r==cmax)
-            h = bc-gc;
+    else
+    {
+        float cdelta = cmax - cmin;
+        float rc = (cmax - r) / cdelta;
+        float gc = (cmax - g) / cdelta;
+        float bc = (cmax - b) / cdelta;
+
+        if (r == cmax)
+            h = bc - gc;
         else
-            if (g==cmax)
-                h = 2.0+rc-bc;
+        {
+            if (g == cmax)
+                h = 2.0 + rc - bc;
             else
-                h = 4.0+gc-rc;
-        h = h*60.0;
-        if (h<0.0)
+                h = 4.0 + gc - rc;
+        }
+
+        h = h * 60.0;
+
+        if (h < 0.0)
             h += 360.0;
     }
-    hsv->x = h/360.0;
+
+    hsv->x = h / 360.0;
     hsv->y = s;
     hsv->z = v;
 }
@@ -202,7 +233,7 @@ int FindNearestColor(byte *palette, int r, int g, int b)
     best = 0;
     best_diff = INT_MAX;
 
-    for (i=0; i<256; ++i)
+    for (i = 0; i < 256; ++i)
     {
         byte *col = palette + i * 3;
         int diff = (r - col[0]) * (r - col[0])
@@ -223,7 +254,7 @@ int FindNearestColor(byte *palette, int r, int g, int b)
     return best;
 }
 
-byte V_Colorize (byte *playpal, int cr, byte source, dboolean keepgray109)
+byte V_Colorize(byte *playpal, int cr, byte source, dboolean keepgray109)
 {
     vect rgb, hsv;
 
@@ -248,13 +279,13 @@ byte V_Colorize (byte *playpal, int cr, byte source, dboolean keepgray109)
 
         if (cr == CRX_GREEN)
         {
-//            hsv.x = ((16.216 * hsv.z) + 100.784)/360.;
-            hsv.x = 135./360.;
+            //hsv.x = ((16.216 * hsv.z) + 100.784) / 360.;
+            hsv.x = 135. / 360.;
         }
         else if (cr == CRX_GOLD)
         {
-//            hsv.x = ((51.351 * hsv.z) + 8.648)/360.;
-            hsv.x = 45./360.;
+            //hsv.x = ((51.351 * hsv.z) + 8.648) / 360.;
+            hsv.x = 45. / 360.;
         }
         else if (cr == CRX_RED)
         {
@@ -262,7 +293,7 @@ byte V_Colorize (byte *playpal, int cr, byte source, dboolean keepgray109)
         }
         else if (cr == CRX_BLUE)
         {
-            hsv.x = 240./360.;
+            hsv.x = 240. / 360.;
         }
     }
 
@@ -272,5 +303,6 @@ byte V_Colorize (byte *playpal, int cr, byte source, dboolean keepgray109)
     rgb.y *= 255.;
     rgb.z *= 255.;
 
-    return FindNearestColor(playpal, (int) rgb.x, (int) rgb.y, (int) rgb.z);
+    return FindNearestColor(playpal, (int)rgb.x, (int)rgb.y, (int)rgb.z);
 }
+

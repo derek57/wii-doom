@@ -115,6 +115,13 @@ static int mapcmdids[] =
     MCMD_TITLEPATCH 
 };
 
+static int         current_episode = -1;
+static int         current_map = -1;
+static int         samelevel;
+
+// cph - store reject lump num if cached
+static int         rejectlump = -1;
+
 int                liquidlumps = 0;
 int                noliquidlumps = 0;
 
@@ -149,21 +156,28 @@ int                sizethings;
 //
 // Blockmap size.
 int                bmapwidth;
-int                bmapheight;        // size in mapblocks
 
-vertex_t*          vertexes;
-seg_t*             segs;
-sector_t*          sectors;
-subsector_t*       subsectors;
-node_t*            nodes;
-line_t*            lines;
-side_t*            sides;
+// size in mapblocks
+int                bmapheight;
+
+// offsets in blockmap are from here
+// [crispy] BLOCKMAP limit
+int                *blockmaplump;
+int                *blockmap;
+
+vertex_t           *vertexes;
+seg_t              *segs;
+sector_t           *sectors;
+subsector_t        *subsectors;
+node_t             *nodes;
+line_t             *lines;
+side_t             *sides;
 
 // for thing chains
-mobj_t**           blocklinks;                
+mobj_t             **blocklinks;                
 
 mapthing_t         deathmatchstarts[MAX_DEATHMATCH_STARTS];
-mapthing_t*        deathmatch_p;
+mapthing_t         *deathmatch_p;
 mapthing_t         playerstarts[MAXPLAYERS];
 
 mapformat_t        mapformat;
@@ -172,24 +186,16 @@ mapformat_t        mapformat;
 fixed_t            bmaporgx;
 fixed_t            bmaporgy;
 
-static int         current_episode = -1;
-static int         current_map = -1;
-static int         samelevel;
-static int         rejectlump = -1;        // cph - store reject lump num if cached
+// cph - const*
+const byte         *rejectmatrix;
 
-// offsets in blockmap are from here
-int                *blockmaplump; // [crispy] BLOCKMAP limit
-int                *blockmap;
-
-const byte         *rejectmatrix;          // cph - const*
-
-//dboolean            createblockmap = false;
-dboolean            canmodify;
-dboolean            transferredsky;
-dboolean            boomlinespecials;
-dboolean            blockmaprecreated;
-dboolean            MAPINFO;
-dboolean            mapinfo_lump;
+//dboolean           createblockmap = false;
+dboolean           canmodify;
+dboolean           transferredsky;
+dboolean           boomlinespecials;
+dboolean           blockmaprecreated;
+dboolean           MAPINFO;
+dboolean           mapinfo_lump;
 
 // REJECT
 // For fast sight rejection.
@@ -216,7 +222,7 @@ extern fixed_t     animatedliquidyoffs;
 //
 // GetSectorAtNullAddress
 //
-static sector_t* GetSectorAtNullAddress(void)
+static sector_t *GetSectorAtNullAddress(void)
 {
     static dboolean null_sector_is_initialized = false;
     static sector_t null_sector;
@@ -247,6 +253,7 @@ static void *malloc_IfSameLevel(void *p, size_t size)
 {
     if (!samelevel || !p)
         return malloc(size);
+
     return p;
 }
 
@@ -267,7 +274,7 @@ static void *calloc_IfSameLevel(void *p, size_t n1, size_t n2)
 //
 // P_LoadVertexes
 //
-void P_LoadVertexes (int lump)
+void P_LoadVertexes(int lump)
 {
     const mapvertex_t   *data;
     int                 i;
@@ -311,6 +318,7 @@ void P_LoadVertexes (int lump)
                     vertexes[i].y = SHORT(vertexfix[j].newy) << FRACBITS;
                     break;
                 }
+
                 j++;
             }
         }
@@ -323,7 +331,7 @@ void P_LoadVertexes (int lump)
 //
 // P_LoadSegs
 //
-void P_LoadSegs (int lump)
+void P_LoadSegs(int lump)
 {
     const mapseg_t      *data;
     int                 i;
@@ -403,6 +411,7 @@ void P_LoadSegs (int lump)
 
             if (v1 >= numvertexes)
                 C_Warning(buffer, commify(i), commify(v1));
+
             if (v2 >= numvertexes)
                 C_Warning(buffer, commify(i), commify(v2));
 
@@ -443,19 +452,25 @@ void P_LoadSegs (int lump)
                 {
                     if (linefix[j].toptexture[0] != '\0')
                         li->sidedef->toptexture = R_TextureNumForName(linefix[j].toptexture);
+
                     if (linefix[j].middletexture[0] != '\0')
                         li->sidedef->midtexture = R_TextureNumForName(linefix[j].middletexture);
+
                     if (linefix[j].bottomtexture[0] != '\0')
                         li->sidedef->bottomtexture = R_TextureNumForName(linefix[j].bottomtexture);
+
                     if (linefix[j].offset != DEFAULT)
                     {
                         li->offset = SHORT(linefix[j].offset) << FRACBITS;
                         li->sidedef->textureoffset = 0;
                     }
+
                     if (linefix[j].rowoffset != DEFAULT)
                         li->sidedef->rowoffset = SHORT(linefix[j].rowoffset) << FRACBITS;
+
                     if (linefix[j].flags & ML_DONTDRAW)
                         li->linedef->hidden = true;
+
                     if (linefix[j].flags != DEFAULT)
                     {
                         if (li->linedef->flags & linefix[j].flags)
@@ -463,12 +478,16 @@ void P_LoadSegs (int lump)
                         else
                             li->linedef->flags |= linefix[j].flags;
                     }
+
                     if (linefix[j].special != DEFAULT)
                         li->linedef->special = linefix[j].special;
+
                     if (linefix[j].tag != DEFAULT)
                         li->linedef->tag = linefix[j].tag;
+
                     break;
                 }
+
                 j++;
             }
         }
@@ -577,6 +596,7 @@ static void P_LoadSegs_V4(int lump)
 
             if (v1 >= numvertexes)
                 C_Warning(buffer, commify(i), commify(v1));
+
             if (v2 >= numvertexes)
                 C_Warning(buffer, commify(i), commify(v2));
 
@@ -609,7 +629,7 @@ static void P_LoadSegs_V4(int lump)
 //
 // P_LoadSubsectors
 //
-void P_LoadSubsectors (int lump)
+void P_LoadSubsectors(int lump)
 {
     const mapsubsector_t        *data;
     int                         i;
@@ -656,7 +676,7 @@ static void P_LoadSubsectors_V4(int lump)
 //
 // P_LoadSectors
 //
-void P_LoadSectors (int lump)
+void P_LoadSectors(int lump)
 {
     const byte  *data;
     int         i;
@@ -681,14 +701,23 @@ void P_LoadSectors (int lump)
         ss->tag = SHORT(ms->tag);
 
         // [crispy] WiggleFix: [kb] for R_FixWiggle()
-//        ss->cachedheight = 0;
+        //ss->cachedheight = 0;
 
-        ss->nextsec = -1;       // jff 2/26/98 add fields to support locking out
-        ss->prevsec = -1;       // stair retriggering until build completes
-        ss->heightsec = -1;     // sector used to get floor and ceiling height
-        ss->floorlightsec = -1; // sector used to get floor lighting
+        // jff 2/26/98 add fields to support locking out
+        ss->nextsec = -1;
+
+        // stair retriggering until build completes
+        ss->prevsec = -1;
+
+        // sector used to get floor and ceiling height
+        ss->heightsec = -1;
+
+        // sector used to get floor lighting
+        ss->floorlightsec = -1;
         ss->ceilinglightsec = -1;
-        ss->ptcllist = NULL;    // haleyjd 02/20/04: particle list
+
+        // haleyjd 02/20/04: particle list
+        ss->ptcllist = NULL;
 
         // Apply any level-specific fixes.
         if (canmodify && d_fixmaperrors)
@@ -704,18 +733,25 @@ void P_LoadSectors (int lump)
                 {
                     if (sectorfix[j].floorpic[0] != '\0')
                         ss->floorpic = R_FlatNumForName(sectorfix[j].floorpic);
+
                     if (sectorfix[j].ceilingpic[0] != '\0')
                         ss->ceilingpic = R_FlatNumForName(sectorfix[j].ceilingpic);
+
                     if (sectorfix[j].floorheight != DEFAULT)
                         ss->floorheight = SHORT(sectorfix[j].floorheight) << FRACBITS;
+
                     if (sectorfix[j].ceilingheight != DEFAULT)
                         ss->ceilingheight = SHORT(sectorfix[j].ceilingheight) << FRACBITS;
+
                     if (sectorfix[j].special != DEFAULT)
                         ss->special = SHORT(sectorfix[j].special) << FRACBITS;
+
                     if (sectorfix[j].tag != DEFAULT)
                         ss->tag = SHORT(sectorfix[j].tag) << FRACBITS;
+
                     break;
                 }
+
                 j++;
             }
         }
@@ -735,7 +771,7 @@ void P_LoadSectors (int lump)
 //
 // P_LoadNodes
 //
-void P_LoadNodes (int lump)
+void P_LoadNodes(int lump)
 {
     const byte  *data;
     int         i;
@@ -960,6 +996,7 @@ static void P_LoadZNodes(int lump)
                 lines[i].v1 = lines[i].v1 - vertexes + newvertarray;
                 lines[i].v2 = lines[i].v2 - vertexes + newvertarray;
             }
+
             free(vertexes);
             vertexes = newvertarray;
             numvertexes = orgVerts + newVerts;
@@ -980,6 +1017,7 @@ static void P_LoadZNodes(int lump)
     data += sizeof(numSubs);
 
     numsubsectors = numSubs;
+
     if (numsubsectors <= 0)
         I_Error("There are no subsectors in this map.");
 
@@ -993,6 +1031,7 @@ static void P_LoadZNodes(int lump)
         subsectors[i].numlines = mseg->numsegs;
         currSeg += mseg->numsegs;
     }
+
     data += numSubs * sizeof(mapsubsector_znod_t);
 
     // Read the segs
@@ -1045,12 +1084,12 @@ static void P_LoadZNodes(int lump)
 //
 // P_LoadThings
 //
-void P_LoadThings (int lump)
+void P_LoadThings(int lump)
 {
     const mapthing_t    *data = (const mapthing_t *)W_CacheLumpNum(lump, PU_STATIC);
     int                 i;
-    dboolean             done = false;
-    dboolean             debug = false;
+    dboolean            done = false;
+    dboolean            debug = false;
 
     sizethings = W_LumpLength(lump);
     numthings = sizethings / sizeof(mapthing_t);
@@ -1060,7 +1099,7 @@ void P_LoadThings (int lump)
     for (i = 0; i < numthings; i++)
     {
         mapthing_t      mt = data[i];
-        dboolean         spawn = true;
+        dboolean        spawn = true;
 
         // Do not spawn cool, new monsters if !commercial
         if (gamemode != commercial)
@@ -1081,6 +1120,7 @@ void P_LoadThings (int lump)
                     break;
             }
         }
+
         if (!spawn)
             break;
 
@@ -1113,12 +1153,16 @@ void P_LoadThings (int lump)
                         mt.x = SHORT(thingfix[j].newx);
                         mt.y = SHORT(thingfix[j].newy);
                     }
+
                     if (thingfix[j].angle != DEFAULT)
                         mt.angle = SHORT(thingfix[j].angle);
+
                     if (thingfix[j].options != DEFAULT)
                         mt.options = thingfix[j].options;
+
                     break;
                 }
+
                 j++;
             }
         }
@@ -1127,7 +1171,7 @@ void P_LoadThings (int lump)
         if (mt.type == WolfensteinSS && bfgedition)
             mt.type = Zombieman;
 
-        if(!debug && spawn)
+        if (!debug && spawn)
             P_SpawnMapThing(&mt, i);
 
         if (spawn && !done && mt.type == Player1Start && debug)
@@ -1151,13 +1195,17 @@ static void P_LoadLineDefs(int lump)
 {
     const byte  *data = W_CacheLumpNum(lump, PU_STATIC);
     int         i;
-    int         warn; // [crispy] warn about unknown linedef types
+
+    // [crispy] warn about unknown linedef types
+    int         warn;
 
     sizelines = W_LumpLength(lump);
     numlines = sizelines / sizeof(maplinedef_t);
     lines = calloc_IfSameLevel(lines, numlines, sizeof(line_t));
 
-    warn = 0; // [crispy] warn about unknown linedef types
+    // [crispy] warn about unknown linedef types
+    warn = 0;
+
     for (i = 0; i < numlines; i++)
     {
         const maplinedef_t      *mld = (const maplinedef_t *)data + i;
@@ -1182,7 +1230,8 @@ static void P_LoadLineDefs(int lump)
         ld->dx = v2->x - v1->x;
         ld->dy = v2->y - v1->y;
 
-        ld->tranlump = -1;   // killough 4/11/98: no translucency by default
+        // killough 4/11/98: no translucency by default
+        ld->tranlump = -1;
 
         ld->slopetype = !ld->dx ? ST_VERTICAL : !ld->dy ? ST_HORIZONTAL :
             FixedDiv(ld->dy, ld->dx) > 0 ? ST_POSITIVE : ST_NEGATIVE;
@@ -1257,13 +1306,15 @@ static void P_LoadLineDefs2(int lump)
             // killough 11/98: fix common wad errors (missing sidedefs):
             if (ld->sidenum[0] == NO_INDEX)
             {
-                ld->sidenum[0] = 0;  // Substitute dummy sidedef for missing right side
+                // Substitute dummy sidedef for missing right side
+                ld->sidenum[0] = 0;
                 C_Warning("Linedef %s is missing its first sidedef.", commify(i));
             }
 
             if (ld->sidenum[1] == NO_INDEX && (ld->flags & ML_TWOSIDED))
             {
-                ld->flags &= ~ML_TWOSIDED;  // Clear 2s flag for missing left side
+                // Clear 2s flag for missing left side
+                ld->flags &= ~ML_TWOSIDED;
                 C_Warning("Linedef %s has the two-sided flag set but has no second sidedef.",
                     commify(i));
             }
@@ -1277,18 +1328,25 @@ static void P_LoadLineDefs2(int lump)
         {
             int lump;
 
-            case Translucent_MiddleTexture:            // killough 4/11/98: translucent 2s textures
-                lump = sides[*ld->sidenum].special;    // translucency from sidedef
-                if (!ld->tag)                          // if tag==0,
-                    ld->tranlump = lump;               // affect this linedef only
+            // killough 4/11/98: translucent 2s textures
+            case Translucent_MiddleTexture:
+                // translucency from sidedef
+                lump = sides[*ld->sidenum].special;
+                // if tag == 0,
+                if (!ld->tag)
+                    // affect this linedef only
+                    ld->tranlump = lump;
                 else
                 {
                     int j;
 
-                    for (j = 0; j < numlines; j++)     // if tag!=0,
-                        if (lines[j].tag == ld->tag)   // affect all matching linedefs
+                    // if tag != 0,
+                    for (j = 0; j < numlines; j++)
+                        // affect all matching linedefs
+                        if (lines[j].tag == ld->tag)
                             lines[j].tranlump = lump;
                 }
+
                 break;
 
             case TransferSkyTextureToTaggedSectors:
@@ -1333,6 +1391,7 @@ static void P_LoadSideDefs2(int lump)
                 commify(i), commify(sector_num));
             sector_num = 0;
         }
+
         sd->sector = sec = &sectors[sector_num];
 
         // killough 4/4/98: allow sidedef texture names to be overloaded
@@ -1399,20 +1458,27 @@ static void P_CreateBlockMap(void)
     // First find limits of map
     vertex = vertexes;
     i = numvertexes;
+
     do
     {
         fixed_t j = vertex->x >> FRACBITS;
 
         if (j < minx)
             minx = j;
+
         if (j > maxx)
             maxx = j;
+
         j = vertex->y >> FRACBITS;
+
         if (j < miny)
             miny = j;
+
         if (j > maxy)
             maxy = j;
+
         ++vertex;
+
     } while (--i);
 
     // Save blockmap parameters
@@ -1444,8 +1510,11 @@ static void P_CreateBlockMap(void)
             int n, nalloc, *list;
         } bmap_t;
 
-        unsigned int    tot = bmapwidth * bmapheight;           // size of blockmap
-        bmap_t          *bmap = calloc(sizeof(*bmap), tot);     // array of blocklists
+        // size of blockmap
+        unsigned int    tot = bmapwidth * bmapheight;
+
+        // array of blocklists
+        bmap_t          *bmap = calloc(sizeof(*bmap), tot);
 
         if (!bmap)
             I_Error("Unable to create blockmap.");
@@ -1484,7 +1553,9 @@ static void P_CreateBlockMap(void)
             ady <<= MAPBTOFRAC;
 
             // Now we simply iterate block-by-block until we reach the end block.
-            while ((unsigned int)b < tot)       // failsafe -- should ALWAYS be true
+
+            // failsafe -- should ALWAYS be true
+            while ((unsigned int)b < tot)
             {
                 bmap_t  *bp = &bmap[b];
 
@@ -1521,11 +1592,13 @@ static void P_CreateBlockMap(void)
         //
         // 4 words, unused if this routine is called, are reserved at the start.
         {
-            int count = tot + 6;  // we need at least 1 word per block, plus reserved's
+            // we need at least 1 word per block, plus reserved's
+            int count = tot + 6;
 
             for (i = 0; (unsigned int)i < tot; i++)
                 if (bmap[i].n)
-                    count += bmap[i].n + 2;     // 1 header word + 1 trailer word + blocklist
+                    // 1 header word + 1 trailer word + blocklist
+                    count += bmap[i].n + 2;
 
             // Allocate blockmap lump with computed count
             blockmaplump = malloc_IfSameLevel(blockmaplump, sizeof(*blockmaplump) * count);
@@ -1533,27 +1606,43 @@ static void P_CreateBlockMap(void)
 
         // Now compress the blockmap.
         {
-            int         ndx = tot += 4; // Advance index to start of linedef lists
-            bmap_t      *bp = bmap;     // Start of uncompressed blockmap
+            // Advance index to start of linedef lists
+            int         ndx = tot += 4;
 
-            blockmaplump[ndx++] = 0;    // Store an empty blockmap list at start
-            blockmaplump[ndx++] = -1;   // (Used for compression)
+            // Start of uncompressed blockmap
+            bmap_t      *bp = bmap;
+
+            // Store an empty blockmap list at start
+            blockmaplump[ndx++] = 0;
+
+            // (Used for compression)
+            blockmaplump[ndx++] = -1;
 
             for (i = 4; (unsigned int)i < tot; i++, bp++)
-                if (bp->n)                                              // Non-empty blocklist
+                // Non-empty blocklist
+                if (bp->n)
                 {
-                    blockmaplump[blockmaplump[i] = ndx++] = 0;          // Store index & header
+                    // Store index & header
+                    blockmaplump[blockmaplump[i] = ndx++] = 0;
+
                     do
-                        blockmaplump[ndx++] = bp->list[--bp->n];        // Copy linedef list
+                        // Copy linedef list
+                        blockmaplump[ndx++] = bp->list[--bp->n];
+
                     while (bp->n);
-                    blockmaplump[ndx++] = -1;                           // Store trailer
-                    free(bp->list);                                     // Free linedef list
+
+                    // Store trailer
+                    blockmaplump[ndx++] = -1;
+
+                    // Free linedef list
+                    free(bp->list);
                 }
                 else
                     // Empty blocklist: point to reserved empty blocklist
                     blockmaplump[i] = tot;
 
-            free(bmap);                 // Free uncompressed blockmap
+            // Free uncompressed blockmap
+            free(bmap);
         }
     }
 }
@@ -1573,6 +1662,7 @@ void P_LoadBlockMap(int lump)
     int lumplen;
 
     blockmaprecreated = false;
+
     if (lump >= numlumps || (lumplen = W_LumpLength(lump)) < 8 || (count = lumplen / 2) >= 0x10000)
     {
         P_CreateBlockMap();
@@ -1650,6 +1740,7 @@ static void P_LoadReject(int lumpnum, int totallines)
     // dump any old cached reject lump, then cache the new one
     if (rejectlump != -1)
         W_ReleaseLumpNum(rejectlump);
+
     rejectlump = lumpnum + ML_REJECT;
     rejectmatrix = W_CacheLumpNum(rejectlump, PU_STATIC);
 
@@ -1704,6 +1795,7 @@ static int P_GroupLines(void)
         seg_t   *seg = &segs[subsectors[i].firstline];
 
         subsectors[i].sector = NULL;
+
         for (j = 0; j < subsectors[i].numlines; j++)
         {
             if (seg->sidedef)
@@ -1711,8 +1803,10 @@ static int P_GroupLines(void)
                 subsectors[i].sector = seg->sidedef->sector;
                 break;
             }
+
             seg++;
         }
+
         if (!subsectors[i].sector)
             I_Error("Subsector %s is not a part of any sector.", commify(i));
     }
@@ -1721,6 +1815,7 @@ static int P_GroupLines(void)
     for (i = 0, li = lines; i < numlines; i++, li++)
     {
         li->frontsector->linecount++;
+
         if (li->backsector && li->backsector != li->frontsector)
         {
             li->backsector->linecount++;
@@ -1745,16 +1840,20 @@ static int P_GroupLines(void)
     for (i = 0, li = lines; i < numlines; i++, li++)
     {
         P_AddLineToSector(li, li->frontsector);
+
         if (li->backsector && li->backsector != li->frontsector)
             P_AddLineToSector(li, li->backsector);
     }
 
     for (i = 0, sector = sectors; i < numsectors; i++, sector++)
     {
-        fixed_t *bbox = (void*)sector->blockbox; // cph - For convenience, so
-        int     block;                           // I can use the old code unchanged
+        // cph - For convenience, so
+        fixed_t *bbox = (void*)sector->blockbox;
 
-        //e6y: fix sound origin for large levels
+        // I can use the old code unchanged
+        int     block;
+
+        // e6y: fix sound origin for large levels
         sector->soundorg.x = bbox[BOXRIGHT] / 2 + bbox[BOXLEFT] / 2;
         sector->soundorg.y = bbox[BOXTOP] / 2 + bbox[BOXBOTTOM] / 2;
 
@@ -1776,7 +1875,8 @@ static int P_GroupLines(void)
         sector->blockbox[BOXLEFT] = block;
     }
 
-    return total;       // this value is needed by the reject overrun emulation code
+    // this value is needed by the reject overrun emulation code
+    return total;
 }
 
 //
@@ -1809,7 +1909,7 @@ static int P_GroupLines(void)
 //
 //                dx²  + dy²                           dx²  + dy²
 //
-// (x0,y0) is the vertex being moved, and (x1,y1)-(x1+dx,y1+dy) is the
+// (x0, y0) is the vertex being moved, and (x1, y1) - (x1 + dx, y1 + dy) is the
 // reference linedef.
 //
 // Segs corresponding to orthogonal linedefs (exactly vertical or horizontal
@@ -1828,26 +1928,34 @@ static int P_GroupLines(void)
 // but pseudovertexes which are dummies that are *only* used in rendering,
 // i.e. r_bsp.c:R_AddLine()
 //
-static void P_RemoveSlimeTrails(void)                   // killough 10/98
+// killough 10/98
+static void P_RemoveSlimeTrails(void)
 {
-    byte        *hit = calloc(1, numvertexes);          // Hitlist for vertices
+    // Hitlist for vertices
+    byte        *hit = calloc(1, numvertexes);
     int         i;
 
-    for (i = 0; i < numsegs; i++)                       // Go through each seg
+    // Go through each seg
+    for (i = 0; i < numsegs; i++)
     {
-        const line_t    *l = segs[i].linedef;              // The parent linedef
+        // The parent linedef
+        const line_t    *l = segs[i].linedef;
 
-        if (l->dx && l->dy)                             // We can ignore orthogonal lines
+        // We can ignore orthogonal lines
+        if (l->dx && l->dy)
         {
             vertex_t    *v = segs[i].v1;
 
             do
             {
-                if (!hit[v - vertexes])                 // If we haven't processed vertex
+                // If we haven't processed vertex
+                if (!hit[v - vertexes])
                 {
-                    hit[v - vertexes] = 1;              // Mark this vertex as processed
+                    // Mark this vertex as processed
+                    hit[v - vertexes] = 1;
 
-                    if (v != l->v1 && v != l->v2)       // Exclude endpoints of linedefs
+                    // Exclude endpoints of linedefs
+                    if (v != l->v1 && v != l->v2)
                     {
                         // Project the vertex back onto the parent linedef
                         int64_t dx2 = (l->dx >> FRACBITS) * (l->dx >> FRACBITS);
@@ -1867,11 +1975,14 @@ static void P_RemoveSlimeTrails(void)                   // killough 10/98
                             v->y = y0;
                         }
                     }
-                }  // Obfuscated C contest entry:   :)
+                // Obfuscated C contest entry:   :)
+                }
             }
+
             while (v != segs[i].v2 && (v = segs[i].v2));
         }
     }
+
     free(hit);
 }
 
@@ -1938,10 +2049,7 @@ static mapformat_t P_CheckMapFormat(int lumpnum)
 //
 // P_SetupLevel
 //
-void
-P_SetupLevel
-( int                ep,
-  int                map)
+void P_SetupLevel(int ep, int map)
 {
     int              i;
     char             lumpname[9];
@@ -1957,10 +2065,9 @@ P_SetupLevel
     totalkills = totalitems = totalsecret = wminfo.maxfrags = 0;
     wminfo.partime = 180;
 
-    for (i=0 ; i<MAXPLAYERS ; i++)
+    for (i = 0; i < MAXPLAYERS; i++)
     {
-        players[i].killcount = players[i].secretcount 
-            = players[i].itemcount = 0;
+        players[i].killcount = players[i].secretcount = players[i].itemcount = 0;
     }
 
     // Initial height of PointOfView
@@ -1968,12 +2075,12 @@ P_SetupLevel
     players[consoleplayer].viewz = 1;
 
     // Make sure all sounds are stopped before Z_FreeTags.
-    S_Start ();                        
+    S_Start();                        
 
     // haleyjd: stop particle engine
     R_ClearParticles();
 
-    Z_FreeTags (PU_LEVEL, PU_PURGELEVEL-1);
+    Z_FreeTags(PU_LEVEL, PU_PURGELEVEL - 1);
 
     if (rejectlump != -1)
     {
@@ -1982,23 +2089,23 @@ P_SetupLevel
         rejectlump = -1;
     }
 
-    // UNUSED W_Profile ();
-    P_InitThinkers ();
+    // UNUSED W_Profile();
+    P_InitThinkers();
            
     // if working with a devlopment map, reload it
-    W_Reload ();
+    W_Reload();
 
     // find map name
-    if ( gamemode == commercial)
+    if (gamemode == commercial)
     {
-        if (map<10)
+        if (map < 10)
             M_snprintf(lumpname, 9, "map0%i", map);
         else
             M_snprintf(lumpname, 9, "map%i", map);
     }
     else
     {
-        if(fsize != 12538385 || map < 10)
+        if (fsize != 12538385 || map < 10)
         {
             lumpname[0] = 'E';
             lumpname[1] = '0' + ep;
@@ -2010,22 +2117,22 @@ P_SetupLevel
             M_snprintf(lumpname, 9, "e1m10");
     }
 
-    if(beta_style && gamemode != shareware && gamemode != commercial)
+    if (beta_style && gamemode != shareware && gamemode != commercial)
     {
-        if(gameepisode == 1 && gamemap == 2)
+        if (gameepisode == 1 && gamemap == 2)
             M_snprintf(lumpname, 9, "e1m0");
 
-        if(gameepisode == 2 && gamemap == 2)
+        if (gameepisode == 2 && gamemap == 2)
             M_snprintf(lumpname, 9, "e3m0");
 
-        if(gameepisode == 3 && gamemap == 5)
+        if (gameepisode == 3 && gamemap == 5)
             M_snprintf(lumpname, 9, "e2m0");
     }
 
     if (nerve_pwad && gamemission == doom2)
         lumpnum = W_GetNumForName2(lumpname);
     else
-        lumpnum = W_GetNumForName (lumpname);
+        lumpnum = W_GetNumForName(lumpname);
 
     mapformat = P_CheckMapFormat(lumpnum);
 
@@ -2034,16 +2141,18 @@ P_SetupLevel
 
     leveltime = 0;
 
-    if(d_swirl)
+    if (d_swirl)
     {
         animatedliquiddiff = FRACUNIT;
         animatedliquidxdir = M_RandomInt(-1, 1) * FRACUNIT / 12;
         animatedliquidydir = M_RandomInt(-1, 1) * FRACUNIT / 12;
+
         if (!animatedliquidxdir && !animatedliquidydir)
         {
             animatedliquidxdir = FRACUNIT / 12;
             animatedliquidydir = FRACUNIT / 12;
         }
+
         animatedliquidxoffs = 0;
         animatedliquidyoffs = 0;
     }
@@ -2069,12 +2178,12 @@ P_SetupLevel
     }
 
     // note: most of this ordering is important        
-    P_LoadVertexes (lumpnum+ML_VERTEXES);
-    P_LoadSectors (lumpnum+ML_SECTORS);
-    P_LoadSideDefs (lumpnum+ML_SIDEDEFS);
-    P_LoadLineDefs (lumpnum+ML_LINEDEFS);
-    P_LoadSideDefs2 (lumpnum+ML_SIDEDEFS);
-    P_LoadLineDefs2 (lumpnum+ML_LINEDEFS);
+    P_LoadVertexes(lumpnum + ML_VERTEXES);
+    P_LoadSectors(lumpnum + ML_SECTORS);
+    P_LoadSideDefs(lumpnum + ML_SIDEDEFS);
+    P_LoadLineDefs(lumpnum + ML_LINEDEFS);
+    P_LoadSideDefs2(lumpnum + ML_SIDEDEFS);
+    P_LoadLineDefs2(lumpnum + ML_LINEDEFS);
 
     if (!samelevel)
         P_LoadBlockMap(lumpnum + ML_BLOCKMAP);
@@ -2101,7 +2210,7 @@ P_SetupLevel
     P_LoadReject(lumpnum, P_GroupLines());
 
     // [crispy] remove slime trails
-    if(remove_slime_trails)
+    if (remove_slime_trails)
         P_RemoveSlimeTrails();
 
     P_CalcSegsLength();
@@ -2116,40 +2225,38 @@ P_SetupLevel
     P_GetMapLiquids((ep - 1) * 10 + map);
     P_GetMapNoLiquids((ep - 1) * 10 + map);
 
-    P_LoadThings (lumpnum+ML_THINGS);
+    P_LoadThings(lumpnum + ML_THINGS);
 
-    for (i=0 ; i<MAXPLAYERS ; i++)
+    for (i = 0; i < MAXPLAYERS; i++)
         P_InitCards(&players[i]);
 
     // if deathmatch, randomly spawn the active players
     if (deathmatch)
     {
-        for (i=0 ; i<MAXPLAYERS ; i++)
+        for (i = 0; i < MAXPLAYERS; i++)
             if (playeringame[i])
             {
                 players[i].mo = NULL;
-                G_DeathMatchSpawnPlayer (i);
+                G_DeathMatchSpawnPlayer(i);
             }
-                        
     }
 
     // clear special respawning que
     iquehead = iquetail = 0;
 
     // set up world state
-    P_SpawnSpecials ();
+    P_SpawnSpecials();
 
     P_MapEnd();
 
     // build subsector connect matrix
-    //        UNUSED P_ConnectSubsectors ();
+    //        UNUSED P_ConnectSubsectors();
 
     // preload graphics
     if (precache)
-        R_PrecacheLevel ();
+        R_PrecacheLevel();
 
-//    C_Warning("P_SetupLevel: Free Memory (0x%x)", Z_FreeMemory());
-    //printf ("free memory: 0x%x\n", Z_FreeMemory());
+    //C_Warning("P_SetupLevel: Free Memory (0x%x)", Z_FreeMemory());
 
     HU_NewLevel();
 }
@@ -2187,12 +2294,15 @@ static void InitMapInfo(void)
     }
 
     SC_Open(MAPINFO_SCRIPT_NAME);
+
     while (SC_GetString())
     {
         if (!SC_Compare("MAP"))
             continue;
+
         SC_MustGetString();
         map = strtol(sc_String, NULL, 0);
+
         if (map < 1 || map > 99)
         {
             char        *mapnum = uppercase(sc_String);
@@ -2201,6 +2311,7 @@ static void InitMapInfo(void)
             {
                 episode = 1;
                 sscanf(mapnum, "MAP0%1i", &map);
+
                 if (!map)
                     sscanf(mapnum, "MAP%2i", &map);
             }
@@ -2210,6 +2321,7 @@ static void InitMapInfo(void)
                 map += (episode - 1) * 10;
             }
         }
+
         if (map < 1 || map > 99)
             SC_ScriptError(NULL);
 
@@ -2220,6 +2332,7 @@ static void InitMapInfo(void)
 
         // Map name must follow the number
         SC_MustGetString();
+
         if (!SC_Compare("LOOKUP"))
             M_StringCopy(info->name, sc_String, sizeof(info->name));
 
@@ -2231,6 +2344,7 @@ static void InitMapInfo(void)
                 SC_UnGet();
                 break;
             }
+
             if ((mcmdvalue = SC_MatchString(mapcmdnames)) >= 0)
             {
                 switch (mapcmdids[mcmdvalue])
@@ -2245,8 +2359,10 @@ static void InitMapInfo(void)
                         int     lump;
 
                         SC_MustGetString();
+
                         if ((lump = R_CheckFlatNumForName(sc_String)) >= 0)
                             info->liquid[liquidlumps++] = lump; 
+
                         break;
                     }
 
@@ -2262,6 +2378,7 @@ static void InitMapInfo(void)
 
                         SC_MustGetString();
                         nextmap = strtol(sc_String, (char **)NULL, 10);
+
                         if (nextmap < 1 || nextmap > 99)
                         {
                             char        *mapnum = uppercase(sc_String);
@@ -2270,16 +2387,19 @@ static void InitMapInfo(void)
                             {
                                 nextepisode = 1;
                                 sscanf(mapnum, "MAP0%1i", &nextmap);
+
                                 if (!nextmap)
                                     sscanf(mapnum, "MAP%2i", &nextmap);
                             }
                             else
                                 sscanf(mapnum, "E%1iM%1i", &nextepisode, &nextmap);
                         }
-                        if(gamemode == commercial)
+
+                        if (gamemode == commercial)
                             info->secretnext = (nextepisode - 2) * 10 + nextmap;
                         else
                             info->secretnext = (nextepisode - 1) * 10 + nextmap;
+
                         break;
                     }
 
@@ -2288,8 +2408,10 @@ static void InitMapInfo(void)
                         int     lump;
 
                         SC_MustGetString();
+
                         if ((lump = R_CheckFlatNumForName(sc_String)) >= 0)
                             info->noliquid[noliquidlumps++] = lump; 
+
                         break;
                     }
 
@@ -2305,6 +2427,7 @@ static void InitMapInfo(void)
 
                         SC_MustGetString();
                         nextmap = strtol(sc_String, (char **)NULL, 10);
+
                         if (nextmap < 1 || nextmap > 99)
                         {
                             char        *mapnum = uppercase(sc_String);
@@ -2313,16 +2436,19 @@ static void InitMapInfo(void)
                             {
                                 nextepisode = 1;
                                 sscanf(mapnum, "MAP0%1i", &nextmap);
+
                                 if (!nextmap)
                                     sscanf(mapnum, "MAP%2i", &nextmap);
                             }
                             else
                                 sscanf(mapnum, "E%1iM%1i", &nextepisode, &nextmap);
                         }
-                        if(gamemode == commercial)
+
+                        if (gamemode == commercial)
                             info->secretnext = (nextepisode - 2) * 10 + nextmap;
                         else
                             info->secretnext = (nextepisode - 1) * 10 + nextmap;
+
                         break;
                     }
 
@@ -2335,16 +2461,20 @@ static void InitMapInfo(void)
 
                     case MCMD_TITLEPATCH:
                         SC_MustGetString();
-                        if(gamemode == commercial)
+
+                        if (gamemode == commercial)
                             info->titlepatch = W_CheckNumForName(sc_String) - 10;
                         else
                             info->titlepatch = W_CheckNumForName(sc_String);
+
                         break;
                 }
             }
         }
+
         mapmax = MAX(map, mapmax);
     }
+
     SC_Close();
     mapcount = mapmax;
 }
@@ -2425,9 +2555,11 @@ int P_GetMapTitlePatch(int map)
 //
 void P_Init (void)
 {
-    P_InitParticleEffects(); // haleyjd 09/30/01
-    P_InitSwitchList ();
-    P_InitPicAnims ();
+    // haleyjd 09/30/01
+    P_InitParticleEffects();
+
+    P_InitSwitchList();
+    P_InitPicAnims();
     InitMapInfo();
     P_LoadTerrainTypeDefs();
     P_InitTerrainTypes();

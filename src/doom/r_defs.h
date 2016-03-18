@@ -36,20 +36,26 @@
 ========================================================================
 */
 
+
 #if !defined(__R_DEFS__)
 #define __R_DEFS__
+
 
 #include "p_mobj.h"
 #include "p_partcl.h"
 
+
 // Silhouette, needed for clipping Segs (mainly)
 // and sprites representing things.
-#define SIL_NONE        0
-#define SIL_BOTTOM      1
-#define SIL_TOP         2
-#define SIL_BOTH        3
+#define SIL_NONE                0
+#define SIL_BOTTOM              1
+#define SIL_TOP                 2
+#define SIL_BOTH                3
 
-#define MAXDRAWSEGS     256
+#define MAXDRAWSEGS             256
+
+#define BOOMLINESPECIALS        142
+
 
 //
 // INTERNAL MAP TYPES
@@ -65,8 +71,13 @@ typedef struct
 {
     fixed_t             x;
     fixed_t             y;
-    angle_t             viewangle;      // e6y: precalculated angle for clipping
-    int                 angletime;      // e6y: recalculation time for view angle
+
+    // e6y: precalculated angle for clipping
+    angle_t             viewangle;
+
+    // e6y: recalculation time for view angle
+    int                 angletime;
+
 } vertex_t;
 
 // Forward of LineDefs, for Sectors.
@@ -80,7 +91,9 @@ struct line_s;
 //  updated.
 typedef struct
 {
-    thinker_t           thinker;        // not used for anything
+    // not used for anything
+    thinker_t           thinker;
+
     fixed_t             x;
     fixed_t             y;
     fixed_t             z;
@@ -120,16 +133,25 @@ typedef struct
     mobj_t              *thinglist;
 
     // thinker_t for reversible actions
-    void                *floordata;             // jff 2/22/98 make thinkers on
-    void                *ceilingdata;           // floors, ceilings, lighting,
-    void                *lightingdata;          // independent of one another
+
+    // jff 2/22/98 make thinkers on
+    void                *floordata;
+
+    // floors, ceilings, lighting,
+    void                *ceilingdata;
+
+    // independent of one another
+    void                *lightingdata;
 
     // list of mobjs that are at least partially in the sector
     // thinglist is a subset of touching_thinglist
-    struct msecnode_s   *touching_thinglist;    // phares 3/14/98
+    // phares 3/14/98
+    struct msecnode_s   *touching_thinglist;
 
     int                 linecount;
-    struct line_s       **lines;                // [linecount] size
+
+    // [linecount] size
+    struct line_s       **lines;
 
     int                 cachedheight;
     int                 scaleindex;
@@ -153,16 +175,22 @@ typedef struct
     fixed_t             interpceilingheight;
 
     // jff 2/26/98 lockout machinery for stairbuilding
-    int                 stairlock;      // -2 on first locked -1 after thinker done 0 normally
-    int                 prevsec;        // -1 or number of sector for previous step
-    int                 nextsec;        // -1 or number of next step sector
+    // -2 on first locked -1 after thinker done 0 normally
+    int                 stairlock;
+
+    // -1 or number of sector for previous step
+    int                 prevsec;
+
+    // -1 or number of next step sector
+    int                 nextsec;
 
     // killough 3/7/98: floor and ceiling texture offsets
     fixed_t             floor_xoffs, floor_yoffs;
     fixed_t             ceiling_xoffs, ceiling_yoffs;
 
     // killough 3/7/98: support flat heights drawn at another sector's heights
-    int                 heightsec;      // other sector, or -1 if no other sector
+    // other sector, or -1 if no other sector
+    int                 heightsec;
 
     // killough 4/11/98: support for lightlevels coming from another sector
     int                 floorlightsec, ceilinglightsec;
@@ -190,7 +218,7 @@ typedef struct
     // haleyjd 02/20/04: list of particles in sector
     particle_t          *ptcllist;
 
-    //jff 2/16/98 remembers if sector WAS secret (automap)
+    // jff 2/16/98 remembers if sector WAS secret (automap)
     short               oldspecial;
 
 } sector_t;
@@ -219,6 +247,7 @@ typedef struct
     // or lump number of special effect. Allows texture names to be overloaded
     // for other functions.
     int                 special;
+
 } side_t;
 
 //
@@ -230,6 +259,7 @@ typedef enum
     ST_VERTICAL,
     ST_POSITIVE,
     ST_NEGATIVE
+
 } slopetype_t;
 
 typedef struct line_s
@@ -272,15 +302,15 @@ typedef struct line_s
     // thinker_t for reversible actions
     void                *specialdata;
 
-    int                 tranlump;       // killough 4/11/98: translucency filter, -1 == none
+    // killough 4/11/98: translucency filter, -1 == none
+    int                 tranlump;
 
     int                 nexttag, firsttag;
 
     // sound origin for switches/buttons
     degenmobj_t         soundorg;
-} line_t;
 
-#define BOOMLINESPECIALS        142
+} line_t;
 
 typedef enum
 {
@@ -558,6 +588,7 @@ typedef enum
     WR_Teleport_MonstersOnly_Silent                                = 269,
     TransferSkyTextureToTaggedSectors                              = 271,
     TransferSkyTextureToTaggedSectors_Flipped                      = 272
+
 } linespecial_e;
 
 typedef enum
@@ -580,6 +611,7 @@ typedef enum
     LightFlickers_Randomly                              = 17,
 
     UNKNOWNSECTORSPECIAL
+
 } sectorspecial_e;
 
 typedef enum
@@ -707,6 +739,7 @@ typedef enum
     Zombieman                                          = 3004,
     Cacodemon                                          = 3005,
     LostSoul                                           = 3006
+
 } thingtype_t;
 
 //
@@ -721,35 +754,9 @@ typedef struct subsector_s
     sector_t            *sector;
     int                 numlines;
     int                 firstline;
+
 } subsector_t;
 
-// phares 3/14/98
-//
-// Sector list node showing all sectors an object appears in.
-//
-// There are two threads that flow through these nodes. The first thread
-// starts at touching_thinglist in a sector_t and flows through the m_snext
-// links to find all mobjs that are entirely or partially in the sector.
-// The second thread starts at touching_sectorlist in an mobj_t and flows
-// through the m_tnext links to find all sectors a thing touches. This is
-// useful when applying friction or push effects to sectors. These effects
-// can be done as thinkers that act upon all objects touching their sectors.
-// As an mobj moves through the world, these nodes are created and
-// destroyed, with the links changed appropriately.
-//
-// For the links, NULL means top or end of list.
-//
-/*
-typedef struct msecnode_s
-{
-    sector_t            *m_sector;      // a sector containing this object
-    struct mobj_s       *m_thing;       // this object
-    struct msecnode_s   *m_tprev;       // prev msecnode_t for this thing
-    struct msecnode_s   *m_tnext;       // next msecnode_t for this thing
-    struct msecnode_s   *m_sprev;       // prev msecnode_t for this sector
-    struct msecnode_s   *m_snext;       // next msecnode_t for this sector
-} msecnode_t;
-*/
 //
 // The LineSeg.
 //
@@ -772,6 +779,7 @@ typedef struct
     // backsector is NULL for one sided lines
     sector_t            *frontsector;
     sector_t            *backsector;
+
 } seg_t;
 
 //
@@ -790,19 +798,8 @@ typedef struct
 
     // If NF_SUBSECTOR its a subsector.
     int                 children[2];
+
 } node_t;
-
-/*
-// posts are runs of non masked source pixels
-typedef struct
-{
-    byte               topdelta;        // -1 is the last post in a column
-    byte               length;          // length data bytes follows
-} PACKEDATTR post_t;
-
-// column_t is a list of 0 or more post_t, (byte)-1 terminated
-typedef post_t column_t;
-*/
 
 //
 // OTHER TYPES
@@ -825,7 +822,7 @@ typedef struct drawseg_s
     fixed_t             scale2;
     fixed_t             scalestep;
 
-    // 0=none, 1=bottom, 2=top, 3=both
+    // 0 = none, 1 = bottom, 2 = top, 3 = both
     int                 silhouette;
 
     // do not clip sprites above this
@@ -839,24 +836,8 @@ typedef struct drawseg_s
     int                 *sprtopclip;
     int                 *sprbottomclip;
     int                 *maskedtexturecol;
-} drawseg_t;
 
-/*
-// Patches.
-// A patch holds one or more columns.
-// Patches are used for sprites and all masked pictures,
-// and we compose textures from the TEXTURE1/2 lists
-// of patches.
-typedef struct
-{
-    short               width;          // bounding box size
-    short               height;
-    short               leftoffset;     // pixels to the left of origin
-    short               topoffset;      // pixels below the origin
-    int                 columnofs[8];   // only [width] used
-    // the [0] is &columnofs[width]
-} PACKEDATTR patch_t;
-*/
+} drawseg_t;
 
 // A vissprite_t is a thing
 //  that will be drawn during a refresh.
@@ -904,10 +885,11 @@ typedef struct vissprite_s
     // killough 3/27/98: height sector for underwater/fake ceiling support
     int                 heightsec;
 
-    dboolean            psprite;            // true if psprite (required for freelook)
+    // true if psprite (required for freelook)
+    dboolean            psprite;
 
     // [crispy] color translation table for blood colored by monster class
-    byte*               translation;
+    byte                *translation;
 
     float               ytop, ybottom;
 
@@ -940,6 +922,7 @@ typedef struct
 
     // Flip bit (1 = flip) to use for view angles 0-15.
     unsigned short      flip;
+
 } spriteframe_t;
 
 //
@@ -985,6 +968,7 @@ typedef struct visplane_s
 
     // [BH] Support animated liquid sectors
     sector_t            *sector;
+
 } visplane_t;
 
 // Translucency tables
@@ -1000,6 +984,7 @@ typedef struct ColorTable32k_s
 {
     byte RGB[32][32][32];
     byte All[32 * 32 * 32];
+
 } ColorTable32k_t;
 
 ColorTable32k_t RGB32k;

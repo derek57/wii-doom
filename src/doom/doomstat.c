@@ -37,18 +37,18 @@ GameVersion_t    gameversion = exe_final2;
 char             *gamedescription;
 
 // Show messages has default, 0 = off, 1 = on
-int              showMessages = 1;        
 
 // specifies whether to follow the player around
-int              drawgrid = 0;
-int              followplayer = 1;
-int              show_stats = 0;
 int              timer_info = 0;
-int              use_vanilla_weapon_change = 1;
 int              chaingun_tics = 4;
-int              crosshair = 0;
 
 // Set if homebrew PWAD stuff has been added.
+dboolean         showMessages = true;
+dboolean         use_vanilla_weapon_change = true;
+dboolean         crosshair = false;
+dboolean         show_stats = false;
+dboolean         followplayer = true;
+dboolean         drawgrid = false;
 dboolean         modifiedgame;
 dboolean         start_respawnparm;
 dboolean         start_fastparm;
@@ -143,12 +143,8 @@ dboolean         d_vsync = false;
 dboolean         particle_sounds = false;
 dboolean         map_secret_after = false;
 dboolean         enable_autosave = false;
-/*
-dboolean         nerve = false;
-dboolean         chex = false;
-*/
+dboolean         drawsplash = false;
 dboolean         chexdeh = false;
-//dboolean         hacx = false;
 dboolean         BTSX = false;
 dboolean         BTSXE1 = false;
 dboolean         BTSXE2 = false;
@@ -157,14 +153,16 @@ dboolean         BTSXE2B = false;
 dboolean         BTSXE3 = false;
 dboolean         BTSXE3A = false;
 dboolean         BTSXE3B = false;
+dboolean         autoaim = true;
+dboolean         render_mode = true;
+
+// Blocky mode, has default, 0 = high, 1 = normal
+dboolean         detailLevel = false;
 
 fixed_t          forwardmove = 29;
 fixed_t          sidemove = 24; 
 
 int              turnspeed = 7;
-
-// Blocky mode, has default, 0 = high, 1 = normal
-int              detailLevel = 0;
 
 // temp for screenblocks (0-9)
 int              screenSize;
@@ -176,7 +174,6 @@ int              usegamma = 10;
 int              d_colblood = 0;
 int              d_colblood2 = 0;
 int              d_swirl;
-int              autoaim = true;
 int              background_type = 0;
 int              icontype = 0;
 int              wipe_type = 2;
@@ -191,45 +188,91 @@ int              use_libsamplerate = 0;
 int              gore_amount = 1;
 int              display_fps = 0;
 int              font_shadow = 0;
+
 #ifdef WII
 int              show_endoom = 0;
 #else
 int              show_endoom = 1;
 #endif
-int              render_mode = 2;
+
 int              bloodsplat_particle = 0;
 int              bulletpuff_particle = 0;
 int              teleport_particle = 0;
 int              d_uncappedframerate = 0;
 int              d_spawnteleglit = 0;
+int              map_grid_size = 128;
 
 // defaulted values
 int              mouseSensitivity = 5;
 
+// jff 1/7/98 default automap colors added
 
-//jff 1/7/98 default automap colors added
-int              mapcolor_back = 247;  // map background
-int              mapcolor_grid = 104;  // grid lines color
-int              mapcolor_wall = 23;   // normal 1s wall color
-int              mapcolor_fchg = 55;   // line at floor height change color
-int              mapcolor_cchg = 215;  // line at ceiling height change color
-int              mapcolor_clsd = 208;  // line at sector with floor=ceiling color
-int              mapcolor_rkey = 175;  // red key color
-int              mapcolor_bkey = 204;  // blue key color
-int              mapcolor_ykey = 231;  // yellow key color
-int              mapcolor_rdor = 175;  // red door color  (diff from keys to allow option)
-int              mapcolor_bdor = 204;  // blue door color (of enabling one but not other)
-int              mapcolor_ydor = 231;  // yellow door color
-int              mapcolor_tele = 119;  // teleporter line color
-int              mapcolor_secr = 252;  // secret sector boundary color
-int              mapcolor_exit = 0;    // jff 4/23/98 add exit line color
-int              mapcolor_unsn = 104;  // computer map unseen line color
-int              mapcolor_flat = 88;   // line with no floor/ceiling changes
-int              mapcolor_sprt = 112;  // general sprite color
-int              mapcolor_item = 231;  // item sprite color
-int              mapcolor_enemy = 177; // enemy sprite color
-int              mapcolor_hair = 208;  // crosshair color
-int              mapcolor_sngl = 208;  // single player arrow color
-int              mapcolor_plyr = 112;  // color for player arrow
-int              map_grid_size = 128;
+// map background
+int              mapcolor_back = 247;
+
+// grid lines color
+int              mapcolor_grid = 104;
+
+// normal 1s wall color
+int              mapcolor_wall = 23;
+
+// line at floor height change color
+int              mapcolor_fchg = 55;
+
+// line at ceiling height change color
+int              mapcolor_cchg = 215;
+
+// line at sector with floor = ceiling color
+int              mapcolor_clsd = 208;
+
+// red key color
+int              mapcolor_rkey = 175;
+
+// blue key color
+int              mapcolor_bkey = 204;
+
+// yellow key color
+int              mapcolor_ykey = 231;
+
+// red door color (diff from keys to allow option)
+int              mapcolor_rdor = 175;
+
+// blue door color (of enabling one but not other)
+int              mapcolor_bdor = 204;
+
+// yellow door color
+int              mapcolor_ydor = 231;
+
+// teleporter line color
+int              mapcolor_tele = 119;
+
+// secret sector boundary color
+int              mapcolor_secr = 252;
+
+// jff 4/23/98 add exit line color
+int              mapcolor_exit = 0;
+
+// computer map unseen line color
+int              mapcolor_unsn = 104;
+
+// line with no floor / ceiling changes
+int              mapcolor_flat = 88;
+
+// general sprite color
+int              mapcolor_sprt = 112;
+
+// item sprite color
+int              mapcolor_item = 231;
+
+// enemy sprite color
+int              mapcolor_enemy = 177;
+
+// crosshair color
+int              mapcolor_hair = 208;
+
+// single player arrow color
+int              mapcolor_sngl = 208;
+
+// color for player arrow
+int              mapcolor_plyr = 112;
 

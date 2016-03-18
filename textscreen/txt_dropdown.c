@@ -12,6 +12,7 @@
 // GNU General Public License for more details.
 //
 
+
 #include <stdlib.h>
 #include <string.h>
 
@@ -24,22 +25,23 @@
 #include "txt_main.h"
 #include "txt_window.h"
 
+
 typedef struct 
 {
     txt_window_t *window;
     txt_dropdown_list_t *list;
     int item;
+
 } callback_data_t;
 
-// Check if the selected value for a list is valid
 
+// Check if the selected value for a list is valid
 static int ValidSelection(txt_dropdown_list_t *list)
 {
     return *list->variable >= 0 && *list->variable < list->num_values;
 }
 
 // Calculate the Y position for the selector window
-
 static int SelectorWindowY(txt_dropdown_list_t *list)
 {
     int result;
@@ -54,7 +56,6 @@ static int SelectorWindowY(txt_dropdown_list_t *list)
     }
 
     // Keep dropdown inside the screen.
-
     if (result < 1)
     {
         result = 1;
@@ -68,24 +69,20 @@ static int SelectorWindowY(txt_dropdown_list_t *list)
 }
 
 // Called when a button in the selector window is pressed
-
 static void ItemSelected(TXT_UNCAST_ARG(button), TXT_UNCAST_ARG(callback_data))
 {
     TXT_CAST_ARG(callback_data_t, callback_data);
 
     // Set the variable
-
     *callback_data->list->variable = callback_data->item;
 
     TXT_EmitSignal(callback_data->list, "changed");
 
     // Close the window
-
     TXT_CloseWindow(callback_data->window);
 }
 
 // Free callback data when the window is closed
-
 static void FreeCallbackData(TXT_UNCAST_ARG(list), 
                              TXT_UNCAST_ARG(callback_data))
 {
@@ -95,7 +92,6 @@ static void FreeCallbackData(TXT_UNCAST_ARG(list),
 }
 
 // Catch presses of escape and close the window.
-
 static int SelectorWindowListener(txt_window_t *window, int key, void *user_data)
 {
     if (key == KEY_ESCAPE)
@@ -124,14 +120,12 @@ static int SelectorMouseListener(txt_window_t *window, int x, int y, int b,
 }
 
 // Open the dropdown list window to select an item
-
 static void OpenSelectorWindow(txt_dropdown_list_t *list)
 {
     txt_window_t *window;
     int i;
 
     // Open a simple window with no title bar or action buttons.
-
     window = TXT_NewWindow(NULL);
 
     TXT_SetWindowAction(window, TXT_HORIZ_LEFT, NULL);
@@ -140,13 +134,11 @@ static void OpenSelectorWindow(txt_dropdown_list_t *list)
 
     // Position the window so that the currently selected item appears
     // over the top of the list widget.
-
     TXT_SetWindowPosition(window, TXT_HORIZ_LEFT, TXT_VERT_TOP,
                           list->widget.x - 2, SelectorWindowY(list));
 
     // Add a button to the window for each option in the list.
-
-    for (i=0; i<list->num_values; ++i)
+    for (i = 0; i < list->num_values; ++i)
     {
         txt_button_t *button;
         callback_data_t *data;
@@ -156,23 +148,19 @@ static void OpenSelectorWindow(txt_dropdown_list_t *list)
         TXT_AddWidget(window, button);
 
         // Callback struct
-
         data = malloc(sizeof(callback_data_t));
         data->list = list;
         data->window = window;
         data->item = i;
         
         // When the button is pressed, invoke the button press callback
-       
         TXT_SignalConnect(button, "pressed", ItemSelected, data);
         
         // When the window is closed, free back the callback struct
-
         TXT_SignalConnect(window, "closed", FreeCallbackData, data);
 
         // Is this the currently-selected value?  If so, select the button
         // in the window as the default.
-        
         if (i == *list->variable)
         {
             TXT_SelectWidget(window, button);
@@ -180,7 +168,6 @@ static void OpenSelectorWindow(txt_dropdown_list_t *list)
     }
 
     // Catch presses of escape in this window and close it.
-
     TXT_SetKeyListener(window, SelectorWindowListener, NULL);
     TXT_SetMouseListener(window, SelectorMouseListener, NULL);
 }
@@ -191,12 +178,12 @@ static int DropdownListWidth(txt_dropdown_list_t *list)
     int result;
 
     // Find the maximum string width
- 
     result = 0;
 
-    for (i=0; i<list->num_values; ++i)
+    for (i = 0; i < list->num_values; ++i)
     {
         int w = strlen(list->values[i]);
+
         if (w > result) 
         {
             result = w;
@@ -221,12 +208,10 @@ static void TXT_DropdownListDrawer(TXT_UNCAST_ARG(list))
     const char *str;
 
     // Set bg/fg text colors.
-
     TXT_SetWidgetBG(list);
 
     // Select a string to draw from the list, if the current value is
     // in range.  Otherwise fall back to a default.
-
     if (ValidSelection(list))
     {
         str = list->values[*list->variable];
@@ -237,10 +222,9 @@ static void TXT_DropdownListDrawer(TXT_UNCAST_ARG(list))
     }
 
     // Draw the string and fill to the end with spaces
-
     TXT_DrawString(str);
 
-    for (i=strlen(str); i<list->widget.w; ++i) 
+    for (i = strlen(str); i < list->widget.w; ++i) 
     {
         TXT_DrawString(" ");
     }
@@ -269,7 +253,6 @@ static void TXT_DropdownListMousePress(TXT_UNCAST_ARG(list),
     TXT_CAST_ARG(txt_dropdown_list_t, list);
 
     // Left mouse click does the same as selecting and pressing enter
-
     if (b == TXT_MOUSE_LEFT)
     {
         TXT_DropdownListKeyPress(list, KEY_ENTER);
@@ -284,7 +267,7 @@ txt_widget_class_t txt_dropdown_list_class =
     TXT_DropdownListKeyPress,
     TXT_DropdownListDestructor,
     TXT_DropdownListMousePress,
-    NULL,
+    NULL
 };
 
 //

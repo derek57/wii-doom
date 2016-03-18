@@ -115,13 +115,13 @@ void I_GraphicsCheckCommandLine(void);
 void I_ShutdownGraphics(void);
 
 // Takes full 8 bit values.
-void I_SetPalette (byte* palette);
+void I_SetPalette(byte *palette);
 int I_GetPaletteIndex(int r, int g, int b);
 
 void I_UpdateNoBlit (void);
 void I_FinishUpdate (int scrn);
 
-void I_ReadScreen (int scrn, byte* scr);
+void I_ReadScreen (int scrn, byte *scr);
 
 void I_PrepareRead (void);
 void I_BeginRead (void);

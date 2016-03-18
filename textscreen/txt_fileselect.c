@@ -15,18 +15,27 @@
 // Routines for selecting files.
 //
 
+
+#include <errno.h>
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/wait.h>
+#include <unistd.h>
 
 #include "doomkeys.h"
-
 #include "txt_fileselect.h"
 #include "txt_inputbox.h"
 #include "txt_main.h"
 #include "txt_widget.h"
 
-struct txt_fileselect_s {
+
+#define ZENITY_BINARY "/usr/bin/zenity"
+
+
+struct txt_fileselect_s
+{
     txt_widget_t widget;
     txt_inputbox_t *inputbox;
     int size;
@@ -34,16 +43,10 @@ struct txt_fileselect_s {
     char **extensions;
 };
 
-// Dummy value to select a directory.
 
+// Dummy value to select a directory.
 char *TXT_DIRECTORY[] = { "__directory__", NULL };
 
-#ifndef _WIN32
-
-#include <fcntl.h>
-#include <unistd.h>
-#include <errno.h>
-#include <sys/wait.h>
 
 static char *ExecReadOutput(char **argv)
 {
@@ -71,7 +74,6 @@ static char *ExecReadOutput(char **argv)
     // Read program output into 'result' string.
     // Wait until the program has completed and (if it was successful)
     // a full line has been read.
-
     result = NULL;
     result_len = 0;
     completed = 0;
@@ -115,7 +117,6 @@ static char *ExecReadOutput(char **argv)
     close(pipefd[1]);
 
     // Must have a success exit code.
-
     if (WEXITSTATUS(status) != 0)
     {
         free(result);
@@ -123,7 +124,6 @@ static char *ExecReadOutput(char **argv)
     }
 
     // Strip off newline from the end.
-
     if (result != NULL && result[result_len - 1] == '\n')
     {
         result[result_len - 1] = '\0';
@@ -131,8 +131,6 @@ static char *ExecReadOutput(char **argv)
 
     return result;
 }
-
-#endif
 
 // This is currently disabled on Windows because it doesn't work.
 // Current issues:
@@ -144,7 +142,6 @@ static char *ExecReadOutput(char **argv)
 //     closed.
 /*
 #if defined(_WIN32)
-
 int TXT_CanSelectFiles(void)
 {
     return 0;
@@ -158,7 +155,6 @@ char *TXT_SelectFile(char *window_title, char **extensions)
 #elif defined(xxxdisabled_WIN32)
 
 // Windows code. Use comdlg32 to pop up a dialog box.
-
 #include <windows.h>
 #include <shlobj.h>
 
@@ -167,7 +163,6 @@ static LPITEMIDLIST (*MySHBrowseForFolder)(LPBROWSEINFO) = NULL;
 static BOOL (*MySHGetPathFromIDList)(LPITEMIDLIST, LPTSTR) = NULL;
 
 // Load library functions from DLL files.
-
 static int LoadDLLs(void)
 {
     HMODULE comdlg32 = LoadLibraryW(L"comdlg32.dll");
@@ -180,8 +175,10 @@ static int LoadDLLs(void)
 
     MyGetOpenFileName =
         (void *) GetProcAddress(comdlg32, "GetOpenFileNameA");
+
     MySHBrowseForFolder =
         (void *) GetProcAddress(shell32, "SHBrowseForFolder");
+
     MySHGetPathFromIDList =
         (void *) GetProcAddress(shell32, "SHGetPathFromIDList");
 
@@ -204,7 +201,6 @@ static int InitLibraries(void)
 }
 
 // Generate the "filter" string from the list of extensions.
-
 static char *GenerateFilterString(char **extensions)
 {
     unsigned int result_len = 1;
@@ -230,6 +226,7 @@ static char *GenerateFilterString(char **extensions)
         // .wad files (*.wad)\0
         size_t offset = TXT_snprintf(out, out_len, "%s files (*.%s)",
                               extensions[i], extensions[i]);
+
         out += offset + 1; out_len -= offset + 1;
 
         // *.wad\0
@@ -326,7 +323,6 @@ char *TXT_SelectFile(char *window_title, char **extensions)
 // an Objective C dependency. This is rather silly.
 
 // Printf format string for the "wrapper" portion of the AppleScript:
-
 #define APPLESCRIPT_WRAPPER \
     "tell application (path to frontmost application as text)\n" \
     "    set theFile to (%s)\n" \
@@ -341,22 +337,24 @@ static char *EscapedString(char *s)
     result = malloc(strlen(s) + 3);
     out = result;
     *out++ = '\"';
+
     for (in = s; *in != '\0'; ++in)
     {
         if (*in == '\"' || *in == '\\')
         {
             *out++ = '\\';
         }
+
         *out++ = *in;
     }
+
     *out++ = '\"';
     *out = '\0';
 
     return result;
 }
 
-// Build list of extensions, like: {"wad","lmp","txt"}
-
+// Build list of extensions, like: { "wad", "lmp", "txt" }
 static char *ExtensionsList(char **extensions)
 {
     char *result;
@@ -369,6 +367,7 @@ static char *ExtensionsList(char **extensions)
     }
 
     result_len = 3;
+
     for (i = 0; extensions[i] != NULL; ++i)
     {
         result_len += 5 + strlen(extensions[i]) * 2;
@@ -411,12 +410,12 @@ static char *GenerateSelector(char *window_title, char **extensions)
     }
 
     // Calculate size.
-
     if (window_title != NULL)
     {
         window_title = EscapedString(window_title);
         result_len += strlen(window_title);
     }
+
     if (ext_list != NULL)
     {
         result_len += strlen(ext_list);
@@ -484,11 +483,9 @@ char *TXT_SelectFile(char *window_title, char **extensions)
 
 #else
 */
+
 // Linux version: invoke the Zenity command line program to pop up a
 // dialog box. This avoids adding Gtk+ as a compile dependency.
-
-#define ZENITY_BINARY "/usr/bin/zenity"
-
 static unsigned int NumExtensions(char **extensions)
 {
     unsigned int result = 0;
@@ -548,8 +545,10 @@ char *TXT_SelectFile(char *window_title, char **extensions)
         {
             len = 30 + strlen(extensions[i]) * 2;
             argv[argc] = malloc(len);
+
             TXT_snprintf(argv[argc], len, "--file-filter=.%s | *.%s",
                          extensions[i], extensions[i]);
+
             ++argc;
         }
     }
@@ -576,7 +575,6 @@ static void TXT_FileSelectSizeCalc(TXT_UNCAST_ARG(fileselect))
 
     // Calculate widget size, but override the width to always
     // be the configured size.
-
     TXT_CalcWidgetSize(fileselect->inputbox);
     fileselect->widget.w = fileselect->size;
     fileselect->widget.h = fileselect->inputbox->widget.h;
@@ -588,7 +586,6 @@ static void TXT_FileSelectDrawer(TXT_UNCAST_ARG(fileselect))
 
     // Input box widget inherits all the properties of the
     // file selector.
-
     fileselect->inputbox->widget.x = fileselect->widget.x;
     fileselect->inputbox->widget.y = fileselect->widget.y;
     fileselect->inputbox->widget.w = fileselect->widget.w;
@@ -612,13 +609,11 @@ static int DoSelectFile(txt_fileselect_t *fileselect)
     {
         char **var;
 
-        path = TXT_SelectFile(fileselect->prompt,
-                              fileselect->extensions);
+        path = TXT_SelectFile(fileselect->prompt, fileselect->extensions);
 
         // Update inputbox variable.
         // If cancel was pressed (ie. NULL was returned by TXT_SelectFile)
         // then reset to empty string, not NULL).
-
         if (path == NULL)
         {
             path = strdup("");
@@ -640,10 +635,8 @@ static int TXT_FileSelectKeyPress(TXT_UNCAST_ARG(fileselect), int key)
     // When the enter key is pressed, pop up a file selection dialog,
     // if file selectors work. Allow holding down 'alt' to override
     // use of the native file selector, so the user can just type a path.
-
-    if (!fileselect->inputbox->editing
-     && !TXT_GetModifierState(TXT_MOD_ALT)
-     && key == KEY_ENTER)
+    if (!fileselect->inputbox->editing && !TXT_GetModifierState(TXT_MOD_ALT)
+        && key == KEY_ENTER)
     {
         if (DoSelectFile(fileselect))
         {
@@ -659,9 +652,8 @@ static void TXT_FileSelectMousePress(TXT_UNCAST_ARG(fileselect),
 {
     TXT_CAST_ARG(txt_fileselect_t, fileselect);
 
-    if (!fileselect->inputbox->editing
-     && !TXT_GetModifierState(TXT_MOD_ALT)
-     && b == TXT_MOUSE_LEFT)
+    if (!fileselect->inputbox->editing && !TXT_GetModifierState(TXT_MOD_ALT)
+        && b == TXT_MOUSE_LEFT)
     {
         if (DoSelectFile(fileselect))
         {
@@ -688,7 +680,7 @@ txt_widget_class_t txt_fileselect_class =
     TXT_FileSelectDestructor,
     TXT_FileSelectMousePress,
     NULL,
-    TXT_FileSelectFocused,
+    TXT_FileSelectFocused
 };
 
 // If the (inner) inputbox widget is changed, emit a change to the

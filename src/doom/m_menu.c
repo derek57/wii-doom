@@ -109,7 +109,7 @@
 #define MOUSE_RIGHTBUTTON                   2
 
 
-void    (*messageRoutine)  (int response);
+static void (*messageRoutine)(int response);
 
 
 static const char *credits[] =
@@ -1152,7 +1152,6 @@ char *Key2String(int ch)
     // and similar for much punctuation.  Probably
     // won't work with international keyboards and
     // dead keys, either.
-
     switch (ch)
     {
 #ifdef WII
@@ -1446,6 +1445,7 @@ char                       string_hair[5];
 char                       string_sngl[5];
 char                       string_plyr[5];
 char                       string_mapgridsize[5];
+char                       tempstring[80];
 
 // old save description before edit
 char                       saveOldString[SAVESTRINGSIZE];  
@@ -1460,7 +1460,7 @@ char                       *skullNameSmall[2] = {
     "M_SKULL4"
 };
 
- // 1 = message to be printed
+// 1 = message to be printed
 int                        messageToPrint;
 
 // message x & y
@@ -1481,13 +1481,15 @@ int                        map = 1;
 int                        cheeting;
 int                        coordinates_info = 0;
 int                        version_info = 0;
+
 #ifdef WII
-int                        key_controls_start_in_cfg_at_pos = 149;
-int                        key_controls_end_in_cfg_at_pos = 163;
-#else
-int                        key_controls_start_in_cfg_at_pos = 148;
+int                        key_controls_start_in_cfg_at_pos = 150;
 int                        key_controls_end_in_cfg_at_pos = 164;
+#else
+int                        key_controls_start_in_cfg_at_pos = 149;
+int                        key_controls_end_in_cfg_at_pos = 165;
 #endif
+
 int                        tracknum = 1;
 int                        epi = 1;
 int                        repi = 1;
@@ -1508,7 +1510,6 @@ int                        memdumpwait;
 int                        statdumpwait;
 int                        restartsongwait;
 int                        printdirwait;
-
 
 // -1 = no quicksave slot picked!
 int                        quickSaveSlot;
@@ -1562,6 +1563,7 @@ dboolean                   blurred = false;
 dboolean                   long_tics = false;
 dboolean                   restart_song = false;
 dboolean                   dump_subst = false;
+dboolean                   quitting;
 
 // current menudef
 menu_t                     *currentMenu;                          
@@ -1596,6 +1598,10 @@ static int                 fireyfac = 2;
 static int                 firexc = 0;
 static int                 fireyc = 39;
 static int                 credits_start_time;
+static int                 mobj_tics;
+
+static state_t             *mobj_state;
+
 
 extern char                *d_lowpixelsize;
 
@@ -1603,17 +1609,17 @@ extern int                 cheat_musnum;
 extern int                 cheating;
 extern int                 dots_enabled;
 extern int                 dont_show;
-extern int                 correct_lost_soul_bounce;
-extern int                 png_screenshots;
+extern int                 pagetic;
 
 // KEY BINDINGS
 extern default_t           doom_defaults_list[];
 
-extern dboolean            message_dontfuckwithme;
-
 // in heads-up code
 extern dboolean            chat_on;
 
+extern dboolean            correct_lost_soul_bounce;
+extern dboolean            png_screenshots;
+extern dboolean            message_dontfuckwithme;
 extern dboolean            BorderNeedRefresh;
 extern dboolean            sendpause;
 extern dboolean            secret_1;
@@ -1623,6 +1629,8 @@ extern dboolean            skippsprinterp;
 extern dboolean            longtics;
 extern dboolean            mus_cheated;
 extern dboolean            wipe;
+extern dboolean            waspaused;
+extern dboolean            splashscreen;
 
 extern short               songlist[148];
 
@@ -1634,294 +1642,300 @@ extern void                A_PainDie(mobj_t *actor);
 //
 // PROTOTYPES
 //
-void M_NewGame(int choice);
-void M_Episode(int choice);
-void M_ChooseSkill(int choice);
-void M_LoadGame(int choice);
-void M_SaveGame(int choice);
-void M_Options(int choice);
-void M_EndGame(int choice);
-void M_ReadThis(int choice);
-void M_ReadThis2(int choice);
-void M_Credits(int choice);
-void M_QuitDOOM(int choice);
-
-void M_ChangeMessages(int choice);
-void M_ChangeSensitivity(int choice);
-void M_MouseWalk(int choice);
-void M_WalkingSpeed(int choice);
-void M_TurningSpeed(int choice);
-void M_StrafingSpeed(int choice);
-void M_GeneralSound(int choice);
-void M_SfxVol(int choice);
-void M_MusicVol(int choice);
-void M_ChangeDetail(int choice);
-void M_Translucency(int choice);
-void M_ColoredBloodA(int choice);
-void M_ColoredBloodB(int choice);
-void M_BloodsplatsAmount(int choice);
-void M_WipeType(int choice);
-void M_UncappedFramerate(int choice);
-void M_Screenshots(int choice);
-void M_Background(int choice);
-void M_FontShadow(int choice);
-void M_DiskIcon(int choice);
-void M_FixWiggle(int choice);
-void M_RemoveSlimeTrails(int choice);
-void M_RenderMode(int choice);
-void M_VSync(int choice);
-void M_IconType(int choice);
-void M_SizeDisplay(int choice);
-void M_StartGame(int choice);
-void M_Sound(int choice);
-
-void M_FinishReadThis(int choice);
-void M_LoadSelect(int choice);
-void M_SaveSelect(int choice);
-void M_ReadSaveStrings(void);
-
-void M_DrawMainMenu(void);
-void M_DrawReadThis1(void);
-void M_DrawReadThis2(void);
-void M_DrawCredits(void);
-void M_DrawNewGame(void);
-void M_DrawEpisode(void);
-void M_DrawOptions(void);
-void M_DrawSound(void);
-void M_DrawLoad(void);
-void M_DrawSave(void);
-
-void M_DrawSaveLoadBorder(int x, int y);
-void M_SetupNextMenu(menu_t *menudef);
-void M_DrawThermoSmall(int x, int y, int thermWidth, int thermDot);
-void M_StartMessage(char *string, void *routine, dboolean input);
-
-void M_MusicType(int choice);
-void M_SoundType(int choice);
-void M_SoundOutput(int choice);
-void M_SoundPitch(int choice);
-void M_DumpSubstituteConfig(int choice);
-void M_Samplerate(int choice);
-void M_RestartSong(int choice);
-void M_OPLDev(int choice);
-void M_SoundChannels(int choice);
-void M_GameFiles(int choice);
-void M_ChangeGamma(int choice);
-void M_Freelook(int choice);
-void M_FreelookSpeed(int choice);
-
-void M_KeyBindingsClearControls(int ch);
-void M_KeyBindingsClearAll(int choice);
-void M_KeyBindingsReset(int choice);
-void M_KeyBindingsSetKey(int choice);
-void M_KeyBindings(int choice);
-void M_FPS(int choice);
-void M_DisplayTicker(int choice);
-void M_Coordinates(int choice);
-void M_Timer(int choice);
-void M_Authors(int choice);
-void M_StatusMap(int choice);
-void M_MapName(int choice);
-void M_MapSecretAfter(int choice);
-void M_Version(int choice);
-void M_SoundInfo(int choice);
-void M_HUD(int choice);
-void M_Autosave(int choice);
-void M_MapColor_Back(int choice);
-void M_MapColor_Grid(int choice);
-void M_MapColor_Wall(int choice);
-void M_MapColor_FCHG(int choice);
-void M_MapColor_CCHG(int choice);
-void M_MapColor_CLSD(int choice);
-void M_MapColor_RKey(int choice);
-void M_MapColor_BKey(int choice);
-void M_MapColor_YKey(int choice);
-void M_MapColor_RDoor(int choice);
-void M_MapColor_BDoor(int choice);
-void M_MapColor_YDoor(int choice);
-void M_MapColor_Teleport(int choice);
-void M_MapColor_Secret(int choice);
-void M_MapColor_Exit(int choice);
-void M_MapColor_Unseen(int choice);
-void M_MapColor_Flat(int choice);
-void M_MapColor_Sprite(int choice);
-void M_MapColor_Item(int choice);
-void M_MapColor_Enemy(int choice);
-void M_MapColor_Crosshair(int choice);
-void M_MapColor_Player(int choice);
-void M_MapColor_Multiplayer(int choice);
-void M_MapColor_Standard_DOSDoom(int choice);
-void M_MapColor_Standard_PRBoom(int choice);
-void M_MapGrid(int choice);
-void M_MapGridSize(int choice);
-void M_WeaponChange(int choice);
-void M_AimingHelp(int choice);
-void M_MapRotation(int choice);
-void M_FollowMode(int choice);
-void M_Statistics(int choice);
-void M_Crosshair(int choice);
-void M_Jumping(int choice);
-void M_WeaponRecoil(int choice);
-void M_PlayerThrust(int choice);
-void M_Particles(int choice);
-void M_BloodType(int choice);
-void M_BulletType(int choice);
-void M_TeleportType(int choice);
-void M_BFGCloud(int choice);
-void M_BFGExplosions(int choice);
-void M_RocketParticles(int choice);
-void M_RocketExplosions(int choice);
-void M_SpawnFlies(int choice);
-void M_DripBlood(int choice);
-void M_ParticleSounds(int choice);
-void M_TeleportGlitter(int choice);
-void M_RespawnMonsters(int choice);
-void M_FastMonsters(int choice);
-void M_Autoaim(int choice);
-void M_MaxGore(int choice);
-void M_Footstep(int choice);
-void M_Footclip(int choice);
-void M_Splash(int choice);
-void M_Swirl(int choice);
-void M_Beta(int choice);
-void M_Corpses(int choice);
-void M_Secrets(int choice);
-void M_Trails(int choice);
-void M_ChaingunTics(int choice);
-void M_FallingDamage(int choice);
-void M_InfiniteAmmo(int choice);
-void M_GoreAmount(int choice);
-void M_Shadows(int choice);
-void M_Offsets(int choice);
-void M_Telefrag(int choice);
-void M_Doorstuck(int choice);
-void M_ResurrectGhosts(int choice);
-void M_LimitedGhosts(int choice);
-void M_BlockSkulls(int choice);
-void M_BlazingDoors(int choice);
-void M_GodAbsolute(int choice);
-void M_Floor(int choice);
-void M_Clipping(int choice);
-void M_Model(int choice);
-void M_BossDeath(int choice);
-void M_Bounce(int choice);
-void M_Masked(int choice);
-void M_Quirk(int choice);
-void M_Ouch(int choice);
-void M_Textures(int choice);
-void M_FixMapErrors(int choice);
-void M_AltLighting(int choice);
-void M_Infighting(int choice);
-void M_LastEnemy(int choice);
-void M_Float(int choice);
-void M_Animate(int choice);
-void M_CrushSound(int choice);
-void M_NoNoise(int choice);
-void M_NudgeCorpses(int choice);
-void M_Slide(int choice);
-void M_Smearblood(int choice);
-void M_ColoredCorpses(int choice);
-void M_LowHealth(int choice);
-void M_CenterWeapon(int choice);
-void M_EjectCasings(int choice);
-void M_EndoomScreen(int choice);
-void M_NoMonsters(int choice);
-void M_AutomapOverlay(int choice);
-
-void M_God(int choice);
-void M_Noclip(int choice);
-void M_Weapons(int choice);
-void M_WeaponsA(int choice);
-void M_WeaponsB(int choice);
-void M_WeaponsC(int choice);
-void M_WeaponsD(int choice);
-void M_WeaponsE(int choice);
-void M_WeaponsF(int choice);
-void M_WeaponsG(int choice);
-void M_WeaponsH(int choice);
-void M_Keys(int choice);
-void M_KeysA(int choice);
-void M_KeysB(int choice);
-void M_KeysC(int choice);
-void M_KeysD(int choice);
-void M_KeysE(int choice);
-void M_KeysF(int choice);
-void M_KeysG(int choice);
-void M_Items(int choice);
-void M_ItemsA(int choice);
-void M_ItemsB(int choice);
-void M_ItemsC(int choice);
-void M_ItemsD(int choice);
-void M_ItemsE(int choice);
-void M_ItemsF(int choice);
-void M_ItemsG(int choice);
-void M_ItemsH(int choice);
-void M_ItemsI(int choice);
-void M_ItemsJ(int choice);
-void M_ItemsK(int choice);
-void M_Topo(int choice);
-void M_Rift(int choice);
-void M_RiftNow(int choice);
-void M_Spin(int choice);
-
-void M_Armor(int choice);
-void M_ArmorA(int choice);
-void M_ArmorB(int choice);
-void M_ArmorC(int choice);
-void M_Massacre(int choice);
-void M_Screen(int choice);
-void M_FPSCounter(int choice);
-void M_HOMDetector(int choice);
-void M_MemoryUsage(int choice);
-void M_ConDump(int choice);
-void M_MemDump(int choice);
-void M_StatDump(int choice);
-void M_PrintDir(int choice);
-void M_ReplaceMissing(int choice);
-void M_Controls(int choice);
-void M_System(int choice);
-void M_Automap(int choice);
-void M_Game(int choice);
-void M_Game2(int choice);
-void M_Game3(int choice);
-void M_Game4(int choice);
-void M_Game5(int choice);
-void M_Game6(int choice);
-void M_Game7(int choice);
-void M_OptSet(int choice);
-void M_DefSet(int choice);
-void M_Expansion(int choice);
-void M_Debug(int choice);
-void M_Test(int choice);
-void M_Cheats(int choice);
+static void M_NewGame(int choice);
+static void M_Episode(int choice);
+static void M_ChooseSkill(int choice);
+static void M_LoadGame(int choice);
+static void M_SaveGame(int choice);
+static void M_Options(int choice);
+static void M_EndGame(int choice);
+static void M_ReadThis(int choice);
+static void M_ReadThis2(int choice);
+static void M_Credits(int choice);
+static void M_ChangeMessages(int choice);
+static void M_ChangeSensitivity(int choice);
+static void M_MouseWalk(int choice);
+static void M_WalkingSpeed(int choice);
+static void M_TurningSpeed(int choice);
+static void M_StrafingSpeed(int choice);
+static void M_GeneralSound(int choice);
+static void M_SfxVol(int choice);
+static void M_MusicVol(int choice);
+static void M_ChangeDetail(int choice);
+static void M_Translucency(int choice);
+static void M_ColoredBloodA(int choice);
+static void M_ColoredBloodB(int choice);
+static void M_BloodsplatsAmount(int choice);
+static void M_WipeType(int choice);
+static void M_UncappedFramerate(int choice);
+static void M_Screenshots(int choice);
+static void M_Background(int choice);
+static void M_FontShadow(int choice);
+static void M_DiskIcon(int choice);
+static void M_FixWiggle(int choice);
+static void M_RemoveSlimeTrails(int choice);
+static void M_IconType(int choice);
+static void M_SizeDisplay(int choice);
+static void M_Sound(int choice);
+static void M_FinishReadThis(int choice);
+static void M_LoadSelect(int choice);
+static void M_SaveSelect(int choice);
+static void M_ReadSaveStrings(void);
+static void M_DrawMainMenu(void);
+static void M_DrawReadThis1(void);
+static void M_DrawReadThis2(void);
+static void M_DrawCredits(void);
+static void M_DrawNewGame(void);
+static void M_DrawEpisode(void);
+static void M_DrawOptions(void);
+static void M_DrawSound(void);
+static void M_DrawLoad(void);
+static void M_DrawSave(void);
+static void M_DrawSaveLoadBorder(int x, int y);
+static void M_SetupNextMenu(menu_t *menudef);
+static void M_DrawThermoSmall(int x, int y, int thermWidth, int thermDot);
+static void M_StartMessage(char *string, void *routine, dboolean input);
+static void M_MusicType(int choice);
+static void M_SoundType(int choice);
+static void M_SoundOutput(int choice);
+static void M_SoundPitch(int choice);
+static void M_RestartSong(int choice);
+static void M_OPLDev(int choice);
+static void M_SoundChannels(int choice);
+static void M_GameFiles(int choice);
+static void M_ChangeGamma(int choice);
+static void M_Freelook(int choice);
+static void M_FreelookSpeed(int choice);
+static void M_KeyBindingsClearControls(int ch);
+static void M_KeyBindingsClearAll(int choice);
+static void M_KeyBindingsReset(int choice);
+static void M_KeyBindingsSetKey(int choice);
+static void M_KeyBindings(int choice);
+static void M_FPS(int choice);
+static void M_DisplayTicker(int choice);
+static void M_Coordinates(int choice);
+static void M_Timer(int choice);
+static void M_Authors(int choice);
+static void M_StatusMap(int choice);
+static void M_MapName(int choice);
+static void M_MapSecretAfter(int choice);
+static void M_Version(int choice);
+static void M_SoundInfo(int choice);
+static void M_HUD(int choice);
+static void M_Autosave(int choice);
+static void M_DrawSplash(int choice);
+static void M_MapColor_Back(int choice);
+static void M_MapColor_Grid(int choice);
+static void M_MapColor_Wall(int choice);
+static void M_MapColor_FCHG(int choice);
+static void M_MapColor_CCHG(int choice);
+static void M_MapColor_CLSD(int choice);
+static void M_MapColor_RKey(int choice);
+static void M_MapColor_BKey(int choice);
+static void M_MapColor_YKey(int choice);
+static void M_MapColor_RDoor(int choice);
+static void M_MapColor_BDoor(int choice);
+static void M_MapColor_YDoor(int choice);
+static void M_MapColor_Teleport(int choice);
+static void M_MapColor_Secret(int choice);
+static void M_MapColor_Exit(int choice);
+static void M_MapColor_Unseen(int choice);
+static void M_MapColor_Flat(int choice);
+static void M_MapColor_Sprite(int choice);
+static void M_MapColor_Item(int choice);
+static void M_MapColor_Enemy(int choice);
+static void M_MapColor_Crosshair(int choice);
+static void M_MapColor_Player(int choice);
+static void M_MapColor_Multiplayer(int choice);
+static void M_MapColor_Standard_DOSDoom(int choice);
+static void M_MapColor_Standard_PRBoom(int choice);
+static void M_MapGrid(int choice);
+static void M_MapGridSize(int choice);
+static void M_WeaponChange(int choice);
+static void M_AimingHelp(int choice);
+static void M_MapRotation(int choice);
+static void M_FollowMode(int choice);
+static void M_Statistics(int choice);
+static void M_Crosshair(int choice);
+static void M_Jumping(int choice);
+static void M_WeaponRecoil(int choice);
+static void M_PlayerThrust(int choice);
+static void M_Particles(int choice);
+static void M_BloodType(int choice);
+static void M_BulletType(int choice);
+static void M_TeleportType(int choice);
+static void M_BFGCloud(int choice);
+static void M_BFGExplosions(int choice);
+static void M_RocketParticles(int choice);
+static void M_RocketExplosions(int choice);
+static void M_SpawnFlies(int choice);
+static void M_DripBlood(int choice);
+static void M_ParticleSounds(int choice);
+static void M_TeleportGlitter(int choice);
+static void M_RespawnMonsters(int choice);
+static void M_FastMonsters(int choice);
+static void M_Autoaim(int choice);
+static void M_MaxGore(int choice);
+static void M_Footstep(int choice);
+static void M_Footclip(int choice);
+static void M_Splash(int choice);
+static void M_Swirl(int choice);
+static void M_Corpses(int choice);
+static void M_Secrets(int choice);
+static void M_Trails(int choice);
+static void M_ChaingunTics(int choice);
+static void M_FallingDamage(int choice);
+static void M_InfiniteAmmo(int choice);
+static void M_GoreAmount(int choice);
+static void M_Shadows(int choice);
+static void M_Offsets(int choice);
+static void M_Telefrag(int choice);
+static void M_Doorstuck(int choice);
+static void M_ResurrectGhosts(int choice);
+static void M_LimitedGhosts(int choice);
+static void M_BlockSkulls(int choice);
+static void M_BlazingDoors(int choice);
+static void M_GodAbsolute(int choice);
+static void M_Floor(int choice);
+static void M_Clipping(int choice);
+static void M_Model(int choice);
+static void M_BossDeath(int choice);
+static void M_Bounce(int choice);
+static void M_Masked(int choice);
+static void M_Quirk(int choice);
+static void M_Ouch(int choice);
+static void M_Textures(int choice);
+static void M_FixMapErrors(int choice);
+static void M_AltLighting(int choice);
+static void M_Infighting(int choice);
+static void M_LastEnemy(int choice);
+static void M_Float(int choice);
+static void M_Animate(int choice);
+static void M_CrushSound(int choice);
+static void M_NoNoise(int choice);
+static void M_NudgeCorpses(int choice);
+static void M_Slide(int choice);
+static void M_Smearblood(int choice);
+static void M_ColoredCorpses(int choice);
+static void M_LowHealth(int choice);
+static void M_CenterWeapon(int choice);
+static void M_EjectCasings(int choice);
+static void M_EndoomScreen(int choice);
+static void M_NoMonsters(int choice);
+static void M_AutomapOverlay(int choice);
+static void M_God(int choice);
+static void M_Noclip(int choice);
+static void M_Weapons(int choice);
+static void M_WeaponsA(int choice);
+static void M_WeaponsB(int choice);
+static void M_WeaponsC(int choice);
+static void M_WeaponsD(int choice);
+static void M_WeaponsE(int choice);
+static void M_WeaponsF(int choice);
+static void M_WeaponsG(int choice);
+static void M_WeaponsH(int choice);
+static void M_Keys(int choice);
+static void M_KeysA(int choice);
+static void M_KeysB(int choice);
+static void M_KeysC(int choice);
+static void M_KeysD(int choice);
+static void M_KeysE(int choice);
+static void M_KeysF(int choice);
+static void M_KeysG(int choice);
+static void M_Items(int choice);
+static void M_ItemsA(int choice);
+static void M_ItemsB(int choice);
+static void M_ItemsC(int choice);
+static void M_ItemsD(int choice);
+static void M_ItemsE(int choice);
+static void M_ItemsF(int choice);
+static void M_ItemsG(int choice);
+static void M_ItemsH(int choice);
+static void M_ItemsI(int choice);
+static void M_ItemsJ(int choice);
+static void M_ItemsK(int choice);
+static void M_Topo(int choice);
+static void M_Rift(int choice);
+static void M_RiftNow(int choice);
+static void M_Spin(int choice);
+static void M_Armor(int choice);
+static void M_ArmorA(int choice);
+static void M_ArmorB(int choice);
+static void M_ArmorC(int choice);
+static void M_Massacre(int choice);
+static void M_Screen(int choice);
+static void M_HOMDetector(int choice);
+static void M_MemoryUsage(int choice);
+static void M_ConDump(int choice);
+static void M_MemDump(int choice);
+static void M_StatDump(int choice);
+static void M_PrintDir(int choice);
+static void M_ReplaceMissing(int choice);
+static void M_Controls(int choice);
+static void M_System(int choice);
+static void M_Automap(int choice);
+static void M_Game(int choice);
+static void M_Game2(int choice);
+static void M_Game3(int choice);
+static void M_Game4(int choice);
+static void M_Game5(int choice);
+static void M_Game6(int choice);
+static void M_Game7(int choice);
+static void M_OptSet(int choice);
+static void M_DefSet(int choice);
+static void M_Expansion(int choice);
+static void M_Debug(int choice);
+static void M_Test(int choice);
+static void M_DrawFilesMenu(void);
+static void M_DrawItems(void);
+static void M_DrawArmor(void);
+static void M_DrawWeapons(void);
+static void M_DrawKeys(void);
+static void M_DrawScreen(void);
+static void M_DrawKeyBindings(void);
+static void M_DrawControls(void);
+static void M_DrawSystem(void);
+static void M_DrawAutomap(void);
+static void M_DrawGame1(void);
+static void M_DrawGame2(void);
+static void M_DrawGame3(void);
+static void M_DrawGame4(void);
+static void M_DrawGame5(void);
+static void M_DrawGame6(void);
+static void M_DrawGame7(void);
+static void M_DrawDebug(void);
+static void M_DrawTest(void);
+static void M_DrawCheats(void);
+static void M_XC(int choice);
+static void M_YC(int choice);
+static void M_XFac(int choice);
+static void M_YFac(int choice);
+static void M_Pitch(int choice);
+static void M_Offset(int choice);
+static void M_Width(int choice);
+static void M_Height(int choice);
+static void M_WidthHeightPitch(int choice);
 /*
-void M_Record(int choice);
-void M_RMap(int choice);
-void M_RSkill(int choice);
-void M_RecordLong(int choice);
-void M_StartRecord(int choice);
+static void M_Record(int choice);
+static void M_RMap(int choice);
+static void M_RSkill(int choice);
+static void M_RecordLong(int choice);
+static void M_StartRecord(int choice);
+static void M_DrawRecord(void);
 */
-void M_DrawFilesMenu(void);
-void M_DrawItems(void);
-void M_DrawArmor(void);
-void M_DrawWeapons(void);
-void M_DrawKeys(void);
-void M_DrawScreen(void);
-void M_DrawKeyBindings(void);
-void M_DrawControls(void);
-void M_DrawSystem(void);
-void M_DrawAutomap(void);
-void M_DrawGame1(void);
-void M_DrawGame2(void);
-void M_DrawGame3(void);
-void M_DrawGame4(void);
-void M_DrawGame5(void);
-void M_DrawGame6(void);
-void M_DrawGame7(void);
-void M_DrawDebug(void);
-void M_DrawTest(void);
-void M_DrawCheats(void);
-//void M_DrawRecord(void);
+
+#ifdef SDL2
+static void M_RenderMode(int choice);
+static void M_VSync(int choice);
+#endif
+
+#ifndef WII
+static void M_DumpSubstituteConfig(int choice);
+static void M_Samplerate(int choice);
+#else
+static void M_Beta(int choice);
+static void M_Cheats(int choice);
+#endif
 
 int  M_StringHeight(char *string);
 
@@ -1992,9 +2006,11 @@ enum
     loadgame,
     savegame,
     endgame,
+
 #ifdef WII
     cheats,
 #endif
+
 //    demos,
     files_end
 } files_e;
@@ -2004,10 +2020,12 @@ static menuitem_t FilesMenu[]=
     {1, "Load Game"  , M_LoadGame, 'l'},
     {1, "Save Game"  , M_SaveGame, 's'},
     {1, "End Game"   , M_EndGame , 'e'}
+
 #ifdef WII
     ,
     {1, "Cheats"     , M_Cheats  , 'c'}
 #endif
+
 /*    ,
     {1, "Record Demo", M_Record  , 'r'}*/
 };
@@ -2044,12 +2062,23 @@ static menuitem_t EpisodeMenu[]=
 
 static menu_t  EpiDef =
 {
-    ep_end,                // # of menu items
-    &MainDef,              // previous menu
-    EpisodeMenu,           // menuitem_t ->
-    M_DrawEpisode,         // drawing routine ->
-    95, 73,                // x, y
-    ep1                    // lastOn
+    // # of menu items
+    ep_end,
+
+    // previous menu
+    &MainDef,
+
+    // menuitem_t ->
+    EpisodeMenu,
+
+    // drawing routine ->
+    M_DrawEpisode,
+
+    // x, y
+    95, 73,
+
+    // lastOn
+    ep1
 };
 
 //
@@ -2065,7 +2094,7 @@ enum
 static menuitem_t ExpansionMenu[]=
 {
     {1, "Hell On Earth"         , M_Expansion, 'k'},
-    {1, "No Rest For The Living", M_Expansion, 't'},
+    {1, "No Rest For The Living", M_Expansion, 't'}
 };
 
 static menu_t  ExpDef =
@@ -2107,10 +2136,10 @@ static menu_t  NewDef =
     NewGameMenu,
     M_DrawNewGame,
     88, 73,
+
+    // FIXME: REMEMBER LAST SKILL A GAME WAS STARTED???
     hurtme
 };
-
-
 
 //
 // OPTIONS MENU
@@ -2425,10 +2454,12 @@ enum
     screen_shadow,
     screen_icon,
     screen_type,
+
 #ifdef SDL2
     screen_render,
     screen_vsync,
 #endif
+
     screen_end
 } screen_e;
 
@@ -2445,11 +2476,13 @@ static menuitem_t ScreenMenu[]=
     {2, "Menu Font Style"         , M_FontShadow       , 'f'},
     {2, "Show Loading Indicator"  , M_DiskIcon         , 'd'},
     {2, ""                        , M_IconType         , 'i'}
+
 #ifdef SDL2
     ,
     {2, "Render Mode"             , M_RenderMode       , 'r'},
     {2, "Vertical Synchronization", M_VSync            , 'v'}
 #endif
+
 };
 
 static menu_t  ScreenDef =
@@ -2513,10 +2546,12 @@ enum
     keybindings_run,
     keybindings_console,
     keybindings_screenshots,
+
 #ifndef WII
     keybindings_strafeleft,
     keybindings_straferight,
 #endif
+
     keybindings_clearall,
     keybindings_reset,
     keybindings_end
@@ -2536,16 +2571,20 @@ static menuitem_t KeyBindingsMenu[]=
     {5, "FLY DOWN"        , M_KeyBindingsSetKey  , 9 },
     {5, "JUMP"            , M_KeyBindingsSetKey  ,'j'},
     {5, "RUN"             , M_KeyBindingsSetKey  ,'e'},
+
 #ifdef WII
     {5, "CONSOLE"         , M_KeyBindingsSetKey  ,'c'},
 #else
     {5, ""                , M_KeyBindingsSetKey  ,'c'},
 #endif
+
     {5, "SCREENSHOTS"     , M_KeyBindingsSetKey  ,'s'},
+
 #ifndef WII
     {5, "STRAFE LEFT"     , M_KeyBindingsSetKey  ,'l'},
     {5, "STRAFE RIGHT"    , M_KeyBindingsSetKey  ,'r'},
 #endif
+
     {5, ""                , M_KeyBindingsClearAll,'x'},
     {5, ""                , M_KeyBindingsReset   ,'d'}
 };
@@ -2661,11 +2700,13 @@ static menuitem_t GameMenu2[]=
     {2, "HERETIC FOOTCLIPS"           , M_Footclip      , 'c'},
     {2, "HERETIC LIQUID SPLASH"       , M_Splash        , 'l'},
     {2, "SWIRLING WATER HACK"         , M_Swirl         , 'w'},
+
 #ifdef WII
     {2, ""                            , M_EndoomScreen  , 'q'},
 #else
     {2, "Show Endoom Screen on quit"  , M_EndoomScreen  , 'q'},
 #endif
+
     {2, "RANDOMLY FLIP CORPSES & GUNS", M_Corpses       , 'd'},
     {2, "SHOW REVEALED SECRETS"       , M_Secrets       , 'z'},
     {2, "MESSAGES"                    , M_ChangeMessages, 'm'},
@@ -2885,28 +2926,34 @@ enum
     game7_recoil,
     game7_hud,
     game7_autosave,
+    game7_splash,
+
 #ifdef WII
     game7_prbeta,
 #endif
+
     game7_end
 } game7_e;
 
 static menuitem_t GameMenu7[]=
 {
-    {2, "ROCKET SMOKE-TRAILS"           , M_Trails           , 't'},
-    {2, "Fix Wiggle Effect"             , M_FixWiggle        , 'w'},
-    {2, "Remove Slime Trails"           , M_RemoveSlimeTrails, 's'},
-    {2, ""                              , M_AimingHelp       , 'a'},
-    {2, "PLAYER THRUST"                 , M_PlayerThrust     , 'p'},
-    {2, "Teleport Landings glitter type", M_TeleportGlitter  , 'g'},
-    {2, ""                              , M_WeaponChange     , 'w'},
-    {2, "WEAPON RECOIL"                 , M_WeaponRecoil     , 'c'},
-    {2, "FULLSCREEN HUD"                , M_HUD              , 'h'},
-    {2, "AUTOSAVE FEATURE"              , M_Autosave         , 'f'},
+    {2, "ROCKET SMOKE-TRAILS"              , M_Trails           , 'r'},
+    {2, "Fix Wiggle Effect"                , M_FixWiggle        , 'w'},
+    {2, "Remove Slime Trails"              , M_RemoveSlimeTrails, 's'},
+    {2, ""                                 , M_AimingHelp       , 'a'},
+    {2, "PLAYER THRUST"                    , M_PlayerThrust     , 'p'},
+    {2, "Teleport Landings glitter type"   , M_TeleportGlitter  , 't'},
+    {2, ""                                 , M_WeaponChange     , 'g'},
+    {2, "WEAPON RECOIL"                    , M_WeaponRecoil     , 'c'},
+    {2, "FULLSCREEN HUD"                   , M_HUD              , 'h'},
+    {2, "AUTOSAVE FEATURE"                 , M_Autosave         , 'f'},
+    {2, "Draw Splash Screen at game bootup", M_DrawSplash       , 'x'}
+
 #ifdef WII
     ,
-    {2, "PRE-RELEASE BETA MODE"         , M_Beta             , 'b'}
+    {2, "PRE-RELEASE BETA MODE"            , M_Beta             , 'b'}
 #endif
+
 };
 
 static menu_t  GameDef7 =
@@ -2997,9 +3044,11 @@ enum
     debug_memusage,
     debug_restart,
     debug_condump,
+
 #ifdef HEAPDUMP
     debug_memdump,
 #endif
+
     debug_statdump,
     debug_printdir,
     debug_end
@@ -3014,9 +3063,11 @@ static menuitem_t DebugMenu[]=
     {2, "Show Memory Usage"              , M_MemoryUsage, 'u'},
     {2, "Restart Current MAP-Music Track", M_RestartSong, 'r'},
     {2, "Dump current Console Output"    , M_ConDump    , 'd'},
+
 #ifdef HEAPDUMP
     {2, "Dump Memory"                    , M_MemDump    , 'm'},
 #endif
+
     {2, "Dump Level Statistics"          , M_StatDump   , 's'},
     {2, "Print WAD contents to textfile" , M_PrintDir   , 'p'}
 };
@@ -3044,16 +3095,6 @@ enum
     tst_yc,
     tst_end
 } tst_e;
-
-void M_XC(int choice);
-void M_YC(int choice);
-void M_XFac(int choice);
-void M_YFac(int choice);
-void M_Pitch(int choice);
-void M_Offset(int choice);
-void M_Width(int choice);
-void M_Height(int choice);
-void M_WidthHeightPitch(int choice);
 
 static menuitem_t TestMenu[]=
 {
@@ -3091,10 +3132,12 @@ enum
     channels,
     output,
     sndpitch,
+
 #ifndef WII
     dsc,
     lsr,
 #endif
+
     sound_end
 } sound_e;
 
@@ -3108,11 +3151,13 @@ static menuitem_t SoundMenu[]=
     {2, "Number of Sound Channels"  , M_SoundChannels       , 'c'},
     {2, "Switch Left / Right Output", M_SoundOutput         , 'o'},
     {2, "v1.1 Random Sound Pitch"   , M_SoundPitch          , 'p'}
+
 #ifndef WII
     ,
     {2, "Dump Substitute Config"    , M_DumpSubstituteConfig, 'd'},
     {2, "Libsamplerate"             , M_Samplerate          , 'r'}
 #endif
+
 };
 
 static menu_t  SoundDef =
@@ -3218,7 +3263,7 @@ static menu_t  RecordDef =
 };
 */
 
-static void DoBlurScreen(byte *tempscreen, byte *blurscreen, int x1, int y1, int x2, int y2, int i)
+static void BlurMenuScreen(byte *tempscreen, byte *blurscreen, int x1, int y1, int x2, int y2, int i)
 {
     int x, y;
 
@@ -3236,15 +3281,15 @@ static void BlurScreen(byte *scrn, byte *tempscreen, byte *blurscreen)
     for (i = 0; i < height; ++i)
         blurscreen[i] = grays[scrn[i]];
 
-    DoBlurScreen(tempscreen, blurscreen, 0, 0, SCREENWIDTH - 1, height, 1);
-    DoBlurScreen(tempscreen, blurscreen, 1, 0, SCREENWIDTH, height, -1);
-    DoBlurScreen(tempscreen, blurscreen, 0, 0, SCREENWIDTH - 1, height - SCREENWIDTH,
+    BlurMenuScreen(tempscreen, blurscreen, 0, 0, SCREENWIDTH - 1, height, 1);
+    BlurMenuScreen(tempscreen, blurscreen, 1, 0, SCREENWIDTH, height, -1);
+    BlurMenuScreen(tempscreen, blurscreen, 0, 0, SCREENWIDTH - 1, height - SCREENWIDTH,
         SCREENWIDTH + 1);
-    DoBlurScreen(tempscreen, blurscreen, 1, SCREENWIDTH, SCREENWIDTH, height, -(SCREENWIDTH + 1));
-    DoBlurScreen(tempscreen, blurscreen, 0, 0, SCREENWIDTH, height - SCREENWIDTH, SCREENWIDTH);
-    DoBlurScreen(tempscreen, blurscreen, 0, SCREENWIDTH, SCREENWIDTH, height, -SCREENWIDTH);
-    DoBlurScreen(tempscreen, blurscreen, 1, 0, SCREENWIDTH, height - SCREENWIDTH, SCREENWIDTH - 1);
-    DoBlurScreen(tempscreen, blurscreen, 0, SCREENWIDTH, SCREENWIDTH - 1, height,
+    BlurMenuScreen(tempscreen, blurscreen, 1, SCREENWIDTH, SCREENWIDTH, height, -(SCREENWIDTH + 1));
+    BlurMenuScreen(tempscreen, blurscreen, 0, 0, SCREENWIDTH, height - SCREENWIDTH, SCREENWIDTH);
+    BlurMenuScreen(tempscreen, blurscreen, 0, SCREENWIDTH, SCREENWIDTH, height, -SCREENWIDTH);
+    BlurMenuScreen(tempscreen, blurscreen, 1, 0, SCREENWIDTH, height - SCREENWIDTH, SCREENWIDTH - 1);
+    BlurMenuScreen(tempscreen, blurscreen, 0, SCREENWIDTH, SCREENWIDTH - 1, height,
         -(SCREENWIDTH - 1));
 }
 
@@ -3291,7 +3336,7 @@ void M_DarkBackground(int scrn)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-result"
 
-void M_ReadSaveStrings(void)
+static void M_ReadSaveStrings(void)
 {
     int     i;
     char    name[256];
@@ -3303,12 +3348,14 @@ void M_ReadSaveStrings(void)
         M_StringCopy(name, P_SaveGameFile(i), sizeof(name));
 
         handle = fopen(name, "rb");
+
         if (handle == NULL)
         {
             M_StringCopy(&savegamestrings[i][0], s_EMPTYSTRING, SAVESTRINGSIZE);
             LoadMenu[i].status = 0;
             continue;
         }
+
         fread(&savegamestrings[i], 1, SAVESTRINGSIZE, handle);
         fclose(handle);
         LoadMenu[i].status = 1;
@@ -3318,11 +3365,9 @@ void M_ReadSaveStrings(void)
 //
 // M_LoadGame & Cie.
 //
-void M_DrawLoad(void)
+static void M_DrawLoad(void)
 {
     int     i;
-
-    //M_DarkBackground(0);
 
     V_DrawPatchWithShadow(72, 28, 0, W_CacheLumpName("M_T_LGME", PU_CACHE), false);
 
@@ -3337,7 +3382,7 @@ void M_DrawLoad(void)
 
     }
 
-    if (whichSkull == 1)
+    if (!whichSkull)
     {
         char *string = "* INDICATES A SAVEGAME THAT WAS";
         char *string2 = "CREATED USING AN OPTIONAL PWAD!";
@@ -3353,7 +3398,7 @@ void M_DrawLoad(void)
 //
 // Draw border for the savegame description
 //
-void M_DrawSaveLoadBorder(int x, int y)
+static void M_DrawSaveLoadBorder(int x, int y)
 {
     int     i;
         
@@ -3371,7 +3416,7 @@ void M_DrawSaveLoadBorder(int x, int y)
 //
 // User wants to load this game
 //
-void M_LoadSelect(int choice)
+static void M_LoadSelect(int choice)
 {
     char    name[256];
         
@@ -3384,7 +3429,7 @@ void M_LoadSelect(int choice)
 //
 // Selected from DOOM menu
 //
-void M_LoadGame(int choice)
+static void M_LoadGame(int choice)
 {
     // [crispy] forbid New Game and (Quick) Load while recording a demo
     if (demorecording)
@@ -3397,19 +3442,18 @@ void M_LoadGame(int choice)
         M_StartMessage(s_LOADNET, NULL, false);
         return;
     }
+
     M_SetupNextMenu(&LoadDef);
     M_ReadSaveStrings();
 }
 
 //
-//  M_SaveGame & Cie.
+// M_SaveGame & Cie.
 //
-void M_DrawSave(void)
+static void M_DrawSave(void)
 {
     int     i;
         
-    //M_DarkBackground(0);
-
     V_DrawPatchWithShadow(72, 28, 0, W_CacheLumpName("M_T_SGME", PU_CACHE), false);
 
     for (i = 0; i < load_end; i++)
@@ -3426,7 +3470,7 @@ void M_DrawSave(void)
         M_WriteText(LoadDef.x + i, LoadDef.y - 1 + LINEHEIGHT_SMALL * saveSlot, "_");
     }
 
-    if (whichSkull == 1)
+    if (!whichSkull)
     {
         char *string = "* INDICATES A SAVEGAME THAT WAS";
         char *string2 = "CREATED USING AN OPTIONAL PWAD!";
@@ -3442,7 +3486,7 @@ void M_DrawSave(void)
 //
 // M_Responder calls this when user is finished
 //
-void M_DoSave(int slot)
+static void M_DoSave(int slot)
 {
     if (players[consoleplayer].playerstate == PST_DEAD)
     {
@@ -3462,7 +3506,7 @@ void M_DoSave(int slot)
 //
 // User wants to save. Start string input for M_Responder
 //
-void M_SaveSelect(int choice)
+static void M_SaveSelect(int choice)
 {
     time_t theTime;
     struct tm *aTime;
@@ -3505,6 +3549,7 @@ void M_SaveSelect(int choice)
             sprintf(savegamestrings[choice], "map%2.2d %d/%d/%d %2.2d:%2.2d",
                     gamemap, year, month, day, hour, min);
     }
+
     M_StringCopy(saveOldString, savegamestrings[choice], sizeof(saveOldString));
 
     if (!strcmp(savegamestrings[choice], s_EMPTYSTRING))
@@ -3516,8 +3561,11 @@ void M_SaveSelect(int choice)
 //
 // Selected from DOOM menu
 //
-void M_SaveGame(int choice)
+static void M_SaveGame(int choice)
 {
+    if (splashscreen)
+        return;
+
     if (!usergame)
     {
         M_StartMessage(s_SAVEDEAD, NULL, true);
@@ -3532,11 +3580,11 @@ void M_SaveGame(int choice)
 }
 
 //
-//      M_QuickSave
+// M_QuickSave
 //
-char    tempstring[80];
 
-void M_QuickSaveResponse(int key)
+#ifndef WII
+static void M_QuickSaveResponse(int key)
 {
     if (key == key_menu_confirm)
     {
@@ -3545,8 +3593,11 @@ void M_QuickSaveResponse(int key)
     }
 }
 
-void M_QuickSave(void)
+static void M_QuickSave(void)
 {
+    if (splashscreen)
+        return;
+
     if (!usergame)
     {
         S_StartSound(NULL, sfx_oof);
@@ -3566,6 +3617,7 @@ void M_QuickSave(void)
         quickSaveSlot = -2;
         return;
     }
+
     M_snprintf(tempstring, 80, s_QSPROMPT, savegamestrings[quickSaveSlot]);
     M_StartMessage(tempstring, M_QuickSaveResponse, true);
 }
@@ -3573,7 +3625,7 @@ void M_QuickSave(void)
 //
 // M_QuickLoad
 //
-void M_QuickLoadResponse(int key)
+static void M_QuickLoadResponse(int key)
 {
     if (key == key_menu_confirm)
     {
@@ -3582,8 +3634,11 @@ void M_QuickLoadResponse(int key)
     }
 }
 
-void M_QuickLoad(void)
+static void M_QuickLoad(void)
 {
+    if (splashscreen)
+        return;
+
     if (netgame)
     {
         M_StartMessage(s_QLOADNET, NULL, false);
@@ -3595,15 +3650,88 @@ void M_QuickLoad(void)
         M_StartMessage(s_QSAVESPOT, NULL, false);
         return;
     }
+
     M_snprintf(tempstring, 80, s_QLPROMPT, savegamestrings[quickSaveSlot]);
     M_StartMessage(tempstring, M_QuickLoadResponse, true);
 }
+
+#else
+
+static void M_Beta(int choice)
+{
+    switch (choice)
+    {
+        case 0:
+            if (beta_style_mode && fsize != 28422764 && fsize != 19321722 && fsize != 12361532)
+                beta_style_mode = false;
+
+            break;
+
+        case 1:
+            if (!beta_style_mode && fsize != 28422764 && fsize != 19321722 && fsize != 12361532)
+                beta_style_mode = true;
+
+            break;
+    }
+}
+
+static void DetectState(void)
+{
+    if (!netgame && !demoplayback && gamestate == GS_LEVEL
+        && gameskill != sk_nightmare &&
+        players[consoleplayer].playerstate == PST_DEAD)
+    {
+        M_StartMessage("CHEATING NOT ALLOWED - YOU'RE DEAD",
+        NULL, true);
+    }
+    else if (!netgame && demoplayback && gamestate == GS_LEVEL
+        && players[consoleplayer].playerstate == PST_LIVE)
+    {
+        M_StartMessage("CHEATING NOT ALLOWED IN DEMO MODE",
+        NULL, true);
+    }
+    else if (!netgame && demoplayback && gamestate == GS_LEVEL
+        && players[consoleplayer].playerstate == PST_DEAD)
+    {
+        M_StartMessage("CHEATING NOT ALLOWED IN DEMO MODE",
+        NULL, true);
+    }
+    else if (!netgame && demoplayback && gamestate != GS_LEVEL)
+    {
+        M_StartMessage("CHEATING NOT ALLOWED IN DEMO MODE",
+        NULL, true);
+    }
+    else if (!netgame && !demoplayback && gamestate != GS_LEVEL)
+    {
+        M_StartMessage("CHEATING NOT ALLOWED IN DEMO MODE",
+        NULL, true);
+    }
+    else if (netgame)
+    {
+        M_StartMessage("CHEATING NOT ALLOWED FOR NET GAME",
+        NULL, true);
+    }
+
+    if (gameskill == sk_nightmare)
+    {
+        M_StartMessage("CHEATING DISABLED - NIGHTMARE SKILL",
+        NULL, true);
+    }
+}
+
+static void M_Cheats(int choice)
+{
+    DetectState();
+
+    M_SetupNextMenu(&CheatsDef);
+}
+#endif
 
 //
 // Read This Menus
 // Had a "quick hack to fix romero bug"
 //
-void M_DrawReadThis1(void)
+static void M_DrawReadThis1(void)
 {
     char *lumpname = "CREDIT";
     int skullx = 330, skully = 175;
@@ -3611,7 +3739,6 @@ void M_DrawReadThis1(void)
     inhelpscreens = true;
     
     // Different versions of Doom 1.9 work differently
-
     switch (gameversion)
     {
         case exe_doom_1_666:
@@ -3622,7 +3749,6 @@ void M_DrawReadThis1(void)
             if (gamemode == commercial)
             {
                 // Doom 2
-
                 lumpname = "HELP";
 
                 skullx = 330;
@@ -3632,12 +3758,12 @@ void M_DrawReadThis1(void)
             {
                 // Doom 1
                 // HELP2 is the first screen shown in Doom 1
-                
                 lumpname = "HELP2";
 
                 skullx = 280;
                 skully = 185;
             }
+
             break;
 
         case exe_ultimate:
@@ -3647,20 +3773,20 @@ void M_DrawReadThis1(void)
 
             // Chex Quest version also uses "HELP1", even though it is based
             // on Final Doom.
-
             lumpname = "HELP1";
+
             break;
 
         case exe_final:
         case exe_final2:
-
             // Final Doom always displays "HELP".
-
             lumpname = "HELP";
+
             break;
 
         default:
             C_Warning("Unhandled game version");
+
             break;
     }
 
@@ -3676,7 +3802,7 @@ void M_DrawReadThis1(void)
 //
 // Read This Menus - optional second page.
 //
-void M_DrawReadThis2(void)
+static void M_DrawReadThis2(void)
 {
     inhelpscreens = true;
 
@@ -3686,7 +3812,7 @@ void M_DrawReadThis2(void)
     V_DrawPatch(0, 0, 0, W_CacheLumpName("HELP1", PU_CACHE));
 }
 
-void M_DrawCredits(void)
+static void M_DrawCredits(void)
 {
     int i, x, y;
 
@@ -3727,6 +3853,7 @@ void M_DrawCredits(void)
 
                 y = 200;
             }
+
             R_DrawChar(x, y, 0, credits[i][j + stringoffset] + colorize_to);
         }
     }
@@ -3753,10 +3880,8 @@ void M_DrawCredits(void)
 //
 // Change Sfx & Music volumes
 //
-void M_DrawSound(void)
+static void M_DrawSound(void)
 {
-    //M_DarkBackground(0);
-
     if (fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
         V_DrawPatchWithShadow(65, 15, 0, W_CacheLumpName("M_T_XSET", PU_CACHE), false);
     else
@@ -3915,52 +4040,56 @@ void M_DrawSound(void)
     }
 #endif
 
-    if (whichSkull == 1)
+    if (!whichSkull)
     {
         int x;
         char *string = "";
         dp_translation = crx[CRX_GOLD];
+
         if (itemOn == 9 || (fsize != 28422764 && fsize != 19321722 && fsize != 12361532 && itemOn > 2 && itemOn < 6))
             string = "YOU MUST QUIT AND RESTART TO TAKE EFFECT.";
         else if (fsize == 19321722 && itemOn == 4)
             string = "PC-SPEAKER OPTION NOT AVAILABLE FOR HACX";
         else if (itemOn == 8)
             string = "DUMPS A CONFIG FILE FOR USE WITH OGG-MUSIC.";
+
         x = ORIGINALWIDTH / 2 - M_StringWidth(string) / 2;
         M_WriteText(x, GameDef2.y + 138, string);
     }
 }
 
-void M_Sound(int choice)
+static void M_Sound(int choice)
 {
     M_SetupNextMenu(&SoundDef);
 }
 
-void M_GeneralSound(int choice)
+static void M_GeneralSound(int choice)
 {
     switch (choice)
     {
         case 0:
-            if (general_sound == true)
+            if (general_sound)
             {
                 general_sound = false;
                 S_SetSfxVolume(0 * 8);
                 S_SetMusicVolume(0 * 8);
             }
+
             break;
 
         case 1:
-            if (general_sound == false)
+            if (!general_sound)
             {
                 general_sound = true;
                 S_SetSfxVolume(sfxVolume * 8);
                 S_SetMusicVolume(musicVolume * 8);
             }
+
             break;
     }
 }
 
-void M_SfxVol(int choice)
+static void M_SfxVol(int choice)
 {
     if (general_sound)
     {
@@ -3969,18 +4098,21 @@ void M_SfxVol(int choice)
             case 0:
                 if (sfxVolume)
                     sfxVolume--;
+
                 break;
 
             case 1:
                 if (sfxVolume < 15)
                     sfxVolume++;
+
                 break;
         }
+
         S_SetSfxVolume(sfxVolume * 8);
     }
 }
 
-void M_MusicVol(int choice)
+static void M_MusicVol(int choice)
 {
     if (general_sound)
     {
@@ -3989,34 +4121,39 @@ void M_MusicVol(int choice)
             case 0:
                 if (musicVolume)
                     musicVolume--;
+
                 break;
 
             case 1:
                 if (musicVolume < 15)
                     musicVolume++;
+
                 break;
         }
+
         S_SetMusicVolume(musicVolume * 8);
     }
 }
 
-void M_SoundType(int choice)
+static void M_SoundType(int choice)
 {
     switch (choice)
     {
         case 0:
             if (snd_module && fsize != 19321722)
                 snd_module = 0;
+
             break;
 
         case 1:
             if (!snd_module && fsize != 19321722)
                 snd_module = 1;
+
             break;
     }
 }
 
-void M_MusicType(int choice)
+static void M_MusicType(int choice)
 {
     switch (choice)
     {
@@ -4036,8 +4173,10 @@ void M_MusicType(int choice)
 
                     snd_musicdevice = SNDDEVICE_SB;
                 }
+
                 mus_engine--;
             }
+
             break;
 
         case 1:
@@ -4056,75 +4195,77 @@ void M_MusicType(int choice)
 
                     snd_musicdevice = SNDDEVICE_SB;
                 }
+
                 mus_engine++;
             }
+
             break;
     }
 }
 
-void M_SoundOutput(int choice)
+static void M_SoundOutput(int choice)
 {
     switch (choice)
     {
         case 0:
-            if (opl_stereo_correct == true)
-            {
+            if (opl_stereo_correct)
                 opl_stereo_correct = false;
-            }
+
             break;
 
         case 1:
-            if (opl_stereo_correct == false)
-            {
+            if (!opl_stereo_correct)
                 opl_stereo_correct = true;
-            }
+
             break;
     }
 }
 
-void M_SoundPitch(int choice)
+static void M_SoundPitch(int choice)
 {
     switch (choice)
     {
         case 0:
-            if (randompitch == true)
-            {
+            if (randompitch)
                 randompitch = false;
-            }
+
             break;
 
         case 1:
-            if (randompitch == false)
-            {
+            if (!randompitch)
                 randompitch = true;
-            }
+
             break;
     }
 }
 
-void M_DumpSubstituteConfig(int choice)
+#ifndef WII
+static void M_DumpSubstituteConfig(int choice)
 {
     dump_subst = true;
     DumpSubstituteConfig("oggmusic.cfg");
 }
 
-void M_Samplerate(int choice)
+static void M_Samplerate(int choice)
 {
     switch (choice)
     {
         case 0:
             if (use_libsamplerate)
                 use_libsamplerate--;
+
             break;
 
         case 1:
             if (use_libsamplerate < 5)
                 use_libsamplerate++;
+
             break;
     }
 }
+#endif
 
-void M_RestartSong(int choice)
+static void M_RestartSong(int choice)
 {
     restart_song = true;
     S_StopMusic();
@@ -4136,27 +4277,25 @@ void M_RestartSong(int choice)
         S_ChangeMusic(gamemap + 32, true, true);
 }
 
-void M_OPLDev(int choice)
+static void M_OPLDev(int choice)
 {
     switch (choice)
     {
         case 0:
-            if (opldev == true)
-            {
+            if (opldev)
                 opldev = false;
-            }
+
             break;
 
         case 1:
-            if (opldev == false)
-            {
+            if (!opldev)
                 opldev = true;
-            }
+
             break;
     }
 }
 
-void M_SoundChannels(int choice)
+static void M_SoundChannels(int choice)
 {
     switch (choice)
     {
@@ -4172,6 +4311,7 @@ void M_SoundChannels(int choice)
                 sound_channels = 32;
             else if (snd_chans == 4)
                 sound_channels = 64;
+
             break;
 
         case 1:
@@ -4186,6 +4326,7 @@ void M_SoundChannels(int choice)
                 sound_channels = 32;
             else if (snd_chans == 4)
                 sound_channels = 64;
+
             break;
     }
 }
@@ -4193,10 +4334,8 @@ void M_SoundChannels(int choice)
 //
 // M_DrawMainMenu
 //
-void M_DrawMainMenu(void)
+static void M_DrawMainMenu(void)
 {
-    //M_DarkBackground(0);
-
     if (beta_style || !font_shadow)
         V_DrawPatch(94, 2, 0, W_CacheLumpName("M_DOOM", PU_CACHE));
     else
@@ -4206,15 +4345,13 @@ void M_DrawMainMenu(void)
 //
 // M_NewGame
 //
-void M_DrawNewGame(void)
+static void M_DrawNewGame(void)
 {
-    //M_DarkBackground(0);
-
     V_DrawPatchWithShadow(96, 14, 0, W_CacheLumpName("M_NEWG", PU_CACHE), false);
     M_WriteText(NewDef.x, NewDef.y - 22, "CHOOSE SKILL LEVEL:");
 }
 
-void M_NewGame(int choice)
+static void M_NewGame(int choice)
 {
     // [crispy] forbid New Game and (Quick) Load while recording a demo
     if (demorecording)
@@ -4229,7 +4366,6 @@ void M_NewGame(int choice)
     }
 
     // Chex Quest disabled the episode select screen, as did Doom II.
-
     if (!beta_style)
     {
         if (fsize == 12361532)
@@ -4245,35 +4381,31 @@ void M_NewGame(int choice)
             G_InitNew (startskill, 3, 5);
         else if (itemOn == 2)
             G_InitNew (startskill, 2, 2);
-
-//        M_ClearMenus();
     }
 }
 
 //
-//      M_Episode
+// M_Episode
 //
-void M_DrawEpisode(void)
+static void M_DrawEpisode(void)
 {
-    //M_DarkBackground(0);
-
     V_DrawPatchWithShadow(75, 38, 0, W_CacheLumpName("M_EPISOD", PU_CACHE), false);
 }
 
-void M_VerifyNightmare(int ch)
+static void M_VerifyNightmare(int ch)
 {
 #ifdef WII
     if (ch != key_menu_forward)
-        return;
 #else
     if (ch != key_menu_confirm)
-        return;
 #endif
+        return;
+
     G_DeferedInitNew(nightmare, epi + 1, 1);
     M_ClearMenus();
 }
 
-void M_ChooseSkill(int choice)
+static void M_ChooseSkill(int choice)
 {
     if (choice == nightmare)
     {
@@ -4294,7 +4426,7 @@ void M_ChooseSkill(int choice)
     M_ClearMenus();
 }
 
-void M_Episode(int choice)
+static void M_Episode(int choice)
 {
     if ((gamemode == shareware) && choice)
     {
@@ -4318,85 +4450,105 @@ void M_Episode(int choice)
 // M_Options
 //
 
-void M_DrawOptions(void)
+static void M_DrawOptions(void)
 {
-    //M_DarkBackground(0);
-
     V_DrawPatchWithShadow(108, 15, 0, W_CacheLumpName("M_OPTTTL",
                                                PU_CACHE), false);
 
     dp_translation = crx[CRX_GRAY];
+
     if (itemOn == 0)
         dp_translation = crx[CRX_GOLD];
+
     M_WriteText(OptionsDef.x, OptionsDef.y - 2, "SCREEN SETTINGS");
 
     dp_translation = crx[CRX_GRAY];
+
     if (itemOn == 1)
         dp_translation = crx[CRX_GOLD];
+
     M_WriteText(OptionsDef.x, OptionsDef.y + 8, "CONTROL SETTINGS");
 
     dp_translation = crx[CRX_GRAY];
+
     if (itemOn == 2)
         dp_translation = crx[CRX_GOLD];
+
     M_WriteText(OptionsDef.x, OptionsDef.y + 18, "SOUND SETTINGS");
 
     dp_translation = crx[CRX_GRAY];
+
     if (itemOn == 3)
         dp_translation = crx[CRX_GOLD];
+
     M_WriteText(OptionsDef.x, OptionsDef.y + 28, "SYSTEM SETTINGS");
 
     dp_translation = crx[CRX_GRAY];
+
     if (itemOn == 4)
         dp_translation = crx[CRX_GOLD];
+
     M_WriteText(OptionsDef.x, OptionsDef.y + 38, "GAME SETTINGS");
 
     dp_translation = crx[CRX_BLUE];
+
     if (itemOn == 6)
         dp_translation = crx[CRX_GOLD];
+
     M_WriteText(OptionsDef.x, OptionsDef.y + 58, "OPTIMAL SETTINGS");
 
     dp_translation = crx[CRX_BLUE];
+
     if (itemOn == 7)
         dp_translation = crx[CRX_GOLD];
+
     M_WriteText(OptionsDef.x, OptionsDef.y + 68, "RESET DEFAULTS");
 
     if (devparm)
     {
         dp_translation = crx[CRX_GRAY];
+
         if (itemOn == 9)
             dp_translation = crx[CRX_GOLD];
+
         M_WriteText(OptionsDef.x, OptionsDef.y + 88, "DEBUG SETTINGS");
 
         dp_translation = crx[CRX_GRAY];
+
         if (itemOn == 10)
             dp_translation = crx[CRX_GOLD];
+
         M_WriteText(OptionsDef.x, OptionsDef.y + 98, "TESTINGS");
     }
 
-    if (whichSkull == 1)
+    if (!whichSkull)
     {
         int x;
         int x2;
         char *string = "";
         char *string2 = "";
+
         dp_translation = crx[CRX_GOLD];
+
         if (itemOn == 6 || itemOn == 7)
         {
             string = "(KEY BINDINGS & AUTOMAP COLORS UNAFFECTED)";
             string2 = "YOU MUST RESTART THE GAME TO TAKE EFFECT.";
         }
+
         x = ORIGINALWIDTH / 2 - M_StringWidth(string) / 2;
         x2 = ORIGINALWIDTH / 2 - M_StringWidth(string2) / 2;
+
         M_WriteText(x, OptionsDef.y + 106, string);
+
         dp_translation = crx[CRX_GOLD];
+
         M_WriteText(x2, OptionsDef.y + 113, string2);
     }
 }
 
-void M_DrawItems(void)
+static void M_DrawItems(void)
 {
-    //M_DarkBackground(0);
-
     V_DrawPatchWithShadow(123, 10, 0, W_CacheLumpName("M_T_ITMS",
                                                PU_CACHE), false);
 
@@ -4413,34 +4565,42 @@ void M_DrawItems(void)
     {
         if (itemOn == 2)
             dp_translation = crx[CRX_GOLD];
+
         M_WriteText(80, 70, "RADIATION SHIELDING SUIT");
 
         if (itemOn == 3)
             dp_translation = crx[CRX_GOLD];
+
         M_WriteText(80, 80, "COMPUTER AREA MAP");
 
         if (itemOn == 4)
             dp_translation = crx[CRX_GOLD];
+
         M_WriteText(80, 90, "LIGHT AMPLIFICATION VISOR");
 
         if (itemOn == 7)
             dp_translation = crx[CRX_GOLD];
+
         M_WriteText(80, 120, "PARTIAL INVISIBILITY");
 
         if (itemOn == 8)
             dp_translation = crx[CRX_GOLD];
+
         M_WriteText(80, 130, "INVULNERABILITY!");
 
         if (itemOn == 9)
             dp_translation = crx[CRX_GOLD];
+
         M_WriteText(80, 140, "BERSERK!");
 
         if (itemOn == 10)
             dp_translation = crx[CRX_GOLD];
+
         M_WriteText(80, 150, "BACKPACK");
 
         if (itemOn == 11)
             dp_translation = crx[CRX_GOLD];
+
         M_WriteText(80, 160, "FLIGHT");
     }
 
@@ -4448,34 +4608,42 @@ void M_DrawItems(void)
     {
         if (itemOn == 2)
             dp_translation = crx[CRX_GOLD];
+
         M_WriteText(80, 70, "VULCAN RUBBER BOOTS");
 
         if (itemOn == 3)
             dp_translation = crx[CRX_GOLD];
+
         M_WriteText(80, 80, "SI ARRAY MAPPING");
 
         if (itemOn == 4)
             dp_translation = crx[CRX_GOLD];
+
         M_WriteText(80, 90, "INFRARED VISOR");
 
         if (itemOn == 7)
             dp_translation = crx[CRX_GOLD];
+
         M_WriteText(80, 120, "ENK BLINDNESS");
 
         if (itemOn == 8)
             dp_translation = crx[CRX_GOLD];
+
         M_WriteText(80, 130, "FORCE FIELD");
 
         if (itemOn == 9)
             dp_translation = crx[CRX_GOLD];
+
         M_WriteText(80, 140, "007 MICROTEL");
 
         if (itemOn == 10)
             dp_translation = crx[CRX_GOLD];
+
         M_WriteText(80, 150, "BACKPACK");
 
         if (itemOn == 11)
             dp_translation = crx[CRX_GOLD];
+
         M_WriteText(80, 160, "FLIGHT");
     }
 
@@ -4483,30 +4651,33 @@ void M_DrawItems(void)
     {
         if (itemOn == 2)
             dp_translation = crx[CRX_GOLD];
+
         M_WriteText(80, 70, "SLIME-PROOF SUIT");
 
         if (itemOn == 3)
             dp_translation = crx[CRX_GOLD];
+
         M_WriteText(80, 80, "COMPUTER AREA MAP");
 
         if (itemOn == 4)
             dp_translation = crx[CRX_GOLD];
+
         M_WriteText(80, 90, "ULTRA GOGGLES");
 
         if (itemOn == 5)
             dp_translation = crx[CRX_GOLD];
+
         M_WriteText(80, 100, "BACKPACK");
 
         if (itemOn == 6)
             dp_translation = crx[CRX_GOLD];
+
         M_WriteText(80, 110, "FLIGHT");
     }
 }
 
-void M_DrawArmor(void)
+static void M_DrawArmor(void)
 {
-    //M_DarkBackground(0);
-
     V_DrawPatchWithShadow(115, 15, 0, W_CacheLumpName("M_T_ARMR",
                                                PU_CACHE), false);
 
@@ -4517,10 +4688,12 @@ void M_DrawArmor(void)
     {
         if (itemOn == 2)
             dp_translation = crx[CRX_GOLD];
+
         M_WriteText(80, 75, "GREEN ARMOR");
 
         if (itemOn == 3)
             dp_translation = crx[CRX_GOLD];
+
         M_WriteText(80, 85, "BLUE ARMOR");
     }
 
@@ -4528,10 +4701,12 @@ void M_DrawArmor(void)
     {
         if (itemOn == 2)
             dp_translation = crx[CRX_GOLD];
+
         M_WriteText(80, 75, "CHEX(R) ARMOR");
 
         if (itemOn == 2)
             dp_translation = crx[CRX_GOLD];
+
         M_WriteText(80, 85, "SUPER CHEX(R) ARMOR");
     }
 
@@ -4539,18 +4714,18 @@ void M_DrawArmor(void)
     {
         if (itemOn == 2)
             dp_translation = crx[CRX_GOLD];
+
         M_WriteText(80, 75, "KEVLAR VEST");
 
         if (itemOn == 2)
             dp_translation = crx[CRX_GOLD];
+
         M_WriteText(80, 85, "SUPER KEVLAR VEST");
     }
 }
 
-void M_DrawWeapons(void)
+static void M_DrawWeapons(void)
 {
-    //M_DarkBackground(0);
-
     V_DrawPatchWithShadow(103, 15, 0, W_CacheLumpName("M_T_WPNS",
                                                PU_CACHE), false);
 
@@ -4561,41 +4736,48 @@ void M_DrawWeapons(void)
     {
         if (itemOn == 2)
             dp_translation = crx[CRX_GOLD];
+
         M_WriteText(80, 75, "CHAINSAW");
 
         if (itemOn == 3)
             dp_translation = crx[CRX_GOLD];
+
         M_WriteText(80, 85, "SHOTGUN");
 
         if (itemOn == 4)
             dp_translation = crx[CRX_GOLD];
+
         M_WriteText(80, 95, "CHAINGUN");
 
         if (itemOn == 5)
             dp_translation = crx[CRX_GOLD];
+
         M_WriteText(80, 105, "ROCKET LAUNCHER");
 
         if (fsize != 4261144 && fsize != 4271324 && fsize != 4211660 &&
-                fsize != 4207819 && fsize != 4274218 && fsize != 4225504 &&
-                fsize != 4225460 && fsize != 4234124 && fsize != 4196020)
+            fsize != 4207819 && fsize != 4274218 && fsize != 4225504 &&
+            fsize != 4225460 && fsize != 4234124 && fsize != 4196020)
         {
             if (itemOn == 6)
                 dp_translation = crx[CRX_GOLD];
+
             M_WriteText(80, 115, "PLASMA CANNON");
 
             if (itemOn == 7)
                 dp_translation = crx[CRX_GOLD];
+
             M_WriteText(80, 125, "BFG 9000");
         }
 
         if (fsize == 14943400 || fsize == 14824716 || fsize == 14612688 ||
-                fsize == 14607420 || fsize == 14604584 || fsize == 18195736 ||
-                fsize == 14683458 || fsize == 18654796 || fsize == 18240172 ||
-                fsize == 17420824 || fsize == 14677988 || fsize == 14691821 ||
-                fsize == 28422764)
+            fsize == 14607420 || fsize == 14604584 || fsize == 18195736 ||
+            fsize == 14683458 || fsize == 18654796 || fsize == 18240172 ||
+            fsize == 17420824 || fsize == 14677988 || fsize == 14691821 ||
+            fsize == 28422764)
         {
             if (itemOn == 8)
                 dp_translation = crx[CRX_GOLD];
+
             M_WriteText(80, 135, "SUPER SHOTGUN");
         }
     }
@@ -4604,30 +4786,37 @@ void M_DrawWeapons(void)
     {
         if (itemOn == 2)
             dp_translation = crx[CRX_GOLD];
+
         M_WriteText(80, 75, "HOIG REZNATOR");
 
         if (itemOn == 3)
             dp_translation = crx[CRX_GOLD];
+
         M_WriteText(80, 85, "TAZER");
 
         if (itemOn == 4)
             dp_translation = crx[CRX_GOLD];
+
         M_WriteText(80, 95, "UZI");
 
         if (itemOn == 5)
             dp_translation = crx[CRX_GOLD];
+
         M_WriteText(80, 105, "PHOTON 'ZOOKA");
 
         if (itemOn == 6)
             dp_translation = crx[CRX_GOLD];
+
         M_WriteText(80, 115, "STICK");
 
         if (itemOn == 7)
             dp_translation = crx[CRX_GOLD];
+
         M_WriteText(80, 125, "NUKER");
 
         if (itemOn == 8)
             dp_translation = crx[CRX_GOLD];
+
         M_WriteText(80, 135, "CRYOGUN");
     }
 
@@ -4635,34 +4824,38 @@ void M_DrawWeapons(void)
     {
         if (itemOn == 2)
             dp_translation = crx[CRX_GOLD];
+
         M_WriteText(80, 75, "SUPER BOOTSPORK");
 
         if (itemOn == 3)
             dp_translation = crx[CRX_GOLD];
+
         M_WriteText(80, 85, "LARGE ZORCHER");
 
         if (itemOn == 4)
             dp_translation = crx[CRX_GOLD];
+
         M_WriteText(80, 95, "RAPID ZORCHER");
 
         if (itemOn == 5)
             dp_translation = crx[CRX_GOLD];
+
         M_WriteText(80, 105, "ZORCH PROPULSOR");
 
         if (itemOn == 6)
             dp_translation = crx[CRX_GOLD];
+
         M_WriteText(80, 115, "PHASING ZORCHER");
 
         if (itemOn == 7)
             dp_translation = crx[CRX_GOLD];
+
         M_WriteText(80, 125, "LARGE AREA ZORCHING DEVICE");
     }
 }
 
-void M_DrawKeys(void)
+static void M_DrawKeys(void)
 {
-    //M_DarkBackground(0);
-
     V_DrawPatchWithShadow(125, 15, 0, W_CacheLumpName("M_T_KEYS",
                                                PU_CACHE), false);
 
@@ -4670,10 +4863,8 @@ void M_DrawKeys(void)
     M_WriteText(80, 55, "GIVE ALL KEYS FOR THIS MAP");
 }
 
-void M_DrawScreen(void)
+static void M_DrawScreen(void)
 {
-    //M_DarkBackground(0);
-
     if (fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
         V_DrawPatchWithShadow(58, 7, 0, W_CacheLumpName("M_T_SSET",
                                                PU_CACHE), false);
@@ -4685,9 +4876,9 @@ void M_DrawScreen(void)
                  11, usegamma / 3);
 
     if (gamemode == commercial || fsize == 4234124 || fsize == 4196020 ||
-            fsize == 12474561 || fsize == 12487824 || fsize == 11159840 ||
-            fsize == 12408292 || fsize == 12538385 || fsize == 12361532 ||
-            fsize == 7585664)
+        fsize == 12474561 || fsize == 12487824 || fsize == 11159840 ||
+        fsize == 12408292 || fsize == 12538385 || fsize == 12361532 ||
+        fsize == 7585664)
     {
         if (gamemission == pack_hacx)
             dp_translation = crx[CRX_BLUE];
@@ -4704,9 +4895,10 @@ void M_DrawScreen(void)
 
     if (itemOn == 10 && show_diskicon && gamemode == commercial)
         dp_translation = crx[CRX_GOLD];
+
     M_WriteText(ScreenDef.x, ScreenDef.y + 98, "Type of Indicator");
 
-    if (detailLevel > 0)
+    if (detailLevel)
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(ScreenDef.x + 180, ScreenDef.y + 18, "LOW");
@@ -4848,12 +5040,12 @@ void M_DrawScreen(void)
     }
 
 #ifdef SDL2
-    if (render_mode == 1)
+    if (render_mode)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(ScreenDef.x + 161, ScreenDef.y + 108, "LINEAR");
     }
-    else if (render_mode == 2)
+    else
     {
         dp_translation = crx[CRX_GOLD];
         M_WriteText(ScreenDef.x + 150, ScreenDef.y + 108, "NEAREST");
@@ -4871,23 +5063,19 @@ void M_DrawScreen(void)
     }
 #endif
 
-    if (whichSkull == 1)
+    if (!whichSkull)
     {
         int x;
         char *string = "";
+
         dp_translation = crx[CRX_GOLD];
+
         if (itemOn == 1 && am_overlay)
             string = "YOU MUST LEAVE AUTOMAP OVERLAY MODE FIRST!!!";
         else if (itemOn == 3)
             string = "START / LOAD A NEW GAME TO TAKE EFFECT.";
         else if (itemOn == 5 && d_vsync)
             string = "DISABLE VSYNC TO UNLOCK 70 FPS & UNCAPPED.";
-/*
-#ifndef SDL2
-        else if (itemOn == 4)
-            string = "OPTION 'BURN' IS ONLY AVAILABLE FOR SDL2";
-#endif
-*/
         else if (itemOn == 10 && (gamemode == retail || gamemode == registered || gamemode == shareware))
             string = "THIS IS ONLY CHANGEABLE FOR DOOM 2";
 
@@ -4897,11 +5085,12 @@ void M_DrawScreen(void)
 #endif
 
         x = ORIGINALWIDTH / 2 - M_StringWidth(string) / 2;
+
         M_WriteText(x, ScreenDef.y + 126, string);
     }
 }
 
-void M_DrawAutomap(void)
+static void M_DrawAutomap(void)
 {
     sprintf(string_back, "%d", mapcolor_back);
     V_FillRect(AutomapDef.x + 550, AutomapDef.y + 20, 0, 10, 10, mapcolor_back);
@@ -4996,52 +5185,35 @@ void M_DrawAutomap(void)
     M_WriteText(AutomapDef.x + 273, AutomapDef.y + 130, string_plyr);
 
     dp_translation = crx[CRX_BLUE];
+
     if (itemOn == 23)
         dp_translation = crx[CRX_GOLD];
+
     M_WriteText(AutomapDef.x, AutomapDef.y + 136, "reset colors to dos doom standard");
 
     dp_translation = crx[CRX_BLUE];
+
     if (itemOn == 24)
         dp_translation = crx[CRX_GOLD];
+
     M_WriteText(AutomapDef.x, AutomapDef.y + 142, "reset colors to prboom standard");
 }
 
-void M_DrawGame1(void)
+static void M_DrawGame1(void)
 {
-    //M_DarkBackground(0);
-
     if (fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
         V_DrawPatchWithShadow(70, 0, 0, W_CacheLumpName("M_T_GSET",
                                                PU_CACHE), false);
     else
         V_DrawPatchWithShadow(70, 0, 0, W_CacheLumpName("M_GMESET",
                                                PU_CACHE), false);
-/*
-    if (devparm)
-    {
-        if (aiming_help)
-        {
-            dp_translation = crx[CRX_GREEN];
-            M_WriteText(GameDef.x + 266, GameDef.y + 128, "ON");
-        }
-        else
-        {
-            dp_translation = crx[CRX_DARK];
-            M_WriteText(GameDef.x + 258, GameDef.y + 128, "OFF");
-        }
 
-        if (itemOn == 13)
-            dp_translation = crx[CRX_GOLD];
-
-        M_WriteText(GameDef.x, GameDef.y + 128, "AIMING HELP");
-    }
-*/
-    if (drawgrid == 1)
+    if (drawgrid)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef.x + 266, GameDef.y - 2, "ON");
     }
-    else if (drawgrid == 0)
+    else
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(GameDef.x + 258, GameDef.y - 2, "OFF");
@@ -5050,23 +5222,23 @@ void M_DrawGame1(void)
     sprintf(string_mapgridsize, "%d", map_grid_size);
     M_WriteText(GameDef.x + 282 - M_StringWidth(string_mapgridsize), GameDef.y + 8, string_mapgridsize);
 
-    if (am_rotate == true)
+    if (am_rotate)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef.x + 266, GameDef.y + 18, "ON");
     }
-    else if (am_rotate == false)
+    else
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(GameDef.x + 258, GameDef.y + 18, "OFF");
     }
 
-    if (followplayer == 1)
+    if (followplayer)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef.x + 266, GameDef.y + 28, "ON");
     }
-    else if (followplayer == 0)
+    else
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(GameDef.x + 258, GameDef.y + 28, "OFF");
@@ -5094,12 +5266,12 @@ void M_DrawGame1(void)
         M_WriteText(GameDef.x + 258, GameDef.y + 48, "OFF");
     }
 
-    if (show_stats == 1)
+    if (show_stats)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef.x + 266, GameDef.y + 58, "ON");
     }
-    else if (show_stats == 0)
+    else
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(GameDef.x + 258, GameDef.y + 58, "OFF");
@@ -5150,8 +5322,10 @@ void M_DrawGame1(void)
     }
 
     dp_translation = crx[CRX_GRAY];
+
     if (itemOn == 11)
         dp_translation = crx[CRX_GOLD];
+
     M_WriteText(GameDef.x, GameDef.y + 108, "AUTOMAP COLORS...");
 
     if (respawnparm)
@@ -5164,58 +5338,33 @@ void M_DrawGame1(void)
         dp_translation = crx[CRX_DARK];
         M_WriteText(GameDef.x + 258, GameDef.y + 118, "OFF");
     }
-/*
-    if (devparm)
-    {
-        if ((itemOn == 11 || itemOn == 12) && whichSkull == 1)
-        {
-            char *string = "YOU MUST START A NEW GAME TO TAKE EFFECT.";
-            int x = ORIGINALWIDTH / 2 - M_StringWidth(string) / 2;
-            dp_translation = crx[CRX_GOLD];
-            M_WriteText(x, GameDef.y + 138, string);
-        }
-        else
-        {
-            if (itemOn == 14)
-                dp_translation = crx[CRX_GOLD];
-            else
-                dp_translation = crx[CRX_GRAY];
 
-            M_WriteText(GameDef.x, GameDef.y + 138, "MORE OPTIONS");
-        }
+    if (!whichSkull)
+    {
+        int x;
+        char *string = "";
+
+        if ((itemOn > 5 && itemOn < 10 && d_statusmap && !modifiedgame) ||
+            (itemOn > 5 && itemOn < 9 && d_statusmap && modifiedgame))
+            string = "YOU NEED TO DISABLE AUTOMAP STATUS BAR FIRST!";
+        else if (itemOn == 12)
+            string = "YOU MUST START A NEW GAME TO TAKE EFFECT.";
+
+        x = ORIGINALWIDTH / 2 - M_StringWidth(string) / 2;
+        dp_translation = crx[CRX_GOLD];
+        M_WriteText(x, GameDef.y + 138, string);
     }
+
+    if (itemOn == 13)
+        dp_translation = crx[CRX_GOLD];
     else
-*/
-    {
-        if (whichSkull == 1)
-        {
-            int x;
-            char *string = "";
+        dp_translation = crx[CRX_GRAY];
 
-            if ((itemOn > 5 && itemOn < 10 && d_statusmap && !modifiedgame) ||
-                (itemOn > 5 && itemOn < 9 && d_statusmap && modifiedgame))
-                string = "YOU NEED TO DISABLE AUTOMAP STATUS BAR FIRST!";
-            else if (itemOn == 12)
-                string = "YOU MUST START A NEW GAME TO TAKE EFFECT.";
-
-            x = ORIGINALWIDTH / 2 - M_StringWidth(string) / 2;
-            dp_translation = crx[CRX_GOLD];
-            M_WriteText(x, GameDef.y + 138, string);
-        }
-
-        if (itemOn == 13)
-            dp_translation = crx[CRX_GOLD];
-        else
-            dp_translation = crx[CRX_GRAY];
-
-        M_WriteText(GameDef.x, GameDef.y + 128, "MORE OPTIONS...");
-    }
+    M_WriteText(GameDef.x, GameDef.y + 128, "MORE OPTIONS...");
 }
 
-void M_DrawGame2(void)
+static void M_DrawGame2(void)
 {
-    //M_DarkBackground(0);
-
     if (fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
         V_DrawPatchWithShadow(70, 0, 0, W_CacheLumpName("M_T_GSET",
                                                PU_CACHE), false);
@@ -5389,11 +5538,12 @@ void M_DrawGame2(void)
         M_WriteText(GameDef2.x + 258, GameDef2.y + 118, "OFF");
     }
 
-    if (whichSkull == 1)
+    if (!whichSkull)
     {
         int x;
         char *string = "";
         dp_translation = crx[CRX_GOLD];
+
         if (itemOn == 0 || itemOn == 1)
             string = "YOU MUST START A NEW GAME TO TAKE EFFECT.";
 #ifdef WII
@@ -5402,7 +5552,9 @@ void M_DrawGame2(void)
 #endif
         else if (itemOn == 10 && gameskill == sk_nightmare)
             string = "NOT AVAILABLE FOR NIGHTMARE SKILL";
+
         x = ORIGINALWIDTH / 2 - M_StringWidth(string) / 2;
+
         M_WriteText(x, GameDef2.y + 138, string);
     }
 
@@ -5414,10 +5566,8 @@ void M_DrawGame2(void)
     M_WriteText(GameDef2.x, GameDef2.y + 128, "MORE & MORE OPTIONS...");
 }
 
-void M_DrawGame3(void)
+static void M_DrawGame3(void)
 {
-    //M_DarkBackground(0);
-
     if (fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
         V_DrawPatchWithShadow(70, 0, 0, W_CacheLumpName("M_T_GSET",
                                                PU_CACHE), false);
@@ -5425,12 +5575,12 @@ void M_DrawGame3(void)
         V_DrawPatchWithShadow(70, 0, 0, W_CacheLumpName("M_GMESET",
                                                PU_CACHE), false);
 
-    if (crosshair == 1)
+    if (crosshair)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef3.x + 266, GameDef3.y -2, "ON");
     }
-    else if (crosshair == 0)
+    else
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(GameDef3.x + 258, GameDef3.y -2, "OFF");
@@ -5527,7 +5677,6 @@ void M_DrawGame3(void)
     M_WriteText(GameDef3.x, GameDef3.y + 68, "Max. Number of Bloodsplats");
 
     sprintf(bloodsplats_buffer, "%d", r_bloodsplats_max);
-
     M_WriteText(GameDef3.x + 282 - M_StringWidth(bloodsplats_buffer), GameDef3.y + 68, bloodsplats_buffer);
 
     if (d_shadows)
@@ -5585,19 +5734,17 @@ void M_DrawGame3(void)
         M_WriteText(GameDef3.x + 258, GameDef3.y + 118, "OFF");
     }
 
-    if (whichSkull == 1)
+    if (!whichSkull)
     {
         int x;
         char *string = "";
         dp_translation = crx[CRX_GOLD];
-        /*if ((itemOn == 3 || itemOn == 4) && dehacked)
-            string = "THIS OPTION IS NOT FOR ENABLED DEHACKED MODE.";
-        else if (itemOn == 8 && modifiedgame)
-            string = "THIS OPTION IS NOT FOR CUSTOM PWAD FILES.";
-        else*/ if (itemOn == 1 && fsize == 12361532)
+
+        if (itemOn == 1 && fsize == 12361532)
             string = "NO EXTRA BLOOD & GORE FOR CHEX QUEST.";
 
         x = ORIGINALWIDTH / 2 - M_StringWidth(string) / 2;
+
         M_WriteText(x, GameDef3.y + 138, string);
     }
 
@@ -5609,10 +5756,8 @@ void M_DrawGame3(void)
     M_WriteText(GameDef3.x, GameDef3.y + 128, "EVEN MORE OPTIONS...");
 }
 
-void M_DrawGame4(void)
+static void M_DrawGame4(void)
 {
-    //M_DarkBackground(0);
-
     if (fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
         V_DrawPatchWithShadow(70, 0, 0, W_CacheLumpName("M_T_GSET",
                                                PU_CACHE), false);
@@ -5763,16 +5908,20 @@ void M_DrawGame4(void)
         M_WriteText(GameDef4.x + 258, GameDef4.y + 118, "OFF");
     }
 
-    if (whichSkull == 1)
+    if (!whichSkull)
     {
         int x;
         char *string = "";
+
         dp_translation = crx[CRX_GOLD];
+
         if (itemOn == 11)
             string = "YOU MUST QUIT AND RESTART TO TAKE EFFECT.";
         else if (itemOn == 12)
             string = "YOU MAY NEED TO RESTART THE MAP FOR THIS.";
+
         x = ORIGINALWIDTH / 2 - M_StringWidth(string) / 2;
+
         M_WriteText(x, GameDef3.y + 138, string);
     }
 
@@ -5784,10 +5933,8 @@ void M_DrawGame4(void)
     M_WriteText(GameDef4.x, GameDef4.y + 128, "ENDLESS ETERNITY...");
 }
 
-void M_DrawGame5(void)
+static void M_DrawGame5(void)
 {
-    //M_DarkBackground(0);
-
     if (fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
         V_DrawPatchWithShadow(70, 0, 0, W_CacheLumpName("M_T_GSET",
                                                PU_CACHE), false);
@@ -5945,14 +6092,18 @@ void M_DrawGame5(void)
         M_WriteText(GameDef5.x + 258, GameDef5.y + 118, "OFF");
     }
 
-    if (whichSkull == 1)
+    if (!whichSkull)
     {
         int x;
         char *string = "";
+
         dp_translation = crx[CRX_GOLD];
+
         if (itemOn == 12)
             string = "YOU MUST START A NEW GAME TO TAKE EFFECT.";
+
         x = ORIGINALWIDTH / 2 - M_StringWidth(string) / 2;
+
         M_WriteText(x, GameDef5.y + 138, string);
     }
 
@@ -5964,10 +6115,8 @@ void M_DrawGame5(void)
     M_WriteText(GameDef5.x, GameDef5.y + 128, "IS THIS EVER GOING TO END...?");
 }
 
-void M_DrawGame6(void)
+static void M_DrawGame6(void)
 {
-    //M_DarkBackground(0);
-
     if (fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
         V_DrawPatchWithShadow(70, 0, 0, W_CacheLumpName("M_T_GSET",
                                                PU_CACHE), false);
@@ -5990,6 +6139,7 @@ void M_DrawGame6(void)
         dp_translation = crx[CRX_DARK];
     else if (itemOn == 1)
         dp_translation = crx[CRX_GOLD];
+
     M_WriteText(GameDef6.x, GameDef6.y + 8, "Eject Weapon Casings");
 
     if (d_ejectcasings)
@@ -6035,6 +6185,7 @@ void M_DrawGame6(void)
         dp_translation = crx[CRX_DARK];
     else if (itemOn == 4 && d_drawparticles)
         dp_translation = crx[CRX_GOLD];
+
     M_WriteText(GameDef6.x, GameDef6.y + 38, "BULLET TYPE");
 
     if (!d_drawparticles)
@@ -6048,42 +6199,49 @@ void M_DrawGame6(void)
         dp_translation = crx[CRX_DARK];
     else if (itemOn == 6 && d_drawparticles)
         dp_translation = crx[CRX_GOLD];
+
     M_WriteText(GameDef6.x, GameDef6.y + 58, "BFG CLOUD WITH PARTICLES");
 
     if (!d_drawparticles)
         dp_translation = crx[CRX_DARK];
     else if (itemOn == 7 && d_drawparticles)
         dp_translation = crx[CRX_GOLD];
+
     M_WriteText(GameDef6.x, GameDef6.y + 68, "BFG Explosion Particles");
 
     if (!d_drawparticles)
         dp_translation = crx[CRX_DARK];
     else if (itemOn == 8 && d_drawparticles)
         dp_translation = crx[CRX_GOLD];
+
     M_WriteText(GameDef6.x, GameDef6.y + 78, "ROCKET PARTICLE-TRAILS");
 
     if (!d_drawparticles)
         dp_translation = crx[CRX_DARK];
     else if (itemOn == 9 && d_drawparticles)
         dp_translation = crx[CRX_GOLD];
+
     M_WriteText(GameDef6.x, GameDef6.y + 88, "Rocket Explosion Particles");
 
     if (!d_drawparticles || gamemode != commercial)
         dp_translation = crx[CRX_DARK];
     else if (itemOn == 10 && d_drawparticles && gamemode == commercial)
         dp_translation = crx[CRX_GOLD];
+
     M_WriteText(GameDef6.x, GameDef6.y + 98, "SPAWN FLIES FOR DEAD CHAINGUNNERS");
 
     if (!d_drawparticles)
         dp_translation = crx[CRX_DARK];
     else if (itemOn == 11 && d_drawparticles)
         dp_translation = crx[CRX_GOLD];
+
     M_WriteText(GameDef6.x, GameDef6.y + 108, "Enemies & hangings bleed randomly");
 
     if (!d_drawparticles)
         dp_translation = crx[CRX_DARK];
     else if (itemOn == 12 && d_drawparticles)
         dp_translation = crx[CRX_GOLD];
+
     M_WriteText(GameDef6.x, GameDef6.y + 118, "Particle sounds For Bullets & Flies");
 
     if (bloodsplat_particle == 0)
@@ -6092,6 +6250,7 @@ void M_DrawGame6(void)
             dp_translation = crx[CRX_DARK];
         else
             dp_translation = crx[CRX_GREEN];
+
         M_WriteText(GameDef6.x + 232, GameDef6.y + 28, "SPRITES");
     }
     else if (bloodsplat_particle == 1)
@@ -6111,6 +6270,7 @@ void M_DrawGame6(void)
             dp_translation = crx[CRX_DARK];
         else
             dp_translation = crx[CRX_GREEN];
+
         M_WriteText(GameDef6.x + 232, GameDef6.y + 38, "SPRITES");
     }
     else if (bulletpuff_particle == 1)
@@ -6130,6 +6290,7 @@ void M_DrawGame6(void)
             dp_translation = crx[CRX_DARK];
         else
             dp_translation = crx[CRX_GREEN];
+
         M_WriteText(GameDef6.x + 232, GameDef6.y + 48, "SPRITES");
     }
     else if (teleport_particle == 1)
@@ -6220,18 +6381,24 @@ void M_DrawGame6(void)
         M_WriteText(GameDef6.x + 258, GameDef6.y + 118, "OFF");
     }
 
-    if (whichSkull == 1)
+    if (!whichSkull)
     {
         int x;
         char *string = "";
+
         dp_translation = crx[CRX_GOLD];
+
         if (itemOn == 1 && fsize == 12361532)
             string = "NO WEAPON CASINGS FOR CHEX";
+
         if (itemOn > 2 && itemOn < 12 && !d_drawparticles)
             string = "YOU MUST ENABLE 'DRAW PARTICLES' FIRST!";
+
         if (itemOn == 10 && d_drawparticles && (gamemode == retail || gamemode == registered || gamemode == shareware))
             string = "THIS IS ONLY AVAILABLE FOR DOOM 2";
+
         x = ORIGINALWIDTH / 2 - M_StringWidth(string) / 2;
+
         M_WriteText(x, GameDef6.y + 138, string);
     }
 
@@ -6243,10 +6410,8 @@ void M_DrawGame6(void)
     M_WriteText(GameDef6.x, GameDef6.y + 128, "I DON'T THINK SO...");
 }
 
-void M_DrawGame7(void)
+static void M_DrawGame7(void)
 {
-    //M_DarkBackground(0);
-
     if (fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
         V_DrawPatchWithShadow(70, 0, 0, W_CacheLumpName("M_T_GSET",
                                                PU_CACHE), false);
@@ -6291,6 +6456,7 @@ void M_DrawGame7(void)
         dp_translation = crx[CRX_DARK];
     else if (itemOn == 3 && (!(players[consoleplayer].cheats & CF_GODMODE)))
         dp_translation = crx[CRX_GOLD];
+
     M_WriteText(GameDef7.x, GameDef7.y + 28, "Aimbot for vulnerable player");
 
     if (aiming_help)
@@ -6343,12 +6509,12 @@ void M_DrawGame7(void)
 
     M_WriteText(GameDef7.x, GameDef7.y + 58, "WEAPON CHANGE");
 
-    if (use_vanilla_weapon_change == 1)
+    if (use_vanilla_weapon_change)
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(GameDef7.x + 250, GameDef7.y + 58, "SLOW");
     }
-    else if (use_vanilla_weapon_change == 0)
+    else
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef7.x + 251, GameDef7.y + 58, "FAST");
@@ -6387,8 +6553,7 @@ void M_DrawGame7(void)
         M_WriteText(GameDef7.x + 258, GameDef7.y + 88, "OFF");
     }
 
-#ifdef WII
-    if (beta_style_mode)
+    if (drawsplash)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef7.x + 266, GameDef7.y + 98, "ON");
@@ -6398,13 +6563,27 @@ void M_DrawGame7(void)
         dp_translation = crx[CRX_DARK];
         M_WriteText(GameDef7.x + 258, GameDef7.y + 98, "OFF");
     }
+
+#ifdef WII
+    if (beta_style_mode)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(GameDef7.x + 266, GameDef7.y + 108, "ON");
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(GameDef7.x + 258, GameDef7.y + 108, "OFF");
+    }
 #endif
 
-    if (whichSkull == 1)
+    if (!whichSkull)
     {
         int x;
         char *string = "";
+
         dp_translation = crx[CRX_GOLD];
+
         if (itemOn == 2)
             string = "START / LOAD A NEW GAME TO TAKE EFFECT.";
         else if (itemOn == 3)
@@ -6420,7 +6599,7 @@ void M_DrawGame7(void)
         else if (itemOn == 6 && gameskill == sk_nightmare)
             string = "NOT AVAILABLE FOR NIGHTMARE SKILL";
 #ifdef WII
-        if (itemOn == 12)
+        if (itemOn == 11)
         {
             if (fsize != 28422764 && fsize != 19321722 && fsize != 12361532)
                 string = "YOU MUST QUIT AND RESTART TO TAKE EFFECT.";
@@ -6429,58 +6608,13 @@ void M_DrawGame7(void)
         }
 #endif
         x = ORIGINALWIDTH / 2 - M_StringWidth(string) / 2;
+
         M_WriteText(x, GameDef7.y + 138, string);
     }
 }
 
-void DetectState(void)
+static void M_DrawCheats(void)
 {
-    if (!netgame && !demoplayback && gamestate == GS_LEVEL
-        && gameskill != sk_nightmare &&
-        players[consoleplayer].playerstate == PST_DEAD)
-    {
-        M_StartMessage("CHEATING NOT ALLOWED - YOU'RE DEAD",
-        NULL, true);
-    }
-    else if (!netgame && demoplayback && gamestate == GS_LEVEL
-        && players[consoleplayer].playerstate == PST_LIVE)
-    {
-        M_StartMessage("CHEATING NOT ALLOWED IN DEMO MODE",
-        NULL, true);
-    }
-    else if (!netgame && demoplayback && gamestate == GS_LEVEL
-        && players[consoleplayer].playerstate == PST_DEAD)
-    {
-        M_StartMessage("CHEATING NOT ALLOWED IN DEMO MODE",
-        NULL, true);
-    }
-    else if (!netgame && demoplayback && gamestate != GS_LEVEL)
-    {
-        M_StartMessage("CHEATING NOT ALLOWED IN DEMO MODE",
-        NULL, true);
-    }
-    else if (!netgame && !demoplayback && gamestate != GS_LEVEL)
-    {
-        M_StartMessage("CHEATING NOT ALLOWED IN DEMO MODE",
-        NULL, true);
-    }
-    else if (netgame)
-    {
-        M_StartMessage("CHEATING NOT ALLOWED FOR NET GAME",
-        NULL, true);
-    }
-
-    if (gameskill == sk_nightmare)
-    {
-        M_StartMessage("CHEATING DISABLED - NIGHTMARE SKILL",
-        NULL, true);
-    }
-}
-
-void M_DrawCheats(void)
-{
-    //M_DarkBackground(0);
-
     if (fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
         V_DrawPatchWithShadow (110, 6, 0, W_CacheLumpName("M_T_CHTS", PU_CACHE), false);
     else
@@ -6512,24 +6646,28 @@ void M_DrawCheats(void)
         dp_translation = crx[CRX_GOLD];
     else
         dp_translation = crx[CRX_GRAY];
+
     M_WriteText(75, 46, "WEAPONS...");
 
     if (itemOn == 3)
         dp_translation = crx[CRX_GOLD];
     else
         dp_translation = crx[CRX_GRAY];
+
     M_WriteText(75, 56, "KEYS...");
 
     if (itemOn == 4)
         dp_translation = crx[CRX_GOLD];
     else
         dp_translation = crx[CRX_GRAY];
+
     M_WriteText(75, 66, "ARMOR...");
 
     if (itemOn == 5)
         dp_translation = crx[CRX_GOLD];
     else
         dp_translation = crx[CRX_GRAY];
+
     M_WriteText(75, 76, "ITEMS...");
 
     if (!cheating)
@@ -6537,12 +6675,12 @@ void M_DrawCheats(void)
         dp_translation = crx[CRX_DARK];
         M_WriteText(215, 86, "OFF");
     }
-    else if (cheating && cheeting!=2)
+    else if (cheating && cheeting != 2)
     {
         dp_translation = crx[CRX_GOLD];
         M_WriteText(199, 86, "WALLS");
     }
-    else if (cheating && cheeting==2)          
+    else if (cheating && cheeting == 2)          
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(215, 86, "ALL");
@@ -6568,6 +6706,7 @@ void M_DrawCheats(void)
             dp_translation = crx[CRX_GRAY];
             M_WriteText(75, 116, "E1M10: SEWERS");
         }
+
         if (epi == 1 && gameversion != exe_chex && map != 10)
         {
             dp_translation = crx[CRX_GRAY];
@@ -6576,49 +6715,54 @@ void M_DrawCheats(void)
         else if (epi == 2 && gameversion != exe_chex)
         {
             dp_translation = crx[CRX_GRAY];
-            M_WriteText(75, 116, maptext[map+9]);
+            M_WriteText(75, 116, maptext[map + 9]);
         }
         else if (epi == 3 && gameversion != exe_chex)
         {
             dp_translation = crx[CRX_GRAY];
-            M_WriteText(75, 116, maptext[map+18]);
+            M_WriteText(75, 116, maptext[map + 18]);
         }
         else if (epi == 4 && gameversion != exe_chex)
         {
             dp_translation = crx[CRX_GRAY];
-            M_WriteText(75, 116, maptext[map+27]);
+            M_WriteText(75, 116, maptext[map + 27]);
         }
     }
 
     if ((fsize == 14943400 || fsize == 14824716 || fsize == 14612688 ||
-            fsize == 14607420 || fsize == 14604584 || fsize == 14677988 ||
-            fsize == 14683458 || fsize == 14691821 || fsize == 28422764) &&
-            map < 33)
+        fsize == 14607420 || fsize == 14604584 || fsize == 14677988 ||
+        fsize == 14683458 || fsize == 14691821 || fsize == 28422764) &&
+        map < 33)
     {
         dp_translation = crx[CRX_GRAY];
-        M_WriteText(75, 116, maptext[map+36]);
+        M_WriteText(75, 116, maptext[map + 36]);
     }
+
     if ((fsize == 14677988 || fsize == 14683458 || fsize == 14691821) &&
         map == 33)
     {
         dp_translation = crx[CRX_GRAY];
         M_WriteText(75, 116, "LEVEL 33: BETRAY");        
     }
+
     if (fsize == 18195736 || fsize == 18654796)
     {
         dp_translation = crx[CRX_GRAY];
-        M_WriteText(75, 116, maptext[map+68]);
+        M_WriteText(75, 116, maptext[map + 68]);
     }
+
     if (fsize == 18240175 || fsize == 17420824)
     {
         dp_translation = crx[CRX_GRAY];
-        M_WriteText(75, 116, maptext[map+100]);
+        M_WriteText(75, 116, maptext[map + 100]);
     }
+
     if (fsize == 19321722)
     {
         dp_translation = crx[CRX_GRAY];
-        M_WriteText(75, 116, maptext[map+142]);
+        M_WriteText(75, 116, maptext[map + 142]);
     }
+
     if (fsize == 4261144 || fsize == 4271324 || fsize == 4211660 ||
         fsize == 4207819 || fsize == 4274218 || fsize == 4225504 ||
         fsize == 4225460 || fsize == 4234124 || fsize == 4196020)
@@ -6633,8 +6777,8 @@ void M_DrawCheats(void)
         M_WriteText(220, 156, songtextbeta[tracknum]);
     }
     else if (fsize == 10396254 || fsize == 10399316 || fsize == 10401760 ||
-            fsize == 11159840 || fsize == 12408292 || fsize == 12361532 ||
-            fsize == 12474561 || fsize == 12538385 || fsize == 12487824)
+        fsize == 11159840 || fsize == 12408292 || fsize == 12361532 ||
+        fsize == 12474561 || fsize == 12538385 || fsize == 12487824)
     {
         if (tracknum == 0)
             tracknum = 1;
@@ -6651,9 +6795,9 @@ void M_DrawCheats(void)
         }
     }
     else if (fsize == 14943400 || fsize == 14824716 || fsize == 14612688 ||
-            fsize == 14607420 || fsize == 14604584 || fsize == 19321722 ||
-            fsize == 28422764 || fsize == 14677988 || fsize == 14683458 ||
-            fsize == 14691821)
+        fsize == 14607420 || fsize == 14604584 || fsize == 19321722 ||
+        fsize == 28422764 || fsize == 14677988 || fsize == 14683458 ||
+        fsize == 14691821)
     {
         if (tracknum == 1)
             tracknum = 33;
@@ -6691,24 +6835,26 @@ void M_DrawCheats(void)
         M_WriteText(220, 156, songtextplut[tracknum]);
     }
 
-    if (whichSkull == 1)
+    if (!whichSkull)
     {
         int x;
         char *string = "";
+
         dp_translation = crx[CRX_GOLD];
+
         if (itemOn == 0 && aiming_help)
             string = "IF ENABLED, AIMBOT WILL BE DISABLED!";
+
         x = ORIGINALWIDTH / 2 - M_StringWidth(string) / 2;
+
         M_WriteText(x, CheatsDef.y + 138, string);
     }
 }
 /*
-void M_DrawRecord(void)
+static void M_DrawRecord(void)
 {
-    char buffer_map[2];
     int offset = 0;
-
-    //M_DarkBackground(0);
+    char buffer_map[2];
 
     M_snprintf(buffer_map, sizeof(buffer_map), "%d", rmap);
 
@@ -6839,6 +6985,7 @@ void M_DrawRecord(void)
         {
             if (fsize == 28422764)
                 offset = 7;
+
             if (rmap == 1 || rmap == 11 || rmap == 21 || rmap == 31)
                 V_DrawPatchWithShadow (115 - offset, 68, W_CacheLumpName
                 ("WINUM1", PU_CACHE), false);
@@ -6937,49 +7084,48 @@ void M_DrawRecord(void)
     }
 }
 */
-void M_Options(int choice)
+
+static void M_Options(int choice)
 {
     M_SetupNextMenu(&OptionsDef);
 }
 
-
-
 //
-//      Toggle messages on/off
+// Toggle messages on/off
 //
-void M_ChangeMessages(int choice)
+static void M_ChangeMessages(int choice)
 {
     blurred = false;
 
     switch (choice)
     {
         case 0:
-            if (showMessages == 1)
-                showMessages = 0;
+            if (showMessages)
+                showMessages = false;
+
             break;
 
         case 1:
-            if (showMessages == 0)
-                showMessages = 1;
+            if (!showMessages)
+                showMessages = true;
+
             break;
     }
 
     message_dontfuckwithme = true;
 }
 
-
 //
 // M_EndGame
 //
-void M_EndGameResponse(int ch)
+static void M_EndGameResponse(int ch)
 {
 #ifdef WII
     if (ch != key_menu_forward)
-        return;
 #else
     if (ch != key_menu_confirm)
-        return;
 #endif
+        return;
 
     // [crispy] killough 5/26/98: make endgame quit if recording or playing back demo
 /*
@@ -6991,7 +7137,7 @@ void M_EndGameResponse(int ch)
     D_StartTitle();
 }
 
-void M_EndGame(int choice)
+static void M_EndGame(int choice)
 {
 /*
     V_DrawPatchWithShadow(58, 15, 0, W_CacheLumpName("M_T_EGME",
@@ -7008,25 +7154,22 @@ void M_EndGame(int choice)
         M_StartMessage(s_NETEND, NULL, false);
         return;
     }
+
     M_StartMessage(s_ENDGAME, M_EndGameResponse, true);
 }
-
-
-
 
 //
 // M_ReadThis
 //
-void M_ReadThis(int choice)
+static void M_ReadThis(int choice)
 {
     M_SetupNextMenu(&ReadDef1);
 }
 
-void M_ReadThis2(int choice)
+static void M_ReadThis2(int choice)
 {
     // Doom 1.9 had two menus when playing Doom 1
     // All others had only one
-
     if (gameversion <= exe_doom_1_9 && gamemode != commercial)
     {
         M_SetupNextMenu(&ReadDef2);
@@ -7034,17 +7177,16 @@ void M_ReadThis2(int choice)
     else
     {
         // Close the menu
-
         M_FinishReadThis(0);
     }
 }
 
-void M_FinishReadThis(int choice)
+static void M_FinishReadThis(int choice)
 {
     M_SetupNextMenu(&MainDef);
 }
 
-void M_Credits(int choice)
+static void M_Credits(int choice)
 {
     credits_start_time = gametic;
     draw_ended = false;
@@ -7095,80 +7237,93 @@ int     quitsounds3[7] =
     sfx_sgtatk
 };
 
-void M_QuitResponse(int ch)
+static void M_QuitResponse(int ch)
 {
 #ifdef WII
     if (ch != key_menu_forward)
-        return;
 #else
     if (ch != key_menu_confirm)
-        return;
 #endif
+    {
+        quitting = false;
+
+        if (waspaused)
+        {
+            waspaused = false;
+            paused = true;
+        }
+
+        return;
+    }
+
     if (!netgame)
     {
         if (gamemode == commercial)
         {
             if (fsize != 10396254 && fsize != 10399316 && fsize != 10401760 &&
-                    fsize != 4261144 && fsize != 4271324 && fsize != 4211660 &&
-                    fsize != 4207819 && fsize != 4274218 && fsize != 4225504 &&
-                    fsize != 4225460)
+                fsize != 4261144 && fsize != 4271324 && fsize != 4211660 &&
+                fsize != 4207819 && fsize != 4274218 && fsize != 4225504 &&
+                fsize != 4225460)
                 S_StartSound(NULL, quitsounds2[(gametic >> 2) & 7]);
             else
                 S_StartSound(NULL, quitsounds3[(gametic >> 2) & 7]);
         }
         else
             S_StartSound(NULL, quitsounds[(gametic >> 2) & 7]);
+
         I_WaitVBL(105);
     }
+
     I_Quit();
 }
-
 
 static char *M_SelectEndMessage(void)
 {
     return *endmsg[M_Random() % NUM_QUITMESSAGES + (gamemission != doom) * NUM_QUITMESSAGES];
 }
 
-
 void M_QuitDOOM(int choice)
 {
+    if (splashscreen)
+        return;
+
+    quitting = true;
+
     if (!beta_style)
     {
-        sprintf(endstring,
-                "%s\n\n" DOSY,
-                M_SelectEndMessage());
-
+        sprintf(endstring, "%s\n\n" DOSY, M_SelectEndMessage());
         M_StartMessage(endstring, M_QuitResponse, true);
     }
     else
         I_Quit();
 }
 
-
-
-void M_ChangeSensitivity(int choice)
+static void M_ChangeSensitivity(int choice)
 {
     switch (choice)
     {
         case 0:
             if (mouseSensitivity)
                 mouseSensitivity--;
+
             break;
 
         case 1:
             if (mouseSensitivity < 9)
                 mouseSensitivity++;
+
             break;
     }
 }
 
-void M_MouseWalk(int choice)
+static void M_MouseWalk(int choice)
 {
     switch (choice)
     {
         case 0:
             if (mousewalk)
                 mousewalk = false;
+
             break;
 
         case 1:
@@ -7177,77 +7332,85 @@ void M_MouseWalk(int choice)
 
             if (mousewalk)
                 mouselook = false;
+
             break;
     }
 }
 
-void M_WalkingSpeed(int choice)
+static void M_WalkingSpeed(int choice)
 {
     switch (choice)
     {
         case 0:
             if (forwardmove > 25)
-            forwardmove--;
+                forwardmove--;
+
             break;
 
         case 1:
             if (forwardmove < 50)
-            forwardmove++;
-        break;
+                forwardmove++;
+
+            break;
     }
 }
 
-void M_TurningSpeed(int choice)
+static void M_TurningSpeed(int choice)
 {
     switch (choice)
     {
         case 0:
             if (turnspeed > 5)
                 turnspeed--;
+
             break;
 
         case 1:
             if (turnspeed < 10)
                 turnspeed++;
+
             break;
     }
 }
 
-void M_StrafingSpeed(int choice)
+static void M_StrafingSpeed(int choice)
 {
     switch (choice)
     {
         case 0:
             if (sidemove > 24)
                 sidemove--;
+
             break;
 
         case 1:
             if (sidemove < 40)
                 sidemove++;
+
             break;
     }
 }
 
-void M_ChangeDetail(int choice)
+static void M_ChangeDetail(int choice)
 {
     blurred = false;
 
     switch (choice)
     {
         case 0:
-            if (detailLevel == 0)
-                detailLevel = 1;
+            if (!detailLevel)
+                detailLevel = true;
+
             break;
 
         case 1:
-            if (detailLevel == 1)
-                detailLevel = 0;
+            if (detailLevel)
+                detailLevel = false;
+
             break;
     }
 
     d_lowpixelsize = "4x4";
-
     GetPixelSize();
 
     if (!detailLevel)
@@ -7256,25 +7419,27 @@ void M_ChangeDetail(int choice)
         players[consoleplayer].message = s_DETAILLO;
 }
 
-void M_Translucency(int choice)
+static void M_Translucency(int choice)
 {
     switch (choice)
     {
         case 0:
             if (d_translucency)
                 d_translucency = false;
+
             break;
 
         case 1:
             if (!d_translucency)
                 d_translucency = true;
+
             break;
     }
 
     R_InitColumnFunctions();
 }
 
-void M_ColoredBloodA(int choice)
+static void M_ColoredBloodA(int choice)
 {
     if (!d_chkblood)
         return;
@@ -7284,16 +7449,18 @@ void M_ColoredBloodA(int choice)
         case 0:
             if (d_colblood)
                 d_colblood = false;
+
             break;
 
         case 1:
             if (!d_colblood)
                 d_colblood = true;
+
             break;
     }
 }
 
-void M_ColoredBloodB(int choice)
+static void M_ColoredBloodB(int choice)
 {
     if (!d_chkblood2)
         return;
@@ -7303,16 +7470,18 @@ void M_ColoredBloodB(int choice)
         case 0:
             if (d_colblood2)
                 d_colblood2 = false;
+
             break;
 
         case 1:
             if (!d_colblood2)
                 d_colblood2 = true;
+
             break;
     }
 }
 
-void M_BloodsplatsAmount(int choice)
+static void M_BloodsplatsAmount(int choice)
 {
     if (!d_maxgore)
         return;
@@ -7331,6 +7500,7 @@ void M_BloodsplatsAmount(int choice)
                 else if (r_bloodsplats_max < r_bloodsplats_max_max - 4999)
                     r_bloodsplats_max -= 499;
             }
+
             break;
 
         case 1:
@@ -7345,6 +7515,7 @@ void M_BloodsplatsAmount(int choice)
                 else if (r_bloodsplats_max < r_bloodsplats_max_max - 4999)
                     r_bloodsplats_max += 499;
             }
+
             break;
     }
 
@@ -7354,23 +7525,25 @@ void M_BloodsplatsAmount(int choice)
         r_bloodsplats_max = r_bloodsplats_max_max;
 }
 
-void M_WipeType(int choice)
+static void M_WipeType(int choice)
 {
     switch (choice)
     {
         case 0:
             if (wipe_type > 0)
                 wipe_type--;
+
             break;
 
         case 1:
             if (wipe_type < 3)
                 wipe_type++;
+
             break;
     }
 }
 
-void M_UncappedFramerate(int choice)
+static void M_UncappedFramerate(int choice)
 {
     switch (choice)
     {
@@ -7383,6 +7556,7 @@ void M_UncappedFramerate(int choice)
                 if (d_uncappedframerate == 1)
                     d_uncappedframerate--;
             }
+
             break;
 
         case 1:
@@ -7396,129 +7570,146 @@ void M_UncappedFramerate(int choice)
                 else if (d_uncappedframerate == 3)
                     d_uncappedframerate = 2;
             }
+
             break;
     }
 }
 
-void M_Screenshots(int choice)
+static void M_Screenshots(int choice)
 {
     switch (choice)
     {
         case 0:
             if (png_screenshots)
-                png_screenshots = 0;
+                png_screenshots = false;
+
             break;
 
         case 1:
-            if (png_screenshots == 0)
-                png_screenshots = 1;
+            if (!png_screenshots)
+                png_screenshots = true;
+
             break;
     }
 }
 
-void M_Background(int choice)
+static void M_Background(int choice)
 {
     switch (choice)
     {
         case 0:
             if (background_type > 0)
                 background_type--;
+
             break;
 
         case 1:
             if (background_type < 3)
                 background_type++;
+
             break;
     }
 }
 
-void M_FontShadow(int choice)
+static void M_FontShadow(int choice)
 {
     switch (choice)
     {
         case 0:
             if (font_shadow > 0)
                 font_shadow--;
+
             break;
 
         case 1:
             if (font_shadow < 2)
                 font_shadow++;
+
             break;
     }
 }
 
-void M_DiskIcon(int choice)
+static void M_DiskIcon(int choice)
 {
     switch (choice)
     {
         case 0:
             if (show_diskicon)
                 show_diskicon = false;
+
             break;
 
         case 1:
             if (!show_diskicon)
                 show_diskicon = true;
+
             break;
     }
 }
 
-void M_FixWiggle(int choice)
+static void M_FixWiggle(int choice)
 {
     switch (choice)
     {
         case 0:
             if (d_fixwiggle)
                 d_fixwiggle = false;
+
             break;
 
         case 1:
             if (!d_fixwiggle)
                 d_fixwiggle = true;
+
             break;
     }
 }
 
-void M_RemoveSlimeTrails(int choice)
+static void M_RemoveSlimeTrails(int choice)
 {
     switch (choice)
     {
         case 0:
             if (remove_slime_trails)
                 remove_slime_trails = false;
+
             break;
 
         case 1:
             if (!remove_slime_trails)
                 remove_slime_trails = true;
+
             break;
     }
 }
 
-void M_RenderMode(int choice)
+#ifdef SDL2
+static void M_RenderMode(int choice)
 {
     switch (choice)
     {
         case 0:
-            if (render_mode > 1)
-                render_mode--;
+            if (render_mode)
+                render_mode = false;
+
             break;
 
         case 1:
-            if (render_mode < 2)
-                render_mode++;
+            if (!render_mode)
+                render_mode = true;
+
             break;
     }
 }
 
-void M_VSync(int choice)
+static void M_VSync(int choice)
 {
     switch (choice)
     {
         case 0:
             if (d_vsync)
                 d_vsync = false;
+
             break;
 
         case 1:
@@ -7527,11 +7718,13 @@ void M_VSync(int choice)
 
             if (d_uncappedframerate == 3 || d_uncappedframerate == 1)
                 d_uncappedframerate--;
+
             break;
     }
 }
+#endif
 
-void M_IconType(int choice)
+static void M_IconType(int choice)
 {
     if ((gamemode == commercial || fsize == 4234124 || fsize == 4196020 ||
         fsize == 12474561 || fsize == 12487824 || fsize == 11159840 ||
@@ -7541,19 +7734,21 @@ void M_IconType(int choice)
         switch (choice)
         {
             case 0:
-                if (icontype == 1)
-                    icontype = 0;
+                if (icontype)
+                    icontype = false;
+
                 break;
 
             case 1:
-                if (icontype == 0)
-                    icontype = 1;
+                if (!icontype)
+                    icontype = true;
+
                 break;
         }
     }
 }
 
-void M_SizeDisplay(int choice)
+static void M_SizeDisplay(int choice)
 {
     if (!am_overlay)
     {
@@ -7565,6 +7760,7 @@ void M_SizeDisplay(int choice)
                     screenblocks--;
                     screenSize--;
                 }
+
                 break;
 
             case 1:
@@ -7579,8 +7775,10 @@ void M_SizeDisplay(int choice)
                     screenblocks--;
                     screenSize--;
                 }
+
                 break;
         }
+
         R_SetViewSize (screenblocks);
 
         if (screenSize < 8)
@@ -7597,12 +7795,12 @@ void M_SizeDisplay(int choice)
 }
 
 //
-//      Menu Functions
+// Menu Functions
 //
 // [nitr8] UNUSED
 //
 /*
-void M_DrawThermo(int x, int y, int thermWidth, int thermDot)
+static void M_DrawThermo(int x, int y, int thermWidth, int thermDot)
 {
     int                xx;
     int                i;
@@ -7610,11 +7808,13 @@ void M_DrawThermo(int x, int y, int thermWidth, int thermDot)
     xx = x;
     V_DrawPatchWithShadow(xx, y, 0, W_CacheLumpName("M_THERML", PU_CACHE), false);
     xx += 8;
+
     for (i = 0; i < thermWidth; i++)
     {
         V_DrawPatchWithShadow(xx, y, 0, W_CacheLumpName("M_THERMM", PU_CACHE), false);
         xx += 8;
     }
+
     V_DrawPatchWithShadow(xx, y, 0, W_CacheLumpName("M_THERMR", PU_CACHE), false);
 
     V_DrawPatchWithShadow((x + 8) + thermDot * 8, y, 0, W_CacheLumpName("M_THERMO",
@@ -7622,7 +7822,7 @@ void M_DrawThermo(int x, int y, int thermWidth, int thermDot)
 }
 */
 
-void M_DrawThermoSmall(int x, int y, int thermWidth, int thermDot)
+static void M_DrawThermoSmall(int x, int y, int thermWidth, int thermDot)
 {
     int         xx;
     int         yy;
@@ -7635,11 +7835,13 @@ void M_DrawThermoSmall(int x, int y, int thermWidth, int thermDot)
 
     V_DrawPatchWithShadow(xx + 3, yy - 18, 0, W_CacheLumpName("M_SLIDEL", PU_CACHE), false);
     xx += 8;
+
     for (i = 0; i < thermWidth; i++)
     {
         V_DrawPatchWithShadow(xx, yy - 18, 0, W_CacheLumpName("M_SLIDEM", PU_CACHE), false);
         xx += 8;
     }
+
     V_DrawPatchWithShadow(xx, yy - 18, 0, W_CacheLumpName("M_SLIDER", PU_CACHE), false);
 
     // +2 to initial y coordinate
@@ -7651,14 +7853,14 @@ void M_DrawThermoSmall(int x, int y, int thermWidth, int thermDot)
 // [nitr8] UNUSED
 //
 /*
-void M_DrawEmptyCell(menu_t *menu, int item)
+static void M_DrawEmptyCell(menu_t *menu, int item)
 {
     V_DrawPatchWithShadow(menu->x - 10,
                           menu->y + item * LINEHEIGHT_SMALL - 1, 0, W_CacheLumpName("M_CELL1",
                           PU_CACHE), false);
 }
 
-void M_DrawSelCell(menu_t *menu, int item)
+static void M_DrawSelCell(menu_t *menu, int item)
 {
     V_DrawPatchWithShadow(menu->x - 10,
                           menu->y + item * LINEHEIGHT_SMALL - 1, 0, W_CacheLumpName("M_CELL2",
@@ -7666,7 +7868,7 @@ void M_DrawSelCell(menu_t *menu, int item)
 }
 */
 
-void M_StartMessage(char *string, void *routine, dboolean input)
+static void M_StartMessage(char *string, void *routine, dboolean input)
 {
     messageLastMenuActive = menuactive;
     messageToPrint = 1;
@@ -7682,6 +7884,7 @@ void M_StartMessage(char *string, void *routine, dboolean input)
     {
         sendpause = true;
     }
+
     return;
 }
 
@@ -7689,7 +7892,7 @@ void M_StartMessage(char *string, void *routine, dboolean input)
 // [nitr8] UNUSED
 //
 /*
-void M_StopMessage(void)
+static void M_StopMessage(void)
 {
     menuactive = messageLastMenuActive;
     messageToPrint = 0;
@@ -7720,10 +7923,8 @@ int M_StringWidth(char *string)
     return w;
 }
 
-
-
 //
-//      Find string height from hu_font chars
+// Find string height from hu_font chars
 //
 int M_StringHeight(char *string)
 {
@@ -7732,6 +7933,7 @@ int M_StringHeight(char *string)
     int             height = SHORT(hu_font[0]->height);
         
     h = height;
+
     for (i = 0; i < strlen(string); i++)
         if (string[i] == '\n')
             h += height;
@@ -7739,17 +7941,15 @@ int M_StringHeight(char *string)
     return h;
 }
 
-
 //
-//      Write a string using the hu_font
+// Write a string using the hu_font
 //
 void M_WriteText(int x, int y, char *string)
 {
-    int                w;
-    char               *ch;
-    int                cx;
-    int                cy;
-                
+    int   w;
+    char  *ch;
+    int   cx;
+    int   cy;
 
     ch = string;
     cx = x;
@@ -7786,7 +7986,7 @@ void M_WriteText(int x, int y, char *string)
 
         w = SHORT(hu_font[c]->width);
 
-        if (cx + w > ORIGINALWIDTH)                // CHANGED FOR HIRES
+        if (cx + w > ORIGINALWIDTH)
             break;
 
         if (dp_translation && font_shadow != 2)
@@ -7796,6 +7996,7 @@ void M_WriteText(int x, int y, char *string)
             V_DrawPatchWithShadow(cx, cy, 0, hu_font[c], false);
         else
             V_DrawPatch(cx, cy, 0, hu_font[c]);
+
         cx += w;
     }
 
@@ -7813,7 +8014,7 @@ static dboolean IsNullKey(int key)
 }
 #endif
 
-void M_ChangeGamma(int choice)
+static void M_ChangeGamma(int choice)
 {
     static int  gammawait;
 
@@ -7824,13 +8025,16 @@ void M_ChangeGamma(int choice)
             case 0:
                 if (usegamma)
                     usegamma--;
+
                 break;
 
             case 1:
                 if (usegamma < GAMMALEVELS - 1)
                     usegamma++;
+
                 break;
         }
+
         r_gamma = gammalevels[usegamma];
 
         S_StartSound(NULL, sfx_stnmov);
@@ -7838,8 +8042,7 @@ void M_ChangeGamma(int choice)
 
     gammawait = I_GetTime() + HU_MSGTIMEOUT;
     players[consoleplayer].message = gammamsg[usegamma];
-    I_SetPalette (W_CacheLumpName ("PLAYPAL",PU_CACHE));
-//    I_SetPalette((byte *)W_CacheLumpName("PLAYPAL", PU_CACHE) + st_palette * 768);
+    I_SetPalette (W_CacheLumpName("PLAYPAL", PU_CACHE));
 }
 
 //
@@ -7849,7 +8052,7 @@ void M_ChangeGamma(int choice)
 //
 // M_Responder
 //
-dboolean M_Responder (event_t* ev)
+dboolean M_Responder(event_t *ev)
 {
     int             ch;
     int             key;
@@ -7862,7 +8065,8 @@ dboolean M_Responder (event_t* ev)
 #ifdef WII
     WPADData *data = WPAD_Data(0);
 
-    ch = -1; // will be changed to a legit char if we're going to use it here
+    // will be changed to a legit char if we're going to use it here
+    ch = -1;
 
     // Process joystick input
     // For some reason, polling ev.data for joystick input here in the menu code
@@ -7870,37 +8074,37 @@ dboolean M_Responder (event_t* ev)
     // time, it works fine if you're using the homebrew channel. I don't know
     // why this is so for the meantime I'm polling the wii remote directly.
 
-    //Classic Controls
+    // Classic Controls
     if (data->exp.type == WPAD_EXP_CLASSIC)
     {
         if (data->btns_d & WPAD_CLASSIC_BUTTON_UP)
         {
-            ch = key_menu_up;                                // phares 3/7/98
+            ch = key_menu_up;
         }
 
         if (data->btns_d & WPAD_CLASSIC_BUTTON_DOWN)
         {
-            ch = key_menu_down;                              // phares 3/7/98
+            ch = key_menu_down;
         }
 
         if (data->btns_d & WPAD_CLASSIC_BUTTON_LEFT)
         {
-            ch = key_menu_left;                              // phares 3/7/98
+            ch = key_menu_left;
         }
 
         if (data->btns_d & WPAD_CLASSIC_BUTTON_RIGHT)
         {
-            ch = key_menu_right;                             // phares 3/7/98
+            ch = key_menu_right;
         }
 
         if (data->btns_d & WPAD_CLASSIC_BUTTON_B)
         {
-            ch = key_menu_forward;                           // phares 3/7/98
+            ch = key_menu_forward;
         }
 
         if (data->btns_d & WPAD_CLASSIC_BUTTON_A)
         {
-            ch = key_menu_back;                              // phares 3/7/98
+            ch = key_menu_back;
         }
 
         if (data->exp.classic.ljs.pos.y > (data->exp.classic.ljs.center.y + 50))
@@ -7922,7 +8126,8 @@ dboolean M_Responder (event_t* ev)
         }
     }
 
-    if (askforkey && data->btns_d)                // KEY BINDINGS
+    // KEY BINDINGS
+    if (askforkey && data->btns_d)
 #else
     if (askforkey && ev->type == ev_keydown)
 #endif
@@ -7935,7 +8140,8 @@ dboolean M_Responder (event_t* ev)
         askforkey = false;
         return true;
     }
-/*                                                        // FIXME: NOT YET WORKING (MOUSE BINDINGS)
+/*
+    // FIXME: NOT YET WORKING (MOUSE BINDINGS)
     if (askforkey && ev->type == ev_mouse)
     {
         if ((ev->data1 & 1) ||
@@ -7952,6 +8158,7 @@ dboolean M_Responder (event_t* ev)
             askforkey = false;
             return true;
         }
+
         return false;
     }
     else if (askforkey && ev->type == ev_mousewheel)
@@ -7966,16 +8173,17 @@ dboolean M_Responder (event_t* ev)
             askforkey = false;
             return true;
         }
+
         return false;
     }
 */
+
 #ifndef WII
     // "close" button pressed on window?
     if (ev->type == ev_quit)
     {
         // First click on close button = bring up quit confirm message.
         // Second click on close button = confirm quit
-
         if (menuactive && messageToPrint && messageRoutine == M_QuitResponse)
         {
             M_QuitResponse(key_menu_confirm);
@@ -7990,10 +8198,11 @@ dboolean M_Responder (event_t* ev)
     }
 
     // key is the key pressed, ch is the actual character typed
-  
     ch = 0;
 #endif
+
     key = -1;
+
 #ifndef WII
     if (ev->type == ev_keydown)
     {
@@ -8008,7 +8217,6 @@ dboolean M_Responder (event_t* ev)
             key = KEY_ENTER;
             mousewait = I_GetTime() + 5;
         }
-
         // previous menu
         else if (ev->data1 & MOUSE_RIGHTBUTTON)
         {
@@ -8026,7 +8234,6 @@ dboolean M_Responder (event_t* ev)
                 key = KEY_UPARROW;
                 mousewait = I_GetTime() + 3;
             }
-
             // select next menu item
             else if (ev->data1 < 0)
             {
@@ -8039,6 +8246,7 @@ dboolean M_Responder (event_t* ev)
     if (key == -1)
         return false;
 #endif
+
     // Save Game string input
     if (saveStringEnter)
     {
@@ -8084,8 +8292,10 @@ dboolean M_Responder (event_t* ev)
                     savegamestrings[saveSlot][saveCharIndex++] = ch;
                     savegamestrings[saveSlot][saveCharIndex] = 0;
                 }
+
                 break;
         }
+
         return true;
     }
 
@@ -8108,6 +8318,7 @@ dboolean M_Responder (event_t* ev)
 
         menuactive = messageLastMenuActive;
         messageToPrint = 0;
+
         if (messageRoutine)
             messageRoutine(ch);
 
@@ -8128,34 +8339,40 @@ dboolean M_Responder (event_t* ev)
     // F-Keys
     if (!menuactive && !beta_style)
     {
-        if (key == key_menu_decscreen)      // Screen size down
+        // Screen size down
+        if (key == key_menu_decscreen)
         {
             if (automapactive)
                 return false;
+
             M_SizeDisplay(0);
             S_StartSound(NULL, sfx_stnmov);
             return true;
         }
-        else if (key == KEY_TILDE /*&& !keydown*/)        // Console
+        // Console
+        else if (key == KEY_TILDE)
         {
-//            keydown = key;
             if (consoleheight < CONSOLEHEIGHT && consoledirection == -1 && !inhelpscreens && !wipe)
             {
                 consoleheight = MAX(1, consoleheight);
                 consoledirection = 1;
                 return true;
             }
+
             return false;
         }
-        else if (key == key_menu_incscreen) // Screen size up
+        // Screen size up
+        else if (key == key_menu_incscreen)
         {
             if (automapactive)
                 return false;
+
             M_SizeDisplay(1);
             S_StartSound(NULL, sfx_stnmov);
             return true;
         }
-        else if (key == key_menu_help)     // Help key
+        // Help key
+        else if (key == key_menu_help)
         {
             M_StartControlPanel();
 
@@ -8168,14 +8385,16 @@ dboolean M_Responder (event_t* ev)
             S_StartSound(NULL, sfx_swtchn);
             return true;
         }
-        else if (key == key_menu_save)     // Save
+        // Save
+        else if (key == key_menu_save)
         {
             M_StartControlPanel();
             S_StartSound(NULL, sfx_swtchn);
             M_SaveGame(0);
             return true;
         }
-        else if (key == key_menu_load)     // Load
+        // Load
+        else if (key == key_menu_load)
         {
 	    // [crispy] forbid New Game and (Quick) Load while recording a demo
 	    if (demorecording)
@@ -8190,7 +8409,8 @@ dboolean M_Responder (event_t* ev)
                 return true;
             }
         }
-        else if (key == key_menu_volume)   // Sound Volume
+        // Sound Volume
+        else if (key == key_menu_volume)
         {
             M_StartControlPanel();
             currentMenu = &SoundDef;
@@ -8198,31 +8418,36 @@ dboolean M_Responder (event_t* ev)
             S_StartSound(NULL, sfx_swtchn);
             return true;
         }
-        else if (key == key_menu_detail)   // Detail toggle
+        // Detail toggle
+        else if (key == key_menu_detail)
         {
             M_ChangeDetail(0);
             S_StartSound(NULL, sfx_swtchn);
             return true;
         }
-        else if (key == key_menu_qsave)    // Quicksave
+        // Quicksave
+        else if (key == key_menu_qsave)
         {
             S_StartSound(NULL, sfx_swtchn);
             M_QuickSave();
             return true;
         }
-        else if (key == key_menu_endgame)  // End game
+        // End game
+        else if (key == key_menu_endgame)
         {
             S_StartSound(NULL, sfx_swtchn);
             M_EndGame(0);
             return true;
         }
-        else if (key == key_menu_messages) // Toggle messages
+        // Toggle messages
+        else if (key == key_menu_messages)
         {
             M_ChangeMessages(0);
             S_StartSound(NULL, sfx_swtchn);
             return true;
         }
-        else if (key == key_menu_qload)    // Quickload
+        // Quickload
+        else if (key == key_menu_qload)
         {
 	    // [crispy] forbid New Game and (Quick) Load while recording a demo
 	    if (demorecording)
@@ -8236,18 +8461,24 @@ dboolean M_Responder (event_t* ev)
                 return true;
             }
         }
-        else if (key == key_menu_quit)     // Quit DOOM
+        // Quit DOOM
+        else if (key == key_menu_quit)
         {
             S_StartSound(NULL, sfx_swtchn);
             M_QuitDOOM(0);
             return true;
         }
-        else if (key == key_menu_gamma)    // gamma toggle
+        // gamma toggle
+        else if (key == key_menu_gamma)
         {
-            if (++usegamma > GAMMALEVELS - 1)
-                usegamma = 0;
-            M_ChangeGamma(1);
-            return false;
+            if (usergame)
+            {
+                if (++usegamma > GAMMALEVELS - 1)
+                    usegamma = 0;
+
+                M_ChangeGamma(1);
+                return false;
+            }
         }
     }
 #endif
@@ -8268,11 +8499,11 @@ dboolean M_Responder (event_t* ev)
             S_StartSound(NULL, sfx_swtchn);
             return true;
         }
+
         return false;
     }
 
     // Keys usable within menu
-
 #ifdef WII
     if (ch == key_menu_down)
 #else
@@ -8280,12 +8511,12 @@ dboolean M_Responder (event_t* ev)
 #endif
     {
         // Move down to next item
-
         do
         {
             if (itemOn + 1 > currentMenu->numitems - 1)
             {
-                if (FirstKey == FIRSTKEY_MAX)        // FOR PSP (if too many menu items)
+                // FOR PSP (if too many menu items)
+                if (FirstKey == FIRSTKEY_MAX)
                 {
                     itemOn = 0;
                     FirstKey = 0;
@@ -8309,7 +8540,9 @@ dboolean M_Responder (event_t* ev)
                 if (currentMenu == &GameDef && itemOn == 14)
                     itemOn = 0;
             }
+
             S_StartSound(NULL, sfx_pstop);
+
         } while ((currentMenu->menuitems[itemOn].status == -1 && !devparm) ||
                  (currentMenu->menuitems[itemOn].status == -1 && currentMenu != &GameDef && devparm));
 
@@ -8322,12 +8555,12 @@ dboolean M_Responder (event_t* ev)
 #endif
     {
         // Move back up to previous item
-
         do
         {
             if (!itemOn)
             {
-                if (FirstKey == 0)                // FOR PSP (if too many menu items)
+                // FOR PSP (if too many menu items)
+                if (FirstKey == 0)
                 {
                     itemOn = currentMenu->numitems - 1;
                     FirstKey = FIRSTKEY_MAX;
@@ -8351,7 +8584,9 @@ dboolean M_Responder (event_t* ev)
                 if (currentMenu == &GameDef && itemOn == 14)
                     itemOn--;
             }
+
             S_StartSound(NULL, sfx_pstop);
+
         } while ((currentMenu->menuitems[itemOn].status == -1 && !devparm) ||
                  (currentMenu->menuitems[itemOn].status == -1 && currentMenu != &GameDef && devparm));
 
@@ -8364,20 +8599,13 @@ dboolean M_Responder (event_t* ev)
 #endif
     {
         // Slide slider left
-
         if (currentMenu->menuitems[itemOn].routine &&
             currentMenu->menuitems[itemOn].status == 2)
         {
             S_StartSound(NULL, sfx_stnmov);
             currentMenu->menuitems[itemOn].routine(0);
         }
-/*
-        else if (currentMenu == &GameDef && devparm && itemOn == 13)
-        {
-            S_StartSound(NULL, sfx_stnmov);
-            M_AimingHelp(0);
-        }
-*/
+
         return true;
     }
 #ifdef WII
@@ -8387,20 +8615,13 @@ dboolean M_Responder (event_t* ev)
 #endif
     {
         // Slide slider right
-
         if (currentMenu->menuitems[itemOn].routine &&
             currentMenu->menuitems[itemOn].status == 2)
         {
             S_StartSound(NULL, sfx_stnmov);
             currentMenu->menuitems[itemOn].routine(1);
         }
-/*
-        else if (currentMenu == &GameDef && devparm && itemOn == 13)
-        {
-            S_StartSound(NULL, sfx_stnmov);
-            M_AimingHelp(1);
-        }
-*/
+
         return true;
     }
 #ifdef WII
@@ -8410,14 +8631,14 @@ dboolean M_Responder (event_t* ev)
 #endif
     {
         // Activate menu item
-
         if (currentMenu->menuitems[itemOn].routine &&
             currentMenu->menuitems[itemOn].status)
         {
             currentMenu->lastOn = itemOn;
             if (currentMenu->menuitems[itemOn].status == 2)
             {
-                currentMenu->menuitems[itemOn].routine(1);      // right arrow
+                // right arrow
+                currentMenu->menuitems[itemOn].routine(1);
                 S_StartSound(NULL, sfx_stnmov);
             }
             else
@@ -8441,7 +8662,6 @@ dboolean M_Responder (event_t* ev)
 #endif
     {
         // Deactivate menu
-
         currentMenu->lastOn = itemOn;
         M_ClearMenus();
         S_StartSound(NULL, sfx_swtchx);
@@ -8454,7 +8674,6 @@ dboolean M_Responder (event_t* ev)
 #endif
     {
         // Go back to previous menu
-
         currentMenu->lastOn = itemOn;
         if (currentMenu->prevMenu)
         {
@@ -8465,6 +8684,7 @@ dboolean M_Responder (event_t* ev)
             itemOn = currentMenu->lastOn;
             S_StartSound(NULL, sfx_swtchn);
         }
+
         return true;
     }
 
@@ -8501,31 +8721,38 @@ dboolean M_Responder (event_t* ev)
     return false;
 }
 
-
-
 //
 // M_StartControlPanel
 //
-void M_StartControlPanel (void)
+void M_StartControlPanel(void)
 {
     // intro might call this repeatedly
     if (menuactive)
         return;
 
+    if (splashscreen)
+    {
+        if (pagetic < 95)
+            pagetic = MIN(10, pagetic);
+
+        return;
+    }
+
     menuactive = 1;
 
     if (!beta_style)
-        currentMenu = &MainDef;         // JDC
+        // JDC
+        currentMenu = &MainDef;
     else
-        currentMenu = &BetaMainDef;     // JDC
+        currentMenu = &BetaMainDef;
 
-    itemOn = currentMenu->lastOn;       // JDC
+    // JDC
+    itemOn = currentMenu->lastOn;
 
     blurred = false;
 }
 
 // Display OPL debug messages - hack for GENMIDI development.
-
 static void M_DrawOPLDev(void)
 {
     extern void I_OPL_DevMessages(char *, size_t);
@@ -8589,7 +8816,7 @@ static void M_DrawCrispnessBackground(int scrn)
 // Called after the view has been rendered,
 // but before it has been blitted.
 //
-void M_Drawer (void)
+void M_Drawer(void)
 {
     static short        x;
     static short        y;
@@ -8624,11 +8851,10 @@ void M_Drawer (void)
                         mus_the_da,
                         mus_in_cit,
                         mus_shawn2,
-                        mus_ddtbl2,
+                        mus_ddtbl2
                     };
 
                     mnum = nmus[gamemap - 1];
-
                     S_ChangeMusic(mnum, true, true);
                 }
                 else
@@ -8657,17 +8883,35 @@ void M_Drawer (void)
             {
                 int spmus[]=
                 {
-                    // Song - Who? - Where?
-        
-                    mus_e3m4,        // American     e4m1
-                    mus_e3m2,        // Romero       e4m2
-                    mus_e3m3,        // Shawn        e4m3
-                    mus_e1m5,        // American     e4m4
-                    mus_e2m7,        // Tim          e4m5
-                    mus_e2m4,        // Romero       e4m6
-                    mus_e2m6,        // J.Anderson   e4m7 CHIRON.WAD
-                    mus_e2m5,        // Shawn        e4m8
-                    mus_e1m9,        // Tim          e4m9
+                    // Who? -       Where?
+                    // Song
+
+                    // American     e4m1
+                    mus_e3m4,
+
+                    // Romero       e4m2
+                    mus_e3m2,
+
+                    // Shawn        e4m3
+                    mus_e3m3,
+
+                    // American     e4m4
+                    mus_e1m5,
+
+                    // Tim          e4m5
+                    mus_e2m7,
+
+                    // Romero       e4m6
+                    mus_e2m4,
+
+                    // J.Anderson   e4m7 CHIRON.WAD
+                    mus_e2m6,
+
+                    // Shawn        e4m8
+                    mus_e2m5,
+
+                    // Tim          e4m9
+                    mus_e1m9
                 };
 
                 if (gameepisode < 4)
@@ -8701,7 +8945,7 @@ void M_Drawer (void)
 
     if (gamestate == GS_LEVEL && !menuactive)
     {
-        player_t* player = &players[consoleplayer];
+        player_t *player = &players[consoleplayer];
 
         if (player->powers[pw_flight] > 0)
         {
@@ -8710,23 +8954,12 @@ void M_Drawer (void)
             M_WriteText(299, 5, flight_counter);
         }
     }
-/*
-    // DISPLAYS BLINKING "BETA" MESSAGE
-    if ((fsize == 4261144 || fsize == 4271324 || fsize == 4211660 || beta_style) &&
-            (!menuactive && (leveltime & 16)) && gamestate == GS_LEVEL &&
-            consoleheight == 0)
-    {
-        char *string = "PR BETA MODE ENABLED";
-        int x = ORIGINALWIDTH / 2 - M_StringWidth(string) / 2;
-        M_WriteText(x, 12, string);
-        BorderNeedRefresh = true;
-    }
-*/
+
     if (coordinates_info)
     {
         if (gamestate == GS_LEVEL)
         {
-            player_t* player = &players[consoleplayer];
+            player_t *player = &players[consoleplayer];
 
             sprintf(coordinates_ang_textbuffer, "ang = 0x%x", player->mo->angle);
             sprintf(coordinates_x_textbuffer, "x = 0x%x", player->mo->x);
@@ -8742,7 +8975,8 @@ void M_Drawer (void)
 
     if (memory_usage && done && consoleheight == 0 && !menuactive)
     {
-        Z_DrawStats();           // print memory allocation stats
+        // print memory allocation stats
+        Z_DrawStats();
     }
 
     // DISPLAYS BINARY VERSION
@@ -8755,14 +8989,14 @@ void M_Drawer (void)
         char                string[80];
         int                 start = 0;
 
-        //M_DarkBackground(0);
-
         y = ORIGINALHEIGHT / 2 - M_StringHeight(messageString) / 2;
+
         while (messageString[start] != '\0')
         {
             int foundnewline = 0;
 
             for (i = 0; i < strlen(messageString + start); i++)
+            {
                 if (messageString[start + i] == '\n')
                 {
                     memset(string, 0, sizeof(string));
@@ -8771,7 +9005,8 @@ void M_Drawer (void)
                     start += i + 1;
                     break;
                 }
-                                
+            }
+
             if (!foundnewline)
             {
                 M_StringCopy(string, messageString + start, sizeof(string));
@@ -8795,7 +9030,8 @@ void M_Drawer (void)
         return;
 
     if (currentMenu->routine)
-        currentMenu->routine();         // call Draw routine
+        // call Draw routine
+        currentMenu->routine();
     
     // DRAW MENU
     x = currentMenu->x;
@@ -8805,10 +9041,7 @@ void M_Drawer (void)
     // FOR PSP (if too many menu items)
     if (currentMenu->menuitems[itemOn].status == 5)
         max += FirstKey;
-/*
-    if (extra_wad_loaded == 1 && currentMenu == &SoundDef)
-        currentMenu->numitems = 4;
-*/
+
     if (!devparm && currentMenu == &OptionsDef)
         currentMenu->numitems = 8;
 
@@ -8828,27 +9061,27 @@ void M_Drawer (void)
 
     // HACK: ALL ELSE THAN SHAREWARE 1.0 & 1.1 && REG 1.1
     if ((fsize == 4207819 || fsize == 4274218 || fsize == 10396254) &&
-            currentMenu == &NewDef)
+        currentMenu == &NewDef)
         currentMenu->numitems = 4;
 
     if ((fsize == 4261144 || fsize == 4271324 || fsize == 4211660 ||
         fsize == 4207819 || fsize == 4274218 || fsize == 4225504 ||
         fsize == 4225460 || fsize == 4234124 || fsize == 4196020) &&
-            currentMenu == &WeaponsDef)
+        currentMenu == &WeaponsDef)
         currentMenu->numitems = 6;
 
     if (fsize == 12361532 && currentMenu == &ItemsDef)
         currentMenu->numitems = 7;
 
     if ((fsize == 10396254 || fsize == 10399316 || fsize == 10401760 ||
-                fsize == 11159840 || fsize == 12408292 || fsize == 12474561 ||
-                fsize == 12538385 || fsize == 12487824) &&
-                currentMenu == &WeaponsDef)
+        fsize == 11159840 || fsize == 12408292 || fsize == 12474561 ||
+        fsize == 12538385 || fsize == 12487824) &&
+        currentMenu == &WeaponsDef)
         currentMenu->numitems = 8;
 
     for (i = 0; i < max; i++)
     {
-        char                *name;
+        char   *name;
 
         menuitem_t *item = &(currentMenu->menuitems[i]);
         name = item->name;
@@ -8858,7 +9091,7 @@ void M_Drawer (void)
             if ((currentMenu == &FilesDef && i == savegame && (!usergame || gamestate != GS_LEVEL)) ||
                 (currentMenu == &FilesDef && i == endgame && (!usergame || netgame)) ||
                 (currentMenu == &FilesDef && i == loadgame && (netgame || demorecording)) ||
-+	        (currentMenu == &MainDef && i == newgame && (demorecording || (netgame && !demoplayback))))
+ 	        (currentMenu == &MainDef && i == newgame && (demorecording || (netgame && !demoplayback))))
                 dp_translation = crx[CRX_DARK];
             else if (i == itemOn)
                 dp_translation = crx[CRX_GOLD];
@@ -8873,8 +9106,10 @@ void M_Drawer (void)
 */
                     M_WriteText(NewDef.x, NewDef.y + 18, "HURT ME PLENTY.");
             }
+
             M_WriteText(x, y - 2, item->name);
         }
+
         y += LINEHEIGHT_SMALL;
 
         // DRAW SKULL
@@ -8937,7 +9172,7 @@ void M_Drawer (void)
 //
 // M_ClearMenus
 //
-void M_ClearMenus (void)
+void M_ClearMenus(void)
 {
     menuactive = 0;
 
@@ -8955,22 +9190,16 @@ void M_ClearMenus (void)
     //       sendpause = true;
 }
 
-
-
-
 //
 // M_SetupNextMenu
 //
-void M_SetupNextMenu(menu_t *menudef)
+static void M_SetupNextMenu(menu_t *menudef)
 {
     currentMenu = menudef;
     itemOn = currentMenu->lastOn;
 }
 
-static state_t *mobj_state;
-static int mobj_tics;
-
-void M_PlayerSetupTicker (void)
+static void M_PlayerSetupTicker(void)
 {
     // Based on code in f_finale.c
     if (--mobj_tics > 0)
@@ -8984,13 +9213,14 @@ void M_PlayerSetupTicker (void)
     {
         mobj_state = &states[mobj_state->nextstate];
     }
+
     mobj_tics = mobj_state->tics;
 }
 
 //
 // M_Ticker
 //
-void M_Ticker (void)
+void M_Ticker(void)
 {
     if (--skullAnimCounter <= 0)
     {
@@ -9017,11 +9247,10 @@ void M_Ticker (void)
     // advance animation
 }
 
-
 //
 // M_Init
 //
-void M_Init (void)
+void M_Init(void)
 {
     currentMenu = &MainDef;
     menuactive = 0;
@@ -9039,8 +9268,6 @@ void M_Init (void)
 
     // Here we could catch other version dependencies,
     //  like HELP1/2, and four episodes.
-
-  
     switch (gamemode)
     {
         case commercial:
@@ -9049,6 +9276,7 @@ void M_Init (void)
             MainDef.numitems--;
             MainDef.y += 8;
             NewDef.prevMenu = &MainDef;
+
             break;
 
         case shareware:
@@ -9057,9 +9285,11 @@ void M_Init (void)
         case registered:
             // We need to remove the fourth episode.
             EpiDef.numitems--;
+
             break;
 
         case retail:
+
             // We are fine.
         default:
             break;
@@ -9067,15 +9297,9 @@ void M_Init (void)
 
     if (gamemode == commercial)
         NewDef.prevMenu = (nerve_pwad ? &ExpDef : &MainDef);
-/*
-#ifndef WII
-    if (!beta_style)
-        opldev = M_CheckParm("-opldev") > 0;
-#endif
-*/
 }
 
-void M_God(int choice)
+static void M_God(int choice)
 {
     players[consoleplayer].cheats ^= CF_GODMODE;
 
@@ -9086,7 +9310,9 @@ void M_God(int choice)
     {
         if (players[consoleplayer].mo)
             players[consoleplayer].mo->health = 100;
+
         players[consoleplayer].health = 100;
+
         if (beta_style)
             players[consoleplayer].message = STSTR_DQDONBETA;
         else
@@ -9101,15 +9327,17 @@ void M_God(int choice)
     }
 }
 
-void M_Noclip(int choice)
+static void M_Noclip(int choice)
 {
     players[consoleplayer].cheats ^= CF_NOCLIP;
+
     if (players[consoleplayer].cheats & CF_NOCLIP)
     {
         if (beta_style)
             players[consoleplayer].message = STSTR_NCONBETA;
         else
             players[consoleplayer].message = s_STSTR_NCON;
+
         players[consoleplayer].mo->flags |= MF_NOCLIP;
         noclip_on = true;
     }
@@ -9119,58 +9347,63 @@ void M_Noclip(int choice)
             players[consoleplayer].message = STSTR_NCOFFBETA;
         else
             players[consoleplayer].message = s_STSTR_NCOFF;
+
         players[consoleplayer].mo->flags &= ~MF_NOCLIP;
         noclip_on = false;
     }
 }
 
-void M_ArmorA(int choice)
+static void M_ArmorA(int choice)
 {
     players[consoleplayer].armorpoints = 200;
     players[consoleplayer].armortype = 2;
     players[consoleplayer].message = "ALL ARMOR ADDED";
 }
 
-void M_ArmorB(int choice)
+static void M_ArmorB(int choice)
 {
     players[consoleplayer].armorpoints = 100;
     players[consoleplayer].armortype = 1;
 
     if (fsize != 12361532 && fsize != 19321722)
         players[consoleplayer].message = "GREEN ARMOR ADDED";
+
     if (fsize == 12361532)
         players[consoleplayer].message = "CHEX(R) ARMOR ADDED";
+
     if (fsize == 19321722)
         players[consoleplayer].message = "KEVLAR VEST ADDED";
 }
 
-void M_ArmorC(int choice)
+static void M_ArmorC(int choice)
 {
     players[consoleplayer].armorpoints = 200;
     players[consoleplayer].armortype = 2;
 
     if (fsize != 12361532 && fsize != 19321722)
         players[consoleplayer].message = "BLUE ARMOR ADDED";
+
     if (fsize == 12361532)
         players[consoleplayer].message = "SUPER CHEX(R) ARMOR ADDED";
+
     if (fsize == 19321722)
         players[consoleplayer].message = "SUPER KEVLAR VEST ADDED";
 }
 
-void M_WeaponsA(int choice)
+static void M_WeaponsA(int choice)
 {
     int i;
 
     if (fsize == 4261144 || fsize == 4271324 || fsize == 4211660 ||
-            fsize == 4207819 || fsize == 4274218 || fsize == 4225504 ||
-            fsize == 4225460 || fsize == 4234124 || fsize == 4196020)
+        fsize == 4207819 || fsize == 4274218 || fsize == 4225504 ||
+        fsize == 4225460 || fsize == 4234124 || fsize == 4196020)
     {
         for (i = 0; i < NUMWEAPONS - 4; i++)
             players[consoleplayer].weaponowned[i] = true;
             players[consoleplayer].weaponowned[7] = true;
     }
     else if (fsize == 10396254 || fsize == 10399316 || fsize == 10401760 ||
-            fsize == 11159840 || fsize == 12408292 || gameversion == exe_chex)
+        fsize == 11159840 || fsize == 12408292 || gameversion == exe_chex)
     {
         for (i = 0; i < NUMWEAPONS - 1; i++)
             players[consoleplayer].weaponowned[i] = true;
@@ -9187,161 +9420,160 @@ void M_WeaponsA(int choice)
     players[consoleplayer].message = s_STSTR_FAADDED;
 }
 
-void M_WeaponsB(int choice)
+static void M_WeaponsB(int choice)
 {
     players[consoleplayer].weaponowned[2] = true;
     players[consoleplayer].ammo[1] = players[consoleplayer].maxammo[1];
 
     if (fsize != 19321722 && fsize != 12361532)
         players[consoleplayer].message = "SHOTGUN ADDED";
+
     if (fsize == 19321722)
         players[consoleplayer].message = "TAZER ADDED";
+
     if (fsize == 12361532)
         players[consoleplayer].message = "LARGE ZORCHER ADDED";
 }
 
-void M_WeaponsC(int choice)
+static void M_WeaponsC(int choice)
 {
     players[consoleplayer].weaponowned[3] = true;
     players[consoleplayer].ammo[1] = players[consoleplayer].maxammo[1];
 
     if (fsize != 19321722 && fsize != 12361532)
         players[consoleplayer].message = "CHAINGUN ADDED";
+
     if (fsize == 19321722)
         players[consoleplayer].message = "UZI ADDED";
+
     if (fsize == 12361532)
         players[consoleplayer].message = "RAPID ZORCHER ADDED";
 }
 
-void M_WeaponsD(int choice)
+static void M_WeaponsD(int choice)
 {
     players[consoleplayer].weaponowned[4] = true;
     players[consoleplayer].ammo[3] = players[consoleplayer].maxammo[3];
 
     if (fsize != 19321722 && fsize != 12361532)
         players[consoleplayer].message = "ROCKET LAUNCHER ADDED";
+
     if (fsize == 19321722)
         players[consoleplayer].message = "PHOTON 'ZOOKA ADDED";
+
     if (fsize == 12361532)
         players[consoleplayer].message = "ZORCH PROPULSOR ADDED";
 }
 
-void M_WeaponsE(int choice)
+static void M_WeaponsE(int choice)
 {
     players[consoleplayer].weaponowned[5] = true;
     players[consoleplayer].ammo[2] = players[consoleplayer].maxammo[2];
 
     if (fsize != 19321722 && fsize != 12361532)
         players[consoleplayer].message = "PLASMA RIFLE ADDED";
+
     if (fsize == 19321722)
         players[consoleplayer].message = "STICK ADDED";
+
     if (fsize == 12361532)
         players[consoleplayer].message = "PHASING ZORCHER ADDED";
 }
 
-void M_WeaponsF(int choice)
+static void M_WeaponsF(int choice)
 {
     players[consoleplayer].weaponowned[6] = true;
     players[consoleplayer].ammo[2] = players[consoleplayer].maxammo[2];
 
     if (fsize != 19321722 && fsize != 12361532)
         players[consoleplayer].message = "BFG9000 ADDED";
+
     if (fsize == 19321722)
         players[consoleplayer].message = "NUKER ADDED";
+
     if (fsize == 12361532)
         players[consoleplayer].message =
         "LARGE AREA ZORCHING DEVICE ADDED";
 }
 
-void M_WeaponsG(int choice)
+static void M_WeaponsG(int choice)
 {
     players[consoleplayer].weaponowned[7] = true;
 
     if (fsize != 19321722 && fsize != 12361532)
         players[consoleplayer].message = "CHAINSAW ADDED";
+
     if (fsize == 19321722)
         players[consoleplayer].message = "HOIG REZNATOR ADDED";
+
     if (fsize == 12361532)
         players[consoleplayer].message = "SUPER BOOTSPORK ADDED";
 }
 
-void M_WeaponsH(int choice)
+static void M_WeaponsH(int choice)
 {
     players[consoleplayer].weaponowned[8] = true;
     players[consoleplayer].ammo[1] = players[consoleplayer].maxammo[1];
 
     if (fsize != 19321722)
         players[consoleplayer].message = "SUPER SHOTGUN ADDED";
+
     if (fsize == 19321722)
         players[consoleplayer].message = "CRYOGUN ADDED";
 }
 
-void M_KeysA(int choice)
+static void M_KeysA(int choice)
 {
     player_t *player = &players[consoleplayer];
-
     P_GiveAllCards(player);
-
     players[consoleplayer].message = "ALL KEYS FOR THIS MAP ADDED";
 }
 
-void M_KeysB(int choice)
+static void M_KeysB(int choice)
 {
     player_t *player = &players[consoleplayer];
-
     P_GiveCard (player, it_bluecard);
-
     players[consoleplayer].message = "BLUE KEYCARD ADDED";
 }
 
-void M_KeysC(int choice)
+static void M_KeysC(int choice)
 {
     player_t *player = &players[consoleplayer];
-
     P_GiveCard (player, it_yellowcard);
-
     players[consoleplayer].message = "YELLOW KEYCARD ADDED";
 }
 
-void M_KeysD(int choice)
+static void M_KeysD(int choice)
 {
     player_t *player = &players[consoleplayer];
-
     P_GiveCard (player, it_redcard);
-
     players[consoleplayer].message = "RED KEYCARD ADDED";
 }
 
-void M_KeysE(int choice)
+static void M_KeysE(int choice)
 {
     player_t *player = &players[consoleplayer];
-
     P_GiveCard (player, it_blueskull);
-
     players[consoleplayer].message = "BLUE SKULLKEY ADDED";
 }
 
-void M_KeysF(int choice)
+static void M_KeysF(int choice)
 {
     player_t *player = &players[consoleplayer];
-
     P_GiveCard (player, it_yellowskull);
-
     players[consoleplayer].message = "YELLOW SKULLKEY ADDED";
 }
 
-void M_KeysG(int choice)
+static void M_KeysG(int choice)
 {
     player_t *player = &players[consoleplayer];
-
     P_GiveCard (player, it_redskull);
-
     players[consoleplayer].message = "RED SKULLKEY ADDED";
 }
 
-void M_ItemsA(int choice)
+static void M_ItemsA(int choice)
 {
-    player_t* player = &players[consoleplayer];
+    player_t *player = &players[consoleplayer];
 
     if (!got_all)
     {
@@ -9362,7 +9594,8 @@ void M_ItemsA(int choice)
         if (!player->backpack)
         {
             for (i = 0; i < NUMAMMO; i++)
-            player->maxammo[i] *= 2;
+                player->maxammo[i] *= 2;
+
             player->backpack = true;
         }
 
@@ -9392,17 +9625,17 @@ void M_ItemsA(int choice)
 
         got_all = false;
     }
+
     players[consoleplayer].message = "ALL ITEMS ADDED";
 }
 
-void M_ItemsB(int choice)
+static void M_ItemsB(int choice)
 {
     if (!got_invisibility)
     {
         players[consoleplayer].powers[2] = INVISTICS;
         players[consoleplayer].cheats ^= CF_NOTARGET;
         players[consoleplayer].mo->flags |= MF_SHADOW;
-
         got_invisibility = true;
     }
     else
@@ -9410,7 +9643,6 @@ void M_ItemsB(int choice)
         players[consoleplayer].powers[2] = 0;
         players[consoleplayer].cheats &= ~CF_NOTARGET;
         players[consoleplayer].mo->flags &= ~MF_SHADOW;
-
         got_invisibility = false;
 
         if (beta_style)
@@ -9423,130 +9655,129 @@ void M_ItemsB(int choice)
         players[consoleplayer].message = s_GOTINVIS;
 }
 
-void M_ItemsC(int choice)
+static void M_ItemsC(int choice)
 {
     if (!got_radiation_suit)
     {
         players[consoleplayer].powers[3] = IRONTICS;
-
         got_radiation_suit = true;
     }
     else
     {
         players[consoleplayer].powers[3] = 0;
-
         got_radiation_suit = false;
     }
 
     if (fsize != 12361532 && fsize != 19321722)
         players[consoleplayer].message = s_GOTSUIT;
+
     if (fsize == 12361532)
         players[consoleplayer].message = "SLIME-PROOF SUIT ADDED";
+
     if (fsize == 19321722)
         players[consoleplayer].message = "VULCAN RUBBER BOOTS ADDED";
 }
 
-void M_ItemsD(int choice)
+static void M_ItemsD(int choice)
 {
     if (!got_map)
     {
         players[consoleplayer].powers[4] = 1;
-
         got_map = true;
     }
     else
     {
         players[consoleplayer].powers[4] = 0;
-
         got_map = false;
     }
 
     if (fsize != 19321722)
         players[consoleplayer].message = s_GOTMAP;
+
     if (fsize == 19321722)
         players[consoleplayer].message = "SI ARRAY MAPPING ADDED";
 }
 
-void M_ItemsE(int choice)
+static void M_ItemsE(int choice)
 {
     if (!got_light_amp)
     {
         players[consoleplayer].powers[5] = INFRATICS;
-
         got_light_amp = true;
     }
     else
     {
         players[consoleplayer].powers[5] = 0;
-
         got_light_amp = false;
     }
 
     if (fsize != 12361532 && fsize != 19321722)
         players[consoleplayer].message = s_GOTVISOR;
+
     if (fsize == 12361532)
         players[consoleplayer].message = "ULTRA GOOGLES ADDED";
+
     if (fsize == 19321722)
         players[consoleplayer].message = "INFRARED VISOR ADDED";
 }
 
-void M_ItemsF(int choice)
+static void M_ItemsF(int choice)
 {
     if (!got_invulnerability)
     {
         players[consoleplayer].powers[0] = INVULNTICS;
-
         got_invulnerability = true;
     }
     else
     {
         players[consoleplayer].powers[0] = 0;
-
         got_invulnerability = false;
     }
 
     if (fsize != 19321722)
         players[consoleplayer].message = s_GOTINVUL;
+
     if (fsize == 19321722)
         players[consoleplayer].message = "FORCE FIELD ADDED";
 }
 
-void M_ItemsG(int choice)
+static void M_ItemsG(int choice)
 {
     if (!got_berserk)
     {
         players[consoleplayer].powers[1] = 1;
-
         got_berserk = true;
     }
     else
     {
         players[consoleplayer].powers[1] = 0;
-
         got_berserk = false;
     }
 
     if (fsize != 19321722)
         players[consoleplayer].message = s_GOTBERSERK;
+
     if (fsize == 19321722)
         players[consoleplayer].message = "007 MICROTEL ADDED";
 }
 
-void M_ItemsH(int choice)
+static void M_ItemsH(int choice)
 {
     if (players[consoleplayer].mo)
         players[consoleplayer].mo->health = 100;
+
     players[consoleplayer].health = 100;
     players[consoleplayer].message = "GOT FULL HEALTH (100)";
 }
 
-void M_ItemsI(int choice)
+static void M_ItemsI(int choice)
 {
     if (fsize == 10396254 || fsize == 10399316 || fsize == 4207819 ||
         fsize == 4274218 || fsize == 4225504)
     {
         if (players[consoleplayer].mo)
             players[consoleplayer].mo->health = 199;
+
         players[consoleplayer].health = 199;
         players[consoleplayer].message = "GOT FULL HEALTH (199)";
     }
@@ -9554,62 +9785,65 @@ void M_ItemsI(int choice)
     {
         if (players[consoleplayer].mo)
             players[consoleplayer].mo->health = 200;
+
         players[consoleplayer].health = 200;
         players[consoleplayer].message = "GOT FULL HEALTH (200)";
     }
 }
 
-void M_ItemsJ(int choice)
+static void M_ItemsJ(int choice)
 {
     int i;
 
-    player_t* player = &players[consoleplayer];
+    player_t *player = &players[consoleplayer];
 
     if (!player->backpack)
     {
         for (i = 0; i < NUMAMMO; i++)
             player->maxammo[i] *= 2;
+
         player->backpack = true;
     }
+
     for (i = 0; i < NUMAMMO; i++)
         P_GiveAmmo (player, i, 1);
+
     HU_PlayerMessage(s_GOTBACKPACK, true);
 }
 
-void M_ItemsK(int choice)
+static void M_ItemsK(int choice)
 {
-    player_t* player = &players[consoleplayer];
-
+    player_t *player = &players[consoleplayer];
     P_UseArtifact(player, arti_fly);
-
     HU_PlayerMessage("FLIGHT ADDED", true);
 }
 
-void M_Topo(int choice)
+static void M_Topo(int choice)
 {
-    cheating = (cheating+1) % 3;
-    cheeting = (cheeting+1) % 3;
+    cheating = (cheating + 1) % 3;
+    cheeting = (cheeting + 1) % 3;
 }
 
-void M_Rift(int choice)
+static void M_Rift(int choice)
 {
     switch (choice)
     {
         case 0:
             if (fsize == 4261144 || fsize == 4271324 || fsize == 4211660 ||
-            fsize == 4207819 || fsize == 4274218 || fsize == 4225504 ||
-            fsize == 4225460 || fsize == 4234124 || fsize == 4196020 ||
-            fsize == 12361532)
+                fsize == 4207819 || fsize == 4274218 || fsize == 4225504 ||
+                fsize == 4225460 || fsize == 4234124 || fsize == 4196020 ||
+                fsize == 12361532)
             {
                 if (epi >= 1 && map >= 1)
                     map--;
             }
             else if (fsize == 10396254 || fsize == 10399316 || fsize == 10401760 ||
-                    fsize == 11159840)
+                fsize == 11159840)
             {
                 if (epi >= 1 && map >= 1)
                 {
                     map--;
+
                     if (epi == 3 && map == 0)
                     {
                         epi = 2;
@@ -9627,6 +9861,7 @@ void M_Rift(int choice)
                 if (epi >= 1 && map >= 1)
                 {
                     map--;
+
                     if (epi == 4 && map == 0)
                     {
                         epi = 3;
@@ -9649,6 +9884,7 @@ void M_Rift(int choice)
                 if (epi >= 1 && map >= 1)
                 {
                     map--;
+
                     if (epi == 4 && map == 0)
                     {
                         epi = 3;
@@ -9668,10 +9904,10 @@ void M_Rift(int choice)
                 }
             }
             else if (fsize == 14943400 || fsize == 14824716 || fsize == 14612688 ||
-                    fsize == 14607420 || fsize == 14604584 || fsize == 18195736 ||
-                    fsize == 18654796 || fsize == 18240172 || fsize == 17420824 ||
-                    fsize == 28422764 || fsize == 14677988 || fsize == 14683458 ||
-                    fsize == 14691821)
+                fsize == 14607420 || fsize == 14604584 || fsize == 18195736 ||
+                fsize == 18654796 || fsize == 18240172 || fsize == 17420824 ||
+                fsize == 28422764 || fsize == 14677988 || fsize == 14683458 ||
+                fsize == 14691821)
             {
                 if (map >= 2)
                     map--;
@@ -9680,19 +9916,22 @@ void M_Rift(int choice)
             {
                 if (map >= 2)
                     map--;
+
                 if (map == 30)
                     map = 20;
             }
+
             break;
 
         case 1:
             if (fsize == 4261144 || fsize == 4271324 || fsize == 4211660 ||
-            fsize == 4207819 || fsize == 4274218 || fsize == 4225504 ||
-            fsize == 4225460 || fsize == 4234124 || fsize == 4196020)
+                fsize == 4207819 || fsize == 4274218 || fsize == 4225504 ||
+                fsize == 4225460 || fsize == 4234124 || fsize == 4196020)
             {
                 if (epi <= 1 && map <= 9)
                 {
                     map++;
+
                     if (epi == 1 && map == 10)
                     {
                         epi = 1;
@@ -9705,6 +9944,7 @@ void M_Rift(int choice)
                 if (epi <= 1 && map <= 5)
                 {
                     map++;
+
                     if (epi == 1 && map == 6)
                     {
                         epi = 1;
@@ -9713,11 +9953,12 @@ void M_Rift(int choice)
                 }
             }
             else if (fsize == 10396254 || fsize == 10399316 || fsize == 10401760 ||
-                    fsize == 11159840)
+                fsize == 11159840)
             {
                 if (epi <= 3 && map <= 9)
                 {
                     map++;
+
                     if (epi == 1 && map == 10)
                     {
                         epi = 2;
@@ -9740,6 +9981,7 @@ void M_Rift(int choice)
                 if (epi <= 4 && map <= 9)
                 {
                     map++;
+
                     if (epi == 1 && map == 10)
                     {
                         epi = 2;
@@ -9767,6 +10009,7 @@ void M_Rift(int choice)
                 if (epi <= 4 && map <= 10)
                 {
                     map++;
+
                     if (epi == 1 && map == 11)
                     {
                         epi = 2;
@@ -9793,6 +10036,7 @@ void M_Rift(int choice)
             {
                 if (map <= 30)
                     map++;
+
                 if (map == 21)
                     map = 31;
             }
@@ -9817,11 +10061,12 @@ void M_Rift(int choice)
                         map++;
                 }
             }
+
             break;
     }
 }
 
-void M_RiftNow(int choice)
+static void M_RiftNow(int choice)
 {
     warped = 1;
     menuactive = 0;
@@ -9829,18 +10074,19 @@ void M_RiftNow(int choice)
     players[consoleplayer].message = STSTR_CLEV;
 }
 
-void M_Spin(int choice)
+static void M_Spin(int choice)
 {
     switch (choice)
     {
         case 0:
             if (fsize == 4261144 || fsize == 4271324 || fsize == 4211660 ||
-            fsize == 4207819 || fsize == 4274218 || fsize == 4225504 ||
-            fsize == 4225460 || fsize == 4234124 || fsize == 4196020)
+                fsize == 4207819 || fsize == 4274218 || fsize == 4225504 ||
+                fsize == 4225460 || fsize == 4234124 || fsize == 4196020)
             {
                 if (tracknum > 1)
                 {
                     tracknum--;
+
                     if (tracknum == 30)
                         tracknum = 29;
                     else if (tracknum == 27)
@@ -9848,12 +10094,13 @@ void M_Spin(int choice)
                 }
             }
             else if (fsize == 10396254 || fsize == 10399316 || fsize == 10401760 ||
-                    fsize == 11159840 || fsize == 12408292 || fsize == 12361532 ||
-                    fsize == 12474561 || fsize == 12538385 || fsize == 12487824)
+                fsize == 11159840 || fsize == 12408292 || fsize == 12361532 ||
+                fsize == 12474561 || fsize == 12538385 || fsize == 12487824)
             {
                 if (tracknum > 1)
                 {
                     tracknum--;
+
                     if (fsize == 12361532)
                     {
                         if (tracknum == 30)
@@ -9875,15 +10122,16 @@ void M_Spin(int choice)
                 }
             }
             else if (fsize == 14943400 || fsize == 14824716 || fsize == 14612688 ||
-                    fsize == 14607420 || fsize == 14604584 || fsize == 19321722 ||
-                    fsize == 28422764 || fsize == 14677988 || fsize == 14683458 ||
-                    fsize == 14691821)
+                fsize == 14607420 || fsize == 14604584 || fsize == 19321722 ||
+                fsize == 28422764 || fsize == 14677988 || fsize == 14683458 ||
+                fsize == 14691821)
             {
                 if (fsize == 19321722)
                 {
                     if (tracknum > 33)
                     {
                         tracknum--;
+
                         if (tracknum == 64)
                             tracknum = 63;
                         else if (tracknum == 62)
@@ -9899,6 +10147,7 @@ void M_Spin(int choice)
                     if (tracknum > 33)
                     {
                         tracknum--;
+
                         if (tracknum == 65)
                             tracknum = 64;
                         else if (tracknum == 60)
@@ -9920,6 +10169,7 @@ void M_Spin(int choice)
                     if (tracknum > 33)
                     {
                         tracknum--;
+
                         if (tracknum == 61)
                             tracknum = 60;
                         else if (tracknum == 59)
@@ -9940,6 +10190,7 @@ void M_Spin(int choice)
                 if (tracknum > 33)
                 {
                     tracknum--;
+
                     if (tracknum == 65)
                         tracknum = 63;
                     else if (tracknum == 62)
@@ -9959,6 +10210,7 @@ void M_Spin(int choice)
                 if (tracknum > 33)
                 {
                     tracknum--;
+
                     if (tracknum == 65)
                         tracknum = 62;
                     else if (tracknum == 61)
@@ -9967,16 +10219,18 @@ void M_Spin(int choice)
                         tracknum = 49;
                 }
             }
+
             break;
 
         case 1:
             if (fsize == 4261144 || fsize == 4271324 || fsize == 4211660 ||
-            fsize == 4207819 || fsize == 4274218 || fsize == 4225504 ||
-            fsize == 4225460 || fsize == 4234124 || fsize == 4196020)
+                fsize == 4207819 || fsize == 4274218 || fsize == 4225504 ||
+                fsize == 4225460 || fsize == 4234124 || fsize == 4196020)
             {
                 if (tracknum < 31)
                 {
                     tracknum++;
+
                     if (tracknum == 10)
                         tracknum = 28;
                     else if (tracknum == 30)
@@ -9984,12 +10238,13 @@ void M_Spin(int choice)
                 }
             }
             else if (fsize == 10396254 || fsize == 10399316 || fsize == 10401760 ||
-                    fsize == 11159840 || fsize == 12408292 || fsize == 12361532 ||
-                    fsize == 12474561 || fsize == 12538385 || fsize == 12487824)
+                fsize == 11159840 || fsize == 12408292 || fsize == 12361532 ||
+                fsize == 12474561 || fsize == 12538385 || fsize == 12487824)
             {
                 if (tracknum < 31)
                 {
                     tracknum++;
+
                     if (fsize == 12361532)
                     {
                         if (tracknum == 6)
@@ -10011,15 +10266,16 @@ void M_Spin(int choice)
                 }
             }
             else if (fsize == 14943400 || fsize == 14824716 || fsize == 14612688 ||
-                    fsize == 14607420 || fsize == 14604584 || fsize == 19321722 ||
-                    fsize == 28422764 || fsize == 14677988 || fsize == 14683458 ||
-                    fsize == 14691821)
+                fsize == 14607420 || fsize == 14604584 || fsize == 19321722 ||
+                fsize == 28422764 || fsize == 14677988 || fsize == 14683458 ||
+                fsize == 14691821)
             {
                 if (fsize == 19321722)
                 {
                     if (tracknum < 67)
                     {
                         tracknum++;
+
                         if (tracknum == 46)
                             tracknum = 47;
                         else if (tracknum == 51)
@@ -10035,6 +10291,7 @@ void M_Spin(int choice)
                     if (tracknum < 67)
                     {
                         tracknum++;
+
                         if (tracknum == 37)
                             tracknum = 38;
                         else if (tracknum == 39)
@@ -10056,6 +10313,7 @@ void M_Spin(int choice)
                     if (tracknum < 67)
                     {
                         tracknum++;
+
                         if (tracknum == 43)
                             tracknum = 50;
                         else if (tracknum == 51)
@@ -10076,6 +10334,7 @@ void M_Spin(int choice)
                 if (tracknum < 66)
                 {
                     tracknum++;
+
                     if (tracknum == 41)
                         tracknum = 42;
                     else if (tracknum == 45)
@@ -10095,6 +10354,7 @@ void M_Spin(int choice)
                 if (tracknum < 67)
                 {
                     tracknum++;
+
                     if (tracknum == 50)
                         tracknum = 51;
                     else if (tracknum == 58)
@@ -10103,8 +10363,10 @@ void M_Spin(int choice)
                         tracknum = 66;
                 }
             }
+
             break;
     }
+
     players[consoleplayer].message = s_STSTR_MUS;
 
     if (mus_engine == 3)
@@ -10115,7 +10377,7 @@ void M_Spin(int choice)
     mus_cheat_used = true;
 }
 
-void M_KeyBindingsSetKey(int choice)
+static void M_KeyBindingsSetKey(int choice)
 {
     askforkey = true;
     keyaskedfor = choice;
@@ -10133,7 +10395,7 @@ void M_KeyBindingsSetKey(int choice)
 // ...CHANGE THE START- & END-POS INTEGERS AS WELL...
 // ...TO THEIR NEW CORRESPONDING POSITIONS OR ELSE...
 // ...THE KEY BINDINGS MENU WILL BE VERY BUGGY!!!
-void M_KeyBindingsClearControls(int ch)
+static void M_KeyBindingsClearControls(int ch)
 {
     int i;
 
@@ -10144,12 +10406,13 @@ void M_KeyBindingsClearControls(int ch)
     }
 }
 
-void M_KeyBindingsClearAll(int choice)
+static void M_KeyBindingsClearAll(int choice)
 {
     int i;
 
     for (i = key_controls_start_in_cfg_at_pos; i < key_controls_end_in_cfg_at_pos; i++)
         *doom_defaults_list[i].location = 0;
+
 #ifdef WII
     *doom_defaults_list[key_controls_start_in_cfg_at_pos + 2].location = CLASSIC_CONTROLLER_MINUS;
 #else
@@ -10157,9 +10420,10 @@ void M_KeyBindingsClearAll(int choice)
 #endif
 }
 
-void M_KeyBindingsReset(int choice)
+static void M_KeyBindingsReset(int choice)
 {
     int i = key_controls_start_in_cfg_at_pos;
+
 #ifdef WII
     *doom_defaults_list[i++].location = CLASSIC_CONTROLLER_R;
     *doom_defaults_list[i++].location = CLASSIC_CONTROLLER_L;
@@ -10195,11 +10459,9 @@ void M_KeyBindingsReset(int choice)
 #endif
 }
 
-void M_DrawKeyBindings(void)
+static void M_DrawKeyBindings(void)
 {
     int i;
-
-    //M_DarkBackground(0);
 
     if (fsize != 19321722)
         V_DrawPatchWithShadow (80, 0, 0, W_CacheLumpName("M_T_BNDS", PU_CACHE), false);
@@ -10209,9 +10471,9 @@ void M_DrawKeyBindings(void)
     for (i = 0; i < key_controls_end_in_cfg_at_pos - key_controls_start_in_cfg_at_pos; i++)
     {
         if (askforkey && keyaskedfor == i)
-            M_WriteText(195, (i*9+16), "???");
+            M_WriteText(195, (i * 9 + 16), "???");
         else
-            M_WriteText(195, (i*9+16),
+            M_WriteText(195, (i * 9 + 16),
                     Key2String(*(doom_defaults_list[i + FirstKey +
                             key_controls_start_in_cfg_at_pos].location)));
     }
@@ -10222,6 +10484,7 @@ void M_DrawKeyBindings(void)
 #endif
 
     dp_translation = crx[CRX_GRAY];
+
 #ifdef WII
     M_WriteText(183, 140, "/");
 #else
@@ -10229,25 +10492,21 @@ void M_DrawKeyBindings(void)
 #endif
 
     dp_translation = crx[CRX_BLUE];
-#ifdef WII
-    if (itemOn == 14)
-#else
-    if (itemOn == 16)
-#endif
-        dp_translation = crx[CRX_GOLD];
-#ifdef WII
-    M_WriteText(45, 140, "CLEAR ALL CONTROLS");
-#else
-    M_WriteText(45, 160, "CLEAR ALL CONTROLS");
-#endif
-/*
+
 #ifdef WII
     if (itemOn == 14)
 #else
     if (itemOn == 16)
 #endif
 
-*/
+    dp_translation = crx[CRX_GOLD];
+
+#ifdef WII
+    M_WriteText(45, 140, "CLEAR ALL CONTROLS");
+#else
+    M_WriteText(45, 160, "CLEAR ALL CONTROLS");
+#endif
+
     dp_translation = crx[CRX_BLUE];
 
 #ifdef WII
@@ -10255,28 +10514,22 @@ void M_DrawKeyBindings(void)
 #else
     if (itemOn == 17)
 #endif
-        dp_translation = crx[CRX_GOLD];
+
+    dp_translation = crx[CRX_GOLD];
+
 #ifdef WII
     M_WriteText(195, 140, "RESET DEFAULTS");
 #else
     M_WriteText(195, 160, "RESET DEFAULTS");
 #endif
-/*
-#ifdef WII
-    if (itemOn == 15)
-#else
-    if (itemOn == 17)
-#endif
-
-*/
 }
 
-void M_KeyBindings(int choice)
+static void M_KeyBindings(int choice)
 {
     M_SetupNextMenu(&KeyBindingsDef);
 }
 
-void M_Freelook(int choice)
+static void M_Freelook(int choice)
 {
     if (!mousewalk)
     {
@@ -10285,17 +10538,19 @@ void M_Freelook(int choice)
             case 0:
                 if (mouselook)
                     mouselook--;
+
                 break;
 
             case 1:
                 if (mouselook < 2)
                     mouselook++;
+
                 break;
         }
     }
 }
 
-void M_FreelookSpeed(int choice)
+static void M_FreelookSpeed(int choice)
 {
     if (mouselook)
     {
@@ -10304,25 +10559,25 @@ void M_FreelookSpeed(int choice)
             case 0:
                 if (mspeed)
                     mspeed--;
+
                 break;
 
             case 1:
                 if (mspeed < 10)
                     mspeed++;
+
                 break;
         }
     }
 }
 
-void M_Controls(int choice)
+static void M_Controls(int choice)
 {
     M_SetupNextMenu(&ControlsDef);
 }
 
-void M_DrawControls(void)
+static void M_DrawControls(void)
 {
-    //M_DarkBackground(0);
-
     if (fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
         V_DrawPatchWithShadow(48, 15, 0, W_CacheLumpName("M_T_CSET",
                                                PU_CACHE), false);
@@ -10418,7 +10673,7 @@ void M_DrawControls(void)
 
     M_WriteText(ControlsDef.x, ControlsDef.y + 28, "FREELOOK");
 
-    if (whichSkull == 1)
+    if (!whichSkull)
     {
         char *string = "IF THE BARS FOR WALKING, TURNING & STRAFING";
         char *string2 = "ARE AT THEIR HIGHEST LEVEL, IT MEANS THE SAME";
@@ -10426,64 +10681,73 @@ void M_DrawControls(void)
         int x = ORIGINALWIDTH / 2 - M_StringWidth(string) / 2;
         int x2 = ORIGINALWIDTH / 2 - M_StringWidth(string2) / 2;
         int x3 = ORIGINALWIDTH / 2 - M_StringWidth(string3) / 2;
+
         dp_translation = crx[CRX_GOLD];
         M_WriteText(x, ControlsDef.y + 78, string);
+
         dp_translation = crx[CRX_GOLD];
         M_WriteText(x2, ControlsDef.y + 88, string2);
+
         dp_translation = crx[CRX_GOLD];
         M_WriteText(x3, ControlsDef.y + 98, string3);
     }
 }
 
-void M_FPS(int choice)
+static void M_FPS(int choice)
 {
     switch (choice)
     {
         case 0:
             if (display_fps)
                 display_fps--;
+
             break;
 
         case 1:
             if (display_fps < 1)
                 display_fps++;
+
             break;
     }
 }
 
-void M_HOMDetector(int choice)
+static void M_HOMDetector(int choice)
 {
     switch (choice)
     {
         case 0:
             if (autodetect_hom)
                 autodetect_hom = false;
+
             break;
 
         case 1:
             if (!autodetect_hom)
                 autodetect_hom = true;
+
             break;
     }
 }
 
-void M_MemoryUsage(int choice)
+static void M_MemoryUsage(int choice)
 {
     switch (choice)
     {
         case 0:
             if (memory_usage)
                 memory_usage = false;
+
             break;
 
         case 1:
             if (!memory_usage)
                 memory_usage = true;
+
             break;
     }
 }
 
-void M_ConDump(int choice)
+static void M_ConDump(int choice)
 {
     dump_con = true;
     C_ConDump();
@@ -10491,7 +10755,7 @@ void M_ConDump(int choice)
 }
 
 #ifdef HEAPDUMP
-void M_MemDump(int choice)
+static void M_MemDump(int choice)
 {
     dump_mem = true;
     Z_DumpMemory();    
@@ -10499,37 +10763,39 @@ void M_MemDump(int choice)
 }
 #endif
 
-void M_StatDump(int choice)
+static void M_StatDump(int choice)
 {
     dump_stat = true;
     StatDump();    
     players[consoleplayer].message = "Level Statistics have been dumped.";
 }
 
-void M_PrintDir(int choice)
+static void M_PrintDir(int choice)
 {
     printdir = true;
     W_PrintDirectory();
     players[consoleplayer].message = "WAD contents have been dumped to textfile.";
 }
 
-void M_ReplaceMissing(int choice)
+static void M_ReplaceMissing(int choice)
 {
     switch (choice)
     {
         case 0:
             if (replace_missing)
                 replace_missing = false;
+
             break;
 
         case 1:
             if (!replace_missing)
                 replace_missing = true;
+
             break;
     }
 }
 
-void M_DisplayTicker(int choice)
+static void M_DisplayTicker(int choice)
 {
     switch (choice)
     {
@@ -10539,6 +10805,7 @@ void M_DisplayTicker(int choice)
                 dots_enabled = 0;
                 display_ticker = false;
             }
+
             break;
 
         case 1:
@@ -10547,247 +10814,263 @@ void M_DisplayTicker(int choice)
                 dots_enabled = 1;
                 display_ticker = true;
             }
+
             break;
     }
+
     I_DisplayFPSDots(display_ticker);
 }
 
-void M_Coordinates(int choice)
+static void M_Coordinates(int choice)
 {
     switch (choice)
     {
         case 0:
             if (coordinates_info)
                 coordinates_info--;
+
             break;
 
         case 1:
             if (coordinates_info < 1)
                 coordinates_info++;
+
             break;
     }
 }
 
-void M_Timer(int choice)
+static void M_Timer(int choice)
 {
     switch (choice)
     {
         case 0:
             if (timer_info)
                 timer_info--;
+
             break;
 
         case 1:
             if (timer_info < 1)
                 timer_info++;
+
             break;
     }
+
     HU_Start();
 }
 
-void M_Authors(int choice)
+static void M_Authors(int choice)
 {
     switch (choice)
     {
         case 0:
             if (show_authors)
                 show_authors = false;
+
             break;
 
         case 1:
             if (!show_authors)
                 show_authors = true;
+
             break;
     }
+
     HU_Start();
 }
 
-void M_StatusMap(int choice)
+static void M_StatusMap(int choice)
 {
     switch (choice)
     {
         case 0:
             if (d_statusmap)
                 d_statusmap = false;
+
             break;
 
         case 1:
             if (!d_statusmap)
                 d_statusmap = true;
+
             break;
     }
+
     HU_Start();
 }
 
-void M_MapName(int choice)
+static void M_MapName(int choice)
 {
     switch (choice)
     {
         case 0:
             if (show_title)
                 show_title = false;
+
             break;
 
         case 1:
             if (!show_title)
                 show_title = true;
+
             break;
     }
+
     HU_Start();
 }
 
-void M_MapSecretAfter(int choice)
+static void M_MapSecretAfter(int choice)
 {
     switch (choice)
     {
         case 0:
             if (map_secret_after)
                 map_secret_after = false;
+
             break;
 
         case 1:
             if (!map_secret_after)
                 map_secret_after = true;
+
             break;
     }
 }
 
-void M_Version(int choice)
+static void M_Version(int choice)
 {
     switch (choice)
     {
         case 0:
             if (version_info)
                 version_info--;
+
             break;
 
         case 1:
             if (version_info < 1)
                 version_info++;
+
             break;
     }
 }
 
-void M_SoundInfo(int choice)
+static void M_SoundInfo(int choice)
 {
     switch (choice)
     {
         case 0:
             if (sound_info)
                 sound_info = false;
+
             break;
 
         case 1:
-            if (sound_info == false)
+            if (!sound_info)
                 sound_info = true;
+
             break;
     }
 }
 
-void M_System(int choice)
+static void M_System(int choice)
 {
     M_SetupNextMenu(&SystemDef);
 }
 
-void M_GameFiles(int choice)
+static void M_GameFiles(int choice)
 {
     M_SetupNextMenu(&FilesDef);
 }
 
-void M_DrawFilesMenu(void)
+static void M_DrawFilesMenu(void)
 {
-    //M_DarkBackground(0);
 }
 
-void M_Armor(int choice)
+static void M_Armor(int choice)
 {
     M_SetupNextMenu(&ArmorDef);
 }
 
-void M_Weapons(int choice)
+static void M_Weapons(int choice)
 {
     M_SetupNextMenu(&WeaponsDef);
 }
 
-void M_Keys(int choice)
+static void M_Keys(int choice)
 {
     M_SetupNextMenu(&KeysDef);
 }
 
-void M_Items(int choice)
+static void M_Items(int choice)
 {
     M_SetupNextMenu(&ItemsDef);
 }
 
-void M_Screen(int choice)
+static void M_Screen(int choice)
 {
     M_SetupNextMenu(&ScreenDef);
 }
 
-void M_Cheats(int choice)
-{
-    DetectState();
-
-    M_SetupNextMenu(&CheatsDef);
-}
 /*
-void M_Record(int choice)
+static void M_Record(int choice)
 {
     M_SetupNextMenu(&RecordDef);
 }
 */
-void M_Automap(int choice)
+
+static void M_Automap(int choice)
 {
     M_SetupNextMenu(&AutomapDef);
 }
 
-void M_Game(int choice)
+static void M_Game(int choice)
 {
     M_SetupNextMenu(&GameDef);
 }
 
-void M_Game2(int choice)
+static void M_Game2(int choice)
 {
     M_SetupNextMenu(&GameDef2);
 }
 
-void M_Game3(int choice)
+static void M_Game3(int choice)
 {
     M_SetupNextMenu(&GameDef3);
 }
 
-void M_Game4(int choice)
+static void M_Game4(int choice)
 {
     M_SetupNextMenu(&GameDef4);
 }
 
-void M_Game5(int choice)
+static void M_Game5(int choice)
 {
     M_SetupNextMenu(&GameDef5);
 }
 
-void M_Game6(int choice)
+static void M_Game6(int choice)
 {
     M_SetupNextMenu(&GameDef6);
 }
 
-void M_Game7(int choice)
+static void M_Game7(int choice)
 {
     M_SetupNextMenu(&GameDef7);
 }
 
-void M_OptSet(int choice)
+static void M_OptSet(int choice)
 {
     musicVolume = 15;
     sfxVolume = 8;
-    showMessages = 1;
-    drawgrid = 0;
-    followplayer = 1;
-    show_stats = 1;
+    showMessages = true;
+    drawgrid = false;
+    followplayer = true;
+    show_stats = true;
     timer_info = 1;
-    use_vanilla_weapon_change = 0;
+    use_vanilla_weapon_change = false;
     chaingun_tics = 1;
-    crosshair = 1;
+    crosshair = true;
     d_colblood = 1;
     d_colblood2 = 1;
     d_swirl = 1;
@@ -10810,7 +11093,7 @@ void M_OptSet(int choice)
     forwardmove = 50;
     sidemove = 36; 
     turnspeed = 5;
-    detailLevel = 0;
+    detailLevel = false;
     screenblocks = 11;
     screenSize = 8;
     usegamma = 5;
@@ -10818,7 +11101,6 @@ void M_OptSet(int choice)
     r_bloodsplats_max = 32768;
     correct_lost_soul_bounce = true;
     dots_enabled = 0;
-
     display_ticker = false;
     am_overlay = true;
     nerve_pwad = false;
@@ -10886,7 +11168,7 @@ void M_OptSet(int choice)
     d_ejectcasings = true;
     d_statusmap = false;
     show_title = true;
-    render_mode = 1;
+    render_mode = false;
     d_drawparticles = true;
     d_drawbfgcloud = true;
     d_drawrockettrails = true;
@@ -10908,18 +11190,18 @@ void M_OptSet(int choice)
     remove_slime_trails = true;
 }
 
-void M_DefSet(int choice)
+static void M_DefSet(int choice)
 {
     musicVolume = 8;
     sfxVolume = 8;
-    showMessages = 1;
-    drawgrid = 0;
-    followplayer = 1;
-    show_stats = 0;
+    showMessages = true;
+    drawgrid = false;
+    followplayer = true;
+    show_stats = false;
     timer_info = 0;
-    use_vanilla_weapon_change = 1;
+    use_vanilla_weapon_change = true;
     chaingun_tics = 4;
-    crosshair = 0;
+    crosshair = false;
     d_colblood = 0;
     d_colblood2 = 0;
     d_swirl = 0;
@@ -10942,7 +11224,7 @@ void M_DefSet(int choice)
     forwardmove = 29;
     sidemove = 24; 
     turnspeed = 7;
-    detailLevel = 0;
+    detailLevel = false;
     screenblocks = 10;
     screenSize = 7;
     usegamma = 10;
@@ -10950,7 +11232,6 @@ void M_DefSet(int choice)
     r_bloodsplats_max = 32768;
     correct_lost_soul_bounce = true;
     dots_enabled = 0;
-
     display_ticker = false;
     am_overlay = false;
     nerve_pwad = false;
@@ -11018,7 +11299,7 @@ void M_DefSet(int choice)
     d_ejectcasings = false;
     d_statusmap = true;
     show_title = true;
-    render_mode = 2;
+    render_mode = true;
     d_drawparticles = false;
     d_drawbfgcloud = false;
     d_drawrockettrails = false;
@@ -11040,14 +11321,15 @@ void M_DefSet(int choice)
     remove_slime_trails = false;
 }
 
-void M_Expansion(int choice)
+static void M_Expansion(int choice)
 {
     gamemission = (choice == ex1 ? doom2 : pack_nerve);
 
     M_SetupNextMenu(&NewDef);
 }
+
 /*
-void M_RMap(int choice)
+static void M_RMap(int choice)
 {
     switch (choice)
     {
@@ -11060,11 +11342,12 @@ void M_RMap(int choice)
                     rmap--;
             }
             else if (fsize == 10396254 || fsize == 10399316 || fsize == 10401760 ||
-                    fsize == 11159840)
+                fsize == 11159840)
             {
                 if (repi >= 1 && rmap >= 1)
                 {
                     rmap--;
+
                     if (repi == 3 && rmap == 0)
                     {
                         repi = 2;
@@ -11082,6 +11365,7 @@ void M_RMap(int choice)
                 if (repi >= 1 && rmap >= 1)
                 {
                     rmap--;
+
                     if (repi == 4 && rmap == 0)
                     {
                         repi = 3;
@@ -11107,9 +11391,9 @@ void M_RMap(int choice)
                 }
             }
             else if (fsize == 14943400 || fsize == 14824716 || fsize == 14612688 ||
-                    fsize == 14607420 || fsize == 14604584 || fsize == 18195736 ||
-                    fsize == 18654796 || fsize == 18240172 || fsize == 17420824 ||
-                    fsize == 28422764)
+                fsize == 14607420 || fsize == 14604584 || fsize == 18195736 ||
+                fsize == 18654796 || fsize == 18240172 || fsize == 17420824 ||
+                fsize == 28422764)
             {
                 if (rmap >= 2)
                     rmap--;
@@ -11118,9 +11402,11 @@ void M_RMap(int choice)
             {
                 if (rmap >= 2)
                     rmap--;
+
                 if (rmap == 30)
                     rmap = 20;
             }
+
             break;
 
         case 1:
@@ -11131,6 +11417,7 @@ void M_RMap(int choice)
                 if (repi <= 1 && rmap <= 9)
                 {
                     rmap++;
+
                     if (repi == 1 && rmap == 10)
                     {
                         repi = 1;
@@ -11139,11 +11426,12 @@ void M_RMap(int choice)
                 }
             }
             else if (fsize == 10396254 || fsize == 10399316 || fsize == 10401760 ||
-                    fsize == 11159840)
+                fsize == 11159840)
             {
                 if (repi <= 3 && rmap <= 9)
                 {
                     rmap++;
+
                     if (repi == 1 && rmap == 10)
                     {
                         repi = 2;
@@ -11166,6 +11454,7 @@ void M_RMap(int choice)
                 if (repi <= 4 && rmap <= 9)
                 {
                     rmap++;
+
                     if (repi == 1 && rmap == 10)
                     {
                         repi = 2;
@@ -11196,8 +11485,8 @@ void M_RMap(int choice)
                 }
             }
             else if (fsize == 14943400 || fsize == 14612688 || fsize == 14607420 ||
-                    fsize == 14604584 || fsize == 18195736 || fsize == 18654796 ||
-                    fsize == 18240172 || fsize == 17420824 || fsize == 28422764)
+                fsize == 14604584 || fsize == 18195736 || fsize == 18654796 ||
+                fsize == 18240172 || fsize == 17420824 || fsize == 28422764)
             {
                 if (rmap <= 31)
                     rmap++;
@@ -11211,20 +11500,23 @@ void M_RMap(int choice)
             {
                 if (rmap <= 30)
                     rmap++;
+
                 if (rmap == 21)
                     rmap = 31;
             }
+
             break;
         }
 }
 
-void M_RSkill(int choice)
+static void M_RSkill(int choice)
 {
     switch (choice)
     {
         case 0:
             if (rskill)
                 rskill--;
+
             break;
 
         case 1:
@@ -11239,33 +11531,38 @@ void M_RSkill(int choice)
                 if (rskill < 3)
                     rskill++;
             }
+
             break;
     }
 }
 
-void M_RecordLong(int choice)
+static void M_RecordLong(int choice)
 {
     switch (choice)
     {
         case 0:
             if (long_tics)
                 long_tics = false;
+
             break;
 
         case 1:
             if (!long_tics)
                 long_tics = true;
+
             break;
     }
 }
 
-void M_StartRecord(int choice)
+static void M_StartRecord(int choice)
 {
     if (!demoplayback)
     {
         M_ClearMenus();
         G_RecordDemo(rskill, repi, rmap);
-        D_DoomLoop();               // never returns
+
+        // never returns
+        D_DoomLoop();
     }
     else if (demoplayback)
     {
@@ -11278,103 +11575,116 @@ void M_StartRecord(int choice)
         longtics = false;
 }
 */
-void M_Crosshair(int choice)
+
+static void M_Crosshair(int choice)
 {
     switch (choice)
     {
         case 0:
             if (crosshair)
-                crosshair--;
+                crosshair = false;
+
             break;
 
         case 1:
-            if (crosshair < 1)
-                crosshair++;
+            if (!crosshair)
+                crosshair = true;
+
             break;
     }
 }
 
-void M_Jumping(int choice)
+static void M_Jumping(int choice)
 {
     switch (choice)
     {
         case 0:
             if (jumping)
                 jumping = false;
+
             break;
 
         case 1:
-            if (jumping == false)
+            if (!jumping)
                 jumping = true;
+
             break;
     }
 }
 
-void M_WeaponRecoil(int choice)
+static void M_WeaponRecoil(int choice)
 {
     switch (choice)
     {
         case 0:
             if (d_recoil)
                 d_recoil = false;
+
             break;
 
         case 1:
-            if (d_recoil == false)
+            if (!d_recoil)
                 d_recoil = true;
+
             break;
     }
 }
 
-void M_PlayerThrust(int choice)
+static void M_PlayerThrust(int choice)
 {
     switch (choice)
     {
         case 0:
             if (d_thrust)
                 d_thrust = false;
+
             break;
 
         case 1:
-            if (d_thrust == false)
+            if (!d_thrust)
                 d_thrust = true;
+
             break;
     }
 }
 
-void M_TeleportGlitter(int choice)
+static void M_TeleportGlitter(int choice)
 {
     switch (choice)
     {
         case 0:
             if (d_spawnteleglit > 0)
                 d_spawnteleglit--;
+
             break;
 
         case 1:
             if (d_spawnteleglit < 3)
                 d_spawnteleglit++;
+
             break;
     }
 }
 
-void M_Particles(int choice)
+static void M_Particles(int choice)
 {
     switch (choice)
     {
         case 0:
             if (d_drawparticles)
                 d_drawparticles = false;
+
             break;
 
         case 1:
-            if (d_drawparticles == false)
+            if (!d_drawparticles)
                 d_drawparticles = true;
+
             break;
     }
 }
 
-void M_BloodType(int choice)
+static void M_BloodType(int choice)
 {
     if (d_drawparticles)
     {
@@ -11383,17 +11693,19 @@ void M_BloodType(int choice)
             case 0:
                 if (bloodsplat_particle > 0)
                     bloodsplat_particle--;
+
                 break;
 
             case 1:
                 if (bloodsplat_particle < 2)
                     bloodsplat_particle++;
+
                 break;
         }
     }
 }
 
-void M_BulletType(int choice)
+static void M_BulletType(int choice)
 {
     if (d_drawparticles)
     {
@@ -11402,17 +11714,19 @@ void M_BulletType(int choice)
             case 0:
                 if (bulletpuff_particle > 0)
                     bulletpuff_particle--;
+
                 break;
 
             case 1:
                 if (bulletpuff_particle < 2)
                     bulletpuff_particle++;
+
                 break;
         }
     }
 }
 
-void M_TeleportType(int choice)
+static void M_TeleportType(int choice)
 {
     if (d_drawparticles)
     {
@@ -11421,17 +11735,19 @@ void M_TeleportType(int choice)
             case 0:
                 if (teleport_particle > 0)
                     teleport_particle--;
+
                 break;
 
             case 1:
                 if (teleport_particle < 2)
                     teleport_particle++;
+
                 break;
         }
     }
 }
 
-void M_BFGCloud(int choice)
+static void M_BFGCloud(int choice)
 {
     if (d_drawparticles)
     {
@@ -11440,17 +11756,19 @@ void M_BFGCloud(int choice)
             case 0:
                 if (d_drawbfgcloud)
                     d_drawbfgcloud = false;
+
                 break;
 
             case 1:
-                if (d_drawbfgcloud == false)
+                if (!d_drawbfgcloud)
                     d_drawbfgcloud = true;
+
                 break;
         }
     }
 }
 
-void M_BFGExplosions(int choice)
+static void M_BFGExplosions(int choice)
 {
     if (d_drawparticles)
     {
@@ -11459,17 +11777,19 @@ void M_BFGExplosions(int choice)
             case 0:
                 if (d_drawbfgexplosions)
                     d_drawbfgexplosions = false;
+
                 break;
 
             case 1:
-                if (d_drawbfgexplosions == false)
+                if (!d_drawbfgexplosions)
                     d_drawbfgexplosions = true;
+
                 break;
         }
     }
 }
 
-void M_RocketParticles(int choice)
+static void M_RocketParticles(int choice)
 {
     if (d_drawparticles)
     {
@@ -11478,17 +11798,19 @@ void M_RocketParticles(int choice)
             case 0:
                 if (d_drawrockettrails)
                     d_drawrockettrails = false;
+
                 break;
 
             case 1:
-                if (d_drawrockettrails == false)
+                if (!d_drawrockettrails)
                     d_drawrockettrails = true;
+
                 break;
         }
     }
 }
 
-void M_RocketExplosions(int choice)
+static void M_RocketExplosions(int choice)
 {
     if (d_drawparticles)
     {
@@ -11497,17 +11819,19 @@ void M_RocketExplosions(int choice)
             case 0:
                 if (d_drawrocketexplosions)
                     d_drawrocketexplosions = false;
+
                 break;
 
-          case 1:
-                if (d_drawrocketexplosions == false)
+            case 1:
+                if (!d_drawrocketexplosions)
                     d_drawrocketexplosions = true;
+
                 break;
         }
     }
 }
 
-void M_SpawnFlies(int choice)
+static void M_SpawnFlies(int choice)
 {
     if (d_drawparticles && gamemode == commercial)
     {
@@ -11516,17 +11840,19 @@ void M_SpawnFlies(int choice)
             case 0:
                 if (d_spawnflies)
                     d_spawnflies = false;
+
                 break;
 
             case 1:
-                if (d_spawnflies == false)
+                if (!d_spawnflies)
                     d_spawnflies = true;
+
                 break;
         }
     }
 }
 
-void M_DripBlood(int choice)
+static void M_DripBlood(int choice)
 {
     if (d_drawparticles)
     {
@@ -11535,33 +11861,37 @@ void M_DripBlood(int choice)
             case 0:
                 if (d_dripblood)
                     d_dripblood = false;
+
                 break;
 
             case 1:
-                if (d_dripblood == false)
+                if (!d_dripblood)
                     d_dripblood = true;
+
                 break;
         }
     }
 }
 
-void M_ParticleSounds(int choice)
+static void M_ParticleSounds(int choice)
 {
     switch (choice)
     {
         case 0:
             if (particle_sounds)
                 particle_sounds = false;
+
             break;
 
         case 1:
-            if (particle_sounds == false)
+            if (!particle_sounds)
                 particle_sounds = true;
+
             break;
     }
 }
 
-void M_RespawnMonsters(int choice)
+static void M_RespawnMonsters(int choice)
 {
     switch (choice)
     {
@@ -11571,19 +11901,21 @@ void M_RespawnMonsters(int choice)
                 start_respawnparm = false;
                 respawnparm = false;
             }
+
             break;
 
         case 1:
-            if (respawnparm == false)
+            if (!respawnparm)
             {
                 start_respawnparm = true;
                 respawnparm = true;
             }
+
             break;
     }
 }
 
-void M_FastMonsters(int choice)
+static void M_FastMonsters(int choice)
 {
     switch (choice)
     {
@@ -11593,185 +11925,183 @@ void M_FastMonsters(int choice)
                 start_fastparm = false;
                 fastparm = false;
             }
+
             break;
 
         case 1:
-            if (fastparm == false)
+            if (!fastparm)
             {
                 start_fastparm = true;
                 fastparm = true;
             }
+
             break;
     }
 }
 
-void M_Autoaim(int choice)
+static void M_Autoaim(int choice)
 {
     switch (choice)
     {
         case 0:
             if (autoaim)
-                autoaim = 0;
+                autoaim = false;
+
             break;
 
         case 1:
-            if (autoaim == 0)
-                autoaim = 1;
+            if (!autoaim)
+                autoaim = true;
+
             break;
     }
 }
 
-void M_MaxGore(int choice)
+static void M_MaxGore(int choice)
 {
     switch (choice)
     {
         case 0:
             if (d_maxgore && fsize != 12361532)
                 d_maxgore = false;
-            players[consoleplayer].message = "MORE GORE DISABLED";
+
             break;
 
         case 1:
             if (!d_maxgore && fsize != 12361532)
                 d_maxgore = true;
-            players[consoleplayer].message = "MORE GORE ENABLED";
+
             break;
     }
 }
 
-void M_Footstep(int choice)
+static void M_Footstep(int choice)
 {
     switch (choice)
     {
         case 0:
             if (d_footstep)
                 d_footstep = false;
+
             break;
 
         case 1:
             if (!d_footstep)
                 d_footstep = true;
+
             break;
     }
 }
 
-void M_Footclip(int choice)
+static void M_Footclip(int choice)
 {
     switch (choice)
     {
         case 0:
             if (d_footclip)
                 d_footclip = false;
+
             break;
 
         case 1:
             if (!d_footclip)
                 d_footclip = true;
+
             break;
     }
 }
 
-void M_Splash(int choice)
+static void M_Splash(int choice)
 {
     switch (choice)
     {
         case 0:
             if (d_splash)
                 d_splash = false;
+
             break;
 
         case 1:
             if (!d_splash)
                 d_splash = true;
+
             break;
     }
 }
 
-void M_Swirl(int choice)
+static void M_Swirl(int choice)
 {
     switch (choice)
     {
         case 0:
             if (d_swirl)
                 d_swirl = 0;
+
             break;
 
         case 1:
             if (!d_swirl)
                 d_swirl = 1;
+
             break;
     }
 }
 
-void M_Beta(int choice)
-{
-    switch (choice)
-    {
-        case 0:
-            if (beta_style_mode && fsize != 28422764 && fsize != 19321722 && fsize != 12361532)
-            {
-                beta_style_mode = false;
-            }
-            break;
-
-        case 1:
-            if (!beta_style_mode && fsize != 28422764 && fsize != 19321722 && fsize != 12361532)
-            {
-                beta_style_mode = true;
-            }
-            break;
-    }
-}
-
-void M_Corpses(int choice)
+static void M_Corpses(int choice)
 {
     switch (choice)
     {
         case 0:
             if (d_flipcorpses)
                 d_flipcorpses = false;
+
             break;
 
         case 1:
             if (!d_flipcorpses)
                 d_flipcorpses = true;
+
             break;
     }
 }
 
-void M_Secrets(int choice)
+static void M_Secrets(int choice)
 {
     switch (choice)
     {
         case 0:
             if (d_secrets)
                 d_secrets = false;
+
             break;
 
         case 1:
             if (!d_secrets)
                 d_secrets = true;
+
             break;
     }
 }
 
-void M_Trails(int choice)
+static void M_Trails(int choice)
 {
     switch (choice)
     {
         case 0:
             if (smoketrails)
                 smoketrails = false;
+
             break;
 
         case 1:
             if (!smoketrails)
                 smoketrails = true;
+
             break;
     }
 }
 
-void M_ChaingunTics(int choice)
+static void M_ChaingunTics(int choice)
 {
     if (gameskill != sk_nightmare)
     {
@@ -11780,481 +12110,541 @@ void M_ChaingunTics(int choice)
             case 0:
                 if (chaingun_tics < 4)
                     chaingun_tics++;
+
                 break;
 
             case 1:
                 if (chaingun_tics > 1)
                     chaingun_tics--;
+
                 break;
         }
     }
 }
 
-void M_FallingDamage(int choice)
+static void M_FallingDamage(int choice)
 {
     switch (choice)
     {
         case 0:
             if (d_fallingdamage)
                 d_fallingdamage = false;
+
             break;
 
         case 1:
             if (!d_fallingdamage)
                 d_fallingdamage = true;
+
             break;
     }
 }
 
-void M_InfiniteAmmo(int choice)
+static void M_InfiniteAmmo(int choice)
 {
     switch (choice)
     {
         case 0:
             if (d_infiniteammo)
                 d_infiniteammo = false;
+
             break;
 
         case 1:
             if (!d_infiniteammo)
                 d_infiniteammo = true;
+
             break;
     }
 }
 
-void M_Shadows(int choice)
+static void M_Shadows(int choice)
 {
     switch (choice)
     {
         case 0:
             if (d_shadows)
                 d_shadows = false;
+
             break;
 
         case 1:
             if (!d_shadows)
                 d_shadows = true;
+
             break;
     }
 }
 
-void M_Offsets(int choice)
+static void M_Offsets(int choice)
 {
     switch (choice)
     {
         case 0:
             if (d_fixspriteoffsets)
                 d_fixspriteoffsets = false;
+
             break;
 
         case 1:
             if (!d_fixspriteoffsets)
                 d_fixspriteoffsets = true;
+
             break;
     }
 }
 
-void M_Telefrag(int choice)
+static void M_Telefrag(int choice)
 {
     switch (choice)
     {
         case 0:
             if (d_telefrag)
                 d_telefrag = false;
+
             break;
 
         case 1:
             if (!d_telefrag)
                 d_telefrag = true;
+
             break;
     }
 }
 
-void M_Doorstuck(int choice)
+static void M_Doorstuck(int choice)
 {
     switch (choice)
     {
         case 0:
             if (d_doorstuck)
                 d_doorstuck = false;
+
             break;
 
         case 1:
             if (!d_doorstuck)
                 d_doorstuck = true;
+
             break;
     }
 }
 
-void M_ResurrectGhosts(int choice)
+static void M_ResurrectGhosts(int choice)
 {
     switch (choice)
     {
         case 0:
             if (d_resurrectghosts)
                 d_resurrectghosts = false;
+
             break;
 
         case 1:
             if (!d_resurrectghosts)
                 d_resurrectghosts = true;
+
             break;
     }
 }
 
-void M_LimitedGhosts(int choice)
+static void M_LimitedGhosts(int choice)
 {
     switch (choice)
     {
         case 0:
             if (d_limitedghosts)
                 d_limitedghosts = false;
+
             break;
 
         case 1:
             if (!d_limitedghosts)
                 d_limitedghosts = true;
+
             break;
     }
 }
 
-void M_BlockSkulls(int choice)
+static void M_BlockSkulls(int choice)
 {
     switch (choice)
     {
         case 0:
             if (!d_blockskulls)
                 d_blockskulls = true;
+
             break;
 
         case 1:
             if (d_blockskulls)
                 d_blockskulls = false;
+
             break;
     }
 }
 
-void M_BlazingDoors(int choice)
+static void M_BlazingDoors(int choice)
 {
     switch (choice)
     {
         case 0:
             if (!d_blazingsound)
                 d_blazingsound = true;
+
             break;
 
         case 1:
             if (d_blazingsound)
                 d_blazingsound = false;
+
             break;
     }
 }
 
-void M_GodAbsolute(int choice)
+static void M_GodAbsolute(int choice)
 {
     switch (choice)
     {
         case 0:
             if (d_god)
                 d_god = false;
+
             break;
 
         case 1:
             if (!d_god)
                 d_god = true;
+
             break;
     }
 }
 
-void M_Floor(int choice)
+static void M_Floor(int choice)
 {
     switch (choice)
     {
         case 0:
             if (d_floors)
                 d_floors = false;
+
             break;
 
         case 1:
             if (!d_floors)
                 d_floors = true;
+
             break;
     }
 }
 
-void M_Clipping(int choice)
+static void M_Clipping(int choice)
 {
     switch (choice)
     {
         case 0:
             if (d_moveblock)
                 d_moveblock = false;
+
             break;
 
         case 1:
             if (!d_moveblock)
                 d_moveblock = true;
+
             break;
     }
 }
 
-void M_Model(int choice)
+static void M_Model(int choice)
 {
     switch (choice)
     {
         case 0:
             if (d_model)
                 d_model = false;
+
             break;
 
         case 1:
             if (!d_model)
                 d_model = true;
+
             break;
     }
 }
 
-void M_BossDeath(int choice)
+static void M_BossDeath(int choice)
 {
     switch (choice)
     {
         case 0:
             if (d_666)
                 d_666 = false;
+
             break;
 
         case 1:
             if (!d_666)
                 d_666 = true;
+
             break;
     }
 }
 
-void M_Bounce(int choice)
+static void M_Bounce(int choice)
 {
     switch (choice)
     {
         case 0:
-            if (correct_lost_soul_bounce == 1)
-                correct_lost_soul_bounce = 0;
+            if (correct_lost_soul_bounce)
+                correct_lost_soul_bounce = false;
+
             break;
 
         case 1:
-            if (correct_lost_soul_bounce == 0)
-                correct_lost_soul_bounce = 1;
+            if (!correct_lost_soul_bounce)
+                correct_lost_soul_bounce = true;
+
             break;
     }
 }
 
-void M_Masked(int choice)
+static void M_Masked(int choice)
 {
     switch (choice)
     {
         case 0:
             if (d_maskedanim)
                 d_maskedanim = false;
+
             break;
 
         case 1:
             if (!d_maskedanim)
                 d_maskedanim = true;
+
             break;
     }
 }
 
-void M_Quirk(int choice)
+static void M_Quirk(int choice)
 {
     switch (choice)
     {
         case 0:
             if (d_sound)
                 d_sound = false;
+
             break;
 
         case 1:
             if (!d_sound)
                 d_sound = true;
+
             break;
     }
 }
 
-void M_Ouch(int choice)
+static void M_Ouch(int choice)
 {
     switch (choice)
     {
         case 0:
             if (d_ouchface)
                 d_ouchface = false;
+
             break;
 
         case 1:
             if (!d_ouchface)
                 d_ouchface = true;
+
             break;
     }
 }
 
-void M_Textures(int choice)
+static void M_Textures(int choice)
 {
     switch (choice)
     {
         case 0:
             if (d_brightmaps)
                 d_brightmaps = false;
+
             break;
 
         case 1:
             if (!d_brightmaps)
                 d_brightmaps = true;
+
             break;
     }
 }
 
-void M_FixMapErrors(int choice)
+static void M_FixMapErrors(int choice)
 {
     switch (choice)
     {
         case 0:
             if (d_fixmaperrors)
                 d_fixmaperrors = false;
+
             break;
 
         case 1:
             if (!d_fixmaperrors)
                 d_fixmaperrors = true;
+
             break;
     }
 }
 
-void M_AltLighting(int choice)
+static void M_AltLighting(int choice)
 {
     switch (choice)
     {
         case 0:
             if (d_altlighting)
                 d_altlighting = false;
+
             break;
 
         case 1:
             if (!d_altlighting)
                 d_altlighting = true;
+
             break;
     }
 }
 
-void M_Infighting(int choice)
+static void M_Infighting(int choice)
 {
     switch (choice)
     {
         case 0:
             if (allow_infighting)
                 allow_infighting = false;
+
             break;
 
         case 1:
             if (!allow_infighting)
                 allow_infighting = true;
+
             break;
     }
 }
 
-void M_LastEnemy(int choice)
+static void M_LastEnemy(int choice)
 {
     switch (choice)
     {
         case 0:
             if (last_enemy)
                 last_enemy = false;
+
             break;
 
         case 1:
             if (!last_enemy)
                 last_enemy = true;
+
             break;
     }
 }
 
-void M_Float(int choice)
+static void M_Float(int choice)
 {
     switch (choice)
     {
         case 0:
             if (float_items)
                 float_items = false;
+
             break;
 
         case 1:
             if (!float_items)
                 float_items = true;
+
             break;
     }
 }
 
-void M_Animate(int choice)
+static void M_Animate(int choice)
 {
     switch (choice)
     {
         case 0:
             if (animated_drop)
                 animated_drop = false;
+
             break;
 
         case 1:
             if (!animated_drop)
                 animated_drop = true;
+
             break;
     }
 }
 
-void M_CrushSound(int choice)
+static void M_CrushSound(int choice)
 {
     switch (choice)
     {
         case 0:
             if (crush_sound)
                 crush_sound = false;
+
             break;
 
         case 1:
             if (!crush_sound)
                 crush_sound = true;
+
             break;
     }
 }
 
-void M_NoNoise(int choice)
+static void M_NoNoise(int choice)
 {
     switch (choice)
     {
         case 0:
             if (disable_noise)
                 disable_noise = false;
+
             break;
 
         case 1:
             if (!disable_noise)
                 disable_noise = true;
+
             break;
     }
 }
 
-void M_NudgeCorpses(int choice)
+static void M_NudgeCorpses(int choice)
 {
     switch (choice)
     {
         case 0:
             if (corpses_nudge)
                 corpses_nudge = false;
+
             break;
 
         case 1:
             if (!corpses_nudge)
                 corpses_nudge = true;
+
             break;
     }
 }
 
-void M_Slide(int choice)
+static void M_Slide(int choice)
 {
     switch (choice)
     {
@@ -12264,16 +12654,18 @@ void M_Slide(int choice)
 
             if (corpses_smearblood)
                 corpses_smearblood = false;
+
             break;
 
         case 1:
             if (!corpses_slide)
                 corpses_slide = true;
+
             break;
     }
 }
 
-void M_Smearblood(int choice)
+static void M_Smearblood(int choice)
 {
     if (corpses_slide)
     {
@@ -12282,65 +12674,73 @@ void M_Smearblood(int choice)
             case 0:
                 if (corpses_smearblood)
                     corpses_smearblood = false;
+
                 break;
 
             case 1:
                 if (!corpses_smearblood)
                     corpses_smearblood = true;
+
                 break;
         }
     }
 }
 
-void M_ColoredCorpses(int choice)
+static void M_ColoredCorpses(int choice)
 {
     switch (choice)
     {
         case 0:
             if (randomly_colored_playercorpses)
                 randomly_colored_playercorpses = false;
+
             break;
 
         case 1:
             if (!randomly_colored_playercorpses)
                 randomly_colored_playercorpses = true;
+
             break;
     }
 }
 
-void M_LowHealth(int choice)
+static void M_LowHealth(int choice)
 {
     switch (choice)
     {
         case 0:
             if (lowhealth)
                 lowhealth = false;
+
             break;
 
         case 1:
             if (!lowhealth)
                 lowhealth = true;
+
             break;
     }
 }
 
-void M_CenterWeapon(int choice)
+static void M_CenterWeapon(int choice)
 {
     switch (choice)
     {
         case 0:
             if (d_centerweapon)
                 d_centerweapon = false;
+
             break;
 
         case 1:
             if (!d_centerweapon)
                 d_centerweapon = true;
+
             break;
     }
 }
 
-void M_EjectCasings(int choice)
+static void M_EjectCasings(int choice)
 {
     if (fsize != 12361532)
     {
@@ -12349,23 +12749,26 @@ void M_EjectCasings(int choice)
             case 0:
                 if (d_ejectcasings)
                     d_ejectcasings = false;
+
                 break;
 
             case 1:
                 if (!d_ejectcasings)
                     d_ejectcasings = true;
+
                 break;
         }
     }
 }
 
-void M_EndoomScreen(int choice)
+static void M_EndoomScreen(int choice)
 {
     switch (choice)
     {
         case 0:
             if (show_endoom)
                 show_endoom = 0;
+
             break;
 
         case 1:
@@ -12377,7 +12780,7 @@ void M_EndoomScreen(int choice)
     }
 }
 
-void M_GoreAmount(int choice)
+static void M_GoreAmount(int choice)
 {
     if (d_maxgore)
     {
@@ -12386,55 +12789,62 @@ void M_GoreAmount(int choice)
             case 0:
                 if (gore_amount > 1)
                     gore_amount--;
+
                 break;
 
             case 1:
                 if (gore_amount < 4)
                     gore_amount++;
+
                 break;
         }
     }
 }
 
-void M_NoMonsters(int choice)
+static void M_NoMonsters(int choice)
 {
     switch (choice)
     {
         case 0:
             if (not_monsters)
                 not_monsters = false;
+
             break;
 
         case 1:
             if (!not_monsters)
                 not_monsters = true;
+
             break;
     }
 }
 
-void M_AutomapOverlay(int choice)
+static void M_AutomapOverlay(int choice)
 {
     switch (choice)
     {
         case 0:
             if (overlay_trigger)
                 overlay_trigger = false;
+
             break;
 
         case 1:
             if (!overlay_trigger)
                 overlay_trigger = true;
+
             break;
     }
+
     HU_Start();
 }
 
-void M_Debug(int choice)
+static void M_Debug(int choice)
 {
     M_SetupNextMenu(&DebugDef);
 }
 
-void M_Test(int choice)
+static void M_Test(int choice)
 {
     M_SetupNextMenu(&TestDef);
 
@@ -12442,10 +12852,8 @@ void M_Test(int choice)
     mobj_tics = mobj_state->tics;
 }
 
-void M_DrawSystem(void)
+static void M_DrawSystem(void)
 {
-    //M_DarkBackground(0);
-
     if (fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
         V_DrawPatchWithShadow (62, 20, 0, W_CacheLumpName("M_T_YSET", PU_CACHE), false);
     else
@@ -12496,407 +12904,475 @@ void M_DrawSystem(void)
     }
 }
 
-void M_HUD(int choice)
+static void M_HUD(int choice)
 {
     switch (choice)
     {
         case 0:
             if (hud)
                 hud = false;
+
             break;
 
         case 1:
-            if (hud == false)
+            if (!hud)
                 hud = true;
+
             break;
     }
 }
 
-void M_Autosave(int choice)
+static void M_Autosave(int choice)
 {
     switch (choice)
     {
         case 0:
             if (enable_autosave)
                 enable_autosave = false;
+
             break;
 
         case 1:
-            if (enable_autosave == false)
+            if (!enable_autosave)
                 enable_autosave = true;
+
             break;
     }
 }
 
-void M_MapColor_Back(int choice)
+static void M_DrawSplash(int choice)
+{
+    switch (choice)
+    {
+        case 0:
+            if (drawsplash)
+                drawsplash = false;
+
+            break;
+
+        case 1:
+            if (!drawsplash)
+                drawsplash = true;
+
+            break;
+    }
+}
+
+static void M_MapColor_Back(int choice)
 {
     switch (choice)
     {
         case 0:
             if (mapcolor_back > 0)
                 mapcolor_back--;
+
             break;
 
         case 1:
             if (mapcolor_back < 255)
                 mapcolor_back++;
+
             break;
     }
 }
 
-void M_MapColor_Grid(int choice)
+static void M_MapColor_Grid(int choice)
 {
     switch (choice)
     {
         case 0:
             if (mapcolor_grid > 0)
                 mapcolor_grid--;
+
             break;
 
         case 1:
             if (mapcolor_grid < 255)
                 mapcolor_grid++;
+
             break;
     }
 }
 
-void M_MapColor_Wall(int choice)
+static void M_MapColor_Wall(int choice)
 {
     switch (choice)
     {
         case 0:
             if (mapcolor_wall > 0)
                 mapcolor_wall--;
+
             break;
 
         case 1:
             if (mapcolor_wall < 255)
                 mapcolor_wall++;
+
             break;
     }
 }
 
-void M_MapColor_FCHG(int choice)
+static void M_MapColor_FCHG(int choice)
 {
     switch (choice)
     {
         case 0:
             if (mapcolor_fchg > 0)
                 mapcolor_fchg--;
+
             break;
 
         case 1:
             if (mapcolor_fchg < 255)
                 mapcolor_fchg++;
+
             break;
     }
 }
 
-void M_MapColor_CCHG(int choice)
+static void M_MapColor_CCHG(int choice)
 {
     switch (choice)
     {
         case 0:
             if (mapcolor_cchg > 0)
                 mapcolor_cchg--;
+
             break;
 
         case 1:
             if (mapcolor_cchg < 255)
                 mapcolor_cchg++;
+
             break;
     }
 }
 
-void M_MapColor_CLSD(int choice)
+static void M_MapColor_CLSD(int choice)
 {
     switch (choice)
     {
         case 0:
             if (mapcolor_clsd > 0)
                 mapcolor_clsd--;
+
             break;
 
         case 1:
             if (mapcolor_clsd < 255)
                 mapcolor_clsd++;
+
             break;
     }
 }
 
-void M_MapColor_RKey(int choice)
+static void M_MapColor_RKey(int choice)
 {
     switch (choice)
     {
         case 0:
             if (mapcolor_rkey > 0)
                 mapcolor_rkey--;
+
             break;
 
         case 1:
             if (mapcolor_rkey < 255)
                 mapcolor_rkey++;
+
             break;
     }
 }
 
-void M_MapColor_BKey(int choice)
+static void M_MapColor_BKey(int choice)
 {
     switch (choice)
     {
         case 0:
             if (mapcolor_bkey > 0)
                 mapcolor_bkey--;
+
             break;
 
         case 1:
             if (mapcolor_bkey < 255)
                 mapcolor_bkey++;
+
             break;
     }
 }
 
-void M_MapColor_YKey(int choice)
+static void M_MapColor_YKey(int choice)
 {
     switch (choice)
     {
         case 0:
             if (mapcolor_ykey > 0)
                 mapcolor_ykey--;
+
             break;
 
         case 1:
             if (mapcolor_ykey < 255)
                 mapcolor_ykey++;
+
             break;
     }
 }
 
-void M_MapColor_RDoor(int choice)
+static void M_MapColor_RDoor(int choice)
 {
     switch (choice)
     {
         case 0:
             if (mapcolor_rdor > 0)
                 mapcolor_rdor--;
+
             break;
 
         case 1:
             if (mapcolor_rdor < 255)
                 mapcolor_rdor++;
+
             break;
     }
 }
 
-void M_MapColor_BDoor(int choice)
+static void M_MapColor_BDoor(int choice)
 {
     switch (choice)
     {
         case 0:
             if (mapcolor_bdor > 0)
                 mapcolor_bdor--;
+
             break;
 
         case 1:
             if (mapcolor_bdor < 255)
                 mapcolor_bdor++;
+
             break;
     }
 }
 
-void M_MapColor_YDoor(int choice)
+static void M_MapColor_YDoor(int choice)
 {
     switch (choice)
     {
         case 0:
             if (mapcolor_ydor > 0)
                 mapcolor_ydor--;
+
             break;
 
         case 1:
             if (mapcolor_ydor < 255)
                 mapcolor_ydor++;
+
             break;
     }
 }
 
-void M_MapColor_Teleport(int choice)
+static void M_MapColor_Teleport(int choice)
 {
     switch (choice)
     {
         case 0:
             if (mapcolor_tele > 0)
                 mapcolor_tele--;
+
             break;
 
         case 1:
             if (mapcolor_tele < 255)
                 mapcolor_tele++;
+
             break;
     }
 }
 
-void M_MapColor_Secret(int choice)
+static void M_MapColor_Secret(int choice)
 {
     switch (choice)
     {
         case 0:
             if (mapcolor_secr > 0)
                 mapcolor_secr--;
+
             break;
 
         case 1:
             if (mapcolor_secr < 255)
                 mapcolor_secr++;
+
             break;
     }
 }
 
-void M_MapColor_Exit(int choice)
+static void M_MapColor_Exit(int choice)
 {
     switch (choice)
     {
         case 0:
             if (mapcolor_exit > 0)
                 mapcolor_exit--;
+
             break;
 
         case 1:
             if (mapcolor_exit < 255)
                 mapcolor_exit++;
+
             break;
     }
 }
 
-void M_MapColor_Unseen(int choice)
+static void M_MapColor_Unseen(int choice)
 {
     switch (choice)
     {
         case 0:
             if (mapcolor_unsn > 0)
                 mapcolor_unsn--;
+
             break;
 
         case 1:
             if (mapcolor_unsn < 255)
                 mapcolor_unsn++;
+
             break;
     }
 }
 
-void M_MapColor_Flat(int choice)
+static void M_MapColor_Flat(int choice)
 {
     switch (choice)
     {
         case 0:
             if (mapcolor_flat > 0)
                 mapcolor_flat--;
+
             break;
 
         case 1:
             if (mapcolor_flat < 255)
                 mapcolor_flat++;
+
             break;
     }
 }
 
-void M_MapColor_Sprite(int choice)
+static void M_MapColor_Sprite(int choice)
 {
     switch (choice)
     {
         case 0:
             if (mapcolor_sprt > 0)
                 mapcolor_sprt--;
+
             break;
 
         case 1:
             if (mapcolor_sprt < 255)
                 mapcolor_sprt++;
+
             break;
     }
 }
 
-void M_MapColor_Item(int choice)
+static void M_MapColor_Item(int choice)
 {
     switch (choice)
     {
         case 0:
             if (mapcolor_item > 0)
                 mapcolor_item--;
+
             break;
 
         case 1:
             if (mapcolor_item < 255)
                 mapcolor_item++;
+
             break;
     }
 }
 
-void M_MapColor_Enemy(int choice)
+static void M_MapColor_Enemy(int choice)
 {
     switch (choice)
     {
         case 0:
             if (mapcolor_enemy > 0)
                 mapcolor_enemy--;
+
             break;
 
         case 1:
             if (mapcolor_enemy < 255)
                 mapcolor_enemy++;
+
             break;
     }
 }
 
-void M_MapColor_Crosshair(int choice)
+static void M_MapColor_Crosshair(int choice)
 {
     switch (choice)
     {
         case 0:
             if (mapcolor_hair > 0)
                 mapcolor_hair--;
+
             break;
 
         case 1:
             if (mapcolor_hair < 255)
                 mapcolor_hair++;
+
             break;
     }
 }
 
-void M_MapColor_Player(int choice)
+static void M_MapColor_Player(int choice)
 {
     switch (choice)
     {
         case 0:
             if (mapcolor_sngl > 0)
                 mapcolor_sngl--;
+
             break;
 
         case 1:
             if (mapcolor_sngl < 255)
                 mapcolor_sngl++;
+
             break;
     }
 }
 
-void M_MapColor_Multiplayer(int choice)
+static void M_MapColor_Multiplayer(int choice)
 {
     switch (choice)
     {
         case 0:
             if (mapcolor_plyr > 0)
                 mapcolor_plyr--;
+
             break;
 
         case 1:
             if (mapcolor_plyr < 255)
                 mapcolor_plyr++;
+
             break;
     }
 }
 
-void M_MapColor_Standard_PRBoom(int choice)
+static void M_MapColor_Standard_PRBoom(int choice)
 {
     mapcolor_back = 247;
     mapcolor_grid = 104;
@@ -12923,7 +13399,7 @@ void M_MapColor_Standard_PRBoom(int choice)
     mapcolor_plyr = 112;
 }
 
-void M_MapColor_Standard_DOSDoom(int choice)
+static void M_MapColor_Standard_DOSDoom(int choice)
 {
     mapcolor_back = BACKGROUND;
     mapcolor_grid = GRIDCOLORS;
@@ -12950,74 +13426,82 @@ void M_MapColor_Standard_DOSDoom(int choice)
     mapcolor_plyr = WHITE;
 }
 
-void M_MapGrid(int choice)
+static void M_MapGrid(int choice)
 {
     switch (choice)
     {
         case 0:
             if (drawgrid)
-                drawgrid--;
+                drawgrid = false;
+
             break;
 
         case 1:
-            if (drawgrid < 1)
-                drawgrid++;
+            if (!drawgrid)
+                drawgrid = true;
+
             break;
     }
 }
 
-void M_MapGridSize(int choice)
+static void M_MapGridSize(int choice)
 {
     switch (choice)
     {
         case 0:
             if (map_grid_size > 10)
                 map_grid_size--;
+
             break;
 
         case 1:
             if (map_grid_size < 256)
                 map_grid_size++;
+
             break;
     }
 }
 
-void M_MapRotation(int choice)
+static void M_MapRotation(int choice)
 {
     switch (choice)
     {
         case 0:
             if (am_rotate)
                 am_rotate = false;
+
             break;
 
         case 1:
-            if (am_rotate == false)
+            if (!am_rotate)
                 am_rotate = true;
+
             break;
     }
 }
 
-void M_WeaponChange(int choice)
+static void M_WeaponChange(int choice)
 {
     if (gameskill != sk_nightmare)
     {
         switch (choice)
         {
             case 0:
-                if (use_vanilla_weapon_change == 0)
-                    use_vanilla_weapon_change = 1;
+                if (!use_vanilla_weapon_change)
+                    use_vanilla_weapon_change = true;
+
                 break;
 
             case 1:
-                if (use_vanilla_weapon_change == 1)
-                    use_vanilla_weapon_change = 0;
+                if (use_vanilla_weapon_change)
+                    use_vanilla_weapon_change = false;
+
                 break;
         }
     }
 }
 
-void M_AimingHelp(int choice)
+static void M_AimingHelp(int choice)
 {
     if (!(players[consoleplayer].cheats & CF_GODMODE) && gameskill != sk_nightmare)
     {
@@ -13026,53 +13510,58 @@ void M_AimingHelp(int choice)
             case 0:
                 if (aiming_help)
                     aiming_help = false;
+
                 break;
 
             case 1:
                 if (!aiming_help)
                     aiming_help = true;
+
                 break;
         }
     }
 }
 
-void M_FollowMode(int choice)
+static void M_FollowMode(int choice)
 {
     switch (choice)
     {
         case 0:
             if (followplayer)
-                followplayer--;
+                followplayer = false;
+
             break;
 
         case 1:
-            if (followplayer < 1)
-                followplayer++;
+            if (!followplayer)
+                followplayer = true;
+
             break;
     }
 }
 
-void M_Statistics(int choice)
+static void M_Statistics(int choice)
 {
     switch (choice)
     {
         case 0:
             if (show_stats)
-                show_stats--;
+                show_stats = false;
+
             break;
 
         case 1:
-            if (show_stats < 1)
-                show_stats++;
+            if (!show_stats)
+                show_stats = true;
+
             break;
     }
+
     HU_Start();
 }
 
-void M_DrawDebug(void)
+static void M_DrawDebug(void)
 {
-    //M_DarkBackground(0);
-
     if (fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
         V_DrawPatchWithShadow (67, 15, 0, W_CacheLumpName("M_T_DSET", PU_CACHE), false);
     else
@@ -13204,77 +13693,86 @@ void M_DrawDebug(void)
     }
 }
 
-void M_XC(int choice)
+static void M_XC(int choice)
 {
     switch (choice)
     {
         case 0:
             if (firexc > -120)
                 firexc--;
+
             break;
 
         case 1:
             if (firexc < 120)
                 firexc++;
+
             break;
     }
 }
 
-void M_YC(int choice)
+static void M_YC(int choice)
 {
     switch (choice)
     {
         case 0:
             if (fireyc > 0)
                 fireyc--;
+
             break;
 
         case 1:
             if (fireyc < 113)
                 fireyc++;
+
             break;
     }
 }
 
-void M_XFac(int choice)
+static void M_XFac(int choice)
 {
     switch (choice)
     {
         case 0:
             if (firexfac > 1)
                 firexfac--;
+
             break;
 
         case 1:
             if (firexfac < 4)
                 firexfac++;
+
             break;
     }
 }
 
-void M_YFac(int choice)
+static void M_YFac(int choice)
 {
     switch (choice)
     {
         case 0:
             if (fireyfac > 1)
                 fireyfac--;
+
             break;
 
         case 1:
             if (fireyfac < 4)
                 fireyfac++;
+
             break;
     }
 }
 
-void M_Pitch(int choice)
+static void M_Pitch(int choice)
 {
     switch (choice)
     {
         case 0:
             if (firepitch > 0)
                 firepitch--;
+
             break;
 
         case 1:
@@ -13283,13 +13781,14 @@ void M_Pitch(int choice)
     }
 }
 
-void M_Offset(int choice)
+static void M_Offset(int choice)
 {
     switch (choice)
     {
         case 0:
             if (fireoffset > 0)
                 fireoffset--;
+
             break;
 
         case 1:
@@ -13298,13 +13797,14 @@ void M_Offset(int choice)
     }
 }
 
-void M_Width(int choice)
+static void M_Width(int choice)
 {
     switch (choice)
     {
         case 0:
             if (firewidth > 0)
                 firewidth--;
+
             break;
 
         case 1:
@@ -13313,13 +13813,14 @@ void M_Width(int choice)
     }
 }
 
-void M_Height(int choice)
+static void M_Height(int choice)
 {
     switch (choice)
     {
         case 0:
             if (fireheight > 0)
                 fireheight--;
+
             break;
 
         case 1:
@@ -13328,7 +13829,7 @@ void M_Height(int choice)
     }
 }
 
-void M_WidthHeightPitch(int choice)
+static void M_WidthHeightPitch(int choice)
 {
     switch (choice)
     {
@@ -13346,7 +13847,7 @@ void M_WidthHeightPitch(int choice)
     }
 }
 
-void M_DrawTest(void)
+static void M_DrawTest(void)
 {
     spriteframe_t *sprframe = &sprites[states[mobjinfo[MT_PLAYER].seestate].sprite].spriteframes[mobj_state->frame & FF_FRAMEMASK];
 
@@ -13364,7 +13865,7 @@ void M_DrawTest(void)
 
     byte *from;
 
-    patch_t* patch = W_CacheLumpNum (lump + firstspritelump, PU_CACHE);
+    patch_t *patch = W_CacheLumpNum (lump + firstspritelump, PU_CACHE);
 
     sprintf(xc_textbuffer, "%d", firexc);
     sprintf(yc_textbuffer, "%d", fireyc);
@@ -13477,6 +13978,7 @@ void M_DrawTest(void)
                         *(to + pitch * c) = fireremap[*from];
                 }
             }
+
             break;
 
         case 2:
@@ -13497,6 +13999,7 @@ void M_DrawTest(void)
                     }
                 }
             }
+
             break;
 
         case 3:
@@ -13518,6 +14021,7 @@ void M_DrawTest(void)
                     }
                 }
             }
+
             break;
 
         case 4:
@@ -13541,6 +14045,7 @@ void M_DrawTest(void)
                     }
                 }
             }
+
             break;
     }
 
@@ -13549,10 +14054,11 @@ void M_DrawTest(void)
 }
 
 // jff 2/01/98 kill all monsters
-void M_Massacre(int choice)
+static void M_Massacre(int choice)
 {
     thinker_t *thinker;
-    int killcount = 0;
+    int       killcount = 0;
+
     massacre_cheat_used = true;
 
     // jff 02/01/98 'em' cheat - kill all monsters
@@ -13560,31 +14066,29 @@ void M_Massacre(int choice)
 
     // killough 2/7/98: cleaned up code and changed to use dprintf;
     // fixed lost soul bug (Lost Souls left behind when Pain Elementals are killed)
-
     thinker = &thinkercap;
 
     while ((thinker=thinker->next) != &thinkercap)
     {
         if (thinker->function == P_MobjThinker &&
-            ((((mobj_t *) thinker)->flags & MF_COUNTKILL) ||
-              ((mobj_t *) thinker)->type == MT_SKULL ||
-              ((mobj_t *) thinker)->type == MT_BETASKULL))
+            ((((mobj_t *)thinker)->flags & MF_COUNTKILL) ||
+            ((mobj_t *)thinker)->type == MT_SKULL ||
+            ((mobj_t *)thinker)->type == MT_BETASKULL))
         {
             // killough 3/6/98: kill even if Pain Elemental is dead
-
-            if (((mobj_t *) thinker)->health > 0)
+            if (((mobj_t *)thinker)->health > 0)
             {
                 killcount++;
 
                 P_DamageMobj((mobj_t *)thinker, NULL, NULL, 10000);
             }
-            if (((mobj_t *) thinker)->type == MT_PAIN)
+
+            if (((mobj_t *)thinker)->type == MT_PAIN)
             {
                 // killough 2/8/98
+                A_PainDie((mobj_t *)thinker);
 
-                A_PainDie((mobj_t *) thinker);
-
-                P_SetMobjState ((mobj_t *) thinker, S_PAIN_DIE6);
+                P_SetMobjState((mobj_t *)thinker, S_PAIN_DIE6);
             }
         }
     }
@@ -13592,12 +14096,10 @@ void M_Massacre(int choice)
     // killough 3/22/98: make more intelligent about plural
 
     // Ty 03/27/98 - string(s) *not* externalized
-
     sprintf(massacre_textbuffer, "%d MONSTER%s KILLED",
         killcount, killcount == 1 ? "" : "S");
 
     players[consoleplayer].message = massacre_textbuffer;
-
     massacre_cheat_used = false;
 }
 

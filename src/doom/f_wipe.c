@@ -46,26 +46,27 @@
 
 
 //
-//                       SCREEN WIPE PACKAGE
+// SCREEN WIPE PACKAGE
 //
 
 
 // when zero, stop the wipe
-static   dboolean  go;
+static   dboolean     go;
 
 // [RH] Crossfade
-static   int      fade;
+static   int          fade;
 
-static   int      density;
-static   int      burntime;
-static   int      *y;
+static   int          density;
+static   int          burntime;
+static   int          *y;
 
-static   byte     *burnarray;
-static   byte     *wipe_scr_start;
-static   byte     *wipe_scr_end;
-static   byte     *wipe_scr;
+static   byte         *burnarray;
+static   byte         *wipe_scr_start;
+static   byte         *wipe_scr_end;
+static   byte         *wipe_scr;
 
-extern   byte     *transtables;
+
+extern   byte         *transtables;
 
 
 void wipe_shittyColMajorXform(short *array)
@@ -75,11 +76,11 @@ void wipe_shittyColMajorXform(short *array)
 
     short         *dest;
 
-    dest = (short *) Z_Malloc((SCREENWIDTH / 2) * SCREENHEIGHT * sizeof(*dest), PU_STATIC, NULL);
+    dest = (short *)Z_Malloc((SCREENWIDTH / 2) * SCREENHEIGHT * sizeof(*dest), PU_STATIC, NULL);
 
-    for(y = 0; y < SCREENHEIGHT; y++)
+    for (y = 0; y < SCREENHEIGHT; y++)
     {
-        for(x = 0; x < (SCREENWIDTH / 2); x++)
+        for (x = 0; x < (SCREENWIDTH / 2); x++)
         {
             dest[x * SCREENHEIGHT + y] = array[y * (SCREENWIDTH / 2) + x];
         }
@@ -196,10 +197,11 @@ int wipe_CalcBurn(byte *burnarray, int width, int height, int density)
             return density;
         }
     }
+
     return -1;
 }
 
-int wipe_doBurn (int ticks)
+int wipe_doBurn(int ticks)
 {
     // Draw the screen
     fixed_t  firex, firey, xstep, ystep;
@@ -254,6 +256,7 @@ int wipe_doBurn (int ticks)
                 done = 0;
             }
         }
+
         fromold += SCREENWIDTH;
         fromnew += SCREENWIDTH;
         to += SCREENWIDTH;
@@ -305,11 +308,13 @@ int wipe_doFade(int ticks)
                 fg = (fg + bg) | 0x1f07c1f;
                 to[x] = RGB32k.RGB[0][0][fg & (fg >> 15)];
             }
+
             fromnew += SCREENWIDTH;
             fromold += SCREENWIDTH;
             to += SCREENWIDTH;
         }
     }
+
     return 0;
 }
 
@@ -328,12 +333,12 @@ int wipe_initMelt(int ticks)
     
     // makes this wipe faster (in theory)
     // to have stuff in column-major format
-    wipe_shittyColMajorXform((short *) wipe_scr_start);
-    wipe_shittyColMajorXform((short *) wipe_scr_end);
+    wipe_shittyColMajorXform((short *)wipe_scr_start);
+    wipe_shittyColMajorXform((short *)wipe_scr_end);
     
     // setup initial column positions
     // (y<0 => not ready to scroll yet)
-    y = (int *) Z_Malloc(SCREENWIDTH * sizeof(int), PU_STATIC, NULL);
+    y = (int *)Z_Malloc(SCREENWIDTH * sizeof(int), PU_STATIC, NULL);
     y[0] = -(M_Random() % 16);
 
     for (i = 1; i < SCREENWIDTH; i++)
@@ -351,6 +356,7 @@ int wipe_initMelt(int ticks)
             y[i] = -15;
         }
     }
+
     return 0;
 }
 
@@ -384,8 +390,8 @@ int wipe_doMelt(int ticks)
                     dy = SCREENHEIGHT - y[i];
                 }
 
-                s = &((short *) wipe_scr_end)[i * SCREENHEIGHT + y[i]];
-                d = &((short *) wipe_scr)[y[i] * (SCREENWIDTH / 2) + i];
+                s = &((short *)wipe_scr_end)[i * SCREENHEIGHT + y[i]];
+                d = &((short *)wipe_scr)[y[i] * (SCREENWIDTH / 2) + i];
 
                 idx = 0;
 
@@ -398,8 +404,8 @@ int wipe_doMelt(int ticks)
 
                 y[i] += dy;
 
-                s = &((short *) wipe_scr_start)[i * SCREENHEIGHT];
-                d = &((short *) wipe_scr)[y[i] * (SCREENWIDTH / 2) + i];
+                s = &((short *)wipe_scr_start)[i * SCREENHEIGHT];
+                d = &((short *)wipe_scr)[y[i] * (SCREENWIDTH / 2) + i];
 
                 idx = 0;
 
@@ -409,10 +415,12 @@ int wipe_doMelt(int ticks)
 
                     idx += SCREENWIDTH / 2;
                 }
+
                 done = false;
             }
         }
     }
+
     return done;
 }
 
@@ -431,7 +439,7 @@ int wipe_StartScreen(void)
 
     I_ReadScreen(0, wipe_scr_start);
 
-//    V_GetBlock (0, 0, 0, SCREENWIDTH, SCREENHEIGHT, wipe_scr_start);
+    //V_GetBlock (0, 0, 0, SCREENWIDTH, SCREENHEIGHT, wipe_scr_start);
 
     return 0;
 }
@@ -440,8 +448,9 @@ int wipe_EndScreen(void)
 {
     wipe_scr_end = Z_Malloc(SCREENWIDTH * SCREENHEIGHT * sizeof(*wipe_scr_end), PU_STATIC, NULL);
 
-//    V_GetBlock (0, 0, 0, SCREENWIDTH, SCREENHEIGHT, wipe_scr_end);
     I_ReadScreen(0, wipe_scr_end);
+
+    //V_GetBlock (0, 0, 0, SCREENWIDTH, SCREENHEIGHT, wipe_scr_end);
 
     // restore start scr.
     V_DrawBlock(0, 0, 0, SCREENWIDTH, SCREENHEIGHT, wipe_scr_start);
@@ -464,11 +473,11 @@ int wipe_ScreenWipe(int wipeno, int ticks, int scrn)
     if (wipeno == wipe_None)
     {
         // we DEFINITELY need to do this
-        if(screenSize < 8)
+        if (screenSize < 8)
         {
-            if(usergame)
+            if (usergame)
             {
-                if(wipe_type == 3)
+                if (wipe_type == 3)
                     ST_doRefresh();
             }
         }
@@ -476,27 +485,28 @@ int wipe_ScreenWipe(int wipeno, int ticks, int scrn)
         return true;
     }
 
-    ticks <<= hires; // ADDED FOR HIRES
+    ticks <<= hires;
 
     // initial stuff
     if (!go)
     {
         go = 1;
 
-        // wipe_scr = (byte *) Z_Malloc(SCREENWIDTH * SCREENHEIGHT, PU_STATIC, NULL); // DEBUG
+        // DEBUG
+        //wipe_scr = (byte *)Z_Malloc(SCREENWIDTH * SCREENHEIGHT, PU_STATIC, NULL);
 
-//        wipe_scr = I_VideoBuffer;
         wipe_scr = screens[scrn];
 
         (*wipes[wipeno * 3])(ticks);
     }
 
     // do a piece of wipe-in
-//    V_MarkRect(0, 0, 1, SCREENWIDTH, SCREENHEIGHT, 0);
+    //V_MarkRect(0, 0, 1, SCREENWIDTH, SCREENHEIGHT, 0);
 
     rc = (*wipes[wipeno * 3 + 1])(ticks);
 
-    //  V_DrawBlock(x, y, 0, SCREENWIDTH, SCREENHEIGHT, wipe_scr); // DEBUG
+    // DEBUG
+    //V_DrawBlock(x, y, 0, SCREENWIDTH, SCREENHEIGHT, wipe_scr);
 
     // final stuff
     if (rc)
@@ -504,6 +514,7 @@ int wipe_ScreenWipe(int wipeno, int ticks, int scrn)
         go = 0;
         (*wipes[wipeno * 3 + 2])(ticks);
     }
+
     return !go;
 }
 

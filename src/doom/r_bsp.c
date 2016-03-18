@@ -36,6 +36,7 @@
 ========================================================================
 */
 
+
 #include <string.h>
 
 #include "doomstat.h"
@@ -45,27 +46,9 @@
 #include "r_plane.h"
 #include "r_things.h"
 
-seg_t           *curline;
-side_t          *sidedef;
-line_t          *linedef;
-sector_t        *frontsector;
-sector_t        *backsector;
 
-dboolean        doorclosed;
+#define MAXSEGS (SCREENWIDTH / 2 + 1)
 
-drawseg_t       *drawsegs;
-unsigned int    maxdrawsegs;
-drawseg_t       *ds_p;
-
-void R_StoreWallRange(int start, int stop);
-
-//
-// R_ClearDrawSegs
-//
-void R_ClearDrawSegs(void)
-{
-    ds_p = drawsegs;
-}
 
 //
 // ClipWallSegment
@@ -77,6 +60,28 @@ typedef struct
     int         first;
     int         last;
 } cliprange_t;
+
+
+// newend is one past the last valid seg
+static cliprange_t      solidsegs[MAXSEGS];
+static cliprange_t      *newend;
+
+seg_t                   *curline;
+
+side_t                  *sidedef;
+
+line_t                  *linedef;
+
+sector_t                *frontsector;
+sector_t                *backsector;
+
+drawseg_t               *drawsegs;
+drawseg_t               *ds_p;
+
+unsigned int            maxdrawsegs;
+
+dboolean                doorclosed;
+
 
 // 1/11/98: Lee Killough
 //
@@ -94,11 +99,13 @@ typedef struct
 // have anything to do with visplanes, but it had everything to do with these
 // clip posts.
 
-#define MAXSEGS (SCREENWIDTH / 2 + 1)
-
-// newend is one past the last valid seg
-static cliprange_t      *newend;
-static cliprange_t      solidsegs[MAXSEGS];
+//
+// R_ClearDrawSegs
+//
+void R_ClearDrawSegs(void)
+{
+    ds_p = drawsegs;
+}
 
 //
 // R_ClipSolidWallSegment
@@ -142,6 +149,7 @@ static void R_ClipSolidWallSegment(int first, int last)
         return;
 
     next = start;
+
     while (last >= (next + 1)->first - 1)
     {
         // There is a fragment between two posts.
@@ -168,10 +176,12 @@ static void R_ClipSolidWallSegment(int first, int last)
 crunch:
 
     if (next == start)
-        return;                 // Post just extended past the bottom of one post.
+        // Post just extended past the bottom of one post.
+        return;
 
     while (next++ != newend)
-        *++start = *next;       // Remove a post.
+        // Remove a post.
+        *++start = *next;
 
     newend = start + 1;
 }
@@ -258,7 +268,7 @@ dboolean R_DoorClosed(void)
 }
 
 // [AM] Interpolate the passed sector, if prudent.
-void R_MaybeInterpolateSector(sector_t* sector)
+void R_MaybeInterpolateSector(sector_t *sector)
 {
     if (d_uncappedframerate
         // Only if we moved the sector last tic.
@@ -270,6 +280,7 @@ void R_MaybeInterpolateSector(sector_t* sector)
                 + FixedMul(sector->floorheight - sector->oldfloorheight, fractionaltic);
         else
             sector->interpfloorheight = sector->floorheight;
+
         if (sector->ceilingheight != sector->oldceilingheight)
             sector->interpceilingheight = sector->oldceilingheight
                 + FixedMul(sector->ceilingheight - sector->oldceilingheight, fractionaltic);
@@ -349,11 +360,13 @@ sector_t *R_FakeFlat(sector_t *sec, sector_t *tempsec, int *floorlightlevel,
 
             if (floorlightlevel)
                 *floorlightlevel = (s->floorlightsec == -1 ? s->lightlevel :
-                    sectors[s->floorlightsec].lightlevel);              // killough 3/16/98
+                    // killough 3/16/98
+                    sectors[s->floorlightsec].lightlevel);
 
             if (ceilinglightlevel)
                 *ceilinglightlevel = (s->ceilinglightsec == -1 ? s->lightlevel :
-                    sectors[s->ceilinglightsec].lightlevel);            // killough 4/11/98
+                    // killough 4/11/98
+                    sectors[s->ceilinglightsec].lightlevel);
         }
         else if (heightsec != -1 && viewz >= sectors[heightsec].interpceilingheight
             && sec->interpceilingheight > s->interpceilingheight)
@@ -378,14 +391,19 @@ sector_t *R_FakeFlat(sector_t *sec, sector_t *tempsec, int *floorlightlevel,
 
             if (floorlightlevel)
                 *floorlightlevel = (s->floorlightsec == -1 ? s->lightlevel :
-                    sectors[s->floorlightsec].lightlevel);              // killough 3/16/98
+                    // killough 3/16/98
+                    sectors[s->floorlightsec].lightlevel);
 
             if (ceilinglightlevel)
                 *ceilinglightlevel = (s->ceilinglightsec == -1 ? s->lightlevel :
-                    sectors[s->ceilinglightsec].lightlevel);            // killough 4/11/98
+                    // killough 4/11/98
+                    sectors[s->ceilinglightsec].lightlevel);
         }
-        sec = tempsec;        // Use other sector
+
+        // Use other sector
+        sec = tempsec;
     }
+
     return sec;
 }
 
@@ -402,7 +420,9 @@ static void R_AddLine(seg_t *line)
     angle_t             angle2;
     angle_t             span;
     angle_t             tspan;
-    static sector_t     tempsec;        // killough 3/8/98: ceiling/water hack
+
+    // killough 3/8/98: ceiling / water hack
+    static sector_t     tempsec;
 
     curline = line;
 
@@ -421,6 +441,7 @@ static void R_AddLine(seg_t *line)
     angle2 -= viewangle;
 
     tspan = angle1 + clipangle;
+
     if (tspan > 2 * clipangle)
     {
         tspan -= 2 * clipangle;
@@ -433,6 +454,7 @@ static void R_AddLine(seg_t *line)
     }
 
     tspan = clipangle - angle2;
+
     if (tspan > 2 * clipangle)
     {
         tspan -= 2 * clipangle;
@@ -440,6 +462,7 @@ static void R_AddLine(seg_t *line)
         // Totally off the left edge?
         if (tspan >= span)
             return;
+
         angle2 = 0 - clipangle;
     }
 
@@ -470,7 +493,8 @@ static void R_AddLine(seg_t *line)
     // killough 3/8/98, 4/4/98: hack for invisible ceilings / deep water
     backsector = R_FakeFlat(backsector, &tempsec, NULL, NULL, true);
 
-    doorclosed = false; // killough 4/16/98
+    // killough 4/16/98
+    doorclosed = false;
 
     // Closed door.
     if (backsector->interpceilingheight <= frontsector->interpfloorheight
@@ -571,19 +595,27 @@ static dboolean R_CheckBBox(const fixed_t *bspcoord)
         // Either angle1 or angle2 is behind us, so it doesn't matter if we
         // change it to the correct sign
         if (angle1 >= ANG180 && angle1 < ANG270)
-            angle1 = INT_MAX;           // which is ANG180 - 1
+            // which is ANG180 - 1
+            angle1 = INT_MAX;
         else
             angle2 = INT_MIN;
     }
 
     if ((signed int)angle2 >= (signed int)clipangle)
-        return false;                   // Both off left edge
+        // Both off left edge
+        return false;
+
     if ((signed int)angle1 <= -(signed int)clipangle)
-        return false;                   // Both off right edge
+        // Both off right edge
+        return false;
+
     if ((signed int)angle1 >= (signed int)clipangle)
-        angle1 = clipangle;             // Clip at left edge
+        // Clip at left edge
+        angle1 = clipangle;
+
     if ((signed int)angle2 <= -(signed int)clipangle)
-        angle2 = 0 - clipangle;         // Clip at right edge
+        // Clip at right edge
+        angle2 = 0 - clipangle;
 
     // Find the first clippost
     //  that touches the source post
@@ -599,17 +631,19 @@ static dboolean R_CheckBBox(const fixed_t *bspcoord)
     // another slime trail
     if (sx1 > 0)
         sx1--;
+
     if (sx2 < viewwidth - 1)
         sx2++;
 
     // SoM: Removed the "does not cross a pixel" test
-
     start = solidsegs;
+
     while (start->last < sx2)
         ++start;
 
     if (sx1 >= start->first && sx2 <= start->last)
-        return false;                   // The clippost contains the new span.
+        // The clippost contains the new span.
+        return false;
 
     return true;
 }
@@ -623,9 +657,16 @@ static dboolean R_CheckBBox(const fixed_t *bspcoord)
 static void R_Subsector(int num)
 {
     subsector_t *sub = &subsectors[num];
-    sector_t    tempsec;              // killough 3/7/98: deep water hack
-    int         floorlightlevel;      // killough 3/16/98: set floor lightlevel
-    int         ceilinglightlevel;    // killough 4/11/98
+
+    // killough 3/7/98: deep water hack
+    sector_t    tempsec;
+
+    // killough 3/16/98: set floor lightlevel
+    int         floorlightlevel;
+
+    // killough 4/11/98
+    int         ceilinglightlevel;
+
     int         count = sub->numlines;
     seg_t       *line = &segs[sub->firstline];
 
@@ -638,25 +679,42 @@ static void R_Subsector(int num)
     // killough 3/8/98, 4/4/98: Deep water / fake ceiling effect
     frontsector = R_FakeFlat(frontsector, &tempsec, &floorlightlevel, &ceilinglightlevel, false);
 
-    floorplane = (frontsector->interpfloorheight < viewz        // killough 3/7/98
+    // killough 3/7/98
+    floorplane = (frontsector->interpfloorheight < viewz
         || (frontsector->heightsec != -1
         && sectors[frontsector->heightsec].ceilingpic == skyflatnum) ?
         R_FindPlane(frontsector->interpfloorheight,
-            (frontsector->floorpic == skyflatnum                // killough 10/98
+
+            // killough 10/98
+            (frontsector->floorpic == skyflatnum
+
                 && (frontsector->sky & PL_SKYFLAT) ? frontsector->sky : frontsector->floorpic),
-            floorlightlevel,                                    // killough 3/16/98
-            frontsector->floor_xoffs,                           // killough 3/7/98
+
+            // killough 3/16/98
+            floorlightlevel,
+
+            // killough 3/7/98
+            frontsector->floor_xoffs,
             frontsector->floor_yoffs) : NULL);
 
     ceilingplane = (frontsector->interpceilingheight > viewz
         || frontsector->ceilingpic == skyflatnum
         || (frontsector->heightsec != -1
         && sectors[frontsector->heightsec].floorpic == skyflatnum) ?
-        R_FindPlane(frontsector->interpceilingheight,           // killough 3/8/98
-            (frontsector->ceilingpic == skyflatnum              // killough 10/98
+
+        // killough 3/8/98
+        R_FindPlane(frontsector->interpceilingheight,
+
+            // killough 10/98
+            (frontsector->ceilingpic == skyflatnum
+
             && (frontsector->sky & PL_SKYFLAT) ? frontsector->sky : frontsector->ceilingpic),
-            ceilinglightlevel,                                  // killough 4/11/98
-            frontsector->ceiling_xoffs,                         // killough 3/7/98
+
+            // killough 4/11/98
+            ceilinglightlevel,
+
+            // killough 3/7/98
+            frontsector->ceiling_xoffs,
             frontsector->ceiling_yoffs) : NULL);
 
     // killough 9/18/98: Fix underwater slowdown, by passing real sector
@@ -691,7 +749,8 @@ static void R_Subsector(int num)
 // Just call with BSP root.
 void R_RenderBSPNode(int bspnum)
 {
-    while (!(bspnum & NF_SUBSECTOR))    // Found a subsector?
+    // Found a subsector?
+    while (!(bspnum & NF_SUBSECTOR))
     {
         const node_t    *bsp = &nodes[bspnum];
 
@@ -707,5 +766,6 @@ void R_RenderBSPNode(int bspnum)
 
         bspnum = bsp->children[side];
     }
+
     R_Subsector(bspnum == -1 ? 0 : (bspnum & ~NF_SUBSECTOR));
 }

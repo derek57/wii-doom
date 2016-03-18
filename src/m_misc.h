@@ -28,10 +28,12 @@
 #ifndef __M_MISC__
 #define __M_MISC__
 
+
 #include <stdio.h>
 #include <stdarg.h>
 
 #include "doomtype.h"
+
 
 dboolean M_WriteFile(char *name, void *source, int length);
 dboolean M_FileExists(char *file);
@@ -40,10 +42,14 @@ dboolean M_StringCopy(char *dest, const char *src, size_t dest_size);
 dboolean M_StringConcat(char *dest, const char *src, size_t dest_size);
 dboolean M_StringStartsWith(const char *s, const char *prefix);
 dboolean M_StringEndsWith(const char *s, const char *suffix);
+dboolean M_StringCompare(const char *str1, const char *str2);
+dboolean isvowel(const char ch);
 
 int M_ReadFile(char *name, byte **buffer);
 int M_vsnprintf(char *buf, size_t buf_len, const char *s, va_list args);
 int M_snprintf(char *buf, size_t buf_len, const char *s, ...);
+int search_string(char src[], char str[]);
+int randInRange(int min, int max);
 
 void M_MakeDirectory(char *dir);
 void M_ExtractFileBase(char *path, char *dest);
@@ -63,12 +69,9 @@ char *M_DirName(char *path);
 char *M_StringReplace(const char *haystack, const char *needle, const char *replacement);
 char *M_ExtractFilename(char *path);
 char *M_BaseName(char *path);
-dboolean M_StringCompare(const char *str1, const char *str2);
-dboolean isvowel(const char ch);
 char *removeext(const char *file);
-int search_string(char src[], char str[]);
 char *M_SubString(const char *str, size_t begin, size_t len);
-int randInRange(int min, int max);
+
 
 #endif
 

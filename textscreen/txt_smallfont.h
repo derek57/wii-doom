@@ -10,8 +10,8 @@
 //
 // ----
 //
+// Copyright (C) 2002-2004 The DOSBox Team
 // Copyright (C) 2005-2014 Simon Howard
-// Copyright (C) 2002-2004  The DOSBox Team
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -2863,14 +2863,18 @@ static unsigned char small_font_data[] = {
     0x00,                    // |    |
     0x00,                    // |    |
     0x00,                    // |    |
-    0x00,                    // |    |
+    0x00                     // |    |
 };
 
 static txt_font_t small_font =
 {
     small_font_data,
-    4,                   // width
-    8                    // height
+
+    // width
+    4,
+
+    // height
+    8
 };
 
 

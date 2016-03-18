@@ -36,9 +36,9 @@
 ========================================================================
 */
 
+
 // Include system definitions so that prototypes become
 // active before macro replacements below are in effect.
-
 
 #include <assert.h>
 #include <stdio.h>
@@ -48,51 +48,65 @@
 #include "doomfeatures.h"
 #include "doomtype.h"
 
+
 //
 // ZONE MEMORY
 // PU - purge tags.
 //
 enum
 {
-    PU_FREE,       // a free block
-    PU_STATIC,     // static entire execution time
-    PU_LEVEL,      // static until level exited
-    PU_LEVSPEC,    // a special thinker in a level
+    // a free block
+    PU_FREE,
+
+    // static entire execution time
+    PU_STATIC,
+
+    // static until level exited
+    PU_LEVEL,
+
+    // a special thinker in a level
+    PU_LEVSPEC,
 
     PU_CACHE,
-    PU_MAX         // Must always be last -- killough
+
+    // Must always be last -- killough
+    PU_MAX
 };
 
-#define PU_PURGELEVEL    PU_CACHE    // First purgeable tag's level
+
+// First purgeable tag's level
+#define PU_PURGELEVEL    PU_CACHE
+
 
 #ifdef INSTRUMENTED
-#define DA(x,y) ,x,y
-#define DAC(x,y) x,y
+#define DA(x, y) , x, y
+#define DAC(x, y)  x, y
 #else
-#define DA(x,y) 
-#define DAC(x,y)
+#define DA(x, y) 
+#define DAC(x, y)
 #endif
 
 void *(Z_Malloc)(size_t size, int32_t tag, void **user DA(const char *, int));
-void *Z_MallocAlign(int reqsize, int32_t tag, void **user, int alignbits);
 void *(Z_Calloc)(size_t n1, size_t n2, int32_t tag, void **user DA(const char *, int)); 
 void *(Z_Realloc)(void *ptr, size_t size DA(const char *, int));
+void *Z_MallocAlign(int reqsize, int32_t tag, void **user, int alignbits);
 void (Z_Free)(void *ptr DA(const char *, int));
 void (Z_FreeTags)(int32_t lowtag, int32_t hightag DA(const char *, int));
 void (Z_ChangeTag)(void *ptr, int32_t tag DA(const char *, int));
 void Z_ChangeUser(void *ptr, void **user);
-void Z_DrawStats(void);            // Print allocation statistics
+void Z_DrawStats(void);
 void Z_DumpHistory(char *buf);
 void Z_DumpMemory(void);
 
+
 #ifdef INSTRUMENTED
-/* cph - save space if not debugging, don't require file 
- * and line to memory calls */
-#define Z_Free(a)          (Z_Free)     (a,      __FILE__,__LINE__)
-#define Z_FreeTags(a,b)    (Z_FreeTags) (a,b,    __FILE__,__LINE__)
-#define Z_ChangeTag(a,b)   (Z_ChangeTag)(a,b,    __FILE__,__LINE__)
-#define Z_Malloc(a,b,c)    (Z_Malloc)   (a,b,c,  __FILE__,__LINE__)
-#define Z_Calloc(a,b,c,d)  (Z_Calloc)   (a,b,c,d,__FILE__,__LINE__)
-#define Z_Realloc(a,b)     (Z_Realloc)  (a,b,    __FILE__,__LINE__)
+// cph - save space if not debugging, don't require file 
+// and line to memory calls
+#define Z_Free(a)             (Z_Free)     (a,         __FILE__, __LINE__)
+#define Z_FreeTags(a, b)      (Z_FreeTags) (a, b,      __FILE__, __LINE__)
+#define Z_ChangeTag(a, b)     (Z_ChangeTag)(a, b,      __FILE__, __LINE__)
+#define Z_Malloc(a, b, c)     (Z_Malloc)   (a, b, c,   __FILE__, __LINE__)
+#define Z_Calloc(a, b, c, d)  (Z_Calloc)   (a, b, c, d,__FILE__, __LINE__)
+#define Z_Realloc(a, b)       (Z_Realloc)  (a, b,      __FILE__, __LINE__)
 #endif
 

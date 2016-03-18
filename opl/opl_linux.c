@@ -15,11 +15,11 @@
 //     OPL Linux interface.
 //
 
+
 #ifndef WII
 #include "config.h"
 
 #if (defined(__i386__) || defined(__x86_64__)) && defined(HAVE_IOPERM)
-
 #include "../src/c_io.h"
 
 #include <stdio.h>
@@ -32,12 +32,13 @@
 #include "opl_internal.h"
 #include "opl_timer.h"
 
+
 static unsigned int opl_port_base;
+
 
 static int OPL_Linux_Init(unsigned int port_base)
 {
     // Try to get permissions:
-
     if (ioperm(port_base, 2, 1) < 0)
     {
         C_Error("Failed to get port permissions for 0x%x: %s", port_base, strerror(errno));
@@ -54,7 +55,6 @@ static int OPL_Linux_Init(unsigned int port_base)
     opl_port_base = port_base;
 
     // Start callback thread
-
     if (!OPL_Timer_StartThread())
     {
         ioperm(port_base, 2, 0);
@@ -67,11 +67,9 @@ static int OPL_Linux_Init(unsigned int port_base)
 static void OPL_Linux_Shutdown(void)
 {
     // Stop callback thread
-
     OPL_Timer_StopThread();
 
     // Release permissions
-
     ioperm(opl_port_base, 2, 0);
 }
 
@@ -97,9 +95,9 @@ opl_driver_t opl_linux_driver =
     OPL_Timer_Lock,
     OPL_Timer_Unlock,
     OPL_Timer_SetPaused,
-    OPL_Timer_AdjustCallbacks,
+    OPL_Timer_AdjustCallbacks
 };
 
-#endif /* #if (defined(__i386__) || defined(__x86_64__)) && defined(HAVE_IOPERM) */
+#endif // #if (defined(__i386__) || defined(__x86_64__)) && defined(HAVE_IOPERM)
 #endif
 

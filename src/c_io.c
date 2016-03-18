@@ -102,7 +102,7 @@
 #endif
 
 #if !defined(MAX_PATH)
-#define MAX_PATH        260
+#define MAX_PATH                260
 #endif
 
 #define CONSOLESPEED            (CONSOLEHEIGHT / 12)
@@ -135,11 +135,34 @@
 #define LDQUOTE                 1
 #define RDQUOTE                 2
 
+
+static int      timestampx;
+static int      zerowidth;
+static int      caretwait;
+static int      outputhistory = -1;
+static int      consolewait;
+static int      notabs[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+
+static dboolean showcaret = true;
+static dboolean forceblurredraw = false;
+
+static patch_t  *unknownchar;
+static patch_t  *consolefont[CONSOLEFONTSIZE];
+static patch_t  *ldquote;
+static patch_t  *rdquote;
+static patch_t  *degree;
+static patch_t  *multiply;
+static patch_t  *caret;
+static patch_t  *route;
+static patch_t  *warning; 
+
+
 dboolean        consoleactive = false;
 dboolean        alwaysrun;
 
-byte            c_tempscreen[SCREENWIDTH * SCREENHEIGHT];
-byte            c_blurscreen[SCREENWIDTH * SCREENHEIGHT];
+// actually it's colored red
+byte            dividercolor = 0;
+
 byte            inputcolor = 4;
 byte            whitecolor = 80;
 byte            bluecolor = 200;
@@ -147,7 +170,8 @@ byte            redcolor = 40;
 byte            graycolor = 100;
 byte            greencolor = 120;
 byte            yellowcolor = 160;
-byte            dividercolor = 0;   // actually it's colored red
+byte            c_tempscreen[SCREENWIDTH * SCREENHEIGHT];
+byte            c_blurscreen[SCREENWIDTH * SCREENHEIGHT];
 byte            consolebrandingcolor = 100;
 byte            consolescrollbartrackcolor = 100;
 byte            consolescrollbarfacecolor = 88;
@@ -170,25 +194,6 @@ int             consoleedgecolor1 = 105;
 int             consoleedgecolor2 = 100;
 int             spacewidth;
 
-static int      timestampx;
-static int      zerowidth;
-static int      caretwait;
-static int      outputhistory = -1;
-static int      consolewait;
-static int      notabs[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
-
-static dboolean showcaret = true;
-static dboolean forceblurredraw = false;
-
-static patch_t  *unknownchar;
-static patch_t  *consolefont[CONSOLEFONTSIZE];
-static patch_t  *ldquote;
-static patch_t  *rdquote;
-static patch_t  *degree;
-static patch_t  *multiply;
-static patch_t  *caret;
-static patch_t  *route;
-static patch_t  *warning; 
 
 extern dboolean wipe;
 
@@ -290,6 +295,7 @@ void C_PlayerMessage(char *string, ...)
 
         ++consolestrings;
     }
+
     outputhistory = -1;
 }
 
@@ -304,13 +310,13 @@ static void C_DrawDivider(int y, int scrn)
     int i;
 
     y *= SCREENWIDTH;
+
     if (y >= CONSOLETOP * SCREENWIDTH)
         for (i = y + CONSOLETEXTX; i < y + CONSOLETEXTX + CONSOLEDIVIDERWIDTH; ++i)
-//            I_VideoBuffer[i] = redcolor;
             screens[scrn][i] = redcolor;
+
     if ((y += SCREENWIDTH) >= CONSOLETOP * SCREENWIDTH)
         for (i = y + CONSOLETEXTX; i < y + CONSOLETEXTX + CONSOLEDIVIDERWIDTH; ++i)
-//            I_VideoBuffer[i] = redcolor;
             screens[scrn][i] = redcolor;
 }
 
@@ -381,10 +387,13 @@ static int C_TextWidth(char *text)
                 w += kern[j].adjust;
                 break;
             }
+
             ++j;
         }
+
         prevletter = letter;
     }
+
     return w;
 }
 
@@ -400,23 +409,23 @@ static void C_DrawScrollbar(int scrn)
     // Draw scrollbar track
     trackstart = CONSOLESCROLLBARY * SCREENWIDTH;
     trackend = trackstart + CONSOLESCROLLBARHEIGHT * SCREENWIDTH;
+
     for (y = trackstart; y < trackend; y += SCREENWIDTH)
         if (y - offset >= 0)
             for (x = CONSOLESCROLLBARX; x < CONSOLESCROLLBARX + CONSOLESCROLLBARWIDTH; ++x)
-//                I_VideoBuffer[y - offset + x] = consolescrollbartrackcolor;
                 screens[scrn][y - offset + x] = tinttab50[screens[scrn][y - offset + x]
                     + consolescrollbartrackcolor];
 
     // Draw scrollbar face
     facestart = (CONSOLESCROLLBARY + CONSOLESCROLLBARHEIGHT * (outputhistory == -1 ?
         MAX(0, consolestrings - CONSOLELINES) : outputhistory) / consolestrings) * SCREENWIDTH;
+
     faceend = facestart + (CONSOLESCROLLBARHEIGHT - CONSOLESCROLLBARHEIGHT
         * MAX(0, consolestrings - CONSOLELINES) / consolestrings) * SCREENWIDTH;
 
     for (y = facestart; y < faceend; y += SCREENWIDTH)
         if (y - offset >= 0)
             for (x = CONSOLESCROLLBARX; x < CONSOLESCROLLBARX + CONSOLESCROLLBARWIDTH; ++x)
-//                I_VideoBuffer[y - offset + x] = consolescrollbarfacecolor;
                 screens[scrn][y - offset + x] = consolescrollbarfacecolor;
 }
 
@@ -427,6 +436,7 @@ void C_Init(void)
     char        buffer[9];
 
     unknownchar = W_CacheLumpName("DRFON000", PU_STATIC);
+
     for (i = 0; i < CONSOLEFONTSIZE; i++)
     {
         M_snprintf(buffer, 9, "DRFON%03d", j++);
@@ -435,7 +445,6 @@ void C_Init(void)
 
     caret = W_CacheLumpName("CARET", PU_STATIC);
     route = W_CacheLumpName("DRFON036", PU_STATIC);
-
     ldquote = W_CacheLumpName("DRFON147", PU_STATIC);
     rdquote = W_CacheLumpName("DRFON148", PU_STATIC);
     degree = W_CacheLumpName("DRFON176", PU_STATIC);
@@ -443,18 +452,32 @@ void C_Init(void)
     warning = W_CacheLumpName("DRFONWRN", PU_STATIC); 
 
     spacewidth = SHORT(caret->width);
+
     timestampx = SCREENWIDTH - C_TextWidth("00:00:00") - CONSOLETEXTX * 2
         - CONSOLESCROLLBARWIDTH + 1;
 
     zerowidth = SHORT(consolefont['0' - CONSOLEFONTSTART]->width);
 
-    consolecolors[yellowstring] = yellowcolor;   // yellow = 160
-    consolecolors[redstring] = redcolor;         // red = 40
-    consolecolors[graystring] = graycolor;       // gray = 100
-    consolecolors[bluestring] = bluecolor;       // blue = 200
-    consolecolors[whitestring] = whitecolor;     // white = 80
-    consolecolors[greenstring] = greencolor;     // green = 120
-    consolecolors[dividerstring] = dividercolor; // divider = 0 (linked to red color)
+    // yellow = 160
+    consolecolors[yellowstring] = yellowcolor;
+
+    // red = 40
+    consolecolors[redstring] = redcolor;
+
+    // gray = 100
+    consolecolors[graystring] = graycolor;
+
+    // blue = 200
+    consolecolors[bluestring] = bluecolor;
+
+    // white = 80
+    consolecolors[whitestring] = whitecolor;
+
+    // green = 120
+    consolecolors[greenstring] = greencolor;
+
+    // divider = 0 (linked to red color)
+    consolecolors[dividerstring] = dividercolor;
 
     consoletintcolor <<= 8;
     consoleedgecolor1 <<= 8;
@@ -475,7 +498,7 @@ void C_HideConsoleFast(void)
     consoleactive = false;
 }
 
-static void DoBlurScreen(int x1, int y1, int x2, int y2, int i)
+static void BlurConsoleScreen(int x1, int y1, int x2, int y2, int i)
 {
     int x, y;
 
@@ -498,47 +521,41 @@ static void C_DrawBackground(int height, int scrn)
         forceblurredraw = false;
 
         for (i = 0; i < height; ++i)
-//            c_blurscreen[i] = I_VideoBuffer[i];
             c_blurscreen[i] = screens[scrn][i];
 
-        DoBlurScreen(0, 0, SCREENWIDTH - 1, height, 1);
-        DoBlurScreen(1, 0, SCREENWIDTH, height, -1);
-        DoBlurScreen(0, 0, SCREENWIDTH - 1, height - SCREENWIDTH, SCREENWIDTH + 1);
-        DoBlurScreen(1, SCREENWIDTH, SCREENWIDTH, height, -(SCREENWIDTH + 1));
-        DoBlurScreen(0, 0, SCREENWIDTH, height - SCREENWIDTH, SCREENWIDTH);
-        DoBlurScreen(0, SCREENWIDTH, SCREENWIDTH, height, -SCREENWIDTH);
-        DoBlurScreen(1, 0, SCREENWIDTH, height - SCREENWIDTH, SCREENWIDTH - 1);
-        DoBlurScreen(0, SCREENWIDTH, SCREENWIDTH - 1, height, -(SCREENWIDTH - 1));
+        BlurConsoleScreen(0, 0, SCREENWIDTH - 1, height, 1);
+        BlurConsoleScreen(1, 0, SCREENWIDTH, height, -1);
+        BlurConsoleScreen(0, 0, SCREENWIDTH - 1, height - SCREENWIDTH, SCREENWIDTH + 1);
+        BlurConsoleScreen(1, SCREENWIDTH, SCREENWIDTH, height, -(SCREENWIDTH + 1));
+        BlurConsoleScreen(0, 0, SCREENWIDTH, height - SCREENWIDTH, SCREENWIDTH);
+        BlurConsoleScreen(0, SCREENWIDTH, SCREENWIDTH, height, -SCREENWIDTH);
+        BlurConsoleScreen(1, 0, SCREENWIDTH, height - SCREENWIDTH, SCREENWIDTH - 1);
+        BlurConsoleScreen(0, SCREENWIDTH, SCREENWIDTH - 1, height, -(SCREENWIDTH - 1));
     }
 
     forceblurredraw = true;
     blurred = (consoleheight == CONSOLEHEIGHT && !wipe);
 
     for (i = 0; i < height; ++i)
-//        I_VideoBuffer[i] = tinttab50[c_blurscreen[i] + consoletintcolor];
         screens[0][i] = colormaps[0][256 * M_RandomInt(0, 10) + tinttab50[c_blurscreen[i]
             + consoletintcolor]];
 
     for (i = height - 2; i > 1; i -= 3)
     {
-//        I_VideoBuffer[i] = colormaps[0][256 * 6 + I_VideoBuffer[i]];
         screens[scrn][i] = colormaps[0][256 * 6 + screens[scrn][i]];
+
         if (((i - 1) % SCREENWIDTH) < SCREENWIDTH - 2)
-//            I_VideoBuffer[i + 1] = colormaps[0][256 * 6 + I_VideoBuffer[i - 1]];
               screens[scrn][i + 1] = colormaps[0][256 * 6 + screens[scrn][i - 1]];
-  }
+    }
 
     for (i = height - SCREENWIDTH * 3; i < height - SCREENWIDTH * 2; ++i)
-//        I_VideoBuffer[i] = tinttab25[consoleedgecolor1 + I_VideoBuffer[i]];
         screens[scrn][i] = tinttab25[consoleedgecolor1 + screens[scrn][i]];
 
     for (i = height - SCREENWIDTH * 2; i < height; ++i)
-//        I_VideoBuffer[i] = tinttab25[consoleedgecolor2 + I_VideoBuffer[i]];
         screens[scrn][i] = tinttab25[consoleedgecolor2 + screens[scrn][i]];
 
     for (j = 1; j <= 4; ++j)
         for (i = height; i < height + SCREENWIDTH * j; ++i)
-//            I_VideoBuffer[i] = colormaps[0][256 * 4 + I_VideoBuffer[i]];
             screens[scrn][i] = colormaps[0][256 * 4 + screens[scrn][i]];
 }
 
@@ -636,6 +653,7 @@ static void C_DrawConsoleText(int x, int y, char *text, int color1, int color2, 
                         x += kern[j].adjust;
                         break;
                     }
+
                     ++j;
                 }
             }
@@ -646,6 +664,7 @@ static void C_DrawConsoleText(int x, int y, char *text, int color1, int color2, 
                 x += SHORT(patch->width);
             }
         }
+
         prevletter = letter;
     }
 }
@@ -663,6 +682,7 @@ static void C_DrawTimeStamp(int x, int y, char *text)
 
         V_DrawConsoleChar(x + (text[i] == '1' ? (zerowidth - SHORT(patch->width)) / 2 : 0), y, 0,
             patch, consolebrandingcolor, NOBACKGROUNDCOLOR, false, tinttab25);
+
         x += (isdigit(text[i]) ? zerowidth : SHORT(patch->width));
     }
 }
@@ -677,11 +697,11 @@ void C_Drawer(void)
         int     end;
 
         // adjust console height
-
         if (consolewait < I_GetTime())
         {
             consoleheight = BETWEEN(0, consoleheight + CONSOLESPEED * consoledirection,
                 CONSOLEHEIGHT);
+
             consolewait = I_GetTime();
         }
 
@@ -705,6 +725,7 @@ void C_Drawer(void)
             start = outputhistory;
             end = outputhistory + CONSOLELINES;
         }
+
         for (i = start; i < end; ++i)
         {
             int y = CONSOLELINEHEIGHT * (i - start + MAX(0, CONSOLELINES - consolestrings))
@@ -716,6 +737,7 @@ void C_Drawer(void)
             {
                 C_DrawConsoleText(CONSOLETEXTX, y + (CONSOLELINEHEIGHT / 2), console[i].string,
                     consolecolors[console[i].type], NOBACKGROUNDCOLOR, tinttab66, console[i].tabs, true);
+
                 if (console[i].timestamp[0])
                     C_DrawTimeStamp(timestampx, y + (CONSOLELINEHEIGHT / 2), console[i].timestamp);
             }
@@ -734,7 +756,6 @@ void C_Drawer(void)
         if (showcaret)
             V_DrawConsoleChar(x + SHORT(route->width), consoleheight - 10, 0,
                     caret, inputcolor, NOBACKGROUNDCOLOR, false, NULL);
-//        x += SHORT(caret->width);
 
         // draw the scrollbar
         C_DrawScrollbar(0);
@@ -753,7 +774,7 @@ dboolean C_Responder(event_t *ev)
         return false;
 
 #ifdef WII
-    if(data->exp.type == WPAD_EXP_CLASSIC)
+    if (data->exp.type == WPAD_EXP_CLASSIC)
     {
         int     key = data->btns_h;
 
@@ -771,22 +792,23 @@ dboolean C_Responder(event_t *ev)
                 if (outputhistory != -1)
                 {
                     ++outputhistory;
+
                     if (outputhistory + CONSOLELINES == consolestrings)
                         outputhistory = -1;
                 }
+
                 break;
 
             default:
                 return false;
         }
     }
+
 #else
+
     if (ev->type == ev_keydown)
     {
         int             key = ev->data1;
-//        char            ch = (char)ev->data2;
-//        int             i;
-//        SDL_Keymod      modstate = SDL_GetModState();
 
         switch (key)
         {
@@ -802,9 +824,11 @@ dboolean C_Responder(event_t *ev)
                 if (outputhistory != -1)
                 {
                     ++outputhistory;
+
                     if (outputhistory + CONSOLELINES == consolestrings)
                         outputhistory = -1;
                 }
+
                 break;
 
             // close console
@@ -815,114 +839,10 @@ dboolean C_Responder(event_t *ev)
 
             default:
                 return false;
-/*
-                if (modstate & KMOD_CTRL)
-                {
-                    // select all text
-                    if (ch == 'a')
-                    {
-                        selectstart = 0;
-                        selectend = caretpos = strlen(consoleinput);
-                    }
-
-                    // copy selected text to clipboard
-                    else if (ch == 'c')
-                    {
-                        if (selectstart < selectend)
-                            SDL_SetClipboardText(M_SubString(consoleinput, selectstart,
-                                selectend - selectstart));
-                    }
-
-                    // paste text from clipboard
-                    else if (ch == 'v')
-                    {
-                        char    buffer[255];
-
-                        M_snprintf(buffer, sizeof(buffer), "%s%s%s",
-                            M_SubString(consoleinput, 0, selectstart), SDL_GetClipboardText(),
-                            M_SubString(consoleinput, selectend, strlen(consoleinput)
-                                - selectend));
-                        if (C_TextWidth(buffer) <= CONSOLEINPUTPIXELWIDTH)
-                        {
-                            C_AddToUndoHistory();
-                            M_StringCopy(consoleinput, buffer, sizeof(consoleinput));
-                            selectstart += strlen(SDL_GetClipboardText());
-                            selectend = caretpos = selectstart;
-                        }
-                    }
-
-                    // cut selected text to clipboard
-                    else if (ch == 'x')
-                    {
-                        if (selectstart < selectend)
-                        {
-                            C_AddToUndoHistory();
-                            SDL_SetClipboardText(M_SubString(consoleinput, selectstart,
-                                selectend - selectstart));
-                            for (i = selectend; (unsigned int)i < strlen(consoleinput); ++i)
-                                consoleinput[selectstart + i - selectend] = consoleinput[i];
-                            consoleinput[selectstart + i - selectend] = '\0';
-                            caretpos = selectend = selectstart;
-                            caretwait = I_GetTimeMS() + caretblinktime;
-                            showcaret = true;
-                        }
-                    }
-
-                    // undo
-                    else if (ch == 'z')
-                        if (undolevels)
-                        {
-                            --undolevels;
-                            M_StringCopy(consoleinput, undohistory[undolevels].input,
-                                sizeof(consoleinput));
-                            caretpos = undohistory[undolevels].caretpos;
-                            selectstart = undohistory[undolevels].selectstart;
-                            selectend = undohistory[undolevels].selectend;
-                        }
-                }
-                else
-                {
-                    if ((modstate & KMOD_SHIFT)
-                        || (key_alwaysrun != KEY_CAPSLOCK && (modstate & KMOD_CAPS)))
-                        ch = shiftxform[ch];
-                    if (ch >= ' ' && ch < '~' && ch != '`'
-                        && C_TextWidth(consoleinput) + (ch == ' ' ? spacewidth :
-                        consolefont[ch - CONSOLEFONTSTART]->width) <= CONSOLEINPUTPIXELWIDTH
-                        && !(modstate & KMOD_ALT))
-                    {
-                        C_AddToUndoHistory();
-                        if (selectstart < selectend)
-                        {
-                            // replace selected text with a character
-                            consoleinput[selectstart] = ch;
-                            for (i = selectend; (unsigned int)i < strlen(consoleinput); ++i)
-                                consoleinput[selectstart + i - selectend + 1] = consoleinput[i];
-                            consoleinput[selectstart + i - selectend + 1] = '\0';
-                            caretpos = selectend = selectstart + 1;
-                            caretwait = I_GetTimeMS() + caretblinktime;
-                            showcaret = true;
-                        }
-                        else
-                        {
-                            // insert a character
-                            consoleinput[strlen(consoleinput) + 1] = '\0';
-                            for (i = strlen(consoleinput); i > caretpos; --i)
-                                consoleinput[i] = consoleinput[i - 1];
-                            consoleinput[caretpos++] = ch;
-                        }
-                        selectstart = selectend = caretpos;
-                        caretwait = I_GetTimeMS() + caretblinktime;
-                        showcaret = true;
-                        autocomplete = -1;
-                        inputhistory = -1;
-                    }
-                }
-*/
         }
     }
     else if (ev->type == ev_keyup)
         return false;
-#ifndef WII
     else if (ev->type == ev_mousewheel)
     {
         // scroll output up
@@ -939,13 +859,14 @@ dboolean C_Responder(event_t *ev)
             if (outputhistory != -1)
             {
                 ++outputhistory;
+
                 if (outputhistory + 10 == consolestrings)
                     outputhistory = -1;
             }
         }
     }
 #endif
-#endif
+
     return true;
 }
 
@@ -961,16 +882,20 @@ static int dayofweek(int day, int month, int year)
 void C_PrintCompileDate(void)
 {
     int                 day, month, year, hour, minute;
+
     static const char   *days[] =
     {
         "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
     };
+
     static const char   mths[] = "JanFebMarAprMayJunJulAugSepOctNovDec";
+
     static const char   *months[] =
     {
         "January", "February", "March", "April", "May", "June",
         "July", "August", "September", "October", "November", "December"
     };
+
     static char         mth[4] = "";
 
     sscanf(__DATE__, "%3s %2d %4d", mth, &day, &year);
@@ -1057,7 +982,7 @@ void C_ConDump(void)
         FILE *file;
 
 #ifdef WII
-        if(usb)
+        if (usb)
             filename = "usb:/apps/wiidoom/condump.txt";
         else
             filename = "sd:/apps/wiidoom/condump.txt";
@@ -1097,6 +1022,7 @@ void C_ConDump(void)
                                 {
                                     for (spaces = 0; spaces < tabstop - outpos; ++spaces)
                                         fputc(' ', file);
+
                                     outpos = tabstop;
                                     ++tabcount;
                                 }
@@ -1118,12 +1044,14 @@ void C_ConDump(void)
                     {
                         for (spaces = 0; spaces < 91 - outpos; ++spaces)
                             fputc(' ', file);
+
                         fputs(console[i].timestamp, file);
                     }
 
                     fputc('\n', file);
                 }
             }
+
             fclose(file);
         }
     }

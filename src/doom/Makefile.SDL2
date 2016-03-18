@@ -98,7 +98,7 @@ am__v_AR_1 =
 libdoom_a_AR = $(AR) $(ARFLAGS)
 libdoom_a_LIBADD =
 am__objects_1 = am_map.$(OBJEXT) d_items.$(OBJEXT) d_main.$(OBJEXT) \
-	d_net.$(OBJEXT) doomdef.$(OBJEXT) doomstat.$(OBJEXT) \
+	d_net.$(OBJEXT) doomstat.$(OBJEXT) \
 	dstrings.$(OBJEXT) f_finale.$(OBJEXT) f_wipe.$(OBJEXT) \
 	g_game.$(OBJEXT) hu_lib.$(OBJEXT) hu_stuff.$(OBJEXT) \
 	info.$(OBJEXT) m_menu.$(OBJEXT) m_random.$(OBJEXT) \
@@ -287,11 +287,10 @@ d_items.c          d_items.h    \
 d_main.c           d_main.h     \
 d_net.c                         \
                    doomdata.h   \
-doomdef.c          doomdef.h    \
+                   doomdef.h    \
 doomstat.c         doomstat.h   \
                    d_player.h   \
 dstrings.c         dstrings.h   \
-                   d_textur.h   \
                    d_think.h    \
 f_finale.c         f_finale.h   \
 f_wipe.c           f_wipe.h     \
@@ -376,7 +375,6 @@ include ./$(DEPDIR)/am_map.Po
 include ./$(DEPDIR)/d_items.Po
 include ./$(DEPDIR)/d_main.Po
 include ./$(DEPDIR)/d_net.Po
-include ./$(DEPDIR)/doomdef.Po
 include ./$(DEPDIR)/doomstat.Po
 include ./$(DEPDIR)/dstrings.Po
 include ./$(DEPDIR)/f_finale.Po

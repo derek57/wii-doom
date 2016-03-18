@@ -64,8 +64,7 @@ static void PlayerQuitGame(player_t *player)
     // Do this the same way as Vanilla Doom does, to allow dehacked
     // replacements of this message
 
-    M_StringCopy(exitmsg, "Player 1 left the game",
-                 sizeof(exitmsg));
+    M_StringCopy(exitmsg, "Player 1 left the game", sizeof(exitmsg));
 
     exitmsg[7] += player_num;
 
@@ -76,7 +75,7 @@ static void PlayerQuitGame(player_t *player)
 /*
     if (demorecording) 
     {
-        G_CheckDemoStatus ();
+        G_CheckDemoStatus();
     }
 */
 }
@@ -102,9 +101,9 @@ static void RunTic(ticcmd_t *cmds, dboolean *ingame)
     // run a tic.
 
     if (advancedemo)
-        D_DoAdvanceDemo ();
+        D_DoAdvanceDemo();
 
-    G_Ticker ();
+    G_Ticker();
 }
 
 static loop_interface_t doom_loop_interface = {
@@ -181,7 +180,7 @@ static void SaveGameSettings(net_gamesettings_t *settings)
 // D_CheckNetGame
 // Works out player numbers among the net participants
 //
-void D_CheckNetGame (void)
+void D_CheckNetGame(void)
 {
     net_gamesettings_t settings;
 
@@ -200,7 +199,7 @@ void D_CheckNetGame (void)
                startskill, deathmatch, startmap, startepisode);
 
     C_Output("player %i of %i (%i nodes)",
-               consoleplayer+1, settings.num_players, settings.num_players);
+               consoleplayer + 1, settings.num_players, settings.num_players);
 
     // Show players here; the server might have specified a time limit
 
@@ -208,8 +207,10 @@ void D_CheckNetGame (void)
     {
         // Gross hack to work like Vanilla:
         C_Network("Levels will end after %d minute", timelimit);
+
         if (timelimit > 1)
             C_Network("s");
+
         C_Network(".");
     }
 }

@@ -539,8 +539,12 @@ static unsigned char main_font_data[] =
 static txt_font_t main_font =
 {
     main_font_data,
-    8,                // width
-    16                // height
+
+    // width
+    8,
+
+    // height
+    16
 };
 
 #endif /* __FONT_H__ */

@@ -59,11 +59,9 @@ typedef struct
 // Sets channels, SFX and music volume,
 //  allocates channel buffer, sets S_sfx lookup.
 //
-
 void S_Init(int sfxVolume, int musicVolume);
 
 // Shut down sound 
-
 void S_Shutdown(void);
 
 //
@@ -71,22 +69,17 @@ void S_Shutdown(void);
 // Kills playing sounds at start of level,
 //  determines music if any, changes music.
 //
-
 void S_Start(void);
 
 //
 // Start sound for thing at <origin>
 //  using <sound_id> from sounds.h
 //
-
-//void S_StartSound(void *origin, int sound_id);
 void S_StartSound(mobj_t *mobj, int sfx_id);
-
 void S_StartSectorSound(degenmobj_t *degenmobj, int sfx_id);
 
 // Stop sound for thing at <origin>
 void S_StopSound(mobj_t *origin);
-
 
 // Start music using <music_id> from sounds.h
 void S_StartMusic(int music_id);
@@ -109,11 +102,11 @@ void S_UpdateSounds(mobj_t *listener);
 
 void S_SetMusicVolume(int volume);
 void S_SetSfxVolume(int volume);
-
 void S_StartMP3Music(int type, int mode);
 
 // query if music is playing
 dboolean S_MusicPlaying(void);
+
 
 extern int snd_channels;
 

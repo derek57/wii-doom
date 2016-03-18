@@ -24,10 +24,10 @@
 //-----------------------------------------------------------------------------
 
 
+#include "d_items.h"
+
 // We are referring to sprite numbers.
 #include "info.h"
-
-#include "d_items.h"
 
 
 //
@@ -42,7 +42,7 @@
 // atkstate, i.e. attack/fire/hit frame
 // flashstate, muzzle flash
 //
-weaponinfo_t        weaponinfo[NUMWEAPONS] =
+weaponinfo_t weaponinfo[NUMWEAPONS] =
 {
     {
         // fist
@@ -54,6 +54,7 @@ weaponinfo_t        weaponinfo[NUMWEAPONS] =
         S_NULL,
         false
     },        
+
     {
         // pistol
         am_clip,
@@ -64,6 +65,7 @@ weaponinfo_t        weaponinfo[NUMWEAPONS] =
         S_PISTOLFLASH,
         false
     },        
+
     {
         // shotgun
         am_shell,
@@ -74,6 +76,7 @@ weaponinfo_t        weaponinfo[NUMWEAPONS] =
         S_SGUNFLASH1,
         false
     },
+
     {
         // chaingun
         am_clip,
@@ -84,6 +87,7 @@ weaponinfo_t        weaponinfo[NUMWEAPONS] =
         S_CHAINFLASH1,
         false
     },
+
     {
         // missile launcher
         am_misl,
@@ -94,6 +98,7 @@ weaponinfo_t        weaponinfo[NUMWEAPONS] =
         S_MISSILEFLASH1,
         false
     },
+
     {
         // plasma rifle
         am_cell,
@@ -104,6 +109,7 @@ weaponinfo_t        weaponinfo[NUMWEAPONS] =
         S_PLASMAFLASH1,
         false
     },
+
     {
         // bfg 9000
         am_cell,
@@ -114,6 +120,7 @@ weaponinfo_t        weaponinfo[NUMWEAPONS] =
         S_BFGFLASH1,
         false
     },
+
     {
         // chainsaw
         am_noammo,
@@ -124,6 +131,7 @@ weaponinfo_t        weaponinfo[NUMWEAPONS] =
         S_NULL,
         false
     },
+
     {
         // super shotgun
         am_shell,
@@ -133,13 +141,6 @@ weaponinfo_t        weaponinfo[NUMWEAPONS] =
         S_DSGUN1,
         S_DSGUNFLASH1,
         false
-    },        
+    }
 };
-
-
-
-
-
-
-
 

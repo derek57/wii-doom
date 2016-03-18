@@ -36,80 +36,23 @@
 ========================================================================
 */
 
+
 #if !defined(__P_FIX__)
 #define __P_FIX__
 
-#define DEFAULT 0x7FFF
-#define REMOVE  0
 
-#define E2M2    (gamemission == doom && gameepisode == 2 && gamemap == 2 && canmodify)
-#define MAP12   (gamemission == doom2 && gamemap == 12 && canmodify)
-/*
-#define Player1Start                                   1
-#define Player2Start                                   2
-#define Player3Start                                   3
-#define Player4Start                                   4
-#define YellowKeycard                                  6
-#define Backpack                                       8
-#define ShotgunGuy                                     9
-#define PlayerDeathmatchStart                          11
-#define TeleportDestination                            14
-#define DeadPlayer                                     15
-#define CellPack                                       17
-#define ShortGreenFirestick                            56
-#define Spectre                                        58
-#define HangingVictimOneLegged                         61
-#define HangingLeg                                     62
-#define HangingVictimTwitching                         63
-#define ArchVile                                       64
-#define HeavyWeaponDude                                65
-#define Revenant                                       66
-#define Mancubus                                       67
-#define Arachnotron                                    68
-#define HellKnight                                     69
-#define BurningBarrel                                  70
-#define PainElemental                                  71
-#define MegaSphere                                     83
-#define WolfensteinSS                                  84
-#define ShortTechnoFloorLamp                           86
-#define BossBrain                                      88
-#define MonstersSpawner                                89
-#define Chaingun                                       2002
-#define Chainsaw                                       2005
-#define Rocket                                         2010
-#define Medikit                                        2012
-#define Berserk                                        2023
-#define Barrel                                         2035
-#define BoxOfRockets                                   2046
-#define Cell                                           2047
-#define BoxOfBullets                                   2048
-#define BoxOfShells                                    2049
-#define Imp                                            3001
-#define Demon                                          3002
-#define Zombieman                                      3004
-#define Cacodemon                                      3005
-#define LostSoul                                       3006
-*/
-#define MTF_NETGAME                                    16
-/*
-#define DR_Door_OpenWaitClose_AlsoMonsters             1
-#define W1_Floor_RaiseToLowestCeiling                  5
-#define S1_Floor_LowerToLowestFloor                    23
-#define DR_Door_Red_OpenWaitClose                      28
-#define D1_Door_OpenStay                               31
-#define W1_Floor_LowerToLowestFloor_ChangesTexture     37
-#define SR_Floor_LowerTo8AboveHighestFloor             70
-#define W1_Floor_RaiseToNextHighestFloor               119
-#define W1_Teleport_MonstersOnly                       125
-#define W1_Floor_RaiseToNextHighestFloor_Fast          130
-*/
-#define ML_DRAWASWALL                                  1024
-#define ML_TRIGGER666                                  2048
+#define DEFAULT                 0x7FFF
+#define REMOVE                  0
+
+#define E2M2                    (gamemission == doom && gameepisode == 2 && gamemap == 2 && canmodify)
+#define MAP12                   (gamemission == doom2 && gamemap == 12 && canmodify)
+#define MTF_NETGAME             16
+#define ML_DRAWASWALL           1024
+#define ML_TRIGGER666           2048
 
 // [BH] Line won't be shown as teleporter in automap.
-#define ML_TELEPORTTRIGGERED                           4096
+#define ML_TELEPORTTRIGGERED    4096
 
-//#define NoSpecial                                      0
 
 typedef struct
 {
@@ -122,8 +65,6 @@ typedef struct
     int         newx;
     int         newy;
 } vertexfix_t;
-
-extern vertexfix_t vertexfix[];
 
 typedef struct
 {
@@ -142,8 +83,6 @@ typedef struct
     int         tag;
 } linefix_t;
 
-extern linefix_t linefix[];
-
 typedef struct
 {
     int         mission;
@@ -157,8 +96,6 @@ typedef struct
     int         special;
     int         tag;
 } sectorfix_t;
-
-extern sectorfix_t sectorfix[];
 
 typedef struct
 {
@@ -175,6 +112,10 @@ typedef struct
     int         options;
 } thingfix_t;
 
-extern thingfix_t thingfix[];
+extern vertexfix_t vertexfix[];
+extern linefix_t   linefix[];
+extern sectorfix_t sectorfix[];
+extern thingfix_t  thingfix[];
 
 #endif
+

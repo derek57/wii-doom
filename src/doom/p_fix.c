@@ -36,6 +36,7 @@
 ========================================================================
 */
 
+
 #include "doomdata.h"
 #include "doomdef.h"
 #include "p_fix.h"
@@ -992,3 +993,4 @@ thingfix_t thingfix[] =
 
     { -1,               0,   0,     0, 0,                      DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT,  DEFAULT                          }
 };
+

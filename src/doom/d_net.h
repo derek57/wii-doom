@@ -29,6 +29,7 @@
 #ifndef __D_NET__
 #define __D_NET__
 
+
 #include "doomtype.h"
 
 
@@ -36,7 +37,7 @@
 // D_CheckNetGame
 // Works out player numbers among the net participants
 //
-void D_CheckNetGame (void);
+void D_CheckNetGame(void);
 
 void D_ConnectNetGame(void);
 

@@ -34,9 +34,6 @@
 #define __V_TRANS__
 
 
-//typedef uint8_t byte;
-
-
 typedef enum
 {
     CRX_NONE,
@@ -46,13 +43,20 @@ typedef enum
     CRX_GOLD,
     CRX_RED,
     CRX_BLUE,
+
     CRXMAX
+
 } crx_t;
 
+
 int FindNearestColor(byte *palette, int r, int g, int b);
-byte V_Colorize (byte *playpal, int cr, byte source, dboolean keepgray109);
+
+byte V_Colorize(byte *playpal, int cr, byte source, dboolean keepgray109);
+
 
 extern byte *crx[CRXMAX];
 extern char **crstr;
 
+
 #endif // __V_TRANS__
+

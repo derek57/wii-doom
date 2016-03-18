@@ -13,6 +13,7 @@
 dboolean sd = false;
 dboolean usb = false;
 
+
 int wii_main()
 {
     FILE *fp2;
@@ -22,7 +23,8 @@ int wii_main()
     // Init the wiimotes
     WPAD_Init();
 
-    WPAD_SetIdleTimeout(60*5); // 5 minutes 
+    // 5 minutes 
+    WPAD_SetIdleTimeout(60 * 5);
 
     WPAD_SetDataFormat(WPAD_CHAN_ALL, WPAD_FMT_BTNS_ACC_IR);
 
@@ -31,19 +33,19 @@ int wii_main()
     // Init the file system
     fatInitDefault();
 
-    //Determine SD or USB
+    // Determine SD or USB
     fp2 = fopen("sd:/apps/wiidoom/pspdoom.wad", "rb");
 
-    if(fp2)
+    if (fp2)
         sd = true;
 
-    if(!fp2)
+    if (!fp2)
         fp2 = fopen("usb:/apps/wiidoom/pspdoom.wad", "rb");
 
-    if(fp2 && !sd)
+    if (fp2 && !sd)
         usb = true;
 
-    if(fp2)
+    if (fp2)
         fclose(fp2);
 
     return 0;

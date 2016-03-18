@@ -7,10 +7,13 @@
 
 #include <wiiuse/wpad.h>
 
+
 /* Constants */
 #define MAX_WIIMOTES        4
 
+
 int start;
+
 
 //
 // [nitr8] UNUSED
@@ -28,6 +31,7 @@ s32 Wpad_Init(void)
 
     // Initialize Wiimote subsystem
     ret = WPAD_Init();
+
     if (ret < 0)
         return ret;
 
@@ -70,6 +74,7 @@ u32 WaitButtons(void)
 
         VIDEO_WaitVSync();
     }
+
     return buttons;
 }
 

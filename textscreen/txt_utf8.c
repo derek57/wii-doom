@@ -12,36 +12,41 @@
 // GNU General Public License for more details.
 //
 
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "txt_utf8.h"
 
+
 // Encode a Unicode character as UTF-8, storing it in the buffer 'p'
 // and returning the new, incremented position.
-
 char *TXT_EncodeUTF8(char *p, unsigned int c)
 {
-    if (c < 0x80)                             // 1 character (ASCII):
+    // 1 character (ASCII):
+    if (c < 0x80)
     {
         p[0] = c;
         return p + 1;
     }
-    else if (c < 0x800)                       // 2 character:
+    // 2 character:
+    else if (c < 0x800)
     {
         p[0] = 0xc0 | (c >> 6);
         p[1] = 0x80 | (c & 0x3f);
         return p + 2;
     }
-    else if (c < 0x10000)                     // 3 chacater:
+    // 3 chacater:
+    else if (c < 0x10000)
     {
         p[0] = 0xe0 | (c >> 12);
         p[1] = 0x80 | ((c >> 6) & 0x3f);
         p[2] = 0x80 | (c & 0x3f);
         return p + 3;
     }
-    else if (c < 0x200000)                    // 4 character:
+    // 4 character:
+    else if (c < 0x200000)
     {
         p[0] = 0xf0 | (c >> 18);
         p[1] = 0x80 | ((c >> 12) & 0x3f);
@@ -52,13 +57,11 @@ char *TXT_EncodeUTF8(char *p, unsigned int c)
     else
     {
         // Too big!
-
         return p;
     }
 }
 
 // Decode UTF-8 character, incrementing *ptr over the decoded bytes.
-
 unsigned int TXT_DecodeUTF8(const char **ptr)
 {
     const char *p = *ptr;
@@ -66,19 +69,22 @@ unsigned int TXT_DecodeUTF8(const char **ptr)
 
     // UTF-8 decode.
 
-    if ((*p & 0x80) == 0)                     // 1 character (ASCII):
+    // 1 character (ASCII):
+    if ((*p & 0x80) == 0)
     {
         c = *p;
         *ptr += 1;
     }
-    else if ((p[0] & 0xe0) == 0xc0            // 2 character:
+    // 2 character:
+    else if ((p[0] & 0xe0) == 0xc0
           && (p[1] & 0xc0) == 0x80)
     {
         c = ((p[0] & 0x1f) << 6)
           |  (p[1] & 0x3f);
         *ptr += 2;
     }
-    else if ((p[0] & 0xf0) == 0xe0            // 3 character:
+    // 3 character:
+    else if ((p[0] & 0xf0) == 0xe0
           && (p[1] & 0xc0) == 0x80
           && (p[2] & 0xc0) == 0x80)
     {
@@ -87,7 +93,8 @@ unsigned int TXT_DecodeUTF8(const char **ptr)
           |  (p[2] & 0x3f);
         *ptr += 3;
     }
-    else if ((p[0] & 0xf8) == 0xf0            // 4 character:
+    // 4 character:
+    else if ((p[0] & 0xf8) == 0xf0
           && (p[1] & 0xc0) == 0x80
           && (p[2] & 0xc0) == 0x80
           && (p[3] & 0xc0) == 0x80)
@@ -102,7 +109,6 @@ unsigned int TXT_DecodeUTF8(const char **ptr)
     {
         // Decode failure.
         // Don't bother with 5/6 byte sequences.
-
         c = 0;
     }
 
@@ -110,7 +116,6 @@ unsigned int TXT_DecodeUTF8(const char **ptr)
 }
 
 // Count the number of characters in a UTF-8 string.
-
 unsigned int TXT_UTF8_Strlen(const char *s)
 {
     const char *p;
@@ -132,7 +137,6 @@ unsigned int TXT_UTF8_Strlen(const char *s)
 }
 
 // Skip past the first n characters in a UTF-8 string.
-
 char *TXT_UTF8_SkipChars(const char *s, unsigned int n)
 {
     unsigned int i;

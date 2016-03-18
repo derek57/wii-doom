@@ -36,21 +36,26 @@
 #include "../doomtype.h"
 #include "../i_timer.h"
 
+
 //
 // Global parameters/defines.
 //
-// DOOM version
-#define DOOM_VERSION 109
-
-// Version code for cph's longtics hack ("v1.91")
-#define DOOM_191_VERSION 111
 
 // If rangecheck is undefined,
 // most parameter validation debugging code will not be compiled
+//
+// TODO: There are separate RANGECHECK defines for different games, but this
+// is common code. Fix this.
 #define RANGECHECK
 
+// DOOM version
+#define DOOM_VERSION             109
+
+// Version code for cph's longtics hack ("v1.91")
+#define DOOM_191_VERSION         111
+
 // The maximum number of players, multiplayer/networking.
-#define MAXPLAYERS 4
+#define MAXPLAYERS               4
 
 #define MAXPATH                  0x108
 
@@ -178,89 +183,93 @@
 #define SavePathRootHacxMusicSD  "sd:/apps/wiidoom/hacx-music"
 
 #ifndef VER_ID
-#define VER_ID             "DVL"
+#define VER_ID                   "DVL"
 #endif
 
 #ifdef RANGECHECK
-#define DOOM_VERSIONTEXT   "Version 2 +R "__DATE__" ("VER_ID")"
+#define DOOM_VERSIONTEXT         "Version 2 +R "__DATE__" ("VER_ID")"
 #else
-#define DOOM_VERSIONTEXT   "Version 2 "__DATE__" ("VER_ID")"
+#define DOOM_VERSIONTEXT         "Version 2 "__DATE__" ("VER_ID")"
 #endif
 
 #ifdef RANGECHECK
-#define VERSIONTEXT        "V2 +R ("VER_ID") "__TIME__""
+#define VERSIONTEXT              "V2 +R ("VER_ID") "__TIME__""
 #endif
 
-#define YEAR               (( (__DATE__ [9] - '0')) * 10 + (__DATE__ [10] - '0'))
+#define YEAR                     (((__DATE__ [9] - '0')) * 10 + (__DATE__ [10] - '0'))
 
-#define MONTH              (__DATE__ [2] == 'n' ? 0                                \
-                           : __DATE__ [2] == 'b' ? 1                               \
-                           : __DATE__ [2] == 'r' ? (__DATE__ [0] == 'M' ? 2 : 3)   \
-                           : __DATE__ [2] == 'y' ? 4                               \
-                           : __DATE__ [2] == 'n' ? 5                               \
-                           : __DATE__ [2] == 'l' ? 6                               \
-                           : __DATE__ [2] == 'g' ? 7                               \
-                           : __DATE__ [2] == 'p' ? 8                               \
-                           : __DATE__ [2] == 't' ? 9                               \
-                           : __DATE__ [2] == 'v' ? 10 : 11)
+#define MONTH                    (__DATE__ [2] == 'n' ? 0                                \
+                                 : __DATE__ [2] == 'b' ? 1                               \
+                                 : __DATE__ [2] == 'r' ? (__DATE__ [0] == 'M' ? 2 : 3)   \
+                                 : __DATE__ [2] == 'y' ? 4                               \
+                                 : __DATE__ [2] == 'n' ? 5                               \
+                                 : __DATE__ [2] == 'l' ? 6                               \
+                                 : __DATE__ [2] == 'g' ? 7                               \
+                                 : __DATE__ [2] == 'p' ? 8                               \
+                                 : __DATE__ [2] == 't' ? 9                               \
+                                 : __DATE__ [2] == 'v' ? 10 : 11)
 
-#define DAY                ((__DATE__ [4] == ' ' ? 0 : __DATE__ [4] - '0') * 10    \
-                           + (__DATE__ [5] - '0'))
+#define DAY                      ((__DATE__ [4] == ' ' ? 0 : __DATE__ [4] - '0') * 10    \
+                                 + (__DATE__ [5] - '0'))
 
-#define DATE_AS_INT        (((YEAR - 2000) * 12 + MONTH) * 31 + DAY)
+#define DATE_AS_INT              (((YEAR - 2000) * 12 + MONTH) * 31 + DAY)
 
-#define NUMKEYS            256
+#define NUMKEYS                  256
 
-#define M_ZOOMIN           ((int) (1.02*FRACUNIT))
+#define M_ZOOMIN                 ((int)(1.02 * FRACUNIT))
 
-#define M_ZOOMOUT          ((int) (FRACUNIT/1.02))
+#define M_ZOOMOUT                ((int)(FRACUNIT / 1.02))
 
-#define AFLAG_JUMP         0x80
+#define AFLAG_JUMP               0x80
 
-#define SCREENSCALE        2
+#define SCREENSCALE              2
 
-#define ORIGINALWIDTH      320
-#define ORIGINALHEIGHT     200
+#define ORIGINALWIDTH            320
+#define ORIGINALHEIGHT           200
 
-#define SCREENWIDTH        (ORIGINALWIDTH * SCREENSCALE)
-#define SCREENHEIGHT       (ORIGINALHEIGHT * SCREENSCALE)
+#define SCREENWIDTH              (ORIGINALWIDTH * SCREENSCALE)
+#define SCREENHEIGHT             (ORIGINALHEIGHT * SCREENSCALE)
 
-#define ORIGINALSBARHEIGHT 32 
-#define SBARHEIGHT         (ORIGINALSBARHEIGHT * SCREENSCALE)
+#define ORIGINALSBARHEIGHT       32 
+#define SBARHEIGHT               (ORIGINALSBARHEIGHT * SCREENSCALE)
 
 // Index of the special effects (INVUL inverse) map.
-#define INVERSECOLORMAP    32
+#define INVERSECOLORMAP          32
 
-#define MOUSE_WHEELUP      MAX_MOUSE_BUTTONS
-#define MOUSE_WHEELDOWN    (MAX_MOUSE_BUTTONS + 1)
+#define MOUSE_WHEELUP            MAX_MOUSE_BUTTONS
+#define MOUSE_WHEELDOWN          (MAX_MOUSE_BUTTONS + 1)
 
 // phares 3/20/98:
 //
 // Player friction is variable, based on controlling
 // linedefs. More friction can create mud, sludge,
 // magnetized floors, etc. Less friction can create ice.
-#define MORE_FRICTION_MOMENTUM  15000   // mud factor based on momentum
-#define ORIG_FRICTION           0xE800  // original value
-#define ORIG_FRICTION_FACTOR    2048    // original value
+
+// mud factor based on momentum
+#define MORE_FRICTION_MOMENTUM   15000
+
+// original value
+#define ORIG_FRICTION            0xE800
+
+// original value
+#define ORIG_FRICTION_FACTOR     2048
 
 //
 // Difficulty/skill settings/filters.
 //
 
 // Skill flags.
-#define MTF_EASY                       1
-#define MTF_NORMAL                     2
-#define MTF_HARD                       4
+#define MTF_EASY                 1
+#define MTF_NORMAL               2
+#define MTF_HARD                 4
 
 // Deaf monsters/do not react to sound.
-#define MTF_AMBUSH                     8
-
-#define TEXTSPEED                      3
-#define TEXTWAIT                       250
+#define MTF_AMBUSH               8
 
 #ifndef PI
-#define PI                             3.14159265358979323846
+#define PI                       3.14159265358979323846
 #endif
+
 
 typedef enum 
 {
@@ -268,7 +277,7 @@ typedef enum
     DEFAULT_INT_HEX,
     DEFAULT_STRING,
     DEFAULT_FLOAT,
-    DEFAULT_KEY,
+    DEFAULT_KEY
 
 } default_type_t;
 
@@ -296,7 +305,7 @@ typedef struct
 
     // If true, this config variable has been bound to a variable
     // and is being used.
-    dboolean        bound;
+    dboolean       bound;
 
 } default_t;
 
@@ -319,7 +328,7 @@ typedef struct
     
     // choice = menu item #.
     // if status = 2,
-    //   choice=0:leftarrow,1:rightarrow
+    //   choice = 0 : leftarrow, 1 : rightarrow
     void           (*routine)(int choice);
     
     // hotkey in menu
@@ -329,13 +338,24 @@ typedef struct
 
 typedef struct menu_s
 {
-    short          numitems;        // # of menu items
-    struct menu_s* prevMenu;        // previous menu
-    menuitem_t*    menuitems;       // menu items
-    void           (*routine)();    // draw routine
+    // # of menu items
+    short          numitems;
+
+    // previous menu
+    struct menu_s  *prevMenu;
+
+    // menu items
+    menuitem_t     *menuitems;
+
+    // draw routine
+    void           (*routine)();
+
+    // x, y of menu
     short          x;
-    short          y;               // x,y of menu
-    short          lastOn;          // last item user was on in menu
+    short          y;
+
+    // last item user was on in menu
+    short          lastOn;
 
 } menu_t;
 
@@ -383,8 +403,6 @@ typedef enum
     
 } card_t;
 
-
-
 // The defined weapons,
 //  including a marker indicating
 //  user has not changed weapon.
@@ -407,18 +425,25 @@ typedef enum
 
 } weapontype_t;
 
-
 // Ammunition types defined.
 typedef enum
 {
-    am_clip,        // Pistol / chaingun ammo.
-    am_shell,       // Shotgun / double barreled shotgun.
-    am_cell,        // Plasma rifle, BFG.
-    am_misl,        // Missile launcher.
+    // Pistol / chaingun ammo.
+    am_clip,
+
+    // Shotgun / double barreled shotgun.
+    am_shell,
+
+    // Plasma rifle, BFG.
+    am_cell,
+
+    // Missile launcher.
+    am_misl,
 
     NUMAMMO,
 
-    am_noammo       // Unlimited for chainsaw / fist.        
+    // Unlimited for chainsaw / fist.        
+    am_noammo
 
 } ammotype_t;
 
@@ -447,62 +472,106 @@ typedef enum
 } powertype_t;
 
 // The "mission" controls what game we are playing.
-
 typedef enum
 {
-    doom,            // Doom 1
-    doom2,           // Doom 2
-    pack_tnt,        // Final Doom: TNT: Evilution
-    pack_plut,       // Final Doom: The Plutonia Experiment
-    pack_chex,       // Chex Quest (modded doom)
-    pack_hacx,       // Hacx (modded doom2)
-    pack_nerve,      // Doom 2: No Rest For The Living
-    pack_master,     // Master Levels for Doom 2
+    // Doom 1
+    doom,
+
+    // Doom 2
+    doom2,
+
+    // Final Doom: TNT: Evilution
+    pack_tnt,
+
+    // Final Doom: The Plutonia Experiment
+    pack_plut,
+
+    // Chex Quest (modded doom)
+    pack_chex,
+
+    // Hacx (modded doom2)
+    pack_hacx,
+
+    // Doom 2: No Rest For The Living
+    pack_nerve,
+
+    // Master Levels for Doom 2
+    pack_master,
 
     none
+
 } GameMission_t;
 
 // The "mode" allows more accurate specification of the game mode we are
 // in: eg. shareware vs. registered.  So doom1.wad and doom.wad are the
 // same mission, but a different mode.
-
 typedef enum
 {
-    shareware,       // Doom/Heretic shareware
-    registered,      // Doom/Heretic registered
-    commercial,      // Doom II/Hexen
-    retail,          // Ultimate Doom
-    indetermined     // Unknown.
+    // Doom/Heretic shareware
+    shareware,
+
+    // Doom/Heretic registered
+    registered,
+
+    // Doom II/Hexen
+    commercial,
+
+    // Ultimate Doom
+    retail,
+
+    // Unknown.
+    indetermined
+
 } GameMode_t;
 
 // What version are we emulating?
-
 typedef enum
 {
-    exe_doom_1_2,    // Doom 1.2: shareware and registered
-    exe_doom_1_666,  // Doom 1.666: for shareware, registered and commercial
-    exe_doom_1_7,    // Doom 1.7/1.7a: "
-    exe_doom_1_8,    // Doom 1.8: "
-    exe_doom_1_9,    // Doom 1.9: "
-    exe_hacx,        // Hacx
-    exe_ultimate,    // Ultimate Doom (retail)
-    exe_final,       // Final Doom
-    exe_final2,      // Final Doom (alternate exe)
-    exe_chex         // Chex Quest executable (based on Final Doom)
+    // Doom 1.2: shareware and registered
+    exe_doom_1_2,
+
+    // Doom 1.666: for shareware, registered and commercial
+    exe_doom_1_666,
+
+    // Doom 1.7/1.7a: "
+    exe_doom_1_7,
+
+    // Doom 1.8: "
+    exe_doom_1_8,
+
+    // Doom 1.9: "
+    exe_doom_1_9,
+
+    // Hacx
+    exe_hacx,
+
+    // Ultimate Doom (retail)
+    exe_ultimate,
+
+    // Final Doom
+    exe_final,
+
+    // Final Doom (alternate exe)
+    exe_final2,
+
+    // Chex Quest executable (based on Final Doom)
+    exe_chex
+
 } GameVersion_t;
 
 // Skill level.
-
 typedef enum
 {
-    sk_noitems = -1,        // the "-skill 0" hack
+    // the "-skill 0" hack
+    sk_noitems = -1,
+
     sk_baby = 0,
     sk_easy,
     sk_medium,
     sk_hard,
     sk_nightmare
-} skill_t;
 
+} skill_t;
 
 //
 // Power up durations,
@@ -511,27 +580,14 @@ typedef enum
 //
 typedef enum
 {
-    INVULNTICS      = (30*TICRATE),
-    INVISTICS       = (60*TICRATE),
-    INFRATICS       = (120*TICRATE),
-    IRONTICS        = (60*TICRATE),
-    FLIGHTTICS      = (60*TICRATE)
+    INVULNTICS      = (30 * TICRATE),
+    INVISTICS       = (60 * TICRATE),
+    INFRATICS       = (120 * TICRATE),
+    IRONTICS        = (60 * TICRATE),
+    FLIGHTTICS      = (60 * TICRATE)
     
 } powerduration_t;
 
-extern dboolean    dont_move_backwards;
-extern dboolean    sd;
-extern dboolean    usb;
-
-extern int         fsize;
-extern int         fsizerw;
-extern int         fsizerw2;
-extern int         fsizecq;
-extern int         is_chex_2;
-extern int         show_deh_loading_message;
-extern int         extra_wad_loaded;
-extern int         load_extra_wad;
-extern int         load_dehacked;
 
 char               extra_wad_1[256];
 char               extra_wad_2[256];
@@ -554,5 +610,20 @@ dboolean           gamekeydown[NUMKEYS];
 FILE               *debugfile;
 FILE               *statsfile;
 
-#endif          // __DOOMDEF__
+
+extern dboolean    dont_move_backwards;
+extern dboolean    sd;
+extern dboolean    usb;
+
+extern int         fsize;
+extern int         fsizerw;
+extern int         fsizerw2;
+extern int         fsizecq;
+extern int         is_chex_2;
+extern int         show_deh_loading_message;
+extern int         extra_wad_loaded;
+extern int         load_extra_wad;
+extern int         load_dehacked;
+
+#endif // __DOOMDEF__
 

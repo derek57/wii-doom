@@ -84,10 +84,12 @@ void T_PlatRaise(plat_t *plat)
                         plat->status = waiting;
                         S_StartSectorSound(&plat->sector->soundorg, sfx_pstop);
                     }
-                    else // else go into stasis awaiting next toggle activation
+                    // else go into stasis awaiting next toggle activation
+                    else
                     {
                         // jff 3/14/98 after action wait
                         plat->oldstatus = plat->status;
+
                         // for reactivation of toggle
                         plat->status = in_stasis;
                     }
@@ -107,6 +109,7 @@ void T_PlatRaise(plat_t *plat)
                     }
                 }
             }
+
             break;
         
         case down:
@@ -128,6 +131,7 @@ void T_PlatRaise(plat_t *plat)
                 {
                     // jff 3/14/98 after action wait
                     plat->oldstatus = plat->status;
+
                     // for reactivation of toggle
                     plat->status = in_stasis;
                 }
@@ -145,6 +149,7 @@ void T_PlatRaise(plat_t *plat)
                     }
                 }
             }
+
             break;
         
         case waiting:
@@ -153,6 +158,7 @@ void T_PlatRaise(plat_t *plat)
                 plat->status = (plat->sector->floorheight == plat->low ? up : down);
                 S_StartSectorSound(&plat->sector->soundorg, sfx_pstart);
             }
+
         case in_stasis:
             break;
     }
@@ -217,7 +223,8 @@ int EV_DoPlat(line_t *line, plattype_e type, int amount)
                 plat->wait = 0;
                 plat->status = up;
                 // NO MORE DAMAGE, IF APPLICABLE
-                sec->special = 0;                
+                sec->special = 0;
+
                 //jff 3/14/98 clear old field as well
                 sec->oldspecial = 0;
 
@@ -235,10 +242,11 @@ int EV_DoPlat(line_t *line, plattype_e type, int amount)
                 break;
             
             case downWaitUpStay:
-                if(beta_style)
+                if (beta_style)
                     plat->speed = PLATSPEED;
                 else
                     plat->speed = PLATSPEED * 4;
+
                 plat->low = P_FindLowestFloorSurrounding(sec);
 
                 if (plat->low > sec->floorheight)
@@ -285,8 +293,10 @@ int EV_DoPlat(line_t *line, plattype_e type, int amount)
             case toggleUpDn:
                 // not used
                 plat->speed = PLATSPEED;
+
                 // not used
                 plat->wait = TICRATE * PLATWAIT;
+
                 // jff 3/14/98 crush anything in the way
                 plat->crush = true;
 
@@ -299,6 +309,7 @@ int EV_DoPlat(line_t *line, plattype_e type, int amount)
             default:
                 break;
         }
+
         P_AddActivePlat(plat);
     }
 
@@ -342,6 +353,7 @@ void P_ActivateInStasis(int tag)
                 plat->status = (plat->oldstatus == up ? down : up);
             else
                 plat->status = plat->oldstatus;
+
             plat->thinker.function = T_PlatRaise;
         }
     }
@@ -369,6 +381,7 @@ dboolean EV_StopPlat(line_t *line)
             plat->thinker.function = NULL;
         }
     }
+
     return true;
 }
 
@@ -382,8 +395,10 @@ void P_AddActivePlat(plat_t *plat)
 
     list->plat = plat;
     plat->list = list;
+
     if ((list->next = activeplats))
         list->next->prev = &list->next;
+
     list->prev = &activeplats;
     activeplats = list;
 }
@@ -398,8 +413,10 @@ void P_RemoveActivePlat(plat_t *plat)
 
     plat->sector->floordata = NULL;
     P_RemoveThinker(&plat->thinker);
+
     if ((*list->prev = list->next))
         list->next->prev = list->prev;
+
     free(list);
 }
 

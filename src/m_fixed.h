@@ -29,26 +29,28 @@
 #define __M_FIXED__
 
 
-
-
 //
 // Fixed point, 32bit as 16.16.
 //
 #define FRACBITS                16
-#define FRACUNIT                (1<<FRACBITS)
+#define FRACUNIT                (1 << FRACBITS)
 #define FIXED2DOUBLE(x)         (x / (double)FRACUNIT)
+
 
 typedef int fixed_t;
 
-fixed_t FixedMul        (fixed_t a, fixed_t b);
-fixed_t FixedDiv        (fixed_t a, fixed_t b);
+
+fixed_t FixedMul(fixed_t a, fixed_t b);
+fixed_t FixedDiv(fixed_t a, fixed_t b);
 
 int BETWEEN(int a, int b, int c);
 int MIN(int a, int b);
 int MAX(int a, int b);
-unsigned int SafeAdd(unsigned int a, unsigned int b);
 int ABS(int a);
 int SIGN(int a);
 
+unsigned int SafeAdd(unsigned int a, unsigned int b);
+
 
 #endif
+

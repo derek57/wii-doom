@@ -29,11 +29,10 @@
 #define __P_INTER__
 
 
+dboolean P_GivePower(player_t *, int);
+
+
 extern dboolean message_dontfuckwithme;
 
-
-dboolean        P_GivePower(player_t*, int);
-
-
-
 #endif
+

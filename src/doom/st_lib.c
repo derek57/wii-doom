@@ -22,10 +22,6 @@
 //-----------------------------------------------------------------------------
 
 
-static const char
-rcsid[] = "$Id: st_lib.c,v 1.4 1997/02/03 16:47:56 b1 Exp $";
-
-
 #include <ctype.h>
 
 #include "d_deh.h"
@@ -42,63 +38,45 @@ rcsid[] = "$Id: st_lib.c,v 1.4 1997/02/03 16:47:56 b1 Exp $";
 #include "z_zone.h"
 
 
-// in AM_map.c
+patch_t *sttminus;
+
 
 //
 // Hack display negative frags.
 //  Loads and store the stminus lump.
 //
-patch_t*                sttminus;
-
-
 void STlib_init(void)
 {
     if (fsize != 10396254 && fsize != 10399316 && fsize != 10401760 && fsize != 4274218 &&
-            fsize != 4225504 && fsize != 4225460 && fsize != 4207819)
-        sttminus = (patch_t *) W_CacheLumpName("STTMINUS", PU_STATIC);
+        fsize != 4225504 && fsize != 4225460 && fsize != 4207819)
+        sttminus = (patch_t *)W_CacheLumpName("STTMINUS", PU_STATIC);
 }
-
 
 // ?
-void
-STlib_initNum
-( st_number_t*          n,
-  int                   x,
-  int                   y,
-  patch_t**             pl,
-  int*                  num,
-  dboolean*              on,
-  int                   width )
+void STlib_initNum(st_number_t *n, int x, int y, patch_t **pl, int *num, dboolean *on, int width)
 {
-    n->x        = x;
-    n->y        = y;
-    n->oldnum   = 0;
-    n->width    = width;
-    n->num      = num;
-    n->on       = on;
-    n->p        = pl;
+    n->x = x;
+    n->y = y;
+    n->oldnum = 0;
+    n->width = width;
+    n->num = num;
+    n->on = on;
+    n->p = pl;
 }
-
 
 // 
 // A fairly efficient way to draw a number
 //  based on differences from the old number.
 // Note: worth the trouble?
 //
-void
-STlib_drawNum
-( st_number_t*  n,
-  dboolean       refresh )
+void STlib_drawNum(st_number_t *n, dboolean refresh)
 {
-
-    int         numdigits = n->width;
-    int         num = *n->num;
-    
-    int         w = SHORT(n->p[0]->width);
-    int         h = SHORT(n->p[0]->height);
-    int         x = n->x;
-    
-    int         neg;
+    int    numdigits = n->width;
+    int    num = *n->num;    
+    int    w = SHORT(n->p[0]->width);
+    int    h = SHORT(n->p[0]->height);
+    int    x = n->x;
+    int    neg;
 
     n->oldnum = *n->num;
 
@@ -115,12 +93,12 @@ STlib_drawNum
     }
 
     // clear the area
-    x = n->x - numdigits*w;
+    x = n->x - numdigits * w;
 
     if (n->y - ST_Y < 0)
         I_Error("drawNum: n->y - ST_Y < 0");
 
-    V_CopyRect(x, n->y - ST_Y, 4, w*numdigits, h, x, n->y, 0);
+    V_CopyRect(x, n->y - ST_Y, 4, w * numdigits, h, x, n->y, 0);
 
     // if non-number, do not draw it
     if (num == 1994)
@@ -136,7 +114,7 @@ STlib_drawNum
     while (num && numdigits--)
     {
         x -= w;
-        V_DrawPatch(x, n->y, 0, n->p[ num % 10 ]);
+        V_DrawPatch(x, n->y, 0, n->p[num % 10]);
         num /= 10;
     }
 
@@ -145,39 +123,21 @@ STlib_drawNum
         V_DrawPatch(x - 8, n->y, 0, sttminus);
 }
 
-
 //
-void
-STlib_updateNum
-( st_number_t*          n,
-  dboolean               refresh )
+void STlib_updateNum(st_number_t *n, dboolean refresh)
 {
-    if (*n->on) STlib_drawNum(n, refresh);
+    if (*n->on)
+        STlib_drawNum(n, refresh);
 }
 
-
 //
-void
-STlib_initPercent
-( st_percent_t*         p,
-  int                   x,
-  int                   y,
-  patch_t**             pl,
-  int*                  num,
-  dboolean*              on,
-  patch_t*              percent )
+void STlib_initPercent(st_percent_t *p, int x, int y, patch_t **pl, int *num, dboolean *on, patch_t *percent)
 {
     STlib_initNum(&p->n, x, y, pl, num, on, 3);
     p->p = percent;
 }
 
-
-
-
-void
-STlib_updatePercent
-( st_percent_t*         per,
-  int                   refresh )
+void STlib_updatePercent(st_percent_t *per, int refresh)
 {
     if (refresh && *per->n.on)
         V_DrawPatch(per->n.x, per->n.y, 0, per->p);
@@ -185,102 +145,71 @@ STlib_updatePercent
     STlib_updateNum(&per->n, refresh);
 }
 
-
-
-void
-STlib_initMultIcon
-( st_multicon_t*        i,
-  int                   x,
-  int                   y,
-  patch_t**             il,
-  int*                  inum,
-  dboolean*              on )
+void STlib_initMultIcon(st_multicon_t *i, int x, int y, patch_t **il, int *inum, dboolean *on)
 {
-    i->x        = x;
-    i->y        = y;
-    i->oldinum  = -1;
-    i->inum     = inum;
-    i->on       = on;
-    i->p        = il;
+    i->x = x;
+    i->y = y;
+    i->oldinum = -1;
+    i->inum = inum;
+    i->on = on;
+    i->p = il;
 }
 
-
-
-void
-STlib_updateMultIcon
-( st_multicon_t*        mi,
-  dboolean               refresh )
+void STlib_updateMultIcon(st_multicon_t *mi, dboolean refresh)
 {
-    if (*mi->on
-        && (mi->oldinum != *mi->inum || refresh)
-        && (*mi->inum!=-1))
+    if (*mi->on && (mi->oldinum != *mi->inum || refresh) && (*mi->inum != -1))
     {
         if (mi->oldinum != -1)
         {
-            int                 w = SHORT(mi->p[mi->oldinum]->width);
-            int                 h = SHORT(mi->p[mi->oldinum]->height);
-            int                 x = mi->x - SHORT(mi->p[mi->oldinum]->leftoffset);
-            int                 y = mi->y - SHORT(mi->p[mi->oldinum]->topoffset);
+            int    w = SHORT(mi->p[mi->oldinum]->width);
+            int    h = SHORT(mi->p[mi->oldinum]->height);
+            int    x = mi->x - SHORT(mi->p[mi->oldinum]->leftoffset);
+            int    y = mi->y - SHORT(mi->p[mi->oldinum]->topoffset);
 
             if (y - ST_Y < 0)
                 I_Error("updateMultIcon: y - ST_Y < 0");
 
-            V_CopyRect(x, y-ST_Y, 4, w, h, x, y, 0);
+            V_CopyRect(x, y - ST_Y, 4, w, h, x, y, 0);
         }
+
         V_DrawPatch(mi->x, mi->y, 0, mi->p[*mi->inum]);
         mi->oldinum = *mi->inum;
     }
 
-    if(beta_style)
+    if (beta_style)
     {
         player_t *player = &players[consoleplayer];
 
         // "3" = standard lifes in the pre-beta version of the game
-        if(3 + player->extra_lifes < 10)
+        if (3 + player->extra_lifes < 10)
         {
-            int             i = 3 + player->extra_lifes;
-            char            namebuf[9];
+            int    i = 3 + player->extra_lifes;
+            char   namebuf[9];
 
             sprintf(namebuf, "STYSNUM%d", i);
-            V_DrawPatch(173, 192, 0,
-                    W_CacheLumpName(namebuf, PU_CACHE));
+            V_DrawPatch(173, 192, 0, W_CacheLumpName(namebuf, PU_CACHE));
         }
     }
 }
 
-
-
-void
-STlib_initBinIcon
-( st_binicon_t*         b,
-  int                   x,
-  int                   y,
-  patch_t*              i,
-  dboolean*              val,
-  dboolean*              on )
+void STlib_initBinIcon(st_binicon_t *b, int x, int y, patch_t *i, dboolean *val, dboolean *on)
 {
-    b->x        = x;
-    b->y        = y;
-    b->oldval   = 0;
-    b->val      = val;
-    b->on       = on;
-    b->p        = i;
+    b->x = x;
+    b->y = y;
+    b->oldval = 0;
+    b->val = val;
+    b->on = on;
+    b->p = i;
 }
 
-
-
-void
-STlib_updateBinIcon
-( st_binicon_t*         bi,
-  dboolean               refresh )
+void STlib_updateBinIcon(st_binicon_t *bi, dboolean refresh)
 {
-    if (*bi->on
-        && (bi->oldval != *bi->val || refresh))
+    if (*bi->on && (bi->oldval != *bi->val || refresh))
     {
-        int x = bi->x - SHORT(bi->p->leftoffset);
-        int y = bi->y - SHORT(bi->p->topoffset);
-        int w = SHORT(bi->p->width);
-        int h = SHORT(bi->p->height);
+        int    x = bi->x - SHORT(bi->p->leftoffset);
+        int    y = bi->y - SHORT(bi->p->topoffset);
+        int    w = SHORT(bi->p->width);
+        int    h = SHORT(bi->p->height);
 
         if (y - ST_Y < 0)
             I_Error("updateBinIcon: y - ST_Y < 0");
@@ -288,10 +217,9 @@ STlib_updateBinIcon
         if (*bi->val)
             V_DrawPatch(bi->x, bi->y, 0, bi->p);
         else
-            V_CopyRect(x, y-ST_Y, 4, w, h, x, y, 0);
+            V_CopyRect(x, y - ST_Y, 4, w, h, x, y, 0);
 
         bi->oldval = *bi->val;
     }
-
 }
 

@@ -36,6 +36,7 @@
 ========================================================================
 */
 
+
 #include <stdlib.h>
 
 #include "c_io.h"
@@ -50,7 +51,11 @@
 #include "w_wad.h"
 #include "z_zone.h"
 
+
 #define TRANSPARENT_COLOR       0x1C
+#define FUZZ(a, b)              fuzzrange[rand() % (b - a + 1) + a]
+#define NOFUZZ                  251
+
 
 //
 // All drawing to the view buffer is accomplished in this file.
@@ -61,22 +66,54 @@
 //  and the total size == width*height*depth/8.,
 //
 
+// Backing buffer containing the bezel drawn around the screen and 
+// surrounding background.
+//static byte     *background_buffer = NULL;
+
+lighttable_t    *dc_colormap;
+lighttable_t    *ds_colormap;
+
+fixed_t         ds_xfrac;
+fixed_t         ds_yfrac;
+fixed_t         ds_xstep;
+fixed_t         ds_ystep;
+fixed_t         dc_iscale;
+fixed_t         dc_texturemid;
+fixed_t         dc_texheight;
+fixed_t         dc_texturefrac;
+
 patch_t         *draw_chars;
 
+dboolean        dc_topsparkle;
+dboolean        dc_bottomsparkle;
+
+int             dc_x;
+int             dc_yl;
+int             dc_yh;
+int             dc_baseclip;
 int             viewwidth;
 int             scaledviewwidth;
-int             scaledviewheight;                        // ADDED FOR HIRES
+int             scaledviewheight;
 int             viewheight;
 int             viewheight2;
 int             viewwindowx;
 int             viewwindowy;
 int             fuzztable[SCREENWIDTH * SCREENHEIGHT];
+int             fuzzrange[3] = { -SCREENWIDTH, 0, SCREENWIDTH };
+int             ds_y;
+int             ds_x1;
+int             ds_x2;
 
-extern int      r_screensize;
+// start of a 64 * 64 tile image
+byte            *ds_source;
 
-// Backing buffer containing the bezel drawn around the screen and 
-// surrounding background.
-//static byte     *background_buffer = NULL;
+// first pixel in a column (possibly virtual)
+byte            *dc_source;
+
+byte            *dc_blood;
+byte            *dc_colormask;
+byte            *dc_translation;
+byte            *translationtables;
 
 // Color tables for different players,
 //  translate a limited part to another
@@ -123,27 +160,7 @@ byte redtogreen[] =
     224, 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 235, 236, 237, 238, 239,
     240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252, 253, 254, 255
 };
-/*
-byte redtoyellow[] =
-{
-      0,   1,   2,   3,   4,   5,   6,   7,   8,   9,  10,  11,  12,  13,  14,  15,
-     16,  17,  18,  19,  20,  21,  22,  23,  24,  25,  26,  27,  28,  29,  30,  31,
-     32,  33,  34,  35,  36,  37,  38,  39,  40,  41,  42,  43, 164, 164, 165, 165,
-     48,  49,  50,  51,  52,  53,  54,  55,  56,  57,  58,  59,  60,  61,  62,  63,
-     64,  65,  66,  67,  68,  69,  70,  71,  72,  73,  74,  75,  76,  77,  78,  79,
-     80,  81,  82,  83,  84,  85,  86,  87,  88,  89,  90,  91,  92,  93,  94,  95,
-     96,  97,  98,  99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111,
-    112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127,
-    128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143,
-    144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159,
-    160, 161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 174, 175,
-    230, 230, 231, 231, 160, 160, 161, 161, 162, 162, 163, 163, 164, 164, 165, 165,
-    192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207,
-    208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223,
-    224, 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 235, 236, 237, 238, 239,
-    240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252, 253, 254, 255
-};
-*/
+
 byte megasphere[] =
 {
       0,   1,   2,   3,   4,   5,   6,   7,   8, 142,  10,  11,  12,  13,  14,  15,
@@ -164,26 +181,10 @@ byte megasphere[] =
     240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252, 253, 254, 255
 };
 
-//
-// R_DrawColumn
-// Source is the top of the column to scale.
-//
-lighttable_t    *dc_colormap;
-int             dc_x;
-int             dc_yl;
-int             dc_yh;
-fixed_t         dc_iscale;
-fixed_t         dc_texturemid;
-fixed_t         dc_texheight;
-fixed_t         dc_texturefrac;
-dboolean         dc_topsparkle;
-dboolean         dc_bottomsparkle;
-byte            *dc_blood;
-byte            *dc_colormask;
-int             dc_baseclip;
 
-// first pixel in a column (possibly virtual)
-byte            *dc_source;
+extern int      r_screensize;
+extern int      fuzzpos;
+
 
 //
 // A column is a vertical slice/span from a wall texture that,
@@ -193,6 +194,10 @@ byte            *dc_source;
 //  be used. It has also been used with Wolfenstein 3D.
 //
 
+//
+// R_DrawColumn
+// Source is the top of the column to scale.
+//
 void R_DrawColumn(void)
 {
     int32_t             count = dc_yh - dc_yl + 1;
@@ -206,7 +211,7 @@ void R_DrawColumn(void)
     if ((unsigned)dc_x >= SCREENWIDTH
         || dc_yl < 0
         || dc_yh >= SCREENHEIGHT)
-        I_Error ("R_DrawColumn: %i to %i at %i", dc_yl, dc_yh, dc_x);
+        I_Error("R_DrawColumn: %i to %i at %i", dc_yl, dc_yh, dc_x);
 #endif
 
     while (--count)
@@ -215,6 +220,7 @@ void R_DrawColumn(void)
         dest += SCREENWIDTH;
         frac += fracstep;
     }
+
     *dest = colormap[source[frac >> FRACBITS]];
 }
 
@@ -228,11 +234,13 @@ void R_DrawShadowColumn(void)
         *dest = tinttab25[*dest];
         dest += SCREENWIDTH;
     }
+
     while (--count > 0)
     {
         *dest = tinttab40[*dest];
         dest += SCREENWIDTH;
     }
+
     *dest = tinttab25[*dest];
 }
 
@@ -245,13 +253,16 @@ void R_DrawSpectreShadowColumn(void)
     {
         if (!(rand() % 4) && !consoleactive)
             *dest = tinttab25[*dest];
+
         dest += SCREENWIDTH;
     }
+
     while (--count > 0)
     {
         *dest = tinttab25[*dest];
         dest += SCREENWIDTH;
     }
+
     if (!(rand() % 4) && !consoleactive)
         *dest = tinttab25[*dest];
 }
@@ -266,6 +277,7 @@ void R_DrawSolidShadowColumn(void)
         *dest = 0;
         dest += SCREENWIDTH;
     }
+
     *dest = 0;
 }
 
@@ -280,6 +292,7 @@ void R_DrawBloodSplatColumn(void)
         *dest = *(*dest + blood);
         dest += SCREENWIDTH;
     }
+
     *dest = *(*dest + blood);
 }
 
@@ -294,6 +307,7 @@ void R_DrawSolidBloodSplatColumn(void)
         *dest = blood;
         dest += SCREENWIDTH;
     }
+
     *dest = blood;
 }
 
@@ -331,6 +345,7 @@ void R_DrawWallColumn(void)
             {
                 *dest = colormap[source[frac >> FRACBITS]];
                 dest += SCREENWIDTH;
+
                 if ((frac += fracstep) >= heightmask)
                     frac -= heightmask;
             }
@@ -447,6 +462,7 @@ void R_DrawFullbrightWallColumn(void)
                 dot = source[frac >> FRACBITS];
                 *dest = (colormask[dot] ? dot : colormap[dot]);
                 dest += SCREENWIDTH;
+
                 if ((frac += fracstep) >= heightmask)
                     frac -= heightmask;
             }
@@ -554,6 +570,7 @@ void R_DrawPlayerSpriteColumn(void)
         dest += SCREENWIDTH;
         frac += fracstep;
     }
+
     *dest = dc_source[frac >> FRACBITS];
 }
 
@@ -572,9 +589,11 @@ void R_DrawSuperShotgunColumn(void)
 
         if (dot != 71)
             *dest = colormap[dot];
+
         dest += SCREENWIDTH;
         frac += fracstep;
     }
+
     *dest = colormap[source[frac >> FRACBITS]];
 }
 
@@ -593,9 +612,11 @@ void R_DrawTranslucentSuperShotgunColumn(void)
 
         if (dot != 71)
             *dest = colormap[tinttabredwhite1[(*dest << 8) + dot]];
+
         dest += SCREENWIDTH;
         frac += fracstep;
     }
+
     *dest = colormap[tinttabredwhite1[(*dest << 8) + source[frac >> FRACBITS]]];
 }
 
@@ -632,6 +653,7 @@ void R_DrawSkyColumn(void)
             {
                 *dest = colormap[source[frac >> FRACBITS]];
                 dest += SCREENWIDTH;
+
                 if ((frac += fracstep) >= heightmask)
                     frac -= heightmask;
             }
@@ -720,6 +742,7 @@ void R_DrawFlippedSkyColumn(void)
         dest += SCREENWIDTH;
         frac += fracstep;
     }
+
     i = frac >> FRACBITS;
     *dest = colormap[source[i > 127 ? 126 - (i & 127) : i]];
 }
@@ -739,6 +762,7 @@ void R_DrawRedToBlueColumn(void)
         dest += SCREENWIDTH;
         frac += fracstep;
     }
+
     *dest = colormap[redtoblue[source[frac >> FRACBITS]]];
 }
 
@@ -757,6 +781,7 @@ void R_DrawTranslucentRedToBlue33Column(void)
         dest += SCREENWIDTH;
         frac += fracstep;
     }
+
     *dest = tinttab33[(*dest << 8) + colormap[redtoblue[source[frac >> FRACBITS]]]];
 }
 
@@ -775,6 +800,7 @@ void R_DrawRedToGreenColumn(void)
         dest += SCREENWIDTH;
         frac += fracstep;
     }
+
     *dest = colormap[redtogreen[source[frac >> FRACBITS]]];
 }
 
@@ -793,6 +819,7 @@ void R_DrawTranslucentRedToGreen33Column(void)
         dest += SCREENWIDTH;
         frac += fracstep;
     }
+
     *dest = tinttab33[(*dest << 8) + colormap[redtogreen[source[frac >> FRACBITS]]]];
 }
 
@@ -811,6 +838,7 @@ void R_DrawTranslucentColumn(void)
         dest += SCREENWIDTH;
         frac += fracstep;
     }
+
     *dest = tinttab[(*dest << 8) + colormap[source[frac >> FRACBITS]]];
 }
 
@@ -829,6 +857,7 @@ void R_DrawTranslucent5Column(void)
         dest += SCREENWIDTH;
         frac += fracstep;
     }
+
     *dest = tinttab5[(*dest << 8) + colormap[source[frac >> FRACBITS]]];
 }
 
@@ -847,6 +876,7 @@ void R_DrawTranslucent10Column(void)
         dest += SCREENWIDTH;
         frac += fracstep;
     }
+
     *dest = tinttab10[(*dest << 8) + colormap[source[frac >> FRACBITS]]];
 }
 
@@ -865,6 +895,7 @@ void R_DrawTranslucent15Column(void)
         dest += SCREENWIDTH;
         frac += fracstep;
     }
+
     *dest = tinttab15[(*dest << 8) + colormap[source[frac >> FRACBITS]]];
 }
 
@@ -883,6 +914,7 @@ void R_DrawTranslucent20Column(void)
         dest += SCREENWIDTH;
         frac += fracstep;
     }
+
     *dest = tinttab20[(*dest << 8) + colormap[source[frac >> FRACBITS]]];
 }
 
@@ -901,6 +933,7 @@ void R_DrawTranslucent25Column(void)
         dest += SCREENWIDTH;
         frac += fracstep;
     }
+
     *dest = tinttab25[(*dest << 8) + colormap[source[frac >> FRACBITS]]];
 }
 
@@ -919,6 +952,7 @@ void R_DrawTranslucent30Column(void)
         dest += SCREENWIDTH;
         frac += fracstep;
     }
+
     *dest = tinttab30[(*dest << 8) + colormap[source[frac >> FRACBITS]]];
 }
 
@@ -937,6 +971,7 @@ void R_DrawTranslucent33Column(void)
         dest += SCREENWIDTH;
         frac += fracstep;
     }
+
     *dest = tinttab33[(*dest << 8) + colormap[source[frac >> FRACBITS]]];
 }
 
@@ -955,6 +990,7 @@ void R_DrawTranslucent35Column(void)
         dest += SCREENWIDTH;
         frac += fracstep;
     }
+
     *dest = tinttab35[(*dest << 8) + colormap[source[frac >> FRACBITS]]];
 }
 
@@ -973,6 +1009,7 @@ void R_DrawTranslucent40Column(void)
         dest += SCREENWIDTH;
         frac += fracstep;
     }
+
     *dest = tinttab40[(*dest << 8) + colormap[source[frac >> FRACBITS]]];
 }
 
@@ -991,6 +1028,7 @@ void R_DrawTranslucent45Column(void)
         dest += SCREENWIDTH;
         frac += fracstep;
     }
+
     *dest = tinttab45[(*dest << 8) + colormap[source[frac >> FRACBITS]]];
 }
 
@@ -1009,6 +1047,7 @@ void R_DrawTranslucent50Column(void)
         dest += SCREENWIDTH;
         frac += fracstep;
     }
+
     *dest = tranmap[(*dest << 8) + colormap[source[frac >> FRACBITS]]];
 }
 
@@ -1027,6 +1066,7 @@ void R_DrawTranslucent55Column(void)
         dest += SCREENWIDTH;
         frac += fracstep;
     }
+
     *dest = tinttab55[(*dest << 8) + colormap[source[frac >> FRACBITS]]];
 }
 
@@ -1045,6 +1085,7 @@ void R_DrawTranslucent60Column(void)
         dest += SCREENWIDTH;
         frac += fracstep;
     }
+
     *dest = tinttab60[(*dest << 8) + colormap[source[frac >> FRACBITS]]];
 }
 
@@ -1063,6 +1104,7 @@ void R_DrawTranslucent65Column(void)
         dest += SCREENWIDTH;
         frac += fracstep;
     }
+
     *dest = tinttab65[(*dest << 8) + colormap[source[frac >> FRACBITS]]];
 }
 
@@ -1081,6 +1123,7 @@ void R_DrawTranslucent70Column(void)
         dest += SCREENWIDTH;
         frac += fracstep;
     }
+
     *dest = tinttab70[(*dest << 8) + colormap[source[frac >> FRACBITS]]];
 }
 
@@ -1099,6 +1142,7 @@ void R_DrawTranslucent75Column(void)
         dest += SCREENWIDTH;
         frac += fracstep;
     }
+
     *dest = tinttab75[(*dest << 8) + colormap[source[frac >> FRACBITS]]];
 }
 
@@ -1117,6 +1161,7 @@ void R_DrawTranslucent80Column(void)
         dest += SCREENWIDTH;
         frac += fracstep;
     }
+
     *dest = tinttab80[(*dest << 8) + colormap[source[frac >> FRACBITS]]];
 }
 
@@ -1135,6 +1180,7 @@ void R_DrawTranslucent85Column(void)
         dest += SCREENWIDTH;
         frac += fracstep;
     }
+
     *dest = tinttab85[(*dest << 8) + colormap[source[frac >> FRACBITS]]];
 }
 
@@ -1153,6 +1199,7 @@ void R_DrawTranslucent90Column(void)
         dest += SCREENWIDTH;
         frac += fracstep;
     }
+
     *dest = tinttab90[(*dest << 8) + colormap[source[frac >> FRACBITS]]];
 }
 
@@ -1171,6 +1218,7 @@ void R_DrawTranslucent95Column(void)
         dest += SCREENWIDTH;
         frac += fracstep;
     }
+
     *dest = tinttab95[(*dest << 8) + colormap[source[frac >> FRACBITS]]];
 }
 
@@ -1189,6 +1237,7 @@ void R_DrawMegaSphereColumn(void)
         dest += SCREENWIDTH;
         frac += fracstep;
     }
+
     *dest = tinttab33[(*dest << 8) + colormap[megasphere[source[frac >> FRACBITS]]]];
 }
 
@@ -1207,6 +1256,7 @@ void R_DrawSolidMegaSphereColumn(void)
         dest += SCREENWIDTH;
         frac += fracstep;
     }
+
     *dest = colormap[megasphere[source[frac >> FRACBITS]]];
 }
 
@@ -1225,6 +1275,7 @@ void R_DrawTranslucentRedColumn(void)
         dest += SCREENWIDTH;
         frac += fracstep;
     }
+
     *dest = tinttabred[(*dest << 8) + colormap[source[frac >> FRACBITS]]];
 }
 
@@ -1243,6 +1294,7 @@ void R_DrawTranslucentRedWhiteColumn1(void)
         dest += SCREENWIDTH;
         frac += fracstep;
     }
+
     *dest = colormap[tinttabredwhite1[(*dest << 8) + source[frac >> FRACBITS]]];
 }
 
@@ -1261,6 +1313,7 @@ void R_DrawTranslucentRedWhiteColumn2(void)
         dest += SCREENWIDTH;
         frac += fracstep;
     }
+
     *dest = colormap[tinttabredwhite2[(*dest << 8) + source[frac >> FRACBITS]]];
 }
 
@@ -1279,6 +1332,7 @@ void R_DrawTranslucentRedWhite50Column(void)
         dest += SCREENWIDTH;
         frac += fracstep;
     }
+
     *dest = colormap[tinttabredwhite50[(*dest << 8) + source[frac >> FRACBITS]]];
 }
 
@@ -1297,6 +1351,7 @@ void R_DrawTranslucentGreenColumn(void)
         dest += SCREENWIDTH;
         frac += fracstep;
     }
+
     *dest = tinttabgreen[(*dest << 8) + colormap[source[frac >> FRACBITS]]];
 }
 
@@ -1315,6 +1370,7 @@ void R_DrawTranslucentBlueColumn(void)
         dest += SCREENWIDTH;
         frac += fracstep;
     }
+
     *dest = tinttabblue[(*dest << 8) + colormap[source[frac >> FRACBITS]]];
 }
 
@@ -1333,6 +1389,7 @@ void R_DrawTranslucentRed33Column(void)
         dest += SCREENWIDTH;
         frac += fracstep;
     }
+
     *dest = colormap[tinttabred33[(*dest << 8) + source[frac >> FRACBITS]]];
 }
 
@@ -1351,6 +1408,7 @@ void R_DrawTranslucentGreen33Column(void)
         dest += SCREENWIDTH;
         frac += fracstep;
     }
+
     *dest = colormap[tinttabgreen33[(*dest << 8) + source[frac >> FRACBITS]]];
 }
 
@@ -1369,19 +1427,13 @@ void R_DrawTranslucentBlue33Column(void)
         dest += SCREENWIDTH;
         frac += fracstep;
     }
+
     *dest = colormap[tinttabblue33[(*dest << 8) + source[frac >> FRACBITS]]];
 }
 
 //
-// Spectre/Invisibility.
+// Spectre / Invisibility.
 //
-extern int      fuzzpos;
-
-int             fuzzrange[3] = { -SCREENWIDTH, 0, SCREENWIDTH };
-
-#define FUZZ(a, b)      fuzzrange[rand() % (b - a + 1) + a]
-#define NOFUZZ          251
-
 void R_DrawFuzzColumn(void)
 {
     byte        *dest;
@@ -1394,7 +1446,7 @@ void R_DrawFuzzColumn(void)
     if ((unsigned)dc_x >= SCREENWIDTH
         || dc_yl < 0 || dc_yh >= SCREENHEIGHT)
     {
-        I_Error ("R_DrawFuzzColumn: %i to %i at %i",
+        I_Error("R_DrawFuzzColumn: %i to %i at %i",
                  dc_yl, dc_yh, dc_x);
     }
 #endif
@@ -1408,6 +1460,7 @@ void R_DrawFuzzColumn(void)
             *dest = fullcolormap[6 * 256 + dest[(fuzztable[fuzzpos++] = FUZZ(1, 2))]];
         else if (!(rand() % 4))
             *dest = fullcolormap[12 * 256 + dest[(fuzztable[fuzzpos++] = FUZZ(0, 2))]];
+
         dest += SCREENWIDTH;
 
         while (--count)
@@ -1441,17 +1494,21 @@ void R_DrawPausedFuzzColumn(void)
         if (!dc_yl)
         {
             *dest = fullcolormap[6 * 256 + dest[fuzztable[fuzzpos++]]];
+
             if (fuzzpos == SCREENWIDTH * SCREENHEIGHT)
                 fuzzpos = 0;
         }
+
         dest += SCREENWIDTH;
 
         while (--count)
         {
             // middle
             *dest = fullcolormap[6 * 256 + dest[fuzztable[fuzzpos++]]];
+
             if (fuzzpos == SCREENWIDTH * SCREENHEIGHT)
                 fuzzpos = 0;
+
             dest += SCREENWIDTH;
         }
 
@@ -1471,12 +1528,10 @@ void R_DrawFuzzColumns(int srcscrn, int destscrn)
         for (y = viewwindowy * SCREENWIDTH; y < h; y += SCREENWIDTH)
         {
             int         i = x + y;
-//            byte        *src = background_buffer + i;
             byte        *src = screens[srcscrn] + i;
 
             if (*src != NOFUZZ)
             {
-//                byte    *dest = I_VideoBuffer + i;
                 byte    *dest = screens[destscrn] + i;
 
                 if (!y || *(src - SCREENWIDTH) == NOFUZZ)
@@ -1521,12 +1576,10 @@ void R_DrawPausedFuzzColumns(int srcscrn, int destscrn)
         for (y = viewwindowy * SCREENWIDTH; y < h; y += SCREENWIDTH)
         {
             int         i = x + y;
-//            byte        *src = background_buffer + i;
             byte        *src = screens[srcscrn] + i;
 
             if (*src != NOFUZZ)
             {
-//                byte    *dest = I_VideoBuffer + i;
                 byte    *dest = screens[destscrn] + i;
 
                 if (!y || *(src - SCREENWIDTH) == NOFUZZ)
@@ -1567,9 +1620,6 @@ void R_DrawPausedFuzzColumns(int srcscrn, int destscrn)
 //  of the BaronOfHell, the HellKnight, uses
 //  identical sprites, kinda brightened up.
 //
-byte    *dc_translation;
-byte    *translationtables;
-
 void R_DrawTranslatedColumn(void)
 {
     int32_t             count = dc_yh - dc_yl + 1;
@@ -1585,7 +1635,7 @@ void R_DrawTranslatedColumn(void)
         || dc_yl < 0
         || dc_yh >= SCREENHEIGHT)
     {
-        I_Error ( "R_DrawTranslatedColumn: %i to %i at %i",
+        I_Error("R_DrawTranslatedColumn: %i to %i at %i",
                   dc_yl, dc_yh, dc_x);
     }
     
@@ -1597,6 +1647,7 @@ void R_DrawTranslatedColumn(void)
         dest += SCREENWIDTH;
         frac += fracstep;
     }
+
     *dest = colormap[translation[source[frac >> FRACBITS]]];
 }
 
@@ -1639,19 +1690,6 @@ void R_InitTranslationTables(void)
 // In consequence, flats are not stored by column (like walls),
 //  and the inner loop has to step in texture space u and v.
 //
-int             ds_y;
-int             ds_x1;
-int             ds_x2;
-
-lighttable_t    *ds_colormap;
-
-fixed_t         ds_xfrac;
-fixed_t         ds_yfrac;
-fixed_t         ds_xstep;
-fixed_t         ds_ystep;
-
-// start of a 64*64 tile image
-byte            *ds_source;
 
 //
 // Draws the actual span.
@@ -1668,15 +1706,11 @@ void R_DrawSpan(void)
     const lighttable_t  *colormap = ds_colormap;
 
 #ifdef RANGECHECK
-    if (ds_x2 < ds_x1
-        || ds_x1<0
-        || ds_x2>=SCREENWIDTH
-        || (unsigned)ds_y>SCREENHEIGHT)
+    if (ds_x2 < ds_x1 || ds_x1 < 0 || ds_x2 >= SCREENWIDTH ||
+        (unsigned)ds_y > SCREENHEIGHT)
     {
-        I_Error( "R_DrawSpan: %i to %i at %i",
-                 ds_x1,ds_x2,ds_y);
+        I_Error("R_DrawSpan: %i to %i at %i", ds_x1, ds_x2, ds_y);
     }
-//        dscount++;
 #endif
 
     while (count >= 4)
@@ -1695,6 +1729,7 @@ void R_DrawSpan(void)
         yfrac += ystep;
         count -= 4;
     }
+
     while (count-- > 0)
     {
         *dest++ = colormap[source[((xfrac >> 16) & 63) | ((yfrac >> 10) & 4032)]];
@@ -1727,8 +1762,8 @@ void R_InitBuffer(int width, int height)
 //
 void R_FillBackScreen(int srcscrn, int destscrn)
 {
-    byte*        src;
-    byte*        dest; 
+    byte         *src;
+    byte         *dest; 
     int          x;
     int          y; 
     char         *name;
@@ -1744,89 +1779,85 @@ void R_FillBackScreen(int srcscrn, int destscrn)
 
     if (scaledviewwidth == SCREENWIDTH)
     {
-/*
+        /*
         if (background_buffer != NULL)
         {
             Z_Free(background_buffer);
             background_buffer = NULL;
         }
-*/
+        */
+
         return;
     }
 
     // Allocate the background buffer if necessary
-/*        
+    /*      
     if (background_buffer == NULL)
     {
         background_buffer = Z_Malloc(SCREENWIDTH * (SCREENHEIGHT - SBARHEIGHT) * sizeof(*background_buffer),
                                      PU_STATIC, NULL);
     }
-*/
+    */
+
     if (gamemode == commercial)
         name = name2;
     else
         name = name1;
     
     src = W_CacheLumpName(name, PU_CACHE); 
-//    dest = background_buffer;
     dest = screens[destscrn];
          
-    for (y=0 ; y<SCREENHEIGHT-SBARHEIGHT ; y++) 
+    for (y = 0; y < SCREENHEIGHT - SBARHEIGHT; y++) 
     { 
-        for (x=0 ; x<SCREENWIDTH/64 ; x++) 
+        for (x = 0; x < SCREENWIDTH / 64; x++) 
         { 
-            memcpy (dest, src+((y&63)<<6), 64); 
+            memcpy(dest, src + ((y & 63) << 6), 64); 
             dest += 64; 
         } 
 
-        if (SCREENWIDTH&63) 
+        if (SCREENWIDTH & 63) 
         { 
-            memcpy (dest, src+((y&63)<<6), SCREENWIDTH&63); 
-            dest += (SCREENWIDTH&63); 
+            memcpy(dest, src + ((y & 63) << 6), SCREENWIDTH & 63); 
+            dest += (SCREENWIDTH & 63); 
         } 
     } 
      
     // Draw screen and bezel; this is done to a separate screen buffer.
 
-//    V_UseBuffer(background_buffer);
-//    V_UseBuffer(screens[srcscrn]);
+    //V_UseBuffer(background_buffer);
+    //V_UseBuffer(screens[srcscrn]);
 
     // COMPLETELY CHANGED FOR HIRES
-    for (x=0 ; x<(scaledviewwidth >> hires) ; x+=8)
-        V_DrawPatch((viewwindowx >> hires)+x,
-                    (viewwindowy >> hires)-8, 1, W_CacheLumpName("brdr_t",PU_CACHE));
+    for (x = 0; x < (scaledviewwidth >> hires); x += 8)
+        V_DrawPatch((viewwindowx >> hires) + x,
+                    (viewwindowy >> hires) - 8, 1, W_CacheLumpName("brdr_t", PU_CACHE));
 
-    for (x=0 ; x<(scaledviewwidth >> hires) ; x+=8)
-        V_DrawPatch((viewwindowx >> hires)+x, (viewwindowy >> hires)+
-                    (scaledviewheight >> hires), 1, W_CacheLumpName("brdr_b",PU_CACHE));
+    for (x = 0; x < (scaledviewwidth >> hires); x += 8)
+        V_DrawPatch((viewwindowx >> hires) + x, (viewwindowy >> hires) +
+                    (scaledviewheight >> hires), 1, W_CacheLumpName("brdr_b", PU_CACHE));
 
-    for (y=0 ; y<(scaledviewheight >> hires) ; y+=8)
-        V_DrawPatch((viewwindowx >> hires)-8,
-                    (viewwindowy >> hires)+y, 1, W_CacheLumpName("brdr_l",PU_CACHE));
+    for (y = 0; y < (scaledviewheight >> hires); y += 8)
+        V_DrawPatch((viewwindowx >> hires) - 8,
+                    (viewwindowy >> hires) + y, 1, W_CacheLumpName("brdr_l", PU_CACHE));
 
-    for (y=0 ; y<(scaledviewheight >> hires); y+=8)
-        V_DrawPatch((viewwindowx >> hires)+
-                    (scaledviewwidth >> hires),
-                    (viewwindowy >> hires)+y, 1, W_CacheLumpName("brdr_r",PU_CACHE));
+    for (y = 0; y < (scaledviewheight >> hires); y += 8)
+        V_DrawPatch((viewwindowx >> hires) + (scaledviewwidth >> hires),
+                    (viewwindowy >> hires) + y, 1, W_CacheLumpName("brdr_r", PU_CACHE));
 
     // Draw beveled edge. 
-    V_DrawPatch((viewwindowx >> hires)-8,
-                (viewwindowy >> hires)-8, 1, W_CacheLumpName("brdr_tl",PU_CACHE));
+    V_DrawPatch((viewwindowx >> hires) - 8,
+                (viewwindowy >> hires) - 8, 1, W_CacheLumpName("brdr_tl", PU_CACHE));
     
-    V_DrawPatch((viewwindowx >> hires)+
-                (scaledviewwidth >> hires),
-                (viewwindowy >> hires)-8, 1, W_CacheLumpName("brdr_tr",PU_CACHE));
+    V_DrawPatch((viewwindowx >> hires) + (scaledviewwidth >> hires),
+                (viewwindowy >> hires) - 8, 1, W_CacheLumpName("brdr_tr", PU_CACHE));
     
-    V_DrawPatch((viewwindowx >> hires)-8,
-                (viewwindowy >> hires)+
-                (scaledviewheight >> hires), 1, W_CacheLumpName("brdr_bl",PU_CACHE));
+    V_DrawPatch((viewwindowx >> hires) - 8, (viewwindowy >> hires) +
+                (scaledviewheight >> hires), 1, W_CacheLumpName("brdr_bl", PU_CACHE));
     
-    V_DrawPatch((viewwindowx >> hires)+
-                (scaledviewwidth >> hires),
-                (viewwindowy >> hires)+
-                (scaledviewheight >> hires), 1, W_CacheLumpName("brdr_br",PU_CACHE));
+    V_DrawPatch((viewwindowx >> hires) + (scaledviewwidth >> hires), (viewwindowy >> hires) +
+                (scaledviewheight >> hires), 1, W_CacheLumpName("brdr_br", PU_CACHE));
 
-//    V_RestoreBuffer();
+    //V_RestoreBuffer();
 }
 
 //
@@ -1839,12 +1870,14 @@ void R_VideoErase(unsigned int ofs, int count, int srcscrn, int destscrn)
     //  is not optimal, e.g. byte by byte on
     //  a 32bit CPU, as GNU GCC/Linux libc did
     //  at one point.
-/*
+
+    /*
     if (background_buffer != NULL)
     {
         memcpy(I_VideoBuffer + ofs, background_buffer + ofs, count * sizeof(*I_VideoBuffer));
     }
-*/
+    */
+
     memcpy(screens[destscrn] + ofs, screens[srcscrn] + ofs, count);
 }
 
@@ -1863,39 +1896,37 @@ void R_DrawViewBorder(void)
     if (scaledviewwidth == SCREENWIDTH || am_overlay) 
         return; 
   
-    top = ((SCREENHEIGHT-SBARHEIGHT)-scaledviewheight)/2; // CHANGED FOR HIRES
-    side = (SCREENWIDTH-scaledviewwidth)/2; 
+    top = ((SCREENHEIGHT - SBARHEIGHT) - scaledviewheight) / 2;
+    side = (SCREENWIDTH - scaledviewwidth) / 2; 
  
     // copy top and one line of left side 
-    R_VideoErase (0, top*SCREENWIDTH+side, 1, 0); 
+    R_VideoErase(0, top * SCREENWIDTH + side, 1, 0); 
  
     // copy one line of right side and bottom 
-    ofs = (scaledviewheight+top)*SCREENWIDTH-side;        // CHANGED FOR HIRES
-    R_VideoErase (ofs, top*SCREENWIDTH+side, 1, 0); 
+    ofs = (scaledviewheight + top) * SCREENWIDTH - side;
+    R_VideoErase(ofs, top * SCREENWIDTH + side, 1, 0); 
  
     // copy sides using wraparound 
-    ofs = top*SCREENWIDTH + SCREENWIDTH-side; 
+    ofs = top * SCREENWIDTH + SCREENWIDTH - side; 
     side <<= 1;
     
-    for (i=1 ; i<scaledviewheight ; i++)                  // CHANGED FOR HIRES
+    for (i = 1; i < scaledviewheight; i++)
     { 
-        R_VideoErase (ofs, side, 1, 0); 
+        R_VideoErase(ofs, side, 1, 0); 
         ofs += SCREENWIDTH; 
     } 
 
     // ? 
-//    V_MarkRect (0, 0, 1, SCREENWIDTH, SCREENHEIGHT - SBARHEIGHT, 0); 
+    //V_MarkRect (0, 0, 1, SCREENWIDTH, SCREENHEIGHT - SBARHEIGHT, 0); 
 }
 
-/*
-================
-Draw_Char
-
-Draws one 8*8 graphics character
-It can be clipped to the top of the screen to allow the console to be
-smoothly scrolled off.
-================
-*/
+//
+// R_DrawChar
+//
+// Draws one 8*8 graphics character
+// It can be clipped to the top of the screen to allow the console to be
+// smoothly scrolled off.
+//
 void R_DrawChar(int x, int y, int scrn, int num)
 {
     byte       *dest;

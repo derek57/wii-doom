@@ -35,28 +35,28 @@ distribution.
 #include "../src/doomtype.h"
 
 
-/* IOCTL commands */
-#define UMS_BASE                        (('U'<<24)|('M'<<16)|('S'<<8))
-#define USB_IOCTL_UMS_INIT              (UMS_BASE+0x1)
-#define USB_IOCTL_UMS_GET_CAPACITY      (UMS_BASE+0x2)
-#define USB_IOCTL_UMS_READ_SECTORS      (UMS_BASE+0x3)
-#define USB_IOCTL_UMS_WRITE_SECTORS     (UMS_BASE+0x4)
-#define USB_IOCTL_UMS_READ_STRESS       (UMS_BASE+0x5)
-#define USB_IOCTL_UMS_SET_VERBOSE       (UMS_BASE+0x6)
-#define USB_IOCTL_UMS_UNMOUNT           (UMS_BASE+0x10)
-#define USB_IOCTL_UMS_WATCHDOG          (UMS_BASE+0x80)
+// IOCTL commands
+#define UMS_BASE                        (('U' << 24) | ('M' << 16) | ('S' << 8))
+#define USB_IOCTL_UMS_INIT              (UMS_BASE + 0x1)
+#define USB_IOCTL_UMS_GET_CAPACITY      (UMS_BASE + 0x2)
+#define USB_IOCTL_UMS_READ_SECTORS      (UMS_BASE + 0x3)
+#define USB_IOCTL_UMS_WRITE_SECTORS     (UMS_BASE + 0x4)
+#define USB_IOCTL_UMS_READ_STRESS       (UMS_BASE + 0x5)
+#define USB_IOCTL_UMS_SET_VERBOSE       (UMS_BASE + 0x6)
+#define USB_IOCTL_UMS_UNMOUNT           (UMS_BASE + 0x10)
+#define USB_IOCTL_UMS_WATCHDOG          (UMS_BASE + 0x80)
 
-#define WBFS_BASE                       (('W'<<24)|('F'<<16)|('S'<<8))
-#define USB_IOCTL_WBFS_OPEN_DISC        (WBFS_BASE+0x1)
-#define USB_IOCTL_WBFS_READ_DISC        (WBFS_BASE+0x2)
-#define USB_IOCTL_WBFS_READ_DEBUG       (WBFS_BASE+0x3)
-#define USB_IOCTL_WBFS_SET_DEVICE       (WBFS_BASE+0x4)
-#define USB_IOCTL_WBFS_SET_FRAGLIST     (WBFS_BASE+0x5)
+#define WBFS_BASE                       (('W' << 24) | ('F' << 16) | ('S' << 8))
+#define USB_IOCTL_WBFS_OPEN_DISC        (WBFS_BASE + 0x1)
+#define USB_IOCTL_WBFS_READ_DISC        (WBFS_BASE + 0x2)
+#define USB_IOCTL_WBFS_READ_DEBUG       (WBFS_BASE + 0x3)
+#define USB_IOCTL_WBFS_SET_DEVICE       (WBFS_BASE + 0x4)
+#define USB_IOCTL_WBFS_SET_FRAGLIST     (WBFS_BASE + 0x5)
 #define UMS_HEAPSIZE                    0x1000
 
-#define DEVICE_TYPE_WII_UMS             (('W'<<24)|('U'<<16)|('M'<<8)|'S')
+#define DEVICE_TYPE_WII_UMS             (('W' << 24) | ('U' << 16) | ('M' << 8) | 'S')
 
-/* Variables */
+// Variables
 static char fs[] ATTRIBUTE_ALIGN(32)  = "/dev/usb2";
 static char fs2[] ATTRIBUTE_ALIGN(32) = "/dev/usb/ehc";
 static char fs3[] ATTRIBUTE_ALIGN(32) = "/dev/usb/usb123";
@@ -87,41 +87,48 @@ s32 USBStorage_Init(void)
 {
     s32 ret;
 
-    /* Already open */
+    // Already open
     if (fd > 0)
         return 0;
 
-    /* Create heap */
+    // Create heap
     if (hid < 0)
     {
         hid = iosCreateHeap(UMS_HEAPSIZE);
+
         if (hid < 0)
             return IPC_ENOMEM;
     }
 
-    /* Open USB device */
+    // Open USB device
     fd = IOS_Open(fs, 0);
+
     if (fd < 0)
         fd = IOS_Open(fs2, 0);
+
     if (fd < 0)
         fd = IOS_Open(fs3, 0);
+
     if (fd < 0)
         return fd;
 
-    /* Initialize USB storage */
+    // Initialize USB storage
     ret = IOS_IoctlvFormat(hid, fd, USB_IOCTL_UMS_INIT, ":");
-    if (ret<0)
+
+    if (ret < 0)
         goto err;
 
-    /* Get device capacity */
+    // Get device capacity
     ret = USBStorage_GetCapacity(NULL);
+
     if (!ret)
         goto err;
 
     return 0;
 
 err:
-    /* Close USB device */
+
+    // Close USB device
     if (fd > 0)
     {
         IOS_Close(fd);
@@ -131,7 +138,7 @@ err:
     return -1;
 }
 
-/** Hermes **/
+// Hermes
 //
 // [nitr8] UNUSED
 //
@@ -141,9 +148,7 @@ s32 USBStorage_Watchdog(u32 on_off)
     if (fd >= 0)
     {
         s32 ret;
-
         ret = IOS_IoctlvFormat(hid, fd, USB_IOCTL_UMS_WATCHDOG, "i:", on_off);
-
         return ret;
     }
 
@@ -165,7 +170,7 @@ s32 USBStorage_Umount(void)
 
 void USBStorage_Deinit(void)
 {
-    /* Close USB device */
+    // Close USB device
     if (fd > 0)
     {
         IOS_Close(fd);
@@ -179,13 +184,13 @@ s32 USBStorage_ReadSectors(u32 sector, u32 numSectors, void *buffer)
 
     s32 ret;
 
-    /* Device not opened */
+    // Device not opened
     if (fd < 0)
         return fd;
 
-
     ret = IOS_IoctlvFormat(hid, fd, USB_IOCTL_UMS_READ_SECTORS,
                            "ii:d", sector, numSectors, buffer, len);
+
     return ret;
 }
 
@@ -195,11 +200,11 @@ s32 USBStorage_WriteSectors(u32 sector, u32 numSectors, const void *buffer)
 
     s32 ret;
 
-    /* Device not opened */
+    // Device not opened
     if (fd < 0)
         return fd;
 
-    /* Write data */
+    // Write data
     ret = IOS_IoctlvFormat(hid, fd, USB_IOCTL_UMS_WRITE_SECTORS,
                            "ii:d", sector, numSectors, buffer, len);
 
@@ -214,10 +219,16 @@ static dboolean __io_usb_Startup(void)
 static dboolean __io_usb_IsInserted(void)
 {
     s32 ret;
-    if (fd < 0) return false;
-        ret = USBStorage_GetCapacity(NULL);
-    if (ret == 0) return false;
-        return true;
+
+    if (fd < 0)
+        return false;
+
+    ret = USBStorage_GetCapacity(NULL);
+
+    if (ret == 0)
+        return false;
+
+    return true;
 }
 
 dboolean __io_usb_ReadSectors(u32 sector, u32 count, void *buffer)
@@ -254,7 +265,8 @@ static dboolean __io_usb_NOP(void)
     return true;
 }
 
-const DISC_INTERFACE __io_usbstorage_ro = {
+const DISC_INTERFACE __io_usbstorage_ro =
+{
         DEVICE_TYPE_WII_USB,
         FEATURE_MEDIUM_CANREAD | FEATURE_WII_USB,
         (FN_MEDIUM_STARTUP)      &__io_usb_Startup,
@@ -273,7 +285,7 @@ s32 USBStorage_WBFS_Open(char *buffer)
 {
     u32   len = 8;
 
-    s32 ret;
+    s32   ret;
 
     // Device not opened
     if (fd < 0)
@@ -296,6 +308,7 @@ s32 USBStorage_WBFS_Read(u32 woffset, u32 len, void *buffer)
     s32 ret;
 
     USBStorage_Init();
+
     // Device not opened
     if (fd < 0)
         return fd;
@@ -313,6 +326,7 @@ s32 USBStorage_WBFS_ReadDebug(u32 off, u32 size, void *buffer)
     s32 ret;
 
     USBStorage_Init();
+
     // Device not opened
     if (fd < 0)
         return fd;
@@ -327,30 +341,39 @@ s32 USBStorage_WBFS_ReadDebug(u32 off, u32 size, void *buffer)
 
 s32 USBStorage_WBFS_SetDevice(int dev)
 {
-    s32 ret;
+    s32        ret;
     static s32 retval = 0;
+
     USBStorage_Init();
+
     // Device not opened
     if (fd < 0)
         return fd;
+
     // ioctl
     ret = IOS_IoctlvFormat(hid, fd, USB_IOCTL_WBFS_SET_DEVICE,
                            "i:i", dev, &retval);
+
     if (retval)
         return retval;
+
     return ret;
 }
 
 s32 USBStorage_WBFS_SetFragList(void *p, int size)
 {
     s32 ret;
+
     USBStorage_Init();
+
     // Device not opened
     if (fd < 0)
         return fd;
+
     // ioctl
     ret = IOS_IoctlvFormat(hid, fd, USB_IOCTL_WBFS_SET_FRAGLIST,
                            "d:", p, size);
+
     return ret;
 }
 */
@@ -362,28 +385,31 @@ dboolean umsio_Startup()
 
 dboolean umsio_IsInserted()
 {
-    return true; // allways true
+    // always true
+    return true;
 }
 
 dboolean umsio_ReadSectors(sec_t sector, sec_t numSectors, u8 *buffer)
 {
     u32 cnt = 0;
     s32 ret;
-    /* Do reads */
+
+    // Do reads
     while (cnt < numSectors)
     {
         u32   sectors = (numSectors - cnt);
 
-        /* Read sectors is too big */
+        // Read sectors is too big
         if (sectors > 32)
             sectors = 32;
 
-        /* USB read */
-        ret = USBStorage_ReadSectors(sector + cnt, sectors, &buffer[cnt*512]);
+        // USB read
+        ret = USBStorage_ReadSectors(sector + cnt, sectors, &buffer[cnt * 512]);
+
         if (ret < 0)
             return false;
 
-        /* Increment counter */
+        // Increment counter
         cnt += sectors;
     }
 
@@ -395,21 +421,22 @@ dboolean umsio_WriteSectors(sec_t sector, sec_t numSectors, const u8* buffer)
     u32 cnt = 0;
     s32 ret;
 
-    /* Do writes */
+    // Do writes
     while (cnt < numSectors)
     {
         u32   sectors = (numSectors - cnt);
 
-        /* Write sectors is too big */
+        // Write sectors is too big
         if (sectors > 32)
             sectors = 32;
 
-        /* USB write */
+        // USB write
         ret = USBStorage_WriteSectors(sector + cnt, sectors, &buffer[cnt * 512]);
+
         if (ret < 0)
             return false;
 
-        /* Increment counter */
+        // Increment counter
         cnt += sectors;
     }
 
@@ -427,7 +454,8 @@ dboolean umsio_Shutdown()
     return true;
 }
 
-const DISC_INTERFACE __io_wiiums = {
+const DISC_INTERFACE __io_wiiums = 
+{
     DEVICE_TYPE_WII_UMS,
     FEATURE_MEDIUM_CANREAD | FEATURE_MEDIUM_CANWRITE | FEATURE_WII_USB,
     (FN_MEDIUM_STARTUP)                    &umsio_Startup,
@@ -438,7 +466,8 @@ const DISC_INTERFACE __io_wiiums = {
     (FN_MEDIUM_SHUTDOWN)                   &umsio_Shutdown
 };
 
-const DISC_INTERFACE __io_wiiums_ro = {
+const DISC_INTERFACE __io_wiiums_ro = 
+{
     DEVICE_TYPE_WII_UMS,
     FEATURE_MEDIUM_CANREAD | FEATURE_MEDIUM_CANWRITE | FEATURE_WII_USB,
     (FN_MEDIUM_STARTUP)                    &umsio_Startup,

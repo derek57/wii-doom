@@ -15,13 +15,16 @@
 //     MIDI file parsing.
 //
 
+
 #ifndef MIDIFILE_H
 #define MIDIFILE_H
 
-typedef struct midi_file_s midi_file_t;
-typedef struct midi_track_iter_s midi_track_iter_t;
 
 #define MIDI_CHANNELS_PER_TRACK 16
+
+
+typedef struct midi_file_s midi_file_t;
+typedef struct midi_track_iter_s midi_track_iter_t;
 
 typedef enum
 {
@@ -35,7 +38,8 @@ typedef enum
 
     MIDI_EVENT_SYSEX           = 0xf0,
     MIDI_EVENT_SYSEX_SPLIT     = 0xf7,
-    MIDI_EVENT_META            = 0xff,
+    MIDI_EVENT_META            = 0xff
+
 } midi_event_type_t;
 
 typedef enum
@@ -50,7 +54,8 @@ typedef enum
     MIDI_CONTROLLER_MAIN_VOLUME     = 0x7,
     MIDI_CONTROLLER_PAN             = 0xa,
 
-    MIDI_CONTROLLER_ALL_NOTES_OFF   = 0x7b,
+    MIDI_CONTROLLER_ALL_NOTES_OFF   = 0x7b
+
 } midi_controller_t;
 
 typedef enum
@@ -72,45 +77,42 @@ typedef enum
     MIDI_META_SMPTE_OFFSET          = 0x54,
     MIDI_META_TIME_SIGNATURE        = 0x58,
     MIDI_META_KEY_SIGNATURE         = 0x59,
-    MIDI_META_SEQUENCER_SPECIFIC    = 0x7f,
+    MIDI_META_SEQUENCER_SPECIFIC    = 0x7f
+
 } midi_meta_event_type_t;
 
 typedef struct
 {
     // Meta event type:
-
     unsigned int type;
 
     // Length:
-
     unsigned int length;
 
     // Meta event data:
-
     byte *data;
+
 } midi_meta_event_data_t;
 
 typedef struct
 {
     // Length:
-
     unsigned int length;
 
     // Event data:
-
     byte *data;
+
 } midi_sysex_event_data_t;
 
 typedef struct
 {
     // The channel number to which this applies:
-
     unsigned int channel;
 
     // Extra parameters:
-
     unsigned int param1;
     unsigned int param2;
+
 } midi_channel_event_data_t;
 
 typedef struct
@@ -127,43 +129,36 @@ typedef struct
         midi_meta_event_data_t meta;
         midi_sysex_event_data_t sysex;
     } data;
+
 } midi_event_t;
 
-// Load a MIDI file.
 
+// Load a MIDI file.
 midi_file_t *MIDI_LoadFile(char *filename);
 
 // Free a MIDI file.
-
 void MIDI_FreeFile(midi_file_t *file);
 
 // Get the time division value from the MIDI header.
-
 unsigned int MIDI_GetFileTimeDivision(midi_file_t *file);
 
 // Get the number of tracks in a MIDI file.
-
 unsigned int MIDI_NumTracks(midi_file_t *file);
 
 // Start iterating over the events in a track.
-
 midi_track_iter_t *MIDI_IterateTrack(midi_file_t *file, unsigned int track_num);
 
 // Free an iterator.
-
 void MIDI_FreeIterator(midi_track_iter_t *iter);
 
 // Get the time until the next MIDI event in a track.
-
 unsigned int MIDI_GetDeltaTime(midi_track_iter_t *iter);
 
 // Get a pointer to the next MIDI event.
-
 int MIDI_GetNextEvent(midi_track_iter_t *iter, midi_event_t **event);
 
 // Reset an iterator to the beginning of a track.
-
 void MIDI_RestartIterator(midi_track_iter_t *iter);
 
-#endif /* #ifndef MIDIFILE_H */
+#endif // #ifndef MIDIFILE_H
 

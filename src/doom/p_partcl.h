@@ -38,10 +38,14 @@
 //
 //----------------------------------------------------------------------------
 
+
 #ifndef __P_PARTCL_H__
 #define __P_PARTCL_H__
 
+
 #include "m_dllist.h"
+
+
 // haleyjd: particle variables and structures
 
 // particle style flags -- 07/03/03
@@ -70,11 +74,14 @@
 
 #define MBC_BLOODMASK           32768
 
+
 typedef struct particle_s
 {
     // haleyjd 02/20/04: particles now need sector links
     // haleyjd 08/05/05: use generalized dbl-linked list code
-    mdllistitem_t      seclinks;         // sector links
+
+    // sector links
+    mdllistitem_t      seclinks;
 
     struct subsector_s *subsector;
 
@@ -90,7 +97,9 @@ typedef struct particle_s
 
     int                color;
     int                next;
-    int                styleflags;       // haleyjd 07/03/03
+
+    // haleyjd 07/03/03
+    int                styleflags;
 
 } particle_t;
 
@@ -105,6 +114,7 @@ enum
     MBC_PURPLE,
     MBC_WHITE,
     MBC_ORANGE,
+
     NUMBLOODCOLORS
 };
 
@@ -114,7 +124,7 @@ enum
     P_EVENT_NONE,
     P_EVENT_ROCKET_EXPLODE,
     P_EVENT_BFG_EXPLODE,
-    P_EVENT_NUMEVENTS,
+    P_EVENT_NUMEVENTS
 };
 
 typedef struct particle_event_s
@@ -127,37 +137,32 @@ typedef struct particle_event_s
 
 } particle_event_t;
 
-extern int numParticles;
-extern int activeParticles;
-extern int inactiveParticles;
-extern particle_t *Particles;
 
-extern particle_event_t particleEvents[P_EVENT_NUMEVENTS];
+particle_t *newParticle(void);
 
 void P_ParticleThinker(void);
 void P_InitParticleEffects(void);
 void P_RunEffects(void);
-
 void P_SmokePuff(int count, fixed_t x, fixed_t y, fixed_t z, angle_t angle, int updown);
-
 void P_DrawSplash(int count, fixed_t x, fixed_t y, fixed_t z, angle_t angle, int kind);
-void P_DrawSplash2(int count, fixed_t x, fixed_t y, fixed_t z, angle_t angle, int updown, 
-                   int kind);
-void P_BloodSpray(mobj_t *mo, int count, fixed_t x, fixed_t y, fixed_t z, 
-                  angle_t angle);
+void P_DrawSplash2(int count, fixed_t x, fixed_t y, fixed_t z, angle_t angle, int updown, int kind);
+void P_BloodSpray(mobj_t *mo, int count, fixed_t x, fixed_t y, fixed_t z, angle_t angle);
 void P_DisconnectEffect(mobj_t *actor);
-
 void P_RocketExplosion(mobj_t *actor);
 void P_BFGExplosion(mobj_t *actor);
 
 // event functions
-
 void P_RunEvent(mobj_t *actor);
-
 void P_AddEventVars(void);
 
-particle_t *newParticle(void);
+
+extern int              numParticles;
+extern int              activeParticles;
+extern int              inactiveParticles;
+
+extern particle_t       *Particles;
+
+extern particle_event_t particleEvents[P_EVENT_NUMEVENTS];
 
 #endif
 
-// EOF

@@ -27,14 +27,21 @@
 #ifndef __HU_STUFF_H__
 #define __HU_STUFF_H__
 
+
 #include "d_event.h"
 #include "v_patch.h"
+
 
 //
 // Globally visible constants.
 //
-#define HU_FONTSTART                  '!'        // the first font characters
-#define HU_FONTEND                    '_'        // the last font characters
+
+// the first font characters
+#define HU_FONTSTART                  '!'
+
+// the last font characters
+#define HU_FONTEND                    '_'
+
 #define HU_FONTENDBETA                '}'
 
 // Calculate # of glyphs in font.
@@ -45,8 +52,12 @@
 
 #define HU_MSGX                       0
 #define HU_MSGY                       0
-#define HU_MSGWIDTH                   64         // in characters
-#define HU_MSGHEIGHT                  1          // in lines
+
+// in characters
+#define HU_MSGWIDTH                   64
+
+// in lines
+#define HU_MSGHEIGHT                  1
 
 #define HU_MSGTIMEOUT                 (4 * TICRATE)
 
@@ -76,36 +87,35 @@
 
 #define playername_default            "you"
 
+
 //
 // HEADS UP TEXT
 //
 
 void HU_Init(void);
 void HU_Start(void);
-
-dboolean HU_Responder(event_t* ev);
-
 void HU_Ticker(void);
 void HU_Drawer(void);
-char HU_dequeueChatChar(void);
 void HU_Erase(void);
+void HU_DrawStats(void);
+void HU_DrawHUD(void);
+void HU_PlayerMessage(char *message, dboolean ingame);
 
-extern char     *chat_macros[10];
-extern char     *playername;
-
-extern patch_t  *hu_font[HU_FONTSIZE];
-
-// hu_newlevel called when we enter a new level
+// HU_NewLevel called when we enter a new level
 // determine the level name and display it in
 // the console
 
 void HU_NewLevel();
 
-void HU_DrawStats(void);
+dboolean HU_Responder(event_t *ev);
 
-void HU_DrawHUD(void);
+char HU_dequeueChatChar(void);
 
-void HU_PlayerMessage(char *message, dboolean ingame);
+
+extern char     *chat_macros[10];
+extern char     *playername;
+
+extern patch_t  *hu_font[HU_FONTSIZE];
 
 #endif
 

@@ -54,19 +54,19 @@
 #include "z_zone.h"
 
 
-#define MAXMIDLENGTH (96 * 1024)
-#define MID_HEADER_MAGIC "MThd"
-#define MUS_HEADER_MAGIC "MUS\x1a"
+#define MAXMIDLENGTH        (96 * 1024)
+#define MID_HEADER_MAGIC    "MThd"
+#define MUS_HEADER_MAGIC    "MUS\x1a"
 
-#define FLAC_HEADER "fLaC"
-#define OGG_HEADER "OggS"
+#define FLAC_HEADER         "fLaC"
+#define OGG_HEADER          "OggS"
 
 // Looping Vorbis metadata tag names. These have been defined by ZDoom
 // for specifying the start and end positions for looping music tracks
 // in .ogg and .flac files.
 // More information is here: http://zdoom.org/wiki/Audio_loop
-#define LOOP_START_TAG "LOOP_START"
-#define LOOP_END_TAG   "LOOP_END"
+#define LOOP_START_TAG       "LOOP_START"
+#define LOOP_END_TAG         "LOOP_END"
 
 // FLAC metadata headers that we care about.
 #define FLAC_STREAMINFO      0
@@ -75,6 +75,7 @@
 // Ogg metadata headers that we care about.
 #define OGG_ID_HEADER        1
 #define OGG_COMMENT_HEADER   3
+
 
 // Structure for music substitution.
 // We store a mapping based on SHA1 checksum -> filename of substitute music
@@ -90,6 +91,7 @@ typedef struct
 {
     sha1_digest_t hash;
     char *filename;
+
 } subst_music_t;
 
 // Structure containing parsed metadata read from a digital music track:
@@ -98,59 +100,60 @@ typedef struct
     dboolean valid;
     unsigned int samplerate_hz;
     int start_time, end_time;
+
 } file_metadata_t;
 
-static subst_music_t *subst_music = NULL;
+
+static subst_music_t    *subst_music = NULL;
 
 // Position (in samples) that we have reached in the current track.
 // This is updated by the TrackPositionCallback function.
-static unsigned int current_track_pos;
+static unsigned int     current_track_pos;
 
-static unsigned int subst_music_len = 0;
+static unsigned int     subst_music_len = 0;
 
-static const char *subst_config_filenames[] =
+static const char       *subst_config_filenames[] =
 {
     "doom1-music.cfg",
     "doom2-music.cfg",
     "tnt-music.cfg"
 };
 
-static dboolean music_initialized;
+static dboolean         music_initialized;
 
 // If this is true, this module initialized SDL sound and has the 
 // responsibility to shut it down
+static dboolean         sdl_was_initialized;
 
-static dboolean sdl_was_initialized;
-
-static dboolean musicpaused;
+static dboolean         musicpaused;
 
 // If true, the currently playing track is being played on loop.
-static dboolean current_track_loop;
+static dboolean         current_track_loop;
 
 // If true, we are playing a substitute digital track rather than in-WAD
 // MIDI/MUS track, and file_metadata contains loop metadata.
-static dboolean playing_substitute = false;
+static dboolean         playing_substitute = false;
 
-static int current_music_volume;
+static int              current_music_volume;
 
-char *timidity_cfg_path = "";
+static char             *temp_timidity_cfg;
 
-static char *temp_timidity_cfg;
-
-static file_metadata_t file_metadata;
+static file_metadata_t  file_metadata;
 
 // Currently playing music track.
-static Mix_Music *current_track_music = NULL;
+static Mix_Music        *current_track_music = NULL;
 
-dboolean change_anyway;
 
-extern int tracknum;
+char                    *timidity_cfg_path = "";
 
-extern dboolean mus_cheat_used;
-/*
-extern dboolean usb;
-extern dboolean sd;
-*/
+dboolean                change_anyway;
+
+
+extern int              tracknum;
+
+extern dboolean         mus_cheat_used;
+
+
 // Given a time string (for LOOP_START/LOOP_END), parse it and return
 // the time (in # samples since start of track) it represents.
 static unsigned int ParseVorbisTime(unsigned int samplerate_hz, char *value)
@@ -231,6 +234,7 @@ static void ParseVorbisComments(file_metadata_t *metadata, FILE *fs)
     {
         return;
     }
+
     if (fseek(fs, LONG(buf), SEEK_CUR) != 0)
     {
         return;
@@ -241,6 +245,7 @@ static void ParseVorbisComments(file_metadata_t *metadata, FILE *fs)
     {
         return;
     }
+
     num_comments = LONG(buf);
 
     // Read each individual comment.
@@ -260,8 +265,9 @@ static void ParseVorbisComments(file_metadata_t *metadata, FILE *fs)
 
         // Read actual comment data into string buffer.
         comment = calloc(1, comment_len + 1);
+
         if (comment == NULL
-         || fread(comment, 1, comment_len, fs) < comment_len)
+            || fread(comment, 1, comment_len, fs) < comment_len)
         {
             free(comment);
             break;
@@ -314,9 +320,11 @@ static void ParseOggFile(file_metadata_t *metadata, FILE *fs)
                 case OGG_ID_HEADER:
                     ParseOggIdHeader(metadata, fs);
                     break;
+
                 case OGG_COMMENT_HEADER:
                     ParseVorbisComments(metadata, fs);
                     break;
+
                 default:
                     break;
             }
@@ -343,7 +351,6 @@ static void ReadLoopPoints(char *filename, file_metadata_t *metadata)
 
     // Check for a recognized file format; use the first four bytes
     // of the file.
-
     if (fread(header, 4, 1, fs) < 1)
     {
         fclose(fs);
@@ -367,7 +374,6 @@ static void ReadLoopPoints(char *filename, file_metadata_t *metadata)
 
 // Given a MUS lump, look up a substitute MUS file to play instead
 // (or NULL to just use normal MIDI playback).
-
 static char *GetSubstituteMusicFile(void *data, size_t data_len)
 {
     sha1_context_t context;
@@ -389,7 +395,6 @@ static char *GetSubstituteMusicFile(void *data, size_t data_len)
     // The substitute mapping list can (intentionally) contain multiple
     // filename mappings for the same hash. This allows us to try
     // different files and fall back if our first choice isn't found.
-
     filename = NULL;
 
     for (i = 0; i < subst_music_len; ++i)
@@ -413,12 +418,13 @@ static char *GetSubstituteMusicFile(void *data, size_t data_len)
 }
 
 // Add a substitute music file to the lookup list.
-
 static void AddSubstituteMusic(subst_music_t *subst)
 {
     ++subst_music_len;
+
     subst_music =
         Z_Realloc(subst_music, sizeof(subst_music_t) * subst_music_len);
+
     memcpy(&subst_music[subst_music_len - 1], subst, sizeof(subst_music_t));
 }
 
@@ -464,6 +470,7 @@ static char *GetFullPath(char *base_filename, char *path)
     // parent dir.
     basedir = M_StringDuplicate(base_filename);
     p = strrchr(basedir, DIR_SEPARATOR);
+
     if (p != NULL)
     {
         p[1] = '\0';
@@ -473,6 +480,7 @@ static char *GetFullPath(char *base_filename, char *path)
     {
         result = M_StringDuplicate(path);
     }
+
     free(basedir);
     free(path);
 
@@ -481,7 +489,6 @@ static char *GetFullPath(char *base_filename, char *path)
 
 // Parse a line from substitute music configuration file; returns error
 // message or NULL for no error.
-
 static char *ParseSubstituteLine(char *filename, char *line)
 {
     subst_music_t subst;
@@ -490,12 +497,14 @@ static char *ParseSubstituteLine(char *filename, char *line)
 
     // Strip out comments if present.
     p = strchr(line, '#');
+
     if (p != NULL)
     {
         while (p > line && isspace(*(p - 1)))
         {
             --p;
         }
+
         *p = '\0';
     }
 
@@ -511,6 +520,7 @@ static char *ParseSubstituteLine(char *filename, char *line)
 
     // Read hash.
     hash_index = 0;
+
     while (*p != '\0' && *p != '=' && !isspace(*p))
     {
         int d1, d2;
@@ -610,7 +620,6 @@ static dboolean ReadSubstituteConfig(char *filename)
 }
 
 // Find substitute configs and try to load them.
-
 static void LoadSubstituteConfigs(void)
 {
     char *musicdir = NULL;
@@ -618,11 +627,13 @@ static void LoadSubstituteConfigs(void)
     unsigned int i;
 
 #ifdef WII
-    if(usb)
+    if (usb)
         musicdir = "usb:/apps/wiidoom/";
-    else if(sd)
+    else if (sd)
         musicdir = "sd:/apps/wiidoom/";
+
 #else
+
     if (!strcmp(configdir, ""))
     {
         musicdir = M_StringDuplicate("");
@@ -632,6 +643,7 @@ static void LoadSubstituteConfigs(void)
         musicdir = configdir;
     }
 #endif
+
     // Load all music packs. We always load all music substitution packs for
     // all games. Why? Suppose we have a Doom PWAD that reuses some music from
     // Heretic. If we have the Heretic music pack loaded, then we get an
@@ -644,7 +656,7 @@ static void LoadSubstituteConfigs(void)
     }
 
     // try also cwd
-    if(*musicdir)
+    if (*musicdir)
     {    
         for (i = 0; i < arrlen(subst_config_filenames); ++i)
         {
@@ -659,7 +671,6 @@ static void LoadSubstituteConfigs(void)
 // be included in substitute configs.
 // Identifying music lumps by name is not feasible; some games (eg.
 // Heretic, Hexen) don't have a common naming pattern for music lumps.
-
 static dboolean IsMusicLump(int lumpnum)
 {
     byte *data;
@@ -682,8 +693,7 @@ static dboolean IsMusicLump(int lumpnum)
 
 // Dump an example config file containing checksums for all MIDI music
 // found in the WAD directory.
-
-/*static*/ void DumpSubstituteConfig(char *filename)
+void DumpSubstituteConfig(char *filename)
 {
     sha1_context_t context;
     sha1_digest_t digest;
@@ -727,15 +737,15 @@ static dboolean IsMusicLump(int lumpnum)
             fprintf(fs, "%02x", digest[h]);
         }
 
-        if(gamemission == doom)
+        if (gamemission == doom)
             fprintf(fs, " = doom1-music/%s.ogg\n", name);
-        else if(gamemission == doom2)
+        else if (gamemission == doom2)
             fprintf(fs, " = doom2-music/%s.ogg\n", name);
-        else if(gamemission == pack_tnt || gamemission == pack_plut)
+        else if (gamemission == pack_tnt || gamemission == pack_plut)
             fprintf(fs, " = tnt-music/%s.ogg\n", name);
-        else if(gamemission == pack_chex)
+        else if (gamemission == pack_chex)
             fprintf(fs, " = chex-music/%s.ogg\n", name);
-        else if(gamemission == pack_hacx)
+        else if (gamemission == pack_hacx)
             fprintf(fs, " = hacx-music/%s.ogg\n", name);
     }
 
@@ -749,16 +759,15 @@ static dboolean IsMusicLump(int lumpnum)
 // config file for Timidity to point to the actual config file. This
 // is needed to inject a "dir" command so that the patches are read
 // relative to the actual config file.
-
 static dboolean WriteWrapperTimidityConfig(char *write_path)
 {
     char *p;
     FILE *fstream;
 
 #ifdef WII
-    if(usb)
+    if (usb)
         timidity_cfg_path = "usb:/apps/wiidoom/";
-    else if(sd)
+    else if (sd)
         timidity_cfg_path = "sd:/apps/wiidoom/";
 #endif
 
@@ -775,6 +784,7 @@ static dboolean WriteWrapperTimidityConfig(char *write_path)
     }
 
     p = strrchr(timidity_cfg_path, DIR_SEPARATOR);
+
     if (p != NULL)
     {
         char    *path = M_StringDuplicate(timidity_cfg_path);
@@ -794,9 +804,9 @@ void I_InitTimidityConfig(void)
     dboolean success;
 
 #ifdef WII
-    if(usb)
+    if (usb)
         temp_timidity_cfg = "usb:/apps/wiidoom/temptimi.cfg";
-    else if(sd)
+    else if (sd)
         temp_timidity_cfg = "sd:/apps/wiidoom/temptimi.cfg";
 #endif
 
@@ -811,7 +821,6 @@ void I_InitTimidityConfig(void)
 
     // Set the TIMIDITY_CFG environment variable to point to the temporary
     // config file.
-
     if (success)
     {
         char *env_string = M_StringJoin("TIMIDITY_CFG=", temp_timidity_cfg, NULL);
@@ -825,6 +834,9 @@ void I_InitTimidityConfig(void)
 }
 
 // Remove the temporary config file generated by I_InitTimidityConfig().
+//
+// [nitr8] UNUSED
+//
 /*
 static void RemoveTimidityConfig(void)
 {
@@ -834,8 +846,8 @@ static void RemoveTimidityConfig(void)
     }
 }
 */
-// Shutdown music
 
+// Shutdown music
 static void I_SDL_ShutdownMusic(void)
 {
     if (music_initialized)
@@ -878,32 +890,32 @@ static dboolean I_SDL_InitMusic(void)
     //
 
 #ifdef WII
-    if(mus_engine == 3)
+    if (mus_engine == 3)
     {
-        if(usb)
+        if (usb)
         {
-            if(gamemission == doom)
+            if (gamemission == doom)
                 DumpSubstituteConfig("usb:/apps/wiidoom/doom1-music.cfg");
-            else if(gamemission == doom2)
+            else if (gamemission == doom2)
                 DumpSubstituteConfig("usb:/apps/wiidoom/doom2-music.cfg");
-            else if(gamemission == pack_tnt || gamemission == pack_plut)
+            else if (gamemission == pack_tnt || gamemission == pack_plut)
                 DumpSubstituteConfig("usb:/apps/wiidoom/tnt-music.cfg");
-            else if(gamemission == pack_chex)
+            else if (gamemission == pack_chex)
                 DumpSubstituteConfig("usb:/apps/wiidoom/chex-music.cfg");
-            else if(gamemission == pack_hacx)
+            else if (gamemission == pack_hacx)
                 DumpSubstituteConfig("usb:/apps/wiidoom/hacx-music.cfg");
         }
-        else if(sd)
+        else if (sd)
         {
-            if(gamemission == doom)
+            if (gamemission == doom)
                 DumpSubstituteConfig("sd:/apps/wiidoom/doom1-music.cfg");
-            else if(gamemission == doom2)
+            else if (gamemission == doom2)
                 DumpSubstituteConfig("sd:/apps/wiidoom/doom2-music.cfg");
-            else if(gamemission == pack_tnt || gamemission == pack_plut)
+            else if (gamemission == pack_tnt || gamemission == pack_plut)
                 DumpSubstituteConfig("sd:/apps/wiidoom/tnt-music.cfg");
-            else if(gamemission == pack_chex)
+            else if (gamemission == pack_chex)
                 DumpSubstituteConfig("sd:/apps/wiidoom/chex-music.cfg");
-            else if(gamemission == pack_hacx)
+            else if (gamemission == pack_hacx)
                 DumpSubstituteConfig("sd:/apps/wiidoom/hacx-music.cfg");
         }
     }
@@ -915,7 +927,6 @@ static dboolean I_SDL_InitMusic(void)
     // Read all MIDI files from loaded WAD files, dump an example substitution
     // music config file to the specified filename and quit.
     //
-
     int i = (M_CheckParmWithArgs("-dumpsubstconfig", 1) && !beta_style);
 
     if (i > 0)
@@ -927,7 +938,6 @@ static dboolean I_SDL_InitMusic(void)
 
     // If SDL_mixer is not initialized, we have to initialize it
     // and have the responsibility to shut it down later on.
-
     if (SDLIsInitialized())
     {
         music_initialized = true;
@@ -938,6 +948,8 @@ static dboolean I_SDL_InitMusic(void)
         {
             C_Error("Unable to set up sound.");
         }
+
+        // FIXME: ???
 #ifdef WII
         else if (Mix_OpenAudio(snd_samplerate, AUDIO_S16SYS, 2, 4096) < 0)
 #else
@@ -962,12 +974,10 @@ static dboolean I_SDL_InitMusic(void)
 
     // Once initialization is complete, the temporary Timidity config
     // file can be removed.
-
-//    RemoveTimidityConfig();
+    //RemoveTimidityConfig();
 
     // If snd_musiccmd is set, we need to call Mix_SetMusicCMD to
     // configure an external music playback program.
-
     if (strlen(snd_musiccmd) > 0)
     {
         Mix_SetMusicCMD(snd_musiccmd);
@@ -977,7 +987,7 @@ static dboolean I_SDL_InitMusic(void)
     Mix_RegisterEffect(MIX_CHANNEL_POST, TrackPositionCallback, NULL, NULL);
 
     // If we're in GENMIDI mode, try to load sound packs.
-//    if (snd_musicdevice == SNDDEVICE_GENMIDI)
+    //if (snd_musicdevice == SNDDEVICE_GENMIDI)
     {
         LoadSubstituteConfigs();
     }
@@ -989,7 +999,6 @@ static dboolean I_SDL_InitMusic(void)
 // SDL_mixer's native MIDI music playing does not pause properly.
 // As a workaround, set the volume to 0 when paused.
 //
-
 static void UpdateMusicVolume(void)
 {
     int vol;
@@ -1007,7 +1016,6 @@ static void UpdateMusicVolume(void)
 }
 
 // Set music volume (0 - 127)
-
 static void I_SDL_SetMusicVolume(int volume)
 {
     // Internal state variable.
@@ -1017,7 +1025,6 @@ static void I_SDL_SetMusicVolume(int volume)
 }
 
 // Start playing a mid
-
 static void I_SDL_PlaySong(void *handle, dboolean looping)
 {
     int loops;
@@ -1050,14 +1057,16 @@ static void I_SDL_PlaySong(void *handle, dboolean looping)
 
     // Don't loop when playing substitute music, as we do it
     // ourselves instead.
-
     if (playing_substitute && file_metadata.valid)
     {
 #ifndef WII
         loops = 1;
 #endif
         SDL_LockAudio();
-        current_track_pos = 0;  // start of track
+
+        // start of track
+        current_track_pos = 0;
+
         SDL_UnlockAudio();
     }
 
@@ -1118,7 +1127,6 @@ static void I_SDL_UnRegisterSong(void *handle)
 }
 
 // Determine whether memory block is a .mid file 
-
 static dboolean IsMid(byte *mem, int len)
 {
     return len > 4 && !memcmp(mem, "MThd", 4);
@@ -1193,21 +1201,19 @@ static void *I_SDL_RegisterSong(void *data, int len)
     filename = M_TempFile("doom.mid");
 
     // [crispy] remove MID file size limit
-    if (IsMid(data, len) /* && len < MAXMIDLENGTH */)
+    if (IsMid(data, len))
     {
         M_WriteFile(filename, data, len);
     }
     else
     {
         // Assume a MUS file and try to convert
-
         ConvertMus(data, len, filename);
     }
 
     // Load the MIDI. In an ideal world we'd be using Mix_LoadMUS_RW()
     // by now, but Mix_SetMusicCMD() only works with Mix_LoadMUS(), so
     // we have to generate a temporary file.
-
     music = Mix_LoadMUS(filename);
 
     if (music == NULL)
@@ -1230,7 +1236,6 @@ static void *I_SDL_RegisterSong(void *data, int len)
         if (music == NULL)
         {
             // Failed to load
-
             C_Error("Error loading midi: %s", Mix_GetError());
         }
     }
@@ -1239,7 +1244,6 @@ static void *I_SDL_RegisterSong(void *data, int len)
     // MIDI program we can't delete the file. Otherwise, the program
     // won't find the file to play. This means we leave a mess on
     // disk :(
-
     if (strlen(snd_musiccmd) == 0)
     {
         remove(filename);
@@ -1330,7 +1334,7 @@ void I_SDL_PollMusic(void)
             RestartCurrentTrack();
         }
 
-        if(mus_cheat_used)
+        if (mus_cheat_used)
             current_track_loop = true;
 
         // Have we reached the actual end of track (not loop end)?
@@ -1339,74 +1343,74 @@ void I_SDL_PollMusic(void)
         {
             change_anyway = true;
 
-            if(!mus_cheat_used)
+            if (!mus_cheat_used)
             {
-                if(gamestate == GS_LEVEL)
+                if (gamestate == GS_LEVEL)
                 {
-                    if(gamemode == commercial && gamemission == pack_nerve)
+                    if (gamemode == commercial && gamemission == pack_nerve)
                     {
-                        if(gamemap == 1)
+                        if (gamemap == 1)
                             S_ChangeMusic(mus_messag, true, true);
-                        else if(gamemap == 2)
+                        else if (gamemap == 2)
                             S_ChangeMusic(mus_ddtblu, true, true);
-                        else if(gamemap == 3)
+                        else if (gamemap == 3)
                             S_ChangeMusic(mus_doom, true, true);
-                        else if(gamemap == 4)
+                        else if (gamemap == 4)
                             S_ChangeMusic(mus_shawn, true, true);
-                        else if(gamemap == 5)
+                        else if (gamemap == 5)
                             S_ChangeMusic(mus_in_cit, true, true);
-                        else if(gamemap == 6)
+                        else if (gamemap == 6)
                             S_ChangeMusic(mus_the_da, true, true);
-                        else if(gamemap == 7)
+                        else if (gamemap == 7)
                             S_ChangeMusic(mus_in_cit, true, true);
-                        else if(gamemap == 8)
+                        else if (gamemap == 8)
                             S_ChangeMusic(mus_shawn2, true, true);
-                        else if(gamemap == 9)
+                        else if (gamemap == 9)
                             S_ChangeMusic(mus_ddtbl2, true, true);
                     }
-                    else if(gamemode == commercial)
+                    else if (gamemode == commercial)
                         S_ChangeMusic(gamemap + 32, true, true);
                     else
                     {
-                        if(gameepisode == 1)
+                        if (gameepisode == 1)
                             S_ChangeMusic(gamemap, true, true);
-                        else if(gameepisode == 2)
+                        else if (gameepisode == 2)
                             S_ChangeMusic(gamemap + 9, true, true);
-                        else if(gameepisode == 3)
+                        else if (gameepisode == 3)
                             S_ChangeMusic(gamemap + 18, true, true);
-                        else if(gameepisode == 4)
+                        else if (gameepisode == 4)
                         {
-                            if(gamemap == 1)
+                            if (gamemap == 1)
                                 S_ChangeMusic(mus_e3m4, true, true);
-                            else if(gamemap == 2)
+                            else if (gamemap == 2)
                                 S_ChangeMusic(mus_e3m2, true, true);
-                            else if(gamemap == 3)
+                            else if (gamemap == 3)
                                 S_ChangeMusic(mus_e3m3, true, true);
-                            else if(gamemap == 4)
+                            else if (gamemap == 4)
                                 S_ChangeMusic(mus_e1m5, true, true);
-                            else if(gamemap == 5)
+                            else if (gamemap == 5)
                                 S_ChangeMusic(mus_e2m7, true, true);
-                            else if(gamemap == 6)
+                            else if (gamemap == 6)
                                 S_ChangeMusic(mus_e2m4, true, true);
-                            else if(gamemap == 7)
+                            else if (gamemap == 7)
                                 S_ChangeMusic(mus_e2m6, true, true);
-                            else if(gamemap == 8)
+                            else if (gamemap == 8)
                                 S_ChangeMusic(mus_e2m5, true, true);
-                            else if(gamemap == 9)
+                            else if (gamemap == 9)
                                 S_ChangeMusic(mus_e1m9, true, true);
                         }
                     }
                 }
-                else if(gamestate == GS_INTERMISSION)
+                else if (gamestate == GS_INTERMISSION)
                 {
-                    if(gamemode == commercial)
+                    if (gamemode == commercial)
                         S_ChangeMusic(mus_dm2int, true, false);
                     else
                         S_ChangeMusic(mus_inter, true, false);
                 }
-                else if(gamestate == GS_FINALE)
+                else if (gamestate == GS_FINALE)
                 {
-                    if(logical_gamemission == doom)
+                    if (logical_gamemission == doom)
                         S_ChangeMusic(mus_victor, true, false);
                     else
                         S_ChangeMusic(mus_read_m, true, false);
@@ -1431,7 +1435,7 @@ static snddevice_t music_sdl_devices[] =
     SNDDEVICE_WAVEBLASTER,
     SNDDEVICE_SOUNDCANVAS,
     SNDDEVICE_GENMIDI,
-    SNDDEVICE_AWE32,
+    SNDDEVICE_AWE32
 };
 
 music_module_t music_sdl_module =
@@ -1448,6 +1452,6 @@ music_module_t music_sdl_module =
     I_SDL_PlaySong,
     I_SDL_StopSong,
     I_SDL_MusicIsPlaying,
-    I_SDL_PollMusic,
+    I_SDL_PollMusic
 };
 

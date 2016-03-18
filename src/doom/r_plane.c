@@ -36,6 +36,7 @@
 ========================================================================
 */
 
+
 #include <stdlib.h>
 
 #include "c_io.h"
@@ -48,24 +49,12 @@
 #include "w_wad.h"
 #include "z_zone.h"
 
-#define MAXVISPLANES    128                           // must be a power of 2
-//#define MAXVISPLANES    128*8                         // must be a power of 2
+
+// must be a power of 2
+#define MAXVISPLANES    128
 
 // ?
-#define MAXOPENINGS        SCREENWIDTH*64*4  // CHANGED FOR HIRES
-
-static visplane_t       *visplanes[MAXVISPLANES];     // killough
-//static visplane_t       *visplanes = NULL;              // CHANGED FOR HIRES
-
-//static visplane_t              *lastvisplane;
-
-static visplane_t       *freetail;                      // killough
-static visplane_t       **freehead = &freetail;         // killough
-
-visplane_t              *floorplane;
-visplane_t              *ceilingplane;
-
-//static int                 numvisplanes;                // ADDED FOR HIRES
+#define MAXOPENINGS     SCREENWIDTH * 64 * 4
 
 // killough -- hash function for visplanes
 // Empirically verified to be fairly uniform:
@@ -73,33 +62,62 @@ visplane_t              *ceilingplane;
     (((unsigned int)(picnum) * 3 + (unsigned int)(lightlevel) + \
     (unsigned int)(height) * 7) & (MAXVISPLANES - 1))
 
-size_t                 maxopenings;
-int                    *openings;                       // dropoff overflow
-int                    *lastopening;                    // dropoff overflow
+// Ripple Effect from Eternity Engine (r_ripple.cpp) by Simon Howard
+#define AMP             2
+#define AMP2            2
+#define SPEED           40
 
-// Clip values are the solid pixel bounding the range.
-//  floorclip starts out SCREENHEIGHT
-//  ceilingclip starts out -1
-int                     floorclip[SCREENWIDTH];         // dropoff overflow
-int                     ceilingclip[SCREENWIDTH];       // dropoff overflow
+// swirl factors determine the number of waves per flat width
+// 1 cycle per 64 units
+#define SWIRLFACTOR     (8192 / 64)
+
+// 1 cycle per 32 units (2 in 64)
+#define SWIRLFACTOR2    (8192 / 32)
+
+
+// killough
+static visplane_t       *visplanes[MAXVISPLANES];
+static visplane_t       *freetail;
+static visplane_t       **freehead = &freetail;
+
+// texture mapping
+static lighttable_t     **planezlight;
+
+// killough 2/28/98: flat offsets
+static fixed_t          xoffs;
+static fixed_t          yoffs;
+
+static fixed_t          planeheight;
+
+static byte             *normalflat;
+static byte             distortedflat[4096];
 
 // spanstart holds the start of a plane span
 // initialized to 0 at start
 static int              spanstart[SCREENHEIGHT];
 
-// texture mapping
-static lighttable_t     **planezlight;
-static fixed_t          planeheight;
-
-static fixed_t          xoffs, yoffs;                   // killough 2/28/98: flat offsets
 
 fixed_t                 yslope[SCREENHEIGHT];
 fixed_t                 distscale[SCREENWIDTH];
 
-//dboolean                r_liquid_swirl = r_liquid_swirl_default;
+visplane_t              *floorplane;
+visplane_t              *ceilingplane;
+
+size_t                  maxopenings;
+
+// Clip values are the solid pixel bounding the range.
+//  floorclip starts out SCREENHEIGHT
+//  ceilingclip starts out -1
+
+// dropoff overflow
+int                     *openings;
+int                     *lastopening;
+int                     floorclip[SCREENWIDTH];
+int                     ceilingclip[SCREENWIDTH];
+
 
 extern fixed_t          animatedliquiddiff;
-//extern dboolean         r_liquid_bob;
+
 
 //
 // R_MapPlane
@@ -121,14 +139,9 @@ static void R_MapPlane(int y, int x1, int x2)
         return;
 
 #ifdef RANGECHECK
-    if (x2 < x1
-     || x1 < 0
-     || x2 >= viewwidth
-     || y > viewheight)
+    if (x2 < x1 || x1 < 0 || x2 >= viewwidth || y > viewheight)
     {
-//        I_Error ("R_MapPlane: %i, %i at %i",x1,x2,y);
-printf("OOPS!\n");
-        C_Error("R_MapPlane: %i, %i at %i",x1,x2,y);
+        C_Error("R_MapPlane: %i, %i at %i", x1, x2, y);
         return;
     }
 #endif
@@ -168,11 +181,11 @@ void R_ClearPlanes(void)
         ceilingclip[i] = -1;
     }
 
-    for (i = 0; i < MAXVISPLANES; i++)  // new code -- killough
+    // new code -- killough
+    for (i = 0; i < MAXVISPLANES; i++)
         for (*freehead = visplanes[i], visplanes[i] = NULL; *freehead;)
             freehead = &(*freehead)->next;
 
-//    lastvisplane = visplanes;
     lastopening = openings;
 }
 
@@ -185,8 +198,10 @@ static visplane_t *new_visplane(unsigned hash)
         check = calloc(1, sizeof(*check));
     else if (!(freetail = freetail->next))
         freehead = &freetail;
+
     check->next = visplanes[hash];
     visplanes[hash] = check;
+
     return check;
 }
 
@@ -195,16 +210,16 @@ static visplane_t *new_visplane(unsigned hash)
 // [nitr8] UNUSED
 //
 /*
-static void R_RaiseVisplanes (visplane_t** vp)
+static void R_RaiseVisplanes (visplane_t **vp)
 {
     if (lastvisplane - visplanes == numvisplanes)
     {
-        int numvisplanes_old = numvisplanes;
-        visplane_t* visplanes_old = visplanes;
+        int         numvisplanes_old = numvisplanes;
+        visplane_t  *visplanes_old = visplanes;
 
         numvisplanes = numvisplanes ? 2 * numvisplanes : MAXVISPLANES;
         visplanes = Z_Realloc(visplanes, numvisplanes * sizeof(*visplanes));
-//        memset(visplanes + numvisplanes_old, 0, (numvisplanes - numvisplanes_old) * sizeof(*visplanes));
+        //memset(visplanes + numvisplanes_old, 0, (numvisplanes - numvisplanes_old) * sizeof(*visplanes));
 
         lastvisplane = visplanes + numvisplanes_old;
         floorplane = visplanes + (floorplane - visplanes_old);
@@ -226,36 +241,35 @@ static void R_RaiseVisplanes (visplane_t** vp)
 visplane_t *R_FindPlane(fixed_t height, int picnum, int lightlevel, fixed_t xoffs, fixed_t yoffs)
 {
     visplane_t          *check;
-    unsigned int        hash;                                   // killough
 
-    if (picnum == skyflatnum || (picnum & PL_SKYFLAT))          // killough 10/98
-        height = lightlevel = 0;                // killough 7/19/98: most skies map together
+    // killough
+    unsigned int        hash;
+
+    // killough 10/98
+    if (picnum == skyflatnum || (picnum & PL_SKYFLAT))
+        // killough 7/19/98: most skies map together
+        height = lightlevel = 0;
 
     // New visplane algorithm uses hash table -- killough
     hash = visplane_hash(picnum, lightlevel, height);
 
-    for (check = visplanes[hash]; check; check = check->next)   // killough
-//    for (check=visplanes; check<lastvisplane; check++)
+    // killough
+    for (check = visplanes[hash]; check; check = check->next)
         if (height == check->height && picnum == check->picnum && lightlevel == check->lightlevel
                 && xoffs == check->xoffs && yoffs == check->yoffs)
             return check;
-//            break;
 
-    check = new_visplane(hash);                                 // killough
-/*
-    if (check < lastvisplane)
-        return check;
+    // killough
+    check = new_visplane(hash);
 
-    R_RaiseVisplanes(&check);
-
-    lastvisplane++;
-*/
     check->height = height;
     check->picnum = picnum;
     check->lightlevel = lightlevel;
     check->minx = viewwidth;
     check->maxx = -1;
-    check->xoffs = xoffs;                                      // killough 2/28/98: Save offsets
+
+    // killough 2/28/98: Save offsets
+    check->xoffs = xoffs;
     check->yoffs = yoffs;
 
     // FIXME: The 2nd memset() argument '32767' doesn't fit into an 'unsigned char'.
@@ -298,11 +312,7 @@ visplane_t *R_CheckPlane(visplane_t *pl, int start, int stop)
     }
 
     for (x = intrl; x <= intrh && pl->top[x] == SHRT_MAX; x++);
-/*
-    for (x=intrl ; x<= intrh ; x++)
-        if (pl->top[x] != 0xffffffffu) // [crispy] hires / 32-bit integer math
-            break;
-*/
+
     // [crispy] fix HOM if ceilingplane and floorplane are the same
     // visplane (e.g. both skies)
     if (!(pl == floorplane && markceiling && floorplane == ceilingplane) && x > intrh)
@@ -319,22 +329,14 @@ visplane_t *R_CheckPlane(visplane_t *pl, int start, int stop)
         new_pl->picnum = pl->picnum;
         new_pl->lightlevel = pl->lightlevel;
         new_pl->sector = pl->sector;
-        new_pl->xoffs = pl->xoffs;      // killough 2/28/98
+
+        // killough 2/28/98
+        new_pl->xoffs = pl->xoffs;
         new_pl->yoffs = pl->yoffs;
+
         pl = new_pl;
 
         // make a new visplane
-/*
-        R_RaiseVisplanes(&pl);                                        // ADDED FOR HIRES
-
-        lastvisplane->height = pl->height;
-        lastvisplane->picnum = pl->picnum;
-        lastvisplane->lightlevel = pl->lightlevel;
-        lastvisplane->xoffs = pl->xoffs;      // killough 2/28/98
-        lastvisplane->yoffs = pl->yoffs;
-    
-        pl = lastvisplane++;
-*/
         pl->minx = start;
         pl->maxx = stop;
 
@@ -361,29 +363,17 @@ static void R_MakeSpans(visplane_t *pl)
 
         for (; t1 < t2 && t1 <= b1; ++t1)
             R_MapPlane(t1, spanstart[t1], x - 1);
+
         for (; b1 > b2 && b1 >= t1; --b1)
             R_MapPlane(b1, spanstart[b1], x - 1);
+
         while (t2 < t1 && t2 <= b2)
             spanstart[t2++] = x;
+
         while (b2 > b1 && b2 >= t2)
             spanstart[b2--] = x;
     }
 }
-
-// Ripple Effect from Eternity Engine (r_ripple.cpp) by Simon Howard
-#define AMP             2
-#define AMP2            2
-#define SPEED           40
-
-// swirl factors determine the number of waves per flat width
-// 1 cycle per 64 units
-#define SWIRLFACTOR     (8192 / 64)
-
-// 1 cycle per 32 units (2 in 64)
-#define SWIRLFACTOR2    (8192 / 32)
-
-static byte     *normalflat;
-static byte     distortedflat[4096];
 
 //
 // R_DistortedFlat
@@ -452,14 +442,10 @@ void R_DrawPlanes(void)
 
 #ifdef RANGECHECK
 
-    if (ds_p - drawsegs > maxdrawsegs)                          // CHANGED FOR HIRES
-        I_Error ("R_DrawPlanes: drawsegs overflow (%i)",        // CHANGED FOR HIRES
-                 ds_p - drawsegs);                              // CHANGED FOR HIRES
-/*    
-    if (lastvisplane - visplanes > numvisplanes)                // CHANGED FOR HIRES
-        I_Error ("R_DrawPlanes: visplane overflow (%i)",        // CHANGED FOR HIRES
-                 lastvisplane - visplanes);                     // CHANGED FOR HIRES
-*/
+    if (ds_p - drawsegs > maxdrawsegs)
+        I_Error ("R_DrawPlanes: drawsegs overflow (%i)",
+                 ds_p - drawsegs);
+
     if (lastopening - openings > MAXOPENINGS)
         I_Error ("R_DrawPlanes: opening overflow (%i)",
                  lastopening - openings);
@@ -470,7 +456,6 @@ void R_DrawPlanes(void)
         visplane_t      *pl;
 
         for (pl = visplanes[i]; pl; pl = pl->next)
-//        for (pl = visplanes ; pl < lastvisplane ; pl++)
         {
             if (pl->minx <= pl->maxx)
             {
@@ -518,15 +503,20 @@ void R_DrawPlanes(void)
                         flip = (l->special == TransferSkyTextureToTaggedSectors_Flipped ?
                             0u : ~0u);
                     }
-                    else        // Normal DOOM sky, only one allowed per level
+                    // Normal DOOM sky, only one allowed per level
+                    else
                     {
-                        dc_texturemid = skytexturemid;  // Default y-offset
-                        texture = skytexture;           // Default texture
-                        flip = 0;                       // DOOM flips it
+                        // Default y-offset
+                        dc_texturemid = skytexturemid;
+
+                        // Default texture
+                        texture = skytexture;
+
+                        // DOOM flips it
+                        flip = 0;
                     }
 
-//                    dc_iscale = pspriteiscale;
-                    dc_iscale = pspriteiscale>>(/*detailshift &&*/ !hires); // CHANGED FOR HIRES
+                    dc_iscale = pspriteiscale >> (!hires);
 
                     // [crispy] stretch sky
                     if (mouselook > 0)
@@ -539,7 +529,6 @@ void R_DrawPlanes(void)
                     dc_colormap = (fixedcolormap ? fixedcolormap : fullcolormap);
 
                     dc_texheight = textureheight[texture] >> FRACBITS;
-//                    dc_iscale = pspriteiscale;
 
                     offset = skycolumnoffset >> FRACBITS;
 
@@ -567,8 +556,10 @@ void R_DrawPlanes(void)
                     ds_source = (swirling ? R_DistortedFlat(picnum) :
                         W_CacheLumpNum(lumpnum, PU_STATIC));
 
-                    xoffs = pl->xoffs;  // killough 2/28/98: Add offsets
+                    // killough 2/28/98: Add offsets
+                    xoffs = pl->xoffs;
                     yoffs = pl->yoffs;
+
                     planeheight = ABS(pl->height - viewz);
 
                     if (liquid && pl->sector && d_swirl && isliquid[pl->sector->floorpic])
@@ -588,3 +579,4 @@ void R_DrawPlanes(void)
         }
     }
 }
+

@@ -49,191 +49,18 @@ dboolean W_ParseCommandLine(void)
 {
     dboolean modifiedgame = false;
     int p = 0;
-/*
-#ifdef FEATURE_WAD_MERGE
 
-    // Merged PWADs are loaded first, because they are supposed to be 
-    // modified IWADs.
-
-    //!
-    // @arg <files>
-    // @category mod
-    //
-    // Simulates the behavior of deutex's -merge option, merging a PWAD
-    // into the main IWAD.  Multiple files may be specified.
-    //
-
-    if(!beta_style)
-        p = M_CheckParmWithArgs("-merge", 1);
-
-    if (p > 0 || gamemode == shareware
-#ifdef WII
-        || load_extra_wad == 1
-#endif
-        || version13 == true
-        )
-    {
-        for (p = p + 1; p<myargc && myargv[p][0] != '-'; ++p)
-        {
-            char *filename = D_TryFindWADByName(myargv[p]);
-            pwadfile = uppercase(removeext(M_ExtractFilename(filename)));
-
-            if (W_MergeFile(filename, false))
-            {
-                modifiedgame = true;
-
-                if (D_IsDehFile(filename))
-                    LoadDehFile(filename);
-
-                if(dont_show_adding_of_resource_wad == 0)
-                    printf("         merging %s\n", filename);
-
-                if ((search_string(filename, "nerve.wad") > -1) ||
-                    (search_string(filename, "NERVE.WAD") > -1))
-                {
-                    int i;
-
-                    nerve_pwad = true;
-                    gamemission = pack_nerve;
-
-                    // [crispy] rename level name patch lumps out of the way
-                    for (i = 0; i < 9; i++)
-                    {
-                        char lumpname[9];
-
-                        M_snprintf (lumpname, 9, "CWILV%2.2d", i);
-                        lumpinfo[W_GetNumForName(lumpname)]->name[0] = 'N';
-                    }
-                }
-            }
-        }
-    }
-
-    // NWT-style merging:
-
-    // NWT's -merge option:
-
-    //!
-    // @arg <files>
-    // @category mod
-    //
-    // Simulates the behavior of NWT's -merge option.  Multiple files
-    // may be specified.
-
-    if(!beta_style)
-        p = M_CheckParmWithArgs("-nwtmerge", 1);
-
-    if (p > 0)
-    {
-        for (p = p + 1; p<myargc && myargv[p][0] != '-'; ++p)
-        {
-            char *filename;
-
-            modifiedgame = true;
-
-            filename = D_TryFindWADByName(myargv[p]);
-            pwadfile = uppercase(removeext(M_ExtractFilename(filename)));
-
-            printf("         performing NWT-style merge of %s\n", filename);
-            W_NWTDashMerge(filename);
-        }
-    }
-    
-    // Add flats
-
-    //!
-    // @arg <files>
-    // @category mod
-    //
-    // Simulates the behavior of NWT's -af option, merging flats into
-    // the main IWAD directory.  Multiple files may be specified.
-    //
-
-    if(!beta_style)
-        p = M_CheckParmWithArgs("-af", 1);
-
-    if (p > 0)
-    {
-        for (p = p + 1; p<myargc && myargv[p][0] != '-'; ++p)
-        {
-            char *filename;
-
-            modifiedgame = true;
-
-            filename = D_TryFindWADByName(myargv[p]);
-            pwadfile = uppercase(removeext(M_ExtractFilename(filename)));
-
-            printf("         merging flats from %s\n", filename);
-            W_NWTMergeFile(filename, W_NWT_MERGE_FLATS);
-        }
-    }
-
-    //!
-    // @arg <files>
-    // @category mod
-    //
-    // Simulates the behavior of NWT's -as option, merging sprites
-    // into the main IWAD directory.  Multiple files may be specified.
-    //
-
-    if(!beta_style)
-        p = M_CheckParmWithArgs("-as", 1);
-
-    if (p > 0)
-    {
-        for (p = p + 1; p<myargc && myargv[p][0] != '-'; ++p)
-        {
-            char *filename;
-
-            modifiedgame = true;
-            filename = D_TryFindWADByName(myargv[p]);
-            pwadfile = uppercase(removeext(M_ExtractFilename(filename)));
-
-            printf("         merging sprites from %s\n", filename);
-            W_NWTMergeFile(filename, W_NWT_MERGE_SPRITES);
-        }
-    }
-
-    //!
-    // @arg <files>
-    // @category mod
-    //
-    // Equivalent to "-af <files> -as <files>".
-    //
-
-    if(!beta_style)
-        p = M_CheckParmWithArgs("-aa", 1);
-
-    if (p > 0)
-    {
-        for (p = p + 1; p<myargc && myargv[p][0] != '-'; ++p)
-        {
-            char *filename;
-
-            modifiedgame = true;
-
-            filename = D_TryFindWADByName(myargv[p]);
-            pwadfile = uppercase(removeext(M_ExtractFilename(filename)));
-
-            printf("         merging sprites and flats from %s\n", filename);
-            W_NWTMergeFile(filename, W_NWT_MERGE_SPRITES | W_NWT_MERGE_FLATS);
-        }
-    }
-
-#endif
-*/
     //!
     // @arg <files>
     // @vanilla
     //
     // Load the specified PWAD files.
     //
-
-    p = M_CheckParmWithArgs ("-file", 1);
+    p = M_CheckParmWithArgs("-file", 1);
 
     if (p)
     {
-        for (p = p + 1; p<myargc && myargv[p][0] != '-'; ++p)
+        for (p = p + 1; p < myargc && myargv[p][0] != '-'; ++p)
         {
             char *filename = D_TryFindWADByName(myargv[p]);
             pwadfile = uppercase(removeext(M_ExtractFilename(filename)));
@@ -269,51 +96,8 @@ dboolean W_ParseCommandLine(void)
         }
     }
 
-//    W_PrintDirectory();
-
     return modifiedgame;
 }
+
 #endif
-
-// Lump names that are unique to particular game types. This lets us check
-// the user is not trying to play with the wrong executable
-//
-// [nitr8] UNUSED
-//
-/*
-static const struct
-{
-    GameMission_t mission;
-    char *lumpname;
-} unique_lumps[] = {
-    { doom,    "POSSA1" }
-};
-
-void W_CheckCorrectIWAD(GameMission_t mission)
-{
-    int i;
-    lumpindex_t lumpnum;
-
-    for (i = 0; i < arrlen(unique_lumps); ++i)
-    {
-        if (mission != unique_lumps[i].mission)
-        {
-            lumpnum = W_CheckNumForName(unique_lumps[i].lumpname);
-
-            if (lumpnum >= 0)
-            {
-                I_Error("\nYou are trying to use a %s IWAD file with "
-                        "the %s%s binary.\nThis isn't going to work.\n"
-                        "You probably want to use the %s%s binary.",
-                        D_SuggestGameName(unique_lumps[i].mission,
-                                          indetermined),
-                        PROGRAM_PREFIX,
-                        D_GameMissionString(mission),
-                        PROGRAM_PREFIX,
-                        D_GameMissionString(unique_lumps[i].mission));
-            }
-        }
-    }
-}
-*/
 

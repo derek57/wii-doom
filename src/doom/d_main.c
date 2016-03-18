@@ -150,7 +150,7 @@ static struct
     {"Final Doom",           "final",      exe_final},
     {"Final Doom (alt)",     "final2",     exe_final2},
     {"Chex Quest",           "chex",       exe_chex},
-    { NULL,                  NULL,         0},
+    { NULL,                  NULL,         0}
 };
 */
 static struct 
@@ -195,6 +195,7 @@ dboolean        main_loop_started = false;
 
 dboolean        version13 = false;
 dboolean        realframe;
+dboolean        splashscreen;
 
 int             startepisode;
 int             startmap;
@@ -221,11 +222,11 @@ extern int      warplev;
 extern int      warped;
 extern int      startlump;
 extern int      viewheight2;
-extern int      correct_lost_soul_bounce;
 extern int      oldscreenblocks;
 extern int      oldscreenSize;
-extern int      png_screenshots;
 
+extern dboolean correct_lost_soul_bounce;
+extern dboolean png_screenshots;
 extern dboolean merge;
 extern dboolean BorderNeedRefresh;
 extern dboolean skillflag;
@@ -250,7 +251,8 @@ extern dboolean blurred;
 extern menu_t*  currentMenu;                          
 extern menu_t   CheatsDef;
 
-extern short    itemOn;    // menu item skull is on
+// menu item skull is on
+extern short    itemOn;
 
 skill_t         startskill;
 
@@ -277,7 +279,7 @@ void D_ProcessEvents(void)
     while ((ev = D_PopEvent()) != NULL)
     {
         // menu or console ate the event
-        if (M_Responder (ev) || C_Responder (ev))
+        if (M_Responder(ev) || C_Responder(ev))
             continue;
 
         G_Responder (ev);
@@ -312,10 +314,7 @@ void D_Display(int scrn)
     if (nodrawers)
         return;
 #endif
-*/                
-    // [crispy] catch SlopeDiv overflows
-//    SlopeDiv = SlopeDivCrispy;
-
+*/
     redrawsbar = false;
     
     realframe = (!d_uncappedframerate || gametic > saved_gametic);
@@ -328,7 +327,7 @@ void D_Display(int scrn)
     // change the view size if needed
     if (setsizeneeded)
     {
-        R_ExecuteSetViewSize ();
+        R_ExecuteSetViewSize();
 
         // force background redraw
         oldgamestate = -1;
@@ -341,14 +340,16 @@ void D_Display(int scrn)
     {
         if (gamestate != wipegamestate)
         {
-            if (dots_enabled == 1)      // ADDED FOR PSP TO PREVENT CRASH...
+            // ADDED CHECKS FOR PSP TO PREVENT CRASH...
+            // ...UPON WIPING SCREEN WITH ENABLED DISPLAY TICKER
+            if (dots_enabled == 1)
             {
-                display_ticker = false; // ...UPON WIPING SCREEN WITH ENABLED DISPLAY TICKER
+                display_ticker = false;
             }
 
-            if (fps_enabled == 1)       // ADDED FOR PSP TO PREVENT CRASH...
+            if (fps_enabled == 1)
             {
-                display_fps = 0;        // ...UPON WIPING SCREEN WITH ENABLED DISPLAY TICKER
+                display_fps = 0;
             }
 
             wipe = true;
@@ -356,14 +357,16 @@ void D_Display(int scrn)
         }
         else
         {
-            if (dots_enabled == 1)      // ADDED FOR PSP TO PREVENT CRASH...
+            // ADDED CHECKS FOR PSP TO PREVENT CRASH...
+            // ...UPON WIPING SCREEN WITH ENABLED DISPLAY TICKER
+            if (dots_enabled == 1)
             {
-                display_ticker = true;  // ...UPON WIPING SCREEN WITH ENABLED DISPLAY TICKER
+                display_ticker = true;
             }
 
-            if (fps_enabled == 1)       // ADDED FOR PSP TO PREVENT CRASH...
+            if (fps_enabled == 1)
             {
-                display_fps = 1;        // ...UPON WIPING SCREEN WITH ENABLED DISPLAY TICKER
+                display_fps = 1;
             }
 
             wipe = false;
@@ -426,7 +429,7 @@ void D_Display(int scrn)
     }
 
     // draw buffered stuff to screen
-    I_UpdateNoBlit ();
+    I_UpdateNoBlit();
 
     // draw the view directly
     if (gamestate == GS_LEVEL && (!automapactive || am_overlay) && gametic)
@@ -436,7 +439,7 @@ void D_Display(int scrn)
     }
 
     // clean up border stuff
-    if (gamestate != oldgamestate && gamestate != GS_LEVEL)
+    if (gamestate != oldgamestate && gamestate != GS_LEVEL && !splashscreen)
     {
         I_SetPalette(W_CacheLumpName("PLAYPAL", PU_CACHE));
     }
@@ -526,7 +529,7 @@ void D_Display(int scrn)
         // erase old menu stuff
         R_DrawViewBorder();
 
-        if (show_stats == 1)
+        if (show_stats)
         {
             HU_DrawStats();
         }
@@ -536,9 +539,6 @@ void D_Display(int scrn)
             AM_DrawWorldTimer();
         }
     }
-
-    // [crispy] back to Vanilla SlopeDiv
-//    SlopeDiv = SlopeDivVanilla;
 
     // [crispy] shade background when a menu is active or the game is paused
     if (((paused || menuactive) && background_type == 1) || inhelpscreens)
@@ -551,7 +551,6 @@ void D_Display(int scrn)
 
             for (y = 0; y < SCREENWIDTH * SCREENHEIGHT; y++)
             {
-//                I_VideoBuffer[y] = colormaps[0][menushade * 256 + I_VideoBuffer[y]];
                 screens[scrn][y] = colormaps[0][menushade * 256 + screens[scrn][y]];
             }
         }
@@ -635,13 +634,13 @@ void D_Display(int scrn)
     // wipe update
     wipe_EndScreen();
 
-    wipestart = I_GetTime () - 1;
+    wipestart = I_GetTime() - 1;
 
     do
     {
         do
         {
-            nowtime = I_GetTime ();
+            nowtime = I_GetTime();
             tics = nowtime - wipestart;
             I_Sleep(1);
         } while (tics <= 0);
@@ -722,7 +721,7 @@ void D_DoomLoop(void)
 {
 /*
     if (demorecording)
-        G_BeginRecording ();
+        G_BeginRecording();
 */
 
 #ifdef WII
@@ -834,7 +833,15 @@ void D_PageTicker(void)
 
 void D_PageDrawer(void)
 {
-    V_DrawPatch(0, 0, 0, W_CacheLumpName(pagename, PU_CACHE));
+    if (splashscreen)
+    {
+        I_SetPalette(W_CacheLumpName("SPLSHPAL", PU_CACHE) + (pagetic >= 95 ? pagetic - 95 :
+            (pagetic < 10 ? 10 - pagetic - 1 : 0)) * 768);
+
+        V_DrawPatch(0, 0, 0, W_CacheLumpName("SPLASH", PU_CACHE));
+    }
+    else
+        V_DrawPatch(0, 0, 0, W_CacheLumpName(pagename, PU_CACHE));
 }
 
 //
@@ -884,6 +891,22 @@ void D_DoAdvanceDemo(void)
 
     switch (demosequence)
     {
+        case -1:
+            gamestate = GS_DEMOSCREEN;
+
+            if (drawsplash)
+            {
+                pagetic = TICRATE * 3;
+                splashscreen = true;
+            }
+            else
+            {
+                pagetic = 0;
+                splashscreen = false;
+            }
+
+            break;
+
         case 0:
             if (gamemode == commercial)
             {
@@ -903,6 +926,12 @@ void D_DoAdvanceDemo(void)
             else
             {
                 pagename = "TITLEPIC";
+            }
+
+            if (splashscreen)
+            {
+                I_SetPalette(W_CacheLumpName("PLAYPAL", PU_CACHE));
+                splashscreen = false;
             }
 
             if (gamemode == commercial)
@@ -1016,7 +1045,12 @@ void D_DoAdvanceDemo(void)
 void D_StartTitle(void)
 {
     gameaction = ga_nothing;
-    demosequence = -1;
+
+    if (drawsplash)
+        demosequence = -2;
+    else
+        demosequence = -1;
+
     D_AdvanceDemo();
 }
 
@@ -1074,21 +1108,19 @@ static char *GetGameName(char *gamename)
         char *deh_sub;
 
         // Has the banner been replaced?
-
         deh_sub = banners[i];
         
         if (deh_sub != banners[i])
         {
             size_t gamename_size;
-//            int version;
+            //int version;
 
             // Has been replaced.
             // We need to expand via printf to include the Doom version number
             // We also need to cut off spaces to get the basic name
-
             gamename_size = strlen(deh_sub) + 10;
             gamename = Z_Malloc(gamename_size, PU_STATIC, NULL);
-//            version = G_VanillaVersionCode();
+            //version = G_VanillaVersionCode();
             M_snprintf(gamename, gamename_size, deh_sub);
 
             while (gamename[0] != '\0' && isspace(gamename[0]))
@@ -1120,7 +1152,6 @@ void D_SetGameDescription(void)
     if (logical_gamemission == doom)
     {
         // Doom 1.  But which version?
-
         if (is_freedoom)
         {
             gamedescription = GetGameName("Freedoom: Phase 1");
@@ -1128,7 +1159,6 @@ void D_SetGameDescription(void)
         else if (gamemode == retail)
         {
             // Ultimate Doom
-
             gamedescription = GetGameName("The Ultimate DOOM");
         } 
         else if (gamemode == registered)
@@ -1143,7 +1173,6 @@ void D_SetGameDescription(void)
     else
     {
         // Doom 2 of some kind.  But which mission?
-
         if (is_freedoom)
         {
             if (is_freedm)
@@ -1461,9 +1490,8 @@ static void D_Endoom(void)
     // Don't show ENDOOM if we have it disabled, or we're running
     // in screensaver or control test mode. Only show it once the
     // game has actually started.
-
     if (!show_endoom || !main_loop_started
-     || screensaver_mode /*|| (M_CheckParm("-testcontrols") > 0 && !beta_style)*/)
+        || screensaver_mode /*|| (M_CheckParm("-testcontrols") > 0 && !beta_style)*/)
     {
         return;
     }
@@ -1841,7 +1869,8 @@ void D_DoomMain(void)
     // Auto-detect the configuration dir.
 
     M_SetConfigDir(NULL);
-/*                                        // FIXME: forwardmove / sidemove
+/*
+    // FIXME: forwardmove / sidemove
     //!
     // @arg <x>
     // @vanilla
@@ -1852,7 +1881,7 @@ void D_DoomMain(void)
 
 #ifndef WII
 
-    if ((p=M_CheckParm("-turbo")))
+    if ((p = M_CheckParm("-turbo")))
     {
         int     scale = 200;
         extern int forwardmove[2];
@@ -1930,14 +1959,14 @@ void D_DoomMain(void)
     {
         musicVolume = 8;
         sfxVolume = 8;
-        showMessages = 1;        
-        drawgrid = 0;
-        followplayer = 1;
-        show_stats = 0;
+        showMessages = true;        
+        drawgrid = false;
+        followplayer = true;
+        show_stats = false;
         timer_info = 0;
-        use_vanilla_weapon_change = 1;
+        use_vanilla_weapon_change = true;
         chaingun_tics = 4;
-        crosshair = 0;
+        crosshair = false;
         d_colblood = 0;
         d_colblood2 = 0;
         d_swirl = 0;
@@ -1960,7 +1989,7 @@ void D_DoomMain(void)
         forwardmove = 29;
         sidemove = 24; 
         turnspeed = 7;
-        detailLevel = 0;
+        detailLevel = false;
         screenblocks = 10;
         screenSize = 7;
         usegamma = 10;
@@ -2036,7 +2065,7 @@ void D_DoomMain(void)
         d_ejectcasings = false;
         d_statusmap = true;
         show_title = false;
-        render_mode = 2;
+        render_mode = true;
         d_drawparticles = false;
         d_drawbfgcloud = false;
         d_drawrockettrails = false;
@@ -2265,6 +2294,7 @@ void D_DoomMain(void)
             printf(D_DEVSTR);
             printf("\n");
         }
+
         printf(" V_Init: allocate screens.\n");
         printf(" M_LoadDefaults: Load system defaults.\n");
         printf(" Z_Init: Init zone memory allocation daemon. \n");
@@ -2329,7 +2359,6 @@ void D_DoomMain(void)
     }
 
     // None found?
-
     if (iwadfile == NULL)
     {
         I_Error("\n Game mode indeterminate.  No IWAD file was found.  Try\n"
@@ -2517,17 +2546,14 @@ void D_DoomMain(void)
 */
     {
         // Determine automatically
-
         if (gamemission == pack_chex)
         {
             // chex.exe - identified by iwad filename
-
             gameversion = exe_chex;
         }
         else if (gamemission == pack_hacx)
         {
             // hacx.exe: identified by iwad filename
-
             gameversion = exe_hacx;
         }
         else if (gamemode == shareware || gamemode == registered
@@ -2594,7 +2620,6 @@ void D_DoomMain(void)
             // which has the crash in the demo loop; however, having
             // this as the default should mean that it plays back
             // most demos correctly.
-
             gameversion = exe_final;
         }
     }
@@ -2832,6 +2857,7 @@ void D_DoomMain(void)
             printf(D_DEVSTR);
             printf("\n");
         }
+
         printf(" V_Init: allocate screens.\n");
         printf(" M_LoadDefaults: Load system defaults.\n");
         printf(" Z_Init: Init zone memory allocation daemon. \n");
@@ -2842,7 +2868,6 @@ void D_DoomMain(void)
     correct_lost_soul_bounce = gameversion >= exe_ultimate;
 
     // The original exe does not support retail - 4th episode not supported
-
     if (gameversion < exe_ultimate && gamemode == retail)
     {
         gamemode = registered;
@@ -2859,7 +2884,6 @@ void D_DoomMain(void)
     I_EnableLoadingDisk(SCREENWIDTH - LOADING_DISK_W, SCREENHEIGHT - LOADING_DISK_H);
 
     // EXEs prior to the Final Doom exes do not support Final Doom.
-
     if (gameversion < exe_final && gamemode == commercial
         && (gamemission == pack_tnt || gamemission == pack_plut))
     {
@@ -3176,6 +3200,7 @@ void D_DoomMain(void)
         // Play back the demo named demo.lmp, determining the framerate
         // of the screen.
         //
+
         p = M_CheckParmWithArgs("-timedemo", 1);
 
     }
@@ -3209,7 +3234,6 @@ void D_DoomMain(void)
             // If file failed to load, still continue trying to play
             // the demo in the same way as Vanilla Doom.  This makes
             // tricks like "-playdemo demo1" possible.
-
             M_StringCopy(demolumpname, myargv[p + 1], sizeof(demolumpname));
         }
 
@@ -3221,7 +3245,6 @@ void D_DoomMain(void)
     I_AtExit(G_CheckDemoStatusAtExit, true);
 */
     // Generate the WAD hash table.  Speed things up a bit.
-
     W_GenerateHashTable();
 
     D_SetGameDescription();
@@ -3569,7 +3592,7 @@ void D_DoomMain(void)
                    "                             press enter to continue                            \n"
                    " ===============================================================================");
 
-            getchar ();
+            getchar();
         }
 
 #endif
@@ -3723,7 +3746,7 @@ void D_DoomMain(void)
     d_chkblood2 = (gamemission != pack_chex && gamemission != pack_hacx);
 /*
 #ifdef FEATURE_MULTIPLAYER
-    NET_Init ();
+    NET_Init();
 #endif
 */
     // Initial netgame startup. Connect to server etc.
@@ -3935,7 +3958,7 @@ void D_DoomMain(void)
     }
 
     C_Output("M_Init: Init miscellaneous info.");
-    M_Init ();
+    M_Init();
 
     if (gameversion == exe_chex)
     {
@@ -3969,7 +3992,7 @@ void D_DoomMain(void)
         }
     }
 
-    R_Init ();
+    R_Init();
 
     if (!beta_style)
     {
@@ -3977,7 +4000,7 @@ void D_DoomMain(void)
     }
 
     C_Output("P_Init: Init Playloop state.");
-    P_Init ();
+    P_Init();
 
     if (!beta_style)
     {

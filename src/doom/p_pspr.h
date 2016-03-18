@@ -28,6 +28,7 @@
 #ifndef __P_PSPR__
 #define __P_PSPR__
 
+
 //
 // Needs to include the precompiled
 //  sprite animation tables.
@@ -42,14 +43,17 @@
 #include "../m_fixed.h"
 #include "../tables.h"
 
+
 //
 // Frame flags:
 // handles maximum brightness (torches, muzzle flare, light sources)
 //
-#define FF_FULLBRIGHT        0x8000        // flag in thing->frame
+
+// flag in thing->frame
+#define FF_FULLBRIGHT        0x8000
 #define FF_FRAMEMASK         0x7fff
 
-#define WEAPONTOP            32*FRACUNIT
+#define WEAPONTOP            32 * FRACUNIT
 
 
 //
@@ -61,13 +65,16 @@ typedef enum
 {
     ps_weapon,
     ps_flash,
+
     NUMPSPRITES
 
 } psprnum_t;
 
 typedef struct
 {
-    state_t*       state;        // a NULL state means not active
+    // a NULL state means not active
+    state_t        *state;
+
     int            tics;
     fixed_t        sx;
     fixed_t        sy;
@@ -75,3 +82,4 @@ typedef struct
 } pspdef_t;
 
 #endif
+

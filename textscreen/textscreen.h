@@ -12,11 +12,12 @@
 // GNU General Public License for more details.
 //
 
+
 #ifndef TEXTSCREEN_H
 #define TEXTSCREEN_H
 
+
 #include "../src/doomkeys.h"
-#include "txt_main.h"
 
 #include "txt_button.h"
 #include "txt_checkbox.h"
@@ -25,6 +26,7 @@
 #include "txt_fileselect.h"
 #include "txt_inputbox.h"
 #include "txt_label.h"
+#include "txt_main.h"
 #include "txt_radiobutton.h"
 #include "txt_scrollpane.h"
 #include "txt_separator.h"
@@ -35,5 +37,6 @@
 #include "txt_window_action.h"
 #include "txt_window.h"
 
-#endif /* #ifndef TEXTSCREEN_H */
+
+#endif // #ifndef TEXTSCREEN_H
 

@@ -12,22 +12,22 @@
 // GNU General Public License for more details.
 //
 
+
 #include <stdlib.h>
 #include <string.h>
 
 #include "doomkeys.h"
-
-#include "txt_strut.h"
 #include "txt_io.h"
 #include "txt_main.h"
+#include "txt_strut.h"
 #include "txt_window.h"
+
 
 static void TXT_StrutSizeCalc(TXT_UNCAST_ARG(strut))
 {
     TXT_CAST_ARG(txt_strut_t, strut);
 
     // Minimum width is the string length + two spaces for padding
-
     strut->widget.w = strut->width;
     strut->widget.h = strut->height;
 }
@@ -54,7 +54,7 @@ txt_widget_class_t txt_strut_class =
     TXT_StrutKeyPress,
     TXT_StrutDestructor,
     NULL,
-    NULL,
+    NULL
 };
 
 txt_strut_t *TXT_NewStrut(int width, int height)

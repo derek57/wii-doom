@@ -35,45 +35,15 @@
 #include "v_video.h"
 
 
-// Bind all of the common controls used by Doom and all other games.
-
-extern dboolean aiming_help;
-
-extern int runcount;
-extern int png_screenshots;
-extern int pixelwidth;
-extern int pixelheight;
-extern int r_bloodsplats_max;
-extern int correct_lost_soul_bounce;
-extern int window_pos_x;
-extern int window_pos_y;
-
-extern int joy_up;
-extern int joy_down;
-extern int joy_left;
-extern int joy_right;
-extern int joy_zl;
-extern int joy_zr;
-extern int joy_l;
-extern int joy_r;
-extern int joy_plus;
-extern int joy_minus;
-extern int joy_home;
-extern int joy_a;
-extern int joy_b;
-extern int joy_x;
-extern int joy_y;
-extern int joy_1;
-extern int joy_2;
-
+// FOR PSP: THESE ARE RESERVED AS SPECIAL KEYS
+int key_strafeleft = KEY_COMMA;
+int key_straferight = KEY_PERIOD;
 
 int key_up = KEY_UPARROW;
 int key_down = KEY_DOWNARROW; 
 int key_left = KEY_LEFTARROW;
 int key_right = KEY_RIGHTARROW;
 int key_invright = KEY_RIGHTBRACKET;
-int key_strafeleft = KEY_COMMA;                // FOR PSP: THIS IS RESERVED AS A SPECIAL KEY
-int key_straferight = KEY_PERIOD;              // FOR PSP: THIS IS RESERVED AS A SPECIAL KEY
 int key_useartifact = KEY_ENTER;
 int key_use = ' ';
 int key_fire = KEY_RCTRL;
@@ -85,7 +55,6 @@ int key_strafe = KEY_RALT;
 int key_aiming = 'x';
 
 // Map control keys:
-
 int key_map_north     = KEY_UPARROW;
 int key_map_south     = KEY_DOWNARROW;
 int key_map_east      = KEY_RIGHTARROW;
@@ -100,7 +69,6 @@ int key_map_mark      = 'm';
 int key_map_clearmark = 'c';
 
 // menu keys:
-
 int key_menu_activate  = KEY_ESCAPE;
 int key_menu_up        = KEY_UPARROW;
 int key_menu_down      = KEY_DOWNARROW;
@@ -135,11 +103,9 @@ int key_pause = KEY_PAUSE;
 
 // Control whether if a mouse button is double clicked, it acts like 
 // "use" has been pressed
-
 int dclick_use = 1;
  
 // Weapon selection keys:
-
 int key_weapon1 = '1';
 int key_weapon2 = '2';
 int key_weapon3 = '3';
@@ -164,9 +130,40 @@ int mousebuse = 1;
 int mousebaiming = -1;
 
 // Joystick controls
-
 int joybstrafeleft = -1;
 int joybstraferight = -1;
+
+
+// Bind all of the common controls used by Doom and all other games.
+extern dboolean aiming_help;
+
+extern int runcount;
+extern int png_screenshots;
+extern int pixelwidth;
+extern int pixelheight;
+extern int r_bloodsplats_max;
+extern int correct_lost_soul_bounce;
+extern int window_pos_x;
+extern int window_pos_y;
+
+extern int joy_up;
+extern int joy_down;
+extern int joy_left;
+extern int joy_right;
+extern int joy_zl;
+extern int joy_zr;
+extern int joy_l;
+extern int joy_r;
+extern int joy_plus;
+extern int joy_minus;
+extern int joy_home;
+extern int joy_a;
+extern int joy_b;
+extern int joy_x;
+extern int joy_y;
+extern int joy_1;
+extern int joy_2;
+
 
 void M_BindBaseControls(void)
 {
@@ -202,9 +199,11 @@ void M_BindBaseControls(void)
     M_BindVariable("footclip",                 &d_footclip);
     M_BindVariable("splash",                   &d_splash);
     M_BindVariable("swirl",                    &d_swirl);
+
 #ifdef WII
     M_BindVariable("pr_beta",                  &beta_style_mode);
 #endif
+
     M_BindVariable("translucency",             &d_translucency);
     M_BindVariable("colored_blood",            &d_colblood);
     M_BindVariable("fixed_blood",              &d_colblood2);
@@ -321,7 +320,10 @@ void M_BindBaseControls(void)
     M_BindVariable("map_gridsize",             &map_grid_size);
     M_BindVariable("map_secrets_after",        &map_secret_after);
     M_BindVariable("use_autosave",             &enable_autosave);
+    M_BindVariable("draw_splash",              &drawsplash);
+
 #ifdef WII
+
     M_BindVariable("key_shoot",                &joy_r);
     M_BindVariable("key_open",                 &joy_l);
     M_BindVariable("key_menu",                 &joy_minus);
@@ -336,7 +338,9 @@ void M_BindBaseControls(void)
     M_BindVariable("key_run",                  &joy_1);
     M_BindVariable("key_console",              &joy_2);
     M_BindVariable("key_screenshots",          &joy_x);
+
 #else
+
     M_BindVariable("key_shoot",                &key_fire);
     M_BindVariable("key_open",                 &key_use);
     M_BindVariable("key_menu",                 &key_menu_activate);
@@ -353,8 +357,8 @@ void M_BindBaseControls(void)
     M_BindVariable("key_screenshots",          &key_menu_screenshot);
     M_BindVariable("key_strafe_left",          &key_strafeleft);
     M_BindVariable("key_strafe_right",         &key_straferight);
+
 #endif
-//    M_BindVariable("key_aiminghelp",           &joy_plus);
 }
 
 //

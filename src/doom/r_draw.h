@@ -36,49 +36,18 @@
 ========================================================================
 */
 
+
 #if !defined(__R_DRAW__)
 #define __R_DRAW__
 
+
 #include "i_video.h"
+
 
 #define R_ADDRESS(scrn, px, py) \
     (screens[scrn] + (viewwindowy + (py)) * SCREENWIDTH + (viewwindowx + (px)))
 
-extern lighttable_t     *dc_colormap;
-extern int              dc_x;
-extern int              dc_yl;
-extern int              dc_yh;
-extern fixed_t          dc_iscale;
-extern fixed_t          dc_texturemid;
-extern fixed_t          dc_texheight;
-extern fixed_t          dc_texturefrac;
-extern dboolean          dc_topsparkle;
-extern dboolean          dc_bottomsparkle;
-extern byte             *dc_blood;
-extern byte             *dc_colormask;
-extern byte             *dc_tranmap;
-extern int              dc_baseclip;
 
-// first pixel in a column
-extern byte             *dc_source;
-
-/*
-extern byte             *tinttab;
-extern byte             *tinttab25;
-extern byte             *tinttab33;
-extern byte             *tinttab40;
-extern byte             *tinttab50;
-extern byte             *tinttab66;
-extern byte             *tinttabred;
-extern byte             *tinttabredwhite1;
-extern byte             *tinttabredwhite2;
-extern byte             *tinttabgreen;
-extern byte             *tinttabblue;
-extern byte             *tinttabred33;
-extern byte             *tinttabredwhite50;
-extern byte             *tinttabgreen33;
-extern byte             *tinttabblue33;
-*/
 // The span blitting interface.
 // Hook in assembler or system specific BLT
 //  here.
@@ -131,8 +100,11 @@ void R_DrawBloodSplatColumn(void);
 void R_DrawSolidBloodSplatColumn(void);
 void R_DrawMegaSphereColumn(void);
 void R_DrawSolidMegaSphereColumn(void);
+void R_DrawChar(int x, int y, int scrn, int num);
+void R_VideoErase(unsigned int ofs, int count, int srcscrn, int destscrn);
+void R_InitBuffer(int width, int height);
 
-// The Spectre/Invisibility effect.
+// The Spectre / Invisibility effect.
 void R_DrawFuzzColumn(void);
 void R_DrawPausedFuzzColumn(void);
 void R_DrawFuzzColumns(int srcscrn, int destscrn);
@@ -140,35 +112,12 @@ void R_DrawPausedFuzzColumns(int srcscrn, int destscrn);
 
 // Draw with color translation tables,
 //  for player sprite rendering,
-//  Green/Red/Blue/Indigo shirts.
+//  Green / Red / Blue / Indigo shirts.
 void R_DrawTranslatedColumn(void);
 
-void R_DrawChar(int x, int y, int scrn, int num);
-
-void R_VideoErase(unsigned int ofs, int count, int srcscrn, int destscrn);
-
-extern int              ds_y;
-extern int              ds_x1;
-extern int              ds_x2;
-
-extern lighttable_t     *ds_colormap;
-
-extern fixed_t          ds_xfrac;
-extern fixed_t          ds_yfrac;
-extern fixed_t          ds_xstep;
-extern fixed_t          ds_ystep;
-
-// start of a 64*64 tile image
-extern byte             *ds_source;
-
-extern byte             *translationtables;
-extern byte             *dc_translation;
-
-// Span blitting for rows, floor/ceiling.
+// Span blitting for rows, floor / ceiling.
 // No Spectre effect needed.
 void R_DrawSpan(void);
-
-void R_InitBuffer(int width, int height);
 
 // Initialize color translation tables,
 //  for player rendering etc.
@@ -180,4 +129,42 @@ void R_FillBackScreen(int srcscrn, int destscrn);
 // If the view size is not full screen, draws a border around it.
 void R_DrawViewBorder(void);
 
+
+extern lighttable_t     *dc_colormap;
+extern lighttable_t     *ds_colormap;
+
+extern fixed_t          ds_xfrac;
+extern fixed_t          ds_yfrac;
+extern fixed_t          ds_xstep;
+extern fixed_t          ds_ystep;
+extern fixed_t          dc_iscale;
+extern fixed_t          dc_texturemid;
+extern fixed_t          dc_texheight;
+extern fixed_t          dc_texturefrac;
+
+extern int              dc_x;
+extern int              dc_yl;
+extern int              dc_yh;
+extern int              dc_baseclip;
+extern int              ds_y;
+extern int              ds_x1;
+extern int              ds_x2;
+
+
+extern dboolean         dc_topsparkle;
+extern dboolean         dc_bottomsparkle;
+
+// first pixel in a column
+extern byte             *dc_source;
+
+// start of a 64 * 64 tile image
+extern byte             *ds_source;
+
+extern byte             *dc_blood;
+extern byte             *dc_colormask;
+extern byte             *dc_tranmap;
+extern byte             *translationtables;
+extern byte             *dc_translation;
+
 #endif
+

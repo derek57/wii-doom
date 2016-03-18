@@ -1,9 +1,11 @@
 #ifndef _WPAD_H_
 #define _WPAD_H_
 
+
 #include <wiiuse/wpad.h>
 
-/* Prototypes */
+
+// Prototypes
 s32  Wpad_Init(void);
 
 dboolean Wpad_TimeButton(void);
@@ -14,6 +16,7 @@ dboolean Wpad_TimeButton(void);
 // Wiimote button presses. Note that the "HOME" button on the Wiimote
 // is mapped to the "SELECT" button on the Gamecube Ctrl. (wiiNinja 5/15/2009)
 u32 WaitButtons(void);
+
 
 #endif
 

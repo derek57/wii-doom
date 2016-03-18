@@ -32,14 +32,15 @@
 #define __V_MISC_H__
 
 
-//---------------------------------------------------------------------------
 //
 // Font
 //
 
+// the first font character
+#define V_FONTSTART     '!'
 
-#define V_FONTSTART     '!'    // the first font character
-#define V_FONTEND       (0x7f) // jff 2/16/98 '_' the last font characters
+// jff 2/16/98 '_' the last font characters
+#define V_FONTEND       (0x7f)
 
 // Calculate # of glyphs in font.
 #define V_FONTSIZE      (V_FONTEND - V_FONTSTART + 1) 
@@ -74,3 +75,4 @@ dboolean V_IsPrint(char c);
 
 
 #endif
+

@@ -45,6 +45,7 @@
 #define SOUND_LINK(name, priority, link_id, pitch, volume) \
     { NULL, name, priority, &S_sfx[link_id], pitch, volume, 0, 0, -1, NULL }
 
+
 musicinfo_t S_music[] =
 {
     MUSIC(NULL),
@@ -118,14 +119,13 @@ musicinfo_t S_music[] =
     MUSIC("credit")
 };
 
-
 //
 // Information about all the sfx
 //
 
 sfxinfo_t S_sfx[] =
 {
-  // S_sfx[0] needs to be a dummy for odd reasons.
+    // S_sfx[0] needs to be a dummy for odd reasons.
     SOUND("none",     0),
     SOUND("pistol",  64),
     SOUND("shotgn",  64),
@@ -246,14 +246,23 @@ sfxinfo_t S_sfx[] =
     SOUND("splsh7",  60),
     SOUND("splsh8",  60),
     SOUND("splsh9",  60),
-    SOUND("burn",    10), // landing in slime
-    SOUND("gloop",   10), // landing in water
+
+    // landing in slime
+    SOUND("burn",    10),
+
+    // landing in water
+    SOUND("gloop",   10),
+
     SOUND("step0",   64),
     SOUND("step1",   64),
     SOUND("step2",   64),
     SOUND("step3",   64),
-    SOUND("water",   96), // walking inside water
-    SOUND("lava",    96), // walking inside slime
+
+    // walking inside water
+    SOUND("water",   96),
+
+    // walking inside slime
+    SOUND("lava",    96),
 
     // [crispy] play DSSECRET if available
     SOUND("secret",  60),
@@ -268,7 +277,10 @@ sfxinfo_t S_sfx[] =
     SOUND("dgpain",  96),
 
     SOUND("eefly",   96),
-    SOUND("muck",    96),  // walking inside sludge
+
+    // walking inside sludge
+    SOUND("muck",    96),
+
     SOUND("squish",  96),
     SOUND("ric1",    96),
     SOUND("ric2",    96),

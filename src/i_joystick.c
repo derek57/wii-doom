@@ -32,6 +32,7 @@
  *-----------------------------------------------------------------------------
  */
 
+
 #ifdef WII
 #include <math.h>
 #include <SDL/SDL.h>
@@ -91,8 +92,8 @@ void I_UpdateJoystick(void)
     btn_plus  = 0;
     btn_minus = 0;
 
-    //Classic Controller
-    if(data->exp.type == WPAD_EXP_CLASSIC)
+    // Classic Controller
+    if (data->exp.type == WPAD_EXP_CLASSIC)
     {  
         Sint16 axis_x, axis_y;
 
@@ -105,11 +106,14 @@ void I_UpdateJoystick(void)
 
         int max = data->exp.classic.ljs.max.x;
 
-        if (nun_x < center - ((center - min) * 0.1f)) //Left
+        // Left
+        if (nun_x < center - ((center - min) * 0.1f))
             axis_x = (1.0f * center - nun_x) / (center - min) * -50.0f;
-        else if (nun_x > center + ((max - center) * 0.1f)) //Right
+        // Right
+        else if (nun_x > center + ((max - center) * 0.1f))
             axis_x = (1.0f * nun_x - center) / (max - center) * 50.0f;
-        else //No stick X movement
+        // No stick X movement
+        else
             axis_x = 0;
 
         center = data->exp.classic.ljs.center.y;
@@ -118,11 +122,14 @@ void I_UpdateJoystick(void)
 
         max = data->exp.classic.ljs.max.y;
 
-        if (nun_y < center - ((center - min) * 0.1f))//Up
+        // Up
+        if (nun_y < center - ((center - min) * 0.1f))
             axis_y = (1.0f * center - nun_y) / (center - min) * -50.0f;
-        else if (nun_y > center + ((max - center) * 0.1f))//Down
+        // Down
+        else if (nun_y > center + ((max - center) * 0.1f))
             axis_y = (1.0f * nun_y - center) / (max - center) * 50.0f;
-        else//No stick Y movement
+        // No stick Y movement
+        else
             axis_y = 0;
 
         // For some strange reason, the home button is detected
@@ -132,55 +139,54 @@ void I_UpdateJoystick(void)
         // interested in tracking it down. It does pretty much what
         // I would have it do anyway.
 
-        //Use/Open/Select
+        // Use / Open / Select
         if (data->btns_h & WPAD_CLASSIC_BUTTON_A)
             btn_d = 1;
 
-        //Fire
+        // Fire
         if (data->btns_h & WPAD_CLASSIC_BUTTON_FULL_R)
             btn_b = 1;
 
-        //Map
+        // Map
         if (data->btns_h & WPAD_CLASSIC_BUTTON_PLUS)
             btn_1 = 1;
 
-        //Run                // USE
+        // Run
         if (data->btns_h & WPAD_CLASSIC_BUTTON_FULL_L)
-            btn_a = 1;        // a        original: z
+            btn_a = 1;
 
-        //Automap follow        // MAIN MENU
+        // Automap follow
         if (data->btns_h & WPAD_CLASSIC_BUTTON_MINUS)
-            btn_h = 1;        // h        original: 1
+            btn_h = 1;
 
-        //No idea ....
+        // No idea ....
         if (data->btns_h & WPAD_CLASSIC_BUTTON_B)
             btn_2 = 1;
 
-        //Left Weapon Cycle / Pan Map
+        // Left Weapon Cycle / Pan Map
         if (data->btns_h & WPAD_CLASSIC_BUTTON_LEFT)
             btn_l = 1;
 
-        //Pan map        // AUTOMAP
+        // Pan map
         if (data->btns_h & WPAD_CLASSIC_BUTTON_DOWN)
-            btn_c = 1;        // c        original: d
+            btn_c = 1;
 
-        //Right Weapon Cycle / Pan Map
+        // Right Weapon Cycle / Pan Map
         if (data->btns_h & WPAD_CLASSIC_BUTTON_RIGHT)
-            btn_u = 1;        // 0
+            btn_u = 1;
 
-        //Pan Map        // Weapon Cycle Right
         if (data->btns_h & WPAD_CLASSIC_BUTTON_UP)
-            btn_r = 1;        // r        original: u
+            btn_r = 1;
 
-        //Map zoom in
+        // Map zoom in
         if (data->btns_h & WPAD_CLASSIC_BUTTON_ZR)
             btn_p = 1;
 
-        //Map Zoom Out
+        // Map Zoom Out
         if (data->btns_h & WPAD_CLASSIC_BUTTON_ZL)
             btn_m = 1;
 
-        //Escape
+        // Escape
         if (data->btns_h & WPAD_CLASSIC_BUTTON_HOME)
             btn_z = 1;
 
@@ -219,7 +225,7 @@ void I_UpdateJoystick(void)
         ev.data2 = axis_x; 
         ev.data3 = axis_y;
 
-        //For turning
+        // For turning
         nun_x = data->exp.classic.rjs.pos.x;
         nun_y = data->exp.classic.rjs.pos.y;
 
@@ -229,11 +235,14 @@ void I_UpdateJoystick(void)
 
         max = data->exp.classic.rjs.max.x;
 
-        if (nun_x < center - ((center - min) * 0.1f)) //Left
+        // Left
+        if (nun_x < center - ((center - min) * 0.1f))
             axis_x = (1.0f * center - nun_x) / (center - min) * -130.0f;
-        else if (nun_x > center + ((max - center) * 0.1f)) //Right
+        // Right
+        else if (nun_x > center + ((max - center) * 0.1f))
             axis_x = (1.0f * nun_x - center) / (max - center) * 130.0f;
-        else //No stick X movement
+        // No stick X movement
+        else
             axis_x = 0;
 
         center = data->exp.classic.rjs.center.y;
@@ -242,18 +251,21 @@ void I_UpdateJoystick(void)
 
         max = data->exp.classic.rjs.max.y;
 
-        if (nun_y < center - ((center - min) * 0.1f))//Up
+        // Up
+        if (nun_y < center - ((center - min) * 0.1f))
             axis_y = (1.0f * center - nun_y) / (center - min) * -130.0f;
-        else if (nun_y > center + ((max - center) * 0.1f))//Down
+        // Down
+        else if (nun_y > center + ((max - center) * 0.1f))
             axis_y = (1.0f * nun_y - center) / (max - center) * 130.0f;
-        else//No stick Y movement
+        // No stick Y movement
+        else
             axis_y = 0;
     
         ev.data4 = axis_x;
         ev.data5 = axis_y;
     }
-    //End Classic Controller
 
+    // End Classic Controller
     D_PostEvent(&ev);
 }
 #endif

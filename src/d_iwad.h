@@ -19,7 +19,9 @@
 #ifndef __D_IWAD__
 #define __D_IWAD__
 
+
 #include "doom/doomdef.h"
+
 
 #define IWAD_MASK_DOOM    ((1 << doom)           \
                          | (1 << doom2)          \
@@ -28,21 +30,25 @@
                          | (1 << pack_chex)      \
                          | (1 << pack_hacx))
 
+
 typedef struct
 {
     char *name;
     GameMission_t mission;
     GameMode_t mode;
     char *description;
+
 } iwad_t;
+
+const iwad_t **D_FindAllIWADs(int mask);
 
 char *D_FindWADByName(char *filename);
 char *D_TryFindWADByName(char *filename);
 char *D_FindIWAD(int mask, GameMission_t *mission);
-const iwad_t **D_FindAllIWADs(int mask);
 char *D_SaveGameIWADName(GameMission_t gamemission);
 char *D_SuggestIWADName(GameMission_t mission, GameMode_t mode);
 char *D_SuggestGameName(GameMission_t mission, GameMode_t mode);
+
 void D_CheckCorrectIWAD(GameMission_t mission);
 
 #endif

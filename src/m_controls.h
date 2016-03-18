@@ -18,7 +18,10 @@
 #ifndef __M_CONTROLS_H__
 #define __M_CONTROLS_H__
 
- 
+
+void M_BindBaseControls(void);
+
+
 extern int key_up;
 extern int key_down;
 extern int key_left;
@@ -48,7 +51,6 @@ extern int key_map_mark;
 extern int key_map_clearmark;
 
 // menu keys:
-
 extern int key_menu_help;
 extern int key_menu_save;
 extern int key_menu_load;
@@ -110,7 +112,6 @@ extern int mousebaiming;
 extern int joybstrafeleft;
 extern int joybstraferight;
 
-void M_BindBaseControls(void);
 
-#endif /* #ifndef __M_CONTROLS_H__ */
+#endif // #ifndef __M_CONTROLS_H__
 

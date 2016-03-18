@@ -12,19 +12,22 @@
 // GNU General Public License for more details.
 //
 
+
 #include <stdlib.h>
 #include <string.h>
 
+#include "txt_desktop.h"
+#include "txt_gui.h"
 #include "txt_io.h"
 #include "txt_widget.h"
-#include "txt_gui.h"
-#include "txt_desktop.h"
+
 
 typedef struct
 {
     char *signal_name;
     TxtWidgetSignalFunc func;
     void *user_data;
+
 } txt_callback_t;
 
 struct txt_callback_table_s
@@ -60,8 +63,7 @@ void TXT_UnrefCallbackTable(txt_callback_table_t *table)
         int i;
 
         // No more references to this table
-
-        for (i=0; i<table->num_callbacks; ++i)
+        for (i = 0; i < table->num_callbacks; ++i)
         {
             free(table->callbacks[i].signal_name);
         }
@@ -80,22 +82,17 @@ void TXT_InitWidget(TXT_UNCAST_ARG(widget), txt_widget_class_t *widget_class)
     widget->parent = NULL;
 
     // Not focused until we hear otherwise.
-
     widget->focused = 0;
 
     // Visible by default.
-
     widget->visible = 1;
 
     // Align left by default
-
     widget->align = TXT_HORIZ_LEFT;
 }
 
-void TXT_SignalConnect(TXT_UNCAST_ARG(widget),
-                       const char *signal_name,
-                       TxtWidgetSignalFunc func, 
-                       void *user_data)
+void TXT_SignalConnect(TXT_UNCAST_ARG(widget), const char *signal_name,
+                       TxtWidgetSignalFunc func, void *user_data)
 {
     TXT_CAST_ARG(txt_widget_t, widget);
     txt_callback_table_t *table;
@@ -104,10 +101,10 @@ void TXT_SignalConnect(TXT_UNCAST_ARG(widget),
     table = widget->callback_table;
 
     // Add a new callback to the table
-
     table->callbacks 
             = realloc(table->callbacks,
                       sizeof(txt_callback_t) * (table->num_callbacks + 1));
+
     callback = &table->callbacks[table->num_callbacks];
     ++table->num_callbacks;
 
@@ -126,13 +123,11 @@ void TXT_EmitSignal(TXT_UNCAST_ARG(widget), const char *signal_name)
 
     // Don't destroy the table while we're searching through it
     // (one of the callbacks may destroy this window)
-
     TXT_RefCallbackTable(table);
 
     // Search the table for all callbacks with this name and invoke
     // the functions.
-
-    for (i=0; i<table->num_callbacks; ++i)
+    for (i = 0; i < table->num_callbacks; ++i)
     {
         if (!strcmp(table->callbacks[i].signal_name, signal_name))
         {
@@ -141,7 +136,6 @@ void TXT_EmitSignal(TXT_UNCAST_ARG(widget), const char *signal_name)
     }
 
     // Finished using the table
-
     TXT_UnrefCallbackTable(table);
 }
 
@@ -159,15 +153,12 @@ void TXT_DrawWidget(TXT_UNCAST_ARG(widget))
 
     // The drawing function might change the fg/bg colors,
     // so make sure we restore them after it's done.
-
     TXT_SaveColors(&colors);
 
     // For convenience...
-
     TXT_GotoXY(widget->x, widget->y);
 
     // Call drawer method
-
     widget->widget_class->drawer(widget);
 
     TXT_RestoreColors(&colors);
@@ -295,7 +286,6 @@ int TXT_HoveringOverWidget(TXT_UNCAST_ARG(widget))
     int x, y;
 
     // We can only be hovering over widgets in the active window.
-
     active_window = TXT_GetActiveWindow();
 
     if (active_window == NULL || !TXT_ContainsWidget(active_window, widget))
@@ -304,7 +294,6 @@ int TXT_HoveringOverWidget(TXT_UNCAST_ARG(widget))
     }
 
     // Is the mouse cursor within the bounds of the widget?
-
     TXT_GetMousePosition(&x, &y);
 
     return (x >= widget->x && x < widget->x + widget->w

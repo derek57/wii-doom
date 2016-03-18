@@ -34,11 +34,6 @@
 // animation states (closely tied to the sprites
 // used to represent them, unfortunately).
 #include "d_items.h"
-#include "p_pspr.h"
-
-// In addition, the player is just a special
-// case of the generic moving object/actor.
-#include "p_mobj.h"
 
 // Finally, for odd reasons, the player input
 // is buffered within the player data struct,
@@ -46,6 +41,12 @@
 #include "../d_ticcmd.h"
 
 #include "../net_defs.h"
+
+// In addition, the player is just a special
+// case of the generic moving object/actor.
+#include "p_mobj.h"
+
+#include "p_pspr.h"
 
 
 //
@@ -55,13 +56,14 @@ typedef enum
 {
     // Playing or camping.
     PST_LIVE,
+
     // Dead on the ground, view follows killer.
     PST_DEAD,
+
     // Ready to restart/respawn???
     PST_REBORN                
 
 } playerstate_t;
-
 
 //
 // Player internal flags, for cheats and debug.
@@ -70,8 +72,10 @@ typedef enum
 {
     // No clipping, walk through barriers.
     CF_NOCLIP            = 1,
+
     // No damage, no health loss.
     CF_GODMODE           = 2,
+
     // Not really a cheat just a debug aid.
     CF_NOMOMENTUM        = 4,
 
@@ -79,13 +83,12 @@ typedef enum
 
 } cheat_t;
 
-
 //
 // Extended player object info: player_t
 //
 typedef struct player_s
 {
-    mobj_t*              mo;
+    mobj_t               *mo;
     playerstate_t        playerstate;
     ticcmd_t             cmd;
 
@@ -93,10 +96,13 @@ typedef struct player_s
     //  including viewpoint bobbing during movement.
     // Focal origin above r.z
     fixed_t              viewz;
+
     // Base height above floor for viewz.
     fixed_t              viewheight;
+
     // Bob/squat speed.
     fixed_t              deltaviewheight;
+
     // bounded/scaled total momentum.
     fixed_t              bob;        
 
@@ -104,16 +110,18 @@ typedef struct player_s
     // mo->health is used during levels.
     int                  health;        
     int                  armorpoints;
+
     // Armor type is 0-2.
     int                  armortype;        
 
     // Power ups. invinc and invis are tic counters.
     int                  powers[NUMPOWERS];
     int                  cards[NUMCARDS];
-    dboolean              backpack;
+    dboolean             backpack;
     
     // Frags, kills of other players.
     int                  frags[MAXPLAYERS];
+
     weapontype_t         readyweapon;
     
     // Is wp_nochange if not changing.
@@ -140,8 +148,8 @@ typedef struct player_s
     int                  secretcount;
 
     // Hint messages.
-    char*                message;
-    char*                messages[3];
+    char                 *message;
+    char                 *messages[3];
     int                  message_count;
     
     // For screen flashing (red or bright).
@@ -149,7 +157,7 @@ typedef struct player_s
     int                  bonuscount;
 
     // Who did damage (NULL for floors/ceilings).
-    mobj_t*              attacker;
+    mobj_t               *attacker;
     
     // So gun flashes light up areas.
     int                  extralight;
@@ -166,7 +174,7 @@ typedef struct player_s
     pspdef_t             psprites[NUMPSPRITES];
 
     // True if secret level has been done.
-    dboolean              didsecret;        
+    dboolean             didsecret;        
 
     // delay the next jump for a moment
     unsigned int         jumpTics;
@@ -174,10 +182,14 @@ typedef struct player_s
     // total time the player's been playing
     unsigned int         worldTimer;
 
+    // freelook angle
     int                  lookdir;
 
-    dboolean              centering;
+    // freelook = 0
+    dboolean             centering;
 
+    // changes freelook angle for a short time
+    // affected by gun shots
     int                  recoilpitch;
 
     int                  flyheight;
@@ -186,18 +198,14 @@ typedef struct player_s
     //      Used to interpolate between camera positions.
     angle_t              oldviewz;
 
+    // beta mode extras
     int                  item;
-
     int                  score;
-
     int                  lifes;
-
     int                  extra_lifes;
-
     int                  nextextra;
 
     int                  neededcard;
-
     int                  neededcardflash;
 
     // [RH] Used for falling damage
@@ -207,8 +215,10 @@ typedef struct player_s
     // mo->momx and mo->momy represent true momenta experienced by player.
     // This only represents the thrust that the player applies himself.
     // This avoids anomolies with such things as Boom ice and conveyors.
-    fixed_t              momx, momy;
+    fixed_t              momx;
+    fixed_t              momy;
 
+    // DOOM Retro???
     weapontype_t         preferredshotgun;
     int                  shotguns;
     weapontype_t         fistorchainsaw;
@@ -229,14 +239,14 @@ typedef struct player_s
 
 } player_t;
 
-
 //
 // INTERMISSION
 // Structure passed e.g. to WI_Start(wb)
 //
 typedef struct
 {
-    dboolean              in;        // whether the player is in game
+    // whether the player is in game
+    dboolean             in;
     
     // Player stats, kills, collected items etc.
     int                  skills;
@@ -244,17 +254,22 @@ typedef struct
     int                  ssecret;
     int                  stime; 
     int                  frags[4];
-    int                  score;        // current score on entry, modified on return
-    int                  bonus;        // current bonus on entry, modified on return
+
+    // current score on entry, modified on return
+    int                  score;
+
+    // current bonus on entry, modified on return
+    int                  bonus;
   
 } wbplayerstruct_t;
 
 typedef struct
 {
-    int                  epsd;        // episode # (0-2)
+    // episode # (0-2)
+    int                  epsd;
 
     // if true, splash the secret level
-    dboolean              didsecret;
+    dboolean             didsecret;
     
     // previous and next levels, origin 0
     int                  last;
@@ -275,5 +290,5 @@ typedef struct
 
 } wbstartstruct_t;
 
-
 #endif
+

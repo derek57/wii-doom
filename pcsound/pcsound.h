@@ -15,24 +15,24 @@
 //    PC speaker interface.
 //
 
+
 #ifndef PCSOUND_H
 #define PCSOUND_H
+
 
 typedef void (*pcsound_callback_func)(int *duration, int *frequency);
 
 // Initialise the PC speaker subsystem.  The given function is called
 // periodically to request more sound data to play.
-
 int PCSound_Init(pcsound_callback_func callback_func);
 
 // Shut down the PC speaker subsystem.
-
 void PCSound_Shutdown(void);
 
 // Set the preferred output sample rate when emulating a PC speaker. 
 // This must be called before PCSound_Init.
-
 void PCSound_SetSampleRate(int rate);
 
-#endif /* #ifndef PCSOUND_H */
+
+#endif // #ifndef PCSOUND_H
 

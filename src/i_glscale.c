@@ -85,34 +85,43 @@
 // Maximum scale factor for the intermediate scaled texture. A value
 // of 4 is pretty much perfect; you can try larger values but it's
 // a case of diminishing returns.
-int gl_max_scale = 4;
+int                    gl_max_scale = 4;
 
 // Simulate fake scanlines?
-static dboolean scanline_mode = false;
+static dboolean        scanline_mode = false;
 
 // Screen dimensions:
-static int screen_w, screen_h;
+static int             screen_w;
+static int             screen_h;
 
 // Size of the calculated "window" of the screen that shows content:
 // at a 4:3 mode these are equal to screen_w, screen_h.
-static int window_w, window_h;
+static int             window_w;
+static int             window_h;
 
-// The texture that "receives" the original 320x200 screen contents:
-static GLuint unscaled_texture = 0;
-static unsigned int *unscaled_data = NULL;
+static int             scaled_w;
+static int             scaled_h;
 
 // The "scaled" version of the texture:
-static GLuint scaled_framebuffer = 0;
-static GLuint scaled_texture = 0;
-static int scaled_w, scaled_h;
+static GLuint          scaled_framebuffer = 0;
+static GLuint          scaled_texture = 0;
+
+// The texture that "receives" the original 320x200 screen contents:
+static GLuint          unscaled_texture = 0;
+
+static unsigned int    *unscaled_data = NULL;
+
 
 // GL function pointers used for scale code.
 // We load the function pointers at runtime to avoid a hard dependency
 // on the OpenGL library.
+static const GLubyte *(*_glGetString)(GLenum);
+
+static GLenum (*_glCheckFramebufferStatus)(GLenum);
+
 static void (*_glBegin)(GLenum);
 static void (*_glBindFramebuffer)(GLenum, GLuint);
 static void (*_glBindTexture)(GLenum, GLuint);
-static GLenum (*_glCheckFramebufferStatus)(GLenum);
 static void (*_glClear)(GLbitfield);
 static void (*_glClearColor)(GLclampf, GLclampf, GLclampf, GLclampf);
 static void (*_glEnable)(GLenum);
@@ -120,18 +129,17 @@ static void (*_glEnd)(void);
 static void (*_glFramebufferTexture)(GLenum, GLenum, GLuint, GLint);
 static void (*_glGenFramebuffers)(GLsizei, GLuint *);
 static void (*_glGenTextures)(GLsizei, GLuint *);
-static const GLubyte *(*_glGetString)(GLenum);
 static void (*_glGetIntegerv)(GLenum, GLint *);
 static void (*_glLoadIdentity)(void);
 static void (*_glMatrixMode)(GLenum);
 static void (*_glShadeModel)(GLenum);
 static void (*_glTexCoord2f)(GLfloat, GLfloat);
-static void (*_glTexImage2D)(GLenum, GLint, GLint, GLsizei, GLsizei, GLint,
-                             GLenum, GLenum, const GLvoid *);
 static void (*_glTexParameteri)(GLenum, GLenum, GLint);
 static void (*_glVertex2f)(GLfloat, GLfloat);
 static void (*_glViewport)(GLint, GLint, GLsizei, GLsizei);
 static void (*_glColor3f)(GLfloat, GLfloat, GLfloat);
+static void (*_glTexImage2D)(GLenum, GLint, GLint, GLsizei, GLsizei, GLint,
+                             GLenum, GLenum, const GLvoid *);
 
 
 static void *GetGLFunction(char *name)
@@ -204,7 +212,7 @@ static dboolean HaveExtension(char *extname)
         if (*p == ' ' || *p == '\0')
         {
             if (p - last_ext_start == strlen(extname)
-             && !strncmp((char *) last_ext_start, extname, strlen(extname)))
+                && !strncmp((char *) last_ext_start, extname, strlen(extname)))
             {
                 return true;
             }
@@ -304,8 +312,12 @@ static void CalculateWindowSize(void)
 
     if (scanline_mode)
     {
-        scaled_w = SCREENWIDTH * 5;   // 1600
-        scaled_h = SCREENHEIGHT * 6;  // x1200
+        // 1600
+        scaled_w = SCREENWIDTH * 5;
+
+        // x1200
+        scaled_h = SCREENHEIGHT * 6;
+
         return;
     }
 
@@ -325,10 +337,12 @@ static dboolean CreateTextures(void)
     {
         unscaled_data = malloc(SCREENWIDTH * SCREENHEIGHT * sizeof(int));
     }
+
     if (unscaled_texture == 0)
     {
         _glGenTextures(1, &unscaled_texture);
     }
+
     _glBindTexture(GL_TEXTURE_2D, unscaled_texture);
     _glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     _glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -363,6 +377,7 @@ static dboolean SetupFramebuffer(void)
     {
         _glGenFramebuffers(1, &scaled_framebuffer);
     }
+
     _glBindFramebuffer(GL_FRAMEBUFFER, scaled_framebuffer);
 
     // Render unscaled texture into scaled texture:
@@ -390,6 +405,7 @@ static void SetInputData(byte *screen, SDL_Color *palette)
 
     // TODO: Maybe support GL_RGB as well as GL_RGBA?
     s = (byte *) unscaled_data;
+
     for (i = 0; i < SCREENWIDTH * SCREENHEIGHT; ++i)
     {
         c = &palette[screen[i]];
@@ -416,7 +432,7 @@ static void DrawScanlines(void)
     // behavior of the software code.
     for (y = 0; y < SCREENHEIGHT * 2; ++y)
     {
-        y1 = (float) y / SCREENHEIGHT - 1.0;
+        y1 = (float)y / SCREENHEIGHT - 1.0;
         _glBegin(GL_LINES);
         _glVertex2f(-1, y1);
         _glVertex2f(1, y1);
@@ -438,10 +454,14 @@ static void DrawUnscaledToScaled(void)
     _glBindTexture(GL_TEXTURE_2D, unscaled_texture);
 
     _glBegin(GL_QUADS);
-    _glTexCoord2f(0, 1); _glVertex2f(-1, 1);
-    _glTexCoord2f(1, 1); _glVertex2f(1, 1);
-    _glTexCoord2f(1, 0); _glVertex2f(1, -1);
-    _glTexCoord2f(0, 0); _glVertex2f(-1, -1);
+    _glTexCoord2f(0, 1);
+    _glVertex2f(-1, 1);
+    _glTexCoord2f(1, 1);
+    _glVertex2f(1, 1);
+    _glTexCoord2f(1, 0);
+    _glVertex2f(1, -1);
+    _glTexCoord2f(0, 0);
+    _glVertex2f(-1, -1);
     _glEnd();
 
     // Scanline hack.
@@ -466,14 +486,18 @@ static void DrawScreen(void)
     _glViewport(0, 0, screen_w, screen_h);
     _glBindTexture(GL_TEXTURE_2D, scaled_texture);
 
-    w = (float) window_w / screen_w;
-    h = (float) window_h / screen_h;
+    w = (float)window_w / screen_w;
+    h = (float)window_h / screen_h;
 
     _glBegin(GL_QUADS);
-    _glTexCoord2f(0, 0); _glVertex2f(-w, h);
-    _glTexCoord2f(1, 0); _glVertex2f(w, h);
-    _glTexCoord2f(1, 1); _glVertex2f(w, -h);
-    _glTexCoord2f(0, 1); _glVertex2f(-w, -h);
+    _glTexCoord2f(0, 0);
+    _glVertex2f(-w, h);
+    _glTexCoord2f(1, 0);
+    _glVertex2f(w, h);
+    _glTexCoord2f(1, 1);
+    _glVertex2f(w, -h);
+    _glTexCoord2f(0, 1);
+    _glVertex2f(-w, -h);
     _glEnd();
 }
 
@@ -502,8 +526,7 @@ dboolean I_GL_InitScale(int w, int h)
     // Scanline hack. Don't enable at less than half the 1600x1200
     // intermediate buffer size or horrible aliasing effects will
     // occur.
-    scanline_mode = /*M_ParmExists("-scanline")
-                 &&*/ h > (SCREENHEIGHT * 3);
+    scanline_mode = h > (SCREENHEIGHT * 3);
 
     _glEnable(GL_TEXTURE_2D);
     _glShadeModel(GL_SMOOTH);
@@ -512,6 +535,7 @@ dboolean I_GL_InitScale(int w, int h)
     screen_w = w;
     screen_h = h;
     CalculateWindowSize();
+
     if (!CreateTextures() || !SetupFramebuffer())
     {
         return false;

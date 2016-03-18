@@ -33,8 +33,6 @@
 #include "m_fixed.h"
 
 
-
-
 //
 // FixedDiv, C version.
 //

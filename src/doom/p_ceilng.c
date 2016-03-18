@@ -99,8 +99,10 @@ void T_MoveCeiling(ceiling_t *ceiling)
                     case genCeilingChgT:
                     case genCeilingChg0:
                         ceiling->sector->special = ceiling->newspecial;
+
                         //jff 3/14/98 transfer old special field as well
                         ceiling->sector->oldspecial = ceiling->oldspecial;
+
                     case genCeilingChg:
                         ceiling->sector->ceilingpic = ceiling->texture;
                         P_RemoveActiveCeiling(ceiling);
@@ -119,6 +121,7 @@ void T_MoveCeiling(ceiling_t *ceiling)
                         break;
                 }
             }
+
             break;
         
         case -1:
@@ -151,8 +154,10 @@ void T_MoveCeiling(ceiling_t *ceiling)
                     case genCrusher:
                         if (ceiling->oldspeed < CEILSPEED * 3)
                             ceiling->speed = ceiling->oldspeed;
+
                         // jff 2/22/98 make it go back up!
                         ceiling->direction = 1;
+
                         break;
 
                     case silentCrushAndRaise:
@@ -168,8 +173,10 @@ void T_MoveCeiling(ceiling_t *ceiling)
                     case genCeilingChgT:
                     case genCeilingChg0:
                         ceiling->sector->special = ceiling->newspecial;
+
                         //jff add to fix bug in special transfers from changes
                         ceiling->sector->oldspecial = ceiling->oldspecial;
+
                     case genCeilingChg:
                         ceiling->sector->ceilingpic = ceiling->texture;
                         P_RemoveActiveCeiling(ceiling);
@@ -196,6 +203,7 @@ void T_MoveCeiling(ceiling_t *ceiling)
                     case genSilentCrusher:
                         if (ceiling->oldspeed < CEILSPEED * 3)
                             ceiling->speed = CEILSPEED / 8;
+
                         break;
 
                     case silentCrushAndRaise:
@@ -208,6 +216,7 @@ void T_MoveCeiling(ceiling_t *ceiling)
                         break;
                 }
             }
+
             break;
     }
 }
@@ -237,6 +246,7 @@ int EV_DoCeiling(line_t *line, ceiling_e type)
     while ((secnum = P_FindSectorFromLineTag(line, secnum)) >= 0)
     {
         sec = &sectors[secnum];
+
         if (P_SectorActive(ceiling_special, sec))
             continue;
         
@@ -266,8 +276,10 @@ int EV_DoCeiling(line_t *line, ceiling_e type)
             case lowerAndCrush:
             case lowerToFloor:
                 ceiling->bottomheight = sec->floorheight;
+
                 if (type != lowerToFloor && !(gamemission == doom2 && gamemap == 4 && canmodify))
                     ceiling->bottomheight += 8 * FRACUNIT;
+
                 ceiling->direction = -1;
                 ceiling->speed = CEILSPEED;
                 break;
@@ -296,8 +308,10 @@ int EV_DoCeiling(line_t *line, ceiling_e type)
                 
         ceiling->tag = sec->tag;
         ceiling->type = type;
+
         P_AddActiveCeiling(ceiling);
     }
+
     return rtn;
 }
 
@@ -312,8 +326,10 @@ void P_AddActiveCeiling(ceiling_t *ceiling)
     list = malloc(sizeof(*list));
     list->ceiling = ceiling;
     ceiling->list = list;
+
     if ((list->next = activeceilings))
         list->next->prev = &list->next;
+
     list->prev = &activeceilings;
     activeceilings = list;
 }
@@ -328,8 +344,10 @@ void P_RemoveActiveCeiling(ceiling_t *ceiling)
 
     ceiling->sector->ceilingdata = NULL;
     P_RemoveThinker(&ceiling->thinker);
+
     if ((*list->prev = list->next))
         list->next->prev = list->prev;
+
     free(list);
 }
 
@@ -368,6 +386,7 @@ dboolean P_ActivateInStasisCeiling(line_t *line)
             result = true;
         }
     }
+
     return result;
 }
 
@@ -392,6 +411,7 @@ dboolean EV_CeilingCrushStop(line_t *line)
             result = true;
         }
     }
+
     return result;
 }
 

@@ -33,6 +33,7 @@
 #ifndef __D_STATE__
 #define __D_STATE__
 
+
 // We need globally shared data structures,
 //  for defining the global state variables.
 #include "doomdata.h"
@@ -45,12 +46,30 @@
 #include "../net_defs.h"
 
 
+// Convenience macro.
+// 'gamemission' can be equal to pack_chex or pack_hacx, but these are
+// just modified versions of doom and doom2, and should be interpreted
+// as the same most of the time.
+
+#define logical_gamemission   (gamemission == pack_chex ? doom :  \
+                              gamemission == pack_hacx ? doom2 : gamemission)
+
+// Player spawn spots for deathmatch.
+#define MAX_DM_STARTS         10
+
+
 // ------------------------
 // Command line parameters.
 //
-extern  dboolean         nomonsters;      // checkparm of -nomonsters
-extern  dboolean         respawnparm;     // checkparm of -respawn
-extern  dboolean         fastparm;        // checkparm of -fast
+
+// checkparm of -nomonsters
+extern  dboolean         nomonsters;
+
+// checkparm of -respawn
+extern  dboolean         respawnparm;
+
+// checkparm of -fast
+extern  dboolean         fastparm;
 
 // MAIN DEVPARM
 extern  dboolean         devparm;
@@ -76,57 +95,15 @@ extern  dboolean         devparm_tnt;
 extern  dboolean         devparm_plutonia;
 extern  dboolean         devparm_chex;
 extern  dboolean         devparm_hacx;
-
-
-// -----------------------------------------------------
-// Game Mode - identify IWAD as shareware, retail etc.
-//
-extern  GameMode_t       gamemode;
-extern  GameMission_t    gamemission;
-extern  GameVersion_t    gameversion;
-extern  char             *gamedescription;
+extern  dboolean         autostart;
 
 // If true, we're using one of the mangled BFG edition IWADs.
 extern  dboolean         bfgedition;
 extern  dboolean         nerve_pwad;
 extern  dboolean         master_pwad;
 
-// Convenience macro.
-// 'gamemission' can be equal to pack_chex or pack_hacx, but these are
-// just modified versions of doom and doom2, and should be interpreted
-// as the same most of the time.
-
-#define logical_gamemission                             \
-    (gamemission == pack_chex ? doom :                  \
-     gamemission == pack_hacx ? doom2 : gamemission)
-
 // Set if homebrew PWAD stuff has been added.
 extern  dboolean         modifiedgame;
-
-
-// -------------------------------------------
-// Selected skill type, map etc.
-//
-
-// Defaults for menu, methinks.
-extern  skill_t          startskill;
-extern  int              startepisode;
-extern  int              startmap;
-
-// Savegame slot to load on startup.  This is the value provided to
-// the -loadgame option.  If this has not been provided, this is -1.
-
-extern  int              startloadgame;
-
-extern  dboolean         autostart;
-
-// Selected by user. 
-extern  skill_t          gameskill;
-extern  int              gameepisode;
-extern  int              gamemap;
-
-// If non-zero, exit the level after this number of minutes
-extern  int              timelimit;
 
 // Nightmare mode flag, single player.
 extern  dboolean         respawnmonsters;
@@ -134,33 +111,8 @@ extern  dboolean         respawnmonsters;
 // Netgame? Only true if >1 player.
 extern  dboolean         netgame;
 
-// 0=Cooperative; 1=Deathmatch; 2=Altdeath
+// 0 = Cooperative; 1 = Deathmatch; 2 = Altdeath
 extern  dboolean         deathmatch;
-
-// -------------------------
-// Internal parameters for sound rendering.
-// These have been taken from the DOS version,
-//  but are not (yet) supported with Linux
-//  (e.g. no sound volume adjustment with menu.
-
-// From m_menu.c:
-//  Sound FX volume has default, 0 - 15
-//  Music volume has default, 0 - 15
-// These are multiplied by 8.
-extern  int              sfxVolume;
-extern  int              musicVolume;
-
-// Current music/sfx card - index useless
-//  w/o a reference LUT in a sound module.
-// Ideally, this would use indices found
-//  in: /usr/include/linux/soundcard.h
-extern  int              snd_MusicDevice;
-extern  int              snd_SfxDevice;
-
-// Config file? Same disclaimer as above.
-extern  int              snd_DesiredMusicDevice;
-extern  int              snd_DesiredSfxDevice;
-
 
 // -------------------------
 // Status flags for refresh.
@@ -171,38 +123,19 @@ extern  int              snd_DesiredSfxDevice;
 //  status bar explicitely.
 extern  dboolean         statusbaractive;
 
-extern  dboolean         automapactive;        // In AutoMap mode?
-extern  dboolean         menuactive;        // Menu overlayed?
-extern  dboolean         paused;                // Game Pause?
+// In AutoMap mode?
+extern  dboolean         automapactive;
+
+// Menu overlayed?
+extern  dboolean         menuactive;
+
+// Game Pause?
+extern  dboolean         paused;
 
 
 extern  dboolean         viewactive;
 
 extern  dboolean         nodrawers;
-
-
-// This one is related to the 3-screen display mode.
-// ANG90 = left side, ANG270 = right
-extern  int              viewangleoffset;
-
-// Player taking events, and displaying.
-extern  int              consoleplayer;        
-extern  int              displayplayer;
-
-
-// -------------------------------------
-// Scores, rating.
-// Statistics on a given map, for intermission.
-//
-extern  int              totalkills;
-extern  int              totalitems;
-extern  int              totalsecret;
-
-// Timer, for scores.
-extern  int              levelstarttic;        // gametic at level start
-extern  int              leveltime;        // tics in game play for par
-
-
 
 // --------------------------------------
 // DEMO playback/recording related stuff.
@@ -217,89 +150,14 @@ extern  dboolean         demorecording;
 // Quit after playing a demo from cmdline.
 extern  dboolean         singledemo;        
 
-
-
-
-//?
-extern  gamestate_t      gamestate;
-
-
-
-
-
-
-//-----------------------------
-// Internal parameters, fixed.
-// These are set by the engine, and not changed
-//  according to user inputs. Partly load from
-//  WAD, partly set at startup time.
-
-
-
-// Bookkeeping on players - state.
-extern  player_t         players[MAXPLAYERS];
-
 // Alive? Disconnected?
 extern  dboolean         playeringame[MAXPLAYERS];
-
-
-// Player spawn spots for deathmatch.
-#define MAX_DM_STARTS    10
-extern  mapthing_t       deathmatchstarts[MAX_DM_STARTS];
-extern  mapthing_t*      deathmatch_p;
-
-// Player spawn spots.
-extern  mapthing_t       playerstarts[MAXPLAYERS];
-
-// Intermission stats.
-// Parameters for world map / intermission.
-extern  wbstartstruct_t  wminfo;        
-
-
-
-
-
-
-
-//-----------------------------------------
-// Internal parameters, used for engine.
-//
-
-// File handling stuff.
-extern  char *           savegamedir;
-extern  char             basedefault[1024];
 
 // if true, load all graphics at level load
 extern  dboolean         precache;
 
-
-// wipegamestate can be set to -1
-//  to force a wipe on the next draw
-extern  gamestate_t      wipegamestate;
-
-extern  int              mouseSensitivity;
-
-extern  int              bodyqueslot;
-
-
-
-// Needed to store the number of the dummy sky flat.
-// Used for rendering,
-//  as well as tracking projectiles etc.
-extern  int              skyflatnum;
-
-
-
-// Netgame stuff (buffers and pointers, i.e. indices).
-
-
-extern  int              rndindex;
-
-extern  ticcmd_t         *netcmds;
-
 extern  dboolean         am_overlay;
 extern  dboolean         memory_usage;
-
 extern  dboolean         remove_slime_trails;
 extern  dboolean         d_fixwiggle;
 extern  dboolean         lowhealth;
@@ -384,12 +242,8 @@ extern  dboolean         d_vsync;
 extern  dboolean         particle_sounds;
 extern  dboolean         map_secret_after;
 extern  dboolean         enable_autosave;
-/*
-extern  dboolean         nerve;
-extern  dboolean         chex;
-*/
+extern  dboolean         drawsplash;
 extern  dboolean         chexdeh;
-//extern  dboolean         hacx;
 extern  dboolean         BTSX;
 extern  dboolean         BTSXE1;
 extern  dboolean         BTSXE2;
@@ -398,9 +252,117 @@ extern  dboolean         BTSXE2B;
 extern  dboolean         BTSXE3;
 extern  dboolean         BTSXE3A;
 extern  dboolean         BTSXE3B;
+extern  dboolean         drawgrid;
+extern  dboolean         followplayer;
+extern  dboolean         show_stats;
+extern  dboolean         crosshair;
+extern  dboolean         use_vanilla_weapon_change;
+extern  dboolean         autoaim;
+extern  dboolean         detailLevel;
+extern  dboolean         showMessages;
+extern  dboolean         render_mode;
 
-extern  fixed_t          forwardmove; 
-extern  fixed_t          sidemove; 
+// -----------------------------------------------------
+// Game Mode - identify IWAD as shareware, retail etc.
+//
+extern  GameMode_t       gamemode;
+
+extern  GameMission_t    gamemission;
+
+extern  GameVersion_t    gameversion;
+
+extern  char             *gamedescription;
+
+//-----------------------------------------
+// Internal parameters, used for engine.
+//
+
+// File handling stuff.
+extern  char             *savegamedir;
+extern  char             basedefault[1024];
+
+// -------------------------------------------
+// Selected skill type, map etc.
+//
+
+// Defaults for menu, methinks.
+extern  skill_t          startskill;
+
+// Selected by user. 
+extern  skill_t          gameskill;
+
+extern  int              startepisode;
+extern  int              startmap;
+
+// Savegame slot to load on startup.  This is the value provided to
+// the -loadgame option.  If this has not been provided, this is -1.
+
+extern  int              startloadgame;
+extern  int              gameepisode;
+extern  int              gamemap;
+
+// If non-zero, exit the level after this number of minutes
+extern  int              timelimit;
+
+// -------------------------
+// Internal parameters for sound rendering.
+// These have been taken from the DOS version,
+//  but are not (yet) supported with Linux
+//  (e.g. no sound volume adjustment with menu.
+
+// From m_menu.c:
+//  Sound FX volume has default, 0 - 15
+//  Music volume has default, 0 - 15
+// These are multiplied by 8.
+extern  int              sfxVolume;
+extern  int              musicVolume;
+
+// Current music/sfx card - index useless
+//  w/o a reference LUT in a sound module.
+// Ideally, this would use indices found
+//  in: /usr/include/linux/soundcard.h
+extern  int              snd_MusicDevice;
+extern  int              snd_SfxDevice;
+
+// Config file? Same disclaimer as above.
+extern  int              snd_DesiredMusicDevice;
+extern  int              snd_DesiredSfxDevice;
+
+// This one is related to the 3-screen display mode.
+// ANG90 = left side, ANG270 = right
+extern  int              viewangleoffset;
+
+// Player taking events, and displaying.
+extern  int              consoleplayer;        
+extern  int              displayplayer;
+
+// -------------------------------------
+// Scores, rating.
+// Statistics on a given map, for intermission.
+//
+extern  int              totalkills;
+extern  int              totalitems;
+extern  int              totalsecret;
+
+// Timer, for scores.
+
+// gametic at level start
+extern  int              levelstarttic;
+
+// tics in game play for par
+extern  int              leveltime;
+
+extern  int              mouseSensitivity;
+
+extern  int              bodyqueslot;
+
+// Needed to store the number of the dummy sky flat.
+// Used for rendering,
+//  as well as tracking projectiles etc.
+extern  int              skyflatnum;
+
+// Netgame stuff (buffers and pointers, i.e. indices).
+extern  int              rndindex;
 
 extern  int              show_endoom;
 extern  int              display_fps;
@@ -408,22 +370,14 @@ extern  int              turnspeed;
 extern  int              d_colblood;
 extern  int              d_colblood2;
 extern  int              d_swirl;
-extern  int              autoaim;
 extern  int              background_type;
-extern  int              drawgrid;
-extern  int              followplayer;
-extern  int              show_stats;
 extern  int              timer_info;
-extern  int              showMessages;
-extern  int              use_vanilla_weapon_change;
 extern  int              chaingun_tics;
-extern  int              crosshair;
 extern  int              icontype;
 extern  int              wipe_type;
 extern  int              usegamma;
 extern  int              screenSize;
 extern  int              screenblocks;
-extern  int              detailLevel;
 extern  int              mouselook;
 extern  int              mspeed;
 extern  int              mus_engine;
@@ -434,38 +388,115 @@ extern  int              opl_type;
 extern  int              use_libsamplerate;
 extern  int              gore_amount;
 extern  int              font_shadow;
-extern  int              render_mode;
 extern  int              bloodsplat_particle;
 extern  int              bulletpuff_particle;
 extern  int              teleport_particle;
 extern  int              d_uncappedframerate;
 extern  int              d_spawnteleglit;
-extern  int              mapcolor_back;  // map background
-extern  int              mapcolor_grid;  // grid lines color
-extern  int              mapcolor_wall;  // normal 1s wall color
-extern  int              mapcolor_fchg;  // line at floor height change color
-extern  int              mapcolor_cchg;  // line at ceiling height change color
-extern  int              mapcolor_clsd;  // line at sector with floor=ceiling color
-extern  int              mapcolor_rkey;  // red key color
-extern  int              mapcolor_bkey;  // blue key color
-extern  int              mapcolor_ykey;  // yellow key color
-extern  int              mapcolor_rdor;  // red door color  (diff from keys to allow option)
-extern  int              mapcolor_bdor;  // blue door color (of enabling one but not other)
-extern  int              mapcolor_ydor;  // yellow door color
-extern  int              mapcolor_tele;  // teleporter line color
-extern  int              mapcolor_secr;  // secret sector boundary color
-extern  int              mapcolor_exit;  // jff 4/23/98 add exit line color
-extern  int              mapcolor_unsn;  // computer map unseen line color
-extern  int              mapcolor_flat;  // line with no floor/ceiling changes
-extern  int              mapcolor_sprt;  // general sprite color
-extern  int              mapcolor_item;  // item sprite color
-extern  int              mapcolor_enemy; // enemy sprite color
-extern  int              mapcolor_hair;  // crosshair color
-extern  int              mapcolor_sngl;  // single player arrow color
-extern  int              mapcolor_plyr;  // color for player arrow
 extern  int              map_grid_size;
 
-void A_MoreGibs(mobj_t* actor);
+// map background
+extern  int              mapcolor_back;
 
+// grid lines color
+extern  int              mapcolor_grid;
+
+// normal 1s wall color
+extern  int              mapcolor_wall;
+
+// line at floor height change color
+extern  int              mapcolor_fchg;
+
+// line at ceiling height change color
+extern  int              mapcolor_cchg;
+
+// line at sector with floor = ceiling color
+extern  int              mapcolor_clsd;
+
+// red key color
+extern  int              mapcolor_rkey;
+
+// blue key color
+extern  int              mapcolor_bkey;
+
+// yellow key color
+extern  int              mapcolor_ykey;
+
+// red door color (diff from keys to allow option)
+extern  int              mapcolor_rdor;
+
+// blue door color (of enabling one but not other)
+extern  int              mapcolor_bdor;
+
+// yellow door color
+extern  int              mapcolor_ydor;
+
+// teleporter line color
+extern  int              mapcolor_tele;
+
+// secret sector boundary color
+extern  int              mapcolor_secr;
+
+// jff 4/23/98 add exit line color
+extern  int              mapcolor_exit;
+
+// computer map unseen line color
+extern  int              mapcolor_unsn;
+
+// line with no floor / ceiling changes
+extern  int              mapcolor_flat;
+
+// general sprite color
+extern  int              mapcolor_sprt;
+
+// item sprite color
+extern  int              mapcolor_item;
+
+// enemy sprite color
+extern  int              mapcolor_enemy;
+
+// crosshair color
+extern  int              mapcolor_hair;
+
+// single player arrow color
+extern  int              mapcolor_sngl;
+
+// color for player arrow
+extern  int              mapcolor_plyr;
+
+// wipegamestate can be set to -1
+//  to force a wipe on the next draw
+extern  gamestate_t      wipegamestate;
+
+//?
+extern  gamestate_t      gamestate;
+
+//-----------------------------
+// Internal parameters, fixed.
+// These are set by the engine, and not changed
+//  according to user inputs. Partly load from
+//  WAD, partly set at startup time.
+
+// Bookkeeping on players - state.
+extern  player_t         players[MAXPLAYERS];
+
+extern  mapthing_t       deathmatchstarts[MAX_DM_STARTS];
+extern  mapthing_t       *deathmatch_p;
+
+// Player spawn spots.
+extern  mapthing_t       playerstarts[MAXPLAYERS];
+
+// Intermission stats.
+// Parameters for world map / intermission.
+extern  wbstartstruct_t  wminfo;        
+
+extern  ticcmd_t         *netcmds;
+
+extern  fixed_t          forwardmove; 
+extern  fixed_t          sidemove; 
+
+
+void A_MoreGibs(mobj_t *actor);
 
 #endif
+

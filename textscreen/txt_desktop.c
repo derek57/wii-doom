@@ -12,12 +12,12 @@
 // GNU General Public License for more details.
 //
 
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "doomkeys.h"
-
 #include "txt_desktop.h"
 #include "txt_gui.h"
 #include "txt_io.h"
@@ -25,23 +25,30 @@
 #include "txt_separator.h"
 #include "txt_window.h"
 
-#define HELP_KEY KEY_F1
-#define MAXWINDOWS 128
 
-//static char *desktop_title;
-static txt_window_t *all_windows[MAXWINDOWS];
-static int num_windows = 0;
+#define HELP_KEY       KEY_F1
+#define MAXWINDOWS     128
+
+
+static txt_window_t    *all_windows[MAXWINDOWS];
+
+static int             num_windows = 0;
+
 /*
-static int main_loop_running = 0;
+static int             main_loop_running = 0;
+
+static char            *desktop_title;
 
 static TxtIdleCallback periodic_callback = NULL;
-static void *periodic_callback_data;
-static unsigned int periodic_callback_period;
+
+static void            *periodic_callback_data;
+
+static unsigned int    periodic_callback_period;
 */
+
 void TXT_AddDesktopWindow(txt_window_t *win)
 {
     // Previously-top window loses focus:
-
     if (num_windows > 0)
     {
         TXT_SetWindowFocus(all_windows[num_windows - 1], 0);
@@ -51,7 +58,6 @@ void TXT_AddDesktopWindow(txt_window_t *win)
     ++num_windows;
 
     // New window gains focus:
-
     TXT_SetWindowFocus(win, 1);
 }
 
@@ -60,10 +66,9 @@ void TXT_RemoveDesktopWindow(txt_window_t *win)
     int from, to;
 
     // Window must lose focus if it's being removed:
-
     TXT_SetWindowFocus(win, 0);
 
-    for (from=0, to=0; from<num_windows; ++from)
+    for (from = 0, to = 0; from < num_windows; ++from)
     {
         if (all_windows[from] != win)
         {
@@ -75,7 +80,6 @@ void TXT_RemoveDesktopWindow(txt_window_t *win)
     num_windows = to;
 
     // Top window gains focus:
-
     if (num_windows > 0)
     {
         TXT_SetWindowFocus(all_windows[num_windows - 1], 1);
@@ -118,7 +122,6 @@ int TXT_RaiseWindow(txt_window_t *window)
     }
 
     // Window not in the list, or at the end of the list (top) already.
-
     return 0;
 }
 
@@ -144,7 +147,6 @@ int TXT_LowerWindow(txt_window_t *window)
     }
 
     // Window not in the list, or at the start of the list (bottom) already.
-
     return 0;
 }
 
@@ -157,20 +159,18 @@ static void DrawDesktopBackground(const char *title)
     screendata = TXT_GetScreenData();
     
     // Fill the screen with gradient characters
-
     p = screendata;
     
-    for (i=0; i<TXT_SCREEN_W * TXT_SCREEN_H; ++i)
+    for (i = 0; i < TXT_SCREEN_W * TXT_SCREEN_H; ++i)
     {
         *p++ = 0xb1;
         *p++ = TXT_COLOR_GREY | (TXT_COLOR_BLUE << 4);
     }
 
     // Draw the top and bottom banners
-
     p = screendata;
 
-    for (i=0; i<TXT_SCREEN_W; ++i)
+    for (i = 0; i < TXT_SCREEN_W; ++i)
     {
         *p++ = ' ';
         *p++ = TXT_COLOR_BLACK | (TXT_COLOR_GREY << 4);
@@ -178,14 +178,13 @@ static void DrawDesktopBackground(const char *title)
 
     p = screendata + (TXT_SCREEN_H - 1) * TXT_SCREEN_W * 2;
 
-    for (i=0; i<TXT_SCREEN_W; ++i)
+    for (i = 0; i < TXT_SCREEN_W; ++i)
     {
         *p++ = ' ';
         *p++ = TXT_COLOR_BLACK | (TXT_COLOR_GREY << 4);
     }
 
     // Print the title
-
     TXT_GotoXY(0, 0);
     TXT_FGColor(TXT_COLOR_BLACK);
     TXT_BGColor(TXT_COLOR_GREY, 0);
@@ -248,12 +247,13 @@ void TXT_DrawDesktop(void)
     DrawDesktopBackground(title);
 
     active_window = TXT_GetActiveWindow();
+
     if (active_window != NULL && active_window->help_url != NULL)
     {
         DrawHelpIndicator();
     }
 
-    for (i=0; i<num_windows; ++i)
+    for (i = 0; i < num_windows; ++i)
     {
         TXT_DrawWindow(all_windows[i]);
     }
@@ -279,21 +279,22 @@ static void DesktopInputEvent(int c)
             {
                 DesktopInputEvent(HELP_KEY);
             }
+
             break;
 
         case HELP_KEY:
             active_window = TXT_GetActiveWindow();
+
             if (active_window != NULL)
             {
                 TXT_OpenWindowHelpURL(active_window);
             }
+
             break;
 
         default:
             break;
     }
-
-
 }
 
 void TXT_DispatchEvents(void)
@@ -328,9 +329,9 @@ void TXT_DrawASCIITable(void)
     TXT_FGColor(TXT_COLOR_BRIGHT_WHITE);
     TXT_BGColor(TXT_COLOR_BLACK, 0);
 
-    for (y=0; y<16; ++y)
+    for (y = 0; y < 16; ++y)
     {
-        for (x=0; x<16; ++x)
+        for (x = 0; x < 16; ++x)
         {
             n = y * 16 + x;
 
@@ -339,7 +340,6 @@ void TXT_DrawASCIITable(void)
             TXT_Puts(buf);
 
             // Write the character directly to the screen memory buffer:
-
             screendata[(y * TXT_SCREEN_W + x * 5 + 3) * 2] = n;
         }
     }
@@ -347,8 +347,7 @@ void TXT_DrawASCIITable(void)
     TXT_UpdateScreen();
 }
 
-void TXT_SetPeriodicCallback(TxtIdleCallback callback,
-                             void *user_data,
+void TXT_SetPeriodicCallback(TxtIdleCallback callback, void *user_data,
                              unsigned int period)
 {
     periodic_callback = callback;
@@ -365,7 +364,6 @@ void TXT_GUIMainLoop(void)
         TXT_DispatchEvents();
 
         // After the last window is closed, exit the loop
-
         if (num_windows <= 0)
         {
             TXT_ExitMainLoop();
@@ -373,7 +371,7 @@ void TXT_GUIMainLoop(void)
         }
 
         TXT_DrawDesktop();
-//        TXT_DrawASCIITable();
+        //TXT_DrawASCIITable();
 
         if (periodic_callback == NULL)
         {

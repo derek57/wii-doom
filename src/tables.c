@@ -38,65 +38,8 @@
 //    
 //-----------------------------------------------------------------------------
 
+
 #include "tables.h"
-
-// to get a global angle from cartesian coordinates, the coordinates are
-// flipped until they are in the first octant of the coordinate system, then
-// the y (<=x) is scaled and divided by x to get a tangent (slope) value
-// which is looked up in the tantoangle[] table.  The +1 size is to handle
-// the case when x==y without additional checking.
-//
-// [nitr8] UNUSED
-//
-/*
-int SlopeDivVanilla(unsigned int num, unsigned int den)
-{    
-    if (den < 512)
-    {
-        return SLOPERANGE;
-    }
-    else
-    {
-        unsigned ans = (num << 3) / (den >> 8);
-
-        if (ans <= SLOPERANGE)
-        {
-            return ans;
-        }
-        else
-        {
-            return SLOPERANGE;
-        }
-    }
-}
-
-//
-// [crispy] catch SlopeDiv overflows, only used in rendering
-//
-int SlopeDivCrispy(unsigned int num, unsigned int den)
-{
-    // catch overflow for very big enumerators
-
-    if (den < 512)
-    {
-        return SLOPERANGE;
-    }
-    else
-    {
-        uint64_t ans = ((uint64_t) num << 3) / (den >> 8);
-
-        if (ans <= SLOPERANGE)
-        {
-            return (int) ans;
-        }
-        else
-        {
-            return SLOPERANGE;
-        }
-    }
-}
-*/
-//int (* SlopeDiv)(unsigned int num, unsigned int den) = SlopeDivVanilla;
 
 
 const fixed_t finetangent[4096] =
@@ -614,7 +557,6 @@ const fixed_t finetangent[4096] =
     5512368,5892567,6329090,6835455,7429880,8137527,8994149,10052327,
     11392683,13145455,15535599,18988036,24413316,34178904,56965752,170910304
 };
-
 
 const fixed_t finesine[10240] =
 {
@@ -1900,8 +1842,6 @@ const fixed_t finesine[10240] =
     65534,65535,65535,65535,65535,65535,65535,65535
 };
 
-const fixed_t *finecosine = &finesine[FINEANGLES/4];
-
 const angle_t tantoangle[2049] =
 {
     0,333772,667544,1001315,1335086,1668857,2002626,2336395,
@@ -2163,7 +2103,14 @@ const angle_t tantoangle[2049] =
     536870912
 };
 
+
+const fixed_t *finecosine = &finesine[FINEANGLES / 4];
+
+
 // Now where did these came from?
+//
+// [nitr8] UNUSED
+//
 /*
 const byte gammatable[5][256] =
 {
@@ -2263,5 +2210,57 @@ const byte gammatable[5][256] =
         247,248,248,249,249,250,250,251,251,252,252,253,254,254,255,255
     }
 };
+
+
+// to get a global angle from cartesian coordinates, the coordinates are
+// flipped until they are in the first octant of the coordinate system, then
+// the y (<=x) is scaled and divided by x to get a tangent (slope) value
+// which is looked up in the tantoangle[] table.  The +1 size is to handle
+// the case when x==y without additional checking.
+int SlopeDivVanilla(unsigned int num, unsigned int den)
+{    
+    if (den < 512)
+    {
+        return SLOPERANGE;
+    }
+    else
+    {
+        unsigned ans = (num << 3) / (den >> 8);
+
+        if (ans <= SLOPERANGE)
+        {
+            return ans;
+        }
+        else
+        {
+            return SLOPERANGE;
+        }
+    }
+}
+
+//
+// [crispy] catch SlopeDiv overflows, only used in rendering
+//
+int SlopeDivCrispy(unsigned int num, unsigned int den)
+{
+    // catch overflow for very big enumerators
+    if (den < 512)
+    {
+        return SLOPERANGE;
+    }
+    else
+    {
+        uint64_t ans = ((uint64_t) num << 3) / (den >> 8);
+
+        if (ans <= SLOPERANGE)
+        {
+            return (int) ans;
+        }
+        else
+        {
+            return SLOPERANGE;
+        }
+    }
+}
 */
 

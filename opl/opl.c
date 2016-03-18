@@ -34,11 +34,23 @@
 
 //#define OPL_DEBUG_TRACE
 
+
+typedef struct
+{
+    int finished;
+
+    SDL_mutex *mutex;
+    SDL_cond *cond;
+
+} delay_data_t;
+
+
 #if (defined(__i386__) || defined(__x86_64__)) && defined(HAVE_IOPERM)
 #ifndef WII
 extern opl_driver_t opl_linux_driver;
 #endif
 #endif
+
 extern opl_driver_t opl_sdl_driver;
 
 
@@ -56,7 +68,9 @@ static opl_driver_t *drivers[] =
 static opl_driver_t *driver = NULL;
 static int init_stage_reg_writes = 1;
 
+
 unsigned int opl_sample_rate = 22050;
+
 
 //
 // Init/shutdown code.
@@ -64,14 +78,12 @@ unsigned int opl_sample_rate = 22050;
 
 // Initialize the specified driver and detect an OPL chip.  Returns
 // true if an OPL is detected.
-
 static opl_init_result_t InitDriver(opl_driver_t *_driver,
                                     unsigned int port_base)
 {
     opl_init_result_t result1, result2;
 
     // Initialize the driver.
-
     if (!_driver->init_func(port_base))
     {
         return OPL_INIT_NONE;
@@ -81,12 +93,12 @@ static opl_init_result_t InitDriver(opl_driver_t *_driver,
     // to write to.  It doesn't mean there's an OPL chip there,
     // though.  Perform the detection sequence to make sure.
     // (it's done twice, like how Doom does it).
-
     driver = _driver;
     init_stage_reg_writes = 1;
 
     result1 = OPL_Detect();
     result2 = OPL_Detect();
+
     if (result1 == OPL_INIT_NONE || result2 == OPL_INIT_NONE)
     {
         C_Error("OPL_Init: No OPL detected using '%s' driver...", _driver->name);
@@ -97,7 +109,7 @@ static opl_init_result_t InitDriver(opl_driver_t *_driver,
 
     init_stage_reg_writes = 0;
 
-    if(opl_type)
+    if (opl_type)
         C_Output("OPL_Init: Using driver '%s' (OPL3).", driver->name);
     else
         C_Output("OPL_Init: Using driver '%s' (OPL2).", driver->name);
@@ -106,14 +118,14 @@ static opl_init_result_t InitDriver(opl_driver_t *_driver,
 }
 
 // Find a driver automatically by trying each in the list.
-
 static opl_init_result_t AutoSelectDriver(unsigned int port_base)
 {
     int i;
 
-    for (i=0; drivers[i] != NULL; ++i)
+    for (i = 0; drivers[i] != NULL; ++i)
     {
         opl_init_result_t result = InitDriver(drivers[i], port_base);
+
         if (result != OPL_INIT_NONE)
         {
             return result;
@@ -127,7 +139,6 @@ static opl_init_result_t AutoSelectDriver(unsigned int port_base)
 
 // Initialize the OPL library. Return value indicates type of OPL chip
 // detected, if any.
-
 opl_init_result_t OPL_Init(unsigned int port_base)
 {
     char *driver_name;
@@ -137,14 +148,14 @@ opl_init_result_t OPL_Init(unsigned int port_base)
     if (driver_name != NULL)
     {
         // Search the list until we find the driver with this name.
-
         int i;
 
-        for (i=0; drivers[i] != NULL; ++i)
+        for (i = 0; drivers[i] != NULL; ++i)
         {
             if (!strcmp(driver_name, drivers[i]->name))
             {
                 int result = InitDriver(drivers[i], port_base);
+
                 if (result)
                 {
                     return result;
@@ -168,7 +179,6 @@ opl_init_result_t OPL_Init(unsigned int port_base)
 }
 
 // Shut down the OPL library.
-
 void OPL_Shutdown(void)
 {
     if (driver != NULL)
@@ -179,7 +189,6 @@ void OPL_Shutdown(void)
 }
 
 // Set the sample rate used for software OPL emulation.
-
 void OPL_SetSampleRate(unsigned int rate)
 {
     opl_sample_rate = rate;
@@ -227,14 +236,12 @@ unsigned int OPL_ReadPort(opl_port_t port)
 // Higher-level functions, based on the lower-level functions above
 // (register write, etc).
 //
-
 unsigned int OPL_ReadStatus(void)
 {
     return OPL_ReadPort(OPL_REGISTER_PORT);
 }
 
 // Write an OPL register value
-
 void OPL_WriteRegister(int reg, int value)
 {
     int i;
@@ -250,13 +257,11 @@ void OPL_WriteRegister(int reg, int value)
 
     // For timing, read the register port six times after writing the
     // register number to cause the appropriate delay
-
-    for (i=0; i<6; ++i)
+    for (i = 0; i < 6; ++i)
     {
         // An oddity of the Doom OPL code: at startup initialization,
         // the spacing here is performed by reading from the register
         // port; after initialization, the data port is read, instead.
-
         if (init_stage_reg_writes)
         {
             OPL_ReadPort(OPL_REGISTER_PORT);
@@ -271,15 +276,13 @@ void OPL_WriteRegister(int reg, int value)
 
     // Read the register port 24 times after writing the value to
     // cause the appropriate delay
-
-    for (i=0; i<24; ++i)
+    for (i = 0; i < 24; ++i)
     {
         OPL_ReadStatus();
     }
 }
 
 // Detect the presence of an OPL chip
-
 opl_init_result_t OPL_Detect(void)
 {
     int result1, result2;
@@ -302,8 +305,7 @@ opl_init_result_t OPL_Detect(void)
 
     // Wait for 80 microseconds
     // This is how Doom does it:
-
-    for (i=0; i<200; ++i)
+    for (i = 0; i < 200; ++i)
     {
         OPL_ReadStatus();
     }
@@ -324,6 +326,7 @@ opl_init_result_t OPL_Detect(void)
     {
         result1 = OPL_ReadPort(OPL_REGISTER_PORT);
         result2 = OPL_ReadPort(OPL_REGISTER_PORT_OPL3);
+
         if (result1 == 0x00)
         {
             return OPL_INIT_OPL3;
@@ -340,14 +343,12 @@ opl_init_result_t OPL_Detect(void)
 }
 
 // Initialize registers on startup
-
 void OPL_InitRegisters(int opl3)
 {
     int r;
 
     // Initialize level registers
-
-    for (r=OPL_REGS_LEVEL; r <= OPL_REGS_LEVEL + OPL_NUM_OPERATORS; ++r)
+    for (r = OPL_REGS_LEVEL; r <= OPL_REGS_LEVEL + OPL_NUM_OPERATORS; ++r)
     {
         OPL_WriteRegister(r, 0x3f);
     }
@@ -356,15 +357,13 @@ void OPL_InitRegisters(int opl3)
     // These two loops write to registers that actually don't exist,
     // but this is what Doom does ...
     // Similarly, the <= is also intenational.
-
-    for (r=OPL_REGS_ATTACK; r <= OPL_REGS_WAVEFORM + OPL_NUM_OPERATORS; ++r)
+    for (r = OPL_REGS_ATTACK; r <= OPL_REGS_WAVEFORM + OPL_NUM_OPERATORS; ++r)
     {
         OPL_WriteRegister(r, 0x00);
     }
 
     // More registers ...
-
-    for (r=1; r < OPL_REGS_LEVEL; ++r)
+    for (r = 1; r < OPL_REGS_LEVEL; ++r)
     {
         OPL_WriteRegister(r, 0x00);
     }
@@ -372,8 +371,8 @@ void OPL_InitRegisters(int opl3)
     // Re-initialize the low registers:
 
     // Reset both timers and enable interrupts:
-    OPL_WriteRegister(OPL_REG_TIMER_CTRL,      0x60);
-    OPL_WriteRegister(OPL_REG_TIMER_CTRL,      0x80);
+    OPL_WriteRegister(OPL_REG_TIMER_CTRL, 0x60);
+    OPL_WriteRegister(OPL_REG_TIMER_CTRL, 0x80);
 
     // "Allow FM chips to control the waveform of each operator":
     OPL_WriteRegister(OPL_REG_WAVEFORM_ENABLE, 0x20);
@@ -383,8 +382,7 @@ void OPL_InitRegisters(int opl3)
         OPL_WriteRegister(OPL_REG_NEW, 0x01);
 
         // Initialize level registers
-
-        for (r=OPL_REGS_LEVEL; r <= OPL_REGS_LEVEL + OPL_NUM_OPERATORS; ++r)
+        for (r = OPL_REGS_LEVEL; r <= OPL_REGS_LEVEL + OPL_NUM_OPERATORS; ++r)
         {
             OPL_WriteRegister(r | 0x100, 0x3f);
         }
@@ -393,22 +391,20 @@ void OPL_InitRegisters(int opl3)
         // These two loops write to registers that actually don't exist,
         // but this is what Doom does ...
         // Similarly, the <= is also intenational.
-
-        for (r=OPL_REGS_ATTACK; r <= OPL_REGS_WAVEFORM + OPL_NUM_OPERATORS; ++r)
+        for (r = OPL_REGS_ATTACK; r <= OPL_REGS_WAVEFORM + OPL_NUM_OPERATORS; ++r)
         {
             OPL_WriteRegister(r | 0x100, 0x00);
         }
 
         // More registers ...
-
-        for (r=1; r < OPL_REGS_LEVEL; ++r)
+        for (r = 1; r < OPL_REGS_LEVEL; ++r)
         {
             OPL_WriteRegister(r | 0x100, 0x00);
         }
     }
 
     // Keyboard split point on (?)
-    OPL_WriteRegister(OPL_REG_FM_MODE,         0x40);
+    OPL_WriteRegister(OPL_REG_FM_MODE, 0x40);
 
     if (opl3)
     {
@@ -419,7 +415,6 @@ void OPL_InitRegisters(int opl3)
 //
 // Timer functions.
 //
-
 void OPL_SetCallback(uint64_t us, opl_callback_t callback, void *data)
 {
     if (driver != NULL)
@@ -452,14 +447,6 @@ void OPL_Unlock(void)
     }
 }
 
-typedef struct
-{
-    int finished;
-
-    SDL_mutex *mutex;
-    SDL_cond *cond;
-} delay_data_t;
-
 static void DelayCallback(void *_delay_data)
 {
     delay_data_t *delay_data = _delay_data;
@@ -483,7 +470,6 @@ void OPL_Delay(uint64_t us)
 
     // Create a callback that will signal this thread after the
     // specified time.
-
     delay_data.finished = 0;
     delay_data.mutex = SDL_CreateMutex();
     delay_data.cond = SDL_CreateCond();
@@ -491,7 +477,6 @@ void OPL_Delay(uint64_t us)
     OPL_SetCallback(us, DelayCallback, &delay_data);
 
     // Wait until the callback is invoked.
-
     SDL_LockMutex(delay_data.mutex);
 
     while (!delay_data.finished)
@@ -502,7 +487,6 @@ void OPL_Delay(uint64_t us)
     SDL_UnlockMutex(delay_data.mutex);
 
     // Clean up.
-
     SDL_DestroyMutex(delay_data.mutex);
     SDL_DestroyCond(delay_data.cond);
 }

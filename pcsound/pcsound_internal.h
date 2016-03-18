@@ -15,12 +15,16 @@
 //    PC speaker interface.
 //
 
+
 #ifndef PCSOUND_INTERNAL_H
 #define PCSOUND_INTERNAL_H
 
+
 #include "pcsound.h"
 
+
 #define PCSOUND_8253_FREQUENCY 1193280
+
 
 typedef struct pcsound_driver_s pcsound_driver_t;
 typedef int (*pcsound_init_func)(pcsound_callback_func callback);
@@ -33,7 +37,9 @@ struct pcsound_driver_s
     pcsound_shutdown_func shutdown_func;
 };
 
+
 extern int pcsound_sample_rate;
 
-#endif /* #ifndef PCSOUND_INTERNAL_H */
+
+#endif // #ifndef PCSOUND_INTERNAL_H
 

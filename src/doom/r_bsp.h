@@ -36,28 +36,35 @@
 ========================================================================
 */
 
+
 #if !defined(__R_BSP__)
 #define __R_BSP__
 
-extern seg_t            *curline;
-extern side_t           *sidedef;
-extern line_t           *linedef;
-extern sector_t         *frontsector;
-extern sector_t         *backsector;
-
-extern drawseg_t        *drawsegs;
-extern unsigned int     maxdrawsegs;
-
-extern drawseg_t        *ds_p;
 
 // BSP?
 void R_ClearClipSegs(void);
 void R_ClearDrawSegs(void);
-
 void R_RenderBSPNode(int bspnum);
+
 dboolean R_DoorClosed(void);
 
 // killough 4/13/98: fake floors/ceilings for deep water / fake ceilings:
 sector_t *R_FakeFlat(sector_t *, sector_t *, int *, int *, dboolean);
 
+
+extern seg_t            *curline;
+
+extern side_t           *sidedef;
+
+extern line_t           *linedef;
+
+extern sector_t         *frontsector;
+extern sector_t         *backsector;
+
+extern drawseg_t        *drawsegs;
+extern drawseg_t        *ds_p;
+
+extern unsigned int     maxdrawsegs;
+
 #endif
+

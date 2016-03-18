@@ -19,6 +19,7 @@
 
  */
 
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -26,19 +27,22 @@
 #include "d_player.h"
 #include "doomstat.h"
 #include "m_argv.h"
-
 #include "statdump.h"
+
+
+#define MAX_CAPTURES 32
+
 
 /* Par times for E1M1-E1M9. */
 static const int doom1_par_times[] =
 {
-    30, 75, 120, 90, 165, 180, 180, 30, 165,
+    30, 75, 120, 90, 165, 180, 180, 30, 165
 };
 
 /* Par times for MAP01-MAP09. */
 static const int doom2_par_times[] =
 {
-    30, 90, 120, 120, 90, 150, 120, 120, 270,
+    30, 90, 120, 120, 90, 150, 120, 120, 270
 };
 
 /* Player colors. */
@@ -49,19 +53,19 @@ static const char *player_colors[] =
 
 // Array of end-of-level statistics that have been captured.
 
-#define MAX_CAPTURES 32
 static wbstartstruct_t captured_stats[MAX_CAPTURES];
 static int num_captured_stats = 0;
 
 static GameMission_t discovered_gamemission = none;
 
+
 extern dboolean already_quitting;
 
-/* Try to work out whether this is a Doom 1 or Doom 2 game, by looking
- * at the episode and map, and the par times.  This is used to decide
- * how to format the level name.  Unfortunately, in some cases it is
- * impossible to determine whether this is Doom 1 or Doom 2. */
 
+// Try to work out whether this is a Doom 1 or Doom 2 game, by looking
+// at the episode and map, and the par times.  This is used to decide
+// how to format the level name.  Unfortunately, in some cases it is
+// impossible to determine whether this is Doom 1 or Doom 2.
 static void DiscoverGamemode(wbstartstruct_t *stats, int num_stats)
 {
     int i;
@@ -71,44 +75,41 @@ static void DiscoverGamemode(wbstartstruct_t *stats, int num_stats)
         return;
     }
 
-    for (i=0; i<num_stats; ++i)
+    for (i = 0; i < num_stats; ++i)
     {
         int partime;
         int level;
 
         level = stats[i].last;
 
-        /* If episode 2, 3 or 4, this is Doom 1. */
-
+        // If episode 2, 3 or 4, this is Doom 1.
         if (stats[i].epsd > 0)
         {
             discovered_gamemission = doom;
             return;
         }
 
-        /* This is episode 1.  If this is level 10 or higher,
-           it must be Doom 2. */
-
+        // This is episode 1.  If this is level 10 or higher,
+        // it must be Doom 2.
         if (level >= 9)
         {
             discovered_gamemission = doom2;
             return;
         }
 
-        /* Try to work out if this is Doom 1 or Doom 2 by looking
-           at the par time. */
-
+        // Try to work out if this is Doom 1 or Doom 2 by looking
+        // at the par time.
         partime = stats[i].partime;
 
         if (partime == doom1_par_times[level] * TICRATE
-         && partime != doom2_par_times[level] * TICRATE)
+            && partime != doom2_par_times[level] * TICRATE)
         {
             discovered_gamemission = doom;
             return;
         }
 
         if (partime != doom1_par_times[level] * TICRATE
-         && partime == doom2_par_times[level] * TICRATE)
+            && partime == doom2_par_times[level] * TICRATE)
         {
             discovered_gamemission = doom2;
             return;
@@ -116,14 +117,13 @@ static void DiscoverGamemode(wbstartstruct_t *stats, int num_stats)
     }
 }
 
-/* Returns the number of players active in the given stats buffer. */
-
+// Returns the number of players active in the given stats buffer.
 static int GetNumPlayers(wbstartstruct_t *stats)
 {
     int i;
     int num_players = 0;
 
-    for (i=0; i<MAXPLAYERS; ++i)
+    for (i = 0; i < MAXPLAYERS; ++i)
     {
         if (stats->plyr[i].in)
         {
@@ -153,13 +153,11 @@ static void PrintPercentage(FILE *stream, int amount, int total)
         // integer overflow can occur when doing this calculation with
         // a large value. Therefore, cast to short to give the same
         // output.
-
         fprintf(stream, " (%i%%)", (short) (amount * 100) / total);
     }
 }
 
-/* Display statistics for a single player. */
-
+// Display statistics for a single player.
 static void PrintPlayerStats(FILE *stream, wbstartstruct_t *stats,
         int player_num)
 {
@@ -168,38 +166,33 @@ static void PrintPlayerStats(FILE *stream, wbstartstruct_t *stats,
     fprintf(stream, "Player %i (%s):\n", player_num + 1,
             player_colors[player_num]);
 
-    /* Kills percentage */
-
+    // Kills percentage
     fprintf(stream, "\tKills: ");
     PrintPercentage(stream, player->skills, stats->maxkills);
     fprintf(stream, "\n");
 
-    /* Items percentage */
-
+    // Items percentage
     fprintf(stream, "\tItems: ");
     PrintPercentage(stream, player->sitems, stats->maxitems);
     fprintf(stream, "\n");
 
-    /* Secrets percentage */
-
+    // Secrets percentage
     fprintf(stream, "\tSecrets: ");
     PrintPercentage(stream, player->ssecret, stats->maxsecret);
     fprintf(stream, "\n");
 }
 
-/* Frags table for multiplayer games. */
-
+// Frags table for multiplayer games.
 static void PrintFragsTable(FILE *stream, wbstartstruct_t *stats)
 {
     int x, y;
 
     fprintf(stream, "Frags:\n");
 
-    /* Print header */
-
+    // Print header
     fprintf(stream, "\t\t");
 
-    for (x=0; x<MAXPLAYERS; ++x)
+    for (x = 0; x < MAXPLAYERS; ++x)
     {
 
         if (!stats->plyr[x].in)
@@ -214,9 +207,8 @@ static void PrintFragsTable(FILE *stream, wbstartstruct_t *stats)
 
     fprintf(stream, "\t\t-------------------------------- VICTIMS\n");
 
-    /* Print table */
-
-    for (y=0; y<MAXPLAYERS; ++y)
+    // Print table
+    for (y = 0; y < MAXPLAYERS; ++y)
     {
         if (!stats->plyr[y].in)
         {
@@ -225,7 +217,7 @@ static void PrintFragsTable(FILE *stream, wbstartstruct_t *stats)
 
         fprintf(stream, "\t%s\t|", player_colors[y]);
 
-        for (x=0; x<MAXPLAYERS; ++x)
+        for (x = 0; x < MAXPLAYERS; ++x)
         {
             if (!stats->plyr[x].in)
             {
@@ -242,8 +234,7 @@ static void PrintFragsTable(FILE *stream, wbstartstruct_t *stats)
     fprintf(stream, "\t     KILLERS\n");
 }
 
-/* Displays the level name: MAPxy or ExMy, depending on game mode. */
-
+// Displays the level name: MAPxy or ExMy, depending on game mode.
 static void PrintLevelName(FILE *stream, int episode, int level)
 {
     PrintBanner(stream);
@@ -254,9 +245,11 @@ static void PrintLevelName(FILE *stream, int episode, int level)
         case doom:
             fprintf(stream, "E%iM%i\n", episode + 1, level + 1);
             break;
+
         case doom2:
             fprintf(stream, "MAP%02i\n", level + 1);
             break;
+
         default:
         case none:
             fprintf(stream, "E%iM%i / MAP%02i\n", 
@@ -267,8 +260,7 @@ static void PrintLevelName(FILE *stream, int episode, int level)
     PrintBanner(stream);
 }
 
-/* Print details of a statistics buffer to the given file. */
-
+// Print details of a statistics buffer to the given file.
 static void PrintStats(FILE *stream, wbstartstruct_t *stats)
 {
     int leveltime, partime;
@@ -283,7 +275,7 @@ static void PrintStats(FILE *stream, wbstartstruct_t *stats)
     fprintf(stream, " (par: %i:%02i)\n", partime / 60, partime % 60);
     fprintf(stream, "\n");
 
-    for (i=0; i<MAXPLAYERS; ++i)
+    for (i = 0; i < MAXPLAYERS; ++i)
     {
         if (stats->plyr[i].in)
         {
@@ -301,7 +293,7 @@ static void PrintStats(FILE *stream, wbstartstruct_t *stats)
 
 void StatCopy(wbstartstruct_t *stats)
 {
-    if((
+    if ((
 /*
 #ifndef WII
         M_ParmExists("-statdump") ||
@@ -326,13 +318,7 @@ void StatDump(void)
     // that were played. The output from this option matches the output
     // from statdump.exe (see ctrlapi.zip in the /idgames archive).
     //
-/*
-#ifndef WII
-    if(!beta_style)
-        i = M_CheckParmWithArgs("-statdump", 1);
-*/
-    if (/*i > 0 ||*/ dump_stat || already_quitting || error_detected)
-//#endif
+    if (dump_stat || already_quitting || error_detected)
     {
         int i;
 
@@ -344,7 +330,6 @@ void StatDump(void)
 
         // We actually know what the real gamemission is, but this has
         // to match the output from statdump.exe.
-
         DiscoverGamemode(captured_stats, num_captured_stats);
 
         // Allow "-" as output file, for stdout.
@@ -356,7 +341,7 @@ void StatDump(void)
         else if (sd)
             dumpfile = fopen("sd:/apps/wiidoom/statdump.txt", "w");
 #endif
-printf("!!!\n");
+
         for (i = 0; i < num_captured_stats; ++i)
         {
             PrintStats(dumpfile, &captured_stats[i]);
@@ -364,7 +349,7 @@ printf("!!!\n");
 
         if (dumpfile != NULL)
         {
-printf("...\n");            fclose(dumpfile);
+            fclose(dumpfile);
         }
     }
 }

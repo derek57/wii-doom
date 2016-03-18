@@ -64,9 +64,12 @@
 #include "z_zone.h"
 
 
-#define DEF_RAM       DEFAULT_RAM // MiB
-#define MIN_RAM       16 // MiB
-#define ZENITY_BINARY "/usr/bin/zenity"
+// MiB
+#define DEF_RAM               DEFAULT_RAM
+#define MIN_RAM               16
+
+#define ZENITY_BINARY         "/usr/bin/zenity"
+#define DOS_MEM_DUMP_SIZE     10
 
 
 typedef struct atexit_listentry_s atexit_listentry_t;
@@ -79,15 +82,26 @@ struct atexit_listentry_s
 };
 
 
-byte *zone_mem;
+static atexit_listentry_t     *exit_funcs = NULL;
 
-//extern dboolean devparm;
+static const unsigned char    mem_dump_dos622[DOS_MEM_DUMP_SIZE] = {
+  0x57, 0x92, 0x19, 0x00, 0xF4, 0x06, 0x70, 0x00, 0x16, 0x00};
 
-int memory_size;
+static const unsigned char    mem_dump_win98[DOS_MEM_DUMP_SIZE] = {
+  0x9E, 0x0F, 0xC9, 0x00, 0x65, 0x04, 0x70, 0x00, 0x16, 0x00};
 
-dboolean already_quitting;
+static const unsigned char    mem_dump_dosbox[DOS_MEM_DUMP_SIZE] = {
+  0x00, 0x00, 0x00, 0xF1, 0x00, 0x00, 0x00, 0x00, 0x07, 0x00};
 
-static atexit_listentry_t *exit_funcs = NULL;
+static const unsigned char    *dos_mem_dump = mem_dump_dos622;
+
+
+byte                          *zone_mem;
+
+int                           memory_size;
+
+dboolean                      already_quitting;
+
 
 void I_AtExit(atexit_func_t func, dboolean run_on_error)
 {
@@ -122,29 +136,25 @@ static byte *AutoAllocMemory(int *size, int default_ram, int min_ram)
     // zone sizes until a size is found that can be allocated.
     // If we used the -mb command line parameter, only the parameter
     // provided is accepted.
-
     zonemem = NULL;
 
     while (zonemem == NULL)
     {
         // We need a reasonable minimum amount of RAM to start.
-
         if (default_ram < min_ram)
         {
             I_Error("Unable to allocate %i MiB of RAM for zone", default_ram);
         }
 
         // Try to allocate the zone memory.
-
         *size = default_ram * 1024 * 1024;
 
         zonemem = malloc(*size);
 
-//        printf("0x%x allocated for zone\n", default_ram);
+        //printf("0x%x allocated for zone\n", default_ram);
 
         // Failed to allocate?  Reduce zone size until we reach a size
         // that is acceptable.
-
         if (zonemem == NULL)
         {
             default_ram -= 1;
@@ -169,7 +179,7 @@ byte *I_ZoneBase (int *size)
     // Specify the heap size, in MiB (default 16).
     //
 
-    if(!beta_style)
+    if (!beta_style)
         p = M_CheckParmWithArgs("-mb", 1);
 
     if (p > 0)
@@ -199,7 +209,7 @@ void I_PrintBanner(char *msg)
     int i;
     int spaces = 35 - (strlen(msg) / 2);
 
-    for (i=0; i<spaces; ++i)
+    for (i = 0; i < spaces; ++i)
         putchar(' ');
 
     puts(msg);
@@ -209,7 +219,7 @@ void I_PrintDivider(void)
 {
     int i;
 
-    for (i=0; i<75; ++i)
+    for (i = 0; i < 75; ++i)
     {
         putchar('=');
     }
@@ -238,7 +248,6 @@ void I_PrintStartupBanner(char *gamedescription)
 //
 // Returns true if stdout is a real console, false if it is a file
 //
-
 dboolean I_ConsoleStdout(void)
 {
     return isatty(fileno(stdout));
@@ -247,7 +256,6 @@ dboolean I_ConsoleStdout(void)
 //
 // I_Quit
 //
-
 void I_Quit (void)
 {
     atexit_listentry_t *entry;
@@ -258,10 +266,7 @@ void I_Quit (void)
     if (statsfile)
         fclose (statsfile);
 
-//    C_ConDump();
-
-    // Run through all exit functions
- 
+    // Run through all exit functions 
     entry = exit_funcs; 
 
     while (entry != NULL)
@@ -290,7 +295,6 @@ static int ZenityAvailable(void)
 
 // Escape special characters in the given string so that they can be
 // safely enclosed in shell quotes.
-
 static char *EscapeShellString(char *string)
 {
     char *result;
@@ -313,7 +317,6 @@ static char *EscapeShellString(char *string)
         //   of $, `, \, and, when history expansion is enabled, !."
         //
         // Therefore, escape these characters by prefixing with a backslash.
-
         if (strchr("$`\\!", *s) != NULL)
         {
             *r = '\\';
@@ -333,7 +336,6 @@ static char *EscapeShellString(char *string)
 }
 
 // Open a native error box with a message using zenity
-
 static int ZenityErrorBox(char *message)
 {
     int result;
@@ -365,7 +367,6 @@ static int ZenityErrorBox(char *message)
 //
 // I_Error
 //
-
 void I_Error (char *error, ...)
 {
 #ifdef WII
@@ -410,7 +411,6 @@ void I_Error (char *error, ...)
     }
 
     // Shutdown. Here might be other errors.
-
     entry = exit_funcs;
 
     while (entry != NULL)
@@ -422,14 +422,13 @@ void I_Error (char *error, ...)
 
         entry = entry->next;
     }
-    error_detected = true;
-/*
-    S_Shutdown();
 
-    I_ShutdownGraphics();
-*/
+    error_detected = true;
+
     I_Quit();
+
 #else
+
     char msgbuf[512];
     va_list argptr;
     atexit_listentry_t *entry;
@@ -447,7 +446,6 @@ void I_Error (char *error, ...)
 
     // Message first.
     va_start(argptr, error);
-    //fprintf(stderr, "\nError: ");
     vfprintf(stderr, error, argptr);
     fprintf(stderr, "\n\n");
     va_end(argptr);
@@ -460,7 +458,6 @@ void I_Error (char *error, ...)
     va_end(argptr);
 
     // Shutdown. Here might be other errors.
-
     entry = exit_funcs;
 
     while (entry != NULL)
@@ -473,7 +470,6 @@ void I_Error (char *error, ...)
         entry = entry->next;
     }
 
-//    exit_gui_popup = !M_ParmExists("-nogui");
     exit_gui_popup = true;
 
     // Pop up a GUI dialog box to show the error message, if the
@@ -486,10 +482,10 @@ void I_Error (char *error, ...)
 
     printf("\n Warning: Game exited safely (possible crash detected).\n");
 
-    // abort();
 #ifdef SDL2
     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, PACKAGE_NAME, msgbuf, NULL);
 #endif
+
     SDL_Quit();
 
     exit(-1);
@@ -513,102 +509,34 @@ void I_Error (char *error, ...)
 // 0000:0000  (9E 0F C9 00) 65 04 70 00-(16 00)
 // DOSBox under XP:
 // 0000:0000  (00 00 00 F1) ?? ?? ?? 00-(07 00)
-
-#define DOS_MEM_DUMP_SIZE 10
-
-static const unsigned char mem_dump_dos622[DOS_MEM_DUMP_SIZE] = {
-  0x57, 0x92, 0x19, 0x00, 0xF4, 0x06, 0x70, 0x00, 0x16, 0x00};
-static const unsigned char mem_dump_win98[DOS_MEM_DUMP_SIZE] = {
-  0x9E, 0x0F, 0xC9, 0x00, 0x65, 0x04, 0x70, 0x00, 0x16, 0x00};
-static const unsigned char mem_dump_dosbox[DOS_MEM_DUMP_SIZE] = {
-  0x00, 0x00, 0x00, 0xF1, 0x00, 0x00, 0x00, 0x00, 0x07, 0x00};
-/*
-#ifndef WII
-static unsigned char mem_dump_custom[DOS_MEM_DUMP_SIZE];
-#endif
-*/
-static const unsigned char *dos_mem_dump = mem_dump_dos622;
-
 dboolean I_GetMemoryValue(unsigned int offset, void *value, int size)
 {
     static dboolean firsttime = true;
 
     if (firsttime)
     {
-/*
-#ifndef WII
-        int p, val;
-#endif
-*/
         firsttime = false;
-
-        //!
-        // @category compat
-        // @arg <version>
-        //
-        // Specify DOS version to emulate for NULL pointer dereference
-        // emulation.  Supported versions are: dos622, dos71, dosbox.
-        // The default is to emulate DOS 7.1 (Windows 98).
-        //
-/*
-#ifndef WII
-        p = M_CheckParmWithArgs("-setmem", 1);
-
-        if (p > 0)
-        {
-            if (!strcasecmp(myargv[p + 1], "dos622"))
-            {
-                dos_mem_dump = mem_dump_dos622;
-            }
-            if (!strcasecmp(myargv[p + 1], "dos71"))
-            {
-                dos_mem_dump = mem_dump_win98;
-            }
-            else if (!strcasecmp(myargv[p + 1], "dosbox"))
-            {
-                dos_mem_dump = mem_dump_dosbox;
-            }
-            else
-            {
-                int i;
-
-                for (i = 0; i < DOS_MEM_DUMP_SIZE; ++i)
-                {
-                    ++p;
-
-                    if (p >= myargc || myargv[p][0] == '-')
-                    {
-                        break;
-                    }
-
-                    M_StrToInt(myargv[p], &val);
-                    mem_dump_custom[i++] = (unsigned char) val;
-                }
-
-                dos_mem_dump = mem_dump_custom;
-            }
-        }
-#endif
-*/
     }
 
     C_Warning("Read Access Violation emulation.");
 
     switch (size)
     {
-    case 1:
-        *((unsigned char *) value) = dos_mem_dump[offset];
-        return true;
-    case 2:
-        *((unsigned short *) value) = dos_mem_dump[offset]
-                                    | (dos_mem_dump[offset + 1] << 8);
-        return true;
-    case 4:
-        *((unsigned int *) value) = dos_mem_dump[offset]
-                                  | (dos_mem_dump[offset + 1] << 8)
-                                  | (dos_mem_dump[offset + 2] << 16)
-                                  | (dos_mem_dump[offset + 3] << 24);
-        return true;
+        case 1:
+            *((unsigned char *) value) = dos_mem_dump[offset];
+            return true;
+
+        case 2:
+            *((unsigned short *) value) = dos_mem_dump[offset]
+                                        | (dos_mem_dump[offset + 1] << 8);
+            return true;
+
+        case 4:
+            *((unsigned int *) value) = dos_mem_dump[offset]
+                                      | (dos_mem_dump[offset + 1] << 8)
+                                      | (dos_mem_dump[offset + 2] << 16)
+                                      | (dos_mem_dump[offset + 3] << 24);
+            return true;
     }
 
     return false;
@@ -616,10 +544,10 @@ dboolean I_GetMemoryValue(unsigned int offset, void *value, int size)
 
 // cphipps - I_SigString
 // Returns a string describing a signal number
-
-const char* I_SigString(char* buf, size_t sz, int signum)
+const char *I_SigString(char *buf, size_t sz, int signum)
 {
-#if HAVE_DECL_SYS_SIGLIST // NSM: automake defines this symbol as 0 or 1
+    // NSM: automake defines this symbol as 0 or 1
+#if HAVE_DECL_SYS_SIGLIST
     if (strlen(sys_siglist[signum]) < sz)
         strcpy(buf, sys_siglist[signum]);
     else

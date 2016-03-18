@@ -36,13 +36,16 @@
 ========================================================================
 */
 
+
 #if !defined(__C_CONSOLE__)
 #define __C_CONSOLE__
+
 
 #include "doom/doomstat.h"
 
 #include "doomtype.h"
 #include "d_event.h"
+
 
 #define CONSOLEHEIGHT   ((SCREENHEIGHT - SBARHEIGHT) / 2)
 
@@ -52,6 +55,7 @@
                         "================================================="
 
 #define stringize(x)    #x
+
 
 typedef enum
 {
@@ -64,6 +68,7 @@ typedef enum
     darkstring,
     dividerstring,
     STRINGTYPES
+
 } stringtype_t;
 
 typedef struct
@@ -72,6 +77,7 @@ typedef struct
     stringtype_t        type;
     int                 tabs[8];
     char                timestamp[9]; 
+
 } console_t;
 
 typedef struct
@@ -80,25 +86,10 @@ typedef struct
     int                 caretpos;
     int                 selectstart;
     int                 selectend;
+
 } undohistory_t;
 
-undohistory_t   *undohistory;
 
-console_t       *console;
-
-extern dboolean consoleactive;
-
-extern int      consoleheight;
-extern int      consoledirection;
-
-extern char     consolecheat[255];
-extern char     consolecheatparm[3];
-extern char     consolecmdparm[255];
-/*
-#if defined(WIN32)
-extern dboolean showmemory;
-#endif
-*/
 void C_Print(stringtype_t type, char *string, ...);
 void C_Input(char *string, ...);
 void C_Output(char *string, ...);
@@ -112,9 +103,26 @@ void C_Init(void);
 void C_HideConsole(void);
 void C_HideConsoleFast(void);
 void C_Drawer(void);
-dboolean C_Responder(event_t *ev);
 void C_PrintCompileDate(void);
 void C_PrintSDLVersions(void);
 void C_ConDump(void);
+
+dboolean C_Responder(event_t *ev);
+
+
+undohistory_t   *undohistory;
+
+console_t       *console;
+
+
+extern dboolean consoleactive;
+
+extern int      consoleheight;
+extern int      consoledirection;
+
+extern char     consolecheat[255];
+extern char     consolecheatparm[3];
+extern char     consolecmdparm[255];
+
 
 #endif

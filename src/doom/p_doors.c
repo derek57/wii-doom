@@ -67,358 +67,385 @@ slidename_t        slideFrameNames[MAXSLIDEDOORS] =
 //
 // T_VerticalDoor
 //
-void T_VerticalDoor (vldoor_t* door)
+void T_VerticalDoor(vldoor_t *door)
 {
     result_e        res;
         
-    switch(door->direction)
+    switch (door->direction)
     {
-      case 0:
-        // WAITING
-        if (!--door->topcountdown)
-        {
-            switch(door->type)
+        case 0:
+            // WAITING
+            if (!--door->topcountdown)
             {
-              case doorBlazeRaise:
-              case genBlazeRaise:
-                door->direction = -1; // time to go back down
-
-                if(fsize != 10396254 && fsize != 10399316 && fsize != 10401760 && fsize != 4207819 &&
-                        fsize != 4274218 && fsize != 4225504 && fsize != 4225460)
-                    S_StartSectorSound(&door->sector->soundorg, sfx_bdcls);
-                break;
-                
-              case doorNormal:
-              case genRaise:
-                door->direction = -1; // time to go back down
-                S_StartSectorSound(&door->sector->soundorg, sfx_dorcls);
-                break;
-                
-              case doorClose30ThenOpen:
-              case genCdO:
-                door->direction = 1;
-                S_StartSectorSound(&door->sector->soundorg, sfx_doropn);
-                break;
-                
-              case genBlazeCdO:
-                door->direction = 1;    // time to go back up
-                S_StartSectorSound(&door->sector->soundorg, sfx_bdopn);
-                break;
-
-              default:
-                break;
-            }
-        }
-        break;
-        
-      case 2:
-        //  INITIAL WAIT
-        if (!--door->topcountdown)
-        {
-            switch(door->type)
-            {
-              case doorRaiseIn5Mins:
-                door->direction = 1;
-                door->type = doorNormal;
-                S_StartSectorSound(&door->sector->soundorg, sfx_doropn);
-                break;
-                
-              default:
-                break;
-            }
-        }
-        break;
-        
-      case -1:
-        // DOWN
-        res = T_MovePlane(door->sector,
-                          door->speed,
-                          door->sector->floorheight,
-                          false,1,door->direction);
-
-        // killough 10/98: implement gradual lighting effects
-        // [BH] enhanced to apply effects to all doors
-        if (door->topheight - door->sector->floorheight)
-        {
-            fixed_t level = FixedDiv(door->sector->ceilingheight - door->sector->floorheight,
-                door->topheight - door->sector->floorheight);
-
-            if (door->lighttag)
-                EV_LightTurnOnPartway(door->line, level);
-            else if (!P_SectorHasLightSpecial(door->sector)) 
-                EV_LightByAdjacentSectors(door->sector, level);
-        }
-
-        if (res == pastdest)
-        {
-            switch(door->type)
-            {
-              case doorBlazeRaise:
-              case doorBlazeClose:
-              case genBlazeRaise:
-              case genBlazeClose:
-                door->sector->ceilingdata = NULL;
-                P_RemoveThinker (&door->thinker);  // unlink and free
-
-                if(fsize != 10396254 && fsize != 10399316 && fsize != 10401760 && fsize != 4207819 &&
-                        fsize != 4274218 && fsize != 4225504 && fsize != 4225460)
+                switch (door->type)
                 {
-                    // killough 4/15/98: remove double-closing sound of blazing doors
-                    if (!d_blazingsound)
-                        S_StartSectorSound(&door->sector->soundorg, sfx_bdcls);
+                    case doorBlazeRaise:
+                    case genBlazeRaise:
+                        // time to go back down
+                        door->direction = -1;
+
+                        if (fsize != 10396254 && fsize != 10399316 && fsize != 10401760 && fsize != 4207819 &&
+                            fsize != 4274218 && fsize != 4225504 && fsize != 4225460)
+                            S_StartSectorSound(&door->sector->soundorg, sfx_bdcls);
+
+                        break;
+                
+                    case doorNormal:
+                    case genRaise:
+                        // time to go back down
+                        door->direction = -1;
+
+                        S_StartSectorSound(&door->sector->soundorg, sfx_dorcls);
+                        break;
+                
+                    case doorClose30ThenOpen:
+                    case genCdO:
+                        door->direction = 1;
+                        S_StartSectorSound(&door->sector->soundorg, sfx_doropn);
+                        break;
+                
+                    case genBlazeCdO:
+                        // time to go back up
+                        door->direction = 1;
+
+                        S_StartSectorSound(&door->sector->soundorg, sfx_bdopn);
+                        break;
+
+                    default:
+                        break;
                 }
-                break;
-                
-              case doorNormal:
-              case doorClose:
-              case genRaise:
-              case genClose:
-                door->sector->ceilingdata = NULL;
-                P_RemoveThinker (&door->thinker);  // unlink and free
-                break;
-                
-              case doorClose30ThenOpen:
-                door->direction = 0;
-                door->topcountdown = TICRATE*30;
-                break;
-                
-              case genCdO:
-              case genBlazeCdO:
-                door->direction = 0;
-                door->topcountdown = door->topwait;     // jff 5/8/98 insert delay
-                break;
-
-              default:
-                break;
             }
-        }
-        else if (res == crushed)
-        {
-            switch(door->type)
+
+            break;
+
+        case 2:
+            // INITIAL WAIT
+            if (!--door->topcountdown)
             {
-              case doorBlazeClose:
-              case doorClose:                // DO NOT GO BACK UP!
-              case genClose:
-              case genBlazeClose:
-                break;
+                switch (door->type)
+                {
+                    case doorRaiseIn5Mins:
+                        door->direction = 1;
+                        door->type = doorNormal;
+                        S_StartSectorSound(&door->sector->soundorg, sfx_doropn);
+                        break;
                 
-              case doorBlazeRaise:
-                door->direction = 1;
-                S_StartSectorSound(&door->sector->soundorg, sfx_bdopn);
-                break;
-
-              default:
-                door->direction = 1;
-                S_StartSectorSound(&door->sector->soundorg, sfx_doropn);
-                break;
+                    default:
+                        break;
+                }
             }
-        }
-        break;
-        
-      case 1:
-        // UP
-        res = T_MovePlane(door->sector,
-                          door->speed,
-                          door->topheight,
-                          false,1,door->direction);
-        
-        // killough 10/98: implement gradual lighting effects
-        // [BH] enhanced to apply effects to all doors
-        if (door->topheight - door->sector->floorheight)
-        {
-            fixed_t level = FixedDiv(door->sector->ceilingheight - door->sector->floorheight,
-                door->topheight - door->sector->floorheight);
 
-            if (door->lighttag)
-                EV_LightTurnOnPartway(door->line, level);
-            else if (!P_SectorHasLightSpecial(door->sector)) 
-                EV_LightByAdjacentSectors(door->sector, level);
-        }
+            break;
+        
+        case -1:
+            // DOWN
+            res = T_MovePlane(door->sector,
+                              door->speed,
+                              door->sector->floorheight,
+                              false, 1 ,door->direction);
 
-        if (res == pastdest)
-        {
-            switch(door->type)
+            // killough 10/98: implement gradual lighting effects
+            // [BH] enhanced to apply effects to all doors
+            if (door->topheight - door->sector->floorheight)
             {
-              case doorBlazeRaise:
-              case doorNormal:
-              case genRaise:
-              case genBlazeRaise:
-                door->direction = 0; // wait at top
-                door->topcountdown = door->topwait;
-                break;
-                
-              case doorClose30ThenOpen:
-              case doorBlazeOpen:
-              case doorOpen:
-              case genBlazeOpen:
-              case genOpen:
-              case genCdO:
-              case genBlazeCdO:
-                door->sector->ceilingdata = NULL;
-                P_RemoveThinker (&door->thinker);  // unlink and free
-                break;
-                
-              default:
-                break;
+                fixed_t level = FixedDiv(door->sector->ceilingheight - door->sector->floorheight,
+                    door->topheight - door->sector->floorheight);
+
+                if (door->lighttag)
+                    EV_LightTurnOnPartway(door->line, level);
+                else if (!P_SectorHasLightSpecial(door->sector)) 
+                    EV_LightByAdjacentSectors(door->sector, level);
             }
-        }
-        break;
+
+            if (res == pastdest)
+            {
+                switch (door->type)
+                {
+                    case doorBlazeRaise:
+                    case doorBlazeClose:
+                    case genBlazeRaise:
+                    case genBlazeClose:
+                        door->sector->ceilingdata = NULL;
+
+                        // unlink and free
+                        P_RemoveThinker(&door->thinker);
+
+                        if (fsize != 10396254 && fsize != 10399316 && fsize != 10401760 && fsize != 4207819 &&
+                            fsize != 4274218 && fsize != 4225504 && fsize != 4225460)
+                        {
+                            // killough 4/15/98: remove double-closing sound of blazing doors
+                            if (!d_blazingsound)
+                                S_StartSectorSound(&door->sector->soundorg, sfx_bdcls);
+                        }
+
+                        break;
+                
+                    case doorNormal:
+                    case doorClose:
+                    case genRaise:
+                    case genClose:
+                        door->sector->ceilingdata = NULL;
+
+                        // unlink and free
+                        P_RemoveThinker(&door->thinker);
+
+                        break;
+
+                    case doorClose30ThenOpen:
+                        door->direction = 0;
+                        door->topcountdown = TICRATE * 30;
+                        break;
+                
+                    case genCdO:
+                    case genBlazeCdO:
+                        door->direction = 0;
+
+                        // jff 5/8/98 insert delay
+                        door->topcountdown = door->topwait;
+
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+            else if (res == crushed)
+            {
+                switch (door->type)
+                {
+                    case doorBlazeClose:
+                    case doorClose:
+                    case genClose:
+                    case genBlazeClose:
+                        break;
+                
+                    case doorBlazeRaise:
+                        door->direction = 1;
+                        S_StartSectorSound(&door->sector->soundorg, sfx_bdopn);
+                        break;
+
+                    default:
+                        door->direction = 1;
+                        S_StartSectorSound(&door->sector->soundorg, sfx_doropn);
+                        break;
+                }
+            }
+
+            break;
+
+        case 1:
+            // UP
+            res = T_MovePlane(door->sector,
+                              door->speed,
+                              door->topheight,
+                              false, 1, door->direction);
+        
+            // killough 10/98: implement gradual lighting effects
+            // [BH] enhanced to apply effects to all doors
+            if (door->topheight - door->sector->floorheight)
+            {
+                fixed_t level = FixedDiv(door->sector->ceilingheight - door->sector->floorheight,
+                    door->topheight - door->sector->floorheight);
+
+                if (door->lighttag)
+                    EV_LightTurnOnPartway(door->line, level);
+                else if (!P_SectorHasLightSpecial(door->sector)) 
+                    EV_LightByAdjacentSectors(door->sector, level);
+            }
+
+            if (res == pastdest)
+            {
+                switch (door->type)
+                {
+                    case doorBlazeRaise:
+                    case doorNormal:
+                    case genRaise:
+                    case genBlazeRaise:
+                        // wait at top
+                        door->direction = 0;
+                        door->topcountdown = door->topwait;
+
+                        break;
+                
+                    case doorClose30ThenOpen:
+                    case doorBlazeOpen:
+                    case doorOpen:
+                    case genBlazeOpen:
+                    case genOpen:
+                    case genCdO:
+                    case genBlazeCdO:
+                        door->sector->ceilingdata = NULL;
+
+                        // unlink and free
+                        P_RemoveThinker(&door->thinker);
+
+                        break;
+                
+                    default:
+                        break;
+                }
+            }
+
+            break;
     }
 }
-
 
 //
 // EV_DoLockedDoor
 // Move a locked door up/down
 //
-
-int
-EV_DoLockedDoor
-( line_t*        line,
-  vldoor_e       type,
-  mobj_t*        thing )
+int EV_DoLockedDoor(line_t *line, vldoor_e type, mobj_t *thing)
 {
-    player_t*    p;
+    player_t     *p = thing->player;
     static char  buffer[1024];
-        
-    p = thing->player;
         
     if (!p)
         return 0;
                 
-    switch(line->special)
+    switch (line->special)
     {
-      case SR_Door_Blue_OpenStay_Fast:
-      case S1_Door_Blue_OpenStay_Fast:
-        if ( !p )
-            return 0;
-        if (p->cards[it_bluecard] <= 0 && p->cards[it_blueskull] <= 0)
-        {
-            // [BH] display player message distinguishing between keycard and skull key
-            // [BH] flash needed key on hud
-            if (p->cards[it_bluecard] == CARDNOTFOUNDYET)
+        case SR_Door_Blue_OpenStay_Fast:
+        case S1_Door_Blue_OpenStay_Fast:
+            if (!p)
+                return 0;
+
+            if (p->cards[it_bluecard] <= 0 && p->cards[it_blueskull] <= 0)
             {
-                if (hud && (!p->neededcardflash || p->neededcard != it_bluecard))
+                // [BH] display player message distinguishing between keycard and skull key
+                // [BH] flash needed key on hud
+                if (p->cards[it_bluecard] == CARDNOTFOUNDYET)
                 {
-                    p->neededcard = it_bluecard;
-                    p->neededcardflash = NEEDEDCARDFLASH;
+                    if (hud && (!p->neededcardflash || p->neededcard != it_bluecard))
+                    {
+                        p->neededcard = it_bluecard;
+                        p->neededcardflash = NEEDEDCARDFLASH;
+                    }
+
+                    M_snprintf(buffer, sizeof(buffer), s_PD_BLUEO, playername,
+                        (M_StringCompare(playername, playername_default) ? "" : "s"), "keycard");
+                    HU_PlayerMessage(buffer, true);
                 }
-                M_snprintf(buffer, sizeof(buffer), s_PD_BLUEO, playername,
-                    (M_StringCompare(playername, playername_default) ? "" : "s"), "keycard");
-                HU_PlayerMessage(buffer, true);
-            }
-            else if (p->cards[it_blueskull] == CARDNOTFOUNDYET)
-            {
-                if (hud && (!p->neededcardflash || p->neededcard != it_blueskull))
+                else if (p->cards[it_blueskull] == CARDNOTFOUNDYET)
                 {
-                    p->neededcard = it_blueskull;
-                    p->neededcardflash = NEEDEDCARDFLASH;
+                    if (hud && (!p->neededcardflash || p->neededcard != it_blueskull))
+                    {
+                        p->neededcard = it_blueskull;
+                        p->neededcardflash = NEEDEDCARDFLASH;
+                    }
+
+                    M_snprintf(buffer, sizeof(buffer), s_PD_BLUEO, playername,
+                        (M_StringCompare(playername, playername_default) ? "" : "s"), "skull key");
+                    HU_PlayerMessage(buffer, true);
                 }
-                M_snprintf(buffer, sizeof(buffer), s_PD_BLUEO, playername,
-                    (M_StringCompare(playername, playername_default) ? "" : "s"), "skull key");
-                HU_PlayerMessage(buffer, true);
+
+                //  [BH] use sfx_noway instead of sfx_oof
+                S_StartSound(p->mo, sfx_noway);
+                return 0;
             }
-            //  [BH] use sfx_noway instead of sfx_oof
-            S_StartSound(p->mo, sfx_noway);
-            return 0;
-        }
-        break;
+
+            break;
         
-      case SR_Door_Red_OpenStay_Fast:
-      case S1_Door_Red_OpenStay_Fast:
-        if ( !p )
-            return 0;
-        if (p->cards[it_redcard] <= 0 && p->cards[it_redskull] <= 0)
-        {
-            if (p->cards[it_redcard] == CARDNOTFOUNDYET)
+        case SR_Door_Red_OpenStay_Fast:
+        case S1_Door_Red_OpenStay_Fast:
+            if (!p)
+                return 0;
+
+            if (p->cards[it_redcard] <= 0 && p->cards[it_redskull] <= 0)
             {
-                if (hud && (!p->neededcardflash || p->neededcard != it_redcard))
+                if (p->cards[it_redcard] == CARDNOTFOUNDYET)
                 {
-                    p->neededcard = it_redcard;
-                    p->neededcardflash = NEEDEDCARDFLASH;
+                    if (hud && (!p->neededcardflash || p->neededcard != it_redcard))
+                    {
+                        p->neededcard = it_redcard;
+                        p->neededcardflash = NEEDEDCARDFLASH;
+                    }
+
+                    M_snprintf(buffer, sizeof(buffer), s_PD_REDO, playername,
+                        (M_StringCompare(playername, playername_default) ? "" : "s"), "keycard");
+                    HU_PlayerMessage(buffer, true);
                 }
-                M_snprintf(buffer, sizeof(buffer), s_PD_REDO, playername,
-                    (M_StringCompare(playername, playername_default) ? "" : "s"), "keycard");
-                HU_PlayerMessage(buffer, true);
-            }
-            else if (p->cards[it_redskull] == CARDNOTFOUNDYET)
-            {
-                if (hud && (!p->neededcardflash || p->neededcard != it_redskull))
+                else if (p->cards[it_redskull] == CARDNOTFOUNDYET)
                 {
-                    p->neededcard = it_redskull;
-                    p->neededcardflash = NEEDEDCARDFLASH;
+                    if (hud && (!p->neededcardflash || p->neededcard != it_redskull))
+                    {
+                        p->neededcard = it_redskull;
+                        p->neededcardflash = NEEDEDCARDFLASH;
+                    }
+
+                    M_snprintf(buffer, sizeof(buffer), s_PD_REDO, playername,
+                        (M_StringCompare(playername, playername_default) ? "" : "s"), "skull key");
+                    HU_PlayerMessage(buffer, true);
                 }
-                M_snprintf(buffer, sizeof(buffer), s_PD_REDO, playername,
-                    (M_StringCompare(playername, playername_default) ? "" : "s"), "skull key");
-                HU_PlayerMessage(buffer, true);
+
+                //  [BH] use sfx_noway instead of sfx_oof
+                S_StartSound(p->mo, sfx_noway);
+                return 0;
             }
-            //  [BH] use sfx_noway instead of sfx_oof
-            S_StartSound(p->mo, sfx_noway);
-            return 0;
-        }
-        break;
+
+            break;
         
-      case SR_Door_Yellow_OpenStay_Fast:
-      case S1_Door_Yellow_OpenStay_Fast:
-        if ( !p )
-            return 0;
-        if (p->cards[it_yellowcard] <= 0 && p->cards[it_yellowskull] <= 0)
-        {
-            if (p->cards[it_yellowcard] == CARDNOTFOUNDYET)
+        case SR_Door_Yellow_OpenStay_Fast:
+        case S1_Door_Yellow_OpenStay_Fast:
+            if (!p)
+                return 0;
+
+            if (p->cards[it_yellowcard] <= 0 && p->cards[it_yellowskull] <= 0)
             {
-                if (hud && (!p->neededcardflash || p->neededcard != it_yellowcard))
+                if (p->cards[it_yellowcard] == CARDNOTFOUNDYET)
                 {
-                    p->neededcard = it_yellowcard;
-                    p->neededcardflash = NEEDEDCARDFLASH;
+                    if (hud && (!p->neededcardflash || p->neededcard != it_yellowcard))
+                    {
+                        p->neededcard = it_yellowcard;
+                        p->neededcardflash = NEEDEDCARDFLASH;
+                    }
+
+                    M_snprintf(buffer, sizeof(buffer), s_PD_YELLOWO, playername,
+                        (M_StringCompare(playername, playername_default) ? "" : "s"), "keycard");
+                    HU_PlayerMessage(buffer, true);
                 }
-                M_snprintf(buffer, sizeof(buffer), s_PD_YELLOWO, playername,
-                    (M_StringCompare(playername, playername_default) ? "" : "s"), "keycard");
-                HU_PlayerMessage(buffer, true);
-            }
-            else if (p->cards[it_yellowskull] == CARDNOTFOUNDYET)
-            {
-                if (hud && (!p->neededcardflash || p->neededcard != it_yellowskull))
+                else if (p->cards[it_yellowskull] == CARDNOTFOUNDYET)
                 {
-                    p->neededcard = it_yellowskull;
-                    p->neededcardflash = NEEDEDCARDFLASH;
+                    if (hud && (!p->neededcardflash || p->neededcard != it_yellowskull))
+                    {
+                        p->neededcard = it_yellowskull;
+                        p->neededcardflash = NEEDEDCARDFLASH;
+                    }
+
+                    M_snprintf(buffer, sizeof(buffer), s_PD_YELLOWO, playername,
+                        (M_StringCompare(playername, playername_default) ? "" : "s"), "skull key");
+                    HU_PlayerMessage(buffer, true);
                 }
-                M_snprintf(buffer, sizeof(buffer), s_PD_YELLOWO, playername,
-                    (M_StringCompare(playername, playername_default) ? "" : "s"), "skull key");
-                HU_PlayerMessage(buffer, true);
+
+                //  [BH] use sfx_noway instead of sfx_oof
+                S_StartSound(p->mo, sfx_noway);
+                return 0;
             }
-            //  [BH] use sfx_noway instead of sfx_oof
-            S_StartSound(p->mo, sfx_noway);
-            return 0;
-        }
-        break;        
+
+            break;        
     }
 
-    return EV_DoDoor(line,type);
+    return EV_DoDoor(line, type);
 }
 
-
-int
-EV_DoDoor
-( line_t*        line,
-  vldoor_e       type )
+int EV_DoDoor(line_t *line, vldoor_e type)
 {
-    int          secnum, rtn, i;
-    sector_t*    sec;
-    vldoor_t*    door;
+    int          secnum = -1;
+    int          rtn = 0;
+    int          i;
+    sector_t     *sec;
+    vldoor_t     *door;
         
-    secnum = -1;
-    rtn = 0;
-    
-    while ((secnum = P_FindSectorFromLineTag(line,secnum)) >= 0)
+    while ((secnum = P_FindSectorFromLineTag(line, secnum)) >= 0)
     {
         sec = &sectors[secnum];
+
         if (P_SectorActive(ceiling_special, sec))
             continue;
 
         // new door thinker
         rtn = 1;
         door = Z_Calloc(1, sizeof(*door), PU_LEVSPEC, NULL); 
-        P_AddThinker (&door->thinker);
+        P_AddThinker(&door->thinker);
         sec->ceilingdata = door;
 
         door->thinker.function = T_VerticalDoor;
@@ -426,213 +453,231 @@ EV_DoDoor
         door->type = type;
         door->topwait = VDOORWAIT;
         door->speed = VDOORSPEED;
-        door->line = line;      // jff 1/31/98 remember line that triggered us
+
+        // jff 1/31/98 remember line that triggered us
+        door->line = line;
+
         door->lighttag = 0;
                 
         for (i = 0; i < door->sector->linecount; i++)
             door->sector->lines[i]->flags &= ~ML_SECRET;
 
-        switch(type)
+        switch (type)
         {
-          case doorBlazeClose:
-            door->topheight = P_FindLowestCeilingSurrounding(sec);
-            door->topheight -= 4*FRACUNIT;
-            door->direction = -1;
-            door->speed = VDOORSPEED * 4;
+            case doorBlazeClose:
+                door->topheight = P_FindLowestCeilingSurrounding(sec);
+                door->topheight -= 4 * FRACUNIT;
+                door->direction = -1;
+                door->speed = VDOORSPEED * 4;
 
-            if(fsize != 10396254 && fsize != 10399316 && fsize != 10401760 && fsize != 4207819 &&
+                if (fsize != 10396254 && fsize != 10399316 && fsize != 10401760 && fsize != 4207819 &&
                     fsize != 4274218 && fsize != 4225504 && fsize != 4225460)
-            {
+                {
+                    if (sec->ceilingheight != sec->floorheight)
+                        S_StartSectorSound(&door->sector->soundorg, sfx_bdcls);
+                }
+
+                break;
+            
+            case doorClose:
+                door->topheight = P_FindLowestCeilingSurrounding(sec);
+                door->topheight -= 4 * FRACUNIT;
+                door->direction = -1;
+
                 if (sec->ceilingheight != sec->floorheight)
-                    S_StartSectorSound(&door->sector->soundorg, sfx_bdcls);
-            }
-            break;
+                    S_StartSectorSound(&door->sector->soundorg, sfx_dorcls);
+
+                break;
             
-          case doorClose:
-            door->topheight = P_FindLowestCeilingSurrounding(sec);
-            door->topheight -= 4*FRACUNIT;
-            door->direction = -1;
-            if (sec->ceilingheight != sec->floorheight)
-                S_StartSectorSound(&door->sector->soundorg, sfx_dorcls);
-            break;
+            case doorClose30ThenOpen:
+                door->topheight = sec->ceilingheight;
+                door->direction = -1;
+
+                if (sec->ceilingheight != sec->floorheight)
+                    S_StartSectorSound(&door->sector->soundorg, sfx_dorcls);
+
+                break;
             
-          case doorClose30ThenOpen:
-            door->topheight = sec->ceilingheight;
-            door->direction = -1;
-            if (sec->ceilingheight != sec->floorheight)
-                S_StartSectorSound(&door->sector->soundorg, sfx_dorcls);
-            break;
-            
-          case doorBlazeRaise:
-          case doorBlazeOpen:
-            door->direction = 1;
-            door->topheight = P_FindLowestCeilingSurrounding(sec);
-            door->topheight -= 4*FRACUNIT;
-            door->speed = VDOORSPEED * 4;
-            if (door->topheight != sec->ceilingheight)
-            {
-                if(fsize != 10396254 && fsize != 10399316 && fsize != 10401760 && fsize != 4207819 &&
+            case doorBlazeRaise:
+            case doorBlazeOpen:
+                door->direction = 1;
+                door->topheight = P_FindLowestCeilingSurrounding(sec);
+                door->topheight -= 4 * FRACUNIT;
+                door->speed = VDOORSPEED * 4;
+
+                if (door->topheight != sec->ceilingheight)
+                {
+                    if (fsize != 10396254 && fsize != 10399316 && fsize != 10401760 && fsize != 4207819 &&
                         fsize != 4274218 && fsize != 4225504 && fsize != 4225460)
-                    S_StartSectorSound(&door->sector->soundorg, sfx_bdopn);
-            }
-            break;
+                        S_StartSectorSound(&door->sector->soundorg, sfx_bdopn);
+                }
+
+                break;
             
-          case doorNormal:
-          case doorOpen:
-            door->direction = 1;
-            door->topheight = P_FindLowestCeilingSurrounding(sec);
-            door->topheight -= 4*FRACUNIT;
-            if (door->topheight != sec->ceilingheight)
-                S_StartSectorSound(&door->sector->soundorg, sfx_doropn);
-            break;
+            case doorNormal:
+            case doorOpen:
+                door->direction = 1;
+                door->topheight = P_FindLowestCeilingSurrounding(sec);
+                door->topheight -= 4 * FRACUNIT;
+
+                if (door->topheight != sec->ceilingheight)
+                    S_StartSectorSound(&door->sector->soundorg, sfx_doropn);
+
+                break;
             
-          default:
-            break;
+            default:
+                break;
         }
-                
     }
+
     return rtn;
 }
-
 
 //
 // EV_VerticalDoor : open a door manually, no tag value
 //
-void
-EV_VerticalDoor
-( line_t*        line,
-  mobj_t*        thing )
+void EV_VerticalDoor(line_t *line, mobj_t *thing)
 {
-    player_t*    player;
-    sector_t*    sec;
-    vldoor_t*    door;
+    // Check for locks
+    player_t     *player = thing->player;
+
+    sector_t     *sec;
+    vldoor_t     *door;
     int          i;
     static char  buffer[1024];
-/*
-    int          side;
-        
-    side = 0;        // only front sides can be used
-*/
-    //        Check for locks
-    player = thing->player;
-                
-    switch(line->special)
+
+    switch (line->special)
     {
-      case DR_Door_Blue_OpenWaitClose:
-      case D1_Door_Blue_OpenStay:
-        if ( !player )
-            return;
+        case DR_Door_Blue_OpenWaitClose:
+        case D1_Door_Blue_OpenStay:
+            if (!player)
+                return;
         
-        if (player->cards[it_bluecard] <= 0 && player->cards[it_blueskull] <= 0)
-        {
-            // [BH] display player message distinguishing between keycard and skull key
-            // [BH] flash needed key on hud
-            if (player->cards[it_bluecard] == CARDNOTFOUNDYET)
+            if (player->cards[it_bluecard] <= 0 && player->cards[it_blueskull] <= 0)
             {
-                if (hud && (!player->neededcardflash || player->neededcard != it_bluecard))
+                // [BH] display player message distinguishing between keycard and skull key
+                // [BH] flash needed key on hud
+                if (player->cards[it_bluecard] == CARDNOTFOUNDYET)
                 {
-                    player->neededcard = it_bluecard;
-                    player->neededcardflash = NEEDEDCARDFLASH;
+                    if (hud && (!player->neededcardflash || player->neededcard != it_bluecard))
+                    {
+                        player->neededcard = it_bluecard;
+                        player->neededcardflash = NEEDEDCARDFLASH;
+                    }
+
+                    M_snprintf(buffer, sizeof(buffer), s_PD_BLUEK, playername,
+                        (M_StringCompare(playername, playername_default) ? "" : "s"), "keycard");
+                    HU_PlayerMessage(buffer, true);
                 }
-                M_snprintf(buffer, sizeof(buffer), s_PD_BLUEK, playername,
-                    (M_StringCompare(playername, playername_default) ? "" : "s"), "keycard");
-                HU_PlayerMessage(buffer, true);
-            }
-            else if (player->cards[it_blueskull] == CARDNOTFOUNDYET)
-            {
-                if (hud && (!player->neededcardflash || player->neededcard != it_blueskull))
+                else if (player->cards[it_blueskull] == CARDNOTFOUNDYET)
                 {
-                    player->neededcard = it_blueskull;
-                    player->neededcardflash = NEEDEDCARDFLASH;
+                    if (hud && (!player->neededcardflash || player->neededcard != it_blueskull))
+                    {
+                        player->neededcard = it_blueskull;
+                        player->neededcardflash = NEEDEDCARDFLASH;
+                    }
+
+                    M_snprintf(buffer, sizeof(buffer), s_PD_BLUEK, playername,
+                        (M_StringCompare(playername, playername_default) ? "" : "s"), "skull key");
+                    HU_PlayerMessage(buffer, true);
                 }
-                M_snprintf(buffer, sizeof(buffer), s_PD_BLUEK, playername,
-                    (M_StringCompare(playername, playername_default) ? "" : "s"), "skull key");
-                HU_PlayerMessage(buffer, true);
+
+                //  [BH] use sfx_noway instead of sfx_oof
+                S_StartSound(player->mo, sfx_noway);
+                return;
             }
-            //  [BH] use sfx_noway instead of sfx_oof
-            S_StartSound(player->mo, sfx_noway);
-            return;
-        }
-        break;
+
+            break;
         
-      case DR_Door_Yellow_OpenWaitClose:
-      case D1_Door_Yellow_OpenStay:
-        if ( !player )
-            return;
+        case DR_Door_Yellow_OpenWaitClose:
+        case D1_Door_Yellow_OpenStay:
+            if (!player)
+                return;
         
-        if (player->cards[it_yellowcard] <= 0 && player->cards[it_yellowskull] <= 0)
-        {
-            if (player->cards[it_yellowcard] == CARDNOTFOUNDYET)
+            if (player->cards[it_yellowcard] <= 0 && player->cards[it_yellowskull] <= 0)
             {
-                if (hud && (!player->neededcardflash || player->neededcard != it_yellowcard))
+                if (player->cards[it_yellowcard] == CARDNOTFOUNDYET)
                 {
-                    player->neededcard = it_yellowcard;
-                    player->neededcardflash = NEEDEDCARDFLASH;
+                    if (hud && (!player->neededcardflash || player->neededcard != it_yellowcard))
+                    {
+                        player->neededcard = it_yellowcard;
+                        player->neededcardflash = NEEDEDCARDFLASH;
+                    }
+
+                    M_snprintf(buffer, sizeof(buffer), s_PD_YELLOWK, playername,
+                        (M_StringCompare(playername, playername_default) ? "" : "s"), "keycard");
+                    HU_PlayerMessage(buffer, true);
                 }
-                M_snprintf(buffer, sizeof(buffer), s_PD_YELLOWK, playername,
-                    (M_StringCompare(playername, playername_default) ? "" : "s"), "keycard");
-                HU_PlayerMessage(buffer, true);
-            }
-            else if (player->cards[it_yellowskull] == CARDNOTFOUNDYET)
-            {
-                if (hud && (!player->neededcardflash || player->neededcard != it_yellowskull))
+                else if (player->cards[it_yellowskull] == CARDNOTFOUNDYET)
                 {
-                    player->neededcard = it_yellowskull;
-                    player->neededcardflash = NEEDEDCARDFLASH;
+                    if (hud && (!player->neededcardflash || player->neededcard != it_yellowskull))
+                    {
+                        player->neededcard = it_yellowskull;
+                        player->neededcardflash = NEEDEDCARDFLASH;
+                    }
+
+                    M_snprintf(buffer, sizeof(buffer), s_PD_YELLOWK, playername,
+                        (M_StringCompare(playername, playername_default) ? "" : "s"), "skull key");
+                    HU_PlayerMessage(buffer, true);
                 }
-                M_snprintf(buffer, sizeof(buffer), s_PD_YELLOWK, playername,
-                    (M_StringCompare(playername, playername_default) ? "" : "s"), "skull key");
-                HU_PlayerMessage(buffer, true);
+
+                //  [BH] use sfx_noway instead of sfx_oof
+                S_StartSound(player->mo, sfx_noway);
+                return;
             }
-            //  [BH] use sfx_noway instead of sfx_oof
-            S_StartSound(player->mo, sfx_noway);
-            return;
-        }
-        break;
+
+            break;
         
-      case DR_Door_Red_OpenWaitClose:
-      case D1_Door_Red_OpenStay:
-        if ( !player )
-            return;
+        case DR_Door_Red_OpenWaitClose:
+        case D1_Door_Red_OpenStay:
+            if (!player)
+                return;
         
-        if (player->cards[it_redcard] <= 0 && player->cards[it_redskull] <= 0)
-        {
-            if (player->cards[it_redcard] == CARDNOTFOUNDYET)
+            if (player->cards[it_redcard] <= 0 && player->cards[it_redskull] <= 0)
             {
-                if (hud && (!player->neededcardflash || player->neededcard != it_redcard))
+                if (player->cards[it_redcard] == CARDNOTFOUNDYET)
                 {
-                    player->neededcard = it_redcard;
-                    player->neededcardflash = NEEDEDCARDFLASH;
+                    if (hud && (!player->neededcardflash || player->neededcard != it_redcard))
+                    {
+                        player->neededcard = it_redcard;
+                        player->neededcardflash = NEEDEDCARDFLASH;
+                    }
+
+                    M_snprintf(buffer, sizeof(buffer), s_PD_REDK, playername,
+                        (M_StringCompare(playername, playername_default) ? "" : "s"), "keycard");
+                    HU_PlayerMessage(buffer, true);
                 }
-                M_snprintf(buffer, sizeof(buffer), s_PD_REDK, playername,
-                    (M_StringCompare(playername, playername_default) ? "" : "s"), "keycard");
-                HU_PlayerMessage(buffer, true);
-            }
-            else if (player->cards[it_redskull] == CARDNOTFOUNDYET)
-            {
-                if (hud && (!player->neededcardflash || player->neededcard != it_redskull))
+                else if (player->cards[it_redskull] == CARDNOTFOUNDYET)
                 {
-                    player->neededcard = it_redskull;
-                    player->neededcardflash = NEEDEDCARDFLASH;
+                    if (hud && (!player->neededcardflash || player->neededcard != it_redskull))
+                    {
+                        player->neededcard = it_redskull;
+                        player->neededcardflash = NEEDEDCARDFLASH;
+                    }
+
+                    M_snprintf(buffer, sizeof(buffer), s_PD_REDK, playername,
+                        (M_StringCompare(playername, playername_default) ? "" : "s"), "skull key");
+                    HU_PlayerMessage(buffer, true);
                 }
-               M_snprintf(buffer, sizeof(buffer), s_PD_REDK, playername,
-                   (M_StringCompare(playername, playername_default) ? "" : "s"), "skull key");
-               HU_PlayerMessage(buffer, true);
+
+                //  [BH] use sfx_noway instead of sfx_oof
+                S_StartSound(player->mo, sfx_noway);
+                return;
             }
-            //  [BH] use sfx_noway instead of sfx_oof
-            S_StartSound(player->mo, sfx_noway);
-            return;
-        }
-        break;
+
+            break;
     }
         
     // if the wrong side of door is pushed, give oof sound
-    if (line->sidenum[1] == NO_INDEX)           // killough
+    // killough
+    if (line->sidenum[1] == NO_INDEX)
     {
         // [BH] use sfx_noway instead of sfx_oof
         // [crispy] do not crash if the wrong side of the door is pushed
         C_Error("EV_VerticalDoor: DR special type on 1-sided linedef");
-        S_StartSound(player->mo, sfx_noway);    // killough 3/20/98
+
+        // killough 3/20/98
+        S_StartSound(player->mo, sfx_noway);
         return;
     }
 
@@ -641,35 +686,18 @@ EV_VerticalDoor
     if (sec->ceilingdata)
     {
         door = sec->ceilingdata;
-        switch(line->special)
+
+        switch (line->special)
         {
-          case DR_Door_OpenWaitClose_AlsoMonsters:
-          case DR_Door_Blue_OpenWaitClose:
-          case DR_Door_Yellow_OpenWaitClose:
-          case DR_Door_Red_OpenWaitClose:
-          case DR_Door_OpenWaitClose_Fast:
-            if (door->direction == -1)
-            {
-                door->direction = 1;        // go back up
-
-                // [BH] play correct door sound
-                if (door->type == doorBlazeRaise)
-                    S_StartSectorSound(&door->sector->soundorg, sfx_bdcls);
-                else
-                    S_StartSectorSound(&door->sector->soundorg, sfx_dorcls);
-            }
-            else
-            {
-                if (!thing->player)
-                    return;                // JDC: bad guys never close doors
-
-                // When is a door not a door?
-                // In Vanilla, door->direction is set, even though
-                // "specialdata" might not actually point at a door.
-
-                if (door->thinker.function == T_VerticalDoor)
+            case DR_Door_OpenWaitClose_AlsoMonsters:
+            case DR_Door_Blue_OpenWaitClose:
+            case DR_Door_Yellow_OpenWaitClose:
+            case DR_Door_Red_OpenWaitClose:
+            case DR_Door_OpenWaitClose_Fast:
+                if (door->direction == -1)
                 {
-                    door->direction = -1;        // start going down immediately
+                    // go back up
+                    door->direction = 1;
 
                     // [BH] play correct door sound
                     if (door->type == doorBlazeRaise)
@@ -677,100 +705,124 @@ EV_VerticalDoor
                     else
                         S_StartSectorSound(&door->sector->soundorg, sfx_dorcls);
                 }
-                else if (door->thinker.function == T_PlatRaise)
-                {
-                    // Erm, this is a plat, not a door.
-                    // This notably causes a problem in ep1-0500.lmp where
-                    // a plat and a door are cross-referenced; the door
-                    // doesn't open on 64-bit.
-                    // The direction field in vldoor_t corresponds to the wait
-                    // field in plat_t.  Let's set that to -1 instead.
-
-                    plat_t *plat;
-
-                    plat = (plat_t *) door;
-                    plat->wait = -1;
-                }
                 else
                 {
-                    // This isn't a door OR a plat.  Now we're in trouble.
+                    if (!thing->player)
+                        // JDC: bad guys never close doors
+                        return;
 
-                    C_Warning("EV_VerticalDoor: Tried to close "
-                                    "something that wasn't a door.");
+                    // When is a door not a door?
+                    // In Vanilla, door->direction is set, even though
+                    // "specialdata" might not actually point at a door.
+                    if (door->thinker.function == T_VerticalDoor)
+                    {
+                        // start going down immediately
+                        door->direction = -1;
 
-                    // Try closing it anyway. At least it will work on 32-bit
-                    // machines.
+                        // [BH] play correct door sound
+                        if (door->type == doorBlazeRaise)
+                            S_StartSectorSound(&door->sector->soundorg, sfx_bdcls);
+                        else
+                            S_StartSectorSound(&door->sector->soundorg, sfx_dorcls);
+                    }
+                    else if (door->thinker.function == T_PlatRaise)
+                    {
+                        // Erm, this is a plat, not a door.
+                        // This notably causes a problem in ep1-0500.lmp where
+                        // a plat and a door are cross-referenced; the door
+                        // doesn't open on 64-bit.
+                        // The direction field in vldoor_t corresponds to the wait
+                        // field in plat_t.  Let's set that to -1 instead.
 
-                    door->direction = -1;
+                        plat_t *plat;
+
+                        plat = (plat_t *) door;
+                        plat->wait = -1;
+                    }
+                    else
+                    {
+                        // This isn't a door OR a plat.  Now we're in trouble.
+                        C_Warning("EV_VerticalDoor: Tried to close "
+                                        "something that wasn't a door.");
+
+                        // Try closing it anyway. At least it will work on 32-bit
+                        // machines.
+                        door->direction = -1;
+                    }
                 }
-            }
-            return;
+
+                return;
         }
     }
         
     // for proper sound
-    switch(line->special)
+    switch (line->special)
     {
-      case DR_Door_OpenWaitClose_Fast:
-      case D1_Door_OpenStay_Fast:
+        case DR_Door_OpenWaitClose_Fast:
+        case D1_Door_OpenStay_Fast:
 
-        if(fsize != 10396254 && fsize != 10399316 && fsize != 10401760 && fsize != 4207819 &&
+            if (fsize != 10396254 && fsize != 10399316 && fsize != 10401760 && fsize != 4207819 &&
                 fsize != 4274218 && fsize != 4225504 && fsize != 4225460)
-            S_StartSectorSound(&sec->soundorg,sfx_bdopn);
-        break;
+                S_StartSectorSound(&sec->soundorg, sfx_bdopn);
+
+            break;
         
-      default:        // LOCKED DOOR SOUND
-        S_StartSectorSound(&sec->soundorg,sfx_doropn);
-        break;
-    }
-        
+        // LOCKED DOOR SOUND
+        default:
+            S_StartSectorSound(&sec->soundorg, sfx_doropn);
+            break;
+    }        
     
     // new door thinker
     door = Z_Calloc(1, sizeof(*door), PU_LEVSPEC, NULL); 
-    P_AddThinker (&door->thinker);
+    P_AddThinker(&door->thinker);
     sec->ceilingdata = door;
     door->thinker.function = T_VerticalDoor;
     door->sector = sec;
     door->direction = 1;
     door->speed = VDOORSPEED;
     door->topwait = VDOORWAIT;
-    door->line = line;          // jff 1/31/98 remember line that triggered us
+
+    // jff 1/31/98 remember line that triggered us
+    door->line = line;
 
     // killough 10/98: use gradual lighting changes if nonzero tag given
     // [BH] check if tag is valid
-    door->lighttag = (P_FindLineFromLineTag(line, 0) ? line->tag : 0);  // killough 10/98
+    door->lighttag = (P_FindLineFromLineTag(line, 0) ? line->tag : 0);
 
-    switch(line->special)
+    switch (line->special)
     {
-      case DR_Door_OpenWaitClose_AlsoMonsters:
-      case DR_Door_Blue_OpenWaitClose:
-      case DR_Door_Yellow_OpenWaitClose:
-      case DR_Door_Red_OpenWaitClose:
-        door->type = doorNormal;
-        break;
+        case DR_Door_OpenWaitClose_AlsoMonsters:
+        case DR_Door_Blue_OpenWaitClose:
+        case DR_Door_Yellow_OpenWaitClose:
+        case DR_Door_Red_OpenWaitClose:
+            door->type = doorNormal;
+            break;
         
-      case D1_Door_OpenStay:
-      case D1_Door_Blue_OpenStay:
-      case D1_Door_Red_OpenStay:
-      case D1_Door_Yellow_OpenStay:
-        door->type = doorOpen;
-        line->special = 0;
-        break;
+        case D1_Door_OpenStay:
+        case D1_Door_Blue_OpenStay:
+        case D1_Door_Red_OpenStay:
+        case D1_Door_Yellow_OpenStay:
+            door->type = doorOpen;
+            line->special = 0;
+            break;
         
-      case DR_Door_OpenWaitClose_Fast:
-        door->type = doorBlazeRaise;
-        door->speed = VDOORSPEED*4;
-        break;
+        case DR_Door_OpenWaitClose_Fast:
+            door->type = doorBlazeRaise;
+            door->speed = VDOORSPEED * 4;
+            break;
 
-      case D1_Door_OpenStay_Fast:
-        door->type = doorBlazeOpen;
-        line->special = 0;
-        door->speed = VDOORSPEED*4;
-        break;
+        case D1_Door_OpenStay_Fast:
+            door->type = doorBlazeOpen;
+            line->special = 0;
+            door->speed = VDOORSPEED * 4;
+            break;
 
-      default:
-        door->lighttag = 0; // killough 10/98
-        break;
+        default:
+            // killough 10/98
+            door->lighttag = 0;
+
+            break;
     }
     
     // find the top and bottom of the movement range
@@ -781,15 +833,14 @@ EV_VerticalDoor
         sec->lines[i]->flags &= ~ML_SECRET;
 }
 
-
 //
 // Spawn a door that closes after 30 seconds
 //
-void P_SpawnDoorCloseIn30 (sector_t* sec)
+void P_SpawnDoorCloseIn30(sector_t *sec)
 {
     vldoor_t    *door = Z_Calloc(1, sizeof(*door), PU_LEVSPEC, NULL); 
 
-    P_AddThinker (&door->thinker);
+    P_AddThinker(&door->thinker);
 
     sec->ceilingdata = door;
     sec->special = 0;
@@ -800,20 +851,22 @@ void P_SpawnDoorCloseIn30 (sector_t* sec)
     door->type = doorNormal;
     door->speed = VDOORSPEED;
     door->topcountdown = 30 * TICRATE;
-    door->line = NULL;          // jff 1/31/98 remember line that triggered us
-    door->lighttag = 0;         // killough 10/98: no lighting changes
+
+    // jff 1/31/98 remember line that triggered us
+    door->line = NULL;
+
+    // killough 10/98: no lighting changes
+    door->lighttag = 0;
 }
 
 //
 // Spawn a door that opens after 5 minutes
 //
-void
-P_SpawnDoorRaiseIn5Mins
-( sector_t*        sec)
+void P_SpawnDoorRaiseIn5Mins(sector_t *sec)
 {
     vldoor_t    *door = Z_Calloc(1, sizeof(*door), PU_LEVSPEC, NULL); 
     
-    P_AddThinker (&door->thinker);
+    P_AddThinker(&door->thinker);
 
     sec->ceilingdata = door;
     sec->special = 0;
@@ -827,11 +880,13 @@ P_SpawnDoorRaiseIn5Mins
     door->topheight -= 4*FRACUNIT;
     door->topwait = VDOORWAIT;
     door->topcountdown = 5 * 60 * TICRATE;
-    door->line = NULL; // jff 1/31/98 remember line that triggered us
-    door->lighttag = 0;  // killough 10/98: no lighting changes
+
+    // jff 1/31/98 remember line that triggered us
+    door->line = NULL;
+
+    // killough 10/98: no lighting changes
+    door->lighttag = 0;
 }
-
-
 
 // UNUSED
 // Separate into p_slidoor.c?
@@ -841,7 +896,6 @@ P_SpawnDoorRaiseIn5Mins
 // EV_SlidingDoor : slide a door horizontally
 // (animate midtexture, then set noblocking line)
 //
-
 
 slideframe_t slideFrames[MAXSLIDEDOORS];
 
@@ -854,10 +908,10 @@ void P_InitSlidingDoorFrames(void)
     int                f4;
         
     // DOOM II ONLY...
-    if ( gamemode != commercial)
+    if (gamemode != commercial)
         return;
         
-    for (i = 0;i < MAXSLIDEDOORS; i++)
+    for (i = 0; i < MAXSLIDEDOORS; i++)
     {
         if (!slideFrameNames[i].frontFrame1[0])
             break;
@@ -884,19 +938,19 @@ void P_InitSlidingDoorFrames(void)
     }
 }
 
-
 //
 // Return index into "slideFrames" array
 // for which door type to use
 //
-int P_FindSlidingDoorType(line_t*        line)
+int P_FindSlidingDoorType(line_t *line)
 {
     int                i;
     int                val;
         
-    for (i = 0;i < MAXSLIDEDOORS;i++)
+    for (i = 0; i < MAXSLIDEDOORS; i++)
     {
         val = sides[line->sidenum[0]].midtexture;
+
         if (val == slideFrames[i].frontFrames[0])
             return i;
     }
@@ -904,100 +958,98 @@ int P_FindSlidingDoorType(line_t*        line)
     return -1;
 }
 
-void T_SlidingDoor (slidedoor_t*        door)
+void T_SlidingDoor(slidedoor_t *door)
 {
-    switch(door->status)
+    switch (door->status)
     {
-      case sd_opening:
-        if (!door->timer--)
-        {
-            if (++door->frame == SNUMFRAMES)
+        case sd_opening:
+            if (!door->timer--)
             {
-                // IF DOOR IS DONE OPENING...
-                sides[door->line->sidenum[0]].midtexture = 0;
-                sides[door->line->sidenum[1]].midtexture = 0;
-                door->line->flags &= ML_BLOCKING^0xff;
-                                        
-                if (door->type == sdt_openOnly)
+                if (++door->frame == SNUMFRAMES)
                 {
-                    door->frontsector->specialdata = NULL;
-                    P_RemoveThinker (&door->thinker);
-                    break;
+                    // IF DOOR IS DONE OPENING...
+                    sides[door->line->sidenum[0]].midtexture = 0;
+                    sides[door->line->sidenum[1]].midtexture = 0;
+                    door->line->flags &= ML_BLOCKING ^ 0xff;
+                                        
+                    if (door->type == sdt_openOnly)
+                    {
+                        door->frontsector->specialdata = NULL;
+                        P_RemoveThinker(&door->thinker);
+                        break;
+                    }
+                                        
+                    door->timer = SDOORWAIT;
+                    door->status = sd_waiting;
                 }
+                else
+                {
+                    // IF DOOR NEEDS TO ANIMATE TO NEXT FRAME...
+                    door->timer = SWAITTICS;
                                         
-                door->timer = SDOORWAIT;
-                door->status = sd_waiting;
-            }
-            else
-            {
-                // IF DOOR NEEDS TO ANIMATE TO NEXT FRAME...
-                door->timer = SWAITTICS;
-                                        
-                sides[door->line->sidenum[0]].midtexture =
-                    slideFrames[door->whichDoorIndex].
-                    frontFrames[door->frame];
-                sides[door->line->sidenum[1]].midtexture =
-                    slideFrames[door->whichDoorIndex].
-                    backFrames[door->frame];
-            }
-        }
-        break;
-                        
-      case sd_waiting:
-        // IF DOOR IS DONE WAITING...
-        if (!door->timer--)
-        {
-            // CAN DOOR CLOSE?
-            if (door->frontsector->thinglist != NULL ||
-                door->backsector->thinglist != NULL)
-            {
-                door->timer = SDOORWAIT;
-                break;
+                    sides[door->line->sidenum[0]].midtexture =
+                        slideFrames[door->whichDoorIndex].
+                        frontFrames[door->frame];
+                    sides[door->line->sidenum[1]].midtexture =
+                        slideFrames[door->whichDoorIndex].
+                        backFrames[door->frame];
+                }
             }
 
-            //door->frame = SNUMFRAMES-1;
-            door->status = sd_closing;
-            door->timer = SWAITTICS;
-        }
-        break;
+            break;
                         
-      case sd_closing:
-        if (!door->timer--)
-        {
-            if (--door->frame < 0)
+        case sd_waiting:
+            // IF DOOR IS DONE WAITING...
+            if (!door->timer--)
             {
-                // IF DOOR IS DONE CLOSING...
-                door->line->flags |= ML_BLOCKING;
-                door->frontsector->specialdata = NULL;
-                P_RemoveThinker (&door->thinker);
-                break;
-            }
-            else
-            {
-                // IF DOOR NEEDS TO ANIMATE TO NEXT FRAME...
+                // CAN DOOR CLOSE?
+                if (door->frontsector->thinglist != NULL ||
+                    door->backsector->thinglist != NULL)
+                {
+                    door->timer = SDOORWAIT;
+                    break;
+                }
+
+                //door->frame = SNUMFRAMES - 1;
+                door->status = sd_closing;
                 door->timer = SWAITTICS;
-                                        
-                sides[door->line->sidenum[0]].midtexture =
-                    slideFrames[door->whichDoorIndex].
-                    frontFrames[door->frame];
-                sides[door->line->sidenum[1]].midtexture =
-                    slideFrames[door->whichDoorIndex].
-                    backFrames[door->frame];
             }
-        }
-        break;
+
+            break;
+                        
+        case sd_closing:
+            if (!door->timer--)
+            {
+                if (--door->frame < 0)
+                {
+                    // IF DOOR IS DONE CLOSING...
+                    door->line->flags |= ML_BLOCKING;
+                    door->frontsector->specialdata = NULL;
+                    P_RemoveThinker(&door->thinker);
+                    break;
+                }
+                else
+                {
+                    // IF DOOR NEEDS TO ANIMATE TO NEXT FRAME...
+                    door->timer = SWAITTICS;
+                                        
+                    sides[door->line->sidenum[0]].midtexture =
+                        slideFrames[door->whichDoorIndex].
+                        frontFrames[door->frame];
+                    sides[door->line->sidenum[1]].midtexture =
+                        slideFrames[door->whichDoorIndex].
+                        backFrames[door->frame];
+                }
+            }
+
+            break;
     }
 }
 
-
-
-void
-EV_SlidingDoor
-( line_t*        line,
-  mobj_t*        thing )
+void EV_SlidingDoor(line_t *line, mobj_t *thing)
 {
-    sector_t*    sec;
-    slidedoor_t* door;
+    sector_t     *sec;
+    slidedoor_t  *door;
         
     // DOOM II ONLY...
     if (gamemode != commercial)
@@ -1006,12 +1058,14 @@ EV_SlidingDoor
     // Make sure door isn't already being animated
     sec = line->frontsector;
     door = NULL;
+
     if (sec->specialdata)
     {
         if (!thing->player)
             return;
                         
         door = sec->specialdata;
+
         if (door->type == sdt_openAndClose)
         {
             if (door->status == sd_waiting)
@@ -1024,8 +1078,8 @@ EV_SlidingDoor
     // Init sliding door vars
     if (!door)
     {
-        door = Z_Malloc (sizeof(*door), PU_LEVSPEC, NULL);
-        P_AddThinker (&door->thinker);
+        door = Z_Malloc(sizeof(*door), PU_LEVSPEC, NULL);
+        P_AddThinker(&door->thinker);
         sec->specialdata = door;
                 
         door->type = sdt_openAndClose;
@@ -1043,4 +1097,6 @@ EV_SlidingDoor
         door->line = line;
     }
 }
+
 #endif
+

@@ -28,6 +28,7 @@
 #ifndef __P_MOBJ__
 #define __P_MOBJ__
 
+
 // We need the thinker_t stuff.
 #include "d_think.h"
 
@@ -47,7 +48,6 @@
 
 // killough 11/98:
 // For torque simulation:
-
 #define OVERDRIVE               6
 #define MAXGEAR                 (OVERDRIVE + 16)
 
@@ -65,6 +65,7 @@
 
 // haleyjd: thing can't trigger particle events
 #define MIF_NOPTCLEVTS          0x00000200
+
 
 //
 // NOTES: mobj_t
@@ -137,24 +138,32 @@ typedef enum
 {
     // Call P_SpecialThing when touched.
     MF_SPECIAL             = 1,
+
     // Blocks.
     MF_SOLID               = 2,
+
     // Can be hit.
     MF_SHOOTABLE           = 4,
+
     // Don't use the sector links (invisible but touchable).
     MF_NOSECTOR            = 8,
+
     // Don't use the blocklinks (inert but displayable)
     MF_NOBLOCKMAP          = 16,                    
 
     // Not to be activated by sound, deaf monster.
     MF_AMBUSH              = 32,
+
     // Will try to attack right back.
     MF_JUSTHIT             = 64,
+
     // Will take at least one step before attacking.
     MF_JUSTATTACKED        = 128,
+
     // On level spawning (initial position),
     //  hang from ceiling instead of stand on floor.
     MF_SPAWNCEILING        = 256,
+
     // Don't apply gravity (every tic),
     //  that is, object will float, keeping current height
     //  or changing it actively.
@@ -163,33 +172,44 @@ typedef enum
     // Movement flags.
     // This allows jumps from high places.
     MF_DROPOFF             = 0x400,
+
     // For players, will pick up items.
     MF_PICKUP              = 0x800,
+
     // Player cheat. ???
     MF_NOCLIP              = 0x1000,
+
     // Player: keep info about sliding along walls.
     MF_SLIDE               = 0x2000,
+
     // Allow moves to any height, no gravity.
     // For active floaters, e.g. cacodemons, pain elementals.
     MF_FLOAT               = 0x4000,
+
     // Don't cross lines
     //   ??? or look at heights on teleport.
     MF_TELEPORT            = 0x8000,
+
     // Don't hit same species, explode on block.
     // Player missiles as well as fireballs of various kinds.
     MF_MISSILE             = 0x10000,        
+
     // Dropped by a demon, not level spawned.
     // E.g. ammo clips dropped by dying former humans.
     MF_DROPPED             = 0x20000,
+
     // Use fuzzy draw (shadow demons or spectres),
     //  temporary player invisibility powerup.
     MF_SHADOW              = 0x40000,
+
     // Flag: don't bleed when shot (use puff),
     //  barrels and shootable furniture shall not bleed.
     MF_NOBLOOD             = 0x80000,
+
     // Don't stop moving halfway off a step,
     //  that is, have dead bodies slide down all the way.
     MF_CORPSE              = 0x100000,
+
     // Floating to a height for a move, ???
     //  don't auto float to target's height.
     MF_INFLOAT             = 0x200000,
@@ -238,27 +258,37 @@ typedef enum
 {
     // Apply additive translucency
     MF2_TRANSLUCENT               = 0x00000001,
+
     // Apply additive translucency on red only
     MF2_TRANSLUCENT_REDONLY       = 0x00000002,
+
     // Apply additive translucency on green only
     MF2_TRANSLUCENT_GREENONLY     = 0x00000004,
+
     // Apply additive translucency on blue only
     MF2_TRANSLUCENT_BLUEONLY      = 0x00000008,
+
     // Apply 33% alpha translucency
     MF2_TRANSLUCENT_33            = 0x00000010,
+
     // Apply additive translucency on all red to white
     MF2_TRANSLUCENT_REDWHITEONLY  = 0x00000020,
+
     // Convert all red to green, then apply 33% alpha translucency
     MF2_TRANSLUCENT_REDTOGREEN_33 = 0x00000040,
+
     // Convert all red to blue, then apply 33% alpha translucency
     MF2_TRANSLUCENT_REDTOBLUE_33  = 0x00000080,
+
     // Apply 33% alpha translucency on all blue
     MF2_TRANSLUCENT_BLUE_33       = 0x00000100,
 
     // Convert all red to green
     MF2_REDTOGREEN                = 0x00000200,
+
     // Convert all green to red
     MF2_GREENTORED                = 0x00000400,
+
     // Convert all red to blue
     MF2_REDTOBLUE                 = 0x00000800,
 
@@ -330,10 +360,10 @@ typedef struct mobj_s
     fixed_t                z;
 
     // More list: links in sector (if needed)
-    struct mobj_s*         snext;
-    struct mobj_s**        sprev;
+    struct mobj_s          *snext;
+    struct mobj_s          **sprev;
 
-    //More drawing info: to determine current sprite.
+    // More drawing info: to determine current sprite.
     // orientation
     angle_t                angle;
 
@@ -345,10 +375,10 @@ typedef struct mobj_s
 
     // Interaction info, by BLOCKMAP.
     // Links in blocks (if needed).
-    struct mobj_s*         bnext;
-    struct mobj_s**        bprev;
+    struct mobj_s          *bnext;
+    struct mobj_s          **bprev;
     
-    struct subsector_s*    subsector;
+    struct subsector_s     *subsector;
 
     // The closest interval over all contacted Sectors.
     fixed_t                floorz;
@@ -369,12 +399,12 @@ typedef struct mobj_s
     mobjtype_t             type;
 
     // &mobjinfo[mobj->type]
-    mobjinfo_t*            info;
+    mobjinfo_t             *info;
     
     // state tic counter
     int                    tics;
 
-    state_t*               state;
+    state_t                *state;
     int                    flags;
     int                    flags2;
     int                    health;
@@ -388,7 +418,7 @@ typedef struct mobj_s
 
     // Thing being chased/attacked (or NULL),
     // also the originator for missiles.
-    struct mobj_s*         target;
+    struct mobj_s          *target;
 
     // Reaction time: if non 0, don't attack yet.
     // Used by player to freeze a bit after teleporting.
@@ -400,7 +430,7 @@ typedef struct mobj_s
 
     // Additional info record for player avatars only.
     // Only valid if type == MT_PLAYER
-    struct player_s*       player;
+    struct player_s        *player;
 
     // Player number last looked for.
     int                    lastlook;        
@@ -409,10 +439,10 @@ typedef struct mobj_s
     mapthing_t             spawnpoint;        
 
     // Thing being chased/attacked for tracers.
-    struct mobj_s*         tracer;        
+    struct mobj_s          *tracer;        
     
     // [AM] If true, ok to interpolate this tic.
-    dboolean                interp;
+    dboolean               interp;
 
     // [AM] Previous position of mobj before think.
     //      Used to interpolate between positions.

@@ -41,6 +41,7 @@ typedef enum
     mus_systemevent = 0x30,
     mus_changecontroller = 0x40,
     mus_scoreend = 0x60
+
 } musevent;
 
 // MIDI event codes
@@ -53,6 +54,7 @@ typedef enum
     midi_changepatch = 0xC0,
     midi_aftertouchchannel = 0xD0,
     midi_pitchwheel = 0xE0
+
 } midievent;
 
 // Structure to hold MUS file header
@@ -64,7 +66,9 @@ typedef struct
     unsigned short primarychannels;
     unsigned short secondarychannels;
     unsigned short instrumentcount;
+
 } PACKEDATTR musheader;
+
 
 // Standard MIDI type 0 header + track header
 static const byte midiheader[] =
@@ -74,7 +78,7 @@ static const byte midiheader[] =
     0x00, 0x00,             // MIDI type (0)
     0x00, 0x01,             // Number of tracks
     0x00, 0x46,             // Resolution
-    'M', 'T', 'r', 'k',        // Start of track
+    'M', 'T', 'r', 'k',     // Start of track
     0x00, 0x00, 0x00, 0x00  // Placeholder for track length
 };
 
@@ -86,11 +90,9 @@ static byte channelvelocities[] =
 };
 
 // Timestamps between sequences of MUS events
-
 static unsigned int queuedtime;
 
 // Counter for the length of the track
-
 static unsigned int tracksize;
 
 static const byte controller_map[] =
@@ -101,8 +103,8 @@ static const byte controller_map[] =
 
 static int channel_map[NUM_CHANNELS];
 
-// Write timestamp to a MIDI file.
 
+// Write timestamp to a MIDI file.
 static dboolean WriteTime(unsigned int time, MEMFILE *midioutput)
 {
     unsigned int buffer = time & 0x7F;
@@ -136,7 +138,6 @@ static dboolean WriteTime(unsigned int time, MEMFILE *midioutput)
         }
     }
 }
-
 
 // Write the end of track marker
 static dboolean WriteEndTrack(MEMFILE *midioutput)
@@ -290,11 +291,8 @@ static dboolean WriteChangePatch(byte channel, byte patch,
 }
 
 // Write a valued controller change event
-
-static dboolean WriteChangeController_Valued(byte channel,
-                                            byte control,
-                                            byte value,
-                                            MEMFILE *midioutput)
+static dboolean WriteChangeController_Valued(byte channel, byte control,
+                                            byte value, MEMFILE *midioutput)
 {
     byte working = midi_changecontroller | channel;
 
@@ -317,12 +315,10 @@ static dboolean WriteChangeController_Valued(byte channel,
 
     // Quirk in vanilla DOOM? MUS controller values should be
     // 7-bit, not 8-bit.
-
     working = value;// & 0x7F;
 
     // Fix on said quirk to stop MIDI players from complaining that
     // the value is out of range:
-
     if (working & 0x80)
     {
         working = 0x7F;
@@ -339,16 +335,13 @@ static dboolean WriteChangeController_Valued(byte channel,
 }
 
 // Write a valueless controller change event
-static dboolean WriteChangeController_Valueless(byte channel,
-                                               byte control,
+static dboolean WriteChangeController_Valueless(byte channel, byte control,
                                                MEMFILE *midioutput)
 {
-    return WriteChangeController_Valued(channel, control, 0,
-                                             midioutput);
+    return WriteChangeController_Valued(channel, control, 0, midioutput);
 }
 
 // Allocate a free MIDI channel.
-
 static int AllocateMIDIChannel(void)
 {
     int result;
@@ -356,10 +349,9 @@ static int AllocateMIDIChannel(void)
     int i;
 
     // Find the current highest-allocated channel.
-
     max = -1;
 
-    for (i=0; i<NUM_CHANNELS; ++i)
+    for (i = 0; i < NUM_CHANNELS; ++i)
     {
         if (channel_map[i] > max)
         {
@@ -370,11 +362,9 @@ static int AllocateMIDIChannel(void)
     // max is now equal to the highest-allocated MIDI channel.  We can
     // now allocate the next available channel.  This also works if
     // no channels are currently allocated (max=-1)
-
     result = max + 1;
 
     // Don't allocate the MIDI percussion channel!
-
     if (result == MIDI_PERCUSSION_CHAN)
     {
         ++result;
@@ -385,12 +375,10 @@ static int AllocateMIDIChannel(void)
 
 // Given a MUS channel number, get the MIDI channel number to use
 // in the outputted file.
-
 static int GetMIDIChannel(int mus_channel, MEMFILE *midioutput)
 {
     // Find the MIDI channel to use for this MUS channel.
     // MUS channel 15 is the percusssion channel.
-
     if (mus_channel == MUS_PERCUSSION_CHAN)
     {
         return MIDI_PERCUSSION_CHAN;
@@ -443,7 +431,6 @@ static dboolean ReadMusHeader(MEMFILE *file, musheader *header)
 // a stream (midioutput).
 //
 // Returns 0 on success or 1 on failure.
-
 dboolean mus2mid(MEMFILE *musinput, MEMFILE *midioutput)
 {
     // Header for the MUS file
@@ -451,9 +438,11 @@ dboolean mus2mid(MEMFILE *musinput, MEMFILE *midioutput)
 
     // Descriptor for the current MUS event
     byte eventdescriptor;
-    int channel; // Channel number
-    musevent event;
 
+    // Channel number
+    int channel;
+
+    musevent event;
 
     // Bunch of vars read from MUS lump
     byte key;
@@ -468,44 +457,43 @@ dboolean mus2mid(MEMFILE *musinput, MEMFILE *midioutput)
 
     // Temp working byte
     byte working;
+
     // Used in building up time delays
     unsigned int timedelay;
 
     // Initialise channel map to mark all channels as unused.
-
-    for (channel=0; channel<NUM_CHANNELS; ++channel)
+    for (channel = 0; channel < NUM_CHANNELS; ++channel)
     {
         channel_map[channel] = -1;
     }
 
     // Grab the header
-
     if (!ReadMusHeader(musinput, &musfileheader))
     {
         return true;
     }
 
 #ifdef CHECK_MUS_HEADER
+
     // Check MUS header
     if (musfileheader.id[0] != 'M'
-     || musfileheader.id[1] != 'U'
-     || musfileheader.id[2] != 'S'
-     || musfileheader.id[3] != 0x1A)
+        || musfileheader.id[1] != 'U'
+        || musfileheader.id[2] != 'S'
+        || musfileheader.id[3] != 0x1A)
     {
         return true;
     }
+
 #endif
 
     // Seek to where the data is held
-    if (mem_fseek(musinput, (long)musfileheader.scorestart,
-                  MEM_SEEK_SET) != 0)
+    if (mem_fseek(musinput, (long)musfileheader.scorestart, MEM_SEEK_SET) != 0)
     {
         return true;
     }
 
     // So, we can assume the MUS file is faintly legit. Let's start
     // writing MIDI data...
-
     mem_fwrite(midiheader, 1, sizeof(midiheader), midioutput);
     tracksize = 0;
 
@@ -513,11 +501,9 @@ dboolean mus2mid(MEMFILE *musinput, MEMFILE *midioutput)
     while (!hitscoreend)
     {
         // Handle a block of events:
-
         while (!hitscoreend)
         {
             // Fetch channel number and event code:
-
             if (mem_fread(&eventdescriptor, 1, 1, musinput) != 1)
             {
                 return true;
@@ -570,6 +556,7 @@ dboolean mus2mid(MEMFILE *musinput, MEMFILE *midioutput)
                     {
                         break;
                     }
+
                     if (WritePitchWheel(channel, (short)(key * 64), midioutput))
                     {
                         return true;
@@ -582,6 +569,7 @@ dboolean mus2mid(MEMFILE *musinput, MEMFILE *midioutput)
                     {
                         return true;
                     }
+
                     if (controllernumber < 10 || controllernumber > 14)
                     {
                         return true;
@@ -647,10 +635,12 @@ dboolean mus2mid(MEMFILE *musinput, MEMFILE *midioutput)
                 break;
             }
         }
+
         // Now we need to read the time code:
         if (!hitscoreend)
         {
             timedelay = 0;
+
             for (;;)
             {
                 if (mem_fread(&working, 1, 1, musinput) != 1)
@@ -659,11 +649,13 @@ dboolean mus2mid(MEMFILE *musinput, MEMFILE *midioutput)
                 }
 
                 timedelay = timedelay * 128 + (working & 0x7F);
+
                 if ((working & 0x80) == 0)
                 {
                     break;
                 }
             }
+
             queuedtime += timedelay;
         }
     }

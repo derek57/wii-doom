@@ -30,10 +30,12 @@
 #ifndef __STSTUFF_H__
 #define __STSTUFF_H__
 
+
 #include "d_event.h"
 #include "doomtype.h"
 #include "m_cheat.h"
 #include "v_patch.h"
+
 
 // Size of statusbar.
 // Now sensitive for scaling.
@@ -43,29 +45,6 @@
 #define ST_Y                          (ORIGINALHEIGHT - ST_HEIGHT)
 
 
-//
-// STATUS BAR
-//
-
-// Called by main loop.
-dboolean ST_Responder (event_t* ev);
-
-// Called by main loop.
-void ST_Ticker (void);
-
-// Called by main loop.
-void ST_Drawer (dboolean fullscreen, dboolean refresh);
-
-// Called when the console player is spawned on each level.
-void ST_Start (void);
-
-// Called by startup code.
-void ST_Init (int scrn);
-
-void ST_doRefresh(void);
-
-void ST_DrawSoundInfo(void);
-
 // States for status bar code.
 typedef enum
 {
@@ -73,7 +52,6 @@ typedef enum
     FirstPersonState
     
 } st_stateenum_t;
-
 
 // States for the chat code.
 typedef enum
@@ -85,11 +63,33 @@ typedef enum
 } st_chatstateenum_t;
 
 
+//
+// STATUS BAR
+//
+
+// Called by main loop.
+dboolean ST_Responder(event_t *ev);
+
+// Called by main loop.
+void ST_Ticker(void);
+
+// Called by main loop.
+void ST_Drawer(dboolean fullscreen, dboolean refresh);
+
+// Called when the console player is spawned on each level.
+void ST_Start(void);
+
+// Called by startup code.
+void ST_Init(int scrn);
+
+void ST_doRefresh(void);
+
+void ST_DrawSoundInfo(void);
+
+
 extern int        healthhighlight;
 extern int        ammohighlight;
 extern int        armorhighlight;
-
-//extern byte*      st_backing_screen;
 
 extern cheatseq_t cheat_mus;
 extern cheatseq_t cheat_massacre;
@@ -114,3 +114,4 @@ extern patch_t    *brdr_bl;
 extern patch_t    *brdr_br;
 
 #endif
+

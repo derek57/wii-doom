@@ -34,18 +34,23 @@
 #include "pcsound.h"
 
 
-#define TIMER_FREQ 1193181 /* hz */
+// hz
+#define TIMER_FREQ     1193181
 
-static dboolean pcs_initialized = false;
 
-static SDL_mutex *sound_lock;
-static dboolean use_sfx_prefix;
+static dboolean        pcs_initialized = false;
+static dboolean        use_sfx_prefix;
 
-static uint8_t *current_sound_lump = NULL;
-static uint8_t *current_sound_pos = NULL;
-static unsigned int current_sound_remaining = 0;
-static int current_sound_handle = 0;
-static int current_sound_lump_num = -1;
+static SDL_mutex       *sound_lock;
+
+static uint8_t         *current_sound_lump = NULL;
+static uint8_t         *current_sound_pos = NULL;
+
+static unsigned int    current_sound_remaining = 0;
+
+static int             current_sound_handle = 0;
+static int             current_sound_lump_num = -1;
+
 
 static const uint16_t divisors[] = {
     0,
@@ -64,7 +69,7 @@ static const uint16_t divisors[] = {
      427,  415,  403,  391,  380,  369,  359,  348,
      339,  329,  319,  310,  302,  293,  285,  276,
      269,  261,  253,  246,  239,  232,  226,  219,
-     213,  207,  201,  195,  190,  184,  179,
+     213,  207,  201,  195,  190,  184,  179
 };
 
 static void PCSCallbackFunc(int *duration, int *freq)
@@ -82,16 +87,14 @@ static void PCSCallbackFunc(int *duration, int *freq)
         unsigned int tone;
 
         // Read the next tone
-
         tone = *current_sound_pos;
 
         // Use the tone -> frequency lookup table.  See pcspkr10.zip
         // for a full discussion of this.
         // Check we don't overflow the frequency table.
-
         if (tone < arrlen(divisors) && divisors[tone] != 0)
         {
-            *freq = (int) (TIMER_FREQ / divisors[tone]);
+            *freq = (int)(TIMER_FREQ / divisors[tone]);
         }
         else
         {
@@ -115,7 +118,6 @@ static dboolean CachePCSLump(sfxinfo_t *sfxinfo)
     int headerlen;
 
     // Free the current sound lump back to the cache
- 
     if (current_sound_lump != NULL)
     {
         W_ReleaseLumpNum(current_sound_lump_num);
@@ -123,12 +125,10 @@ static dboolean CachePCSLump(sfxinfo_t *sfxinfo)
     }
 
     // Load from WAD
-
     current_sound_lump = W_CacheLumpNum(sfxinfo->lumpnum, PU_STATIC);
     lumplen = W_LumpLength(sfxinfo->lumpnum);
 
     // Read header
-  
     if (current_sound_lump[0] != 0x00 || current_sound_lump[1] != 0x00)
     {
         return false;
@@ -142,7 +142,6 @@ static dboolean CachePCSLump(sfxinfo_t *sfxinfo)
     }
 
     // Header checks out ok
-
     current_sound_remaining = headerlen;
     current_sound_pos = current_sound_lump + 4;
     current_sound_lump_num = sfxinfo->lumpnum;
@@ -153,20 +152,20 @@ static dboolean CachePCSLump(sfxinfo_t *sfxinfo)
 // These Doom PC speaker sounds are not played - this can be seen in the 
 // Heretic source code, where there are remnants of this left over
 // from Doom.
-
 static dboolean IsDisabledSound(sfxinfo_t *sfxinfo)
 {
     int i;
+
     const char *disabled_sounds[] = {
         "posact",
         "bgact",
         "dmact",
         "dmpain",
         "popain",
-        "sawidl",
+        "sawidl"
     };
 
-    for (i=0; i<arrlen(disabled_sounds); ++i)
+    for (i = 0; i < arrlen(disabled_sounds); ++i)
     {
         if (!strcmp(sfxinfo->name, disabled_sounds[i]))
         {
@@ -232,7 +231,6 @@ static void I_PCS_StopSound(int handle)
     }
 
     // If this is the channel currently playing, immediately end it.
-
     if (current_sound_handle == handle)
     {
         current_sound_remaining = 0;
@@ -245,7 +243,6 @@ static void I_PCS_StopSound(int handle)
 // Retrieve the raw data lump index
 //  for a given SFX name.
 //
-
 static int I_PCS_GetSfxLumpNum(sfxinfo_t* sfx)
 {
     char namebuf[9];
@@ -332,6 +329,6 @@ sound_module_t sound_pcsound_module =
     I_PCS_UpdateSoundParams,
     I_PCS_StartSound,
     I_PCS_StopSound,
-    I_PCS_SoundIsPlaying,
+    I_PCS_SoundIsPlaying
 };
 

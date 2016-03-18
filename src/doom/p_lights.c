@@ -45,7 +45,7 @@
 //
 // T_FireFlicker
 //
-void T_FireFlicker (fireflicker_t* flick)
+void T_FireFlicker(fireflicker_t *flick)
 {
     if (--flick->count)
         return;
@@ -55,12 +55,10 @@ void T_FireFlicker (fireflicker_t* flick)
     flick->count = 4;
 }
 
-
-
 //
 // P_SpawnFireFlicker
 //
-void P_SpawnFireFlicker (sector_t*        sector)
+void P_SpawnFireFlicker(sector_t *sector)
 {
     fireflicker_t       *flick = Z_Calloc(1, sizeof(*flick), PU_LEVSPEC, NULL); 
 
@@ -73,18 +71,15 @@ void P_SpawnFireFlicker (sector_t*        sector)
     flick->count = 4;
 }
 
-
-
 //
 // BROKEN LIGHT FLASHING
 //
-
 
 //
 // T_LightFlash
 // Do flashing lights.
 //
-void T_LightFlash (lightflash_t* flash)
+void T_LightFlash(lightflash_t *flash)
 {
     if (--flash->count)
         return;
@@ -92,51 +87,44 @@ void T_LightFlash (lightflash_t* flash)
     if (flash->sector->lightlevel == flash->maxlight)
     {
         flash-> sector->lightlevel = flash->minlight;
-        flash->count = (P_Random()&flash->mintime)+1;
+        flash->count = (P_Random() & flash->mintime) + 1;
     }
     else
     {
         flash-> sector->lightlevel = flash->maxlight;
-        flash->count = (P_Random()&flash->maxtime)+1;
+        flash->count = (P_Random() & flash->maxtime) + 1;
     }
-
 }
-
-
-
 
 //
 // P_SpawnLightFlash
 // After the map has been loaded, scan each sector
 // for specials that spawn thinkers
 //
-void P_SpawnLightFlash (sector_t*        sector)
+void P_SpawnLightFlash(sector_t *sector)
 {
     lightflash_t        *flash = Z_Calloc(1, sizeof(*flash), PU_LEVSPEC, NULL); 
 
-    P_AddThinker (&flash->thinker);
+    P_AddThinker(&flash->thinker);
 
     flash->thinker.function = T_LightFlash;
     flash->sector = sector;
     flash->maxlight = sector->lightlevel;
 
-    flash->minlight = P_FindMinSurroundingLight(sector,sector->lightlevel);
+    flash->minlight = P_FindMinSurroundingLight(sector, sector->lightlevel);
     flash->maxtime = 63;
     flash->mintime = 7;
-    flash->count = (P_Random()&flash->maxtime)+1;
+    flash->count = (P_Random() & flash->maxtime) + 1;
 }
-
-
 
 //
 // STROBE LIGHT FLASHING
 //
 
-
 //
 // T_StrobeFlash
 //
-void T_StrobeFlash (strobe_t*                flash)
+void T_StrobeFlash(strobe_t *flash)
 {
     if (--flash->count)
         return;
@@ -151,25 +139,18 @@ void T_StrobeFlash (strobe_t*                flash)
         flash-> sector->lightlevel = flash->minlight;
         flash->count =flash->darktime;
     }
-
 }
-
-
 
 //
 // P_SpawnStrobeFlash
 // After the map has been loaded, scan each sector
 // for specials that spawn thinkers
 //
-void
-P_SpawnStrobeFlash
-( sector_t*        sector,
-  int                fastOrSlow,
-  int                inSync )
+void P_SpawnStrobeFlash(sector_t *sector, int fastOrSlow, int inSync)
 {
     strobe_t    *flash = Z_Calloc(1, sizeof(*flash), PU_LEVSPEC, NULL); 
         
-    P_AddThinker (&flash->thinker);
+    P_AddThinker(&flash->thinker);
 
     flash->sector = sector;
     flash->darktime = fastOrSlow;
@@ -183,7 +164,6 @@ P_SpawnStrobeFlash
 
     flash->count = (inSync ? 1 : (P_Random() & 7) + 1);
 }
-
 
 //
 // Start strobing lights (usually from a trigger)
@@ -201,10 +181,9 @@ int EV_StartLightStrobing(line_t *line)
 
         P_SpawnStrobeFlash(sec, SLOWDARK, 0);
     }
+
     return 1;
 }
-
-
 
 //
 // TURN LINE'S TAG LIGHTS OFF
@@ -227,19 +206,17 @@ int EV_TurnTagLightsOff(line_t* line)
         for (j = 0; j < sector->linecount; j++)
             if ((temp = getNextSector(sector->lines[j], sector)) && temp->lightlevel < min)
                 min = temp->lightlevel;
+
         sector->lightlevel = min;
     }
+
     return 1;
 }
-
 
 //
 // TURN LINE'S TAG LIGHTS ON
 //
-int
-EV_LightTurnOn
-( line_t*        line,
-  int            bright )
+int EV_LightTurnOn(line_t *line, int bright)
 {
     int          i;
 
@@ -250,7 +227,9 @@ EV_LightTurnOn
     {
         sector_t        *temp;
         sector_t        *sector = sectors + i;
-        int             tbright = bright;       // jff 5/17/98 search for maximum PER sector
+
+        // jff 5/17/98 search for maximum PER sector
+        int             tbright = bright;
 
         // bright = 0 means to search for highest light level surrounding sector
         if (!bright)
@@ -261,13 +240,15 @@ EV_LightTurnOn
                 if ((temp = getNextSector(sector->lines[j], sector)) && temp->lightlevel > tbright)
                     tbright = temp->lightlevel;
         }
+
         sector->lightlevel = tbright;
 
-        //jff 5/17/98 unless compatibility optioned
-        //then maximum near ANY tagged sector
+        // jff 5/17/98 unless compatibility optioned
+        // then maximum near ANY tagged sector
         if (d_model)
             bright = tbright;
     }
+
     return 1;
 }
 
@@ -276,41 +257,44 @@ EV_LightTurnOn
 // Spawn glowing light
 //
 
-void T_Glow(glow_t*        g)
+void T_Glow(glow_t *g)
 {
-    switch(g->direction)
+    switch (g->direction)
     {
-      case -1:
-        // DOWN
-        g->sector->lightlevel -= GLOWSPEED;
-        if (g->sector->lightlevel <= g->minlight)
-        {
-            g->sector->lightlevel += GLOWSPEED;
-            g->direction = 1;
-        }
-        break;
-        
-      case 1:
-        // UP
-        g->sector->lightlevel += GLOWSPEED;
-        if (g->sector->lightlevel >= g->maxlight)
-        {
+        case -1:
+            // DOWN
             g->sector->lightlevel -= GLOWSPEED;
-            g->direction = -1;
-        }
-        break;
+
+            if (g->sector->lightlevel <= g->minlight)
+            {
+                g->sector->lightlevel += GLOWSPEED;
+                g->direction = 1;
+            }
+
+            break;
+        
+        case 1:
+            // UP
+            g->sector->lightlevel += GLOWSPEED;
+
+            if (g->sector->lightlevel >= g->maxlight)
+            {
+                g->sector->lightlevel -= GLOWSPEED;
+                g->direction = -1;
+            }
+
+            break;
     }
 }
 
-
-void P_SpawnGlowingLight(sector_t*        sector)
+void P_SpawnGlowingLight(sector_t *sector)
 {
     glow_t      *glow = Z_Calloc(1, sizeof(*glow), PU_LEVSPEC, NULL); 
         
     P_AddThinker(&glow->thinker);
 
     glow->sector = sector;
-    glow->minlight = P_FindMinSurroundingLight(sector,sector->lightlevel);
+    glow->minlight = P_FindMinSurroundingLight(sector, sector->lightlevel);
     glow->maxlight = sector->lightlevel;
     glow->thinker.function = T_Glow;
     glow->direction = -1;
@@ -331,7 +315,8 @@ void EV_LightTurnOnPartway(line_t *line, fixed_t level)
 {
     int i;
 
-    level = BETWEEN(0, level, FRACUNIT);        // clip at extremes
+    // clip at extremes
+    level = BETWEEN(0, level, FRACUNIT);
 
     // search all sectors for ones with same tag as activating line
     for (i = -1; (i = P_FindSectorFromLineTag(line, i)) >= 0;)
@@ -344,6 +329,7 @@ void EV_LightTurnOnPartway(line_t *line, fixed_t level)
             {
                 if (temp->lightlevel > bright)
                     bright = temp->lightlevel;
+
                 if (temp->lightlevel < min)
                     min = temp->lightlevel;
             }
@@ -360,13 +346,15 @@ void EV_LightByAdjacentSectors(sector_t *sector, fixed_t level)
     sector_t    *temp;
     int         i, bright = 0, min = MAX(0, sector->lightlevel - 4);
 
-    level = BETWEEN(0, level, FRACUNIT);        // clip at extremes
+    // clip at extremes
+    level = BETWEEN(0, level, FRACUNIT);
 
     for (i = 0; i < sector->linecount; i++)
         if ((temp = getNextSector(sector->lines[i], sector)))
         {
             if (temp->lightlevel > bright)
                 bright = temp->lightlevel;
+
             if (temp->lightlevel < min)
                 min = temp->lightlevel;
         }

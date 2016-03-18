@@ -70,36 +70,37 @@ struct allocated_sound_s
 
 static allocated_sound_t *channels_playing[NUM_CHANNELS];
 
-static int mixer_freq;
-static int mixer_channels;
-static int allocated_sounds_size;
+static int               mixer_freq;
+static int               mixer_channels;
+static int               allocated_sounds_size;
 
-static Uint16 mixer_format;
+static Uint16            mixer_format;
 
-static dboolean setpanning_workaround = false;
-static dboolean sound_initialized;
-static dboolean use_sfx_prefix;
+static dboolean          setpanning_workaround = false;
+static dboolean          sound_initialized;
+static dboolean          use_sfx_prefix;
+
 static dboolean (*ExpandSoundData)(sfxinfo_t *sfxinfo, byte *data, int samplerate, int length) = NULL;
 
 // Doubly-linked list of allocated sounds.
 // When a sound is played, it is moved to the head, so that the oldest
 // sounds not used recently are at the tail.
-
 static allocated_sound_t *allocated_sounds_head;
 static allocated_sound_t *allocated_sounds_tail;
 
-extern int lib_sample_rate;
 
 // Scale factor used when converting libsamplerate floating point numbers
 // to integers. Too high means the sounds can clip; too low means they
 // will be too quiet. This is an amount that should avoid clipping most
 // of the time: with all the Doom IWAD sound effects, at least. If a PWAD
 // is used, clipping might occur.
+float                    libsamplerate_scale = 0.65;
 
-float libsamplerate_scale = 0.65;
+
+extern int               lib_sample_rate;
+
 
 // Hook a sound into the linked list at the head.
-
 static void AllocatedSoundLink(allocated_sound_t *snd)
 {
     snd->prev = NULL;
@@ -118,7 +119,6 @@ static void AllocatedSoundLink(allocated_sound_t *snd)
 }
 
 // Unlink a sound from the linked list.
-
 static void AllocatedSoundUnlink(allocated_sound_t *snd)
 {
     if (snd->prev == NULL)
@@ -143,11 +143,9 @@ static void AllocatedSoundUnlink(allocated_sound_t *snd)
 static void FreeAllocatedSound(allocated_sound_t *snd)
 {
     // Unlink from linked list.
-
     AllocatedSoundUnlink(snd);
 
     // Keep track of the amount of allocated sound data:
-
     allocated_sounds_size -= snd->chunk.alen;
 
     free(snd);
@@ -156,7 +154,6 @@ static void FreeAllocatedSound(allocated_sound_t *snd)
 // Search from the tail backwards along the allocated sounds list, find
 // and free a sound that is not in use, to free up memory.  Return true
 // for success.
-
 static dboolean FindAndFreeSound(void)
 {
     allocated_sound_t *snd;
@@ -175,7 +172,6 @@ static dboolean FindAndFreeSound(void)
     }
 
     // No available sounds to free...
-
     return false;
 }
 
@@ -192,11 +188,9 @@ static void ReserveCacheSpace(size_t len)
 
     // Keep freeing sound effects that aren't currently being played,
     // until there is enough space for the new sound.
-
     while (allocated_sounds_size + len > snd_cachesize)
     {
         // Free a sound.  If there is nothing more to free, stop.
-
         if (!FindAndFreeSound())
         {
             break;
@@ -205,25 +199,21 @@ static void ReserveCacheSpace(size_t len)
 }
 
 // Allocate a block for a new sound effect.
-
 static allocated_sound_t *AllocateSound(sfxinfo_t *sfxinfo, size_t len)
 {
     allocated_sound_t *snd;
 
     // Keep allocated sounds within the cache size.
-
     ReserveCacheSpace(len);
 
     // Allocate the sound structure and data.  The data will immediately
     // follow the structure, which acts as a header.
-
     do
     {
         snd = malloc(sizeof(allocated_sound_t) + len);
 
         // Out of memory?  Try to free an old sound, then loop round
         // and try again.
-
         if (snd == NULL && !FindAndFreeSound())
         {
             return NULL;
@@ -232,7 +222,6 @@ static allocated_sound_t *AllocateSound(sfxinfo_t *sfxinfo, size_t len)
     } while (snd == NULL);
 
     // Skip past the chunk structure for the audio buffer
-
     snd->chunk.abuf = (byte *) (snd + 1);
     snd->chunk.alen = len;
     snd->chunk.allocated = 1;
@@ -243,7 +232,6 @@ static allocated_sound_t *AllocateSound(sfxinfo_t *sfxinfo, size_t len)
     snd->use_count = 0;
 
     // Keep track of how much memory all these cached sounds are using...
-
     allocated_sounds_size += len;
 
     AllocatedSoundLink(snd);
@@ -252,24 +240,20 @@ static allocated_sound_t *AllocateSound(sfxinfo_t *sfxinfo, size_t len)
 }
 
 // Lock a sound, to indicate that it may not be freed.
-
 static void LockAllocatedSound(allocated_sound_t *snd)
 {
     // Increase use count, to stop the sound being freed.
-
     ++snd->use_count;
 
     //printf("++ %s: Use count=%i\n", snd->sfxinfo->name, snd->use_count);
 
     // When we use a sound, re-link it into the list at the head, so
     // that the oldest sounds fall to the end of the list for freeing.
-
     AllocatedSoundUnlink(snd);
     AllocatedSoundLink(snd);
 }
 
 // Unlock a sound to indicate that it may now be freed.
-
 static void UnlockAllocatedSound(allocated_sound_t *snd)
 {
     if (snd->use_count <= 0)
@@ -284,25 +268,25 @@ static void UnlockAllocatedSound(allocated_sound_t *snd)
 
 // Search through the list of allocated sounds and return the one that matches
 // the supplied sfxinfo entry and pitch level.
-
 static allocated_sound_t * GetAllocatedSoundBySfxInfoAndPitch(sfxinfo_t *sfxinfo, int pitch)
 {
     allocated_sound_t * p = allocated_sounds_head;
 
-    while(p != NULL)
+    while (p != NULL)
     {
-        if(p->sfxinfo == sfxinfo && p->pitch == pitch)
+        if (p->sfxinfo == sfxinfo && p->pitch == pitch)
         {
             return p;
         }
+
         p = p->next;
     }
+
     return NULL;
 }
 
 // Allocate a new sound chunk and pitch-shift an existing sound up-or-down
 // into it.
-
 static allocated_sound_t * PitchShift(allocated_sound_t *insnd, int pitch)
 {
     allocated_sound_t * outsnd;
@@ -318,12 +302,12 @@ static allocated_sound_t * PitchShift(allocated_sound_t *insnd, int pitch)
     dstlen = (int)((1 + (1 - (float)pitch / NORM_PITCH)) * srclen);
 
     // ensure that the new buffer is an even length
-    if( (dstlen % 2) == 0)
+    if ((dstlen % 2) == 0)
         dstlen++;
 
     outsnd = AllocateSound(insnd->sfxinfo, dstlen);
 
-    if(!outsnd)
+    if (!outsnd)
     {
         return NULL;
     }
@@ -332,7 +316,7 @@ static allocated_sound_t * PitchShift(allocated_sound_t *insnd, int pitch)
     dstbuf = (Sint16 *)outsnd->chunk.abuf;
 
     // loop over output buffer. find corresponding input cell, copy over
-    for(outp = dstbuf; outp < dstbuf + dstlen / 2; ++outp)
+    for (outp = dstbuf; outp < dstbuf + dstlen / 2; ++outp)
     {
         Sint16 *inp = srcbuf + (int)((float)(outp - dstbuf) / dstlen * srclen);
         *outp = *inp;
@@ -344,7 +328,6 @@ static allocated_sound_t * PitchShift(allocated_sound_t *insnd, int pitch)
 // When a sound stops, check if it is still playing.  If it is not, 
 // we can mark the sound data as CACHE to be freed back for other
 // means.
-
 static void ReleaseSoundOnChannel(int channel)
 {
     allocated_sound_t *snd = channels_playing[channel];
@@ -360,7 +343,7 @@ static void ReleaseSoundOnChannel(int channel)
 
     // if the sound is a pitch-shift and it's not in use, immediately
     // free it
-    if(snd->pitch != NORM_PITCH && snd->use_count <= 0)
+    if (snd->pitch != NORM_PITCH && snd->use_count <= 0)
     {
         FreeAllocatedSound(snd);
     }
@@ -369,27 +352,28 @@ static void ReleaseSoundOnChannel(int channel)
 #ifdef HAVE_LIBSAMPLERATE
 
 // Returns the conversion mode for libsamplerate to use.
-
 static int SRC_ConversionMode(void)
 {
     switch (use_libsamplerate)
     {
         // 0 = disabled
-
         default:
         case 0:
             return -1;
 
         // Ascending numbers give higher quality
-
         case 1:
             return SRC_LINEAR;
+
         case 2:
             return SRC_ZERO_ORDER_HOLD;
+
         case 3:
             return SRC_SINC_FASTEST;
+
         case 4:
             return SRC_SINC_MEDIUM_QUALITY;
+
         case 5:
             return SRC_SINC_BEST_QUALITY;
     }
@@ -401,15 +385,11 @@ static int SRC_ConversionMode(void)
 //   samplerate --> mixer_freq
 // Returns number of clipped samples.
 // DWF 2008-02-10 with cleanups by Simon Howard.
-
-static dboolean ExpandSoundData_SRC(sfxinfo_t *sfxinfo,
-                                   byte *data,
-                                   int samplerate,
-                                   int length)
+static dboolean ExpandSoundData_SRC(sfxinfo_t *sfxinfo, byte *data,
+                                   int samplerate, int length)
 {
     SRC_DATA src_data;
     uint32_t i, abuf_index=0, clipped=0;
-//    uint32_t alen;
     int retn;
     int16_t *expanded;
     allocated_sound_t *snd;
@@ -426,8 +406,7 @@ static dboolean ExpandSoundData_SRC(sfxinfo_t *sfxinfo,
     assert(src_data.data_in != NULL && src_data.data_out != NULL);
 
     // Convert input data to floats
-
-    for (i=0; i<length; ++i)
+    for (i = 0; i < length; ++i)
     {
         // Unclear whether 128 should be interpreted as "zero" or whether a
         // symmetrical range should be assumed.  The following assumes a
@@ -442,9 +421,6 @@ static dboolean ExpandSoundData_SRC(sfxinfo_t *sfxinfo,
     assert(retn == 0);
 
     // Allocate the new chunk.
-
-//    alen = src_data.output_frames_gen * 4;
-
     snd = AllocateSound(sfxinfo, src_data.output_frames_gen * 4);
 
     if (snd == NULL)
@@ -456,8 +432,7 @@ static dboolean ExpandSoundData_SRC(sfxinfo_t *sfxinfo,
     expanded = (int16_t *) chunk->abuf;
 
     // Convert the result back into 16-bit integers.
-
-    for (i=0; i<src_data.output_frames_gen; ++i)
+    for (i = 0; i < src_data.output_frames_gen; ++i)
     {
         // libsamplerate does not limit itself to the -1.0 .. 1.0 range on
         // output, so a multiplier less than INT16_MAX (32767) is required
@@ -479,9 +454,9 @@ static dboolean ExpandSoundData_SRC(sfxinfo_t *sfxinfo,
         // quest for the loudest possible sound overall.  The results of
         // using INT16_MAX as the multiplier are not all that bad, but
         // artifacts are noticeable during the loudest parts.
-
         float cvtval_f =
             src_data.data_out[i] * libsamplerate_scale * INT16_MAX;
+
         int32_t cvtval_i = cvtval_f + (cvtval_f < 0 ? -0.5 : 0.5);
 
         // Asymmetrical sound worries me, so we won't use -32768.
@@ -497,7 +472,6 @@ static dboolean ExpandSoundData_SRC(sfxinfo_t *sfxinfo,
         }
 
         // Left and right channels
-
         expanded[abuf_index++] = cvtval_i;
         expanded[abuf_index++] = cvtval_i;
     }
@@ -528,13 +502,11 @@ static dboolean ConvertibleRatio(int freq1, int freq2)
     else if ((freq2 % freq1) != 0)
     {
         // Not in a direct ratio
-
         return false;
     }
     else
     {
         // Check the ratio is a power of 2
-
         ratio = freq2 / freq1;
 
         while ((ratio & 1) == 0)
@@ -548,11 +520,8 @@ static dboolean ConvertibleRatio(int freq1, int freq2)
 
 // Generic sound expansion function for any sample rate.
 // Returns number of clipped samples (always 0).
-
-static dboolean ExpandSoundData_SDL(sfxinfo_t *sfxinfo,
-                                   byte *data,
-                                   int samplerate,
-                                   int length)
+static dboolean ExpandSoundData_SDL(sfxinfo_t *sfxinfo, byte *data,
+                                   int samplerate, int length)
 {
     SDL_AudioCVT convertor;
     Mix_Chunk *chunk;
@@ -560,15 +529,12 @@ static dboolean ExpandSoundData_SDL(sfxinfo_t *sfxinfo,
     allocated_sound_t *snd;
 
     // Calculate the length of the expanded version of the sample.    
-
     expanded_length = (uint32_t) ((((uint64_t) length) * mixer_freq) / samplerate);
 
     // Double up twice: 8 -> 16 bit and mono -> stereo
-
     expanded_length *= 4;
 
     // Allocate a chunk in which to expand the sound
-
     snd = AllocateSound(sfxinfo, expanded_length);
 
     if (snd == NULL)
@@ -579,11 +545,8 @@ static dboolean ExpandSoundData_SDL(sfxinfo_t *sfxinfo,
     chunk = &snd->chunk;
 
     // If we can, use the standard / optimized SDL conversion routines.
-
-    if (samplerate <= mixer_freq
-     && ConvertibleRatio(samplerate, mixer_freq)
-     && SDL_BuildAudioCVT(&convertor,
-                          AUDIO_U8, 1, samplerate,
+    if (samplerate <= mixer_freq && ConvertibleRatio(samplerate, mixer_freq)
+        && SDL_BuildAudioCVT(&convertor, AUDIO_U8, 1, samplerate,
                           mixer_format, mixer_channels, mixer_freq))
     {
         convertor.buf = chunk->abuf;
@@ -606,11 +569,10 @@ static dboolean ExpandSoundData_SDL(sfxinfo_t *sfxinfo,
         // ratio, do this naive conversion instead.
 
         // number of samples in the converted sound
-
         expanded_length = ((uint64_t) length * mixer_freq) / samplerate;
         expand_ratio = (length << 8) / expanded_length;
 
-        for (i=0; i<expanded_length; ++i)
+        for (i = 0; i < expanded_length; ++i)
         {
             Sint16 sample;
             int src;
@@ -621,7 +583,6 @@ static dboolean ExpandSoundData_SDL(sfxinfo_t *sfxinfo,
             sample -= 32768;
 
             // expand 8->16 bits, mono->stereo
-
             expanded[i * 2] = expanded[i * 2 + 1] = sample;
         }
     }
@@ -631,7 +592,6 @@ static dboolean ExpandSoundData_SDL(sfxinfo_t *sfxinfo,
 
 // Load and convert a sound effect
 // Returns true if successful
-
 static dboolean CacheSFX(sfxinfo_t *sfxinfo)
 {
     int lumpnum;
@@ -641,23 +601,19 @@ static dboolean CacheSFX(sfxinfo_t *sfxinfo)
     byte *data;
 
     // need to load the sound
-
     lumpnum = sfxinfo->lumpnum;
     data = W_CacheLumpNum(lumpnum, PU_STATIC);
     lumplen = W_LumpLength(lumpnum);
 
     // Check the header, and ensure this is a valid sound
-
     if (lumplen < 8
-     || data[0] != 0x03 || data[1] != 0x00)
+        || data[0] != 0x03 || data[1] != 0x00)
     {
         // Invalid sound
-
         return false;
     }
 
     // 16 bit sample rate field, 32 bit length field
-
     samplerate = (data[3] << 8) | data[2];
     length = (data[7] << 24) | (data[6] << 16) | (data[5] << 8) | data[4];
 
@@ -669,7 +625,6 @@ static dboolean CacheSFX(sfxinfo_t *sfxinfo)
     // seems to vary slightly depending on the sample rate.  This needs
     // further investigation to better understand the correct
     // behavior.
-
     if (length > lumplen - 8 || length <= 48)
     {
         return false;
@@ -677,19 +632,16 @@ static dboolean CacheSFX(sfxinfo_t *sfxinfo)
 
     // The DMX sound library seems to skip the first 16 and last 16
     // bytes of the lump - reason unknown.
-
     data += 16;
     length -= 32;
 
     // Sample rate conversion
-
     if (!ExpandSoundData(sfxinfo, data + 8, samplerate, length))
     {
         return false;
     }
 
     // don't need the original lump any more
-  
     W_ReleaseLumpNum(lumpnum);
 
     return true;
@@ -698,12 +650,10 @@ static dboolean CacheSFX(sfxinfo_t *sfxinfo)
 static void GetSfxLumpName(sfxinfo_t *sfx, char *buf, size_t buf_len)
 {
     // Linked sfx lumps? Get the lump number for the sound linked to.
-
     if (sfx->link != NULL)
     {
         sfx = sfx->link;
     }
-
     // Doom adds a DS* prefix to sound lumps; Heretic and Hexen don't
     // do this.
 
@@ -720,14 +670,12 @@ static void GetSfxLumpName(sfxinfo_t *sfx, char *buf, size_t buf_len)
 #ifdef HAVE_LIBSAMPLERATE
 
 // Preload all the sound effects - stops nasty ingame freezes
-
 static void I_SDL_PrecacheSounds(sfxinfo_t *sounds, int num_sounds)
 {
     char namebuf[9];
     int i;
 
     // Don't need to precache the sounds unless we are using libsamplerate.
-
     if (use_libsamplerate == 0)
     {
         return;
@@ -735,7 +683,7 @@ static void I_SDL_PrecacheSounds(sfxinfo_t *sounds, int num_sounds)
 
     C_Output("I_SDL_PrecacheSounds: Precaching all sound effects..");
 
-    for (i=0; i<num_sounds; ++i)
+    for (i = 0; i < num_sounds; ++i)
     {
         if ((i % 6) == 0)
         {
@@ -766,11 +714,9 @@ static void I_SDL_PrecacheSounds(sfxinfo_t *sounds, int num_sounds)
 #endif
 
 // Load a SFX chunk into memory and ensure that it is locked.
-
 static dboolean LockSound(sfxinfo_t *sfxinfo)
 {
     // If the sound isn't loaded, load it now
-
     if (GetAllocatedSoundBySfxInfoAndPitch(sfxinfo, NORM_PITCH) == NULL)
     {
         if (!CacheSFX(sfxinfo))
@@ -788,7 +734,6 @@ static dboolean LockSound(sfxinfo_t *sfxinfo)
 // Retrieve the raw data lump index
 //  for a given SFX name.
 //
-
 static int I_SDL_GetSfxLumpNum(sfxinfo_t *sfx)
 {
     char namebuf[9];
@@ -810,16 +755,20 @@ static void I_SDL_UpdateSoundParams(int handle, int vol, int sep)
     left = ((254 - sep) * vol) / 127;
     right = ((sep) * vol) / 127;
 
-    if (left < 0) left = 0;
-    else if ( left > 255) left = 255;
-    if (right < 0) right = 0;
-    else if (right > 255) right = 255;
+    if (left < 0)
+        left = 0;
+    else if (left > 255)
+        left = 255;
+
+    if (right < 0)
+        right = 0;
+    else if (right > 255)
+        right = 255;
 
     // SDL_mixer version 1.2.8 and earlier has a bug in the Mix_SetPanning
     // function.  A workaround is to call Mix_UnregisterAllEffects for
     // the channel before calling it.  This is undesirable as it may lead
     // to the channel volumes resetting briefly.
-
     if (setpanning_workaround)
     {
         Mix_UnregisterAllEffects(handle);
@@ -840,7 +789,6 @@ static void I_SDL_UpdateSoundParams(int handle, int vol, int sep)
 // Pitching (that is, increased speed of playback)
 //  is set, but currently not used by mixing.
 //
-
 static int I_SDL_StartSound(sfxinfo_t *sfxinfo, int channel, int vol, int sep, int pitch)
 {
     allocated_sound_t *snd;
@@ -852,11 +800,9 @@ static int I_SDL_StartSound(sfxinfo_t *sfxinfo, int channel, int vol, int sep, i
 
     // Release a sound effect if there is already one playing
     // on this channel
-
     ReleaseSoundOnChannel(channel);
 
     // Get the sound data
-
     if (!LockSound(sfxinfo))
     {
         return -1;
@@ -864,23 +810,23 @@ static int I_SDL_StartSound(sfxinfo_t *sfxinfo, int channel, int vol, int sep, i
 
     snd = GetAllocatedSoundBySfxInfoAndPitch(sfxinfo, pitch);
 
-    if(snd == NULL)
+    if (snd == NULL)
     {
         allocated_sound_t *newsnd;
 
         // fetch the base sound effect, un-pitch-shifted
         snd = GetAllocatedSoundBySfxInfoAndPitch(sfxinfo, NORM_PITCH);
 
-        if(!snd)
+        if (!snd)
         {
             return -1;
         }
 
-        if(randompitch && !menuactive)
+        if (randompitch && !menuactive)
         {
             newsnd = PitchShift(snd, pitch);
 
-            if(newsnd)
+            if (newsnd)
             {
                 LockAllocatedSound(newsnd);
                 UnlockAllocatedSound(snd);
@@ -894,13 +840,11 @@ static int I_SDL_StartSound(sfxinfo_t *sfxinfo, int channel, int vol, int sep, i
     }
 
     // play sound
-
     Mix_PlayChannel(channel, &snd->chunk, 0);
 
     channels_playing[channel] = snd;
 
     // set separation, etc.
- 
     I_SDL_UpdateSoundParams(channel, vol, sep);
 
     return channel;
@@ -917,7 +861,6 @@ static void I_SDL_StopSound(int handle)
 
     // Sound data is no longer needed; release the
     // sound data being used for this channel
-
     ReleaseSoundOnChannel(handle);
 }
 
@@ -935,20 +878,17 @@ static dboolean I_SDL_SoundIsPlaying(int handle)
 // 
 // Periodically called to update the sound system
 //
-
 static void I_SDL_UpdateSound(void)
 {
     int i;
 
     // Check all channels to see if a sound has finished
-
-    for (i=0; i<NUM_CHANNELS; ++i)
+    for (i = 0; i < NUM_CHANNELS; ++i)
     {
         if (channels_playing[i] && !I_SDL_SoundIsPlaying(i))
         {
             // Sound has finished playing on this channel,
             // but sound data has not been released to cache
-            
             ReleaseSoundOnChannel(i);
         }
     }
@@ -969,7 +909,6 @@ static void I_SDL_ShutdownSound(void)
 
 // Calculate slice size, based on snd_maxslicetime_ms.
 // The result must be a power of two.
-
 static int GetSliceSize(void)
 {
     int limit;
@@ -978,11 +917,9 @@ static int GetSliceSize(void)
     limit = (snd_samplerate * snd_maxslicetime_ms) / 1000;
 
     // Try all powers of two, not exceeding the limit.
-
-    for (n=0;; ++n)
+    for (n = 0; ; ++n)
     {
-        // 2^n <= limit < 2^n+1 ?
-
+        // 2 ^ n <= limit < 2 ^ n + 1 ?
         if ((1 << (n + 1)) > limit)
         {
             return (1 << n);
@@ -990,19 +927,17 @@ static int GetSliceSize(void)
     }
 
     // Should never happen?
-
     return 1024;
 }
 
-/*static*/ dboolean I_SDL_InitSound(dboolean _use_sfx_prefix)
+dboolean I_SDL_InitSound(dboolean _use_sfx_prefix)
 {
     int i;
 
     use_sfx_prefix = _use_sfx_prefix;
 
     // No sounds yet
-
-    for (i=0; i<NUM_CHANNELS; ++i)
+    for (i = 0; i < NUM_CHANNELS; ++i)
     {
         channels_playing[i] = NULL;
     }
@@ -1031,6 +966,7 @@ static int GetSliceSize(void)
             I_Error("I_SDL_InitSound: Invalid value for use_libsamplerate: %i",
                     use_libsamplerate);
         }
+
         ExpandSoundData = ExpandSoundData_SRC;
     }
 #else
@@ -1044,7 +980,6 @@ static int GetSliceSize(void)
     // function that can cause the game to lock up.  If we're using an old
     // version, we need to apply a workaround.  But the workaround has its
     // own drawbacks ...
-
     {
         const SDL_version *mixer_version;
         int v;
@@ -1079,7 +1014,7 @@ static snddevice_t sound_sdl_devices[] =
     SNDDEVICE_GUS,
     SNDDEVICE_WAVEBLASTER,
     SNDDEVICE_SOUNDCANVAS,
-    SNDDEVICE_AWE32,
+    SNDDEVICE_AWE32
 };
 
 sound_module_t sound_sdl_module = 
@@ -1094,6 +1029,6 @@ sound_module_t sound_sdl_module =
     I_SDL_StartSound,
     I_SDL_StopSound,
     I_SDL_SoundIsPlaying,
-    I_SDL_PrecacheSounds,
+    I_SDL_PrecacheSounds
 };
 
