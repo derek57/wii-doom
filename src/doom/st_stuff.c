@@ -1617,7 +1617,7 @@ void ST_Drawer(dboolean fullscreen, dboolean refresh)
     // If just after ST_Start(), refresh all
     if (st_firsttime || beta_style || (scaledviewheight == SCREENHEIGHT && viewactive))
     {
-        //if (screenSize < 8)
+        if (screenSize < 8)
         {
             if (usergame && !menuactive)
                 ST_doRefresh();

@@ -69,14 +69,12 @@ static   byte         *wipe_scr;
 extern   byte         *transtables;
 
 
-void wipe_shittyColMajorXform(short *array)
+static void wipe_shittyColMajorXform(short *array)
 {
     int           x;
     int           y;
 
-    short         *dest;
-
-    dest = (short *)Z_Malloc((SCREENWIDTH / 2) * SCREENHEIGHT * sizeof(*dest), PU_STATIC, NULL);
+    short         *dest = (short *)Z_Malloc((SCREENWIDTH / 2) * SCREENHEIGHT * sizeof(*dest), PU_STATIC, NULL);
 
     for (y = 0; y < SCREENHEIGHT; y++)
     {
@@ -92,8 +90,7 @@ void wipe_shittyColMajorXform(short *array)
 }
 
 // Burn -------------------------------------------------------------
-
-int wipe_initBurn(int ticks)
+static int wipe_initBurn(int ticks)
 {
     burnarray = Z_Malloc(FIREWIDTH * (FIREHEIGHT + 5), PU_STATIC, NULL);
     memset(burnarray, 0, FIREWIDTH * (FIREHEIGHT + 5));
@@ -103,18 +100,16 @@ int wipe_initBurn(int ticks)
     return 0;
 }
 
-int wipe_CalcBurn(byte *burnarray, int width, int height, int density)
+static int wipe_CalcBurn(byte *burnarray, int width, int height, int density)
 {
     // This is a modified version of the fire that was once used
     // on the player setup menu.
     static int voop;
 
-    int        a, b;
-    byte       *from;
+    int        a, b = voop;
+    byte       *from = &burnarray[width * height];
 
     // generator
-    from = &burnarray[width * height];
-    b = voop;
     voop += density / 3;
 
     for (a = 0; a < density / 8; a++)
@@ -126,7 +121,6 @@ int wipe_CalcBurn(byte *burnarray, int width, int height, int density)
     }
 
     density = MIN(density + 10, width * 7);
-
     from = burnarray;
 
     for (b = 0; b <= height; b += 2)
@@ -201,32 +195,27 @@ int wipe_CalcBurn(byte *burnarray, int width, int height, int density)
     return -1;
 }
 
-int wipe_doBurn(int ticks)
+static int wipe_doBurn(int ticks)
 {
     // Draw the screen
-    fixed_t  firex, firey, xstep, ystep;
+    fixed_t  firex, firey;
+    fixed_t  xstep = (FIREWIDTH * FRACUNIT) / SCREENWIDTH;
+    fixed_t  ystep = (FIREHEIGHT * FRACUNIT) / SCREENHEIGHT;
     int      x, y;
-    byte     *to, *fromold, *fromnew;
-
-    int done;
+    byte     *to = screens[0];
+    byte     *fromold = (byte *)wipe_scr_start;
+    byte     *fromnew = (byte *)wipe_scr_end;
+    int      done = 0;
 
     burntime += ticks;
     ticks *= 2;
 
     // Make the fire burn
-    done = 0;
-
     while (done == 0 && ticks--)
     {
         density = wipe_CalcBurn(burnarray, FIREWIDTH, FIREHEIGHT, density);
         done = (density < 0);
     }
-
-    xstep = (FIREWIDTH * FRACUNIT) / SCREENWIDTH;
-    ystep = (FIREHEIGHT * FRACUNIT) / SCREENHEIGHT;
-    to = screens[0];
-    fromold = (byte *)wipe_scr_start;
-    fromnew = (byte *)wipe_scr_end;
 
     for (y = 0, firey = 0; y < SCREENHEIGHT; y++, firey += ystep)
     {
@@ -265,28 +254,25 @@ int wipe_doBurn(int ticks)
     return done || (burntime > 40);
 }
 
-int wipe_exitBurn(int ticks)
+static int wipe_exitBurn(int ticks)
 {
     Z_Free(burnarray);
-
     return 0;
 }
 
-int wipe_initFade(int ticks)
+static int wipe_initFade(int ticks)
 {
     fade = 0;
-
     return 0;
 }
 
-int wipe_doFade(int ticks)
+static int wipe_doFade(int ticks)
 {
     fade += ticks * 2;
 
     if (fade > 64)
     {
         V_DrawBlock(0, 0, 0, SCREENWIDTH, SCREENHEIGHT, (byte *)wipe_scr_end);
-
         return 1;
     }
     else
@@ -318,16 +304,15 @@ int wipe_doFade(int ticks)
     return 0;
 }
 
-int wipe_exitFade(int ticks)
+static int wipe_exitFade(int ticks)
 {
-    return 0;
+   return 0;
 }
 
-
-int wipe_initMelt(int ticks)
+static int wipe_initMelt(int ticks)
 {
     int           i;
-    
+
     // copy start screen to main screen
     memcpy(wipe_scr, wipe_scr_start, SCREENWIDTH * SCREENHEIGHT * sizeof(*wipe_scr));
     
@@ -360,7 +345,7 @@ int wipe_initMelt(int ticks)
     return 0;
 }
 
-int wipe_doMelt(int ticks)
+static int wipe_doMelt(int ticks)
 {
     int           i;
     int           j;
@@ -369,7 +354,7 @@ int wipe_doMelt(int ticks)
     short         *s;
     short         *d;
 
-    dboolean       done = true;
+    dboolean      done = true;
 
     while (ticks--)
     {
@@ -384,14 +369,13 @@ int wipe_doMelt(int ticks)
             else if (y[i] < SCREENHEIGHT)
             {
                 dy = (y[i] < 16) ? y[i] + 1 : 8;
+                s = &((short *)wipe_scr_end)[i * SCREENHEIGHT + y[i]];
+                d = &((short *)wipe_scr)[y[i] * (SCREENWIDTH / 2) + i];
 
                 if (y[i] + dy >= SCREENHEIGHT)
                 {
                     dy = SCREENHEIGHT - y[i];
                 }
-
-                s = &((short *)wipe_scr_end)[i * SCREENHEIGHT + y[i]];
-                d = &((short *)wipe_scr)[y[i] * (SCREENWIDTH / 2) + i];
 
                 idx = 0;
 
@@ -424,12 +408,11 @@ int wipe_doMelt(int ticks)
     return done;
 }
 
-int wipe_exitMelt(int ticks)
+static int wipe_exitMelt(int ticks)
 {
     Z_Free(y);
     Z_Free(wipe_scr_start);
     Z_Free(wipe_scr_end);
-
     return 0;
 }
 
@@ -440,7 +423,6 @@ int wipe_StartScreen(void)
     I_ReadScreen(0, wipe_scr_start);
 
     //V_GetBlock (0, 0, 0, SCREENWIDTH, SCREENHEIGHT, wipe_scr_start);
-
     return 0;
 }
 

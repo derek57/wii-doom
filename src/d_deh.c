@@ -238,6 +238,7 @@ char    *s_PD_ALL6 = "";
 char    *s_GGSAVED = GGSAVED;
 char    *s_GGAUTOSAVED = ""; 
 char    *s_GGLOADED = "";
+char    *s_GGAUTOLOADED = ""; 
 char    *s_GSCREENSHOT = GSCREENSHOT;
 
 char    *s_ALWAYSRUNOFF = "";
@@ -254,6 +255,7 @@ char    *s_HUSTR_E1M6 = HUSTR_E1M6;
 char    *s_HUSTR_E1M7 = HUSTR_E1M7;
 char    *s_HUSTR_E1M8 = HUSTR_E1M8;
 char    *s_HUSTR_E1M9 = HUSTR_E1M9;
+char    *s_HUSTR_E1M10 = HUSTR_E1M10;
 char    *s_HUSTR_E2M1 = HUSTR_E2M1;
 char    *s_HUSTR_E2M2 = HUSTR_E2M2;
 char    *s_HUSTR_E2M3 = HUSTR_E2M3;
@@ -312,10 +314,10 @@ char    *s_HUSTR_28 = HUSTR_28;
 char    *s_HUSTR_29 = HUSTR_29;
 char    *s_HUSTR_30 = HUSTR_30;
 char    *s_HUSTR_31 = HUSTR_31;
-char    *s_HUSTR_32 = HUSTR_32;
 char    *s_HUSTR_31_BFG = "";
+char    *s_HUSTR_32 = HUSTR_32;
 char    *s_HUSTR_32_BFG = "";
-char    *s_HUSTR_33_BFG = "";
+char    *s_HUSTR_33 = "";
 char    *s_PHUSTR_1 = PHUSTR_1;
 char    *s_PHUSTR_2 = PHUSTR_2;
 char    *s_PHUSTR_3 = PHUSTR_3;
@@ -749,6 +751,7 @@ deh_strs deh_strlookup[] =
     { &s_GGSAVED,              "GGSAVED",              false },
     { &s_GGAUTOSAVED,          "GGAUTOSAVED",          false }, 
     { &s_GGLOADED,             "GGLOADED",             false },
+    { &s_GGAUTOLOADED,         "GGAUTOLOADED",         false }, 
     { &s_GSCREENSHOT,          "GSCREENSHOT",          false },
 
     { &s_ALWAYSRUNOFF,         "ALWAYSRUNOFF",         false },
@@ -765,6 +768,7 @@ deh_strs deh_strlookup[] =
     { &s_HUSTR_E1M7,           "HUSTR_E1M7",           false },
     { &s_HUSTR_E1M8,           "HUSTR_E1M8",           false },
     { &s_HUSTR_E1M9,           "HUSTR_E1M9",           false },
+    { &s_HUSTR_E1M10,          "HUSTR_E1M10",          false },
     { &s_HUSTR_E2M1,           "HUSTR_E2M1",           false },
     { &s_HUSTR_E2M2,           "HUSTR_E2M2",           false },
     { &s_HUSTR_E2M3,           "HUSTR_E2M3",           false },
@@ -823,10 +827,10 @@ deh_strs deh_strlookup[] =
     { &s_HUSTR_29,             "HUSTR_29",             false },
     { &s_HUSTR_30,             "HUSTR_30",             false },
     { &s_HUSTR_31,             "HUSTR_31",             false },
-    { &s_HUSTR_32,             "HUSTR_32",             false },
     { &s_HUSTR_31_BFG,         "HUSTR_31_BFG",         false },
+    { &s_HUSTR_32,             "HUSTR_32",             false },
     { &s_HUSTR_32_BFG,         "HUSTR_32_BFG",         false },
-    { &s_HUSTR_33_BFG,         "HUSTR_33_BFG",         false },
+    { &s_HUSTR_33,             "HUSTR_33",             false },
     { &s_PHUSTR_1,             "PHUSTR_1",             false },
     { &s_PHUSTR_2,             "PHUSTR_2",             false },
     { &s_PHUSTR_3,             "PHUSTR_3",             false },
@@ -1161,6 +1165,7 @@ char **mapnames[] =
     &s_HUSTR_E1M7,
     &s_HUSTR_E1M8,
     &s_HUSTR_E1M9,
+    &s_HUSTR_E1M10,
     &s_HUSTR_E2M1,
     &s_HUSTR_E2M2,
     &s_HUSTR_E2M3,
@@ -1273,7 +1278,7 @@ char **mapnames2_bfg[] =
     &s_HUSTR_30,
     &s_HUSTR_31_BFG,
     &s_HUSTR_32_BFG,
-    &s_HUSTR_33_BFG
+    &s_HUSTR_33
 };
 
 // Plutonia WAD map names.
@@ -1777,16 +1782,16 @@ static const struct deh_mobjflags_s deh_mobjflags2[] =
     { "RESURRECTING",              MF2_RESURRECTING              },
     { "NOFOOTCLIP",                MF2_NOFOOTCLIP                },
     { "NOLIQUIDBOB",               MF2_NOLIQUIDBOB               },
-    { "MF2_FEETARECLIPPED",        MF2_FEETARECLIPPED            },
-    { "MF2_SHADOW",                MF2_SHADOW                    },
-    { "MF2_BLOOD",                 MF2_BLOOD                     },
-    { "MF2_DONOTMAP",              MF2_DONOTMAP                  },
-    { "MF2_SMOKETRAIL",            MF2_SMOKETRAIL                },
-    { "MF2_CRUSHABLE",             MF2_CRUSHABLE                 },
-    { "MF2_LOGRAV",                MF2_LOGRAV                    },
-    { "MF2_FLY",                   MF2_FLY                       },
-    { "MF2_NOTELEPORT",            MF2_NOTELEPORT                },
-    { "MF2_NOSPLASH",              MF2_NOSPLASH                  }
+    { "FEETARECLIPPED",            MF2_FEETARECLIPPED            },
+    { "SHADOW",                    MF2_SHADOW                    },
+    { "BLOOD",                     MF2_BLOOD                     },
+    { "DONOTMAP",                  MF2_DONOTMAP                  },
+    { "SMOKETRAIL",                MF2_SMOKETRAIL                },
+    { "CRUSHABLE",                 MF2_CRUSHABLE                 },
+    { "LOGRAV",                    MF2_LOGRAV                    },
+    { "FLY",                       MF2_FLY                       },
+    { "NOTELEPORT",                MF2_NOTELEPORT                },
+    { "NOSPLASH",                  MF2_NOSPLASH                  }
 };
 
 // STATE - Dehacked block name = "Frame" and "Pointer"
@@ -2232,7 +2237,7 @@ static const deh_bexptr deh_bexptrs[] =
 };
 
 // to hold startup code pointers from INFO.C
-static actionf_t deh_codeptr[NUMSTATES];
+static actionf_t deh_codeptr[EXTRASTATES_END];
 
 //
 // [nitr8] UNUSED
@@ -2317,8 +2322,20 @@ void ProcessDehFile(char *filename, int lumpnum)
         static int      i;
 
         // remember what they start as for deh xref
-        for (; i < NUMSTATES; i++)
+        for (; i < EXTRASTATES_START; i++)  
+            deh_codeptr[i] = states[i].action;
+
+        // [BH] Initialize extra DeHacked states 1089 to 3999
+        for (; i < EXTRASTATES_END; i++)
         {
+            states[i].sprite = SPR_TNT1;
+            states[i].frame = 0;
+            states[i].tics = -1;
+            states[i].action = NULL;
+            states[i].nextstate = i;
+            states[i].misc1 = 0;
+            states[i].misc2 = 0;
+            states[i].dehacked = false;
             deh_codeptr[i] = states[i].action;
         }
     }
@@ -2481,9 +2498,9 @@ void deh_procBexCodePointers(DEHFILE *fpin, char *line)
         if (devparm)
             C_Output("Processing pointer at index %d: %s", indexnum, mnemonic);
 
-        if (indexnum < 0 || indexnum >= NUMSTATES)
+        if (indexnum < 0 || indexnum >= EXTRASTATES_END)
         {
-            C_Warning("Bad pointer number %d of %d.", indexnum, NUMSTATES);
+            C_Warning("Bad pointer number %d of %d.", indexnum, EXTRASTATES_END);
 
             // killough 10/98: fix SegViol
             return;
@@ -2718,8 +2735,8 @@ void deh_procFrame(DEHFILE *fpin, char *line)
     if (devparm)
         C_Output("Processing Frame at index %d: %s", indexnum, key);
 
-    if (indexnum < 0 || indexnum >= NUMSTATES)
-        C_Warning("Bad frame number %d of %d.", indexnum, NUMSTATES);
+    if (indexnum < 0 || indexnum >= EXTRASTATES_END)
+        C_Warning("Bad frame number %d of %d.", indexnum, EXTRASTATES_END);
 
     while (!dehfeof(fpin) && *inbuffer && *inbuffer != ' ')
     {
@@ -2865,9 +2882,9 @@ void deh_procPointer(DEHFILE *fpin, char *line)
     if (devparm)
         C_Output("Processing Pointer at index %d: %s", indexnum, key);
 
-    if (indexnum < 0 || indexnum >= NUMSTATES)
+    if (indexnum < 0 || indexnum >= EXTRASTATES_END)
     {
-        C_Warning("Bad pointer number %d of %d.", indexnum, NUMSTATES);
+        C_Warning("Bad pointer number %d of %d.", indexnum, EXTRASTATES_END);
         return;
     }
 
@@ -2889,9 +2906,9 @@ void deh_procPointer(DEHFILE *fpin, char *line)
             continue;
         }
 
-        if (value < 0 || value >= NUMSTATES)
+        if (value < 0 || value >= EXTRASTATES_END)
         {
-            C_Warning("Bad pointer number %ld of %d.", value, NUMSTATES);
+            C_Warning("Bad pointer number %ld of %d.", value, EXTRASTATES_END);
             return;
         }
 

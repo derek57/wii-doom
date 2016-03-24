@@ -97,7 +97,6 @@ int P_BoxOnLineSide(fixed_t *tmbox, line_t *ld)
         int     p;
 
         default:
-
         case ST_HORIZONTAL:
             return ((tmbox[BOXBOTTOM] > ld->v1->y) == (p = (tmbox[BOXTOP] > ld->v1->y)) ?
                 p ^ (ld->dx < 0) : -1);
@@ -131,7 +130,7 @@ static int P_PointOnDivlineSide(fixed_t x, fixed_t y, divline_t *line)
 //
 // P_MakeDivline
 //
-void P_MakeDivline(line_t *li, divline_t *dl)
+static void P_MakeDivline(line_t *li, divline_t *dl)
 {
     dl->x = li->v1->x;
     dl->y = li->v1->y;
@@ -146,7 +145,7 @@ void P_MakeDivline(line_t *li, divline_t *dl)
 // This is only called by the addthings
 // and addlines traversers.
 //
-fixed_t P_InterceptVector(divline_t *v2, divline_t *v1)
+static fixed_t P_InterceptVector(divline_t *v2, divline_t *v1)
 {
     int64_t     den = (int64_t)v1->dy * v2->dx - (int64_t)v1->dx * v2->dy;
 
@@ -166,8 +165,8 @@ fixed_t P_InterceptVector(divline_t *v2, divline_t *v1)
 //
 void P_LineOpening(line_t *linedef)
 {
-    sector_t     *front;
-    sector_t     *back;
+    sector_t    *front;
+    sector_t    *back;
         
     if (linedef->sidenum[1] == NO_INDEX)
     {
@@ -396,7 +395,7 @@ void P_SetBloodSplatPosition(mobj_t *splat)
 // to P_BlockLinesIterator, then make one or more calls
 // to it.
 //
-dboolean P_BlockLinesIterator(int x, int y, dboolean func(line_t*))
+dboolean P_BlockLinesIterator(int x, int y, dboolean func(line_t *))
 {
     if (x < 0 || y < 0 || x >= bmapwidth || y >= bmapheight)
         return true;
@@ -427,7 +426,7 @@ dboolean P_BlockLinesIterator(int x, int y, dboolean func(line_t*))
 //
 // P_BlockThingsIterator
 //
-dboolean P_BlockThingsIterator(int x, int y, dboolean func(mobj_t*))
+dboolean P_BlockThingsIterator(int x, int y, dboolean func(mobj_t *))
 {
     if (!(x < 0 || y < 0 || x >= bmapwidth || y >= bmapheight))
     {
@@ -457,10 +456,7 @@ static void check_intercept(void)
         num_intercepts = (num_intercepts ? num_intercepts * 2 : 128);
         intercepts = Z_Realloc(intercepts, sizeof(*intercepts) * num_intercepts);
         intercept_p = intercepts + offset;
-/*
-        memset(intercepts + num_intercepts_old, 0,
-                (num_intercepts - num_intercepts_old) * sizeof(*intercepts));
-*/
+
         if (num_intercepts_old != 0)
             C_Warning("Check_Intercept: MaxIntercepts limit at %d, raised to %u",
                     num_intercepts_old, num_intercepts);
@@ -478,10 +474,10 @@ static void check_intercept(void)
 //
 static dboolean PIT_AddLineIntercepts(line_t *ld)
 {
-    int          s1;
-    int          s2;
-    fixed_t      frac;
-    divline_t    dl;
+    int         s1;
+    int         s2;
+    fixed_t     frac;
+    divline_t   dl;
         
     // avoid precision problems with two routines
     if (trace.dx > FRACUNIT * 16 || trace.dy > FRACUNIT * 16
@@ -493,7 +489,7 @@ static dboolean PIT_AddLineIntercepts(line_t *ld)
     else
     {
         s1 = P_PointOnLineSide(trace.x, trace.y, ld);
-        s2 = P_PointOnLineSide(trace.x+trace.dx, trace.y+trace.dy, ld);
+        s2 = P_PointOnLineSide(trace.x + trace.dx, trace.y + trace.dy, ld);
     }
     
     if (s1 == s2)
@@ -525,15 +521,15 @@ static dboolean PIT_AddLineIntercepts(line_t *ld)
 //
 static dboolean PIT_AddThingIntercepts(mobj_t *thing)
 {
-    fixed_t      x1, y1;
-    fixed_t      x2, y2;
-    int          s1;
-    int          s2;
-    fixed_t      frac;
-    divline_t    dl;
-    fixed_t      radius = thing->radius;
-    fixed_t      x = thing->x;
-    fixed_t      y = thing->y;
+    fixed_t     x1, y1;
+    fixed_t     x2, y2;
+    int         s1;
+    int         s2;
+    fixed_t     frac;
+    divline_t   dl;
+    fixed_t     radius = thing->radius;
+    fixed_t     x = thing->x;
+    fixed_t     y = thing->y;
 
     // check a corner to corner crosssection for hit
     if ((trace.dx ^ trace.dy) > 0)
@@ -575,7 +571,7 @@ static dboolean PIT_AddThingIntercepts(mobj_t *thing)
     intercept_p->frac = frac;
     intercept_p->isaline = false;
     intercept_p->d.thing = thing;
-    intercept_p++;
+    ++intercept_p;
 
     // keep going
     return true;
@@ -588,8 +584,8 @@ static dboolean PIT_AddThingIntercepts(mobj_t *thing)
 // 
 static dboolean P_TraverseIntercepts(traverser_t func, fixed_t maxfrac)
 {
-    int          count = intercept_p - intercepts;
-    intercept_t  *in = NULL;
+    int         count = intercept_p - intercepts;
+    intercept_t *in = NULL;
             
     while (count--)
     {
@@ -625,8 +621,8 @@ static dboolean P_TraverseIntercepts(traverser_t func, fixed_t maxfrac)
 // Returns true if the traverser function returns true
 // for all lines.
 //
-dboolean P_PathTraverse(fixed_t x1, fixed_t y1, fixed_t x2, fixed_t y2,
-                       int flags, dboolean(*trav)(intercept_t *))
+dboolean P_PathTraverse(fixed_t x1, fixed_t y1, fixed_t x2, fixed_t y2, int flags,
+    dboolean (*trav)(intercept_t *))
 {
     fixed_t     xt1, yt1;
     fixed_t     xt2, yt2;

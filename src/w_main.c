@@ -72,7 +72,7 @@ dboolean W_ParseCommandLine(void)
                 if (D_IsDehFile(filename))
                     LoadDehFile(filename);
 
-                if(dont_show_adding_of_resource_wad == 0)
+                if (dont_show_adding_of_resource_wad == 0)
                     printf("         adding %s\n", filename);
 
                 if ((search_string(filename, "nerve.wad") > -1) ||

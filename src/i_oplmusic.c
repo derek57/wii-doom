@@ -1020,7 +1020,8 @@ static void KeyOnEvent(opl_track_data_t *track, midi_event_t *event)
     // A volume of zero means key off. Some MIDI tracks, eg. the ones
     // in AV.wad, use a second key on with a volume of zero to mean
     // key off.
-    if (volume <= 0)
+    //if (volume <= 0)
+    if (!volume)
     {
         KeyOffEvent(track, event);
         return;
@@ -1425,7 +1426,8 @@ static void TrackTimerCallback(void *arg)
         // to construct an empty MIDI file that causes the game
         // to lock up in an infinite loop. (5ms should be short
         // enough not to be noticeable by the listener).
-        if (running_tracks <= 0 && song_looping)
+        //if (running_tracks <= 0 && song_looping)
+        if (!running_tracks && song_looping)
         {
             OPL_SetCallback(5000, RestartSong, NULL);
         }

@@ -1051,7 +1051,7 @@ static inline void WriteSquashedLine1x(byte *dest, byte *src)
 {
     int x;
 
-    for (x = 0; x < SCREENWIDTH; )
+    for (x = 0; x < SCREENWIDTH;)
     {
         // Draw in blocks of 5
 
@@ -1116,7 +1116,7 @@ static inline void WriteSquashedLine1p5x(byte *dest, byte *src)
     dest2 = dest + dest_pitch;
     dest3 = dest + dest_pitch * 2;
 
-    for (x = 0; x < SCREENWIDTH; )
+    for (x = 0; x < SCREENWIDTH;)
     {
         // Every 4 pixels is expanded to 5 pixels horizontally
         // Every 2 pixels is expanded to 3 pixels vertically
@@ -1207,7 +1207,7 @@ static inline void WriteSquashedLine2x(byte *dest, byte *src)
 
     dest2 = dest + dest_pitch;
 
-    for (x = 0; x < SCREENWIDTH; )
+    for (x = 0; x < SCREENWIDTH;)
     {
         int c = src[0];
 
@@ -1290,7 +1290,7 @@ static inline void WriteSquashedLine3x(byte *dest, byte *src)
     dest2 = dest + dest_pitch;
     dest3 = dest + dest_pitch * 2;
 
-    for (x = 0; x < SCREENWIDTH; )
+    for (x = 0; x < SCREENWIDTH;)
     {
         int c = src[0];
 
@@ -1364,7 +1364,7 @@ static inline void WriteSquashedLine4x(byte *dest, byte *src)
     dest3 = dest + dest_pitch * 2;
     dest4 = dest + dest_pitch * 3;
 
-    for (x = 0; x < SCREENWIDTH; )
+    for (x = 0; x < SCREENWIDTH;)
     {
         int c = src[0];
 

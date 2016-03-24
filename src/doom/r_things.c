@@ -498,6 +498,8 @@ static vissprite_t *R_NewVisSprite(fixed_t scale)
 static void R_DrawMaskedSpriteColumn(column_t *column)
 {
     byte        topdelta;
+    int         ceilingclip = mceilingclip[dc_x] + 1;
+    int         floorclip = mfloorclip[dc_x] - 1;
 
     while ((topdelta = column->topdelta) != 0xFF)
     {
@@ -506,8 +508,8 @@ static void R_DrawMaskedSpriteColumn(column_t *column)
         // calculate unclipped screen coordinates for post
         int64_t topscreen = sprtopscreen + spryscale * topdelta + 1;
 
-        dc_yl = MAX((int)((topscreen + FRACUNIT) >> FRACBITS), mceilingclip[dc_x] + 1);
-        dc_yh = MIN((int)((topscreen + spryscale * length) >> FRACBITS), mfloorclip[dc_x] - 1);
+        dc_yl = MAX((int)((topscreen + FRACUNIT) >> FRACBITS), ceilingclip);
+        dc_yh = MIN((int)((topscreen + spryscale * length) >> FRACBITS), floorclip);
 
         if (dc_baseclip != -1)
             dc_yh = MIN(dc_baseclip, dc_yh);
@@ -544,6 +546,8 @@ static void R_DrawMaskedSpriteColumn(column_t *column)
 static void R_DrawMaskedBloodSplatColumn(column_t *column)
 {
     byte        topdelta;
+    int         ceilingclip = mceilingclip[dc_x] + 1;
+    int         floorclip = mfloorclip[dc_x] - 1;
 
     while ((topdelta = column->topdelta) != 0xFF)
     {
@@ -552,8 +556,8 @@ static void R_DrawMaskedBloodSplatColumn(column_t *column)
         // calculate unclipped screen coordinates for post
         int64_t topscreen = sprtopscreen + spryscale * topdelta;
 
-        dc_yl = MAX((int)(topscreen >> FRACBITS) + 1, mceilingclip[dc_x] + 1);
-        dc_yh = MIN((int)((topscreen + spryscale * length) >> FRACBITS), mfloorclip[dc_x] - 1);
+        dc_yl = MAX((int)(topscreen >> FRACBITS) + 1, ceilingclip);
+        dc_yh = MIN((int)((topscreen + spryscale * length) >> FRACBITS), floorclip);
 
         if (dc_yl <= dc_yh && dc_yh < viewheight)
             colfunc();
@@ -565,6 +569,8 @@ static void R_DrawMaskedBloodSplatColumn(column_t *column)
 static void R_DrawMaskedShadowColumn(column_t *column)
 {
     byte        topdelta;
+    int         ceilingclip = mceilingclip[dc_x] + 1;
+    int         floorclip = mfloorclip[dc_x] - 1;
 
     while ((topdelta = column->topdelta) != 0xFF)
     {
@@ -573,9 +579,9 @@ static void R_DrawMaskedShadowColumn(column_t *column)
         // calculate unclipped screen coordinates for post
         int64_t topscreen = sprtopscreen + spryscale * topdelta;
 
-        dc_yl = MAX((int)(((topscreen >> FRACBITS) + 1) / 10 + shift), mceilingclip[dc_x] + 1);
+        dc_yl = MAX((int)(((topscreen >> FRACBITS) + 1) / 10 + shift), ceilingclip);
         dc_yh = MIN((int)(((topscreen + spryscale * length) >> FRACBITS) / 10 + shift),
-            mfloorclip[dc_x] - 1);
+            floorclip);
 
         if (dc_yl <= dc_yh && dc_yh < viewheight)
             colfunc();
@@ -783,7 +789,7 @@ void R_DrawVisSprite(vissprite_t *vis)
         }
 #endif
 
-        column = (column_t *) ((byte *)patch +
+        column = (column_t *)((byte *)patch +
                                LONG(patch->columnofs[texturecolumn]));
 
         R_DrawMaskedSpriteColumn(column);
@@ -1842,7 +1848,7 @@ static void R_DrawPSprite(pspdef_t *psp, dboolean invisibility)
         vis->mobjflags |= MF_TRANSLUCENT;
     }
 
-    //e6y: interpolation for weapon bobbing
+    // e6y: interpolation for weapon bobbing
     if (d_uncappedframerate)
     {
         typedef struct interpolate_s

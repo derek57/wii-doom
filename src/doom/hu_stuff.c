@@ -93,74 +93,99 @@
 #define HU_ITEMSY       HU_STATSY + HU_TITLEY - 20 + (35 - SHORT(hu_font[0]->height))
 #define HU_SECRETSY     HU_STATSY + HU_TITLEY - 20 + (45 - SHORT(hu_font[0]->height))
 
+#define AA              "Andre Arsenault"
+#define AD              "Andrew Dowswell"
 #define AM              "American McGee"
+#define BK              "Brian Kidby"
+#define CB              "Christopher Buteau"
+#define DC              "Dario Casali"
+#define DJ              "Dean Johnson"
+#define DO              "Drake O'Brien"
 #define JA              "John Anderson"
+#define JD              "Jim Dethlefsen"
+#define JL              "Jim Lowell"
+#define JM              "Jim Mentzer"
+#define JM2             "John Minadeo"
 #define JR              "John Romero"
+#define JS              "Jimmy Sieben"
+#define JW              "John Wakelin"
 #define MB              "Michael Bukowski"
+#define MC              "Milo Casali"
+#define MS              "Mark Snell"
+#define PT              "Paul Turnbull"
 #define RH              "Richard Heath"
 #define RM              "Russell Meakim"
+#define RP              "Robin Patenall"
 #define SG              "Shawn Green"
 #define SP              "Sandy Petersen"
 #define TH              "Tom Hall"
+#define TH2             "Ty Halderman"
+#define TM              "Tom Mustaine"
 #define TW              "Tim Willits"
+#define WW              "William D. Whitaker"
 #define AMSP            AM", "SP
+#define BKTH2           BK", "TH2
+#define DCMC            DC", "MC
+#define DCTH2           DC", "TH2
 #define JRTH            JR", "TH
+#define JSTH2           JS", "TH2
+#define MSJL            MS", "JL
+#define RPJM2           RP", "JM2
 #define SPTH            SP", "TH
 
-char *authors[][3] =
+char *authors[][5] =
 {
-    /*        ULT. | DOOM2 | NERVE
-              DOOM |  BFG  | PACK.
-       00 */ { "",     "",    "" },
-    /* 01 */ { "",     SP,    RM },
-    /* 02 */ { "",     AM,    RH },
-    /* 03 */ { "",     AM,    RM },
-    /* 04 */ { "",     AM,    RM },
-    /* 05 */ { "",     AM,    RH },
-    /* 06 */ { "",     AM,    RH },
-    /* 07 */ { "",     AMSP,  RH },
-    /* 08 */ { "",     SP,    RH },
-    /* 09 */ { "",     SP,    RM },
-    /* 10 */ { "",     SPTH,  "" },
-    /* 11 */ { JR,     JR,    "" },
-    /* 12 */ { JR,     SP,    "" },
-    /* 13 */ { JR,     SP,    "" },
-    /* 14 */ { JRTH,   AM,    "" },
-    /* 15 */ { JR,     JR,    "" },
-    /* 16 */ { JR,     SP,    "" },
-    /* 17 */ { JR,     JR,    "" },
-    /* 18 */ { SPTH,   SP,    "" },
-    /* 19 */ { JR,     SP,    "" },
-    /* 20 */ { "",     JR,    "" },
-    /* 21 */ { SPTH,   SP,    "" },
-    /* 22 */ { SPTH,   AM,    "" },
-    /* 23 */ { SPTH,   SP,    "" },
-    /* 24 */ { SPTH,   SP,    "" },
-    /* 25 */ { SP,     SG,    "" },
-    /* 26 */ { SP,     JR,    "" },
-    /* 27 */ { SPTH,   SP,    "" },
-    /* 28 */ { SP,     SP,    "" },
-    /* 29 */ { SP,     JR,    "" },
-    /* 30 */ { "",     SP,    "" },
-    /* 31 */ { "",     SP,    "" },
-    /* 32 */ { "",     SP,    "" },
-    /* 33 */ { SPTH,   MB,    "" },
-    /* 34 */ { "",     "",    "" },
-    /* 35 */ { "",     "",    "" },
-    /* 36 */ { "",     "",    "" },
-    /* 37 */ { "",     "",    "" },
-    /* 38 */ { "",     "",    "" },
-    /* 39 */ { "",     "",    "" },
-    /* 40 */ { "",     "",    "" },
-    /* 41 */ { AM,     "",    "" },
-    /* 42 */ { JR,     "",    "" },
-    /* 43 */ { SG,     "",    "" },
-    /* 44 */ { AM,     "",    "" },
-    /* 45 */ { TW,     "",    "" },
-    /* 46 */ { JR,     "",    "" },
-    /* 47 */ { JA,     "",    "" },
-    /* 48 */ { SG,     "",    "" },
-    /* 49 */ { TW,     "",    "" }
+    /* xy      doom   doom2  tnt    plut   nerve */
+    /* 00 */ { "",    "",    "",    DCMC,  "" },
+    /* 01 */ { "",    SP,    TM,    DCMC,  RM },
+    /* 02 */ { "",    AM,    JW,    DCMC,  RH },
+    /* 03 */ { "",    AM,    RPJM2, DCMC,  RM },
+    /* 04 */ { "",    AM,    TH2,   DCMC,  RM },
+    /* 05 */ { "",    AM,    JD,    DCMC,  RH },
+    /* 06 */ { "",    AM,    JSTH2, DCMC,  RH },
+    /* 07 */ { "",    AMSP,  AD,    DCMC,  RH },
+    /* 08 */ { "",    SP,    JM2,   DCMC,  RH },
+    /* 09 */ { "",    SP,    JSTH2, DCMC,  RM },
+    /* 10 */ { "",    SPTH,  TM,    DCMC,  "" },
+    /* 11 */ { JR,    JR,    DJ,    DCMC,  "" },
+    /* 12 */ { JR,    SP,    JL,    DCMC,  "" },
+    /* 13 */ { JR,    SP,    BKTH2, DCMC,  "" },
+    /* 14 */ { JRTH,  AM,    RP,    DCMC,  "" },
+    /* 15 */ { JR,    JR,    WW,    DCMC,  "" },
+    /* 16 */ { JR,    SP,    AA,    DCMC,  "" },
+    /* 17 */ { JR,    JR,    TM,    DCMC,  "" },
+    /* 18 */ { SPTH,  SP,    DCTH2, DCMC,  "" },
+    /* 19 */ { JR,    SP,    TH2,   DCMC,  "" },
+    /* 20 */ { "",    JR,    DO,    DCMC,  "" },
+    /* 21 */ { SPTH,  SP,    DO,    DCMC,  "" },
+    /* 22 */ { SPTH,  AM,    CB,    DCMC,  "" },
+    /* 23 */ { SPTH,  SP,    PT,    DCMC,  "" },
+    /* 24 */ { SPTH,  SP,    DJ,    DCMC,  "" },
+    /* 25 */ { SP,    SG,    JM,    DCMC,  "" },
+    /* 26 */ { SP,    JR,    MSJL,  DCMC,  "" },
+    /* 27 */ { SPTH,  SP,    DO,    DCMC,  "" },
+    /* 28 */ { SP,    SP,    MC,    DCMC,  "" },
+    /* 29 */ { SP,    JR,    JS,    DCMC,  "" },
+    /* 30 */ { "",    SP,    JS,    DCMC,  "" },
+    /* 31 */ { "",    SP,    DC,    DCMC,  "" },
+    /* 32 */ { "",    SP,    DC,    DCMC,  "" },
+    /* 33 */ { SPTH,  MB,    "",    "",    "" },
+    /* 34 */ { "",    "",    "",    "",    "" },
+    /* 35 */ { "",    "",    "",    "",    "" },
+    /* 36 */ { "",    "",    "",    "",    "" },
+    /* 37 */ { "",    "",    "",    "",    "" },
+    /* 38 */ { "",    "",    "",    "",    "" },
+    /* 39 */ { "",    "",    "",    "",    "" },
+    /* 40 */ { "",    "",    "",    "",    "" },
+    /* 41 */ { AM,    "",    "",    "",    "" },
+    /* 42 */ { JR,    "",    "",    "",    "" },
+    /* 43 */ { SG,    "",    "",    "",    "" },
+    /* 44 */ { AM,    "",    "",    "",    "" },
+    /* 45 */ { TW,    "",    "",    "",    "" },
+    /* 46 */ { JR,    "",    "",    "",    "" },
+    /* 47 */ { JA,    "",    "",    "",    "" },
+    /* 48 */ { SG,    "",    "",    "",    "" },
+    /* 49 */ { TW,    "",    "",    "",    "" }
 };
 
 #define NERVE_AUTHORS   authors[gamemap][2]
@@ -213,20 +238,20 @@ static int              message_counter;
 static int              secret_counter;
 static int              hudnumoffset;
 
-static char             monstersstr1[80];
-static char             monstersstr2[80];
-static char             monstersstr3[80];
-static char             monstersstr4[80];
+static char             monstersstr1[10];
+static char             monstersstr2[2];
+static char             monstersstr3[10];
+static char             monstersstr4[5];
 
-static char             itemsstr1[80];
-static char             itemsstr2[80];
-static char             itemsstr3[80];
-static char             itemsstr4[80];
+static char             itemsstr1[10];
+static char             itemsstr2[2];
+static char             itemsstr3[10];
+static char             itemsstr4[5];
 
-static char             secretsstr1[80];
-static char             secretsstr2[80];
-static char             secretsstr3[80];
-static char             secretsstr4[80];
+static char             secretsstr1[10];
+static char             secretsstr2[2];
+static char             secretsstr3[10];
+static char             secretsstr4[5];
 
 dboolean                message_dontfuckwithme;
 dboolean                show_chat_bar;
@@ -236,6 +261,7 @@ patch_t                 *hu_font[HU_FONTSIZE];
 patch_t                 *beta_hu_font[HU_FONTSIZEBETA];
 
 extern int              cardsfound;
+extern int              dehcount;
 
 extern dboolean         blurred;
 extern dboolean         mapinfo_lump;
@@ -664,7 +690,6 @@ void HU_Start(void)
     }
 
     // dehacked substitution to get modified level name
-
     t = monstersstr1;
     y = monstersstr2;
     z = monstersstr3;
@@ -681,9 +706,8 @@ void HU_Start(void)
     n = secretsstr4;
 
     if (((fsize != 12538385 && fsize != 14691821 && fsize != 14677988 &&
-        fsize != 14683458) || (fsize == 12538385 && gamemap != 10) ||
-        ((fsize == 14683458 || fsize == 14677988 || fsize == 14691821) &&
-        gamemap != 33)) && show_title)
+        fsize != 14683458) || (fsize == 12538385) ||
+        ((fsize == 14683458 || fsize == 14677988 || fsize == 14691821))) && show_title)
     {
         while (*s)
             HUlib_addCharToTextLine(&w_title, *(s++));
@@ -738,11 +762,13 @@ void HU_Start(void)
         while (*v)
             HUlib_addCharToTextLine(&w_author_title, *(v++));
     }
+
     /*
     // create the inputbuffer widgets
     for (i = 0; i < MAXPLAYERS; i++)
         HUlib_initIText(&w_inputbuffer[i], 0, 0, 0, 0, &always_off);
     */
+
     if (W_CheckNumForName("MEDIA0"))
         healthpatch = W_CacheLumpNum(W_GetNumForName("MEDIA0"), PU_CACHE);
 
@@ -778,11 +804,10 @@ void HU_Start(void)
 /*
 static void HU_DemoProgressBar(int scrn)
 {
-    int i;
     extern char *demo_p, *demobuffer;
     extern int defdemosize;
 
-    i = SCREENWIDTH * (demo_p - demobuffer) / defdemosize;
+    int i = SCREENWIDTH * (demo_p - demobuffer) / defdemosize;
 
     // [crispy] white
     V_DrawHorizLine(0, SCREENHEIGHT - 3, scrn, i, 4);
@@ -1180,7 +1205,7 @@ void HU_DrawHUD(void)
 
     if (armor)
     {
-        patch_t     *patch = (plr->armortype == 1 ? greenarmorpatch : bluearmorpatch);
+        patch_t     *patch = (plr->armortype == GREENARMOR ? greenarmorpatch : bluearmorpatch);
         int         armor_x = HUD_ARMOR_X;
 
         if (patch)
@@ -1279,6 +1304,7 @@ void HU_Drawer(void)
 
     if (dp_translucent)
         dp_translucent = false;
+
     /*
     // [crispy] demo progress bar
     // FIXME (crashing)
@@ -1372,9 +1398,7 @@ void HU_Ticker(void)
 dboolean HU_Responder(event_t *ev)
 {
     dboolean      eatkey = false;
-
     int           i;
-
     int           numplayers = 0;
 
     for (i = 0; i < MAXPLAYERS; i++)
@@ -1462,7 +1486,6 @@ void HU_NewLevel()
     }
 
     // print the new level name into the console
-
     if (modifiedgame)
     {
         if (mapinfo_lump)
@@ -1497,7 +1520,7 @@ void HU_NewLevel()
     C_Output("");
 
     if (gameepisode == 1 && gamemap == 10 && fsize == 12538385)
-        C_Output("%s", "E1M10: Sewers");
+        C_Output("%s", uppercase(s_HUSTR_E1M10));
     else
         C_Output("%s", uppercase(s));
 

@@ -2146,26 +2146,43 @@ void WI_Drawer (void)
     }
 }
 
+// RNGCHECK():
+//  Return 0 if value is outside the range of high and low; else 1.
+
+#ifdef RANGECHECK
+static int RNGCHECK(int value, char *name, int low, int high)
+{
+    if ((value < low) || (value > high))
+    {
+        C_Warning("WI_initVariables: %s outside valid range of %d - %d", name, low, high);
+
+        return(0);
+    }
+
+    return(1);
+}
+#endif
+
 void WI_initVariables(wbstartstruct_t *wbstartstruct)
 {
     wbs = wbstartstruct;
 
-#ifdef RANGECHECKING
+#ifdef RANGECHECK
     if (gamemode != commercial)
     {
         if (gamemode == retail)
-            RNGCHECK(wbs->epsd, 0, 3);
+            RNGCHECK(wbs->epsd, "wbs->epsd", 0, 3);
         else
-            RNGCHECK(wbs->epsd, 0, 2);
+            RNGCHECK(wbs->epsd, "wbs->epsd", 0, 2);
     }
     else
     {
-        RNGCHECK(wbs->last, 0, 8);
-        RNGCHECK(wbs->next, 0, 8);
+        RNGCHECK(wbs->last, "wbs->epsd", 0, 8);
+        RNGCHECK(wbs->next, "wbs->epsd", 0, 8);
     }
 
-    RNGCHECK(wbs->pnum, 0, MAXPLAYERS);
-    RNGCHECK(wbs->pnum, 0, MAXPLAYERS);
+    RNGCHECK(wbs->pnum, "wbs->epsd", 0, MAXPLAYERS);
+    RNGCHECK(wbs->pnum, "wbs->epsd", 0, MAXPLAYERS);
 #endif
 
     acceleratestage = 0;

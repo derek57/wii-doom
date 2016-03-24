@@ -321,6 +321,12 @@ void M_BindBaseControls(void)
     M_BindVariable("map_secrets_after",        &map_secret_after);
     M_BindVariable("use_autosave",             &enable_autosave);
     M_BindVariable("draw_splash",              &drawsplash);
+    M_BindVariable("menu_back",                &background_color);
+    M_BindVariable("precache_level",           &precache);
+    M_BindVariable("still_bob",                &stillbob);
+    M_BindVariable("move_bob",                 &movebob);
+    M_BindVariable("flip_levels",              &d_fliplevels);
+    M_BindVariable("use_autoload",             &enable_autoload);
 
 #ifdef WII
 

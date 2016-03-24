@@ -87,8 +87,10 @@ void P_Bob(player_t *player, angle_t angle, fixed_t move)
 //
 void P_CalcHeight(player_t *player) 
 {
+    mobj_t      *mo = player->mo;
+
     if (!onground)
-        player->viewz = MIN(player->mo->z + VIEWHEIGHT, player->mo->ceilingz - 4 * FRACUNIT);
+        player->viewz = MIN(mo->z + VIEWHEIGHT, mo->ceilingz - 4 * FRACUNIT);
     else if (player->playerstate == PST_LIVE)
     {
         int     angle = (FINEANGLES / 20 * leveltime) & FINEMASK;
@@ -98,7 +100,8 @@ void P_CalcHeight(player_t *player)
         // Regular movement bobbing
         // (needs to be calculated for gun swing
         // even if not on ground)
-        player->bob = MIN(bob, MAXBOB) * 75 / 100;
+        player->bob = (bob ? MAX(MIN(bob, MAXBOB) * movebob / 100, MAXBOB * stillbob / 400) :
+            MAXBOB * stillbob / 400);
         
         bob = FixedMul(player->bob / 2, finesine[angle]);
 
@@ -127,17 +130,17 @@ void P_CalcHeight(player_t *player)
                 player->deltaviewheight = 1;
         }
 
-        player->viewz = player->mo->z + player->viewheight + bob;
+        player->viewz = mo->z + player->viewheight + bob;
     }
     else
-        player->viewz = player->mo->z + player->viewheight;
+        player->viewz = mo->z + player->viewheight;
 
-    if ((player->mo->flags2 & MF2_FEETARECLIPPED) && d_footclip)
+    if ((mo->flags2 & MF2_FEETARECLIPPED) && d_footclip)
     {
         dboolean                    liquid = true;
         const struct msecnode_s     *seclist;
 
-        for (seclist = player->mo->touching_sectorlist; seclist; seclist = seclist->m_tnext)
+        for (seclist = mo->touching_sectorlist; seclist; seclist = seclist->m_tnext)
             if (!isliquid[seclist->m_sector->floorpic] || seclist->m_sector->heightsec != -1)
             {
                 liquid = false;
@@ -148,7 +151,7 @@ void P_CalcHeight(player_t *player)
             player->viewz -= FOOTCLIPSIZE;
     }
 
-    player->viewz = BETWEEN(player->mo->floorz + 4 * FRACUNIT, player->viewz, player->mo->ceilingz - 4 * FRACUNIT);
+    player->viewz = BETWEEN(mo->floorz + 4 * FRACUNIT, player->viewz, mo->ceilingz - 4 * FRACUNIT);
 }
 
 //

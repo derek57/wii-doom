@@ -632,7 +632,7 @@ void W_CheckSize(int wad)
             // take a position of file pointer un size variable
             fsizerw = ftell(fprw);
 
-            if (fsizerw != 1131979)
+            if (fsizerw != 1132257)
                 print_resource_pwad_error = true;
 
             fclose(fprw);
@@ -760,7 +760,7 @@ void W_CheckSize(int wad)
             fseek(fprw, 0, 2);
 
             // take a position of file pointer un size variable
-            fsizerw = ftell(fprw);
+            fsizerw2 = ftell(fprw);
 
             fclose(fprw);
         }

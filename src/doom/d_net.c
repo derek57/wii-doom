@@ -47,23 +47,21 @@
 #include "w_wad.h"
 
 
+ticcmd_t *netcmds;
+
+
 extern dboolean longtics;
 extern dboolean lowres_turn;
 
-ticcmd_t *netcmds;
 
 // Called when a player leaves the game
-
 static void PlayerQuitGame(player_t *player)
 {
     static char exitmsg[80];
-    unsigned int player_num;
-
-    player_num = player - players;
+    unsigned int player_num = player - players;
 
     // Do this the same way as Vanilla Doom does, to allow dehacked
     // replacements of this message
-
     M_StringCopy(exitmsg, "Player 1 left the game", sizeof(exitmsg));
 
     exitmsg[7] += player_num;
@@ -86,7 +84,6 @@ static void RunTic(ticcmd_t *cmds, dboolean *ingame)
     unsigned int i;
 
     // Check for player quits.
-
     for (i = 0; i < MAXPLAYERS; ++i)
     {
         if (!demoplayback && playeringame[i] && !ingame[i])
@@ -99,7 +96,6 @@ static void RunTic(ticcmd_t *cmds, dboolean *ingame)
 
     // check that there are players in the game.  if not, we cannot
     // run a tic.
-
     if (advancedemo)
         D_DoAdvanceDemo();
 
@@ -116,7 +112,6 @@ static loop_interface_t doom_loop_interface = {
 
 // Load game settings from the specified structure and
 // set global variables.
-
 static void LoadGameSettings(net_gamesettings_t *settings)
 {
     unsigned int i;
@@ -147,12 +142,10 @@ static void LoadGameSettings(net_gamesettings_t *settings)
 
 // Save the game settings from global variables to the specified
 // game settings structure.
-
 static void SaveGameSettings(net_gamesettings_t *settings)
 {
     // Fill in game settings structure with appropriate parameters
     // for the new game
-
     settings->deathmatch = deathmatch;
     settings->episode = startepisode;
     settings->map = startmap;
@@ -168,7 +161,7 @@ static void SaveGameSettings(net_gamesettings_t *settings)
     settings->lowres_turn = M_CheckParm("-record") > 0
                          && M_CheckParm("-longtics") == 0;
 #else
-    if(longtics)
+    if (longtics)
         settings->lowres_turn = true;
     else
 */
@@ -202,7 +195,6 @@ void D_CheckNetGame(void)
                consoleplayer + 1, settings.num_players, settings.num_players);
 
     // Show players here; the server might have specified a time limit
-
     if (timelimit > 0 && deathmatch)
     {
         // Gross hack to work like Vanilla:

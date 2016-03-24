@@ -98,13 +98,10 @@ dboolean HUlib_delCharFromTextLine(hu_textline_t* t)
 
 void HUlib_drawTextLine(hu_textline_t *l, dboolean drawcursor)
 {
-    int                 i;
-    int                 w;
-    int                 x;
+    int  i, w;
+    int  x = l->x;
 
     // draw the new stuff
-    x = l->x;
-
     for (i = 0; i < l->len; i++)
     {
         unsigned char c = 0;
@@ -114,8 +111,7 @@ void HUlib_drawTextLine(hu_textline_t *l, dboolean drawcursor)
         else
             c = toupper(l->l[i]);
 
-        if (c != ' '
-            && c >= l->sc
+        if (c != ' ' && c >= l->sc
             && ((c <= '_' && !beta_style) || (c <= '}' && beta_style)))
         {
             if (beta_style)
@@ -166,7 +162,7 @@ void HUlib_initSText(hu_stext_t *s, int x, int y, int h, patch_t **font, int sta
                            font, startchar);
 }
 
-void HUlib_addLineToSText(hu_stext_t *s)
+static void HUlib_addLineToSText(hu_stext_t *s)
 {
     int i;
 

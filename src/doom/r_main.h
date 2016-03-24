@@ -73,6 +73,15 @@
 #define NUMCOLORMAPS            32
 
 
+// haleyjd 20140902: [SVE] interpolation
+typedef enum
+{
+    SEC_INTERPOLATE,
+    SEC_NORMAL
+
+} secinterpstate_e;
+
+
 //
 // Function pointers to switch refresh/drawing functions.
 // Used to select shadow mode etc.

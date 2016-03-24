@@ -149,8 +149,8 @@ static void display_jpeg(JPEGIMG jpeg, int x, int y)
     int height = jpeg.height;
     int width = jpeg.width / 2;
 
-    for(i = 0; i <= width; i++)
-        for(j = 0; j <= height - 2; j++)
+    for (i = 0; i <= width; i++)
+        for (j = 0; j <= height - 2; j++)
             xfb[(i + x) + 320 * (j + 16 + y)] = jpegout[i + width * j];
 
     free(jpeg.outbuffer);
@@ -191,7 +191,7 @@ static void Con_Clear(void)
 
 static void Restart(void)
 {
-    Con_Clear ();
+    Con_Clear();
 
     fflush(stdout);
 
@@ -312,7 +312,7 @@ static void Menu_FatDevice(void)
     // Select source device
     if (gConfig.fatDeviceIndex < 0)
     {
-        for ( ; ; )
+        for (;;)
         {
             u32 buttons;
 
@@ -408,7 +408,7 @@ static void Menu_FatDevice(void)
     // Draw main title
     drawMain();
 
-    printf("  Loading...: %s", fdev->name );
+    printf("  Loading...: %s", fdev->name);
     printf("    |");
 
     fflush(stdout);
@@ -628,7 +628,7 @@ static void Menu_WadList(void)
         file->install = 0;
     }
 
-    for ( ; ; )
+    for (;;)
     {
         u32 cnt;
 
@@ -1504,7 +1504,7 @@ static void Menu_WadList(void)
                 }
                 else
                 {
-                    tmpCurPath = PeekCurrentDir ();
+                    tmpCurPath = PeekCurrentDir();
 
                     if (tmpCurPath != NULL)
                     {
@@ -2367,7 +2367,7 @@ static void Menu_WadList(void)
 
 void Menu_Loop(void)
 {
-    for ( ; ; )
+    for (;;)
     {
         // FAT device menu
         Menu_FatDevice();

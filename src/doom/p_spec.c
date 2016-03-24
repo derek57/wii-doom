@@ -80,6 +80,15 @@
 #define PUSH_FACTOR                  7
 
 
+// haleyjd 11/20/00: restructuring for purposes of adding a
+// customizable data lump
+typedef struct terraintype_s
+{
+   char  name[9];
+   short type;
+
+} terraintype_t; 
+
 //
 // Animating textures and planes
 // There is another anim_t used in wi_stuff, unrelated.
@@ -210,6 +219,8 @@ static struct
 };
 
 
+terraintype_t  *TerrainTypeDefs = NULL;
+
 fixed_t         animatedliquiddiff;
 fixed_t         animatedliquidxdir;
 fixed_t         animatedliquidydir;
@@ -259,6 +270,12 @@ char            *playername = playername_default;
 
 int             levelTimeCount;
 
+// haleyjd 3/17/99: TerrainTypes
+int             numterraindefs;
+
+// return to array model; optimization
+int             *TerrainTypes = NULL;
+
 
 extern dboolean noclip_on;
 
@@ -270,7 +287,7 @@ extern dboolean noclip_on;
 //
 // Animating line specials
 //
-void P_InitPicAnims (void)
+void P_InitPicAnims(void)
 {
     int size = (numflats + 1) * sizeof(dboolean);
 
@@ -400,7 +417,7 @@ void P_SetLiquids(void)
 
 //
 // getSide()
-// Will return a side_t*
+// Will return a side_t *
 //  given the number of the current sector,
 //  the line number, and the side (0/1) that you want.
 //
@@ -411,7 +428,7 @@ side_t *getSide(int currentSector, int line, int side)
 
 //
 // getSector()
-// Will return a sector_t*
+// Will return a sector_t *
 //  given the number of the current sector,
 //  the line number and the side (0/1) that you want.
 //
@@ -2214,9 +2231,12 @@ void P_PlayerInSpecialSector(player_t *player)
 
                 // killough 2/21/98: add compatibility switch
                 if (d_god)
+                {
                     // on godmode cheat clearing
                     // does not affect invulnerability
                     player->cheats &= ~CF_GODMODE;
+                    player->powers[pw_invulnerability] = 0;
+                }
 
                 if (!(leveltime & 0x1f))
                     P_DamageMobj(player->mo, NULL, NULL, 20);
@@ -2415,7 +2435,7 @@ dboolean EV_DoDonut(line_t *line)
 
         if (!s2)
         {
-            C_Error("EV_DoDonut: linedef had no second sidedef! Unexpected behavior may occur in Vanilla Doom. ");
+            C_Error("EV_DoDonut: linedef had no second sidedef! Unexpected behavior may occur in Vanilla Doom.");
             continue;
         }
 
@@ -3342,40 +3362,15 @@ void P_SpawnSpecials(void)
     //P_InitSlidingDoorFrames();
 }
 
-//////////////////////////////////
-//
-// haleyjd 3/17/99: TerrainTypes
-//
-//////////////////////////////////
+// haleyjd 11/20/00: added a really sweet feature, made
+// TerrainTypes editable via the TERTYPES lump. Binary format, needs
+// an external editor utility (which I have written). This code
+// expects to find a lump with the number of terrain definitions,
+// then for each, a 9-character NULL-extended string for the flat
+// name, and a short describing what type of effect to trigger
+// (see p_spec.h, the values are all the same).
 
-int numterraindefs;
-
-// return to array model; optimization
-int *TerrainTypes = NULL;
-
-// haleyjd 11/20/00: restructuring for purposes of adding a
-// customizable data lump
-
-typedef struct terraintype_s
-{
-   char  name[9];
-   short type;
-
-} terraintype_t; 
-
-terraintype_t *TerrainTypeDefs = NULL;
-
-/*
-   haleyjd 11/20/00: added a really sweet feature, made
-   TerrainTypes editable via the TERTYPES lump. Binary format, needs
-   an external editor utility (which I have written). This code
-   expects to find a lump with the number of terrain definitions,
-   then for each, a 9-character NULL-extended string for the flat
-   name, and a short describing what type of effect to trigger
-   (see p_spec.h, the values are all the same).
-*/
-
-// [nitr8]
+// [nitr8]:
 //
 // The tool mentioned by haleyjd above is named "TerrainEd" for the
 // Eternity Engine. It's short name is "TERRED" which i found over
@@ -3384,7 +3379,6 @@ terraintype_t *TerrainTypeDefs = NULL;
 // folder alongside it's source code, the DOS binary, an example
 // script, a precompiled lump, a precompiled Linux binary and modded
 // it's source code a bit to also match the liquid flats of DOOM 2.
-
 void P_LoadTerrainTypeDefs(void)
 {
     int   lumpnum;

@@ -54,6 +54,23 @@ extern dboolean canmodify;
 
 
 //
+// P_RemoveActiveCeiling
+// Remove a ceiling's thinker
+//
+static void P_RemoveActiveCeiling(ceiling_t *ceiling)
+{
+    ceilinglist_t       *list = ceiling->list;
+
+    ceiling->sector->ceilingdata = NULL;
+    P_RemoveThinker(&ceiling->thinker);
+
+    if ((*list->prev = list->next))
+        list->next->prev = list->prev;
+
+    free(list);
+}
+
+//
 // T_MoveCeiling
 //
 void T_MoveCeiling(ceiling_t *ceiling)
@@ -68,7 +85,8 @@ void T_MoveCeiling(ceiling_t *ceiling)
 
         case 1:
             // UP
-            res = T_MovePlane(ceiling->sector, ceiling->speed, ceiling->topheight, false, 1, ceiling->direction);
+            res = T_MovePlane(ceiling->sector, ceiling->speed, ceiling->topheight, false, 1,
+                ceiling->direction);
         
             if (!(leveltime & 7)
                 // [BH] don't make sound once ceiling is at its destination height
@@ -100,7 +118,7 @@ void T_MoveCeiling(ceiling_t *ceiling)
                     case genCeilingChg0:
                         ceiling->sector->special = ceiling->newspecial;
 
-                        //jff 3/14/98 transfer old special field as well
+                        // jff 3/14/98 transfer old special field as well
                         ceiling->sector->oldspecial = ceiling->oldspecial;
 
                     case genCeilingChg:
@@ -126,7 +144,8 @@ void T_MoveCeiling(ceiling_t *ceiling)
         
         case -1:
             // DOWN
-            res = T_MovePlane(ceiling->sector, ceiling->speed, ceiling->bottomheight, ceiling->crush, 1, ceiling->direction);
+            res = T_MovePlane(ceiling->sector, ceiling->speed, ceiling->bottomheight,
+                ceiling->crush, 1, ceiling->direction);
         
             if (!(leveltime & 7)
                 // [BH] don't make sound once ceiling is at its destination height
@@ -140,7 +159,6 @@ void T_MoveCeiling(ceiling_t *ceiling)
 
                     default:
                         S_StartSectorSound(&ceiling->sector->soundorg, sfx_stnmov);
-                        break;
                 }
             }
         
@@ -174,7 +192,7 @@ void T_MoveCeiling(ceiling_t *ceiling)
                     case genCeilingChg0:
                         ceiling->sector->special = ceiling->newspecial;
 
-                        //jff add to fix bug in special transfers from changes
+                        // jff add to fix bug in special transfers from changes
                         ceiling->sector->oldspecial = ceiling->oldspecial;
 
                     case genCeilingChg:
@@ -225,13 +243,14 @@ void T_MoveCeiling(ceiling_t *ceiling)
 // EV_DoCeiling
 // Move a ceiling up/down and all around!
 //
-int EV_DoCeiling(line_t *line, ceiling_e type)
+dboolean EV_DoCeiling(line_t *line, ceiling_e type)
 {
+    int         i;
     int         secnum = -1;
     dboolean    rtn = false;
-    sector_t*   sec;
-    ceiling_t*  ceiling;
-        
+    sector_t    *sec;
+    ceiling_t   *ceiling;
+
     // Reactivate in-stasis ceilings...for certain types.
     switch (type)
     {
@@ -253,7 +272,7 @@ int EV_DoCeiling(line_t *line, ceiling_e type)
         // new ceiling thinker
         rtn = true;
         ceiling = Z_Calloc(1, sizeof(*ceiling), PU_LEVSPEC, NULL); 
-        P_AddThinker (&ceiling->thinker);
+        P_AddThinker(&ceiling->thinker);
         sec->ceilingdata = ceiling;
         ceiling->thinker.function = T_MoveCeiling;
         ceiling->sector = sec;
@@ -264,7 +283,7 @@ int EV_DoCeiling(line_t *line, ceiling_e type)
             case fastCrushAndRaise:
                 ceiling->crush = true;
                 ceiling->topheight = sec->ceilingheight;
-                ceiling->bottomheight = sec->floorheight + (8 * FRACUNIT);
+                ceiling->bottomheight = sec->floorheight + 8 * FRACUNIT;
                 ceiling->direction = -1;
                 ceiling->speed = CEILSPEED * 2;
                 break;
@@ -308,8 +327,11 @@ int EV_DoCeiling(line_t *line, ceiling_e type)
                 
         ceiling->tag = sec->tag;
         ceiling->type = type;
-
         P_AddActiveCeiling(ceiling);
+
+        // [BH] ceiling is no longer secret
+        for (i = 0; i < sec->linecount; i++)
+            sec->lines[i]->flags &= ~ML_SECRET;
     }
 
     return rtn;
@@ -321,9 +343,8 @@ int EV_DoCeiling(line_t *line, ceiling_e type)
 //
 void P_AddActiveCeiling(ceiling_t *ceiling)
 {
-    ceilinglist_t       *list;
+    ceilinglist_t       *list = malloc(sizeof(*list));
 
-    list = malloc(sizeof(*list));
     list->ceiling = ceiling;
     ceiling->list = list;
 
@@ -332,23 +353,6 @@ void P_AddActiveCeiling(ceiling_t *ceiling)
 
     list->prev = &activeceilings;
     activeceilings = list;
-}
-
-//
-// P_RemoveActiveCeiling
-// Remove a ceiling's thinker
-//
-void P_RemoveActiveCeiling(ceiling_t *ceiling)
-{
-    ceilinglist_t       *list = ceiling->list;
-
-    ceiling->sector->ceilingdata = NULL;
-    P_RemoveThinker(&ceiling->thinker);
-
-    if ((*list->prev = list->next))
-        list->next->prev = list->prev;
-
-    free(list);
 }
 
 //
@@ -372,7 +376,7 @@ void P_RemoveAllActiveCeilings(void)
 //
 dboolean P_ActivateInStasisCeiling(line_t *line)
 {
-    dboolean             result = false;
+    dboolean            result = false;
     ceilinglist_t       *list;
 
     for (list = activeceilings; list; list = list->next)
@@ -396,7 +400,7 @@ dboolean P_ActivateInStasisCeiling(line_t *line)
 //
 dboolean EV_CeilingCrushStop(line_t *line)
 {
-    dboolean             result = false;
+    dboolean            result = false;
     ceilinglist_t       *list;
 
     for (list = activeceilings; list; list = list->next)

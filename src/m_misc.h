@@ -45,6 +45,7 @@ dboolean M_StringEndsWith(const char *s, const char *suffix);
 dboolean M_StringCompare(const char *str1, const char *str2);
 dboolean isvowel(const char ch);
 
+int M_DoubleToInt(double x);
 int M_ReadFile(char *name, byte **buffer);
 int M_vsnprintf(char *buf, size_t buf_len, const char *s, va_list args);
 int M_snprintf(char *buf, size_t buf_len, const char *s, ...);

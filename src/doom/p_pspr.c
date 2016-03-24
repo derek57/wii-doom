@@ -105,8 +105,11 @@ static const int recoil_values[][2] =
 // adapted from prboom-plus/src/p_pspr.c:484-495 (A_FireSomething())
 void A_Recoil(player_t *player)
 {
-    if (!netgame && d_recoil && !(player->mo->flags & MF_NOCLIP))
+    if (!netgame && d_thrust && !(player->mo->flags & MF_NOCLIP))
         P_Thrust(player, ANG180 + player->mo->angle, 2048 * recoil_values[player->readyweapon][0]);
+
+    if (d_recoil)
+	player->recoilpitch = recoil_values[player->readyweapon][1] << FRACBITS;
 }
 
 //
@@ -184,17 +187,20 @@ void P_BringUpWeapon(player_t *player)
         player->pendingweapon = player->readyweapon;
                 
     if (player->pendingweapon == wp_chainsaw)
-        S_StartSound (player->mo, sfx_sawup);
+        S_StartSound(player->mo, sfx_sawup);
                 
     if (player->pendingweapon >= NUMWEAPONS)
         C_Error("P_BringUpWeapon: weaponinfo overrun has occured.");
 
-    if (beta_style && player->pendingweapon == wp_chaingun)
-        newstate = S_BETACHAINUP;
-    else if (beta_style && player->pendingweapon == wp_plasma)
-        newstate = S_BETAPLASMAUP;
-    else
-        newstate = weaponinfo[player->pendingweapon].upstate;
+    newstate = weaponinfo[player->pendingweapon].upstate;
+
+    if (beta_style)
+    {
+        if (player->pendingweapon == wp_chaingun)
+            newstate = S_BETACHAINUP;
+        else if (player->pendingweapon == wp_plasma)
+            newstate = S_BETAPLASMAUP;
+    }
 
     player->pendingweapon = wp_nochange;
     player->psprites[ps_weapon].sy = WEAPONBOTTOM;
@@ -211,6 +217,7 @@ dboolean P_CheckAmmo(player_t *player)
 {
     ammotype_t     ammo = weaponinfo[player->readyweapon].ammo;
     int            count;
+    statenum_t     newstate;
 
     // Minimal amount for one shot varies.
     if (player->readyweapon == wp_bfg)
@@ -279,19 +286,18 @@ dboolean P_CheckAmmo(player_t *player)
         
     } while (player->pendingweapon == wp_nochange);
 
+    newstate = weaponinfo[player->readyweapon].downstate;
+
     // Now set appropriate weapon overlay.
-    if (beta_style && player->readyweapon == wp_chaingun)
-        P_SetPsprite(player,
-                     ps_weapon,
-                     S_BETACHAINDOWN);
-    else if (beta_style && player->readyweapon == wp_plasma)
-        P_SetPsprite(player,
-                     ps_weapon,
-                     S_BETAPLASMADOWN);
-    else
-        P_SetPsprite(player,
-                     ps_weapon,
-                     weaponinfo[player->readyweapon].downstate);
+    if (beta_style)
+    {
+        if (player->readyweapon == wp_chaingun)
+            newstate = S_BETACHAINDOWN;
+        else if (player->readyweapon == wp_plasma)
+            newstate = S_BETAPLASMADOWN;
+    }
+
+    P_SetPsprite(player, ps_weapon, newstate);
 
     return false;        
 }
@@ -309,12 +315,15 @@ void P_FireWeapon(player_t *player)
         
     P_SetMobjState(player->mo, S_PLAY_ATK1);
 
-    if (beta_style && player->readyweapon == wp_chaingun)
-        newstate = S_BETACHAIN1;
-    else if (beta_style && player->readyweapon == wp_plasma)
-        newstate = S_BETAPLASMA1;
-    else
-        newstate = weaponinfo[player->readyweapon].atkstate;
+    newstate = weaponinfo[player->readyweapon].atkstate;
+
+    if (beta_style)
+    {
+        if (player->readyweapon == wp_chaingun)
+            newstate = S_BETACHAIN1;
+        else if (player->readyweapon == wp_plasma)
+            newstate = S_BETAPLASMA1;
+    }
 
     P_SetPsprite(player, ps_weapon, newstate);
 
@@ -341,18 +350,17 @@ void P_FireWeapon(player_t *player)
 //
 void P_DropWeapon(player_t *player)
 {
-    if (beta_style && player->readyweapon == wp_chaingun)
-        P_SetPsprite(player,
-                     ps_weapon,
-                     S_BETACHAINDOWN);
-    else if (beta_style && player->readyweapon == wp_plasma)
-        P_SetPsprite(player,
-                     ps_weapon,
-                     S_BETAPLASMADOWN);
-    else
-        P_SetPsprite(player,
-                     ps_weapon,
-                     weaponinfo[player->readyweapon].downstate);
+    statenum_t     newstate = weaponinfo[player->readyweapon].downstate;
+
+    if (beta_style)
+    {
+        if (player->readyweapon == wp_chaingun)
+            newstate = S_BETACHAINDOWN;
+        else if (player->readyweapon == wp_plasma)
+            newstate = S_BETAPLASMADOWN;
+    }
+
+    P_SetPsprite(player, ps_weapon, newstate);
 }
 
 //
@@ -385,16 +393,17 @@ void A_WeaponReady(player_t *player, pspdef_t *psp)
     //  if player is dead, put the weapon away
     if (player->pendingweapon != wp_nochange || !player->health)
     {
-        statenum_t     newstate;
+        statenum_t     newstate = weaponinfo[player->readyweapon].downstate;
 
         // change weapon
         //  (pending weapon should allready be validated)
-        if (beta_style && player->readyweapon == wp_chaingun)
-            newstate = S_BETACHAINDOWN;
-        else if (beta_style && player->readyweapon == wp_plasma)
-            newstate = S_BETAPLASMADOWN;
-        else
-            newstate = weaponinfo[player->readyweapon].downstate;
+        if (beta_style)
+        {
+            if (player->readyweapon == wp_chaingun)
+                newstate = S_BETACHAINDOWN;
+            else if (player->readyweapon == wp_plasma)
+                newstate = S_BETAPLASMADOWN;
+        }
 
         P_SetPsprite(player, ps_weapon, newstate);
         return;        
@@ -416,8 +425,7 @@ void A_WeaponReady(player_t *player, pspdef_t *psp)
     else
         player->attackdown = false;
 
-    // FIXME: ???
-    //if (actor->momx || actor->momy || actor->momz)
+    if (player->mo->momx || player->mo->momy || player->mo->momz)
     {
         // bob the weapon based on movement speed
         int     angle = (128 * leveltime) & FINEMASK;
@@ -445,11 +453,8 @@ void A_ReFire(player_t *player, pspdef_t *psp)
          && player->pendingweapon == wp_nochange
          && player->health)
     {
-        if (beta_style)
-        {
-            if (player->readyweapon == wp_plasma)
+        if (beta_style && player->readyweapon == wp_plasma)
                 beta_plasma_refired = true;
-        }
 
         player->refire++;
         P_FireWeapon(player);
@@ -543,14 +548,17 @@ void A_Raise(player_t *player, pspdef_t *psp)
 
     psp->sy = WEAPONTOP;
     
+    newstate = weaponinfo[player->readyweapon].readystate;
+
     // The weapon has been raised all the way,
     //  so change to the ready state.
-    if (beta_style && player->readyweapon == wp_chaingun)
-        newstate = S_BETACHAIN;
-    else if (beta_style && player->readyweapon == wp_plasma)
-        newstate = S_BETAPLASMA;
-    else
-        newstate = weaponinfo[player->readyweapon].readystate;
+    if (beta_style)
+    {
+        if (player->readyweapon == wp_chaingun)
+            newstate = S_BETACHAIN;
+        else if (player->readyweapon == wp_plasma)
+            newstate = S_BETAPLASMA;
+    }
 
     P_SetPsprite(player, ps_weapon, newstate);
 }
@@ -560,12 +568,19 @@ void A_Raise(player_t *player, pspdef_t *psp)
 //
 void A_GunFlash(player_t *player, pspdef_t *psp) 
 {
+    statenum_t     newstate;
+
     P_SetMobjState(player->mo, S_PLAY_ATK2);
 
-    if (beta_style && player->readyweapon == wp_chaingun)
-        P_SetPsprite(player,ps_flash,S_BETACHAINFLASH1);
-    else if ((beta_style && player->readyweapon != wp_missile) || !beta_style)
-        P_SetPsprite(player,ps_flash,weaponinfo[player->readyweapon].flashstate);
+    newstate = weaponinfo[player->readyweapon].flashstate;
+
+    if (beta_style && player->readyweapon != wp_missile)
+    {
+        if (player->readyweapon == wp_chaingun)
+            newstate = S_BETACHAINFLASH1;
+    }
+
+    P_SetPsprite(player, ps_flash, newstate);
 }
 
 //
@@ -669,12 +684,7 @@ void A_FireMissile(player_t *player, pspdef_t *psp)
         DecreaseAmmo(player, weaponinfo[player->readyweapon].ammo, 1);
 
     P_SpawnPlayerMissile(player->mo, MT_ROCKET);
-
-    if (d_recoil)
-        player->recoilpitch = (8 * FRACUNIT);
-
-    if (d_thrust)
-        A_Recoil(player);
+    A_Recoil(player);
 }
 
 //
@@ -686,12 +696,7 @@ void A_FireBFG(player_t *player, pspdef_t *psp)
         DecreaseAmmo(player, weaponinfo[player->readyweapon].ammo, bfgcells);
 
     P_SpawnPlayerMissile(player->mo, MT_BFG);
-
-    if (d_recoil)
-        player->recoilpitch = (14 * FRACUNIT);
-
-    if (d_thrust)
-        A_Recoil(player);
+    A_Recoil(player);
 }
 
 //
@@ -708,10 +713,6 @@ void A_FireOldBFG(player_t *player, pspdef_t *psp)
 
     // sf: make sure the player is in firing frame, or it looks silly
     P_SetMobjState(player->mo, S_PLAY_ATK2);
-
-    if (d_recoil && !(player->mo->flags & MF_NOCLIP))
-        P_Thrust(player, ANG180 + player->mo->angle,
-                512 * recoil_values[wp_plasma][0]);
 
     if (!d_infiniteammo)
         player->ammo[weaponinfo[player->readyweapon].ammo]--;
@@ -787,16 +788,9 @@ void A_FirePlasma(player_t *player, pspdef_t *psp)
         DecreaseAmmo(player, weaponinfo[player->readyweapon].ammo, 1);
 
     if (beta_style)
-        P_SetPsprite(player,
-                     ps_flash,
-                     S_BETAPLASMAFLASH1);
-    else
-        P_SetPsprite(player,
-                     ps_flash,
-                     weaponinfo[player->readyweapon].flashstate + (P_Random() & 1));
-
-    if (beta_style)
     {
+        P_SetPsprite(player, ps_flash, S_BETAPLASMAFLASH1);
+
         if (beta_plasma_refired && (beta_plasma_counter % 2))
         {
             beta_plasma_counter = 1;
@@ -807,18 +801,18 @@ void A_FirePlasma(player_t *player, pspdef_t *psp)
             P_SpawnPlayerMissile(player->mo, MT_PLASMA1);
             beta_plasma_counter = 0;
         }
+
+        if (player->attackdown)
+            beta_plasma_counter++;
     }
     else
+    {
+        P_SetPsprite(player, ps_flash, weaponinfo[player->readyweapon].flashstate + (P_Random() & 1));
+
         P_SpawnPlayerMissile(player->mo, MT_PLASMA);
+    }
 
-    if (d_recoil)
-        player->recoilpitch = (6 * FRACUNIT);
-
-    if (d_thrust)
-        A_Recoil(player);
-
-    if (beta_style && player->attackdown)
-        beta_plasma_counter++;
+    A_Recoil(player);
 }
 
 //
@@ -890,19 +884,13 @@ void A_FirePistol(player_t *player, pspdef_t *psp)
     if (!d_infiniteammo)
         DecreaseAmmo(player, weaponinfo[player->readyweapon].ammo, 1);
 
-    P_SetPsprite(player,
-                 ps_flash,
-                 weaponinfo[player->readyweapon].flashstate);
+    P_SetPsprite(player, ps_flash, weaponinfo[player->readyweapon].flashstate);
 
     P_BulletSlope(player->mo);
 
     P_GunShot(player->mo, !player->refire);
 
-    if (d_recoil)
-        player->recoilpitch = (6 * FRACUNIT);
-
-    if (d_thrust)
-        A_Recoil(player);
+    A_Recoil(player);
 }
 
 //
@@ -918,20 +906,14 @@ void A_FireShotgun(player_t *player, pspdef_t *psp)
     if (!d_infiniteammo)
         DecreaseAmmo(player, weaponinfo[player->readyweapon].ammo, 1);
 
-    P_SetPsprite(player,
-                 ps_flash,
-                 weaponinfo[player->readyweapon].flashstate);
+    P_SetPsprite(player, ps_flash, weaponinfo[player->readyweapon].flashstate);
 
     P_BulletSlope(player->mo);
         
     for (i = 0; i < 7; i++)
         P_GunShot(player->mo, false);
 
-    if (d_recoil)
-        player->recoilpitch = (6 * FRACUNIT);
-
-    if (d_thrust)
-        A_Recoil(player);
+    A_Recoil(player);
 }
 
 //
@@ -947,9 +929,7 @@ void A_FireShotgun2(player_t *player, pspdef_t *psp)
     if (!d_infiniteammo)
         DecreaseAmmo(player, weaponinfo[player->readyweapon].ammo, 2);
 
-    P_SetPsprite(player,
-                 ps_flash,
-                 weaponinfo[player->readyweapon].flashstate);
+    P_SetPsprite(player, ps_flash, weaponinfo[player->readyweapon].flashstate);
 
     P_BulletSlope(player->mo);
         
@@ -966,11 +946,23 @@ void A_FireShotgun2(player_t *player, pspdef_t *psp)
                      bulletslope + ((P_Random() - P_Random()) << 5), damage);
     }
 
-    if (d_recoil)
-        player->recoilpitch = (8 * FRACUNIT);
+    A_Recoil(player);
+}
 
-    if (d_thrust)
-        A_Recoil (player);
+void A_OpenShotgun2(player_t *player, pspdef_t *psp)
+{
+    S_StartSound(player->mo, sfx_dbopn);
+}
+
+void A_LoadShotgun2(player_t *player, pspdef_t *psp)
+{
+    S_StartSound(player->mo, sfx_dbload);
+}
+
+void A_CloseShotgun2(player_t *player, pspdef_t *psp)
+{
+    S_StartSound(player->mo, sfx_dbcls);
+    A_ReFire(player, psp);
 }
 
 //
@@ -992,13 +984,9 @@ void A_FireCGun(player_t *player, pspdef_t *psp)
     if (player->readyweapon == wp_chaingun)
     {
         if (beta_style)
-            P_SetPsprite(player,
-                         ps_flash,
-                         S_BETACHAINFLASH1 + psp->state - &states[S_BETACHAIN1]);
+            P_SetPsprite(player, ps_flash, S_BETACHAINFLASH1 + psp->state - &states[S_BETACHAIN1]);
         else
-            P_SetPsprite(player,
-                         ps_flash,
-                         weaponinfo[player->readyweapon].flashstate + psp->state - &states[S_CHAIN1]);
+            P_SetPsprite(player, ps_flash, weaponinfo[player->readyweapon].flashstate + psp->state - &states[S_CHAIN1]);
     }
 
     psp->state->tics = chaingun_tics;
@@ -1009,11 +997,7 @@ void A_FireCGun(player_t *player, pspdef_t *psp)
 
     A_EjectCasing(player->mo);
 
-    if (d_recoil)
-        player->recoilpitch = (8 * FRACUNIT);
-
-    if (d_thrust)
-        A_Recoil(player);
+    A_Recoil(player);
 }
 
 //

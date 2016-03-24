@@ -383,6 +383,7 @@ typedef enum
     ga_victory,
     ga_worlddone,
     ga_screenshot,
+    ga_autoloadgame, 
     ga_autosavegame
 
 } gameaction_t;

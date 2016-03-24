@@ -86,12 +86,12 @@ void T_LightFlash(lightflash_t *flash)
         
     if (flash->sector->lightlevel == flash->maxlight)
     {
-        flash-> sector->lightlevel = flash->minlight;
+        flash->sector->lightlevel = flash->minlight;
         flash->count = (P_Random() & flash->mintime) + 1;
     }
     else
     {
-        flash-> sector->lightlevel = flash->maxlight;
+        flash->sector->lightlevel = flash->maxlight;
         flash->count = (P_Random() & flash->maxtime) + 1;
     }
 }
@@ -131,13 +131,13 @@ void T_StrobeFlash(strobe_t *flash)
         
     if (flash->sector->lightlevel == flash->minlight)
     {
-        flash-> sector->lightlevel = flash->maxlight;
+        flash->sector->lightlevel = flash->maxlight;
         flash->count = flash->brighttime;
     }
     else
     {
-        flash-> sector->lightlevel = flash->minlight;
-        flash->count =flash->darktime;
+        flash->sector->lightlevel = flash->minlight;
+        flash->count = flash->darktime;
     }
 }
 
@@ -170,7 +170,7 @@ void P_SpawnStrobeFlash(sector_t *sector, int fastOrSlow, int inSync)
 //
 int EV_StartLightStrobing(line_t *line)
 {
-    int         secnum = -1;
+    int secnum = -1;
 
     while ((secnum = P_FindSectorFromLineTag(line, secnum)) >= 0)
     {
@@ -188,9 +188,9 @@ int EV_StartLightStrobing(line_t *line)
 //
 // TURN LINE'S TAG LIGHTS OFF
 //
-int EV_TurnTagLightsOff(line_t* line)
+int EV_TurnTagLightsOff(line_t *line)
 {
-    int                        i;
+    int i;
 
     // search sectors for those with same tag as activating line
 
@@ -218,7 +218,7 @@ int EV_TurnTagLightsOff(line_t* line)
 //
 int EV_LightTurnOn(line_t *line, int bright)
 {
-    int          i;
+    int i;
 
     // search all sectors for ones with same tag as activating line
 
@@ -256,7 +256,6 @@ int EV_LightTurnOn(line_t *line, int bright)
 //
 // Spawn glowing light
 //
-
 void T_Glow(glow_t *g)
 {
     switch (g->direction)
@@ -310,7 +309,6 @@ void P_SpawnGlowingLight(sector_t *sector)
 // Sets the light to min on 0, max on 1, and interpolates in-between.
 // Used for doors with gradual lighting effects.
 //
-// Returns true
 void EV_LightTurnOnPartway(line_t *line, fixed_t level)
 {
     int i;
@@ -321,8 +319,11 @@ void EV_LightTurnOnPartway(line_t *line, fixed_t level)
     // search all sectors for ones with same tag as activating line
     for (i = -1; (i = P_FindSectorFromLineTag(line, i)) >= 0;)
     {
-        sector_t        *temp, *sector = sectors + i;
-        int             j, bright = 0, min = sector->lightlevel;
+        sector_t        *temp;
+        sector_t        *sector = sectors + i;
+        int             j;
+        int             bright = 0;
+        int             min = sector->lightlevel;
 
         for (j = 0; j < sector->linecount; j++)
             if ((temp = getNextSector(sector->lines[j], sector)))
@@ -339,12 +340,17 @@ void EV_LightTurnOnPartway(line_t *line, fixed_t level)
     }
 }
 
+//
+// EV_LightByAdjacentSectors()
+//
 // [BH] similar to EV_LightTurnOnPartway(), but instead of using a line tag, looks at adjacent
 //  sectors of the sector itself.
 void EV_LightByAdjacentSectors(sector_t *sector, fixed_t level)
 {
     sector_t    *temp;
-    int         i, bright = 0, min = MAX(0, sector->lightlevel - 4);
+    int         i;
+    int         bright = 0;
+    int         min = MAX(0, sector->lightlevel - 4);
 
     // clip at extremes
     level = BETWEEN(0, level, FRACUNIT);

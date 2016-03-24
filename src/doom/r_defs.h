@@ -78,6 +78,10 @@ typedef struct
     // e6y: recalculation time for view angle
     int                 angletime;
 
+    // [SVE] svillarreal - new properties below
+    float               fx;
+    float               fy;
+
 } vertex_t;
 
 // Forward of LineDefs, for Sectors.
@@ -742,6 +746,14 @@ typedef enum
 
 } thingtype_t;
 
+// [SVE] svillarreal - lightmap info struct
+typedef struct
+{
+    int         num;
+    float       *coords;
+
+} lightMapInfo_t;
+
 //
 // A SubSector.
 // References a Sector.
@@ -986,6 +998,31 @@ typedef struct ColorTable32k_s
     byte All[32 * 32 * 32];
 
 } ColorTable32k_t;
+
+//
+// [SVE] svillarreal - LEAFS structure
+//
+typedef struct
+{
+    vertex_t    *vertex;
+    seg_t       *seg;
+
+} leaf_t;
+
+// [SVE] svillarreal - lightgrid info struct
+typedef struct
+{
+    int         count;
+    short       min[3];
+    short       max[3];
+    short       gridSize[3];
+    short       blockSize[3];
+    float       gridUnit[3];
+    byte        *bits;
+    byte        *types;
+    byte        *rgb;
+
+} lightGridInfo_t;
 
 ColorTable32k_t RGB32k;
 

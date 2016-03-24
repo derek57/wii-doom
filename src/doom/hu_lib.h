@@ -130,9 +130,6 @@ void HUlib_drawTextLine(hu_textline_t *l, dboolean drawcursor);
 // ?
 void HUlib_initSText(hu_stext_t *s, int x, int y, int h, patch_t **font, int startchar, dboolean *on);
 
-// add a new line
-void HUlib_addLineToSText(hu_stext_t *s);  
-
 // ?
 void HUlib_addMessageToSText(hu_stext_t *s, char *prefix, char *msg);
 

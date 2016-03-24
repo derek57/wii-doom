@@ -38,12 +38,9 @@ dboolean D_IsDehFile(char *filename);
 // BASE LEVEL
 //
 void D_PageTicker(void);
-void D_PageDrawer(void);
-void D_AdvanceDemo(void);
 void D_DoAdvanceDemo(void);
 void D_StartTitle(void);
 void D_DoomMain(void);
-void D_DoomLoop(void);
 
 // Read events from all input devices
 void D_ProcessEvents(void); 

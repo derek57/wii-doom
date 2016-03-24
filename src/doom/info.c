@@ -71,7 +71,19 @@ char *sprnames[] =
     // Sprite 144
     "BLD2",     // [BH] blood splats
 
-    // Sprite 145 to 188
+    // [BH] Sprites 145 to 244 (100 extra sprite names to use in DeHackEd patches)
+    "SP00", "SP01", "SP02", "SP03", "SP04", "SP05", "SP06", "SP07", "SP08", "SP09",
+    "SP10", "SP11", "SP12", "SP13", "SP14", "SP15", "SP16", "SP17", "SP18", "SP19",
+    "SP20", "SP21", "SP22", "SP23", "SP24", "SP25", "SP26", "SP27", "SP28", "SP29",
+    "SP30", "SP31", "SP32", "SP33", "SP34", "SP35", "SP36", "SP37", "SP38", "SP39",
+    "SP40", "SP41", "SP42", "SP43", "SP44", "SP45", "SP46", "SP47", "SP48", "SP49",
+    "SP50", "SP51", "SP52", "SP53", "SP54", "SP55", "SP56", "SP57", "SP58", "SP59",
+    "SP60", "SP61", "SP62", "SP63", "SP64", "SP65", "SP66", "SP67", "SP68", "SP69",
+    "SP70", "SP71", "SP72", "SP73", "SP74", "SP75", "SP76", "SP77", "SP78", "SP79",
+    "SP80", "SP81", "SP82", "SP83", "SP84", "SP85", "SP86", "SP87", "SP88", "SP89",
+    "SP90", "SP91", "SP92", "SP93", "SP94", "SP95", "SP96", "SP97", "SP98", "SP99",
+
+    // Sprite 245 to 288
     "BSKL", "FLSH", "SPRY", "SPSH", "LVAS", "SLDG", "BND1", "BND2", "BPL3", "BPL5",
     "BBSK", "BRSK", "BYSK", "BSHL", "BCLL", "BBOX", "BBXP", "BPNS", "BPNV", "BBSS",
     "BCL1", "BELC", "BPL4", "BPL7", "BPL6", "BSMT", "BHED", "BPSS", "BSPS", "BCHG",
@@ -172,9 +184,9 @@ void A_Stop(mobj_t *actor);
 void A_Footstep(mobj_t *actor);
 void A_MoreGibs(mobj_t *actor);
 void A_CasingThrust(mobj_t *actor);
-void A_SetCounter(mobj_t *actor);
-void A_CounterSwitch(mobj_t *actor);
-void A_FadeOut(mobj_t *actor);
+void A_SetCasing(mobj_t *actor);
+void A_CasingSwitch(mobj_t *actor);
+void A_FadeCasing(mobj_t *actor);
 void A_CasingJump(mobj_t *actor);
 void A_EjectCasing(mobj_t *actor);
 void A_SpawnTeleGlitter(mobj_t *actor);
@@ -1574,7 +1586,55 @@ state_t states[NUMSTATES] =
     { SPR_PUFF,  0 | FF_FULLBRIGHT,                4,               NULL,              S_TRAIL2           }, // S_TRAIL
     { SPR_PUFF,  1,                                4,               NULL,              S_TRAIL3           }, // S_TRAIL2
     { SPR_PUFF,  2,                               10,               NULL,              S_TRAIL4           }, // S_TRAIL3
-    { SPR_PUFF,  3,                               14,               NULL,              S_NULL             }, // S_TRAIL4
+    { SPR_PUFF,  3,                               14,               NULL,              S_NULL             }, // S_TRAIL4 (#1088)
+
+    // [nitr8] This is some real nasty badass code to fill up 2908
+    //  states (all nulled) to get the same dehacked state numbers to
+    //  work the way DOOM Retro does. It is taken from the MBF source
+    //  code and courtesy of Lee Killough 7/11/98 (modified by me).
+    #define FILL_1_FRAME(x) \
+                             \
+    {        0,  0,                                0,               NULL, x + EXTRASTATES_START + 2       }, // EXTRASTATES_START
+
+    #define FILL_2_FRAMES(x)    FILL_1_FRAME(x)     FILL_1_FRAME(x + 1)
+    #define FILL_4_FRAMES(x)    FILL_2_FRAMES(x)    FILL_2_FRAMES(x + 2)
+    #define FILL_8_FRAMES(x)    FILL_4_FRAMES(x)    FILL_4_FRAMES(x + 4)
+    #define FILL_16_FRAMES(x)   FILL_8_FRAMES(x)    FILL_8_FRAMES(x + 8)
+    #define FILL_32_FRAMES(x)   FILL_16_FRAMES(x)   FILL_16_FRAMES(x + 16)
+    #define FILL_64_FRAMES(x)   FILL_32_FRAMES(x)   FILL_32_FRAMES(x + 32)
+    #define FILL_128_FRAMES(x)  FILL_64_FRAMES(x)   FILL_64_FRAMES(x + 64)
+    #define FILL_256_FRAMES(x)  FILL_128_FRAMES(x)  FILL_128_FRAMES(x + 128)
+    #define FILL_512_FRAMES(x)  FILL_256_FRAMES(x)  FILL_256_FRAMES(x + 256)
+    #define FILL_1024_FRAMES(x) FILL_512_FRAMES(x)  FILL_512_FRAMES(x + 512)
+    #define FILL_2048_FRAMES(x) FILL_1024_FRAMES(x) FILL_1024_FRAMES(x + 1024)
+
+    {        0,  0,                                0,               NULL,   EXTRASTATES_START + 1         }, // FILL_FRAMES
+
+    FILL_2048_FRAMES(0)
+
+    // 2560
+    FILL_512_FRAMES(2048)
+
+    // 2816
+    FILL_256_FRAMES(2560)
+
+    // 2880
+    FILL_64_FRAMES(2816)
+
+    // 2896
+    FILL_16_FRAMES(2880)
+
+    // 2904
+    FILL_8_FRAMES(2896)
+
+    // 2908
+    FILL_4_FRAMES(2904)
+
+    // 2909 (3998)
+    FILL_1_FRAME(2908)
+
+    // 3999
+    {        0,  0,                                0,               NULL,     EXTRASTATES_END             }, // EXTRASTATES_END
 
     { SPR_FLSH,  0,                               -1,               NULL,              S_NULL             }, // S_FLESH_00
     { SPR_FLSH,  1,                               -1,               NULL,              S_NULL             }, // S_FLESH_01
@@ -1839,8 +1899,8 @@ state_t states[NUMSTATES] =
     { SPR_TNT1,  0,                                1,               NULL,              S_SHELLCASE_THRUST }, // S_SHELLCASE_SPAWN
     { SPR_TNT1,  0,                                0,               A_CasingThrust,    S_SHELLCASE_CALC1  }, // S_SHELLCASE_THRUST
 
-    { SPR_TNT1,  0,                                0,               A_SetCounter,      S_SHELLCASE_CALC2  }, // S_SHELLCASE_CALC1
-    { SPR_TNT1,  0,                                0,               A_CounterSwitch,   S_SHELLCASE_A      }, // S_SHELLCASE_CALC2
+    { SPR_TNT1,  0,                                0,               A_SetCasing,       S_SHELLCASE_CALC2  }, // S_SHELLCASE_CALC1
+    { SPR_TNT1,  0,                                0,               A_CasingSwitch,    S_SHELLCASE_A      }, // S_SHELLCASE_CALC2
 
     { SPR_CAS1,  0,                              200,               NULL,              S_SHELLCASE_A_FADE1}, // S_SHELLCASE_A
     { SPR_CAS1,  1,                              200,               NULL,              S_SHELLCASE_B_FADE1}, // S_SHELLCASE_B
@@ -1851,70 +1911,70 @@ state_t states[NUMSTATES] =
     { SPR_CAS1,  6,                              200,               NULL,              S_SHELLCASE_G_FADE1}, // S_SHELLCASE_G
     { SPR_CAS1,  7,                              200,               NULL,              S_SHELLCASE_H_FADE1}, // S_SHELLCASE_H
 
-    { SPR_CAS1,  0,                                0,               A_SetCounter,      S_SHELLCASE_A_FADE2}, // S_SHELLCASE_A_FADE1
-    { SPR_CAS1,  0,                                1,               A_FadeOut,         S_SHELLCASE_A_FADE3}, // S_SHELLCASE_A_FADE2
+    { SPR_CAS1,  0,                                0,               A_SetCasing,       S_SHELLCASE_A_FADE2}, // S_SHELLCASE_A_FADE1
+    { SPR_CAS1,  0,                                1,               A_FadeCasing,      S_SHELLCASE_A_FADE3}, // S_SHELLCASE_A_FADE2
     { SPR_CAS1,  0,                                0,               A_CasingJump,      S_NULL             }, // S_SHELLCASE_A_FADE3
 
-    { SPR_CAS1,  1,                                0,               A_SetCounter,      S_SHELLCASE_B_FADE2}, // S_SHELLCASE_B_FADE1
-    { SPR_CAS1,  1,                                1,               A_FadeOut,         S_SHELLCASE_B_FADE3}, // S_SHELLCASE_B_FADE2
+    { SPR_CAS1,  1,                                0,               A_SetCasing,       S_SHELLCASE_B_FADE2}, // S_SHELLCASE_B_FADE1
+    { SPR_CAS1,  1,                                1,               A_FadeCasing,      S_SHELLCASE_B_FADE3}, // S_SHELLCASE_B_FADE2
     { SPR_CAS1,  1,                                0,               A_CasingJump,      S_NULL             }, // S_SHELLCASE_B_FADE3
 
-    { SPR_CAS1,  2,                                0,               A_SetCounter,      S_SHELLCASE_C_FADE2}, // S_SHELLCASE_C_FADE1
-    { SPR_CAS1,  2,                                1,               A_FadeOut,         S_SHELLCASE_C_FADE3}, // S_SHELLCASE_C_FADE2
+    { SPR_CAS1,  2,                                0,               A_SetCasing,       S_SHELLCASE_C_FADE2}, // S_SHELLCASE_C_FADE1
+    { SPR_CAS1,  2,                                1,               A_FadeCasing,      S_SHELLCASE_C_FADE3}, // S_SHELLCASE_C_FADE2
     { SPR_CAS1,  2,                                0,               A_CasingJump,      S_NULL             }, // S_SHELLCASE_C_FADE3
 
-    { SPR_CAS1,  3,                                0,               A_SetCounter,      S_SHELLCASE_D_FADE2}, // S_SHELLCASE_D_FADE1
-    { SPR_CAS1,  3,                                1,               A_FadeOut,         S_SHELLCASE_D_FADE3}, // S_SHELLCASE_D_FADE2
+    { SPR_CAS1,  3,                                0,               A_SetCasing,       S_SHELLCASE_D_FADE2}, // S_SHELLCASE_D_FADE1
+    { SPR_CAS1,  3,                                1,               A_FadeCasing,      S_SHELLCASE_D_FADE3}, // S_SHELLCASE_D_FADE2
     { SPR_CAS1,  3,                                0,               A_CasingJump,      S_NULL             }, // S_SHELLCASE_D_FADE3
 
-    { SPR_CAS1,  4,                                0,               A_SetCounter,      S_SHELLCASE_E_FADE2}, // S_SHELLCASE_E_FADE1
-    { SPR_CAS1,  4,                                1,               A_FadeOut,         S_SHELLCASE_E_FADE3}, // S_SHELLCASE_E_FADE2
+    { SPR_CAS1,  4,                                0,               A_SetCasing,       S_SHELLCASE_E_FADE2}, // S_SHELLCASE_E_FADE1
+    { SPR_CAS1,  4,                                1,               A_FadeCasing,      S_SHELLCASE_E_FADE3}, // S_SHELLCASE_E_FADE2
     { SPR_CAS1,  4,                                0,               A_CasingJump,      S_NULL             }, // S_SHELLCASE_E_FADE3
 
-    { SPR_CAS1,  5,                                0,               A_SetCounter,      S_SHELLCASE_F_FADE2}, // S_SHELLCASE_F_FADE1
-    { SPR_CAS1,  5,                                1,               A_FadeOut,         S_SHELLCASE_F_FADE3}, // S_SHELLCASE_F_FADE2
+    { SPR_CAS1,  5,                                0,               A_SetCasing,       S_SHELLCASE_F_FADE2}, // S_SHELLCASE_F_FADE1
+    { SPR_CAS1,  5,                                1,               A_FadeCasing,      S_SHELLCASE_F_FADE3}, // S_SHELLCASE_F_FADE2
     { SPR_CAS1,  5,                                0,               A_CasingJump,      S_NULL             }, // S_SHELLCASE_F_FADE3
 
-    { SPR_CAS1,  6,                                0,               A_SetCounter,      S_SHELLCASE_G_FADE2}, // S_SHELLCASE_G_FADE1
-    { SPR_CAS1,  6,                                1,               A_FadeOut,         S_SHELLCASE_G_FADE3}, // S_SHELLCASE_G_FADE2
+    { SPR_CAS1,  6,                                0,               A_SetCasing,       S_SHELLCASE_G_FADE2}, // S_SHELLCASE_G_FADE1
+    { SPR_CAS1,  6,                                1,               A_FadeCasing,      S_SHELLCASE_G_FADE3}, // S_SHELLCASE_G_FADE2
     { SPR_CAS1,  6,                                0,               A_CasingJump,      S_NULL             }, // S_SHELLCASE_G_FADE3
 
-    { SPR_CAS1,  7,                                0,               A_SetCounter,      S_SHELLCASE_H_FADE2}, // S_SHELLCASE_H_FADE1
-    { SPR_CAS1,  7,                                1,               A_FadeOut,         S_SHELLCASE_H_FADE3}, // S_SHELLCASE_H_FADE2
+    { SPR_CAS1,  7,                                0,               A_SetCasing,       S_SHELLCASE_H_FADE2}, // S_SHELLCASE_H_FADE1
+    { SPR_CAS1,  7,                                1,               A_FadeCasing,      S_SHELLCASE_H_FADE3}, // S_SHELLCASE_H_FADE2
     { SPR_CAS1,  7,                                0,               A_CasingJump,      S_NULL             }, // S_SHELLCASE_H_FADE3
 
     { SPR_TNT1,  0,                                1,               NULL,              S_PISCASE_THRUST   }, // S_PISCASE_SPAWN
     { SPR_TNT1,  0,                                0,               A_CasingThrust,    S_PISCASE_CALC1    }, // S_PISCASE_THRUST
 
-    { SPR_TNT1,  0,                                0,               A_SetCounter,      S_PISCASE_CALC2    }, // S_PISCASE_CALC1
-    { SPR_TNT1,  0,                                0,               A_CounterSwitch,   S_PISCASE_A        }, // S_PISCASE_CALC2
+    { SPR_TNT1,  0,                                0,               A_SetCasing,       S_PISCASE_CALC2    }, // S_PISCASE_CALC1
+    { SPR_TNT1,  0,                                0,               A_CasingSwitch,    S_PISCASE_A        }, // S_PISCASE_CALC2
 
     { SPR_CAS2,  0,                              200,               NULL,              S_PISCASE_A_FADE1  }, // S_PISCASE_A
     { SPR_CAS2,  1,                              200,               NULL,              S_PISCASE_B_FADE1  }, // S_PISCASE_B
     { SPR_CAS2,  2,                              200,               NULL,              S_PISCASE_C_FADE1  }, // S_PISCASE_C
     { SPR_CAS2,  3,                              200,               NULL,              S_PISCASE_D_FADE1  }, // S_PISCASE_D
 
-    { SPR_CAS2,  0,                                0,               A_SetCounter,      S_PISCASE_A_FADE2  }, // S_PISCASE_A_FADE1
-    { SPR_CAS2,  0,                                1,               A_FadeOut,         S_PISCASE_A_FADE3  }, // S_PISCASE_A_FADE2
+    { SPR_CAS2,  0,                                0,               A_SetCasing,       S_PISCASE_A_FADE2  }, // S_PISCASE_A_FADE1
+    { SPR_CAS2,  0,                                1,               A_FadeCasing,      S_PISCASE_A_FADE3  }, // S_PISCASE_A_FADE2
     { SPR_CAS2,  0,                                0,               A_CasingJump,      S_NULL             }, // S_PISCASE_A_FADE3
 
-    { SPR_CAS2,  1,                                0,               A_SetCounter,      S_PISCASE_B_FADE2  }, // S_PISCASE_B_FADE1
-    { SPR_CAS2,  1,                                1,               A_FadeOut,         S_PISCASE_B_FADE3  }, // S_PISCASE_B_FADE2
+    { SPR_CAS2,  1,                                0,               A_SetCasing,       S_PISCASE_B_FADE2  }, // S_PISCASE_B_FADE1
+    { SPR_CAS2,  1,                                1,               A_FadeCasing,      S_PISCASE_B_FADE3  }, // S_PISCASE_B_FADE2
     { SPR_CAS2,  1,                                0,               A_CasingJump,      S_NULL             }, // S_PISCASE_B_FADE3
 
-    { SPR_CAS2,  2,                                0,               A_SetCounter,      S_PISCASE_C_FADE2  }, // S_PISCASE_C_FADE1
-    { SPR_CAS2,  2,                                1,               A_FadeOut,         S_PISCASE_C_FADE3  }, // S_PISCASE_C_FADE2
+    { SPR_CAS2,  2,                                0,               A_SetCasing,       S_PISCASE_C_FADE2  }, // S_PISCASE_C_FADE1
+    { SPR_CAS2,  2,                                1,               A_FadeCasing,      S_PISCASE_C_FADE3  }, // S_PISCASE_C_FADE2
     { SPR_CAS2,  2,                                0,               A_CasingJump,      S_NULL             }, // S_PISCASE_C_FADE3
 
-    { SPR_CAS2,  3,                                0,               A_SetCounter,      S_PISCASE_D_FADE2  }, // S_PISCASE_D_FADE1
-    { SPR_CAS2,  3,                                1,               A_FadeOut,         S_PISCASE_D_FADE3  }, // S_PISCASE_D_FADE2
+    { SPR_CAS2,  3,                                0,               A_SetCasing,       S_PISCASE_D_FADE2  }, // S_PISCASE_D_FADE1
+    { SPR_CAS2,  3,                                1,               A_FadeCasing,      S_PISCASE_D_FADE3  }, // S_PISCASE_D_FADE2
     { SPR_CAS2,  3,                                0,               A_CasingJump,      S_NULL             }, // S_PISCASE_D_FADE3
 
     { SPR_TNT1,  0,                                1,               NULL,              S_RNDCASE_THRUST   }, // S_RNDCASE_SPAWN
     { SPR_TNT1,  0,                                0,               A_CasingThrust,    S_RNDCASE_CALC1    }, // S_RNDCASE_THRUST
 
-    { SPR_TNT1,  0,                                0,               A_SetCounter,      S_RNDCASE_CALC2    }, // S_RNDCASE_CALC1
-    { SPR_TNT1,  0,                                0,               A_CounterSwitch,   S_RNDCASE_A        }, // S_RNDCASE_CALC2
+    { SPR_TNT1,  0,                                0,               A_SetCasing,       S_RNDCASE_CALC2    }, // S_RNDCASE_CALC1
+    { SPR_TNT1,  0,                                0,               A_CasingSwitch,    S_RNDCASE_A        }, // S_RNDCASE_CALC2
 
     { SPR_CAS7,  0,                              200,               NULL,              S_RNDCASE_A_FADE1  }, // S_RNDCASE_A
     { SPR_CAS7,  1,                              200,               NULL,              S_RNDCASE_B_FADE1  }, // S_RNDCASE_B
@@ -1923,28 +1983,28 @@ state_t states[NUMSTATES] =
     { SPR_CAS7,  4,                              200,               NULL,              S_RNDCASE_E_FADE1  }, // S_RNDCASE_E
     { SPR_CAS7,  5,                              200,               NULL,              S_RNDCASE_F_FADE1  }, // S_RNDCASE_F
 
-    { SPR_CAS7,  0,                                0,               A_SetCounter,      S_RNDCASE_A_FADE2  }, // S_RNDCASE_A_FADE1
-    { SPR_CAS7,  0,                                1,               A_FadeOut,         S_RNDCASE_A_FADE3  }, // S_RNDCASE_A_FADE2
+    { SPR_CAS7,  0,                                0,               A_SetCasing,       S_RNDCASE_A_FADE2  }, // S_RNDCASE_A_FADE1
+    { SPR_CAS7,  0,                                1,               A_FadeCasing,      S_RNDCASE_A_FADE3  }, // S_RNDCASE_A_FADE2
     { SPR_CAS7,  0,                                0,               A_CasingJump,      S_NULL             }, // S_RNDCASE_A_FADE3
 
-    { SPR_CAS7,  1,                                0,               A_SetCounter,      S_RNDCASE_B_FADE2  }, // S_RNDCASE_B_FADE1
-    { SPR_CAS7,  1,                                1,               A_FadeOut,         S_RNDCASE_B_FADE3  }, // S_RNDCASE_B_FADE2
+    { SPR_CAS7,  1,                                0,               A_SetCasing,       S_RNDCASE_B_FADE2  }, // S_RNDCASE_B_FADE1
+    { SPR_CAS7,  1,                                1,               A_FadeCasing,      S_RNDCASE_B_FADE3  }, // S_RNDCASE_B_FADE2
     { SPR_CAS7,  1,                                0,               A_CasingJump,      S_NULL             }, // S_RNDCASE_B_FADE3
 
-    { SPR_CAS7,  2,                                0,               A_SetCounter,      S_RNDCASE_C_FADE2  }, // S_RNDCASE_C_FADE1
-    { SPR_CAS7,  2,                                1,               A_FadeOut,         S_RNDCASE_C_FADE3  }, // S_RNDCASE_C_FADE2
+    { SPR_CAS7,  2,                                0,               A_SetCasing,       S_RNDCASE_C_FADE2  }, // S_RNDCASE_C_FADE1
+    { SPR_CAS7,  2,                                1,               A_FadeCasing,      S_RNDCASE_C_FADE3  }, // S_RNDCASE_C_FADE2
     { SPR_CAS7,  2,                                0,               A_CasingJump,      S_NULL             }, // S_RNDCASE_C_FADE3
 
-    { SPR_CAS7,  3,                                0,               A_SetCounter,      S_RNDCASE_D_FADE2  }, // S_RNDCASE_D_FADE1
-    { SPR_CAS7,  3,                                1,               A_FadeOut,         S_RNDCASE_D_FADE3  }, // S_RNDCASE_D_FADE2
+    { SPR_CAS7,  3,                                0,               A_SetCasing,       S_RNDCASE_D_FADE2  }, // S_RNDCASE_D_FADE1
+    { SPR_CAS7,  3,                                1,               A_FadeCasing,      S_RNDCASE_D_FADE3  }, // S_RNDCASE_D_FADE2
     { SPR_CAS7,  3,                                0,               A_CasingJump,      S_NULL             }, // S_RNDCASE_D_FADE3
 
-    { SPR_CAS7,  4,                                0,               A_SetCounter,      S_RNDCASE_E_FADE2  }, // S_RNDCASE_E_FADE1
-    { SPR_CAS7,  4,                                1,               A_FadeOut,         S_RNDCASE_E_FADE3  }, // S_RNDCASE_E_FADE2
+    { SPR_CAS7,  4,                                0,               A_SetCasing,       S_RNDCASE_E_FADE2  }, // S_RNDCASE_E_FADE1
+    { SPR_CAS7,  4,                                1,               A_FadeCasing,      S_RNDCASE_E_FADE3  }, // S_RNDCASE_E_FADE2
     { SPR_CAS7,  4,                                0,               A_CasingJump,      S_NULL             }, // S_RNDCASE_E_FADE3
 
-    { SPR_CAS7,  5,                                0,               A_SetCounter,      S_RNDCASE_F_FADE2  }, // S_RNDCASE_F_FADE1
-    { SPR_CAS7,  5,                                1,               A_FadeOut,         S_RNDCASE_F_FADE3  }, // S_RNDCASE_F_FADE2
+    { SPR_CAS7,  5,                                0,               A_SetCasing,       S_RNDCASE_F_FADE2  }, // S_RNDCASE_F_FADE1
+    { SPR_CAS7,  5,                                1,               A_FadeCasing,      S_RNDCASE_F_FADE3  }, // S_RNDCASE_F_FADE2
     { SPR_CAS7,  5,                                0,               A_CasingJump,      S_NULL             }, // S_RNDCASE_F_FADE3
 
     { SPR_PART,  0,                                8,               NULL,              S_NULL             }, // S_PART1

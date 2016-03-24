@@ -1353,7 +1353,7 @@ static void CreateUpscaledTexture(int w, int h)
     // Set the scaling quality for rendering the upscaled texture to "linear",
     // which looks much softer and smoother than "nearest" but does a better
     // job at downscaling from the upscaled texture to screen.
-    if(render_mode)
+    if (render_mode)
         SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "nearest");
     else
         SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
@@ -2165,7 +2165,7 @@ static void SetVideoMode(screen_mode_t *mode, int w, int h)
         C_Output("The framerate is uncapped.");
     }
 
-    C_Output("The %ix%i screen is scaled up to %i x %i", SCREENWIDTH, SCREENHEIGHT, h * 4 / 3, h);
+    C_Output("The %ix%i screen is scaled up to %ix%i", SCREENWIDTH, SCREENHEIGHT, h * 4 / 3, h);
 
     // Important: Set the "logical size" of the rendering context. At the same
     // time this also defines the aspect ratio that is preserved while scaling
@@ -2245,7 +2245,7 @@ static void SetVideoMode(screen_mode_t *mode, int w, int h)
         // Set the scaling quality for rendering the intermediate texture into
         // the upscaled texture to "nearest", which is gritty and pixelated and
         // resembles software scaling pretty well.
-        if(render_mode)
+        if (render_mode)
             SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "nearest");
         else
             SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");

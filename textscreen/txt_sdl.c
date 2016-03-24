@@ -520,7 +520,7 @@ static int TranslateKey(SDL_Keysym *sym)
 static int TranslateKey(SDL_keysym *sym)
 #endif
 {
-    switch(sym->sym)
+    switch (sym->sym)
     {
         case SDLK_LEFT:
             return KEY_LEFTARROW;

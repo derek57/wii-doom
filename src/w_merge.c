@@ -582,11 +582,11 @@ dboolean W_MergeFile(char *filename, dboolean automatic)
         return false;
 
 #ifdef WII
-    if(devparm)
+    if (devparm)
     {
-        if(gamemode == shareware || load_extra_wad == 1 || version13 == true)
+        if (gamemode == shareware || load_extra_wad == 1 || version13 == true)
         {
-            if(dont_show_adding_of_resource_wad == 0)
+            if (dont_show_adding_of_resource_wad == 0)
             {
                 printf("         adding %s\n", filename);
             }

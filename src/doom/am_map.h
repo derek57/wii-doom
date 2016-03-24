@@ -88,7 +88,18 @@ typedef struct
 {
     fixed_t x;
     fixed_t y;
+
 } mpoint_t;
+
+typedef struct
+{
+   fixed_t x, y;
+   fixed_t w, h;
+
+   char label[16];
+   int widths[16];
+
+} markpoint_t;
 
 
 // Called by main loop.
@@ -110,9 +121,11 @@ void AM_Toggle(void);
 dboolean AM_Responder(event_t *ev);
 
 
-extern cheatseq_t cheat_amap;
+extern cheatseq_t  cheat_amap;
 
-extern int        lightlev;
+extern int         lightlev;
+
+extern markpoint_t *markpoints;
 
 #endif
 

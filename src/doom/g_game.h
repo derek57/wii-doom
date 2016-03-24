@@ -84,6 +84,7 @@ void G_ScreenShot(void);
 void G_DrawMouseSpeedBox(void);
 
 void G_PlayerReborn(int player);
+void G_LoadedGameMessage(void);
 
 dboolean G_CheckDemoStatus(void);
 dboolean G_Responder(event_t *ev);

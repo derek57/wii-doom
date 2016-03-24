@@ -1518,6 +1518,10 @@ void R_DrawPausedFuzzColumn(void)
     }
 }
 
+//
+// [nitr8] UNUSED
+//
+/*
 void R_DrawFuzzColumns(int srcscrn, int destscrn)
 {
     int         x, y;
@@ -1610,6 +1614,7 @@ void R_DrawPausedFuzzColumns(int srcscrn, int destscrn)
             }
         }
 }
+*/
 
 //
 // R_DrawTranslatedColumn
@@ -1713,6 +1718,35 @@ void R_DrawSpan(void)
     }
 #endif
 
+    while (count >= 8)
+    {
+        *dest++ = colormap[source[((xfrac >> 16) & 63) | ((yfrac >> 10) & 4032)]];
+        xfrac += xstep;
+        yfrac += ystep;
+        *dest++ = colormap[source[((xfrac >> 16) & 63) | ((yfrac >> 10) & 4032)]];
+        xfrac += xstep;
+        yfrac += ystep;
+        *dest++ = colormap[source[((xfrac >> 16) & 63) | ((yfrac >> 10) & 4032)]];
+        xfrac += xstep;
+        yfrac += ystep;
+        *dest++ = colormap[source[((xfrac >> 16) & 63) | ((yfrac >> 10) & 4032)]];
+        xfrac += xstep;
+        yfrac += ystep;
+        *dest++ = colormap[source[((xfrac >> 16) & 63) | ((yfrac >> 10) & 4032)]];
+        xfrac += xstep;
+        yfrac += ystep;
+        *dest++ = colormap[source[((xfrac >> 16) & 63) | ((yfrac >> 10) & 4032)]];
+        xfrac += xstep;
+        yfrac += ystep;
+        *dest++ = colormap[source[((xfrac >> 16) & 63) | ((yfrac >> 10) & 4032)]];
+        xfrac += xstep;
+        yfrac += ystep;
+        *dest++ = colormap[source[((xfrac >> 16) & 63) | ((yfrac >> 10) & 4032)]];
+        xfrac += xstep;
+        yfrac += ystep;
+        count -= 8;
+    }
+
     while (count >= 4)
     {
         *dest++ = colormap[source[((xfrac >> 16) & 63) | ((yfrac >> 10) & 4032)]];
@@ -1776,7 +1810,6 @@ void R_FillBackScreen(int srcscrn, int destscrn)
 
     // If we are running full screen, there is no need to do any of this,
     // and the background buffer can be freed if it was previously in use.
-
     if (scaledviewwidth == SCREENWIDTH)
     {
         /*

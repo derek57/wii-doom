@@ -303,7 +303,7 @@ void SHA1_Final(sha1_digest_t digest, sha1_context_t *hd)
 #ifdef SYS_BIG_ENDIAN
 #define X(a) do                             \
              {                              \
-                 *(uint32_t*)p = hd->h##a;  \
+                 *(uint32_t *)p = hd->h##a; \
                  p += 4;                    \
                                             \
              } while (0)

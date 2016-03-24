@@ -58,7 +58,7 @@
 // strings used in dehacked.
 int                initial_health = 100;
 int                initial_bullets = 50;
-int                maxhealth = 200;
+int                maxhealth = MAXHEALTH * 2;
 int                max_armor = 200;
 int                green_armor_class = 1;
 int                blue_armor_class = 2;
@@ -102,7 +102,7 @@ int P_GiveAmmo(player_t *player, ammotype_t ammo, int num)
         return 0;
                 
     if (ammo > NUMAMMO)
-        I_Error("P_GiveAmmo: bad type %i", ammo);
+        C_Error("P_GiveAmmo: bad type %i", ammo);
                 
     if (player->ammo[ammo] == player->maxammo[ammo])
         return 0;
@@ -125,8 +125,8 @@ int P_GiveAmmo(player_t *player, ammotype_t ammo, int num)
     if (player->ammo[ammo] > player->maxammo[ammo])
         player->ammo[ammo] = player->maxammo[ammo];
 
-    if (hud && num && ammo == weaponinfo[player->readyweapon].ammo)
-        ammohighlight = I_GetTime() + HUD_AMMO_HIGHLIGHT_WAIT;
+    if (hud && num && num && ammo == weaponinfo[player->readyweapon].ammo)
+        ammohighlight = I_GetTimeMS() + HUD_AMMO_HIGHLIGHT_WAIT;
 
     // If non zero ammo, 
     // don't change up weapons,
@@ -237,7 +237,7 @@ dboolean P_GiveWeapon(player_t *player, weapontype_t weapon, dboolean dropped)
     if (gaveweapon || gaveammo)
     {
         if (hud)
-            ammohighlight = I_GetTime() + HUD_AMMO_HIGHLIGHT_WAIT;
+            ammohighlight = I_GetTimeMS() + HUD_AMMO_HIGHLIGHT_WAIT;
 
         return true;
     }
@@ -260,7 +260,7 @@ dboolean P_GiveBody(player_t *player, int num)
         player->health = MAXHEALTH;
 
     player->mo->health = player->health;
-    healthhighlight = I_GetTime() + HUD_HEALTH_HIGHLIGHT_WAIT;
+    healthhighlight = I_GetTimeMS() + HUD_HEALTH_HIGHLIGHT_WAIT;
     return true;
 }
 
@@ -269,7 +269,7 @@ dboolean P_GiveBody(player_t *player, int num)
 // Returns false if the armor is worse
 // than the current armor.
 //
-dboolean P_GiveArmor(player_t *player, int armortype)
+dboolean P_GiveArmor(player_t *player, armortype_t armortype)
 {
     int    hits = armortype * 100;
 
@@ -279,7 +279,7 @@ dboolean P_GiveArmor(player_t *player, int armortype)
                 
     player->armortype = armortype;
     player->armorpoints = hits;
-    armorhighlight = I_GetTime() + HUD_ARMOR_HIGHLIGHT_WAIT;
+    armorhighlight = I_GetTimeMS() + HUD_ARMOR_HIGHLIGHT_WAIT;
     return true;
 }
 
@@ -540,7 +540,7 @@ void P_TouchSpecialThing(mobj_t *special, mobj_t *toucher)
                     player->health = maxhealth;
             }
             else
-                healthhighlight = I_GetTime() + HUD_HEALTH_HIGHLIGHT_WAIT;
+                healthhighlight = I_GetTimeMS() + HUD_HEALTH_HIGHLIGHT_WAIT;
 
             player->mo->health = player->health;
 
@@ -558,12 +558,12 @@ void P_TouchSpecialThing(mobj_t *special, mobj_t *toucher)
             if (player->armorpoints > max_armor)
                 player->armorpoints = max_armor;
             else
-                armorhighlight = I_GetTime() + HUD_ARMOR_HIGHLIGHT_WAIT;
+                armorhighlight = I_GetTimeMS() + HUD_ARMOR_HIGHLIGHT_WAIT;
 
             // green_armor_class only applies to the green armor shirt;
             // for the armor helmets, armortype 1 is always used.
             if (!player->armortype)
-                player->armortype = 1;
+                player->armortype = GREENARMOR;
 
             if (beta_style)
                 player->message = GOTARMBONUS;
@@ -577,7 +577,7 @@ void P_TouchSpecialThing(mobj_t *special, mobj_t *toucher)
             {
                 player->health = 100;
                 player->mo->health = player->health;
-                healthhighlight = I_GetTime() + HUD_HEALTH_HIGHLIGHT_WAIT;
+                healthhighlight = I_GetTimeMS() + HUD_HEALTH_HIGHLIGHT_WAIT;
                 player->extra_lifes++;
                 player->message = GOTSUPERBETA;
             }
@@ -1447,17 +1447,17 @@ void P_KillMobj(mobj_t *source, mobj_t *target)
 //
 void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, int damage)
 {
-    int         flags = target->flags;
-    int         type = target->type;
     player_t    *splayer = NULL;
     player_t    *tplayer;
-    mobjinfo_t  *info = &mobjinfo[type]; 
+    int         flags = target->flags;
     dboolean    corpse = flags & MF_CORPSE; 
+    int         type = target->type;
+    mobjinfo_t  *info = &mobjinfo[type]; 
 
     if (!(flags & (MF_SHOOTABLE | MF_BOUNCES)) && (!corpse || !corpses_slide))
         // shouldn't happen...
         return;
-                
+
     if (type == MT_BARREL && corpse)
         return;
 /*
@@ -1494,8 +1494,8 @@ void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, int damage)
         }
                 
         ang >>= ANGLETOFINESHIFT;
-        target->momx += FixedMul (thrust, finecosine[ang]);
-        target->momy += FixedMul (thrust, finesine[ang]);
+        target->momx += FixedMul(thrust, finecosine[ang]);
+        target->momy += FixedMul(thrust, finesine[ang]);
 
         // killough 11/98: thrust objects hanging off ledges
         if ((target->flags2 & MF2_FALLING) && target->gear >= MAXGEAR)
@@ -1559,13 +1559,13 @@ void P_DamageMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, int damage)
         
         if (tplayer->armortype)
         {
-            int saved = damage / (tplayer->armortype == 1 ? 3 : 2);
+            int saved = damage / (tplayer->armortype == GREENARMOR ? 3 : 2);
             
             if (tplayer->armorpoints <= saved)
             {
                 // armor is used up
                 saved = tplayer->armorpoints;
-                tplayer->armortype = 0;
+                tplayer->armortype = NOARMOR;
             }
 
             tplayer->armorpoints -= saved;

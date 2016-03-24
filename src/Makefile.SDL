@@ -293,7 +293,7 @@ INSTALL_SCRIPT = ${INSTALL}
 INSTALL_STRIP_PROGRAM = $(install_sh) -c -s
 LDFLAGS =  -L/usr/local/lib -Wl,-rpath,/usr/local/lib -lSDL -lpthread
 LIBOBJS = 
-LIBS = -lm -lpng -lz -lsamplerate
+LIBS = -lm -lpng -lz -lsamplerate -lGL
 LTLIBOBJS = 
 MAKEINFO = ${SHELL} /home/user/TEST/chocolate-doom/autotools/missing makeinfo
 MKDIR_P = /bin/mkdir -p
@@ -371,7 +371,7 @@ target_alias =
 top_build_prefix = ../
 top_builddir = ..
 top_srcdir = ..
-SUBDIRS = doom 
+SUBDIRS = doom opengl
 execgamesdir = ${exec_prefix}/games
 AM_CFLAGS = -I$(top_srcdir)/textscreen            \
             -I$(top_srcdir)/opl                   \

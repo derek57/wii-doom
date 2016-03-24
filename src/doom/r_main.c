@@ -726,6 +726,21 @@ subsector_t *R_PointInSubsector(fixed_t x, fixed_t y)
 }
 
 //
+// R_LerpCoord
+//
+// Do linear interpolation on a fixed_t coordinate value from oldpos to
+// newpos.
+//
+// [nitr8] UNUSED
+//
+/*
+fixed_t R_LerpCoord(fixed_t lerp, fixed_t oldpos, fixed_t newpos)
+{
+   return oldpos + FixedMul(lerp, newpos - oldpos);
+}
+*/
+
+//
 // R_SetupPitch
 // villsa [STRIFE] new function
 // Calculate centery/centeryfrac for player viewpitch

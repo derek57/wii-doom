@@ -69,6 +69,14 @@
 #define MCMD_TITLEPATCH         9
 
 
+typedef enum
+{
+    DOOMBSP = 0,
+    DEEPBSP = 1,
+    ZDBSPX  = 2
+
+} mapformat_t;
+
 typedef struct mapinfo_s mapinfo_t;
 
 struct mapinfo_s
@@ -166,11 +174,17 @@ int                *blockmaplump;
 int                *blockmap;
 
 vertex_t           *vertexes;
+
 seg_t              *segs;
+
 sector_t           *sectors;
+
 subsector_t        *subsectors;
+
 node_t             *nodes;
+
 line_t             *lines;
+
 side_t             *sides;
 
 // for thing chains
@@ -189,21 +203,14 @@ fixed_t            bmaporgy;
 // cph - const*
 const byte         *rejectmatrix;
 
-//dboolean           createblockmap = false;
 dboolean           canmodify;
 dboolean           transferredsky;
 dboolean           boomlinespecials;
 dboolean           blockmaprecreated;
 dboolean           MAPINFO;
 dboolean           mapinfo_lump;
+dboolean           rejectempty;
 
-// REJECT
-// For fast sight rejection.
-// Speeds up enemy AI by skipping detailed
-//  LineOf Sight calculation.
-// Without special effect, this could be
-//  used as a PVS lookup as well.
-//
 
 extern dboolean    mus_cheated;
 extern dboolean    mus_cheat_used;
@@ -298,6 +305,10 @@ void P_LoadVertexes(int lump)
     for (i = 0; i < numvertexes; i++)
     {
         vertexes[i].x = SHORT(data[i].x) << FRACBITS;
+
+	if (d_fliplevels)
+	    vertexes[i].x = -vertexes[i].x;
+
         vertexes[i].y = SHORT(data[i].y) << FRACBITS;
 
         // Apply any map-specific fixes.
@@ -357,6 +368,10 @@ void P_LoadSegs(int lump)
         v1 = (unsigned short)SHORT(ml->v1);
         v2 = (unsigned short)SHORT(ml->v2);
         li->angle = SHORT(ml->angle) << FRACBITS;
+
+	if (d_fliplevels)
+            li->angle = -li->angle;
+
         linedef = (unsigned short)SHORT(ml->linedef);
 
         if (linedef < 0 || linedef >= numlines)
@@ -407,7 +422,7 @@ void P_LoadSegs(int lump)
         // http://www.doomworld.com/idgames/index.php?id=12647
         if (v1 >= numvertexes || v2 >= numvertexes)
         {
-            char buffer[] = " Seg %s references an invalid vertex of %s.";
+            char buffer[] = "Seg %s references an invalid vertex of %s.";
 
             if (v1 >= numvertexes)
                 C_Warning(buffer, commify(i), commify(v1));
@@ -432,7 +447,15 @@ void P_LoadSegs(int lump)
             li->v2 = &vertexes[v2];
         }
 
-        li->offset = GetOffset(li->v1, (ml->side ? ldef->v2 : ldef->v1));
+	if (d_fliplevels)
+	{
+            vertex_t* tmp = li->v1;
+            li->v1 = li->v2;
+            li->v2 = tmp;
+	}
+
+	// [crispy] recalculate
+	li->offset = GetOffset(li->v1, ((ml->side ^ d_fliplevels) ? ldef->v2 : ldef->v1));
 
         if (li->linedef->special >= BOOMLINESPECIALS)
             boomlinespecials = true;
@@ -526,7 +549,7 @@ static void P_LoadSegs_V4(int lump)
         li->offset = SHORT(ml->offset) << FRACBITS;
         linedef = (unsigned short)SHORT(ml->linedef);
 
-        //e6y: check for wrong indexes
+        // e6y: check for wrong indexes
         if (linedef < 0 || linedef >= numlines)
             I_Error("Seg %s references an invalid linedef of %s.", commify(i), commify(linedef));
 
@@ -563,14 +586,14 @@ static void P_LoadSegs_V4(int lump)
         // killough 5/3/98: ignore 2s flag if second sidedef missing:
         if ((ldef->flags & ML_TWOSIDED) && ldef->sidenum[side ^ 1] != -1)
         {
+            // FIXME: This case was implemented into Chocolate DOOM at stock.
+            // DOOM RETRO doesn't have it included. Need to research this...
+
             // If the sidenum is out of range, this may be a "glass hack"
             // impassible window.  Point at side #0 (this may not be
             // the correct Vanilla behavior; however, it seems to work for
             // OTTAWAU.WAD, which is the one place I've seen this trick
             // used).
-
-            // FIXME: This case was implemented into Chocolate DOOM at stock.
-            // DOOM RETRO doesn't have it included. Need to research this...
             if (ldef->sidenum[side ^ 1] < 0 || ldef->sidenum[side ^ 1] >= numsides)
             {
                 li->backsector = GetSectorAtNullAddress();
@@ -592,7 +615,7 @@ static void P_LoadSegs_V4(int lump)
         // http://www.doomworld.com/idgames/index.php?id=12647
         if (v1 >= numvertexes || v2 >= numvertexes)
         {
-            char buffer[] = " Seg %s references an invalid vertex of %s.";
+            char buffer[] = "Seg %s references an invalid vertex of %s.";
 
             if (v1 >= numvertexes)
                 C_Warning(buffer, commify(i), commify(v1));
@@ -800,6 +823,14 @@ void P_LoadNodes(int lump)
         no->dx = SHORT(mn->dx) << FRACBITS;
         no->dy = SHORT(mn->dy) << FRACBITS;
 
+	if (d_fliplevels)
+	{
+	    no->x += no->dx;
+	    no->y += no->dy;
+	    no->x = -no->x;
+	    no->dy = -no->dy;
+	}
+
         for (j = 0; j < 2; j++)
         {
             int k;
@@ -826,6 +857,13 @@ void P_LoadNodes(int lump)
 
             for (k = 0; k < 4; k++)
                 no->bbox[j][k] = SHORT(mn->bbox[j][k]) << FRACBITS;
+
+	    if (d_fliplevels)
+	    {
+		fixed_t tmp = no->bbox[j][2];
+		no->bbox[j][2] = -no->bbox[j][3];
+		no->bbox[j][3] = -tmp;
+	    }
         }
     }
 
@@ -1015,7 +1053,6 @@ static void P_LoadZNodes(int lump)
     // Read the subsectors
     numSubs = *((const unsigned int*)data);
     data += sizeof(numSubs);
-
     numsubsectors = numSubs;
 
     if (numsubsectors <= 0)
@@ -1088,8 +1125,6 @@ void P_LoadThings(int lump)
 {
     const mapthing_t    *data = (const mapthing_t *)W_CacheLumpNum(lump, PU_STATIC);
     int                 i;
-    dboolean            done = false;
-    dboolean            debug = false;
 
     sizethings = W_LumpLength(lump);
     numthings = sizethings / sizeof(mapthing_t);
@@ -1171,14 +1206,14 @@ void P_LoadThings(int lump)
         if (mt.type == WolfensteinSS && bfgedition)
             mt.type = Zombieman;
 
-        if (!debug && spawn)
-            P_SpawnMapThing(&mt, i);
+	if (d_fliplevels)
+	{
+	    mt.x = -mt.x;
+	    mt.angle = 180 - mt.angle;
+	}
 
-        if (spawn && !done && mt.type == Player1Start && debug)
-        {
+        if (spawn)
             P_SpawnMapThing(&mt, i);
-            done = true;
-        }
     }
 
     srand((unsigned int)time(NULL));
@@ -1197,14 +1232,11 @@ static void P_LoadLineDefs(int lump)
     int         i;
 
     // [crispy] warn about unknown linedef types
-    int         warn;
+    int         warn = 0;
 
     sizelines = W_LumpLength(lump);
     numlines = sizelines / sizeof(maplinedef_t);
     lines = calloc_IfSameLevel(lines, numlines, sizeof(line_t));
-
-    // [crispy] warn about unknown linedef types
-    warn = 0;
 
     for (i = 0; i < numlines; i++)
     {
@@ -1225,8 +1257,16 @@ static void P_LoadLineDefs(int lump)
         }
 
         ld->tag = SHORT(mld->tag);
-        v1 = ld->v1 = &vertexes[(unsigned short)SHORT(mld->v1)];
-        v2 = ld->v2 = &vertexes[(unsigned short)SHORT(mld->v2)];
+	if (d_fliplevels)
+	{
+	    v1 = ld->v2 = &vertexes[(unsigned short)SHORT(mld->v2)]; // [crispy] extended nodes
+	    v2 = ld->v1 = &vertexes[(unsigned short)SHORT(mld->v1)]; // [crispy] extended nodes
+	}
+	else
+	{
+	v1 = ld->v1 = &vertexes[(unsigned short)SHORT(mld->v1)]; // [crispy] extended nodes
+	v2 = ld->v2 = &vertexes[(unsigned short)SHORT(mld->v2)]; // [crispy] extended nodes
+	}
         ld->dx = v2->x - v1->x;
         ld->dy = v2->y - v1->y;
 
@@ -1330,8 +1370,10 @@ static void P_LoadLineDefs2(int lump)
 
             // killough 4/11/98: translucent 2s textures
             case Translucent_MiddleTexture:
+
                 // translucency from sidedef
                 lump = sides[*ld->sidenum].special;
+
                 // if tag == 0,
                 if (!ld->tag)
                     // affect this linedef only
@@ -1522,28 +1564,49 @@ static void P_CreateBlockMap(void)
         for (i = 0; i < numlines; i++)
         {
             // starting coordinates
-            int x = (lines[i].v1->x >> FRACBITS) - minx;
-            int y = (lines[i].v1->y >> FRACBITS) - miny;
+            int x, dx, adx;
+            int y, dy, ady;
+            int b, bend, diff;
+
+	// starting coordinates
+	if (d_fliplevels)
+	{
+	    x = (lines[i].v2->x >> FRACBITS) - minx;
+	    y = (lines[i].v2->y >> FRACBITS) - miny;
+	}
+	else
+	{
+	    x = (lines[i].v1->x >> FRACBITS) - minx;
+	    y = (lines[i].v1->y >> FRACBITS) - miny;
+	}
 
             // x - y deltas
-            int adx = lines[i].dx >> FRACBITS;
-            int dx = (adx < 0 ? -1 : 1);
-            int ady = lines[i].dy >> FRACBITS;
-            int dy = (ady < 0 ? -1 : 1);
+            adx = lines[i].dx >> FRACBITS;
+            dx = (adx < 0 ? -1 : 1);
+            ady = lines[i].dy >> FRACBITS;
+            dy = (ady < 0 ? -1 : 1);
 
             // difference in preferring to move across y (>0) instead of x (<0)
-            int diff = !adx ? 1 : !ady ? -1 :
+            diff = !adx ? 1 : !ady ? -1 :
                 (((x >> MAPBTOFRAC) << MAPBTOFRAC)
                 + (dx > 0 ? MAPBLOCKUNITS - 1 : 0) - x) * (ady = ABS(ady)) * dx
                 - (((y >> MAPBTOFRAC) << MAPBTOFRAC)
                 + (dy > 0 ? MAPBLOCKUNITS - 1 : 0) - y) * (adx = ABS(adx)) * dy;
 
             // starting block, and pointer to its blocklist structure
-            int b = (y >> MAPBTOFRAC) * bmapwidth + (x >> MAPBTOFRAC);
+            b = (y >> MAPBTOFRAC) * bmapwidth + (x >> MAPBTOFRAC);
 
-            // ending block
-            int bend = (((lines[i].v2->y >> FRACBITS) - miny) >> MAPBTOFRAC) * bmapwidth
-                + (((lines[i].v2->x >> FRACBITS) - minx) >> MAPBTOFRAC);
+	// ending block
+	if (d_fliplevels)
+	{
+	    bend = (((lines[i].v1->y >> FRACBITS) - miny) >> MAPBTOFRAC) *
+	        bmapwidth + (((lines[i].v1->x >> FRACBITS) - minx) >> MAPBTOFRAC);
+	}
+	else
+	{
+	    bend = (((lines[i].v2->y >> FRACBITS) - miny) >> MAPBTOFRAC) *
+	        bmapwidth + (((lines[i].v2->x >> FRACBITS) - minx) >> MAPBTOFRAC);
+	}
 
             // delta for pointer when moving across y
             dy *= bmapwidth;
@@ -1665,15 +1728,18 @@ void P_LoadBlockMap(int lump)
 
     if (lump >= numlumps || (lumplen = W_LumpLength(lump)) < 8 || (count = lumplen / 2) >= 0x10000)
     {
+	C_Warning("P_LoadBlockMap: (Re-)creating BLOCKMAP.");
         P_CreateBlockMap();
         blockmaprecreated = true;
     }
     else
     {
-        short   *wadblockmaplump = W_CacheLumpNum(lump, PU_LEVEL);
+        short   *wadblockmaplump = Z_Malloc(lumplen, PU_LEVEL, NULL);
         int      i;
 
+        W_ReadLump(lump, wadblockmaplump);
         blockmaplump = malloc_IfSameLevel(blockmaplump, sizeof(*blockmaplump) * count);
+        blockmap = blockmaplump + 4;
 
         // killough 3/1/98: Expand wad blockmap into larger internal one,
         // by treating all offsets except -1 as unsigned and zero-extending
@@ -1701,10 +1767,41 @@ void P_LoadBlockMap(int lump)
         bmapheight = blockmaplump[3];
     }
 
+    if (d_fliplevels)
+    {
+	int x, y;
+	int *rowoffset;
+
+	bmaporgx += bmapwidth * 128 * FRACUNIT;
+	bmaporgx = -bmaporgx;
+
+	for (y = 0; y < bmapheight; y++)
+	{
+	    rowoffset = blockmap + y * bmapwidth;
+
+	    for (x = 0; x < bmapwidth / 2; x++)
+	    {
+	        int tmp;
+
+	        tmp = rowoffset[x];
+	        rowoffset[x] = rowoffset[bmapwidth - 1 - x];
+	        rowoffset[bmapwidth - 1 - x] = tmp;
+	    }
+	}
+    }
+
     // Clear out mobj chains
     blocklinks = calloc_IfSameLevel(blocklinks, bmapwidth * bmapheight, sizeof(*blocklinks));
     blockmap = blockmaplump + 4;
 }
+
+// REJECT
+// For fast sight rejection.
+// Speeds up enemy AI by skipping detailed
+//  LineOf Sight calculation.
+// Without special effect, this could be
+//  used as a PVS lookup as well.
+//
 
 //
 // reject overrun emulation
@@ -1748,7 +1845,7 @@ static void P_LoadReject(int lumpnum, int totallines)
     {
         if (((int *)rejectmatrix)[i])
         {
-            //rejectempty = false;
+            rejectempty = false;
             break;
         }
     }
@@ -1756,10 +1853,10 @@ static void P_LoadReject(int lumpnum, int totallines)
     if (i >= end)
     {
         C_Warning("Reject matrix is empty");
-        //rejectempty = true;
+        rejectempty = true;
     }
 
-    //e6y: check for overflow
+    // e6y: check for overflow
     RejectOverrun(rejectlump, &rejectmatrix, totallines);
 }
 
@@ -2022,13 +2119,13 @@ static mapformat_t P_CheckMapFormat(int lumpnum)
             I_Error("Compressed ZDoom nodes are not supported.");
     }
 
-    if ((b = lumpnum+ML_BLOCKMAP+1) < numlumps &&
+    if ((b = lumpnum + ML_BLOCKMAP + 1) < numlumps &&
             !strncasecmp(lumpinfo[b]->name, "BEHAVIOR", 8))
         C_Warning("Hexen map format, ");
     else
         C_Warning("Doom map format, ");
 
-    if (!((b = lumpnum+ML_NODES) < numlumps && (nodes = W_CacheLumpNum(b, PU_CACHE)) &&
+    if (!((b = lumpnum + ML_NODES) < numlumps && (nodes = W_CacheLumpNum(b, PU_CACHE)) &&
             W_LumpLength(b) > 0))
         C_Warning("No nodes.");
     else if (!memcmp(nodes, "xNd4\0\0\0\0", 8))
@@ -2054,7 +2151,7 @@ void P_SetupLevel(int ep, int map)
     int              i;
     char             lumpname[9];
     int              lumpnum;
-        
+
     mus_cheated = false;
     mus_cheat_used = false;
     finale_music = false;
@@ -2089,10 +2186,12 @@ void P_SetupLevel(int ep, int map)
         rejectlump = -1;
     }
 
-    // UNUSED W_Profile();
+    // UNUSED 
+    //W_Profile();
+
     P_InitThinkers();
            
-    // if working with a devlopment map, reload it
+    // if working with a development map, reload it
     W_Reload();
 
     // find map name
@@ -2179,6 +2278,7 @@ void P_SetupLevel(int ep, int map)
 
     // note: most of this ordering is important        
     P_LoadVertexes(lumpnum + ML_VERTEXES);
+
     P_LoadSectors(lumpnum + ML_SECTORS);
     P_LoadSideDefs(lumpnum + ML_SIDEDEFS);
     P_LoadLineDefs(lumpnum + ML_LINEDEFS);
@@ -2563,6 +2663,6 @@ void P_Init (void)
     InitMapInfo();
     P_LoadTerrainTypeDefs();
     P_InitTerrainTypes();
-    R_InitSprites (sprnames);
+    R_InitSprites(sprnames);
 }
 

@@ -335,7 +335,8 @@ void P_XYMovement(mobj_t *mo)
             else if (flags & MF_MISSILE)
             {
                 // explode a missile
-                if (ceilingline && ceilingline->backsector
+                if (ceilingline
+                    && ceilingline->backsector
                     && ceilingline->backsector->ceilingpic == skyflatnum
                     && mo->z > ceilingline->backsector->ceilingheight)
                 {
@@ -410,12 +411,14 @@ void P_XYMovement(mobj_t *mo)
     }
 
     if ((corpse || (flags2 & MF2_FALLING))
-        && (mo->momx > FRACUNIT / 4 || mo->momx < -FRACUNIT / 4 || mo->momy > FRACUNIT / 4 || mo->momy < -FRACUNIT / 4)
+        && (mo->momx > FRACUNIT / 4 || mo->momx < -FRACUNIT / 4
+            || mo->momy > FRACUNIT / 4 || mo->momy < -FRACUNIT / 4)
         && mo->floorz != mo->subsector->sector->floorheight)
         // do not stop sliding if halfway off a step with some momentum
         return;
 
-    if (mo->momx > -STOPSPEED && mo->momx < STOPSPEED && mo->momy > -STOPSPEED && mo->momy < STOPSPEED
+    if (mo->momx > -STOPSPEED && mo->momx < STOPSPEED
+        && mo->momy > -STOPSPEED && mo->momy < STOPSPEED
         && (!player || (!player->cmd.forwardmov && !player->cmd.sidemov) || P_IsVoodooDoll(mo)))
     {
         // if in a walking frame, stop moving
@@ -489,7 +492,7 @@ static void P_MonsterFallingDamage(mobj_t *actor)
             d_colblood2 && d_chkblood2)
             goto skip;
 
-        for(i = 0; i < 8; i++)
+        for (i = 0; i < 8; i++)
         {
             mo->type = color;
 
@@ -530,9 +533,9 @@ static void P_MonsterFallingDamage(mobj_t *actor)
                 P_SetMobjState(mo, S_SPRAY_00 + t);
 
             t = P_Random();
-            mo->momx = (t - P_Random ()) << 11;
+            mo->momx = (t - P_Random()) << 11;
             t = P_Random();
-            mo->momy = (t - P_Random ()) << 11;
+            mo->momy = (t - P_Random()) << 11;
             mo->momz = P_Random() << 11;
         }
 
@@ -870,7 +873,7 @@ void P_NightmareRespawn(mobj_t *mobj)
     mobj_t      *mo;
     mapthing_t  *mthing = &mobj->spawnpoint;
 
-    // [BH] Fix (0,0) respawning bug. See <http://doomwiki.org/wiki/(0,0)_respawning_bug>.
+    // [BH] Fix (0, 0) respawning bug. See <http://doomwiki.org/wiki/(0,0)_respawning_bug>.
     if (!x && !y)
     {
         x = mobj->x;
@@ -1093,6 +1096,8 @@ mobj_t *P_SpawnMobj(fixed_t x, fixed_t y, fixed_t z, mobjtype_t type)
     state_t     *st;
     mobjinfo_t  *info = &mobjinfo[type];
     sector_t    *sector;
+    static int  prevx, prevy, prevz;
+    static int  prevbob;
 
     mobj->type = type;
     mobj->info = info;
@@ -1114,7 +1119,7 @@ mobj_t *P_SpawnMobj(fixed_t x, fixed_t y, fixed_t z, mobjtype_t type)
     if (gameskill != sk_nightmare)
         mobj->reactiontime = info->reactiontime;
 
-    mobj->lastlook = P_Random () % MAXPLAYERS;
+    mobj->lastlook = P_Random() % MAXPLAYERS;
 
     // do not set the state with P_SetMobjState
     // because action routines cannot be called yet
@@ -1158,7 +1163,7 @@ mobj_t *P_SpawnMobj(fixed_t x, fixed_t y, fixed_t z, mobjtype_t type)
 
     // [BH] initialize bobbing powerups 
     if (float_items)
-        mobj->floatbob = P_Random();
+        mobj->floatbob = prevbob = (x == prevx && y == prevy && z == prevz ? prevbob : P_Random());
 
     mobj->z = (z == ONFLOORZ ? mobj->floorz :
               (z == ONCEILINGZ ? mobj->ceilingz - mobj->height : z));
@@ -1181,6 +1186,10 @@ mobj_t *P_SpawnMobj(fixed_t x, fixed_t y, fixed_t z, mobjtype_t type)
 
     if (!(mobj->flags2 & MF2_NOFOOTCLIP) && isliquid[sector->floorpic] && sector->heightsec == -1)
         mobj->flags2 |= MF2_FEETARECLIPPED;
+
+    prevx = x;
+    prevy = y;
+    prevz = z;
 
     return mobj;
 }
@@ -1705,7 +1714,7 @@ void P_SpawnMapThing(mapthing_t *mthing, int index)
         && mobj->floorz + mobjinfo[MT_PLAYER].height <= mobj->z)
         // player under body's head height <= bottom of body
     {
-        C_Warning("P_SpawnMapThing: solid hanging body in tall sector at %d,%d (%s)",
+        C_Warning("P_SpawnMapThing: solid hanging body in tall sector at %d, %d (%s)",
                 mthing->x, mthing->y, mobj->name);
     }
 
@@ -1728,7 +1737,7 @@ void P_SpawnMapThing(mapthing_t *mthing, int index)
     if (!netgame && (randomly_colored_playercorpses) && (mobj->info->spawnstate == S_PLAY_DIE7 ||
                                                          mobj->info->spawnstate == S_PLAY_XDIE9))
     {
-        flags |= (M_RandomInt(0, 3) << MF_TRANSSHIFT);
+        mobj->flags |= (M_RandomInt(0, 3) << MF_TRANSSHIFT);
     }
 
     // haleyjd: set particle fountain color
@@ -1761,26 +1770,6 @@ void P_SpawnParticle(mobj_t *target, fixed_t x, fixed_t y, fixed_t z, angle_t an
         {
             if (attackrange != MELEERANGE)
                 P_DrawSplash2(32, x, y, z, angle, updown, 1);
-        }
-
-        if (particle_sounds)
-        {
-            // FIXME: Ricochet sounds for bullets (player (but not for fists and not for chainsaw) & monsters)
-//            player_t *player = &players[consoleplayer];
-            mobj_t *mo = P_SpawnMobj(x, y, z, MT_PARTICLE);
-
-            if (isliquid[mo->subsector->sector->floorpic] && water_hit)
-                S_StartSound(mo, sfx_gloop);
-            else if (!hit_enemy && !isliquid[mo->subsector->sector->floorpic])
-            {
-                int t = P_Random() % 6;
-
-                if (t > 0 /*&& (player->readyweapon == wp_pistol ||
-                              player->readyweapon == wp_shotgun ||
-                              player->readyweapon == wp_supershotgun ||
-                              player->readyweapon == wp_chaingun)*/)
-                    S_StartSound(mo, sfx_ric1 + t);
-            }
         }
     }
 }
@@ -1932,9 +1921,9 @@ void P_SpawnBlood(fixed_t x, fixed_t y, fixed_t z, angle_t angle, int damage, mo
                 th2->z = th->z;
 
                 t = P_Random();
-                th2->momx = (t - P_Random ()) << 10;
+                th2->momx = (t - P_Random()) << 10;
                 t = P_Random();
-                th2->momy = (t - P_Random ()) << 10;
+                th2->momy = (t - P_Random()) << 10;
                 th2->momz = P_Random() << 10;
 
                 // Spectres bleed spectre blood
@@ -2456,4 +2445,47 @@ void P_ParticleLine(mobj_t *source, mobj_t *dest)
                         sourcez + ((destz - source->z) * j) / linedetail);
 }
 */
+
+void P_InitExtraMobjs(void)
+{
+    int i;
+
+    for (i = MT_EXTRA00; i <= MT_EXTRA99; ++i)
+    {
+        mobjinfo[i].doomednum = -1;
+        mobjinfo[i].spawnstate = S_NULL;
+        mobjinfo[i].spawnhealth = 0;
+        mobjinfo[i].gibhealth = 0;
+        mobjinfo[i].seestate = S_NULL;
+        mobjinfo[i].seesound = sfx_None;
+        mobjinfo[i].reactiontime = 0;
+        mobjinfo[i].attacksound = sfx_None;
+        mobjinfo[i].painstate = S_NULL;
+        mobjinfo[i].painchance = 0;
+        mobjinfo[i].painsound = sfx_None;
+        mobjinfo[i].meleestate = S_NULL;
+        mobjinfo[i].missilestate = S_NULL;
+        mobjinfo[i].deathstate = S_NULL;
+        mobjinfo[i].xdeathstate = S_NULL;
+        mobjinfo[i].deathsound = sfx_None;
+        mobjinfo[i].speed = 0;
+        mobjinfo[i].radius = 0;
+        mobjinfo[i].height = 0;
+        mobjinfo[i].projectilepassheight = 0;
+        mobjinfo[i].mass = 0;
+        mobjinfo[i].damage = 0;
+        mobjinfo[i].activesound = sfx_None;
+        mobjinfo[i].flags = 0;
+        mobjinfo[i].flags2 = 0;
+        mobjinfo[i].raisestate = S_NULL;
+        mobjinfo[i].frames = 0;
+        mobjinfo[i].blood = 0;
+        mobjinfo[i].shadowoffset = 0;
+        mobjinfo[i].particlefx = 0;
+        mobjinfo[i].name1[0] = '\0';
+        mobjinfo[i].plural1[0] = '\0';
+        mobjinfo[i].name2[0] = '\0';
+        mobjinfo[i].plural2[0] = '\0';
+    }
+}
 

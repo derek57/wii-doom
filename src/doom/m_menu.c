@@ -49,6 +49,7 @@
 #include "f_finale.h"
 #include "g_game.h"
 #include "hu_stuff.h"
+#include "i_oplmusic.h"
 #include "i_sdlmusic.h"
 #include "i_swap.h"
 #include "i_system.h"
@@ -1414,13 +1415,16 @@ char *Key2String(int ch)
 
 char                       savegamestrings[10][SAVESTRINGSIZE];
 char                       endstring[160];
-char                       coordinates_ang_textbuffer[50];
-char                       coordinates_x_textbuffer[50];
-char                       coordinates_y_textbuffer[50];
-char                       coordinates_z_textbuffer[50];
+char                       coordinates_ang_textbuffer[20];
+char                       coordinates_x_textbuffer[20];
+char                       coordinates_y_textbuffer[20];
+char                       coordinates_z_textbuffer[20];
 char                       massacre_textbuffer[30];
 char                       flight_counter[10];
 char                       bloodsplats_buffer[10];
+char                       backgroundcolor_buffer[10];
+char                       stillbob_buffer[10];
+char                       movebob_buffer[10];
 char                       string_back[5];
 char                       string_grid[5];
 char                       string_wall[5];
@@ -1483,11 +1487,11 @@ int                        coordinates_info = 0;
 int                        version_info = 0;
 
 #ifdef WII
-int                        key_controls_start_in_cfg_at_pos = 150;
-int                        key_controls_end_in_cfg_at_pos = 164;
+int                        key_controls_start_in_cfg_at_pos = 154;
+int                        key_controls_end_in_cfg_at_pos = 169;
 #else
-int                        key_controls_start_in_cfg_at_pos = 149;
-int                        key_controls_end_in_cfg_at_pos = 165;
+int                        key_controls_start_in_cfg_at_pos = 154;
+int                        key_controls_end_in_cfg_at_pos = 170;
 #endif
 
 int                        tracknum = 1;
@@ -1670,6 +1674,7 @@ static void M_WipeType(int choice);
 static void M_UncappedFramerate(int choice);
 static void M_Screenshots(int choice);
 static void M_Background(int choice);
+static void M_BackgroundColor(int choice);
 static void M_FontShadow(int choice);
 static void M_DiskIcon(int choice);
 static void M_FixWiggle(int choice);
@@ -1722,8 +1727,12 @@ static void M_MapSecretAfter(int choice);
 static void M_Version(int choice);
 static void M_SoundInfo(int choice);
 static void M_HUD(int choice);
+static void M_Autoload(int choice);
 static void M_Autosave(int choice);
 static void M_DrawSplash(int choice);
+static void M_Stillbob(int choice);
+static void M_Movebob(int choice);
+static void M_Flip(int choice);
 static void M_MapColor_Back(int choice);
 static void M_MapColor_Grid(int choice);
 static void M_MapColor_Wall(int choice);
@@ -1871,6 +1880,7 @@ static void M_MemDump(int choice);
 static void M_StatDump(int choice);
 static void M_PrintDir(int choice);
 static void M_ReplaceMissing(int choice);
+static void M_Precache(int choice);
 static void M_Controls(int choice);
 static void M_System(int choice);
 static void M_Automap(int choice);
@@ -1881,6 +1891,7 @@ static void M_Game4(int choice);
 static void M_Game5(int choice);
 static void M_Game6(int choice);
 static void M_Game7(int choice);
+static void M_Game8(int choice);
 static void M_OptSet(int choice);
 static void M_DefSet(int choice);
 static void M_Expansion(int choice);
@@ -1903,6 +1914,7 @@ static void M_DrawGame4(void);
 static void M_DrawGame5(void);
 static void M_DrawGame6(void);
 static void M_DrawGame7(void);
+static void M_DrawGame8(void);
 static void M_DrawDebug(void);
 static void M_DrawTest(void);
 static void M_DrawCheats(void);
@@ -1936,8 +1948,6 @@ static void M_Samplerate(int choice);
 static void M_Beta(int choice);
 static void M_Cheats(int choice);
 #endif
-
-int  M_StringHeight(char *string);
 
 
 //
@@ -2451,6 +2461,7 @@ enum
     screen_framerate,
     screen_shots,
     screen_background,
+    screen_color,
     screen_shadow,
     screen_icon,
     screen_type,
@@ -2473,6 +2484,7 @@ static menuitem_t ScreenMenu[]=
     {2, "Framerate"               , M_UncappedFramerate, 'u'},
     {2, "Screenshot Format"       , M_Screenshots      , 'x'},
     {2, "Menu Background"         , M_Background       , 'b'},
+    {2, ""                        , M_BackgroundColor  , 'c'},
     {2, "Menu Font Style"         , M_FontShadow       , 'f'},
     {2, "Show Loading Indicator"  , M_DiskIcon         , 'd'},
     {2, ""                        , M_IconType         , 'i'}
@@ -2491,7 +2503,7 @@ static menu_t  ScreenDef =
     &OptionsDef,
     ScreenMenu,
     M_DrawScreen,
-    60, 35,
+    60, 25,
     0
 };
 
@@ -2605,6 +2617,7 @@ enum
     system_ticker,
     system_hom,
     system_replace,
+    system_precache,
     system_end
 } system_e;
 
@@ -2613,7 +2626,8 @@ static menuitem_t SystemMenu[]=
     {2, "FPS Counter"             , M_FPS           , 'f'},
     {2, "Display Ticker"          , M_DisplayTicker , 't'},
     {2, "Hall of Mirrors Detector", M_HOMDetector   , 'h'},
-    {2, "Replace Missing Textures", M_ReplaceMissing, 'r'}
+    {2, "Replace Missing Textures", M_ReplaceMissing, 'r'},
+    {2, "Precache Level at Start" , M_Precache      , 'p'}
 };
 
 static menu_t  SystemDef =
@@ -2925,13 +2939,11 @@ enum
     game7_weapon,
     game7_recoil,
     game7_hud,
+    game7_autoload,
     game7_autosave,
-    game7_splash,
-
-#ifdef WII
-    game7_prbeta,
-#endif
-
+    game7_still,
+    game7_move,
+    game7_game8,
     game7_end
 } game7_e;
 
@@ -2946,14 +2958,11 @@ static menuitem_t GameMenu7[]=
     {2, ""                                 , M_WeaponChange     , 'g'},
     {2, "WEAPON RECOIL"                    , M_WeaponRecoil     , 'c'},
     {2, "FULLSCREEN HUD"                   , M_HUD              , 'h'},
+    {2, "AUTOLOAD FEATURE"                 , M_Autoload         , 'l'},
     {2, "AUTOSAVE FEATURE"                 , M_Autosave         , 'f'},
-    {2, "Draw Splash Screen at game bootup", M_DrawSplash       , 'x'}
-
-#ifdef WII
-    ,
-    {2, "PRE-RELEASE BETA MODE"            , M_Beta             , 'b'}
-#endif
-
+    {2, "Bob the players view (%)"         , M_Stillbob         , 'b'},
+    {2, "Bob the players gun (%)"          , M_Movebob          , 'm'},
+    {1, ""                                 , M_Game8            , '8'}
 };
 
 static menu_t  GameDef7 =
@@ -2962,6 +2971,38 @@ static menu_t  GameDef7 =
     &GameDef6,
     GameMenu7,
     M_DrawGame7,
+    23, 22,
+    0
+};
+
+enum
+{
+    game8_splash,
+    game8_flip,
+#ifdef WII
+    game8_prbeta,
+#endif
+
+    game8_end
+} game8_e;
+
+static menuitem_t GameMenu8[]=
+{
+    {2, "Draw Splash Screen at game bootup", M_DrawSplash       , 's'},
+    {2, "Flip Levels horizontally"         , M_Flip             , 'n'}
+#ifdef WII
+    ,
+    {2, "PRE-RELEASE BETA MODE"            , M_Beta             , 'b'}
+#endif
+
+};
+
+static menu_t  GameDef8 =
+{
+    game8_end,
+    &GameDef7,
+    GameMenu8,
+    M_DrawGame8,
     23, 22,
     0
 };
@@ -3181,6 +3222,10 @@ enum
     load4,
     load5,
     load6,
+    load7,
+    load8,
+    load9,
+    load0,
     load_end
 } load_e;
 
@@ -3191,7 +3236,11 @@ static menuitem_t LoadMenu[]=
     {1, "", M_LoadSelect, '3'},
     {1, "", M_LoadSelect, '4'},
     {1, "", M_LoadSelect, '5'},
-    {1, "", M_LoadSelect, '6'}
+    {1, "", M_LoadSelect, '6'},
+    {1, "", M_LoadSelect, '7'},
+    {1, "", M_LoadSelect, '8'},
+    {1, "", M_LoadSelect, '9'},
+    {1, "", M_LoadSelect, '0'}
 };
 
 static menu_t  LoadDef =
@@ -3200,7 +3249,7 @@ static menu_t  LoadDef =
     &FilesDef,
     LoadMenu,
     M_DrawLoad,
-    75, 56,
+    75, 34,
     0
 };
 
@@ -3214,7 +3263,11 @@ static menuitem_t SaveMenu[]=
     {1, "", M_SaveSelect, '3'},
     {1, "", M_SaveSelect, '4'},
     {1, "", M_SaveSelect, '5'},
-    {1, "", M_SaveSelect, '6'}
+    {1, "", M_SaveSelect, '6'},
+    {1, "", M_SaveSelect, '7'},
+    {1, "", M_SaveSelect, '8'},
+    {1, "", M_SaveSelect, '9'},
+    {1, "", M_SaveSelect, '0'}
 };
 
 static menu_t  SaveDef =
@@ -3223,7 +3276,7 @@ static menu_t  SaveDef =
     &FilesDef,
     SaveMenu,
     M_DrawSave,
-    75, 56,
+    75, 34,
     0
 };
 /*
@@ -3338,8 +3391,8 @@ void M_DarkBackground(int scrn)
 
 static void M_ReadSaveStrings(void)
 {
-    int     i;
-    char    name[256];
+    int    i;
+    char   name[256];
 
     for (i = 0; i < load_end; i++)
     {
@@ -3369,7 +3422,7 @@ static void M_DrawLoad(void)
 {
     int     i;
 
-    V_DrawPatchWithShadow(72, 28, 0, W_CacheLumpName("M_T_LGME", PU_CACHE), false);
+    V_DrawPatchWithShadow(72, 8, 0, W_CacheLumpName("M_T_LGME", PU_CACHE), false);
 
     for (i = 0; i < load_end; i++)
     {
@@ -3388,10 +3441,12 @@ static void M_DrawLoad(void)
         char *string2 = "CREATED USING AN OPTIONAL PWAD!";
         int x = ORIGINALWIDTH / 2 - M_StringWidth(string) / 2;
         int x2 = ORIGINALWIDTH / 2 - M_StringWidth(string2) / 2;
+
         dp_translation = crx[CRX_GOLD];
-        M_WriteText(x, LoadDef.y + 78, string);
+        M_WriteText(x, LoadDef.y + 108, string);
+
         dp_translation = crx[CRX_GOLD];
-        M_WriteText(x2, LoadDef.y + 88, string2);
+        M_WriteText(x2, LoadDef.y + 118, string2);
     }
 }
 
@@ -3434,7 +3489,7 @@ static void M_LoadGame(int choice)
     // [crispy] forbid New Game and (Quick) Load while recording a demo
     if (demorecording)
     {
-	return;
+        return;
     }
 
     if (netgame)
@@ -3454,7 +3509,7 @@ static void M_DrawSave(void)
 {
     int     i;
         
-    V_DrawPatchWithShadow(72, 28, 0, W_CacheLumpName("M_T_SGME", PU_CACHE), false);
+    V_DrawPatchWithShadow(72, 8, 0, W_CacheLumpName("M_T_SGME", PU_CACHE), false);
 
     for (i = 0; i < load_end; i++)
     {
@@ -3476,10 +3531,12 @@ static void M_DrawSave(void)
         char *string2 = "CREATED USING AN OPTIONAL PWAD!";
         int x = ORIGINALWIDTH / 2 - M_StringWidth(string) / 2;
         int x2 = ORIGINALWIDTH / 2 - M_StringWidth(string2) / 2;
+
         dp_translation = crx[CRX_GOLD];
-        M_WriteText(x, SaveDef.y + 78, string);
+        M_WriteText(x, SaveDef.y + 108, string);
+
         dp_translation = crx[CRX_GOLD];
-        M_WriteText(x2, SaveDef.y + 88, string2);
+        M_WriteText(x2, SaveDef.y + 118, string2);
     }
 }
 
@@ -3508,28 +3565,19 @@ static void M_DoSave(int slot)
 //
 static void M_SaveSelect(int choice)
 {
-    time_t theTime;
-    struct tm *aTime;
+    time_t theTime = time(NULL);
+    struct tm *aTime = localtime(&theTime);
 
-    int day;
-    int month;
-    int year;
-    int hour;
-    int min;
+    int day = aTime->tm_mday;
+    int month = aTime->tm_mon + 1;
+    int year = aTime->tm_year + 1900;
+    int hour = aTime->tm_hour;
+    int min = aTime->tm_min;
 
     // we are going to be intercepting all chars
     saveStringEnter = 1;
     
     saveSlot = choice;
-
-    theTime = time(NULL);
-    aTime = localtime(&theTime);
-
-    day = aTime->tm_mday;
-    month = aTime->tm_mon + 1;
-    year = aTime->tm_year + 1900;
-    hour = aTime->tm_hour;
-    min = aTime->tm_min;
 
     if (gamemode == shareware || gamemode == registered || gamemode == retail)
     {
@@ -3734,7 +3782,8 @@ static void M_Cheats(int choice)
 static void M_DrawReadThis1(void)
 {
     char *lumpname = "CREDIT";
-    int skullx = 330, skully = 175;
+    int skullx = 330;
+    int skully = 175;
 
     inhelpscreens = true;
     
@@ -4356,7 +4405,7 @@ static void M_NewGame(int choice)
     // [crispy] forbid New Game and (Quick) Load while recording a demo
     if (demorecording)
     {
-	return;
+        return;
     }
 
     if (netgame && !demoplayback)
@@ -4893,10 +4942,10 @@ static void M_DrawScreen(void)
     if (!show_diskicon)
         dp_translation = crx[CRX_DARK];
 
-    if (itemOn == 10 && show_diskicon && gamemode == commercial)
+    if (itemOn == 11 && show_diskicon && gamemode == commercial)
         dp_translation = crx[CRX_GOLD];
 
-    M_WriteText(ScreenDef.x, ScreenDef.y + 98, "Type of Indicator");
+    M_WriteText(ScreenDef.x, ScreenDef.y + 108, "Type of Indicator");
 
     if (detailLevel)
     {
@@ -4988,78 +5037,93 @@ static void M_DrawScreen(void)
     else if (background_type == 1)
     {
         dp_translation = crx[CRX_GOLD];
-        M_WriteText(ScreenDef.x + 158, ScreenDef.y + 68, "SHADED");
+        M_WriteText(ScreenDef.x + 123, ScreenDef.y + 68, "CRISPY-DOOM");
     }
     else if (background_type == 2)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(ScreenDef.x + 149, ScreenDef.y + 68, "BLURRED");
+        M_WriteText(ScreenDef.x + 128, ScreenDef.y + 68, "DOOM RETRO");
     }
     else if (background_type == 3)
     {
         dp_translation = crx[CRX_BLUE];
         M_WriteText(ScreenDef.x + 156, ScreenDef.y + 68, "PRBOOM");
     }
+    else if (background_type == 4)
+    {
+        dp_translation = crx[CRX_GRAY];
+        M_WriteText(ScreenDef.x + 165, ScreenDef.y + 68, "ZDOOM");
+    }
+
+    if (background_type != 4)
+        dp_translation = crx[CRX_DARK];
+    else if (background_type == 4 && itemOn == 8)
+        dp_translation = crx[CRX_GOLD];
+
+    M_WriteText(ScreenDef.x, ScreenDef.y + 78, "Menu Background Color");
+
+    sprintf(backgroundcolor_buffer, "%d", background_color);
+    M_WriteText(ScreenDef.x + 205 - M_StringWidth(backgroundcolor_buffer), ScreenDef.y + 78, backgroundcolor_buffer);
 
     if (font_shadow == 0)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(ScreenDef.x + 156, ScreenDef.y + 78, "NORMAL");
+        M_WriteText(ScreenDef.x + 156, ScreenDef.y + 88, "NORMAL");
     }
     else if (font_shadow == 1)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(ScreenDef.x + 141, ScreenDef.y + 78, "SHADOWED");
+        M_WriteText(ScreenDef.x + 141, ScreenDef.y + 88, "SHADOWED");
     }
     else if (font_shadow == 2)
     {
         dp_translation = crx[CRX_GOLD];
-        M_WriteText(ScreenDef.x + 149, ScreenDef.y + 78, "COLORED");
+        M_WriteText(ScreenDef.x + 149, ScreenDef.y + 88, "COLORED");
     }
 
     if (show_diskicon)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(ScreenDef.x + 189, ScreenDef.y + 88, "ON");
+        M_WriteText(ScreenDef.x + 189, ScreenDef.y + 98, "ON");
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(ScreenDef.x + 181, ScreenDef.y + 88, "OFF");
+        M_WriteText(ScreenDef.x + 181, ScreenDef.y + 98, "OFF");
     }
 
     if (icontype == 1)
     {
         dp_translation = crx[CRX_GRAY];
-        M_WriteText(ScreenDef.x + 158, ScreenDef.y + 98, "CD-ROM");
+        M_WriteText(ScreenDef.x + 158, ScreenDef.y + 108, "CD-ROM");
     }
     else
     {
         dp_translation = crx[CRX_BLUE];
-        M_WriteText(ScreenDef.x + 126, ScreenDef.y + 98, "FLOPPY DISK");
+        M_WriteText(ScreenDef.x + 126, ScreenDef.y + 108, "FLOPPY DISK");
     }
 
 #ifdef SDL2
     if (render_mode)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(ScreenDef.x + 161, ScreenDef.y + 108, "LINEAR");
+        M_WriteText(ScreenDef.x + 161, ScreenDef.y + 118, "LINEAR");
     }
     else
     {
         dp_translation = crx[CRX_GOLD];
-        M_WriteText(ScreenDef.x + 150, ScreenDef.y + 108, "NEAREST");
+        M_WriteText(ScreenDef.x + 150, ScreenDef.y + 118, "NEAREST");
     }
 
     if (d_vsync)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(ScreenDef.x + 189, ScreenDef.y + 118, "ON");
+        M_WriteText(ScreenDef.x + 189, ScreenDef.y + 128, "ON");
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(ScreenDef.x + 181, ScreenDef.y + 118, "OFF");
+        M_WriteText(ScreenDef.x + 181, ScreenDef.y + 128, "OFF");
     }
 #endif
 
@@ -5076,17 +5140,24 @@ static void M_DrawScreen(void)
             string = "START / LOAD A NEW GAME TO TAKE EFFECT.";
         else if (itemOn == 5 && d_vsync)
             string = "DISABLE VSYNC TO UNLOCK 70 FPS & UNCAPPED.";
-        else if (itemOn == 10 && (gamemode == retail || gamemode == registered || gamemode == shareware))
+        else if (itemOn == 8)
+        {
+            if (background_type != 4)
+                string = "ONLY FOR 'ZDOOM' MENU BACKGROUND";
+            else
+                string = "DEFAULT VALUE IS 231";
+        }
+        else if (itemOn == 11 && (gamemode == retail || gamemode == registered || gamemode == shareware))
             string = "THIS IS ONLY CHANGEABLE FOR DOOM 2";
 
 #ifdef SDL2
-        else if (itemOn == 11 || itemOn == 12)
+        else if (itemOn == 12 || itemOn == 13)
             string = "YOU MUST QUIT AND RESTART TO TAKE EFFECT.";
 #endif
 
         x = ORIGINALWIDTH / 2 - M_StringWidth(string) / 2;
 
-        M_WriteText(x, ScreenDef.y + 126, string);
+        M_WriteText(x, ScreenDef.y + 136, string);
     }
 }
 
@@ -6542,7 +6613,7 @@ static void M_DrawGame7(void)
         M_WriteText(GameDef7.x + 258, GameDef7.y + 78, "OFF");
     }
 
-    if (enable_autosave)
+    if (enable_autoload)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef7.x + 266, GameDef7.y + 88, "ON");
@@ -6553,7 +6624,7 @@ static void M_DrawGame7(void)
         M_WriteText(GameDef7.x + 258, GameDef7.y + 88, "OFF");
     }
 
-    if (drawsplash)
+    if (enable_autosave)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef7.x + 266, GameDef7.y + 98, "ON");
@@ -6564,18 +6635,11 @@ static void M_DrawGame7(void)
         M_WriteText(GameDef7.x + 258, GameDef7.y + 98, "OFF");
     }
 
-#ifdef WII
-    if (beta_style_mode)
-    {
-        dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef7.x + 266, GameDef7.y + 108, "ON");
-    }
-    else
-    {
-        dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef7.x + 258, GameDef7.y + 108, "OFF");
-    }
-#endif
+    sprintf(stillbob_buffer, "%d", stillbob);
+    M_WriteText(GameDef7.x + 282 - M_StringWidth(stillbob_buffer), GameDef7.y + 108, stillbob_buffer);
+
+    sprintf(movebob_buffer, "%d", movebob);
+    M_WriteText(GameDef7.x + 282 - M_StringWidth(movebob_buffer), GameDef7.y + 118, movebob_buffer);
 
     if (!whichSkull)
     {
@@ -6598,8 +6662,82 @@ static void M_DrawGame7(void)
         }
         else if (itemOn == 6 && gameskill == sk_nightmare)
             string = "NOT AVAILABLE FOR NIGHTMARE SKILL";
+        else if (itemOn == 9 || itemOn == 10)
+            string = "YOU NEED TO PICK A QUICKSAVE SLOT FIRST (F6)";
+        else if (itemOn == 11)
+            string = "DEFAULT VALUE IS 0";
+        else if (itemOn == 12)
+            string = "DEFAULT VALUE IS 75";
+
+        x = ORIGINALWIDTH / 2 - M_StringWidth(string) / 2;
+
+        M_WriteText(x, GameDef7.y + 138, string);
+    }
+
+    if (itemOn == 13)
+        dp_translation = crx[CRX_GOLD];
+    else
+        dp_translation = crx[CRX_GRAY];
+
+    M_WriteText(GameDef7.x, GameDef7.y + 128, "WHATEVER...");
+}
+
+static void M_DrawGame8(void)
+{
+    if (fsize != 19321722 && fsize != 12361532 && fsize != 28422764)
+        V_DrawPatchWithShadow(70, 0, 0, W_CacheLumpName("M_T_GSET",
+                                               PU_CACHE), false);
+    else
+        V_DrawPatchWithShadow(70, 0, 0, W_CacheLumpName("M_GMESET",
+                                               PU_CACHE), false);
+
+    if (drawsplash)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(GameDef8.x + 266, GameDef8.y - 2, "ON");
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(GameDef8.x + 258, GameDef8.y - 2, "OFF");
+    }
+
+    if (d_fliplevels)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(GameDef8.x + 266, GameDef8.y + 8, "ON");
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(GameDef8.x + 258, GameDef8.y + 8, "OFF");
+    }
+
 #ifdef WII
-        if (itemOn == 11)
+    if (beta_style_mode)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(GameDef8.x + 266, GameDef8.y + 8, "ON");
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(GameDef8.x + 258, GameDef8.y + 8, "OFF");
+    }
+#endif
+
+    if (!whichSkull)
+    {
+        int x;
+        char *string = "";
+
+        dp_translation = crx[CRX_GOLD];
+
+        if (itemOn == 1)
+            string = "YOU NEED TO START A NEW MAP TO TAKE EFFECT.";
+
+#ifdef WII
+        if (itemOn == 2)
         {
             if (fsize != 28422764 && fsize != 19321722 && fsize != 12361532)
                 string = "YOU MUST QUIT AND RESTART TO TAKE EFFECT.";
@@ -6609,7 +6747,7 @@ static void M_DrawGame7(void)
 #endif
         x = ORIGINALWIDTH / 2 - M_StringWidth(string) / 2;
 
-        M_WriteText(x, GameDef7.y + 138, string);
+        M_WriteText(x, GameDef8.y + 138, string);
     }
 }
 
@@ -6704,7 +6842,7 @@ static void M_DrawCheats(void)
         if (fsize == 12538385 && epi == 1 && map == 10)
         {
             dp_translation = crx[CRX_GRAY];
-            M_WriteText(75, 116, "E1M10: SEWERS");
+            M_WriteText(75, 116, s_HUSTR_E1M10);
         }
 
         if (epi == 1 && gameversion != exe_chex && map != 10)
@@ -6742,7 +6880,7 @@ static void M_DrawCheats(void)
         map == 33)
     {
         dp_translation = crx[CRX_GRAY];
-        M_WriteText(75, 116, "LEVEL 33: BETRAY");        
+        M_WriteText(75, 116, s_HUSTR_33);        
     }
 
     if (fsize == 18195736 || fsize == 18654796)
@@ -7130,7 +7268,7 @@ static void M_EndGameResponse(int ch)
     // [crispy] killough 5/26/98: make endgame quit if recording or playing back demo
 /*
     if (demorecording || singledemo)
-	G_CheckDemoStatus();
+        G_CheckDemoStatus();
 */
     currentMenu->lastOn = itemOn;
     M_ClearMenus();
@@ -7604,10 +7742,31 @@ static void M_Background(int choice)
             break;
 
         case 1:
-            if (background_type < 3)
+            if (background_type < 4)
                 background_type++;
 
             break;
+    }
+}
+
+static void M_BackgroundColor(int choice)
+{
+    if (background_type == 4)
+    {
+        switch (choice)
+        {
+            case 0:
+                if (background_color > 0)
+                    background_color--;
+
+                break;
+
+            case 1:
+                if (background_color < 256)
+                    background_color++;
+
+                break;
+        }
     }
 }
 
@@ -7802,10 +7961,9 @@ static void M_SizeDisplay(int choice)
 /*
 static void M_DrawThermo(int x, int y, int thermWidth, int thermDot)
 {
-    int                xx;
+    int                xx = x;
     int                i;
 
-    xx = x;
     V_DrawPatchWithShadow(xx, y, 0, W_CacheLumpName("M_THERML", PU_CACHE), false);
     xx += 8;
 
@@ -7824,15 +7982,11 @@ static void M_DrawThermo(int x, int y, int thermWidth, int thermDot)
 
 static void M_DrawThermoSmall(int x, int y, int thermWidth, int thermDot)
 {
-    int         xx;
-    int         yy;
+    int         xx = x;
+    int         yy = y + 6;
     int         i;
 
-    xx = x;
-
     // +6 to y coordinate
-    yy = y + 6;
-
     V_DrawPatchWithShadow(xx + 3, yy - 18, 0, W_CacheLumpName("M_SLIDEL", PU_CACHE), false);
     xx += 8;
 
@@ -7929,15 +8083,13 @@ int M_StringWidth(char *string)
 int M_StringHeight(char *string)
 {
     size_t          i;
-    int             h;
     int             height = SHORT(hu_font[0]->height);
+    int             h = height;
         
-    h = height;
-
     for (i = 0; i < strlen(string); i++)
         if (string[i] == '\n')
             h += height;
-                
+
     return h;
 }
 
@@ -7946,15 +8098,11 @@ int M_StringHeight(char *string)
 //
 void M_WriteText(int x, int y, char *string)
 {
+    char  *ch = string;
+    int   cx = x;
+    int   cy = y;
     int   w;
-    char  *ch;
-    int   cx;
-    int   cy;
 
-    ch = string;
-    cx = x;
-    cy = y;
-        
     while (1)
     {
         int c = *ch++;
@@ -8054,9 +8202,8 @@ static void M_ChangeGamma(int choice)
 //
 dboolean M_Responder(event_t *ev)
 {
-    int             ch;
+    int             ch = -1;
     int             key;
-    int             i;
 
 #ifndef WII
     static int      mousewait = 0;
@@ -8064,9 +8211,6 @@ dboolean M_Responder(event_t *ev)
 
 #ifdef WII
     WPADData *data = WPAD_Data(0);
-
-    // will be changed to a legit char if we're going to use it here
-    ch = -1;
 
     // Process joystick input
     // For some reason, polling ev.data for joystick input here in the menu code
@@ -8396,13 +8540,13 @@ dboolean M_Responder(event_t *ev)
         // Load
         else if (key == key_menu_load)
         {
-	    // [crispy] forbid New Game and (Quick) Load while recording a demo
-	    if (demorecording)
-	    {
-		S_StartSound(NULL, sfx_oof);
-	    }
-	    else
-	    {
+            // [crispy] forbid New Game and (Quick) Load while recording a demo
+            if (demorecording)
+            {
+                S_StartSound(NULL, sfx_oof);
+            }
+            else
+            {
                 M_StartControlPanel();
                 S_StartSound(NULL, sfx_swtchn);
                 M_LoadGame(0);
@@ -8449,13 +8593,13 @@ dboolean M_Responder(event_t *ev)
         // Quickload
         else if (key == key_menu_qload)
         {
-	    // [crispy] forbid New Game and (Quick) Load while recording a demo
-	    if (demorecording)
-	    {
-		S_StartSound(NULL, sfx_oof);
-	    }
-	    else
-	    {
+            // [crispy] forbid New Game and (Quick) Load while recording a demo
+            if (demorecording)
+            {
+                S_StartSound(NULL, sfx_oof);
+            }
+            else
+            {
                 S_StartSound(NULL, sfx_swtchn);
                 M_QuickLoad();
                 return true;
@@ -8541,7 +8685,12 @@ dboolean M_Responder(event_t *ev)
                     itemOn = 0;
             }
 
-            S_StartSound(NULL, sfx_pstop);
+            if (background_type == 3 && currentMenu != &MainDef
+                && currentMenu != &EpiDef && currentMenu != &NewDef
+                && currentMenu != &ExpDef)
+                S_StartSound(NULL, sfx_itemup);
+            else
+                S_StartSound(NULL, sfx_pstop);
 
         } while ((currentMenu->menuitems[itemOn].status == -1 && !devparm) ||
                  (currentMenu->menuitems[itemOn].status == -1 && currentMenu != &GameDef && devparm));
@@ -8585,7 +8734,12 @@ dboolean M_Responder(event_t *ev)
                     itemOn--;
             }
 
-            S_StartSound(NULL, sfx_pstop);
+            if (background_type == 3 && currentMenu != &MainDef
+                && currentMenu != &EpiDef && currentMenu != &NewDef
+                && currentMenu != &ExpDef)
+                S_StartSound(NULL, sfx_itemup);
+            else
+                S_StartSound(NULL, sfx_pstop);
 
         } while ((currentMenu->menuitems[itemOn].status == -1 && !devparm) ||
                  (currentMenu->menuitems[itemOn].status == -1 && currentMenu != &GameDef && devparm));
@@ -8697,6 +8851,8 @@ dboolean M_Responder(event_t *ev)
     else if (ch != 0 || IsNullKey(key))
 #endif
     {
+        int             i;
+
         for (i = itemOn + 1; i < currentMenu->numitems; i++)
         {
             if (currentMenu->menuitems[i].alphaKey == ch)
@@ -8755,14 +8911,12 @@ void M_StartControlPanel(void)
 // Display OPL debug messages - hack for GENMIDI development.
 static void M_DrawOPLDev(void)
 {
-    extern void I_OPL_DevMessages(char *, size_t);
     char debug[1024];
     char *curr, *p;
-    int line;
+    int line = 0;
 
     I_OPL_DevMessages(debug, sizeof(debug));
     curr = debug;
-    line = 0;
 
     for (;;)
     {
@@ -8792,11 +8946,10 @@ static void M_DrawCrispnessBackground(int scrn)
 
     if (!sdest)
     {
-        byte *src, *dest;
+        byte *src = W_CacheLumpName("FLOOR4_6", PU_CACHE);
+        byte *dest = Z_Malloc(SCREENWIDTH * SCREENHEIGHT * sizeof(*dest), PU_STATIC, NULL);
         int x, y;
 
-        src = W_CacheLumpName("FLOOR4_6", PU_CACHE);
-        dest = Z_Malloc(SCREENWIDTH * SCREENHEIGHT * sizeof(*dest), PU_STATIC, NULL);
         sdest = dest;
 
         for (y = 0; y < SCREENHEIGHT; y++)
@@ -8829,6 +8982,8 @@ void M_Drawer(void)
             M_DarkBackground(0);
         else if (background_type == 3)
             M_DrawCrispnessBackground(0);
+        else if (background_type == 4)
+            V_DimScreen(0);
     }
 
     if (!inhelpscreens)
@@ -8986,14 +9141,14 @@ void M_Drawer(void)
     // Horiz. & Vertically center string and print it.
     if (messageToPrint)
     {
-        char                string[80];
-        int                 start = 0;
+        int  start = 0;
+        char string[80];
 
         y = ORIGINALHEIGHT / 2 - M_StringHeight(messageString) / 2;
 
         while (messageString[start] != '\0')
         {
-            int foundnewline = 0;
+            int  foundnewline = 0;
 
             for (i = 0; i < strlen(messageString + start); i++)
             {
@@ -9081,17 +9236,15 @@ void M_Drawer(void)
 
     for (i = 0; i < max; i++)
     {
-        char   *name;
-
         menuitem_t *item = &(currentMenu->menuitems[i]);
-        name = item->name;
+        char       *name = item->name;
 
         if (*name)
         {
             if ((currentMenu == &FilesDef && i == savegame && (!usergame || gamestate != GS_LEVEL)) ||
                 (currentMenu == &FilesDef && i == endgame && (!usergame || netgame)) ||
                 (currentMenu == &FilesDef && i == loadgame && (netgame || demorecording)) ||
- 	        (currentMenu == &MainDef && i == newgame && (demorecording || (netgame && !demoplayback))))
+                (currentMenu == &MainDef && i == newgame && (demorecording || (netgame && !demoplayback))))
                 dp_translation = crx[CRX_DARK];
             else if (i == itemOn)
                 dp_translation = crx[CRX_GOLD];
@@ -9175,8 +9328,7 @@ void M_Drawer(void)
 void M_ClearMenus(void)
 {
     menuactive = 0;
-
-    paused = false;
+    //paused = false;
 
     if (screenSize < 8)
     {
@@ -10795,6 +10947,24 @@ static void M_ReplaceMissing(int choice)
     }
 }
 
+static void M_Precache(int choice)
+{
+    switch (choice)
+    {
+        case 0:
+            if (precache)
+                precache = false;
+
+            break;
+
+        case 1:
+            if (!precache)
+                precache = true;
+
+            break;
+    }
+}
+
 static void M_DisplayTicker(int choice)
 {
     switch (choice)
@@ -11057,6 +11227,11 @@ static void M_Game6(int choice)
 static void M_Game7(int choice)
 {
     M_SetupNextMenu(&GameDef7);
+}
+
+static void M_Game8(int choice)
+{
+    M_SetupNextMenu(&GameDef8);
 }
 
 static void M_OptSet(int choice)
@@ -12902,6 +13077,17 @@ static void M_DrawSystem(void)
         dp_translation = crx[CRX_DARK];
         M_WriteText(SystemDef.x + 190, SystemDef.y + 28, "OFF");
     }
+
+    if (precache)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(SystemDef.x + 198, SystemDef.y + 38, "ON");
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(SystemDef.x + 190, SystemDef.y + 38, "OFF");
+    }
 }
 
 static void M_HUD(int choice)
@@ -12917,6 +13103,24 @@ static void M_HUD(int choice)
         case 1:
             if (!hud)
                 hud = true;
+
+            break;
+    }
+}
+
+static void M_Autoload(int choice)
+{
+    switch (choice)
+    {
+        case 0:
+            if (enable_autoload)
+                enable_autoload = false;
+
+            break;
+
+        case 1:
+            if (!enable_autoload)
+                enable_autoload = true;
 
             break;
     }
@@ -12953,6 +13157,60 @@ static void M_DrawSplash(int choice)
         case 1:
             if (!drawsplash)
                 drawsplash = true;
+
+            break;
+    }
+}
+
+static void M_Stillbob(int choice)
+{
+    switch (choice)
+    {
+        case 0:
+            if (stillbob > 0)
+                stillbob--;
+
+            break;
+
+        case 1:
+            if (stillbob < 100)
+                stillbob++;
+
+            break;
+    }
+}
+
+static void M_Movebob(int choice)
+{
+    switch (choice)
+    {
+        case 0:
+            if (movebob > 0)
+                movebob--;
+
+            break;
+
+        case 1:
+            if (movebob < 100)
+                movebob++;
+
+            break;
+    }
+}
+
+static void M_Flip(int choice)
+{
+    switch (choice)
+    {
+        case 0:
+            if (d_fliplevels)
+                d_fliplevels = false;
+
+            break;
+
+        case 1:
+            if (!d_fliplevels)
+                d_fliplevels = true;
 
             break;
     }
@@ -14056,7 +14314,7 @@ static void M_DrawTest(void)
 // jff 2/01/98 kill all monsters
 static void M_Massacre(int choice)
 {
-    thinker_t *thinker;
+    thinker_t *thinker = &thinkercap;
     int       killcount = 0;
 
     massacre_cheat_used = true;
@@ -14066,8 +14324,6 @@ static void M_Massacre(int choice)
 
     // killough 2/7/98: cleaned up code and changed to use dprintf;
     // fixed lost soul bug (Lost Souls left behind when Pain Elementals are killed)
-    thinker = &thinkercap;
-
     while ((thinker=thinker->next) != &thinkercap)
     {
         if (thinker->function == P_MobjThinker &&

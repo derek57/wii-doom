@@ -54,7 +54,7 @@ platlist_t *activeplats;
 //
 void T_PlatRaise(plat_t *plat)
 {
-    result_e        res;
+    result_e    res;
         
     switch (plat->status)
     {
@@ -67,7 +67,7 @@ void T_PlatRaise(plat_t *plat)
                     S_StartSectorSound(&plat->sector->soundorg, sfx_stnmov);
             }
 
-            if (res == crushed && (!plat->crush))
+            if (res == crushed && !plat->crush)
             {
                 plat->count = plat->wait;
                 plat->status = down;
@@ -159,6 +159,8 @@ void T_PlatRaise(plat_t *plat)
                 S_StartSectorSound(&plat->sector->soundorg, sfx_pstart);
             }
 
+            break;
+
         case in_stasis:
             break;
     }
@@ -168,16 +170,13 @@ void T_PlatRaise(plat_t *plat)
 // Do Platforms
 //  "amount" is only used for SOME platforms.
 //
-int EV_DoPlat(line_t *line, plattype_e type, int amount)
+dboolean EV_DoPlat(line_t *line, plattype_e type, int amount)
 {
     plat_t       *plat;
-    int          secnum;
-    int          rtn;
+    int          secnum = -1;
+    int          rtn = false;
     sector_t     *sec = NULL;
         
-    secnum = -1;
-    rtn = 0;
-    
     // Activate all <type> plats that are in_stasis
     switch (type)
     {
@@ -187,7 +186,7 @@ int EV_DoPlat(line_t *line, plattype_e type, int amount)
         
         case toggleUpDn:
             P_ActivateInStasis(line->tag);
-            rtn = 1;
+            rtn = true;
             break;
 
         default:
@@ -202,7 +201,7 @@ int EV_DoPlat(line_t *line, plattype_e type, int amount)
             continue;
         
         // Find lowest & highest floors around sector
-        rtn = 1;
+        rtn = true;
         plat = Z_Calloc(1, sizeof(*plat), PU_LEVSPEC, NULL); 
         P_AddThinker(&plat->thinker);
                 
@@ -222,10 +221,11 @@ int EV_DoPlat(line_t *line, plattype_e type, int amount)
                 plat->high = P_FindNextHighestFloor(sec, sec->floorheight);
                 plat->wait = 0;
                 plat->status = up;
+
                 // NO MORE DAMAGE, IF APPLICABLE
                 sec->special = 0;
 
-                //jff 3/14/98 clear old field as well
+                // jff 3/14/98 clear old field as well
                 sec->oldspecial = 0;
 
                 S_StartSectorSound(&sec->soundorg, sfx_stnmov);
@@ -253,7 +253,7 @@ int EV_DoPlat(line_t *line, plattype_e type, int amount)
                     plat->low = sec->floorheight;
 
                 plat->high = sec->floorheight;
-                plat->wait = TICRATE*PLATWAIT;
+                plat->wait = TICRATE * PLATWAIT;
                 plat->status = down;
                 S_StartSectorSound(&sec->soundorg, sfx_pstart);
                 break;

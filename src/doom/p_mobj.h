@@ -344,7 +344,10 @@ typedef enum
     MF2_NOTELEPORT                = 0x10000000,
 
     // does not splash
-    MF2_NOSPLASH                  = 0x20000000
+    MF2_NOSPLASH                  = 0x20000000,
+
+    // leave a decal in some way
+    MF2_MARKDECAL                 = 0x40000000
 
 } mobjflag2_t;
 
@@ -484,9 +487,8 @@ typedef struct mobj_s
 
     fixed_t                nudge;
 
-    // counters - these were known as special1/2/3 in Heretic and Hexen
-    int                    counters[NUMMOBJCOUNTERS];
-
+    // casing counters
+    int                    casing_counters[NUMMOBJCOUNTERS];
     int                    casing_counter;
 
     // particle effect flag field

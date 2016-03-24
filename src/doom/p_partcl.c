@@ -326,6 +326,8 @@ static void P_ExplosionParticles(fixed_t, fixed_t, fixed_t, byte, byte);
 extern dboolean is_liquid_floor;
 extern dboolean is_liquid_ceiling;
 extern dboolean water_hit;
+extern dboolean hit_enemy;
+extern dboolean rejectempty;
 
 
 //
@@ -509,7 +511,7 @@ void P_RunEffects(void)
             if (mobj->effects)
             {
                 // run only if possibly visible
-                if (!(rejectmatrix[rnum >> 3] & (1 << (rnum & 7))))
+                if (rejectempty || !(rejectmatrix[rnum >> 3] & (1 << (rnum & 7))))
                     P_RunEffect(mobj, mobj->effects);
             }
         }
@@ -745,7 +747,7 @@ void P_DrawSplash(int count, fixed_t x, fixed_t y, fixed_t z, angle_t angle, int
             return;
     }
 
-    for ( ; count; count--)
+    for (; count; count--)
     {
         angle_t       an;
         particle_t    *p = JitterParticle(10);
@@ -780,7 +782,7 @@ void P_DrawSplash(int count, fixed_t x, fixed_t y, fixed_t z, angle_t angle, int
 //
 static void P_BloodDrop(int count, fixed_t x, fixed_t y, fixed_t z, angle_t angle, byte color1, byte color2)
 {
-    for ( ; count; --count)
+    for (; count; --count)
     {
         particle_t    *p = newParticle();
         angle_t       an;
@@ -824,7 +826,7 @@ void P_SmokePuff(int count, fixed_t x, fixed_t y, fixed_t z, angle_t angle, int 
     byte color1 = grey1;
     byte color2 = grey5;
 
-//    if (!comp[comp_terrain])
+    //if (!comp[comp_terrain])
     {
         // 06/21/02: make bullet puff colors responsive to 
         // TerrainTypes -- this is very cool and Quake-2-like ^_^
@@ -883,7 +885,7 @@ void P_SmokePuff(int count, fixed_t x, fixed_t y, fixed_t z, angle_t angle, int 
         water_hit = false;
     }
 
-    for ( ; count; --count)
+    for (; count; --count)
     {
         if (!(p = newParticle()))
             break;
@@ -926,7 +928,7 @@ void P_SmokePuff(int count, fixed_t x, fixed_t y, fixed_t z, angle_t angle, int 
     {
         count = M_RandomSMMU() & 3;
 
-        for ( ; count; --count)
+        for (; count; --count)
         {
             fixed_t pathdist = M_RandomSMMU() << 8;
             fixed_t speed;
@@ -956,6 +958,21 @@ void P_SmokePuff(int count, fixed_t x, fixed_t y, fixed_t z, angle_t angle, int 
             p->color = yellow;
             p->size = 2;
             p->styleflags = PS_FULLBRIGHT;
+        }
+    }
+
+    if (particle_sounds)
+    {
+        mobj_t *mo = P_SpawnMobj(x, y, z, MT_PARTICLE);
+
+        if (isliquid[mo->subsector->sector->floorpic] && water_hit)
+            S_StartSound(mo, sfx_gloop);
+        else if (!hit_enemy && !isliquid[mo->subsector->sector->floorpic])
+        {
+            int t = P_Random() % 6;
+
+            if (t > 0)
+                S_StartSound(mo, sfx_ric1 + t);
         }
     }
 }
@@ -1027,7 +1044,7 @@ void P_BloodSpray(mobj_t *mo, int count, fixed_t x, fixed_t y, fixed_t z, angle_
     // haleyjd 07/04/09: randomize z coordinate a bit (128/32 == 4 units)
     z += 3 * FRACUNIT + (M_RandomSMMU() - 128) * FRACUNIT / 32;
 
-    for( ; count; --count)
+    for (; count; --count)
     {
         angle_t       an;
         particle_t    *p;
@@ -1085,7 +1102,7 @@ void P_DrawSplash2(int count, fixed_t x, fixed_t y, fixed_t z, angle_t angle, in
     zspread = (updown ? -6000 : 6000);
     zadd = ((updown == 2) ? -128 : 0);
 
-    for ( ; count; count--)
+    for (; count; count--)
     {
         particle_t    *p = newParticle();
         angle_t       an;
@@ -1396,7 +1413,7 @@ static void P_ExplosionParticles(fixed_t x, fixed_t y, fixed_t z, byte color1, b
 {
     int i;
 
-    for(i = 0; i < 256; i++)
+    for (i = 0; i < 256; i++)
     {
         int          rnd;
         particle_t   *p = newParticle();

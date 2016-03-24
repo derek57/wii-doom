@@ -825,18 +825,12 @@ extern ceilinglist_t   *activeceilings;
 // P_TELEPT
 //
 int EV_Teleport(line_t *line, int side, mobj_t *thing);
-int EV_BuildStairs(line_t *line, stair_e type);
-int EV_DoFloor(line_t *line, floor_e floortype);
 int twoSided(int sector, int line);
 int P_FindSectorFromLineTag(const line_t *line, int start);
 int P_FindMinSurroundingLight(sector_t *sector, int max);
 int EV_StartLightStrobing(line_t *line);
 int EV_TurnTagLightsOff(line_t *line);
 int EV_LightTurnOn(line_t *line, int bright);
-int EV_DoPlat(line_t *line, plattype_e type, int amount);
-int EV_DoDoor(line_t *line, vldoor_e type);
-int EV_DoLockedDoor(line_t *line, vldoor_e type, mobj_t *thing);
-int EV_DoCeiling(line_t *line, ceiling_e type);
 int P_GetTerrainTypeForPoint(fixed_t x, fixed_t y, int position);
 
 mobj_t *P_GetPushThing(int);
@@ -844,6 +838,12 @@ mobj_t *P_GetPushThing(int);
 //
 // SPECIAL
 //
+dboolean EV_DoPlat(line_t *line, plattype_e type, int amount);
+dboolean EV_BuildStairs(line_t *line, stair_e type);
+dboolean EV_DoFloor(line_t *line, floor_e floortype);
+dboolean EV_DoDoor(line_t *line, vldoor_e type);
+dboolean EV_DoLockedDoor(line_t *line, vldoor_e type, mobj_t *thing);
+dboolean EV_DoCeiling(line_t *line, ceiling_e type);
 dboolean EV_DoDonut(line_t *line);
 dboolean EV_SilentTeleport(line_t *line, int side, mobj_t *thing);
 dboolean EV_SilentLineTeleport(line_t *line, int side, mobj_t *thing, dboolean reverse);
@@ -895,7 +895,6 @@ void P_ActivateInStasis(int tag);
 void P_SpawnDoorCloseIn30(sector_t *sec);
 void P_SpawnDoorRaiseIn5Mins(sector_t *sec);
 void P_AddActiveCeiling(ceiling_t *c);
-void P_RemoveActiveCeiling(ceiling_t *c);
 void P_RemoveAllActiveCeilings(void);
 void P_RemoveAllActivePlats(void);
 void P_StartButton(line_t *line, bwhere_e w, int texture, int time);

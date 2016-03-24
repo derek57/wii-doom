@@ -297,5 +297,42 @@ typedef struct
 
 } PACKEDATTR mapthing_t;
 
+// [crispy] allow loading of Hexen-format maps
+// taken from chocolate-doom/src/hexen/xddefs.h:63-75
+typedef struct
+{
+    short v1;
+    short v2;
+    short flags;
+    byte special;
+    byte arg1;
+    byte arg2;
+    byte arg3;
+    byte arg4;
+    byte arg5;
+    short sidenum[2];
+
+} PACKEDATTR maplinedef_hexen_t;
+
+// [crispy] allow loading of Hexen-format maps
+// taken from chocolate-doom/src/hexen/xddefs.h:134-149
+typedef struct
+{
+    short tid;
+    short x;
+    short y;
+    short height;
+    short angle;
+    short type;
+    short options;
+    byte special;
+    byte arg1;
+    byte arg2;
+    byte arg3;
+    byte arg4;
+    byte arg5;
+
+} PACKEDATTR mapthing_hexen_t;
+
 #endif // __DOOMDATA__
 

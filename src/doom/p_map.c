@@ -170,7 +170,7 @@ void (*P_BloodSplatSpawner)(fixed_t, fixed_t, int, int, mobj_t *);
 
 dboolean PIT_StompThing(mobj_t *thing)
 {
-    fixed_t        blockdist;
+    fixed_t     blockdist;
                 
     // phares 9/10/98: moved this self-check to start of routine
     // don't clip against self
@@ -228,10 +228,9 @@ int P_GetFriction(const mobj_t *mo, int *frictionfactor)
     // friction value (muddy has precedence over icy).
     if (!(mo->flags & (MF_NOCLIP | MF_NOGRAVITY)))
         for (m = mo->touching_sectorlist; m; m = m->m_tnext)
-            if (((sec = m->m_sector)->special & FRICTION_MASK)
-                && (sec->friction < friction || friction == ORIG_FRICTION)
-                && (mo->z <= sec->floorheight || (sec->heightsec != -1
-                && mo->z <= sectors[sec->heightsec].floorheight)))
+            if (((sec = m->m_sector)->special & FRICTION_MASK) && (sec->friction < friction
+                || friction == ORIG_FRICTION) && (mo->z <= sec->floorheight
+                || (sec->heightsec != -1 && mo->z <= sectors[sec->heightsec].floorheight)))
             {
                 friction = sec->friction;
                 movefactor = sec->movefactor;
@@ -291,7 +290,7 @@ dboolean P_TeleportMove(mobj_t *thing, fixed_t x, fixed_t y, fixed_t z, dboolean
     fixed_t     radius = thing->radius;
     
     // killough 8/9/98: make telefragging more consistent, preserve compatibility
-    telefrag = thing->player || (!d_telefrag ? boss : (gamemap==30));
+    telefrag = (thing->player || (!d_telefrag ? boss : (gamemap == 30)));
 
     // kill anything occupying the position
     tmthing = thing;
@@ -347,11 +346,13 @@ dboolean P_TeleportMove(mobj_t *thing, fixed_t x, fixed_t y, fixed_t z, dboolean
  
     P_SetThingPosition(thing);
         
+    // [BH] check if new sector is liquid and clip/unclip feet as necessary
     if (!(thing->flags2 & MF2_NOFOOTCLIP) && isliquid[newsec->floorpic])
         thing->flags2 |= MF2_FEETARECLIPPED;
     else
         thing->flags2 &= ~MF2_FEETARECLIPPED;
 
+    // [BH] update shadow position as well
     if (thing->shadow)
     {
         P_UnsetThingPosition(thing->shadow);
@@ -369,7 +370,6 @@ dboolean P_TeleportMove(mobj_t *thing, fixed_t x, fixed_t y, fixed_t z, dboolean
 // MOVEMENT ITERATOR FUNCTIONS
 //
 
-// phares
 // PIT_CrossLine
 // Checks to see if a PE->LS trajectory line crosses a blocking
 // line. Returns false if it does.
@@ -588,7 +588,7 @@ dboolean PIT_CheckThing(mobj_t *thing)
     }
 
     // missiles can hit other things
-    if ((tmthing->flags & MF_MISSILE) || ((tmthing->flags & MF_BOUNCES) && !(tmthing->flags & MF_SOLID)))
+    if ((tmflags & MF_MISSILE) || ((tmflags & MF_BOUNCES) && !(tmflags & MF_SOLID)))
     {
         int clipheight = (thing->projectilepassheight ?
                 thing->projectilepassheight : thing->height);
@@ -601,13 +601,13 @@ dboolean PIT_CheckThing(mobj_t *thing)
         if (tmthing->z + tmthing->height < thing->z)
             // underneath
             return true;
-                
-        if (tmthing->target &&
-           (tmthing->target->type == thing->type || 
-           (tmthing->target->type == MT_KNIGHT && thing->type == MT_BRUISER && !beta_style) ||
-           (tmthing->target->type == MT_KNIGHT && thing->type == MT_BETABRUISER && beta_style) ||
-           (tmthing->target->type == MT_BRUISER && thing->type == MT_KNIGHT && !beta_style) ||
-           (tmthing->target->type == MT_BETABRUISER && thing->type == MT_KNIGHT && beta_style)))
+
+        if (tmthing->target
+            && (tmthing->target->type == thing->type
+                || (tmthing->target->type == MT_KNIGHT && thing->type == MT_BRUISER && !beta_style)
+                || (tmthing->target->type == MT_KNIGHT && thing->type == MT_BETABRUISER && beta_style)
+                || (tmthing->target->type == MT_BRUISER && thing->type == MT_KNIGHT && !beta_style)
+                || (tmthing->target->type == MT_BETABRUISER && thing->type == MT_KNIGHT && beta_style)))
         {
             // Don't hit same species as originator.
             if (thing == tmthing->target)
@@ -618,34 +618,20 @@ dboolean PIT_CheckThing(mobj_t *thing)
                 return false;
         }
         
-        // killough 8/10/98: if moving thing is not a missile, no damage
-        // is inflicted, and momentum is reduced if object hit is solid.
-        if (!(tmflags & MF_MISSILE))
-        {
-            if (!(flags & MF_SOLID))
-                return true;
-            else
-            {
-                tmthing->momx = -tmthing->momx;
-                tmthing->momy = -tmthing->momy;
-
-                if (!(tmthing->flags & MF_NOGRAVITY))
-                {
-                    tmthing->momx >>= 2;
-                    tmthing->momy >>= 2;
-                }
-
-                return false;
-            }
-        }
-
         if (!(flags & MF_SHOOTABLE))
             // didn't do any damage
             return !(flags & MF_SOLID);
         
         // damage / explode
-        damage = ((P_Random() % 8) + 1) * tmthing->info->damage;
-        P_DamageMobj(thing, tmthing, tmthing->target, damage);
+        if (tmthing->type != MT_BULLET && tmthing->type != MT_SHELL && tmthing->type != MT_ROUND)
+        {
+            damage = ((P_Random() % 8) + 1) * tmthing->info->damage;
+            P_DamageMobj(thing, tmthing, tmthing->target, damage);
+        }
+
+        if (thing->type != MT_BARREL)
+            if (tmthing->type == MT_ROCKET)
+                tmthing->nudge++;
 
         // don't traverse any more
         return false;                                
@@ -708,9 +694,6 @@ dboolean PIT_CheckThing(mobj_t *thing)
 // sides of the blocking line. If so, return true, otherwise
 // false.
 //
-// [nitr8] UNUSED
-//
-/*
 dboolean P_CheckLineSide(mobj_t *actor, fixed_t x, fixed_t y)
 {
     int bx;
@@ -747,7 +730,6 @@ dboolean P_CheckLineSide(mobj_t *actor, fixed_t x, fixed_t y)
 
     return false;
 }
-*/
 
 //
 // PIT_CheckOnmobjZ
@@ -814,15 +796,15 @@ dboolean PIT_CheckOnmobjZ(mobj_t *thing)
 //
 dboolean P_CheckPosition(mobj_t *thing, fixed_t x, fixed_t y)
 {
-    int          xl;
-    int          xh;
-    int          yl;
-    int          yh;
-    int          bx;
-    int          by;
-    subsector_t  *newsubsec;
-    fixed_t      radius = ((thing->flags & MF_SPECIAL) ?
-                     MIN(20 * FRACUNIT, thing->radius) : thing->radius);
+    int         xl;
+    int         xh;
+    int         yl;
+    int         yh;
+    int         bx;
+    int         by;
+    subsector_t *newsubsec;
+    fixed_t     radius = ((thing->flags & MF_SPECIAL) ? MIN(20 * FRACUNIT, thing->radius) :
+                    thing->radius);
 
     tmthing = thing;
         
@@ -949,7 +931,12 @@ void P_FakeZMovement(mobj_t *mo)
 //
 mobj_t *P_CheckOnmobj(mobj_t *thing)
 {
-    int         xl, xh, yl, yh, bx, by;
+    int         xl;
+    int         xh;
+    int         yl;
+    int         yh;
+    int         bx;
+    int         by;
     subsector_t *newsubsec;
     fixed_t     x = thing->x;
     fixed_t     y = thing->y;
@@ -1042,8 +1029,10 @@ dboolean P_TryMove(mobj_t *thing, fixed_t x, fixed_t y, dboolean dropoff)
             // too big a step up
             || (!(thing->flags & MF_TELEPORT)
                 && tmfloorz - thing->z > 24 * FRACUNIT)
-            || ((thing->flags2 & MF2_FLY) && ((thing->z + thing->height > tmceilingz) ||
-               (thing->z < tmfloorz && tmfloorz - tmdropoffz > 24 * FRACUNIT))))
+            || ((thing->flags2 & MF2_FLY)
+                && ((thing->z + thing->height > tmceilingz)
+                    || (thing->z < tmfloorz
+                        && tmfloorz - tmdropoffz > 24 * FRACUNIT))))
         {
             return (tmunstuck
                     && !(ceilingline && untouched(ceilingline))
@@ -1061,9 +1050,7 @@ dboolean P_TryMove(mobj_t *thing, fixed_t x, fixed_t y, dboolean dropoff)
             {
                 if (thing->floorz - tmfloorz > 24 * FRACUNIT
                     || thing->dropoffz - tmdropoffz > 24 * FRACUNIT)
-                {
                     return false;
-                }
             }
             else
             {
@@ -1074,7 +1061,7 @@ dboolean P_TryMove(mobj_t *thing, fixed_t x, fixed_t y, dboolean dropoff)
 
         // killough 8/13/98
         if ((thing->flags & MF_BOUNCES) &&
-            !(thing->flags & (MF_MISSILE|MF_NOGRAVITY)) &&
+            !(thing->flags & (MF_MISSILE | MF_NOGRAVITY)) &&
             !sentient(thing) && tmfloorz - thing->z > 16 * FRACUNIT)
             // too big a step up for bouncers under gravity
             return false;
@@ -1240,7 +1227,8 @@ void P_ApplyTorque(mobj_t *mo)
     int xh = ((tmbbox[BOXRIGHT] = x + radius) - bmaporgx) >> MAPBLOCKSHIFT;
     int yl = ((tmbbox[BOXBOTTOM] = y - radius) - bmaporgy) >> MAPBLOCKSHIFT;
     int yh = ((tmbbox[BOXTOP] = y + radius) - bmaporgy) >> MAPBLOCKSHIFT;
-    int bx, by;
+    int bx;
+    int by;
 
     // Remember the current state, for gear-change
     int flags2 = mo->flags2;
@@ -1290,7 +1278,7 @@ void P_ApplyTorque(mobj_t *mo)
 //
 dboolean P_ThingHeightClip(mobj_t *thing)
 {
-    dboolean     onfloor = (thing->z == thing->floorz);
+    dboolean    onfloor = (thing->z == thing->floorz);
 
     // haleyjd
     fixed_t     oldfloorz = thing->floorz;
@@ -1606,7 +1594,7 @@ void P_SlideMove(mobj_t *mo)
 
 //
 // PTR_AimTraverse
-// Sets linetaget and aimslope when a target is aimed at.
+// Sets linetarget and aimslope when a target is aimed at.
 //
 dboolean PTR_AimTraverse(intercept_t *in)
 {
@@ -1955,7 +1943,7 @@ hitline:
         // Spawn particles.
         if (bulletpuff_particle == 1 || bulletpuff_particle == 2)
         {
-            P_SpawnParticle(NULL, x, y, z, shootangle, 2, false);
+            P_SpawnParticle(th, x, y, z, shootangle, 2, false);
 
             // haleyjd: for demo sync etc we still need to do the above, so
             // here we'll make the puff invisible and draw particles instead
@@ -1975,7 +1963,7 @@ hitline:
             // Spawn particles.
             if (bulletpuff_particle == 1 || bulletpuff_particle == 2)
             {
-                P_SpawnParticle(NULL, x, y, z - FRACUNIT * 8, shootangle, 2, false);
+                P_SpawnParticle(th, x, y, z - FRACUNIT * 8, shootangle, 2, false);
 
                 // haleyjd: for demo sync etc we still need to do the above, so
                 // here we'll make the puff invisible and draw particles instead
@@ -2038,8 +2026,7 @@ hitline:
 //
 fixed_t P_AimLineAttack(mobj_t *t1, angle_t angle, fixed_t distance)
 {
-    fixed_t        x2;
-    fixed_t        y2;
+    fixed_t        x2, y2;
 
     t1 = P_SubstNullMobj(t1);
         
@@ -2189,11 +2176,10 @@ static dboolean PTR_UseTraverse(intercept_t *in)
 //
 dboolean PTR_NoWayTraverse(intercept_t *in)
 {
-    line_t *ld = in->d.line;
+    line_t      *ld = in->d.line;
 
-    return (ld->special || !((ld->flags & ML_BLOCKING)
-        || (P_LineOpening(ld), (openrange <= 0 || openbottom > usething->z + 24 * FRACUNIT
-        || opentop < usething->z + usething->height))));
+    return (ld->special || !((ld->flags & ML_BLOCKING) || (P_LineOpening(ld), (openrange <= 0
+        || openbottom > usething->z + 24 * FRACUNIT || opentop < usething->z + usething->height))));
 }
 
 //
@@ -2202,9 +2188,9 @@ dboolean PTR_NoWayTraverse(intercept_t *in)
 //
 void P_UseLines(player_t *player) 
 {
-    int     angle;
-    fixed_t x1, y1;
-    fixed_t x2, y2;
+    int         angle;
+    fixed_t     x1, y1;
+    fixed_t     x2, y2;
         
     if (automapactive && !followplayer)
         return;
@@ -2237,8 +2223,9 @@ dboolean PIT_RadiusAttack(mobj_t *thing)
 {
     fixed_t     dist;
 
-    // [BH] allow corpses to react to blast damage 
-    if (!(thing->flags & (MF_SHOOTABLE | MF_BOUNCES)) && !(thing->flags & MF_CORPSE))
+    if (!(thing->flags & (MF_SHOOTABLE | MF_BOUNCES))
+        // [BH] allow corpses to react to blast damage 
+        && !(thing->flags & MF_CORPSE))
         return true;
 
     // Boss spider and cyborg
@@ -2278,6 +2265,10 @@ dboolean PIT_RadiusAttack(mobj_t *thing)
     {
         // must be in direct path
         P_DamageMobj(thing, bombspot, bombsource, bombdamage - dist);
+
+        // [BH] count number of times player's rockets hit a monster
+        if (bombspot->type == MT_ROCKET && thing->type != MT_BARREL && !(thing->flags & MF_CORPSE))
+            bombspot->nudge++;
     }
 
     return true;
@@ -2322,15 +2313,10 @@ void P_RadiusAttack(mobj_t *spot, mobj_t *source, int damage)
 //
 // PIT_ChangeSector
 //
-dboolean PIT_ChangeSector (mobj_t *thing)
+void PIT_ChangeSector(mobj_t *thing)
 {
     int flags = thing->flags;
     int flags2 = thing->flags2;
-
-    /*
-    printf("name1 = %s\n",thing->info->name1);
-    printf("doomednum = %d\n",thing->info->doomednum);
-    */
 
     if (isliquidsector && !(flags2 & MF2_NOFOOTCLIP))
         thing->flags2 |= MF2_FEETARECLIPPED;
@@ -2339,7 +2325,7 @@ dboolean PIT_ChangeSector (mobj_t *thing)
 
     if (P_ThingHeightClip(thing))
         // keep checking
-        return true;
+        return;
 
     if (!beta_style)
     {
@@ -2349,7 +2335,7 @@ dboolean PIT_ChangeSector (mobj_t *thing)
             if (thing->type == MT_PLAYER)
             {
                 nofit = true;
-                return true;
+                return;
             }
 
             // [crispy] connect giblet object with the crushed monster
@@ -2392,7 +2378,7 @@ dboolean PIT_ChangeSector (mobj_t *thing)
             //P_RemoveMobj(thing);
 
             // keep checking
-            return true;                
+            return;
         }
 
         // crunch dropped items
@@ -2401,12 +2387,12 @@ dboolean PIT_ChangeSector (mobj_t *thing)
             P_RemoveMobj(thing);
         
             // keep checking
-            return true;                
+            return;
         }
 
         if (!(flags & MF_SHOOTABLE))
             // assume it is bloody gibs or something
-            return true;
+            return;
     }
 
     nofit = true;
@@ -2457,7 +2443,7 @@ dboolean PIT_ChangeSector (mobj_t *thing)
     }
 
     // keep checking (crush other things)        
-    return true;
+    return;
 }
 
 //
@@ -2761,11 +2747,8 @@ void P_CreateSecNodeList(mobj_t *thing, fixed_t x, fixed_t y)
     int         yh;
     int         bx;
     int         by;
-
     msecnode_t  *node = sector_list;
-
     mobj_t      *saved_tmthing = tmthing;
-
     fixed_t     saved_tmx = tmx;
     fixed_t     saved_tmy = tmy;
     fixed_t     radius = thing->radius;
@@ -2802,7 +2785,7 @@ void P_CreateSecNodeList(mobj_t *thing, fixed_t x, fixed_t y)
         for (by = yl; by <= yh; ++by)
             P_BlockLinesIterator(bx, by, PIT_GetSectors);
 
-    // Add the sector of the (x,y) point to sector_list.
+    // Add the sector of the (x, y) point to sector_list.
     sector_list = P_AddSecnode(thing->subsector->sector, thing, sector_list);
 
     // Now delete any nodes that won't be used. These are the ones where
@@ -2844,57 +2827,5 @@ void P_CreateSecNodeList(mobj_t *thing, fixed_t x, fixed_t y)
 void P_MapEnd(void)
 {
     tmthing = NULL;
-}
-
-// phares
-// This routine checks for Lost Souls trying to be spawned
-// across 1-sided lines, impassible lines, or "monsters can't
-// cross" lines. Draw an imaginary line between the PE
-// and the new Lost Soul spawn spot. If that line crosses
-// a 'blocking' line, then disallow the spawn. Only search
-// lines in the blocks of the blockmap where the bounding box
-// of the trajectory line resides. Then check bounding box
-// of the trajectory vs. the bounding box of each blocking
-// line to see if the trajectory and the blocking line cross.
-// Then check the PE and LS to see if they're on different
-// sides of the blocking line. If so, return true, otherwise
-// false.
-
-dboolean Check_Sides(mobj_t *actor, int x, int y)
-{
-    int bx, by, xl, xh, yl, yh;
-
-    pe_x = actor->x;
-    pe_y = actor->y;
-    ls_x = x;
-    ls_y = y;
-
-    // Here is the bounding box of the trajectory
-    tmbbox[BOXLEFT]   = pe_x < x ? pe_x : x;
-    tmbbox[BOXRIGHT]  = pe_x > x ? pe_x : x;
-    tmbbox[BOXTOP]    = pe_y > y ? pe_y : y;
-    tmbbox[BOXBOTTOM] = pe_y < y ? pe_y : y;
-
-    // Determine which blocks to look in for blocking lines
-    xl = (tmbbox[BOXLEFT]   - bmaporgx) >> MAPBLOCKSHIFT;
-    xh = (tmbbox[BOXRIGHT]  - bmaporgx) >> MAPBLOCKSHIFT;
-    yl = (tmbbox[BOXBOTTOM] - bmaporgy) >> MAPBLOCKSHIFT;
-    yh = (tmbbox[BOXTOP]    - bmaporgy) >> MAPBLOCKSHIFT;
-
-    // xl->xh, yl->yh determine the mapblock set to search
-
-    // prevents checking same line twice
-    validcount++;
-
-    for (bx = xl ; bx <= xh ; bx++)
-    {
-        for (by = yl ; by <= yh ; by++)
-        {
-            if (!P_BlockLinesIterator(bx, by, PIT_CrossLine))
-                return true;
-        }
-    }
-
-    return(false);
 }
 

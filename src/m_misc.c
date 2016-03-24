@@ -727,3 +727,16 @@ int randInRange(int min, int max)
     return min + (int)((double)rand() / (double)RAND_MAX * (max - min + 1));
 }
 
+int M_DoubleToInt(double x)
+{
+#ifdef __GNUC__
+    double tmp = x;
+
+    return (int)tmp;
+
+#else
+
+    return (int)x;
+#endif
+}
+

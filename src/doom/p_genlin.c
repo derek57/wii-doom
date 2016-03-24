@@ -122,7 +122,7 @@ manual_floor:
         floor->texture = sec->floorpic;
         floor->newspecial = sec->special;
 
-        //jff 3/14/98 transfer old special field too
+        // jff 3/14/98 transfer old special field too
         floor->oldspecial = sec->oldspecial;
 
         floor->type = genFloor;
@@ -227,7 +227,7 @@ manual_floor:
                         case FChgZero:
                             floor->newspecial = 0;
 
-                            //jff 3/14/98 change old field too
+                            // jff 3/14/98 change old field too
                             floor->oldspecial = 0;
 
                             floor->type = genFloorChg0;
@@ -237,7 +237,7 @@ manual_floor:
                         case FChgTyp:
                             floor->newspecial = sec->special;
 
-                            //jff 3/14/98 change old field too
+                            // jff 3/14/98 change old field too
                             floor->oldspecial = sec->oldspecial;
 
                             floor->type = genFloorChgT;
@@ -264,7 +264,7 @@ manual_floor:
                     case FChgZero:
                         floor->newspecial = 0;
 
-                        //jff 3/14/98 change old field too
+                        // jff 3/14/98 change old field too
                         floor->oldspecial = 0;
 
                         floor->type = genFloorChg0;
@@ -274,7 +274,7 @@ manual_floor:
                     case FChgTyp:
                         floor->newspecial = line->frontsector->special;
 
-                        //jff 3/14/98 change old field too
+                        // jff 3/14/98 change old field too
                         floor->oldspecial = line->frontsector->oldspecial;
 
                         floor->type = genFloorChgT;
@@ -369,7 +369,7 @@ manual_ceiling:
         ceiling->texture = sec->ceilingpic;
         ceiling->newspecial = sec->special;
 
-        //jff 3/14/98 change old field too
+        // jff 3/14/98 change old field too
         ceiling->oldspecial = sec->oldspecial;
 
         ceiling->tag = sec->tag;
@@ -479,7 +479,7 @@ manual_ceiling:
                         case CChgZero:
                             ceiling->newspecial = 0;
 
-                            //jff 3/14/98 change old field too
+                            // jff 3/14/98 change old field too
                             ceiling->oldspecial = 0;
 
                             ceiling->type = genCeilingChg0;
@@ -489,7 +489,7 @@ manual_ceiling:
                         case CChgTyp:
                             ceiling->newspecial = sec->special;
 
-                            //jff 3/14/98 change old field too
+                            // jff 3/14/98 change old field too
                             ceiling->oldspecial = sec->oldspecial;
 
                             ceiling->type = genCeilingChgT;
@@ -516,7 +516,7 @@ manual_ceiling:
                     case CChgZero:
                         ceiling->newspecial = 0;
 
-                        //jff 3/14/98 change old field too
+                        // jff 3/14/98 change old field too
                         ceiling->oldspecial = 0;
 
                         ceiling->type = genCeilingChg0;
@@ -526,7 +526,7 @@ manual_ceiling:
                     case CChgTyp:
                         ceiling->newspecial = line->frontsector->special;
 
-                        //jff 3/14/98 change old field too
+                        // jff 3/14/98 change old field too
                         ceiling->oldspecial = line->frontsector->oldspecial;
 
                         ceiling->type = genCeilingChgT;

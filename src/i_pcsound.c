@@ -243,7 +243,7 @@ static void I_PCS_StopSound(int handle)
 // Retrieve the raw data lump index
 //  for a given SFX name.
 //
-static int I_PCS_GetSfxLumpNum(sfxinfo_t* sfx)
+static int I_PCS_GetSfxLumpNum(sfxinfo_t *sfx)
 {
     char namebuf[9];
 

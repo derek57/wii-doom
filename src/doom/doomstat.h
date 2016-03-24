@@ -241,6 +241,7 @@ extern  dboolean         d_dripblood;
 extern  dboolean         d_vsync;
 extern  dboolean         particle_sounds;
 extern  dboolean         map_secret_after;
+extern  dboolean         enable_autoload;
 extern  dboolean         enable_autosave;
 extern  dboolean         drawsplash;
 extern  dboolean         chexdeh;
@@ -261,6 +262,7 @@ extern  dboolean         autoaim;
 extern  dboolean         detailLevel;
 extern  dboolean         showMessages;
 extern  dboolean         render_mode;
+extern  dboolean         d_fliplevels;
 
 // -----------------------------------------------------
 // Game Mode - identify IWAD as shareware, retail etc.
@@ -394,6 +396,9 @@ extern  int              teleport_particle;
 extern  int              d_uncappedframerate;
 extern  int              d_spawnteleglit;
 extern  int              map_grid_size;
+extern  int              stillbob;
+extern  int              movebob;
+extern  int              background_color;
 
 // map background
 extern  int              mapcolor_back;

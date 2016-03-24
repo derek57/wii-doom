@@ -46,21 +46,10 @@
 #include "r_data.h"
 
 
-typedef enum
-{
-    DOOMBSP = 0,
-    DEEPBSP = 1,
-    ZDBSPX  = 2
-
-} mapformat_t;
-
-
 //
 // Refresh internal data structures,
 //  for rendering.
 //
-
-extern mapformat_t      mapformat;
 
 // needed for texture pegging
 extern fixed_t          *textureheight;
@@ -112,6 +101,8 @@ extern line_t           *lines;
 
 extern side_t           *sides;
 
+extern leaf_t           *leafs;
+
 extern int              numsprites;
 extern int              numvertexes;
 extern int              numsegs;
@@ -121,6 +112,9 @@ extern int              numnodes;
 extern int              numlines;
 extern int              numsides;
 extern int              numthings;
+
+// [SVE] svillarreal
+extern int              numleafs;
 
 // for global animation
 extern int              *flattranslation;

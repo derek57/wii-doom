@@ -47,9 +47,6 @@
 #define MAPBMASK                      (MAPBLOCKSIZE - 1)
 #define MAPBTOFRAC                    (MAPBLOCKSHIFT - FRACBITS)
 
-// player radius for movement checking
-#define PLAYERRADIUS                  16 * FRACUNIT
-
 // MAXRADIUS is for precalculated sector block boxes
 // the spider demon is larger,
 // but we do not have any moving sectors nearby
@@ -150,7 +147,6 @@ void P_MobjThinker(mobj_t *mobj);
 void P_SpawnParticle(mobj_t *target, fixed_t x, fixed_t y, fixed_t z, angle_t angle, int updown, dboolean blood);
 void P_SpawnBlood(fixed_t x, fixed_t y, fixed_t z, angle_t angle, int damage, mobj_t *target);
 void P_SpawnPlayer(const mapthing_t *mthing);
-void P_MakeDivline(line_t *li, divline_t *dl);
 void P_LineOpening(line_t *linedef);
 void P_UnsetThingPosition(mobj_t *thing);
 void P_SetThingPosition(mobj_t *thing);
@@ -174,6 +170,7 @@ void P_RemoveMobjShadow(mobj_t *mobj);
 void P_SpawnShadow(mobj_t *actor);
 void P_CalcHeight(player_t *player);
 void P_SetPsprite(player_t *player, int position, statenum_t stnum);
+void P_InitExtraMobjs(void); 
 void EV_LightTurnOnPartway(line_t *line, fixed_t level);
 void EV_LightByAdjacentSectors(sector_t *sector, fixed_t level);
 
@@ -185,7 +182,6 @@ mobj_t *P_SpawnPlayerMissile(mobj_t *source, mobjtype_t type);
 mobj_t *P_CheckOnmobj(mobj_t *thing);
 
 fixed_t P_AproxDistance(fixed_t dx, fixed_t dy);
-fixed_t P_InterceptVector(divline_t *v2, divline_t *v1);
 fixed_t P_AimLineAttack(mobj_t *t1, angle_t angle, fixed_t distance);
 
 dboolean P_SetMobjState(mobj_t *mobj, statenum_t state);

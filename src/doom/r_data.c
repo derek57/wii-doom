@@ -1251,7 +1251,7 @@ void R_InitTranMap()
 */
 
 //
-// BestColor
+// R_BestColor
 //
 // (borrowed from Quake2 source: utils3/qdata/images.c)
 //
@@ -1763,6 +1763,9 @@ void R_PrecacheLevel(void)
     int         i;
     int         j;
     int         k;
+
+    if (demoplayback)
+        return;
 
     // Precache flats.
     memset(hitlist, 0, numflats);

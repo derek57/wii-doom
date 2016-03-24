@@ -49,6 +49,13 @@
 #include "p_pspr.h"
 
 
+typedef enum
+{
+    NOARMOR             = 0,
+    GREENARMOR          = 1,
+    BLUEARMOR           = 2
+} armortype_t;
+
 //
 // Player states.
 //
@@ -112,7 +119,7 @@ typedef struct player_s
     int                  armorpoints;
 
     // Armor type is 0-2.
-    int                  armortype;        
+    armortype_t          armortype;        
 
     // Power ups. invinc and invis are tic counters.
     int                  powers[NUMPOWERS];

@@ -1310,3 +1310,26 @@ void V_Clear(int left, int top, int right, int bottom, int scrn, int color)
 }
 */
 
+void V_DimScreen(int scrn)
+{
+    float dimamount = 0.2;
+    fixed_t amount = (fixed_t)(dimamount * 64);
+    unsigned int *fg2rgb = Col2RGB8[amount];
+    unsigned int *bg2rgb = Col2RGB8[64 - amount];
+    byte *spot = screens[scrn];
+    unsigned int fg = fg2rgb[background_color];
+    int x, y;
+
+    for (y = 0; y < SCREENHEIGHT; y++)
+    {
+        for (x = 0; x < SCREENWIDTH; x++)
+        {
+            unsigned int bg = bg2rgb[*spot];
+
+            bg = (fg + bg) | 0x1f07c1f;
+
+            *spot++ = RGB32k.RGB[0][0][bg & (bg >> 15)];
+        }
+    }
+}
+

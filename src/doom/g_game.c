@@ -92,29 +92,26 @@
 */
 
 // DOOM Par Times
-int pars[4][10] = 
+int pars[5][10] = 
 { 
     { 0}, 
-    { 0, 30, 75, 120,  90, 165, 180, 180, 30, 165 }, 
-    { 0, 90, 90,  90, 120,  90, 360, 240, 30, 170 }, 
-    { 0, 90, 45,  90, 150,  90,  90, 165, 30, 135 } 
+    { 0,  30,  75, 120,  90, 165, 180, 180,  30, 165 }, 
+    { 0,  90,  90,  90, 120,  90, 360, 240,  30, 170 }, 
+    { 0,  90,  45,  90, 150,  90,  90, 165,  30, 135 }, 
+
+    // [BH] Episode 4 Par Times
+    { 0, 165, 255, 135, 150, 180, 390, 135, 360, 180 }
 }; 
 
 // DOOM II Par Times
-int cpars[32] =
+int cpars[33] =
 {
      30,  90, 120, 120,  90, 150, 120, 120, 270,  90,    //  1-10
     210, 150, 150, 150, 210, 150, 420, 150, 210, 150,    // 11-20
     240, 150, 180, 150, 150, 300, 330, 420, 300, 180,    // 21-30
-    120,  30                                             // 31-32
+    120,  30,   0                                        // 31-33
 };
  
-// [crispy] Episode 4 par times from the BFG Edition
-static int e4pars[10] =
-{
-    0, 165, 255, 135, 150, 180, 390, 135, 360, 180
-};
-
 // [crispy] No Rest For The Living par times from the BFG Edition
 static int npars[9] =
 {
@@ -128,6 +125,7 @@ gamestate_t     oldgamestate;
 gamestate_t     gamestate; 
 
 gameaction_t    gameaction; 
+gameaction_t    loadaction = ga_nothing;
 
 skill_t         gameskill; 
 skill_t         d_skill; 
@@ -258,9 +256,6 @@ dboolean        netdemo;
 // quit after playing a demo from cmdline  
 dboolean        singledemo;
 
-// if true, load all graphics at start 
-dboolean        precache = true;
-
 #ifdef WII
 dboolean        joyarray[MAX_JOY_BUTTONS + 1]; 
 
@@ -377,18 +372,13 @@ extern short    itemOn;
 extern char     *pagename; 
 
 
-void ChangeWeaponRight(void)
+static void ChangeWeaponRight(void)
 {
-    static player_t     *plyrweap;
-    static event_t      kbevent;
-
     if (gamestate == GS_LEVEL && !menuactive)
     {
-        weapontype_t    num;
-
-        plyrweap = &players[consoleplayer];
-
-        num = plyrweap->readyweapon;
+        static event_t  kbevent;
+        player_t        *plyrweap = &players[consoleplayer];
+        weapontype_t    num = plyrweap->readyweapon;
 
         while (1)
         {
@@ -415,18 +405,13 @@ void ChangeWeaponRight(void)
     }
 }
 
-void ChangeWeaponLeft(void)
+static void ChangeWeaponLeft(void)
 {
-    static player_t     *plyrweap;
-    static event_t      kbevent;
-
     if (gamestate == GS_LEVEL && !menuactive)
     {
-        weapontype_t    num;
-
-        plyrweap = &players[consoleplayer];
-
-        num = plyrweap->readyweapon;
+        static event_t  kbevent;
+        player_t        *plyrweap = &players[consoleplayer];
+        weapontype_t    num = plyrweap->readyweapon;
 
         while (1)
         {
@@ -460,14 +445,12 @@ void ChangeWeaponLeft(void)
 static dboolean WeaponSelectable(weapontype_t weapon)
 {
     // Can't select the super shotgun in Doom 1.
-
     if (weapon == wp_supershotgun && logical_gamemission == doom)
     {
         return false;
     }
 
     // These weapons aren't available in shareware.
-
     if ((weapon == wp_plasma || weapon == wp_bfg)
         && gamemission == doom && gamemode == shareware)
     {
@@ -475,7 +458,6 @@ static dboolean WeaponSelectable(weapontype_t weapon)
     }
 
     // Can't select a weapon if we don't own it.
-
     if (!players[consoleplayer].weaponowned[weapon])
     {
         return false;
@@ -483,7 +465,6 @@ static dboolean WeaponSelectable(weapontype_t weapon)
 
     // Can't select the fist if we have the chainsaw, unless
     // we also have the berserk pack.
-
     if (weapon == wp_fist
         && players[consoleplayer].weaponowned[wp_chainsaw]
         && !players[consoleplayer].powers[pw_strength])
@@ -500,7 +481,6 @@ static int G_NextWeapon(int direction)
     int start_i, i;
 
     // Find index in the table.
-
     if (players[consoleplayer].pendingweapon == wp_nochange)
     {
         weapon = players[consoleplayer].readyweapon;
@@ -538,7 +518,6 @@ static int G_NextWeapon(int direction)
 // or reads it from the demo buffer. 
 // If recording a demo, write it out 
 // 
-
 void G_BuildTiccmd(ticcmd_t *cmd, int maketic) 
 { 
     dboolean    strafe
@@ -1173,6 +1152,167 @@ void G_BuildTiccmd(ticcmd_t *cmd, int maketic)
 } 
 
 //
+// G_CheckSpot  
+// Returns false if the player cannot be respawned
+// at the given mapthing_t spot  
+// because something is occupying it 
+//
+static dboolean G_CheckSpot(int playernum, mapthing_t *mthing) 
+{ 
+    fixed_t          x;
+    fixed_t          y; 
+    subsector_t      *ss; 
+    mobj_t           *mo; 
+        
+    if (!players[playernum].mo)
+    {
+        int i;
+
+        // first spawn of level, before corpses
+        for (i = 0; i < playernum; i++)
+            if (players[i].mo->x == mthing->x << FRACBITS
+                && players[i].mo->y == mthing->y << FRACBITS)
+                return false;
+
+        return true;
+    }
+                
+    x = mthing->x << FRACBITS; 
+    y = mthing->y << FRACBITS; 
+         
+    if (!P_CheckPosition(players[playernum].mo, x, y)) 
+        return false; 
+ 
+    // flush an old corpse if needed 
+    if (bodyqueslot >= BODYQUESIZE) 
+        P_RemoveMobj(bodyque[bodyqueslot % BODYQUESIZE]); 
+
+    bodyque[bodyqueslot % BODYQUESIZE] = players[playernum].mo; 
+    bodyqueslot++; 
+
+    // spawn a teleport fog
+    ss = R_PointInSubsector(x, y);
+
+    // The code in the released source looks like this:
+    //
+    //    an = (ANG45 * (((unsigned int)mthing->angle) / 45))
+    //         >> ANGLETOFINESHIFT;
+    //    mo = P_SpawnMobj(x + 20 * finecosine[an], y + 20 * finesine[an],
+    //                     ss->sector->floorheight,
+    //                     MT_TFOG);
+    //
+    // But 'an' can be a signed value in the DOS version. This means that
+    // we get a negative index and the lookups into finecosine/finesine
+    // end up dereferencing values in finetangent[].
+    // A player spawning on a deathmatch start facing directly west spawns
+    // "silently" with no spawn fog. Emulate this.
+    //
+    // This code is imported from PrBoom+.
+
+    {
+        fixed_t xa, ya;
+        signed int an = (ANG45 >> ANGLETOFINESHIFT) * ((signed int)mthing->angle / 45);
+
+        // This calculation overflows in Vanilla Doom, but here we deliberately
+        // avoid integer overflow as it is undefined behavior, so the value of
+        // 'an' will always be positive.
+        switch (an)
+        {
+            // -4096:
+            case 4096:
+                // finecosine[-4096]
+                xa = finetangent[2048];
+
+                // finesine[-4096]
+                ya = finetangent[0];
+
+                break;
+
+            // -3072:
+            case 5120:
+                // finecosine[-3072]
+                xa = finetangent[3072];
+
+                // finesine[-3072]
+                ya = finetangent[1024];
+
+                break;
+
+            // -2048:
+            case 6144:
+                // finecosine[-2048]
+                xa = finesine[0];
+
+                // finesine[-2048]
+                ya = finetangent[2048];
+
+                break;
+
+            // -1024:
+            case 7168:
+                // finecosine[-1024]
+                xa = finesine[1024];
+
+                // finesine[-1024]
+                ya = finetangent[3072];
+
+                break;
+
+            case 0:
+            case 1024:
+            case 2048:
+            case 3072:
+                xa = finecosine[an];
+                ya = finesine[an];
+                break;
+
+            default:
+                I_Error("G_CheckSpot: unexpected angle %d\n", an);
+                xa = ya = 0;
+                break;
+        }
+
+        mo = P_SpawnMobj(x + 20 * xa, y + 20 * ya,
+                         ss->sector->floorheight, MT_TFOG);
+    }
+
+    if (players[consoleplayer].viewz != 1) 
+        // don't start sound on first frame 
+        S_StartSound(mo, sfx_telept);
+ 
+    return true; 
+} 
+
+//
+// G_DeathMatchSpawnPlayer 
+// Spawns a player at one of the random death match spots 
+// called at level load and each death 
+//
+void G_DeathMatchSpawnPlayer(int playernum) 
+{ 
+    int     j; 
+    int     selections = deathmatch_p - deathmatchstarts; 
+
+    if (selections < 4) 
+        I_Error ("Only %i deathmatch spots, 4 required", selections); 
+ 
+    for (j = 0; j < 20; j++) 
+    { 
+        int i = P_Random() % selections; 
+
+        if (G_CheckSpot(playernum, &deathmatchstarts[i])) 
+        { 
+            deathmatchstarts[i].type = playernum + 1; 
+            P_SpawnPlayer(&deathmatchstarts[i]); 
+            return; 
+        } 
+    } 
+ 
+    // no good spot, so the player will probably get stuck 
+    P_SpawnPlayer(&playerstarts[playernum]); 
+} 
+ 
+//
 // G_Responder  
 // Get info needed to make ticcmd_ts for the players.
 // 
@@ -1402,22 +1542,12 @@ void G_ReadDemoTiccmd(ticcmd_t *cmd)
 } 
 
 // Increase the size of the demo buffer to allow unlimited demos
-
 static void IncreaseDemoBuffer(void)
 {
-    int current_length;
-    byte *new_demobuffer;
-    byte *new_demop;
-    int new_length;
-
-    // Find the current size
-    current_length = demoend - demobuffer;
-    
-    // Generate a new buffer twice the size
-    new_length = current_length * 2;
-    
-    new_demobuffer = Z_Malloc(new_length, PU_STATIC, NULL);
-    new_demop = new_demobuffer + (demo_p - demobuffer);
+    int current_length = demoend - demobuffer;
+    int new_length = current_length * 2;
+    byte *new_demobuffer = Z_Malloc(new_length, PU_STATIC, NULL);
+    byte *new_demop = new_demobuffer + (demo_p - demobuffer);
 
     // Copy over the old data
     memcpy(new_demobuffer, demobuffer, current_length);
@@ -1432,15 +1562,13 @@ static void IncreaseDemoBuffer(void)
 
 void G_WriteDemoTiccmd(ticcmd_t *cmd) 
 { 
-    byte *demo_start;
+    byte *demo_start = demo_p;
 
 #ifndef WII
     // press q to end demo recording 
     if (gamekeydown[key_demo_quit])
         G_CheckDemoStatus(); 
 #endif
-
-    demo_start = demo_p;
 
     *demo_p++ = cmd->forwardmove; 
     *demo_p++ = cmd->sidemove; 
@@ -1488,148 +1616,14 @@ void G_WriteDemoTiccmd(ticcmd_t *cmd)
 */ 
 
 //
-// G_CheckSpot  
-// Returns false if the player cannot be respawned
-// at the given mapthing_t spot  
-// because something is occupying it 
-//
-dboolean G_CheckSpot(int playernum, mapthing_t *mthing) 
-{ 
-    fixed_t          x;
-    fixed_t          y; 
-    subsector_t      *ss; 
-    mobj_t           *mo; 
-        
-    if (!players[playernum].mo)
-    {
-        int i;
-
-        // first spawn of level, before corpses
-        for (i = 0; i < playernum; i++)
-            if (players[i].mo->x == mthing->x << FRACBITS
-                && players[i].mo->y == mthing->y << FRACBITS)
-                return false;
-
-        return true;
-    }
-                
-    x = mthing->x << FRACBITS; 
-    y = mthing->y << FRACBITS; 
-         
-    if (!P_CheckPosition(players[playernum].mo, x, y)) 
-        return false; 
- 
-    // flush an old corpse if needed 
-    if (bodyqueslot >= BODYQUESIZE) 
-        P_RemoveMobj(bodyque[bodyqueslot % BODYQUESIZE]); 
-
-    bodyque[bodyqueslot % BODYQUESIZE] = players[playernum].mo; 
-    bodyqueslot++; 
-
-    // spawn a teleport fog
-    ss = R_PointInSubsector(x, y);
-
-    // The code in the released source looks like this:
-    //
-    //    an = (ANG45 * (((unsigned int)mthing->angle) / 45))
-    //         >> ANGLETOFINESHIFT;
-    //    mo = P_SpawnMobj(x + 20 * finecosine[an], y + 20 * finesine[an],
-    //                     ss->sector->floorheight,
-    //                     MT_TFOG);
-    //
-    // But 'an' can be a signed value in the DOS version. This means that
-    // we get a negative index and the lookups into finecosine/finesine
-    // end up dereferencing values in finetangent[].
-    // A player spawning on a deathmatch start facing directly west spawns
-    // "silently" with no spawn fog. Emulate this.
-    //
-    // This code is imported from PrBoom+.
-
-    {
-        fixed_t xa, ya;
-        signed int an;
-
-        // This calculation overflows in Vanilla Doom, but here we deliberately
-        // avoid integer overflow as it is undefined behavior, so the value of
-        // 'an' will always be positive.
-        an = (ANG45 >> ANGLETOFINESHIFT) * ((signed int)mthing->angle / 45);
-
-        switch (an)
-        {
-            // -4096:
-            case 4096:
-                // finecosine[-4096]
-                xa = finetangent[2048];
-
-                // finesine[-4096]
-                ya = finetangent[0];
-
-                break;
-
-            // -3072:
-            case 5120:
-                // finecosine[-3072]
-                xa = finetangent[3072];
-
-                // finesine[-3072]
-                ya = finetangent[1024];
-
-                break;
-
-            // -2048:
-            case 6144:
-                // finecosine[-2048]
-                xa = finesine[0];
-
-                // finesine[-2048]
-                ya = finetangent[2048];
-
-                break;
-
-            // -1024:
-            case 7168:
-                // finecosine[-1024]
-                xa = finesine[1024];
-
-                // finesine[-1024]
-                ya = finetangent[3072];
-
-                break;
-
-            case 0:
-            case 1024:
-            case 2048:
-            case 3072:
-                xa = finecosine[an];
-                ya = finesine[an];
-                break;
-
-            default:
-                I_Error("G_CheckSpot: unexpected angle %d\n", an);
-                xa = ya = 0;
-                break;
-        }
-
-        mo = P_SpawnMobj(x + 20 * xa, y + 20 * ya,
-                         ss->sector->floorheight, MT_TFOG);
-    }
-
-    if (players[consoleplayer].viewz != 1) 
-        // don't start sound on first frame 
-        S_StartSound(mo, sfx_telept);
- 
-    return true; 
-} 
-
-//
 // G_DoReborn 
 // 
-void G_DoReborn(int playernum) 
+static void G_DoReborn(int playernum) 
 { 
     if (!netgame)
     {
         // reload the level from scratch
-        gameaction = ga_loadlevel;  
+        gameaction = (quickSaveSlot >= 0 && enable_autoload ? ga_autoloadgame : ga_loadlevel);
     }
     else 
     {
@@ -1677,9 +1671,10 @@ void G_DoReborn(int playernum)
 //
 // G_DoLoadLevel 
 //
-void G_DoLoadLevel(void) 
+static void G_DoLoadLevel(void) 
 { 
-    int         i, ep; 
+    int         i;
+    int         ep = (gamemode == commercial ? (gamemission == pack_nerve ? 2 : 1) : gameepisode); 
     int         map = (gameepisode - 1) * 10 + gamemap;
 
     // Set the sky map.
@@ -1687,12 +1682,10 @@ void G_DoLoadLevel(void)
     //  a flat. The data is in the WAD only because
     //  we look for an actual index, instead of simply
     //  setting one.
-
     skyflatnum = R_FlatNumForName(SKYFLATNAME);
 
     // The "Sky never changes in Doom II" bug was fixed in
     // the id Anthology version of doom2.exe for Final Doom.
-
     skytexture = P_GetMapSky1Texture(map);
 
     if (!skytexture || skytexture == R_CheckTextureNumForName("SKY1TALL"))
@@ -1761,8 +1754,6 @@ void G_DoLoadLevel(void)
     // died.
     P_FreeSecNodeList();
 
-    ep = (gamemode == commercial ? (gamemission == pack_nerve ? 2 : 1) : gameepisode);
-
     if (beta_style && ep == 1 && gamemap == 3)
         I_Error("W_GetNumForName: E1M3 not found!");
 
@@ -1790,7 +1781,7 @@ void G_DoLoadLevel(void)
         C_HideConsoleFast();
 } 
 
-void G_DoNewGame(void) 
+static void G_DoNewGame(void) 
 {
     demoplayback = false; 
     netdemo = false;
@@ -1818,8 +1809,6 @@ void G_DoNewGame(void)
 /*
 static char *DemoVersionDescription(int version)
 {
-    static char resultbuf[16];
-
     switch (version)
     {
         case 104:
@@ -1853,6 +1842,8 @@ static char *DemoVersionDescription(int version)
     }
     else
     {
+        static char resultbuf[16];
+
         sprintf(resultbuf, "%i.%i (unknown)", version / 100, version % 100);
         return resultbuf;
     }
@@ -1888,10 +1879,6 @@ void G_DoPlayDemo(void)
     skill_t   skill; 
     int       i, episode, map; 
 
-//#ifndef WII
-    int       demoversion;
-//#endif
-
     gameaction = ga_nothing; 
     demobuffer = demo_p = W_CacheLumpName(defdemoname, PU_STATIC); 
 
@@ -1906,7 +1893,7 @@ void G_DoPlayDemo(void)
         fsize == 18240172 || fsize == 17420824 || fsize == 28422764 ||
         fsize == 12361532 || fsize == 19321722)
     {
-        demoversion = *demo_p++;
+        int demoversion = *demo_p++;
 
         if (demoversion == G_VanillaVersionCode())
         {
@@ -2001,7 +1988,7 @@ void G_DoPlayDemo(void)
 // G_PlayerFinishLevel
 // Can when a player completes a level.
 //
-void G_PlayerFinishLevel(int player) 
+static void G_PlayerFinishLevel(int player) 
 { 
     player_t  *p = &players[player]; 
 
@@ -2027,7 +2014,7 @@ void G_PlayerFinishLevel(int player)
 //
 // G_DoCompleted 
 //
-void G_DoCompleted(void) 
+static void G_DoCompleted(void) 
 { 
     int         i;          
     int         map = (gameepisode - 1) * 10 + gamemap;
@@ -2135,9 +2122,7 @@ void G_DoCompleted(void)
         }
     }
     else if (gamemission == pack_master)
-    {
         wminfo.next = gamemap;
-    }
     else if (secretexit && secretnextmap)
         wminfo.next = secretnextmap - 1;
     else if (nextmap)
@@ -2261,7 +2246,7 @@ void G_DoCompleted(void)
                 wminfo.partime = TICRATE * npars[gamemap - 1];
             else if (gamemission == pack_tnt || gamemission == pack_plut)
                 wminfo.partime = 0;
-            else if (gamemap == 33 || gamemission == pack_master)
+            else if (gamemission == pack_master)
                 // map 33 par time sucks
                 wminfo.partime = INT_MAX;
             else
@@ -2269,18 +2254,11 @@ void G_DoCompleted(void)
         }
         else if (gameepisode < 4 && gameepisode != 1 && gamemap != 10)
             wminfo.partime = TICRATE * pars[gameepisode][gamemap];
-        else if (gameepisode == 4)
-            wminfo.partime = TICRATE * e4pars[gamemap];
-/*
-        else
-            wminfo.partime = TICRATE * pars[gameepisode][gamemap];
-*/
     }
-/*
-    if (modifiedgame ||
-           (gamemode == commercial && (gamemission == pack_tnt || gamemission == pack_plut)))
+
+    if (modifiedgame)
         wminfo.partime = 0;
-*/
+
     wminfo.pnum = consoleplayer; 
  
     for (i = 0; i < MAXPLAYERS; i++) 
@@ -2309,7 +2287,7 @@ void G_DoCompleted(void)
     WI_Start(&wminfo); 
 } 
 
-void G_DoWorldDone (void) 
+static void G_DoWorldDone (void) 
 {        
     gamestate = GS_LEVEL; 
     gamemap = wminfo.next + 1; 
@@ -2321,7 +2299,7 @@ void G_DoWorldDone (void)
     viewactive = true; 
 } 
 
-void G_DoSaveGame (void) 
+static void G_DoSaveGame (void) 
 { 
     char        *savegame_file = (consoleactive ? savename : P_SaveGameFile(savegameslot));
     char        *temp_savegame_file = P_TempSaveGameFile();
@@ -2435,7 +2413,7 @@ void G_DoSaveGame (void)
 // G_Ticker
 // Make ticcmd_ts for the players.
 //
-void G_Ticker (void) 
+void G_Ticker(void) 
 { 
     int        i;
     int        buf; 
@@ -2456,6 +2434,11 @@ void G_Ticker (void)
             case ga_loadlevel: 
                 G_DoLoadLevel(); 
                 break; 
+
+            case ga_autoloadgame:
+                M_StringCopy(savename, P_SaveGameFile(quickSaveSlot), sizeof(savename));
+                G_DoLoadGame();
+                break;
 
             case ga_newgame: 
                 G_DoNewGame(); 
@@ -2693,37 +2676,6 @@ void G_InitPlayer(int player)
 }
 */
 
-//
-// G_DeathMatchSpawnPlayer 
-// Spawns a player at one of the random death match spots 
-// called at level load and each death 
-//
-void G_DeathMatchSpawnPlayer(int playernum) 
-{ 
-    int     j; 
-    int     selections; 
-         
-    selections = deathmatch_p - deathmatchstarts; 
-
-    if (selections < 4) 
-        I_Error ("Only %i deathmatch spots, 4 required", selections); 
- 
-    for (j = 0; j < 20; j++) 
-    { 
-        int i = P_Random() % selections; 
-
-        if (G_CheckSpot(playernum, &deathmatchstarts[i])) 
-        { 
-            deathmatchstarts[i].type = playernum + 1; 
-            P_SpawnPlayer(&deathmatchstarts[i]); 
-            return; 
-        } 
-    } 
- 
-    // no good spot, so the player will probably get stuck 
-    P_SpawnPlayer(&playerstarts[playernum]); 
-} 
- 
 void G_ScreenShot(void) 
 { 
     gameaction = ga_screenshot; 
@@ -2813,9 +2765,10 @@ void G_LoadGame(char *name)
 void G_DoLoadGame(void) 
 { 
     int savedleveltime = leveltime;
-         
+
+    loadaction = gameaction;
     gameaction = ga_nothing; 
-         
+
     save_stream = fopen(savename, "rb");
 
     if (!save_stream)
@@ -2895,19 +2848,18 @@ void G_InitNew(skill_t skill, int episode, int map)
 {
     char     *skytexturename;
     int      i;
-    player_t *player;
+    player_t *player = &players[consoleplayer];
+
+    player->nextextra = EXTRAPOINTS;
+    player->item = 0;
+    player->score = 0;
+    player->extra_lifes = 0;
 
     if (paused)
     {
         paused = false;
         S_ResumeSound();
     }
-
-    player = &players[consoleplayer];
-    player->nextextra = EXTRAPOINTS;
-    player->item = 0;
-    player->score = 0;
-    player->extra_lifes = 0;
 
     /*
     // Note: This commented-out block of code was added at some point
@@ -2977,7 +2929,7 @@ void G_InitNew(skill_t skill, int episode, int map)
 
     if (fastparm || (skill == sk_nightmare && gameskill != sk_nightmare))
     {
-        for (i = S_SARG_RUN1; i <= S_SARG_PAIN2; i++)
+        for (i = S_SARG_RUN1; i <= S_SARG_PAIN2; ++i)
             // [crispy] Fix infinite loop caused by Demon speed bug
             if (states[i].tics != 1)
             {
@@ -2991,7 +2943,7 @@ void G_InitNew(skill_t skill, int episode, int map)
     }
     else if (skill != sk_nightmare && gameskill == sk_nightmare)
     {
-        for (i = S_SARG_RUN1; i <= S_SARG_PAIN2; i++)
+        for (i = S_SARG_RUN1; i <= S_SARG_PAIN2; ++i)
             states[i].tics <<= 1;
 
         mobjinfo[MT_BRUISERSHOT].speed = 15 * FRACUNIT;
@@ -3065,19 +3017,32 @@ void G_InitNew(skill_t skill, int episode, int map)
     G_DoLoadLevel();
 }
 
+void G_LoadedGameMessage(void)
+{
+    if (*savedescription)
+    {
+        static char     buffer[1024];
+
+        M_snprintf(buffer, sizeof(buffer), (loadaction == ga_autoloadgame ? s_GGAUTOLOADED :
+            s_GGLOADED), titlecase(savedescription));
+        HU_PlayerMessage(buffer, false);
+        //message_dontfuckwithme = true;
+    }
+
+    loadaction = ga_nothing;
+}
+
 /*
 #ifndef WII
 void G_RecordDemoCmd(char *name)
 {
-    size_t demoname_size;
-    int i;
-    int maxsize;
+    size_t demoname_size = strlen(name) + 5;
+    int i = M_CheckParmWithArgs("-maxdemo", 1);
+    int maxsize = 0x20000;
 
     usergame = false;
-    demoname_size = strlen(name) + 5;
     demoname = Z_Malloc(demoname_size, PU_STATIC, NULL);
     M_snprintf(demoname, demoname_size, "%s.lmp", name);
-    maxsize = 0x20000;
 
     //!
     // @arg <size>
@@ -3086,9 +3051,6 @@ void G_RecordDemoCmd(char *name)
     //
     // Specify the demo buffer size (KiB)
     //
-
-    i = M_CheckParmWithArgs("-maxdemo", 1);
-
     if (i)
         maxsize = atoi(myargv[i + 1]) * 1024;
 
@@ -3126,13 +3088,11 @@ void G_BeginRecording(void)
 #endif
 
     // If not recording a longtics demo, record in low res
-
     lowres_turn = !longtics;
 
     demo_p = demobuffer;
 
     // Save the right version code for this demo
-
     if (longtics)
     {
         *demo_p++ = DOOM_191_VERSION;
@@ -3186,7 +3146,6 @@ void G_TimeDemo(char *name)
     //
     // Disable rendering the screen entirely.
     //
-
     nodrawers = M_CheckParm("-nodraw"); 
 #endif
 
@@ -3203,17 +3162,12 @@ void G_TimeDemo(char *name)
 // Returns true if a new demo loop action will take place 
 //
 dboolean G_CheckDemoStatus(void) 
-{ 
-    int             endtime; 
-         
+{          
     if (timingdemo) 
     { 
-        float fps;
-        int realtics;
-
-        endtime = I_GetTime(); 
-        realtics = endtime - starttime;
-        fps = ((float)gametic * TICRATE) / realtics;
+        int endtime = I_GetTime(); 
+        int realtics = endtime - starttime;
+        float fps = ((float)gametic * TICRATE) / realtics;
 
         // Prevent recursive calls
         timingdemo = false;

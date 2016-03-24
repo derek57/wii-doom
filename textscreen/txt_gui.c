@@ -361,7 +361,7 @@ void TXT_DrawUTF8String(const char *s)
     {
         int x1 = x;
 
-        for (p = s; *p != '\0'; )
+        for (p = s; *p != '\0';)
         {
             unsigned int c = TXT_DecodeUTF8(&p);
 

@@ -41,6 +41,7 @@ char             *gamedescription;
 // specifies whether to follow the player around
 int              timer_info = 0;
 int              chaingun_tics = 4;
+int              background_color = 231;
 
 // Set if homebrew PWAD stuff has been added.
 dboolean         showMessages = true;
@@ -142,6 +143,7 @@ dboolean         d_dripblood = false;
 dboolean         d_vsync = false;
 dboolean         particle_sounds = false;
 dboolean         map_secret_after = false;
+dboolean         enable_autoload = false;
 dboolean         enable_autosave = false;
 dboolean         drawsplash = false;
 dboolean         chexdeh = false;
@@ -155,6 +157,10 @@ dboolean         BTSXE3A = false;
 dboolean         BTSXE3B = false;
 dboolean         autoaim = true;
 dboolean         render_mode = true;
+dboolean         d_fliplevels = false;
+
+// if true, load all graphics at start 
+dboolean         precache = true;
 
 // Blocky mode, has default, 0 = high, 1 = normal
 dboolean         detailLevel = false;
@@ -188,6 +194,8 @@ int              use_libsamplerate = 0;
 int              gore_amount = 1;
 int              display_fps = 0;
 int              font_shadow = 0;
+int              stillbob = 0;
+int              movebob = 75;
 
 #ifdef WII
 int              show_endoom = 0;

@@ -67,8 +67,8 @@ typedef struct
 } castinfo_t;
 
 
-castinfo_t      castorder[MAX_CASTORDER];
-//castinfo_t      castorderbeta[MAX_CASTORDER];
+castinfo_t       castorder[MAX_CASTORDER];
+//castinfo_t       castorderbeta[MAX_CASTORDER];
 
 // Stage of animation:
 state_t          *caststate;
@@ -89,8 +89,6 @@ int              casttics;
 int              castframes;
 int              castonmelee;
 
-
-extern dboolean  opl;
 
 extern void      A_RandomJump(mobj_t *actor); 
 
@@ -235,10 +233,9 @@ void F_StartFinale(void)
 //
 // F_CastResponder
 //
-
-dboolean F_CastResponder(event_t *ev)
+static dboolean F_CastResponder(event_t *ev)
 {
-    mobjtype_t  type;
+    mobjtype_t  type = castorder[castnum].type;
 
 #ifdef WII
     if (ev->type == ev_joystick) 
@@ -279,8 +276,6 @@ dboolean F_CastResponder(event_t *ev)
             return true;
         }
     }
-
-    type = castorder[castnum].type;
 
     // go into death frame
     castdeath = true;
@@ -337,7 +332,7 @@ dboolean F_Responder(event_t *event)
 //
 // F_StartCast
 //
-void F_StartCast(void)
+static void F_StartCast(void)
 {
     castorder[0].name = s_CC_ZOMBIE,  castorder[0].type = MT_POSSESSED;
     castorder[1].name = s_CC_SHOTGUN, castorder[1].type = MT_SHOTGUY;
@@ -407,7 +402,7 @@ void F_StartCast(void)
 //
 // F_CastTicker
 //
-void F_CastTicker(void)
+static void F_CastTicker(void)
 {        
     if (--casttics > 0)
         // not time to change state yet
@@ -701,7 +696,6 @@ void F_Ticker(void)
     if (finalestage == F_STAGE_CAST)
     {
         F_CastTicker();
-
         return;
     }
         
@@ -728,21 +722,17 @@ void F_Ticker(void)
 //
 // F_TextWrite
 //
-void F_TextWrite(int scrn)
-{
-    byte        *src;
-    byte        *dest;
-    
-    int         x, y, w;
-    signed int  count;
-    char        *ch;
-    int         cx;
-    int         cy;
-    
+static void F_TextWrite(int scrn)
+{    
+    byte        *src = W_CacheLumpName(finaleflat, PU_CACHE);
+    byte        *dest = screens[scrn];
+    int         w, x, y;
+    int         cx = 10;
+    int         cy = 10;
+    signed int  count = ((signed int) finalecount - 10) / TEXTSPEED;
+    char        *ch = finaletext;
+
     // erase the entire screen to a tiled background
-    src = W_CacheLumpName(finaleflat, PU_CACHE);
-    dest = screens[scrn];
-        
     for (y = 0; y < SCREENHEIGHT; y++)
     {
         for (x = 0; x < SCREENWIDTH / 64; x++)
@@ -761,12 +751,6 @@ void F_TextWrite(int scrn)
     //V_MarkRect (0, 0, 0, SCREENWIDTH, SCREENHEIGHT, 0);
     
     // draw some of the text onto the screen
-    cx = 10;
-    cy = 10;
-    ch = finaletext;
-        
-    count = ((signed int) finalecount - 10) / TEXTSPEED;
-
     if (count < 0)
         count = 0;
 
@@ -811,18 +795,13 @@ void F_TextWrite(int scrn)
 // Casting by id Software.
 //   in order of appearance
 //
-void F_CastPrint(char *text)
+static void F_CastPrint(char *text)
 {
-    char         *ch;
-    int          c;
-    int          cx;
-    int          w;
-    int          width;
+    char         *ch = text;
+    int          c, cx, w;
+    int          width = 0;
     
     // find width
-    ch = text;
-    width = 0;
-        
     while (ch)
     {
         c = *ch++;
@@ -875,10 +854,10 @@ void F_CastPrint(char *text)
 //
 // F_CastDrawer
 //
-void F_CastDrawer(void)
+static void F_CastDrawer(void)
 {
-    spritedef_t      *sprdef;
-    spriteframe_t    *sprframe;
+    spritedef_t      *sprdef = &sprites[caststate->sprite];
+    spriteframe_t    *sprframe = &sprdef->spriteframes[caststate->frame & FF_FRAMEMASK];
     int              lump;
     dboolean         flip;
     patch_t          *patch;
@@ -895,17 +874,11 @@ void F_CastDrawer(void)
     */
 
     // draw the current frame in the middle of the screen
-    sprdef = &sprites[caststate->sprite];
-    sprframe = &sprdef->spriteframes[caststate->frame & FF_FRAMEMASK];
-
     if (sprframe->rotate)
         rot = castrot;
 
     lump = sprframe->lump[rot];
-
-    //flip = (dboolean)sprframe->flip[0];
     flip = !!(sprframe->flip & (1 << rot));
-
     patch = W_CacheLumpNum(lump + firstspritelump, PU_CACHE);
 
     if (flip || castdeathflip)
@@ -917,23 +890,21 @@ void F_CastDrawer(void)
 //
 // F_DrawPatchCol
 //
-void F_DrawPatchCol(int x, int scrn, patch_t *patch, int col)
+static void F_DrawPatchCol(int x, int scrn, patch_t *patch, int col)
 {
-    column_t    *column = (column_t *)((byte *)patch + LONG(patch->columnofs[col]));
-    byte        *desttop = screens[scrn] + x;
-    int         f;
+    int          f;
+    column_t     *column = (column_t *)((byte *)patch + LONG(patch->columnofs[col]));
+    byte         *desttop = screens[scrn] + x;
 
     // step through the posts in a column
-    while (column->topdelta != 0xff )
+    while (column->topdelta != 0xff)
     {
-        int count = column->length;
-
         for (f = 0; f <= hires; f++)
         {
-            byte  *source = (byte *)column + 3;
-            byte  *dest = desttop + column->topdelta*
-                          (SCREENWIDTH << hires) + (x * hires) + f;
-                
+            int          count = column->length;
+            byte         *source = (byte *)column + 3;
+            byte         *dest = desttop + column->topdelta * (SCREENWIDTH << hires) + (x * hires) + f;
+
             while (count--)
             {
                 if (hires)
@@ -954,23 +925,18 @@ void F_DrawPatchCol(int x, int scrn, patch_t *patch, int col)
 //
 // F_BunnyScroll
 //
-void F_BunnyScroll(void)
+static void F_BunnyScroll(void)
 {
-    signed int  scrolled;
+    signed int  scrolled = (ORIGINALWIDTH - ((signed int)finalecount - 230) / 2);
     int         x;
-    patch_t     *p1;
-    patch_t     *p2;
+    patch_t     *p1 = W_CacheLumpName("PFUB2", PU_LEVEL);
+    patch_t     *p2 = W_CacheLumpName("PFUB1", PU_LEVEL);
     char        name[10];
     int         stage;
     static int  laststage;
                 
-    p1 = W_CacheLumpName("PFUB2", PU_LEVEL);
-    p2 = W_CacheLumpName("PFUB1", PU_LEVEL);
-
     //V_MarkRect(0, 0, 0, SCREENWIDTH, SCREENHEIGHT, 0);
         
-    scrolled = (ORIGINALWIDTH - ((signed int)finalecount - 230) / 2);
-
     if (scrolled > ORIGINALWIDTH)
         scrolled = ORIGINALWIDTH;
 
