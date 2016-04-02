@@ -141,6 +141,14 @@ void P_SetPsprite(player_t *player, int position, statenum_t stnum)
         // could be 0
         psp->tics = state->tics;
 
+        if (psp->state->nextstate == S_PISTOL4 ||
+            psp->state->nextstate == S_SGUN6   ||
+            psp->state->nextstate == S_DSGUN6  ||
+            psp->state->nextstate == S_DSGUN7  ||
+            psp->state->nextstate == S_CHAIN2  ||
+            psp->state->nextstate == S_CHAIN3)
+            A_EjectCasing(player->mo);
+
         if (state->misc1)
         {
             // coordinate set
@@ -162,12 +170,6 @@ void P_SetPsprite(player_t *player, int position, statenum_t stnum)
         }
         
         stnum = psp->state->nextstate;
-
-        if (stnum == S_PISTOL4 ||
-            stnum == S_SGUN6   ||
-            stnum == S_DSGUN6  ||
-            stnum == S_DSGUN7)
-            A_EjectCasing(player->mo);
 
     } while (!psp->tics);
     // an initial state of 0 could cycle through
@@ -986,7 +988,8 @@ void A_FireCGun(player_t *player, pspdef_t *psp)
         if (beta_style)
             P_SetPsprite(player, ps_flash, S_BETACHAINFLASH1 + psp->state - &states[S_BETACHAIN1]);
         else
-            P_SetPsprite(player, ps_flash, weaponinfo[player->readyweapon].flashstate + psp->state - &states[S_CHAIN1]);
+            P_SetPsprite(player, ps_flash, weaponinfo[player->readyweapon].flashstate
+                + (unsigned int)((psp->state - &states[S_CHAIN1]) & 1));
     }
 
     psp->state->tics = chaingun_tics;
@@ -994,8 +997,6 @@ void A_FireCGun(player_t *player, pspdef_t *psp)
     P_BulletSlope(player->mo);
         
     P_GunShot(player->mo, !player->refire);
-
-    A_EjectCasing(player->mo);
 
     A_Recoil(player);
 }

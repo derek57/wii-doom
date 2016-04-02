@@ -242,6 +242,8 @@ default_t   doom_defaults_list[] =
     CONFIG_VARIABLE_INT                (move_bob),
     CONFIG_VARIABLE_INT                (flip_levels),
     CONFIG_VARIABLE_INT                (use_autoload),
+    CONFIG_VARIABLE_INT                (random_music),
+    CONFIG_VARIABLE_INT                (slow_water),
     CONFIG_VARIABLE_INT                (key_shoot),
     CONFIG_VARIABLE_INT                (key_open),
     CONFIG_VARIABLE_INT                (key_menu),

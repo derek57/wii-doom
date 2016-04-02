@@ -598,10 +598,9 @@ char               target[MAXPATH];
 char               path_tmp[MAXPATH];
 char               temp[MAXPATH];
 
-int                extra_wad_slot_1_loaded;
-int                extra_wad_slot_2_loaded;
-int                extra_wad_slot_3_loaded;
-
+dboolean           extra_wad_slot_1_loaded;
+dboolean           extra_wad_slot_2_loaded;
+dboolean           extra_wad_slot_3_loaded;
 dboolean           dont_move_forwards;
 dboolean           error_detected;
 dboolean           print_resource_pwad_error;
@@ -615,16 +614,16 @@ FILE               *statsfile;
 extern dboolean    dont_move_backwards;
 extern dboolean    sd;
 extern dboolean    usb;
+extern dboolean    is_chex_2;
+extern dboolean    extra_wad_loaded;
+extern dboolean    load_extra_wad;
+extern dboolean    load_dehacked;
 
 extern int         fsize;
 extern int         fsizerw;
 extern int         fsizerw2;
 extern int         fsizecq;
-extern int         is_chex_2;
-extern int         show_deh_loading_message;
-extern int         extra_wad_loaded;
-extern int         load_extra_wad;
-extern int         load_dehacked;
+//extern int         show_deh_loading_message;
 
 #endif // __DOOMDEF__
 

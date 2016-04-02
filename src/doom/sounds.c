@@ -236,6 +236,13 @@ sfxinfo_t S_sfx[] =
     SOUND("skeatk",  70),
     SOUND("radio",   60),
 
+    // killough 11/98: dog sounds
+    SOUND("dgsit",   98),
+    SOUND("dgatk",   70),
+    SOUND("dgact",  120),
+    SOUND("dgdth",   70),
+    SOUND("dgpain",  96),
+
     SOUND("splsh0",  60),
     SOUND("splsh1",  60),
     SOUND("splsh2",  60),
@@ -268,14 +275,6 @@ sfxinfo_t S_sfx[] =
     SOUND("secret",  60),
 
     SOUND("jump",    64),
-
-    // killough 11/98: dog sounds
-    SOUND("dgsit",   98),
-    SOUND("dgatk",   70),
-    SOUND("dgact",  120),
-    SOUND("dgdth",   70),
-    SOUND("dgpain",  96),
-
     SOUND("eefly",   96),
 
     // walking inside sludge

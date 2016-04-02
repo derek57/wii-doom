@@ -217,8 +217,6 @@ extern dboolean    mus_cheat_used;
 extern dboolean    finale_music;
 extern dboolean    sound_warning_printed;
 
-extern int         numsplats;
-
 extern fixed_t     animatedliquiddiff;
 extern fixed_t     animatedliquidxdir;
 extern fixed_t     animatedliquidydir;
@@ -306,8 +304,8 @@ void P_LoadVertexes(int lump)
     {
         vertexes[i].x = SHORT(data[i].x) << FRACBITS;
 
-	if (d_fliplevels)
-	    vertexes[i].x = -vertexes[i].x;
+        if (d_fliplevels)
+            vertexes[i].x = -vertexes[i].x;
 
         vertexes[i].y = SHORT(data[i].y) << FRACBITS;
 
@@ -369,7 +367,7 @@ void P_LoadSegs(int lump)
         v2 = (unsigned short)SHORT(ml->v2);
         li->angle = SHORT(ml->angle) << FRACBITS;
 
-	if (d_fliplevels)
+        if (d_fliplevels)
             li->angle = -li->angle;
 
         linedef = (unsigned short)SHORT(ml->linedef);
@@ -447,15 +445,16 @@ void P_LoadSegs(int lump)
             li->v2 = &vertexes[v2];
         }
 
-	if (d_fliplevels)
-	{
+        if (d_fliplevels)
+        {
             vertex_t* tmp = li->v1;
+
             li->v1 = li->v2;
             li->v2 = tmp;
-	}
+        }
 
-	// [crispy] recalculate
-	li->offset = GetOffset(li->v1, ((ml->side ^ d_fliplevels) ? ldef->v2 : ldef->v1));
+        // [crispy] recalculate
+        li->offset = GetOffset(li->v1, ((ml->side ^ d_fliplevels) ? ldef->v2 : ldef->v1));
 
         if (li->linedef->special >= BOOMLINESPECIALS)
             boomlinespecials = true;
@@ -823,13 +822,13 @@ void P_LoadNodes(int lump)
         no->dx = SHORT(mn->dx) << FRACBITS;
         no->dy = SHORT(mn->dy) << FRACBITS;
 
-	if (d_fliplevels)
-	{
-	    no->x += no->dx;
-	    no->y += no->dy;
-	    no->x = -no->x;
-	    no->dy = -no->dy;
-	}
+        if (d_fliplevels)
+        {
+            no->x += no->dx;
+            no->y += no->dy;
+            no->x = -no->x;
+            no->dy = -no->dy;
+        }
 
         for (j = 0; j < 2; j++)
         {
@@ -858,12 +857,13 @@ void P_LoadNodes(int lump)
             for (k = 0; k < 4; k++)
                 no->bbox[j][k] = SHORT(mn->bbox[j][k]) << FRACBITS;
 
-	    if (d_fliplevels)
-	    {
-		fixed_t tmp = no->bbox[j][2];
-		no->bbox[j][2] = -no->bbox[j][3];
-		no->bbox[j][3] = -tmp;
-	    }
+            if (d_fliplevels)
+            {
+                fixed_t tmp = no->bbox[j][2];
+
+                no->bbox[j][2] = -no->bbox[j][3];
+                no->bbox[j][3] = -tmp;
+            }
         }
     }
 
@@ -1206,11 +1206,11 @@ void P_LoadThings(int lump)
         if (mt.type == WolfensteinSS && bfgedition)
             mt.type = Zombieman;
 
-	if (d_fliplevels)
-	{
-	    mt.x = -mt.x;
-	    mt.angle = 180 - mt.angle;
-	}
+        if (d_fliplevels)
+        {
+            mt.x = -mt.x;
+            mt.angle = 180 - mt.angle;
+        }
 
         if (spawn)
             P_SpawnMapThing(&mt, i);
@@ -1257,16 +1257,19 @@ static void P_LoadLineDefs(int lump)
         }
 
         ld->tag = SHORT(mld->tag);
-	if (d_fliplevels)
-	{
-	    v1 = ld->v2 = &vertexes[(unsigned short)SHORT(mld->v2)]; // [crispy] extended nodes
-	    v2 = ld->v1 = &vertexes[(unsigned short)SHORT(mld->v1)]; // [crispy] extended nodes
-	}
-	else
-	{
-	v1 = ld->v1 = &vertexes[(unsigned short)SHORT(mld->v1)]; // [crispy] extended nodes
-	v2 = ld->v2 = &vertexes[(unsigned short)SHORT(mld->v2)]; // [crispy] extended nodes
-	}
+
+        // [crispy] extended nodes
+        if (d_fliplevels)
+        {
+            v1 = ld->v2 = &vertexes[(unsigned short)SHORT(mld->v2)];
+            v2 = ld->v1 = &vertexes[(unsigned short)SHORT(mld->v1)];
+        }
+        else
+        {
+            v1 = ld->v1 = &vertexes[(unsigned short)SHORT(mld->v1)];
+            v2 = ld->v2 = &vertexes[(unsigned short)SHORT(mld->v2)];
+        }
+
         ld->dx = v2->x - v1->x;
         ld->dy = v2->y - v1->y;
 
@@ -1568,17 +1571,17 @@ static void P_CreateBlockMap(void)
             int y, dy, ady;
             int b, bend, diff;
 
-	// starting coordinates
-	if (d_fliplevels)
-	{
-	    x = (lines[i].v2->x >> FRACBITS) - minx;
-	    y = (lines[i].v2->y >> FRACBITS) - miny;
-	}
-	else
-	{
-	    x = (lines[i].v1->x >> FRACBITS) - minx;
-	    y = (lines[i].v1->y >> FRACBITS) - miny;
-	}
+            // starting coordinates
+            if (d_fliplevels)
+            {
+                x = (lines[i].v2->x >> FRACBITS) - minx;
+                y = (lines[i].v2->y >> FRACBITS) - miny;
+            }
+            else
+            {
+                x = (lines[i].v1->x >> FRACBITS) - minx;
+                y = (lines[i].v1->y >> FRACBITS) - miny;
+            }
 
             // x - y deltas
             adx = lines[i].dx >> FRACBITS;
@@ -1596,17 +1599,17 @@ static void P_CreateBlockMap(void)
             // starting block, and pointer to its blocklist structure
             b = (y >> MAPBTOFRAC) * bmapwidth + (x >> MAPBTOFRAC);
 
-	// ending block
-	if (d_fliplevels)
-	{
-	    bend = (((lines[i].v1->y >> FRACBITS) - miny) >> MAPBTOFRAC) *
-	        bmapwidth + (((lines[i].v1->x >> FRACBITS) - minx) >> MAPBTOFRAC);
-	}
-	else
-	{
-	    bend = (((lines[i].v2->y >> FRACBITS) - miny) >> MAPBTOFRAC) *
-	        bmapwidth + (((lines[i].v2->x >> FRACBITS) - minx) >> MAPBTOFRAC);
-	}
+            // ending block
+            if (d_fliplevels)
+            {
+                bend = (((lines[i].v1->y >> FRACBITS) - miny) >> MAPBTOFRAC) *
+                    bmapwidth + (((lines[i].v1->x >> FRACBITS) - minx) >> MAPBTOFRAC);
+            }
+            else
+            {
+                bend = (((lines[i].v2->y >> FRACBITS) - miny) >> MAPBTOFRAC) *
+                    bmapwidth + (((lines[i].v2->x >> FRACBITS) - minx) >> MAPBTOFRAC);
+            }
 
             // delta for pointer when moving across y
             dy *= bmapwidth;
@@ -1728,7 +1731,7 @@ void P_LoadBlockMap(int lump)
 
     if (lump >= numlumps || (lumplen = W_LumpLength(lump)) < 8 || (count = lumplen / 2) >= 0x10000)
     {
-	C_Warning("P_LoadBlockMap: (Re-)creating BLOCKMAP.");
+        C_Warning("P_LoadBlockMap: (Re-)creating BLOCKMAP.");
         P_CreateBlockMap();
         blockmaprecreated = true;
     }
@@ -1769,25 +1772,25 @@ void P_LoadBlockMap(int lump)
 
     if (d_fliplevels)
     {
-	int x, y;
-	int *rowoffset;
+        int x, y;
+        int *rowoffset;
 
-	bmaporgx += bmapwidth * 128 * FRACUNIT;
-	bmaporgx = -bmaporgx;
+        bmaporgx += bmapwidth * 128 * FRACUNIT;
+        bmaporgx = -bmaporgx;
 
-	for (y = 0; y < bmapheight; y++)
-	{
-	    rowoffset = blockmap + y * bmapwidth;
+        for (y = 0; y < bmapheight; y++)
+        {
+            rowoffset = blockmap + y * bmapwidth;
 
-	    for (x = 0; x < bmapwidth / 2; x++)
-	    {
-	        int tmp;
+            for (x = 0; x < bmapwidth / 2; x++)
+            {
+                int tmp;
 
-	        tmp = rowoffset[x];
-	        rowoffset[x] = rowoffset[bmapwidth - 1 - x];
-	        rowoffset[bmapwidth - 1 - x] = tmp;
-	    }
-	}
+                tmp = rowoffset[x];
+                rowoffset[x] = rowoffset[bmapwidth - 1 - x];
+                rowoffset[bmapwidth - 1 - x] = tmp;
+            }
+        }
     }
 
     // Clear out mobj chains
@@ -2156,8 +2159,6 @@ void P_SetupLevel(int ep, int map)
     mus_cheat_used = false;
     finale_music = false;
     sound_warning_printed = false;
-
-    numsplats = 0;
 
     totalkills = totalitems = totalsecret = wminfo.maxfrags = 0;
     wminfo.partime = 180;

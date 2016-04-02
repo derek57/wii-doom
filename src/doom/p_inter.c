@@ -1351,8 +1351,8 @@ void P_KillMobj(mobj_t *source, mobj_t *target)
             if (target->type != MT_BARREL && target->type != MT_BETABARREL)
             {
                 int t = P_Random() % 7;
-    
-                if (!snd_module)
+
+                if (!snd_module && !target->state->dehacked)
                     S_StartSound(target, sfx_splsh0 + t);
             }
         }

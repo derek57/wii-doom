@@ -57,24 +57,20 @@
 
 // when to clip out sounds
 // Does not fit the large outdoor areas.
+#define S_CLIPPING_DIST (1200 << FRACBITS)
 
-#define S_CLIPPING_DIST (1200 * FRACUNIT)
-
-// Distance tp origin when sounds should be maxed out.
+// Distance to origin when sounds should be maxed out.
 // This should relate to movement clipping resolution
 // (see BLOCKMAP handling).
 // In the source code release: (160 * FRACUNIT).  Changed back to the 
 // Vanilla value of 200 (why was this changed?)
-
-#define S_CLOSE_DIST    (200 * FRACUNIT)
+#define S_CLOSE_DIST    (200 << FRACBITS)
 
 // The range over which sound attenuates
-
 #define S_ATTENUATOR    ((S_CLIPPING_DIST - S_CLOSE_DIST) >> FRACBITS)
 
 // Stereo separation
-
-#define S_STEREO_SWING  (96 * FRACUNIT)
+#define S_STEREO_SWING  (96 << FRACBITS)
 
 #define NORM_PRIORITY   64
 #define NORM_SEP        128
@@ -102,15 +98,11 @@ int                musicVolume = 8;
 // The set of channels available
 channel_t          channels[64];
 
-short              songlist[148];
-short              currentsong = 0;
-
 dboolean           sound_warning_printed;
 
 
 extern dboolean    fake;
 extern dboolean    change_anyway;
-extern dboolean    mus_cheat_used;
 extern dboolean    initialized;
 extern dboolean    splashscreen;
 
@@ -210,28 +202,20 @@ static void S_StopChannel(int cnum)
     }
 }
 
-//
-// Per level startup code.
-// Kills playing sounds at start of level,
-//  determines music if any, changes music.
-//
-void S_Start(void)
+void S_StopSounds(void)
 {
     int cnum;
-    int mnum;
 
     // kill all playing sounds at start of level
     //  (trust me - a good idea)
     for (cnum = 0; cnum < snd_channels; cnum++)
-    {
         if (channels[cnum].sfxinfo)
-        {
             S_StopChannel(cnum);
-        }
-    }
+}
 
-    // start new music for the level
-    mus_paused = 0;
+static int S_GetMusicNum(void)
+{
+    static int mnum;
 
     if (gamemode == commercial && gamemission == pack_nerve)
     {
@@ -248,11 +232,11 @@ void S_Start(void)
             mus_ddtbl2
         };
 
-        mnum = nmus[gamemap - 1];
+        mnum = nmus[(s_randommusic ? M_RandomIntNoRepeat(1, 9, mnum) : gamemap) - 1];
     }
     else if (gamemode == commercial)
     {
-        mnum = mus_runnin + gamemap - 1;
+        mnum = mus_runnin + (s_randommusic ? M_RandomIntNoRepeat(1, 32, mnum) : gamemap) - 1;
     }
     else
     {
@@ -291,16 +275,35 @@ void S_Start(void)
 
         if (gameepisode < 4)
         {
-            mnum = mus_e1m1 + (gameepisode - 1) * 9 + gamemap - 1;
+            mnum = mus_e1m1 + (s_randommusic ? M_RandomIntNoRepeat(1, 21, mnum) :
+                (gameepisode - 1) * 9 + gamemap) - 1;
         }
         else
         {
-            mnum = spmus[gamemap - 1];
+            mnum = spmus[(s_randommusic ? M_RandomIntNoRepeat(1, 28, mnum) : gamemap) - 1];
         }
     }
 
-    S_ChangeMusic(mnum, true, true);
+    return mnum;
+//    S_ChangeMusic(mnum, true, true);
 }        
+
+//
+// Per level startup code.
+// Kills playing sounds at start of level,
+//  determines music if any, changes music.
+//
+void S_Start(void)
+{
+    // kill all playing sounds at start of level
+    //  (trust me - a good idea)
+    S_StopSounds();
+
+    // start new music for the level
+    mus_paused = false;
+
+    S_ChangeMusic(S_GetMusicNum(), !s_randommusic, true);
+}
 
 void S_StopSound(mobj_t *origin)
 {
@@ -328,13 +331,10 @@ static int S_GetChannel(mobj_t *origin, sfxinfo_t *sfxinfo)
     channel_t         *c;
 
     // Find an open channel
-    for (cnum = 0; cnum < snd_channels; cnum++)
+    for (cnum = 0; cnum < snd_channels && channels[cnum].sfxinfo; ++cnum)
     {
-        if (!channels[cnum].sfxinfo)
-        {
-            break;
-        }
-        else if (origin && channels[cnum].origin == origin)
+        if (origin && channels[cnum].origin == origin
+            && channels[cnum].sfxinfo->singularity == sfxinfo->singularity)
         {
             S_StopChannel(cnum);
             break;
@@ -345,7 +345,7 @@ static int S_GetChannel(mobj_t *origin, sfxinfo_t *sfxinfo)
     if (cnum == snd_channels)
     {
         // Look for lower priority
-        for (cnum = 0; cnum < snd_channels; cnum++)
+        for (cnum = 0; cnum < snd_channels; ++cnum)
         {
             if (channels[cnum].sfxinfo->priority >= sfxinfo->priority)
             {
@@ -380,68 +380,62 @@ static int S_GetChannel(mobj_t *origin, sfxinfo_t *sfxinfo)
 // If the sound is not audible, returns a 0.
 // Otherwise, modifies parameters and returns 1.
 //
-static int S_AdjustSoundParams(mobj_t *listener, mobj_t *source,
-                               int *vol, int *sep)
+static int S_AdjustSoundParams(mobj_t *listener, mobj_t *source, int *vol, int *sep)
 {
-    fixed_t        approx_dist;
-    fixed_t        adx;
-    fixed_t        ady;
-    angle_t        angle;
+    fixed_t     dist;
+    fixed_t     adx;
+    fixed_t     ady;
+    angle_t     angle;
+
+    if (!listener)
+        return 0;
 
     // calculate the distance to sound origin
     //  and clip it if necessary
-    adx = ABS(listener->x - source->x);
-    ady = ABS(listener->y - source->y);
+    // killough 11/98: scale coordinates down before calculations start
+    // killough 12/98: use exact distance formula instead of approximation
+    adx = ABS((listener->x >> FRACBITS) - (source->x >> FRACBITS));
+    ady = ABS((listener->y >> FRACBITS) - (source->y >> FRACBITS));
 
-    // From _GG1_ p.428. Appox. eucledian distance fast.
-    approx_dist = adx + ady - ((adx < ady ? adx : ady) >> 1);
-    
-    if (gamemap != 8 && approx_dist > S_CLIPPING_DIST)
+    if (ady > adx)
     {
-        return 0;
+        dist = adx;
+        adx = ady;
+        ady = dist;
     }
+
+    dist = (adx ? FixedDiv(adx, finesine[(tantoangle[FixedDiv(ady, adx) >> DBITS]
+        + ANG90) >> ANGLETOFINESHIFT]) : 0);
     
+    if (dist > (S_CLIPPING_DIST >> FRACBITS))
+        return 0;
+
     // angle of source to listener
     angle = R_PointToAngle2(listener->x, listener->y, source->x, source->y);
 
-    if (angle > listener->angle)
-    {
-        angle = angle - listener->angle;
-    }
-    else
-    {
-        angle = angle + (0xffffffff - listener->angle);
-    }
+    if (angle <= listener->angle)
+        angle += 0xffffffff;
 
+    angle -= listener->angle;
     angle >>= ANGLETOFINESHIFT;
 
     // stereo separation
-    *sep = 128 - (FixedMul(S_STEREO_SWING, finesine[angle]) >> FRACBITS);
+    *sep = NORM_SEP - FixedMul(S_STEREO_SWING >> FRACBITS, finesine[angle]);
 
     // volume calculation
-    if (approx_dist < S_CLOSE_DIST)
-    {
+    if (dist < (S_CLOSE_DIST >> FRACBITS))
         *vol = snd_SfxVolume;
-    }
     else if (gamemap == 8)
     {
-        if (approx_dist > S_CLIPPING_DIST)
-        {
-            approx_dist = S_CLIPPING_DIST;
-        }
+        if (dist > S_CLIPPING_DIST)
+            dist = S_CLIPPING_DIST;
 
-        *vol = 15 + ((snd_SfxVolume - 15)
-                    * ((S_CLIPPING_DIST - approx_dist) >> FRACBITS))
+        *vol = 15 + ((snd_SfxVolume - 15) * ((S_CLIPPING_DIST - dist) >> FRACBITS))
             / S_ATTENUATOR;
     }
     else
-    {
-        // distance effect
-        *vol = (snd_SfxVolume
-                * ((S_CLIPPING_DIST - approx_dist) >> FRACBITS))
-            / S_ATTENUATOR; 
-    }
-    
+        *vol = snd_SfxVolume * ((S_CLIPPING_DIST >> FRACBITS) - dist) / S_ATTENUATOR;
+
     return (*vol > 0);
 }
 
@@ -465,78 +459,43 @@ static mobj_t *GetSoundListener(void)
     }
 }
 
-static int Clamp(int x)
+void S_StartSoundAtVolume(mobj_t *origin, int sfx_id, int pitch, int volume)
 {
-    if (x < 0)
-    {
-        return 0;
-    }
-    else if (x > 255)
-    {
-        return 255;
-    }
-
-    return x;
-}
-
-void S_StartNewSound(mobj_t *origin, int sfx_id, int pitch)
-{
-    sfxinfo_t *sfx;
-    int rc;
-    int sep;
-    int cnum;
-    int volume = snd_SfxVolume;
+    sfxinfo_t   *sfx;
+    mobj_t      *player = players[consoleplayer].mo;
+    int         sep;
+    int         cnum;
+    int         handle;
 
     // check for bogus sound #
     if (sfx_id < 1 || sfx_id > NUMSFX)
     {
-        I_Error("Bad sfx #: %d", sfx_id);
+        C_Error("Bad sfx #: %d", sfx_id);
     }
 
     sfx = &S_sfx[sfx_id];
 
     // Initialize sound parameters
-    pitch = NORM_PITCH;
-
     if (sfx->link)
     {
         volume += sfx->volume;
-        pitch = sfx->pitch;
 
         if (volume < 1)
-        {
             return;
-        }
 
         if (volume > snd_SfxVolume)
-        {
             volume = snd_SfxVolume;
-        }
     }
 
 
     // Check to see if it is audible,
     //  and if not, modify the params
-    if (origin && origin != players[consoleplayer].mo)
-    {
-        rc = S_AdjustSoundParams(players[consoleplayer].mo,
-                                 origin, &volume, &sep);
-
-        if (origin->x == players[consoleplayer].mo->x
-            && origin->y == players[consoleplayer].mo->y)
-        {        
-            sep = NORM_SEP;
-        }
-
-        if (!rc)
-        {
-            return;
-        }
-    }        
-    else
-    {
+    if (!origin || origin == player)
         sep = NORM_SEP;
-    }
+    else if (!S_AdjustSoundParams(player, origin, &volume, &sep))
+        return;
+    else if (origin->x == player->x && origin->y == player->y)
+        sep = NORM_SEP;
 
     // hacks to vary the sfx pitches
     if (sfx_id >= sfx_sawup && sfx_id <= sfx_sawhit)
@@ -555,7 +514,8 @@ void S_StartNewSound(mobj_t *origin, int sfx_id, int pitch)
     {
         for (cnum = 0; cnum < snd_channels; cnum++)
         {
-            if (channels[cnum].sfxinfo && channels[cnum].origin == origin)
+            if (channels[cnum].sfxinfo && channels[cnum].sfxinfo->singularity == sfx->singularity
+                && channels[cnum].origin == origin)
             {
                 S_StopChannel(cnum);
                 break;
@@ -579,38 +539,37 @@ void S_StartNewSound(mobj_t *origin, int sfx_id, int pitch)
         sfx->usefulness = 1;
     }
 
-    if (sfx->lumpnum < 0)
-    {
-        sfx->lumpnum = I_GetSfxLumpNum(sfx);
-    }
+    // Get lumpnum if necessary
+    // killough 2/28/98: make missing sounds non-fatal
+    if (sfx->lumpnum < 0 && (sfx->lumpnum = I_GetSfxLumpNum(sfx)) < 0)
+        return;
 
-    channels[cnum].pitch = pitch;
-    channels[cnum].handle = I_StartSound(sfx, cnum, volume, sep, channels[cnum].pitch);
+    // Assigns the handle to one of the channels in the
+    //  mix/output buffer.
+    // e6y: [Fix] Crash with zero-length sounds.
+    if ((handle = I_StartSound(sfx, cnum, volume, sep, pitch)) != -1)
+    {
+        channels[cnum].handle = handle;
+        channels[cnum].pitch = pitch;
+    }
 
     if (!menuactive && devparm && !automapactive && sound_info && gamestate == GS_LEVEL && usergame)
     {
-        int priority;
-        int absx;
-        int absy;
-        int dist;
-
         mobj_t *listener = GetSoundListener();
 
-        if (listener == NULL || origin == NULL)
-            goto skip;
+        if (listener != NULL && origin != NULL)
+        {
+            int priority = S_sfx[sfx_id].priority;
+            int absx = ABS(origin->x - listener->x);
+            int absy = ABS(origin->y - listener->y);
+            int dist = absx + absy - (absx > absy ? absy >> 1 : absx >> 1);
 
-        priority = S_sfx[sfx_id].priority;
-        absx = ABS(origin->x - listener->x);
-        absy = ABS(origin->y - listener->y);
-        dist = absx + absy - (absx > absy ? absy >> 1 : absx >> 1);
+            dist >>= FRACBITS;
+            priority *= (10 - (dist / 160));
 
-        dist >>= FRACBITS;
-        priority *= (10 - (dist / 160));
-
-        channels[cnum].sound_id = sfx_id;
-        channels[cnum].priority = priority;
-
-        skip: ;
+            channels[cnum].sound_id = sfx_id;
+            channels[cnum].priority = priority;
+        }
     }
 }        
 
@@ -619,12 +578,12 @@ void S_StartSound(mobj_t *mobj, int sfx_id)
     if (splashscreen && sfx_id == sfx_swtchn)
         return;
 
-    S_StartNewSound(mobj, sfx_id, (mobj ? mobj->pitch : NORM_PITCH));
+    S_StartSoundAtVolume(mobj, sfx_id, (mobj ? mobj->pitch : NORM_PITCH), snd_SfxVolume);
 }
 
 void S_StartSectorSound(degenmobj_t *degenmobj, int sfx_id)
 {
-    S_StartNewSound((mobj_t *)degenmobj, sfx_id, NORM_PITCH);
+    S_StartSoundAtVolume((mobj_t *)degenmobj, sfx_id, NORM_PITCH, snd_SfxVolume);
 }
 
 //
@@ -653,27 +612,22 @@ void S_ResumeSound(void)
 //
 void S_UpdateSounds(mobj_t *listener)
 {
-    int                audible;
     int                cnum;
-    int                volume;
-    int                sep;
-    channel_t          *c;
 
     I_UpdateSound();
 
-    for (cnum = 0; cnum < snd_channels; cnum++)
+    for (cnum = 0; cnum < snd_channels; ++cnum)
     {
-        sfxinfo_t  *sfx;
-        c = &channels[cnum];
-        sfx = c->sfxinfo;
+        channel_t       *c = &channels[cnum];
+        sfxinfo_t       *sfx = c->sfxinfo;
 
-        if (c->sfxinfo)
+        if (sfx)
         {
             if (I_SoundIsPlaying(c->handle))
             {
                 // initialize parameters
-                volume = snd_SfxVolume;
-                sep = NORM_SEP;
+                int volume = snd_SfxVolume;
+                int sep = NORM_SEP;
 
                 if (sfx->link)
                 {
@@ -694,10 +648,7 @@ void S_UpdateSounds(mobj_t *listener)
                 //  or modify their params
                 if (c->origin && listener != c->origin)
                 {
-                    audible = S_AdjustSoundParams(listener, c->origin,
-                                                  &volume, &sep);
-                    
-                    if (!audible)
+                    if (!S_AdjustSoundParams(listener, c->origin, &volume, &sep))
                     {
                         S_StopChannel(cnum);
                     }
@@ -715,6 +666,9 @@ void S_UpdateSounds(mobj_t *listener)
             }
         }
     }
+
+    if (s_randommusic && !I_MusicIsPlaying())
+        S_ChangeMusic(S_GetMusicNum(), false, false);
 }
 
 void S_SetMusicVolume(int volume)

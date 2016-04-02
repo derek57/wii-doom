@@ -1593,7 +1593,7 @@ state_t states[NUMSTATES] =
     //  work the way DOOM Retro does. It is taken from the MBF source
     //  code and courtesy of Lee Killough 7/11/98 (modified by me).
     #define FILL_1_FRAME(x) \
-                             \
+                            \
     {        0,  0,                                0,               NULL, x + EXTRASTATES_START + 2       }, // EXTRASTATES_START
 
     #define FILL_2_FRAMES(x)    FILL_1_FRAME(x)     FILL_1_FRAME(x + 1)
@@ -10582,3 +10582,4 @@ offset_t sproffsets[] =
     { "YSKUB0",      7,   14,  13,  16, MT_MISC7        }, //    7,   18
     { "",            0,    0,   0,   0, NOTYPE          }
 };
+

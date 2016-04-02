@@ -131,7 +131,7 @@ static void InitSfxModule(dboolean use_sfx_prefix)
     sound_module = sound_modules[snd_module];
 
     C_Output("SFX playing at a sample rate of %.1fkHz on %i channels using %s module.",
-            snd_samplerate / 1000.0f, snd_channels, snd_module == 1 ? "PC-SPEAKER" : "SDL");
+            snd_samplerate / 1000.0f, snd_channels, snd_module ? "PC-SPEAKER" : "SDL");
 }
 
 // Initialize music according to snd_musicdevice.
@@ -367,10 +367,6 @@ void I_StopSong(void)
     }
 }
 
-//
-// [nitr8] UNUSED
-//
-/*
 dboolean I_MusicIsPlaying(void)
 {
     if (music_module != NULL)
@@ -383,6 +379,10 @@ dboolean I_MusicIsPlaying(void)
     }
 }
 
+//
+// [nitr8] UNUSED
+//
+/*
 void I_BindSoundVariables(void)
 {
 }

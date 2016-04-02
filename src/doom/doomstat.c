@@ -39,7 +39,6 @@ char             *gamedescription;
 // Show messages has default, 0 = off, 1 = on
 
 // specifies whether to follow the player around
-int              timer_info = 0;
 int              chaingun_tics = 4;
 int              background_color = 231;
 
@@ -59,6 +58,7 @@ dboolean         randompitch;
 dboolean         opl_stereo_correct;
 dboolean         display_ticker;
 dboolean         memory_usage;
+dboolean         timer_info = false;
 
 dboolean         am_overlay = false;
 dboolean         nerve_pwad = false;
@@ -158,12 +158,27 @@ dboolean         BTSXE3B = false;
 dboolean         autoaim = true;
 dboolean         render_mode = true;
 dboolean         d_fliplevels = false;
+dboolean         d_colblood = false;
+dboolean         d_colblood2 = false;
+dboolean         d_swirl = false;
+dboolean         icontype = false;
+dboolean         snd_module = false;
+dboolean         opl_type = false;
+dboolean         display_fps = false;
+dboolean         s_randommusic = false;
+dboolean         slowwater = false;
 
 // if true, load all graphics at start 
 dboolean         precache = true;
 
 // Blocky mode, has default, 0 = high, 1 = normal
 dboolean         detailLevel = false;
+
+#ifdef WII
+dboolean         show_endoom = false;
+#else
+dboolean         show_endoom = true;
+#endif
 
 fixed_t          forwardmove = 29;
 fixed_t          sidemove = 24; 
@@ -177,31 +192,18 @@ int              screenblocks = 9;
 // Gamma correction level to use
 int              usegamma = 10;
 
-int              d_colblood = 0;
-int              d_colblood2 = 0;
-int              d_swirl;
 int              background_type = 0;
-int              icontype = 0;
 int              wipe_type = 2;
 int              mouselook;
 int              mspeed = 2;
 int              mus_engine = 1;
-int              snd_module = 0;
 int              snd_chans = 1;
 int              sound_channels = 8;
-int              opl_type = 0;
 int              use_libsamplerate = 0;
 int              gore_amount = 1;
-int              display_fps = 0;
 int              font_shadow = 0;
 int              stillbob = 0;
 int              movebob = 75;
-
-#ifdef WII
-int              show_endoom = 0;
-#else
-int              show_endoom = 1;
-#endif
 
 int              bloodsplat_particle = 0;
 int              bulletpuff_particle = 0;

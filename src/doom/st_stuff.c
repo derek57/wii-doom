@@ -538,7 +538,6 @@ cheatseq_t        cheat_powerup[7] =
 
 cheatseq_t cheat_choppers = CHEAT("idchoppers", 0);
 cheatseq_t cheat_clev = CHEAT("idclev", 2);
-cheatseq_t cheat_clev10 = CHEAT("idclev10", 0);
 cheatseq_t cheat_mypos = CHEAT("idmypos", 0);
 
 
@@ -952,102 +951,113 @@ dboolean ST_Responder(event_t *ev)
             }
         }
 
-        // 'clev10' change-level cheat
-        if (!netgame && cht_CheckCheat(&cheat_clev10, ev->data2) && fsize == 12538385 && !beta_style)
-        {
-            HU_PlayerMessage(STSTR_CLEV, true);
-            G_DeferedInitNew(gameskill, 1, 10);
-        }
-
-        // 'clev' change-level cheat
         if (!netgame && cht_CheckCheat(&cheat_clev, ev->data2) && !beta_style)
         {
             char        buf[3];
-            char        lump[6];
-            int         epsd;
-            int         map;
-      
+
             cht_GetParam(&cheat_clev, buf);
-      
-            if (gamemode == commercial)
+
+            if (buf[0] == '1' && buf[1] == '0')
             {
-                epsd = 1;
-                map = (buf[0] - '0') * 10 + buf[1] - '0';
-                M_snprintf(lump, sizeof(lump), "MAP%c%c", buf[0], buf[1]);
+                // 'clev10' change-level cheat
+                if ((fsize == 12538385 && gamemode == retail) || gamemode == commercial)
+                {
+                    HU_PlayerMessage(STSTR_CLEV, true);
+                    G_DeferedInitNew(gameskill, 1, 10);
+                }
+                else
+                {
+                    HU_PlayerMessage("invalid map", true);
+                    return false;
+                }
             }
             else
             {
-                epsd = buf[0] - '0';
-                map = buf[1] - '0';
-                M_snprintf(lump, sizeof(lump), "E%cM%c", buf[0], buf[1]);
+                // 'clev' change-level cheat
+                char        lump[6];
+                int         epsd;
+                int         map;
 
-                // Chex.exe always warps to episode 1.
-                if (gameversion == exe_chex)
+                if (gamemode == commercial)
                 {
-                    if (epsd > 1)
-                    {
-                        epsd = 1;
-                    }
+                    epsd = 1;
+                    map = (buf[0] - '0') * 10 + buf[1] - '0';
+                    M_snprintf(lump, sizeof(lump), "MAP%c%c", buf[0], buf[1]);
+                }
+                else
+                {
+                    epsd = buf[0] - '0';
+                    map = buf[1] - '0';
+                    M_snprintf(lump, sizeof(lump), "E%cM%c", buf[0], buf[1]);
 
-                    if (map > 5)
+                    // Chex.exe always warps to episode 1.
+                    if (gameversion == exe_chex)
                     {
-                        map = 5;
+                        if (epsd > 1)
+                        {
+                            epsd = 1;
+                        }
+
+                        if (map > 5)
+                        {
+                            map = 5;
+                        }
                     }
                 }
-            }
 
-            // [BH] only allow MAP01 to MAP09 when NERVE.WAD loaded
-            if (W_CheckNumForName(lump) < 0
-                    || (gamemission == pack_nerve && map > 9)
-                    || (BTSX && W_CheckMultipleLumps(lump) == 1))
-            {
-                HU_PlayerMessage("invalid map", true);
-                return false;
-            }
+                // [BH] only allow MAP01 to MAP09 when NERVE.WAD loaded
+                if (W_CheckNumForName(lump) < 0
+                        || (gamemission == pack_nerve && map > 9)
+                        || (BTSX && W_CheckMultipleLumps(lump) == 1))
+                {
+                    HU_PlayerMessage("invalid map", true);
+                    return false;
+                }
 
-            // Catch invalid maps.
-            if (epsd < 1)
-            {
-                HU_PlayerMessage("invalid map", true);
-                return false;
-            }
+                // Catch invalid maps.
+                if (epsd < 1)
+                {
+                    HU_PlayerMessage("invalid map", true);
+                    return false;
+                }
 
-            if (map < 1)
-            {
-                HU_PlayerMessage("invalid map", true);
-                return false;
-            }
+                if (map < 1)
+                {
+                    HU_PlayerMessage("invalid map", true);
+                    return false;
+                }
 
-            // Ohmygod - this is not going to work.
-            if ((gamemode == retail) && ((epsd > 4) || (map > 9)))
-            {
-                HU_PlayerMessage("invalid map", true);
-                return false;
-            }
+                // Ohmygod - this is not going to work.
+                if ((gamemode == retail) && ((epsd > 4) || (map > 9)))
+                {
+                    HU_PlayerMessage("invalid map", true);
+                    return false;
+                }
 
-            if ((gamemode == registered) && ((epsd > 3) || (map > 9)))
-            {
-                HU_PlayerMessage("invalid map", true);
-                return false;
-            }
+                if ((gamemode == registered) && ((epsd > 3) || (map > 9)))
+                {
+                    HU_PlayerMessage("invalid map", true);
+                    return false;
+                }
 
-            if ((gamemode == shareware) && ((epsd > 1) || (map > 9)))
-            {
-                HU_PlayerMessage("invalid map", true);
-                return false;
-            }
+                if ((gamemode == shareware) && ((epsd > 1) || (map > 9)))
+                {
+                    HU_PlayerMessage("invalid map", true);
+                    return false;
+                }
 
-            // The source release has this check as map > 34. However, Vanilla
-            // Doom allows IDCLEV up to MAP40 even though it normally crashes.
-            if ((gamemode == commercial) && ((epsd > 1) || (map > 40)))
-            {
-                HU_PlayerMessage("invalid map", true);
-                return false;
-            }
+                // The source release has this check as map > 34. However, Vanilla
+                // Doom allows IDCLEV up to MAP40 even though it normally crashes.
+                if ((gamemode == commercial) && ((epsd > 1) || (map > 40)))
+                {
+                    HU_PlayerMessage("invalid map", true);
+                    return false;
+                }
 
-            // So be it.
-            HU_PlayerMessage(STSTR_CLEV, true);
-            G_DeferedInitNew(gameskill, epsd, map);
+                // So be it.
+                HU_PlayerMessage(STSTR_CLEV, true);
+                G_DeferedInitNew(gameskill, epsd, map);
+            }
         }
     }
 #endif
@@ -1617,7 +1627,7 @@ void ST_Drawer(dboolean fullscreen, dboolean refresh)
     // If just after ST_Start(), refresh all
     if (st_firsttime || beta_style || (scaledviewheight == SCREENHEIGHT && viewactive))
     {
-        if (screenSize < 8)
+        if (screenSize < 8 || (automapactive && !am_overlay && d_statusmap))
         {
             if (usergame && !menuactive)
                 ST_doRefresh();

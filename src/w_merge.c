@@ -76,8 +76,7 @@ static int            sprite_frames_alloced;
 
 extern dboolean       merge;
 extern dboolean       version13;
-
-extern int            dont_show_adding_of_resource_wad;
+extern dboolean       dont_show_adding_of_resource_wad;
 
 
 // Search in a list to find a lump with a particular name
@@ -584,9 +583,9 @@ dboolean W_MergeFile(char *filename, dboolean automatic)
 #ifdef WII
     if (devparm)
     {
-        if (gamemode == shareware || load_extra_wad == 1 || version13 == true)
+        if (gamemode == shareware || load_extra_wad || version13)
         {
-            if (dont_show_adding_of_resource_wad == 0)
+            if (!dont_show_adding_of_resource_wad)
             {
                 printf("         adding %s\n", filename);
             }

@@ -1,16 +1,16 @@
 /*
 ========================================================================
 
-                               DOOM Retro
+                           D O O M  R e t r o
          The classic, refined DOOM source port. For Windows PC.
 
 ========================================================================
 
-  Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company.
-  Copyright (C) 2013-2015 Brad Harding.
+  Copyright © 1993-2012 id Software LLC, a ZeniMax Media company.
+  Copyright © 2013-2016 Brad Harding.
 
-  DOOM Retro is a fork of Chocolate DOOM by Simon Howard.
-  For a complete list of credits, see the accompanying AUTHORS file.
+  DOOM Retro is a fork of Chocolate DOOM.
+  For a list of credits, see the accompanying AUTHORS file.
 
   This file is part of DOOM Retro.
 
@@ -31,17 +31,15 @@
   company, in the US and/or other countries and is used without
   permission. All other trademarks are the property of their respective
   holders. DOOM Retro is in no way affiliated with nor endorsed by
-  id Software LLC.
+  id Software.
 
 ========================================================================
 */
-
 
 #include "doomdata.h"
 #include "doomdef.h"
 #include "p_fix.h"
 #include "r_defs.h"
-
 
 vertexfix_t vertexfix[] =
 {
@@ -250,7 +248,6 @@ linefix_t linefix[] =
     { doom2,            1,   8,     276,    1, "COMPTALL", "",            "",            DEFAULT,   DEFAULT, ML_DONTPEGBOTTOM,        DEFAULT,                                    DEFAULT },
     { doom2,            1,   8,     598,    0, "",         "GRAY5",       "",            DEFAULT,   DEFAULT, DEFAULT,                 DEFAULT,                                    DEFAULT },
 
-//  { doom2,            1,  10,     750,    0, "",         "",            "",            DEFAULT,   DEFAULT, DEFAULT,                 NoSpecial,                                  DEFAULT },
     { doom2,            1,  10,     880,    0, "",         "",            "",            DEFAULT,   DEFAULT, ML_DONTDRAW,             DEFAULT,                                    DEFAULT },
     { doom2,            1,  10,     899,    1, "",         "-",           "",            DEFAULT,   DEFAULT, DEFAULT,                 DEFAULT,                                    DEFAULT },
     { doom2,            1,  10,     900,    1, "",         "-",           "",            DEFAULT,   DEFAULT, DEFAULT,                 DEFAULT,                                    DEFAULT },
@@ -993,4 +990,3 @@ thingfix_t thingfix[] =
 
     { -1,               0,   0,     0, 0,                      DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT,  DEFAULT                          }
 };
-

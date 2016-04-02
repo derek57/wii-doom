@@ -391,6 +391,8 @@ int M_Random(void);
 
 int M_RandomInt(int lower, int upper);
 
+int M_RandomIntNoRepeat(int lower, int upper, int previous);
+
 // As M_Random, but used only by the play simulation.
 int P_Random(void);
 

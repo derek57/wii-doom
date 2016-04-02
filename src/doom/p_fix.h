@@ -47,11 +47,6 @@
 #define E2M2                    (gamemission == doom && gameepisode == 2 && gamemap == 2 && canmodify)
 #define MAP12                   (gamemission == doom2 && gamemap == 12 && canmodify)
 #define MTF_NETGAME             16
-#define ML_DRAWASWALL           1024
-#define ML_TRIGGER666           2048
-
-// [BH] Line won't be shown as teleporter in automap.
-#define ML_TELEPORTTRIGGERED    4096
 
 
 typedef struct

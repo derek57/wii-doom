@@ -323,6 +323,9 @@ static void P_DripEffect(mobj_t *actor);
 static void P_ExplosionParticles(fixed_t, fixed_t, fixed_t, byte, byte);
 
 
+mobj_t *ricochet_sound;
+
+
 extern dboolean is_liquid_floor;
 extern dboolean is_liquid_ceiling;
 extern dboolean water_hit;
@@ -522,7 +525,6 @@ void P_RunEffects(void)
 // haleyjd 05/19/02: partially rewrote to not make assumptions
 // about struct member order and alignment in memory
 //
-
 static particle_t *JitterParticle(int ttl)
 {
     particle_t *particle = newParticle();
@@ -595,10 +597,10 @@ static void P_RunEffect(mobj_t *actor, unsigned int effects)
 {
     angle_t      moveangle = R_PointToAngle2(0, 0, actor->momx, actor->momy);
 
-    if (actor->effect_flies_can_spawn == true && (((effects & FX_FLIES) && actor->health <= 0)
+    if (actor->effect_flies_can_spawn && (((effects & FX_FLIES) && actor->health <= 0)
         /*|| ((effects & FX_FLIESONDEATH) && actor->tics == -1 && actor->movecount >= 4 * TICRATE)*/) && d_spawnflies)
     {
-        if (actor->effect_flies_shot == true)
+        if (actor->effect_flies_shot)
             return;
 
         if (actor->effect_flies_start_timer < 360)
@@ -963,17 +965,20 @@ void P_SmokePuff(int count, fixed_t x, fixed_t y, fixed_t z, angle_t angle, int 
 
     if (particle_sounds)
     {
-        mobj_t *mo = P_SpawnMobj(x, y, z, MT_PARTICLE);
+        ricochet_sound = P_SpawnMobj(x, y, z, MT_PARTICLE);
 
-        if (isliquid[mo->subsector->sector->floorpic] && water_hit)
-            S_StartSound(mo, sfx_gloop);
-        else if (!hit_enemy && !isliquid[mo->subsector->sector->floorpic])
+        if (isliquid[ricochet_sound->subsector->sector->floorpic] && water_hit)
+            S_StartSound(ricochet_sound, sfx_gloop);
+        else if (!hit_enemy && !isliquid[ricochet_sound->subsector->sector->floorpic])
         {
             int t = P_Random() % 6;
 
             if (t > 0)
-                S_StartSound(mo, sfx_ric1 + t);
+                S_StartSound(ricochet_sound, sfx_ric1 + t);
         }
+
+        ricochet_sound->tics = 50;
+        ricochet_sound->state->nextstate = S_NULL;
     }
 }
 
@@ -1145,7 +1150,7 @@ void P_DisconnectEffect(mobj_t *actor)
 
         for (i = 64; i; i--)
         {
-            particle_t *p = JitterParticle (TICRATE * 2);
+            particle_t *p = JitterParticle(TICRATE * 2);
 
             if (!p)
                 break;

@@ -209,6 +209,11 @@ dboolean                main_loop_started = false;
 dboolean                version13 = false;
 dboolean                realframe;
 dboolean                splashscreen;
+dboolean                dots_enabled = false;
+dboolean                fps_enabled = false;
+dboolean                wad_message_has_been_shown = false;
+dboolean                dont_show_adding_of_resource_wad = false;
+dboolean                resource_wad_exists = false;
 
 int                     startepisode;
 int                     startmap;
@@ -216,11 +221,6 @@ int                     startloadgame;
 int                     fsize = 0;
 int                     fsizerw = 0;
 int                     fsizerw2 = 0;
-int                     wad_message_has_been_shown = 0;
-int                     dont_show_adding_of_resource_wad = 0;
-int                     dots_enabled = 0;
-int                     fps_enabled = 0;
-int                     resource_wad_exists = 0;
 int                     demosequence;
 int                     pagetic;
 int                     runcount = 0;
@@ -366,14 +366,14 @@ static void D_Display(int scrn)
         {
             // ADDED CHECKS FOR PSP TO PREVENT CRASH...
             // ...UPON WIPING SCREEN WITH ENABLED DISPLAY TICKER
-            if (dots_enabled == 1)
+            if (dots_enabled)
             {
                 display_ticker = false;
             }
 
-            if (fps_enabled == 1)
+            if (fps_enabled)
             {
-                display_fps = 0;
+                display_fps = false;
             }
 
             wipe = true;
@@ -383,14 +383,14 @@ static void D_Display(int scrn)
         {
             // ADDED CHECKS FOR PSP TO PREVENT CRASH...
             // ...UPON WIPING SCREEN WITH ENABLED DISPLAY TICKER
-            if (dots_enabled == 1)
+            if (dots_enabled)
             {
                 display_ticker = true;
             }
 
-            if (fps_enabled == 1)
+            if (fps_enabled)
             {
-                display_fps = 1;
+                display_fps = true;
             }
 
             wipe = false;
@@ -559,7 +559,7 @@ static void D_Display(int scrn)
             HU_DrawStats();
         }
 
-        if (timer_info == 1)
+        if (timer_info)
         {
             AM_DrawWorldTimer();
         }
@@ -1221,12 +1221,12 @@ static dboolean D_AddFile(char *filename, dboolean automatic)
 
     if ((gamemode == shareware ||
 #ifdef WII
-       load_extra_wad == 1 ||
+       load_extra_wad ||
 #endif
-       version13 == true) && !beta_style
+       version13) && !beta_style
        )
     {
-//        if (dont_show_adding_of_resource_wad == 0)
+//        if (!dont_show_adding_of_resource_wad)
         {
             printf("         adding %s\n", filename);
         }
@@ -1598,7 +1598,7 @@ void D_DoomMain(void)
 
     if (fprw)
     {
-        resource_wad_exists = 1;
+        resource_wad_exists = true;
 
         fclose(fprw);
 
@@ -1606,7 +1606,7 @@ void D_DoomMain(void)
     }
     else
     {
-        resource_wad_exists = 0;
+        resource_wad_exists = false;
     }
 
     if (print_resource_pwad_error)
@@ -1659,7 +1659,7 @@ void D_DoomMain(void)
         I_QuitSerialFail();
     }
 
-    if (resource_wad_exists == 0)
+    if (!resource_wad_exists)
     {
         printf("\n\n\n\n\n");
         printf(" ===============================================================================");
@@ -1934,11 +1934,11 @@ void D_DoomMain(void)
 
         if (mus_engine == 1)
         {
-            opl_type = 0;
+            opl_type = false;
         }
         else
         {
-            opl_type = 1;
+            opl_type = true;
         }
     }
     else if (mus_engine == 3)
@@ -1958,29 +1958,29 @@ void D_DoomMain(void)
         drawgrid = false;
         followplayer = true;
         show_stats = false;
-        timer_info = 0;
+        timer_info = false;
         use_vanilla_weapon_change = true;
         chaingun_tics = 4;
         crosshair = false;
-        d_colblood = 0;
-        d_colblood2 = 0;
-        d_swirl = 0;
+        d_colblood = false;
+        d_colblood2 = false;
+        d_swirl = false;
         autoaim = true;
         background_type = 0;
-        icontype = 0;
+        icontype = false;
         wipe_type = 2;
         mouselook = 0;
         mspeed = 2;
         mus_engine = 1;
-        snd_module = 0;
+        snd_module = false;
         snd_chans = 1;
         sound_channels = 8;
-        opl_type = 0;
+        opl_type = false;
         use_libsamplerate = 0;
         gore_amount = 1;
-        display_fps = 0;
+        display_fps = false;
         font_shadow = 0;
-        show_endoom = 1;
+        show_endoom = true;
         forwardmove = 29;
         sidemove = 24; 
         turnspeed = 7;
@@ -1991,7 +1991,7 @@ void D_DoomMain(void)
         mouseSensitivity = 5;
         r_bloodsplats_max = 32768;
         correct_lost_soul_bounce = true;
-        dots_enabled = 0;
+        dots_enabled = false;
 
         display_ticker = false;
         am_overlay = false;
@@ -2879,7 +2879,7 @@ void D_DoomMain(void)
             fsize != 12408292 && fsize != 12538385 && fsize != 12361532 &&
             fsize != 7585664)
     {
-        icontype = 0;
+        icontype = false;
     }
 
     I_EnableLoadingDisk(SCREENWIDTH - LOADING_DISK_W, SCREENHEIGHT - LOADING_DISK_H);
@@ -2993,21 +2993,21 @@ void D_DoomMain(void)
 
     if (gamemode != shareware || gameversion == exe_chex)
     {
-        if (load_extra_wad == 1)
+        if (load_extra_wad)
         {
-            if (extra_wad_slot_1_loaded == 1)
+            if (extra_wad_slot_1_loaded)
             {
                 W_MergeFile(extra_wad_1, false);
             }
 
             if (!nerve_pwad && !master_pwad)
             {
-                if (extra_wad_slot_2_loaded == 1)
+                if (extra_wad_slot_2_loaded)
                 {
                     W_MergeFile(extra_wad_2, false);
                 }
 
-                if (extra_wad_slot_3_loaded == 1)
+                if (extra_wad_slot_3_loaded)
                 {
                     W_MergeFile(extra_wad_3, false);
                 }
@@ -3058,7 +3058,7 @@ void D_DoomMain(void)
 */
     }
 
-    dont_show_adding_of_resource_wad = 0;
+    dont_show_adding_of_resource_wad = false;
 
 #ifndef WII
     // Load PWAD files.
@@ -3465,7 +3465,7 @@ void D_DoomMain(void)
         {
             uint32_t buttons;
 
-            if (wad_message_has_been_shown == 1)
+            if (wad_message_has_been_shown)
             {
                 goto skip_showing_message;
             }
@@ -3497,7 +3497,7 @@ void D_DoomMain(void)
                 break;
             }
 
-            wad_message_has_been_shown = 1;
+            wad_message_has_been_shown = true;
         }
 #else
         if (!beta_style)

@@ -146,6 +146,10 @@ fixed_t         sidemve;
 fixed_t         low_health_forwardmove = 17;
 fixed_t         low_health_sidemove = 15;
 
+fixed_t         slow_water_forwardmove = 17;
+fixed_t         slow_water_sidemove = 15;
+
+int             slow_water_turnspeed = 5;
 int             low_health_turnspeed = 5;
 
 // If non-zero, exit the level after this number of minutes.
@@ -201,6 +205,7 @@ int             joy_2 = 65536;
 int             bodyqueslot; 
 int             vanilla_savegame_limit = 0;
 //int             vanilla_demo_limit = 1; 
+
 #ifdef WII
 int             joybstrafe;
 int             joybinvright = 0;
@@ -221,6 +226,7 @@ int             joybinvleft = 14;
 int             joybspeed = 15;
 int             joybconsole = 16;
 #endif
+
 dboolean        secret_1 = false;
 dboolean        secret_2 = false;
 dboolean        secretexit; 
@@ -268,6 +274,8 @@ dboolean        turbodetected[MAXPLAYERS];
 
 // low resolution turning for longtics
 dboolean        lowres_turn;
+
+dboolean        on_low_health = false;
 /*
 // cph's doom 1.91 longtics hack
 dboolean        longtics;
@@ -350,7 +358,6 @@ extern dboolean netgameflag;
 extern dboolean aiming_help;
 extern dboolean messageNeedsInput;
 extern dboolean setsizeneeded;
-extern dboolean map_flag;
 extern dboolean transferredsky;
 extern dboolean long_tics;
 extern dboolean mouse_grabbed;
@@ -621,7 +628,7 @@ void G_BuildTiccmd(ticcmd_t *cmd, int maketic)
     {
         // fprintf(stderr, "up\n");
 #ifdef WII
-        if (dont_move_forwards == true)
+        if (dont_move_forwards)
 #else
         {
             not_walking = false;
@@ -634,7 +641,7 @@ void G_BuildTiccmd(ticcmd_t *cmd, int maketic)
     {
         // fprintf(stderr, "down\n");
 #ifdef WII
-        if (dont_move_backwards == true)
+        if (dont_move_backwards)
 #else
         {
             not_walking = false;
@@ -671,9 +678,19 @@ void G_BuildTiccmd(ticcmd_t *cmd, int maketic)
         forwardmve = low_health_forwardmove;
         sidemve = low_health_sidemove;
         turnspd = low_health_turnspeed;
+        on_low_health = true;
+    }
+    else if (isliquid[players[consoleplayer].mo->subsector->sector->floorpic]
+        && !on_low_health && slowwater)
+    {
+        forwardmve = low_health_forwardmove;
+        sidemve = low_health_sidemove;
+        turnspd = low_health_turnspeed;
     }
     else
     {
+        on_low_health = false;
+
         if (
 #ifdef WII
             joybuttons[joybspeed]
@@ -2897,21 +2914,6 @@ void G_InitNew(skill_t skill, int episode, int map)
 
     if (map < 1)
         map = 1;
-
-    if (fsize != 12538385 || gameepisode > 1)
-    {
-        if (map > 9 && gamemode != commercial && !map_flag)
-            map = 9;
-        else if (map_flag)
-            map = 10;
-    }
-    else
-    {
-        if (fsize == 12538385 && gameepisode == 1 && map > 10 && gamemode != commercial)
-            map = 10;
-    }
-
-    map_flag = false;
 
     M_ClearRandom();
 

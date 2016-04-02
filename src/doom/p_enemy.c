@@ -188,11 +188,8 @@ fixed_t           viletryx;
 fixed_t           viletryy;
 
 // 1/11/98 killough: Limit removed on special lines crossed
-mobj_t            *soundtarget;
 mobj_t            *corpsehit;
 mobj_t            **braintargets;
-
-mobjtype_t        chunk_type;
 
 dboolean          on_ground;
 
@@ -203,7 +200,6 @@ unsigned int      braintargeted;
 int               old_t;
 int               old_u;
 int               TRACEANGLE = 0xc000000;
-int               numsplats;
 
 
 extern dboolean   not_walking;
@@ -219,7 +215,7 @@ extern void       A_ReFire(player_t *player, pspdef_t *psp);
 
 //
 // ENEMY THINKING
-// Enemies are allways spawned
+// Enemies are always spawned
 // with targetplayer = -1, threshold = 0
 // Most monsters are spawned unaware of all players,
 // but some can be made preaware
@@ -606,7 +602,7 @@ static dboolean P_Move(mobj_t *actor, dboolean dropoff)
     else
         actor->flags &= ~MF_INFLOAT;
 
-    // killough 11/98: fall more slowly, under gravity, if felldown==true
+    // killough 11/98: fall more slowly, under gravity, if felldown == true
     if (!(actor->flags & MF_FLOAT) && !felldown)
     {
         if (actor->z > actor->floorz && d_splash)
@@ -2506,7 +2502,7 @@ void A_MoreGibs(mobj_t *actor)
                 if ((t == 0 || t == 1 || t == 2 || t == 3 || t == 4 || t == 5 || 
                     t == 6 || t == 7 || t == 8 || t == 9) && t != old_u)
                 {
-                    if (!snd_module)
+                    if (!snd_module && !actor->state->dehacked)
                         S_StartSound(actor, sfx_splsh0 + t);
 
                     old_u = t;

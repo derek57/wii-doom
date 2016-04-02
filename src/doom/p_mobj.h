@@ -344,10 +344,7 @@ typedef enum
     MF2_NOTELEPORT                = 0x10000000,
 
     // does not splash
-    MF2_NOSPLASH                  = 0x20000000,
-
-    // leave a decal in some way
-    MF2_MARKDECAL                 = 0x40000000
+    MF2_NOSPLASH                  = 0x20000000
 
 } mobjflag2_t;
 
@@ -496,6 +493,7 @@ typedef struct mobj_s
 
     int                    effect_flies_start_timer;
     int                    effect_flies_sound_timer;
+    int                    particle_sound_timer;
 
     // enemy dead but shot again with flies surrounding
     dboolean               effect_flies_can_spawn;

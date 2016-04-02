@@ -2028,10 +2028,10 @@ static void AM_drawThings(void)
 
                             angle,
 
-                            /* cph 2006/07/30 - Show count-as-kills in red. */
+                            // cph 2006/07/30 - Show count-as-kills in red.
                             ((t->flags & (MF_COUNTKILL | MF_CORPSE)) == MF_COUNTKILL) ? mapcolor_enemy :
 
-                            /* bbm 2/28/03 Show countable items in yellow. */
+                            // bbm 2/28/03 Show countable items in yellow.
                             (t->flags & MF_COUNTITEM) ? mapcolor_item : mapcolor_sprt, p.x, p.y);
 
                 }

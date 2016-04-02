@@ -179,6 +179,25 @@ void P_AllocateThinker(thinker_t *thinker)
 //
 // P_RunThinkers
 //
+// killough 4/25/98:
+//
+// Fix deallocator to stop using "next" pointer after node has been freed
+// (a DOOM bug).
+//
+// Process each thinker. For thinkers which are marked deleted, we must
+// load the "next" pointer prior to freeing the node. In DOOM, the "next"
+// pointer was loaded AFTER the thinker was freed, which could have caused
+// crashes.
+//
+// But if we are not deleting the thinker, we should reload the "next"
+// pointer after calling the function, in case additional thinkers are
+// added at the end of the list.
+//
+// killough 11/98:
+//
+// Rewritten to delete nodes implicitly, by making currentthinker
+// external and using P_RemoveThinkerDelayed() implicitly.
+//
 void P_RunThinkers(void)
 {
 //    thinker_t *currentthinker, *nextthinker;
@@ -187,26 +206,9 @@ void P_RunThinkers(void)
 
     while (currentthinker != &thinkercap)
     {
-/*
-        nextthinker = currentthinker->next;
+        if (currentthinker->function)
+            currentthinker->function(currentthinker);
 
-        if (currentthinker->function == NULL)
-        {
-            // time to remove it
-            currentthinker->next->prev = currentthinker->prev;
-            currentthinker->prev->next = currentthinker->next;
-            Z_Free(currentthinker);
-        }
-        else
-        {
-*/
-            if (currentthinker->function)
-                currentthinker->function(currentthinker);
-/*
-        }
-
-        currentthinker = nextthinker;
-*/
         currentthinker = currentthinker->next;
     }
 }
@@ -275,12 +277,12 @@ void P_Ticker(void)
 //
 void P_SetTarget(mobj_t **mop, mobj_t *targ)
 {
+    // If there was a target already, decrease its refcount
     if (*mop)
-        // If there was a target already, decrease its refcount
         (*mop)->thinker.references--;
 
+    // Set new target and if non-NULL, increase its counter
     if ((*mop = targ))
-        // Set new target and if non-NULL, increase its counter
         targ->thinker.references++;
 }
 

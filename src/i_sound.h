@@ -34,11 +34,14 @@
 
 typedef struct
 {
-    int id;
+    int            id;
+    int            distance;
+
     unsigned short priority;
-    char *name;
-    mobj_t *mo;
-    int distance;
+
+    char           *name;
+
+    mobj_t         *mo;
 
 } ChanInfo_t;
 
@@ -50,47 +53,47 @@ typedef struct sfxinfo_struct        sfxinfo_t;
 struct sfxinfo_struct
 {
     // tag name, used for hexen.
-    char *tagname;
+    char        *tagname;
     
     // lump name.  If we are running with use_sfx_prefix=true, a
     // 'DS' (or 'DP' for PC speaker sounds) is prepended to this.
-    char name[9];
+    char        name[9];
 
     // Sfx priority
-    int priority;
+    int         priority;
 
     // referenced sound if a link
-    sfxinfo_t *link;
+    sfxinfo_t   *link;
 
     // pitch if a link
-    int pitch;
+    int         pitch;
 
     // volume if a link
-    int volume;
+    int         volume;
 
     // this is checked every second to see if sound
     // can be thrown out (if 0, then decrement, if -1,
     // then throw out, if > 0, then it is in use)
-    int usefulness;
+    int         usefulness;
 
     // lump number of sfx
-    int lumpnum;                
+    int         lumpnum;                
 
     // Maximum number of channels that the sound can be played on 
     // (Heretic)
-    int numchannels;
+    int         numchannels;
 
     // data used by the low level code
-    void *driver_data;
+    void        *driver_data;
 
-    int distance;
+    int         distance;
 
-    mobj_t *mo;
+    mobj_t      *mo;
 
     // Sfx singularity (only one at a time)
     int         singularity;
 
-    ChanInfo_t chan[8];
+    ChanInfo_t  chan[8];
 };
 
 //
@@ -99,16 +102,16 @@ struct sfxinfo_struct
 typedef struct
 {
     // up to 6-character name
-    char *name;
+    char        *name;
 
     // lump number of music
-    int lumpnum;
+    int         lumpnum;
     
     // music data
-    void *data;
+    void        *data;
 
     // music handle once registered
-    void *handle;
+    void        *handle;
     
 } musicinfo_t;
 

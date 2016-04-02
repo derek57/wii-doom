@@ -51,6 +51,7 @@ int M_vsnprintf(char *buf, size_t buf_len, const char *s, va_list args);
 int M_snprintf(char *buf, size_t buf_len, const char *s, ...);
 int search_string(char src[], char str[]);
 int randInRange(int min, int max);
+int Clamp(int x);
 
 void M_MakeDirectory(char *dir);
 void M_ExtractFileBase(char *path, char *dest);

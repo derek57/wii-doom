@@ -55,10 +55,10 @@ static u32        *xfb;
 static GXRModeObj *rmode;
 
 
-int               is_chex_2 = 0;
-int               extra_wad_loaded = 0;
-int               load_extra_wad = 0;
-int               load_dehacked = 0;
+dboolean          is_chex_2 = false;
+dboolean          extra_wad_loaded = false;
+dboolean          load_extra_wad = false;
+dboolean          load_dehacked = false;
 
 dboolean          multiplayer = false;
 dboolean          multiplayer_flag = false;
@@ -272,13 +272,13 @@ static s32 __Menu_RetrieveList(char *inPath, fatFile **outbuf, u32 *outlen)
                 if (strlen(entry->d_name) > 4)
                 {
                     if (!stricmp(entry->d_name + strlen(entry->d_name) - 4, ".wad") ||
-                            !stricmp(entry->d_name + strlen(entry->d_name) - 4, ".deh") ||
-                            !stricmp(entry->d_name + strlen(entry->d_name) - 4, ".bex"))
+                        !stricmp(entry->d_name + strlen(entry->d_name) - 4, ".deh") ||
+                        !stricmp(entry->d_name + strlen(entry->d_name) - 4, ".bex"))
                         addFlag = true;
                 }
             }
 
-            if (addFlag == true)
+            if (addFlag)
             {
                 fatFile *file = &buffer[cnt++];
     
@@ -2097,12 +2097,12 @@ static void Menu_WadList(void)
                 else if (strncmp(calculated_md5_string,
                             known_md5_string_nerve_bfg_pwad, 32) == 0)
                 {
-                    load_extra_wad = 1;
+                    load_extra_wad = true;
 
                     M_StringCopy(extra_wad_1, check, sizeof(extra_wad_1));
                     M_StringCopy(stripped_extra_wad_1, tmpFile->filename, sizeof(stripped_extra_wad_1));
 
-                    extra_wad_slot_1_loaded = 1;
+                    extra_wad_slot_1_loaded = true;
 
                     md5_check = true;
                     master_pwad = false;
@@ -2111,12 +2111,12 @@ static void Menu_WadList(void)
                 else if (strncmp(calculated_md5_string,
                             known_md5_string_nerve_xbox360_pwad, 32) == 0)
                 {
-                    load_extra_wad = 1;
+                    load_extra_wad = true;
 
                     M_StringCopy(extra_wad_1, check, sizeof(extra_wad_1));
                     M_StringCopy(stripped_extra_wad_1, tmpFile->filename, sizeof(stripped_extra_wad_1));
 
-                    extra_wad_slot_1_loaded = 1;
+                    extra_wad_slot_1_loaded = true;
 
                     md5_check = true;
                     master_pwad = false;
@@ -2125,12 +2125,12 @@ static void Menu_WadList(void)
                 else if (strncmp(calculated_md5_string,
                             known_md5_string_master_levels_pwad, 32) == 0)
                 {
-                    load_extra_wad = 1;
+                    load_extra_wad = true;
 
                     M_StringCopy(extra_wad_1, check, sizeof(extra_wad_1));
                     M_StringCopy(stripped_extra_wad_1, tmpFile->filename, sizeof(stripped_extra_wad_1));
 
-                    extra_wad_slot_1_loaded = 1;
+                    extra_wad_slot_1_loaded = true;
 
                     md5_check = true;
                     master_pwad = true;
@@ -2153,132 +2153,132 @@ static void Menu_WadList(void)
 
                         if (strncmp(iwad_term, buffer, 4) == 0)
                         {
-                            if (extra_wad_slot_1_loaded == 0)
+                            if (!extra_wad_slot_1_loaded)
                             {
-                                load_extra_wad = 1;
+                                load_extra_wad = true;
 
                                 M_StringCopy(extra_wad_1, check, sizeof(extra_wad_1));
                                 M_StringCopy(stripped_extra_wad_1, tmpFile->filename,
                                         sizeof(stripped_extra_wad_1));
 
-                                extra_wad_slot_1_loaded = 1;
+                                extra_wad_slot_1_loaded = true;
 
-                                extra_wad_loaded = 1;
+                                extra_wad_loaded = true;
 
                                 break;
                             }
-                            else if (extra_wad_slot_1_loaded == 1 &&
-                                    extra_wad_slot_2_loaded == 0)
+                            else if (extra_wad_slot_1_loaded &&
+                                    !extra_wad_slot_2_loaded)
                             {
                                 if (strcmp(check, extra_wad_1) != 0)
                                 {
-                                    load_extra_wad = 1;
+                                    load_extra_wad = true;
 
                                     M_StringCopy(extra_wad_2, check, sizeof(extra_wad_2));
                                     M_StringCopy(stripped_extra_wad_2, tmpFile->filename,
                                             sizeof(stripped_extra_wad_2));
 
-                                    extra_wad_slot_2_loaded = 1;
+                                    extra_wad_slot_2_loaded = true;
 
-                                    extra_wad_loaded = 1;
+                                    extra_wad_loaded = true;
                                 }
 
                                 break;
                             }
-                            else if (extra_wad_slot_1_loaded == 1 &&
-                                    extra_wad_slot_2_loaded == 1 &&
-                                    extra_wad_slot_3_loaded == 0)
+                            else if (extra_wad_slot_1_loaded &&
+                                    extra_wad_slot_2_loaded &&
+                                    !extra_wad_slot_3_loaded)
                             {
                                 if ((strcmp(check, extra_wad_1) != 0 &&
                                     strcmp(check, extra_wad_2) != 0))
                                 {
-                                    load_extra_wad = 1;
+                                    load_extra_wad = true;
 
                                     M_StringCopy(extra_wad_3, check, sizeof(extra_wad_3));
                                     M_StringCopy(stripped_extra_wad_3, tmpFile->filename,
                                             sizeof(stripped_extra_wad_3));
 
-                                    extra_wad_slot_3_loaded = 1;
+                                    extra_wad_slot_3_loaded = true;
 
-                                    extra_wad_loaded = 1;
+                                    extra_wad_loaded = true;
                                 }
 
                                 break;
                             }
                         }
                         else if (strncmp(pwad_term, buffer, 4) == 0 &&
-                                 extra_wad_slot_1_loaded == 0)
+                                 !extra_wad_slot_1_loaded)
                         {
-                            load_extra_wad = 1;
+                            load_extra_wad = true;
 
                             M_StringCopy(extra_wad_1, check, sizeof(extra_wad_1));
                             M_StringCopy(stripped_extra_wad_1, tmpFile->filename,
                                     sizeof(stripped_extra_wad_1));
 
-                            extra_wad_slot_1_loaded = 1;
+                            extra_wad_slot_1_loaded = true;
 
                             W_CheckSize(4);
 
                             if (fsizecq == 7585664)
                                 is_chex_2 = true;
 
-                            extra_wad_loaded = 1;
+                            extra_wad_loaded = true;
 
                             break;
                         }
                         else if (strncmp(pwad_term, buffer, 4) == 0 &&
-                                 extra_wad_slot_1_loaded == 1 &&
-                                 extra_wad_slot_2_loaded == 0)
+                                 extra_wad_slot_1_loaded &&
+                                 !extra_wad_slot_2_loaded)
                         {
                             if (strcmp(check, extra_wad_1) != 0)
                             {
-                                load_extra_wad = 1;
+                                load_extra_wad = true;
 
                                 M_StringCopy(extra_wad_2, check, sizeof(extra_wad_2));
                                 M_StringCopy(stripped_extra_wad_2, tmpFile->filename,
                                         sizeof(stripped_extra_wad_2));
 
-                                extra_wad_slot_2_loaded = 1;
+                                extra_wad_slot_2_loaded = true;
 
                                 W_CheckSize(4);
 
                                 if (fsizecq == 7585664)
                                     is_chex_2 = true;
 
-                                extra_wad_loaded = 1;
+                                extra_wad_loaded = true;
                             }
 
                             break;
                         }
                         else if (strncmp(pwad_term, buffer, 4) == 0 &&
-                                 extra_wad_slot_1_loaded == 1 &&
-                                 extra_wad_slot_2_loaded == 1 &&
-                                 extra_wad_slot_3_loaded == 0)
+                                 extra_wad_slot_1_loaded &&
+                                 extra_wad_slot_2_loaded &&
+                                 !extra_wad_slot_3_loaded)
                         {
                             if ((strcmp(check, extra_wad_1) != 0 &&
                                 strcmp(check, extra_wad_2) != 0))
                             {
-                                load_extra_wad = 1;
+                                load_extra_wad = true;
 
                                 M_StringCopy(extra_wad_3, check, sizeof(extra_wad_3));
                                 M_StringCopy(stripped_extra_wad_3, tmpFile->filename,
                                         sizeof(stripped_extra_wad_3));
 
-                                extra_wad_slot_3_loaded = 1;
+                                extra_wad_slot_3_loaded = true;
 
                                 W_CheckSize(4);
 
                                 if (fsizecq == 7585664)
                                     is_chex_2 = true;
 
-                                extra_wad_loaded = 1;
+                                extra_wad_loaded = true;
                             }
 
                             break;
                         }
                         else if (strncmp(deh_term, buffer, 4) == 0) 
                         {
-                            load_dehacked = 1;
+                            load_dehacked = true;
 
                             M_StringCopy(dehacked_file, check, sizeof(dehacked_file));
                             M_StringCopy(stripped_dehacked_file, tmpFile->filename,
@@ -2322,8 +2322,8 @@ static void Menu_WadList(void)
         // X button
         if (buttons & WPAD_CLASSIC_BUTTON_X)
         {
-            load_dehacked = 0;
-            load_extra_wad = 0;
+            load_dehacked = false;
+            load_extra_wad = false;
 
             M_StringCopy(stripped_dehacked_file, "", sizeof(stripped_dehacked_file));
             M_StringCopy(stripped_extra_wad_1, "", sizeof(stripped_extra_wad_1));
@@ -2337,11 +2337,11 @@ static void Menu_WadList(void)
             M_StringCopy(extra_wad_3, "", sizeof(extra_wad_3));
             M_StringCopy(target, "", sizeof(target));
 
-            extra_wad_slot_1_loaded = 0;
-            extra_wad_slot_2_loaded = 0;
-            extra_wad_slot_3_loaded = 0;
+            extra_wad_slot_1_loaded = false;
+            extra_wad_slot_2_loaded = false;
+            extra_wad_slot_3_loaded = false;
 
-            extra_wad_loaded = 0;
+            extra_wad_loaded = false;
         }
 
         // List scrolling

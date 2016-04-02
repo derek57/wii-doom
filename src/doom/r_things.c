@@ -1605,7 +1605,7 @@ static void R_DrawPSprite(pspdef_t *psp, dboolean invisibility)
     long                frame;
     spriteframe_t       *sprframe;
     int                 lump;
-    dboolean             flip;
+    dboolean            flip;
     vissprite_t         *vis;
     vissprite_t         avis;
     state_t             *state;
@@ -1692,7 +1692,7 @@ static void R_DrawPSprite(pspdef_t *psp, dboolean invisibility)
         vis->colfunc = fuzzcolfunc;
         vis->colormap = NULL;
     }
-    else //if (fixedcolormap)
+    else
     {
         if (spr == SPR_SHT2 && (!frame || frame >= 8) && !dehacked) 
             vis->colfunc = (d_translucency ? R_DrawTranslucentSuperShotgunColumn :

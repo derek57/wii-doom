@@ -229,6 +229,13 @@ typedef enum
     sfx_skeatk,
     sfx_radio,
 
+    // killough 11/98: dog sounds
+    sfx_dgsit,
+    sfx_dgatk,
+    sfx_dgact,
+    sfx_dgdth,
+    sfx_dgpain,
+
     sfx_splsh0,
     sfx_splsh1,
     sfx_splsh2,
@@ -252,13 +259,6 @@ typedef enum
     sfx_secret,
 
     sfx_jump,
-
-    // killough 11/98: dog sounds
-    sfx_dgsit,
-    sfx_dgatk,
-    sfx_dgact,
-    sfx_dgdth,
-    sfx_dgpain,
 
     // buzzing flies
     sfx_eefly,

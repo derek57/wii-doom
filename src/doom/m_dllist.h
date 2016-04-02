@@ -46,42 +46,43 @@
 
 typedef struct mdllistitem_s
 {
-   struct mdllistitem_s *next;
-   struct mdllistitem_s **prev;
+    struct mdllistitem_s *next;
+    struct mdllistitem_s **prev;
 
-   // 08/02/09: pointer back to object
-   void                 *obj;
+    // 08/02/09: pointer back to object
+    void                 *obj;
 
-   // 02/07/10: arbitrary data cached at node
-   unsigned int         data;
+    // 02/07/10: arbitrary data cached at node
+    unsigned int         data;
 
 } mdllistitem_t;
 
 d_inline static void M_DLListInsert(mdllistitem_t *item, mdllistitem_t **head)
 {
-   mdllistitem_t *next = *head;
+    mdllistitem_t *next = *head;
 
-   if((item->next = next))
-      next->prev = &item->next;
-   item->prev = head;
-   *head = item;
+    if ((item->next = next))
+       next->prev = &item->next;
 
-   // set to object, which is generally distinct
-   item->obj = item;
+    item->prev = head;
+    *head = item;
+
+    // set to object, which is generally distinct
+    item->obj = item;
 }
 
 d_inline static void M_DLListRemove(mdllistitem_t *item)
 {
-   mdllistitem_t **prev = item->prev;
-   mdllistitem_t *next  = item->next;
+    mdllistitem_t **prev = item->prev;
+    mdllistitem_t *next  = item->next;
    
-   // haleyjd 05/07/13: safety #1: only if prev is non-null
-   if(prev && (*prev = next))
-      next->prev = prev;
+    // haleyjd 05/07/13: safety #1: only if prev is non-null
+    if (prev && (*prev = next))
+       next->prev = prev;
 
-   // haleyjd 05/07/13: safety #2: clear links.
-   item->prev = NULL;
-   item->next = NULL;
+    // haleyjd 05/07/13: safety #2: clear links.
+    item->prev = NULL;
+    item->next = NULL;
 }
 
 #endif

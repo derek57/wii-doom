@@ -721,11 +721,11 @@ void W_CheckSize(int wad)
     }
     else if (wad == 4)
     {
-        if (extra_wad_slot_1_loaded == 1)
+        if (extra_wad_slot_1_loaded)
             fprw = fopen(extra_wad_1, "r");
-        else if (extra_wad_slot_2_loaded == 1)
+        else if (extra_wad_slot_2_loaded)
             fprw = fopen(extra_wad_2, "r");
-        else if (extra_wad_slot_3_loaded == 1)
+        else if (extra_wad_slot_3_loaded)
             fprw = fopen(extra_wad_3, "r");
 
         if (fprw == NULL)

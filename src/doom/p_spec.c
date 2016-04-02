@@ -697,7 +697,7 @@ fixed_t P_FindShortestTextureAround(int secnum)
 fixed_t P_FindShortestUpperAround(int secnum)
 {
     const sector_t      *sec = &sectors[secnum];
-    int                 i, minsize = 32000 * FRACBITS;
+    int                 i, minsize = 32000 * FRACUNIT;
 
     // in height calcs
     for (i = 0; i < sec->linecount; i++)
@@ -738,7 +738,8 @@ sector_t *P_FindModelFloorSector(fixed_t floordestheight, int secnum)
     int         i, linecount = sec->linecount;
 
     for (i = 0; i < linecount; i++)
-        if (twoSided(secnum, i) && (sec = getSector(secnum, i,
+        if (twoSided(secnum, i)
+            && (sec = getSector(secnum, i,
             getSide(secnum, i, 0)->sector - sectors == secnum))->floorheight == floordestheight)
             return sec;
 
@@ -767,7 +768,8 @@ sector_t *P_FindModelCeilingSector(fixed_t ceildestheight, int secnum)
     int         i, linecount = sec->linecount;
 
     for (i = 0; i < linecount; i++)
-        if (twoSided(secnum, i) && (sec = getSector(secnum, i,
+        if (twoSided(secnum, i)
+            && (sec = getSector(secnum, i,
             getSide(secnum, i, 0)->sector - sectors == secnum))->ceilingheight == ceildestheight)
             return sec;
 
@@ -2318,7 +2320,7 @@ void P_UpdateSpecials(void)
     int            i;
 
     //        LEVEL TIMER
-    if (levelTimer == true)
+    if (levelTimer)
     {
         levelTimeCount--;
 
@@ -2361,9 +2363,7 @@ void P_UpdateSpecials(void)
     {
         if (buttonlist[i].btimer)
         {
-            buttonlist[i].btimer--;
-
-            if (!buttonlist[i].btimer)
+            if (!--buttonlist[i].btimer)
             {
                 switch (buttonlist[i].where)
                 {
@@ -2384,7 +2384,7 @@ void P_UpdateSpecials(void)
                 }
                 /* don't take the address of the switch's sound origin,
                  * unless in a compatibility mode. */
-/*
+/*              // FIXME
                 so = buttonlist[i].soundorg;
 
                 if (d_sound)
@@ -2852,7 +2852,7 @@ dboolean PIT_PushThing(mobj_t *thing)
         // to be able to see the push/pull source point.
         if (speed > 0 && P_CheckSight(thing, tmpusher->source))
         {
-            angle_t pushangle = R_PointToAngle2(thing->x, thing->y, sx, sy);
+            angle_t     pushangle = R_PointToAngle2(thing->x, thing->y, sx, sy);
 
             if (tmpusher->source->type == MT_PUSH)
                 // away
@@ -3215,7 +3215,6 @@ void P_SpawnSpecials(void)
     int         i;
 
     // See if -TIMER was specified.
-
     if (timelimit > 0 && deathmatch)
     {
         levelTimer = true;

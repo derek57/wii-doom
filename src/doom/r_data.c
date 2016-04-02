@@ -1449,7 +1449,7 @@ dboolean R_InternalCreatePalette(palette_t *palette, char *name, byte *colors,
     else if (numcolors == 0)
         return false;
 
-    strncpy (palette->name.name, name, 8);
+    strncpy(palette->name.name, name, 8);
     palette->flags = flags;
     palette->usecount = 1;
     palette->maps.colormaps = NULL;

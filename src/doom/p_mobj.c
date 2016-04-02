@@ -89,6 +89,8 @@ extern dboolean     not_walking;
 extern fixed_t      animatedliquiddiffs[64];
 extern fixed_t      attackrange;
 
+extern mobj_t       *ricochet_sound;
+
 extern int          *TerrainTypes;
 
 extern void         A_EjectCasing(mobj_t *actor);
@@ -649,10 +651,12 @@ void P_ZMovement(mobj_t *mo)
 
     // check for smooth step up
     // killough 5/12/98: exclude voodoo dolls
-    if (player && mo->player->mo == mo && mo->z < mo->floorz)
+    if (player
+        && mo->player->mo == mo // killough 5/12/98: exclude voodoo dolls
+        && mo->z < mo->floorz)
     {
-        mo->player->viewheight -= mo->floorz - mo->z;
-        mo->player->deltaviewheight = (VIEWHEIGHT - mo->player->viewheight) >> 3;
+        player->viewheight -= mo->floorz - mo->z;
+        player->deltaviewheight = (VIEWHEIGHT - player->viewheight) >> 3;
     }
     
     // adjust height
@@ -663,7 +667,8 @@ floater:
     // float down towards target if too close
 
     // killough 11/98: simplify
-    if (!((flags ^ MF_FLOAT) & (MF_FLOAT | MF_SKULLFLY | MF_INFLOAT)) && mo->target)
+    if (!((mo->flags ^ MF_FLOAT) & (MF_FLOAT | MF_SKULLFLY | MF_INFLOAT))
+        && mo->target)
     {
         fixed_t     delta = (mo->target->z + (mo->height >> 1) - mo->z) * 3;
  
@@ -777,9 +782,9 @@ floater:
                 // Decrease viewheight for a moment
                 // after hitting the ground (hard),
                 // and utter appropriate sound.
-                mo->player->deltaviewheight = mo->momz >> 3;
+                player->deltaviewheight = mo->momz >> 3;
 
-                if (!isliquid[mo->subsector->sector->floorpic])
+                if (!isliquid[mo->subsector->sector->floorpic] && mo->health > 0)
                     S_StartSound(mo, sfx_oof);
 
                 if (d_splash)
@@ -816,7 +821,7 @@ floater:
         if (!correct_lost_soul_bounce && (flags & MF_SKULLFLY))
             mo->momz = -mo->momz;
 
-        if (!((flags ^ MF_MISSILE) & (MF_MISSILE | MF_NOCLIP)))
+        if (!((mo->flags ^ MF_MISSILE) & (MF_MISSILE | MF_NOCLIP)))
         {
             P_ExplodeMissile(mo);
             return;
@@ -1165,8 +1170,8 @@ mobj_t *P_SpawnMobj(fixed_t x, fixed_t y, fixed_t z, mobjtype_t type)
     if (float_items)
         mobj->floatbob = prevbob = (x == prevx && y == prevy && z == prevz ? prevbob : P_Random());
 
-    mobj->z = (z == ONFLOORZ ? mobj->floorz :
-              (z == ONCEILINGZ ? mobj->ceilingz - mobj->height : z));
+    mobj->z = (z == ONFLOORZ ? mobj->floorz : (z == ONCEILINGZ ? mobj->ceilingz - mobj->height :
+        z));
 
     // [AM] Do not interpolate on spawn.
     mobj->interp = false;
@@ -1659,10 +1664,10 @@ void P_SpawnMapThing(mapthing_t *mthing, int index)
     mobj = P_SpawnMobj(x, y, z, (mobjtype_t)i);
     mobj->spawnpoint = *mthing;
 
-    flags = mobj->flags;
-
     if (mthing->options & MTF_AMBUSH)
-        flags |= MF_AMBUSH;
+        mobj->flags |= MF_AMBUSH;
+
+    flags = mobj->flags;
 
     if (mobj->tics > 0)
         mobj->tics = 1 + (P_Random() % mobj->tics);
@@ -1788,7 +1793,7 @@ mobj_t *P_SpawnPuff(fixed_t x, fixed_t y, fixed_t z, angle_t angle)
 
     // don't make punches spark on the wall
     if (attackrange == MELEERANGE)
-        P_SetMobjState (th, S_PUFF3);
+        P_SetMobjState(th, S_PUFF3);
 
     return th;
 }

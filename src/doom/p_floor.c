@@ -229,7 +229,7 @@ result_e T_MovePlane(sector_t *sector, fixed_t speed, fixed_t dest, dboolean cru
                         //flag = P_ChangeSector(sector, crush);
 // UNUSED
 #if 0
-                        if (flag == true)
+                        if (flag)
                         {
                             sector->ceilingheight = lastpos;
                             P_ChangeSector(sector, crush);
@@ -659,6 +659,8 @@ dboolean EV_DoFloor(line_t *line, floor_e floortype)
                 break;
         }
 
+        floor->stopsound = (floor->sector->floorheight != floor->floordestheight);
+
         // [BH] floor is no longer secret
         for (i = 0; i < sec->linecount; i++)
             sec->lines[i]->flags &= ~ML_SECRET;
@@ -806,7 +808,7 @@ dboolean EV_BuildStairs(line_t *line, stair_e type)
         floor->texture = 0;
         floor->crush = crushing;
         floor->type = buildStair;
-        //floor->stopsound = (sec->floorheight != floor->floordestheight);
+        floor->stopsound = (sec->floorheight != floor->floordestheight);
 
         texture = sec->floorpic;
 
@@ -862,7 +864,7 @@ dboolean EV_BuildStairs(line_t *line, stair_e type)
                 floor->floordestheight = height;
                 floor->type = buildStair;
                 floor->crush = (type != build8);
-                //floor->stopsound = (sec->floorheight != height);
+                floor->stopsound = (sec->floorheight != height);
                 okay = true;
                 break;
             }

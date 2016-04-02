@@ -263,6 +263,17 @@ extern  dboolean         detailLevel;
 extern  dboolean         showMessages;
 extern  dboolean         render_mode;
 extern  dboolean         d_fliplevels;
+extern  dboolean         show_endoom;
+extern  dboolean         display_fps;
+extern  dboolean         d_colblood;
+extern  dboolean         d_colblood2;
+extern  dboolean         d_swirl;
+extern  dboolean         timer_info;
+extern  dboolean         icontype;
+extern  dboolean         snd_module;
+extern  dboolean         opl_type;
+extern  dboolean         s_randommusic;
+extern  dboolean         slowwater;
 
 // -----------------------------------------------------
 // Game Mode - identify IWAD as shareware, retail etc.
@@ -366,16 +377,9 @@ extern  int              skyflatnum;
 // Netgame stuff (buffers and pointers, i.e. indices).
 extern  int              rndindex;
 
-extern  int              show_endoom;
-extern  int              display_fps;
 extern  int              turnspeed;
-extern  int              d_colblood;
-extern  int              d_colblood2;
-extern  int              d_swirl;
 extern  int              background_type;
-extern  int              timer_info;
 extern  int              chaingun_tics;
-extern  int              icontype;
 extern  int              wipe_type;
 extern  int              usegamma;
 extern  int              screenSize;
@@ -383,10 +387,8 @@ extern  int              screenblocks;
 extern  int              mouselook;
 extern  int              mspeed;
 extern  int              mus_engine;
-extern  int              snd_module;
 extern  int              snd_chans;
 extern  int              sound_channels;
-extern  int              opl_type;
 extern  int              use_libsamplerate;
 extern  int              gore_amount;
 extern  int              font_shadow;

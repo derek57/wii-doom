@@ -37,8 +37,7 @@ char                *pwadfile;
 
 
 extern dboolean     version13;
-
-extern int          dont_show_adding_of_resource_wad;
+extern dboolean     dont_show_adding_of_resource_wad;
 
 
 // Parse the command line, merging WAD files that are sppecified.
@@ -72,7 +71,7 @@ dboolean W_ParseCommandLine(void)
                 if (D_IsDehFile(filename))
                     LoadDehFile(filename);
 
-                if (dont_show_adding_of_resource_wad == 0)
+                if (!dont_show_adding_of_resource_wad)
                     printf("         adding %s\n", filename);
 
                 if ((search_string(filename, "nerve.wad") > -1) ||

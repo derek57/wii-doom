@@ -1487,11 +1487,11 @@ int                        coordinates_info = 0;
 int                        version_info = 0;
 
 #ifdef WII
-int                        key_controls_start_in_cfg_at_pos = 154;
-int                        key_controls_end_in_cfg_at_pos = 169;
+int                        key_controls_start_in_cfg_at_pos = 158;
+int                        key_controls_end_in_cfg_at_pos = 172;
 #else
-int                        key_controls_start_in_cfg_at_pos = 154;
-int                        key_controls_end_in_cfg_at_pos = 170;
+int                        key_controls_start_in_cfg_at_pos = 157;
+int                        key_controls_end_in_cfg_at_pos = 173;
 #endif
 
 int                        tracknum = 1;
@@ -1535,7 +1535,6 @@ short                      whichSkull;
 
 // timed message = no input from user
 dboolean                   messageNeedsInput;
-dboolean                   map_flag = false;
 dboolean                   inhelpscreens;
 dboolean                   menuactive;
 dboolean                   fake = false;
@@ -1611,7 +1610,6 @@ extern char                *d_lowpixelsize;
 
 extern int                 cheat_musnum;
 extern int                 cheating;
-extern int                 dots_enabled;
 extern int                 dont_show;
 extern int                 pagetic;
 
@@ -1621,6 +1619,7 @@ extern default_t           doom_defaults_list[];
 // in heads-up code
 extern dboolean            chat_on;
 
+extern dboolean            dots_enabled;
 extern dboolean            correct_lost_soul_bounce;
 extern dboolean            png_screenshots;
 extern dboolean            message_dontfuckwithme;
@@ -1704,6 +1703,7 @@ static void M_MusicType(int choice);
 static void M_SoundType(int choice);
 static void M_SoundOutput(int choice);
 static void M_SoundPitch(int choice);
+static void M_RandomMusic(int choice);
 static void M_RestartSong(int choice);
 static void M_OPLDev(int choice);
 static void M_SoundChannels(int choice);
@@ -1827,6 +1827,7 @@ static void M_Slide(int choice);
 static void M_Smearblood(int choice);
 static void M_ColoredCorpses(int choice);
 static void M_LowHealth(int choice);
+static void M_SlowWater(int choice);
 static void M_CenterWeapon(int choice);
 static void M_EjectCasings(int choice);
 static void M_EndoomScreen(int choice);
@@ -2848,27 +2849,27 @@ enum
     game5_smearblood,
     game5_coloredcorpses,
     game5_health,
-    game5_offsets,
+    game5_slowwater,
     game5_game6,
     game5_end
 } game5_e;
 
 static menuitem_t GameMenu5[]=
 {
-    {2, "Alt. Lighting for Player Sprites"    , M_AltLighting   , 'l'},
-    {2, "Allow Monsters Infighting"           , M_Infighting    , 'i'},
-    {2, "Monsters Remember last enemy"        , M_LastEnemy     , 'e'},
-    {2, "Allow floating items"                , M_Float         , 'f'},
-    {2, "Animate items dropped by monsters"   , M_Animate       , 'a'},
-    {2, "Play sound crushing things to gibs"  , M_CrushSound    , 's'},
-    {2, "Don't alert enemies when firing fist", M_NoNoise       , 'n'},
-    {2, "Nudge corpses when walking over"     , M_NudgeCorpses  , 'c'},
-    {2, "Corpses slide caused by explosions"  , M_Slide         , 'x'},
-    {2, ""                                    , M_Smearblood    , 'b'},
-    {2, "Randomly colored player corpses"     , M_ColoredCorpses, 'r'},
-    {2, "Player walks slower if health < 15%" , M_LowHealth     , 'h'},
-    {2, "Fix Sprite Offsets"                  , M_Offsets       , 'x'},
-    {1, ""                                    , M_Game6         , '6'}
+    {2, "Alt. Lighting for Player Sprites"     , M_AltLighting   , 'l'},
+    {2, "Allow Monsters Infighting"            , M_Infighting    , 'i'},
+    {2, "Monsters Remember last enemy"         , M_LastEnemy     , 'e'},
+    {2, "Allow floating items"                 , M_Float         , 'f'},
+    {2, "Animate items dropped by monsters"    , M_Animate       , 'a'},
+    {2, "Play sound crushing things to gibs"   , M_CrushSound    , 's'},
+    {2, "Don't alert enemies when firing fist" , M_NoNoise       , 'n'},
+    {2, "Nudge corpses when walking over"      , M_NudgeCorpses  , 'c'},
+    {2, "Corpses slide caused by explosions"   , M_Slide         , 'x'},
+    {2, ""                                     , M_Smearblood    , 'b'},
+    {2, "Randomly colored player corpses"      , M_ColoredCorpses, 'r'},
+    {2, "Player walks slower if health < 15%"  , M_LowHealth     , 'h'},
+    {2, "Player walks slower if inside liquids", M_SlowWater     , 'w'},
+    {1, ""                                     , M_Game6         , '6'}
 };
 
 static menu_t  GameDef5 =
@@ -2978,6 +2979,7 @@ static menu_t  GameDef7 =
 enum
 {
     game8_splash,
+    game8_offsets,
     game8_flip,
 #ifdef WII
     game8_prbeta,
@@ -2989,7 +2991,8 @@ enum
 static menuitem_t GameMenu8[]=
 {
     {2, "Draw Splash Screen at game bootup", M_DrawSplash       , 's'},
-    {2, "Flip Levels horizontally"         , M_Flip             , 'n'}
+    {2, "Flip Levels horizontally"         , M_Flip             , 'n'},
+    {2, "Fix Sprite Offsets"               , M_Offsets          , 'x'},
 #ifdef WII
     ,
     {2, "PRE-RELEASE BETA MODE"            , M_Beta             , 'b'}
@@ -3173,6 +3176,7 @@ enum
     channels,
     output,
     sndpitch,
+    rndm,
 
 #ifndef WII
     dsc,
@@ -3191,12 +3195,13 @@ static menuitem_t SoundMenu[]=
     {2, "Sound Type"                , M_SoundType           , 's'},
     {2, "Number of Sound Channels"  , M_SoundChannels       , 'c'},
     {2, "Switch Left / Right Output", M_SoundOutput         , 'o'},
-    {2, "v1.1 Random Sound Pitch"   , M_SoundPitch          , 'p'}
+    {2, "v1.1 Random Sound Pitch"   , M_SoundPitch          , 'p'},
+    {2, "Random Music Playback"     , M_RandomMusic         , 'r'}
 
 #ifndef WII
     ,
     {2, "Dump Substitute Config"    , M_DumpSubstituteConfig, 'd'},
-    {2, "Libsamplerate"             , M_Samplerate          , 'r'}
+    {2, "Libsamplerate"             , M_Samplerate          , 'l'}
 #endif
 
 };
@@ -3207,7 +3212,7 @@ static menu_t  SoundDef =
     &OptionsDef,
     SoundMenu,
     M_DrawSound,
-    45, 60,
+    45, 40,
     0
 };
 
@@ -4042,12 +4047,23 @@ static void M_DrawSound(void)
         M_WriteText(SoundDef.x + 212, SoundDef.y + 68, "OFF");
     }
 
+    if (s_randommusic)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(SoundDef.x + 220, SoundDef.y + 78, "ON");
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(SoundDef.x + 212, SoundDef.y + 78, "OFF");
+    }
+
     if (dump_subst)
     {
         if (substdumpwait < 5)
         {
             dp_translation = crx[CRX_GREEN];
-            M_WriteText(SoundDef.x + 204, SoundDef.y + 78, "DONE");
+            M_WriteText(SoundDef.x + 204, SoundDef.y + 88, "DONE");
         }
         else
         {
@@ -4060,32 +4076,32 @@ static void M_DrawSound(void)
     if (use_libsamplerate == 0)
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(SoundDef.x + 212, SoundDef.y + 88, "OFF");
+        M_WriteText(SoundDef.x + 212, SoundDef.y + 98, "OFF");
     }
     else if (use_libsamplerate == 1)
     {
         dp_translation = crx[CRX_GRAY];
-        M_WriteText(SoundDef.x + 192, SoundDef.y + 88, "LINEAR");
+        M_WriteText(SoundDef.x + 192, SoundDef.y + 98, "LINEAR");
     }
     else if (use_libsamplerate == 2)
     {
         dp_translation = crx[CRX_RED];
-        M_WriteText(SoundDef.x + 117, SoundDef.y + 88, "ZERO_ORDER_HOLD");
+        M_WriteText(SoundDef.x + 117, SoundDef.y + 98, "ZERO_ORDER_HOLD");
     }
     else if (use_libsamplerate == 3)
     {
         dp_translation = crx[CRX_GOLD];
-        M_WriteText(SoundDef.x + 182, SoundDef.y + 88, "FASTEST");
+        M_WriteText(SoundDef.x + 182, SoundDef.y + 98, "FASTEST");
     }
     else if (use_libsamplerate == 4)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(SoundDef.x + 130, SoundDef.y + 88, "MEDIUM_QUALITY");
+        M_WriteText(SoundDef.x + 130, SoundDef.y + 98, "MEDIUM_QUALITY");
     }
     else if (use_libsamplerate == 5)
     {
         dp_translation = crx[CRX_BLUE];
-        M_WriteText(SoundDef.x + 145, SoundDef.y + 88, "BEST_QUALITY");
+        M_WriteText(SoundDef.x + 145, SoundDef.y + 98, "BEST_QUALITY");
     }
 #endif
 
@@ -4095,11 +4111,11 @@ static void M_DrawSound(void)
         char *string = "";
         dp_translation = crx[CRX_GOLD];
 
-        if (itemOn == 9 || (fsize != 28422764 && fsize != 19321722 && fsize != 12361532 && itemOn > 2 && itemOn < 6))
+        if (itemOn == 10 || (fsize != 28422764 && fsize != 19321722 && fsize != 12361532 && itemOn > 2 && itemOn < 6))
             string = "YOU MUST QUIT AND RESTART TO TAKE EFFECT.";
         else if (fsize == 19321722 && itemOn == 4)
             string = "PC-SPEAKER OPTION NOT AVAILABLE FOR HACX";
-        else if (itemOn == 8)
+        else if (itemOn == 9)
             string = "DUMPS A CONFIG FILE FOR USE WITH OGG-MUSIC.";
 
         x = ORIGINALWIDTH / 2 - M_StringWidth(string) / 2;
@@ -4190,13 +4206,13 @@ static void M_SoundType(int choice)
     {
         case 0:
             if (snd_module && fsize != 19321722)
-                snd_module = 0;
+                snd_module = false;
 
             break;
 
         case 1:
             if (!snd_module && fsize != 19321722)
-                snd_module = 1;
+                snd_module = true;
 
             break;
     }
@@ -4216,9 +4232,9 @@ static void M_MusicType(int choice)
                 else if (mus_engine < 3)
                 {
                     if (mus_engine == 2)
-                        opl_type = 1;
+                        opl_type = true;
                     else
-                        opl_type = 0;
+                        opl_type = false;
 
                     snd_musicdevice = SNDDEVICE_SB;
                 }
@@ -4238,9 +4254,9 @@ static void M_MusicType(int choice)
                 else if (mus_engine < 3)
                 {
                     if (mus_engine == 2)
-                        opl_type = 1;
+                        opl_type = true;
                     else
-                        opl_type = 0;
+                        opl_type = false;
 
                     snd_musicdevice = SNDDEVICE_SB;
                 }
@@ -4283,6 +4299,24 @@ static void M_SoundPitch(int choice)
         case 1:
             if (!randompitch)
                 randompitch = true;
+
+            break;
+    }
+}
+
+static void M_RandomMusic(int choice)
+{
+    switch (choice)
+    {
+        case 0:
+            if (s_randommusic)
+                s_randommusic = false;
+
+            break;
+
+        case 1:
+            if (!s_randommusic)
+                s_randommusic = true;
 
             break;
     }
@@ -5092,7 +5126,7 @@ static void M_DrawScreen(void)
         M_WriteText(ScreenDef.x + 181, ScreenDef.y + 98, "OFF");
     }
 
-    if (icontype == 1)
+    if (icontype)
     {
         dp_translation = crx[CRX_GRAY];
         M_WriteText(ScreenDef.x + 158, ScreenDef.y + 108, "CD-ROM");
@@ -6152,7 +6186,7 @@ static void M_DrawGame5(void)
         M_WriteText(GameDef5.x + 258, GameDef5.y + 108, "OFF");
     }
 
-    if (d_fixspriteoffsets)
+    if (slowwater)
     {
         dp_translation = crx[CRX_GREEN];
         M_WriteText(GameDef5.x + 266, GameDef5.y + 118, "ON");
@@ -6161,21 +6195,6 @@ static void M_DrawGame5(void)
     {
         dp_translation = crx[CRX_DARK];
         M_WriteText(GameDef5.x + 258, GameDef5.y + 118, "OFF");
-    }
-
-    if (!whichSkull)
-    {
-        int x;
-        char *string = "";
-
-        dp_translation = crx[CRX_GOLD];
-
-        if (itemOn == 12)
-            string = "YOU MUST START A NEW GAME TO TAKE EFFECT.";
-
-        x = ORIGINALWIDTH / 2 - M_StringWidth(string) / 2;
-
-        M_WriteText(x, GameDef5.y + 138, string);
     }
 
     if (itemOn == 13)
@@ -6713,16 +6732,27 @@ static void M_DrawGame8(void)
         M_WriteText(GameDef8.x + 258, GameDef8.y + 8, "OFF");
     }
 
-#ifdef WII
-    if (beta_style_mode)
+    if (d_fixspriteoffsets)
     {
         dp_translation = crx[CRX_GREEN];
-        M_WriteText(GameDef8.x + 266, GameDef8.y + 8, "ON");
+        M_WriteText(GameDef5.x + 266, GameDef5.y + 18, "ON");
     }
     else
     {
         dp_translation = crx[CRX_DARK];
-        M_WriteText(GameDef8.x + 258, GameDef8.y + 8, "OFF");
+        M_WriteText(GameDef5.x + 258, GameDef5.y + 18, "OFF");
+    }
+
+#ifdef WII
+    if (beta_style_mode)
+    {
+        dp_translation = crx[CRX_GREEN];
+        M_WriteText(GameDef8.x + 266, GameDef8.y + 28, "ON");
+    }
+    else
+    {
+        dp_translation = crx[CRX_DARK];
+        M_WriteText(GameDef8.x + 258, GameDef8.y + 28, "OFF");
     }
 #endif
 
@@ -6733,11 +6763,11 @@ static void M_DrawGame8(void)
 
         dp_translation = crx[CRX_GOLD];
 
-        if (itemOn == 1)
+        if (itemOn == 1 || itemOn == 2)
             string = "YOU NEED TO START A NEW MAP TO TAKE EFFECT.";
 
 #ifdef WII
-        if (itemOn == 2)
+        if (itemOn == 3)
         {
             if (fsize != 28422764 && fsize != 19321722 && fsize != 12361532)
                 string = "YOU MUST QUIT AND RESTART TO TAKE EFFECT.";
@@ -8988,111 +9018,114 @@ void M_Drawer(void)
 
     if (!inhelpscreens)
     {
-        int mnum;
-
-        if (gamemode == commercial)
+        if (!s_randommusic)
         {
-            if (gamestate == GS_LEVEL)
+            int mnum;
+
+            if (gamemode == commercial)
             {
-                if (gamemission == pack_nerve)
+                if (gamestate == GS_LEVEL)
                 {
-                    int nmus[]=
+                    if (gamemission == pack_nerve)
                     {
-                        mus_messag,
-                        mus_ddtblu,
-                        mus_doom,
-                        mus_shawn,
-                        mus_in_cit,
-                        mus_the_da,
-                        mus_in_cit,
-                        mus_shawn2,
-                        mus_ddtbl2
+                        int nmus[]=
+                        {
+                            mus_messag,
+                            mus_ddtblu,
+                            mus_doom,
+                            mus_shawn,
+                            mus_in_cit,
+                            mus_the_da,
+                            mus_in_cit,
+                            mus_shawn2,
+                            mus_ddtbl2
+                        };
+
+                        mnum = nmus[gamemap - 1];
+                        S_ChangeMusic(mnum, true, true);
+                    }
+                    else
+                    {
+                        // FIXME: Add case for other game missions here (CHEX, HACX, FINAL DOOM)
+                        if (mus_cheat_used)
+                            S_ChangeMusic(tracknum, true, true);
+                        else if (mus_cheated && !beta_style)
+                            S_ChangeMusic(cheat_musnum, true, true);
+                        else if (!mus_cheat_used && !mus_cheated)
+                            S_ChangeMusic(gamemap + 32, true, true);
+                    }
+                }
+                else if (gamestate == GS_FINALE && finalestage == F_STAGE_TEXT)
+                    S_ChangeMusic(mus_read_m, true, false);
+                else if (gamestate == GS_FINALE && finalestage == F_STAGE_CAST)
+                    S_ChangeMusic(mus_evil, true, false);
+                else if (gamestate == GS_DEMOSCREEN)
+                    S_ChangeMusic(mus_dm2ttl, false, false);
+                else if (gamestate == GS_INTERMISSION)
+                    S_ChangeMusic(mus_dm2int, true, false);
+            }
+            else
+            {
+                if (gamestate == GS_LEVEL)
+                {
+                    int spmus[]=
+                    {
+                        // Who? -       Where?
+                        // Song
+
+                        // American     e4m1
+                        mus_e3m4,
+
+                        // Romero       e4m2
+                        mus_e3m2,
+
+                        // Shawn        e4m3
+                        mus_e3m3,
+
+                        // American     e4m4
+                        mus_e1m5,
+
+                        // Tim          e4m5
+                        mus_e2m7,
+
+                        // Romero       e4m6
+                        mus_e2m4,
+
+                        // J.Anderson   e4m7 CHIRON.WAD
+                        mus_e2m6,
+
+                        // Shawn        e4m8
+                        mus_e2m5,
+
+                        // Tim          e4m9
+                        mus_e1m9
                     };
 
-                    mnum = nmus[gamemap - 1];
-                    S_ChangeMusic(mnum, true, true);
-                }
-                else
-                {
-                    // FIXME: Add case for other game missions here (CHEX, HACX, FINAL DOOM)
+                    if (gameepisode < 4)
+                    {
+                        mnum = mus_e1m1 + (gameepisode - 1) * 9 + gamemap - 1;
+                    }
+                    else
+                    {
+                        mnum = spmus[gamemap - 1];
+                    }
+
                     if (mus_cheat_used)
                         S_ChangeMusic(tracknum, true, true);
                     else if (mus_cheated && !beta_style)
                         S_ChangeMusic(cheat_musnum, true, true);
                     else if (!mus_cheat_used && !mus_cheated)
-                        S_ChangeMusic(gamemap + 32, true, true);
+                        S_ChangeMusic(mnum, true, true);
                 }
+                else if (gamestate == GS_FINALE && finalestage == F_STAGE_TEXT)
+                    S_ChangeMusic(mus_victor, true, false);
+                else if (gamestate == GS_FINALE && finalestage == F_STAGE_CAST)
+                    S_StartMusic (mus_bunny);
+                else if (gamestate == GS_DEMOSCREEN)
+                    S_ChangeMusic(mus_intro, false, false);
+                else if (gamestate == GS_INTERMISSION)
+                    S_ChangeMusic(mus_inter, true, false);
             }
-            else if (gamestate == GS_FINALE && finalestage == F_STAGE_TEXT)
-                S_ChangeMusic(mus_read_m, true, false);
-            else if (gamestate == GS_FINALE && finalestage == F_STAGE_CAST)
-                S_ChangeMusic(mus_evil, true, false);
-            else if (gamestate == GS_DEMOSCREEN)
-                S_ChangeMusic(mus_dm2ttl, false, false);
-            else if (gamestate == GS_INTERMISSION)
-                S_ChangeMusic(mus_dm2int, true, false);
-        }
-        else
-        {
-            if (gamestate == GS_LEVEL)
-            {
-                int spmus[]=
-                {
-                    // Who? -       Where?
-                    // Song
-
-                    // American     e4m1
-                    mus_e3m4,
-
-                    // Romero       e4m2
-                    mus_e3m2,
-
-                    // Shawn        e4m3
-                    mus_e3m3,
-
-                    // American     e4m4
-                    mus_e1m5,
-
-                    // Tim          e4m5
-                    mus_e2m7,
-
-                    // Romero       e4m6
-                    mus_e2m4,
-
-                    // J.Anderson   e4m7 CHIRON.WAD
-                    mus_e2m6,
-
-                    // Shawn        e4m8
-                    mus_e2m5,
-
-                    // Tim          e4m9
-                    mus_e1m9
-                };
-
-                if (gameepisode < 4)
-                {
-                    mnum = mus_e1m1 + (gameepisode - 1) * 9 + gamemap - 1;
-                }
-                else
-                {
-                    mnum = spmus[gamemap - 1];
-                }
-
-                if (mus_cheat_used)
-                    S_ChangeMusic(tracknum, true, true);
-                else if (mus_cheated && !beta_style)
-                    S_ChangeMusic(cheat_musnum, true, true);
-                else if (!mus_cheat_used && !mus_cheated)
-                    S_ChangeMusic(mnum, true, true);
-            }
-            else if (gamestate == GS_FINALE && finalestage == F_STAGE_TEXT)
-                S_ChangeMusic(mus_victor, true, false);
-            else if (gamestate == GS_FINALE && finalestage == F_STAGE_CAST)
-                S_StartMusic (mus_bunny);
-            else if (gamestate == GS_DEMOSCREEN)
-                S_ChangeMusic(mus_intro, false, false);
-            else if (gamestate == GS_INTERMISSION)
-                S_ChangeMusic(mus_inter, true, false);
         }
     }
 
@@ -10051,7 +10084,6 @@ static void M_Rift(int choice)
                     {
                         epi = 1;
                         map = 10;
-                        map_flag = true;
                     }
                 }
             }
@@ -10851,13 +10883,13 @@ static void M_FPS(int choice)
     {
         case 0:
             if (display_fps)
-                display_fps--;
+                display_fps = false;
 
             break;
 
         case 1:
-            if (display_fps < 1)
-                display_fps++;
+            if (!display_fps)
+                display_fps = true;
 
             break;
     }
@@ -10972,7 +11004,7 @@ static void M_DisplayTicker(int choice)
         case 0:
             if (display_ticker)
             {
-                dots_enabled = 0;
+                dots_enabled = false;
                 display_ticker = false;
             }
 
@@ -10981,7 +11013,7 @@ static void M_DisplayTicker(int choice)
         case 1:
             if (!display_ticker)
             {
-                dots_enabled = 1;
+                dots_enabled = true;
                 display_ticker = true;
             }
 
@@ -11015,13 +11047,13 @@ static void M_Timer(int choice)
     {
         case 0:
             if (timer_info)
-                timer_info--;
+                timer_info = false;
 
             break;
 
         case 1:
-            if (timer_info < 1)
-                timer_info++;
+            if (!timer_info)
+                timer_info = true;
 
             break;
     }
@@ -11242,29 +11274,29 @@ static void M_OptSet(int choice)
     drawgrid = false;
     followplayer = true;
     show_stats = true;
-    timer_info = 1;
+    timer_info = true;
     use_vanilla_weapon_change = false;
     chaingun_tics = 1;
     crosshair = true;
-    d_colblood = 1;
-    d_colblood2 = 1;
-    d_swirl = 1;
+    d_colblood = true;
+    d_colblood2 = true;
+    d_swirl = true;
     autoaim = false;
     background_type = 1;
-    icontype = 0;
+    icontype = false;
     wipe_type = 3;
     mouselook = 1;
     mspeed = 4;
     mus_engine = 2;
-    snd_module = 0;
+    snd_module = false;
     snd_chans = 2;
     sound_channels = 16;
-    opl_type = 1;
+    opl_type = true;
     use_libsamplerate = 0;
     gore_amount = 4;
-    display_fps = 0;
+    display_fps = false;
     font_shadow = 2;
-    show_endoom = 1;
+    show_endoom = true;
     forwardmove = 50;
     sidemove = 36; 
     turnspeed = 5;
@@ -11275,9 +11307,8 @@ static void M_OptSet(int choice)
     mouseSensitivity = 4;
     r_bloodsplats_max = 32768;
     correct_lost_soul_bounce = true;
-    dots_enabled = 0;
+    dots_enabled = false;
     display_ticker = false;
-    am_overlay = true;
     nerve_pwad = false;
     master_pwad = false;
     d_recoil = true;
@@ -11373,29 +11404,29 @@ static void M_DefSet(int choice)
     drawgrid = false;
     followplayer = true;
     show_stats = false;
-    timer_info = 0;
+    timer_info = false;
     use_vanilla_weapon_change = true;
     chaingun_tics = 4;
     crosshair = false;
-    d_colblood = 0;
-    d_colblood2 = 0;
-    d_swirl = 0;
+    d_colblood = false;
+    d_colblood2 = false;
+    d_swirl = false;
     autoaim = true;
     background_type = 0;
-    icontype = 0;
+    icontype = false;
     wipe_type = 2;
     mouselook = 0;
     mspeed = 2;
     mus_engine = 1;
-    snd_module = 0;
+    snd_module = false;
     snd_chans = 1;
     sound_channels = 8;
-    opl_type = 0;
+    opl_type = false;
     use_libsamplerate = 0;
     gore_amount = 1;
-    display_fps = 0;
+    display_fps = false;
     font_shadow = 0;
-    show_endoom = 1;
+    show_endoom = true;
     forwardmove = 29;
     sidemove = 24; 
     turnspeed = 7;
@@ -11406,9 +11437,8 @@ static void M_DefSet(int choice)
     mouseSensitivity = 5;
     r_bloodsplats_max = 32768;
     correct_lost_soul_bounce = true;
-    dots_enabled = 0;
+    dots_enabled = false;
     display_ticker = false;
-    am_overlay = false;
     nerve_pwad = false;
     master_pwad = false;
     d_recoil = false;
@@ -12210,13 +12240,13 @@ static void M_Swirl(int choice)
     {
         case 0:
             if (d_swirl)
-                d_swirl = 0;
+                d_swirl = false;
 
             break;
 
         case 1:
             if (!d_swirl)
-                d_swirl = 1;
+                d_swirl = true;
 
             break;
     }
@@ -12897,6 +12927,24 @@ static void M_LowHealth(int choice)
     }
 }
 
+static void M_SlowWater(int choice)
+{
+    switch (choice)
+    {
+        case 0:
+            if (slowwater)
+                slowwater = false;
+
+            break;
+
+        case 1:
+            if (!slowwater)
+                slowwater = true;
+
+            break;
+    }
+}
+
 static void M_CenterWeapon(int choice)
 {
     switch (choice)
@@ -12942,14 +12990,14 @@ static void M_EndoomScreen(int choice)
     {
         case 0:
             if (show_endoom)
-                show_endoom = 0;
+                show_endoom = false;
 
             break;
 
         case 1:
 #ifndef WII
             if (!show_endoom)
-                show_endoom = 1;
+                show_endoom = true;
 #endif
             break;
     }
@@ -13656,7 +13704,7 @@ static void M_MapColor_Standard_PRBoom(int choice)
     mapcolor_sngl = 208;
     mapcolor_plyr = 112;
 }
-
+int lightlev;
 static void M_MapColor_Standard_DOSDoom(int choice)
 {
     mapcolor_back = BACKGROUND;

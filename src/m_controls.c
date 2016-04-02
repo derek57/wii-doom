@@ -327,6 +327,8 @@ void M_BindBaseControls(void)
     M_BindVariable("move_bob",                 &movebob);
     M_BindVariable("flip_levels",              &d_fliplevels);
     M_BindVariable("use_autoload",             &enable_autoload);
+    M_BindVariable("random_music",             &s_randommusic);
+    M_BindVariable("slow_water",               &slowwater);
 
 #ifdef WII
 

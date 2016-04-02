@@ -1685,7 +1685,7 @@ dboolean PTR_AimTraverse(intercept_t *in)
     // don't go any farther
     return false;
 }
-
+extern dboolean water_hit;
 //
 // PTR_ShootTraverse
 //
@@ -1773,7 +1773,7 @@ hitline:
         // hit ceiling / floor
         // set position based on intersection
         //
-        if (hitplane == true && sidesector)
+        if (hitplane && sidesector)
         {
             fixed_t den;
             fixed_t num;
@@ -1901,7 +1901,7 @@ hitline:
         return true;
     }
 
-    if (th->effect_flies_spawned == true)
+    if (th->effect_flies_spawned)
         th->effect_flies_shot = true;
 
     if (!(th->flags & MF_SHOOTABLE))
@@ -2133,7 +2133,6 @@ void P_LineAttack(mobj_t *t1, angle_t angle, fixed_t distance, fixed_t slope, in
 //
 // USE LINES
 //
-
 static dboolean PTR_UseTraverse(intercept_t *in)
 {
     int         side = 0;

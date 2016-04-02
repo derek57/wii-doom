@@ -740,3 +740,17 @@ int M_DoubleToInt(double x)
 #endif
 }
 
+int Clamp(int x)
+{
+    if (x < 0)
+    {
+        return 0;
+    }
+    else if (x > 255)
+    {
+        return 255;
+    }
+
+    return x;
+}
+

@@ -98,7 +98,9 @@
 #define AM              "American McGee"
 #define BK              "Brian Kidby"
 #define CB              "Christopher Buteau"
+#define DB              "David Blanshine"
 #define DC              "Dario Casali"
+#define DC2             "David Calvin"
 #define DJ              "Dean Johnson"
 #define DO              "Drake O'Brien"
 #define JA              "John Anderson"
@@ -125,6 +127,7 @@
 #define WW              "William D. Whitaker"
 #define AMSP            AM", "SP
 #define BKTH2           BK", "TH2
+#define DC2DB           DC2", "DB
 #define DCMC            DC", "MC
 #define DCTH2           DC", "TH2
 #define JRTH            JR", "TH
@@ -136,60 +139,62 @@
 char *authors[][5] =
 {
     /* xy      doom   doom2  tnt    plut   nerve */
-    /* 00 */ { "",    "",    "",    DCMC,  "" },
-    /* 01 */ { "",    SP,    TM,    DCMC,  RM },
-    /* 02 */ { "",    AM,    JW,    DCMC,  RH },
-    /* 03 */ { "",    AM,    RPJM2, DCMC,  RM },
-    /* 04 */ { "",    AM,    TH2,   DCMC,  RM },
-    /* 05 */ { "",    AM,    JD,    DCMC,  RH },
-    /* 06 */ { "",    AM,    JSTH2, DCMC,  RH },
-    /* 07 */ { "",    AMSP,  AD,    DCMC,  RH },
-    /* 08 */ { "",    SP,    JM2,   DCMC,  RH },
-    /* 09 */ { "",    SP,    JSTH2, DCMC,  RM },
-    /* 10 */ { "",    SPTH,  TM,    DCMC,  "" },
-    /* 11 */ { JR,    JR,    DJ,    DCMC,  "" },
-    /* 12 */ { JR,    SP,    JL,    DCMC,  "" },
-    /* 13 */ { JR,    SP,    BKTH2, DCMC,  "" },
-    /* 14 */ { JRTH,  AM,    RP,    DCMC,  "" },
-    /* 15 */ { JR,    JR,    WW,    DCMC,  "" },
-    /* 16 */ { JR,    SP,    AA,    DCMC,  "" },
-    /* 17 */ { JR,    JR,    TM,    DCMC,  "" },
-    /* 18 */ { SPTH,  SP,    DCTH2, DCMC,  "" },
-    /* 19 */ { JR,    SP,    TH2,   DCMC,  "" },
-    /* 20 */ { "",    JR,    DO,    DCMC,  "" },
-    /* 21 */ { SPTH,  SP,    DO,    DCMC,  "" },
-    /* 22 */ { SPTH,  AM,    CB,    DCMC,  "" },
-    /* 23 */ { SPTH,  SP,    PT,    DCMC,  "" },
-    /* 24 */ { SPTH,  SP,    DJ,    DCMC,  "" },
-    /* 25 */ { SP,    SG,    JM,    DCMC,  "" },
-    /* 26 */ { SP,    JR,    MSJL,  DCMC,  "" },
-    /* 27 */ { SPTH,  SP,    DO,    DCMC,  "" },
-    /* 28 */ { SP,    SP,    MC,    DCMC,  "" },
-    /* 29 */ { SP,    JR,    JS,    DCMC,  "" },
-    /* 30 */ { "",    SP,    JS,    DCMC,  "" },
-    /* 31 */ { "",    SP,    DC,    DCMC,  "" },
-    /* 32 */ { "",    SP,    DC,    DCMC,  "" },
-    /* 33 */ { SPTH,  MB,    "",    "",    "" },
-    /* 34 */ { "",    "",    "",    "",    "" },
-    /* 35 */ { "",    "",    "",    "",    "" },
-    /* 36 */ { "",    "",    "",    "",    "" },
-    /* 37 */ { "",    "",    "",    "",    "" },
-    /* 38 */ { "",    "",    "",    "",    "" },
-    /* 39 */ { "",    "",    "",    "",    "" },
-    /* 40 */ { "",    "",    "",    "",    "" },
-    /* 41 */ { AM,    "",    "",    "",    "" },
-    /* 42 */ { JR,    "",    "",    "",    "" },
-    /* 43 */ { SG,    "",    "",    "",    "" },
-    /* 44 */ { AM,    "",    "",    "",    "" },
-    /* 45 */ { TW,    "",    "",    "",    "" },
-    /* 46 */ { JR,    "",    "",    "",    "" },
-    /* 47 */ { JA,    "",    "",    "",    "" },
-    /* 48 */ { SG,    "",    "",    "",    "" },
-    /* 49 */ { TW,    "",    "",    "",    "" }
+    /* 00 */ { "",    "",    "",    DCMC,  ""   },
+    /* 01 */ { "",    SP,    TM,    DCMC,  RM   },
+    /* 02 */ { "",    AM,    JW,    DCMC,  RH   },
+    /* 03 */ { "",    AM,    RPJM2, DCMC,  RM   },
+    /* 04 */ { "",    AM,    TH2,   DCMC,  RM   },
+    /* 05 */ { "",    AM,    JD,    DCMC,  RH   },
+    /* 06 */ { "",    AM,    JSTH2, DCMC,  RH   },
+    /* 07 */ { "",    AMSP,  AD,    DCMC,  RH   },
+    /* 08 */ { "",    SP,    JM2,   DCMC,  RH   },
+    /* 09 */ { "",    SP,    JSTH2, DCMC,  RM   },
+    /* 10 */ { "",    SPTH,  TM,    DCMC,  SPTH },
+    /* 11 */ { JR,    JR,    DJ,    DCMC,  JR   },
+    /* 12 */ { JR,    SP,    JL,    DCMC,  SP   },
+    /* 13 */ { JR,    SP,    BKTH2, DCMC,  SP   },
+    /* 14 */ { JRTH,  AM,    RP,    DCMC,  AM   },
+    /* 15 */ { JR,    JR,    WW,    DCMC,  JR   },
+    /* 16 */ { JR,    SP,    AA,    DCMC,  SP   },
+    /* 17 */ { JR,    JR,    TM,    DCMC,  JR   },
+    /* 18 */ { SPTH,  SP,    DCTH2, DCMC,  SP   },
+    /* 19 */ { JR,    SP,    TH2,   DCMC,  SP   },
+    /* 20 */ { DC2DB, JR,    DO,    DCMC,  JR   },
+    /* 21 */ { SPTH,  SP,    DO,    DCMC,  SP   },
+    /* 22 */ { SPTH,  AM,    CB,    DCMC,  AM   },
+    /* 23 */ { SPTH,  SP,    PT,    DCMC,  SP   },
+    /* 24 */ { SPTH,  SP,    DJ,    DCMC,  SP   },
+    /* 25 */ { SP,    SG,    JM,    DCMC,  SG   },
+    /* 26 */ { SP,    JR,    MSJL,  DCMC,  JR   },
+    /* 27 */ { SPTH,  SP,    DO,    DCMC,  SP   },
+    /* 28 */ { SP,    SP,    MC,    DCMC,  SP   },
+    /* 29 */ { SP,    JR,    JS,    DCMC,  JR   },
+    /* 30 */ { "",    SP,    JS,    DCMC,  SP   },
+    /* 31 */ { SP,    SP,    DC,    DCMC,  SP   },
+    /* 32 */ { SP,    SP,    DC,    DCMC,  SP   },
+    /* 33 */ { SPTH,  MB,    "",    "",    MB   },
+    /* 34 */ { SP,    "",    "",    "",    ""   },
+    /* 35 */ { SP,    "",    "",    "",    ""   },
+    /* 36 */ { SP,    "",    "",    "",    ""   },
+    /* 37 */ { SPTH,  "",    "",    "",    ""   },
+    /* 38 */ { SP,    "",    "",    "",    ""   },
+    /* 39 */ { SP,    "",    "",    "",    ""   },
+    /* 40 */ { "",    "",    "",    "",    ""   },
+    /* 41 */ { AM,    "",    "",    "",    ""   },
+    /* 42 */ { JR,    "",    "",    "",    ""   },
+    /* 43 */ { SG,    "",    "",    "",    ""   },
+    /* 44 */ { AM,    "",    "",    "",    ""   },
+    /* 45 */ { TW,    "",    "",    "",    ""   },
+    /* 46 */ { JR,    "",    "",    "",    ""   },
+    /* 47 */ { JA,    "",    "",    "",    ""   },
+    /* 48 */ { SG,    "",    "",    "",    ""   },
+    /* 49 */ { TW,    "",    "",    "",    ""   }
 };
 
-#define NERVE_AUTHORS   authors[gamemap][2]
+#define NERVE_AUTHORS   authors[gamemap][4]
 #define DOOM2_AUTHORS   authors[gamemap][1]
+#define TNT_AUTHORS     authors[gamemap][2]
+#define PLUT_AUTHORS    authors[gamemap][3]
 #define UDOOM_AUTHORS   authors[(gameepisode * 10) + gamemap][0]
 
 static player_t         *plr;
@@ -256,6 +261,7 @@ static char             secretsstr4[5];
 dboolean                message_dontfuckwithme;
 dboolean                show_chat_bar;
 dboolean                emptytallpercent;
+dboolean                mapnumonly = false;
 
 patch_t                 *hu_font[HU_FONTSIZE];
 patch_t                 *beta_hu_font[HU_FONTSIZEBETA];
@@ -408,29 +414,31 @@ void HU_Start(void)
         else
         */
         {
-            if (!modifiedgame)
+            //if (!modifiedgame)
             {
                 HUlib_initTextLine(&w_title,
-                                   HU_TITLEX, HU_TITLEY + 32,
+                                   HU_TITLEX, HU_TITLEY + ST_HEIGHT,
                                    hu_font,
                                    HU_FONTSTART);
             }
+            /*
             else
             {
                 HUlib_initTextLine(&w_title,
-                                   HU_TITLEX, HU_MONSTERSY + 32,
+                                   HU_TITLEX, HU_MONSTERSY + ST_HEIGHT,
                                    hu_font,
                                    HU_FONTSTART);
             }
+            */
         }
     }
 
     if ((show_authors && gameversion != exe_chex && gameversion != exe_hacx
 #ifdef WII
-         && load_extra_wad == 0
+         && !load_extra_wad
 #endif
-         ) ||
-        (show_authors && nerve_pwad) || (show_authors && master_pwad))
+         ) /*||
+        (show_authors && nerve_pwad) || (show_authors && master_pwad)*/)
     {
         if (d_statusmap && automapactive)
         {
@@ -524,72 +532,108 @@ void HU_Start(void)
     */
     {
         HUlib_initTextLine(&w_monsters1,
-                           HU_MONSECX1, HU_MONSTERSY + 32,
+                           HU_MONSECX1, HU_MONSTERSY + ST_HEIGHT,
                            hu_font,
                            HU_FONTSTART);
 
         HUlib_initTextLine(&w_monsters2,
-                           HU_MONSECX2, HU_MONSTERSY + 32,
+                           HU_MONSECX2, HU_MONSTERSY + ST_HEIGHT,
                            hu_font,
                            HU_FONTSTART);
 
         HUlib_initTextLine(&w_monsters3,
-                           HU_MONSECX3, HU_MONSTERSY + 32,
+                           HU_MONSECX3, HU_MONSTERSY + ST_HEIGHT,
                            hu_font,
                            HU_FONTSTART);
 
         HUlib_initTextLine(&w_monsters4,
-                           HU_MONSECX4, HU_MONSTERSY + 32,
+                           HU_MONSECX4, HU_MONSTERSY + ST_HEIGHT,
                            hu_font,
                            HU_FONTSTART);
 
         HUlib_initTextLine(&w_items1,
-                           HU_MONSECX1, HU_ITEMSY + 32,
+                           HU_MONSECX1, HU_ITEMSY + ST_HEIGHT,
                            hu_font,
                            HU_FONTSTART);
 
         HUlib_initTextLine(&w_items2,
-                           HU_MONSECX2, HU_ITEMSY + 32,
+                           HU_MONSECX2, HU_ITEMSY + ST_HEIGHT,
                            hu_font,
                            HU_FONTSTART);
 
         HUlib_initTextLine(&w_items3,
-                           HU_MONSECX3, HU_ITEMSY + 32,
+                           HU_MONSECX3, HU_ITEMSY + ST_HEIGHT,
                            hu_font,
                            HU_FONTSTART);
 
         HUlib_initTextLine(&w_items4,
-                           HU_MONSECX4, HU_ITEMSY + 32,
+                           HU_MONSECX4, HU_ITEMSY + ST_HEIGHT,
                            hu_font,
                            HU_FONTSTART);
 
         HUlib_initTextLine(&w_secrets1,
-                           HU_MONSECX1, HU_SECRETSY + 32,
+                           HU_MONSECX1, HU_SECRETSY + ST_HEIGHT,
                            hu_font,
                            HU_FONTSTART);
 
         HUlib_initTextLine(&w_secrets2,
-                           HU_MONSECX2, HU_SECRETSY + 32,
+                           HU_MONSECX2, HU_SECRETSY + ST_HEIGHT,
                            hu_font,
                            HU_FONTSTART);
 
         HUlib_initTextLine(&w_secrets3,
-                           HU_MONSECX3, HU_SECRETSY + 32,
+                           HU_MONSECX3, HU_SECRETSY + ST_HEIGHT,
                            hu_font,
                            HU_FONTSTART);
 
         HUlib_initTextLine(&w_secrets4,
-                           HU_MONSECX4, HU_SECRETSY + 32,
+                           HU_MONSECX4, HU_SECRETSY + ST_HEIGHT,
                            hu_font,
                            HU_FONTSTART);
     }
 
-    if (!modifiedgame)
+    if (modifiedgame)
+    {
+        if (mapinfo_lump)
+        {
+            if (gamemode == commercial)
+                s = P_GetMapName(gamemap);
+            else
+                s = P_GetMapName((gameepisode - 1) * 10 + gamemap);
+        }
+        else
+        {
+            char lump[6];
+
+            if (gamemode == commercial)
+            {
+                if (gamemap < 10)
+                    M_snprintf(lump, sizeof(lump), "MAP0%i", gamemap);
+                else if (gamemap > 9)
+                    M_snprintf(lump, sizeof(lump), "MAP%i", gamemap);
+            }
+            else
+                M_snprintf(lump, sizeof(lump), "E%iM%i", gameepisode, gamemap);
+
+            s = lump;
+
+            if (W_CheckMultipleLumps(s) > 1 && dehcount == 1 && fsize != 12361532)
+                mapnumonly = true;
+            else
+                mapnumonly = false;
+        }
+    }
+
+    if (!mapnumonly)
     {
         switch (logical_gamemission)
         {
             case doom:
-                s = HU_TITLE;
+                if (gameepisode > 1)
+                    s = (*mapnames[(gameepisode - 1) * 9 + gamemap]);
+                else
+                    s = HU_TITLE;
+
                 break;
 
             case doom2:
@@ -649,36 +693,17 @@ void HU_Start(void)
             s = HU_TITLE2_BFG;
     }
 
-    if (modifiedgame)
-    {
-        if (mapinfo_lump)
-        {
-            if (gamemode == commercial)
-                s = P_GetMapName(gamemap);
-            else
-                s = P_GetMapName((gameepisode - 1) * 10 + gamemap);
-        }
-        else
-        {
-            char lump[6];
-
-            if (gamemode == commercial)
-            {
-                if (gamemap < 10)
-                    M_snprintf(lump, sizeof(s), "MAP0%i", gamemap);
-                else if (gamemap > 9)
-                    M_snprintf(lump, sizeof(lump), "MAP%i", gamemap);
-            }
-            else
-                M_snprintf(lump, sizeof(lump), "E%iM%i", gameepisode, gamemap);
-
-            s = lump;
-        }
-    }
-
     if (gamemission == pack_nerve)
     {
         u = NERVE_AUTHORS;
+    }
+    else if (gamemission == pack_tnt)
+    {
+        u = TNT_AUTHORS;
+    }
+    else if (gamemission == pack_plut)
+    {
+        u = PLUT_AUTHORS;
     }
     else if (gamemission == doom2)
     {
@@ -751,10 +776,10 @@ void HU_Start(void)
 
     if ((show_authors && gameversion != exe_chex && gameversion != exe_hacx
 #ifdef WII
-         && load_extra_wad == 0
+         && !load_extra_wad
 #endif
-        ) ||
-        (show_authors && nerve_pwad) || (show_authors && master_pwad))
+        ) /*||
+        (show_authors && nerve_pwad) || (show_authors && master_pwad)*/)
     {
         while (*u)
             HUlib_addCharToTextLine(&w_authors, *(u++));
@@ -1278,12 +1303,12 @@ void HU_Drawer(void)
         if (((automapactive ||
              ((am_overlay && (show_authors 
 #ifdef WII
-               && load_extra_wad == 0
+               && !load_extra_wad
 #endif
-              ))) ||
-              (show_authors && nerve_pwad) || (show_authors && master_pwad))))
+              ))) /*||
+              (show_authors && nerve_pwad) || (show_authors && master_pwad)*/)))
         {
-            if (((!modifiedgame || nerve_pwad) && !d_statusmap) || (am_overlay && !modifiedgame))
+            if (((!mapnumonly /*|| nerve_pwad*/) && !d_statusmap) || (am_overlay && !mapnumonly))
             {
                 HUlib_drawTextLine(&w_author_title, false);
                 HUlib_drawTextLine(&w_authors, false);
@@ -1297,9 +1322,10 @@ void HU_Drawer(void)
         if (show_stats)
             HU_DrawStats();
 
-        if (timer_info == 1)
+        if (timer_info)
             AM_DrawWorldTimer();
     }
+
     V_ClearDPTranslation();
 
     if (dp_translucent)
@@ -1415,12 +1441,48 @@ void HU_NewLevel()
 {
     char       *s = "Unknown level";
 
-    if (!modifiedgame)
+    if (modifiedgame)
+    {
+        if (mapinfo_lump)
+        {
+            if (gamemode == commercial)
+                s = P_GetMapName(gamemap);
+            else
+                s = P_GetMapName((gameepisode - 1) * 10 + gamemap);
+        }
+        else
+        {
+            char lump[6];
+
+            if (gamemode == commercial)
+            {
+                if (gamemap < 10)
+                    M_snprintf(lump, sizeof(lump), "MAP0%i", gamemap);
+                else if (gamemap > 9)
+                    M_snprintf(lump, sizeof(lump), "MAP%i", gamemap);
+            }
+            else
+                M_snprintf(lump, sizeof(lump), "E%iM%i", gameepisode, gamemap);
+
+            s = lump;
+
+            if (W_CheckMultipleLumps(s) > 1 && dehcount == 1 && fsize != 12361532)
+                mapnumonly = true;
+            else
+                mapnumonly = false;
+        }
+    }
+
+    if (!mapnumonly)
     {
         switch (logical_gamemission)
         {
             case doom:
-                s = HU_TITLE;
+                if (gameepisode > 1)
+                    s = (*mapnames[(gameepisode - 1) * 9 + gamemap]);
+                else
+                    s = HU_TITLE;
+
                 break;
 
             case doom2:
@@ -1486,33 +1548,6 @@ void HU_NewLevel()
     }
 
     // print the new level name into the console
-    if (modifiedgame)
-    {
-        if (mapinfo_lump)
-        {
-            if (gamemode == commercial)
-                s = P_GetMapName(gamemap);
-            else
-                s = P_GetMapName((gameepisode - 1) * 10 + gamemap);
-        }
-        else
-        {
-            char lump[6];
-
-            if (gamemode == commercial)
-            {
-                if (gamemap < 10)
-                    M_snprintf(lump, sizeof(s), "MAP0%i", gamemap);
-                else if (gamemap > 9)
-                    M_snprintf(lump, sizeof(lump), "MAP%i", gamemap);
-            }
-            else
-                M_snprintf(lump, sizeof(lump), "E%iM%i", gameepisode, gamemap);
-
-            s = lump;
-        }
-    }
-
     C_Output("");
 
     C_AddConsoleDivider();
