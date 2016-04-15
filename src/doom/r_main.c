@@ -50,6 +50,7 @@
 #include "p_local.h"
 #include "r_sky.h"
 #include "v_video.h"
+#include "wii-doom.h"
 
 
 // Fineangles in the SCREENWIDTH wide window.
@@ -78,6 +79,8 @@ int                     r_frame_count;
 
 // bumped light from gun blasts
 int                     extralight;
+
+int                     viewangleoffset;
 
 // [AM] Fractional part of the current tic, in the half-open
 //      range of [0.0, 1.0). Used for interpolation.
@@ -683,6 +686,8 @@ void R_Init(void)
 
     R_InitTranslationTables();
 
+    R_InitPatches(); 
+
     if (!beta_style)
         printf(".");
 
@@ -807,7 +812,7 @@ void R_SetupFrame(player_t *player)
         viewx = mo->x;
         viewy = mo->y;
         viewz = player->viewz;
-        viewangle = mo->angle;
+        viewangle = mo->angle + viewangleoffset;
     }
 
     extralight = player->extralight << 1;

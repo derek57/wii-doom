@@ -92,16 +92,11 @@ txt_widget_class_t txt_button_class =
     NULL
 };
 
-//
-// [nitr8] UNUSED
-//
-/*
 void TXT_SetButtonLabel(txt_button_t *button, char *label)
 {
     free(button->label);
     button->label = strdup(label);
 }
-*/
 
 txt_button_t *TXT_NewButton(char *label)
 {
@@ -116,10 +111,6 @@ txt_button_t *TXT_NewButton(char *label)
 }
 
 // Button with a callback set automatically
-//
-// [nitr8] UNUSED
-//
-/*
 txt_button_t *TXT_NewButton2(char *label, TxtWidgetSignalFunc func,
                              void *user_data)
 {
@@ -131,5 +122,4 @@ txt_button_t *TXT_NewButton2(char *label, TxtWidgetSignalFunc func,
 
     return button;
 }
-*/
 

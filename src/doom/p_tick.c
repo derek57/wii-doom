@@ -30,6 +30,7 @@
 #include "doomstat.h"
 #include "p_local.h"
 #include "p_tick.h"
+#include "wii-doom.h"
 #include "z_zone.h"
 
 
@@ -48,6 +49,7 @@ thinker_t        *currentthinker;
 //
 
 int              leveltime;
+int              stat_time = 0;
 
 
 //
@@ -221,11 +223,11 @@ void P_Ticker(void)
     int         i;
     
     // run the tic
-    if ((paused || menuactive) && !beta_style)
+    if (paused)
         return;
 
     // pause if in menu and at least one tic has been run
-    if (!netgame && menuactive && !demoplayback
+    if (!netgame && menuactive /*&& !demoplayback*/
         && players[consoleplayer].viewz != 1 && !beta_style)
     {
         return;
@@ -259,6 +261,7 @@ void P_Ticker(void)
 
     // for par times
     leveltime++;        
+    stat_time = SafeAdd(stat_time, 1);
 
     // haleyjd: run particle effects
     P_RunEffects();

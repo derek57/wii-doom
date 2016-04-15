@@ -70,13 +70,24 @@
 #include "v_video.h"
 #include "w_wad.h"
 #include "wi_stuff.h"
+#include "wii-doom.h"
 #include "z_zone.h"
 
 #ifdef WII
 #include <wiiuse/wpad.h>
 #endif
 
+/*
+fixed_t         forwardmove_demo[2] = { 0x19, 0x32 }; 
+fixed_t         sidemove_demo[2] = { 0x18, 0x28 }; 
 
+// + slow turn 
+fixed_t         angleturn_demo[3] = { 640, 1280, 320 };
+
+
+#define MAXPLMOVE_DEMO   (forwardmove_demo[1]) 
+#define DEMOMARKER       0x80
+*/
 #define SAVEGAMESIZE     0x2c000
 #define MAXPLMOVE        0x32
 #define TURBOTHRESHOLD   0x32
@@ -84,12 +95,12 @@
 #define BODYQUESIZE      32
 #define KEY_1            0x02
 #define VERSIONSIZE      16 
-/*
-#define DEMOMARKER       0x80
 
 // Version code for cph's longtics hack ("v1.91")
-#define DOOM_191_VERSION 111
-*/
+//#define DOOM_191_VERSION 111
+
+#define SLOWTURNTICS     6 
+
 
 // DOOM Par Times
 int pars[5][10] = 
@@ -106,10 +117,17 @@ int pars[5][10] =
 // DOOM II Par Times
 int cpars[33] =
 {
-     30,  90, 120, 120,  90, 150, 120, 120, 270,  90,    //  1-10
-    210, 150, 150, 150, 210, 150, 420, 150, 210, 150,    // 11-20
-    240, 150, 180, 150, 150, 300, 330, 420, 300, 180,    // 21-30
-    120,  30,   0                                        // 31-33
+    //  1-10
+     30,  90, 120, 120,  90, 150, 120, 120, 270,  90,
+
+    // 11-20
+    210, 150, 150, 150, 210, 150, 420, 150, 210, 150,
+
+    // 21-30
+    240, 150, 180, 150, 150, 300, 330, 420, 300, 180,
+
+    // 31-33
+    120,  30,   0
 };
  
 // [crispy] No Rest For The Living par times from the BFG Edition
@@ -145,11 +163,6 @@ fixed_t         sidemve;
 
 fixed_t         low_health_forwardmove = 17;
 fixed_t         low_health_sidemove = 15;
-
-fixed_t         slow_water_forwardmove = 17;
-fixed_t         slow_water_sidemove = 15;
-
-int             slow_water_turnspeed = 5;
 int             low_health_turnspeed = 5;
 
 // If non-zero, exit the level after this number of minutes.
@@ -169,12 +182,6 @@ int             gamemap;
 
 // for comparative timing purposes
 int             starttime;
-
-// player taking events and displaying 
-int             consoleplayer;
-
-// view being displayed 
-int             displayplayer;
 
 // gametic at level start 
 int             levelstarttic;
@@ -254,14 +261,14 @@ dboolean        deathmatch;
 dboolean        netgame;
 
 dboolean        playeringame[MAXPLAYERS]; 
-
+/*
 dboolean        demorecording; 
 dboolean        demoplayback; 
 dboolean        netdemo; 
 
 // quit after playing a demo from cmdline  
 dboolean        singledemo;
-
+*/
 #ifdef WII
 dboolean        joyarray[MAX_JOY_BUTTONS + 1]; 
 
@@ -271,20 +278,19 @@ dboolean        *joybuttons = &joyarray[1];
 
 dboolean        not_walking;
 dboolean        turbodetected[MAXPLAYERS];
-
+/*
 // low resolution turning for longtics
 dboolean        lowres_turn;
 
-dboolean        on_low_health = false;
-/*
 // cph's doom 1.91 longtics hack
 dboolean        longtics;
+*/
 
 #ifndef WII
 // for comparative timing purposes 
 dboolean        nodrawers;
 #endif
-
+/*
 char            *demoname;
 char            *defdemoname; 
 
@@ -310,6 +316,9 @@ static int      dclicks;
 static int      dclicktime2;
 static int      dclicks2;
 static int      savegameslot; 
+
+// for accelerative turning 
+//static int      turnheld;
 
 // joystick values are repeated 
 static int      joyxmove;
@@ -355,13 +364,13 @@ extern int      quickSaveSlot;
 
 extern dboolean done;
 extern dboolean netgameflag;
-extern dboolean aiming_help;
 extern dboolean messageNeedsInput;
 extern dboolean setsizeneeded;
 extern dboolean transferredsky;
 extern dboolean long_tics;
 extern dboolean mouse_grabbed;
 extern dboolean splashscreen;
+extern dboolean must_recreate_blockmap;
 
 // how far the window zooms in each tic (map coords)
 extern fixed_t  mtof_zoommul;
@@ -543,6 +552,7 @@ void G_BuildTiccmd(ticcmd_t *cmd, int maketic)
     int         side;
     int         look;
     int         flyheight;
+//    int         tspeed; 
 
     memset(cmd, 0, sizeof(ticcmd_t));
 
@@ -560,10 +570,27 @@ void G_BuildTiccmd(ticcmd_t *cmd, int maketic)
 
     // fraggle: support the old "joyb_speed = 31" hack which
     // allowed an autorun effect
+
 #ifndef WII
     speed = key_speed >= NUMKEYS || gamekeydown[key_speed];
 #endif
     forward = side = look = flyheight = 0;
+
+/*
+    // use two stage accelerative turning
+    // on the keyboard and joystick
+    if (joyxmove < 0 || joyxmove > 0  
+        || gamekeydown[key_right] || gamekeydown[key_left]) 
+        turnheld += ticdup; 
+    else 
+        turnheld = 0; 
+
+    if (turnheld < SLOWTURNTICS) 
+        // slow turn 
+        tspeed = 2;
+    else 
+        tspeed = speed;
+*/
 
     // let movement keys cancel each other out
     if (strafe) 
@@ -574,7 +601,12 @@ void G_BuildTiccmd(ticcmd_t *cmd, int maketic)
             not_walking = false;
 #endif
             // fprintf(stderr, "strafe right\n");
-            side += sidemve; 
+/*
+            if (demoplayback)
+                side += sidemove_demo[speed]; 
+            else
+*/
+                side += sidemve; 
         }
 
         if (gamekeydown[key_left] || mousebuttons[mousebstrafeleft] || gamekeydown[key_strafeleft]) 
@@ -583,41 +615,89 @@ void G_BuildTiccmd(ticcmd_t *cmd, int maketic)
             not_walking = false;
 #endif
             // fprintf(stderr, "strafe left\n");
-            side -= sidemve; 
+/*
+            if (demoplayback)
+                side -= sidemove_demo[speed]; 
+            else
+*/
+                side -= sidemve; 
         }
+/*
+        if (demoplayback) 
+        {
+            if (joyxmove > 0) 
+                side += sidemove_demo[speed]; 
 
-        if (joyxmove > 0) 
-            side += sidemve; 
+            if (joyxmove < 0) 
+                side -= sidemove_demo[speed]; 
+        }
+        else
+*/
+        {
+            if (joyxmove > 0) 
+                side += sidemve; 
 
-        if (joyxmove < 0) 
-            side -= sidemve; 
+            if (joyxmove < 0) 
+                side -= sidemve; 
+        }
     } 
     else 
     { 
-        if (gamekeydown[key_right])
-            cmd->angleturn -= turnspd * 128; 
+/*
+        if (demoplayback)
+        {
+            if (gamekeydown[key_right]) 
+                cmd->angleturn -= angleturn_demo[tspeed]; 
 
-        if (gamekeydown[key_left]) 
-            cmd->angleturn += turnspd * 128;
+            if (gamekeydown[key_left]) 
+                cmd->angleturn += angleturn_demo[tspeed]; 
 
-        if (joyxmove > 20) 
-            side += sidemve; 
-        else if (joyxmove < -20) 
-            side -= sidemve; 
+            if (joyxmove > 0) 
+                cmd->angleturn -= angleturn_demo[tspeed]; 
 
-        // calculate wii IR curve based on input
-        if (joyirx > 0)
-            cmd->angleturn -= turnspd * joyirx;
+            if (joyxmove < 0) 
+                cmd->angleturn += angleturn_demo[tspeed]; 
+        }
+        else
+*/
+        {
+            if (gamekeydown[key_right])
+                cmd->angleturn -= turnspd * 128; 
 
-        // calculate wii IR curve based on input
-        if (joyirx < 0)
-            cmd->angleturn -= turnspd * joyirx;
+            if (gamekeydown[key_left]) 
+                cmd->angleturn += turnspd * 128;
+
+            if (joyxmove > 20) 
+                side += sidemve; 
+            else if (joyxmove < -20) 
+                side -= sidemve; 
+
+            // calculate wii IR curve based on input
+            if (joyirx > 0)
+                cmd->angleturn -= turnspd * joyirx;
+
+            // calculate wii IR curve based on input
+            if (joyirx < 0)
+                cmd->angleturn -= turnspd * joyirx;
+        } 
     } 
+/*
+    if (demoplayback)
+    {
+        if (joyymove < 0) 
+            forward += forwardmove_demo[speed]; 
 
-    if (joyymove > 20) 
-        forward += forwardmve; 
-    else if (joyymove < -20) 
-        forward -= forwardmve; 
+        if (joyymove > 0) 
+            forward -= forwardmove_demo[speed]; 
+    }
+    else
+*/
+    {
+        if (joyymove > 20) 
+            forward += forwardmve; 
+        else if (joyymove < -20) 
+            forward -= forwardmve; 
+    }
 
     if (joyxmove > 20 || joyymove > 20 || joyxmove < -20 || joyymove < -20)
         not_walking = false;
@@ -627,6 +707,7 @@ void G_BuildTiccmd(ticcmd_t *cmd, int maketic)
     if (gamekeydown[key_up]) 
     {
         // fprintf(stderr, "up\n");
+
 #ifdef WII
         if (dont_move_forwards)
 #else
@@ -634,12 +715,19 @@ void G_BuildTiccmd(ticcmd_t *cmd, int maketic)
             not_walking = false;
         }
 #endif
-        forward += forwardmve; 
+
+/*
+        if (demoplayback)
+            forward += forwardmove_demo[speed]; 
+        else
+*/
+            forward += forwardmve; 
     }
 
     if (gamekeydown[key_down]) 
     {
         // fprintf(stderr, "down\n");
+
 #ifdef WII
         if (dont_move_backwards)
 #else
@@ -647,7 +735,13 @@ void G_BuildTiccmd(ticcmd_t *cmd, int maketic)
             not_walking = false;
         }
 #endif
-        forward -= forwardmve; 
+
+/*
+        if (demoplayback)
+            forward -= forwardmove_demo[speed]; 
+        else
+*/
+            forward -= forwardmve; 
     }
 
 #ifdef WII
@@ -656,14 +750,27 @@ void G_BuildTiccmd(ticcmd_t *cmd, int maketic)
 
     if (joybuttons[joybstrafeleft]) 
     {
-        side -= sidemve;
+/*
+        if (demplayback)
+            side -= sidemove_demo[speed]; 
+        else
+*/
+            side -= sidemve;
     }
 
     if (joybuttons[joybstraferight])
     {
-        side += sidemve; 
+/*
+        if (demplayback)
+            side += sidemove_demo[speed]; 
+        else
+*/
+            side += sidemve; 
     }
 #endif
+
+    // buttons
+    cmd->chatchar = HU_dequeueChatChar(); 
 
     if (gamekeydown[key_fire] ||
 #ifdef WII
@@ -672,68 +779,61 @@ void G_BuildTiccmd(ticcmd_t *cmd, int maketic)
         mousebuttons[mousebfire]) 
         cmd->buttons |= BT_ATTACK; 
 
-    // villsa [STRIFE] disable running if low on health
-    if (players[consoleplayer].health <= 15 && lowhealth)
+    if (/*!demoplayback &&*/ usergame)
     {
-        forwardmve = low_health_forwardmove;
-        sidemve = low_health_sidemove;
-        turnspd = low_health_turnspeed;
-        on_low_health = true;
-    }
-    else if (isliquid[players[consoleplayer].mo->subsector->sector->floorpic]
-        && !on_low_health && slowwater)
-    {
-        forwardmve = low_health_forwardmove;
-        sidemve = low_health_sidemove;
-        turnspd = low_health_turnspeed;
-    }
-    else
-    {
-        on_low_health = false;
-
-        if (
-#ifdef WII
-            joybuttons[joybspeed]
-#else
-               speed
-#endif
-           )
+        // villsa [STRIFE] disable running if low on health
+        if (players[consoleplayer].health <= 15 && lowhealth)
         {
-            forwardmve = forwardmove * 6;
-            sidemve = sidemove * 6;
-            turnspd = turnspeed * 4;
+            forwardmve = low_health_forwardmove;
+            sidemve = low_health_sidemove;
+            turnspd = low_health_turnspeed;
         }
-        else if (
-#ifdef WII
-                !joybuttons[joybspeed]
-#else
-                !speed
-#endif
-                )
+        else
         {
-            forwardmve = forwardmove;
-            sidemve = sidemove;
-            turnspd = turnspeed;
+            if (
+#ifdef WII
+                joybuttons[joybspeed]
+#else
+                   speed
+#endif
+               )
+            {
+                forwardmve = forwardmove * 6;
+                sidemve = sidemove * 6;
+                turnspd = turnspeed * 4;
+            }
+            else if (
+#ifdef WII
+                    !joybuttons[joybspeed]
+#else
+                    !speed
+#endif
+                    )
+            {
+                forwardmve = forwardmove;
+                sidemve = sidemove;
+                turnspd = turnspeed;
+            }
         }
+
+        if (forwardmve < -25)
+            forwardmve = -25;
+
+        if (forwardmve > 50)
+            forwardmve = 50;
+
+        if (sidemve < -24)
+            sidemve = -24;
+
+        if (sidemve > 40)
+            sidemve = 40;
+
+        if (cmd->angleturn < -1280)
+            cmd->angleturn = -1280;
+
+        if (cmd->angleturn > 1280)
+            cmd->angleturn = 1280;
     }
-
-    if (forwardmve < -25)
-        forwardmve = -25;
-
-    if (forwardmve > 50)
-        forwardmve = 50;
-
-    if (sidemve < -24)
-        sidemve = -24;
-
-    if (sidemve > 40)
-        sidemve = 40;
-
-    if (cmd->angleturn < -1280)
-        cmd->angleturn = -1280;
-
-    if (cmd->angleturn > 1280)
-        cmd->angleturn = 1280;
 
     if (mouselook == 0)
         look = -8;
@@ -764,12 +864,12 @@ void G_BuildTiccmd(ticcmd_t *cmd, int maketic)
 #endif
          gamekeydown[key_jump] || mousebuttons[mousebjump]) && !menuactive)
     {
-        if (!demoplayback)
+//        if (!demoplayback)
             cmd->arti |= AFLAG_JUMP;
     }
 
 #ifndef WII
-    if (!demoplayback)
+//    if (!demoplayback)
     {
         if (mousebuttons[mousebnextweapon])
             ChangeWeaponRight();
@@ -785,7 +885,7 @@ void G_BuildTiccmd(ticcmd_t *cmd, int maketic)
 #else
         gamekeydown[key_aiming] || mousebuttons[mousebaiming]
 #endif
-        ) && aiming_help && !demoplayback && devparm)
+        ) && aiming_help && /*!demoplayback &&*/ devparm)
     {
         player_t *player = &players[consoleplayer];
         P_AimingHelp(player);
@@ -855,7 +955,7 @@ void G_BuildTiccmd(ticcmd_t *cmd, int maketic)
                 }
             }
 
-            if (!demoplayback)
+//            if (!demoplayback)
             {
                 if (joybuttons[joybright])
                     ChangeWeaponRight();
@@ -931,7 +1031,6 @@ void G_BuildTiccmd(ticcmd_t *cmd, int maketic)
     else
     {
         // Check weapon keys.
-
         for (i = 0; i < arrlen(weapon_keys); ++i)
         {
             int key = *weapon_keys[i];
@@ -951,12 +1050,22 @@ void G_BuildTiccmd(ticcmd_t *cmd, int maketic)
     // mouse
     if (mousebuttons[mousebforward]) 
     {
-        forward += forwardmve;
+/*
+        if (demoplayback)
+            forward += forwardmove_demo[speed];
+        else
+*/
+            forward += forwardmve;
     }
 
     if (mousebuttons[mousebbackward])
     {
-        forward -= forwardmve;
+/*
+        if (demoplayback)
+            forward -= forwardmove_demo[speed];
+        else
+*/
+            forward -= forwardmve;
     }
 
     if (dclick_use)
@@ -1063,6 +1172,7 @@ void G_BuildTiccmd(ticcmd_t *cmd, int maketic)
 #endif
 
     // mouselook, but not when paused
+
 #ifdef WII
     if (joyiry && !paused && mouselook > 0 && players[consoleplayer].playerstate == PST_LIVE)
 #else
@@ -1075,7 +1185,7 @@ void G_BuildTiccmd(ticcmd_t *cmd, int maketic)
         // initialiser added to prevent compiler warning
         float newlookdir = 0;
 
-        if (!menuactive && !demoplayback)
+        if (!menuactive /*&& !demoplayback*/)
         {
 #ifdef WII
             adj = ((joyiry * 0x4) << 16) / (float)0x80000000 * 180 * 110.0 / 85.0;
@@ -1145,9 +1255,8 @@ void G_BuildTiccmd(ticcmd_t *cmd, int maketic)
         sendsave = false; 
         cmd->buttons = BT_SPECIAL | BTS_SAVEGAME | (savegameslot<<BTS_SAVESHIFT); 
     } 
-
-    // low-res turning
 /*
+    // low-res turning
     if (lowres_turn)
     {
         static signed short carry = 0;
@@ -1157,12 +1266,10 @@ void G_BuildTiccmd(ticcmd_t *cmd, int maketic)
 
         // round angleturn to the nearest 256 unit boundary
         // for recording demos with single byte values for turn
-
         cmd->angleturn = (desired_angleturn + 128) & 0xff00;
 
         // Carry forward the error from the reduced resolution to the
         // next tic, so that successive small movements can accumulate.
-
         carry = desired_angleturn - cmd->angleturn;
     }
 */
@@ -1338,7 +1445,7 @@ dboolean G_Responder(event_t *ev)
 #ifndef WII
     // allow spy mode changes even during the demo
     if (gamestate == GS_LEVEL && ev->type == ev_keydown 
-        && ev->data1 == key_spy && (singledemo || !deathmatch))
+        && ev->data1 == key_spy && (/*singledemo ||*/ !deathmatch))
     {
         // spy mode 
         do 
@@ -1354,8 +1461,8 @@ dboolean G_Responder(event_t *ev)
     }
 
     // any other key pops up menu if in demos
-    if (gameaction == ga_nothing && !singledemo && 
-        (demoplayback || gamestate == GS_DEMOSCREEN)) 
+    if (gameaction == ga_nothing /*&& !singledemo*/ && 
+        (/*demoplayback ||*/ gamestate == GS_DEMOSCREEN)) 
     { 
         if ((ev->type == ev_keydown && ev->data1 != KEY_RSHIFT) ||  
             (ev->type == ev_mouse && ev->data1) || 
@@ -1380,11 +1487,10 @@ dboolean G_Responder(event_t *ev)
             return true; 
         } 
 #endif 
-/*
         if (HU_Responder(ev)) 
             // chat ate the event 
             return true;
-*/
+
         if (ST_Responder(ev)) 
             // status window ate it 
             return true;
@@ -1525,6 +1631,8 @@ dboolean G_Responder(event_t *ev)
 //
 // DEMO RECORDING 
 // 
+// [nitr8] UNUSED
+//
 /*
 void G_ReadDemoTiccmd(ticcmd_t *cmd) 
 { 
@@ -1536,8 +1644,8 @@ void G_ReadDemoTiccmd(ticcmd_t *cmd)
         return; 
     } 
 
-    cmd->forwardmove = ((signed char)*demo_p++); 
-    cmd->sidemove = ((signed char)*demo_p++); 
+    cmd->forwardmov = ((signed char)*demo_p++); 
+    cmd->sidemov = ((signed char)*demo_p++); 
 
     // If this is a longtics demo, read back in higher resolution
 
@@ -1554,6 +1662,12 @@ void G_ReadDemoTiccmd(ticcmd_t *cmd)
     }
 
     cmd->buttons = (unsigned char)*demo_p++; 
+
+    if (d_fliplevels)
+    {
+        cmd->sidemov *= (const signed char) -1;
+        cmd->angleturn *= (const short) -1;
+    }
 
 //    cmd->lookfly = (unsigned char)*demo_p++;
 } 
@@ -1581,28 +1695,34 @@ void G_WriteDemoTiccmd(ticcmd_t *cmd)
 { 
     byte *demo_start = demo_p;
 
+    if (d_fliplevels)
+    {
+        cmd->sidemov *= (const signed char) -1;
+        cmd->angleturn *= (const short) -1;
+    }
+
 #ifndef WII
     // press q to end demo recording 
     if (gamekeydown[key_demo_quit])
         G_CheckDemoStatus(); 
 #endif
 
-    *demo_p++ = cmd->forwardmove; 
-    *demo_p++ = cmd->sidemove; 
+    *demo_p++ = cmd->forwardmov; 
+    *demo_p++ = cmd->sidemov; 
+
+    // If this is a longtics demo, record in higher resolution
 
 #ifndef WII
-    // If this is a longtics demo, record in higher resolution
     if (longtics)
     {
         *demo_p++ = (cmd->angleturn & 0xff);
         *demo_p++ = (cmd->angleturn >> 8) & 0xff;
     }
     else
+#else
     {
         *demo_p++ = cmd->angleturn >> 8; 
     }
-#else
-    *demo_p++ = cmd->angleturn >> 8; 
 #endif
 
     *demo_p++ = cmd->buttons; 
@@ -1630,7 +1750,7 @@ void G_WriteDemoTiccmd(ticcmd_t *cmd)
     // make SURE it is exactly the same 
     G_ReadDemoTiccmd(cmd);
 } 
-*/ 
+*/
 
 //
 // G_DoReborn 
@@ -1794,14 +1914,19 @@ static void G_DoLoadLevel(void)
     memset(joyarray, 0, sizeof(joyarray)); 
 #endif
 
+    if (must_recreate_blockmap)
+        must_recreate_blockmap = false;
+
     if (consoleactive)
         C_HideConsoleFast();
 } 
 
 static void G_DoNewGame(void) 
 {
+/*
     demoplayback = false; 
     netdemo = false;
+*/
     netgame = false;
 
     deathmatch = false;
@@ -1822,8 +1947,8 @@ static void G_DoNewGame(void)
     infight = false;
 } 
 
-// Generate a string describing a demo version
 /*
+// Generate a string describing a demo version
 static char *DemoVersionDescription(int version)
 {
     switch (version)
@@ -1852,7 +1977,6 @@ static char *DemoVersionDescription(int version)
 
     // Unknown version.  Perhaps this is a pre-v1.4 IWAD?  If the version
     // byte is in the range 0-4 then it can be a v1.0-v1.2 demo.
-
     if (version >= 0 && version <= 4)
     {
         return "v1.0/v1.1/v1.2";
@@ -1898,6 +2022,7 @@ void G_DoPlayDemo(void)
 
     gameaction = ga_nothing; 
     demobuffer = demo_p = W_CacheLumpName(defdemoname, PU_STATIC); 
+    longtics = false;
 
     // THESE ARE PRIOR VERSION 1.2
     if (fsize == 4261144  || fsize == 4271324  || fsize == 4211660  ||
@@ -1953,7 +2078,7 @@ void G_DoPlayDemo(void)
         nomonsters = *demo_p++;
         consoleplayer = *demo_p++;
     }
-        
+
     for (i = 0; i < MAXPLAYERS; i++) 
         playeringame[i] = *demo_p++; 
 
@@ -2038,9 +2163,14 @@ static void G_DoCompleted(void)
     int         nextmap = P_GetMapNext(map);
     int         par = P_GetMapPar(map);
     int         secretnextmap = P_GetMapSecretNext(map);
+    player_t    *player = &players[0];
 
     gameaction = ga_nothing; 
  
+    player->mo->x = 0;
+    player->mo->y = 0;
+    player->mo->z = 0;
+
     for (i = 0; i < MAXPLAYERS; i++) 
         if (playeringame[i]) 
             // take away cards and stuff 
@@ -2052,7 +2182,6 @@ static void G_DoCompleted(void)
     if (gamemode != commercial)
     {
         // Chex Quest ends after 5 levels, rather than 8.
-
         if (gameversion == exe_chex)
         {
             if (gamemap == 5)
@@ -2235,7 +2364,6 @@ static void G_DoCompleted(void)
     // Set par time. Doom episode 4 doesn't have a par time, so this
     // overflows into the cpars array. It's necessary to emulate this
     // for statcheck regression testing.
-
     if (par)
         wminfo.partime = TICRATE * par;
     else
@@ -2332,6 +2460,7 @@ static void G_DoSaveGame (void)
     {
         // Failed to save the game, so we're going to have to abort. But
         // to be nice, save to somewhere else before we call I_Error().
+
 #ifdef WII
         if (usb)
             recovery_savegame_file = M_TempFile("usb:/apps/wiidoom/savegames/recovery.dsg");
@@ -2340,6 +2469,7 @@ static void G_DoSaveGame (void)
 #else
         recovery_savegame_file = M_TempFile("recovery.dsg");
 #endif
+
         save_stream = fopen(recovery_savegame_file, "wb");
 
         if (!save_stream)
@@ -2382,14 +2512,12 @@ static void G_DoSaveGame (void)
          
     // Enforce the same savegame size limit as in Vanilla Doom, 
     // except if the vanilla_savegame_limit setting is turned off.
-
     if (vanilla_savegame_limit && ftell(save_stream) > SAVEGAMESIZE)
     {
         I_Error("Savegame buffer overrun");
     }
     
     // Finish up, close the savegame file.
-
     fclose(save_stream);
 
     if (recovery_savegame_file != NULL)
@@ -2404,7 +2532,6 @@ static void G_DoSaveGame (void)
 
     // Now rename the temporary savegame file to the actual savegame
     // file, overwriting the old savegame if there was one there.
-
     remove(savegame_file);
     rename(temp_savegame_file, savegame_file);
     
@@ -2423,7 +2550,7 @@ static void G_DoSaveGame (void)
     M_StringCopy(savedescription, "", sizeof(savedescription));
 
     // draw the pattern into the back screen
-    R_FillBackScreen(0, 1);
+    R_FillBackScreen();
 } 
 
 //
@@ -2515,13 +2642,15 @@ void G_Ticker(void)
             cmd = &players[i].cmd; 
 
             memcpy(cmd, &netcmds[i], sizeof(ticcmd_t));
-/*
+
+            /*
             if (demoplayback) 
                 G_ReadDemoTiccmd(cmd); 
 
             if (demorecording) 
                 G_WriteDemoTiccmd(cmd);
-*/
+            */
+
 #ifndef WII
             // check for turbo cheats
 
@@ -2530,7 +2659,6 @@ void G_Ticker(void)
             // over the past 4 seconds.  offset the checking period
             // for each player so messages are not displayed at the
             // same time.
-
             if (cmd->forwardmov > TURBOTHRESHOLD)
             {
                 turbodetected[i] = true;
@@ -2543,7 +2671,7 @@ void G_Ticker(void)
                 turbodetected[i] = false;
             }
 #endif
-            if (netgame && !netdemo && !(gametic % ticdup)) 
+            if (netgame /*&& !netdemo*/ && !(gametic % ticdup)) 
             { 
                 if (gametic > BACKUPTICS 
                     && consistancy[i][buf] != cmd->consistancy) 
@@ -2581,13 +2709,14 @@ void G_Ticker(void)
 
                     case BTS_SAVEGAME: 
                         // [crispy] never override savegames by demo playback
+/*
                         if (demoplayback)
                             break;
-
+*/
                         if (!savedescription[0]) 
                             M_StringCopy(savedescription, "NET GAME", sizeof(savedescription));
 
-                        savegameslot = (players[i].cmd.buttons & BTS_SAVEMASK)>>BTS_SAVESHIFT; 
+                        savegameslot = (players[i].cmd.buttons & BTS_SAVEMASK) >> BTS_SAVESHIFT; 
                         gameaction = ga_savegame; 
                         break; 
                 } 
@@ -2596,7 +2725,6 @@ void G_Ticker(void)
     }
 
     // Have we just finished displaying an intermission screen?
-
     if (oldgamestate == GS_INTERMISSION && gamestate != GS_INTERMISSION)
     {
         WI_End();
@@ -2781,7 +2909,7 @@ void G_LoadGame(char *name)
 
 void G_DoLoadGame(void) 
 { 
-    int savedleveltime = leveltime;
+    int savedleveltime;
 
     loadaction = gameaction;
     gameaction = ga_nothing; 
@@ -2798,6 +2926,8 @@ void G_DoLoadGame(void)
         fclose(save_stream);
         return;
     }
+
+    savedleveltime = leveltime;
 
     // load a base level 
     G_InitNew(gameskill, gameepisode, gamemap); 
@@ -2825,7 +2955,7 @@ void G_DoLoadGame(void)
         R_ExecuteSetViewSize();
     
     // draw the pattern into the back screen
-    R_FillBackScreen(0, 1);   
+    R_FillBackScreen();   
 
     if (consoleactive)
     {
@@ -2884,7 +3014,6 @@ void G_InitNew(skill_t skill, int episode, int map)
     // found in disassemblies of the DOS version and causes IDCLEV and
     // the -warp command line parameter to behave differently.
     // This is left here for posterity.
-
     if (skill > sk_nightmare)
         skill = sk_nightmare;
 
@@ -2962,7 +3091,7 @@ void G_InitNew(skill_t skill, int episode, int map)
     usergame = true;
 
     paused = false;
-    demoplayback = false;
+//    demoplayback = false;
     automapactive = false;
     viewactive = true;
     gameepisode = episode;
@@ -2980,7 +3109,6 @@ void G_InitNew(skill_t skill, int episode, int map)
     // start of a level, the sky texture never changes unless we
     // restore from a saved game.  This was fixed before the Doom
     // source release, but this IS the way Vanilla DOS Doom behaves.
-
     if (gamemode == commercial)
     {
         if (gamemap < 12)

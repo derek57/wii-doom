@@ -100,6 +100,7 @@ void HU_Erase(void);
 void HU_DrawStats(void);
 void HU_DrawHUD(void);
 void HU_PlayerMessage(char *message, dboolean ingame);
+void HU_DemoProgressBar(int scrn);
 
 // HU_NewLevel called when we enter a new level
 // determine the level name and display it in

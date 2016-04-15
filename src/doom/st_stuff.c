@@ -67,6 +67,7 @@
 #include "v_video.h"
 
 #include "w_wad.h"
+#include "wii-doom.h"
 #include "z_zone.h"
 
 
@@ -539,6 +540,7 @@ cheatseq_t        cheat_powerup[7] =
 cheatseq_t cheat_choppers = CHEAT("idchoppers", 0);
 cheatseq_t cheat_clev = CHEAT("idclev", 2);
 cheatseq_t cheat_mypos = CHEAT("idmypos", 0);
+cheatseq_t cheat_goobers = CHEAT("goobers", 0);
 
 
 int                 prio = 0;
@@ -558,7 +560,6 @@ extern dboolean     show_chat_bar;
 extern dboolean     done;
 extern dboolean     massacre_cheat_used;
 extern dboolean     mus_cheat_used;
-extern dboolean     aiming_help;
 
 extern char         massacre_textbuffer[30];
 
@@ -908,6 +909,18 @@ dboolean ST_Responder(event_t *ev)
                     plyr->mo->flags &= ~MF_NOCLIP;
                     plyr->message = STSTR_NCOFFBETA;
                 }
+            }
+            // [crispy] implement Crispy Doom's "goobers" cheat, ne easter egg
+            else if (cht_CheckCheat(&cheat_goobers, ev->data2))
+            {
+                static char msg[80];
+
+                extern void EV_DoGoobers (void);
+
+                EV_DoGoobers();
+
+                M_snprintf(msg, sizeof(msg), "Get Psyched!");
+                plyr->message = msg;
             }
 
             // 'behold?' power-up cheats
@@ -1629,7 +1642,7 @@ void ST_Drawer(dboolean fullscreen, dboolean refresh)
     {
         if (screenSize < 8 || (automapactive && !am_overlay && d_statusmap))
         {
-            if (usergame && !menuactive)
+            if ((usergame && !menuactive) /*|| demoplayback*/)
                 ST_doRefresh();
         }
     }
@@ -2058,10 +2071,10 @@ void ST_Start (void)
     }
 }
 
-void ST_Init(int scrn)
+void ST_Init(void)
 {
     ST_loadData();
 
-    screens[scrn] = Z_Malloc((ST_WIDTH << hires) * (ST_HEIGHT << hires) * sizeof(*screens[scrn]), PU_STATIC, NULL);
+    screens[4] = Z_Malloc((ST_WIDTH << hires) * (ST_HEIGHT << hires) * sizeof(*screens[4]), PU_STATIC, NULL);
 }
 

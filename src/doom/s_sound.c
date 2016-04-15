@@ -52,6 +52,7 @@
 #include "sounds.h"
 #include "v_trans.h"
 #include "w_wad.h"
+#include "wii-doom.h"
 #include "z_zone.h"
 
 
@@ -76,6 +77,19 @@
 #define NORM_SEP        128
 
 
+// [crispy] "sound objects" hold the coordinates of removed map objects
+typedef struct
+{
+    thinker_t dummy;
+    fixed_t x;
+    fixed_t y;
+    fixed_t z;
+
+} sobj_t;
+
+
+static sobj_t      *sobjs; 
+
 // Internal volume level, ranging from 0-127
 static int         snd_SfxVolume;
 
@@ -87,13 +101,6 @@ static musicinfo_t *mus_playing = NULL;
 
 // Number of channels to use
 int                snd_channels = 8;
-
-// Maximum volume of a sound effect.
-// Internal default is max out of 0-15.
-int                sfxVolume = 8;
-
-// Maximum volume of music. 
-int                musicVolume = 8;
 
 // The set of channels available
 channel_t          channels[64];
@@ -147,6 +154,7 @@ void S_Init(int sfxVolume, int musicVolume)
     // (the maximum number of sounds rendered
     // simultaneously) within zone memory.
     //channels = Z_Malloc(snd_channels * sizeof(channel_t), PU_STATIC, NULL);
+    sobjs = Z_Malloc(snd_channels * sizeof(sobj_t), PU_STATIC, 0); 
 
     // Free all channels for use
     for (i = 0; i < snd_channels; i++)
@@ -217,26 +225,29 @@ static int S_GetMusicNum(void)
 {
     static int mnum;
 
-    if (gamemode == commercial && gamemission == pack_nerve)
+    if (gamemode == commercial)
     {
-        int nmus[]=
+        if (gamemission == pack_nerve)
         {
-            mus_messag,
-            mus_ddtblu,
-            mus_doom,
-            mus_shawn,
-            mus_in_cit,
-            mus_the_da,
-            mus_in_cit,
-            mus_shawn2,
-            mus_ddtbl2
-        };
+            int nmus[]=
+            {
+                mus_messag,
+                mus_ddtblu,
+                mus_doom,
+                mus_shawn,
+                mus_in_cit,
+                mus_the_da,
+                mus_in_cit,
+                mus_shawn2,
+                mus_ddtbl2
+            };
 
-        mnum = nmus[(s_randommusic ? M_RandomIntNoRepeat(1, 9, mnum) : gamemap) - 1];
-    }
-    else if (gamemode == commercial)
-    {
-        mnum = mus_runnin + (s_randommusic ? M_RandomIntNoRepeat(1, 32, mnum) : gamemap) - 1;
+            mnum = nmus[(s_randommusic ? M_RandomIntNoRepeat(1, 9, mnum) : gamemap) - 1];
+        }
+        else
+        {
+            mnum = mus_runnin + (s_randommusic ? M_RandomIntNoRepeat(1, 32, mnum) : gamemap) - 1;
+        }
     }
     else
     {
@@ -273,14 +284,20 @@ static int S_GetMusicNum(void)
             mus_e1m9
         };
 
-        if (gameepisode < 4)
-        {
-            mnum = mus_e1m1 + (s_randommusic ? M_RandomIntNoRepeat(1, 21, mnum) :
+        if (gamemode == shareware)
+            mnum = mus_e1m1 + (s_randommusic ? M_RandomIntNoRepeat(1, 7, mnum) :
                 (gameepisode - 1) * 9 + gamemap) - 1;
-        }
         else
         {
-            mnum = spmus[(s_randommusic ? M_RandomIntNoRepeat(1, 28, mnum) : gamemap) - 1];
+            if (gameepisode < 4)
+            {
+                mnum = mus_e1m1 + (s_randommusic ? M_RandomIntNoRepeat(1, 21, mnum) :
+                    (gameepisode - 1) * 9 + gamemap) - 1;
+            }
+            else
+            {
+                mnum = spmus[(s_randommusic ? M_RandomIntNoRepeat(1, 28, mnum) : gamemap) - 1];
+            }
         }
     }
 
@@ -314,6 +331,32 @@ void S_StopSound(mobj_t *origin)
         if (channels[cnum].sfxinfo && channels[cnum].origin == origin)
         {
             S_StopChannel(cnum);
+            break;
+        }
+    }
+}
+
+// [crispy] removed map objects may finish their sounds
+// When map objects are removed from the map by P_RemoveMobj(), instead of
+// stopping their sounds, their coordinates are transfered to "sound objects"
+// so stereo positioning and distance calculations continue to work even after
+// the corresponding map object has already disappeared.
+// Thanks to jeff-d and kb1 for discussing this feature and the former for the
+// original implementation idea: https://www.doomworld.com/vb/post/1585325
+void S_UnlinkSound(mobj_t *origin)
+{
+    int cnum;
+
+    for (cnum = 0; cnum < snd_channels; cnum++)
+    {
+        if (channels[cnum].sfxinfo && channels[cnum].origin == origin)
+        {
+            sobj_t *const sobj = &sobjs[cnum];
+            sobj->x = origin->x;
+            sobj->y = origin->y;
+            sobj->z = origin->z;
+            channels[cnum].origin = (mobj_t *) sobj;
+
             break;
         }
     }

@@ -369,9 +369,6 @@ txt_widget_class_t txt_spincontrol_class =
     TXT_SpinControlFocused
 };
 
-//
-// [nitr8] UNUSED
-//
 /*
 static txt_spincontrol_t *TXT_BaseSpinControl(void)
 {

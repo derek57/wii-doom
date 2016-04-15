@@ -30,6 +30,7 @@
 #include "config.h"
 #include "opl.h"
 #include "opl_internal.h"
+#include "../src/wii-doom.h"
 
 
 //#define OPL_DEBUG_TRACE

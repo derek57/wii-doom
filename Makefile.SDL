@@ -273,7 +273,7 @@ PATH_SEPARATOR = :
 PROGRAM_PREFIX = chocolate-
 RANLIB = ranlib
 SDLMIXER_LIBS =  -lSDL_mixer
-#SDLNET_LIBS =  -lSDL_net
+SDLNET_LIBS =  -lSDL_net
 SDL_CFLAGS = -I/usr/local/include/SDL -D_GNU_SOURCE=1 -D_REENTRANT
 SDL_CONFIG = /usr/local/bin/sdl-config
 SDL_LIBS = -L/usr/local/lib -Wl,-rpath,/usr/local/lib -lSDL -lpthread
@@ -381,6 +381,7 @@ all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
 .SUFFIXES:
+am--refresh: Makefile.SDL
 $(top_builddir)/config.status: $(top_srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
 	$(SHELL) ./config.status --recheck
 

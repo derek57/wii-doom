@@ -371,10 +371,6 @@ void TXT_AddWidget(TXT_UNCAST_ARG(table), TXT_UNCAST_ARG(widget))
 }
 
 // Add multiple widgets to a table.
-//
-// [nitr8] UNUSED
-//
-/*
 void TXT_AddWidgets(TXT_UNCAST_ARG(table), ...)
 {
     TXT_CAST_ARG(txt_table_t, table);
@@ -397,7 +393,6 @@ void TXT_AddWidgets(TXT_UNCAST_ARG(table), ...)
 
     va_end(args);
 }
-*/
 
 static int SelectableCell(txt_table_t *table, int x, int y)
 {
@@ -872,10 +867,6 @@ void TXT_InitTable(txt_table_t *table, int columns)
     }
 }
 
-//
-// [nitr8] UNUSED
-//
-/*
 txt_table_t *TXT_NewTable(int columns)
 {
     txt_table_t *table;
@@ -947,7 +938,6 @@ txt_table_t *TXT_NewHorizBox(TXT_UNCAST_ARG(first_widget), ...)
     va_end(args);
     return result;
 }
-*/
 
 // Get the currently-selected widget in a table, recursively searching
 // through sub-tables if necessary.
@@ -1019,10 +1009,6 @@ int TXT_SelectWidget(TXT_UNCAST_ARG(table), TXT_UNCAST_ARG(widget))
     return 0;
 }
 
-//
-// [nitr8] UNUSED
-//
-/*
 void TXT_SetTableColumns(TXT_UNCAST_ARG(table), int new_columns)
 {
     TXT_CAST_ARG(txt_table_t, table);
@@ -1110,7 +1096,6 @@ void TXT_SetColumnWidths(TXT_UNCAST_ARG(table), ...)
 
     va_end(args);
 }
-*/
 
 // Moves the select by at least the given number of characters.
 // Currently quietly ignores pagex, as we don't use it.

@@ -41,6 +41,9 @@
 #define __P_FIX__
 
 
+#include "wii-doom.h"
+
+
 #define DEFAULT                 0x7FFF
 #define REMOVE                  0
 

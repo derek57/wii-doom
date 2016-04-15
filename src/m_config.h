@@ -21,6 +21,7 @@
 #define __M_CONFIG__
 
 
+#include "doom/doomdef.h"
 #include "doomtype.h"
 
 
@@ -28,10 +29,14 @@ void M_LoadDefaults(void);
 void M_SaveDefaults(void);
 void M_SaveDefaultsAlternate(char *main, char *extra);
 void M_SetConfigDir(char *dir);
-void M_BindVariable(char *name, void *variable);
+void M_BindIntVariable(char *name, int *location);
 void M_SetConfigFilenames(char *main_config);
+void M_BindFloatVariable(char *name, float *variable);
+void M_BindStringVariable(char *name, char **variable);
+void M_BindBooleanVariable(char *name, dboolean *location);
 
 dboolean M_SetVariable(char *name, char *value);
+dboolean LoadDefaultCollection(default_collection_t *collection);
 
 int M_GetIntVariable(char *name);
 

@@ -51,6 +51,7 @@
 #include "p_saveg.h"
 #include "p_spec.h"
 #include "p_tick.h"
+#include "wii-doom.h"
 #include "z_zone.h"
 
 
@@ -312,9 +313,6 @@ static void saveg_read_mobj_t(mobj_t *str)
     // fixed_t momz
     str->momz = saveg_read32();
 
-    // int validcount
-    str->validcount = saveg_read32();
-
     // mobjtype_t type
     str->type = (mobjtype_t)saveg_read_enum();
 
@@ -484,9 +482,6 @@ static void saveg_write_mobj_t(mobj_t *str)
     // fixed_t momz
     saveg_write32(str->momz);
 
-    // int validcount
-    saveg_write32(str->validcount);
-
     // mobjtype_t type
     saveg_write_enum(str->type);
 
@@ -600,7 +595,7 @@ static void saveg_read_ticcmd_t(ticcmd_t *str)
     str->consistancy = saveg_read16();
 
     // byte chatchar;
-//    str->chatchar = saveg_read8();
+    str->chatchar = saveg_read8();
 
     // byte buttons
     str->buttons = saveg_read8();
@@ -624,7 +619,7 @@ static void saveg_write_ticcmd_t(ticcmd_t *str)
     saveg_write16(str->consistancy);
 
     // byte chatchar;
-//    saveg_write8(str->chatchar);
+    saveg_write8(str->chatchar);
 
     // byte buttons
     saveg_write8(str->buttons);
@@ -2062,15 +2057,18 @@ void P_UnArchiveThinkers(void)
 uint32_t P_ThinkerToIndex(thinker_t *thinker)
 {
     thinker_t   *th;
-    uint32_t    i;
+    uint32_t    i = 0;
 
     if (!thinker)
         return 0;
 
-    for (th = thinkerclasscap[th_mobj].cnext, i = 1; th != &thinkerclasscap[th_mobj];
-        th = th->cnext, ++i)
+    for (th = thinkerclasscap[th_mobj].cnext; th != &thinkerclasscap[th_mobj]; th = th->cnext)
+    {
+        ++i;
+
         if (th == thinker)
             return i;
+    }
 
     return 0;
 }
@@ -2078,14 +2076,13 @@ uint32_t P_ThinkerToIndex(thinker_t *thinker)
 thinker_t *P_IndexToThinker(uint32_t index)
 {
     thinker_t   *th;
-    uint32_t    i;
+    uint32_t    i = 0;
 
     if (!index)
         return NULL;
 
-    for (th = thinkerclasscap[th_mobj].cnext, i = 1; th != &thinkerclasscap[th_mobj];
-        th = th->cnext, ++i)
-        if (i == index)
+    for (th = thinkerclasscap[th_mobj].cnext; th != &thinkerclasscap[th_mobj]; th = th->cnext)
+        if (++i == index)
             return th;
 
     restoretargets_fail++;

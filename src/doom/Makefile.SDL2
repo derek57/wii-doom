@@ -109,7 +109,7 @@ am__objects_1 = am_map.$(OBJEXT) d_items.$(OBJEXT) d_main.$(OBJEXT) \
 	p_setup.$(OBJEXT) p_sight.$(OBJEXT) p_spec.$(OBJEXT) \
 	p_switch.$(OBJEXT) p_telept.$(OBJEXT) p_tick.$(OBJEXT) \
 	p_user.$(OBJEXT) r_bsp.$(OBJEXT) r_data.$(OBJEXT) \
-	r_draw.$(OBJEXT) r_main.$(OBJEXT) r_plane.$(OBJEXT) \
+	r_draw.$(OBJEXT) r_main.$(OBJEXT) r_patch.$(OBJEXT) r_plane.$(OBJEXT) \
 	r_segs.$(OBJEXT) r_sky.$(OBJEXT) r_things.$(OBJEXT) \
 	s_sound.$(OBJEXT) sc_man.$(OBJEXT) sounds.$(OBJEXT) statdump.$(OBJEXT) \
 	st_lib.$(OBJEXT) st_stuff.$(OBJEXT) wi_stuff.$(OBJEXT)
@@ -180,7 +180,7 @@ AUTOMAKE = ${SHELL} /home/user/TEST/chocolate-doom/autotools/missing automake-1.
 AWK = mawk
 CC = gcc
 CCDEPMODE = depmode=gcc3
-CFLAGS = -O2 -g -Wall -Wdeclaration-after-statement -Wredundant-decls  -D_REENTRANT -I/usr/local/include/SDL2 
+CFLAGS = -O2 -g -Wall -Wdeclaration-after-statement -Wredundant-decls  -I/usr/local/include/SDL2 -D_GNU_SOURCE=1 -D_REENTRANT
 CPP = gcc -E
 CPPFLAGS = 
 CYGPATH_W = echo
@@ -223,8 +223,8 @@ PROGRAM_PREFIX = chocolate-
 RANLIB = ranlib
 SDL2_CONFIG = pkg-config sdl2
 SDLMIXER_LIBS =  -lSDL2_mixer
-#SDLNET_LIBS =  -lSDL2_net
-SDL_CFLAGS = -D_REENTRANT -I/usr/local/include/SDL2 
+SDLNET_LIBS =  -lSDL2_net
+SDL_CFLAGS = -I/usr/local/include/SDL2 -D_GNU_SOURCE=1 -D_REENTRANT
 SDL_LIBS = -L/usr/local/lib -Wl,-rpath,/usr/local/lib -lSDL2 
 SDLMIXER_CFLAGS = 
 SDLNET_CFLAGS = 
@@ -278,14 +278,14 @@ target_alias =
 top_build_prefix = ../../
 top_builddir = ../..
 top_srcdir = ../..
-AM_CFLAGS = -I$(top_srcdir)/src -D_REENTRANT -I/usr/local/include/SDL2   
+AM_CFLAGS = -I$(top_srcdir)/src -I/usr/local/include/SDL2 -D_GNU_SOURCE=1 -D_REENTRANT
 noinst_LIBRARIES = libdoom.a
 SOURCE_FILES = \
 am_map.c           am_map.h     \
                    d_englsh.h   \
 d_items.c          d_items.h    \
 d_main.c           d_main.h     \
-d_net.c                         \
+d_net.c            d_net.h      \
                    doomdata.h   \
                    doomdef.h    \
 doomstat.c         doomstat.h   \
@@ -329,6 +329,7 @@ r_data.c           r_data.h     \
 r_draw.c           r_draw.h     \
                    r_local.h    \
 r_main.c           r_main.h     \
+r_patch.c          r_patch.h    \
 r_plane.c          r_plane.h    \
 r_segs.c           r_segs.h     \
 r_sky.c            r_sky.h      \
@@ -411,6 +412,7 @@ include ./$(DEPDIR)/r_bsp.Po
 include ./$(DEPDIR)/r_data.Po
 include ./$(DEPDIR)/r_draw.Po
 include ./$(DEPDIR)/r_main.Po
+include ./$(DEPDIR)/r_patch.Po
 include ./$(DEPDIR)/r_plane.Po
 include ./$(DEPDIR)/r_segs.Po
 include ./$(DEPDIR)/r_sky.Po

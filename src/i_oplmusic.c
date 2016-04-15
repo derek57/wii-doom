@@ -31,6 +31,7 @@
 #include "mus2mid.h"
 #include "opl.h"
 #include "w_wad.h"
+#include "wii-doom.h"
 #include "z_zone.h"
 
 

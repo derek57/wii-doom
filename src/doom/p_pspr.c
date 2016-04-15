@@ -44,6 +44,7 @@
 #include "sounds.h"
 
 #include "v_trans.h"
+#include "wii-doom.h"
 
 
 #define LOWERSPEED      FRACUNIT * 6
@@ -61,8 +62,6 @@ dboolean                beta_plasma_refired;
 int                     beta_plasma_counter;
 int                     bfglook = 1;
 
-
-extern dboolean         aiming_help;
 
 extern void             P_Thrust(player_t *player, angle_t angle, fixed_t move);
 extern void             A_EjectCasing(mobj_t *actor);
@@ -109,7 +108,7 @@ void A_Recoil(player_t *player)
         P_Thrust(player, ANG180 + player->mo->angle, 2048 * recoil_values[player->readyweapon][0]);
 
     if (d_recoil)
-	player->recoilpitch = recoil_values[player->readyweapon][1] << FRACBITS;
+        player->recoilpitch = recoil_values[player->readyweapon][1] << FRACBITS;
 }
 
 //
@@ -494,7 +493,7 @@ void A_Lower(player_t *player, pspdef_t *psp)
     psp->sy += LOWERSPEED;
 
     // Is already down.
-    if (use_vanilla_weapon_change || demoplayback || demorecording
+    if (use_vanilla_weapon_change /*|| demoplayback || demorecording*/
 #ifndef WII
        || (player->readyweapon == wp_shotgun && player->weaponowned[wp_supershotgun])
        || (player->readyweapon == wp_supershotgun && player->weaponowned[wp_shotgun])
@@ -537,7 +536,7 @@ void A_Raise(player_t *player, pspdef_t *psp)
         
     psp->sy -= RAISESPEED;
 
-    if (use_vanilla_weapon_change || demoplayback || demorecording
+    if (use_vanilla_weapon_change /*|| demoplayback || demorecording*/
 #ifndef WII
        || (player->readyweapon == wp_shotgun && player->weaponowned[wp_supershotgun])
        || (player->readyweapon == wp_supershotgun && player->weaponowned[wp_shotgun])

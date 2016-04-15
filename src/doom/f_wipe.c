@@ -37,6 +37,7 @@
 #include "r_defs.h"
 #include "st_stuff.h"
 #include "v_video.h"
+#include "wii-doom.h"
 #include "z_zone.h"
 
 
@@ -411,16 +412,16 @@ static int wipe_doMelt(int ticks)
 static int wipe_exitMelt(int ticks)
 {
     Z_Free(y);
-    Z_Free(wipe_scr_start);
-    Z_Free(wipe_scr_end);
+    //Z_Free(wipe_scr_start);
+    //Z_Free(wipe_scr_end);
     return 0;
 }
 
 int wipe_StartScreen(void)
 {
-    wipe_scr_start = Z_Malloc(SCREENWIDTH * SCREENHEIGHT * sizeof(*wipe_scr_start), PU_STATIC, NULL);
+    wipe_scr_start = screens[2];
 
-    I_ReadScreen(0, wipe_scr_start);
+    I_ReadScreen(wipe_scr_start);
 
     //V_GetBlock (0, 0, 0, SCREENWIDTH, SCREENHEIGHT, wipe_scr_start);
     return 0;
@@ -428,9 +429,9 @@ int wipe_StartScreen(void)
 
 int wipe_EndScreen(void)
 {
-    wipe_scr_end = Z_Malloc(SCREENWIDTH * SCREENHEIGHT * sizeof(*wipe_scr_end), PU_STATIC, NULL);
+    wipe_scr_end = screens[3];
 
-    I_ReadScreen(0, wipe_scr_end);
+    I_ReadScreen(wipe_scr_end);
 
     //V_GetBlock (0, 0, 0, SCREENWIDTH, SCREENHEIGHT, wipe_scr_end);
 
@@ -440,7 +441,7 @@ int wipe_EndScreen(void)
     return 0;
 }
 
-int wipe_ScreenWipe(int wipeno, int ticks, int scrn)
+int wipe_ScreenWipe(int wipeno, int ticks)
 {
     int           rc;
 
@@ -477,13 +478,13 @@ int wipe_ScreenWipe(int wipeno, int ticks, int scrn)
         // DEBUG
         //wipe_scr = (byte *)Z_Malloc(SCREENWIDTH * SCREENHEIGHT, PU_STATIC, NULL);
 
-        wipe_scr = screens[scrn];
+        wipe_scr = screens[0];
 
         (*wipes[wipeno * 3])(ticks);
     }
 
     // do a piece of wipe-in
-    //V_MarkRect(0, 0, 1, SCREENWIDTH, SCREENHEIGHT, 0);
+    V_MarkRect(0, 0, SCREENWIDTH, SCREENHEIGHT);
 
     rc = (*wipes[wipeno * 3 + 1])(ticks);
 

@@ -25,6 +25,7 @@
 
 #include "doom/doomdef.h"
 #include "doomtype.h"
+#include "d_mode.h"
 #include "w_file.h"
 
 
@@ -97,14 +98,15 @@ lumpindex_t W_GetNumForName2(char *name);
 lumpindex_t W_RangeCheckNumForName(lumpindex_t min, lumpindex_t max, char *name);
 
 
+unsigned int       numlumps;
+
+lumpinfo_t         **lumpinfo;                
+
+
 extern unsigned int W_LumpNameHash(const char *s);
 
 
 extern disk_indicator_e disk_indicator;
-
-extern lumpinfo_t       **lumpinfo;
-
-extern unsigned int     numlumps;
 
 
 #endif

@@ -45,13 +45,6 @@ int SIGN(int a)
 }
 */
 
-int ABS(int a)
-{
-    int b = a >> 31;
-
-    return ((a ^ b) - b);
-}
-
 int BETWEEN(int a, int b, int c)
 {
     return MAX(a, MIN(b, c));
@@ -80,5 +73,10 @@ int MAX(int a, int b)
 {
     b = a - b;
     return (a - (b & (b >> 31)));
+}
+
+unsigned int SafeAdd(unsigned int a, unsigned int b)
+{
+    return (b > UINT_MAX - a ? UINT_MAX : a + b);
 }
 

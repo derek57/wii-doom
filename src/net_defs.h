@@ -63,6 +63,8 @@
 #define NET_TICDIFF_BUTTONS      (1 << 3)
 #define NET_TICDIFF_CONSISTANCY  (1 << 4)
 #define NET_TICDIFF_CHATCHAR     (1 << 5)
+#define NET_TICDIFF_RAVEN        (1 << 6)
+#define NET_TICDIFF_STRIFE       (1 << 7)
 
 
 typedef struct _net_module_s net_module_t;

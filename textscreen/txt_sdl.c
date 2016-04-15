@@ -1193,14 +1193,12 @@ void TXT_Sleep(int timeout)
     }
 }
 
-//
-// [nitr8] UNUSED
-//
 /*
 void TXT_EnableKeyMapping(int enable)
 {
     key_mapping = enable;
 }
+*/
 
 void TXT_SetWindowTitle(char *title)
 {
@@ -1211,6 +1209,7 @@ void TXT_SetWindowTitle(char *title)
 #endif
 }
 
+/*
 void TXT_SDL_SetEventCallback(TxtSDLEventCallbackFunc callback, void *user_data)
 {
     event_callback = callback;

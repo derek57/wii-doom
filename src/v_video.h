@@ -98,7 +98,7 @@ void V_DrawBlock(int x, int y, int scrn, int width, int height, byte *src);
 
 void V_DrawPatch(int x, int y, int scrn, patch_t *patch);
 void V_DrawPatchFlipped(int x, int y, int scrn, patch_t *patch);
-void V_MarkRect(int x, int y, int srcscrn, int width, int height, int destscrn);
+void V_MarkRect(int x, int y, /*int srcscrn,*/ int width, int height/*, int destscrn*/);
 void V_DrawConsoleChar(int x, int y, int scrn, patch_t *patch, int color1, int color2, dboolean italics, byte *tinttab);
 void V_DrawHUDPatch(int x, int y, int scrn, patch_t *patch, byte *tinttab);
 void V_DrawYellowHUDPatch(int x, int y, int scrn, patch_t *patch, byte *tinttab);
@@ -107,16 +107,16 @@ void V_DrawTranslucentHUDNumberPatch(int x, int y, int scrn, patch_t *patch, byt
 void V_DrawTranslucentYellowHUDPatch(int x, int y, int scrn, patch_t *patch, byte *tinttab);
 void V_GetBlock(int x, int y, int scrn, int width, int height, byte *dest);
 void V_ScreenShot(int scrn, char *format);
-void V_LowGraphicDetail(int height, int scrn);
+void V_LowGraphicDetail(int height);
 void V_DrawPatchWithShadow(int x, int y, int scrn, patch_t *patch, dboolean flag);
 void V_DrawDistortedBackground(int scrn, char *patchname);
 void V_FillRect(int x, int y, int scrn, int width, int height, byte color);
 void V_Clear(int left, int top, int right, int bottom, int scrn, int color);
-void V_DimScreen(int scrn);
+void V_DimScreen(void);
+void V_DrawHorizLine(int x, int y, int scrn, int w, int c);
 void LoadPCX (char *filename, byte **pic, byte **palette, int *width, int *height);
 
 /*
-void V_DrawHorizLine(int x, int y, int scrn, int w, int c);
 void V_ColorBlock(int x, int y, int scrn, int width, int height, byte color);
 
 // Temporarily switch to using a different buffer to draw graphics, etc.

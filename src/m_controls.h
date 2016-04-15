@@ -20,7 +20,7 @@
 
 
 void M_BindBaseControls(void);
-
+void M_BindChatControls(unsigned int num_players);
 
 extern int key_up;
 extern int key_down;
@@ -111,7 +111,12 @@ extern int mousebaiming;
 
 extern int joybstrafeleft;
 extern int joybstraferight;
+extern int joybprevweapon;
+extern int joybmenu;
 
+extern int key_multi_msg;
+extern int key_multi_msgplayer[8];
+extern int key_message_refresh;
 
 #endif // #ifndef __M_CONTROLS_H__
 

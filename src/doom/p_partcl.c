@@ -60,6 +60,7 @@
 #include "p_tick.h"
 #include "s_sound.h"
 #include "p_spec.h"
+#include "wii-doom.h"
 
 
 #define BEAMLENGTH       16

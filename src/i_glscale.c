@@ -60,8 +60,8 @@
 
 
 #ifndef WII
-#include <SDL.h>
-#include "SDL_opengl.h"
+#include <SDL/SDL.h>
+#include <SDL/SDL_opengl.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -71,6 +71,7 @@
 #include "i_video.h"
 #include "m_argv.h"
 #include "v_trans.h"
+#include "wii-doom.h"
 
 
 // Constants for GL framebuffer extension. These are not in the MingW

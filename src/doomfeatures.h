@@ -32,16 +32,15 @@
 // Enables wad merging (the '-merge' command line parameter)
 #ifndef WII
 #define FEATURE_WAD_MERGE 1
+
+// Enables multiplayer support (network games)
+#define FEATURE_MULTIPLAYER 1
+
+//#define DEBUG_NET 1
 #endif
 
 // Enables dehacked support ('-deh')
 #define FEATURE_DEHACKED 1
-
-// Enables multiplayer support (network games)
-//#define FEATURE_MULTIPLAYER 1
-
-// Prints function names entered when running network mode
-//#define NET_DEBUG 1
 
 // Enables sound output
 #define FEATURE_SOUND 1

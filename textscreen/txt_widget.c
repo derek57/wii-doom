@@ -205,17 +205,12 @@ void TXT_SetWidgetFocus(TXT_UNCAST_ARG(widget), int focused)
     }
 }
 
-//
-// [nitr8] UNUSED
-//
-/*
 void TXT_SetWidgetAlign(TXT_UNCAST_ARG(widget), txt_horiz_align_t horiz_align)
 {
     TXT_CAST_ARG(txt_widget_t, widget);
 
     widget->align = horiz_align;
 }
-*/
 
 void TXT_WidgetMousePress(TXT_UNCAST_ARG(widget), int x, int y, int b)
 {

@@ -330,10 +330,6 @@ void SHA1_Final(sha1_digest_t digest, sha1_context_t *hd)
     memcpy(digest, hd->buf, sizeof(sha1_digest_t));
 }
 
-//
-// [nitr8] UNUSED
-//
-/*
 void SHA1_UpdateInt32(sha1_context_t *context, unsigned int val)
 {
     byte buf[4];
@@ -350,5 +346,4 @@ void SHA1_UpdateString(sha1_context_t *context, char *str)
 {
     SHA1_Update(context, (byte *)str, strlen(str) + 1);
 }
-*/
 

@@ -222,11 +222,11 @@ AUTOMAKE = ${SHELL} /home/user/Downloads/chocolate-doom/autotools/missing automa
 AWK = mawk
 CC = gcc
 CCDEPMODE = depmode=gcc3
-CFLAGS = -O2 -g -Wall -Wdeclaration-after-statement -Wredundant-decls  -I/usr/local/include/SDL -D_GNU_SOURCE=1 -D_REENTRANT
+CFLAGS = -O2 -g -Wall -Wdeclaration-after-statement -Wredundant-decls  -I/usr/local/include/SDL2 -D_GNU_SOURCE=1 -D_REENTRANT
 CPP = gcc -E
 CPPFLAGS = 
 CYGPATH_W = echo
-DEFS = -DHAVE_CONFIG_H
+DEFS = -DHAVE_CONFIG_H -DSDL2
 DEPDIR = .deps
 ECHO_C = 
 ECHO_N = -n
@@ -240,7 +240,7 @@ INSTALL_DATA = ${INSTALL} -m 644
 INSTALL_PROGRAM = ${INSTALL}
 INSTALL_SCRIPT = ${INSTALL}
 INSTALL_STRIP_PROGRAM = $(install_sh) -c -s
-LDFLAGS =  -L/usr/local/lib -Wl,-rpath,/usr/local/lib -lSDL -lpthread
+LDFLAGS =  -L/usr/local/lib -Wl,-rpath,/usr/local/lib -lSDL2 -lpthread
 LIBOBJS = 
 LIBS = -lm -lpng -lz -lsamplerate
 LTLIBOBJS = 
@@ -264,12 +264,12 @@ PATH_SEPARATOR = :
 PROGRAM_PREFIX = chocolate-
 RANLIB = ranlib
 SDLMIXER_CFLAGS = 
-SDLMIXER_LIBS =  -lSDL_mixer
+SDLMIXER_LIBS =  -lSDL2_mixer
 SDLNET_CFLAGS = 
-SDLNET_LIBS =  -lSDL_net
-SDL_CFLAGS = -I/usr/local/include/SDL -D_GNU_SOURCE=1 -D_REENTRANT
-SDL_CONFIG = /usr/local/bin/sdl-config
-SDL_LIBS = -L/usr/local/lib -Wl,-rpath,/usr/local/lib -lSDL -lpthread
+SDLNET_LIBS =  -lSDL2_net
+SDL_CFLAGS = -I/usr/local/include/SDL2 -D_GNU_SOURCE=1 -D_REENTRANT
+SDL2_CONFIG = /usr/local/bin/sdl2-config
+SDL_LIBS = -L/usr/local/lib -Wl,-rpath,/usr/local/lib -lSDL2 -lpthread
 SET_MAKE = 
 SHELL = /bin/bash
 STRIP = strip

@@ -62,7 +62,7 @@ void R_InitParticles(void);
 void R_ClearParticles(void);
 void R_AddPSprites(void);
 void R_DrawSprites(void);
-void R_InitSprites(char **namelist);
+void R_InitSprites(void);
 void R_ClearSprites(void);
 void R_DrawPlayerSprites(void);
 void R_DrawMasked(void);

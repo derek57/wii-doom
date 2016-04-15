@@ -50,6 +50,7 @@
 #include "s_sound.h"
 #include "sounds.h"
 #include "st_stuff.h"
+#include "wii-doom.h"
 
 
 // Ty 03/07/98 - add deh externals
@@ -125,7 +126,7 @@ int P_GiveAmmo(player_t *player, ammotype_t ammo, int num)
     if (player->ammo[ammo] > player->maxammo[ammo])
         player->ammo[ammo] = player->maxammo[ammo];
 
-    if (hud && num && num && ammo == weaponinfo[player->readyweapon].ammo)
+    if (hud && num && ammo == weaponinfo[player->readyweapon].ammo)
         ammohighlight = I_GetTimeMS() + HUD_AMMO_HIGHLIGHT_WAIT;
 
     // If non zero ammo, 
@@ -1167,8 +1168,8 @@ void P_KillMobj(mobj_t *source, mobj_t *target)
     int         minhealth;
     dboolean    e6y = false;
   
-    if (target->player && source && target->health < -target->info->spawnhealth &&
-            !demorecording && !demoplayback)
+    if (target->player && source && target->health < -target->info->spawnhealth /*&&
+            !demorecording && !demoplayback*/)
     {
         angle_t ang = R_PointToAngle2(target->x, target->y, source->x, source->y) - target->angle;
         e6y = (ang > (unsigned)(ANG180 - ANG45) && ang < (unsigned)(ANG180 + ANG45));

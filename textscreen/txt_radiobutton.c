@@ -120,9 +120,6 @@ txt_widget_class_t txt_radiobutton_class =
     NULL
 };
 
-//
-// [nitr8] UNUSED
-//
 /*
 txt_radiobutton_t *TXT_NewRadioButton(char *label, int *variable, int value)
 {

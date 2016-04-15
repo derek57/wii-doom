@@ -64,7 +64,7 @@ void M_StartControlPanel(void);
 void M_WriteText(int x, int y, char *string);
 
 void M_ClearMenus(void);
-void M_DarkBackground(int scrn);
+void M_DarkBackground(void);
 void M_QuitDOOM(int choice);
 
 //

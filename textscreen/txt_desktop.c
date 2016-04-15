@@ -34,7 +34,6 @@ static txt_window_t    *all_windows[MAXWINDOWS];
 
 static int             num_windows = 0;
 
-/*
 static int             main_loop_running = 0;
 
 static char            *desktop_title;
@@ -44,7 +43,7 @@ static TxtIdleCallback periodic_callback = NULL;
 static void            *periodic_callback_data;
 
 static unsigned int    periodic_callback_period;
-*/
+
 
 void TXT_AddDesktopWindow(txt_window_t *win)
 {
@@ -124,7 +123,7 @@ int TXT_RaiseWindow(txt_window_t *window)
     // Window not in the list, or at the end of the list (top) already.
     return 0;
 }
-
+*/
 int TXT_LowerWindow(txt_window_t *window)
 {
     int i;
@@ -317,6 +316,7 @@ void TXT_ExitMainLoop(void)
     main_loop_running = 0;
 }
 
+/*
 void TXT_DrawASCIITable(void)
 {
     unsigned char *screendata;
@@ -346,6 +346,7 @@ void TXT_DrawASCIITable(void)
 
     TXT_UpdateScreen();
 }
+*/
 
 void TXT_SetPeriodicCallback(TxtIdleCallback callback, void *user_data,
                              unsigned int period)
@@ -385,5 +386,4 @@ void TXT_GUIMainLoop(void)
         }
     }
 }
-*/
 

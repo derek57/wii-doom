@@ -59,6 +59,7 @@
 #include "v_video.h"
 
 #include "w_wad.h"
+#include "wii-doom.h"
 #include "z_zone.h"
 
 #ifdef WII
@@ -390,6 +391,7 @@ static void AM_activateNewScale(void)
 //
 // Passed nothing, returns nothing
 //
+#ifndef WII
 static void AM_saveScaleAndLoc(void)
 {
     old_m_x = m_x;
@@ -474,6 +476,7 @@ static void AM_addMark(void)
     M_snprintf(message, sizeof(message), s_AMSTR_MARKEDSPOT, ++markpointnum);
     HU_PlayerMessage(message, false);
 }
+#endif
 
 //
 // AM_findMinMaxBoundaries()
@@ -664,7 +667,7 @@ static void AM_changeWindowLoc(void)
 // Status bar is notified that the automap has been entered
 // Passed nothing, returns nothing
 //
-static void AM_initVariables(int scrn)
+static void AM_initVariables(void)
 {
     static event_t st_notify =
     {
@@ -675,7 +678,7 @@ static void AM_initVariables(int scrn)
     };
 
     automapactive = true;
-    fb = screens[scrn];
+    fb = screens[0];
 
     f_oldloc.x = INT_MAX;
     amclock = 0;
@@ -713,8 +716,6 @@ static void AM_initVariables(int scrn)
     m_x = (plr->mo->x >> FRACTOMAPBITS) - m_w / 2;
     m_y = (plr->mo->y >> FRACTOMAPBITS) - m_h / 2;
 
-    m_x = plr->mo->x - m_w / 2;
-    m_y = plr->mo->y - m_h / 2;
     AM_changeWindowLoc();
 
     // for saving & restoring
@@ -856,7 +857,7 @@ void AM_Start(void)
             lastepisode = gameepisode;
         }
 
-        AM_initVariables(0);
+        AM_initVariables();
         AM_loadPics();
     }
 }
@@ -1872,7 +1873,6 @@ static void AM_drawLineCharacter(mline_t *lineguy, int lineguylines, fixed_t sca
 static void AM_drawPlayers(void)
 {
     int                i;
-    angle_t            angle;
     mpoint_t           pt;
 
     if (!netgame)
@@ -1898,32 +1898,32 @@ static void AM_drawPlayers(void)
     for (i = 0; i < MAXPLAYERS; i++)
     {
         player_t *p = &players[i];
+        angle_t angle = p->mo->angle;
 
-        pt.x = p->mo->x >> FRACTOMAPBITS;
-        pt.y = p->mo->y >> FRACTOMAPBITS;
-        angle = p->mo->angle;
-
-        if ((deathmatch && !singledemo) && p != plr)
+        if ((deathmatch /*&& !singledemo*/) && p != plr)
             continue;
-
+/*
         if (!playeringame[i])
             continue;
-
+*/
         if (playeringame[i])
         {
+            pt.x = p->mo->x >> FRACTOMAPBITS;
+            pt.y = p->mo->y >> FRACTOMAPBITS;
+
             if (automapactive && am_rotate)
                 AM_rotatePoint(&pt);
+
+            AM_drawLineCharacter(player_arrow, arrlen(player_arrow), 0, angle,
+
+                // close to black
+                p->powers[pw_invisibility] ? 246 : 
+
+                // jff 1/6/98 use default color
+                mapcolor_plyr[i],
+
+                pt.x, pt.y);
         }
-
-        AM_drawLineCharacter(player_arrow, arrlen(player_arrow), 0, angle,
-
-            // close to black
-            p->powers[pw_invisibility] ? 246 : 
-
-            // jff 1/6/98 use default color
-            mapcolor_plyr,
-
-            pt.x, pt.y);
     }
 }
 
@@ -2062,8 +2062,6 @@ static void AM_drawMarks(void)
     {
         if (markpoints[i].x != -1)
         {
-            int w;
-            int k;
             mpoint_t p;
       
             // - m_x + prev_m_x;
@@ -2084,7 +2082,8 @@ static void AM_drawMarks(void)
 
             if (p.y < f_y + f_w && p.y >= f_x)
             {
-                w = 0;
+                int w = 0;
+                int k;
 
                 for (k = 0; k < (int)strlen(markpoints[i].label); k++)
                 {
@@ -2193,7 +2192,7 @@ void AM_Drawer(void)
 
     AM_drawMarks();
 
-    //V_MarkRect(f_x, f_y, f_w, f_h);
+    V_MarkRect(f_x, f_y, f_w, f_h);
 }
 
 void AM_DrawWorldTimer(void)

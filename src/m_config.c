@@ -34,17 +34,21 @@
 #include "i_system.h"
 #include "m_argv.h"
 #include "m_misc.h"
+#include "wii-doom.h"
 #include "z_zone.h"
 
 
 #define CONFIG_VARIABLE_GENERIC(name, type) \
-    { #name, NULL, type, 0, 0, false }
+    { #name, {NULL}, type, 0, 0, false }
 
 #define CONFIG_VARIABLE_KEY(name) \
     CONFIG_VARIABLE_GENERIC(name, DEFAULT_KEY)
 
 #define CONFIG_VARIABLE_INT(name) \
     CONFIG_VARIABLE_GENERIC(name, DEFAULT_INT)
+
+#define CONFIG_VARIABLE_BOOLEAN(name) \
+    CONFIG_VARIABLE_GENERIC(name, DEFAULT_BOOLEAN)
 
 #define CONFIG_VARIABLE_INT_HEX(name) \
     CONFIG_VARIABLE_GENERIC(name, DEFAULT_INT_HEX)
@@ -77,191 +81,217 @@ char        *configdir;
 static char *default_main_config;
 
 
-extern char *pwadfile;
-
-
 default_t   doom_defaults_list[] =
 {
-    CONFIG_VARIABLE_INT                (sfx_volume),
-    CONFIG_VARIABLE_INT                (music_volume),
-    CONFIG_VARIABLE_INT                (screensize),
-    CONFIG_VARIABLE_INT                (walking_speed),
-    CONFIG_VARIABLE_INT                (turning_speed),
-    CONFIG_VARIABLE_INT                (strafing_speed),
-    CONFIG_VARIABLE_INT                (freelook_speed),
-    CONFIG_VARIABLE_INT                (use_gamma),
-    CONFIG_VARIABLE_INT                (mouse_look),
-    CONFIG_VARIABLE_INT                (map_grid),
-    CONFIG_VARIABLE_INT                (follow_player),
-    CONFIG_VARIABLE_INT                (showstats),
-    CONFIG_VARIABLE_INT                (show_messages),
-    CONFIG_VARIABLE_INT                (map_rotate),
-    CONFIG_VARIABLE_INT                (detail),
-    CONFIG_VARIABLE_INT                (vanilla_weapon_change),
-    CONFIG_VARIABLE_INT                (xhair),
-    CONFIG_VARIABLE_INT                (jump),
-    CONFIG_VARIABLE_INT                (music_engine),
-    CONFIG_VARIABLE_INT                (recoil),
-    CONFIG_VARIABLE_INT                (monsters_respawn),
-    CONFIG_VARIABLE_INT                (fast_monsters),
-    CONFIG_VARIABLE_INT                (auto_aim),
-    CONFIG_VARIABLE_INT                (max_gore),
-    CONFIG_VARIABLE_INT                (extra_hud),
-    CONFIG_VARIABLE_INT                (switch_chans),
-    CONFIG_VARIABLE_INT                (player_thrust),
-    CONFIG_VARIABLE_INT                (run_count),
-    CONFIG_VARIABLE_INT                (footsteps),
-    CONFIG_VARIABLE_INT                (footclip),
-    CONFIG_VARIABLE_INT                (splash),
-    CONFIG_VARIABLE_INT                (swirl),
+    CONFIG_VARIABLE_INT                    (sfx_volume),
+    CONFIG_VARIABLE_INT                    (music_volume),
+    CONFIG_VARIABLE_INT                    (screensize),
+    CONFIG_VARIABLE_INT                    (walking_speed),
+    CONFIG_VARIABLE_INT                    (turning_speed),
+    CONFIG_VARIABLE_INT                    (strafing_speed),
+    CONFIG_VARIABLE_INT                    (freelook_speed),
+    CONFIG_VARIABLE_INT                    (use_gamma),
+    CONFIG_VARIABLE_INT                    (mouse_look),
+    CONFIG_VARIABLE_BOOLEAN                (map_grid),
+    CONFIG_VARIABLE_BOOLEAN                (follow_player),
+    CONFIG_VARIABLE_BOOLEAN                (showstats),
+    CONFIG_VARIABLE_BOOLEAN                (show_messages),
+    CONFIG_VARIABLE_BOOLEAN                (map_rotate),
+    CONFIG_VARIABLE_BOOLEAN                (detail),
+    CONFIG_VARIABLE_BOOLEAN                (vanilla_weapon_change),
+    CONFIG_VARIABLE_BOOLEAN                (xhair),
+    CONFIG_VARIABLE_BOOLEAN                (jump),
+    CONFIG_VARIABLE_INT                    (music_engine),
+    CONFIG_VARIABLE_BOOLEAN                (recoil),
+    CONFIG_VARIABLE_BOOLEAN                (monsters_respawn),
+    CONFIG_VARIABLE_BOOLEAN                (fast_monsters),
+    CONFIG_VARIABLE_BOOLEAN                (auto_aim),
+    CONFIG_VARIABLE_BOOLEAN                (max_gore),
+    CONFIG_VARIABLE_BOOLEAN                (extra_hud),
+    CONFIG_VARIABLE_BOOLEAN                (switch_chans),
+    CONFIG_VARIABLE_BOOLEAN                (player_thrust),
+    CONFIG_VARIABLE_INT                    (run_count),
+    CONFIG_VARIABLE_BOOLEAN                (footsteps),
+    CONFIG_VARIABLE_BOOLEAN                (footclip),
+    CONFIG_VARIABLE_BOOLEAN                (splash),
+    CONFIG_VARIABLE_BOOLEAN                (swirl),
 
 #ifdef WII
-    CONFIG_VARIABLE_INT                (pr_beta),
+    CONFIG_VARIABLE_BOOLEAN                (pr_beta),
 #endif
 
-    CONFIG_VARIABLE_INT                (translucency),
-    CONFIG_VARIABLE_INT                (colored_blood),
-    CONFIG_VARIABLE_INT                (fixed_blood),
-    CONFIG_VARIABLE_INT                (mirrored_corpses),
-    CONFIG_VARIABLE_INT                (show_secrets),
-    CONFIG_VARIABLE_INT                (uncapped_framerate),
-    CONFIG_VARIABLE_INT                (opltype),
-    CONFIG_VARIABLE_INT                (trails),
-    CONFIG_VARIABLE_INT                (chaingun_speed),
-    CONFIG_VARIABLE_INT                (sound_type),
-    CONFIG_VARIABLE_INT                (sound_chans),
-    CONFIG_VARIABLE_INT                (hom_detector),
-    CONFIG_VARIABLE_INT                (falling_damage),
-    CONFIG_VARIABLE_INT                (infinite_ammo),
-    CONFIG_VARIABLE_INT                (no_monsters),
-    CONFIG_VARIABLE_INT                (screenwipe_type),
-    CONFIG_VARIABLE_INT                (automap_overlay),
-    CONFIG_VARIABLE_INT                (show_timer),
-    CONFIG_VARIABLE_INT                (replace),
-    CONFIG_VARIABLE_INT                (goreamount),
-    CONFIG_VARIABLE_INT                (random_pitch),
-    CONFIG_VARIABLE_INT                (telefrag),
-    CONFIG_VARIABLE_INT                (doorstuck),
-    CONFIG_VARIABLE_INT                (resurrect_ghosts),
-    CONFIG_VARIABLE_INT                (limited_ghosts),
-    CONFIG_VARIABLE_INT                (block_skulls),
-    CONFIG_VARIABLE_INT                (blazing_sound),
-    CONFIG_VARIABLE_INT                (god),
-    CONFIG_VARIABLE_INT                (floors),
-    CONFIG_VARIABLE_INT                (model),
-    CONFIG_VARIABLE_INT                (hell),
-    CONFIG_VARIABLE_INT                (masked_anim),
-    CONFIG_VARIABLE_INT                (sound),
-    CONFIG_VARIABLE_INT                (ouchface),
-    CONFIG_VARIABLE_INT                (authors),
-    CONFIG_VARIABLE_INT                (png_screenshot),
-    CONFIG_VARIABLE_INT                (menu_type),
-    CONFIG_VARIABLE_INT                (menu_shadow),
-    CONFIG_VARIABLE_INT                (shadows),
-    CONFIG_VARIABLE_INT                (offsets),
-    CONFIG_VARIABLE_INT                (pixel_width),
-    CONFIG_VARIABLE_INT                (pixel_height),
-    CONFIG_VARIABLE_INT                (brightmaps),
-    CONFIG_VARIABLE_INT                (screenwidth),
-    CONFIG_VARIABLE_INT                (screenheight),
-    CONFIG_VARIABLE_INT                (fixmaperrors),
-    CONFIG_VARIABLE_INT                (altlighting),
-    CONFIG_VARIABLE_INT                (infighting),
-    CONFIG_VARIABLE_INT                (lastenemy),
-    CONFIG_VARIABLE_INT                (floatitems),
-    CONFIG_VARIABLE_INT                (animate_dropping),
-    CONFIG_VARIABLE_INT                (crushing_sound),
-    CONFIG_VARIABLE_INT                (no_noise),
-    CONFIG_VARIABLE_INT                (nudge_corpses),
-    CONFIG_VARIABLE_INT                (slide_corpses),
-    CONFIG_VARIABLE_INT                (smearblood_corpses),
-    CONFIG_VARIABLE_INT                (diskicon),
-    CONFIG_VARIABLE_INT                (samplerate),
-    CONFIG_VARIABLE_INT                (mouse_walk),
-    CONFIG_VARIABLE_INT                (generalsound),
-    CONFIG_VARIABLE_INT                (icon_type),
-    CONFIG_VARIABLE_INT                (colored_player_corpses),
-    CONFIG_VARIABLE_INT                (endoom_screen),
-    CONFIG_VARIABLE_INT                (low_health),
-    CONFIG_VARIABLE_INT                (wiggle_fix),
-    CONFIG_VARIABLE_INT                (mouse_sensitivity),
-    CONFIG_VARIABLE_INT                (slime_trails),
-    CONFIG_VARIABLE_INT                (max_bloodsplats),
-    CONFIG_VARIABLE_INT                (center_weapon),
-    CONFIG_VARIABLE_INT                (eject_casings),
-    CONFIG_VARIABLE_INT                (status_map),
-    CONFIG_VARIABLE_INT                (show_maptitle),
-    CONFIG_VARIABLE_INT                (rendermode),
-    CONFIG_VARIABLE_INT                (particles),
-    CONFIG_VARIABLE_INT                (bloodparticles),
-    CONFIG_VARIABLE_INT                (bulletparticles),
-    CONFIG_VARIABLE_INT                (bfgcloud),
-    CONFIG_VARIABLE_INT                (rockettrails),
-    CONFIG_VARIABLE_INT                (rocketexplosions),
-    CONFIG_VARIABLE_INT                (bfgexplosions),
-    CONFIG_VARIABLE_INT                (tele_particle),
-    CONFIG_VARIABLE_INT                (spawn_flies),
-    CONFIG_VARIABLE_INT                (drip_blood),
-    CONFIG_VARIABLE_INT                (vsync),
-    CONFIG_VARIABLE_INT                (aimhelp),
-    CONFIG_VARIABLE_INT                (particle_sound),
-    CONFIG_VARIABLE_INT                (spawn_teleport_glitter),
-    CONFIG_VARIABLE_INT                (lost_soul_bounce),
-    CONFIG_VARIABLE_INT                (window_position_x),
-    CONFIG_VARIABLE_INT                (window_position_y),
-    CONFIG_VARIABLE_INT                (map_color_background),
-    CONFIG_VARIABLE_INT                (map_color_grid),
-    CONFIG_VARIABLE_INT                (map_color_wall),
-    CONFIG_VARIABLE_INT                (map_color_floorchange),
-    CONFIG_VARIABLE_INT                (map_color_ceilingchange),
-    CONFIG_VARIABLE_INT                (map_color_ceilingatfloor),
-    CONFIG_VARIABLE_INT                (map_color_redkey),
-    CONFIG_VARIABLE_INT                (map_color_bluekey),
-    CONFIG_VARIABLE_INT                (map_color_yellowkey),
-    CONFIG_VARIABLE_INT                (map_color_reddoor),
-    CONFIG_VARIABLE_INT                (map_color_bluedoor),
-    CONFIG_VARIABLE_INT                (map_color_yellowdoor),
-    CONFIG_VARIABLE_INT                (map_color_teleport),
-    CONFIG_VARIABLE_INT                (map_color_secret),
-    CONFIG_VARIABLE_INT                (map_color_exit),
-    CONFIG_VARIABLE_INT                (map_color_unseen),
-    CONFIG_VARIABLE_INT                (map_color_flat),
-    CONFIG_VARIABLE_INT                (map_color_sprite),
-    CONFIG_VARIABLE_INT                (map_color_item),
-    CONFIG_VARIABLE_INT                (map_color_enemy),
-    CONFIG_VARIABLE_INT                (map_color_crosshair),
-    CONFIG_VARIABLE_INT                (map_color_single),
-    CONFIG_VARIABLE_INT                (map_color_player),
-    CONFIG_VARIABLE_INT                (map_gridsize),
-    CONFIG_VARIABLE_INT                (map_secrets_after),
-    CONFIG_VARIABLE_INT                (use_autosave),
-    CONFIG_VARIABLE_INT                (draw_splash),
-    CONFIG_VARIABLE_INT                (menu_back),
-    CONFIG_VARIABLE_INT                (precache_level),
-    CONFIG_VARIABLE_INT                (still_bob),
-    CONFIG_VARIABLE_INT                (move_bob),
-    CONFIG_VARIABLE_INT                (flip_levels),
-    CONFIG_VARIABLE_INT                (use_autoload),
-    CONFIG_VARIABLE_INT                (random_music),
-    CONFIG_VARIABLE_INT                (slow_water),
-    CONFIG_VARIABLE_INT                (key_shoot),
-    CONFIG_VARIABLE_INT                (key_open),
-    CONFIG_VARIABLE_INT                (key_menu),
-    CONFIG_VARIABLE_INT                (key_weapon_left),
-    CONFIG_VARIABLE_INT                (key_automap),
-    CONFIG_VARIABLE_INT                (key_weapon_right),
-    CONFIG_VARIABLE_INT                (key_automap_zoom_in),
-    CONFIG_VARIABLE_INT                (key_automap_zoom_out),
-    CONFIG_VARIABLE_INT                (key_flyup),
-    CONFIG_VARIABLE_INT                (key_flydown),
-    CONFIG_VARIABLE_INT                (key_jump),
-    CONFIG_VARIABLE_INT                (key_run),
-    CONFIG_VARIABLE_INT                (key_console),
-    CONFIG_VARIABLE_INT                (key_screenshots),
+    CONFIG_VARIABLE_BOOLEAN                (translucency),
+    CONFIG_VARIABLE_BOOLEAN                (colored_blood),
+    CONFIG_VARIABLE_BOOLEAN                (fixed_blood),
+    CONFIG_VARIABLE_BOOLEAN                (mirrored_corpses),
+    CONFIG_VARIABLE_BOOLEAN                (show_secrets),
+    CONFIG_VARIABLE_INT                    (uncapped_framerate),
+    CONFIG_VARIABLE_BOOLEAN                (opltype),
+    CONFIG_VARIABLE_BOOLEAN                (trails),
+    CONFIG_VARIABLE_INT                    (chaingun_speed),
+    CONFIG_VARIABLE_BOOLEAN                (sound_type),
+    CONFIG_VARIABLE_INT                    (sound_chans),
+    CONFIG_VARIABLE_BOOLEAN                (hom_detector),
+    CONFIG_VARIABLE_BOOLEAN                (falling_damage),
+    CONFIG_VARIABLE_BOOLEAN                (infinite_ammo),
+    CONFIG_VARIABLE_BOOLEAN                (no_monsters),
+    CONFIG_VARIABLE_INT                    (screenwipe_type),
+    CONFIG_VARIABLE_BOOLEAN                (automap_overlay),
+    CONFIG_VARIABLE_BOOLEAN                (show_timer),
+    CONFIG_VARIABLE_BOOLEAN                (replace),
+    CONFIG_VARIABLE_INT                    (goreamount),
+    CONFIG_VARIABLE_BOOLEAN                (random_pitch),
+    CONFIG_VARIABLE_BOOLEAN                (telefrag),
+    CONFIG_VARIABLE_BOOLEAN                (doorstuck),
+    CONFIG_VARIABLE_BOOLEAN                (resurrect_ghosts),
+    CONFIG_VARIABLE_BOOLEAN                (limited_ghosts),
+    CONFIG_VARIABLE_BOOLEAN                (block_skulls),
+    CONFIG_VARIABLE_BOOLEAN                (blazing_sound),
+    CONFIG_VARIABLE_BOOLEAN                (god),
+    CONFIG_VARIABLE_BOOLEAN                (floors),
+    CONFIG_VARIABLE_BOOLEAN                (model),
+    CONFIG_VARIABLE_BOOLEAN                (hell),
+    CONFIG_VARIABLE_BOOLEAN                (masked_anim),
+    CONFIG_VARIABLE_BOOLEAN                (sound),
+    CONFIG_VARIABLE_BOOLEAN                (ouchface),
+    CONFIG_VARIABLE_BOOLEAN                (authors),
+    CONFIG_VARIABLE_BOOLEAN                (png_screenshot),
+    CONFIG_VARIABLE_INT                    (menu_type),
+    CONFIG_VARIABLE_INT                    (menu_shadow),
+    CONFIG_VARIABLE_BOOLEAN                (shadows),
+    CONFIG_VARIABLE_BOOLEAN                (offsets),
+    CONFIG_VARIABLE_INT                    (pixel_width),
+    CONFIG_VARIABLE_INT                    (pixel_height),
+    CONFIG_VARIABLE_BOOLEAN                (brightmaps),
+    CONFIG_VARIABLE_INT                    (screenwidth),
+    CONFIG_VARIABLE_INT                    (screenheight),
+    CONFIG_VARIABLE_BOOLEAN                (fixmaperrors),
+    CONFIG_VARIABLE_BOOLEAN                (altlighting),
+    CONFIG_VARIABLE_BOOLEAN                (infighting),
+    CONFIG_VARIABLE_BOOLEAN                (lastenemy),
+    CONFIG_VARIABLE_BOOLEAN                (floatitems),
+    CONFIG_VARIABLE_BOOLEAN                (animate_dropping),
+    CONFIG_VARIABLE_BOOLEAN                (crushing_sound),
+    CONFIG_VARIABLE_BOOLEAN                (no_noise),
+    CONFIG_VARIABLE_BOOLEAN                (nudge_corpses),
+    CONFIG_VARIABLE_BOOLEAN                (slide_corpses),
+    CONFIG_VARIABLE_BOOLEAN                (smearblood_corpses),
+    CONFIG_VARIABLE_BOOLEAN                (diskicon),
+    CONFIG_VARIABLE_INT                    (samplerate),
+    CONFIG_VARIABLE_BOOLEAN                (mouse_walk),
+    CONFIG_VARIABLE_BOOLEAN                (generalsound),
+    CONFIG_VARIABLE_BOOLEAN                (icon_type),
+    CONFIG_VARIABLE_BOOLEAN                (colored_player_corpses),
+    CONFIG_VARIABLE_BOOLEAN                (endoom_screen),
+    CONFIG_VARIABLE_BOOLEAN                (low_health),
+    CONFIG_VARIABLE_BOOLEAN                (wiggle_fix),
+    CONFIG_VARIABLE_INT                    (mouse_sensitivity),
+    CONFIG_VARIABLE_BOOLEAN                (slime_trails),
+    CONFIG_VARIABLE_INT                    (max_bloodsplats),
+    CONFIG_VARIABLE_BOOLEAN                (center_weapon),
+    CONFIG_VARIABLE_BOOLEAN                (eject_casings),
+    CONFIG_VARIABLE_BOOLEAN                (status_map),
+    CONFIG_VARIABLE_BOOLEAN                (show_maptitle),
+    CONFIG_VARIABLE_BOOLEAN                (rendermode),
+    CONFIG_VARIABLE_BOOLEAN                (particles),
+    CONFIG_VARIABLE_INT                    (bloodparticles),
+    CONFIG_VARIABLE_INT                    (bulletparticles),
+    CONFIG_VARIABLE_BOOLEAN                (bfgcloud),
+    CONFIG_VARIABLE_BOOLEAN                (rockettrails),
+    CONFIG_VARIABLE_BOOLEAN                (rocketexplosions),
+    CONFIG_VARIABLE_BOOLEAN                (bfgexplosions),
+    CONFIG_VARIABLE_INT                    (tele_particle),
+    CONFIG_VARIABLE_BOOLEAN                (spawn_flies),
+    CONFIG_VARIABLE_BOOLEAN                (drip_blood),
+    CONFIG_VARIABLE_BOOLEAN                (vsync),
+    CONFIG_VARIABLE_BOOLEAN                (aimhelp),
+    CONFIG_VARIABLE_BOOLEAN                (particle_sound),
+    CONFIG_VARIABLE_INT                    (spawn_teleport_glitter),
+    CONFIG_VARIABLE_BOOLEAN                (lost_soul_bounce),
+    CONFIG_VARIABLE_INT                    (window_position_x),
+    CONFIG_VARIABLE_INT                    (window_position_y),
+    CONFIG_VARIABLE_INT                    (map_color_background),
+    CONFIG_VARIABLE_INT                    (map_color_grid),
+    CONFIG_VARIABLE_INT                    (map_color_wall),
+    CONFIG_VARIABLE_INT                    (map_color_floorchange),
+    CONFIG_VARIABLE_INT                    (map_color_ceilingchange),
+    CONFIG_VARIABLE_INT                    (map_color_ceilingatfloor),
+    CONFIG_VARIABLE_INT                    (map_color_redkey),
+    CONFIG_VARIABLE_INT                    (map_color_bluekey),
+    CONFIG_VARIABLE_INT                    (map_color_yellowkey),
+    CONFIG_VARIABLE_INT                    (map_color_reddoor),
+    CONFIG_VARIABLE_INT                    (map_color_bluedoor),
+    CONFIG_VARIABLE_INT                    (map_color_yellowdoor),
+    CONFIG_VARIABLE_INT                    (map_color_teleport),
+    CONFIG_VARIABLE_INT                    (map_color_secret),
+    CONFIG_VARIABLE_INT                    (map_color_exit),
+    CONFIG_VARIABLE_INT                    (map_color_unseen),
+    CONFIG_VARIABLE_INT                    (map_color_flat),
+    CONFIG_VARIABLE_INT                    (map_color_sprite),
+    CONFIG_VARIABLE_INT                    (map_color_item),
+    CONFIG_VARIABLE_INT                    (map_color_enemy),
+    CONFIG_VARIABLE_INT                    (map_color_crosshair),
+    CONFIG_VARIABLE_INT                    (map_color_single),
+    CONFIG_VARIABLE_INT                    (map_color_player),
+    CONFIG_VARIABLE_INT                    (map_gridsize),
+    CONFIG_VARIABLE_BOOLEAN                (map_secrets_after),
+    CONFIG_VARIABLE_BOOLEAN                (use_autosave),
+    CONFIG_VARIABLE_BOOLEAN                (draw_splash),
+    CONFIG_VARIABLE_INT                    (menu_back),
+    CONFIG_VARIABLE_BOOLEAN                (precache_level),
+    CONFIG_VARIABLE_INT                    (still_bob),
+    CONFIG_VARIABLE_BOOLEAN                (move_bob),
+    CONFIG_VARIABLE_BOOLEAN                (flip_levels),
+    CONFIG_VARIABLE_BOOLEAN                (use_autoload),
+    CONFIG_VARIABLE_BOOLEAN                (random_music),
+
+#ifdef FEATURE_MULTIPLAYER
+    CONFIG_VARIABLE_STRING                 (player_name),
+#endif
+
+    CONFIG_VARIABLE_KEY                    (key_multi_msg),
+    CONFIG_VARIABLE_KEY                    (key_multi_msgplayer1),
+    CONFIG_VARIABLE_KEY                    (key_multi_msgplayer2),
+    CONFIG_VARIABLE_KEY                    (key_multi_msgplayer3),
+    CONFIG_VARIABLE_KEY                    (key_multi_msgplayer4),
+
+    CONFIG_VARIABLE_INT                    (autoadjust_video_settings),
+    CONFIG_VARIABLE_INT                    (fullscreen),
+    CONFIG_VARIABLE_INT                    (aspect_ratio_correct),
+    CONFIG_VARIABLE_INT                    (startup_delay),
+    CONFIG_VARIABLE_INT                    (screen_bpp),
+    CONFIG_VARIABLE_STRING                 (video_driver),
+    CONFIG_VARIABLE_STRING                 (window_position),
+
+    CONFIG_VARIABLE_STRING                 (chatmacro0),
+    CONFIG_VARIABLE_STRING                 (chatmacro1),
+    CONFIG_VARIABLE_STRING                 (chatmacro2),
+    CONFIG_VARIABLE_STRING                 (chatmacro3),
+    CONFIG_VARIABLE_STRING                 (chatmacro4),
+    CONFIG_VARIABLE_STRING                 (chatmacro5),
+    CONFIG_VARIABLE_STRING                 (chatmacro6),
+    CONFIG_VARIABLE_STRING                 (chatmacro7),
+    CONFIG_VARIABLE_STRING                 (chatmacro8),
+    CONFIG_VARIABLE_STRING                 (chatmacro9),
+    CONFIG_VARIABLE_FLOAT                  (samplerate_scale),
+    CONFIG_VARIABLE_KEY                    (key_shoot),
+    CONFIG_VARIABLE_KEY                    (key_open),
+    CONFIG_VARIABLE_KEY                    (key_menu),
+    CONFIG_VARIABLE_KEY                    (key_weapon_left),
+    CONFIG_VARIABLE_KEY                    (key_automap),
+    CONFIG_VARIABLE_KEY                    (key_weapon_right),
+    CONFIG_VARIABLE_KEY                    (key_automap_zoom_in),
+    CONFIG_VARIABLE_KEY                    (key_automap_zoom_out),
+    CONFIG_VARIABLE_KEY                    (key_flyup),
+    CONFIG_VARIABLE_KEY                    (key_flydown),
+    CONFIG_VARIABLE_KEY                    (key_jump),
+    CONFIG_VARIABLE_KEY                    (key_run),
+    CONFIG_VARIABLE_KEY                    (key_console),
+    CONFIG_VARIABLE_KEY                    (key_screenshots),
 
 #ifndef WII
-    CONFIG_VARIABLE_INT                (key_strafe_left),
-    CONFIG_VARIABLE_INT                (key_strafe_right)
+    CONFIG_VARIABLE_KEY                    (key_strafe_left),
+    CONFIG_VARIABLE_KEY                    (key_strafe_right)
 #endif
 };
 
@@ -326,7 +356,7 @@ static void SaveDefaultCollection(default_collection_t *collection)
                 // use the untranslated version if we can, to reduce
                 // the possibility of screwing up the user's config
                 // file
-                v = * (int *)defaults[i].location;
+                v = * (int *)defaults[i].location.i;
 
                 if (v == KEY_RSHIFT)
                 {
@@ -349,19 +379,23 @@ static void SaveDefaultCollection(default_collection_t *collection)
                 break;
 
             case DEFAULT_INT:
-                fprintf(f, "%i", * (int *)defaults[i].location);
+                fprintf(f, "%i", * (int *)defaults[i].location.i);
+                break;
+
+            case DEFAULT_BOOLEAN:
+                fprintf(f, "%i", * (dboolean *)defaults[i].location.b);
                 break;
 
             case DEFAULT_INT_HEX:
-                fprintf(f, "0x%x", * (int *)defaults[i].location);
+                fprintf(f, "0x%x", * (int *)defaults[i].location.i);
                 break;
 
             case DEFAULT_FLOAT:
-                fprintf(f, "%f", * (float *)defaults[i].location);
+                fprintf(f, "%f", * (float *)defaults[i].location.f);
                 break;
 
             case DEFAULT_STRING:
-                fprintf(f,"\"%s\"", * (char **)(defaults[i].location));
+                fprintf(f,"\"%s\"", * (char **)(defaults[i].location.s));
                 break;
         }
 
@@ -392,12 +426,16 @@ static void SetVariable(default_t *def, char *value)
     switch (def->type)
     {
         case DEFAULT_STRING:
-            *(char **)def->location = M_StringDuplicate(value);
+            *(char **)def->location.s = M_StringDuplicate(value);
+            break;
+
+        case DEFAULT_BOOLEAN:
+            *(dboolean *)def->location.b = ParseIntParameter(value);
             break;
 
         case DEFAULT_INT:
         case DEFAULT_INT_HEX:
-            *(int *)def->location = ParseIntParameter(value);
+            *(int *)def->location.i = ParseIntParameter(value);
             break;
 
         case DEFAULT_KEY:
@@ -407,11 +445,11 @@ static void SetVariable(default_t *def, char *value)
             intparm = ParseIntParameter(value);
             def->untranslated = intparm;
 
-            *(int *)def->location = intparm;
+            *(int *)def->location.i = intparm;
             break;
 
         case DEFAULT_FLOAT:
-            *(float *)def->location = (float) atof(value);
+            *(float *)def->location.f = (float) atof(value);
             break;
     }
 }
@@ -419,7 +457,7 @@ static void SetVariable(default_t *def, char *value)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wchar-subscripts"
 
-static dboolean LoadDefaultCollection(default_collection_t *collection)
+dboolean LoadDefaultCollection(default_collection_t *collection)
 {
     FILE *f;
     default_t *def;
@@ -493,8 +531,6 @@ void M_SaveDefaults (void)
 //
 // Save defaults to alternate filenames
 //
-// [nitr8] UNUSED
-//
 /*
 void M_SaveDefaultsAlternate(char *main)
 {
@@ -542,12 +578,13 @@ void M_LoadDefaults (void)
         doom_defaults.filename
             = M_StringJoin(configdir, default_main_config, NULL);
     }
-
+/*
     if (LoadDefaultCollection(&doom_defaults))
         C_Output("Loaded VARs from %s.", uppercase(doom_defaults.filename));
     else
         C_Output("%s not found. Using defaults for all VARs and creating %s.",
             uppercase(doom_defaults.filename), uppercase(doom_defaults.filename));
+*/
 }
 
 // Get a configuration file variable by its name
@@ -570,13 +607,46 @@ static default_t *GetDefaultForName(char *name)
 //
 // Bind a variable to a given configuration file variable, by name.
 //
-void M_BindVariable(char *name, void *location)
+void M_BindIntVariable(char *name, int *location)
 {
     default_t *variable;
 
     variable = GetDefaultForName(name);
 
-    variable->location = location;
+    variable->location.i = location;
+    variable->bound = true;
+}
+
+void M_BindBooleanVariable(char *name, dboolean *location)
+{
+    default_t *variable;
+
+    variable = GetDefaultForName(name);
+    assert(variable->type == DEFAULT_BOOLEAN);
+
+    variable->location.b = location;
+    variable->bound = true;
+}
+
+void M_BindFloatVariable(char *name, float *location)
+{
+    default_t *variable;
+
+    variable = GetDefaultForName(name);
+    assert(variable->type == DEFAULT_FLOAT);
+
+    variable->location.f = location;
+    variable->bound = true;
+}
+
+void M_BindStringVariable(char *name, char **location)
+{
+    default_t *variable;
+
+    variable = GetDefaultForName(name);
+    assert(variable->type == DEFAULT_STRING);
+
+    variable->location.s = location;
     variable->bound = true;
 }
 
@@ -615,7 +685,22 @@ int M_GetIntVariable(char *name)
         return 0;
     }
 
-    return *((int *)variable->location);
+    return *((int *)variable->location.i);
+}
+
+dboolean M_GetBooleanVariable(char *name)
+{
+    default_t *variable;
+
+    variable = GetDefaultForName(name);
+
+    if (variable == NULL || !variable->bound
+        || (variable->type != DEFAULT_BOOLEAN))
+    {
+        return 0;
+    }
+
+    return *((dboolean *)variable->location.b);
 }
 
 const char *M_GetStrVariable(char *name)
@@ -630,7 +715,7 @@ const char *M_GetStrVariable(char *name)
         return NULL;
     }
 
-    return *((const char **)variable->location);
+    return *((const char **)variable->location.s);
 }
 
 float M_GetFloatVariable(char *name)
@@ -645,7 +730,7 @@ float M_GetFloatVariable(char *name)
         return 0;
     }
 
-    return *((float *)variable->location);
+    return *((float *)variable->location.f);
 }
 */
 
@@ -1038,8 +1123,6 @@ char *M_GetSaveGameDir(char *iwadname)
                 DIR_SEPARATOR_S, NULL);
 
         M_MakeDirectory(savegamedir);
-
-        C_Output("Savegames will be saved and loaded in %s.", uppercase(savegamedir));
     }
 
     return savegamedir;

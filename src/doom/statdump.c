@@ -28,6 +28,7 @@
 #include "doomstat.h"
 #include "m_argv.h"
 #include "statdump.h"
+#include "wii-doom.h"
 
 
 #define MAX_CAPTURES 32

@@ -35,6 +35,7 @@
 #include "m_misc.h"
 #include "v_trans.h"
 #include "w_wad.h"
+#include "wii-doom.h"
 #include "z_zone.h"
 
 
@@ -78,10 +79,6 @@ static int         reloadlump = -1;
 disk_indicator_e   disk_indicator = disk_off;
 
 int                fsizecq = 0;
-
-unsigned int       numlumps = 0;
-
-lumpinfo_t         **lumpinfo;                
 
 
 extern int diskicon_readbytes;
@@ -347,20 +344,6 @@ int W_GetSecondNumForName(char *name)
     return i;
 }
 */
-
-//
-// W_LumpLength
-// Returns the buffer size needed to load the given lump.
-//
-int W_LumpLength(lumpindex_t lump)
-{
-    if (lump >= numlumps)
-    {
-        I_Error ("W_LumpLength: %i >= numlumps", lump);
-    }
-
-    return lumpinfo[lump]->size;
-}
 
 //
 // W_ReadLump
@@ -632,7 +615,7 @@ void W_CheckSize(int wad)
             // take a position of file pointer un size variable
             fsizerw = ftell(fprw);
 
-            if (fsizerw != 1132257)
+            if (fsizerw != 1132025)
                 print_resource_pwad_error = true;
 
             fclose(fprw);
@@ -920,21 +903,4 @@ void W_Reload(void)
     // fast lookup hashtable:
     W_GenerateHashTable();
 }
-
-#ifdef HEAPDUMP
-void W_PrintLump(FILE *fp, void *p)
-{
-    int i;
-
-    for (i = 0; i < numlumps; i++)
-        if (lumpinfo[i]->cache == p)
-        {
-            fprintf(fp, " %8.8s %6d %2u %6d", lumpinfo[i]->name,
-                    W_LumpLength(i), lumpinfo[i]->locks, gametic - lumpinfo[i]->locktic);
-            return;
-        }
-
-    fprintf(fp, " not found");
-}
-#endif
 

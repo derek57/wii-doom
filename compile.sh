@@ -14,7 +14,13 @@ cd src
 cd doom
 make -f Makefile.SDL
 cd ..
+cd setup
+make -f Makefile.SDL
+cd ..
 make -f Makefile.SDL chocolate-doom
+make -f Makefile.SDL chocolate-setup
+make -f Makefile.SDL chocolate-doom-setup
+make -f Makefile.SDL chocolate-server
 cd ..
 cd man
 make -f Makefile.SDL

@@ -48,6 +48,7 @@
 #include "v_trans.h"
 #include "v_video.h"
 #include "w_wad.h"
+#include "wii-doom.h"
 #include "z_zone.h"
 
 
@@ -99,7 +100,6 @@ spritedef_t                     *sprites;
 //
 
 // variables used to look up and range check thing_t sprites patches
-int                             numsprites;
 
 // constant arrays
 //  used for psprite clipping and initializing clipping
@@ -201,7 +201,7 @@ static void R_InstallSpriteLump(lumpinfo_t *lump, int lumpnum, unsigned int fram
 //
 // Empirically verified to have excellent hash
 // properties across standard DOOM sprites:
-static void R_InitSpriteDefs(const char *const *namelist)
+static void R_InitSpriteDefs(void)
 {
     size_t              numentries = lastspritelump - firstspritelump + 1;
     unsigned int        i;
@@ -212,15 +212,11 @@ static void R_InitSpriteDefs(const char *const *namelist)
         int     next;
     } *hash;
 
-    if (!numentries || !*namelist)
+    if (!numentries)
         return;
 
     // count the number of sprite names
-    for (i = 0; namelist[i]; ++i);
-
-    numsprites = (signed int)i;
-
-    sprites = Z_Calloc(numsprites, sizeof(*sprites), PU_STATIC, NULL);
+    sprites = Z_Calloc(NUMSPRITES, sizeof(*sprites), PU_STATIC, NULL); 
 
     // Create hash table based on just the first four letters of each sprite
     // killough 1/31/98
@@ -244,9 +240,9 @@ static void R_InitSpriteDefs(const char *const *namelist)
 
     // scan all the lump names for each of the names,
     //  noting the highest frame letter.
-    for (i = 0; i < (unsigned int)numsprites; ++i)
+    for (i = 0; i < NUMSPRITES; ++i)
     {
-        const char      *spritename = namelist[i];
+        const char      *spritename = sprnames[i];
         int             j = hash[R_SpriteNameHash(spritename) % numentries].index;
 
         if (j >= 0)
@@ -291,7 +287,7 @@ static void R_InitSpriteDefs(const char *const *namelist)
                     {
                         case -1:
                             // no rotations were found for that frame at all
-                            C_Warning("R_InitSprites: No patches found for %s frame %c", namelist[i], frame+'A');
+                            C_Warning("R_InitSprites: No patches found for %s frame %c", sprnames[i], frame + 'A');
                             break;
 
                         case 0:
@@ -327,7 +323,7 @@ static void R_InitSpriteDefs(const char *const *namelist)
                             for (rot = 0; rot < 16; ++rot)
                                 if (sprtemp[frame].lump[rot] == -1)
                                     I_Error("R_InitSprites: Frame %c of sprite %.8s frame %c is "
-                                        "missing rotations", frame + 'A', namelist[i]);
+                                        "missing rotations", frame + 'A', sprnames[i]);
 
                             break;
                     }
@@ -360,14 +356,14 @@ static void R_InitSpriteDefs(const char *const *namelist)
 // R_InitSprites
 // Called at program start.
 //
-void R_InitSprites(char **namelist)
+void R_InitSprites(void)
 {
     int i;
 
     for (i = 0; i < SCREENWIDTH; i++)
         negonearray[i] = -1;
 
-    R_InitSpriteDefs((const char *const *)namelist);
+    R_InitSpriteDefs();
 
     num_vissprite = 0;
     num_vissprite_alloc = 128;
@@ -514,27 +510,11 @@ static void R_DrawMaskedSpriteColumn(column_t *column)
         if (dc_baseclip != -1)
             dc_yh = MIN(dc_baseclip, dc_yh);
 
-        dc_texturefrac = dc_texturemid - (topdelta << FRACBITS)
-            + FixedMul((dc_yl - centery) << FRACBITS, dc_iscale);
-
-        if (dc_texturefrac < 0)
-        {
-            int cnt = (FixedDiv(-dc_texturefrac, dc_iscale) + FRACUNIT - 1) >> FRACBITS;
-
-            dc_yl += cnt;
-            dc_texturefrac += cnt * dc_iscale;
-        }
-
-        {
-            const fixed_t       endfrac = dc_texturefrac + (dc_yh - dc_yl) * dc_iscale;
-            const fixed_t       maxfrac = length << FRACBITS;
-
-            if (endfrac >= maxfrac)
-                dc_yh -= (FixedDiv(endfrac - maxfrac - 1, dc_iscale) + FRACUNIT - 1) >> FRACBITS;
-        }
-
         if (dc_yl <= dc_yh && dc_yh < viewheight)
         {
+            dc_texturefrac = dc_texturemid - (topdelta << FRACBITS)
+                + FixedMul((dc_yl - centery) << FRACBITS, dc_iscale);
+
             dc_source = (byte *)column + 3;
             colfunc();
         }
@@ -938,7 +918,7 @@ void R_ProjectSprite(mobj_t *thing)
     // decide which patch to use for sprite relative to player
 
 #ifdef RANGECHECK
-    if ((unsigned int)thing->sprite >= (unsigned int)numsprites)
+    if ((unsigned int)thing->sprite >= NUMSPRITES)
         I_Error("R_ProjectSprite: invalid sprite number %i ",
                  thing->sprite);
 #endif
@@ -1196,7 +1176,7 @@ void R_ProjectBloodSplat(mobj_t *thing)
         return;
 
 #ifdef RANGECHECK
-    if ((unsigned int)thing->sprite >= (unsigned int)numsprites)
+    if ((unsigned int)thing->sprite >= NUMSPRITES)
         I_Error("R_ProjectBloodsplat: invalid sprite number %i ",
                  thing->sprite);
 #endif
@@ -1318,7 +1298,7 @@ void R_ProjectShadow(mobj_t *thing)
     // decide which patch to use for sprite relative to player
 
 #ifdef RANGECHECK
-    if ((unsigned int)thing->sprite >= (unsigned int)numsprites)
+    if ((unsigned int)thing->sprite >= NUMSPRITES)
         I_Error("R_ProjectShadow: invalid sprite number %i ",
                  thing->sprite);
 #endif
@@ -1616,7 +1596,7 @@ static void R_DrawPSprite(pspdef_t *psp, dboolean invisibility)
     spr = state->sprite;
 
 #ifdef RANGECHECK
-    if ((unsigned)psp->state->sprite >= (unsigned int)numsprites)
+    if ((unsigned)psp->state->sprite >= NUMSPRITES)
         I_Error("R_DrawPSprite: invalid sprite number %i ",
                  psp->state->sprite);
 #endif
@@ -2247,7 +2227,9 @@ void R_DrawMasked(void)
             R_RenderMaskedSegRange(ds, ds->x1, ds->x2);
 
     // draw the psprites on top of everything
-    R_DrawPlayerSprites();
+    //  but does not draw on side views
+    if (!viewangleoffset)
+        R_DrawPlayerSprites();
 }
 
 //

@@ -56,6 +56,7 @@
 #include "v_trans.h"
 #include "v_video.h"
 #include "w_wad.h"
+#include "wii-doom.h"
 #include "z_zone.h"
 
 
@@ -144,8 +145,6 @@ byte                         *tranmap = NULL;
 byte                         *dp_translation = NULL;
 
 int                          dirtybox[4]; 
-int                          pixelwidth;
-int                          pixelheight;
 int                          italicize[15] = { 0, 2, 2, 2, 1, 1, 1, 1, 0, 0, 0, 0, -1, -1, -1 };
 
 // haleyjd 20110213: BUG FIX - 12 is too small!
@@ -159,26 +158,22 @@ dboolean                     dp_translucent = false;
 extern byte                  redtoblue[];
 extern byte                  redtogreen[];
 
-extern dboolean              png_screenshots;
-
 
 //
 // V_MarkRect 
-// 
-// [nitr8] UNUSED
 //
-/*
-void V_MarkRect(int x, int y, int srcscrn, int width, int height, int destscrn) 
+void V_MarkRect(int x, int y, /*int srcscrn,*/ int width, int height/*, int destscrn*/) 
 { 
     // If we are temporarily using an alternate screen, do not 
     // affect the update box.
-    if (screens[srcscrn] == screens[destscrn])
+    //if (screens[srcscrn] == screens[destscrn])
     {
         M_AddToBox(dirtybox, x, y); 
         M_AddToBox(dirtybox, x + width - 1, y + height - 1); 
     }
 } 
- 
+
+/*
 void V_DrawHorizLine(int x, int y, int scrn, int w, int c)
 {
     uint8_t *buf;
@@ -237,7 +232,7 @@ void V_CopyRect(int srcx, int srcy, int srcscrn, int width, int height, int dest
     if (desty + height > SCREENHEIGHT)
         height = SCREENHEIGHT - desty;
 
-    //V_MarkRect(destx, desty, 0, width, height); 
+    V_MarkRect(destx, desty, width, height); 
 
     src = screens[srcscrn] + SCREENWIDTH * srcy + srcx;
     dest = screens[destscrn] + SCREENWIDTH * desty + destx;
@@ -278,10 +273,12 @@ void V_DrawPatch(int x, int y, int scrn, patch_t *patch)
         y < 0 || y + SHORT(patch->height) > ORIGINALHEIGHT)
     {
         C_Error("Bad V_DrawPatch: Patch (%d, %d) exceeds LFB", x, y);
+        return;
     }
 #endif
 
-    //V_MarkRect(x, y, 0, SHORT(patch->width), SHORT(patch->height));
+    if (!scrn)
+        V_MarkRect(x, y, SHORT(patch->width), SHORT(patch->height));
 
     col = 0;
 
@@ -380,10 +377,12 @@ void V_DrawPatchFlipped(int x, int y, int scrn, patch_t *patch)
     {
         C_Error("Bad V_DrawPatchFlipped: Patch (%d, %d) - (%d, %d) exceeds LFB"
                 , x, y, x + SHORT(patch->width), y + SHORT(patch->height));
+        return;
     }
 #endif
 
-    //V_MarkRect(x, y, 0, SHORT(patch->width), SHORT(patch->height));
+    if (!scrn)
+        V_MarkRect(x, y, SHORT(patch->width), SHORT(patch->height));
 
     col = 0;
     desttop = screens[scrn] + (y << hires) * SCREENWIDTH + x;
@@ -472,10 +471,11 @@ void V_DrawBlock(int x, int y, int scrn, int width, int height, byte *src)
     {
         C_Error("Bad V_DrawBlock: Patch (%d, %d) - (%d, %d) exceeds LFB"
                 , x, y, x + width, y + height);
+	return;
     }
 #endif 
 
-    //V_MarkRect(x, y, 0, width, height); 
+    V_MarkRect(x, y, width, height); 
  
     dest = screens[scrn] + (y << hires) * SCREENWIDTH + x;
 
@@ -806,6 +806,7 @@ void V_GetBlock(int x, int y, int scrn, int width, int height, byte *dest)
         y < 0 || y + height > SCREENHEIGHT)
     {
         C_Error("Bad V_GetBlock");
+	return;
     }
 #endif
 
@@ -1156,7 +1157,7 @@ void V_ScreenShot(int scrn, char *format)
     }
 }
 
-void V_LowGraphicDetail(int scrn, int height)
+void V_LowGraphicDetail(int height)
 {
     int x, y;
     int h = pixelheight * SCREENWIDTH;
@@ -1164,7 +1165,7 @@ void V_LowGraphicDetail(int scrn, int height)
     for (y = 0; y < height; y += h)
         for (x = 0; x < SCREENWIDTH; x += pixelwidth)
         {
-            byte        *dot = screens[scrn] + y + x;
+            byte        *dot = screens[0] + y + x;
             int         xx, yy;
 
             for (yy = 0; yy < h; yy += SCREENWIDTH)
@@ -1310,13 +1311,13 @@ void V_Clear(int left, int top, int right, int bottom, int scrn, int color)
 }
 */
 
-void V_DimScreen(int scrn)
+void V_DimScreen(void)
 {
     float dimamount = 0.2;
     fixed_t amount = (fixed_t)(dimamount * 64);
     unsigned int *fg2rgb = Col2RGB8[amount];
     unsigned int *bg2rgb = Col2RGB8[64 - amount];
-    byte *spot = screens[scrn];
+    byte *spot = screens[0];
     unsigned int fg = fg2rgb[background_color];
     int x, y;
 

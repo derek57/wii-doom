@@ -49,6 +49,7 @@
 #include "v_trans.h"
 #include "v_video.h"
 #include "w_wad.h"
+#include "wii-doom.h"
 #include "z_zone.h"
 
 
@@ -336,7 +337,7 @@ void R_DrawWallColumn(void)
             heightmask <<= FRACBITS;
 
             if (frac < 0)
-                while ((frac += heightmask) <  0);
+                while ((frac += heightmask) < 0);
             else
                 while (frac >= heightmask)
                     frac -= heightmask;
@@ -452,7 +453,7 @@ void R_DrawFullbrightWallColumn(void)
             heightmask <<= FRACBITS;
 
             if (frac < 0)
-                while ((frac += heightmask) <  0);
+                while ((frac += heightmask) < 0);
             else
                 while (frac >= heightmask)
                     frac -= heightmask;
@@ -644,7 +645,7 @@ void R_DrawSkyColumn(void)
             heightmask <<= FRACBITS;
 
             if (frac < 0)
-                while ((frac += heightmask) <  0);
+                while ((frac += heightmask) < 0);
             else
                 while (frac >= heightmask)
                     frac -= heightmask;
@@ -1522,7 +1523,7 @@ void R_DrawPausedFuzzColumn(void)
 // [nitr8] UNUSED
 //
 /*
-void R_DrawFuzzColumns(int srcscrn, int destscrn)
+void R_DrawFuzzColumns(void)
 {
     int         x, y;
     int         w = viewwindowx + viewwidth;
@@ -1532,11 +1533,11 @@ void R_DrawFuzzColumns(int srcscrn, int destscrn)
         for (y = viewwindowy * SCREENWIDTH; y < h; y += SCREENWIDTH)
         {
             int         i = x + y;
-            byte        *src = screens[srcscrn] + i;
+            byte        *src = screens[1] + i;
 
             if (*src != NOFUZZ)
             {
-                byte    *dest = screens[destscrn] + i;
+                byte    *dest = screens[0] + i;
 
                 if (!y || *(src - SCREENWIDTH) == NOFUZZ)
                 {
@@ -1570,7 +1571,7 @@ void R_DrawFuzzColumns(int srcscrn, int destscrn)
         }
 }
 
-void R_DrawPausedFuzzColumns(int srcscrn, int destscrn)
+void R_DrawPausedFuzzColumns(void)
 {
     int         x, y;
     int         w = viewwindowx + viewwidth;
@@ -1580,11 +1581,11 @@ void R_DrawPausedFuzzColumns(int srcscrn, int destscrn)
         for (y = viewwindowy * SCREENWIDTH; y < h; y += SCREENWIDTH)
         {
             int         i = x + y;
-            byte        *src = screens[srcscrn] + i;
+            byte        *src = screens[1] + i;
 
             if (*src != NOFUZZ)
             {
-                byte    *dest = screens[destscrn] + i;
+                byte    *dest = screens[0] + i;
 
                 if (!y || *(src - SCREENWIDTH) == NOFUZZ)
                 {
@@ -1794,7 +1795,7 @@ void R_InitBuffer(int width, int height)
 //  for variable screen sizes
 // Also draws a beveled edge.
 //
-void R_FillBackScreen(int srcscrn, int destscrn)
+void R_FillBackScreen(void)
 {
     byte         *src;
     byte         *dest; 
@@ -1838,7 +1839,7 @@ void R_FillBackScreen(int srcscrn, int destscrn)
         name = name1;
     
     src = W_CacheLumpName(name, PU_CACHE); 
-    dest = screens[destscrn];
+    dest = screens[1];
          
     for (y = 0; y < SCREENHEIGHT - SBARHEIGHT; y++) 
     { 
@@ -1858,7 +1859,7 @@ void R_FillBackScreen(int srcscrn, int destscrn)
     // Draw screen and bezel; this is done to a separate screen buffer.
 
     //V_UseBuffer(background_buffer);
-    //V_UseBuffer(screens[srcscrn]);
+    //V_UseBuffer(screens[0]);
 
     // COMPLETELY CHANGED FOR HIRES
     for (x = 0; x < (scaledviewwidth >> hires); x += 8)
@@ -1896,7 +1897,7 @@ void R_FillBackScreen(int srcscrn, int destscrn)
 //
 // Copy a screen buffer.
 //
-void R_VideoErase(unsigned int ofs, int count, int srcscrn, int destscrn)
+void R_VideoErase(unsigned int ofs, int count)
 {
     // LFB copy.
     // This might not be a good idea if memcpy
@@ -1911,7 +1912,7 @@ void R_VideoErase(unsigned int ofs, int count, int srcscrn, int destscrn)
     }
     */
 
-    memcpy(screens[destscrn] + ofs, screens[srcscrn] + ofs, count);
+    memcpy(screens[0] + ofs, screens[1] + ofs, count);
 }
 
 //
@@ -1933,11 +1934,11 @@ void R_DrawViewBorder(void)
     side = (SCREENWIDTH - scaledviewwidth) / 2; 
  
     // copy top and one line of left side 
-    R_VideoErase(0, top * SCREENWIDTH + side, 1, 0); 
+    R_VideoErase(0, top * SCREENWIDTH + side); 
  
     // copy one line of right side and bottom 
     ofs = (scaledviewheight + top) * SCREENWIDTH - side;
-    R_VideoErase(ofs, top * SCREENWIDTH + side, 1, 0); 
+    R_VideoErase(ofs, top * SCREENWIDTH + side); 
  
     // copy sides using wraparound 
     ofs = top * SCREENWIDTH + SCREENWIDTH - side; 
@@ -1945,12 +1946,12 @@ void R_DrawViewBorder(void)
     
     for (i = 1; i < scaledviewheight; i++)
     { 
-        R_VideoErase(ofs, side, 1, 0); 
+        R_VideoErase(ofs, side); 
         ofs += SCREENWIDTH; 
     } 
 
     // ? 
-    //V_MarkRect (0, 0, 1, SCREENWIDTH, SCREENHEIGHT - SBARHEIGHT, 0); 
+    V_MarkRect(0, 0, SCREENWIDTH, SCREENHEIGHT - SBARHEIGHT); 
 }
 
 //
@@ -1960,7 +1961,7 @@ void R_DrawViewBorder(void)
 // It can be clipped to the top of the screen to allow the console to be
 // smoothly scrolled off.
 //
-void R_DrawChar(int x, int y, int scrn, int num)
+void R_DrawChar(int x, int y, int num)
 {
     byte       *dest;
     byte       *source;
@@ -2042,7 +2043,7 @@ void R_DrawChar(int x, int y, int scrn, int num)
     else
         drawline = 8;
 
-    dest = screens[scrn] + y * SCREENWIDTH + x;
+    dest = screens[0] + y * SCREENWIDTH + x;
 
     while (drawline--)
     {

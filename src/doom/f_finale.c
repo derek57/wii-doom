@@ -52,6 +52,7 @@
 #include "sounds.h"
 #include "v_video.h"
 #include "w_wad.h"
+#include "wii-doom.h"
 #include "z_zone.h"
 
 
@@ -722,10 +723,10 @@ void F_Ticker(void)
 //
 // F_TextWrite
 //
-static void F_TextWrite(int scrn)
+static void F_TextWrite(void)
 {    
     byte        *src = W_CacheLumpName(finaleflat, PU_CACHE);
-    byte        *dest = screens[scrn];
+    byte        *dest = screens[0];
     int         w, x, y;
     int         cx = 10;
     int         cy = 10;
@@ -748,7 +749,7 @@ static void F_TextWrite(int scrn)
         }
     }
 
-    //V_MarkRect (0, 0, 0, SCREENWIDTH, SCREENHEIGHT, 0);
+    V_MarkRect(0, 0, SCREENWIDTH, SCREENHEIGHT);
     
     // draw some of the text onto the screen
     if (count < 0)
@@ -890,11 +891,11 @@ static void F_CastDrawer(void)
 //
 // F_DrawPatchCol
 //
-static void F_DrawPatchCol(int x, int scrn, patch_t *patch, int col)
+static void F_DrawPatchCol(int x, patch_t *patch, int col)
 {
     int          f;
     column_t     *column = (column_t *)((byte *)patch + LONG(patch->columnofs[col]));
-    byte         *desttop = screens[scrn] + x;
+    byte         *desttop = screens[0] + x;
 
     // step through the posts in a column
     while (column->topdelta != 0xff)
@@ -935,7 +936,7 @@ static void F_BunnyScroll(void)
     int         stage;
     static int  laststage;
                 
-    //V_MarkRect(0, 0, 0, SCREENWIDTH, SCREENHEIGHT, 0);
+    V_MarkRect(0, 0, SCREENWIDTH, SCREENHEIGHT);
         
     if (scrolled > ORIGINALWIDTH)
         scrolled = ORIGINALWIDTH;
@@ -946,9 +947,9 @@ static void F_BunnyScroll(void)
     for (x = 0; x < ORIGINALWIDTH; x++)
     {
         if (x + scrolled < ORIGINALWIDTH)
-            F_DrawPatchCol(x, 0, p1, x + scrolled);
+            F_DrawPatchCol(x, p1, x + scrolled);
         else
-            F_DrawPatchCol(x, 0, p2, x + scrolled - ORIGINALWIDTH);                
+            F_DrawPatchCol(x, p2, x + scrolled - ORIGINALWIDTH);                
     }
         
     if (finalecount < 1130)
@@ -1043,7 +1044,7 @@ void F_Drawer(void)
             break;
 
         case F_STAGE_TEXT:
-            F_TextWrite(0);
+            F_TextWrite();
             break;
 
         case F_STAGE_ARTSCREEN:

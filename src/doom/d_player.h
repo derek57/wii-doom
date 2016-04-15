@@ -83,7 +83,15 @@ typedef enum
     // No damage, no health loss.
     CF_GODMODE           = 2,
 
-    CF_NOTARGET          = 4
+    CF_NOTARGET         = 4,
+
+    CF_MYPOS            = 8,
+
+    CF_ALLMAP           = 16,
+
+    CF_ALLMAP_THINGS    = 32,
+
+    CF_CHOPPERS         = 64
 
 } cheat_t;
 

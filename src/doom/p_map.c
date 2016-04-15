@@ -52,6 +52,7 @@
 #include "sounds.h"
 
 #include "v_trans.h"
+#include "wii-doom.h"
 #include "z_zone.h"
 
 
@@ -61,7 +62,6 @@
 
 
 static mobj_t        *slidemo;
-static mobj_t        *tmthing;
 static mobj_t        *usething;
 
 // slopes to top and bottom of target
@@ -142,6 +142,7 @@ angle_t              shootangle;
 // who got hit (or NULL)
 mobj_t               *linetarget;
 
+mobj_t               *tmthing;
 mobj_t               *shootthing;
 mobj_t               *onmobj;
 mobj_t               *bombsource;
@@ -387,13 +388,14 @@ dboolean P_TeleportMove(mobj_t *thing, fixed_t x, fixed_t y, fixed_t z, dboolean
 //
 //
 // killough 11/98: reformatted
+// [BH] Allow pain elementals to shoot lost souls through 2-sided walls with an ML_BLOCKMONSTERS
+//  flag. This is a compromise between BOOM and Vanilla DOOM behaviors, and allows pain elementals
+//  at the end of REQUIEM.WAD's MAP04 to do their thing.
 static dboolean PIT_CrossLine(line_t *ld)
 {
-    return (!((ld->flags ^ ML_TWOSIDED) & (ML_TWOSIDED | ML_BLOCKING | ML_BLOCKMONSTERS))
-        || tmbbox[BOXLEFT]   > ld->bbox[BOXRIGHT]
-        || tmbbox[BOXRIGHT]  < ld->bbox[BOXLEFT]
-        || tmbbox[BOXTOP]    < ld->bbox[BOXBOTTOM]
-        || tmbbox[BOXBOTTOM] > ld->bbox[BOXTOP]
+    return (!((ld->flags ^ ML_TWOSIDED) & (ML_TWOSIDED | ML_BLOCKING/* | ML_BLOCKMONSTERS*/))
+        || tmbbox[BOXLEFT]   > ld->bbox[BOXRIGHT] || tmbbox[BOXRIGHT]  < ld->bbox[BOXLEFT]
+        || tmbbox[BOXTOP]    < ld->bbox[BOXBOTTOM] || tmbbox[BOXBOTTOM] > ld->bbox[BOXTOP]
         || P_PointOnLineSide(pe_x, pe_y, ld) == P_PointOnLineSide(ls_x, ls_y, ld));
 }
 
@@ -418,10 +420,8 @@ static int untouched(line_t *ld)
 //
 static dboolean PIT_CheckLine(line_t *ld)
 {
-    if (tmbbox[BOXRIGHT] <= ld->bbox[BOXLEFT]
-        || tmbbox[BOXLEFT] >= ld->bbox[BOXRIGHT]
-        || tmbbox[BOXTOP] <= ld->bbox[BOXBOTTOM]
-        || tmbbox[BOXBOTTOM] >= ld->bbox[BOXTOP])
+    if (tmbbox[BOXRIGHT] <= ld->bbox[BOXLEFT] || tmbbox[BOXLEFT] >= ld->bbox[BOXRIGHT]
+        || tmbbox[BOXTOP] <= ld->bbox[BOXBOTTOM] || tmbbox[BOXBOTTOM] >= ld->bbox[BOXTOP])
         // didn't hit it
         return true;
 

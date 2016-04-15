@@ -33,6 +33,7 @@
 
 #include "d_event.h"
 #include "d_ticcmd.h"
+#include "d_mode.h"
 
 
 //
@@ -90,8 +91,7 @@ dboolean G_CheckDemoStatus(void);
 dboolean G_Responder(event_t *ev);
 
 
-extern int vanilla_savegame_limit;
-extern int vanilla_demo_limit;
+//extern int vanilla_demo_limit;
 
 extern dboolean canmodify;
 

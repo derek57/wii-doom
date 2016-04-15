@@ -50,6 +50,7 @@
 #include "m_misc.h"
 #include "v_trans.h"
 #include "w_wad.h"
+#include "wii-doom.h"
 #include "z_zone.h"
 
 
@@ -94,9 +95,6 @@ static allocated_sound_t *allocated_sounds_tail;
 // will be too quiet. This is an amount that should avoid clipping most
 // of the time: with all the Doom IWAD sound effects, at least. If a PWAD
 // is used, clipping might occur.
-float                    libsamplerate_scale = 0.65;
-
-
 extern int               lib_sample_rate;
 
 

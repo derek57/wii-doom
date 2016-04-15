@@ -143,10 +143,6 @@ txt_window_action_t *TXT_NewWindowEscapeAction(txt_window_t *window)
 }
 
 // Exactly the same as the above, but the button is named "abort"
-//
-// [nitr8] UNUSED
-//
-/*
 txt_window_action_t *TXT_NewWindowAbortAction(txt_window_t *window)
 {
     txt_window_action_t *action;
@@ -156,7 +152,6 @@ txt_window_action_t *TXT_NewWindowAbortAction(txt_window_t *window)
 
     return action;
 }
-*/
 
 txt_window_action_t *TXT_NewWindowSelectAction(txt_window_t *window)
 {

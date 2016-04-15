@@ -44,6 +44,7 @@ dboolean M_StringStartsWith(const char *s, const char *prefix);
 dboolean M_StringEndsWith(const char *s, const char *suffix);
 dboolean M_StringCompare(const char *str1, const char *str2);
 dboolean isvowel(const char ch);
+dboolean wildcard(char *input, char *pattern);
 
 int M_DoubleToInt(double x);
 int M_ReadFile(char *name, byte **buffer);
@@ -60,7 +61,7 @@ void M_ForceUppercase(char *text);
 long M_FileLength(FILE *handle);
 
 char *titlecase(const char *str);
-char *uppercase(char *str);
+char *uppercase(const char *str);
 char *commify(int value);
 char *M_StringDuplicate(const char *orig);
 char *M_TempFile(char *s);
@@ -73,7 +74,12 @@ char *M_ExtractFilename(char *path);
 char *M_BaseName(char *path);
 char *removeext(const char *file);
 char *M_SubString(const char *str, size_t begin, size_t len);
+char *striptrailingzero(float value, int precision);
+char *removespaces(const char *input);
+char *formatsize(const char *str);
+char *convertsize(const int size);
 
+const char *leafname(const char *path);
 
 #endif
 

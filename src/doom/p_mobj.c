@@ -45,6 +45,7 @@
 #include "sounds.h"
 #include "st_stuff.h"
 #include "v_trans.h"
+#include "wii-doom.h"
 #include "z_zone.h"
 
 
@@ -70,10 +71,8 @@ int                 iquehead;
 int                 iquetail;
 int                 puffcount;
 int                 r_blood = r_blood_default;
-int                 r_bloodsplats_max = r_bloodsplats_max_default;
 int                 r_bloodsplats_total;
 
-dboolean            correct_lost_soul_bounce;
 dboolean            water_hit;
 dboolean            hit_enemy;
 
@@ -790,7 +789,7 @@ floater:
                 if (d_splash)
                     P_HitFloor(mo);
 
-                if (mouselook && !demorecording && !demoplayback)
+                if (mouselook /*&& !demorecording && !demoplayback*/)
                 {
                     mo->player->centering = false;
                 }
@@ -1102,7 +1101,6 @@ mobj_t *P_SpawnMobj(fixed_t x, fixed_t y, fixed_t z, mobjtype_t type)
     mobjinfo_t  *info = &mobjinfo[type];
     sector_t    *sector;
     static int  prevx, prevy, prevz;
-    static int  prevbob;
 
     mobj->type = type;
     mobj->info = info;
@@ -1168,7 +1166,11 @@ mobj_t *P_SpawnMobj(fixed_t x, fixed_t y, fixed_t z, mobjtype_t type)
 
     // [BH] initialize bobbing powerups 
     if (float_items)
+    {
+        static int  prevbob;
+
         mobj->floatbob = prevbob = (x == prevx && y == prevy && z == prevz ? prevbob : P_Random());
+    }
 
     mobj->z = (z == ONFLOORZ ? mobj->floorz : (z == ONCEILINGZ ? mobj->ceilingz - mobj->height :
         z));
@@ -1227,15 +1229,18 @@ void P_RemoveMobj(mobj_t *mobj)
     // unlink from sector and block lists
     P_UnsetThingPosition(mobj);
     
+    // [crispy] removed map objects may finish their sounds
+    S_UnlinkSound(mobj);
+
+    // stop any playing sound
+    S_StopSound(mobj);
+
     // Delete all nodes on the current sector_list
     if (sector_list)
     {
         P_DelSeclist(sector_list);
         sector_list = NULL;
     }
-
-    // stop any playing sound
-    S_StopSound(mobj);
     
     mobj->flags |= (MF_NOSECTOR | MF_NOBLOCKMAP);
 
@@ -1446,6 +1451,7 @@ void P_SpawnPlayer(const mapthing_t *mthing)
     {
         // wake up the status bar
         ST_Start();
+
         // wake up the heads up text
         HU_Start();                
     }

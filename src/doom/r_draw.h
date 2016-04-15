@@ -100,15 +100,15 @@ void R_DrawBloodSplatColumn(void);
 void R_DrawSolidBloodSplatColumn(void);
 void R_DrawMegaSphereColumn(void);
 void R_DrawSolidMegaSphereColumn(void);
-void R_DrawChar(int x, int y, int scrn, int num);
-void R_VideoErase(unsigned int ofs, int count, int srcscrn, int destscrn);
+void R_DrawChar(int x, int y, int num);
+void R_VideoErase(unsigned int ofs, int count);
 void R_InitBuffer(int width, int height);
 
 // The Spectre / Invisibility effect.
 void R_DrawFuzzColumn(void);
 void R_DrawPausedFuzzColumn(void);
-void R_DrawFuzzColumns(int srcscrn, int destscrn);
-void R_DrawPausedFuzzColumns(int srcscrn, int destscrn);
+void R_DrawFuzzColumns(void);
+void R_DrawPausedFuzzColumns(void);
 
 // Draw with color translation tables,
 //  for player sprite rendering,
@@ -124,7 +124,7 @@ void R_DrawSpan(void);
 void R_InitTranslationTables(void);
 
 // Rendering function.
-void R_FillBackScreen(int srcscrn, int destscrn);
+void R_FillBackScreen(void);
 
 // If the view size is not full screen, draws a border around it.
 void R_DrawViewBorder(void);

@@ -53,7 +53,6 @@ int joyleft;
 int joyright;
 int joyup;
 int joydown;
-int usejoystick;
 
 
 void I_UpdateJoystick(void)

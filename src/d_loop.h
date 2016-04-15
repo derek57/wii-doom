@@ -78,7 +78,6 @@ void D_StartNetGame(net_gamesettings_t *settings,
 
 extern dboolean singletics;
 
-extern int      gametic;
 extern int      ticdup;
 
 

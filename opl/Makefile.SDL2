@@ -207,7 +207,7 @@ AUTOMAKE = ${SHELL} /home/user/TEST/chocolate-doom/autotools/missing automake-1.
 AWK = mawk
 CC = gcc
 CCDEPMODE = depmode=gcc3
-CFLAGS = -O2 -g -Wall -Wdeclaration-after-statement -Wredundant-decls  -D_REENTRANT -I/usr/local/include/SDL2 
+CFLAGS = -O2 -g -Wall -Wdeclaration-after-statement -Wredundant-decls  -I/usr/local/include/SDL2 -D_GNU_SOURCE=1 -D_REENTRANT
 CPP = gcc -E
 CPPFLAGS = 
 CYGPATH_W = echo
@@ -249,8 +249,8 @@ PATH_SEPARATOR = :
 PROGRAM_PREFIX = chocolate-
 RANLIB = ranlib
 SDLMIXER_LIBS =  -lSDL2_mixer
-#SDLNET_LIBS =  -lSDL2_net
-SDL_CFLAGS = -D_REENTRANT -I/usr/local/include/SDL2 
+SDLNET_LIBS =  -lSDL2_net
+SDL_CFLAGS = -I/usr/local/include/SDL2 -D_GNU_SOURCE=1 -D_REENTRANT
 SDL2_CONFIG = pkg-config sdl2
 SDL_LIBS = -L/usr/local/lib -Wl,-rpath,/usr/local/lib -lSDL2 
 SDLMIXER_CFLAGS = 
@@ -305,7 +305,7 @@ target_alias =
 top_build_prefix = ../
 top_builddir = ..
 top_srcdir = ..
-AM_CFLAGS = 
+AM_CFLAGS = -D_GNU_SOURCE=1 -D_REENTRANT
 SUBDIRS = . 
 noinst_LIBRARIES = libopl.a
 libopl_a_SOURCES = \

@@ -48,6 +48,46 @@
 #include "doomfeatures.h"
 #include "doomtype.h"
 
+// Number of mallocs & frees kept in history buffer (must be a power of 2)
+#define ZONE_HISTORY     4
+
+typedef struct memblock
+{
+#ifdef ZONEIDCHECK
+    unsigned id;
+#endif
+
+    struct memblock     *next;
+    struct memblock     *prev;
+    size_t              size;
+    void                **user;
+    unsigned char       tag;
+
+#ifdef INSTRUMENTED
+    const char          *file;
+    int                 line;
+#endif
+
+} memblock_t;
+
+enum
+{
+    malloc_history,
+    free_history,
+
+    NUM_HISTORY_TYPES
+};
+
+
+int               line_history[NUM_HISTORY_TYPES][ZONE_HISTORY];
+int               history_index[NUM_HISTORY_TYPES];
+const char        *file_history[NUM_HISTORY_TYPES][ZONE_HISTORY];
+
+static const char *const desc[NUM_HISTORY_TYPES] = 
+{
+    "malloc()'s",
+    "free()'s"
+};
 
 //
 // ZONE MEMORY
@@ -94,9 +134,9 @@ void (Z_Free)(void *ptr DA(const char *, int));
 void (Z_FreeTags)(int32_t lowtag, int32_t hightag DA(const char *, int));
 void (Z_ChangeTag)(void *ptr, int32_t tag DA(const char *, int));
 void Z_ChangeUser(void *ptr, void **user);
-void Z_DrawStats(void);
 void Z_DumpHistory(char *buf);
 void Z_DumpMemory(void);
+void Z_Init(void);
 
 
 #ifdef INSTRUMENTED

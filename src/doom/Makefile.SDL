@@ -109,7 +109,7 @@ am__objects_1 = am_map.$(OBJEXT) d_items.$(OBJEXT) d_main.$(OBJEXT) \
 	p_setup.$(OBJEXT) p_sight.$(OBJEXT) p_spec.$(OBJEXT) \
 	p_switch.$(OBJEXT) p_telept.$(OBJEXT) p_tick.$(OBJEXT) \
 	p_user.$(OBJEXT) r_bsp.$(OBJEXT) r_data.$(OBJEXT) \
-	r_draw.$(OBJEXT) r_main.$(OBJEXT) r_plane.$(OBJEXT) \
+	r_draw.$(OBJEXT) r_main.$(OBJEXT) r_patch.$(OBJEXT) r_plane.$(OBJEXT) \
 	r_segs.$(OBJEXT) r_sky.$(OBJEXT) r_things.$(OBJEXT) \
 	s_sound.$(OBJEXT) sc_man.$(OBJEXT) sounds.$(OBJEXT) statdump.$(OBJEXT) \
 	st_lib.$(OBJEXT) st_stuff.$(OBJEXT) wi_stuff.$(OBJEXT)
@@ -221,7 +221,7 @@ PATH_SEPARATOR = :
 PROGRAM_PREFIX = chocolate-
 RANLIB = ranlib
 SDLMIXER_LIBS =  -lSDL_mixer
-#SDLNET_LIBS =  -lSDL_net
+SDLNET_LIBS =  -lSDL_net
 SDL_CFLAGS = -I/usr/local/include/SDL -D_GNU_SOURCE=1 -D_REENTRANT
 SDL_CONFIG = /usr/local/bin/sdl-config
 SDL_LIBS = -L/usr/local/lib -Wl,-rpath,/usr/local/lib -lSDL -lpthread
@@ -284,7 +284,7 @@ am_map.c           am_map.h     \
                    d_englsh.h   \
 d_items.c          d_items.h    \
 d_main.c           d_main.h     \
-d_net.c                         \
+d_net.c            d_net.h      \
                    doomdata.h   \
                    doomdef.h    \
 doomstat.c         doomstat.h   \
@@ -328,6 +328,7 @@ r_data.c           r_data.h     \
 r_draw.c           r_draw.h     \
                    r_local.h    \
 r_main.c           r_main.h     \
+r_patch.c          r_patch.h    \
 r_plane.c          r_plane.h    \
 r_segs.c           r_segs.h     \
 r_sky.c            r_sky.h      \
@@ -410,6 +411,7 @@ include ./$(DEPDIR)/r_bsp.Po
 include ./$(DEPDIR)/r_data.Po
 include ./$(DEPDIR)/r_draw.Po
 include ./$(DEPDIR)/r_main.Po
+include ./$(DEPDIR)/r_patch.Po
 include ./$(DEPDIR)/r_plane.Po
 include ./$(DEPDIR)/r_segs.Po
 include ./$(DEPDIR)/r_sky.Po
@@ -422,6 +424,7 @@ include ./$(DEPDIR)/st_lib.Po
 include ./$(DEPDIR)/st_stuff.Po
 include ./$(DEPDIR)/statdump.Po
 include ./$(DEPDIR)/wi_stuff.Po
+#include ./$(DEPDIR)/wii-doom.Po
 
 .c.o:
 	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

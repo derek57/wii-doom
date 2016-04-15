@@ -35,6 +35,7 @@
 #include "v_patch.h"
 #include "v_video.h"
 #include "w_wad.h"
+#include "wii-doom.h"
 #include "z_zone.h"
 
 

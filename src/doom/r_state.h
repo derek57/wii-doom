@@ -101,7 +101,6 @@ extern line_t           *lines;
 
 extern side_t           *sides;
 
-extern int              numsprites;
 extern int              numvertexes;
 extern int              numsegs;
 extern int              numsectors;

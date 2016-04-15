@@ -45,8 +45,8 @@ static int OPL_Linux_Init(unsigned int port_base)
 
         if (errno == EPERM)
         {
-            C_Print(graystring, "        You may need to run the program as root in order");
-            C_Print(graystring, "        to acquire I/O port permissions for OPL MIDI playback.");
+            C_Warning("        You may need to run the program as root in order");
+            C_Warning("        to acquire I/O port permissions for OPL MIDI playback.");
         }
 
         return 0;

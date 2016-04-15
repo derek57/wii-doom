@@ -428,12 +428,12 @@
 #define HUSTR_PLRINDIGO                             "Indigo: "
 #define HUSTR_PLRBROWN                              "Brown: "
 #define HUSTR_PLRRED                                "Red: "
-/*
+
 #define HUSTR_KEYGREEN                              'g'
 #define HUSTR_KEYINDIGO                             'i'
 #define HUSTR_KEYBROWN                              'b'
 #define HUSTR_KEYRED                                'r'
-*/
+
 #define HUSTR_SECRETFOUND                           "A secret is revealed!"
 
 //

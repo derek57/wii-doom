@@ -63,15 +63,10 @@ int M_CheckParmWithArgs(char *check, int num_args)
 //
 // Returns true if the given parameter exists in the program's command
 // line arguments, false if not.
-//
-// [nitr8] UNUSED
-//
-/*
 dboolean M_ParmExists(char *check)
 {
     return M_CheckParm(check) != 0;
 }
-*/
 
 int M_CheckParm(char *check)
 {
@@ -96,11 +91,11 @@ static void LoadResponseFile(int argv_index)
 
     if (handle == NULL)
     {
-        printf ("\nNo such response file!");
+        printf ("\n No such response file!");
         exit(1);
     }
 
-    printf("Found response file %s!\n", response_filename);
+    printf(" Found response file %s!\n", response_filename);
 
     size = M_FileLength(handle);
 
@@ -237,10 +232,6 @@ void M_FindResponseFile(void)
 }
 
 // Return the name of the executable used to start the program:
-//
-// [nitr8] UNUSED
-//
-/*
 char *M_GetExecutableName(void)
 {
     char *sep;
@@ -256,6 +247,6 @@ char *M_GetExecutableName(void)
         return sep + 1;
     }
 }
-*/
+
 #endif
 

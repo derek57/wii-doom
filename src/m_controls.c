@@ -33,6 +33,7 @@
 #include "doom/s_sound.h"
 
 #include "v_video.h"
+#include "wii-doom.h"
 
 
 // FOR PSP: THESE ARE RESERVED AS SPECIAL KEYS
@@ -93,7 +94,7 @@ int key_menu_gamma     = KEY_F11;
 
 int key_menu_incscreen = KEY_EQUALS;
 int key_menu_decscreen = KEY_MINUS;
-int key_menu_screenshot = KEY_F12;
+int key_menu_screenshot = 0;
 int key_menu_screenshot_beta = KEY_F11;
 
 int key_console = KEY_TILDE;
@@ -132,19 +133,18 @@ int mousebaiming = -1;
 // Joystick controls
 int joybstrafeleft = -1;
 int joybstraferight = -1;
+int joybprevweapon = -1;
 
+#ifndef WII
+int joybmenu = -1;
+#endif
+
+// Multiplayer chat keys:
+int key_multi_msg = 't';
+int key_multi_msgplayer[8];
+int key_message_refresh = KEY_ENTER;
 
 // Bind all of the common controls used by Doom and all other games.
-extern dboolean aiming_help;
-
-extern int runcount;
-extern int png_screenshots;
-extern int pixelwidth;
-extern int pixelheight;
-extern int r_bloodsplats_max;
-extern int correct_lost_soul_bounce;
-extern int window_pos_x;
-extern int window_pos_y;
 
 extern int joy_up;
 extern int joy_down;
@@ -167,204 +167,205 @@ extern int joy_2;
 
 void M_BindBaseControls(void)
 {
-    M_BindVariable("sfx_volume",               &sfxVolume);
-    M_BindVariable("music_volume",             &musicVolume);
-    M_BindVariable("screensize",               &screenblocks);
-    M_BindVariable("walking_speed",            &forwardmove);
-    M_BindVariable("turning_speed",            &turnspeed);
-    M_BindVariable("strafing_speed",           &sidemove);
-    M_BindVariable("freelook_speed",           &mspeed);
-    M_BindVariable("use_gamma",                &usegamma);
-    M_BindVariable("mouse_look",               &mouselook);
-    M_BindVariable("map_grid",                 &drawgrid);
-    M_BindVariable("follow_player",            &followplayer);
-    M_BindVariable("showstats",                &show_stats);
-    M_BindVariable("show_messages",            &showMessages);
-    M_BindVariable("map_rotate",               &am_rotate);
-    M_BindVariable("detail",                   &detailLevel);
-    M_BindVariable("vanilla_weapon_change",    &use_vanilla_weapon_change);
-    M_BindVariable("xhair",                    &crosshair);
-    M_BindVariable("jump",                     &jumping);
-    M_BindVariable("music_engine",             &mus_engine);
-    M_BindVariable("recoil",                   &d_recoil);
-    M_BindVariable("monsters_respawn",         &start_respawnparm);
-    M_BindVariable("fast_monsters",            &start_fastparm);
-    M_BindVariable("auto_aim",                 &autoaim);
-    M_BindVariable("max_gore",                 &d_maxgore);
-    M_BindVariable("extra_hud",                &hud);
-    M_BindVariable("switch_chans",             &opl_stereo_correct);
-    M_BindVariable("player_thrust",            &d_thrust);
-    M_BindVariable("run_count",                &runcount);
-    M_BindVariable("footsteps",                &d_footstep);
-    M_BindVariable("footclip",                 &d_footclip);
-    M_BindVariable("splash",                   &d_splash);
-    M_BindVariable("swirl",                    &d_swirl);
+    M_BindIntVariable("sfx_volume",                   &sfxVolume);
+    M_BindIntVariable("music_volume",                 &musicVolume);
+    M_BindIntVariable("screensize",                   &screenblocks);
+    M_BindIntVariable("walking_speed",                &forwardmove);
+    M_BindIntVariable("turning_speed",                &turnspeed);
+    M_BindIntVariable("strafing_speed",               &sidemove);
+    M_BindIntVariable("freelook_speed",               &mspeed);
+    M_BindIntVariable("use_gamma",                    &usegamma);
+    M_BindIntVariable("mouse_look",                   &mouselook);
+    M_BindBooleanVariable("map_grid",                 &drawgrid);
+    M_BindBooleanVariable("follow_player",            &followplayer);
+    M_BindBooleanVariable("showstats",                &show_stats);
+    M_BindBooleanVariable("show_messages",            &showMessages);
+    M_BindBooleanVariable("map_rotate",               &am_rotate);
+    M_BindBooleanVariable("detail",                   &detailLevel);
+    M_BindBooleanVariable("vanilla_weapon_change",    &use_vanilla_weapon_change);
+    M_BindBooleanVariable("xhair",                    &crosshair);
+    M_BindBooleanVariable("jump",                     &jumping);
+    M_BindIntVariable("music_engine",                 &mus_engine);
+    M_BindBooleanVariable("recoil",                   &d_recoil);
+    M_BindBooleanVariable("monsters_respawn",         &start_respawnparm);
+    M_BindBooleanVariable("fast_monsters",            &start_fastparm);
+    M_BindBooleanVariable("auto_aim",                 &autoaim);
+    M_BindBooleanVariable("max_gore",                 &d_maxgore);
+    M_BindBooleanVariable("extra_hud",                &hud);
+    M_BindBooleanVariable("switch_chans",             &opl_stereo_correct);
+    M_BindBooleanVariable("player_thrust",            &d_thrust);
+    M_BindIntVariable("run_count",                    &runcount);
+    M_BindBooleanVariable("footsteps",                &d_footstep);
+    M_BindBooleanVariable("footclip",                 &d_footclip);
+    M_BindBooleanVariable("splash",                   &d_splash);
+    M_BindBooleanVariable("swirl",                    &d_swirl);
 
 #ifdef WII
-    M_BindVariable("pr_beta",                  &beta_style_mode);
+    M_BindBooleanVariable("pr_beta",                  &beta_style_mode);
 #endif
 
-    M_BindVariable("translucency",             &d_translucency);
-    M_BindVariable("colored_blood",            &d_colblood);
-    M_BindVariable("fixed_blood",              &d_colblood2);
-    M_BindVariable("mirrored_corpses",         &d_flipcorpses);
-    M_BindVariable("show_secrets",             &d_secrets);
-    M_BindVariable("uncapped_framerate",       &d_uncappedframerate);
-    M_BindVariable("opltype",                  &opl_type);
-    M_BindVariable("trails",                   &smoketrails);
-    M_BindVariable("chaingun_speed",           &chaingun_tics);
-    M_BindVariable("sound_type",               &snd_module);
-    M_BindVariable("sound_chans",              &sound_channels);
-    M_BindVariable("hom_detector",             &autodetect_hom);
-    M_BindVariable("falling_damage",           &d_fallingdamage);
-    M_BindVariable("infinite_ammo",            &d_infiniteammo);
-    M_BindVariable("no_monsters",              &not_monsters);
-    M_BindVariable("screenwipe_type",          &wipe_type);
-    M_BindVariable("automap_overlay",          &overlay_trigger);
-    M_BindVariable("show_timer",               &timer_info);
-    M_BindVariable("replace",                  &replace_missing);
-    M_BindVariable("goreamount",               &gore_amount);
-    M_BindVariable("random_pitch",             &randompitch);
-    M_BindVariable("telefrag",                 &d_telefrag);
-    M_BindVariable("doorstuck",                &d_doorstuck);
-    M_BindVariable("resurrect_ghosts",         &d_resurrectghosts);
-    M_BindVariable("limited_ghosts",           &d_limitedghosts);
-    M_BindVariable("block_skulls",             &d_blockskulls);
-    M_BindVariable("blazing_sound",            &d_blazingsound);
-    M_BindVariable("god",                      &d_god);
-    M_BindVariable("floors",                   &d_floors);
-    M_BindVariable("model",                    &d_model);
-    M_BindVariable("hell",                     &d_666);
-    M_BindVariable("masked_anim",              &d_maskedanim);
-    M_BindVariable("sound",                    &d_sound);
-    M_BindVariable("ouchface",                 &d_ouchface);
-    M_BindVariable("authors",                  &show_authors);
-    M_BindVariable("png_screenshot",           &png_screenshots);
-    M_BindVariable("menu_type",                &background_type);
-    M_BindVariable("menu_shadow",              &font_shadow);
-    M_BindVariable("shadows",                  &d_shadows);
-    M_BindVariable("offsets",                  &d_fixspriteoffsets);
-    M_BindVariable("pixel_width",              &pixelwidth);
-    M_BindVariable("pixel_height",             &pixelheight);
-    M_BindVariable("brightmaps",               &d_brightmaps);
-    M_BindVariable("screenwidth",              &screen_width);
-    M_BindVariable("screenheight",             &screen_height);
-    M_BindVariable("fixmaperrors",             &d_fixmaperrors);
-    M_BindVariable("altlighting",              &d_altlighting);
-    M_BindVariable("infighting",               &allow_infighting);
-    M_BindVariable("lastenemy",                &last_enemy);
-    M_BindVariable("floatitems",               &float_items);
-    M_BindVariable("animate_dropping",         &animated_drop);
-    M_BindVariable("crushing_sound",           &crush_sound);
-    M_BindVariable("no_noise",                 &disable_noise);
-    M_BindVariable("nudge_corpses",            &corpses_nudge);
-    M_BindVariable("slide_corpses",            &corpses_slide);
-    M_BindVariable("smearblood_corpses",       &corpses_smearblood);
-    M_BindVariable("diskicon",                 &show_diskicon);
-    M_BindVariable("samplerate",               &use_libsamplerate);
-    M_BindVariable("mouse_walk",               &mousewalk);
-    M_BindVariable("generalsound",             &general_sound);
-    M_BindVariable("icon_type",                &icontype);
-    M_BindVariable("colored_player_corpses",   &randomly_colored_playercorpses);
-    M_BindVariable("endoom_screen",            &show_endoom);
-    M_BindVariable("low_health",               &lowhealth);
-    M_BindVariable("wiggle_fix",               &d_fixwiggle);
-    M_BindVariable("mouse_sensitivity",        &mouseSensitivity);
-    M_BindVariable("slime_trails",             &remove_slime_trails);
-    M_BindVariable("max_bloodsplats",          &r_bloodsplats_max);
-    M_BindVariable("center_weapon",            &d_centerweapon);
-    M_BindVariable("eject_casings",            &d_ejectcasings);
-    M_BindVariable("status_map",               &d_statusmap);
-    M_BindVariable("show_maptitle",            &show_title);
-    M_BindVariable("rendermode",               &render_mode);
-    M_BindVariable("particles",                &d_drawparticles);
-    M_BindVariable("bloodparticles",           &bloodsplat_particle);
-    M_BindVariable("bulletparticles",          &bulletpuff_particle);
-    M_BindVariable("bfgcloud",                 &d_drawbfgcloud);
-    M_BindVariable("rockettrails",             &d_drawrockettrails);
-    M_BindVariable("rocketexplosions",         &d_drawrocketexplosions);
-    M_BindVariable("bfgexplosions",            &d_drawbfgexplosions);
-    M_BindVariable("tele_particle",            &teleport_particle);
-    M_BindVariable("spawn_flies",              &d_spawnflies);
-    M_BindVariable("drip_blood",               &d_dripblood);
-    M_BindVariable("vsync",                    &d_vsync);
-    M_BindVariable("aimhelp",                  &aiming_help);
-    M_BindVariable("particle_sound",           &particle_sounds);
-    M_BindVariable("spawn_teleport_glitter",   &d_spawnteleglit);
-    M_BindVariable("lost_soul_bounce",         &correct_lost_soul_bounce);
-    M_BindVariable("window_position_x",        &window_pos_x);
-    M_BindVariable("window_position_y",        &window_pos_y);
-    M_BindVariable("map_color_background",     &mapcolor_back);
-    M_BindVariable("map_color_grid",           &mapcolor_grid);
-    M_BindVariable("map_color_wall",           &mapcolor_wall);
-    M_BindVariable("map_color_floorchange",    &mapcolor_fchg);
-    M_BindVariable("map_color_ceilingchange",  &mapcolor_cchg);
-    M_BindVariable("map_color_ceilingatfloor", &mapcolor_clsd);
-    M_BindVariable("map_color_redkey",         &mapcolor_rkey);
-    M_BindVariable("map_color_bluekey",        &mapcolor_bkey);
-    M_BindVariable("map_color_yellowkey",      &mapcolor_ykey);
-    M_BindVariable("map_color_reddoor",        &mapcolor_rdor);
-    M_BindVariable("map_color_bluedoor",       &mapcolor_bdor);
-    M_BindVariable("map_color_yellowdoor",     &mapcolor_ydor);
-    M_BindVariable("map_color_teleport",       &mapcolor_tele);
-    M_BindVariable("map_color_secret",         &mapcolor_secr);
-    M_BindVariable("map_color_exit",           &mapcolor_exit);
-    M_BindVariable("map_color_unseen",         &mapcolor_unsn);
-    M_BindVariable("map_color_flat",           &mapcolor_flat);
-    M_BindVariable("map_color_sprite",         &mapcolor_sprt);
-    M_BindVariable("map_color_item",           &mapcolor_item);
-    M_BindVariable("map_color_enemy",          &mapcolor_enemy);
-    M_BindVariable("map_color_crosshair",      &mapcolor_hair);
-    M_BindVariable("map_color_single",         &mapcolor_sngl);
-    M_BindVariable("map_color_player",         &mapcolor_plyr);
-    M_BindVariable("map_gridsize",             &map_grid_size);
-    M_BindVariable("map_secrets_after",        &map_secret_after);
-    M_BindVariable("use_autosave",             &enable_autosave);
-    M_BindVariable("draw_splash",              &drawsplash);
-    M_BindVariable("menu_back",                &background_color);
-    M_BindVariable("precache_level",           &precache);
-    M_BindVariable("still_bob",                &stillbob);
-    M_BindVariable("move_bob",                 &movebob);
-    M_BindVariable("flip_levels",              &d_fliplevels);
-    M_BindVariable("use_autoload",             &enable_autoload);
-    M_BindVariable("random_music",             &s_randommusic);
-    M_BindVariable("slow_water",               &slowwater);
+    M_BindBooleanVariable("translucency",             &d_translucency);
+    M_BindBooleanVariable("colored_blood",            &d_colblood);
+    M_BindBooleanVariable("fixed_blood",              &d_colblood2);
+    M_BindBooleanVariable("mirrored_corpses",         &d_flipcorpses);
+    M_BindBooleanVariable("show_secrets",             &d_secrets);
+    M_BindIntVariable("uncapped_framerate",           &d_uncappedframerate);
+    M_BindBooleanVariable("opltype",                  &opl_type);
+    M_BindBooleanVariable("trails",                   &smoketrails);
+    M_BindIntVariable("chaingun_speed",               &chaingun_tics);
+    M_BindBooleanVariable("sound_type",               &snd_module);
+    M_BindIntVariable("sound_chans",                  &sound_channels);
+    M_BindBooleanVariable("hom_detector",             &autodetect_hom);
+    M_BindBooleanVariable("falling_damage",           &d_fallingdamage);
+    M_BindBooleanVariable("infinite_ammo",            &d_infiniteammo);
+    M_BindBooleanVariable("no_monsters",              &not_monsters);
+    M_BindIntVariable("screenwipe_type",              &wipe_type);
+    M_BindBooleanVariable("automap_overlay",          &overlay_trigger);
+    M_BindBooleanVariable("show_timer",               &timer_info);
+    M_BindBooleanVariable("replace",                  &replace_missing);
+    M_BindIntVariable("goreamount",                   &gore_amount);
+    M_BindBooleanVariable("random_pitch",             &randompitch);
+    M_BindBooleanVariable("telefrag",                 &d_telefrag);
+    M_BindBooleanVariable("doorstuck",                &d_doorstuck);
+    M_BindBooleanVariable("resurrect_ghosts",         &d_resurrectghosts);
+    M_BindBooleanVariable("limited_ghosts",           &d_limitedghosts);
+    M_BindBooleanVariable("block_skulls",             &d_blockskulls);
+    M_BindBooleanVariable("blazing_sound",            &d_blazingsound);
+    M_BindBooleanVariable("god",                      &d_god);
+    M_BindBooleanVariable("floors",                   &d_floors);
+    M_BindBooleanVariable("model",                    &d_model);
+    M_BindBooleanVariable("hell",                     &d_666);
+    M_BindBooleanVariable("masked_anim",              &d_maskedanim);
+    M_BindBooleanVariable("sound",                    &d_sound);
+    M_BindBooleanVariable("ouchface",                 &d_ouchface);
+    M_BindBooleanVariable("authors",                  &show_authors);
+    M_BindBooleanVariable("png_screenshot",           &png_screenshots);
+    M_BindIntVariable("menu_type",                    &background_type);
+    M_BindIntVariable("menu_shadow",                  &font_shadow);
+    M_BindBooleanVariable("shadows",                  &d_shadows);
+    M_BindBooleanVariable("offsets",                  &d_fixspriteoffsets);
+    M_BindIntVariable("pixel_width",                  &pixelwidth);
+    M_BindIntVariable("pixel_height",                 &pixelheight);
+    M_BindBooleanVariable("brightmaps",               &d_brightmaps);
+    M_BindIntVariable("screenwidth",                  &screen_width);
+    M_BindIntVariable("screenheight",                 &screen_height);
+    M_BindBooleanVariable("fixmaperrors",             &d_fixmaperrors);
+    M_BindBooleanVariable("altlighting",              &d_altlighting);
+    M_BindBooleanVariable("infighting",               &allow_infighting);
+    M_BindBooleanVariable("lastenemy",                &last_enemy);
+    M_BindBooleanVariable("floatitems",               &float_items);
+    M_BindBooleanVariable("animate_dropping",         &animated_drop);
+    M_BindBooleanVariable("crushing_sound",           &crush_sound);
+    M_BindBooleanVariable("no_noise",                 &disable_noise);
+    M_BindBooleanVariable("nudge_corpses",            &corpses_nudge);
+    M_BindBooleanVariable("slide_corpses",            &corpses_slide);
+    M_BindBooleanVariable("smearblood_corpses",       &corpses_smearblood);
+    M_BindBooleanVariable("diskicon",                 &show_diskicon);
+    M_BindIntVariable("samplerate",                   &use_libsamplerate);
+    M_BindBooleanVariable("mouse_walk",               &mousewalk);
+    M_BindBooleanVariable("generalsound",             &general_sound);
+    M_BindBooleanVariable("icon_type",                &icontype);
+    M_BindBooleanVariable("colored_player_corpses",   &randomly_colored_playercorpses);
+    M_BindBooleanVariable("endoom_screen",            &show_endoom);
+    M_BindBooleanVariable("low_health",               &lowhealth);
+    M_BindBooleanVariable("wiggle_fix",               &d_fixwiggle);
+    M_BindIntVariable("mouse_sensitivity",            &mouseSensitivity);
+    M_BindBooleanVariable("slime_trails",             &remove_slime_trails);
+    M_BindIntVariable("max_bloodsplats",              &r_bloodsplats_max);
+    M_BindBooleanVariable("center_weapon",            &d_centerweapon);
+    M_BindBooleanVariable("eject_casings",            &d_ejectcasings);
+    M_BindBooleanVariable("status_map",               &d_statusmap);
+    M_BindBooleanVariable("show_maptitle",            &show_title);
+    M_BindBooleanVariable("rendermode",               &render_mode);
+    M_BindBooleanVariable("particles",                &d_drawparticles);
+    M_BindIntVariable("bloodparticles",               &bloodsplat_particle);
+    M_BindIntVariable("bulletparticles",              &bulletpuff_particle);
+    M_BindBooleanVariable("bfgcloud",                 &d_drawbfgcloud);
+    M_BindBooleanVariable("rockettrails",             &d_drawrockettrails);
+    M_BindBooleanVariable("rocketexplosions",         &d_drawrocketexplosions);
+    M_BindBooleanVariable("bfgexplosions",            &d_drawbfgexplosions);
+    M_BindIntVariable("tele_particle",                &teleport_particle);
+    M_BindBooleanVariable("spawn_flies",              &d_spawnflies);
+    M_BindBooleanVariable("drip_blood",               &d_dripblood);
+    M_BindBooleanVariable("vsync",                    &d_vsync);
+    M_BindBooleanVariable("aimhelp",                  &aiming_help);
+    M_BindBooleanVariable("particle_sound",           &particle_sounds);
+    M_BindIntVariable("spawn_teleport_glitter",       &d_spawnteleglit);
+    M_BindBooleanVariable("lost_soul_bounce",         &correct_lost_soul_bounce);
+    M_BindIntVariable("window_position_x",            &window_pos_x);
+    M_BindIntVariable("window_position_y",            &window_pos_y);
+    M_BindIntVariable("map_color_background",         &mapcolor_back);
+    M_BindIntVariable("map_color_grid",               &mapcolor_grid);
+    M_BindIntVariable("map_color_wall",               &mapcolor_wall);
+    M_BindIntVariable("map_color_floorchange",        &mapcolor_fchg);
+    M_BindIntVariable("map_color_ceilingchange",      &mapcolor_cchg);
+    M_BindIntVariable("map_color_ceilingatfloor",     &mapcolor_clsd);
+    M_BindIntVariable("map_color_redkey",             &mapcolor_rkey);
+    M_BindIntVariable("map_color_bluekey",            &mapcolor_bkey);
+    M_BindIntVariable("map_color_yellowkey",          &mapcolor_ykey);
+    M_BindIntVariable("map_color_reddoor",            &mapcolor_rdor);
+    M_BindIntVariable("map_color_bluedoor",           &mapcolor_bdor);
+    M_BindIntVariable("map_color_yellowdoor",         &mapcolor_ydor);
+    M_BindIntVariable("map_color_teleport",           &mapcolor_tele);
+    M_BindIntVariable("map_color_secret",             &mapcolor_secr);
+    M_BindIntVariable("map_color_exit",               &mapcolor_exit);
+    M_BindIntVariable("map_color_unseen",             &mapcolor_unsn);
+    M_BindIntVariable("map_color_flat",               &mapcolor_flat);
+    M_BindIntVariable("map_color_sprite",             &mapcolor_sprt);
+    M_BindIntVariable("map_color_item",               &mapcolor_item);
+    M_BindIntVariable("map_color_enemy",              &mapcolor_enemy);
+    M_BindIntVariable("map_color_crosshair",          &mapcolor_hair);
+    M_BindIntVariable("map_color_single",             &mapcolor_sngl);
+    M_BindIntVariable("map_color_player",             &mapcolor_plyr[consoleplayer]);
+    M_BindIntVariable("map_gridsize",                 &map_grid_size);
+    M_BindBooleanVariable("map_secrets_after",        &map_secret_after);
+    M_BindBooleanVariable("use_autosave",             &enable_autosave);
+    M_BindBooleanVariable("draw_splash",              &drawsplash);
+    M_BindIntVariable("menu_back",                    &background_color);
+    M_BindBooleanVariable("precache_level",           &precache);
+    M_BindIntVariable("still_bob",                    &stillbob);
+    M_BindIntVariable("move_bob",                     &movebob);
+    M_BindBooleanVariable("flip_levels",              &d_fliplevels);
+    M_BindBooleanVariable("use_autoload",             &enable_autoload);
+    M_BindBooleanVariable("random_music",             &s_randommusic);
+
+    M_BindFloatVariable("samplerate_scale",           &libsamplerate_scale);
 
 #ifdef WII
 
-    M_BindVariable("key_shoot",                &joy_r);
-    M_BindVariable("key_open",                 &joy_l);
-    M_BindVariable("key_menu",                 &joy_minus);
-    M_BindVariable("key_weapon_left",          &joy_left);
-    M_BindVariable("key_automap",              &joy_down);
-    M_BindVariable("key_weapon_right",         &joy_right);
-    M_BindVariable("key_automap_zoom_in",      &joy_zl);
-    M_BindVariable("key_automap_zoom_out",     &joy_zr);
-    M_BindVariable("key_flyup",                &joy_a);
-    M_BindVariable("key_flydown",              &joy_y);
-    M_BindVariable("key_jump",                 &joy_b);
-    M_BindVariable("key_run",                  &joy_1);
-    M_BindVariable("key_console",              &joy_2);
-    M_BindVariable("key_screenshots",          &joy_x);
+    M_BindIntVariable("key_shoot",                    &joy_r);
+    M_BindIntVariable("key_open",                     &joy_l);
+    M_BindIntVariable("key_menu",                     &joy_minus);
+    M_BindIntVariable("key_weapon_left",              &joy_left);
+    M_BindIntVariable("key_automap",                  &joy_down);
+    M_BindIntVariable("key_weapon_right",             &joy_right);
+    M_BindIntVariable("key_automap_zoom_in",          &joy_zl);
+    M_BindIntVariable("key_automap_zoom_out",         &joy_zr);
+    M_BindIntVariable("key_flyup",                    &joy_a);
+    M_BindIntVariable("key_flydown",                  &joy_y);
+    M_BindIntVariable("key_jump",                     &joy_b);
+    M_BindIntVariable("key_run",                      &joy_1);
+    M_BindIntVariable("key_console",                  &joy_2);
+    M_BindIntVariable("key_screenshots",              &joy_x);
 
 #else
 
-    M_BindVariable("key_shoot",                &key_fire);
-    M_BindVariable("key_open",                 &key_use);
-    M_BindVariable("key_menu",                 &key_menu_activate);
-    M_BindVariable("key_weapon_left",          &key_prevweapon);
-    M_BindVariable("key_automap",              &key_map_toggle);
-    M_BindVariable("key_weapon_right",         &key_nextweapon);
-    M_BindVariable("key_automap_zoom_in",      &key_map_zoomin);
-    M_BindVariable("key_automap_zoom_out",     &key_map_zoomout);
-    M_BindVariable("key_flyup",                &key_flyup);
-    M_BindVariable("key_flydown",              &key_flydown);
-    M_BindVariable("key_jump",                 &key_jump);
-    M_BindVariable("key_run",                  &key_speed);
-    M_BindVariable("key_console",              &key_console);
-    M_BindVariable("key_screenshots",          &key_menu_screenshot);
-    M_BindVariable("key_strafe_left",          &key_strafeleft);
-    M_BindVariable("key_strafe_right",         &key_straferight);
+    M_BindIntVariable("key_shoot",                    &key_fire);
+    M_BindIntVariable("key_open",                     &key_use);
+    M_BindIntVariable("key_menu",                     &key_menu_activate);
+    M_BindIntVariable("key_weapon_left",              &key_prevweapon);
+    M_BindIntVariable("key_automap",                  &key_map_toggle);
+    M_BindIntVariable("key_weapon_right",             &key_nextweapon);
+    M_BindIntVariable("key_automap_zoom_in",          &key_map_zoomin);
+    M_BindIntVariable("key_automap_zoom_out",         &key_map_zoomout);
+    M_BindIntVariable("key_flyup",                    &key_flyup);
+    M_BindIntVariable("key_flydown",                  &key_flydown);
+    M_BindIntVariable("key_jump",                     &key_jump);
+    M_BindIntVariable("key_run",                      &key_speed);
+    M_BindIntVariable("key_console",                  &key_console);
+    M_BindIntVariable("key_screenshots",              &key_menu_screenshot);
+    M_BindIntVariable("key_strafe_left",              &key_strafeleft);
+    M_BindIntVariable("key_strafe_right",             &key_straferight);
 
 #endif
 }
@@ -381,4 +382,18 @@ void M_ApplyPlatformDefaults(void)
     // no-op. Add your platform-specific patches here.
 }
 */
+
+void M_BindChatControls(unsigned int num_players)
+{
+    char name[32];  // haleyjd: 20 not large enough - Thank you, come again!
+    unsigned int i; // haleyjd: signedness conflict
+
+    M_BindIntVariable("key_multi_msg",     &key_multi_msg);
+
+    for (i=0; i<num_players; ++i)
+    {
+        M_snprintf(name, sizeof(name), "key_multi_msgplayer%i", i + 1);
+        M_BindIntVariable(name, &key_multi_msgplayer[i]);
+    }
+}
 

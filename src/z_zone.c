@@ -49,11 +49,9 @@
 
 #include "v_trans.h"
 #include "w_wad.h"
+#include "wii-doom.h"
 #include "z_zone.h"
 
-
-// Number of mallocs & frees kept in history buffer (must be a power of 2)
-#define ZONE_HISTORY    4
 
 // Minimum chunk size at which blocks are allocated
 #define CHUNK_SIZE      32
@@ -62,52 +60,14 @@
 #define ZONEID          0x931d4a11
 
 
-typedef struct memblock
-{
-#ifdef ZONEIDCHECK
-    unsigned id;
-#endif
-
-    struct memblock     *next;
-    struct memblock     *prev;
-    size_t              size;
-    void                **user;
-    unsigned char       tag;
-
-#ifdef INSTRUMENTED
-    const char          *file;
-    int                 line;
-#endif
-
-} memblock_t;
-
-enum
-{
-    malloc_history,
-    free_history,
-
-    NUM_HISTORY_TYPES
-};
-
-
-static const char        *file_history[NUM_HISTORY_TYPES][ZONE_HISTORY];
-
-static const char *const desc[NUM_HISTORY_TYPES] = 
-{
-    "malloc()'s",
-    "free()'s"
-};
-
 // size of block header
 // cph - base on sizeof(memblock_t), which can be larger than CHUNK_SIZE on
 // 64bit architectures
 static const size_t      HEADER_SIZE = (sizeof(memblock_t) + CHUNK_SIZE - 1) & ~(CHUNK_SIZE - 1);
 
-static int               line_history[NUM_HISTORY_TYPES][ZONE_HISTORY];
-static int               history_index[NUM_HISTORY_TYPES];
-static int               free_memory;
-static int               active_memory;
-static int               purgable_memory;
+int                      free_memory;
+int                      active_memory;
+int                      purgable_memory;
 
 static memblock_t        *blockbytag[PU_MAX];
 
@@ -195,29 +155,13 @@ void Z_DumpMemory(void)
 }
 #endif
 
-void Z_DumpHistory(char *buf)
+//
+// Z_Init
+//
+void Z_Init(void)
 {
-    int i, j;
-    char s[1024];
-
-    strcat(buf, "\n");
-
-    for (i = 0; i < NUM_HISTORY_TYPES; i++)
-    {
-        sprintf(s, "\nLast several %s:\n\n", desc[i]);
-        strcat(buf, s);
-
-        for (j = 0; j < ZONE_HISTORY; j++)
-        {
-            int k = (history_index[i] - j - 1) & (ZONE_HISTORY - 1);
-
-            if (file_history[i][k])
-            {
-                sprintf(s, "File: %s, Line: %d\n", file_history[i][k], line_history[i][k]);
-                strcat(buf, s);
-            }
-        }
-    }
+    memset(blockbytag, 0, sizeof(blockbytag));
+    printf("zone memory: Using native C allocator.\n");
 }
 
 //
@@ -522,6 +466,7 @@ void (Z_ChangeTag)(void *ptr, int32_t tag
 
     block->tag = tag;
 }
+
 /*
 //
 // [nitr8] UNUSED
@@ -536,41 +481,6 @@ void Z_ChangeUser(void *ptr, void **user)
     *user = ptr;
 }
 */
-
-// Print allocation statistics
-void Z_DrawStats(void)
-{
-    char act_mem[50];
-    char pur_mem[50];
-    char free_mem[50];
-    char tot_mem[50];
-
-    double s;
-
-    unsigned long total_memory;
-
-    if (gamestate != GS_LEVEL)
-        return;
-
-    total_memory = (DEFAULT_RAM * 1024 * 1024);
-
-    s = 100.0 / total_memory;
-
-    free_memory = total_memory - active_memory - purgable_memory;
-
-    sprintf(act_mem, "%-5i\t%6.01f%%\tstatic\n", active_memory, active_memory * s);
-    sprintf(pur_mem, "%-5i\t%6.01f%%\tpurgable\n", purgable_memory, purgable_memory * s);
-    sprintf(free_mem, "%-5i\t%6.01f%%\tfree\n", free_memory, free_memory * s);
-    sprintf(tot_mem, "%-5lu\t\ttotal\n", total_memory);
-
-    if (leveltime & 16)
-        M_WriteText(0, 10, "Memory Heap Info\n");
-
-    M_WriteText(0, 20, act_mem);
-    M_WriteText(0, 30, pur_mem);
-    M_WriteText(0, 40, free_mem);
-    M_WriteText(0, 60, tot_mem);
-}
 
 //
 // [nitr8] UNUSED

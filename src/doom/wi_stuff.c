@@ -49,6 +49,7 @@
 
 #include "w_wad.h"
 #include "wi_stuff.h"
+#include "wii-doom.h"
 #include "z_zone.h"
 
 
@@ -410,10 +411,10 @@ static patch_t                 **lnames;
 // Buffer storing the backdrop
 static patch_t                 *background;
 
-static dboolean                 snl_pointeron;
+static dboolean                snl_pointeron;
 
-extern dboolean                 secretexit;
-extern dboolean                 opl;
+extern dboolean                secretexit;
+extern dboolean                opl;
 
 
 //

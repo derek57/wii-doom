@@ -277,7 +277,8 @@ typedef enum
     DEFAULT_INT_HEX,
     DEFAULT_STRING,
     DEFAULT_FLOAT,
-    DEFAULT_KEY
+    DEFAULT_KEY,
+    DEFAULT_BOOLEAN
 
 } default_type_t;
 
@@ -287,7 +288,12 @@ typedef struct
     char           *name;
 
     // Pointer to the location in memory of the variable
-    int            *location;
+    union {
+        int *i;
+        char **s;
+        float *f;
+        dboolean *b;
+    } location;
 
     // Type of the variable
     default_type_t type;
@@ -472,108 +478,6 @@ typedef enum
     
 } powertype_t;
 
-// The "mission" controls what game we are playing.
-typedef enum
-{
-    // Doom 1
-    doom,
-
-    // Doom 2
-    doom2,
-
-    // Final Doom: TNT: Evilution
-    pack_tnt,
-
-    // Final Doom: The Plutonia Experiment
-    pack_plut,
-
-    // Chex Quest (modded doom)
-    pack_chex,
-
-    // Hacx (modded doom2)
-    pack_hacx,
-
-    // Doom 2: No Rest For The Living
-    pack_nerve,
-
-    // Master Levels for Doom 2
-    pack_master,
-
-    none
-
-} GameMission_t;
-
-// The "mode" allows more accurate specification of the game mode we are
-// in: eg. shareware vs. registered.  So doom1.wad and doom.wad are the
-// same mission, but a different mode.
-typedef enum
-{
-    // Doom/Heretic shareware
-    shareware,
-
-    // Doom/Heretic registered
-    registered,
-
-    // Doom II/Hexen
-    commercial,
-
-    // Ultimate Doom
-    retail,
-
-    // Unknown.
-    indetermined
-
-} GameMode_t;
-
-// What version are we emulating?
-typedef enum
-{
-    // Doom 1.2: shareware and registered
-    exe_doom_1_2,
-
-    // Doom 1.666: for shareware, registered and commercial
-    exe_doom_1_666,
-
-    // Doom 1.7/1.7a: "
-    exe_doom_1_7,
-
-    // Doom 1.8: "
-    exe_doom_1_8,
-
-    // Doom 1.9: "
-    exe_doom_1_9,
-
-    // Hacx
-    exe_hacx,
-
-    // Ultimate Doom (retail)
-    exe_ultimate,
-
-    // Final Doom
-    exe_final,
-
-    // Final Doom (alternate exe)
-    exe_final2,
-
-    // Chex Quest executable (based on Final Doom)
-    exe_chex
-
-} GameVersion_t;
-
-// Skill level.
-typedef enum
-{
-    // the "-skill 0" hack
-    sk_noitems = -1,
-
-    sk_baby = 0,
-    sk_easy,
-    sk_medium,
-    sk_hard,
-    sk_nightmare
-
-} skill_t;
-
 //
 // Power up durations,
 //  how many seconds till expiration,
@@ -588,6 +492,14 @@ typedef enum
     FLIGHTTICS      = (60 * TICRATE)
     
 } powerduration_t;
+
+typedef enum
+{
+    DOOMBSP = 0,
+    DEEPBSP = 1,
+    ZDBSPX  = 2
+
+} mapformat_t;
 
 
 char               extra_wad_1[256];

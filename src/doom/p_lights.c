@@ -35,6 +35,7 @@
 // State.
 #include "r_state.h"
 
+#include "wii-doom.h"
 #include "z_zone.h"
 
 

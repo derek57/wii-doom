@@ -260,11 +260,14 @@ void I_Quit (void)
 {
     atexit_listentry_t *entry;
 
-    if (debugfile)
-        fclose (debugfile);
+//    if (!demoplayback)
+    {
+        if (debugfile)
+            fclose(debugfile);
 
-    if (statsfile)
-        fclose (statsfile);
+        if (statsfile)
+            fclose(statsfile);
+    }
 
     // Run through all exit functions 
     entry = exit_funcs; 
@@ -398,7 +401,6 @@ void I_Error (char *error, ...)
 
     if (already_quitting)
     {
-        C_Warning("Warning: recursive call to I_Error detected.");
         printf("\n Warning: recursive call to I_Error detected.\n");
 
         error_detected = true;
@@ -470,7 +472,7 @@ void I_Error (char *error, ...)
         entry = entry->next;
     }
 
-    exit_gui_popup = true;
+    exit_gui_popup = !M_ParmExists("-nogui");
 
     // Pop up a GUI dialog box to show the error message, if the
     // game was not run from the console (and the user will
@@ -518,7 +520,7 @@ dboolean I_GetMemoryValue(unsigned int offset, void *value, int size)
         firsttime = false;
     }
 
-    C_Warning("Read Access Violation emulation.");
+    printf("Read Access Violation emulation.\n");
 
     switch (size)
     {

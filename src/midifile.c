@@ -392,13 +392,13 @@ static dboolean ReadTrackHeader(midi_track_t *track, FILE *stream)
 
     if (records_read < 1)
     {
-        C_Error("ReadTrackHeader: records_read is < 1");
+        //C_Error("ReadTrackHeader: records_read is < 1");
         return false;
     }
 
     if (!CheckChunkHeader(&chunk_header, TRACK_CHUNK_ID))
     {
-        C_Error("ReadTrackHeader: Error (CheckChunkHeader)");
+        //C_Error("ReadTrackHeader: Error (CheckChunkHeader)");
         return false;
     }
 
@@ -418,7 +418,7 @@ static dboolean ReadTrack(midi_track_t *track, FILE *stream)
     // Read the header:
     if (!ReadTrackHeader(track, stream))
     {
-        C_Error("ReadTrack: Error (Read the header)");
+        //C_Error("ReadTrack: Error (Read the header)");
         return false;
     }
 
@@ -434,8 +434,8 @@ static dboolean ReadTrack(midi_track_t *track, FILE *stream)
 
         if (new_events == NULL)
         {
-            C_Error("ReadTrack: Error (new_events is NULL)");
-            C_Error("ReadTrack: Error (track->num_events is %d)", track->num_events);
+            //C_Error("ReadTrack: Error (new_events is NULL)");
+            //C_Error("ReadTrack: Error (track->num_events is %d)", track->num_events);
             return false;
         }
 
@@ -446,7 +446,7 @@ static dboolean ReadTrack(midi_track_t *track, FILE *stream)
 
         if (!ReadEvent(event, &last_event_type, stream))
         {
-            C_Error("ReadTrack: Error (Read the next event)");
+            //C_Error("ReadTrack: Error (Read the next event)");
             return false;
         }
 
@@ -485,7 +485,7 @@ static dboolean ReadAllTracks(midi_file_t *file, FILE *stream)
 
     if (file->tracks == NULL)
     {
-        C_Error("ReadAllTracks: file->tracks is NULL");
+        //C_Error("ReadAllTracks: file->tracks is NULL");
         return false;
     }
 
@@ -496,7 +496,7 @@ static dboolean ReadAllTracks(midi_file_t *file, FILE *stream)
     {
         if (!ReadTrack(&file->tracks[i], stream))
         {
-            C_Error("ReadAllTracks: Error (Read each track)");
+            //C_Error("ReadAllTracks: Error (Read each track)");
             return false;
         }
     }
@@ -514,7 +514,7 @@ static dboolean ReadFileHeader(midi_file_t *file, FILE *stream)
 
     if (records_read < 1)
     {
-        C_Error("ReadFileHeader: records_read is < 1");
+        //C_Error("ReadFileHeader: records_read is < 1");
         return false;
     }
 
@@ -567,7 +567,7 @@ midi_file_t *MIDI_LoadFile(char *filename)
 
     if (file == NULL)
     {
-        C_Error("MIDI_LoadFile: file is NULL for file %c", filename);
+        //C_Error("MIDI_LoadFile: file is NULL for file %c", filename);
         return NULL;
     }
 
@@ -589,7 +589,7 @@ midi_file_t *MIDI_LoadFile(char *filename)
     // Read MIDI file header
     if (!ReadFileHeader(file, stream))
     {
-        C_Error("MIDI_LoadFile: Error (Read MIDI file header)");
+        //C_Error("MIDI_LoadFile: Error (Read MIDI file header)");
         fclose(stream);
         MIDI_FreeFile(file);
         return NULL;
@@ -598,7 +598,7 @@ midi_file_t *MIDI_LoadFile(char *filename)
     // Read all tracks:
     if (!ReadAllTracks(file, stream))
     {
-        C_Error("MIDI_LoadFile: Error (Read all tracks)");
+        //C_Error("MIDI_LoadFile: Error (Read all tracks)");
         fclose(stream);
         MIDI_FreeFile(file);
         return NULL;

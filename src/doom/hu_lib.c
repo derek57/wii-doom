@@ -34,6 +34,7 @@
 #include "r_draw.h"
 #include "r_local.h"
 #include "v_video.h"
+#include "wii-doom.h"
 
 
 //
@@ -75,11 +76,7 @@ dboolean HUlib_addCharToTextLine(hu_textline_t *t, char ch)
     }
 }
 
-//
-// nitr8 [UNUSED]
-//
-/*
-dboolean HUlib_delCharFromTextLine(hu_textline_t* t)
+dboolean HUlib_delCharFromTextLine(hu_textline_t *t)
 {
     if (!t->len)
         return false;
@@ -91,7 +88,6 @@ dboolean HUlib_delCharFromTextLine(hu_textline_t* t)
         return true;
     }
 }
-*/
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wchar-subscripts"
@@ -228,7 +224,6 @@ void HUlib_eraseSText(hu_stext_t *s)
     s->laston = *s->on;
 }
 
-/*
 void HUlib_initIText(hu_itext_t *it, int x, int y, patch_t **font, int startchar, dboolean *on)
 {
     // default left margin is start of text
@@ -245,11 +240,13 @@ void HUlib_delCharFromIText(hu_itext_t *it)
         HUlib_delCharFromTextLine(&it->l);
 }
 
+/*
 void HUlib_eraseLineFromIText(hu_itext_t *it)
 {
     while (it->lm != it->l.len)
         HUlib_delCharFromTextLine(&it->l);
 }
+*/
 
 // Resets left margin as well
 void HUlib_resetIText(hu_itext_t *it)
@@ -258,6 +255,7 @@ void HUlib_resetIText(hu_itext_t *it)
     HUlib_clearTextLine(&it->l);
 }
 
+/*
 void HUlib_addPrefixToIText(hu_itext_t *it, char *str)
 {
     while (*str)
@@ -265,6 +263,7 @@ void HUlib_addPrefixToIText(hu_itext_t *it, char *str)
 
     it->lm = it->l.len;
 }
+*/
 
 // wrapper function for handling general keyed input.
 // returns true if it ate the key
@@ -301,6 +300,37 @@ void HUlib_drawIText(hu_itext_t *it)
     HUlib_drawTextLine(l, true);
 }
 
+// sorta called by HU_Erase and just better darn get things straight
+void HUlib_eraseTextLine(hu_textline_t *l)
+{
+    // Only erases when NOT in automap and the screen is reduced,
+    // and the text must either need updating or refreshing
+    // (because of a recent change back from the automap)
+    if (!automapactive && viewwindowx && l->needsupdate)
+    {
+        int lh = SHORT(l->f[0]->height) + 1;
+        int y;
+        int yoffset;
+
+        for (y = l->y, yoffset = y * SCREENWIDTH; y < l->y + lh; y++, yoffset += SCREENWIDTH)
+        {
+            if (y < viewwindowy || y >= viewwindowy + viewheight)
+                // erase entire line
+                R_VideoErase(yoffset, SCREENWIDTH);
+            else
+            {
+                // erase left border
+                R_VideoErase(yoffset, viewwindowx);
+                R_VideoErase(yoffset + viewwindowx + viewwidth, viewwindowx);
+                // erase right border
+            }
+        }
+    }
+
+    if (l->needsupdate) l->needsupdate--;
+
+}
+
 void HUlib_eraseIText(hu_itext_t *it)
 {
     if (it->laston && !*it->on)
@@ -309,5 +339,4 @@ void HUlib_eraseIText(hu_itext_t *it)
     HUlib_eraseTextLine(&it->l);
     it->laston = *it->on;
 }
-*/
 

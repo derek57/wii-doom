@@ -51,7 +51,6 @@
 #include "i_tinttab.h"
 #include "i_video.h"
 #include "i_scale.h"
-#include "icon.c"
 #include "m_argv.h"
 #include "m_config.h"
 
@@ -62,6 +61,7 @@
 #include "v_trans.h"
 #include "v_video.h"
 #include "w_wad.h"
+#include "wii-doom.h"
 #include "z_zone.h"
 
 #ifdef WII
@@ -144,33 +144,6 @@ static dboolean palette_to_set;
 // display has been set up?
 dboolean initialized = false;
 
-#ifndef SDL2
-
-// Color depth.
-int screen_bpp = 0;
-
-// Automatically adjust video settings if the selected mode is 
-// not a valid video mode.
-static int autoadjust_video_settings = 1;
-#endif
-
-int window_pos_x = 0;
-int window_pos_y = 0;
-
-// Screen width and height, from configuration file.
-int screen_width = SCREENWIDTH;
-int screen_height = SCREENHEIGHT;
-
-// Run in full screen mode?  (int type for config code)
-int fullscreen = false;
-
-// Aspect ratio correction mode
-int aspect_ratio_correct = false;
-
-// Time to wait for the screen to settle on startup before starting the
-// game (ms)
-static int startup_delay = 1000;
-
 // If true, we display dots at the bottom of the screen to 
 // indicate FPS.
 static dboolean display_fps_dots;
@@ -193,9 +166,6 @@ int vanilla_keyboard_mapping = true;
 
 // Save screenshots in PNG format.
 dboolean png_screenshots = false;
-
-// Window title
-static char *window_title = "";
 
 static int loading_disk_xoffs = 0;
 static int loading_disk_yoffs = 0;
@@ -275,19 +245,13 @@ static SDL_Cursor *cursors[2];
 float mouse_acceleration = 2.0;
 int mouse_threshold = 10;
 
-// Window position:
-static char *window_position = "";
-
 // SDL video driver name
 char *video_driver = "";
 #endif
 
-dboolean waspaused = false;
-
 
 extern dboolean blurred;
 extern dboolean splashscreen;
-extern dboolean quitting;
 
 
 // If true, we are rendering the screen using OpenGL hardware scaling
@@ -327,6 +291,9 @@ static SDL_Rect blit_rect = {
 
 #else
 static SDL_Surface *screen;
+
+// if true, screens[0] is screen->pixel
+static dboolean native_surface;
 #endif
 
 // Only display the disk icon if more then this much bytes have been read
@@ -1088,14 +1055,13 @@ void I_GetEvent(void)
 #endif
 
             case SDL_QUIT:
-                if (!quitting && !splashscreen)
+                if (!splashscreen)
                 {
                     C_HideConsoleFast();
+
                     if (paused)
-                    {
                         paused = false;
-                        waspaused = true;
-                    }
+
                     event.type = ev_quit;
                     D_PostEvent(&event);
                     M_QuitDOOM(0);
@@ -1278,15 +1244,23 @@ static void UpdateGrab(void)
 // Return true if blit was successful.
 
 #ifndef SDL2
-static dboolean BlitArea(int x1, int y1, int scrn, int x2, int y2)
+static dboolean BlitArea(int x1, int y1, int x2, int y2)
 {
-    int x_offset = (screenbuffer->w - screen_mode->width) / 2;
-    int y_offset = (screenbuffer->h - screen_mode->height) / 2;
+    int x_offset, y_offset;
     dboolean result;
+
+    // No blit needed on native surface
+    if (native_surface)
+    {
+	return true;
+    }
+
+    x_offset = (screenbuffer->w - screen_mode->width) / 2;
+    y_offset = (screenbuffer->h - screen_mode->height) / 2;
 
     if (SDL_LockSurface(screenbuffer) >= 0)
     {
-        I_InitScale(screens[scrn], (byte *)screenbuffer->pixels
+        I_InitScale(screens[0], (byte *)screenbuffer->pixels
             + (y_offset * screenbuffer->pitch) + x_offset,
                 screenbuffer->pitch);
 
@@ -2313,7 +2287,7 @@ static void FinishUpdateSoftware(void)
     // draw to screen
 
 #ifndef SDL2
-    BlitArea(0, 0, 0, SCREENWIDTH, SCREENHEIGHT);
+    BlitArea(0, 0, SCREENWIDTH, SCREENHEIGHT);
 #endif
 
     if (palette_to_set)
@@ -2381,7 +2355,7 @@ static void FinishUpdateSoftware(void)
 //
 // I_FinishUpdate
 //
-void I_FinishUpdate (int scrn)
+void I_FinishUpdate(void)
 {
     int         i;
 
@@ -2449,10 +2423,10 @@ void I_FinishUpdate (int scrn)
         if (tics > 20) tics = 20;
 
         for (i = 0; i < tics * 4; i += 4)
-            screens[scrn][(SCREENHEIGHT - 1) * SCREENWIDTH + i] = 0xff;
+            screens[0][(SCREENHEIGHT - 1) * SCREENWIDTH + i] = 0xff;
 
         for (; i < 20 * 4; i += 4)
-            screens[scrn][(SCREENHEIGHT - 1) * SCREENWIDTH + i] = 0x0;
+            screens[0][(SCREENHEIGHT - 1) * SCREENWIDTH + i] = 0x0;
     }
 
     // [AM] Real FPS counter
@@ -2497,7 +2471,7 @@ void I_FinishUpdate (int scrn)
 #ifndef SDL2
     if (using_opengl)
     {
-        I_GL_UpdateScreen(screens[scrn], palette);
+        I_GL_UpdateScreen(screens[0], palette);
         SDL_GL_SwapBuffers();
     }
     else
@@ -2511,9 +2485,9 @@ void I_FinishUpdate (int scrn)
 //
 // I_ReadScreen
 //
-void I_ReadScreen(int scrn, byte *scr)
+void I_ReadScreen(byte *scr)
 {
-    memcpy(scr, screens[scrn], SCREENWIDTH * SCREENHEIGHT * sizeof(*scr));
+    memcpy(scr, screens[0], SCREENWIDTH * SCREENHEIGHT * sizeof(*scr));
 }
 
 //
@@ -2569,54 +2543,6 @@ int I_GetPaletteIndex(int r, int g, int b)
 }
 */
 
-// Set the application icon
-
-#ifndef WII
-void I_InitWindowIcon(void)
-{
-    SDL_Surface *surface;
-
-#ifndef SDL2
-    Uint8 *mask;
-    int i;
-
-    // Generate the mask
-    mask = malloc(icon_w * icon_h / 8);
-    memset(mask, 0, icon_w * icon_h / 8);
-
-    for (i = 0; i < icon_w * icon_h; ++i)
-    {
-        if (icon_data[i * 3] != 0x00
-            || icon_data[i * 3 + 1] != 0x00
-            || icon_data[i * 3 + 2] != 0x00)
-        {
-            mask[i / 8] |= 1 << (7 - i % 8);
-        }
-    }
-
-    surface = SDL_CreateRGBSurfaceFrom(icon_data, icon_w, icon_h, 24,
-                                       icon_w * 3, 0xff << 0, 0xff << 8,
-                                       0xff << 16, 0);
-
-    SDL_WM_SetIcon(surface, mask);
-
-#else
-
-    surface = SDL_CreateRGBSurfaceFrom((void *) icon_data, icon_w, icon_h,
-                                       32, icon_w * 4, 0xff << 24, 0xff << 16,
-                                       0xff << 8, 0xff << 0);
-
-    SDL_SetWindowIcon(screen, surface);
-#endif
-
-    SDL_FreeSurface(surface);
-
-#ifndef SDL2
-    free(mask);
-#endif
-}
-#endif
-
 //
 // Call the SDL function to set the window title, based on 
 // the title set with I_SetWindowTitle.
@@ -2624,19 +2550,6 @@ void I_InitWindowIcon(void)
 void I_SetWindowTitle(char *title)
 {
     window_title = title;
-}
-
-void I_InitWindowTitle(void)
-{
-    char *buf = M_StringJoin(window_title, " - ", PACKAGE_STRING, NULL);
-
-#ifdef SDL2
-    SDL_SetWindowTitle(screen, buf);
-#else
-    SDL_WM_SetCaption(buf, NULL);
-#endif
-
-    free(buf);
 }
 
 void I_InitGammaTables(void)
@@ -2649,7 +2562,7 @@ void I_InitGammaTables(void)
             gammatable[i][j] = (byte)(pow(j / 255.0, 1.0 / gammalevels[i]) * 255.0 + 0.5);
 }
 
-void I_InitGraphics(int scrn)
+void I_InitGraphics(void)
 {
     SDL_Event  dummy;
     byte       *doompal = W_CacheLumpName("PLAYPAL", PU_CACHE);
@@ -2813,17 +2726,38 @@ void I_InitGraphics(int scrn)
         SDL_Delay(startup_delay);
     }
 
-    // Allocate a buffer and copy from that buffer to the screen when we do an
-    // update
-
 #ifdef SDL2
-    screens[scrn] = screenbuffer->pixels;
+    screens[0] = screenbuffer->pixels;
+#else
+    // Check if we have a native surface we can use
+    // If we have to lock the screen, draw to a buffer and copy
+    // Likewise if the screen pitch is not the same as the width
+    // If we have to multiply, drawing is done to a separate 320x200 buf
+    native_surface = screen == screenbuffer
+                  && !SDL_MUSTLOCK(screen)
+                  && screen_mode == &mode_scale_1x
+                  && screen->pitch == SCREENWIDTH
+                  && aspect_ratio_correct;
+
+    // If not, allocate a buffer and copy from that buffer to the
+    // screen when we do an update
+    if (native_surface)
+    {
+	screens[0] = (unsigned char *)screen->pixels;
+
+        screens[0] += (screen->h - SCREENHEIGHT) / 2;
+    }
+    else
+    {
+	screens[0] = (unsigned char *)Z_Malloc(SCREENWIDTH * SCREENHEIGHT,
+                                                 PU_STATIC, NULL);
+    }
 #endif
 
     //V_RestoreBuffer();
 
     // Clear the screen to black.
-    memset(screens[scrn], 0, SCREENWIDTH * SCREENHEIGHT);
+    memset(screens[0], 0, SCREENWIDTH * SCREENHEIGHT);
 
     // We need SDL to give us translated versions of keys as well
 

@@ -79,7 +79,6 @@
 #define r_blood_default               r_blood_all
 #define r_blood_max                   r_blood_all
 #define r_bloodsplats_max_min         0
-#define r_bloodsplats_max_default     32768
 #define r_bloodsplats_max_max         32768
 #define r_bloodsplats_total_min       0
 #define r_bloodsplats_total_default   0
@@ -272,7 +271,6 @@ extern int                  maxammo[NUMAMMO];
 extern int                  clipammo[NUMAMMO];
 extern int                  r_blood;
 extern int                  r_bloodsplats_total;
-extern int                  r_bloodsplats_max;
 extern int                  itemrespawntime[ITEMQUESIZE];
 extern int                  iquehead;
 extern int                  iquetail;

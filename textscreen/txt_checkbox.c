@@ -114,10 +114,6 @@ txt_widget_class_t txt_checkbox_class =
     NULL
 };
 
-//
-// [nitr8] UNUSED
-//
-/*
 txt_checkbox_t *TXT_NewCheckBox(char *label, int *variable)
 {
     txt_checkbox_t *checkbox;
@@ -141,5 +137,4 @@ txt_checkbox_t *TXT_NewInvertedCheckBox(char *label, int *variable)
 
     return result;
 }
-*/
 

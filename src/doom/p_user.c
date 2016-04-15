@@ -38,6 +38,7 @@
 #include "p_local.h"
 #include "s_sound.h"
 #include "sounds.h"
+#include "wii-doom.h"
 
 
 #define ANG5      (ANG90 / 18)

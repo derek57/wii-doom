@@ -47,6 +47,7 @@
 #include "r_local.h"
 #include "r_sky.h"
 #include "w_wad.h"
+#include "wii-doom.h"
 #include "z_zone.h"
 
 
@@ -412,15 +413,15 @@ void R_DrawPlanes(void)
 #ifdef RANGECHECK
 
     if (ds_p - drawsegs > maxdrawsegs)
-        I_Error ("R_DrawPlanes: drawsegs overflow (%i)",
+        I_Error("R_DrawPlanes: drawsegs overflow (%i)",
                  ds_p - drawsegs);
 
     if (lastvisplane - visplanes > numvisplanes)
-	I_Error ("R_DrawPlanes: visplane overflow (%i)",
-		 lastvisplane - visplanes);
+        I_Error("R_DrawPlanes: visplane overflow (%i)",
+                 lastvisplane - visplanes);
 
     if (lastopening - openings > MAXOPENINGS)
-        I_Error ("R_DrawPlanes: opening overflow (%i)",
+        I_Error("R_DrawPlanes: opening overflow (%i)",
                  lastopening - openings);
 #endif
 
@@ -438,6 +439,7 @@ void R_DrawPlanes(void)
             int         texture;
             int         offset;
             angle_t     an, flip;
+            rpatch_t    *tex_patch; 
 
             // killough 10/98: allow skies to come from sidedefs.
             // Allows scrolling and/or animated skies, as well as
@@ -500,6 +502,8 @@ void R_DrawPlanes(void)
 
             dc_texheight = textureheight[texture] >> FRACBITS;
 
+            tex_patch = R_CacheTextureCompositePatchNum(texture);
+
             offset = skycolumnoffset >> FRACBITS;
 
             for (x = pl->minx; x <= pl->maxx; x++)
@@ -510,11 +514,13 @@ void R_DrawPlanes(void)
                 if (dc_yl <= dc_yh)
                 {
                     dc_x = x;
-                    dc_source = R_GetColumn(texture, (((an + xtoviewangle[x]) ^ flip)
-                        >> ANGLETOSKYSHIFT) + offset, false);
+                    dc_source = R_GetTextureColumn(tex_patch,
+                        (((an + xtoviewangle[x]) ^ flip) >> ANGLETOSKYSHIFT) + offset);
                     skycolfunc();
                 }
             }
+
+            R_UnlockTextureCompositePatchNum(texture);
         }
         else
         {

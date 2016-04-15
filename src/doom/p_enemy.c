@@ -53,6 +53,7 @@
 // Data.
 #include "sounds.h"
 
+#include "wii-doom.h"
 #include "z_zone.h"
 
 
@@ -876,11 +877,7 @@ static dboolean P_LookForMonsters(mobj_t *actor)
     return false;
 }
 
-//
-// P_LookForPlayers
-// If allaround is false, only look 180 degrees in front.
-// Returns true if a player is targeted.
-//
+/*
 static dboolean P_LookForPlayers(mobj_t *actor, dboolean allaround)
 {
     player_t    *player;
@@ -949,6 +946,107 @@ static dboolean P_LookForPlayers(mobj_t *actor, dboolean allaround)
     P_SetTarget(&actor->target, mo);
     actor->threshold = 60;
     return true;
+}
+*/
+
+//
+// P_LookForPlayers
+// If allaround is false, only look 180 degrees in front.
+// Returns true if a player is targeted.
+//
+// [nitr8] Might not be the final version but currently fixes multiplayer
+//
+static dboolean P_LookForPlayers(mobj_t *actor, dboolean allaround)
+{
+    int		c;
+    int		stop;
+    player_t    *player;
+    angle_t	an;
+    fixed_t	dist;
+    mobj_t      *mo;
+
+    if (infight)
+        // player is dead, look for monsters
+        return P_LookForMonsters(actor);
+
+    c = 0;
+
+    // Change mask of 3 to (MAXPLAYERS-1) -- killough 2/15/98:
+    stop = (actor->lastlook - 1) & (MAXPLAYERS - 1);
+	
+    for (;; actor->lastlook = (actor->lastlook + 1) & (MAXPLAYERS - 1))
+    {
+	if (!playeringame[actor->lastlook])
+            continue;
+			
+	if (c++ == 2 || actor->lastlook == stop)
+	{
+            // Use last known enemy if no players sighted -- killough 2/15/98
+            if (actor->lastenemy && actor->lastenemy->health > 0 && last_enemy)
+            {
+                P_SetTarget(&actor->target, actor->lastenemy);
+                P_SetTarget(&actor->lastenemy, NULL);
+                return true;
+            }
+
+            // done looking
+            return false;	
+	}
+	
+	player = &players[actor->lastlook];
+        mo = player->mo;
+
+        if (player->cheats & CF_NOTARGET)
+            return false;
+
+	if (player->health <= 0)
+            // dead
+            continue;
+
+	if (!P_CheckSight(actor, player->mo))
+            // out of sight
+            continue;
+
+	if (!allaround)
+	{
+            an = R_PointToAngle2(actor->x, actor->y, player->mo->x, player->mo->y) - actor->angle;
+           
+            if (an > ANG90 && an < ANG270)
+            {
+		dist = P_AproxDistance(player->mo->x - actor->x, player->mo->y - actor->y);
+
+                // Use last known enemy if no players sighted -- killough 2/15/98
+                if (actor->lastenemy && actor->lastenemy->health > 0 && last_enemy)
+                {
+                    P_SetTarget(&actor->target, actor->lastenemy);
+                    P_SetTarget(&actor->lastenemy, NULL);
+                    return true;
+                }
+
+                // if real close, react anyway
+                if (dist > MELEERANGE)
+                    return false;
+            }
+	}
+		
+        if (mo->flags & MF_SHADOW)
+        {
+            // player is invisible
+            if (dist > 2 * MELEERANGE && P_AproxDistance(mo->momx, mo->momy) < 5 * FRACUNIT)
+                // player is sneaking - can't detect
+                return false;
+
+            if (P_Random() < 225)
+                // player isn't sneaking, but still didn't detect
+                return false;
+        }
+
+        P_SetTarget(&actor->target, mo);
+        actor->threshold = 60;
+        return true;
+    }
+
+    return false;
 }
 
 void A_Fall(mobj_t *actor)
@@ -1668,8 +1766,14 @@ void A_Fire(mobj_t *actor)
     actor->y = dest->y + FixedMul(24 * FRACUNIT, finesine[an]);
     actor->z = dest->z;
     P_SetThingPosition(actor);
-    actor->floorz = dest->floorz;
-    actor->ceilingz = dest->ceilingz;
+
+    // [crispy] update the Archvile fire's floorz and ceilingz values
+    // to prevent it from jumping back and forth between the floor heights
+    // of its (faulty) spawn sector and the target's actual sector.
+    // Thanks to Quasar for his excellent analysis at
+    // https://www.doomworld.com/vb/post/1297952
+    actor->floorz = actor->subsector->sector->floorheight;
+    actor->ceilingz = actor->subsector->sector->ceilingheight;
 }
 
 void A_StartFire(mobj_t *actor)

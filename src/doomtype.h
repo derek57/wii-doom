@@ -46,7 +46,13 @@
 //
 
 #ifdef __GNUC__
+
+#if defined(_WIN32) && !defined(__clang__)
+#define PACKEDATTR __attribute__((packed,gcc_struct))
+#else
 #define PACKEDATTR __attribute__((packed))
+#endif
+
 #else
 #define PACKEDATTR
 #endif
@@ -58,7 +64,7 @@
 
 #if defined(__GNUC__)
 #define d_inline __inline__
-#elif defined(_MSC_VER)
+#elif defined(_MSC_VER) && !defined(__cplusplus)
 #define d_inline __inline
 #else
 #define d_inline

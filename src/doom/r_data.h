@@ -42,8 +42,12 @@
 
 
 #include "r_defs.h"
+#include "r_patch.h" 
 #include "r_state.h"
 #include "v_video.h"
+
+
+#define NO_TEXTURE      0 
 
 
 //
@@ -56,11 +60,11 @@
 //
 typedef struct
 {
-    short       originx;
-    short       originy;
-    short       patch;
-    short       stepdir;
-    short       colormap;
+    short               originx;
+    short               originy;
+    short               patch;
+    short               stepdir;
+    short               colormap;
 
 } PACKEDATTR mappatch_t;
 
@@ -71,13 +75,13 @@ typedef struct
 //
 typedef struct
 {
-    char        name[8];
-    int         masked;
-    short       width;
-    short       height;
-    int         obsolete;
-    short       patchcount;
-    mappatch_t  patches[1];
+    char                name[8];
+    int                 masked;
+    short               width;
+    short               height;
+    int                 obsolete;
+    short               patchcount;
+    mappatch_t          patches[1];
 
 } PACKEDATTR maptexture_t;
 
@@ -89,9 +93,9 @@ typedef struct
     // Block origin (always UL),
     // which has already accounted
     // for the internal origin of the patch.
-    short       originx;
-    short       originy;
-    int         patch;
+    short               originx;
+    short               originy;
+    int                 patch;
 
 } texpatch_t;
 
@@ -104,25 +108,27 @@ typedef struct texture_s texture_t;
 struct texture_s
 {
     // Keep name for switch changing, etc.
-    char        name[8];
-    short       width;
-    short       height;
+    char                name[8];
+    short               width;
+    short               height;
 
     // Index in textures list
-    int         index;
+    int                 index;
 
     // Next in hash table chain
-    texture_t   *next;
+    int                 next;
+
+    unsigned int        widthmask; 
 
     // All the patches[patchcount]
     //  are drawn back to front into the cached texture.
-    short       patchcount;
-    texpatch_t  patches[1];
+    short               patchcount;
+    texpatch_t          patches[1];
 };
 
 
 // Retrieve column data for span blitting.
-byte *R_GetColumn(int tex, int col, dboolean opaque);
+byte *R_GetTextureColumn(rpatch_t *texpatch, int col); 
 
 byte R_BestColor(const unsigned int *palette, const int r, const int g, const int b, const int numcolors);
 

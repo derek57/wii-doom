@@ -55,6 +55,7 @@
 #include "doom/sounds.h"
 #include "doom/st_stuff.h"
 #include "w_wad.h"
+#include "wii-doom.h"
 #include "z_zone.h"
 
 
@@ -3189,7 +3190,6 @@ void deh_procSprite(DEHFILE *fpin, char *line)
 extern int pars[5][10];
 extern int cpars[33];
 
-#if !defined(WIN32)
 char *strlwr(char *str)
 {
     size_t      i;
@@ -3200,7 +3200,6 @@ char *strlwr(char *str)
 
     return str;
 }
-#endif
 
 // ====================================================================
 // deh_procPars

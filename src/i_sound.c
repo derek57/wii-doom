@@ -35,6 +35,7 @@
 #include "doom/s_sound.h"
 
 #include "v_trans.h"
+#include "wii-doom.h"
 
 
 int                      snd_musicdevice = SNDDEVICE_SB;

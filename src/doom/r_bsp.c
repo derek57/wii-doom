@@ -45,6 +45,7 @@
 #include "r_main.h"
 #include "r_plane.h"
 #include "r_things.h"
+#include "wii-doom.h"
 
 
 #define MAXSEGS (SCREENWIDTH / 2 + 1)

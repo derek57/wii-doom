@@ -69,14 +69,6 @@
 #define MCMD_TITLEPATCH         9
 
 
-typedef enum
-{
-    DOOMBSP = 0,
-    DEEPBSP = 1,
-    ZDBSPX  = 2
-
-} mapformat_t;
-
 typedef struct mapinfo_s mapinfo_t;
 
 struct mapinfo_s
@@ -125,11 +117,11 @@ static int mapcmdids[] =
 
 static int         current_episode = -1;
 static int         current_map = -1;
-static int         samelevel;
 
 // cph - store reject lump num if cached
 static int         rejectlump = -1;
 
+int                samelevel;
 int                liquidlumps = 0;
 int                noliquidlumps = 0;
 
@@ -207,6 +199,7 @@ dboolean           canmodify;
 dboolean           transferredsky;
 dboolean           boomlinespecials;
 dboolean           blockmaprecreated;
+dboolean           must_recreate_blockmap;
 dboolean           MAPINFO;
 dboolean           mapinfo_lump;
 dboolean           rejectempty;
@@ -1729,7 +1722,7 @@ void P_LoadBlockMap(int lump)
 
     blockmaprecreated = false;
 
-    if (lump >= numlumps || (lumplen = W_LumpLength(lump)) < 8 || (count = lumplen / 2) >= 0x10000)
+    if (lump >= numlumps || (lumplen = W_LumpLength(lump)) < 8 || (count = lumplen / 2) >= 0x10000 || must_recreate_blockmap)
     {
         C_Warning("P_LoadBlockMap: (Re-)creating BLOCKMAP.");
         P_CreateBlockMap();
@@ -2286,7 +2279,7 @@ void P_SetupLevel(int ep, int map)
     P_LoadSideDefs2(lumpnum + ML_SIDEDEFS);
     P_LoadLineDefs2(lumpnum + ML_LINEDEFS);
 
-    if (!samelevel)
+    if (!samelevel || must_recreate_blockmap)
         P_LoadBlockMap(lumpnum + ML_BLOCKMAP);
     else
         memset(blocklinks, 0, bmapwidth * bmapheight * sizeof(*blocklinks));
@@ -2664,6 +2657,6 @@ void P_Init (void)
     InitMapInfo();
     P_LoadTerrainTypeDefs();
     P_InitTerrainTypes();
-    R_InitSprites(sprnames);
+    R_InitSprites();
 }
 

@@ -28,6 +28,7 @@
 
 #include <ctype.h>
 #include <errno.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -46,6 +47,14 @@
 #include "v_video.h"
 #include "w_wad.h"
 #include "z_zone.h"
+
+
+static const char       *sizes[] =
+{
+    "MB",
+    "KB",
+    " bytes"
+};
 
 
 //
@@ -109,7 +118,7 @@ dboolean M_WriteFile(char *name, void *source, int length)
 
     if (handle == NULL)
     {
-        C_Error("M_WriteFile: name handle is NULL");
+        //printf("M_WriteFile: name handle is NULL\n");
         return false;
     }
 
@@ -118,7 +127,7 @@ dboolean M_WriteFile(char *name, void *source, int length)
         
     if (count < length)
     {
-        C_Error("M_WriteFile: count < length for file %c", name);
+        //printf("M_WriteFile: count < length for file %s\n", name);
         return false;
     }
                 
@@ -205,7 +214,7 @@ void M_ExtractFileBase(char *path, char *dest)
     {
         if (length >= 8)
         {
-            C_Warning("Warning: Truncated '%s' lump name to '%.8s'.",
+            printf("Warning: Truncated '%s' lump name to '%.8s'.\n",
                    filename, dest);
             break;
         }
@@ -522,7 +531,7 @@ char *M_DirName(char *path)
 }
 */
 
-char *uppercase(char *str)
+char *uppercase(const char *str)
 {
     char        *newstr;
     char        *p;
@@ -530,7 +539,7 @@ char *uppercase(char *str)
     p = newstr = strdup(str);
 
     while ((*p = toupper(*p)))
-        p++;
+        ++p;
 
     return newstr;
 }
@@ -654,6 +663,11 @@ int stricmp(const char *string1, const char *string2)
 
     return strcmp(src, dest);
 }
+
+dboolean isvowel(const char ch)
+{
+    return (!!strchr("aeiou", ch));
+}
 */
 
 // Returns true if 'str1' and 'str2' are the same.
@@ -661,11 +675,6 @@ int stricmp(const char *string1, const char *string2)
 dboolean M_StringCompare(const char *str1, const char *str2)
 {
     return !strcasecmp(str1, str2);
-}
-
-dboolean isvowel(const char ch)
-{
-    return (!!strchr("aeiou", ch));
 }
 
 char *removeext(const char *file)
@@ -752,5 +761,136 @@ int Clamp(int x)
     }
 
     return x;
+}
+
+char *striptrailingzero(float value, int precision)
+{
+    char        *result = malloc(100 * sizeof(char));
+
+    if (result)
+    {
+        size_t  len;
+
+        M_snprintf(result, 100, "%.*f", (precision == 2 ? 2 : (value != floor(value))), value);
+        len = strlen(result);
+
+        if (len >= 4 && result[len - 3] == '.' && result[len - 1] == '0')
+            result[len - 1] = '\0';
+    }
+
+    return result;
+}
+
+char *removespaces(const char *input)
+{
+    char        *p = malloc(strlen(input) + 1);
+
+    if (p)
+    {
+        char    *p2 = p;
+
+        while (*input != '\0')
+            if (isalnum((unsigned char)*input))
+                *p2++ = *input++;
+            else
+                ++input;
+
+        *p2 = '\0';
+    }
+
+    return p;
+}
+
+const char *leafname(const char *path)
+{
+    char        cc;
+    const char  *ptr = path;
+
+    do
+    {
+        cc = *ptr++;
+
+        if (cc == '\\' || cc == '/')
+            path = ptr;
+
+    } while (cc);
+
+    return path;
+}
+
+dboolean wildcard(char *input, char *pattern)
+{
+    int i, z;
+
+    if (pattern[0] == '\0')
+        return true;
+
+    for (i = 0; pattern[i] != '\0'; i++)
+    {
+        if (pattern[i] == '\0')
+            return false;
+        else if (pattern[i] == '?')
+            continue;
+        else if (pattern[i] == '*')
+        {
+            for (z = i; input[z] != '\0'; z++)
+                if (wildcard(input + z, pattern + i + 1))
+                    return true;
+
+            return false;
+        }
+        else if (pattern[i] != input[i])
+            return false;
+    }
+
+    return true;
+}
+
+char *formatsize(const char *str)
+{
+    char        *newstr = strdup(str);
+    size_t      len = strlen(newstr);
+
+    if (len > 1)
+    {
+        size_t  i;
+
+        for (i = 1; i < len; ++i)
+            if (newstr[i] == 'x')
+            {
+                newstr[i] = 215;
+                break;
+            }
+    }
+
+    return newstr;
+}
+
+char *convertsize(const int size)
+{
+    char        *result = malloc(20 * sizeof(char));
+
+    if (result)
+    {
+        int         multiplier = 1024ULL * 1024ULL;
+        int         i;
+
+        for (i = 0; i < sizeof(sizes) / sizeof(*sizes); i++, multiplier /= 1024)
+        {
+            if (size < multiplier)
+                continue;
+
+            if (!(size % multiplier))
+                M_snprintf(result, 20, "%s%s", commify(size / multiplier), sizes[i]);
+            else
+                M_snprintf(result, 20, "%.2f%s", (float)size / multiplier, sizes[i]);
+
+            return result;
+        }
+
+        strcpy(result, "0");
+    }
+
+    return result;
 }
 

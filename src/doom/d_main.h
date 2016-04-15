@@ -32,6 +32,28 @@
 #include "doomdef.h"
         
 
+#define COLORIZE_CMD       "\033["
+#define COLORIZE_NORMAL    "0"
+
+#define TEXT_BLACK         "30m"
+#define TEXT_RED           "31m"
+#define TEXT_GREEN         "32m"
+#define TEXT_YELLOW        "33m"
+#define TEXT_BLUE          "34m"
+#define TEXT_MAGENTA       "35m"
+#define TEXT_CYAN          "36m"
+#define TEXT_WHITE         "37m"
+
+#define BACKGROUND_BLACK   "40"
+#define BACKGROUND_RED     "41"
+#define BACKGROUND_GREEN   "42"
+#define BACKGROUND_YELLOW  "43"
+#define BACKGROUND_BLUE    "44"
+#define BACKGROUND_MAGENTA "45"
+#define BACKGROUND_CYAN    "46"
+#define BACKGROUND_WHITE   "47"
+
+
 dboolean D_IsDehFile(char *filename);
 
 //
@@ -41,6 +63,8 @@ void D_PageTicker(void);
 void D_DoAdvanceDemo(void);
 void D_StartTitle(void);
 void D_DoomMain(void);
+void D_AdvanceDemo(void);
+void D_DoomLoop(void);
 
 // Read events from all input devices
 void D_ProcessEvents(void); 

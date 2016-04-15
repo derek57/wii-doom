@@ -251,7 +251,7 @@ PROGRAM_PREFIX = chocolate-
 RANLIB = ranlib
 SDLMIXER_CFLAGS = 
 SDLMIXER_LIBS =  -lSDL_mixer
-#SDLNET_LIBS =  -lSDL_net
+SDLNET_LIBS =  -lSDL_net
 SDL_CFLAGS = -I/usr/local/include/SDL -D_GNU_SOURCE=1 -D_REENTRANT
 SDL_CONFIG = /usr/local/bin/sdl-config
 SDL_LIBS = -L/usr/local/lib -Wl,-rpath,/usr/local/lib -lSDL -lpthread
@@ -306,7 +306,7 @@ target_alias =
 top_build_prefix = ../
 top_builddir = ..
 top_srcdir = ..
-AM_CFLAGS = 
+AM_CFLAGS = -D_GNU_SOURCE=1 -D_REENTRANT
 SUBDIRS = . 
 noinst_LIBRARIES = libopl.a
 libopl_a_SOURCES = \

@@ -103,6 +103,7 @@ void S_UpdateSounds(mobj_t *listener);
 void S_SetMusicVolume(int volume);
 void S_SetSfxVolume(int volume);
 void S_StartMP3Music(int type, int mode);
+void S_UnlinkSound(mobj_t *origin); 
 
 // query if music is playing
 dboolean S_MusicPlaying(void);

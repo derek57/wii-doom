@@ -322,7 +322,7 @@ target_alias =
 top_build_prefix = ../
 top_builddir = ..
 top_srcdir = ..
-AM_CFLAGS = -I$(top_srcdir)/src
+AM_CFLAGS = -I$(top_srcdir)/src -D_GNU_SOURCE=1 -D_REENTRANT
 CTAGS_ARGS = -I TXT_UNCAST_ARG+
 
 # build this directory before the examples directory.

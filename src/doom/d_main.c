@@ -48,9 +48,9 @@
 
 #include "c_io.h"
 #include "config.h"
+#include "d_deh.h"
 #include "d_main.h"
 #include "d_net.h"
-#include "d_deh.h"
 #include "doomdef.h"
 #include "doomfeatures.h"
 #include "doomstat.h"
@@ -78,11 +78,9 @@
 #include "m_menu.h"
 #include "m_argv.h"
 #include "m_misc.h"
-/*
 #include "net_client.h"
 #include "net_dedicated.h"
 #include "net_query.h"
-*/
 #include "p_local.h"
 #include "p_saveg.h"
 #include "p_setup.h"
@@ -104,33 +102,13 @@
 #include "w_wad.h"
 
 #include "wi_stuff.h"
-
+#include "wii-doom.h"
 #include "z_zone.h"
+
 
 #if !defined(MAX_PATH)
 #define MAX_PATH           260
 #endif
-
-#define COLORIZE_CMD       "\033["
-#define COLORIZE_NORMAL    "0"
-
-#define TEXT_BLACK         "30m"
-#define TEXT_RED           "31m"
-#define TEXT_GREEN         "32m"
-#define TEXT_YELLOW        "33m"
-#define TEXT_BLUE          "34m"
-#define TEXT_MAGENTA       "35m"
-#define TEXT_CYAN          "36m"
-#define TEXT_WHITE         "37m"
-
-#define BACKGROUND_BLACK   "40"
-#define BACKGROUND_RED     "41"
-#define BACKGROUND_GREEN   "42"
-#define BACKGROUND_YELLOW  "43"
-#define BACKGROUND_BLUE    "44"
-#define BACKGROUND_MAGENTA "45"
-#define BACKGROUND_CYAN    "46"
-#define BACKGROUND_WHITE   "47"
 
 #define MAXDEHFILES        16
 
@@ -223,7 +201,6 @@ int                     fsizerw = 0;
 int                     fsizerw2 = 0;
 int                     demosequence;
 int                     pagetic;
-int                     runcount = 0;
 int                     startuptimer;
 
 
@@ -239,26 +216,11 @@ extern int              viewheight2;
 extern int              oldscreenblocks;
 extern int              oldscreenSize;
 
-extern dboolean         correct_lost_soul_bounce;
-extern dboolean         png_screenshots;
 extern dboolean         merge;
 extern dboolean         BorderNeedRefresh;
-extern dboolean         skillflag;
-extern dboolean         nomonstersflag;
-extern dboolean         fastflag;
-extern dboolean         respawnflag;
-extern dboolean         warpflag;
-extern dboolean         multiplayerflag;
-extern dboolean         deathmatchflag;
-extern dboolean         altdeathflag;
-extern dboolean         locallanflag;
-extern dboolean         searchflag;
-extern dboolean         queryflag;
-extern dboolean         dedicatedflag;
 extern dboolean         setsizeneeded;
 extern dboolean         inhelpscreens;
 extern dboolean         finale_music;
-extern dboolean         aiming_help;
 extern dboolean         show_chat_bar;
 extern dboolean         blurred;
 extern dboolean         initialized;
@@ -267,6 +229,8 @@ extern menu_t           *currentMenu;
 extern menu_t           CheatsDef;
 
 extern gameaction_t     loadaction;
+
+extern default_collection_t doom_defaults;
 
 // menu item skull is on
 extern short            itemOn;
@@ -317,7 +281,7 @@ static void D_PageDrawer(void)
 // D_Display
 //  draw current display, possibly wiping it from the previous
 //
-static void D_Display(int scrn)
+static void D_Display(void)
 {
     static  dboolean            viewactivestate;
     static  dboolean            menuactivestate;
@@ -480,7 +444,7 @@ static void D_Display(int scrn)
             viewactivestate = false;
 
             // draw the pattern into the back screen
-            R_FillBackScreen(0, 1);
+            R_FillBackScreen();
         }
 
         // see if the border needs to be updated to the screen
@@ -493,7 +457,7 @@ static void D_Display(int scrn)
 
             if (detailLevel)
             {
-                V_LowGraphicDetail(0, viewheight2 * SCREENWIDTH);
+                V_LowGraphicDetail(viewheight2 * SCREENWIDTH);
             }
 
             if (borderdrawcount)
@@ -576,7 +540,7 @@ static void D_Display(int scrn)
 
             for (y = 0; y < SCREENWIDTH * SCREENHEIGHT; y++)
             {
-                screens[scrn][y] = colormaps[0][menushade * 256 + screens[scrn][y]];
+                screens[0][y] = colormaps[0][menushade * 256 + screens[0][y]];
             }
         }
 
@@ -605,7 +569,7 @@ static void D_Display(int scrn)
 #ifndef WII
     if (paused)
     {
-        M_DarkBackground(0);
+        M_DarkBackground();
 
         if (!inhelpscreens)
         {
@@ -640,12 +604,16 @@ static void D_Display(int scrn)
 
     if (screenSize < 8 && !wipe && !beta_style)
     {
-        if (usergame && !inhelpscreens && gamestate == GS_LEVEL)
+        if ((usergame && !inhelpscreens && gamestate == GS_LEVEL) /*|| demoplayback*/)
         {
             ST_doRefresh();
         }
     }
-
+/*
+    // [crispy] demo progress bar
+    if (demoplayback)
+        HU_DemoProgressBar(0);
+*/
     if (usergame && oldscreenblocks && !inhelpscreens && !menuactive && screenSize != oldscreenSize && !am_overlay)
     {
         screenSize = oldscreenSize;
@@ -657,7 +625,7 @@ static void D_Display(int scrn)
     if (!wipe)
     {
         // page flip or blit buffer
-        I_FinishUpdate(0);
+        I_FinishUpdate();
 
         return;
     }
@@ -678,7 +646,7 @@ static void D_Display(int scrn)
         } while (tics <= 0);
 
         wipestart = nowtime;
-        done = wipe_ScreenWipe(wipe_type, tics, 0);
+        done = wipe_ScreenWipe(wipe_type, tics);
         blurred = false;
         C_Drawer();
         I_UpdateNoBlit();
@@ -687,7 +655,7 @@ static void D_Display(int scrn)
         M_Drawer();
 
         // page flip or blit buffer
-        I_FinishUpdate(0);
+        I_FinishUpdate();
 
     } while (!done);
 
@@ -696,21 +664,21 @@ static void D_Display(int scrn)
         show_chat_bar = false;
     }
 
+#ifdef WII
     if (done)
     {
         BorderNeedRefresh = true;
 
         if (warped == 1)
         {
-#ifdef WII
             paused = true;
-#endif
             currentMenu = &CheatsDef;
             menuactive = 1;
             itemOn = currentMenu->lastOn;
             warped = 0;
         }
     }
+#endif
 
     if (loadaction != ga_nothing)
         G_LoadedGameMessage();
@@ -721,7 +689,28 @@ static void D_Display(int scrn)
 //
 static void D_BindVariables(void)
 {
+    int i;
+
     M_BindBaseControls();
+    M_BindChatControls(MAXPLAYERS);
+
+    key_multi_msgplayer[0] = HUSTR_KEYGREEN;
+    key_multi_msgplayer[1] = HUSTR_KEYINDIGO;
+    key_multi_msgplayer[2] = HUSTR_KEYBROWN;
+    key_multi_msgplayer[3] = HUSTR_KEYRED;
+
+#ifdef FEATURE_MULTIPLAYER
+    NET_BindVariables();
+#endif
+
+    // Multiplayer chat macros
+    for (i = 0; i < 10; ++i)
+    {
+        char buf[12];
+
+        M_snprintf(buf, sizeof(buf), "chatmacro%i", i);
+        M_BindStringVariable(buf, &chat_macros[i]);
+    }
 }
 
 //
@@ -729,8 +718,15 @@ static void D_BindVariables(void)
 //
 // Called to determine whether to grab the mouse pointer
 //
+#ifndef WII
 static dboolean D_GrabMouseCallback(void)
 {
+    // Drone players don't need mouse focus
+    if (drone)
+    {
+        return false;
+    }
+
     // when menu is active or game is paused, release the mouse 
     if (menuactive || paused)
     {
@@ -738,8 +734,9 @@ static dboolean D_GrabMouseCallback(void)
     }
 
     // only grab mouse when playing levels (but not demos)
-    return (gamestate == GS_LEVEL) && !demoplayback && !advancedemo;
+    return (gamestate == GS_LEVEL) /*&& !demoplayback*/ && !advancedemo;
 }
+#endif
 
 //
 // D-DoomLoop()
@@ -750,8 +747,16 @@ static dboolean D_GrabMouseCallback(void)
 //  calls all ?_Responder, ?_Ticker, and ?_Drawer,
 //  calls I_GetTime, I_StartFrame, and I_StartTic
 //
-static void D_DoomLoop(void)
+void D_DoomLoop(void)
 {
+    if (bfgedition &&
+        (/*demorecording || (gameaction == ga_playdemo) ||*/ netgame))
+    {
+        C_Warning("WARNING: You are playing using one of the Doom Classic");
+        C_Warning("IWAD files shipped with the Doom 3: BFG Edition. These are");
+        C_Warning("known to be incompatible with the regular IWAD files and");
+        C_Warning("may cause demos and network games to get out of sync.");
+    }
 /*
     if (demorecording)
         G_BeginRecording();
@@ -792,7 +797,7 @@ static void D_DoomLoop(void)
     }
 #endif
 
-    I_InitGraphics(0);
+    I_InitGraphics();
 
     //V_RestoreBuffer();
 
@@ -839,7 +844,7 @@ static void D_DoomLoop(void)
         if (screenvisible)
 #endif
         {
-            D_Display(0);
+            D_Display();
         }
     }
 }
@@ -848,7 +853,7 @@ static void D_DoomLoop(void)
 // D_AdvanceDemo
 // Called after each demo or intro demosequence finishes
 //
-static void D_AdvanceDemo(void)
+void D_AdvanceDemo(void)
 {
     advancedemo = true;
 }
@@ -959,12 +964,7 @@ void D_DoAdvanceDemo(void)
             break;
 
         case 1:
-/*
-            if (devparm)
-            {
-                G_DeferedPlayDemo("demo1");
-            }
-*/
+            //G_DeferedPlayDemo("demo1");
             break;
 
         case 2:
@@ -975,12 +975,7 @@ void D_DoAdvanceDemo(void)
             break;
 
         case 3:
-/*
-            if (devparm)
-            {
-                G_DeferedPlayDemo("demo2");
-            }
-*/
+            //G_DeferedPlayDemo("demo2");
             break;
 
         case 4:
@@ -1025,22 +1020,12 @@ void D_DoAdvanceDemo(void)
             break;
 
         case 5:
-/*
-            if (devparm)
-            {
-                G_DeferedPlayDemo("demo3");
-            }
-*/
+            //G_DeferedPlayDemo("demo3");
             break;
 
         // THE DEFINITIVE DOOM Special Edition demo
         case 6:
-/*
-            if (devparm)
-            {
-                G_DeferedPlayDemo("demo4");
-            }
-*/
+            //G_DeferedPlayDemo("demo4");
             break;
     }
 
@@ -1242,23 +1227,9 @@ static void LoadChexDeh(void)
 {
     if (gameversion == exe_chex)
     {
+#ifndef WII
         char *chex_deh = NULL;
         char *sep = strrchr(iwadfile, DIR_SEPARATOR);
-
-#ifdef WII
-        if (devparm_chex)
-        {
-            if (usb)
-            {
-                D_AddFile("usb:/apps/wiidoom/IWAD/CHEX/CHEX.DEH", true);
-            }
-            else if (sd)
-            {
-                D_AddFile("sd:/apps/wiidoom/IWAD/CHEX/CHEX.DEH", true);
-            }
-        }
-
-#else
 
         // Look for chex.deh in the same directory as the IWAD file.
         if (sep != NULL)
@@ -1294,13 +1265,24 @@ static void LoadChexDeh(void)
         }
 
         LoadDehFile(chex_deh);
+
+#else
+
+        if (devparm_chex)
+        {
+            if (usb)
+            {
+                D_AddFile("usb:/apps/wiidoom/IWAD/CHEX/CHEX.DEH", true);
+            }
+            else if (sd)
+            {
+                D_AddFile("sd:/apps/wiidoom/IWAD/CHEX/CHEX.DEH", true);
+            }
+        }
 #endif
     }
 }
 
-//
-// [nitr8] UNUSED
-//
 /*
 static void G_CheckDemoStatusAtExit(void)
 {
@@ -1540,6 +1522,7 @@ static void D_ParseStartupString(const char *string)
 void D_DoomMain(void)
 {
     FILE *fprw = NULL;
+//    char demolumpname[9];
 
 #ifndef WII
     FILE *iwad;
@@ -1700,7 +1683,7 @@ void D_DoomMain(void)
 
         I_QuitSerialFail();
     }
-/*
+
 #ifdef FEATURE_MULTIPLAYER
     //!
     // @category net
@@ -1708,7 +1691,7 @@ void D_DoomMain(void)
     // Start a dedicated server, routing packets but not participating
     // in the game itself.
     //
-    if (dedicatedflag && devparm_net)
+    if (M_CheckParm("-dedicated") > 0)
     {
         printf("Dedicated server mode.\n");
         NET_DedicatedServer();
@@ -1722,9 +1705,24 @@ void D_DoomMain(void)
     // Query the Internet master server for a global list of active
     // servers.
     //
-    if (searchflag && devparm_net)
+    if (M_CheckParm("-search"))
     {
         NET_MasterQuery();
+        exit(0);
+    }
+
+    //!
+    // @arg <address>
+    // @category net
+    //
+    // Query the status of the server running on the given IP
+    // address.
+    //
+    p = M_CheckParmWithArgs("-query", 1);
+
+    if (p)
+    {
+        NET_QueryAddress(myargv[p + 1]);
         exit(0);
     }
 
@@ -1733,14 +1731,13 @@ void D_DoomMain(void)
     //
     // Search the local LAN for running servers.
     //
-    if (locallanflag && devparm_net)
+    if (M_CheckParm("-localsearch"))
     {
         NET_LANQuery();
         exit(0);
     }
 
 #endif
-*/
 
 #ifndef WII
 
@@ -1751,6 +1748,32 @@ void D_DoomMain(void)
     else
     {
         beta_style_mode = false;
+    }
+
+    if (beta_style_mode)
+    {
+        if (gamemode != registered && gamemode != retail)
+        {
+
+#ifdef SDL2
+            char *msgbuf = "WARNING: YOU ARE TRYING TO RUN IN PR BETA MODE, USING A 'NON-DOOM 1-IWAD'.\n"
+                           "YOU NEED TO HAVE AT LEAST THE REGISTERED VERSION OF DOOM 1!\n"
+                           "BETA MODE WILL BE DISABLED!";
+
+            SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, PACKAGE_NAME, msgbuf, NULL);
+#else
+            printf("\n WARNING: YOU ARE TRYING TO RUN IN PR BETA MODE, USING A 'NON-DOOM 1-IWAD'.");
+            printf("\n YOU NEED TO HAVE AT LEAST THE REGISTERED VERSION OF DOOM 1!");
+            printf("\n BETA MODE WILL BE DISABLED!\n\n");
+#endif
+
+            beta_style_mode = false;
+        }
+
+        if (beta_style_mode)
+        {
+            printf(" heap size: 0x3cbba10 \n");
+        }
     }
 
     if (M_CheckParm("-devparm"))
@@ -1768,54 +1791,36 @@ void D_DoomMain(void)
     //
     // Disable monsters.
     //
-    if ((nomonstersflag && devparm_net)
-
 #ifndef WII
-
-        || (M_CheckParm("-nomonsters"))
-
-#endif
-
-        )
+    if (M_CheckParm("-nomonsters"))
     {
         nomonsters = true;
     }
+#endif
 
     //!
     // @vanilla
     //
     // Monsters respawn after being killed.
     //
-    if ((respawnflag && devparm_net)
-
 #ifndef WII
-
-        || (M_CheckParm("-respawn"))
-
-#endif
-
-        )
+    if (M_CheckParm("-respawn"))
     {
         respawnparm = true;
     }
+#endif
 
     //!
     // @vanilla
     //
     // Monsters move faster.
     //
-    if ((fastflag && devparm_net)
-
 #ifndef WII
-
-        || (M_CheckParm("-fast"))
-
-#endif
-
-        )
+    if (M_CheckParm("-fast"))
     {
         fastparm = true;
     }
+#endif
 
     if (beta_style_mode && devparm)
     {
@@ -1844,7 +1849,8 @@ void D_DoomMain(void)
     //
     // Start a deathmatch game.
     //
-    if (deathmatchflag && devparm_net)
+#ifndef WII
+    if (M_CheckParm("-deathmatch"))
     {
         deathmatch = 1;
     }
@@ -1856,10 +1862,11 @@ void D_DoomMain(void)
     // Start a deathmatch 2.0 game.  Weapons do not stay in place and
     // all items respawn after 30 seconds.
     //
-    if (altdeathflag && devparm_net)
+    if (M_CheckParm("-altdeath"))
     {
         deathmatch = 2;
     }
+#endif
 
     // Auto-detect the configuration dir.
     M_SetConfigDir(NULL);
@@ -1917,6 +1924,12 @@ void D_DoomMain(void)
     C_PrintSDLVersions();
 
     M_LoadDefaults();
+
+    if (LoadDefaultCollection(&doom_defaults))
+        C_Output("Loaded VARs from %s.", uppercase(doom_defaults.filename));
+    else
+        C_Output("%s not found. Using defaults for all VARs and creating %s.",
+            uppercase(doom_defaults.filename), uppercase(doom_defaults.filename));
 
     if (runcount < 32768)
     {
@@ -2378,6 +2391,8 @@ void D_DoomMain(void)
         fclose(iwad);
     }
 
+    W_CheckCorrectIWAD(doom);
+
     if (runcount < 2)
     {
         C_Output("~Wii-DOOM~ has been run %s", (!runcount ? "once" : "twice"));
@@ -2557,6 +2572,7 @@ void D_DoomMain(void)
         else if (gamemode == shareware || gamemode == registered
               || (gamemode == commercial && gamemission == doom2))
         {
+            char demolumpname[9];
             int i;
 
             // original
@@ -2565,8 +2581,6 @@ void D_DoomMain(void)
             // Detect version from demo lump
             for (i = 1; i <= 3; ++i)
             {
-                char demolumpname[9];
-
                 M_snprintf(demolumpname, 6, "demo%i", i);
 
                 if (W_CheckNumForName(demolumpname) > 0)
@@ -2620,32 +2634,6 @@ void D_DoomMain(void)
             // this as the default should mean that it plays back
             // most demos correctly.
             gameversion = exe_final;
-        }
-    }
-
-    if (beta_style)
-    {
-        if (gamemode != registered && gamemode != retail)
-        {
-
-#ifdef SDL2
-            char *msgbuf = "WARNING: YOU ARE TRYING TO RUN IN PR BETA MODE, USING A 'NON-DOOM 1-IWAD'.\n"
-                           "YOU NEED TO HAVE AT LEAST THE REGISTERED VERSION OF DOOM 1!\n"
-                           "BETA MODE WILL BE DISABLED!";
-
-            SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, PACKAGE_NAME, msgbuf, NULL);
-#else
-            printf("\n WARNING: YOU ARE TRYING TO RUN IN PR BETA MODE, USING A 'NON-DOOM 1-IWAD'.");
-            printf("\n YOU NEED TO HAVE AT LEAST THE REGISTERED VERSION OF DOOM 1!");
-            printf("\n BETA MODE WILL BE DISABLED!\n\n");
-#endif
-
-            beta_style = false;
-        }
-
-        if (beta_style)
-        {
-            printf(" heap size: 0x3cbba10 \n");
         }
     }
 
@@ -3220,11 +3208,13 @@ void D_DoomMain(void)
 
     I_AtExit(G_CheckDemoStatusAtExit, true);
 */
+
     // Generate the WAD hash table.  Speed things up a bit.
     W_GenerateHashTable();
 
     D_SetGameDescription();
     savegamedir = M_GetSaveGameDir(D_SaveGameIWADName(gamemission));
+    C_Output("Savegames will be saved and loaded in %s.", uppercase(savegamedir));
     D_ProcessDehInWad();
 
 #ifndef WII
@@ -3644,14 +3634,17 @@ void D_DoomMain(void)
     d_chkblood = (gamemission != pack_chex);
     d_chkblood2 = (gamemission != pack_chex && gamemission != pack_hacx);
 
-/*
+    // We need to init the timer right in this place or else
+    // running network from multiplayer setup won't work at all
+    I_InitTimer();
+
 #ifdef FEATURE_MULTIPLAYER
+    C_Network("NET_Init: Init network subsystem.");
     NET_Init();
 #endif
-*/
 
     // Initial netgame startup. Connect to server etc.
-    //D_ConnectNetGame();
+    D_ConnectNetGame();
 
     start_respawnparm = respawnparm;
     start_fastparm = fastparm;
@@ -3680,13 +3673,7 @@ void D_DoomMain(void)
     // 0 disables all monsters.
     //
 
-#ifdef WII
-    if (skillflag && devparm_net)
-    {
-        startskill = mp_skill;
-        autostart = true;
-    }
-#else
+#ifndef WII
     p = M_CheckParmWithArgs("-skill", 1);
 
     if (p)
@@ -3694,33 +3681,6 @@ void D_DoomMain(void)
         startskill = myargv[p + 1][0] - '1';
         autostart = true;
     }
-#endif
-
-    //!
-    // @arg <n>
-    // @vanilla
-    //
-    // Start playing on episode n (1-4)
-    //
-
-#ifdef WII
-    if (warpflag && devparm_net)
-    {
-        if (gamemode == commercial)
-        {
-            startmap = warplev;
-        }
-        else
-        {
-            startepisode = warpepi;
-
-            startmap = 1;
-        }
-
-        autostart = true;
-    }
-
-#else
 
     //!
     // @arg <n>
@@ -3770,7 +3730,7 @@ void D_DoomMain(void)
     //
     if (!beta_style)
     {
-        p = M_CheckParm ("-avg");
+        p = M_CheckParm("-avg");
     }
 
     if (p)
@@ -3863,25 +3823,18 @@ void D_DoomMain(void)
     }
     else
     {
-        if (fsize != 4207819 && fsize != 4274218 && fsize != 4225504 &&
-            fsize != 10396254 && fsize != 10399316)
+        if (!beta_style)
         {
-            if (!beta_style)
-            {
-                printf(" R_Init: Init DOOM refresh daemon - ");
-            }
+            printf(" R_Init: Init DOOM refresh daemon");
 
-            C_Output("R_Init: Init DOOM refresh daemon - ");
-        }
-        else
-        {
-            if (!beta_style)
+            if (fsize != 4207819 && fsize != 4274218 && fsize != 4225504 &&
+                fsize != 10396254 && fsize != 10399316)
             {
-                printf(" R_Init: Init DOOM refresh daemon");
+                printf(" - ");
             }
-
-            C_Output("R_Init: Init DOOM refresh daemon");
         }
+
+        C_Output("R_Init: Init DOOM refresh daemon");
     }
 
     R_Init();
@@ -3941,7 +3894,6 @@ void D_DoomMain(void)
     }
 
     C_Output("I_StartupTimer");
-    I_InitTimer();
 
     startuptimer = I_StartupTimer();
 
@@ -3968,16 +3920,13 @@ void D_DoomMain(void)
         printf(" D_CheckNetGame: Checking network game status.\n");
     }
 
-    C_Output("D_CheckNetGame: Checking network game status.");
-    D_CheckNetGame();
-
 #ifndef WII
     PrintGameVersion();
 #endif
 
     if (!beta_style)
     {
-        printf(" S_Init: Setting up sound.");
+        printf(" S_Init: Setting up sound.\n");
     }
 
     C_Output("S_Init: Setting up sound.");
@@ -3986,8 +3935,11 @@ void D_DoomMain(void)
     {
         S_Init(sfxVolume * 8, musicVolume * 8);
 
-        printf("\n HU_Init: Setting up heads up display.\n");
+        printf(" HU_Init: Setting up heads up display.\n");
     }
+
+    C_Network("D_CheckNetGame: Checking network game status.");
+    D_CheckNetGame();
 
     C_Output("HU_Init: Setting up heads up display.");
     HU_Init();
@@ -3998,7 +3950,7 @@ void D_DoomMain(void)
     }
 
     C_Output("ST_Init: Init status bar.");
-    ST_Init(4);
+    ST_Init();
 
     // If Doom II without a MAP01 lump, this is a store demo.
     // Moved this here so that MAP01 isn't constantly looked up
@@ -4009,13 +3961,13 @@ void D_DoomMain(void)
     }
 
 /*
-#ifndef WII
-
     if (M_CheckParmWithArgs("-statdump", 1) && !beta_style)
     {
         I_AtExit(StatDump, true);
         printf("External statistics registered.\n");
     }
+
+#ifndef WII
 
     //!
     // @arg <x>
@@ -4039,7 +3991,7 @@ void D_DoomMain(void)
         // quit after one demo
         singledemo = true;
 
-        G_DeferedPlayDemo (demolumpname);
+        G_DeferedPlayDemo(demolumpname);
 
         // never returns
         D_DoomLoop();
@@ -4054,6 +4006,7 @@ void D_DoomMain(void)
         // never returns
         D_DoomLoop();
     }
+
 #endif
 */
 

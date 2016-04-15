@@ -38,6 +38,7 @@
 #include "sounds.h"
 
 #include "s_sound.h"
+#include "wii-doom.h"
 #include "z_zone.h"
 
 

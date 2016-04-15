@@ -37,6 +37,10 @@ id Software.
 */
 
 
+#if !defined(__SC_MAN_H__)
+#define __SC_MAN_H__
+
+
 void SC_Open(char *name);
 void SC_Close(void);
 void SC_MustGetString(void);
@@ -61,4 +65,6 @@ extern int      sc_Line;
 extern dboolean sc_End;
 extern dboolean sc_Crossed;
 extern dboolean sc_FileScripts;
+
+#endif
 

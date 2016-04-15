@@ -51,6 +51,7 @@
 #include "sha1.h"
 #include "v_trans.h"
 #include "w_wad.h"
+#include "wii-doom.h"
 #include "z_zone.h"
 
 

@@ -77,11 +77,12 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
-execgames_PROGRAMS = chocolate-doom-sdl2$(EXEEXT)
+execgames_PROGRAMS = chocolate-doom-sdl2$(EXEEXT) chocolate-server-sdl2$(EXEEXT)
+noinst_PROGRAMS = chocolate-setup-sdl2$(EXEEXT)
 subdir = src
 DIST_COMMON = $(srcdir)/doom.appdata.xml.in $(srcdir)/doom.desktop.in \
 	$(srcdir)/doom-screensaver.desktop.in $(srcdir)/resource.rc.in \
-	$(top_srcdir)/autotools/depcomp
+	$(srcdir)/setup-res.rc.in $(top_srcdir)/autotools/depcomp
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
 	$(top_srcdir)/configure.ac
@@ -90,55 +91,88 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES = doom.appdata.xml doom.desktop \
-	doom-screensaver.desktop resource.rc
+	doom-screensaver.desktop resource.rc setup-res.rc
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(execgamesdir)" "$(DESTDIR)$(appdir)" \
 	"$(DESTDIR)$(appdatadir)" "$(DESTDIR)$(screensaverdir)"
-PROGRAMS = $(execgames_PROGRAMS)
-am__chocolate-doom_SOURCES_DIST = i_endoom.c i_endoom.h i_main.c i_system.c i_system.h \
-	m_argv.c m_argv.h m_misc.c m_misc.h c_io.c c_io.h d_event.c \
+PROGRAMS = $(execgames_PROGRAMS) $(noinst_PROGRAMS)
+am__chocolate-doom_SOURCES_DIST = i_main.c i_system.c i_system.h \
+	m_argv.c m_argv.h m_misc.c m_misc.h c_cmds.c c_cmds.h c_io.c c_io.h d_deh.c d_deh.h d_event.c \
 	d_event.h doomkeys.h doomfeatures.h doomtype.h d_iwad.c \
-	d_iwad.h d_loop.c d_loop.h d_ticcmd.h \
-	d_deh.c d_deh.h i_glscale.c i_glscale.h i_joystick.c \
+	d_iwad.h d_loop.c d_loop.h d_mode.c d_mode.h d_ticcmd.h \
+	i_endoom.c i_endoom.h i_glscale.c i_glscale.h i_joystick.c \
         i_joystick.h i_scale.c i_scale.h i_swap.h i_sound.c i_sound.h \
         i_timer.c i_timer.h i_tinttab.c i_tinttab.h i_video.c \
         i_video.h m_bbox.c m_bbox.h m_cheat.c m_cheat.h m_config.c m_config.h \
         m_controls.c m_controls.h m_fixed.c m_fixed.h sha1.c sha1.h \
         memio.c memio.h tables.c tables.h v_misc.h v_trans.c v_trans.h \
         v_video.c v_video.h v_patch.h \
-        w_main.c w_main.h w_wad.c w_wad.h w_file.c w_file.h \
-        w_file_stdc.c z_zone.c z_zone.h w_merge.c w_merge.h gusconf.c \
+        w_checksum.c w_checksum.h w_main.c w_main.h w_wad.c w_wad.h w_file.c w_file.h \
+        w_file_stdc.c z_zone.c z_zone.h w_merge.c w_merge.h wii-doom.c wii-doom.h gusconf.c \
         gusconf.h i_pcsound.c i_sdlsound.c i_sdlmusic.c i_oplmusic.c \
-        midifile.c midifile.h mus2mid.c mus2mid.h resource.rc
-am__objects_1 = i_endoom.$(OBJEXT) i_main.$(OBJEXT) i_system.$(OBJEXT) m_argv.$(OBJEXT) \
+        midifile.c midifile.h mus2mid.c mus2mid.h \
+	net_client.c net_client.h net_common.c net_common.h \
+	net_dedicated.c net_dedicated.h net_defs.h net_gui.c net_gui.h \
+	net_io.c net_io.h net_loop.c net_loop.h net_packet.c \
+	net_packet.h net_query.c net_query.h net_sdl.c net_sdl.h \
+	net_server.c net_server.h net_structrw.c net_structrw.h resource.rc
+am__objects_1 = i_main.$(OBJEXT) i_system.$(OBJEXT) m_argv.$(OBJEXT) \
 	m_misc.$(OBJEXT)
-am__objects_2 = c_io.$(OBJEXT) d_event.$(OBJEXT) d_iwad.$(OBJEXT) \
-	d_loop.$(OBJEXT) d_deh.$(OBJEXT) \
-        i_glscale.$(OBJEXT) i_joystick.$(OBJEXT) i_scale.$(OBJEXT) \
+am__objects_2 = c_cmds.$(OBJEXT) c_io.$(OBJEXT) d_deh.$(OBJEXT) d_event.$(OBJEXT) d_iwad.$(OBJEXT) \
+	d_mode.$(OBJEXT) d_loop.$(OBJEXT) \
+        i_endoom.$(OBJEXT) i_glscale.$(OBJEXT) i_joystick.$(OBJEXT) i_scale.$(OBJEXT) \
         i_sound.$(OBJEXT) i_timer.$(OBJEXT) i_tinttab.$(OBJEXT) \
         i_video.$(OBJEXT) m_bbox.$(OBJEXT) m_cheat.$(OBJEXT) m_config.$(OBJEXT) \
         m_controls.$(OBJEXT) m_fixed.$(OBJEXT) sha1.$(OBJEXT) \
         memio.$(OBJEXT) tables.$(OBJEXT) v_trans.$(OBJEXT) \
-        v_video.$(OBJEXT) w_main.$(OBJEXT) \
-        w_wad.$(OBJEXT) w_file.$(OBJEXT) w_file_stdc.$(OBJEXT) \
+        v_video.$(OBJEXT) w_checksum.$(OBJEXT) w_main.$(OBJEXT) \
+        w_wad.$(OBJEXT) w_file.$(OBJEXT) w_file_stdc.$(OBJEXT) wii-doom.$(OBJEXT) \
         z_zone.$(OBJEXT)
 am__objects_3 = w_merge.$(OBJEXT)
 am__objects_4 = gusconf.$(OBJEXT) i_pcsound.$(OBJEXT) \
 	i_sdlsound.$(OBJEXT) i_sdlmusic.$(OBJEXT) i_oplmusic.$(OBJEXT) \
 	midifile.$(OBJEXT) mus2mid.$(OBJEXT)
-am__objects_5 = $(am__objects_1) $(am__objects_2) $(am__objects_3) \
-	$(am__objects_4)
-am__objects_7 = $(am__objects_5)
+am__objects_5 = net_client.$(OBJEXT) \
+	net_common.$(OBJEXT) net_dedicated.$(OBJEXT) net_gui.$(OBJEXT) \
+	net_io.$(OBJEXT) net_loop.$(OBJEXT) net_packet.$(OBJEXT) \
+	net_query.$(OBJEXT) net_sdl.$(OBJEXT) net_server.$(OBJEXT) \
+	net_structrw.$(OBJEXT)
+am__objects_6 = $(am__objects_1) $(am__objects_2) $(am__objects_3) \
+	$(am__objects_4) $(am__objects_5)
+am__objects_7 = $(am__objects_6)
 am_chocolate-doom_OBJECTS =  \
 	$(am__objects_7)
-#am_chocolate-doom_OBJECTS = $(am__objects_7) \
-#	resource.$(OBJEXT)
 chocolate-doom_OBJECTS = $(am_chocolate-doom_OBJECTS)
 am__DEPENDENCIES_1 = $(top_builddir)/textscreen/libtextscreen.a \
 	$(top_builddir)/pcsound/libpcsound.a \
 	$(top_builddir)/opl/libopl.a
 chocolate-doom_DEPENDENCIES = doom/libdoom.a \
 	$(am__DEPENDENCIES_1)
+am__objects_9 = d_dedicated.$(OBJEXT) d_mode.$(OBJEXT) \
+	i_timer.$(OBJEXT) net_common.$(OBJEXT) net_dedicated.$(OBJEXT) \
+	net_io.$(OBJEXT) net_packet.$(OBJEXT) net_sdl.$(OBJEXT) \
+	net_query.$(OBJEXT) net_server.$(OBJEXT) \
+	net_structrw.$(OBJEXT) wii-doom.$(OBJEXT) z_zone.$(OBJEXT)
+am_chocolate-server_OBJECTS = $(am__objects_1) $(am__objects_9)
+chocolate-server_OBJECTS = $(am_chocolate-server_OBJECTS)
+chocolate-server_DEPENDENCIES =
+am__chocolate-setup_SOURCES_DIST = d_mode.c \
+	d_mode.h d_iwad.c d_iwad.h i_timer.c i_timer.h m_config.c \
+	m_config.h m_controls.c m_controls.h net_io.c net_io.h \
+	net_packet.c net_packet.h net_sdl.c net_sdl.h net_query.c \
+	net_query.h net_structrw.c net_structrw.h z_zone.c z_zone.h \
+	i_main.c i_system.c i_system.h m_argv.c m_argv.h m_misc.c \
+	m_misc.h wii-doom.c wii-doom.h setup-res.rc
+am__objects_10 = d_mode.$(OBJEXT) d_iwad.$(OBJEXT) \
+	i_timer.$(OBJEXT) m_config.$(OBJEXT) m_controls.$(OBJEXT) \
+	net_io.$(OBJEXT) net_packet.$(OBJEXT) net_sdl.$(OBJEXT) \
+	net_query.$(OBJEXT) net_structrw.$(OBJEXT) wii-doom.$(OBJEXT) z_zone.$(OBJEXT)
+am_chocolate-setup_OBJECTS =  \
+	$(am__objects_10) $(am__objects_1)
+chocolate-setup_OBJECTS = $(am_chocolate-setup_OBJECTS)
+chocolate-setup_DEPENDENCIES = setup/libsetup.a \
+	$(top_builddir)/textscreen/libtextscreen.a
+SCRIPTS = $(execgames_SCRIPTS)
 AM_V_P = $(am__v_P_$(V))
 am__v_P_ = $(am__v_P_$(AM_DEFAULT_VERBOSITY))
 am__v_P_0 = false
@@ -167,8 +201,10 @@ AM_V_CCLD = $(am__v_CCLD_$(V))
 am__v_CCLD_ = $(am__v_CCLD_$(AM_DEFAULT_VERBOSITY))
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(chocolate-doom_SOURCES)
-DIST_SOURCES = $(am__chocolate-doom_SOURCES_DIST)
+SOURCES = $(chocolate-doom_SOURCES) $(chocolate-server_SOURCES) \
+	$(chocolate-setup_SOURCES)
+DIST_SOURCES = $(am__chocolate-doom_SOURCES_DIST) $(chocolate-server_SOURCES) \
+	$(am__chocolate-setup_SOURCES_DIST)
 RECURSIVE_TARGETS = all-recursive check-recursive cscopelist-recursive \
 	ctags-recursive dvi-recursive html-recursive info-recursive \
 	install-data-recursive install-dvi-recursive \
@@ -274,7 +310,7 @@ AWK = mawk
 CC = gcc
 CCDEPMODE = depmode=gcc3
 DEFS = -DHAVE_CONFIG_H -DSDL2
-CFLAGS = -O2 -g -Wall -Wdeclaration-after-statement -Wredundant-decls  -D_REENTRANT -I/usr/local/include/SDL2 
+CFLAGS = -O2 -g -Wall -Wdeclaration-after-statement -Wredundant-decls  -I/usr/local/include/SDL2 -D_GNU_SOURCE=1 -D_REENTRANT
 CPP = gcc -E
 CPPFLAGS = 
 CYGPATH_W = echo
@@ -314,12 +350,12 @@ PACKAGE_VERSION = 2.2.0
 PATH_SEPARATOR = :
 PROGRAM_PREFIX = chocolate-
 RANLIB = ranlib
+SDLMIXER_CFLAGS = 
 SDLMIXER_LIBS =  -lSDL2_mixer
-#SDLNET_LIBS =  -lSDL2_net
-SDL_CFLAGS = -D_REENTRANT -I/usr/local/include/SDL2 
+SDLNET_LIBS =  -lSDL2_net
+SDL_CFLAGS = -I/usr/local/include/SDL2 -D_GNU_SOURCE=1 -D_REENTRANT
 SDL2_CONFIG = pkg-config sdl2
 SDL_LIBS = -L/usr/local/lib -Wl,-rpath,/usr/local/lib -lSDL2 
-SDLMIXER_CFLAGS = 
 SDLNET_CFLAGS = 
 SET_MAKE = 
 SHELL = /bin/bash
@@ -371,34 +407,56 @@ target_alias =
 top_build_prefix = ../
 top_builddir = ..
 top_srcdir = ..
-SUBDIRS = doom opengl
+SUBDIRS = doom setup
 execgamesdir = ${exec_prefix}/games
+SETUP_BINARIES = chocolate-doom-setup-sdl2$(EXEEXT)
+execgames_SCRIPTS = $(SETUP_BINARIES)
 AM_CFLAGS = -I$(top_srcdir)/textscreen            \
             -I$(top_srcdir)/opl                   \
             -I$(top_srcdir)/pcsound               \
-             
+            -D_GNU_SOURCE=1 -D_REENTRANT
 
 
 # Common source files used by absolutely everything:
 COMMON_SOURCE_FILES = \
-i_endoom.c           i_endoom.h            \
 i_main.c                                   \
 i_system.c           i_system.h            \
 m_argv.c             m_argv.h              \
 m_misc.c             m_misc.h
 
+# Dedicated server (chocolate-server):
+DEDSERV_FILES = \
+d_dedicated.c                              \
+d_mode.c             d_mode.h              \
+i_timer.c            i_timer.h             \
+net_common.c         net_common.h          \
+net_dedicated.c      net_dedicated.h       \
+net_io.c             net_io.h              \
+net_packet.c         net_packet.h          \
+net_sdl.c            net_sdl.h             \
+net_query.c          net_query.h           \
+net_server.c         net_server.h          \
+net_structrw.c       net_structrw.h        \
+wii-doom.c           wii-doom.h            \
+z_zone.c             z_zone.h
+
+chocolate-server_SOURCES = $(COMMON_SOURCE_FILES) $(DEDSERV_FILES)
+chocolate-server_LDADD =  -L/usr/local/lib -Wl,-rpath,/usr/local/lib -lSDL2 -lpthread  -lSDL2_net
 
 # Source files used by the game binaries (chocolate-doom, etc.)
 GAME_SOURCE_FILES = \
+c_cmds.c             c_cmds.h              \
 c_io.c               c_io.h                \
+d_deh.c              d_deh.h               \
 d_event.c            d_event.h             \
                      doomkeys.h            \
                      doomfeatures.h        \
                      doomtype.h            \
 d_iwad.c             d_iwad.h              \
 d_loop.c             d_loop.h              \
+d_mode.c             d_mode.h              \
                      d_ticcmd.h            \
-d_deh.c              d_deh.h               \
+i_endoom.c           i_endoom.h            \
 i_glscale.c          i_glscale.h           \
 i_joystick.c         i_joystick.h          \
 i_scale.c            i_scale.h             \
@@ -419,12 +477,29 @@ tables.c             tables.h              \
 v_trans.c            v_trans.h             \
 v_video.c            v_video.h             \
                      v_patch.h             \
+w_checksum.c         w_checksum.h          \
 w_main.c             w_main.h              \
 w_wad.c              w_wad.h               \
 w_file.c             w_file.h              \
 w_file_stdc.c                              \
+wii-doom.c           wii-doom.h            \
 z_zone.c             z_zone.h
 
+
+# source files needed for FEATURE_MULTIPLAYER
+FEATURE_MULTIPLAYER_SOURCE_FILES = \
+net_client.c         net_client.h          \
+net_common.c         net_common.h          \
+net_dedicated.c      net_dedicated.h       \
+net_defs.h                                 \
+net_gui.c            net_gui.h             \
+net_io.c             net_io.h              \
+net_loop.c           net_loop.h            \
+net_packet.c         net_packet.h          \
+net_query.c          net_query.h           \
+net_sdl.c            net_sdl.h             \
+net_server.c         net_server.h          \
+net_structrw.c       net_structrw.h
 
 # source files needed for FEATURE_WAD_MERGE
 FEATURE_WAD_MERGE_SOURCE_FILES = \
@@ -446,7 +521,8 @@ mus2mid.c            mus2mid.h
 SOURCE_FILES = $(COMMON_SOURCE_FILES)              \
                $(GAME_SOURCE_FILES)                \
                $(FEATURE_WAD_MERGE_SOURCE_FILES)   \
-               $(FEATURE_SOUND_SOURCE_FILES)
+               $(FEATURE_SOUND_SOURCE_FILES)       \
+               $(FEATURE_MULTIPLAYER_SOURCE_FILES)
 
 SOURCE_FILES_WITH_DEH = $(SOURCE_FILES)
 
@@ -456,12 +532,33 @@ EXTRA_LIBS = \
                $(top_builddir)/opl/libopl.a                \
                 -L/usr/local/lib -Wl,-rpath,/usr/local/lib -lSDL2 \
                -L/usr/local/lib -Wl,-rpath,/usr/local/lib -lSDL2 \
-                -lSDL2_mixer                             #\
+                -lSDL2_mixer                             \
                 -lSDL2_net
 
 chocolate-doom_SOURCES = $(SOURCE_FILES_WITH_DEH)
 #chocolate-doom_SOURCES = $(SOURCE_FILES_WITH_DEH) resource.rc
 chocolate-doom_LDADD = doom/libdoom.a $(EXTRA_LIBS)
+
+# Source files needed for chocolate-setup:
+SETUP_FILES = \
+d_mode.c             d_mode.h              \
+d_iwad.c             d_iwad.h              \
+i_timer.c            i_timer.h             \
+m_config.c           m_config.h            \
+m_controls.c         m_controls.h          \
+net_io.c             net_io.h              \
+net_packet.c         net_packet.h          \
+net_sdl.c            net_sdl.h             \
+net_query.c          net_query.h           \
+net_structrw.c       net_structrw.h        \
+wii-doom.c           wii-doom.h            \
+z_zone.c             z_zone.h
+
+chocolate-setup_SOURCES = $(SETUP_FILES) $(COMMON_SOURCE_FILES)
+#chocolate-setup_SOURCES = $(SETUP_FILES) $(COMMON_SOURCE_FILES) setup-res.rc
+chocolate-setup_LDADD = setup/libsetup.a                             \
+                        $(top_builddir)/textscreen/libtextscreen.a   \
+                         -L/usr/local/lib -Wl,-rpath,/usr/local/lib -lSDL2 -lpthread -L/usr/local/lib -Wl,-rpath,/usr/local/lib -lSDL2 -lpthread  -lSDL2_mixer  -lSDL2_net
 
 appdatadir = $(prefix)/share/appdata
 appdata_DATA = \
@@ -540,9 +637,55 @@ uninstall-execgamesPROGRAMS:
 clean-execgamesPROGRAMS:
 	-test -z "$(execgames_PROGRAMS)" || rm -f $(execgames_PROGRAMS)
 
+clean-noinstPROGRAMS:
+	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
+
 chocolate-doom-sdl2$(EXEEXT): $(chocolate-doom_OBJECTS) $(chocolate-doom_DEPENDENCIES) $(EXTRA_chocolate-doom_DEPENDENCIES) 
 	@rm -f chocolate-doom-sdl2$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(chocolate-doom_OBJECTS) $(chocolate-doom_LDADD) $(LIBS)
+
+chocolate-server-sdl2$(EXEEXT): $(chocolate-server_OBJECTS) $(chocolate-server_DEPENDENCIES) $(EXTRA_chocolate-server_DEPENDENCIES) 
+	@rm -f chocolate-server-sdl2$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(chocolate-server_OBJECTS) $(chocolate-server_LDADD) $(LIBS)
+
+chocolate-setup-sdl2$(EXEEXT): $(chocolate-setup_OBJECTS) $(chocolate-setup_DEPENDENCIES) $(EXTRA_chocolate-setup_DEPENDENCIES) 
+	@rm -f chocolate-setup-sdl2$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(chocolate-setup_OBJECTS) $(chocolate-setup_LDADD) $(LIBS)
+install-execgamesSCRIPTS: $(execgames_SCRIPTS)
+	@$(NORMAL_INSTALL)
+	@list='$(execgames_SCRIPTS)'; test -n "$(execgamesdir)" || list=; \
+	if test -n "$$list"; then \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(execgamesdir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(execgamesdir)" || exit 1; \
+	fi; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  if test -f "$$d$$p"; then echo "$$d$$p"; echo "$$p"; else :; fi; \
+	done | \
+	sed -e 'p;s,.*/,,;n' \
+	    -e 'h;s|.*|.|' \
+	    -e 'p;x;s,.*/,,;$(transform)' | sed 'N;N;N;s,\n, ,g' | \
+	$(AWK) 'BEGIN { files["."] = ""; dirs["."] = 1; } \
+	  { d=$$3; if (dirs[d] != 1) { print "d", d; dirs[d] = 1 } \
+	    if ($$2 == $$4) { files[d] = files[d] " " $$1; \
+	      if (++n[d] == $(am__install_max)) { \
+		print "f", d, files[d]; n[d] = 0; files[d] = "" } } \
+	    else { print "f", d "/" $$4, $$1 } } \
+	  END { for (d in files) print "f", d, files[d] }' | \
+	while read type dir files; do \
+	     if test "$$dir" = .; then dir=; else dir=/$$dir; fi; \
+	     test -z "$$files" || { \
+	       echo " $(INSTALL_SCRIPT) $$files '$(DESTDIR)$(execgamesdir)$$dir'"; \
+	       $(INSTALL_SCRIPT) $$files "$(DESTDIR)$(execgamesdir)$$dir" || exit $$?; \
+	     } \
+	; done
+
+uninstall-execgamesSCRIPTS:
+	@$(NORMAL_UNINSTALL)
+	@list='$(execgames_SCRIPTS)'; test -n "$(execgamesdir)" || exit 0; \
+	files=`for p in $$list; do echo "$$p"; done | \
+	       sed -e 's,.*/,,;$(transform)'`; \
+	dir='$(DESTDIR)$(execgamesdir)'; $(am__uninstall_files_from_dir)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -550,11 +693,14 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+include ./$(DEPDIR)/c_cmds.Po
 include ./$(DEPDIR)/c_io.Po
+include ./$(DEPDIR)/d_dedicated.Po
+include ./$(DEPDIR)/d_deh.Po
 include ./$(DEPDIR)/d_event.Po
 include ./$(DEPDIR)/d_iwad.Po
 include ./$(DEPDIR)/d_loop.Po
-include ./$(DEPDIR)/d_deh.Po
+include ./$(DEPDIR)/d_mode.Po
 include ./$(DEPDIR)/gusconf.Po
 include ./$(DEPDIR)/i_endoom.Po
 include ./$(DEPDIR)/i_glscale.Po
@@ -580,15 +726,28 @@ include ./$(DEPDIR)/m_misc.Po
 include ./$(DEPDIR)/memio.Po
 include ./$(DEPDIR)/midifile.Po
 include ./$(DEPDIR)/mus2mid.Po
+include ./$(DEPDIR)/net_client.Po
+include ./$(DEPDIR)/net_common.Po
+include ./$(DEPDIR)/net_dedicated.Po
+include ./$(DEPDIR)/net_gui.Po
+include ./$(DEPDIR)/net_io.Po
+include ./$(DEPDIR)/net_loop.Po
+include ./$(DEPDIR)/net_packet.Po
+include ./$(DEPDIR)/net_query.Po
+include ./$(DEPDIR)/net_sdl.Po
+include ./$(DEPDIR)/net_server.Po
+include ./$(DEPDIR)/net_structrw.Po
 include ./$(DEPDIR)/sha1.Po
 include ./$(DEPDIR)/tables.Po
 include ./$(DEPDIR)/v_trans.Po
 include ./$(DEPDIR)/v_video.Po
+include ./$(DEPDIR)/w_checksum.Po
 include ./$(DEPDIR)/w_file.Po
 include ./$(DEPDIR)/w_file_stdc.Po
 include ./$(DEPDIR)/w_main.Po
 include ./$(DEPDIR)/w_merge.Po
 include ./$(DEPDIR)/w_wad.Po
+include ./$(DEPDIR)/wii-doom.Po
 include ./$(DEPDIR)/z_zone.Po
 
 .c.o:
@@ -824,7 +983,7 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-recursive
-all-am: Makefile.SDL2 $(PROGRAMS) $(DATA)
+all-am: Makefile.SDL2 $(PROGRAMS) $(SCRIPTS) $(DATA)
 installdirs: installdirs-recursive
 installdirs-am:
 	for dir in "$(DESTDIR)$(execgamesdir)" "$(DESTDIR)$(appdir)" "$(DESTDIR)$(appdatadir)" "$(DESTDIR)$(screensaverdir)"; do \
@@ -861,9 +1020,10 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
+
 clean: clean-am
 
-clean-am: clean-execgamesPROGRAMS clean-generic mostlyclean-am
+clean-am: clean-execgamesPROGRAMS clean-generic clean-noinstPROGRAMS mostlyclean-am
 
 distclean: distclean-recursive
 	-rm -rf ./$(DEPDIR)
@@ -890,7 +1050,7 @@ install-dvi: install-dvi-recursive
 
 install-dvi-am:
 
-install-exec-am: install-execgamesPROGRAMS
+install-exec-am: install-execgamesPROGRAMS install-execgamesSCRIPTS
 
 install-html: install-html-recursive
 
@@ -930,18 +1090,18 @@ ps: ps-recursive
 ps-am:
 
 uninstall-am: uninstall-appDATA uninstall-appdataDATA \
-	uninstall-execgamesPROGRAMS uninstall-screensaverDATA
+	uninstall-execgamesPROGRAMS uninstall-execgamesSCRIPTS uninstall-screensaverDATA
 
 .MAKE: $(am__recursive_targets) install-am install-strip
 
 .PHONY: $(am__recursive_targets) CTAGS GTAGS TAGS all all-am check \
 	check-am clean clean-execgamesPROGRAMS clean-generic \
-	cscopelist-am ctags ctags-am distclean distclean-compile \
+	clean-noinstPROGRAMS cscopelist-am ctags ctags-am distclean distclean-compile \
 	distclean-generic distclean-tags distdir dvi dvi-am html \
 	html-am info info-am install install-am install-appDATA \
 	install-appdataDATA install-data install-data-am install-dvi \
 	install-dvi-am install-exec install-exec-am \
-	install-execgamesPROGRAMS install-html install-html-am \
+	install-execgamesPROGRAMS install-execgamesSCRIPTS install-html install-html-am \
 	install-info install-info-am install-man install-pdf \
 	install-pdf-am install-ps install-ps-am \
 	install-screensaverDATA install-strip installcheck \
@@ -949,7 +1109,10 @@ uninstall-am: uninstall-appDATA uninstall-appdataDATA \
 	maintainer-clean-generic mostlyclean mostlyclean-compile \
 	mostlyclean-generic pdf pdf-am ps ps-am tags tags-am uninstall \
 	uninstall-am uninstall-appDATA uninstall-appdataDATA \
-	uninstall-execgamesPROGRAMS uninstall-screensaverDATA
+	uninstall-execgamesPROGRAMS uninstall-execgamesSCRIPTS uninstall-screensaverDATA
+
+$(SETUP_BINARIES): chocolate-setup-sdl2$(EXEEXT)
+	cp chocolate-setup-sdl2$(EXEEXT) $@
 
 chocolate-doom.appdata.xml : doom.appdata.xml
 	cp doom.appdata.xml $@
@@ -970,7 +1133,7 @@ icon.c : $(top_builddir)/data/doom8.ico
 midiread : midifile.c
 	$(CC) -DTEST $(CFLAGS)  -L/usr/local/lib -Wl,-rpath,/usr/local/lib -lSDL2 -lpthread midifile.c -o $@
 
-MUS2MID_SRC_FILES = mus2mid.c memio.c z_native.c i_system.c m_argv.c m_misc.c
+MUS2MID_SRC_FILES = mus2mid.c memio.c z_zone.c i_system.c m_argv.c m_misc.c
 mus2mid : $(MUS2MID_SRC_FILES)
 	$(CC) -DSTANDALONE -I$(top_builddir) $(CFLAGS) @LDFLAGS@ \
               $(MUS2MID_SRC_FILES) -o $@

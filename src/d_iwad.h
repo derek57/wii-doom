@@ -21,6 +21,7 @@
 
 
 #include "doom/doomdef.h"
+#include "d_mode.h"
 
 
 #define IWAD_MASK_DOOM    ((1 << doom)           \

@@ -41,6 +41,7 @@
 #include "sounds.h"
 
 #include "v_trans.h"
+#include "wii-doom.h"
 #include "z_zone.h"
 
 
@@ -952,5 +953,63 @@ dboolean EV_DoElevator(line_t *line, elevator_e elevtype)
     }
 
     return rtn;
+}
+
+// [crispy] easter egg: homage to an old friend (thinker)
+void T_MoveGoobers(floormove_t *floor)
+{
+    result_e res1, res2;
+
+    res1 = T_MovePlane(floor->sector, 2 * FLOORSPEED, 0,
+                       true, 0, (floor->direction &  1) * 2 - 1);
+
+    res2 = T_MovePlane(floor->sector, 2 * FLOORSPEED, floor->floordestheight,
+                       true, 1, (floor->direction >> 1) * 2 - 1);
+
+    if (!(leveltime & 7))
+    {
+        S_StartSectorSound(&floor->sector->soundorg, sfx_stnmov);
+    }
+
+    if ((res1 & res2) == pastdest)
+    {
+        floor->sector->floordata = NULL;
+        P_RemoveThinker(&floor->thinker);
+
+        S_StartSectorSound(&floor->sector->soundorg, sfx_pstop);
+    }
+}
+
+// [crispy] easter egg: homage to an old friend
+void EV_DoGoobers(void)
+{
+    int i;
+
+    for (i = 0; i < numsectors; i++)
+    {
+        sector_t* sec;
+        floormove_t* floor;
+
+        sec = &sectors[i];
+
+        if (sec->floordata)
+        {
+            floor = sec->floordata;
+            P_RemoveThinker(&floor->thinker);
+            sec->floordata = NULL;
+        }
+
+        floor = Z_Malloc(sizeof(*floor), PU_LEVSPEC, 0);
+        P_AddThinker(&floor->thinker);
+        sec->floordata = floor;
+        floor->thinker.function = T_MoveGoobers;
+        floor->sector = sec;
+
+        floor->floordestheight = (!sec->tag &&
+            sec->interpceilingheight == sec->interpfloorheight) ? 0 : 128 * FRACUNIT;
+
+        floor->direction = (sec->floorheight < 0) |
+                           (sec->ceilingheight < floor->floordestheight) << 1;
+    }
 }
 

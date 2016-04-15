@@ -18,6 +18,9 @@ cd src
 cd doom
 make -f Makefile.SDL clean
 cd ..
+cd setup
+make -f Makefile.SDL clean
+cd ..
 make -f Makefile.SDL clean
 make -f Makefile.SDL2 clean
 cd ..

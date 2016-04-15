@@ -113,10 +113,6 @@ txt_widget_class_t txt_label_class =
     NULL
 };
 
-//
-// [nitr8] UNUSED
-//
-/*
 void TXT_SetLabel(txt_label_t *label, char *value)
 {
     char *p;
@@ -191,7 +187,7 @@ void TXT_SetFGColor(txt_label_t *label, txt_color_t color)
 {
     label->fgcolor = color;
 }
-
+/*
 void TXT_SetBGColor(txt_label_t *label, txt_color_t color)
 {
     label->bgcolor = color;
